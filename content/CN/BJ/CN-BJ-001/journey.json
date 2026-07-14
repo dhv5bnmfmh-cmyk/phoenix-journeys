@@ -1,0 +1,16 @@
+{
+  "id": "CN-BJ-001",
+  "country": "China",
+  "city": "Beijing",
+  "place": "Forbidden City",
+  "title_zh_hans": "第一次走进紫禁城",
+  "title_zh_hant": "第一次走進紫禁城",
+  "mood": "awe",
+  "estimated_minutes": 15,
+  "status": "draft",
+  "review": {
+    "factual": "pending",
+    "cultural": "pending",
+    "copyright": "pending"
+  }
+}
