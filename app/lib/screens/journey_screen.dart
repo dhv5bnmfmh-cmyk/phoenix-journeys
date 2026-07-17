@@ -8,6 +8,7 @@ import '../services/narration_controller.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/interactive_story_text.dart';
+import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
 import '../widgets/word_detail_sheet.dart';
 
@@ -20,12 +21,24 @@ class JourneyScreen extends StatefulWidget {
 
 class _JourneyScreenState extends State<JourneyScreen>
     with WidgetsBindingObserver {
+  static const _stepLabels = [
+    '故事',
+    '生词',
+    '发现',
+    '思考',
+    '表达',
+    '回忆',
+    '完成',
+  ];
+
   int step = 0;
   final wonderController = TextEditingController();
   final expressController = TextEditingController();
   final memoryController = TextEditingController();
   late final NarrationController _narration;
+  late AppState _appState;
   String aiReply = '';
+  bool _initialized = false;
   bool _discoveryAutoStarted = false;
 
   @override
@@ -36,15 +49,36 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+
+    _appState = context.read<AppState>();
+    step = _appState.beijingJourneyStep;
+    wonderController.text = _appState.wonderDraft;
+    expressController.text = _appState.expressDraft;
+    memoryController.text = _appState.memoryDraft;
+    _initialized = true;
+
+    if (step == 2) {
+      _scheduleDiscoveryAutoStart();
+    }
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) {
       unawaited(_narration.stop());
+      if (_initialized) unawaited(_persistProgress());
     }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    if (_initialized) {
+      unawaited(_persistProgress());
+    }
     _narration.dispose();
     wonderController.dispose();
     expressController.dispose();
@@ -52,21 +86,40 @@ class _JourneyScreenState extends State<JourneyScreen>
     super.dispose();
   }
 
-  Future<void> _next() async {
+  Future<void> _persistProgress({int? overrideStep}) {
+    return _appState.saveJourneyProgress(
+      step: overrideStep ?? step,
+      wonder: wonderController.text,
+      express: expressController.text,
+      memory: memoryController.text,
+    );
+  }
+
+  Future<void> _goToStep(int targetStep) async {
+    final safeStep = targetStep.clamp(0, AppState.beijingJourneyLastStep);
     await _narration.stop();
-    if (!mounted) return;
+    if (!mounted || safeStep == step) return;
 
-    final nextStep = step < 6 ? step + 1 : 6;
-    setState(() => step = nextStep);
+    setState(() => step = safeStep);
+    await _persistProgress(overrideStep: safeStep);
 
-    if (nextStep == 2 && !_discoveryAutoStarted) {
-      _discoveryAutoStarted = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && step == 2) {
-          unawaited(_playDiscoveries());
-        }
-      });
+    if (safeStep == 2) {
+      _scheduleDiscoveryAutoStart();
     }
+  }
+
+  Future<void> _next() => _goToStep(step + 1);
+
+  Future<void> _back() => _goToStep(step - 1);
+
+  void _scheduleDiscoveryAutoStart() {
+    if (_discoveryAutoStarted) return;
+    _discoveryAutoStarted = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && step == 2) {
+        unawaited(_playDiscoveries());
+      }
+    });
   }
 
   Future<void> _playStory() {
@@ -144,7 +197,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         ],
       ),
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 350),
+        duration: const Duration(milliseconds: 320),
         child: pages[step],
       ),
     );
@@ -155,18 +208,50 @@ class _JourneyScreenState extends State<JourneyScreen>
     required Widget child,
     String buttonText = '继续',
     VoidCallback? onNext,
+    bool showBack = true,
   }) {
+    final state = context.watch<AppState>();
+
     return ListView(
       key: ValueKey(title),
-      padding: const EdgeInsets.fromLTRB(24, 18, 24, 34),
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 40),
       children: [
+        JourneyProgressHeader(
+          currentStep: step,
+          furthestStep: state.beijingJourneyFurthestStep,
+          labels: _stepLabels,
+          onStepSelected: (value) => unawaited(_goToStep(value)),
+        ),
+        const SizedBox(height: 22),
         Text(title, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 18),
         child,
         const SizedBox(height: 28),
-        FilledButton(
-          onPressed: onNext ?? () => unawaited(_next()),
-          child: Text(buttonText),
+        Row(
+          children: [
+            if (showBack && step > 0 && step < AppState.beijingJourneyLastStep) ...[
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => unawaited(_back()),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('上一步'),
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              flex: 2,
+              child: FilledButton.icon(
+                onPressed: onNext ?? () => unawaited(_next()),
+                icon: Icon(
+                  step == AppState.beijingJourneyLastStep
+                      ? Icons.home_outlined
+                      : Icons.arrow_forward,
+                ),
+                label: Text(buttonText),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -186,29 +271,9 @@ class _JourneyScreenState extends State<JourneyScreen>
             onPlay: _playStory,
           ),
           const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: PhoenixTheme.gold.withValues(alpha: .12),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: PhoenixTheme.gold.withValues(alpha: .28),
-              ),
-            ),
-            child: const Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.touch_app_outlined, color: PhoenixTheme.red),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    '长按红色虚线词语查看拼音、中文释义和越南语。打开生词时，故事朗读会自动停止。',
-                    style: TextStyle(height: 1.5),
-                  ),
-                ),
-              ],
-            ),
+          _TipCard(
+            icon: Icons.touch_app_outlined,
+            text: '长按红色虚线词语查看拼音、中文释义和越南语。打开生词时，故事朗读会自动停止。',
           ),
           const SizedBox(height: 18),
           AnimatedBuilder(
@@ -236,22 +301,14 @@ class _JourneyScreenState extends State<JourneyScreen>
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 180),
-                          child: isActive
-                              ? const Padding(
-                                  key: ValueKey('speaking'),
-                                  padding: EdgeInsets.only(right: 10, top: 2),
-                                  child: Icon(
-                                    Icons.graphic_eq,
-                                    size: 20,
-                                    color: PhoenixTheme.red,
-                                  ),
-                                )
-                              : const SizedBox.shrink(
-                                  key: ValueKey('silent'),
-                                ),
-                        ),
+                        if (isActive) ...[
+                          const Icon(
+                            Icons.graphic_eq,
+                            size: 20,
+                            color: PhoenixTheme.red,
+                          ),
+                          const SizedBox(width: 10),
+                        ],
                         Expanded(
                           child: InteractiveStoryText(
                             text: entry.value,
@@ -268,13 +325,12 @@ class _JourneyScreenState extends State<JourneyScreen>
               );
             },
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
             '本页重点词语',
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
           ),
           const SizedBox(height: 10),
           Wrap(
@@ -314,10 +370,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 child: ListTile(
                   onTap: () => unawaited(_openWord(entry)),
                   onLongPress: () => unawaited(_openWord(entry)),
-                  leading: Text(
-                    entry.symbol,
-                    style: const TextStyle(fontSize: 30),
-                  ),
+                  leading: Text(entry.symbol, style: const TextStyle(fontSize: 30)),
                   title: Text(
                     entry.word,
                     style: const TextStyle(fontWeight: FontWeight.w800),
@@ -395,16 +448,11 @@ class _JourneyScreenState extends State<JourneyScreen>
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 38,
-                          height: 38,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? PhoenixTheme.red
-                                : PhoenixTheme.gold.withValues(alpha: .18),
-                            borderRadius: BorderRadius.circular(13),
-                          ),
+                        CircleAvatar(
+                          radius: 19,
+                          backgroundColor: isActive
+                              ? PhoenixTheme.red
+                              : PhoenixTheme.gold.withValues(alpha: .18),
                           child: isActive
                               ? const Icon(
                                   Icons.graphic_eq,
@@ -454,6 +502,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             controller: wonderController,
             minLines: 3,
             maxLines: 6,
+            onChanged: (_) => unawaited(_persistProgress()),
             decoration: const InputDecoration(
               hintText: '写下你的想法……',
               border: OutlineInputBorder(),
@@ -480,10 +529,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 color: PhoenixTheme.ai.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Text(
-                aiReply,
-                style: const TextStyle(color: PhoenixTheme.ai),
-              ),
+              child: Text(aiReply, style: const TextStyle(color: PhoenixTheme.ai)),
             ),
           ],
         ],
@@ -503,6 +549,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             controller: expressController,
             minLines: 4,
             maxLines: 8,
+            onChanged: (_) => unawaited(_persistProgress()),
             decoration: const InputDecoration(
               hintText: '用中文写下你的表达……',
               border: OutlineInputBorder(),
@@ -523,12 +570,12 @@ class _JourneyScreenState extends State<JourneyScreen>
       title: '留下今天',
       buttonText: '完成旅程并自动保存',
       onNext: () async {
+        final state = context.read<AppState>();
+        final memory = memoryController.text;
         await _narration.stop();
-        if (!context.mounted) return;
-        await context.read<AppState>().completeJourney(memoryController.text);
-        if (mounted) {
-          setState(() => step = 6);
-        }
+        await state.completeJourney(memory);
+        if (!mounted) return;
+        setState(() => step = AppState.beijingJourneyLastStep);
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -539,6 +586,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             controller: memoryController,
             minLines: 3,
             maxLines: 6,
+            onChanged: (_) => unawaited(_persistProgress()),
             decoration: const InputDecoration(
               hintText: '每一次感受都会自动保存，未来可以回来比较自己的变化。',
               border: OutlineInputBorder(),
@@ -553,17 +601,60 @@ class _JourneyScreenState extends State<JourneyScreen>
     return _page(
       title: '北京已点亮',
       buttonText: '返回首页',
+      showBack: false,
       onNext: () => Navigator.of(context).pop(),
-      child: const Column(
+      child: Column(
         children: [
-          SizedBox(height: 18),
-          Text('🏯', style: TextStyle(fontSize: 78)),
-          SizedBox(height: 18),
-          Text(
+          const SizedBox(height: 18),
+          const Text('🏯', style: TextStyle(fontSize: 78)),
+          const SizedBox(height: 18),
+          const Text(
             '你没有完成一堂课。\n你完成了一段旅程。',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 20, height: 1.6),
           ),
+          const SizedBox(height: 20),
+          OutlinedButton.icon(
+            onPressed: () async {
+              await _appState.restartJourney();
+              wonderController.clear();
+              expressController.clear();
+              memoryController.clear();
+              aiReply = '';
+              _discoveryAutoStarted = false;
+              if (mounted) setState(() => step = 0);
+            },
+            icon: const Icon(Icons.replay),
+            label: const Text('重新体验北京 Journey'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TipCard extends StatelessWidget {
+  const _TipCard({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: PhoenixTheme.gold.withValues(alpha: .12),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .28)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: PhoenixTheme.red),
+          const SizedBox(width: 10),
+          Expanded(child: Text(text, style: const TextStyle(height: 1.5))),
         ],
       ),
     );
