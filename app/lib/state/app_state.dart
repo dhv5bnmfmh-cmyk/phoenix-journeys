@@ -9,6 +9,15 @@ enum AppLoadStatus { loading, ready, error }
 
 class AppState extends ChangeNotifier {
   static const int beijingJourneyLastStep = 6;
+  static const List<String> beijingJourneyStepLabels = [
+    '故事',
+    '生词',
+    '发现',
+    '思考',
+    '表达',
+    '回忆',
+    '完成',
+  ];
 
   ScriptMode scriptMode = ScriptMode.simplified;
   String translationLanguage = '越南语';
@@ -36,6 +45,15 @@ class AppState extends ChangeNotifier {
     if (journeyCompleted) return 1;
     return (beijingJourneyStep + 1) / (beijingJourneyLastStep + 1);
   }
+
+  int get beijingJourneyProgressPercent =>
+      (beijingJourneyProgress * 100).round();
+
+  String get beijingJourneyStepLabel =>
+      beijingJourneyStepLabels[_safeJourneyStep(beijingJourneyStep)];
+
+  String get beijingJourneyFurthestStepLabel =>
+      beijingJourneyStepLabels[_safeJourneyStep(beijingJourneyFurthestStep)];
 
   bool isWordSaved(String word) => savedWords.contains(word);
 
