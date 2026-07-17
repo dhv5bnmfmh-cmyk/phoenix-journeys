@@ -32,7 +32,6 @@ class NarrationPlayerCard extends StatelessWidget {
         final isPaused = status == NarrationStatus.paused;
         final hasError = status == NarrationStatus.error;
         final progress = isCurrent ? controller.progress : 0.0;
-        final currentLabel = isCurrent ? controller.currentItemLabel : null;
         final currentItem = isCurrent ? controller.currentItemIndex : null;
         final itemCount = isCurrent ? controller.itemCount : 0;
         final canControl = isCurrent && controller.hasContent;
@@ -42,7 +41,7 @@ class NarrationPlayerCard extends StatelessWidget {
           label: '$title，$subtitle，${_statusText(status)}',
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(14, 13, 14, 11),
+            padding: const EdgeInsets.fromLTRB(11, 8, 10, 7),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -52,12 +51,12 @@ class NarrationPlayerCard extends StatelessWidget {
                   const Color(0xFF651418),
                 ],
               ),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(15),
               boxShadow: const [
                 BoxShadow(
-                  blurRadius: 16,
-                  offset: Offset(0, 8),
-                  color: Color(0x1A000000),
+                  blurRadius: 10,
+                  offset: Offset(0, 5),
+                  color: Color(0x14000000),
                 ),
               ],
             ),
@@ -65,22 +64,12 @@ class NarrationPlayerCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .13),
-                        borderRadius: BorderRadius.circular(13),
-                        border: Border.all(color: Colors.white24),
-                      ),
-                      child: Icon(
-                        isPlaying ? Icons.graphic_eq_rounded : Icons.headphones,
-                        color: Colors.white,
-                        size: 22,
-                      ),
+                    Icon(
+                      isPlaying ? Icons.graphic_eq_rounded : Icons.headphones,
+                      color: Colors.white,
+                      size: 18,
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,35 +80,35 @@ class NarrationPlayerCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 15,
+                              fontSize: 13,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
-                          const SizedBox(height: 2),
                           Text(
                             hasError
                                 ? controller.errorMessage ?? '朗读暂时不可用'
-                                : currentLabel ?? subtitle,
+                                : subtitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: Colors.white70,
-                              fontSize: 10.5,
-                              height: 1.25,
+                              fontSize: 9.5,
+                              height: 1.15,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     IconButton.filled(
                       key: const ValueKey('narration-main-control'),
                       tooltip: _mainButtonTooltip(status),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: PhoenixTheme.red,
-                        minimumSize: const Size(46, 46),
-                        maximumSize: const Size(46, 46),
+                        minimumSize: const Size(38, 38),
+                        maximumSize: const Size(38, 38),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       onPressed: () {
                         if (isPlaying) {
@@ -130,67 +119,26 @@ class NarrationPlayerCard extends StatelessWidget {
                           unawaited(onPlay());
                         }
                       },
-                      iconSize: 28,
+                      iconSize: 23,
                       icon: Icon(
                         isPlaying
                             ? Icons.pause_rounded
                             : Icons.play_arrow_rounded,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 9),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(99),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          minHeight: 4,
-                          backgroundColor: Colors.white24,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 9),
-                    Text(
-                      currentItem == null || itemCount == 0
-                          ? '—/—'
-                          : '${currentItem + 1}/$itemCount',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 10,
-                        fontFeatures: [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    _CompactControl(
-                      tooltip: '重新播放',
-                      icon: Icons.replay_rounded,
-                      label: '重播',
-                      onPressed: canControl
-                          ? () => unawaited(controller.restart())
-                          : null,
-                    ),
-                    const SizedBox(width: 2),
-                    _CompactControl(
+                    const SizedBox(width: 3),
+                    _MiniIconButton(
                       key: const ValueKey('narration-stop-control'),
                       tooltip: '停止朗读',
                       icon: Icons.stop_rounded,
-                      label: '停止',
                       onPressed: canControl && status != NarrationStatus.idle
                           ? () => unawaited(controller.stop())
                           : null,
                     ),
-                    const Spacer(),
                     PopupMenuButton<double>(
                       key: const ValueKey('narration-speed-control'),
                       tooltip: '调整朗读语速',
+                      padding: EdgeInsets.zero,
                       onSelected: (rate) {
                         unawaited(controller.setSpeechRate(rate));
                       },
@@ -198,58 +146,63 @@ class NarrationPlayerCard extends StatelessWidget {
                           .map(
                             (option) => PopupMenuItem<double>(
                               value: option.rate,
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    (option.rate - controller.speechRate).abs() <
-                                            .001
-                                        ? Icons.check_circle
-                                        : Icons.circle_outlined,
-                                    size: 18,
-                                    color: PhoenixTheme.red,
-                                  ),
-                                  const SizedBox(width: 9),
-                                  Text('${option.label} 语速'),
-                                ],
-                              ),
+                              child: Text('${option.label} 语速'),
                             ),
                           )
                           .toList(growable: false),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 9,
-                          vertical: 5,
+                          horizontal: 7,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: .13),
                           borderRadius: BorderRadius.circular(99),
-                          border: Border.all(color: Colors.white24),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.speed_rounded,
-                              size: 15,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              controller.speedLabel,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const Icon(
-                              Icons.arrow_drop_down,
-                              size: 16,
-                              color: Colors.white70,
-                            ),
-                          ],
+                        child: Text(
+                          controller.speedLabel,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(99),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 3,
+                          backgroundColor: Colors.white24,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 7),
+                    Text(
+                      currentItem == null || itemCount == 0
+                          ? '—/—'
+                          : '${currentItem + 1}/$itemCount',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 9,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                    const SizedBox(width: 3),
+                    _MiniIconButton(
+                      tooltip: '重新播放',
+                      icon: Icons.replay_rounded,
+                      onPressed: canControl
+                          ? () => unawaited(controller.restart())
+                          : null,
                     ),
                   ],
                 ),
@@ -280,35 +233,29 @@ class NarrationPlayerCard extends StatelessWidget {
   }
 }
 
-class _CompactControl extends StatelessWidget {
-  const _CompactControl({
+class _MiniIconButton extends StatelessWidget {
+  const _MiniIconButton({
     required this.tooltip,
     required this.icon,
-    required this.label,
     required this.onPressed,
     super.key,
   });
 
   final String tooltip;
   final IconData icon;
-  final String label;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return TextButton.icon(
+    return IconButton(
+      tooltip: tooltip,
       onPressed: onPressed,
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.white,
-        disabledForegroundColor: Colors.white30,
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-        minimumSize: const Size(0, 28),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-        textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800),
-      ),
-      icon: Icon(icon, size: 16),
-      label: Text(label),
+      visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.all(4),
+      constraints: const BoxConstraints.tightFor(width: 30, height: 30),
+      icon: Icon(icon, size: 17),
+      color: Colors.white,
+      disabledColor: Colors.white30,
     );
   }
 }
