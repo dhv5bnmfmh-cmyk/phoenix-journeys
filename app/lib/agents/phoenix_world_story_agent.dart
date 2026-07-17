@@ -47,7 +47,7 @@ class PhoenixWorldStoryAgent {
       }
     }
     final uri = Uri.tryParse(source.url);
-    if (uri == null || !(uri.isScheme('https') || uri.isScheme('http'))) {
+    if (uri == null || !(uri.scheme == 'https' || uri.scheme == 'http')) {
       throw StateError('Story source has an invalid URL: ${source.id}');
     }
     _sources[source.id] = source;
