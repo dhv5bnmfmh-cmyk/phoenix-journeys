@@ -22,6 +22,9 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Test Phoenix agents
+        run: node --test worker/*.test.mjs
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -35,6 +38,9 @@ jobs:
       - name: Build Flutter web release
         working-directory: app
         run: flutter build web --release
+
+      - name: Validate Worker bundle
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
 
       - name: Check Cloudflare credentials
         id: cloudflare_credentials
@@ -58,3 +64,18 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4"
           command: deploy
+
+      - name: Verify production Agent health
+        if: steps.cloudflare_credentials.outputs.ready == 'true'
+        shell: bash
+        run: |
+          health_url="https://phoenix-journeys-alpha.7hn5tyrjgh.workers.dev/api/health?commit=${GITHUB_SHA}"
+          response="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "$health_url")"
+          echo "$response"
+          node -e '
+            const health = JSON.parse(process.argv[1]);
+            if (!health.ok || !health.ai || health.service !== "phoenix-journeys") {
+              console.error("Phoenix Agent health check failed", health);
+              process.exit(1);
+            }
+          ' "$response"
