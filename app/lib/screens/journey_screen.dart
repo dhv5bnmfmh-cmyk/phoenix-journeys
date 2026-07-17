@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../data/journey_data.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/interactive_story_text.dart';
 import '../widgets/word_detail_sheet.dart';
 
 class JourneyScreen extends StatefulWidget {
@@ -91,29 +92,68 @@ class _JourneyScreenState extends State<JourneyScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '点击带下划线的词语，可查看拼音、解释和辅助翻译。',
-            style: TextStyle(color: PhoenixTheme.translation),
-          ),
-          const SizedBox(height: 16),
-          ...storyParagraphs.map(
-            (paragraph) => Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: Text(paragraph, style: Theme.of(context).textTheme.bodyLarge),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: PhoenixTheme.gold.withValues(alpha: .12),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: PhoenixTheme.gold.withValues(alpha: .28),
+              ),
+            ),
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.touch_app_outlined, color: PhoenixTheme.red),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '长按红色虚线词语，立即查看拼音、中文释义和越南语；打开后会自动朗读。',
+                    style: TextStyle(height: 1.5),
+                  ),
+                ),
+              ],
             ),
           ),
+          const SizedBox(height: 18),
+          ...storyParagraphs.map(
+            (paragraph) => Padding(
+              padding: const EdgeInsets.only(bottom: 18),
+              child: InteractiveStoryText(
+                text: paragraph,
+                entries: words,
+                onWordLongPress: (entry) => showWordDetail(context, entry),
+              ),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '本页重点词语',
+            style: Theme.of(context)
+                .textTheme
+                .titleSmall
+                ?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: words
-                .take(3)
+                .where(
+                  (entry) => storyParagraphs.any(
+                    (paragraph) => paragraph.contains(entry.word),
+                  ),
+                )
+                .take(8)
                 .map(
                   (entry) => ActionChip(
+                    avatar: Text(entry.symbol),
                     label: Text('${entry.word} · ${entry.pinyin}'),
                     onPressed: () => showWordDetail(context, entry),
                   ),
                 )
-                .toList(),
+                .toList(growable: false),
           ),
         ],
       ),
@@ -121,6 +161,8 @@ class _JourneyScreenState extends State<JourneyScreen> {
   }
 
   Widget _words(BuildContext context) {
+    final state = context.watch<AppState>();
+
     return _page(
       title: '生词',
       child: Column(
@@ -130,14 +172,33 @@ class _JourneyScreenState extends State<JourneyScreen> {
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
                   onTap: () => showWordDetail(context, entry),
-                  leading: Text(entry.symbol, style: const TextStyle(fontSize: 32)),
-                  title: Text(entry.word),
+                  onLongPress: () => showWordDetail(context, entry),
+                  leading: Text(
+                    entry.symbol,
+                    style: const TextStyle(fontSize: 30),
+                  ),
+                  title: Text(
+                    entry.word,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
                   subtitle: Text(entry.pinyin),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (state.isWordSaved(entry.word))
+                        const Icon(
+                          Icons.bookmark,
+                          size: 19,
+                          color: PhoenixTheme.red,
+                        ),
+                      const SizedBox(width: 3),
+                      const Icon(Icons.chevron_right),
+                    ],
+                  ),
                 ),
               ),
             )
-            .toList(),
+            .toList(growable: false),
       ),
     );
   }
@@ -156,7 +217,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
                 ),
               ),
             )
-            .toList(),
+            .toList(growable: false),
       ),
     );
   }
