@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/journey_data.dart';
+import '../data/world_story_runtime.dart';
+import '../models/story_content.dart';
 import '../services/narration_controller.dart';
 import '../services/phoenix_ai_service.dart';
 import '../state/app_state.dart';
@@ -31,6 +33,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   final expressController = TextEditingController();
   final memoryController = TextEditingController();
   late final NarrationController _narration;
+  late final JourneyContentRecord _journeyContent;
   late final PhoenixAiService _ai;
   late AppState _appState;
   PhoenixGuideFeedback? _guideFeedback;
@@ -45,6 +48,11 @@ class _JourneyScreenState extends State<JourneyScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _narration = NarrationController();
+    final worldStoryAgent = createPhoenixWorldStoryAgent();
+    _journeyContent = requireJourneyContent(
+      worldStoryAgent,
+      'beijing-forbidden-city',
+    );
     _ai = PhoenixAiService();
   }
 
@@ -117,7 +125,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   Future<void> _playStory() {
     return _narration.play(
       contentId: 'story',
-      items: storyParagraphs
+      items: _journeyContent.storyParagraphs
           .asMap()
           .entries
           .map(
@@ -327,7 +335,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             controller: _narration,
             contentId: 'story',
             title: '紫禁城故事',
-            subtitle: '普通话 · ${storyParagraphs.length} 段',
+            subtitle: '普通话 · ${_journeyContent.storyParagraphs.length} 段',
             onPlay: _playStory,
           ),
           const SizedBox(height: 8),
@@ -340,7 +348,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             animation: _narration,
             builder: (context, _) {
               return Column(
-                children: storyParagraphs.asMap().entries.map((entry) {
+                children: _journeyContent.storyParagraphs.asMap().entries.map((entry) {
                   final annotation = storyAnnotations[entry.key];
                   final isActive = _isNarrating('story', entry.key);
 
@@ -386,7 +394,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             runSpacing: 8,
             children: words
                 .where(
-                  (entry) => storyParagraphs.any(
+                  (entry) => _journeyContent.storyParagraphs.any(
                     (paragraph) => paragraph.contains(entry.word),
                   ),
                 )
