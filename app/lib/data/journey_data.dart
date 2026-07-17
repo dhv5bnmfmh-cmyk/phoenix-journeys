@@ -96,7 +96,7 @@ const words = [
     word: '国家事务',
     pinyin: 'guójiā shìwù',
     simpleChinese: '与国家管理和运行有关的事情。',
-    translation: 'Công việc và事务 liên quan đến quản lý quốc gia.',
+    translation: 'Công việc liên quan đến quản lý và vận hành quốc gia.',
     symbol: '📜',
   ),
   WordEntry(
