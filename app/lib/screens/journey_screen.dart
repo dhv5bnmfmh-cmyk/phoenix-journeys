@@ -524,7 +524,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       buttonText: '完成旅程并自动保存',
       onNext: () async {
         await _narration.stop();
-        if (!mounted) return;
+        if (!context.mounted) return;
         await context.read<AppState>().completeJourney(memoryController.text);
         if (mounted) {
           setState(() => step = 6);
