@@ -6,6 +6,14 @@ import 'package:flutter_tts/flutter_tts.dart';
 enum NarrationStatus { idle, playing, paused, error }
 
 @immutable
+class NarrationSpeedOption {
+  const NarrationSpeedOption({required this.label, required this.rate});
+
+  final String label;
+  final double rate;
+}
+
+@immutable
 class NarrationItem {
   const NarrationItem({
     required this.id,
@@ -36,9 +44,7 @@ class NarrationTextPlan {
     for (var index = 0; index < items.length; index += 1) {
       starts.add(buffer.length);
       buffer.write(items[index].text.trim());
-      if (index != items.length - 1) {
-        buffer.write('\n');
-      }
+      if (index != items.length - 1) buffer.write('\n');
     }
 
     return NarrationTextPlan._(
@@ -64,9 +70,7 @@ class NarrationTextPlan {
             : offset;
 
     for (var index = 0; index < itemStarts.length - 1; index += 1) {
-      if (safeOffset < itemStarts[index + 1]) {
-        return index;
-      }
+      if (safeOffset < itemStarts[index + 1]) return index;
     }
 
     return itemStarts.length - 1;
@@ -78,6 +82,13 @@ class NarrationController extends ChangeNotifier {
     _bindHandlers();
   }
 
+  static const speedOptions = <NarrationSpeedOption>[
+    NarrationSpeedOption(label: '0.8×', rate: .32),
+    NarrationSpeedOption(label: '1.0×', rate: .40),
+    NarrationSpeedOption(label: '1.2×', rate: .48),
+    NarrationSpeedOption(label: '1.5×', rate: .60),
+  ];
+
   final FlutterTts _tts;
 
   NarrationStatus _status = NarrationStatus.idle;
@@ -88,6 +99,7 @@ class NarrationController extends ChangeNotifier {
   int _speechBaseOffset = 0;
   int _currentOffset = 0;
   int? _currentItemIndex;
+  double _speechRate = .40;
   bool _disposed = false;
 
   NarrationStatus get status => _status;
@@ -96,6 +108,16 @@ class NarrationController extends ChangeNotifier {
   int? get currentItemIndex => _currentItemIndex;
   int get itemCount => _plan.items.length;
   bool get hasContent => !_plan.isEmpty;
+  double get speechRate => _speechRate;
+
+  String get speedLabel {
+    return speedOptions
+        .firstWhere(
+          (option) => (option.rate - _speechRate).abs() < .001,
+          orElse: () => speedOptions[1],
+        )
+        .label;
+  }
 
   String? get currentItemLabel {
     final index = _currentItemIndex;
@@ -192,7 +214,33 @@ class NarrationController extends ChangeNotifier {
     await _speakFrom(0);
   }
 
+  Future<void> setSpeechRate(double rate) async {
+    final option = speedOptions.reduce(
+      (current, next) => (next.rate - rate).abs() <
+              (current.rate - rate).abs()
+          ? next
+          : current,
+    );
+    if ((_speechRate - option.rate).abs() < .001) return;
+
+    _speechRate = option.rate;
+    _safeNotify();
+
+    if (_status == NarrationStatus.playing && !_plan.isEmpty) {
+      await _speakFrom(_currentOffset);
+    }
+  }
+
   Future<void> stop({bool resetPosition = true}) async {
+    _status = NarrationStatus.idle;
+    _errorMessage = null;
+    _currentItemIndex = null;
+    if (resetPosition) {
+      _currentOffset = 0;
+      _speechBaseOffset = 0;
+    }
+    _safeNotify();
+
     try {
       await _tts.stop();
     } catch (error) {
@@ -201,12 +249,7 @@ class NarrationController extends ChangeNotifier {
 
     if (_disposed) return;
     _status = NarrationStatus.idle;
-    _errorMessage = null;
     _currentItemIndex = null;
-    if (resetPosition) {
-      _currentOffset = 0;
-      _speechBaseOffset = 0;
-    }
     _safeNotify();
   }
 
@@ -230,7 +273,7 @@ class NarrationController extends ChangeNotifier {
       _safeNotify();
 
       await _tts.setLanguage('zh-CN');
-      await _tts.setSpeechRate(0.40);
+      await _tts.setSpeechRate(_speechRate);
       await _tts.setPitch(1.0);
       await _tts.setVolume(1.0);
       final result = await _tts.speak(remainingText);
