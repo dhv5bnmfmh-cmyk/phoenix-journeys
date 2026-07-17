@@ -11,11 +11,14 @@ class AppState extends ChangeNotifier {
   int selectedTab = 0;
   bool journeyCompleted = false;
   final List<String> memories = [];
+  final Set<String> savedWords = <String>{};
 
   AppLoadStatus loadStatus = AppLoadStatus.loading;
   String? loadErrorMessage;
 
   bool get isReady => loadStatus == AppLoadStatus.ready;
+
+  bool isWordSaved(String word) => savedWords.contains(word);
 
   Future<void> load() async {
     loadStatus = AppLoadStatus.loading;
@@ -33,6 +36,9 @@ class AppState extends ChangeNotifier {
       memories
         ..clear()
         ..addAll(prefs.getStringList('memories') ?? <String>[]);
+      savedWords
+        ..clear()
+        ..addAll(prefs.getStringList('savedWords') ?? <String>[]);
       loadStatus = AppLoadStatus.ready;
     } catch (error, stackTrace) {
       debugPrint('Failed to load Phoenix state: $error');
@@ -63,6 +69,19 @@ class AppState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('translationLanguage', value);
     notifyListeners();
+  }
+
+  Future<void> toggleSavedWord(String word) async {
+    if (savedWords.contains(word)) {
+      savedWords.remove(word);
+    } else {
+      savedWords.add(word);
+    }
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    final orderedWords = savedWords.toList()..sort();
+    await prefs.setStringList('savedWords', orderedWords);
   }
 
   Future<void> completeJourney(String memory) async {
