@@ -28,14 +28,14 @@ class _StartupLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: PhoenixTheme.paper,
       body: SafeArea(
         child: Center(
           child: Semantics(
             label: 'Phoenix Journeys 正在载入',
             liveRegion: true,
-            child: Padding(
+            child: const Padding(
               padding: EdgeInsets.all(32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
