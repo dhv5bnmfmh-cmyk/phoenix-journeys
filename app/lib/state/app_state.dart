@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum ScriptMode { simplified, traditional }
 
+enum AppLoadStatus { loading, ready, error }
+
 class AppState extends ChangeNotifier {
   ScriptMode scriptMode = ScriptMode.simplified;
   String translationLanguage = '越南语';
@@ -10,17 +12,35 @@ class AppState extends ChangeNotifier {
   bool journeyCompleted = false;
   final List<String> memories = [];
 
+  AppLoadStatus loadStatus = AppLoadStatus.loading;
+  String? loadErrorMessage;
+
+  bool get isReady => loadStatus == AppLoadStatus.ready;
+
   Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    scriptMode = prefs.getBool('traditional') == true
-        ? ScriptMode.traditional
-        : ScriptMode.simplified;
-    translationLanguage =
-        prefs.getString('translationLanguage') ?? '越南语';
-    journeyCompleted = prefs.getBool('journeyCompleted') ?? false;
-    memories
-      ..clear()
-      ..addAll(prefs.getStringList('memories') ?? <String>[]);
+    loadStatus = AppLoadStatus.loading;
+    loadErrorMessage = null;
+    notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      scriptMode = prefs.getBool('traditional') == true
+          ? ScriptMode.traditional
+          : ScriptMode.simplified;
+      translationLanguage =
+          prefs.getString('translationLanguage') ?? '越南语';
+      journeyCompleted = prefs.getBool('journeyCompleted') ?? false;
+      memories
+        ..clear()
+        ..addAll(prefs.getStringList('memories') ?? <String>[]);
+      loadStatus = AppLoadStatus.ready;
+    } catch (error, stackTrace) {
+      debugPrint('Failed to load Phoenix state: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      loadStatus = AppLoadStatus.error;
+      loadErrorMessage = '暂时无法读取你的旅程记录，请重新尝试。';
+    }
+
     notifyListeners();
   }
 

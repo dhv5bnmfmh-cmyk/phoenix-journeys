@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'theme/phoenix_theme.dart';
-import 'screens/home_shell.dart';
+import 'widgets/startup_gate.dart';
 
 class PhoenixApp extends StatelessWidget {
   const PhoenixApp({super.key});
@@ -12,7 +12,7 @@ class PhoenixApp extends StatelessWidget {
       title: 'Phoenix Journeys',
       debugShowCheckedModeBanner: false,
       theme: PhoenixTheme.light,
-      home: const HomeShell(),
+      home: const StartupGate(),
     );
   }
 }

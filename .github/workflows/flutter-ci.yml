@@ -44,19 +44,33 @@ jobs:
           flutter analyze 2>&1 | tee analyze.log
 
       - name: Test
-        run: flutter test
+        id: test
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          flutter test 2>&1 | tee test.log
 
       - name: Build web release
-        run: flutter build web --release
+        id: build
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          flutter build web --release 2>&1 | tee build-web.log
 
-      - name: Upload analyzer log
+      - name: Upload verification logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-analyze-log
-          path: app/analyze.log
+          name: flutter-verification-logs
+          path: |
+            app/analyze.log
+            app/test.log
+            app/build-web.log
           if-no-files-found: error
 
-      - name: Enforce analyzer result
-        if: steps.analyze.outcome != 'success'
+      - name: Enforce verification results
+        if: >-
+          steps.analyze.outcome != 'success' ||
+          steps.test.outcome != 'success' ||
+          steps.build.outcome != 'success'
         run: exit 1
