@@ -15,6 +15,8 @@ Add these repository secrets under **Settings → Secrets and variables → Acti
 
 The API token needs permission to edit Workers Scripts for the Cloudflare account that owns `phoenix-journeys-alpha`.
 
+Setup status: both repository secrets were added on 2026-07-17.
+
 ## Automatic production flow
 
 After both secrets exist, every push to `main` runs `.github/workflows/deploy-cloudflare.yml`:
