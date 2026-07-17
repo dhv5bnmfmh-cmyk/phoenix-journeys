@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../data/journey_data.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/word_detail_sheet.dart';
 
 class MeScreen extends StatelessWidget {
   const MeScreen({super.key});
@@ -11,6 +13,9 @@ class MeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final savedEntries = words
+        .where((entry) => state.savedWords.contains(entry.word))
+        .toList(growable: false);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
@@ -46,6 +51,53 @@ class MeScreen extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                '我的生词',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: PhoenixTheme.red.withValues(alpha: .09),
+                borderRadius: BorderRadius.circular(99),
+              ),
+              child: Text(
+                '${savedEntries.length} 个',
+                style: const TextStyle(
+                  color: PhoenixTheme.red,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (savedEntries.isEmpty)
+          const _EmptyVocabularyCard()
+        else
+          ...savedEntries.map(
+            (entry) => Card(
+              margin: const EdgeInsets.only(bottom: 10),
+              child: ListTile(
+                onTap: () => showWordDetail(context, entry),
+                leading: Text(
+                  entry.symbol,
+                  style: const TextStyle(fontSize: 28),
+                ),
+                title: Text(
+                  entry.word,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                subtitle: Text(entry.pinyin),
+                trailing: const Icon(Icons.volume_up_outlined),
+              ),
+            ),
+          ),
         const SizedBox(height: 24),
         Text('回忆时间轴', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
@@ -140,6 +192,35 @@ class _InstallAppCard extends StatelessWidget {
                   style: TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyVocabularyCard extends StatelessWidget {
+  const _EmptyVocabularyCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: PhoenixTheme.gold.withValues(alpha: .10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .28)),
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('🔖', style: TextStyle(fontSize: 28)),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '在 Journey 中长按词语，再点“加入生词本”。以后可以从这里随时复习和朗读。',
+              style: TextStyle(height: 1.5),
             ),
           ),
         ],
