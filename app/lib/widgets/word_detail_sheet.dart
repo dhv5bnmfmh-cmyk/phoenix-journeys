@@ -107,10 +107,10 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
-        22,
-        4,
-        22,
-        24 + MediaQuery.viewInsetsOf(context).bottom,
+        18,
+        2,
+        18,
+        22 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       child: Center(
         child: ConstrainedBox(
@@ -122,8 +122,8 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  WordMark(word: widget.entry.word, size: 64),
-                  const SizedBox(width: 14),
+                  WordMark(word: widget.entry.word, size: 56),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,23 +132,23 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                           widget.entry.word,
                           style: Theme.of(context)
                               .textTheme
-                              .headlineMedium
+                              .headlineSmall
                               ?.copyWith(fontWeight: FontWeight.w900),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 1),
                         Text(
                           widget.entry.pinyin,
                           style: const TextStyle(
                             color: PhoenixTheme.red,
-                            fontSize: 17,
+                            fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(height: 7),
+                        const SizedBox(height: 5),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 4,
+                            horizontal: 8,
+                            vertical: 3,
                           ),
                           decoration: BoxDecoration(
                             color: PhoenixTheme.gold.withValues(alpha: .16),
@@ -158,7 +158,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                             widget.entry.partOfSpeech,
                             style: const TextStyle(
                               color: PhoenixTheme.red,
-                              fontSize: 11,
+                              fontSize: 10,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -169,6 +169,8 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                   IconButton.filledTonal(
                     tooltip: _isSpeaking ? '正在朗读' : '重新朗读',
                     onPressed: _isSpeaking ? null : _speak,
+                    iconSize: 20,
+                    visualDensity: VisualDensity.compact,
                     icon: Icon(
                       _isSpeaking
                           ? Icons.graphic_eq
@@ -177,45 +179,45 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 22),
+              const SizedBox(height: 14),
               _DefinitionCard(
                 icon: Icons.menu_book_outlined,
                 title: '中文释义',
                 text: widget.entry.simpleChinese,
                 color: PhoenixTheme.ink,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 7),
               _DefinitionCard(
                 icon: Icons.language,
                 title: 'English definition',
                 text: widget.entry.englishDefinition,
                 color: PhoenixTheme.ai,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 7),
               _DefinitionCard(
                 icon: Icons.translate,
                 title: widget.entry.nativeLabel(language),
                 text: widget.entry.nativeDefinition(language),
                 color: PhoenixTheme.translation,
               ),
-              const SizedBox(height: 22),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   const Icon(
                     Icons.format_quote_rounded,
-                    size: 20,
+                    size: 18,
                     color: PhoenixTheme.red,
                   ),
-                  const SizedBox(width: 7),
+                  const SizedBox(width: 6),
                   Text(
                     '三个例句',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w900,
                         ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               ...examples.asMap().entries.map(
                     (entry) => _ExampleCard(
                       number: entry.key + 1,
@@ -225,13 +227,13 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                     ),
                   ),
               if (_speechUnavailable) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 const Text(
                   '当前浏览器没有提供中文语音，请检查静音设置或换用 Safari、Chrome。',
-                  style: TextStyle(color: Colors.black54, fontSize: 12),
+                  style: TextStyle(color: Colors.black54, fontSize: 11.5),
                 ),
               ],
-              const SizedBox(height: 18),
+              const SizedBox(height: 14),
               Row(
                 children: [
                   Expanded(
@@ -241,7 +243,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                       label: const Text('再听一次'),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: () => state.toggleSavedWord(widget.entry.word),
@@ -278,10 +280,10 @@ class _DefinitionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
       decoration: BoxDecoration(
         color: color.withValues(alpha: .07),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: color.withValues(alpha: .16)),
       ),
       child: Column(
@@ -289,20 +291,25 @@ class _DefinitionCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 17, color: color),
-              const SizedBox(width: 7),
-              Text(
-                title,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
+              Icon(icon, size: 15, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 7),
-          Text(text, style: const TextStyle(height: 1.5)),
+          const SizedBox(height: 4),
+          Text(
+            text,
+            style: const TextStyle(fontSize: 13, height: 1.35),
+          ),
         ],
       ),
     );
@@ -326,11 +333,11 @@ class _ExampleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(17),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .22)),
       ),
       child: Column(
@@ -340,35 +347,35 @@ class _ExampleCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CircleAvatar(
-                radius: 12,
+                radius: 10,
                 backgroundColor: PhoenixTheme.red.withValues(alpha: .09),
                 child: Text(
                   '$number',
                   style: const TextStyle(
                     color: PhoenixTheme.red,
-                    fontSize: 10,
+                    fontSize: 9,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
-              const SizedBox(width: 9),
+              const SizedBox(width: 7),
               Expanded(
                 child: Text(
                   example.chinese,
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    height: 1.45,
+                    height: 1.32,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 6),
           _ExampleLine(label: '拼音', text: example.pinyin),
-          const SizedBox(height: 7),
+          const SizedBox(height: 4),
           _ExampleLine(label: nativeLabel, text: nativeText),
-          const SizedBox(height: 7),
+          const SizedBox(height: 4),
           _ExampleLine(label: 'English', text: example.english),
         ],
       ),
@@ -384,24 +391,35 @@ class _ExampleLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.black45,
-            fontSize: 10,
-            fontWeight: FontWeight.w900,
+        Container(
+          constraints: const BoxConstraints(minWidth: 42, maxWidth: 96),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: PhoenixTheme.ink.withValues(alpha: .055),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w900,
+              height: 1.2,
+            ),
           ),
         ),
-        const SizedBox(height: 2),
-        Text(
-          text,
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 12.5,
-            height: 1.45,
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 11.5,
+              height: 1.32,
+            ),
           ),
         ),
       ],
