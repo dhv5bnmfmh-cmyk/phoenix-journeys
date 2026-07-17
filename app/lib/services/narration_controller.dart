@@ -77,8 +77,13 @@ class NarrationTextPlan {
   }
 }
 
-class NarrationController extends ChangeNotifier {
-  NarrationController({FlutterTts? tts}) : _tts = tts ?? FlutterTts() {
+/// Owns all spoken-audio state for Phoenix Journeys.
+///
+/// It coordinates long-form narration, play/pause/resume, speed changes,
+/// temporary vocabulary interruptions, and automatic continuation from the
+/// saved reading position.
+class PhoenixNarrationAgent extends ChangeNotifier {
+  PhoenixNarrationAgent({FlutterTts? tts}) : _tts = tts ?? FlutterTts() {
     _bindHandlers();
   }
 
@@ -102,6 +107,11 @@ class NarrationController extends ChangeNotifier {
   double _speechRate = .40;
   bool _disposed = false;
 
+  bool _isInterrupting = false;
+  String? _interruptionLabel;
+  Completer<void>? _interruptionCompleter;
+  int _interruptionGeneration = 0;
+
   NarrationStatus get status => _status;
   String? get contentId => _contentId;
   String? get errorMessage => _errorMessage;
@@ -109,6 +119,8 @@ class NarrationController extends ChangeNotifier {
   int get itemCount => _plan.items.length;
   bool get hasContent => !_plan.isEmpty;
   double get speechRate => _speechRate;
+  bool get isInterrupting => _isInterrupting;
+  String? get interruptionLabel => _interruptionLabel;
 
   String get speedLabel {
     return speedOptions
@@ -120,6 +132,10 @@ class NarrationController extends ChangeNotifier {
   }
 
   String? get currentItemLabel {
+    if (_isInterrupting && _interruptionLabel != null) {
+      return _interruptionLabel;
+    }
+
     final index = _currentItemIndex;
     if (index == null || index < 0 || index >= _plan.items.length) {
       return null;
@@ -135,23 +151,37 @@ class NarrationController extends ChangeNotifier {
 
   void _bindHandlers() {
     _tts.setStartHandler(() {
+      if (_isInterrupting) {
+        _safeNotify();
+        return;
+      }
       _status = NarrationStatus.playing;
       _errorMessage = null;
       _safeNotify();
     });
+
     _tts.setCompletionHandler(() {
+      if (_isInterrupting) {
+        final completer = _interruptionCompleter;
+        if (completer != null && !completer.isCompleted) completer.complete();
+        return;
+      }
+
       _status = NarrationStatus.idle;
       _currentOffset = _plan.text.length;
       _currentItemIndex = null;
       _safeNotify();
     });
+
     _tts.setCancelHandler(() {
-      if (_status == NarrationStatus.paused) return;
+      if (_isInterrupting || _status == NarrationStatus.paused) return;
       _status = NarrationStatus.idle;
       _currentItemIndex = null;
       _safeNotify();
     });
+
     _tts.setProgressHandler((_, startOffset, __, ___) {
+      if (_isInterrupting) return;
       final offset = _speechBaseOffset + startOffset;
       _currentOffset = offset < 0
           ? 0
@@ -161,7 +191,15 @@ class NarrationController extends ChangeNotifier {
       _currentItemIndex = _plan.indexForOffset(_currentOffset);
       _safeNotify();
     });
+
     _tts.setErrorHandler((message) {
+      if (_isInterrupting) {
+        final completer = _interruptionCompleter;
+        if (completer != null && !completer.isCompleted) completer.complete();
+        debugPrint('Vocabulary interruption error: $message');
+        return;
+      }
+
       _status = NarrationStatus.error;
       _errorMessage = '当前设备暂时无法朗读，请检查声音设置后重试。';
       _currentItemIndex = null;
@@ -177,6 +215,7 @@ class NarrationController extends ChangeNotifier {
     final plan = NarrationTextPlan.fromItems(items);
     if (plan.isEmpty) return;
 
+    _cancelInterruption();
     _contentId = contentId;
     _plan = plan;
     _currentOffset = 0;
@@ -186,7 +225,7 @@ class NarrationController extends ChangeNotifier {
   }
 
   Future<void> pause() async {
-    if (_status != NarrationStatus.playing) return;
+    if (_status != NarrationStatus.playing || _isInterrupting) return;
 
     _status = NarrationStatus.paused;
     _safeNotify();
@@ -203,7 +242,9 @@ class NarrationController extends ChangeNotifier {
   }
 
   Future<void> resume() async {
-    if (_status != NarrationStatus.paused || _plan.isEmpty) return;
+    if (_status != NarrationStatus.paused || _plan.isEmpty || _isInterrupting) {
+      return;
+    }
 
     final offset = _currentOffset >= _plan.text.length ? 0 : _currentOffset;
     await _speakFrom(offset);
@@ -211,6 +252,7 @@ class NarrationController extends ChangeNotifier {
 
   Future<void> restart() async {
     if (_plan.isEmpty || _contentId == null) return;
+    _cancelInterruption();
     await _speakFrom(0);
   }
 
@@ -226,12 +268,65 @@ class NarrationController extends ChangeNotifier {
     _speechRate = option.rate;
     _safeNotify();
 
-    if (_status == NarrationStatus.playing && !_plan.isEmpty) {
+    if (_status == NarrationStatus.playing && !_plan.isEmpty && !_isInterrupting) {
       await _speakFrom(_currentOffset);
     }
   }
 
+  /// Temporarily interrupts long-form narration to pronounce one vocabulary
+  /// item, then resumes from the saved reading offset when appropriate.
+  Future<void> pronounceWordAndResume(String word) async {
+    final vocabulary = word.trim();
+    if (vocabulary.isEmpty || _disposed) return;
+
+    final generation = ++_interruptionGeneration;
+    final shouldResume = _status == NarrationStatus.playing && !_plan.isEmpty;
+    final resumeOffset = _currentOffset;
+
+    _interruptionCompleter?.complete();
+    _interruptionCompleter = Completer<void>();
+
+    try {
+      await _tts.stop();
+      if (_disposed || generation != _interruptionGeneration) return;
+
+      _isInterrupting = true;
+      _interruptionLabel = '生词 · $vocabulary';
+      if (shouldResume) _status = NarrationStatus.paused;
+      _errorMessage = null;
+      _safeNotify();
+
+      await _tts.setLanguage('zh-CN');
+      await _tts.setSpeechRate(.42);
+      await _tts.setPitch(1.0);
+      await _tts.setVolume(1.0);
+      final result = await _tts.speak(vocabulary);
+
+      if (result == 1) {
+        await _interruptionCompleter!.future.timeout(
+          const Duration(seconds: 8),
+          onTimeout: () {},
+        );
+      }
+    } catch (error, stackTrace) {
+      debugPrint('Unable to pronounce vocabulary "$vocabulary": $error');
+      debugPrintStack(stackTrace: stackTrace);
+    } finally {
+      if (_disposed || generation != _interruptionGeneration) return;
+
+      _isInterrupting = false;
+      _interruptionLabel = null;
+      _interruptionCompleter = null;
+      _safeNotify();
+
+      if (shouldResume && !_plan.isEmpty) {
+        await _speakFrom(resumeOffset);
+      }
+    }
+  }
+
   Future<void> stop({bool resetPosition = true}) async {
+    _cancelInterruption();
     _status = NarrationStatus.idle;
     _errorMessage = null;
     _currentItemIndex = null;
@@ -294,6 +389,15 @@ class NarrationController extends ChangeNotifier {
     }
   }
 
+  void _cancelInterruption() {
+    _interruptionGeneration += 1;
+    _isInterrupting = false;
+    _interruptionLabel = null;
+    final completer = _interruptionCompleter;
+    if (completer != null && !completer.isCompleted) completer.complete();
+    _interruptionCompleter = null;
+  }
+
   void _safeNotify() {
     if (!_disposed) notifyListeners();
   }
@@ -301,7 +405,13 @@ class NarrationController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _cancelInterruption();
     unawaited(_tts.stop());
     super.dispose();
   }
+}
+
+/// Backward-compatible name while existing screens migrate to the Agent name.
+class NarrationController extends PhoenixNarrationAgent {
+  NarrationController({super.tts});
 }
