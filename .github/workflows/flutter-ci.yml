@@ -37,10 +37,24 @@ jobs:
         run: flutter pub get
 
       - name: Analyze
-        run: flutter analyze --no-fatal-infos
+        id: analyze
+        continue-on-error: true
+        run: flutter analyze --no-fatal-infos 2>&1 | tee analyze.log
 
       - name: Test
         run: flutter test
 
       - name: Build web release
         run: flutter build web --release
+
+      - name: Upload analyzer log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-analyze-log
+          path: app/analyze.log
+          if-no-files-found: error
+
+      - name: Enforce analyzer result
+        if: steps.analyze.outcome != 'success'
+        run: exit 1
