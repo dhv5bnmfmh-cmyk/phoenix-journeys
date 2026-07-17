@@ -14,6 +14,16 @@ class ExploreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
 
+    Future<void> openJourney() async {
+      if (state.journeyCompleted) {
+        await state.restartJourney();
+      }
+      if (!context.mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const JourneyScreen()),
+      );
+    }
+
     return Stack(
       children: [
         const Positioned.fill(child: _JourneyBackground()),
@@ -35,15 +45,9 @@ class ExploreScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 24),
-            const _FlightMapCard(),
+            _FlightMapCard(state: state),
             const SizedBox(height: 20),
-            _JourneyCard(
-              onStart: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const JourneyScreen()),
-                );
-              },
-            ),
+            _JourneyCard(state: state, onOpen: openJourney),
             const SizedBox(height: 20),
             const _DiscoveryCard(),
           ],
@@ -131,7 +135,9 @@ class _JourneyBackground extends StatelessWidget {
 }
 
 class _FlightMapCard extends StatefulWidget {
-  const _FlightMapCard();
+  const _FlightMapCard({required this.state});
+
+  final AppState state;
 
   @override
   State<_FlightMapCard> createState() => _FlightMapCardState();
@@ -158,6 +164,15 @@ class _FlightMapCardState extends State<_FlightMapCard>
 
   @override
   Widget build(BuildContext context) {
+    final state = widget.state;
+    final status = state.journeyCompleted
+        ? '北京已点亮 · 印章已获得'
+        : state.hasJourneyInProgress
+            ? '${state.beijingStampEarned ? '印章已收藏 · ' : ''}旅程 ${state.beijingJourneyProgressPercent}%'
+            : state.beijingStampEarned
+                ? '北京印章已收藏 · 可以再次出发'
+                : '1,670 km · 学习航程';
+
     return Container(
       height: 245,
       clipBehavior: Clip.antiAlias,
@@ -201,9 +216,15 @@ class _FlightMapCardState extends State<_FlightMapCard>
             child: AnimatedBuilder(
               animation: _controller,
               builder: (context, _) {
-                final t = Curves.easeInOut.transform(_controller.value);
-                final x = 64 + (MediaQuery.sizeOf(context).width - 150) * t;
-                final y = 172 - math.sin(t * math.pi) * 70;
+                final t = state.journeyCompleted
+                    ? 1.0
+                    : Curves.easeInOut.transform(_controller.value);
+                final width = MediaQuery.sizeOf(context)
+                    .width
+                    .clamp(280.0, 760.0)
+                    .toDouble();
+                final x = 64.0 + (width - 150.0) * t;
+                final y = 172.0 - math.sin(t * math.pi) * 70.0;
                 return Stack(
                   children: [
                     Positioned(
@@ -228,10 +249,10 @@ class _FlightMapCardState extends State<_FlightMapCard>
             bottom: 24,
             child: _MapPin(label: '河内', active: false),
           ),
-          const Positioned(
+          Positioned(
             right: 24,
             top: 90,
-            child: _MapPin(label: '北京', active: true),
+            child: _MapPin(label: '北京', active: state.beijingStampEarned),
           ),
           Positioned(
             right: 18,
@@ -243,9 +264,9 @@ class _FlightMapCardState extends State<_FlightMapCard>
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.white24),
               ),
-              child: const Text(
-                '1,670 km · 学习航程',
-                style: TextStyle(color: Colors.white),
+              child: Text(
+                status,
+                style: const TextStyle(color: Colors.white, fontSize: 12),
               ),
             ),
           ),
@@ -283,9 +304,22 @@ class _MapPin extends StatelessWidget {
 }
 
 class _JourneyCard extends StatelessWidget {
-  const _JourneyCard({required this.onStart});
+  const _JourneyCard({required this.state, required this.onOpen});
 
-  final VoidCallback onStart;
+  final AppState state;
+  final VoidCallback onOpen;
+
+  String get _buttonText {
+    if (state.journeyCompleted) return '再次探索北京';
+    if (state.hasJourneyInProgress) return '继续北京 Journey';
+    return '开始北京 Journey';
+  }
+
+  IconData get _buttonIcon {
+    if (state.journeyCompleted) return Icons.replay_rounded;
+    if (state.hasJourneyInProgress) return Icons.play_arrow_rounded;
+    return Icons.flight_takeoff;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -313,6 +347,50 @@ class _JourneyCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           const Text('跟随 AI 导游，用故事、词汇和文化打开北京。'),
+          if (state.hasJourneyInProgress || state.journeyCompleted) ...[
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    state.journeyCompleted
+                        ? '旅程完成 · 北京紫禁城印章已收入护照'
+                        : '上次停在「${state.beijingJourneyStepLabel}」',
+                    style: const TextStyle(
+                      color: PhoenixTheme.red,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${state.beijingJourneyProgressPercent}%',
+                  style: const TextStyle(
+                    color: PhoenixTheme.red,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(99),
+              child: LinearProgressIndicator(
+                value: state.beijingJourneyProgress,
+                minHeight: 7,
+                color: PhoenixTheme.red,
+                backgroundColor: PhoenixTheme.gold.withValues(alpha: .18),
+              ),
+            ),
+          ] else if (state.beijingStampEarned) ...[
+            const SizedBox(height: 18),
+            const Text(
+              '北京印章已收藏，可以随时再次体验。',
+              style: TextStyle(
+                color: PhoenixTheme.red,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
           const SizedBox(height: 18),
           const Wrap(
             spacing: 8,
@@ -335,9 +413,9 @@ class _JourneyCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(18),
                 ),
               ),
-              icon: const Icon(Icons.flight_takeoff),
-              label: const Text('开始北京 Journey'),
-              onPressed: onStart,
+              icon: Icon(_buttonIcon),
+              label: Text(_buttonText),
+              onPressed: onOpen,
             ),
           ),
         ],
@@ -379,7 +457,7 @@ class _DiscoveryCard extends StatelessWidget {
                 Text('为什么故宫的屋顶大多是黄色？'),
                 SizedBox(height: 8),
                 Text(
-                  '进入 Journey 后自动朗读，并可长按汉字查看拼音、释义与越南语。',
+                  '中文朗读下方会显示探索者的解释语言，理解后再继续思考与表达。',
                   style: TextStyle(color: Colors.black54, height: 1.45),
                 ),
               ],

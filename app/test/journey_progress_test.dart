@@ -25,6 +25,8 @@ void main() {
 
     expect(restored.beijingJourneyStep, 4);
     expect(restored.beijingJourneyFurthestStep, 4);
+    expect(restored.beijingJourneyStepLabel, '表达');
+    expect(restored.beijingJourneyProgressPercent, 71);
     expect(restored.wonderDraft, '我想观察红墙和屋顶。');
     expect(restored.expressDraft, '故宫保存了很多历史记忆。');
     expect(restored.memoryDraft, '今天记住了太和殿。');
@@ -50,9 +52,10 @@ void main() {
 
     expect(state.beijingJourneyStep, 2);
     expect(state.beijingJourneyFurthestStep, 5);
+    expect(state.beijingJourneyFurthestStepLabel, '回忆');
   });
 
-  test('completion and restart reset the learning flow safely', () async {
+  test('completion earns a permanent stamp and restart keeps it', () async {
     final state = AppState();
     await state.load();
     await state.saveJourneyProgress(
@@ -65,6 +68,7 @@ void main() {
     await state.completeJourney('北京的红墙');
 
     expect(state.journeyCompleted, isTrue);
+    expect(state.beijingStampEarned, isTrue);
     expect(state.beijingJourneyStep, AppState.beijingJourneyLastStep);
     expect(state.memories.first, '北京的红墙');
     expect(state.wonderDraft, isEmpty);
@@ -72,8 +76,16 @@ void main() {
     await state.restartJourney();
 
     expect(state.journeyCompleted, isFalse);
+    expect(state.beijingStampEarned, isTrue);
     expect(state.beijingJourneyStep, 0);
     expect(state.beijingJourneyFurthestStep, 0);
     expect(state.memories.first, '北京的红墙');
+
+    final restored = AppState();
+    await restored.load();
+
+    expect(restored.journeyCompleted, isFalse);
+    expect(restored.beijingStampEarned, isTrue);
+    expect(restored.memories.first, '北京的红墙');
   });
 }

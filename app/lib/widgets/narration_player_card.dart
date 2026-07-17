@@ -33,23 +33,26 @@ class NarrationPlayerCard extends StatelessWidget {
         final hasError = status == NarrationStatus.error;
         final progress = isCurrent ? controller.progress : 0.0;
         final currentLabel = isCurrent ? controller.currentItemLabel : null;
+        final currentItem = isCurrent ? controller.currentItemIndex : null;
+        final itemCount = isCurrent ? controller.itemCount : 0;
+        final canControl = isCurrent && controller.hasContent;
 
         return Semantics(
           container: true,
-          label: '$title，$subtitle',
+          label: '$title，$subtitle，${_statusText(status)}',
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  PhoenixTheme.red.withValues(alpha: .96),
-                  const Color(0xFF6E171A),
+                  PhoenixTheme.red.withValues(alpha: .97),
+                  const Color(0xFF651418),
                 ],
               ),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(26),
               boxShadow: const [
                 BoxShadow(
                   blurRadius: 22,
@@ -59,23 +62,25 @@ class NarrationPlayerCard extends StatelessWidget {
               ],
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      width: 58,
+                      height: 58,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .14),
-                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.white.withValues(alpha: .13),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: Colors.white24),
                       ),
                       child: Icon(
-                        isPlaying ? Icons.graphic_eq : Icons.headphones,
+                        isPlaying ? Icons.graphic_eq_rounded : Icons.headphones,
                         color: Colors.white,
+                        size: 29,
                       ),
                     ),
-                    const SizedBox(width: 13),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,22 +93,84 @@ class NarrationPlayerCard extends StatelessWidget {
                               fontWeight: FontWeight.w900,
                             ),
                           ),
-                          const SizedBox(height: 3),
+                          const SizedBox(height: 4),
                           Text(
                             subtitle,
                             style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 12,
+                              height: 1.35,
                             ),
                           ),
                         ],
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        hasError
+                            ? controller.errorMessage ?? '朗读暂时不可用。'
+                            : currentLabel ?? _statusText(status),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      currentItem == null || itemCount == 0
+                          ? '— / —'
+                          : '${currentItem + 1} / $itemCount',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 9),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(99),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 5,
+                    backgroundColor: Colors.white24,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      tooltip: '重新播放',
+                      onPressed: canControl
+                          ? () => unawaited(controller.restart())
+                          : null,
+                      icon: const Icon(Icons.replay_rounded),
+                      color: Colors.white,
+                      disabledColor: Colors.white30,
+                      iconSize: 27,
+                    ),
+                    const SizedBox(width: 18),
                     IconButton.filled(
+                      key: const ValueKey('narration-main-control'),
                       tooltip: _mainButtonTooltip(status),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: PhoenixTheme.red,
+                        disabledBackgroundColor: Colors.white70,
+                        minimumSize: const Size(66, 66),
                       ),
                       onPressed: () {
                         if (isPlaying) {
@@ -114,62 +181,23 @@ class NarrationPlayerCard extends StatelessWidget {
                           unawaited(onPlay());
                         }
                       },
+                      iconSize: 36,
                       icon: Icon(
                         isPlaying
                             ? Icons.pause_rounded
-                            : isPaused
-                                ? Icons.play_arrow_rounded
-                                : Icons.volume_up_rounded,
+                            : Icons.play_arrow_rounded,
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 18),
                     IconButton(
-                      tooltip: '重新播放',
-                      onPressed: isCurrent && controller.hasContent
-                          ? () => unawaited(controller.restart())
+                      tooltip: '停止朗读',
+                      onPressed: canControl && status != NarrationStatus.idle
+                          ? () => unawaited(controller.stop())
                           : null,
-                      icon: const Icon(Icons.replay_rounded),
+                      icon: const Icon(Icons.stop_rounded),
                       color: Colors.white,
-                      disabledColor: Colors.white38,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 15),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(99),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 6,
-                    backgroundColor: Colors.white24,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Icon(
-                      hasError
-                          ? Icons.error_outline
-                          : isPaused
-                              ? Icons.pause_circle_outline
-                              : isPlaying
-                                  ? Icons.volume_up_outlined
-                                  : Icons.play_circle_outline,
-                      color: Colors.white70,
-                      size: 17,
-                    ),
-                    const SizedBox(width: 7),
-                    Expanded(
-                      child: Text(
-                        hasError
-                            ? controller.errorMessage ?? '朗读暂时不可用。'
-                            : currentLabel ?? _statusText(status),
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                          height: 1.35,
-                        ),
-                      ),
+                      disabledColor: Colors.white30,
+                      iconSize: 27,
                     ),
                   ],
                 ),
@@ -194,7 +222,7 @@ class NarrationPlayerCard extends StatelessWidget {
     return switch (status) {
       NarrationStatus.playing => '正在朗读',
       NarrationStatus.paused => '朗读已暂停',
-      NarrationStatus.idle => '点击播放，使用慢速普通话朗读全部内容',
+      NarrationStatus.idle => '点击播放开始朗读',
       NarrationStatus.error => '朗读暂时不可用',
     };
   }

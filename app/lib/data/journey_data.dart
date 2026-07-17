@@ -14,6 +14,38 @@ class WordEntry {
   final String symbol;
 }
 
+class DiscoveryEntry {
+  const DiscoveryEntry({
+    required this.text,
+    required this.simpleChinese,
+    required this.vietnamese,
+    required this.english,
+  });
+
+  final String text;
+  final String simpleChinese;
+  final String vietnamese;
+  final String english;
+
+  String supportText(String language) {
+    return switch (language) {
+      '越南语' => vietnamese,
+      '英语' => english,
+      '双语' => '$vietnamese\n$english',
+      _ => simpleChinese,
+    };
+  }
+
+  String supportLabel(String language) {
+    return switch (language) {
+      '越南语' => '探索者母语 · 越南语',
+      '英语' => 'Explorer language · English',
+      '双语' => '探索者语言 · 越南语 / English',
+      _ => '简明中文',
+    };
+  }
+}
+
 const storyParagraphs = [
   '清晨，北京的天空刚刚泛白。你站在一扇巨大的红色宫门前，微风从护城河上轻轻吹来。',
   '厚重的宫门慢慢打开。红墙、金色屋顶和宽阔的石路，一点一点出现在你的眼前。',
@@ -172,10 +204,38 @@ const words = [
 ];
 
 const discoveries = [
-  '故宫并不是一栋建筑，而是由大量宫殿、院落和通道组成的建筑群。',
-  '红墙与黄色琉璃瓦不仅形成强烈视觉识别，也与传统礼制和皇权象征有关。',
-  '木结构带来灵活与美感，同时也使防火成为长期而重要的管理问题。',
-  '故宫今天既是文化遗产，也是持续进行保护、研究和公众教育的博物馆。',
+  DiscoveryEntry(
+    text: '故宫并不是一栋建筑，而是由大量宫殿、院落和通道组成的建筑群。',
+    simpleChinese: '故宫由许多建筑和院子共同组成，不是一座单独的房子。',
+    vietnamese:
+        'Cố Cung không phải là một tòa nhà đơn lẻ, mà là một quần thể gồm nhiều cung điện, sân và lối đi.',
+    english:
+        'The Forbidden City is not one building, but a complex of many halls, courtyards, and passageways.',
+  ),
+  DiscoveryEntry(
+    text: '红墙与黄色琉璃瓦不仅形成强烈视觉识别，也与传统礼制和皇权象征有关。',
+    simpleChinese: '红墙和黄瓦不只是好看，也代表古代的礼制与皇权。',
+    vietnamese:
+        'Tường đỏ và ngói lưu ly vàng không chỉ tạo dấu ấn thị giác, mà còn liên quan đến lễ chế truyền thống và biểu tượng hoàng quyền.',
+    english:
+        'The red walls and yellow glazed tiles are visually distinctive and also symbolize traditional ritual order and imperial authority.',
+  ),
+  DiscoveryEntry(
+    text: '木结构带来灵活与美感，同时也使防火成为长期而重要的管理问题。',
+    simpleChinese: '木结构很美，也比较灵活，但需要特别注意防火。',
+    vietnamese:
+        'Kết cấu gỗ tạo nên vẻ đẹp và sự linh hoạt, nhưng cũng khiến việc phòng cháy trở thành nhiệm vụ lâu dài và rất quan trọng.',
+    english:
+        'Timber structures offer flexibility and beauty, but they also make fire prevention a long-term priority.',
+  ),
+  DiscoveryEntry(
+    text: '故宫今天既是文化遗产，也是持续进行保护、研究和公众教育的博物馆。',
+    simpleChinese: '今天的故宫既是文化遗产，也是进行保护、研究和教育的博物馆。',
+    vietnamese:
+        'Ngày nay, Cố Cung vừa là di sản văn hóa, vừa là bảo tàng liên tục thực hiện công tác bảo tồn, nghiên cứu và giáo dục công chúng.',
+    english:
+        'Today, the Palace Museum is both cultural heritage and an active museum for conservation, research, and public education.',
+  ),
 ];
 
 const wonderQuestion = '如果你能在故宫安静地停留一个小时，你最想观察哪里？为什么？';

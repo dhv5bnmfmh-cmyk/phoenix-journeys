@@ -7,6 +7,7 @@ import '../data/journey_data.dart';
 import '../services/narration_controller.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/forbidden_city_stamp.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
@@ -22,16 +23,6 @@ class JourneyScreen extends StatefulWidget {
 
 class _JourneyScreenState extends State<JourneyScreen>
     with WidgetsBindingObserver {
-  static const _stepLabels = [
-    '故事',
-    '生词',
-    '发现',
-    '思考',
-    '表达',
-    '回忆',
-    '完成',
-  ];
-
   int step = 0;
   final wonderController = TextEditingController();
   final expressController = TextEditingController();
@@ -61,25 +52,20 @@ class _JourneyScreenState extends State<JourneyScreen>
     memoryController.text = _appState.memoryDraft;
     _initialized = true;
 
-    if (step == 2) {
-      _scheduleDiscoveryAutoStart();
-    }
+    if (step == 2) _scheduleDiscoveryAutoStart();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) {
-      unawaited(_narration.stop());
-      if (_initialized) unawaited(_persistProgress());
-    }
+    if (state == AppLifecycleState.resumed) return;
+    unawaited(_narration.stop());
+    if (_initialized) unawaited(_persistProgress());
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    if (_initialized) {
-      unawaited(_persistProgress());
-    }
+    if (_initialized) unawaited(_persistProgress());
     _narration.dispose();
     wonderController.dispose();
     expressController.dispose();
@@ -104,22 +90,14 @@ class _JourneyScreenState extends State<JourneyScreen>
     setState(() => step = safeStep);
     await _persistProgress(overrideStep: safeStep);
 
-    if (safeStep == 2) {
-      _scheduleDiscoveryAutoStart();
-    }
+    if (safeStep == 2) _scheduleDiscoveryAutoStart();
   }
-
-  Future<void> _next() => _goToStep(step + 1);
-
-  Future<void> _back() => _goToStep(step - 1);
 
   void _scheduleDiscoveryAutoStart() {
     if (_discoveryAutoStarted) return;
     _discoveryAutoStarted = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && step == 2) {
-        unawaited(_playDiscoveries());
-      }
+      if (mounted && step == 2) unawaited(_playDiscoveries());
     });
   }
 
@@ -149,7 +127,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           .map(
             (entry) => NarrationItem(
               id: 'discovery-${entry.key}',
-              text: entry.value,
+              text: entry.value.text,
               label: '今日发现 ${entry.key + 1}',
             ),
           )
@@ -171,16 +149,33 @@ class _JourneyScreenState extends State<JourneyScreen>
         _narration.currentItemIndex == itemIndex;
   }
 
+  Future<void> _finishJourney() async {
+    await _narration.stop();
+    await _appState.completeJourney(memoryController.text);
+    if (!mounted) return;
+    setState(() => step = AppState.beijingJourneyLastStep);
+  }
+
+  Future<void> _restartJourney() async {
+    await _appState.restartJourney();
+    wonderController.clear();
+    expressController.clear();
+    memoryController.clear();
+    aiReply = '';
+    _discoveryAutoStarted = false;
+    if (mounted) setState(() => step = 0);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final pages = [
-      _story(context),
-      _words(context),
-      _discover(context),
-      _wonder(context),
-      _express(context),
-      _memory(context),
-      _complete(context),
+    final pages = <Widget>[
+      _storyPage(),
+      _wordsPage(),
+      _discoveryPage(),
+      _wonderPage(),
+      _expressPage(),
+      _memoryPage(),
+      _completePage(),
     ];
 
     return Scaffold(
@@ -198,7 +193,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         ],
       ),
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 320),
+        duration: const Duration(milliseconds: 280),
         child: pages[step],
       ),
     );
@@ -208,6 +203,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     required String title,
     required Widget child,
     String buttonText = '继续',
+    IconData buttonIcon = Icons.arrow_forward,
     VoidCallback? onNext,
     bool showBack = true,
   }) {
@@ -220,7 +216,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         JourneyProgressHeader(
           currentStep: step,
           furthestStep: state.beijingJourneyFurthestStep,
-          labels: _stepLabels,
+          labels: AppState.beijingJourneyStepLabels,
           onStepSelected: (value) => unawaited(_goToStep(value)),
         ),
         const SizedBox(height: 14),
@@ -235,7 +231,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 step < AppState.beijingJourneyLastStep) ...[
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => unawaited(_back()),
+                  onPressed: () => unawaited(_goToStep(step - 1)),
                   icon: const Icon(Icons.arrow_back),
                   label: const Text('上一步'),
                 ),
@@ -245,12 +241,8 @@ class _JourneyScreenState extends State<JourneyScreen>
             Expanded(
               flex: 2,
               child: FilledButton.icon(
-                onPressed: onNext ?? () => unawaited(_next()),
-                icon: Icon(
-                  step == AppState.beijingJourneyLastStep
-                      ? Icons.home_outlined
-                      : Icons.arrow_forward,
-                ),
+                onPressed: onNext ?? () => unawaited(_goToStep(step + 1)),
+                icon: Icon(buttonIcon),
                 label: Text(buttonText),
               ),
             ),
@@ -260,7 +252,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  Widget _story(BuildContext context) {
+  Widget _storyPage() {
     return _page(
       title: '故事',
       child: Column(
@@ -269,14 +261,14 @@ class _JourneyScreenState extends State<JourneyScreen>
           NarrationPlayerCard(
             controller: _narration,
             contentId: 'story',
-            title: '听完整故事',
+            title: '紫禁城故事',
             subtitle: '慢速普通话 · ${storyParagraphs.length} 段',
             onPlay: _playStory,
           ),
           const SizedBox(height: 10),
           const _InlineTip(
             icon: Icons.touch_app_outlined,
-            text: '长按红色词语，查看拼音、释义和越南语',
+            text: '长按红色词语，查看拼音、释义和探索者母语',
           ),
           const SizedBox(height: 8),
           AnimatedBuilder(
@@ -363,7 +355,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  Widget _words(BuildContext context) {
+  Widget _wordsPage() {
     final state = context.watch<AppState>();
 
     return _page(
@@ -403,7 +395,10 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  Widget _discover(BuildContext context) {
+  Widget _discoveryPage() {
+    final state = context.watch<AppState>();
+    final language = state.translationLanguage;
+
     return _page(
       title: '发现',
       child: Column(
@@ -412,14 +407,14 @@ class _JourneyScreenState extends State<JourneyScreen>
           NarrationPlayerCard(
             controller: _narration,
             contentId: 'discovery',
-            title: 'Discovery 自动朗读',
-            subtitle: '进入本页自动播放 · 可暂停或重播',
+            title: 'Discovery',
+            subtitle: '中文朗读 · ${discoveries.length} 段',
             onPlay: _playDiscoveries,
           ),
           const SizedBox(height: 10),
-          const _InlineTip(
-            icon: Icons.graphic_eq,
-            text: '朗读中的内容会自动高亮；首次使用可能需要手动播放',
+          _InlineTip(
+            icon: Icons.translate,
+            text: '中文是主内容，下方显示你的解释语言：$language',
           ),
           const SizedBox(height: 12),
           AnimatedBuilder(
@@ -427,6 +422,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             builder: (context, _) {
               return Column(
                 children: discoveries.asMap().entries.map((entry) {
+                  final item = entry.value;
                   final isActive = _isNarrating('discovery', entry.key);
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 220),
@@ -475,13 +471,52 @@ class _JourneyScreenState extends State<JourneyScreen>
                         ),
                         const SizedBox(width: 13),
                         Expanded(
-                          child: Text(
-                            entry.value,
-                            style: TextStyle(
-                              height: 1.55,
-                              fontWeight:
-                                  isActive ? FontWeight.w700 : FontWeight.w400,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.text,
+                                style: TextStyle(
+                                  height: 1.55,
+                                  fontSize: 16,
+                                  fontWeight: isActive
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: PhoenixTheme.translation
+                                      .withValues(alpha: .07),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.supportLabel(language),
+                                      style: const TextStyle(
+                                        color: PhoenixTheme.translation,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      item.supportText(language),
+                                      style: const TextStyle(
+                                        color: PhoenixTheme.translation,
+                                        height: 1.5,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -496,7 +531,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  Widget _wonder(BuildContext context) {
+  Widget _wonderPage() {
     return _page(
       title: '思考',
       child: Column(
@@ -546,7 +581,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  Widget _express(BuildContext context) {
+  Widget _expressPage() {
     return _page(
       title: '表达',
       child: Column(
@@ -566,7 +601,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           ),
           const SizedBox(height: 12),
           const Text(
-            '后续版本将接入 AI：纠正语法、解释原因，并给出更自然的表达。',
+            '后续接入 AI 后，将纠正语法、解释原因，并给出更自然的表达。',
             style: TextStyle(color: PhoenixTheme.translation),
           ),
         ],
@@ -574,18 +609,12 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  Widget _memory(BuildContext context) {
+  Widget _memoryPage() {
     return _page(
-      title: '留下今天',
-      buttonText: '完成旅程并自动保存',
-      onNext: () async {
-        final state = context.read<AppState>();
-        final memory = memoryController.text;
-        await _narration.stop();
-        await state.completeJourney(memory);
-        if (!mounted) return;
-        setState(() => step = AppState.beijingJourneyLastStep);
-      },
+      title: '旅程回忆',
+      buttonText: '结束旅程',
+      buttonIcon: Icons.flag_rounded,
+      onNext: () => unawaited(_finishJourney()),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -597,42 +626,49 @@ class _JourneyScreenState extends State<JourneyScreen>
             maxLines: 6,
             onChanged: (_) => unawaited(_persistProgress()),
             decoration: const InputDecoration(
-              hintText: '每一次感受都会自动保存，未来可以回来比较自己的变化。',
+              hintText: '写下感受，未来可以回来比较自己的变化。',
               border: OutlineInputBorder(),
             ),
+          ),
+          const SizedBox(height: 10),
+          const _InlineTip(
+            icon: Icons.approval_outlined,
+            text: '结束后会自动保存回忆，并获得北京紫禁城印章',
           ),
         ],
       ),
     );
   }
 
-  Widget _complete(BuildContext context) {
+  Widget _completePage() {
     return _page(
       title: '北京已点亮',
       buttonText: '返回首页',
+      buttonIcon: Icons.home_outlined,
       showBack: false,
       onNext: () => Navigator.of(context).pop(),
       child: Column(
         children: [
-          const SizedBox(height: 18),
-          const Text('🏯', style: TextStyle(fontSize: 78)),
-          const SizedBox(height: 18),
+          const SizedBox(height: 10),
+          const ForbiddenCityStamp(),
+          const SizedBox(height: 22),
+          const Text(
+            '盖章成功',
+            style: TextStyle(
+              color: PhoenixTheme.red,
+              fontSize: 21,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
           const Text(
             '你没有完成一堂课。\n你完成了一段旅程。',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20, height: 1.6),
+            style: TextStyle(fontSize: 19, height: 1.6),
           ),
           const SizedBox(height: 20),
           OutlinedButton.icon(
-            onPressed: () async {
-              await _appState.restartJourney();
-              wonderController.clear();
-              expressController.clear();
-              memoryController.clear();
-              aiReply = '';
-              _discoveryAutoStarted = false;
-              if (mounted) setState(() => step = 0);
-            },
+            onPressed: () => unawaited(_restartJourney()),
             icon: const Icon(Icons.replay),
             label: const Text('重新体验北京 Journey'),
           ),
@@ -660,7 +696,7 @@ class _InlineTip extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              maxLines: 2,
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: Colors.black54,
