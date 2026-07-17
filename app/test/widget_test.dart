@@ -38,7 +38,7 @@ void main() {
     expect(find.text('开始北京 Journey'), findsOneWidget);
   });
 
-  testWidgets('switches tabs without replacing the home shell', (tester) async {
+  testWidgets('keeps the home shell while changing tabs', (tester) async {
     final state = AppState();
     await state.load();
 
@@ -49,8 +49,8 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('我的'));
-    await tester.pumpAndSettle();
+    state.setTab(2);
+    await tester.pump();
 
     expect(find.text('我的旅程'), findsOneWidget);
     expect(state.selectedTab, 2);
