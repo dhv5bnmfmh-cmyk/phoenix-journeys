@@ -271,7 +271,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             onPlay: _playStory,
           ),
           const SizedBox(height: 16),
-          _TipCard(
+          const _TipCard(
             icon: Icons.touch_app_outlined,
             text: '长按红色虚线词语查看拼音、中文释义和越南语。打开生词时，故事朗读会自动停止。',
           ),
