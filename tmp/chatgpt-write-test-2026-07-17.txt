@@ -1,0 +1,3 @@
+Phoenix Journeys GitHub write test
+Created by ChatGPT on 2026-07-17.
+This temporary file confirms that repository write access is working.
