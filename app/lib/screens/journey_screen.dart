@@ -167,7 +167,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(wonderQuestion),
+          const Text(wonderQuestion),
           const SizedBox(height: 14),
           TextField(
             controller: wonderController,
@@ -216,7 +216,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(expressQuestion),
+          const Text(expressQuestion),
           const SizedBox(height: 14),
           TextField(
             controller: expressController,
