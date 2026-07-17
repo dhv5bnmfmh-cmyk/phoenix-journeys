@@ -7,6 +7,7 @@ import '../data/journey_data.dart';
 import '../services/narration_controller.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/annotated_reading_card.dart';
 import '../widgets/forbidden_city_stamp.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_progress_header.dart';
@@ -86,6 +87,10 @@ class _JourneyScreenState extends State<JourneyScreen>
     final safeStep = targetStep.clamp(0, AppState.beijingJourneyLastStep);
     await _narration.stop();
     if (!mounted || safeStep == step) return;
+
+    if (step == 2 && safeStep != 2) {
+      _discoveryAutoStarted = false;
+    }
 
     setState(() => step = safeStep);
     await _persistProgress(overrideStep: safeStep);
@@ -219,11 +224,11 @@ class _JourneyScreenState extends State<JourneyScreen>
           labels: AppState.beijingJourneyStepLabels,
           onStepSelected: (value) => unawaited(_goToStep(value)),
         ),
-        const SizedBox(height: 14),
-        Text(title, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 12),
+        Text(title, style: Theme.of(context).textTheme.headlineMedium),
+        const SizedBox(height: 10),
         child,
-        const SizedBox(height: 28),
+        const SizedBox(height: 26),
         Row(
           children: [
             if (showBack &&
@@ -253,6 +258,9 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _storyPage() {
+    final state = context.watch<AppState>();
+    final language = state.translationLanguage;
+
     return _page(
       title: '故事',
       child: Column(
@@ -262,61 +270,46 @@ class _JourneyScreenState extends State<JourneyScreen>
             controller: _narration,
             contentId: 'story',
             title: '紫禁城故事',
-            subtitle: '慢速普通话 · ${storyParagraphs.length} 段',
+            subtitle: '普通话 · ${storyParagraphs.length} 段',
             onPlay: _playStory,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           const _InlineTip(
             icon: Icons.touch_app_outlined,
-            text: '长按红色词语，查看拼音、释义和探索者母语',
+            text: '长按红色词语查词；点每段右侧的小“注”查看拼音、母语与英文',
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           AnimatedBuilder(
             animation: _narration,
             builder: (context, _) {
               return Column(
                 children: storyParagraphs.asMap().entries.map((entry) {
+                  final annotation = storyAnnotations[entry.key];
                   final isActive = _isNarrating('story', entry.key);
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 4),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isActive
-                          ? PhoenixTheme.red.withValues(alpha: .08)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isActive
-                            ? PhoenixTheme.red.withValues(alpha: .32)
-                            : Colors.transparent,
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (isActive) ...[
-                          const Icon(
-                            Icons.graphic_eq,
-                            size: 20,
-                            color: PhoenixTheme.red,
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                        Expanded(
-                          child: InteractiveStoryText(
-                            text: entry.value,
-                            entries: words,
-                            onWordLongPress: (word) {
-                              unawaited(_openWord(word));
-                            },
-                          ),
-                        ),
-                      ],
+
+                  return AnnotatedReadingCard(
+                    id: 'story-${entry.key}',
+                    isActive: isActive,
+                    pinyin: annotation.pinyin,
+                    nativeLabel: annotation.nativeLabel(language),
+                    nativeText: annotation.nativeText(language, entry.value),
+                    english: annotation.english,
+                    leading: isActive
+                        ? const Padding(
+                            padding: EdgeInsets.only(top: 2),
+                            child: Icon(
+                              Icons.graphic_eq,
+                              size: 18,
+                              color: PhoenixTheme.red,
+                            ),
+                          )
+                        : null,
+                    mainText: InteractiveStoryText(
+                      text: entry.value,
+                      entries: words,
+                      onWordLongPress: (word) {
+                        unawaited(_openWord(word));
+                      },
                     ),
                   );
                 }).toList(growable: false),
@@ -330,7 +323,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                   fontWeight: FontWeight.w800,
                 ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 9),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -364,14 +357,38 @@ class _JourneyScreenState extends State<JourneyScreen>
         children: words
             .map(
               (entry) => Card(
-                margin: const EdgeInsets.only(bottom: 10),
+                margin: const EdgeInsets.only(bottom: 9),
                 child: ListTile(
                   onTap: () => unawaited(_openWord(entry)),
                   onLongPress: () => unawaited(_openWord(entry)),
                   leading: WordMark(word: entry.word, size: 48),
-                  title: Text(
-                    entry.word,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          entry.word,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: PhoenixTheme.gold.withValues(alpha: .14),
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                        child: Text(
+                          entry.partOfSpeech,
+                          style: const TextStyle(
+                            color: PhoenixTheme.red,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   subtitle: Text(entry.pinyin),
                   trailing: Row(
@@ -411,12 +428,12 @@ class _JourneyScreenState extends State<JourneyScreen>
             subtitle: '中文朗读 · ${discoveries.length} 段',
             onPlay: _playDiscoveries,
           ),
-          const SizedBox(height: 10),
-          _InlineTip(
-            icon: Icons.translate,
-            text: '中文是主内容，下方显示你的解释语言：$language',
+          const SizedBox(height: 8),
+          const _InlineTip(
+            icon: Icons.notes_rounded,
+            text: '每段右侧点“注”展开拼音、探索者母语和 English；播放器可暂停、停止、重播和调速',
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           AnimatedBuilder(
             animation: _narration,
             builder: (context, _) {
@@ -424,102 +441,43 @@ class _JourneyScreenState extends State<JourneyScreen>
                 children: discoveries.asMap().entries.map((entry) {
                   final item = entry.value;
                   final isActive = _isNarrating('discovery', entry.key);
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: isActive
-                          ? PhoenixTheme.gold.withValues(alpha: .18)
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isActive
-                            ? PhoenixTheme.gold
-                            : PhoenixTheme.gold.withValues(alpha: .18),
-                      ),
-                      boxShadow: const [
-                        BoxShadow(
-                          blurRadius: 14,
-                          offset: Offset(0, 7),
-                          color: Color(0x10000000),
-                        ),
-                      ],
+
+                  return AnnotatedReadingCard(
+                    id: 'discovery-${entry.key}',
+                    elevated: true,
+                    isActive: isActive,
+                    padding: const EdgeInsets.all(14),
+                    pinyin: item.pinyin,
+                    nativeLabel: item.nativeLabel(language),
+                    nativeText: item.nativeText(language),
+                    english: item.english,
+                    leading: CircleAvatar(
+                      radius: 17,
+                      backgroundColor: isActive
+                          ? PhoenixTheme.red
+                          : PhoenixTheme.gold.withValues(alpha: .18),
+                      child: isActive
+                          ? const Icon(
+                              Icons.graphic_eq,
+                              size: 18,
+                              color: Colors.white,
+                            )
+                          : Text(
+                              '${entry.key + 1}',
+                              style: const TextStyle(
+                                color: PhoenixTheme.red,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 19,
-                          backgroundColor: isActive
-                              ? PhoenixTheme.red
-                              : PhoenixTheme.gold.withValues(alpha: .18),
-                          child: isActive
-                              ? const Icon(
-                                  Icons.graphic_eq,
-                                  size: 20,
-                                  color: Colors.white,
-                                )
-                              : Text(
-                                  '${entry.key + 1}',
-                                  style: const TextStyle(
-                                    color: PhoenixTheme.red,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                        ),
-                        const SizedBox(width: 13),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.text,
-                                style: TextStyle(
-                                  height: 1.55,
-                                  fontSize: 16,
-                                  fontWeight: isActive
-                                      ? FontWeight.w800
-                                      : FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: PhoenixTheme.translation
-                                      .withValues(alpha: .07),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.supportLabel(language),
-                                      style: const TextStyle(
-                                        color: PhoenixTheme.translation,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      item.supportText(language),
-                                      style: const TextStyle(
-                                        color: PhoenixTheme.translation,
-                                        height: 1.5,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    mainText: Text(
+                      item.text,
+                      style: TextStyle(
+                        height: 1.55,
+                        fontSize: 15.5,
+                        fontWeight:
+                            isActive ? FontWeight.w800 : FontWeight.w600,
+                      ),
                     ),
                   );
                 }).toList(growable: false),
@@ -633,7 +591,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           const SizedBox(height: 10),
           const _InlineTip(
             icon: Icons.approval_outlined,
-            text: '结束后会自动保存回忆，并获得北京紫禁城印章',
+            text: '结束后会自动保存回忆，由 PhoenixStampAgent 完成原创盖章动画',
           ),
         ],
       ),
@@ -649,9 +607,8 @@ class _JourneyScreenState extends State<JourneyScreen>
       onNext: () => Navigator.of(context).pop(),
       child: Column(
         children: [
+          const AnimatedForbiddenCityStamp(),
           const SizedBox(height: 10),
-          const ForbiddenCityStamp(),
-          const SizedBox(height: 22),
           const Text(
             '盖章成功',
             style: TextStyle(
@@ -691,8 +648,8 @@ class _InlineTip extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, size: 17, color: PhoenixTheme.red),
-          const SizedBox(width: 7),
+          Icon(icon, size: 16, color: PhoenixTheme.red),
+          const SizedBox(width: 6),
           Expanded(
             child: Text(
               text,
@@ -700,7 +657,7 @@ class _InlineTip extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: Colors.black54,
-                fontSize: 12,
+                fontSize: 11.5,
                 height: 1.35,
               ),
             ),
