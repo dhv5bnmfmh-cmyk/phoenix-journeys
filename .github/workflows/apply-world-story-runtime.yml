@@ -1,0 +1,74 @@
+name: Apply WorldStory runtime integration
+
+on:
+  push:
+    branches:
+      - feature/world-story-runtime
+    paths:
+      - .phoenix-trigger-world-story-runtime
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/world-story-runtime
+          fetch-depth: 0
+
+      - name: Connect Journey screen to PhoenixWorldStoryAgent
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/screens/journey_screen.dart')
+          text = path.read_text()
+
+          import_anchor = "import '../data/journey_data.dart';"
+          import_block = """import '../data/journey_data.dart';
+          import '../data/world_story_runtime.dart';
+          import '../models/story_content.dart';"""
+          if import_anchor not in text:
+              raise SystemExit('Journey data import not found')
+          text = text.replace(import_anchor, import_block, 1)
+
+          field_anchor = '  late final NarrationController _narration;'
+          field_block = """  late final NarrationController _narration;
+            late final JourneyContentRecord _journeyContent;"""
+          if field_anchor not in text:
+              raise SystemExit('Narration field not found')
+          text = text.replace(field_anchor, field_block, 1)
+
+          init_anchor = '    _narration = NarrationController();'
+          init_block = """    _narration = NarrationController();
+              final worldStoryAgent = createPhoenixWorldStoryAgent();
+              _journeyContent = requireJourneyContent(
+                worldStoryAgent,
+                'beijing-forbidden-city',
+              );"""
+          if init_anchor not in text:
+              raise SystemExit('Narration initialization not found')
+          text = text.replace(init_anchor, init_block, 1)
+
+          occurrences = text.count('storyParagraphs')
+          if occurrences < 2:
+              raise SystemExit(f'Expected multiple storyParagraphs uses, found {occurrences}')
+          text = text.replace('storyParagraphs', '_journeyContent.storyParagraphs')
+          path.write_text(text)
+          PY
+
+      - name: Remove integration trigger
+        run: |
+          rm .github/workflows/apply-world-story-runtime.yml
+          rm .phoenix-trigger-world-story-runtime
+
+      - name: Commit runtime integration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart .github/workflows/apply-world-story-runtime.yml .phoenix-trigger-world-story-runtime
+          git commit -m "feat: serve Beijing story through PhoenixWorldStoryAgent"
+          git push origin HEAD:feature/world-story-runtime
