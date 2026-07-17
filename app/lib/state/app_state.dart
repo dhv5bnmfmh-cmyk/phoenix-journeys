@@ -62,10 +62,14 @@ class AppState extends ChangeNotifier {
       beijingJourneyStep = _safeJourneyStep(
         prefs.getInt('beijingJourneyStep') ?? 0,
       );
-      beijingJourneyFurthestStep = math.max(
-        beijingJourneyStep,
-        _safeJourneyStep(prefs.getInt('beijingJourneyFurthestStep') ?? 0),
-      );
+      beijingJourneyFurthestStep = math
+          .max(
+            beijingJourneyStep,
+            _safeJourneyStep(
+              prefs.getInt('beijingJourneyFurthestStep') ?? 0,
+            ),
+          )
+          .toInt();
       wonderDraft = prefs.getString('wonderDraft') ?? '';
       expressDraft = prefs.getString('expressDraft') ?? '';
       memoryDraft = prefs.getString('memoryDraft') ?? '';
@@ -90,7 +94,7 @@ class AppState extends ChangeNotifier {
   }
 
   int _safeJourneyStep(int value) {
-    return value.clamp(0, beijingJourneyLastStep);
+    return value.clamp(0, beijingJourneyLastStep).toInt();
   }
 
   Future<void> toggleScript() async {
@@ -135,10 +139,12 @@ class AppState extends ChangeNotifier {
   }) async {
     final safeStep = _safeJourneyStep(step);
     beijingJourneyStep = safeStep;
-    beijingJourneyFurthestStep = math.max(
-      beijingJourneyFurthestStep,
-      safeStep,
-    );
+    beijingJourneyFurthestStep = math
+        .max(
+          beijingJourneyFurthestStep,
+          safeStep,
+        )
+        .toInt();
     wonderDraft = wonder;
     expressDraft = express;
     memoryDraft = memory;
