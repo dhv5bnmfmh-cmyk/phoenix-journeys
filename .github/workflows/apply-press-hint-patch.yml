@@ -1,0 +1,143 @@
+name: Apply press hint patch
+
+on:
+  push:
+    branches:
+      - feature/compact-player-press-hints
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/compact-player-press-hints
+          fetch-depth: 0
+
+      - name: Replace inline tips with press-and-hold hints
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/screens/journey_screen.dart')
+          source = path.read_text()
+          start = source.index('class _InlineTip extends StatelessWidget')
+          replacement = r'''class _InlineTip extends StatefulWidget {
+  const _InlineTip({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  State<_InlineTip> createState() => _InlineTipState();
+}
+
+class _InlineTipState extends State<_InlineTip> {
+  bool _visible = false;
+
+  void _show() {
+    if (!_visible) setState(() => _visible = true);
+  }
+
+  void _hide() {
+    if (_visible) setState(() => _visible = false);
+  }
+
+  void _toggle() {
+    setState(() => _visible = !_visible);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: '提示：${widget.text}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            key: ValueKey('press-hint-${widget.text.hashCode}'),
+            behavior: HitTestBehavior.opaque,
+            onTapDown: (_) => _show(),
+            onTapUp: (_) => _hide(),
+            onTapCancel: _hide,
+            onLongPressStart: (_) => _show(),
+            onLongPressEnd: (_) => _hide(),
+            onSecondaryTap: _toggle,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+              decoration: BoxDecoration(
+                color: PhoenixTheme.red.withValues(alpha: .07),
+                borderRadius: BorderRadius.circular(99),
+                border: Border.all(
+                  color: PhoenixTheme.red.withValues(alpha: .18),
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.tips_and_updates_outlined,
+                    size: 14,
+                    color: PhoenixTheme.red,
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    '提示',
+                    style: TextStyle(
+                      color: PhoenixTheme.red,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOut,
+            child: _visible
+                ? Container(
+                    key: const ValueKey('press-hint-content'),
+                    margin: const EdgeInsets.only(top: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: PhoenixTheme.red.withValues(alpha: .06),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      widget.text,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 11,
+                        height: 1.35,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+'''
+          path.write_text(source[:start] + replacement)
+          Path('.github/workflows/apply-press-hint-patch.yml').unlink()
+          PY
+
+      - name: Commit generated UI patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart .github/workflows/apply-press-hint-patch.yml
+          git commit -m "feat: show hints only while pressed"
+          git push origin HEAD:feature/compact-player-press-hints
