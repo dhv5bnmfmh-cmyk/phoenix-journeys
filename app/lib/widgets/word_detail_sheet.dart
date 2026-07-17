@@ -102,6 +102,8 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final isSaved = state.isWordSaved(widget.entry.word);
+    final language = state.translationLanguage;
+    final examples = widget.entry.studyExamples.take(3).toList(growable: false);
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
@@ -142,10 +144,24 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          '打开生词后会自动朗读',
-                          style: TextStyle(color: Colors.black54, fontSize: 12),
+                        const SizedBox(height: 7),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: PhoenixTheme.gold.withValues(alpha: .16),
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                          child: Text(
+                            widget.entry.partOfSpeech,
+                            style: const TextStyle(
+                              color: PhoenixTheme.red,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -161,20 +177,53 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 22),
               _DefinitionCard(
                 icon: Icons.menu_book_outlined,
                 title: '中文释义',
                 text: widget.entry.simpleChinese,
                 color: PhoenixTheme.ink,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
+              _DefinitionCard(
+                icon: Icons.language,
+                title: 'English definition',
+                text: widget.entry.englishDefinition,
+                color: PhoenixTheme.ai,
+              ),
+              const SizedBox(height: 10),
               _DefinitionCard(
                 icon: Icons.translate,
-                title: '越南语',
-                text: widget.entry.translation,
+                title: widget.entry.nativeLabel(language),
+                text: widget.entry.nativeDefinition(language),
                 color: PhoenixTheme.translation,
               ),
+              const SizedBox(height: 22),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.format_quote_rounded,
+                    size: 20,
+                    color: PhoenixTheme.red,
+                  ),
+                  const SizedBox(width: 7),
+                  Text(
+                    '三个例句',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ...examples.asMap().entries.map(
+                    (entry) => _ExampleCard(
+                      number: entry.key + 1,
+                      example: entry.value,
+                      nativeLabel: widget.entry.nativeLabel(language),
+                      nativeText: entry.value.nativeText(language),
+                    ),
+                  ),
               if (_speechUnavailable) ...[
                 const SizedBox(height: 12),
                 const Text(
@@ -182,7 +231,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                   style: TextStyle(color: Colors.black54, fontSize: 12),
                 ),
               ],
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
               Row(
                 children: [
                   Expanded(
@@ -229,10 +278,10 @@ class _DefinitionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: color.withValues(alpha: .07),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withValues(alpha: .16)),
       ),
       child: Column(
@@ -240,18 +289,122 @@ class _DefinitionCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: color),
+              Icon(icon, size: 17, color: color),
               const SizedBox(width: 7),
               Text(
                 title,
-                style: TextStyle(color: color, fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(text, style: const TextStyle(height: 1.55)),
+          const SizedBox(height: 7),
+          Text(text, style: const TextStyle(height: 1.5)),
         ],
       ),
+    );
+  }
+}
+
+class _ExampleCard extends StatelessWidget {
+  const _ExampleCard({
+    required this.number,
+    required this.example,
+    required this.nativeLabel,
+    required this.nativeText,
+  });
+
+  final int number;
+  final WordExample example;
+  final String nativeLabel;
+  final String nativeText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 12,
+                backgroundColor: PhoenixTheme.red.withValues(alpha: .09),
+                child: Text(
+                  '$number',
+                  style: const TextStyle(
+                    color: PhoenixTheme.red,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  example.chinese,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    height: 1.45,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          _ExampleLine(label: '拼音', text: example.pinyin),
+          const SizedBox(height: 7),
+          _ExampleLine(label: nativeLabel, text: nativeText),
+          const SizedBox(height: 7),
+          _ExampleLine(label: 'English', text: example.english),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExampleLine extends StatelessWidget {
+  const _ExampleLine({required this.label, required this.text});
+
+  final String label;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.black45,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          text,
+          style: const TextStyle(
+            color: Colors.black87,
+            fontSize: 12.5,
+            height: 1.45,
+          ),
+        ),
+      ],
     );
   }
 }
