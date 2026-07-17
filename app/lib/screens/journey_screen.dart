@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../data/journey_data.dart';
 import '../services/narration_controller.dart';
+import '../services/phoenix_ai_service.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/annotated_reading_card.dart';
@@ -12,6 +13,7 @@ import '../widgets/forbidden_city_stamp.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
+import '../widgets/phoenix_agent_cards.dart';
 import '../widgets/word_detail_sheet.dart';
 import '../widgets/word_mark.dart';
 
@@ -29,8 +31,12 @@ class _JourneyScreenState extends State<JourneyScreen>
   final expressController = TextEditingController();
   final memoryController = TextEditingController();
   late final NarrationController _narration;
+  late final PhoenixAiService _ai;
   late AppState _appState;
-  String aiReply = '';
+  PhoenixGuideFeedback? _guideFeedback;
+  PhoenixWritingFeedback? _writingFeedback;
+  bool _guideLoading = false;
+  bool _writingLoading = false;
   bool _initialized = false;
   bool _discoveryAutoStarted = false;
 
@@ -39,6 +45,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _narration = NarrationController();
+    _ai = PhoenixAiService();
   }
 
   @override
@@ -68,6 +75,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     WidgetsBinding.instance.removeObserver(this);
     if (_initialized) unawaited(_persistProgress());
     _narration.dispose();
+    _ai.close();
     wonderController.dispose();
     expressController.dispose();
     memoryController.dispose();
@@ -154,6 +162,52 @@ class _JourneyScreenState extends State<JourneyScreen>
         _narration.currentItemIndex == itemIndex;
   }
 
+  Future<void> _askGuide() async {
+    if (_guideLoading) return;
+
+    setState(() => _guideLoading = true);
+    final feedback = await _ai.askGuide(
+      text: wonderController.text,
+      language: _appState.translationLanguage,
+    );
+    if (!mounted) return;
+
+    setState(() {
+      _guideFeedback = feedback;
+      _guideLoading = false;
+    });
+  }
+
+  Future<void> _reviewWriting() async {
+    if (_writingLoading) return;
+
+    setState(() => _writingLoading = true);
+    final feedback = await _ai.reviewWriting(
+      text: expressController.text,
+      language: _appState.translationLanguage,
+    );
+    if (!mounted) return;
+
+    setState(() {
+      _writingFeedback = feedback;
+      _writingLoading = false;
+    });
+  }
+
+  void _onWonderChanged(String _) {
+    if (_guideFeedback != null) {
+      setState(() => _guideFeedback = null);
+    }
+    unawaited(_persistProgress());
+  }
+
+  void _onExpressChanged(String _) {
+    if (_writingFeedback != null) {
+      setState(() => _writingFeedback = null);
+    }
+    unawaited(_persistProgress());
+  }
+
   Future<void> _finishJourney() async {
     await _narration.stop();
     await _appState.completeJourney(memoryController.text);
@@ -166,7 +220,10 @@ class _JourneyScreenState extends State<JourneyScreen>
     wonderController.clear();
     expressController.clear();
     memoryController.clear();
-    aiReply = '';
+    _guideFeedback = null;
+    _writingFeedback = null;
+    _guideLoading = false;
+    _writingLoading = false;
     _discoveryAutoStarted = false;
     if (mounted) setState(() => step = 0);
   }
@@ -496,43 +553,45 @@ class _JourneyScreenState extends State<JourneyScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(wonderQuestion),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
+          const _InlineTip(
+            icon: Icons.explore_outlined,
+            text: 'PhoenixGuideAgent 会回应你的观察、补充一个探索角度，再提出下一步问题',
+          ),
+          const SizedBox(height: 12),
           TextField(
             controller: wonderController,
             minLines: 3,
             maxLines: 6,
-            onChanged: (_) => unawaited(_persistProgress()),
+            onChanged: _onWonderChanged,
             decoration: const InputDecoration(
               hintText: '写下你的想法……',
               border: OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: () {
-              final answer = wonderController.text.trim();
-              setState(() {
-                aiReply = answer.isEmpty
-                    ? '先写一点你的想法，我会认真回应。'
-                    : '你的观察很有意思。你已经开始把建筑与人的生活连接起来了；下一次可以再补充一个具体细节，让表达更有画面。';
-              });
-            },
-            icon: const Icon(Icons.auto_awesome),
-            label: const Text('请 AI 回应'),
-          ),
-          if (aiReply.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: PhoenixTheme.ai.withValues(alpha: .10),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                aiReply,
-                style: const TextStyle(color: PhoenixTheme.ai),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              key: const ValueKey('ask-phoenix-guide-agent'),
+              onPressed: _guideLoading ? null : () => unawaited(_askGuide()),
+              icon: _guideLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.auto_awesome),
+              label: Text(
+                _guideLoading
+                    ? 'PhoenixGuideAgent 正在回应…'
+                    : '问 PhoenixGuideAgent',
               ),
             ),
+          ),
+          if (_guideFeedback != null) ...[
+            const SizedBox(height: 12),
+            PhoenixGuideReplyCard(feedback: _guideFeedback!),
           ],
         ],
       ),
@@ -546,22 +605,47 @@ class _JourneyScreenState extends State<JourneyScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(expressQuestion),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
+          const _InlineTip(
+            icon: Icons.edit_note_outlined,
+            text: 'PhoenixWritingAgent 会保留原意，给出修改版、原因和更自然的表达',
+          ),
+          const SizedBox(height: 12),
           TextField(
             controller: expressController,
             minLines: 4,
             maxLines: 8,
-            onChanged: (_) => unawaited(_persistProgress()),
+            onChanged: _onExpressChanged,
             decoration: const InputDecoration(
               hintText: '用中文写下你的表达……',
               border: OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
-            '后续接入 AI 后，将纠正语法、解释原因，并给出更自然的表达。',
-            style: TextStyle(color: PhoenixTheme.translation),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const ValueKey('ask-phoenix-writing-agent'),
+              onPressed:
+                  _writingLoading ? null : () => unawaited(_reviewWriting()),
+              icon: _writingLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.spellcheck_rounded),
+              label: Text(
+                _writingLoading
+                    ? 'PhoenixWritingAgent 正在批改…'
+                    : '请 PhoenixWritingAgent 批改',
+              ),
+            ),
           ),
+          if (_writingFeedback != null) ...[
+            const SizedBox(height: 14),
+            PhoenixWritingFeedbackCard(feedback: _writingFeedback!),
+          ],
         ],
       ),
     );
