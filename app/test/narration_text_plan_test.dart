@@ -28,7 +28,7 @@ void main() {
   });
 
   test('offers compact player speed presets from slow to fast', () {
-    final options = NarrationController.speedOptions;
+    const options = NarrationController.speedOptions;
 
     expect(options.map((option) => option.label), [
       '0.8×',
