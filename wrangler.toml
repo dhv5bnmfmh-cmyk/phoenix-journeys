@@ -1,0 +1,6 @@
+name = "phoenix-journeys-alpha"
+compatibility_date = "2026-07-17"
+
+[assets]
+directory = "./app/build/web"
+not_found_handling = "single-page-application"
