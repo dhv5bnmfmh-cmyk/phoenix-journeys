@@ -27,6 +27,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Test Phoenix agents
+        id: agents
+        continue-on-error: true
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -o pipefail
+          node --test worker/*.test.mjs 2>&1 | tee worker-test.log
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -57,12 +65,22 @@ jobs:
           set -o pipefail
           flutter build web --release 2>&1 | tee build-web.log
 
+      - name: Validate Cloudflare Worker bundle
+        id: worker
+        continue-on-error: true
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -o pipefail
+          npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run 2>&1 | tee worker-build.log
+
       - name: Upload verification logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: flutter-verification-logs
+          name: phoenix-verification-logs
           path: |
+            worker-test.log
+            worker-build.log
             app/analyze.log
             app/test.log
             app/build-web.log
@@ -70,7 +88,9 @@ jobs:
 
       - name: Enforce verification results
         if: >-
+          steps.agents.outcome != 'success' ||
           steps.analyze.outcome != 'success' ||
           steps.test.outcome != 'success' ||
-          steps.build.outcome != 'success'
+          steps.build.outcome != 'success' ||
+          steps.worker.outcome != 'success'
         run: exit 1
