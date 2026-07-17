@@ -5,6 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:phoenix_journeys/services/phoenix_ai_service.dart';
 
+const _jsonHeaders = <String, String>{
+  'content-type': 'application/json; charset=utf-8',
+};
+
 void main() {
   test('guide client returns online PhoenixGuideAgent response', () async {
     final client = MockClient((request) async {
@@ -20,6 +24,7 @@ void main() {
           'reply': '红墙确实能让空间显得安静而有距离。你还可以观察光线怎样改变红色。清晨和傍晚，你觉得哪一个时刻更适合停留？',
         }),
         200,
+        headers: _jsonHeaders,
       );
     });
     final service = PhoenixAiService(
@@ -69,6 +74,7 @@ void main() {
           },
         }),
         200,
+        headers: _jsonHeaders,
       );
     });
     final service = PhoenixAiService(
