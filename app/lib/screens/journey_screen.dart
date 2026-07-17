@@ -719,32 +719,98 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 }
 
-class _InlineTip extends StatelessWidget {
+class _InlineTip extends StatefulWidget {
   const _InlineTip({required this.icon, required this.text});
 
   final IconData icon;
   final String text;
 
   @override
+  State<_InlineTip> createState() => _InlineTipState();
+}
+
+class _InlineTipState extends State<_InlineTip> {
+  bool _visible = false;
+
+  void _show() {
+    if (!_visible) setState(() => _visible = true);
+  }
+
+  void _hide() {
+    if (_visible) setState(() => _visible = false);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: text,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      button: true,
+      label: '按住提示查看：${widget.text}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: PhoenixTheme.red),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              text,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.black54,
-                fontSize: 11.5,
-                height: 1.35,
+          GestureDetector(
+            key: ValueKey('press-hint-${widget.text.hashCode}'),
+            behavior: HitTestBehavior.opaque,
+            onTapDown: (_) => _show(),
+            onTapUp: (_) => _hide(),
+            onTapCancel: _hide,
+            onLongPressStart: (_) => _show(),
+            onLongPressEnd: (_) => _hide(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+              decoration: BoxDecoration(
+                color: PhoenixTheme.red.withValues(alpha: .07),
+                borderRadius: BorderRadius.circular(99),
+                border: Border.all(
+                  color: PhoenixTheme.red.withValues(alpha: .18),
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.tips_and_updates_outlined,
+                    size: 14,
+                    color: PhoenixTheme.red,
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    '提示',
+                    style: TextStyle(
+                      color: PhoenixTheme.red,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
               ),
             ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 110),
+            curve: Curves.easeOut,
+            child: _visible
+                ? Container(
+                    key: const ValueKey('press-hint-content'),
+                    margin: const EdgeInsets.only(top: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: PhoenixTheme.red.withValues(alpha: .06),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      widget.text,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 11,
+                        height: 1.35,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
         ],
       ),
