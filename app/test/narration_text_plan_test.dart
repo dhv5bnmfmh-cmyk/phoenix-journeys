@@ -26,4 +26,16 @@ void main() {
     expect(plan.text, '有效内容');
     expect(plan.indexForOffset(0), 0);
   });
+
+  test('offers compact player speed presets from slow to fast', () {
+    final options = NarrationController.speedOptions;
+
+    expect(options.map((option) => option.label), [
+      '0.8×',
+      '1.0×',
+      '1.2×',
+      '1.5×',
+    ]);
+    expect(options.first.rate, lessThan(options.last.rate));
+  });
 }
