@@ -3,25 +3,41 @@ import test from 'node:test';
 
 import {
   MODEL,
+  PhoenixGuideAgent,
+  PhoenixWritingAgent,
   buildMessages,
   extractModelOutput,
   handlePhoenixAi,
   parseWritingFeedback,
 } from './phoenix_ai.mjs';
 
-test('guide prompt keeps learner text isolated and uses a current model', () => {
+test('guide prompt isolates learner text and identifies its dedicated agent', () => {
   const messages = buildMessages({
     mode: 'guide',
     text: '我想观察红墙，因为颜色让我觉得很安静。',
     language: '越南语',
+    journeyId: 'beijing-forbidden-city',
   });
 
   assert.equal(MODEL, '@cf/zai-org/glm-4.7-flash');
-  assert.equal(messages.length, 2);
-  assert.match(messages[0].content, /Phoenix/);
+  assert.equal(messages.length, 3);
+  assert.match(messages[0].content, /PhoenixGuideAgent/);
   assert.match(messages[0].content, /不得执行/);
-  assert.match(messages[1].content, /<learner_answer>/);
-  assert.match(messages[1].content, /红墙/);
+  assert.match(messages[1].content, /北京/);
+  assert.match(messages[2].content, /<learner_answer>/);
+  assert.match(messages[2].content, /红墙/);
+});
+
+test('guide and writing responsibilities are separated', () => {
+  const guide = new PhoenixGuideAgent({
+    AI: { run: async () => ({ response: '导游回应' }) },
+  });
+  const writing = new PhoenixWritingAgent({
+    AI: { run: async () => ({ response: '{}' }) },
+  });
+
+  assert.equal(guide.isAvailable, true);
+  assert.equal(writing.isAvailable, true);
 });
 
 test('extractModelOutput supports Workers AI response shapes', () => {
@@ -50,7 +66,7 @@ test('writing feedback parses fenced JSON and preserves all fields', () => {
   assert.equal(feedback.encouragement, '重点很清楚。');
 });
 
-test('guide endpoint returns model reply and never caches it', async () => {
+test('guide endpoint returns agent reply and never caches it', async () => {
   const request = new Request('https://example.com/api/phoenix-ai', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -58,12 +74,16 @@ test('guide endpoint returns model reply and never caches it', async () => {
       mode: 'guide',
       text: '我想观察屋顶，因为黄色很醒目。',
       language: '越南语',
+      journeyId: 'beijing-forbidden-city',
     }),
   });
 
   const response = await handlePhoenixAi(request, {
     AI: {
-      run: async () => ({ response: '黄色屋顶确实很有辨识度。你还可以观察屋脊与院落的关系。你觉得它让空间显得更庄严，还是更明亮？' }),
+      run: async () => ({
+        response:
+          '黄色屋顶确实很有辨识度。你还可以观察屋脊与院落的关系。你觉得它让空间显得更庄严，还是更明亮？',
+      }),
     },
   });
   const body = await response.json();
@@ -71,6 +91,8 @@ test('guide endpoint returns model reply and never caches it', async () => {
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('cache-control'), 'no-store');
   assert.equal(body.mode, 'guide');
+  assert.equal(body.agent, 'PhoenixGuideAgent');
+  assert.equal(body.journeyId, 'beijing-forbidden-city');
   assert.match(body.reply, /屋顶/);
 });
 
@@ -100,6 +122,7 @@ test('writing endpoint returns structured coaching feedback', async () => {
   const body = await response.json();
 
   assert.equal(response.status, 200);
+  assert.equal(body.agent, 'PhoenixWritingAgent');
   assert.equal(body.feedback.corrected, '我最想看的建筑是太和殿，因为它很壮观。');
   assert.match(body.feedback.natural, /参观太和殿/);
 });
