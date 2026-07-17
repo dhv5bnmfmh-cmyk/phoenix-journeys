@@ -39,7 +39,9 @@ jobs:
       - name: Analyze
         id: analyze
         continue-on-error: true
-        run: flutter analyze --no-fatal-infos 2>&1 | tee analyze.log
+        run: |
+          set -o pipefail
+          flutter analyze 2>&1 | tee analyze.log
 
       - name: Test
         run: flutter test
