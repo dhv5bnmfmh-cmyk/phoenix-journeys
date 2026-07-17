@@ -81,7 +81,8 @@ class NarrationController extends ChangeNotifier {
   final FlutterTts _tts;
 
   NarrationStatus _status = NarrationStatus.idle;
-  NarrationTextPlan _plan = NarrationTextPlan.fromItems(const []);
+  NarrationTextPlan _plan =
+      NarrationTextPlan.fromItems(const <NarrationItem>[]);
   String? _contentId;
   String? _errorMessage;
   int _speechBaseOffset = 0;
@@ -107,7 +108,7 @@ class NarrationController extends ChangeNotifier {
   double get progress {
     if (_plan.text.isEmpty) return 0;
     final value = _currentOffset / _plan.text.length;
-    return value.clamp(0.0, 1.0);
+    return value.clamp(0.0, 1.0).toDouble();
   }
 
   void _bindHandlers() {
@@ -128,7 +129,7 @@ class NarrationController extends ChangeNotifier {
       _currentItemIndex = null;
       _safeNotify();
     });
-    _tts.setProgressHandler((text, startOffset, endOffset, word) {
+    _tts.setProgressHandler((_, startOffset, __, ___) {
       final offset = _speechBaseOffset + startOffset;
       _currentOffset = offset < 0
           ? 0
@@ -154,7 +155,6 @@ class NarrationController extends ChangeNotifier {
     final plan = NarrationTextPlan.fromItems(items);
     if (plan.isEmpty) return;
 
-    await _tts.stop();
     _contentId = contentId;
     _plan = plan;
     _currentOffset = 0;
@@ -218,15 +218,17 @@ class NarrationController extends ChangeNotifier {
             : offset;
     final remainingText = _plan.text.substring(safeOffset);
 
-    _speechBaseOffset = safeOffset;
-    _currentOffset = safeOffset;
-    _currentItemIndex = _plan.indexForOffset(safeOffset);
-    _status = NarrationStatus.playing;
-    _errorMessage = null;
-    _safeNotify();
-
     try {
       await _tts.stop();
+      if (_disposed) return;
+
+      _speechBaseOffset = safeOffset;
+      _currentOffset = safeOffset;
+      _currentItemIndex = _plan.indexForOffset(safeOffset);
+      _status = NarrationStatus.playing;
+      _errorMessage = null;
+      _safeNotify();
+
       await _tts.setLanguage('zh-CN');
       await _tts.setSpeechRate(0.40);
       await _tts.setPitch(1.0);
