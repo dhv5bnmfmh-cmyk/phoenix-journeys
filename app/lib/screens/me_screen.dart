@@ -6,6 +6,7 @@ import '../data/journey_data.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/word_detail_sheet.dart';
+import '../widgets/word_mark.dart';
 
 class MeScreen extends StatelessWidget {
   const MeScreen({super.key});
@@ -85,10 +86,7 @@ class MeScreen extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 10),
               child: ListTile(
                 onTap: () => showWordDetail(context, entry),
-                leading: Text(
-                  entry.symbol,
-                  style: const TextStyle(fontSize: 28),
-                ),
+                leading: WordMark(word: entry.word, size: 44),
                 title: Text(
                   entry.word,
                   style: const TextStyle(fontWeight: FontWeight.w800),

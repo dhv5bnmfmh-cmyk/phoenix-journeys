@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../data/journey_data.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import 'word_mark.dart';
 
 Future<void> showWordDetail(BuildContext context, WordEntry entry) {
   return showModalBottomSheet<void>(
@@ -119,19 +120,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: PhoenixTheme.gold.withValues(alpha: .16),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      widget.entry.symbol,
-                      style: const TextStyle(fontSize: 34),
-                    ),
-                  ),
+                  WordMark(word: widget.entry.word, size: 64),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(

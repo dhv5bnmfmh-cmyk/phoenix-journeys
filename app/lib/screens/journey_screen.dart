@@ -11,6 +11,7 @@ import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
 import '../widgets/word_detail_sheet.dart';
+import '../widgets/word_mark.dart';
 
 class JourneyScreen extends StatefulWidget {
   const JourneyScreen({super.key});
@@ -214,7 +215,7 @@ class _JourneyScreenState extends State<JourneyScreen>
 
     return ListView(
       key: ValueKey(title),
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 40),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
       children: [
         JourneyProgressHeader(
           currentStep: step,
@@ -222,14 +223,16 @@ class _JourneyScreenState extends State<JourneyScreen>
           labels: _stepLabels,
           onStepSelected: (value) => unawaited(_goToStep(value)),
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 14),
         Text(title, style: Theme.of(context).textTheme.headlineMedium),
-        const SizedBox(height: 18),
+        const SizedBox(height: 12),
         child,
         const SizedBox(height: 28),
         Row(
           children: [
-            if (showBack && step > 0 && step < AppState.beijingJourneyLastStep) ...[
+            if (showBack &&
+                step > 0 &&
+                step < AppState.beijingJourneyLastStep) ...[
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => unawaited(_back()),
@@ -270,12 +273,12 @@ class _JourneyScreenState extends State<JourneyScreen>
             subtitle: '慢速普通话 · ${storyParagraphs.length} 段',
             onPlay: _playStory,
           ),
-          const SizedBox(height: 16),
-          const _TipCard(
+          const SizedBox(height: 10),
+          const _InlineTip(
             icon: Icons.touch_app_outlined,
-            text: '长按红色虚线词语查看拼音、中文释义和越南语。打开生词时，故事朗读会自动停止。',
+            text: '长按红色词语，查看拼音、释义和越南语',
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 8),
           AnimatedBuilder(
             animation: _narration,
             builder: (context, _) {
@@ -285,13 +288,16 @@ class _JourneyScreenState extends State<JourneyScreen>
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 220),
                     width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(15),
+                    margin: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: isActive
                           ? PhoenixTheme.red.withValues(alpha: .08)
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(
                         color: isActive
                             ? PhoenixTheme.red.withValues(alpha: .32)
@@ -307,7 +313,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                             size: 20,
                             color: PhoenixTheme.red,
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
                         ],
                         Expanded(
                           child: InteractiveStoryText(
@@ -325,7 +331,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               );
             },
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 10),
           Text(
             '本页重点词语',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -345,7 +351,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 .take(8)
                 .map(
                   (entry) => ActionChip(
-                    avatar: Text(entry.symbol),
+                    avatar: WordMark(word: entry.word, size: 24),
                     label: Text('${entry.word} · ${entry.pinyin}'),
                     onPressed: () => unawaited(_openWord(entry)),
                   ),
@@ -366,11 +372,11 @@ class _JourneyScreenState extends State<JourneyScreen>
         children: words
             .map(
               (entry) => Card(
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: const EdgeInsets.only(bottom: 10),
                 child: ListTile(
                   onTap: () => unawaited(_openWord(entry)),
                   onLongPress: () => unawaited(_openWord(entry)),
-                  leading: Text(entry.symbol, style: const TextStyle(fontSize: 30)),
+                  leading: WordMark(word: entry.word, size: 48),
                   title: Text(
                     entry.word,
                     style: const TextStyle(fontWeight: FontWeight.w800),
@@ -410,12 +416,12 @@ class _JourneyScreenState extends State<JourneyScreen>
             subtitle: '进入本页自动播放 · 可暂停或重播',
             onPlay: _playDiscoveries,
           ),
-          const SizedBox(height: 12),
-          const Text(
-            '当前正在朗读的发现会自动亮起。部分浏览器首次使用时，可能需要手动点一次播放。',
-            style: TextStyle(color: Colors.black54, height: 1.45),
+          const SizedBox(height: 10),
+          const _InlineTip(
+            icon: Icons.graphic_eq,
+            text: '朗读中的内容会自动高亮；首次使用可能需要手动播放',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           AnimatedBuilder(
             animation: _narration,
             builder: (context, _) {
@@ -529,7 +535,10 @@ class _JourneyScreenState extends State<JourneyScreen>
                 color: PhoenixTheme.ai.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Text(aiReply, style: const TextStyle(color: PhoenixTheme.ai)),
+              child: Text(
+                aiReply,
+                style: const TextStyle(color: PhoenixTheme.ai),
+              ),
             ),
           ],
         ],
@@ -633,28 +642,33 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 }
 
-class _TipCard extends StatelessWidget {
-  const _TipCard({required this.icon, required this.text});
+class _InlineTip extends StatelessWidget {
+  const _InlineTip({required this.icon, required this.text});
 
   final IconData icon;
   final String text;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: PhoenixTheme.gold.withValues(alpha: .12),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .28)),
-      ),
+    return Semantics(
+      label: text,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: PhoenixTheme.red),
-          const SizedBox(width: 10),
-          Expanded(child: Text(text, style: const TextStyle(height: 1.5))),
+          Icon(icon, size: 17, color: PhoenixTheme.red),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.black54,
+                fontSize: 12,
+                height: 1.35,
+              ),
+            ),
+          ),
         ],
       ),
     );
