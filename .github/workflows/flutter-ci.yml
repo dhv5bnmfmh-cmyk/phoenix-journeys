@@ -87,10 +87,17 @@ jobs:
           if-no-files-found: error
 
       - name: Enforce verification results
-        if: >-
-          steps.agents.outcome != 'success' ||
-          steps.analyze.outcome != 'success' ||
-          steps.test.outcome != 'success' ||
-          steps.build.outcome != 'success' ||
-          steps.worker.outcome != 'success'
-        run: exit 1
+        shell: bash
+        run: |
+          failures=0
+          for result in \
+            "${{ steps.agents.outcome }}" \
+            "${{ steps.analyze.outcome }}" \
+            "${{ steps.test.outcome }}" \
+            "${{ steps.build.outcome }}" \
+            "${{ steps.worker.outcome }}"; do
+            if [[ "$result" != "success" ]]; then
+              failures=1
+            fi
+          done
+          exit "$failures"
