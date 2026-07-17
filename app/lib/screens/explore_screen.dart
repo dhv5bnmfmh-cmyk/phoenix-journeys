@@ -14,7 +14,11 @@ class ExploreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
 
-    void openJourney() {
+    Future<void> openJourney() async {
+      if (state.journeyCompleted) {
+        await state.restartJourney();
+      }
+      if (!context.mounted) return;
       Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const JourneyScreen()),
       );
@@ -164,8 +168,10 @@ class _FlightMapCardState extends State<_FlightMapCard>
     final status = state.journeyCompleted
         ? '北京已点亮 · 印章已获得'
         : state.hasJourneyInProgress
-            ? '旅程 ${state.beijingJourneyProgressPercent}% · ${state.beijingJourneyStepLabel}'
-            : '1,670 km · 学习航程';
+            ? '${state.beijingStampEarned ? '印章已收藏 · ' : ''}旅程 ${state.beijingJourneyProgressPercent}%'
+            : state.beijingStampEarned
+                ? '北京印章已收藏 · 可以再次出发'
+                : '1,670 km · 学习航程';
 
     return Container(
       height: 245,
@@ -213,9 +219,12 @@ class _FlightMapCardState extends State<_FlightMapCard>
                 final t = state.journeyCompleted
                     ? 1.0
                     : Curves.easeInOut.transform(_controller.value);
-                final width = MediaQuery.sizeOf(context).width.clamp(280, 760);
-                final x = 64 + (width - 150) * t;
-                final y = 172 - math.sin(t * math.pi) * 70;
+                final width = MediaQuery.sizeOf(context)
+                    .width
+                    .clamp(280.0, 760.0)
+                    .toDouble();
+                final x = 64.0 + (width - 150.0) * t;
+                final y = 172.0 - math.sin(t * math.pi) * 70.0;
                 return Stack(
                   children: [
                     Positioned(
@@ -243,7 +252,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
           Positioned(
             right: 24,
             top: 90,
-            child: _MapPin(label: '北京', active: state.journeyCompleted),
+            child: _MapPin(label: '北京', active: state.beijingStampEarned),
           ),
           Positioned(
             right: 18,
@@ -370,6 +379,15 @@ class _JourneyCard extends StatelessWidget {
                 minHeight: 7,
                 color: PhoenixTheme.red,
                 backgroundColor: PhoenixTheme.gold.withValues(alpha: .18),
+              ),
+            ),
+          ] else if (state.beijingStampEarned) ...[
+            const SizedBox(height: 18),
+            const Text(
+              '北京印章已收藏，可以随时再次体验。',
+              style: TextStyle(
+                color: PhoenixTheme.red,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ],
