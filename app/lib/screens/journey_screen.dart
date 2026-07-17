@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/journey_data.dart';
+import '../services/narration_controller.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/interactive_story_text.dart';
+import '../widgets/narration_player_card.dart';
 import '../widgets/word_detail_sheet.dart';
 
 class JourneyScreen extends StatefulWidget {
@@ -14,22 +18,104 @@ class JourneyScreen extends StatefulWidget {
   State<JourneyScreen> createState() => _JourneyScreenState();
 }
 
-class _JourneyScreenState extends State<JourneyScreen> {
+class _JourneyScreenState extends State<JourneyScreen>
+    with WidgetsBindingObserver {
   int step = 0;
   final wonderController = TextEditingController();
   final expressController = TextEditingController();
   final memoryController = TextEditingController();
+  late final NarrationController _narration;
   String aiReply = '';
+  bool _discoveryAutoStarted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _narration = NarrationController();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) {
+      unawaited(_narration.stop());
+    }
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _narration.dispose();
     wonderController.dispose();
     expressController.dispose();
     memoryController.dispose();
     super.dispose();
   }
 
-  void next() => setState(() => step = (step + 1).clamp(0, 6));
+  Future<void> _next() async {
+    await _narration.stop();
+    if (!mounted) return;
+
+    final nextStep = step < 6 ? step + 1 : 6;
+    setState(() => step = nextStep);
+
+    if (nextStep == 2 && !_discoveryAutoStarted) {
+      _discoveryAutoStarted = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && step == 2) {
+          unawaited(_playDiscoveries());
+        }
+      });
+    }
+  }
+
+  Future<void> _playStory() {
+    return _narration.play(
+      contentId: 'story',
+      items: storyParagraphs
+          .asMap()
+          .entries
+          .map(
+            (entry) => NarrationItem(
+              id: 'story-${entry.key}',
+              text: entry.value,
+              label: '故事第 ${entry.key + 1} 段',
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+
+  Future<void> _playDiscoveries() {
+    return _narration.play(
+      contentId: 'discovery',
+      items: discoveries
+          .asMap()
+          .entries
+          .map(
+            (entry) => NarrationItem(
+              id: 'discovery-${entry.key}',
+              text: entry.value,
+              label: '今日发现 ${entry.key + 1}',
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+
+  Future<void> _openWord(WordEntry entry) async {
+    await _narration.stop();
+    if (!mounted) return;
+    await showWordDetail(context, entry);
+  }
+
+  bool _isNarrating(String contentId, int itemIndex) {
+    final isActive = _narration.status == NarrationStatus.playing ||
+        _narration.status == NarrationStatus.paused;
+    return isActive &&
+        _narration.contentId == contentId &&
+        _narration.currentItemIndex == itemIndex;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +165,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
         child,
         const SizedBox(height: 28),
         FilledButton(
-          onPressed: onNext ?? next,
+          onPressed: onNext ?? () => unawaited(_next()),
           child: Text(buttonText),
         ),
       ],
@@ -92,6 +178,14 @@ class _JourneyScreenState extends State<JourneyScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          NarrationPlayerCard(
+            controller: _narration,
+            contentId: 'story',
+            title: '听完整故事',
+            subtitle: '慢速普通话 · ${storyParagraphs.length} 段',
+            onPlay: _playStory,
+          ),
+          const SizedBox(height: 16),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(15),
@@ -109,7 +203,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
                 SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    '长按红色虚线词语，立即查看拼音、中文释义和越南语；打开后会自动朗读。',
+                    '长按红色虚线词语查看拼音、中文释义和越南语。打开生词时，故事朗读会自动停止。',
                     style: TextStyle(height: 1.5),
                   ),
                 ),
@@ -117,15 +211,62 @@ class _JourneyScreenState extends State<JourneyScreen> {
             ),
           ),
           const SizedBox(height: 18),
-          ...storyParagraphs.map(
-            (paragraph) => Padding(
-              padding: const EdgeInsets.only(bottom: 18),
-              child: InteractiveStoryText(
-                text: paragraph,
-                entries: words,
-                onWordLongPress: (entry) => showWordDetail(context, entry),
-              ),
-            ),
+          AnimatedBuilder(
+            animation: _narration,
+            builder: (context, _) {
+              return Column(
+                children: storyParagraphs.asMap().entries.map((entry) {
+                  final isActive = _isNarrating('story', entry.key);
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? PhoenixTheme.red.withValues(alpha: .08)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: isActive
+                            ? PhoenixTheme.red.withValues(alpha: .32)
+                            : Colors.transparent,
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 180),
+                          child: isActive
+                              ? const Padding(
+                                  key: ValueKey('speaking'),
+                                  padding: EdgeInsets.only(right: 10, top: 2),
+                                  child: Icon(
+                                    Icons.graphic_eq,
+                                    size: 20,
+                                    color: PhoenixTheme.red,
+                                  ),
+                                )
+                              : const SizedBox.shrink(
+                                  key: ValueKey('silent'),
+                                ),
+                        ),
+                        Expanded(
+                          child: InteractiveStoryText(
+                            text: entry.value,
+                            entries: words,
+                            onWordLongPress: (word) {
+                              unawaited(_openWord(word));
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(growable: false),
+              );
+            },
           ),
           const SizedBox(height: 2),
           Text(
@@ -150,7 +291,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
                   (entry) => ActionChip(
                     avatar: Text(entry.symbol),
                     label: Text('${entry.word} · ${entry.pinyin}'),
-                    onPressed: () => showWordDetail(context, entry),
+                    onPressed: () => unawaited(_openWord(entry)),
                   ),
                 )
                 .toList(growable: false),
@@ -171,8 +312,8 @@ class _JourneyScreenState extends State<JourneyScreen> {
               (entry) => Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
-                  onTap: () => showWordDetail(context, entry),
-                  onLongPress: () => showWordDetail(context, entry),
+                  onTap: () => unawaited(_openWord(entry)),
+                  onLongPress: () => unawaited(_openWord(entry)),
                   leading: Text(
                     entry.symbol,
                     style: const TextStyle(fontSize: 30),
@@ -207,17 +348,96 @@ class _JourneyScreenState extends State<JourneyScreen> {
     return _page(
       title: '发现',
       child: Column(
-        children: discoveries
-            .map(
-              (item) => Card(
-                margin: const EdgeInsets.only(bottom: 14),
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Text(item),
-                ),
-              ),
-            )
-            .toList(growable: false),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          NarrationPlayerCard(
+            controller: _narration,
+            contentId: 'discovery',
+            title: 'Discovery 自动朗读',
+            subtitle: '进入本页自动播放 · 可暂停或重播',
+            onPlay: _playDiscoveries,
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            '当前正在朗读的发现会自动亮起。部分浏览器首次使用时，可能需要手动点一次播放。',
+            style: TextStyle(color: Colors.black54, height: 1.45),
+          ),
+          const SizedBox(height: 16),
+          AnimatedBuilder(
+            animation: _narration,
+            builder: (context, _) {
+              return Column(
+                children: discoveries.asMap().entries.map((entry) {
+                  final isActive = _isNarrating('discovery', entry.key);
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? PhoenixTheme.gold.withValues(alpha: .18)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isActive
+                            ? PhoenixTheme.gold
+                            : PhoenixTheme.gold.withValues(alpha: .18),
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          blurRadius: 14,
+                          offset: Offset(0, 7),
+                          color: Color(0x10000000),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? PhoenixTheme.red
+                                : PhoenixTheme.gold.withValues(alpha: .18),
+                            borderRadius: BorderRadius.circular(13),
+                          ),
+                          child: isActive
+                              ? const Icon(
+                                  Icons.graphic_eq,
+                                  size: 20,
+                                  color: Colors.white,
+                                )
+                              : Text(
+                                  '${entry.key + 1}',
+                                  style: const TextStyle(
+                                    color: PhoenixTheme.red,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(width: 13),
+                        Expanded(
+                          child: Text(
+                            entry.value,
+                            style: TextStyle(
+                              height: 1.55,
+                              fontWeight:
+                                  isActive ? FontWeight.w700 : FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(growable: false),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -303,8 +523,12 @@ class _JourneyScreenState extends State<JourneyScreen> {
       title: '留下今天',
       buttonText: '完成旅程并自动保存',
       onNext: () async {
+        await _narration.stop();
+        if (!context.mounted) return;
         await context.read<AppState>().completeJourney(memoryController.text);
-        if (mounted) next();
+        if (mounted) {
+          setState(() => step = 6);
+        }
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
