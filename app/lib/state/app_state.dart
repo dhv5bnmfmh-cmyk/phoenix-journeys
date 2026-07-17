@@ -23,6 +23,7 @@ class AppState extends ChangeNotifier {
   String translationLanguage = '越南语';
   int selectedTab = 0;
   bool journeyCompleted = false;
+  bool beijingStampEarned = false;
   final List<String> memories = [];
   final Set<String> savedWords = <String>{};
 
@@ -70,6 +71,8 @@ class AppState extends ChangeNotifier {
       translationLanguage =
           prefs.getString('translationLanguage') ?? '越南语';
       journeyCompleted = prefs.getBool('journeyCompleted') ?? false;
+      beijingStampEarned =
+          prefs.getBool('beijingStampEarned') ?? journeyCompleted;
       memories
         ..clear()
         ..addAll(prefs.getStringList('memories') ?? <String>[]);
@@ -207,6 +210,7 @@ class AppState extends ChangeNotifier {
 
   Future<void> completeJourney(String memory) async {
     journeyCompleted = true;
+    beijingStampEarned = true;
     beijingJourneyStep = beijingJourneyLastStep;
     beijingJourneyFurthestStep = beijingJourneyLastStep;
     if (memory.trim().isNotEmpty) {
@@ -220,6 +224,7 @@ class AppState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await Future.wait([
       prefs.setBool('journeyCompleted', true),
+      prefs.setBool('beijingStampEarned', true),
       prefs.setStringList('memories', memories),
       prefs.setInt('beijingJourneyStep', beijingJourneyLastStep),
       prefs.setInt('beijingJourneyFurthestStep', beijingJourneyLastStep),
