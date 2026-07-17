@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -6,6 +8,8 @@ enum ScriptMode { simplified, traditional }
 enum AppLoadStatus { loading, ready, error }
 
 class AppState extends ChangeNotifier {
+  static const int beijingJourneyLastStep = 6;
+
   ScriptMode scriptMode = ScriptMode.simplified;
   String translationLanguage = '越南语';
   int selectedTab = 0;
@@ -13,10 +17,25 @@ class AppState extends ChangeNotifier {
   final List<String> memories = [];
   final Set<String> savedWords = <String>{};
 
+  int beijingJourneyStep = 0;
+  int beijingJourneyFurthestStep = 0;
+  String wonderDraft = '';
+  String expressDraft = '';
+  String memoryDraft = '';
+  DateTime? journeyUpdatedAt;
+
   AppLoadStatus loadStatus = AppLoadStatus.loading;
   String? loadErrorMessage;
 
   bool get isReady => loadStatus == AppLoadStatus.ready;
+
+  bool get hasJourneyInProgress =>
+      !journeyCompleted && beijingJourneyStep > 0;
+
+  double get beijingJourneyProgress {
+    if (journeyCompleted) return 1;
+    return (beijingJourneyStep + 1) / (beijingJourneyLastStep + 1);
+  }
 
   bool isWordSaved(String word) => savedWords.contains(word);
 
@@ -39,6 +58,26 @@ class AppState extends ChangeNotifier {
       savedWords
         ..clear()
         ..addAll(prefs.getStringList('savedWords') ?? <String>[]);
+
+      beijingJourneyStep = _safeJourneyStep(
+        prefs.getInt('beijingJourneyStep') ?? 0,
+      );
+      beijingJourneyFurthestStep = math.max(
+        beijingJourneyStep,
+        _safeJourneyStep(prefs.getInt('beijingJourneyFurthestStep') ?? 0),
+      );
+      wonderDraft = prefs.getString('wonderDraft') ?? '';
+      expressDraft = prefs.getString('expressDraft') ?? '';
+      memoryDraft = prefs.getString('memoryDraft') ?? '';
+      journeyUpdatedAt = DateTime.tryParse(
+        prefs.getString('journeyUpdatedAt') ?? '',
+      );
+
+      if (journeyCompleted) {
+        beijingJourneyStep = beijingJourneyLastStep;
+        beijingJourneyFurthestStep = beijingJourneyLastStep;
+      }
+
       loadStatus = AppLoadStatus.ready;
     } catch (error, stackTrace) {
       debugPrint('Failed to load Phoenix state: $error');
@@ -48,6 +87,10 @@ class AppState extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  int _safeJourneyStep(int value) {
+    return value.clamp(0, beijingJourneyLastStep);
   }
 
   Future<void> toggleScript() async {
@@ -84,14 +127,83 @@ class AppState extends ChangeNotifier {
     await prefs.setStringList('savedWords', orderedWords);
   }
 
+  Future<void> saveJourneyProgress({
+    required int step,
+    required String wonder,
+    required String express,
+    required String memory,
+  }) async {
+    final safeStep = _safeJourneyStep(step);
+    beijingJourneyStep = safeStep;
+    beijingJourneyFurthestStep = math.max(
+      beijingJourneyFurthestStep,
+      safeStep,
+    );
+    wonderDraft = wonder;
+    expressDraft = express;
+    memoryDraft = memory;
+    journeyUpdatedAt = DateTime.now();
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.setInt('beijingJourneyStep', beijingJourneyStep),
+      prefs.setInt(
+        'beijingJourneyFurthestStep',
+        beijingJourneyFurthestStep,
+      ),
+      prefs.setString('wonderDraft', wonderDraft),
+      prefs.setString('expressDraft', expressDraft),
+      prefs.setString('memoryDraft', memoryDraft),
+      prefs.setString('journeyUpdatedAt', journeyUpdatedAt!.toIso8601String()),
+    ]);
+  }
+
+  Future<void> restartJourney() async {
+    journeyCompleted = false;
+    beijingJourneyStep = 0;
+    beijingJourneyFurthestStep = 0;
+    wonderDraft = '';
+    expressDraft = '';
+    memoryDraft = '';
+    journeyUpdatedAt = DateTime.now();
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.setBool('journeyCompleted', false),
+      prefs.setInt('beijingJourneyStep', 0),
+      prefs.setInt('beijingJourneyFurthestStep', 0),
+      prefs.remove('wonderDraft'),
+      prefs.remove('expressDraft'),
+      prefs.remove('memoryDraft'),
+      prefs.setString('journeyUpdatedAt', journeyUpdatedAt!.toIso8601String()),
+    ]);
+  }
+
   Future<void> completeJourney(String memory) async {
     journeyCompleted = true;
+    beijingJourneyStep = beijingJourneyLastStep;
+    beijingJourneyFurthestStep = beijingJourneyLastStep;
     if (memory.trim().isNotEmpty) {
       memories.insert(0, memory.trim());
     }
+    wonderDraft = '';
+    expressDraft = '';
+    memoryDraft = '';
+    journeyUpdatedAt = DateTime.now();
+
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('journeyCompleted', true);
-    await prefs.setStringList('memories', memories);
+    await Future.wait([
+      prefs.setBool('journeyCompleted', true),
+      prefs.setStringList('memories', memories),
+      prefs.setInt('beijingJourneyStep', beijingJourneyLastStep),
+      prefs.setInt('beijingJourneyFurthestStep', beijingJourneyLastStep),
+      prefs.remove('wonderDraft'),
+      prefs.remove('expressDraft'),
+      prefs.remove('memoryDraft'),
+      prefs.setString('journeyUpdatedAt', journeyUpdatedAt!.toIso8601String()),
+    ]);
     notifyListeners();
   }
 }
