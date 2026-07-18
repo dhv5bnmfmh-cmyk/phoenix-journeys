@@ -1,0 +1,95 @@
+name: Apply story word highlight fix
+
+on:
+  push:
+    branches:
+      - feature/story-word-highlight-fix
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/story-word-highlight-fix
+          fetch-depth: 0
+
+      - name: Bind narration highlight to stable item IDs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          widget_path = Path('app/lib/widgets/interactive_story_text.dart')
+          text = widget_path.read_text()
+
+          text = text.replace(
+          '''    this.onWordLongPress,\n    super.key,\n  });''',
+          '''    this.onWordLongPress,\n    this.narrationContentId,\n    this.narrationItemId,\n    super.key,\n  });''',
+          1,
+          )
+          text = text.replace(
+          '''  final ValueChanged<WordEntry>? onWordLongPress;\n\n  @override''',
+          '''  final ValueChanged<WordEntry>? onWordLongPress;\n  final String? narrationContentId;\n  final String? narrationItemId;\n\n  @override''',
+          1,
+          )
+
+          old_match = '''            final snapshot = NarrationHighlightBus.instance.snapshot;\n            final highlightStart = snapshot?.itemText == widget.text\n                ? snapshot!.start\n                : -1;\n            final highlightEnd = snapshot?.itemText == widget.text\n                ? snapshot!.end\n                : -1;'''
+          new_match = '''            final snapshot = NarrationHighlightBus.instance.snapshot;\n            final isCurrentNarrationItem = narrationSnapshotMatches(\n              snapshot: snapshot,\n              contentId: widget.narrationContentId,\n              itemId: widget.narrationItemId,\n              sourceText: widget.text,\n              displayedText: state.displayText(widget.text),\n              displayText: state.displayText,\n            );\n            final highlightStart = isCurrentNarrationItem ? snapshot!.start : -1;\n            final highlightEnd = isCurrentNarrationItem ? snapshot!.end : -1;'''
+          if old_match not in text:
+              raise SystemExit('Highlight matching block not found')
+          text = text.replace(old_match, new_match, 1)
+
+          old_style = '''        style: segmentStyle?.copyWith(\n          color: PhoenixTheme.ink,\n          backgroundColor: const Color(0xFFFFD879),\n          fontWeight: FontWeight.w900,\n          decoration: TextDecoration.none,\n        ),'''
+          new_style = '''        style: (segmentStyle ?? baseStyle ?? const TextStyle()).copyWith(\n          color: const Color(0xFF781E18),\n          backgroundColor: const Color(0xFFFFD05A),\n          fontWeight: FontWeight.w900,\n          decoration: TextDecoration.none,\n          shadows: const [\n            Shadow(color: Color(0x22FFFFFF), blurRadius: 1),\n          ],\n        ),'''
+          if old_style not in text:
+              raise SystemExit('Highlight style block not found')
+          text = text.replace(old_style, new_style, 1)
+
+          marker = '''class InteractiveStoryText extends StatefulWidget {'''
+          helper = '''@visibleForTesting\nbool narrationSnapshotMatches({\n  required NarrationHighlightSnapshot? snapshot,\n  required String? contentId,\n  required String? itemId,\n  required String sourceText,\n  required String displayedText,\n  required String Function(String) displayText,\n}) {\n  if (snapshot == null) return false;\n\n  if (contentId != null && snapshot.contentId != contentId) return false;\n  if (itemId != null) return snapshot.itemId == itemId;\n\n  final source = sourceText.trim();\n  final spoken = snapshot.itemText.trim();\n  if (source == spoken) return true;\n  return displayedText.trim() == displayText(spoken).trim();\n}\n\n'''
+          if helper not in text:
+              if marker not in text:
+                  raise SystemExit('InteractiveStoryText marker not found')
+              text = text.replace(marker, helper + marker, 1)
+
+          widget_path.write_text(text)
+
+          journey_path = Path('app/lib/screens/journey_screen.dart')
+          journey = journey_path.read_text()
+          old_call = '''                    mainText: InteractiveStoryText(\n                      text: entry.value,\n                      entries: words,\n                      onWordLongPress: (word) {\n                        unawaited(_openWord(word));\n                      },\n                    ),'''
+          new_call = '''                    mainText: InteractiveStoryText(\n                      text: entry.value,\n                      entries: words,\n                      narrationContentId: 'story',\n                      narrationItemId: 'story-${entry.key}',\n                    ),'''
+          if old_call not in journey:
+              raise SystemExit('Story InteractiveStoryText call not found')
+          journey = journey.replace(old_call, new_call, 1)
+          journey = journey.replace(
+              "text: '点按红色词语查看意思；点每段右侧的小“注”查看拼音、母语与英文',",
+              "text: '朗读时当前词会高亮；点按红色词语查看意思',",
+              1,
+          )
+          journey_path.write_text(journey)
+
+          test_path = Path('app/test/interactive_story_text_test.dart')
+          test = test_path.read_text()
+          if "matches narration by stable item ID" not in test:
+              insert = '''\n  test('matches narration by stable item ID', () {\n    const snapshot = NarrationHighlightSnapshot(\n      contentId: 'story',\n      itemId: 'story-2',\n      itemText: '这里曾经是皇帝生活的地方。',\n      itemIndex: 2,\n      start: 2,\n      end: 4,\n      word: '曾经',\n    );\n\n    expect(\n      narrationSnapshotMatches(\n        snapshot: snapshot,\n        contentId: 'story',\n        itemId: 'story-2',\n        sourceText: '这里曾经是皇帝生活的地方。',\n        displayedText: '這裡曾經是皇帝生活的地方。',\n        displayText: (value) => value,\n      ),\n      isTrue,\n    );\n    expect(\n      narrationSnapshotMatches(\n        snapshot: snapshot,\n        contentId: 'story',\n        itemId: 'story-1',\n        sourceText: snapshot.itemText,\n        displayedText: snapshot.itemText,\n        displayText: (value) => value,\n      ),\n      isFalse,\n    );\n  });\n'''
+              pos = test.rfind('}')
+              if pos < 0:
+                  raise SystemExit('Test file closing brace not found')
+              test = test[:pos] + insert + test[pos:]
+              test_path.write_text(test)
+          PY
+
+      - name: Remove one-time workflow
+        run: rm .github/workflows/apply-story-word-highlight-fix.yml
+
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/widgets/interactive_story_text.dart app/lib/screens/journey_screen.dart app/test/interactive_story_text_test.dart .github/workflows/apply-story-word-highlight-fix.yml
+          git commit -m "fix: restore deterministic story word highlighting"
+          git push origin HEAD:feature/story-word-highlight-fix
