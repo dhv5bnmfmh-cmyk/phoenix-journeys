@@ -8,21 +8,23 @@ const interactive = readFileSync(
   'utf8',
 );
 
-test('Story and Discovery always expose an obvious live reading position', () => {
-  assert.equal((journey.match(/_NowReadingStrip\(/g) ?? []).length, 3);
-  assert.match(journey, /ValueKey\('now-reading-\$contentId'\)/);
-  assert.match(journey, /ValueKey\('now-reading-word-\$contentId'\)/);
-  assert.match(journey, /Icons\.graphic_eq_rounded/);
-  assert.match(journey, /正在朗读/);
-  assert.match(journey, /暂停在/);
-  assert.match(journey, /当前：\$word/);
-  assert.match(journey, /第 \$itemNumber\/\$totalItems 段/);
+test('Story and Discovery show reading position only inside the text', () => {
+  assert.doesNotMatch(journey, /_NowReadingStrip/);
+  assert.doesNotMatch(journey, /朗读位置/);
+  assert.doesNotMatch(journey, /正在朗读/);
+  assert.doesNotMatch(journey, /当前：\$word/);
+  assert.equal(
+    (journey.match(/highlightStart: isActive \? snapshot!\.start : null/g) ?? [])
+      .length,
+    2,
+  );
 });
 
-test('active paragraph and current word use strong visual contrast', () => {
-  assert.match(journey, /const Color\(0xFFFFE7A8\)/);
+test('current word is unmistakably different from surrounding text', () => {
+  assert.match(journey, /const Color\(0xFFFFF2EE\)/);
   assert.match(journey, /color: active[\s\S]*PhoenixTheme\.red/);
-  assert.match(interactive, /backgroundColor: const Color\(0xFFFFC928\)/);
-  assert.match(interactive, /decorationThickness: 2\.1/);
-  assert.match(interactive, /fontSize:[\s\S]*\+ 1\.4/);
+  assert.match(interactive, /color: Colors\.white/);
+  assert.match(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
+  assert.match(interactive, /fontSize:[\s\S]*\+ 2\.2/);
+  assert.match(interactive, /fontWeight: FontWeight\.w900/);
 });

@@ -6,7 +6,7 @@ import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
 import 'package:provider/provider.dart';
 
 bool _containsStrongYellowHighlight(InlineSpan span) {
-  if (span.style?.backgroundColor == const Color(0xFFFFC928) &&
+  if (span.style?.backgroundColor == const Color(0xFF8F1D18) &&
       span.style?.fontWeight == FontWeight.w900 &&
       span.style?.decoration == TextDecoration.underline) {
     return true;
