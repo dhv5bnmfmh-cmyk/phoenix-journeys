@@ -28,17 +28,7 @@ jobs:
           fetch-depth: 0
 
       - name: Execute narration patch
-        shell: python
-        run: |
-          from pathlib import Path
-
-          lines = Path('.github/workflows/apply-resume-offset-fix.yml').read_text().splitlines()
-          start = next(i for i, line in enumerate(lines) if line.strip() == '- name: Patch narration resume and story density')
-          run_line = next(i for i in range(start, len(lines)) if lines[i].strip() == 'run: |')
-          end = next(i for i in range(run_line + 1, len(lines)) if lines[i].strip() == '- uses: dart-lang/setup-dart@v1')
-          script_lines = lines[run_line + 1:end]
-          script = '\n'.join(line[10:] if line.startswith('          ') else line for line in script_lines)
-          exec(compile(script, 'resume_fix.py', 'exec'))
+        run: python tools/apply_resume_fix.py
 
       - uses: dart-lang/setup-dart@v1
 
