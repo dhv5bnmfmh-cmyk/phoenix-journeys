@@ -768,7 +768,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             wonderQuestion,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -846,7 +846,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             expressQuestion,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
