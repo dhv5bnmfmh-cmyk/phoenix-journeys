@@ -13,8 +13,18 @@ const player = readFileSync(
 
 test('stalled Safari offsets cannot freeze or rewind Phoenix progress', () => {
   assert.match(controller, /if \(globalStart < _currentOffset\) return;/);
-  assert.match(controller, /final nativeAdvanced = globalStart > _lastNativeOffset;/);
-  assert.match(controller, /if \(nativeAdvanced\) \{[\s\S]*_lastNativeProgressAt = now;/);
+  assert.match(
+    controller,
+    /final nativeAdvanced = globalStart > _lastNativeOffset;/,
+  );
+  assert.match(
+    controller,
+    /if \(nativeAdvanced\) \{[\s\S]*_lastNativeProgressAt = now;/,
+  );
+  assert.doesNotMatch(
+    controller,
+    /_lastNativeProgressAt = DateTime\.now\(\);/,
+  );
 });
 
 test('visible percentage leaves zero as soon as progress advances', () => {
