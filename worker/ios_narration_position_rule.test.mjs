@@ -38,8 +38,7 @@ test('pause freezes and resumes from exactly one saved offset', () => {
 
 test('speed changes keep the same saved offset', () => {
   const start = player.indexOf('Future<void> _setSpeechRate');
-  const end = player.indexOf('@override
-  Widget build', start);
+  const end = player.indexOf('@override\n  Widget build', start);
   const body = player.slice(start, end);
 
   assert.match(body, /final offset = _captureContinuationOffset\(\)/);
