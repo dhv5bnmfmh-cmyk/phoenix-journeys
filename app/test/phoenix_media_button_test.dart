@@ -24,11 +24,13 @@ void main() {
 
     await pumpButton(false);
     expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
+    expect(find.byTooltip('开始朗读'), findsOneWidget);
     await tester.tap(find.byType(PhoenixMediaButton));
     expect(tapCount, 1);
 
     await pumpButton(true);
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+    expect(find.byTooltip('暂停朗读'), findsOneWidget);
   });
 }
