@@ -184,20 +184,168 @@ if new_sheet not in journey:
         raise SystemExit('reading support sheet block missing')
     journey = journey.replace(old_sheet, new_sheet, 1)
 
-replacements = {
-    "style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),": "style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),",
-    "const SizedBox(height: 10),": "const SizedBox(height: 6),",
-    "const SizedBox(height: 8),": "const SizedBox(height: 5),",
-    "padding: const EdgeInsets.all(11),": "padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),",
-    "borderRadius: BorderRadius.circular(12),": "borderRadius: BorderRadius.circular(10),",
-    "fontSize: 10,": "fontSize: 9,",
-    "const SizedBox(height: 3),\n          Text(text, style: const TextStyle(fontSize: 12.5, height: 1.4)),": "const SizedBox(height: 2),\n          Text(text, style: const TextStyle(fontSize: 11.2, height: 1.25)),",
+old_support = '''class _ReadingSupportSheet extends StatelessWidget {
+  const _ReadingSupportSheet({
+    required this.title,
+    required this.pinyin,
+    required this.nativeLabel,
+    required this.nativeText,
+    required this.english,
+  });
+
+  final String title;
+  final String pinyin;
+  final String nativeLabel;
+  final String nativeText;
+  final String english;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 10),
+        _SupportLine(label: '拼音', text: pinyin, color: PhoenixTheme.red),
+        const SizedBox(height: 8),
+        _SupportLine(
+          label: nativeLabel,
+          text: nativeText,
+          color: PhoenixTheme.translation,
+        ),
+        const SizedBox(height: 8),
+        _SupportLine(label: 'English', text: english, color: PhoenixTheme.ai),
+      ],
+    );
+  }
 }
-for old, new in replacements.items():
-    if old in journey:
-        journey = journey.replace(old, new, 1)
-    elif new not in journey:
-        raise SystemExit(f'journey compact replacement missing: {old}')
+
+class _SupportLine extends StatelessWidget {
+  const _SupportLine({
+    required this.label,
+    required this.text,
+    required this.color,
+  });
+
+  final String label;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(11),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .07),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(text, style: const TextStyle(fontSize: 12.5, height: 1.4)),
+        ],
+      ),
+    );
+  }
+}
+'''
+new_support = '''class _ReadingSupportSheet extends StatelessWidget {
+  const _ReadingSupportSheet({
+    required this.title,
+    required this.pinyin,
+    required this.nativeLabel,
+    required this.nativeText,
+    required this.english,
+  });
+
+  final String title;
+  final String pinyin;
+  final String nativeLabel;
+  final String nativeText;
+  final String english;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 6),
+        _SupportLine(label: '拼音', text: pinyin, color: PhoenixTheme.red),
+        const SizedBox(height: 5),
+        _SupportLine(
+          label: nativeLabel,
+          text: nativeText,
+          color: PhoenixTheme.translation,
+        ),
+        const SizedBox(height: 5),
+        _SupportLine(label: 'English', text: english, color: PhoenixTheme.ai),
+      ],
+    );
+  }
+}
+
+class _SupportLine extends StatelessWidget {
+  const _SupportLine({
+    required this.label,
+    required this.text,
+    required this.color,
+  });
+
+  final String label;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .07),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(text, style: const TextStyle(fontSize: 11.2, height: 1.25)),
+        ],
+      ),
+    );
+  }
+}
+'''
+if new_support not in journey:
+    if old_support not in journey:
+        raise SystemExit('reading support classes missing')
+    journey = journey.replace(old_support, new_support, 1)
 
 journey_path.write_text(journey)
 
