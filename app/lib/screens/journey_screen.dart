@@ -185,15 +185,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     await _narration.resumeFromOffset(resumeOffset);
   }
 
-  bool _isNarrating(String contentId, int itemIndex) {
-    final isActive =
-        _narration.status == NarrationStatus.playing ||
-        _narration.status == NarrationStatus.paused;
-    return isActive &&
-        _narration.contentId == contentId &&
-        _narration.currentItemIndex == itemIndex;
-  }
-
   Future<void> _askGuide() async {
     if (_guideLoading) return;
 
@@ -516,7 +507,10 @@ class _JourneyScreenState extends State<JourneyScreen>
                         .entries
                         .map((entry) {
                           final annotation = storyAnnotations[entry.key];
-                          final isActive = _isNarrating('story', entry.key);
+                          final snapshot = _narration.highlightSnapshot;
+                          final isActive =
+                              snapshot?.contentId == 'story' &&
+                              snapshot?.itemId == 'story-${entry.key}';
                           return _CompactTextBlock(
                             index: entry.key + 1,
                             active: isActive,
@@ -536,6 +530,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                               text: entry.value,
                               entries: words,
                               narrationController: _narration,
+                              highlightStart: isActive ? snapshot!.start : null,
+                              highlightEnd: isActive ? snapshot!.end : null,
                               narrationContentId: 'story',
                               narrationItemId: 'story-${entry.key}',
                               style: const TextStyle(
@@ -688,7 +684,10 @@ class _JourneyScreenState extends State<JourneyScreen>
                         .entries
                         .map((entry) {
                           final item = entry.value;
-                          final isActive = _isNarrating('discovery', entry.key);
+                          final snapshot = _narration.highlightSnapshot;
+                          final isActive =
+                              snapshot?.contentId == 'discovery' &&
+                              snapshot?.itemId == 'discovery-${entry.key}';
                           return _CompactTextBlock(
                             index: entry.key + 1,
                             active: isActive,
@@ -705,6 +704,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                               text: item.text,
                               entries: words,
                               narrationController: _narration,
+                              highlightStart: isActive ? snapshot!.start : null,
+                              highlightEnd: isActive ? snapshot!.end : null,
                               narrationContentId: 'discovery',
                               narrationItemId: 'discovery-${entry.key}',
                               style: TextStyle(
