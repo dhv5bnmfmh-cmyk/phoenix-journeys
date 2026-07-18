@@ -11,6 +11,7 @@ import '../services/phoenix_ai_service.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/annotated_reading_card.dart';
+import '../widgets/compact_pager.dart';
 import '../widgets/forbidden_city_stamp.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_progress_header.dart';
@@ -181,7 +182,8 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   bool _isNarrating(String contentId, int itemIndex) {
-    final isActive = _narration.status == NarrationStatus.playing ||
+    final isActive =
+        _narration.status == NarrationStatus.playing ||
         _narration.status == NarrationStatus.paused;
     return isActive &&
         _narration.contentId == contentId &&
@@ -202,6 +204,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       _guideFeedback = feedback;
       _guideLoading = false;
     });
+    await _showGuideFeedback();
   }
 
   Future<void> _reviewWriting() async {
@@ -218,6 +221,43 @@ class _JourneyScreenState extends State<JourneyScreen>
       _writingFeedback = feedback;
       _writingLoading = false;
     });
+    await _showWritingFeedback();
+  }
+
+  Future<void> _showGuideFeedback() async {
+    final feedback = _guideFeedback;
+    if (feedback == null || !mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (_) => FractionallySizedBox(
+        heightFactor: .78,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 2, 16, 20),
+          child: PhoenixGuideReplyCard(feedback: feedback),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showWritingFeedback() async {
+    final feedback = _writingFeedback;
+    if (feedback == null || !mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (_) => FractionallySizedBox(
+        heightFactor: .82,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 2, 16, 20),
+          child: PhoenixWritingFeedbackCard(feedback: feedback),
+        ),
+      ),
+    );
   }
 
   void _onWonderChanged(String _) {
@@ -268,13 +308,22 @@ class _JourneyScreenState extends State<JourneyScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('北京 · 紫禁城'),
+        toolbarHeight: 44,
+        title: const Text(
+          '北京 · 紫禁城',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+        ),
         actions: [
           Consumer<AppState>(
             builder: (_, state, __) => TextButton(
               onPressed: state.toggleScript,
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
               child: Text(
                 state.scriptMode == ScriptMode.simplified ? '简 / 繁' : '繁 / 简',
+                style: const TextStyle(fontSize: 10.5),
               ),
             ),
           ),
@@ -297,46 +346,110 @@ class _JourneyScreenState extends State<JourneyScreen>
   }) {
     final state = context.watch<AppState>();
 
-    return ListView(
+    return LayoutBuilder(
       key: ValueKey(title),
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-      children: [
-        JourneyProgressHeader(
-          currentStep: step,
-          furthestStep: state.beijingJourneyFurthestStep,
-          labels: AppState.beijingJourneyStepLabels,
-          onStepSelected: (value) => unawaited(_goToStep(value)),
-        ),
-        const SizedBox(height: 12),
-        Text(title, style: Theme.of(context).textTheme.headlineMedium),
-        const SizedBox(height: 10),
-        child,
-        const SizedBox(height: 26),
-        Row(
-          children: [
-            if (showBack &&
-                step > 0 &&
-                step < AppState.beijingJourneyLastStep) ...[
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => unawaited(_goToStep(step - 1)),
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('上一步'),
+      builder: (context, constraints) {
+        final compact = constraints.maxHeight < 590;
+        return Padding(
+          padding: EdgeInsets.fromLTRB(12, compact ? 4 : 6, 12, 8),
+          child: Column(
+            children: [
+              JourneyProgressHeader(
+                currentStep: step,
+                furthestStep: state.beijingJourneyFurthestStep,
+                labels: AppState.beijingJourneyStepLabels,
+                onStepSelected: (value) => unawaited(_goToStep(value)),
+              ),
+              SizedBox(height: compact ? 3 : 5),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontSize: compact ? 17 : 19,
+                        height: 1.05,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: PhoenixTheme.gold.withValues(alpha: .12),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                    child: const Text(
+                      '单屏模式',
+                      style: TextStyle(
+                        color: PhoenixTheme.red,
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: compact ? 4 : 6),
+              Expanded(child: child),
+              SizedBox(height: compact ? 4 : 7),
+              SizedBox(
+                height: compact ? 36 : 40,
+                child: Row(
+                  children: [
+                    if (showBack &&
+                        step > 0 &&
+                        step < AppState.beijingJourneyLastStep) ...[
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => unawaited(_goToStep(step - 1)),
+                          style: OutlinedButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                          icon: const Icon(Icons.arrow_back_rounded, size: 17),
+                          label: const Text(
+                            '上一步',
+                            style: TextStyle(fontSize: 11),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 7),
+                    ],
+                    Expanded(
+                      flex: 2,
+                      child: FilledButton.icon(
+                        onPressed:
+                            onNext ?? () => unawaited(_goToStep(step + 1)),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: PhoenixTheme.red,
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                        ),
+                        icon: Icon(buttonIcon, size: 17),
+                        label: Text(
+                          buttonText,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
             ],
-            Expanded(
-              flex: 2,
-              child: FilledButton.icon(
-                onPressed: onNext ?? () => unawaited(_goToStep(step + 1)),
-                icon: Icon(buttonIcon),
-                label: Text(buttonText),
-              ),
-            ),
-          ],
-        ),
-      ],
+          ),
+        );
+      },
     );
   }
 
@@ -344,10 +457,99 @@ class _JourneyScreenState extends State<JourneyScreen>
     final state = context.watch<AppState>();
     final language = state.translationLanguage;
 
+    final pages = _journeyContent.storyParagraphs
+        .asMap()
+        .entries
+        .map((entry) {
+          final annotation = storyAnnotations[entry.key];
+          final paragraphWords = words
+              .where((word) => entry.value.contains(word.word))
+              .toList(growable: false);
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AnimatedBuilder(
+                    animation: _narration,
+                    builder: (context, _) {
+                      final isActive = _isNarrating('story', entry.key);
+                      return AnnotatedReadingCard(
+                        id: 'story-${entry.key}',
+                        elevated: true,
+                        isActive: isActive,
+                        padding: const EdgeInsets.all(12),
+                        pinyin: annotation.pinyin,
+                        nativeLabel: annotation.nativeLabel(language),
+                        nativeText: annotation.nativeText(
+                          language,
+                          entry.value,
+                        ),
+                        english: annotation.english,
+                        leading: isActive
+                            ? const Icon(
+                                Icons.graphic_eq_rounded,
+                                size: 18,
+                                color: PhoenixTheme.red,
+                              )
+                            : CircleAvatar(
+                                radius: 15,
+                                backgroundColor: PhoenixTheme.gold.withValues(
+                                  alpha: .16,
+                                ),
+                                child: Text(
+                                  '${entry.key + 1}',
+                                  style: const TextStyle(
+                                    color: PhoenixTheme.red,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ),
+                        mainText: InteractiveStoryText(
+                          text: entry.value,
+                          entries: words,
+                          narrationContentId: 'story',
+                          narrationItemId: 'story-${entry.key}',
+                        ),
+                      );
+                    },
+                  ),
+                  if (paragraphWords.isNotEmpty) ...[
+                    const SizedBox(height: 5),
+                    SizedBox(
+                      height: 32,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: paragraphWords.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 5),
+                        itemBuilder: (context, index) {
+                          final word = paragraphWords[index];
+                          return ActionChip(
+                            visualDensity: VisualDensity.compact,
+                            avatar: WordMark(word: word.word, size: 21),
+                            label: Text(
+                              '${state.displayText(word.word)} · ${word.pinyin}',
+                              style: const TextStyle(fontSize: 9.5),
+                            ),
+                            onPressed: () => unawaited(_openWord(word)),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+        })
+        .toList(growable: false);
+
     return _page(
       title: '故事',
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           NarrationPlayerCard(
             controller: _narration,
@@ -356,74 +558,14 @@ class _JourneyScreenState extends State<JourneyScreen>
             subtitle: '普通话 · ${_journeyContent.storyParagraphs.length} 段',
             onPlay: _playStory,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 5),
           const _InlineTip(
             icon: Icons.touch_app_outlined,
-            text: '长按红色词语查词；点每段右侧的小“注”查看拼音、母语与英文',
+            text: '左右翻页阅读；点红色词语看释义，点“注”看拼音、母语与 English。',
           ),
-          const SizedBox(height: 6),
-          AnimatedBuilder(
-            animation: _narration,
-            builder: (context, _) {
-              return Column(
-                children: _journeyContent.storyParagraphs.asMap().entries.map((entry) {
-                  final annotation = storyAnnotations[entry.key];
-                  final isActive = _isNarrating('story', entry.key);
-
-                  return AnnotatedReadingCard(
-                    id: 'story-${entry.key}',
-                    isActive: isActive,
-                    pinyin: annotation.pinyin,
-                    nativeLabel: annotation.nativeLabel(language),
-                    nativeText: annotation.nativeText(language, entry.value),
-                    english: annotation.english,
-                    leading: isActive
-                        ? const Padding(
-                            padding: EdgeInsets.only(top: 2),
-                            child: Icon(
-                              Icons.graphic_eq,
-                              size: 18,
-                              color: PhoenixTheme.red,
-                            ),
-                          )
-                        : null,
-                    mainText: InteractiveStoryText(
-                      text: entry.value,
-                      entries: words,
-                      narrationContentId: 'story',
-                      narrationItemId: 'story-${entry.key}',
-                    ),
-                  );
-                }).toList(growable: false),
-              );
-            },
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '本页重点词语',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-          const SizedBox(height: 9),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: words
-                .where(
-                  (entry) => _journeyContent.storyParagraphs.any(
-                    (paragraph) => paragraph.contains(entry.word),
-                  ),
-                )
-                .take(8)
-                .map(
-                  (entry) => ActionChip(
-                    avatar: WordMark(word: entry.word, size: 24),
-                    label: Text('${entry.word} · ${entry.pinyin}'),
-                    onPressed: () => unawaited(_openWord(entry)),
-                  ),
-                )
-                .toList(growable: false),
+          const SizedBox(height: 5),
+          Expanded(
+            child: CompactPager(semanticLabel: '故事段落分页', pages: pages),
           ),
         ],
       ),
@@ -432,63 +574,101 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Widget _wordsPage() {
     final state = context.watch<AppState>();
+    final chunks = compactChunks(words, 6);
 
     return _page(
       title: '生词',
-      child: Column(
-        children: words
-            .map(
-              (entry) => Card(
-                margin: const EdgeInsets.only(bottom: 9),
-                child: ListTile(
-                  onTap: () => unawaited(_openWord(entry)),
-                  onLongPress: () => unawaited(_openWord(entry)),
-                  leading: WordMark(word: entry.word, size: 48),
-                  title: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          entry.word,
-                          style: const TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: PhoenixTheme.gold.withValues(alpha: .14),
-                          borderRadius: BorderRadius.circular(99),
-                        ),
-                        child: Text(
-                          entry.partOfSpeech,
-                          style: const TextStyle(
-                            color: PhoenixTheme.red,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w900,
+      child: CompactPager(
+        semanticLabel: '生词分页',
+        pages: chunks
+            .map((entries) {
+              return GridView.count(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 2),
+                crossAxisCount: 2,
+                mainAxisSpacing: 6,
+                crossAxisSpacing: 6,
+                childAspectRatio: 2.05,
+                children: entries
+                    .map((entry) {
+                      return Material(
+                        color: Colors.white.withValues(alpha: .94),
+                        borderRadius: BorderRadius.circular(14),
+                        child: InkWell(
+                          onTap: () => unawaited(_openWord(entry)),
+                          borderRadius: BorderRadius.circular(14),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: PhoenixTheme.gold.withValues(alpha: .24),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                WordMark(word: entry.word, size: 35),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              state.displayText(entry.word),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                            ),
+                                          ),
+                                          if (state.isWordSaved(entry.word))
+                                            const Icon(
+                                              Icons.bookmark_rounded,
+                                              size: 14,
+                                              color: PhoenixTheme.red,
+                                            ),
+                                        ],
+                                      ),
+                                      Text(
+                                        entry.pinyin,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.black54,
+                                          fontSize: 9.5,
+                                        ),
+                                      ),
+                                      Text(
+                                        state.displayText(entry.partOfSpeech),
+                                        maxLines: 1,
+                                        style: const TextStyle(
+                                          color: PhoenixTheme.red,
+                                          fontSize: 8.5,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  subtitle: Text(entry.pinyin),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (state.isWordSaved(entry.word))
-                        const Icon(
-                          Icons.bookmark,
-                          size: 19,
-                          color: PhoenixTheme.red,
-                        ),
-                      const SizedBox(width: 3),
-                      const Icon(Icons.chevron_right),
-                    ],
-                  ),
-                ),
-              ),
-            )
+                      );
+                    })
+                    .toList(growable: false),
+              );
+            })
             .toList(growable: false),
       ),
     );
@@ -498,10 +678,68 @@ class _JourneyScreenState extends State<JourneyScreen>
     final state = context.watch<AppState>();
     final language = state.translationLanguage;
 
+    final pages = discoveries
+        .asMap()
+        .entries
+        .map((entry) {
+          final item = entry.value;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: SingleChildScrollView(
+              child: AnimatedBuilder(
+                animation: _narration,
+                builder: (context, _) {
+                  final isActive = _isNarrating('discovery', entry.key);
+                  return AnnotatedReadingCard(
+                    id: 'discovery-${entry.key}',
+                    elevated: true,
+                    isActive: isActive,
+                    padding: const EdgeInsets.all(13),
+                    pinyin: item.pinyin,
+                    nativeLabel: item.nativeLabel(language),
+                    nativeText: item.nativeText(language),
+                    english: item.english,
+                    leading: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: isActive
+                          ? PhoenixTheme.red
+                          : PhoenixTheme.gold.withValues(alpha: .18),
+                      child: isActive
+                          ? const Icon(
+                              Icons.graphic_eq,
+                              size: 17,
+                              color: Colors.white,
+                            )
+                          : Text(
+                              '${entry.key + 1}',
+                              style: const TextStyle(
+                                color: PhoenixTheme.red,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                    ),
+                    mainText: Text(
+                      state.displayText(item.text),
+                      style: TextStyle(
+                        height: 1.45,
+                        fontSize: 14.5,
+                        fontWeight: isActive
+                            ? FontWeight.w800
+                            : FontWeight.w600,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        })
+        .toList(growable: false);
+
     return _page(
       title: '发现',
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           NarrationPlayerCard(
             controller: _narration,
@@ -510,61 +748,14 @@ class _JourneyScreenState extends State<JourneyScreen>
             subtitle: '中文朗读 · ${discoveries.length} 段',
             onPlay: _playDiscoveries,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 5),
           const _InlineTip(
             icon: Icons.notes_rounded,
-            text: '每段右侧点“注”展开拼音、探索者母语和 English；播放器可暂停、停止、重播和调速',
+            text: '左右翻页浏览发现；点“注”查看拼音、探索者母语和 English。',
           ),
-          const SizedBox(height: 8),
-          AnimatedBuilder(
-            animation: _narration,
-            builder: (context, _) {
-              return Column(
-                children: discoveries.asMap().entries.map((entry) {
-                  final item = entry.value;
-                  final isActive = _isNarrating('discovery', entry.key);
-
-                  return AnnotatedReadingCard(
-                    id: 'discovery-${entry.key}',
-                    elevated: true,
-                    isActive: isActive,
-                    padding: const EdgeInsets.all(14),
-                    pinyin: item.pinyin,
-                    nativeLabel: item.nativeLabel(language),
-                    nativeText: item.nativeText(language),
-                    english: item.english,
-                    leading: CircleAvatar(
-                      radius: 17,
-                      backgroundColor: isActive
-                          ? PhoenixTheme.red
-                          : PhoenixTheme.gold.withValues(alpha: .18),
-                      child: isActive
-                          ? const Icon(
-                              Icons.graphic_eq,
-                              size: 18,
-                              color: Colors.white,
-                            )
-                          : Text(
-                              '${entry.key + 1}',
-                              style: const TextStyle(
-                                color: PhoenixTheme.red,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                    ),
-                    mainText: Text(
-                      item.text,
-                      style: TextStyle(
-                        height: 1.55,
-                        fontSize: 15.5,
-                        fontWeight:
-                            isActive ? FontWeight.w800 : FontWeight.w600,
-                      ),
-                    ),
-                  );
-                }).toList(growable: false),
-              );
-            },
+          const SizedBox(height: 5),
+          Expanded(
+            child: CompactPager(semanticLabel: '发现分页', pages: pages),
           ),
         ],
       ),
@@ -577,47 +768,73 @@ class _JourneyScreenState extends State<JourneyScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(wonderQuestion),
-          const SizedBox(height: 8),
-          const _InlineTip(
-            icon: Icons.explore_outlined,
-            text: 'PhoenixGuideAgent 会回应你的观察、补充一个探索角度，再提出下一步问题',
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: wonderController,
-            minLines: 3,
-            maxLines: 6,
-            onChanged: _onWonderChanged,
-            decoration: const InputDecoration(
-              hintText: '写下你的想法……',
-              border: OutlineInputBorder(),
+          const Text(
+            wonderQuestion,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              height: 1.25,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              key: const ValueKey('ask-phoenix-guide-agent'),
-              onPressed: _guideLoading ? null : () => unawaited(_askGuide()),
-              icon: _guideLoading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.auto_awesome),
-              label: Text(
-                _guideLoading
-                    ? 'PhoenixGuideAgent 正在回应…'
-                    : '问 PhoenixGuideAgent',
+          const SizedBox(height: 5),
+          const _InlineTip(
+            icon: Icons.explore_outlined,
+            text: 'PhoenixGuideAgent 会补充探索角度，并提出下一步问题。',
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            child: TextField(
+              controller: wonderController,
+              expands: true,
+              maxLines: null,
+              minLines: null,
+              textAlignVertical: TextAlignVertical.top,
+              onChanged: _onWonderChanged,
+              decoration: const InputDecoration(
+                hintText: '写下你的想法……',
+                contentPadding: EdgeInsets.all(11),
+                border: OutlineInputBorder(),
               ),
             ),
           ),
-          if (_guideFeedback != null) ...[
-            const SizedBox(height: 12),
-            PhoenixGuideReplyCard(feedback: _guideFeedback!),
-          ],
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  key: const ValueKey('ask-phoenix-guide-agent'),
+                  onPressed: _guideLoading
+                      ? null
+                      : () => unawaited(_askGuide()),
+                  style: OutlinedButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  icon: _guideLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.auto_awesome, size: 17),
+                  label: Text(
+                    _guideLoading ? 'AI 正在回应…' : '问 PhoenixGuideAgent',
+                    style: const TextStyle(fontSize: 10.5),
+                  ),
+                ),
+              ),
+              if (_guideFeedback != null) ...[
+                const SizedBox(width: 6),
+                IconButton.filledTonal(
+                  tooltip: '查看 AI 回应',
+                  onPressed: () => unawaited(_showGuideFeedback()),
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.forum_rounded, size: 18),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
@@ -629,48 +846,74 @@ class _JourneyScreenState extends State<JourneyScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(expressQuestion),
-          const SizedBox(height: 8),
-          const _InlineTip(
-            icon: Icons.edit_note_outlined,
-            text: 'PhoenixWritingAgent 会保留原意，给出修改版、原因和更自然的表达',
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: expressController,
-            minLines: 4,
-            maxLines: 8,
-            onChanged: _onExpressChanged,
-            decoration: const InputDecoration(
-              hintText: '用中文写下你的表达……',
-              border: OutlineInputBorder(),
+          const Text(
+            expressQuestion,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              height: 1.25,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              key: const ValueKey('ask-phoenix-writing-agent'),
-              onPressed:
-                  _writingLoading ? null : () => unawaited(_reviewWriting()),
-              icon: _writingLoading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.spellcheck_rounded),
-              label: Text(
-                _writingLoading
-                    ? 'PhoenixWritingAgent 正在批改…'
-                    : '请 PhoenixWritingAgent 批改',
+          const SizedBox(height: 5),
+          const _InlineTip(
+            icon: Icons.edit_note_outlined,
+            text: 'PhoenixWritingAgent 会保留原意，给出修改版和原因。',
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            child: TextField(
+              controller: expressController,
+              expands: true,
+              maxLines: null,
+              minLines: null,
+              textAlignVertical: TextAlignVertical.top,
+              onChanged: _onExpressChanged,
+              decoration: const InputDecoration(
+                hintText: '用中文写下你的表达……',
+                contentPadding: EdgeInsets.all(11),
+                border: OutlineInputBorder(),
               ),
             ),
           ),
-          if (_writingFeedback != null) ...[
-            const SizedBox(height: 14),
-            PhoenixWritingFeedbackCard(feedback: _writingFeedback!),
-          ],
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  key: const ValueKey('ask-phoenix-writing-agent'),
+                  onPressed: _writingLoading
+                      ? null
+                      : () => unawaited(_reviewWriting()),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: PhoenixTheme.red,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  icon: _writingLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.spellcheck_rounded, size: 17),
+                  label: Text(
+                    _writingLoading ? 'AI 正在批改…' : '请 PhoenixWritingAgent 批改',
+                    style: const TextStyle(fontSize: 10.5),
+                  ),
+                ),
+              ),
+              if (_writingFeedback != null) ...[
+                const SizedBox(width: 6),
+                IconButton.filledTonal(
+                  tooltip: '查看批改结果',
+                  onPressed: () => unawaited(_showWritingFeedback()),
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.fact_check_rounded, size: 18),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
@@ -685,22 +928,30 @@ class _JourneyScreenState extends State<JourneyScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('今天最想记住的一件事是什么？'),
-          const SizedBox(height: 14),
-          TextField(
-            controller: memoryController,
-            minLines: 3,
-            maxLines: 6,
-            onChanged: (_) => unawaited(_persistProgress()),
-            decoration: const InputDecoration(
-              hintText: '写下感受，未来可以回来比较自己的变化。',
-              border: OutlineInputBorder(),
+          const Text(
+            '今天最想记住的一件事是什么？',
+            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            child: TextField(
+              controller: memoryController,
+              expands: true,
+              maxLines: null,
+              minLines: null,
+              textAlignVertical: TextAlignVertical.top,
+              onChanged: (_) => unawaited(_persistProgress()),
+              decoration: const InputDecoration(
+                hintText: '写下感受，未来回来比较自己的变化。',
+                contentPadding: EdgeInsets.all(11),
+                border: OutlineInputBorder(),
+              ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           const _InlineTip(
             icon: Icons.approval_outlined,
-            text: '结束后会自动保存回忆，由 PhoenixStampAgent 完成原创盖章动画',
+            text: '结束后自动保存回忆，并由 PhoenixStampAgent 完成盖章。',
           ),
         ],
       ),
@@ -716,27 +967,43 @@ class _JourneyScreenState extends State<JourneyScreen>
       onNext: () => Navigator.of(context).pop(),
       child: Column(
         children: [
-          const AnimatedForbiddenCityStamp(),
-          const SizedBox(height: 10),
+          const Expanded(
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: AnimatedForbiddenCityStamp(),
+              ),
+            ),
+          ),
           const Text(
             '盖章成功',
             style: TextStyle(
               color: PhoenixTheme.red,
-              fontSize: 21,
+              fontSize: 18,
               fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 3),
           const Text(
-            '你没有完成一堂课。\n你完成了一段旅程。',
+            '你完成的不是一堂课，而是一段旅程。',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 19, height: 1.6),
+            maxLines: 2,
+            style: TextStyle(fontSize: 12, height: 1.25),
           ),
-          const SizedBox(height: 20),
-          OutlinedButton.icon(
-            onPressed: () => unawaited(_restartJourney()),
-            icon: const Icon(Icons.replay),
-            label: const Text('重新体验北京 Journey'),
+          const SizedBox(height: 6),
+          SizedBox(
+            height: 34,
+            child: OutlinedButton.icon(
+              onPressed: () => unawaited(_restartJourney()),
+              style: OutlinedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+              ),
+              icon: const Icon(Icons.replay_rounded, size: 16),
+              label: const Text(
+                '重新体验北京 Journey',
+                style: TextStyle(fontSize: 10.5),
+              ),
+            ),
           ),
         ],
       ),

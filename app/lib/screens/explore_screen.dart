@@ -36,35 +36,37 @@ class ExploreScreen extends StatelessWidget {
     return Stack(
       children: [
         const Positioned.fill(child: _JourneyBackground()),
-        ListView(
-          padding: const EdgeInsets.fromLTRB(14, 10, 14, 60),
-          children: [
-            _TopBar(state: state),
-            const SizedBox(height: 7),
-            Text(
-              state.displayText('欢迎回来，Explorer'),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontSize: 17,
-                fontWeight: FontWeight.w900,
-                height: 1.1,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
+          child: Column(
+            children: [
+              _TopBar(state: state),
+              const SizedBox(height: 7),
+              Text(
+                state.displayText('欢迎回来，Explorer'),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                  height: 1.1,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              state.displayText('世界很大，从一门语言开始。'),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 11.5,
-                height: 1.15,
-                color: Colors.black54,
+              const SizedBox(height: 2),
+              Text(
+                state.displayText('世界很大，从一门语言开始。'),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: 11.5,
+                  height: 1.15,
+                  color: Colors.black54,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            _FlightMapCard(state: state, height: mapHeight),
-            const SizedBox(height: 8),
-            _JourneyCard(state: state, onOpen: openJourney),
-            const SizedBox(height: 8),
-            const _DiscoveryCard(),
-          ],
+              const SizedBox(height: 8),
+              _FlightMapCard(state: state, height: mapHeight),
+              const SizedBox(height: 8),
+              _JourneyCard(state: state, onOpen: openJourney),
+              const SizedBox(height: 8),
+              const _DiscoveryCard(),
+            ],
+          ),
         ),
       ],
     );
