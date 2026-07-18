@@ -4,6 +4,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import 'phoenix_web_speech.dart';
+
 enum NarrationStatus { idle, playing, paused, error }
 
 enum _NarrationSpeechMode { idle, narration, word }
@@ -132,6 +134,14 @@ class NarrationTextPlan {
 
 class NarrationController extends ChangeNotifier {
   NarrationController({FlutterTts? tts}) : _tts = tts ?? FlutterTts() {
+    _webSpeech = PhoenixWebSpeech(
+      onStart: _handleWebStart,
+      onProgress: _handleWebProgress,
+      onComplete: _handleWebComplete,
+      onPause: _handleWebPause,
+      onResume: _handleWebResume,
+      onError: _handleWebError,
+    );
     _bindHandlers();
   }
 
@@ -143,6 +153,7 @@ class NarrationController extends ChangeNotifier {
   ];
 
   final FlutterTts _tts;
+  late final PhoenixWebSpeech _webSpeech;
 
   NarrationStatus _status = NarrationStatus.idle;
   NarrationTextPlan _plan = NarrationTextPlan.fromItems(
@@ -170,6 +181,8 @@ class NarrationController extends ChangeNotifier {
   String? _configuredVoiceLanguage;
   NarrationHighlightSnapshot? _highlightSnapshot;
   int _speechSessionToken = 0;
+  bool _webSpeechPausedInPlace = false;
+  bool _restartWebSpeechOnResume = false;
 
   NarrationStatus get status => _status;
   String? get contentId => _contentId;
@@ -255,7 +268,63 @@ class NarrationController extends ChangeNotifier {
     return until != null && DateTime.now().isBefore(until);
   }
 
+
+  void _handleWebStart() {
+    if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
+    _status = NarrationStatus.playing;
+    _errorMessage = null;
+    _startProgressClock(_currentOffset);
+    _safeNotify();
+  }
+
+  void _handleWebProgress(int startOffset, int endOffset, String word) {
+    if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
+    final globalStart = _speechBaseOffset + startOffset;
+    final globalEnd = _speechBaseOffset + endOffset;
+    final now = DateTime.now();
+    _lastNativeOffset = globalStart;
+    _lastNativeProgressAt = now;
+    _estimateAnchorTime = now;
+    _estimateAnchorOffset = globalStart;
+    _applyProgress(globalStart, endOffset: globalEnd, word: word);
+  }
+
+  void _handleWebComplete() {
+    if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
+    _webSpeechPausedInPlace = false;
+    _restartWebSpeechOnResume = false;
+    _finishNarrationSession();
+  }
+
+  void _handleWebPause() {
+    if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
+    _status = NarrationStatus.paused;
+    _cancelProgressClock();
+    _safeNotify();
+  }
+
+  void _handleWebResume() {
+    if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
+    _status = NarrationStatus.playing;
+    _startProgressClock(_currentOffset);
+    _safeNotify();
+  }
+
+  void _handleWebError(String message) {
+    if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
+    _cancelProgressClock();
+    _speechMode = _NarrationSpeechMode.idle;
+    _status = NarrationStatus.error;
+    _errorMessage = '当前设备暂时无法朗读，请检查声音设置后重试。';
+    _currentItemIndex = null;
+    _highlightSnapshot = null;
+    NarrationHighlightBus.instance.clear(contentId: _contentId);
+    debugPrint('Phoenix web narration error: $message');
+    _safeNotify();
+  }
+
   void _bindHandlers() {
+    if (_webSpeech.isAvailable) return;
     _tts.setStartHandler(() {
       if (_shouldIgnoreEngineCallback) return;
       if (_speechMode == _NarrationSpeechMode.word) {
@@ -369,6 +438,8 @@ class NarrationController extends ChangeNotifier {
     _errorMessage = null;
     _status = NarrationStatus.playing;
     _speechMode = _NarrationSpeechMode.narration;
+    _webSpeechPausedInPlace = false;
+    _restartWebSpeechOnResume = false;
     _applyProgress(0);
     await _speakFrom(0);
   }
@@ -389,6 +460,18 @@ class NarrationController extends ChangeNotifier {
     _cancelProgressClock();
     _applyProgress(safeOffset);
 
+    if (_webSpeech.isAvailable) {
+      final paused = await _webSpeech.pause();
+      if (_disposed) return;
+      _webSpeechPausedInPlace = paused;
+      _status = NarrationStatus.paused;
+      _currentOffset = safeOffset;
+      _speechBaseOffset = safeOffset;
+      _currentItemIndex = _plan.indexForOffset(safeOffset);
+      _applyProgress(safeOffset);
+      return;
+    }
+
     await _stopSpeechEngine();
     if (_disposed) return;
 
@@ -401,10 +484,7 @@ class NarrationController extends ChangeNotifier {
 
   Future<void> resume() async {
     if (_status != NarrationStatus.paused || _plan.isEmpty) return;
-
-    final maxOffset = math.max(0, _plan.text.length - 1);
-    final offset = _currentOffset.clamp(0, maxOffset).toInt();
-    await _speakFrom(offset);
+    await resumeFromOffset(_currentOffset);
   }
 
   Future<void> resumeFromOffset(int offset) async {
@@ -413,13 +493,36 @@ class NarrationController extends ChangeNotifier {
     final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
     final safeOffset = offset.clamp(0, maxOffset).toInt();
     _status = NarrationStatus.paused;
+    _currentOffset = safeOffset;
+    _speechBaseOffset = safeOffset;
+    _currentItemIndex = _plan.indexForOffset(safeOffset);
     _cancelProgressClock();
-    _safeNotify();
+    _applyProgress(safeOffset);
+
+    if (_webSpeech.isAvailable) {
+      final resumeInPlace =
+          _webSpeechPausedInPlace && !_restartWebSpeechOnResume;
+      _webSpeechPausedInPlace = false;
+      final restartAtSavedOffset = _restartWebSpeechOnResume;
+      _restartWebSpeechOnResume = false;
+
+      if (resumeInPlace) {
+        _status = NarrationStatus.playing;
+        _startProgressClock(safeOffset);
+        _safeNotify();
+        final resumed = await _webSpeech.resume();
+        if (resumed || _disposed) return;
+      }
+
+      if (restartAtSavedOffset || !_disposed) {
+        await _speakFrom(safeOffset);
+      }
+      return;
+    }
 
     await _stopSpeechEngine();
     if (_disposed) return;
 
-    // Safari/iOS needs a quiet gap after the word voice releases audio.
     await Future<void>.delayed(const Duration(milliseconds: 220));
     if (_disposed) return;
     _ignoreEngineCallbacksUntil = null;
@@ -480,6 +583,9 @@ class NarrationController extends ChangeNotifier {
     if ((_speechRate - option.rate).abs() < .001) return;
 
     _speechRate = option.rate;
+    if (_webSpeech.isAvailable && _status == NarrationStatus.paused) {
+      _restartWebSpeechOnResume = true;
+    }
     _safeNotify();
   }
 
@@ -574,6 +680,27 @@ class NarrationController extends ChangeNotifier {
       _safeNotify();
       final sessionToken = ++_speechSessionToken;
 
+      if (_webSpeech.isAvailable) {
+        _webSpeechPausedInPlace = false;
+        _restartWebSpeechOnResume = false;
+        unawaited(_startProgressWatchdog(sessionToken, safeOffset));
+        final started = await _webSpeech.speak(
+          remainingText,
+          languageCode: 'zh-CN',
+          rate: _speechRate,
+          pitch: .98,
+          volume: 1,
+        );
+        if (!started && !_disposed) {
+          _cancelProgressClock();
+          _speechMode = _NarrationSpeechMode.idle;
+          _status = NarrationStatus.error;
+          _errorMessage = '当前浏览器暂时无法朗读，请换用 Safari 或 Chrome 重试。';
+          _safeNotify();
+        }
+        return;
+      }
+
       await _configureNaturalVoice('zh-CN');
       await _tts.setSpeechRate(_speechRate);
       await _tts.setPitch(.98);
@@ -660,6 +787,15 @@ class NarrationController extends ChangeNotifier {
 
   Future<void> _stopSpeechEngine() async {
     _speechSessionToken += 1;
+    if (_webSpeech.isAvailable) {
+      await _webSpeech.stop();
+      _webSpeechPausedInPlace = false;
+      _restartWebSpeechOnResume = false;
+      _speechMode = _NarrationSpeechMode.idle;
+      _isSpeakingWord = false;
+      _spokenWord = null;
+      return;
+    }
     _suppressEngineCallbacks = true;
     _ignoreEngineCallbacksUntil = DateTime.now().add(
       const Duration(milliseconds: 120),
@@ -793,6 +929,7 @@ class NarrationController extends ChangeNotifier {
     _cancelProgressClock();
     _highlightSnapshot = null;
     NarrationHighlightBus.instance.clear(contentId: _contentId);
+    _webSpeech.dispose();
     unawaited(_tts.stop());
     super.dispose();
   }
