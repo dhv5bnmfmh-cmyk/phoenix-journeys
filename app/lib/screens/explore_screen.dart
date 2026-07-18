@@ -7,45 +7,62 @@ import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import 'journey_screen.dart';
 
+@visibleForTesting
+double compactExploreMapHeight(double viewportHeight) {
+  if (viewportHeight < 700) return 160;
+  if (viewportHeight < 820) return 174;
+  return 188;
+}
+
 class ExploreScreen extends StatelessWidget {
   const ExploreScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final viewportHeight = MediaQuery.sizeOf(context).height;
+    final mapHeight = compactExploreMapHeight(viewportHeight);
 
     Future<void> openJourney() async {
       if (state.journeyCompleted) {
         await state.restartJourney();
       }
       if (!context.mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const JourneyScreen()),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const JourneyScreen()));
     }
 
     return Stack(
       children: [
         const Positioned.fill(child: _JourneyBackground()),
         ListView(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 60),
           children: [
             _TopBar(state: state),
-            const SizedBox(height: 28),
+            const SizedBox(height: 7),
             Text(
               state.displayText('欢迎回来，Explorer'),
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontSize: 17,
+                fontWeight: FontWeight.w900,
+                height: 1.1,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 2),
             Text(
               state.displayText('世界很大，从一门语言开始。'),
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontSize: 11.5,
+                height: 1.15,
+                color: Colors.black54,
+              ),
             ),
-            const SizedBox(height: 24),
-            _FlightMapCard(state: state),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
+            _FlightMapCard(state: state, height: mapHeight),
+            const SizedBox(height: 8),
             _JourneyCard(state: state, onOpen: openJourney),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
             const _DiscoveryCard(),
           ],
         ),
@@ -61,51 +78,76 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF9F2B28), PhoenixTheme.red],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                blurRadius: 16,
-                offset: Offset(0, 8),
-                color: Color(0x22000000),
+    return SizedBox(
+      height: 36,
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF9F2B28), PhoenixTheme.red],
               ),
-            ],
-          ),
-          child: const Icon(Icons.local_fire_department, color: Colors.white),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'PHOENIX JOURNEYS',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                  color: Color(0x18000000),
                 ),
-              ),
-              Text(state.displayText('你的语言旅行护照')),
-            ],
+              ],
+            ),
+            child: const Icon(
+              Icons.local_fire_department,
+              color: Colors.white,
+              size: 21,
+            ),
           ),
-        ),
-        OutlinedButton.icon(
-          onPressed: state.toggleScript,
-          icon: const Icon(Icons.translate_rounded, size: 17),
-          label: Text(state.isTraditional ? '繁體' : '简体'),
-        ),
-      ],
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'PHOENIX JOURNEYS',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    height: 1.05,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .9,
+                  ),
+                ),
+                Text(
+                  state.displayText('你的语言旅行护照'),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    height: 1.05,
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          OutlinedButton.icon(
+            onPressed: state.toggleScript,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 30),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              visualDensity: VisualDensity.compact,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            icon: const Icon(Icons.translate_rounded, size: 14),
+            label: Text(
+              state.isTraditional ? '繁體' : '简体',
+              style: const TextStyle(fontSize: 10.5),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -120,11 +162,7 @@ class _JourneyBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFFFF7EA),
-            Color(0xFFF6E7D4),
-            PhoenixTheme.paper,
-          ],
+          colors: [Color(0xFFFFF7EA), Color(0xFFF6E7D4), PhoenixTheme.paper],
         ),
       ),
       child: CustomPaint(painter: _CloudPainter()),
@@ -133,9 +171,10 @@ class _JourneyBackground extends StatelessWidget {
 }
 
 class _FlightMapCard extends StatefulWidget {
-  const _FlightMapCard({required this.state});
+  const _FlightMapCard({required this.state, required this.height});
 
   final AppState state;
+  final double height;
 
   @override
   State<_FlightMapCard> createState() => _FlightMapCardState();
@@ -166,30 +205,26 @@ class _FlightMapCardState extends State<_FlightMapCard>
     final status = state.journeyCompleted
         ? '北京已点亮 · 印章已获得'
         : state.hasJourneyInProgress
-            ? '${state.beijingStampEarned ? '印章已收藏 · ' : ''}旅程 ${state.beijingJourneyProgressPercent}%'
-            : state.beijingStampEarned
-                ? '北京印章已收藏 · 可以再次出发'
-                : '1,670 km · 学习航程';
+        ? '${state.beijingStampEarned ? '印章已收藏 · ' : ''}旅程 ${state.beijingJourneyProgressPercent}%'
+        : state.beijingStampEarned
+        ? '北京印章已收藏 · 可以再次出发'
+        : '1,670 km · 学习航程';
 
     return Container(
-      height: 292,
+      height: widget.height,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0A2834),
-            Color(0xFF124B54),
-            Color(0xFF0C303A),
-          ],
+          colors: [Color(0xFF0A2834), Color(0xFF124B54), Color(0xFF0C303A)],
         ),
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(23),
         border: Border.all(color: Colors.white12),
         boxShadow: const [
           BoxShadow(
-            blurRadius: 28,
-            offset: Offset(0, 14),
+            blurRadius: 16,
+            offset: Offset(0, 8),
             color: Color(0x31000000),
           ),
         ],
@@ -202,8 +237,8 @@ class _FlightMapCardState extends State<_FlightMapCard>
               final journeyProgress = state.journeyCompleted
                   ? 1.0
                   : state.hasJourneyInProgress
-                      ? state.beijingJourneyProgress
-                      : _controller.value;
+                  ? state.beijingJourneyProgress
+                  : _controller.value;
               final flightT = state.journeyCompleted
                   ? 1.0
                   : Curves.easeInOutCubic.transform(_controller.value);
@@ -224,9 +259,9 @@ class _FlightMapCardState extends State<_FlightMapCard>
                     ),
                   ),
                   Positioned(
-                    left: 18,
-                    top: 16,
-                    right: 18,
+                    left: 12,
+                    top: 9,
+                    right: 12,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -238,16 +273,16 @@ class _FlightMapCardState extends State<_FlightMapCard>
                                 state.displayText('今日航线'),
                                 style: const TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 12,
+                                  fontSize: 9.5,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              const SizedBox(height: 3),
+                              const SizedBox(height: 1),
                               Text(
                                 state.displayText('河内  →  北京'),
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 22,
+                                  fontSize: 16.5,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: .2,
                                 ),
@@ -257,12 +292,12 @@ class _FlightMapCardState extends State<_FlightMapCard>
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 7,
+                            horizontal: 7,
+                            vertical: 4,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: .10),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: Colors.white24),
                           ),
                           child: Row(
@@ -271,14 +306,14 @@ class _FlightMapCardState extends State<_FlightMapCard>
                               const Icon(
                                 Icons.auto_awesome,
                                 color: Color(0xFFFFD879),
-                                size: 15,
+                                size: 12,
                               ),
-                              const SizedBox(width: 5),
+                              const SizedBox(width: 3),
                               Text(
                                 state.displayText('AI 旅程'),
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 10.5,
+                                  fontSize: 8.5,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -289,36 +324,37 @@ class _FlightMapCardState extends State<_FlightMapCard>
                     ),
                   ),
                   Positioned(
-                    left: plane.dx - 18,
-                    top: plane.dy - 18,
+                    left: plane.dx - 13,
+                    top: plane.dy - 13,
                     child: Transform.rotate(
                       angle: angle,
                       child: Container(
-                        width: 36,
-                        height: 36,
+                        width: 26,
+                        height: 26,
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFD879),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFFFD879)
-                                  .withValues(alpha: .45),
-                              blurRadius: 18,
-                              spreadRadius: 2,
+                              color: const Color(
+                                0xFFFFD879,
+                              ).withValues(alpha: .45),
+                              blurRadius: 10,
+                              spreadRadius: 1,
                             ),
                           ],
                         ),
                         child: const Icon(
                           Icons.flight_rounded,
                           color: Color(0xFF713016),
-                          size: 22,
+                          size: 16,
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: geometry.hanoi.dx - 22,
-                    top: geometry.hanoi.dy - 22,
+                    left: geometry.hanoi.dx - 16,
+                    top: geometry.hanoi.dy - 16,
                     child: _CityMarker(
                       label: state.displayText('河内'),
                       subtitle: 'HAN',
@@ -327,8 +363,8 @@ class _FlightMapCardState extends State<_FlightMapCard>
                     ),
                   ),
                   Positioned(
-                    left: geometry.beijing.dx - 22,
-                    top: geometry.beijing.dy - 22,
+                    left: geometry.beijing.dx - 16,
+                    top: geometry.beijing.dy - 16,
                     child: _CityMarker(
                       label: state.displayText('北京'),
                       subtitle: 'PEK',
@@ -337,24 +373,24 @@ class _FlightMapCardState extends State<_FlightMapCard>
                     ),
                   ),
                   Positioned(
-                    left: 18,
-                    right: 18,
-                    bottom: 15,
+                    left: 12,
+                    right: 12,
+                    bottom: 9,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
+                        horizontal: 9,
+                        vertical: 6,
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF071D26).withValues(alpha: .70),
-                        borderRadius: BorderRadius.circular(17),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.white12),
                       ),
                       child: Row(
                         children: [
                           Container(
-                            width: 8,
-                            height: 8,
+                            width: 6,
+                            height: 6,
                             decoration: const BoxDecoration(
                               color: Color(0xFFFFD879),
                               shape: BoxShape.circle,
@@ -368,7 +404,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 11.5,
+                                fontSize: 9.5,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -378,7 +414,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
                             style: const TextStyle(
                               color: Color(0xFFFFD879),
                               fontWeight: FontWeight.w900,
-                              fontSize: 12,
+                              fontSize: 10,
                             ),
                           ),
                         ],
@@ -397,9 +433,9 @@ class _FlightMapCardState extends State<_FlightMapCard>
 
 class _FlightGeometry {
   _FlightGeometry(this.size)
-      : hanoi = Offset(size.width * .23, size.height * .68),
-        control = Offset(size.width * .48, size.height * .25),
-        beijing = Offset(size.width * .78, size.height * .43);
+    : hanoi = Offset(size.width * .23, size.height * .68),
+      control = Offset(size.width * .48, size.height * .25),
+      beijing = Offset(size.width * .78, size.height * .43);
 
   final Size size;
   final Offset hanoi;
@@ -420,9 +456,11 @@ class _FlightGeometry {
 
   double angleAt(double t) {
     final dx =
-        2 * (1 - t) * (control.dx - hanoi.dx) + 2 * t * (beijing.dx - control.dx);
+        2 * (1 - t) * (control.dx - hanoi.dx) +
+        2 * t * (beijing.dx - control.dx);
     final dy =
-        2 * (1 - t) * (control.dy - hanoi.dy) + 2 * t * (beijing.dy - control.dy);
+        2 * (1 - t) * (control.dy - hanoi.dy) +
+        2 * t * (beijing.dy - control.dy);
     return math.atan2(dy, dx);
   }
 }
@@ -442,7 +480,7 @@ class _CityMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scale = 1 + math.sin(pulse * math.pi * 2) * .05;
+    final scale = 1 + math.sin(pulse * math.pi * 2) * .035;
     final color = active ? const Color(0xFFFFD879) : Colors.white;
 
     return Transform.scale(
@@ -450,51 +488,43 @@ class _CityMarker extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 43,
-            height: 43,
+            width: 31,
+            height: 31,
             decoration: BoxDecoration(
-              color: const Color(0xFF08252D).withValues(alpha: .86),
+              color: const Color(0xFF08252D).withValues(alpha: .88),
               shape: BoxShape.circle,
-              border: Border.all(color: color.withValues(alpha: .85), width: 2),
+              border: Border.all(
+                color: color.withValues(alpha: .85),
+                width: 1.4,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: color.withValues(alpha: active ? .35 : .18),
-                  blurRadius: active ? 18 : 10,
-                  spreadRadius: active ? 3 : 1,
+                  color: color.withValues(alpha: active ? .28 : .13),
+                  blurRadius: active ? 10 : 6,
+                  spreadRadius: active ? 1.5 : .5,
                 ),
               ],
             ),
             child: Icon(
               active ? Icons.star_rounded : Icons.location_on_rounded,
               color: color,
-              size: 22,
+              size: 16,
             ),
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 1),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
             decoration: BoxDecoration(
-              color: const Color(0xFF071D26).withValues(alpha: .82),
-              borderRadius: BorderRadius.circular(9),
+              color: const Color(0xFF071D26).withValues(alpha: .84),
+              borderRadius: BorderRadius.circular(7),
             ),
-            child: Text.rich(
-              TextSpan(
-                text: '$label ',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w900,
-                ),
-                children: [
-                  TextSpan(
-                    text: subtitle,
-                    style: const TextStyle(
-                      color: Colors.white54,
-                      fontSize: 8.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
+            child: Text(
+              '$label $subtitle',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 7.5,
+                height: 1,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
@@ -525,11 +555,11 @@ class _JourneyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .92),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .45)),
+        color: Colors.white.withValues(alpha: .94),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .40)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,30 +573,42 @@ class _JourneyCard extends StatelessWidget {
               const Spacer(),
               Text(
                 state.displayText('第一站'),
-                style: const TextStyle(color: Colors.black54),
+                style: const TextStyle(color: Colors.black54, fontSize: 10),
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 7),
           Text(
             state.displayText('第一次走进紫禁城'),
-            style: Theme.of(context).textTheme.headlineMedium,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontSize: 19,
+              height: 1.05,
+              fontWeight: FontWeight.w900,
+            ),
           ),
-          const SizedBox(height: 10),
-          Text(state.displayText('跟随 AI 导游，用故事、词汇和文化打开北京。')),
+          const SizedBox(height: 3),
+          Text(
+            state.displayText('跟随 AI 导游，用故事、词汇和文化打开北京。'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 11.5, height: 1.15),
+          ),
           if (state.hasJourneyInProgress || state.journeyCompleted) ...[
-            const SizedBox(height: 18),
+            const SizedBox(height: 7),
             Row(
               children: [
                 Expanded(
                   child: Text(
                     state.displayText(
                       state.journeyCompleted
-                          ? '旅程完成 · 北京紫禁城印章已收入护照'
+                          ? '旅程完成 · 紫禁城印章已收入护照'
                           : '上次停在「${state.beijingJourneyStepLabel}」',
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: PhoenixTheme.red,
+                      fontSize: 10,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -575,64 +617,81 @@ class _JourneyCard extends StatelessWidget {
                   '${state.beijingJourneyProgressPercent}%',
                   style: const TextStyle(
                     color: PhoenixTheme.red,
+                    fontSize: 10,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             ClipRRect(
               borderRadius: BorderRadius.circular(99),
               child: LinearProgressIndicator(
                 value: state.beijingJourneyProgress,
-                minHeight: 7,
+                minHeight: 4,
                 color: PhoenixTheme.red,
                 backgroundColor: PhoenixTheme.gold.withValues(alpha: .18),
               ),
             ),
           ] else if (state.beijingStampEarned) ...[
-            const SizedBox(height: 18),
+            const SizedBox(height: 6),
             Text(
               state.displayText('北京印章已收藏，可以随时再次体验。'),
+              maxLines: 1,
               style: const TextStyle(
                 color: PhoenixTheme.red,
+                fontSize: 10,
                 fontWeight: FontWeight.w800,
               ),
             ),
           ],
-          const SizedBox(height: 18),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          const SizedBox(height: 8),
+          Row(
             children: [
-              _FeatureChip(
-                icon: Icons.headphones,
-                text: state.displayText('自动朗读'),
+              Expanded(
+                child: _FeatureChip(
+                  icon: Icons.headphones,
+                  text: state.displayText('自动朗读'),
+                ),
               ),
-              _FeatureChip(
-                icon: Icons.touch_app,
-                text: state.displayText('长按查词'),
+              const SizedBox(width: 4),
+              Expanded(
+                child: _FeatureChip(
+                  icon: Icons.touch_app,
+                  text: state.displayText('点词释义'),
+                ),
               ),
-              _FeatureChip(
-                icon: Icons.edit_note,
-                text: state.displayText('写作任务'),
+              const SizedBox(width: 4),
+              Expanded(
+                child: _FeatureChip(
+                  icon: Icons.edit_note,
+                  text: state.displayText('写作任务'),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
+            height: 40,
             child: FilledButton.icon(
               style: FilledButton.styleFrom(
                 backgroundColor: PhoenixTheme.red,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 17),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                visualDensity: VisualDensity.compact,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(13),
                 ),
               ),
-              icon: Icon(_buttonIcon),
-              label: Text(state.displayText(_buttonText)),
+              icon: Icon(_buttonIcon, size: 18),
+              label: Text(
+                state.displayText(_buttonText),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               onPressed: onOpen,
             ),
           ),
@@ -649,21 +708,20 @@ class _DiscoveryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF4DF),
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(17),
         border: Border.all(color: const Color(0xFFE8C788)),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const CircleAvatar(
-            radius: 24,
+            radius: 16,
             backgroundColor: Color(0xFF7B1E1E),
-            child: Icon(Icons.auto_awesome, color: Colors.white),
+            child: Icon(Icons.auto_awesome, color: Colors.white, size: 17),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -671,23 +729,34 @@ class _DiscoveryCard extends StatelessWidget {
                 Text(
                   state.displayText('Discovery · 今日发现'),
                   style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 11.5,
+                    height: 1.05,
                   ),
                 ),
-                const SizedBox(height: 7),
-                Text(state.displayText('为什么故宫的屋顶大多是黄色？')),
-                const SizedBox(height: 8),
+                const SizedBox(height: 2),
                 Text(
-                  state.displayText(
-                    '中文朗读下方会显示探索者的解释语言，理解后再继续思考与表达。',
+                  state.displayText('为什么故宫的屋顶大多是黄色？'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11, height: 1.05),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  state.displayText('朗读后用探索者语言理解，再继续表达。'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontSize: 9.5,
+                    height: 1.05,
                   ),
-                  style: const TextStyle(color: Colors.black54, height: 1.45),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.volume_up_outlined),
+          const SizedBox(width: 6),
+          const Icon(Icons.volume_up_outlined, size: 18),
         ],
       ),
     );
@@ -703,7 +772,7 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFFF5E5D2),
         borderRadius: BorderRadius.circular(99),
@@ -711,9 +780,9 @@ class _Pill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16),
-          const SizedBox(width: 5),
-          Text(text),
+          Icon(icon, size: 13),
+          const SizedBox(width: 3),
+          Text(text, style: const TextStyle(fontSize: 10)),
         ],
       ),
     );
@@ -729,17 +798,29 @@ class _FeatureChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
       decoration: BoxDecoration(
         color: const Color(0xFFF7F1E8),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: PhoenixTheme.red),
-          const SizedBox(width: 5),
-          Text(text, style: const TextStyle(fontSize: 12)),
+          Icon(icon, size: 13, color: PhoenixTheme.red),
+          const SizedBox(width: 3),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 9.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -747,10 +828,7 @@ class _FeatureChip extends StatelessWidget {
 }
 
 class _PremiumMapPainter extends CustomPainter {
-  const _PremiumMapPainter({
-    required this.routeProgress,
-    required this.pulse,
-  });
+  const _PremiumMapPainter({required this.routeProgress, required this.pulse});
 
   final double routeProgress;
   final double pulse;
@@ -891,11 +969,7 @@ class _PremiumMapPainter extends CustomPainter {
       ),
       islands,
     );
-    canvas.drawCircle(
-      Offset(size.width * .54, size.height * .76),
-      4,
-      islands,
-    );
+    canvas.drawCircle(Offset(size.width * .54, size.height * .76), 4, islands);
   }
 
   void _drawRoute(Canvas canvas, Size size) {
@@ -937,9 +1011,9 @@ class _PremiumMapPainter extends CustomPainter {
     canvas.drawPath(visible, active);
 
     final halo = Paint()
-      ..color = const Color(0xFFFFD879).withValues(
-        alpha: .10 + (math.sin(pulse * math.pi * 2).abs() * .10),
-      )
+      ..color = const Color(
+        0xFFFFD879,
+      ).withValues(alpha: .10 + (math.sin(pulse * math.pi * 2).abs() * .10))
       ..style = PaintingStyle.stroke
       ..strokeWidth = 13
       ..strokeCap = StrokeCap.round;
@@ -959,7 +1033,8 @@ class _PremiumMapPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _PremiumMapPainter oldDelegate) {
-    return oldDelegate.routeProgress != routeProgress || oldDelegate.pulse != pulse;
+    return oldDelegate.routeProgress != routeProgress ||
+        oldDelegate.pulse != pulse;
   }
 }
 
