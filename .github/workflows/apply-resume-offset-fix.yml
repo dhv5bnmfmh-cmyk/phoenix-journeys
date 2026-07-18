@@ -1,0 +1,404 @@
+name: Apply exact narration resume fix
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.head_ref == 'fix/resume-offset-and-compact-story' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/resume-offset-and-compact-story
+          fetch-depth: 0
+
+      - name: Patch narration resume and story density
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          def replace_once(text, old, new, label):
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 match, got {count}')
+              return text.replace(old, new, 1)
+
+          controller_path = Path('app/lib/services/narration_controller.dart')
+          controller = controller_path.read_text()
+          controller = replace_once(
+              controller,
+              '  DateTime? _lastNativeProgressAt;\n',
+              '  DateTime? _lastNativeProgressAt;\n  int _lastNativeOffset = 0;\n',
+              'native offset field',
+          )
+          controller = replace_once(
+              controller,
+              '  int get currentOffset => _currentOffset;\n  int get totalCharacters => _plan.text.length;\n',
+              '''  int get currentOffset => _currentOffset;
+  int get lastNativeOffset => _lastNativeOffset;
+  bool get hasFreshNativeProgress {
+    final last = _lastNativeProgressAt;
+    return last != null &&
+        DateTime.now().difference(last).inMilliseconds < 1200;
+  }
+  int get totalCharacters => _plan.text.length;
+''',
+              'native offset getters',
+          )
+          controller = replace_once(
+              controller,
+              '      _lastNativeProgressAt = DateTime.now();\n      _estimateAnchorTime = _lastNativeProgressAt;\n',
+              '      _lastNativeOffset = globalStart;\n      _lastNativeProgressAt = DateTime.now();\n      _estimateAnchorTime = _lastNativeProgressAt;\n',
+              'native progress capture',
+          )
+          controller = replace_once(
+              controller,
+              '    _currentOffset = 0;\n    _currentItemIndex = 0;\n',
+              '    _currentOffset = 0;\n    _lastNativeOffset = 0;\n    _lastNativeProgressAt = null;\n    _currentItemIndex = 0;\n',
+              'play reset',
+          )
+          old_pause = '''  Future<void> pause() async {
+    if (_status != NarrationStatus.playing) return;
+
+    _status = NarrationStatus.paused;
+    _cancelProgressClock();
+    _safeNotify();
+    await _stopSpeechEngine();
+
+    if (_disposed) return;
+    _status = NarrationStatus.paused;
+    _safeNotify();
+  }
+'''
+          new_pause = '''  Future<void> pause() async {
+    await pauseAtOffset(_currentOffset);
+  }
+
+  Future<void> pauseAtOffset(int offset) async {
+    if (_plan.isEmpty || _disposed) return;
+
+    final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
+    final safeOffset = offset.clamp(0, maxOffset).toInt();
+    _status = NarrationStatus.paused;
+    _currentOffset = safeOffset;
+    _speechBaseOffset = safeOffset;
+    _currentItemIndex = _plan.indexForOffset(safeOffset);
+    _cancelProgressClock();
+    _applyProgress(safeOffset);
+
+    await _stopSpeechEngine();
+    if (_disposed) return;
+
+    _status = NarrationStatus.paused;
+    _currentOffset = safeOffset;
+    _speechBaseOffset = safeOffset;
+    _currentItemIndex = _plan.indexForOffset(safeOffset);
+    _applyProgress(safeOffset);
+  }
+'''
+          controller = replace_once(controller, old_pause, new_pause, 'pauseAtOffset')
+          controller = replace_once(
+              controller,
+              '      _speechMode = _NarrationSpeechMode.narration;\n      _speechBaseOffset = safeOffset;\n',
+              '      _speechMode = _NarrationSpeechMode.narration;\n      _lastNativeOffset = safeOffset;\n      _lastNativeProgressAt = null;\n      _speechBaseOffset = safeOffset;\n',
+              'speak reset',
+          )
+          controller_path.write_text(controller)
+
+          player_path = Path('app/lib/widgets/narration_player_card.dart')
+          player = player_path.read_text()
+          old_resolver = '''int resolveNarrationPauseOffset({
+  required int controllerOffset,
+  required int estimatedOffset,
+  required int totalCharacters,
+}) {
+  if (totalCharacters <= 0) return 0;
+  // Never resume ahead of the native/highlight position. Repeating part of the
+  // current word is preferable to skipping characters the user has not heard.
+  final candidate = math.min(controllerOffset, estimatedOffset);
+  return candidate.clamp(0, math.max(0, totalCharacters - 1)).toInt();
+}
+'''
+          new_resolver = '''int resolveNarrationPauseOffset({
+  required int nativeOffset,
+  required bool nativeProgressIsFresh,
+  required int estimatedOffset,
+  required int totalCharacters,
+}) {
+  if (totalCharacters <= 0) return 0;
+  final maxOffset = math.max(0, totalCharacters - 1);
+  if (nativeProgressIsFresh) {
+    return nativeOffset.clamp(0, maxOffset).toInt();
+  }
+
+  // Safari often keeps returning zero even while speech is audible. In that
+  // case use Phoenix's running clock and repeat one character for safety.
+  final estimated = estimatedOffset.clamp(0, maxOffset).toInt();
+  return math.max(0, estimated - 1);
+}
+'''
+          player = replace_once(player, old_resolver, new_resolver, 'pause resolver')
+          player = replace_once(
+              player,
+              '''        ? resolveNarrationPauseOffset(
+            controllerOffset: widget.controller.currentOffset,
+            estimatedOffset: estimatedOffset,
+            totalCharacters: widget.controller.totalCharacters,
+          )
+''',
+              '''        ? resolveNarrationPauseOffset(
+            nativeOffset: widget.controller.lastNativeOffset,
+            nativeProgressIsFresh: widget.controller.hasFreshNativeProgress,
+            estimatedOffset: estimatedOffset,
+            totalCharacters: widget.controller.totalCharacters,
+          )
+''',
+              'pause resolver call',
+          )
+          player = replace_once(
+              player,
+              '    await widget.controller.stop(resetPosition: false);\n',
+              '    await widget.controller.pauseAtOffset(offset);\n',
+              'pause controller call',
+          )
+          player_path.write_text(player)
+
+          journey_path = Path('app/lib/screens/journey_screen.dart')
+          journey = journey_path.read_text()
+          story_section = r'''  Widget _storyPage() {
+    final state = context.watch<AppState>();
+    final language = state.translationLanguage;
+
+    return _page(
+      title: '故事',
+      child: Column(
+        children: [
+          NarrationPlayerCard(
+            controller: _narration,
+            contentId: 'story',
+            title: '紫禁城故事',
+            subtitle: '普通话 · ${_journeyContent.storyParagraphs.length} 段',
+            compact: true,
+            onPlay: _playStory,
+          ),
+          const SizedBox(height: 2),
+          Expanded(
+            child: AnimatedBuilder(
+              animation: _narration,
+              builder: (context, _) {
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: _journeyContent.storyParagraphs
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                          final annotation = storyAnnotations[entry.key];
+                          final isActive = _isNarrating('story', entry.key);
+                          return _CompactTextBlock(
+                            index: entry.key + 1,
+                            active: isActive,
+                            onSupport: () => unawaited(
+                              _showReadingSupport(
+                                title: '故事第 ${entry.key + 1} 段',
+                                pinyin: annotation.pinyin,
+                                nativeLabel: annotation.nativeLabel(language),
+                                nativeText: annotation.nativeText(
+                                  language,
+                                  entry.value,
+                                ),
+                                english: annotation.english,
+                              ),
+                            ),
+                            child: InteractiveStoryText(
+                              text: entry.value,
+                              entries: words,
+                              narrationContentId: 'story',
+                              narrationItemId: 'story-${entry.key}',
+                              style: const TextStyle(
+                                fontSize: 10.8,
+                                height: 1.18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          );
+                        })
+                        .toList(growable: false),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+'''
+          journey, count = re.subn(
+              r"  Widget _storyPage\(\) \{[\s\S]*?\n  \}\n\n  Widget _wordsPage\(\)",
+              story_section + '\n  Widget _wordsPage()',
+              journey,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'story section replacement: {count}')
+
+          compact_block = r'''class _CompactTextBlock extends StatelessWidget {
+  const _CompactTextBlock({
+    required this.index,
+    required this.active,
+    required this.child,
+    required this.onSupport,
+  });
+
+  final int index;
+  final bool active;
+  final Widget child;
+  final VoidCallback onSupport;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 2),
+      padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
+      decoration: BoxDecoration(
+        color: active
+            ? PhoenixTheme.gold.withValues(alpha: .18)
+            : Colors.white.withValues(alpha: .94),
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(
+          color: active
+              ? PhoenixTheme.gold
+              : PhoenixTheme.gold.withValues(alpha: .22),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 1),
+            child: CircleAvatar(
+              radius: 9,
+              backgroundColor: active
+                  ? PhoenixTheme.red
+                  : PhoenixTheme.gold.withValues(alpha: .18),
+              child: active
+                  ? const Icon(
+                      Icons.graphic_eq_rounded,
+                      size: 10,
+                      color: Colors.white,
+                    )
+                  : Text(
+                      '$index',
+                      style: const TextStyle(
+                        color: PhoenixTheme.red,
+                        fontSize: 7,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Expanded(child: child),
+          SizedBox(
+            width: 23,
+            height: 23,
+            child: TextButton(
+              onPressed: onSupport,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(23, 23),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              ),
+              child: const Text(
+                '注',
+                style: TextStyle(
+                  color: PhoenixTheme.red,
+                  fontSize: 8,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+'''
+          journey, count = re.subn(
+              r'class _CompactTextBlock extends StatelessWidget \{[\s\S]*?\n\}\n\n(?=class _ReadingSupportSheet)',
+              compact_block + '\n',
+              journey,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'compact block replacement: {count}')
+          journey_path.write_text(journey)
+
+          test_path = Path('app/test/narration_resume_offset_test.dart')
+          test_path.write_text(r'''import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/widgets/narration_player_card.dart';
+
+void main() {
+  test('uses the exact native word start when progress is fresh', () {
+    expect(
+      resolveNarrationPauseOffset(
+        nativeOffset: 17,
+        nativeProgressIsFresh: true,
+        estimatedOffset: 24,
+        totalCharacters: 100,
+      ),
+      17,
+    );
+  });
+
+  test('does not restart when Safari keeps returning zero', () {
+    expect(
+      resolveNarrationPauseOffset(
+        nativeOffset: 0,
+        nativeProgressIsFresh: false,
+        estimatedOffset: 24,
+        totalCharacters: 100,
+      ),
+      23,
+    );
+  });
+
+  test('stale browser progress falls back to Phoenix clock', () {
+    expect(
+      resolveNarrationPauseOffset(
+        nativeOffset: 5,
+        nativeProgressIsFresh: false,
+        estimatedOffset: 31,
+        totalCharacters: 100,
+      ),
+      30,
+    );
+  });
+}
+''')
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Format changed Dart files
+        run: dart format app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/test/narration_resume_offset_test.dart
+
+      - name: Commit verified source changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-resume-offset-fix.yml
+          git add app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/test/narration_resume_offset_test.dart
+          git commit -m "fix: resume narration from the paused word"
+          git push origin HEAD:fix/resume-offset-and-compact-story
