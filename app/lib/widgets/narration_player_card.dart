@@ -535,7 +535,6 @@ class _MiniIconButton extends StatelessWidget {
     required this.tooltip,
     required this.icon,
     required this.onPressed,
-    super.key,
   });
 
   final String tooltip;
