@@ -12,6 +12,7 @@ test('Story and Discovery always expose an obvious live reading position', () =>
   assert.equal((journey.match(/_NowReadingStrip\(/g) ?? []).length, 3);
   assert.match(journey, /ValueKey\('now-reading-\$contentId'\)/);
   assert.match(journey, /ValueKey\('now-reading-word-\$contentId'\)/);
+  assert.match(journey, /Icons\.graphic_eq_rounded/);
   assert.match(journey, /正在朗读/);
   assert.match(journey, /暂停在/);
   assert.match(journey, /当前：\$word/);
