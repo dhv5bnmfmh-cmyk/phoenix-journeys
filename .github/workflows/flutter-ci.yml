@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - "feature/**"
-      - "fix/**"
+      - fix/resume-offset-and-compact-story
   pull_request:
     branches:
       - main
