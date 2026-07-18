@@ -390,9 +390,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                     mainText: InteractiveStoryText(
                       text: entry.value,
                       entries: words,
-                      onWordLongPress: (word) {
-                        unawaited(_openWord(word));
-                      },
+                      narrationContentId: 'story',
+                      narrationItemId: 'story-${entry.key}',
                     ),
                   );
                 }).toList(growable: false),

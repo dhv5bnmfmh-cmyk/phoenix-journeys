@@ -83,11 +83,33 @@ List<StoryTextSegment> segmentStoryText(
   return segments;
 }
 
+@visibleForTesting
+bool narrationSnapshotMatches({
+  required NarrationHighlightSnapshot? snapshot,
+  required String? contentId,
+  required String? itemId,
+  required String sourceText,
+  required String displayedText,
+  required String Function(String) displayText,
+}) {
+  if (snapshot == null) return false;
+
+  if (contentId != null && snapshot.contentId != contentId) return false;
+  if (itemId != null) return snapshot.itemId == itemId;
+
+  final source = sourceText.trim();
+  final spoken = snapshot.itemText.trim();
+  if (source == spoken) return true;
+  return displayedText.trim() == displayText(spoken).trim();
+}
+
 class InteractiveStoryText extends StatefulWidget {
   const InteractiveStoryText({
     required this.text,
     required this.entries,
     this.onWordLongPress,
+    this.narrationContentId,
+    this.narrationItemId,
     super.key,
   });
 
@@ -97,6 +119,8 @@ class InteractiveStoryText extends StatefulWidget {
   // Kept temporarily for compatibility with older Journey page calls.
   // Story vocabulary now uses tap-only inline meanings and never invokes this.
   final ValueChanged<WordEntry>? onWordLongPress;
+  final String? narrationContentId;
+  final String? narrationItemId;
 
   @override
   State<InteractiveStoryText> createState() => _InteractiveStoryTextState();
@@ -189,12 +213,16 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
           animation: NarrationHighlightBus.instance,
           builder: (context, _) {
             final snapshot = NarrationHighlightBus.instance.snapshot;
-            final highlightStart = snapshot?.itemText == widget.text
-                ? snapshot!.start
-                : -1;
-            final highlightEnd = snapshot?.itemText == widget.text
-                ? snapshot!.end
-                : -1;
+            final isCurrentNarrationItem = narrationSnapshotMatches(
+              snapshot: snapshot,
+              contentId: widget.narrationContentId,
+              itemId: widget.narrationItemId,
+              sourceText: widget.text,
+              displayedText: state.displayText(widget.text),
+              displayText: state.displayText,
+            );
+            final highlightStart = isCurrentNarrationItem ? snapshot!.start : -1;
+            final highlightEnd = isCurrentNarrationItem ? snapshot!.end : -1;
 
             return Text.rich(
               TextSpan(
@@ -299,11 +327,14 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
           segment.text.substring(beforeLength, beforeLength + activeLength),
         ),
         segment,
-        style: segmentStyle?.copyWith(
-          color: PhoenixTheme.ink,
-          backgroundColor: const Color(0xFFFFD879),
+        style: (segmentStyle ?? baseStyle ?? const TextStyle()).copyWith(
+          color: const Color(0xFF781E18),
+          backgroundColor: const Color(0xFFFFD05A),
           fontWeight: FontWeight.w900,
           decoration: TextDecoration.none,
+          shadows: const [
+            Shadow(color: Color(0x22FFFFFF), blurRadius: 1),
+          ],
         ),
         state: state,
       ),
