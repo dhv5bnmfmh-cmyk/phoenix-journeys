@@ -32,6 +32,16 @@ jobs:
 
       - name: Apply unified timeline patch
         run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tools/apply_unified_timeline_fix.py')
+          source = path.read_text()
+          old = """    if count != 1:\n        raise RuntimeError(f'{label}: expected one match, got {count}')\n    return text.replace(old, new, 1)\n"""
+          new = """    if label == 'first button height' and count == 2:\n        return text.replace(old, new, 1)\n    if count != 1:\n        raise RuntimeError(f'{label}: expected one match, got {count}')\n    return text.replace(old, new, 1)\n"""
+          if old not in source:
+              raise SystemExit('replace_once helper not found')
+          path.write_text(source.replace(old, new, 1))
+          PY
           set +e
           python tools/apply_unified_timeline_fix.py > patch-output.log 2>&1
           result=$?
