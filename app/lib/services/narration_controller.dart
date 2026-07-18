@@ -582,9 +582,12 @@ class NarrationController extends ChangeNotifier {
       await _tts.setSpeechRate(_speechRate);
       await _tts.setPitch(.98);
       await _tts.setVolume(1.0);
-      final speakFuture = _tts.speak(remainingText);
+      // Schedule Phoenix progress before invoking Safari. On iOS Web the
+      // speak() call can hold the Dart continuation until the utterance ends.
+      // Starting the watchdog first keeps percentage and the triangle marker
+      // moving while audio is audible.
       unawaited(_startProgressWatchdog(sessionToken, safeOffset));
-      final result = await speakFuture;
+      final result = await _tts.speak(remainingText);
       if (result == 1 && !_disposed) {
         // Most engines call setStartHandler. This fallback covers browsers
         // that start speaking without providing that callback.

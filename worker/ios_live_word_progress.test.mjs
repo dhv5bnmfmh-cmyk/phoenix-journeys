@@ -7,16 +7,21 @@ const controller = readFileSync(
   'utf8',
 );
 
-test('iOS narration starts its progress watchdog without awaiting speak completion', () => {
-  assert.match(controller, /final speakFuture = _tts\.speak\(remainingText\);/);
+test('iOS narration starts its progress watchdog before Safari speech can block', () => {
   assert.match(
     controller,
-    /unawaited\(_startProgressWatchdog\(sessionToken, safeOffset\)\);[\s\S]*final result = await speakFuture;/,
+    /unawaited\(_startProgressWatchdog\(sessionToken, safeOffset\)\);[\s\S]*final result = await _tts\.speak\(remainingText\);/,
   );
   assert.match(controller, /Duration\(milliseconds: 260\)/);
 });
 
 test('active narration always derives an inline highlight item', () => {
-  assert.match(controller, /sessionActive[\s\S]*_plan\.indexForOffset\(_currentOffset\)/);
-  assert.match(controller, /_status = NarrationStatus\.playing;[\s\S]*_applyProgress\(0\);/);
+  assert.match(
+    controller,
+    /sessionActive[\s\S]*_plan\.indexForOffset\(_currentOffset\)/,
+  );
+  assert.match(
+    controller,
+    /_status = NarrationStatus\.playing;[\s\S]*_applyProgress\(0\);/,
+  );
 });

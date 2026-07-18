@@ -256,8 +256,8 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
             _sessionPaused ||
             (controllerIsCurrent && widget.controller.hasContent);
         final roundedPercent = (progress * 100).round();
-        final percent = progress > 0 && roundedPercent == 0
-            ? 1
+        final percent = isPlaying
+            ? roundedPercent.clamp(1, 99)
             : roundedPercent;
         final activeSubtitle = hasError
             ? widget.controller.errorMessage ?? '朗读暂时不可用'
