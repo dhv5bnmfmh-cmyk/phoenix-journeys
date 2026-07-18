@@ -1,0 +1,36 @@
+name: Apply live narration highlight fix
+
+on:
+  push:
+    branches:
+      - feature/live-narration-highlight
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/live-narration-highlight
+          fetch-depth: 0
+
+      - name: Apply live highlight patch
+        run: python tools/apply_live_highlight_fix.py
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Format changed Dart files
+        run: dart format app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart
+
+      - name: Commit live highlight fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-live-highlight.yml tools/apply_live_highlight_fix.py
+          git add app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart worker/live_narration_highlight.test.mjs
+          git commit -m "fix: highlight the current word during narration"
+          git push origin HEAD:feature/live-narration-highlight
