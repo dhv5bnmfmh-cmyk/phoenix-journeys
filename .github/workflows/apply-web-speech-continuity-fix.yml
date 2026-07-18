@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   patch:
-    if: ${{ github.head_ref == 'fix/web-speech-native-continuity' && !contains(github.event.pull_request.head.sha, 'web-speech-patched') }}
+    if: ${{ github.head_ref == 'fix/web-speech-native-continuity' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out branch
@@ -23,8 +23,11 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Apply continuity patch
+      - name: Apply web speech continuity patch
         run: python tools/apply_web_speech_continuity_fix.py
+
+      - name: Preserve native utterance offsets
+        run: python tools/fix_web_speech_in_place_offsets.py
 
       - name: Commit patched code
         shell: bash
@@ -35,8 +38,8 @@ jobs:
                   app/lib/widgets/narration_player_card.dart \
                   worker/web_speech_continuity_rule.test.mjs
           if git diff --cached --quiet; then
-            echo "Patch already applied."
+            echo "Patches already applied."
             exit 0
           fi
-          git commit -m "fix: use native Safari pause and resume [web-speech-patched]"
+          git commit -m "fix: preserve Safari utterance position [web-speech-offsets]"
           git push origin HEAD:${{ github.head_ref }}
