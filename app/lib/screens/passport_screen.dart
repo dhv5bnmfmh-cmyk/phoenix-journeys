@@ -55,7 +55,11 @@ class _PassportHeader extends StatelessWidget {
             color: PhoenixTheme.red,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(Icons.auto_stories_rounded, color: Colors.white, size: 20),
+          child: const Icon(
+            Icons.auto_stories_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
         ),
         const SizedBox(width: 9),
         Expanded(
@@ -65,10 +69,10 @@ class _PassportHeader extends StatelessWidget {
               Text(
                 state.displayText('探索护照'),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 19,
-                      height: 1.05,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  fontSize: 19,
+                  height: 1.05,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(height: 1),
               Text(
@@ -110,8 +114,8 @@ class _PassportMap extends StatelessWidget {
     final status = state.beijingStampEarned
         ? '已点亮 1 座城市 · 北京'
         : state.hasJourneyInProgress
-            ? '北京探索中 · ${state.beijingJourneyProgressPercent}%'
-            : '第一枚印章正在北京等待你';
+        ? '北京探索中 · ${state.beijingJourneyProgressPercent}%'
+        : '第一枚印章正在北京等待你';
 
     return Container(
       width: double.infinity,
@@ -124,7 +128,11 @@ class _PassportMap extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(22),
         boxShadow: const [
-          BoxShadow(blurRadius: 14, offset: Offset(0, 7), color: Color(0x1D000000)),
+          BoxShadow(
+            blurRadius: 14,
+            offset: Offset(0, 7),
+            color: Color(0x1D000000),
+          ),
         ],
       ),
       child: LayoutBuilder(
@@ -209,8 +217,8 @@ class _PassportMap extends StatelessWidget {
                           state.beijingStampEarned
                               ? Icons.star_rounded
                               : state.hasJourneyInProgress
-                                  ? Icons.flight_rounded
-                                  : Icons.lock_outline_rounded,
+                              ? Icons.flight_rounded
+                              : Icons.lock_outline_rounded,
                           color: state.beijingStampEarned
                               ? const Color(0xFFFFD879)
                               : Colors.white70,
@@ -235,7 +243,10 @@ class _PassportMap extends StatelessWidget {
                 right: 12,
                 bottom: 9,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF071D26).withValues(alpha: .68),
                     borderRadius: BorderRadius.circular(12),
@@ -288,8 +299,8 @@ class _BeijingStampCard extends StatelessWidget {
     final description = earned
         ? '印章已永久收入护照，重新体验也不会消失。'
         : state.hasJourneyInProgress
-            ? '已到达「${state.beijingJourneyStepLabel}」，完成旅程后盖章。'
-            : '完成故事、生词、发现、思考、表达与回忆后获得。';
+        ? '已到达「${state.beijingJourneyStepLabel}」，完成旅程后盖章。'
+        : '完成故事、生词、发现、思考、表达与回忆后获得。';
 
     return Container(
       width: double.infinity,
@@ -331,7 +342,10 @@ class _BeijingStampCard extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: earned
                             ? PhoenixTheme.red.withValues(alpha: .08)
@@ -342,8 +356,8 @@ class _BeijingStampCard extends StatelessWidget {
                         earned
                             ? '已获得'
                             : state.hasJourneyInProgress
-                                ? '${state.beijingJourneyProgressPercent}%'
-                                : '未获得',
+                            ? '${state.beijingJourneyProgressPercent}%'
+                            : '未获得',
                         style: TextStyle(
                           color: earned ? PhoenixTheme.red : Colors.black54,
                           fontSize: 9.5,
@@ -372,7 +386,9 @@ class _BeijingStampCard extends StatelessWidget {
                     child: FilledButton.icon(
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const JourneyScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const JourneyScreen(),
+                          ),
                         );
                       },
                       style: FilledButton.styleFrom(
@@ -395,7 +411,10 @@ class _BeijingStampCard extends StatelessWidget {
                               ? '继续北京 Journey'
                               : '开始北京 Journey',
                         ),
-                        style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800),
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),

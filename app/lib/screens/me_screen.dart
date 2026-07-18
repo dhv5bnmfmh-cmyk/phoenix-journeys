@@ -84,8 +84,16 @@ class MeScreen extends StatelessWidget {
                       fontWeight: FontWeight.w900,
                     ),
                     tabs: [
-                      Tab(text: state.displayText('我的生词 · ${savedEntries.length}')),
-                      Tab(text: state.displayText('回忆时间轴 · ${state.memories.length}')),
+                      Tab(
+                        text: state.displayText(
+                          '我的生词 · ${savedEntries.length}',
+                        ),
+                      ),
+                      Tab(
+                        text: state.displayText(
+                          '回忆时间轴 · ${state.memories.length}',
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -96,7 +104,8 @@ class MeScreen extends StatelessWidget {
                       _VocabularyPanel(
                         state: state,
                         entries: savedEntries,
-                        onOpen: (entry) => _openSavedWord(context, state, entry),
+                        onOpen: (entry) =>
+                            _openSavedWord(context, state, entry),
                       ),
                       _MemoryPanel(state: state),
                     ],
@@ -127,7 +136,11 @@ class _MeHeader extends StatelessWidget {
             color: PhoenixTheme.red,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(Icons.person_outline_rounded, color: Colors.white, size: 21),
+          child: const Icon(
+            Icons.person_outline_rounded,
+            color: Colors.white,
+            size: 21,
+          ),
         ),
         const SizedBox(width: 9),
         Expanded(
@@ -137,10 +150,10 @@ class _MeHeader extends StatelessWidget {
               Text(
                 state.displayText('我的旅程'),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 19,
-                      height: 1.05,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  fontSize: 19,
+                  height: 1.05,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(height: 1),
               Text(
@@ -188,7 +201,11 @@ class _LanguageControl extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.translate_rounded, size: 18, color: PhoenixTheme.red),
+          const Icon(
+            Icons.translate_rounded,
+            size: 18,
+            color: PhoenixTheme.red,
+          ),
           const SizedBox(width: 7),
           Expanded(
             child: Text(
@@ -252,7 +269,11 @@ class _InstallAppStrip extends StatelessWidget {
               color: Colors.white.withValues(alpha: .14),
               borderRadius: BorderRadius.circular(9),
             ),
-            child: const Icon(Icons.install_mobile_rounded, color: Colors.white, size: 17),
+            child: const Icon(
+              Icons.install_mobile_rounded,
+              color: Colors.white,
+              size: 17,
+            ),
           ),
           const SizedBox(width: 8),
           const Text(
@@ -297,65 +318,79 @@ class _VocabularyPanel extends StatelessWidget {
 
     return CompactPager(
       semanticLabel: state.displayText('生词分页'),
-      pages: chunks.map((pageEntries) {
-        return GridView.count(
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 2),
-          crossAxisCount: 2,
-          mainAxisSpacing: 6,
-          crossAxisSpacing: 6,
-          childAspectRatio: 2.15,
-          children: pageEntries.map((entry) {
-            return Material(
-              color: Colors.white.withValues(alpha: .92),
-              borderRadius: BorderRadius.circular(14),
-              child: InkWell(
-                onTap: () => onOpen(entry),
-                borderRadius: BorderRadius.circular(14),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 6),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: PhoenixTheme.gold.withValues(alpha: .25),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      WordMark(word: entry.word, size: 34),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              state.displayText(entry.word),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w900,
+      pages: chunks
+          .map((pageEntries) {
+            return GridView.count(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 2),
+              crossAxisCount: 2,
+              mainAxisSpacing: 6,
+              crossAxisSpacing: 6,
+              childAspectRatio: 2.15,
+              children: pageEntries
+                  .map((entry) {
+                    return Material(
+                      color: Colors.white.withValues(alpha: .92),
+                      borderRadius: BorderRadius.circular(14),
+                      child: InkWell(
+                        onTap: () => onOpen(entry),
+                        borderRadius: BorderRadius.circular(14),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: PhoenixTheme.gold.withValues(alpha: .25),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              WordMark(word: entry.word, size: 34),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      state.displayText(entry.word),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                    Text(
+                                      entry.pinyin,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 9.5,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            Text(
-                              entry.pinyin,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 9.5, color: Colors.black54),
-                            ),
-                          ],
+                              const Icon(
+                                Icons.chevron_right_rounded,
+                                size: 16,
+                                color: Colors.black38,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      const Icon(Icons.chevron_right_rounded, size: 16, color: Colors.black38),
-                    ],
-                  ),
-                ),
-              ),
+                    );
+                  })
+                  .toList(growable: false),
             );
-          }).toList(growable: false),
-        );
-      }).toList(growable: false),
+          })
+          .toList(growable: false),
     );
   }
 }
@@ -372,52 +407,69 @@ class _MemoryPanel extends StatelessWidget {
 
     return CompactPager(
       semanticLabel: state.displayText('回忆分页'),
-      pages: chunks.map((memories) {
-        return Column(
-          children: memories.asMap().entries.map((entry) {
-            final index = state.memories.indexOf(entry.value);
-            return Expanded(
-              child: Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 6),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .92),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .24)),
-                ),
-                child: Row(
-                  children: [
-                    const Text('📖', style: TextStyle(fontSize: 21)),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            entry.value,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 11, height: 1.2),
+      pages: chunks
+          .map((memories) {
+            return Column(
+              children: memories
+                  .asMap()
+                  .entries
+                  .map((entry) {
+                    final index = state.memories.indexOf(entry.value);
+                    return Expanded(
+                      child: Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: .92),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: PhoenixTheme.gold.withValues(alpha: .24),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            state.displayText(
-                              '第 ${state.memories.length - index} 次北京之旅',
+                        ),
+                        child: Row(
+                          children: [
+                            const Text('📖', style: TextStyle(fontSize: 21)),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    entry.value,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    state.displayText(
+                                      '第 ${state.memories.length - index} 次北京之旅',
+                                    ),
+                                    style: const TextStyle(
+                                      fontSize: 9,
+                                      color: Colors.black45,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            style: const TextStyle(fontSize: 9, color: Colors.black45),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    );
+                  })
+                  .toList(growable: false),
             );
-          }).toList(growable: false),
-        );
-      }).toList(growable: false),
+          })
+          .toList(growable: false),
     );
   }
 }
@@ -480,12 +532,19 @@ class _CompactEmptyCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     text,
-                    style: const TextStyle(fontSize: 11, color: Colors.black54, height: 1.25),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.black54,
+                      height: 1.25,
+                    ),
                   ),
                 ],
               ),

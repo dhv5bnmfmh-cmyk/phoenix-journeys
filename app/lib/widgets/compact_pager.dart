@@ -84,7 +84,10 @@ class _CompactPagerState extends State<CompactPager> {
                   onPressed: _page > 0 ? () => _move(_page - 1) : null,
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints.tightFor(width: 34, height: 30),
+                  constraints: const BoxConstraints.tightFor(
+                    width: 34,
+                    height: 30,
+                  ),
                   icon: const Icon(Icons.chevron_left_rounded, size: 21),
                 ),
                 const SizedBox(width: 4),
@@ -111,7 +114,10 @@ class _CompactPagerState extends State<CompactPager> {
                       : null,
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints.tightFor(width: 34, height: 30),
+                  constraints: const BoxConstraints.tightFor(
+                    width: 34,
+                    height: 30,
+                  ),
                   icon: const Icon(Icons.chevron_right_rounded, size: 21),
                 ),
               ],
