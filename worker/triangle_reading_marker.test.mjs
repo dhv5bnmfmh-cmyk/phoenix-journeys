@@ -6,7 +6,7 @@ const controller = readFileSync('app/lib/services/narration_controller.dart', 'u
 const journey = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
 const interactive = readFileSync('app/lib/widgets/interactive_story_text.dart', 'utf8');
 
-test('iOS progress watchdog starts before Safari speech is awaited', () => {
+test('iOS live progress starts before Safari speech is awaited', () => {
   const watchdog = controller.indexOf('unawaited(_startProgressWatchdog(sessionToken, safeOffset))');
   const speak = controller.indexOf('final result = await _tts.speak(remainingText)');
   assert.ok(watchdog >= 0 && speak > watchdog);
