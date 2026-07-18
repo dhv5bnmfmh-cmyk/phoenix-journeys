@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_web_libraries_in_flutter, deprecated_member_use
+
 import 'dart:async';
 import 'dart:html' as html;
 
@@ -105,7 +107,7 @@ final class PhoenixWebSpeech {
         _paused = false;
         _utterance = null;
         _cancelSubscriptions();
-        _onError('${event.type}');
+        _onError(event.type);
       }),
     );
 
