@@ -1,0 +1,50 @@
+name: Fix final one-screen const hints
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.head_ref == 'feature/global-one-screen-layout' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/global-one-screen-layout
+          fetch-depth: 0
+
+      - name: Remove redundant nested const keywords
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('app/lib/screens/journey_screen.dart')
+          source = path.read_text()
+          source = source.replace(
+              "          const Text(\n            wonderQuestion,\n            maxLines: 2,\n            overflow: TextOverflow.ellipsis,\n            style: const TextStyle(",
+              "          const Text(\n            wonderQuestion,\n            maxLines: 2,\n            overflow: TextOverflow.ellipsis,\n            style: TextStyle(",
+              1,
+          )
+          source = source.replace(
+              "          const Text(\n            expressQuestion,\n            maxLines: 2,\n            overflow: TextOverflow.ellipsis,\n            style: const TextStyle(",
+              "          const Text(\n            expressQuestion,\n            maxLines: 2,\n            overflow: TextOverflow.ellipsis,\n            style: TextStyle(",
+              1,
+          )
+          path.write_text(source)
+          PY
+          rm .github/workflows/fix-one-screen-final-const-pr.yml
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Format and commit
+        run: |
+          dart format app/lib/screens/journey_screen.dart
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: remove redundant nested const hints"
+          git push origin HEAD:feature/global-one-screen-layout
