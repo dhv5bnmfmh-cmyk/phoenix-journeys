@@ -185,15 +185,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     await _narration.resumeFromOffset(resumeOffset);
   }
 
-  bool _isNarrating(String contentId, int itemIndex) {
-    final isActive =
-        _narration.status == NarrationStatus.playing ||
-        _narration.status == NarrationStatus.paused;
-    return isActive &&
-        _narration.contentId == contentId &&
-        _narration.currentItemIndex == itemIndex;
-  }
-
   Future<void> _askGuide() async {
     if (_guideLoading) return;
 

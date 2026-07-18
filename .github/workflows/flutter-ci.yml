@@ -10,49 +10,14 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  apply-final-highlight-cleanup:
-    if: >-
-      github.actor != 'github-actions[bot]' &&
-      (github.ref == 'refs/heads/feature/explicit-visual-narration-highlight' ||
-       github.head_ref == 'feature/explicit-visual-narration-highlight')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: feature/explicit-visual-narration-highlight
-          fetch-depth: 0
-
-      - name: Remove obsolete narration helper
-        run: python tools/remove_unused_narrating_helper.py
-
-      - uses: dart-lang/setup-dart@v1
-
-      - name: Format Journey screen
-        run: dart format app/lib/screens/journey_screen.dart
-
-      - name: Commit final highlight cleanup
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout origin/main -- .github/workflows/flutter-ci.yml
-          git rm tools/remove_unused_narrating_helper.py
-          git add -A
-          git commit -m "chore: remove obsolete narration helper"
-          git push origin HEAD:feature/explicit-visual-narration-highlight
-
   verify:
-    if: >-
-      github.actor == 'github-actions[bot]' ||
-      (github.ref != 'refs/heads/feature/explicit-visual-narration-highlight' &&
-       github.head_ref != 'feature/explicit-visual-narration-highlight')
     runs-on: ubuntu-latest
     defaults:
       run:
