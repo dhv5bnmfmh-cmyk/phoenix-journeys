@@ -1,0 +1,36 @@
+name: Apply compact word study update
+
+on:
+  push:
+    branches:
+      - feature/compact-word-study
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/compact-word-study
+          fetch-depth: 0
+
+      - name: Apply compact word study patch
+        run: python tools/apply_compact_word_study.py
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Format changed files
+        run: dart format app/lib/widgets/word_detail_sheet.dart app/lib/screens/journey_screen.dart app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart
+
+      - name: Commit compact word study
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-compact-word-study.yml tools/apply_compact_word_study.py
+          git add app/lib/widgets/word_detail_sheet.dart app/lib/screens/journey_screen.dart app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart worker/compact_word_study.test.mjs
+          git commit -m "ui: compact word study and naturalize narration"
+          git push origin HEAD:feature/compact-word-study
