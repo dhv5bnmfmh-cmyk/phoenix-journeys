@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/journey_data.dart';
+import 'package:phoenix_journeys/services/narration_controller.dart';
 import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
 
 void main() {
@@ -41,5 +42,40 @@ void main() {
         .toList(growable: false);
 
     expect(vocabulary, ['紫禁城']);
+  });
+
+  test('matches narration by stable item ID', () {
+    const snapshot = NarrationHighlightSnapshot(
+      contentId: 'story',
+      itemId: 'story-2',
+      itemText: '这里曾经是皇帝生活的地方。',
+      itemIndex: 2,
+      start: 2,
+      end: 4,
+      word: '曾经',
+    );
+
+    expect(
+      narrationSnapshotMatches(
+        snapshot: snapshot,
+        contentId: 'story',
+        itemId: 'story-2',
+        sourceText: '这里曾经是皇帝生活的地方。',
+        displayedText: '這裡曾經是皇帝生活的地方。',
+        displayText: (value) => value,
+      ),
+      isTrue,
+    );
+    expect(
+      narrationSnapshotMatches(
+        snapshot: snapshot,
+        contentId: 'story',
+        itemId: 'story-1',
+        sourceText: snapshot.itemText,
+        displayedText: snapshot.itemText,
+        displayText: (value) => value,
+      ),
+      isFalse,
+    );
   });
 }
