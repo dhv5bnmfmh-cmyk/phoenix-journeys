@@ -1,0 +1,63 @@
+name: Apply word narration resume fix
+
+on:
+  push:
+    branches:
+      - feature/word-resume-phoenix-media-button
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/word-resume-phoenix-media-button
+          fetch-depth: 0
+
+      - name: Preserve and resume narration around word details
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/screens/journey_screen.dart')
+          text = path.read_text()
+          old = '''  Future<void> _openWord(WordEntry entry) async {
+            await _narration.stop();
+            if (!mounted) return;
+            await showWordDetail(context, entry);
+          }'''
+          new = '''  Future<void> _openWord(WordEntry entry) async {
+            final shouldResume = _narration.status == NarrationStatus.playing;
+            if (shouldResume) {
+              await _narration.pause();
+            }
+            if (!mounted) return;
+
+            await showWordDetail(context, entry);
+            if (!mounted || !shouldResume) return;
+
+            // Let the word-detail voice release the audio channel before resuming.
+            await Future<void>.delayed(const Duration(milliseconds: 120));
+            if (mounted && _narration.status == NarrationStatus.paused) {
+              await _narration.resume();
+            }
+          }'''
+          if old not in text:
+              raise SystemExit('Expected _openWord block not found')
+          path.write_text(text.replace(old, new, 1))
+          PY
+
+      - name: Remove temporary workflow
+        run: rm .github/workflows/apply-word-resume.yml
+
+      - name: Commit narration resume fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart .github/workflows/apply-word-resume.yml
+          git commit -m "fix: resume story narration after closing word details"
+          git push origin HEAD:feature/word-resume-phoenix-media-button
