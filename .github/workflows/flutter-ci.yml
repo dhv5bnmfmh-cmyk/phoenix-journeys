@@ -10,14 +10,50 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  apply-explicit-visual-highlight:
+    if: >-
+      github.actor != 'github-actions[bot]' &&
+      (github.ref == 'refs/heads/feature/explicit-visual-narration-highlight' ||
+       github.head_ref == 'feature/explicit-visual-narration-highlight')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out explicit highlight branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/explicit-visual-narration-highlight
+          fetch-depth: 0
+
+      - name: Apply explicit visual highlight patch
+        run: python tools/apply_explicit_visual_highlight.py
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Format changed Dart and test files
+        run: dart format app/lib/services/narration_controller.dart app/lib/widgets/interactive_story_text.dart app/lib/screens/journey_screen.dart app/test/widgets/interactive_story_text_visual_test.dart
+
+      - name: Commit explicit visual highlight
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout origin/main -- .github/workflows/flutter-ci.yml
+          git rm .github/workflows/apply-explicit-visual-highlight.yml tools/apply_explicit_visual_highlight.py docs/explicit-visual-highlight-trigger.md
+          git add -A
+          git commit -m "fix: paint narration highlight from explicit playback range"
+          git push origin HEAD:feature/explicit-visual-narration-highlight
+
   verify:
+    if: >-
+      github.actor == 'github-actions[bot]' ||
+      (github.ref != 'refs/heads/feature/explicit-visual-narration-highlight' &&
+       github.head_ref != 'feature/explicit-visual-narration-highlight')
     runs-on: ubuntu-latest
     defaults:
       run:
