@@ -27,6 +27,55 @@ class NarrationItem {
 }
 
 @immutable
+class NarrationHighlightSnapshot {
+  const NarrationHighlightSnapshot({
+    required this.contentId,
+    required this.itemId,
+    required this.itemText,
+    required this.itemIndex,
+    required this.start,
+    required this.end,
+    required this.word,
+  });
+
+  final String contentId;
+  final String itemId;
+  final String itemText;
+  final int itemIndex;
+  final int start;
+  final int end;
+  final String word;
+}
+
+class NarrationHighlightBus extends ChangeNotifier {
+  NarrationHighlightBus._();
+
+  static final NarrationHighlightBus instance = NarrationHighlightBus._();
+
+  NarrationHighlightSnapshot? _snapshot;
+
+  NarrationHighlightSnapshot? get snapshot => _snapshot;
+
+  void update(NarrationHighlightSnapshot snapshot) {
+    if (_snapshot?.contentId == snapshot.contentId &&
+        _snapshot?.itemId == snapshot.itemId &&
+        _snapshot?.start == snapshot.start &&
+        _snapshot?.end == snapshot.end) {
+      return;
+    }
+    _snapshot = snapshot;
+    notifyListeners();
+  }
+
+  void clear({String? contentId}) {
+    if (_snapshot == null) return;
+    if (contentId != null && _snapshot?.contentId != contentId) return;
+    _snapshot = null;
+    notifyListeners();
+  }
+}
+
+@immutable
 class NarrationTextPlan {
   const NarrationTextPlan._({
     required this.items,
@@ -63,17 +112,18 @@ class NarrationTextPlan {
   int? indexForOffset(int offset) {
     if (isEmpty) return null;
 
-    final safeOffset = offset < 0
-        ? 0
-        : offset > text.length
-            ? text.length
-            : offset;
-
+    final safeOffset = offset.clamp(0, text.length).toInt();
     for (var index = 0; index < itemStarts.length - 1; index += 1) {
       if (safeOffset < itemStarts[index + 1]) return index;
     }
-
     return itemStarts.length - 1;
+  }
+
+  int itemStart(int index) => itemStarts[index];
+
+  int itemEnd(int index) {
+    if (index >= items.length - 1) return text.length;
+    return itemStarts[index + 1] - 1;
   }
 }
 
@@ -101,6 +151,10 @@ class NarrationController extends ChangeNotifier {
   int? _currentItemIndex;
   double _speechRate = .40;
   bool _disposed = false;
+  Timer? _progressTimer;
+  DateTime? _estimateAnchorTime;
+  int _estimateAnchorOffset = 0;
+  DateTime? _lastNativeProgressAt;
 
   NarrationStatus get status => _status;
   String? get contentId => _contentId;
@@ -109,6 +163,8 @@ class NarrationController extends ChangeNotifier {
   int get itemCount => _plan.items.length;
   bool get hasContent => !_plan.isEmpty;
   double get speechRate => _speechRate;
+  int get currentOffset => _currentOffset;
+  int get totalCharacters => _plan.text.length;
 
   String get speedLabel {
     return speedOptions
@@ -137,34 +193,43 @@ class NarrationController extends ChangeNotifier {
     _tts.setStartHandler(() {
       _status = NarrationStatus.playing;
       _errorMessage = null;
+      _startProgressClock(_currentOffset);
       _safeNotify();
     });
     _tts.setCompletionHandler(() {
+      _cancelProgressClock();
       _status = NarrationStatus.idle;
       _currentOffset = _plan.text.length;
       _currentItemIndex = null;
+      NarrationHighlightBus.instance.clear(contentId: _contentId);
       _safeNotify();
     });
     _tts.setCancelHandler(() {
       if (_status == NarrationStatus.paused) return;
+      _cancelProgressClock();
       _status = NarrationStatus.idle;
       _currentItemIndex = null;
+      NarrationHighlightBus.instance.clear(contentId: _contentId);
       _safeNotify();
     });
-    _tts.setProgressHandler((_, startOffset, __, ___) {
-      final offset = _speechBaseOffset + startOffset;
-      _currentOffset = offset < 0
-          ? 0
-          : offset > _plan.text.length
-              ? _plan.text.length
-              : offset;
-      _currentItemIndex = _plan.indexForOffset(_currentOffset);
-      _safeNotify();
+    _tts.setProgressHandler((wordText, startOffset, endOffset, word) {
+      final globalStart = _speechBaseOffset + startOffset;
+      final globalEnd = _speechBaseOffset + endOffset;
+      _lastNativeProgressAt = DateTime.now();
+      _estimateAnchorTime = _lastNativeProgressAt;
+      _estimateAnchorOffset = globalStart;
+      _applyProgress(
+        globalStart,
+        endOffset: globalEnd,
+        word: word.isNotEmpty ? word : wordText,
+      );
     });
     _tts.setErrorHandler((message) {
+      _cancelProgressClock();
       _status = NarrationStatus.error;
       _errorMessage = '当前设备暂时无法朗读，请检查声音设置后重试。';
       _currentItemIndex = null;
+      NarrationHighlightBus.instance.clear(contentId: _contentId);
       debugPrint('Narration error: $message');
       _safeNotify();
     });
@@ -177,6 +242,7 @@ class NarrationController extends ChangeNotifier {
     final plan = NarrationTextPlan.fromItems(items);
     if (plan.isEmpty) return;
 
+    NarrationHighlightBus.instance.clear(contentId: _contentId);
     _contentId = contentId;
     _plan = plan;
     _currentOffset = 0;
@@ -189,6 +255,7 @@ class NarrationController extends ChangeNotifier {
     if (_status != NarrationStatus.playing) return;
 
     _status = NarrationStatus.paused;
+    _cancelProgressClock();
     _safeNotify();
 
     try {
@@ -232,9 +299,11 @@ class NarrationController extends ChangeNotifier {
   }
 
   Future<void> stop({bool resetPosition = true}) async {
+    _cancelProgressClock();
     _status = NarrationStatus.idle;
     _errorMessage = null;
     _currentItemIndex = null;
+    NarrationHighlightBus.instance.clear(contentId: _contentId);
     if (resetPosition) {
       _currentOffset = 0;
       _speechBaseOffset = 0;
@@ -262,6 +331,7 @@ class NarrationController extends ChangeNotifier {
     final remainingText = _plan.text.substring(safeOffset);
 
     try {
+      _cancelProgressClock();
       await _tts.stop();
       if (_disposed) return;
 
@@ -270,6 +340,8 @@ class NarrationController extends ChangeNotifier {
       _currentItemIndex = _plan.indexForOffset(safeOffset);
       _status = NarrationStatus.playing;
       _errorMessage = null;
+      _startProgressClock(safeOffset);
+      _applyProgress(safeOffset);
       _safeNotify();
 
       await _tts.setLanguage('zh-CN');
@@ -278,20 +350,119 @@ class NarrationController extends ChangeNotifier {
       await _tts.setVolume(1.0);
       final result = await _tts.speak(remainingText);
       if (result != 1 && !_disposed) {
+        _cancelProgressClock();
         _status = NarrationStatus.error;
         _errorMessage = '没有找到可用的中文语音，请换用 Safari 或 Chrome 重试。';
         _currentItemIndex = null;
+        NarrationHighlightBus.instance.clear(contentId: _contentId);
         _safeNotify();
       }
     } catch (error, stackTrace) {
       debugPrint('Unable to start narration: $error');
       debugPrintStack(stackTrace: stackTrace);
       if (_disposed) return;
+      _cancelProgressClock();
       _status = NarrationStatus.error;
       _errorMessage = '朗读启动失败，请检查设备音量或浏览器权限。';
       _currentItemIndex = null;
+      NarrationHighlightBus.instance.clear(contentId: _contentId);
       _safeNotify();
     }
+  }
+
+  void _startProgressClock(int offset) {
+    _cancelProgressClock();
+    _estimateAnchorOffset = offset;
+    _estimateAnchorTime = DateTime.now();
+    _lastNativeProgressAt = null;
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 160), (_) {
+      if (_disposed || _status != NarrationStatus.playing || _plan.isEmpty) {
+        return;
+      }
+
+      final now = DateTime.now();
+      final nativeProgressIsFresh = _lastNativeProgressAt != null &&
+          now.difference(_lastNativeProgressAt!).inMilliseconds < 650;
+      if (nativeProgressIsFresh) return;
+
+      final anchor = _estimateAnchorTime ?? now;
+      final elapsedSeconds =
+          now.difference(anchor).inMilliseconds.toDouble() / 1000;
+      final charsPerSecond = 4.2 * (_speechRate / .40);
+      final estimated =
+          _estimateAnchorOffset + (elapsedSeconds * charsPerSecond).floor();
+      if (estimated <= _currentOffset) return;
+      _applyProgress(estimated);
+    });
+  }
+
+  void _cancelProgressClock() {
+    _progressTimer?.cancel();
+    _progressTimer = null;
+  }
+
+  void _applyProgress(
+    int offset, {
+    int? endOffset,
+    String word = '',
+  }) {
+    if (_plan.isEmpty) return;
+
+    final safeOffset = offset.clamp(0, _plan.text.length).toInt();
+    _currentOffset = safeOffset;
+    final itemIndex = _plan.indexForOffset(safeOffset);
+    _currentItemIndex = itemIndex;
+    if (itemIndex == null || _contentId == null) {
+      _safeNotify();
+      return;
+    }
+
+    final item = _plan.items[itemIndex];
+    final itemStart = _plan.itemStart(itemIndex);
+    final itemEnd = _plan.itemEnd(itemIndex);
+    var localStart = (safeOffset - itemStart).clamp(0, item.text.length).toInt();
+    while (localStart < item.text.length &&
+        _isBoundary(item.text.substring(localStart, localStart + 1))) {
+      localStart += 1;
+    }
+
+    var localEnd = endOffset == null
+        ? localStart + _fallbackHighlightLength(item.text, localStart)
+        : endOffset - itemStart;
+    localEnd = localEnd.clamp(localStart, item.text.length).toInt();
+    if (localEnd == localStart && localStart < item.text.length) {
+      localEnd = (localStart + 1).clamp(0, item.text.length).toInt();
+    }
+
+    if (safeOffset <= itemEnd && localStart < item.text.length) {
+      NarrationHighlightBus.instance.update(
+        NarrationHighlightSnapshot(
+          contentId: _contentId!,
+          itemId: item.id,
+          itemText: item.text,
+          itemIndex: itemIndex,
+          start: localStart,
+          end: localEnd,
+          word: word,
+        ),
+      );
+    }
+    _safeNotify();
+  }
+
+  int _fallbackHighlightLength(String text, int start) {
+    if (start >= text.length) return 0;
+    var length = 1;
+    while (length < 3 && start + length < text.length) {
+      final character = text.substring(start + length, start + length + 1);
+      if (_isBoundary(character)) break;
+      length += 1;
+    }
+    return length;
+  }
+
+  bool _isBoundary(String character) {
+    return RegExp(r'[\s，。！？；：、,.!?;:]').hasMatch(character);
   }
 
   void _safeNotify() {
@@ -301,6 +472,8 @@ class NarrationController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _cancelProgressClock();
+    NarrationHighlightBus.instance.clear(contentId: _contentId);
     unawaited(_tts.stop());
     super.dispose();
   }
