@@ -149,13 +149,11 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
 
   int _captureContinuationOffset() {
     if (!_controllerIsCurrent) return _resumeOffset;
-    return resolveNarrationContinuationOffset(
-      nativeOffset: widget.controller.lastNativeOffset,
-      nativeProgressIsFresh: widget.controller.hasFreshNativeProgress,
-      controllerOffset: widget.controller.currentOffset,
-      lastObservedOffset: _lastObservedOffset,
-      totalCharacters: widget.controller.totalCharacters,
-    );
+    final total = widget.controller.totalCharacters;
+    if (total <= 0) return 0;
+    return widget.controller.currentOffset
+        .clamp(0, math.max(0, total - 1))
+        .toInt();
   }
 
   void _handleMainPressed() {
