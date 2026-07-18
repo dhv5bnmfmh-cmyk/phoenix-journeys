@@ -30,15 +30,21 @@ int resolveNarrationDisplayOffset({
 
 @visibleForTesting
 int resolveNarrationPauseOffset({
-  required int controllerOffset,
+  required int nativeOffset,
+  required bool nativeProgressIsFresh,
   required int estimatedOffset,
   required int totalCharacters,
 }) {
   if (totalCharacters <= 0) return 0;
-  // Never resume ahead of the native/highlight position. Repeating part of the
-  // current word is preferable to skipping characters the user has not heard.
-  final candidate = math.min(controllerOffset, estimatedOffset);
-  return candidate.clamp(0, math.max(0, totalCharacters - 1)).toInt();
+  final maxOffset = math.max(0, totalCharacters - 1);
+  if (nativeProgressIsFresh) {
+    return nativeOffset.clamp(0, maxOffset).toInt();
+  }
+
+  // Safari often keeps returning zero even while speech is audible. In that
+  // case use Phoenix's running clock and repeat one character for safety.
+  final estimated = estimatedOffset.clamp(0, maxOffset).toInt();
+  return math.max(0, estimated - 1);
 }
 
 class NarrationPlayerCard extends StatefulWidget {
@@ -219,7 +225,8 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
         : _displayOffset;
     final offset = controllerIsCurrent
         ? resolveNarrationPauseOffset(
-            controllerOffset: widget.controller.currentOffset,
+            nativeOffset: widget.controller.lastNativeOffset,
+            nativeProgressIsFresh: widget.controller.hasFreshNativeProgress,
             estimatedOffset: estimatedOffset,
             totalCharacters: widget.controller.totalCharacters,
           )
@@ -236,7 +243,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       _displayItemIndex =
           widget.controller.currentItemIndex ?? _displayItemIndex;
     });
-    await widget.controller.stop(resetPosition: false);
+    await widget.controller.pauseAtOffset(offset);
   }
 
   Future<void> _resumeSession(int commandId) async {

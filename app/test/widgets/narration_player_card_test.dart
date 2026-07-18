@@ -36,10 +36,10 @@ void main() {
     expect(offset, 120);
   });
 
-  // Audio resume must never move beyond the word visible at pause time.
-  test('pause offset never jumps ahead of the native word position', () {
+  test('fresh native progress resumes from the highlighted word', () {
     final offset = resolveNarrationPauseOffset(
-      controllerOffset: 23,
+      nativeOffset: 23,
+      nativeProgressIsFresh: true,
       estimatedOffset: 28,
       totalCharacters: 120,
     );
@@ -49,7 +49,8 @@ void main() {
 
   test('pause offset remains inside the narration range', () {
     final offset = resolveNarrationPauseOffset(
-      controllerOffset: 150,
+      nativeOffset: 150,
+      nativeProgressIsFresh: true,
       estimatedOffset: 145,
       totalCharacters: 120,
     );

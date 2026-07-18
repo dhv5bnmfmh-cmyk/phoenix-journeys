@@ -144,8 +144,9 @@ class NarrationController extends ChangeNotifier {
   final FlutterTts _tts;
 
   NarrationStatus _status = NarrationStatus.idle;
-  NarrationTextPlan _plan =
-      NarrationTextPlan.fromItems(const <NarrationItem>[]);
+  NarrationTextPlan _plan = NarrationTextPlan.fromItems(
+    const <NarrationItem>[],
+  );
   String? _contentId;
   String? _errorMessage;
   int _speechBaseOffset = 0;
@@ -157,6 +158,7 @@ class NarrationController extends ChangeNotifier {
   DateTime? _estimateAnchorTime;
   int _estimateAnchorOffset = 0;
   DateTime? _lastNativeProgressAt;
+  int _lastNativeOffset = 0;
   _NarrationSpeechMode _speechMode = _NarrationSpeechMode.idle;
   bool _suppressEngineCallbacks = false;
   DateTime? _ignoreEngineCallbacksUntil;
@@ -173,6 +175,13 @@ class NarrationController extends ChangeNotifier {
   bool get hasContent => !_plan.isEmpty;
   double get speechRate => _speechRate;
   int get currentOffset => _currentOffset;
+  int get lastNativeOffset => _lastNativeOffset;
+  bool get hasFreshNativeProgress {
+    final last = _lastNativeProgressAt;
+    return last != null &&
+        DateTime.now().difference(last).inMilliseconds < 1200;
+  }
+
   int get totalCharacters => _plan.text.length;
   bool get isSpeakingWord => _isSpeakingWord;
   bool get wordSpeechUnavailable => _wordSpeechUnavailable;
@@ -244,7 +253,7 @@ class NarrationController extends ChangeNotifier {
         return;
       }
       if (_status == NarrationStatus.paused ||
-_speechMode != _NarrationSpeechMode.narration) {
+          _speechMode != _NarrationSpeechMode.narration) {
         return;
       }
       _cancelProgressClock();
@@ -256,11 +265,12 @@ _speechMode != _NarrationSpeechMode.narration) {
     });
     _tts.setProgressHandler((wordText, startOffset, endOffset, word) {
       if (_shouldIgnoreEngineCallback ||
-_speechMode != _NarrationSpeechMode.narration) {
+          _speechMode != _NarrationSpeechMode.narration) {
         return;
       }
       final globalStart = _speechBaseOffset + startOffset;
       final globalEnd = _speechBaseOffset + endOffset;
+      _lastNativeOffset = globalStart;
       _lastNativeProgressAt = DateTime.now();
       _estimateAnchorTime = _lastNativeProgressAt;
       _estimateAnchorOffset = globalStart;
@@ -298,22 +308,37 @@ _speechMode != _NarrationSpeechMode.narration) {
     _contentId = contentId;
     _plan = plan;
     _currentOffset = 0;
+    _lastNativeOffset = 0;
+    _lastNativeProgressAt = null;
     _currentItemIndex = 0;
     _errorMessage = null;
     await _speakFrom(0);
   }
 
   Future<void> pause() async {
-    if (_status != NarrationStatus.playing) return;
+    await pauseAtOffset(_currentOffset);
+  }
 
+  Future<void> pauseAtOffset(int offset) async {
+    if (_plan.isEmpty || _disposed) return;
+
+    final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
+    final safeOffset = offset.clamp(0, maxOffset).toInt();
     _status = NarrationStatus.paused;
+    _currentOffset = safeOffset;
+    _speechBaseOffset = safeOffset;
+    _currentItemIndex = _plan.indexForOffset(safeOffset);
     _cancelProgressClock();
-    _safeNotify();
-    await _stopSpeechEngine();
+    _applyProgress(safeOffset);
 
+    await _stopSpeechEngine();
     if (_disposed) return;
+
     _status = NarrationStatus.paused;
-    _safeNotify();
+    _currentOffset = safeOffset;
+    _speechBaseOffset = safeOffset;
+    _currentItemIndex = _plan.indexForOffset(safeOffset);
+    _applyProgress(safeOffset);
   }
 
   Future<void> resume() async {
@@ -342,10 +367,7 @@ _speechMode != _NarrationSpeechMode.narration) {
     await _speakFrom(safeOffset, stopEngineFirst: false);
   }
 
-  Future<bool> speakWord(
-    String word, {
-    required String languageCode,
-  }) async {
+  Future<bool> speakWord(String word, {required String languageCode}) async {
     final value = word.trim();
     if (value.isEmpty || _disposed) return false;
 
@@ -385,7 +407,6 @@ _speechMode != _NarrationSpeechMode.narration) {
     }
   }
 
-
   Future<void> restart() async {
     if (_plan.isEmpty || _contentId == null) return;
     await _speakFrom(0);
@@ -393,8 +414,7 @@ _speechMode != _NarrationSpeechMode.narration) {
 
   Future<void> setSpeechRate(double rate) async {
     final option = speedOptions.reduce(
-      (current, next) => (next.rate - rate).abs() <
-              (current.rate - rate).abs()
+      (current, next) => (next.rate - rate).abs() < (current.rate - rate).abs()
           ? next
           : current,
     );
@@ -427,15 +447,12 @@ _speechMode != _NarrationSpeechMode.narration) {
     _safeNotify();
   }
 
-  Future<void> _speakFrom(
-    int offset, {
-    bool stopEngineFirst = true,
-  }) async {
+  Future<void> _speakFrom(int offset, {bool stopEngineFirst = true}) async {
     final safeOffset = offset < 0
         ? 0
         : offset >= _plan.text.length
-  ? 0
-  : offset;
+        ? 0
+        : offset;
     final remainingText = _plan.text.substring(safeOffset);
 
     try {
@@ -446,6 +463,8 @@ _speechMode != _NarrationSpeechMode.narration) {
       if (_disposed) return;
 
       _speechMode = _NarrationSpeechMode.narration;
+      _lastNativeOffset = safeOffset;
+      _lastNativeProgressAt = null;
       _speechBaseOffset = safeOffset;
       _currentOffset = safeOffset;
       _currentItemIndex = _plan.indexForOffset(safeOffset);
@@ -498,8 +517,9 @@ _speechMode != _NarrationSpeechMode.narration) {
 
   Future<void> _stopSpeechEngine() async {
     _suppressEngineCallbacks = true;
-    _ignoreEngineCallbacksUntil =
-        DateTime.now().add(const Duration(milliseconds: 120));
+    _ignoreEngineCallbacksUntil = DateTime.now().add(
+      const Duration(milliseconds: 120),
+    );
     try {
       await _tts.stop();
       await Future<void>.delayed(const Duration(milliseconds: 30));
@@ -529,7 +549,8 @@ _speechMode != _NarrationSpeechMode.narration) {
       }
 
       final now = DateTime.now();
-      final nativeProgressIsFresh = _lastNativeProgressAt != null &&
+      final nativeProgressIsFresh =
+          _lastNativeProgressAt != null &&
           now.difference(_lastNativeProgressAt!).inMilliseconds < 650;
       if (nativeProgressIsFresh) return;
 
@@ -549,11 +570,7 @@ _speechMode != _NarrationSpeechMode.narration) {
     _progressTimer = null;
   }
 
-  void _applyProgress(
-    int offset, {
-    int? endOffset,
-    String word = '',
-  }) {
+  void _applyProgress(int offset, {int? endOffset, String word = ''}) {
     if (_plan.isEmpty) return;
 
     final safeOffset = offset.clamp(0, _plan.text.length).toInt();
@@ -568,7 +585,9 @@ _speechMode != _NarrationSpeechMode.narration) {
     final item = _plan.items[itemIndex];
     final itemStart = _plan.itemStart(itemIndex);
     final itemEnd = _plan.itemEnd(itemIndex);
-    var localStart = (safeOffset - itemStart).clamp(0, item.text.length).toInt();
+    var localStart = (safeOffset - itemStart)
+        .clamp(0, item.text.length)
+        .toInt();
     while (localStart < item.text.length &&
         _isBoundary(item.text.substring(localStart, localStart + 1))) {
       localStart += 1;
