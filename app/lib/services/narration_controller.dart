@@ -323,6 +323,25 @@ _speechMode != _NarrationSpeechMode.narration) {
     await _speakFrom(offset);
   }
 
+  Future<void> resumeFromOffset(int offset) async {
+    if (_plan.isEmpty || _disposed) return;
+
+    final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
+    final safeOffset = offset.clamp(0, maxOffset).toInt();
+    _status = NarrationStatus.paused;
+    _cancelProgressClock();
+    _safeNotify();
+
+    await _stopSpeechEngine();
+    if (_disposed) return;
+
+    // Safari/iOS needs a quiet gap after the word voice releases audio.
+    await Future<void>.delayed(const Duration(milliseconds: 220));
+    if (_disposed) return;
+    _ignoreEngineCallbacksUntil = null;
+    await _speakFrom(safeOffset, stopEngineFirst: false);
+  }
+
   Future<bool> speakWord(
     String word, {
     required String languageCode,
@@ -408,7 +427,10 @@ _speechMode != _NarrationSpeechMode.narration) {
     _safeNotify();
   }
 
-  Future<void> _speakFrom(int offset) async {
+  Future<void> _speakFrom(
+    int offset, {
+    bool stopEngineFirst = true,
+  }) async {
     final safeOffset = offset < 0
         ? 0
         : offset >= _plan.text.length
@@ -418,7 +440,9 @@ _speechMode != _NarrationSpeechMode.narration) {
 
     try {
       _cancelProgressClock();
-      await _stopSpeechEngine();
+      if (stopEngineFirst) {
+        await _stopSpeechEngine();
+      }
       if (_disposed) return;
 
       _speechMode = _NarrationSpeechMode.narration;
