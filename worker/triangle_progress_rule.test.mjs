@@ -13,12 +13,14 @@ test('Safari progress watchdog is scheduled before speak', () => {
   assert.ok(watchdog >= 0 && speak > watchdog);
 });
 
-test('active narration uses an inline triangle rather than recoloring text', () => {
+test('Story and Discovery use an inline triangle rather than recoloring text', () => {
   assert.match(interactive, /class _ReadingTrianglePainter/);
   assert.match(interactive, /reading-triangle-/);
   assert.match(interactive, /CustomPaint\(size: Size\(7, 4\)/);
   assert.doesNotMatch(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
   assert.equal((journey.match(/InteractiveStoryText\(/g) ?? []).length >= 2, true);
+  assert.match(journey, /contentId: 'story'/);
+  assert.match(journey, /contentId: 'discovery'/);
 });
 
 test('playing percent never appears stuck at zero', () => {
