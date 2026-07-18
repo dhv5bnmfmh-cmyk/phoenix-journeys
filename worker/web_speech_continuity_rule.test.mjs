@@ -48,16 +48,29 @@ test('audio, triangle, and highlighted text share controller offset', () => {
   assert.match(controller, /_applyProgress\(globalStart/);
 });
 
-
 test('utterance base offset is preserved during native pause and resume', () => {
   const pauseStart = controller.indexOf('Future<void> pauseAtOffset');
   const resumeStart = controller.indexOf('Future<void> resumeFromOffset');
   const wordStart = controller.indexOf('Future<bool> speakWord');
   const pauseBody = controller.slice(pauseStart, resumeStart);
   const resumeBody = controller.slice(resumeStart, wordStart);
-  const webPauseBody = pauseBody.slice(pauseBody.indexOf('if (_webSpeech.isAvailable)'));
-  const webResumeBody = resumeBody.slice(0, resumeBody.indexOf('await _stopSpeechEngine'));
 
+  const webPauseStart = pauseBody.indexOf('if (_webSpeech.isAvailable)');
+  const fallbackPauseStart = pauseBody.indexOf(
+    '_speechBaseOffset = safeOffset',
+    webPauseStart,
+  );
+  const webPauseBody = pauseBody.slice(webPauseStart, fallbackPauseStart);
+
+  const webResumeStart = resumeBody.indexOf('if (_webSpeech.isAvailable)');
+  const fallbackResumeStart = resumeBody.indexOf(
+    'await _stopSpeechEngine',
+    webResumeStart,
+  );
+  const webResumeBody = resumeBody.slice(webResumeStart, fallbackResumeStart);
+
+  assert.ok(webPauseStart >= 0 && fallbackPauseStart > webPauseStart);
+  assert.ok(webResumeStart >= 0 && fallbackResumeStart > webResumeStart);
   assert.doesNotMatch(webPauseBody, /_speechBaseOffset = safeOffset/);
   assert.doesNotMatch(webResumeBody, /_speechBaseOffset = safeOffset/);
 });
