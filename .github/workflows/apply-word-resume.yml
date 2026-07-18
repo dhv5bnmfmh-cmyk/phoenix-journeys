@@ -1,9 +1,13 @@
 name: Apply word narration resume fix
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/word-resume-phoenix-media-button
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
@@ -15,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: feature/word-resume-phoenix-media-button
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
 
       - name: Preserve and resume narration around word details
@@ -60,4 +64,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app/lib/screens/journey_screen.dart .github/workflows/apply-word-resume.yml
           git commit -m "fix: resume story narration after closing word details"
-          git push origin HEAD:feature/word-resume-phoenix-media-button
+          git push origin HEAD:${{ github.head_ref }}
