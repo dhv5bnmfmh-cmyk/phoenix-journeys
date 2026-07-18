@@ -108,6 +108,7 @@ class InteractiveStoryText extends StatefulWidget {
     this.onWordLongPress,
     this.narrationContentId,
     this.narrationItemId,
+    this.narrationController,
     super.key,
   });
 
@@ -120,6 +121,7 @@ class InteractiveStoryText extends StatefulWidget {
   final ValueChanged<WordEntry>? onWordLongPress;
   final String? narrationContentId;
   final String? narrationItemId;
+  final NarrationController? narrationController;
 
   @override
   State<InteractiveStoryText> createState() => _InteractiveStoryTextState();
@@ -207,14 +209,18 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
     final state = context.watch<AppState>();
     final baseStyle = widget.style ?? Theme.of(context).textTheme.bodyLarge;
     final selectedEntry = _selectedEntry;
+    final Listenable highlightSource =
+        widget.narrationController ?? NarrationHighlightBus.instance;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AnimatedBuilder(
-          animation: NarrationHighlightBus.instance,
+          animation: highlightSource,
           builder: (context, _) {
-            final snapshot = NarrationHighlightBus.instance.snapshot;
+            final snapshot =
+                widget.narrationController?.highlightSnapshot ??
+                NarrationHighlightBus.instance.snapshot;
             final isCurrentNarrationItem = narrationSnapshotMatches(
               snapshot: snapshot,
               contentId: widget.narrationContentId,

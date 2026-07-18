@@ -167,6 +167,7 @@ class NarrationController extends ChangeNotifier {
   String? _spokenWord;
   Completer<bool>? _wordSpeechCompleter;
   String? _configuredVoiceLanguage;
+  NarrationHighlightSnapshot? _highlightSnapshot;
 
   NarrationStatus get status => _status;
   String? get contentId => _contentId;
@@ -187,6 +188,7 @@ class NarrationController extends ChangeNotifier {
   bool get isSpeakingWord => _isSpeakingWord;
   bool get wordSpeechUnavailable => _wordSpeechUnavailable;
   String? get spokenWord => _spokenWord;
+  NarrationHighlightSnapshot? get highlightSnapshot => _highlightSnapshot;
 
   String get speedLabel {
     return speedOptions
@@ -265,6 +267,7 @@ class NarrationController extends ChangeNotifier {
       _speechMode = _NarrationSpeechMode.idle;
       _status = NarrationStatus.idle;
       _currentItemIndex = null;
+      _highlightSnapshot = null;
       NarrationHighlightBus.instance.clear(contentId: _contentId);
       _safeNotify();
     });
@@ -296,6 +299,7 @@ class NarrationController extends ChangeNotifier {
       _status = NarrationStatus.error;
       _errorMessage = '当前设备暂时无法朗读，请检查声音设置后重试。';
       _currentItemIndex = null;
+      _highlightSnapshot = null;
       NarrationHighlightBus.instance.clear(contentId: _contentId);
       debugPrint('Narration error: $message');
       _safeNotify();
@@ -309,6 +313,7 @@ class NarrationController extends ChangeNotifier {
     final plan = NarrationTextPlan.fromItems(items);
     if (plan.isEmpty) return;
 
+    _highlightSnapshot = null;
     NarrationHighlightBus.instance.clear(contentId: _contentId);
     _contentId = contentId;
     _plan = plan;
@@ -438,6 +443,7 @@ class NarrationController extends ChangeNotifier {
     _status = NarrationStatus.idle;
     _errorMessage = null;
     _currentItemIndex = null;
+    _highlightSnapshot = null;
     NarrationHighlightBus.instance.clear(contentId: _contentId);
     if (resetPosition) {
       _currentOffset = 0;
@@ -544,6 +550,7 @@ class NarrationController extends ChangeNotifier {
         _status = NarrationStatus.error;
         _errorMessage = '没有找到可用的中文语音，请换用 Safari 或 Chrome 重试。';
         _currentItemIndex = null;
+        _highlightSnapshot = null;
         NarrationHighlightBus.instance.clear(contentId: _contentId);
         _safeNotify();
       }
@@ -556,6 +563,7 @@ class NarrationController extends ChangeNotifier {
       _status = NarrationStatus.error;
       _errorMessage = '朗读启动失败，请检查设备音量或浏览器权限。';
       _currentItemIndex = null;
+      _highlightSnapshot = null;
       NarrationHighlightBus.instance.clear(contentId: _contentId);
       _safeNotify();
     }
@@ -567,6 +575,7 @@ class NarrationController extends ChangeNotifier {
     _status = NarrationStatus.idle;
     _currentOffset = _plan.text.length;
     _currentItemIndex = null;
+    _highlightSnapshot = null;
     NarrationHighlightBus.instance.clear(contentId: _contentId);
     _safeNotify();
   }
@@ -677,17 +686,17 @@ class NarrationController extends ChangeNotifier {
     }
 
     if (safeOffset <= itemEnd && localStart < item.text.length) {
-      NarrationHighlightBus.instance.update(
-        NarrationHighlightSnapshot(
-          contentId: _contentId!,
-          itemId: item.id,
-          itemText: item.text,
-          itemIndex: itemIndex,
-          start: localStart,
-          end: localEnd,
-          word: word,
-        ),
+      final snapshot = NarrationHighlightSnapshot(
+        contentId: _contentId!,
+        itemId: item.id,
+        itemText: item.text,
+        itemIndex: itemIndex,
+        start: localStart,
+        end: localEnd,
+        word: word,
       );
+      _highlightSnapshot = snapshot;
+      NarrationHighlightBus.instance.update(snapshot);
     }
     _safeNotify();
   }
@@ -715,6 +724,7 @@ class NarrationController extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _cancelProgressClock();
+    _highlightSnapshot = null;
     NarrationHighlightBus.instance.clear(contentId: _contentId);
     unawaited(_tts.stop());
     super.dispose();
