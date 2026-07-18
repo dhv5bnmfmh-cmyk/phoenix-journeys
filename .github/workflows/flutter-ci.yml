@@ -10,41 +10,14 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  apply-resume-fix:
-    if: (github.ref == 'refs/heads/feature/resume-offset-and-compact-story-v2' || github.head_ref == 'feature/resume-offset-and-compact-story-v2') && github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out feature branch
-        uses: actions/checkout@v4
-        with:
-          ref: feature/resume-offset-and-compact-story-v2
-          fetch-depth: 0
-
-      - name: Execute narration patch
-        run: python tools/apply_resume_fix.py
-
-      - uses: dart-lang/setup-dart@v1
-
-      - name: Format changed files
-        run: dart format app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/test/narration_resume_offset_test.dart
-
-      - name: Commit source fix
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/test/narration_resume_offset_test.dart
-          git commit -m "fix: resume narration from the paused word"
-          git push origin HEAD:feature/resume-offset-and-compact-story-v2
-
   verify:
-    if: ((github.ref != 'refs/heads/feature/resume-offset-and-compact-story-v2' && github.head_ref != 'feature/resume-offset-and-compact-story-v2') || github.actor == 'github-actions[bot]')
     runs-on: ubuntu-latest
     defaults:
       run:
