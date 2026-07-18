@@ -5,19 +5,57 @@ on:
     branches:
       - main
       - "feature/**"
+      - "fix/**"
   pull_request:
     branches:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  apply-resume-fix:
+    if: github.ref == 'refs/heads/fix/resume-offset-and-compact-story' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out fix branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/resume-offset-and-compact-story
+          fetch-depth: 0
+
+      - name: Execute narration patch
+        shell: python
+        run: |
+          from pathlib import Path
+
+          lines = Path('.github/workflows/apply-resume-offset-fix.yml').read_text().splitlines()
+          start = next(i for i, line in enumerate(lines) if line.strip() == '- name: Patch narration resume and story density')
+          run_line = next(i for i in range(start, len(lines)) if lines[i].strip() == 'run: |')
+          end = next(i for i in range(run_line + 1, len(lines)) if lines[i].strip() == '- uses: dart-lang/setup-dart@v1')
+          script_lines = lines[run_line + 1:end]
+          script = '\n'.join(line[10:] if line.startswith('          ') else line for line in script_lines)
+          exec(compile(script, 'resume_fix.py', 'exec'))
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Format changed files
+        run: dart format app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/test/narration_resume_offset_test.dart
+
+      - name: Commit source fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/test/narration_resume_offset_test.dart
+          git commit -m "fix: resume narration from the paused word"
+          git push origin HEAD:fix/resume-offset-and-compact-story
+
   verify:
+    if: github.ref != 'refs/heads/fix/resume-offset-and-compact-story' || github.actor == 'github-actions[bot]'
     runs-on: ubuntu-latest
     defaults:
       run:
