@@ -14,7 +14,7 @@ test('iOS progress watchdog starts before Safari speech is awaited', () => {
 
 test('Story and Discovery use an inline triangle without paragraph narration highlighting', () => {
   assert.match(interactive, /_ReadingTrianglePainter/);
-  assert.match(interactive, /CustomPaint\(size: Size\(6, 3\.5\)/);
+  assert.match(interactive, /size:\s*Size\(6, 3\.5\)/);
   assert.doesNotMatch(journey, /Icons\.graphic_eq_rounded/);
   assert.doesNotMatch(journey, /const Color\(0xFFFFF2EE\)/);
 });
