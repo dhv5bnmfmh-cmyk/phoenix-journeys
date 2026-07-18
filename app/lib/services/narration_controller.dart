@@ -168,6 +168,7 @@ class NarrationController extends ChangeNotifier {
   Completer<bool>? _wordSpeechCompleter;
   String? _configuredVoiceLanguage;
   NarrationHighlightSnapshot? _highlightSnapshot;
+  int _speechSessionToken = 0;
 
   NarrationStatus get status => _status;
   String? get contentId => _contentId;
@@ -190,7 +191,11 @@ class NarrationController extends ChangeNotifier {
   String? get spokenWord => _spokenWord;
   NarrationHighlightSnapshot? get highlightSnapshot {
     final contentId = _contentId;
-    final itemIndex = _currentItemIndex;
+    final sessionActive =
+        _status == NarrationStatus.playing || _status == NarrationStatus.paused;
+    final itemIndex =
+        _currentItemIndex ??
+        (sessionActive ? _plan.indexForOffset(_currentOffset) : null);
     if (_plan.isEmpty || contentId == null || itemIndex == null) return null;
     if (itemIndex < 0 || itemIndex >= _plan.items.length) return null;
 
@@ -352,6 +357,9 @@ class NarrationController extends ChangeNotifier {
     _lastNativeProgressAt = null;
     _currentItemIndex = 0;
     _errorMessage = null;
+    _status = NarrationStatus.playing;
+    _speechMode = _NarrationSpeechMode.narration;
+    _applyProgress(0);
     await _speakFrom(0);
   }
 
@@ -559,12 +567,15 @@ class NarrationController extends ChangeNotifier {
       _errorMessage = null;
       _applyProgress(safeOffset);
       _safeNotify();
+      final sessionToken = ++_speechSessionToken;
 
       await _configureNaturalVoice('zh-CN');
       await _tts.setSpeechRate(_speechRate);
       await _tts.setPitch(.98);
       await _tts.setVolume(1.0);
-      final result = await _tts.speak(remainingText);
+      final speakFuture = _tts.speak(remainingText);
+      unawaited(_startProgressWatchdog(sessionToken, safeOffset));
+      final result = await speakFuture;
       if (result == 1 && !_disposed) {
         // Most engines call setStartHandler. This fallback covers browsers
         // that start speaking without providing that callback.
@@ -599,7 +610,23 @@ class NarrationController extends ChangeNotifier {
     }
   }
 
+  Future<void> _startProgressWatchdog(int sessionToken, int offset) async {
+    // iOS Safari may not resolve speak() or emit a start callback until the
+    // utterance ends. Start Phoenix's single fallback clock independently so
+    // progress and the inline current-word highlight never remain at 0%.
+    await Future<void>.delayed(const Duration(milliseconds: 260));
+    if (_disposed ||
+        sessionToken != _speechSessionToken ||
+        _speechMode != _NarrationSpeechMode.narration ||
+        _status != NarrationStatus.playing ||
+        _progressTimer != null) {
+      return;
+    }
+    _startProgressClock(offset);
+  }
+
   void _finishNarrationSession() {
+    _speechSessionToken += 1;
     _cancelProgressClock();
     _speechMode = _NarrationSpeechMode.idle;
     _status = NarrationStatus.idle;
@@ -624,6 +651,7 @@ class NarrationController extends ChangeNotifier {
   }
 
   Future<void> _stopSpeechEngine() async {
+    _speechSessionToken += 1;
     _suppressEngineCallbacks = true;
     _ignoreEngineCallbacksUntil = DateTime.now().add(
       const Duration(milliseconds: 120),
@@ -752,6 +780,7 @@ class NarrationController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _speechSessionToken += 1;
     _disposed = true;
     _cancelProgressClock();
     _highlightSnapshot = null;

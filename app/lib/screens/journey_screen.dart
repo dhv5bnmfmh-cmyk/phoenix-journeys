@@ -268,19 +268,22 @@ class _JourneyScreenState extends State<JourneyScreen>
       isScrollControlled: true,
       showDragHandle: true,
       useSafeArea: true,
-      builder: (_) => FractionallySizedBox(
-        heightFactor: .72,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: _ReadingSupportSheet(
-            title: title,
-            pinyin: pinyin,
-            nativeLabel: nativeLabel,
-            nativeText: nativeText,
-            english: english,
+      builder: (sheetContext) {
+        final maxHeight = MediaQuery.sizeOf(sheetContext).height * .52;
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            child: _ReadingSupportSheet(
+              title: title,
+              pinyin: pinyin,
+              nativeLabel: nativeLabel,
+              nativeText: nativeText,
+              english: english,
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -493,7 +496,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             compact: true,
             onPlay: _playStory,
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 2),
           Expanded(
             child: AnimatedBuilder(
               animation: _narration,
@@ -1086,21 +1089,22 @@ class _ReadingSupportSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         _SupportLine(label: '拼音', text: pinyin, color: PhoenixTheme.red),
-        const SizedBox(height: 8),
+        const SizedBox(height: 5),
         _SupportLine(
           label: nativeLabel,
           text: nativeText,
           color: PhoenixTheme.translation,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 5),
         _SupportLine(label: 'English', text: english, color: PhoenixTheme.ai),
       ],
     );
@@ -1122,10 +1126,10 @@ class _SupportLine extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(11),
+      padding: const EdgeInsets.fromLTRB(9, 7, 9, 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: .07),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1134,12 +1138,12 @@ class _SupportLine extends StatelessWidget {
             label,
             style: TextStyle(
               color: color,
-              fontSize: 10,
+              fontSize: 9.5,
               fontWeight: FontWeight.w900,
             ),
           ),
           const SizedBox(height: 3),
-          Text(text, style: const TextStyle(fontSize: 12.5, height: 1.4)),
+          Text(text, style: const TextStyle(fontSize: 11.5, height: 1.28)),
         ],
       ),
     );
