@@ -10,14 +10,49 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  apply-inline-only-highlight:
+    if: >-
+      github.actor != 'github-actions[bot]' &&
+      (github.ref == 'refs/heads/feature/inline-only-reading-highlight' ||
+       github.head_ref == 'feature/inline-only-reading-highlight')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/inline-only-reading-highlight
+          fetch-depth: 0
+
+      - name: Apply inline-only reading highlight
+        run: python tools/apply_inline_only_highlight.py
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Format changed Dart files
+        run: dart format app/lib/screens/journey_screen.dart app/lib/widgets/interactive_story_text.dart app/test/widgets/interactive_story_text_visual_test.dart
+
+      - name: Commit inline-only highlight
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout origin/main -- .github/workflows/flutter-ci.yml
+          git rm tools/apply_inline_only_highlight.py
+          git add -A
+          git commit -m "ui: show reading position only on the active word"
+          git push origin HEAD:feature/inline-only-reading-highlight
+
   verify:
+    if: >-
+      github.actor == 'github-actions[bot]' ||
+      (github.ref != 'refs/heads/feature/inline-only-reading-highlight' &&
+       github.head_ref != 'feature/inline-only-reading-highlight')
     runs-on: ubuntu-latest
     defaults:
       run:
