@@ -1,0 +1,1 @@
+Run explicit visual narration highlight migration.
