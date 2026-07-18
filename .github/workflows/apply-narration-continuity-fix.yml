@@ -1,20 +1,25 @@
 name: Apply narration continuity fix
 
 on:
-  push:
+  pull_request:
     branches:
       - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
 
 jobs:
   patch:
-    if: ${{ github.event.head_commit.message == 'chore: apply narration continuity patch' }}
+    if: ${{ github.head_ref == 'fix/narration-continuity-single-source' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
       - run: python tools/apply_narration_continuity_fix.py
       - name: Commit fix
@@ -26,7 +31,9 @@ jobs:
                   app/test/narration_resume_offset_test.dart \
                   worker/ios_narration_position_rule.test.mjs \
                   worker/narration_continuity_rule.test.mjs
+          if git diff --cached --quiet; then
+            echo "Narration fix already applied."
+            exit 0
+          fi
           git commit -m "fix: keep narration position and sync progress"
-          git push origin HEAD:main
-
-# trigger: narration-continuity-v2
+          git push origin HEAD:${{ github.head_ref }}
