@@ -1,0 +1,61 @@
+name: Apply story tap vocabulary integration
+
+on:
+  push:
+    branches:
+      - feature/tap-vocabulary-popover
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/tap-vocabulary-popover
+          fetch-depth: 0
+
+      - name: Replace long press with tap popover
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/screens/journey_screen.dart')
+          text = path.read_text()
+
+          old_tip = "text: '长按红色词语查词；点每段右侧的小“注”查看拼音、母语与英文',"
+          new_tip = "text: '点一下红色词语快速查看意思；故事朗读不会暂停或重头播放',"
+          if old_tip not in text:
+              raise SystemExit('Story vocabulary tip not found')
+          text = text.replace(old_tip, new_tip, 1)
+
+          old_widget = '''                    mainText: InteractiveStoryText(
+                      text: entry.value,
+                      entries: words,
+                      onWordLongPress: (word) {
+                        unawaited(_openWord(word));
+                      },
+                    ),'''
+          new_widget = '''                    mainText: InteractiveStoryText(
+                      text: entry.value,
+                      entries: words,
+                    ),'''
+          if old_widget not in text:
+              raise SystemExit('InteractiveStoryText story block not found')
+          text = text.replace(old_widget, new_widget, 1)
+          path.write_text(text)
+          PY
+
+      - name: Remove one-time workflow
+        run: rm .github/workflows/apply-tap-vocabulary-popover.yml
+
+      - name: Commit integration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart .github/workflows/apply-tap-vocabulary-popover.yml
+          git commit -m "feat: tap story vocabulary without interrupting narration"
+          git push origin HEAD:feature/tap-vocabulary-popover
