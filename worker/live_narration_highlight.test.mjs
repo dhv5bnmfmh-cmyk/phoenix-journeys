@@ -10,15 +10,22 @@ const player = readFileSync(
   'app/lib/widgets/narration_player_card.dart',
   'utf8',
 );
+const journey = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
 
-test('Phoenix clock drives highlighting during active playback', () => {
-  assert.match(controller, /void syncPlaybackHighlight\(/);
-  assert.match(player, /widget\.controller\.syncPlaybackHighlight\([\s\S]*offset: nextOffset/);
+test('NarrationController is the only playback and highlight clock', () => {
+  assert.doesNotMatch(player, /_positionClock/);
+  assert.doesNotMatch(player, /syncPlaybackHighlight/);
+  assert.match(controller, /setStartHandler\([\s\S]*_startProgressClock/);
+  assert.match(controller, /final charsPerSecond = 3\.35/);
 });
 
-test('highlight clears only after the local playback clock reaches the end', () => {
-  assert.match(
-    player,
-    /if \(total > 0 && nextOffset >= total\)[\s\S]*clearPlaybackHighlight/,
-  );
+test('Story and Discovery share the same word highlight path', () => {
+  assert.match(journey, /narrationContentId: 'story'/);
+  assert.match(journey, /narrationContentId: 'discovery'/);
+  assert.match(journey, /narrationItemId: 'discovery-\$\{entry\.key\}'/);
+});
+
+test('premature Safari completion cannot clear an active highlight', () => {
+  assert.match(controller, /if \(_currentOffset < finalReadableOffset\)/);
+  assert.match(controller, /_finishNarrationSession\(\)/);
 });

@@ -683,39 +683,40 @@ class _JourneyScreenState extends State<JourneyScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: discoveries
-                      .asMap()
-                      .entries
-                      .map((entry) {
-                        final item = entry.value;
-                        final isActive = _isNarrating('discovery', entry.key);
-                        return _CompactTextBlock(
-                          index: entry.key + 1,
-                          active: isActive,
-                          onSupport: () => unawaited(
-                            _showReadingSupport(
-                              title: '今日发现 ${entry.key + 1}',
-                              pinyin: item.pinyin,
-                              nativeLabel: item.nativeLabel(language),
-                              nativeText: item.nativeText(language),
-                              english: item.english,
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                          final item = entry.value;
+                          final isActive = _isNarrating('discovery', entry.key);
+                          return _CompactTextBlock(
+                            index: entry.key + 1,
+                            active: isActive,
+                            onSupport: () => unawaited(
+                              _showReadingSupport(
+                                title: '今日发现 ${entry.key + 1}',
+                                pinyin: item.pinyin,
+                                nativeLabel: item.nativeLabel(language),
+                                nativeText: item.nativeText(language),
+                                english: item.english,
+                              ),
                             ),
-                          ),
-                          child: InteractiveStoryText(
-                            text: item.text,
-                            entries: words,
-                            narrationContentId: 'discovery',
-                            narrationItemId: 'discovery-${entry.key}',
-                            style: TextStyle(
-                              fontSize: 9.9,
-                              height: 1.12,
-                              fontWeight: isActive
-                                  ? FontWeight.w800
-                                  : FontWeight.w600,
+                            child: InteractiveStoryText(
+                              text: item.text,
+                              entries: words,
+                              narrationContentId: 'discovery',
+                              narrationItemId: 'discovery-${entry.key}',
+                              style: TextStyle(
+                                fontSize: 9.9,
+                                height: 1.12,
+                                fontWeight: isActive
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                              ),
                             ),
-                          ),
-                        );
-                      })
-                      .toList(growable: false),
+                          );
+                        })
+                        .toList(growable: false),
+                  ),
                 );
               },
             ),
