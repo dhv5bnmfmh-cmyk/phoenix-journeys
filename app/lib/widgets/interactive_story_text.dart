@@ -406,8 +406,10 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
   }) {
     final entry = segment.entry;
     return WidgetSpan(
-      alignment: PlaceholderAlignment.baseline,
-      baseline: TextBaseline.alphabetic,
+      // Flutter Web on iPhone can clip content painted below an alphabetic
+      // baseline when the surrounding paragraph uses a compact line height.
+      // Middle alignment lets the marker reserve its full vertical space.
+      alignment: PlaceholderAlignment.middle,
       child: Semantics(
         label: '正在朗读：$text',
         child: GestureDetector(
@@ -438,13 +440,28 @@ class _InlineReadingMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(text, style: style),
-        const SizedBox(height: .5),
-        const CustomPaint(size: Size(7, 4), painter: _ReadingTrianglePainter()),
-      ],
+    return Padding(
+      // Reserve real layout space for the triangle. Painting below a Text
+      // baseline alone is clipped by Flutter Web on iOS Safari.
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.topCenter,
+        children: [
+          Text(text, style: style.copyWith(height: 1)),
+          const Positioned(
+            left: 0,
+            right: 0,
+            bottom: -4,
+            child: Center(
+              child: CustomPaint(
+                size: Size(9, 5),
+                painter: _ReadingTrianglePainter(),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
