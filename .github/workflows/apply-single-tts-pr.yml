@@ -33,9 +33,6 @@ jobs:
           exec(compile(script, 'single_tts_migration.py', 'exec'))
           RUNNER
 
-      - name: Format changed Dart files
-        run: dart format app/lib/services/narration_controller.dart app/lib/widgets/word_detail_sheet.dart app/lib/screens/journey_screen.dart
-
       - name: Remove one-time workflows
         run: rm .github/workflows/apply-single-tts-fix.yml .github/workflows/apply-single-tts-pr.yml
 
