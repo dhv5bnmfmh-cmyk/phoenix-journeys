@@ -22,28 +22,10 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           journey_path = Path('app/lib/screens/journey_screen.dart')
           journey = journey_path.read_text()
-          old_open_word = '''  Future<void> _openWord(WordEntry entry) async {
-            final shouldResume = _narration.status == NarrationStatus.playing;
-            if (shouldResume) {
-              await _narration.pause();
-            }
-            if (!mounted) return;
-
-            await showWordDetail(
-              context,
-              entry,
-              onSpeak: () => _narration.speakWord(
-                _appState.displayText(entry.word),
-                languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
-              ),
-            );
-            if (!mounted || !shouldResume) return;
-
-            await _narration.resume();
-          }'''
           new_open_word = '''  Future<void> _openWord(WordEntry entry) async {
             final shouldResume = _narration.status == NarrationStatus.playing;
             if (shouldResume) {
@@ -67,19 +49,22 @@ jobs:
             await Future<void>.delayed(const Duration(milliseconds: 360));
             if (!mounted) return;
             await _narration.resumeFromOffset(resumeOffset);
-          }'''
-          if old_open_word not in journey:
-              raise SystemExit('Expected _openWord block not found')
-          journey_path.write_text(journey.replace(old_open_word, new_open_word, 1))
+          }
+
+'''
+          journey, count = re.subn(
+              r'  Future<void> _openWord\(WordEntry entry\) async \{.*?\n  \}\n\n(?=  bool _isNarrating)',
+              new_open_word,
+              journey,
+              count=1,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit(f'Expected one _openWord block, replaced {count}')
+          journey_path.write_text(journey)
 
           controller_path = Path('app/lib/services/narration_controller.dart')
           controller = controller_path.read_text()
-          old_resume = '''  Future<void> resume() async {
-            if (_status != NarrationStatus.paused || _plan.isEmpty) return;
-
-            final offset = _currentOffset >= _plan.text.length ? 0 : _currentOffset;
-            await _speakFrom(offset);
-          }'''
           new_resume = '''  Future<void> resume() async {
             if (_status != NarrationStatus.paused || _plan.isEmpty) return;
 
@@ -99,35 +84,50 @@ jobs:
             await _stopSpeechEngine();
             if (_disposed) return;
 
-            // Safari/iOS needs a short quiet gap after stopping the word voice.
+            // Safari/iOS needs a quiet gap after stopping the word voice.
             await Future<void>.delayed(const Duration(milliseconds: 220));
             if (_disposed) return;
             _ignoreEngineCallbacksUntil = null;
             await _speakFrom(safeOffset, stopEngineFirst: false);
-          }'''
-          if old_resume not in controller:
-              raise SystemExit('Expected resume block not found')
-          controller = controller.replace(old_resume, new_resume, 1)
+          }
 
-          old_signature = '  Future<void> _speakFrom(int offset) async {'
-          new_signature = '''  Future<void> _speakFrom(
+'''
+          controller, count = re.subn(
+              r'  Future<void> resume\(\) async \{.*?\n  \}\n\n(?=  Future<bool> speakWord)',
+              new_resume,
+              controller,
+              count=1,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit(f'Expected one resume block, replaced {count}')
+
+          controller, count = re.subn(
+              r'  Future<void> _speakFrom\(int offset\) async \{',
+              '''  Future<void> _speakFrom(
             int offset, {
             bool stopEngineFirst = true,
-          }) async {'''
-          if old_signature not in controller:
-              raise SystemExit('Expected _speakFrom signature not found')
-          controller = controller.replace(old_signature, new_signature, 1)
-
-          method_start = controller.index(new_signature)
-          stop_call = '      await _stopSpeechEngine();'
-          stop_index = controller.index(stop_call, method_start)
-          controller = (
-              controller[:stop_index]
-              + '''      if (stopEngineFirst) {
-                await _stopSpeechEngine();
-              }'''
-              + controller[stop_index + len(stop_call):]
+          }) async {''',
+              controller,
+              count=1,
           )
+          if count != 1:
+              raise SystemExit(f'Expected one _speakFrom signature, replaced {count}')
+
+          method_start = controller.index('  Future<void> _speakFrom(')
+          method_end = controller.index('\n  void _finishWordSpeech', method_start)
+          method = controller[method_start:method_end]
+          method, count = re.subn(
+              r'      await _stopSpeechEngine\(\);',
+              '''      if (stopEngineFirst) {
+                await _stopSpeechEngine();
+              }''',
+              method,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'Expected one engine stop in _speakFrom, replaced {count}')
+          controller = controller[:method_start] + method + controller[method_end:]
           controller_path.write_text(controller)
           PY
 
