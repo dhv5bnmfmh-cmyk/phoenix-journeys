@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   apply-exact-pause-fix:
-    if: github.ref == 'refs/heads/feature/exact-word-pause-resume' && github.actor != 'github-actions[bot]'
+    if: (github.ref == 'refs/heads/feature/exact-word-pause-resume' || github.head_ref == 'feature/exact-word-pause-resume') && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Check out patch branch
@@ -57,7 +57,7 @@ jobs:
           git push origin HEAD:feature/exact-word-pause-resume
 
   verify:
-    if: github.ref != 'refs/heads/feature/exact-word-pause-resume' || github.actor == 'github-actions[bot]'
+    if: (github.ref != 'refs/heads/feature/exact-word-pause-resume' && github.head_ref != 'feature/exact-word-pause-resume') || github.actor == 'github-actions[bot]'
     runs-on: ubuntu-latest
     defaults:
       run:
