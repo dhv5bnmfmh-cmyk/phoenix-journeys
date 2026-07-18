@@ -47,6 +47,22 @@ int resolveNarrationPauseOffset({
   return math.max(0, estimated - 1);
 }
 
+@visibleForTesting
+int resolveNarrationContinuationOffset({
+  required int nativeOffset,
+  required bool nativeProgressIsFresh,
+  required int controllerOffset,
+  required int lastObservedOffset,
+  required int totalCharacters,
+}) {
+  return resolveNarrationPauseOffset(
+    nativeOffset: nativeOffset,
+    nativeProgressIsFresh: nativeProgressIsFresh,
+    estimatedOffset: math.max(controllerOffset, lastObservedOffset),
+    totalCharacters: totalCharacters,
+  );
+}
+
 class NarrationPlayerCard extends StatefulWidget {
   const NarrationPlayerCard({
     required this.controller,
@@ -74,6 +90,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
   bool _sessionPaused = false;
   int _commandVersion = 0;
   int _resumeOffset = 0;
+  int _lastObservedOffset = 0;
 
   bool get _controllerIsCurrent =>
       widget.controller.contentId == widget.contentId;
@@ -104,6 +121,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     _sessionPlaying = false;
     _sessionPaused = false;
     _resumeOffset = 0;
+    _lastObservedOffset = 0;
   }
 
   void _beginLocalPlayback(int offset) {
@@ -111,7 +129,36 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       _sessionPlaying = true;
       _sessionPaused = false;
       _resumeOffset = offset;
+      _lastObservedOffset = math.max(_lastObservedOffset, offset);
     });
+  }
+
+  void _observeControllerOffset(NarrationStatus status) {
+    if (!_controllerIsCurrent ||
+        (status != NarrationStatus.playing &&
+            status != NarrationStatus.paused)) {
+      return;
+    }
+
+    final total = widget.controller.totalCharacters;
+    if (total <= 0) return;
+    final observed = widget.controller.currentOffset
+        .clamp(0, math.max(0, total - 1))
+        .toInt();
+    if (observed > _lastObservedOffset) {
+      _lastObservedOffset = observed;
+    }
+  }
+
+  int _captureContinuationOffset() {
+    if (!_controllerIsCurrent) return _resumeOffset;
+    return resolveNarrationContinuationOffset(
+      nativeOffset: widget.controller.lastNativeOffset,
+      nativeProgressIsFresh: widget.controller.hasFreshNativeProgress,
+      controllerOffset: widget.controller.currentOffset,
+      lastObservedOffset: _lastObservedOffset,
+      totalCharacters: widget.controller.totalCharacters,
+    );
   }
 
   void _handleMainPressed() {
@@ -127,6 +174,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       _sessionPlaying = false;
       _sessionPaused = false;
       _resumeOffset = 0;
+      _lastObservedOffset = 0;
       unawaited(_startSession(commandId));
       return;
     }
@@ -135,7 +183,13 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       return;
     }
     if (_sessionPaused || controllerPaused) {
-      if (!_sessionPaused) _resumeOffset = widget.controller.currentOffset;
+      if (!_sessionPaused) {
+        _resumeOffset = _captureContinuationOffset();
+        _lastObservedOffset = math.max(
+          _lastObservedOffset,
+          _resumeOffset,
+        );
+      }
       unawaited(_resumeSession(commandId));
       return;
     }
@@ -143,33 +197,25 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
   }
 
   Future<void> _startSession(int commandId) async {
+    _lastObservedOffset = 0;
     _beginLocalPlayback(0);
     await widget.onPlay();
     if (!mounted || commandId != _commandVersion || !_sessionPlaying) return;
+    final offset = _controllerIsCurrent ? widget.controller.currentOffset : 0;
     setState(() {
-      _resumeOffset = _controllerIsCurrent
-          ? widget.controller.currentOffset
-          : 0;
+      _resumeOffset = offset;
+      _lastObservedOffset = math.max(_lastObservedOffset, offset);
     });
   }
 
   Future<void> _pauseSession(int commandId) async {
-    final currentOffset = _controllerIsCurrent
-        ? widget.controller.currentOffset
-        : _resumeOffset;
-    final offset = _controllerIsCurrent
-        ? resolveNarrationPauseOffset(
-            nativeOffset: widget.controller.lastNativeOffset,
-            nativeProgressIsFresh: widget.controller.hasFreshNativeProgress,
-            estimatedOffset: currentOffset,
-            totalCharacters: widget.controller.totalCharacters,
-          )
-        : currentOffset;
+    final offset = _captureContinuationOffset();
     if (!mounted || commandId != _commandVersion) return;
     setState(() {
       _sessionPlaying = false;
       _sessionPaused = true;
       _resumeOffset = offset;
+      _lastObservedOffset = math.max(_lastObservedOffset, offset);
     });
     await widget.controller.pauseAtOffset(offset);
   }
@@ -183,11 +229,22 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     _beginLocalPlayback(safeOffset);
     await widget.controller.resumeFromOffset(safeOffset);
     if (!mounted || commandId != _commandVersion || !_sessionPlaying) return;
-    setState(() => _resumeOffset = widget.controller.currentOffset);
+    final controllerOffset = _controllerIsCurrent
+        ? widget.controller.currentOffset
+        : safeOffset;
+    final continuedOffset = math.max(safeOffset, controllerOffset);
+    setState(() {
+      _resumeOffset = continuedOffset;
+      _lastObservedOffset = math.max(
+        _lastObservedOffset,
+        continuedOffset,
+      );
+    });
   }
 
   Future<void> _restartSession() async {
     final commandId = ++_commandVersion;
+    _lastObservedOffset = 0;
     _beginLocalPlayback(0);
     if (_controllerIsCurrent && widget.controller.hasContent) {
       await widget.controller.restart();
@@ -195,18 +252,70 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       await widget.onPlay();
     }
     if (!mounted || commandId != _commandVersion || !_sessionPlaying) return;
-    setState(() => _resumeOffset = widget.controller.currentOffset);
+    final offset = widget.controller.currentOffset;
+    setState(() {
+      _resumeOffset = offset;
+      _lastObservedOffset = offset;
+    });
   }
 
   Future<void> _setSpeechRate(double rate) async {
-    final offset = _controllerIsCurrent
-        ? widget.controller.currentOffset
-        : _resumeOffset;
-    _resumeOffset = offset;
+    if ((widget.controller.speechRate - rate).abs() < .001) return;
+
+    final commandId = ++_commandVersion;
+    final controllerPlaying =
+        _controllerIsCurrent &&
+        widget.controller.status == NarrationStatus.playing;
+    final controllerPaused =
+        _controllerIsCurrent &&
+        widget.controller.status == NarrationStatus.paused;
+    final wasPlaying = _sessionPlaying || controllerPlaying;
+    final wasPaused = _sessionPaused || controllerPaused;
+    final offset = _captureContinuationOffset();
+
+    if (mounted) {
+      setState(() {
+        _resumeOffset = offset;
+        _lastObservedOffset = math.max(_lastObservedOffset, offset);
+        if (wasPlaying) {
+          _sessionPlaying = false;
+          _sessionPaused = true;
+        }
+      });
+    }
+
+    // Freeze the audible utterance first. Calling setSpeechRate while the
+    // controller still reports playing makes Safari rebuild from a transient
+    // offset, which can be zero. Pausing first locks one continuation offset.
+    if (wasPlaying) {
+      await widget.controller.pauseAtOffset(offset);
+      if (!mounted || commandId != _commandVersion) return;
+    }
+
     await widget.controller.setSpeechRate(rate);
-    if (_sessionPlaying &&
-        widget.controller.status != NarrationStatus.playing) {
+    if (!mounted || commandId != _commandVersion) return;
+
+    if (wasPlaying) {
+      _beginLocalPlayback(offset);
       await widget.controller.resumeFromOffset(offset);
+      if (!mounted || commandId != _commandVersion || !_sessionPlaying) return;
+      final controllerOffset = _controllerIsCurrent
+          ? widget.controller.currentOffset
+          : offset;
+      final continuedOffset = math.max(offset, controllerOffset);
+      setState(() {
+        _resumeOffset = continuedOffset;
+        _lastObservedOffset = math.max(
+          _lastObservedOffset,
+          continuedOffset,
+        );
+      });
+    } else if (wasPaused) {
+      setState(() {
+        _sessionPlaying = false;
+        _sessionPaused = true;
+        _resumeOffset = offset;
+      });
     }
   }
 
@@ -220,6 +329,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
         final controllerStatus = controllerIsCurrent
             ? widget.controller.status
             : NarrationStatus.idle;
+        _observeControllerOffset(controllerStatus);
         final hasError =
             !_sessionPlaying &&
             !_sessionPaused &&
