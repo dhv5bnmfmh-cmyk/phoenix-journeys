@@ -13,6 +13,9 @@ def replace_once(text: str, old: str, new: str, label: str) -> str:
 
 
 player = PLAYER.read_text(encoding='utf-8')
+if '_continuationClock' not in player and 'estimated - 2' in player:
+    raise SystemExit(0)
+
 player = replace_once(
     player,
     "  int _lastObservedOffset = 0;\n"
