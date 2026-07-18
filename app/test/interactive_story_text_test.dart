@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/journey_data.dart';
+import 'package:phoenix_journeys/services/narration_controller.dart';
 import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
 
 void main() {
