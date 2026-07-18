@@ -26,15 +26,15 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path('app/lib/screens/journey_screen.dart')
           text = path.read_text()
-          old = '''  Future<void> _openWord(WordEntry entry) async {
-            await _narration.stop();
-            if (!mounted) return;
-            await showWordDetail(context, entry);
-          }'''
-          new = '''  Future<void> _openWord(WordEntry entry) async {
+          pattern = re.compile(
+              r"  Future<void> _openWord\(WordEntry entry\) async \{.*?\n  \}\n\n  bool _isNarrating",
+              re.S,
+          )
+          replacement = '''  Future<void> _openWord(WordEntry entry) async {
             final shouldResume = _narration.status == NarrationStatus.playing;
             if (shouldResume) {
               await _narration.pause();
@@ -49,10 +49,13 @@ jobs:
             if (mounted && _narration.status == NarrationStatus.paused) {
               await _narration.resume();
             }
-          }'''
-          if old not in text:
-              raise SystemExit('Expected _openWord block not found')
-          path.write_text(text.replace(old, new, 1))
+          }
+
+          bool _isNarrating'''
+          text, count = pattern.subn(replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f'Expected one _openWord block, found {count}')
+          path.write_text(text)
           PY
 
       - name: Remove temporary workflow
