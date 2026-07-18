@@ -5,22 +5,9 @@ import 'package:phoenix_journeys/state/app_state.dart';
 import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
 import 'package:provider/provider.dart';
 
-bool _containsActiveHighlight(InlineSpan span) {
-  if (span.style?.backgroundColor == const Color(0xFF8F1D18) &&
-      span.style?.color == Colors.white &&
-      span.style?.fontWeight == FontWeight.w900 &&
-      span.style?.decoration == TextDecoration.none) {
-    return true;
-  }
-  if (span is TextSpan) {
-    return span.children?.any(_containsActiveHighlight) ?? false;
-  }
-  return false;
-}
-
 void main() {
   testWidgets(
-    'explicit narration range paints a high-contrast active word',
+    'explicit narration range paints a triangle under the active text',
     (tester) async {
       final state = AppState();
       await tester.pumpWidget(
@@ -40,11 +27,11 @@ void main() {
         ),
       );
 
-      final text = tester.widget<Text>(
-        find.byKey(const ValueKey('interactive-highlight-visual-test')),
+      expect(
+        find.byKey(const ValueKey('reading-triangle-visual-test')),
+        findsOneWidget,
       );
-      expect(text.textSpan, isNotNull);
-      expect(_containsActiveHighlight(text.textSpan!), isTrue);
+      expect(find.byType(CustomPaint), findsWidgets);
     },
   );
 }

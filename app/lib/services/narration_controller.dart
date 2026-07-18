@@ -313,10 +313,19 @@ class NarrationController extends ChangeNotifier {
       }
       final globalStart = _speechBaseOffset + startOffset;
       final globalEnd = _speechBaseOffset + endOffset;
-      _lastNativeOffset = globalStart;
-      _lastNativeProgressAt = DateTime.now();
-      _estimateAnchorTime = _lastNativeProgressAt;
-      _estimateAnchorOffset = globalStart;
+
+      // Safari can repeatedly report offset 0 while speech is already moving.
+      // Never allow a stale native callback to pull Phoenix progress backwards,
+      // and only mark native progress as fresh when it truly advances.
+      if (globalStart < _currentOffset) return;
+      final nativeAdvanced = globalStart > _lastNativeOffset;
+      if (nativeAdvanced) {
+        final now = DateTime.now();
+        _lastNativeOffset = globalStart;
+        _lastNativeProgressAt = now;
+        _estimateAnchorTime = now;
+        _estimateAnchorOffset = globalStart;
+      }
       _applyProgress(
         globalStart,
         endOffset: globalEnd,

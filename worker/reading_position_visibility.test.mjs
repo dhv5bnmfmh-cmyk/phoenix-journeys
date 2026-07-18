@@ -8,23 +8,20 @@ const interactive = readFileSync(
   'utf8',
 );
 
-test('Story and Discovery show reading position only inside the text', () => {
+test('Story and Discovery show position only with the inline triangle', () => {
   assert.doesNotMatch(journey, /_NowReadingStrip/);
-  assert.doesNotMatch(journey, /朗读位置/);
-  assert.doesNotMatch(journey, /正在朗读/);
-  assert.doesNotMatch(journey, /当前：\$word/);
   assert.equal(
     (journey.match(/highlightStart: isActive \? snapshot!\.start : null/g) ?? [])
       .length,
     2,
   );
+  assert.match(interactive, /reading-triangle-/);
+  assert.match(interactive, /_ReadingTrianglePainter/);
 });
 
-test('current word is unmistakably different from surrounding text', () => {
-  assert.match(journey, /const Color\(0xFFFFF2EE\)/);
-  assert.match(journey, /color: active[\s\S]*PhoenixTheme\.red/);
-  assert.match(interactive, /color: Colors\.white/);
-  assert.match(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
-  assert.match(interactive, /fontSize:[\s\S]*\+ 2\.2/);
-  assert.match(interactive, /fontWeight: FontWeight\.w900/);
+test('no text or paragraph color change is used for narration position', () => {
+  assert.doesNotMatch(interactive, /color: Colors\.white/);
+  assert.doesNotMatch(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
+  assert.doesNotMatch(journey, /const Color\(0xFFFFF2EE\)/);
+  assert.doesNotMatch(journey, /Icons\.graphic_eq_rounded/);
 });

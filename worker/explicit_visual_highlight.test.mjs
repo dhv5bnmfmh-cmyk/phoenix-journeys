@@ -16,32 +16,20 @@ const widgetTest = readFileSync(
   'utf8',
 );
 
-test('highlight derives from current playback position and is passed explicitly', () => {
-  assert.match(
-    controller,
-    /NarrationHighlightSnapshot\? get highlightSnapshot \{/,
-  );
+test('position derives from playback and is passed to Story and Discovery', () => {
+  assert.match(controller, /NarrationHighlightSnapshot\? get highlightSnapshot \{/);
   assert.match(interactive, /final int\? highlightStart/);
-  assert.match(interactive, /hasExplicitHighlight/);
   assert.equal(
-    (
-      journey.match(
-        /highlightStart: isActive \? snapshot!\.start : null/g,
-      ) ?? []
-    ).length,
-    2,
-  );
-  assert.equal(
-    (journey.match(/highlightEnd: isActive \? snapshot!\.end : null/g) ?? [])
+    (journey.match(/highlightStart: isActive \? snapshot!\.start : null/g) ?? [])
       .length,
     2,
   );
 });
 
-test('Flutter verifies a high-contrast active-word TextSpan is painted', () => {
-  assert.match(widgetTest, /backgroundColor == const Color\(0xFF8F1D18\)/);
-  assert.match(widgetTest, /color == Colors\.white/);
-  assert.match(widgetTest, /FontWeight\.w900/);
-  assert.match(widgetTest, /TextDecoration\.none/);
-  assert.match(widgetTest, /_containsActiveHighlight\(text\.textSpan!\)/);
+test('Flutter verifies a real inline triangle is painted', () => {
+  assert.match(interactive, /class _InlineReadingMarker/);
+  assert.match(interactive, /class _ReadingTrianglePainter/);
+  assert.match(interactive, /size: Size\(7, 4\)/);
+  assert.doesNotMatch(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
+  assert.match(widgetTest, /reading-triangle-visual-test/);
 });

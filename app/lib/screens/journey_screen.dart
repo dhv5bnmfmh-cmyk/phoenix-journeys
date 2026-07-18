@@ -992,29 +992,14 @@ class _CompactTextBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: ValueKey('compact-text-$index-${active ? 'active' : 'idle'}'),
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 2),
       padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
       decoration: BoxDecoration(
-        color: active
-            ? const Color(0xFFFFF2EE)
-            : Colors.white.withValues(alpha: .94),
+        color: Colors.white.withValues(alpha: .94),
         borderRadius: BorderRadius.circular(9),
-        border: Border.all(
-          color: active
-              ? PhoenixTheme.red
-              : PhoenixTheme.gold.withValues(alpha: .22),
-          width: active ? 1.5 : 1,
-        ),
-        boxShadow: active
-            ? const [
-                BoxShadow(
-                  color: Color(0x24781E18),
-                  blurRadius: 6,
-                  offset: Offset(0, 2),
-                ),
-              ]
-            : null,
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .22)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1023,23 +1008,15 @@ class _CompactTextBlock extends StatelessWidget {
             padding: const EdgeInsets.only(top: 1),
             child: CircleAvatar(
               radius: 9,
-              backgroundColor: active
-                  ? PhoenixTheme.red
-                  : PhoenixTheme.gold.withValues(alpha: .18),
-              child: active
-                  ? const Icon(
-                      Icons.graphic_eq_rounded,
-                      size: 10,
-                      color: Colors.white,
-                    )
-                  : Text(
-                      '$index',
-                      style: const TextStyle(
-                        color: PhoenixTheme.red,
-                        fontSize: 7,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
+              backgroundColor: PhoenixTheme.gold.withValues(alpha: .18),
+              child: Text(
+                '$index',
+                style: const TextStyle(
+                  color: PhoenixTheme.red,
+                  fontSize: 7,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 4),

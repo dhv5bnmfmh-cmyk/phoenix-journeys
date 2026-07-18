@@ -10,49 +10,14 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  apply-inline-triangle-progress:
-    if: >-
-      github.actor != 'github-actions[bot]' &&
-      (github.ref == 'refs/heads/feature/inline-triangle-progress' ||
-       github.head_ref == 'feature/inline-triangle-progress')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: feature/inline-triangle-progress
-          fetch-depth: 0
-
-      - name: Apply inline triangle and progress fix
-        run: python tools/apply_inline_triangle_progress.py
-
-      - uses: dart-lang/setup-dart@v1
-
-      - name: Format changed Dart files
-        run: dart format app/lib/services/narration_controller.dart app/lib/widgets/interactive_story_text.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/test/widgets/interactive_story_text_visual_test.dart
-
-      - name: Commit formal implementation
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout origin/main -- .github/workflows/flutter-ci.yml
-          git rm tools/apply_inline_triangle_progress.py
-          git add -A
-          git commit -m "fix: track narration with an inline triangle and monotonic progress"
-          git push origin HEAD:feature/inline-triangle-progress
-
   verify:
-    if: >-
-      github.actor == 'github-actions[bot]' ||
-      (github.ref != 'refs/heads/feature/inline-triangle-progress' &&
-       github.head_ref != 'feature/inline-triangle-progress')
     runs-on: ubuntu-latest
     defaults:
       run:
