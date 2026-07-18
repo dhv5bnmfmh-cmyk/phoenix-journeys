@@ -1,9 +1,9 @@
 name: Apply force resume after word sheet
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
+      - fix/force-resume-after-word-sheet
 
 permissions:
   contents: write
@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: fix/force-resume-after-word-sheet
           fetch-depth: 0
 
       - name: Apply reliable resume patch
@@ -140,4 +140,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app/lib/screens/journey_screen.dart app/lib/services/narration_controller.dart .github/workflows/apply-force-resume.yml
           git commit -m "fix: force narration resume after word sheet dismissal"
-          git push origin HEAD:${{ github.head_ref }}
+          git push origin HEAD:fix/force-resume-after-word-sheet
