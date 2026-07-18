@@ -37,4 +37,30 @@ void main() {
       30,
     );
   });
+
+  test('transient controller zero keeps the last visible reading position', () {
+    expect(
+      resolveNarrationContinuationOffset(
+        nativeOffset: 0,
+        nativeProgressIsFresh: false,
+        controllerOffset: 0,
+        lastObservedOffset: 42,
+        totalCharacters: 100,
+      ),
+      41,
+    );
+  });
+
+  test('fresh native word remains the continuation source of truth', () {
+    expect(
+      resolveNarrationContinuationOffset(
+        nativeOffset: 37,
+        nativeProgressIsFresh: true,
+        controllerOffset: 46,
+        lastObservedOffset: 48,
+        totalCharacters: 100,
+      ),
+      37,
+    );
+  });
 }
