@@ -161,6 +161,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (shouldResume) {
       await _narration.pause();
     }
+    final resumeOffset = _narration.currentOffset;
     if (!mounted) return;
 
     await showWordDetail(
@@ -173,7 +174,10 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
     if (!mounted || !shouldResume) return;
 
-    await _narration.resume();
+    // Wait until the sheet animation and iOS audio channel have fully closed.
+    await Future<void>.delayed(const Duration(milliseconds: 360));
+    if (!mounted) return;
+    await _narration.resumeFromOffset(resumeOffset);
   }
 
   bool _isNarrating(String contentId, int itemIndex) {
