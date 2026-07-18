@@ -10,49 +10,14 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  apply-reading-position-cleanup:
-    if: >-
-      github.actor != 'github-actions[bot]' &&
-      (github.ref == 'refs/heads/feature/obvious-reading-position' ||
-       github.head_ref == 'feature/obvious-reading-position')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: feature/obvious-reading-position
-          fetch-depth: 0
-
-      - name: Apply reading-position null-safety cleanup
-        run: python tools/fix_reading_position_nullable.py
-
-      - uses: dart-lang/setup-dart@v1
-
-      - name: Format Journey screen
-        run: dart format app/lib/screens/journey_screen.dart
-
-      - name: Commit reading-position cleanup
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout origin/main -- .github/workflows/flutter-ci.yml
-          git rm tools/fix_reading_position_nullable.py
-          git add -A
-          git commit -m "fix: make reading-position strip null-safe"
-          git push origin HEAD:feature/obvious-reading-position
-
   verify:
-    if: >-
-      github.actor == 'github-actions[bot]' ||
-      (github.ref != 'refs/heads/feature/obvious-reading-position' &&
-       github.head_ref != 'feature/obvious-reading-position')
     runs-on: ubuntu-latest
     defaults:
       run:

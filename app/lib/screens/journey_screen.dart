@@ -1002,7 +1002,11 @@ class _NowReadingStrip extends StatelessWidget {
       animation: controller,
       builder: (context, _) {
         final snapshot = controller.highlightSnapshot;
-        final isCurrent = snapshot?.contentId == contentId;
+        final currentSnapshot =
+            snapshot != null && snapshot.contentId == contentId
+            ? snapshot
+            : null;
+        final isCurrent = currentSnapshot != null;
         final status = controller.status;
         final isPlaying = isCurrent && status == NarrationStatus.playing;
         final isPaused = isCurrent && status == NarrationStatus.paused;
@@ -1016,13 +1020,15 @@ class _NowReadingStrip extends StatelessWidget {
             : isPaused
             ? Icons.pause_rounded
             : Icons.my_location_rounded;
-        final itemNumber = isCurrent ? snapshot!.itemIndex + 1 : null;
-        final word = isCurrent
-            ? snapshot.itemText.substring(
-                snapshot.start.clamp(0, snapshot.itemText.length),
-                snapshot.end.clamp(0, snapshot.itemText.length),
-              )
-            : '';
+        final itemNumber = currentSnapshot?.itemIndex == null
+            ? null
+            : currentSnapshot!.itemIndex + 1;
+        final word = currentSnapshot == null
+            ? ''
+            : currentSnapshot.itemText.substring(
+                currentSnapshot.start.clamp(0, currentSnapshot.itemText.length),
+                currentSnapshot.end.clamp(0, currentSnapshot.itemText.length),
+              );
 
         return AnimatedContainer(
           key: ValueKey('now-reading-$contentId'),
