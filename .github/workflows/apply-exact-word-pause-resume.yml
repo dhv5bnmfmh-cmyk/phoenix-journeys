@@ -1,0 +1,286 @@
+name: Apply exact-word pause resume fix
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.head_ref == 'feature/exact-word-pause-resume' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/exact-word-pause-resume
+          fetch-depth: 0
+
+      - name: Patch exact pause and resume position
+        shell: python
+        run: |
+          from pathlib import Path
+
+          controller_path = Path('app/lib/services/narration_controller.dart')
+          controller = controller_path.read_text()
+
+          old_getters = """  int get currentOffset => _currentOffset;
+  int get totalCharacters => _plan.text.length;
+"""
+          new_getters = """  int get currentOffset => _currentOffset;
+
+  int? get currentWordStartOffset {
+    final snapshot = NarrationHighlightBus.instance.snapshot;
+    if (snapshot == null || snapshot.contentId != _contentId) return null;
+    final index = snapshot.itemIndex;
+    if (index < 0 || index >= _plan.items.length) return null;
+    final item = _plan.items[index];
+    if (snapshot.itemId != item.id) return null;
+    return (_plan.itemStart(index) + snapshot.start)
+        .clamp(0, _plan.text.length)
+        .toInt();
+  }
+
+  int get totalCharacters => _plan.text.length;
+"""
+          if old_getters not in controller:
+              raise SystemExit('controller getters anchor not found')
+          controller = controller.replace(old_getters, new_getters, 1)
+
+          old_pause = """  Future<void> pause() async {
+    if (_status != NarrationStatus.playing) return;
+
+    _status = NarrationStatus.paused;
+    _cancelProgressClock();
+    _safeNotify();
+    await _stopSpeechEngine();
+
+    if (_disposed) return;
+    _status = NarrationStatus.paused;
+    _safeNotify();
+  }
+"""
+          new_pause = """  Future<void> pause() async {
+    if (_status != NarrationStatus.playing) return;
+    await pauseAtOffset(currentWordStartOffset ?? _currentOffset);
+  }
+
+  Future<void> pauseAtOffset(int offset) async {
+    if (_plan.isEmpty || _disposed) return;
+    final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
+    final safeOffset = offset.clamp(0, maxOffset).toInt();
+    final itemIndex = _plan.indexForOffset(safeOffset);
+
+    _currentOffset = safeOffset;
+    _currentItemIndex = itemIndex;
+    _status = NarrationStatus.paused;
+    _cancelProgressClock();
+    _safeNotify();
+    await _stopSpeechEngine();
+
+    if (_disposed) return;
+    _currentOffset = safeOffset;
+    _currentItemIndex = itemIndex;
+    _status = NarrationStatus.paused;
+    _safeNotify();
+  }
+"""
+          if old_pause not in controller:
+              raise SystemExit('controller pause anchor not found')
+          controller = controller.replace(old_pause, new_pause, 1)
+
+          early_clock = """      _status = NarrationStatus.playing;
+      _errorMessage = null;
+      _startProgressClock(safeOffset);
+      _applyProgress(safeOffset);
+"""
+          delayed_clock = """      _status = NarrationStatus.playing;
+      _errorMessage = null;
+      // Do not estimate before the speech engine actually starts. Starting the
+      // clock here made pause/resume jump several Chinese characters ahead.
+      _applyProgress(safeOffset);
+"""
+          if early_clock not in controller:
+              raise SystemExit('early progress clock anchor not found')
+          controller = controller.replace(early_clock, delayed_clock, 1)
+
+          result_anchor = """      final result = await _tts.speak(remainingText);
+      if (result != 1 && !_disposed) {
+"""
+          result_replacement = """      final result = await _tts.speak(remainingText);
+      if (result == 1 && !_disposed) {
+        // Some web engines omit the start callback. Give them a short grace
+        // period, then begin fallback estimation only if native progress still
+        // has not started.
+        unawaited(
+          Future<void>.delayed(const Duration(milliseconds: 650), () {
+            if (_disposed ||
+                _status != NarrationStatus.playing ||
+                _speechBaseOffset != safeOffset ||
+                _progressTimer != null ||
+                _lastNativeProgressAt != null) {
+              return;
+            }
+            _startProgressClock(_currentOffset);
+          }),
+        );
+      }
+      if (result != 1 && !_disposed) {
+"""
+          if result_anchor not in controller:
+              raise SystemExit('tts result anchor not found')
+          controller = controller.replace(result_anchor, result_replacement, 1)
+          controller_path.write_text(controller)
+
+          player_path = Path('app/lib/widgets/narration_player_card.dart')
+          player = player_path.read_text()
+
+          display_function_end = """  return candidate.clamp(0, totalCharacters).toInt();
+}
+
+class NarrationPlayerCard extends StatefulWidget {
+"""
+          pause_function = """  return candidate.clamp(0, totalCharacters).toInt();
+}
+
+@visibleForTesting
+int resolveNarrationPauseOffset({
+  required int? highlightedWordOffset,
+  required int controllerOffset,
+  required int estimatedOffset,
+  required int totalCharacters,
+}) {
+  if (totalCharacters <= 0) return 0;
+  final conservativeOffset = math.min(controllerOffset, estimatedOffset);
+  final candidate = highlightedWordOffset ?? conservativeOffset;
+  return candidate.clamp(0, math.max(0, totalCharacters - 1)).toInt();
+}
+
+class NarrationPlayerCard extends StatefulWidget {
+"""
+          if display_function_end not in player:
+              raise SystemExit('player function insertion anchor not found')
+          player = player.replace(display_function_end, pause_function, 1)
+
+          old_pause_session = """  Future<void> _pauseSession(int commandId) async {
+    final controllerIsCurrent = widget.controller.contentId == widget.contentId;
+    final offset = _sessionPlaying
+        ? _estimatedSessionOffset()
+        : controllerIsCurrent
+        ? widget.controller.currentOffset
+        : _displayOffset;
+    if (!mounted || commandId != _commandVersion) return;
+    _positionClock?.cancel();
+    setState(() {
+      _sessionPlaying = false;
+      _sessionPaused = true;
+      _displayOffset = offset;
+      _resumeOffset = offset;
+      _anchorOffset = offset;
+      _anchorTime = null;
+      _displayItemIndex =
+          widget.controller.currentItemIndex ?? _displayItemIndex;
+    });
+    await widget.controller.stop(resetPosition: false);
+  }
+"""
+          new_pause_session = """  Future<void> _pauseSession(int commandId) async {
+    final controllerIsCurrent = widget.controller.contentId == widget.contentId;
+    final estimatedOffset = _sessionPlaying
+        ? _estimatedSessionOffset()
+        : _displayOffset;
+    final offset = controllerIsCurrent
+        ? resolveNarrationPauseOffset(
+            highlightedWordOffset: widget.controller.currentWordStartOffset,
+            controllerOffset: widget.controller.currentOffset,
+            estimatedOffset: estimatedOffset,
+            totalCharacters: widget.controller.totalCharacters,
+          )
+        : estimatedOffset;
+    if (!mounted || commandId != _commandVersion) return;
+    _positionClock?.cancel();
+    setState(() {
+      _sessionPlaying = false;
+      _sessionPaused = true;
+      _displayOffset = offset;
+      _resumeOffset = offset;
+      _anchorOffset = offset;
+      _anchorTime = null;
+      _displayItemIndex =
+          widget.controller.currentItemIndex ?? _displayItemIndex;
+    });
+    if (controllerIsCurrent) {
+      await widget.controller.pauseAtOffset(offset);
+    }
+  }
+"""
+          if old_pause_session not in player:
+              raise SystemExit('player pause session anchor not found')
+          player = player.replace(old_pause_session, new_pause_session, 1)
+
+          old_resume_anchor = """    setState(() {
+      _anchorOffset = math.max(safeOffset, widget.controller.currentOffset);
+      _anchorTime = DateTime.now();
+    });
+"""
+          new_resume_anchor = """    setState(() {
+      // Keep the visual clock anchored to the exact word used for audio resume.
+      // Native progress will advance it after the engine starts speaking.
+      _displayOffset = safeOffset;
+      _resumeOffset = safeOffset;
+      _anchorOffset = safeOffset;
+      _anchorTime = DateTime.now();
+    });
+"""
+          if old_resume_anchor not in player:
+              raise SystemExit('player resume anchor not found')
+          player = player.replace(old_resume_anchor, new_resume_anchor, 1)
+          player_path.write_text(player)
+
+          test_path = Path('app/test/widgets/narration_player_card_test.dart')
+          test = test_path.read_text()
+          test_insert = """
+
+  test('resumes from the highlighted word instead of an ahead estimate', () {
+    final offset = resolveNarrationPauseOffset(
+      highlightedWordOffset: 23,
+      controllerOffset: 25,
+      estimatedOffset: 29,
+      totalCharacters: 120,
+    );
+
+    expect(offset, 23);
+  });
+
+  test('uses the conservative offset when no word callback is available', () {
+    final offset = resolveNarrationPauseOffset(
+      highlightedWordOffset: null,
+      controllerOffset: 18,
+      estimatedOffset: 23,
+      totalCharacters: 120,
+    );
+
+    expect(offset, 18);
+  });
+"""
+          end = test.rfind('\n}')
+          if end == -1:
+              raise SystemExit('test file closing brace not found')
+          test = test[:end] + test_insert + test[end:]
+          test_path.write_text(test)
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Format patched Dart files
+        run: dart format app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/test/widgets/narration_player_card_test.dart
+
+      - name: Commit exact-word resume fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-exact-word-pause-resume.yml
+          git add app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/test/widgets/narration_player_card_test.dart
+          git commit -m "fix: resume narration from the exact highlighted word"
+          git push origin HEAD:feature/exact-word-pause-resume
