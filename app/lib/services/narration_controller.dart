@@ -239,13 +239,17 @@ class NarrationController extends ChangeNotifier {
         return;
       }
       if (_speechMode != _NarrationSpeechMode.narration) return;
-      _cancelProgressClock();
-      _speechMode = _NarrationSpeechMode.idle;
-      _status = NarrationStatus.idle;
-      _currentOffset = _plan.text.length;
-      _currentItemIndex = null;
-      NarrationHighlightBus.instance.clear(contentId: _contentId);
-      _safeNotify();
+
+      // Safari can report completion before the audible voice has finished.
+      // Keep the single Phoenix clock alive until it reaches the text end.
+      final finalReadableOffset = _plan.text.isEmpty
+          ? 0
+          : _plan.text.length - 1;
+      if (_currentOffset < finalReadableOffset) {
+        if (_progressTimer == null) _startProgressClock(_currentOffset);
+        return;
+      }
+      _finishNarrationSession();
     });
     _tts.setCancelHandler(() {
       if (_shouldIgnoreEngineCallback) return;
@@ -314,21 +318,6 @@ class NarrationController extends ChangeNotifier {
     _currentItemIndex = 0;
     _errorMessage = null;
     await _speakFrom(0);
-  }
-
-  /// Keeps the visible word highlight moving while a browser continues to
-  /// speak but reports an unreliable completion/progress state.
-  void syncPlaybackHighlight({required String contentId, required int offset}) {
-    if (_disposed || _plan.isEmpty || _contentId != contentId) return;
-
-    final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
-    final safeOffset = offset.clamp(0, maxOffset).toInt();
-    _applyProgress(safeOffset);
-  }
-
-  void clearPlaybackHighlight({required String contentId}) {
-    if (_disposed || _contentId != contentId) return;
-    NarrationHighlightBus.instance.clear(contentId: contentId);
   }
 
   Future<void> pause() async {
@@ -532,7 +521,6 @@ class NarrationController extends ChangeNotifier {
       _currentItemIndex = _plan.indexForOffset(safeOffset);
       _status = NarrationStatus.playing;
       _errorMessage = null;
-      _startProgressClock(safeOffset);
       _applyProgress(safeOffset);
       _safeNotify();
 
@@ -541,7 +529,16 @@ class NarrationController extends ChangeNotifier {
       await _tts.setPitch(.98);
       await _tts.setVolume(1.0);
       final result = await _tts.speak(remainingText);
-      if (result != 1 && !_disposed) {
+      if (result == 1 && !_disposed) {
+        // Most engines call setStartHandler. This fallback covers browsers
+        // that start speaking without providing that callback.
+        await Future<void>.delayed(const Duration(milliseconds: 140));
+        if (!_disposed &&
+            _status == NarrationStatus.playing &&
+            _progressTimer == null) {
+          _startProgressClock(_currentOffset);
+        }
+      } else if (!_disposed) {
         _cancelProgressClock();
         _speechMode = _NarrationSpeechMode.idle;
         _status = NarrationStatus.error;
@@ -562,6 +559,16 @@ class NarrationController extends ChangeNotifier {
       NarrationHighlightBus.instance.clear(contentId: _contentId);
       _safeNotify();
     }
+  }
+
+  void _finishNarrationSession() {
+    _cancelProgressClock();
+    _speechMode = _NarrationSpeechMode.idle;
+    _status = NarrationStatus.idle;
+    _currentOffset = _plan.text.length;
+    _currentItemIndex = null;
+    NarrationHighlightBus.instance.clear(contentId: _contentId);
+    _safeNotify();
   }
 
   void _finishWordSpeech({required bool success}) {
@@ -619,9 +626,15 @@ class NarrationController extends ChangeNotifier {
       final anchor = _estimateAnchorTime ?? now;
       final elapsedSeconds =
           now.difference(anchor).inMilliseconds.toDouble() / 1000;
-      final charsPerSecond = 4.2 * (_speechRate / .36);
+      // Conservative fallback pace: native word callbacks remain exact;
+      // this clock is only used when a browser supplies no usable word events.
+      final charsPerSecond = 3.35 * (_speechRate / .36);
       final estimated =
           _estimateAnchorOffset + (elapsedSeconds * charsPerSecond).floor();
+      if (estimated >= _plan.text.length) {
+        _finishNarrationSession();
+        return;
+      }
       if (estimated <= _currentOffset) return;
       _applyProgress(estimated);
     });

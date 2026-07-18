@@ -678,38 +678,45 @@ class _JourneyScreenState extends State<JourneyScreen>
             child: AnimatedBuilder(
               animation: _narration,
               builder: (context, _) {
-                return Column(
-                  children: discoveries
-                      .asMap()
-                      .entries
-                      .map((entry) {
-                        final item = entry.value;
-                        final isActive = _isNarrating('discovery', entry.key);
-                        return _CompactTextBlock(
-                          index: entry.key + 1,
-                          active: isActive,
-                          onSupport: () => unawaited(
-                            _showReadingSupport(
-                              title: '今日发现 ${entry.key + 1}',
-                              pinyin: item.pinyin,
-                              nativeLabel: item.nativeLabel(language),
-                              nativeText: item.nativeText(language),
-                              english: item.english,
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: discoveries
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                          final item = entry.value;
+                          final isActive = _isNarrating('discovery', entry.key);
+                          return _CompactTextBlock(
+                            index: entry.key + 1,
+                            active: isActive,
+                            onSupport: () => unawaited(
+                              _showReadingSupport(
+                                title: '今日发现 ${entry.key + 1}',
+                                pinyin: item.pinyin,
+                                nativeLabel: item.nativeLabel(language),
+                                nativeText: item.nativeText(language),
+                                english: item.english,
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            state.displayText(item.text),
-                            style: TextStyle(
-                              fontSize: 10.2,
-                              height: 1.15,
-                              fontWeight: isActive
-                                  ? FontWeight.w800
-                                  : FontWeight.w600,
+                            child: InteractiveStoryText(
+                              text: item.text,
+                              entries: words,
+                              narrationContentId: 'discovery',
+                              narrationItemId: 'discovery-${entry.key}',
+                              style: TextStyle(
+                                fontSize: 9.9,
+                                height: 1.12,
+                                fontWeight: isActive
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                              ),
                             ),
-                          ),
-                        );
-                      })
-                      .toList(growable: false),
+                          );
+                        })
+                        .toList(growable: false),
+                  ),
                 );
               },
             ),
@@ -985,8 +992,8 @@ class _CompactTextBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 2),
-      padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
+      margin: const EdgeInsets.only(bottom: 1),
+      padding: const EdgeInsets.fromLTRB(3, 1, 1, 1),
       decoration: BoxDecoration(
         color: active
             ? PhoenixTheme.gold.withValues(alpha: .18)

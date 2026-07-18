@@ -9,9 +9,10 @@ const narration = readFileSync(
   'utf8',
 );
 
-test('word study sheet fits one viewport and advances through the list', () => {
-  assert.match(sheet, /FractionallySizedBox\([\s\S]*heightFactor: \.88/);
-  assert.doesNotMatch(sheet, /SingleChildScrollView/);
+test('word study sheet follows its content and advances through the list', () => {
+  assert.doesNotMatch(sheet, /FractionallySizedBox/);
+  assert.match(sheet, /mainAxisSize: MainAxisSize\.min/);
+  assert.doesNotMatch(sheet, /Expanded\([\s\S]*child: _CoreExampleCard/);
   assert.match(sheet, /下一个单词/);
   assert.match(sheet, /完成并收起/);
   assert.match(sheet, /if \(_isLast\) \{[\s\S]*Navigator\.of\(context\)\.pop/);
@@ -19,16 +20,17 @@ test('word study sheet fits one viewport and advances through the list', () => {
   assert.match(journey, /onSpeakEntry:/);
 });
 
-test('Discovery cards follow text height instead of equal-height expansion', () => {
+test('Discovery cards follow text height and support word highlighting', () => {
   const start = journey.indexOf('Widget _discoveryPage()');
   const end = journey.indexOf('Widget _wonderPage()', start);
   const discovery = journey.slice(start, end);
-  assert.doesNotMatch(discovery, /return Expanded\([\s\S]*_CompactTextBlock/);
-  assert.match(discovery, /fontSize: 10\.2/);
-  assert.match(discovery, /height: 1\.15/);
+  assert.match(discovery, /mainAxisSize: MainAxisSize\.min/);
+  assert.match(discovery, /InteractiveStoryText/);
+  assert.match(discovery, /fontSize: 9\.9/);
+  assert.match(discovery, /height: 1\.12/);
 });
 
-test('narration uses a natural Chinese voice profile when available', () => {
+test('narration keeps the natural Chinese voice profile', () => {
   assert.match(narration, /getVoices/);
   assert.match(narration, /natural/);
   assert.match(narration, /premium/);
