@@ -1,0 +1,36 @@
+name: Apply triangle reading marker fix
+
+on:
+  push:
+    branches:
+      - feature/triangle-reading-marker
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/triangle-reading-marker
+          fetch-depth: 0
+
+      - name: Apply triangle and progress fix
+        run: python tools/apply_triangle_progress_fix.py
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Format Dart files
+        run: dart format app/lib/services/narration_controller.dart app/lib/screens/journey_screen.dart app/lib/widgets/interactive_story_text.dart
+
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-triangle-reading-marker.yml tools/apply_triangle_progress_fix.py
+          git add -A
+          git commit -m "fix: track narration with an inline triangle"
+          git push origin HEAD:feature/triangle-reading-marker
