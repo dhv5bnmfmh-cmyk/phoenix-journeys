@@ -7,6 +7,11 @@ void main() {
     expect(compactExploreMapHeight(760), 174);
   });
 
+  test('switches to the regular compact height at the phone boundary', () {
+    expect(compactExploreMapHeight(819), 174);
+    expect(compactExploreMapHeight(820), 188);
+  });
+
   test('caps the regular phone map at a one-screen-friendly height', () {
     expect(compactExploreMapHeight(850), 188);
   });
