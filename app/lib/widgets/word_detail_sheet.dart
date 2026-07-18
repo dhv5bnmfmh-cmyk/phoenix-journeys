@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 
 import '../data/journey_data.dart';
@@ -9,94 +8,55 @@ import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import 'word_mark.dart';
 
-Future<void> showWordDetail(BuildContext context, WordEntry entry) {
+Future<void> showWordDetail(
+  BuildContext context,
+  WordEntry entry, {
+  required Future<bool> Function() onSpeak,
+}) {
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (_) => _WordDetailSheet(entry: entry),
+    builder: (_) => _WordDetailSheet(entry: entry, onSpeak: onSpeak),
   );
 }
 
 class _WordDetailSheet extends StatefulWidget {
-  const _WordDetailSheet({required this.entry});
+  const _WordDetailSheet({required this.entry, required this.onSpeak});
 
   final WordEntry entry;
+  final Future<bool> Function() onSpeak;
 
   @override
   State<_WordDetailSheet> createState() => _WordDetailSheetState();
 }
 
 class _WordDetailSheetState extends State<_WordDetailSheet> {
-  late final FlutterTts _tts;
   bool _isSpeaking = false;
   bool _speechUnavailable = false;
 
   @override
   void initState() {
     super.initState();
-    _tts = FlutterTts();
-    _tts.setStartHandler(() => _setSpeaking(true));
-    _tts.setCompletionHandler(() => _setSpeaking(false));
-    _tts.setCancelHandler(() => _setSpeaking(false));
-    _tts.setErrorHandler((_) {
-      if (!mounted) return;
-      setState(() {
-        _isSpeaking = false;
-        _speechUnavailable = true;
-      });
-    });
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_speak());
-    });
-  }
-
-  void _setSpeaking(bool value) {
-    if (!mounted) return;
-    setState(() {
-      _isSpeaking = value;
-      if (value) _speechUnavailable = false;
+      if (mounted) unawaited(_speak());
     });
   }
 
   Future<void> _speak() async {
-    if (mounted) {
-      setState(() {
-        _isSpeaking = true;
-        _speechUnavailable = false;
-      });
-    }
+    if (_isSpeaking) return;
+    setState(() {
+      _isSpeaking = true;
+      _speechUnavailable = false;
+    });
 
-    try {
-      final state = context.read<AppState>();
-      await _tts.stop();
-      await _tts.setLanguage(state.isTraditional ? 'zh-TW' : 'zh-CN');
-      await _tts.setSpeechRate(0.42);
-      await _tts.setPitch(1.0);
-      await _tts.setVolume(1.0);
-      final result = await _tts.speak(state.displayText(widget.entry.word));
-      if (result != 1 && mounted) {
-        setState(() {
-          _isSpeaking = false;
-          _speechUnavailable = true;
-        });
-      }
-    } catch (error) {
-      debugPrint('Unable to pronounce ${widget.entry.word}: $error');
-      if (!mounted) return;
-      setState(() {
-        _isSpeaking = false;
-        _speechUnavailable = true;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _tts.stop();
-    super.dispose();
+    final success = await widget.onSpeak();
+    if (!mounted) return;
+    setState(() {
+      _isSpeaking = false;
+      _speechUnavailable = !success;
+    });
   }
 
   @override

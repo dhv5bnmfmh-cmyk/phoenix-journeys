@@ -18,7 +18,11 @@ class PhoenixMediaButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconSize = size * .46;
+    final iconSize = size * .44;
+    final innerColors = isPlaying
+        ? const [Color(0xFFB92A2C), Color(0xFF71161A)]
+        : const [Color(0xFFFFFCF3), Color(0xFFF1D79F)];
+    final iconColor = isPlaying ? const Color(0xFFFFF5D6) : PhoenixTheme.red;
 
     return Tooltip(
       message: tooltip,
@@ -31,29 +35,37 @@ class PhoenixMediaButton extends StatelessWidget {
             onTap: onPressed,
             customBorder: const CircleBorder(),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
+              duration: const Duration(milliseconds: 170),
+              curve: Curves.easeOut,
               width: size,
               height: size,
               padding: EdgeInsets.all(size * .065),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFFD24B35),
-                    PhoenixTheme.red,
-                    Color(0xFF651418),
-                  ],
+                  colors: isPlaying
+                      ? const [
+                          Color(0xFFFFD879),
+                          Color(0xFFC78D2B),
+                          PhoenixTheme.red,
+                        ]
+                      : const [
+                          Color(0xFFD24B35),
+                          PhoenixTheme.red,
+                          Color(0xFF651418),
+                        ],
                 ),
                 border: Border.all(
-                  color: const Color(0xFFF2C86E),
+                  color: const Color(0xFFF6D57D),
                   width: size * .045,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: PhoenixTheme.red.withValues(alpha: .30),
-                    blurRadius: size * .32,
+                    color: (isPlaying ? PhoenixTheme.gold : PhoenixTheme.red)
+                        .withValues(alpha: .34),
+                    blurRadius: size * .34,
                     offset: Offset(0, size * .14),
                   ),
                   const BoxShadow(
@@ -67,17 +79,14 @@ class PhoenixMediaButton extends StatelessWidget {
                 clipBehavior: Clip.none,
                 children: [
                   Positioned.fill(
-                    child: DecoratedBox(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 170),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: const RadialGradient(
-                          center: Alignment(-.28, -.34),
+                        gradient: RadialGradient(
+                          center: const Alignment(-.28, -.34),
                           radius: 1.05,
-                          colors: [
-                            Color(0xFFFFFCF3),
-                            Color(0xFFF8EACB),
-                            Color(0xFFEFD39B),
-                          ],
+                          colors: innerColors,
                         ),
                         border: Border.all(
                           color: const Color(0xFFF4D488),
@@ -93,14 +102,16 @@ class PhoenixMediaButton extends StatelessWidget {
                       width: size * .28,
                       height: size * .08,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .68),
+                        color: Colors.white.withValues(
+                          alpha: isPlaying ? .22 : .68,
+                        ),
                         borderRadius: BorderRadius.circular(99),
                       ),
                     ),
                   ),
                   Center(
                     child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 160),
+                      duration: const Duration(milliseconds: 150),
                       transitionBuilder: (child, animation) => ScaleTransition(
                         scale: animation,
                         child: FadeTransition(opacity: animation, child: child),
@@ -109,8 +120,10 @@ class PhoenixMediaButton extends StatelessWidget {
                         isPlaying
                             ? Icons.pause_rounded
                             : Icons.play_arrow_rounded,
-                        key: ValueKey(isPlaying),
-                        color: PhoenixTheme.red,
+                        key: ValueKey<String>(
+                          isPlaying ? 'phoenix-pause' : 'phoenix-play',
+                        ),
+                        color: iconColor,
                         size: iconSize,
                       ),
                     ),
@@ -142,7 +155,9 @@ class PhoenixMediaButton extends StatelessWidget {
                       ),
                       child: Icon(
                         Icons.local_fire_department_rounded,
-                        color: PhoenixTheme.red,
+                        color: isPlaying
+                            ? const Color(0xFF651418)
+                            : PhoenixTheme.red,
                         size: size * .18,
                       ),
                     ),

@@ -157,23 +157,26 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Future<void> _openWord(WordEntry entry) async {
-  final shouldResume = _narration.status == NarrationStatus.playing;
-  if (shouldResume) {
-    await _narration.pause();
-  }
-  if (!mounted) return;
+    final shouldResume = _narration.status == NarrationStatus.playing;
+    if (shouldResume) {
+      await _narration.pause();
+    }
+    if (!mounted) return;
 
-  await showWordDetail(context, entry);
-  if (!mounted || !shouldResume) return;
+    await showWordDetail(
+      context,
+      entry,
+      onSpeak: () => _narration.speakWord(
+        _appState.displayText(entry.word),
+        languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
+      ),
+    );
+    if (!mounted || !shouldResume) return;
 
-  // Let the word-detail voice release the audio channel before resuming.
-  await Future<void>.delayed(const Duration(milliseconds: 120));
-  if (mounted && _narration.status == NarrationStatus.paused) {
     await _narration.resume();
   }
-}
 
-bool _isNarrating(String contentId, int itemIndex) {
+  bool _isNarrating(String contentId, int itemIndex) {
     final isActive = _narration.status == NarrationStatus.playing ||
         _narration.status == NarrationStatus.paused;
     return isActive &&

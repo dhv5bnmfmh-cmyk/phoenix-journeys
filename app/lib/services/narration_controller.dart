@@ -5,6 +5,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 
 enum NarrationStatus { idle, playing, paused, error }
 
+enum _NarrationSpeechMode { idle, narration, word }
+
 @immutable
 class NarrationSpeedOption {
   const NarrationSpeedOption({required this.label, required this.rate});
@@ -155,6 +157,13 @@ class NarrationController extends ChangeNotifier {
   DateTime? _estimateAnchorTime;
   int _estimateAnchorOffset = 0;
   DateTime? _lastNativeProgressAt;
+  _NarrationSpeechMode _speechMode = _NarrationSpeechMode.idle;
+  bool _suppressEngineCallbacks = false;
+  DateTime? _ignoreEngineCallbacksUntil;
+  bool _isSpeakingWord = false;
+  bool _wordSpeechUnavailable = false;
+  String? _spokenWord;
+  Completer<bool>? _wordSpeechCompleter;
 
   NarrationStatus get status => _status;
   String? get contentId => _contentId;
@@ -165,6 +174,9 @@ class NarrationController extends ChangeNotifier {
   double get speechRate => _speechRate;
   int get currentOffset => _currentOffset;
   int get totalCharacters => _plan.text.length;
+  bool get isSpeakingWord => _isSpeakingWord;
+  bool get wordSpeechUnavailable => _wordSpeechUnavailable;
+  String? get spokenWord => _spokenWord;
 
   String get speedLabel {
     return speedOptions
@@ -189,15 +201,36 @@ class NarrationController extends ChangeNotifier {
     return value.clamp(0.0, 1.0).toDouble();
   }
 
+  bool get _shouldIgnoreEngineCallback {
+    if (_suppressEngineCallbacks) return true;
+    final until = _ignoreEngineCallbacksUntil;
+    return until != null && DateTime.now().isBefore(until);
+  }
+
   void _bindHandlers() {
     _tts.setStartHandler(() {
+      if (_shouldIgnoreEngineCallback) return;
+      if (_speechMode == _NarrationSpeechMode.word) {
+        _isSpeakingWord = true;
+        _wordSpeechUnavailable = false;
+        _safeNotify();
+        return;
+      }
+      if (_speechMode != _NarrationSpeechMode.narration) return;
       _status = NarrationStatus.playing;
       _errorMessage = null;
       _startProgressClock(_currentOffset);
       _safeNotify();
     });
     _tts.setCompletionHandler(() {
+      if (_shouldIgnoreEngineCallback) return;
+      if (_speechMode == _NarrationSpeechMode.word) {
+        _finishWordSpeech(success: true);
+        return;
+      }
+      if (_speechMode != _NarrationSpeechMode.narration) return;
       _cancelProgressClock();
+      _speechMode = _NarrationSpeechMode.idle;
       _status = NarrationStatus.idle;
       _currentOffset = _plan.text.length;
       _currentItemIndex = null;
@@ -205,14 +238,27 @@ class NarrationController extends ChangeNotifier {
       _safeNotify();
     });
     _tts.setCancelHandler(() {
-      if (_status == NarrationStatus.paused) return;
+      if (_shouldIgnoreEngineCallback) return;
+      if (_speechMode == _NarrationSpeechMode.word) {
+        _finishWordSpeech(success: true);
+        return;
+      }
+      if (_status == NarrationStatus.paused ||
+_speechMode != _NarrationSpeechMode.narration) {
+        return;
+      }
       _cancelProgressClock();
+      _speechMode = _NarrationSpeechMode.idle;
       _status = NarrationStatus.idle;
       _currentItemIndex = null;
       NarrationHighlightBus.instance.clear(contentId: _contentId);
       _safeNotify();
     });
     _tts.setProgressHandler((wordText, startOffset, endOffset, word) {
+      if (_shouldIgnoreEngineCallback ||
+_speechMode != _NarrationSpeechMode.narration) {
+        return;
+      }
       final globalStart = _speechBaseOffset + startOffset;
       final globalEnd = _speechBaseOffset + endOffset;
       _lastNativeProgressAt = DateTime.now();
@@ -225,7 +271,13 @@ class NarrationController extends ChangeNotifier {
       );
     });
     _tts.setErrorHandler((message) {
+      if (_speechMode == _NarrationSpeechMode.word) {
+        debugPrint('Word narration error: $message');
+        _finishWordSpeech(success: false);
+        return;
+      }
       _cancelProgressClock();
+      _speechMode = _NarrationSpeechMode.idle;
       _status = NarrationStatus.error;
       _errorMessage = '当前设备暂时无法朗读，请检查声音设置后重试。';
       _currentItemIndex = null;
@@ -257,12 +309,7 @@ class NarrationController extends ChangeNotifier {
     _status = NarrationStatus.paused;
     _cancelProgressClock();
     _safeNotify();
-
-    try {
-      await _tts.stop();
-    } catch (error) {
-      debugPrint('Unable to pause narration: $error');
-    }
+    await _stopSpeechEngine();
 
     if (_disposed) return;
     _status = NarrationStatus.paused;
@@ -275,6 +322,50 @@ class NarrationController extends ChangeNotifier {
     final offset = _currentOffset >= _plan.text.length ? 0 : _currentOffset;
     await _speakFrom(offset);
   }
+
+  Future<bool> speakWord(
+    String word, {
+    required String languageCode,
+  }) async {
+    final value = word.trim();
+    if (value.isEmpty || _disposed) return false;
+
+    if (_status == NarrationStatus.playing) {
+      await pause();
+    }
+    await _stopSpeechEngine();
+    if (_disposed) return false;
+
+    _speechMode = _NarrationSpeechMode.word;
+    _spokenWord = value;
+    _isSpeakingWord = true;
+    _wordSpeechUnavailable = false;
+    final completer = Completer<bool>();
+    _wordSpeechCompleter = completer;
+    _safeNotify();
+
+    try {
+      await _tts.setLanguage(languageCode);
+      await _tts.setSpeechRate(.42);
+      await _tts.setPitch(1.0);
+      await _tts.setVolume(1.0);
+      final result = await _tts.speak(value);
+      if (result != 1) {
+        _finishWordSpeech(success: false);
+      }
+    } catch (error) {
+      debugPrint('Unable to pronounce $value: $error');
+      _finishWordSpeech(success: false);
+    }
+
+    try {
+      return await completer.future.timeout(const Duration(seconds: 8));
+    } on TimeoutException {
+      await _stopSpeechEngine();
+      return false;
+    }
+  }
+
 
   Future<void> restart() async {
     if (_plan.isEmpty || _contentId == null) return;
@@ -310,12 +401,7 @@ class NarrationController extends ChangeNotifier {
     }
     _safeNotify();
 
-    try {
-      await _tts.stop();
-    } catch (error) {
-      debugPrint('Unable to stop narration: $error');
-    }
-
+    await _stopSpeechEngine();
     if (_disposed) return;
     _status = NarrationStatus.idle;
     _currentItemIndex = null;
@@ -326,15 +412,16 @@ class NarrationController extends ChangeNotifier {
     final safeOffset = offset < 0
         ? 0
         : offset >= _plan.text.length
-            ? 0
-            : offset;
+  ? 0
+  : offset;
     final remainingText = _plan.text.substring(safeOffset);
 
     try {
       _cancelProgressClock();
-      await _tts.stop();
+      await _stopSpeechEngine();
       if (_disposed) return;
 
+      _speechMode = _NarrationSpeechMode.narration;
       _speechBaseOffset = safeOffset;
       _currentOffset = safeOffset;
       _currentItemIndex = _plan.indexForOffset(safeOffset);
@@ -351,6 +438,7 @@ class NarrationController extends ChangeNotifier {
       final result = await _tts.speak(remainingText);
       if (result != 1 && !_disposed) {
         _cancelProgressClock();
+        _speechMode = _NarrationSpeechMode.idle;
         _status = NarrationStatus.error;
         _errorMessage = '没有找到可用的中文语音，请换用 Safari 或 Chrome 重试。';
         _currentItemIndex = null;
@@ -362,11 +450,47 @@ class NarrationController extends ChangeNotifier {
       debugPrintStack(stackTrace: stackTrace);
       if (_disposed) return;
       _cancelProgressClock();
+      _speechMode = _NarrationSpeechMode.idle;
       _status = NarrationStatus.error;
       _errorMessage = '朗读启动失败，请检查设备音量或浏览器权限。';
       _currentItemIndex = null;
       NarrationHighlightBus.instance.clear(contentId: _contentId);
       _safeNotify();
+    }
+  }
+
+  void _finishWordSpeech({required bool success}) {
+    _isSpeakingWord = false;
+    _wordSpeechUnavailable = !success;
+    _spokenWord = null;
+    _speechMode = _NarrationSpeechMode.idle;
+    final completer = _wordSpeechCompleter;
+    _wordSpeechCompleter = null;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete(success);
+    }
+    _safeNotify();
+  }
+
+  Future<void> _stopSpeechEngine() async {
+    _suppressEngineCallbacks = true;
+    _ignoreEngineCallbacksUntil =
+        DateTime.now().add(const Duration(milliseconds: 120));
+    try {
+      await _tts.stop();
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+    } catch (error) {
+      debugPrint('Unable to stop speech engine: $error');
+    } finally {
+      _suppressEngineCallbacks = false;
+    }
+
+    if (_speechMode == _NarrationSpeechMode.word) {
+      _finishWordSpeech(success: true);
+    } else {
+      _speechMode = _NarrationSpeechMode.idle;
+      _isSpeakingWord = false;
+      _spokenWord = null;
     }
   }
 
