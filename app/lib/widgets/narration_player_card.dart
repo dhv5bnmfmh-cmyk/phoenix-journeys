@@ -19,7 +19,8 @@ int resolveNarrationDisplayOffset({
   // Safari/iOS can report completion while speech is still audible. In that
   // case the controller jumps to 100%, so only trust native offsets while the
   // controller still reports an active or paused session.
-  final nativeOffsetIsReliable = controllerStatus == NarrationStatus.playing ||
+  final nativeOffsetIsReliable =
+      controllerStatus == NarrationStatus.playing ||
       controllerStatus == NarrationStatus.paused;
   final candidate = nativeOffsetIsReliable
       ? math.max(estimatedOffset, controllerOffset)
@@ -50,7 +51,7 @@ class NarrationPlayerCard extends StatefulWidget {
 class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
   bool _sessionPlaying = false;
   bool _sessionPaused = false;
-  bool _transitioning = false;
+  int _commandVersion = 0;
   int _displayOffset = 0;
   int _resumeOffset = 0;
   int _anchorOffset = 0;
@@ -63,12 +64,14 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.contentId != widget.contentId ||
         oldWidget.controller != widget.controller) {
+      _commandVersion += 1;
       _resetLocalSession();
     }
   }
 
   @override
   void dispose() {
+    _commandVersion += 1;
     _positionClock?.cancel();
     super.dispose();
   }
@@ -90,11 +93,8 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     if (total <= 0) return 0;
 
     final anchorTime = _anchorTime ?? DateTime.now();
-    final elapsedSeconds = DateTime.now()
-            .difference(anchorTime)
-            .inMilliseconds
-            .toDouble() /
-        1000;
+    final elapsedSeconds =
+        DateTime.now().difference(anchorTime).inMilliseconds.toDouble() / 1000;
     final charsPerSecond = 4.2 * (widget.controller.speechRate / .40);
     final estimated = _anchorOffset + (elapsedSeconds * charsPerSecond).floor();
 
@@ -161,102 +161,93 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     _startPositionClock();
   }
 
-  Future<void> _handleMainPressed() async {
-    if (_transitioning) return;
-    _transitioning = true;
-    try {
-      if (_sessionPlaying) {
-        await _pauseSession();
-      } else if (_sessionPaused) {
-        await _resumeSession();
-      } else if (widget.controller.contentId == widget.contentId &&
-          widget.controller.status == NarrationStatus.playing) {
-        _beginLocalPlayback(widget.controller.currentOffset);
-        await _pauseSession();
-      } else if (widget.controller.contentId == widget.contentId &&
-          widget.controller.status == NarrationStatus.paused) {
-        _resumeOffset = widget.controller.currentOffset;
-        await _resumeSession();
-      } else {
-        await _startSession();
-      }
-    } finally {
-      _transitioning = false;
-    }
-  }
+  void _handleMainPressed() {
+    final commandId = ++_commandVersion;
+    final controllerIsCurrent = widget.controller.contentId == widget.contentId;
+    final controllerPlaying =
+        controllerIsCurrent &&
+        widget.controller.status == NarrationStatus.playing;
+    final controllerPaused =
+        controllerIsCurrent &&
+        widget.controller.status == NarrationStatus.paused;
 
-  Future<void> _startSession() async {
-    _beginLocalPlayback(0);
-    await widget.onPlay();
-    if (!mounted) return;
-
-    if (widget.controller.status == NarrationStatus.error) {
-      _positionClock?.cancel();
-      setState(() {
-        _sessionPlaying = false;
-        _sessionPaused = false;
-      });
+    if (_sessionPlaying || controllerPlaying) {
+      unawaited(_pauseSession(commandId));
       return;
     }
+    if (_sessionPaused || controllerPaused) {
+      if (!_sessionPaused) _resumeOffset = widget.controller.currentOffset;
+      unawaited(_resumeSession(commandId));
+      return;
+    }
+    unawaited(_startSession(commandId));
+  }
 
+  Future<void> _startSession(int commandId) async {
+    _beginLocalPlayback(0);
+    await widget.onPlay();
+    if (!mounted || commandId != _commandVersion || !_sessionPlaying) {
+      return;
+    }
+    final nativeOffset =
+        widget.controller.status == NarrationStatus.playing ||
+            widget.controller.status == NarrationStatus.paused
+        ? widget.controller.currentOffset
+        : _displayOffset;
+    final safeOffset = math.max(_displayOffset, nativeOffset);
     setState(() {
-      _anchorOffset = 0;
+      _displayOffset = safeOffset;
+      _resumeOffset = safeOffset;
+      _anchorOffset = safeOffset;
       _anchorTime = DateTime.now();
-      _displayOffset = 0;
-      _resumeOffset = 0;
-      _displayItemIndex = widget.controller.currentItemIndex ?? 0;
+      _displayItemIndex =
+          widget.controller.currentItemIndex ?? _displayItemIndex ?? 0;
     });
     _startPositionClock();
   }
 
-  Future<void> _pauseSession() async {
-    final offset = _estimatedSessionOffset();
+  Future<void> _pauseSession(int commandId) async {
+    final controllerIsCurrent = widget.controller.contentId == widget.contentId;
+    final offset = _sessionPlaying
+        ? _estimatedSessionOffset()
+        : controllerIsCurrent
+        ? widget.controller.currentOffset
+        : _displayOffset;
+    if (!mounted || commandId != _commandVersion) return;
     _positionClock?.cancel();
-    if (mounted) {
-      setState(() {
-        _sessionPlaying = false;
-        _sessionPaused = true;
-        _displayOffset = offset;
-        _resumeOffset = offset;
-        _anchorOffset = offset;
-        _anchorTime = null;
-      });
-    }
-
-    // stop(resetPosition: false) is deliberate: unlike pause(), it still
-    // releases audio when Safari has already changed the controller to idle.
+    setState(() {
+      _sessionPlaying = false;
+      _sessionPaused = true;
+      _displayOffset = offset;
+      _resumeOffset = offset;
+      _anchorOffset = offset;
+      _anchorTime = null;
+      _displayItemIndex =
+          widget.controller.currentItemIndex ?? _displayItemIndex;
+    });
     await widget.controller.stop(resetPosition: false);
   }
 
-  Future<void> _resumeSession() async {
+  Future<void> _resumeSession(int commandId) async {
     final total = widget.controller.totalCharacters;
     final safeOffset = total <= 0
         ? 0
         : _resumeOffset.clamp(0, math.max(0, total - 1)).toInt();
+    if (!mounted || commandId != _commandVersion) return;
     _beginLocalPlayback(safeOffset);
     await widget.controller.resumeFromOffset(safeOffset);
-    if (!mounted) return;
-
-    if (widget.controller.status == NarrationStatus.error) {
-      _positionClock?.cancel();
-      setState(() {
-        _sessionPlaying = false;
-        _sessionPaused = true;
-      });
+    if (!mounted || commandId != _commandVersion || !_sessionPlaying) {
+      return;
     }
-  }
-
-  Future<void> _stopSession() async {
-    _positionClock?.cancel();
-    if (mounted) {
-      setState(_resetLocalSession);
-    } else {
-      _resetLocalSession();
-    }
-    await widget.controller.stop();
+    setState(() {
+      _anchorOffset = math.max(safeOffset, widget.controller.currentOffset);
+      _anchorTime = DateTime.now();
+    });
+    _startPositionClock();
   }
 
   Future<void> _restartSession() async {
+    final commandId = ++_commandVersion;
     _beginLocalPlayback(0);
     if (widget.controller.contentId == widget.contentId &&
         widget.controller.hasContent) {
@@ -264,6 +255,14 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     } else {
       await widget.onPlay();
     }
+    if (!mounted || commandId != _commandVersion || !_sessionPlaying) {
+      return;
+    }
+    setState(() {
+      _anchorOffset = 0;
+      _anchorTime = DateTime.now();
+    });
+    _startPositionClock();
   }
 
   Future<void> _setSpeechRate(double rate) async {
@@ -295,42 +294,45 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
             ? widget.controller.status
             : NarrationStatus.idle;
         final hasError = controllerStatus == NarrationStatus.error;
-        final isPlaying = _sessionPlaying ||
+        final isPlaying =
+            _sessionPlaying ||
             (!_sessionPaused && controllerStatus == NarrationStatus.playing);
-        final isPaused = _sessionPaused ||
+        final isPaused =
+            _sessionPaused ||
             (!isPlaying && controllerStatus == NarrationStatus.paused);
         final status = hasError
             ? NarrationStatus.error
             : isPlaying
-                ? NarrationStatus.playing
-                : isPaused
-                    ? NarrationStatus.paused
-                    : NarrationStatus.idle;
+            ? NarrationStatus.playing
+            : isPaused
+            ? NarrationStatus.paused
+            : NarrationStatus.idle;
         final total = widget.controller.totalCharacters;
         final progress = (_sessionPlaying || _sessionPaused) && total > 0
             ? (_displayOffset / total).clamp(0.0, 1.0).toDouble()
             : controllerIsCurrent
-                ? widget.controller.progress
-                : 0.0;
+            ? widget.controller.progress
+            : 0.0;
         final currentItem = (_sessionPlaying || _sessionPaused)
             ? _displayItemIndex
             : controllerIsCurrent
-                ? widget.controller.currentItemIndex
-                : null;
+            ? widget.controller.currentItemIndex
+            : null;
         final itemCount = controllerIsCurrent ? widget.controller.itemCount : 0;
-        final canControl = _sessionPlaying ||
+        final canControl =
+            _sessionPlaying ||
             _sessionPaused ||
             (controllerIsCurrent && widget.controller.hasContent);
         final percent = (progress * 100).round();
         final activeSubtitle = hasError
             ? widget.controller.errorMessage ?? '朗读暂时不可用'
             : isPlaying
-                ? widget.controller.currentItemLabel != null
-                    ? '${widget.controller.currentItemLabel} · $percent%'
-                    : '正在朗读 · $percent%'
-                : isPaused
-                    ? '已暂停 · $percent%'
-                    : widget.subtitle;
+            ? widget.controller.currentItemLabel != null
+                  ? '${widget.controller.currentItemLabel} · $percent%'
+                  : '正在朗读 · $percent%'
+            : isPaused
+            ? '已暂停 · $percent%'
+            : widget.subtitle;
 
         return Semantics(
           container: true,
@@ -415,17 +417,9 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                       isPlaying: isPlaying,
                       tooltip: _mainButtonTooltip(status),
                       size: 50,
-                      onPressed: () => unawaited(_handleMainPressed()),
+                      onPressed: _handleMainPressed,
                     ),
-                    const SizedBox(width: 2),
-                    _MiniIconButton(
-                      key: const ValueKey('narration-stop-control'),
-                      tooltip: '停止朗读',
-                      icon: Icons.stop_rounded,
-                      onPressed: canControl && status != NarrationStatus.idle
-                          ? () => unawaited(_stopSession())
-                          : null,
-                    ),
+                    const SizedBox(width: 8),
                     PopupMenuButton<double>(
                       key: const ValueKey('narration-speed-control'),
                       tooltip: '调整朗读语速',
@@ -433,15 +427,14 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                       onSelected: (rate) {
                         unawaited(_setSpeechRate(rate));
                       },
-                      itemBuilder: (context) =>
-                          NarrationController.speedOptions
-                              .map(
-                                (option) => PopupMenuItem<double>(
-                                  value: option.rate,
-                                  child: Text('${option.label} 语速'),
-                                ),
-                              )
-                              .toList(growable: false),
+                      itemBuilder: (context) => NarrationController.speedOptions
+                          .map(
+                            (option) => PopupMenuItem<double>(
+                              value: option.rate,
+                              child: Text('${option.label} 语速'),
+                            ),
+                          )
+                          .toList(growable: false),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 7,
