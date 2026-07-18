@@ -1,0 +1,40 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/widgets/narration_player_card.dart';
+
+void main() {
+  test('uses exact native word start when progress is fresh', () {
+    expect(
+      resolveNarrationPauseOffset(
+        nativeOffset: 17,
+        nativeProgressIsFresh: true,
+        estimatedOffset: 24,
+        totalCharacters: 100,
+      ),
+      17,
+    );
+  });
+
+  test('Safari zero progress does not restart narration', () {
+    expect(
+      resolveNarrationPauseOffset(
+        nativeOffset: 0,
+        nativeProgressIsFresh: false,
+        estimatedOffset: 24,
+        totalCharacters: 100,
+      ),
+      23,
+    );
+  });
+
+  test('stale progress falls back to Phoenix clock', () {
+    expect(
+      resolveNarrationPauseOffset(
+        nativeOffset: 5,
+        nativeProgressIsFresh: false,
+        estimatedOffset: 31,
+        totalCharacters: 100,
+      ),
+      30,
+    );
+  });
+}

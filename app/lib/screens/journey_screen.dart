@@ -495,25 +495,22 @@ class _JourneyScreenState extends State<JourneyScreen>
             compact: true,
             onPlay: _playStory,
           ),
-          const SizedBox(height: 4),
-          const _InlineTip(
-            icon: Icons.touch_app_outlined,
-            text: '四段短文同屏阅读；点红色词语看释义，点“注”查看拼音、母语与 English。',
-          ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Expanded(
             child: AnimatedBuilder(
               animation: _narration,
               builder: (context, _) {
-                return Column(
-                  children: _journeyContent.storyParagraphs
-                      .asMap()
-                      .entries
-                      .map((entry) {
-                        final annotation = storyAnnotations[entry.key];
-                        final isActive = _isNarrating('story', entry.key);
-                        return Expanded(
-                          child: _CompactTextBlock(
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: _journeyContent.storyParagraphs
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                          final annotation = storyAnnotations[entry.key];
+                          final isActive = _isNarrating('story', entry.key);
+                          return _CompactTextBlock(
                             index: entry.key + 1,
                             active: isActive,
                             onSupport: () => unawaited(
@@ -534,15 +531,15 @@ class _JourneyScreenState extends State<JourneyScreen>
                               narrationContentId: 'story',
                               narrationItemId: 'story-${entry.key}',
                               style: const TextStyle(
-                                fontSize: 11.5,
-                                height: 1.28,
+                                fontSize: 10.8,
+                                height: 1.18,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ),
-                        );
-                      })
-                      .toList(growable: false),
+                          );
+                        })
+                        .toList(growable: false),
+                  ),
                 );
               },
             ),
@@ -983,13 +980,13 @@ class _CompactTextBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 4),
-      padding: const EdgeInsets.fromLTRB(6, 4, 3, 4),
+      margin: const EdgeInsets.only(bottom: 2),
+      padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
       decoration: BoxDecoration(
         color: active
             ? PhoenixTheme.gold.withValues(alpha: .18)
             : Colors.white.withValues(alpha: .94),
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: BorderRadius.circular(9),
         border: Border.all(
           color: active
               ? PhoenixTheme.gold
@@ -997,42 +994,41 @@ class _CompactTextBlock extends StatelessWidget {
         ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 11,
-            backgroundColor: active
-                ? PhoenixTheme.red
-                : PhoenixTheme.gold.withValues(alpha: .18),
-            child: active
-                ? const Icon(
-                    Icons.graphic_eq_rounded,
-                    size: 12,
-                    color: Colors.white,
-                  )
-                : Text(
-                    '$index',
-                    style: const TextStyle(
-                      color: PhoenixTheme.red,
-                      fontSize: 8,
-                      fontWeight: FontWeight.w900,
+          Padding(
+            padding: const EdgeInsets.only(top: 1),
+            child: CircleAvatar(
+              radius: 9,
+              backgroundColor: active
+                  ? PhoenixTheme.red
+                  : PhoenixTheme.gold.withValues(alpha: .18),
+              child: active
+                  ? const Icon(
+                      Icons.graphic_eq_rounded,
+                      size: 10,
+                      color: Colors.white,
+                    )
+                  : Text(
+                      '$index',
+                      style: const TextStyle(
+                        color: PhoenixTheme.red,
+                        fontSize: 7,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-                  ),
-          ),
-          const SizedBox(width: 5),
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              child: child,
             ),
           ),
+          const SizedBox(width: 4),
+          Expanded(child: child),
           SizedBox(
-            width: 27,
-            height: 27,
+            width: 23,
+            height: 23,
             child: TextButton(
               onPressed: onSupport,
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
-                minimumSize: const Size(27, 27),
+                minimumSize: const Size(23, 23),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 visualDensity: VisualDensity.compact,
               ),
@@ -1040,7 +1036,7 @@ class _CompactTextBlock extends StatelessWidget {
                 '注',
                 style: TextStyle(
                   color: PhoenixTheme.red,
-                  fontSize: 9,
+                  fontSize: 8,
                   fontWeight: FontWeight.w900,
                 ),
               ),
