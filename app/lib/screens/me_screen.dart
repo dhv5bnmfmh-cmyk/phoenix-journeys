@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/journey_data.dart';
+import '../services/narration_controller.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/word_detail_sheet.dart';
@@ -10,6 +11,26 @@ import '../widgets/word_mark.dart';
 
 class MeScreen extends StatelessWidget {
   const MeScreen({super.key});
+
+  Future<void> _openSavedWord(
+    BuildContext context,
+    AppState state,
+    WordEntry entry,
+  ) async {
+    final narration = NarrationController();
+    try {
+      await showWordDetail(
+        context,
+        entry,
+        onSpeak: () => narration.speakWord(
+          state.displayText(entry.word),
+          languageCode: state.isTraditional ? 'zh-TW' : 'zh-CN',
+        ),
+      );
+    } finally {
+      narration.dispose();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +106,7 @@ class MeScreen extends StatelessWidget {
             (entry) => Card(
               margin: const EdgeInsets.only(bottom: 10),
               child: ListTile(
-                onTap: () => showWordDetail(context, entry),
+                onTap: () => _openSavedWord(context, state, entry),
                 leading: WordMark(word: entry.word, size: 44),
                 title: Text(
                   entry.word,
