@@ -12,33 +12,67 @@ Future<void> showWordDetail(
   BuildContext context,
   WordEntry entry, {
   required Future<bool> Function() onSpeak,
+  List<WordEntry>? entries,
+  int? initialIndex,
+  Future<bool> Function(WordEntry entry)? onSpeakEntry,
 }) {
+  final studyEntries = entries == null || entries.isEmpty
+      ? <WordEntry>[entry]
+      : List<WordEntry>.unmodifiable(entries);
+  final matchingIndex = studyEntries.indexWhere(
+    (candidate) => candidate.word == entry.word,
+  );
+  final requestedIndex = initialIndex ?? matchingIndex;
+  final safeIndex = requestedIndex < 0
+      ? 0
+      : requestedIndex.clamp(0, studyEntries.length - 1);
+
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (_) => _WordDetailSheet(entry: entry, onSpeak: onSpeak),
+    builder: (_) => FractionallySizedBox(
+      heightFactor: .88,
+      child: _WordDetailSheet(
+        entries: studyEntries,
+        initialIndex: safeIndex,
+        onSpeak: onSpeak,
+        onSpeakEntry: onSpeakEntry,
+      ),
+    ),
   );
 }
 
 class _WordDetailSheet extends StatefulWidget {
-  const _WordDetailSheet({required this.entry, required this.onSpeak});
+  const _WordDetailSheet({
+    required this.entries,
+    required this.initialIndex,
+    required this.onSpeak,
+    required this.onSpeakEntry,
+  });
 
-  final WordEntry entry;
+  final List<WordEntry> entries;
+  final int initialIndex;
   final Future<bool> Function() onSpeak;
+  final Future<bool> Function(WordEntry entry)? onSpeakEntry;
 
   @override
   State<_WordDetailSheet> createState() => _WordDetailSheetState();
 }
 
 class _WordDetailSheetState extends State<_WordDetailSheet> {
+  late int _index;
   bool _isSpeaking = false;
   bool _speechUnavailable = false;
+
+  WordEntry get _entry => widget.entries[_index];
+  bool get _isLast => _index == widget.entries.length - 1;
 
   @override
   void initState() {
     super.initState();
+    _index = widget.initialIndex;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) unawaited(_speak());
     });
@@ -51,7 +85,10 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
       _speechUnavailable = false;
     });
 
-    final success = await widget.onSpeak();
+    final callback = widget.onSpeakEntry;
+    final success = callback == null
+        ? await widget.onSpeak()
+        : await callback(_entry);
     if (!mounted) return;
     setState(() {
       _isSpeaking = false;
@@ -59,155 +96,204 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
     });
   }
 
+  Future<void> _nextWord() async {
+    if (_isSpeaking) return;
+    if (_isLast) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    setState(() {
+      _index += 1;
+      _speechUnavailable = false;
+    });
+    await _speak();
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final isSaved = state.isWordSaved(widget.entry.word);
+    final entry = _entry;
+    final isSaved = state.isWordSaved(entry.word);
     final language = state.translationLanguage;
-    final examples = widget.entry.studyExamples.take(3).toList(growable: false);
+    final example = entry.studyExamples.isEmpty
+        ? null
+        : entry.studyExamples.first;
+    final compact = MediaQuery.sizeOf(context).height < 720;
 
-    return SingleChildScrollView(
+    return Padding(
       padding: EdgeInsets.fromLTRB(
-        18,
-        2,
-        18,
-        22 + MediaQuery.viewInsetsOf(context).bottom,
+        14,
+        0,
+        14,
+        10 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  WordMark(word: widget.entry.word, size: 56),
-                  const SizedBox(width: 10),
+                  WordMark(word: entry.word, size: compact ? 40 : 46),
+                  const SizedBox(width: 9),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          state.displayText(widget.entry.word),
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.w900),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                state.displayText(entry.word),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: compact ? 21 : 24,
+                                  height: 1,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              '${_index + 1} / ${widget.entries.length}',
+                              style: const TextStyle(
+                                color: Colors.black45,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 1),
+                        const SizedBox(height: 2),
                         Text(
-                          widget.entry.pinyin,
+                          entry.pinyin,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: PhoenixTheme.red,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(height: 5),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: PhoenixTheme.gold.withValues(alpha: .16),
-                            borderRadius: BorderRadius.circular(99),
-                          ),
-                          child: Text(
-                            state.displayText(widget.entry.partOfSpeech),
-                            style: const TextStyle(
-                              color: PhoenixTheme.red,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                            ),
+                        const SizedBox(height: 3),
+                        Text(
+                          state.displayText(entry.partOfSpeech),
+                          maxLines: 1,
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 6),
                   IconButton.filledTonal(
                     tooltip: _isSpeaking ? '正在朗读' : '重新朗读',
                     onPressed: _isSpeaking ? null : _speak,
-                    iconSize: 20,
                     visualDensity: VisualDensity.compact,
+                    iconSize: 19,
                     icon: Icon(
-                      _isSpeaking
-                          ? Icons.graphic_eq
-                          : Icons.volume_up_outlined,
+                      _isSpeaking ? Icons.graphic_eq : Icons.volume_up_outlined,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
-              _DefinitionCard(
-                icon: Icons.menu_book_outlined,
-                title: '中文释义',
-                text: widget.entry.simpleChinese,
+              const SizedBox(height: 7),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(99),
+                child: LinearProgressIndicator(
+                  minHeight: 4,
+                  value: (_index + 1) / widget.entries.length,
+                  color: PhoenixTheme.red,
+                  backgroundColor: PhoenixTheme.gold.withValues(alpha: .18),
+                ),
+              ),
+              const SizedBox(height: 7),
+              _CompactDefinitionLine(
+                label: '中文',
+                text: entry.simpleChinese,
                 color: PhoenixTheme.ink,
               ),
-              const SizedBox(height: 7),
-              _DefinitionCard(
-                icon: Icons.language,
-                title: 'English definition',
-                text: widget.entry.englishDefinition,
+              const SizedBox(height: 4),
+              _CompactDefinitionLine(
+                label: 'English',
+                text: entry.englishDefinition,
                 color: PhoenixTheme.ai,
               ),
-              const SizedBox(height: 7),
-              _DefinitionCard(
-                icon: Icons.translate,
-                title: widget.entry.nativeLabel(language),
-                text: widget.entry.nativeDefinition(language),
+              const SizedBox(height: 4),
+              _CompactDefinitionLine(
+                label: entry.nativeLabel(language),
+                text: entry.nativeDefinition(language),
                 color: PhoenixTheme.translation,
               ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.format_quote_rounded,
-                    size: 18,
-                    color: PhoenixTheme.red,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    state.displayText('三个例句'),
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                  ),
-                ],
+              const SizedBox(height: 7),
+              Expanded(
+                child: _CoreExampleCard(
+                  example: example,
+                  nativeLabel: entry.nativeLabel(language),
+                  nativeText: example?.nativeText(language) ?? '',
+                  compact: compact,
+                ),
               ),
-              const SizedBox(height: 8),
-              ...examples.asMap().entries.map(
-                    (entry) => _ExampleCard(
-                      number: entry.key + 1,
-                      example: entry.value,
-                      nativeLabel: widget.entry.nativeLabel(language),
-                      nativeText: entry.value.nativeText(language),
-                    ),
-                  ),
               if (_speechUnavailable) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: 4),
                 Text(
-                  state.displayText(
-                    '当前浏览器没有提供中文语音，请检查静音设置或换用 Safari、Chrome。',
-                  ),
-                  style: const TextStyle(color: Colors.black54, fontSize: 11.5),
+                  state.displayText('当前浏览器没有提供中文语音，请检查静音设置。'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.black54, fontSize: 9.5),
                 ),
               ],
-              const SizedBox(height: 14),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: () => state.toggleSavedWord(widget.entry.word),
-                  icon: Icon(
-                    isSaved ? Icons.bookmark : Icons.bookmark_add_outlined,
+              const SizedBox(height: 7),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => state.toggleSavedWord(entry.word),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(40),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      icon: Icon(
+                        isSaved ? Icons.bookmark : Icons.bookmark_add_outlined,
+                        size: 17,
+                      ),
+                      label: Text(
+                        state.displayText(isSaved ? '已收藏' : '收藏生词'),
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                    ),
                   ),
-                  label: Text(
-                    state.displayText(isSaved ? '已加入生词本' : '加入生词本'),
+                  const SizedBox(width: 7),
+                  Expanded(
+                    flex: 2,
+                    child: FilledButton.icon(
+                      key: const ValueKey('next-word-button'),
+                      onPressed: _isSpeaking ? null : _nextWord,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(40),
+                        backgroundColor: PhoenixTheme.red,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      icon: Icon(
+                        _isLast
+                            ? Icons.keyboard_arrow_down
+                            : Icons.arrow_forward,
+                        size: 18,
+                      ),
+                      label: Text(
+                        state.displayText(_isLast ? '完成并收起' : '下一个单词'),
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -217,16 +303,14 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
   }
 }
 
-class _DefinitionCard extends StatelessWidget {
-  const _DefinitionCard({
-    required this.icon,
-    required this.title,
+class _CompactDefinitionLine extends StatelessWidget {
+  const _CompactDefinitionLine({
+    required this.label,
     required this.text,
     required this.color,
   });
 
-  final IconData icon;
-  final String title;
+  final String label;
   final String text;
   final Color color;
 
@@ -235,35 +319,33 @@ class _DefinitionCard extends StatelessWidget {
     final state = context.watch<AppState>();
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: .07),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: .16)),
+        color: color.withValues(alpha: .065),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: .14)),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 15, color: color),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  state.displayText(title),
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
+          SizedBox(
+            width: 54,
+            child: Text(
+              state.displayText(label),
+              style: TextStyle(
+                color: color,
+                fontSize: 9.5,
+                fontWeight: FontWeight.w900,
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            state.displayText(text),
-            style: const TextStyle(fontSize: 13, height: 1.35),
+          Expanded(
+            child: Text(
+              state.displayText(text),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 11.2, height: 1.18),
+            ),
           ),
         ],
       ),
@@ -271,76 +353,73 @@ class _DefinitionCard extends StatelessWidget {
   }
 }
 
-class _ExampleCard extends StatelessWidget {
-  const _ExampleCard({
-    required this.number,
+class _CoreExampleCard extends StatelessWidget {
+  const _CoreExampleCard({
     required this.example,
     required this.nativeLabel,
     required this.nativeText,
+    required this.compact,
   });
 
-  final int number;
-  final WordExample example;
+  final WordExample? example;
   final String nativeLabel;
   final String nativeText;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    if (example == null) {
+      return const Center(
+        child: Text('暂无例句', style: TextStyle(color: Colors.black45)),
+      );
+    }
+
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 7),
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+      padding: EdgeInsets.all(compact ? 8 : 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .22)),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .24)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                radius: 10,
-                backgroundColor: PhoenixTheme.red.withValues(alpha: .09),
-                child: Text(
-                  '$number',
-                  style: const TextStyle(
-                    color: PhoenixTheme.red,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 7),
-              Expanded(
-                child: Text(
-                  state.displayText(example.chinese),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    height: 1.32,
-                  ),
-                ),
-              ),
-            ],
+          const Text(
+            '核心例句',
+            style: TextStyle(
+              color: PhoenixTheme.red,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w900,
+            ),
           ),
-          const SizedBox(height: 6),
-          _ExampleLine(label: '拼音', text: example.pinyin),
-          const SizedBox(height: 4),
-          _ExampleLine(label: nativeLabel, text: nativeText),
-          const SizedBox(height: 4),
-          _ExampleLine(label: 'English', text: example.english),
+          const SizedBox(height: 3),
+          Text(
+            state.displayText(example!.chinese),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: compact ? 12 : 13,
+              height: 1.18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 3),
+          _CompactExampleLine(label: '拼音', text: example!.pinyin),
+          const SizedBox(height: 2),
+          _CompactExampleLine(label: nativeLabel, text: nativeText),
+          const SizedBox(height: 2),
+          _CompactExampleLine(label: 'English', text: example!.english),
         ],
       ),
     );
   }
 }
 
-class _ExampleLine extends StatelessWidget {
-  const _ExampleLine({required this.label, required this.text});
+class _CompactExampleLine extends StatelessWidget {
+  const _CompactExampleLine({required this.label, required this.text});
 
   final String label;
   final String text;
@@ -351,32 +430,25 @@ class _ExampleLine extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          constraints: const BoxConstraints(minWidth: 42, maxWidth: 96),
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: PhoenixTheme.ink.withValues(alpha: .055),
-            borderRadius: BorderRadius.circular(7),
-          ),
+        SizedBox(
+          width: 54,
           child: Text(
             state.displayText(label),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: Colors.black54,
-              fontSize: 9.5,
+              color: Colors.black45,
+              fontSize: 8.5,
               fontWeight: FontWeight.w900,
-              height: 1.2,
             ),
           ),
         ),
-        const SizedBox(width: 6),
         Expanded(
           child: Text(
             state.displayText(text),
-            style: const TextStyle(
-              color: Colors.black87,
-              fontSize: 11.5,
-              height: 1.32,
-            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 9.8, height: 1.15),
           ),
         ),
       ],

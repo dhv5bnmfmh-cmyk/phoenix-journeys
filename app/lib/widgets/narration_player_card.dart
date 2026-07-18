@@ -116,7 +116,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     final anchorTime = _anchorTime ?? DateTime.now();
     final elapsedSeconds =
         DateTime.now().difference(anchorTime).inMilliseconds.toDouble() / 1000;
-    final charsPerSecond = 4.2 * (widget.controller.speechRate / .40);
+    final charsPerSecond = 4.2 * (widget.controller.speechRate / .36);
     final estimated = _anchorOffset + (elapsedSeconds * charsPerSecond).floor();
 
     return resolveNarrationDisplayOffset(

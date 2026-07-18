@@ -135,10 +135,10 @@ class NarrationController extends ChangeNotifier {
   }
 
   static const speedOptions = <NarrationSpeedOption>[
-    NarrationSpeedOption(label: '0.8×', rate: .32),
-    NarrationSpeedOption(label: '1.0×', rate: .40),
-    NarrationSpeedOption(label: '1.2×', rate: .48),
-    NarrationSpeedOption(label: '1.5×', rate: .60),
+    NarrationSpeedOption(label: '0.8×', rate: .29),
+    NarrationSpeedOption(label: '1.0×', rate: .36),
+    NarrationSpeedOption(label: '1.2×', rate: .44),
+    NarrationSpeedOption(label: '1.5×', rate: .54),
   ];
 
   final FlutterTts _tts;
@@ -152,7 +152,7 @@ class NarrationController extends ChangeNotifier {
   int _speechBaseOffset = 0;
   int _currentOffset = 0;
   int? _currentItemIndex;
-  double _speechRate = .40;
+  double _speechRate = .36;
   bool _disposed = false;
   Timer? _progressTimer;
   DateTime? _estimateAnchorTime;
@@ -166,6 +166,7 @@ class NarrationController extends ChangeNotifier {
   bool _wordSpeechUnavailable = false;
   String? _spokenWord;
   Completer<bool>? _wordSpeechCompleter;
+  String? _configuredVoiceLanguage;
 
   NarrationStatus get status => _status;
   String? get contentId => _contentId;
@@ -401,9 +402,9 @@ class NarrationController extends ChangeNotifier {
     _safeNotify();
 
     try {
-      await _tts.setLanguage(languageCode);
-      await _tts.setSpeechRate(.42);
-      await _tts.setPitch(1.0);
+      await _configureNaturalVoice(languageCode);
+      await _tts.setSpeechRate(.38);
+      await _tts.setPitch(.98);
       await _tts.setVolume(1.0);
       final result = await _tts.speak(value);
       if (result != 1) {
@@ -462,6 +463,52 @@ class NarrationController extends ChangeNotifier {
     _safeNotify();
   }
 
+  Future<void> _configureNaturalVoice(String languageCode) async {
+    await _tts.setLanguage(languageCode);
+    if (_configuredVoiceLanguage == languageCode) return;
+
+    try {
+      final dynamic availableVoices = await _tts.getVoices;
+      if (availableVoices is List) {
+        Map<String, String>? bestVoice;
+        var bestScore = -1;
+        for (final dynamic rawVoice in availableVoices) {
+          if (rawVoice is! Map) continue;
+          final name = '${rawVoice['name'] ?? ''}';
+          final locale = '${rawVoice['locale'] ?? rawVoice['language'] ?? ''}';
+          final lowerName = name.toLowerCase();
+          final lowerLocale = locale.toLowerCase();
+          if (!lowerLocale.startsWith('zh')) continue;
+
+          var score = 10;
+          if (lowerLocale == languageCode.toLowerCase()) score += 80;
+          if (lowerName.contains('natural')) score += 60;
+          if (lowerName.contains('premium')) score += 50;
+          if (lowerName.contains('enhanced')) score += 45;
+          for (final preferredName in const [
+            'xiaoxiao',
+            'tingting',
+            'meijia',
+            'yunxi',
+            'sinji',
+          ]) {
+            if (lowerName.contains(preferredName)) score += 35;
+          }
+
+          if (score > bestScore && name.isNotEmpty && locale.isNotEmpty) {
+            bestScore = score;
+            bestVoice = <String, String>{'name': name, 'locale': locale};
+          }
+        }
+        if (bestVoice != null) await _tts.setVoice(bestVoice);
+      }
+    } catch (error) {
+      debugPrint('Natural Chinese voice selection unavailable: $error');
+    }
+
+    _configuredVoiceLanguage = languageCode;
+  }
+
   Future<void> _speakFrom(int offset, {bool stopEngineFirst = true}) async {
     final safeOffset = offset < 0
         ? 0
@@ -489,9 +536,9 @@ class NarrationController extends ChangeNotifier {
       _applyProgress(safeOffset);
       _safeNotify();
 
-      await _tts.setLanguage('zh-CN');
+      await _configureNaturalVoice('zh-CN');
       await _tts.setSpeechRate(_speechRate);
-      await _tts.setPitch(1.0);
+      await _tts.setPitch(.98);
       await _tts.setVolume(1.0);
       final result = await _tts.speak(remainingText);
       if (result != 1 && !_disposed) {
@@ -572,7 +619,7 @@ class NarrationController extends ChangeNotifier {
       final anchor = _estimateAnchorTime ?? now;
       final elapsedSeconds =
           now.difference(anchor).inMilliseconds.toDouble() / 1000;
-      final charsPerSecond = 4.2 * (_speechRate / .40);
+      final charsPerSecond = 4.2 * (_speechRate / .36);
       final estimated =
           _estimateAnchorOffset + (elapsedSeconds * charsPerSecond).floor();
       if (estimated <= _currentOffset) return;
