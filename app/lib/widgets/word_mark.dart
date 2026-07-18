@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 
 class WordMark extends StatelessWidget {
@@ -12,14 +14,17 @@ class WordMark extends StatelessWidget {
   final String word;
   final double size;
 
-  String get _label {
-    final value = word.trim();
-    if (value.isEmpty) return '词';
-    return value.substring(0, 1);
+  String _label(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return '词';
+    return trimmed.substring(0, 1);
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final displayWord = state.displayText(word);
+
     return Container(
       width: size,
       height: size,
@@ -32,7 +37,7 @@ class WordMark extends StatelessWidget {
         ),
       ),
       child: Text(
-        _label,
+        _label(displayWord),
         style: TextStyle(
           color: PhoenixTheme.red,
           fontSize: size * .42,
