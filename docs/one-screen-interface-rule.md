@@ -8,3 +8,4 @@ All primary Phoenix Journeys screens must show their main information and main a
 - Do not add a top-level vertically scrolling feature stack.
 - Secondary reference details may scroll only inside a modal sheet or a single focused card.
 - New features must join an existing group or page instead of increasing the screen height.
+- This rule applies to Explore, Passport, Me, every Journey step, and all future primary screens.
