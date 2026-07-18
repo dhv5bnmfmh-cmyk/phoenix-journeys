@@ -1,0 +1,1074 @@
+name: Apply no horizontal paging
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.head_ref == 'feature/no-horizontal-paging' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/no-horizontal-paging
+          fetch-depth: 0
+
+      - name: Replace horizontal paging with static one-screen layouts
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          journey_path = Path('app/lib/screens/journey_screen.dart')
+          journey = journey_path.read_text()
+          for unused in [
+              "import '../widgets/annotated_reading_card.dart';\n",
+              "import '../widgets/compact_pager.dart';\n",
+              "import '../widgets/word_mark.dart';\n",
+          ]:
+              journey = journey.replace(unused, '')
+
+          support_methods = r'''
+  Future<void> _showReadingSupport({
+    required String title,
+    required String pinyin,
+    required String nativeLabel,
+    required String nativeText,
+    required String english,
+  }) async {
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (_) => FractionallySizedBox(
+        heightFactor: .72,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          child: _ReadingSupportSheet(
+            title: title,
+            pinyin: pinyin,
+            nativeLabel: nativeLabel,
+            nativeText: nativeText,
+            english: english,
+          ),
+        ),
+      ),
+    );
+  }
+
+'''
+          anchor = '  void _onWonderChanged(String _) {'
+          if support_methods.strip() not in journey:
+              journey = journey.replace(anchor, support_methods + anchor, 1)
+
+          story_method = r'''  Widget _storyPage() {
+    final state = context.watch<AppState>();
+    final language = state.translationLanguage;
+
+    return _page(
+      title: '故事',
+      child: Column(
+        children: [
+          NarrationPlayerCard(
+            controller: _narration,
+            contentId: 'story',
+            title: '紫禁城故事',
+            subtitle: '普通话 · ${_journeyContent.storyParagraphs.length} 段',
+            compact: true,
+            onPlay: _playStory,
+          ),
+          const SizedBox(height: 4),
+          const _InlineTip(
+            icon: Icons.touch_app_outlined,
+            text: '四段短文同屏阅读；点红色词语看释义，点“注”查看拼音、母语与 English。',
+          ),
+          const SizedBox(height: 4),
+          Expanded(
+            child: AnimatedBuilder(
+              animation: _narration,
+              builder: (context, _) {
+                return Column(
+                  children: _journeyContent.storyParagraphs
+                      .asMap()
+                      .entries
+                      .map((entry) {
+                        final annotation = storyAnnotations[entry.key];
+                        final isActive = _isNarrating('story', entry.key);
+                        return Expanded(
+                          child: _CompactTextBlock(
+                            index: entry.key + 1,
+                            active: isActive,
+                            onSupport: () => unawaited(
+                              _showReadingSupport(
+                                title: '故事第 ${entry.key + 1} 段',
+                                pinyin: annotation.pinyin,
+                                nativeLabel: annotation.nativeLabel(language),
+                                nativeText: annotation.nativeText(
+                                  language,
+                                  entry.value,
+                                ),
+                                english: annotation.english,
+                              ),
+                            ),
+                            child: InteractiveStoryText(
+                              text: entry.value,
+                              entries: words,
+                              narrationContentId: 'story',
+                              narrationItemId: 'story-${entry.key}',
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                height: 1.28,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        );
+                      })
+                      .toList(growable: false),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+'''
+          journey, count = re.subn(
+              r'  Widget _storyPage\(\) \{[\s\S]*?\n  \}\n\n(?=  Widget _wordsPage)',
+              story_method,
+              journey,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'story replacement count: {count}')
+
+          words_method = r'''  Widget _wordsPage() {
+    final state = context.watch<AppState>();
+
+    return _page(
+      title: '生词',
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const columns = 3;
+          const spacing = 4.0;
+          final rows = (words.length / columns).ceil();
+          final cellWidth =
+              (constraints.maxWidth - spacing * (columns - 1)) / columns;
+          final cellHeight =
+              (constraints.maxHeight - spacing * (rows - 1)) / rows;
+          final ratio = cellWidth / cellHeight.clamp(38.0, 70.0);
+
+          return GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            itemCount: words.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              mainAxisSpacing: spacing,
+              crossAxisSpacing: spacing,
+              childAspectRatio: ratio,
+            ),
+            itemBuilder: (context, index) {
+              final entry = words[index];
+              return Material(
+                color: Colors.white.withValues(alpha: .94),
+                borderRadius: BorderRadius.circular(10),
+                child: InkWell(
+                  onTap: () => unawaited(_openWord(entry)),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: PhoenixTheme.gold.withValues(alpha: .25),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                state.displayText(entry.word),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  height: 1,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                            if (state.isWordSaved(entry.word)) ...[
+                              const SizedBox(width: 2),
+                              const Icon(
+                                Icons.bookmark_rounded,
+                                size: 11,
+                                color: PhoenixTheme.red,
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          entry.pinyin,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 8,
+                            height: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+'''
+          journey, count = re.subn(
+              r'  Widget _wordsPage\(\) \{[\s\S]*?\n  \}\n\n(?=  Widget _discoveryPage)',
+              words_method,
+              journey,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'words replacement count: {count}')
+
+          discovery_method = r'''  Widget _discoveryPage() {
+    final state = context.watch<AppState>();
+    final language = state.translationLanguage;
+
+    return _page(
+      title: '发现',
+      child: Column(
+        children: [
+          NarrationPlayerCard(
+            controller: _narration,
+            contentId: 'discovery',
+            title: 'Discovery',
+            subtitle: '中文朗读 · ${discoveries.length} 段',
+            compact: true,
+            onPlay: _playDiscoveries,
+          ),
+          const SizedBox(height: 4),
+          const _InlineTip(
+            icon: Icons.notes_rounded,
+            text: '四段发现同屏显示；点“注”查看拼音、探索者母语和 English。',
+          ),
+          const SizedBox(height: 4),
+          Expanded(
+            child: AnimatedBuilder(
+              animation: _narration,
+              builder: (context, _) {
+                return Column(
+                  children: discoveries.asMap().entries.map((entry) {
+                    final item = entry.value;
+                    final isActive = _isNarrating('discovery', entry.key);
+                    return Expanded(
+                      child: _CompactTextBlock(
+                        index: entry.key + 1,
+                        active: isActive,
+                        onSupport: () => unawaited(
+                          _showReadingSupport(
+                            title: '今日发现 ${entry.key + 1}',
+                            pinyin: item.pinyin,
+                            nativeLabel: item.nativeLabel(language),
+                            nativeText: item.nativeText(language),
+                            english: item.english,
+                          ),
+                        ),
+                        child: Text(
+                          state.displayText(item.text),
+                          style: TextStyle(
+                            fontSize: 10.8,
+                            height: 1.2,
+                            fontWeight:
+                                isActive ? FontWeight.w800 : FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(growable: false),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+'''
+          journey, count = re.subn(
+              r'  Widget _discoveryPage\(\) \{[\s\S]*?\n  \}\n\n(?=  Widget _wonderPage)',
+              discovery_method,
+              journey,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'discovery replacement count: {count}')
+
+          helper_widgets = r'''
+class _CompactTextBlock extends StatelessWidget {
+  const _CompactTextBlock({
+    required this.index,
+    required this.active,
+    required this.child,
+    required this.onSupport,
+  });
+
+  final int index;
+  final bool active;
+  final Widget child;
+  final VoidCallback onSupport;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.fromLTRB(6, 4, 3, 4),
+      decoration: BoxDecoration(
+        color: active
+            ? PhoenixTheme.gold.withValues(alpha: .18)
+            : Colors.white.withValues(alpha: .94),
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(
+          color: active
+              ? PhoenixTheme.gold
+              : PhoenixTheme.gold.withValues(alpha: .22),
+        ),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 11,
+            backgroundColor: active
+                ? PhoenixTheme.red
+                : PhoenixTheme.gold.withValues(alpha: .18),
+            child: active
+                ? const Icon(Icons.graphic_eq_rounded, size: 12, color: Colors.white)
+                : Text(
+                    '$index',
+                    style: const TextStyle(
+                      color: PhoenixTheme.red,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+          ),
+          const SizedBox(width: 5),
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: child,
+            ),
+          ),
+          SizedBox(
+            width: 27,
+            height: 27,
+            child: TextButton(
+              onPressed: onSupport,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(27, 27),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              ),
+              child: const Text(
+                '注',
+                style: TextStyle(
+                  color: PhoenixTheme.red,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadingSupportSheet extends StatelessWidget {
+  const _ReadingSupportSheet({
+    required this.title,
+    required this.pinyin,
+    required this.nativeLabel,
+    required this.nativeText,
+    required this.english,
+  });
+
+  final String title;
+  final String pinyin;
+  final String nativeLabel;
+  final String nativeText;
+  final String english;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 10),
+        _SupportLine(label: '拼音', text: pinyin, color: PhoenixTheme.red),
+        const SizedBox(height: 8),
+        _SupportLine(
+          label: nativeLabel,
+          text: nativeText,
+          color: PhoenixTheme.translation,
+        ),
+        const SizedBox(height: 8),
+        _SupportLine(label: 'English', text: english, color: PhoenixTheme.ai),
+      ],
+    );
+  }
+}
+
+class _SupportLine extends StatelessWidget {
+  const _SupportLine({
+    required this.label,
+    required this.text,
+    required this.color,
+  });
+
+  final String label;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(11),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .07),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(text, style: const TextStyle(fontSize: 12.5, height: 1.4)),
+        ],
+      ),
+    );
+  }
+}
+
+'''
+          marker = 'class _InlineTip extends StatefulWidget {'
+          if helper_widgets.strip() not in journey:
+              journey = journey.replace(marker, helper_widgets + marker, 1)
+          journey_path.write_text(journey)
+
+          interactive_path = Path('app/lib/widgets/interactive_story_text.dart')
+          interactive = interactive_path.read_text()
+          interactive = interactive.replace(
+              '    required this.entries,\n    this.onWordLongPress,',
+              '    required this.entries,\n    this.style,\n    this.onWordLongPress,',
+              1,
+          )
+          interactive = interactive.replace(
+              '  final List<WordEntry> entries;\n\n  // Kept temporarily',
+              '  final List<WordEntry> entries;\n  final TextStyle? style;\n\n  // Kept temporarily',
+              1,
+          )
+          interactive = interactive.replace(
+              '    final baseStyle = Theme.of(context).textTheme.bodyLarge;',
+              '    final baseStyle = widget.style ?? Theme.of(context).textTheme.bodyLarge;',
+              1,
+          )
+          interactive_path.write_text(interactive)
+
+          player_path = Path('app/lib/widgets/narration_player_card.dart')
+          player = player_path.read_text()
+          player = player.replace(
+              '    required this.onPlay,\n    super.key,',
+              '    required this.onPlay,\n    this.compact = false,\n    super.key,',
+              1,
+          )
+          player = player.replace(
+              '  final Future<void> Function() onPlay;\n',
+              '  final Future<void> Function() onPlay;\n  final bool compact;\n',
+              1,
+          )
+          player = player.replace(
+              '        return Semantics(',
+              '        final compact = widget.compact;\n\n        return Semantics(',
+              1,
+          )
+          player = player.replace(
+              'padding: const EdgeInsets.fromLTRB(12, 10, 10, 9),',
+              'padding: EdgeInsets.fromLTRB(\n              compact ? 9 : 12,\n              compact ? 6 : 10,\n              compact ? 8 : 10,\n              compact ? 6 : 9,\n            ),',
+              1,
+          )
+          player = player.replace(
+              'borderRadius: BorderRadius.circular(17),',
+              'borderRadius: BorderRadius.circular(compact ? 13 : 17),',
+              1,
+          )
+          player = player.replace('width: 34,\n                      height: 34,', 'width: compact ? 28 : 34,\n                      height: compact ? 28 : 34,', 1)
+          player = player.replace('size: 19,', 'size: compact ? 16 : 19,', 1)
+          player = player.replace('size: 50,', 'size: compact ? 42 : 50,', 1)
+          player = player.replace('const SizedBox(height: 9),', 'SizedBox(height: compact ? 5 : 9),', 1)
+          player = player.replace('minHeight: 7,', 'minHeight: compact ? 5 : 7,', 1)
+          player_path.write_text(player)
+
+          me_path = Path('app/lib/screens/me_screen.dart')
+          me = me_path.read_text().replace("import '../widgets/compact_pager.dart';\n", '')
+
+          me_screen = r'''class MeScreen extends StatefulWidget {
+  const MeScreen({super.key});
+
+  @override
+  State<MeScreen> createState() => _MeScreenState();
+}
+
+class _MeScreenState extends State<MeScreen> {
+  int _section = 0;
+
+  Future<void> _openSavedWord(
+    BuildContext context,
+    AppState state,
+    WordEntry entry,
+  ) async {
+    final narration = NarrationController();
+    try {
+      await showWordDetail(
+        context,
+        entry,
+        onSpeak: () => narration.speakWord(
+          state.displayText(entry.word),
+          languageCode: state.isTraditional ? 'zh-TW' : 'zh-CN',
+        ),
+      );
+    } finally {
+      narration.dispose();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final savedEntries = words
+        .where((entry) => state.savedWords.contains(entry.word))
+        .toList(growable: false);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxHeight < 650;
+        return Padding(
+          padding: EdgeInsets.fromLTRB(14, compact ? 8 : 12, 14, 8),
+          child: Column(
+            children: [
+              _MeHeader(state: state),
+              SizedBox(height: compact ? 6 : 8),
+              if (kIsWeb) ...[
+                const _InstallAppStrip(),
+                SizedBox(height: compact ? 5 : 7),
+              ],
+              _LanguageControl(state: state),
+              SizedBox(height: compact ? 5 : 7),
+              _MeSectionSwitch(
+                state: state,
+                selected: _section,
+                vocabularyCount: savedEntries.length,
+                memoryCount: state.memories.length,
+                onSelected: (value) => setState(() => _section = value),
+              ),
+              const SizedBox(height: 7),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  child: _section == 0
+                      ? _VocabularyPanel(
+                          key: const ValueKey('me-vocabulary-panel'),
+                          state: state,
+                          entries: savedEntries,
+                          onOpen: (entry) =>
+                              _openSavedWord(context, state, entry),
+                        )
+                      : _MemoryPanel(
+                          key: const ValueKey('me-memory-panel'),
+                          state: state,
+                        ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _MeSectionSwitch extends StatelessWidget {
+  const _MeSectionSwitch({
+    required this.state,
+    required this.selected,
+    required this.vocabularyCount,
+    required this.memoryCount,
+    required this.onSelected,
+  });
+
+  final AppState state;
+  final int selected;
+  final int vocabularyCount;
+  final int memoryCount;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 36,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: PhoenixTheme.gold.withValues(alpha: .10),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          _SectionButton(
+            selected: selected == 0,
+            label: state.displayText('我的生词 · $vocabularyCount'),
+            onTap: () => onSelected(0),
+          ),
+          const SizedBox(width: 3),
+          _SectionButton(
+            selected: selected == 1,
+            label: state.displayText('回忆时间轴 · $memoryCount'),
+            onTap: () => onSelected(1),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionButton extends StatelessWidget {
+  const _SectionButton({
+    required this.selected,
+    required this.label,
+    required this.onTap,
+  });
+
+  final bool selected;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Material(
+        color: selected ? Colors.white : Colors.transparent,
+        borderRadius: BorderRadius.circular(9),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(9),
+          child: Center(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: selected ? PhoenixTheme.red : Colors.black54,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+'''
+          me, count = re.subn(
+              r'class MeScreen extends StatelessWidget \{[\s\S]*?\n\}\n\n(?=class _MeHeader)',
+              me_screen,
+              me,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'MeScreen replacement count: {count}')
+
+          panels = r'''class _VocabularyPanel extends StatelessWidget {
+  const _VocabularyPanel({
+    required this.state,
+    required this.entries,
+    required this.onOpen,
+    super.key,
+  });
+
+  final AppState state;
+  final List<WordEntry> entries;
+  final ValueChanged<WordEntry> onOpen;
+
+  Future<void> _showAll(BuildContext context) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (sheetContext) => FractionallySizedBox(
+        heightFactor: .82,
+        child: ListView.separated(
+          padding: const EdgeInsets.fromLTRB(14, 0, 14, 20),
+          itemCount: entries.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 5),
+          itemBuilder: (context, index) {
+            final entry = entries[index];
+            return ListTile(
+              dense: true,
+              tileColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              leading: WordMark(word: entry.word, size: 34),
+              title: Text(
+                state.displayText(entry.word),
+                style: const TextStyle(fontWeight: FontWeight.w900),
+              ),
+              subtitle: Text(entry.pinyin),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                onOpen(entry);
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (entries.isEmpty) return const _EmptyVocabularyCard();
+    final preview = entries.take(6).toList(growable: false);
+
+    return Column(
+      children: [
+        Expanded(
+          child: GridView.count(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            crossAxisCount: 2,
+            mainAxisSpacing: 6,
+            crossAxisSpacing: 6,
+            childAspectRatio: 2.15,
+            children: preview.map((entry) {
+              return Material(
+                color: Colors.white.withValues(alpha: .92),
+                borderRadius: BorderRadius.circular(14),
+                child: InkWell(
+                  onTap: () => onOpen(entry),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: PhoenixTheme.gold.withValues(alpha: .25),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        WordMark(word: entry.word, size: 34),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state.displayText(entry.word),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              Text(
+                                entry.pinyin,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 9.5,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(growable: false),
+          ),
+        ),
+        if (entries.length > preview.length) ...[
+          const SizedBox(height: 5),
+          SizedBox(
+            height: 32,
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _showAll(context),
+              icon: const Icon(Icons.view_list_rounded, size: 16),
+              label: Text(
+                state.displayText('查看全部 ${entries.length} 个生词'),
+                style: const TextStyle(fontSize: 10.5),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _MemoryPanel extends StatelessWidget {
+  const _MemoryPanel({required this.state, super.key});
+
+  final AppState state;
+
+  Future<void> _showAll(BuildContext context) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (_) => FractionallySizedBox(
+        heightFactor: .78,
+        child: ListView.separated(
+          padding: const EdgeInsets.fromLTRB(14, 0, 14, 20),
+          itemCount: state.memories.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 5),
+          itemBuilder: (context, index) {
+            final memory = state.memories[index];
+            return ListTile(
+              dense: true,
+              tileColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              leading: const Text('📖', style: TextStyle(fontSize: 21)),
+              title: Text(memory),
+              subtitle: Text(
+                state.displayText(
+                  '第 ${state.memories.length - index} 次北京之旅',
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (state.memories.isEmpty) return const _EmptyMemoryCard();
+    final preview = state.memories.take(4).toList(growable: false);
+
+    return Column(
+      children: [
+        Expanded(
+          child: Column(
+            children: preview.asMap().entries.map((entry) {
+              final index = state.memories.indexOf(entry.value);
+              return Expanded(
+                child: Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .92),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: PhoenixTheme.gold.withValues(alpha: .24),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text('📖', style: TextStyle(fontSize: 21)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              entry.value,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 11, height: 1.2),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              state.displayText(
+                                '第 ${state.memories.length - index} 次北京之旅',
+                              ),
+                              style: const TextStyle(
+                                fontSize: 9,
+                                color: Colors.black45,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(growable: false),
+          ),
+        ),
+        if (state.memories.length > preview.length) ...[
+          const SizedBox(height: 5),
+          SizedBox(
+            height: 32,
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _showAll(context),
+              icon: const Icon(Icons.history_rounded, size: 16),
+              label: Text(
+                state.displayText('查看全部 ${state.memories.length} 条回忆'),
+                style: const TextStyle(fontSize: 10.5),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+'''
+          me, count = re.subn(
+              r'class _VocabularyPanel extends StatelessWidget \{[\s\S]*?\n\}\n\nclass _MemoryPanel extends StatelessWidget \{[\s\S]*?\n\}\n\n(?=class _EmptyVocabularyCard)',
+              panels,
+              me,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'panel replacement count: {count}')
+          me_path.write_text(me)
+
+          Path('docs/one-screen-interface-rule.md').write_text('''# Phoenix one-screen interface rule
+
+All primary Phoenix Journeys screens must show their main information and main action within one phone viewport.
+
+- Keep the top identity/progress area fixed and compact.
+- Keep the main action area fixed and visible.
+- Show related short content together in the same viewport whenever it can fit.
+- Use explicit tap tabs, grouped cards, collapsible areas, or modal sheets for additional content.
+- Do not use horizontal paging, swipe-to-change pages, `PageView`, `TabBarView`, or `CompactPager` in Phoenix interfaces.
+- Do not add a top-level vertically scrolling feature stack.
+- Secondary reference details may scroll only inside a modal sheet or a single focused card.
+- New features must join an existing group, tab, or modal instead of increasing screen height.
+- This rule applies to Explore, Passport, Me, every Journey step, and all future primary screens.
+- CI must reject future primary-screen changes that restore horizontal paging or top-level vertical feature stacking.
+''')
+
+          Path('worker/one_screen_layout.test.mjs').write_text(r'''import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const read = (path) => readFileSync(path, 'utf8');
+
+const primaryScreens = [
+  'app/lib/screens/explore_screen.dart',
+  'app/lib/screens/passport_screen.dart',
+  'app/lib/screens/me_screen.dart',
+  'app/lib/screens/journey_screen.dart',
+];
+
+test('primary Phoenix screens obey the one-screen layout rule', () => {
+  const sources = primaryScreens.map(read).join('\n');
+  const passport = read('app/lib/screens/passport_screen.dart');
+  const me = read('app/lib/screens/me_screen.dart');
+  const journey = read('app/lib/screens/journey_screen.dart');
+
+  assert.doesNotMatch(passport, /return ListView\(/);
+  assert.doesNotMatch(me, /return ListView\(/);
+  assert.match(journey, /Expanded\(child: child\)/);
+  assert.doesNotMatch(sources, /CompactPager\s*\(/);
+  assert.doesNotMatch(sources, /PageView\s*\(/);
+  assert.doesNotMatch(sources, /TabBarView\s*\(/);
+  assert.doesNotMatch(journey, /左右翻页/);
+  assert.doesNotMatch(journey, /scrollDirection:\s*Axis\.horizontal/);
+});
+
+test('story and Discovery place every short paragraph in the same screen', () => {
+  const journey = read('app/lib/screens/journey_screen.dart');
+  assert.match(journey, /四段短文同屏阅读/);
+  assert.match(journey, /四段发现同屏显示/);
+  assert.doesNotMatch(journey, /本页重点词语/);
+});
+
+test('one-screen rule forbids horizontal paging in future development', () => {
+  const policy = read('docs/one-screen-interface-rule.md');
+  assert.match(policy, /one phone viewport/i);
+  assert.match(policy, /Do not use horizontal paging/i);
+  assert.match(policy, /PageView/);
+  assert.match(policy, /Do not add a top-level vertically scrolling feature stack/i);
+});
+''')
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Format changed Dart files
+        run: dart format app/lib/screens/journey_screen.dart app/lib/screens/me_screen.dart app/lib/widgets/interactive_story_text.dart app/lib/widgets/narration_player_card.dart
+
+      - name: Remove horizontal pager component and commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -f app/lib/widgets/compact_pager.dart
+          rm -f app/test/compact_pager_test.dart
+          git rm .github/workflows/apply-no-horizontal-paging.yml
+          if grep -R "CompactPager\|PageView(\|TabBarView(" app/lib/screens; then
+            echo "Horizontal paging reference remains in a primary screen"
+            exit 1
+          fi
+          git add app/lib/screens/journey_screen.dart app/lib/screens/me_screen.dart app/lib/widgets/interactive_story_text.dart app/lib/widgets/narration_player_card.dart docs/one-screen-interface-rule.md worker/one_screen_layout.test.mjs app/test || true
+          git commit -m "ui: remove horizontal paging from every Phoenix screen"
+          git push origin HEAD:feature/no-horizontal-paging
