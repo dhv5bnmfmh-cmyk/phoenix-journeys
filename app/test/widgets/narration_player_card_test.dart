@@ -36,7 +36,7 @@ void main() {
     expect(offset, 120);
   });
 
-  test('fresh native progress resumes from the highlighted word', () {
+  test('fresh native progress cannot rewind behind the visible word', () {
     final offset = resolveNarrationPauseOffset(
       nativeOffset: 23,
       nativeProgressIsFresh: true,
@@ -44,7 +44,7 @@ void main() {
       totalCharacters: 120,
     );
 
-    expect(offset, 23);
+    expect(offset, 27);
   });
 
   test('pause offset remains inside the narration range', () {

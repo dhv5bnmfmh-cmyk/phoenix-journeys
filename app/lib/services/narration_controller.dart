@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -401,7 +402,8 @@ class NarrationController extends ChangeNotifier {
   Future<void> resume() async {
     if (_status != NarrationStatus.paused || _plan.isEmpty) return;
 
-    final offset = _currentOffset >= _plan.text.length ? 0 : _currentOffset;
+    final maxOffset = math.max(0, _plan.text.length - 1);
+    final offset = _currentOffset.clamp(0, maxOffset).toInt();
     await _speakFrom(offset);
   }
 
@@ -479,10 +481,6 @@ class NarrationController extends ChangeNotifier {
 
     _speechRate = option.rate;
     _safeNotify();
-
-    if (_status == NarrationStatus.playing && !_plan.isEmpty) {
-      await _speakFrom(_currentOffset);
-    }
   }
 
   Future<void> stop({bool resetPosition = true}) async {
@@ -552,11 +550,9 @@ class NarrationController extends ChangeNotifier {
   }
 
   Future<void> _speakFrom(int offset, {bool stopEngineFirst = true}) async {
-    final safeOffset = offset < 0
-        ? 0
-        : offset >= _plan.text.length
-        ? 0
-        : offset;
+    if (_plan.isEmpty) return;
+    final maxOffset = math.max(0, _plan.text.length - 1);
+    final safeOffset = offset.clamp(0, maxOffset).toInt();
     final remainingText = _plan.text.substring(safeOffset);
 
     try {
