@@ -772,7 +772,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             wonderQuestion,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               height: 1.25,
               fontWeight: FontWeight.w700,
@@ -850,7 +850,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             expressQuestion,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               height: 1.25,
               fontWeight: FontWeight.w700,
