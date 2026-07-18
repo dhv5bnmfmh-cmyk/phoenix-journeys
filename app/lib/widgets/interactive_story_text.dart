@@ -87,11 +87,16 @@ class InteractiveStoryText extends StatefulWidget {
   const InteractiveStoryText({
     required this.text,
     required this.entries,
+    this.onWordLongPress,
     super.key,
   });
 
   final String text;
   final List<WordEntry> entries;
+
+  // Kept temporarily for compatibility with older Journey page calls.
+  // Story vocabulary now uses tap-only inline meanings and never invokes this.
+  final ValueChanged<WordEntry>? onWordLongPress;
 
   @override
   State<InteractiveStoryText> createState() => _InteractiveStoryTextState();
