@@ -16,9 +16,6 @@ int resolveNarrationDisplayOffset({
 }) {
   if (totalCharacters <= 0) return 0;
 
-  // Safari/iOS can report completion while speech is still audible. In that
-  // case the controller jumps to 100%, so only trust native offsets while the
-  // controller still reports an active or paused session.
   final nativeOffsetIsReliable =
       controllerStatus == NarrationStatus.playing ||
       controllerStatus == NarrationStatus.paused;
@@ -41,8 +38,6 @@ int resolveNarrationPauseOffset({
     return nativeOffset.clamp(0, maxOffset).toInt();
   }
 
-  // Safari often keeps returning zero even while speech is audible. In that
-  // case use Phoenix's running clock and repeat one character for safety.
   final estimated = estimatedOffset.clamp(0, maxOffset).toInt();
   return math.max(0, estimated - 1);
 }
@@ -91,6 +86,9 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
   int _commandVersion = 0;
   int _resumeOffset = 0;
   int _lastObservedOffset = 0;
+  int _clockAnchorOffset = 0;
+  DateTime? _clockAnchorTime;
+  Timer? _continuationClock;
 
   bool get _controllerIsCurrent =>
       widget.controller.contentId == widget.contentId;
@@ -114,14 +112,57 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
   @override
   void dispose() {
     _commandVersion += 1;
+    _continuationClock?.cancel();
     super.dispose();
   }
 
   void _resetLocalSession() {
+    _continuationClock?.cancel();
+    _continuationClock = null;
     _sessionPlaying = false;
     _sessionPaused = false;
     _resumeOffset = 0;
     _lastObservedOffset = 0;
+    _clockAnchorOffset = 0;
+    _clockAnchorTime = null;
+  }
+
+  int _estimatedClockOffset() {
+    final total = widget.controller.totalCharacters;
+    final anchorTime = _clockAnchorTime;
+    if (total <= 0 || anchorTime == null) return _clockAnchorOffset;
+
+    final elapsedSeconds =
+        DateTime.now().difference(anchorTime).inMilliseconds / 1000.0;
+    final charsPerSecond = 3.35 * (widget.controller.speechRate / .36);
+    final estimated =
+        _clockAnchorOffset + (elapsedSeconds * charsPerSecond).floor();
+    return estimated.clamp(0, math.max(0, total - 1)).toInt();
+  }
+
+  void _startContinuationClock(int offset) {
+    _continuationClock?.cancel();
+    _clockAnchorOffset = offset;
+    _clockAnchorTime = DateTime.now();
+    _continuationClock = Timer.periodic(
+      const Duration(milliseconds: 120),
+      (_) {
+        if (!_sessionPlaying) return;
+        final controllerOffset = _controllerIsCurrent
+            ? widget.controller.currentOffset
+            : 0;
+        final observed = math.max(_estimatedClockOffset(), controllerOffset);
+        if (observed > _lastObservedOffset) {
+          _lastObservedOffset = observed;
+        }
+      },
+    );
+  }
+
+  void _stopContinuationClock() {
+    _continuationClock?.cancel();
+    _continuationClock = null;
+    _clockAnchorTime = null;
   }
 
   void _beginLocalPlayback(int offset) {
@@ -131,6 +172,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       _resumeOffset = offset;
       _lastObservedOffset = math.max(_lastObservedOffset, offset);
     });
+    _startContinuationClock(offset);
   }
 
   void _observeControllerOffset(NarrationStatus status) {
@@ -152,11 +194,13 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
 
   int _captureContinuationOffset() {
     if (!_controllerIsCurrent) return _resumeOffset;
+    final clockOffset = _estimatedClockOffset();
+    final retainedOffset = math.max(_lastObservedOffset, clockOffset);
     return resolveNarrationContinuationOffset(
       nativeOffset: widget.controller.lastNativeOffset,
       nativeProgressIsFresh: widget.controller.hasFreshNativeProgress,
       controllerOffset: widget.controller.currentOffset,
-      lastObservedOffset: _lastObservedOffset,
+      lastObservedOffset: retainedOffset,
       totalCharacters: widget.controller.totalCharacters,
     );
   }
@@ -210,6 +254,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
 
   Future<void> _pauseSession(int commandId) async {
     final offset = _captureContinuationOffset();
+    _stopContinuationClock();
     if (!mounted || commandId != _commandVersion) return;
     setState(() {
       _sessionPlaying = false;
@@ -244,6 +289,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
 
   Future<void> _restartSession() async {
     final commandId = ++_commandVersion;
+    _stopContinuationClock();
     _lastObservedOffset = 0;
     _beginLocalPlayback(0);
     if (_controllerIsCurrent && widget.controller.hasContent) {
@@ -273,6 +319,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     final wasPaused = _sessionPaused || controllerPaused;
     final offset = _captureContinuationOffset();
 
+    if (wasPlaying) _stopContinuationClock();
     if (mounted) {
       setState(() {
         _resumeOffset = offset;
@@ -284,9 +331,6 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       });
     }
 
-    // Freeze the audible utterance first. Calling setSpeechRate while the
-    // controller still reports playing makes Safari rebuild from a transient
-    // offset, which can be zero. Pausing first locks one continuation offset.
     if (wasPlaying) {
       await widget.controller.pauseAtOffset(offset);
       if (!mounted || commandId != _commandVersion) return;
@@ -330,6 +374,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
             ? widget.controller.status
             : NarrationStatus.idle;
         _observeControllerOffset(controllerStatus);
+
         final hasError =
             !_sessionPlaying &&
             !_sessionPaused &&
@@ -356,7 +401,24 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
             : isPaused
             ? NarrationStatus.paused
             : NarrationStatus.idle;
-        final progress = controllerIsCurrent ? widget.controller.progress : 0.0;
+
+        final total = controllerIsCurrent
+            ? widget.controller.totalCharacters
+            : 0;
+        final retainedOffset = controllerIsCurrent
+            ? math.max(
+                widget.controller.currentOffset,
+                math.max(_resumeOffset, _lastObservedOffset),
+              )
+            : 0;
+        final visibleOffset = isPlaying || isPaused
+            ? retainedOffset
+            : controllerIsCurrent
+            ? widget.controller.currentOffset
+            : 0;
+        final progress = total <= 0
+            ? 0.0
+            : (visibleOffset / total).clamp(0.0, 1.0).toDouble();
         final currentItem = controllerIsCurrent
             ? widget.controller.currentItemIndex
             : null;
@@ -378,7 +440,6 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
             : isPaused
             ? '已暂停 · $percent%'
             : widget.subtitle;
-
         final compact = widget.compact;
 
         return Semantics(
