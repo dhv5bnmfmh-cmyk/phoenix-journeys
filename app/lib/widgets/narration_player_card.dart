@@ -28,6 +28,19 @@ int resolveNarrationDisplayOffset({
   return candidate.clamp(0, totalCharacters).toInt();
 }
 
+@visibleForTesting
+int resolveNarrationPauseOffset({
+  required int controllerOffset,
+  required int estimatedOffset,
+  required int totalCharacters,
+}) {
+  if (totalCharacters <= 0) return 0;
+  // Never resume ahead of the native/highlight position. Repeating part of the
+  // current word is preferable to skipping characters the user has not heard.
+  final candidate = math.min(controllerOffset, estimatedOffset);
+  return candidate.clamp(0, math.max(0, totalCharacters - 1)).toInt();
+}
+
 class NarrationPlayerCard extends StatefulWidget {
   const NarrationPlayerCard({
     required this.controller,
@@ -199,11 +212,16 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
 
   Future<void> _pauseSession(int commandId) async {
     final controllerIsCurrent = widget.controller.contentId == widget.contentId;
-    final offset = _sessionPlaying
+    final estimatedOffset = _sessionPlaying
         ? _estimatedSessionOffset()
-        : controllerIsCurrent
-        ? widget.controller.currentOffset
         : _displayOffset;
+    final offset = controllerIsCurrent
+        ? resolveNarrationPauseOffset(
+            controllerOffset: widget.controller.currentOffset,
+            estimatedOffset: estimatedOffset,
+            totalCharacters: widget.controller.totalCharacters,
+          )
+        : estimatedOffset;
     if (!mounted || commandId != _commandVersion) return;
     _positionClock?.cancel();
     setState(() {
@@ -231,7 +249,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       return;
     }
     setState(() {
-      _anchorOffset = math.max(safeOffset, widget.controller.currentOffset);
+      // Keep visual progress anchored to the same character used for audio.
+      _displayOffset = safeOffset;
+      _resumeOffset = safeOffset;
+      _anchorOffset = safeOffset;
       _anchorTime = DateTime.now();
     });
     _startPositionClock();

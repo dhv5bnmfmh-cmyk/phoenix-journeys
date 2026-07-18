@@ -35,4 +35,25 @@ void main() {
 
     expect(offset, 120);
   });
+
+  // Audio resume must never move beyond the word visible at pause time.
+  test('pause offset never jumps ahead of the native word position', () {
+    final offset = resolveNarrationPauseOffset(
+      controllerOffset: 23,
+      estimatedOffset: 28,
+      totalCharacters: 120,
+    );
+
+    expect(offset, 23);
+  });
+
+  test('pause offset remains inside the narration range', () {
+    final offset = resolveNarrationPauseOffset(
+      controllerOffset: 150,
+      estimatedOffset: 145,
+      totalCharacters: 120,
+    );
+
+    expect(offset, 119);
+  });
 }
