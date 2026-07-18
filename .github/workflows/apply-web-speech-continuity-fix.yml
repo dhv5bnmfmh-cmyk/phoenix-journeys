@@ -1,22 +1,26 @@
 name: Apply web speech continuity fix
 
 on:
-  push:
+  pull_request:
     branches:
-      - fix/web-speech-native-continuity
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
 
 jobs:
   patch:
-    if: ${{ github.event.head_commit.message == 'chore: run web speech continuity patch' }}
+    if: ${{ github.head_ref == 'fix/web-speech-native-continuity' && !contains(github.event.pull_request.head.sha, 'web-speech-patched') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out branch
         uses: actions/checkout@v6
         with:
-          ref: fix/web-speech-native-continuity
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
 
       - name: Apply continuity patch
@@ -30,5 +34,9 @@ jobs:
           git add app/lib/services/narration_controller.dart \
                   app/lib/widgets/narration_player_card.dart \
                   worker/web_speech_continuity_rule.test.mjs
+          if git diff --cached --quiet; then
+            echo "Patch already applied."
+            exit 0
+          fi
           git commit -m "fix: use native Safari pause and resume [web-speech-patched]"
-          git push origin HEAD:fix/web-speech-native-continuity
+          git push origin HEAD:${{ github.head_ref }}
