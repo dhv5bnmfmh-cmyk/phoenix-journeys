@@ -111,15 +111,6 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     _positionClock = Timer.periodic(const Duration(milliseconds: 160), (_) {
       if (!mounted || !_sessionPlaying) return;
 
-      if (widget.controller.status == NarrationStatus.error) {
-        _positionClock?.cancel();
-        setState(() {
-          _sessionPlaying = false;
-          _sessionPaused = false;
-        });
-        return;
-      }
-
       final total = widget.controller.totalCharacters;
       final nextOffset = _estimatedSessionOffset();
       final nextItem = widget.controller.status == NarrationStatus.playing
@@ -293,7 +284,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
         final controllerStatus = controllerIsCurrent
             ? widget.controller.status
             : NarrationStatus.idle;
-        final hasError = controllerStatus == NarrationStatus.error;
+        final hasError =
+            !_sessionPlaying &&
+            !_sessionPaused &&
+            controllerStatus == NarrationStatus.error;
         final isPlaying =
             _sessionPlaying ||
             (!_sessionPaused && controllerStatus == NarrationStatus.playing);
