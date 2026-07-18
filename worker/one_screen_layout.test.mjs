@@ -31,8 +31,8 @@ test('story and Discovery place every short paragraph in the same screen', () =>
   const journey = read('app/lib/screens/journey_screen.dart');
   assert.match(journey, /mainAxisSize:\s*MainAxisSize\.min/);
   assert.match(journey, /fontSize:\s*10\.8/);
-  assert.equal((journey.match(/_NowReadingStrip\(/g) ?? []).length, 3);
-  assert.match(journey, /按播放后，这里会显示当前段落和词语/);
+  assert.doesNotMatch(journey, /_NowReadingStrip/);
+  assert.doesNotMatch(journey, /朗读位置/);
   assert.doesNotMatch(journey, /本页重点词语/);
 });
 

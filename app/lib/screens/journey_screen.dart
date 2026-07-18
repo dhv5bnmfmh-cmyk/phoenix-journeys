@@ -494,12 +494,6 @@ class _JourneyScreenState extends State<JourneyScreen>
             onPlay: _playStory,
           ),
           const SizedBox(height: 3),
-          _NowReadingStrip(
-            controller: _narration,
-            contentId: 'story',
-            totalItems: _journeyContent.storyParagraphs.length,
-          ),
-          const SizedBox(height: 2),
           Expanded(
             child: AnimatedBuilder(
               animation: _narration,
@@ -670,12 +664,6 @@ class _JourneyScreenState extends State<JourneyScreen>
             subtitle: '中文朗读 · ${discoveries.length} 段',
             compact: true,
             onPlay: _playDiscoveries,
-          ),
-          const SizedBox(height: 3),
-          _NowReadingStrip(
-            controller: _narration,
-            contentId: 'discovery',
-            totalItems: discoveries.length,
           ),
           const SizedBox(height: 3),
           Expanded(
@@ -985,136 +973,6 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 }
 
-class _NowReadingStrip extends StatelessWidget {
-  const _NowReadingStrip({
-    required this.controller,
-    required this.contentId,
-    required this.totalItems,
-  });
-
-  final NarrationController controller;
-  final String contentId;
-  final int totalItems;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, _) {
-        final snapshot = controller.highlightSnapshot;
-        final currentSnapshot =
-            snapshot != null && snapshot.contentId == contentId
-            ? snapshot
-            : null;
-        final isCurrent = currentSnapshot != null;
-        final status = controller.status;
-        final isPlaying = isCurrent && status == NarrationStatus.playing;
-        final isPaused = isCurrent && status == NarrationStatus.paused;
-        final label = isPlaying
-            ? '正在朗读'
-            : isPaused
-            ? '暂停在'
-            : '朗读位置';
-        final icon = isPlaying
-            ? Icons.graphic_eq_rounded
-            : isPaused
-            ? Icons.pause_rounded
-            : Icons.my_location_rounded;
-        final itemNumber = currentSnapshot?.itemIndex == null
-            ? null
-            : currentSnapshot!.itemIndex + 1;
-        final word = currentSnapshot == null
-            ? ''
-            : currentSnapshot.itemText.substring(
-                currentSnapshot.start.clamp(0, currentSnapshot.itemText.length),
-                currentSnapshot.end.clamp(0, currentSnapshot.itemText.length),
-              );
-
-        return AnimatedContainer(
-          key: ValueKey('now-reading-$contentId'),
-          duration: const Duration(milliseconds: 160),
-          height: 32,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: isCurrent
-                ? const Color(0xFFFFE39B)
-                : Colors.white.withValues(alpha: .92),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: isCurrent
-                  ? PhoenixTheme.red
-                  : PhoenixTheme.gold.withValues(alpha: .30),
-              width: isCurrent ? 1.5 : 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 16,
-                color: isCurrent ? PhoenixTheme.red : Colors.black45,
-              ),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isCurrent ? PhoenixTheme.red : Colors.black54,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(width: 6),
-              if (isCurrent) ...[
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: PhoenixTheme.red,
-                    borderRadius: BorderRadius.circular(99),
-                  ),
-                  child: Text(
-                    '第 $itemNumber/$totalItems 段',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    '当前：$word',
-                    key: ValueKey('now-reading-word-$contentId'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color(0xFF65130F),
-                      fontSize: 13,
-                      height: 1,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ] else
-                const Expanded(
-                  child: Text(
-                    '按播放后，这里会显示当前段落和词语',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.black45, fontSize: 9.5),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
 class _CompactTextBlock extends StatelessWidget {
   const _CompactTextBlock({
     required this.index,
@@ -1136,7 +994,7 @@ class _CompactTextBlock extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
       decoration: BoxDecoration(
         color: active
-            ? const Color(0xFFFFE7A8)
+            ? const Color(0xFFFFF2EE)
             : Colors.white.withValues(alpha: .94),
         borderRadius: BorderRadius.circular(9),
         border: Border.all(
