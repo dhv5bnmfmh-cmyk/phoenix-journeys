@@ -15,9 +15,12 @@ new = '''      await _tts.setVolume(1.0);
       unawaited(_startProgressWatchdog(sessionToken, safeOffset));
       final result = await _tts.speak(remainingText);
 '''
-if old not in controller:
-    raise SystemExit('speech watchdog order block not found')
-controller = controller.replace(old, new, 1)
+if old in controller:
+    controller = controller.replace(old, new, 1)
+watchdog = controller.find('unawaited(_startProgressWatchdog(sessionToken, safeOffset))')
+speak = controller.find('final result = await _tts.speak(remainingText)')
+if watchdog < 0 or speak <= watchdog:
+    raise SystemExit('Safari watchdog is not scheduled before speech')
 controller_path.write_text(controller)
 
 journey_path = Path('app/lib/screens/journey_screen.dart')
