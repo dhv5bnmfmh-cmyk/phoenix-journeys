@@ -22,7 +22,7 @@ void main() {
         estimatedOffset: 24,
         totalCharacters: 100,
       ),
-      23,
+      22,
     );
   });
 
@@ -34,7 +34,7 @@ void main() {
         estimatedOffset: 31,
         totalCharacters: 100,
       ),
-      30,
+      29,
     );
   });
 
@@ -47,7 +47,7 @@ void main() {
         lastObservedOffset: 42,
         totalCharacters: 100,
       ),
-      41,
+      40,
     );
   });
 
