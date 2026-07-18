@@ -22,8 +22,13 @@ class WordMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final displayWord = state.displayText(word);
+    AppState? state;
+    try {
+      state = Provider.of<AppState>(context);
+    } on ProviderNotFoundException {
+      state = null;
+    }
+    final displayWord = state?.displayText(word) ?? word;
 
     return Container(
       width: size,
