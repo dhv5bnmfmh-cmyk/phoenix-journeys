@@ -19,10 +19,15 @@ controller_path.write_text(controller.replace(old, new, 1))
 
 player_path = Path('app/lib/widgets/narration_player_card.dart')
 player = player_path.read_text()
-old_percent = '''        final percent = (progress * 100).round();
+old_percent = '''        final roundedPercent = (progress * 100).round();
+        final percent = progress > 0 && roundedPercent == 0
+            ? 1
+            : roundedPercent;
 '''
-new_percent = '''        final rawPercent = (progress * 100).round();
-        final percent = isPlaying ? rawPercent.clamp(1, 99) : rawPercent;
+new_percent = '''        final roundedPercent = (progress * 100).round();
+        final percent = isPlaying
+            ? roundedPercent.clamp(1, 99)
+            : roundedPercent;
 '''
 if old_percent not in player:
     raise SystemExit('player percent marker not found')
@@ -53,6 +58,6 @@ test('active narration uses an inline triangle rather than recoloring text', () 
 });
 
 test('playing percent never appears stuck at zero', () => {
-  assert.match(player, /final percent = isPlaying \? rawPercent\.clamp\(1, 99\) : rawPercent/);
+  assert.match(player, /final percent = isPlaying[\s\S]*roundedPercent\.clamp\(1, 99\)/);
 });
 ''')
