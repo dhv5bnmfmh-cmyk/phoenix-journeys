@@ -1,0 +1,51 @@
+name: Apply narration analyze fix
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/music-style-narration-controls
+          fetch-depth: 0
+
+      - name: Remove unused mini-button key parameter
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path('app/lib/widgets/narration_player_card.dart')
+          text = path.read_text()
+          old = '''  const _MiniIconButton({
+                required this.tooltip,
+                required this.icon,
+                required this.onPressed,
+                super.key,
+              });'''
+          new = '''  const _MiniIconButton({
+                required this.tooltip,
+                required this.icon,
+                required this.onPressed,
+              });'''
+          if old not in text:
+              raise SystemExit('Mini button constructor not found')
+          path.write_text(text.replace(old, new, 1))
+
+      - uses: dart-lang/setup-dart@v1
+      - run: dart format app/lib/widgets/narration_player_card.dart
+
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/widgets/narration_player_card.dart
+          git commit -m "fix: remove unused narration mini-button parameter"
+          git push origin HEAD:feature/music-style-narration-controls
