@@ -10,7 +10,13 @@ const player = readFileSync(
 test('iPhone uses one narration position source', () => {
   assert.doesNotMatch(player, /_continuationClock/);
   assert.doesNotMatch(player, /_estimatedClockOffset/);
-  assert.match(player, /lastObservedOffset: _lastObservedOffset/);
+
+  const start = player.indexOf('int _captureContinuationOffset');
+  const end = player.indexOf('void _handleMainPressed', start);
+  const body = player.slice(start, end);
+  assert.match(body, /widget\.controller\.currentOffset/);
+  assert.doesNotMatch(body, /lastNativeOffset/);
+  assert.doesNotMatch(body, /lastObservedOffset/);
 });
 
 test('fresh native zero cannot pull the saved position back to the beginning', () => {
