@@ -7,29 +7,39 @@ const player = readFileSync(
   'utf8',
 );
 
-test('iPhone playback owns a local continuation clock', () => {
-  assert.match(player, /Timer\? _continuationClock/);
-  assert.match(player, /void _startContinuationClock\(int offset\)/);
-  assert.match(player, /_estimatedClockOffset\(\)/);
-  assert.match(player, /3\.35 \* \(widget\.controller\.speechRate \/ \.36\)/);
+test('iPhone uses one narration position source', () => {
+  assert.doesNotMatch(player, /_continuationClock/);
+  assert.doesNotMatch(player, /_estimatedClockOffset/);
+  assert.match(
+    player,
+    /lastObservedOffset: _lastObservedOffset/,
+  );
 });
 
-test('pause captures the local clock before stopping it', () => {
-  const start = player.indexOf('Future<void> _pauseSession');
-  const end = player.indexOf('Future<void> _resumeSession', start);
+test('every resumed session resets the observed offset to its start', () => {
+  const start = player.indexOf('void _beginLocalPlayback');
+  const end = player.indexOf('void _observeControllerOffset', start);
   const body = player.slice(start, end);
-  const capture = body.indexOf('final offset = _captureContinuationOffset()');
-  const stop = body.indexOf('_stopContinuationClock()');
-  const pause = body.indexOf('pauseAtOffset(offset)');
 
-  assert.ok(capture >= 0);
-  assert.ok(stop > capture);
-  assert.ok(pause > stop);
+  assert.match(body, /_lastObservedOffset = offset/);
+  assert.doesNotMatch(body, /math\.max\(_lastObservedOffset, offset\)/);
 });
 
-test('speed changes restart the continuation clock from the saved offset', () => {
+test('pause freezes and resumes from exactly one saved offset', () => {
+  const pauseStart = player.indexOf('Future<void> _pauseSession');
+  const pauseEnd = player.indexOf('Future<void> _resumeSession', pauseStart);
+  const pause = player.slice(pauseStart, pauseEnd);
+
+  assert.match(pause, /final offset = _captureContinuationOffset\(\)/);
+  assert.match(pause, /_resumeOffset = offset/);
+  assert.match(pause, /_lastObservedOffset = offset/);
+  assert.match(pause, /pauseAtOffset\(offset\)/);
+});
+
+test('speed changes keep the same saved offset', () => {
   const start = player.indexOf('Future<void> _setSpeechRate');
-  const end = player.indexOf('@override\n  Widget build', start);
+  const end = player.indexOf('@override
+  Widget build', start);
   const body = player.slice(start, end);
 
   assert.match(body, /final offset = _captureContinuationOffset\(\)/);
@@ -39,7 +49,11 @@ test('speed changes restart the continuation clock from the saved offset', () =>
   assert.match(body, /resumeFromOffset\(offset\)/);
 });
 
-test('paused progress uses the retained offset instead of transient zero', () => {
+test('estimated Safari progress rewinds instead of skipping text', () => {
+  assert.match(player, /return math\.max\(0, estimated - 2\)/);
+});
+
+test('paused progress remains visible at the retained offset', () => {
   assert.match(player, /math\.max\(_resumeOffset, _lastObservedOffset\)/);
   assert.match(player, /final visibleOffset = isPlaying \|\| isPaused/);
   assert.match(player, /visibleOffset \/ total/);

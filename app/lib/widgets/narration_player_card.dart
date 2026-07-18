@@ -39,7 +39,9 @@ int resolveNarrationPauseOffset({
   }
 
   final estimated = estimatedOffset.clamp(0, maxOffset).toInt();
-  return math.max(0, estimated - 1);
+  // When Safari has no exact word callback, resume slightly before the
+  // estimate so Phoenix never skips text after pause or a speed change.
+  return math.max(0, estimated - 2);
 }
 
 @visibleForTesting
@@ -86,9 +88,6 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
   int _commandVersion = 0;
   int _resumeOffset = 0;
   int _lastObservedOffset = 0;
-  int _clockAnchorOffset = 0;
-  DateTime? _clockAnchorTime;
-  Timer? _continuationClock;
 
   bool get _controllerIsCurrent =>
       widget.controller.contentId == widget.contentId;
@@ -112,57 +111,14 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
   @override
   void dispose() {
     _commandVersion += 1;
-    _continuationClock?.cancel();
     super.dispose();
   }
 
   void _resetLocalSession() {
-    _continuationClock?.cancel();
-    _continuationClock = null;
     _sessionPlaying = false;
     _sessionPaused = false;
     _resumeOffset = 0;
     _lastObservedOffset = 0;
-    _clockAnchorOffset = 0;
-    _clockAnchorTime = null;
-  }
-
-  int _estimatedClockOffset() {
-    final total = widget.controller.totalCharacters;
-    final anchorTime = _clockAnchorTime;
-    if (total <= 0 || anchorTime == null) return _clockAnchorOffset;
-
-    final elapsedSeconds =
-        DateTime.now().difference(anchorTime).inMilliseconds / 1000.0;
-    final charsPerSecond = 3.35 * (widget.controller.speechRate / .36);
-    final estimated =
-        _clockAnchorOffset + (elapsedSeconds * charsPerSecond).floor();
-    return estimated.clamp(0, math.max(0, total - 1)).toInt();
-  }
-
-  void _startContinuationClock(int offset) {
-    _continuationClock?.cancel();
-    _clockAnchorOffset = offset;
-    _clockAnchorTime = DateTime.now();
-    _continuationClock = Timer.periodic(
-      const Duration(milliseconds: 120),
-      (_) {
-        if (!_sessionPlaying) return;
-        final controllerOffset = _controllerIsCurrent
-            ? widget.controller.currentOffset
-            : 0;
-        final observed = math.max(_estimatedClockOffset(), controllerOffset);
-        if (observed > _lastObservedOffset) {
-          _lastObservedOffset = observed;
-        }
-      },
-    );
-  }
-
-  void _stopContinuationClock() {
-    _continuationClock?.cancel();
-    _continuationClock = null;
-    _clockAnchorTime = null;
   }
 
   void _beginLocalPlayback(int offset) {
@@ -170,9 +126,8 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       _sessionPlaying = true;
       _sessionPaused = false;
       _resumeOffset = offset;
-      _lastObservedOffset = math.max(_lastObservedOffset, offset);
+      _lastObservedOffset = offset;
     });
-    _startContinuationClock(offset);
   }
 
   void _observeControllerOffset(NarrationStatus status) {
@@ -194,13 +149,11 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
 
   int _captureContinuationOffset() {
     if (!_controllerIsCurrent) return _resumeOffset;
-    final clockOffset = _estimatedClockOffset();
-    final retainedOffset = math.max(_lastObservedOffset, clockOffset);
     return resolveNarrationContinuationOffset(
       nativeOffset: widget.controller.lastNativeOffset,
       nativeProgressIsFresh: widget.controller.hasFreshNativeProgress,
       controllerOffset: widget.controller.currentOffset,
-      lastObservedOffset: retainedOffset,
+      lastObservedOffset: _lastObservedOffset,
       totalCharacters: widget.controller.totalCharacters,
     );
   }
@@ -229,10 +182,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     if (_sessionPaused || controllerPaused) {
       if (!_sessionPaused) {
         _resumeOffset = _captureContinuationOffset();
-        _lastObservedOffset = math.max(
-          _lastObservedOffset,
-          _resumeOffset,
-        );
+        _lastObservedOffset = _resumeOffset;
       }
       unawaited(_resumeSession(commandId));
       return;
@@ -248,19 +198,18 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     final offset = _controllerIsCurrent ? widget.controller.currentOffset : 0;
     setState(() {
       _resumeOffset = offset;
-      _lastObservedOffset = math.max(_lastObservedOffset, offset);
+      _lastObservedOffset = offset;
     });
   }
 
   Future<void> _pauseSession(int commandId) async {
     final offset = _captureContinuationOffset();
-    _stopContinuationClock();
     if (!mounted || commandId != _commandVersion) return;
     setState(() {
       _sessionPlaying = false;
       _sessionPaused = true;
       _resumeOffset = offset;
-      _lastObservedOffset = math.max(_lastObservedOffset, offset);
+      _lastObservedOffset = offset;
     });
     await widget.controller.pauseAtOffset(offset);
   }
@@ -280,16 +229,12 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     final continuedOffset = math.max(safeOffset, controllerOffset);
     setState(() {
       _resumeOffset = continuedOffset;
-      _lastObservedOffset = math.max(
-        _lastObservedOffset,
-        continuedOffset,
-      );
+      _lastObservedOffset = continuedOffset;
     });
   }
 
   Future<void> _restartSession() async {
     final commandId = ++_commandVersion;
-    _stopContinuationClock();
     _lastObservedOffset = 0;
     _beginLocalPlayback(0);
     if (_controllerIsCurrent && widget.controller.hasContent) {
@@ -319,11 +264,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     final wasPaused = _sessionPaused || controllerPaused;
     final offset = _captureContinuationOffset();
 
-    if (wasPlaying) _stopContinuationClock();
     if (mounted) {
       setState(() {
         _resumeOffset = offset;
-        _lastObservedOffset = math.max(_lastObservedOffset, offset);
+        _lastObservedOffset = offset;
         if (wasPlaying) {
           _sessionPlaying = false;
           _sessionPaused = true;
