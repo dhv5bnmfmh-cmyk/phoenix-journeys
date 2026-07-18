@@ -162,11 +162,18 @@ class _JourneyScreenState extends State<JourneyScreen>
     final resumeOffset = _narration.currentOffset;
     if (!mounted) return;
 
+    final initialIndex = words.indexWhere((item) => item.word == entry.word);
     await showWordDetail(
       context,
       entry,
+      entries: words,
+      initialIndex: initialIndex < 0 ? 0 : initialIndex,
       onSpeak: () => _narration.speakWord(
         _appState.displayText(entry.word),
+        languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
+      ),
+      onSpeakEntry: (currentEntry) => _narration.speakWord(
+        _appState.displayText(currentEntry.word),
         languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
       ),
     );
@@ -678,28 +685,26 @@ class _JourneyScreenState extends State<JourneyScreen>
                       .map((entry) {
                         final item = entry.value;
                         final isActive = _isNarrating('discovery', entry.key);
-                        return Expanded(
-                          child: _CompactTextBlock(
-                            index: entry.key + 1,
-                            active: isActive,
-                            onSupport: () => unawaited(
-                              _showReadingSupport(
-                                title: '今日发现 ${entry.key + 1}',
-                                pinyin: item.pinyin,
-                                nativeLabel: item.nativeLabel(language),
-                                nativeText: item.nativeText(language),
-                                english: item.english,
-                              ),
+                        return _CompactTextBlock(
+                          index: entry.key + 1,
+                          active: isActive,
+                          onSupport: () => unawaited(
+                            _showReadingSupport(
+                              title: '今日发现 ${entry.key + 1}',
+                              pinyin: item.pinyin,
+                              nativeLabel: item.nativeLabel(language),
+                              nativeText: item.nativeText(language),
+                              english: item.english,
                             ),
-                            child: Text(
-                              state.displayText(item.text),
-                              style: TextStyle(
-                                fontSize: 10.8,
-                                height: 1.2,
-                                fontWeight: isActive
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
-                              ),
+                          ),
+                          child: Text(
+                            state.displayText(item.text),
+                            style: TextStyle(
+                              fontSize: 10.2,
+                              height: 1.15,
+                              fontWeight: isActive
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
                             ),
                           ),
                         );
