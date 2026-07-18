@@ -678,8 +678,11 @@ class _JourneyScreenState extends State<JourneyScreen>
             child: AnimatedBuilder(
               animation: _narration,
               builder: (context, _) {
-                return Column(
-                  children: discoveries
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: discoveries
                       .asMap()
                       .entries
                       .map((entry) {
@@ -697,11 +700,14 @@ class _JourneyScreenState extends State<JourneyScreen>
                               english: item.english,
                             ),
                           ),
-                          child: Text(
-                            state.displayText(item.text),
+                          child: InteractiveStoryText(
+                            text: item.text,
+                            entries: words,
+                            narrationContentId: 'discovery',
+                            narrationItemId: 'discovery-${entry.key}',
                             style: TextStyle(
-                              fontSize: 10.2,
-                              height: 1.15,
+                              fontSize: 9.9,
+                              height: 1.12,
                               fontWeight: isActive
                                   ? FontWeight.w800
                                   : FontWeight.w600,
@@ -985,8 +991,8 @@ class _CompactTextBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 2),
-      padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
+      margin: const EdgeInsets.only(bottom: 1),
+      padding: const EdgeInsets.fromLTRB(3, 1, 1, 1),
       decoration: BoxDecoration(
         color: active
             ? PhoenixTheme.gold.withValues(alpha: .18)

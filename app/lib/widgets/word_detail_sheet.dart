@@ -32,14 +32,11 @@ Future<void> showWordDetail(
     showDragHandle: true,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (_) => FractionallySizedBox(
-      heightFactor: .88,
-      child: _WordDetailSheet(
-        entries: studyEntries,
-        initialIndex: safeIndex,
-        onSpeak: onSpeak,
-        onSpeakEntry: onSpeakEntry,
-      ),
+    builder: (_) => _WordDetailSheet(
+      entries: studyEntries,
+      initialIndex: safeIndex,
+      onSpeak: onSpeak,
+      onSpeakEntry: onSpeakEntry,
     ),
   );
 }
@@ -119,7 +116,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
     final example = entry.studyExamples.isEmpty
         ? null
         : entry.studyExamples.first;
-    final compact = MediaQuery.sizeOf(context).height < 720;
+    final compact = MediaQuery.sizeOf(context).height < 780;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -132,10 +129,11 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
-                  WordMark(word: entry.word, size: compact ? 40 : 46),
+                  WordMark(word: entry.word, size: compact ? 34 : 38),
                   const SizedBox(width: 9),
                   Expanded(
                     child: Column(
@@ -149,7 +147,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: compact ? 21 : 24,
+                                  fontSize: compact ? 18.5 : 20,
                                   height: 1,
                                   fontWeight: FontWeight.w900,
                                 ),
@@ -201,11 +199,11 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 7),
+              const SizedBox(height: 5),
               ClipRRect(
                 borderRadius: BorderRadius.circular(99),
                 child: LinearProgressIndicator(
-                  minHeight: 4,
+                  minHeight: 3,
                   value: (_index + 1) / widget.entries.length,
                   color: PhoenixTheme.red,
                   backgroundColor: PhoenixTheme.gold.withValues(alpha: .18),
@@ -230,13 +228,11 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                 color: PhoenixTheme.translation,
               ),
               const SizedBox(height: 7),
-              Expanded(
-                child: _CoreExampleCard(
-                  example: example,
-                  nativeLabel: entry.nativeLabel(language),
-                  nativeText: example?.nativeText(language) ?? '',
-                  compact: compact,
-                ),
+              _CoreExampleCard(
+                example: example,
+                nativeLabel: entry.nativeLabel(language),
+                nativeText: example?.nativeText(language) ?? '',
+                compact: compact,
               ),
               if (_speechUnavailable) ...[
                 const SizedBox(height: 4),
@@ -254,7 +250,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                     child: OutlinedButton.icon(
                       onPressed: () => state.toggleSavedWord(entry.word),
                       style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(40),
+                        minimumSize: const Size.fromHeight(36),
                         visualDensity: VisualDensity.compact,
                       ),
                       icon: Icon(
@@ -319,7 +315,7 @@ class _CompactDefinitionLine extends StatelessWidget {
     final state = context.watch<AppState>();
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: .065),
         borderRadius: BorderRadius.circular(10),
@@ -377,7 +373,7 @@ class _CoreExampleCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(compact ? 8 : 10),
+      padding: EdgeInsets.all(compact ? 6 : 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),

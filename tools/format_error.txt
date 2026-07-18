@@ -1,0 +1,16 @@
+Warning: Package resolution error when reading "analysis_options.yaml" file:
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at "/home/runner/work/phoenix-journeys/phoenix-journeys/app/analysis_options.yaml".
+Formatted app/lib/services/narration_controller.dart
+Warning: Package resolution error when reading "analysis_options.yaml" file:
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at "/home/runner/work/phoenix-journeys/phoenix-journeys/app/analysis_options.yaml".
+Formatted app/lib/widgets/narration_player_card.dart
+Warning: Package resolution error when reading "analysis_options.yaml" file:
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at "/home/runner/work/phoenix-journeys/phoenix-journeys/app/analysis_options.yaml".
+Could not format because the source could not be parsed:
+
+line 720, column 15 of app/lib/screens/journey_screen.dart: Expected to find ')'.
+    ╷
+720 │               },
+    │               ^
+    ╵
+Formatted 3 files (2 changed) in 0.04 seconds.
