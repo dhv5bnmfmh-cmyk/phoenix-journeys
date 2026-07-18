@@ -29,7 +29,7 @@ test('position derives from playback and is passed to Story and Discovery', () =
 test('Flutter verifies a real inline triangle is painted', () => {
   assert.match(interactive, /class _InlineReadingMarker/);
   assert.match(interactive, /class _ReadingTrianglePainter/);
-  assert.match(interactive, /size: Size\(7, 4\)/);
+  assert.match(interactive, /size:\s*Size\(6, 3\.5\)/);
   assert.doesNotMatch(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
   assert.match(widgetTest, /reading-triangle-visual-test/);
 });
