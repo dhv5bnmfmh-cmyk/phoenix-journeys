@@ -1,22 +1,26 @@
 name: Apply narration pause patch
 
 on:
-  push:
+  pull_request:
     branches:
-      - fix/narration-exact-pause-position
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
 
 jobs:
   patch:
-    if: ${{ !contains(github.event.head_commit.message, '[narration-patch-applied]') }}
+    if: ${{ github.head_ref == 'fix/narration-exact-pause-position' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out patch branch
         uses: actions/checkout@v6
         with:
-          ref: fix/narration-exact-pause-position
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
 
       - name: Apply exact pause-position patch
@@ -35,4 +39,4 @@ jobs:
             exit 0
           fi
           git commit -m "fix: resume narration without skipping text [narration-patch-applied]"
-          git push origin HEAD:fix/narration-exact-pause-position
+          git push origin HEAD:${{ github.head_ref }}
