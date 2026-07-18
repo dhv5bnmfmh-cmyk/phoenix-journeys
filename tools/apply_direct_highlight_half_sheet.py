@@ -156,10 +156,12 @@ replacements = [
     ('minimumSize: const Size.fromHeight(36),', 'minimumSize: const Size.fromHeight(32),', 'save button height'),
     ('minimumSize: const Size.fromHeight(40),', 'minimumSize: const Size.fromHeight(32),', 'next button height'),
     ('padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),', 'padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),', 'definition padding'),
-    ('width: 54,', 'width: 44,', 'definition label width'),
 ]
 for old, new, label in replacements:
     sheet = replace_once(sheet, old, new, label)
+if sheet.count('width: 54,') != 2:
+    raise RuntimeError(f'label widths: expected two matches, got {sheet.count("width: 54,")}')
+sheet = sheet.replace('width: 54,', 'width: 44,')
 sheet_path.write_text(sheet)
 
 
