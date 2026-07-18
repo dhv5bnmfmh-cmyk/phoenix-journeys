@@ -5,17 +5,21 @@ import 'package:phoenix_journeys/state/app_state.dart';
 import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
 import 'package:provider/provider.dart';
 
-bool _containsYellowHighlight(InlineSpan span) {
-  if (span.style?.backgroundColor == const Color(0xFFFFD05A)) return true;
+bool _containsStrongYellowHighlight(InlineSpan span) {
+  if (span.style?.backgroundColor == const Color(0xFFFFC928) &&
+      span.style?.fontWeight == FontWeight.w900 &&
+      span.style?.decoration == TextDecoration.underline) {
+    return true;
+  }
   if (span is TextSpan) {
-    return span.children?.any(_containsYellowHighlight) ?? false;
+    return span.children?.any(_containsStrongYellowHighlight) ?? false;
   }
   return false;
 }
 
 void main() {
   testWidgets(
-    'explicit narration range paints a visible yellow word highlight',
+    'explicit narration range paints a strong visible current-word highlight',
     (tester) async {
       final state = AppState();
       await tester.pumpWidget(
@@ -39,7 +43,7 @@ void main() {
         find.byKey(const ValueKey('interactive-highlight-visual-test')),
       );
       expect(text.textSpan, isNotNull);
-      expect(_containsYellowHighlight(text.textSpan!), isTrue);
+      expect(_containsStrongYellowHighlight(text.textSpan!), isTrue);
     },
   );
 }
