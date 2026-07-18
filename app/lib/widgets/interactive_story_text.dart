@@ -443,7 +443,10 @@ class _InlineReadingMarker extends StatelessWidget {
       children: [
         Text(text, style: style),
         const SizedBox(height: .5),
-        const CustomPaint(size: Size(7, 4), painter: _ReadingTrianglePainter()),
+        const CustomPaint(
+          size: Size(6, 3.5),
+          painter: _ReadingTrianglePainter(),
+        ),
       ],
     );
   }
