@@ -11,6 +11,7 @@ export default {
           service: 'phoenix-journeys',
           ai: Boolean(env?.AI),
           model: MODEL,
+          release: env?.PHOENIX_RELEASE ?? 'local',
         },
         {
           headers: {
