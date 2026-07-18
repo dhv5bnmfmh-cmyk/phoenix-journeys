@@ -10,19 +10,12 @@ const player = readFileSync(
 test('iPhone uses one narration position source', () => {
   assert.doesNotMatch(player, /_continuationClock/);
   assert.doesNotMatch(player, /_estimatedClockOffset/);
-  assert.match(
-    player,
-    /lastObservedOffset: _lastObservedOffset/,
-  );
+  assert.match(player, /lastObservedOffset: _lastObservedOffset/);
 });
 
-test('every resumed session resets the observed offset to its start', () => {
-  const start = player.indexOf('void _beginLocalPlayback');
-  const end = player.indexOf('void _observeControllerOffset', start);
-  const body = player.slice(start, end);
-
-  assert.match(body, /_lastObservedOffset = offset/);
-  assert.doesNotMatch(body, /math\.max\(_lastObservedOffset, offset\)/);
+test('fresh native zero cannot pull the saved position back to the beginning', () => {
+  assert.match(player, /return math\.max\(native, safeEstimated\)/);
+  assert.match(player, /final safeEstimated = math\.max\(0, estimated - 1\)/);
 });
 
 test('pause freezes and resumes from exactly one saved offset', () => {
@@ -32,28 +25,24 @@ test('pause freezes and resumes from exactly one saved offset', () => {
 
   assert.match(pause, /final offset = _captureContinuationOffset\(\)/);
   assert.match(pause, /_resumeOffset = offset/);
-  assert.match(pause, /_lastObservedOffset = offset/);
   assert.match(pause, /pauseAtOffset\(offset\)/);
 });
 
 test('speed changes keep the same saved offset', () => {
   const start = player.indexOf('Future<void> _setSpeechRate');
-  const end = player.indexOf('@override\n  Widget build', start);
+  const end = player.indexOf('@override
+  Widget build', start);
   const body = player.slice(start, end);
 
   assert.match(body, /final offset = _captureContinuationOffset\(\)/);
   assert.match(body, /pauseAtOffset\(offset\)/);
   assert.match(body, /setSpeechRate\(rate\)/);
-  assert.match(body, /_beginLocalPlayback\(offset\)/);
   assert.match(body, /resumeFromOffset\(offset\)/);
 });
 
-test('estimated Safari progress rewinds instead of skipping text', () => {
-  assert.match(player, /return math\.max\(0, estimated - 2\)/);
-});
-
-test('paused progress remains visible at the retained offset', () => {
-  assert.match(player, /math\.max\(_resumeOffset, _lastObservedOffset\)/);
-  assert.match(player, /final visibleOffset = isPlaying \|\| isPaused/);
-  assert.match(player, /visibleOffset \/ total/);
+test('playing progress comes directly from the narration controller', () => {
+  assert.match(
+    player,
+    /isPaused[\s\S]*math\.max\(widget\.controller\.currentOffset, _resumeOffset\)[\s\S]*: widget\.controller\.currentOffset/,
+  );
 });

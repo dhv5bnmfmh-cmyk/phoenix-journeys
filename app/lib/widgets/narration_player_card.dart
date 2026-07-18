@@ -34,14 +34,14 @@ int resolveNarrationPauseOffset({
 }) {
   if (totalCharacters <= 0) return 0;
   final maxOffset = math.max(0, totalCharacters - 1);
+  final estimated = estimatedOffset.clamp(0, maxOffset).toInt();
+  final safeEstimated = math.max(0, estimated - 1);
   if (nativeProgressIsFresh) {
-    return nativeOffset.clamp(0, maxOffset).toInt();
+    final native = nativeOffset.clamp(0, maxOffset).toInt();
+    return math.max(native, safeEstimated);
   }
 
-  final estimated = estimatedOffset.clamp(0, maxOffset).toInt();
-  // When Safari has no exact word callback, resume slightly before the
-  // estimate so Phoenix never skips text after pause or a speed change.
-  return math.max(0, estimated - 2);
+  return safeEstimated;
 }
 
 @visibleForTesting
@@ -349,16 +349,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
         final total = controllerIsCurrent
             ? widget.controller.totalCharacters
             : 0;
-        final retainedOffset = controllerIsCurrent
-            ? math.max(
-                widget.controller.currentOffset,
-                math.max(_resumeOffset, _lastObservedOffset),
-              )
-            : 0;
-        final visibleOffset = isPlaying || isPaused
-            ? retainedOffset
-            : controllerIsCurrent
-            ? widget.controller.currentOffset
+        final visibleOffset = controllerIsCurrent
+            ? isPaused
+                  ? math.max(widget.controller.currentOffset, _resumeOffset)
+                  : widget.controller.currentOffset
             : 0;
         final progress = total <= 0
             ? 0.0
