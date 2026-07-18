@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   apply-resume-fix:
-    if: github.ref == 'refs/heads/feature/resume-offset-and-compact-story-v2' && github.actor != 'github-actions[bot]'
+    if: (github.ref == 'refs/heads/feature/resume-offset-and-compact-story-v2' || github.head_ref == 'feature/resume-offset-and-compact-story-v2') && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Check out feature branch
@@ -54,7 +54,7 @@ jobs:
           git push origin HEAD:feature/resume-offset-and-compact-story-v2
 
   verify:
-    if: github.ref != 'refs/heads/feature/resume-offset-and-compact-story-v2' || github.actor == 'github-actions[bot]'
+    if: ((github.ref != 'refs/heads/feature/resume-offset-and-compact-story-v2' && github.head_ref != 'feature/resume-offset-and-compact-story-v2') || github.actor == 'github-actions[bot]')
     runs-on: ubuntu-latest
     defaults:
       run:
