@@ -61,16 +61,11 @@ jobs:
       - name: Format changed Dart files
         run: dart format app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/lib/widgets/word_detail_sheet.dart
 
-      - name: Commit unified timeline fix
+      - name: Commit generated unified timeline files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout origin/main -- .github/workflows/flutter-ci.yml
-          git rm .github/workflows/apply-unified-timeline.yml tools/apply_unified_timeline_fix.py
-          if [ -f tools/patch_error.txt ]; then git rm tools/patch_error.txt; fi
-          if [ -f tools/format_error.txt ]; then git rm tools/format_error.txt; fi
-          git add app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/lib/widgets/word_detail_sheet.dart worker/live_narration_highlight.test.mjs worker/compact_word_study.test.mjs .github/workflows/flutter-ci.yml
+          git add app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/lib/widgets/word_detail_sheet.dart worker/live_narration_highlight.test.mjs worker/compact_word_study.test.mjs
           git commit -m "fix: unify narration audio progress and word highlights"
           git push origin HEAD:feature/unified-narration-timeline
 
