@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:pinyin/pinyin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum ScriptMode { simplified, traditional }
@@ -38,6 +39,13 @@ class AppState extends ChangeNotifier {
   String? loadErrorMessage;
 
   bool get isReady => loadStatus == AppLoadStatus.ready;
+  bool get isTraditional => scriptMode == ScriptMode.traditional;
+
+  String displayText(String text) {
+    return isTraditional
+        ? ChineseHelper.convertToTraditionalChinese(text)
+        : ChineseHelper.convertToSimplifiedChinese(text);
+  }
 
   bool get hasJourneyInProgress =>
       !journeyCompleted && beijingJourneyStep > 0;
@@ -51,10 +59,11 @@ class AppState extends ChangeNotifier {
       (beijingJourneyProgress * 100).round();
 
   String get beijingJourneyStepLabel =>
-      beijingJourneyStepLabels[_safeJourneyStep(beijingJourneyStep)];
+      displayText(beijingJourneyStepLabels[_safeJourneyStep(beijingJourneyStep)]);
 
-  String get beijingJourneyFurthestStepLabel =>
-      beijingJourneyStepLabels[_safeJourneyStep(beijingJourneyFurthestStep)];
+  String get beijingJourneyFurthestStepLabel => displayText(
+        beijingJourneyStepLabels[_safeJourneyStep(beijingJourneyFurthestStep)],
+      );
 
   bool isWordSaved(String word) => savedWords.contains(word);
 
@@ -122,9 +131,10 @@ class AppState extends ChangeNotifier {
     scriptMode = scriptMode == ScriptMode.simplified
         ? ScriptMode.traditional
         : ScriptMode.simplified;
+    notifyListeners();
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('traditional', scriptMode == ScriptMode.traditional);
-    notifyListeners();
   }
 
   void setTab(int value) {

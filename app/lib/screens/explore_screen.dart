@@ -30,18 +30,15 @@ class ExploreScreen extends StatelessWidget {
         ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
           children: [
-            _TopBar(
-              isSimplified: state.scriptMode == ScriptMode.simplified,
-              onToggleScript: state.toggleScript,
-            ),
+            _TopBar(state: state),
             const SizedBox(height: 28),
             Text(
-              '欢迎回来，Explorer',
+              state.displayText('欢迎回来，Explorer'),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              '世界很大，从一门语言开始。',
+              state.displayText('世界很大，从一门语言开始。'),
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 24),
@@ -58,13 +55,9 @@ class ExploreScreen extends StatelessWidget {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({
-    required this.isSimplified,
-    required this.onToggleScript,
-  });
+  const _TopBar({required this.state});
 
-  final bool isSimplified;
-  final VoidCallback onToggleScript;
+  final AppState state;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +67,11 @@ class _TopBar extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: PhoenixTheme.red,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF9F2B28), PhoenixTheme.red],
+            ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: const [
               BoxShadow(
@@ -87,11 +84,11 @@ class _TopBar extends StatelessWidget {
           child: const Icon(Icons.local_fire_department, color: Colors.white),
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'PHOENIX JOURNEYS',
                 style: TextStyle(
                   fontSize: 12,
@@ -99,13 +96,14 @@ class _TopBar extends StatelessWidget {
                   letterSpacing: 1.2,
                 ),
               ),
-              Text('你的语言旅行护照'),
+              Text(state.displayText('你的语言旅行护照')),
             ],
           ),
         ),
-        OutlinedButton(
-          onPressed: onToggleScript,
-          child: Text(isSimplified ? '简 / 繁' : '繁 / 简'),
+        OutlinedButton.icon(
+          onPressed: state.toggleScript,
+          icon: const Icon(Icons.translate_rounded, size: 17),
+          label: Text(state.isTraditional ? '繁體' : '简体'),
         ),
       ],
     );
@@ -152,7 +150,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 5),
+      duration: const Duration(seconds: 7),
     )..repeat();
   }
 
@@ -174,131 +172,334 @@ class _FlightMapCardState extends State<_FlightMapCard>
                 : '1,670 km · 学习航程';
 
     return Container(
-      height: 245,
+      height: 292,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: const Color(0xFF173B3C),
-        borderRadius: BorderRadius.circular(30),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF0A2834),
+            Color(0xFF124B54),
+            Color(0xFF0C303A),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: Colors.white12),
         boxShadow: const [
           BoxShadow(
-            blurRadius: 24,
-            offset: Offset(0, 12),
-            color: Color(0x26000000),
+            blurRadius: 28,
+            offset: Offset(0, 14),
+            color: Color(0x31000000),
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          const Positioned.fill(child: CustomPaint(painter: _MapPainter())),
-          const Positioned(
-            left: 20,
-            top: 18,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '今日航线',
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  '河内  →  北京',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              final journeyProgress = state.journeyCompleted
+                  ? 1.0
+                  : state.hasJourneyInProgress
+                      ? state.beijingJourneyProgress
+                      : _controller.value;
+              final flightT = state.journeyCompleted
+                  ? 1.0
+                  : Curves.easeInOutCubic.transform(_controller.value);
+              final geometry = _FlightGeometry(
+                Size(constraints.maxWidth, constraints.maxHeight),
+              );
+              final plane = geometry.pointAt(flightT);
+              final angle = geometry.angleAt(flightT);
+
+              return Stack(
+                children: [
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: _PremiumMapPainter(
+                        routeProgress: journeyProgress,
+                        pulse: _controller.value,
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Positioned.fill(
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, _) {
-                final t = state.journeyCompleted
-                    ? 1.0
-                    : Curves.easeInOut.transform(_controller.value);
-                final width = MediaQuery.sizeOf(context)
-                    .width
-                    .clamp(280.0, 760.0)
-                    .toDouble();
-                final x = 64.0 + (width - 150.0) * t;
-                final y = 172.0 - math.sin(t * math.pi) * 70.0;
-                return Stack(
-                  children: [
-                    Positioned(
-                      left: x,
-                      top: y,
-                      child: Transform.rotate(
-                        angle: -0.18,
+                  Positioned(
+                    left: 18,
+                    top: 16,
+                    right: 18,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state.displayText('今日航线'),
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                state.displayText('河内  →  北京'),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: .2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: .10),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.auto_awesome,
+                                color: Color(0xFFFFD879),
+                                size: 15,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                state.displayText('AI 旅程'),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    left: plane.dx - 18,
+                    top: plane.dy - 18,
+                    child: Transform.rotate(
+                      angle: angle,
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFD879),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFFD879)
+                                  .withValues(alpha: .45),
+                              blurRadius: 18,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
                         child: const Icon(
-                          Icons.flight,
-                          color: Color(0xFFFFD47D),
-                          size: 32,
+                          Icons.flight_rounded,
+                          color: Color(0xFF713016),
+                          size: 22,
                         ),
                       ),
                     ),
-                  ],
-                );
-              },
-            ),
-          ),
-          const Positioned(
-            left: 24,
-            bottom: 24,
-            child: _MapPin(label: '河内', active: false),
-          ),
-          Positioned(
-            right: 24,
-            top: 90,
-            child: _MapPin(label: '北京', active: state.beijingStampEarned),
-          ),
-          Positioned(
-            right: 18,
-            bottom: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: .12),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white24),
-              ),
-              child: Text(
-                status,
-                style: const TextStyle(color: Colors.white, fontSize: 12),
-              ),
-            ),
-          ),
-        ],
+                  ),
+                  Positioned(
+                    left: geometry.hanoi.dx - 22,
+                    top: geometry.hanoi.dy - 22,
+                    child: _CityMarker(
+                      label: state.displayText('河内'),
+                      subtitle: 'HAN',
+                      active: false,
+                      pulse: _controller.value,
+                    ),
+                  ),
+                  Positioned(
+                    left: geometry.beijing.dx - 22,
+                    top: geometry.beijing.dy - 22,
+                    child: _CityMarker(
+                      label: state.displayText('北京'),
+                      subtitle: 'PEK',
+                      active: state.beijingStampEarned,
+                      pulse: _controller.value,
+                    ),
+                  ),
+                  Positioned(
+                    left: 18,
+                    right: 18,
+                    bottom: 15,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF071D26).withValues(alpha: .70),
+                        borderRadius: BorderRadius.circular(17),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFFD879),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              state.displayText(status),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '${state.beijingJourneyProgressPercent}%',
+                            style: const TextStyle(
+                              color: Color(0xFFFFD879),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
 }
 
-class _MapPin extends StatelessWidget {
-  const _MapPin({required this.label, required this.active});
+class _FlightGeometry {
+  _FlightGeometry(this.size)
+      : hanoi = Offset(size.width * .23, size.height * .68),
+        control = Offset(size.width * .48, size.height * .25),
+        beijing = Offset(size.width * .78, size.height * .43);
+
+  final Size size;
+  final Offset hanoi;
+  final Offset control;
+  final Offset beijing;
+
+  Offset pointAt(double t) {
+    final oneMinus = 1 - t;
+    return Offset(
+      oneMinus * oneMinus * hanoi.dx +
+          2 * oneMinus * t * control.dx +
+          t * t * beijing.dx,
+      oneMinus * oneMinus * hanoi.dy +
+          2 * oneMinus * t * control.dy +
+          t * t * beijing.dy,
+    );
+  }
+
+  double angleAt(double t) {
+    final dx =
+        2 * (1 - t) * (control.dx - hanoi.dx) + 2 * t * (beijing.dx - control.dx);
+    final dy =
+        2 * (1 - t) * (control.dy - hanoi.dy) + 2 * t * (beijing.dy - control.dy);
+    return math.atan2(dy, dx);
+  }
+}
+
+class _CityMarker extends StatelessWidget {
+  const _CityMarker({
+    required this.label,
+    required this.subtitle,
+    required this.active,
+    required this.pulse,
+  });
 
   final String label;
+  final String subtitle;
   final bool active;
+  final double pulse;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Icon(
-          Icons.location_on,
-          color: active ? const Color(0xFFFFD47D) : Colors.white70,
-          size: active ? 32 : 26,
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            color: active ? Colors.white : Colors.white70,
-            fontWeight: FontWeight.w700,
+    final scale = 1 + math.sin(pulse * math.pi * 2) * .05;
+    final color = active ? const Color(0xFFFFD879) : Colors.white;
+
+    return Transform.scale(
+      scale: scale,
+      child: Column(
+        children: [
+          Container(
+            width: 43,
+            height: 43,
+            decoration: BoxDecoration(
+              color: const Color(0xFF08252D).withValues(alpha: .86),
+              shape: BoxShape.circle,
+              border: Border.all(color: color.withValues(alpha: .85), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: active ? .35 : .18),
+                  blurRadius: active ? 18 : 10,
+                  spreadRadius: active ? 3 : 1,
+                ),
+              ],
+            ),
+            child: Icon(
+              active ? Icons.star_rounded : Icons.location_on_rounded,
+              color: color,
+              size: 22,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 3),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+            decoration: BoxDecoration(
+              color: const Color(0xFF071D26).withValues(alpha: .82),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Text.rich(
+              TextSpan(
+                text: '$label ',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w900,
+                ),
+                children: [
+                  TextSpan(
+                    text: subtitle,
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -333,29 +534,37 @@ class _JourneyCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              _Pill(icon: Icons.place_outlined, text: '中国 · 北京'),
-              Spacer(),
-              Text('第一站', style: TextStyle(color: Colors.black54)),
+              _Pill(
+                icon: Icons.place_outlined,
+                text: state.displayText('中国 · 北京'),
+              ),
+              const Spacer(),
+              Text(
+                state.displayText('第一站'),
+                style: const TextStyle(color: Colors.black54),
+              ),
             ],
           ),
           const SizedBox(height: 18),
           Text(
-            '第一次走进紫禁城',
+            state.displayText('第一次走进紫禁城'),
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: 10),
-          const Text('跟随 AI 导游，用故事、词汇和文化打开北京。'),
+          Text(state.displayText('跟随 AI 导游，用故事、词汇和文化打开北京。')),
           if (state.hasJourneyInProgress || state.journeyCompleted) ...[
             const SizedBox(height: 18),
             Row(
               children: [
                 Expanded(
                   child: Text(
-                    state.journeyCompleted
-                        ? '旅程完成 · 北京紫禁城印章已收入护照'
-                        : '上次停在「${state.beijingJourneyStepLabel}」',
+                    state.displayText(
+                      state.journeyCompleted
+                          ? '旅程完成 · 北京紫禁城印章已收入护照'
+                          : '上次停在「${state.beijingJourneyStepLabel}」',
+                    ),
                     style: const TextStyle(
                       color: PhoenixTheme.red,
                       fontWeight: FontWeight.w800,
@@ -383,22 +592,31 @@ class _JourneyCard extends StatelessWidget {
             ),
           ] else if (state.beijingStampEarned) ...[
             const SizedBox(height: 18),
-            const Text(
-              '北京印章已收藏，可以随时再次体验。',
-              style: TextStyle(
+            Text(
+              state.displayText('北京印章已收藏，可以随时再次体验。'),
+              style: const TextStyle(
                 color: PhoenixTheme.red,
                 fontWeight: FontWeight.w800,
               ),
             ),
           ],
           const SizedBox(height: 18),
-          const Wrap(
+          Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              _FeatureChip(icon: Icons.headphones, text: '自动朗读'),
-              _FeatureChip(icon: Icons.touch_app, text: '长按查词'),
-              _FeatureChip(icon: Icons.edit_note, text: '写作任务'),
+              _FeatureChip(
+                icon: Icons.headphones,
+                text: state.displayText('自动朗读'),
+              ),
+              _FeatureChip(
+                icon: Icons.touch_app,
+                text: state.displayText('长按查词'),
+              ),
+              _FeatureChip(
+                icon: Icons.edit_note,
+                text: state.displayText('写作任务'),
+              ),
             ],
           ),
           const SizedBox(height: 22),
@@ -414,7 +632,7 @@ class _JourneyCard extends StatelessWidget {
                 ),
               ),
               icon: Icon(_buttonIcon),
-              label: Text(_buttonText),
+              label: Text(state.displayText(_buttonText)),
               onPressed: onOpen,
             ),
           ),
@@ -429,6 +647,7 @@ class _DiscoveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -436,34 +655,39 @@ class _DiscoveryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
         border: Border.all(color: const Color(0xFFE8C788)),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
+          const CircleAvatar(
             radius: 24,
             backgroundColor: Color(0xFF7B1E1E),
             child: Icon(Icons.auto_awesome, color: Colors.white),
           ),
-          SizedBox(width: 14),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Discovery · 今日发现',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                  state.displayText('Discovery · 今日发现'),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
                 ),
-                SizedBox(height: 7),
-                Text('为什么故宫的屋顶大多是黄色？'),
-                SizedBox(height: 8),
+                const SizedBox(height: 7),
+                Text(state.displayText('为什么故宫的屋顶大多是黄色？')),
+                const SizedBox(height: 8),
                 Text(
-                  '中文朗读下方会显示探索者的解释语言，理解后再继续思考与表达。',
-                  style: TextStyle(color: Colors.black54, height: 1.45),
+                  state.displayText(
+                    '中文朗读下方会显示探索者的解释语言，理解后再继续思考与表达。',
+                  ),
+                  style: const TextStyle(color: Colors.black54, height: 1.45),
                 ),
               ],
             ),
           ),
-          Icon(Icons.volume_up_outlined),
+          const Icon(Icons.volume_up_outlined),
         ],
       ),
     );
@@ -522,41 +746,221 @@ class _FeatureChip extends StatelessWidget {
   }
 }
 
-class _MapPainter extends CustomPainter {
-  const _MapPainter();
+class _PremiumMapPainter extends CustomPainter {
+  const _PremiumMapPainter({
+    required this.routeProgress,
+    required this.pulse,
+  });
+
+  final double routeProgress;
+  final double pulse;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final grid = Paint()
-      ..color = Colors.white.withValues(alpha: .07)
-      ..strokeWidth = 1;
+    _drawGrid(canvas, size);
+    _drawStars(canvas, size);
+    _drawLand(canvas, size);
+    _drawRoute(canvas, size);
+  }
 
-    for (double x = 0; x < size.width; x += 34) {
+  void _drawGrid(Canvas canvas, Size size) {
+    final grid = Paint()
+      ..color = Colors.white.withValues(alpha: .045)
+      ..strokeWidth = .8;
+
+    for (double x = 8; x < size.width; x += 36) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
     }
-    for (double y = 0; y < size.height; y += 34) {
+    for (double y = 8; y < size.height; y += 36) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
     }
+  }
 
-    final route = Paint()
-      ..color = const Color(0xFFFFD47D).withValues(alpha: .75)
+  void _drawStars(Canvas canvas, Size size) {
+    final star = Paint()..color = Colors.white.withValues(alpha: .24);
+    const points = <Offset>[
+      Offset(.08, .18),
+      Offset(.18, .33),
+      Offset(.34, .17),
+      Offset(.57, .13),
+      Offset(.88, .22),
+      Offset(.93, .58),
+      Offset(.12, .54),
+      Offset(.43, .68),
+      Offset(.69, .72),
+    ];
+    for (final point in points) {
+      canvas.drawCircle(
+        Offset(size.width * point.dx, size.height * point.dy),
+        1.2,
+        star,
+      );
+    }
+  }
+
+  void _drawLand(Canvas canvas, Size size) {
+    final land = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF2D6870), Color(0xFF1A4B55)],
+      ).createShader(Offset.zero & size)
+      ..style = PaintingStyle.fill;
+    final coast = Paint()
+      ..color = const Color(0xFF89ADB0).withValues(alpha: .40)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+      ..strokeWidth = 1.1;
 
-    final path = Path()
-      ..moveTo(54, size.height - 54)
+    final mainland = Path()
+      ..moveTo(size.width * .31, size.height * .28)
+      ..cubicTo(
+        size.width * .43,
+        size.height * .17,
+        size.width * .67,
+        size.height * .16,
+        size.width * .89,
+        size.height * .29,
+      )
+      ..lineTo(size.width * .91, size.height * .47)
+      ..cubicTo(
+        size.width * .84,
+        size.height * .49,
+        size.width * .82,
+        size.height * .57,
+        size.width * .72,
+        size.height * .58,
+      )
+      ..cubicTo(
+        size.width * .62,
+        size.height * .59,
+        size.width * .58,
+        size.height * .67,
+        size.width * .49,
+        size.height * .63,
+      )
+      ..cubicTo(
+        size.width * .39,
+        size.height * .59,
+        size.width * .37,
+        size.height * .45,
+        size.width * .31,
+        size.height * .28,
+      )
+      ..close();
+    canvas.drawPath(mainland, land);
+    canvas.drawPath(mainland, coast);
+
+    final peninsula = Path()
+      ..moveTo(size.width * .43, size.height * .56)
+      ..cubicTo(
+        size.width * .46,
+        size.height * .61,
+        size.width * .43,
+        size.height * .76,
+        size.width * .35,
+        size.height * .79,
+      )
+      ..cubicTo(
+        size.width * .31,
+        size.height * .72,
+        size.width * .35,
+        size.height * .62,
+        size.width * .43,
+        size.height * .56,
+      )
+      ..close();
+    canvas.drawPath(peninsula, land);
+    canvas.drawPath(peninsula, coast);
+
+    final islands = Paint()
+      ..color = const Color(0xFF316B72)
+      ..style = PaintingStyle.fill;
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * .83, size.height * .56),
+        width: 7,
+        height: 18,
+      ),
+      islands,
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * .47, size.height * .80),
+        width: 18,
+        height: 6,
+      ),
+      islands,
+    );
+    canvas.drawCircle(
+      Offset(size.width * .54, size.height * .76),
+      4,
+      islands,
+    );
+  }
+
+  void _drawRoute(Canvas canvas, Size size) {
+    final geometry = _FlightGeometry(size);
+    final route = Path()
+      ..moveTo(geometry.hanoi.dx, geometry.hanoi.dy)
       ..quadraticBezierTo(
-        size.width * .5,
-        size.height * .25,
-        size.width - 54,
-        110,
+        geometry.control.dx,
+        geometry.control.dy,
+        geometry.beijing.dx,
+        geometry.beijing.dy,
       );
 
-    canvas.drawPath(path, route);
+    final glow = Paint()
+      ..color = const Color(0xFFFFD879).withValues(alpha: .20)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8
+      ..strokeCap = StrokeCap.round;
+    canvas.drawPath(route, glow);
+
+    final dashed = Paint()
+      ..color = Colors.white.withValues(alpha: .35)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+    _drawDashedPath(canvas, route, dashed);
+
+    final metrics = route.computeMetrics().toList(growable: false);
+    if (metrics.isEmpty) return;
+    final metric = metrics.first;
+    final visible = metric.extractPath(
+      0,
+      metric.length * routeProgress.clamp(0.0, 1.0),
+    );
+    final active = Paint()
+      ..color = const Color(0xFFFFD879)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    canvas.drawPath(visible, active);
+
+    final halo = Paint()
+      ..color = const Color(0xFFFFD879).withValues(
+        alpha: .10 + (math.sin(pulse * math.pi * 2).abs() * .10),
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 13
+      ..strokeCap = StrokeCap.round;
+    canvas.drawPath(visible, halo);
+  }
+
+  void _drawDashedPath(Canvas canvas, Path path, Paint paint) {
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        final next = math.min(distance + 6, metric.length);
+        canvas.drawPath(metric.extractPath(distance, next), paint);
+        distance += 12;
+      }
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _PremiumMapPainter oldDelegate) {
+    return oldDelegate.routeProgress != routeProgress || oldDelegate.pulse != pulse;
+  }
 }
 
 class _CloudPainter extends CustomPainter {

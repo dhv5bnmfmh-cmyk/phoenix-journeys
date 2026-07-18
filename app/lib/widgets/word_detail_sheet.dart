@@ -70,12 +70,13 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
     }
 
     try {
+      final state = context.read<AppState>();
       await _tts.stop();
-      await _tts.setLanguage('zh-CN');
+      await _tts.setLanguage(state.isTraditional ? 'zh-TW' : 'zh-CN');
       await _tts.setSpeechRate(0.42);
       await _tts.setPitch(1.0);
       await _tts.setVolume(1.0);
-      final result = await _tts.speak(widget.entry.word);
+      final result = await _tts.speak(state.displayText(widget.entry.word));
       if (result != 1 && mounted) {
         setState(() {
           _isSpeaking = false;
@@ -129,7 +130,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.entry.word,
+                          state.displayText(widget.entry.word),
                           style: Theme.of(context)
                               .textTheme
                               .headlineSmall
@@ -155,7 +156,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                             borderRadius: BorderRadius.circular(99),
                           ),
                           child: Text(
-                            widget.entry.partOfSpeech,
+                            state.displayText(widget.entry.partOfSpeech),
                             style: const TextStyle(
                               color: PhoenixTheme.red,
                               fontSize: 10,
@@ -210,7 +211,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '三个例句',
+                    state.displayText('三个例句'),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w900,
                         ),
@@ -228,32 +229,25 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                   ),
               if (_speechUnavailable) ...[
                 const SizedBox(height: 10),
-                const Text(
-                  '当前浏览器没有提供中文语音，请检查静音设置或换用 Safari、Chrome。',
-                  style: TextStyle(color: Colors.black54, fontSize: 11.5),
+                Text(
+                  state.displayText(
+                    '当前浏览器没有提供中文语音，请检查静音设置或换用 Safari、Chrome。',
+                  ),
+                  style: const TextStyle(color: Colors.black54, fontSize: 11.5),
                 ),
               ],
               const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _speak,
-                      icon: const Icon(Icons.volume_up_outlined),
-                      label: const Text('再听一次'),
-                    ),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () => state.toggleSavedWord(widget.entry.word),
+                  icon: Icon(
+                    isSaved ? Icons.bookmark : Icons.bookmark_add_outlined,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () => state.toggleSavedWord(widget.entry.word),
-                      icon: Icon(
-                        isSaved ? Icons.bookmark : Icons.bookmark_add_outlined,
-                      ),
-                      label: Text(isSaved ? '已加入生词本' : '加入生词本'),
-                    ),
+                  label: Text(
+                    state.displayText(isSaved ? '已加入生词本' : '加入生词本'),
                   ),
-                ],
+                ),
               ),
             ],
           ),
@@ -278,6 +272,7 @@ class _DefinitionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
@@ -295,7 +290,7 @@ class _DefinitionCard extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  title,
+                  state.displayText(title),
                   style: TextStyle(
                     color: color,
                     fontSize: 11,
@@ -307,7 +302,7 @@ class _DefinitionCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            text,
+            state.displayText(text),
             style: const TextStyle(fontSize: 13, height: 1.35),
           ),
         ],
@@ -331,6 +326,7 @@ class _ExampleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 7),
@@ -361,7 +357,7 @@ class _ExampleCard extends StatelessWidget {
               const SizedBox(width: 7),
               Expanded(
                 child: Text(
-                  example.chinese,
+                  state.displayText(example.chinese),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -391,6 +387,7 @@ class _ExampleLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -402,7 +399,7 @@ class _ExampleLine extends StatelessWidget {
             borderRadius: BorderRadius.circular(7),
           ),
           child: Text(
-            label,
+            state.displayText(label),
             style: const TextStyle(
               color: Colors.black54,
               fontSize: 9.5,
@@ -414,7 +411,7 @@ class _ExampleLine extends StatelessWidget {
         const SizedBox(width: 6),
         Expanded(
           child: Text(
-            text,
+            state.displayText(text),
             style: const TextStyle(
               color: Colors.black87,
               fontSize: 11.5,
