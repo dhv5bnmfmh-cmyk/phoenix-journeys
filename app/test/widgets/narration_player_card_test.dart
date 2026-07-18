@@ -36,6 +36,7 @@ void main() {
     expect(offset, 120);
   });
 
+  // Audio resume must never move beyond the word visible at pause time.
   test('pause offset never jumps ahead of the native word position', () {
     final offset = resolveNarrationPauseOffset(
       controllerOffset: 23,
