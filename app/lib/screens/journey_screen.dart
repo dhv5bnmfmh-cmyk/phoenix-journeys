@@ -535,6 +535,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                             child: InteractiveStoryText(
                               text: entry.value,
                               entries: words,
+                              narrationController: _narration,
                               narrationContentId: 'story',
                               narrationItemId: 'story-${entry.key}',
                               style: const TextStyle(
@@ -703,6 +704,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                             child: InteractiveStoryText(
                               text: item.text,
                               entries: words,
+                              narrationController: _narration,
                               narrationContentId: 'discovery',
                               narrationItemId: 'discovery-${entry.key}',
                               style: TextStyle(

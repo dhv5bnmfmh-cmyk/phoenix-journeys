@@ -32,12 +32,26 @@ Future<void> showWordDetail(
     showDragHandle: true,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (_) => _WordDetailSheet(
-      entries: studyEntries,
-      initialIndex: safeIndex,
-      onSpeak: onSpeak,
-      onSpeakEntry: onSpeakEntry,
-    ),
+    builder: (sheetContext) {
+      final size = MediaQuery.sizeOf(sheetContext);
+      final sheetWidth = (size.width - 20).clamp(0.0, 560.0).toDouble();
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: size.height * .48),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            width: sheetWidth,
+            child: _WordDetailSheet(
+              entries: studyEntries,
+              initialIndex: safeIndex,
+              onSpeak: onSpeak,
+              onSpeakEntry: onSpeakEntry,
+            ),
+          ),
+        ),
+      );
+    },
   );
 }
 
@@ -120,9 +134,9 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        14,
+        10,
         0,
-        14,
+        10,
         10 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       child: Center(
@@ -133,7 +147,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
             children: [
               Row(
                 children: [
-                  WordMark(word: entry.word, size: compact ? 34 : 38),
+                  WordMark(word: entry.word, size: compact ? 28 : 31),
                   const SizedBox(width: 9),
                   Expanded(
                     child: Column(
@@ -147,7 +161,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: compact ? 18.5 : 20,
+                                  fontSize: compact ? 16 : 17.5,
                                   height: 1,
                                   fontWeight: FontWeight.w900,
                                 ),
@@ -170,7 +184,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: PhoenixTheme.red,
-                            fontSize: 13,
+                            fontSize: 10.5,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -192,7 +206,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                     tooltip: _isSpeaking ? '正在朗读' : '重新朗读',
                     onPressed: _isSpeaking ? null : _speak,
                     visualDensity: VisualDensity.compact,
-                    iconSize: 19,
+                    iconSize: 16,
                     icon: Icon(
                       _isSpeaking ? Icons.graphic_eq : Icons.volume_up_outlined,
                     ),
@@ -250,7 +264,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                     child: OutlinedButton.icon(
                       onPressed: () => state.toggleSavedWord(entry.word),
                       style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(36),
+                        minimumSize: const Size.fromHeight(32),
                         visualDensity: VisualDensity.compact,
                       ),
                       icon: Icon(
@@ -315,7 +329,7 @@ class _CompactDefinitionLine extends StatelessWidget {
     final state = context.watch<AppState>();
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
       decoration: BoxDecoration(
         color: color.withValues(alpha: .065),
         borderRadius: BorderRadius.circular(10),
@@ -325,7 +339,7 @@ class _CompactDefinitionLine extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 54,
+            width: 44,
             child: Text(
               state.displayText(label),
               style: TextStyle(
@@ -427,7 +441,7 @@ class _CompactExampleLine extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 54,
+          width: 44,
           child: Text(
             state.displayText(label),
             maxLines: 1,
