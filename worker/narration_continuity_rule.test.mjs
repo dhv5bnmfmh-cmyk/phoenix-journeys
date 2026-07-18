@@ -16,13 +16,19 @@ test('changing speed never starts a second narration session', () => {
   assert.doesNotMatch(body, /_speakFrom/);
 });
 
-test('resume clamps to the saved position instead of zero', () => {
-  const start = controller.indexOf('Future<void> resume()');
-  const end = controller.indexOf('Future<void> resumeFromOffset', start);
-  const body = controller.slice(start, end);
+test('resume delegates the saved position to a clamped continuation entrypoint', () => {
+  const resumeStart = controller.indexOf('Future<void> resume()');
+  const continuationStart = controller.indexOf(
+    'Future<void> resumeFromOffset',
+    resumeStart,
+  );
+  const wordStart = controller.indexOf('Future<bool> speakWord', continuationStart);
+  const resumeBody = controller.slice(resumeStart, continuationStart);
+  const continuationBody = controller.slice(continuationStart, wordStart);
 
-  assert.match(body, /_currentOffset\.clamp\(0, maxOffset\)/);
-  assert.doesNotMatch(body, /\? 0 : _currentOffset/);
+  assert.match(resumeBody, /resumeFromOffset\(_currentOffset\)/);
+  assert.match(continuationBody, /offset\.clamp\(0, maxOffset\)/);
+  assert.doesNotMatch(resumeBody, /\? 0 : _currentOffset/);
 });
 
 test('speaking from an end-adjacent offset cannot restart at the beginning', () => {
