@@ -10,70 +10,14 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  apply-unified-timeline:
-    if: >-
-      github.actor != 'github-actions[bot]' &&
-      (github.ref == 'refs/heads/feature/unified-narration-timeline' ||
-       github.head_ref == 'feature/unified-narration-timeline')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out unified timeline branch
-        uses: actions/checkout@v4
-        with:
-          ref: feature/unified-narration-timeline
-          fetch-depth: 0
-
-      - name: Reset generated files and apply unified timeline patch
-        run: |
-          git fetch origin main
-          git checkout origin/main -- app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/lib/widgets/word_detail_sheet.dart worker/live_narration_highlight.test.mjs worker/compact_word_study.test.mjs
-          python - <<'PY'
-          from pathlib import Path
-          path = Path('tools/apply_unified_timeline_fix.py')
-          source = path.read_text()
-          old = """    if count != 1:\n        raise RuntimeError(f'{label}: expected one match, got {count}')\n    return text.replace(old, new, 1)\n"""
-          new = """    if label == 'first button height' and count == 2:\n        return text.replace(old, new, 1)\n    if count != 1:\n        raise RuntimeError(f'{label}: expected one match, got {count}')\n    return text.replace(old, new, 1)\n"""
-          if old not in source:
-              raise SystemExit('replace_once helper not found')
-          path.write_text(source.replace(old, new, 1))
-          PY
-          python tools/apply_unified_timeline_fix.py
-          python - <<'PY'
-          from pathlib import Path
-          path = Path('app/lib/screens/journey_screen.dart')
-          source = path.read_text()
-          old = """                      .toList(growable: false),\n                );\n              },\n            ),\n          ),\n        ],\n      ),\n    );\n  }\n\n  Widget _wonderPage()"""
-          new = """                      .toList(growable: false),\n                  ),\n                );\n              },\n            ),\n          ),\n        ],\n      ),\n    );\n  }\n\n  Widget _wonderPage()"""
-          if old not in source:
-              raise SystemExit('Discovery closing structure not found')
-          path.write_text(source.replace(old, new, 1))
-          PY
-
-      - uses: dart-lang/setup-dart@v1
-
-      - name: Format changed Dart files
-        run: dart format app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/lib/widgets/word_detail_sheet.dart
-
-      - name: Commit generated unified timeline files
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/lib/services/narration_controller.dart app/lib/widgets/narration_player_card.dart app/lib/screens/journey_screen.dart app/lib/widgets/word_detail_sheet.dart worker/live_narration_highlight.test.mjs worker/compact_word_study.test.mjs
-          git commit -m "fix: unify narration audio progress and word highlights"
-          git push origin HEAD:feature/unified-narration-timeline
-
   verify:
-    if: >-
-      github.actor == 'github-actions[bot]' ||
-      (github.ref != 'refs/heads/feature/unified-narration-timeline' &&
-       github.head_ref != 'feature/unified-narration-timeline')
     runs-on: ubuntu-latest
     defaults:
       run:
