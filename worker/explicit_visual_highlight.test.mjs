@@ -38,7 +38,12 @@ test('highlight derives from current playback position and is passed explicitly'
   );
 });
 
-test('Flutter verifies an actual yellow TextSpan is painted', () => {
-  assert.match(widgetTest, /backgroundColor == const Color\(0xFFFFD05A\)/);
-  assert.match(widgetTest, /_containsYellowHighlight\(text\.textSpan!\)/);
+test('Flutter verifies a strong yellow underlined TextSpan is painted', () => {
+  assert.match(widgetTest, /backgroundColor == const Color\(0xFFFFC928\)/);
+  assert.match(widgetTest, /FontWeight\.w900/);
+  assert.match(widgetTest, /TextDecoration\.underline/);
+  assert.match(
+    widgetTest,
+    /_containsStrongYellowHighlight\(text\.textSpan!\)/,
+  );
 });
