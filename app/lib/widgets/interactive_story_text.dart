@@ -355,26 +355,12 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
     }
 
     spans.add(
-      _span(
+      _readingMarkerSpan(
         state.displayText(
           segment.text.substring(beforeLength, beforeLength + activeLength),
         ),
         segment,
-        style: (segmentStyle ?? baseStyle ?? const TextStyle()).copyWith(
-          color: Colors.white,
-          backgroundColor: const Color(0xFF8F1D18),
-          fontSize: ((segmentStyle ?? baseStyle)?.fontSize ?? 11) + 2.2,
-          fontWeight: FontWeight.w900,
-          decoration: TextDecoration.none,
-          letterSpacing: .25,
-          shadows: const [
-            Shadow(
-              color: Color(0x44000000),
-              blurRadius: 1,
-              offset: Offset(0, 1),
-            ),
-          ],
-        ),
+        style: segmentStyle ?? baseStyle ?? const TextStyle(),
         state: state,
       ),
     );
@@ -411,6 +397,78 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
       style: style,
     );
   }
+
+  WidgetSpan _readingMarkerSpan(
+    String text,
+    _InteractiveSegment segment, {
+    required TextStyle style,
+    required AppState state,
+  }) {
+    final entry = segment.entry;
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.baseline,
+      baseline: TextBaseline.alphabetic,
+      child: Semantics(
+        label: '正在朗读：$text',
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: entry == null ? null : () => _showEntry(entry),
+          child: _InlineReadingMarker(
+            key: ValueKey(
+              'reading-triangle-${widget.narrationItemId ?? widget.text}',
+            ),
+            text: text,
+            style: style,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InlineReadingMarker extends StatelessWidget {
+  const _InlineReadingMarker({
+    required this.text,
+    required this.style,
+    super.key,
+  });
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(text, style: style),
+        const SizedBox(height: .5),
+        const CustomPaint(size: Size(7, 4), painter: _ReadingTrianglePainter()),
+      ],
+    );
+  }
+}
+
+class _ReadingTrianglePainter extends CustomPainter {
+  const _ReadingTrianglePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final triangle = Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(
+      triangle,
+      Paint()
+        ..color = PhoenixTheme.red
+        ..style = PaintingStyle.fill,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ReadingTrianglePainter oldDelegate) => false;
 }
 
 class _VocabularyPopover extends StatelessWidget {
