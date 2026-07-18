@@ -324,7 +324,6 @@ class NarrationController extends ChangeNotifier {
   }
 
   void _bindHandlers() {
-    if (_webSpeech.isAvailable) return;
     _tts.setStartHandler(() {
       if (_shouldIgnoreEngineCallback) return;
       if (_speechMode == _NarrationSpeechMode.word) {
@@ -455,7 +454,6 @@ class NarrationController extends ChangeNotifier {
     final safeOffset = offset.clamp(0, maxOffset).toInt();
     _status = NarrationStatus.paused;
     _currentOffset = safeOffset;
-    _speechBaseOffset = safeOffset;
     _currentItemIndex = _plan.indexForOffset(safeOffset);
     _cancelProgressClock();
     _applyProgress(safeOffset);
@@ -466,12 +464,12 @@ class NarrationController extends ChangeNotifier {
       _webSpeechPausedInPlace = paused;
       _status = NarrationStatus.paused;
       _currentOffset = safeOffset;
-      _speechBaseOffset = safeOffset;
       _currentItemIndex = _plan.indexForOffset(safeOffset);
       _applyProgress(safeOffset);
       return;
     }
 
+    _speechBaseOffset = safeOffset;
     await _stopSpeechEngine();
     if (_disposed) return;
 
@@ -494,7 +492,6 @@ class NarrationController extends ChangeNotifier {
     final safeOffset = offset.clamp(0, maxOffset).toInt();
     _status = NarrationStatus.paused;
     _currentOffset = safeOffset;
-    _speechBaseOffset = safeOffset;
     _currentItemIndex = _plan.indexForOffset(safeOffset);
     _cancelProgressClock();
     _applyProgress(safeOffset);
@@ -787,7 +784,8 @@ class NarrationController extends ChangeNotifier {
 
   Future<void> _stopSpeechEngine() async {
     _speechSessionToken += 1;
-    if (_webSpeech.isAvailable) {
+    if (_webSpeech.isAvailable &&
+        _speechMode != _NarrationSpeechMode.word) {
       await _webSpeech.stop();
       _webSpeechPausedInPlace = false;
       _restartWebSpeechOnResume = false;

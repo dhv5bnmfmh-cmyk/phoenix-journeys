@@ -47,3 +47,28 @@ test('audio, triangle, and highlighted text share controller offset', () => {
   assert.doesNotMatch(body, /lastObservedOffset/);
   assert.match(controller, /_applyProgress\(globalStart/);
 });
+
+
+test('utterance base offset is preserved during native pause and resume', () => {
+  const pauseStart = controller.indexOf('Future<void> pauseAtOffset');
+  const resumeStart = controller.indexOf('Future<void> resumeFromOffset');
+  const wordStart = controller.indexOf('Future<bool> speakWord');
+  const pauseBody = controller.slice(pauseStart, resumeStart);
+  const resumeBody = controller.slice(resumeStart, wordStart);
+  const webPauseBody = pauseBody.slice(pauseBody.indexOf('if (_webSpeech.isAvailable)'));
+  const webResumeBody = resumeBody.slice(0, resumeBody.indexOf('await _stopSpeechEngine'));
+
+  assert.doesNotMatch(webPauseBody, /_speechBaseOffset = safeOffset/);
+  assert.doesNotMatch(webResumeBody, /_speechBaseOffset = safeOffset/);
+});
+
+test('Flutter word callbacks remain bound on web', () => {
+  assert.doesNotMatch(
+    controller,
+    /void _bindHandlers\(\) \{\s*if \(_webSpeech\.isAvailable\) return/,
+  );
+  assert.match(
+    controller,
+    /_webSpeech\.isAvailable &&\s*_speechMode != _NarrationSpeechMode\.word/,
+  );
+});
