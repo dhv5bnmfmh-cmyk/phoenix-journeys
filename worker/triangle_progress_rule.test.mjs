@@ -16,7 +16,7 @@ test('Safari progress watchdog is scheduled before speak', () => {
 test('Story and Discovery use an inline triangle rather than recoloring text', () => {
   assert.match(interactive, /class _ReadingTrianglePainter/);
   assert.match(interactive, /reading-triangle-/);
-  assert.match(interactive, /CustomPaint\(size: Size\(7, 4\)/);
+  assert.match(interactive, /size:\s*Size\(6, 3\.5\)/);
   assert.doesNotMatch(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
   assert.equal((journey.match(/InteractiveStoryText\(/g) ?? []).length >= 2, true);
   assert.match(journey, /contentId: 'story'/);
