@@ -31,7 +31,19 @@ jobs:
           fetch-depth: 0
 
       - name: Apply explicit visual highlight patch
-        run: python tools/apply_explicit_visual_highlight.py
+        run: |
+          set +e
+          python tools/apply_explicit_visual_highlight.py > patch-output.log 2>&1
+          result=$?
+          if [ "$result" -ne 0 ]; then
+            tail -n 20 patch-output.log > tools/explicit_highlight_patch_error.txt
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add tools/explicit_highlight_patch_error.txt
+            git commit -m "chore: record explicit highlight patch error"
+            git push origin HEAD:feature/explicit-visual-narration-highlight
+            exit "$result"
+          fi
 
       - uses: dart-lang/setup-dart@v1
 
@@ -44,7 +56,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git checkout origin/main -- .github/workflows/flutter-ci.yml
-          git rm .github/workflows/apply-explicit-visual-highlight.yml tools/apply_explicit_visual_highlight.py docs/explicit-visual-highlight-trigger.md
+          git rm .github/workflows/apply-explicit-visual-highlight.yml tools/apply_explicit_visual_highlight.py docs/explicit-visual-highlight-trigger.md docs/explicit-visual-highlight-trigger-2.md
+          if [ -f tools/explicit_highlight_patch_error.txt ]; then git rm tools/explicit_highlight_patch_error.txt; fi
           git add -A
           git commit -m "fix: paint narration highlight from explicit playback range"
           git push origin HEAD:feature/explicit-visual-narration-highlight
