@@ -26,7 +26,7 @@ class _CompactPagerState extends State<CompactPager> {
   void initState() {
     super.initState();
     final maxIndex = widget.pages.isEmpty ? 0 : widget.pages.length - 1;
-    _page = widget.initialPage.clamp(0, maxIndex);
+    _page = widget.initialPage.clamp(0, maxIndex).toInt();
     _controller = PageController(initialPage: _page);
   }
 
@@ -49,7 +49,7 @@ class _CompactPagerState extends State<CompactPager> {
 
   void _move(int target) {
     if (widget.pages.isEmpty) return;
-    final safe = target.clamp(0, widget.pages.length - 1);
+    final safe = target.clamp(0, widget.pages.length - 1).toInt();
     _controller.animateToPage(
       safe,
       duration: const Duration(milliseconds: 220),
@@ -131,9 +131,12 @@ class _CompactPagerState extends State<CompactPager> {
 
 List<List<T>> compactChunks<T>(List<T> values, int size) {
   assert(size > 0);
-  if (values.isEmpty) return const [];
+  if (values.isEmpty) return <List<T>>[];
   return [
     for (var start = 0; start < values.length; start += size)
-      values.sublist(start, (start + size).clamp(0, values.length)),
+      values.sublist(
+        start,
+        (start + size).clamp(0, values.length).toInt(),
+      ),
   ];
 }
