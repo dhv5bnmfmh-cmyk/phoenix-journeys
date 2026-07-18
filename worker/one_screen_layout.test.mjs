@@ -29,7 +29,8 @@ test('primary Phoenix screens obey the one-screen layout rule', () => {
 
 test('story and Discovery place every short paragraph in the same screen', () => {
   const journey = read('app/lib/screens/journey_screen.dart');
-  assert.match(journey, /四段短文同屏阅读/);
+  assert.match(journey, /mainAxisSize:\s*MainAxisSize\.min/);
+  assert.match(journey, /fontSize:\s*10\.8/);
   assert.match(journey, /四段发现同屏显示/);
   assert.doesNotMatch(journey, /本页重点词语/);
 });
