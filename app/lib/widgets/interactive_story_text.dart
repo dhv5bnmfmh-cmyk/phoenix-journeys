@@ -27,10 +27,7 @@ class StoryTextSegment {
 }
 
 @visibleForTesting
-List<StoryTextSegment> segmentStoryText(
-  String text,
-  List<WordEntry> entries,
-) {
+List<StoryTextSegment> segmentStoryText(String text, List<WordEntry> entries) {
   final sortedEntries = List<WordEntry>.of(entries)
     ..sort((a, b) => b.word.length.compareTo(a.word.length));
   final segments = <StoryTextSegment>[];
@@ -107,6 +104,7 @@ class InteractiveStoryText extends StatefulWidget {
   const InteractiveStoryText({
     required this.text,
     required this.entries,
+    this.style,
     this.onWordLongPress,
     this.narrationContentId,
     this.narrationItemId,
@@ -115,6 +113,7 @@ class InteractiveStoryText extends StatefulWidget {
 
   final String text;
   final List<WordEntry> entries;
+  final TextStyle? style;
 
   // Kept temporarily for compatibility with older Journey page calls.
   // Story vocabulary now uses tap-only inline meanings and never invokes this.
@@ -149,26 +148,29 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
   }
 
   void _buildSegments() {
-    _segments = segmentStoryText(widget.text, widget.entries).map((segment) {
-      final entry = segment.entry;
-      if (entry == null) {
-        return _InteractiveSegment(
-          text: segment.text,
-          start: segment.start,
-          end: segment.end,
-        );
-      }
+    _segments = segmentStoryText(widget.text, widget.entries)
+        .map((segment) {
+          final entry = segment.entry;
+          if (entry == null) {
+            return _InteractiveSegment(
+              text: segment.text,
+              start: segment.start,
+              end: segment.end,
+            );
+          }
 
-      final recognizer = TapGestureRecognizer()..onTap = () => _showEntry(entry);
-      _recognizers.add(recognizer);
-      return _InteractiveSegment(
-        text: segment.text,
-        start: segment.start,
-        end: segment.end,
-        entry: entry,
-        recognizer: recognizer,
-      );
-    }).toList(growable: false);
+          final recognizer = TapGestureRecognizer()
+            ..onTap = () => _showEntry(entry);
+          _recognizers.add(recognizer);
+          return _InteractiveSegment(
+            text: segment.text,
+            start: segment.start,
+            end: segment.end,
+            entry: entry,
+            recognizer: recognizer,
+          );
+        })
+        .toList(growable: false);
   }
 
   void _showEntry(WordEntry entry) {
@@ -203,7 +205,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final baseStyle = Theme.of(context).textTheme.bodyLarge;
+    final baseStyle = widget.style ?? Theme.of(context).textTheme.bodyLarge;
     final selectedEntry = _selectedEntry;
 
     return Column(
@@ -221,21 +223,25 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
               displayedText: state.displayText(widget.text),
               displayText: state.displayText,
             );
-            final highlightStart = isCurrentNarrationItem ? snapshot!.start : -1;
+            final highlightStart = isCurrentNarrationItem
+                ? snapshot!.start
+                : -1;
             final highlightEnd = isCurrentNarrationItem ? snapshot!.end : -1;
 
             return Text.rich(
               TextSpan(
                 style: baseStyle,
-                children: _segments.expand((segment) {
-                  return _buildSegmentSpans(
-                    segment,
-                    state: state,
-                    baseStyle: baseStyle,
-                    highlightStart: highlightStart,
-                    highlightEnd: highlightEnd,
-                  );
-                }).toList(growable: false),
+                children: _segments
+                    .expand((segment) {
+                      return _buildSegmentSpans(
+                        segment,
+                        state: state,
+                        baseStyle: baseStyle,
+                        highlightStart: highlightStart,
+                        highlightEnd: highlightEnd,
+                      );
+                    })
+                    .toList(growable: false),
               ),
             );
           },
@@ -291,7 +297,9 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
             decorationThickness: 1.6,
           );
 
-    final overlapStart = highlightStart.clamp(segment.start, segment.end).toInt();
+    final overlapStart = highlightStart
+        .clamp(segment.start, segment.end)
+        .toInt();
     final overlapEnd = highlightEnd.clamp(segment.start, segment.end).toInt();
     final hasHighlight = highlightStart >= 0 && overlapEnd > overlapStart;
 
@@ -332,9 +340,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
           backgroundColor: const Color(0xFFFFD05A),
           fontWeight: FontWeight.w900,
           decoration: TextDecoration.none,
-          shadows: const [
-            Shadow(color: Color(0x22FFFFFF), blurRadius: 1),
-          ],
+          shadows: const [Shadow(color: Color(0x22FFFFFF), blurRadius: 1)],
         ),
         state: state,
       ),
@@ -365,8 +371,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
     return TextSpan(
       text: text,
       recognizer: segment.recognizer,
-      mouseCursor:
-          entry == null ? MouseCursor.defer : SystemMouseCursors.click,
+      mouseCursor: entry == null ? MouseCursor.defer : SystemMouseCursors.click,
       semanticsLabel: entry == null
           ? null
           : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',

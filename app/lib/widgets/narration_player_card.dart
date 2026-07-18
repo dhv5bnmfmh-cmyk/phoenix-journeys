@@ -48,6 +48,7 @@ class NarrationPlayerCard extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.onPlay,
+    this.compact = false,
     super.key,
   });
 
@@ -56,6 +57,7 @@ class NarrationPlayerCard extends StatefulWidget {
   final String title;
   final String subtitle;
   final Future<void> Function() onPlay;
+  final bool compact;
 
   @override
   State<NarrationPlayerCard> createState() => _NarrationPlayerCardState();
@@ -349,13 +351,20 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
             ? '已暂停 · $percent%'
             : widget.subtitle;
 
+        final compact = widget.compact;
+
         return Semantics(
           container: true,
           label:
               '${widget.title}，${widget.subtitle}，${_statusText(status)}，进度 $percent%',
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(12, 10, 10, 9),
+            padding: EdgeInsets.fromLTRB(
+              compact ? 9 : 12,
+              compact ? 6 : 10,
+              compact ? 8 : 10,
+              compact ? 6 : 9,
+            ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -365,7 +374,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                   const Color(0xFF651418),
                 ],
               ),
-              borderRadius: BorderRadius.circular(17),
+              borderRadius: BorderRadius.circular(compact ? 13 : 17),
               boxShadow: const [
                 BoxShadow(
                   blurRadius: 12,
@@ -379,8 +388,8 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                 Row(
                   children: [
                     Container(
-                      width: 34,
-                      height: 34,
+                      width: compact ? 28 : 34,
+                      height: compact ? 28 : 34,
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: .12),
                         borderRadius: BorderRadius.circular(11),
@@ -390,7 +399,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                             ? Icons.graphic_eq_rounded
                             : Icons.headphones_rounded,
                         color: Colors.white,
-                        size: 19,
+                        size: compact ? 16 : 19,
                       ),
                     ),
                     const SizedBox(width: 9),
@@ -431,7 +440,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                       key: const ValueKey('narration-main-control'),
                       isPlaying: isPlaying,
                       tooltip: _mainButtonTooltip(status),
-                      size: 50,
+                      size: compact ? 42 : 50,
                       onPressed: _handleMainPressed,
                     ),
                     const SizedBox(width: 8),
@@ -471,7 +480,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 9),
+                SizedBox(height: compact ? 5 : 9),
                 Row(
                   children: [
                     Expanded(
@@ -482,7 +491,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                             borderRadius: BorderRadius.circular(99),
                             child: LinearProgressIndicator(
                               value: progress,
-                              minHeight: 7,
+                              minHeight: compact ? 5 : 7,
                               backgroundColor: Colors.white24,
                               color: const Color(0xFFFFD879),
                             ),
