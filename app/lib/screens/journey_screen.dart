@@ -10,15 +10,12 @@ import '../services/narration_controller.dart';
 import '../services/phoenix_ai_service.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
-import '../widgets/annotated_reading_card.dart';
-import '../widgets/compact_pager.dart';
 import '../widgets/forbidden_city_stamp.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
 import '../widgets/phoenix_agent_cards.dart';
 import '../widgets/word_detail_sheet.dart';
-import '../widgets/word_mark.dart';
 
 class JourneyScreen extends StatefulWidget {
   const JourneyScreen({super.key});
@@ -260,6 +257,35 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
+  Future<void> _showReadingSupport({
+    required String title,
+    required String pinyin,
+    required String nativeLabel,
+    required String nativeText,
+    required String english,
+  }) async {
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (_) => FractionallySizedBox(
+        heightFactor: .72,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          child: _ReadingSupportSheet(
+            title: title,
+            pinyin: pinyin,
+            nativeLabel: nativeLabel,
+            nativeText: nativeText,
+            english: english,
+          ),
+        ),
+      ),
+    );
+  }
+
   void _onWonderChanged(String _) {
     if (_guideFeedback != null) {
       setState(() => _guideFeedback = null);
@@ -457,96 +483,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     final state = context.watch<AppState>();
     final language = state.translationLanguage;
 
-    final pages = _journeyContent.storyParagraphs
-        .asMap()
-        .entries
-        .map((entry) {
-          final annotation = storyAnnotations[entry.key];
-          final paragraphWords = words
-              .where((word) => entry.value.contains(word.word))
-              .toList(growable: false);
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AnimatedBuilder(
-                    animation: _narration,
-                    builder: (context, _) {
-                      final isActive = _isNarrating('story', entry.key);
-                      return AnnotatedReadingCard(
-                        id: 'story-${entry.key}',
-                        elevated: true,
-                        isActive: isActive,
-                        padding: const EdgeInsets.all(12),
-                        pinyin: annotation.pinyin,
-                        nativeLabel: annotation.nativeLabel(language),
-                        nativeText: annotation.nativeText(
-                          language,
-                          entry.value,
-                        ),
-                        english: annotation.english,
-                        leading: isActive
-                            ? const Icon(
-                                Icons.graphic_eq_rounded,
-                                size: 18,
-                                color: PhoenixTheme.red,
-                              )
-                            : CircleAvatar(
-                                radius: 15,
-                                backgroundColor: PhoenixTheme.gold.withValues(
-                                  alpha: .16,
-                                ),
-                                child: Text(
-                                  '${entry.key + 1}',
-                                  style: const TextStyle(
-                                    color: PhoenixTheme.red,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                              ),
-                        mainText: InteractiveStoryText(
-                          text: entry.value,
-                          entries: words,
-                          narrationContentId: 'story',
-                          narrationItemId: 'story-${entry.key}',
-                        ),
-                      );
-                    },
-                  ),
-                  if (paragraphWords.isNotEmpty) ...[
-                    const SizedBox(height: 5),
-                    SizedBox(
-                      height: 32,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: paragraphWords.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 5),
-                        itemBuilder: (context, index) {
-                          final word = paragraphWords[index];
-                          return ActionChip(
-                            visualDensity: VisualDensity.compact,
-                            avatar: WordMark(word: word.word, size: 21),
-                            label: Text(
-                              '${state.displayText(word.word)} · ${word.pinyin}',
-                              style: const TextStyle(fontSize: 9.5),
-                            ),
-                            onPressed: () => unawaited(_openWord(word)),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          );
-        })
-        .toList(growable: false);
-
     return _page(
       title: '故事',
       child: Column(
@@ -556,16 +492,60 @@ class _JourneyScreenState extends State<JourneyScreen>
             contentId: 'story',
             title: '紫禁城故事',
             subtitle: '普通话 · ${_journeyContent.storyParagraphs.length} 段',
+            compact: true,
             onPlay: _playStory,
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
           const _InlineTip(
             icon: Icons.touch_app_outlined,
-            text: '左右翻页阅读；点红色词语看释义，点“注”看拼音、母语与 English。',
+            text: '四段短文同屏阅读；点红色词语看释义，点“注”查看拼音、母语与 English。',
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
           Expanded(
-            child: CompactPager(semanticLabel: '故事段落分页', pages: pages),
+            child: AnimatedBuilder(
+              animation: _narration,
+              builder: (context, _) {
+                return Column(
+                  children: _journeyContent.storyParagraphs
+                      .asMap()
+                      .entries
+                      .map((entry) {
+                        final annotation = storyAnnotations[entry.key];
+                        final isActive = _isNarrating('story', entry.key);
+                        return Expanded(
+                          child: _CompactTextBlock(
+                            index: entry.key + 1,
+                            active: isActive,
+                            onSupport: () => unawaited(
+                              _showReadingSupport(
+                                title: '故事第 ${entry.key + 1} 段',
+                                pinyin: annotation.pinyin,
+                                nativeLabel: annotation.nativeLabel(language),
+                                nativeText: annotation.nativeText(
+                                  language,
+                                  entry.value,
+                                ),
+                                english: annotation.english,
+                              ),
+                            ),
+                            child: InteractiveStoryText(
+                              text: entry.value,
+                              entries: words,
+                              narrationContentId: 'story',
+                              narrationItemId: 'story-${entry.key}',
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                height: 1.28,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        );
+                      })
+                      .toList(growable: false),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -574,102 +554,96 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Widget _wordsPage() {
     final state = context.watch<AppState>();
-    final chunks = compactChunks(words, 6);
 
     return _page(
       title: '生词',
-      child: CompactPager(
-        semanticLabel: '生词分页',
-        pages: chunks
-            .map((entries) {
-              return GridView.count(
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 2),
-                crossAxisCount: 2,
-                mainAxisSpacing: 6,
-                crossAxisSpacing: 6,
-                childAspectRatio: 2.05,
-                children: entries
-                    .map((entry) {
-                      return Material(
-                        color: Colors.white.withValues(alpha: .94),
-                        borderRadius: BorderRadius.circular(14),
-                        child: InkWell(
-                          onTap: () => unawaited(_openWord(entry)),
-                          borderRadius: BorderRadius.circular(14),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: PhoenixTheme.gold.withValues(alpha: .24),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const columns = 3;
+          const spacing = 4.0;
+          final rows = (words.length / columns).ceil();
+          final cellWidth =
+              (constraints.maxWidth - spacing * (columns - 1)) / columns;
+          final cellHeight =
+              (constraints.maxHeight - spacing * (rows - 1)) / rows;
+          final ratio = cellWidth / cellHeight.clamp(38.0, 70.0);
+
+          return GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            itemCount: words.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              mainAxisSpacing: spacing,
+              crossAxisSpacing: spacing,
+              childAspectRatio: ratio,
+            ),
+            itemBuilder: (context, index) {
+              final entry = words[index];
+              return Material(
+                color: Colors.white.withValues(alpha: .94),
+                borderRadius: BorderRadius.circular(10),
+                child: InkWell(
+                  onTap: () => unawaited(_openWord(entry)),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: PhoenixTheme.gold.withValues(alpha: .25),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                state.displayText(entry.word),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  height: 1,
+                                  fontWeight: FontWeight.w900,
+                                ),
                               ),
                             ),
-                            child: Row(
-                              children: [
-                                WordMark(word: entry.word, size: 35),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              state.displayText(entry.word),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w900,
-                                              ),
-                                            ),
-                                          ),
-                                          if (state.isWordSaved(entry.word))
-                                            const Icon(
-                                              Icons.bookmark_rounded,
-                                              size: 14,
-                                              color: PhoenixTheme.red,
-                                            ),
-                                        ],
-                                      ),
-                                      Text(
-                                        entry.pinyin,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Colors.black54,
-                                          fontSize: 9.5,
-                                        ),
-                                      ),
-                                      Text(
-                                        state.displayText(entry.partOfSpeech),
-                                        maxLines: 1,
-                                        style: const TextStyle(
-                                          color: PhoenixTheme.red,
-                                          fontSize: 8.5,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                            if (state.isWordSaved(entry.word)) ...[
+                              const SizedBox(width: 2),
+                              const Icon(
+                                Icons.bookmark_rounded,
+                                size: 11,
+                                color: PhoenixTheme.red,
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          entry.pinyin,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 8,
+                            height: 1,
                           ),
                         ),
-                      );
-                    })
-                    .toList(growable: false),
+                      ],
+                    ),
+                  ),
+                ),
               );
-            })
-            .toList(growable: false),
+            },
+          );
+        },
       ),
     );
   }
@@ -677,65 +651,6 @@ class _JourneyScreenState extends State<JourneyScreen>
   Widget _discoveryPage() {
     final state = context.watch<AppState>();
     final language = state.translationLanguage;
-
-    final pages = discoveries
-        .asMap()
-        .entries
-        .map((entry) {
-          final item = entry.value;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: SingleChildScrollView(
-              child: AnimatedBuilder(
-                animation: _narration,
-                builder: (context, _) {
-                  final isActive = _isNarrating('discovery', entry.key);
-                  return AnnotatedReadingCard(
-                    id: 'discovery-${entry.key}',
-                    elevated: true,
-                    isActive: isActive,
-                    padding: const EdgeInsets.all(13),
-                    pinyin: item.pinyin,
-                    nativeLabel: item.nativeLabel(language),
-                    nativeText: item.nativeText(language),
-                    english: item.english,
-                    leading: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: isActive
-                          ? PhoenixTheme.red
-                          : PhoenixTheme.gold.withValues(alpha: .18),
-                      child: isActive
-                          ? const Icon(
-                              Icons.graphic_eq,
-                              size: 17,
-                              color: Colors.white,
-                            )
-                          : Text(
-                              '${entry.key + 1}',
-                              style: const TextStyle(
-                                color: PhoenixTheme.red,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                    ),
-                    mainText: Text(
-                      state.displayText(item.text),
-                      style: TextStyle(
-                        height: 1.45,
-                        fontSize: 14.5,
-                        fontWeight: isActive
-                            ? FontWeight.w800
-                            : FontWeight.w600,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          );
-        })
-        .toList(growable: false);
 
     return _page(
       title: '发现',
@@ -746,16 +661,56 @@ class _JourneyScreenState extends State<JourneyScreen>
             contentId: 'discovery',
             title: 'Discovery',
             subtitle: '中文朗读 · ${discoveries.length} 段',
+            compact: true,
             onPlay: _playDiscoveries,
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
           const _InlineTip(
             icon: Icons.notes_rounded,
-            text: '左右翻页浏览发现；点“注”查看拼音、探索者母语和 English。',
+            text: '四段发现同屏显示；点“注”查看拼音、探索者母语和 English。',
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
           Expanded(
-            child: CompactPager(semanticLabel: '发现分页', pages: pages),
+            child: AnimatedBuilder(
+              animation: _narration,
+              builder: (context, _) {
+                return Column(
+                  children: discoveries
+                      .asMap()
+                      .entries
+                      .map((entry) {
+                        final item = entry.value;
+                        final isActive = _isNarrating('discovery', entry.key);
+                        return Expanded(
+                          child: _CompactTextBlock(
+                            index: entry.key + 1,
+                            active: isActive,
+                            onSupport: () => unawaited(
+                              _showReadingSupport(
+                                title: '今日发现 ${entry.key + 1}',
+                                pinyin: item.pinyin,
+                                nativeLabel: item.nativeLabel(language),
+                                nativeText: item.nativeText(language),
+                                english: item.english,
+                              ),
+                            ),
+                            child: Text(
+                              state.displayText(item.text),
+                              style: TextStyle(
+                                fontSize: 10.8,
+                                height: 1.2,
+                                fontWeight: isActive
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        );
+                      })
+                      .toList(growable: false),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -1005,6 +960,170 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CompactTextBlock extends StatelessWidget {
+  const _CompactTextBlock({
+    required this.index,
+    required this.active,
+    required this.child,
+    required this.onSupport,
+  });
+
+  final int index;
+  final bool active;
+  final Widget child;
+  final VoidCallback onSupport;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.fromLTRB(6, 4, 3, 4),
+      decoration: BoxDecoration(
+        color: active
+            ? PhoenixTheme.gold.withValues(alpha: .18)
+            : Colors.white.withValues(alpha: .94),
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(
+          color: active
+              ? PhoenixTheme.gold
+              : PhoenixTheme.gold.withValues(alpha: .22),
+        ),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 11,
+            backgroundColor: active
+                ? PhoenixTheme.red
+                : PhoenixTheme.gold.withValues(alpha: .18),
+            child: active
+                ? const Icon(
+                    Icons.graphic_eq_rounded,
+                    size: 12,
+                    color: Colors.white,
+                  )
+                : Text(
+                    '$index',
+                    style: const TextStyle(
+                      color: PhoenixTheme.red,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+          ),
+          const SizedBox(width: 5),
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: child,
+            ),
+          ),
+          SizedBox(
+            width: 27,
+            height: 27,
+            child: TextButton(
+              onPressed: onSupport,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(27, 27),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              ),
+              child: const Text(
+                '注',
+                style: TextStyle(
+                  color: PhoenixTheme.red,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadingSupportSheet extends StatelessWidget {
+  const _ReadingSupportSheet({
+    required this.title,
+    required this.pinyin,
+    required this.nativeLabel,
+    required this.nativeText,
+    required this.english,
+  });
+
+  final String title;
+  final String pinyin;
+  final String nativeLabel;
+  final String nativeText;
+  final String english;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 10),
+        _SupportLine(label: '拼音', text: pinyin, color: PhoenixTheme.red),
+        const SizedBox(height: 8),
+        _SupportLine(
+          label: nativeLabel,
+          text: nativeText,
+          color: PhoenixTheme.translation,
+        ),
+        const SizedBox(height: 8),
+        _SupportLine(label: 'English', text: english, color: PhoenixTheme.ai),
+      ],
+    );
+  }
+}
+
+class _SupportLine extends StatelessWidget {
+  const _SupportLine({
+    required this.label,
+    required this.text,
+    required this.color,
+  });
+
+  final String label;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(11),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .07),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(text, style: const TextStyle(fontSize: 12.5, height: 1.4)),
         ],
       ),
     );
