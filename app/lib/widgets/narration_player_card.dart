@@ -134,12 +134,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
 
       final total = widget.controller.totalCharacters;
       final nextOffset = _estimatedSessionOffset();
-      final nextItem = widget.controller.status == NarrationStatus.playing
-          ? widget.controller.currentItemIndex
-          : _displayItemIndex;
 
       if (total > 0 && nextOffset >= total) {
         _positionClock?.cancel();
+        widget.controller.clearPlaybackHighlight(contentId: widget.contentId);
         setState(() {
           _sessionPlaying = false;
           _sessionPaused = false;
@@ -150,10 +148,19 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
         return;
       }
 
+      // The local Phoenix clock is the source of truth for live highlighting.
+      // Safari can announce completion while audio is still playing, which
+      // otherwise leaves the text unhighlighted until the user presses pause.
+      widget.controller.syncPlaybackHighlight(
+        contentId: widget.contentId,
+        offset: nextOffset,
+      );
+      final nextItem = widget.controller.currentItemIndex ?? _displayItemIndex;
+
       if (nextOffset != _displayOffset || nextItem != _displayItemIndex) {
         setState(() {
           _displayOffset = nextOffset;
-          _displayItemIndex = nextItem ?? _displayItemIndex;
+          _displayItemIndex = nextItem;
         });
       }
     });
@@ -170,6 +177,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       _anchorTime = DateTime.now();
       _displayItemIndex = widget.controller.currentItemIndex ?? 0;
     });
+    widget.controller.syncPlaybackHighlight(
+      contentId: widget.contentId,
+      offset: offset,
+    );
     _startPositionClock();
   }
 

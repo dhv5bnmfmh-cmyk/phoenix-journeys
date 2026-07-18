@@ -315,6 +315,21 @@ class NarrationController extends ChangeNotifier {
     await _speakFrom(0);
   }
 
+  /// Keeps the visible word highlight moving while a browser continues to
+  /// speak but reports an unreliable completion/progress state.
+  void syncPlaybackHighlight({required String contentId, required int offset}) {
+    if (_disposed || _plan.isEmpty || _contentId != contentId) return;
+
+    final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
+    final safeOffset = offset.clamp(0, maxOffset).toInt();
+    _applyProgress(safeOffset);
+  }
+
+  void clearPlaybackHighlight({required String contentId}) {
+    if (_disposed || _contentId != contentId) return;
+    NarrationHighlightBus.instance.clear(contentId: contentId);
+  }
+
   Future<void> pause() async {
     await pauseAtOffset(_currentOffset);
   }
