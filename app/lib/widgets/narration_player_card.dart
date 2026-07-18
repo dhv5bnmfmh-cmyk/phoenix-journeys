@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../services/narration_controller.dart';
 import '../theme/phoenix_theme.dart';
+import 'phoenix_media_button.dart';
 
 class NarrationPlayerCard extends StatelessWidget {
   const NarrationPlayerCard({
@@ -118,17 +119,12 @@ class NarrationPlayerCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    IconButton.filled(
+                    const SizedBox(width: 7),
+                    PhoenixMediaButton(
                       key: const ValueKey('narration-main-control'),
+                      isPlaying: isPlaying,
                       tooltip: _mainButtonTooltip(status),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: PhoenixTheme.red,
-                        minimumSize: const Size(40, 40),
-                        maximumSize: const Size(40, 40),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
+                      size: 50,
                       onPressed: () {
                         if (isPlaying) {
                           unawaited(controller.pause());
@@ -138,14 +134,8 @@ class NarrationPlayerCard extends StatelessWidget {
                           unawaited(onPlay());
                         }
                       },
-                      iconSize: 24,
-                      icon: Icon(
-                        isPlaying
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                      ),
                     ),
-                    const SizedBox(width: 3),
+                    const SizedBox(width: 2),
                     _MiniIconButton(
                       key: const ValueKey('narration-stop-control'),
                       tooltip: '停止朗读',
