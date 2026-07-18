@@ -109,6 +109,8 @@ class InteractiveStoryText extends StatefulWidget {
     this.narrationContentId,
     this.narrationItemId,
     this.narrationController,
+    this.highlightStart,
+    this.highlightEnd,
     super.key,
   });
 
@@ -122,6 +124,8 @@ class InteractiveStoryText extends StatefulWidget {
   final String? narrationContentId;
   final String? narrationItemId;
   final NarrationController? narrationController;
+  final int? highlightStart;
+  final int? highlightEnd;
 
   @override
   State<InteractiveStoryText> createState() => _InteractiveStoryTextState();
@@ -221,20 +225,35 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
             final snapshot =
                 widget.narrationController?.highlightSnapshot ??
                 NarrationHighlightBus.instance.snapshot;
-            final isCurrentNarrationItem = narrationSnapshotMatches(
-              snapshot: snapshot,
-              contentId: widget.narrationContentId,
-              itemId: widget.narrationItemId,
-              sourceText: widget.text,
-              displayedText: state.displayText(widget.text),
-              displayText: state.displayText,
-            );
-            final highlightStart = isCurrentNarrationItem
+            final hasExplicitHighlight =
+                widget.highlightStart != null &&
+                widget.highlightEnd != null &&
+                widget.highlightEnd! > widget.highlightStart!;
+            final isCurrentNarrationItem =
+                hasExplicitHighlight ||
+                narrationSnapshotMatches(
+                  snapshot: snapshot,
+                  contentId: widget.narrationContentId,
+                  itemId: widget.narrationItemId,
+                  sourceText: widget.text,
+                  displayedText: state.displayText(widget.text),
+                  displayText: state.displayText,
+                );
+            final highlightStart = hasExplicitHighlight
+                ? widget.highlightStart!
+                : isCurrentNarrationItem
                 ? snapshot!.start
                 : -1;
-            final highlightEnd = isCurrentNarrationItem ? snapshot!.end : -1;
+            final highlightEnd = hasExplicitHighlight
+                ? widget.highlightEnd!
+                : isCurrentNarrationItem
+                ? snapshot!.end
+                : -1;
 
             return Text.rich(
+              key: ValueKey(
+                'interactive-highlight-${widget.narrationItemId ?? widget.text}',
+              ),
               TextSpan(
                 style: baseStyle,
                 children: _segments

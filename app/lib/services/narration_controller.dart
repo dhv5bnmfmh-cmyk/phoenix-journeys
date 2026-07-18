@@ -188,7 +188,37 @@ class NarrationController extends ChangeNotifier {
   bool get isSpeakingWord => _isSpeakingWord;
   bool get wordSpeechUnavailable => _wordSpeechUnavailable;
   String? get spokenWord => _spokenWord;
-  NarrationHighlightSnapshot? get highlightSnapshot => _highlightSnapshot;
+  NarrationHighlightSnapshot? get highlightSnapshot {
+    final contentId = _contentId;
+    final itemIndex = _currentItemIndex;
+    if (_plan.isEmpty || contentId == null || itemIndex == null) return null;
+    if (itemIndex < 0 || itemIndex >= _plan.items.length) return null;
+
+    final item = _plan.items[itemIndex];
+    final itemStart = _plan.itemStart(itemIndex);
+    var localStart = (_currentOffset - itemStart)
+        .clamp(0, item.text.length)
+        .toInt();
+    while (localStart < item.text.length &&
+        _isBoundary(item.text.substring(localStart, localStart + 1))) {
+      localStart += 1;
+    }
+    if (localStart >= item.text.length) return null;
+
+    final localEnd =
+        (localStart + _fallbackHighlightLength(item.text, localStart))
+            .clamp(localStart + 1, item.text.length)
+            .toInt();
+    return NarrationHighlightSnapshot(
+      contentId: contentId,
+      itemId: item.id,
+      itemText: item.text,
+      itemIndex: itemIndex,
+      start: localStart,
+      end: localEnd,
+      word: _highlightSnapshot?.word ?? '',
+    );
+  }
 
   String get speedLabel {
     return speedOptions
