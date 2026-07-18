@@ -5,6 +5,7 @@ All primary Phoenix Journeys screens must show their main information and main a
 - Keep the top identity/progress area fixed and compact.
 - Keep the main action area fixed and visible.
 - Show related short content together in the same viewport whenever it can fit.
+- Short story and Discovery sections must display together statically rather than becoming separate swipe pages.
 - Use explicit tap tabs, grouped cards, collapsible areas, or modal sheets for additional content.
 - Do not use horizontal paging, swipe-to-change pages, `PageView`, `TabBarView`, or `CompactPager` in Phoenix interfaces.
 - Do not add a top-level vertically scrolling feature stack.
