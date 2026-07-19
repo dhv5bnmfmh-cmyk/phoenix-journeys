@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
 import '../data/world_story_runtime.dart';
 import '../models/story_content.dart';
@@ -11,7 +12,7 @@ import '../services/narration_controller.dart';
 import '../services/phoenix_ai_service.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
-import '../widgets/forbidden_city_stamp.dart';
+import '../widgets/city_journey_stamp.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_share_button.dart';
 import '../widgets/journey_progress_header.dart';
@@ -20,7 +21,9 @@ import '../widgets/phoenix_agent_cards.dart';
 import '../widgets/word_detail_sheet.dart';
 
 class JourneyScreen extends StatefulWidget {
-  const JourneyScreen({super.key});
+  const JourneyScreen({super.key, this.journeyId});
+
+  final String? journeyId;
 
   @override
   State<JourneyScreen> createState() => _JourneyScreenState();
@@ -36,6 +39,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   final expressFocusNode = FocusNode(debugLabel: 'express-writing');
   final memoryFocusNode = FocusNode(debugLabel: 'memory-writing');
   late final NarrationController _narration;
+  late final DailyJourneyExperience _experience;
   late final JourneyContentRecord _journeyContent;
   late final PhoenixAiService _ai;
   late AppState _appState;
@@ -52,9 +56,12 @@ class _JourneyScreenState extends State<JourneyScreen>
     WidgetsBinding.instance.addObserver(this);
     _narration = NarrationController();
     final worldStoryAgent = createPhoenixWorldStoryAgent();
+    final journeyId = widget.journeyId ??
+        dailyJourneyForDate(DateTime.now()).id;
+    _experience = requireDailyJourneyExperience(journeyId);
     _journeyContent = requireJourneyContent(
       worldStoryAgent,
-      'beijing-forbidden-city',
+      _experience.id,
     );
     _ai = PhoenixAiService();
     wonderFocusNode.addListener(_handleWritingFocusChanged);
@@ -116,7 +123,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Future<void> _goToStep(int targetStep) async {
-    final safeStep = targetStep.clamp(0, AppState.beijingJourneyLastStep);
+    final safeStep = targetStep.clamp(0, AppState.journeyLastStep);
     await _narration.stop();
     if (!mounted || safeStep == step) return;
 
@@ -158,7 +165,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   Future<void> _playDiscoveries() {
     return _narration.play(
       contentId: 'discovery',
-      items: discoveries
+      items: _experience.discoveries
           .asMap()
           .entries
           .map(
@@ -180,11 +187,11 @@ class _JourneyScreenState extends State<JourneyScreen>
     final resumeOffset = _narration.currentOffset;
     if (!mounted) return;
 
-    final initialIndex = words.indexWhere((item) => item.word == entry.word);
+    final initialIndex = _experience.words.indexWhere((item) => item.word == entry.word);
     await showWordDetail(
       context,
       entry,
-      entries: words,
+      entries: _experience.words,
       initialIndex: initialIndex < 0 ? 0 : initialIndex,
       onSpeak: () => _narration.speakWord(
         _appState.displayText(entry.word),
@@ -425,7 +432,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     await _narration.stop();
     await _appState.completeJourney(memoryController.text);
     if (!mounted) return;
-    setState(() => step = AppState.beijingJourneyLastStep);
+    setState(() => step = AppState.journeyLastStep);
   }
 
   Future<void> _restartJourney() async {
@@ -457,9 +464,12 @@ class _JourneyScreenState extends State<JourneyScreen>
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         toolbarHeight: 44,
-        title: const Text(
-          '北京 · 紫禁城',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+        title: Text(
+          _appState.displayText(_experience.appBarTitle),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+          ),
         ),
         actions: [
           Consumer<AppState>(
@@ -518,7 +528,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 JourneyProgressHeader(
                   currentStep: step,
                   furthestStep: state.beijingJourneyFurthestStep,
-                  labels: AppState.beijingJourneyStepLabels,
+                  labels: AppState.journeyStepLabels,
                   onStepSelected: (value) => unawaited(_goToStep(value)),
                 ),
                 SizedBox(height: compact ? 3 : 5),
@@ -590,7 +600,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                     children: [
                       if (showBack &&
                           step > 0 &&
-                          step < AppState.beijingJourneyLastStep) ...[
+                          step < AppState.journeyLastStep) ...[
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () => unawaited(_goToStep(step - 1)),
@@ -662,7 +672,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           NarrationPlayerCard(
             controller: _narration,
             contentId: 'story',
-            title: '紫禁城故事',
+            title: _appState.displayText(_experience.storyTitle),
             subtitle: '普通话 · ${_journeyContent.storyParagraphs.length} 段',
             compact: true,
             onPlay: _playStory,
@@ -680,7 +690,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                         .asMap()
                         .entries
                         .map((entry) {
-                          final annotation = storyAnnotations[entry.key];
+                          final annotation = _experience.storyAnnotations[entry.key];
                           final snapshot = _narration.highlightSnapshot;
                           final isActive =
                               snapshot?.contentId == 'story' &&
@@ -702,7 +712,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                             ),
                             child: InteractiveStoryText(
                               text: entry.value,
-                              entries: words,
+                              entries: _experience.words,
                               narrationController: _narration,
                               highlightStart: isActive ? snapshot!.start : null,
                               highlightEnd: isActive ? snapshot!.end : null,
@@ -736,7 +746,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         builder: (context, constraints) {
           const columns = 3;
           const spacing = 4.0;
-          final rows = (words.length / columns).ceil();
+          final rows = (_experience.words.length / columns).ceil();
           final cellWidth =
               (constraints.maxWidth - spacing * (columns - 1)) / columns;
           final cellHeight =
@@ -746,7 +756,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           return GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             padding: EdgeInsets.zero,
-            itemCount: words.length,
+            itemCount: _experience.words.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: columns,
               mainAxisSpacing: spacing,
@@ -754,7 +764,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               childAspectRatio: ratio,
             ),
             itemBuilder: (context, index) {
-              final entry = words[index];
+              final entry = _experience.words[index];
               return Material(
                 color: Colors.white.withValues(alpha: .94),
                 borderRadius: BorderRadius.circular(10),
@@ -835,7 +845,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             controller: _narration,
             contentId: 'discovery',
             title: 'Discovery',
-            subtitle: '中文朗读 · ${discoveries.length} 段',
+            subtitle: '中文朗读 · ${_experience.discoveries.length} 段',
             compact: true,
             onPlay: _playDiscoveries,
           ),
@@ -848,7 +858,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                   alignment: Alignment.topCenter,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: discoveries
+                    children: _experience.discoveries
                         .asMap()
                         .entries
                         .map((entry) {
@@ -871,7 +881,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                             ),
                             child: InteractiveStoryText(
                               text: item.text,
-                              entries: words,
+                              entries: _experience.words,
                               narrationController: _narration,
                               highlightStart: isActive ? snapshot!.start : null,
                               highlightEnd: isActive ? snapshot!.end : null,
@@ -916,7 +926,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            wonderQuestion,
+            _experience.wonderQuestion,
             maxLines: keyboardVisible ? 1 : 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -974,7 +984,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            expressQuestion,
+            _experience.expressQuestion,
             maxLines: keyboardVisible ? 1 : 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -1068,18 +1078,20 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Widget _completePage() {
     return _page(
-      title: '北京已点亮',
+      title: '${_experience.city}已点亮',
       buttonText: '返回首页',
       buttonIcon: Icons.home_outlined,
       showBack: false,
       onNext: () => Navigator.of(context).pop(),
       child: Column(
         children: [
-          const Expanded(
+          Expanded(
             child: Center(
               child: FittedBox(
                 fit: BoxFit.contain,
-                child: AnimatedForbiddenCityStamp(),
+                child: AnimatedCityJourneyStamp(
+                  journey: _experience,
+                ),
               ),
             ),
           ),
@@ -1106,6 +1118,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                 Expanded(
                   child: JourneyShareButton(
                     isTraditional: _appState.isTraditional,
+                    city: _experience.city,
+                    place: _experience.place,
                     compact: true,
                     label: _appState.displayText('分享旅程'),
                   ),

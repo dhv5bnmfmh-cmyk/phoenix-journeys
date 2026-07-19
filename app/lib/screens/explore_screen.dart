@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -21,6 +22,11 @@ class ExploreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final viewportHeight = MediaQuery.sizeOf(context).height;
+    if (state.activeJourneyId != state.todayJourney.id) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(state.refreshDailyJourney());
+      });
+    }
     final mapHeight = compactExploreMapHeight(viewportHeight);
 
     Future<void> openJourney() async {
@@ -28,9 +34,13 @@ class ExploreScreen extends StatelessWidget {
         await state.restartJourney();
       }
       if (!context.mounted) return;
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const JourneyScreen()));
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => JourneyScreen(
+            journeyId: state.activeJourneyId,
+          ),
+        ),
+      );
     }
 
     return Stack(
@@ -205,12 +215,12 @@ class _FlightMapCardState extends State<_FlightMapCard>
   Widget build(BuildContext context) {
     final state = widget.state;
     final status = state.journeyCompleted
-        ? '北京已点亮 · 印章已获得'
+        ? '${state.activeJourney.city}已点亮 · 印章已获得'
         : state.hasJourneyInProgress
-        ? '${state.beijingStampEarned ? '印章已收藏 · ' : ''}旅程 ${state.beijingJourneyProgressPercent}%'
-        : state.beijingStampEarned
-        ? '北京印章已收藏 · 可以再次出发'
-        : '1,670 km · 学习航程';
+        ? '${state.activeJourneyStampEarned ? '印章已收藏 · ' : ''}旅程 ${state.beijingJourneyProgressPercent}%'
+        : state.activeJourneyStampEarned
+        ? '${state.activeJourney.city}印章已收藏 · 可以再次出发'
+        : '${state.activeJourney.distanceLabel} · 学习航程';
 
     return Container(
       height: widget.height,
@@ -281,7 +291,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
                               ),
                               const SizedBox(height: 1),
                               Text(
-                                state.displayText('河内  →  北京'),
+                                state.displayText('河内  →  ${state.activeJourney.city}'),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16.5,
@@ -368,9 +378,9 @@ class _FlightMapCardState extends State<_FlightMapCard>
                     left: geometry.beijing.dx - 16,
                     top: geometry.beijing.dy - 16,
                     child: _CityMarker(
-                      label: state.displayText('北京'),
-                      subtitle: 'PEK',
-                      active: state.beijingStampEarned,
+                      label: state.displayText(state.activeJourney.city),
+                      subtitle: state.activeJourney.cityCode,
+                      active: state.activeJourneyStampEarned,
                       pulse: _controller.value,
                     ),
                   ),
@@ -543,9 +553,9 @@ class _JourneyCard extends StatelessWidget {
   final VoidCallback onOpen;
 
   String get _buttonText {
-    if (state.journeyCompleted) return '再次探索北京';
-    if (state.hasJourneyInProgress) return '继续北京 Journey';
-    return '开始北京 Journey';
+    if (state.journeyCompleted) return '再次探索${state.activeJourney.city}';
+    if (state.hasJourneyInProgress) return '继续${state.activeJourney.city} Journey';
+    return '开始${state.activeJourney.city} Journey';
   }
 
   IconData get _buttonIcon {
@@ -570,18 +580,18 @@ class _JourneyCard extends StatelessWidget {
             children: [
               _Pill(
                 icon: Icons.place_outlined,
-                text: state.displayText('中国 · 北京'),
+                text: state.displayText('中国 · ${state.activeJourney.city}'),
               ),
               const Spacer(),
               Text(
-                state.displayText('第一站'),
+                state.displayText('今日旅程'),
                 style: const TextStyle(color: Colors.black54, fontSize: 10),
               ),
             ],
           ),
           const SizedBox(height: 7),
           Text(
-            state.displayText('第一次走进紫禁城'),
+            state.displayText(state.activeJourney.headline),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontSize: 19,
               height: 1.05,
@@ -590,7 +600,7 @@ class _JourneyCard extends StatelessWidget {
           ),
           const SizedBox(height: 3),
           Text(
-            state.displayText('跟随 AI 导游，用故事、词汇和文化打开北京。'),
+            state.displayText(state.activeJourney.description),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 11.5, height: 1.15),
@@ -603,7 +613,7 @@ class _JourneyCard extends StatelessWidget {
                   child: Text(
                     state.displayText(
                       state.journeyCompleted
-                          ? '旅程完成 · 紫禁城印章已收入护照'
+                          ? '旅程完成 · ${state.activeJourney.place}印章已收入护照'
                           : '上次停在「${state.beijingJourneyStepLabel}」',
                     ),
                     maxLines: 1,
@@ -635,10 +645,10 @@ class _JourneyCard extends StatelessWidget {
                 backgroundColor: PhoenixTheme.gold.withValues(alpha: .18),
               ),
             ),
-          ] else if (state.beijingStampEarned) ...[
+          ] else if (state.activeJourneyStampEarned) ...[
             const SizedBox(height: 6),
             Text(
-              state.displayText('北京印章已收藏，可以随时再次体验。'),
+              state.displayText('${state.activeJourney.city}印章已收藏，可以随时再次体验。'),
               maxLines: 1,
               style: const TextStyle(
                 color: PhoenixTheme.red,
@@ -738,7 +748,7 @@ class _DiscoveryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  state.displayText('为什么故宫的屋顶大多是黄色？'),
+                  state.displayText(state.activeJourney.discoveryTeaser),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 11, height: 1.05),
