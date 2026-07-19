@@ -20,6 +20,23 @@ test('keyboard mode hides fixed navigation that previously covered writing', () 
   assert.match(body, /输入中/);
 });
 
+test('writing fields keep persistent focus nodes on iPhone Safari', () => {
+  assert.match(screen, /final wonderFocusNode = FocusNode/);
+  assert.match(screen, /final expressFocusNode = FocusNode/);
+  assert.match(screen, /final memoryFocusNode = FocusNode/);
+  assert.match(screen, /focusNode: wonderFocusNode/);
+  assert.match(screen, /focusNode: expressFocusNode/);
+  assert.match(screen, /focusNode: memoryFocusNode/);
+  assert.match(screen, /wonderFocusNode\.hasFocus/);
+  assert.match(screen, /expressFocusNode\.hasFocus/);
+  assert.match(screen, /memoryFocusNode\.hasFocus/);
+});
+
+test('Safari keyboard cannot be dismissed by a synthetic tap outside', () => {
+  assert.doesNotMatch(screen, /onTapOutside:/);
+  assert.doesNotMatch(screen, /primaryFocus\?\.unfocus/);
+});
+
 for (const page of ['_wonderPage', '_expressPage', '_memoryPage']) {
   test(`${page} gives the text field the keyboard viewport`, () => {
     const start = screen.indexOf(`Widget ${page}`);
@@ -29,7 +46,6 @@ for (const page of ['_wonderPage', '_expressPage', '_memoryPage']) {
     assert.match(body, /keyboardAdaptive: true/);
     assert.match(body, /Expanded\([\s\S]*TextField\(/);
     assert.match(body, /scrollPadding: const EdgeInsets\.only\(bottom: 24\)/);
-    assert.match(body, /onTapOutside:/);
   });
 }
 
