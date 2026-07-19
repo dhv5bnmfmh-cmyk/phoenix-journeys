@@ -11,16 +11,16 @@ class JourneyShareCopy {
 
   static String title({
     required bool traditional,
-    required String city,
-    required String place,
+    String city = '北京',
+    String place = '紫禁城',
   }) {
     return 'Phoenix Journeys · $city$place';
   }
 
   static String message({
     required bool traditional,
-    required String city,
-    required String place,
+    String city = '北京',
+    String place = '紫禁城',
   }) {
     if (traditional) {
       return '我在 Phoenix Journeys 完成了「$city・$place」中文旅程，點亮$city並獲得了城市印章 🔥\n\n'
