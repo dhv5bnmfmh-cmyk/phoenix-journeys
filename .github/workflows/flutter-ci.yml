@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
@@ -26,32 +26,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
-          fetch-depth: 0
-
-      - name: Apply journey planner
-        if: ${{ github.ref_name == 'feature/journey-planner' && !contains(github.event.head_commit.message, '[planner-applied]') }}
-        working-directory: ${{ github.workspace }}
-        run: python tools/apply_journey_planner_patch.py
-
-      - name: Commit journey planner
-        if: ${{ github.ref_name == 'feature/journey-planner' && !contains(github.event.head_commit.message, '[planner-applied]') }}
-        working-directory: ${{ github.workspace }}
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/lib/state/app_state.dart \
-                  app/lib/screens/explore_screen.dart \
-                  app/test/journey_plan_state_test.dart \
-                  worker/journey_plan_rule.test.mjs
-          if git diff --cached --quiet; then
-            echo "Journey planner already applied."
-          else
-            git commit -m "feat: add a persistent Beijing journey plan [planner-applied]"
-            git push origin HEAD:feature/journey-planner
-          fi
 
       - name: Test Phoenix agents
         id: agents
