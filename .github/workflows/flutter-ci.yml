@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
@@ -26,6 +26,30 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Apply keyboard-safe writing layout
+        if: ${{ github.event_name == 'pull_request' && github.head_ref == 'fix/keyboard-safe-writing-pages' }}
+        working-directory: ${{ github.workspace }}
+        run: python tools/apply_keyboard_safe_writing_pages.py
+
+      - name: Commit keyboard-safe writing layout
+        if: ${{ github.event_name == 'pull_request' && github.head_ref == 'fix/keyboard-safe-writing-pages' }}
+        working-directory: ${{ github.workspace }}
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart \
+                  worker/keyboard_safe_writing_pages_rule.test.mjs
+          if git diff --cached --quiet; then
+            echo "Keyboard-safe layout already applied."
+          else
+            git commit -m "fix: keep writing visible above the iPhone keyboard [keyboard-safe]"
+            git push origin HEAD:fix/keyboard-safe-writing-pages
+          fi
 
       - name: Test Phoenix agents
         id: agents
