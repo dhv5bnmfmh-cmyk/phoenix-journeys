@@ -334,6 +334,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     ];
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         toolbarHeight: 44,
         title: const Text(
@@ -370,109 +371,144 @@ class _JourneyScreenState extends State<JourneyScreen>
     IconData buttonIcon = Icons.arrow_forward,
     VoidCallback? onNext,
     bool showBack = true,
+    bool keyboardAdaptive = false,
   }) {
     final state = context.watch<AppState>();
 
     return LayoutBuilder(
       key: ValueKey(title),
       builder: (context, constraints) {
-        final compact = constraints.maxHeight < 590;
+        final keyboardVisible =
+            keyboardAdaptive && MediaQuery.viewInsetsOf(context).bottom > 0;
+        final compact = constraints.maxHeight < 590 || keyboardVisible;
         return Padding(
-          padding: EdgeInsets.fromLTRB(12, compact ? 4 : 6, 12, 8),
+          padding: EdgeInsets.fromLTRB(
+            12,
+            keyboardVisible ? 2 : (compact ? 4 : 6),
+            12,
+            keyboardVisible ? 3 : 8,
+          ),
           child: Column(
             children: [
-              JourneyProgressHeader(
-                currentStep: step,
-                furthestStep: state.beijingJourneyFurthestStep,
-                labels: AppState.beijingJourneyStepLabels,
-                onStepSelected: (value) => unawaited(_goToStep(value)),
-              ),
-              SizedBox(height: compact ? 3 : 5),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontSize: compact ? 17 : 19,
-                        height: 1.05,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 7,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: PhoenixTheme.gold.withValues(alpha: .12),
-                      borderRadius: BorderRadius.circular(99),
-                    ),
-                    child: const Text(
-                      '单屏模式',
-                      style: TextStyle(
-                        color: PhoenixTheme.red,
-                        fontSize: 8.5,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: compact ? 4 : 6),
-              Expanded(child: child),
-              SizedBox(height: compact ? 4 : 7),
+              if (!keyboardVisible) ...[
+                JourneyProgressHeader(
+                  currentStep: step,
+                  furthestStep: state.beijingJourneyFurthestStep,
+                  labels: AppState.beijingJourneyStepLabels,
+                  onStepSelected: (value) => unawaited(_goToStep(value)),
+                ),
+                SizedBox(height: compact ? 3 : 5),
+              ],
               SizedBox(
-                height: compact ? 36 : 40,
+                height: keyboardVisible ? 26 : null,
                 child: Row(
                   children: [
-                    if (showBack &&
-                        step > 0 &&
-                        step < AppState.beijingJourneyLastStep) ...[
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => unawaited(_goToStep(step - 1)),
-                          style: OutlinedButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                          ),
-                          icon: const Icon(Icons.arrow_back_rounded, size: 17),
-                          label: const Text(
-                            '上一步',
-                            style: TextStyle(fontSize: 11),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 7),
-                    ],
                     Expanded(
-                      flex: 2,
-                      child: FilledButton.icon(
-                        onPressed:
-                            onNext ?? () => unawaited(_goToStep(step + 1)),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: PhoenixTheme.red,
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                        ),
-                        icon: Icon(buttonIcon, size: 17),
-                        label: Text(
-                          buttonText,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                          ),
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontSize: keyboardVisible ? 15 : (compact ? 17 : 19),
+                          height: 1.05,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
+                    if (keyboardVisible)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: PhoenixTheme.gold.withValues(alpha: .12),
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                        child: const Text(
+                          '输入中',
+                          style: TextStyle(
+                            color: PhoenixTheme.red,
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: PhoenixTheme.gold.withValues(alpha: .12),
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                        child: const Text(
+                          '单屏模式',
+                          style: TextStyle(
+                            color: PhoenixTheme.red,
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
+              SizedBox(height: keyboardVisible ? 3 : (compact ? 4 : 6)),
+              Expanded(child: child),
+              if (!keyboardVisible) ...[
+                SizedBox(height: compact ? 4 : 7),
+                SizedBox(
+                  height: compact ? 36 : 40,
+                  child: Row(
+                    children: [
+                      if (showBack &&
+                          step > 0 &&
+                          step < AppState.beijingJourneyLastStep) ...[
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => unawaited(_goToStep(step - 1)),
+                            style: OutlinedButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            icon: const Icon(Icons.arrow_back_rounded, size: 17),
+                            label: const Text(
+                              '上一步',
+                              style: TextStyle(fontSize: 11),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 7),
+                      ],
+                      Expanded(
+                        flex: 2,
+                        child: FilledButton.icon(
+                          onPressed:
+                              onNext ?? () => unawaited(_goToStep(step + 1)),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: PhoenixTheme.red,
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                          ),
+                          icon: Icon(buttonIcon, size: 17),
+                          label: Text(
+                            buttonText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         );
@@ -728,34 +764,41 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _wonderPage() {
+    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
     return _page(
       title: '思考',
+      keyboardAdaptive: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             wonderQuestion,
-            maxLines: 2,
+            maxLines: keyboardVisible ? 1 : 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 12,
-              height: 1.25,
+              fontSize: keyboardVisible ? 11 : 12,
+              height: 1.2,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 5),
-          const _InlineTip(
-            icon: Icons.explore_outlined,
-            text: 'PhoenixGuideAgent 会补充探索角度，并提出下一步问题。',
-          ),
-          const SizedBox(height: 6),
+          SizedBox(height: keyboardVisible ? 3 : 5),
+          if (!keyboardVisible) ...[
+            const _InlineTip(
+              icon: Icons.explore_outlined,
+              text: 'PhoenixGuideAgent 会补充探索角度，并提出下一步问题。',
+            ),
+            const SizedBox(height: 6),
+          ],
           Expanded(
             child: TextField(
+              key: const ValueKey('wonder-writing-field'),
               controller: wonderController,
               expands: true,
               maxLines: null,
               minLines: null,
               textAlignVertical: TextAlignVertical.top,
+              scrollPadding: const EdgeInsets.only(bottom: 24),
+              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
               onChanged: _onWonderChanged,
               decoration: const InputDecoration(
                 hintText: '写下你的想法……',
@@ -764,76 +807,85 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
           ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const ValueKey('ask-phoenix-guide-agent'),
-                  onPressed: _guideLoading
-                      ? null
-                      : () => unawaited(_askGuide()),
-                  style: OutlinedButton.styleFrom(
+          if (!keyboardVisible) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    key: const ValueKey('ask-phoenix-guide-agent'),
+                    onPressed: _guideLoading
+                        ? null
+                        : () => unawaited(_askGuide()),
+                    style: OutlinedButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: _guideLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.auto_awesome, size: 17),
+                    label: Text(
+                      _guideLoading ? 'AI 正在回应…' : '问 PhoenixGuideAgent',
+                      style: const TextStyle(fontSize: 10.5),
+                    ),
+                  ),
+                ),
+                if (_guideFeedback != null) ...[
+                  const SizedBox(width: 6),
+                  IconButton.filledTonal(
+                    tooltip: '查看 AI 回应',
+                    onPressed: () => unawaited(_showGuideFeedback()),
                     visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.forum_rounded, size: 18),
                   ),
-                  icon: _guideLoading
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.auto_awesome, size: 17),
-                  label: Text(
-                    _guideLoading ? 'AI 正在回应…' : '问 PhoenixGuideAgent',
-                    style: const TextStyle(fontSize: 10.5),
-                  ),
-                ),
-              ),
-              if (_guideFeedback != null) ...[
-                const SizedBox(width: 6),
-                IconButton.filledTonal(
-                  tooltip: '查看 AI 回应',
-                  onPressed: () => unawaited(_showGuideFeedback()),
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.forum_rounded, size: 18),
-                ),
+                ],
               ],
-            ],
-          ),
+            ),
+          ],
         ],
       ),
     );
   }
 
   Widget _expressPage() {
+    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
     return _page(
       title: '表达',
+      keyboardAdaptive: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             expressQuestion,
-            maxLines: 2,
+            maxLines: keyboardVisible ? 1 : 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 12,
-              height: 1.25,
+              fontSize: keyboardVisible ? 11 : 12,
+              height: 1.2,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 5),
-          const _InlineTip(
-            icon: Icons.edit_note_outlined,
-            text: 'PhoenixWritingAgent 会保留原意，给出修改版和原因。',
-          ),
-          const SizedBox(height: 6),
+          SizedBox(height: keyboardVisible ? 3 : 5),
+          if (!keyboardVisible) ...[
+            const _InlineTip(
+              icon: Icons.edit_note_outlined,
+              text: 'PhoenixWritingAgent 会保留原意，给出修改版和原因。',
+            ),
+            const SizedBox(height: 6),
+          ],
           Expanded(
             child: TextField(
+              key: const ValueKey('express-writing-field'),
               controller: expressController,
               expands: true,
               maxLines: null,
               minLines: null,
               textAlignVertical: TextAlignVertical.top,
+              scrollPadding: const EdgeInsets.only(bottom: 24),
+              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
               onChanged: _onExpressChanged,
               decoration: const InputDecoration(
                 hintText: '用中文写下你的表达……',
@@ -842,69 +894,81 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
           ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  key: const ValueKey('ask-phoenix-writing-agent'),
-                  onPressed: _writingLoading
-                      ? null
-                      : () => unawaited(_reviewWriting()),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: PhoenixTheme.red,
+          if (!keyboardVisible) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    key: const ValueKey('ask-phoenix-writing-agent'),
+                    onPressed: _writingLoading
+                        ? null
+                        : () => unawaited(_reviewWriting()),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: PhoenixTheme.red,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: _writingLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.spellcheck_rounded, size: 17),
+                    label: Text(
+                      _writingLoading ? 'AI 正在批改…' : '请 PhoenixWritingAgent 批改',
+                      style: const TextStyle(fontSize: 10.5),
+                    ),
+                  ),
+                ),
+                if (_writingFeedback != null) ...[
+                  const SizedBox(width: 6),
+                  IconButton.filledTonal(
+                    tooltip: '查看批改结果',
+                    onPressed: () => unawaited(_showWritingFeedback()),
                     visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.fact_check_rounded, size: 18),
                   ),
-                  icon: _writingLoading
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.spellcheck_rounded, size: 17),
-                  label: Text(
-                    _writingLoading ? 'AI 正在批改…' : '请 PhoenixWritingAgent 批改',
-                    style: const TextStyle(fontSize: 10.5),
-                  ),
-                ),
-              ),
-              if (_writingFeedback != null) ...[
-                const SizedBox(width: 6),
-                IconButton.filledTonal(
-                  tooltip: '查看批改结果',
-                  onPressed: () => unawaited(_showWritingFeedback()),
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.fact_check_rounded, size: 18),
-                ),
+                ],
               ],
-            ],
-          ),
+            ),
+          ],
         ],
       ),
     );
   }
 
   Widget _memoryPage() {
+    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
     return _page(
       title: '旅程回忆',
+      keyboardAdaptive: true,
       buttonText: '结束旅程',
       buttonIcon: Icons.flag_rounded,
       onNext: () => unawaited(_finishJourney()),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '今天最想记住的一件事是什么？',
-            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: keyboardVisible ? 11 : 12.5,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: keyboardVisible ? 3 : 6),
           Expanded(
             child: TextField(
+              key: const ValueKey('memory-writing-field'),
               controller: memoryController,
               expands: true,
               maxLines: null,
               minLines: null,
               textAlignVertical: TextAlignVertical.top,
+              scrollPadding: const EdgeInsets.only(bottom: 24),
+              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
               onChanged: (_) => unawaited(_persistProgress()),
               decoration: const InputDecoration(
                 hintText: '写下感受，未来回来比较自己的变化。',
@@ -913,11 +977,13 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
           ),
-          const SizedBox(height: 6),
-          const _InlineTip(
-            icon: Icons.approval_outlined,
-            text: '结束后自动保存回忆，并由 PhoenixStampAgent 完成盖章。',
-          ),
+          if (!keyboardVisible) ...[
+            const SizedBox(height: 6),
+            const _InlineTip(
+              icon: Icons.approval_outlined,
+              text: '结束后自动保存回忆，并由 PhoenixStampAgent 完成盖章。',
+            ),
+          ],
         ],
       ),
     );
