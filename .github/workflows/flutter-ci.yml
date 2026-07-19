@@ -31,12 +31,12 @@ jobs:
           fetch-depth: 0
 
       - name: Apply daily journey engine
-        if: ${{ github.ref_name == 'feature/daily-journey-engine' && !contains(github.event.head_commit.message, '[daily-engine-applied]') }}
+        if: ${{ github.ref_name == 'feature/daily-journey-engine' || github.head_ref == 'feature/daily-journey-engine' }}
         working-directory: ${{ github.workspace }}
         run: python tools/apply_daily_journey_engine.py
 
       - name: Commit daily journey engine
-        if: ${{ github.ref_name == 'feature/daily-journey-engine' && !contains(github.event.head_commit.message, '[daily-engine-applied]') }}
+        if: ${{ github.ref_name == 'feature/daily-journey-engine' || github.head_ref == 'feature/daily-journey-engine' }}
         working-directory: ${{ github.workspace }}
         shell: bash
         run: |
