@@ -337,7 +337,6 @@ class _JourneyScreenState extends State<JourneyScreen>
   Future<void> _showGuideFeedback() async {
     final feedback = _guideFeedback;
     if (feedback == null || !mounted) return;
-    FocusManager.instance.primaryFocus?.unfocus();
     await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
     if (!mounted) return;
     await showModalBottomSheet<void>(
@@ -359,7 +358,6 @@ class _JourneyScreenState extends State<JourneyScreen>
   Future<void> _showWritingFeedback() async {
     final feedback = _writingFeedback;
     if (feedback == null || !mounted) return;
-    FocusManager.instance.primaryFocus?.unfocus();
     await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
     if (!mounted) return;
     await showModalBottomSheet<void>(
