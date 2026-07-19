@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/journey_data.dart';
@@ -202,45 +203,146 @@ class _JourneyScreenState extends State<JourneyScreen>
     await _narration.resumeFromOffset(resumeOffset);
   }
 
+  Future<void> _prepareAgentAction(
+    FocusNode focusNode,
+    String message,
+  ) async {
+    focusNode.unfocus();
+    await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    if (!mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(child: Text(message)),
+            ],
+          ),
+          duration: const Duration(seconds: 20),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+    // iPhone Safari needs one keyboard animation frame before a modal route.
+    await Future<void>.delayed(const Duration(milliseconds: 180));
+  }
+
+  void _clearAgentStatus() {
+    if (mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
+
+  void _showAgentMessage(String message) {
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+  }
+
   Future<void> _askGuide() async {
     if (_guideLoading) return;
+    final answer = wonderController.text.trim();
+    if (answer.length < 2) {
+      _showAgentMessage('请先写下一点想法。');
+      return;
+    }
 
     setState(() => _guideLoading = true);
-    final feedback = await _ai.askGuide(
-      text: wonderController.text,
-      language: _appState.translationLanguage,
+    await _prepareAgentAction(
+      wonderFocusNode,
+      'PhoenixGuideAgent 正在思考…',
     );
     if (!mounted) return;
 
-    setState(() {
-      _guideFeedback = feedback;
-      _guideLoading = false;
-    });
-    await _showGuideFeedback();
+    try {
+      final feedback = await _ai.askGuide(
+        text: answer,
+        language: _appState.translationLanguage,
+      );
+      if (!mounted) return;
+
+      _clearAgentStatus();
+      setState(() {
+        _guideFeedback = feedback;
+        _guideLoading = false;
+      });
+      await _showGuideFeedback();
+    } catch (_) {
+      if (!mounted) return;
+      _clearAgentStatus();
+      _showAgentMessage('PhoenixGuideAgent 暂时没有回应，请再试一次。');
+    } finally {
+      if (mounted && _guideLoading) {
+        setState(() => _guideLoading = false);
+      }
+    }
   }
 
   Future<void> _reviewWriting() async {
     if (_writingLoading) return;
+    final writing = expressController.text.trim();
+    if (writing.length < 2) {
+      _showAgentMessage('请先写下至少两个字。');
+      return;
+    }
 
     setState(() => _writingLoading = true);
-    final feedback = await _ai.reviewWriting(
-      text: expressController.text,
-      language: _appState.translationLanguage,
+    await _prepareAgentAction(
+      expressFocusNode,
+      'PhoenixWritingAgent 正在批改…',
     );
     if (!mounted) return;
 
-    setState(() {
-      _writingFeedback = feedback;
-      _writingLoading = false;
-    });
-    await _showWritingFeedback();
+    try {
+      final feedback = await _ai.reviewWriting(
+        text: writing,
+        language: _appState.translationLanguage,
+      );
+      if (!mounted) return;
+
+      _clearAgentStatus();
+      setState(() {
+        _writingFeedback = feedback;
+        _writingLoading = false;
+      });
+      await _showWritingFeedback();
+    } catch (_) {
+      if (!mounted) return;
+      _clearAgentStatus();
+      _showAgentMessage('PhoenixWritingAgent 暂时无法批改，请再试一次。');
+    } finally {
+      if (mounted && _writingLoading) {
+        setState(() => _writingLoading = false);
+      }
+    }
   }
 
   Future<void> _showGuideFeedback() async {
     final feedback = _guideFeedback;
     if (feedback == null || !mounted) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    if (!mounted) return;
     await showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       useSafeArea: true,
@@ -257,8 +359,12 @@ class _JourneyScreenState extends State<JourneyScreen>
   Future<void> _showWritingFeedback() async {
     final feedback = _writingFeedback;
     if (feedback == null || !mounted) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    if (!mounted) return;
     await showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       useSafeArea: true,
