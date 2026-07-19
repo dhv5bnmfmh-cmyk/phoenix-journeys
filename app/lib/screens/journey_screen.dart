@@ -12,6 +12,7 @@ import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/forbidden_city_stamp.dart';
 import '../widgets/interactive_story_text.dart';
+import '../widgets/journey_share_button.dart';
 import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
 import '../widgets/phoenix_agent_cards.dart';
@@ -1039,17 +1040,34 @@ class _JourneyScreenState extends State<JourneyScreen>
           ),
           const SizedBox(height: 6),
           SizedBox(
-            height: 34,
-            child: OutlinedButton.icon(
-              onPressed: () => unawaited(_restartJourney()),
-              style: OutlinedButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-              ),
-              icon: const Icon(Icons.replay_rounded, size: 16),
-              label: const Text(
-                '重新体验北京 Journey',
-                style: TextStyle(fontSize: 10.5),
-              ),
+            height: 36,
+            child: Row(
+              children: [
+                Expanded(
+                  child: JourneyShareButton(
+                    isTraditional: _appState.isTraditional,
+                    compact: true,
+                    label: _appState.displayText('分享旅程'),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => unawaited(_restartJourney()),
+                    style: OutlinedButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    icon: const Icon(Icons.replay_rounded, size: 16),
+                    label: const Text(
+                      '重新体验',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 10.5),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
