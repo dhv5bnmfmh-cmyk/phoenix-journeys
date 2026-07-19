@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/journey_data.dart';
@@ -202,45 +203,144 @@ class _JourneyScreenState extends State<JourneyScreen>
     await _narration.resumeFromOffset(resumeOffset);
   }
 
+  Future<void> _prepareAgentAction(
+    FocusNode focusNode,
+    String message,
+  ) async {
+    focusNode.unfocus();
+    await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    if (!mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(child: Text(message)),
+            ],
+          ),
+          duration: const Duration(seconds: 20),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+    await Future<void>.delayed(const Duration(milliseconds: 180));
+  }
+
+  void _clearAgentStatus() {
+    if (mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
+
+  void _showAgentMessage(String message) {
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+  }
+
   Future<void> _askGuide() async {
     if (_guideLoading) return;
+    final answer = wonderController.text.trim();
+    if (answer.length < 2) {
+      _showAgentMessage('请先写下一点想法。');
+      return;
+    }
 
     setState(() => _guideLoading = true);
-    final feedback = await _ai.askGuide(
-      text: wonderController.text,
-      language: _appState.translationLanguage,
+    await _prepareAgentAction(
+      wonderFocusNode,
+      'PhoenixGuideAgent 正在思考…',
     );
     if (!mounted) return;
 
-    setState(() {
-      _guideFeedback = feedback;
-      _guideLoading = false;
-    });
-    await _showGuideFeedback();
+    try {
+      final feedback = await _ai.askGuide(
+        text: answer,
+        language: _appState.translationLanguage,
+      );
+      if (!mounted) return;
+
+      _clearAgentStatus();
+      setState(() {
+        _guideFeedback = feedback;
+        _guideLoading = false;
+      });
+      await _showGuideFeedback();
+    } catch (_) {
+      if (!mounted) return;
+      _clearAgentStatus();
+      _showAgentMessage('PhoenixGuideAgent 暂时没有回应，请再试一次。');
+    } finally {
+      if (mounted && _guideLoading) {
+        setState(() => _guideLoading = false);
+      }
+    }
   }
 
   Future<void> _reviewWriting() async {
     if (_writingLoading) return;
+    final writing = expressController.text.trim();
+    if (writing.length < 2) {
+      _showAgentMessage('请先写下至少两个字。');
+      return;
+    }
 
     setState(() => _writingLoading = true);
-    final feedback = await _ai.reviewWriting(
-      text: expressController.text,
-      language: _appState.translationLanguage,
+    await _prepareAgentAction(
+      expressFocusNode,
+      'PhoenixWritingAgent 正在批改…',
     );
     if (!mounted) return;
 
-    setState(() {
-      _writingFeedback = feedback;
-      _writingLoading = false;
-    });
-    await _showWritingFeedback();
+    try {
+      final feedback = await _ai.reviewWriting(
+        text: writing,
+        language: _appState.translationLanguage,
+      );
+      if (!mounted) return;
+
+      _clearAgentStatus();
+      setState(() {
+        _writingFeedback = feedback;
+        _writingLoading = false;
+      });
+      await _showWritingFeedback();
+    } catch (_) {
+      if (!mounted) return;
+      _clearAgentStatus();
+      _showAgentMessage('PhoenixWritingAgent 暂时无法批改，请再试一次。');
+    } finally {
+      if (mounted && _writingLoading) {
+        setState(() => _writingLoading = false);
+      }
+    }
   }
 
   Future<void> _showGuideFeedback() async {
     final feedback = _guideFeedback;
     if (feedback == null || !mounted) return;
+    await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    if (!mounted) return;
     await showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       useSafeArea: true,
@@ -257,8 +357,11 @@ class _JourneyScreenState extends State<JourneyScreen>
   Future<void> _showWritingFeedback() async {
     final feedback = _writingFeedback;
     if (feedback == null || !mounted) return;
+    await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    if (!mounted) return;
     await showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       useSafeArea: true,
@@ -390,6 +493,8 @@ class _JourneyScreenState extends State<JourneyScreen>
     bool showBack = true,
     bool keyboardAdaptive = false,
     FocusNode? keyboardFocusNode,
+    bool primaryLoading = false,
+    bool primaryEnabled = true,
   }) {
     final state = context.watch<AppState>();
 
@@ -505,14 +610,25 @@ class _JourneyScreenState extends State<JourneyScreen>
                       Expanded(
                         flex: 2,
                         child: FilledButton.icon(
-                          onPressed:
-                              onNext ?? () => unawaited(_goToStep(step + 1)),
+                          onPressed: primaryEnabled && !primaryLoading
+                              ? onNext ??
+                                  () => unawaited(_goToStep(step + 1))
+                              : null,
                           style: FilledButton.styleFrom(
                             backgroundColor: PhoenixTheme.red,
                             visualDensity: VisualDensity.compact,
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                           ),
-                          icon: Icon(buttonIcon, size: 17),
+                          icon: primaryLoading
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Icon(buttonIcon, size: 17),
                           label: Text(
                             buttonText,
                             maxLines: 1,
@@ -784,10 +900,18 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Widget _wonderPage() {
     final keyboardVisible = wonderFocusNode.hasFocus;
+    final hasFeedback = _guideFeedback != null;
     return _page(
       title: '思考',
       keyboardAdaptive: true,
       keyboardFocusNode: wonderFocusNode,
+      buttonText: hasFeedback
+          ? '继续'
+          : (_guideLoading ? 'AI 正在回应…' : '问 PhoenixGuideAgent'),
+      buttonIcon: hasFeedback ? Icons.arrow_forward : Icons.auto_awesome,
+      primaryLoading: _guideLoading,
+      primaryEnabled: !_guideLoading,
+      onNext: hasFeedback ? null : () => unawaited(_askGuide()),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -827,50 +951,6 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
           ),
-          SizedBox(height: keyboardVisible ? 3 : 6),
-          SizedBox(
-            height: keyboardVisible ? 34 : 38,
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    key: const ValueKey('ask-phoenix-guide-agent'),
-                    onPressed: _guideLoading
-                        ? null
-                        : () => unawaited(_askGuide()),
-                    style: OutlinedButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    icon: _guideLoading
-                        ? const SizedBox(
-                            width: 15,
-                            height: 15,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.auto_awesome, size: 16),
-                    label: Text(
-                      _guideLoading ? 'AI 正在回应…' : '问 PhoenixGuideAgent',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: keyboardVisible ? 9.5 : 10.5,
-                      ),
-                    ),
-                  ),
-                ),
-                if (_guideFeedback != null) ...[
-                  const SizedBox(width: 6),
-                  IconButton.filledTonal(
-                    tooltip: '查看 AI 回应',
-                    onPressed: () => unawaited(_showGuideFeedback()),
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.forum_rounded, size: 17),
-                  ),
-                ],
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -878,10 +958,18 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Widget _expressPage() {
     final keyboardVisible = expressFocusNode.hasFocus;
+    final hasFeedback = _writingFeedback != null;
     return _page(
       title: '表达',
       keyboardAdaptive: true,
       keyboardFocusNode: expressFocusNode,
+      buttonText: hasFeedback
+          ? '继续'
+          : (_writingLoading ? 'AI 正在批改…' : '请 PhoenixWritingAgent 批改'),
+      buttonIcon: hasFeedback ? Icons.arrow_forward : Icons.spellcheck_rounded,
+      primaryLoading: _writingLoading,
+      primaryEnabled: !_writingLoading,
+      onNext: hasFeedback ? null : () => unawaited(_reviewWriting()),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -919,51 +1007,6 @@ class _JourneyScreenState extends State<JourneyScreen>
                 contentPadding: EdgeInsets.all(11),
                 border: OutlineInputBorder(),
               ),
-            ),
-          ),
-          SizedBox(height: keyboardVisible ? 3 : 6),
-          SizedBox(
-            height: keyboardVisible ? 34 : 38,
-            child: Row(
-              children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    key: const ValueKey('ask-phoenix-writing-agent'),
-                    onPressed: _writingLoading
-                        ? null
-                        : () => unawaited(_reviewWriting()),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: PhoenixTheme.red,
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    icon: _writingLoading
-                        ? const SizedBox(
-                            width: 15,
-                            height: 15,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.spellcheck_rounded, size: 16),
-                    label: Text(
-                      _writingLoading ? 'AI 正在批改…' : '请 PhoenixWritingAgent 批改',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: keyboardVisible ? 9.5 : 10.5,
-                      ),
-                    ),
-                  ),
-                ),
-                if (_writingFeedback != null) ...[
-                  const SizedBox(width: 6),
-                  IconButton.filledTonal(
-                    tooltip: '查看批改结果',
-                    onPressed: () => unawaited(_showWritingFeedback()),
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.fact_check_rounded, size: 17),
-                  ),
-                ],
-              ],
             ),
           ),
         ],
