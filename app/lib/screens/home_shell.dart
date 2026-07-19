@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/journey_plan_sheet.dart';
 import 'explore_screen.dart';
 import 'me_screen.dart';
 import 'passport_screen.dart';
@@ -36,7 +37,13 @@ class HomeShell extends StatelessWidget {
                 children: [
                   NavigationRail(
                     selectedIndex: state.selectedTab,
-                    onDestinationSelected: state.setTab,
+                    onDestinationSelected: (value) {
+                      if (value == 3) {
+                        showJourneyPlanSheet(context);
+                        return;
+                      }
+                      state.setTab(value);
+                    },
                     labelType: NavigationRailLabelType.all,
                     leading: const Padding(
                       padding: EdgeInsets.only(top: 12, bottom: 20),
@@ -54,6 +61,10 @@ class HomeShell extends StatelessWidget {
                       NavigationRailDestination(
                         icon: Icon(Icons.person_outline),
                         label: Text('我的'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.event_note_outlined),
+                        label: Text('计划'),
                       ),
                     ],
                   ),
@@ -126,6 +137,14 @@ class _CompactBottomNavigation extends StatelessWidget {
                 onTap: () => state.setTab(1),
               ),
               _CompactNavItem(
+                icon: Icons.event_note_outlined,
+                label: state.displayText(
+                  state.hasJourneyPlan ? state.journeyPlanDateLabel : '计划',
+                ),
+                selected: false,
+                onTap: () => showJourneyPlanSheet(context),
+              ),
+              _CompactNavItem(
                 icon: Icons.person_outline_rounded,
                 label: state.displayText('我的'),
                 selected: state.selectedTab == 2,
@@ -181,6 +200,8 @@ class _CompactNavItem extends StatelessWidget {
               ),
               Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: color,
                   fontSize: 9.5,
