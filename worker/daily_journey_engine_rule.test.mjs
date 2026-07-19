@@ -8,7 +8,7 @@ const journey = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
 const explore = readFileSync('app/lib/screens/explore_screen.dart', 'utf8');
 
 test('daily catalog contains three reviewed city journeys', () => {
-  assert.match(catalog, /beijing-forbidden-city/);
+  assert.match(catalog, /beijingForbiddenCityJourney/);
   assert.match(catalog, /shanghai-bund/);
   assert.match(catalog, /xian-city-wall/);
   assert.match(catalog, /dailyJourneyForDate/);
