@@ -30,6 +30,9 @@ class _JourneyScreenState extends State<JourneyScreen>
   final wonderController = TextEditingController();
   final expressController = TextEditingController();
   final memoryController = TextEditingController();
+  final wonderFocusNode = FocusNode(debugLabel: 'wonder-writing');
+  final expressFocusNode = FocusNode(debugLabel: 'express-writing');
+  final memoryFocusNode = FocusNode(debugLabel: 'memory-writing');
   late final NarrationController _narration;
   late final JourneyContentRecord _journeyContent;
   late final PhoenixAiService _ai;
@@ -52,6 +55,13 @@ class _JourneyScreenState extends State<JourneyScreen>
       'beijing-forbidden-city',
     );
     _ai = PhoenixAiService();
+    wonderFocusNode.addListener(_handleWritingFocusChanged);
+    expressFocusNode.addListener(_handleWritingFocusChanged);
+    memoryFocusNode.addListener(_handleWritingFocusChanged);
+  }
+
+  void _handleWritingFocusChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -85,6 +95,12 @@ class _JourneyScreenState extends State<JourneyScreen>
     wonderController.dispose();
     expressController.dispose();
     memoryController.dispose();
+    wonderFocusNode.removeListener(_handleWritingFocusChanged);
+    expressFocusNode.removeListener(_handleWritingFocusChanged);
+    memoryFocusNode.removeListener(_handleWritingFocusChanged);
+    wonderFocusNode.dispose();
+    expressFocusNode.dispose();
+    memoryFocusNode.dispose();
     super.dispose();
   }
 
@@ -764,7 +780,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _wonderPage() {
-    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final keyboardVisible = wonderFocusNode.hasFocus;
     return _page(
       title: '思考',
       keyboardAdaptive: true,
@@ -793,12 +809,12 @@ class _JourneyScreenState extends State<JourneyScreen>
             child: TextField(
               key: const ValueKey('wonder-writing-field'),
               controller: wonderController,
+              focusNode: wonderFocusNode,
               expands: true,
               maxLines: null,
               minLines: null,
               textAlignVertical: TextAlignVertical.top,
               scrollPadding: const EdgeInsets.only(bottom: 24),
-              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
               onChanged: _onWonderChanged,
               decoration: const InputDecoration(
                 hintText: '写下你的想法……',
@@ -851,7 +867,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _expressPage() {
-    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final keyboardVisible = expressFocusNode.hasFocus;
     return _page(
       title: '表达',
       keyboardAdaptive: true,
@@ -880,12 +896,12 @@ class _JourneyScreenState extends State<JourneyScreen>
             child: TextField(
               key: const ValueKey('express-writing-field'),
               controller: expressController,
+              focusNode: expressFocusNode,
               expands: true,
               maxLines: null,
               minLines: null,
               textAlignVertical: TextAlignVertical.top,
               scrollPadding: const EdgeInsets.only(bottom: 24),
-              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
               onChanged: _onExpressChanged,
               decoration: const InputDecoration(
                 hintText: '用中文写下你的表达……',
@@ -939,7 +955,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _memoryPage() {
-    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final keyboardVisible = memoryFocusNode.hasFocus;
     return _page(
       title: '旅程回忆',
       keyboardAdaptive: true,
@@ -963,12 +979,12 @@ class _JourneyScreenState extends State<JourneyScreen>
             child: TextField(
               key: const ValueKey('memory-writing-field'),
               controller: memoryController,
+              focusNode: memoryFocusNode,
               expands: true,
               maxLines: null,
               minLines: null,
               textAlignVertical: TextAlignVertical.top,
               scrollPadding: const EdgeInsets.only(bottom: 24),
-              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
               onChanged: (_) => unawaited(_persistProgress()),
               decoration: const InputDecoration(
                 hintText: '写下感受，未来回来比较自己的变化。',
