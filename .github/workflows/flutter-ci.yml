@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
@@ -26,6 +26,30 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Apply keyboard-safe AI actions
+        if: ${{ github.event_name == 'pull_request' && github.head_ref == 'feature/share-journey-passport' }}
+        working-directory: ${{ github.workspace }}
+        run: python tools/apply_keyboard_ai_actions_patch.py
+
+      - name: Commit keyboard-safe AI actions
+        if: ${{ github.event_name == 'pull_request' && github.head_ref == 'feature/share-journey-passport' }}
+        working-directory: ${{ github.workspace }}
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart \
+                  worker/keyboard_safe_writing_pages_rule.test.mjs
+          if git diff --cached --quiet; then
+            echo "Keyboard-safe AI actions already applied."
+          else
+            git commit -m "fix: keep writing AI actions above the iPhone keyboard"
+            git push origin HEAD:feature/share-journey-passport
+          fi
 
       - name: Test Phoenix agents
         id: agents
