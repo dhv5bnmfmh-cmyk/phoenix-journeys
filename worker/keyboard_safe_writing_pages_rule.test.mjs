@@ -67,23 +67,22 @@ test('writing page shell follows the persistent FocusNode on iPhone Safari', () 
   assert.match(screen, /keyboardFocusNode: memoryFocusNode/);
 });
 
-test('Think and Express AI actions remain above the keyboard', () => {
+test('Think and Express Agent actions use the bottom primary button', () => {
+  const pageStart = screen.indexOf('Widget _page');
+  const storyStart = screen.indexOf('Widget _storyPage', pageStart);
+  const page = screen.slice(pageStart, storyStart);
   const wonderStart = screen.indexOf('Widget _wonderPage');
   const expressStart = screen.indexOf('Widget _expressPage');
   const memoryStart = screen.indexOf('Widget _memoryPage');
   const wonder = screen.slice(wonderStart, expressStart);
   const express = screen.slice(expressStart, memoryStart);
-  const wonderAction = wonder.slice(
-    wonder.lastIndexOf('SizedBox(height: keyboardVisible ? 3 : 6)'),
-  );
-  const expressAction = express.slice(
-    express.lastIndexOf('SizedBox(height: keyboardVisible ? 3 : 6)'),
-  );
 
-  assert.match(wonderAction, /height: keyboardVisible \? 34 : 38/);
-  assert.match(wonderAction, /ask-phoenix-guide-agent/);
-  assert.doesNotMatch(wonderAction, /if \(!keyboardVisible\)/);
-  assert.match(expressAction, /height: keyboardVisible \? 34 : 38/);
-  assert.match(expressAction, /ask-phoenix-writing-agent/);
-  assert.doesNotMatch(expressAction, /if \(!keyboardVisible\)/);
+  assert.match(page, /FilledButton\.icon/);
+  assert.match(page, /if \(!keyboardVisible\)/);
+  assert.match(wonder, /问 PhoenixGuideAgent/);
+  assert.match(wonder, /onNext: hasFeedback/);
+  assert.match(express, /请 PhoenixWritingAgent 批改/);
+  assert.match(express, /onNext: hasFeedback/);
+  assert.doesNotMatch(wonder, /ask-phoenix-guide-agent/);
+  assert.doesNotMatch(express, /ask-phoenix-writing-agent/);
 });
