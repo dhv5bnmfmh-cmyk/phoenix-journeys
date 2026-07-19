@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
@@ -26,6 +26,30 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Apply Agent primary action
+        if: ${{ github.ref_name == 'feature/agent-primary-actions' && !contains(github.event.head_commit.message, '[agent-primary-applied]') }}
+        working-directory: ${{ github.workspace }}
+        run: python tools/apply_agent_primary_actions.py
+
+      - name: Commit Agent primary action
+        if: ${{ github.ref_name == 'feature/agent-primary-actions' && !contains(github.event.head_commit.message, '[agent-primary-applied]') }}
+        working-directory: ${{ github.workspace }}
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart \
+                  worker/agent_primary_action_rule.test.mjs
+          if git diff --cached --quiet; then
+            echo "Agent primary action already applied."
+          else
+            git commit -m "feat: unify Agent and Continue actions [agent-primary-applied]"
+            git push origin HEAD:feature/agent-primary-actions
+          fi
 
       - name: Test Phoenix agents
         id: agents
