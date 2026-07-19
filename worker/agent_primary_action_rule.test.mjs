@@ -12,10 +12,16 @@ test('Think and Express use the bottom primary action area', () => {
 });
 
 test('Agent buttons become Continue only after feedback exists', () => {
-  const matches = screen.match(/hasFeedback \? '继续'/g) ?? [];
+  const matches = screen.match(/hasFeedback\s*\?\s*'继续'/g) ?? [];
   assert.equal(matches.length, 2);
-  assert.match(screen, /onNext: hasFeedback \? null : \(\) => unawaited\(_askGuide\(\)\)/);
-  assert.match(screen, /onNext: hasFeedback \? null : \(\) => unawaited\(_reviewWriting\(\)\)/);
+  assert.match(
+    screen,
+    /onNext: hasFeedback\s*\?\s*null\s*:\s*\(\) => unawaited\(_askGuide\(\)\)/,
+  );
+  assert.match(
+    screen,
+    /onNext: hasFeedback\s*\?\s*null\s*:\s*\(\) => unawaited\(_reviewWriting\(\)\)/,
+  );
 });
 
 test('primary action shows loading and cannot accidentally continue', () => {
