@@ -55,7 +55,6 @@ test('all three writing fields have stable test keys', () => {
   assert.match(screen, /memory-writing-field/);
 });
 
-
 test('writing page shell follows the persistent FocusNode on iPhone Safari', () => {
   const start = screen.indexOf('Widget _page');
   const end = screen.indexOf('Widget _storyPage', start);
@@ -74,11 +73,17 @@ test('Think and Express AI actions remain above the keyboard', () => {
   const memoryStart = screen.indexOf('Widget _memoryPage');
   const wonder = screen.slice(wonderStart, expressStart);
   const express = screen.slice(expressStart, memoryStart);
+  const wonderAction = wonder.slice(
+    wonder.lastIndexOf('SizedBox(height: keyboardVisible ? 3 : 6)'),
+  );
+  const expressAction = express.slice(
+    express.lastIndexOf('SizedBox(height: keyboardVisible ? 3 : 6)'),
+  );
 
-  assert.match(wonder, /height: keyboardVisible \? 34 : 38/);
-  assert.match(wonder, /ask-phoenix-guide-agent/);
-  assert.doesNotMatch(wonder, /if \(!keyboardVisible\)[\s\S]*ask-phoenix-guide-agent/);
-  assert.match(express, /height: keyboardVisible \? 34 : 38/);
-  assert.match(express, /ask-phoenix-writing-agent/);
-  assert.doesNotMatch(express, /if \(!keyboardVisible\)[\s\S]*ask-phoenix-writing-agent/);
+  assert.match(wonderAction, /height: keyboardVisible \? 34 : 38/);
+  assert.match(wonderAction, /ask-phoenix-guide-agent/);
+  assert.doesNotMatch(wonderAction, /if \(!keyboardVisible\)/);
+  assert.match(expressAction, /height: keyboardVisible \? 34 : 38/);
+  assert.match(expressAction, /ask-phoenix-writing-agent/);
+  assert.doesNotMatch(expressAction, /if \(!keyboardVisible\)/);
 });
