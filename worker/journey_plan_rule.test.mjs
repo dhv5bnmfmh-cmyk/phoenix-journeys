@@ -10,7 +10,7 @@ test('journey plans persist in AppState', () => {
   assert.match(state, /String journeyOrigin = '河内'/);
   assert.match(state, /DateTime\? plannedJourneyDate/);
   assert.match(state, /Future<void> saveJourneyPlan/);
-  assert.match(state, /prefs\.setString\('plannedJourneyDate'/);
+  assert.match(state, /prefs\.setString\(\s*'plannedJourneyDate'/);
 });
 
 test('mobile and wide navigation open the planner', () => {
