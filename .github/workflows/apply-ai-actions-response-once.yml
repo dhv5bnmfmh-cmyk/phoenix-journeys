@@ -1,0 +1,36 @@
+name: Apply AI action response once
+
+on:
+  push:
+    branches:
+      - fix/ai-actions-response
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/ai-actions-response
+          fetch-depth: 0
+
+      - name: Apply AI action response patch
+        run: python tools/apply_ai_actions_response_patch.py
+
+      - name: Commit production changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart \
+                  worker/ai_action_response_rule.test.mjs
+          if git diff --cached --quiet; then
+            echo "AI action response patch already applied."
+            exit 0
+          fi
+          git commit -m "fix: show AI feedback from Think and Express"
+          git push origin HEAD:fix/ai-actions-response
