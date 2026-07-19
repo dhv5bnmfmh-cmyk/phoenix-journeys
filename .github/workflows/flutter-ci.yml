@@ -33,7 +33,13 @@ jobs:
       - name: Apply daily journey engine
         if: ${{ github.ref_name == 'feature/daily-journey-engine' || github.head_ref == 'feature/daily-journey-engine' }}
         working-directory: ${{ github.workspace }}
-        run: python tools/apply_daily_journey_engine.py
+        shell: bash
+        run: |
+          if grep -q "state.activeJourney.headline" app/lib/screens/explore_screen.dart; then
+            echo "Daily journey engine already applied."
+          else
+            python tools/apply_daily_journey_engine.py
+          fi
 
       - name: Commit daily journey engine
         if: ${{ github.ref_name == 'feature/daily-journey-engine' || github.head_ref == 'feature/daily-journey-engine' }}
