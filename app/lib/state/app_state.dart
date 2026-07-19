@@ -35,6 +35,10 @@ class AppState extends ChangeNotifier {
   String memoryDraft = '';
   DateTime? journeyUpdatedAt;
 
+  String journeyOrigin = '河内';
+  DateTime? plannedJourneyDate;
+  String journeyLearningFocus = '文化';
+
   AppLoadStatus loadStatus = AppLoadStatus.loading;
   String? loadErrorMessage;
 
@@ -64,6 +68,26 @@ class AppState extends ChangeNotifier {
   String get beijingJourneyFurthestStepLabel => displayText(
         beijingJourneyStepLabels[_safeJourneyStep(beijingJourneyFurthestStep)],
       );
+
+  bool get hasJourneyPlan => plannedJourneyDate != null;
+
+  String get journeyPlanDateLabel {
+    final date = plannedJourneyDate;
+    if (date == null) return '计划';
+    return '${date.month}月${date.day}日';
+  }
+
+  String get journeyPlanCountdownLabel {
+    final date = plannedJourneyDate;
+    if (date == null) return '计划旅程';
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(date.year, date.month, date.day);
+    final days = target.difference(today).inDays;
+    if (days < 0) return '计划日期已过';
+    if (days == 0) return '今天出发';
+    return '还有 $days 天';
+  }
 
   bool isWordSaved(String word) => savedWords.contains(word);
 
@@ -106,6 +130,16 @@ class AppState extends ChangeNotifier {
       journeyUpdatedAt = DateTime.tryParse(
         prefs.getString('journeyUpdatedAt') ?? '',
       );
+
+      final storedOrigin = prefs.getString('journeyOrigin')?.trim();
+      journeyOrigin = storedOrigin == null || storedOrigin.isEmpty
+          ? '河内'
+          : storedOrigin;
+      plannedJourneyDate = DateTime.tryParse(
+        prefs.getString('plannedJourneyDate') ?? '',
+      );
+      journeyLearningFocus =
+          prefs.getString('journeyLearningFocus') ?? '文化';
 
       if (journeyCompleted) {
         beijingJourneyStep = beijingJourneyLastStep;
@@ -193,6 +227,30 @@ class AppState extends ChangeNotifier {
       prefs.setString('expressDraft', expressDraft),
       prefs.setString('memoryDraft', memoryDraft),
       prefs.setString('journeyUpdatedAt', journeyUpdatedAt!.toIso8601String()),
+    ]);
+  }
+
+  Future<void> saveJourneyPlan({
+    required String origin,
+    required DateTime date,
+    required String focus,
+  }) async {
+    final normalizedOrigin = origin.trim();
+    if (normalizedOrigin.isEmpty) return;
+
+    journeyOrigin = normalizedOrigin;
+    plannedJourneyDate = DateTime(date.year, date.month, date.day);
+    journeyLearningFocus = focus;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.setString('journeyOrigin', journeyOrigin),
+      prefs.setString(
+        'plannedJourneyDate',
+        plannedJourneyDate!.toIso8601String(),
+      ),
+      prefs.setString('journeyLearningFocus', journeyLearningFocus),
     ]);
   }
 
