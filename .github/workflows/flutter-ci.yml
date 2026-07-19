@@ -31,12 +31,12 @@ jobs:
           fetch-depth: 0
 
       - name: Apply Agent primary action
-        if: ${{ github.ref_name == 'feature/agent-primary-actions' && !contains(github.event.head_commit.message, '[agent-primary-applied]') }}
+        if: ${{ github.ref_name == 'feature/agent-primary-actions' || github.head_ref == 'feature/agent-primary-actions' }}
         working-directory: ${{ github.workspace }}
-        run: python tools/apply_agent_primary_actions.py
+        run: python tools/run_agent_primary_patch.py
 
       - name: Commit Agent primary action
-        if: ${{ github.ref_name == 'feature/agent-primary-actions' && !contains(github.event.head_commit.message, '[agent-primary-applied]') }}
+        if: ${{ github.ref_name == 'feature/agent-primary-actions' || github.head_ref == 'feature/agent-primary-actions' }}
         working-directory: ${{ github.workspace }}
         shell: bash
         run: |
