@@ -12,6 +12,7 @@ import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/forbidden_city_stamp.dart';
 import '../widgets/interactive_story_text.dart';
+import '../widgets/journey_share_button.dart';
 import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
 import '../widgets/phoenix_agent_cards.dart';
@@ -388,14 +389,16 @@ class _JourneyScreenState extends State<JourneyScreen>
     VoidCallback? onNext,
     bool showBack = true,
     bool keyboardAdaptive = false,
+    FocusNode? keyboardFocusNode,
   }) {
     final state = context.watch<AppState>();
 
     return LayoutBuilder(
       key: ValueKey(title),
       builder: (context, constraints) {
-        final keyboardVisible =
-            keyboardAdaptive && MediaQuery.viewInsetsOf(context).bottom > 0;
+        final keyboardVisible = keyboardAdaptive &&
+            (keyboardFocusNode?.hasFocus ??
+                MediaQuery.viewInsetsOf(context).bottom > 0);
         final compact = constraints.maxHeight < 590 || keyboardVisible;
         return Padding(
           padding: EdgeInsets.fromLTRB(
@@ -784,6 +787,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return _page(
       title: '思考',
       keyboardAdaptive: true,
+      keyboardFocusNode: wonderFocusNode,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -823,9 +827,10 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
           ),
-          if (!keyboardVisible) ...[
-            const SizedBox(height: 6),
-            Row(
+          SizedBox(height: keyboardVisible ? 3 : 6),
+          SizedBox(
+            height: keyboardVisible ? 34 : 38,
+            child: Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
@@ -835,17 +840,22 @@ class _JourneyScreenState extends State<JourneyScreen>
                         : () => unawaited(_askGuide()),
                     style: OutlinedButton.styleFrom(
                       visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                     icon: _guideLoading
                         ? const SizedBox(
-                            width: 16,
-                            height: 16,
+                            width: 15,
+                            height: 15,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.auto_awesome, size: 17),
+                        : const Icon(Icons.auto_awesome, size: 16),
                     label: Text(
                       _guideLoading ? 'AI 正在回应…' : '问 PhoenixGuideAgent',
-                      style: const TextStyle(fontSize: 10.5),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: keyboardVisible ? 9.5 : 10.5,
+                      ),
                     ),
                   ),
                 ),
@@ -855,12 +865,12 @@ class _JourneyScreenState extends State<JourneyScreen>
                     tooltip: '查看 AI 回应',
                     onPressed: () => unawaited(_showGuideFeedback()),
                     visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.forum_rounded, size: 18),
+                    icon: const Icon(Icons.forum_rounded, size: 17),
                   ),
                 ],
               ],
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -871,6 +881,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return _page(
       title: '表达',
       keyboardAdaptive: true,
+      keyboardFocusNode: expressFocusNode,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -910,9 +921,10 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
           ),
-          if (!keyboardVisible) ...[
-            const SizedBox(height: 6),
-            Row(
+          SizedBox(height: keyboardVisible ? 3 : 6),
+          SizedBox(
+            height: keyboardVisible ? 34 : 38,
+            child: Row(
               children: [
                 Expanded(
                   child: FilledButton.icon(
@@ -923,17 +935,22 @@ class _JourneyScreenState extends State<JourneyScreen>
                     style: FilledButton.styleFrom(
                       backgroundColor: PhoenixTheme.red,
                       visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                     icon: _writingLoading
                         ? const SizedBox(
-                            width: 16,
-                            height: 16,
+                            width: 15,
+                            height: 15,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.spellcheck_rounded, size: 17),
+                        : const Icon(Icons.spellcheck_rounded, size: 16),
                     label: Text(
                       _writingLoading ? 'AI 正在批改…' : '请 PhoenixWritingAgent 批改',
-                      style: const TextStyle(fontSize: 10.5),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: keyboardVisible ? 9.5 : 10.5,
+                      ),
                     ),
                   ),
                 ),
@@ -943,12 +960,12 @@ class _JourneyScreenState extends State<JourneyScreen>
                     tooltip: '查看批改结果',
                     onPressed: () => unawaited(_showWritingFeedback()),
                     visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.fact_check_rounded, size: 18),
+                    icon: const Icon(Icons.fact_check_rounded, size: 17),
                   ),
                 ],
               ],
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -959,6 +976,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return _page(
       title: '旅程回忆',
       keyboardAdaptive: true,
+      keyboardFocusNode: memoryFocusNode,
       buttonText: '结束旅程',
       buttonIcon: Icons.flag_rounded,
       onNext: () => unawaited(_finishJourney()),
@@ -1039,17 +1057,34 @@ class _JourneyScreenState extends State<JourneyScreen>
           ),
           const SizedBox(height: 6),
           SizedBox(
-            height: 34,
-            child: OutlinedButton.icon(
-              onPressed: () => unawaited(_restartJourney()),
-              style: OutlinedButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-              ),
-              icon: const Icon(Icons.replay_rounded, size: 16),
-              label: const Text(
-                '重新体验北京 Journey',
-                style: TextStyle(fontSize: 10.5),
-              ),
+            height: 36,
+            child: Row(
+              children: [
+                Expanded(
+                  child: JourneyShareButton(
+                    isTraditional: _appState.isTraditional,
+                    compact: true,
+                    label: _appState.displayText('分享旅程'),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => unawaited(_restartJourney()),
+                    style: OutlinedButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    icon: const Icon(Icons.replay_rounded, size: 16),
+                    label: const Text(
+                      '重新体验',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 10.5),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

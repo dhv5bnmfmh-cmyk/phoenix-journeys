@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/forbidden_city_stamp.dart';
+import '../widgets/journey_share_button.dart';
 import 'journey_screen.dart';
 
 class PassportScreen extends StatelessWidget {
@@ -378,6 +379,18 @@ class _BeijingStampCard extends StatelessWidget {
                     height: 1.25,
                   ),
                 ),
+                if (earned) ...[
+                  const Spacer(),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 36,
+                    child: JourneyShareButton(
+                      isTraditional: state.isTraditional,
+                      compact: true,
+                      label: state.displayText('分享北京印章'),
+                    ),
+                  ),
+                ],
                 if (!earned) ...[
                   const Spacer(),
                   SizedBox(
