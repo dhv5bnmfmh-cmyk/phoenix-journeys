@@ -1,0 +1,34 @@
+name: Apply daily journey engine once
+
+on:
+  push:
+    branches:
+      - feature/daily-journey-engine
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ github.event.head_commit.message == 'chore: trigger daily journey patch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/daily-journey-engine
+          fetch-depth: 0
+
+      - name: Apply daily journey engine
+        run: python tools/apply_daily_journey_engine.py
+
+      - name: Commit production changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart \
+                  app/lib/screens/explore_screen.dart \
+                  worker/daily_journey_engine_rule.test.mjs
+          git commit -m "feat: connect the daily journey engine [daily-engine-applied]"
+          git push origin HEAD:feature/daily-journey-engine
