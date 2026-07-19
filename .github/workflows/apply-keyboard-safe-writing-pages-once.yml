@@ -1,0 +1,33 @@
+name: Apply keyboard-safe writing pages once
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ github.event.head_commit.message == 'chore: run keyboard-safe writing patch from main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out target branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/keyboard-safe-writing-pages
+          fetch-depth: 0
+
+      - name: Apply keyboard-safe layout
+        run: python tools/apply_keyboard_safe_writing_pages.py
+
+      - name: Commit production changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart \
+                  worker/keyboard_safe_writing_pages_rule.test.mjs
+          git commit -m "fix: keep writing visible above the iPhone keyboard [keyboard-safe]"
+          git push origin HEAD:fix/keyboard-safe-writing-pages
