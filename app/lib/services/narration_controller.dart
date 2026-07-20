@@ -877,7 +877,8 @@ class NarrationController extends ChangeNotifier {
           now.difference(anchor).inMilliseconds.toDouble() / 1000;
       // Conservative fallback pace: native word callbacks remain exact;
       // this clock is only used when a browser supplies no usable word events.
-      final charsPerSecond = 3.35 * _speechRate;
+      final charsPerSecond =
+          _nativeCharsPerSecond(_narrationLanguageCode) * _speechRate;
       final estimated =
           _estimateAnchorOffset + (elapsedSeconds * charsPerSecond).floor();
       if (estimated >= _plan.text.length) {
