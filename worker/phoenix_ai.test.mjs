@@ -20,7 +20,7 @@ test('guide prompt isolates learner text and identifies its dedicated agent', ()
     journeyId: 'beijing-forbidden-city',
   });
 
-  assert.equal(MODEL, 'gpt-5.2');
+  assert.equal(MODEL, 'gpt-5.6');
   assert.equal(GUIDE_FALLBACK_MODEL, '@cf/zai-org/glm-4.7-flash');
   assert.equal(messages.length, 3);
   assert.match(messages[0].content, /PhoenixGuideAgent/);
