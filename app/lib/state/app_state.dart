@@ -46,6 +46,13 @@ class AppState extends ChangeNotifier {
   String wonderDraft = '';
   String expressDraft = '';
   String memoryDraft = '';
+  String guideFeedbackReply = '';
+  bool guideFeedbackOffline = false;
+  String writingFeedbackCorrected = '';
+  String writingFeedbackExplanation = '';
+  String writingFeedbackNatural = '';
+  String writingFeedbackEncouragement = '';
+  bool writingFeedbackOffline = false;
   DateTime? journeyUpdatedAt;
 
   AppLoadStatus loadStatus = AppLoadStatus.loading;
@@ -90,6 +97,13 @@ class AppState extends ChangeNotifier {
       displayText(journeyStepLabels[_safeJourneyStep(_journeyFurthestStep)]);
   String get beijingJourneyStepLabel => journeyStepLabel;
   String get beijingJourneyFurthestStepLabel => journeyFurthestStepLabel;
+
+  bool get hasGuideFeedback => guideFeedbackReply.trim().isNotEmpty;
+  bool get hasWritingFeedback =>
+      writingFeedbackCorrected.trim().isNotEmpty ||
+      writingFeedbackExplanation.trim().isNotEmpty ||
+      writingFeedbackNatural.trim().isNotEmpty ||
+      writingFeedbackEncouragement.trim().isNotEmpty;
 
   bool isWordSaved(String word) => savedWords.contains(word);
   bool isJourneyStampEarned(String journeyId) =>
@@ -169,6 +183,19 @@ class AppState extends ChangeNotifier {
     memoryDraft = prefs.getString(_key('memoryDraft')) ??
         (isLegacyBeijing ? prefs.getString('memoryDraft') : null) ??
         '';
+    guideFeedbackReply = prefs.getString(_key('guideFeedbackReply')) ?? '';
+    guideFeedbackOffline =
+        prefs.getBool(_key('guideFeedbackOffline')) ?? false;
+    writingFeedbackCorrected =
+        prefs.getString(_key('writingFeedbackCorrected')) ?? '';
+    writingFeedbackExplanation =
+        prefs.getString(_key('writingFeedbackExplanation')) ?? '';
+    writingFeedbackNatural =
+        prefs.getString(_key('writingFeedbackNatural')) ?? '';
+    writingFeedbackEncouragement =
+        prefs.getString(_key('writingFeedbackEncouragement')) ?? '';
+    writingFeedbackOffline =
+        prefs.getBool(_key('writingFeedbackOffline')) ?? false;
     journeyUpdatedAt = DateTime.tryParse(
       prefs.getString(_key('updatedAt')) ??
           (isLegacyBeijing ? prefs.getString('journeyUpdatedAt') : null) ??
@@ -260,6 +287,89 @@ class AppState extends ChangeNotifier {
     ]);
   }
 
+  Future<void> saveGuideFeedback({
+    required String reply,
+    required bool isOfflineFallback,
+  }) async {
+    guideFeedbackReply = reply.trim();
+    guideFeedbackOffline = isOfflineFallback;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.setString(_key('guideFeedbackReply'), guideFeedbackReply),
+      prefs.setBool(_key('guideFeedbackOffline'), guideFeedbackOffline),
+    ]);
+  }
+
+  Future<void> clearGuideFeedback() async {
+    if (!hasGuideFeedback) return;
+    guideFeedbackReply = '';
+    guideFeedbackOffline = false;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.remove(_key('guideFeedbackReply')),
+      prefs.remove(_key('guideFeedbackOffline')),
+    ]);
+  }
+
+  Future<void> saveWritingFeedback({
+    required String corrected,
+    required String explanation,
+    required String natural,
+    required String encouragement,
+    required bool isOfflineFallback,
+  }) async {
+    writingFeedbackCorrected = corrected.trim();
+    writingFeedbackExplanation = explanation.trim();
+    writingFeedbackNatural = natural.trim();
+    writingFeedbackEncouragement = encouragement.trim();
+    writingFeedbackOffline = isOfflineFallback;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.setString(
+        _key('writingFeedbackCorrected'),
+        writingFeedbackCorrected,
+      ),
+      prefs.setString(
+        _key('writingFeedbackExplanation'),
+        writingFeedbackExplanation,
+      ),
+      prefs.setString(
+        _key('writingFeedbackNatural'),
+        writingFeedbackNatural,
+      ),
+      prefs.setString(
+        _key('writingFeedbackEncouragement'),
+        writingFeedbackEncouragement,
+      ),
+      prefs.setBool(_key('writingFeedbackOffline'), writingFeedbackOffline),
+    ]);
+  }
+
+  Future<void> clearWritingFeedback() async {
+    if (!hasWritingFeedback) return;
+    writingFeedbackCorrected = '';
+    writingFeedbackExplanation = '';
+    writingFeedbackNatural = '';
+    writingFeedbackEncouragement = '';
+    writingFeedbackOffline = false;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.remove(_key('writingFeedbackCorrected')),
+      prefs.remove(_key('writingFeedbackExplanation')),
+      prefs.remove(_key('writingFeedbackNatural')),
+      prefs.remove(_key('writingFeedbackEncouragement')),
+      prefs.remove(_key('writingFeedbackOffline')),
+    ]);
+  }
+
   Future<void> restartJourney() async {
     journeyCompleted = false;
     _journeyStep = 0;
@@ -267,6 +377,13 @@ class AppState extends ChangeNotifier {
     wonderDraft = '';
     expressDraft = '';
     memoryDraft = '';
+    guideFeedbackReply = '';
+    guideFeedbackOffline = false;
+    writingFeedbackCorrected = '';
+    writingFeedbackExplanation = '';
+    writingFeedbackNatural = '';
+    writingFeedbackEncouragement = '';
+    writingFeedbackOffline = false;
     journeyUpdatedAt = _clock();
     notifyListeners();
 
@@ -278,6 +395,13 @@ class AppState extends ChangeNotifier {
       prefs.remove(_key('wonderDraft')),
       prefs.remove(_key('expressDraft')),
       prefs.remove(_key('memoryDraft')),
+      prefs.remove(_key('guideFeedbackReply')),
+      prefs.remove(_key('guideFeedbackOffline')),
+      prefs.remove(_key('writingFeedbackCorrected')),
+      prefs.remove(_key('writingFeedbackExplanation')),
+      prefs.remove(_key('writingFeedbackNatural')),
+      prefs.remove(_key('writingFeedbackEncouragement')),
+      prefs.remove(_key('writingFeedbackOffline')),
       prefs.setString(_key('updatedAt'), journeyUpdatedAt!.toIso8601String()),
     ]);
   }

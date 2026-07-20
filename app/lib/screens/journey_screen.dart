@@ -83,6 +83,21 @@ class _JourneyScreenState extends State<JourneyScreen>
     wonderController.text = _appState.wonderDraft;
     expressController.text = _appState.expressDraft;
     memoryController.text = _appState.memoryDraft;
+    if (_appState.hasGuideFeedback) {
+      _guideFeedback = PhoenixGuideFeedback(
+        reply: _appState.guideFeedbackReply,
+        isOfflineFallback: _appState.guideFeedbackOffline,
+      );
+    }
+    if (_appState.hasWritingFeedback) {
+      _writingFeedback = PhoenixWritingFeedback(
+        corrected: _appState.writingFeedbackCorrected,
+        explanation: _appState.writingFeedbackExplanation,
+        natural: _appState.writingFeedbackNatural,
+        encouragement: _appState.writingFeedbackEncouragement,
+        isOfflineFallback: _appState.writingFeedbackOffline,
+      );
+    }
     _initialized = true;
 
     if (step == 2) _scheduleDiscoveryAutoStart();
@@ -281,6 +296,11 @@ class _JourneyScreenState extends State<JourneyScreen>
       final feedback = await _ai.askGuide(
         text: answer,
         language: _appState.translationLanguage,
+        journeyId: _experience.id,
+      );
+      await _appState.saveGuideFeedback(
+        reply: feedback.reply,
+        isOfflineFallback: feedback.isOfflineFallback,
       );
       if (!mounted) return;
 
@@ -320,6 +340,13 @@ class _JourneyScreenState extends State<JourneyScreen>
       final feedback = await _ai.reviewWriting(
         text: writing,
         language: _appState.translationLanguage,
+      );
+      await _appState.saveWritingFeedback(
+        corrected: feedback.corrected,
+        explanation: feedback.explanation,
+        natural: feedback.natural,
+        encouragement: feedback.encouragement,
+        isOfflineFallback: feedback.isOfflineFallback,
       );
       if (!mounted) return;
 
@@ -417,6 +444,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   void _onWonderChanged(String _) {
     if (_guideFeedback != null) {
       setState(() => _guideFeedback = null);
+      unawaited(_appState.clearGuideFeedback());
     }
     unawaited(_persistProgress());
   }
@@ -424,6 +452,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   void _onExpressChanged(String _) {
     if (_writingFeedback != null) {
       setState(() => _writingFeedback = null);
+      unawaited(_appState.clearWritingFeedback());
     }
     unawaited(_persistProgress());
   }
@@ -505,6 +534,9 @@ class _JourneyScreenState extends State<JourneyScreen>
     FocusNode? keyboardFocusNode,
     bool primaryLoading = false,
     bool primaryEnabled = true,
+    String? secondaryButtonText,
+    IconData secondaryButtonIcon = Icons.auto_awesome_outlined,
+    VoidCallback? onSecondary,
   }) {
     final state = context.watch<AppState>();
 
@@ -597,7 +629,30 @@ class _JourneyScreenState extends State<JourneyScreen>
                           ),
                         ),
                         const SizedBox(width: 7),
-                      ],
+                      ],                       if (secondaryButtonText != null && onSecondary != null) ...[
+                         Expanded(
+                           child: OutlinedButton.icon(
+                             key: ValueKey('journey-secondary-$title'),
+                             onPressed: onSecondary,
+                             style: OutlinedButton.styleFrom(
+                               visualDensity: VisualDensity.compact,
+                               padding: const EdgeInsets.symmetric(horizontal: 5),
+                             ),
+                             icon: Icon(secondaryButtonIcon, size: 15),
+                             label: Text(
+                               secondaryButtonText,
+                               maxLines: 1,
+                               overflow: TextOverflow.ellipsis,
+                               style: const TextStyle(
+                                 fontSize: 10,
+                                 fontWeight: FontWeight.w800,
+                               ),
+                             ),
+                           ),
+                         ),
+                         const SizedBox(width: 7),
+                       ],
+
                       Expanded(
                         flex: 2,
                         child: FilledButton.icon(
@@ -903,6 +958,10 @@ class _JourneyScreenState extends State<JourneyScreen>
       primaryLoading: _guideLoading,
       primaryEnabled: !_guideLoading,
       onNext: hasFeedback ? null : () => unawaited(_askGuide()),
+      secondaryButtonText: hasFeedback ? 'AI 回答' : null,
+      secondaryButtonIcon: Icons.forum_outlined,
+      onSecondary:
+          hasFeedback ? () => unawaited(_showGuideFeedback()) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -961,6 +1020,10 @@ class _JourneyScreenState extends State<JourneyScreen>
       primaryLoading: _writingLoading,
       primaryEnabled: !_writingLoading,
       onNext: hasFeedback ? null : () => unawaited(_reviewWriting()),
+      secondaryButtonText: hasFeedback ? 'AI 批改' : null,
+      secondaryButtonIcon: Icons.fact_check_outlined,
+      onSecondary:
+          hasFeedback ? () => unawaited(_showWritingFeedback()) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
