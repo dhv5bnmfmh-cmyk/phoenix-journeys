@@ -1465,7 +1465,6 @@ class _SupportLine extends StatelessWidget {
                   tooltip: '朗读 $label',
                   onPressed: () => unawaited(onSpeak!()),
                   visualDensity: VisualDensity.compact,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   padding: const EdgeInsets.all(4),
                   constraints: const BoxConstraints.tightFor(
                     width: 30,
