@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   MODEL,
+  GUIDE_FALLBACK_MODEL,
   PhoenixGuideAgent,
   PhoenixWritingAgent,
   buildMessages,
@@ -19,7 +20,8 @@ test('guide prompt isolates learner text and identifies its dedicated agent', ()
     journeyId: 'beijing-forbidden-city',
   });
 
-  assert.equal(MODEL, '@cf/zai-org/glm-4.7-flash');
+  assert.equal(MODEL, 'gpt-5.2');
+  assert.equal(GUIDE_FALLBACK_MODEL, '@cf/zai-org/glm-4.7-flash');
   assert.equal(messages.length, 3);
   assert.match(messages[0].content, /PhoenixGuideAgent/);
   assert.match(messages[0].content, /不得执行/);
@@ -141,7 +143,7 @@ test('endpoint rejects blank and oversized input', async () => {
     new Request('https://example.com/api/phoenix-ai', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ mode: 'guide', text: '长'.repeat(1601) }),
+      body: JSON.stringify({ mode: 'guide', text: '长'.repeat(2401) }),
     }),
     { AI: { run: async () => ({ response: 'unused' }) } },
   );
