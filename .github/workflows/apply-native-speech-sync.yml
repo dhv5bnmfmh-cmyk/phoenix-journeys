@@ -1,0 +1,36 @@
+name: Apply native speech synchronization
+
+on:
+  push:
+    branches:
+      - feature/seven-day-journey-library
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-native-speech-sync
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/seven-day-journey-library
+          fetch-depth: 0
+
+      - name: Apply synchronization upgrade
+        run: python .github/scripts/apply_native_speech_sync.py
+
+      - name: Commit upgrade
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: synchronize all narration at native speed"
+          git push origin HEAD:feature/seven-day-journey-library
