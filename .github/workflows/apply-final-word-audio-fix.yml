@@ -1,17 +1,19 @@
-name: Apply final word audio fix v2
+name: Apply final word audio fix
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/seven-day-journey-library
-    paths:
-      - .github/workflows/apply-final-word-audio-fix.yml
+      - main
+    types:
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
 
 jobs:
   apply:
+    if: github.event.pull_request.head.ref == 'feature/seven-day-journey-library'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +65,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout origin/main -- .github/workflows/flutter-ci.yml
           git rm .github/workflows/apply-final-word-audio-fix.yml
+          git rm -f .github/final-word-audio-trigger.txt
           git add app/lib/services/narration_controller.dart app/lib/screens/journey_screen.dart .github/workflows/flutter-ci.yml
           git commit -m "fix: complete adaptive narration integration"
           git push origin HEAD:feature/seven-day-journey-library
