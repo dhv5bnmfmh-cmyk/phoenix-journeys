@@ -7,6 +7,7 @@ const extended = readFileSync('app/lib/data/extended_journey_catalog.dart', 'utf
 const state = readFileSync('app/lib/state/app_state.dart', 'utf8');
 const journey = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
 const explore = readFileSync('app/lib/screens/explore_screen.dart', 'utf8');
+const progress = readFileSync('app/lib/widgets/journey_progress_header.dart', 'utf8');
 
 test('daily catalog contains a reviewed seven-day city cycle', () => {
   assert.match(catalog, /beijingForbiddenCityJourney/);
@@ -54,4 +55,12 @@ test('Explore opens every selected city journey', () => {
   assert.match(explore, /JourneyScreen\(journeyId: journeyId\)/);
   assert.match(explore, /dailyJourneyExperiences\.map/);
   assert.doesNotMatch(journey, /单屏模式/);
+});
+
+test('PR previews unlock every journey step for full product testing', () => {
+  assert.match(progress, /Uri\.base/);
+  assert.match(progress, /queryParameters\['unlock'\] == 'all'/);
+  assert.match(progress, /host\.startsWith\('phoenix-journeys-pr-'\)/);
+  assert.match(progress, /allAccess \|\| index <= furthestStep/);
+  assert.match(progress, /选择学习步骤 · 体验全开放/);
 });
