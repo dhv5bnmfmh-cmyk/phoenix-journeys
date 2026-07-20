@@ -58,13 +58,10 @@ class _JourneyScreenState extends State<JourneyScreen>
     WidgetsBinding.instance.addObserver(this);
     _narration = NarrationController();
     final worldStoryAgent = createPhoenixWorldStoryAgent();
-    final journeyId = widget.journeyId ??
-        dailyJourneyForDate(DateTime.now()).id;
+    final journeyId =
+        widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
     _experience = requireDailyJourneyExperience(journeyId);
-    _journeyContent = requireJourneyContent(
-      worldStoryAgent,
-      _experience.id,
-    );
+    _journeyContent = requireJourneyContent(worldStoryAgent, _experience.id);
     _ai = PhoenixAiService();
     wonderFocusNode.addListener(_handleWritingFocusChanged);
     expressFocusNode.addListener(_handleWritingFocusChanged);
@@ -212,7 +209,9 @@ class _JourneyScreenState extends State<JourneyScreen>
     final resumeOffset = _narration.currentOffset;
     if (!mounted) return;
 
-    final initialIndex = _experience.words.indexWhere((item) => item.word == entry.word);
+    final initialIndex = _experience.words.indexWhere(
+      (item) => item.word == entry.word,
+    );
     await showWordDetail(
       context,
       entry,
@@ -236,10 +235,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     await _narration.resumeFromOffset(resumeOffset);
   }
 
-  Future<void> _prepareAgentAction(
-    FocusNode focusNode,
-    String message,
-  ) async {
+  Future<void> _prepareAgentAction(FocusNode focusNode, String message) async {
     focusNode.unfocus();
     await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
     if (!mounted) return;
@@ -275,16 +271,38 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
+  Map<String, dynamic> get _aiLearnerProfile {
+    final guideObservations = <String>[
+      wonderController.text.trim(),
+      _appState.guideFeedbackReply.trim(),
+      ..._appState.memories.take(6),
+    ].where((value) => value.isNotEmpty).toList(growable: false);
+    final writingInsights = <String>[
+      _appState.writingFeedbackExplanation.trim(),
+      _appState.writingFeedbackNatural.trim(),
+      expressController.text.trim(),
+    ].where((value) => value.isNotEmpty).toList(growable: false);
+
+    return <String, dynamic>{
+      'interfaceLanguage': _appState.translationLanguage,
+      'scriptMode': _appState.isTraditional ? 'traditional' : 'simplified',
+      'currentLevel': '根据学习者本次中文动态判断',
+      'savedWords': _appState.savedWords.toList(growable: false),
+      'completedJourneys': _appState.earnedJourneyStampIds.toList(
+        growable: false,
+      ),
+      'recentGuideObservations': guideObservations,
+      'recentWritingInsights': writingInsights,
+    };
+  }
+
   void _showAgentMessage(String message) {
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-        ),
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
       );
   }
 
@@ -297,10 +315,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     }
 
     setState(() => _guideLoading = true);
-    await _prepareAgentAction(
-      wonderFocusNode,
-      'PhoenixGuideAgent 正在思考…',
-    );
+    await _prepareAgentAction(wonderFocusNode, 'PhoenixGuideAgent 正在思考…');
     if (!mounted) return;
 
     try {
@@ -308,6 +323,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         text: answer,
         language: _appState.translationLanguage,
         journeyId: _experience.id,
+        learnerProfile: _aiLearnerProfile,
       );
       await _appState.saveGuideFeedback(
         reply: feedback.reply,
@@ -341,16 +357,15 @@ class _JourneyScreenState extends State<JourneyScreen>
     }
 
     setState(() => _writingLoading = true);
-    await _prepareAgentAction(
-      expressFocusNode,
-      'PhoenixWritingAgent 正在批改…',
-    );
+    await _prepareAgentAction(expressFocusNode, 'PhoenixWritingAgent 正在批改…');
     if (!mounted) return;
 
     try {
       final feedback = await _ai.reviewWriting(
         text: writing,
         language: _appState.translationLanguage,
+        journeyId: _experience.id,
+        learnerProfile: _aiLearnerProfile,
       );
       await _appState.saveWritingFeedback(
         corrected: feedback.corrected,
@@ -471,10 +486,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                 nativeText,
                 languageCode: _nativeSupportLanguageCode,
               ),
-              onSpeakEnglish: () => _speakSupportText(
-                english,
-                languageCode: 'en-US',
-              ),
+              onSpeakEnglish: () =>
+                  _speakSupportText(english, languageCode: 'en-US'),
             ),
           ),
         );
@@ -492,8 +505,9 @@ class _JourneyScreenState extends State<JourneyScreen>
   }) {
     if (texts.isEmpty || !constraints.hasBoundedHeight) return minSize;
 
-    final availableWidth =
-        (constraints.maxWidth - 58).clamp(120.0, constraints.maxWidth).toDouble();
+    final availableWidth = (constraints.maxWidth - 58)
+        .clamp(120.0, constraints.maxWidth)
+        .toDouble();
     final availableHeight = math.max(0.0, constraints.maxHeight - 8);
     final textScaler = MediaQuery.textScalerOf(context);
     final direction = Directionality.of(context);
@@ -582,10 +596,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         toolbarHeight: 44,
         title: Text(
           _appState.displayText(_experience.appBarTitle),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
         ),
         actions: [
           Consumer<AppState>(
@@ -630,7 +641,8 @@ class _JourneyScreenState extends State<JourneyScreen>
     return LayoutBuilder(
       key: ValueKey(title),
       builder: (context, constraints) {
-        final keyboardVisible = keyboardAdaptive &&
+        final keyboardVisible =
+            keyboardAdaptive &&
             (keyboardFocusNode?.hasFocus ??
                 MediaQuery.viewInsetsOf(context).bottom > 0);
         final compact = constraints.maxHeight < 590 || keyboardVisible;
@@ -687,7 +699,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                             fontWeight: FontWeight.w900,
                           ),
                         ),
-                      )
+                      ),
                   ],
                 ),
               ),
@@ -707,9 +719,14 @@ class _JourneyScreenState extends State<JourneyScreen>
                             onPressed: () => unawaited(_goToStep(step - 1)),
                             style: OutlinedButton.styleFrom(
                               visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
                             ),
-                            icon: const Icon(Icons.arrow_back_rounded, size: 17),
+                            icon: const Icon(
+                              Icons.arrow_back_rounded,
+                              size: 17,
+                            ),
                             label: const Text(
                               '上一步',
                               style: TextStyle(fontSize: 11),
@@ -717,36 +734,39 @@ class _JourneyScreenState extends State<JourneyScreen>
                           ),
                         ),
                         const SizedBox(width: 7),
-                      ],                       if (secondaryButtonText != null && onSecondary != null) ...[
-                         Expanded(
-                           child: OutlinedButton.icon(
-                             key: ValueKey('journey-secondary-$title'),
-                             onPressed: onSecondary,
-                             style: OutlinedButton.styleFrom(
-                               visualDensity: VisualDensity.compact,
-                               padding: const EdgeInsets.symmetric(horizontal: 5),
-                             ),
-                             icon: Icon(secondaryButtonIcon, size: 15),
-                             label: Text(
-                               secondaryButtonText,
-                               maxLines: 1,
-                               overflow: TextOverflow.ellipsis,
-                               style: const TextStyle(
-                                 fontSize: 10,
-                                 fontWeight: FontWeight.w800,
-                               ),
-                             ),
-                           ),
-                         ),
-                         const SizedBox(width: 7),
-                       ],
+                      ],
+                      if (secondaryButtonText != null &&
+                          onSecondary != null) ...[
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            key: ValueKey('journey-secondary-$title'),
+                            onPressed: onSecondary,
+                            style: OutlinedButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                              ),
+                            ),
+                            icon: Icon(secondaryButtonIcon, size: 15),
+                            label: Text(
+                              secondaryButtonText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 7),
+                      ],
 
                       Expanded(
                         flex: 2,
                         child: FilledButton.icon(
                           onPressed: primaryEnabled && !primaryLoading
-                              ? onNext ??
-                                  () => unawaited(_goToStep(step + 1))
+                              ? onNext ?? () => unawaited(_goToStep(step + 1))
                               : null,
                           style: FilledButton.styleFrom(
                             backgroundColor: PhoenixTheme.red,
@@ -824,50 +844,53 @@ class _JourneyScreenState extends State<JourneyScreen>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: _journeyContent.storyParagraphs
-                          .asMap()
-                          .entries
-                          .map((entry) {
-                            final annotation =
-                                _experience.storyAnnotations[entry.key];
-                            final snapshot = _narration.highlightSnapshot;
-                            final isActive =
-                                snapshot?.contentId == 'story' &&
-                                snapshot?.itemId == 'story-${entry.key}';
-                            return _CompactTextBlock(
-                              index: entry.key + 1,
-                              active: isActive,
-                              onSupport: () => unawaited(
-                                _showReadingSupport(
-                                  title: '故事第 ${entry.key + 1} 段',
-                                  pinyin: annotation.pinyin,
-                                  nativeLabel: annotation.nativeLabel(language),
-                                  nativeText: annotation.nativeText(
-                                    language,
-                                    entry.value,
+                            .asMap()
+                            .entries
+                            .map((entry) {
+                              final annotation =
+                                  _experience.storyAnnotations[entry.key];
+                              final snapshot = _narration.highlightSnapshot;
+                              final isActive =
+                                  snapshot?.contentId == 'story' &&
+                                  snapshot?.itemId == 'story-${entry.key}';
+                              return _CompactTextBlock(
+                                index: entry.key + 1,
+                                active: isActive,
+                                onSupport: () => unawaited(
+                                  _showReadingSupport(
+                                    title: '故事第 ${entry.key + 1} 段',
+                                    pinyin: annotation.pinyin,
+                                    nativeLabel: annotation.nativeLabel(
+                                      language,
+                                    ),
+                                    nativeText: annotation.nativeText(
+                                      language,
+                                      entry.value,
+                                    ),
+                                    english: annotation.english,
                                   ),
-                                  english: annotation.english,
                                 ),
-                              ),
-                              child: InteractiveStoryText(
-                                text: entry.value,
-                                entries: _experience.words,
-                                narrationController: _narration,
-                                highlightStart:
-                                    isActive ? snapshot!.start : null,
-                                highlightEnd: isActive ? snapshot!.end : null,
-                                narrationContentId: 'story',
-                                narrationItemId: 'story-${entry.key}',
-                                style: TextStyle(
-                                  fontSize: fontSize,
-                                  height: 1.22,
-                                  fontWeight: isActive
-                                      ? FontWeight.w800
-                                      : FontWeight.w600,
+                                child: InteractiveStoryText(
+                                  text: entry.value,
+                                  entries: _experience.words,
+                                  narrationController: _narration,
+                                  highlightStart: isActive
+                                      ? snapshot!.start
+                                      : null,
+                                  highlightEnd: isActive ? snapshot!.end : null,
+                                  narrationContentId: 'story',
+                                  narrationItemId: 'story-${entry.key}',
+                                  style: TextStyle(
+                                    fontSize: fontSize,
+                                    height: 1.22,
+                                    fontWeight: isActive
+                                        ? FontWeight.w800
+                                        : FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                            );
-                          })
-                          .toList(growable: false),
+                              );
+                            })
+                            .toList(growable: false),
                       ),
                     );
                   },
@@ -900,8 +923,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           final showPartOfSpeech = cellHeight >= 52;
           final showNativeMeaning = cellHeight >= 72;
           final showEnglishMeaning = cellHeight >= 96 && language != '英语';
-          final showChineseMeaning =
-              cellHeight >= 122 && language != '中文解释';
+          final showChineseMeaning = cellHeight >= 122 && language != '中文解释';
           final nativeLabel = switch (language) {
             '英语' => 'English',
             '中文解释' => '中文',
@@ -1107,8 +1129,9 @@ class _JourneyScreenState extends State<JourneyScreen>
                                 text: item.text,
                                 entries: _experience.words,
                                 narrationController: _narration,
-                                highlightStart:
-                                    isActive ? snapshot!.start : null,
+                                highlightStart: isActive
+                                    ? snapshot!.start
+                                    : null,
                                 highlightEnd: isActive ? snapshot!.end : null,
                                 narrationContentId: 'discovery',
                                 narrationItemId: 'discovery-${entry.key}',
@@ -1150,8 +1173,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       onNext: hasFeedback ? null : () => unawaited(_askGuide()),
       secondaryButtonText: hasFeedback ? 'AI 回答' : null,
       secondaryButtonIcon: Icons.forum_outlined,
-      onSecondary:
-          hasFeedback ? () => unawaited(_showGuideFeedback()) : null,
+      onSecondary: hasFeedback ? () => unawaited(_showGuideFeedback()) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1212,8 +1234,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       onNext: hasFeedback ? null : () => unawaited(_reviewWriting()),
       secondaryButtonText: hasFeedback ? 'AI 批改' : null,
       secondaryButtonIcon: Icons.fact_check_outlined,
-      onSecondary:
-          hasFeedback ? () => unawaited(_showWritingFeedback()) : null,
+      onSecondary: hasFeedback ? () => unawaited(_showWritingFeedback()) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1323,9 +1344,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             child: Center(
               child: FittedBox(
                 fit: BoxFit.contain,
-                child: AnimatedCityJourneyStamp(
-                  journey: _experience,
-                ),
+                child: AnimatedCityJourneyStamp(journey: _experience),
               ),
             ),
           ),
@@ -1572,11 +1591,7 @@ class _SupportLine extends StatelessWidget {
                     width: 30,
                     height: 30,
                   ),
-                  icon: Icon(
-                    Icons.volume_up_rounded,
-                    size: 18,
-                    color: color,
-                  ),
+                  icon: Icon(Icons.volume_up_rounded, size: 18, color: color),
                 ),
             ],
           ),
