@@ -269,7 +269,6 @@ class NarrationController extends ChangeNotifier {
     return until != null && DateTime.now().isBefore(until);
   }
 
-
   void _handleWebStart() {
     if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
     _status = NarrationStatus.playing;
@@ -653,7 +652,6 @@ class NarrationController extends ChangeNotifier {
           };
           for (final preferredName in preferredNames) {
             if (lowerName.contains(preferredName)) score += 42;
-          }
           }
 
           if (score > bestScore && name.isNotEmpty && locale.isNotEmpty) {
