@@ -1,17 +1,20 @@
 name: Apply mobile layout fix
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/seven-day-journey-library
-    paths:
-      - .github/workflows/apply-mobile-layout-fix.yml
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
 
 jobs:
   apply:
+    if: github.event.pull_request.head.ref == 'feature/seven-day-journey-library'
     runs-on: ubuntu-latest
     steps:
       - name: Check out feature branch
