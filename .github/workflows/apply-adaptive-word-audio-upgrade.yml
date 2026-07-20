@@ -1,0 +1,474 @@
+name: Apply adaptive word and audio upgrade
+
+on:
+  push:
+    branches:
+      - feature/seven-day-journey-library
+    paths:
+      - .github/workflows/apply-adaptive-word-audio-upgrade.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/seven-day-journey-library
+          fetch-depth: 0
+
+      - name: Apply adaptive vocabulary and unified narration speed
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(text, old, new, label):
+              if old not in text:
+                  raise SystemExit(f'{label} target not found')
+              return text.replace(old, new, 1)
+
+          narration_path = Path('app/lib/services/narration_controller.dart')
+          narration = narration_path.read_text(encoding='utf-8')
+          narration = replace_once(
+              narration,
+              """  static const speedOptions = <NarrationSpeedOption>[
+    NarrationSpeedOption(label: '0.8×', rate: .29),
+    NarrationSpeedOption(label: '1.0×', rate: .36),
+    NarrationSpeedOption(label: '1.2×', rate: .44),
+    NarrationSpeedOption(label: '1.5×', rate: .54),
+  ];""",
+              """  static const speedOptions = <NarrationSpeedOption>[
+    NarrationSpeedOption(label: '1.0×', rate: 1.0),
+    NarrationSpeedOption(label: '1.5×', rate: 1.5),
+    NarrationSpeedOption(label: '2.0×', rate: 2.0),
+    NarrationSpeedOption(label: '2.5×', rate: 2.5),
+    NarrationSpeedOption(label: '3.0×', rate: 3.0),
+  ];""",
+              'speed options',
+          )
+          narration = replace_once(
+              narration,
+              "  double _speechRate = .36;",
+              "  double _speechRate = 1.0;",
+              'default speech rate',
+          )
+          narration = replace_once(
+              narration,
+              "          orElse: () => speedOptions[1],",
+              "          orElse: () => speedOptions.first,",
+              'speed label fallback',
+          )
+          narration = replace_once(
+              narration,
+              """      await _configureNaturalVoice(languageCode);
+      await _tts.setSpeechRate(.38);
+      await _tts.setPitch(.98);""",
+              """      await _configureNaturalVoice(languageCode);
+      await _tts.setSpeechRate(_ttsSpeechRate(_speechRate));
+      await _tts.setPitch(.98);""",
+              'word speech rate',
+          )
+          narration = replace_once(
+              narration,
+              """    try {
+      return await completer.future.timeout(const Duration(seconds: 8));
+    } on TimeoutException {""",
+              """    final timeoutSeconds = math.max(
+      8,
+      (value.length / math.max(4.0, 7.0 * _speechRate)).ceil() + 5,
+    );
+    try {
+      return await completer.future.timeout(Duration(seconds: timeoutSeconds));
+    } on TimeoutException {""",
+              'word speech timeout',
+          )
+          narration = replace_once(
+              narration,
+              """  Future<void> _configureNaturalVoice(String languageCode) async {
+    await _tts.setLanguage(languageCode);""",
+              """  double _ttsSpeechRate(double multiplier) {
+    if (kIsWeb) return multiplier.clamp(0.5, 3.0).toDouble();
+    return (0.48 + (multiplier - 1.0) * 0.20)
+        .clamp(0.48, 1.0)
+        .toDouble();
+  }
+
+  Future<void> _configureNaturalVoice(String languageCode) async {
+    await _tts.setLanguage(languageCode);""",
+              'tts rate mapper',
+          )
+          narration = replace_once(
+              narration,
+              """          if (lowerName.contains('natural')) score += 60;
+          if (lowerName.contains('premium')) score += 50;
+          if (lowerName.contains('enhanced')) score += 45;
+          if (requestedPrefix == 'zh') {
+            for (final preferredName in const [
+              'xiaoxiao',
+              'tingting',
+              'meijia',
+              'yunxi',
+              'sinji',
+            ]) {
+              if (lowerName.contains(preferredName)) score += 35;
+            }
+          }""",
+              """          if (lowerName.contains('natural')) score += 70;
+          if (lowerName.contains('premium')) score += 60;
+          if (lowerName.contains('enhanced')) score += 55;
+          if (lowerName.contains('compact')) score -= 45;
+          if (lowerName.contains('novelty')) score -= 80;
+          if (lowerName.contains('espeak')) score -= 60;
+
+          final preferredNames = switch (requestedPrefix) {
+            'zh' => const [
+                'xiaoxiao',
+                'tingting',
+                'meijia',
+                'yunxi',
+                'sinji',
+              ],
+            'en' => const [
+                'samantha',
+                'ava',
+                'serena',
+                'daniel',
+                'karen',
+              ],
+            'vi' => const [
+                'linh',
+                'mai',
+                'nam',
+                'hoai',
+              ],
+            _ => const <String>[],
+          };
+          for (final preferredName in preferredNames) {
+            if (lowerName.contains(preferredName)) score += 42;
+          }""",
+              'natural voice preferences',
+          )
+          narration = narration.replace(
+              "await _tts.setSpeechRate(_speechRate);",
+              "await _tts.setSpeechRate(_ttsSpeechRate(_speechRate));",
+          )
+          narration = replace_once(
+              narration,
+              "final charsPerSecond = 3.35 * (_speechRate / .36);",
+              "final charsPerSecond = 3.35 * _speechRate;",
+              'progress speed estimate',
+          )
+          narration_path.write_text(narration, encoding='utf-8')
+
+          journey_path = Path('app/lib/screens/journey_screen.dart')
+          journey = journey_path.read_text(encoding='utf-8')
+          journey = replace_once(
+              journey,
+              """    await showWordDetail(
+      context,
+      entry,
+      entries: _experience.words,""",
+              """    await showWordDetail(
+      context,
+      entry,
+      narrationController: _narration,
+      entries: _experience.words,""",
+              'word detail narration controller',
+          )
+          journey = replace_once(
+              journey,
+              """          final safeCellHeight = math.max(1.0, cellHeight);
+          final ratio = cellWidth / safeCellHeight;
+
+          return GridView.builder(""",
+              """          final safeCellHeight = math.max(1.0, cellHeight);
+          final ratio = cellWidth / safeCellHeight;
+          final showPartOfSpeech =
+              cellHeight >= 108 && _experience.words.length <= 12;
+          final showMeaning =
+              cellHeight >= 145 && _experience.words.length <= 9;
+
+          return GridView.builder(""",
+              'adaptive word metadata flags',
+          )
+          journey = replace_once(
+              journey,
+              """                        Text(
+                          entry.pinyin,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 8,
+                            height: 1,
+                          ),
+                        ),
+                      ],""",
+              """                        Text(
+                          entry.pinyin,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: cellHeight >= 120 ? 10 : 8,
+                            height: 1,
+                          ),
+                        ),
+                        if (showPartOfSpeech) ...[
+                          const SizedBox(height: 7),
+                          Text(
+                            state.displayText(entry.partOfSpeech),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: PhoenixTheme.red,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                        if (showMeaning) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            state.displayText(entry.simpleChinese),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 9.5,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ],""",
+              'adaptive word metadata content',
+          )
+          journey = replace_once(
+              journey,
+              """            child: _ReadingSupportSheet(
+              title: title,""",
+              """            child: _ReadingSupportSheet(
+              controller: _narration,
+              title: title,""",
+              'reading support controller argument',
+          )
+          journey = replace_once(
+              journey,
+              """  const _ReadingSupportSheet({
+    required this.title,""",
+              """  const _ReadingSupportSheet({
+    required this.controller,
+    required this.title,""",
+              'reading support constructor',
+          )
+          journey = replace_once(
+              journey,
+              """  final String title;
+  final String pinyin;""",
+              """  final NarrationController controller;
+  final String title;
+  final String pinyin;""",
+              'reading support controller field',
+          )
+          journey = replace_once(
+              journey,
+              """        Text(
+          title,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 6),""",
+              """        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            AnimatedBuilder(
+              animation: controller,
+              builder: (context, _) => PopupMenuButton<double>(
+                key: const ValueKey('support-speed-control'),
+                tooltip: '调整朗读语速',
+                onSelected: (rate) => unawaited(controller.setSpeechRate(rate)),
+                itemBuilder: (context) => NarrationController.speedOptions
+                    .map(
+                      (option) => PopupMenuItem<double>(
+                        value: option.rate,
+                        child: Text('${option.label} 语速'),
+                      ),
+                    )
+                    .toList(growable: false),
+                child: Chip(
+                  visualDensity: VisualDensity.compact,
+                  label: Text(
+                    controller.speedLabel,
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),""",
+              'reading support speed menu',
+          )
+          journey_path.write_text(journey, encoding='utf-8')
+
+          sheet_path = Path('app/lib/widgets/word_detail_sheet.dart')
+          sheet = sheet_path.read_text(encoding='utf-8')
+          sheet = replace_once(
+              sheet,
+              """import '../data/journey_data.dart';
+import '../state/app_state.dart';""",
+              """import '../data/journey_data.dart';
+import '../services/narration_controller.dart';
+import '../state/app_state.dart';""",
+              'word sheet narration import',
+          )
+          sheet = replace_once(
+              sheet,
+              """  WordEntry entry, {
+  required Future<bool> Function() onSpeak,""",
+              """  WordEntry entry, {
+  required NarrationController narrationController,
+  required Future<bool> Function() onSpeak,""",
+              'word detail signature',
+          )
+          sheet = replace_once(
+              sheet,
+              """            child: _WordDetailSheet(
+              entries: studyEntries,""",
+              """            child: _WordDetailSheet(
+              narrationController: narrationController,
+              entries: studyEntries,""",
+              'word detail controller pass',
+          )
+          sheet = replace_once(
+              sheet,
+              """  const _WordDetailSheet({
+    required this.entries,""",
+              """  const _WordDetailSheet({
+    required this.narrationController,
+    required this.entries,""",
+              'word detail widget constructor',
+          )
+          sheet = replace_once(
+              sheet,
+              """  final List<WordEntry> entries;
+  final int initialIndex;""",
+              """  final NarrationController narrationController;
+  final List<WordEntry> entries;
+  final int initialIndex;""",
+              'word detail controller field',
+          )
+          sheet = replace_once(
+              sheet,
+              """                  const SizedBox(width: 6),
+                  IconButton.filledTonal(""",
+              """                  const SizedBox(width: 6),
+                  AnimatedBuilder(
+                    animation: widget.narrationController,
+                    builder: (context, _) => PopupMenuButton<double>(
+                      key: const ValueKey('word-detail-speed-control'),
+                      tooltip: '调整朗读语速',
+                      onSelected: (rate) => unawaited(
+                        widget.narrationController.setSpeechRate(rate),
+                      ),
+                      itemBuilder: (context) => NarrationController.speedOptions
+                          .map(
+                            (option) => PopupMenuItem<double>(
+                              value: option.rate,
+                              child: Text('${option.label} 语速'),
+                            ),
+                          )
+                          .toList(growable: false),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: PhoenixTheme.red.withValues(alpha: .08),
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                        child: Text(
+                          widget.narrationController.speedLabel,
+                          style: const TextStyle(
+                            color: PhoenixTheme.red,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton.filledTonal(""",
+              'word detail speed menu',
+          )
+          sheet_path.write_text(sheet, encoding='utf-8')
+
+          legacy_test_path = Path('worker/word_sheet_flow.test.mjs')
+          legacy_test = legacy_test_path.read_text(encoding='utf-8')
+          legacy_test = replace_once(
+              legacy_test,
+              "assert.match(narration, /NarrationSpeedOption\\(label: '1\\.0×', rate: \\.36\\)/);",
+              "assert.match(narration, /NarrationSpeedOption\\(label: '1\\.0×', rate: 1\\.0\\)/);",
+              'legacy speed assertion',
+          )
+          legacy_test_path.write_text(legacy_test, encoding='utf-8')
+
+          regression_path = Path('worker/adaptive_word_audio_upgrade.test.mjs')
+          regression_path.write_text("""import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+
+          const journey = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
+          const narration = readFileSync('app/lib/services/narration_controller.dart', 'utf8');
+          const sheet = readFileSync('app/lib/widgets/word_detail_sheet.dart', 'utf8');
+
+          test('word cards reveal metadata only when available space allows it', () => {
+            assert.match(journey, /showPartOfSpeech/);
+            assert.match(journey, /showMeaning/);
+            assert.match(journey, /entry\.partOfSpeech/);
+            assert.match(journey, /entry\.simpleChinese/);
+          });
+
+          test('all Phoenix speech uses the unified 1x to 3x speed scale', () => {
+            for (const label of ['1.0×', '1.5×', '2.0×', '2.5×', '3.0×']) {
+              assert.match(narration, new RegExp(label.replace('.', '\\\\.')));
+            }
+            assert.doesNotMatch(narration, /label: '0\.8×'/);
+            assert.doesNotMatch(narration, /label: '1\.2×'/);
+            assert.match(narration, /_ttsSpeechRate\(_speechRate\)/);
+            assert.match(narration, /final charsPerSecond = 3\.35 \* _speechRate/);
+          });
+
+          test('word details and reading notes expose speed controls', () => {
+            assert.match(journey, /support-speed-control/);
+            assert.match(journey, /controller: _narration/);
+            assert.match(sheet, /word-detail-speed-control/);
+            assert.match(sheet, /narrationController: narrationController/);
+          });
+          """.replace('          ', ''), encoding='utf-8')
+          PY
+
+      - name: Commit upgrade
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-adaptive-word-audio-upgrade.yml
+          git add app/lib/services/narration_controller.dart app/lib/screens/journey_screen.dart app/lib/widgets/word_detail_sheet.dart worker/word_sheet_flow.test.mjs worker/adaptive_word_audio_upgrade.test.mjs
+          git commit -m "feat: add adaptive word details and unified narration speeds"
+          git push origin HEAD:feature/seven-day-journey-library
