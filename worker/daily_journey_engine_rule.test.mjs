@@ -32,13 +32,13 @@ test('one stable Journey screen renders all daily cities', () => {
   assert.doesNotMatch(journey, /AnimatedForbiddenCityStamp/);
 });
 
-test('Explore opens and describes the active daily journey', () => {
-  assert.match(explore, /JourneyScreen\([\s\S]*journeyId: state\.activeJourneyId/);
+test('Explore opens and describes the selected city journey', () => {
+  assert.match(explore, /openJourneyById\(String journeyId\)/);
+  assert.match(explore, /state\.activateJourney\(journeyId\)/);
+  assert.match(explore, /JourneyScreen\(journeyId: journeyId\)/);
   assert.match(explore, /state\.activeJourney\.headline/);
   assert.match(explore, /state\.activeJourney\.discoveryTeaser/);
-  assert.match(explore, /state\.refreshDailyJourney/);
 });
-
 
 test('journey pages stay clean and every city remains directly accessible', () => {
   assert.doesNotMatch(journey, /单屏模式/);
