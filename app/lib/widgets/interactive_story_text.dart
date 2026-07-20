@@ -510,8 +510,9 @@ class _VocabularyPopover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final nativeLabel = entry.nativeLabel(state.translationLanguage);
     final nativeDefinition = entry.nativeDefinition(state.translationLanguage);
-    final english = entry.englishDefinition.trim();
+    final englishDefinition = entry.englishDefinition.trim();
 
     return Material(
       color: Colors.transparent,
@@ -565,21 +566,34 @@ class _VocabularyPopover extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
+                    state.displayText(entry.partOfSpeech),
+                    key: ValueKey('story-discovery-word-pos-${entry.word}'),
+                    style: TextStyle(color: PhoenixTheme.red.withValues(alpha: .78), fontSize: 10.5, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    state.displayText(nativeLabel),
+                    key: ValueKey('story-discovery-word-native-label-${entry.word}'),
+                    style: TextStyle(color: PhoenixTheme.ink.withValues(alpha: .52), fontSize: 9.5, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
                     nativeDefinition,
+                    key: ValueKey('story-discovery-word-native-${entry.word}'),
                     style: const TextStyle(fontSize: 13, height: 1.3),
                   ),
-                  if (english.isNotEmpty &&
-                      state.translationLanguage != '英语') ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      english,
-                      style: TextStyle(
-                        color: PhoenixTheme.ink.withValues(alpha: .58),
-                        fontSize: 11.5,
-                        height: 1.25,
-                      ),
-                    ),
-                  ],
+                  const SizedBox(height: 4),
+                  Text(
+                    'English',
+                    key: ValueKey('story-discovery-word-english-label-${entry.word}'),
+                    style: TextStyle(color: PhoenixTheme.ink.withValues(alpha: .52), fontSize: 9.5, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    englishDefinition.isEmpty ? '—' : englishDefinition,
+                    key: ValueKey('story-discovery-word-english-${entry.word}'),
+                    style: TextStyle(color: PhoenixTheme.ink.withValues(alpha: .7), fontSize: 11.5, height: 1.25),
+                  ),
                 ],
               ),
             ),

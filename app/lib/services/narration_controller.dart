@@ -152,11 +152,19 @@ class NarrationController extends ChangeNotifier {
   static final Set<NarrationController> _instances =
       <NarrationController>{};
 
+  static const double speechRateStep = 0.1;
+
   static const speedOptions = <NarrationSpeedOption>[
     NarrationSpeedOption(label: '0.5×', rate: .5),
-    NarrationSpeedOption(label: '0.75×', rate: .75),
+    NarrationSpeedOption(label: '0.6×', rate: .6),
+    NarrationSpeedOption(label: '0.7×', rate: .7),
+    NarrationSpeedOption(label: '0.8×', rate: .8),
+    NarrationSpeedOption(label: '0.9×', rate: .9),
     NarrationSpeedOption(label: '1.0×', rate: 1.0),
-    NarrationSpeedOption(label: '1.25×', rate: 1.25),
+    NarrationSpeedOption(label: '1.1×', rate: 1.1),
+    NarrationSpeedOption(label: '1.2×', rate: 1.2),
+    NarrationSpeedOption(label: '1.3×', rate: 1.3),
+    NarrationSpeedOption(label: '1.4×', rate: 1.4),
     NarrationSpeedOption(label: '1.5×', rate: 1.5),
   ];
 
