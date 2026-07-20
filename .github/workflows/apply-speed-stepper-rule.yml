@@ -59,3 +59,5 @@ jobs:
           git add -A
           git commit -m "feat: synchronize narration speed with step controls"
           git push origin HEAD:feature/seven-day-journey-library
+
+# Triggered after the workflow became available on the feature branch.
