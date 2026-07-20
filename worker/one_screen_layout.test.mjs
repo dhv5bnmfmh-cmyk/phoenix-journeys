@@ -29,10 +29,16 @@ test('primary Phoenix screens obey the one-screen layout rule', () => {
 
 test('story and Discovery adapt every short paragraph to the same screen', () => {
   const journey = read('app/lib/screens/journey_screen.dart');
+  const discoveryStart = journey.indexOf('Widget _discoveryPage()');
+  const discoveryEnd = journey.indexOf('Widget _wonderPage()', discoveryStart);
+  assert.ok(discoveryStart >= 0 && discoveryEnd > discoveryStart);
+  const discovery = journey.slice(discoveryStart, discoveryEnd);
+
   assert.match(journey, /adaptive-story-text-area/);
-  assert.match(journey, /adaptive-discovery-text-area/);
+  assert.match(discovery, /adaptive-discovery-text-area/);
   assert.match(journey, /_fitJourneyTextSize/);
-  assert.doesNotMatch(journey, /MainAxisAlignment\.spaceBetween/);
+  assert.doesNotMatch(discovery, /MainAxisAlignment\.spaceBetween/);
+  assert.match(discovery, /MainAxisAlignment\.start/);
   assert.doesNotMatch(journey, /cellHeight\.clamp\(38\.0, 70\.0\)/);
   assert.match(journey, /safeCellHeight = math\.max\(1\.0, cellHeight\)/);
   assert.doesNotMatch(journey, /_NowReadingStrip/);
