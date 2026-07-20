@@ -27,15 +27,17 @@ void main() {
     expect(plan.indexForOffset(0), 0);
   });
 
-  test('offers compact player speed presets from slow to fast', () {
+  test('offers unified player speed presets from 1x to 3x', () {
     const options = NarrationController.speedOptions;
 
     expect(options.map((option) => option.label), [
-      '0.8×',
       '1.0×',
-      '1.2×',
       '1.5×',
+      '2.0×',
+      '2.5×',
+      '3.0×',
     ]);
-    expect(options.first.rate, lessThan(options.last.rate));
+    expect(options.first.rate, 1.0);
+    expect(options.last.rate, 3.0);
   });
 }
