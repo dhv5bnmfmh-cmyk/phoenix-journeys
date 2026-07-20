@@ -157,9 +157,9 @@ final class PhoenixWebSpeech {
     html.SpeechSynthesisVoice? bestVoice;
     var bestScore = -1;
     for (final voice in voices) {
-      final locale = voice.lang.toLowerCase().replaceAll('_', '-');
+      final locale = (voice.lang ?? '').toLowerCase().replaceAll('_', '-');
       if (!locale.startsWith(prefix)) continue;
-      final name = voice.name.toLowerCase();
+      final name = (voice.name ?? '').toLowerCase();
       var score = 10;
       if (locale == requested) score += 100;
       if (name.contains('natural')) score += 70;
