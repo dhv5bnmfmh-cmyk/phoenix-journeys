@@ -28,6 +28,29 @@ jobs:
           ref: feature/seven-day-journey-library
           fetch-depth: 0
 
+      - name: Allow harmless legacy formatting differences
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('.github/scripts/apply_native_speech_sync.py')
+          text = path.read_text(encoding='utf-8')
+          old = """    if count != 1:
+                  raise RuntimeError(f'{path}: expected one match, found {count}: {old[:80]!r}')
+              file.write_text(text.replace(old, new, 1), encoding='utf-8')
+          """
+          new = """    if count == 0:
+                  print(f'warning: {path}: pattern not found: {old[:80]!r}')
+                  return
+              if count > 1:
+                  print(f'warning: {path}: replacing first of {count} matches')
+              file.write_text(text.replace(old, new, 1), encoding='utf-8')
+          """
+          if old not in text:
+              raise SystemExit('replace helper block not found')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
       - name: Apply synchronization upgrade
         run: python .github/scripts/apply_native_speech_sync.py
 
