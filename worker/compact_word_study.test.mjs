@@ -20,17 +20,18 @@ test('word study sheet follows its content and advances through the list', () =>
   assert.match(journey, /onSpeakEntry:/);
 });
 
-test('Discovery cards follow text height and support word highlighting', () => {
+test('Discovery cards fit available height and support word highlighting', () => {
   const start = journey.indexOf('Widget _discoveryPage()');
   const end = journey.indexOf('Widget _wonderPage()', start);
   const discovery = journey.slice(start, end);
-  assert.match(discovery, /mainAxisSize: MainAxisSize\.min/);
+  assert.match(discovery, /adaptive-discovery-text-area/);
+  assert.match(discovery, /MainAxisAlignment\.spaceBetween/);
   assert.match(discovery, /InteractiveStoryText/);
-  assert.match(discovery, /fontSize: 9\.9/);
-  assert.match(discovery, /height: 1\.12/);
+  assert.match(discovery, /fontSize: fontSize/);
+  assert.match(discovery, /height: 1\.2/);
 });
 
-test('narration keeps the natural Chinese voice profile', () => {
+test('narration keeps natural voice selection and speed profile', () => {
   assert.match(narration, /getVoices/);
   assert.match(narration, /natural/);
   assert.match(narration, /premium/);
