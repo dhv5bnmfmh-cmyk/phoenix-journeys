@@ -568,25 +568,6 @@ class _JourneyScreenState extends State<JourneyScreen>
                           ),
                         ),
                       )
-                    else
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: PhoenixTheme.gold.withValues(alpha: .12),
-                          borderRadius: BorderRadius.circular(99),
-                        ),
-                        child: const Text(
-                          '单屏模式',
-                          style: TextStyle(
-                            color: PhoenixTheme.red,
-                            fontSize: 8.5,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),

@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../data/daily_journey_catalog.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import 'journey_screen.dart';
@@ -22,22 +23,83 @@ class ExploreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final viewportHeight = MediaQuery.sizeOf(context).height;
-    if (state.activeJourneyId != state.todayJourney.id) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(state.refreshDailyJourney());
-      });
-    }
     final mapHeight = compactExploreMapHeight(viewportHeight);
 
-    Future<void> openJourney() async {
+    Future<void> openJourneyById(String journeyId) async {
+      await state.activateJourney(journeyId);
       if (state.journeyCompleted) {
         await state.restartJourney();
       }
       if (!context.mounted) return;
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => JourneyScreen(
-            journeyId: state.activeJourneyId,
+          builder: (_) => JourneyScreen(journeyId: journeyId),
+        ),
+      );
+    }
+
+    Future<void> chooseJourney() async {
+      await showModalBottomSheet<void>(
+        context: context,
+        useSafeArea: true,
+        showDragHandle: true,
+        builder: (sheetContext) => Padding(
+          padding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                state.displayText('选择城市旅程'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                    ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                state.displayText('今日旅程是推荐路线，其他城市也可随时继续。'),
+                style: const TextStyle(color: Colors.black54, fontSize: 11),
+              ),
+              const SizedBox(height: 8),
+              ...dailyJourneyExperiences.map(
+                (journey) => Card(
+                  margin: const EdgeInsets.only(bottom: 6),
+                  child: ListTile(
+                    key: ValueKey('journey-picker-${journey.id}'),
+                    dense: true,
+                    leading: CircleAvatar(
+                      backgroundColor: PhoenixTheme.red.withValues(alpha: .10),
+                      child: Text(
+                        state.displayText(journey.stampSymbol),
+                        style: const TextStyle(
+                          color: PhoenixTheme.red,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      state.displayText('${journey.city} · ${journey.place}'),
+                      style: const TextStyle(fontWeight: FontWeight.w900),
+                    ),
+                    subtitle: Text(
+                      state.displayText(
+                        journey.id == state.todayJourney.id
+                            ? '今日推荐 · 点击进入'
+                            : state.isJourneyStampEarned(journey.id)
+                                ? '印章已获得 · 可再次体验'
+                                : '可随时开始或继续',
+                      ),
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 15),
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      unawaited(openJourneyById(journey.id));
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -72,7 +134,13 @@ class ExploreScreen extends StatelessWidget {
               const SizedBox(height: 8),
               _FlightMapCard(state: state, height: mapHeight),
               const SizedBox(height: 8),
-              _JourneyCard(state: state, onOpen: openJourney),
+              _JourneyCard(
+                state: state,
+                onOpen: () => unawaited(
+                  openJourneyById(state.activeJourneyId),
+                ),
+                onChoose: () => unawaited(chooseJourney()),
+              ),
               const SizedBox(height: 8),
               const _DiscoveryCard(),
             ],
@@ -547,10 +615,15 @@ class _CityMarker extends StatelessWidget {
 }
 
 class _JourneyCard extends StatelessWidget {
-  const _JourneyCard({required this.state, required this.onOpen});
+  const _JourneyCard({
+    required this.state,
+    required this.onOpen,
+    required this.onChoose,
+  });
 
   final AppState state;
   final VoidCallback onOpen;
+  final VoidCallback onChoose;
 
   String get _buttonText {
     if (state.journeyCompleted) return '再次探索${state.activeJourney.city}';
@@ -583,9 +656,20 @@ class _JourneyCard extends StatelessWidget {
                 text: state.displayText('中国 · ${state.activeJourney.city}'),
               ),
               const Spacer(),
-              Text(
-                state.displayText('今日旅程'),
-                style: const TextStyle(color: Colors.black54, fontSize: 10),
+              TextButton.icon(
+                key: const ValueKey('choose-city-journey'),
+                onPressed: onChoose,
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, 28),
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  visualDensity: VisualDensity.compact,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                icon: const Icon(Icons.swap_horiz_rounded, size: 14),
+                label: Text(
+                  state.displayText('选择城市'),
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800),
+                ),
               ),
             ],
           ),

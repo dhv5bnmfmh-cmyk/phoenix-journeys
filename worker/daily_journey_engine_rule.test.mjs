@@ -38,3 +38,13 @@ test('Explore opens and describes the active daily journey', () => {
   assert.match(explore, /state\.activeJourney\.discoveryTeaser/);
   assert.match(explore, /state\.refreshDailyJourney/);
 });
+
+
+test('journey pages stay clean and every city remains directly accessible', () => {
+  assert.doesNotMatch(journey, /单屏模式/);
+  assert.match(explore, /choose-city-journey/);
+  assert.match(explore, /选择城市旅程/);
+  assert.match(explore, /dailyJourneyExperiences\.map/);
+  assert.match(explore, /openJourneyById/);
+  assert.doesNotMatch(explore, /refreshDailyJourney\(\)/);
+});
