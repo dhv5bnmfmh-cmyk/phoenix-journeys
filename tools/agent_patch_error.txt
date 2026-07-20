@@ -1,0 +1,8 @@
+RuntimeError: secondary footer placement
+
+Traceback (most recent call last):
+  File "/home/runner/work/phoenix-journeys/phoenix-journeys/tools/run_agent_feedback_history_once.py", line 12, in <module>
+    exec(
+  File "tools/apply_agent_feedback_history_v2.py", line 354, in <module>
+    raise RuntimeError('secondary footer placement')
+RuntimeError: secondary footer placement
