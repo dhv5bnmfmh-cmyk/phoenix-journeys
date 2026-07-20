@@ -31,12 +31,12 @@ jobs:
           fetch-depth: 0
 
       - name: Apply city journey access
-        if: ${{ github.event_name == 'push' && github.ref_name == 'feature/daily-journey-engine' && github.event.head_commit.message == 'chore: run city access patch' }}
+        if: ${{ github.head_ref == 'feature/daily-journey-engine' || github.ref_name == 'feature/daily-journey-engine' }}
         working-directory: ${{ github.workspace }}
-        run: python tools/apply_city_journey_access.py
+        run: python tools/run_city_access_once.py
 
       - name: Commit city journey access
-        if: ${{ github.event_name == 'push' && github.ref_name == 'feature/daily-journey-engine' && github.event.head_commit.message == 'chore: run city access patch' }}
+        if: ${{ github.head_ref == 'feature/daily-journey-engine' || github.ref_name == 'feature/daily-journey-engine' }}
         working-directory: ${{ github.workspace }}
         shell: bash
         run: |
@@ -45,8 +45,12 @@ jobs:
           git add app/lib/screens/journey_screen.dart \
                   app/lib/screens/explore_screen.dart \
                   worker/daily_journey_engine_rule.test.mjs
-          git commit -m "feat: keep all daily cities directly accessible"
-          git push origin HEAD:feature/daily-journey-engine
+          if git diff --cached --quiet; then
+            echo "City journey access already applied."
+          else
+            git commit -m "feat: keep all daily cities directly accessible"
+            git push origin HEAD:feature/daily-journey-engine
+          fi
 
       - name: Test Phoenix agents
         id: agents
