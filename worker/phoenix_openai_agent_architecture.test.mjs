@@ -15,6 +15,7 @@ import { PhoenixQualityAgent } from './agents/phoenix_quality_agent.mjs';
 const read = (path) => readFileSync(path, 'utf8');
 const guide = read('worker/agents/phoenix_guide_agent.mjs');
 const writing = read('worker/agents/phoenix_writing_agent.mjs');
+const memory = read('worker/agents/phoenix_memory_agent.mjs');
 const endpoint = read('worker/phoenix_ai.mjs');
 const health = read('worker/index.mjs');
 const appService = read('app/lib/services/phoenix_ai_service.dart');
@@ -176,10 +177,12 @@ test('Guide and Writing are expert agents with a hidden quality pass', () => {
 
 test('learner memory is sanitized, sent by Flutter, and used by both agents', () => {
   assert.match(endpoint, /safeLearnerProfile/);
-  assert.match(endpoint, /savedWords/);
-  assert.match(endpoint, /completedJourneys/);
-  assert.match(endpoint, /recentGuideObservations/);
-  assert.match(endpoint, /recentWritingInsights/);
+  assert.match(memory, /savedWords/);
+  assert.match(memory, /completedJourneys/);
+  assert.match(memory, /recentGuideObservations/);
+  assert.match(memory, /recentWritingInsights/);
+  assert.match(memory, /storage: 'client-private'/);
+  assert.match(memory, /serverPersisted: false/);
   assert.match(appService, /learnerProfile/);
   assert.match(journey, /_aiLearnerProfile/);
   assert.match(journey, /_appState\.savedWords/);
