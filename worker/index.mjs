@@ -18,6 +18,7 @@ export default {
           ok: true,
           service: 'phoenix-journeys',
           ai: openaiConfigured || cloudflareConfigured,
+          aiVersion: '2.0',
           aiProvider: openaiConfigured
             ? 'openai'
             : cloudflareConfigured
@@ -25,8 +26,16 @@ export default {
               : 'none',
           openaiConfigured,
           cloudflareFallbackConfigured: cloudflareConfigured,
+          brainAgent: true,
+          guideAgent: true,
+          writingAgent: true,
+          conversationAgent: true,
+          learningAgent: true,
           qualityAgent: true,
-          learningMemory: true,
+          memoryAgent: true,
+          knowledgeAgent: true,
+          memoryStorage: 'client-private',
+          serverMemoryPersisted: false,
           model:
             (typeof env?.OPENAI_MODEL === 'string' && env.OPENAI_MODEL.trim()) ||
             MODEL,
