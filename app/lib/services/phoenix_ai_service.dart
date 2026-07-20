@@ -45,6 +45,52 @@ class PhoenixWritingFeedback {
   final int qualityScore;
 }
 
+class PhoenixConversationFeedback {
+  const PhoenixConversationFeedback({
+    required this.reply,
+    required this.isOfflineFallback,
+    this.provider = 'local',
+    this.model = '',
+    this.qualityReviewed = false,
+    this.qualityScore = 0,
+  });
+
+  final String reply;
+  final bool isOfflineFallback;
+  final String provider;
+  final String model;
+  final bool qualityReviewed;
+  final int qualityScore;
+}
+
+class PhoenixLearningReport {
+  const PhoenixLearningReport({
+    required this.summary,
+    required this.strengths,
+    required this.focusAreas,
+    required this.nextActions,
+    required this.recommendedWords,
+    required this.recommendedPattern,
+    required this.isOfflineFallback,
+    this.provider = 'local',
+    this.model = '',
+    this.qualityReviewed = false,
+    this.qualityScore = 0,
+  });
+
+  final String summary;
+  final List<String> strengths;
+  final List<String> focusAreas;
+  final List<String> nextActions;
+  final List<String> recommendedWords;
+  final String recommendedPattern;
+  final bool isOfflineFallback;
+  final String provider;
+  final String model;
+  final bool qualityReviewed;
+  final int qualityScore;
+}
+
 class PhoenixAiService {
   PhoenixAiService({
     http.Client? client,
@@ -73,35 +119,25 @@ class PhoenixAiService {
     }
 
     try {
-      final response = await _client
-          .post(
-            endpoint,
-            headers: const {'content-type': 'application/json'},
-            body: jsonEncode({
-              'mode': 'guide',
-              'text': answer,
-              'language': language,
-              'journeyId': journeyId,
-              'learnerProfile': learnerProfile,
-              'conversation': conversation,
-            }),
-          )
-          .timeout(timeout);
-
-      final body = _decodeObject(response.body);
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final reply = body['reply'];
-        if (reply is String && reply.trim().isNotEmpty) {
-          final quality = _readObject(body, 'quality');
-          return PhoenixGuideFeedback(
-            reply: reply.trim(),
-            isOfflineFallback: false,
-            provider: _readText(body, 'provider', 'cloudflare'),
-            model: _readText(body, 'model', ''),
-            qualityReviewed: quality['reviewed'] == true,
-            qualityScore: _readInt(quality, 'score'),
-          );
-        }
+      final body = await _post({
+        'mode': 'guide',
+        'text': answer,
+        'language': language,
+        'journeyId': journeyId,
+        'learnerProfile': learnerProfile,
+        'conversation': conversation,
+      });
+      final reply = body['reply'];
+      if (reply is String && reply.trim().isNotEmpty) {
+        final quality = _readObject(body, 'quality');
+        return PhoenixGuideFeedback(
+          reply: reply.trim(),
+          isOfflineFallback: false,
+          provider: _readText(body, 'provider', 'cloudflare'),
+          model: _readText(body, 'model', ''),
+          qualityReviewed: quality['reviewed'] == true,
+          qualityScore: _readInt(quality, 'score'),
+        );
       }
     } catch (_) {
       // Fall through to the transparent local response below.
@@ -131,25 +167,15 @@ class PhoenixAiService {
     }
 
     try {
-      final response = await _client
-          .post(
-            endpoint,
-            headers: const {'content-type': 'application/json'},
-            body: jsonEncode({
-              'mode': 'writing',
-              'text': writing,
-              'language': language,
-              'journeyId': journeyId,
-              'learnerProfile': learnerProfile,
-            }),
-          )
-          .timeout(timeout);
-
-      final body = _decodeObject(response.body);
+      final body = await _post({
+        'mode': 'writing',
+        'text': writing,
+        'language': language,
+        'journeyId': journeyId,
+        'learnerProfile': learnerProfile,
+      });
       final feedback = _readObject(body, 'feedback');
-      if (response.statusCode >= 200 &&
-          response.statusCode < 300 &&
-          feedback.isNotEmpty) {
+      if (feedback.isNotEmpty) {
         final quality = _readObject(body, 'quality');
         return PhoenixWritingFeedback(
           corrected: _readText(feedback, 'corrected', writing),
@@ -185,6 +211,126 @@ class PhoenixAiService {
     );
   }
 
+  Future<PhoenixConversationFeedback> practiceConversation({
+    required String text,
+    required String language,
+    String journeyId = 'beijing-forbidden-city',
+    Map<String, dynamic> learnerProfile = const <String, dynamic>{},
+    List<Map<String, String>> conversation = const <Map<String, String>>[],
+  }) async {
+    final speech = text.trim();
+    if (speech.length < 2) {
+      return const PhoenixConversationFeedback(
+        reply: '先说一句你现在想到的话，我们从那里开始聊。',
+        isOfflineFallback: true,
+      );
+    }
+
+    try {
+      final body = await _post({
+        'mode': 'conversation',
+        'text': speech,
+        'language': language,
+        'journeyId': journeyId,
+        'learnerProfile': learnerProfile,
+        'conversation': conversation,
+      });
+      final reply = body['reply'];
+      if (reply is String && reply.trim().isNotEmpty) {
+        final quality = _readObject(body, 'quality');
+        return PhoenixConversationFeedback(
+          reply: reply.trim(),
+          isOfflineFallback: false,
+          provider: _readText(body, 'provider', 'cloudflare'),
+          model: _readText(body, 'model', ''),
+          qualityReviewed: quality['reviewed'] == true,
+          qualityScore: _readInt(quality, 'score'),
+        );
+      }
+    } catch (_) {
+      // Fall through to a transparent local response.
+    }
+
+    return PhoenixConversationFeedback(
+      reply: '本地建议：你刚才说的是“$speech”。可以再补充一个原因或具体例子，让我们继续聊下去。',
+      isOfflineFallback: true,
+    );
+  }
+
+  Future<PhoenixLearningReport> buildLearningReport({
+    required String text,
+    required String language,
+    String journeyId = 'beijing-forbidden-city',
+    Map<String, dynamic> learnerProfile = const <String, dynamic>{},
+  }) async {
+    final learning = text.trim();
+    if (learning.length < 2) {
+      return const PhoenixLearningReport(
+        summary: '学习记录还不够，完成一次回答或写作后再生成报告。',
+        strengths: <String>[],
+        focusAreas: <String>[],
+        nextActions: <String>['先完成一次 Journey 回答或写作练习。'],
+        recommendedWords: <String>[],
+        recommendedPattern: '',
+        isOfflineFallback: true,
+      );
+    }
+
+    try {
+      final body = await _post({
+        'mode': 'learning',
+        'text': learning,
+        'language': language,
+        'journeyId': journeyId,
+        'learnerProfile': learnerProfile,
+      });
+      final report = _readObject(body, 'report');
+      if (report.isNotEmpty) {
+        final quality = _readObject(body, 'quality');
+        return PhoenixLearningReport(
+          summary: _readText(report, 'summary', '学习记录已整理。'),
+          strengths: _readStringList(report, 'strengths'),
+          focusAreas: _readStringList(report, 'focusAreas'),
+          nextActions: _readStringList(report, 'nextActions'),
+          recommendedWords: _readStringList(report, 'recommendedWords'),
+          recommendedPattern: _readText(report, 'recommendedPattern', ''),
+          isOfflineFallback: false,
+          provider: _readText(body, 'provider', 'cloudflare'),
+          model: _readText(body, 'model', ''),
+          qualityReviewed: quality['reviewed'] == true,
+          qualityScore: _readInt(quality, 'score'),
+        );
+      }
+    } catch (_) {
+      // Fall through to a transparent local response.
+    }
+
+    return const PhoenixLearningReport(
+      summary: '目前无法连接 PhoenixLearningAgent，学习资料仍保存在本机。',
+      strengths: <String>[],
+      focusAreas: <String>['稍后重新生成完整学习分析。'],
+      nextActions: <String>['复习本次 Journey 的生词并再写两句话。'],
+      recommendedWords: <String>[],
+      recommendedPattern: '因为……，所以……',
+      isOfflineFallback: true,
+    );
+  }
+
+  Future<Map<String, dynamic>> _post(Map<String, dynamic> payload) async {
+    final response = await _client
+        .post(
+          endpoint,
+          headers: const {'content-type': 'application/json'},
+          body: jsonEncode(payload),
+        )
+        .timeout(timeout);
+    final body = _decodeObject(response.body);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw StateError(_readText(body, 'error', 'Phoenix AI 请求失败。'));
+    }
+    return body;
+  }
+
   Map<String, dynamic> _decodeObject(String source) {
     final value = jsonDecode(source);
     return value is Map<String, dynamic> ? value : <String, dynamic>{};
@@ -210,6 +356,16 @@ class PhoenixAiService {
   int _readInt(Map<String, dynamic> source, String key) {
     final value = source[key];
     return value is num ? value.round() : 0;
+  }
+
+  List<String> _readStringList(Map<String, dynamic> source, String key) {
+    final value = source[key];
+    if (value is! List) return const <String>[];
+    return value
+        .whereType<String>()
+        .map((item) => item.trim())
+        .where((item) => item.isNotEmpty)
+        .toList(growable: false);
   }
 
   String _localGuideReply(String answer) {
