@@ -1,0 +1,70 @@
+name: Apply mobile layout fix
+
+on:
+  push:
+    branches:
+      - feature/seven-day-journey-library
+    paths:
+      - .github/workflows/apply-mobile-layout-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/seven-day-journey-library
+          fetch-depth: 0
+
+      - name: Apply adaptive Words and Discovery layout
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          journey_path = Path('app/lib/screens/journey_screen.dart')
+          journey = journey_path.read_text(encoding='utf-8')
+
+          old_ratio = """          final ratio = cellWidth / cellHeight.clamp(38.0, 70.0);"""
+          new_ratio = """          final safeCellHeight = math.max(1.0, cellHeight);
+          final ratio = cellWidth / safeCellHeight;"""
+          if old_ratio not in journey:
+              raise SystemExit('Words grid ratio target not found')
+          journey = journey.replace(old_ratio, new_ratio, 1)
+
+          old_discovery = """                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: _experience.discoveries"""
+          new_discovery = """                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: _experience.discoveries"""
+          if old_discovery not in journey:
+              raise SystemExit('Discovery spacing target not found')
+          journey = journey.replace(old_discovery, new_discovery, 1)
+          journey_path.write_text(journey, encoding='utf-8')
+
+          test_path = Path('worker/one_screen_layout.test.mjs')
+          test_source = test_path.read_text(encoding='utf-8')
+          old_test = """  assert.match(journey, /MainAxisAlignment\\.spaceBetween/);"""
+          new_test = """  assert.doesNotMatch(journey, /MainAxisAlignment\\.spaceBetween/);
+  assert.doesNotMatch(journey, /cellHeight\\.clamp\\(38\\.0, 70\\.0\\)/);
+  assert.match(journey, /safeCellHeight = math\\.max\\(1\\.0, cellHeight\\)/);"""
+          if old_test not in test_source:
+              raise SystemExit('Layout regression assertion target not found')
+          test_source = test_source.replace(old_test, new_test, 1)
+          test_path.write_text(test_source, encoding='utf-8')
+          PY
+
+      - name: Commit layout fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-mobile-layout-fix.yml
+          git add app/lib/screens/journey_screen.dart worker/one_screen_layout.test.mjs
+          git commit -m "fix: fill mobile Words and Discovery layouts"
+          git push origin HEAD:feature/seven-day-journey-library
