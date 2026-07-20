@@ -9,16 +9,24 @@ class JourneyShareCopy {
   static const productionUrl =
       'https://phoenix-journeys-alpha.7hn5tyrjgh.workers.dev/';
 
-  static String title({required bool traditional}) {
-    return traditional ? 'Phoenix Journeys · 北京紫禁城' : 'Phoenix Journeys · 北京紫禁城';
+  static String title({
+    required bool traditional,
+    String city = '北京',
+    String place = '紫禁城',
+  }) {
+    return 'Phoenix Journeys · $city$place';
   }
 
-  static String message({required bool traditional}) {
+  static String message({
+    required bool traditional,
+    String city = '北京',
+    String place = '紫禁城',
+  }) {
     if (traditional) {
-      return '我在 Phoenix Journeys 完成了「北京・紫禁城」中文旅程，點亮北京並獲得了城市印章 🔥\n\n'
+      return '我在 Phoenix Journeys 完成了「$city・$place」中文旅程，點亮$city並獲得了城市印章 🔥\n\n'
           '一起從一門語言出發，探索世界：\n$productionUrl';
     }
-    return '我在 Phoenix Journeys 完成了「北京·紫禁城」中文旅程，点亮北京并获得了城市印章 🔥\n\n'
+    return '我在 Phoenix Journeys 完成了「$city·$place」中文旅程，点亮$city并获得了城市印章 🔥\n\n'
         '一起从一门语言出发，探索世界：\n$productionUrl';
   }
 }
@@ -27,12 +35,16 @@ class JourneyShareButton extends StatefulWidget {
   const JourneyShareButton({
     super.key,
     required this.isTraditional,
+    this.city = '北京',
+    this.place = '紫禁城',
     this.compact = false,
     this.filled = true,
     this.label,
   });
 
   final bool isTraditional;
+  final String city;
+  final String place;
   final bool compact;
   final bool filled;
   final String? label;
@@ -66,12 +78,18 @@ class _JourneyShareButtonState extends State<JourneyShareButton> {
         ShareParams(
           title: JourneyShareCopy.title(
             traditional: widget.isTraditional,
+            city: widget.city,
+            place: widget.place,
           ),
           subject: JourneyShareCopy.title(
             traditional: widget.isTraditional,
+            city: widget.city,
+            place: widget.place,
           ),
           text: JourneyShareCopy.message(
             traditional: widget.isTraditional,
+            city: widget.city,
+            place: widget.place,
           ),
           sharePositionOrigin: _shareOrigin(),
         ),
@@ -96,8 +114,7 @@ class _JourneyShareButtonState extends State<JourneyShareButton> {
 
   @override
   Widget build(BuildContext context) {
-    final label = widget.label ??
-        (widget.isTraditional ? '分享旅程' : '分享旅程');
+    final label = widget.label ?? '分享旅程';
     final icon = _sharing
         ? SizedBox(
             width: widget.compact ? 14 : 16,

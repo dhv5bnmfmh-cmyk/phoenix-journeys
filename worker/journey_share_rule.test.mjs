@@ -27,7 +27,9 @@ test('share copy points to the stable production experience', () => {
     button,
     /https:\/\/phoenix-journeys-alpha\.7hn5tyrjgh\.workers\.dev\//,
   );
-  assert.match(button, /北京·紫禁城/);
+  assert.match(button, /String city = '北京'/);
+  assert.match(button, /String place = '紫禁城'/);
+  assert.match(button, /\$city·\$place/);
   assert.match(button, /城市印章/);
 });
 
@@ -37,16 +39,18 @@ test('journey completion page offers sharing without replacing replay', () => {
   const body = journey.slice(start, end);
 
   assert.match(body, /JourneyShareButton\(/);
+  assert.match(body, /city: _experience\.city/);
   assert.match(body, /分享旅程/);
   assert.match(body, /_restartJourney/);
 });
 
-test('passport shows sharing only after the Beijing stamp is earned', () => {
-  const start = passport.indexOf('class _BeijingStampCard');
-  const end = passport.indexOf('class _PassportGridPainter', start);
-  const body = passport.slice(start, end);
+test('passport shares earned city stamps and protects locked journeys', () => {
+  const start = passport.indexOf('class _CityStampCard');
+  const body = passport.slice(start);
 
-  assert.match(body, /if \(earned\) \.\.\.[\s\S]*JourneyShareButton\(/);
-  assert.match(body, /分享北京印章/);
-  assert.match(body, /if \(!earned\) \.\.\.[\s\S]*开始北京 Journey/);
+  assert.match(body, /earned\s*\?\s*Row\([\s\S]*JourneyShareButton\(/);
+  assert.match(body, /city: journey\.city/);
+  assert.match(body, /分享印章/);
+  assert.match(body, /isToday \|\| active/);
+  assert.match(body, /等待成为今日旅程/);
 });

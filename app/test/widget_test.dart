@@ -22,8 +22,8 @@ void main() {
     expect(find.text('正在准备你的旅程…'), findsOneWidget);
   });
 
-  testWidgets('shows the first Beijing journey after loading', (tester) async {
-    final state = AppState();
+  testWidgets('shows the Beijing journey on its rotation day', (tester) async {
+    final state = AppState(clock: () => DateTime(2026, 7, 18));
     await state.load();
 
     await tester.pumpWidget(

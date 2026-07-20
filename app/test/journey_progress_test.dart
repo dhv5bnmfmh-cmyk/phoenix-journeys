@@ -55,9 +55,12 @@ void main() {
     expect(state.beijingJourneyFurthestStepLabel, '回忆');
   });
 
-  test('completion earns a permanent stamp and restart keeps it', () async {
-    final state = AppState();
+  test('completion earns a permanent Beijing stamp and restart keeps it', () async {
+    DateTime clock() => DateTime(2026, 7, 18);
+    final state = AppState(clock: clock);
     await state.load();
+    expect(state.activeJourneyId, 'beijing-forbidden-city');
+
     await state.saveJourneyProgress(
       step: 5,
       wonder: '草稿一',
@@ -70,7 +73,7 @@ void main() {
     expect(state.journeyCompleted, isTrue);
     expect(state.beijingStampEarned, isTrue);
     expect(state.beijingJourneyStep, AppState.beijingJourneyLastStep);
-    expect(state.memories.first, '北京的红墙');
+    expect(state.memories.first, '北京 · 紫禁城｜北京的红墙');
     expect(state.wonderDraft, isEmpty);
 
     await state.restartJourney();
@@ -79,13 +82,13 @@ void main() {
     expect(state.beijingStampEarned, isTrue);
     expect(state.beijingJourneyStep, 0);
     expect(state.beijingJourneyFurthestStep, 0);
-    expect(state.memories.first, '北京的红墙');
+    expect(state.memories.first, '北京 · 紫禁城｜北京的红墙');
 
-    final restored = AppState();
+    final restored = AppState(clock: clock);
     await restored.load();
 
     expect(restored.journeyCompleted, isFalse);
     expect(restored.beijingStampEarned, isTrue);
-    expect(restored.memories.first, '北京的红墙');
+    expect(restored.memories.first, '北京 · 紫禁城｜北京的红墙');
   });
 }
