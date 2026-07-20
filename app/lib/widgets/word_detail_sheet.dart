@@ -29,6 +29,21 @@ Future<void> showWordDetail(
       ? 0
       : requestedIndex.clamp(0, studyEntries.length - 1);
   final speedController = narrationController ?? NarrationController();
+  final appState = context.read<AppState>();
+
+  Future<bool> speakWithController(WordEntry currentEntry) {
+    return speedController.speakWord(
+      appState.displayText(currentEntry.word),
+      languageCode: appState.isTraditional ? 'zh-TW' : 'zh-CN',
+    );
+  }
+
+  final effectiveOnSpeak = narrationController == null
+      ? () => speakWithController(entry)
+      : onSpeak;
+  final effectiveOnSpeakEntry = narrationController == null
+      ? speakWithController
+      : onSpeakEntry;
 
   return showModalBottomSheet<void>(
     context: context,
@@ -49,8 +64,8 @@ Future<void> showWordDetail(
               narrationController: speedController,
               entries: studyEntries,
               initialIndex: safeIndex,
-              onSpeak: onSpeak,
-              onSpeakEntry: onSpeakEntry,
+              onSpeak: effectiveOnSpeak,
+              onSpeakEntry: effectiveOnSpeakEntry,
             ),
           ),
         ),
