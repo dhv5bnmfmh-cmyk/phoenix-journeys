@@ -15,10 +15,84 @@ const JOURNEYS = {
     reflection:
       '如果你能在故宫安静地停留一个小时，你最想观察哪里？为什么？',
   },
+  'shanghai-bund': {
+    city: '上海',
+    place: '外滩',
+    context: [
+      '学习者沿黄浦江观察外滩历史建筑、滨水空间与浦东现代天际线。',
+      'Journey 强调外滩见证了金融、贸易和城市发展，也呈现旧建筑与新城市隔江对话。',
+      '学习者刚读完故事、生词与 Discovery 内容。',
+    ].join(''),
+    reflection:
+      '如果你能在外滩选择一个位置停留一小时，你想面对老建筑还是浦东天际线？为什么？',
+  },
+  'xian-city-wall': {
+    city: '西安',
+    place: '城墙',
+    context: [
+      '学习者登上西安城墙，观察城门、宽阔墙顶、防御结构与古都城市边界。',
+      'Journey 引导学习者比较城内老街与城外现代城市，并理解城墙从防御设施到文化空间的变化。',
+      '学习者刚读完故事、生词与 Discovery 内容。',
+    ].join(''),
+    reflection:
+      '站在西安城墙上，你更想观察城内的老街还是城外的现代城市？为什么？',
+  },
+  'hangzhou-west-lake': {
+    city: '杭州',
+    place: '西湖',
+    context: [
+      '学习者沿苏堤观察湖面、桥、柳树、亭台、宝塔与园林。',
+      'Journey 强调西湖是自然、历代人工营造、诗画命名和城市生活共同形成的文化景观。',
+      '学习者刚读完故事、生词与 Discovery 内容。',
+    ].join(''),
+    reflection:
+      '如果你能为西湖的一处风景重新命名，你会选择什么名字？为什么？',
+  },
+  'chengdu-kuanzhai-alley': {
+    city: '成都',
+    place: '宽窄巷子',
+    context: [
+      '学习者走进宽巷、窄巷和井巷，观察院落、街巷、茶馆与日常生活。',
+      'Journey 引导学习者理解历史街区如何在保护旧空间的同时继续服务今天的城市生活。',
+      '学习者刚读完故事、生词与 Discovery 内容。',
+    ].join(''),
+    reflection:
+      '在宽巷、窄巷和井巷中，你最想在哪一条巷子停下来？为什么？',
+  },
+  'nanjing-qinhuai-river': {
+    city: '南京',
+    place: '秦淮河',
+    context: [
+      '学习者沿秦淮河观察夫子庙、古桥、历史街区、江南贡院与夜晚灯影。',
+      'Journey 将科举教育、秦淮灯会、剪纸和传统小吃视为仍在城市中延续的文化记忆。',
+      '学习者刚读完故事、生词与 Discovery 内容。',
+    ].join(''),
+    reflection:
+      '如果你夜游秦淮河，最想停在哪一种文化场景前：古桥、贡院、灯会还是小吃街？',
+  },
+  'guangzhou-chen-clan-academy': {
+    city: '广州',
+    place: '陈家祠',
+    context: [
+      '学习者靠近陈家祠的屋脊、门窗、梁架和墙面，观察密集的岭南建筑装饰。',
+      'Journey 重点介绍木雕、砖雕、石雕、陶塑与灰塑，并理解建筑如何保存宗族、教育和工艺记忆。',
+      '学习者刚读完故事、生词与 Discovery 内容。',
+    ].join(''),
+    reflection:
+      '木雕、砖雕、陶塑和灰塑中，你最想近距离观察哪一种？为什么？',
+  },
+};
+
+const UNKNOWN_JOURNEY = {
+  city: '当前城市',
+  place: '今日目的地',
+  context:
+    '学习者刚完成一段 Journey。只回应学习者已经写出的观察，不补充未经 Journey 提供的具体历史事实。',
+  reflection: '这段旅程中，哪个细节最值得继续观察？为什么？',
 };
 
 export function getJourneyContext(journeyId) {
-  return JOURNEYS[journeyId] ?? JOURNEYS['beijing-forbidden-city'];
+  return JOURNEYS[journeyId] ?? UNKNOWN_JOURNEY;
 }
 
 export function buildGuideMessages({
