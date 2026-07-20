@@ -1,4 +1,4 @@
-name: Apply final word audio fix
+name: Apply final word audio fix v2
 
 on:
   push:
@@ -26,37 +26,35 @@ jobs:
 
           narration_path = Path('app/lib/services/narration_controller.dart')
           narration = narration_path.read_text(encoding='utf-8')
-          narration = narration.replace(
-              """          for (final preferredName in preferredNames) {
+          broken = """          for (final preferredName in preferredNames) {
             if (lowerName.contains(preferredName)) score += 42;
           }
           }
 
-          if (score > bestScore""",
-              """          for (final preferredName in preferredNames) {
+          if (score > bestScore"""
+          fixed = """          for (final preferredName in preferredNames) {
             if (lowerName.contains(preferredName)) score += 42;
           }
 
-          if (score > bestScore""",
-              1,
-          )
-          narration_path.write_text(narration, encoding='utf-8')
+          if (score > bestScore"""
+          if broken not in narration:
+              raise SystemExit('voice brace target missing')
+          narration_path.write_text(narration.replace(broken, fixed, 1), encoding='utf-8')
 
           journey_path = Path('app/lib/screens/journey_screen.dart')
           journey = journey_path.read_text(encoding='utf-8')
-          journey = journey.replace(
-              """    await showWordDetail(
+          target = """    await showWordDetail(
       context,
       entry,
-      entries: _experience.words,""",
-              """    await showWordDetail(
+      entries: _experience.words,"""
+          replacement = """    await showWordDetail(
       context,
       entry,
       narrationController: _narration,
-      entries: _experience.words,""",
-              1,
-          )
-          journey_path.write_text(journey, encoding='utf-8')
+      entries: _experience.words,"""
+          if target not in journey:
+              raise SystemExit('word detail call target missing')
+          journey_path.write_text(journey.replace(target, replacement, 1), encoding='utf-8')
           PY
 
       - name: Commit fix
