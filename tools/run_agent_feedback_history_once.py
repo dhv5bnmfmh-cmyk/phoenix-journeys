@@ -8,8 +8,8 @@ if 'Future<void> saveGuideFeedback' in state and 'secondaryButtonText' in screen
 
 exec(
     compile(
-        Path('tools/apply_agent_feedback_history.py').read_text(encoding='utf-8'),
-        'tools/apply_agent_feedback_history.py',
+        Path('tools/apply_agent_feedback_history_v2.py').read_text(encoding='utf-8'),
+        'tools/apply_agent_feedback_history_v2.py',
         'exec',
     )
 )
