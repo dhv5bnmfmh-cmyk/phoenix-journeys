@@ -615,27 +615,31 @@ class NarrationController extends ChangeNotifier {
       if (availableVoices is List) {
         Map<String, String>? bestVoice;
         var bestScore = -1;
+        final requestedPrefix =
+            languageCode.toLowerCase().split(RegExp('[-_]')).first;
         for (final dynamic rawVoice in availableVoices) {
           if (rawVoice is! Map) continue;
           final name = '${rawVoice['name'] ?? ''}';
           final locale = '${rawVoice['locale'] ?? rawVoice['language'] ?? ''}';
           final lowerName = name.toLowerCase();
           final lowerLocale = locale.toLowerCase();
-          if (!lowerLocale.startsWith('zh')) continue;
+          if (!lowerLocale.startsWith(requestedPrefix)) continue;
 
           var score = 10;
           if (lowerLocale == languageCode.toLowerCase()) score += 80;
           if (lowerName.contains('natural')) score += 60;
           if (lowerName.contains('premium')) score += 50;
           if (lowerName.contains('enhanced')) score += 45;
-          for (final preferredName in const [
-            'xiaoxiao',
-            'tingting',
-            'meijia',
-            'yunxi',
-            'sinji',
-          ]) {
-            if (lowerName.contains(preferredName)) score += 35;
+          if (requestedPrefix == 'zh') {
+            for (final preferredName in const [
+              'xiaoxiao',
+              'tingting',
+              'meijia',
+              'yunxi',
+              'sinji',
+            ]) {
+              if (lowerName.contains(preferredName)) score += 35;
+            }
           }
 
           if (score > bestScore && name.isNotEmpty && locale.isNotEmpty) {

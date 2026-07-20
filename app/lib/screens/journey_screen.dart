@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -409,6 +410,27 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
+  String get _nativeSupportLanguageCode {
+    return switch (_appState.translationLanguage) {
+      '英语' => 'en-US',
+      '中文解释' => _appState.isTraditional ? 'zh-TW' : 'zh-CN',
+      _ => 'vi-VN',
+    };
+  }
+
+  Future<void> _speakSupportText(
+    String text, {
+    required String languageCode,
+  }) async {
+    final spoken = await _narration.speakWord(
+      text,
+      languageCode: languageCode,
+    );
+    if (!spoken && mounted) {
+      _showAgentMessage('当前设备暂时无法朗读这段文字。');
+    }
+  }
+
   Future<void> _showReadingSupport({
     required String title,
     required String pinyin,
@@ -434,11 +456,65 @@ class _JourneyScreenState extends State<JourneyScreen>
               nativeLabel: nativeLabel,
               nativeText: nativeText,
               english: english,
+              onSpeakNative: () => _speakSupportText(
+                nativeText,
+                languageCode: _nativeSupportLanguageCode,
+              ),
+              onSpeakEnglish: () => _speakSupportText(
+                english,
+                languageCode: 'en-US',
+              ),
             ),
           ),
         );
       },
     );
+  }
+
+  double _fitJourneyTextSize(
+    BuildContext context,
+    BoxConstraints constraints,
+    List<String> texts, {
+    required double minSize,
+    required double maxSize,
+    required double lineHeight,
+  }) {
+    if (texts.isEmpty || !constraints.hasBoundedHeight) return minSize;
+
+    final availableWidth =
+        (constraints.maxWidth - 58).clamp(120.0, constraints.maxWidth).toDouble();
+    final availableHeight = constraints.maxHeight;
+    final textScaler = MediaQuery.textScalerOf(context);
+    final direction = Directionality.of(context);
+    var low = minSize;
+    var high = maxSize;
+
+    for (var iteration = 0; iteration < 10; iteration += 1) {
+      final candidate = (low + high) / 2;
+      var totalHeight = 0.0;
+      for (final text in texts) {
+        final painter = TextPainter(
+          text: TextSpan(
+            text: text,
+            style: TextStyle(
+              fontSize: candidate,
+              height: lineHeight,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          textDirection: direction,
+          textScaler: textScaler,
+        )..layout(maxWidth: availableWidth);
+        totalHeight += math.max(18, painter.height) + 6;
+      }
+
+      if (totalHeight <= availableHeight) {
+        low = candidate;
+      } else {
+        high = candidate;
+      }
+    }
+    return low;
   }
 
   void _onWonderChanged(String _) {
@@ -715,55 +791,69 @@ class _JourneyScreenState extends State<JourneyScreen>
           ),
           const SizedBox(height: 2),
           Expanded(
-            child: AnimatedBuilder(
-              animation: _narration,
-              builder: (context, _) {
-                return Align(
-                  alignment: Alignment.topCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _journeyContent.storyParagraphs
-                        .asMap()
-                        .entries
-                        .map((entry) {
-                          final annotation = _experience.storyAnnotations[entry.key];
-                          final snapshot = _narration.highlightSnapshot;
-                          final isActive =
-                              snapshot?.contentId == 'story' &&
-                              snapshot?.itemId == 'story-${entry.key}';
-                          return _CompactTextBlock(
-                            index: entry.key + 1,
-                            active: isActive,
-                            onSupport: () => unawaited(
-                              _showReadingSupport(
-                                title: '故事第 ${entry.key + 1} 段',
-                                pinyin: annotation.pinyin,
-                                nativeLabel: annotation.nativeLabel(language),
-                                nativeText: annotation.nativeText(
-                                  language,
-                                  entry.value,
+            child: LayoutBuilder(
+              key: const ValueKey('adaptive-story-text-area'),
+              builder: (context, constraints) {
+                final fontSize = _fitJourneyTextSize(
+                  context,
+                  constraints,
+                  _journeyContent.storyParagraphs,
+                  minSize: 10.8,
+                  maxSize: 20,
+                  lineHeight: 1.22,
+                );
+                return AnimatedBuilder(
+                  animation: _narration,
+                  builder: (context, _) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: _journeyContent.storyParagraphs
+                          .asMap()
+                          .entries
+                          .map((entry) {
+                            final annotation =
+                                _experience.storyAnnotations[entry.key];
+                            final snapshot = _narration.highlightSnapshot;
+                            final isActive =
+                                snapshot?.contentId == 'story' &&
+                                snapshot?.itemId == 'story-${entry.key}';
+                            return _CompactTextBlock(
+                              index: entry.key + 1,
+                              active: isActive,
+                              onSupport: () => unawaited(
+                                _showReadingSupport(
+                                  title: '故事第 ${entry.key + 1} 段',
+                                  pinyin: annotation.pinyin,
+                                  nativeLabel: annotation.nativeLabel(language),
+                                  nativeText: annotation.nativeText(
+                                    language,
+                                    entry.value,
+                                  ),
+                                  english: annotation.english,
                                 ),
-                                english: annotation.english,
                               ),
-                            ),
-                            child: InteractiveStoryText(
-                              text: entry.value,
-                              entries: _experience.words,
-                              narrationController: _narration,
-                              highlightStart: isActive ? snapshot!.start : null,
-                              highlightEnd: isActive ? snapshot!.end : null,
-                              narrationContentId: 'story',
-                              narrationItemId: 'story-${entry.key}',
-                              style: const TextStyle(
-                                fontSize: 10.8,
-                                height: 1.18,
-                                fontWeight: FontWeight.w600,
+                              child: InteractiveStoryText(
+                                text: entry.value,
+                                entries: _experience.words,
+                                narrationController: _narration,
+                                highlightStart:
+                                    isActive ? snapshot!.start : null,
+                                highlightEnd: isActive ? snapshot!.end : null,
+                                narrationContentId: 'story',
+                                narrationItemId: 'story-${entry.key}',
+                                style: TextStyle(
+                                  fontSize: fontSize,
+                                  height: 1.22,
+                                  fontWeight: isActive
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          );
-                        })
-                        .toList(growable: false),
-                  ),
+                            );
+                          })
+                          .toList(growable: false),
+                    );
+                  },
                 );
               },
             ),
@@ -887,54 +977,68 @@ class _JourneyScreenState extends State<JourneyScreen>
           ),
           const SizedBox(height: 3),
           Expanded(
-            child: AnimatedBuilder(
-              animation: _narration,
-              builder: (context, _) {
-                return Align(
-                  alignment: Alignment.topCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _experience.discoveries
-                        .asMap()
-                        .entries
-                        .map((entry) {
-                          final item = entry.value;
-                          final snapshot = _narration.highlightSnapshot;
-                          final isActive =
-                              snapshot?.contentId == 'discovery' &&
-                              snapshot?.itemId == 'discovery-${entry.key}';
-                          return _CompactTextBlock(
-                            index: entry.key + 1,
-                            active: isActive,
-                            onSupport: () => unawaited(
-                              _showReadingSupport(
-                                title: '今日发现 ${entry.key + 1}',
-                                pinyin: item.pinyin,
-                                nativeLabel: item.nativeLabel(language),
-                                nativeText: item.nativeText(language),
-                                english: item.english,
+            child: LayoutBuilder(
+              key: const ValueKey('adaptive-discovery-text-area'),
+              builder: (context, constraints) {
+                final discoveryTexts = _experience.discoveries
+                    .map((item) => item.text)
+                    .toList(growable: false);
+                final fontSize = _fitJourneyTextSize(
+                  context,
+                  constraints,
+                  discoveryTexts,
+                  minSize: 9.9,
+                  maxSize: 19,
+                  lineHeight: 1.2,
+                );
+                return AnimatedBuilder(
+                  animation: _narration,
+                  builder: (context, _) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: _experience.discoveries
+                          .asMap()
+                          .entries
+                          .map((entry) {
+                            final item = entry.value;
+                            final snapshot = _narration.highlightSnapshot;
+                            final isActive =
+                                snapshot?.contentId == 'discovery' &&
+                                snapshot?.itemId == 'discovery-${entry.key}';
+                            return _CompactTextBlock(
+                              index: entry.key + 1,
+                              active: isActive,
+                              onSupport: () => unawaited(
+                                _showReadingSupport(
+                                  title: '今日发现 ${entry.key + 1}',
+                                  pinyin: item.pinyin,
+                                  nativeLabel: item.nativeLabel(language),
+                                  nativeText: item.nativeText(language),
+                                  english: item.english,
+                                ),
                               ),
-                            ),
-                            child: InteractiveStoryText(
-                              text: item.text,
-                              entries: _experience.words,
-                              narrationController: _narration,
-                              highlightStart: isActive ? snapshot!.start : null,
-                              highlightEnd: isActive ? snapshot!.end : null,
-                              narrationContentId: 'discovery',
-                              narrationItemId: 'discovery-${entry.key}',
-                              style: TextStyle(
-                                fontSize: 9.9,
-                                height: 1.12,
-                                fontWeight: isActive
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
+                              child: InteractiveStoryText(
+                                text: item.text,
+                                entries: _experience.words,
+                                narrationController: _narration,
+                                highlightStart:
+                                    isActive ? snapshot!.start : null,
+                                highlightEnd: isActive ? snapshot!.end : null,
+                                narrationContentId: 'discovery',
+                                narrationItemId: 'discovery-${entry.key}',
+                                style: TextStyle(
+                                  fontSize: fontSize,
+                                  height: 1.2,
+                                  fontWeight: isActive
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          );
-                        })
-                        .toList(growable: false),
-                  ),
+                            );
+                          })
+                          .toList(growable: false),
+                    );
+                  },
                 );
               },
             ),
@@ -1273,6 +1377,8 @@ class _ReadingSupportSheet extends StatelessWidget {
     required this.nativeLabel,
     required this.nativeText,
     required this.english,
+    required this.onSpeakNative,
+    required this.onSpeakEnglish,
   });
 
   final String title;
@@ -1280,6 +1386,8 @@ class _ReadingSupportSheet extends StatelessWidget {
   final String nativeLabel;
   final String nativeText;
   final String english;
+  final Future<void> Function() onSpeakNative;
+  final Future<void> Function() onSpeakEnglish;
 
   @override
   Widget build(BuildContext context) {
@@ -1295,12 +1403,20 @@ class _ReadingSupportSheet extends StatelessWidget {
         _SupportLine(label: '拼音', text: pinyin, color: PhoenixTheme.red),
         const SizedBox(height: 5),
         _SupportLine(
+          key: const ValueKey('support-native-audio'),
           label: nativeLabel,
           text: nativeText,
           color: PhoenixTheme.translation,
+          onSpeak: onSpeakNative,
         ),
         const SizedBox(height: 5),
-        _SupportLine(label: 'English', text: english, color: PhoenixTheme.ai),
+        _SupportLine(
+          key: const ValueKey('support-english-audio'),
+          label: 'English',
+          text: english,
+          color: PhoenixTheme.ai,
+          onSpeak: onSpeakEnglish,
+        ),
       ],
     );
   }
@@ -1311,17 +1427,20 @@ class _SupportLine extends StatelessWidget {
     required this.label,
     required this.text,
     required this.color,
+    this.onSpeak,
+    super.key,
   });
 
   final String label;
   final String text;
   final Color color;
+  final Future<void> Function()? onSpeak;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(9, 7, 9, 8),
+      padding: const EdgeInsets.fromLTRB(9, 5, 5, 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: .07),
         borderRadius: BorderRadius.circular(10),
@@ -1329,15 +1448,38 @@ class _SupportLine extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 9.5,
-              fontWeight: FontWeight.w900,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              if (onSpeak != null)
+                IconButton(
+                  tooltip: '朗读 $label',
+                  onPressed: () => unawaited(onSpeak!()),
+                  visualDensity: VisualDensity.compact,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: const EdgeInsets.all(4),
+                  constraints: const BoxConstraints.tightFor(
+                    width: 30,
+                    height: 30,
+                  ),
+                  icon: Icon(
+                    Icons.volume_up_rounded,
+                    size: 18,
+                    color: color,
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 1),
           Text(text, style: const TextStyle(fontSize: 11.5, height: 1.28)),
         ],
       ),
