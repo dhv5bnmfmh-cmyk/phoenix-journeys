@@ -3,66 +3,46 @@ name: Flutter CI
 on:
   push:
     branches:
-      - main
       - "feature/**"
   pull_request:
     branches:
       - main
 
 permissions:
-  contents: write
-
-concurrency:
-  group: flutter-ci-${{ github.ref }}
-  cancel-in-progress: true
+  contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
-  verify:
+  diagnose:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: app
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
           ref: feature/seven-day-journey-library
-          fetch-depth: 0
+          fetch-depth: 1
+          show-progress: false
 
-      - name: Capture upgrade diagnostic
-        working-directory: ${{ github.workspace }}
+      - name: Run upgrade script
+        id: upgrade
+        continue-on-error: true
         run: |
-          set +e
           python3 .github/scripts/apply_adaptive_word_audio_upgrade.py > upgrade-diagnostic.txt 2>&1
-          status=$?
-          echo "$status" > upgrade-status.txt
-          cat upgrade-diagnostic.txt
-          exit 0
 
-      - name: Persist diagnostic or upgrade
-        working-directory: ${{ github.workspace }}
+      - name: Publish diagnostic
+        if: steps.upgrade.outcome != 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          status=$(cat upgrade-status.txt)
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout origin/main -- .github/workflows/flutter-ci.yml
-          git rm -f .github/workflows/apply-adaptive-word-audio-upgrade.yml
-          git rm -f .github/scripts/apply_adaptive_word_audio_upgrade.py
-          if [[ "$status" != "0" ]]; then
-            git checkout -- app/lib/services/narration_controller.dart app/lib/screens/journey_screen.dart app/lib/widgets/word_detail_sheet.dart worker/word_sheet_flow.test.mjs
-            rm -f worker/adaptive_word_audio_upgrade.test.mjs
-            mkdir -p docs
-            mv upgrade-diagnostic.txt docs/adaptive-word-audio-upgrade-error.txt
-            git add docs/adaptive-word-audio-upgrade-error.txt .github/workflows/flutter-ci.yml
-            git commit -m "chore: capture adaptive upgrade error"
-            git push origin HEAD:feature/seven-day-journey-library
-            exit 0
-          fi
-          rm -f upgrade-diagnostic.txt upgrade-status.txt
-          git add app/lib/services/narration_controller.dart app/lib/screens/journey_screen.dart app/lib/widgets/word_detail_sheet.dart worker/word_sheet_flow.test.mjs worker/adaptive_word_audio_upgrade.test.mjs .github/workflows/flutter-ci.yml
-          git commit -m "feat: add adaptive word details and unified narration speeds"
-          git push origin HEAD:feature/seven-day-journey-library
+          {
+            echo '### Adaptive word/audio upgrade diagnostic'
+            echo '```text'
+            cat upgrade-diagnostic.txt
+            echo '```'
+          } > comment.txt
+          gh pr comment 61 --body-file comment.txt
 
-      - name: Stop after diagnostic
-        run: echo "Diagnostic captured or upgrade committed."
+      - name: Fail when upgrade failed
+        if: steps.upgrade.outcome != 'success'
+        run: exit 1
