@@ -14,7 +14,7 @@ import {
   parseWritingFeedback,
 } from './agents/phoenix_writing_agent.mjs';
 import { PhoenixQualityAgent } from './agents/phoenix_quality_agent.mjs';
-import { safeLanguage } from './ai_model_utils.mjs';
+import { extractModelOutput, safeLanguage } from './ai_model_utils.mjs';
 import { OPENAI_DEFAULT_MODEL } from './ai/openai_responses_provider.mjs';
 
 function json(data, status = 200) {
@@ -183,6 +183,7 @@ export {
   PhoenixQualityAgent,
   buildGuideMessages,
   buildWritingMessages,
+  extractModelOutput,
   parseWritingFeedback,
   safeLearnerProfile,
 };
