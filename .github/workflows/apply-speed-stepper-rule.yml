@@ -1,20 +1,25 @@
 name: Apply synchronized speed stepper rule
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/seven-day-journey-library
+      - main
+    types:
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
 
 concurrency:
-  group: apply-speed-stepper-rule
+  group: apply-speed-stepper-rule-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
 jobs:
   apply:
-    if: github.actor != 'github-actions[bot]'
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feature/seven-day-journey-library'
     runs-on: ubuntu-latest
     steps:
       - name: Check out feature branch
@@ -59,5 +64,3 @@ jobs:
           git add -A
           git commit -m "feat: synchronize narration speed with step controls"
           git push origin HEAD:feature/seven-day-journey-library
-
-# Triggered after the workflow became available on the feature branch.
