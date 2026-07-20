@@ -27,7 +27,7 @@ void main() {
     expect(plan.indexForOffset(0), 0);
   });
 
-  test('offers natural player speed presets from 0.5x to 2x', () {
+  test('offers natural player speed presets from 0.5x to 1.5x', () {
     const options = NarrationController.speedOptions;
 
     expect(options.map((option) => option.label), [
@@ -36,11 +36,9 @@ void main() {
       '1.0×',
       '1.25×',
       '1.5×',
-      '1.75×',
-      '2.0×',
     ]);
     expect(options.first.rate, .5);
     expect(options[2].rate, 1.0);
-    expect(options.last.rate, 2.0);
+    expect(options.last.rate, 1.5);
   });
 }
