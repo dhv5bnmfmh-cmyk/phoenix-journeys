@@ -56,6 +56,19 @@
 4. 每个生词必须提供有效的 `partOfSpeech`、`translation` 与 `englishDefinition`，禁止用空值上线。
 5. 修改任一页的生词展示时，必须同步验证另一页并更新回归测试；违反规则时 CI 必须失败。
 
+## 永久 AI Agent 开发准则
+
+以下规则适用于 PhoenixGuideAgent、PhoenixWritingAgent、PhoenixQualityAgent 以及今后新增的任何 AI 功能：
+
+1. `PhoenixModelGateway` 是唯一模型入口；优先使用服务器端 `OPENAI_API_KEY` 调用 OpenAI Responses API，密钥缺失或请求失败时自动回退 Cloudflare Workers AI。
+2. OpenAI 请求必须设置 `store: false`，API 密钥只能保存在 Cloudflare Secret，禁止写入 Flutter、GitHub、日志、网页或任何客户端资料。
+3. `PhoenixGuideAgent` 只负责文化观察、语言引导和有依据的追问；回复必须针对学习者的具体内容，禁止模板化称赞和编造 Journey 之外的历史事实。
+4. `PhoenixWritingAgent` 只负责中文写作批改；不得为了显示修改而制造错误，必须区分“必要修改”和“更自然的可选表达”。
+5. `PhoenixQualityAgent` 为隐藏复核层；Guide 与 Writing 的在线结果都必须尝试复核，不合格时使用复核后的完整结果，复核故障时允许保留主 Agent 结果而不能让用户请求失败。
+6. 两个主 Agent 必须接收学习档案，包括辅助语言、简繁模式、收藏生词、已完成旅程、近期观察和近期写作问题，并限制传输数量与长度。
+7. 在线结果必须返回 `provider`、`model` 与 `quality` 状态；App 应显示“GPT · 已复核”“AI · 已复核”或明确的本地备用状态，不得假装使用了未配置的模型。
+8. 新增或修改 AI 架构时必须添加 Prompt、结构化输出、回退、隐私、学习记忆和质量复核测试；CI 失败时禁止合并。
+
 ## 禁止事项
 
 - 禁止直接在 `main` 开发或试验。
@@ -65,6 +78,7 @@
 - 禁止使用正式线上链接测试未完成的新功能。
 - 禁止绕过 `NarrationController` 直接在页面或组件中创建独立朗读状态。
 - 禁止把默认朗读速度改成慢速教学语音；默认必须保持 `1.0×` 本地自然语速。
+- 禁止在客户端或仓库中保存 `OPENAI_API_KEY`；禁止绕过 `PhoenixModelGateway` 直接从页面调用模型供应商。
 
 ## 核心回归功能
 
@@ -81,4 +95,6 @@
 - 思考、表达、旅程回忆键盘稳定
 - 进度保存
 - AI 导游与写作批改入口
+- OpenAI 主模型、Cloudflare 回退、PhoenixQualityAgent 和学习档案连接
+- AI 状态不得误报，客户端与仓库不得出现密钥
 - 城市印章和完成旅程流程
