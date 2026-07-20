@@ -1,20 +1,25 @@
 name: Apply native speech synchronization
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/seven-day-journey-library
+      - main
+    types:
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
 
 concurrency:
-  group: apply-native-speech-sync
+  group: apply-native-speech-sync-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
 jobs:
   apply:
-    if: github.actor != 'github-actions[bot]'
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feature/seven-day-journey-library'
     runs-on: ubuntu-latest
     steps:
       - name: Check out feature branch
