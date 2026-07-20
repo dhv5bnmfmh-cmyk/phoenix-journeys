@@ -1,4 +1,4 @@
-export const OPENAI_DEFAULT_MODEL = 'gpt-5.2';
+export const OPENAI_DEFAULT_MODEL = 'gpt-5.6';
 export const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
 
 function outputTextFromResponse(value) {
