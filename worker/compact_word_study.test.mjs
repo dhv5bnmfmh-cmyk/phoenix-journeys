@@ -20,12 +20,19 @@ test('word study sheet follows its content and advances through the list', () =>
   assert.match(journey, /onSpeakEntry:/);
 });
 
-test('Discovery cards fit available height and support word highlighting', () => {
+test('Words grid fills the available height without a fixed card cap', () => {
+  assert.doesNotMatch(journey, /cellHeight\.clamp\(38\.0, 70\.0\)/);
+  assert.match(journey, /safeCellHeight = math\.max\(1\.0, cellHeight\)/);
+  assert.match(journey, /final ratio = cellWidth \/ safeCellHeight/);
+});
+
+test('Discovery cards stay connected and support word highlighting', () => {
   const start = journey.indexOf('Widget _discoveryPage()');
   const end = journey.indexOf('Widget _wonderPage()', start);
   const discovery = journey.slice(start, end);
   assert.match(discovery, /adaptive-discovery-text-area/);
-  assert.match(discovery, /MainAxisAlignment\.spaceBetween/);
+  assert.doesNotMatch(discovery, /MainAxisAlignment\.spaceBetween/);
+  assert.match(discovery, /MainAxisAlignment\.start/);
   assert.match(discovery, /InteractiveStoryText/);
   assert.match(discovery, /fontSize: fontSize/);
   assert.match(discovery, /height: 1\.2/);
