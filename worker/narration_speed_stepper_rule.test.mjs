@@ -11,12 +11,19 @@ const journey = read('app/lib/screens/journey_screen.dart');
 const processDoc = read('docs/development-workflow.md');
 const template = read('.github/pull_request_template.md');
 
-test('Phoenix speed range is permanently limited to 0.5x through 1.5x', () => {
-  assert.match(controller, /NarrationSpeedOption\(label: '0\.5×', rate: \.5\)/);
-  assert.match(controller, /NarrationSpeedOption\(label: '1\.5×', rate: 1\.5\)/);
-  assert.doesNotMatch(controller, /NarrationSpeedOption\(label: '1\.75×'/);
-  assert.doesNotMatch(controller, /NarrationSpeedOption\(label: '2\.0×'/);
+test('Phoenix speed range uses exact 0.1 steps from 0.5x through 1.5x', () => {
+  const labels = [
+    '0.5×', '0.6×', '0.7×', '0.8×', '0.9×', '1.0×',
+    '1.1×', '1.2×', '1.3×', '1.4×', '1.5×',
+  ];
+  assert.match(controller, /static const double speechRateStep = 0\.1/);
+  for (const label of labels) {
+    assert.ok(controller.includes(`label: '${label}'`));
+  }
+  assert.doesNotMatch(controller, /0\.75×|1\.25×|1\.75×|2\.0×/);
   assert.match(controller, /multiplier\.clamp\(0\.5, 1\.5\)/);
+  assert.match(controller, /speedOptions\[index - 1\]\.rate/);
+  assert.match(controller, /speedOptions\[index \+ 1\]\.rate/);
 });
 
 test('the current speed has slow-down and speed-up choices directly underneath', () => {
@@ -46,9 +53,8 @@ test('changing speed synchronizes every narration controller and future controll
 
 test('permanent documents and pull requests enforce the same speed rule', () => {
   assert.match(processDoc, /0\.5×–1\.5×/);
-  assert.match(processDoc, /速度数字下方必须固定显示“减速”和“加速”/);
+  assert.match(processDoc, /固定只变化 `0\.1×`/);
   assert.match(processDoc, /所有现有与之后打开的朗读入口必须立刻同步/);
-  assert.match(template, /0\.5×–1\.5×/);
-  assert.match(template, /减速 \/ 加速/);
+  assert.match(template, /每次固定变化 `0\.1×`/);
   assert.match(template, /全部朗读入口同步同一倍率/);
 });
