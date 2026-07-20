@@ -16,6 +16,12 @@ class JourneyProgressHeader extends StatelessWidget {
   final List<String> labels;
   final ValueChanged<int> onStepSelected;
 
+  bool get _allAccessPreview {
+    final uri = Uri.base;
+    return uri.queryParameters['unlock'] == 'all' ||
+        uri.host.startsWith('phoenix-journeys-pr-');
+  }
+
   @override
   Widget build(BuildContext context) {
     final progress = (currentStep + 1) / labels.length;
@@ -90,6 +96,7 @@ class JourneyProgressHeader extends StatelessWidget {
   }
 
   void _showSteps(BuildContext context) {
+    final allAccess = _allAccessPreview;
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -99,14 +106,17 @@ class JourneyProgressHeader extends StatelessWidget {
             shrinkWrap: true,
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
             children: [
-              const Text(
-                '选择学习步骤',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+              Text(
+                allAccess ? '选择学习步骤 · 体验全开放' : '选择学习步骤',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(height: 8),
               ...labels.asMap().entries.map((entry) {
                 final index = entry.key;
-                final enabled = index <= furthestStep;
+                final enabled = allAccess || index <= furthestStep;
                 final selected = index == currentStep;
 
                 return ListTile(
