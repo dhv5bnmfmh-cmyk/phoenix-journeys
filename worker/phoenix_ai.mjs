@@ -2,15 +2,20 @@ import {
   PhoenixGuideAgent,
   GUIDE_LIMIT,
   GUIDE_MODEL,
+  GUIDE_FALLBACK_MODEL,
   buildGuideMessages,
 } from './agents/phoenix_guide_agent.mjs';
 import {
   PhoenixWritingAgent,
   WRITING_LIMIT,
+  WRITING_MODEL,
+  WRITING_FALLBACK_MODEL,
   buildWritingMessages,
   parseWritingFeedback,
 } from './agents/phoenix_writing_agent.mjs';
-import { extractModelOutput, safeLanguage } from './ai_model_utils.mjs';
+import { PhoenixQualityAgent } from './agents/phoenix_quality_agent.mjs';
+import { safeLanguage } from './ai_model_utils.mjs';
+import { OPENAI_DEFAULT_MODEL } from './ai/openai_responses_provider.mjs';
 
 function json(data, status = 200) {
   return Response.json(data, {
@@ -26,7 +31,7 @@ function safeConversation(value) {
   if (!Array.isArray(value)) return [];
 
   return value
-    .slice(-6)
+    .slice(-8)
     .filter(
       (item) =>
         item &&
@@ -36,8 +41,45 @@ function safeConversation(value) {
     )
     .map((item) => ({
       role: item.role,
-      content: item.content.trim().slice(0, 800),
+      content: item.content.trim().slice(0, 1000),
     }));
+}
+
+function safeStringList(value, { limit = 8, itemLimit = 500 } = {}) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item) => typeof item === 'string' && item.trim())
+    .slice(-limit)
+    .map((item) => item.trim().slice(0, itemLimit));
+}
+
+function safeLearnerProfile(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return {
+    interfaceLanguage:
+      typeof value.interfaceLanguage === 'string'
+        ? value.interfaceLanguage.slice(0, 40)
+        : '',
+    scriptMode:
+      typeof value.scriptMode === 'string' ? value.scriptMode.slice(0, 24) : '',
+    currentLevel:
+      typeof value.currentLevel === 'string'
+        ? value.currentLevel.slice(0, 80)
+        : '根据本次文字动态判断',
+    savedWords: safeStringList(value.savedWords, { limit: 40, itemLimit: 40 }),
+    completedJourneys: safeStringList(value.completedJourneys, {
+      limit: 24,
+      itemLimit: 120,
+    }),
+    recentGuideObservations: safeStringList(value.recentGuideObservations, {
+      limit: 8,
+      itemLimit: 500,
+    }),
+    recentWritingInsights: safeStringList(value.recentWritingInsights, {
+      limit: 8,
+      itemLimit: 600,
+    }),
+  };
 }
 
 export function buildMessages(payload) {
@@ -48,7 +90,7 @@ export function buildMessages(payload) {
 
 async function readPayload(request) {
   const contentLength = Number(request.headers.get('content-length') || 0);
-  if (contentLength > 16000) {
+  if (contentLength > 32000) {
     throw new RangeError('请求内容过长。');
   }
 
@@ -61,6 +103,7 @@ async function readPayload(request) {
       ? body.journeyId.trim().slice(0, 120)
       : 'beijing-forbidden-city';
   const conversation = safeConversation(body?.conversation);
+  const learnerProfile = safeLearnerProfile(body?.learnerProfile);
 
   if (!['guide', 'writing'].includes(mode)) {
     throw new TypeError('不支持的 AI 模式。');
@@ -80,6 +123,7 @@ async function readPayload(request) {
     language,
     journeyId,
     conversation,
+    learnerProfile,
   };
 }
 
@@ -129,10 +173,16 @@ export async function handlePhoenixAi(request, env) {
 
 export {
   GUIDE_MODEL as MODEL,
+  GUIDE_MODEL,
+  WRITING_MODEL,
+  GUIDE_FALLBACK_MODEL,
+  WRITING_FALLBACK_MODEL,
+  OPENAI_DEFAULT_MODEL,
   PhoenixGuideAgent,
   PhoenixWritingAgent,
+  PhoenixQualityAgent,
   buildGuideMessages,
   buildWritingMessages,
-  extractModelOutput,
   parseWritingFeedback,
+  safeLearnerProfile,
 };
