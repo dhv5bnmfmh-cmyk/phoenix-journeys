@@ -1,0 +1,804 @@
+TAP version 13
+# Subtest: Story and Discovery fit their text to the available phone height
+ok 1 - Story and Discovery fit their text to the available phone height
+  ---
+  duration_ms: 1.308019
+  type: 'test'
+  ...
+# Subtest: reading notes expose native-language and English speakers
+ok 2 - reading notes expose native-language and English speakers
+  ---
+  duration_ms: 0.398292
+  type: 'test'
+  ...
+# Subtest: narration selects voices for Vietnamese and English as well as Chinese
+ok 3 - narration selects voices for Vietnamese and English as well as Chinese
+  ---
+  duration_ms: 0.229998
+  type: 'test'
+  ...
+# Subtest: story vocabulary automatically remains visible above the bottom controls
+ok 4 - story vocabulary automatically remains visible above the bottom controls
+  ---
+  duration_ms: 1.323928
+  type: 'test'
+  ...
+# Subtest: word cards prioritize part of speech, explorer language, English, then Chinese
+ok 5 - word cards prioritize part of speech, explorer language, English, then Chinese
+  ---
+  duration_ms: 0.483421
+  type: 'test'
+  ...
+# Subtest: all Phoenix speech uses a natural 0.5x to 1.5x scale with 1x default
+ok 6 - all Phoenix speech uses a natural 0.5x to 1.5x scale with 1x default
+  ---
+  duration_ms: 6.401355
+  type: 'test'
+  ...
+# Subtest: step picker stays locked until the whole journey is completed
+ok 7 - step picker stays locked until the whole journey is completed
+  ---
+  duration_ms: 0.283959
+  type: 'test'
+  ...
+# Subtest: Agent feedback is persisted inside each journey namespace
+ok 8 - Agent feedback is persisted inside each journey namespace
+  ---
+  duration_ms: 1.306405
+  type: 'test'
+  ...
+# Subtest: Journey restores saved feedback after reopening
+ok 9 - Journey restores saved feedback after reopening
+  ---
+  duration_ms: 0.33776
+  type: 'test'
+  ...
+# Subtest: Think and Express show review buttons between Back and Continue
+ok 10 - Think and Express show review buttons between Back and Continue
+  ---
+  duration_ms: 5.182641
+  type: 'test'
+  ...
+# Subtest: editing an answer removes feedback that no longer matches it
+ok 11 - editing an answer removes feedback that no longer matches it
+  ---
+  duration_ms: 0.226001
+  type: 'test'
+  ...
+# Subtest: Think and Express use the bottom primary action area
+ok 12 - Think and Express use the bottom primary action area
+  ---
+  duration_ms: 1.192412
+  type: 'test'
+  ...
+# Subtest: Agent buttons become Continue only after feedback exists
+ok 13 - Agent buttons become Continue only after feedback exists
+  ---
+  duration_ms: 0.377504
+  type: 'test'
+  ...
+# Subtest: primary action shows loading and cannot accidentally continue
+ok 14 - primary action shows loading and cannot accidentally continue
+  ---
+  duration_ms: 0.22546
+  type: 'test'
+  ...
+# Subtest: Agent actions safely close the iPhone keyboard and show results
+ok 15 - Agent actions safely close the iPhone keyboard and show results
+  ---
+  duration_ms: 0.167061
+  type: 'test'
+  ...
+# Subtest: editing an answer resets the primary action back to Agent
+ok 16 - editing an answer resets the primary action back to Agent
+  ---
+  duration_ms: 0.226021
+  type: 'test'
+  ...
+# Subtest: annotation sheet follows content and never occupies most of the screen
+ok 17 - annotation sheet follows content and never occupies most of the screen
+  ---
+  duration_ms: 1.42626
+  type: 'test'
+  ...
+# Subtest: word study sheet follows its content and advances through the list
+ok 18 - word study sheet follows its content and advances through the list
+  ---
+  duration_ms: 1.753299
+  type: 'test'
+  ...
+# Subtest: Words grid fills the available height without a fixed card cap
+ok 19 - Words grid fills the available height without a fixed card cap
+  ---
+  duration_ms: 0.304958
+  type: 'test'
+  ...
+# Subtest: Discovery cards stay connected and support word highlighting
+ok 20 - Discovery cards stay connected and support word highlighting
+  ---
+  duration_ms: 0.234427
+  type: 'test'
+  ...
+# Subtest: narration keeps natural voice selection and speed profile
+ok 21 - narration keeps natural voice selection and speed profile
+  ---
+  duration_ms: 0.252982
+  type: 'test'
+  ...
+# Subtest: daily catalog contains a reviewed seven-day city cycle
+ok 22 - daily catalog contains a reviewed seven-day city cycle
+  ---
+  duration_ms: 1.087097
+  type: 'test'
+  ...
+# Subtest: new journeys include authoritative sources and complete study stages
+ok 23 - new journeys include authoritative sources and complete study stages
+  ---
+  duration_ms: 0.387302
+  type: 'test'
+  ...
+# Subtest: daily progress, Agent feedback and stamps are namespaced by journey id
+ok 24 - daily progress, Agent feedback and stamps are namespaced by journey id
+  ---
+  duration_ms: 0.183702
+  type: 'test'
+  ...
+# Subtest: one stable Journey screen renders every city
+ok 25 - one stable Journey screen renders every city
+  ---
+  duration_ms: 0.207306
+  type: 'test'
+  ...
+# Subtest: Explore opens every selected city journey
+ok 26 - Explore opens every selected city journey
+  ---
+  duration_ms: 1.068893
+  type: 'test'
+  ...
+# Subtest: learners follow journey steps in order until completion
+ok 27 - learners follow journey steps in order until completion
+  ---
+  duration_ms: 0.166801
+  type: 'test'
+  ...
+# Subtest: story text listens directly to the same narration controller as audio
+ok 28 - story text listens directly to the same narration controller as audio
+  ---
+  duration_ms: 1.318218
+  type: 'test'
+  ...
+# Subtest: Story, Discovery, and word details share the active narration controller
+ok 29 - Story, Discovery, and word details share the active narration controller
+  ---
+  duration_ms: 0.620126
+  type: 'test'
+  ...
+# Subtest: vocabulary detail stays content-sized and below half a phone viewport
+ok 30 - vocabulary detail stays content-sized and below half a phone viewport
+  ---
+  duration_ms: 0.30063
+  type: 'test'
+  ...
+# Subtest: position derives from playback and is passed to Story and Discovery
+ok 31 - position derives from playback and is passed to Story and Discovery
+  ---
+  duration_ms: 1.514744
+  type: 'test'
+  ...
+# Subtest: Flutter verifies a real inline triangle is painted
+ok 32 - Flutter verifies a real inline triangle is painted
+  ---
+  duration_ms: 0.40243
+  type: 'test'
+  ...
+# Subtest: iOS narration starts its progress watchdog before Safari speech can block
+ok 33 - iOS narration starts its progress watchdog before Safari speech can block
+  ---
+  duration_ms: 1.363843
+  type: 'test'
+  ...
+# Subtest: active narration always derives an inline highlight item
+ok 34 - active narration always derives an inline highlight item
+  ---
+  duration_ms: 0.451813
+  type: 'test'
+  ...
+# Subtest: iPhone uses one narration position source
+ok 35 - iPhone uses one narration position source
+  ---
+  duration_ms: 1.053584
+  type: 'test'
+  ...
+# Subtest: fresh native zero cannot pull the saved position back to the beginning
+ok 36 - fresh native zero cannot pull the saved position back to the beginning
+  ---
+  duration_ms: 0.203529
+  type: 'test'
+  ...
+# Subtest: pause freezes and resumes from exactly one saved offset
+ok 37 - pause freezes and resumes from exactly one saved offset
+  ---
+  duration_ms: 1.284141
+  type: 'test'
+  ...
+# Subtest: speed changes keep the same saved offset
+ok 38 - speed changes keep the same saved offset
+  ---
+  duration_ms: 0.184184
+  type: 'test'
+  ...
+# Subtest: playing progress comes directly from the narration controller
+ok 39 - playing progress comes directly from the narration controller
+  ---
+  duration_ms: 0.239477
+  type: 'test'
+  ...
+# Subtest: journey sharing uses the supported cross-platform plugin
+ok 40 - journey sharing uses the supported cross-platform plugin
+  ---
+  duration_ms: 1.326683
+  type: 'test'
+  ...
+# Subtest: iPad receives a non-empty share position origin
+ok 41 - iPad receives a non-empty share position origin
+  ---
+  duration_ms: 0.221302
+  type: 'test'
+  ...
+# Subtest: share copy points to the stable production experience
+ok 42 - share copy points to the stable production experience
+  ---
+  duration_ms: 0.32691
+  type: 'test'
+  ...
+# Subtest: journey completion page offers sharing without replacing replay
+ok 43 - journey completion page offers sharing without replacing replay
+  ---
+  duration_ms: 0.236321
+  type: 'test'
+  ...
+# Subtest: passport shares earned city stamps and protects locked journeys
+ok 44 - passport shares earned city stamps and protects locked journeys
+  ---
+  duration_ms: 0.325447
+  type: 'test'
+  ...
+# Subtest: journey screen resizes above the iPhone keyboard
+ok 45 - journey screen resizes above the iPhone keyboard
+  ---
+  duration_ms: 1.391354
+  type: 'test'
+  ...
+# Subtest: keyboard mode hides fixed navigation that previously covered writing
+ok 46 - keyboard mode hides fixed navigation that previously covered writing
+  ---
+  duration_ms: 0.498269
+  type: 'test'
+  ...
+# Subtest: writing fields keep persistent focus nodes on iPhone Safari
+ok 47 - writing fields keep persistent focus nodes on iPhone Safari
+  ---
+  duration_ms: 0.306241
+  type: 'test'
+  ...
+# Subtest: Safari keyboard cannot be dismissed by a synthetic tap outside
+ok 48 - Safari keyboard cannot be dismissed by a synthetic tap outside
+  ---
+  duration_ms: 0.37525
+  type: 'test'
+  ...
+# Subtest: _wonderPage gives the text field the keyboard viewport
+ok 49 - _wonderPage gives the text field the keyboard viewport
+  ---
+  duration_ms: 0.280032
+  type: 'test'
+  ...
+# Subtest: _expressPage gives the text field the keyboard viewport
+ok 50 - _expressPage gives the text field the keyboard viewport
+  ---
+  duration_ms: 0.17136
+  type: 'test'
+  ...
+# Subtest: _memoryPage gives the text field the keyboard viewport
+ok 51 - _memoryPage gives the text field the keyboard viewport
+  ---
+  duration_ms: 0.280684
+  type: 'test'
+  ...
+# Subtest: all three writing fields have stable test keys
+ok 52 - all three writing fields have stable test keys
+  ---
+  duration_ms: 0.23038
+  type: 'test'
+  ...
+# Subtest: writing page shell follows the persistent FocusNode on iPhone Safari
+ok 53 - writing page shell follows the persistent FocusNode on iPhone Safari
+  ---
+  duration_ms: 0.668977
+  type: 'test'
+  ...
+# Subtest: Think and Express Agent actions use the bottom primary button
+ok 54 - Think and Express Agent actions use the bottom primary button
+  ---
+  duration_ms: 0.655382
+  type: 'test'
+  ...
+# Subtest: NarrationController is the only playback and highlight clock
+ok 55 - NarrationController is the only playback and highlight clock
+  ---
+  duration_ms: 1.401172
+  type: 'test'
+  ...
+# Subtest: Story and Discovery share the same word highlight path
+ok 56 - Story and Discovery share the same word highlight path
+  ---
+  duration_ms: 0.350383
+  type: 'test'
+  ...
+# Subtest: premature Safari completion cannot clear an active highlight
+ok 57 - premature Safari completion cannot clear an active highlight
+  ---
+  duration_ms: 0.208378
+  type: 'test'
+  ...
+# Subtest: stalled Safari offsets cannot freeze or rewind Phoenix progress
+ok 58 - stalled Safari offsets cannot freeze or rewind Phoenix progress
+  ---
+  duration_ms: 2.072467
+  type: 'test'
+  ...
+# Subtest: visible percentage leaves zero immediately while narration is playing
+ok 59 - visible percentage leaves zero immediately while narration is playing
+  ---
+  duration_ms: 0.272127
+  type: 'test'
+  ...
+# Subtest: pause captures one stable continuation offset
+ok 60 - pause captures one stable continuation offset
+  ---
+  duration_ms: 1.457708
+  type: 'test'
+  ...
+# Subtest: speed change freezes, changes rate, and resumes from the same offset
+ok 61 - speed change freezes, changes rate, and resumes from the same offset
+  ---
+  duration_ms: 0.277388
+  type: 'test'
+  ...
+# Subtest: transient Safari zero cannot erase the last visible position
+ok 62 - transient Safari zero cannot erase the last visible position
+  ---
+  duration_ms: 0.237553
+  type: 'test'
+  ...
+# Subtest: Story and Discovery keep the same continuation-safe player
+ok 63 - Story and Discovery keep the same continuation-safe player
+  ---
+  duration_ms: 0.310459
+  type: 'test'
+  ...
+# Subtest: changing speed never starts a second narration session
+not ok 64 - changing speed never starts a second narration session
+  ---
+  duration_ms: 3.352759
+  type: 'test'
+  location: '/home/runner/work/phoenix-journeys/phoenix-journeys/worker/narration_continuity_rule.test.mjs:10:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /_speechRate = option\.rate/. Input:
+    
+    'Future<void> setSpeechRate(double rate) async {\n' +
+      '    final option = speedOptions.reduce(\n' +
+      '      (current, next) => (next.rate - rate).abs() < (current.rate - rate).abs()\n' +
+      '          ? next\n' +
+      '          : current,\n' +
+      '    );\n' +
+      '\n' +
+      '    _sharedSpeechRate = option.rate;\n' +
+      '    final controllers = List<NarrationController>.of(_instances);\n' +
+      '    for (final controller in controllers) {\n' +
+      '      await controller._applySharedSpeechRate(option.rate);\n' +
+      '    }\n' +
+      '  }\n' +
+      '\n' +
+      '  Future<void> _applySharedSpeechRate(double rate) async {\n' +
+      '    if (_disposed || (_speechRate - rate).abs() < .001) return;\n' +
+      '\n' +
+      '    final wasPlaying =\n' +
+      '        _status == NarrationStatus.playing &&\n' +
+      '        _speechMode == _NarrationSpeechMode.narration &&\n' +
+      '        !_plan.isEmpty;\n' +
+      '    final resumeOffset = _currentOffset;\n' +
+      '    if (wasPlaying) await pauseAtOffset(resumeOffset);\n' +
+      '    if (_disposed) return;\n' +
+      '\n' +
+      '    _speechRate = rate;\n' +
+      '    if (_webSpeech.isAvailable && _status == NarrationStatus.paused) {\n' +
+      '      _restartWebSpeechOnResume = true;\n' +
+      '    }\n' +
+      '    _safeNotify();\n' +
+      '\n' +
+      '    if (wasPlaying && !_disposed) {\n' +
+      '      await resumeFromOffset(resumeOffset);\n' +
+      '    }\n' +
+      '  }\n' +
+      '\n' +
+      '  '
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: |-
+    Future<void> setSpeechRate(double rate) async {
+        final option = speedOptions.reduce(
+          (current, next) => (next.rate - rate).abs() < (current.rate - rate).abs()
+              ? next
+              : current,
+        );
+    
+        _sharedSpeechRate = option.rate;
+        final controllers = List<NarrationController>.of(_instances);
+        for (final controller in controllers) {
+          await controller._applySharedSpeechRate(option.rate);
+        }
+      }
+    
+      Future<void> _applySharedSpeechRate(double rate) async {
+        if (_disposed || (_speechRate - rate).abs() < .001) return;
+    
+        final wasPlaying =
+            _status == NarrationStatus.playing &&
+            _speechMode == _NarrationSpeechMode.narration &&
+            !_plan.isEmpty;
+        final resumeOffset = _currentOffset;
+        if (wasPlaying) await pauseAtOffset(resumeOffset);
+        if (_disposed) return;
+    
+        _speechRate = rate;
+        if (_webSpeech.isAvailable && _status == NarrationStatus.paused) {
+          _restartWebSpeechOnResume = true;
+        }
+        _safeNotify();
+    
+        if (wasPlaying && !_disposed) {
+          await resumeFromOffset(resumeOffset);
+        }
+      }
+    
+      
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///home/runner/work/phoenix-journeys/phoenix-journeys/worker/narration_continuity_rule.test.mjs:15:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: resume delegates the saved position to a clamped continuation entrypoint
+ok 65 - resume delegates the saved position to a clamped continuation entrypoint
+  ---
+  duration_ms: 0.2571
+  type: 'test'
+  ...
+# Subtest: speaking from an end-adjacent offset cannot restart at the beginning
+ok 66 - speaking from an end-adjacent offset cannot restart at the beginning
+  ---
+  duration_ms: 0.231471
+  type: 'test'
+  ...
+# Subtest: audio, progress and highlight share currentOffset
+ok 67 - audio, progress and highlight share currentOffset
+  ---
+  duration_ms: 0.24668
+  type: 'test'
+  ...
+# Subtest: Phoenix permanently documents the native-speed narration contract
+ok 68 - Phoenix permanently documents the native-speed narration contract
+  ---
+  duration_ms: 1.503273
+  type: 'test'
+  ...
+# Subtest: every pull request must verify the permanent narration rules
+ok 69 - every pull request must verify the permanent narration rules
+  ---
+  duration_ms: 0.324295
+  type: 'test'
+  ...
+# Subtest: runtime keeps native speed, locale and one synchronized controller
+ok 70 - runtime keeps native speed, locale and one synchronized controller
+  ---
+  duration_ms: 0.37546
+  type: 'test'
+  ...
+# Subtest: speed changes never call setSpeechRate while narration is still playing
+ok 71 - speed changes never call setSpeechRate while narration is still playing
+  ---
+  duration_ms: 1.358322
+  type: 'test'
+  ...
+# Subtest: Phoenix speed range is permanently limited to 0.5x through 1.5x
+ok 72 - Phoenix speed range is permanently limited to 0.5x through 1.5x
+  ---
+  duration_ms: 1.118926
+  type: 'test'
+  ...
+# Subtest: the current speed has slow-down and speed-up choices directly underneath
+ok 73 - the current speed has slow-down and speed-up choices directly underneath
+  ---
+  duration_ms: 0.329014
+  type: 'test'
+  ...
+# Subtest: changing speed synchronizes every narration controller and future controller
+ok 74 - changing speed synchronizes every narration controller and future controller
+  ---
+  duration_ms: 0.20389
+  type: 'test'
+  ...
+# Subtest: permanent documents and pull requests enforce the same speed rule
+ok 75 - permanent documents and pull requests enforce the same speed rule
+  ---
+  duration_ms: 0.148397
+  type: 'test'
+  ...
+# Subtest: every Phoenix voice starts from the platform native speaking rate
+ok 76 - every Phoenix voice starts from the platform native speaking rate
+  ---
+  duration_ms: 1.090904
+  type: 'test'
+  ...
+# Subtest: all Chinese narration paths use the matching local locale
+ok 77 - all Chinese narration paths use the matching local locale
+  ---
+  duration_ms: 0.295711
+  type: 'test'
+  ...
+# Subtest: temporary note speech pauses and resumes the exact narration position
+ok 78 - temporary note speech pauses and resumes the exact narration position
+  ---
+  duration_ms: 0.210813
+  type: 'test'
+  ...
+# Subtest: player, progress and CJK reading marker share one synchronized source
+ok 79 - player, progress and CJK reading marker share one synchronized source
+  ---
+  duration_ms: 0.254014
+  type: 'test'
+  ...
+# Subtest: primary Phoenix screens obey the one-screen layout rule
+ok 80 - primary Phoenix screens obey the one-screen layout rule
+  ---
+  duration_ms: 5.23512
+  type: 'test'
+  ...
+# Subtest: story and Discovery adapt every short paragraph to the same screen
+ok 81 - story and Discovery adapt every short paragraph to the same screen
+  ---
+  duration_ms: 0.712608
+  type: 'test'
+  ...
+# Subtest: one-screen rule forbids horizontal paging in future development
+ok 82 - one-screen rule forbids horizontal paging in future development
+  ---
+  duration_ms: 6.12048
+  type: 'test'
+  ...
+# Subtest: PR preview unlocks every passport city
+ok 83 - PR preview unlocks every passport city
+  ---
+  duration_ms: 0.966172
+  type: 'test'
+  ...
+# Subtest: preview map removes lock symbols for all cities
+ok 84 - preview map removes lock symbols for all cities
+  ---
+  duration_ms: 0.275233
+  type: 'test'
+  ...
+# Subtest: production still keeps daily rotation rules
+ok 85 - production still keeps daily rotation rules
+  ---
+  duration_ms: 0.272127
+  type: 'test'
+  ...
+# Subtest: guide prompt isolates learner text and identifies its dedicated agent
+ok 86 - guide prompt isolates learner text and identifies its dedicated agent
+  ---
+  duration_ms: 2.570722
+  type: 'test'
+  ...
+# Subtest: guide and writing responsibilities are separated
+ok 87 - guide and writing responsibilities are separated
+  ---
+  duration_ms: 0.421345
+  type: 'test'
+  ...
+# Subtest: extractModelOutput supports Workers AI response shapes
+ok 88 - extractModelOutput supports Workers AI response shapes
+  ---
+  duration_ms: 1.073411
+  type: 'test'
+  ...
+# Subtest: writing feedback parses fenced JSON and preserves all fields
+ok 89 - writing feedback parses fenced JSON and preserves all fields
+  ---
+  duration_ms: 0.444008
+  type: 'test'
+  ...
+# Subtest: guide endpoint returns agent reply and never caches it
+ok 90 - guide endpoint returns agent reply and never caches it
+  ---
+  duration_ms: 129.457219
+  type: 'test'
+  ...
+# Subtest: writing endpoint returns structured coaching feedback
+ok 91 - writing endpoint returns structured coaching feedback
+  ---
+  duration_ms: 1.26577
+  type: 'test'
+  ...
+# Subtest: endpoint rejects blank and oversized input
+ok 92 - endpoint rejects blank and oversized input
+  ---
+  duration_ms: 2.585963
+  type: 'test'
+  ...
+# Subtest: every Phoenix pull request gets an isolated Worker name and URL
+ok 93 - every Phoenix pull request gets an isolated Worker name and URL
+  ---
+  duration_ms: 0.93296
+  type: 'test'
+  ...
+# Subtest: preview uses the feature head commit rather than the pull request merge ref
+ok 94 - preview uses the feature head commit rather than the pull request merge ref
+  ---
+  duration_ms: 0.218076
+  type: 'test'
+  ...
+# Subtest: preview is verified before its link is published
+ok 95 - preview is verified before its link is published
+  ---
+  duration_ms: 1.105611
+  type: 'test'
+  ...
+# Subtest: preview workers are removed when pull requests close
+ok 96 - preview workers are removed when pull requests close
+  ---
+  duration_ms: 0.259183
+  type: 'test'
+  ...
+# Subtest: fork pull requests cannot access deployment secrets
+ok 97 - fork pull requests cannot access deployment secrets
+  ---
+  duration_ms: 0.156161
+  type: 'test'
+  ...
+# Subtest: merge checklist protects stable Phoenix behavior
+ok 98 - merge checklist protects stable Phoenix behavior
+  ---
+  duration_ms: 0.142245
+  type: 'test'
+  ...
+# Subtest: development process forbids direct main development
+ok 99 - development process forbids direct main development
+  ---
+  duration_ms: 0.207256
+  type: 'test'
+  ...
+# Subtest: Story and Discovery show position only with the inline triangle
+ok 100 - Story and Discovery show position only with the inline triangle
+  ---
+  duration_ms: 1.419136
+  type: 'test'
+  ...
+# Subtest: no text or paragraph color change is used for narration position
+ok 101 - no text or paragraph color change is used for narration position
+  ---
+  duration_ms: 0.246339
+  type: 'test'
+  ...
+# Subtest: every Flutter bootstrap URL carries a generated release version
+ok 102 - every Flutter bootstrap URL carries a generated release version
+  ---
+  duration_ms: 1.437721
+  type: 'test'
+  ...
+# Subtest: legacy Flutter service workers and caches are retired safely
+ok 103 - legacy Flutter service workers and caches are retired safely
+  ---
+  duration_ms: 0.300531
+  type: 'test'
+  ...
+# Subtest: Phoenix app-shell files are never served stale
+ok 104 - Phoenix app-shell files are never served stale
+  ---
+  duration_ms: 0.590321
+  type: 'test'
+  ...
+# Subtest: production health proves the exact commit is live
+ok 105 - production health proves the exact commit is live
+  ---
+  duration_ms: 1.797742
+  type: 'test'
+  ...
+# Subtest: PhoenixGuideAgent has a distinct grounded context for all seven journeys
+ok 106 - PhoenixGuideAgent has a distinct grounded context for all seven journeys
+  ---
+  duration_ms: 1.295688
+  type: 'test'
+  ...
+# Subtest: guide messages use the selected journey rather than Beijing fallback
+ok 107 - guide messages use the selected journey rather than Beijing fallback
+  ---
+  duration_ms: 0.679296
+  type: 'test'
+  ...
+# Subtest: unknown journey ids use a neutral safety context
+ok 108 - unknown journey ids use a neutral safety context
+  ---
+  duration_ms: 1.042053
+  type: 'test'
+  ...
+# Subtest: Safari progress watchdog is scheduled before speak
+ok 109 - Safari progress watchdog is scheduled before speak
+  ---
+  duration_ms: 1.140436
+  type: 'test'
+  ...
+# Subtest: Story and Discovery use an inline triangle rather than recoloring text
+ok 110 - Story and Discovery use an inline triangle rather than recoloring text
+  ---
+  duration_ms: 0.406849
+  type: 'test'
+  ...
+# Subtest: playing percent never appears stuck at zero
+ok 111 - playing percent never appears stuck at zero
+  ---
+  duration_ms: 0.192299
+  type: 'test'
+  ...
+# Subtest: Safari narration uses a Phoenix-owned utterance
+ok 112 - Safari narration uses a Phoenix-owned utterance
+  ---
+  duration_ms: 1.177695
+  type: 'test'
+  ...
+# Subtest: pause and continue keep the same browser utterance
+ok 113 - pause and continue keep the same browser utterance
+  ---
+  duration_ms: 0.293527
+  type: 'test'
+  ...
+# Subtest: speed changes restart only at the saved offset
+ok 114 - speed changes restart only at the saved offset
+  ---
+  duration_ms: 0.34317
+  type: 'test'
+  ...
+# Subtest: audio, triangle, and highlighted text share controller offset
+ok 115 - audio, triangle, and highlighted text share controller offset
+  ---
+  duration_ms: 0.37545
+  type: 'test'
+  ...
+# Subtest: utterance base offset is preserved during native pause and resume
+ok 116 - utterance base offset is preserved during native pause and resume
+  ---
+  duration_ms: 0.275073
+  type: 'test'
+  ...
+# Subtest: Flutter word callbacks remain bound on web
+ok 117 - Flutter word callbacks remain bound on web
+  ---
+  duration_ms: 0.294269
+  type: 'test'
+  ...
+1..117
+# tests 117
+# suites 0
+# pass 116
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1054.901803
+exit_code=1
