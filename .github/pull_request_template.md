@@ -24,6 +24,11 @@
 - [ ] 所有朗读入口共用 `NarrationController`，没有独立播放状态或计时器
 - [ ] 故事页与发现页生词均显示词性、探索者母语和英文释义
 - [ ] 生词查看与朗读正常
+- [ ] OpenAI Responses API 为首选模型入口，Cloudflare Workers AI 自动回退
+- [ ] PhoenixGuideAgent 与 PhoenixWritingAgent 均经过 PhoenixQualityAgent 隐藏复核
+- [ ] 学习档案包含收藏生词、已完成旅程、近期观察和近期写作问题，并限制长度
+- [ ] 在线 AI 返回 provider / model / quality，App 状态不误报
+- [ ] `OPENAI_API_KEY` 仅存在于 Cloudflare Secret，仓库与客户端没有密钥
 - [ ] 思考、表达、旅程回忆键盘稳定
 - [ ] 进度保存、简繁切换正常
 - [ ] 用户已确认可以合并到 `main`
@@ -33,3 +38,4 @@
 未经体验确认，不合并到 `main`。一个 PR 只开发或修复一项功能。
 朗读功能必须遵守 `docs/development-workflow.md` 中的「永久朗读开发准则」。
 故事与发现生词必须遵守同文件中的「永久生词展示准则」。
+所有 AI 功能必须遵守同文件中的「永久 AI Agent 开发准则」。
