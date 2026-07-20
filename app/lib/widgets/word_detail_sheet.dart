@@ -12,7 +12,7 @@ import 'word_mark.dart';
 Future<void> showWordDetail(
   BuildContext context,
   WordEntry entry, {
-  required NarrationController narrationController,
+  NarrationController? narrationController,
   required Future<bool> Function() onSpeak,
   List<WordEntry>? entries,
   int? initialIndex,
@@ -28,6 +28,7 @@ Future<void> showWordDetail(
   final safeIndex = requestedIndex < 0
       ? 0
       : requestedIndex.clamp(0, studyEntries.length - 1);
+  final speedController = narrationController ?? NarrationController();
 
   return showModalBottomSheet<void>(
     context: context,
@@ -45,7 +46,7 @@ Future<void> showWordDetail(
           child: SizedBox(
             width: sheetWidth,
             child: _WordDetailSheet(
-              narrationController: narrationController,
+              narrationController: speedController,
               entries: studyEntries,
               initialIndex: safeIndex,
               onSpeak: onSpeak,
@@ -55,7 +56,9 @@ Future<void> showWordDetail(
         ),
       );
     },
-  );
+  ).whenComplete(() {
+    if (narrationController == null) speedController.dispose();
+  });
 }
 
 class _WordDetailSheet extends StatefulWidget {
