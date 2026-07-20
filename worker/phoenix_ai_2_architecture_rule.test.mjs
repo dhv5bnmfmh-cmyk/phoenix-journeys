@@ -34,10 +34,19 @@ test('PhoenixBrainAgent is the only orchestrator for all four specialist modes',
 
   const brain = new PhoenixBrainAgent({}, { gateway: { isAvailable: true } });
   const calls = [];
-  brain.guide = { respond: async (payload) => (calls.push(payload.mode), { agent: 'guide' }) };
-  brain.writing = { review: async (payload) => (calls.push(payload.mode), { agent: 'writing' }) };
-  brain.conversation = { respond: async (payload) => (calls.push(payload.mode), { agent: 'conversation' }) };
-  brain.learning = { analyze: async (payload) => (calls.push(payload.mode), { agent: 'learning' }) };
+  brain.guide = {
+    respond: async (payload) => (calls.push(payload.mode), { agent: 'guide' }),
+  };
+  brain.writing = {
+    review: async (payload) => (calls.push(payload.mode), { agent: 'writing' }),
+  };
+  brain.conversation = {
+    respond: async (payload) =>
+      (calls.push(payload.mode), { agent: 'conversation' }),
+  };
+  brain.learning = {
+    analyze: async (payload) => (calls.push(payload.mode), { agent: 'learning' }),
+  };
 
   for (const mode of PHOENIX_AI_MODES) {
     const result = await brain.run({
@@ -115,7 +124,7 @@ test('GPT-5.6 is primary while Cloudflare remains the automatic fallback', () =>
 test('permanent rules protect orchestration, privacy, grounding and quality', () => {
   assert.match(brainSource, /PhoenixMemoryAgent/);
   assert.match(brainSource, /PhoenixKnowledgeAgent/);
-  assert.match(workflow, /PhoenixBrainAgent 是唯一 AI 总调度入口/);
+  assert.match(workflow, /`PhoenixBrainAgent` 是唯一 AI 总调度入口/);
   assert.match(workflow, /服务器不得持久保存学习记忆/);
   assert.match(workflow, /只提供 Phoenix 已审核 Journey 背景/);
   assert.match(workflow, /Guide、Writing、Conversation 和 Learning/);
