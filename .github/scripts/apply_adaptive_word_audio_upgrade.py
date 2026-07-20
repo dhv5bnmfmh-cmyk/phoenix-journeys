@@ -1,0 +1,366 @@
+from pathlib import Path
+import re
+
+narration_path = Path('app/lib/services/narration_controller.dart')
+narration = narration_path.read_text(encoding='utf-8')
+narration = re.sub(
+    r"  static const speedOptions = <NarrationSpeedOption>\[[\s\S]*?\n  \];",
+    """  static const speedOptions = <NarrationSpeedOption>[
+    NarrationSpeedOption(label: '1.0×', rate: 1.0),
+    NarrationSpeedOption(label: '1.5×', rate: 1.5),
+    NarrationSpeedOption(label: '2.0×', rate: 2.0),
+    NarrationSpeedOption(label: '2.5×', rate: 2.5),
+    NarrationSpeedOption(label: '3.0×', rate: 3.0),
+  ];""",
+    narration,
+    count=1,
+)
+narration = re.sub(
+    r"  double _speechRate = [^;]+;",
+    "  double _speechRate = 1.0;",
+    narration,
+    count=1,
+)
+narration = re.sub(
+    r"orElse: \(\) => speedOptions\[\d+\],",
+    "orElse: () => speedOptions.first,",
+    narration,
+    count=1,
+)
+narration = narration.replace(
+    "await _tts.setSpeechRate(.38);",
+    "await _tts.setSpeechRate(_ttsSpeechRate(_speechRate));",
+)
+narration = narration.replace(
+    "await _tts.setSpeechRate(_speechRate);",
+    "await _tts.setSpeechRate(_ttsSpeechRate(_speechRate));",
+)
+narration = narration.replace(
+    "return await completer.future.timeout(const Duration(seconds: 8));",
+    """final timeoutSeconds = math.max(
+        8,
+        (value.length / math.max(4.0, 7.0 * _speechRate)).ceil() + 5,
+      );
+      return await completer.future.timeout(Duration(seconds: timeoutSeconds));""",
+)
+if 'double _ttsSpeechRate(double multiplier)' not in narration:
+    narration = narration.replace(
+        "  Future<void> _configureNaturalVoice(String languageCode) async {",
+        """  double _ttsSpeechRate(double multiplier) {
+    if (kIsWeb) return multiplier.clamp(0.5, 3.0).toDouble();
+    return (0.48 + (multiplier - 1.0) * 0.20)
+        .clamp(0.48, 1.0)
+        .toDouble();
+  }
+
+  Future<void> _configureNaturalVoice(String languageCode) async {""",
+        1,
+    )
+narration = narration.replace(
+    "if (lowerName.contains('natural')) score += 60;",
+    "if (lowerName.contains('natural')) score += 70;",
+)
+narration = narration.replace(
+    "if (lowerName.contains('premium')) score += 50;",
+    "if (lowerName.contains('premium')) score += 60;",
+)
+narration = narration.replace(
+    "if (lowerName.contains('enhanced')) score += 45;",
+    """if (lowerName.contains('enhanced')) score += 55;
+          if (lowerName.contains('compact')) score -= 45;
+          if (lowerName.contains('novelty')) score -= 80;
+          if (lowerName.contains('espeak')) score -= 60;""",
+)
+narration = re.sub(
+    r"          if \(requestedPrefix == 'zh'\) \{[\s\S]*?          \}",
+    """          final preferredNames = switch (requestedPrefix) {
+            'zh' => const ['xiaoxiao', 'tingting', 'meijia', 'yunxi', 'sinji'],
+            'en' => const ['samantha', 'ava', 'serena', 'daniel', 'karen'],
+            'vi' => const ['linh', 'mai', 'nam', 'hoai'],
+            _ => const <String>[],
+          };
+          for (final preferredName in preferredNames) {
+            if (lowerName.contains(preferredName)) score += 42;
+          }""",
+    narration,
+    count=1,
+)
+narration = narration.replace(
+    "final charsPerSecond = 3.35 * (_speechRate / .36);",
+    "final charsPerSecond = 3.35 * _speechRate;",
+)
+for required in [
+    "label: '3.0×'",
+    '_ttsSpeechRate(_speechRate)',
+    'final charsPerSecond = 3.35 * _speechRate',
+]:
+    if required not in narration:
+        raise SystemExit(f'narration upgrade missing: {required}')
+narration_path.write_text(narration, encoding='utf-8')
+
+journey_path = Path('app/lib/screens/journey_screen.dart')
+journey = journey_path.read_text(encoding='utf-8')
+if 'narrationController: _narration,' not in journey:
+    journey = journey.replace(
+        "      entry,\n      entries: _experience.words,",
+        "      entry,\n      narrationController: _narration,\n      entries: _experience.words,",
+        1,
+    )
+if 'final showPartOfSpeech' not in journey:
+    journey = journey.replace(
+        """          final safeCellHeight = math.max(1.0, cellHeight);
+          final ratio = cellWidth / safeCellHeight;""",
+        """          final safeCellHeight = math.max(1.0, cellHeight);
+          final ratio = cellWidth / safeCellHeight;
+          final showPartOfSpeech =
+              cellHeight >= 108 && _experience.words.length <= 12;
+          final showMeaning =
+              cellHeight >= 145 && _experience.words.length <= 9;""",
+        1,
+    )
+if 'if (showPartOfSpeech)' not in journey:
+    old = """                        Text(
+                          entry.pinyin,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 8,
+                            height: 1,
+                          ),
+                        ),
+                      ],"""
+    new = """                        Text(
+                          entry.pinyin,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: cellHeight >= 120 ? 10 : 8,
+                            height: 1,
+                          ),
+                        ),
+                        if (showPartOfSpeech) ...[
+                          const SizedBox(height: 7),
+                          Text(
+                            state.displayText(entry.partOfSpeech),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: PhoenixTheme.red,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                        if (showMeaning) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            state.displayText(entry.simpleChinese),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 9.5,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ],"""
+    if old not in journey:
+        raise SystemExit('word card pinyin block not found')
+    journey = journey.replace(old, new, 1)
+if 'controller: _narration,\n              title: title,' not in journey:
+    journey = journey.replace(
+        "            child: _ReadingSupportSheet(\n              title: title,",
+        "            child: _ReadingSupportSheet(\n              controller: _narration,\n              title: title,",
+        1,
+    )
+if 'required this.controller,' not in journey:
+    journey = journey.replace(
+        "  const _ReadingSupportSheet({\n    required this.title,",
+        "  const _ReadingSupportSheet({\n    required this.controller,\n    required this.title,",
+        1,
+    )
+if 'final NarrationController controller;' not in journey:
+    journey = journey.replace(
+        "  final String title;\n  final String pinyin;",
+        "  final NarrationController controller;\n  final String title;\n  final String pinyin;",
+        1,
+    )
+if 'support-speed-control' not in journey:
+    old = """        Text(
+          title,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 6),"""
+    new = """        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            AnimatedBuilder(
+              animation: controller,
+              builder: (context, _) => PopupMenuButton<double>(
+                key: const ValueKey('support-speed-control'),
+                tooltip: '调整朗读语速',
+                onSelected: (rate) => unawaited(controller.setSpeechRate(rate)),
+                itemBuilder: (context) => NarrationController.speedOptions
+                    .map(
+                      (option) => PopupMenuItem<double>(
+                        value: option.rate,
+                        child: Text('${option.label} 语速'),
+                      ),
+                    )
+                    .toList(growable: false),
+                child: Chip(
+                  visualDensity: VisualDensity.compact,
+                  label: Text(
+                    controller.speedLabel,
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),"""
+    if old not in journey:
+        raise SystemExit('reading support title block not found')
+    journey = journey.replace(old, new, 1)
+for required in [
+    'showPartOfSpeech',
+    'showMeaning',
+    'support-speed-control',
+    'narrationController: _narration',
+]:
+    if required not in journey:
+        raise SystemExit(f'journey upgrade missing: {required}')
+journey_path.write_text(journey, encoding='utf-8')
+
+sheet_path = Path('app/lib/widgets/word_detail_sheet.dart')
+sheet = sheet_path.read_text(encoding='utf-8')
+if "../services/narration_controller.dart" not in sheet:
+    sheet = sheet.replace(
+        "import '../data/journey_data.dart';",
+        "import '../data/journey_data.dart';\nimport '../services/narration_controller.dart';",
+        1,
+    )
+if 'required NarrationController narrationController,' not in sheet:
+    sheet = sheet.replace(
+        "  WordEntry entry, {\n  required Future<bool> Function() onSpeak,",
+        "  WordEntry entry, {\n  required NarrationController narrationController,\n  required Future<bool> Function() onSpeak,",
+        1,
+    )
+if 'narrationController: narrationController,' not in sheet:
+    sheet = sheet.replace(
+        "            child: _WordDetailSheet(\n              entries: studyEntries,",
+        "            child: _WordDetailSheet(\n              narrationController: narrationController,\n              entries: studyEntries,",
+        1,
+    )
+if 'required this.narrationController,' not in sheet:
+    sheet = sheet.replace(
+        "  const _WordDetailSheet({\n    required this.entries,",
+        "  const _WordDetailSheet({\n    required this.narrationController,\n    required this.entries,",
+        1,
+    )
+if 'final NarrationController narrationController;' not in sheet:
+    sheet = sheet.replace(
+        "  final List<WordEntry> entries;",
+        "  final NarrationController narrationController;\n  final List<WordEntry> entries;",
+        1,
+    )
+if 'word-detail-speed-control' not in sheet:
+    old = """                  const SizedBox(width: 6),
+                  IconButton.filledTonal("""
+    new = """                  const SizedBox(width: 6),
+                  AnimatedBuilder(
+                    animation: widget.narrationController,
+                    builder: (context, _) => PopupMenuButton<double>(
+                      key: const ValueKey('word-detail-speed-control'),
+                      tooltip: '调整朗读语速',
+                      onSelected: (rate) => unawaited(
+                        widget.narrationController.setSpeechRate(rate),
+                      ),
+                      itemBuilder: (context) => NarrationController.speedOptions
+                          .map(
+                            (option) => PopupMenuItem<double>(
+                              value: option.rate,
+                              child: Text('${option.label} 语速'),
+                            ),
+                          )
+                          .toList(growable: false),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: PhoenixTheme.red.withValues(alpha: .08),
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                        child: Text(
+                          widget.narrationController.speedLabel,
+                          style: const TextStyle(
+                            color: PhoenixTheme.red,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton.filledTonal("""
+    if old not in sheet:
+        raise SystemExit('word detail audio button block not found')
+    sheet = sheet.replace(old, new, 1)
+for required in [
+    'word-detail-speed-control',
+    'final NarrationController narrationController;',
+]:
+    if required not in sheet:
+        raise SystemExit(f'word sheet upgrade missing: {required}')
+sheet_path.write_text(sheet, encoding='utf-8')
+
+legacy = Path('worker/word_sheet_flow.test.mjs')
+legacy_text = legacy.read_text(encoding='utf-8').replace(
+    "NarrationSpeedOption\\(label: '1\\.0×', rate: \\.36\\)",
+    "NarrationSpeedOption\\(label: '1\\.0×', rate: 1\\.0\\)",
+)
+legacy.write_text(legacy_text, encoding='utf-8')
+
+Path('worker/adaptive_word_audio_upgrade.test.mjs').write_text(
+    """import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const journey = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
+const narration = readFileSync('app/lib/services/narration_controller.dart', 'utf8');
+const sheet = readFileSync('app/lib/widgets/word_detail_sheet.dart', 'utf8');
+test('word cards reveal metadata only when available space allows it', () => {
+  assert.match(journey, /showPartOfSpeech/);
+  assert.match(journey, /showMeaning/);
+  assert.match(journey, /entry\.partOfSpeech/);
+  assert.match(journey, /entry\.simpleChinese/);
+});
+test('all Phoenix speech uses the unified 1x to 3x speed scale', () => {
+  for (const label of ['1.0×', '1.5×', '2.0×', '2.5×', '3.0×']) assert.ok(narration.includes(label));
+  assert.doesNotMatch(narration, /label: '0\.8×'/);
+  assert.doesNotMatch(narration, /label: '1\.2×'/);
+  assert.match(narration, /_ttsSpeechRate\(_speechRate\)/);
+});
+test('word details and reading notes expose speed controls', () => {
+  assert.match(journey, /support-speed-control/);
+  assert.match(sheet, /word-detail-speed-control/);
+});
+""",
+    encoding='utf-8',
+)
