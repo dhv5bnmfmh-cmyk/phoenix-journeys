@@ -57,10 +57,13 @@ test('Explore opens every selected city journey', () => {
   assert.doesNotMatch(journey, /单屏模式/);
 });
 
-test('PR previews unlock every journey step for full product testing', () => {
-  assert.match(progress, /Uri\.base/);
-  assert.match(progress, /queryParameters\['unlock'\] == 'all'/);
-  assert.match(progress, /host\.startsWith\('phoenix-journeys-pr-'\)/);
-  assert.match(progress, /allAccess \|\| index <= furthestStep/);
-  assert.match(progress, /选择学习步骤 · 体验全开放/);
+test('learners follow journey steps in order until completion', () => {
+  assert.match(journey, /!_appState\.journeyCompleted/);
+  assert.match(journey, /safeStep != step - 1/);
+  assert.match(journey, /safeStep != step \+ 1/);
+  assert.match(progress, /required this\.isCompleted/);
+  assert.match(progress, /final enabled = isCompleted/);
+  assert.match(progress, /全部完成后可自由选择页面/);
+  assert.doesNotMatch(progress, /Uri\.base/);
+  assert.doesNotMatch(progress, /体验全开放/);
 });
