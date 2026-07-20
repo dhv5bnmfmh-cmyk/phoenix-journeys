@@ -1,4 +1,6 @@
 import '../models/story_content.dart';
+
+export 'daily_journey_experience.dart';
 import 'beijing_story_catalog.dart';
 import 'daily_journey_experience.dart';
 import 'extended_journey_catalog.dart';
