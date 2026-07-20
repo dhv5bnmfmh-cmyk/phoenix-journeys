@@ -16,7 +16,8 @@ test('NarrationController is the only playback and highlight clock', () => {
   assert.doesNotMatch(player, /_positionClock/);
   assert.doesNotMatch(player, /syncPlaybackHighlight/);
   assert.match(controller, /setStartHandler\([\s\S]*_startProgressClock/);
-  assert.match(controller, /final charsPerSecond = 3\.35/);
+  assert.match(controller, /_nativeCharsPerSecond\(_narrationLanguageCode\) \* _speechRate/);
+  assert.doesNotMatch(controller, /final charsPerSecond = 3\.35/);
 });
 
 test('Story and Discovery share the same word highlight path', () => {
