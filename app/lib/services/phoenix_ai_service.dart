@@ -7,10 +7,18 @@ class PhoenixGuideFeedback {
   const PhoenixGuideFeedback({
     required this.reply,
     required this.isOfflineFallback,
+    this.provider = 'local',
+    this.model = '',
+    this.qualityReviewed = false,
+    this.qualityScore = 0,
   });
 
   final String reply;
   final bool isOfflineFallback;
+  final String provider;
+  final String model;
+  final bool qualityReviewed;
+  final int qualityScore;
 }
 
 class PhoenixWritingFeedback {
@@ -20,6 +28,10 @@ class PhoenixWritingFeedback {
     required this.natural,
     required this.encouragement,
     required this.isOfflineFallback,
+    this.provider = 'local',
+    this.model = '',
+    this.qualityReviewed = false,
+    this.qualityScore = 0,
   });
 
   final String corrected;
@@ -27,15 +39,19 @@ class PhoenixWritingFeedback {
   final String natural;
   final String encouragement;
   final bool isOfflineFallback;
+  final String provider;
+  final String model;
+  final bool qualityReviewed;
+  final int qualityScore;
 }
 
 class PhoenixAiService {
   PhoenixAiService({
     http.Client? client,
     Uri? endpoint,
-    this.timeout = const Duration(seconds: 18),
-  })  : _client = client ?? http.Client(),
-        endpoint = endpoint ?? Uri.base.resolve('/api/phoenix-ai');
+    this.timeout = const Duration(seconds: 42),
+  }) : _client = client ?? http.Client(),
+       endpoint = endpoint ?? Uri.base.resolve('/api/phoenix-ai');
 
   final http.Client _client;
   final Uri endpoint;
@@ -45,6 +61,8 @@ class PhoenixAiService {
     required String text,
     required String language,
     String journeyId = 'beijing-forbidden-city',
+    Map<String, dynamic> learnerProfile = const <String, dynamic>{},
+    List<Map<String, String>> conversation = const <Map<String, String>>[],
   }) async {
     final answer = text.trim();
     if (answer.length < 2) {
@@ -64,6 +82,8 @@ class PhoenixAiService {
               'text': answer,
               'language': language,
               'journeyId': journeyId,
+              'learnerProfile': learnerProfile,
+              'conversation': conversation,
             }),
           )
           .timeout(timeout);
@@ -72,9 +92,14 @@ class PhoenixAiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final reply = body['reply'];
         if (reply is String && reply.trim().isNotEmpty) {
+          final quality = _readObject(body, 'quality');
           return PhoenixGuideFeedback(
             reply: reply.trim(),
             isOfflineFallback: false,
+            provider: _readText(body, 'provider', 'cloudflare'),
+            model: _readText(body, 'model', ''),
+            qualityReviewed: quality['reviewed'] == true,
+            qualityScore: _readInt(quality, 'score'),
           );
         }
       }
@@ -91,6 +116,8 @@ class PhoenixAiService {
   Future<PhoenixWritingFeedback> reviewWriting({
     required String text,
     required String language,
+    String journeyId = 'beijing-forbidden-city',
+    Map<String, dynamic> learnerProfile = const <String, dynamic>{},
   }) async {
     final writing = text.trim();
     if (writing.length < 2) {
@@ -112,15 +139,18 @@ class PhoenixAiService {
               'mode': 'writing',
               'text': writing,
               'language': language,
+              'journeyId': journeyId,
+              'learnerProfile': learnerProfile,
             }),
           )
           .timeout(timeout);
 
       final body = _decodeObject(response.body);
-      final feedback = body['feedback'];
+      final feedback = _readObject(body, 'feedback');
       if (response.statusCode >= 200 &&
           response.statusCode < 300 &&
-          feedback is Map<String, dynamic>) {
+          feedback.isNotEmpty) {
+        final quality = _readObject(body, 'quality');
         return PhoenixWritingFeedback(
           corrected: _readText(feedback, 'corrected', writing),
           explanation: _readText(
@@ -135,6 +165,10 @@ class PhoenixAiService {
             '你已经把意思表达出来了，继续保持。',
           ),
           isOfflineFallback: false,
+          provider: _readText(body, 'provider', 'cloudflare'),
+          model: _readText(body, 'model', ''),
+          qualityReviewed: quality['reviewed'] == true,
+          qualityScore: _readInt(quality, 'score'),
         );
       }
     } catch (_) {
@@ -156,6 +190,14 @@ class PhoenixAiService {
     return value is Map<String, dynamic> ? value : <String, dynamic>{};
   }
 
+  Map<String, dynamic> _readObject(
+    Map<String, dynamic> source,
+    String key,
+  ) {
+    final value = source[key];
+    return value is Map<String, dynamic> ? value : <String, dynamic>{};
+  }
+
   String _readText(
     Map<String, dynamic> source,
     String key,
@@ -163,6 +205,11 @@ class PhoenixAiService {
   ) {
     final value = source[key];
     return value is String && value.trim().isNotEmpty ? value.trim() : fallback;
+  }
+
+  int _readInt(Map<String, dynamic> source, String key) {
+    final value = source[key];
+    return value is num ? value.round() : 0;
   }
 
   String _localGuideReply(String answer) {
