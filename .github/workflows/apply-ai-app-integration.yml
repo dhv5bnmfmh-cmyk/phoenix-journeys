@@ -1,0 +1,44 @@
+name: Apply Phoenix AI app integration
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+      - reopened
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-phoenix-ai-app-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feature/seven-day-journey-library'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/seven-day-journey-library
+          fetch-depth: 0
+      - name: Apply app integration
+        run: python .github/scripts/apply_ai_app_integration.py
+      - name: Format Dart files
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: dart format app/lib/screens/journey_screen.dart app/lib/widgets/phoenix_agent_cards.dart
+      - name: Commit app integration
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: connect learner memory and quality status"
+          git push origin HEAD:feature/seven-day-journey-library
