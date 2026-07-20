@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
@@ -26,35 +26,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
-          fetch-depth: 0
-
-      - name: Apply persistent Agent feedback
-        if: ${{ github.head_ref == 'feature/daily-journey-engine' || github.ref_name == 'feature/daily-journey-engine' }}
-        working-directory: ${{ github.workspace }}
-        run: python tools/run_agent_feedback_history_once.py
-
-      - name: Commit persistent Agent feedback
-        if: ${{ github.head_ref == 'feature/daily-journey-engine' || github.ref_name == 'feature/daily-journey-engine' }}
-        working-directory: ${{ github.workspace }}
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/lib/state/app_state.dart app/lib/screens/journey_screen.dart
-          [[ -f app/test/journey_feedback_persistence_test.dart ]] && git add app/test/journey_feedback_persistence_test.dart
-          [[ -f worker/agent_feedback_history_rule.test.mjs ]] && git add worker/agent_feedback_history_rule.test.mjs
-          [[ -f tools/agent_patch_error.txt ]] && git add tools/agent_patch_error.txt
-          if git diff --cached --quiet; then
-            echo "Persistent Agent feedback already applied."
-          elif [[ -f tools/agent_patch_error.txt ]]; then
-            git commit -m "chore: capture Agent feedback patch diagnostic"
-            git push origin HEAD:feature/daily-journey-engine
-          else
-            git commit -m "feat: preserve and review Agent feedback"
-            git push origin HEAD:feature/daily-journey-engine
-          fi
 
       - name: Test Phoenix agents
         id: agents
