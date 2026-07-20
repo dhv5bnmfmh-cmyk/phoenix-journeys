@@ -27,10 +27,12 @@ test('primary Phoenix screens obey the one-screen layout rule', () => {
   assert.doesNotMatch(journey, /scrollDirection:\s*Axis\.horizontal/);
 });
 
-test('story and Discovery place every short paragraph in the same screen', () => {
+test('story and Discovery adapt every short paragraph to the same screen', () => {
   const journey = read('app/lib/screens/journey_screen.dart');
-  assert.match(journey, /mainAxisSize:\s*MainAxisSize\.min/);
-  assert.match(journey, /fontSize:\s*10\.8/);
+  assert.match(journey, /adaptive-story-text-area/);
+  assert.match(journey, /adaptive-discovery-text-area/);
+  assert.match(journey, /_fitJourneyTextSize/);
+  assert.match(journey, /MainAxisAlignment\.spaceBetween/);
   assert.doesNotMatch(journey, /_NowReadingStrip/);
   assert.doesNotMatch(journey, /朗读位置/);
   assert.doesNotMatch(journey, /本页重点词语/);
