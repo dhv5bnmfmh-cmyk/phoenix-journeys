@@ -182,6 +182,15 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
   void _showEntry(WordEntry entry) {
     _hideTimer?.cancel();
     setState(() => _selectedEntry = entry);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Scrollable.ensureVisible(
+        context,
+        alignment: .18,
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOutCubic,
+      );
+    });
     _hideTimer = Timer(const Duration(milliseconds: 3200), () {
       if (mounted && identical(_selectedEntry, entry)) {
         setState(() => _selectedEntry = null);
@@ -290,7 +299,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
             child: selectedEntry == null
                 ? const SizedBox.shrink(key: ValueKey('word-popover-empty'))
                 : Padding(
-                    key: ValueKey('word-popover-${selectedEntry.word}'),
+                    key: ValueKey('word-popover-auto-visible-${selectedEntry.word}'),
                     padding: const EdgeInsets.only(top: 8),
                     child: _VocabularyPopover(
                       entry: selectedEntry,

@@ -140,6 +140,12 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Future<void> _goToStep(int targetStep) async {
     final safeStep = targetStep.clamp(0, AppState.journeyLastStep);
+    if (!_appState.journeyCompleted &&
+        safeStep != step &&
+        safeStep != step - 1 &&
+        safeStep != step + 1) {
+      return;
+    }
     await _narration.stop();
     if (!mounted || safeStep == step) return;
 
@@ -207,6 +213,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     await showWordDetail(
       context,
       entry,
+      narrationController: _narration,
       entries: _experience.words,
       initialIndex: initialIndex < 0 ? 0 : initialIndex,
       onSpeak: () => _narration.speakWord(
@@ -484,7 +491,7 @@ class _JourneyScreenState extends State<JourneyScreen>
 
     final availableWidth =
         (constraints.maxWidth - 58).clamp(120.0, constraints.maxWidth).toDouble();
-    final availableHeight = constraints.maxHeight;
+    final availableHeight = math.max(0.0, constraints.maxHeight - 8);
     final textScaler = MediaQuery.textScalerOf(context);
     final direction = Directionality.of(context);
     var low = minSize;
@@ -506,7 +513,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           textDirection: direction,
           textScaler: textScaler,
         )..layout(maxWidth: availableWidth);
-        totalHeight += math.max(18, painter.height) + 6;
+        totalHeight += math.max(18, painter.height) + 12;
       }
 
       if (totalHeight <= availableHeight) {
@@ -637,6 +644,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 JourneyProgressHeader(
                   currentStep: step,
                   furthestStep: state.beijingJourneyFurthestStep,
+                  isCompleted: state.journeyCompleted,
                   labels: AppState.journeyStepLabels,
                   onStepSelected: (value) => unawaited(_goToStep(value)),
                 ),
@@ -806,9 +814,13 @@ class _JourneyScreenState extends State<JourneyScreen>
                 return AnimatedBuilder(
                   animation: _narration,
                   builder: (context, _) {
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: _journeyContent.storyParagraphs
+                    return SingleChildScrollView(
+                      key: const ValueKey('story-auto-visibility-scroll'),
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: _journeyContent.storyParagraphs
                           .asMap()
                           .entries
                           .map((entry) {
@@ -853,6 +865,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                             );
                           })
                           .toList(growable: false),
+                      ),
                     );
                   },
                 );
@@ -866,6 +879,7 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Widget _wordsPage() {
     final state = context.watch<AppState>();
+    final language = state.translationLanguage;
 
     return _page(
       title: '生词',
@@ -880,10 +894,16 @@ class _JourneyScreenState extends State<JourneyScreen>
               (constraints.maxHeight - spacing * (rows - 1)) / rows;
           final safeCellHeight = math.max(1.0, cellHeight);
           final ratio = cellWidth / safeCellHeight;
-          final showPartOfSpeech =
-              cellHeight >= 108 && _experience.words.length <= 12;
-          final showMeaning =
-              cellHeight >= 145 && _experience.words.length <= 9;
+          final showPartOfSpeech = cellHeight >= 52;
+          final showNativeMeaning = cellHeight >= 72;
+          final showEnglishMeaning = cellHeight >= 96 && language != '英语';
+          final showChineseMeaning =
+              cellHeight >= 122 && language != '中文解释';
+          final nativeLabel = switch (language) {
+            '英语' => 'English',
+            '中文解释' => '中文',
+            _ => '母语',
+          };
 
           return GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
@@ -967,17 +987,46 @@ class _JourneyScreenState extends State<JourneyScreen>
                             ),
                           ),
                         ],
-                        if (showMeaning) ...[
+                        if (showNativeMeaning) ...[
                           const SizedBox(height: 4),
                           Text(
-                            state.displayText(entry.simpleChinese),
+                            '$nativeLabel · ${state.displayText(entry.nativeDefinition(language))}',
+                            maxLines: cellHeight >= 112 ? 2 : 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: PhoenixTheme.translation,
+                              fontSize: 8.6,
+                              height: 1.15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                        if (showEnglishMeaning) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            'EN · ${entry.englishDefinition}',
+                            maxLines: cellHeight >= 126 ? 2 : 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: PhoenixTheme.ai,
+                              fontSize: 8.4,
+                              height: 1.15,
+                            ),
+                          ),
+                        ],
+                        if (showChineseMeaning) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            state.displayText('中 · ${entry.simpleChinese}'),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.black54,
-                              fontSize: 9.5,
-                              height: 1.2,
+                              fontSize: 8.4,
+                              height: 1.15,
                             ),
                           ),
                         ],

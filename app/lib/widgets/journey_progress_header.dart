@@ -6,6 +6,7 @@ class JourneyProgressHeader extends StatelessWidget {
   const JourneyProgressHeader({
     required this.currentStep,
     required this.furthestStep,
+    required this.isCompleted,
     required this.labels,
     required this.onStepSelected,
     super.key,
@@ -13,14 +14,10 @@ class JourneyProgressHeader extends StatelessWidget {
 
   final int currentStep;
   final int furthestStep;
+  final bool isCompleted;
   final List<String> labels;
   final ValueChanged<int> onStepSelected;
 
-  bool get _allAccessPreview {
-    final uri = Uri.base;
-    return uri.queryParameters['unlock'] == 'all' ||
-        uri.host.startsWith('phoenix-journeys-pr-');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +31,18 @@ class JourneyProgressHeader extends StatelessWidget {
       child: InkWell(
         key: const ValueKey('journey-progress-strip'),
         borderRadius: BorderRadius.circular(12),
-        onTap: () => _showSteps(context),
+        onTap: isCompleted
+            ? () => _showSteps(context)
+            : () {
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    const SnackBar(
+                      content: Text('请按顺序完成课程；全部完成后可自由选择页面。'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+              },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(
@@ -62,17 +70,19 @@ class JourneyProgressHeader extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    currentStep == labels.length - 1
-                        ? '旅程完成'
-                        : '下一步 $nextLabel',
+                    isCompleted
+                        ? '课程已完成 · 可自由选择'
+                        : currentStep == labels.length - 1
+                            ? '完成最后一步'
+                            : '下一步 $nextLabel',
                     style: const TextStyle(
                       color: Colors.black45,
                       fontSize: 11,
                     ),
                   ),
                   const SizedBox(width: 2),
-                  const Icon(
-                    Icons.expand_more,
+                  Icon(
+                    isCompleted ? Icons.expand_more : Icons.lock_outline,
                     size: 17,
                     color: Colors.black38,
                   ),
@@ -96,7 +106,6 @@ class JourneyProgressHeader extends StatelessWidget {
   }
 
   void _showSteps(BuildContext context) {
-    final allAccess = _allAccessPreview;
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -107,7 +116,7 @@ class JourneyProgressHeader extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
             children: [
               Text(
-                allAccess ? '选择学习步骤 · 体验全开放' : '选择学习步骤',
+                isCompleted ? '选择学习步骤 · 课程已完成' : '请按顺序完成课程',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
@@ -116,7 +125,7 @@ class JourneyProgressHeader extends StatelessWidget {
               const SizedBox(height: 8),
               ...labels.asMap().entries.map((entry) {
                 final index = entry.key;
-                final enabled = allAccess || index <= furthestStep;
+                final enabled = isCompleted;
                 final selected = index == currentStep;
 
                 return ListTile(

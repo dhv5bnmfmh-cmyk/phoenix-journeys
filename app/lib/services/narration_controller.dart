@@ -146,11 +146,13 @@ class NarrationController extends ChangeNotifier {
   }
 
   static const speedOptions = <NarrationSpeedOption>[
+    NarrationSpeedOption(label: '0.5×', rate: .5),
+    NarrationSpeedOption(label: '0.75×', rate: .75),
     NarrationSpeedOption(label: '1.0×', rate: 1.0),
+    NarrationSpeedOption(label: '1.25×', rate: 1.25),
     NarrationSpeedOption(label: '1.5×', rate: 1.5),
+    NarrationSpeedOption(label: '1.75×', rate: 1.75),
     NarrationSpeedOption(label: '2.0×', rate: 2.0),
-    NarrationSpeedOption(label: '2.5×', rate: 2.5),
-    NarrationSpeedOption(label: '3.0×', rate: 3.0),
   ];
 
   final FlutterTts _tts;
@@ -611,9 +613,9 @@ class NarrationController extends ChangeNotifier {
   }
 
   double _ttsSpeechRate(double multiplier) {
-    if (kIsWeb) return multiplier.clamp(0.5, 3.0).toDouble();
-    return (0.48 + (multiplier - 1.0) * 0.20)
-        .clamp(0.48, 1.0)
+    if (kIsWeb) return multiplier.clamp(0.5, 2.0).toDouble();
+    return (0.50 + (multiplier - 1.0) * 0.20)
+        .clamp(0.40, 0.70)
         .toDouble();
   }
 

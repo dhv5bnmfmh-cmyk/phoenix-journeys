@@ -120,15 +120,15 @@ const hangzhouStoryAnnotations = <ReadingAnnotation>[
 ];
 
 const hangzhouWords = <WordEntry>[
-  WordEntry(word: '苏堤', pinyin: 'Sūdī', simpleChinese: '横跨西湖的重要堤道。', translation: 'Đê Tô, con đê nổi tiếng trên Tây Hồ.', englishDefinition: 'Su Causeway', symbol: '🌉'),
-  WordEntry(word: '倒映', pinyin: 'dàoyìng', simpleChinese: '物体的影子映在水面或镜面上。', translation: 'Phản chiếu trên mặt nước hoặc gương.', englishDefinition: 'to be reflected', symbol: '🪞'),
-  WordEntry(word: '堤岸', pinyin: 'dī’àn', simpleChinese: '防止水流漫出的岸边建筑。', translation: 'Bờ đê ngăn nước tràn.', englishDefinition: 'embankment', symbol: '🧱'),
-  WordEntry(word: '疏浚', pinyin: 'shūjùn', simpleChinese: '清理河湖底部，让水道更通畅。', translation: 'Nạo vét để dòng nước thông thoáng.', englishDefinition: 'to dredge', symbol: '⛏️'),
-  WordEntry(word: '亭台', pinyin: 'tíngtái', simpleChinese: '园林中的亭子和台阁。', translation: 'Đình và lầu trong vườn cảnh.', englishDefinition: 'pavilions and terraces', symbol: '🏯'),
-  WordEntry(word: '融合', pinyin: 'rónghé', simpleChinese: '不同事物结合在一起。', translation: 'Hòa hợp hoặc kết hợp với nhau.', englishDefinition: 'to blend or integrate', symbol: '🫶'),
-  WordEntry(word: '景点', pinyin: 'jǐngdiǎn', simpleChinese: '值得参观的风景或地点。', translation: 'Điểm tham quan.', englishDefinition: 'scenic spot', symbol: '📍'),
-  WordEntry(word: '山水', pinyin: 'shānshuǐ', simpleChinese: '山和水组成的自然景色。', translation: 'Phong cảnh núi non và sông nước.', englishDefinition: 'mountains-and-water landscape', symbol: '🏞️'),
-  WordEntry(word: '彼此', pinyin: 'bǐcǐ', simpleChinese: '双方互相。', translation: 'Lẫn nhau, đôi bên.', englishDefinition: 'each other', symbol: '↔️'),
+  WordEntry(word: '苏堤', pinyin: 'Sūdī', partOfSpeech: '名词（专名）', simpleChinese: '横跨西湖的重要堤道。', translation: 'Đê Tô, con đê nổi tiếng trên Tây Hồ.', englishDefinition: 'Su Causeway', symbol: '🌉'),
+  WordEntry(word: '倒映', pinyin: 'dàoyìng', partOfSpeech: '动词', simpleChinese: '物体的影子映在水面或镜面上。', translation: 'Phản chiếu trên mặt nước hoặc gương.', englishDefinition: 'to be reflected', symbol: '🪞'),
+  WordEntry(word: '堤岸', pinyin: 'dī’àn', partOfSpeech: '名词', simpleChinese: '防止水流漫出的岸边建筑。', translation: 'Bờ đê ngăn nước tràn.', englishDefinition: 'embankment', symbol: '🧱'),
+  WordEntry(word: '疏浚', pinyin: 'shūjùn', partOfSpeech: '动词', simpleChinese: '清理河湖底部，让水道更通畅。', translation: 'Nạo vét để dòng nước thông thoáng.', englishDefinition: 'to dredge', symbol: '⛏️'),
+  WordEntry(word: '亭台', pinyin: 'tíngtái', partOfSpeech: '名词', simpleChinese: '园林中的亭子和台阁。', translation: 'Đình và lầu trong vườn cảnh.', englishDefinition: 'pavilions and terraces', symbol: '🏯'),
+  WordEntry(word: '融合', pinyin: 'rónghé', partOfSpeech: '动词', simpleChinese: '不同事物结合在一起。', translation: 'Hòa hợp hoặc kết hợp với nhau.', englishDefinition: 'to blend or integrate', symbol: '🫶'),
+  WordEntry(word: '景点', pinyin: 'jǐngdiǎn', partOfSpeech: '名词', simpleChinese: '值得参观的风景或地点。', translation: 'Điểm tham quan.', englishDefinition: 'scenic spot', symbol: '📍'),
+  WordEntry(word: '山水', pinyin: 'shānshuǐ', partOfSpeech: '名词', simpleChinese: '山和水组成的自然景色。', translation: 'Phong cảnh núi non và sông nước.', englishDefinition: 'mountains-and-water landscape', symbol: '🏞️'),
+  WordEntry(word: '彼此', pinyin: 'bǐcǐ', partOfSpeech: '代词', simpleChinese: '双方互相。', translation: 'Lẫn nhau, đôi bên.', englishDefinition: 'each other', symbol: '↔️'),
 ];
 
 const hangzhouDiscoveries = <DiscoveryEntry>[
@@ -153,15 +153,15 @@ const chengduStoryAnnotations = <ReadingAnnotation>[
 ];
 
 const chengduWords = <WordEntry>[
-  WordEntry(word: '巷子', pinyin: 'xiàngzi', simpleChinese: '城市里比较窄的小路。', translation: 'Ngõ hoặc hẻm nhỏ trong thành phố.', englishDefinition: 'alley or lane', symbol: '🛤️'),
-  WordEntry(word: '青砖', pinyin: 'qīngzhuān', simpleChinese: '颜色偏灰青的传统砖。', translation: 'Gạch xanh xám truyền thống.', englishDefinition: 'grey-blue brick', symbol: '🧱'),
-  WordEntry(word: '院落', pinyin: 'yuànluò', simpleChinese: '由房屋围成的院子和建筑。', translation: 'Khu nhà và sân được bao quanh.', englishDefinition: 'courtyard compound', symbol: '🏡'),
-  WordEntry(word: '平行', pinyin: 'píngxíng', simpleChinese: '方向相同而不相交。', translation: 'Song song, cùng hướng không giao nhau.', englishDefinition: 'parallel', symbol: '〰️'),
-  WordEntry(word: '茶馆', pinyin: 'cháguǎn', simpleChinese: '喝茶、休息和聊天的地方。', translation: 'Quán trà để uống trà và trò chuyện.', englishDefinition: 'teahouse', symbol: '🍵'),
-  WordEntry(word: '盖碗茶', pinyin: 'gàiwǎnchá', simpleChinese: '用带盖茶碗冲泡和饮用的茶。', translation: 'Trà pha trong chén có nắp.', englishDefinition: 'tea served in a lidded bowl', symbol: '🫖'),
-  WordEntry(word: '保留', pinyin: 'bǎoliú', simpleChinese: '留下来，不让它消失。', translation: 'Giữ lại, bảo tồn.', englishDefinition: 'to preserve or retain', symbol: '📦'),
-  WordEntry(word: '慢生活', pinyin: 'màn shēnghuó', simpleChinese: '节奏比较放松的生活方式。', translation: 'Lối sống chậm và thư thái.', englishDefinition: 'slow-paced lifestyle', symbol: '🐢'),
-  WordEntry(word: '商业', pinyin: 'shāngyè', simpleChinese: '买卖商品和服务的活动。', translation: 'Hoạt động kinh doanh và thương mại.', englishDefinition: 'commerce', symbol: '🏪'),
+  WordEntry(word: '巷子', pinyin: 'xiàngzi', partOfSpeech: '名词', simpleChinese: '城市里比较窄的小路。', translation: 'Ngõ hoặc hẻm nhỏ trong thành phố.', englishDefinition: 'alley or lane', symbol: '🛤️'),
+  WordEntry(word: '青砖', pinyin: 'qīngzhuān', partOfSpeech: '名词', simpleChinese: '颜色偏灰青的传统砖。', translation: 'Gạch xanh xám truyền thống.', englishDefinition: 'grey-blue brick', symbol: '🧱'),
+  WordEntry(word: '院落', pinyin: 'yuànluò', partOfSpeech: '名词', simpleChinese: '由房屋围成的院子和建筑。', translation: 'Khu nhà và sân được bao quanh.', englishDefinition: 'courtyard compound', symbol: '🏡'),
+  WordEntry(word: '平行', pinyin: 'píngxíng', partOfSpeech: '形容词', simpleChinese: '方向相同而不相交。', translation: 'Song song, cùng hướng không giao nhau.', englishDefinition: 'parallel', symbol: '〰️'),
+  WordEntry(word: '茶馆', pinyin: 'cháguǎn', partOfSpeech: '名词', simpleChinese: '喝茶、休息和聊天的地方。', translation: 'Quán trà để uống trà và trò chuyện.', englishDefinition: 'teahouse', symbol: '🍵'),
+  WordEntry(word: '盖碗茶', pinyin: 'gàiwǎnchá', partOfSpeech: '名词', simpleChinese: '用带盖茶碗冲泡和饮用的茶。', translation: 'Trà pha trong chén có nắp.', englishDefinition: 'tea served in a lidded bowl', symbol: '🫖'),
+  WordEntry(word: '保留', pinyin: 'bǎoliú', partOfSpeech: '动词', simpleChinese: '留下来，不让它消失。', translation: 'Giữ lại, bảo tồn.', englishDefinition: 'to preserve or retain', symbol: '📦'),
+  WordEntry(word: '慢生活', pinyin: 'màn shēnghuó', partOfSpeech: '名词', simpleChinese: '节奏比较放松的生活方式。', translation: 'Lối sống chậm và thư thái.', englishDefinition: 'slow-paced lifestyle', symbol: '🐢'),
+  WordEntry(word: '商业', pinyin: 'shāngyè', partOfSpeech: '名词', simpleChinese: '买卖商品和服务的活动。', translation: 'Hoạt động kinh doanh và thương mại.', englishDefinition: 'commerce', symbol: '🏪'),
 ];
 
 const chengduDiscoveries = <DiscoveryEntry>[
@@ -186,15 +186,15 @@ const nanjingStoryAnnotations = <ReadingAnnotation>[
 ];
 
 const nanjingWords = <WordEntry>[
-  WordEntry(word: '秦淮河', pinyin: 'Qínhuái Hé', simpleChinese: '流经南京历史城区的重要河流。', translation: 'Sông Tần Hoài chảy qua khu lịch sử Nam Kinh.', englishDefinition: 'the Qinhuai River', symbol: '🛶'),
-  WordEntry(word: '夫子庙', pinyin: 'Fūzǐmiào', simpleChinese: '南京著名的孔庙和历史文化区域。', translation: 'Phu Tử Miếu, khu văn hóa lịch sử nổi tiếng.', englishDefinition: 'Nanjing Confucius Temple', symbol: '🏛️'),
-  WordEntry(word: '牌坊', pinyin: 'páifāng', simpleChinese: '有纪念或标志作用的传统门式建筑。', translation: 'Cổng bài truyền thống mang ý nghĩa biểu tượng.', englishDefinition: 'ceremonial archway', symbol: '⛩️'),
-  WordEntry(word: '贡院', pinyin: 'gòngyuàn', simpleChinese: '古代举行科举考试的场所。', translation: 'Nơi tổ chức khoa cử thời xưa.', englishDefinition: 'imperial examination compound', symbol: '📝'),
-  WordEntry(word: '交织', pinyin: 'jiāozhī', simpleChinese: '不同事物互相连接在一起。', translation: 'Đan xen, kết nối với nhau.', englishDefinition: 'to interweave', symbol: '🧶'),
-  WordEntry(word: '灯会', pinyin: 'dēnghuì', simpleChinese: '集中展示花灯的节庆活动。', translation: 'Lễ hội đèn lồng.', englishDefinition: 'lantern festival', symbol: '🏮'),
-  WordEntry(word: '曲艺', pinyin: 'qǔyì', simpleChinese: '说唱、评书等传统表演艺术。', translation: 'Nghệ thuật kể chuyện và hát nói truyền thống.', englishDefinition: 'Chinese folk performance arts', symbol: '🎭'),
-  WordEntry(word: '游船', pinyin: 'yóuchuán', simpleChinese: '供游客乘坐游览的船。', translation: 'Thuyền du lịch.', englishDefinition: 'sightseeing boat', symbol: '⛵'),
-  WordEntry(word: '静止', pinyin: 'jìngzhǐ', simpleChinese: '停止不动。', translation: 'Đứng yên, không chuyển động.', englishDefinition: 'still or motionless', symbol: '⏸️'),
+  WordEntry(word: '秦淮河', pinyin: 'Qínhuái Hé', partOfSpeech: '名词（专名）', simpleChinese: '流经南京历史城区的重要河流。', translation: 'Sông Tần Hoài chảy qua khu lịch sử Nam Kinh.', englishDefinition: 'the Qinhuai River', symbol: '🛶'),
+  WordEntry(word: '夫子庙', pinyin: 'Fūzǐmiào', partOfSpeech: '名词（专名）', simpleChinese: '南京著名的孔庙和历史文化区域。', translation: 'Phu Tử Miếu, khu văn hóa lịch sử nổi tiếng.', englishDefinition: 'Nanjing Confucius Temple', symbol: '🏛️'),
+  WordEntry(word: '牌坊', pinyin: 'páifāng', partOfSpeech: '名词', simpleChinese: '有纪念或标志作用的传统门式建筑。', translation: 'Cổng bài truyền thống mang ý nghĩa biểu tượng.', englishDefinition: 'ceremonial archway', symbol: '⛩️'),
+  WordEntry(word: '贡院', pinyin: 'gòngyuàn', partOfSpeech: '名词', simpleChinese: '古代举行科举考试的场所。', translation: 'Nơi tổ chức khoa cử thời xưa.', englishDefinition: 'imperial examination compound', symbol: '📝'),
+  WordEntry(word: '交织', pinyin: 'jiāozhī', partOfSpeech: '动词', simpleChinese: '不同事物互相连接在一起。', translation: 'Đan xen, kết nối với nhau.', englishDefinition: 'to interweave', symbol: '🧶'),
+  WordEntry(word: '灯会', pinyin: 'dēnghuì', partOfSpeech: '名词', simpleChinese: '集中展示花灯的节庆活动。', translation: 'Lễ hội đèn lồng.', englishDefinition: 'lantern festival', symbol: '🏮'),
+  WordEntry(word: '曲艺', pinyin: 'qǔyì', partOfSpeech: '名词', simpleChinese: '说唱、评书等传统表演艺术。', translation: 'Nghệ thuật kể chuyện và hát nói truyền thống.', englishDefinition: 'Chinese folk performance arts', symbol: '🎭'),
+  WordEntry(word: '游船', pinyin: 'yóuchuán', partOfSpeech: '名词', simpleChinese: '供游客乘坐游览的船。', translation: 'Thuyền du lịch.', englishDefinition: 'sightseeing boat', symbol: '⛵'),
+  WordEntry(word: '静止', pinyin: 'jìngzhǐ', partOfSpeech: '形容词', simpleChinese: '停止不动。', translation: 'Đứng yên, không chuyển động.', englishDefinition: 'still or motionless', symbol: '⏸️'),
 ];
 
 const nanjingDiscoveries = <DiscoveryEntry>[
@@ -219,15 +219,15 @@ const guangzhouStoryAnnotations = <ReadingAnnotation>[
 ];
 
 const guangzhouWords = <WordEntry>[
-  WordEntry(word: '陈家祠', pinyin: 'Chénjiācí', simpleChinese: '广州著名的祠堂式历史建筑。', translation: 'Trần Gia Từ, công trình từ đường nổi tiếng ở Quảng Châu.', englishDefinition: 'Chen Clan Ancestral Hall', symbol: '🏯'),
-  WordEntry(word: '屋脊', pinyin: 'wūjǐ', simpleChinese: '屋顶最高的连接部分。', translation: 'Nóc mái, phần cao nhất của mái nhà.', englishDefinition: 'roof ridge', symbol: '🏠'),
-  WordEntry(word: '木雕', pinyin: 'mùdiāo', simpleChinese: '在木头上雕刻图案的工艺。', translation: 'Nghệ thuật chạm khắc gỗ.', englishDefinition: 'wood carving', symbol: '🪵'),
-  WordEntry(word: '砖雕', pinyin: 'zhuāndiāo', simpleChinese: '在砖上雕刻图案的工艺。', translation: 'Nghệ thuật chạm khắc gạch.', englishDefinition: 'brick carving', symbol: '🧱'),
-  WordEntry(word: '陶塑', pinyin: 'táosù', simpleChinese: '用陶土制作立体装饰。', translation: 'Tượng trang trí bằng gốm.', englishDefinition: 'ceramic sculpture', symbol: '🏺'),
-  WordEntry(word: '灰塑', pinyin: 'huīsù', simpleChinese: '用灰泥制作的传统建筑装饰。', translation: 'Phù điêu trang trí bằng vữa.', englishDefinition: 'lime or plaster sculpture', symbol: '🎨'),
-  WordEntry(word: '工匠', pinyin: 'gōngjiàng', simpleChinese: '掌握手工技艺的专业劳动者。', translation: 'Thợ thủ công có kỹ năng chuyên môn.', englishDefinition: 'craftsperson or artisan', symbol: '🛠️'),
-  WordEntry(word: '宗族', pinyin: 'zōngzú', simpleChinese: '有共同祖先的家族群体。', translation: 'Dòng họ có cùng tổ tiên.', englishDefinition: 'clan or lineage', symbol: '👨‍👩‍👧‍👦'),
-  WordEntry(word: '岭南', pinyin: 'Lǐngnán', simpleChinese: '中国南岭以南的文化地理区域。', translation: 'Vùng văn hóa địa lý phía nam dãy Nam Lĩnh.', englishDefinition: 'Lingnan, the region south of the Nanling Mountains', symbol: '🌺'),
+  WordEntry(word: '陈家祠', pinyin: 'Chénjiācí', partOfSpeech: '名词（专名）', simpleChinese: '广州著名的祠堂式历史建筑。', translation: 'Trần Gia Từ, công trình từ đường nổi tiếng ở Quảng Châu.', englishDefinition: 'Chen Clan Ancestral Hall', symbol: '🏯'),
+  WordEntry(word: '屋脊', pinyin: 'wūjǐ', partOfSpeech: '名词', simpleChinese: '屋顶最高的连接部分。', translation: 'Nóc mái, phần cao nhất của mái nhà.', englishDefinition: 'roof ridge', symbol: '🏠'),
+  WordEntry(word: '木雕', pinyin: 'mùdiāo', partOfSpeech: '名词', simpleChinese: '在木头上雕刻图案的工艺。', translation: 'Nghệ thuật chạm khắc gỗ.', englishDefinition: 'wood carving', symbol: '🪵'),
+  WordEntry(word: '砖雕', pinyin: 'zhuāndiāo', partOfSpeech: '名词', simpleChinese: '在砖上雕刻图案的工艺。', translation: 'Nghệ thuật chạm khắc gạch.', englishDefinition: 'brick carving', symbol: '🧱'),
+  WordEntry(word: '陶塑', pinyin: 'táosù', partOfSpeech: '名词', simpleChinese: '用陶土制作立体装饰。', translation: 'Tượng trang trí bằng gốm.', englishDefinition: 'ceramic sculpture', symbol: '🏺'),
+  WordEntry(word: '灰塑', pinyin: 'huīsù', partOfSpeech: '名词', simpleChinese: '用灰泥制作的传统建筑装饰。', translation: 'Phù điêu trang trí bằng vữa.', englishDefinition: 'lime or plaster sculpture', symbol: '🎨'),
+  WordEntry(word: '工匠', pinyin: 'gōngjiàng', partOfSpeech: '名词', simpleChinese: '掌握手工技艺的专业劳动者。', translation: 'Thợ thủ công có kỹ năng chuyên môn.', englishDefinition: 'craftsperson or artisan', symbol: '🛠️'),
+  WordEntry(word: '宗族', pinyin: 'zōngzú', partOfSpeech: '名词', simpleChinese: '有共同祖先的家族群体。', translation: 'Dòng họ có cùng tổ tiên.', englishDefinition: 'clan or lineage', symbol: '👨‍👩‍👧‍👦'),
+  WordEntry(word: '岭南', pinyin: 'Lǐngnán', partOfSpeech: '名词（专名）', simpleChinese: '中国南岭以南的文化地理区域。', translation: 'Vùng văn hóa địa lý phía nam dãy Nam Lĩnh.', englishDefinition: 'Lingnan, the region south of the Nanling Mountains', symbol: '🌺'),
 ];
 
 const guangzhouDiscoveries = <DiscoveryEntry>[
