@@ -1,0 +1,61 @@
+name: Apply synchronized speed stepper rule
+
+on:
+  push:
+    branches:
+      - feature/seven-day-journey-library
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-speed-stepper-rule
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/seven-day-journey-library
+          fetch-depth: 0
+
+      - name: Apply speed range, controls and permanent rule
+        run: python .github/scripts/apply_speed_stepper_rule.py
+
+      - name: Test Phoenix rules
+        run: node --test worker/*.test.mjs
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Test Flutter app
+        working-directory: app
+        run: flutter test
+
+      - name: Build web release
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Commit synchronized speed rule
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: synchronize narration speed with step controls"
+          git push origin HEAD:feature/seven-day-journey-library
