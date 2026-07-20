@@ -35,8 +35,11 @@ test('changing speed synchronizes every narration controller and future controll
   assert.match(controller, /static final Set<NarrationController> _instances/);
   assert.match(controller, /_speechRate = _sharedSpeechRate/);
   assert.match(controller, /_instances\.add\(this\)/);
+  assert.match(controller, /Future<void> decreaseSpeechRate\(\)/);
+  assert.match(controller, /Future<void> increaseSpeechRate\(\)/);
   assert.match(controller, /List<NarrationController>\.of\(_instances\)/);
   assert.match(controller, /controller\._applySharedSpeechRate\(option\.rate\)/);
+  assert.match(controller, /final wasPlaying =/);
   assert.match(controller, /resumeFromOffset\(resumeOffset\)/);
   assert.match(controller, /_instances\.remove\(this\)/);
 });
