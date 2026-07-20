@@ -25,7 +25,7 @@
 - [ ] 故事页与发现页生词均显示词性、探索者母语和英文释义
 - [ ] 生词查看与朗读正常
 - [ ] PhoenixBrainAgent 是唯一 AI 总调度入口
-- [ ] Guide / Writing / Conversation / Learning 均由 Brain 调度并经过 Quality 隐藏复核
+- [ ] Guide / Writing / Conversation / Learning 均由 PhoenixBrainAgent 调度并经过 PhoenixQualityAgent 隐藏复核
 - [ ] GPT-5.6 通过 OpenAI Responses API 优先运行，Cloudflare Workers AI 自动回退
 - [ ] PhoenixMemoryAgent 只处理有限客户端学习档案，服务器不持久保存
 - [ ] PhoenixKnowledgeAgent 只提供已审核 Journey 背景
