@@ -41,4 +41,5 @@ test('player, progress and CJK reading marker share one synchronized source', ()
   assert.match(webSpeech, /_isCjkCodeUnit/);
   assert.match(webSpeech, /return \(start \+ 1\)\.clamp/);
   assert.match(narration, /_nativeCharsPerSecond\(_narrationLanguageCode\)/);
+  assert.doesNotMatch(narration, /3\.35 \* _speechRate/);
 });
