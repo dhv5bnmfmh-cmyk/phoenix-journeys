@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
@@ -26,58 +26,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: feature/seven-day-journey-library
-          fetch-depth: 0
-
-      - name: Fix adaptive narration integration
-        working-directory: ${{ github.workspace }}
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          narration_path = Path('app/lib/services/narration_controller.dart')
-          narration = narration_path.read_text(encoding='utf-8')
-          broken = """          for (final preferredName in preferredNames) {
-            if (lowerName.contains(preferredName)) score += 42;
-          }
-          }
-
-          if (score > bestScore"""
-          fixed = """          for (final preferredName in preferredNames) {
-            if (lowerName.contains(preferredName)) score += 42;
-          }
-
-          if (score > bestScore"""
-          if broken not in narration:
-              raise SystemExit('extra voice-selection brace not found')
-          narration_path.write_text(narration.replace(broken, fixed, 1), encoding='utf-8')
-
-          journey_path = Path('app/lib/screens/journey_screen.dart')
-          journey = journey_path.read_text(encoding='utf-8')
-          target = """    await showWordDetail(
-      context,
-      entry,
-      entries: _experience.words,"""
-          replacement = """    await showWordDetail(
-      context,
-      entry,
-      narrationController: _narration,
-      entries: _experience.words,"""
-          if target not in journey:
-              raise SystemExit('word detail call target not found')
-          journey_path.write_text(journey.replace(target, replacement, 1), encoding='utf-8')
-          PY
-
-      - name: Persist integration fix
-        working-directory: ${{ github.workspace }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout origin/main -- .github/workflows/flutter-ci.yml
-          git add app/lib/services/narration_controller.dart app/lib/screens/journey_screen.dart .github/workflows/flutter-ci.yml
-          git commit -m "fix: complete adaptive narration integration"
-          git push origin HEAD:feature/seven-day-journey-library
 
       - name: Test Phoenix agents
         id: agents
