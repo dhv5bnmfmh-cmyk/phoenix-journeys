@@ -37,14 +37,14 @@ test('word cards prioritize part of speech, explorer language, English, then Chi
   }
 });
 
-test('all Phoenix speech uses a natural 0.5x to 1.5x scale with 1x default', () => {
-  for (const label of ['0.5×', '0.75×', '1.0×', '1.25×', '1.5×']) {
-    assert.ok(narration.includes(label));
-  }
-  assert.doesNotMatch(narration, /label: '1\.75×'/);
-  assert.doesNotMatch(narration, /label: '2\.0×'/);
-  assert.doesNotMatch(narration, /label: '2\.5×'/);
-  assert.doesNotMatch(narration, /label: '3\.0×'/);
+test('all Phoenix speech uses 0.1 steps from 0.5x to 1.5x with 1x default', () => {
+  const labels = [
+    '0.5×', '0.6×', '0.7×', '0.8×', '0.9×', '1.0×',
+    '1.1×', '1.2×', '1.3×', '1.4×', '1.5×',
+  ];
+  for (const label of labels) assert.ok(narration.includes(label));
+  assert.match(narration, /static const double speechRateStep = 0\.1/);
+  assert.doesNotMatch(narration, /0\.75×|1\.25×|1\.75×|2\.0×|2\.5×|3\.0×/);
   assert.match(narration, /static const double nativeDefaultRate = 1\.0/);
   assert.match(narration, /double _speechRate = nativeDefaultRate/);
   assert.match(narration, /clamp\(0\.5, 1\.5\)/);
