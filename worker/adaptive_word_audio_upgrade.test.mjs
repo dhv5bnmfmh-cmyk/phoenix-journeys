@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
+// Regression coverage for the guided course, adaptive word cards, and audio range.
 const journey = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
 const narration = readFileSync('app/lib/services/narration_controller.dart', 'utf8');
 const sheet = readFileSync('app/lib/widgets/word_detail_sheet.dart', 'utf8');
