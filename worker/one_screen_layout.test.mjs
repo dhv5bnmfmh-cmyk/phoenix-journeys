@@ -32,7 +32,9 @@ test('story and Discovery adapt every short paragraph to the same screen', () =>
   assert.match(journey, /adaptive-story-text-area/);
   assert.match(journey, /adaptive-discovery-text-area/);
   assert.match(journey, /_fitJourneyTextSize/);
-  assert.match(journey, /MainAxisAlignment\.spaceBetween/);
+  assert.doesNotMatch(journey, /MainAxisAlignment\.spaceBetween/);
+  assert.doesNotMatch(journey, /cellHeight\.clamp\(38\.0, 70\.0\)/);
+  assert.match(journey, /safeCellHeight = math\.max\(1\.0, cellHeight\)/);
   assert.doesNotMatch(journey, /_NowReadingStrip/);
   assert.doesNotMatch(journey, /朗读位置/);
   assert.doesNotMatch(journey, /本页重点词语/);

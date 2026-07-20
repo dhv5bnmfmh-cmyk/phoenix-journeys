@@ -877,7 +877,8 @@ class _JourneyScreenState extends State<JourneyScreen>
               (constraints.maxWidth - spacing * (columns - 1)) / columns;
           final cellHeight =
               (constraints.maxHeight - spacing * (rows - 1)) / rows;
-          final ratio = cellWidth / cellHeight.clamp(38.0, 70.0);
+          final safeCellHeight = math.max(1.0, cellHeight);
+          final ratio = cellWidth / safeCellHeight;
 
           return GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
@@ -995,7 +996,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                   animation: _narration,
                   builder: (context, _) {
                     return Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: _experience.discoveries
                           .asMap()
                           .entries
