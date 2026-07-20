@@ -18,6 +18,7 @@ import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_share_button.dart';
 import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
+import '../widgets/narration_speed_stepper.dart';
 import '../widgets/phoenix_agent_cards.dart';
 import '../widgets/word_detail_sheet.dart';
 
@@ -1493,28 +1494,10 @@ class _ReadingSupportSheet extends StatelessWidget {
                 ),
               ),
             ),
-            AnimatedBuilder(
-              animation: controller,
-              builder: (context, _) => PopupMenuButton<double>(
-                key: const ValueKey('support-speed-control'),
-                tooltip: '调整朗读语速',
-                onSelected: (rate) => unawaited(controller.setSpeechRate(rate)),
-                itemBuilder: (context) => NarrationController.speedOptions
-                    .map(
-                      (option) => PopupMenuItem<double>(
-                        value: option.rate,
-                        child: Text('${option.label} 语速'),
-                      ),
-                    )
-                    .toList(growable: false),
-                child: Chip(
-                  visualDensity: VisualDensity.compact,
-                  label: Text(
-                    controller.speedLabel,
-                    style: const TextStyle(fontSize: 10),
-                  ),
-                ),
-              ),
+            NarrationSpeedStepper(
+              key: const ValueKey('support-speed-control'),
+              controller: controller,
+              compact: true,
             ),
           ],
         ),

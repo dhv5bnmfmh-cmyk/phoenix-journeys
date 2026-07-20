@@ -14,7 +14,7 @@ const permanentRule = '永久朗读开发准则';
 test('Phoenix permanently documents the native-speed narration contract', () => {
   assert.match(processDoc, new RegExp(permanentRule));
   assert.match(processDoc, /默认倍率固定为 `1\.0×`/);
-  assert.match(processDoc, /用户可调范围固定为 `0\.5×–2\.0×`/);
+  assert.match(processDoc, /用户可调范围固定为 `0\.5×–1\.5×`/);
   assert.match(processDoc, /简体中文使用 `zh-CN`/);
   assert.match(processDoc, /繁体中文使用 `zh-TW`/);
   assert.match(processDoc, /英文使用 `en-US`/);
@@ -26,7 +26,7 @@ test('Phoenix permanently documents the native-speed narration contract', () => 
 
 test('every pull request must verify the permanent narration rules', () => {
   assert.match(template, /所有朗读默认 `1\.0×` 本地自然语速/);
-  assert.match(template, /范围为 `0\.5×–2\.0×`/);
+  assert.match(template, /范围为 `0\.5×–1\.5×`/);
   assert.match(template, /声音、进度、百分比、当前段落和字符三角形同步/);
   assert.match(template, /共用 `NarrationController`/);
   assert.match(template, /永久朗读开发准则/);
@@ -35,7 +35,8 @@ test('every pull request must verify the permanent narration rules', () => {
 test('runtime keeps native speed, locale and one synchronized controller', () => {
   assert.match(controller, /static const double nativeDefaultRate = 1\.0/);
   assert.match(controller, /NarrationSpeedOption\(label: '0\.5×', rate: \.5\)/);
-  assert.match(controller, /NarrationSpeedOption\(label: '2\.0×', rate: 2\.0\)/);
+  assert.match(controller, /NarrationSpeedOption\(label: '1\.5×', rate: 1\.5\)/);
+  assert.doesNotMatch(controller, /1\.75×|2\.0×/);
   assert.match(controller, /Future<bool> speakTemporaryText/);
   assert.match(controller, /resumeFromOffset\(resumeOffset\)/);
   assert.match(journey, /languageCode: _appState\.isTraditional \? 'zh-TW' : 'zh-CN'/);

@@ -142,10 +142,15 @@ class NarrationController extends ChangeNotifier {
       onResume: _handleWebResume,
       onError: _handleWebError,
     );
+    _speechRate = _sharedSpeechRate;
+    _instances.add(this);
     _bindHandlers();
   }
 
   static const double nativeDefaultRate = 1.0;
+  static double _sharedSpeechRate = nativeDefaultRate;
+  static final Set<NarrationController> _instances =
+      <NarrationController>{};
 
   static const speedOptions = <NarrationSpeedOption>[
     NarrationSpeedOption(label: '0.5×', rate: .5),
@@ -153,8 +158,6 @@ class NarrationController extends ChangeNotifier {
     NarrationSpeedOption(label: '1.0×', rate: 1.0),
     NarrationSpeedOption(label: '1.25×', rate: 1.25),
     NarrationSpeedOption(label: '1.5×', rate: 1.5),
-    NarrationSpeedOption(label: '1.75×', rate: 1.75),
-    NarrationSpeedOption(label: '2.0×', rate: 2.0),
   ];
 
   final FlutterTts _tts;
@@ -197,6 +200,37 @@ class NarrationController extends ChangeNotifier {
   int get itemCount => _plan.items.length;
   bool get hasContent => !_plan.isEmpty;
   double get speechRate => _speechRate;
+  int get _speechRateIndex {
+    final index = speedOptions.indexWhere(
+      (option) => (option.rate - _speechRate).abs() < .001,
+    );
+    return index < 0 ? 0 : index;
+  }
+
+  double? get slowerSpeechRate {
+    final index = _speechRateIndex;
+    return index <= 0 ? null : speedOptions[index - 1].rate;
+  }
+
+  double? get fasterSpeechRate {
+    final index = _speechRateIndex;
+    return index >= speedOptions.length - 1
+        ? null
+        : speedOptions[index + 1].rate;
+  }
+
+  bool get canDecreaseSpeechRate => slowerSpeechRate != null;
+  bool get canIncreaseSpeechRate => fasterSpeechRate != null;
+
+  Future<void> decreaseSpeechRate() async {
+    final rate = slowerSpeechRate;
+    if (rate != null) await setSpeechRate(rate);
+  }
+
+  Future<void> increaseSpeechRate() async {
+    final rate = fasterSpeechRate;
+    if (rate != null) await setSpeechRate(rate);
+  }
   int get currentOffset => _currentOffset;
   int get lastNativeOffset => _lastNativeOffset;
   bool get hasFreshNativeProgress {
@@ -605,13 +639,34 @@ class NarrationController extends ChangeNotifier {
           ? next
           : current,
     );
-    if ((_speechRate - option.rate).abs() < .001) return;
 
-    _speechRate = option.rate;
+    _sharedSpeechRate = option.rate;
+    final controllers = List<NarrationController>.of(_instances);
+    for (final controller in controllers) {
+      await controller._applySharedSpeechRate(option.rate);
+    }
+  }
+
+  Future<void> _applySharedSpeechRate(double rate) async {
+    if (_disposed || (_speechRate - rate).abs() < .001) return;
+
+    final wasPlaying =
+        _status == NarrationStatus.playing &&
+        _speechMode == _NarrationSpeechMode.narration &&
+        !_plan.isEmpty;
+    final resumeOffset = _currentOffset;
+    if (wasPlaying) await pauseAtOffset(resumeOffset);
+    if (_disposed) return;
+
+    _speechRate = rate;
     if (_webSpeech.isAvailable && _status == NarrationStatus.paused) {
       _restartWebSpeechOnResume = true;
     }
     _safeNotify();
+
+    if (wasPlaying && !_disposed) {
+      await resumeFromOffset(resumeOffset);
+    }
   }
 
   Future<void> stop({bool resetPosition = true}) async {
@@ -635,7 +690,7 @@ class NarrationController extends ChangeNotifier {
   }
 
   double _ttsSpeechRate(double multiplier) {
-    if (kIsWeb) return multiplier.clamp(0.5, 2.0).toDouble();
+    if (kIsWeb) return multiplier.clamp(0.5, 1.5).toDouble();
     return (0.50 + (multiplier - 1.0) * 0.20)
         .clamp(0.40, 0.70)
         .toDouble();
@@ -973,6 +1028,7 @@ class NarrationController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _instances.remove(this);
     _speechSessionToken += 1;
     _disposed = true;
     _cancelProgressClock();

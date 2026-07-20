@@ -7,6 +7,7 @@ import '../data/journey_data.dart';
 import '../services/narration_controller.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import 'narration_speed_stepper.dart';
 import 'word_mark.dart';
 
 Future<void> showWordDetail(
@@ -225,41 +226,10 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  AnimatedBuilder(
-                    animation: widget.narrationController,
-                    builder: (context, _) => PopupMenuButton<double>(
-                      key: const ValueKey('word-detail-speed-control'),
-                      tooltip: '调整朗读语速',
-                      onSelected: (rate) => unawaited(
-                        widget.narrationController.setSpeechRate(rate),
-                      ),
-                      itemBuilder: (context) => NarrationController.speedOptions
-                          .map(
-                            (option) => PopupMenuItem<double>(
-                              value: option.rate,
-                              child: Text('${option.label} 语速'),
-                            ),
-                          )
-                          .toList(growable: false),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: PhoenixTheme.red.withValues(alpha: .08),
-                          borderRadius: BorderRadius.circular(99),
-                        ),
-                        child: Text(
-                          widget.narrationController.speedLabel,
-                          style: const TextStyle(
-                            color: PhoenixTheme.red,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                    ),
+                  NarrationSpeedStepper(
+                    key: const ValueKey('word-detail-speed-control'),
+                    controller: widget.narrationController,
+                    compact: true,
                   ),
                   const SizedBox(width: 4),
                   IconButton.filledTonal(
