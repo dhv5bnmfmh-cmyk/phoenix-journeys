@@ -13,6 +13,30 @@ import {
   buildWritingMessages,
   parseWritingFeedback,
 } from './agents/phoenix_writing_agent.mjs';
+import {
+  PhoenixConversationAgent,
+  CONVERSATION_LIMIT,
+  CONVERSATION_MODEL,
+  CONVERSATION_FALLBACK_MODEL,
+  buildConversationMessages,
+} from './agents/phoenix_conversation_agent.mjs';
+import {
+  PhoenixLearningAgent,
+  LEARNING_LIMIT,
+  LEARNING_MODEL,
+  LEARNING_FALLBACK_MODEL,
+  buildLearningMessages,
+  learningReportSchema,
+} from './agents/phoenix_learning_agent.mjs';
+import {
+  PhoenixBrainAgent,
+  PHOENIX_AI_MODES,
+} from './agents/phoenix_brain_agent.mjs';
+import {
+  PhoenixMemoryAgent,
+  safeLearnerProfile,
+} from './agents/phoenix_memory_agent.mjs';
+import { PhoenixKnowledgeAgent } from './agents/phoenix_knowledge_agent.mjs';
 import { PhoenixQualityAgent } from './agents/phoenix_quality_agent.mjs';
 import { extractModelOutput, safeLanguage } from './ai_model_utils.mjs';
 import { OPENAI_DEFAULT_MODEL } from './ai/openai_responses_provider.mjs';
@@ -31,7 +55,7 @@ function safeConversation(value) {
   if (!Array.isArray(value)) return [];
 
   return value
-    .slice(-8)
+    .slice(-10)
     .filter(
       (item) =>
         item &&
@@ -45,52 +69,31 @@ function safeConversation(value) {
     }));
 }
 
-function safeStringList(value, { limit = 8, itemLimit = 500 } = {}) {
-  if (!Array.isArray(value)) return [];
-  return value
-    .filter((item) => typeof item === 'string' && item.trim())
-    .slice(-limit)
-    .map((item) => item.trim().slice(0, itemLimit));
-}
-
-function safeLearnerProfile(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
-  return {
-    interfaceLanguage:
-      typeof value.interfaceLanguage === 'string'
-        ? value.interfaceLanguage.slice(0, 40)
-        : '',
-    scriptMode:
-      typeof value.scriptMode === 'string' ? value.scriptMode.slice(0, 24) : '',
-    currentLevel:
-      typeof value.currentLevel === 'string'
-        ? value.currentLevel.slice(0, 80)
-        : '根据本次文字动态判断',
-    savedWords: safeStringList(value.savedWords, { limit: 40, itemLimit: 40 }),
-    completedJourneys: safeStringList(value.completedJourneys, {
-      limit: 24,
-      itemLimit: 120,
-    }),
-    recentGuideObservations: safeStringList(value.recentGuideObservations, {
-      limit: 8,
-      itemLimit: 500,
-    }),
-    recentWritingInsights: safeStringList(value.recentWritingInsights, {
-      limit: 8,
-      itemLimit: 600,
-    }),
-  };
-}
+const MODE_LIMITS = {
+  guide: GUIDE_LIMIT,
+  writing: WRITING_LIMIT,
+  conversation: CONVERSATION_LIMIT,
+  learning: LEARNING_LIMIT,
+};
 
 export function buildMessages(payload) {
-  return payload.mode === 'guide'
-    ? buildGuideMessages(payload)
-    : buildWritingMessages(payload);
+  switch (payload.mode) {
+    case 'guide':
+      return buildGuideMessages(payload);
+    case 'writing':
+      return buildWritingMessages(payload);
+    case 'conversation':
+      return buildConversationMessages(payload);
+    case 'learning':
+      return buildLearningMessages(payload);
+    default:
+      throw new TypeError('不支持的 AI 模式。');
+  }
 }
 
 async function readPayload(request) {
   const contentLength = Number(request.headers.get('content-length') || 0);
-  if (contentLength > 32000) {
+  if (contentLength > 40000) {
     throw new RangeError('请求内容过长。');
   }
 
@@ -105,14 +108,14 @@ async function readPayload(request) {
   const conversation = safeConversation(body?.conversation);
   const learnerProfile = safeLearnerProfile(body?.learnerProfile);
 
-  if (!['guide', 'writing'].includes(mode)) {
+  if (!PHOENIX_AI_MODES.includes(mode)) {
     throw new TypeError('不支持的 AI 模式。');
   }
   if (text.length < 2) {
     throw new TypeError('请先写下一点内容。');
   }
 
-  const limit = mode === 'guide' ? GUIDE_LIMIT : WRITING_LIMIT;
+  const limit = MODE_LIMITS[mode];
   if (text.length > limit) {
     throw new RangeError(`内容请控制在 ${limit} 个字符以内。`);
   }
@@ -126,6 +129,13 @@ async function readPayload(request) {
     learnerProfile,
   };
 }
+
+const ERROR_MESSAGES = {
+  guide: 'AI 导游暂时没有回应，请稍后再试。',
+  writing: 'AI 写作教练暂时没有回应，请稍后再试。',
+  conversation: 'AI 口语伙伴暂时没有回应，请稍后再试。',
+  learning: 'AI 学习分析暂时没有回应，请稍后再试。',
+};
 
 export async function handlePhoenixAi(request, env) {
   if (request.method === 'OPTIONS') {
@@ -150,24 +160,18 @@ export async function handlePhoenixAi(request, env) {
   }
 
   try {
-    if (payload.mode === 'guide') {
-      const result = await new PhoenixGuideAgent(env).respond(payload);
-      return json({ mode: 'guide', ...result });
-    }
-
-    const result = await new PhoenixWritingAgent(env).review(payload);
-    return json({ mode: 'writing', ...result });
+    const result = await new PhoenixBrainAgent(env).run(payload);
+    return json({ mode: payload.mode, ...result });
   } catch (error) {
     console.error('Phoenix agent request failed', {
       mode: payload.mode,
       error,
     });
 
-    const message = payload.mode === 'guide'
-      ? 'AI 导游暂时没有回应，请稍后再试。'
-      : 'AI 写作教练暂时没有回应，请稍后再试。';
-
-    return json({ error: message }, 503);
+    return json(
+      { error: ERROR_MESSAGES[payload.mode] ?? 'Phoenix AI 暂时没有回应。' },
+      503,
+    );
   }
 }
 
@@ -175,14 +179,27 @@ export {
   GUIDE_MODEL as MODEL,
   GUIDE_MODEL,
   WRITING_MODEL,
+  CONVERSATION_MODEL,
+  LEARNING_MODEL,
   GUIDE_FALLBACK_MODEL,
   WRITING_FALLBACK_MODEL,
+  CONVERSATION_FALLBACK_MODEL,
+  LEARNING_FALLBACK_MODEL,
   OPENAI_DEFAULT_MODEL,
+  PhoenixBrainAgent,
   PhoenixGuideAgent,
   PhoenixWritingAgent,
+  PhoenixConversationAgent,
+  PhoenixLearningAgent,
+  PhoenixMemoryAgent,
+  PhoenixKnowledgeAgent,
   PhoenixQualityAgent,
+  PHOENIX_AI_MODES,
   buildGuideMessages,
   buildWritingMessages,
+  buildConversationMessages,
+  buildLearningMessages,
+  learningReportSchema,
   extractModelOutput,
   parseWritingFeedback,
   safeLearnerProfile,
