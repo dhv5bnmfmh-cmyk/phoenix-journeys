@@ -22,7 +22,7 @@ test('reading notes expose native-language and English speakers', () => {
   assert.match(journey, /onSpeakNative/);
   assert.match(journey, /onSpeakEnglish/);
   assert.match(journey, /languageCode: 'en-US'/);
-  assert.match(journey, /'越南语'[\s\S]*'vi-VN'/);
+  assert.match(journey, /_ => 'vi-VN'/);
 });
 
 test('narration selects voices for Vietnamese and English as well as Chinese', () => {
