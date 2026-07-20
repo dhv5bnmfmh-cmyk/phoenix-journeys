@@ -1,0 +1,70 @@
+name: Apply final word audio fix
+
+on:
+  push:
+    branches:
+      - feature/seven-day-journey-library
+    paths:
+      - .github/workflows/apply-final-word-audio-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/seven-day-journey-library
+          fetch-depth: 0
+
+      - name: Fix integration
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          narration_path = Path('app/lib/services/narration_controller.dart')
+          narration = narration_path.read_text(encoding='utf-8')
+          narration = narration.replace(
+              """          for (final preferredName in preferredNames) {
+            if (lowerName.contains(preferredName)) score += 42;
+          }
+          }
+
+          if (score > bestScore""",
+              """          for (final preferredName in preferredNames) {
+            if (lowerName.contains(preferredName)) score += 42;
+          }
+
+          if (score > bestScore""",
+              1,
+          )
+          narration_path.write_text(narration, encoding='utf-8')
+
+          journey_path = Path('app/lib/screens/journey_screen.dart')
+          journey = journey_path.read_text(encoding='utf-8')
+          journey = journey.replace(
+              """    await showWordDetail(
+      context,
+      entry,
+      entries: _experience.words,""",
+              """    await showWordDetail(
+      context,
+      entry,
+      narrationController: _narration,
+      entries: _experience.words,""",
+              1,
+          )
+          journey_path.write_text(journey, encoding='utf-8')
+          PY
+
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout origin/main -- .github/workflows/flutter-ci.yml
+          git rm .github/workflows/apply-final-word-audio-fix.yml
+          git add app/lib/services/narration_controller.dart app/lib/screens/journey_screen.dart .github/workflows/flutter-ci.yml
+          git commit -m "fix: complete adaptive narration integration"
+          git push origin HEAD:feature/seven-day-journey-library
