@@ -42,6 +42,6 @@ test('narration keeps natural voice selection and speed profile', () => {
   assert.match(narration, /getVoices/);
   assert.match(narration, /natural/);
   assert.match(narration, /premium/);
-  assert.match(narration, /NarrationSpeedOption\(label: '1\.0×', rate: \.36\)/);
+  assert.match(narration, /NarrationSpeedOption\(label: '1\.0×', rate: 1\.0\)/);
   assert.match(narration, /setPitch\(\.98\)/);
 });

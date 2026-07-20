@@ -451,6 +451,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
             child: _ReadingSupportSheet(
+              controller: _narration,
               title: title,
               pinyin: pinyin,
               nativeLabel: nativeLabel,
@@ -879,6 +880,10 @@ class _JourneyScreenState extends State<JourneyScreen>
               (constraints.maxHeight - spacing * (rows - 1)) / rows;
           final safeCellHeight = math.max(1.0, cellHeight);
           final ratio = cellWidth / safeCellHeight;
+          final showPartOfSpeech =
+              cellHeight >= 108 && _experience.words.length <= 12;
+          final showMeaning =
+              cellHeight >= 145 && _experience.words.length <= 9;
 
           return GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
@@ -942,12 +947,40 @@ class _JourneyScreenState extends State<JourneyScreen>
                           entry.pinyin,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.black54,
-                            fontSize: 8,
+                            fontSize: cellHeight >= 120 ? 10 : 8,
                             height: 1,
                           ),
                         ),
+                        if (showPartOfSpeech) ...[
+                          const SizedBox(height: 7),
+                          Text(
+                            state.displayText(entry.partOfSpeech),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: PhoenixTheme.red,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                        if (showMeaning) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            state.displayText(entry.simpleChinese),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 9.5,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -1373,6 +1406,7 @@ class _CompactTextBlock extends StatelessWidget {
 
 class _ReadingSupportSheet extends StatelessWidget {
   const _ReadingSupportSheet({
+    required this.controller,
     required this.title,
     required this.pinyin,
     required this.nativeLabel,
@@ -1382,6 +1416,7 @@ class _ReadingSupportSheet extends StatelessWidget {
     required this.onSpeakEnglish,
   });
 
+  final NarrationController controller;
   final String title;
   final String pinyin;
   final String nativeLabel;
@@ -1396,9 +1431,41 @@ class _ReadingSupportSheet extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            AnimatedBuilder(
+              animation: controller,
+              builder: (context, _) => PopupMenuButton<double>(
+                key: const ValueKey('support-speed-control'),
+                tooltip: '调整朗读语速',
+                onSelected: (rate) => unawaited(controller.setSpeechRate(rate)),
+                itemBuilder: (context) => NarrationController.speedOptions
+                    .map(
+                      (option) => PopupMenuItem<double>(
+                        value: option.rate,
+                        child: Text('${option.label} 语速'),
+                      ),
+                    )
+                    .toList(growable: false),
+                child: Chip(
+                  visualDensity: VisualDensity.compact,
+                  label: Text(
+                    controller.speedLabel,
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 6),
         _SupportLine(label: '拼音', text: pinyin, color: PhoenixTheme.red),
