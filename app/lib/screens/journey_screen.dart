@@ -170,6 +170,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   Future<void> _playStory() {
     return _narration.play(
       contentId: 'story',
+      languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
       items: _journeyContent.storyParagraphs
           .asMap()
           .entries
@@ -187,6 +188,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   Future<void> _playDiscoveries() {
     return _narration.play(
       contentId: 'discovery',
+      languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
       items: _experience.discoveries
           .asMap()
           .entries
@@ -429,7 +431,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     String text, {
     required String languageCode,
   }) async {
-    final spoken = await _narration.speakWord(
+    final spoken = await _narration.speakTemporaryText(
       text,
       languageCode: languageCode,
     );

@@ -131,9 +131,23 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
   }
 
   void _observeControllerOffset(NarrationStatus status) {
-    if (!_controllerIsCurrent ||
-        (status != NarrationStatus.playing &&
-            status != NarrationStatus.paused)) {
+    if (!_controllerIsCurrent) return;
+
+    // The controller is the single source of truth. Temporary word and
+    // support speech can pause the same engine outside this card.
+    if (status == NarrationStatus.playing) {
+      _sessionPlaying = true;
+      _sessionPaused = false;
+    } else if (status == NarrationStatus.paused) {
+      _sessionPlaying = false;
+      _sessionPaused = true;
+    } else if (_controllerFinished) {
+      _sessionPlaying = false;
+      _sessionPaused = false;
+    }
+
+    if (status != NarrationStatus.playing &&
+        status != NarrationStatus.paused) {
       return;
     }
 

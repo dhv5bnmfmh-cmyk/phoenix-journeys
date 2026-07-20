@@ -60,6 +60,11 @@ final class PhoenixWebSpeech {
       ..rate = rate
       ..pitch = pitch
       ..volume = volume;
+    final selectedVoice = _selectNaturalVoice(
+      synth.getVoices(),
+      languageCode,
+    );
+    if (selectedVoice != null) utterance.voice = selectedVoice;
     _utterance = utterance;
 
     _subscriptions.add(
@@ -143,14 +148,49 @@ final class PhoenixWebSpeech {
     _synth?.cancel();
   }
 
+  html.SpeechSynthesisVoice? _selectNaturalVoice(
+    List<html.SpeechSynthesisVoice> voices,
+    String languageCode,
+  ) {
+    final requested = languageCode.toLowerCase().replaceAll('_', '-');
+    final prefix = requested.split('-').first;
+    html.SpeechSynthesisVoice? bestVoice;
+    var bestScore = -1;
+    for (final voice in voices) {
+      final locale = voice.lang.toLowerCase().replaceAll('_', '-');
+      if (!locale.startsWith(prefix)) continue;
+      final name = voice.name.toLowerCase();
+      var score = 10;
+      if (locale == requested) score += 100;
+      if (name.contains('natural')) score += 70;
+      if (name.contains('premium')) score += 60;
+      if (name.contains('enhanced')) score += 50;
+      if (name.contains('compact')) score -= 40;
+      if (score > bestScore) {
+        bestScore = score;
+        bestVoice = voice;
+      }
+    }
+    return bestVoice;
+  }
+
   int _findWordEnd(String text, int start) {
     if (start >= text.length) return text.length;
+    if (_isCjkCodeUnit(text.codeUnitAt(start))) {
+      return (start + 1).clamp(0, text.length).toInt();
+    }
     var end = start + 1;
     while (end < text.length &&
         !RegExp(r'[\s，。！？；：、,.!?;:]').hasMatch(text[end])) {
       end += 1;
     }
     return end;
+  }
+
+  bool _isCjkCodeUnit(int value) {
+    return (value >= 0x3400 && value <= 0x4DBF) ||
+        (value >= 0x4E00 && value <= 0x9FFF) ||
+        (value >= 0xF900 && value <= 0xFAFF);
   }
 
   void _cancelSubscriptions() {

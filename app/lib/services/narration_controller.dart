@@ -145,6 +145,8 @@ class NarrationController extends ChangeNotifier {
     _bindHandlers();
   }
 
+  static const double nativeDefaultRate = 1.0;
+
   static const speedOptions = <NarrationSpeedOption>[
     NarrationSpeedOption(label: '0.5×', rate: .5),
     NarrationSpeedOption(label: '0.75×', rate: .75),
@@ -167,7 +169,7 @@ class NarrationController extends ChangeNotifier {
   int _speechBaseOffset = 0;
   int _currentOffset = 0;
   int? _currentItemIndex;
-  double _speechRate = 1.0;
+  double _speechRate = nativeDefaultRate;
   bool _disposed = false;
   Timer? _progressTimer;
   DateTime? _estimateAnchorTime;
@@ -182,6 +184,7 @@ class NarrationController extends ChangeNotifier {
   String? _spokenWord;
   Completer<bool>? _wordSpeechCompleter;
   String? _configuredVoiceLanguage;
+  String _narrationLanguageCode = 'zh-CN';
   NarrationHighlightSnapshot? _highlightSnapshot;
   int _speechSessionToken = 0;
   bool _webSpeechPausedInPlace = false;
@@ -246,7 +249,9 @@ class NarrationController extends ChangeNotifier {
     return speedOptions
         .firstWhere(
           (option) => (option.rate - _speechRate).abs() < .001,
-          orElse: () => speedOptions.first,
+          orElse: () => speedOptions.firstWhere(
+            (option) => option.rate == nativeDefaultRate,
+          ),
         )
         .label;
   }
@@ -424,6 +429,7 @@ class NarrationController extends ChangeNotifier {
   Future<void> play({
     required String contentId,
     required List<NarrationItem> items,
+    String languageCode = 'zh-CN',
   }) async {
     final plan = NarrationTextPlan.fromItems(items);
     if (plan.isEmpty) return;
@@ -431,6 +437,7 @@ class NarrationController extends ChangeNotifier {
     _highlightSnapshot = null;
     NarrationHighlightBus.instance.clear(contentId: _contentId);
     _contentId = contentId;
+    _narrationLanguageCode = languageCode;
     _plan = plan;
     _currentOffset = 0;
     _lastNativeOffset = 0;
@@ -572,6 +579,21 @@ class NarrationController extends ChangeNotifier {
     }
   }
 
+  Future<bool> speakTemporaryText(
+    String text, {
+    required String languageCode,
+  }) async {
+    final shouldResume =
+        _status == NarrationStatus.playing && !_plan.isEmpty;
+    final resumeOffset = _currentOffset;
+    final spoken = await speakWord(text, languageCode: languageCode);
+    if (shouldResume && spoken && !_disposed) {
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      if (!_disposed) await resumeFromOffset(resumeOffset);
+    }
+    return spoken;
+  }
+
   Future<void> restart() async {
     if (_plan.isEmpty || _contentId == null) return;
     await _speakFrom(0);
@@ -664,7 +686,7 @@ class NarrationController extends ChangeNotifier {
         if (bestVoice != null) await _tts.setVoice(bestVoice);
       }
     } catch (error) {
-      debugPrint('Natural Chinese voice selection unavailable: $error');
+      debugPrint('Natural voice selection unavailable: $error');
     }
 
     _configuredVoiceLanguage = languageCode;
@@ -701,7 +723,7 @@ class NarrationController extends ChangeNotifier {
         unawaited(_startProgressWatchdog(sessionToken, safeOffset));
         final started = await _webSpeech.speak(
           remainingText,
-          languageCode: 'zh-CN',
+          languageCode: _narrationLanguageCode,
           rate: _speechRate,
           pitch: .98,
           volume: 1,
@@ -716,7 +738,7 @@ class NarrationController extends ChangeNotifier {
         return;
       }
 
-      await _configureNaturalVoice('zh-CN');
+      await _configureNaturalVoice(_narrationLanguageCode);
       await _tts.setSpeechRate(_ttsSpeechRate(_speechRate));
       await _tts.setPitch(.98);
       await _tts.setVolume(1.0);
@@ -865,6 +887,16 @@ class NarrationController extends ChangeNotifier {
       if (estimated <= _currentOffset) return;
       _applyProgress(estimated);
     });
+  }
+
+  double _nativeCharsPerSecond(String languageCode) {
+    final prefix = languageCode.toLowerCase().split(RegExp('[-_]')).first;
+    return switch (prefix) {
+      'zh' => 4.05,
+      'vi' => 12.0,
+      'en' => 13.0,
+      _ => 10.0,
+    };
   }
 
   void _cancelProgressClock() {

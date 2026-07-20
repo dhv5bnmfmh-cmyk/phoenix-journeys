@@ -39,7 +39,8 @@ test('all Phoenix speech uses a natural 0.5x to 2x scale with 1x default', () =>
   }
   assert.doesNotMatch(narration, /label: '2\.5×'/);
   assert.doesNotMatch(narration, /label: '3\.0×'/);
-  assert.match(narration, /double _speechRate = 1\.0/);
+  assert.match(narration, /static const double nativeDefaultRate = 1\.0/);
+  assert.match(narration, /double _speechRate = nativeDefaultRate/);
   assert.match(narration, /clamp\(0\.5, 2\.0\)/);
   assert.match(sheet, /word-detail-speed-control/);
 });
