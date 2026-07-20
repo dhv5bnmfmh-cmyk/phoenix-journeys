@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
@@ -26,31 +26,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
-          fetch-depth: 0
-
-      - name: Integrate seven-day journey library
-        if: ${{ github.head_ref == 'feature/seven-day-journey-library' || github.ref_name == 'feature/seven-day-journey-library' }}
-        working-directory: ${{ github.workspace }}
-        run: python tools/apply_seven_day_library.py
-
-      - name: Commit seven-day journey library
-        if: ${{ github.head_ref == 'feature/seven-day-journey-library' || github.ref_name == 'feature/seven-day-journey-library' }}
-        working-directory: ${{ github.workspace }}
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/lib/data/daily_journey_catalog.dart \
-                  app/test/seven_day_journey_catalog_test.dart \
-                  worker/daily_journey_engine_rule.test.mjs
-          if git diff --cached --quiet; then
-            echo "Seven-day journey library already integrated."
-          else
-            git commit -m "feat: expand daily journeys to a seven-day cycle"
-            git push origin HEAD:feature/seven-day-journey-library
-          fi
 
       - name: Test Phoenix agents
         id: agents
