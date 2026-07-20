@@ -2,9 +2,18 @@ from pathlib import Path
 import subprocess
 import traceback
 
-state = Path('app/lib/state/app_state.dart').read_text(encoding='utf-8')
-screen = Path('app/lib/screens/journey_screen.dart').read_text(encoding='utf-8')
+state_path = Path('app/lib/state/app_state.dart')
+screen_path = Path('app/lib/screens/journey_screen.dart')
+state = state_path.read_text(encoding='utf-8')
+screen = screen_path.read_text(encoding='utf-8')
 diagnostic = Path('tools/agent_patch_error.txt')
+
+screen = screen.replace(
+    "                       ],                       if (secondaryButtonText != null && onSecondary != null) ...[\n",
+    "                       ],\n"
+    "                       if (secondaryButtonText != null && onSecondary != null) ...[\n",
+)
+screen_path.write_text(screen, encoding='utf-8')
 
 if 'Future<void> saveGuideFeedback' in state and 'secondaryButtonText' in screen:
     if diagnostic.exists():
