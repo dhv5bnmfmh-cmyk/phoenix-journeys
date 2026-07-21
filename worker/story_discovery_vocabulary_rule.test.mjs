@@ -25,8 +25,11 @@ test('short-text vocabulary shows explorer native and English meanings', () => {
 });
 
 test('permanent rules prevent Story and Discovery vocabulary from drifting apart', () => {
-  assert.match(workflow, /永久生词展示准则/);
+  assert.match(workflow, /永久生词展示与例句准则/);
   assert.match(workflow, /探索者母语释义和英文释义/);
   assert.match(workflow, /不得隐藏这两项释义/);
+  assert.match(workflow, /PhoenixVocabularyAgent/);
+  assert.match(workflow, /永久禁止使用“故事里出现了这个词”/);
   assert.match(template, /故事页与发现页生词均显示词性、探索者母语和英文释义/);
+  assert.match(template, /PhoenixVocabularyAgent/);
 });
