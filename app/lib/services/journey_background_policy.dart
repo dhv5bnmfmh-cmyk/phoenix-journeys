@@ -17,9 +17,11 @@ class JourneyBackgroundKpi {
 class JourneyBackgroundPolicy {
   const JourneyBackgroundPolicy();
 
-  static const int dailyApprovedTargetPerDestination = 4;
-  static const int minimumDestinationInventory = 20;
-  static const int minimumPageInventory = 5;
+  static const int requiredOfflineInventoryPerDestination = 10;
+  static const int minimumDestinationInventory =
+      requiredOfflineInventoryPerDestination;
+  static const int minimumPageInventory =
+      requiredOfflineInventoryPerDestination;
   static const int minimumComplianceScore = 90;
   static const int minimumVarietyScore = 80;
 

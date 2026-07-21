@@ -15,76 +15,152 @@ const destinationBriefs = {
     'Chen Clan Ancestral Hall, Lingnan roof ridges, courtyards and subtle ceramic ornament',
 };
 
-const pageMoods = [
-  'story-immersive',
-  'discovery-cultural',
-  'study-calm',
-  'general-light',
-];
+export const PHOENIX_OFFLINE_IMAGES_PER_DESTINATION = 10;
 
-const timeSlots = ['early morning', 'bright afternoon', 'golden hour', 'blue hour'];
-const weatherSlots = ['clear air', 'light mist', 'after rain', 'soft cloud cover'];
-const cameraSlots = [
-  'wide establishing view',
-  'street-level human perspective',
-  'architectural detail with deep background',
-  'elevated panoramic perspective',
-];
-const sceneSlots = [
-  'quiet arrival',
-  'local daily life without identifiable people',
-  'seasonal landscape',
-  'illuminated evening atmosphere',
-];
-
-function stableOffset(value) {
-  let hash = 0;
-  for (const character of value) {
-    hash = (hash * 31 + character.codePointAt(0)) >>> 0;
-  }
-  return hash;
-}
+const libraryVariants = Object.freeze([
+  {
+    slug: 'sunrise-arrival',
+    mood: 'story-immersive',
+    timeOfDay: 'sunrise',
+    weather: 'clear air',
+    camera: 'wide establishing view',
+    scene: 'quiet arrival',
+  },
+  {
+    slug: 'morning-street',
+    mood: 'study-calm',
+    timeOfDay: 'early morning',
+    weather: 'soft cloud cover',
+    camera: 'street-level human perspective',
+    scene: 'local daily life without identifiable people',
+  },
+  {
+    slug: 'misty-detail',
+    mood: 'discovery-cultural',
+    timeOfDay: 'morning',
+    weather: 'light mist',
+    camera: 'architectural detail with deep background',
+    scene: 'heritage detail',
+  },
+  {
+    slug: 'bright-panorama',
+    mood: 'general-light',
+    timeOfDay: 'bright afternoon',
+    weather: 'clear air',
+    camera: 'elevated panoramic perspective',
+    scene: 'open city panorama',
+  },
+  {
+    slug: 'after-rain',
+    mood: 'reflection-soft',
+    timeOfDay: 'afternoon',
+    weather: 'after rain',
+    camera: 'low reflective perspective',
+    scene: 'wet stone and soft reflections',
+  },
+  {
+    slug: 'seasonal-landscape',
+    mood: 'memory-warm',
+    timeOfDay: 'late afternoon',
+    weather: 'soft cloud cover',
+    camera: 'layered landscape view',
+    scene: 'seasonal landscape',
+  },
+  {
+    slug: 'golden-hour',
+    mood: 'writing-gentle',
+    timeOfDay: 'golden hour',
+    weather: 'warm clear sky',
+    camera: 'side-lit architectural perspective',
+    scene: 'warm departure',
+  },
+  {
+    slug: 'blue-hour',
+    mood: 'discovery-evening',
+    timeOfDay: 'blue hour',
+    weather: 'calm evening air',
+    camera: 'wide evening perspective',
+    scene: 'first city lights',
+  },
+  {
+    slug: 'lantern-night',
+    mood: 'story-night',
+    timeOfDay: 'night',
+    weather: 'clear night',
+    camera: 'street-level cinematic depth',
+    scene: 'illuminated evening atmosphere',
+  },
+  {
+    slug: 'quiet-night-panorama',
+    mood: 'completion-calm',
+    timeOfDay: 'late night',
+    weather: 'light haze',
+    camera: 'elevated quiet panorama',
+    scene: 'calm closing view',
+  },
+]);
 
 export class PhoenixBackgroundAgent {
-  constructor({ variantsPerDestination = 4 } = {}) {
-    this.variantsPerDestination = variantsPerDestination;
+  constructor({
+    targetPerDestination = PHOENIX_OFFLINE_IMAGES_PER_DESTINATION,
+  } = {}) {
+    this.targetPerDestination = targetPerDestination;
   }
 
-  planDailyJobs({ date, journeyIds = Object.keys(destinationBriefs) }) {
-    return journeyIds.flatMap((journeyId) => {
-      const offset = stableOffset(`${journeyId}-${date}`);
-      return Array.from({ length: this.variantsPerDestination }, (_, index) => {
-        const mood = pageMoods[index % pageMoods.length];
-        const timeOfDay = timeSlots[(offset + index) % timeSlots.length];
-        const weather = weatherSlots[(offset + index * 3) % weatherSlots.length];
-        const camera = cameraSlots[(offset + index) % cameraSlots.length];
-        const scene = sceneSlots[(offset + index) % sceneSlots.length];
-        const varietyKey = [journeyId, timeOfDay, weather, camera, scene].join('|');
-        return {
-          id: `${journeyId}-${date}-${mood}`,
-          journeyId,
-          date,
-          mood,
-          timeOfDay,
-          weather,
-          camera,
-          scene,
-          varietyKey,
-          prompt: [
-            'Create an original vertical mobile app background illustration.',
-            destinationBriefs[journeyId],
-            `Mood: ${mood}.`,
-            `Scene variation: ${timeOfDay}, ${weather}, ${camera}, ${scene}.`,
-            'Make this composition visibly different from generic travel wallpaper and from other daily variants.',
-            'Elegant editorial travel illustration, atmospheric depth, calm edges, spacious center for readable UI cards.',
-            'Historically plausible but not a replica of any photograph or artwork.',
-            'Original composition, no text, no logo, no trademark, no copyrighted character, no celebrity, no signature, no watermark, no artist imitation.',
-          ].join(' '),
-          negativePrompt:
-            'No text, no logo, no trademark, no brand mark, no copyrighted character, no movie character, no anime character, no celebrity, no signature, no watermark, no copied poster, no artist imitation, no generic repeated composition.',
-        };
-      });
-    });
+  planOfflineLibrary({
+    journeyIds = Object.keys(destinationBriefs),
+    existingIds = [],
+    maxNewImages = Number.POSITIVE_INFINITY,
+  } = {}) {
+    const existing = new Set(existingIds);
+    const allSlots = journeyIds.flatMap((journeyId) =>
+      libraryVariants
+        .slice(0, this.targetPerDestination)
+        .map((variant, index) => this._buildJob({ journeyId, variant, index })),
+    );
+    const missingSlots = allSlots.filter((job) => !existing.has(job.id));
+    return missingSlots.slice(0, Math.max(0, maxNewImages));
+  }
+
+  // Compatibility for older callers. The offline plan is stable and never
+  // requires image generation while an explorer is using the app.
+  planDailyJobs({ journeyIds = Object.keys(destinationBriefs) } = {}) {
+    return this.planOfflineLibrary({ journeyIds });
+  }
+
+  _buildJob({ journeyId, variant, index }) {
+    const varietyKey = [
+      journeyId,
+      variant.timeOfDay,
+      variant.weather,
+      variant.camera,
+      variant.scene,
+    ].join('|');
+    return {
+      id: `${journeyId}-${String(index + 1).padStart(2, '0')}-${variant.slug}`,
+      journeyId,
+      fileName: `${journeyId}-${String(index + 1).padStart(2, '0')}-${variant.slug}.webp`,
+      slot: index + 1,
+      mood: variant.mood,
+      timeOfDay: variant.timeOfDay,
+      weather: variant.weather,
+      camera: variant.camera,
+      scene: variant.scene,
+      varietyKey,
+      prompt: [
+        'Create an original vertical mobile app background illustration for the Phoenix Journeys offline library.',
+        destinationBriefs[journeyId],
+        `Library slot ${index + 1} of ${PHOENIX_OFFLINE_IMAGES_PER_DESTINATION}.`,
+        `Mood: ${variant.mood}.`,
+        `Scene variation: ${variant.timeOfDay}, ${variant.weather}, ${variant.camera}, ${variant.scene}.`,
+        'Make this composition visibly different from every other city slot.',
+        'Elegant editorial travel illustration, atmospheric depth, calm edges and spacious center for readable Chinese learning UI cards.',
+        'Historically plausible but not a replica of any photograph or artwork.',
+        'Original composition, no text, no logo, no trademark, no copyrighted character, no celebrity, no signature, no watermark and no artist imitation.',
+      ].join(' '),
+      negativePrompt:
+        'No text, no logo, no trademark, no brand mark, no copyrighted character, no movie character, no anime character, no celebrity, no signature, no watermark, no copied poster, no artist imitation and no repeated generic composition.',
+    };
   }
 }
 
