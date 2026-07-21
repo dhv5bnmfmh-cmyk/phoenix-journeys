@@ -28,6 +28,13 @@ test('daily scheduler creates four original reviewed jobs per destination', () =
   assert.equal(BACKGROUND_KPI.uniqueDailyCompositionRate, 1);
   assert.equal(plan.uniqueVarietyKeys, plan.expected);
   assert.equal(plan.varietyKpiPassed, true);
+  for (const journeyId of PHOENIX_BACKGROUND_DESTINATIONS) {
+    const destinationJobs = plan.approvedJobs.filter(
+      (job) => job.journeyId === journeyId,
+    );
+    assert.equal(new Set(destinationJobs.map((job) => job.camera)).size, 4);
+    assert.equal(new Set(destinationJobs.map((job) => job.timeOfDay)).size, 4);
+  }
 });
 
 test('prompts ban IP, logos, trademarks and artist imitation', () => {
