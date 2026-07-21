@@ -10,6 +10,7 @@ def replace_once(path, old, new):
         raise SystemExit(f'Expected pattern not found in {path}')
     file.write_text(text.replace(old, new, 1))
 
+
 replace_once(
     'app/lib/screens/explore_screen.dart',
     "import '../state/app_state.dart';\n",
@@ -62,3 +63,14 @@ replace_once(
   }
 }""",
 )
+
+explore = Path('app/lib/screens/explore_screen.dart')
+text = explore.read_text()
+text = text.replace(
+    """    if (state.hasJourneyInProgress)
+      return '继续${state.activeJourney.city} Journey';""",
+    """    if (state.hasJourneyInProgress) {
+      return '继续${state.activeJourney.city} Journey';
+    }""",
+)
+explore.write_text(text)
