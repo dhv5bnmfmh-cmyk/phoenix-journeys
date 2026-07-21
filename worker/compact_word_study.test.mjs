@@ -46,6 +46,7 @@ test('narration keeps natural voice selection and speed profile', () => {
   assert.match(narration, /setPitch\(\.98\)/);
 });
 
+// Keep these three mobile actions in visual and keyboard order.
 test('word detail actions keep Save Previous and Next on one row', () => {
   assert.match(sheet, /bool get _isFirst => _index == 0;/);
   assert.match(sheet, /Future<void> _previousWord\(\) async/);
