@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:phoenix_journeys/data/journey_background_catalog.dart';
+import 'package:phoenix_journeys/data/journey_background_generated.dart';
 import 'package:phoenix_journeys/models/journey_background.dart';
 import 'package:phoenix_journeys/services/journey_background_policy.dart';
 
@@ -24,7 +25,7 @@ void main() {
     expect(first!.id, second!.id);
   });
 
-  test('every published seed destination has three approved fallbacks', () {
+  test('every published seed destination keeps three approved fallbacks', () {
     const journeys = [
       'beijing-forbidden-city',
       'shanghai-bund',
@@ -43,23 +44,48 @@ void main() {
     }
   });
 
-  test('approved AI backgrounds replace geometric seed fallbacks', () {
+  test('seven cities each ship ten approved offline AI backgrounds', () {
+    const journeys = [
+      'beijing-forbidden-city',
+      'shanghai-bund',
+      'xian-city-wall',
+      'hangzhou-west-lake',
+      'chengdu-kuanzhai-alley',
+      'nanjing-qinhuai-river',
+      'guangzhou-chen-clan',
+    ];
+    expect(generatedJourneyBackgrounds, hasLength(70));
+    for (final journeyId in journeys) {
+      final assets = generatedJourneyBackgrounds
+          .where((asset) => asset.journeyId == journeyId)
+          .toList(growable: false);
+      expect(assets, hasLength(10), reason: journeyId);
+      expect(assets.every((asset) => asset.approved), isTrue);
+      expect(
+        assets.every((asset) => asset.svgData?.startsWith('<svg') ?? false),
+        isTrue,
+      );
+      expect(assets.map((asset) => asset.id).toSet(), hasLength(10));
+      final kpi = policy.inspect(
+        journeyId: journeyId,
+        page: JourneyBackgroundPage.story,
+        catalog: journeyBackgroundCatalog,
+      );
+      expect(kpi.destinationTargetMet, isTrue, reason: journeyId);
+      expect(kpi.pageTargetMet, isTrue, reason: journeyId);
+    }
+  });
+
+  test('approved AI backgrounds replace seed fallbacks', () {
     final selected = policy.select(
       journeyId: 'beijing-forbidden-city',
       page: JourneyBackgroundPage.story,
       localDate: DateTime(2026, 7, 21),
       catalog: [
-        _asset(
-          id: 'seed',
-          origin: JourneyBackgroundOrigin.originalSeed,
-        ),
-        _asset(
-          id: 'ai',
-          origin: JourneyBackgroundOrigin.aiGenerated,
-        ),
+        _asset(id: 'seed', origin: JourneyBackgroundOrigin.originalSeed),
+        _asset(id: 'ai', origin: JourneyBackgroundOrigin.aiGenerated),
       ],
     );
-
     expect(selected, isNotNull);
     expect(selected!.id, 'ai');
   });
@@ -70,10 +96,7 @@ void main() {
       page: JourneyBackgroundPage.story,
       localDate: DateTime(2026, 7, 21),
       catalog: [
-        _asset(
-          id: 'seed',
-          origin: JourneyBackgroundOrigin.originalSeed,
-        ),
+        _asset(id: 'seed', origin: JourneyBackgroundOrigin.originalSeed),
         _asset(
           id: 'flat-ai',
           origin: JourneyBackgroundOrigin.aiGenerated,
@@ -81,31 +104,8 @@ void main() {
         ),
       ],
     );
-
     expect(selected, isNotNull);
     expect(selected!.id, 'seed');
-  });
-
-  test('inventory KPI counts reviewed AI assets rather than fallbacks', () {
-    final kpi = policy.inspect(
-      journeyId: 'beijing-forbidden-city',
-      page: JourneyBackgroundPage.story,
-      catalog: [
-        _asset(
-          id: 'seed',
-          origin: JourneyBackgroundOrigin.originalSeed,
-        ),
-        _asset(
-          id: 'ai',
-          origin: JourneyBackgroundOrigin.aiGenerated,
-        ),
-      ],
-    );
-
-    expect(kpi.destinationInventory, 1);
-    expect(kpi.pageInventory, 1);
-    expect(kpi.destinationTargetMet, isFalse);
-    expect(kpi.pageTargetMet, isFalse);
   });
 
   test('KPI constants permanently require ten offline images per city', () {
