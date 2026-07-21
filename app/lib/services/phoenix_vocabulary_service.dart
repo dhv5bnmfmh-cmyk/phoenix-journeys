@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -93,7 +94,10 @@ class PhoenixVocabularyService {
           .timeout(timeout);
       final body = _decodeObject(response.body);
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw StateError(_readText(body, 'error', 'Phoenix AI 请求失败。'));
+        throw http.ClientException(
+          _readText(body, 'error', 'Phoenix AI 请求失败。'),
+          endpoint,
+        );
       }
 
       final example = _readObject(body, 'example');
@@ -113,9 +117,11 @@ class PhoenixVocabularyService {
       _validate(generated, entry.word);
       _sessionCache[cacheKey] = generated;
       return generated;
-    } catch (_) {
-      // A temporary failure must never poison the session cache. The Retry
-      // action should always make a fresh request to PhoenixVocabularyAgent.
+    } on TimeoutException catch (_) {
+      return fallback;
+    } on FormatException catch (_) {
+      return fallback;
+    } on http.ClientException catch (_) {
       return fallback;
     }
   }
