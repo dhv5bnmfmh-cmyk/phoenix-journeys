@@ -1,1 +1,0 @@
-Apply the verified saved-vocabulary repair and remove this trigger.
