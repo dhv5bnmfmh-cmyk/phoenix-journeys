@@ -64,7 +64,7 @@ test('prompts ban IP, logos, trademarks and artist imitation', () => {
     assert.match(job.prompt, /no trademark/i);
     assert.match(job.prompt, /no copyrighted character/i);
     assert.match(job.prompt, /no artist imitation/i);
-    assert.match(job.prompt, /clearly different/i);
+    assert.match(job.prompt, /visibly different/i);
     assert.ok(job.timeOfDay);
     assert.ok(job.weather);
     assert.ok(job.camera);
