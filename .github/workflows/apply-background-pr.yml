@@ -1,0 +1,70 @@
+name: Apply destination backgrounds in PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/apply-background-pr.yml
+      - worker/run-background-runtime.txt
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feature/destination-background-agent'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out writable PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Generate original offline backgrounds
+        run: |
+          python -m pip install pillow
+          python tools/generate_seed_backgrounds.py
+          mkdir -p app/assets/images/backgrounds/generated
+          touch app/assets/images/backgrounds/generated/.gitkeep
+
+      - name: Patch all major Flutter pages
+        run: |
+          python tools/patch_background_home.py
+          python tools/patch_background_explore.py
+          python tools/patch_background_journey.py
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Validate runtime and agents
+        run: |
+          cd app
+          dart format lib/models/journey_background.dart lib/data/journey_background_catalog.dart lib/data/journey_background_generated.dart lib/services/journey_background_policy.dart lib/widgets/destination_background.dart lib/screens/home_shell.dart lib/screens/explore_screen.dart lib/screens/journey_screen.dart test/journey_background_policy_test.dart
+          flutter pub get
+          flutter analyze
+          flutter test
+          flutter build web --release
+          cd ..
+          node --test worker/*.test.mjs
+
+      - name: Commit installed runtime
+        shell: bash
+        run: |
+          rm -f \
+            .github/workflows/apply-background-runtime.yml \
+            .github/workflows/apply-background-pr.yml \
+            worker/run-background-runtime.txt \
+            tools/generate_seed_backgrounds.py \
+            tools/patch_background_home.py \
+            tools/patch_background_explore.py \
+            tools/patch_background_journey.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat: install destination background runtime'
+          git push origin HEAD:${{ github.head_ref }}
