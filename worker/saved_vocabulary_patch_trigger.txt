@@ -1,1 +1,0 @@
-Run the atomic saved-vocabulary repair now. This file is removed by the repair commit.
