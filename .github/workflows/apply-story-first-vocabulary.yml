@@ -1,0 +1,55 @@
+name: Apply story first vocabulary flow
+
+on:
+  push:
+    branches:
+      - fix/story-continue-first-vocabulary
+    paths:
+      - '.github/workflows/apply-story-first-vocabulary.yml'
+      - 'tools/patch_story_first_vocabulary.py'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/story-continue-first-vocabulary
+          fetch-depth: 0
+
+      - name: Apply Story to first vocabulary flow
+        run: python3 tools/patch_story_first_vocabulary.py
+
+      - name: Validate focused Journey rule
+        run: node --test worker/story_discovery_vocabulary_rule.test.mjs
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Validate Flutter app
+        working-directory: app
+        run: |
+          dart format lib/screens/journey_screen.dart
+          flutter pub get
+          flutter analyze
+          flutter test
+          flutter build web --release
+
+      - name: Remove installer and commit feature
+        shell: bash
+        run: |
+          rm -f \
+            .github/workflows/apply-story-first-vocabulary.yml \
+            tools/patch_story_first_vocabulary.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: open the first vocabulary word after Story'
+          git push origin HEAD:fix/story-continue-first-vocabulary
