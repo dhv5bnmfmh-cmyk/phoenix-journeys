@@ -29,6 +29,14 @@ import {
   learningReportSchema,
 } from './agents/phoenix_learning_agent.mjs';
 import {
+  PhoenixVocabularyAgent,
+  VOCABULARY_LIMIT,
+  VOCABULARY_MODEL,
+  VOCABULARY_FALLBACK_MODEL,
+  buildVocabularyMessages,
+  vocabularyExampleSchema,
+} from './agents/phoenix_vocabulary_agent.mjs';
+import {
   PhoenixBrainAgent,
   PHOENIX_AI_MODES,
 } from './agents/phoenix_brain_agent.mjs';
@@ -69,11 +77,16 @@ function safeConversation(value) {
     }));
 }
 
+function safeField(value, limit = 1200) {
+  return typeof value === 'string' ? value.trim().slice(0, limit) : '';
+}
+
 const MODE_LIMITS = {
   guide: GUIDE_LIMIT,
   writing: WRITING_LIMIT,
   conversation: CONVERSATION_LIMIT,
   learning: LEARNING_LIMIT,
+  vocabulary: VOCABULARY_LIMIT,
 };
 
 export function buildMessages(payload) {
@@ -86,6 +99,8 @@ export function buildMessages(payload) {
       return buildConversationMessages(payload);
     case 'learning':
       return buildLearningMessages(payload);
+    case 'vocabulary':
+      return buildVocabularyMessages(payload);
     default:
       throw new TypeError('不支持的 AI 模式。');
   }
@@ -99,20 +114,21 @@ async function readPayload(request) {
 
   const body = await request.json();
   const mode = body?.mode;
-  const text = typeof body?.text === 'string' ? body.text.trim() : '';
-  const language = safeLanguage(body?.language);
-  const journeyId =
-    typeof body?.journeyId === 'string' && body.journeyId.trim()
-      ? body.journeyId.trim().slice(0, 120)
-      : 'beijing-forbidden-city';
-  const conversation = safeConversation(body?.conversation);
-  const learnerProfile = safeLearnerProfile(body?.learnerProfile);
-
   if (!PHOENIX_AI_MODES.includes(mode)) {
     throw new TypeError('不支持的 AI 模式。');
   }
-  if (text.length < 2) {
-    throw new TypeError('请先写下一点内容。');
+
+  const word = safeField(body?.word || body?.text, 120);
+  const text = mode === 'vocabulary' ? word : safeField(body?.text, 4000);
+  const language = safeLanguage(body?.language);
+  const journeyId = safeField(body?.journeyId, 120) || 'beijing-forbidden-city';
+  const conversation = safeConversation(body?.conversation);
+  const learnerProfile = safeLearnerProfile(body?.learnerProfile);
+
+  if (text.length < (mode === 'vocabulary' ? 1 : 2)) {
+    throw new TypeError(
+      mode === 'vocabulary' ? '缺少需要查询的生词。' : '请先写下一点内容。',
+    );
   }
 
   const limit = MODE_LIMITS[mode];
@@ -123,6 +139,16 @@ async function readPayload(request) {
   return {
     mode,
     text,
+    word,
+    pinyin: safeField(body?.pinyin, 160),
+    partOfSpeech: safeField(body?.partOfSpeech, 120),
+    simpleChinese: safeField(body?.simpleChinese, 600),
+    nativeDefinition: safeField(body?.nativeDefinition, 800),
+    englishDefinition: safeField(body?.englishDefinition, 800),
+    contextChinese: safeField(body?.contextChinese, 1800),
+    contextPinyin: safeField(body?.contextPinyin, 2400),
+    contextNative: safeField(body?.contextNative, 2400),
+    contextEnglish: safeField(body?.contextEnglish, 2400),
     language,
     journeyId,
     conversation,
@@ -135,6 +161,7 @@ const ERROR_MESSAGES = {
   writing: 'AI 写作教练暂时没有回应，请稍后再试。',
   conversation: 'AI 口语伙伴暂时没有回应，请稍后再试。',
   learning: 'AI 学习分析暂时没有回应，请稍后再试。',
+  vocabulary: 'AI 生词助手暂时无法查询实际用法，请稍后再试。',
 };
 
 export async function handlePhoenixAi(request, env) {
@@ -181,16 +208,19 @@ export {
   WRITING_MODEL,
   CONVERSATION_MODEL,
   LEARNING_MODEL,
+  VOCABULARY_MODEL,
   GUIDE_FALLBACK_MODEL,
   WRITING_FALLBACK_MODEL,
   CONVERSATION_FALLBACK_MODEL,
   LEARNING_FALLBACK_MODEL,
+  VOCABULARY_FALLBACK_MODEL,
   OPENAI_DEFAULT_MODEL,
   PhoenixBrainAgent,
   PhoenixGuideAgent,
   PhoenixWritingAgent,
   PhoenixConversationAgent,
   PhoenixLearningAgent,
+  PhoenixVocabularyAgent,
   PhoenixMemoryAgent,
   PhoenixKnowledgeAgent,
   PhoenixQualityAgent,
@@ -199,7 +229,9 @@ export {
   buildWritingMessages,
   buildConversationMessages,
   buildLearningMessages,
+  buildVocabularyMessages,
   learningReportSchema,
+  vocabularyExampleSchema,
   extractModelOutput,
   parseWritingFeedback,
   safeLearnerProfile,
