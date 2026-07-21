@@ -33,7 +33,7 @@ void main() {
       'hangzhou-west-lake',
       'chengdu-kuanzhai-alley',
       'nanjing-qinhuai-river',
-      'guangzhou-chen-clan',
+      'guangzhou-chen-clan-academy',
     ];
     for (final journeyId in journeys) {
       final assets = seedJourneyBackgrounds
@@ -52,7 +52,7 @@ void main() {
       'hangzhou-west-lake',
       'chengdu-kuanzhai-alley',
       'nanjing-qinhuai-river',
-      'guangzhou-chen-clan',
+      'guangzhou-chen-clan-academy',
     ];
     expect(generatedJourneyBackgrounds, hasLength(70));
     for (final journeyId in journeys) {
