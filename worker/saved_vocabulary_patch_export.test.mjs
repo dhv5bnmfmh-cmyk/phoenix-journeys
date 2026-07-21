@@ -50,8 +50,11 @@ sheet = replaceOnce(
 writeFileSync(paths.sheet, sheet);
 
 function exported(name, source) {
+  const encoded = Buffer.from(source, 'utf8').toString('base64');
   console.log(`PHOENIX_EXPORT_${name}_BEGIN`);
-  console.log(Buffer.from(source, 'utf8').toString('base64'));
+  for (let offset = 0; offset < encoded.length; offset += 120) {
+    console.log(encoded.slice(offset, offset + 120));
+  }
   console.log(`PHOENIX_EXPORT_${name}_END`);
 }
 
