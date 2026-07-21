@@ -26,7 +26,7 @@ CITIES = (
     ("hangzhou-west-lake", "hangzhou"),
     ("chengdu-kuanzhai-alley", "chengdu"),
     ("nanjing-qinhuai-river", "nanjing"),
-    ("guangzhou-chen-clan", "guangzhou"),
+    ("guangzhou-chen-clan-academy", "guangzhou"),
 )
 
 VARIANTS = (
