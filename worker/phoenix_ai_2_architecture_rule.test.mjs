@@ -17,19 +17,22 @@ const read = (path) => readFileSync(path, 'utf8');
 const brainSource = read('worker/agents/phoenix_brain_agent.mjs');
 const conversationSource = read('worker/agents/phoenix_conversation_agent.mjs');
 const learningSource = read('worker/agents/phoenix_learning_agent.mjs');
+const vocabularySource = read('worker/agents/phoenix_vocabulary_agent.mjs');
 const qualitySource = read('worker/agents/phoenix_quality_agent.mjs');
 const endpoint = read('worker/phoenix_ai.mjs');
 const health = read('worker/index.mjs');
 const appService = read('app/lib/services/phoenix_ai_service.dart');
+const vocabularyService = read('app/lib/services/phoenix_vocabulary_service.dart');
 const workflow = read('docs/development-workflow.md');
 const template = read('.github/pull_request_template.md');
 
-test('PhoenixBrainAgent is the only orchestrator for all four specialist modes', async () => {
+test('PhoenixBrainAgent is the only orchestrator for all five specialist modes', async () => {
   assert.deepEqual(PHOENIX_AI_MODES, [
     'guide',
     'writing',
     'conversation',
     'learning',
+    'vocabulary',
   ]);
 
   const brain = new PhoenixBrainAgent({}, { gateway: { isAvailable: true } });
@@ -47,11 +50,19 @@ test('PhoenixBrainAgent is the only orchestrator for all four specialist modes',
   brain.learning = {
     analyze: async (payload) => (calls.push(payload.mode), { agent: 'learning' }),
   };
+  brain.vocabulary = {
+    generate: async (payload) =>
+      (calls.push(payload.mode), { agent: 'vocabulary' }),
+  };
 
   for (const mode of PHOENIX_AI_MODES) {
     const result = await brain.run({
       mode,
       text: '学习内容',
+      word: '红墙',
+      pinyin: 'hóngqiáng',
+      partOfSpeech: '名词',
+      simpleChinese: '红色的墙。',
       language: '越南语',
       journeyId: 'beijing-forbidden-city',
       learnerProfile: { savedWords: ['红墙'] },
@@ -88,7 +99,7 @@ test('PhoenixKnowledgeAgent grounds every specialist in reviewed Journey context
   assert.match(knowledge.boundaries.join(''), /不得猜测/);
 });
 
-test('Conversation and Learning both use the model gateway and hidden quality review', () => {
+test('Conversation, Learning, and Vocabulary use the gateway and hidden quality review', () => {
   assert.match(conversationSource, /PhoenixModelGateway/);
   assert.match(conversationSource, /PhoenixQualityAgent/);
   assert.match(conversationSource, /reviewConversation/);
@@ -96,12 +107,16 @@ test('Conversation and Learning both use the model gateway and hidden quality re
   assert.match(learningSource, /PhoenixQualityAgent/);
   assert.match(learningSource, /reviewLearning/);
   assert.match(learningSource, /learningReportSchema/);
+  assert.match(vocabularySource, /PhoenixModelGateway/);
+  assert.match(vocabularySource, /PhoenixQualityAgent/);
+  assert.match(vocabularySource, /reviewVocabulary/);
   assert.match(qualitySource, /conversationSchema/);
   assert.match(qualitySource, /learningSchema/);
+  assert.match(qualitySource, /vocabularySchema/);
 });
 
 test('endpoint, health and Flutter expose the complete AI 2 capability set', () => {
-  for (const mode of ['guide', 'writing', 'conversation', 'learning']) {
+  for (const mode of PHOENIX_AI_MODES) {
     assert.ok(endpoint.includes(`'${mode}'`));
   }
   assert.match(endpoint, /new PhoenixBrainAgent\(env\)\.run\(payload\)/);
@@ -109,9 +124,11 @@ test('endpoint, health and Flutter expose the complete AI 2 capability set', () 
   assert.match(health, /brainAgent: true/);
   assert.match(health, /conversationAgent: true/);
   assert.match(health, /learningAgent: true/);
+  assert.match(health, /vocabularyAgent: true/);
   assert.match(health, /memoryStorage: 'client-private'/);
   assert.match(appService, /Future<PhoenixConversationFeedback> practiceConversation/);
   assert.match(appService, /Future<PhoenixLearningReport> buildLearningReport/);
+  assert.match(vocabularyService, /Future<PhoenixVocabularyExample> generateExample/);
 });
 
 test('GPT-5.6 is primary while Cloudflare remains the automatic fallback', () => {
@@ -124,10 +141,12 @@ test('GPT-5.6 is primary while Cloudflare remains the automatic fallback', () =>
 test('permanent rules protect orchestration, privacy, grounding and quality', () => {
   assert.match(brainSource, /PhoenixMemoryAgent/);
   assert.match(brainSource, /PhoenixKnowledgeAgent/);
+  assert.match(brainSource, /PhoenixVocabularyAgent/);
   assert.match(workflow, /`PhoenixBrainAgent` 是唯一 AI 总调度入口/);
   assert.match(workflow, /服务器不得持久保存学习记忆/);
   assert.match(workflow, /只提供 Phoenix 已审核 Journey 背景/);
-  assert.match(workflow, /Guide、Writing、Conversation 和 Learning/);
+  assert.match(workflow, /Guide、Writing、Conversation、Learning 和 Vocabulary/);
   assert.match(template, /PhoenixBrainAgent 是唯一 AI 总调度入口/);
   assert.match(template, /服务器不持久保存/);
+  assert.match(template, /PhoenixVocabularyAgent/);
 });
