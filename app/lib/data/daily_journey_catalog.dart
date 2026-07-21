@@ -275,6 +275,13 @@ final dailyJourneyExperiences = <DailyJourneyExperience>[
   ...extendedJourneyExperiences,
 ];
 
+final List<WordEntry> allDailyJourneyWords = List<WordEntry>.unmodifiable(
+  <String, WordEntry>{
+    for (final journey in dailyJourneyExperiences)
+      for (final entry in journey.words) entry.word: entry,
+  }.values,
+);
+
 DailyJourneyExperience requireDailyJourneyExperience(String id) {
   return dailyJourneyExperiences.firstWhere(
     (journey) => journey.id == id,
