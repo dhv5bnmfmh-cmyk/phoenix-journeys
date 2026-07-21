@@ -7,12 +7,17 @@ on:
     paths:
       - '.github/workflows/apply-story-first-vocabulary.yml'
       - 'tools/patch_story_first_vocabulary.py'
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
 jobs:
   apply:
+    if: github.head_ref == 'fix/story-continue-first-vocabulary' || github.ref_name == 'fix/story-continue-first-vocabulary'
     runs-on: ubuntu-latest
     steps:
       - name: Check out feature branch
