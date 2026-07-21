@@ -18,6 +18,9 @@ replacements = {
         "title: '还没有收藏生词'": "title: '还没有收藏单词'",
         "text: '在 Journey 点红色词语，再加入生词本。'": "text: '在 Journey 点红色词语，再加入单词本。'",
     },
+    Path('app/test/saved_vocabulary_library_test.dart'): {
+        "expect(find.text('我的生词 · 1'), findsOneWidget);": "expect(find.text('我的单词 · 1'), findsOneWidget);",
+    },
     Path('worker/compact_word_study.test.mjs'): {
         "state.displayText(isSaved ? '已收藏' : '收藏生词')": "state.displayText(isSaved ? '已收藏' : '收藏单词')",
         "state.displayText('上一个生词')": "state.displayText('上一个单词')",
