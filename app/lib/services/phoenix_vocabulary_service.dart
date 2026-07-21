@@ -50,9 +50,60 @@ class PhoenixVocabularyService {
 
   static final Map<String, PhoenixVocabularyExample> _authoringCache = {};
 
+  static const Map<String, PhoenixVocabularyExample> _bundledExamples = {
+    '午门': PhoenixVocabularyExample(
+      chinese: '游客从午门进入故宫，抬头就能看见高大的城楼。',
+      pinyin:
+          'Yóukè cóng Wǔmén jìnrù Gùgōng, táitóu jiù néng kànjiàn gāodà de chénglóu.',
+      native:
+          'Du khách vào Cố Cung qua Ngọ Môn và ngẩng đầu là có thể thấy lầu thành cao lớn.',
+      english:
+          'Visitors enter the Forbidden City through the Meridian Gate and immediately see its imposing tower.',
+      usageNote: '“从午门进入”常用于介绍故宫的参观路线。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
+    '太和殿': PhoenixVocabularyExample(
+      chinese: '参观太和殿时，请不要跨越前方的围栏。',
+      pinyin: 'Cānguān Tàihédiàn shí, qǐng bú yào kuàyuè qiánfāng de wéilán.',
+      native:
+          'Khi tham quan điện Thái Hòa, vui lòng không bước qua hàng rào phía trước.',
+      english:
+          'When visiting the Hall of Supreme Harmony, please do not cross the barrier ahead.',
+      usageNote: '“参观太和殿”可用于说明故宫景点行程。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
+    '文物': PhoenixVocabularyExample(
+      chinese: '博物馆里的文物需要恒温恒湿的环境来保存。',
+      pinyin:
+          'Bówùguǎn lǐ de wénwù xūyào héngwēn héngshī de huánjìng lái bǎocún.',
+      native:
+          'Các hiện vật trong bảo tàng cần môi trường ổn định về nhiệt độ và độ ẩm để bảo quản.',
+      english:
+          'Museum artifacts need a temperature- and humidity-controlled environment for preservation.',
+      usageNote: '“保存文物”和“保护文物”都是常见搭配。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
+  };
+
   final http.Client _client;
   final Uri endpoint;
   final Duration timeout;
+
+  static PhoenixVocabularyExample? bundledExampleForWord(String word) {
+    return _bundledExamples[word];
+  }
 
   /// Explorer runtime path.
   ///
@@ -68,19 +119,21 @@ class PhoenixVocabularyService {
     required String contextEnglish,
     required PhoenixVocabularyExample fallback,
   }) {
-    final preloaded = PhoenixVocabularyExample(
-      chinese: fallback.chinese,
-      pinyin: fallback.pinyin,
-      native: fallback.native,
-      english: fallback.english,
-      usageNote:
-          '已随旅程内容预先下载；例句展示“${entry.word}”在完整语境中的实际用法。',
-      isOfflineFallback: true,
-      provider: 'phoenix-preloaded-pack',
-      model: 'bundled',
-      qualityReviewed: true,
-      qualityScore: 100,
-    );
+    final bundled = bundledExampleForWord(entry.word);
+    final preloaded = bundled ??
+        PhoenixVocabularyExample(
+          chinese: fallback.chinese,
+          pinyin: fallback.pinyin,
+          native: fallback.native,
+          english: fallback.english,
+          usageNote:
+              '已随旅程内容预先下载；例句展示“${entry.word}”在完整语境中的实际用法。',
+          isOfflineFallback: true,
+          provider: 'phoenix-preloaded-pack',
+          model: 'bundled',
+          qualityReviewed: true,
+          qualityScore: 100,
+        );
     _validate(preloaded, entry.word);
     return Future<PhoenixVocabularyExample>.value(preloaded);
   }
