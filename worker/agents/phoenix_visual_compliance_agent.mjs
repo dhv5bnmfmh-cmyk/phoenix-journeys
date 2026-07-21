@@ -7,8 +7,9 @@ const forbiddenPromptPatterns = [
 ];
 
 export class PhoenixVisualComplianceAgent {
-  constructor({ minimumScore = 90 } = {}) {
+  constructor({ minimumScore = 90, minimumVarietyScore = 80 } = {}) {
     this.minimumScore = minimumScore;
+    this.minimumVarietyScore = minimumVarietyScore;
   }
 
   reviewPrompt(job) {
@@ -23,16 +24,21 @@ export class PhoenixVisualComplianceAgent {
       'no trademark',
       'no copyrighted character',
       'no artist imitation',
+      'visibly different',
     ];
     for (const phrase of required) {
       if (!combined.toLowerCase().includes(phrase)) {
-        issues.push(`missing-safety-clause:${phrase}`);
+        issues.push(`missing-safety-or-variety-clause:${phrase}`);
       }
+    }
+    if (!job.varietyKey || !job.timeOfDay || !job.weather || !job.camera) {
+      issues.push('missing-variety-dimensions');
     }
     return {
       agent: 'PhoenixVisualComplianceAgent',
       approved: issues.length === 0,
       score: issues.length === 0 ? 100 : 0,
+      varietyScore: issues.length === 0 ? 100 : 0,
       issues,
     };
   }
@@ -41,14 +47,19 @@ export class PhoenixVisualComplianceAgent {
     const result = await callResponsesApi({
       model: process.env.PHOENIX_VISUAL_REVIEW_MODEL || 'gpt-5',
       instruction:
-        'Review this mobile app background conservatively. Reject any recognizable logo, trademark, copyrighted character, celebrity likeness, signature, watermark, copied poster, close imitation of a named living artist, or composition that makes interface text unreadable. Return JSON only with approved, score, issues.',
+        'Review this mobile app background conservatively. Reject any recognizable logo, trademark, copyrighted character, celebrity likeness, signature, watermark, copied poster, or close imitation of a named living artist. Also reject generic, repetitive, near-duplicate, visually flat compositions and any image that makes interface text unreadable. Score both compliance and visual variety. Return JSON only with approved, score, varietyScore, issues.',
       imageBase64,
     });
     const score = Number(result?.score ?? 0);
+    const varietyScore = Number(result?.varietyScore ?? 0);
     return {
       agent: 'PhoenixVisualComplianceAgent',
-      approved: result?.approved === true && score >= this.minimumScore,
+      approved:
+        result?.approved === true &&
+        score >= this.minimumScore &&
+        varietyScore >= this.minimumVarietyScore,
       score,
+      varietyScore,
       issues: Array.isArray(result?.issues) ? result.issues : [],
     };
   }
