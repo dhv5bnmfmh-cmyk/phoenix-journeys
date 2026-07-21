@@ -54,12 +54,14 @@
 2. 点按短文中的生词后，必须显示汉字、拼音、词性、探索者母语释义和英文释义。
 3. “探索者母语”和“English”必须有清楚标签；空间不足时允许自适应布局或滚动，但不得隐藏这两项释义。
 4. 每个生词必须提供有效的 `partOfSpeech`、`translation` 与 `englishDefinition`，禁止用空值上线。
-5. 生词的核心例句必须优先由 `PhoenixVocabularyAgent` 根据词义、词性、当前 Journey 语境和探索者辅助语言查询并生成实际应用句，再交给 `PhoenixQualityAgent` 隐藏复核。
-6. AI 核心例句必须自然包含目标词，并同时提供完整拼音、探索者母语翻译、英文翻译及一句简短用法说明。
-7. 永久禁止使用“故事里出现了这个词”“老师请我解释这个词”“我想学会使用这个词”等讨论词语本身的万能占位句。
-8. AI 不可用时只能回退到该词在 Phoenix 已审核 Journey 中的真实句子；没有真实语境时显示重试状态，禁止伪造例句。
-9. 同一词、同一旅程和同一辅助语言的 AI 结果应在会话内缓存，避免重复请求和不必要费用。
-10. 修改任一页的生词展示或例句逻辑时，必须同步验证另一页并更新回归测试；违反规则时 CI 必须失败。
+5. `PhoenixVocabularyAgent` 只在旅程内容制作阶段根据词义、词性、Journey 语境和探索者辅助语言批量生成实际应用句，再交给 `PhoenixQualityAgent` 复核。
+6. 每个已发布生词必须随 Journey 内容包预先保存至少一个已审核例句，包含中文、完整拼音、探索者母语翻译、英文翻译及一句简短用法说明。
+7. 探索者点开生词时必须立即读取本地或已经提前下载的例句包；禁止在点按后才向模型查询，也禁止让探索者等待 AI 加载。
+8. Journey 内容包可以在安装、更新或同步旅程时提前下载新例句，但下载必须发生在探索者打开生词之前，并支持离线查看。
+9. 永久禁止使用“故事里出现了这个词”“老师请我解释这个词”“我想学会使用这个词”等讨论词语本身的万能占位句。
+10. 例句包缺少目标词、拼音、探索者母语、英文或真实语境时，发布检查必须失败；禁止把不完整内容交给探索者，也禁止临时伪造例句。
+11. 同一个词在故事页、发现页和“我的生词”中必须读取同一份预下载例句，不得各自生成不同答案。
+12. 修改任一页的生词展示或例句逻辑时，必须同步验证另一页并更新回归测试；违反规则时 CI 必须失败。
 
 ## 永久 AI Agent 开发准则
 
@@ -72,8 +74,8 @@
 5. `PhoenixWritingAgent` 只负责中文写作批改；不得为了显示修改而制造错误，必须区分必要修改与可选自然表达。
 6. `PhoenixConversationAgent` 只负责自然中文口语陪练；每轮最多纠正一个高价值问题，禁止把聊天变成机械批改清单。
 7. `PhoenixLearningAgent` 只依据真实学习记录生成报告与下一步计划；禁止虚构时长、正确率、考试成绩或不存在的错误。
-8. `PhoenixVocabularyAgent` 只负责真实词语应用例句；必须使用目标词、给定词义和词性，禁止模板占位句或无依据的历史事实。
-9. `PhoenixQualityAgent` 是隐藏复核层；Guide、Writing、Conversation、Learning 和 Vocabulary 在线结果都必须尝试复核；复核故障时保留通过本地结构验证的主 Agent 结果，不得让请求失败。
+8. `PhoenixVocabularyAgent` 只负责在内容制作阶段生成真实词语应用例句；必须使用目标词、给定词义和词性，禁止模板占位句或无依据的历史事实；复核完成后必须保存进 Journey 内容包。
+9. `PhoenixQualityAgent` 是隐藏复核层；Guide、Writing、Conversation、Learning 的在线结果以及 Vocabulary 内容制作结果都必须尝试复核；复核故障时保留通过本地结构验证的主 Agent 结果，不得让请求失败。
 10. `PhoenixMemoryAgent` 只整理探索者在客户端保存并主动提交的有限学习档案；默认 `client-private`，服务器不得持久保存学习记忆。
 11. `PhoenixKnowledgeAgent` 只提供 Phoenix 已审核 Journey 背景；没有依据的年代、人物、数字和事件必须明确不确定，不得猜测。
 12. 所有专家 Agent 必须共享辅助语言、简繁模式、收藏生词、已完成旅程、近期观察与近期写作问题，并严格限制数量和长度。
@@ -107,6 +109,7 @@
 - 禁止绕过 `PhoenixBrainAgent` 或 `PhoenixModelGateway` 直接调用模型供应商。
 - 禁止默认在服务器持久保存探索者的学习记忆。
 - 禁止用讨论词语本身的万能句代替真实应用例句。
+- 禁止探索者打开生词时现场请求 AI 例句或等待模型生成。
 - 禁止在页面中绕过 `JourneyAccessPolicy` 自行决定免费、付费或随机旅程权限。
 - 禁止在开发体验版启用正式上市的免费旅程限制。
 
@@ -117,8 +120,10 @@
 - 故事页与发现页朗读
 - 所有朗读默认 `1.0×` 本地自然语速，可调范围 `0.5×–1.5×`，每次加减速固定 `0.1×`
 - 故事页与发现页生词同步显示词性、探索者母语和英文释义
-- 生词核心例句由 PhoenixVocabularyAgent 生成实际应用句并经过 PhoenixQualityAgent 复核
-- AI 不可用时回退到 Journey 真实语境，不显示万能占位句
+- 所有已发布生词都随 Journey 内容包预下载真实例句
+- 点开生词立即显示例句，不发起 AI 请求，不出现等待状态
+- PhoenixVocabularyAgent 与 PhoenixQualityAgent 只在内容制作阶段生成并复核例句
+- 预下载例句包含目标词、完整拼音、探索者母语、英文和用法说明，不显示万能占位句
 - 暂停、继续与调语速保留准确位置
 - 声音、进度、百分比、当前段落和字符三角形同步
 - 生词与「注」临时朗读后按原位置继续
@@ -126,7 +131,7 @@
 - 简体与繁体切换
 - 思考、表达、旅程回忆键盘稳定
 - 进度保存
-- PhoenixBrainAgent 正确调度 Guide、Writing、Conversation、Learning 与 Vocabulary
+- PhoenixBrainAgent 正确调度 Guide、Writing、Conversation、Learning 与 Vocabulary 内容制作
 - GPT-5.6 主模型、Cloudflare 回退和 PhoenixQualityAgent 复核
 - PhoenixMemoryAgent 保持客户端隐私且不在服务器持久保存
 - PhoenixKnowledgeAgent 只使用已审核 Journey 背景
