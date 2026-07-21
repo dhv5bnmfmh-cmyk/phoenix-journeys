@@ -2,7 +2,7 @@ const forbiddenPromptPatterns = [
   /\b(use|include|show|copy|replicate)\b.{0,30}\b(logo|logotype|trademark|brand mark)\b/i,
   /\b(use|include|show|copy|replicate)\b.{0,30}\b(copyrighted character|movie character|anime character)\b/i,
   /\bin the style of\b/i,
-  /\b(official poster|album cover replica|copied poster)\b/i,
+  /\b(use|include|show|copy|replicate)\b.{0,40}\b(official poster|album cover|poster artwork)\b/i,
   /\b(add|include|show)\b.{0,20}\b(signature|watermark)\b/i,
 ];
 
@@ -39,7 +39,7 @@ export class PhoenixVisualComplianceAgent {
 
   async reviewGeneratedImage({ imageBase64, callResponsesApi }) {
     const result = await callResponsesApi({
-      model: process.env.PHOENIX_VISUAL_REVIEW_MODEL || 'gpt-5.6-luna',
+      model: process.env.PHOENIX_VISUAL_REVIEW_MODEL || 'gpt-5',
       instruction:
         'Review this mobile app background conservatively. Reject any recognizable logo, trademark, copyrighted character, celebrity likeness, signature, watermark, copied poster, close imitation of a named living artist, or composition that makes interface text unreadable. Return JSON only with approved, score, issues.',
       imageBase64,

@@ -54,9 +54,18 @@ test('explorer runtime reads pre-generated assets without image AI', () => {
     '.github/workflows/daily-background-refresh.yml',
     'utf8',
   );
+  const rules = readFileSync(
+    'docs/destination-background-policy.md',
+    'utf8',
+  );
   assert.match(widget, /Image\.asset/);
   assert.doesNotMatch(widget, /http|OpenAI|generate/);
   assert.match(policy, /_stableHash/);
   assert.match(workflow, /schedule:/);
   assert.match(workflow, /generate_daily_backgrounds\.mjs/);
+  assert.match(rules, /PhoenixBackgroundAgent/);
+  assert.match(rules, /PhoenixVisualComplianceAgent/);
+  assert.match(rules, /PhoenixBackgroundScheduler/);
+  assert.match(rules, /禁止现场生成/);
+  assert.match(rules, /侵权合规通过率必须为 100%/);
 });

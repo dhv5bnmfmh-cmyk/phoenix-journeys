@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/journey_background.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/destination_background.dart';
 import 'explore_screen.dart';
 import 'me_screen.dart';
 import 'passport_screen.dart';
@@ -10,11 +12,7 @@ import 'passport_screen.dart';
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key});
 
-  static const _pages = [
-    ExploreScreen(),
-    PassportScreen(),
-    MeScreen(),
-  ];
+  static const _pages = [ExploreScreen(), PassportScreen(), MeScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +21,26 @@ class HomeShell extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 800;
-        final content = IndexedStack(
+        final indexedPages = IndexedStack(
           index: state.selectedTab,
           children: _pages,
         );
+        final pageType = switch (state.selectedTab) {
+          1 => JourneyBackgroundPage.passport,
+          2 => JourneyBackgroundPage.profile,
+          _ => JourneyBackgroundPage.explore,
+        };
+        final content = state.selectedTab == 0
+            ? indexedPages
+            : DestinationBackground(
+                journeyId: state.activeJourneyId,
+                pageType: pageType,
+                child: indexedPages,
+              );
 
         if (isWide) {
           return Scaffold(
-            backgroundColor: PhoenixTheme.paper,
+            backgroundColor: Colors.transparent,
             body: SafeArea(
               child: Row(
                 children: [
@@ -60,7 +70,7 @@ class HomeShell extends StatelessWidget {
                   const VerticalDivider(width: 1),
                   Expanded(
                     child: ColoredBox(
-                      color: PhoenixTheme.paper,
+                      color: Colors.transparent,
                       child: Center(
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 760),
@@ -76,6 +86,7 @@ class HomeShell extends StatelessWidget {
         }
 
         return Scaffold(
+          backgroundColor: Colors.transparent,
           body: SafeArea(bottom: false, child: content),
           bottomNavigationBar: _CompactBottomNavigation(state: state),
         );
@@ -95,9 +106,7 @@ class _CompactBottomNavigation extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFBF5),
         border: Border(
-          top: BorderSide(
-            color: PhoenixTheme.gold.withValues(alpha: .24),
-          ),
+          top: BorderSide(color: PhoenixTheme.gold.withValues(alpha: .24)),
         ),
         boxShadow: const [
           BoxShadow(

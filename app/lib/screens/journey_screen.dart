@@ -8,12 +8,14 @@ import 'package:provider/provider.dart';
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
 import '../data/world_story_runtime.dart';
+import '../models/journey_background.dart';
 import '../models/story_content.dart';
 import '../services/narration_controller.dart';
 import '../services/phoenix_ai_service.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/city_journey_stamp.dart';
+import '../widgets/destination_background.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_share_button.dart';
 import '../widgets/journey_progress_header.dart';
@@ -578,6 +580,16 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (mounted) setState(() => step = 0);
   }
 
+  JourneyBackgroundPage get _backgroundPageType => switch (step) {
+    0 => JourneyBackgroundPage.story,
+    1 => JourneyBackgroundPage.vocabulary,
+    2 => JourneyBackgroundPage.discovery,
+    3 => JourneyBackgroundPage.reflection,
+    4 => JourneyBackgroundPage.writing,
+    5 => JourneyBackgroundPage.memory,
+    _ => JourneyBackgroundPage.completion,
+  };
+
   @override
   Widget build(BuildContext context) {
     final pages = <Widget>[
@@ -590,33 +602,38 @@ class _JourneyScreenState extends State<JourneyScreen>
       _completePage(),
     ];
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        toolbarHeight: 44,
-        title: Text(
-          _appState.displayText(_experience.appBarTitle),
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-        ),
-        actions: [
-          Consumer<AppState>(
-            builder: (_, state, __) => TextButton(
-              onPressed: state.toggleScript,
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-              ),
-              child: Text(
-                state.scriptMode == ScriptMode.simplified ? '简 / 繁' : '繁 / 简',
-                style: const TextStyle(fontSize: 10.5),
+    return DestinationBackground(
+      journeyId: _experience.id,
+      pageType: _backgroundPageType,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          toolbarHeight: 44,
+          title: Text(
+            _appState.displayText(_experience.appBarTitle),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+          ),
+          actions: [
+            Consumer<AppState>(
+              builder: (_, state, __) => TextButton(
+                onPressed: state.toggleScript,
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                child: Text(
+                  state.scriptMode == ScriptMode.simplified ? '简 / 繁' : '繁 / 简',
+                  style: const TextStyle(fontSize: 10.5),
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 280),
-        child: pages[step],
+          ],
+        ),
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 280),
+          child: pages[step],
+        ),
       ),
     );
   }

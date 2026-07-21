@@ -1,1 +1,0 @@
-Generate the original seed pack, patch the Flutter runtime, validate, remove temporary tools, and publish the destination background system now.
