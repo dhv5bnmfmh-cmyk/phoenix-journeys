@@ -113,6 +113,35 @@ const learningSchema = {
   },
 };
 
+const vocabularyExampleProperties = {
+  chinese: { type: 'string' },
+  pinyin: { type: 'string' },
+  native: { type: 'string' },
+  english: { type: 'string' },
+  usageNote: { type: 'string' },
+};
+
+const vocabularySchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['approved', 'score', 'issues', 'revisedExample'],
+  properties: {
+    approved: { type: 'boolean' },
+    score: { type: 'integer', minimum: 0, maximum: 100 },
+    issues: {
+      type: 'array',
+      maxItems: 6,
+      items: { type: 'string' },
+    },
+    revisedExample: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['chinese', 'pinyin', 'native', 'english', 'usageNote'],
+      properties: vocabularyExampleProperties,
+    },
+  },
+};
+
 function profileText(profile) {
   try {
     return JSON.stringify(profile ?? {});
@@ -329,6 +358,67 @@ export class PhoenixQualityAgent {
       model: result.model,
     };
   }
+
+  async reviewVocabulary({
+    word,
+    meaning,
+    partOfSpeech,
+    context,
+    candidate,
+    language,
+  }) {
+    const result = await this.gateway.generateStructured({
+      messages: [
+        {
+          role: 'system',
+          content: [
+            '你是隐藏的 PhoenixQualityAgent，只审核 PhoenixVocabularyAgent 生成的实际应用例句。',
+            '中文句子必须自然包含目标词，并准确体现给定词义和词性，而不是讨论“这个词”本身。',
+            '禁止“故事里出现了”“老师请我解释”“我想学会使用”等模板占位句。',
+            '核对完整拼音、探索者语言翻译和英文翻译是否与中文一致；usageNote 必须提供真实搭配、语体或限制。',
+            '不得编造提供语境之外的历史年代、人物、数字或事件。',
+            '不合格时重写完整 revisedExample；合格时原样返回。',
+            '只输出符合 JSON Schema 的对象。',
+          ].join('\n'),
+        },
+        {
+          role: 'user',
+          content: [
+            `<word>${word}</word>`,
+            `<meaning>${meaning}</meaning>`,
+            `<part_of_speech>${partOfSpeech}</part_of_speech>`,
+            `<journey_context>${context}</journey_context>`,
+            `<learner_language>${language}</learner_language>`,
+            `<candidate_example>${JSON.stringify(candidate)}</candidate_example>`,
+          ].join('\n'),
+        },
+      ],
+      schema: vocabularySchema,
+      schemaName: 'phoenix_vocabulary_quality',
+      maxOutputTokens: 850,
+      reasoningEffort: 'medium',
+      temperature: 0.08,
+      purpose: 'quality-vocabulary',
+    });
+    const review = result.value;
+    const status = qualityResult(review);
+    const revised = review.revisedExample;
+    const validRevision =
+      revised &&
+      typeof revised.chinese === 'string' &&
+      revised.chinese.includes(word) &&
+      typeof revised.pinyin === 'string' &&
+      typeof revised.native === 'string' &&
+      typeof revised.english === 'string' &&
+      typeof revised.usageNote === 'string';
+
+    return {
+      example: status.approved || !validRevision ? candidate : revised,
+      ...status,
+      provider: result.provider,
+      model: result.model,
+    };
+  }
 }
 
 export {
@@ -338,4 +428,6 @@ export {
   conversationSchema,
   learningSchema,
   learningReportProperties,
+  vocabularySchema,
+  vocabularyExampleProperties,
 };
