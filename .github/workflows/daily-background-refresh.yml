@@ -1,8 +1,6 @@
-name: Daily Phoenix backgrounds
+name: Phoenix offline background library
 
 on:
-  schedule:
-    - cron: '10 1 * * *'
   workflow_dispatch:
   push:
     branches:
@@ -12,50 +10,29 @@ on:
       - 'worker/agents/phoenix_background_agent.mjs'
       - 'worker/agents/phoenix_background_scheduler.mjs'
       - 'worker/agents/phoenix_visual_compliance_agent.mjs'
-      - 'worker/scripts/generate_daily_backgrounds.mjs'
+      - 'worker/scripts/plan_offline_background_library.mjs'
+      - 'worker/background_agent.test.mjs'
+      - 'docs/destination-background-policy.md'
+      - 'app/lib/services/journey_background_policy.dart'
+      - 'app/test/journey_background_policy_test.dart'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: phoenix-daily-backgrounds
-  cancel-in-progress: false
+  group: phoenix-offline-background-library
+  cancel-in-progress: true
 
 jobs:
-  generate-review-publish:
+  validate-library-rule:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 10
     steps:
-      - name: Check out content branch
+      - name: Check out repository
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
-      - name: Verify image generation secret
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: test -n "$OPENAI_API_KEY"
-
-      - name: Generate, review and publish destination backgrounds
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          PHOENIX_IMAGE_MODEL: gpt-image-1
-          PHOENIX_VISUAL_REVIEW_MODEL: gpt-5
-        run: node worker/scripts/generate_daily_backgrounds.mjs
+      - name: Validate 10-image city plans
+        run: node worker/scripts/plan_offline_background_library.mjs --check
 
       - name: Run visual agent regression tests
         run: node --test worker/background_agent.test.mjs
-
-      - name: Commit approved background-only update
-        shell: bash
-        run: |
-          if git diff --quiet; then
-            echo 'No approved background changes.'
-            exit 0
-          fi
-          git config user.name 'phoenix-background-scheduler[bot]'
-          git config user.email 'phoenix-background-scheduler[bot]@users.noreply.github.com'
-          git add app/assets/images/backgrounds app/lib/data/journey_background_generated.dart reports/backgrounds
-          git commit -m 'content: publish daily destination backgrounds'
-          git pull --rebase origin main
-          git push origin HEAD:main
