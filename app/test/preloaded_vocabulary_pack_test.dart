@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/services/phoenix_vocabulary_service.dart';
 
 void main() {
   test('every published word has a complete preloaded example', () {
@@ -8,6 +9,20 @@ void main() {
 
     for (final journey in dailyJourneyExperiences) {
       for (final entry in journey.words) {
+        final bundled = PhoenixVocabularyService.bundledExampleForWord(
+          entry.word,
+        );
+        if (bundled != null) {
+          if (!bundled.chinese.contains(entry.word) ||
+              bundled.pinyin.trim().isEmpty ||
+              bundled.native.trim().isEmpty ||
+              bundled.english.trim().isEmpty ||
+              bundled.usageNote.trim().isEmpty) {
+            missing.add('${journey.id}/${entry.word}: bundled example incomplete');
+          }
+          continue;
+        }
+
         if (entry.examples.isNotEmpty) {
           final example = entry.examples.first;
           if (!example.chinese.contains(entry.word) ||
