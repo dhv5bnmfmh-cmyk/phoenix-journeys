@@ -17,15 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out content branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Generate, review and publish destination backgrounds
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          PHOENIX_IMAGE_MODEL: gpt-image-2
-          PHOENIX_VISUAL_REVIEW_MODEL: gpt-5.6-luna
+          PHOENIX_IMAGE_MODEL: gpt-image-1
+          PHOENIX_VISUAL_REVIEW_MODEL: gpt-5
         run: node worker/scripts/generate_daily_backgrounds.mjs
 
       - name: Run visual agent regression tests
