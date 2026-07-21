@@ -1,4 +1,4 @@
-name: Fix Guangzhou background journey id
+name: Finish Guangzhou background id migration
 
 on:
   push:
@@ -12,10 +12,10 @@ permissions:
   contents: write
 
 jobs:
-  regenerate:
+  migrate-and-clean:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - name: Check out feature branch
         uses: actions/checkout@v6
@@ -23,28 +23,67 @@ jobs:
           ref: feature/complete-seven-city-background-library
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
-
-      - name: Install image encoder
-        run: python -m pip install --disable-pip-version-check pillow==11.3.0
-
-      - name: Correct production journey id and regenerate
+      - name: Align all runtime and agent journey ids
         shell: bash
         run: |
-          sed -i 's/("guangzhou-chen-clan", "guangzhou")/("guangzhou-chen-clan-academy", "guangzhou")/' .github/scripts/generate_offline_city_backgrounds.py
-          python .github/scripts/generate_offline_city_backgrounds.py
-          test "$(find app/assets/images/backgrounds/generated -maxdepth 1 -name '*.webp' | wc -l)" -eq 70
-          test "$(find app/assets/images/backgrounds/generated -maxdepth 1 -name 'guangzhou-chen-clan-academy-*.webp' | wc -l)" -eq 10
+          sed -i "s/'guangzhou-chen-clan':/'guangzhou-chen-clan-academy':/" worker/agents/phoenix_background_agent.mjs
+          sed -i "s/'guangzhou-chen-clan',/'guangzhou-chen-clan-academy',/g" app/test/journey_background_policy_test.dart
+          cat > app/lib/data/journey_background_catalog.dart <<'DART'
+          import '../models/journey_background.dart';
+          import 'journey_background_generated.dart';
+
+          class _SeedJourneySpec {
+            const _SeedJourneySpec(this.journeyId, this.assetPrefix);
+
+            final String journeyId;
+            final String assetPrefix;
+          }
+
+          const _seedJourneys = <_SeedJourneySpec>[
+            _SeedJourneySpec('beijing-forbidden-city', 'beijing-forbidden-city'),
+            _SeedJourneySpec('shanghai-bund', 'shanghai-bund'),
+            _SeedJourneySpec('xian-city-wall', 'xian-city-wall'),
+            _SeedJourneySpec('hangzhou-west-lake', 'hangzhou-west-lake'),
+            _SeedJourneySpec('chengdu-kuanzhai-alley', 'chengdu-kuanzhai-alley'),
+            _SeedJourneySpec('nanjing-qinhuai-river', 'nanjing-qinhuai-river'),
+            _SeedJourneySpec(
+              'guangzhou-chen-clan-academy',
+              'guangzhou-chen-clan',
+            ),
+          ];
+
+          final seedJourneyBackgrounds = <JourneyBackgroundAsset>[
+            for (final journey in _seedJourneys)
+              for (var variant = 1; variant <= 3; variant += 1)
+                JourneyBackgroundAsset(
+                  id: '${journey.journeyId}-seed-v$variant',
+                  journeyId: journey.journeyId,
+                  assetPath:
+                      'assets/images/backgrounds/seed/${journey.assetPrefix}-v$variant.webp',
+                  generatedOn: DateTime.utc(2026, 7, 21),
+                  origin: JourneyBackgroundOrigin.originalSeed,
+                  complianceReviewed: true,
+                  complianceScore: 100,
+                ),
+          ];
+
+          final journeyBackgroundCatalog = <JourneyBackgroundAsset>[
+            ...generatedJourneyBackgrounds,
+            ...seedJourneyBackgrounds,
+          ];
+          DART
+
+          grep -q "'guangzhou-chen-clan-academy':" worker/agents/phoenix_background_agent.mjs
+          grep -q "_SeedJourneySpec('guangzhou-chen-clan-academy'" app/lib/data/journey_background_catalog.dart || grep -q "'guangzhou-chen-clan-academy'," app/lib/data/journey_background_catalog.dart
           grep -q "journeyId: 'guangzhou-chen-clan-academy'" app/lib/data/journey_background_generated.dart
+          grep -q "'guangzhou-chen-clan-academy'," app/test/journey_background_policy_test.dart
 
-      - name: Commit corrected WebP library
+      - name: Remove temporary workflow and commit migration
         shell: bash
         run: |
+          git rm .github/workflows/fix-guangzhou-background-id-once.yml
           git config user.name 'phoenix-background-librarian[bot]'
           git config user.email 'phoenix-background-librarian[bot]@users.noreply.github.com'
-          git add .github/scripts/generate_offline_city_backgrounds.py app/assets/images/backgrounds/generated app/lib/data/journey_background_generated.dart
-          git commit -m 'fix: key Guangzhou backgrounds to production journey id'
+          git add worker/agents/phoenix_background_agent.mjs app/lib/data/journey_background_catalog.dart app/test/journey_background_policy_test.dart
+          git commit -m 'fix: align Guangzhou background inventory with journey catalog'
           git push origin HEAD:feature/complete-seven-city-background-library
