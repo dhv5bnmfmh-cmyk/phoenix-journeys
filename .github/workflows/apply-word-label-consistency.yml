@@ -10,7 +10,7 @@ on:
   pull_request:
     branches:
       - main
-    types: [opened]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
@@ -42,7 +42,7 @@ jobs:
       - name: Validate Flutter app
         working-directory: app
         run: |
-          dart format lib/state/app_state.dart lib/screens/journey_screen.dart lib/widgets/word_detail_sheet.dart lib/screens/me_screen.dart
+          dart format lib/state/app_state.dart lib/screens/journey_screen.dart lib/widgets/word_detail_sheet.dart lib/screens/me_screen.dart test/saved_vocabulary_library_test.dart
           flutter pub get
           flutter analyze
           flutter test
@@ -54,5 +54,9 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add app/lib app/test worker
+          if git diff --cached --quiet; then
+            echo 'No product changes to commit.'
+            exit 0
+          fi
           git commit -m 'fix: use 单词 consistently in the interface'
           git push origin HEAD:fix/word-label-consistency
