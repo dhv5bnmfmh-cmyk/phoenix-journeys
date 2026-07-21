@@ -104,12 +104,14 @@ void main() {
 
     expect(kpi.destinationInventory, 1);
     expect(kpi.pageInventory, 1);
+    expect(kpi.destinationTargetMet, isFalse);
+    expect(kpi.pageTargetMet, isFalse);
   });
 
-  test('KPI constants remain centralized and adjustable', () {
-    expect(JourneyBackgroundPolicy.dailyApprovedTargetPerDestination, 4);
-    expect(JourneyBackgroundPolicy.minimumDestinationInventory, 20);
-    expect(JourneyBackgroundPolicy.minimumPageInventory, 5);
+  test('KPI constants permanently require ten offline images per city', () {
+    expect(JourneyBackgroundPolicy.requiredOfflineInventoryPerDestination, 10);
+    expect(JourneyBackgroundPolicy.minimumDestinationInventory, 10);
+    expect(JourneyBackgroundPolicy.minimumPageInventory, 10);
     expect(JourneyBackgroundPolicy.minimumComplianceScore, 90);
     expect(JourneyBackgroundPolicy.minimumVarietyScore, 80);
   });
