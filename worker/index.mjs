@@ -31,6 +31,7 @@ export default {
           writingAgent: true,
           conversationAgent: true,
           learningAgent: true,
+          vocabularyAgent: true,
           qualityAgent: true,
           memoryAgent: true,
           knowledgeAgent: true,
