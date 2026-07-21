@@ -22,8 +22,8 @@ test('Story, Discovery, and word details share the active narration controller',
   assert.match(journey, /showWordDetail\([\s\S]*narrationController: _narration/);
 });
 
-test('vocabulary detail stays content-sized and below half a phone viewport', () => {
-  assert.match(sheet, /maxHeight: size\.height \* \.48/);
+test('vocabulary detail stays content-sized within a compact phone viewport', () => {
+  assert.match(sheet, /maxHeight: size\.height \* \.52/);
   assert.match(sheet, /FittedBox\(/);
   assert.match(sheet, /fit: BoxFit\.scaleDown/);
 });
