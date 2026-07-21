@@ -24,7 +24,10 @@ jobs:
         run: python -m pip install pillow
 
       - name: Generate original seed backgrounds
-        run: python tools/generate_seed_backgrounds.py
+        run: |
+          python tools/generate_seed_backgrounds.py
+          mkdir -p app/assets/images/backgrounds/generated
+          touch app/assets/images/backgrounds/generated/.gitkeep
 
       - name: Patch Flutter runtime
         run: |
