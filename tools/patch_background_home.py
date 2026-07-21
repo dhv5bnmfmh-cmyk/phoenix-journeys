@@ -10,12 +10,15 @@ def replace_once(path, old, new):
         raise SystemExit(f'Expected pattern not found in {path}')
     file.write_text(text.replace(old, new, 1))
 
+
 pubspec = Path('app/pubspec.yaml')
 text = pubspec.read_text()
-if 'assets/images/backgrounds/' not in text:
+if 'assets/images/backgrounds/seed/' not in text:
     text = text.replace(
         '    - assets/images/\n',
-        '    - assets/images/\n    - assets/images/backgrounds/\n',
+        '    - assets/images/\n'
+        '    - assets/images/backgrounds/seed/\n'
+        '    - assets/images/backgrounds/generated/\n',
     )
     pubspec.write_text(text)
 
@@ -35,19 +38,22 @@ replace_once(
           index: state.selectedTab,
           children: _pages,
         );""",
-    """        final pageType = switch (state.selectedTab) {
+    """        final indexedPages = IndexedStack(
+          index: state.selectedTab,
+          children: _pages,
+        );
+        final pageType = switch (state.selectedTab) {
           1 => JourneyBackgroundPage.passport,
           2 => JourneyBackgroundPage.profile,
           _ => JourneyBackgroundPage.explore,
         };
-        final content = DestinationBackground(
-          journeyId: state.activeJourneyId,
-          pageType: pageType,
-          child: IndexedStack(
-            index: state.selectedTab,
-            children: _pages,
-          ),
-        );""",
+        final content = state.selectedTab == 0
+            ? indexedPages
+            : DestinationBackground(
+                journeyId: state.activeJourneyId,
+                pageType: pageType,
+                child: indexedPages,
+              );""",
 )
 home = Path('app/lib/screens/home_shell.dart')
 text = home.read_text()
