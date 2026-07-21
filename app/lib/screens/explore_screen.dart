@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/daily_journey_catalog.dart';
+import '../models/journey_background.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/destination_background.dart';
 import 'journey_screen.dart';
 
 @visibleForTesting
@@ -32,9 +34,7 @@ class ExploreScreen extends StatelessWidget {
       }
       if (!context.mounted) return;
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => JourneyScreen(journeyId: journeyId),
-        ),
+        MaterialPageRoute(builder: (_) => JourneyScreen(journeyId: journeyId)),
       );
     }
 
@@ -52,9 +52,9 @@ class ExploreScreen extends StatelessWidget {
               Text(
                 state.displayText('选择城市旅程'),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(height: 3),
               Text(
@@ -87,11 +87,14 @@ class ExploreScreen extends StatelessWidget {
                         journey.id == state.todayJourney.id
                             ? '今日推荐 · 点击进入'
                             : state.isJourneyStampEarned(journey.id)
-                                ? '印章已获得 · 可再次体验'
-                                : '可随时开始或继续',
+                            ? '印章已获得 · 可再次体验'
+                            : '可随时开始或继续',
                       ),
                     ),
-                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 15),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 15,
+                    ),
                     onTap: () {
                       Navigator.of(sheetContext).pop();
                       unawaited(openJourneyById(journey.id));
@@ -107,7 +110,9 @@ class ExploreScreen extends StatelessWidget {
 
     return Stack(
       children: [
-        const Positioned.fill(child: _JourneyBackground()),
+        Positioned.fill(
+          child: _JourneyBackground(journeyId: state.activeJourneyId),
+        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
           child: Column(
@@ -136,9 +141,7 @@ class ExploreScreen extends StatelessWidget {
               const SizedBox(height: 8),
               _JourneyCard(
                 state: state,
-                onOpen: () => unawaited(
-                  openJourneyById(state.activeJourneyId),
-                ),
+                onOpen: () => unawaited(openJourneyById(state.activeJourneyId)),
                 onChoose: () => unawaited(chooseJourney()),
               ),
               const SizedBox(height: 8),
@@ -233,18 +236,16 @@ class _TopBar extends StatelessWidget {
 }
 
 class _JourneyBackground extends StatelessWidget {
-  const _JourneyBackground();
+  const _JourneyBackground({required this.journeyId});
+
+  final String journeyId;
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFFFF7EA), Color(0xFFF6E7D4), PhoenixTheme.paper],
-        ),
-      ),
+    return DestinationBackground(
+      journeyId: journeyId,
+      pageType: JourneyBackgroundPage.explore,
+      scrimStrength: .56,
       child: CustomPaint(painter: _CloudPainter()),
     );
   }
@@ -359,7 +360,9 @@ class _FlightMapCardState extends State<_FlightMapCard>
                               ),
                               const SizedBox(height: 1),
                               Text(
-                                state.displayText('河内  →  ${state.activeJourney.city}'),
+                                state.displayText(
+                                  '河内  →  ${state.activeJourney.city}',
+                                ),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16.5,
@@ -627,7 +630,8 @@ class _JourneyCard extends StatelessWidget {
 
   String get _buttonText {
     if (state.journeyCompleted) return '再次探索${state.activeJourney.city}';
-    if (state.hasJourneyInProgress) return '继续${state.activeJourney.city} Journey';
+    if (state.hasJourneyInProgress)
+      return '继续${state.activeJourney.city} Journey';
     return '开始${state.activeJourney.city} Journey';
   }
 
@@ -668,7 +672,10 @@ class _JourneyCard extends StatelessWidget {
                 icon: const Icon(Icons.swap_horiz_rounded, size: 14),
                 label: Text(
                   state.displayText('选择城市'),
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
