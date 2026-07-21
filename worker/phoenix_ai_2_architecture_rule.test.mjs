@@ -145,8 +145,11 @@ test('permanent rules protect orchestration, privacy, grounding and quality', ()
   assert.match(workflow, /`PhoenixBrainAgent` 是唯一 AI 总调度入口/);
   assert.match(workflow, /服务器不得持久保存学习记忆/);
   assert.match(workflow, /只提供 Phoenix 已审核 Journey 背景/);
-  assert.match(workflow, /Guide、Writing、Conversation、Learning 和 Vocabulary/);
+  assert.match(workflow, /Guide、Writing、Conversation、Learning/);
+  assert.match(workflow, /Vocabulary 内容制作结果/);
+  assert.match(workflow, /点开生词时必须立即读取本地或已经提前下载的例句包/);
   assert.match(template, /PhoenixBrainAgent 是唯一 AI 总调度入口/);
   assert.match(template, /服务器不持久保存/);
   assert.match(template, /PhoenixVocabularyAgent/);
+  assert.match(template, /不现场请求 AI/);
 });
