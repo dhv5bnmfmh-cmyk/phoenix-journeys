@@ -17,6 +17,7 @@ permissions:
 
 jobs:
   apply:
+    # Temporary installer for the isolated PR; the workflow removes itself.
     if: github.head_ref == 'fix/story-continue-first-vocabulary' || github.ref_name == 'fix/story-continue-first-vocabulary'
     runs-on: ubuntu-latest
     steps:
