@@ -52,6 +52,7 @@ export class PhoenixBackgroundScheduler {
       existingInventory: existingIds.length,
       missingInventory: allMissingJobs.length,
       requestedImages: requestedJobs.length,
+      expected: requestedJobs.length,
       approvedJobs,
       uniqueVarietyKeys: uniqueVarietyKeys.size,
       varietyKpiPassed: uniqueVarietyKeys.size === approvedJobs.length,
