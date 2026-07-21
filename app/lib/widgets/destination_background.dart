@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../data/journey_background_catalog.dart';
 import '../models/journey_background.dart';
@@ -12,7 +11,7 @@ class DestinationBackground extends StatelessWidget {
     required this.pageType,
     required this.child,
     this.localDate,
-    this.scrimStrength = .64,
+    this.scrimStrength = .42,
     super.key,
   });
 
@@ -35,7 +34,15 @@ class DestinationBackground extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         if (asset != null)
-          ExcludeSemantics(child: _BackgroundArtwork(asset: asset))
+          ExcludeSemantics(
+            child: Image.asset(
+              asset.assetPath,
+              key: ValueKey('journey-background-${asset.id}'),
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+              errorBuilder: (_, __, ___) => const _BackgroundFallback(),
+            ),
+          )
         else
           const _BackgroundFallback(),
         DecoratedBox(
@@ -44,47 +51,15 @@ class DestinationBackground extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
+                PhoenixTheme.paper.withValues(alpha: scrimStrength + .08),
+                PhoenixTheme.paper.withValues(alpha: scrimStrength - .06),
                 PhoenixTheme.paper.withValues(alpha: scrimStrength + .12),
-                PhoenixTheme.paper.withValues(alpha: scrimStrength),
-                PhoenixTheme.paper.withValues(alpha: scrimStrength + .18),
               ],
             ),
           ),
         ),
         child,
       ],
-    );
-  }
-}
-
-class _BackgroundArtwork extends StatelessWidget {
-  const _BackgroundArtwork({required this.asset});
-
-  final JourneyBackgroundAsset asset;
-
-  @override
-  Widget build(BuildContext context) {
-    final svgData = asset.svgData;
-    if (svgData != null) {
-      final normalizedSvg = svgData
-          .replaceAll('rx="120 120 0 0"', 'rx="120"')
-          .replaceAll('rx="36 36 0 0"', 'rx="36"');
-      return SvgPicture.string(
-        normalizedSvg,
-        key: ValueKey('journey-background-${asset.id}'),
-        fit: BoxFit.cover,
-        placeholderBuilder: (_) => const _BackgroundFallback(),
-      );
-    }
-
-    final assetPath = asset.assetPath;
-    if (assetPath == null) return const _BackgroundFallback();
-    return Image.asset(
-      assetPath,
-      key: ValueKey('journey-background-${asset.id}'),
-      fit: BoxFit.cover,
-      filterQuality: FilterQuality.medium,
-      errorBuilder: (_, __, ___) => const _BackgroundFallback(),
     );
   }
 }
