@@ -23,16 +23,19 @@
 - [ ] 生词与「注」临时朗读后从原准确位置继续
 - [ ] 所有朗读入口共用 `NarrationController`，没有独立播放状态或计时器
 - [ ] 故事页与发现页生词均显示词性、探索者母语和英文释义
-- [ ] PhoenixVocabularyAgent 为每个生词生成真实应用句、完整拼音、探索者母语、英文和用法说明
-- [ ] 生词 AI 例句经过 PhoenixQualityAgent 复核，且没有“故事里出现了这个词”等万能占位句
-- [ ] AI 不可用时只回退到 Journey 已审核真实语境
+- [ ] 每个已发布生词都随 Journey 内容包预下载真实应用例句
+- [ ] 点开生词立即读取本地例句，不现场请求 AI，也不显示等待生成状态
+- [ ] 预下载例句包含目标词、完整拼音、探索者母语、英文和用法说明
+- [ ] PhoenixVocabularyAgent 与 PhoenixQualityAgent 只在内容制作阶段生成并复核例句
+- [ ] 例句没有“故事里出现了这个词”等万能占位句
 - [ ] 生词查看与朗读正常
 - [ ] 开发分支与 PR 体验版保持全部旅程开放
 - [ ] 免费探索者每天稳定随机早晚各一段，同日两段不重复
 - [ ] 付费探索者可以打开全部已发布旅程
 - [ ] 免费、付费与随机旅程权限统一经过 `JourneyAccessPolicy`
 - [ ] PhoenixBrainAgent 是唯一 AI 总调度入口
-- [ ] Guide / Writing / Conversation / Learning / Vocabulary 均由 PhoenixBrainAgent 调度并经过 PhoenixQualityAgent 隐藏复核
+- [ ] Guide / Writing / Conversation / Learning 在线功能由 PhoenixBrainAgent 调度并经过 PhoenixQualityAgent 隐藏复核
+- [ ] Vocabulary 内容制作由 PhoenixBrainAgent 调度并在发布前写入 Journey 内容包
 - [ ] GPT-5.6 通过 OpenAI Responses API 优先运行，Cloudflare Workers AI 自动回退
 - [ ] PhoenixMemoryAgent 只处理有限客户端学习档案，服务器不持久保存
 - [ ] PhoenixKnowledgeAgent 只提供已审核 Journey 背景
@@ -46,6 +49,6 @@
 
 未经体验确认，不合并到 `main`。一个 PR 只开发或修复一项功能。
 朗读功能必须遵守 `docs/development-workflow.md` 中的「永久朗读开发准则」。
-故事、发现生词与 AI 实际用法例句必须遵守同文件中的「永久生词展示与例句准则」。
+故事、发现生词与预下载真实例句必须遵守同文件中的「永久生词展示与例句准则」。
 所有 AI 功能必须遵守同文件中的「永久 AI Agent 开发准则」。
 旅程开放、免费随机与付费权限必须遵守同文件中的「永久旅程访问与订阅准则」。
