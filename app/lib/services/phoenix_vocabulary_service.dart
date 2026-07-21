@@ -48,13 +48,50 @@ class PhoenixVocabularyService {
   }) : _client = client ?? http.Client(),
        endpoint = endpoint ?? Uri.base.resolve('/api/phoenix-ai');
 
-  static final Map<String, PhoenixVocabularyExample> _sessionCache = {};
+  static final Map<String, PhoenixVocabularyExample> _authoringCache = {};
 
   final http.Client _client;
   final Uri endpoint;
   final Duration timeout;
 
+  /// Explorer runtime path.
+  ///
+  /// Published vocabulary examples are prepared before release and bundled
+  /// with the Journey pack. Opening a word must never wait for a model request.
   Future<PhoenixVocabularyExample> generateExample({
+    required WordEntry entry,
+    required String language,
+    required String journeyId,
+    required String contextChinese,
+    required String contextPinyin,
+    required String contextNative,
+    required String contextEnglish,
+    required PhoenixVocabularyExample fallback,
+  }) {
+    final preloaded = PhoenixVocabularyExample(
+      chinese: fallback.chinese,
+      pinyin: fallback.pinyin,
+      native: fallback.native,
+      english: fallback.english,
+      usageNote:
+          '已随旅程内容预先下载；例句展示“${entry.word}”在完整语境中的实际用法。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    );
+    _validate(preloaded, entry.word);
+    return Future<PhoenixVocabularyExample>.value(preloaded);
+  }
+
+  /// Content-authoring path only.
+  ///
+  /// PhoenixVocabularyAgent and PhoenixQualityAgent can generate and review
+  /// examples while a Journey pack is being prepared. Their result must be
+  /// saved into the pack before explorers receive it; the app UI does not call
+  /// this method when a learner opens a word.
+  Future<PhoenixVocabularyExample> generateExampleForContentPipeline({
     required WordEntry entry,
     required String language,
     required String journeyId,
@@ -66,7 +103,7 @@ class PhoenixVocabularyService {
   }) async {
     final cacheKey =
         '${endpoint.toString()}|$journeyId|${entry.word}|$language';
-    final cached = _sessionCache[cacheKey];
+    final cached = _authoringCache[cacheKey];
     if (cached != null) return cached;
 
     try {
@@ -115,7 +152,7 @@ class PhoenixVocabularyService {
         qualityScore: _readInt(quality, 'score'),
       );
       _validate(generated, entry.word);
-      _sessionCache[cacheKey] = generated;
+      _authoringCache[cacheKey] = generated;
       return generated;
     } on TimeoutException catch (_) {
       return fallback;
@@ -142,7 +179,9 @@ class PhoenixVocabularyService {
         example.english.isEmpty ||
         example.usageNote.isEmpty ||
         hasPlaceholder) {
-      throw const FormatException('Phoenix AI returned a placeholder example.');
+      throw const FormatException(
+        'Phoenix vocabulary pack contains an invalid example.',
+      );
     }
   }
 
