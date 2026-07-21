@@ -46,6 +46,7 @@ void main() {
           'quality': {'reviewed': true, 'score': 96},
         }),
         200,
+        headers: const {'content-type': 'application/json; charset=utf-8'},
       );
     });
     final service = PhoenixVocabularyService(
