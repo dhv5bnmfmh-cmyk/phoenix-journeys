@@ -24,6 +24,17 @@ test('daily scheduler creates four original reviewed jobs per destination', () =
   assert.equal(plan.expected, 28);
   assert.equal(BACKGROUND_KPI.minimumInventoryPerDestination, 20);
   assert.equal(BACKGROUND_KPI.minimumInventoryPerPageType, 5);
+  assert.equal(BACKGROUND_KPI.minimumVarietyScore, 80);
+  assert.equal(BACKGROUND_KPI.uniqueDailyCompositionRate, 1);
+  assert.equal(plan.uniqueVarietyKeys, plan.expected);
+  assert.equal(plan.varietyKpiPassed, true);
+  for (const journeyId of PHOENIX_BACKGROUND_DESTINATIONS) {
+    const destinationJobs = plan.approvedJobs.filter(
+      (job) => job.journeyId === journeyId,
+    );
+    assert.equal(new Set(destinationJobs.map((job) => job.camera)).size, 4);
+    assert.equal(new Set(destinationJobs.map((job) => job.timeOfDay)).size, 4);
+  }
 });
 
 test('prompts ban IP, logos, trademarks and artist imitation', () => {
@@ -38,6 +49,12 @@ test('prompts ban IP, logos, trademarks and artist imitation', () => {
     assert.match(job.prompt, /no trademark/i);
     assert.match(job.prompt, /no copyrighted character/i);
     assert.match(job.prompt, /no artist imitation/i);
+    assert.match(job.prompt, /visibly different/i);
+    assert.ok(job.timeOfDay);
+    assert.ok(job.weather);
+    assert.ok(job.camera);
+    assert.ok(job.scene);
+    assert.ok(job.varietyKey);
   }
 });
 

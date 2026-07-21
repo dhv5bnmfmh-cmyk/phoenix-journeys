@@ -77,6 +77,12 @@ for (const job of plan.approvedJobs) {
       origin: 'aiGenerated',
       complianceReviewed: true,
       complianceScore: review.score,
+      varietyScore: review.varietyScore,
+      varietyKey: job.varietyKey,
+      timeOfDay: job.timeOfDay,
+      weather: job.weather,
+      camera: job.camera,
+      scene: job.scene,
       pageTypes: [
         'explore',
         'passport',
@@ -124,6 +130,8 @@ const report = {
   kpi: BACKGROUND_KPI,
   passedDailyGenerationKpi: accepted.length === plan.expected,
   publishedInventory: Object.fromEntries(counts),
+  approvedVarietyKeys: accepted.map((item) => item.varietyKey),
+  minimumVarietyScore: BACKGROUND_KPI.minimumVarietyScore,
   rejectedItems: rejected,
 };
 await writeFile(
@@ -177,10 +185,11 @@ async function reviewWithVision({ model, instruction, imageBase64 }) {
         schema: {
           type: 'object',
           additionalProperties: false,
-          required: ['approved', 'score', 'issues'],
+          required: ['approved', 'score', 'varietyScore', 'issues'],
           properties: {
             approved: { type: 'boolean' },
             score: { type: 'integer', minimum: 0, maximum: 100 },
+            varietyScore: { type: 'integer', minimum: 0, maximum: 100 },
             issues: { type: 'array', items: { type: 'string' } },
           },
         },

@@ -11,6 +11,8 @@ export const BACKGROUND_KPI = Object.freeze({
   compliancePassRate: 1,
   generationRecoveryRate: 0.95,
   dailyPublicationSuccessRate: 0.99,
+  minimumVarietyScore: 80,
+  uniqueDailyCompositionRate: 1,
 });
 
 export class PhoenixBackgroundScheduler {
@@ -34,6 +36,7 @@ export class PhoenixBackgroundScheduler {
       promptReview: this.complianceAgent.reviewPrompt(job),
     }));
     const approvedJobs = reviewed.filter((job) => job.promptReview.approved);
+    const uniqueVarietyKeys = new Set(approvedJobs.map((job) => job.varietyKey));
     return {
       agent: 'PhoenixBackgroundScheduler',
       date,
@@ -42,6 +45,8 @@ export class PhoenixBackgroundScheduler {
         PHOENIX_BACKGROUND_DESTINATIONS.length *
         BACKGROUND_KPI.dailyApprovedPerDestination,
       approvedJobs,
+      uniqueVarietyKeys: uniqueVarietyKeys.size,
+      varietyKpiPassed: uniqueVarietyKeys.size === approvedJobs.length,
       rejectedJobs: reviewed.filter((job) => !job.promptReview.approved),
     };
   }
