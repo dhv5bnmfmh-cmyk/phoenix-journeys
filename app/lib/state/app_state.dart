@@ -18,7 +18,7 @@ class AppState extends ChangeNotifier {
   static const int journeyLastStep = 6;
   static const List<String> journeyStepLabels = [
     '故事',
-    '生词',
+    '单词',
     '发现',
     '思考',
     '表达',
@@ -122,8 +122,7 @@ class AppState extends ChangeNotifier {
       scriptMode = prefs.getBool('traditional') == true
           ? ScriptMode.traditional
           : ScriptMode.simplified;
-      translationLanguage =
-          prefs.getString('translationLanguage') ?? '越南语';
+      translationLanguage = prefs.getString('translationLanguage') ?? '越南语';
       memories
         ..clear()
         ..addAll(prefs.getStringList('memories') ?? <String>[]);
@@ -132,9 +131,7 @@ class AppState extends ChangeNotifier {
         ..addAll(prefs.getStringList('savedWords') ?? <String>[]);
       earnedJourneyStampIds
         ..clear()
-        ..addAll(
-          prefs.getStringList('earnedJourneyStampIds') ?? <String>[],
-        );
+        ..addAll(prefs.getStringList('earnedJourneyStampIds') ?? <String>[]);
 
       // Migrate the original single-city stamp without losing it.
       if (prefs.getBool('beijingStampEarned') == true ||
@@ -157,35 +154,36 @@ class AppState extends ChangeNotifier {
 
   void _loadActiveJourney(SharedPreferences prefs) {
     final isLegacyBeijing = activeJourneyId == 'beijing-forbidden-city';
-    final storedStep = prefs.getInt(_key('step')) ??
+    final storedStep =
+        prefs.getInt(_key('step')) ??
         (isLegacyBeijing ? prefs.getInt('beijingJourneyStep') : null) ??
         0;
-    final storedFurthest = prefs.getInt(_key('furthestStep')) ??
-        (isLegacyBeijing
-            ? prefs.getInt('beijingJourneyFurthestStep')
-            : null) ??
+    final storedFurthest =
+        prefs.getInt(_key('furthestStep')) ??
+        (isLegacyBeijing ? prefs.getInt('beijingJourneyFurthestStep') : null) ??
         storedStep;
 
     _journeyStep = _safeJourneyStep(storedStep);
     _journeyFurthestStep = math
         .max(_journeyStep, _safeJourneyStep(storedFurthest))
         .toInt();
-    journeyCompleted = prefs.getBool(_key('completed')) ??
-        (isLegacyBeijing
-            ? prefs.getBool('journeyCompleted') ?? false
-            : false);
-    wonderDraft = prefs.getString(_key('wonderDraft')) ??
+    journeyCompleted =
+        prefs.getBool(_key('completed')) ??
+        (isLegacyBeijing ? prefs.getBool('journeyCompleted') ?? false : false);
+    wonderDraft =
+        prefs.getString(_key('wonderDraft')) ??
         (isLegacyBeijing ? prefs.getString('wonderDraft') : null) ??
         '';
-    expressDraft = prefs.getString(_key('expressDraft')) ??
+    expressDraft =
+        prefs.getString(_key('expressDraft')) ??
         (isLegacyBeijing ? prefs.getString('expressDraft') : null) ??
         '';
-    memoryDraft = prefs.getString(_key('memoryDraft')) ??
+    memoryDraft =
+        prefs.getString(_key('memoryDraft')) ??
         (isLegacyBeijing ? prefs.getString('memoryDraft') : null) ??
         '';
     guideFeedbackReply = prefs.getString(_key('guideFeedbackReply')) ?? '';
-    guideFeedbackOffline =
-        prefs.getBool(_key('guideFeedbackOffline')) ?? false;
+    guideFeedbackOffline = prefs.getBool(_key('guideFeedbackOffline')) ?? false;
     writingFeedbackCorrected =
         prefs.getString(_key('writingFeedbackCorrected')) ?? '';
     writingFeedbackExplanation =
@@ -339,10 +337,7 @@ class AppState extends ChangeNotifier {
         _key('writingFeedbackExplanation'),
         writingFeedbackExplanation,
       ),
-      prefs.setString(
-        _key('writingFeedbackNatural'),
-        writingFeedbackNatural,
-      ),
+      prefs.setString(_key('writingFeedbackNatural'), writingFeedbackNatural),
       prefs.setString(
         _key('writingFeedbackEncouragement'),
         writingFeedbackEncouragement,

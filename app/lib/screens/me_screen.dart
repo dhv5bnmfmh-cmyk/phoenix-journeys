@@ -123,7 +123,7 @@ class _MeSectionSwitch extends StatelessWidget {
         children: [
           _SectionButton(
             selected: selected == 0,
-            label: state.displayText('我的生词 · $vocabularyCount'),
+            label: state.displayText('我的单词 · $vocabularyCount'),
             onTap: () => onSelected(0),
           ),
           const SizedBox(width: 3),
@@ -487,7 +487,7 @@ class _VocabularyPanel extends StatelessWidget {
               onPressed: () => _showAll(context),
               icon: const Icon(Icons.view_list_rounded, size: 16),
               label: Text(
-                state.displayText('查看全部 ${entries.length} 个生词'),
+                state.displayText('查看全部 ${entries.length} 个单词'),
                 style: const TextStyle(fontSize: 10.5),
               ),
             ),
@@ -630,8 +630,8 @@ class _EmptyVocabularyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return const _CompactEmptyCard(
       icon: '🔖',
-      title: '还没有收藏生词',
-      text: '在 Journey 点红色词语，再加入生词本。',
+      title: '还没有收藏单词',
+      text: '在 Journey 点红色词语，再加入单词本。',
     );
   }
 }

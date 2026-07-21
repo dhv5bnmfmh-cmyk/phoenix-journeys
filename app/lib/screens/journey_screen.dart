@@ -936,7 +936,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     final language = state.translationLanguage;
 
     return _page(
-      title: '生词',
+      title: '单词',
       child: LayoutBuilder(
         builder: (context, constraints) {
           const columns = 3;
