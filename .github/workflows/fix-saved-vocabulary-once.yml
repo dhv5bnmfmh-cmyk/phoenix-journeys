@@ -1,11 +1,11 @@
 name: Fix saved vocabulary once
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/seven-day-journey-library
-    paths:
-      - .github/workflows/fix-saved-vocabulary-once.yml
+      - main
+    types:
+      - synchronize
 
 permissions:
   contents: write
@@ -111,7 +111,7 @@ const catalog = readFileSync('app/lib/data/daily_journey_catalog.dart', 'utf8');
 const meScreen = readFileSync('app/lib/screens/me_screen.dart', 'utf8');
 const wordSheet = readFileSync('app/lib/widgets/word_detail_sheet.dart', 'utf8');
 
- test('My Vocabulary uses the shared seven-city vocabulary catalog', () => {
+test('My Vocabulary uses the shared seven-city vocabulary catalog', () => {
   assert.match(catalog, /allDailyJourneyWords/);
   assert.match(catalog, /for \(final journey in dailyJourneyExperiences\)/);
   assert.match(meScreen, /final savedEntries = allDailyJourneyWords/);
