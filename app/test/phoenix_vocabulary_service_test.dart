@@ -27,7 +27,39 @@ void main() {
     symbol: '门',
   );
 
-  test('parses a reviewed practical AI example', () async {
+  test('explorer runtime returns the preloaded example without HTTP', () async {
+    var requested = false;
+    final client = MockClient((_) async {
+      requested = true;
+      throw StateError('Explorer runtime must not request AI examples.');
+    });
+    final service = PhoenixVocabularyService(
+      client: client,
+      endpoint: Uri.parse('https://example.test/api/phoenix-ai'),
+    );
+
+    final result = await service.generateExample(
+      entry: entry,
+      language: '越南语',
+      journeyId: 'nanjing-qinhuai-river',
+      contextChinese: fallback.chinese,
+      contextPinyin: fallback.pinyin,
+      contextNative: fallback.native,
+      contextEnglish: fallback.english,
+      fallback: fallback,
+    );
+
+    expect(requested, isFalse);
+    expect(result.chinese, fallback.chinese);
+    expect(result.provider, 'phoenix-preloaded-pack');
+    expect(result.model, 'bundled');
+    expect(result.qualityReviewed, isTrue);
+    expect(result.qualityScore, 100);
+    expect(result.usageNote, contains('预先下载'));
+    service.close();
+  });
+
+  test('content pipeline can still generate a reviewed AI example', () async {
     final client = MockClient((request) async {
       final payload = jsonDecode(request.body) as Map<String, dynamic>;
       expect(payload['mode'], 'vocabulary');
@@ -54,10 +86,10 @@ void main() {
       endpoint: Uri.parse('https://example.test/api/phoenix-ai'),
     );
 
-    final result = await service.generateExample(
+    final result = await service.generateExampleForContentPipeline(
       entry: entry,
       language: '越南语',
-      journeyId: 'nanjing-qinhuai-river-online',
+      journeyId: 'nanjing-qinhuai-river-authoring',
       contextChinese: fallback.chinese,
       contextPinyin: fallback.pinyin,
       contextNative: fallback.native,
@@ -69,32 +101,6 @@ void main() {
     expect(result.isOfflineFallback, isFalse);
     expect(result.qualityReviewed, isTrue);
     expect(result.qualityScore, 96);
-    service.close();
-  });
-
-  test('uses the real journey context when AI is unavailable', () async {
-    final client = MockClient(
-      (_) async => http.Response(jsonEncode({'error': 'unavailable'}), 503),
-    );
-    final service = PhoenixVocabularyService(
-      client: client,
-      endpoint: Uri.parse('https://example.test/api/phoenix-ai'),
-    );
-
-    final result = await service.generateExample(
-      entry: entry,
-      language: '越南语',
-      journeyId: 'nanjing-qinhuai-river-offline',
-      contextChinese: fallback.chinese,
-      contextPinyin: fallback.pinyin,
-      contextNative: fallback.native,
-      contextEnglish: fallback.english,
-      fallback: fallback,
-    );
-
-    expect(result, same(fallback));
-    expect(result.chinese, '秦淮河边可以看到传统牌坊。');
-    expect(result.isOfflineFallback, isTrue);
     service.close();
   });
 }
