@@ -237,6 +237,16 @@ class _JourneyScreenState extends State<JourneyScreen>
     await _narration.resumeFromOffset(resumeOffset);
   }
 
+  Future<void> _enterVocabularyAtFirstWord() async {
+    await _goToStep(1);
+    if (!mounted || step != 1 || _experience.words.isEmpty) return;
+
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted || step != 1) return;
+
+    await _openWord(_experience.words.first);
+  }
+
   Future<void> _prepareAgentAction(FocusNode focusNode, String message) async {
     focusNode.unfocus();
     await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
@@ -828,6 +838,7 @@ class _JourneyScreenState extends State<JourneyScreen>
 
     return _page(
       title: '故事',
+      onNext: () => unawaited(_enterVocabularyAtFirstWord()),
       child: Column(
         children: [
           NarrationPlayerCard(
