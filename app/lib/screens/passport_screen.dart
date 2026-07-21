@@ -10,6 +10,12 @@ import '../widgets/city_journey_stamp.dart';
 import '../widgets/journey_share_button.dart';
 import 'journey_screen.dart';
 
+bool get _passportAllAccessPreview {
+  final uri = Uri.base;
+  return uri.queryParameters['unlock'] == 'all' ||
+      uri.host.startsWith('phoenix-journeys-pr-');
+}
+
 class PassportScreen extends StatelessWidget {
   const PassportScreen({super.key});
 
@@ -81,7 +87,11 @@ class _PassportHeader extends StatelessWidget {
               ),
               const SizedBox(height: 1),
               Text(
-                state.displayText('每天完成一段 Journey，收藏一座城市。'),
+                state.displayText(
+                  _passportAllAccessPreview
+                      ? '体验版已开放全部城市与学习步骤。'
+                      : '每天完成一段 Journey，收藏一座城市。',
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 10.5, color: Colors.black54),
@@ -96,7 +106,9 @@ class _PassportHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(99),
           ),
           child: Text(
-            '${state.earnedStampCount} 枚',
+            _passportAllAccessPreview
+                ? state.displayText('全开放')
+                : '${state.earnedStampCount} 枚',
             style: const TextStyle(
               color: PhoenixTheme.red,
               fontSize: 10.5,
@@ -116,6 +128,7 @@ class _PassportMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final allAccess = _passportAllAccessPreview;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
@@ -160,7 +173,9 @@ class _PassportMap extends StatelessWidget {
                 ),
               ),
               Text(
-                state.displayText('今日 · ${state.todayJourney.city}'),
+                state.displayText(
+                  allAccess ? '体验 · 七城开放' : '今日 · ${state.todayJourney.city}',
+                ),
                 style: const TextStyle(
                   color: Color(0xFFFFD879),
                   fontSize: 10,
@@ -174,6 +189,7 @@ class _PassportMap extends StatelessWidget {
             children: dailyJourneyExperiences.map((journey) {
               final earned = state.isJourneyStampEarned(journey.id);
               final isToday = state.todayJourney.id == journey.id;
+              final available = allAccess || earned || isToday;
               return Expanded(
                 child: Column(
                   children: [
@@ -185,7 +201,7 @@ class _PassportMap extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: const Color(0xFF102E33),
                         border: Border.all(
-                          color: earned || isToday
+                          color: available
                               ? const Color(0xFFFFD879)
                               : Colors.white30,
                           width: isToday ? 2.2 : 1.4,
@@ -202,9 +218,11 @@ class _PassportMap extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          earned ? journey.stampSymbol : (isToday ? '今' : '锁'),
+                          earned || allAccess
+                              ? journey.stampSymbol
+                              : (isToday ? '今' : '锁'),
                           style: TextStyle(
-                            color: earned || isToday
+                            color: available
                                 ? const Color(0xFFFFD879)
                                 : Colors.white54,
                             fontSize: 15,
@@ -253,6 +271,7 @@ class _CityStampCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final allAccess = _passportAllAccessPreview;
     final earned = state.isJourneyStampEarned(journey.id);
     final active = state.activeJourneyId == journey.id;
     final isToday = state.todayJourney.id == journey.id;
@@ -260,9 +279,11 @@ class _CityStampCard extends StatelessWidget {
         ? '已获得'
         : active && state.hasJourneyInProgress
             ? '${state.journeyProgressPercent}%'
-            : isToday
-                ? '今日旅程'
-                : '等待轮换';
+            : allAccess
+                ? '体验开放'
+                : isToday
+                    ? '今日旅程'
+                    : '等待轮换';
 
     return Container(
       padding: const EdgeInsets.all(10),
@@ -272,7 +293,7 @@ class _CityStampCard extends StatelessWidget {
         border: Border.all(
           color: earned
               ? PhoenixTheme.red.withValues(alpha: .30)
-              : isToday
+              : allAccess || isToday
                   ? PhoenixTheme.gold.withValues(alpha: .70)
                   : PhoenixTheme.gold.withValues(alpha: .28),
         ),
@@ -281,7 +302,7 @@ class _CityStampCard extends StatelessWidget {
         children: [
           CityJourneyStamp(
             journey: journey,
-            isUnlocked: earned,
+            isUnlocked: earned || allAccess,
             size: 82,
           ),
           const SizedBox(width: 10),
@@ -364,7 +385,7 @@ class _CityStampCard extends StatelessWidget {
                           ],
                         )
                       : FilledButton.icon(
-                          onPressed: isToday || active
+                          onPressed: allAccess || isToday || active
                               ? () => unawaited(_openJourney(context))
                               : null,
                           style: FilledButton.styleFrom(
@@ -381,9 +402,11 @@ class _CityStampCard extends StatelessWidget {
                             state.displayText(
                               active && state.hasJourneyInProgress
                                   ? '继续旅程'
-                                  : isToday
-                                      ? '开始今日旅程'
-                                      : '等待成为今日旅程',
+                                  : allAccess
+                                      ? '开始体验'
+                                      : isToday
+                                          ? '开始今日旅程'
+                                          : '等待成为今日旅程',
                             ),
                             style: const TextStyle(fontSize: 10.5),
                           ),

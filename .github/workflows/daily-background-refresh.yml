@@ -1,0 +1,45 @@
+name: Daily Phoenix backgrounds
+
+on:
+  schedule:
+    - cron: '10 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: phoenix-daily-backgrounds
+  cancel-in-progress: false
+
+jobs:
+  generate-review-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out content branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate, review and publish destination backgrounds
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PHOENIX_IMAGE_MODEL: gpt-image-2
+          PHOENIX_VISUAL_REVIEW_MODEL: gpt-5.6-luna
+        run: node worker/scripts/generate_daily_backgrounds.mjs
+
+      - name: Run visual agent regression tests
+        run: node --test worker/background_agent.test.mjs
+
+      - name: Commit approved background-only update
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No approved background changes.'
+            exit 0
+          fi
+          git config user.name 'phoenix-background-scheduler[bot]'
+          git config user.email 'phoenix-background-scheduler[bot]@users.noreply.github.com'
+          git add app/assets/images/backgrounds app/lib/data/journey_background_generated.dart reports/backgrounds
+          git commit -m 'content: publish daily destination backgrounds'
+          git push

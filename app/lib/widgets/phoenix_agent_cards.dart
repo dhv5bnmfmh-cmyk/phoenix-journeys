@@ -43,7 +43,11 @@ class PhoenixGuideReplyCard extends StatelessWidget {
                   ),
                 ),
               ),
-              _AgentStatusChip(isOffline: feedback.isOfflineFallback),
+              _AgentStatusChip(
+                isOffline: feedback.isOfflineFallback,
+                provider: feedback.provider,
+                qualityReviewed: feedback.qualityReviewed,
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -108,7 +112,11 @@ class PhoenixWritingFeedbackCard extends StatelessWidget {
                   ),
                 ),
               ),
-              _AgentStatusChip(isOffline: feedback.isOfflineFallback),
+              _AgentStatusChip(
+                isOffline: feedback.isOfflineFallback,
+                provider: feedback.provider,
+                qualityReviewed: feedback.qualityReviewed,
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -146,20 +154,36 @@ class PhoenixWritingFeedbackCard extends StatelessWidget {
 }
 
 class _AgentStatusChip extends StatelessWidget {
-  const _AgentStatusChip({required this.isOffline});
+  const _AgentStatusChip({
+    required this.isOffline,
+    required this.provider,
+    required this.qualityReviewed,
+  });
 
   final bool isOffline;
+  final String provider;
+  final bool qualityReviewed;
+
+  String get _label {
+    if (isOffline) return '本地建议';
+    if (provider == 'openai' && qualityReviewed) return 'GPT · 已复核';
+    if (qualityReviewed) return 'AI · 已复核';
+    return provider == 'openai' ? 'GPT 在线' : 'AI 在线';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: ValueKey('phoenix-agent-status-$provider-$qualityReviewed'),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: (isOffline ? Colors.orange : Colors.green).withValues(alpha: .10),
+        color: (isOffline ? Colors.orange : Colors.green).withValues(
+          alpha: .10,
+        ),
         borderRadius: BorderRadius.circular(99),
       ),
       child: Text(
-        isOffline ? '本地建议' : 'AI 在线',
+        _label,
         style: TextStyle(
           color: isOffline ? Colors.orange.shade800 : Colors.green.shade700,
           fontSize: 10,

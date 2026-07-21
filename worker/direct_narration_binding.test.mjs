@@ -14,15 +14,16 @@ test('story text listens directly to the same narration controller as audio', ()
   assert.match(interactive, /widget\.narrationController\?\.highlightSnapshot/);
 });
 
-test('Story and Discovery both pass the active controller to highlighted text', () => {
+test('Story, Discovery, and word details share the active narration controller', () => {
   const bindings = journey.match(/narrationController: _narration/g) ?? [];
-  assert.equal(bindings.length, 2);
+  assert.ok(bindings.length >= 3);
   assert.match(journey, /narrationContentId: 'story'/);
   assert.match(journey, /narrationContentId: 'discovery'/);
+  assert.match(journey, /showWordDetail\([\s\S]*narrationController: _narration/);
 });
 
-test('vocabulary detail stays content-sized and below half a phone viewport', () => {
-  assert.match(sheet, /maxHeight: size\.height \* \.48/);
+test('vocabulary detail stays content-sized within a compact phone viewport', () => {
+  assert.match(sheet, /maxHeight: size\.height \* \.52/);
   assert.match(sheet, /FittedBox\(/);
   assert.match(sheet, /fit: BoxFit\.scaleDown/);
 });

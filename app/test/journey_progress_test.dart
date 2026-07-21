@@ -56,9 +56,10 @@ void main() {
   });
 
   test('completion earns a permanent Beijing stamp and restart keeps it', () async {
-    DateTime clock() => DateTime(2026, 7, 18);
+    DateTime clock() => DateTime(2026, 1, 1);
     final state = AppState(clock: clock);
     await state.load();
+    await state.activateJourney('beijing-forbidden-city');
     expect(state.activeJourneyId, 'beijing-forbidden-city');
 
     await state.saveJourneyProgress(
@@ -86,6 +87,7 @@ void main() {
 
     final restored = AppState(clock: clock);
     await restored.load();
+    await restored.activateJourney('beijing-forbidden-city');
 
     expect(restored.journeyCompleted, isFalse);
     expect(restored.beijingStampEarned, isTrue);

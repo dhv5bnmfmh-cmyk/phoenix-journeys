@@ -22,9 +22,10 @@ void main() {
     expect(find.text('正在准备你的旅程…'), findsOneWidget);
   });
 
-  testWidgets('shows the Beijing journey on its rotation day', (tester) async {
-    final state = AppState(clock: () => DateTime(2026, 7, 18));
+  testWidgets('shows the selected Beijing journey', (tester) async {
+    final state = AppState(clock: () => DateTime(2026, 1, 1));
     await state.load();
+    await state.activateJourney('beijing-forbidden-city');
 
     await tester.pumpWidget(
       ChangeNotifierProvider.value(

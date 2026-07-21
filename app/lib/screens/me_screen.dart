@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
 import '../services/narration_controller.dart';
 import '../state/app_state.dart';
@@ -42,7 +43,7 @@ class _MeScreenState extends State<MeScreen> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final savedEntries = words
+    final savedEntries = allDailyJourneyWords
         .where((entry) => state.savedWords.contains(entry.word))
         .toList(growable: false);
 

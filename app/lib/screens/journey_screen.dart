@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +18,7 @@ import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_share_button.dart';
 import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
+import '../widgets/narration_speed_stepper.dart';
 import '../widgets/phoenix_agent_cards.dart';
 import '../widgets/word_detail_sheet.dart';
 
@@ -56,13 +58,10 @@ class _JourneyScreenState extends State<JourneyScreen>
     WidgetsBinding.instance.addObserver(this);
     _narration = NarrationController();
     final worldStoryAgent = createPhoenixWorldStoryAgent();
-    final journeyId = widget.journeyId ??
-        dailyJourneyForDate(DateTime.now()).id;
+    final journeyId =
+        widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
     _experience = requireDailyJourneyExperience(journeyId);
-    _journeyContent = requireJourneyContent(
-      worldStoryAgent,
-      _experience.id,
-    );
+    _journeyContent = requireJourneyContent(worldStoryAgent, _experience.id);
     _ai = PhoenixAiService();
     wonderFocusNode.addListener(_handleWritingFocusChanged);
     expressFocusNode.addListener(_handleWritingFocusChanged);
@@ -139,6 +138,12 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Future<void> _goToStep(int targetStep) async {
     final safeStep = targetStep.clamp(0, AppState.journeyLastStep);
+    if (!_appState.journeyCompleted &&
+        safeStep != step &&
+        safeStep != step - 1 &&
+        safeStep != step + 1) {
+      return;
+    }
     await _narration.stop();
     if (!mounted || safeStep == step) return;
 
@@ -163,6 +168,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   Future<void> _playStory() {
     return _narration.play(
       contentId: 'story',
+      languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
       items: _journeyContent.storyParagraphs
           .asMap()
           .entries
@@ -180,6 +186,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   Future<void> _playDiscoveries() {
     return _narration.play(
       contentId: 'discovery',
+      languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
       items: _experience.discoveries
           .asMap()
           .entries
@@ -202,10 +209,13 @@ class _JourneyScreenState extends State<JourneyScreen>
     final resumeOffset = _narration.currentOffset;
     if (!mounted) return;
 
-    final initialIndex = _experience.words.indexWhere((item) => item.word == entry.word);
+    final initialIndex = _experience.words.indexWhere(
+      (item) => item.word == entry.word,
+    );
     await showWordDetail(
       context,
       entry,
+      narrationController: _narration,
       entries: _experience.words,
       initialIndex: initialIndex < 0 ? 0 : initialIndex,
       onSpeak: () => _narration.speakWord(
@@ -225,10 +235,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     await _narration.resumeFromOffset(resumeOffset);
   }
 
-  Future<void> _prepareAgentAction(
-    FocusNode focusNode,
-    String message,
-  ) async {
+  Future<void> _prepareAgentAction(FocusNode focusNode, String message) async {
     focusNode.unfocus();
     await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
     if (!mounted) return;
@@ -264,16 +271,38 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
+  Map<String, dynamic> get _aiLearnerProfile {
+    final guideObservations = <String>[
+      wonderController.text.trim(),
+      _appState.guideFeedbackReply.trim(),
+      ..._appState.memories.take(6),
+    ].where((value) => value.isNotEmpty).toList(growable: false);
+    final writingInsights = <String>[
+      _appState.writingFeedbackExplanation.trim(),
+      _appState.writingFeedbackNatural.trim(),
+      expressController.text.trim(),
+    ].where((value) => value.isNotEmpty).toList(growable: false);
+
+    return <String, dynamic>{
+      'interfaceLanguage': _appState.translationLanguage,
+      'scriptMode': _appState.isTraditional ? 'traditional' : 'simplified',
+      'currentLevel': '根据学习者本次中文动态判断',
+      'savedWords': _appState.savedWords.toList(growable: false),
+      'completedJourneys': _appState.earnedJourneyStampIds.toList(
+        growable: false,
+      ),
+      'recentGuideObservations': guideObservations,
+      'recentWritingInsights': writingInsights,
+    };
+  }
+
   void _showAgentMessage(String message) {
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-        ),
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
       );
   }
 
@@ -286,10 +315,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     }
 
     setState(() => _guideLoading = true);
-    await _prepareAgentAction(
-      wonderFocusNode,
-      'PhoenixGuideAgent 正在思考…',
-    );
+    await _prepareAgentAction(wonderFocusNode, 'PhoenixGuideAgent 正在思考…');
     if (!mounted) return;
 
     try {
@@ -297,6 +323,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         text: answer,
         language: _appState.translationLanguage,
         journeyId: _experience.id,
+        learnerProfile: _aiLearnerProfile,
       );
       await _appState.saveGuideFeedback(
         reply: feedback.reply,
@@ -330,16 +357,15 @@ class _JourneyScreenState extends State<JourneyScreen>
     }
 
     setState(() => _writingLoading = true);
-    await _prepareAgentAction(
-      expressFocusNode,
-      'PhoenixWritingAgent 正在批改…',
-    );
+    await _prepareAgentAction(expressFocusNode, 'PhoenixWritingAgent 正在批改…');
     if (!mounted) return;
 
     try {
       final feedback = await _ai.reviewWriting(
         text: writing,
         language: _appState.translationLanguage,
+        journeyId: _experience.id,
+        learnerProfile: _aiLearnerProfile,
       );
       await _appState.saveWritingFeedback(
         corrected: feedback.corrected,
@@ -409,6 +435,27 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
+  String get _nativeSupportLanguageCode {
+    return switch (_appState.translationLanguage) {
+      '英语' => 'en-US',
+      '中文解释' => _appState.isTraditional ? 'zh-TW' : 'zh-CN',
+      _ => 'vi-VN',
+    };
+  }
+
+  Future<void> _speakSupportText(
+    String text, {
+    required String languageCode,
+  }) async {
+    final spoken = await _narration.speakTemporaryText(
+      text,
+      languageCode: languageCode,
+    );
+    if (!spoken && mounted) {
+      _showAgentMessage('当前设备暂时无法朗读这段文字。');
+    }
+  }
+
   Future<void> _showReadingSupport({
     required String title,
     required String pinyin,
@@ -429,16 +476,70 @@ class _JourneyScreenState extends State<JourneyScreen>
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
             child: _ReadingSupportSheet(
+              controller: _narration,
               title: title,
               pinyin: pinyin,
               nativeLabel: nativeLabel,
               nativeText: nativeText,
               english: english,
+              onSpeakNative: () => _speakSupportText(
+                nativeText,
+                languageCode: _nativeSupportLanguageCode,
+              ),
+              onSpeakEnglish: () =>
+                  _speakSupportText(english, languageCode: 'en-US'),
             ),
           ),
         );
       },
     );
+  }
+
+  double _fitJourneyTextSize(
+    BuildContext context,
+    BoxConstraints constraints,
+    List<String> texts, {
+    required double minSize,
+    required double maxSize,
+    required double lineHeight,
+  }) {
+    if (texts.isEmpty || !constraints.hasBoundedHeight) return minSize;
+
+    final availableWidth = (constraints.maxWidth - 58)
+        .clamp(120.0, constraints.maxWidth)
+        .toDouble();
+    final availableHeight = math.max(0.0, constraints.maxHeight - 8);
+    final textScaler = MediaQuery.textScalerOf(context);
+    final direction = Directionality.of(context);
+    var low = minSize;
+    var high = maxSize;
+
+    for (var iteration = 0; iteration < 10; iteration += 1) {
+      final candidate = (low + high) / 2;
+      var totalHeight = 0.0;
+      for (final text in texts) {
+        final painter = TextPainter(
+          text: TextSpan(
+            text: text,
+            style: TextStyle(
+              fontSize: candidate,
+              height: lineHeight,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          textDirection: direction,
+          textScaler: textScaler,
+        )..layout(maxWidth: availableWidth);
+        totalHeight += math.max(18, painter.height) + 12;
+      }
+
+      if (totalHeight <= availableHeight) {
+        low = candidate;
+      } else {
+        high = candidate;
+      }
+    }
+    return low;
   }
 
   void _onWonderChanged(String _) {
@@ -495,10 +596,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         toolbarHeight: 44,
         title: Text(
           _appState.displayText(_experience.appBarTitle),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
         ),
         actions: [
           Consumer<AppState>(
@@ -543,7 +641,8 @@ class _JourneyScreenState extends State<JourneyScreen>
     return LayoutBuilder(
       key: ValueKey(title),
       builder: (context, constraints) {
-        final keyboardVisible = keyboardAdaptive &&
+        final keyboardVisible =
+            keyboardAdaptive &&
             (keyboardFocusNode?.hasFocus ??
                 MediaQuery.viewInsetsOf(context).bottom > 0);
         final compact = constraints.maxHeight < 590 || keyboardVisible;
@@ -560,6 +659,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 JourneyProgressHeader(
                   currentStep: step,
                   furthestStep: state.beijingJourneyFurthestStep,
+                  isCompleted: state.journeyCompleted,
                   labels: AppState.journeyStepLabels,
                   onStepSelected: (value) => unawaited(_goToStep(value)),
                 ),
@@ -599,7 +699,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                             fontWeight: FontWeight.w900,
                           ),
                         ),
-                      )
+                      ),
                   ],
                 ),
               ),
@@ -619,9 +719,14 @@ class _JourneyScreenState extends State<JourneyScreen>
                             onPressed: () => unawaited(_goToStep(step - 1)),
                             style: OutlinedButton.styleFrom(
                               visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
                             ),
-                            icon: const Icon(Icons.arrow_back_rounded, size: 17),
+                            icon: const Icon(
+                              Icons.arrow_back_rounded,
+                              size: 17,
+                            ),
                             label: const Text(
                               '上一步',
                               style: TextStyle(fontSize: 11),
@@ -629,36 +734,39 @@ class _JourneyScreenState extends State<JourneyScreen>
                           ),
                         ),
                         const SizedBox(width: 7),
-                      ],                       if (secondaryButtonText != null && onSecondary != null) ...[
-                         Expanded(
-                           child: OutlinedButton.icon(
-                             key: ValueKey('journey-secondary-$title'),
-                             onPressed: onSecondary,
-                             style: OutlinedButton.styleFrom(
-                               visualDensity: VisualDensity.compact,
-                               padding: const EdgeInsets.symmetric(horizontal: 5),
-                             ),
-                             icon: Icon(secondaryButtonIcon, size: 15),
-                             label: Text(
-                               secondaryButtonText,
-                               maxLines: 1,
-                               overflow: TextOverflow.ellipsis,
-                               style: const TextStyle(
-                                 fontSize: 10,
-                                 fontWeight: FontWeight.w800,
-                               ),
-                             ),
-                           ),
-                         ),
-                         const SizedBox(width: 7),
-                       ],
+                      ],
+                      if (secondaryButtonText != null &&
+                          onSecondary != null) ...[
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            key: ValueKey('journey-secondary-$title'),
+                            onPressed: onSecondary,
+                            style: OutlinedButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                              ),
+                            ),
+                            icon: Icon(secondaryButtonIcon, size: 15),
+                            label: Text(
+                              secondaryButtonText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 7),
+                      ],
 
                       Expanded(
                         flex: 2,
                         child: FilledButton.icon(
                           onPressed: primaryEnabled && !primaryLoading
-                              ? onNext ??
-                                  () => unawaited(_goToStep(step + 1))
+                              ? onNext ?? () => unawaited(_goToStep(step + 1))
                               : null,
                           style: FilledButton.styleFrom(
                             backgroundColor: PhoenixTheme.red,
@@ -715,55 +823,77 @@ class _JourneyScreenState extends State<JourneyScreen>
           ),
           const SizedBox(height: 2),
           Expanded(
-            child: AnimatedBuilder(
-              animation: _narration,
-              builder: (context, _) {
-                return Align(
-                  alignment: Alignment.topCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _journeyContent.storyParagraphs
-                        .asMap()
-                        .entries
-                        .map((entry) {
-                          final annotation = _experience.storyAnnotations[entry.key];
-                          final snapshot = _narration.highlightSnapshot;
-                          final isActive =
-                              snapshot?.contentId == 'story' &&
-                              snapshot?.itemId == 'story-${entry.key}';
-                          return _CompactTextBlock(
-                            index: entry.key + 1,
-                            active: isActive,
-                            onSupport: () => unawaited(
-                              _showReadingSupport(
-                                title: '故事第 ${entry.key + 1} 段',
-                                pinyin: annotation.pinyin,
-                                nativeLabel: annotation.nativeLabel(language),
-                                nativeText: annotation.nativeText(
-                                  language,
-                                  entry.value,
+            child: LayoutBuilder(
+              key: const ValueKey('adaptive-story-text-area'),
+              builder: (context, constraints) {
+                final fontSize = _fitJourneyTextSize(
+                  context,
+                  constraints,
+                  _journeyContent.storyParagraphs,
+                  minSize: 10.8,
+                  maxSize: 20,
+                  lineHeight: 1.22,
+                );
+                return AnimatedBuilder(
+                  animation: _narration,
+                  builder: (context, _) {
+                    return SingleChildScrollView(
+                      key: const ValueKey('story-auto-visibility-scroll'),
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: _journeyContent.storyParagraphs
+                            .asMap()
+                            .entries
+                            .map((entry) {
+                              final annotation =
+                                  _experience.storyAnnotations[entry.key];
+                              final snapshot = _narration.highlightSnapshot;
+                              final isActive =
+                                  snapshot?.contentId == 'story' &&
+                                  snapshot?.itemId == 'story-${entry.key}';
+                              return _CompactTextBlock(
+                                index: entry.key + 1,
+                                active: isActive,
+                                onSupport: () => unawaited(
+                                  _showReadingSupport(
+                                    title: '故事第 ${entry.key + 1} 段',
+                                    pinyin: annotation.pinyin,
+                                    nativeLabel: annotation.nativeLabel(
+                                      language,
+                                    ),
+                                    nativeText: annotation.nativeText(
+                                      language,
+                                      entry.value,
+                                    ),
+                                    english: annotation.english,
+                                  ),
                                 ),
-                                english: annotation.english,
-                              ),
-                            ),
-                            child: InteractiveStoryText(
-                              text: entry.value,
-                              entries: _experience.words,
-                              narrationController: _narration,
-                              highlightStart: isActive ? snapshot!.start : null,
-                              highlightEnd: isActive ? snapshot!.end : null,
-                              narrationContentId: 'story',
-                              narrationItemId: 'story-${entry.key}',
-                              style: const TextStyle(
-                                fontSize: 10.8,
-                                height: 1.18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          );
-                        })
-                        .toList(growable: false),
-                  ),
+                                child: InteractiveStoryText(
+                                  text: entry.value,
+                                  entries: _experience.words,
+                                  narrationController: _narration,
+                                  highlightStart: isActive
+                                      ? snapshot!.start
+                                      : null,
+                                  highlightEnd: isActive ? snapshot!.end : null,
+                                  narrationContentId: 'story',
+                                  narrationItemId: 'story-${entry.key}',
+                                  style: TextStyle(
+                                    fontSize: fontSize,
+                                    height: 1.22,
+                                    fontWeight: isActive
+                                        ? FontWeight.w800
+                                        : FontWeight.w600,
+                                  ),
+                                ),
+                              );
+                            })
+                            .toList(growable: false),
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -775,6 +905,7 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Widget _wordsPage() {
     final state = context.watch<AppState>();
+    final language = state.translationLanguage;
 
     return _page(
       title: '生词',
@@ -787,7 +918,17 @@ class _JourneyScreenState extends State<JourneyScreen>
               (constraints.maxWidth - spacing * (columns - 1)) / columns;
           final cellHeight =
               (constraints.maxHeight - spacing * (rows - 1)) / rows;
-          final ratio = cellWidth / cellHeight.clamp(38.0, 70.0);
+          final safeCellHeight = math.max(1.0, cellHeight);
+          final ratio = cellWidth / safeCellHeight;
+          final showPartOfSpeech = cellHeight >= 52;
+          final showNativeMeaning = cellHeight >= 72;
+          final showEnglishMeaning = cellHeight >= 96 && language != '英语';
+          final showChineseMeaning = cellHeight >= 122 && language != '中文解释';
+          final nativeLabel = switch (language) {
+            '英语' => 'English',
+            '中文解释' => '中文',
+            _ => '母语',
+          };
 
           return GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
@@ -851,12 +992,69 @@ class _JourneyScreenState extends State<JourneyScreen>
                           entry.pinyin,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.black54,
-                            fontSize: 8,
+                            fontSize: cellHeight >= 120 ? 10 : 8,
                             height: 1,
                           ),
                         ),
+                        if (showPartOfSpeech) ...[
+                          const SizedBox(height: 7),
+                          Text(
+                            state.displayText(entry.partOfSpeech),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: PhoenixTheme.red,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                        if (showNativeMeaning) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            '$nativeLabel · ${state.displayText(entry.nativeDefinition(language))}',
+                            maxLines: cellHeight >= 112 ? 2 : 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: PhoenixTheme.translation,
+                              fontSize: 8.6,
+                              height: 1.15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                        if (showEnglishMeaning) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            'EN · ${entry.englishDefinition}',
+                            maxLines: cellHeight >= 126 ? 2 : 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: PhoenixTheme.ai,
+                              fontSize: 8.4,
+                              height: 1.15,
+                            ),
+                          ),
+                        ],
+                        if (showChineseMeaning) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            state.displayText('中 · ${entry.simpleChinese}'),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 8.4,
+                              height: 1.15,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -887,54 +1085,69 @@ class _JourneyScreenState extends State<JourneyScreen>
           ),
           const SizedBox(height: 3),
           Expanded(
-            child: AnimatedBuilder(
-              animation: _narration,
-              builder: (context, _) {
-                return Align(
-                  alignment: Alignment.topCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _experience.discoveries
-                        .asMap()
-                        .entries
-                        .map((entry) {
-                          final item = entry.value;
-                          final snapshot = _narration.highlightSnapshot;
-                          final isActive =
-                              snapshot?.contentId == 'discovery' &&
-                              snapshot?.itemId == 'discovery-${entry.key}';
-                          return _CompactTextBlock(
-                            index: entry.key + 1,
-                            active: isActive,
-                            onSupport: () => unawaited(
-                              _showReadingSupport(
-                                title: '今日发现 ${entry.key + 1}',
-                                pinyin: item.pinyin,
-                                nativeLabel: item.nativeLabel(language),
-                                nativeText: item.nativeText(language),
-                                english: item.english,
+            child: LayoutBuilder(
+              key: const ValueKey('adaptive-discovery-text-area'),
+              builder: (context, constraints) {
+                final discoveryTexts = _experience.discoveries
+                    .map((item) => item.text)
+                    .toList(growable: false);
+                final fontSize = _fitJourneyTextSize(
+                  context,
+                  constraints,
+                  discoveryTexts,
+                  minSize: 9.9,
+                  maxSize: 19,
+                  lineHeight: 1.2,
+                );
+                return AnimatedBuilder(
+                  animation: _narration,
+                  builder: (context, _) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: _experience.discoveries
+                          .asMap()
+                          .entries
+                          .map((entry) {
+                            final item = entry.value;
+                            final snapshot = _narration.highlightSnapshot;
+                            final isActive =
+                                snapshot?.contentId == 'discovery' &&
+                                snapshot?.itemId == 'discovery-${entry.key}';
+                            return _CompactTextBlock(
+                              index: entry.key + 1,
+                              active: isActive,
+                              onSupport: () => unawaited(
+                                _showReadingSupport(
+                                  title: '今日发现 ${entry.key + 1}',
+                                  pinyin: item.pinyin,
+                                  nativeLabel: item.nativeLabel(language),
+                                  nativeText: item.nativeText(language),
+                                  english: item.english,
+                                ),
                               ),
-                            ),
-                            child: InteractiveStoryText(
-                              text: item.text,
-                              entries: _experience.words,
-                              narrationController: _narration,
-                              highlightStart: isActive ? snapshot!.start : null,
-                              highlightEnd: isActive ? snapshot!.end : null,
-                              narrationContentId: 'discovery',
-                              narrationItemId: 'discovery-${entry.key}',
-                              style: TextStyle(
-                                fontSize: 9.9,
-                                height: 1.12,
-                                fontWeight: isActive
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
+                              child: InteractiveStoryText(
+                                text: item.text,
+                                entries: _experience.words,
+                                narrationController: _narration,
+                                highlightStart: isActive
+                                    ? snapshot!.start
+                                    : null,
+                                highlightEnd: isActive ? snapshot!.end : null,
+                                narrationContentId: 'discovery',
+                                narrationItemId: 'discovery-${entry.key}',
+                                style: TextStyle(
+                                  fontSize: fontSize,
+                                  height: 1.2,
+                                  fontWeight: isActive
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          );
-                        })
-                        .toList(growable: false),
-                  ),
+                            );
+                          })
+                          .toList(growable: false),
+                    );
+                  },
                 );
               },
             ),
@@ -960,8 +1173,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       onNext: hasFeedback ? null : () => unawaited(_askGuide()),
       secondaryButtonText: hasFeedback ? 'AI 回答' : null,
       secondaryButtonIcon: Icons.forum_outlined,
-      onSecondary:
-          hasFeedback ? () => unawaited(_showGuideFeedback()) : null,
+      onSecondary: hasFeedback ? () => unawaited(_showGuideFeedback()) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1022,8 +1234,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       onNext: hasFeedback ? null : () => unawaited(_reviewWriting()),
       secondaryButtonText: hasFeedback ? 'AI 批改' : null,
       secondaryButtonIcon: Icons.fact_check_outlined,
-      onSecondary:
-          hasFeedback ? () => unawaited(_showWritingFeedback()) : null,
+      onSecondary: hasFeedback ? () => unawaited(_showWritingFeedback()) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1133,9 +1344,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             child: Center(
               child: FittedBox(
                 fit: BoxFit.contain,
-                child: AnimatedCityJourneyStamp(
-                  journey: _experience,
-                ),
+                child: AnimatedCityJourneyStamp(journey: _experience),
               ),
             ),
           ),
@@ -1268,18 +1477,24 @@ class _CompactTextBlock extends StatelessWidget {
 
 class _ReadingSupportSheet extends StatelessWidget {
   const _ReadingSupportSheet({
+    required this.controller,
     required this.title,
     required this.pinyin,
     required this.nativeLabel,
     required this.nativeText,
     required this.english,
+    required this.onSpeakNative,
+    required this.onSpeakEnglish,
   });
 
+  final NarrationController controller;
   final String title;
   final String pinyin;
   final String nativeLabel;
   final String nativeText;
   final String english;
+  final Future<void> Function() onSpeakNative;
+  final Future<void> Function() onSpeakEnglish;
 
   @override
   Widget build(BuildContext context) {
@@ -1287,20 +1502,42 @@ class _ReadingSupportSheet extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            NarrationSpeedStepper(
+              key: const ValueKey('support-speed-control'),
+              controller: controller,
+              compact: true,
+            ),
+          ],
         ),
         const SizedBox(height: 6),
         _SupportLine(label: '拼音', text: pinyin, color: PhoenixTheme.red),
         const SizedBox(height: 5),
         _SupportLine(
+          key: const ValueKey('support-native-audio'),
           label: nativeLabel,
           text: nativeText,
           color: PhoenixTheme.translation,
+          onSpeak: onSpeakNative,
         ),
         const SizedBox(height: 5),
-        _SupportLine(label: 'English', text: english, color: PhoenixTheme.ai),
+        _SupportLine(
+          key: const ValueKey('support-english-audio'),
+          label: 'English',
+          text: english,
+          color: PhoenixTheme.ai,
+          onSpeak: onSpeakEnglish,
+        ),
       ],
     );
   }
@@ -1311,17 +1548,20 @@ class _SupportLine extends StatelessWidget {
     required this.label,
     required this.text,
     required this.color,
+    this.onSpeak,
+    super.key,
   });
 
   final String label;
   final String text;
   final Color color;
+  final Future<void> Function()? onSpeak;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(9, 7, 9, 8),
+      padding: const EdgeInsets.fromLTRB(9, 5, 5, 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: .07),
         borderRadius: BorderRadius.circular(10),
@@ -1329,15 +1569,33 @@ class _SupportLine extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 9.5,
-              fontWeight: FontWeight.w900,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              if (onSpeak != null)
+                IconButton(
+                  tooltip: '朗读 $label',
+                  onPressed: () => unawaited(onSpeak!()),
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.all(4),
+                  constraints: const BoxConstraints.tightFor(
+                    width: 30,
+                    height: 30,
+                  ),
+                  icon: Icon(Icons.volume_up_rounded, size: 18, color: color),
+                ),
+            ],
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 1),
           Text(text, style: const TextStyle(fontSize: 11.5, height: 1.28)),
         ],
       ),

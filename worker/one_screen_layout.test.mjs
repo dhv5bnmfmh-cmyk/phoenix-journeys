@@ -27,10 +27,20 @@ test('primary Phoenix screens obey the one-screen layout rule', () => {
   assert.doesNotMatch(journey, /scrollDirection:\s*Axis\.horizontal/);
 });
 
-test('story and Discovery place every short paragraph in the same screen', () => {
+test('story and Discovery adapt every short paragraph to the same screen', () => {
   const journey = read('app/lib/screens/journey_screen.dart');
-  assert.match(journey, /mainAxisSize:\s*MainAxisSize\.min/);
-  assert.match(journey, /fontSize:\s*10\.8/);
+  const discoveryStart = journey.indexOf('Widget _discoveryPage()');
+  const discoveryEnd = journey.indexOf('Widget _wonderPage()', discoveryStart);
+  assert.ok(discoveryStart >= 0 && discoveryEnd > discoveryStart);
+  const discovery = journey.slice(discoveryStart, discoveryEnd);
+
+  assert.match(journey, /adaptive-story-text-area/);
+  assert.match(discovery, /adaptive-discovery-text-area/);
+  assert.match(journey, /_fitJourneyTextSize/);
+  assert.doesNotMatch(discovery, /MainAxisAlignment\.spaceBetween/);
+  assert.match(discovery, /MainAxisAlignment\.start/);
+  assert.doesNotMatch(journey, /cellHeight\.clamp\(38\.0, 70\.0\)/);
+  assert.match(journey, /safeCellHeight = math\.max\(1\.0, cellHeight\)/);
   assert.doesNotMatch(journey, /_NowReadingStrip/);
   assert.doesNotMatch(journey, /朗读位置/);
   assert.doesNotMatch(journey, /本页重点词语/);

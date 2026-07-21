@@ -20,8 +20,9 @@ test('position derives from playback and is passed to Story and Discovery', () =
   assert.match(controller, /NarrationHighlightSnapshot\? get highlightSnapshot \{/);
   assert.match(interactive, /final int\? highlightStart/);
   assert.equal(
-    (journey.match(/highlightStart: isActive \? snapshot!\.start : null/g) ?? [])
-      .length,
+    (journey.match(
+      /highlightStart:\s*isActive\s*\?\s*snapshot!\.start\s*:\s*null/g,
+    ) ?? []).length,
     2,
   );
 });

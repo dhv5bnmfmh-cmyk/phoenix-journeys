@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../services/narration_controller.dart';
 import '../theme/phoenix_theme.dart';
+import 'narration_speed_stepper.dart';
 import 'phoenix_media_button.dart';
 
 @visibleForTesting
@@ -131,9 +132,23 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
   }
 
   void _observeControllerOffset(NarrationStatus status) {
-    if (!_controllerIsCurrent ||
-        (status != NarrationStatus.playing &&
-            status != NarrationStatus.paused)) {
+    if (!_controllerIsCurrent) return;
+
+    // The controller is the single source of truth. Temporary word and
+    // support speech can pause the same engine outside this card.
+    if (status == NarrationStatus.playing) {
+      _sessionPlaying = true;
+      _sessionPaused = false;
+    } else if (status == NarrationStatus.paused) {
+      _sessionPlaying = false;
+      _sessionPaused = true;
+    } else if (_controllerFinished) {
+      _sessionPlaying = false;
+      _sessionPaused = false;
+    }
+
+    if (status != NarrationStatus.playing &&
+        status != NarrationStatus.paused) {
       return;
     }
 
@@ -469,39 +484,12 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                       onPressed: _handleMainPressed,
                     ),
                     const SizedBox(width: 8),
-                    PopupMenuButton<double>(
+                    NarrationSpeedStepper(
                       key: const ValueKey('narration-speed-control'),
-                      tooltip: '调整朗读语速',
-                      padding: EdgeInsets.zero,
-                      onSelected: (rate) {
-                        unawaited(_setSpeechRate(rate));
-                      },
-                      itemBuilder: (context) => NarrationController.speedOptions
-                          .map(
-                            (option) => PopupMenuItem<double>(
-                              value: option.rate,
-                              child: Text('${option.label} 语速'),
-                            ),
-                          )
-                          .toList(growable: false),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: .13),
-                          borderRadius: BorderRadius.circular(99),
-                        ),
-                        child: Text(
-                          widget.controller.speedLabel,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
+                      controller: widget.controller,
+                      onRateChange: _setSpeechRate,
+                      dark: true,
+                      compact: compact,
                     ),
                   ],
                 ),

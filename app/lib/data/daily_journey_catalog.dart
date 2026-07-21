@@ -1,48 +1,10 @@
 import '../models/story_content.dart';
+
+export 'daily_journey_experience.dart';
 import 'beijing_story_catalog.dart';
+import 'daily_journey_experience.dart';
+import 'extended_journey_catalog.dart';
 import 'journey_data.dart';
-
-class DailyJourneyExperience {
-  const DailyJourneyExperience({
-    required this.id,
-    required this.city,
-    required this.cityCode,
-    required this.place,
-    required this.appBarTitle,
-    required this.storyTitle,
-    required this.headline,
-    required this.description,
-    required this.discoveryTeaser,
-    required this.distanceLabel,
-    required this.stampSymbol,
-    required this.content,
-    required this.storyAnnotations,
-    required this.words,
-    required this.discoveries,
-    required this.wonderQuestion,
-    required this.expressQuestion,
-  });
-
-  final String id;
-  final String city;
-  final String cityCode;
-  final String place;
-  final String appBarTitle;
-  final String storyTitle;
-  final String headline;
-  final String description;
-  final String discoveryTeaser;
-  final String distanceLabel;
-  final String stampSymbol;
-  final JourneyContentRecord content;
-  final List<ReadingAnnotation> storyAnnotations;
-  final List<WordEntry> words;
-  final List<DiscoveryEntry> discoveries;
-  final String wonderQuestion;
-  final String expressQuestion;
-
-  String get stampTitle => '$city · $place';
-}
 
 const shanghaiStorySources = <StorySourceRecord>[
   StorySourceRecord(
@@ -141,18 +103,18 @@ const shanghaiStoryAnnotations = <ReadingAnnotation>[
 ];
 
 const shanghaiWords = <WordEntry>[
-  WordEntry(word: '外滩', pinyin: 'Wàitān', simpleChinese: '上海黄浦江边著名的历史滨水区域。', translation: 'Bến Thượng Hải, khu ven sông lịch sử nổi tiếng.', englishDefinition: 'the Bund, Shanghai’s historic waterfront', symbol: '🌆'),
-  WordEntry(word: '滨水', pinyin: 'bīnshuǐ', simpleChinese: '靠近河流、湖泊或海边。', translation: 'Nằm ven sông, hồ hoặc biển.', englishDefinition: 'waterfront; beside a body of water', symbol: '🌊'),
-  WordEntry(word: '黄浦江', pinyin: 'Huángpǔ Jiāng', simpleChinese: '流经上海市中心的重要河流。', translation: 'Sông Hoàng Phố chảy qua trung tâm Thượng Hải.', englishDefinition: 'the Huangpu River', symbol: '🚢'),
-  WordEntry(word: '轮廓', pinyin: 'lúnkuò', simpleChinese: '物体外部的线条和大致形状。', translation: 'Đường nét hoặc hình dáng bên ngoài.', englishDefinition: 'outline or silhouette', symbol: '✒️'),
-  WordEntry(word: '见证', pinyin: 'jiànzhèng', simpleChinese: '亲眼看见并能够证明某件事。', translation: 'Chứng kiến và có thể xác nhận một sự việc.', englishDefinition: 'to witness', symbol: '👁️'),
-  WordEntry(word: '金融', pinyin: 'jīnróng', simpleChinese: '与资金、银行和投资有关的经济活动。', translation: 'Hoạt động tài chính, ngân hàng và đầu tư.', englishDefinition: 'finance and financial activity', symbol: '🏦'),
-  WordEntry(word: '贸易', pinyin: 'màoyì', simpleChinese: '商品和服务的买卖活动。', translation: 'Hoạt động mua bán hàng hóa và dịch vụ.', englishDefinition: 'trade or commerce', symbol: '📦'),
-  WordEntry(word: '天际线', pinyin: 'tiānjìxiàn', simpleChinese: '建筑物顶部与天空形成的整体线条。', translation: 'Đường chân trời do các tòa nhà tạo thành.', englishDefinition: 'skyline', symbol: '🏙️'),
-  WordEntry(word: '隔江相望', pinyin: 'gé jiāng xiāngwàng', simpleChinese: '在河的两边互相面对。', translation: 'Nhìn nhau từ hai bờ sông.', englishDefinition: 'to face each other across a river', symbol: '↔️'),
-  WordEntry(word: '灯火', pinyin: 'dēnghuǒ', simpleChinese: '夜晚亮起的灯光。', translation: 'Ánh đèn vào ban đêm.', englishDefinition: 'lights at night', symbol: '✨'),
-  WordEntry(word: '时代', pinyin: 'shídài', simpleChinese: '历史发展中的一个时期。', translation: 'Một thời đại hoặc giai đoạn lịch sử.', englishDefinition: 'era or age', symbol: '⏳'),
-  WordEntry(word: '走向', pinyin: 'zǒuxiàng', simpleChinese: '朝着某个方向发展。', translation: 'Phát triển theo một hướng.', englishDefinition: 'to move toward', symbol: '➡️'),
+  WordEntry(word: '外滩', pinyin: 'Wàitān', partOfSpeech: '名词（专名）', simpleChinese: '上海黄浦江边著名的历史滨水区域。', translation: 'Bến Thượng Hải, khu ven sông lịch sử nổi tiếng.', englishDefinition: 'the Bund, Shanghai’s historic waterfront', symbol: '🌆'),
+  WordEntry(word: '滨水', pinyin: 'bīnshuǐ', partOfSpeech: '形容词', simpleChinese: '靠近河流、湖泊或海边。', translation: 'Nằm ven sông, hồ hoặc biển.', englishDefinition: 'waterfront; beside a body of water', symbol: '🌊'),
+  WordEntry(word: '黄浦江', pinyin: 'Huángpǔ Jiāng', partOfSpeech: '名词（专名）', simpleChinese: '流经上海市中心的重要河流。', translation: 'Sông Hoàng Phố chảy qua trung tâm Thượng Hải.', englishDefinition: 'the Huangpu River', symbol: '🚢'),
+  WordEntry(word: '轮廓', pinyin: 'lúnkuò', partOfSpeech: '名词', simpleChinese: '物体外部的线条和大致形状。', translation: 'Đường nét hoặc hình dáng bên ngoài.', englishDefinition: 'outline or silhouette', symbol: '✒️'),
+  WordEntry(word: '见证', pinyin: 'jiànzhèng', partOfSpeech: '动词', simpleChinese: '亲眼看见并能够证明某件事。', translation: 'Chứng kiến và có thể xác nhận một sự việc.', englishDefinition: 'to witness', symbol: '👁️'),
+  WordEntry(word: '金融', pinyin: 'jīnróng', partOfSpeech: '名词', simpleChinese: '与资金、银行和投资有关的经济活动。', translation: 'Hoạt động tài chính, ngân hàng và đầu tư.', englishDefinition: 'finance and financial activity', symbol: '🏦'),
+  WordEntry(word: '贸易', pinyin: 'màoyì', partOfSpeech: '名词', simpleChinese: '商品和服务的买卖活动。', translation: 'Hoạt động mua bán hàng hóa và dịch vụ.', englishDefinition: 'trade or commerce', symbol: '📦'),
+  WordEntry(word: '天际线', pinyin: 'tiānjìxiàn', partOfSpeech: '名词', simpleChinese: '建筑物顶部与天空形成的整体线条。', translation: 'Đường chân trời do các tòa nhà tạo thành.', englishDefinition: 'skyline', symbol: '🏙️'),
+  WordEntry(word: '隔江相望', pinyin: 'gé jiāng xiāngwàng', partOfSpeech: '动词短语', simpleChinese: '在河的两边互相面对。', translation: 'Nhìn nhau từ hai bờ sông.', englishDefinition: 'to face each other across a river', symbol: '↔️'),
+  WordEntry(word: '灯火', pinyin: 'dēnghuǒ', partOfSpeech: '名词', simpleChinese: '夜晚亮起的灯光。', translation: 'Ánh đèn vào ban đêm.', englishDefinition: 'lights at night', symbol: '✨'),
+  WordEntry(word: '时代', pinyin: 'shídài', partOfSpeech: '名词', simpleChinese: '历史发展中的一个时期。', translation: 'Một thời đại hoặc giai đoạn lịch sử.', englishDefinition: 'era or age', symbol: '⏳'),
+  WordEntry(word: '走向', pinyin: 'zǒuxiàng', partOfSpeech: '动词', simpleChinese: '朝着某个方向发展。', translation: 'Phát triển theo một hướng.', englishDefinition: 'to move toward', symbol: '➡️'),
 ];
 
 const shanghaiDiscoveries = <DiscoveryEntry>[
@@ -177,18 +139,18 @@ const xianStoryAnnotations = <ReadingAnnotation>[
 ];
 
 const xianWords = <WordEntry>[
-  WordEntry(word: '城墙', pinyin: 'chéngqiáng', simpleChinese: '围绕城市、用于保护城市的高墙。', translation: 'Tường thành bao quanh và bảo vệ thành phố.', englishDefinition: 'city wall', symbol: '🧱'),
-  WordEntry(word: '永宁门', pinyin: 'Yǒngníngmén', simpleChinese: '西安城墙南面的重要城门。', translation: 'Cổng Vĩnh Ninh, cổng quan trọng phía nam.', englishDefinition: 'Yongning Gate, the south gate', symbol: '🚪'),
-  WordEntry(word: '砖石', pinyin: 'zhuānshí', simpleChinese: '砖和石头等建筑材料。', translation: 'Gạch và đá dùng trong xây dựng.', englishDefinition: 'brick and stone', symbol: '🪨'),
-  WordEntry(word: '角楼', pinyin: 'jiǎolóu', simpleChinese: '建在城墙转角处的楼。', translation: 'Tháp xây ở góc tường thành.', englishDefinition: 'corner tower', symbol: '🏯'),
-  WordEntry(word: '护城河', pinyin: 'hùchénghé', simpleChinese: '城墙外用于防御的河沟。', translation: 'Hào nước phòng thủ bên ngoài tường thành.', englishDefinition: 'moat', symbol: '🌊'),
-  WordEntry(word: '防御', pinyin: 'fángyù', simpleChinese: '保护自己，阻止外来的攻击。', translation: 'Phòng thủ, ngăn chặn tấn công.', englishDefinition: 'defence', symbol: '🛡️'),
-  WordEntry(word: '现存', pinyin: 'xiàncún', simpleChinese: '现在仍然存在。', translation: 'Hiện vẫn còn tồn tại.', englishDefinition: 'still existing', symbol: '📍'),
-  WordEntry(word: '规模', pinyin: 'guīmó', simpleChinese: '事物的大小和范围。', translation: 'Quy mô và phạm vi.', englishDefinition: 'scale or extent', symbol: '📐'),
-  WordEntry(word: '修缮', pinyin: 'xiūshàn', simpleChinese: '修理并保护建筑。', translation: 'Tu bổ và bảo vệ công trình.', englishDefinition: 'to repair and conserve', symbol: '🔧'),
-  WordEntry(word: '巡查', pinyin: 'xúnchá', simpleChinese: '按照路线检查情况。', translation: 'Tuần tra và kiểm tra theo tuyến.', englishDefinition: 'to patrol and inspect', symbol: '🔍'),
-  WordEntry(word: '古都', pinyin: 'gǔdū', simpleChinese: '古代曾经作为首都的城市。', translation: 'Cố đô, thành phố từng là kinh đô.', englishDefinition: 'ancient capital', symbol: '🏛️'),
-  WordEntry(word: '边界', pinyin: 'biānjiè', simpleChinese: '两个区域之间的分界线。', translation: 'Ranh giới giữa hai khu vực.', englishDefinition: 'boundary', symbol: '〰️'),
+  WordEntry(word: '城墙', pinyin: 'chéngqiáng', partOfSpeech: '名词', simpleChinese: '围绕城市、用于保护城市的高墙。', translation: 'Tường thành bao quanh và bảo vệ thành phố.', englishDefinition: 'city wall', symbol: '🧱'),
+  WordEntry(word: '永宁门', pinyin: 'Yǒngníngmén', partOfSpeech: '名词（专名）', simpleChinese: '西安城墙南面的重要城门。', translation: 'Cổng Vĩnh Ninh, cổng quan trọng phía nam.', englishDefinition: 'Yongning Gate, the south gate', symbol: '🚪'),
+  WordEntry(word: '砖石', pinyin: 'zhuānshí', partOfSpeech: '名词', simpleChinese: '砖和石头等建筑材料。', translation: 'Gạch và đá dùng trong xây dựng.', englishDefinition: 'brick and stone', symbol: '🪨'),
+  WordEntry(word: '角楼', pinyin: 'jiǎolóu', partOfSpeech: '名词', simpleChinese: '建在城墙转角处的楼。', translation: 'Tháp xây ở góc tường thành.', englishDefinition: 'corner tower', symbol: '🏯'),
+  WordEntry(word: '护城河', pinyin: 'hùchénghé', partOfSpeech: '名词', simpleChinese: '城墙外用于防御的河沟。', translation: 'Hào nước phòng thủ bên ngoài tường thành.', englishDefinition: 'moat', symbol: '🌊'),
+  WordEntry(word: '防御', pinyin: 'fángyù', partOfSpeech: '动词', simpleChinese: '保护自己，阻止外来的攻击。', translation: 'Phòng thủ, ngăn chặn tấn công.', englishDefinition: 'defence', symbol: '🛡️'),
+  WordEntry(word: '现存', pinyin: 'xiàncún', partOfSpeech: '形容词', simpleChinese: '现在仍然存在。', translation: 'Hiện vẫn còn tồn tại.', englishDefinition: 'still existing', symbol: '📍'),
+  WordEntry(word: '规模', pinyin: 'guīmó', partOfSpeech: '名词', simpleChinese: '事物的大小和范围。', translation: 'Quy mô và phạm vi.', englishDefinition: 'scale or extent', symbol: '📐'),
+  WordEntry(word: '修缮', pinyin: 'xiūshàn', partOfSpeech: '动词', simpleChinese: '修理并保护建筑。', translation: 'Tu bổ và bảo vệ công trình.', englishDefinition: 'to repair and conserve', symbol: '🔧'),
+  WordEntry(word: '巡查', pinyin: 'xúnchá', partOfSpeech: '动词', simpleChinese: '按照路线检查情况。', translation: 'Tuần tra và kiểm tra theo tuyến.', englishDefinition: 'to patrol and inspect', symbol: '🔍'),
+  WordEntry(word: '古都', pinyin: 'gǔdū', partOfSpeech: '名词', simpleChinese: '古代曾经作为首都的城市。', translation: 'Cố đô, thành phố từng là kinh đô.', englishDefinition: 'ancient capital', symbol: '🏛️'),
+  WordEntry(word: '边界', pinyin: 'biānjiè', partOfSpeech: '名词', simpleChinese: '两个区域之间的分界线。', translation: 'Ranh giới giữa hai khu vực.', englishDefinition: 'boundary', symbol: '〰️'),
 ];
 
 const xianDiscoveries = <DiscoveryEntry>[
@@ -242,12 +204,14 @@ final dailyStorySources = <StorySourceRecord>[
   ...beijingStorySources,
   ...shanghaiStorySources,
   ...xianStorySources,
+  ...extendedJourneySources,
 ];
 
 final dailyJourneyRecords = <JourneyContentRecord>[
   beijingForbiddenCityJourney,
   shanghaiBundJourney,
   xianCityWallJourney,
+  ...extendedJourneyRecords,
 ];
 
 final dailyJourneyExperiences = <DailyJourneyExperience>[
@@ -308,7 +272,15 @@ final dailyJourneyExperiences = <DailyJourneyExperience>[
     wonderQuestion: '站在西安城墙上，你更想观察城内的老街还是城外的现代城市？为什么？',
     expressQuestion: '请用两到三句话介绍你想从西安城墙上看到的景象。',
   ),
+  ...extendedJourneyExperiences,
 ];
+
+final List<WordEntry> allDailyJourneyWords = List<WordEntry>.unmodifiable(
+  <String, WordEntry>{
+    for (final journey in dailyJourneyExperiences)
+      for (final entry in journey.words) entry.word: entry,
+  }.values,
+);
 
 DailyJourneyExperience requireDailyJourneyExperience(String id) {
   return dailyJourneyExperiences.firstWhere(

@@ -11,8 +11,9 @@ const interactive = readFileSync(
 test('Story and Discovery show position only with the inline triangle', () => {
   assert.doesNotMatch(journey, /_NowReadingStrip/);
   assert.equal(
-    (journey.match(/highlightStart: isActive \? snapshot!\.start : null/g) ?? [])
-      .length,
+    (journey.match(
+      /highlightStart:\s*isActive\s*\?\s*snapshot!\.start\s*:\s*null/g,
+    ) ?? []).length,
     2,
   );
   assert.match(interactive, /reading-triangle-/);

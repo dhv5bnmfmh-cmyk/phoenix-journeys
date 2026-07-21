@@ -142,14 +142,30 @@ class NarrationController extends ChangeNotifier {
       onResume: _handleWebResume,
       onError: _handleWebError,
     );
+    _speechRate = _sharedSpeechRate;
+    _instances.add(this);
     _bindHandlers();
   }
 
+  static const double nativeDefaultRate = 1.0;
+  static double _sharedSpeechRate = nativeDefaultRate;
+  static final Set<NarrationController> _instances =
+      <NarrationController>{};
+
+  static const double speechRateStep = 0.1;
+
   static const speedOptions = <NarrationSpeedOption>[
-    NarrationSpeedOption(label: '0.8×', rate: .29),
-    NarrationSpeedOption(label: '1.0×', rate: .36),
-    NarrationSpeedOption(label: '1.2×', rate: .44),
-    NarrationSpeedOption(label: '1.5×', rate: .54),
+    NarrationSpeedOption(label: '0.5×', rate: .5),
+    NarrationSpeedOption(label: '0.6×', rate: .6),
+    NarrationSpeedOption(label: '0.7×', rate: .7),
+    NarrationSpeedOption(label: '0.8×', rate: .8),
+    NarrationSpeedOption(label: '0.9×', rate: .9),
+    NarrationSpeedOption(label: '1.0×', rate: 1.0),
+    NarrationSpeedOption(label: '1.1×', rate: 1.1),
+    NarrationSpeedOption(label: '1.2×', rate: 1.2),
+    NarrationSpeedOption(label: '1.3×', rate: 1.3),
+    NarrationSpeedOption(label: '1.4×', rate: 1.4),
+    NarrationSpeedOption(label: '1.5×', rate: 1.5),
   ];
 
   final FlutterTts _tts;
@@ -164,7 +180,7 @@ class NarrationController extends ChangeNotifier {
   int _speechBaseOffset = 0;
   int _currentOffset = 0;
   int? _currentItemIndex;
-  double _speechRate = .36;
+  double _speechRate = nativeDefaultRate;
   bool _disposed = false;
   Timer? _progressTimer;
   DateTime? _estimateAnchorTime;
@@ -179,6 +195,7 @@ class NarrationController extends ChangeNotifier {
   String? _spokenWord;
   Completer<bool>? _wordSpeechCompleter;
   String? _configuredVoiceLanguage;
+  String _narrationLanguageCode = 'zh-CN';
   NarrationHighlightSnapshot? _highlightSnapshot;
   int _speechSessionToken = 0;
   bool _webSpeechPausedInPlace = false;
@@ -191,6 +208,37 @@ class NarrationController extends ChangeNotifier {
   int get itemCount => _plan.items.length;
   bool get hasContent => !_plan.isEmpty;
   double get speechRate => _speechRate;
+  int get _speechRateIndex {
+    final index = speedOptions.indexWhere(
+      (option) => (option.rate - _speechRate).abs() < .001,
+    );
+    return index < 0 ? 0 : index;
+  }
+
+  double? get slowerSpeechRate {
+    final index = _speechRateIndex;
+    return index <= 0 ? null : speedOptions[index - 1].rate;
+  }
+
+  double? get fasterSpeechRate {
+    final index = _speechRateIndex;
+    return index >= speedOptions.length - 1
+        ? null
+        : speedOptions[index + 1].rate;
+  }
+
+  bool get canDecreaseSpeechRate => slowerSpeechRate != null;
+  bool get canIncreaseSpeechRate => fasterSpeechRate != null;
+
+  Future<void> decreaseSpeechRate() async {
+    final rate = slowerSpeechRate;
+    if (rate != null) await setSpeechRate(rate);
+  }
+
+  Future<void> increaseSpeechRate() async {
+    final rate = fasterSpeechRate;
+    if (rate != null) await setSpeechRate(rate);
+  }
   int get currentOffset => _currentOffset;
   int get lastNativeOffset => _lastNativeOffset;
   bool get hasFreshNativeProgress {
@@ -243,7 +291,9 @@ class NarrationController extends ChangeNotifier {
     return speedOptions
         .firstWhere(
           (option) => (option.rate - _speechRate).abs() < .001,
-          orElse: () => speedOptions[1],
+          orElse: () => speedOptions.firstWhere(
+            (option) => option.rate == nativeDefaultRate,
+          ),
         )
         .label;
   }
@@ -267,7 +317,6 @@ class NarrationController extends ChangeNotifier {
     final until = _ignoreEngineCallbacksUntil;
     return until != null && DateTime.now().isBefore(until);
   }
-
 
   void _handleWebStart() {
     if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
@@ -422,6 +471,7 @@ class NarrationController extends ChangeNotifier {
   Future<void> play({
     required String contentId,
     required List<NarrationItem> items,
+    String languageCode = 'zh-CN',
   }) async {
     final plan = NarrationTextPlan.fromItems(items);
     if (plan.isEmpty) return;
@@ -429,6 +479,7 @@ class NarrationController extends ChangeNotifier {
     _highlightSnapshot = null;
     NarrationHighlightBus.instance.clear(contentId: _contentId);
     _contentId = contentId;
+    _narrationLanguageCode = languageCode;
     _plan = plan;
     _currentOffset = 0;
     _lastNativeOffset = 0;
@@ -546,7 +597,7 @@ class NarrationController extends ChangeNotifier {
 
     try {
       await _configureNaturalVoice(languageCode);
-      await _tts.setSpeechRate(.38);
+      await _tts.setSpeechRate(_ttsSpeechRate(_speechRate));
       await _tts.setPitch(.98);
       await _tts.setVolume(1.0);
       final result = await _tts.speak(value);
@@ -559,11 +610,30 @@ class NarrationController extends ChangeNotifier {
     }
 
     try {
-      return await completer.future.timeout(const Duration(seconds: 8));
+      final timeoutSeconds = math.max(
+        8,
+        (value.length / math.max(4.0, 7.0 * _speechRate)).ceil() + 5,
+      );
+      return await completer.future.timeout(Duration(seconds: timeoutSeconds));
     } on TimeoutException {
       await _stopSpeechEngine();
       return false;
     }
+  }
+
+  Future<bool> speakTemporaryText(
+    String text, {
+    required String languageCode,
+  }) async {
+    final shouldResume =
+        _status == NarrationStatus.playing && !_plan.isEmpty;
+    final resumeOffset = _currentOffset;
+    final spoken = await speakWord(text, languageCode: languageCode);
+    if (shouldResume && spoken && !_disposed) {
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      if (!_disposed) await resumeFromOffset(resumeOffset);
+    }
+    return spoken;
   }
 
   Future<void> restart() async {
@@ -577,13 +647,34 @@ class NarrationController extends ChangeNotifier {
           ? next
           : current,
     );
-    if ((_speechRate - option.rate).abs() < .001) return;
 
-    _speechRate = option.rate;
+    _sharedSpeechRate = option.rate;
+    final controllers = List<NarrationController>.of(_instances);
+    for (final controller in controllers) {
+      await controller._applySharedSpeechRate(option.rate);
+    }
+  }
+
+  Future<void> _applySharedSpeechRate(double rate) async {
+    if (_disposed || (_speechRate - rate).abs() < .001) return;
+
+    final wasPlaying =
+        _status == NarrationStatus.playing &&
+        _speechMode == _NarrationSpeechMode.narration &&
+        !_plan.isEmpty;
+    final resumeOffset = _currentOffset;
+    if (wasPlaying) await pauseAtOffset(resumeOffset);
+    if (_disposed) return;
+
+    _speechRate = rate;
     if (_webSpeech.isAvailable && _status == NarrationStatus.paused) {
       _restartWebSpeechOnResume = true;
     }
     _safeNotify();
+
+    if (wasPlaying && !_disposed) {
+      await resumeFromOffset(resumeOffset);
+    }
   }
 
   Future<void> stop({bool resetPosition = true}) async {
@@ -606,6 +697,13 @@ class NarrationController extends ChangeNotifier {
     _safeNotify();
   }
 
+  double _ttsSpeechRate(double multiplier) {
+    if (kIsWeb) return multiplier.clamp(0.5, 1.5).toDouble();
+    return (0.50 + (multiplier - 1.0) * 0.20)
+        .clamp(0.40, 0.70)
+        .toDouble();
+  }
+
   Future<void> _configureNaturalVoice(String languageCode) async {
     await _tts.setLanguage(languageCode);
     if (_configuredVoiceLanguage == languageCode) return;
@@ -615,27 +713,32 @@ class NarrationController extends ChangeNotifier {
       if (availableVoices is List) {
         Map<String, String>? bestVoice;
         var bestScore = -1;
+        final requestedPrefix =
+            languageCode.toLowerCase().split(RegExp('[-_]')).first;
         for (final dynamic rawVoice in availableVoices) {
           if (rawVoice is! Map) continue;
           final name = '${rawVoice['name'] ?? ''}';
           final locale = '${rawVoice['locale'] ?? rawVoice['language'] ?? ''}';
           final lowerName = name.toLowerCase();
           final lowerLocale = locale.toLowerCase();
-          if (!lowerLocale.startsWith('zh')) continue;
+          if (!lowerLocale.startsWith(requestedPrefix)) continue;
 
           var score = 10;
           if (lowerLocale == languageCode.toLowerCase()) score += 80;
-          if (lowerName.contains('natural')) score += 60;
-          if (lowerName.contains('premium')) score += 50;
-          if (lowerName.contains('enhanced')) score += 45;
-          for (final preferredName in const [
-            'xiaoxiao',
-            'tingting',
-            'meijia',
-            'yunxi',
-            'sinji',
-          ]) {
-            if (lowerName.contains(preferredName)) score += 35;
+          if (lowerName.contains('natural')) score += 70;
+          if (lowerName.contains('premium')) score += 60;
+          if (lowerName.contains('enhanced')) score += 55;
+          if (lowerName.contains('compact')) score -= 45;
+          if (lowerName.contains('novelty')) score -= 80;
+          if (lowerName.contains('espeak')) score -= 60;
+          final preferredNames = switch (requestedPrefix) {
+            'zh' => const ['xiaoxiao', 'tingting', 'meijia', 'yunxi', 'sinji'],
+            'en' => const ['samantha', 'ava', 'serena', 'daniel', 'karen'],
+            'vi' => const ['linh', 'mai', 'nam', 'hoai'],
+            _ => const <String>[],
+          };
+          for (final preferredName in preferredNames) {
+            if (lowerName.contains(preferredName)) score += 42;
           }
 
           if (score > bestScore && name.isNotEmpty && locale.isNotEmpty) {
@@ -646,7 +749,7 @@ class NarrationController extends ChangeNotifier {
         if (bestVoice != null) await _tts.setVoice(bestVoice);
       }
     } catch (error) {
-      debugPrint('Natural Chinese voice selection unavailable: $error');
+      debugPrint('Natural voice selection unavailable: $error');
     }
 
     _configuredVoiceLanguage = languageCode;
@@ -683,7 +786,7 @@ class NarrationController extends ChangeNotifier {
         unawaited(_startProgressWatchdog(sessionToken, safeOffset));
         final started = await _webSpeech.speak(
           remainingText,
-          languageCode: 'zh-CN',
+          languageCode: _narrationLanguageCode,
           rate: _speechRate,
           pitch: .98,
           volume: 1,
@@ -698,8 +801,8 @@ class NarrationController extends ChangeNotifier {
         return;
       }
 
-      await _configureNaturalVoice('zh-CN');
-      await _tts.setSpeechRate(_speechRate);
+      await _configureNaturalVoice(_narrationLanguageCode);
+      await _tts.setSpeechRate(_ttsSpeechRate(_speechRate));
       await _tts.setPitch(.98);
       await _tts.setVolume(1.0);
       // Schedule Phoenix progress before invoking Safari. On iOS Web the
@@ -837,7 +940,8 @@ class NarrationController extends ChangeNotifier {
           now.difference(anchor).inMilliseconds.toDouble() / 1000;
       // Conservative fallback pace: native word callbacks remain exact;
       // this clock is only used when a browser supplies no usable word events.
-      final charsPerSecond = 3.35 * (_speechRate / .36);
+      final charsPerSecond =
+          _nativeCharsPerSecond(_narrationLanguageCode) * _speechRate;
       final estimated =
           _estimateAnchorOffset + (elapsedSeconds * charsPerSecond).floor();
       if (estimated >= _plan.text.length) {
@@ -847,6 +951,16 @@ class NarrationController extends ChangeNotifier {
       if (estimated <= _currentOffset) return;
       _applyProgress(estimated);
     });
+  }
+
+  double _nativeCharsPerSecond(String languageCode) {
+    final prefix = languageCode.toLowerCase().split(RegExp('[-_]')).first;
+    return switch (prefix) {
+      'zh' => 4.05,
+      'vi' => 12.0,
+      'en' => 13.0,
+      _ => 10.0,
+    };
   }
 
   void _cancelProgressClock() {
@@ -922,6 +1036,7 @@ class NarrationController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _instances.remove(this);
     _speechSessionToken += 1;
     _disposed = true;
     _cancelProgressClock();
