@@ -24,6 +24,10 @@
 - [ ] 所有朗读入口共用 `NarrationController`，没有独立播放状态或计时器
 - [ ] 故事页与发现页生词均显示词性、探索者母语和英文释义
 - [ ] 生词查看与朗读正常
+- [ ] 开发分支与 PR 体验版保持全部旅程开放
+- [ ] 免费探索者每天稳定随机早晚各一段，同日两段不重复
+- [ ] 付费探索者可以打开全部已发布旅程
+- [ ] 免费、付费与随机旅程权限统一经过 `JourneyAccessPolicy`
 - [ ] PhoenixBrainAgent 是唯一 AI 总调度入口
 - [ ] Guide / Writing / Conversation / Learning 均由 PhoenixBrainAgent 调度并经过 PhoenixQualityAgent 隐藏复核
 - [ ] GPT-5.6 通过 OpenAI Responses API 优先运行，Cloudflare Workers AI 自动回退
@@ -41,3 +45,4 @@
 朗读功能必须遵守 `docs/development-workflow.md` 中的「永久朗读开发准则」。
 故事与发现生词必须遵守同文件中的「永久生词展示准则」。
 所有 AI 功能必须遵守同文件中的「永久 AI Agent 开发准则」。
+旅程开放、免费随机与付费权限必须遵守同文件中的「永久旅程访问与订阅准则」。
