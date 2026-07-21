@@ -109,6 +109,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
   int _exampleRequest = 0;
 
   WordEntry get _entry => widget.entries[_index];
+  bool get _isFirst => _index == 0;
   bool get _isLast => _index == widget.entries.length - 1;
 
   @override
@@ -186,6 +187,18 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
       _generatedExample = result;
       _exampleLoading = false;
     });
+  }
+
+  Future<void> _previousWord() async {
+    if (_isSpeaking || _isFirst) return;
+
+    setState(() {
+      _index -= 1;
+      _speechUnavailable = false;
+      _generatedExample = null;
+    });
+    unawaited(_loadExample());
+    await _speak();
   }
 
   Future<void> _nextWord() async {
@@ -355,14 +368,16 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
+                      key: const ValueKey('save-word-button'),
                       onPressed: () => state.toggleSavedWord(entry.word),
                       style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(32),
+                        minimumSize: const Size.fromHeight(40),
                         visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
                       ),
                       icon: Icon(
                         isSaved ? Icons.bookmark : Icons.bookmark_add_outlined,
-                        size: 17,
+                        size: 16,
                       ),
                       label: FittedBox(
                         fit: BoxFit.scaleDown,
@@ -370,14 +385,35 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                           state.displayText(isSaved ? '已收藏' : '收藏生词'),
                           maxLines: 1,
                           softWrap: false,
-                          style: const TextStyle(fontSize: 11),
+                          style: const TextStyle(fontSize: 10.5),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 7),
+                  const SizedBox(width: 5),
                   Expanded(
-                    flex: 2,
+                    child: OutlinedButton.icon(
+                      key: const ValueKey('previous-word-button'),
+                      onPressed: _isSpeaking || _isFirst ? null : _previousWord,
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(40),
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                      ),
+                      icon: const Icon(Icons.arrow_back, size: 16),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          state.displayText('上一个生词'),
+                          maxLines: 1,
+                          softWrap: false,
+                          style: const TextStyle(fontSize: 10.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Expanded(
                     child: FilledButton.icon(
                       key: const ValueKey('next-word-button'),
                       onPressed: _isSpeaking ? null : _nextWord,
@@ -385,18 +421,24 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                         minimumSize: const Size.fromHeight(40),
                         backgroundColor: PhoenixTheme.red,
                         visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
                       ),
                       icon: Icon(
                         _isLast
                             ? Icons.keyboard_arrow_down
                             : Icons.arrow_forward,
-                        size: 18,
+                        size: 16,
                       ),
-                      label: Text(
-                        state.displayText(_isLast ? '完成并收起' : '下一个单词'),
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w900,
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          state.displayText(_isLast ? '完成并收起' : '下一个单词'),
+                          maxLines: 1,
+                          softWrap: false,
+                          style: const TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ),
                     ),
@@ -596,78 +638,78 @@ class _CoreExampleCard extends StatelessWidget {
               ),
             )
           : example == null || example!.chinese.trim().isEmpty
-              ? Row(
+          ? Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'AI 暂时无法查询实际例句，请稍后重试。',
+                    style: TextStyle(color: Colors.black54, fontSize: 10.5),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => unawaited(onRetry()),
+                  child: const Text('重试'),
+                ),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
                   children: [
-                    const Expanded(
-                      child: Text(
-                        'AI 暂时无法查询实际例句，请稍后重试。',
-                        style: TextStyle(color: Colors.black54, fontSize: 10.5),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => unawaited(onRetry()),
-                      child: const Text('重试'),
-                    ),
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          isOfflineFallback ? '旅程真实语境' : 'AI 实际用法',
-                          style: const TextStyle(
-                            color: PhoenixTheme.red,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const Spacer(),
-                        if (!isOfflineFallback)
-                          Text(
-                            qualityReviewed ? 'AI 已复核' : 'AI 生成',
-                            style: const TextStyle(
-                              color: PhoenixTheme.ai,
-                              fontSize: 8.5,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 3),
                     Text(
-                      state.displayText(example!.chinese),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: compact ? 12 : 13,
-                        height: 1.18,
-                        fontWeight: FontWeight.w800,
+                      isOfflineFallback ? '旅程真实语境' : 'AI 实际用法',
+                      style: const TextStyle(
+                        color: PhoenixTheme.red,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: 3),
-                    _CompactExampleLine(label: '拼音', text: example!.pinyin),
-                    const SizedBox(height: 2),
-                    _CompactExampleLine(label: nativeLabel, text: nativeText),
-                    const SizedBox(height: 2),
-                    _CompactExampleLine(label: 'English', text: example!.english),
-                    if (usageNote.trim().isNotEmpty) ...[
-                      const SizedBox(height: 3),
+                    const Spacer(),
+                    if (!isOfflineFallback)
                       Text(
-                        state.displayText('用法：$usageNote'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        qualityReviewed ? 'AI 已复核' : 'AI 生成',
                         style: const TextStyle(
-                          color: Colors.black54,
-                          fontSize: 8.8,
-                          fontWeight: FontWeight.w700,
+                          color: PhoenixTheme.ai,
+                          fontSize: 8.5,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ],
                   ],
                 ),
+                const SizedBox(height: 3),
+                Text(
+                  state.displayText(example!.chinese),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: compact ? 12 : 13,
+                    height: 1.18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                _CompactExampleLine(label: '拼音', text: example!.pinyin),
+                const SizedBox(height: 2),
+                _CompactExampleLine(label: nativeLabel, text: nativeText),
+                const SizedBox(height: 2),
+                _CompactExampleLine(label: 'English', text: example!.english),
+                if (usageNote.trim().isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    state.displayText('用法：$usageNote'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 8.8,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ],
+            ),
     );
   }
 }

@@ -45,3 +45,20 @@ test('narration keeps natural voice selection and speed profile', () => {
   assert.match(narration, /NarrationSpeedOption\(label: '1\.0×', rate: 1\.0\)/);
   assert.match(narration, /setPitch\(\.98\)/);
 });
+
+// Keep these three mobile actions in visual and keyboard order.
+test('word detail actions keep Save Previous and Next on one row', () => {
+  assert.match(sheet, /bool get _isFirst => _index == 0;/);
+  assert.match(sheet, /Future<void> _previousWord\(\) async/);
+  assert.match(sheet, /_index -= 1;/);
+  assert.match(sheet, /key: const ValueKey\('previous-word-button'\)/);
+  assert.match(
+    sheet,
+    /onPressed: _isSpeaking \|\| _isFirst \? null : _previousWord/,
+  );
+
+  const save = sheet.indexOf("state.displayText(isSaved ? '已收藏' : '收藏生词')");
+  const previous = sheet.indexOf("state.displayText('上一个生词')");
+  const next = sheet.indexOf("_isLast ? '完成并收起' : '下一个单词'");
+  assert.ok(save >= 0 && save < previous && previous < next);
+});
