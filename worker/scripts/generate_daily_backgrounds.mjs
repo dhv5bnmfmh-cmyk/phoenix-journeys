@@ -23,7 +23,7 @@ const dartPath = path.join(
 );
 const reportDirectory = path.join(root, 'reports/backgrounds');
 const apiKey = process.env.OPENAI_API_KEY ?? '';
-const imageModel = process.env.PHOENIX_IMAGE_MODEL || 'gpt-image-2';
+const imageModel = process.env.PHOENIX_IMAGE_MODEL || 'gpt-image-1';
 
 if (!apiKey) {
   throw new Error(
@@ -49,6 +49,7 @@ for (const job of plan.approvedJobs) {
       size: '1024x1536',
       quality: 'medium',
       output_format: 'webp',
+      output_compression: 82,
       moderation: 'auto',
       n: 1,
     });
@@ -106,7 +107,15 @@ const combined = [...accepted, ...previous].sort((left, right) =>
 );
 const kept = [];
 const counts = new Map();
+const seenIds = new Set();
+let duplicateEntriesDiscarded = 0;
 for (const item of combined) {
+  if (seenIds.has(item.id)) {
+    duplicateEntriesDiscarded += 1;
+    continue;
+  }
+  seenIds.add(item.id);
+
   const count = counts.get(item.journeyId) ?? 0;
   if (count >= 24) {
     if (item.assetPath?.includes('/generated/')) {
@@ -132,6 +141,7 @@ const report = {
   publishedInventory: Object.fromEntries(counts),
   approvedVarietyKeys: accepted.map((item) => item.varietyKey),
   minimumVarietyScore: BACKGROUND_KPI.minimumVarietyScore,
+  duplicateEntriesDiscarded,
   rejectedItems: rejected,
 };
 await writeFile(
@@ -220,7 +230,8 @@ function renderDart(items) {
     generatedOn: DateTime.utc(${item.generatedOn.replaceAll('-', ', ')}),
     origin: JourneyBackgroundOrigin.aiGenerated,
     complianceReviewed: true,
-    complianceScore: ${item.complianceScore},
+    complianceScore: ${Number(item.complianceScore ?? 0)},
+    varietyScore: ${Number(item.varietyScore ?? 0)},
   ),`,
     )
     .join('\n');

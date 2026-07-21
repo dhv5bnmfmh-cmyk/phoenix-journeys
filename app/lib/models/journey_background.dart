@@ -22,6 +22,7 @@ class JourneyBackgroundAsset {
     required this.origin,
     required this.complianceReviewed,
     required this.complianceScore,
+    this.varietyScore = 100,
     this.pageTypes = JourneyBackgroundPage.values,
   });
 
@@ -32,8 +33,11 @@ class JourneyBackgroundAsset {
   final JourneyBackgroundOrigin origin;
   final bool complianceReviewed;
   final int complianceScore;
+  final int varietyScore;
   final List<JourneyBackgroundPage> pageTypes;
 
   bool supports(JourneyBackgroundPage page) => pageTypes.contains(page);
-  bool get approved => complianceReviewed && complianceScore >= 90;
+
+  bool get approved =>
+      complianceReviewed && complianceScore >= 90 && varietyScore >= 80;
 }

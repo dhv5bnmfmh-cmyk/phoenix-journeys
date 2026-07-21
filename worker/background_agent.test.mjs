@@ -71,6 +71,10 @@ test('explorer runtime reads pre-generated assets without image AI', () => {
     '.github/workflows/daily-background-refresh.yml',
     'utf8',
   );
+  const generator = readFileSync(
+    'worker/scripts/generate_daily_backgrounds.mjs',
+    'utf8',
+  );
   const rules = readFileSync(
     'docs/destination-background-policy.md',
     'utf8',
@@ -78,8 +82,13 @@ test('explorer runtime reads pre-generated assets without image AI', () => {
   assert.match(widget, /Image\.asset/);
   assert.doesNotMatch(widget, /http|OpenAI|generate/);
   assert.match(policy, /_stableHash/);
+  assert.match(policy, /JourneyBackgroundOrigin\.aiGenerated/);
+  assert.match(policy, /minimumVarietyScore/);
   assert.match(workflow, /schedule:/);
+  assert.match(workflow, /push:/);
   assert.match(workflow, /generate_daily_backgrounds\.mjs/);
+  assert.match(generator, /seenIds/);
+  assert.match(generator, /varietyScore:/);
   assert.match(rules, /PhoenixBackgroundAgent/);
   assert.match(rules, /PhoenixVisualComplianceAgent/);
   assert.match(rules, /PhoenixBackgroundScheduler/);

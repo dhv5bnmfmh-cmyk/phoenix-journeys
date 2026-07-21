@@ -4,6 +4,15 @@ on:
   schedule:
     - cron: '10 1 * * *'
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/daily-background-refresh.yml'
+      - 'worker/agents/phoenix_background_agent.mjs'
+      - 'worker/agents/phoenix_background_scheduler.mjs'
+      - 'worker/agents/phoenix_visual_compliance_agent.mjs'
+      - 'worker/scripts/generate_daily_backgrounds.mjs'
 
 permissions:
   contents: write
@@ -15,11 +24,17 @@ concurrency:
 jobs:
   generate-review-publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - name: Check out content branch
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Verify image generation secret
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: test -n "$OPENAI_API_KEY"
 
       - name: Generate, review and publish destination backgrounds
         env:
@@ -42,4 +57,5 @@ jobs:
           git config user.email 'phoenix-background-scheduler[bot]@users.noreply.github.com'
           git add app/assets/images/backgrounds app/lib/data/journey_background_generated.dart reports/backgrounds
           git commit -m 'content: publish daily destination backgrounds'
-          git push
+          git pull --rebase origin main
+          git push origin HEAD:main

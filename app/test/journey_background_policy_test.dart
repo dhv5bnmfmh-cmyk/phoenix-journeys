@@ -24,7 +24,7 @@ void main() {
     expect(first!.id, second!.id);
   });
 
-  test('every published seed destination has three approved originals', () {
+  test('every published seed destination has three approved fallbacks', () {
     const journeys = [
       'beijing-forbidden-city',
       'shanghai-bund',
@@ -43,10 +43,91 @@ void main() {
     }
   });
 
+  test('approved AI backgrounds replace geometric seed fallbacks', () {
+    final selected = policy.select(
+      journeyId: 'beijing-forbidden-city',
+      page: JourneyBackgroundPage.story,
+      localDate: DateTime(2026, 7, 21),
+      catalog: [
+        _asset(
+          id: 'seed',
+          origin: JourneyBackgroundOrigin.originalSeed,
+        ),
+        _asset(
+          id: 'ai',
+          origin: JourneyBackgroundOrigin.aiGenerated,
+        ),
+      ],
+    );
+
+    expect(selected, isNotNull);
+    expect(selected!.id, 'ai');
+  });
+
+  test('AI backgrounds below the variety threshold never reach runtime', () {
+    final selected = policy.select(
+      journeyId: 'beijing-forbidden-city',
+      page: JourneyBackgroundPage.story,
+      localDate: DateTime(2026, 7, 21),
+      catalog: [
+        _asset(
+          id: 'seed',
+          origin: JourneyBackgroundOrigin.originalSeed,
+        ),
+        _asset(
+          id: 'flat-ai',
+          origin: JourneyBackgroundOrigin.aiGenerated,
+          varietyScore: 79,
+        ),
+      ],
+    );
+
+    expect(selected, isNotNull);
+    expect(selected!.id, 'seed');
+  });
+
+  test('inventory KPI counts reviewed AI assets rather than fallbacks', () {
+    final kpi = policy.inspect(
+      journeyId: 'beijing-forbidden-city',
+      page: JourneyBackgroundPage.story,
+      catalog: [
+        _asset(
+          id: 'seed',
+          origin: JourneyBackgroundOrigin.originalSeed,
+        ),
+        _asset(
+          id: 'ai',
+          origin: JourneyBackgroundOrigin.aiGenerated,
+        ),
+      ],
+    );
+
+    expect(kpi.destinationInventory, 1);
+    expect(kpi.pageInventory, 1);
+  });
+
   test('KPI constants remain centralized and adjustable', () {
     expect(JourneyBackgroundPolicy.dailyApprovedTargetPerDestination, 4);
     expect(JourneyBackgroundPolicy.minimumDestinationInventory, 20);
     expect(JourneyBackgroundPolicy.minimumPageInventory, 5);
     expect(JourneyBackgroundPolicy.minimumComplianceScore, 90);
+    expect(JourneyBackgroundPolicy.minimumVarietyScore, 80);
   });
+}
+
+JourneyBackgroundAsset _asset({
+  required String id,
+  required JourneyBackgroundOrigin origin,
+  int varietyScore = 100,
+}) {
+  return JourneyBackgroundAsset(
+    id: id,
+    journeyId: 'beijing-forbidden-city',
+    assetPath: 'assets/images/backgrounds/$id.webp',
+    generatedOn: DateTime.utc(2026, 7, 21),
+    origin: origin,
+    complianceReviewed: true,
+    complianceScore: 100,
+    varietyScore: varietyScore,
+  );
 }
