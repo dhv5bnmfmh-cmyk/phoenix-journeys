@@ -46,7 +46,7 @@ test('normalization rejects examples that do not actually use the word', () => {
   assert.equal(normalizeVocabularyExample(candidate, '牌坊').chinese, candidate.chinese);
 });
 
-test('PhoenixBrainAgent routes vocabulary through specialist and quality review', async () => {
+test('PhoenixBrainAgent routes authoring through specialist and quality review', async () => {
   const calls = [];
   const gateway = {
     isAvailable: true,
@@ -96,17 +96,21 @@ test('PhoenixBrainAgent routes vocabulary through specialist and quality review'
   assert.equal(result.quality.reviewed, true);
 });
 
-test('word details query AI and do not render the generic studyExamples fallback', () => {
+test('explorers read bundled examples and never wait for a model request', () => {
   const sheet = readFileSync('app/lib/widgets/word_detail_sheet.dart', 'utf8');
   const service = readFileSync(
     'app/lib/services/phoenix_vocabulary_service.dart',
     'utf8',
   );
+  const runtime = service.match(
+    /Future<PhoenixVocabularyExample> generateExample\([\s\S]*?\n  }\n\n  \/\/\/ Content-authoring path only\./,
+  )?.[0] ?? '';
 
   assert.match(sheet, /PhoenixVocabularyService/);
-  assert.match(sheet, /AI 正在查询实际用法/);
-  assert.match(sheet, /AI 实际用法/);
   assert.doesNotMatch(sheet, /entry\.studyExamples/);
-  assert.match(service, /故事里出现了/);
+  assert.match(runtime, /phoenix-preloaded-pack/);
+  assert.match(runtime, /Future<PhoenixVocabularyExample>\.value\(preloaded\)/);
+  assert.doesNotMatch(runtime, /_client\s*\.post/);
+  assert.match(service, /generateExampleForContentPipeline/);
   assert.match(service, /forbidden\.any/);
 });
