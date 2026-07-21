@@ -57,8 +57,8 @@ test('word detail actions keep Save Previous and Next on one row', () => {
     /onPressed: _isSpeaking \|\| _isFirst \? null : _previousWord/,
   );
 
-  const save = sheet.indexOf("state.displayText(isSaved ? '已收藏' : '收藏生词')");
-  const previous = sheet.indexOf("state.displayText('上一个生词')");
+  const save = sheet.indexOf("state.displayText(isSaved ? '已收藏' : '收藏单词')");
+  const previous = sheet.indexOf("state.displayText('上一个单词')");
   const next = sheet.indexOf("_isLast ? '完成并收起' : '下一个单词'");
   assert.ok(save >= 0 && save < previous && previous < next);
 });

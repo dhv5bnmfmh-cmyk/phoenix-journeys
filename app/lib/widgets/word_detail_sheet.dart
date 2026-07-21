@@ -382,7 +382,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                       label: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          state.displayText(isSaved ? '已收藏' : '收藏生词'),
+                          state.displayText(isSaved ? '已收藏' : '收藏单词'),
                           maxLines: 1,
                           softWrap: false,
                           style: const TextStyle(fontSize: 10.5),
@@ -404,7 +404,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                       label: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          state.displayText('上一个生词'),
+                          state.displayText('上一个单词'),
                           maxLines: 1,
                           softWrap: false,
                           style: const TextStyle(fontSize: 10.5),

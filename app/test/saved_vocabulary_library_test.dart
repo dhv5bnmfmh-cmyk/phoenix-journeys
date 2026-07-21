@@ -15,7 +15,9 @@ void main() {
   });
 
   test('the shared vocabulary library contains words from every journey', () {
-    final catalogWords = allDailyJourneyWords.map((entry) => entry.word).toSet();
+    final catalogWords = allDailyJourneyWords
+        .map((entry) => entry.word)
+        .toSet();
 
     for (final journey in dailyJourneyExperiences) {
       for (final entry in journey.words) {
@@ -40,7 +42,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('我的生词 · 1'), findsOneWidget);
+    expect(find.text('我的单词 · 1'), findsOneWidget);
     expect(find.text('牌坊'), findsOneWidget);
   });
 }
