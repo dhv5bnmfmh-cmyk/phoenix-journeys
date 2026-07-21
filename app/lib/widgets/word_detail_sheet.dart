@@ -301,9 +301,14 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                         isSaved ? Icons.bookmark : Icons.bookmark_add_outlined,
                         size: 17,
                       ),
-                      label: Text(
-                        state.displayText(isSaved ? '已收藏' : '收藏生词'),
-                        style: const TextStyle(fontSize: 11),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          state.displayText(isSaved ? '已收藏' : '收藏生词'),
+                          maxLines: 1,
+                          softWrap: false,
+                          style: const TextStyle(fontSize: 11),
+                        ),
                       ),
                     ),
                   ),
