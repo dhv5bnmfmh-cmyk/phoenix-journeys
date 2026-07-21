@@ -1,9 +1,9 @@
 const forbiddenPromptPatterns = [
-  /logo|logotype|trademark|brand mark/i,
-  /copyrighted character|movie character|anime character/i,
-  /in the style of|style of [A-Z]/i,
-  /poster for|official poster|album cover/i,
-  /signature|watermark/i,
+  /\b(use|include|show|copy|replicate)\b.{0,30}\b(logo|logotype|trademark|brand mark)\b/i,
+  /\b(use|include|show|copy|replicate)\b.{0,30}\b(copyrighted character|movie character|anime character)\b/i,
+  /\bin the style of\b/i,
+  /\b(official poster|album cover replica|copied poster)\b/i,
+  /\b(add|include|show)\b.{0,20}\b(signature|watermark)\b/i,
 ];
 
 export class PhoenixVisualComplianceAgent {
