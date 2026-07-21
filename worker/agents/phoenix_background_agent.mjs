@@ -57,7 +57,7 @@ export class PhoenixBackgroundAgent {
         const mood = pageMoods[index % pageMoods.length];
         const timeOfDay = timeSlots[(offset + index) % timeSlots.length];
         const weather = weatherSlots[(offset + index * 3) % weatherSlots.length];
-        const camera = cameraSlots[(offset + index * 2) % cameraSlots.length];
+        const camera = cameraSlots[(offset + index) % cameraSlots.length];
         const scene = sceneSlots[(offset + index) % sceneSlots.length];
         const varietyKey = [journeyId, timeOfDay, weather, camera, scene].join('|');
         return {
