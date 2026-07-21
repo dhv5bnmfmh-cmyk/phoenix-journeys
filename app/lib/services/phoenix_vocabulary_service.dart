@@ -44,8 +44,8 @@ class PhoenixVocabularyService {
     http.Client? client,
     Uri? endpoint,
     this.timeout = const Duration(seconds: 42),
-  })  : _client = client ?? http.Client(),
-        endpoint = endpoint ?? Uri.base.resolve('/api/phoenix-ai');
+  }) : _client = client ?? http.Client(),
+       endpoint = endpoint ?? Uri.base.resolve('/api/phoenix-ai');
 
   static final Map<String, PhoenixVocabularyExample> _sessionCache = {};
 
@@ -63,7 +63,8 @@ class PhoenixVocabularyService {
     required String contextEnglish,
     required PhoenixVocabularyExample fallback,
   }) async {
-    final cacheKey = '$journeyId|${entry.word}|$language';
+    final cacheKey =
+        '${endpoint.toString()}|$journeyId|${entry.word}|$language';
     final cached = _sessionCache[cacheKey];
     if (cached != null) return cached;
 
@@ -113,7 +114,8 @@ class PhoenixVocabularyService {
       _sessionCache[cacheKey] = generated;
       return generated;
     } catch (_) {
-      _sessionCache[cacheKey] = fallback;
+      // A temporary failure must never poison the session cache. The Retry
+      // action should always make a fresh request to PhoenixVocabularyAgent.
       return fallback;
     }
   }
