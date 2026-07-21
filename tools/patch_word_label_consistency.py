@@ -30,9 +30,10 @@ replacements = {
 for path, mapping in replacements.items():
     text = path.read_text(encoding='utf-8')
     for old, new in mapping.items():
-        if old not in text:
-            raise SystemExit(f'Missing expected label in {path}: {old}')
-        text = text.replace(old, new)
+        if old in text:
+            text = text.replace(old, new)
+        elif new not in text:
+            raise SystemExit(f'Missing expected old or new label in {path}: {old}')
     path.write_text(text, encoding='utf-8')
 
 Path('worker/word_label_consistency.test.mjs').write_text(
