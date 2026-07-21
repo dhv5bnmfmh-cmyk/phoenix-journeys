@@ -1,0 +1,159 @@
+name: Apply saved vocabulary fix
+
+on:
+  push:
+    branches:
+      - feature/seven-day-journey-library
+    paths:
+      - worker/run-saved-vocabulary-fix.txt
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out writable branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/seven-day-journey-library
+          fetch-depth: 0
+
+      - name: Apply verified repair
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new, already):
+              file = Path(path)
+              text = file.read_text()
+              if already in text:
+                  return
+              if old not in text:
+                  raise SystemExit(f'Expected repair pattern not found in {path}')
+              file.write_text(text.replace(old, new, 1))
+
+          replace_once(
+              'app/lib/data/daily_journey_catalog.dart',
+              """  ...extendedJourneyExperiences,\n];\n\nDailyJourneyExperience requireDailyJourneyExperience(String id) {""",
+              """  ...extendedJourneyExperiences,\n];\n\nfinal List<WordEntry> allDailyJourneyWords = List<WordEntry>.unmodifiable(\n  <String, WordEntry>{\n    for (final journey in dailyJourneyExperiences)\n      for (final entry in journey.words) entry.word: entry,\n  }.values,\n);\n\nDailyJourneyExperience requireDailyJourneyExperience(String id) {""",
+              'allDailyJourneyWords',
+          )
+
+          me = Path('app/lib/screens/me_screen.dart')
+          me_text = me.read_text()
+          if "import '../data/daily_journey_catalog.dart';" not in me_text:
+              me_text = me_text.replace(
+                  "import '../data/journey_data.dart';\n",
+                  "import '../data/daily_journey_catalog.dart';\nimport '../data/journey_data.dart';\n",
+                  1,
+              )
+          old_saved = """    final savedEntries = words\n        .where((entry) => state.savedWords.contains(entry.word))\n        .toList(growable: false);"""
+          new_saved = """    final savedEntries = allDailyJourneyWords\n        .where((entry) => state.savedWords.contains(entry.word))\n        .toList(growable: false);"""
+          if new_saved not in me_text:
+              if old_saved not in me_text:
+                  raise SystemExit('Expected MeScreen saved-entry pattern not found')
+              me_text = me_text.replace(old_saved, new_saved, 1)
+          me.write_text(me_text)
+
+          sheet = Path('app/lib/widgets/word_detail_sheet.dart')
+          sheet_text = sheet.read_text()
+          old_label = """                      label: Text(\n                        state.displayText(isSaved ? '已收藏' : '收藏生词'),\n                        style: const TextStyle(fontSize: 11),\n                      ),"""
+          new_label = """                      label: FittedBox(\n                        fit: BoxFit.scaleDown,\n                        child: Text(\n                          state.displayText(isSaved ? '已收藏' : '收藏生词'),\n                          maxLines: 1,\n                          softWrap: false,\n                          style: const TextStyle(fontSize: 11),\n                        ),\n                      ),"""
+          if new_label not in sheet_text:
+              if old_label not in sheet_text:
+                  raise SystemExit('Expected save-vocabulary label pattern not found')
+              sheet.write_text(sheet_text.replace(old_label, new_label, 1))
+
+          Path('app/test/saved_vocabulary_library_test.dart').write_text(r'''import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/screens/me_screen.dart';
+import 'package:phoenix_journeys/state/app_state.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+  });
+
+  test('the shared vocabulary library contains words from every journey', () {
+    final catalogWords = allDailyJourneyWords.map((entry) => entry.word).toSet();
+
+    for (final journey in dailyJourneyExperiences) {
+      for (final entry in journey.words) {
+        expect(catalogWords, contains(entry.word));
+      }
+    }
+
+    expect(catalogWords, contains('牌坊'));
+    expect(catalogWords.length, allDailyJourneyWords.length);
+  });
+
+  testWidgets('a saved Nanjing word appears in My Vocabulary', (tester) async {
+    final state = AppState(clock: () => DateTime(2026, 7, 21));
+    await state.load();
+    await state.toggleSavedWord('牌坊');
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: const MaterialApp(home: Scaffold(body: MeScreen())),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('我的生词 · 1'), findsOneWidget);
+    expect(find.text('牌坊'), findsOneWidget);
+  });
+}
+''')
+
+          Path('worker/saved_vocabulary_rule.test.mjs').write_text(r'''import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const catalog = readFileSync('app/lib/data/daily_journey_catalog.dart', 'utf8');
+const meScreen = readFileSync('app/lib/screens/me_screen.dart', 'utf8');
+const wordSheet = readFileSync('app/lib/widgets/word_detail_sheet.dart', 'utf8');
+
+test('My Vocabulary uses the shared seven-city vocabulary catalog', () => {
+  assert.match(catalog, /allDailyJourneyWords/);
+  assert.match(catalog, /for \(final journey in dailyJourneyExperiences\)/);
+  assert.match(meScreen, /final savedEntries = allDailyJourneyWords/);
+  assert.doesNotMatch(meScreen, /final savedEntries = words\n/);
+});
+
+test('the save-vocabulary label is permanently constrained to one line', () => {
+  assert.match(wordSheet, /state\.displayText\(isSaved \? '已收藏' : '收藏生词'\)/);
+  assert.match(wordSheet, /maxLines: 1/);
+  assert.match(wordSheet, /softWrap: false/);
+  assert.match(wordSheet, /fit: BoxFit\.scaleDown/);
+});
+''')
+          PY
+
+      - name: Remove temporary repair files
+        shell: bash
+        run: |
+          rm -f \
+            .github/workflows/apply-saved-vocabulary-fix.yml \
+            .github/workflows/fix-saved-vocabulary-once.yml \
+            worker/run-saved-vocabulary-fix.txt \
+            worker/saved_vocabulary_patch_trigger.txt \
+            worker/saved_vocabulary_patch_export.test.mjs
+
+      - name: Commit repair
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: persist saved words from every journey"
+          git push origin HEAD:feature/seven-day-journey-library
