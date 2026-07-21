@@ -21,6 +21,7 @@ class JourneyBackgroundPolicy {
   static const int minimumDestinationInventory = 20;
   static const int minimumPageInventory = 5;
   static const int minimumComplianceScore = 90;
+  static const int minimumVarietyScore = 80;
 
   JourneyBackgroundAsset? select({
     required String journeyId,
@@ -28,17 +29,24 @@ class JourneyBackgroundPolicy {
     required DateTime localDate,
     required List<JourneyBackgroundAsset> catalog,
   }) {
-    final candidates = catalog
+    final eligible = catalog
         .where(
           (asset) =>
               asset.journeyId == journeyId &&
               asset.approved &&
               asset.complianceScore >= minimumComplianceScore &&
+              asset.varietyScore >= minimumVarietyScore &&
               asset.supports(page),
         )
-        .toList(growable: false)
-      ..sort((left, right) => left.id.compareTo(right.id));
+        .toList(growable: false);
+
+    final aiGenerated = eligible
+        .where((asset) => asset.origin == JourneyBackgroundOrigin.aiGenerated)
+        .toList(growable: false);
+    final candidates = aiGenerated.isNotEmpty ? aiGenerated : eligible;
+
     if (candidates.isEmpty) return null;
+    candidates.sort((left, right) => left.id.compareTo(right.id));
 
     final dayKey = '${localDate.year}-${localDate.month}-${localDate.day}';
     final index =
@@ -52,7 +60,12 @@ class JourneyBackgroundPolicy {
     required List<JourneyBackgroundAsset> catalog,
   }) {
     final destinationAssets = catalog
-        .where((asset) => asset.journeyId == journeyId && asset.approved)
+        .where(
+          (asset) =>
+              asset.journeyId == journeyId &&
+              asset.approved &&
+              asset.origin == JourneyBackgroundOrigin.aiGenerated,
+        )
         .toList(growable: false);
     final pageAssets = destinationAssets
         .where((asset) => asset.supports(page))
