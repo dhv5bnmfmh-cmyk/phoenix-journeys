@@ -3,6 +3,7 @@ import { PhoenixGuideAgent } from './phoenix_guide_agent.mjs';
 import { PhoenixWritingAgent } from './phoenix_writing_agent.mjs';
 import { PhoenixConversationAgent } from './phoenix_conversation_agent.mjs';
 import { PhoenixLearningAgent } from './phoenix_learning_agent.mjs';
+import { PhoenixVocabularyAgent } from './phoenix_vocabulary_agent.mjs';
 import { PhoenixMemoryAgent } from './phoenix_memory_agent.mjs';
 import { PhoenixKnowledgeAgent } from './phoenix_knowledge_agent.mjs';
 
@@ -11,6 +12,7 @@ export const PHOENIX_AI_MODES = [
   'writing',
   'conversation',
   'learning',
+  'vocabulary',
 ];
 
 export class PhoenixBrainAgent {
@@ -24,6 +26,9 @@ export class PhoenixBrainAgent {
       gateway: this.gateway,
     });
     this.learning = new PhoenixLearningAgent(env, { gateway: this.gateway });
+    this.vocabulary = new PhoenixVocabularyAgent(env, {
+      gateway: this.gateway,
+    });
   }
 
   get isAvailable() {
@@ -57,6 +62,9 @@ export class PhoenixBrainAgent {
         break;
       case 'learning':
         result = await this.learning.analyze(specialistPayload);
+        break;
+      case 'vocabulary':
+        result = await this.vocabulary.generate(specialistPayload);
         break;
       default:
         throw new TypeError('不支持的 AI 模式。');
