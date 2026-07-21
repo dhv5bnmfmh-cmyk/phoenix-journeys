@@ -44,7 +44,7 @@ void main() {
     }
   });
 
-  test('seven cities each ship ten approved offline AI backgrounds', () {
+  test('seven cities each ship ten approved offline WebP backgrounds', () {
     const journeys = [
       'beijing-forbidden-city',
       'shanghai-bund',
@@ -62,10 +62,17 @@ void main() {
       expect(assets, hasLength(10), reason: journeyId);
       expect(assets.every((asset) => asset.approved), isTrue);
       expect(
-        assets.every((asset) => asset.svgData?.startsWith('<svg') ?? false),
+        assets.every(
+          (asset) =>
+              asset.assetPath.startsWith(
+                'assets/images/backgrounds/generated/',
+              ) &&
+              asset.assetPath.endsWith('.webp'),
+        ),
         isTrue,
       );
       expect(assets.map((asset) => asset.id).toSet(), hasLength(10));
+      expect(assets.map((asset) => asset.assetPath).toSet(), hasLength(10));
       final kpi = policy.inspect(
         journeyId: journeyId,
         page: JourneyBackgroundPage.story,
@@ -76,7 +83,7 @@ void main() {
     }
   });
 
-  test('approved AI backgrounds replace seed fallbacks', () {
+  test('approved generated backgrounds replace seed fallbacks', () {
     final selected = policy.select(
       journeyId: 'beijing-forbidden-city',
       page: JourneyBackgroundPage.story,
@@ -90,7 +97,7 @@ void main() {
     expect(selected!.id, 'ai');
   });
 
-  test('AI backgrounds below the variety threshold never reach runtime', () {
+  test('backgrounds below the variety threshold never reach runtime', () {
     final selected = policy.select(
       journeyId: 'beijing-forbidden-city',
       page: JourneyBackgroundPage.story,
