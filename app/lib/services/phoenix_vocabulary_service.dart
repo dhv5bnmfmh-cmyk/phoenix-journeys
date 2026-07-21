@@ -127,12 +127,15 @@ class PhoenixVocabularyService {
       '我想学会使用',
       '这个词出现在故事里',
     ];
+    final hasPlaceholder = forbidden.any(
+      (phrase) => example.chinese.contains(phrase),
+    );
     if (!example.chinese.contains(word) ||
         example.pinyin.isEmpty ||
         example.native.isEmpty ||
         example.english.isEmpty ||
         example.usageNote.isEmpty ||
-        forbidden.any(example.chinese.contains)) {
+        hasPlaceholder) {
       throw const FormatException('Phoenix AI returned a placeholder example.');
     }
   }
