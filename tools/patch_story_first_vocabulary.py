@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# Triggered only on the isolated feature branch; removed after successful validation.
 journey_path = Path('app/lib/screens/journey_screen.dart')
 journey = journey_path.read_text(encoding='utf-8')
 
