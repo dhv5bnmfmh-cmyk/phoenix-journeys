@@ -2,8 +2,7 @@ name: Apply destination backgrounds in PR
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - .github/workflows/apply-background-pr.yml
       - worker/run-background-runtime.txt
@@ -41,28 +40,33 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Validate runtime and agents
-        run: |
-          cd app
-          dart format lib/models/journey_background.dart lib/data/journey_background_catalog.dart lib/data/journey_background_generated.dart lib/services/journey_background_policy.dart lib/widgets/destination_background.dart lib/screens/home_shell.dart lib/screens/explore_screen.dart lib/screens/journey_screen.dart test/journey_background_policy_test.dart
-          flutter pub get
-          flutter analyze
-          flutter test
-          flutter build web --release
-          cd ..
-          node --test worker/*.test.mjs
+      - name: Format Flutter files
+        working-directory: app
+        run: dart format lib/models/journey_background.dart lib/data/journey_background_catalog.dart lib/data/journey_background_generated.dart lib/services/journey_background_policy.dart lib/widgets/destination_background.dart lib/screens/home_shell.dart lib/screens/explore_screen.dart lib/screens/journey_screen.dart test/journey_background_policy_test.dart
+
+      - name: Install Flutter dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Analyze Flutter app
+        working-directory: app
+        run: flutter analyze
+
+      - name: Test Flutter app
+        working-directory: app
+        run: flutter test
+
+      - name: Build Flutter web
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Validate background agents
+        run: node --test worker/*.test.mjs
 
       - name: Commit installed runtime
         shell: bash
         run: |
-          rm -f \
-            .github/workflows/apply-background-runtime.yml \
-            .github/workflows/apply-background-pr.yml \
-            worker/run-background-runtime.txt \
-            tools/generate_seed_backgrounds.py \
-            tools/patch_background_home.py \
-            tools/patch_background_explore.py \
-            tools/patch_background_journey.py
+          rm -f .github/workflows/apply-background-runtime.yml .github/workflows/apply-background-pr.yml worker/run-background-runtime.txt tools/generate_seed_backgrounds.py tools/patch_background_home.py tools/patch_background_explore.py tools/patch_background_journey.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
