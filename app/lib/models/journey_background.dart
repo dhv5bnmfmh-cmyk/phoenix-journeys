@@ -17,18 +17,23 @@ class JourneyBackgroundAsset {
   const JourneyBackgroundAsset({
     required this.id,
     required this.journeyId,
-    required this.assetPath,
     required this.generatedOn,
     required this.origin,
     required this.complianceReviewed,
     required this.complianceScore,
+    this.assetPath,
+    this.svgData,
     this.varietyScore = 100,
     this.pageTypes = JourneyBackgroundPage.values,
-  });
+  }) : assert(
+          assetPath != null || svgData != null,
+          'A background needs an assetPath or inline SVG data.',
+        );
 
   final String id;
   final String journeyId;
-  final String assetPath;
+  final String? assetPath;
+  final String? svgData;
   final DateTime generatedOn;
   final JourneyBackgroundOrigin origin;
   final bool complianceReviewed;
