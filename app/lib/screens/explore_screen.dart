@@ -630,8 +630,9 @@ class _JourneyCard extends StatelessWidget {
 
   String get _buttonText {
     if (state.journeyCompleted) return '再次探索${state.activeJourney.city}';
-    if (state.hasJourneyInProgress)
+    if (state.hasJourneyInProgress) {
       return '继续${state.activeJourney.city} Journey';
+    }
     return '开始${state.activeJourney.city} Journey';
   }
 

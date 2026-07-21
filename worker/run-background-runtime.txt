@@ -1,1 +1,0 @@
-Install Phoenix destination backgrounds now via Git Data push: generate 21 original offline assets, patch all major pages, validate, and remove temporary installer files.
