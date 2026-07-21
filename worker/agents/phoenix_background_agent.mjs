@@ -11,7 +11,7 @@ const destinationBriefs = {
     'Kuanzhai Alley courtyards, grey brick lanes, bamboo and warm lantern light',
   'nanjing-qinhuai-river':
     'Qinhuai River, white-wall black-roof houses, arch bridge and gentle lantern reflections',
-  'guangzhou-chen-clan':
+  'guangzhou-chen-clan-academy':
     'Chen Clan Ancestral Hall, Lingnan roof ridges, courtyards and subtle ceramic ornament',
 };
 
