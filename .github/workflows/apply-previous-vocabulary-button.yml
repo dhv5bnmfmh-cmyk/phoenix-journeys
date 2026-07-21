@@ -1,0 +1,60 @@
+name: Apply previous vocabulary button
+
+on:
+  push:
+    branches:
+      - fix/story-continue-first-vocabulary
+    paths:
+      - '.github/workflows/apply-previous-vocabulary-button.yml'
+      - 'tools/patch_previous_vocabulary_button.py'
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.head_ref == 'fix/story-continue-first-vocabulary' || github.ref_name == 'fix/story-continue-first-vocabulary'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/story-continue-first-vocabulary
+          fetch-depth: 0
+
+      - name: Add previous vocabulary navigation
+        run: python3 tools/patch_previous_vocabulary_button.py
+
+      - name: Validate focused vocabulary rule
+        run: node --test worker/compact_word_study.test.mjs
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Validate Flutter app
+        working-directory: app
+        run: |
+          dart format lib/widgets/word_detail_sheet.dart
+          flutter pub get
+          flutter analyze
+          flutter test
+          flutter build web --release
+
+      - name: Remove installer and commit feature
+        shell: bash
+        run: |
+          rm -f \
+            .github/workflows/apply-previous-vocabulary-button.yml \
+            tools/patch_previous_vocabulary_button.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat: add previous vocabulary navigation'
+          git push origin HEAD:fix/story-continue-first-vocabulary
