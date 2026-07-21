@@ -153,7 +153,7 @@ export class PhoenixBackgroundAgent {
         `Library slot ${index + 1} of ${PHOENIX_OFFLINE_IMAGES_PER_DESTINATION}.`,
         `Mood: ${variant.mood}.`,
         `Scene variation: ${variant.timeOfDay}, ${variant.weather}, ${variant.camera}, ${variant.scene}.`,
-        'Keep the composition clearly different from every other city slot.',
+        'Make this composition visibly different from every other city slot.',
         'Elegant editorial travel illustration, atmospheric depth, calm edges and spacious center for readable Chinese learning UI cards.',
         'Historically plausible but not a replica of any photograph or artwork.',
         'Original composition, no text, no logo, no trademark, no copyrighted character, no celebrity, no signature, no watermark and no artist imitation.',
