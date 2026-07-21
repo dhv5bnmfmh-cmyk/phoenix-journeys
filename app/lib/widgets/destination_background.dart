@@ -66,8 +66,11 @@ class _BackgroundArtwork extends StatelessWidget {
   Widget build(BuildContext context) {
     final svgData = asset.svgData;
     if (svgData != null) {
+      final normalizedSvg = svgData
+          .replaceAll('rx="120 120 0 0"', 'rx="120"')
+          .replaceAll('rx="36 36 0 0"', 'rx="36"');
       return SvgPicture.string(
-        svgData,
+        normalizedSvg,
         key: ValueKey('journey-background-${asset.id}'),
         fit: BoxFit.cover,
         placeholderBuilder: (_) => const _BackgroundFallback(),
