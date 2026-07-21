@@ -19,7 +19,7 @@ test('My Vocabulary uses the shared seven-city vocabulary catalog', () => {
 test('the save-vocabulary label is permanently constrained to one line', () => {
   assert.match(
     wordSheet,
-    /state\.displayText\(isSaved \? '已收藏' : '收藏生词'\)/,
+    /state\.displayText\(isSaved \? '已收藏' : '收藏单词'\)/,
   );
   assert.match(wordSheet, /maxLines: 1/);
   assert.match(wordSheet, /softWrap: false/);
