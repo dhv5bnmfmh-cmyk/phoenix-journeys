@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# One-time installer for the isolated terminology PR.
 replacements = {
     Path('app/lib/state/app_state.dart'): {
         "    '生词',": "    '单词',",
