@@ -323,12 +323,20 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
     final segmentStyle = segment.entry == null
         ? baseStyle
         : baseStyle?.copyWith(
-            color: PhoenixTheme.red,
+            color: const Color(0xFFFFD879),
             fontWeight: FontWeight.w800,
             decoration: TextDecoration.underline,
-            decorationColor: PhoenixTheme.gold,
+            decorationColor: Colors.white,
             decorationStyle: TextDecorationStyle.dotted,
             decorationThickness: 1.6,
+            shadows: const [
+              Shadow(
+                color: Color(0xF0000000),
+                blurRadius: 3,
+                offset: Offset(0, 1),
+              ),
+              Shadow(color: Color(0xB3000000), blurRadius: 7),
+            ],
           );
 
     final overlapStart = highlightStart

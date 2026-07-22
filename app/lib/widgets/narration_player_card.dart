@@ -410,8 +410,8 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  PhoenixTheme.red.withValues(alpha: .98),
-                  const Color(0xFF651418),
+                  PhoenixTheme.red.withValues(alpha: .78),
+                  const Color(0xCC651418),
                 ],
               ),
               borderRadius: BorderRadius.circular(compact ? 13 : 17),

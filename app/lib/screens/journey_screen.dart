@@ -909,11 +909,23 @@ class _JourneyScreenState extends State<JourneyScreen>
                                   narrationContentId: 'story',
                                   narrationItemId: 'story-${entry.key}',
                                   style: TextStyle(
+                                    color: Colors.white,
                                     fontSize: fontSize,
                                     height: 1.22,
                                     fontWeight: isActive
                                         ? FontWeight.w800
                                         : FontWeight.w600,
+                                    shadows: const [
+                                      Shadow(
+                                        color: Color(0xE6000000),
+                                        blurRadius: 3,
+                                        offset: Offset(0, 1),
+                                      ),
+                                      Shadow(
+                                        color: Color(0x99000000),
+                                        blurRadius: 8,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               );
@@ -1452,9 +1464,7 @@ class _CompactTextBlock extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 2),
       padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .94),
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .22)),
+        color: Colors.transparent,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1463,11 +1473,11 @@ class _CompactTextBlock extends StatelessWidget {
             padding: const EdgeInsets.only(top: 1),
             child: CircleAvatar(
               radius: 9,
-              backgroundColor: PhoenixTheme.gold.withValues(alpha: .18),
+              backgroundColor: const Color(0x99000000),
               child: Text(
                 '$index',
                 style: const TextStyle(
-                  color: PhoenixTheme.red,
+                  color: Color(0xFFFFD879),
                   fontSize: 7,
                   fontWeight: FontWeight.w900,
                 ),
@@ -1490,7 +1500,7 @@ class _CompactTextBlock extends StatelessWidget {
               child: const Text(
                 '注',
                 style: TextStyle(
-                  color: PhoenixTheme.red,
+                  color: Color(0xFFFFD879),
                   fontSize: 8,
                   fontWeight: FontWeight.w900,
                 ),
