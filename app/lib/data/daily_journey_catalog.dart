@@ -458,6 +458,7 @@ final xianCityWallJourney = JourneyContentRecord(
 
 final dailyStorySources = <StorySourceRecord>[
   ...beijingStorySources,
+  ...summerPalaceStorySources,
   ...shanghaiStorySources,
   ...xianStorySources,
   ...extendedJourneySources,
@@ -465,6 +466,7 @@ final dailyStorySources = <StorySourceRecord>[
 
 final dailyJourneyRecords = <JourneyContentRecord>[
   beijingForbiddenCityJourney,
+  summerPalaceJourneyContent,
   shanghaiBundJourney,
   xianCityWallJourney,
   ...extendedJourneyRecords,

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/state/app_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -29,7 +30,10 @@ void main() {
     expect(restored.hasWritingFeedback, isTrue);
     expect(restored.writingFeedbackNatural, contains('城墙'));
 
-    await restored.activateJourney('beijing-forbidden-city');
+    final otherJourneyId = dailyJourneyExperiences
+        .firstWhere((journey) => journey.id != restored.activeJourneyId)
+        .id;
+    await restored.activateJourney(otherJourneyId);
     expect(restored.hasGuideFeedback, isFalse);
     expect(restored.hasWritingFeedback, isFalse);
   });
