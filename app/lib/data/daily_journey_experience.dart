@@ -40,5 +40,18 @@ class DailyJourneyExperience {
   final String wonderQuestion;
   final String expressQuestion;
 
+  String get cityId {
+    final separator = id.indexOf('-');
+    return separator <= 0 ? id : id.substring(0, separator);
+  }
+
+  String get destinationId {
+    final separator = id.indexOf('-');
+    if (separator < 0 || separator == id.length - 1) return id;
+    return id.substring(separator + 1);
+  }
+
+  String get locationPath => '$cityId/$destinationId';
+
   String get stampTitle => '$city · $place';
 }
