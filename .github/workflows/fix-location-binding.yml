@@ -95,13 +95,20 @@ jobs:
             app/test/journey_city_catalog_test.dart \
             app/test/journey_location_binding_test.dart
 
-      - name: Verify focused location tests
+      - name: Capture focused verification output
         working-directory: app
+        shell: bash
         run: |
-          flutter analyze
-          flutter test test/journey_city_catalog_test.dart test/journey_location_binding_test.dart test/journey_background_policy_test.dart
+          set +e
+          flutter analyze > ../location-binding-verify.log 2>&1
+          analyze_status=$?
+          flutter test test/journey_city_catalog_test.dart test/journey_location_binding_test.dart test/journey_background_policy_test.dart >> ../location-binding-verify.log 2>&1
+          test_status=$?
+          printf '\nANALYZE_EXIT_CODE=%s\nTEST_EXIT_CODE=%s\n' "$analyze_status" "$test_status" >> ../location-binding-verify.log
+          cat ../location-binding-verify.log
+          exit 0
 
-      - name: Commit fixes and remove temporary files
+      - name: Commit fixes and diagnostics
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -109,5 +116,5 @@ jobs:
           git rm .github/workflows/fix-location-binding.yml
           git rm -f location-binding-format.log
           git add -A
-          git commit -m "fix: complete canonical Journey location binding [location-bound]"
+          git commit -m "chore: capture canonical location binding verification"
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
