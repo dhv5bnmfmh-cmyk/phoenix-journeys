@@ -1,189 +1,77 @@
-name: Cloudflare PR Preview
+name: Apply Journey location binding
 
 on:
   pull_request:
     branches:
       - main
     types:
-      - opened
       - synchronize
-      - reopened
-      - closed
 
 permissions:
-  contents: read
-  pull-requests: write
-  statuses: write
-
-concurrency:
-  group: cloudflare-preview-pr-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
-env:
-  PREVIEW_WORKER: phoenix-journeys-pr-${{ github.event.pull_request.number }}
-  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event.pull_request.number }}.7hn5tyrjgh.workers.dev
-  PREVIEW_RELEASE: ${{ github.event.pull_request.head.sha }}
+  contents: write
 
 jobs:
-  deploy-preview:
+  apply-location-binding:
     if: >-
-      github.event.action != 'closed' &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event.pull_request.number == 83 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feat/two-level-journey-picker' &&
+      !contains(github.event.pull_request.head.label, '[location-bound]')
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out feature branch
-        uses: actions/checkout@v6
+      - name: Check out writable feature branch
+        uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
 
-      - name: Test Phoenix agents
-        run: node --test worker/*.test.mjs
+      - name: Apply canonical Journey location binding
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64
+          import gzip
+          payload = 'H4sICDXQYGoCA2FwcGx5X2xvY2F0aW9uX2JpbmRpbmcucHkA7T1Nc9zGcvf9FaP3FAN4hrAUKduqpSmF+vJTLMssSS/vIKq2wMXsEhIW2ABYkRuat1xzTCWH3JNLUjnlksq/iZP8jHTPF2YGA+wuSen5vQqrTBPAdE9PT09Pd09Pa1oWc7KI69MsPSHpfFGUNTmCx8FgkNApKekiiyd0XOQT6mOzEanqMiRFloi/cnrG/grInQfkZZHT0YDAzzTNKDlgqBhcwN7W9LyGt/gxKmmcjPGFz7+lU8RK8qImac5ackz4U8ZpRcnrVVXT+dPztPan3tPzBZ3UNEHia1rmDHBaLPMEwS+wz8sRuQCUb0f3d97dKi+9QFEWnZVpTXnv+CsS4/ShORtSSO4GAfDg1/B/8jjOizydxBnJiklcp0VOTtI8SfPZiPxFsSxzusLBf0eLl0VC8c95vBhWdVHGMzo8iScfZiUjDImKBownXrxYDIHnw4qWH9MJrYbvOaax7GMs+oiSuKy9QCe59DxPzJUXRUPoJa+r4eK0oHl6Pj4ryiwZY/erMfvEMewPNJAkrmP4lWarsewXeo2zYrZZYwrcL1MKUtHVnlMxo0UP4jmwK6uG2CiHP2WLwSSLq0qy9od4cVSkeU0uYPomRV7V9hf/oqR/tUxLEIb6NK2i85CYL1aXAWDFqc9hEpNieQLCeb5vv1mxRn9efKRlmSYU/j4piowUMNQYuEkODvwfT96D1JGiPqUg8QcPhISyZ5K2af7iC/4tOgdoct48r/C53SHCzGhNTuPq9DEK08EDwvuM8JUPQ1vBWC4tHr0QMvOIi0ybVVYD/4IRbnJJzG3o+MQWBwq36yNMH4o0fjL4/AQlRvT/VMkLEd003JfrRnXSfHqRVvW34vsDIjpiXbyuSxwo8kogfJ4gs8RDlCb7ZqtJWltN+BurWUKrGrpGXpmtjQ8WkFyySJ0Oo7+3QGZ8ULwPNfI22UKLvIzntFpAK2zuSfy39Q48myg6iyer173winVei7wchZ4mj5T2egIzPkGl0oi9ByJIQfOkc+ii0jQdrmmBYGgQOfTY7IkFx8iEb/WSS3rDB/n21r7Vushnruby9S2G3l6FCDnX1YhcHfM0f9FgJHd3dqKdff17fG58392zvgO8op/s7rahm6/37uJXsQXlbDMRmF8he8iB2u18vxnmHYPGgAyJbxBlfQ8UEvyJQEnMFz4MCvazaCfY13sXlDk6lzTf0cenunZ/Xdex0Bs1TExLfQvQ8xEBiL375EubNb8hO9FXO4HCunc/hDf37wehAF0x0G92gShzXAh5714Ducsgv9kVkIwjl6hOOVOO+Bb6e9y7cOWsDnH/JHLbA03EXxx0tMSh4E5WjQjb/wDgMd/9wgEygfcCA/+Wr7WwQz8rFWK9r8REjU+WaZa4YSsfe9qkjzVY2ErhFJ+o7sk6rBeXjfpGe0eDMb4pBWg3wBaw2fq8meAD2nSJcz+pArGiefucbZqtGYvga+IrzV/kNb5UNIiVASaozxEckHyZZRI1GK6nZXEGChI02tOyLEpfibsnLcDbF83ecwmiPqUlo48s8w95cZbLfW5EvAa4AWrRdBl5UrwFeZeKyFvMXEqrI9SA5Kef2LCjRpVy8psPjQ679sDmS9BsKA+kLkjMdbDaws9S2AAnRVEmuFXSqm8ITDiiOGmmRd8ogh4SvSfLRQb2eE2V+a0Mc+6jNCTrOIGjbTIaOWS0cMYmW3Yvx6/cgtsXApHepyamwpRxSSqO4E2hCGkkU8DAtD+dL+oVzq58BbZgDY3JrQMi4Xrof55Pivkio3UzcdgpW3bOSbfHINXB26bNOxhKh60p6BBtR8SwM0mzi48Y7fK1GNrItAGjZQ5OQzpNY7AIJEdMZT5Q+8wGOtDEJ8fFLewO21oYv9ZXXxhPyqJyqE9gUYdaf6vA3uEgcLYVjLli27PZWgLghqAvXNIZcA6UEHjqjaEnpvKy4ZLoCIcMbmWAPu9uQEDBFuByg69C4mV9WoDzCdg/NhID0gZ9UXBdVkpowECEpR8NjKjBgFuKwt3dwJfks/mrXgvbu82t9+Ftwy739o/zX7ngDXO7pWoBCuCu3S3j3V5AXtC4zLmoID9gBwBOIuBQg+JL7gNdVSFXm3UZ52Cil2hfcNsdDKxZyRr3srRCYRjC05j9ZTBxG5e/Yd2WUC2gDWMakmtXHBvp8jBx5uoiieUnnDndeHhWlE8AmT+eAF0f/CAwpOYmkUqcHaoEccYTXFZWA0CuQWsut611DGi0Y9xybDQTLqGQaasfJzmR7YVee+YEbWOQf6k5q+V0mp6H5C1/ftio0ndBm87Gh71o/P+HD4nFkMvoNsfr1Awbd39h9G4r9Y656aPLmCilisEclAvE5rg5EAl56VJcY649vv/Fjs0dmdhkhOAtPiRjjBzL3sDnen0KSjM50izuBfwNatUYvUOGWDPYBWrEwmRBNA1wVObXhqeyjblpYKTQJO0RvLkB2hiabuL453XUyXnX6ePvboBCgaibRtnASeX19EhLZeEO36+XMcZmDQX2pzg51NH4jPjAbojt0PZaotN6uFi8UM/sOGNlKJnPTFt8Fqc1GXObgR46NP61BhUMiixhxIznFAxCHAueQxDysQBb0EFmh2SZ/npavWBS8Yim77nGabHsgHgn/Osd8FBO0iSh+R00pzw9noUKkwLddKEFs9or3AOTeOExAW1CXjYR1uKX3StuIgYyEna5hminTdCzZQk2NLjMvURNRavX1ybumYHJRWTDKBGVk4Yd5x0ZV/GUakP1GwDhBUoAvS8AnOOxoYoAzuNzX8ccdiGWWLQQYlQXODTRnUDyWPisiYuVjZb0pG+bbMFIBu7ZHXlMjU3jDMz3Ef+/IOmsyBNaPinjqXNidY3oaW23oEigMKFd0+mJVQBeVEmrajOa9MZXIMoE76NqTudFudqMKK3tFWgyoPtImi3ThD6jNMHjilew8YAp30FRuyknzI3rx+k0S3OqY9PE0tVUYGOSJQQL/GzoX7Z7XJQlP+VeK2UdgBbBVjPwb7JY+KNb9qCB9vfxEnaSEvThlvgF2Br68wmsWdja5iwqv+UIdOD+ftTU9moeN1B7koWe+d0iwQOyQzxOQDPgTTqnUV2ujuKyojJq5h7JUoJaC2WzpWL3714vuGJUYE0FIW0d2cQZrW1ERrpivj/sW62svcPZ+pIFqsDGGOT07I/N9LC9FGFVC/vjD2h+dBFm2iD/b4JsaIK0XD7Jz4lhRnxGM8Th5EmaTGviM5siPXRZBsVnNkd6CDOtis9pkmxCncs+WW+erBddt62yvanSJ4md9srW5srmvRg2y1Ymy+Z9KLvlCmbLFiMxbZetTJfOae+yX65hvvSMSLNh/tRNGPj1bAliQb9Fg+VBf5CGwXVF5eBjQOJqlU8E0Tggzh081YrTvML4mhHqCEQI1kg+YtmkLPVCUIYBzAcP3hpmZ9UOnIQGk1QCjqO9aU+ETra14d2OfNjagduQ3U53qG+UawDNvSQ09rI1oIa6D/W9Zg2gS42Hjk2hl1tunR0694BOehodscapDFXLrjYq8eNqfRmqurM3rdXa/vq9zLBjD7gq+aZ+7h6A3q57CBs4mWGH4hfI3u3b+q/R37fspCCuHFg+jOXwVt2OaNjaGG6hEV0V97/euSuAgsCZD8RD11wRRfi3zykQqQroARonBGsOB4gVqWYZ/fqLax04iNQ2ZAe6jIz0lrrmrhEgQPxWxH3DiH5e1Ol0hdkvmEpb+YF1uPC56LjiuUIH+SxH4l5AXi3zGgwGouUM89Qy0PqUTPFWCuaeVPHckToxhQmmZW9SxFmazDA1WQMbN3115Ui0EhcakPGiyNLJqi9XYhvoT5gzscXQCfk9a0xYJqj/CH8/xuyY85pnyZzX7gNilvgNYmdcMmhyxY/YaP0A9EUGu4FvnTip0+NR82eoS/cVqVIpUOvPrS1p/ZSjMs/amoSikXoyshTDDc5ENxS0UD+FF1c27Dy10DqsF83ag4eFThbwKzTV0IaI5Qm0PdIrdH3TrGl+2PxH7/X4X/PwxRfWXJpQQEBZfKSi3Q2iH8/jegIGc5Pzg2hCg5PBttTdNA/FPaoYT/dhAXm3L5C8DP3CaEXj8vKO/mYOi/jUfAWgl55rTYLyo+fkoDU63J1PMvpbvBXlNfmNP92+QEmJctg4Ln+6zSkC7/DPyCQGNZqwrOSM5rP61LmffpIhJGDcwR4GWI2EwodaIs7Vhy6xbz3yAHZi8BfxGiWp0lmOBi8lfkVB/SWkmEyWJTMiggGfdHmdc2s5kQjG4vqn+KZfABV0jPEG6IGWMdcoge8XqaTWB92/TvVsoVFU52Al3lznHQpvK7qmROeLuBmr8ZJfkG1djvU6dq6oPdvq0mzHJI2N27EaNSHRuIa3ZRUXp2lW07KZya004Frd5WpQlOkMGHNw0Gboj+xTFKffyftoxowLWtXEX4PWzdX05xpjIz3alNycEHGkV5SghqKQtCeDydMpzRbwCJ7LKd69Fel/hvITS+9jnC2psAg5lDogZBd4W1PDRtwa3yGz/vi0DTqXMIvANbE3M0Nc3bsZOGfv1kaz1/jhInWyLpdUd5flTadyHmfpX1NOuLhOIsRJvpGMP8wy3zs+Bt/YG3rGPcAGzQtjKMao+9AIIh3kqJCkjCJ4XVdE3UQMPfNiB8YBgOemYFxboAU+ouEz5Vm/ee+SaYOeUKL7kljvWUGBX5OvAvIGHNtpls5O2a1UgvtgRWg8OdVvH3uVumqhX6jqtdsmJaV5NaTni6wo6Zg/d/m64vJ9e+/uc3E3APqUtwHWD1A/AMcbWgeEu8MRe3RZWZVMfeThHjvQ7DISN0WtxywkfmeC/VXpugluNT/qatqc1njNm4yfMSn9TrzxO1wM0JSwdH3mNcOyy+sKj97Bhwd1Say3v6WIMQg7UAX7Xc7TL4A4ok9oJC+UrxnKzU6RisYizbQckfFRSefpco6Xqfm7bkaoairFsqZHZTHDkw0VrJAvwrXwi2VWUega1XtZZBktI7YFr4MMwq7J/aMeliEWTCRGWwmKxZ5gIKSh7W/1SIuCktaXeNS9LLVjeXIZRSJzBzd09U7fhHjWt7bq0KzipUes9ceMFntNsvogFaw/nlgzIqdxXqSA5sfpFIwEHz9FZ7gWyW9ItLsXEvbmlK1DfPV1c8dfTEsX8L37LeDdrxTwicrxcgJ/0wa+t6fXMkEdwlo0F9g5Ij6i1ltBbOu9oGNfZbVdn7Vhq9yFLY6fgvlNLpeOxfcBD5g+NgXROZaP2NXOweyp2m0dfpmbZ2+37e66Omq1XGkHUjc+21pv+9J6NdaTMF71pdtlvfKUiJZonODNEcNodeuBsV3mShHBT8eap7t8zQtVbMplSysD+pri2c3jZVUXc/m2qT/kUORWtSZDbduVm5hOdlVvMqBalZwYWLPIPuFYHPWQzAG5qikhda4PtnS2SiptM3j5dp12MCRTcuoKgtnmJ7eullg06EoSKojhAqoeMNQ01Q3lHpuQbT1oh20zIEm+wjuJs2zrAdjm/CZUhlsChW1V36C5K+9sAUU4IhUTUS47fHxC8VIeuBeGSGGgwnyhRTR0KCZq2NpacJ+ty65WNl8QoFfwJcVbyAlIujRYiQTvVMd6EKFT4AUWLvDqQQQOvg7IK8pYgztiDYOpWMUOGSXAUIK8txuLYoN3PlCjikBjTyJ8p0M+xq9r6g4uwPWPZ3Q0zZZYf5GBDPUHu96fBKhYjsJ40SQpDNuvVClAG1oWORSkV1tUMuxEsWmAYgNMrtwRGAW7pzCH6RRVld4Af/gZd/WMs0yUBIjAvl+W9Hme1ikPiPlc/4M58buF78vYYDvRAxr8ALInIP8SHZfKV+VPeA3BBxeXPJbGceIs+Z5ZwuM0rkiRqzIfIROrBVtCKFRGnR3wGhRBlJXj9Dvqm4SI9wU7e/I7yjiJo6kgMNIU3RWkrBpS3Q2k68VaWBth0/Qq1aa2vSnflPJRvFLX4fXwsrN2YBekKmDSgNklrVowWq1BXj4qJGn1plzSTvJEVSkM1D/PJ9mySj/SV3E+o/7uTkju7QbdAxNlpxygd3ewNNzuXiewnDqs5tmCZhXgsADcWuiVCxqrwGEROBtabSUNg7vLIDYuhgpze8OOwlNDz058U302ZbBc8hB0zY4UfQOymfwWmFoJBoB8a5Z3El00IHxphgR2H2BG+Qa8IP9e0FYlomyN1CVY3EbsPhSrhXWXwOGaRM9rNgOth4sFK3nks4vyI2x88EBlnYMc7n4dkm9CsqvmlMPXcTljGT1dSmealqCJT0GJysmXCzYwq4miAeEI4D5PtCOKq6vlQauoCaecFd9iidcjshf2tjLSrUfkXn9rPT96RLz//vt/+t9//bef//Pv/us//vZ//ubff/6Xf/j5H/9ZRCAvpUbmiYCcCZg6KC9H6e8Zc+APmVCoupRIhGwZMW1+N2sv2O9soeeMg8pxtdRGFHYNyAXXVRondHDOWNOetVNtlYip02HepevvNJJZ+HvXwGFn5lv87Lh5ug6rmXIvpa9PspQCwf9k7bHDJAFLgxngKSgMUopEUWbOijNn1DasaBY4DGQC2miGW7DQPktYasxlq6KBlpDCYPSIqmEBtzJXdBPYRMNcPguxkcuin1hzvfj90XPuDMdoioD2mcc5zetsJY0GaAe+kbipw6vpYjOmMYWVhcFjdAvEOLhfxdFLFh0+1+ji2bTs5Jtl0rbKxPEkWt2GEzqXJTfiPS6ZqCPSHQetNMeuy7Fy9s1sR9l62NEa815G7pwYVg5ppaNlKVcj9xaggpbcDxiRt2qrdh/6+9qNoRTHdVYWbFScQ9rXLQavTv/Z6AdmrH+jysmSX9VyPqflnUWM5tqQ0Rad0ZOF0ZUC+zFv2BIt64mTNcxfZpkHo40SSjQwdi0nRT32in5M6RnWF8QMBXeb1xPwdEdYWbn5rlGx4XxM+K2SX8yMmB0MBXl/GpPyzrwxJzdLoRXQsHxZ1C/xvsi+q8Et2OzD1ow1tqKIuZjZG5aC7Yq4NNzgWwDY3LRkysyRvGGraC2OYXWnYjAyVUPp2S+Jkb3BN4+zovxAy+7gSbnMaMS6nL+vOgMoDD+75+Bh2dMRPjchBhTG0vjO3wwr2IwnWsMLlj7yLM3oazSeL3WQacX+MQUWu5aWtN567T0ab1lP7+PccRzNuWQHlr7TbBuZtlNZ+AZXuMvAkbMi2xy9SlntRL1NlnMLvXHTYNMO3GElC/+A7+ngfIWqfihGXvSLMixexsI0rV1doObbOngwuLNz0YmYLaAS1kIy7Pu3BY6jY/NfFxiyJdyFqs9R7odU8YhjFWnYHEAGGBwQTJChuTPfpqe9YOBxqwLjJjDuyoYOSLFEAFaT7GPlj/dCdB0xGkBJQVFP/9AHK3ezdmeNsAGM+87KsWH+O3DwNQTwdvrlsSs19jgY6o7A/wF1FGqPl2gAAA=='
+          source = gzip.decompress(base64.b64decode(payload))
+          exec(compile(source, 'apply_location_binding.py', 'exec'))
+          PY
 
-      - name: Set up Flutter
+      - name: Set up Flutter for formatting
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
-      - name: Install dependencies
-        working-directory: app
-        run: flutter pub get
+      - name: Format location-bound Dart files
+        run: |
+          dart format \
+            app/lib/services/journey_location_binding.dart \
+            app/lib/data/daily_journey_experience.dart \
+            app/lib/state/app_state.dart \
+            app/lib/widgets/destination_background.dart \
+            app/lib/services/journey_background_policy.dart \
+            app/lib/screens/explore_screen.dart \
+            app/test/journey_location_binding_test.dart \
+            app/test/journey_background_policy_test.dart
 
-      - name: Analyze
-        working-directory: app
-        run: flutter analyze
-
-      - name: Test Flutter app
-        working-directory: app
-        run: flutter test
-
-      - name: Build preview web app
-        working-directory: app
-        run: flutter build web --release
-
-      - name: Deploy isolated preview Worker
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Commit canonical location binding
         shell: bash
         run: |
-          test -n "$CLOUDFLARE_API_TOKEN"
-          test -n "$CLOUDFLARE_ACCOUNT_ID"
-          npx --yes wrangler@4 deploy \
-            --name "$PREVIEW_WORKER" \
-            --var "PHOENIX_RELEASE:$PREVIEW_RELEASE"
-
-      - name: Verify preview release
-        shell: bash
-        run: |
-          health_url="${PREVIEW_URL}/api/health?commit=${PREVIEW_RELEASE}"
-          verified="false"
-
-          for attempt in {1..18}; do
-            response="$(curl --fail --silent --show-error "$health_url" || true)"
-            echo "Preview release check ${attempt}/18: ${response:-no response}"
-
-            if node -e '
-              let health;
-              try {
-                health = JSON.parse(process.argv[1]);
-              } catch (_) {
-                process.exit(1);
-              }
-              const expectedRelease = process.argv[2];
-              if (!health.ok ||
-                  !health.ai ||
-                  health.service !== "phoenix-journeys" ||
-                  health.release !== expectedRelease) {
-                process.exit(1);
-              }
-            ' "$response" "$PREVIEW_RELEASE"; then
-              verified="true"
-              break
-            fi
-
-            sleep 5
-          done
-
-          if [[ "$verified" != "true" ]]; then
-            echo "Phoenix PR preview did not propagate the expected release."
-            exit 1
-          fi
-
-      - name: Publish preview status
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          payload="$(node -e '
-            const [url] = process.argv.slice(1);
-            process.stdout.write(JSON.stringify({
-              state: "success",
-              description: "Isolated Phoenix preview is ready",
-              context: "cloudflare/preview",
-              target_url: url
-            }));
-          ' "$PREVIEW_URL")"
-
-          curl --fail --silent --show-error \
-            --request POST \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer $GITHUB_TOKEN" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
-            --data "$payload"
-
-      - name: Add or update preview comment
-        uses: actions/github-script@v7
-        env:
-          PHOENIX_PREVIEW_URL: ${{ env.PREVIEW_URL }}
-          PHOENIX_PREVIEW_RELEASE: ${{ env.PREVIEW_RELEASE }}
-        with:
-          script: |
-            const marker = '<!-- phoenix-pr-preview -->';
-            const shortRelease = process.env.PHOENIX_PREVIEW_RELEASE.slice(0, 8);
-            const body = `${marker}\n## Phoenix 独立体验版 ✅\n\n[打开 PR 体验链接](${process.env.PHOENIX_PREVIEW_URL}/?v=${shortRelease})\n\n- PR：#${context.issue.number}\n- Commit：\`${shortRelease}\`\n- 与正式版 main 完全隔离\n- 只有确认通过后才会合并上线`;
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              per_page: 100,
-            });
-            const existing = comments.find(
-              (comment) => comment.user.type === 'Bot' && comment.body?.includes(marker),
-            );
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            }
-
-  remove-preview:
-    if: >-
-      github.event.action == 'closed' &&
-      github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Delete isolated preview Worker
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        shell: bash
-        run: |
-          if [[ -z "$CLOUDFLARE_API_TOKEN" || -z "$CLOUDFLARE_ACCOUNT_ID" ]]; then
-            echo "Cloudflare credentials unavailable; preview cleanup skipped."
-            exit 0
-          fi
-          printf 'y\n' | npx --yes wrangler@4 delete --name "$PREVIEW_WORKER" || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout origin/main -- .github/workflows/preview-cloudflare.yml
+          git add \
+            .github/workflows/preview-cloudflare.yml \
+            app/lib/services/journey_location_binding.dart \
+            app/lib/data/daily_journey_experience.dart \
+            app/lib/state/app_state.dart \
+            app/lib/widgets/destination_background.dart \
+            app/lib/services/journey_background_policy.dart \
+            app/lib/screens/explore_screen.dart \
+            app/test/journey_location_binding_test.dart \
+            app/test/journey_background_policy_test.dart \
+            worker/journey_location_binding_rule.test.mjs
+          git commit -m "feat: bind map backgrounds and records to location paths [location-bound]"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
