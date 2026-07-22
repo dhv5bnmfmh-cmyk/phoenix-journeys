@@ -1,23 +1,39 @@
-name: Format two-level picker
+name: Flutter CI
 
 on:
   push:
     branches:
-      - feat/two-level-journey-picker
+      - main
+      - "feature/**"
+  pull_request:
+    branches:
+      - main
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: flutter-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  format:
-    if: "!contains(github.event.head_commit.message, '[picker-formatted]')"
+  verify:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+
     steps:
-      - name: Check out feature branch
+      - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: feat/two-level-journey-picker
-          fetch-depth: 0
+
+      - name: Test Phoenix agents
+        id: agents
+        continue-on-error: true
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -o pipefail
+          node --test worker/*.test.mjs 2>&1 | tee worker-test.log
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -25,20 +41,63 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Format picker sources
-        run: |
-          dart format \
-            app/lib/screens/explore_screen.dart \
-            app/lib/widgets/journey_picker_sheet.dart \
-            app/test/journey_picker_sheet_test.dart
+      - name: Install dependencies
+        run: flutter pub get
 
-      - name: Commit formatted sources
+      - name: Analyze
+        id: analyze
+        continue-on-error: true
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            app/lib/screens/explore_screen.dart \
-            app/lib/widgets/journey_picker_sheet.dart \
-            app/test/journey_picker_sheet_test.dart
-          git commit -m "style: format city and destination picker [picker-formatted]"
-          git push origin HEAD:feat/two-level-journey-picker
+          set -o pipefail
+          flutter analyze 2>&1 | tee analyze.log
+
+      - name: Test
+        id: test
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          flutter test 2>&1 | tee test.log
+
+      - name: Build web release
+        id: build
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          flutter build web --release 2>&1 | tee build-web.log
+
+      - name: Validate Cloudflare Worker bundle
+        id: worker
+        continue-on-error: true
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -o pipefail
+          npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run 2>&1 | tee worker-build.log
+
+      - name: Upload verification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-verification-logs
+          path: |
+            worker-test.log
+            worker-build.log
+            app/analyze.log
+            app/test.log
+            app/build-web.log
+          if-no-files-found: error
+
+      - name: Enforce verification results
+        shell: bash
+        run: |
+          failures=0
+          for result in \
+            "${{ steps.agents.outcome }}" \
+            "${{ steps.analyze.outcome }}" \
+            "${{ steps.test.outcome }}" \
+            "${{ steps.build.outcome }}" \
+            "${{ steps.worker.outcome }}"; do
+            if [[ "$result" != "success" ]]; then
+              failures=1
+            fi
+          done
+          exit "$failures"
