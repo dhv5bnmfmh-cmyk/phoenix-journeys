@@ -1,0 +1,113 @@
+name: Fix Journey location binding
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+
+permissions:
+  contents: write
+
+jobs:
+  fix-location-binding:
+    if: >-
+      github.event.pull_request.number == 83 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feat/two-level-journey-picker'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out writable feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Fix location path, map geometry and tests
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              file = Path(path)
+              text = file.read_text()
+              if old not in text:
+                  raise SystemExit(f'Expected pattern not found in {path}: {old!r}')
+              file.write_text(text.replace(old, new, 1))
+
+          replace_once(
+              'app/lib/data/daily_journey_experience.dart',
+              "  String get destinationId {\n    final separator = id.indexOf('-');",
+              "  String get destinationId {\n    if (id == 'guangzhou-chen-clan-academy') {\n      return 'chen-clan-ancestral-hall';\n    }\n    final separator = id.indexOf('-');",
+          )
+
+          replace_once(
+              'app/test/journey_city_catalog_test.dart',
+              "expect(paths, contains('guangzhou/chen-clan-academy'));",
+              "expect(paths, contains('guangzhou/chen-clan-ancestral-hall'));",
+          )
+
+          location_test = Path('app/test/journey_location_binding_test.dart')
+          text = location_test.read_text()
+          if not text.endswith("  });\n});\n"):
+              raise SystemExit('Unexpected location test ending')
+          location_test.write_text(text[:-7] + "}\n")
+
+          replace_once(
+              'app/lib/services/journey_location_binding.dart',
+              "      x: (0.38 + longitudeRatio * 0.50).clamp(0.38, 0.88),\n      y: (0.72 - latitudeRatio * 0.44).clamp(0.28, 0.72),",
+              "      x: (0.38 + longitudeRatio * 0.50)\n          .clamp(0.38, 0.88)\n          .toDouble(),\n      y: (0.72 - latitudeRatio * 0.44)\n          .clamp(0.28, 0.72)\n          .toDouble(),",
+          )
+
+          explore = Path('app/lib/screens/explore_screen.dart')
+          text = explore.read_text()
+          for old, new in [
+              ('t * t * beijing.dx', 't * t * destination.dx'),
+              ('t * t * beijing.dy', 't * t * destination.dy'),
+              ('2 * t * (beijing.dx - control.dx)', '2 * t * (destination.dx - control.dx)'),
+              ('2 * t * (beijing.dy - control.dy)', '2 * t * (destination.dy - control.dy)'),
+          ]:
+              if old not in text:
+                  raise SystemExit(f'Expected Explore geometry pattern not found: {old}')
+              text = text.replace(old, new, 1)
+          explore.write_text(text)
+          PY
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Format changed sources
+        run: |
+          dart format \
+            app/lib/data/daily_journey_experience.dart \
+            app/lib/services/journey_location_binding.dart \
+            app/lib/screens/explore_screen.dart \
+            app/test/journey_city_catalog_test.dart \
+            app/test/journey_location_binding_test.dart
+
+      - name: Verify focused location tests
+        working-directory: app
+        run: |
+          flutter analyze
+          flutter test test/journey_city_catalog_test.dart test/journey_location_binding_test.dart test/journey_background_policy_test.dart
+
+      - name: Commit fixes and remove temporary files
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/fix-location-binding.yml
+          git rm -f location-binding-format.log
+          git add -A
+          git commit -m "fix: complete canonical Journey location binding [location-bound]"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
