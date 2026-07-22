@@ -52,18 +52,18 @@ class HomeShell extends StatelessWidget {
                       padding: EdgeInsets.only(top: 12, bottom: 20),
                       child: _PhoenixRailMark(),
                     ),
-                    destinations: const [
+                    destinations: [
                       NavigationRailDestination(
-                        icon: Icon(Icons.public),
-                        label: Text('探索'),
+                        icon: const Icon(Icons.public),
+                        label: Text(state.displayText('探索')),
                       ),
                       NavigationRailDestination(
-                        icon: Icon(Icons.auto_stories),
-                        label: Text('护照'),
+                        icon: const Icon(Icons.auto_stories),
+                        label: Text(state.displayText('护照')),
                       ),
                       NavigationRailDestination(
-                        icon: Icon(Icons.person_outline),
-                        label: Text('我的'),
+                        icon: const Icon(Icons.person_outline),
+                        label: Text(state.displayText('我的')),
                       ),
                     ],
                   ),
