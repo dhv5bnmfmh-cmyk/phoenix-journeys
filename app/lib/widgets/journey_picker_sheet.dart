@@ -37,10 +37,7 @@ Future<String?> showJourneyPickerSheet({
                   const SizedBox(height: 3),
                   Text(
                     state.displayText('先选择城市，再进入这座城市的具体旅程。'),
-                    style: const TextStyle(
-                      color: Colors.black54,
-                      fontSize: 11,
-                    ),
+                    style: const TextStyle(color: Colors.black54, fontSize: 11),
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
@@ -66,9 +63,8 @@ Future<String?> showJourneyPickerSheet({
                           borderRadius: BorderRadius.circular(15),
                           child: InkWell(
                             key: ValueKey('journey-city-${city.id}'),
-                            onTap: () => setSheetState(
-                              () => selectedCityId = city.id,
-                            ),
+                            onTap: () =>
+                                setSheetState(() => selectedCityId = city.id),
                             borderRadius: BorderRadius.circular(15),
                             child: Container(
                               width: 92,
@@ -81,7 +77,9 @@ Future<String?> showJourneyPickerSheet({
                                 border: Border.all(
                                   color: selected
                                       ? PhoenixTheme.red
-                                      : PhoenixTheme.gold.withValues(alpha: .32),
+                                      : PhoenixTheme.gold.withValues(
+                                          alpha: .32,
+                                        ),
                                 ),
                               ),
                               child: Column(
@@ -191,12 +189,9 @@ Future<String?> showJourneyPickerSheet({
                               : Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           child: InkWell(
-                            key: ValueKey(
-                              'journey-destination-${journey.id}',
-                            ),
-                            onTap: () => Navigator.of(
-                              sheetContext,
-                            ).pop(journey.id),
+                            key: ValueKey('journey-destination-${journey.id}'),
+                            onTap: () =>
+                                Navigator.of(sheetContext).pop(journey.id),
                             borderRadius: BorderRadius.circular(16),
                             child: Container(
                               padding: const EdgeInsets.all(11),
@@ -205,16 +200,17 @@ Future<String?> showJourneyPickerSheet({
                                 border: Border.all(
                                   color: active
                                       ? PhoenixTheme.red.withValues(alpha: .45)
-                                      : PhoenixTheme.gold.withValues(alpha: .28),
+                                      : PhoenixTheme.gold.withValues(
+                                          alpha: .28,
+                                        ),
                                 ),
                               ),
                               child: Row(
                                 children: [
                                   CircleAvatar(
                                     radius: 20,
-                                    backgroundColor: PhoenixTheme.red.withValues(
-                                      alpha: .10,
-                                    ),
+                                    backgroundColor: PhoenixTheme.red
+                                        .withValues(alpha: .10),
                                     child: Text(
                                       state.displayText(journey.stampSymbol),
                                       style: const TextStyle(
@@ -234,7 +230,9 @@ Future<String?> showJourneyPickerSheet({
                                           children: [
                                             Expanded(
                                               child: Text(
-                                                state.displayText(journey.place),
+                                                state.displayText(
+                                                  journey.place,
+                                                ),
                                                 style: const TextStyle(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w900,

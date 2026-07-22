@@ -40,14 +40,14 @@ class ExploreScreen extends StatelessWidget {
     }
 
     Future<void> chooseJourney() async {
-    final journeyId = await showJourneyPickerSheet(
-      context: context,
-      state: state,
-    );
-    if (journeyId != null) {
-      await openJourneyById(journeyId);
+      final journeyId = await showJourneyPickerSheet(
+        context: context,
+        state: state,
+      );
+      if (journeyId != null) {
+        await openJourneyById(journeyId);
+      }
     }
-  }
 
     return Stack(
       children: [
