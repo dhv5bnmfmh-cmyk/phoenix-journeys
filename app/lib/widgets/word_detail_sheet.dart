@@ -12,6 +12,13 @@ import '../theme/phoenix_theme.dart';
 import 'narration_speed_stepper.dart';
 import 'word_mark.dart';
 
+const _popupInk = Color(0xFF2B1B0E);
+const _popupMuted = Color(0xFF68533C);
+const _popupCream = Color(0xFFFFF4D8);
+const _popupBlue = Color(0xFFEAF3FF);
+const _popupGreen = Color(0xFFEAF6E8);
+const _popupGoldLine = Color(0xFFE1B85D);
+
 Future<void> showWordDetail(
   BuildContext context,
   WordEntry entry, {
@@ -60,17 +67,19 @@ Future<void> showWordDetail(
       final sheetWidth = (size.width - 20).clamp(0.0, 560.0).toDouble();
       return ConstrainedBox(
         constraints: BoxConstraints(maxHeight: size.height * .52),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.topCenter,
-          child: SizedBox(
-            width: sheetWidth,
-            child: _WordDetailSheet(
-              narrationController: speedController,
-              entries: studyEntries,
-              initialIndex: safeIndex,
-              onSpeak: effectiveOnSpeak,
-              onSpeakEntry: effectiveOnSpeakEntry,
+        child: ClipRect(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: sheetWidth,
+              child: _WordDetailSheet(
+                narrationController: speedController,
+                entries: studyEntries,
+                initialIndex: safeIndex,
+                onSpeak: effectiveOnSpeak,
+                onSpeakEntry: effectiveOnSpeakEntry,
+              ),
             ),
           ),
         ),
@@ -193,7 +202,6 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
 
   Future<void> _previousWord() async {
     if (_isSpeaking || _isFirst) return;
-
     setState(() {
       _index -= 1;
       _speechUnavailable = false;
@@ -209,7 +217,6 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
       Navigator.of(context).pop();
       return;
     }
-
     setState(() {
       _index += 1;
       _speechUnavailable = false;
@@ -236,105 +243,58 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
         10,
         10 + MediaQuery.viewInsetsOf(context).bottom,
       ),
-      padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-      // A firm visual plane keeps the vocabulary grid from showing through.
+      padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
       decoration: PhoenixTheme.journeySolidPanelDecoration,
+      clipBehavior: Clip.antiAlias,
       child: DefaultTextStyle.merge(
-        style: PhoenixTheme.journeyBodyStyle,
-        child: Center(
+        style: PhoenixTheme.journeyBodyStyle.copyWith(
+          color: _popupInk,
+          shadows: const [],
+        ),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  WordMark(word: entry.word, size: compact ? 28 : 31),
-                  const SizedBox(width: 9),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                state.displayText(entry.word),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: PhoenixTheme.journeyTitleStyle.copyWith(
-                                  fontSize: compact ? 16 : 17.5,
-                                  height: 1,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              '${_index + 1} / ${widget.entries.length}',
-                              style: PhoenixTheme.journeyMetaStyle.copyWith(fontSize: 10),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          entry.pinyin,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: PhoenixTheme.journeyMetaStyle,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          state.displayText(entry.partOfSpeech),
-                          maxLines: 1,
-                          style: PhoenixTheme.journeyMetaStyle.copyWith(fontSize: 9.5),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  NarrationSpeedStepper(
-                    key: const ValueKey('word-detail-speed-control'),
-                    controller: widget.narrationController,
-                    compact: true,
-                  ),
-                  const SizedBox(width: 4),
-                  IconButton.filledTonal(
-                    tooltip: _isSpeaking ? '正在朗读' : '重新朗读',
-                    onPressed: _isSpeaking ? null : _speak,
-                    visualDensity: VisualDensity.compact,
-                    iconSize: 16,
-                    icon: Icon(
-                      _isSpeaking ? Icons.graphic_eq : Icons.volume_up_outlined,
-                    ),
-                  ),
-                ],
+              _PopupHeader(
+                entry: entry,
+                currentIndex: _index,
+                total: widget.entries.length,
+                compact: compact,
+                isSpeaking: _isSpeaking,
+                narrationController: widget.narrationController,
+                onSpeak: _speak,
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 6),
               ClipRRect(
                 borderRadius: BorderRadius.circular(99),
                 child: LinearProgressIndicator(
-                  minHeight: 3,
+                  minHeight: 4,
                   value: (_index + 1) / widget.entries.length,
                   color: PhoenixTheme.red,
-                  backgroundColor: PhoenixTheme.gold.withValues(alpha: .18),
+                  backgroundColor: Colors.white.withValues(alpha: .34),
                 ),
               ),
               const SizedBox(height: 7),
               _CompactDefinitionLine(
                 label: '中文',
                 text: entry.simpleChinese,
-                color: PhoenixTheme.contentPrimary,
+                background: _popupCream,
+                accent: PhoenixTheme.red,
               ),
               const SizedBox(height: 4),
               _CompactDefinitionLine(
                 label: 'English',
                 text: entry.englishDefinition,
-                color: PhoenixTheme.contentSecondary,
+                background: _popupBlue,
+                accent: PhoenixTheme.translation,
               ),
               const SizedBox(height: 4),
               _CompactDefinitionLine(
                 label: entry.nativeLabel(language),
                 text: entry.nativeDefinition(language),
-                color: PhoenixTheme.contentSecondary,
+                background: _popupGreen,
+                accent: const Color(0xFF39734A),
               ),
               const SizedBox(height: 7),
               _CoreExampleCard(
@@ -354,7 +314,10 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                   state.displayText('当前浏览器没有提供中文语音，请检查静音设置。'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.black54, fontSize: 9.5),
+                  style: PhoenixTheme.journeyMetaStyle.copyWith(
+                    color: const Color(0xFF5A1E1E),
+                    shadows: const [],
+                  ),
                 ),
               ],
               const SizedBox(height: 7),
@@ -366,6 +329,9 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                       onPressed: () => state.toggleSavedWord(entry.word),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size.fromHeight(40),
+                        foregroundColor: _popupInk,
+                        backgroundColor: Colors.white.withValues(alpha: .78),
+                        side: const BorderSide(color: _popupGoldLine),
                         visualDensity: VisualDensity.compact,
                         padding: const EdgeInsets.symmetric(horizontal: 5),
                       ),
@@ -379,7 +345,9 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                           state.displayText(isSaved ? '已收藏' : '收藏单词'),
                           maxLines: 1,
                           softWrap: false,
-                          style: const TextStyle(fontSize: 10.5),
+                          style: PhoenixTheme.journeyButtonStyle.copyWith(
+                            fontSize: 11,
+                          ),
                         ),
                       ),
                     ),
@@ -391,6 +359,9 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                       onPressed: _isSpeaking || _isFirst ? null : _previousWord,
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size.fromHeight(40),
+                        foregroundColor: _popupInk,
+                        backgroundColor: Colors.white.withValues(alpha: .78),
+                        side: const BorderSide(color: _popupGoldLine),
                         visualDensity: VisualDensity.compact,
                         padding: const EdgeInsets.symmetric(horizontal: 5),
                       ),
@@ -401,7 +372,9 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                           state.displayText('上一个单词'),
                           maxLines: 1,
                           softWrap: false,
-                          style: const TextStyle(fontSize: 10.5),
+                          style: PhoenixTheme.journeyButtonStyle.copyWith(
+                            fontSize: 11,
+                          ),
                         ),
                       ),
                     ),
@@ -429,9 +402,9 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                           state.displayText(_isLast ? '完成并收起' : '下一个单词'),
                           maxLines: 1,
                           softWrap: false,
-                          style: const TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w900,
+                          style: PhoenixTheme.journeyButtonStyle.copyWith(
+                            color: Colors.white,
+                            fontSize: 11,
                           ),
                         ),
                       ),
@@ -442,7 +415,112 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
             ],
           ),
         ),
-        ),
+      ),
+    );
+  }
+}
+
+class _PopupHeader extends StatelessWidget {
+  const _PopupHeader({
+    required this.entry,
+    required this.currentIndex,
+    required this.total,
+    required this.compact,
+    required this.isSpeaking,
+    required this.narrationController,
+    required this.onSpeak,
+  });
+
+  final WordEntry entry;
+  final int currentIndex;
+  final int total;
+  final bool compact;
+  final bool isSpeaking;
+  final NarrationController narrationController;
+  final Future<void> Function() onSpeak;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(8, 7, 8, 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF6A3E12).withValues(alpha: .58),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFFFE39A), width: 1),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              WordMark(word: entry.word, size: compact ? 27 : 30),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  state.displayText(entry.word),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: PhoenixTheme.journeyWordTitleStyle.copyWith(
+                    fontSize: compact ? 16 : 17,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${currentIndex + 1} / $total',
+                style: PhoenixTheme.journeyMetaStyle.copyWith(
+                  color: const Color(0xFFFFF2C9),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 3),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry.pinyin,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: PhoenixTheme.journeyMetaStyle.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      state.displayText(entry.partOfSpeech),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: PhoenixTheme.journeyMetaStyle.copyWith(
+                        color: const Color(0xFFFFE5A5),
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              NarrationSpeedStepper(
+                key: const ValueKey('word-detail-speed-control'),
+                controller: narrationController,
+                compact: true,
+              ),
+              const SizedBox(width: 3),
+              IconButton.filledTonal(
+                tooltip: isSpeaking ? '正在朗读' : '重新朗读',
+                onPressed: isSpeaking ? null : () => unawaited(onSpeak()),
+                visualDensity: VisualDensity.compact,
+                iconSize: 16,
+                icon: Icon(
+                  isSpeaking ? Icons.graphic_eq : Icons.volume_up_outlined,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -534,44 +612,61 @@ class _CompactDefinitionLine extends StatelessWidget {
   const _CompactDefinitionLine({
     required this.label,
     required this.text,
-    required this.color,
+    required this.background,
+    required this.accent,
   });
 
   final String label;
   final String text;
-  final Color color;
+  final Color background;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: .065),
+        color: background,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: .14)),
+        border: Border.all(color: accent.withValues(alpha: .5), width: 1),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 44,
+          Container(
+            width: 66,
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: .14),
+              borderRadius: BorderRadius.circular(6),
+            ),
             child: Text(
               state.displayText(label),
-              style: TextStyle(
-                color: color,
-                fontSize: 9.5,
-                fontWeight: FontWeight.w900,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: PhoenixTheme.journeyMetaStyle.copyWith(
+                color: accent,
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                shadows: const [],
               ),
             ),
           ),
+          const SizedBox(width: 7),
           Expanded(
             child: Text(
               state.displayText(text),
               maxLines: 2,
+              softWrap: true,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11.2, height: 1.18),
+              style: PhoenixTheme.journeyBodyStyle.copyWith(
+                color: _popupInk,
+                fontSize: 11.5,
+                height: 1.2,
+                shadows: const [],
+              ),
             ),
           ),
         ],
@@ -608,15 +703,22 @@ class _CoreExampleCard extends StatelessWidget {
     final state = context.watch<AppState>();
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(compact ? 6 : 8),
+      padding: EdgeInsets.all(compact ? 7 : 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .24)),
+        border: Border.all(color: PhoenixTheme.red.withValues(alpha: .45)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: isLoading
           ? const SizedBox(
-              height: 58,
+              height: 54,
               child: Center(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -627,7 +729,13 @@ class _CoreExampleCard extends StatelessWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
                     SizedBox(width: 8),
-                    Text('AI 正在查询实际用法…', style: TextStyle(fontSize: 10.5)),
+                    Flexible(
+                      child: Text(
+                        'AI 正在查询实际用法…',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -638,7 +746,9 @@ class _CoreExampleCard extends StatelessWidget {
                 const Expanded(
                   child: Text(
                     'AI 暂时无法查询实际例句，请稍后重试。',
-                    style: TextStyle(color: Colors.black54, fontSize: 10.5),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: _popupMuted, fontSize: 10.5),
                   ),
                 ),
                 TextButton(
@@ -648,27 +758,32 @@ class _CoreExampleCard extends StatelessWidget {
               ],
             )
           : Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
                   children: [
-                    Text(
-                      isOfflineFallback ? '旅程真实语境' : 'AI 实际用法',
-                      style: const TextStyle(
-                        color: PhoenixTheme.red,
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w900,
+                    Expanded(
+                      child: Text(
+                        isOfflineFallback ? '旅程真实语境' : 'AI 实际用法',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: PhoenixTheme.journeyMetaStyle.copyWith(
+                          color: PhoenixTheme.red,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          shadows: const [],
+                        ),
                       ),
                     ),
-                    const Spacer(),
                     if (!isOfflineFallback)
                       Text(
                         qualityReviewed ? 'AI 已复核' : 'AI 生成',
-                        style: const TextStyle(
+                        style: PhoenixTheme.journeyMetaStyle.copyWith(
                           color: PhoenixTheme.ai,
-                          fontSize: 8.5,
+                          fontSize: 9,
                           fontWeight: FontWeight.w800,
+                          shadows: const [],
                         ),
                       ),
                   ],
@@ -677,11 +792,14 @@ class _CoreExampleCard extends StatelessWidget {
                 Text(
                   state.displayText(example!.chinese),
                   maxLines: 2,
+                  softWrap: true,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: compact ? 12 : 13,
+                  style: PhoenixTheme.journeyBodyStyle.copyWith(
+                    color: _popupInk,
+                    fontSize: compact ? 12 : 12.5,
                     height: 1.18,
                     fontWeight: FontWeight.w800,
+                    shadows: const [],
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -696,10 +814,11 @@ class _CoreExampleCard extends StatelessWidget {
                     state.displayText('用法：$usageNote'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.black54,
-                      fontSize: 8.8,
-                      fontWeight: FontWeight.w700,
+                    style: PhoenixTheme.journeyMetaStyle.copyWith(
+                      color: _popupMuted,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w600,
+                      shadows: const [],
                     ),
                   ),
                 ],
@@ -722,24 +841,31 @@ class _CompactExampleLine extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 44,
+          width: 66,
           child: Text(
             state.displayText(label),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.black45,
-              fontSize: 8.5,
-              fontWeight: FontWeight.w900,
+            style: PhoenixTheme.journeyMetaStyle.copyWith(
+              color: PhoenixTheme.translation,
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              shadows: const [],
             ),
           ),
         ),
+        const SizedBox(width: 5),
         Expanded(
           child: Text(
             state.displayText(text),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 9.8, height: 1.15),
+            style: PhoenixTheme.journeyMetaStyle.copyWith(
+              color: _popupInk,
+              fontSize: 10,
+              height: 1.15,
+              shadows: const [],
+            ),
           ),
         ),
       ],
