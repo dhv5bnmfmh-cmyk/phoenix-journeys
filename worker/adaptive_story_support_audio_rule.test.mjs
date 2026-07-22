@@ -16,7 +16,7 @@ test('Story and Discovery fit their text to the available phone height', () => {
   assert.match(journey, /TextPainter/);
   assert.match(journey, /story-auto-visibility-scroll/);
   assert.match(interactive, /Scrollable\.ensureVisible/);
-  assert.match(journey, /maxSize: 20/);
+  assert.match(journey, /maxSize: 16/);
   assert.match(journey, /maxSize: 19/);
 });
 

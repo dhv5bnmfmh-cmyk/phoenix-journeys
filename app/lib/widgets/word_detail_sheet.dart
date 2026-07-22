@@ -50,6 +50,8 @@ Future<void> showWordDetail(
 
   return showModalBottomSheet<void>(
     context: context,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black26,
     showDragHandle: true,
     isScrollControlled: true,
     useSafeArea: true,
@@ -227,14 +229,26 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
     final example = generated?.toWordExample(nativeLanguage: language);
     final compact = MediaQuery.sizeOf(context).height < 780;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
+    return Container(
+      margin: EdgeInsets.fromLTRB(
         10,
         0,
         10,
         10 + MediaQuery.viewInsetsOf(context).bottom,
       ),
-      child: Center(
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+      decoration: BoxDecoration(
+        color: const Color(0xB3120E0C),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .38)),
+      ),
+      child: DefaultTextStyle.merge(
+        style: const TextStyle(
+          color: Colors.white,
+          fontFamily: PhoenixTheme.chineseFontFamily,
+          fontFamilyFallback: PhoenixTheme.chineseFontFallback,
+        ),
+        child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
           child: Column(
@@ -265,7 +279,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                             Text(
                               '${_index + 1} / ${widget.entries.length}',
                               style: const TextStyle(
-                                color: Colors.black45,
+                                color: Colors.white,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -278,7 +292,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: PhoenixTheme.red,
+                            color: Colors.white,
                             fontSize: 10.5,
                             fontWeight: FontWeight.w800,
                           ),
@@ -288,7 +302,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                           state.displayText(entry.partOfSpeech),
                           maxLines: 1,
                           style: const TextStyle(
-                            color: Colors.black54,
+                            color: Colors.white,
                             fontSize: 9.5,
                             fontWeight: FontWeight.w800,
                           ),
@@ -447,6 +461,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

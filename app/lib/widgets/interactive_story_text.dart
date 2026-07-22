@@ -524,11 +524,18 @@ class _VocabularyPopover extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      child: Container(
+      child: DefaultTextStyle.merge(
+        style: const TextStyle(
+          color: Colors.white,
+          fontFamily: PhoenixTheme.chineseFontFamily,
+          fontFamilyFallback: PhoenixTheme.chineseFontFallback,
+          shadows: [Shadow(color: Colors.black, blurRadius: 5)],
+        ),
+        child: Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(12, 9, 8, 9),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF8E8),
+          color: const Color(0x33000000),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .55)),
           boxShadow: const [
@@ -553,9 +560,14 @@ class _VocabularyPopover extends StatelessWidget {
                       Text(
                         state.displayText(entry.word),
                         style: const TextStyle(
-                          color: PhoenixTheme.red,
+                          color: Colors.white,
                           fontSize: 16,
+                          fontFamily: PhoenixTheme.chineseFontFamily,
+                          fontFamilyFallback: PhoenixTheme.chineseFontFallback,
                           fontWeight: FontWeight.w900,
+                          shadows: [
+                            Shadow(color: Colors.black, blurRadius: 5),
+                          ],
                         ),
                       ),
                       const SizedBox(width: 7),
@@ -564,9 +576,15 @@ class _VocabularyPopover extends StatelessWidget {
                           entry.pinyin,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: PhoenixTheme.ink.withValues(alpha: .62),
+                            color: Colors.white,
                             fontSize: 12.5,
+                            fontFamily: PhoenixTheme.chineseFontFamily,
+                            fontFamilyFallback:
+                                PhoenixTheme.chineseFontFallback,
                             fontWeight: FontWeight.w700,
+                            shadows: [
+                              Shadow(color: Colors.black, blurRadius: 5),
+                            ],
                           ),
                         ),
                       ),
@@ -576,31 +594,31 @@ class _VocabularyPopover extends StatelessWidget {
                   Text(
                     state.displayText(entry.partOfSpeech),
                     key: ValueKey('story-discovery-word-pos-${entry.word}'),
-                    style: TextStyle(color: PhoenixTheme.red.withValues(alpha: .78), fontSize: 10.5, fontWeight: FontWeight.w900),
+                    style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     state.displayText(nativeLabel),
                     key: ValueKey('story-discovery-word-native-label-${entry.word}'),
-                    style: TextStyle(color: PhoenixTheme.ink.withValues(alpha: .52), fontSize: 9.5, fontWeight: FontWeight.w900),
+                    style: const TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 1),
                   Text(
                     nativeDefinition,
                     key: ValueKey('story-discovery-word-native-${entry.word}'),
-                    style: const TextStyle(fontSize: 13, height: 1.3),
+                    style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.3),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'English',
                     key: ValueKey('story-discovery-word-english-label-${entry.word}'),
-                    style: TextStyle(color: PhoenixTheme.ink.withValues(alpha: .52), fontSize: 9.5, fontWeight: FontWeight.w900),
+                    style: const TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 1),
                   Text(
                     englishDefinition.isEmpty ? '—' : englishDefinition,
                     key: ValueKey('story-discovery-word-english-${entry.word}'),
-                    style: TextStyle(color: PhoenixTheme.ink.withValues(alpha: .7), fontSize: 11.5, height: 1.25),
+                    style: const TextStyle(color: Colors.white, fontSize: 11.5, height: 1.25),
                   ),
                 ],
               ),
@@ -614,6 +632,7 @@ class _VocabularyPopover extends StatelessWidget {
               icon: const Icon(Icons.close_rounded, size: 17),
             ),
           ],
+        ),
         ),
       ),
     );

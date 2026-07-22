@@ -400,18 +400,18 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
           child: Container(
             width: double.infinity,
             padding: EdgeInsets.fromLTRB(
-              compact ? 9 : 12,
-              compact ? 6 : 10,
-              compact ? 8 : 10,
-              compact ? 6 : 9,
+              compact ? 7 : 10,
+              compact ? 4 : 8,
+              compact ? 6 : 8,
+              compact ? 4 : 7,
             ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  PhoenixTheme.red.withValues(alpha: .78),
-                  const Color(0xCC651418),
+                  PhoenixTheme.red.withValues(alpha: .42),
+                  const Color(0x73651418),
                 ],
               ),
               borderRadius: BorderRadius.circular(compact ? 13 : 17),
@@ -428,8 +428,8 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                 Row(
                   children: [
                     Container(
-                      width: compact ? 28 : 34,
-                      height: compact ? 28 : 34,
+                      width: compact ? 24 : 30,
+                      height: compact ? 24 : 30,
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: .12),
                         borderRadius: BorderRadius.circular(11),
@@ -439,7 +439,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                             ? Icons.graphic_eq_rounded
                             : Icons.headphones_rounded,
                         color: Colors.white,
-                        size: compact ? 16 : 19,
+                        size: compact ? 14 : 17,
                       ),
                     ),
                     const SizedBox(width: 9),
@@ -453,7 +453,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 13.5,
+                              fontSize: 12,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -467,7 +467,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 color: Colors.white70,
-                                fontSize: 10,
+                                fontSize: 9,
                                 height: 1.2,
                               ),
                             ),
@@ -480,7 +480,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                       key: const ValueKey('narration-main-control'),
                       isPlaying: isPlaying,
                       tooltip: _mainButtonTooltip(status),
-                      size: compact ? 42 : 50,
+                      size: compact ? 36 : 44,
                       onPressed: _handleMainPressed,
                     ),
                     const SizedBox(width: 8),
@@ -493,7 +493,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                     ),
                   ],
                 ),
-                SizedBox(height: compact ? 5 : 9),
+                SizedBox(height: compact ? 3 : 7),
                 Row(
                   children: [
                     Expanded(

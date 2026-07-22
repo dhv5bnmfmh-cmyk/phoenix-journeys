@@ -17,5 +17,7 @@ test('story cards expose the destination image and vocabulary stays legible', ()
   assert.match(journey, /color: Colors\.white/);
   assert.match(story, /color: const Color\(0xFFFFD879\)/);
   assert.match(story, /Shadow\(/);
-  assert.match(player, /withValues\(alpha: \.78\)/);
+  assert.match(player, /withValues\(alpha: \.42\)/);
+  assert.match(journey, /fontFamily: PhoenixTheme\.chineseFontFamily/);
+  assert.match(journey, /color: const Color\(0x26000000\)/);
 });

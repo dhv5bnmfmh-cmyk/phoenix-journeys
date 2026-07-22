@@ -7,6 +7,14 @@ class PhoenixTheme {
   static const paper = Color(0xFFF8F2E8);
   static const translation = Color(0xFF476C8B);
   static const ai = Color(0xFF6A4C8C);
+  static const chineseFontFamily = 'STKaiti';
+  static const chineseFontFallback = <String>[
+    'Kaiti SC',
+    'KaiTi',
+    'DFKai-SB',
+    'Noto Serif CJK SC',
+    'serif',
+  ];
 
   static ThemeData get light {
     return ThemeData(

@@ -859,7 +859,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                   constraints,
                   _journeyContent.storyParagraphs,
                   minSize: 10.8,
-                  maxSize: 20,
+                  maxSize: 16,
                   lineHeight: 1.22,
                 );
                 return AnimatedBuilder(
@@ -912,9 +912,10 @@ class _JourneyScreenState extends State<JourneyScreen>
                                     color: Colors.white,
                                     fontSize: fontSize,
                                     height: 1.22,
-                                    fontWeight: isActive
-                                        ? FontWeight.w800
-                                        : FontWeight.w600,
+                                    fontFamily: PhoenixTheme.chineseFontFamily,
+                                    fontFamilyFallback:
+                                        PhoenixTheme.chineseFontFallback,
+                                    fontWeight: FontWeight.w700,
                                     shadows: const [
                                       Shadow(
                                         color: Color(0xE6000000),
@@ -983,7 +984,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             itemBuilder: (context, index) {
               final entry = _experience.words[index];
               return Material(
-                color: Colors.white.withValues(alpha: .94),
+                color: const Color(0x26000000),
                 borderRadius: BorderRadius.circular(10),
                 child: InkWell(
                   onTap: () => unawaited(_openWord(entry)),
@@ -1011,9 +1012,16 @@ class _JourneyScreenState extends State<JourneyScreen>
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
+                                  color: Colors.white,
                                   fontSize: 11,
                                   height: 1,
+                                  fontFamily: PhoenixTheme.chineseFontFamily,
+                                  fontFamilyFallback:
+                                      PhoenixTheme.chineseFontFallback,
                                   fontWeight: FontWeight.w900,
+                                  shadows: [
+                                    Shadow(color: Colors.black, blurRadius: 4),
+                                  ],
                                 ),
                               ),
                             ),
@@ -1033,9 +1041,15 @@ class _JourneyScreenState extends State<JourneyScreen>
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Colors.black54,
+                            color: Colors.white,
                             fontSize: cellHeight >= 120 ? 10 : 8,
                             height: 1,
+                            fontFamily: PhoenixTheme.chineseFontFamily,
+                            fontFamilyFallback:
+                                PhoenixTheme.chineseFontFallback,
+                            shadows: const [
+                              Shadow(color: Colors.black, blurRadius: 4),
+                            ],
                           ),
                         ),
                         if (showPartOfSpeech) ...[
@@ -1046,9 +1060,15 @@ class _JourneyScreenState extends State<JourneyScreen>
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: PhoenixTheme.red,
+                              color: Colors.white,
                               fontSize: 9.5,
+                              fontFamily: PhoenixTheme.chineseFontFamily,
+                              fontFamilyFallback:
+                                  PhoenixTheme.chineseFontFallback,
                               fontWeight: FontWeight.w800,
+                              shadows: [
+                                Shadow(color: Colors.black, blurRadius: 4),
+                              ],
                             ),
                           ),
                         ],
@@ -1060,10 +1080,16 @@ class _JourneyScreenState extends State<JourneyScreen>
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: PhoenixTheme.translation,
+                              color: Colors.white,
                               fontSize: 8.6,
                               height: 1.15,
+                              fontFamily: PhoenixTheme.chineseFontFamily,
+                              fontFamilyFallback:
+                                  PhoenixTheme.chineseFontFallback,
                               fontWeight: FontWeight.w700,
+                              shadows: [
+                                Shadow(color: Colors.black, blurRadius: 4),
+                              ],
                             ),
                           ),
                         ],
@@ -1075,9 +1101,15 @@ class _JourneyScreenState extends State<JourneyScreen>
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: PhoenixTheme.ai,
+                              color: Colors.white,
                               fontSize: 8.4,
                               height: 1.15,
+                              fontFamily: PhoenixTheme.chineseFontFamily,
+                              fontFamilyFallback:
+                                  PhoenixTheme.chineseFontFallback,
+                              shadows: [
+                                Shadow(color: Colors.black, blurRadius: 4),
+                              ],
                             ),
                           ),
                         ],
@@ -1089,9 +1121,15 @@ class _JourneyScreenState extends State<JourneyScreen>
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: Colors.black54,
+                              color: Colors.white,
                               fontSize: 8.4,
                               height: 1.15,
+                              fontFamily: PhoenixTheme.chineseFontFamily,
+                              fontFamilyFallback:
+                                  PhoenixTheme.chineseFontFallback,
+                              shadows: [
+                                Shadow(color: Colors.black, blurRadius: 4),
+                              ],
                             ),
                           ),
                         ],
