@@ -114,6 +114,14 @@ const summerPalaceWords = <WordEntry>[
     simpleChinese: '物体映在水面或镜子里的影像。',
     translation: 'Hình phản chiếu trên mặt nước hoặc trong gương.',
     englishDefinition: 'a reflection in water or a mirror',
+    examples: const [
+      WordExample(
+        chinese: '昆明湖里有万寿山的倒影。',
+        pinyin: 'Kūnmíng Hú lǐ yǒu Wànshòu Shān de dàoyǐng.',
+        vietnamese: 'Trong hồ Côn Minh có hình phản chiếu của núi Vạn Thọ.',
+        english: 'Longevity Hill is reflected in Kunming Lake.',
+      ),
+    ],
     symbol: '🪞',
   ),
   WordEntry(
@@ -132,6 +140,15 @@ const summerPalaceWords = <WordEntry>[
     simpleChinese: '不同事物结合在一起，形成一个整体。',
     translation: 'Hòa quyện nhiều yếu tố thành một thể thống nhất.',
     englishDefinition: 'to blend or integrate into a whole',
+    examples: const [
+      WordExample(
+        chinese: '颐和园把山水和建筑融合在一起。',
+        pinyin: 'Yíhéyuán bǎ shānshuǐ hé jiànzhù rónghé zài yìqǐ.',
+        vietnamese: 'Di Hòa Viên hòa quyện cảnh quan núi nước với kiến trúc.',
+        english:
+            'The Summer Palace blends landscape and architecture together.',
+      ),
+    ],
     symbol: '🧩',
   ),
   WordEntry(
@@ -160,6 +177,16 @@ const summerPalaceWords = <WordEntry>[
     translation:
         'Mượn cảnh quan xa hoặc ngoài vườn để tạo thành một phần của khung cảnh.',
     englishDefinition: 'borrowed scenery in landscape design',
+    examples: const [
+      WordExample(
+        chinese: '设计者用借景的方法把远山带进园林。',
+        pinyin: 'Shèjìzhě yòng jièjǐng de fāngfǎ bǎ yuǎnshān dài jìn yuánlín.',
+        vietnamese:
+            'Người thiết kế dùng phương pháp mượn cảnh để đưa núi xa vào khu vườn.',
+        english:
+            'The designer used borrowed scenery to bring distant hills into the garden.',
+      ),
+    ],
     symbol: '🔭',
   ),
   WordEntry(
@@ -169,6 +196,15 @@ const summerPalaceWords = <WordEntry>[
     simpleChinese: '湖水和山景组成的美丽风光。',
     translation: 'Cảnh đẹp hòa hợp giữa hồ nước và núi non.',
     englishDefinition: 'beautiful scenery of lakes and mountains',
+    examples: const [
+      WordExample(
+        chinese: '站在长廊边可以欣赏湖光山色。',
+        pinyin: 'Zhàn zài Chángláng biān kěyǐ xīnshǎng húguāng shānsè.',
+        vietnamese: 'Đứng bên Trường Lang có thể thưởng ngoạn cảnh hồ và núi.',
+        english:
+            'From the Long Corridor, visitors can enjoy the lake-and-mountain scenery.',
+      ),
+    ],
     symbol: '🌄',
   ),
   WordEntry(
