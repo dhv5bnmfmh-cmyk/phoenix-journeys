@@ -5,6 +5,7 @@ import 'package:pinyin/pinyin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/daily_journey_catalog.dart';
+import '../services/journey_location_binding.dart';
 
 enum ScriptMode { simplified, traditional }
 
@@ -63,6 +64,9 @@ class AppState extends ChangeNotifier {
   DailyJourneyExperience get activeJourney =>
       requireDailyJourneyExperience(activeJourneyId);
   DailyJourneyExperience get todayJourney => dailyJourneyForDate(_clock());
+  JourneyLocationBinding get activeJourneyLocation =>
+      requireJourneyLocation(activeJourneyId);
+  String get activeJourneyStoragePath => activeJourneyLocation.storageNamespace;
   bool get activeJourneyStampEarned =>
       earnedJourneyStampIds.contains(activeJourneyId);
   bool get beijingStampEarned =>
@@ -109,8 +113,24 @@ class AppState extends ChangeNotifier {
   bool isJourneyStampEarned(String journeyId) =>
       earnedJourneyStampIds.contains(journeyId);
 
-  String _key(String suffix, [String? journeyId]) =>
-      'journey.${journeyId ?? activeJourneyId}.$suffix';
+  String _key(String suffix, [String? journeyId]) {
+    final binding = requireJourneyLocation(journeyId ?? activeJourneyId);
+    return '${binding.storageNamespace}.$suffix';
+  }
+
+  String _legacyKey(String suffix, [String? journeyId]) {
+    final binding = requireJourneyLocation(journeyId ?? activeJourneyId);
+    return '${binding.legacyStorageNamespace}.$suffix';
+  }
+
+  int? _readJourneyInt(SharedPreferences prefs, String suffix) =>
+      prefs.getInt(_key(suffix)) ?? prefs.getInt(_legacyKey(suffix));
+
+  bool? _readJourneyBool(SharedPreferences prefs, String suffix) =>
+      prefs.getBool(_key(suffix)) ?? prefs.getBool(_legacyKey(suffix));
+
+  String? _readJourneyString(SharedPreferences prefs, String suffix) =>
+      prefs.getString(_key(suffix)) ?? prefs.getString(_legacyKey(suffix));
 
   Future<void> load() async {
     loadStatus = AppLoadStatus.loading;
@@ -141,6 +161,7 @@ class AppState extends ChangeNotifier {
 
       activeJourneyId = dailyJourneyForDate(_clock()).id;
       _loadActiveJourney(prefs);
+      await _migrateActiveJourneyStorage(prefs);
       loadStatus = AppLoadStatus.ready;
     } catch (error, stackTrace) {
       debugPrint('Failed to load Phoenix state: $error');
@@ -155,11 +176,11 @@ class AppState extends ChangeNotifier {
   void _loadActiveJourney(SharedPreferences prefs) {
     final isLegacyBeijing = activeJourneyId == 'beijing-forbidden-city';
     final storedStep =
-        prefs.getInt(_key('step')) ??
+        _readJourneyInt(prefs, 'step') ??
         (isLegacyBeijing ? prefs.getInt('beijingJourneyStep') : null) ??
         0;
     final storedFurthest =
-        prefs.getInt(_key('furthestStep')) ??
+        _readJourneyInt(prefs, 'furthestStep') ??
         (isLegacyBeijing ? prefs.getInt('beijingJourneyFurthestStep') : null) ??
         storedStep;
 
@@ -168,34 +189,35 @@ class AppState extends ChangeNotifier {
         .max(_journeyStep, _safeJourneyStep(storedFurthest))
         .toInt();
     journeyCompleted =
-        prefs.getBool(_key('completed')) ??
+        _readJourneyBool(prefs, 'completed') ??
         (isLegacyBeijing ? prefs.getBool('journeyCompleted') ?? false : false);
     wonderDraft =
-        prefs.getString(_key('wonderDraft')) ??
+        _readJourneyString(prefs, 'wonderDraft') ??
         (isLegacyBeijing ? prefs.getString('wonderDraft') : null) ??
         '';
     expressDraft =
-        prefs.getString(_key('expressDraft')) ??
+        _readJourneyString(prefs, 'expressDraft') ??
         (isLegacyBeijing ? prefs.getString('expressDraft') : null) ??
         '';
     memoryDraft =
-        prefs.getString(_key('memoryDraft')) ??
+        _readJourneyString(prefs, 'memoryDraft') ??
         (isLegacyBeijing ? prefs.getString('memoryDraft') : null) ??
         '';
-    guideFeedbackReply = prefs.getString(_key('guideFeedbackReply')) ?? '';
-    guideFeedbackOffline = prefs.getBool(_key('guideFeedbackOffline')) ?? false;
+    guideFeedbackReply = _readJourneyString(prefs, 'guideFeedbackReply') ?? '';
+    guideFeedbackOffline =
+        _readJourneyBool(prefs, 'guideFeedbackOffline') ?? false;
     writingFeedbackCorrected =
-        prefs.getString(_key('writingFeedbackCorrected')) ?? '';
+        _readJourneyString(prefs, 'writingFeedbackCorrected') ?? '';
     writingFeedbackExplanation =
-        prefs.getString(_key('writingFeedbackExplanation')) ?? '';
+        _readJourneyString(prefs, 'writingFeedbackExplanation') ?? '';
     writingFeedbackNatural =
-        prefs.getString(_key('writingFeedbackNatural')) ?? '';
+        _readJourneyString(prefs, 'writingFeedbackNatural') ?? '';
     writingFeedbackEncouragement =
-        prefs.getString(_key('writingFeedbackEncouragement')) ?? '';
+        _readJourneyString(prefs, 'writingFeedbackEncouragement') ?? '';
     writingFeedbackOffline =
-        prefs.getBool(_key('writingFeedbackOffline')) ?? false;
+        _readJourneyBool(prefs, 'writingFeedbackOffline') ?? false;
     journeyUpdatedAt = DateTime.tryParse(
-      prefs.getString(_key('updatedAt')) ??
+      _readJourneyString(prefs, 'updatedAt') ??
           (isLegacyBeijing ? prefs.getString('journeyUpdatedAt') : null) ??
           '',
     );
@@ -204,6 +226,41 @@ class AppState extends ChangeNotifier {
       _journeyStep = journeyLastStep;
       _journeyFurthestStep = journeyLastStep;
     }
+  }
+
+  Future<void> _migrateActiveJourneyStorage(SharedPreferences prefs) async {
+    if (prefs.containsKey(_key('step'))) return;
+
+    final writes = <Future<bool>>[
+      prefs.setInt(_key('step'), _journeyStep),
+      prefs.setInt(_key('furthestStep'), _journeyFurthestStep),
+      prefs.setBool(_key('completed'), journeyCompleted),
+      prefs.setString(_key('wonderDraft'), wonderDraft),
+      prefs.setString(_key('expressDraft'), expressDraft),
+      prefs.setString(_key('memoryDraft'), memoryDraft),
+      prefs.setString(_key('guideFeedbackReply'), guideFeedbackReply),
+      prefs.setBool(_key('guideFeedbackOffline'), guideFeedbackOffline),
+      prefs.setString(
+        _key('writingFeedbackCorrected'),
+        writingFeedbackCorrected,
+      ),
+      prefs.setString(
+        _key('writingFeedbackExplanation'),
+        writingFeedbackExplanation,
+      ),
+      prefs.setString(_key('writingFeedbackNatural'), writingFeedbackNatural),
+      prefs.setString(
+        _key('writingFeedbackEncouragement'),
+        writingFeedbackEncouragement,
+      ),
+      prefs.setBool(_key('writingFeedbackOffline'), writingFeedbackOffline),
+    ];
+    if (journeyUpdatedAt != null) {
+      writes.add(
+        prefs.setString(_key('updatedAt'), journeyUpdatedAt!.toIso8601String()),
+      );
+    }
+    await Future.wait(writes);
   }
 
   int _safeJourneyStep(int value) {
@@ -215,6 +272,7 @@ class AppState extends ChangeNotifier {
     activeJourneyId = requireDailyJourneyExperience(journeyId).id;
     final prefs = await SharedPreferences.getInstance();
     _loadActiveJourney(prefs);
+    await _migrateActiveJourneyStorage(prefs);
     notifyListeners();
   }
 

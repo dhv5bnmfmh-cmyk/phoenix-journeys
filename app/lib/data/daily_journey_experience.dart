@@ -51,6 +51,8 @@ class DailyJourneyExperience {
     return id.substring(separator + 1);
   }
 
+  String get geoNodeId => content.geoNodeId;
+
   String get locationPath => '$cityId/$destinationId';
 
   String get stampTitle => '$city · $place';

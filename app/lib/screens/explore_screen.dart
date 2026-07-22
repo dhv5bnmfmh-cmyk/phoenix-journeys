@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/journey_background.dart';
+import '../services/journey_location_binding.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/destination_background.dart';
@@ -223,6 +224,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
+    final destination = state.activeJourneyLocation;
     final status = state.journeyCompleted
         ? '${state.activeJourney.city}已点亮 · 印章已获得'
         : state.hasJourneyInProgress
@@ -265,6 +267,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
                   : Curves.easeInOutCubic.transform(_controller.value);
               final geometry = _FlightGeometry(
                 Size(constraints.maxWidth, constraints.maxHeight),
+                destination.mapPoint,
               );
               final plane = geometry.pointAt(flightT);
               final angle = geometry.angleAt(flightT);
@@ -276,6 +279,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
                       painter: _PremiumMapPainter(
                         routeProgress: journeyProgress,
                         pulse: _controller.value,
+                        destinationPoint: destination.mapPoint,
                       ),
                     ),
                   ),
@@ -386,8 +390,8 @@ class _FlightMapCardState extends State<_FlightMapCard>
                     ),
                   ),
                   Positioned(
-                    left: geometry.beijing.dx - 16,
-                    top: geometry.beijing.dy - 16,
+                    left: geometry.destination.dx - 16,
+                    top: geometry.destination.dy - 16,
                     child: _CityMarker(
                       label: state.displayText(state.activeJourney.city),
                       subtitle: state.activeJourney.cityCode,
@@ -455,15 +459,21 @@ class _FlightMapCardState extends State<_FlightMapCard>
 }
 
 class _FlightGeometry {
-  _FlightGeometry(this.size)
+  _FlightGeometry(this.size, JourneyMapPoint destinationPoint)
     : hanoi = Offset(size.width * .23, size.height * .68),
-      control = Offset(size.width * .48, size.height * .25),
-      beijing = Offset(size.width * .78, size.height * .43);
+      control = Offset(
+        size.width * ((.23 + destinationPoint.x) / 2),
+        size.height * .22,
+      ),
+      destination = Offset(
+        size.width * destinationPoint.x,
+        size.height * destinationPoint.y,
+      );
 
   final Size size;
   final Offset hanoi;
   final Offset control;
-  final Offset beijing;
+  final Offset destination;
 
   Offset pointAt(double t) {
     final oneMinus = 1 - t;
@@ -872,10 +882,15 @@ class _FeatureChip extends StatelessWidget {
 }
 
 class _PremiumMapPainter extends CustomPainter {
-  const _PremiumMapPainter({required this.routeProgress, required this.pulse});
+  const _PremiumMapPainter({
+    required this.routeProgress,
+    required this.pulse,
+    required this.destinationPoint,
+  });
 
   final double routeProgress;
   final double pulse;
+  final JourneyMapPoint destinationPoint;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1017,14 +1032,14 @@ class _PremiumMapPainter extends CustomPainter {
   }
 
   void _drawRoute(Canvas canvas, Size size) {
-    final geometry = _FlightGeometry(size);
+    final geometry = _FlightGeometry(size, destinationPoint);
     final route = Path()
       ..moveTo(geometry.hanoi.dx, geometry.hanoi.dy)
       ..quadraticBezierTo(
         geometry.control.dx,
         geometry.control.dy,
-        geometry.beijing.dx,
-        geometry.beijing.dy,
+        geometry.destination.dx,
+        geometry.destination.dy,
       );
 
     final glow = Paint()
@@ -1078,7 +1093,8 @@ class _PremiumMapPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _PremiumMapPainter oldDelegate) {
     return oldDelegate.routeProgress != routeProgress ||
-        oldDelegate.pulse != pulse;
+        oldDelegate.pulse != pulse ||
+        oldDelegate.destinationPoint != destinationPoint;
   }
 }
 

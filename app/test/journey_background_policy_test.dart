@@ -49,14 +49,8 @@ void main() {
       page: JourneyBackgroundPage.story,
       localDate: DateTime(2026, 7, 21),
       catalog: [
-        _asset(
-          id: 'seed',
-          origin: JourneyBackgroundOrigin.originalSeed,
-        ),
-        _asset(
-          id: 'ai',
-          origin: JourneyBackgroundOrigin.aiGenerated,
-        ),
+        _asset(id: 'seed', origin: JourneyBackgroundOrigin.originalSeed),
+        _asset(id: 'ai', origin: JourneyBackgroundOrigin.aiGenerated),
       ],
     );
 
@@ -70,10 +64,7 @@ void main() {
       page: JourneyBackgroundPage.story,
       localDate: DateTime(2026, 7, 21),
       catalog: [
-        _asset(
-          id: 'seed',
-          origin: JourneyBackgroundOrigin.originalSeed,
-        ),
+        _asset(id: 'seed', origin: JourneyBackgroundOrigin.originalSeed),
         _asset(
           id: 'flat-ai',
           origin: JourneyBackgroundOrigin.aiGenerated,
@@ -91,14 +82,8 @@ void main() {
       journeyId: 'beijing-forbidden-city',
       page: JourneyBackgroundPage.story,
       catalog: [
-        _asset(
-          id: 'seed',
-          origin: JourneyBackgroundOrigin.originalSeed,
-        ),
-        _asset(
-          id: 'ai',
-          origin: JourneyBackgroundOrigin.aiGenerated,
-        ),
+        _asset(id: 'seed', origin: JourneyBackgroundOrigin.originalSeed),
+        _asset(id: 'ai', origin: JourneyBackgroundOrigin.aiGenerated),
       ],
     );
 
@@ -106,6 +91,40 @@ void main() {
     expect(kpi.pageInventory, 1);
     expect(kpi.destinationTargetMet, isFalse);
     expect(kpi.pageTargetMet, isFalse);
+  });
+
+  test('runtime AI background must match the Journey location folder', () {
+    final selected = policy.select(
+      journeyId: 'beijing-forbidden-city',
+      locationPath: 'beijing/forbidden-city',
+      page: JourneyBackgroundPage.story,
+      localDate: DateTime(2026, 7, 22),
+      catalog: [
+        JourneyBackgroundAsset(
+          id: 'wrong-folder',
+          journeyId: 'beijing-forbidden-city',
+          assetPath:
+              'assets/images/backgrounds/generated/beijing/summer-palace/wrong.webp',
+          generatedOn: DateTime.utc(2026, 7, 22),
+          origin: JourneyBackgroundOrigin.aiGenerated,
+          complianceReviewed: true,
+          complianceScore: 100,
+        ),
+        JourneyBackgroundAsset(
+          id: 'correct-folder',
+          journeyId: 'beijing-forbidden-city',
+          assetPath:
+              'assets/images/backgrounds/generated/beijing/forbidden-city/correct.webp',
+          generatedOn: DateTime.utc(2026, 7, 22),
+          origin: JourneyBackgroundOrigin.aiGenerated,
+          complianceReviewed: true,
+          complianceScore: 100,
+        ),
+      ],
+    );
+
+    expect(selected, isNotNull);
+    expect(selected!.id, 'correct-folder');
   });
 
   test('KPI constants permanently require ten offline images per city', () {
