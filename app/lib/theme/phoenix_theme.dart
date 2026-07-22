@@ -71,14 +71,24 @@ class PhoenixTheme {
     alpha: .30,
   );
 
-  // Vocabulary details sit above another text-heavy page, so this surface is
-  // deliberately opaque while keeping the same Phoenix red/gold character.
+  // Vocabulary details use a fully opaque Phoenix red-and-gold surface. The
+  // colored gradient keeps the popup visually rich without letting the page
+  // or destination background show through it.
   static BoxDecoration get journeySolidPanelDecoration => BoxDecoration(
-    color: const Color(0xFF2A1715),
+    gradient: const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF8F2B2D),
+        Color(0xFF5F211F),
+        Color(0xFFB56A2A),
+      ],
+      stops: [0, .58, 1],
+    ),
     borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: contentAccent.withValues(alpha: .62)),
+    border: Border.all(color: contentAccent, width: 1.25),
     boxShadow: const [
-      BoxShadow(color: Color(0x42000000), blurRadius: 18, offset: Offset(0, 7)),
+      BoxShadow(color: Color(0x66000000), blurRadius: 20, offset: Offset(0, 8)),
     ],
   );
 
