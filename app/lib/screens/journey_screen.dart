@@ -1463,7 +1463,7 @@ class _CompactTextBlock extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 2),
       padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.transparent,
       ),
       child: Row(
@@ -1471,7 +1471,7 @@ class _CompactTextBlock extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 1),
-            child: const CircleAvatar(
+            child: CircleAvatar(
               radius: 9,
               backgroundColor: const Color(0x99000000),
               child: Text(
