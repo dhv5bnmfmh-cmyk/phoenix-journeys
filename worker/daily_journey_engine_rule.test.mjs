@@ -14,6 +14,7 @@ const progress = readFileSync('app/lib/widgets/journey_progress_header.dart', 'u
 test('daily catalog contains a reviewed seven-day city cycle', () => {
   assert.match(catalog, /beijingForbiddenCityJourney/);
   assert.match(catalog, /shanghai-bund/);
+  assert.match(catalog, /summerPalaceJourneyExperience/);
   assert.match(catalog, /xian-city-wall/);
   assert.match(catalog, /extendedJourneyExperiences/);
   assert.match(extended, /hangzhou-west-lake/);

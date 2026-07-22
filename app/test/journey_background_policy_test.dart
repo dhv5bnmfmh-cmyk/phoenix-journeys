@@ -127,6 +127,21 @@ void main() {
     expect(selected!.id, 'correct-folder');
   });
 
+  test('Summer Palace ships ten reviewed location-bound backgrounds', () {
+    final assets = journeyBackgroundCatalog
+        .where((asset) => asset.journeyId == 'beijing-summer-palace')
+        .toList(growable: false);
+    expect(assets, hasLength(10));
+    expect(
+      assets.every(
+        (asset) => asset.assetPath.contains(
+          '/generated/beijing/summer-palace/',
+        ),
+      ),
+      isTrue,
+    );
+  });
+
   test('KPI constants permanently require ten offline images per city', () {
     expect(JourneyBackgroundPolicy.requiredOfflineInventoryPerDestination, 10);
     expect(JourneyBackgroundPolicy.minimumDestinationInventory, 10);

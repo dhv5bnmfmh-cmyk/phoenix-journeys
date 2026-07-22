@@ -157,7 +157,8 @@ const summerPalaceWords = <WordEntry>[
     pinyin: 'jièjǐng',
     partOfSpeech: '名词／动词',
     simpleChinese: '把远处或园外的景色引入当前视野的园林方法。',
-    translation: 'Mượn cảnh quan xa hoặc ngoài vườn để tạo thành một phần của khung cảnh.',
+    translation:
+        'Mượn cảnh quan xa hoặc ngoài vườn để tạo thành một phần của khung cảnh.',
     englishDefinition: 'borrowed scenery in landscape design',
     symbol: '🔭',
   ),
