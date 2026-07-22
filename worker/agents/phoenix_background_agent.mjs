@@ -100,6 +100,35 @@ const libraryVariants = Object.freeze([
   },
 ]);
 
+// Published libraries may keep human-friendly art-direction slugs while the
+// scheduler uses stable semantic slot IDs. Canonicalizing shipped IDs here
+// prevents the Agent from regenerating a destination whose ten slots already
+// exist in the reviewed offline library.
+const publishedSlotAliases = Object.freeze({
+  'beijing-forbidden-city-01-twilight-courtyard':
+    'beijing-forbidden-city-01-sunrise-arrival',
+  'beijing-forbidden-city-02-moonlit-palace':
+    'beijing-forbidden-city-02-morning-street',
+  'beijing-forbidden-city-03-golden-gate':
+    'beijing-forbidden-city-03-misty-detail',
+  'beijing-forbidden-city-04-winter-snow':
+    'beijing-forbidden-city-04-bright-panorama',
+  'beijing-forbidden-city-05-after-rain':
+    'beijing-forbidden-city-05-after-rain',
+  'beijing-forbidden-city-06-autumn-maples':
+    'beijing-forbidden-city-06-seasonal-landscape',
+  'beijing-forbidden-city-07-clear-morning':
+    'beijing-forbidden-city-07-golden-hour',
+  'beijing-forbidden-city-08-sunlit-corridor':
+    'beijing-forbidden-city-08-blue-hour',
+  'beijing-forbidden-city-09-misty-courtyard':
+    'beijing-forbidden-city-09-lantern-night',
+  'beijing-forbidden-city-10-sunset-panorama':
+    'beijing-forbidden-city-10-quiet-night-panorama',
+});
+
+const canonicalSlotId = (id) => publishedSlotAliases[id] ?? id;
+
 export class PhoenixBackgroundAgent {
   constructor({
     targetPerDestination = PHOENIX_OFFLINE_IMAGES_PER_DESTINATION,
@@ -112,7 +141,7 @@ export class PhoenixBackgroundAgent {
     existingIds = [],
     maxNewImages = Number.POSITIVE_INFINITY,
   } = {}) {
-    const existing = new Set(existingIds);
+    const existing = new Set(existingIds.map(canonicalSlotId));
     const allSlots = journeyIds.flatMap((journeyId) =>
       libraryVariants
         .slice(0, this.targetPerDestination)
