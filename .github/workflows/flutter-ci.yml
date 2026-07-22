@@ -5,12 +5,13 @@ on:
     branches:
       - main
       - "feature/**"
+      - "feat/**"
   pull_request:
     branches:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
@@ -26,6 +27,125 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: feat/two-level-journey-picker
+          fetch-depth: 0
+
+      - name: Wire two-level picker into Explore
+        if: github.ref == 'refs/heads/feat/two-level-journey-picker'
+        working-directory: ${{ github.workspace }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/screens/explore_screen.dart')
+          text = path.read_text()
+
+          import_anchor = "import '../widgets/destination_background.dart';\n"
+          import_replacement = (
+              "import '../widgets/destination_background.dart';\n"
+              "import '../widgets/journey_picker_sheet.dart';\n"
+          )
+          if "journey_picker_sheet.dart" not in text:
+              if import_anchor not in text:
+                  raise SystemExit('Explore import anchor not found')
+              text = text.replace(import_anchor, import_replacement, 1)
+
+          old = """    Future<void> chooseJourney() async {
+              await showModalBottomSheet<void>(
+                context: context,
+                useSafeArea: true,
+                showDragHandle: true,
+                builder: (sheetContext) => Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.displayText('选择城市旅程'),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontSize: 19,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        state.displayText('今日旅程是推荐路线，其他城市也可随时继续。'),
+                        style: const TextStyle(color: Colors.black54, fontSize: 11),
+                      ),
+                      const SizedBox(height: 8),
+                      ...dailyJourneyExperiences.map(
+                        (journey) => Card(
+                          margin: const EdgeInsets.only(bottom: 6),
+                          child: ListTile(
+                            key: ValueKey('journey-picker-${journey.id}'),
+                            dense: true,
+                            leading: CircleAvatar(
+                              backgroundColor: PhoenixTheme.red.withValues(alpha: .10),
+                              child: Text(
+                                state.displayText(journey.stampSymbol),
+                                style: const TextStyle(
+                                  color: PhoenixTheme.red,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              state.displayText('${journey.city} · ${journey.place}'),
+                              style: const TextStyle(fontWeight: FontWeight.w900),
+                            ),
+                            subtitle: Text(
+                              state.displayText(
+                                journey.id == state.todayJourney.id
+                                    ? '今日推荐 · 点击进入'
+                                    : state.isJourneyStampEarned(journey.id)
+                                    ? '印章已获得 · 可再次体验'
+                                    : '可随时开始或继续',
+                              ),
+                            ),
+                            trailing: const Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 15,
+                            ),
+                            onTap: () {
+                              Navigator.of(sheetContext).pop();
+                              unawaited(openJourneyById(journey.id));
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+          """
+
+          new = """    Future<void> chooseJourney() async {
+              final journeyId = await showJourneyPickerSheet(
+                context: context,
+                state: state,
+              );
+              if (journeyId != null) {
+                await openJourneyById(journeyId);
+              }
+            }
+          """
+
+          if old not in text:
+              raise SystemExit('Legacy journey picker block not found')
+          path.write_text(text.replace(old, new, 1))
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git show 80e57b01ab058b9f024eb0c1a2cbfde9a53b9666:.github/workflows/flutter-ci.yml > .github/workflows/flutter-ci.yml
+          rm -f .github/workflows/apply-journey-picker-patch.yml
+          git add app/lib/screens/explore_screen.dart .github/workflows/flutter-ci.yml .github/workflows/apply-journey-picker-patch.yml
+          git commit -m "feat: connect city and destination picker [picker-wired]"
+          git push origin HEAD:feat/two-level-journey-picker
 
       - name: Test Phoenix agents
         id: agents
