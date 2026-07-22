@@ -46,6 +46,9 @@ class DailyJourneyExperience {
   }
 
   String get destinationId {
+    if (id == 'guangzhou-chen-clan-academy') {
+      return 'chen-clan-ancestral-hall';
+    }
     final separator = id.indexOf('-');
     if (separator < 0 || separator == id.length - 1) return id;
     return id.substring(separator + 1);

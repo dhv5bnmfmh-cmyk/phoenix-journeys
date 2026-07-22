@@ -50,18 +50,18 @@ class JourneyLocationBinding {
 
     final longitudeRatio =
         ((longitude - minLongitude) / (maxLongitude - minLongitude)).clamp(
-          0.0,
-          1.0,
-        );
+      0.0,
+      1.0,
+    );
     final latitudeRatio =
         ((latitude - minLatitude) / (maxLatitude - minLatitude)).clamp(
-          0.0,
-          1.0,
-        );
+      0.0,
+      1.0,
+    );
 
     return JourneyMapPoint(
-      x: (0.38 + longitudeRatio * 0.50).clamp(0.38, 0.88),
-      y: (0.72 - latitudeRatio * 0.44).clamp(0.28, 0.72),
+      x: (0.38 + longitudeRatio * 0.50).clamp(0.38, 0.88).toDouble(),
+      y: (0.72 - latitudeRatio * 0.44).clamp(0.28, 0.72).toDouble(),
     );
   }
 }

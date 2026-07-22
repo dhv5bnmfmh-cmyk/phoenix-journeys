@@ -63,19 +63,19 @@ class ExploreScreen extends StatelessWidget {
               Text(
                 state.displayText('欢迎回来，Explorer'),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w900,
-                  height: 1.1,
-                ),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                      height: 1.1,
+                    ),
               ),
               const SizedBox(height: 2),
               Text(
                 state.displayText('世界很大，从一门语言开始。'),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontSize: 11.5,
-                  height: 1.15,
-                  color: Colors.black54,
-                ),
+                      fontSize: 11.5,
+                      height: 1.15,
+                      color: Colors.black54,
+                    ),
               ),
               const SizedBox(height: 8),
               _FlightMapCard(state: state, height: mapHeight),
@@ -228,10 +228,10 @@ class _FlightMapCardState extends State<_FlightMapCard>
     final status = state.journeyCompleted
         ? '${state.activeJourney.city}已点亮 · 印章已获得'
         : state.hasJourneyInProgress
-        ? '${state.activeJourneyStampEarned ? '印章已收藏 · ' : ''}旅程 ${state.beijingJourneyProgressPercent}%'
-        : state.activeJourneyStampEarned
-        ? '${state.activeJourney.city}印章已收藏 · 可以再次出发'
-        : '${state.activeJourney.distanceLabel} · 学习航程';
+            ? '${state.activeJourneyStampEarned ? '印章已收藏 · ' : ''}旅程 ${state.beijingJourneyProgressPercent}%'
+            : state.activeJourneyStampEarned
+                ? '${state.activeJourney.city}印章已收藏 · 可以再次出发'
+                : '${state.activeJourney.distanceLabel} · 学习航程';
 
     return Container(
       height: widget.height,
@@ -260,8 +260,8 @@ class _FlightMapCardState extends State<_FlightMapCard>
               final journeyProgress = state.journeyCompleted
                   ? 1.0
                   : state.hasJourneyInProgress
-                  ? state.beijingJourneyProgress
-                  : _controller.value;
+                      ? state.beijingJourneyProgress
+                      : _controller.value;
               final flightT = state.journeyCompleted
                   ? 1.0
                   : Curves.easeInOutCubic.transform(_controller.value);
@@ -460,15 +460,15 @@ class _FlightMapCardState extends State<_FlightMapCard>
 
 class _FlightGeometry {
   _FlightGeometry(this.size, JourneyMapPoint destinationPoint)
-    : hanoi = Offset(size.width * .23, size.height * .68),
-      control = Offset(
-        size.width * ((.23 + destinationPoint.x) / 2),
-        size.height * .22,
-      ),
-      destination = Offset(
-        size.width * destinationPoint.x,
-        size.height * destinationPoint.y,
-      );
+      : hanoi = Offset(size.width * .23, size.height * .68),
+        control = Offset(
+          size.width * ((.23 + destinationPoint.x) / 2),
+          size.height * .22,
+        ),
+        destination = Offset(
+          size.width * destinationPoint.x,
+          size.height * destinationPoint.y,
+        );
 
   final Size size;
   final Offset hanoi;
@@ -480,20 +480,18 @@ class _FlightGeometry {
     return Offset(
       oneMinus * oneMinus * hanoi.dx +
           2 * oneMinus * t * control.dx +
-          t * t * beijing.dx,
+          t * t * destination.dx,
       oneMinus * oneMinus * hanoi.dy +
           2 * oneMinus * t * control.dy +
-          t * t * beijing.dy,
+          t * t * destination.dy,
     );
   }
 
   double angleAt(double t) {
-    final dx =
-        2 * (1 - t) * (control.dx - hanoi.dx) +
-        2 * t * (beijing.dx - control.dx);
-    final dy =
-        2 * (1 - t) * (control.dy - hanoi.dy) +
-        2 * t * (beijing.dy - control.dy);
+    final dx = 2 * (1 - t) * (control.dx - hanoi.dx) +
+        2 * t * (destination.dx - control.dx);
+    final dy = 2 * (1 - t) * (control.dy - hanoi.dy) +
+        2 * t * (destination.dy - control.dy);
     return math.atan2(dy, dx);
   }
 }
@@ -635,10 +633,10 @@ class _JourneyCard extends StatelessWidget {
           Text(
             state.displayText(state.activeJourney.headline),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontSize: 19,
-              height: 1.05,
-              fontWeight: FontWeight.w900,
-            ),
+                  fontSize: 19,
+                  height: 1.05,
+                  fontWeight: FontWeight.w900,
+                ),
           ),
           const SizedBox(height: 3),
           Text(

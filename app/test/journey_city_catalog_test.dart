@@ -19,12 +19,11 @@ void main() {
       ]),
     );
 
-    final paths = dailyJourneyExperiences
-        .map((journey) => journey.locationPath)
-        .toSet();
+    final paths =
+        dailyJourneyExperiences.map((journey) => journey.locationPath).toSet();
     expect(paths, hasLength(dailyJourneyExperiences.length));
     expect(paths, contains('beijing/forbidden-city'));
-    expect(paths, contains('guangzhou/chen-clan-academy'));
+    expect(paths, contains('guangzhou/chen-clan-ancestral-hall'));
   });
 
   test('one city can contain multiple destination journeys', () {
