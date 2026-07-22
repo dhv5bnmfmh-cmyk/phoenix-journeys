@@ -38,7 +38,7 @@ void main() {
         )
         .toList(growable: false);
 
-    expect(selectedIds, isNot(containsNull));
+    expect(selectedIds, everyElement(isNotNull));
     expect(selectedIds.toSet(), hasLength(JourneyBackgroundPage.values.length));
   });
 
