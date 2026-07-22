@@ -51,7 +51,7 @@ Future<void> showWordDetail(
   return showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
-    barrierColor: Colors.black26,
+    barrierColor: Colors.black.withValues(alpha: .42),
     showDragHandle: true,
     isScrollControlled: true,
     useSafeArea: true,
@@ -237,7 +237,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
         10 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-      decoration: PhoenixTheme.destinationGlass(alpha: .18),
+      // A firm visual plane keeps the vocabulary grid from showing through.\n      decoration: PhoenixTheme.destinationGlass(alpha: .82),
       child: DefaultTextStyle.merge(
         style: PhoenixTheme.journeyBodyStyle,
         child: Center(
