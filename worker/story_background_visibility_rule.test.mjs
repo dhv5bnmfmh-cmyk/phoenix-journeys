@@ -21,3 +21,13 @@ test('story cards expose the destination image and vocabulary stays legible', ()
   assert.match(journey, /fontFamily: PhoenixTheme\.chineseFontFamily/);
   assert.match(journey, /color: const Color\(0x26000000\)/);
 });
+
+test('vocabulary detail has a distinct readable destination surface', () => {
+  const detail = readFileSync(
+    'app/lib/widgets/word_detail_sheet.dart',
+    'utf8',
+  );
+
+  assert.match(detail, /barrierColor: Colors\.black\.withValues\(alpha: \.42\)/);
+  assert.match(detail, /PhoenixTheme\.destinationGlass\(alpha: \.82\)/);
+});
