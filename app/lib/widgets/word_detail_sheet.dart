@@ -237,7 +237,8 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
         10 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-      // A firm visual plane keeps the vocabulary grid from showing through.\n      decoration: PhoenixTheme.destinationGlass(alpha: .82),
+      // A firm visual plane keeps the vocabulary grid from showing through.
+      decoration: PhoenixTheme.journeySolidPanelDecoration,
       child: DefaultTextStyle.merge(
         style: PhoenixTheme.journeyBodyStyle,
         child: Center(

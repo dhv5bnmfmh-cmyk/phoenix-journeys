@@ -17,6 +17,6 @@ test('Typography Agent keeps journey surfaces on the shared Phoenix type system'
   }
   assert.match(journey, /PhoenixTheme\.journeyBodyStyle\.copyWith/);
   assert.match(popover, /PhoenixTheme\.destinationGlass\(alpha: \.12\)/);
-  assert.match(detail, /PhoenixTheme\.destinationGlass\(alpha: \.82\)/);
+  assert.match(detail, /PhoenixTheme\.journeySolidPanelDecoration/);
   assert.doesNotMatch(detail, /Color\(0xB3120E0C\)/, 'word sheet must not become an opaque black box');
 });

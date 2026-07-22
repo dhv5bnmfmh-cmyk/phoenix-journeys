@@ -405,23 +405,8 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
               compact ? 6 : 8,
               compact ? 4 : 7,
             ),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  PhoenixTheme.red.withValues(alpha: .42),
-                  const Color(0x73651418),
-                ],
-              ),
+            decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
               borderRadius: BorderRadius.circular(compact ? 13 : 17),
-              boxShadow: const [
-                BoxShadow(
-                  blurRadius: 12,
-                  offset: Offset(0, 6),
-                  color: Color(0x18000000),
-                ),
-              ],
             ),
             child: Column(
               children: [
@@ -451,10 +436,8 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                             widget.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: PhoenixTheme.journeyTitleStyle.copyWith(
                               fontSize: 12,
-                              fontWeight: FontWeight.w900,
                             ),
                           ),
                           const SizedBox(height: 1),
@@ -465,10 +448,8 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                               key: ValueKey(activeSubtitle),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white70,
+                              style: PhoenixTheme.journeyMetaStyle.copyWith(
                                 fontSize: 9,
-                                height: 1.2,
                               ),
                             ),
                           ),

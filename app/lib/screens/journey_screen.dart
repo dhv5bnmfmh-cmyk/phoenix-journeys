@@ -146,6 +146,17 @@ class _JourneyScreenState extends State<JourneyScreen>
         safeStep != step + 1) {
       return;
     }
+    // Discovery autoplay must enter the browser speech API in the same user
+    // gesture that pressed Continue. Awaiting storage/animation first can make
+    // iOS display "playing" while silently blocking the actual utterance.
+    if (safeStep == 2 && safeStep != step) {
+      setState(() => step = safeStep);
+      _discoveryAutoStarted = true;
+      unawaited(_playDiscoveries(stopEngineFirst: false));
+      await _persistProgress(overrideStep: safeStep);
+      return;
+    }
+
     await _narration.stop();
     if (!mounted || safeStep == step) return;
 
@@ -185,7 +196,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  Future<void> _playDiscoveries() {
+  Future<void> _playDiscoveries({bool stopEngineFirst = true}) {
     return _narration.play(
       contentId: 'discovery',
       languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
@@ -200,6 +211,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             ),
           )
           .toList(growable: false),
+      stopEngineFirst: stopEngineFirst,
     );
   }
 
@@ -701,7 +713,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        style: PhoenixTheme.journeyTitleStyle.copyWith(
                           fontSize: keyboardVisible ? 15 : (compact ? 17 : 19),
                           height: 1.05,
                           fontWeight: FontWeight.w900,
@@ -984,7 +996,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             itemBuilder: (context, index) {
               final entry = _experience.words[index];
               return Material(
-                color: const Color(0x26000000),
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(10),
                 child: InkWell(
                   onTap: () => unawaited(_openWord(entry)),
@@ -994,11 +1006,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                       horizontal: 5,
                       vertical: 3,
                     ),
-                    decoration: BoxDecoration(
+                    decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: PhoenixTheme.gold.withValues(alpha: .25),
-                      ),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -1500,8 +1509,8 @@ class _CompactTextBlock extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 2),
       padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
-      decoration: const BoxDecoration(
-        color: Colors.transparent,
+      decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

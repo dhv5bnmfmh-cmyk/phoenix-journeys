@@ -65,6 +65,23 @@ class PhoenixTheme {
     ],
   );
 
+  // One shared surface for every card inside a journey. Individual pages must
+  // not invent their own card color, border, radius, or shadow.
+  static BoxDecoration get journeyPanelDecoration => destinationGlass(
+    alpha: .30,
+  );
+
+  // Vocabulary details sit above another text-heavy page, so this surface is
+  // deliberately opaque while keeping the same Phoenix red/gold character.
+  static BoxDecoration get journeySolidPanelDecoration => BoxDecoration(
+    color: const Color(0xFF2A1715),
+    borderRadius: BorderRadius.circular(16),
+    border: Border.all(color: contentAccent.withValues(alpha: .62)),
+    boxShadow: const [
+      BoxShadow(color: Color(0x42000000), blurRadius: 18, offset: Offset(0, 7)),
+    ],
+  );
+
   static ThemeData get light {
     return ThemeData(
       useMaterial3: true,

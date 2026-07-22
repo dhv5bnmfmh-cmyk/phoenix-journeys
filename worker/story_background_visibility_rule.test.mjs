@@ -17,9 +17,11 @@ test('story cards expose the destination image and vocabulary stays legible', ()
   assert.match(journey, /color: Colors\.white/);
   assert.match(story, /color: const Color\(0xFFFFD879\)/);
   assert.match(story, /Shadow\(/);
-  assert.match(player, /withValues\(alpha: \.42\)/);
+  assert.match(player, /PhoenixTheme\.journeyPanelDecoration/);
   assert.match(journey, /fontFamily: PhoenixTheme\.chineseFontFamily/);
-  assert.match(journey, /color: const Color\(0x26000000\)/);
+  assert.ok(
+    (journey.match(/PhoenixTheme\.journeyPanelDecoration/g) ?? []).length >= 2,
+  );
 });
 
 test('vocabulary detail has a distinct readable destination surface', () => {
@@ -29,5 +31,5 @@ test('vocabulary detail has a distinct readable destination surface', () => {
   );
 
   assert.match(detail, /barrierColor: Colors\.black\.withValues\(alpha: \.42\)/);
-  assert.match(detail, /PhoenixTheme\.destinationGlass\(alpha: \.82\)/);
+  assert.match(detail, /PhoenixTheme\.journeySolidPanelDecoration/);
 });
