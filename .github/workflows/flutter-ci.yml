@@ -5,13 +5,12 @@ on:
     branches:
       - main
       - "feature/**"
-      - "feat/**"
   pull_request:
     branches:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
@@ -27,58 +26,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: feat/two-level-journey-picker
-          fetch-depth: 0
-
-      - name: Wire two-level picker into Explore
-        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/feat/two-level-journey-picker'
-        working-directory: ${{ github.workspace }}
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path('app/lib/screens/explore_screen.dart')
-          text = path.read_text()
-
-          import_anchor = "import '../widgets/destination_background.dart';\n"
-          if "journey_picker_sheet.dart" not in text:
-              if import_anchor not in text:
-                  raise SystemExit('Explore import anchor not found')
-              text = text.replace(
-                  import_anchor,
-                  import_anchor + "import '../widgets/journey_picker_sheet.dart';\n",
-                  1,
-              )
-
-          start_marker = "    Future<void> chooseJourney() async {"
-          end_marker = "\n    return Stack("
-          start = text.find(start_marker)
-          end = text.find(end_marker, start)
-          if start < 0 or end < 0:
-              raise SystemExit('Journey picker boundaries not found')
-
-          replacement = """    Future<void> chooseJourney() async {
-              final journeyId = await showJourneyPickerSheet(
-                context: context,
-                state: state,
-              );
-              if (journeyId != null) {
-                await openJourneyById(journeyId);
-              }
-            }
-          """
-
-          text = text[:start] + replacement.rstrip() + "\n" + text[end:]
-          path.write_text(text)
-          PY
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/lib/screens/explore_screen.dart
-          git commit -m "feat: connect city and destination picker [picker-wired]"
-          git push origin HEAD:feat/two-level-journey-picker
 
       - name: Test Phoenix agents
         id: agents
