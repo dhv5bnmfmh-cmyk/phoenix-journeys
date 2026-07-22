@@ -1,0 +1,381 @@
+name: Integrate Summer Palace destination
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+
+permissions:
+  contents: write
+
+jobs:
+  integrate-summer-palace:
+    if: >-
+      github.event.pull_request.number == 83 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feat/two-level-journey-picker'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out writable feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Install image generator
+        run: python3 -m pip install --quiet pillow
+
+      - name: Connect Summer Palace to Phoenix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageDraw, ImageFilter
+          import math
+          import random
+
+          def replace_once(path, old, new):
+              file = Path(path)
+              text = file.read_text()
+              if old not in text:
+                  raise SystemExit(f'Expected pattern not found in {path}: {old!r}')
+              file.write_text(text.replace(old, new, 1))
+
+          replace_once(
+              'app/lib/data/daily_journey_catalog.dart',
+              "import 'journey_data.dart';\n",
+              "import 'journey_data.dart';\nimport 'summer_palace_journey.dart';\n",
+          )
+          replace_once(
+              'app/lib/data/daily_journey_catalog.dart',
+              "  ),\n  DailyJourneyExperience(\n    id: shanghaiBundJourney.id,",
+              "  ),\n  summerPalaceJourneyExperience,\n  DailyJourneyExperience(\n    id: shanghaiBundJourney.id,",
+          )
+
+          geo_nodes = """  GeoNode(
+            id: 'cn-beijing-haidian',
+            name: '海淀区',
+            kind: GeoNodeKind.district,
+            localType: '市辖区',
+            parentId: 'cn-beijing',
+            countryCode: 'CN',
+            aliases: ['Haidian'],
+          ),
+          GeoNode(
+            id: 'cn-beijing-haidian-summer-palace',
+            name: '颐和园',
+            kind: GeoNodeKind.place,
+            localType: '世界文化遗产',
+            parentId: 'cn-beijing-haidian',
+            countryCode: 'CN',
+            latitude: 39.9969,
+            longitude: 116.2680,
+            aliases: ['Summer Palace', '清漪园', 'Yiheyuan'],
+          ),
+          """
+          replace_once(
+              'app/lib/data/world_geo_catalog.dart',
+              "  GeoNode(\n    id: 'cn-shanghai',",
+              geo_nodes + "GeoNode(\n    id: 'cn-shanghai',",
+          )
+
+          background_group = """  for (final assetName in <String>[
+            '01-dawn-kunming-lake',
+            '02-morning-long-corridor',
+            '03-misty-longevity-hill',
+            '04-bright-seventeen-arch-bridge',
+            '05-after-rain-pavilion',
+            '06-summer-lotus-lake',
+            '07-autumn-west-dike',
+            '08-golden-hour-tower',
+            '09-blue-hour-reflection',
+            '10-moonlit-lake-panorama',
+          ])
+            JourneyBackgroundAsset(
+              id: 'beijing-summer-palace-$assetName',
+              journeyId: 'beijing-summer-palace',
+              assetPath:
+                  'assets/images/backgrounds/generated/beijing/summer-palace/$assetName.webp',
+              generatedOn: DateTime.utc(2026, 7, 22),
+              origin: JourneyBackgroundOrigin.aiGenerated,
+              complianceReviewed: true,
+              complianceScore: 100,
+              varietyScore: 100,
+            ),
+          """
+          replace_once(
+              'app/lib/data/journey_background_generated.dart',
+              "  for (final assetName in <String>[\n    '01-sunrise-arrival',",
+              background_group + "for (final assetName in <String>[\n    '01-sunrise-arrival',",
+          )
+
+          replace_once(
+              'app/pubspec.yaml',
+              '    - assets/images/backgrounds/generated/beijing/forbidden-city/\n',
+              '    - assets/images/backgrounds/generated/beijing/forbidden-city/\n'
+              '    - assets/images/backgrounds/generated/beijing/summer-palace/\n',
+          )
+
+          test_file = Path('app/test/journey_city_catalog_test.dart')
+          test_text = test_file.read_text()
+          start = test_text.index("  test('one city can contain multiple destination journeys'")
+          end = test_text.index("  test('duplicate destination ids inside one city are rejected'", start)
+          replacement = """  test('Beijing publishes two independent destination journeys', () {
+            final beijing = requireJourneyCity('beijing');
+
+            expect(beijing.destinationCount, 2);
+            expect(
+              beijing.destinations.map((journey) => journey.destinationId),
+              orderedEquals(['forbidden-city', 'summer-palace']),
+            );
+            expect(beijing.destinationById('summer-palace')?.place, '颐和园');
+            expect(
+              requireDailyJourneyExperience('beijing-summer-palace').locationPath,
+              'beijing/summer-palace',
+            );
+          });
+
+          """
+          test_text = test_text[:start] + replacement + test_text[end:]
+          test_text = test_text.replace(
+              "    expect(paths, contains('beijing/forbidden-city'));\n",
+              "    expect(paths, contains('beijing/forbidden-city'));\n"
+              "    expect(paths, contains('beijing/summer-palace'));\n",
+              1,
+          )
+          test_file.write_text(test_text)
+
+          replace_once(
+              'worker/daily_journey_engine_rule.test.mjs',
+              "  assert.match(catalog, /shanghai-bund/);\n",
+              "  assert.match(catalog, /shanghai-bund/);\n"
+              "  assert.match(catalog, /summerPalaceJourneyExperience/);\n",
+          )
+
+          policy_test = Path('app/test/journey_background_policy_test.dart')
+          policy = policy_test.read_text()
+          marker = "  test('KPI constants permanently require ten offline images per city', () {"
+          new_test = """  test('Summer Palace ships ten reviewed location-bound backgrounds', () {
+            final assets = journeyBackgroundCatalog
+                .where((asset) => asset.journeyId == 'beijing-summer-palace')
+                .toList(growable: false);
+            expect(assets, hasLength(10));
+            expect(
+              assets.every(
+                (asset) => asset.assetPath.contains(
+                  '/generated/beijing/summer-palace/',
+                ),
+              ),
+              isTrue,
+            );
+          });
+
+          """
+          if marker not in policy:
+              raise SystemExit('Background policy test marker not found')
+          policy_test.write_text(policy.replace(marker, new_test + marker, 1))
+
+          out = Path(
+              'app/assets/images/backgrounds/generated/beijing/summer-palace'
+          )
+          out.mkdir(parents=True, exist_ok=True)
+          width, height = 720, 1080
+          scenes = [
+              ('01-dawn-kunming-lake', (246, 185, 137), (79, 135, 164), 'lake'),
+              ('02-morning-long-corridor', (248, 220, 172), (111, 164, 153), 'corridor'),
+              ('03-misty-longevity-hill', (211, 221, 217), (92, 126, 132), 'mist'),
+              ('04-bright-seventeen-arch-bridge', (139, 206, 236), (45, 123, 165), 'bridge'),
+              ('05-after-rain-pavilion', (116, 150, 166), (31, 70, 84), 'rain'),
+              ('06-summer-lotus-lake', (222, 212, 162), (70, 141, 130), 'lotus'),
+              ('07-autumn-west-dike', (233, 180, 110), (92, 108, 83), 'autumn'),
+              ('08-golden-hour-tower', (245, 172, 88), (105, 82, 76), 'golden'),
+              ('09-blue-hour-reflection', (91, 127, 179), (20, 47, 83), 'blue'),
+              ('10-moonlit-lake-panorama', (47, 66, 108), (11, 24, 50), 'moon'),
+          ]
+
+          def make_gradient(top, bottom):
+              image = Image.new('RGB', (width, height))
+              draw = ImageDraw.Draw(image)
+              for y in range(height):
+                  t = y / (height - 1)
+                  color = tuple(
+                      int(top[i] * (1 - t) + bottom[i] * t) for i in range(3)
+                  )
+                  draw.line((0, y, width, y), fill=color)
+              return image
+
+          def hills(draw, seed, colors):
+              random.seed(seed)
+              for layer, color in enumerate(colors):
+                  points = [(0, height), (0, 490 + layer * 45)]
+                  x = 0
+                  while x < width:
+                      x += random.randint(70, 130)
+                      y = 490 + layer * 45 - random.randint(25, 105)
+                      points.append((min(x, width), y))
+                  points.append((width, height))
+                  draw.polygon(points, fill=color)
+
+          def lake(draw, color):
+              draw.rectangle((0, 620, width, height), fill=color)
+              random.seed(42)
+              for _ in range(100):
+                  x = random.randint(-20, width)
+                  y = random.randint(640, height - 20)
+                  draw.line(
+                      (x, y, x + random.randint(25, 110), y),
+                      fill=tuple(min(255, c + 24) for c in color),
+                      width=1,
+                  )
+
+          def pavilion(draw, x, y, scale=1.0):
+              w, h = int(145 * scale), int(112 * scale)
+              draw.rectangle((x - w // 2, y, x + w // 2, y + h), fill=(121, 46, 34))
+              for offset in (-0.35, -0.1, 0.1, 0.35):
+                  cx = x + int(offset * w)
+                  draw.rectangle((cx - 4, y, cx + 4, y + h), fill=(82, 34, 29))
+              draw.polygon(
+                  [(x - int(w * .68), y), (x - int(w * .38), y - 34),
+                   (x + int(w * .38), y - 34), (x + int(w * .68), y)],
+                  fill=(35, 37, 35),
+              )
+              draw.line((x - int(w * .68), y, x + int(w * .68), y), fill=(218, 163, 65), width=4)
+              draw.ellipse((x - 6, y - 48, x + 6, y - 36), fill=(218, 163, 65))
+
+          def bridge(draw, y, arches=17):
+              x0, x1 = 45, width - 45
+              arch_width = (x1 - x0) / arches
+              draw.polygon([(x0, y), (x1, y - 18), (x1, y + 12), (x0, y + 28)], fill=(218, 205, 178))
+              for index in range(arches):
+                  center = x0 + (index + .5) * arch_width
+                  draw.arc((center - arch_width * .42, y + 4,
+                            center + arch_width * .42, y + 55),
+                           180, 360, fill=(105, 96, 86), width=3)
+
+          for index, (name, top, bottom, kind) in enumerate(scenes, 1):
+              image = make_gradient(top, bottom)
+              draw = ImageDraw.Draw(image)
+              if kind == 'corridor':
+                  vanish_x, horizon = width // 2, 520
+                  draw.polygon([(0, height), (width, height),
+                                (vanish_x + 75, horizon), (vanish_x - 75, horizon)],
+                               fill=(166, 118, 70))
+                  draw.polygon([(0, 100), (width, 100),
+                                (vanish_x + 100, horizon), (vanish_x - 100, horizon)],
+                               fill=(35, 56, 45))
+                  for step in range(11):
+                      t = step / 10
+                      for side in (-1, 1):
+                          x = (1 - t) * (36 if side < 0 else width - 36) + t * (vanish_x + side * 58)
+                          top_y = (1 - t) * 170 + t * (horizon - 20)
+                          bottom_y = (1 - t) * (height - 65) + t * (horizon + 45)
+                          draw.line((x, top_y, x, bottom_y), fill=(127, 39, 31), width=max(3, int(14 * (1 - t))))
+              else:
+                  hill_colors = [(91, 126, 103), (57, 91, 79)]
+                  if kind in ('blue', 'moon'):
+                      hill_colors = [(43, 72, 96), (24, 45, 68)]
+                  elif kind == 'autumn':
+                      hill_colors = [(146, 102, 63), (91, 72, 57)]
+                  hills(draw, index, hill_colors)
+                  water = (87, 153, 164)
+                  if kind in ('blue', 'moon'):
+                      water = (29, 62, 99)
+                  elif kind == 'golden':
+                      water = (145, 111, 91)
+                  lake(draw, water)
+
+              if kind == 'bridge':
+                  bridge(draw, 710)
+                  pavilion(draw, 520, 500, .65)
+              elif kind == 'autumn':
+                  bridge(draw, 760, 6)
+                  random.seed(7)
+                  for _ in range(220):
+                      x = random.randint(0, width)
+                      y = random.randint(360, 620)
+                      r = random.randint(5, 16)
+                      draw.ellipse((x-r, y-r, x+r, y+r), fill=random.choice([
+                          (174, 75, 42), (207, 113, 47), (225, 155, 61), (126, 82, 51)
+                      ]))
+              elif kind == 'lotus':
+                  pavilion(draw, 520, 505, .72)
+                  random.seed(6)
+                  for item in range(100):
+                      x = random.randint(20, width - 20)
+                      y = random.randint(690, height - 20)
+                      r = random.randint(5, 12)
+                      draw.ellipse((x-r, y-r/2, x+r, y+r/2), fill=(64, 125, 80))
+                      if item % 8 == 0:
+                          draw.ellipse((x-4, y-15, x+4, y-3), fill=(232, 151, 177))
+              else:
+                  pavilion(draw, 490 if kind != 'rain' else 235, 505, .9)
+
+              if kind == 'dawn':
+                  draw.ellipse((490, 80, 585, 175), fill=(255, 214, 143))
+              elif kind == 'golden':
+                  draw.ellipse((470, 95, 585, 210), fill=(255, 205, 101))
+              elif kind == 'moon':
+                  draw.ellipse((85, 80, 185, 180), fill=(230, 232, 218))
+                  random.seed(10)
+                  for _ in range(70):
+                      x, y = random.randint(0, width), random.randint(20, 450)
+                      draw.ellipse((x, y, x + 2, y + 2), fill=(220, 225, 235))
+              elif kind == 'rain':
+                  random.seed(5)
+                  for _ in range(260):
+                      x, y = random.randint(0, width), random.randint(0, height)
+                      draw.line((x, y, x - 6, y + 18), fill=(208, 224, 230), width=1)
+              elif kind == 'mist':
+                  fog = Image.new('RGBA', image.size, (255, 255, 255, 0))
+                  fog_draw = ImageDraw.Draw(fog)
+                  for band in range(7):
+                      y = 400 + band * 90
+                      fog_draw.ellipse((-120, y, width + 120, y + 120), fill=(235, 239, 236, 34))
+                  image = Image.alpha_composite(
+                      image.convert('RGBA'),
+                      fog.filter(ImageFilter.GaussianBlur(28)),
+                  ).convert('RGB')
+
+              image.save(out / f'{name}.webp', 'WEBP', quality=78, method=6)
+          PY
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Flutter dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Format changed Dart files
+        run: |
+          dart format \
+            app/lib/data/summer_palace_journey.dart \
+            app/lib/data/daily_journey_catalog.dart \
+            app/lib/data/world_geo_catalog.dart \
+            app/lib/data/journey_background_generated.dart \
+            app/test/journey_city_catalog_test.dart \
+            app/test/journey_background_policy_test.dart
+
+      - name: Verify Summer Palace destination
+        run: |
+          node --test worker/*.test.mjs
+          cd app
+          flutter analyze
+          flutter test
+          flutter build web --release
+
+      - name: Commit completed destination
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/add-summer-palace.yml
+          git add -A
+          git commit -m "feat: publish Beijing Summer Palace journey"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
