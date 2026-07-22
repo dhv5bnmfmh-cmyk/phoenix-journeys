@@ -75,6 +75,7 @@ test('Flutter bundles each published destination directory explicitly', () => {
     'beijing/forbidden-city',
     'shanghai/bund',
     'xian/city-wall',
+    'hangzhou/west-lake',
   ]) {
     assert.match(
       pubspec,
