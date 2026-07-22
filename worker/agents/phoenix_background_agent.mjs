@@ -15,6 +15,18 @@ const destinationBriefs = {
     'Chen Clan Ancestral Hall, Lingnan roof ridges, courtyards and subtle ceramic ornament',
 };
 
+// Keep every destination in its own city branch. A city can grow to many
+// destination folders without mixing their reviewed offline image libraries.
+const destinationAssetDirectories = Object.freeze({
+  'beijing-forbidden-city': 'beijing/forbidden-city',
+  'shanghai-bund': 'shanghai/bund',
+  'xian-city-wall': 'xian/city-wall',
+  'hangzhou-west-lake': 'hangzhou/west-lake',
+  'chengdu-kuanzhai-alley': 'chengdu/kuanzhai-alley',
+  'nanjing-qinhuai-river': 'nanjing/qinhuai-river',
+  'guangzhou-chen-clan': 'guangzhou/chen-clan',
+});
+
 export const PHOENIX_OFFLINE_IMAGES_PER_DESTINATION = 10;
 
 const libraryVariants = Object.freeze([
@@ -158,6 +170,11 @@ export class PhoenixBackgroundAgent {
   }
 
   _buildJob({ journeyId, variant, index }) {
+    const assetDirectory = destinationAssetDirectories[journeyId];
+    if (!assetDirectory) {
+      throw new Error(`Missing background asset directory for ${journeyId}.`);
+    }
+    const assetFileName = `${String(index + 1).padStart(2, '0')}-${variant.slug}.webp`;
     const varietyKey = [
       journeyId,
       variant.timeOfDay,
@@ -168,7 +185,8 @@ export class PhoenixBackgroundAgent {
     return {
       id: `${journeyId}-${String(index + 1).padStart(2, '0')}-${variant.slug}`,
       journeyId,
-      fileName: `${journeyId}-${String(index + 1).padStart(2, '0')}-${variant.slug}.webp`,
+      assetDirectory,
+      fileName: `${assetDirectory}/${assetFileName}`,
       slot: index + 1,
       mood: variant.mood,
       timeOfDay: variant.timeOfDay,

@@ -18,7 +18,7 @@ final generatedJourneyBackgrounds = <JourneyBackgroundAsset>[
       id: 'beijing-forbidden-city-$assetName',
       journeyId: 'beijing-forbidden-city',
       assetPath:
-          'assets/images/backgrounds/generated/beijing-forbidden-city-$assetName.webp',
+          'assets/images/backgrounds/generated/beijing/forbidden-city/$assetName.webp',
       generatedOn: DateTime.utc(2026, 7, 22),
       origin: JourneyBackgroundOrigin.aiGenerated,
       complianceReviewed: true,
@@ -41,7 +41,7 @@ final generatedJourneyBackgrounds = <JourneyBackgroundAsset>[
       id: 'shanghai-bund-$assetName',
       journeyId: 'shanghai-bund',
       assetPath:
-          'assets/images/backgrounds/generated/shanghai-bund-$assetName.webp',
+          'assets/images/backgrounds/generated/shanghai/bund/$assetName.webp',
       generatedOn: DateTime.utc(2026, 7, 22),
       origin: JourneyBackgroundOrigin.aiGenerated,
       complianceReviewed: true,
@@ -64,7 +64,7 @@ final generatedJourneyBackgrounds = <JourneyBackgroundAsset>[
       id: 'xian-city-wall-$assetName',
       journeyId: 'xian-city-wall',
       assetPath:
-          'assets/images/backgrounds/generated/xian-city-wall-$assetName.webp',
+          'assets/images/backgrounds/generated/xian/city-wall/$assetName.webp',
       generatedOn: DateTime.utc(2026, 7, 22),
       origin: JourneyBackgroundOrigin.aiGenerated,
       complianceReviewed: true,

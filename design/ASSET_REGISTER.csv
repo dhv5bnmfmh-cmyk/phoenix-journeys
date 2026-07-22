@@ -1,32 +1,32 @@
 asset_path,description,origin,license_type,proof_url,review_status
 assets/images/.gitkeep,placeholder,self-created,owned,,approved
-assets/images/backgrounds/generated/beijing-forbidden-city-01-twilight-courtyard.webp,Beijing twilight courtyard,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
-assets/images/backgrounds/generated/beijing-forbidden-city-02-moonlit-palace.webp,Beijing moonlit palace,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
-assets/images/backgrounds/generated/beijing-forbidden-city-03-golden-gate.webp,Beijing golden gate,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
-assets/images/backgrounds/generated/beijing-forbidden-city-04-winter-snow.webp,Beijing winter snow,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
-assets/images/backgrounds/generated/beijing-forbidden-city-05-after-rain.webp,Beijing after rain,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
-assets/images/backgrounds/generated/beijing-forbidden-city-06-autumn-maples.webp,Beijing autumn maples,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
-assets/images/backgrounds/generated/beijing-forbidden-city-07-clear-morning.webp,Beijing clear morning,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
-assets/images/backgrounds/generated/beijing-forbidden-city-08-sunlit-corridor.webp,Beijing sunlit corridor,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
-assets/images/backgrounds/generated/beijing-forbidden-city-09-misty-courtyard.webp,Beijing misty courtyard,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
-assets/images/backgrounds/generated/beijing-forbidden-city-10-sunset-panorama.webp,Beijing sunset panorama,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
-assets/images/backgrounds/generated/shanghai-bund-01-sunrise-arrival.webp,Shanghai Bund sunrise arrival,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/shanghai-bund-02-morning-street.webp,Shanghai Bund morning street,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/shanghai-bund-03-misty-detail.webp,Shanghai Bund misty architectural detail,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/shanghai-bund-04-bright-panorama.webp,Shanghai Bund bright panorama,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/shanghai-bund-05-after-rain.webp,Shanghai Bund after rain,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/shanghai-bund-06-seasonal-landscape.webp,Shanghai Bund autumn landscape,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/shanghai-bund-07-golden-hour.webp,Shanghai Bund golden hour,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/shanghai-bund-08-blue-hour.webp,Shanghai Bund blue hour,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/shanghai-bund-09-lantern-night.webp,Shanghai Bund waterfront night,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/shanghai-bund-10-quiet-night-panorama.webp,Shanghai Bund quiet night panorama,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/xian-city-wall-01-sunrise-arrival.webp,Xian city wall sunrise arrival,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/xian-city-wall-02-morning-street.webp,Xian city wall morning street,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/xian-city-wall-03-misty-detail.webp,Xian city wall misty architectural detail,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/xian-city-wall-04-bright-panorama.webp,Xian city wall bright panorama,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/xian-city-wall-05-after-rain.webp,Xian city wall after rain,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/xian-city-wall-06-seasonal-landscape.webp,Xian city wall autumn landscape,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/xian-city-wall-07-golden-hour.webp,Xian city wall golden hour,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/xian-city-wall-08-blue-hour.webp,Xian city wall blue hour,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/xian-city-wall-09-lantern-night.webp,Xian city wall lantern night,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
-assets/images/backgrounds/generated/xian-city-wall-10-quiet-night-panorama.webp,Xian city wall quiet night panorama,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/beijing/forbidden-city/01-twilight-courtyard.webp,Beijing twilight courtyard,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
+assets/images/backgrounds/generated/beijing/forbidden-city/02-moonlit-palace.webp,Beijing moonlit palace,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
+assets/images/backgrounds/generated/beijing/forbidden-city/03-golden-gate.webp,Beijing golden gate,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
+assets/images/backgrounds/generated/beijing/forbidden-city/04-winter-snow.webp,Beijing winter snow,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
+assets/images/backgrounds/generated/beijing/forbidden-city/05-after-rain.webp,Beijing after rain,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
+assets/images/backgrounds/generated/beijing/forbidden-city/06-autumn-maples.webp,Beijing autumn maples,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
+assets/images/backgrounds/generated/beijing/forbidden-city/07-clear-morning.webp,Beijing clear morning,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
+assets/images/backgrounds/generated/beijing/forbidden-city/08-sunlit-corridor.webp,Beijing sunlit corridor,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
+assets/images/backgrounds/generated/beijing/forbidden-city/09-misty-courtyard.webp,Beijing misty courtyard,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
+assets/images/backgrounds/generated/beijing/forbidden-city/10-sunset-panorama.webp,Beijing sunset panorama,commissioned Phoenix original,phoenix-exclusive-owned,user-provided source file,approved
+assets/images/backgrounds/generated/shanghai/bund/01-sunrise-arrival.webp,Shanghai Bund sunrise arrival,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/shanghai/bund/02-morning-street.webp,Shanghai Bund morning street,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/shanghai/bund/03-misty-detail.webp,Shanghai Bund misty architectural detail,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/shanghai/bund/04-bright-panorama.webp,Shanghai Bund bright panorama,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/shanghai/bund/05-after-rain.webp,Shanghai Bund after rain,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/shanghai/bund/06-seasonal-landscape.webp,Shanghai Bund autumn landscape,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/shanghai/bund/07-golden-hour.webp,Shanghai Bund golden hour,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/shanghai/bund/08-blue-hour.webp,Shanghai Bund blue hour,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/shanghai/bund/09-lantern-night.webp,Shanghai Bund waterfront night,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/shanghai/bund/10-quiet-night-panorama.webp,Shanghai Bund quiet night panorama,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/xian/city-wall/01-sunrise-arrival.webp,Xian city wall sunrise arrival,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/xian/city-wall/02-morning-street.webp,Xian city wall morning street,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/xian/city-wall/03-misty-detail.webp,Xian city wall misty architectural detail,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/xian/city-wall/04-bright-panorama.webp,Xian city wall bright panorama,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/xian/city-wall/05-after-rain.webp,Xian city wall after rain,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/xian/city-wall/06-seasonal-landscape.webp,Xian city wall autumn landscape,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/xian/city-wall/07-golden-hour.webp,Xian city wall golden hour,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/xian/city-wall/08-blue-hour.webp,Xian city wall blue hour,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/xian/city-wall/09-lantern-night.webp,Xian city wall lantern night,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
+assets/images/backgrounds/generated/xian/city-wall/10-quiet-night-panorama.webp,Xian city wall quiet night panorama,AI-generated Phoenix original,phoenix-exclusive-owned,OpenAI image generation 2026-07-22,approved
