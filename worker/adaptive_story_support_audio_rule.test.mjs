@@ -17,7 +17,8 @@ test('Story and Discovery fit their text to the available phone height', () => {
   assert.match(journey, /story-auto-visibility-scroll/);
   assert.match(interactive, /Scrollable\.ensureVisible/);
   assert.match(journey, /maxSize: 16/);
-  assert.match(journey, /maxSize: 19/);
+  assert.match(journey, /maxSize: 15/);
+  assert.match(journey, /PhoenixTheme\.journeyBodyStyle\.copyWith/);
 });
 
 test('reading notes expose native-language and English speakers', () => {

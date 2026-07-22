@@ -525,27 +525,11 @@ class _VocabularyPopover extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: DefaultTextStyle.merge(
-        style: const TextStyle(
-          color: Colors.white,
-          fontFamily: PhoenixTheme.chineseFontFamily,
-          fontFamilyFallback: PhoenixTheme.chineseFontFallback,
-          shadows: [Shadow(color: Colors.black, blurRadius: 5)],
-        ),
+        style: PhoenixTheme.journeyBodyStyle,
         child: Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(12, 9, 8, 9),
-        decoration: BoxDecoration(
-          color: const Color(0x33000000),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .55)),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x18000000),
-              blurRadius: 12,
-              offset: Offset(0, 5),
-            ),
-          ],
-        ),
+        decoration: PhoenixTheme.destinationGlass(alpha: .12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -559,33 +543,14 @@ class _VocabularyPopover extends StatelessWidget {
                     children: [
                       Text(
                         state.displayText(entry.word),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: PhoenixTheme.chineseFontFamily,
-                          fontFamilyFallback: PhoenixTheme.chineseFontFallback,
-                          fontWeight: FontWeight.w900,
-                          shadows: [
-                            Shadow(color: Colors.black, blurRadius: 5),
-                          ],
-                        ),
+                        style: PhoenixTheme.journeyTitleStyle,
                       ),
                       const SizedBox(width: 7),
                       Expanded(
                         child: Text(
                           entry.pinyin,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12.5,
-                            fontFamily: PhoenixTheme.chineseFontFamily,
-                            fontFamilyFallback:
-                                PhoenixTheme.chineseFontFallback,
-                            fontWeight: FontWeight.w700,
-                            shadows: [
-                              Shadow(color: Colors.black, blurRadius: 5),
-                            ],
-                          ),
+                          style: PhoenixTheme.journeyMetaStyle.copyWith(fontSize: 12),
                         ),
                       ),
                     ],

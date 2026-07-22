@@ -1174,8 +1174,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                   constraints,
                   discoveryTexts,
                   minSize: 9.9,
-                  maxSize: 19,
-                  lineHeight: 1.2,
+                  maxSize: 15,
+                  lineHeight: 1.28,
                 );
                 return AnimatedBuilder(
                   animation: _narration,
@@ -1213,12 +1213,11 @@ class _JourneyScreenState extends State<JourneyScreen>
                                 highlightEnd: isActive ? snapshot!.end : null,
                                 narrationContentId: 'discovery',
                                 narrationItemId: 'discovery-${entry.key}',
-                                style: TextStyle(
+                                style: PhoenixTheme.journeyBodyStyle.copyWith(
                                   fontSize: fontSize,
-                                  height: 1.2,
                                   fontWeight: isActive
-                                      ? FontWeight.w800
-                                      : FontWeight.w600,
+                                      ? FontWeight.w900
+                                      : FontWeight.w700,
                                 ),
                               ),
                             );

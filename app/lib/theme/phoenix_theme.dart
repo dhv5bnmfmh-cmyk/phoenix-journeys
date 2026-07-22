@@ -16,6 +16,55 @@ class PhoenixTheme {
     'serif',
   ];
 
+  // Phoenix Typography Agent contract: journey content must use these tokens.
+  // Keeping the tokens here makes destination pages change as one system.
+  static const contentPrimary = Colors.white;
+  static const contentSecondary = Color(0xFFEADFCB);
+  static const contentAccent = Color(0xFFFFD46A);
+  static const contentShadow = <Shadow>[
+    Shadow(color: Color(0xE6000000), blurRadius: 3, offset: Offset(0, 1)),
+    Shadow(color: Color(0x99000000), blurRadius: 8),
+  ];
+
+  static const journeyTitleStyle = TextStyle(
+    color: contentPrimary,
+    fontSize: 16,
+    height: 1.15,
+    fontWeight: FontWeight.w900,
+    fontFamily: chineseFontFamily,
+    fontFamilyFallback: chineseFontFallback,
+    shadows: contentShadow,
+  );
+
+  static const journeyBodyStyle = TextStyle(
+    color: contentPrimary,
+    fontSize: 15,
+    height: 1.28,
+    fontWeight: FontWeight.w700,
+    fontFamily: chineseFontFamily,
+    fontFamilyFallback: chineseFontFallback,
+    shadows: contentShadow,
+  );
+
+  static const journeyMetaStyle = TextStyle(
+    color: contentSecondary,
+    fontSize: 10.5,
+    height: 1.2,
+    fontWeight: FontWeight.w700,
+    fontFamily: chineseFontFamily,
+    fontFamilyFallback: chineseFontFallback,
+    shadows: contentShadow,
+  );
+
+  static BoxDecoration destinationGlass({double alpha = .16}) => BoxDecoration(
+    color: Colors.black.withValues(alpha: alpha),
+    borderRadius: BorderRadius.circular(16),
+    border: Border.all(color: contentAccent.withValues(alpha: .42)),
+    boxShadow: const [
+      BoxShadow(color: Color(0x24000000), blurRadius: 14, offset: Offset(0, 5)),
+    ],
+  );
+
   static ThemeData get light {
     return ThemeData(
       useMaterial3: true,

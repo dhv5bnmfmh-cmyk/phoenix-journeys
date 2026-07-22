@@ -237,17 +237,9 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
         10 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-      decoration: BoxDecoration(
-        color: const Color(0xB3120E0C),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .38)),
-      ),
+      decoration: PhoenixTheme.destinationGlass(alpha: .18),
       child: DefaultTextStyle.merge(
-        style: const TextStyle(
-          color: Colors.white,
-          fontFamily: PhoenixTheme.chineseFontFamily,
-          fontFamilyFallback: PhoenixTheme.chineseFontFallback,
-        ),
+        style: PhoenixTheme.journeyBodyStyle,
         child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
@@ -269,20 +261,15 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                                 state.displayText(entry.word),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: PhoenixTheme.journeyTitleStyle.copyWith(
                                   fontSize: compact ? 16 : 17.5,
                                   height: 1,
-                                  fontWeight: FontWeight.w900,
                                 ),
                               ),
                             ),
                             Text(
                               '${_index + 1} / ${widget.entries.length}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                              ),
+                              style: PhoenixTheme.journeyMetaStyle.copyWith(fontSize: 10),
                             ),
                           ],
                         ),
@@ -291,21 +278,13 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                           entry.pinyin,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style: PhoenixTheme.journeyMetaStyle,
                         ),
                         const SizedBox(height: 3),
                         Text(
                           state.displayText(entry.partOfSpeech),
                           maxLines: 1,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style: PhoenixTheme.journeyMetaStyle.copyWith(fontSize: 9.5),
                         ),
                       ],
                     ),
@@ -342,19 +321,19 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
               _CompactDefinitionLine(
                 label: '中文',
                 text: entry.simpleChinese,
-                color: PhoenixTheme.ink,
+                color: PhoenixTheme.contentPrimary,
               ),
               const SizedBox(height: 4),
               _CompactDefinitionLine(
                 label: 'English',
                 text: entry.englishDefinition,
-                color: PhoenixTheme.ai,
+                color: PhoenixTheme.contentSecondary,
               ),
               const SizedBox(height: 4),
               _CompactDefinitionLine(
                 label: entry.nativeLabel(language),
                 text: entry.nativeDefinition(language),
-                color: PhoenixTheme.translation,
+                color: PhoenixTheme.contentSecondary,
               ),
               const SizedBox(height: 7),
               _CoreExampleCard(
