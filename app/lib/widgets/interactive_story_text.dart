@@ -575,7 +575,7 @@ class _VocabularyPopover extends StatelessWidget {
                         child: Text(
                           entry.pinyin,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12.5,
                             fontFamily: PhoenixTheme.chineseFontFamily,
