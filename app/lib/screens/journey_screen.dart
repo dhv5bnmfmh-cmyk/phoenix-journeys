@@ -1471,7 +1471,7 @@ class _CompactTextBlock extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 1),
-            child: CircleAvatar(
+            child: const CircleAvatar(
               radius: 9,
               backgroundColor: const Color(0x99000000),
               child: Text(
