@@ -9,6 +9,7 @@ import '../models/journey_background.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/destination_background.dart';
+import '../widgets/journey_picker_sheet.dart';
 import 'journey_screen.dart';
 
 @visibleForTesting
@@ -39,74 +40,14 @@ class ExploreScreen extends StatelessWidget {
     }
 
     Future<void> chooseJourney() async {
-      await showModalBottomSheet<void>(
-        context: context,
-        useSafeArea: true,
-        showDragHandle: true,
-        builder: (sheetContext) => Padding(
-          padding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                state.displayText('选择城市旅程'),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                state.displayText('今日旅程是推荐路线，其他城市也可随时继续。'),
-                style: const TextStyle(color: Colors.black54, fontSize: 11),
-              ),
-              const SizedBox(height: 8),
-              ...dailyJourneyExperiences.map(
-                (journey) => Card(
-                  margin: const EdgeInsets.only(bottom: 6),
-                  child: ListTile(
-                    key: ValueKey('journey-picker-${journey.id}'),
-                    dense: true,
-                    leading: CircleAvatar(
-                      backgroundColor: PhoenixTheme.red.withValues(alpha: .10),
-                      child: Text(
-                        state.displayText(journey.stampSymbol),
-                        style: const TextStyle(
-                          color: PhoenixTheme.red,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      state.displayText('${journey.city} · ${journey.place}'),
-                      style: const TextStyle(fontWeight: FontWeight.w900),
-                    ),
-                    subtitle: Text(
-                      state.displayText(
-                        journey.id == state.todayJourney.id
-                            ? '今日推荐 · 点击进入'
-                            : state.isJourneyStampEarned(journey.id)
-                            ? '印章已获得 · 可再次体验'
-                            : '可随时开始或继续',
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 15,
-                    ),
-                    onTap: () {
-                      Navigator.of(sheetContext).pop();
-                      unawaited(openJourneyById(journey.id));
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+    final journeyId = await showJourneyPickerSheet(
+      context: context,
+      state: state,
+    );
+    if (journeyId != null) {
+      await openJourneyById(journeyId);
     }
+  }
 
     return Stack(
       children: [
