@@ -1,0 +1,71 @@
+name: Finalize Summer Palace destination
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+
+permissions:
+  contents: write
+
+jobs:
+  finalize-summer-palace:
+    if: >-
+      github.event.pull_request.number == 83 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feat/two-level-journey-picker'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out writable feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Remove redundant constants
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('app/lib/data/summer_palace_journey.dart')
+          text = path.read_text()
+          count = text.count('    examples: const [')
+          if count != 4:
+              raise SystemExit(f'Expected four redundant constants, found {count}')
+          path.write_text(text.replace('    examples: const [', '    examples: ['))
+          PY
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Format content
+        run: dart format app/lib/data/summer_palace_journey.dart
+
+      - name: Final verification
+        run: |
+          node --test worker/*.test.mjs
+          cd app
+          flutter analyze
+          flutter test
+          flutter build web --release
+
+      - name: Commit completed destination
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/finalize-summer-palace.yml
+          git rm -f summer-palace-vocabulary-verify.log
+          git add -A
+          git commit -m "feat: publish Beijing Summer Palace destination"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
