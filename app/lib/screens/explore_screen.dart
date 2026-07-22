@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../data/daily_journey_catalog.dart';
 import '../models/journey_background.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
