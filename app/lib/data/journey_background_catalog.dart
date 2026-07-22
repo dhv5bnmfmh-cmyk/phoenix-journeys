@@ -8,7 +8,7 @@ const _seedJourneys = <String>[
   'hangzhou-west-lake',
   'chengdu-kuanzhai-alley',
   'nanjing-qinhuai-river',
-  'guangzhou-chen-clan',
+  'guangzhou-chen-clan-academy',
 ];
 
 final seedJourneyBackgrounds = <JourneyBackgroundAsset>[

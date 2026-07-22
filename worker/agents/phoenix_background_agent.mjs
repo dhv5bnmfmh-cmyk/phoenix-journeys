@@ -11,7 +11,7 @@ const destinationBriefs = {
     'Kuanzhai Alley courtyards, grey brick lanes, bamboo and warm lantern light',
   'nanjing-qinhuai-river':
     'Qinhuai River, white-wall black-roof houses, arch bridge and gentle lantern reflections',
-  'guangzhou-chen-clan':
+  'guangzhou-chen-clan-academy':
     'Chen Clan Ancestral Hall, Lingnan roof ridges, courtyards and subtle ceramic ornament',
 };
 
@@ -24,7 +24,8 @@ const destinationAssetDirectories = Object.freeze({
   'hangzhou-west-lake': 'hangzhou/west-lake',
   'chengdu-kuanzhai-alley': 'chengdu/kuanzhai-alley',
   'nanjing-qinhuai-river': 'nanjing/qinhuai-river',
-  'guangzhou-chen-clan': 'guangzhou/chen-clan',
+  'guangzhou-chen-clan-academy':
+    'guangzhou/chen-clan-ancestral-hall',
 });
 
 export const PHOENIX_OFFLINE_IMAGES_PER_DESTINATION = 10;
