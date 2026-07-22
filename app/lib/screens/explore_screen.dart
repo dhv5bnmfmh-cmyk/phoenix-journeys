@@ -245,7 +245,7 @@ class _JourneyBackground extends StatelessWidget {
     return DestinationBackground(
       journeyId: journeyId,
       pageType: JourneyBackgroundPage.explore,
-      scrimStrength: .56,
+      scrimStrength: .28,
       child: CustomPaint(painter: _CloudPainter()),
     );
   }

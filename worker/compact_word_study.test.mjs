@@ -35,7 +35,8 @@ test('Discovery cards stay connected and support word highlighting', () => {
   assert.match(discovery, /MainAxisAlignment\.start/);
   assert.match(discovery, /InteractiveStoryText/);
   assert.match(discovery, /fontSize: fontSize/);
-  assert.match(discovery, /height: 1\.2/);
+  assert.match(discovery, /lineHeight: 1\.28/);
+  assert.match(discovery, /PhoenixTheme\.journeyBodyStyle\.copyWith/);
 });
 
 test('narration keeps natural voice selection and speed profile', () => {

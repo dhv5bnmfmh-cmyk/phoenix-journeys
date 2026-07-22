@@ -65,9 +65,11 @@ for (const job of plan.approvedJobs) {
       continue;
     }
 
-    const filename = `${job.id}.webp`;
+    const filename = job.fileName;
+    const outputPath = path.join(outputDirectory, filename);
+    await mkdir(path.dirname(outputPath), { recursive: true });
     await writeFile(
-      path.join(outputDirectory, filename),
+      outputPath,
       Buffer.from(imageBase64, 'base64'),
     );
     accepted.push({

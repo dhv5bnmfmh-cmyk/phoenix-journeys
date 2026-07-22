@@ -146,6 +146,17 @@ class _JourneyScreenState extends State<JourneyScreen>
         safeStep != step + 1) {
       return;
     }
+    // Discovery autoplay must enter the browser speech API in the same user
+    // gesture that pressed Continue. Awaiting storage/animation first can make
+    // iOS display "playing" while silently blocking the actual utterance.
+    if (safeStep == 2 && safeStep != step) {
+      setState(() => step = safeStep);
+      _discoveryAutoStarted = true;
+      unawaited(_playDiscoveries(stopEngineFirst: false));
+      await _persistProgress(overrideStep: safeStep);
+      return;
+    }
+
     await _narration.stop();
     if (!mounted || safeStep == step) return;
 
@@ -185,7 +196,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  Future<void> _playDiscoveries() {
+  Future<void> _playDiscoveries({bool stopEngineFirst = true}) {
     return _narration.play(
       contentId: 'discovery',
       languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
@@ -200,6 +211,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             ),
           )
           .toList(growable: false),
+      stopEngineFirst: stopEngineFirst,
     );
   }
 
@@ -701,7 +713,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        style: PhoenixTheme.journeyTitleStyle.copyWith(
                           fontSize: keyboardVisible ? 15 : (compact ? 17 : 19),
                           height: 1.05,
                           fontWeight: FontWeight.w900,
@@ -859,7 +871,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                   constraints,
                   _journeyContent.storyParagraphs,
                   minSize: 10.8,
-                  maxSize: 20,
+                  maxSize: 16,
                   lineHeight: 1.22,
                 );
                 return AnimatedBuilder(
@@ -909,11 +921,24 @@ class _JourneyScreenState extends State<JourneyScreen>
                                   narrationContentId: 'story',
                                   narrationItemId: 'story-${entry.key}',
                                   style: TextStyle(
+                                    color: Colors.white,
                                     fontSize: fontSize,
                                     height: 1.22,
-                                    fontWeight: isActive
-                                        ? FontWeight.w800
-                                        : FontWeight.w600,
+                                    fontFamily: PhoenixTheme.chineseFontFamily,
+                                    fontFamilyFallback:
+                                        PhoenixTheme.chineseFontFallback,
+                                    fontWeight: FontWeight.w700,
+                                    shadows: const [
+                                      Shadow(
+                                        color: Color(0xE6000000),
+                                        blurRadius: 3,
+                                        offset: Offset(0, 1),
+                                      ),
+                                      Shadow(
+                                        color: Color(0x99000000),
+                                        blurRadius: 8,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               );
@@ -971,7 +996,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             itemBuilder: (context, index) {
               final entry = _experience.words[index];
               return Material(
-                color: Colors.white.withValues(alpha: .94),
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(10),
                 child: InkWell(
                   onTap: () => unawaited(_openWord(entry)),
@@ -981,11 +1006,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                       horizontal: 5,
                       vertical: 3,
                     ),
-                    decoration: BoxDecoration(
+                    decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: PhoenixTheme.gold.withValues(alpha: .25),
-                      ),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -999,9 +1021,16 @@ class _JourneyScreenState extends State<JourneyScreen>
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
+                                  color: Colors.white,
                                   fontSize: 11,
                                   height: 1,
+                                  fontFamily: PhoenixTheme.chineseFontFamily,
+                                  fontFamilyFallback:
+                                      PhoenixTheme.chineseFontFallback,
                                   fontWeight: FontWeight.w900,
+                                  shadows: [
+                                    Shadow(color: Colors.black, blurRadius: 4),
+                                  ],
                                 ),
                               ),
                             ),
@@ -1021,9 +1050,15 @@ class _JourneyScreenState extends State<JourneyScreen>
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Colors.black54,
+                            color: Colors.white,
                             fontSize: cellHeight >= 120 ? 10 : 8,
                             height: 1,
+                            fontFamily: PhoenixTheme.chineseFontFamily,
+                            fontFamilyFallback:
+                                PhoenixTheme.chineseFontFallback,
+                            shadows: const [
+                              Shadow(color: Colors.black, blurRadius: 4),
+                            ],
                           ),
                         ),
                         if (showPartOfSpeech) ...[
@@ -1034,9 +1069,15 @@ class _JourneyScreenState extends State<JourneyScreen>
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: PhoenixTheme.red,
+                              color: Colors.white,
                               fontSize: 9.5,
+                              fontFamily: PhoenixTheme.chineseFontFamily,
+                              fontFamilyFallback:
+                                  PhoenixTheme.chineseFontFallback,
                               fontWeight: FontWeight.w800,
+                              shadows: [
+                                Shadow(color: Colors.black, blurRadius: 4),
+                              ],
                             ),
                           ),
                         ],
@@ -1048,10 +1089,16 @@ class _JourneyScreenState extends State<JourneyScreen>
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: PhoenixTheme.translation,
+                              color: Colors.white,
                               fontSize: 8.6,
                               height: 1.15,
+                              fontFamily: PhoenixTheme.chineseFontFamily,
+                              fontFamilyFallback:
+                                  PhoenixTheme.chineseFontFallback,
                               fontWeight: FontWeight.w700,
+                              shadows: [
+                                Shadow(color: Colors.black, blurRadius: 4),
+                              ],
                             ),
                           ),
                         ],
@@ -1063,9 +1110,15 @@ class _JourneyScreenState extends State<JourneyScreen>
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: PhoenixTheme.ai,
+                              color: Colors.white,
                               fontSize: 8.4,
                               height: 1.15,
+                              fontFamily: PhoenixTheme.chineseFontFamily,
+                              fontFamilyFallback:
+                                  PhoenixTheme.chineseFontFallback,
+                              shadows: [
+                                Shadow(color: Colors.black, blurRadius: 4),
+                              ],
                             ),
                           ),
                         ],
@@ -1077,9 +1130,15 @@ class _JourneyScreenState extends State<JourneyScreen>
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: Colors.black54,
+                              color: Colors.white,
                               fontSize: 8.4,
                               height: 1.15,
+                              fontFamily: PhoenixTheme.chineseFontFamily,
+                              fontFamilyFallback:
+                                  PhoenixTheme.chineseFontFallback,
+                              shadows: [
+                                Shadow(color: Colors.black, blurRadius: 4),
+                              ],
                             ),
                           ),
                         ],
@@ -1124,8 +1183,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                   constraints,
                   discoveryTexts,
                   minSize: 9.9,
-                  maxSize: 19,
-                  lineHeight: 1.2,
+                  maxSize: 15,
+                  lineHeight: 1.28,
                 );
                 return AnimatedBuilder(
                   animation: _narration,
@@ -1163,12 +1222,11 @@ class _JourneyScreenState extends State<JourneyScreen>
                                 highlightEnd: isActive ? snapshot!.end : null,
                                 narrationContentId: 'discovery',
                                 narrationItemId: 'discovery-${entry.key}',
-                                style: TextStyle(
+                                style: PhoenixTheme.journeyBodyStyle.copyWith(
                                   fontSize: fontSize,
-                                  height: 1.2,
                                   fontWeight: isActive
-                                      ? FontWeight.w800
-                                      : FontWeight.w600,
+                                      ? FontWeight.w900
+                                      : FontWeight.w700,
                                 ),
                               ),
                             );
@@ -1451,10 +1509,8 @@ class _CompactTextBlock extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 2),
       padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .94),
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .22)),
+      decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1463,11 +1519,11 @@ class _CompactTextBlock extends StatelessWidget {
             padding: const EdgeInsets.only(top: 1),
             child: CircleAvatar(
               radius: 9,
-              backgroundColor: PhoenixTheme.gold.withValues(alpha: .18),
+              backgroundColor: const Color(0x99000000),
               child: Text(
                 '$index',
                 style: const TextStyle(
-                  color: PhoenixTheme.red,
+                  color: Color(0xFFFFD879),
                   fontSize: 7,
                   fontWeight: FontWeight.w900,
                 ),
@@ -1490,7 +1546,7 @@ class _CompactTextBlock extends StatelessWidget {
               child: const Text(
                 '注',
                 style: TextStyle(
-                  color: PhoenixTheme.red,
+                  color: Color(0xFFFFD879),
                   fontSize: 8,
                   fontWeight: FontWeight.w900,
                 ),

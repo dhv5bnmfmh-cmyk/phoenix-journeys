@@ -54,6 +54,39 @@ test('future commands can request only the next missing image batch', () => {
   );
 });
 
+test('every destination writes into a city and destination branch', () => {
+  const jobs = new PhoenixBackgroundAgent().planOfflineLibrary();
+  for (const job of jobs) {
+    assert.match(job.assetDirectory, /^[a-z-]+\/[a-z-]+$/);
+    assert.match(
+      job.fileName,
+      new RegExp(`^${job.assetDirectory}/\\d{2}-[a-z-]+\\.webp$`),
+    );
+  }
+
+  const beijing = jobs.find((job) => job.journeyId === 'beijing-forbidden-city');
+  assert.equal(beijing.assetDirectory, 'beijing/forbidden-city');
+  assert.match(beijing.fileName, /^beijing\/forbidden-city\//);
+});
+
+test('Flutter bundles each published destination directory explicitly', () => {
+  const pubspec = readFileSync('app/pubspec.yaml', 'utf8');
+  for (const directory of [
+    'beijing/forbidden-city',
+    'shanghai/bund',
+    'xian/city-wall',
+    'hangzhou/west-lake',
+    'chengdu/kuanzhai-alley',
+    'nanjing/qinhuai-river',
+    'guangzhou/chen-clan-ancestral-hall',
+  ]) {
+    assert.match(
+      pubspec,
+      new RegExp(`assets/images/backgrounds/generated/${directory}/`),
+    );
+  }
+});
+
 test('prompts ban IP, logos, trademarks and artist imitation', () => {
   const jobs = new PhoenixBackgroundAgent().planOfflineLibrary();
   const compliance = new PhoenixVisualComplianceAgent();

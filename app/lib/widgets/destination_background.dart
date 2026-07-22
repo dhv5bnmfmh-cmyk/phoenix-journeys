@@ -11,7 +11,7 @@ class DestinationBackground extends StatelessWidget {
     required this.pageType,
     required this.child,
     this.localDate,
-    this.scrimStrength = .64,
+    this.scrimStrength = .24,
     super.key,
   });
 
@@ -29,6 +29,7 @@ class DestinationBackground extends StatelessWidget {
       localDate: localDate ?? DateTime.now(),
       catalog: journeyBackgroundCatalog,
     );
+    final visibleScrimStrength = (scrimStrength * .55).clamp(0.0, 1.0);
 
     return Stack(
       fit: StackFit.expand,
@@ -39,7 +40,7 @@ class DestinationBackground extends StatelessWidget {
               asset.assetPath,
               key: ValueKey('journey-background-${asset.id}'),
               fit: BoxFit.cover,
-              filterQuality: FilterQuality.medium,
+              filterQuality: FilterQuality.high,
               errorBuilder: (_, __, ___) => const _BackgroundFallback(),
             ),
           )
@@ -51,9 +52,13 @@ class DestinationBackground extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                PhoenixTheme.paper.withValues(alpha: scrimStrength + .12),
-                PhoenixTheme.paper.withValues(alpha: scrimStrength),
-                PhoenixTheme.paper.withValues(alpha: scrimStrength + .18),
+                PhoenixTheme.paper.withValues(
+                  alpha: visibleScrimStrength + .04,
+                ),
+                PhoenixTheme.paper.withValues(alpha: visibleScrimStrength),
+                PhoenixTheme.paper.withValues(
+                  alpha: visibleScrimStrength + .07,
+                ),
               ],
             ),
           ),

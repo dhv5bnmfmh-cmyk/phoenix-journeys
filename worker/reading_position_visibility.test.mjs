@@ -21,7 +21,7 @@ test('Story and Discovery show position only with the inline triangle', () => {
 });
 
 test('no text or paragraph color change is used for narration position', () => {
-  assert.doesNotMatch(interactive, /color: Colors\.white/);
+  assert.doesNotMatch(interactive, /isCurrentNarrationItem[\s\S]{0,200}color:/);
   assert.doesNotMatch(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
   assert.doesNotMatch(journey, /const Color\(0xFFFFF2EE\)/);
   assert.doesNotMatch(journey, /Icons\.graphic_eq_rounded/);

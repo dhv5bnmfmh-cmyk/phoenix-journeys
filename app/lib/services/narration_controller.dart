@@ -472,6 +472,7 @@ class NarrationController extends ChangeNotifier {
     required String contentId,
     required List<NarrationItem> items,
     String languageCode = 'zh-CN',
+    bool stopEngineFirst = true,
   }) async {
     final plan = NarrationTextPlan.fromItems(items);
     if (plan.isEmpty) return;
@@ -491,7 +492,7 @@ class NarrationController extends ChangeNotifier {
     _webSpeechPausedInPlace = false;
     _restartWebSpeechOnResume = false;
     _applyProgress(0);
-    await _speakFrom(0);
+    await _speakFrom(0, stopEngineFirst: stopEngineFirst);
   }
 
   Future<void> pause() async {

@@ -11,9 +11,22 @@ const destinationBriefs = {
     'Kuanzhai Alley courtyards, grey brick lanes, bamboo and warm lantern light',
   'nanjing-qinhuai-river':
     'Qinhuai River, white-wall black-roof houses, arch bridge and gentle lantern reflections',
-  'guangzhou-chen-clan':
+  'guangzhou-chen-clan-academy':
     'Chen Clan Ancestral Hall, Lingnan roof ridges, courtyards and subtle ceramic ornament',
 };
+
+// Keep every destination in its own city branch. A city can grow to many
+// destination folders without mixing their reviewed offline image libraries.
+const destinationAssetDirectories = Object.freeze({
+  'beijing-forbidden-city': 'beijing/forbidden-city',
+  'shanghai-bund': 'shanghai/bund',
+  'xian-city-wall': 'xian/city-wall',
+  'hangzhou-west-lake': 'hangzhou/west-lake',
+  'chengdu-kuanzhai-alley': 'chengdu/kuanzhai-alley',
+  'nanjing-qinhuai-river': 'nanjing/qinhuai-river',
+  'guangzhou-chen-clan-academy':
+    'guangzhou/chen-clan-ancestral-hall',
+});
 
 export const PHOENIX_OFFLINE_IMAGES_PER_DESTINATION = 10;
 
@@ -100,6 +113,35 @@ const libraryVariants = Object.freeze([
   },
 ]);
 
+// Published libraries may keep human-friendly art-direction slugs while the
+// scheduler uses stable semantic slot IDs. Canonicalizing shipped IDs here
+// prevents the Agent from regenerating a destination whose ten slots already
+// exist in the reviewed offline library.
+const publishedSlotAliases = Object.freeze({
+  'beijing-forbidden-city-01-twilight-courtyard':
+    'beijing-forbidden-city-01-sunrise-arrival',
+  'beijing-forbidden-city-02-moonlit-palace':
+    'beijing-forbidden-city-02-morning-street',
+  'beijing-forbidden-city-03-golden-gate':
+    'beijing-forbidden-city-03-misty-detail',
+  'beijing-forbidden-city-04-winter-snow':
+    'beijing-forbidden-city-04-bright-panorama',
+  'beijing-forbidden-city-05-after-rain':
+    'beijing-forbidden-city-05-after-rain',
+  'beijing-forbidden-city-06-autumn-maples':
+    'beijing-forbidden-city-06-seasonal-landscape',
+  'beijing-forbidden-city-07-clear-morning':
+    'beijing-forbidden-city-07-golden-hour',
+  'beijing-forbidden-city-08-sunlit-corridor':
+    'beijing-forbidden-city-08-blue-hour',
+  'beijing-forbidden-city-09-misty-courtyard':
+    'beijing-forbidden-city-09-lantern-night',
+  'beijing-forbidden-city-10-sunset-panorama':
+    'beijing-forbidden-city-10-quiet-night-panorama',
+});
+
+const canonicalSlotId = (id) => publishedSlotAliases[id] ?? id;
+
 export class PhoenixBackgroundAgent {
   constructor({
     targetPerDestination = PHOENIX_OFFLINE_IMAGES_PER_DESTINATION,
@@ -112,7 +154,7 @@ export class PhoenixBackgroundAgent {
     existingIds = [],
     maxNewImages = Number.POSITIVE_INFINITY,
   } = {}) {
-    const existing = new Set(existingIds);
+    const existing = new Set(existingIds.map(canonicalSlotId));
     const allSlots = journeyIds.flatMap((journeyId) =>
       libraryVariants
         .slice(0, this.targetPerDestination)
@@ -129,6 +171,11 @@ export class PhoenixBackgroundAgent {
   }
 
   _buildJob({ journeyId, variant, index }) {
+    const assetDirectory = destinationAssetDirectories[journeyId];
+    if (!assetDirectory) {
+      throw new Error(`Missing background asset directory for ${journeyId}.`);
+    }
+    const assetFileName = `${String(index + 1).padStart(2, '0')}-${variant.slug}.webp`;
     const varietyKey = [
       journeyId,
       variant.timeOfDay,
@@ -139,7 +186,8 @@ export class PhoenixBackgroundAgent {
     return {
       id: `${journeyId}-${String(index + 1).padStart(2, '0')}-${variant.slug}`,
       journeyId,
-      fileName: `${journeyId}-${String(index + 1).padStart(2, '0')}-${variant.slug}.webp`,
+      assetDirectory,
+      fileName: `${assetDirectory}/${assetFileName}`,
       slot: index + 1,
       mood: variant.mood,
       timeOfDay: variant.timeOfDay,
