@@ -48,4 +48,27 @@ final generatedJourneyBackgrounds = <JourneyBackgroundAsset>[
       complianceScore: 100,
       varietyScore: 100,
     ),
+  for (final assetName in <String>[
+    '01-sunrise-arrival',
+    '02-morning-street',
+    '03-misty-detail',
+    '04-bright-panorama',
+    '05-after-rain',
+    '06-seasonal-landscape',
+    '07-golden-hour',
+    '08-blue-hour',
+    '09-lantern-night',
+    '10-quiet-night-panorama',
+  ])
+    JourneyBackgroundAsset(
+      id: 'xian-city-wall-$assetName',
+      journeyId: 'xian-city-wall',
+      assetPath:
+          'assets/images/backgrounds/generated/xian-city-wall-$assetName.webp',
+      generatedOn: DateTime.utc(2026, 7, 22),
+      origin: JourneyBackgroundOrigin.aiGenerated,
+      complianceReviewed: true,
+      complianceScore: 100,
+      varietyScore: 100,
+    ),
 ];
