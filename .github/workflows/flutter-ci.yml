@@ -32,7 +32,7 @@ jobs:
           fetch-depth: 0
 
       - name: Wire two-level picker into Explore
-        if: github.ref == 'refs/heads/feat/two-level-journey-picker'
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/feat/two-level-journey-picker'
         working-directory: ${{ github.workspace }}
         shell: bash
         run: |
