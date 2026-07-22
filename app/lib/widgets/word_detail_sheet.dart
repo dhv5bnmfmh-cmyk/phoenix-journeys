@@ -64,7 +64,7 @@ Future<void> showWordDetail(
     useSafeArea: true,
     builder: (sheetContext) {
       final size = MediaQuery.sizeOf(sheetContext);
-      final sheetWidth = (size.width - 20).clamp(0.0, 560.0).toDouble();
+      final sheetWidth = size.width;
       return ConstrainedBox(
         constraints: BoxConstraints(maxHeight: size.height * .52),
         child: ClipRect(
@@ -238,9 +238,9 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
 
     return Container(
       margin: EdgeInsets.fromLTRB(
-        10,
         0,
-        10,
+        0,
+        0,
         10 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
