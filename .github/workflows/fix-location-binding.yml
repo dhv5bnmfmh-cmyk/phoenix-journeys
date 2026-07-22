@@ -54,7 +54,7 @@ jobs:
           text = location_test.read_text()
           if not text.endswith("  });\n});\n"):
               raise SystemExit('Unexpected location test ending')
-          location_test.write_text(text[:-7] + "}\n")
+          location_test.write_text(text[:-10] + "}\n")
 
           replace_once(
               'app/lib/services/journey_location_binding.dart',
