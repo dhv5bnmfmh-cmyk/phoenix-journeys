@@ -86,7 +86,7 @@ class PhoenixTheme {
       stops: [0, .55, 1],
     ),
     borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: Color(0xFFFFE39A), width: 1.4),
+    border: Border.all(color: const Color(0xFFFFE39A), width: 1.4),
     boxShadow: const [
       BoxShadow(color: Color(0x66000000), blurRadius: 20, offset: Offset(0, 8)),
     ],
