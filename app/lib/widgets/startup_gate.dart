@@ -13,8 +13,9 @@ class StartupGate extends StatelessWidget {
     final state = context.watch<AppState>();
 
     return switch (state.loadStatus) {
-      AppLoadStatus.loading => const _StartupLoading(),
+      AppLoadStatus.loading => _StartupLoading(state: state),
       AppLoadStatus.error => _StartupError(
+          state: state,
           message: state.loadErrorMessage ?? '暂时无法打开 Phoenix Journeys。',
           onRetry: state.load,
         ),
@@ -24,7 +25,9 @@ class StartupGate extends StatelessWidget {
 }
 
 class _StartupLoading extends StatelessWidget {
-  const _StartupLoading();
+  const _StartupLoading({required this.state});
+
+  final AppState state;
 
   @override
   Widget build(BuildContext context) {
@@ -33,27 +36,30 @@ class _StartupLoading extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: Semantics(
-            label: 'Phoenix Journeys 正在载入',
+            label: state.displayText('Phoenix Journeys 正在载入'),
             liveRegion: true,
-            child: const Padding(
-              padding: EdgeInsets.all(32),
+            child: Padding(
+              padding: const EdgeInsets.all(32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _PhoenixMark(),
-                  SizedBox(height: 24),
-                  CircularProgressIndicator(),
-                  SizedBox(height: 18),
+                  const _PhoenixMark(),
+                  const SizedBox(height: 24),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 18),
                   Text(
-                    '正在准备你的旅程…',
+                    state.displayText('正在准备你的旅程…'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
-                    '读取语言设置与学习记录',
+                    state.displayText('读取语言设置与学习记录'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.black54),
+                    style: const TextStyle(color: Colors.black54),
                   ),
                 ],
               ),
@@ -66,8 +72,13 @@ class _StartupLoading extends StatelessWidget {
 }
 
 class _StartupError extends StatelessWidget {
-  const _StartupError({required this.message, required this.onRetry});
+  const _StartupError({
+    required this.state,
+    required this.message,
+    required this.onRetry,
+  });
 
+  final AppState state;
   final String message;
   final Future<void> Function() onRetry;
 
@@ -87,13 +98,13 @@ class _StartupError extends StatelessWidget {
                   const _PhoenixMark(),
                   const SizedBox(height: 24),
                   Text(
-                    '旅程暂时停在登机口',
+                    state.displayText('旅程暂时停在登机口'),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    message,
+                    state.displayText(message),
                     textAlign: TextAlign.center,
                     style: const TextStyle(height: 1.5, color: Colors.black54),
                   ),
@@ -101,7 +112,7 @@ class _StartupError extends StatelessWidget {
                   FilledButton.icon(
                     onPressed: onRetry,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('重新尝试'),
+                    label: Text(state.displayText('重新尝试')),
                   ),
                 ],
               ),
