@@ -34,8 +34,10 @@ test('new journeys include authoritative sources and complete study stages', () 
   assert.ok((extended.match(/expressQuestion:/g) ?? []).length >= 4);
 });
 
-test('daily progress, Agent feedback and stamps are namespaced by journey id', () => {
-  assert.match(state, /journey\.\$\{journeyId \?\? activeJourneyId\}/);
+test('daily progress, Agent feedback and stamps use destination path namespaces', () => {
+  assert.match(state, /binding\.storageNamespace/);
+  assert.match(state, /binding\.legacyStorageNamespace/);
+  assert.match(state, /activeJourneyStoragePath/);
   assert.match(state, /earnedJourneyStampIds/);
   assert.match(state, /saveGuideFeedback/);
   assert.match(state, /saveWritingFeedback/);
