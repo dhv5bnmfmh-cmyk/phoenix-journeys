@@ -24,6 +24,24 @@ void main() {
     expect(first!.id, second!.id);
   });
 
+  test('ten journey pages receive ten distinct daily backgrounds', () {
+    final selectedIds = JourneyBackgroundPage.values
+        .map(
+          (page) => policy
+              .select(
+                journeyId: 'beijing-forbidden-city',
+                page: page,
+                localDate: DateTime(2026, 7, 22),
+                catalog: journeyBackgroundCatalog,
+              )
+              ?.id,
+        )
+        .toList(growable: false);
+
+    expect(selectedIds, everyElement(isNotNull));
+    expect(selectedIds.toSet(), hasLength(JourneyBackgroundPage.values.length));
+  });
+
   test('every published seed destination has three approved fallbacks', () {
     const journeys = [
       'beijing-forbidden-city',

@@ -51,8 +51,8 @@ class JourneyBackgroundPolicy {
     candidates.sort((left, right) => left.id.compareTo(right.id));
 
     final dayKey = '${localDate.year}-${localDate.month}-${localDate.day}';
-    final index =
-        _stableHash('$journeyId|${page.name}|$dayKey') % candidates.length;
+    final dailyOffset = _stableHash('$journeyId|$dayKey') % candidates.length;
+    final index = (dailyOffset + page.index) % candidates.length;
     return candidates[index];
   }
 
