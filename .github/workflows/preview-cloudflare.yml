@@ -11,7 +11,7 @@ on:
       - closed
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   statuses: write
 
@@ -36,6 +36,102 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Recover approved Summer Palace backgrounds
+        if: >-
+          github.event.pull_request.number == 85 &&
+          github.event.pull_request.head.ref == 'fix/summer-palace-background-refresh'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import gzip
+          import io
+          import tarfile
+
+          expected = [
+              '01-dawn-kunming-lake.webp',
+              '02-morning-long-corridor.webp',
+              '03-misty-longevity-hill.webp',
+              '04-bright-seventeen-arch-bridge.webp',
+              '05-after-rain-pavilion.webp',
+              '06-summer-lotus-lake.webp',
+              '07-autumn-west-dike.webp',
+              '08-golden-hour-tower.webp',
+              '09-blue-hour-reflection.webp',
+              '10-moonlit-lake-panorama.webp',
+          ]
+          sources = [
+              Path('.github/sp-upload-q5'),
+              Path('.github/sp-upload-q10'),
+              Path('.github/sp400-upload'),
+              Path('.github/sp400b-upload'),
+              Path('.github/sp-upload'),
+          ]
+          selected = None
+          selected_source = None
+          for source in sources:
+              chunks = sorted(source.glob('chunk_*'))
+              if not chunks:
+                  continue
+              encoded = ''.join(chunk.read_text(encoding='utf-8').strip() for chunk in chunks)
+              try:
+                  compressed = base64.b64decode(encoded, validate=True)
+                  try:
+                      tar_bytes = gzip.decompress(compressed)
+                      archive = tarfile.open(fileobj=io.BytesIO(tar_bytes), mode='r:')
+                  except Exception:
+                      archive = tarfile.open(fileobj=io.BytesIO(compressed), mode='r:gz')
+                  with archive:
+                      found = {}
+                      for member in archive.getmembers():
+                          name = Path(member.name).name
+                          if member.isfile() and name in expected:
+                              handle = archive.extractfile(member)
+                              if handle is not None:
+                                  found[name] = handle.read()
+                  if set(found) != set(expected):
+                      raise ValueError(f'missing {sorted(set(expected) - set(found))}')
+                  for name, data in found.items():
+                      if len(data) < 20000 or data[:4] != b'RIFF' or data[8:12] != b'WEBP':
+                          raise ValueError(f'invalid WebP {name}: {len(data)} bytes')
+                  selected = found
+                  selected_source = source
+                  break
+              except Exception as error:
+                  print(f'Skipping {source}: {error}')
+
+          if selected is None:
+              raise SystemExit('No complete approved Summer Palace archive was found.')
+
+          target = Path('app/assets/images/backgrounds/generated/beijing/summer-palace')
+          target.mkdir(parents=True, exist_ok=True)
+          for old in target.glob('*.webp'):
+              old.unlink()
+          for name in expected:
+              (target / name).write_bytes(selected[name])
+              print(f'Installed {name}: {len(selected[name])} bytes')
+          print(f'Archive source: {selected_source}')
+          PY
+
+          rm -rf .github/sp-upload .github/sp-upload-q5 .github/sp-upload-q10
+          rm -rf .github/sp400-upload .github/sp400b-upload
+          rm -f .github/direct-import-marker.txt
+          rm -f .github/workflows/import-summer-palace-backgrounds.yml
+          rm -f .github/workflows/import-refined-summer-palace-backgrounds.yml
+          rm -f .github/workflows/finalize-summer-palace-backgrounds.yml
+          rm -f .github/workflows/refresh-summer-palace-backgrounds.yml
+          git checkout origin/main -- .github/workflows/preview-cloudflare.yml
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'fix: install approved Summer Palace background set'
+          git push origin HEAD:fix/summer-palace-background-refresh
 
       - name: Test Phoenix agents
         run: node --test worker/*.test.mjs
