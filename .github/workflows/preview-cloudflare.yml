@@ -42,21 +42,30 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/summer-palace
-          : > /tmp/summer-palace-archive.b64
-          gh api "repos/$GITHUB_REPOSITORY/contents/.github/sp-upload-q5?ref=$PREVIEW_RELEASE" \
-            --jq 'sort_by(.name)[] | .path' > /tmp/summer-palace-chunks.txt
-          while IFS= read -r chunk_path; do
-            echo "Reading $chunk_path"
-            gh api "repos/$GITHUB_REPOSITORY/contents/$chunk_path?ref=$PREVIEW_RELEASE" --jq '.content' \
+          candidates=(
+            02c0ddf5ed8e4278c9eee316d6e938d574bfa118
+            8064c36b3e9ff1ca2969d6e0a0cbb974f2d68900
+            23d592277d4652831baedc1f7d580a768f43f5ec
+            d0405e410bc43bdb8984458d123256d8ee808261
+          )
+          selected=''
+          for sha in "${candidates[@]}"; do
+            echo "Checking reviewed archive $sha"
+            if gh api "repos/$GITHUB_REPOSITORY/git/blobs/$sha" --jq '.content' \
               | tr -d '\n' \
-              | base64 --decode >> /tmp/summer-palace-archive.b64
-          done < /tmp/summer-palace-chunks.txt
-          echo "Encoded characters: $(tr -d '\r\n ' < /tmp/summer-palace-archive.b64 | wc -c)"
-          tr -d '\r\n ' < /tmp/summer-palace-archive.b64 \
-            | base64 --decode > /tmp/summer-palace.tar.gz
-          echo "Archive bytes: $(wc -c < /tmp/summer-palace.tar.gz)"
-          tar -tzf /tmp/summer-palace.tar.gz
-          tar -xzf /tmp/summer-palace.tar.gz -C /tmp/summer-palace
+              | base64 --decode > /tmp/candidate.tar.gz \
+              && tar -tzf /tmp/candidate.tar.gz > /tmp/candidate-files.txt; then
+              count="$(grep -Ec '/(11|12|13|14|15|16|17|18|19|20)-.*\.webp$|^(11|12|13|14|15|16|17|18|19|20)-.*\.webp$' /tmp/candidate-files.txt || true)"
+              echo "Reviewed WebP count: $count"
+              if [[ "$count" -eq 10 ]]; then
+                selected="$sha"
+                break
+              fi
+            fi
+          done
+          test -n "$selected"
+          echo "Selected reviewed archive: $selected"
+          tar -xzf /tmp/candidate.tar.gz -C /tmp/summer-palace
 
       - name: Check out feature branch
         uses: actions/checkout@v6
@@ -72,7 +81,7 @@ jobs:
         run: |
           set -euo pipefail
           target='app/assets/images/backgrounds/generated/beijing/summer-palace'
-          expected=(
+          destinations=(
             01-dawn-kunming-lake.webp
             02-morning-long-corridor.webp
             03-misty-longevity-hill.webp
@@ -86,13 +95,15 @@ jobs:
           )
           mkdir -p "$target"
           rm -f "$target"/*.webp
-          for name in "${expected[@]}"; do
-            source_file="$(find /tmp/summer-palace -type f -name "$name" -print -quit)"
+          for index in {1..10}; do
+            prefix="$(printf '%02d' "$((index + 10))")-"
+            source_file="$(find /tmp/summer-palace -type f -name "${prefix}*.webp" -print -quit)"
+            destination="${destinations[$((index - 1))]}"
             test -n "$source_file"
-            cp "$source_file" "$target/$name"
-            test "$(head -c 4 "$target/$name")" = 'RIFF'
-            test "$(dd if="$target/$name" bs=1 skip=8 count=4 status=none)" = 'WEBP'
-            test "$(wc -c < "$target/$name")" -ge 20000
+            cp "$source_file" "$target/$destination"
+            test "$(head -c 4 "$target/$destination")" = 'RIFF'
+            test "$(dd if="$target/$destination" bs=1 skip=8 count=4 status=none)" = 'WEBP'
+            test "$(wc -c < "$target/$destination")" -ge 20000
           done
           test "$(find "$target" -maxdepth 1 -name '*.webp' | wc -l)" -eq 10
 
