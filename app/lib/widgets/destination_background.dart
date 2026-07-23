@@ -105,8 +105,8 @@ class _SummerPalaceDynamicBackgroundState
   }
 
   void _syncMotionPreference() {
-    final shouldAnimate =
-        !_summerPalaceReduceMotion(context) && TickerMode.of(context);
+    final shouldAnimate = !_summerPalaceReduceMotion(context) &&
+        TickerMode.valuesOf(context).enabled;
     if (_motionActive == shouldAnimate) return;
 
     _motionActive = shouldAnimate;
