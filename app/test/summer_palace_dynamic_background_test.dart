@@ -29,6 +29,14 @@ void main() {
       findsOneWidget,
     );
     expect(
+      find.byKey(const ValueKey('summer-palace-static-background')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('summer-palace-live-loop')),
+      findsNothing,
+    );
+    expect(
       find.byKey(const ValueKey('summer-palace-cloud-light')),
       findsOneWidget,
     );
@@ -58,6 +66,11 @@ void main() {
       ),
     );
     await tester.pump();
+
+    expect(
+      find.byKey(const ValueKey('summer-palace-live-loop')),
+      findsOneWidget,
+    );
 
     final initialTransform = tester
         .widget<Transform>(

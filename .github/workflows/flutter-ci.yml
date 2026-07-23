@@ -1,55 +1,39 @@
-name: Apply Summer Palace live cinemagraph through Flutter CI
+name: Flutter CI
 
 on:
+  push:
+    branches:
+      - main
+      - "feature/**"
   pull_request:
     branches:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: summer-palace-live-cinemagraph-final
+  group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  generate-verify-publish:
+  verify:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+
     steps:
-      - name: Check out feature branch
+      - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: feature/summer-palace-parallax-background
-          fetch-depth: 0
-
-      - name: Set up Python imaging tools
-        run: python3 -m pip install --disable-pip-version-check pillow numpy
-
-      - name: Generate and integrate live background
-        run: |
-          set -euo pipefail
-          python3 tools/apply_summer_palace_live_cinemagraph.py
-          rm -f tools/apply_summer_palace_live_cinemagraph.py
-          rm -f .github/workflows/apply-summer-palace-live-cinemagraph.yml
-          git diff --check
-          asset=app/assets/images/backgrounds/generated/beijing/summer-palace/live/11-live-cinemagraph.webp
-          test -s "$asset"
-          test "$(stat -c%s "$asset")" -lt 1100000
 
       - name: Test Phoenix agents
         id: agents
         continue-on-error: true
+        working-directory: ${{ github.workspace }}
         run: |
           set -o pipefail
-          node --test worker/*.test.mjs 2>&1 | tee /tmp/phoenix-agent-live.log
-
-      - name: Upload Agent diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: summer-palace-live-agent-log
-          path: /tmp/phoenix-agent-live.log
-          if-no-files-found: error
+          node --test worker/*.test.mjs 2>&1 | tee worker-test.log
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -58,43 +42,62 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        working-directory: app
         run: flutter pub get
 
-      - name: Format changed Dart files
-        run: |
-          dart format \
-            app/lib/data/journey_background_catalog.dart \
-            app/lib/widgets/destination_background.dart \
-            app/test/summer_palace_dynamic_background_test.dart
-
       - name: Analyze
-        working-directory: app
-        run: flutter analyze
+        id: analyze
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          flutter analyze 2>&1 | tee analyze.log
 
-      - name: Test Flutter app
-        working-directory: app
-        run: flutter test
+      - name: Test
+        id: test
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          flutter test 2>&1 | tee test.log
 
       - name: Build web release
-        working-directory: app
-        run: flutter build web --release
+        id: build
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          flutter build web --release 2>&1 | tee build-web.log
 
       - name: Validate Cloudflare Worker bundle
-        run: npx --yes wrangler@4 deploy --dry-run --outdir /tmp/phoenix-wrangler-dry-run
-
-      - name: Enforce Agent result
-        run: test "${{ steps.agents.outcome }}" = success
-
-      - name: Publish clean live background commit
+        id: worker
+        continue-on-error: true
+        working-directory: ${{ github.workspace }}
         run: |
-          set -euo pipefail
-          git checkout origin/main -- .github/workflows/flutter-ci.yml
-          rm -rf .wrangler-dry-run
-          rm -f worker-test.log worker-build.log
-          rm -f app/analyze.log app/test.log app/build-web.log
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
-          git commit -m 'feat: add Summer Palace live cinemagraph background'
-          git push origin HEAD:feature/summer-palace-parallax-background
+          set -o pipefail
+          npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run 2>&1 | tee worker-build.log
+
+      - name: Upload verification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-verification-logs
+          path: |
+            worker-test.log
+            worker-build.log
+            app/analyze.log
+            app/test.log
+            app/build-web.log
+          if-no-files-found: error
+
+      - name: Enforce verification results
+        shell: bash
+        run: |
+          failures=0
+          for result in \
+            "${{ steps.agents.outcome }}" \
+            "${{ steps.analyze.outcome }}" \
+            "${{ steps.test.outcome }}" \
+            "${{ steps.build.outcome }}" \
+            "${{ steps.worker.outcome }}"; do
+            if [[ "$result" != "success" ]]; then
+              failures=1
+            fi
+          done
+          exit "$failures"

@@ -137,6 +137,10 @@ class _SummerPalaceDynamicBackgroundState
     if (path == null || path == _preloadedAssetPath) return;
     _preloadedAssetPath = path;
     precacheImage(AssetImage(path), context);
+    precacheImage(
+      const AssetImage(summerPalaceLiveLoopAssetPath),
+      context,
+    );
   }
 
   @override
@@ -148,6 +152,7 @@ class _SummerPalaceDynamicBackgroundState
   @override
   Widget build(BuildContext context) {
     final reduceMotion = _summerPalaceReduceMotion(context);
+    final useLiveLoop = !reduceMotion;
     return RepaintBoundary(
       key: const ValueKey('summer-palace-dynamic-background'),
       child: ClipRect(
@@ -166,6 +171,7 @@ class _SummerPalaceDynamicBackgroundState
                       _SummerPalaceCameraLayer(
                         assetPath: widget.assetPath,
                         progress: progress,
+                        useLiveLoop: useLiveLoop,
                       ),
                       _SummerPalaceCloudLight(progress: progress),
                       _SummerPalaceWaterShimmer(progress: progress),
@@ -189,14 +195,16 @@ class _SummerPalaceCameraLayer extends StatelessWidget {
   const _SummerPalaceCameraLayer({
     required this.assetPath,
     required this.progress,
+    required this.useLiveLoop,
   });
 
   final String? assetPath;
   final double progress;
+  final bool useLiveLoop;
 
   @override
   Widget build(BuildContext context) {
-    final path = assetPath;
+    final path = useLiveLoop ? summerPalaceLiveLoopAssetPath : assetPath;
     if (path == null) return const _BackgroundFallback();
 
     return RepaintBoundary(
@@ -208,6 +216,11 @@ class _SummerPalaceCameraLayer extends StatelessWidget {
           scale: 1.075 + .075 * progress,
           child: Image.asset(
             path,
+            key: ValueKey(
+              useLiveLoop
+                  ? 'summer-palace-live-loop'
+                  : 'summer-palace-static-background',
+            ),
             fit: BoxFit.cover,
             filterQuality: FilterQuality.medium,
             gaplessPlayback: true,
@@ -343,7 +356,8 @@ class _SummerPalaceRipplePainter extends CustomPainter {
       final phase = progress * math.pi * 4 + row * .72;
 
       for (var x = -8.0; x <= size.width + 8; x += 6) {
-        final y = yBase + math.sin((x / wavelength) * math.pi * 2 + phase) * amplitude;
+        final y = yBase +
+            math.sin((x / wavelength) * math.pi * 2 + phase) * amplitude;
         if (x <= -8) {
           path.moveTo(x, y);
         } else {
