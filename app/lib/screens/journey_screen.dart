@@ -1425,60 +1425,74 @@ class _JourneyScreenState extends State<JourneyScreen>
       buttonIcon: Icons.home_outlined,
       showBack: false,
       onNext: () => Navigator.of(context).pop(),
-      child: Column(
+      child: Stack(
         children: [
-          Expanded(
-            child: Center(
+          Align(
+            key: const ValueKey('completion-background-stamp'),
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 2, right: 2),
               child: FittedBox(
                 fit: BoxFit.contain,
-                child: AnimatedCityJourneyStamp(journey: _experience),
+                child: AnimatedCityJourneyStamp(
+                  journey: _experience,
+                  size: 104,
+                ),
               ),
             ),
           ),
-          const Text(
-            '盖章成功',
-            style: TextStyle(
-              color: PhoenixTheme.red,
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 3),
-          const Text(
-            '你完成的不是一堂课，而是一段旅程。',
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            style: TextStyle(fontSize: 12, height: 1.25),
-          ),
-          const SizedBox(height: 6),
-          SizedBox(
-            height: 36,
-            child: Row(
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: JourneyShareButton(
-                    isTraditional: _appState.isTraditional,
-                    city: _experience.city,
-                    place: _experience.place,
-                    compact: true,
-                    label: _appState.displayText('分享旅程'),
+                const Text(
+                  '盖章成功',
+                  style: TextStyle(
+                    color: PhoenixTheme.red,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => unawaited(_restartJourney()),
-                    style: OutlinedButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    icon: const Icon(Icons.replay_rounded, size: 16),
-                    label: const Text(
-                      '重新体验',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 10.5),
-                    ),
+                const SizedBox(height: 3),
+                const Text(
+                  '你完成的不是一堂课，而是一段旅程。',
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: TextStyle(fontSize: 12, height: 1.25),
+                ),
+                const SizedBox(height: 6),
+                SizedBox(
+                  height: 36,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: JourneyShareButton(
+                          isTraditional: _appState.isTraditional,
+                          city: _experience.city,
+                          place: _experience.place,
+                          compact: true,
+                          label: _appState.displayText('分享旅程'),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => unawaited(_restartJourney()),
+                          style: OutlinedButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                          icon: const Icon(Icons.replay_rounded, size: 16),
+                          label: const Text(
+                            '重新体验',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 10.5),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
