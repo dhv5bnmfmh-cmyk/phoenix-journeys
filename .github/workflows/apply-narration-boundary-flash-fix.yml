@@ -1,5 +1,6 @@
 name: Apply narration boundary flash fix
 
+# Retriggered through an isolated merge into the cinematic feature branch.
 on:
   push:
     branches:
