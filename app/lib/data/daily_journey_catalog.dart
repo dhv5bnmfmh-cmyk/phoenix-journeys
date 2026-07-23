@@ -5,6 +5,7 @@ import 'beijing_story_catalog.dart';
 import 'daily_journey_experience.dart';
 import 'extended_journey_catalog.dart';
 import 'journey_data.dart';
+import 'summer_palace_journey.dart';
 
 const shanghaiStorySources = <StorySourceRecord>[
   StorySourceRecord(
@@ -50,8 +51,7 @@ const xianStorySources = <StorySourceRecord>[
     id: 'xian-qujiang-city-wall',
     title: '西安城墙',
     publisher: '西安曲江新区管理委员会',
-    url:
-        'https://qjxq.xa.gov.cn/zjqj/gyqj/tsqj/5df21c5565cbd81235fc1efa.html',
+    url: 'https://qjxq.xa.gov.cn/zjqj/gyqj/tsqj/5df21c5565cbd81235fc1efa.html',
     kind: StorySourceKind.government,
     languageCode: 'zh-CN',
     geoNodeIds: ['cn-shaanxi-xian-city-wall'],
@@ -103,25 +103,141 @@ const shanghaiStoryAnnotations = <ReadingAnnotation>[
 ];
 
 const shanghaiWords = <WordEntry>[
-  WordEntry(word: '外滩', pinyin: 'Wàitān', partOfSpeech: '名词（专名）', simpleChinese: '上海黄浦江边著名的历史滨水区域。', translation: 'Bến Thượng Hải, khu ven sông lịch sử nổi tiếng.', englishDefinition: 'the Bund, Shanghai’s historic waterfront', symbol: '🌆'),
-  WordEntry(word: '滨水', pinyin: 'bīnshuǐ', partOfSpeech: '形容词', simpleChinese: '靠近河流、湖泊或海边。', translation: 'Nằm ven sông, hồ hoặc biển.', englishDefinition: 'waterfront; beside a body of water', symbol: '🌊'),
-  WordEntry(word: '黄浦江', pinyin: 'Huángpǔ Jiāng', partOfSpeech: '名词（专名）', simpleChinese: '流经上海市中心的重要河流。', translation: 'Sông Hoàng Phố chảy qua trung tâm Thượng Hải.', englishDefinition: 'the Huangpu River', symbol: '🚢'),
-  WordEntry(word: '轮廓', pinyin: 'lúnkuò', partOfSpeech: '名词', simpleChinese: '物体外部的线条和大致形状。', translation: 'Đường nét hoặc hình dáng bên ngoài.', englishDefinition: 'outline or silhouette', symbol: '✒️'),
-  WordEntry(word: '见证', pinyin: 'jiànzhèng', partOfSpeech: '动词', simpleChinese: '亲眼看见并能够证明某件事。', translation: 'Chứng kiến và có thể xác nhận một sự việc.', englishDefinition: 'to witness', symbol: '👁️'),
-  WordEntry(word: '金融', pinyin: 'jīnróng', partOfSpeech: '名词', simpleChinese: '与资金、银行和投资有关的经济活动。', translation: 'Hoạt động tài chính, ngân hàng và đầu tư.', englishDefinition: 'finance and financial activity', symbol: '🏦'),
-  WordEntry(word: '贸易', pinyin: 'màoyì', partOfSpeech: '名词', simpleChinese: '商品和服务的买卖活动。', translation: 'Hoạt động mua bán hàng hóa và dịch vụ.', englishDefinition: 'trade or commerce', symbol: '📦'),
-  WordEntry(word: '天际线', pinyin: 'tiānjìxiàn', partOfSpeech: '名词', simpleChinese: '建筑物顶部与天空形成的整体线条。', translation: 'Đường chân trời do các tòa nhà tạo thành.', englishDefinition: 'skyline', symbol: '🏙️'),
-  WordEntry(word: '隔江相望', pinyin: 'gé jiāng xiāngwàng', partOfSpeech: '动词短语', simpleChinese: '在河的两边互相面对。', translation: 'Nhìn nhau từ hai bờ sông.', englishDefinition: 'to face each other across a river', symbol: '↔️'),
-  WordEntry(word: '灯火', pinyin: 'dēnghuǒ', partOfSpeech: '名词', simpleChinese: '夜晚亮起的灯光。', translation: 'Ánh đèn vào ban đêm.', englishDefinition: 'lights at night', symbol: '✨'),
-  WordEntry(word: '时代', pinyin: 'shídài', partOfSpeech: '名词', simpleChinese: '历史发展中的一个时期。', translation: 'Một thời đại hoặc giai đoạn lịch sử.', englishDefinition: 'era or age', symbol: '⏳'),
-  WordEntry(word: '走向', pinyin: 'zǒuxiàng', partOfSpeech: '动词', simpleChinese: '朝着某个方向发展。', translation: 'Phát triển theo một hướng.', englishDefinition: 'to move toward', symbol: '➡️'),
+  WordEntry(
+      word: '外滩',
+      pinyin: 'Wàitān',
+      partOfSpeech: '名词（专名）',
+      simpleChinese: '上海黄浦江边著名的历史滨水区域。',
+      translation: 'Bến Thượng Hải, khu ven sông lịch sử nổi tiếng.',
+      englishDefinition: 'the Bund, Shanghai’s historic waterfront',
+      symbol: '🌆'),
+  WordEntry(
+      word: '滨水',
+      pinyin: 'bīnshuǐ',
+      partOfSpeech: '形容词',
+      simpleChinese: '靠近河流、湖泊或海边。',
+      translation: 'Nằm ven sông, hồ hoặc biển.',
+      englishDefinition: 'waterfront; beside a body of water',
+      symbol: '🌊'),
+  WordEntry(
+      word: '黄浦江',
+      pinyin: 'Huángpǔ Jiāng',
+      partOfSpeech: '名词（专名）',
+      simpleChinese: '流经上海市中心的重要河流。',
+      translation: 'Sông Hoàng Phố chảy qua trung tâm Thượng Hải.',
+      englishDefinition: 'the Huangpu River',
+      symbol: '🚢'),
+  WordEntry(
+      word: '轮廓',
+      pinyin: 'lúnkuò',
+      partOfSpeech: '名词',
+      simpleChinese: '物体外部的线条和大致形状。',
+      translation: 'Đường nét hoặc hình dáng bên ngoài.',
+      englishDefinition: 'outline or silhouette',
+      symbol: '✒️'),
+  WordEntry(
+      word: '见证',
+      pinyin: 'jiànzhèng',
+      partOfSpeech: '动词',
+      simpleChinese: '亲眼看见并能够证明某件事。',
+      translation: 'Chứng kiến và có thể xác nhận một sự việc.',
+      englishDefinition: 'to witness',
+      symbol: '👁️'),
+  WordEntry(
+      word: '金融',
+      pinyin: 'jīnróng',
+      partOfSpeech: '名词',
+      simpleChinese: '与资金、银行和投资有关的经济活动。',
+      translation: 'Hoạt động tài chính, ngân hàng và đầu tư.',
+      englishDefinition: 'finance and financial activity',
+      symbol: '🏦'),
+  WordEntry(
+      word: '贸易',
+      pinyin: 'màoyì',
+      partOfSpeech: '名词',
+      simpleChinese: '商品和服务的买卖活动。',
+      translation: 'Hoạt động mua bán hàng hóa và dịch vụ.',
+      englishDefinition: 'trade or commerce',
+      symbol: '📦'),
+  WordEntry(
+      word: '天际线',
+      pinyin: 'tiānjìxiàn',
+      partOfSpeech: '名词',
+      simpleChinese: '建筑物顶部与天空形成的整体线条。',
+      translation: 'Đường chân trời do các tòa nhà tạo thành.',
+      englishDefinition: 'skyline',
+      symbol: '🏙️'),
+  WordEntry(
+      word: '隔江相望',
+      pinyin: 'gé jiāng xiāngwàng',
+      partOfSpeech: '动词短语',
+      simpleChinese: '在河的两边互相面对。',
+      translation: 'Nhìn nhau từ hai bờ sông.',
+      englishDefinition: 'to face each other across a river',
+      symbol: '↔️'),
+  WordEntry(
+      word: '灯火',
+      pinyin: 'dēnghuǒ',
+      partOfSpeech: '名词',
+      simpleChinese: '夜晚亮起的灯光。',
+      translation: 'Ánh đèn vào ban đêm.',
+      englishDefinition: 'lights at night',
+      symbol: '✨'),
+  WordEntry(
+      word: '时代',
+      pinyin: 'shídài',
+      partOfSpeech: '名词',
+      simpleChinese: '历史发展中的一个时期。',
+      translation: 'Một thời đại hoặc giai đoạn lịch sử.',
+      englishDefinition: 'era or age',
+      symbol: '⏳'),
+  WordEntry(
+      word: '走向',
+      pinyin: 'zǒuxiàng',
+      partOfSpeech: '动词',
+      simpleChinese: '朝着某个方向发展。',
+      translation: 'Phát triển theo một hướng.',
+      englishDefinition: 'to move toward',
+      symbol: '➡️'),
 ];
 
 const shanghaiDiscoveries = <DiscoveryEntry>[
-  DiscoveryEntry(text: '外滩是一段约一点五公里长的滨水区域，也是受到保护的历史街区。', pinyin: 'Wàitān shì yí duàn yuē yì diǎn wǔ gōnglǐ cháng de bīnshuǐ qūyù, yě shì shòudào bǎohù de lìshǐ jiēqū.', simpleChinese: '外滩沿江约一点五公里，并受到历史文化保护。', vietnamese: 'Bến Thượng Hải là khu ven sông dài khoảng 1,5 km và là khu lịch sử được bảo vệ.', english: 'The Bund is an approximately 1.5-kilometre waterfront and a protected historic district.'),
-  DiscoveryEntry(text: '黄浦江西岸保存着许多不同风格的历史建筑，因此外滩也常被称为露天建筑博物馆。', pinyin: 'Huángpǔ Jiāng xī àn bǎocúnzhe xǔduō bùtóng fēnggé de lìshǐ jiànzhù, yīncǐ Wàitān yě cháng bèi chēngwéi lùtiān jiànzhù bówùguǎn.', simpleChinese: '外滩有很多不同风格的老建筑，像一座露天博物馆。', vietnamese: 'Bờ tây sông Hoàng Phố có nhiều công trình lịch sử đa phong cách, nên thường được gọi là bảo tàng kiến trúc ngoài trời.', english: 'Historic buildings in many styles make the Bund an outdoor museum of architecture.'),
-  DiscoveryEntry(text: '外滩过去与银行、贸易公司和城市商业发展密切相关。', pinyin: 'Wàitān guòqù yǔ yínháng, màoyì gōngsī hé chéngshì shāngyè fāzhǎn mìqiè xiāngguān.', simpleChinese: '外滩过去是银行、贸易和商业活动的重要地区。', vietnamese: 'Trong quá khứ, Bến Thượng Hải gắn chặt với ngân hàng, thương mại và sự phát triển kinh doanh.', english: 'The Bund was closely connected to banks, trading firms, and commercial development.'),
-  DiscoveryEntry(text: '从外滩看浦东，可以同时观察上海的历史建筑与现代天际线。', pinyin: 'Cóng Wàitān kàn Pǔdōng, kěyǐ tóngshí guānchá Shànghǎi de lìshǐ jiànzhù yǔ xiàndài tiānjìxiàn.', simpleChinese: '站在外滩，可以同时看到老上海和现代浦东。', vietnamese: 'Từ Bến Thượng Hải có thể đồng thời ngắm kiến trúc lịch sử và đường chân trời hiện đại của Phố Đông.', english: 'From the Bund, historic Shanghai and Pudong’s modern skyline appear together.'),
+  DiscoveryEntry(
+      text: '外滩是一段约一点五公里长的滨水区域，也是受到保护的历史街区。',
+      pinyin:
+          'Wàitān shì yí duàn yuē yì diǎn wǔ gōnglǐ cháng de bīnshuǐ qūyù, yě shì shòudào bǎohù de lìshǐ jiēqū.',
+      simpleChinese: '外滩沿江约一点五公里，并受到历史文化保护。',
+      vietnamese:
+          'Bến Thượng Hải là khu ven sông dài khoảng 1,5 km và là khu lịch sử được bảo vệ.',
+      english:
+          'The Bund is an approximately 1.5-kilometre waterfront and a protected historic district.'),
+  DiscoveryEntry(
+      text: '黄浦江西岸保存着许多不同风格的历史建筑，因此外滩也常被称为露天建筑博物馆。',
+      pinyin:
+          'Huángpǔ Jiāng xī àn bǎocúnzhe xǔduō bùtóng fēnggé de lìshǐ jiànzhù, yīncǐ Wàitān yě cháng bèi chēngwéi lùtiān jiànzhù bówùguǎn.',
+      simpleChinese: '外滩有很多不同风格的老建筑，像一座露天博物馆。',
+      vietnamese:
+          'Bờ tây sông Hoàng Phố có nhiều công trình lịch sử đa phong cách, nên thường được gọi là bảo tàng kiến trúc ngoài trời.',
+      english:
+          'Historic buildings in many styles make the Bund an outdoor museum of architecture.'),
+  DiscoveryEntry(
+      text: '外滩过去与银行、贸易公司和城市商业发展密切相关。',
+      pinyin:
+          'Wàitān guòqù yǔ yínháng, màoyì gōngsī hé chéngshì shāngyè fāzhǎn mìqiè xiāngguān.',
+      simpleChinese: '外滩过去是银行、贸易和商业活动的重要地区。',
+      vietnamese:
+          'Trong quá khứ, Bến Thượng Hải gắn chặt với ngân hàng, thương mại và sự phát triển kinh doanh.',
+      english:
+          'The Bund was closely connected to banks, trading firms, and commercial development.'),
+  DiscoveryEntry(
+      text: '从外滩看浦东，可以同时观察上海的历史建筑与现代天际线。',
+      pinyin:
+          'Cóng Wàitān kàn Pǔdōng, kěyǐ tóngshí guānchá Shànghǎi de lìshǐ jiànzhù yǔ xiàndài tiānjìxiàn.',
+      simpleChinese: '站在外滩，可以同时看到老上海和现代浦东。',
+      vietnamese:
+          'Từ Bến Thượng Hải có thể đồng thời ngắm kiến trúc lịch sử và đường chân trời hiện đại của Phố Đông.',
+      english:
+          'From the Bund, historic Shanghai and Pudong’s modern skyline appear together.'),
 ];
 
 const xianStoryParagraphs = <String>[
@@ -132,32 +248,172 @@ const xianStoryParagraphs = <String>[
 ];
 
 const xianStoryAnnotations = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Bàngwǎn, nǐ cóng Yǒngníngmén zǒu shàng Xī’ān Chéngqiáng. Jiǎoxià de zhuānshí xiàng liǎngbiān yánshēn, chéngmén, jiǎolóu hé hùchénghé zǔchéng qīngxī de fángyùxiàn.', vietnamese: 'Chiều tối, bạn bước lên tường thành Tây An từ cổng Vĩnh Ninh. Gạch đá kéo dài sang hai phía, còn cổng thành, tháp góc và hào nước tạo nên một tuyến phòng thủ rõ ràng.', english: 'At dusk, you climb Xi’an City Wall from Yongning Gate. Brickwork, gates, corner towers, and the moat form a clear defensive line.'),
-  ReadingAnnotation(pinyin: 'Xiàncún chéngqiáng de zhǔyào guīmó xíngchéng yú Míngdài, bìng zài hòulái de xiūshàn zhōng bùduàn wánshàn. Kuānkuò de qiángdǐng céngjīng fāngbiàn shǒuchéng rényuán xúnchá hé diàodòng.', vietnamese: 'Quy mô chính của tường thành hiện nay được hình thành vào thời Minh và tiếp tục hoàn thiện qua các lần tu bổ. Mặt thành rộng từng giúp binh lính tuần tra và di chuyển.', english: 'The present wall took its main form in the Ming dynasty and was refined through later repairs. Its broad top supported patrol and movement.'),
-  ReadingAnnotation(pinyin: 'Zhàn zài chéngqiáng shàng xiàng nèi kàn, shì jiēxiàng yǔ lǎochéng; xiàng wài kàn, shì dàolù, gāolóu hé bùduàn kuòdà de xiàndài chéngshì.', vietnamese: 'Nhìn vào trong từ tường thành là những ngõ phố và khu thành cổ; nhìn ra ngoài là đường sá, nhà cao tầng và đô thị hiện đại đang mở rộng.', english: 'Inside the wall lie lanes and the old city; outside are roads, towers, and an expanding modern metropolis.'),
-  ReadingAnnotation(pinyin: 'Rào chéngqiáng xíngzǒu, jiù xiàng yánzhe Xī’ān de shíjiān biānjiè qiánjìn. Gǔdū méiyǒu tíng zài guòqù, ér shì bǎ lìshǐ liú zài jīntiān de shēnghuó lǐ.', vietnamese: 'Đi dọc tường thành giống như bước theo ranh giới thời gian của Tây An. Cố đô không dừng lại trong quá khứ mà giữ lịch sử trong đời sống hôm nay.', english: 'Walking the wall follows Xi’an’s boundary through time. The ancient capital keeps history inside contemporary life.'),
+  ReadingAnnotation(
+      pinyin:
+          'Bàngwǎn, nǐ cóng Yǒngníngmén zǒu shàng Xī’ān Chéngqiáng. Jiǎoxià de zhuānshí xiàng liǎngbiān yánshēn, chéngmén, jiǎolóu hé hùchénghé zǔchéng qīngxī de fángyùxiàn.',
+      vietnamese:
+          'Chiều tối, bạn bước lên tường thành Tây An từ cổng Vĩnh Ninh. Gạch đá kéo dài sang hai phía, còn cổng thành, tháp góc và hào nước tạo nên một tuyến phòng thủ rõ ràng.',
+      english:
+          'At dusk, you climb Xi’an City Wall from Yongning Gate. Brickwork, gates, corner towers, and the moat form a clear defensive line.'),
+  ReadingAnnotation(
+      pinyin:
+          'Xiàncún chéngqiáng de zhǔyào guīmó xíngchéng yú Míngdài, bìng zài hòulái de xiūshàn zhōng bùduàn wánshàn. Kuānkuò de qiángdǐng céngjīng fāngbiàn shǒuchéng rényuán xúnchá hé diàodòng.',
+      vietnamese:
+          'Quy mô chính của tường thành hiện nay được hình thành vào thời Minh và tiếp tục hoàn thiện qua các lần tu bổ. Mặt thành rộng từng giúp binh lính tuần tra và di chuyển.',
+      english:
+          'The present wall took its main form in the Ming dynasty and was refined through later repairs. Its broad top supported patrol and movement.'),
+  ReadingAnnotation(
+      pinyin:
+          'Zhàn zài chéngqiáng shàng xiàng nèi kàn, shì jiēxiàng yǔ lǎochéng; xiàng wài kàn, shì dàolù, gāolóu hé bùduàn kuòdà de xiàndài chéngshì.',
+      vietnamese:
+          'Nhìn vào trong từ tường thành là những ngõ phố và khu thành cổ; nhìn ra ngoài là đường sá, nhà cao tầng và đô thị hiện đại đang mở rộng.',
+      english:
+          'Inside the wall lie lanes and the old city; outside are roads, towers, and an expanding modern metropolis.'),
+  ReadingAnnotation(
+      pinyin:
+          'Rào chéngqiáng xíngzǒu, jiù xiàng yánzhe Xī’ān de shíjiān biānjiè qiánjìn. Gǔdū méiyǒu tíng zài guòqù, ér shì bǎ lìshǐ liú zài jīntiān de shēnghuó lǐ.',
+      vietnamese:
+          'Đi dọc tường thành giống như bước theo ranh giới thời gian của Tây An. Cố đô không dừng lại trong quá khứ mà giữ lịch sử trong đời sống hôm nay.',
+      english:
+          'Walking the wall follows Xi’an’s boundary through time. The ancient capital keeps history inside contemporary life.'),
 ];
 
 const xianWords = <WordEntry>[
-  WordEntry(word: '城墙', pinyin: 'chéngqiáng', partOfSpeech: '名词', simpleChinese: '围绕城市、用于保护城市的高墙。', translation: 'Tường thành bao quanh và bảo vệ thành phố.', englishDefinition: 'city wall', symbol: '🧱'),
-  WordEntry(word: '永宁门', pinyin: 'Yǒngníngmén', partOfSpeech: '名词（专名）', simpleChinese: '西安城墙南面的重要城门。', translation: 'Cổng Vĩnh Ninh, cổng quan trọng phía nam.', englishDefinition: 'Yongning Gate, the south gate', symbol: '🚪'),
-  WordEntry(word: '砖石', pinyin: 'zhuānshí', partOfSpeech: '名词', simpleChinese: '砖和石头等建筑材料。', translation: 'Gạch và đá dùng trong xây dựng.', englishDefinition: 'brick and stone', symbol: '🪨'),
-  WordEntry(word: '角楼', pinyin: 'jiǎolóu', partOfSpeech: '名词', simpleChinese: '建在城墙转角处的楼。', translation: 'Tháp xây ở góc tường thành.', englishDefinition: 'corner tower', symbol: '🏯'),
-  WordEntry(word: '护城河', pinyin: 'hùchénghé', partOfSpeech: '名词', simpleChinese: '城墙外用于防御的河沟。', translation: 'Hào nước phòng thủ bên ngoài tường thành.', englishDefinition: 'moat', symbol: '🌊'),
-  WordEntry(word: '防御', pinyin: 'fángyù', partOfSpeech: '动词', simpleChinese: '保护自己，阻止外来的攻击。', translation: 'Phòng thủ, ngăn chặn tấn công.', englishDefinition: 'defence', symbol: '🛡️'),
-  WordEntry(word: '现存', pinyin: 'xiàncún', partOfSpeech: '形容词', simpleChinese: '现在仍然存在。', translation: 'Hiện vẫn còn tồn tại.', englishDefinition: 'still existing', symbol: '📍'),
-  WordEntry(word: '规模', pinyin: 'guīmó', partOfSpeech: '名词', simpleChinese: '事物的大小和范围。', translation: 'Quy mô và phạm vi.', englishDefinition: 'scale or extent', symbol: '📐'),
-  WordEntry(word: '修缮', pinyin: 'xiūshàn', partOfSpeech: '动词', simpleChinese: '修理并保护建筑。', translation: 'Tu bổ và bảo vệ công trình.', englishDefinition: 'to repair and conserve', symbol: '🔧'),
-  WordEntry(word: '巡查', pinyin: 'xúnchá', partOfSpeech: '动词', simpleChinese: '按照路线检查情况。', translation: 'Tuần tra và kiểm tra theo tuyến.', englishDefinition: 'to patrol and inspect', symbol: '🔍'),
-  WordEntry(word: '古都', pinyin: 'gǔdū', partOfSpeech: '名词', simpleChinese: '古代曾经作为首都的城市。', translation: 'Cố đô, thành phố từng là kinh đô.', englishDefinition: 'ancient capital', symbol: '🏛️'),
-  WordEntry(word: '边界', pinyin: 'biānjiè', partOfSpeech: '名词', simpleChinese: '两个区域之间的分界线。', translation: 'Ranh giới giữa hai khu vực.', englishDefinition: 'boundary', symbol: '〰️'),
+  WordEntry(
+      word: '城墙',
+      pinyin: 'chéngqiáng',
+      partOfSpeech: '名词',
+      simpleChinese: '围绕城市、用于保护城市的高墙。',
+      translation: 'Tường thành bao quanh và bảo vệ thành phố.',
+      englishDefinition: 'city wall',
+      symbol: '🧱'),
+  WordEntry(
+      word: '永宁门',
+      pinyin: 'Yǒngníngmén',
+      partOfSpeech: '名词（专名）',
+      simpleChinese: '西安城墙南面的重要城门。',
+      translation: 'Cổng Vĩnh Ninh, cổng quan trọng phía nam.',
+      englishDefinition: 'Yongning Gate, the south gate',
+      symbol: '🚪'),
+  WordEntry(
+      word: '砖石',
+      pinyin: 'zhuānshí',
+      partOfSpeech: '名词',
+      simpleChinese: '砖和石头等建筑材料。',
+      translation: 'Gạch và đá dùng trong xây dựng.',
+      englishDefinition: 'brick and stone',
+      symbol: '🪨'),
+  WordEntry(
+      word: '角楼',
+      pinyin: 'jiǎolóu',
+      partOfSpeech: '名词',
+      simpleChinese: '建在城墙转角处的楼。',
+      translation: 'Tháp xây ở góc tường thành.',
+      englishDefinition: 'corner tower',
+      symbol: '🏯'),
+  WordEntry(
+      word: '护城河',
+      pinyin: 'hùchénghé',
+      partOfSpeech: '名词',
+      simpleChinese: '城墙外用于防御的河沟。',
+      translation: 'Hào nước phòng thủ bên ngoài tường thành.',
+      englishDefinition: 'moat',
+      symbol: '🌊'),
+  WordEntry(
+      word: '防御',
+      pinyin: 'fángyù',
+      partOfSpeech: '动词',
+      simpleChinese: '保护自己，阻止外来的攻击。',
+      translation: 'Phòng thủ, ngăn chặn tấn công.',
+      englishDefinition: 'defence',
+      symbol: '🛡️'),
+  WordEntry(
+      word: '现存',
+      pinyin: 'xiàncún',
+      partOfSpeech: '形容词',
+      simpleChinese: '现在仍然存在。',
+      translation: 'Hiện vẫn còn tồn tại.',
+      englishDefinition: 'still existing',
+      symbol: '📍'),
+  WordEntry(
+      word: '规模',
+      pinyin: 'guīmó',
+      partOfSpeech: '名词',
+      simpleChinese: '事物的大小和范围。',
+      translation: 'Quy mô và phạm vi.',
+      englishDefinition: 'scale or extent',
+      symbol: '📐'),
+  WordEntry(
+      word: '修缮',
+      pinyin: 'xiūshàn',
+      partOfSpeech: '动词',
+      simpleChinese: '修理并保护建筑。',
+      translation: 'Tu bổ và bảo vệ công trình.',
+      englishDefinition: 'to repair and conserve',
+      symbol: '🔧'),
+  WordEntry(
+      word: '巡查',
+      pinyin: 'xúnchá',
+      partOfSpeech: '动词',
+      simpleChinese: '按照路线检查情况。',
+      translation: 'Tuần tra và kiểm tra theo tuyến.',
+      englishDefinition: 'to patrol and inspect',
+      symbol: '🔍'),
+  WordEntry(
+      word: '古都',
+      pinyin: 'gǔdū',
+      partOfSpeech: '名词',
+      simpleChinese: '古代曾经作为首都的城市。',
+      translation: 'Cố đô, thành phố từng là kinh đô.',
+      englishDefinition: 'ancient capital',
+      symbol: '🏛️'),
+  WordEntry(
+      word: '边界',
+      pinyin: 'biānjiè',
+      partOfSpeech: '名词',
+      simpleChinese: '两个区域之间的分界线。',
+      translation: 'Ranh giới giữa hai khu vực.',
+      englishDefinition: 'boundary',
+      symbol: '〰️'),
 ];
 
 const xianDiscoveries = <DiscoveryEntry>[
-  DiscoveryEntry(text: '西安现存城墙的主要结构形成于明代，并建立在更早城市遗迹的基础上。', pinyin: 'Xī’ān xiàncún chéngqiáng de zhǔyào jiégòu xíngchéng yú Míngdài, bìng jiànlì zài gèng zǎo chéngshì yíjì de jīchǔ shàng.', simpleChinese: '今天看到的城墙主要形成于明代，也利用了更早的城市基础。', vietnamese: 'Cấu trúc chính của tường thành Tây An hiện nay hình thành vào thời Minh trên nền dấu tích đô thị sớm hơn.', english: 'The existing wall took its main form in the Ming dynasty on foundations from earlier cities.'),
-  DiscoveryEntry(text: '城墙、城门、护城河和城楼共同组成完整的古代城市防御体系。', pinyin: 'Chéngqiáng, chéngmén, hùchénghé hé chénglóu gòngtóng zǔchéng wánzhěng de gǔdài chéngshì fángyù tǐxì.', simpleChinese: '不同设施一起保护古代城市。', vietnamese: 'Tường thành, cổng, hào nước và tháp thành tạo thành một hệ thống phòng thủ đô thị hoàn chỉnh.', english: 'Walls, gates, moat, and towers formed an integrated urban defence system.'),
-  DiscoveryEntry(text: '宽阔的墙顶不仅用于防守，也方便人员和物资移动。', pinyin: 'Kuānkuò de qiángdǐng bùjǐn yòngyú fángshǒu, yě fāngbiàn rényuán hé wùzī yídòng.', simpleChinese: '墙顶很宽，可以巡逻和运送物资。', vietnamese: 'Mặt thành rộng không chỉ dùng để phòng thủ mà còn giúp di chuyển người và vật tư.', english: 'The broad top supported defence as well as movement of people and supplies.'),
-  DiscoveryEntry(text: '今天的西安城墙通过持续修缮与公共开放，连接文化保护和现代城市生活。', pinyin: 'Jīntiān de Xī’ān Chéngqiáng tōngguò chíxù xiūshàn yǔ gōnggòng kāifàng, liánjiē wénhuà bǎohù hé xiàndài chéngshì shēnghuó.', simpleChinese: '城墙一边被保护，一边继续进入今天的城市生活。', vietnamese: 'Ngày nay, việc tu bổ liên tục và mở cửa công cộng giúp tường thành kết nối bảo tồn văn hóa với đời sống đô thị hiện đại.', english: 'Ongoing conservation and public access connect the wall with modern city life.'),
+  DiscoveryEntry(
+      text: '西安现存城墙的主要结构形成于明代，并建立在更早城市遗迹的基础上。',
+      pinyin:
+          'Xī’ān xiàncún chéngqiáng de zhǔyào jiégòu xíngchéng yú Míngdài, bìng jiànlì zài gèng zǎo chéngshì yíjì de jīchǔ shàng.',
+      simpleChinese: '今天看到的城墙主要形成于明代，也利用了更早的城市基础。',
+      vietnamese:
+          'Cấu trúc chính của tường thành Tây An hiện nay hình thành vào thời Minh trên nền dấu tích đô thị sớm hơn.',
+      english:
+          'The existing wall took its main form in the Ming dynasty on foundations from earlier cities.'),
+  DiscoveryEntry(
+      text: '城墙、城门、护城河和城楼共同组成完整的古代城市防御体系。',
+      pinyin:
+          'Chéngqiáng, chéngmén, hùchénghé hé chénglóu gòngtóng zǔchéng wánzhěng de gǔdài chéngshì fángyù tǐxì.',
+      simpleChinese: '不同设施一起保护古代城市。',
+      vietnamese:
+          'Tường thành, cổng, hào nước và tháp thành tạo thành một hệ thống phòng thủ đô thị hoàn chỉnh.',
+      english:
+          'Walls, gates, moat, and towers formed an integrated urban defence system.'),
+  DiscoveryEntry(
+      text: '宽阔的墙顶不仅用于防守，也方便人员和物资移动。',
+      pinyin:
+          'Kuānkuò de qiángdǐng bùjǐn yòngyú fángshǒu, yě fāngbiàn rényuán hé wùzī yídòng.',
+      simpleChinese: '墙顶很宽，可以巡逻和运送物资。',
+      vietnamese:
+          'Mặt thành rộng không chỉ dùng để phòng thủ mà còn giúp di chuyển người và vật tư.',
+      english:
+          'The broad top supported defence as well as movement of people and supplies.'),
+  DiscoveryEntry(
+      text: '今天的西安城墙通过持续修缮与公共开放，连接文化保护和现代城市生活。',
+      pinyin:
+          'Jīntiān de Xī’ān Chéngqiáng tōngguò chíxù xiūshàn yǔ gōnggòng kāifàng, liánjiē wénhuà bǎohù hé xiàndài chéngshì shēnghuó.',
+      simpleChinese: '城墙一边被保护，一边继续进入今天的城市生活。',
+      vietnamese:
+          'Ngày nay, việc tu bổ liên tục và mở cửa công cộng giúp tường thành kết nối bảo tồn văn hóa với đời sống đô thị hiện đại.',
+      english:
+          'Ongoing conservation and public access connect the wall with modern city life.'),
 ];
 
 final shanghaiBundJourney = JourneyContentRecord(
@@ -202,6 +458,7 @@ final xianCityWallJourney = JourneyContentRecord(
 
 final dailyStorySources = <StorySourceRecord>[
   ...beijingStorySources,
+  ...summerPalaceStorySources,
   ...shanghaiStorySources,
   ...xianStorySources,
   ...extendedJourneySources,
@@ -209,6 +466,7 @@ final dailyStorySources = <StorySourceRecord>[
 
 final dailyJourneyRecords = <JourneyContentRecord>[
   beijingForbiddenCityJourney,
+  summerPalaceJourneyContent,
   shanghaiBundJourney,
   xianCityWallJourney,
   ...extendedJourneyRecords,
@@ -234,6 +492,7 @@ final dailyJourneyExperiences = <DailyJourneyExperience>[
     wonderQuestion: wonderQuestion,
     expressQuestion: expressQuestion,
   ),
+  summerPalaceJourneyExperience,
   DailyJourneyExperience(
     id: shanghaiBundJourney.id,
     city: '上海',
@@ -294,5 +553,6 @@ DailyJourneyExperience dailyJourneyForDate(DateTime date) {
   final epoch = DateTime.utc(2026, 1, 1);
   final dayNumber = day.difference(epoch).inDays;
   final index = dayNumber % dailyJourneyExperiences.length;
-  return dailyJourneyExperiences[index < 0 ? index + dailyJourneyExperiences.length : index];
+  return dailyJourneyExperiences[
+      index < 0 ? index + dailyJourneyExperiences.length : index];
 }

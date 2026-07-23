@@ -26,6 +26,29 @@ final generatedJourneyBackgrounds = <JourneyBackgroundAsset>[
       varietyScore: 100,
     ),
   for (final assetName in <String>[
+    '01-dawn-kunming-lake',
+    '02-morning-long-corridor',
+    '03-misty-longevity-hill',
+    '04-bright-seventeen-arch-bridge',
+    '05-after-rain-pavilion',
+    '06-summer-lotus-lake',
+    '07-autumn-west-dike',
+    '08-golden-hour-tower',
+    '09-blue-hour-reflection',
+    '10-moonlit-lake-panorama',
+  ])
+    JourneyBackgroundAsset(
+      id: 'beijing-summer-palace-$assetName',
+      journeyId: 'beijing-summer-palace',
+      assetPath:
+          'assets/images/backgrounds/generated/beijing/summer-palace/$assetName.webp',
+      generatedOn: DateTime.utc(2026, 7, 22),
+      origin: JourneyBackgroundOrigin.aiGenerated,
+      complianceReviewed: true,
+      complianceScore: 100,
+      varietyScore: 100,
+    ),
+  for (final assetName in <String>[
     '01-sunrise-arrival',
     '02-morning-street',
     '03-misty-detail',

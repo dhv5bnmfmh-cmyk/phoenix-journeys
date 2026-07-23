@@ -4,14 +4,17 @@ import { readFileSync } from 'node:fs';
 
 const catalog = readFileSync('app/lib/data/daily_journey_catalog.dart', 'utf8');
 const extended = readFileSync('app/lib/data/extended_journey_catalog.dart', 'utf8');
+const cityCatalog = readFileSync('app/lib/data/journey_city_catalog.dart', 'utf8');
 const state = readFileSync('app/lib/state/app_state.dart', 'utf8');
 const journey = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
 const explore = readFileSync('app/lib/screens/explore_screen.dart', 'utf8');
+const picker = readFileSync('app/lib/widgets/journey_picker_sheet.dart', 'utf8');
 const progress = readFileSync('app/lib/widgets/journey_progress_header.dart', 'utf8');
 
 test('daily catalog contains a reviewed seven-day city cycle', () => {
   assert.match(catalog, /beijingForbiddenCityJourney/);
   assert.match(catalog, /shanghai-bund/);
+  assert.match(catalog, /summerPalaceJourneyExperience/);
   assert.match(catalog, /xian-city-wall/);
   assert.match(catalog, /extendedJourneyExperiences/);
   assert.match(extended, /hangzhou-west-lake/);
@@ -32,8 +35,10 @@ test('new journeys include authoritative sources and complete study stages', () 
   assert.ok((extended.match(/expressQuestion:/g) ?? []).length >= 4);
 });
 
-test('daily progress, Agent feedback and stamps are namespaced by journey id', () => {
-  assert.match(state, /journey\.\$\{journeyId \?\? activeJourneyId\}/);
+test('daily progress, Agent feedback and stamps use destination path namespaces', () => {
+  assert.match(state, /binding\.storageNamespace/);
+  assert.match(state, /binding\.legacyStorageNamespace/);
+  assert.match(state, /activeJourneyStoragePath/);
   assert.match(state, /earnedJourneyStampIds/);
   assert.match(state, /saveGuideFeedback/);
   assert.match(state, /saveWritingFeedback/);
@@ -49,11 +54,16 @@ test('one stable Journey screen renders every city', () => {
   assert.match(journey, /AnimatedCityJourneyStamp/);
 });
 
-test('Explore opens every selected city journey', () => {
+test('Explore opens every selected city and destination journey', () => {
   assert.match(explore, /openJourneyById\(String journeyId\)/);
   assert.match(explore, /state\.activateJourney\(journeyId\)/);
   assert.match(explore, /JourneyScreen\(journeyId: journeyId\)/);
-  assert.match(explore, /dailyJourneyExperiences\.map/);
+  assert.match(explore, /showJourneyPickerSheet/);
+  assert.match(cityCatalog, /journeyCityCatalog/);
+  assert.match(cityCatalog, /destinations/);
+  assert.match(picker, /journey-city-\$\{city\.id\}/);
+  assert.match(picker, /journey-destination-\$\{journey\.id\}/);
+  assert.match(picker, /\.pop\(journey\.id\)/);
   assert.doesNotMatch(journey, /单屏模式/);
 });
 

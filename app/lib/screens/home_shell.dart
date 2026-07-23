@@ -5,14 +5,14 @@ import '../models/journey_background.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/destination_background.dart';
+import 'city_passport_screen.dart';
 import 'explore_screen.dart';
 import 'me_screen.dart';
-import 'passport_screen.dart';
 
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key});
 
-  static const _pages = [ExploreScreen(), PassportScreen(), MeScreen()];
+  static const _pages = [ExploreScreen(), CityPassportScreen(), MeScreen()];
 
   @override
   Widget build(BuildContext context) {

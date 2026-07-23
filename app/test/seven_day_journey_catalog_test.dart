@@ -2,15 +2,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 
 void main() {
-  test('seven reviewed journeys rotate without repeating during one week', () {
-    expect(dailyJourneyExperiences, hasLength(7));
-    expect(dailyJourneyExperiences.map((item) => item.id).toSet(), hasLength(7));
+  test('eight reviewed destinations rotate without repeating during one cycle',
+      () {
+    expect(dailyJourneyExperiences, hasLength(8));
+    expect(
+        dailyJourneyExperiences.map((item) => item.id).toSet(), hasLength(8));
 
-    final week = List.generate(
-      7,
+    final cycle = List.generate(
+      8,
       (index) => dailyJourneyForDate(DateTime(2026, 1, 1 + index)).id,
     );
-    expect(week.toSet(), hasLength(7));
+    expect(cycle.toSet(), hasLength(8));
   });
 
   test('every journey has complete story and learning content', () {
@@ -36,7 +38,8 @@ void main() {
     final sourceIds = dailyStorySources.map((item) => item.id).toSet();
     for (final record in dailyJourneyRecords) {
       expect(record.sourceIds, isNotEmpty, reason: record.id);
-      expect(sourceIds.containsAll(record.sourceIds), isTrue, reason: record.id);
+      expect(sourceIds.containsAll(record.sourceIds), isTrue,
+          reason: record.id);
     }
   });
 }

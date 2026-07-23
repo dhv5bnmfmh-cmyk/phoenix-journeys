@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/journey_background_catalog.dart';
 import '../models/journey_background.dart';
 import '../services/journey_background_policy.dart';
+import '../services/journey_location_binding.dart';
 import '../theme/phoenix_theme.dart';
 
 class DestinationBackground extends StatelessWidget {
@@ -23,8 +24,10 @@ class DestinationBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final location = requireJourneyLocation(journeyId);
     final asset = const JourneyBackgroundPolicy().select(
       journeyId: journeyId,
+      locationPath: location.locationPath,
       page: pageType,
       localDate: localDate ?? DateTime.now(),
       catalog: journeyBackgroundCatalog,
@@ -79,11 +82,7 @@ class _BackgroundFallback extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFFFF7EA),
-            Color(0xFFF2DFCA),
-            PhoenixTheme.paper,
-          ],
+          colors: [Color(0xFFFFF7EA), Color(0xFFF2DFCA), PhoenixTheme.paper],
         ),
       ),
     );

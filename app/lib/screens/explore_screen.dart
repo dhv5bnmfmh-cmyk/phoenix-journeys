@@ -4,11 +4,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../data/daily_journey_catalog.dart';
 import '../models/journey_background.dart';
+import '../services/journey_location_binding.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/destination_background.dart';
+import '../widgets/journey_picker_sheet.dart';
 import 'journey_screen.dart';
 
 @visibleForTesting
@@ -39,73 +40,13 @@ class ExploreScreen extends StatelessWidget {
     }
 
     Future<void> chooseJourney() async {
-      await showModalBottomSheet<void>(
+      final journeyId = await showJourneyPickerSheet(
         context: context,
-        useSafeArea: true,
-        showDragHandle: true,
-        builder: (sheetContext) => Padding(
-          padding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                state.displayText('选择城市旅程'),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                state.displayText('今日旅程是推荐路线，其他城市也可随时继续。'),
-                style: const TextStyle(color: Colors.black54, fontSize: 11),
-              ),
-              const SizedBox(height: 8),
-              ...dailyJourneyExperiences.map(
-                (journey) => Card(
-                  margin: const EdgeInsets.only(bottom: 6),
-                  child: ListTile(
-                    key: ValueKey('journey-picker-${journey.id}'),
-                    dense: true,
-                    leading: CircleAvatar(
-                      backgroundColor: PhoenixTheme.red.withValues(alpha: .10),
-                      child: Text(
-                        state.displayText(journey.stampSymbol),
-                        style: const TextStyle(
-                          color: PhoenixTheme.red,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      state.displayText('${journey.city} · ${journey.place}'),
-                      style: const TextStyle(fontWeight: FontWeight.w900),
-                    ),
-                    subtitle: Text(
-                      state.displayText(
-                        journey.id == state.todayJourney.id
-                            ? '今日推荐 · 点击进入'
-                            : state.isJourneyStampEarned(journey.id)
-                            ? '印章已获得 · 可再次体验'
-                            : '可随时开始或继续',
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 15,
-                    ),
-                    onTap: () {
-                      Navigator.of(sheetContext).pop();
-                      unawaited(openJourneyById(journey.id));
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        state: state,
       );
+      if (journeyId != null) {
+        await openJourneyById(journeyId);
+      }
     }
 
     return Stack(
@@ -122,19 +63,19 @@ class ExploreScreen extends StatelessWidget {
               Text(
                 state.displayText('欢迎回来，Explorer'),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w900,
-                  height: 1.1,
-                ),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                      height: 1.1,
+                    ),
               ),
               const SizedBox(height: 2),
               Text(
                 state.displayText('世界很大，从一门语言开始。'),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontSize: 11.5,
-                  height: 1.15,
-                  color: Colors.black54,
-                ),
+                      fontSize: 11.5,
+                      height: 1.15,
+                      color: Colors.black54,
+                    ),
               ),
               const SizedBox(height: 8),
               _FlightMapCard(state: state, height: mapHeight),
@@ -283,13 +224,14 @@ class _FlightMapCardState extends State<_FlightMapCard>
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
+    final destination = state.activeJourneyLocation;
     final status = state.journeyCompleted
         ? '${state.activeJourney.city}已点亮 · 印章已获得'
         : state.hasJourneyInProgress
-        ? '${state.activeJourneyStampEarned ? '印章已收藏 · ' : ''}旅程 ${state.beijingJourneyProgressPercent}%'
-        : state.activeJourneyStampEarned
-        ? '${state.activeJourney.city}印章已收藏 · 可以再次出发'
-        : '${state.activeJourney.distanceLabel} · 学习航程';
+            ? '${state.activeJourneyStampEarned ? '印章已收藏 · ' : ''}旅程 ${state.beijingJourneyProgressPercent}%'
+            : state.activeJourneyStampEarned
+                ? '${state.activeJourney.city}印章已收藏 · 可以再次出发'
+                : '${state.activeJourney.distanceLabel} · 学习航程';
 
     return Container(
       height: widget.height,
@@ -318,13 +260,14 @@ class _FlightMapCardState extends State<_FlightMapCard>
               final journeyProgress = state.journeyCompleted
                   ? 1.0
                   : state.hasJourneyInProgress
-                  ? state.beijingJourneyProgress
-                  : _controller.value;
+                      ? state.beijingJourneyProgress
+                      : _controller.value;
               final flightT = state.journeyCompleted
                   ? 1.0
                   : Curves.easeInOutCubic.transform(_controller.value);
               final geometry = _FlightGeometry(
                 Size(constraints.maxWidth, constraints.maxHeight),
+                destination.mapPoint,
               );
               final plane = geometry.pointAt(flightT);
               final angle = geometry.angleAt(flightT);
@@ -336,6 +279,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
                       painter: _PremiumMapPainter(
                         routeProgress: journeyProgress,
                         pulse: _controller.value,
+                        destinationPoint: destination.mapPoint,
                       ),
                     ),
                   ),
@@ -446,8 +390,8 @@ class _FlightMapCardState extends State<_FlightMapCard>
                     ),
                   ),
                   Positioned(
-                    left: geometry.beijing.dx - 16,
-                    top: geometry.beijing.dy - 16,
+                    left: geometry.destination.dx - 16,
+                    top: geometry.destination.dy - 16,
                     child: _CityMarker(
                       label: state.displayText(state.activeJourney.city),
                       subtitle: state.activeJourney.cityCode,
@@ -515,35 +459,39 @@ class _FlightMapCardState extends State<_FlightMapCard>
 }
 
 class _FlightGeometry {
-  _FlightGeometry(this.size)
-    : hanoi = Offset(size.width * .23, size.height * .68),
-      control = Offset(size.width * .48, size.height * .25),
-      beijing = Offset(size.width * .78, size.height * .43);
+  _FlightGeometry(this.size, JourneyMapPoint destinationPoint)
+      : hanoi = Offset(size.width * .23, size.height * .68),
+        control = Offset(
+          size.width * ((.23 + destinationPoint.x) / 2),
+          size.height * .22,
+        ),
+        destination = Offset(
+          size.width * destinationPoint.x,
+          size.height * destinationPoint.y,
+        );
 
   final Size size;
   final Offset hanoi;
   final Offset control;
-  final Offset beijing;
+  final Offset destination;
 
   Offset pointAt(double t) {
     final oneMinus = 1 - t;
     return Offset(
       oneMinus * oneMinus * hanoi.dx +
           2 * oneMinus * t * control.dx +
-          t * t * beijing.dx,
+          t * t * destination.dx,
       oneMinus * oneMinus * hanoi.dy +
           2 * oneMinus * t * control.dy +
-          t * t * beijing.dy,
+          t * t * destination.dy,
     );
   }
 
   double angleAt(double t) {
-    final dx =
-        2 * (1 - t) * (control.dx - hanoi.dx) +
-        2 * t * (beijing.dx - control.dx);
-    final dy =
-        2 * (1 - t) * (control.dy - hanoi.dy) +
-        2 * t * (beijing.dy - control.dy);
+    final dx = 2 * (1 - t) * (control.dx - hanoi.dx) +
+        2 * t * (destination.dx - control.dx);
+    final dy = 2 * (1 - t) * (control.dy - hanoi.dy) +
+        2 * t * (destination.dy - control.dy);
     return math.atan2(dy, dx);
   }
 }
@@ -685,10 +633,10 @@ class _JourneyCard extends StatelessWidget {
           Text(
             state.displayText(state.activeJourney.headline),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontSize: 19,
-              height: 1.05,
-              fontWeight: FontWeight.w900,
-            ),
+                  fontSize: 19,
+                  height: 1.05,
+                  fontWeight: FontWeight.w900,
+                ),
           ),
           const SizedBox(height: 3),
           Text(
@@ -932,10 +880,15 @@ class _FeatureChip extends StatelessWidget {
 }
 
 class _PremiumMapPainter extends CustomPainter {
-  const _PremiumMapPainter({required this.routeProgress, required this.pulse});
+  const _PremiumMapPainter({
+    required this.routeProgress,
+    required this.pulse,
+    required this.destinationPoint,
+  });
 
   final double routeProgress;
   final double pulse;
+  final JourneyMapPoint destinationPoint;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1077,14 +1030,14 @@ class _PremiumMapPainter extends CustomPainter {
   }
 
   void _drawRoute(Canvas canvas, Size size) {
-    final geometry = _FlightGeometry(size);
+    final geometry = _FlightGeometry(size, destinationPoint);
     final route = Path()
       ..moveTo(geometry.hanoi.dx, geometry.hanoi.dy)
       ..quadraticBezierTo(
         geometry.control.dx,
         geometry.control.dy,
-        geometry.beijing.dx,
-        geometry.beijing.dy,
+        geometry.destination.dx,
+        geometry.destination.dy,
       );
 
     final glow = Paint()
@@ -1138,7 +1091,8 @@ class _PremiumMapPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _PremiumMapPainter oldDelegate) {
     return oldDelegate.routeProgress != routeProgress ||
-        oldDelegate.pulse != pulse;
+        oldDelegate.pulse != pulse ||
+        oldDelegate.destinationPoint != destinationPoint;
   }
 }
 

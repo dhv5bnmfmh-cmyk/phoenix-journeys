@@ -27,6 +27,7 @@ class JourneyBackgroundPolicy {
 
   JourneyBackgroundAsset? select({
     required String journeyId,
+    String? locationPath,
     required JourneyBackgroundPage page,
     required DateTime localDate,
     required List<JourneyBackgroundAsset> catalog,
@@ -35,6 +36,7 @@ class JourneyBackgroundPolicy {
         .where(
           (asset) =>
               asset.journeyId == journeyId &&
+              _matchesLocation(asset, locationPath) &&
               asset.approved &&
               asset.complianceScore >= minimumComplianceScore &&
               asset.varietyScore >= minimumVarietyScore &&
@@ -51,13 +53,15 @@ class JourneyBackgroundPolicy {
     candidates.sort((left, right) => left.id.compareTo(right.id));
 
     final dayKey = '${localDate.year}-${localDate.month}-${localDate.day}';
+    final identity = locationPath ?? journeyId;
     final index =
-        _stableHash('$journeyId|${page.name}|$dayKey') % candidates.length;
+        _stableHash('$identity|${page.name}|$dayKey') % candidates.length;
     return candidates[index];
   }
 
   JourneyBackgroundKpi inspect({
     required String journeyId,
+    String? locationPath,
     required JourneyBackgroundPage page,
     required List<JourneyBackgroundAsset> catalog,
   }) {
@@ -65,6 +69,7 @@ class JourneyBackgroundPolicy {
         .where(
           (asset) =>
               asset.journeyId == journeyId &&
+              _matchesLocation(asset, locationPath) &&
               asset.approved &&
               asset.origin == JourneyBackgroundOrigin.aiGenerated,
         )
@@ -78,6 +83,18 @@ class JourneyBackgroundPolicy {
       destinationTargetMet:
           destinationAssets.length >= minimumDestinationInventory,
       pageTargetMet: pageAssets.length >= minimumPageInventory,
+    );
+  }
+
+  bool _matchesLocation(JourneyBackgroundAsset asset, String? locationPath) {
+    if (locationPath == null ||
+        asset.origin != JourneyBackgroundOrigin.aiGenerated) {
+      return true;
+    }
+    final normalizedAssetPath = asset.assetPath.replaceAll('\\', '/');
+    final normalizedLocationPath = locationPath.replaceAll('\\', '/');
+    return normalizedAssetPath.contains(
+      '/backgrounds/generated/$normalizedLocationPath/',
     );
   }
 
