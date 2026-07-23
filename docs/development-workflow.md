@@ -145,3 +145,5 @@
 - 免费探索者每天稳定随机早晚各一段，且同日不重复
 - 付费探索者全部旅程开放
 - 城市印章和完成旅程流程
+
+- Adaptive journey rule: a destination may offer light, standard, and challenge Chinese content without changing its identity, background, progress, or stamp; the explorer can switch levels and the choice persists.

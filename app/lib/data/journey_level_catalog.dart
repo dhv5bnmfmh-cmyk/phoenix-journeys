@@ -6,28 +6,28 @@ enum JourneyDifficulty { easy, standard, challenge }
 
 extension JourneyDifficultyPresentation on JourneyDifficulty {
   String get storageValue => switch (this) {
-    JourneyDifficulty.easy => 'easy',
-    JourneyDifficulty.standard => 'standard',
-    JourneyDifficulty.challenge => 'challenge',
-  };
+        JourneyDifficulty.easy => 'easy',
+        JourneyDifficulty.standard => 'standard',
+        JourneyDifficulty.challenge => 'challenge',
+      };
 
   String get label => switch (this) {
-    JourneyDifficulty.easy => '轻松',
-    JourneyDifficulty.standard => '标准',
-    JourneyDifficulty.challenge => '挑战',
-  };
+        JourneyDifficulty.easy => '轻松',
+        JourneyDifficulty.standard => '标准',
+        JourneyDifficulty.challenge => '挑战',
+      };
 
   String get hint => switch (this) {
-    JourneyDifficulty.easy => '短句 · 重点词 · 慢一点',
-    JourneyDifficulty.standard => '完整故事 · 正常节奏',
-    JourneyDifficulty.challenge => '文化表达 · 深度思考',
-  };
+        JourneyDifficulty.easy => '短句 · 重点词 · 慢一点',
+        JourneyDifficulty.standard => '完整故事 · 正常节奏',
+        JourneyDifficulty.challenge => '文化表达 · 深度思考',
+      };
 
   double get speechRate => switch (this) {
-    JourneyDifficulty.easy => .8,
-    JourneyDifficulty.standard => 1,
-    JourneyDifficulty.challenge => 1.1,
-  };
+        JourneyDifficulty.easy => .8,
+        JourneyDifficulty.standard => 1,
+        JourneyDifficulty.challenge => 1.1,
+      };
 }
 
 JourneyDifficulty parseJourneyDifficulty(String? value) {
@@ -47,7 +47,8 @@ class JourneyLevelContent {
     required this.expressQuestion,
   });
 
-  factory JourneyLevelContent.fromExperience(DailyJourneyExperience experience) {
+  factory JourneyLevelContent.fromExperience(
+      DailyJourneyExperience experience) {
     return JourneyLevelContent(
       storyParagraphs: experience.content.storyParagraphs,
       storyAnnotations: experience.storyAnnotations,
@@ -85,7 +86,8 @@ JourneyLevelContent resolveJourneyLevel(
 
   return switch (difficulty) {
     JourneyDifficulty.easy => summerPalaceEasyLevel,
-    JourneyDifficulty.standard => JourneyLevelContent.fromExperience(experience),
+    JourneyDifficulty.standard =>
+      JourneyLevelContent.fromExperience(experience),
     JourneyDifficulty.challenge => summerPalaceChallengeLevel,
   };
 }
@@ -207,7 +209,7 @@ final summerPalaceChallengeLevel = JourneyLevelContent(
     ),
     ReadingAnnotation(
       pinyin:
-          'Cóng Qīngyīyuán dào Yíhéyuán, zhè zuò huángjiā yuánlín jīnglì xīngjiàn, pòhuài yǔ chóngjiàn. Lìshǐ liúxià de lièhén bìngwèi wánquán xiāoshī, fǎn'ér ràng xiūfù běnshēn yě chéngwéi yuánlín jìyì de yí bùfen.',
+          'Cóng Qīngyīyuán dào Yíhéyuán, zhè zuò huángjiā yuánlín jīnglì xīngjiàn, pòhuài yǔ chóngjiàn. Lìshǐ liúxià de lièhén bìngwèi wánquán xiāoshī, fǎn\'ér ràng xiūfù běnshēn yě chéngwéi yuánlín jìyì de yí bùfen.',
       vietnamese:
           'Từ Thanh Y Viên đến Di Hòa Viên, khu vườn hoàng gia này trải qua xây dựng, phá hủy và tái thiết. Những vết nứt lịch sử không biến mất hoàn toàn mà khiến chính việc phục hồi trở thành một phần ký ức của khu vườn.',
       english:

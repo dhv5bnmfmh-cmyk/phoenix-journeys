@@ -7,9 +7,8 @@ import 'package:provider/provider.dart';
 
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
-import '../data/world_story_runtime.dart';
+import '../data/journey_level_catalog.dart';
 import '../models/journey_background.dart';
-import '../models/story_content.dart';
 import '../services/narration_controller.dart';
 import '../services/phoenix_ai_service.dart';
 import '../state/app_state.dart';
@@ -44,7 +43,6 @@ class _JourneyScreenState extends State<JourneyScreen>
   final memoryFocusNode = FocusNode(debugLabel: 'memory-writing');
   late final NarrationController _narration;
   late final DailyJourneyExperience _experience;
-  late final JourneyContentRecord _journeyContent;
   late final PhoenixAiService _ai;
   late AppState _appState;
   PhoenixGuideFeedback? _guideFeedback;
@@ -53,17 +51,16 @@ class _JourneyScreenState extends State<JourneyScreen>
   bool _writingLoading = false;
   bool _initialized = false;
   bool _discoveryAutoStarted = false;
+  bool _difficultyPromptScheduled = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _narration = NarrationController();
-    final worldStoryAgent = createPhoenixWorldStoryAgent();
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
     _experience = requireDailyJourneyExperience(journeyId);
-    _journeyContent = requireJourneyContent(worldStoryAgent, _experience.id);
     _ai = PhoenixAiService();
     wonderFocusNode.addListener(_handleWritingFocusChanged);
     expressFocusNode.addListener(_handleWritingFocusChanged);
@@ -100,6 +97,10 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
     }
     _initialized = true;
+    unawaited(
+      _narration.setSpeechRate(_appState.journeyDifficulty.speechRate),
+    );
+    _scheduleDifficultyWelcome();
 
     if (step == 2) _scheduleDiscoveryAutoStart();
   }
@@ -136,6 +137,113 @@ class _JourneyScreenState extends State<JourneyScreen>
       express: expressController.text,
       memory: memoryController.text,
     );
+  }
+
+  JourneyLevelContent get _levelContent =>
+      resolveJourneyLevel(_experience, _appState.journeyDifficulty);
+
+  List<JourneyDifficulty> get _supportedDifficulties =>
+      supportedJourneyDifficulties(_experience);
+
+  Future<void> _changeDifficulty(JourneyDifficulty value) async {
+    if (value == _appState.journeyDifficulty &&
+        _appState.journeyDifficultyChosen) {
+      return;
+    }
+    await _narration.stop();
+    await _narration.setSpeechRate(value.speechRate);
+    await _appState.setJourneyDifficulty(value);
+    if (!mounted) return;
+    setState(() => _discoveryAutoStarted = false);
+    if (step == 2) _scheduleDiscoveryAutoStart();
+  }
+
+  void _scheduleDifficultyWelcome() {
+    if (_difficultyPromptScheduled ||
+        _appState.journeyDifficultyChosen ||
+        _supportedDifficulties.length < 2) {
+      return;
+    }
+    _difficultyPromptScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_showDifficultyWelcome());
+    });
+  }
+
+  Future<void> _showDifficultyWelcome() async {
+    final selected = await showModalBottomSheet<JourneyDifficulty>(
+      context: context,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _appState.displayText('选择适合你的旅程'),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _appState.displayText('目的地不变，只调整中文难度。之后可以随时更换。'),
+                style: const TextStyle(fontSize: 12, height: 1.35),
+              ),
+              const SizedBox(height: 10),
+              for (final difficulty in _supportedDifficulties)
+                ListTile(
+                  key: ValueKey(
+                    'journey-difficulty-welcome-${difficulty.storageValue}',
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
+                    backgroundColor: PhoenixTheme.red.withValues(alpha: .12),
+                    child: Text(
+                      difficulty == JourneyDifficulty.easy
+                          ? '轻'
+                          : difficulty == JourneyDifficulty.standard
+                              ? '标'
+                              : '挑',
+                      style: const TextStyle(
+                        color: PhoenixTheme.red,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  title: Row(
+                    children: [
+                      Text(
+                        _appState.displayText(difficulty.label),
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                      if (difficulty == JourneyDifficulty.standard) ...[
+                        const SizedBox(width: 7),
+                        const Text(
+                          '推荐',
+                          style: TextStyle(
+                            color: PhoenixTheme.red,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  subtitle: Text(_appState.displayText(difficulty.hint)),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => Navigator.of(sheetContext).pop(difficulty),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+    await _changeDifficulty(selected ?? JourneyDifficulty.standard);
   }
 
   Future<void> _goToStep(int targetStep) async {
@@ -182,7 +290,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return _narration.play(
       contentId: 'story',
       languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
-      items: _journeyContent.storyParagraphs
+      items: _levelContent.storyParagraphs
           .asMap()
           .entries
           .map(
@@ -200,7 +308,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return _narration.play(
       contentId: 'discovery',
       languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
-      items: _experience.discoveries
+      items: _levelContent.discoveries
           .asMap()
           .entries
           .map(
@@ -223,14 +331,14 @@ class _JourneyScreenState extends State<JourneyScreen>
     final resumeOffset = _narration.currentOffset;
     if (!mounted) return;
 
-    final initialIndex = _experience.words.indexWhere(
+    final initialIndex = _levelContent.words.indexWhere(
       (item) => item.word == entry.word,
     );
     await showWordDetail(
       context,
       entry,
       narrationController: _narration,
-      entries: _experience.words,
+      entries: _levelContent.words,
       initialIndex: initialIndex < 0 ? 0 : initialIndex,
       onSpeak: () => _narration.speakWord(
         _appState.displayText(entry.word),
@@ -251,12 +359,12 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Future<void> _enterVocabularyAtFirstWord() async {
     await _goToStep(1);
-    if (!mounted || step != 1 || _experience.words.isEmpty) return;
+    if (!mounted || step != 1 || _levelContent.words.isEmpty) return;
 
     await WidgetsBinding.instance.endOfFrame;
     if (!mounted || step != 1) return;
 
-    await _openWord(_experience.words.first);
+    await _openWord(_levelContent.words.first);
   }
 
   Future<void> _prepareAgentAction(FocusNode focusNode, String message) async {
@@ -310,7 +418,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return <String, dynamic>{
       'interfaceLanguage': _appState.translationLanguage,
       'scriptMode': _appState.isTraditional ? 'traditional' : 'simplified',
-      'currentLevel': '根据学习者本次中文动态判断',
+      'currentLevel': _appState.journeyDifficulty.label,
       'savedWords': _appState.savedWords.toList(growable: false),
       'completedJourneys': _appState.earnedJourneyStampIds.toList(
         growable: false,
@@ -603,14 +711,14 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   JourneyBackgroundPage get _backgroundPageType => switch (step) {
-    0 => JourneyBackgroundPage.story,
-    1 => JourneyBackgroundPage.vocabulary,
-    2 => JourneyBackgroundPage.discovery,
-    3 => JourneyBackgroundPage.reflection,
-    4 => JourneyBackgroundPage.writing,
-    5 => JourneyBackgroundPage.memory,
-    _ => JourneyBackgroundPage.completion,
-  };
+        0 => JourneyBackgroundPage.story,
+        1 => JourneyBackgroundPage.vocabulary,
+        2 => JourneyBackgroundPage.discovery,
+        3 => JourneyBackgroundPage.reflection,
+        4 => JourneyBackgroundPage.writing,
+        5 => JourneyBackgroundPage.memory,
+        _ => JourneyBackgroundPage.completion,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -637,6 +745,72 @@ class _JourneyScreenState extends State<JourneyScreen>
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
           ),
           actions: [
+            Consumer<AppState>(
+              builder: (_, state, __) {
+                if (_supportedDifficulties.length < 2) {
+                  return const SizedBox.shrink();
+                }
+                return PopupMenuButton<JourneyDifficulty>(
+                  key: const ValueKey('journey-difficulty-selector'),
+                  tooltip: _appState.displayText('选择旅程难度'),
+                  initialValue: state.journeyDifficulty,
+                  onSelected: (value) => unawaited(_changeDifficulty(value)),
+                  itemBuilder: (_) => [
+                    for (final difficulty in _supportedDifficulties)
+                      PopupMenuItem<JourneyDifficulty>(
+                        value: difficulty,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    state.displayText(difficulty.label),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                  Text(
+                                    state.displayText(difficulty.hint),
+                                    style: const TextStyle(fontSize: 10.5),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (state.journeyDifficulty == difficulty)
+                              const Icon(
+                                Icons.check_rounded,
+                                size: 18,
+                                color: PhoenixTheme.red,
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: .22),
+                      borderRadius: BorderRadius.circular(99),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: .2),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      state.displayText('${state.journeyDifficulty.label} ▾'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
             Consumer<AppState>(
               builder: (_, state, __) => TextButton(
                 onPressed: state.toggleScript,
@@ -680,8 +854,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return LayoutBuilder(
       key: ValueKey(title),
       builder: (context, constraints) {
-        final keyboardVisible =
-            keyboardAdaptive &&
+        final keyboardVisible = keyboardAdaptive &&
             (keyboardFocusNode?.hasFocus ??
                 MediaQuery.viewInsetsOf(context).bottom > 0);
         final compact = constraints.maxHeight < 590 || keyboardVisible;
@@ -800,7 +973,6 @@ class _JourneyScreenState extends State<JourneyScreen>
                         ),
                         const SizedBox(width: 7),
                       ],
-
                       Expanded(
                         flex: 2,
                         child: FilledButton.icon(
@@ -849,8 +1021,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     required int itemIndex,
     required int itemLength,
   }) {
-    final sessionActive =
-        _narration.contentId == contentId &&
+    final sessionActive = _narration.contentId == contentId &&
         (_narration.status == NarrationStatus.playing ||
             _narration.status == NarrationStatus.paused);
     if (!sessionActive) return null;
@@ -875,7 +1046,8 @@ class _JourneyScreenState extends State<JourneyScreen>
             controller: _narration,
             contentId: 'story',
             title: _appState.displayText(_experience.storyTitle),
-            subtitle: '普通话 · ${_journeyContent.storyParagraphs.length} 段',
+            subtitle:
+                '${_appState.journeyDifficulty.label} · 普通话 · ${_levelContent.storyParagraphs.length} 段',
             compact: true,
             onPlay: _playStory,
           ),
@@ -887,7 +1059,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 final fontSize = _fitJourneyTextSize(
                   context,
                   constraints,
-                  _journeyContent.storyParagraphs,
+                  _levelContent.storyParagraphs,
                   minSize: 10.8,
                   maxSize: 16,
                   lineHeight: 1.22,
@@ -901,73 +1073,69 @@ class _JourneyScreenState extends State<JourneyScreen>
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: _journeyContent.storyParagraphs
+                        children: _levelContent.storyParagraphs
                             .asMap()
                             .entries
                             .map((entry) {
-                              final annotation =
-                                  _experience.storyAnnotations[entry.key];
-                              final snapshot = _narration.highlightSnapshot;
-                              final isActive =
-                                  snapshot?.contentId == 'story' &&
-                                  snapshot?.itemId == 'story-${entry.key}';
-                              return _CompactTextBlock(
-                                index: entry.key + 1,
-                                active: isActive,
-                                transparentSurface: true,
-                                onSupport: () => unawaited(
-                                  _showReadingSupport(
-                                    title: '故事第 ${entry.key + 1} 段',
-                                    pinyin: annotation.pinyin,
-                                    nativeLabel: annotation.nativeLabel(
-                                      language,
-                                    ),
-                                    nativeText: annotation.nativeText(
-                                      language,
-                                      entry.value,
-                                    ),
-                                    english: annotation.english,
-                                  ),
+                          final annotation =
+                              _levelContent.storyAnnotations[entry.key];
+                          final snapshot = _narration.highlightSnapshot;
+                          final isActive = snapshot?.contentId == 'story' &&
+                              snapshot?.itemId == 'story-${entry.key}';
+                          return _CompactTextBlock(
+                            index: entry.key + 1,
+                            active: isActive,
+                            transparentSurface: true,
+                            onSupport: () => unawaited(
+                              _showReadingSupport(
+                                title: '故事第 ${entry.key + 1} 段',
+                                pinyin: annotation.pinyin,
+                                nativeLabel: annotation.nativeLabel(
+                                  language,
                                 ),
-                                child: InteractiveStoryText(
-                                  text: entry.value,
-                                  entries: _experience.words,
-                                  narrationController: _narration,
-                                  highlightStart: isActive
-                                      ? snapshot!.start
-                                      : null,
-                                  highlightEnd: isActive ? snapshot!.end : null,
-                                  revealEnd: _narrationRevealEnd(
-                                    contentId: 'story',
-                                    itemIndex: entry.key,
-                                    itemLength: entry.value.length,
-                                  ),
-                                  narrationContentId: 'story',
-                                  narrationItemId: 'story-${entry.key}',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: fontSize,
-                                    height: 1.22,
-                                    fontFamily: PhoenixTheme.chineseFontFamily,
-                                    fontFamilyFallback:
-                                        PhoenixTheme.chineseFontFallback,
-                                    fontWeight: FontWeight.w700,
-                                    shadows: const [
-                                      Shadow(
-                                        color: Color(0xE6000000),
-                                        blurRadius: 3,
-                                        offset: Offset(0, 1),
-                                      ),
-                                      Shadow(
-                                        color: Color(0x99000000),
-                                        blurRadius: 8,
-                                      ),
-                                    ],
-                                  ),
+                                nativeText: annotation.nativeText(
+                                  language,
+                                  entry.value,
                                 ),
-                              );
-                            })
-                            .toList(growable: false),
+                                english: annotation.english,
+                              ),
+                            ),
+                            child: InteractiveStoryText(
+                              text: entry.value,
+                              entries: _levelContent.words,
+                              narrationController: _narration,
+                              highlightStart: isActive ? snapshot!.start : null,
+                              highlightEnd: isActive ? snapshot!.end : null,
+                              revealEnd: _narrationRevealEnd(
+                                contentId: 'story',
+                                itemIndex: entry.key,
+                                itemLength: entry.value.length,
+                              ),
+                              narrationContentId: 'story',
+                              narrationItemId: 'story-${entry.key}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: fontSize,
+                                height: 1.22,
+                                fontFamily: PhoenixTheme.chineseFontFamily,
+                                fontFamilyFallback:
+                                    PhoenixTheme.chineseFontFallback,
+                                fontWeight: FontWeight.w700,
+                                shadows: const [
+                                  Shadow(
+                                    color: Color(0xE6000000),
+                                    blurRadius: 3,
+                                    offset: Offset(0, 1),
+                                  ),
+                                  Shadow(
+                                    color: Color(0x99000000),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(growable: false),
                       ),
                     );
                   },
@@ -990,7 +1158,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         builder: (context, constraints) {
           const columns = 3;
           const spacing = 4.0;
-          final rows = (_experience.words.length / columns).ceil();
+          final rows = (_levelContent.words.length / columns).ceil();
           final cellWidth =
               (constraints.maxWidth - spacing * (columns - 1)) / columns;
           final cellHeight =
@@ -1010,7 +1178,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           return GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             padding: EdgeInsets.zero,
-            itemCount: _experience.words.length,
+            itemCount: _levelContent.words.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: columns,
               mainAxisSpacing: spacing,
@@ -1018,7 +1186,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               childAspectRatio: ratio,
             ),
             itemBuilder: (context, index) {
-              final entry = _experience.words[index];
+              final entry = _levelContent.words[index];
               return Material(
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(10),
@@ -1190,7 +1358,8 @@ class _JourneyScreenState extends State<JourneyScreen>
             controller: _narration,
             contentId: 'discovery',
             title: 'Discovery',
-            subtitle: '中文朗读 · ${_experience.discoveries.length} 段',
+            subtitle:
+                '${_appState.journeyDifficulty.label} · 中文朗读 · ${_levelContent.discoveries.length} 段',
             compact: true,
             onPlay: _playDiscoveries,
           ),
@@ -1199,7 +1368,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             child: LayoutBuilder(
               key: const ValueKey('adaptive-discovery-text-area'),
               builder: (context, constraints) {
-                final discoveryTexts = _experience.discoveries
+                final discoveryTexts = _levelContent.discoveries
                     .map((item) => item.text)
                     .toList(growable: false);
                 final fontSize = _fitJourneyTextSize(
@@ -1215,53 +1384,48 @@ class _JourneyScreenState extends State<JourneyScreen>
                   builder: (context, _) {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.start,
-                      children: _experience.discoveries
+                      children: _levelContent.discoveries
                           .asMap()
                           .entries
                           .map((entry) {
-                            final item = entry.value;
-                            final snapshot = _narration.highlightSnapshot;
-                            final isActive =
-                                snapshot?.contentId == 'discovery' &&
-                                snapshot?.itemId == 'discovery-${entry.key}';
-                            return _CompactTextBlock(
-                              index: entry.key + 1,
-                              active: isActive,
-                              transparentSurface: true,
-                              onSupport: () => unawaited(
-                                _showReadingSupport(
-                                  title: '今日发现 ${entry.key + 1}',
-                                  pinyin: item.pinyin,
-                                  nativeLabel: item.nativeLabel(language),
-                                  nativeText: item.nativeText(language),
-                                  english: item.english,
-                                ),
-                              ),
-                              child: InteractiveStoryText(
-                                text: item.text,
-                                entries: _experience.words,
-                                narrationController: _narration,
-                                highlightStart: isActive
-                                    ? snapshot!.start
-                                    : null,
-                                highlightEnd: isActive ? snapshot!.end : null,
-                                revealEnd: _narrationRevealEnd(
-                                  contentId: 'discovery',
-                                  itemIndex: entry.key,
-                                  itemLength: item.text.length,
-                                ),
-                                narrationContentId: 'discovery',
-                                narrationItemId: 'discovery-${entry.key}',
-                                style: PhoenixTheme.journeyBodyStyle.copyWith(
-                                  fontSize: fontSize,
-                                  fontWeight: isActive
-                                      ? FontWeight.w900
-                                      : FontWeight.w700,
-                                ),
-                              ),
-                            );
-                          })
-                          .toList(growable: false),
+                        final item = entry.value;
+                        final snapshot = _narration.highlightSnapshot;
+                        final isActive = snapshot?.contentId == 'discovery' &&
+                            snapshot?.itemId == 'discovery-${entry.key}';
+                        return _CompactTextBlock(
+                          index: entry.key + 1,
+                          active: isActive,
+                          transparentSurface: true,
+                          onSupport: () => unawaited(
+                            _showReadingSupport(
+                              title: '今日发现 ${entry.key + 1}',
+                              pinyin: item.pinyin,
+                              nativeLabel: item.nativeLabel(language),
+                              nativeText: item.nativeText(language),
+                              english: item.english,
+                            ),
+                          ),
+                          child: InteractiveStoryText(
+                            text: item.text,
+                            entries: _levelContent.words,
+                            narrationController: _narration,
+                            highlightStart: isActive ? snapshot!.start : null,
+                            highlightEnd: isActive ? snapshot!.end : null,
+                            revealEnd: _narrationRevealEnd(
+                              contentId: 'discovery',
+                              itemIndex: entry.key,
+                              itemLength: item.text.length,
+                            ),
+                            narrationContentId: 'discovery',
+                            narrationItemId: 'discovery-${entry.key}',
+                            style: PhoenixTheme.journeyBodyStyle.copyWith(
+                              fontSize: fontSize,
+                              fontWeight:
+                                  isActive ? FontWeight.w900 : FontWeight.w700,
+                            ),
+                          ),
+                        );
+                      }).toList(growable: false),
                     );
                   },
                 );
@@ -1292,43 +1456,43 @@ class _JourneyScreenState extends State<JourneyScreen>
       onSecondary: hasFeedback ? () => unawaited(_showGuideFeedback()) : null,
       child: _JourneyWritingSurface(
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _experience.wonderQuestion,
-            maxLines: keyboardVisible ? 1 : 2,
-            overflow: TextOverflow.ellipsis,
-            style: PhoenixTheme.journeyWritingQuestionStyle.copyWith(
-              fontSize: keyboardVisible ? 11 : 12,
-            ),
-          ),
-          SizedBox(height: keyboardVisible ? 3 : 5),
-          if (!keyboardVisible) ...[
-            const _InlineTip(
-              icon: Icons.explore_outlined,
-              text: 'PhoenixGuideAgent 会补充探索角度，并提出下一步问题。',
-            ),
-            const SizedBox(height: 6),
-          ],
-          Expanded(
-            child: TextField(
-              key: const ValueKey('wonder-writing-field'),
-              controller: wonderController,
-              focusNode: wonderFocusNode,
-              expands: true,
-              maxLines: null,
-              minLines: null,
-              textAlignVertical: TextAlignVertical.top,
-              scrollPadding: const EdgeInsets.only(bottom: 24),
-              onChanged: _onWonderChanged,
-              style: PhoenixTheme.journeyWritingInputStyle,
-              cursorColor: PhoenixTheme.contentAccent,
-              decoration: PhoenixTheme.journeyWritingInputDecoration(
-                '写下你的想法……',
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _levelContent.wonderQuestion,
+              maxLines: keyboardVisible ? 1 : 2,
+              overflow: TextOverflow.ellipsis,
+              style: PhoenixTheme.journeyWritingQuestionStyle.copyWith(
+                fontSize: keyboardVisible ? 11 : 12,
               ),
             ),
-          ),
-        ],
+            SizedBox(height: keyboardVisible ? 3 : 5),
+            if (!keyboardVisible) ...[
+              const _InlineTip(
+                icon: Icons.explore_outlined,
+                text: 'PhoenixGuideAgent 会补充探索角度，并提出下一步问题。',
+              ),
+              const SizedBox(height: 6),
+            ],
+            Expanded(
+              child: TextField(
+                key: const ValueKey('wonder-writing-field'),
+                controller: wonderController,
+                focusNode: wonderFocusNode,
+                expands: true,
+                maxLines: null,
+                minLines: null,
+                textAlignVertical: TextAlignVertical.top,
+                scrollPadding: const EdgeInsets.only(bottom: 24),
+                onChanged: _onWonderChanged,
+                style: PhoenixTheme.journeyWritingInputStyle,
+                cursorColor: PhoenixTheme.contentAccent,
+                decoration: PhoenixTheme.journeyWritingInputDecoration(
+                  '写下你的想法……',
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1353,43 +1517,43 @@ class _JourneyScreenState extends State<JourneyScreen>
       onSecondary: hasFeedback ? () => unawaited(_showWritingFeedback()) : null,
       child: _JourneyWritingSurface(
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _experience.expressQuestion,
-            maxLines: keyboardVisible ? 1 : 2,
-            overflow: TextOverflow.ellipsis,
-            style: PhoenixTheme.journeyWritingQuestionStyle.copyWith(
-              fontSize: keyboardVisible ? 11 : 12,
-            ),
-          ),
-          SizedBox(height: keyboardVisible ? 3 : 5),
-          if (!keyboardVisible) ...[
-            const _InlineTip(
-              icon: Icons.edit_note_outlined,
-              text: 'PhoenixWritingAgent 会保留原意，给出修改版和原因。',
-            ),
-            const SizedBox(height: 6),
-          ],
-          Expanded(
-            child: TextField(
-              key: const ValueKey('express-writing-field'),
-              controller: expressController,
-              focusNode: expressFocusNode,
-              expands: true,
-              maxLines: null,
-              minLines: null,
-              textAlignVertical: TextAlignVertical.top,
-              scrollPadding: const EdgeInsets.only(bottom: 24),
-              onChanged: _onExpressChanged,
-              style: PhoenixTheme.journeyWritingInputStyle,
-              cursorColor: PhoenixTheme.contentAccent,
-              decoration: PhoenixTheme.journeyWritingInputDecoration(
-                '用中文写下你的表达……',
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _levelContent.expressQuestion,
+              maxLines: keyboardVisible ? 1 : 2,
+              overflow: TextOverflow.ellipsis,
+              style: PhoenixTheme.journeyWritingQuestionStyle.copyWith(
+                fontSize: keyboardVisible ? 11 : 12,
               ),
             ),
-          ),
-        ],
+            SizedBox(height: keyboardVisible ? 3 : 5),
+            if (!keyboardVisible) ...[
+              const _InlineTip(
+                icon: Icons.edit_note_outlined,
+                text: 'PhoenixWritingAgent 会保留原意，给出修改版和原因。',
+              ),
+              const SizedBox(height: 6),
+            ],
+            Expanded(
+              child: TextField(
+                key: const ValueKey('express-writing-field'),
+                controller: expressController,
+                focusNode: expressFocusNode,
+                expands: true,
+                maxLines: null,
+                minLines: null,
+                textAlignVertical: TextAlignVertical.top,
+                scrollPadding: const EdgeInsets.only(bottom: 24),
+                onChanged: _onExpressChanged,
+                style: PhoenixTheme.journeyWritingInputStyle,
+                cursorColor: PhoenixTheme.contentAccent,
+                decoration: PhoenixTheme.journeyWritingInputDecoration(
+                  '用中文写下你的表达……',
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1406,43 +1570,43 @@ class _JourneyScreenState extends State<JourneyScreen>
       onNext: () => unawaited(_finishJourney()),
       child: _JourneyWritingSurface(
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '今天最想记住的一件事是什么？',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: PhoenixTheme.journeyWritingQuestionStyle.copyWith(
-              fontSize: keyboardVisible ? 11 : 12.5,
-            ),
-          ),
-          SizedBox(height: keyboardVisible ? 3 : 6),
-          Expanded(
-            child: TextField(
-              key: const ValueKey('memory-writing-field'),
-              controller: memoryController,
-              focusNode: memoryFocusNode,
-              expands: true,
-              maxLines: null,
-              minLines: null,
-              textAlignVertical: TextAlignVertical.top,
-              scrollPadding: const EdgeInsets.only(bottom: 24),
-              onChanged: (_) => unawaited(_persistProgress()),
-              style: PhoenixTheme.journeyWritingInputStyle,
-              cursorColor: PhoenixTheme.contentAccent,
-              decoration: PhoenixTheme.journeyWritingInputDecoration(
-                '写下感受，未来回来比较自己的变化。',
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '今天最想记住的一件事是什么？',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: PhoenixTheme.journeyWritingQuestionStyle.copyWith(
+                fontSize: keyboardVisible ? 11 : 12.5,
               ),
             ),
-          ),
-          if (!keyboardVisible) ...[
-            const SizedBox(height: 6),
-            const _InlineTip(
-              icon: Icons.approval_outlined,
-              text: '结束后自动保存回忆，并由 PhoenixStampAgent 完成盖章。',
+            SizedBox(height: keyboardVisible ? 3 : 6),
+            Expanded(
+              child: TextField(
+                key: const ValueKey('memory-writing-field'),
+                controller: memoryController,
+                focusNode: memoryFocusNode,
+                expands: true,
+                maxLines: null,
+                minLines: null,
+                textAlignVertical: TextAlignVertical.top,
+                scrollPadding: const EdgeInsets.only(bottom: 24),
+                onChanged: (_) => unawaited(_persistProgress()),
+                style: PhoenixTheme.journeyWritingInputStyle,
+                cursorColor: PhoenixTheme.contentAccent,
+                decoration: PhoenixTheme.journeyWritingInputDecoration(
+                  '写下感受，未来回来比较自己的变化。',
+                ),
+              ),
             ),
+            if (!keyboardVisible) ...[
+              const SizedBox(height: 6),
+              const _InlineTip(
+                icon: Icons.approval_outlined,
+                text: '结束后自动保存回忆，并由 PhoenixStampAgent 完成盖章。',
+              ),
+            ],
           ],
-        ],
         ),
       ),
     );

@@ -27,14 +27,16 @@ void main() {
 
     test('challenge journey increases depth without changing destination', () {
       final standard = resolveJourneyLevel(journey, JourneyDifficulty.standard);
-      final challenge = resolveJourneyLevel(journey, JourneyDifficulty.challenge);
+      final challenge =
+          resolveJourneyLevel(journey, JourneyDifficulty.challenge);
 
       expect(
         challenge.storyParagraphs.join().length,
         greaterThan(standard.storyParagraphs.join().length),
       );
       expect(challenge.words.length, standard.words.length);
-      expect(challenge.storyAnnotations.length, challenge.storyParagraphs.length);
+      expect(
+          challenge.storyAnnotations.length, challenge.storyParagraphs.length);
       expect(challenge.wonderQuestion, contains('重新解释自然'));
     });
 
@@ -46,7 +48,8 @@ void main() {
     });
   });
 
-  test('other destinations remain standard until level content is prepared', () {
+  test('other destinations remain standard until level content is prepared',
+      () {
     final journey = requireDailyJourneyExperience('beijing-forbidden-city');
     expect(
       supportedJourneyDifficulties(journey),
