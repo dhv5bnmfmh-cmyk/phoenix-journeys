@@ -1,0 +1,145 @@
+name: Import refined Summer Palace backgrounds
+
+on:
+  push:
+    branches:
+      - feat/two-level-journey-picker
+    paths:
+      - .github/workflows/import-refined-summer-palace-backgrounds.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import-backgrounds:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/two-level-journey-picker
+          fetch-depth: 0
+
+      - name: Download and validate the reviewed image archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          import tarfile
+          import urllib.request
+          from pathlib import Path, PurePosixPath
+
+          blob_sha = '8064c36b3e9ff1ca2969d6e0a0cbb974f2d68900'
+          url = f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}/git/blobs/{blob_sha}'
+          request = urllib.request.Request(
+              url,
+              headers={
+                  'Authorization': f'Bearer {os.environ["GH_TOKEN"]}',
+                  'Accept': 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+              },
+          )
+          with urllib.request.urlopen(request) as response:
+              payload = json.load(response)
+          archive_path = Path('/tmp/summer-palace-backgrounds.tar.gz')
+          archive_path.write_bytes(base64.b64decode(payload['content']))
+
+          expected_names = {
+              '11-serene-lakeside-temple-dawn.webp',
+              '12-sunlit-pavilion-kunming-lake.webp',
+              '13-golden-mist-longevity-hill.webp',
+              '14-classic-garden-by-lake.webp',
+              '15-golden-lakeside-pavilion.webp',
+              '16-lotus-lake-pagoda.webp',
+              '17-golden-lakeside-path.webp',
+              '18-sunset-lakeside-temple.webp',
+              '19-palace-at-dusk.webp',
+              '20-moonlit-lake-pavilion.webp',
+          }
+          prefix = PurePosixPath('app/assets/images/backgrounds/generated/beijing/summer-palace')
+          with tarfile.open(archive_path, 'r:gz') as archive:
+              files = [member for member in archive.getmembers() if member.isfile()]
+              names = set()
+              for member in files:
+                  path = PurePosixPath(member.name)
+                  if path.is_absolute() or '..' in path.parts or path.parent != prefix:
+                      raise SystemExit(f'Unsafe archive path: {member.name}')
+                  names.add(path.name)
+              if names != expected_names:
+                  raise SystemExit(f'Unexpected archive files: {sorted(names)}')
+              archive.extractall('.', filter='data')
+          PY
+
+      - name: Register twenty Summer Palace backgrounds
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          catalog_path = Path('app/lib/data/journey_background_generated.dart')
+          catalog = catalog_path.read_text()
+          anchor = "    '10-moonlit-lake-panorama',\n"
+          additions = """    '11-serene-lakeside-temple-dawn',
+              '12-sunlit-pavilion-kunming-lake',
+              '13-golden-mist-longevity-hill',
+              '14-classic-garden-by-lake',
+              '15-golden-lakeside-pavilion',
+              '16-lotus-lake-pagoda',
+              '17-golden-lakeside-path',
+              '18-sunset-lakeside-temple',
+              '19-palace-at-dusk',
+              '20-moonlit-lake-pavilion',
+          """
+          if "'20-moonlit-lake-pavilion'" not in catalog:
+              summer_start = catalog.index("'01-dawn-kunming-lake'")
+              anchor_index = catalog.index(anchor, summer_start) + len(anchor)
+              catalog = catalog[:anchor_index] + additions + catalog[anchor_index:]
+              catalog_path.write_text(catalog)
+
+          test_path = Path('app/test/journey_background_policy_test.dart')
+          test = test_path.read_text()
+          test = test.replace(
+              "test('Summer Palace ships ten reviewed location-bound backgrounds'",
+              "test('Summer Palace ships twenty reviewed location-bound backgrounds'",
+          )
+          marker = "(asset) => asset.assetPath.contains(\n          '/generated/beijing/summer-palace/',"
+          section_start = test.index("Summer Palace ships twenty")
+          length_index = test.index('expect(assets, hasLength(10));', section_start)
+          test = test[:length_index] + test[length_index:].replace(
+              'expect(assets, hasLength(10));',
+              'expect(assets, hasLength(20));',
+              1,
+          )
+          test_path.write_text(test)
+          PY
+
+      - name: Remove temporary upload files
+        run: |
+          rm -rf .github/sp-upload .github/sp400-upload .github/sp400b-upload
+          rm -f .github/direct-import-marker.txt
+          rm -f .github/workflows/import-summer-palace-backgrounds.yml
+          rm -f .github/workflows/import-refined-summer-palace-backgrounds.yml
+
+      - name: Verify the background library
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Run focused verification
+        working-directory: app
+        run: |
+          flutter pub get
+          dart format lib/data/journey_background_generated.dart test/journey_background_policy_test.dart
+          flutter analyze
+          flutter test test/journey_background_policy_test.dart
+
+      - name: Commit imported backgrounds
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: add ten refined Summer Palace backgrounds [summer-palace-imported]"
+          git push origin HEAD:feat/two-level-journey-picker
