@@ -11,7 +11,8 @@ const catalog = readFileSync(
   'utf8',
 );
 
-// Permanent guard for the first destination-level pseudo-dynamic background.
+// Permanent guard for the first destination-level live cinemagraph, its
+// reduced-motion fallback, and the supporting pseudo-dynamic depth layers.
 test('Summer Palace background uses clearly visible local pseudo-dynamic layers', () => {
   assert.match(widget, /beijing-summer-palace/);
   assert.match(widget, /summer-palace-dynamic-background/);
