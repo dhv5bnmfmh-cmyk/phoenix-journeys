@@ -27,6 +27,16 @@ class StoryTextSegment {
 }
 
 @visibleForTesting
+int revealedSegmentLength({
+  required int segmentStart,
+  required int segmentEnd,
+  int? revealEnd,
+}) {
+  if (revealEnd == null) return segmentEnd - segmentStart;
+  return revealEnd.clamp(segmentStart, segmentEnd).toInt() - segmentStart;
+}
+
+@visibleForTesting
 List<StoryTextSegment> segmentStoryText(String text, List<WordEntry> entries) {
   final sortedEntries = List<WordEntry>.of(entries)
     ..sort((a, b) => b.word.length.compareTo(a.word.length));
@@ -111,6 +121,7 @@ class InteractiveStoryText extends StatefulWidget {
     this.narrationController,
     this.highlightStart,
     this.highlightEnd,
+    this.revealEnd,
     super.key,
   });
 
@@ -126,6 +137,7 @@ class InteractiveStoryText extends StatefulWidget {
   final NarrationController? narrationController;
   final int? highlightStart;
   final int? highlightEnd;
+  final int? revealEnd;
 
   @override
   State<InteractiveStoryText> createState() => _InteractiveStoryTextState();
@@ -273,6 +285,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
                         baseStyle: baseStyle,
                         highlightStart: highlightStart,
                         highlightEnd: highlightEnd,
+                        revealEnd: widget.revealEnd,
                       );
                     })
                     .toList(growable: false),
@@ -319,6 +332,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
     required TextStyle? baseStyle,
     required int highlightStart,
     required int highlightEnd,
+    required int? revealEnd,
   }) {
     final segmentStyle = segment.entry == null
         ? baseStyle
@@ -339,57 +353,90 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
             ],
           );
 
-    final overlapStart = highlightStart
-        .clamp(segment.start, segment.end)
-        .toInt();
-    final overlapEnd = highlightEnd.clamp(segment.start, segment.end).toInt();
-    final hasHighlight = highlightStart >= 0 && overlapEnd > overlapStart;
-
-    if (!hasHighlight) {
-      return [
-        _span(
-          state.displayText(segment.text),
-          segment,
-          style: segmentStyle,
-          state: state,
-        ),
-      ];
-    }
-
-    final beforeLength = overlapStart - segment.start;
-    final activeLength = overlapEnd - overlapStart;
+    final visibleLength = revealedSegmentLength(
+      segmentStart: segment.start,
+      segmentEnd: segment.end,
+      revealEnd: revealEnd,
+    );
+    final visibleEnd = segment.start + visibleLength;
     final spans = <InlineSpan>[];
 
-    if (beforeLength > 0) {
-      spans.add(
-        _span(
-          state.displayText(segment.text.substring(0, beforeLength)),
-          segment,
-          style: segmentStyle,
-          state: state,
-        ),
-      );
+    if (visibleLength > 0) {
+      final overlapStart = highlightStart
+          .clamp(segment.start, visibleEnd)
+          .toInt();
+      final overlapEnd = highlightEnd.clamp(segment.start, visibleEnd).toInt();
+      final hasHighlight = highlightStart >= 0 && overlapEnd > overlapStart;
+
+      if (!hasHighlight) {
+        spans.add(
+          _span(
+            state.displayText(segment.text.substring(0, visibleLength)),
+            segment,
+            style: segmentStyle,
+            state: state,
+          ),
+        );
+      } else {
+        final beforeLength = overlapStart - segment.start;
+        final activeLength = overlapEnd - overlapStart;
+
+        if (beforeLength > 0) {
+          spans.add(
+            _span(
+              state.displayText(segment.text.substring(0, beforeLength)),
+              segment,
+              style: segmentStyle,
+              state: state,
+            ),
+          );
+        }
+
+        spans.add(
+          _readingMarkerSpan(
+            state.displayText(
+              segment.text.substring(
+                beforeLength,
+                beforeLength + activeLength,
+              ),
+            ),
+            segment,
+            style: segmentStyle ?? baseStyle ?? const TextStyle(),
+            state: state,
+          ),
+        );
+
+        final afterStart = beforeLength + activeLength;
+        if (afterStart < visibleLength) {
+          spans.add(
+            _span(
+              state.displayText(
+                segment.text.substring(afterStart, visibleLength),
+              ),
+              segment,
+              style: segmentStyle,
+              state: state,
+            ),
+          );
+        }
+      }
     }
 
-    spans.add(
-      _readingMarkerSpan(
-        state.displayText(
-          segment.text.substring(beforeLength, beforeLength + activeLength),
-        ),
-        segment,
-        style: segmentStyle ?? baseStyle ?? const TextStyle(),
-        state: state,
-      ),
-    );
-
-    final afterStart = beforeLength + activeLength;
-    if (afterStart < segment.text.length) {
+    if (visibleLength < segment.text.length) {
+      final hiddenStyle =
+          (segmentStyle ?? baseStyle ?? const TextStyle()).copyWith(
+            color: Colors.transparent,
+            decoration: TextDecoration.none,
+            shadows: const <Shadow>[],
+          );
       spans.add(
         _span(
-          state.displayText(segment.text.substring(afterStart)),
+          state.displayText(segment.text.substring(visibleLength)),
           segment,
-          style: segmentStyle,
+          style: hiddenStyle,
           state: state,
+          interactive: false,
+          hidden: true,
         ),
       );
     }
@@ -402,13 +449,19 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
     _InteractiveSegment segment, {
     required TextStyle? style,
     required AppState state,
+    bool interactive = true,
+    bool hidden = false,
   }) {
     final entry = segment.entry;
     return TextSpan(
       text: text,
-      recognizer: segment.recognizer,
-      mouseCursor: entry == null ? MouseCursor.defer : SystemMouseCursors.click,
-      semanticsLabel: entry == null
+      recognizer: interactive ? segment.recognizer : null,
+      mouseCursor: interactive && entry != null
+          ? SystemMouseCursors.click
+          : MouseCursor.defer,
+      semanticsLabel: hidden
+          ? ''
+          : entry == null
           ? null
           : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
       style: style,

@@ -844,6 +844,24 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
+  int? _narrationRevealEnd({
+    required String contentId,
+    required int itemIndex,
+    required int itemLength,
+  }) {
+    final sessionActive =
+        _narration.contentId == contentId &&
+        (_narration.status == NarrationStatus.playing ||
+            _narration.status == NarrationStatus.paused);
+    if (!sessionActive) return null;
+
+    final snapshot = _narration.highlightSnapshot;
+    if (snapshot == null || snapshot.contentId != contentId) return 0;
+    if (itemIndex < snapshot.itemIndex) return itemLength;
+    if (itemIndex > snapshot.itemIndex) return 0;
+    return snapshot.end.clamp(0, itemLength).toInt();
+  }
+
   Widget _storyPage() {
     final state = context.watch<AppState>();
     final language = state.translationLanguage;
@@ -896,6 +914,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                               return _CompactTextBlock(
                                 index: entry.key + 1,
                                 active: isActive,
+                                transparentSurface: true,
                                 onSupport: () => unawaited(
                                   _showReadingSupport(
                                     title: '故事第 ${entry.key + 1} 段',
@@ -918,6 +937,11 @@ class _JourneyScreenState extends State<JourneyScreen>
                                       ? snapshot!.start
                                       : null,
                                   highlightEnd: isActive ? snapshot!.end : null,
+                                  revealEnd: _narrationRevealEnd(
+                                    contentId: 'story',
+                                    itemIndex: entry.key,
+                                    itemLength: entry.value.length,
+                                  ),
                                   narrationContentId: 'story',
                                   narrationItemId: 'story-${entry.key}',
                                   style: TextStyle(
@@ -1203,6 +1227,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                             return _CompactTextBlock(
                               index: entry.key + 1,
                               active: isActive,
+                              transparentSurface: true,
                               onSupport: () => unawaited(
                                 _showReadingSupport(
                                   title: '今日发现 ${entry.key + 1}',
@@ -1220,6 +1245,11 @@ class _JourneyScreenState extends State<JourneyScreen>
                                     ? snapshot!.start
                                     : null,
                                 highlightEnd: isActive ? snapshot!.end : null,
+                                revealEnd: _narrationRevealEnd(
+                                  contentId: 'discovery',
+                                  itemIndex: entry.key,
+                                  itemLength: item.text.length,
+                                ),
                                 narrationContentId: 'discovery',
                                 narrationItemId: 'discovery-${entry.key}',
                                 style: PhoenixTheme.journeyBodyStyle.copyWith(
@@ -1526,12 +1556,14 @@ class _CompactTextBlock extends StatelessWidget {
     required this.active,
     required this.child,
     required this.onSupport,
+    this.transparentSurface = false,
   });
 
   final int index;
   final bool active;
   final Widget child;
   final VoidCallback onSupport;
+  final bool transparentSurface;
 
   @override
   Widget build(BuildContext context) {
@@ -1540,9 +1572,11 @@ class _CompactTextBlock extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 2),
       padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
-      decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
-        borderRadius: BorderRadius.circular(10),
-      ),
+      decoration: transparentSurface
+          ? null
+          : PhoenixTheme.journeyPanelDecoration.copyWith(
+              borderRadius: BorderRadius.circular(10),
+            ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
