@@ -12,7 +12,7 @@ test('story and discovery side controls keep stable geometry during narration', 
   assert.match(journey, /ValueKey\('compact-text-\$index'\)/);
   assert.doesNotMatch(journey, /compact-text-\$index-\$\{active/);
   assert.match(journey, /fontWeight: FontWeight\.w700/);
-  assert.match(journey, /backgroundColor: active/);
+  assert.match(journey, /backgroundColor:\s*active/);
 });
 
 test('cinematic glyphs and reading marker use one fixed line box', () => {
