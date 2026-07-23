@@ -9,6 +9,7 @@ const catalog = readFileSync(
 const state = readFileSync('app/lib/state/app_state.dart', 'utf8');
 const screen = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
 
+// Guards the first adaptive destination rollout before wider catalog expansion.
 test('Summer Palace provides three persistent journey levels', () => {
   assert.match(catalog, /enum JourneyDifficulty \{ easy, standard, challenge \}/);
   assert.match(catalog, /summerPalaceEasyLevel/);
