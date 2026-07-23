@@ -13,8 +13,7 @@ const screen = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
 test('Summer Palace provides three persistent journey levels', () => {
   assert.match(catalog, /enum JourneyDifficulty \{ easy, standard, challenge \}/);
   assert.match(catalog, /summerPalaceEasyLevel/);
-  assert.match(catalog, /summerPalaceChallengeLevel/);
-  assert.match(catalog, /const JourneyLevelContent/);
+  assert.match(catalog, /const summerPalaceChallengeLevel = JourneyLevelContent/);
   assert.match(state, /JourneyDifficulty journeyDifficulty/);
   assert.match(state, /Future<void> setJourneyDifficulty/);
   assert.match(state, /_key\('difficulty'\)/);
