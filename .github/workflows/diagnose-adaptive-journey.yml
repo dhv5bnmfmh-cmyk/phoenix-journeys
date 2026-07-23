@@ -1,0 +1,38 @@
+name: Diagnose adaptive journey worker tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.event.pull_request.number == 97
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/adaptive-summer-palace
+      - name: Run worker tests and capture output
+        shell: bash
+        run: |
+          set +e
+          node --test worker/*.test.mjs > adaptive-worker-test.log 2>&1
+          status=$?
+          echo "$status" > adaptive-worker-test.status
+          exit 0
+      - name: Upload diagnostic log
+        uses: actions/upload-artifact@v4
+        with:
+          name: adaptive-worker-test-log
+          path: |
+            adaptive-worker-test.log
+            adaptive-worker-test.status
+          retention-days: 1
