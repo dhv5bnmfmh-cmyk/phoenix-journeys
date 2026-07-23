@@ -6,6 +6,13 @@ on:
       - fix/global-script-surfaces
     paths:
       - '.github/workflows/finalize-completion-script-consistency.yml'
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
@@ -16,6 +23,9 @@ concurrency:
 
 jobs:
   finalize:
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.ref == 'fix/global-script-surfaces'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
