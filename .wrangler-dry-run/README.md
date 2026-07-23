@@ -1,1 +1,0 @@
-This folder contains the built output assets for the worker "phoenix-journeys-alpha" generated at 2026-07-23T13:45:07.919Z.
