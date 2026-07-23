@@ -1,8 +1,8 @@
 import '../models/journey_background.dart';
 import 'journey_background_generated.dart';
 
-const summerPalaceLiveLoopAssetPath =
-    'assets/images/backgrounds/generated/beijing/summer-palace/live/11-live-cinemagraph.webp';
+const summerPalaceLivingBackgroundAssetPath =
+    'assets/images/backgrounds/generated/beijing/summer-palace/06-summer-lotus-lake.webp';
 
 const _seedJourneys = <String>[
   'beijing-forbidden-city',
