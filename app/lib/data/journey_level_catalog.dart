@@ -183,7 +183,7 @@ final summerPalaceEasyLevel = JourneyLevelContent(
   expressQuestion: '请用一到两句话介绍颐和园里你最喜欢的景色。',
 );
 
-final summerPalaceChallengeLevel = JourneyLevelContent(
+final summerPalaceChallengeLevel = const JourneyLevelContent(
   storyParagraphs: const <String>[
     '清晨的薄雾尚未散尽，昆明湖已经把万寿山的轮廓收进水面。远处亭台若隐若现，使人工营造的园林看起来像自然生成的山水。',
     '长廊并非单纯连接景点的通道。它用连续的彩画、开合变化的视野和行走节奏，把湖岸上的不同空间组织成一场缓慢展开的观看。',
