@@ -7,18 +7,33 @@ on:
     paths:
       - '.github/sp-upload/**'
       - '.github/workflows/import-summer-palace-backgrounds.yml'
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - '.github/sp-upload/**'
+      - '.github/workflows/import-summer-palace-backgrounds.yml'
 
 permissions:
   contents: write
 
+concurrency:
+  group: import-summer-palace-backgrounds
+  cancel-in-progress: true
+
 jobs:
   import-backgrounds:
-    if: ${{ !contains(github.event.head_commit.message, '[summer-palace-imported]') }}
+    if: ${{ github.event_name == 'pull_request' || !contains(github.event.head_commit.message, '[summer-palace-imported]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: feat/two-level-journey-picker
 
       - name: Decode and validate the ten backgrounds
         run: |
