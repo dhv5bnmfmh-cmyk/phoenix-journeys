@@ -32,6 +32,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          echo 'Retrying the approved Summer Palace background import.'
           git reset --hard "$BASE_COMMIT"
 
           target='app/assets/images/backgrounds/generated/beijing/summer-palace'
