@@ -37,7 +37,19 @@ jobs:
           test "$(stat -c%s "$asset")" -lt 1100000
 
       - name: Test Phoenix agents
-        run: node --test worker/*.test.mjs
+        id: agents
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node --test worker/*.test.mjs 2>&1 | tee /tmp/phoenix-agent-live.log
+
+      - name: Upload Agent diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: summer-palace-live-agent-log
+          path: /tmp/phoenix-agent-live.log
+          if-no-files-found: error
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -69,6 +81,9 @@ jobs:
 
       - name: Validate Cloudflare Worker bundle
         run: npx --yes wrangler@4 deploy --dry-run --outdir /tmp/phoenix-wrangler-dry-run
+
+      - name: Enforce Agent result
+        run: test "${{ steps.agents.outcome }}" = success
 
       - name: Publish clean live background commit
         run: |
