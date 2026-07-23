@@ -2,18 +2,13 @@ name: Import Summer Palace backgrounds
 
 on:
   push:
-    branches:
-      - feat/two-level-journey-picker
+    branches: [feat/two-level-journey-picker]
     paths:
       - '.github/sp-upload/**'
       - '.github/workflows/import-summer-palace-backgrounds.yml'
   pull_request:
-    branches:
-      - main
-    types:
-      - opened
-      - synchronize
-      - reopened
+    branches: [main]
+    types: [opened, synchronize, reopened]
     paths:
       - '.github/sp-upload/**'
       - '.github/workflows/import-summer-palace-backgrounds.yml'
@@ -27,7 +22,6 @@ concurrency:
 
 jobs:
   import-backgrounds:
-    if: ${{ github.event_name == 'pull_request' || !contains(github.event.head_commit.message, '[summer-palace-imported]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,6 +61,16 @@ jobs:
               compressed = base64.b64decode(encoded, validate=True)
               tar_bytes = gzip.decompress(compressed)
           except Exception as error:
+              diagnostic = [
+                  f'error={error!r}',
+                  f'chunk_count={len(chunks)}',
+                  f'encoded_length={len(encoded)}',
+                  f'encoded_mod_4={len(encoded) % 4}',
+                  f'first_32={encoded[:32]}',
+                  f'last_32={encoded[-32:]}',
+              ]
+              diagnostic.extend(f'{path.name}={path.stat().st_size}' for path in chunks)
+              Path('.github/sp-upload/diagnostic.txt').write_text('\n'.join(diagnostic) + '\n', encoding='utf-8')
               raise SystemExit(f'Staged Summer Palace archive is incomplete or corrupt: {error}')
 
           found = {}
@@ -76,9 +80,8 @@ jobs:
                   if not member.isfile() or name not in expected:
                       continue
                   handle = archive.extractfile(member)
-                  if handle is None:
-                      continue
-                  found[name] = handle.read()
+                  if handle is not None:
+                      found[name] = handle.read()
 
           missing = [name for name in expected if name not in found]
           if missing:
@@ -119,7 +122,17 @@ jobs:
           Path('.github/workflows/import-summer-palace-backgrounds.yml').unlink()
           PY
 
+      - name: Record archive diagnostics
+        if: failure()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/sp-upload/diagnostic.txt
+          git commit -m 'chore: record Summer Palace archive diagnostics [skip ci]'
+          git push origin HEAD:feat/two-level-journey-picker
+
       - name: Replace staging commits with one clean import commit
+        if: success()
         env:
           BASE_COMMIT: 788ea1647a02051d358ad50175d8ec524a58686b
         run: |
