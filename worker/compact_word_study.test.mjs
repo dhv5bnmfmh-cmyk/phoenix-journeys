@@ -16,7 +16,7 @@ test('word study sheet follows its content and advances through the list', () =>
   assert.match(sheet, /下一个单词/);
   assert.match(sheet, /完成并收起/);
   assert.match(sheet, /if \(_isLast\) \{[\s\S]*Navigator\.of\(context\)\.pop/);
-  assert.match(journey, /entries: (?:_experience\.)?words/);
+  assert.match(journey, /entries: (?:_experience|_levelContent)\.words/);
   assert.match(journey, /onSpeakEntry:/);
 });
 
