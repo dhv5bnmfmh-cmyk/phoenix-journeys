@@ -1,27 +1,35 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 /// Controls Phoenix's calm background-viewing mode on reading-focused pages.
 ///
 /// After a short period without interaction, the journey chrome can fade away
-/// without stopping narration or destroying the current reading state. Any
-/// touch reveals the content immediately and restarts the idle countdown.
+/// without stopping narration or destroying the current reading state. Pointer
+/// activity anywhere in the app, including modal sheets, reveals the content
+/// immediately and restarts the idle countdown.
 class PhoenixImmersionAgent extends ChangeNotifier {
   PhoenixImmersionAgent({
     this.idleDelay = const Duration(seconds: 7),
-  });
+  }) {
+    _globalPointerRoute = _handleGlobalPointerEvent;
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_globalPointerRoute);
+  }
 
   final Duration idleDelay;
 
+  late final PointerRoute _globalPointerRoute;
   Timer? _idleTimer;
   bool _enabled = false;
   bool _immersed = false;
+  bool _disposed = false;
 
   bool get enabled => _enabled;
   bool get immersed => _immersed;
 
   void setEnabled(bool value) {
+    if (_disposed) return;
     if (_enabled == value) {
       if (value && !_immersed && _idleTimer == null) _schedule();
       return;
@@ -43,7 +51,7 @@ class PhoenixImmersionAgent extends ChangeNotifier {
   }
 
   void registerInteraction() {
-    if (!_enabled) return;
+    if (_disposed || !_enabled) return;
 
     _idleTimer?.cancel();
     _idleTimer = null;
@@ -58,12 +66,20 @@ class PhoenixImmersionAgent extends ChangeNotifier {
     registerInteraction();
   }
 
+  void _handleGlobalPointerEvent(PointerEvent event) {
+    if (event is PointerDownEvent ||
+        event is PointerMoveEvent ||
+        event is PointerSignalEvent) {
+      registerInteraction();
+    }
+  }
+
   void _schedule() {
-    if (!_enabled) return;
+    if (_disposed || !_enabled) return;
     _idleTimer?.cancel();
     _idleTimer = Timer(idleDelay, () {
       _idleTimer = null;
-      if (!_enabled || _immersed) return;
+      if (_disposed || !_enabled || _immersed) return;
       _immersed = true;
       notifyListeners();
     });
@@ -71,7 +87,13 @@ class PhoenixImmersionAgent extends ChangeNotifier {
 
   @override
   void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    _enabled = false;
+    _immersed = false;
     _idleTimer?.cancel();
+    _idleTimer = null;
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_globalPointerRoute);
     super.dispose();
   }
 }
