@@ -19,7 +19,7 @@ test('Summer Palace uses capped local motion without full-frame animated media',
   assert.match(catalog, /06-summer-lotus-lake\.webp/);
   assert.match(widget, /Timer\.periodic\(_summerPalaceFrameInterval/);
   assert.match(widget, /Duration\(milliseconds: 50\)/);
-  assert.match(widget, /TickerMode\.of\(context\)/);
+  assert.match(widget, /TickerMode\.valuesOf\(context\)\.enabled/);
   assert.match(widget, /summer-palace-camera-layer/);
   assert.match(widget, /summer-palace-camera-transform/);
   assert.match(widget, /summer-palace-living-layer/);
