@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../agents/phoenix_immersion_agent.dart';
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
 import '../data/world_story_runtime.dart';
@@ -43,6 +44,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   final expressFocusNode = FocusNode(debugLabel: 'express-writing');
   final memoryFocusNode = FocusNode(debugLabel: 'memory-writing');
   late final NarrationController _narration;
+  late final PhoenixImmersionAgent _immersion;
   late final DailyJourneyExperience _experience;
   late final JourneyContentRecord _journeyContent;
   late final PhoenixAiService _ai;
@@ -59,6 +61,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _narration = NarrationController();
+    _immersion = PhoenixImmersionAgent();
     final worldStoryAgent = createPhoenixWorldStoryAgent();
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
@@ -72,6 +75,12 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   void _handleWritingFocusChanged() {
     if (mounted) setState(() {});
+  }
+
+  bool get _supportsImmersion => step >= 0 && step <= 2;
+
+  void _syncImmersion() {
+    _immersion.setEnabled(_supportsImmersion);
   }
 
   @override
@@ -100,13 +109,17 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
     }
     _initialized = true;
+    _syncImmersion();
 
     if (step == 2) _scheduleDiscoveryAutoStart();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) return;
+    if (state == AppLifecycleState.resumed) {
+      _immersion.reveal();
+      return;
+    }
     unawaited(_narration.stop());
     if (_initialized) unawaited(_persistProgress());
   }
@@ -115,6 +128,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     if (_initialized) unawaited(_persistProgress());
+    _immersion.dispose();
     _narration.dispose();
     _ai.close();
     wonderController.dispose();
@@ -151,6 +165,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     // iOS display "playing" while silently blocking the actual utterance.
     if (safeStep == 2 && safeStep != step) {
       setState(() => step = safeStep);
+      _syncImmersion();
       _discoveryAutoStarted = true;
       unawaited(_playDiscoveries(stopEngineFirst: false));
       await _persistProgress(overrideStep: safeStep);
@@ -165,6 +180,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     }
 
     setState(() => step = safeStep);
+    _syncImmersion();
     await _persistProgress(overrideStep: safeStep);
 
     if (safeStep == 2) _scheduleDiscoveryAutoStart();
@@ -241,6 +257,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
       ),
     );
+    _immersion.reveal();
     if (!mounted || !shouldResume) return;
 
     // Wait until the sheet animation and iOS audio channel have fully closed.
@@ -587,6 +604,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     await _appState.completeJourney(memoryController.text);
     if (!mounted) return;
     setState(() => step = AppState.journeyLastStep);
+    _syncImmersion();
   }
 
   Future<void> _restartJourney() async {
@@ -599,7 +617,10 @@ class _JourneyScreenState extends State<JourneyScreen>
     _guideLoading = false;
     _writingLoading = false;
     _discoveryAutoStarted = false;
-    if (mounted) setState(() => step = 0);
+    if (mounted) {
+      setState(() => step = 0);
+      _syncImmersion();
+    }
   }
 
   JourneyBackgroundPage get _backgroundPageType => switch (step) {
@@ -624,37 +645,126 @@ class _JourneyScreenState extends State<JourneyScreen>
       _completePage(),
     ];
 
+    final mediaQuery = MediaQuery.of(context);
+    final automaticImmersionDisabled =
+        mediaQuery.disableAnimations || mediaQuery.accessibleNavigation;
+
     return DestinationBackground(
       journeyId: _experience.id,
       pageType: _backgroundPageType,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          toolbarHeight: 44,
-          title: Text(
-            _appState.displayText(_experience.appBarTitle),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-          ),
-          actions: [
-            Consumer<AppState>(
-              builder: (_, state, __) => TextButton(
-                onPressed: state.toggleScript,
-                style: TextButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Listener(
+        key: const ValueKey('journey-immersion-listener'),
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (_) => _immersion.registerInteraction(),
+        child: AnimatedBuilder(
+          animation: _immersion,
+          builder: (context, _) {
+            final immersed =
+                _supportsImmersion &&
+                _immersion.immersed &&
+                !automaticImmersionDisabled;
+
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                AnimatedOpacity(
+                  key: const ValueKey('journey-content-opacity'),
+                  duration: const Duration(milliseconds: 1600),
+                  curve: Curves.easeInOutCubic,
+                  opacity: immersed ? .035 : 1,
+                  child: IgnorePointer(
+                    ignoring: immersed,
+                    child: Scaffold(
+                      backgroundColor: Colors.transparent,
+                      resizeToAvoidBottomInset: true,
+                      appBar: AppBar(
+                        toolbarHeight: 44,
+                        title: Text(
+                          _appState.displayText(_experience.appBarTitle),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        actions: [
+                          Consumer<AppState>(
+                            builder: (_, state, __) => TextButton(
+                              onPressed: state.toggleScript,
+                              style: TextButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                              ),
+                              child: Text(
+                                state.scriptMode == ScriptMode.simplified
+                                    ? '简 / 繁'
+                                    : '繁 / 简',
+                                style: const TextStyle(fontSize: 10.5),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      body: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 280),
+                        child: pages[step],
+                      ),
+                    ),
+                  ),
                 ),
-                child: Text(
-                  state.scriptMode == ScriptMode.simplified ? '简 / 繁' : '繁 / 简',
-                  style: const TextStyle(fontSize: 10.5),
+                IgnorePointer(
+                  child: AnimatedOpacity(
+                    key: const ValueKey('journey-immersion-hint'),
+                    duration: const Duration(milliseconds: 500),
+                    opacity: immersed ? 1 : 0,
+                    child: SafeArea(
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 18),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: .22),
+                              borderRadius: BorderRadius.circular(99),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: .22),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.visibility_outlined,
+                                    color: Colors.white,
+                                    size: 15,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _appState.displayText('轻触屏幕显示内容'),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
-        ),
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 280),
-          child: pages[step],
+              ],
+            );
+          },
         ),
       ),
     );
