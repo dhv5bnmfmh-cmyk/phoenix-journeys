@@ -87,6 +87,17 @@ class PhoenixStampAgent {
       TweenSequenceItem(tween: Tween(begin: .62, end: .18), weight: 12),
       TweenSequenceItem(tween: Tween(begin: .18, end: 0), weight: 49),
     ]).animate(controller);
+
+    toolOpacity = TweenSequence<double>([
+      TweenSequenceItem(tween: ConstantTween(1), weight: 66),
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: 0.0).chain(
+          CurveTween(curve: Curves.easeInCubic),
+        ),
+        weight: 20,
+      ),
+      TweenSequenceItem(tween: ConstantTween(0), weight: 14),
+    ]).animate(controller);
   }
 
   final AnimationController controller;
@@ -96,6 +107,7 @@ class PhoenixStampAgent {
   late final Animation<double> imprintOpacity;
   late final Animation<double> imprintScale;
   late final Animation<double> impactShadow;
+  late final Animation<double> toolOpacity;
 
   Future<void> play() async {
     await controller.forward(from: 0);
