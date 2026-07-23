@@ -17,6 +17,12 @@ test('reading journeys enter calm immersion without destroying content state', (
   assert.match(journey, /轻触屏幕显示内容/);
 });
 
+test('accessibility settings prevent automatic content hiding', () => {
+  assert.match(journey, /mediaQuery\.disableAnimations/);
+  assert.match(journey, /mediaQuery\.accessibleNavigation/);
+  assert.match(journey, /!automaticImmersionDisabled/);
+});
+
 test('immersion timer is centralized in PhoenixImmersionAgent', () => {
   assert.match(agent, /idleDelay = const Duration\(seconds: 7\)/);
   assert.match(agent, /void registerInteraction\(\)/);
