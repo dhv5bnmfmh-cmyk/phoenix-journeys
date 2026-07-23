@@ -25,6 +25,14 @@ void main() {
     );
     expect(find.byKey(const ValueKey('city-stamp-tool')), findsOneWidget);
     expect(find.byKey(const ValueKey('city-stamp-imprint')), findsOneWidget);
+    expect(
+      tester
+          .widget<CityJourneyStamp>(
+            find.byKey(const ValueKey('city-stamp-imprint-mark')),
+          )
+          .transparentInk,
+      isTrue,
+    );
 
     expect(
       tester.widget<Opacity>(

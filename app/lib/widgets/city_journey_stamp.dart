@@ -12,16 +12,24 @@ class CityJourneyStamp extends StatelessWidget {
     required this.journey,
     required this.isUnlocked,
     this.size = 104,
+    this.transparentInk = false,
   });
 
   final DailyJourneyExperience journey;
   final bool isUnlocked;
   final double size;
+  final bool transparentInk;
 
   @override
   Widget build(BuildContext context) {
-    final foreground = isUnlocked ? PhoenixTheme.red : Colors.black38;
-    final border = isUnlocked
+    final foreground = transparentInk
+        ? PhoenixTheme.red.withValues(alpha: .62)
+        : isUnlocked
+        ? PhoenixTheme.red
+        : Colors.black38;
+    final border = transparentInk
+        ? PhoenixTheme.red.withValues(alpha: .54)
+        : isUnlocked
         ? PhoenixTheme.red.withValues(alpha: .78)
         : Colors.black26;
 
@@ -32,11 +40,13 @@ class CityJourneyStamp extends StatelessWidget {
       padding: EdgeInsets.all(size * .08),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isUnlocked
+        color: transparentInk
+            ? Colors.transparent
+            : isUnlocked
             ? const Color(0xFFFFF1DF)
             : Colors.black.withValues(alpha: .035),
         border: Border.all(color: border, width: size * .025),
-        boxShadow: isUnlocked
+        boxShadow: isUnlocked && !transparentInk
             ? [
                 BoxShadow(
                   color: PhoenixTheme.red.withValues(alpha: .17),
@@ -166,9 +176,11 @@ class _AnimatedCityJourneyStampState extends State<AnimatedCityJourneyStamp>
                     child: Transform.scale(
                       scale: _agent.imprintScale.value,
                       child: CityJourneyStamp(
+                        key: const ValueKey('city-stamp-imprint-mark'),
                         journey: widget.journey,
                         isUnlocked: true,
                         size: widget.size,
+                        transparentInk: true,
                       ),
                     ),
                   ),
