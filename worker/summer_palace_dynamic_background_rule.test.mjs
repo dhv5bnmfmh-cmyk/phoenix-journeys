@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const widget = readFileSync(
+  'app/lib/widgets/destination_background.dart',
+  'utf8',
+);
+
+test('Summer Palace background uses lightweight local pseudo-dynamic layers', () => {
+  assert.match(widget, /beijing-summer-palace/);
+  assert.match(widget, /summer-palace-dynamic-background/);
+  assert.match(widget, /AnimationController/);
+  assert.match(widget, /repeat\(reverse: true\)/);
+  assert.match(widget, /summer-palace-camera-layer/);
+  assert.match(widget, /summer-palace-cloud-light/);
+  assert.match(widget, /summer-palace-water-shimmer/);
+  assert.match(widget, /summer-palace-foreground-breath/);
+  assert.match(widget, /disableAnimations/);
+  assert.match(widget, /precacheImage/);
+  assert.match(widget, /RepaintBoundary/);
+});
