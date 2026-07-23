@@ -32,7 +32,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo 'Retrying the approved Summer Palace background import.'
           git reset --hard "$BASE_COMMIT"
 
           target='app/assets/images/backgrounds/generated/beijing/summer-palace'
@@ -46,16 +45,16 @@ jobs:
               | base64 --decode > "$output"
           }
 
-          fetch_blob 20bc51f87d4bf023992445aee7064e9ca5e56d8f "$target/01-dawn-kunming-lake.webp"
-          fetch_blob 9007d6f42efefbd6c7b56b1b7774861b34b2020e "$target/02-morning-long-corridor.webp"
-          fetch_blob 02ce382889f798b510c359c0560dfa7d3c142f45 "$target/03-misty-longevity-hill.webp"
-          fetch_blob aeb409e2aeeef9114b486041e5e0345e869d4ae4 "$target/04-bright-seventeen-arch-bridge.webp"
-          fetch_blob 09a95d09433faddb5cb821208d428eabadb2029f "$target/05-after-rain-pavilion.webp"
-          fetch_blob f0121c194f6760e441542b0783bca263e84490b4 "$target/06-summer-lotus-lake.webp"
-          fetch_blob f444ebba58adffa7515cb500f9512c8763247f8d "$target/07-autumn-west-dike.webp"
-          fetch_blob c5843772958a92a4d6d39d7a459d98b213ad6336 "$target/08-golden-hour-tower.webp"
-          fetch_blob d3257c8056c793fb45d8a6fd077517d3004d0534 "$target/09-blue-hour-reflection.webp"
-          fetch_blob 372793505782e2a1ba90d7f7be30ce680e721394 "$target/10-moonlit-lake-panorama.webp"
+          fetch_blob 20bc51f87d4bf023992445aee7064e9ca5e56d8f "$target/11-moonlit-kunming-lake.webp"
+          fetch_blob 9007d6f42efefbd6c7b56b1b7774861b34b2020e "$target/12-illuminated-blue-hour.webp"
+          fetch_blob 02ce382889f798b510c359c0560dfa7d3c142f45 "$target/13-golden-sunrise.webp"
+          fetch_blob aeb409e2aeeef9114b486041e5e0345e869d4ae4 "$target/14-autumn-lakeside.webp"
+          fetch_blob 09a95d09433faddb5cb821208d428eabadb2029f "$target/15-lotus-sunrise.webp"
+          fetch_blob f0121c194f6760e441542b0783bca263e84490b4 "$target/16-pavilion-after-rain.webp"
+          fetch_blob f444ebba58adffa7515cb500f9512c8763247f8d "$target/17-seventeen-arch-bridge.webp"
+          fetch_blob c5843772958a92a4d6d39d7a459d98b213ad6336 "$target/18-misty-longevity-hill.webp"
+          fetch_blob d3257c8056c793fb45d8a6fd077517d3004d0534 "$target/19-long-corridor.webp"
+          fetch_blob 372793505782e2a1ba90d7f7be30ce680e721394 "$target/20-golden-lake-panorama.webp"
 
           python3 - <<'PY'
           from pathlib import Path
@@ -63,28 +62,54 @@ jobs:
 
           target = Path('app/assets/images/backgrounds/generated/beijing/summer-palace')
           files = sorted(target.glob('*.webp'))
-          if len(files) != 10:
-              raise SystemExit(f'Expected 10 Summer Palace images, found {len(files)}')
+          if len(files) != 20:
+              raise SystemExit(f'Expected 20 Summer Palace images, found {len(files)}')
           for path in files:
               data = path.read_bytes()
               if data[:4] != b'RIFF' or data[8:12] != b'WEBP':
                   raise SystemExit(f'Invalid WebP: {path}')
               if len(data) < 4000:
                   raise SystemExit(f'Unexpectedly small image: {path} ({len(data)} bytes)')
-              print(f'Validated {path}: {len(data)} bytes')
+
+          catalog_path = Path('app/lib/data/journey_background_generated.dart')
+          catalog = catalog_path.read_text()
+          anchor = "    '10-moonlit-lake-panorama',\n"
+          additions = """    '11-moonlit-kunming-lake',
+              '12-illuminated-blue-hour',
+              '13-golden-sunrise',
+              '14-autumn-lakeside',
+              '15-lotus-sunrise',
+              '16-pavilion-after-rain',
+              '17-seventeen-arch-bridge',
+              '18-misty-longevity-hill',
+              '19-long-corridor',
+              '20-golden-lake-panorama',
+          """
+          summer_start = catalog.index("'01-dawn-kunming-lake'")
+          if "'20-golden-lake-panorama'" not in catalog[summer_start:]:
+              anchor_index = catalog.index(anchor, summer_start) + len(anchor)
+              catalog = catalog[:anchor_index] + additions + catalog[anchor_index:]
+              catalog_path.write_text(catalog)
+
+          test_path = Path('app/test/journey_background_policy_test.dart')
+          test = test_path.read_text()
+          test = test.replace(
+              "test('Summer Palace ships ten reviewed location-bound backgrounds'",
+              "test('Summer Palace ships twenty reviewed location-bound backgrounds'",
+          )
+          section_start = test.index('Summer Palace ships twenty')
+          length_index = test.index('expect(assets, hasLength(10));', section_start)
+          test = test[:length_index] + test[length_index:].replace(
+              'expect(assets, hasLength(10));',
+              'expect(assets, hasLength(20));',
+              1,
+          )
+          test_path.write_text(test)
 
           register = Path('design/ASSET_REGISTER.csv')
           rows = [
-              ['assets/images/backgrounds/generated/beijing/summer-palace/01-dawn-kunming-lake.webp', 'Summer Palace moonlit Kunming Lake', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
-              ['assets/images/backgrounds/generated/beijing/summer-palace/02-morning-long-corridor.webp', 'Summer Palace illuminated blue hour', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
-              ['assets/images/backgrounds/generated/beijing/summer-palace/03-misty-longevity-hill.webp', 'Summer Palace golden sunrise', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
-              ['assets/images/backgrounds/generated/beijing/summer-palace/04-bright-seventeen-arch-bridge.webp', 'Summer Palace autumn lakeside', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
-              ['assets/images/backgrounds/generated/beijing/summer-palace/05-after-rain-pavilion.webp', 'Summer Palace lotus sunrise', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
-              ['assets/images/backgrounds/generated/beijing/summer-palace/06-summer-lotus-lake.webp', 'Summer Palace lakeside pavilion after rain', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
-              ['assets/images/backgrounds/generated/beijing/summer-palace/07-autumn-west-dike.webp', 'Summer Palace Seventeen-Arch Bridge daylight', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
-              ['assets/images/backgrounds/generated/beijing/summer-palace/08-golden-hour-tower.webp', 'Summer Palace misty Longevity Hill', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
-              ['assets/images/backgrounds/generated/beijing/summer-palace/09-blue-hour-reflection.webp', 'Summer Palace Long Corridor', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
-              ['assets/images/backgrounds/generated/beijing/summer-palace/10-moonlit-lake-panorama.webp', 'Summer Palace golden lake panorama', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
+              [f'assets/images/backgrounds/generated/beijing/summer-palace/{path.name}', f'Summer Palace refined background {index}', 'AI-generated Phoenix original', 'phoenix-exclusive-owned', 'generated in ChatGPT 2026-07-23', 'approved']
+              for index, path in enumerate(files[10:], start=11)
           ]
           existing = register.read_text(encoding='utf-8')
           with register.open('a', encoding='utf-8', newline='') as output:
@@ -96,7 +121,10 @@ jobs:
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add app/assets/images/backgrounds/generated/beijing/summer-palace design/ASSET_REGISTER.csv
+          git add app/assets/images/backgrounds/generated/beijing/summer-palace \
+            app/lib/data/journey_background_generated.dart \
+            app/test/journey_background_policy_test.dart \
+            design/ASSET_REGISTER.csv
           git diff --cached --check
-          git commit -m 'feat: import user-approved Summer Palace backgrounds'
+          git commit -m 'feat: keep old and add ten refined Summer Palace backgrounds'
           git push --force origin HEAD:"$BRANCH"
