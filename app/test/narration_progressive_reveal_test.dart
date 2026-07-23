@@ -20,4 +20,23 @@ void main() {
       5,
     );
   });
+
+  test('cinematic reveal interpolates each glyph with a bounded duration', () {
+    expect(
+      cinematicRevealProgress(revealCursor: 4, characterIndex: 4),
+      0,
+    );
+    final half = cinematicRevealProgress(
+      revealCursor: 4.5,
+      characterIndex: 4,
+    );
+    expect(half, greaterThan(.5));
+    expect(half, lessThan(1));
+    expect(
+      cinematicRevealProgress(revealCursor: 5, characterIndex: 4),
+      1,
+    );
+    expect(cinematicRevealDuration(1).inMilliseconds, 260);
+    expect(cinematicRevealDuration(30).inMilliseconds, 720);
+  });
 }

@@ -147,3 +147,12 @@
 - 城市印章和完成旅程流程
 
 - Adaptive journey rule: a destination may offer light, standard, and challenge Chinese content without changing its identity, background, progress, or stamp; the explorer can switch levels and the choice persists.
+
+
+## 永久电影级朗读显现准则
+
+- 故事页与发现页开始朗读后，文字显现不得使用逐字硬切或瞬间跳变。
+- 两次语音进度回调之间必须连续插值，新增文字使用淡入、轻微上浮与散焦收束，形成电影字幕式节奏。
+- 未朗读文字必须保留原版面位置，但不得显示、交互或进入辅助阅读语义。
+- 新一轮朗读开始时可以立即隐藏未来文字；暂停必须保留当前进度，结束后平滑恢复全文。
+- 动画最长不得超过 720ms，避免语音进度更新时产生明显拖尾。

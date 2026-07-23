@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +35,22 @@ int revealedSegmentLength({
 }) {
   if (revealEnd == null) return segmentEnd - segmentStart;
   return revealEnd.clamp(segmentStart, segmentEnd).toInt() - segmentStart;
+}
+
+@visibleForTesting
+double cinematicRevealProgress({
+  required double revealCursor,
+  required int characterIndex,
+}) {
+  final raw = (revealCursor - characterIndex).clamp(0.0, 1.0).toDouble();
+  return Curves.easeOutCubic.transform(raw);
+}
+
+@visibleForTesting
+Duration cinematicRevealDuration(double characterDistance) {
+  final milliseconds =
+      (210 + characterDistance.abs() * 34).round().clamp(260, 720).toInt();
+  return Duration(milliseconds: milliseconds);
 }
 
 @visibleForTesting
@@ -143,52 +160,110 @@ class InteractiveStoryText extends StatefulWidget {
   State<InteractiveStoryText> createState() => _InteractiveStoryTextState();
 }
 
-class _InteractiveStoryTextState extends State<InteractiveStoryText> {
+class _InteractiveStoryTextState extends State<InteractiveStoryText>
+    with SingleTickerProviderStateMixin {
   final List<TapGestureRecognizer> _recognizers = [];
   late List<_InteractiveSegment> _segments;
   WordEntry? _selectedEntry;
   Timer? _hideTimer;
+  late final AnimationController _cinematicRevealController;
+  double _revealFrom = 0;
+  double _revealTo = 0;
 
   @override
   void initState() {
     super.initState();
+    final initialReveal = _targetRevealCursor(widget.revealEnd);
+    _revealFrom = initialReveal;
+    _revealTo = initialReveal;
+    _cinematicRevealController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 360),
+      value: 1,
+    );
     _buildSegments();
   }
 
   @override
   void didUpdateWidget(covariant InteractiveStoryText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text || oldWidget.entries != widget.entries) {
+    final textChanged = oldWidget.text != widget.text;
+    if (textChanged || oldWidget.entries != widget.entries) {
       _disposeRecognizers();
       _selectedEntry = null;
       _buildSegments();
     }
+
+    if (textChanged) {
+      _resetRevealTo(widget.revealEnd);
+    } else if (oldWidget.revealEnd != widget.revealEnd) {
+      _animateRevealTo(widget.revealEnd);
+    }
+  }
+
+  double _targetRevealCursor(int? revealEnd) {
+    return (revealEnd ?? widget.text.length)
+        .clamp(0, widget.text.length)
+        .toDouble();
+  }
+
+  double get _currentRevealCursor {
+    final eased = Curves.easeOutCubic.transform(
+      _cinematicRevealController.value,
+    );
+    return lerpDouble(_revealFrom, _revealTo, eased) ?? _revealTo;
+  }
+
+  void _resetRevealTo(int? revealEnd) {
+    final target = _targetRevealCursor(revealEnd);
+    _cinematicRevealController.stop();
+    _revealFrom = target;
+    _revealTo = target;
+    _cinematicRevealController.value = 1;
+  }
+
+  void _animateRevealTo(int? revealEnd) {
+    final target = _targetRevealCursor(revealEnd);
+    final current =
+        _currentRevealCursor.clamp(0.0, widget.text.length.toDouble());
+    final distance = target - current;
+
+    // Starting a new narration should hide future text immediately. Forward
+    // progress is then interpolated continuously between speech callbacks.
+    if (distance <= 0.01) {
+      _resetRevealTo(revealEnd);
+      return;
+    }
+
+    _cinematicRevealController.stop();
+    _revealFrom = current;
+    _revealTo = target;
+    _cinematicRevealController.duration = cinematicRevealDuration(distance);
+    _cinematicRevealController.forward(from: 0);
   }
 
   void _buildSegments() {
-    _segments = segmentStoryText(widget.text, widget.entries)
-        .map((segment) {
-          final entry = segment.entry;
-          if (entry == null) {
-            return _InteractiveSegment(
-              text: segment.text,
-              start: segment.start,
-              end: segment.end,
-            );
-          }
+    _segments = segmentStoryText(widget.text, widget.entries).map((segment) {
+      final entry = segment.entry;
+      if (entry == null) {
+        return _InteractiveSegment(
+          text: segment.text,
+          start: segment.start,
+          end: segment.end,
+        );
+      }
 
-          final recognizer = TapGestureRecognizer()
-            ..onTap = () => _showEntry(entry);
-          _recognizers.add(recognizer);
-          return _InteractiveSegment(
-            text: segment.text,
-            start: segment.start,
-            end: segment.end,
-            entry: entry,
-            recognizer: recognizer,
-          );
-        })
-        .toList(growable: false);
+      final recognizer = TapGestureRecognizer()
+        ..onTap = () => _showEntry(entry);
+      _recognizers.add(recognizer);
+      return _InteractiveSegment(
+        text: segment.text,
+        start: segment.start,
+        end: segment.end,
+        entry: entry,
+        recognizer: recognizer,
+      );
+    }).toList(growable: false);
   }
 
   void _showEntry(WordEntry entry) {
@@ -225,6 +300,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
   @override
   void dispose() {
     _hideTimer?.cancel();
+    _cinematicRevealController.dispose();
     _disposeRecognizers();
     super.dispose();
   }
@@ -241,17 +317,17 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AnimatedBuilder(
-          animation: highlightSource,
+          animation: Listenable.merge(<Listenable>[
+            highlightSource,
+            _cinematicRevealController,
+          ]),
           builder: (context, _) {
-            final snapshot =
-                widget.narrationController?.highlightSnapshot ??
+            final snapshot = widget.narrationController?.highlightSnapshot ??
                 NarrationHighlightBus.instance.snapshot;
-            final hasExplicitHighlight =
-                widget.highlightStart != null &&
+            final hasExplicitHighlight = widget.highlightStart != null &&
                 widget.highlightEnd != null &&
                 widget.highlightEnd! > widget.highlightStart!;
-            final isCurrentNarrationItem =
-                hasExplicitHighlight ||
+            final isCurrentNarrationItem = hasExplicitHighlight ||
                 narrationSnapshotMatches(
                   snapshot: snapshot,
                   contentId: widget.narrationContentId,
@@ -263,13 +339,13 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
             final highlightStart = hasExplicitHighlight
                 ? widget.highlightStart!
                 : isCurrentNarrationItem
-                ? snapshot!.start
-                : -1;
+                    ? snapshot!.start
+                    : -1;
             final highlightEnd = hasExplicitHighlight
                 ? widget.highlightEnd!
                 : isCurrentNarrationItem
-                ? snapshot!.end
-                : -1;
+                    ? snapshot!.end
+                    : -1;
 
             return Text.rich(
               key: ValueKey(
@@ -277,18 +353,16 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
               ),
               TextSpan(
                 style: baseStyle,
-                children: _segments
-                    .expand((segment) {
-                      return _buildSegmentSpans(
-                        segment,
-                        state: state,
-                        baseStyle: baseStyle,
-                        highlightStart: highlightStart,
-                        highlightEnd: highlightEnd,
-                        revealEnd: widget.revealEnd,
-                      );
-                    })
-                    .toList(growable: false),
+                children: _segments.expand((segment) {
+                  return _buildSegmentSpans(
+                    segment,
+                    state: state,
+                    baseStyle: baseStyle,
+                    highlightStart: highlightStart,
+                    highlightEnd: highlightEnd,
+                    revealCursor: _currentRevealCursor,
+                  );
+                }).toList(growable: false),
               ),
             );
           },
@@ -312,7 +386,8 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
             child: selectedEntry == null
                 ? const SizedBox.shrink(key: ValueKey('word-popover-empty'))
                 : Padding(
-                    key: ValueKey('word-popover-auto-visible-${selectedEntry.word}'),
+                    key: ValueKey(
+                        'word-popover-auto-visible-${selectedEntry.word}'),
                     padding: const EdgeInsets.only(top: 8),
                     child: _VocabularyPopover(
                       entry: selectedEntry,
@@ -332,7 +407,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
     required TextStyle? baseStyle,
     required int highlightStart,
     required int highlightEnd,
-    required int? revealEnd,
+    required double revealCursor,
   }) {
     final segmentStyle = segment.entry == null
         ? baseStyle
@@ -353,18 +428,16 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
             ],
           );
 
-    final visibleLength = revealedSegmentLength(
-      segmentStart: segment.start,
-      segmentEnd: segment.end,
-      revealEnd: revealEnd,
-    );
+    final localCursor = (revealCursor - segment.start)
+        .clamp(0.0, segment.text.length.toDouble())
+        .toDouble();
+    final visibleLength = localCursor.floor();
     final visibleEnd = segment.start + visibleLength;
     final spans = <InlineSpan>[];
 
     if (visibleLength > 0) {
-      final overlapStart = highlightStart
-          .clamp(segment.start, visibleEnd)
-          .toInt();
+      final overlapStart =
+          highlightStart.clamp(segment.start, visibleEnd).toInt();
       final overlapEnd = highlightEnd.clamp(segment.start, visibleEnd).toInt();
       final hasHighlight = highlightStart >= 0 && overlapEnd > overlapStart;
 
@@ -422,16 +495,40 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
       }
     }
 
+    var hiddenStart = visibleLength;
     if (visibleLength < segment.text.length) {
+      final characterIndex = segment.start + visibleLength;
+      final frontierProgress = cinematicRevealProgress(
+        revealCursor: revealCursor,
+        characterIndex: characterIndex,
+      );
+      if (frontierProgress > .001) {
+        final isHighlighted = highlightStart >= 0 &&
+            characterIndex >= highlightStart &&
+            characterIndex < highlightEnd;
+        spans.add(
+          _cinematicFrontierSpan(
+            state.displayText(segment.text[visibleLength]),
+            segment,
+            style: segmentStyle ?? baseStyle ?? const TextStyle(),
+            progress: frontierProgress,
+            highlighted: isHighlighted,
+          ),
+        );
+        hiddenStart += 1;
+      }
+    }
+
+    if (hiddenStart < segment.text.length) {
       final hiddenStyle =
           (segmentStyle ?? baseStyle ?? const TextStyle()).copyWith(
-            color: Colors.transparent,
-            decoration: TextDecoration.none,
-            shadows: const <Shadow>[],
-          );
+        color: Colors.transparent,
+        decoration: TextDecoration.none,
+        shadows: const <Shadow>[],
+      );
       spans.add(
         _span(
-          state.displayText(segment.text.substring(visibleLength)),
+          state.displayText(segment.text.substring(hiddenStart)),
           segment,
           style: hiddenStyle,
           state: state,
@@ -442,6 +539,33 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
     }
 
     return spans;
+  }
+
+  WidgetSpan _cinematicFrontierSpan(
+    String text,
+    _InteractiveSegment segment, {
+    required TextStyle style,
+    required double progress,
+    required bool highlighted,
+  }) {
+    final entry = segment.entry;
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.baseline,
+      baseline: TextBaseline.alphabetic,
+      child: Semantics(
+        label: text,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: entry == null ? null : () => _showEntry(entry),
+          child: _CinematicRevealGlyph(
+            text: text,
+            style: style,
+            progress: progress,
+            highlighted: highlighted,
+          ),
+        ),
+      ),
+    );
   }
 
   TextSpan _span(
@@ -462,8 +586,8 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
       semanticsLabel: hidden
           ? ''
           : entry == null
-          ? null
-          : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
+              ? null
+              : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
       style: style,
     );
   }
@@ -491,6 +615,53 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
             ),
             text: text,
             style: style,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CinematicRevealGlyph extends StatelessWidget {
+  const _CinematicRevealGlyph({
+    required this.text,
+    required this.style,
+    required this.progress,
+    required this.highlighted,
+  });
+
+  final String text;
+  final TextStyle style;
+  final double progress;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = progress.clamp(0.0, 1.0).toDouble();
+    final blur = (1 - t) * 3.8;
+    final lift = (1 - t) * 4.5;
+    final baseColor = style.color ?? Colors.white;
+    final glowColor = highlighted ? const Color(0xFFFFD879) : baseColor;
+
+    return Transform.translate(
+      offset: Offset(0, lift),
+      child: Opacity(
+        opacity: t,
+        child: ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: Text(
+            text,
+            style: style.copyWith(
+              height: 1,
+              shadows: <Shadow>[
+                ...?style.shadows,
+                Shadow(
+                  color: glowColor.withValues(alpha: .4 * t),
+                  blurRadius: 2 + (1 - t) * 8,
+                  offset: Offset(0, 1 + (1 - t) * 1.5),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -580,77 +751,93 @@ class _VocabularyPopover extends StatelessWidget {
       child: DefaultTextStyle.merge(
         style: PhoenixTheme.journeyBodyStyle,
         child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(12, 9, 8, 9),
-        decoration: PhoenixTheme.destinationGlass(alpha: .12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(entry.symbol, style: const TextStyle(fontSize: 21)),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        state.displayText(entry.word),
-                        style: PhoenixTheme.journeyTitleStyle,
-                      ),
-                      const SizedBox(width: 7),
-                      Expanded(
-                        child: Text(
-                          entry.pinyin,
-                          overflow: TextOverflow.ellipsis,
-                          style: PhoenixTheme.journeyMetaStyle.copyWith(fontSize: 12),
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(12, 9, 8, 9),
+          decoration: PhoenixTheme.destinationGlass(alpha: .12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(entry.symbol, style: const TextStyle(fontSize: 21)),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          state.displayText(entry.word),
+                          style: PhoenixTheme.journeyTitleStyle,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    state.displayText(entry.partOfSpeech),
-                    key: ValueKey('story-discovery-word-pos-${entry.word}'),
-                    style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    state.displayText(nativeLabel),
-                    key: ValueKey('story-discovery-word-native-label-${entry.word}'),
-                    style: const TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    nativeDefinition,
-                    key: ValueKey('story-discovery-word-native-${entry.word}'),
-                    style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.3),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'English',
-                    key: ValueKey('story-discovery-word-english-label-${entry.word}'),
-                    style: const TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    englishDefinition.isEmpty ? '—' : englishDefinition,
-                    key: ValueKey('story-discovery-word-english-${entry.word}'),
-                    style: const TextStyle(color: Colors.white, fontSize: 11.5, height: 1.25),
-                  ),
-                ],
+                        const SizedBox(width: 7),
+                        Expanded(
+                          child: Text(
+                            entry.pinyin,
+                            overflow: TextOverflow.ellipsis,
+                            style: PhoenixTheme.journeyMetaStyle
+                                .copyWith(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      state.displayText(entry.partOfSpeech),
+                      key: ValueKey('story-discovery-word-pos-${entry.word}'),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      state.displayText(nativeLabel),
+                      key: ValueKey(
+                          'story-discovery-word-native-label-${entry.word}'),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      nativeDefinition,
+                      key:
+                          ValueKey('story-discovery-word-native-${entry.word}'),
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 13, height: 1.3),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'English',
+                      key: ValueKey(
+                          'story-discovery-word-english-label-${entry.word}'),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      englishDefinition.isEmpty ? '—' : englishDefinition,
+                      key: ValueKey(
+                          'story-discovery-word-english-${entry.word}'),
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 11.5, height: 1.25),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              visualDensity: VisualDensity.compact,
-              padding: const EdgeInsets.all(3),
-              constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-              tooltip: '关闭解释',
-              onPressed: onClose,
-              icon: const Icon(Icons.close_rounded, size: 17),
-            ),
-          ],
-        ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.all(3),
+                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                tooltip: '关闭解释',
+                onPressed: onClose,
+                icon: const Icon(Icons.close_rounded, size: 17),
+              ),
+            ],
+          ),
         ),
       ),
     );
