@@ -37,8 +37,46 @@ void main() {
       findsOneWidget,
     );
     expect(
+      find.byKey(const ValueKey('summer-palace-water-ripples')),
+      findsOneWidget,
+    );
+    expect(
       find.byKey(const ValueKey('summer-palace-foreground-breath')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('Summer Palace camera visibly changes position over time',
+      (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: DestinationBackground(
+          journeyId: 'beijing-summer-palace',
+          pageType: JourneyBackgroundPage.story,
+          child: SizedBox.expand(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final initialTransform = tester
+        .widget<Transform>(
+          find.byKey(const ValueKey('summer-palace-camera-transform')),
+        )
+        .transform
+        .storage
+        .toList(growable: false);
+
+    await tester.pump(const Duration(seconds: 2));
+
+    final laterTransform = tester
+        .widget<Transform>(
+          find.byKey(const ValueKey('summer-palace-camera-transform')),
+        )
+        .transform
+        .storage
+        .toList(growable: false);
+
+    expect(laterTransform, isNot(orderedEquals(initialTransform)));
   });
 }
