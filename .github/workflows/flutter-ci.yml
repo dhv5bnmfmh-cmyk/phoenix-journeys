@@ -1,9 +1,9 @@
 name: Apply Summer Palace live cinemagraph through Flutter CI
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/summer-palace-parallax-background
+      - main
 
 permissions:
   contents: write
