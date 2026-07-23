@@ -1,0 +1,73 @@
+name: Refresh Summer Palace backgrounds
+
+on:
+  push:
+    branches:
+      - fix/summer-palace-background-refresh
+    paths:
+      - '.github/workflows/refresh-summer-palace-backgrounds.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/summer-palace-background-refresh
+          fetch-depth: 0
+
+      - name: Replace Summer Palace backgrounds
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          target='app/assets/images/backgrounds/generated/beijing/summer-palace'
+          mkdir -p "$target"
+
+          fetch_blob() {
+            local sha="$1"
+            local output="$2"
+            gh api "repos/$GITHUB_REPOSITORY/git/blobs/$sha" --jq '.content' \
+              | tr -d '\n' \
+              | base64 --decode > "$output"
+            test "$(git hash-object "$output")" = "$sha"
+          }
+
+          fetch_blob 20bc51f87d4bf023992445aee7064e9ca5e56d8f "$target/01-dawn-kunming-lake.webp"
+          fetch_blob 9007d6f42efefbd6c7b56b1b7774861b34b2020e "$target/02-morning-long-corridor.webp"
+          fetch_blob 02ce382889f798b510c359c0560dfa7d3c142f45 "$target/03-misty-longevity-hill.webp"
+          fetch_blob aeb409e2aeeef9114b486041e5e0345e869d4ae4 "$target/04-bright-seventeen-arch-bridge.webp"
+          fetch_blob 09a95d09433faddb5cb821208d428eabadb2029f "$target/05-after-rain-pavilion.webp"
+          fetch_blob f0121c194f6760e441542b0783bca263e84490b4 "$target/06-summer-lotus-lake.webp"
+          fetch_blob f444ebba58adffa7515cb500f9512c8763247f8d "$target/07-autumn-west-dike.webp"
+          fetch_blob c5843772958a92a4d6d39d7a459d98b213ad6336 "$target/08-golden-hour-tower.webp"
+          fetch_blob d3257c8056c793fb45d8a6fd077517d3004d0534 "$target/09-blue-hour-reflection.webp"
+          fetch_blob 372793505782e2a1ba90d7f7be30ce680e721394 "$target/10-moonlit-lake-panorama.webp"
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          target = Path('app/assets/images/backgrounds/generated/beijing/summer-palace')
+          files = sorted(target.glob('*.webp'))
+          if len(files) != 10:
+              raise SystemExit(f'Expected 10 backgrounds, found {len(files)}')
+          for path in files:
+              data = path.read_bytes()
+              if data[:4] != b'RIFF' or data[8:12] != b'WEBP':
+                  raise SystemExit(f'Invalid WebP: {path}')
+              if len(data) < 4000:
+                  raise SystemExit(f'Unexpectedly small image: {path}')
+          PY
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$target"
+          git rm .github/workflows/refresh-summer-palace-backgrounds.yml
+          git diff --cached --check
+          git commit -m 'fix: replace Summer Palace backgrounds with approved set'
+          git push origin HEAD:fix/summer-palace-background-refresh
