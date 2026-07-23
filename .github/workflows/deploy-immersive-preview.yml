@@ -1,5 +1,6 @@
 name: Deploy immersive journey preview
 
+# Merge-only trigger for PR #92 final experience deployment.
 on:
   push:
     branches:
