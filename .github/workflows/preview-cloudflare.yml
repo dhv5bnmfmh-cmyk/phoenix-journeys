@@ -32,90 +32,62 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Prepare approved Summer Palace archive
+        if: >-
+          github.event.pull_request.number == 85 &&
+          github.event.pull_request.head.ref == 'fix/summer-palace-background-refresh'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/summer-palace
+          gh api "repos/$GITHUB_REPOSITORY/contents/.github/sp-upload-q10/chunk_00?ref=$PREVIEW_RELEASE" --jq '.content' \
+            | tr -d '\n' \
+            | base64 --decode > /tmp/summer-palace-archive.b64
+          tr -d '\r\n ' < /tmp/summer-palace-archive.b64 \
+            | base64 --decode > /tmp/summer-palace.tar.gz
+          echo "Archive bytes: $(wc -c < /tmp/summer-palace.tar.gz)"
+          tar -tzf /tmp/summer-palace.tar.gz
+          tar -xzf /tmp/summer-palace.tar.gz -C /tmp/summer-palace
+
       - name: Check out feature branch
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Recover approved Summer Palace backgrounds
+      - name: Install approved Summer Palace backgrounds
         if: >-
           github.event.pull_request.number == 85 &&
           github.event.pull_request.head.ref == 'fix/summer-palace-background-refresh'
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import base64
-          import gzip
-          import io
-          import tarfile
-
-          expected = [
-              '01-dawn-kunming-lake.webp',
-              '02-morning-long-corridor.webp',
-              '03-misty-longevity-hill.webp',
-              '04-bright-seventeen-arch-bridge.webp',
-              '05-after-rain-pavilion.webp',
-              '06-summer-lotus-lake.webp',
-              '07-autumn-west-dike.webp',
-              '08-golden-hour-tower.webp',
-              '09-blue-hour-reflection.webp',
-              '10-moonlit-lake-panorama.webp',
-          ]
-          sources = [
-              Path('.github/sp-upload-q5'),
-              Path('.github/sp-upload-q10'),
-              Path('.github/sp400-upload'),
-              Path('.github/sp400b-upload'),
-              Path('.github/sp-upload'),
-          ]
-          selected = None
-          selected_source = None
-          for source in sources:
-              chunks = sorted(source.glob('chunk_*'))
-              if not chunks:
-                  continue
-              encoded = ''.join(chunk.read_text(encoding='utf-8').strip() for chunk in chunks)
-              try:
-                  compressed = base64.b64decode(encoded, validate=True)
-                  try:
-                      tar_bytes = gzip.decompress(compressed)
-                      archive = tarfile.open(fileobj=io.BytesIO(tar_bytes), mode='r:')
-                  except Exception:
-                      archive = tarfile.open(fileobj=io.BytesIO(compressed), mode='r:gz')
-                  with archive:
-                      found = {}
-                      for member in archive.getmembers():
-                          name = Path(member.name).name
-                          if member.isfile() and name in expected:
-                              handle = archive.extractfile(member)
-                              if handle is not None:
-                                  found[name] = handle.read()
-                  if set(found) != set(expected):
-                      raise ValueError(f'missing {sorted(set(expected) - set(found))}')
-                  for name, data in found.items():
-                      if len(data) < 20000 or data[:4] != b'RIFF' or data[8:12] != b'WEBP':
-                          raise ValueError(f'invalid WebP {name}: {len(data)} bytes')
-                  selected = found
-                  selected_source = source
-                  break
-              except Exception as error:
-                  print(f'Skipping {source}: {error}')
-
-          if selected is None:
-              raise SystemExit('No complete approved Summer Palace archive was found.')
-
-          target = Path('app/assets/images/backgrounds/generated/beijing/summer-palace')
-          target.mkdir(parents=True, exist_ok=True)
-          for old in target.glob('*.webp'):
-              old.unlink()
-          for name in expected:
-              (target / name).write_bytes(selected[name])
-              print(f'Installed {name}: {len(selected[name])} bytes')
-          print(f'Archive source: {selected_source}')
-          PY
+          target='app/assets/images/backgrounds/generated/beijing/summer-palace'
+          expected=(
+            01-dawn-kunming-lake.webp
+            02-morning-long-corridor.webp
+            03-misty-longevity-hill.webp
+            04-bright-seventeen-arch-bridge.webp
+            05-after-rain-pavilion.webp
+            06-summer-lotus-lake.webp
+            07-autumn-west-dike.webp
+            08-golden-hour-tower.webp
+            09-blue-hour-reflection.webp
+            10-moonlit-lake-panorama.webp
+          )
+          mkdir -p "$target"
+          rm -f "$target"/*.webp
+          for name in "${expected[@]}"; do
+            source_file="$(find /tmp/summer-palace -type f -name "$name" -print -quit)"
+            test -n "$source_file"
+            cp "$source_file" "$target/$name"
+            test "$(head -c 4 "$target/$name")" = 'RIFF'
+            test "$(dd if="$target/$name" bs=1 skip=8 count=4 status=none)" = 'WEBP'
+            test "$(wc -c < "$target/$name")" -ge 20000
+          done
+          test "$(find "$target" -maxdepth 1 -name '*.webp' | wc -l)" -eq 10
 
           rm -rf .github/sp-upload .github/sp-upload-q5 .github/sp-upload-q10
           rm -rf .github/sp400-upload .github/sp400b-upload
@@ -175,37 +147,21 @@ jobs:
         run: |
           health_url="${PREVIEW_URL}/api/health?commit=${PREVIEW_RELEASE}"
           verified="false"
-
           for attempt in {1..18}; do
             response="$(curl --fail --silent --show-error "$health_url" || true)"
             echo "Preview release check ${attempt}/18: ${response:-no response}"
-
             if node -e '
               let health;
-              try {
-                health = JSON.parse(process.argv[1]);
-              } catch (_) {
-                process.exit(1);
-              }
+              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
               const expectedRelease = process.argv[2];
-              if (!health.ok ||
-                  !health.ai ||
-                  health.service !== "phoenix-journeys" ||
-                  health.release !== expectedRelease) {
-                process.exit(1);
-              }
+              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expectedRelease) process.exit(1);
             ' "$response" "$PREVIEW_RELEASE"; then
               verified="true"
               break
             fi
-
             sleep 5
           done
-
-          if [[ "$verified" != "true" ]]; then
-            echo "Phoenix PR preview did not propagate the expected release."
-            exit 1
-          fi
+          test "$verified" = 'true'
 
       - name: Publish preview status
         env:
@@ -214,14 +170,8 @@ jobs:
         run: |
           payload="$(node -e '
             const [url] = process.argv.slice(1);
-            process.stdout.write(JSON.stringify({
-              state: "success",
-              description: "Isolated Phoenix preview is ready",
-              context: "cloudflare/preview",
-              target_url: url
-            }));
+            process.stdout.write(JSON.stringify({state:"success",description:"Isolated Phoenix preview is ready",context:"cloudflare/preview",target_url:url}));
           ' "$PREVIEW_URL")"
-
           curl --fail --silent --show-error \
             --request POST \
             --header "Accept: application/vnd.github+json" \
@@ -240,29 +190,12 @@ jobs:
             const marker = '<!-- phoenix-pr-preview -->';
             const shortRelease = process.env.PHOENIX_PREVIEW_RELEASE.slice(0, 8);
             const body = `${marker}\n## Phoenix 独立体验版 ✅\n\n[打开 PR 体验链接](${process.env.PHOENIX_PREVIEW_URL}/?v=${shortRelease})\n\n- PR：#${context.issue.number}\n- Commit：\`${shortRelease}\`\n- 与正式版 main 完全隔离\n- 只有确认通过后才会合并上线`;
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              per_page: 100,
-            });
-            const existing = comments.find(
-              (comment) => comment.user.type === 'Bot' && comment.body?.includes(marker),
-            );
+            const comments = await github.paginate(github.rest.issues.listComments, {owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, per_page: 100});
+            const existing = comments.find((comment) => comment.user.type === 'Bot' && comment.body?.includes(marker));
             if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
+              await github.rest.issues.updateComment({owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body});
             } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
+              await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body});
             }
 
   remove-preview:
