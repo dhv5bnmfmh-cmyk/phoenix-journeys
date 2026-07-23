@@ -1,5 +1,6 @@
 name: Apply cinematic narration reveal
 
+# Triggered through an isolated merge into the cinematic feature branch.
 on:
   push:
     branches:
