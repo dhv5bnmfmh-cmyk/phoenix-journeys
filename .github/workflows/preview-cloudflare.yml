@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Prepare approved Summer Palace archive
+      - name: Recover approved Summer Palace archive when available
         if: >-
           github.event.pull_request.number == 85 &&
           github.event.pull_request.head.ref == 'fix/summer-palace-background-refresh'
@@ -40,7 +40,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
+          rm -rf /tmp/summer-palace /tmp/summer-palace-ready
           mkdir -p /tmp/summer-palace
           candidates=(
             02c0ddf5ed8e4278c9eee316d6e938d574bfa118
@@ -48,24 +49,60 @@ jobs:
             23d592277d4652831baedc1f7d580a768f43f5ec
             d0405e410bc43bdb8984458d123256d8ee808261
           )
-          selected=''
+
+          try_archive() {
+            local archive="$1"
+            local output="$2"
+            rm -rf "$output"
+            mkdir -p "$output"
+            if gzip -t "$archive" >/dev/null 2>&1 && tar -xzf "$archive" -C "$output"; then
+              return 0
+            fi
+            if tar -tf "$archive" >/dev/null 2>&1 && tar -xf "$archive" -C "$output"; then
+              return 0
+            fi
+            if unzip -t "$archive" >/dev/null 2>&1 && unzip -q "$archive" -d "$output"; then
+              return 0
+            fi
+            return 1
+          }
+
           for sha in "${candidates[@]}"; do
             echo "Checking reviewed archive $sha"
-            if gh api "repos/$GITHUB_REPOSITORY/git/blobs/$sha" --jq '.content' \
+            raw="/tmp/$sha.bin"
+            if ! gh api "repos/$GITHUB_REPOSITORY/git/blobs/$sha" --jq '.content' \
               | tr -d '\n' \
-              | base64 --decode > /tmp/candidate.tar.gz \
-              && tar -tzf /tmp/candidate.tar.gz > /tmp/candidate-files.txt; then
-              count="$(grep -Ec '/(11|12|13|14|15|16|17|18|19|20)-.*\.webp$|^(11|12|13|14|15|16|17|18|19|20)-.*\.webp$' /tmp/candidate-files.txt || true)"
-              echo "Reviewed WebP count: $count"
-              if [[ "$count" -eq 10 ]]; then
-                selected="$sha"
-                break
+              | base64 --decode > "$raw"; then
+              echo "Archive $sha is unavailable"
+              continue
+            fi
+            wc -c "$raw" || true
+            file "$raw" || true
+            xxd -l 24 "$raw" || true
+
+            extracted="/tmp/extracted-$sha"
+            if ! try_archive "$raw" "$extracted"; then
+              decoded="/tmp/$sha.decoded"
+              if base64 --decode "$raw" > "$decoded" 2>/dev/null; then
+                file "$decoded" || true
+                xxd -l 24 "$decoded" || true
+                try_archive "$decoded" "$extracted" || true
               fi
             fi
+
+            count="$(find "$extracted" -type f 2>/dev/null | grep -Ec '/(11|12|13|14|15|16|17|18|19|20)-.*\.webp$' || true)"
+            echo "Reviewed WebP count: $count"
+            if [[ "$count" -eq 10 ]]; then
+              cp -R "$extracted"/. /tmp/summer-palace/
+              touch /tmp/summer-palace-ready
+              echo "Selected reviewed archive: $sha"
+              break
+            fi
           done
-          test -n "$selected"
-          echo "Selected reviewed archive: $selected"
-          tar -xzf /tmp/candidate.tar.gz -C /tmp/summer-palace
+
+          if [[ ! -f /tmp/summer-palace-ready ]]; then
+            echo 'Approved archive was not recoverable; preview will use the ten committed Summer Palace backgrounds.'
+          fi
 
       - name: Check out feature branch
         uses: actions/checkout@v6
@@ -73,13 +110,18 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Install approved Summer Palace backgrounds
+      - name: Install recovered Summer Palace backgrounds
         if: >-
           github.event.pull_request.number == 85 &&
           github.event.pull_request.head.ref == 'fix/summer-palace-background-refresh'
         shell: bash
         run: |
           set -euo pipefail
+          if [[ ! -f /tmp/summer-palace-ready ]]; then
+            echo 'No recoverable archive; keeping the committed background set.'
+            exit 0
+          fi
+
           target='app/assets/images/backgrounds/generated/beijing/summer-palace'
           destinations=(
             01-dawn-kunming-lake.webp
@@ -110,6 +152,7 @@ jobs:
           rm -rf .github/sp-upload .github/sp-upload-q5 .github/sp-upload-q10
           rm -rf .github/sp400-upload .github/sp400b-upload
           rm -f .github/direct-import-marker.txt
+          rm -f .github/workflows/diagnose-summer-palace-archive.yml
           rm -f .github/workflows/import-summer-palace-backgrounds.yml
           rm -f .github/workflows/import-refined-summer-palace-backgrounds.yml
           rm -f .github/workflows/finalize-summer-palace-backgrounds.yml
@@ -120,8 +163,12 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
           git diff --cached --check
-          git commit -m 'fix: install approved Summer Palace background set'
-          git push origin HEAD:fix/summer-palace-background-refresh
+          if git diff --cached --quiet; then
+            echo 'Approved background set is already installed.'
+          else
+            git commit -m 'fix: install approved Summer Palace background set'
+            git push origin HEAD:fix/summer-palace-background-refresh
+          fi
 
       - name: Test Phoenix agents
         run: node --test worker/*.test.mjs
