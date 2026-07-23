@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../data/journey_background_catalog.dart';
@@ -7,6 +9,12 @@ import '../services/journey_location_binding.dart';
 import '../theme/phoenix_theme.dart';
 
 const _summerPalaceJourneyId = 'beijing-summer-palace';
+
+bool _summerPalaceReduceMotion(BuildContext context) {
+  final forceMotion = Uri.base.queryParameters['motion'] == 'on';
+  return !forceMotion &&
+      (MediaQuery.maybeOf(context)?.disableAnimations ?? false);
+}
 
 class DestinationBackground extends StatelessWidget {
   const DestinationBackground({
@@ -93,7 +101,7 @@ class _SummerPalaceDynamicBackgroundState
     super.initState();
     _motion = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 26),
+      duration: const Duration(seconds: 13),
     );
   }
 
@@ -114,11 +122,12 @@ class _SummerPalaceDynamicBackgroundState
   }
 
   void _syncMotionPreference() {
-    final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final reduceMotion = _summerPalaceReduceMotion(context);
     if (reduceMotion) {
       _motion.stop();
       _motion.value = .42;
     } else if (!_motion.isAnimating) {
+      _motion.value = .08;
       _motion.repeat(reverse: true);
     }
   }
@@ -138,7 +147,7 @@ class _SummerPalaceDynamicBackgroundState
 
   @override
   Widget build(BuildContext context) {
-    final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final reduceMotion = _summerPalaceReduceMotion(context);
     return RepaintBoundary(
       key: const ValueKey('summer-palace-dynamic-background'),
       child: ClipRect(
@@ -160,6 +169,7 @@ class _SummerPalaceDynamicBackgroundState
                       ),
                       _SummerPalaceCloudLight(progress: progress),
                       _SummerPalaceWaterShimmer(progress: progress),
+                      _SummerPalaceWaterRipples(progress: progress),
                       _SummerPalaceForegroundBreath(progress: progress),
                     ],
                   ),
@@ -192,9 +202,10 @@ class _SummerPalaceCameraLayer extends StatelessWidget {
     return RepaintBoundary(
       key: const ValueKey('summer-palace-camera-layer'),
       child: Transform.translate(
-        offset: Offset(-8 + 16 * progress, -7 + 6 * progress),
+        key: const ValueKey('summer-palace-camera-transform'),
+        offset: Offset(-18 + 36 * progress, -13 + 15 * progress),
         child: Transform.scale(
-          scale: 1.085 + .035 * progress,
+          scale: 1.075 + .075 * progress,
           child: Image.asset(
             path,
             fit: BoxFit.cover,
@@ -219,22 +230,22 @@ class _SummerPalaceCloudLight extends StatelessWidget {
       child: Align(
         alignment: Alignment.topCenter,
         child: FractionallySizedBox(
-          widthFactor: 1.35,
-          heightFactor: .62,
+          widthFactor: 1.55,
+          heightFactor: .66,
           child: Transform.translate(
-            offset: Offset(-42 + 84 * progress, -3 + 6 * progress),
+            offset: Offset(-80 + 160 * progress, -7 + 14 * progress),
             child: DecoratedBox(
               key: const ValueKey('summer-palace-cloud-light'),
               decoration: BoxDecoration(
                 gradient: RadialGradient(
-                  center: Alignment(-.58 + 1.16 * progress, -.32),
-                  radius: 1.14,
+                  center: Alignment(-.72 + 1.44 * progress, -.34),
+                  radius: 1.05,
                   colors: [
-                    Colors.white.withValues(alpha: .12),
-                    const Color(0xFFFFD89B).withValues(alpha: .055),
+                    Colors.white.withValues(alpha: .19),
+                    const Color(0xFFFFD89B).withValues(alpha: .105),
                     Colors.transparent,
                   ],
-                  stops: const [0, .34, 1],
+                  stops: const [0, .38, 1],
                 ),
               ),
             ),
@@ -256,10 +267,10 @@ class _SummerPalaceWaterShimmer extends StatelessWidget {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: FractionallySizedBox(
-          widthFactor: 1.42,
-          heightFactor: .55,
+          widthFactor: 1.62,
+          heightFactor: .58,
           child: Transform.translate(
-            offset: Offset(58 - 116 * progress, 2 - 4 * progress),
+            offset: Offset(92 - 184 * progress, 5 - 10 * progress),
             child: DecoratedBox(
               key: const ValueKey('summer-palace-water-shimmer'),
               decoration: BoxDecoration(
@@ -268,12 +279,12 @@ class _SummerPalaceWaterShimmer extends StatelessWidget {
                   end: const Alignment(1.2, .8),
                   colors: [
                     Colors.transparent,
-                    Colors.white.withValues(alpha: .018),
-                    const Color(0xFFFFE1A9).withValues(alpha: .08),
-                    Colors.white.withValues(alpha: .024),
+                    Colors.white.withValues(alpha: .035),
+                    const Color(0xFFFFE1A9).withValues(alpha: .15),
+                    Colors.white.withValues(alpha: .055),
                     Colors.transparent,
                   ],
-                  stops: const [0, .28, .5, .72, 1],
+                  stops: const [0, .25, .5, .75, 1],
                 ),
               ),
             ),
@@ -281,6 +292,71 @@ class _SummerPalaceWaterShimmer extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _SummerPalaceWaterRipples extends StatelessWidget {
+  const _SummerPalaceWaterRipples({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: FractionallySizedBox(
+          widthFactor: 1,
+          heightFactor: .46,
+          child: CustomPaint(
+            key: const ValueKey('summer-palace-water-ripples'),
+            painter: _SummerPalaceRipplePainter(progress),
+            size: Size.infinite,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SummerPalaceRipplePainter extends CustomPainter {
+  const _SummerPalaceRipplePainter(this.progress);
+
+  final double progress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bright = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.15
+      ..color = const Color(0xFFFFE7B8).withValues(alpha: .11);
+    final soft = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = .7
+      ..color = Colors.white.withValues(alpha: .07);
+
+    for (var row = 0; row < 11; row += 1) {
+      final path = Path();
+      final yBase = size.height * (.12 + row * .075);
+      final amplitude = 1.4 + (row % 3) * .65;
+      final wavelength = 52.0 + row * 5.0;
+      final phase = progress * math.pi * 4 + row * .72;
+
+      for (var x = -8.0; x <= size.width + 8; x += 6) {
+        final y = yBase + math.sin((x / wavelength) * math.pi * 2 + phase) * amplitude;
+        if (x <= -8) {
+          path.moveTo(x, y);
+        } else {
+          path.lineTo(x, y);
+        }
+      }
+      canvas.drawPath(path, row.isEven ? bright : soft);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SummerPalaceRipplePainter oldDelegate) {
+    return oldDelegate.progress != progress;
   }
 }
 
@@ -295,21 +371,26 @@ class _SummerPalaceForegroundBreath extends StatelessWidget {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: FractionallySizedBox(
-          heightFactor: .42,
+          widthFactor: 1,
+          heightFactor: .44,
           child: Transform.translate(
-            offset: Offset(0, 4 - 8 * progress),
-            child: DecoratedBox(
-              key: const ValueKey('summer-palace-foreground-breath'),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    const Color(0xFF17382E).withValues(alpha: .025),
-                    const Color(0xFF0A211B).withValues(alpha: .10),
-                  ],
-                  stops: const [0, .58, 1],
+            offset: Offset(0, 8 - 16 * progress),
+            child: Transform.scale(
+              alignment: Alignment.bottomCenter,
+              scale: 1 + .022 * progress,
+              child: DecoratedBox(
+                key: const ValueKey('summer-palace-foreground-breath'),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      const Color(0xFF17382E).withValues(alpha: .045),
+                      const Color(0xFF0A211B).withValues(alpha: .14),
+                    ],
+                    stops: const [0, .55, 1],
+                  ),
                 ),
               ),
             ),
