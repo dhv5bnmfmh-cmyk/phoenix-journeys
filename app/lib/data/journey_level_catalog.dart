@@ -183,14 +183,14 @@ final summerPalaceEasyLevel = JourneyLevelContent(
   expressQuestion: '请用一到两句话介绍颐和园里你最喜欢的景色。',
 );
 
-final summerPalaceChallengeLevel = const JourneyLevelContent(
-  storyParagraphs: const <String>[
+const summerPalaceChallengeLevel = JourneyLevelContent(
+  storyParagraphs: <String>[
     '清晨的薄雾尚未散尽，昆明湖已经把万寿山的轮廓收进水面。远处亭台若隐若现，使人工营造的园林看起来像自然生成的山水。',
     '长廊并非单纯连接景点的通道。它用连续的彩画、开合变化的视野和行走节奏，把湖岸上的不同空间组织成一场缓慢展开的观看。',
     '从清漪园到颐和园，这座皇家园林经历兴建、破坏与重建。历史留下的裂痕并未完全消失，反而让修复本身也成为园林记忆的一部分。',
     '站在十七孔桥前回望，所谓借景并不是复制自然，而是选择视线、距离和比例，让湖光山色与建筑彼此成全。',
   ],
-  storyAnnotations: const <ReadingAnnotation>[
+  storyAnnotations: <ReadingAnnotation>[
     ReadingAnnotation(
       pinyin:
           'Qīngchén de báowù shàngwèi sànjìn, Kūnmíng Hú yǐjīng bǎ Wànshòu Shān de lúnkuò shōu jìn shuǐmiàn. Yuǎnchù tíngtái ruòyǐn-ruòxiàn, shǐ réngōng yíngzào de yuánlín kàn qǐlái xiàng zìrán shēngchéng de shānshuǐ.',
@@ -225,7 +225,7 @@ final summerPalaceChallengeLevel = const JourneyLevelContent(
     ),
   ],
   words: summerPalaceWords,
-  discoveries: const <DiscoveryEntry>[
+  discoveries: <DiscoveryEntry>[
     DiscoveryEntry(
       text: '颐和园的价值不仅在于单体建筑，而在于它把中国园林关于山水秩序的想象集中呈现在一个大型皇家园林中。',
       pinyin:
