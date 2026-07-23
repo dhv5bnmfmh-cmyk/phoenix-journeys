@@ -115,8 +115,7 @@ class _SummerPalaceDynamicBackgroundState
 
   void _syncMotionPreference() {
     final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    final tickerEnabled = TickerMode.of(context);
-    if (reduceMotion || !tickerEnabled) {
+    if (reduceMotion) {
       _motion.stop();
       _motion.value = .42;
     } else if (!_motion.isAnimating) {
