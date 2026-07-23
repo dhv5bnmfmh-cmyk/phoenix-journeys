@@ -1,11 +1,11 @@
 name: Finalize Summer Palace backgrounds
 
 on:
-  push:
+  pull_request:
     branches:
-      - feat/two-level-journey-picker
-    paths:
-      - '.github/workflows/finalize-summer-palace-backgrounds.yml'
+      - main
+    types:
+      - synchronize
 
 permissions:
   contents: write
@@ -16,6 +16,10 @@ concurrency:
 
 jobs:
   finalize:
+    if: >-
+      github.event.pull_request.number == 83 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feat/two-level-journey-picker'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
@@ -28,7 +32,7 @@ jobs:
           ref: feat/two-level-journey-picker
           fetch-depth: 0
 
-      - name: Build one clean Summer Palace import commit
+      - name: Keep old images and add ten refined images
         shell: bash
         run: |
           set -euo pipefail
@@ -86,10 +90,9 @@ jobs:
               '20-golden-lake-panorama',
           """
           summer_start = catalog.index("'01-dawn-kunming-lake'")
-          if "'20-golden-lake-panorama'" not in catalog[summer_start:]:
-              anchor_index = catalog.index(anchor, summer_start) + len(anchor)
-              catalog = catalog[:anchor_index] + additions + catalog[anchor_index:]
-              catalog_path.write_text(catalog)
+          anchor_index = catalog.index(anchor, summer_start) + len(anchor)
+          catalog = catalog[:anchor_index] + additions + catalog[anchor_index:]
+          catalog_path.write_text(catalog)
 
           test_path = Path('app/test/journey_background_policy_test.dart')
           test = test_path.read_text()
