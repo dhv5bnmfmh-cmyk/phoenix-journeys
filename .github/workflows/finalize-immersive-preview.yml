@@ -1,5 +1,6 @@
 name: Finalize immersive journey preview
 
+# Merge trigger: apply immediate reveal fix, test, and deploy PR #92.
 on:
   push:
     branches:
