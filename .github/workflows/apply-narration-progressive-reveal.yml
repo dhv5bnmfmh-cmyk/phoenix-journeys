@@ -1,5 +1,6 @@
 name: Apply narration progressive reveal
 
+# Merge trigger for PR #95 preview.
 on:
   push:
     branches:
