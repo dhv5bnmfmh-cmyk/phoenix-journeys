@@ -32,7 +32,7 @@ jobs:
           rm -f tools/apply_summer_palace_live_cinemagraph.py
           rm -f .github/workflows/apply-summer-palace-live-cinemagraph.yml
           git diff --check
-          asset=app/assets/images/backgrounds/generated/beijing/summer-palace/11-live-cinemagraph.webp
+          asset=app/assets/images/backgrounds/generated/beijing/summer-palace/live/11-live-cinemagraph.webp
           test -s "$asset"
           test "$(stat -c%s "$asset")" -lt 1100000
 
@@ -64,6 +64,7 @@ jobs:
       - name: Format changed Dart files
         run: |
           dart format \
+            app/lib/data/journey_background_catalog.dart \
             app/lib/widgets/destination_background.dart \
             app/test/summer_palace_dynamic_background_test.dart
 
