@@ -10,6 +10,7 @@ const agent = readFileSync(
 
 test('reading journeys enter calm immersion without destroying content state', () => {
   assert.match(journey, /bool get _supportsImmersion => step >= 0 && step <= 2/);
+  assert.match(journey, /_immersion\.setEnabled\(_supportsImmersion\)/);
   assert.match(journey, /Duration\(milliseconds: 1600\)/);
   assert.match(journey, /opacity: immersed \? \.035 : 1/);
   assert.match(journey, /IgnorePointer\([\s\S]*ignoring: immersed/);
