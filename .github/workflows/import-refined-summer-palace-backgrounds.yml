@@ -25,33 +25,25 @@ jobs:
           ref: feat/two-level-journey-picker
           fetch-depth: 0
 
-      - name: Download and validate the reviewed image archive
+      - name: Find and validate the reviewed image archive
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           python3 - <<'PY'
           import base64
+          import io
           import json
           import os
           import tarfile
           import urllib.request
           from pathlib import Path, PurePosixPath
 
-          blob_sha = '8064c36b3e9ff1ca2969d6e0a0cbb974f2d68900'
-          url = f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}/git/blobs/{blob_sha}'
-          request = urllib.request.Request(
-              url,
-              headers={
-                  'Authorization': f'Bearer {os.environ["GH_TOKEN"]}',
-                  'Accept': 'application/vnd.github+json',
-                  'X-GitHub-Api-Version': '2022-11-28',
-              },
-          )
-          with urllib.request.urlopen(request) as response:
-              payload = json.load(response)
-          archive_path = Path('/tmp/summer-palace-backgrounds.tar.gz')
-          archive_path.write_bytes(base64.b64decode(payload['content']))
-
+          candidates = [
+              '02c0ddf5ed8e4278c9eee316d6e938d574bfa118',
+              '8064c36b3e9ff1ca2969d6e0a0cbb974f2d68900',
+              '23d592277d4652831baedc1f7d580a768f43f5ec',
+              'd0405e410bc43bdb8984458d123256d8ee808261',
+          ]
           expected_names = {
               '11-serene-lakeside-temple-dawn.webp',
               '12-sunlit-pavilion-kunming-lake.webp',
@@ -65,16 +57,40 @@ jobs:
               '20-moonlit-lake-pavilion.webp',
           }
           prefix = PurePosixPath('app/assets/images/backgrounds/generated/beijing/summer-palace')
+          selected = None
+          for blob_sha in candidates:
+              url = f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}/git/blobs/{blob_sha}'
+              request = urllib.request.Request(
+                  url,
+                  headers={
+                      'Authorization': f'Bearer {os.environ["GH_TOKEN"]}',
+                      'Accept': 'application/vnd.github+json',
+                      'X-GitHub-Api-Version': '2022-11-28',
+                  },
+              )
+              try:
+                  with urllib.request.urlopen(request) as response:
+                      payload = json.load(response)
+                  data = base64.b64decode(payload['content'])
+                  with tarfile.open(fileobj=io.BytesIO(data), mode='r:gz') as archive:
+                      files = [member for member in archive.getmembers() if member.isfile()]
+                      names = set()
+                      for member in files:
+                          path = PurePosixPath(member.name)
+                          if path.is_absolute() or '..' in path.parts or path.parent != prefix:
+                              raise ValueError(f'Unsafe archive path: {member.name}')
+                          names.add(path.name)
+                      if names == expected_names:
+                          selected = data
+                          print(f'Selected reviewed archive {blob_sha} ({len(data)} bytes)')
+                          break
+              except Exception as error:
+                  print(f'Skipping {blob_sha}: {error}')
+          if selected is None:
+              raise SystemExit('No reviewed Summer Palace archive matched the expected ten images.')
+          archive_path = Path('/tmp/summer-palace-backgrounds.tar.gz')
+          archive_path.write_bytes(selected)
           with tarfile.open(archive_path, 'r:gz') as archive:
-              files = [member for member in archive.getmembers() if member.isfile()]
-              names = set()
-              for member in files:
-                  path = PurePosixPath(member.name)
-                  if path.is_absolute() or '..' in path.parts or path.parent != prefix:
-                      raise SystemExit(f'Unsafe archive path: {member.name}')
-                  names.add(path.name)
-              if names != expected_names:
-                  raise SystemExit(f'Unexpected archive files: {sorted(names)}')
               archive.extractall('.', filter='data')
           PY
 
@@ -126,9 +142,8 @@ jobs:
           rm -f .github/workflows/import-summer-palace-backgrounds.yml
           rm -f .github/workflows/import-refined-summer-palace-backgrounds.yml
 
-      - name: Format and commit imported backgrounds
+      - name: Commit imported backgrounds
         run: |
-          dart format app/lib/data/journey_background_generated.dart app/test/journey_background_policy_test.dart || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
