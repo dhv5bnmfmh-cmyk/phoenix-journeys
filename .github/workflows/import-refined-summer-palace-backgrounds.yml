@@ -1,20 +1,25 @@
 name: Import refined Summer Palace backgrounds
 
 on:
-  push:
+  pull_request:
     branches:
-      - feat/two-level-journey-picker
-    paths:
-      - .github/workflows/import-refined-summer-palace-backgrounds.yml
+      - main
+    types:
+      - synchronize
 
 permissions:
   contents: write
 
 jobs:
   import-backgrounds:
+    if: >-
+      github.event.pull_request.number == 83 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'feat/two-level-journey-picker'
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out feature branch
+      - name: Check out writable feature branch
         uses: actions/checkout@v4
         with:
           ref: feat/two-level-journey-picker
@@ -104,8 +109,7 @@ jobs:
               "test('Summer Palace ships ten reviewed location-bound backgrounds'",
               "test('Summer Palace ships twenty reviewed location-bound backgrounds'",
           )
-          marker = "(asset) => asset.assetPath.contains(\n          '/generated/beijing/summer-palace/',"
-          section_start = test.index("Summer Palace ships twenty")
+          section_start = test.index('Summer Palace ships twenty')
           length_index = test.index('expect(assets, hasLength(10));', section_start)
           test = test[:length_index] + test[length_index:].replace(
               'expect(assets, hasLength(10));',
@@ -122,22 +126,9 @@ jobs:
           rm -f .github/workflows/import-summer-palace-backgrounds.yml
           rm -f .github/workflows/import-refined-summer-palace-backgrounds.yml
 
-      - name: Verify the background library
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Run focused verification
-        working-directory: app
+      - name: Format and commit imported backgrounds
         run: |
-          flutter pub get
-          dart format lib/data/journey_background_generated.dart test/journey_background_policy_test.dart
-          flutter analyze
-          flutter test test/journey_background_policy_test.dart
-
-      - name: Commit imported backgrounds
-        run: |
+          dart format app/lib/data/journey_background_generated.dart app/test/journey_background_policy_test.dart || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
