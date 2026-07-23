@@ -7,6 +7,7 @@ const interactive = readFileSync(
   'utf8',
 );
 
+// Permanent guard: narration progress must animate between speech callbacks.
 test('narration reveal uses cinematic interpolation instead of hard cuts', () => {
   assert.match(interactive, /SingleTickerProviderStateMixin/);
   assert.match(interactive, /AnimationController/);
@@ -18,7 +19,7 @@ test('narration reveal uses cinematic interpolation instead of hard cuts', () =>
   assert.match(interactive, /Listenable\.merge/);
 });
 
- test('future text remains layout-stable and non-interactive', () => {
+test('future text remains layout-stable and non-interactive', () => {
   assert.match(interactive, /color: Colors\.transparent/);
   assert.match(interactive, /interactive: false/);
   assert.match(interactive, /hidden: true/);
