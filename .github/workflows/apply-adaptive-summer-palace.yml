@@ -1,5 +1,6 @@
 name: Apply adaptive Summer Palace levels
 
+# Triggered through an isolated merge into the feature branch.
 on:
   push:
     branches:
