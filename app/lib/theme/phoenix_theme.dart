@@ -39,6 +39,9 @@ class PhoenixTheme {
   static const contentPrimary = Colors.white;
   static const contentSecondary = Color(0xFFEADFCB);
   static const contentAccent = Color(0xFFFFD46A);
+  static const writingInk = Color(0xFF2D2421);
+  static const writingSecondary = Color(0xFF675D57);
+  static const writingSurface = Color(0xF5FFF9F0);
   static const contentShadow = <Shadow>[
     Shadow(color: Color(0xE6000000), blurRadius: 3, offset: Offset(0, 1)),
     Shadow(color: Color(0x99000000), blurRadius: 8),
@@ -91,6 +94,62 @@ class PhoenixTheme {
     fontFamily: chineseFontFamily,
     fontFamilyFallback: chineseFontFallback,
   );
+
+  // Think, Express and Journey Memory share one readability contract.
+  // These pages sit over changing destination art, so their writing content
+  // must never inherit a color from either the image or the global theme.
+  static const journeyWritingQuestionStyle = TextStyle(
+    color: writingInk,
+    fontSize: bodySize,
+    height: 1.25,
+    fontWeight: FontWeight.w800,
+    fontFamily: chineseFontFamily,
+    fontFamilyFallback: chineseFontFallback,
+  );
+
+  static const journeyWritingInputStyle = TextStyle(
+    color: writingInk,
+    fontSize: bodySize,
+    height: 1.4,
+    fontWeight: FontWeight.w600,
+    fontFamily: chineseFontFamily,
+    fontFamilyFallback: chineseFontFallback,
+  );
+
+  static const journeyWritingHintStyle = TextStyle(
+    color: writingSecondary,
+    fontSize: bodySize,
+    height: 1.4,
+    fontWeight: FontWeight.w500,
+    fontFamily: chineseFontFamily,
+    fontFamilyFallback: chineseFontFallback,
+  );
+
+  static BoxDecoration get journeyWritingPanelDecoration => BoxDecoration(
+    color: writingSurface,
+    borderRadius: BorderRadius.circular(16),
+    border: Border.all(color: const Color(0xB3C79A43), width: 1.2),
+    boxShadow: const [
+      BoxShadow(color: Color(0x4D000000), blurRadius: 18, offset: Offset(0, 7)),
+    ],
+  );
+
+  static InputDecoration journeyWritingInputDecoration(String hintText) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: journeyWritingHintStyle,
+      filled: true,
+      fillColor: const Color(0xF7FFFFFF),
+      contentPadding: const EdgeInsets.all(11),
+      enabledBorder: const OutlineInputBorder(
+        borderSide: BorderSide(color: Color(0x669D1C20)),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderSide: BorderSide(color: red, width: 1.6),
+      ),
+      border: const OutlineInputBorder(),
+    );
+  }
 
   static BoxDecoration destinationGlass({double alpha = .16}) => BoxDecoration(
     color: Colors.black.withValues(alpha: alpha),

@@ -1260,17 +1260,16 @@ class _JourneyScreenState extends State<JourneyScreen>
       secondaryButtonText: hasFeedback ? 'AI 回答' : null,
       secondaryButtonIcon: Icons.forum_outlined,
       onSecondary: hasFeedback ? () => unawaited(_showGuideFeedback()) : null,
-      child: Column(
+      child: _JourneyWritingSurface(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             _experience.wonderQuestion,
             maxLines: keyboardVisible ? 1 : 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: PhoenixTheme.journeyWritingQuestionStyle.copyWith(
               fontSize: keyboardVisible ? 11 : 12,
-              height: 1.2,
-              fontWeight: FontWeight.w700,
             ),
           ),
           SizedBox(height: keyboardVisible ? 3 : 5),
@@ -1292,14 +1291,15 @@ class _JourneyScreenState extends State<JourneyScreen>
               textAlignVertical: TextAlignVertical.top,
               scrollPadding: const EdgeInsets.only(bottom: 24),
               onChanged: _onWonderChanged,
-              decoration: const InputDecoration(
-                hintText: '写下你的想法……',
-                contentPadding: EdgeInsets.all(11),
-                border: OutlineInputBorder(),
+              style: PhoenixTheme.journeyWritingInputStyle,
+              cursorColor: PhoenixTheme.red,
+              decoration: PhoenixTheme.journeyWritingInputDecoration(
+                '写下你的想法……',
               ),
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -1321,17 +1321,16 @@ class _JourneyScreenState extends State<JourneyScreen>
       secondaryButtonText: hasFeedback ? 'AI 批改' : null,
       secondaryButtonIcon: Icons.fact_check_outlined,
       onSecondary: hasFeedback ? () => unawaited(_showWritingFeedback()) : null,
-      child: Column(
+      child: _JourneyWritingSurface(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             _experience.expressQuestion,
             maxLines: keyboardVisible ? 1 : 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: PhoenixTheme.journeyWritingQuestionStyle.copyWith(
               fontSize: keyboardVisible ? 11 : 12,
-              height: 1.2,
-              fontWeight: FontWeight.w700,
             ),
           ),
           SizedBox(height: keyboardVisible ? 3 : 5),
@@ -1353,14 +1352,15 @@ class _JourneyScreenState extends State<JourneyScreen>
               textAlignVertical: TextAlignVertical.top,
               scrollPadding: const EdgeInsets.only(bottom: 24),
               onChanged: _onExpressChanged,
-              decoration: const InputDecoration(
-                hintText: '用中文写下你的表达……',
-                contentPadding: EdgeInsets.all(11),
-                border: OutlineInputBorder(),
+              style: PhoenixTheme.journeyWritingInputStyle,
+              cursorColor: PhoenixTheme.red,
+              decoration: PhoenixTheme.journeyWritingInputDecoration(
+                '用中文写下你的表达……',
               ),
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -1374,16 +1374,16 @@ class _JourneyScreenState extends State<JourneyScreen>
       buttonText: '结束旅程',
       buttonIcon: Icons.flag_rounded,
       onNext: () => unawaited(_finishJourney()),
-      child: Column(
+      child: _JourneyWritingSurface(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             '今天最想记住的一件事是什么？',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: PhoenixTheme.journeyWritingQuestionStyle.copyWith(
               fontSize: keyboardVisible ? 11 : 12.5,
-              fontWeight: FontWeight.w800,
             ),
           ),
           SizedBox(height: keyboardVisible ? 3 : 6),
@@ -1398,10 +1398,10 @@ class _JourneyScreenState extends State<JourneyScreen>
               textAlignVertical: TextAlignVertical.top,
               scrollPadding: const EdgeInsets.only(bottom: 24),
               onChanged: (_) => unawaited(_persistProgress()),
-              decoration: const InputDecoration(
-                hintText: '写下感受，未来回来比较自己的变化。',
-                contentPadding: EdgeInsets.all(11),
-                border: OutlineInputBorder(),
+              style: PhoenixTheme.journeyWritingInputStyle,
+              cursorColor: PhoenixTheme.red,
+              decoration: PhoenixTheme.journeyWritingInputDecoration(
+                '写下感受，未来回来比较自己的变化。',
               ),
             ),
           ),
@@ -1413,6 +1413,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             ),
           ],
         ],
+        ),
       ),
     );
   }
@@ -1485,6 +1486,22 @@ class _JourneyScreenState extends State<JourneyScreen>
           ),
         ],
       ),
+    );
+  }
+}
+
+class _JourneyWritingSurface extends StatelessWidget {
+  const _JourneyWritingSurface({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(11),
+      decoration: PhoenixTheme.journeyWritingPanelDecoration,
+      child: child,
     );
   }
 }
