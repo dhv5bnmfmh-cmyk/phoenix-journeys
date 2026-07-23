@@ -33,6 +33,9 @@ void main() {
       1,
     );
 
+    // The stamp agent starts in a post-frame callback, mirroring the real page.
+    // Give that callback one frame before advancing through the full press.
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 1900));
 
     expect(
