@@ -112,7 +112,7 @@ interactive = replace_once(
             bottom: 0,
             child: Center(
               child: CustomPaint(
-                size: Size(8, 4),
+                size: Size(9, 5),
                 painter: _ReadingTrianglePainter(),
               ),
             ),
