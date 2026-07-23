@@ -11,26 +11,23 @@ const catalog = readFileSync(
   'utf8',
 );
 
-// Permanent guard for the first destination-level live cinemagraph, its
-// reduced-motion fallback, and the supporting pseudo-dynamic depth layers.
-test('Summer Palace background uses clearly visible local pseudo-dynamic layers', () => {
+// Permanent guard for the lightweight destination-level living background.
+test('Summer Palace uses capped local motion without full-frame animated media', () => {
   assert.match(widget, /beijing-summer-palace/);
   assert.match(widget, /summer-palace-dynamic-background/);
-  assert.match(widget, /summerPalaceLiveLoopAssetPath/);
-  assert.match(catalog, /summer-palace\/live\/11-live-cinemagraph\.webp/);
-  assert.match(widget, /summer-palace-live-loop/);
-  assert.match(widget, /summer-palace-static-background/);
-  assert.match(widget, /AnimationController/);
-  assert.match(widget, /Duration\(seconds: 13\)/);
-  assert.match(widget, /repeat\(reverse: true\)/);
+  assert.match(widget, /summerPalaceLivingBackgroundAssetPath/);
+  assert.match(catalog, /06-summer-lotus-lake\.webp/);
+  assert.match(widget, /Timer\.periodic\(_summerPalaceFrameInterval/);
+  assert.match(widget, /Duration\(milliseconds: 50\)/);
+  assert.match(widget, /TickerMode\.of\(context\)/);
   assert.match(widget, /summer-palace-camera-layer/);
   assert.match(widget, /summer-palace-camera-transform/);
-  assert.match(widget, /summer-palace-cloud-light/);
-  assert.match(widget, /summer-palace-water-shimmer/);
-  assert.match(widget, /summer-palace-water-ripples/);
-  assert.match(widget, /summer-palace-foreground-breath/);
+  assert.match(widget, /summer-palace-living-layer/);
+  assert.match(widget, /_SummerPalaceLivingPainter/);
   assert.match(widget, /queryParameters\['motion'\] == 'on'/);
   assert.match(widget, /disableAnimations/);
   assert.match(widget, /precacheImage/);
   assert.match(widget, /RepaintBoundary/);
+  assert.doesNotMatch(widget, /live-loop|live-cinemagraph|animated WebP/i);
+  assert.doesNotMatch(catalog, /live-cinemagraph|\.webp';\s*\/\/ animated/i);
 });
