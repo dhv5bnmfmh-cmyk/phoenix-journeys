@@ -24,8 +24,12 @@ test('accessibility settings prevent automatic content hiding', () => {
   assert.match(journey, /!automaticImmersionDisabled/);
 });
 
-test('immersion timer is centralized in PhoenixImmersionAgent', () => {
+test('immersion timer is centralized and safe across modal routes', () => {
   assert.match(agent, /idleDelay = const Duration\(seconds: 7\)/);
   assert.match(agent, /void registerInteraction\(\)/);
+  assert.match(agent, /pointerRouter\.addGlobalRoute/);
+  assert.match(agent, /PointerSignalEvent/);
+  assert.match(agent, /if \(_disposed \|\| !_enabled\) return/);
+  assert.match(agent, /pointerRouter\.removeGlobalRoute/);
   assert.match(agent, /_idleTimer = Timer\(idleDelay/);
 });
