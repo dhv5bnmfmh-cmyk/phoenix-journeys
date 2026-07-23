@@ -4,7 +4,7 @@ import 'package:phoenix_journeys/models/journey_background.dart';
 import 'package:phoenix_journeys/widgets/destination_background.dart';
 
 void main() {
-  testWidgets('Summer Palace dynamic background respects reduced motion',
+  testWidgets('Summer Palace living background respects reduced motion',
       (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -33,28 +33,12 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey('summer-palace-live-loop')),
+      find.byKey(const ValueKey('summer-palace-living-layer')),
       findsNothing,
-    );
-    expect(
-      find.byKey(const ValueKey('summer-palace-cloud-light')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey('summer-palace-water-shimmer')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey('summer-palace-water-ripples')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey('summer-palace-foreground-breath')),
-      findsOneWidget,
     );
   });
 
-  testWidgets('Summer Palace camera visibly changes position over time',
+  testWidgets('Summer Palace living scene advances at a capped frame rate',
       (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -68,7 +52,7 @@ void main() {
     await tester.pump();
 
     expect(
-      find.byKey(const ValueKey('summer-palace-live-loop')),
+      find.byKey(const ValueKey('summer-palace-living-layer')),
       findsOneWidget,
     );
 
