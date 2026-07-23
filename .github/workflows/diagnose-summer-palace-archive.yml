@@ -6,6 +6,13 @@ on:
       - fix/summer-palace-background-refresh
     paths:
       - '.github/workflows/diagnose-summer-palace-archive.yml'
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
   workflow_dispatch:
 
 permissions:
@@ -13,6 +20,7 @@ permissions:
 
 jobs:
   diagnose:
+    if: github.event_name != 'pull_request' || github.event.pull_request.number == 85
     runs-on: ubuntu-latest
     steps:
       - name: Inspect reviewed archive blobs
