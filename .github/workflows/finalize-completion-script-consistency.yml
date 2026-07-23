@@ -1,0 +1,84 @@
+name: Finalize completion script consistency
+
+on:
+  push:
+    branches:
+      - fix/global-script-surfaces
+    paths:
+      - '.github/workflows/finalize-completion-script-consistency.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: finalize-completion-script-consistency
+  cancel-in-progress: true
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fix/global-script-surfaces
+          fetch-depth: 0
+
+      - name: Convert completion-page labels through AppState
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          journey_path = Path('app/lib/screens/journey_screen.dart')
+          journey = journey_path.read_text(encoding='utf-8')
+          replacements = {
+              "title: '${_experience.city}已点亮',": "title: _appState.displayText('${_experience.city}已点亮'),",
+              "buttonText: '返回首页',": "buttonText: _appState.displayText('返回首页'),",
+              "                const Text(\n                  '盖章成功',": "                Text(\n                  _appState.displayText('盖章成功'),",
+              "                const Text(\n                  '你完成的不是一堂课，而是一段旅程。',": "                Text(\n                  _appState.displayText('你完成的不是一堂课，而是一段旅程。'),",
+              "                          label: const Text(\n                            '重新体验',": "                          label: Text(\n                            _appState.displayText('重新体验'),",
+          }
+          for old, new in replacements.items():
+              if old not in journey:
+                  raise SystemExit(f'missing journey completion snippet: {old!r}')
+              journey = journey.replace(old, new, 1)
+          journey_path.write_text(journey, encoding='utf-8')
+
+          test_path = Path('worker/global_script_surfaces_rule.test.mjs')
+          test = test_path.read_text(encoding='utf-8')
+          old_imports = "const shell = readFileSync('app/lib/screens/home_shell.dart', 'utf8');\nconst workflow = readFileSync('docs/development-workflow.md', 'utf8');"
+          new_imports = "const shell = readFileSync('app/lib/screens/home_shell.dart', 'utf8');\nconst journey = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');\nconst workflow = readFileSync('docs/development-workflow.md', 'utf8');"
+          if old_imports not in test:
+              raise SystemExit('missing global script test imports')
+          test = test.replace(old_imports, new_imports, 1)
+
+          marker = "test('global script consistency is a permanent development rule', () => {"
+          completion_test = """test('completion-page labels follow the selected script', () => {\n  for (const label of [\n    '${_experience.city}已点亮',\n    '返回首页',\n    '盖章成功',\n    '你完成的不是一堂课，而是一段旅程。',\n    '重新体验',\n  ]) {\n    assert.match(journey, new RegExp(`_appState\\.displayText\\('${label.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}'\\)`));\n  }\n});\n\n"""
+          if marker not in test:
+              raise SystemExit('missing permanent rule test marker')
+          test = test.replace(marker, completion_test + marker, 1)
+          test_path.write_text(test, encoding='utf-8')
+
+          docs_path = Path('docs/development-workflow.md')
+          docs = docs_path.read_text(encoding='utf-8')
+          old_rule = '- 启动载入、启动错误、手机导航和宽屏导航必须统一跟随简体／繁体设置；不得在任何响应式分支写死单一字形'
+          new_rule = '- 启动载入、启动错误、手机导航、宽屏导航和旅程完成页必须统一跟随简体／繁体设置；不得在任何响应式分支或完成流程写死单一字形'
+          if old_rule not in docs:
+              raise SystemExit('missing script consistency documentation rule')
+          docs_path.write_text(docs.replace(old_rule, new_rule, 1), encoding='utf-8')
+          PY
+
+          rm -f .github/workflows/finalize-completion-script-consistency.yml
+          node --test worker/global_script_surfaces_rule.test.mjs
+          git diff --check
+
+      - name: Commit completion-page consistency
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: keep completion page in selected Chinese script'
+          git push origin HEAD:fix/global-script-surfaces
