@@ -1,0 +1,1 @@
+Staging placeholder; binary background import is handled separately.
