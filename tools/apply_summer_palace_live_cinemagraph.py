@@ -8,7 +8,9 @@ from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "app/assets/images/backgrounds/generated/beijing/summer-palace/06-summer-lotus-lake.webp"
-OUTPUT = ROOT / "app/assets/images/backgrounds/generated/beijing/summer-palace/11-live-cinemagraph.webp"
+OUTPUT = ROOT / "app/assets/images/backgrounds/generated/beijing/summer-palace/live/11-live-cinemagraph.webp"
+CATALOG = ROOT / "app/lib/data/journey_background_catalog.dart"
+PUBSPEC = ROOT / "app/pubspec.yaml"
 WIDGET = ROOT / "app/lib/widgets/destination_background.dart"
 WIDGET_TEST = ROOT / "app/test/summer_palace_dynamic_background_test.dart"
 RULE = ROOT / "worker/summer_palace_dynamic_background_rule.test.mjs"
@@ -36,7 +38,7 @@ def cover_resize(image: Image.Image, size: tuple[int, int]) -> Image.Image:
 
 def water_displacement(frame: Image.Image, phase: float) -> Image.Image:
     array = np.asarray(frame).copy()
-    height, width = array.shape[:2]
+    height, _ = array.shape[:2]
     water_top = int(height * 0.48)
     source = array[water_top:].copy()
     displaced = source.copy()
@@ -60,7 +62,6 @@ def add_live_details(frame: Image.Image, phase: float) -> Image.Image:
     overlay = Image.new("RGBA", frame.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay, "RGBA")
 
-    # Slow sunlight bands and water glints.
     water_top = int(height * 0.50)
     for line in range(12):
         y = water_top + line * int(height * 0.032)
@@ -74,28 +75,54 @@ def add_live_details(frame: Image.Image, phase: float) -> Image.Image:
             fill=(255, 229, 174, alpha),
         )
 
-    # A tiny covered boat gliding slowly across the far water.
     boat_x = int(width * 0.70 + math.sin(phase * math.tau) * width * 0.035)
     boat_y = int(height * 0.585 + math.sin(phase * math.tau * 2) * 1.5)
     draw.polygon(
-        [(boat_x - 18, boat_y + 7), (boat_x + 19, boat_y + 7), (boat_x + 13, boat_y + 13), (boat_x - 12, boat_y + 13)],
+        [
+            (boat_x - 18, boat_y + 7),
+            (boat_x + 19, boat_y + 7),
+            (boat_x + 13, boat_y + 13),
+            (boat_x - 12, boat_y + 13),
+        ],
         fill=(54, 35, 24, 170),
     )
-    draw.line((boat_x - 13, boat_y + 1, boat_x + 13, boat_y + 1), fill=(76, 43, 28, 185), width=2)
-    draw.line((boat_x - 10, boat_y + 1, boat_x - 7, boat_y + 8), fill=(58, 35, 24, 175), width=1)
-    draw.line((boat_x + 10, boat_y + 1, boat_x + 7, boat_y + 8), fill=(58, 35, 24, 175), width=1)
-    draw.rectangle((boat_x - 9, boat_y - 5, boat_x + 9, boat_y + 1), fill=(67, 39, 25, 170))
+    draw.line(
+        (boat_x - 13, boat_y + 1, boat_x + 13, boat_y + 1),
+        fill=(76, 43, 28, 185),
+        width=2,
+    )
+    draw.line(
+        (boat_x - 10, boat_y + 1, boat_x - 7, boat_y + 8),
+        fill=(58, 35, 24, 175),
+        width=1,
+    )
+    draw.line(
+        (boat_x + 10, boat_y + 1, boat_x + 7, boat_y + 8),
+        fill=(58, 35, 24, 175),
+        width=1,
+    )
+    draw.rectangle(
+        (boat_x - 9, boat_y - 5, boat_x + 9, boat_y + 1),
+        fill=(67, 39, 25, 170),
+    )
 
-    # Tiny visitors moving on the distant lakeside path.
     walkway_y = int(height * 0.505)
     for index, base in enumerate((0.34, 0.39, 0.44)):
-        person_x = int(width * base + ((phase + index * 0.17) % 1.0) * width * 0.018)
+        person_x = int(
+            width * base + ((phase + index * 0.17) % 1.0) * width * 0.018
+        )
         bob = math.sin(phase * math.tau * 2 + index) * 0.8
         head_y = int(walkway_y - 7 + bob)
-        draw.ellipse((person_x - 1, head_y - 2, person_x + 2, head_y + 1), fill=(235, 218, 185, 170))
-        draw.line((person_x, head_y + 1, person_x, head_y + 7), fill=(72, 56, 45, 165), width=2)
+        draw.ellipse(
+            (person_x - 1, head_y - 2, person_x + 2, head_y + 1),
+            fill=(235, 218, 185, 170),
+        )
+        draw.line(
+            (person_x, head_y + 1, person_x, head_y + 7),
+            fill=(72, 56, 45, 165),
+            width=2,
+        )
 
-    # A soft moving cloud-light veil, deliberately subtle.
     glow_x = int(width * (0.45 + math.sin(phase * math.tau) * 0.12))
     glow = Image.new("L", frame.size, 0)
     glow_draw = ImageDraw.Draw(glow)
@@ -125,8 +152,12 @@ def generate_live_loop() -> None:
             (round(base.width * breathe), round(base.height * breathe)),
             Image.Resampling.LANCZOS,
         )
-        x = (scaled.width - base.width) // 2 + round(math.sin(phase * math.tau) * 3)
-        y = (scaled.height - base.height) // 2 + round(math.cos(phase * math.tau) * 2)
+        x = (scaled.width - base.width) // 2 + round(
+            math.sin(phase * math.tau) * 3
+        )
+        y = (scaled.height - base.height) // 2 + round(
+            math.cos(phase * math.tau) * 2
+        )
         camera = scaled.crop((x, y, x + base.width, y + base.height))
         displaced = water_displacement(camera, phase)
         frames.append(add_live_details(displaced, phase))
@@ -145,21 +176,41 @@ def generate_live_loop() -> None:
         raise SystemExit(f"Live loop is too large: {OUTPUT.stat().st_size} bytes")
 
 
+def update_background_catalog() -> None:
+    text = CATALOG.read_text(encoding="utf-8")
+    text = replace_once(
+        text,
+        "import 'journey_background_generated.dart';\n\n",
+        "import 'journey_background_generated.dart';\n\n"
+        "const summerPalaceLiveLoopAssetPath =\n"
+        "    'assets/images/backgrounds/generated/beijing/summer-palace/live/11-live-cinemagraph.webp';\n\n",
+        "live loop catalog path",
+    )
+    CATALOG.write_text(text, encoding="utf-8")
+
+
+def update_pubspec() -> None:
+    text = PUBSPEC.read_text(encoding="utf-8")
+    text = replace_once(
+        text,
+        "    - assets/images/backgrounds/generated/beijing/summer-palace/\n",
+        "    - assets/images/backgrounds/generated/beijing/summer-palace/\n"
+        "    - assets/images/backgrounds/generated/beijing/summer-palace/live/\n",
+        "live loop asset directory",
+    )
+    PUBSPEC.write_text(text, encoding="utf-8")
+
+
 def update_flutter_widget() -> None:
     text = WIDGET.read_text(encoding="utf-8")
     text = replace_once(
         text,
-        "const _summerPalaceJourneyId = 'beijing-summer-palace';\n",
-        "const _summerPalaceJourneyId = 'beijing-summer-palace';\n"
-        "const _summerPalaceLiveLoopAsset =\n"
-        "    'assets/images/backgrounds/generated/beijing/summer-palace/11-live-cinemagraph.webp';\n",
-        "live loop asset constant",
-    )
-    text = replace_once(
-        text,
         "    precacheImage(AssetImage(path), context);\n",
         "    precacheImage(AssetImage(path), context);\n"
-        "    precacheImage(const AssetImage(_summerPalaceLiveLoopAsset), context);\n",
+        "    precacheImage(\n"
+        "      const AssetImage(summerPalaceLiveLoopAssetPath),\n"
+        "      context,\n"
+        "    );\n",
         "live loop precache",
     )
     text = replace_once(
@@ -197,7 +248,7 @@ def update_flutter_widget() -> None:
     text = replace_once(
         text,
         "    final path = assetPath;\n    if (path == null) return const _BackgroundFallback();\n",
-        "    final path = useLiveLoop ? _summerPalaceLiveLoopAsset : assetPath;\n"
+        "    final path = useLiveLoop ? summerPalaceLiveLoopAssetPath : assetPath;\n"
         "    if (path == null) return const _BackgroundFallback();\n",
         "camera live asset selection",
     )
@@ -252,9 +303,26 @@ def update_tests_and_rules() -> None:
     rule = RULE.read_text(encoding="utf-8")
     rule = replace_once(
         rule,
+        "const widget = readFileSync(\n"
+        "  'app/lib/widgets/destination_background.dart',\n"
+        "  'utf8',\n"
+        ");\n",
+        "const widget = readFileSync(\n"
+        "  'app/lib/widgets/destination_background.dart',\n"
+        "  'utf8',\n"
+        ");\n"
+        "const catalog = readFileSync(\n"
+        "  'app/lib/data/journey_background_catalog.dart',\n"
+        "  'utf8',\n"
+        ");\n",
+        "live loop rule catalog source",
+    )
+    rule = replace_once(
+        rule,
         "  assert.match(widget, /summer-palace-dynamic-background/);\n",
         "  assert.match(widget, /summer-palace-dynamic-background/);\n"
-        "  assert.match(widget, /11-live-cinemagraph\\.webp/);\n"
+        "  assert.match(widget, /summerPalaceLiveLoopAssetPath/);\n"
+        "  assert.match(catalog, /summer-palace\\/live\\/11-live-cinemagraph\\.webp/);\n"
         "  assert.match(widget, /summer-palace-live-loop/);\n"
         "  assert.match(widget, /summer-palace-static-background/);\n",
         "live loop permanent rule",
@@ -277,6 +345,8 @@ def update_tests_and_rules() -> None:
 
 def main() -> None:
     generate_live_loop()
+    update_background_catalog()
+    update_pubspec()
     update_flutter_widget()
     update_tests_and_rules()
     print(f"Generated {OUTPUT.relative_to(ROOT)} ({OUTPUT.stat().st_size} bytes)")
