@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: refresh-summer-palace-backgrounds
+  cancel-in-progress: true
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -19,55 +23,94 @@ jobs:
           ref: fix/summer-palace-background-refresh
           fetch-depth: 0
 
-      - name: Replace Summer Palace backgrounds
+      - name: Recover and install approved backgrounds
         shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-
-          target='app/assets/images/backgrounds/generated/beijing/summer-palace'
-          mkdir -p "$target"
-
-          fetch_blob() {
-            local sha="$1"
-            local output="$2"
-            gh api "repos/$GITHUB_REPOSITORY/git/blobs/$sha" --jq '.content' \
-              | tr -d '\n' \
-              | base64 --decode > "$output"
-            test "$(git hash-object "$output")" = "$sha"
-          }
-
-          fetch_blob 20bc51f87d4bf023992445aee7064e9ca5e56d8f "$target/01-dawn-kunming-lake.webp"
-          fetch_blob 9007d6f42efefbd6c7b56b1b7774861b34b2020e "$target/02-morning-long-corridor.webp"
-          fetch_blob 02ce382889f798b510c359c0560dfa7d3c142f45 "$target/03-misty-longevity-hill.webp"
-          fetch_blob aeb409e2aeeef9114b486041e5e0345e869d4ae4 "$target/04-bright-seventeen-arch-bridge.webp"
-          fetch_blob 09a95d09433faddb5cb821208d428eabadb2029f "$target/05-after-rain-pavilion.webp"
-          fetch_blob f0121c194f6760e441542b0783bca263e84490b4 "$target/06-summer-lotus-lake.webp"
-          fetch_blob f444ebba58adffa7515cb500f9512c8763247f8d "$target/07-autumn-west-dike.webp"
-          fetch_blob c5843772958a92a4d6d39d7a459d98b213ad6336 "$target/08-golden-hour-tower.webp"
-          fetch_blob d3257c8056c793fb45d8a6fd077517d3004d0534 "$target/09-blue-hour-reflection.webp"
-          fetch_blob 372793505782e2a1ba90d7f7be30ce680e721394 "$target/10-moonlit-lake-panorama.webp"
-
           python3 - <<'PY'
           from pathlib import Path
+          import base64
+          import gzip
+          import io
+          import tarfile
+
+          expected = [
+              '01-dawn-kunming-lake.webp',
+              '02-morning-long-corridor.webp',
+              '03-misty-longevity-hill.webp',
+              '04-bright-seventeen-arch-bridge.webp',
+              '05-after-rain-pavilion.webp',
+              '06-summer-lotus-lake.webp',
+              '07-autumn-west-dike.webp',
+              '08-golden-hour-tower.webp',
+              '09-blue-hour-reflection.webp',
+              '10-moonlit-lake-panorama.webp',
+          ]
+          sources = [
+              Path('.github/sp-upload-q5'),
+              Path('.github/sp-upload-q10'),
+              Path('.github/sp400-upload'),
+              Path('.github/sp400b-upload'),
+              Path('.github/sp-upload'),
+          ]
+
+          selected = None
+          selected_source = None
+          for source in sources:
+              chunks = sorted(source.glob('chunk_*'))
+              if not chunks:
+                  continue
+              encoded = ''.join(chunk.read_text(encoding='utf-8').strip() for chunk in chunks)
+              try:
+                  compressed = base64.b64decode(encoded, validate=True)
+                  try:
+                      tar_bytes = gzip.decompress(compressed)
+                      archive = tarfile.open(fileobj=io.BytesIO(tar_bytes), mode='r:')
+                  except Exception:
+                      archive = tarfile.open(fileobj=io.BytesIO(compressed), mode='r:gz')
+                  with archive:
+                      found = {}
+                      for member in archive.getmembers():
+                          name = Path(member.name).name
+                          if member.isfile() and name in expected:
+                              handle = archive.extractfile(member)
+                              if handle is not None:
+                                  found[name] = handle.read()
+                  if set(found) != set(expected):
+                      raise ValueError(f'missing {sorted(set(expected) - set(found))}')
+                  for name, data in found.items():
+                      if len(data) < 20000 or data[:4] != b'RIFF' or data[8:12] != b'WEBP':
+                          raise ValueError(f'invalid WebP {name}: {len(data)} bytes')
+                  selected = found
+                  selected_source = source
+                  break
+              except Exception as error:
+                  print(f'Skipping {source}: {error}')
+
+          if selected is None:
+              raise SystemExit('No complete approved Summer Palace archive was found.')
 
           target = Path('app/assets/images/backgrounds/generated/beijing/summer-palace')
-          files = sorted(target.glob('*.webp'))
-          if len(files) != 10:
-              raise SystemExit(f'Expected 10 backgrounds, found {len(files)}')
-          for path in files:
-              data = path.read_bytes()
-              if data[:4] != b'RIFF' or data[8:12] != b'WEBP':
-                  raise SystemExit(f'Invalid WebP: {path}')
-              if len(data) < 4000:
-                  raise SystemExit(f'Unexpectedly small image: {path}')
+          target.mkdir(parents=True, exist_ok=True)
+          for old in target.glob('*.webp'):
+              old.unlink()
+          for name in expected:
+              (target / name).write_bytes(selected[name])
+              print(f'Installed {name}: {len(selected[name])} bytes')
+          print(f'Archive source: {selected_source}')
           PY
+
+          rm -rf .github/sp-upload .github/sp-upload-q5 .github/sp-upload-q10
+          rm -rf .github/sp400-upload .github/sp400b-upload
+          rm -f .github/direct-import-marker.txt
+          rm -f .github/workflows/import-summer-palace-backgrounds.yml
+          rm -f .github/workflows/import-refined-summer-palace-backgrounds.yml
+          rm -f .github/workflows/finalize-summer-palace-backgrounds.yml
+          rm -f .github/workflows/refresh-summer-palace-backgrounds.yml
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add "$target"
-          git rm .github/workflows/refresh-summer-palace-backgrounds.yml
+          git add -A
           git diff --cached --check
-          git commit -m 'fix: replace Summer Palace backgrounds with approved set'
+          git commit -m 'fix: install approved Summer Palace background set'
           git push origin HEAD:fix/summer-palace-background-refresh
