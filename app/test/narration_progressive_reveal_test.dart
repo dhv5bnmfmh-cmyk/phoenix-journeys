@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/screens/journey_screen.dart';
 import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
 
 void main() {
@@ -18,6 +19,45 @@ void main() {
     expect(
       revealedSegmentLength(segmentStart: 5, segmentEnd: 10, revealEnd: 14),
       5,
+    );
+  });
+
+  test('paragraph boundary never clears the whole narration for one frame', () {
+    expect(
+      stableNarrationRevealEnd(
+        sessionActive: true,
+        itemIndex: 0,
+        itemLength: 12,
+        snapshotItemIndex: null,
+        snapshotEnd: null,
+        controllerItemIndex: 0,
+        currentOffset: 12,
+      ),
+      12,
+    );
+    expect(
+      stableNarrationRevealEnd(
+        sessionActive: true,
+        itemIndex: 1,
+        itemLength: 10,
+        snapshotItemIndex: null,
+        snapshotEnd: null,
+        controllerItemIndex: 0,
+        currentOffset: 12,
+      ),
+      0,
+    );
+    expect(
+      stableNarrationRevealEnd(
+        sessionActive: true,
+        itemIndex: 0,
+        itemLength: 12,
+        snapshotItemIndex: null,
+        snapshotEnd: null,
+        controllerItemIndex: 0,
+        currentOffset: 0,
+      ),
+      0,
     );
   });
 

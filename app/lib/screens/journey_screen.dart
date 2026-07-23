@@ -23,6 +23,33 @@ import '../widgets/narration_speed_stepper.dart';
 import '../widgets/phoenix_agent_cards.dart';
 import '../widgets/word_detail_sheet.dart';
 
+@visibleForTesting
+int? stableNarrationRevealEnd({
+  required bool sessionActive,
+  required int itemIndex,
+  required int itemLength,
+  required int? snapshotItemIndex,
+  required int? snapshotEnd,
+  required int? controllerItemIndex,
+  required int currentOffset,
+}) {
+  if (!sessionActive) return null;
+
+  final activeItemIndex = snapshotItemIndex ?? controllerItemIndex;
+  if (activeItemIndex == null) return currentOffset <= 0 ? 0 : itemLength;
+  if (itemIndex < activeItemIndex) return itemLength;
+  if (itemIndex > activeItemIndex) return 0;
+
+  if (snapshotEnd != null) {
+    return snapshotEnd.clamp(0, itemLength).toInt();
+  }
+
+  // At the newline between narration items, Flutter TTS briefly reports no
+  // highlight snapshot. Keep the paragraph that just finished fully visible
+  // instead of clearing every paragraph for one frame.
+  return currentOffset <= 0 ? 0 : itemLength;
+}
+
 class JourneyScreen extends StatefulWidget {
   const JourneyScreen({super.key, this.journeyId});
 
@@ -1024,13 +1051,18 @@ class _JourneyScreenState extends State<JourneyScreen>
     final sessionActive = _narration.contentId == contentId &&
         (_narration.status == NarrationStatus.playing ||
             _narration.status == NarrationStatus.paused);
-    if (!sessionActive) return null;
-
     final snapshot = _narration.highlightSnapshot;
-    if (snapshot == null || snapshot.contentId != contentId) return 0;
-    if (itemIndex < snapshot.itemIndex) return itemLength;
-    if (itemIndex > snapshot.itemIndex) return 0;
-    return snapshot.end.clamp(0, itemLength).toInt();
+    final snapshotMatches = snapshot?.contentId == contentId;
+
+    return stableNarrationRevealEnd(
+      sessionActive: sessionActive,
+      itemIndex: itemIndex,
+      itemLength: itemLength,
+      snapshotItemIndex: snapshotMatches ? snapshot?.itemIndex : null,
+      snapshotEnd: snapshotMatches ? snapshot?.end : null,
+      controllerItemIndex: _narration.currentItemIndex,
+      currentOffset: _narration.currentOffset,
+    );
   }
 
   Widget _storyPage() {

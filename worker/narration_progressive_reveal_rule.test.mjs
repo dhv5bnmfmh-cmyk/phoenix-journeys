@@ -14,6 +14,9 @@ test('story and discovery reveal text from narration progress', () => {
   assert.match(journey, /contentId: 'story'[\s\S]*revealEnd: _narrationRevealEnd/);
   assert.match(journey, /contentId: 'discovery'[\s\S]*revealEnd: _narrationRevealEnd/);
   assert.match(journey, /transparentSurface: true/);
+  assert.match(journey, /stableNarrationRevealEnd/);
+  assert.match(journey, /controllerItemIndex: _narration\.currentItemIndex/);
+  assert.match(journey, /currentOffset: _narration\.currentOffset/);
 });
 
 test('unspoken text stays layout-stable, invisible, and non-interactive', () => {
