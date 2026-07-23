@@ -1,0 +1,60 @@
+name: Finalize adaptive constant context
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: write
+
+concurrency:
+  group: finalize-adaptive-const-context
+  cancel-in-progress: true
+
+jobs:
+  finalize:
+    if: github.event.pull_request.number == 97
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/adaptive-summer-palace
+          fetch-depth: 0
+      - name: Normalize challenge constant context
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('app/lib/data/journey_level_catalog.dart')
+          text = path.read_text(encoding='utf-8')
+          marker = 'final summerPalaceChallengeLevel = const JourneyLevelContent('
+          if text.count(marker) != 1:
+              raise SystemExit(f'expected one challenge marker, found {text.count(marker)}')
+          before, challenge = text.split(marker, 1)
+          challenge = challenge.replace('storyParagraphs: const <String>[', 'storyParagraphs: <String>[', 1)
+          challenge = challenge.replace(
+              'storyAnnotations: const <ReadingAnnotation>[',
+              'storyAnnotations: <ReadingAnnotation>[',
+              1,
+          )
+          challenge = challenge.replace(
+              'discoveries: const <DiscoveryEntry>[',
+              'discoveries: <DiscoveryEntry>[',
+              1,
+          )
+          text = before + 'const summerPalaceChallengeLevel = JourneyLevelContent(' + challenge
+          path.write_text(text, encoding='utf-8')
+          PY
+          rm -f .github/workflows/finalize-adaptive-const-context.yml
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'style: normalize adaptive constant context'
+          git push origin HEAD:feature/adaptive-summer-palace
