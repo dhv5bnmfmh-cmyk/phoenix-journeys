@@ -1,0 +1,78 @@
+name: Apply Summer Palace live cinemagraph
+
+on:
+  push:
+    branches:
+      - feature/summer-palace-parallax-background
+    paths:
+      - .github/workflows/apply-summer-palace-live-cinemagraph.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: summer-palace-live-cinemagraph
+  cancel-in-progress: true
+
+jobs:
+  generate-verify-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/summer-palace-parallax-background
+          fetch-depth: 0
+
+      - name: Set up Python imaging tools
+        run: python3 -m pip install --disable-pip-version-check pillow numpy
+
+      - name: Generate and integrate live background
+        run: |
+          set -euo pipefail
+          python3 tools/apply_summer_palace_live_cinemagraph.py
+          rm -f tools/apply_summer_palace_live_cinemagraph.py
+          rm -f .github/workflows/apply-summer-palace-live-cinemagraph.yml
+          git diff --check
+          test -s app/assets/images/backgrounds/generated/beijing/summer-palace/11-live-cinemagraph.webp
+          test "$(stat -c%s app/assets/images/backgrounds/generated/beijing/summer-palace/11-live-cinemagraph.webp)" -lt 1100000
+
+      - name: Test Phoenix agents
+        run: node --test worker/*.test.mjs
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Format changed Dart files
+        run: |
+          dart format \
+            app/lib/widgets/destination_background.dart \
+            app/test/summer_palace_dynamic_background_test.dart
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Test Flutter app
+        working-directory: app
+        run: flutter test
+
+      - name: Build web release
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Publish live cinemagraph commit
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat: add Summer Palace live cinemagraph background'
+          git push origin HEAD:feature/summer-palace-parallax-background
