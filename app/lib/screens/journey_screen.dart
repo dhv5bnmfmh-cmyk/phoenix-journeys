@@ -1420,8 +1420,8 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Widget _completePage() {
     return _page(
-      title: '${_experience.city}已点亮',
-      buttonText: '返回首页',
+      title: _appState.displayText('${_experience.city}已点亮'),
+      buttonText: _appState.displayText('返回首页'),
       buttonIcon: Icons.home_outlined,
       showBack: false,
       onNext: () => Navigator.of(context).pop(),
@@ -1446,8 +1446,8 @@ class _JourneyScreenState extends State<JourneyScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '盖章成功',
+                Text(
+                  _appState.displayText('盖章成功'),
                   style: TextStyle(
                     color: PhoenixTheme.red,
                     fontSize: 18,
@@ -1455,8 +1455,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                   ),
                 ),
                 const SizedBox(height: 3),
-                const Text(
-                  '你完成的不是一堂课，而是一段旅程。',
+                Text(
+                  _appState.displayText('你完成的不是一堂课，而是一段旅程。'),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   style: TextStyle(fontSize: 12, height: 1.25),
@@ -1484,8 +1484,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                           ),
                           icon: const Icon(Icons.replay_rounded, size: 16),
-                          label: const Text(
-                            '重新体验',
+                          label: Text(
+                            _appState.displayText('重新体验'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(fontSize: 10.5),
