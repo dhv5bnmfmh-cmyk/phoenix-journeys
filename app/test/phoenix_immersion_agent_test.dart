@@ -34,4 +34,21 @@ void main() {
 
     expect(agent.immersed, isFalse);
   });
+
+  testWidgets('leaving a reading page cancels the pending idle fade', (
+    tester,
+  ) async {
+    final agent = PhoenixImmersionAgent(
+      idleDelay: const Duration(milliseconds: 100),
+    );
+    addTearDown(agent.dispose);
+
+    agent.setEnabled(true);
+    await tester.pump(const Duration(milliseconds: 45));
+    agent.setEnabled(false);
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(agent.enabled, isFalse);
+    expect(agent.immersed, isFalse);
+  });
 }
