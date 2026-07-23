@@ -7,6 +7,7 @@ const widget = readFileSync(
   'utf8',
 );
 
+// Permanent guard for the first destination-level pseudo-dynamic background.
 test('Summer Palace background uses lightweight local pseudo-dynamic layers', () => {
   assert.match(widget, /beijing-summer-palace/);
   assert.match(widget, /summer-palace-dynamic-background/);
