@@ -1452,8 +1452,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                             narrationItemId: 'discovery-${entry.key}',
                             style: PhoenixTheme.journeyBodyStyle.copyWith(
                               fontSize: fontSize,
-                              fontWeight:
-                                  isActive ? FontWeight.w900 : FontWeight.w700,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         );
@@ -1764,7 +1763,7 @@ class _CompactTextBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: ValueKey('compact-text-$index-${active ? 'active' : 'idle'}'),
+      key: ValueKey('compact-text-$index'),
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 2),
       padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
@@ -1780,7 +1779,8 @@ class _CompactTextBlock extends StatelessWidget {
             padding: const EdgeInsets.only(top: 1),
             child: CircleAvatar(
               radius: 9,
-              backgroundColor: const Color(0x99000000),
+              backgroundColor:
+                  active ? const Color(0xB33A1714) : const Color(0x99000000),
               child: Text(
                 '$index',
                 style: const TextStyle(

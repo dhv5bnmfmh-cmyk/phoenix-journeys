@@ -351,6 +351,12 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
               key: ValueKey(
                 'interactive-highlight-${widget.narrationItemId ?? widget.text}',
               ),
+              strutStyle: StrutStyle(
+                fontSize: baseStyle?.fontSize,
+                height: baseStyle?.height,
+                fontWeight: baseStyle?.fontWeight,
+                forceStrutHeight: true,
+              ),
               TextSpan(
                 style: baseStyle,
                 children: _segments.expand((segment) {
@@ -652,7 +658,7 @@ class _CinematicRevealGlyph extends StatelessWidget {
           child: Text(
             text,
             style: style.copyWith(
-              height: 1,
+              height: style.height ?? 1.22,
               shadows: <Shadow>[
                 ...?style.shadows,
                 Shadow(
@@ -681,19 +687,22 @@ class _InlineReadingMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      // Reserve real layout space for the triangle. Painting below a Text
-      // baseline alone is clipped by Flutter Web on iOS Safari.
-      padding: const EdgeInsets.only(bottom: 5),
+    final fontSize = style.fontSize ?? 14;
+    final lineHeight = style.height ?? 1.22;
+    return SizedBox(
+      height: fontSize * lineHeight,
       child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
+        clipBehavior: Clip.hardEdge,
+        alignment: Alignment.center,
         children: [
-          Text(text, style: style.copyWith(height: 1)),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 3),
+            child: Text(text, style: style.copyWith(height: lineHeight)),
+          ),
           const Positioned(
             left: 0,
             right: 0,
-            bottom: -4,
+            bottom: 0,
             child: Center(
               child: CustomPaint(
                 size: Size(9, 5),

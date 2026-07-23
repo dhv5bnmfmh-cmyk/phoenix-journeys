@@ -1,0 +1,131 @@
+Resolving dependencies...
+Downloading packages...
+  flutter_lints 4.0.0 (6.0.0 available)
+  hooks 2.0.2 (2.1.0 available)
+  intl 0.19.0 (0.20.3 available)
+  lints 4.0.0 (6.1.0 available)
+  matcher 0.12.19 (0.12.20 available)
+  meta 1.18.0 (1.19.0 available)
+  package_config 2.2.0 (3.0.0 available)
+  record_use 0.6.0 (1.0.0 available)
+  share_plus 12.0.2 (13.2.1 available)
+  share_plus_platform_interface 6.1.0 (7.1.0 available)
+  test_api 0.7.11 (0.7.13 available)
+  vector_math 2.2.0 (2.4.0 available)
+  win32 5.15.0 (6.3.0 available)
+Got dependencies!
+13 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/nanjing_background_library_test.dart: Nanjing ships a complete reviewed ten-image offline library
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_agent_cards_test.dart: guide card identifies PhoenixGuideAgent as online
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/beijing_background_library_test.dart: Beijing ships a complete reviewed ten-image offline library
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_agent_cards_test.dart: guide fallback is clearly marked as local
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_agent_cards_test.dart: writing card separates correction and natural expression
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/daily_journey_state_test.dart: progress is stored independently for each journey
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/daily_journey_state_test.dart: completing a journey permanently adds its city stamp
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/daily_journey_state_test.dart: the next day automatically loads a different journey
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_feedback_persistence_test.dart: Agent feedback persists separately for each city journey
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/app_state_test.dart: saves and restores vocabulary selections
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/app_state_test.dart: removes a saved word when toggled again
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_background_policy_test.dart: same destination page and local day keep a stable image
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_background_policy_test.dart: every published seed destination has three approved fallbacks
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_background_policy_test.dart: approved AI backgrounds replace geometric seed fallbacks
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_background_policy_test.dart: AI backgrounds below the variety threshold never reach runtime
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_background_policy_test.dart: inventory KPI counts reviewed AI assets rather than fallbacks
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_background_policy_test.dart: runtime AI background must match the Journey location folder
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_background_policy_test.dart: Summer Palace ships ten reviewed location-bound backgrounds
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_background_policy_test.dart: KPI constants permanently require ten offline images per city
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/discovery_and_stamp_test.dart: Discovery provides pinyin and Explorer-language support
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/daily_journey_engine_test.dart: the same calendar day always returns the same journey
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/daily_journey_engine_test.dart: three consecutive days rotate through three different journeys
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/daily_journey_engine_test.dart: all daily journeys pass publication checks
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/discovery_and_stamp_test.dart: earned Forbidden City stamp uses original Phoenix artwork
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/discovery_and_stamp_test.dart: animated stamp drops from above and leaves an imprint
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/discovery_and_stamp_test.dart: locked stamp clearly stays unavailable before completion
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/preloaded_vocabulary_pack_test.dart: every published word has a complete preloaded example
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/explore_compact_layout_test.dart: uses a compact map height for short phone viewports
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/explore_compact_layout_test.dart: switches to the regular compact height at the phone boundary
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/explore_compact_layout_test.dart: caps the regular phone map at a one-screen-friendly height
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_location_binding_test.dart: every Journey has one GeoNode, map point and location path
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_location_binding_test.dart: legacy Journey keys migrate to city/destination path keys
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/xian_background_library_test.dart: Xian ships a complete reviewed ten-image offline library
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/city_journey_stamp_animation_test.dart: city stamp presses from above then removes the physical tool
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_world_story_agent_test.dart: builds the full path to the Forbidden City
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_world_story_agent_test.dart: searches local and international aliases
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_world_story_agent_test.dart: rejects orphan geographic nodes
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_world_story_agent_test.dart: binds the Beijing Journey to its precise place and evidence
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_world_story_agent_test.dart: finds a place Journey from its country hierarchy
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_world_story_agent_test.dart: marks the seeded Beijing Journey publishable
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_world_story_agent_test.dart: blocks publication when evidence is weak or unverified
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/guangzhou_background_library_test.dart: Guangzhou ships a complete reviewed ten-image offline library
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/widget_test.dart: shows startup progress before app data is ready
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/saved_vocabulary_library_test.dart: the shared vocabulary library contains words from every journey
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/widget_test.dart: shows the selected Beijing journey
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/widget_test.dart: keeps the home shell while changing tabs
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/saved_vocabulary_library_test.dart: a saved Nanjing word appears in My Vocabulary
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/narration_progressive_reveal_test.dart: narration reveal preserves layout while exposing only spoken text
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/narration_progressive_reveal_test.dart: paragraph boundary never clears the whole narration for one frame
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/narration_progressive_reveal_test.dart: cinematic reveal interpolates each glyph with a bounded duration
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/reading_annotation_and_vocabulary_test.dart: tiny note button reveals pinyin native language and English
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/reading_annotation_and_vocabulary_test.dart: all Beijing words include word class English and three examples
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/reading_annotation_and_vocabulary_test.dart: every story paragraph has a complete hidden annotation
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/narration_resume_offset_test.dart: uses exact native word start when progress is fresh
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/narration_resume_offset_test.dart: Safari zero progress does not restart narration
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/narration_resume_offset_test.dart: stale progress falls back to Phoenix clock
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/narration_resume_offset_test.dart: transient controller zero keeps the last visible reading position
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/narration_resume_offset_test.dart: fresh native word remains the continuation source of truth
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/hangzhou_background_library_test.dart: Hangzhou ships a complete reviewed ten-image offline library
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_access_policy_test.dart: development experience keeps every journey open
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_access_policy_test.dart: paid explorers can open every journey
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_access_policy_test.dart: free assignment is stable for one explorer, date, and slot
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_access_policy_test.dart: free explorers receive one morning and one afternoon journey
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_access_policy_test.dart: free explorers cannot open an unreleased journey
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/seven_day_journey_catalog_test.dart: eight reviewed destinations rotate without repeating during one cycle
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/seven_day_journey_catalog_test.dart: every journey has complete story and learning content
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/seven_day_journey_catalog_test.dart: all published records use verified source ids
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/narration_text_plan_test.dart: builds narration text and maps offsets to the correct item
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/narration_text_plan_test.dart: ignores empty narration items
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/narration_text_plan_test.dart: offers synchronized 0.1 speed steps from 0.5x to 1.5x
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/city_passport_screen_test.dart: Passport groups every destination under its city collection
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_city_catalog_test.dart: published journeys expose stable city and destination paths
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_city_catalog_test.dart: Beijing publishes two independent destination journeys
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_city_catalog_test.dart: duplicate destination ids inside one city are rejected
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_share_copy_test.dart: simplified share copy contains journey, stamp, and production URL
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_share_copy_test.dart: traditional share copy uses traditional characters
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/summer_palace_dynamic_background_test.dart: Summer Palace dynamic background respects reduced motion
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/summer_palace_dynamic_background_test.dart: Summer Palace camera visibly changes position over time
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_level_catalog_test.dart: Summer Palace adaptive levels offers light, standard, and challenge journeys
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_level_catalog_test.dart: Summer Palace adaptive levels light journey reduces reading and vocabulary load
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_level_catalog_test.dart: Summer Palace adaptive levels challenge journey increases depth without changing destination
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_level_catalog_test.dart: Summer Palace adaptive levels storage parser safely falls back to standard
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_level_catalog_test.dart: other destinations remain standard until level content is prepared
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_picker_sheet_test.dart: traveler selects a city before opening its destination
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/shanghai_background_library_test.dart: Shanghai ships a complete reviewed ten-image offline library
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_ai_service_test.dart: guide client returns online PhoenixGuideAgent response
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_ai_service_test.dart: guide client labels transparent local fallback
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_ai_service_test.dart: writing client reads structured PhoenixWritingAgent feedback
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_ai_service_test.dart: writing client never presents local fallback as online AI
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/chengdu_background_library_test.dart: Chengdu ships a complete reviewed ten-image offline library
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_vocabulary_service_test.dart: explorer runtime returns the preloaded example without HTTP
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_vocabulary_service_test.dart: content pipeline can still generate a reviewed AI example
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_reading_focus_test.dart: journey progress stays locked until completion
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_reading_focus_test.dart: completed journey opens free step navigation
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_reading_focus_test.dart: word mark uses the word itself instead of an unrelated image
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/phoenix_media_button_test.dart: shows play and pause states and handles taps
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/interactive_story_text_test.dart: preserves the complete story while identifying vocabulary
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/interactive_story_text_test.dart: uses the longest matching word first
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/interactive_story_text_test.dart: matches narration by stable item ID
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/world_story_runtime_test.dart: runtime serves a publishable Beijing Forbidden City Journey
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/world_story_runtime_test.dart: runtime rejects an unknown Journey ID
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/widgets/narration_player_card_test.dart: ignores a premature idle completion jump from Safari
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/widgets/narration_player_card_test.dart: uses native progress while narration is actively playing
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/widgets/narration_player_card_test.dart: keeps the guarded offset inside the narration range
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/widgets/narration_player_card_test.dart: fresh native progress cannot rewind behind the visible word
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/widgets/narration_player_card_test.dart: pause offset remains inside the narration range
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_progress_test.dart: restores the last journey step and writing drafts
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_progress_test.dart: going back does not lock previously reached steps
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/journey_progress_test.dart: completion earns a permanent Beijing stamp and restart keeps it
+✅ /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/widgets/interactive_story_text_visual_test.dart: explicit narration range paints a triangle under the active text
+
+🎉 110 tests passed.
