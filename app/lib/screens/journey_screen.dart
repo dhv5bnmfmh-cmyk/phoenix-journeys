@@ -669,7 +669,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               children: [
                 AnimatedOpacity(
                   key: const ValueKey('journey-content-opacity'),
-                  duration: const Duration(milliseconds: 1600),
+                  duration: Duration(milliseconds: immersed ? 1600 : 120),
                   curve: Curves.easeInOutCubic,
                   opacity: immersed ? .035 : 1,
                   child: IgnorePointer(
