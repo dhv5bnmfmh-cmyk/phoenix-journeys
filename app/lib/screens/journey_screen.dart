@@ -1292,7 +1292,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               scrollPadding: const EdgeInsets.only(bottom: 24),
               onChanged: _onWonderChanged,
               style: PhoenixTheme.journeyWritingInputStyle,
-              cursorColor: PhoenixTheme.red,
+              cursorColor: PhoenixTheme.contentAccent,
               decoration: PhoenixTheme.journeyWritingInputDecoration(
                 '写下你的想法……',
               ),
@@ -1353,7 +1353,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               scrollPadding: const EdgeInsets.only(bottom: 24),
               onChanged: _onExpressChanged,
               style: PhoenixTheme.journeyWritingInputStyle,
-              cursorColor: PhoenixTheme.red,
+              cursorColor: PhoenixTheme.contentAccent,
               decoration: PhoenixTheme.journeyWritingInputDecoration(
                 '用中文写下你的表达……',
               ),
@@ -1399,7 +1399,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               scrollPadding: const EdgeInsets.only(bottom: 24),
               onChanged: (_) => unawaited(_persistProgress()),
               style: PhoenixTheme.journeyWritingInputStyle,
-              cursorColor: PhoenixTheme.red,
+              cursorColor: PhoenixTheme.contentAccent,
               decoration: PhoenixTheme.journeyWritingInputDecoration(
                 '写下感受，未来回来比较自己的变化。',
               ),
