@@ -30,32 +30,25 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           from textwrap import dedent
+          import re
 
           path = Path('app/lib/screens/journey_screen.dart')
           source = path.read_text()
-          start_marker = dedent('''\
-                        SizedBox(
-                          height: keyboardVisible ? 26 : null,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  title,
-          ''')
-          start = source.find(start_marker)
-          if start < 0:
-              raise SystemExit('Unable to locate duplicate shared page title')
-
-          end_marker = dedent('''\
-                        SizedBox(height: keyboardVisible ? 3 : (compact ? 4 : 6)),
-                        Expanded(child: child),
-          ''')
-          end = source.find(end_marker, start)
-          if end < 0:
-              raise SystemExit('Unable to locate duplicate shared page title end')
-
-          replacement = '              Expanded(child: child),\n'
-          source = source[:start] + replacement + source[end + len(end_marker):]
+          pattern = re.compile(
+              r'''\n\s+SizedBox\(\n\s+height: keyboardVisible \? 26 : null,\n'''
+              r'''\s+child: Row\(\n\s+children: \[\n\s+Expanded\(\n'''
+              r'''\s+child: Text\(\n\s+title,.*?'''
+              r'''\n\s+SizedBox\(height: keyboardVisible \? 3 : \(compact \? 4 : 6\)\),'''
+              r'''\n\s+Expanded\(child: child\),''',
+              re.S,
+          )
+          source, count = pattern.subn(
+              '\n              Expanded(child: child),',
+              source,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f'Expected one duplicate page title block, found {count}')
           if 'PhoenixTheme.journeyTitleStyle.copyWith' in source:
               raise SystemExit('Duplicate shared page title remained after cleanup')
           path.write_text(source)
