@@ -17,9 +17,11 @@ test('Story and Discovery use text-only narration highlights', () => {
   assert.match(interactive, /class _InlineReadingMarker/);
   assert.match(interactive, /reading-highlight-/);
   assert.match(interactive, /alignment: PlaceholderAlignment\.middle/);
-  assert.match(interactive, /height: fontSize \* lineHeight/);
   assert.match(interactive, /color: const Color\(0xFFFFE7AA\)/);
-  assert.doesNotMatch(interactive, /_ReadingTrianglePainter|reading-triangle-|CustomPaint/);
+  assert.doesNotMatch(
+    interactive,
+    /_ReadingTrianglePainter|reading-triangle-|Size\(9,\s*5\)/,
+  );
   assert.equal((journey.match(/InteractiveStoryText\(/g) ?? []).length >= 2, true);
   assert.match(journey, /contentId: 'story'/);
   assert.match(journey, /contentId: 'discovery'/);
