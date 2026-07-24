@@ -44,7 +44,10 @@ Phoenix Journeys 是一款故事驱动的世界探索产品。
 5. 让同一城市的不同地点组成可连续追踪的故事宇宙。
 6. 完成剩余地点动态背景，同时坚持慢镜头、分层光影、减少动态回退和手机性能保护。
 
-完整路线见 [`docs/DEVELOPMENT_PLAN.md`](docs/DEVELOPMENT_PLAN.md)。
+完整路线：
+
+- [`docs/DEVELOPMENT_PLAN.md`](docs/DEVELOPMENT_PLAN.md)：从项目起点到故事优先阶段的总路线
+- [`docs/STORY_TRANSFORMATION_PLAN.md`](docs/STORY_TRANSFORMATION_PLAN.md)：故事长度、Story Blueprint、Story Engine 与分阶段转型方案
 
 ## Repository Structure
 
