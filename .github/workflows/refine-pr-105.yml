@@ -1,6 +1,10 @@
 name: Refine PR 105
 
 on:
+  pull_request:
+    branches:
+      - feature/shanghai-bund-dynamic-background
+    types: [opened, reopened, synchronize]
   push:
     branches:
       - feature/shanghai-bund-dynamic-background
