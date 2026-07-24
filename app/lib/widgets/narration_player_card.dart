@@ -17,8 +17,7 @@ int resolveNarrationDisplayOffset({
 }) {
   if (totalCharacters <= 0) return 0;
 
-  final nativeOffsetIsReliable =
-      controllerStatus == NarrationStatus.playing ||
+  final nativeOffsetIsReliable = controllerStatus == NarrationStatus.playing ||
       controllerStatus == NarrationStatus.paused;
   final candidate = nativeOffsetIsReliable
       ? math.max(estimatedOffset, controllerOffset)
@@ -147,8 +146,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       _sessionPaused = false;
     }
 
-    if (status != NarrationStatus.playing &&
-        status != NarrationStatus.paused) {
+    if (status != NarrationStatus.playing && status != NarrationStatus.paused) {
       return;
     }
 
@@ -173,11 +171,9 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
 
   void _handleMainPressed() {
     final commandId = ++_commandVersion;
-    final controllerPlaying =
-        _controllerIsCurrent &&
+    final controllerPlaying = _controllerIsCurrent &&
         widget.controller.status == NarrationStatus.playing;
-    final controllerPaused =
-        _controllerIsCurrent &&
+    final controllerPaused = _controllerIsCurrent &&
         widget.controller.status == NarrationStatus.paused;
 
     if (_controllerFinished) {
@@ -229,16 +225,14 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
 
   Future<void> _resumeSession(int commandId) async {
     final total = widget.controller.totalCharacters;
-    final safeOffset = total <= 0
-        ? 0
-        : _resumeOffset.clamp(0, math.max(0, total - 1)).toInt();
+    final safeOffset =
+        total <= 0 ? 0 : _resumeOffset.clamp(0, math.max(0, total - 1)).toInt();
     if (!mounted || commandId != _commandVersion) return;
     _beginLocalPlayback(safeOffset);
     await widget.controller.resumeFromOffset(safeOffset);
     if (!mounted || commandId != _commandVersion || !_sessionPlaying) return;
-    final controllerOffset = _controllerIsCurrent
-        ? widget.controller.currentOffset
-        : safeOffset;
+    final controllerOffset =
+        _controllerIsCurrent ? widget.controller.currentOffset : safeOffset;
     final continuedOffset = math.max(safeOffset, controllerOffset);
     setState(() {
       _resumeOffset = continuedOffset;
@@ -267,11 +261,9 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     if ((widget.controller.speechRate - rate).abs() < .001) return;
 
     final commandId = ++_commandVersion;
-    final controllerPlaying =
-        _controllerIsCurrent &&
+    final controllerPlaying = _controllerIsCurrent &&
         widget.controller.status == NarrationStatus.playing;
-    final controllerPaused =
-        _controllerIsCurrent &&
+    final controllerPaused = _controllerIsCurrent &&
         widget.controller.status == NarrationStatus.paused;
     final wasPlaying = _sessionPlaying || controllerPlaying;
     final wasPaused = _sessionPaused || controllerPaused;
@@ -300,9 +292,8 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
       _beginLocalPlayback(offset);
       await widget.controller.resumeFromOffset(offset);
       if (!mounted || commandId != _commandVersion || !_sessionPlaying) return;
-      final controllerOffset = _controllerIsCurrent
-          ? widget.controller.currentOffset
-          : offset;
+      final controllerOffset =
+          _controllerIsCurrent ? widget.controller.currentOffset : offset;
       final continuedOffset = math.max(offset, controllerOffset);
       setState(() {
         _resumeOffset = continuedOffset;
@@ -332,65 +323,57 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
             : NarrationStatus.idle;
         _observeControllerOffset(controllerStatus);
 
-        final hasError =
-            !_sessionPlaying &&
+        final hasError = !_sessionPlaying &&
             !_sessionPaused &&
             controllerStatus == NarrationStatus.error;
-        final finished =
-            controllerIsCurrent &&
+        final finished = controllerIsCurrent &&
             controllerStatus == NarrationStatus.idle &&
             widget.controller.totalCharacters > 0 &&
             widget.controller.currentOffset >=
                 widget.controller.totalCharacters;
-        final isPlaying =
-            !finished &&
+        final isPlaying = !finished &&
             (_sessionPlaying ||
                 (!_sessionPaused &&
                     controllerStatus == NarrationStatus.playing));
-        final isPaused =
-            !finished &&
+        final isPaused = !finished &&
             (_sessionPaused ||
                 (!isPlaying && controllerStatus == NarrationStatus.paused));
         final status = hasError
             ? NarrationStatus.error
             : isPlaying
-            ? NarrationStatus.playing
-            : isPaused
-            ? NarrationStatus.paused
-            : NarrationStatus.idle;
+                ? NarrationStatus.playing
+                : isPaused
+                    ? NarrationStatus.paused
+                    : NarrationStatus.idle;
 
-        final total = controllerIsCurrent
-            ? widget.controller.totalCharacters
-            : 0;
+        final total =
+            controllerIsCurrent ? widget.controller.totalCharacters : 0;
         final visibleOffset = controllerIsCurrent
             ? isPaused
-                  ? math.max(widget.controller.currentOffset, _resumeOffset)
-                  : widget.controller.currentOffset
+                ? math.max(widget.controller.currentOffset, _resumeOffset)
+                : widget.controller.currentOffset
             : 0;
         final progress = total <= 0
             ? 0.0
             : (visibleOffset / total).clamp(0.0, 1.0).toDouble();
-        final currentItem = controllerIsCurrent
-            ? widget.controller.currentItemIndex
-            : null;
+        final currentItem =
+            controllerIsCurrent ? widget.controller.currentItemIndex : null;
         final itemCount = controllerIsCurrent ? widget.controller.itemCount : 0;
-        final canControl =
-            _sessionPlaying ||
+        final canControl = _sessionPlaying ||
             _sessionPaused ||
             (controllerIsCurrent && widget.controller.hasContent);
         final roundedPercent = (progress * 100).round();
-        final percent = isPlaying
-            ? roundedPercent.clamp(1, 99)
-            : roundedPercent;
+        final percent =
+            isPlaying ? roundedPercent.clamp(1, 99) : roundedPercent;
         final activeSubtitle = hasError
             ? widget.controller.errorMessage ?? '朗读暂时不可用'
             : isPlaying
-            ? widget.controller.currentItemLabel != null
-                  ? '${widget.controller.currentItemLabel} · $percent%'
-                  : '正在朗读 · $percent%'
-            : isPaused
-            ? '已暂停 · $percent%'
-            : widget.subtitle;
+                ? widget.controller.currentItemLabel != null
+                    ? '${widget.controller.currentItemLabel} · $percent%'
+                    : '正在朗读 · $percent%'
+                : isPaused
+                    ? '已暂停 · $percent%'
+                    : widget.subtitle;
         final compact = widget.compact;
 
         return Semantics(
@@ -400,21 +383,21 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
           child: Container(
             width: double.infinity,
             padding: EdgeInsets.fromLTRB(
-              compact ? 7 : 10,
-              compact ? 4 : 8,
-              compact ? 6 : 8,
-              compact ? 4 : 7,
+              compact ? 6 : 10,
+              compact ? 3 : 8,
+              compact ? 5 : 8,
+              compact ? 3 : 7,
             ),
             decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
-              borderRadius: BorderRadius.circular(compact ? 13 : 17),
+              borderRadius: BorderRadius.circular(compact ? 11 : 17),
             ),
             child: Column(
               children: [
                 Row(
                   children: [
                     Container(
-                      width: compact ? 24 : 30,
-                      height: compact ? 24 : 30,
+                      width: compact ? 20 : 30,
+                      height: compact ? 20 : 30,
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: .12),
                         borderRadius: BorderRadius.circular(11),
@@ -424,10 +407,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                             ? Icons.graphic_eq_rounded
                             : Icons.headphones_rounded,
                         color: Colors.white,
-                        size: compact ? 14 : 17,
+                        size: compact ? 12 : 17,
                       ),
                     ),
-                    const SizedBox(width: 9),
+                    SizedBox(width: compact ? 6 : 9),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -437,7 +420,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: PhoenixTheme.journeyTitleStyle.copyWith(
-                              fontSize: 12,
+                              fontSize: compact ? 11 : 12,
                             ),
                           ),
                           const SizedBox(height: 1),
@@ -449,7 +432,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: PhoenixTheme.journeyMetaStyle.copyWith(
-                                fontSize: 9,
+                                fontSize: compact ? 8.2 : 9,
                               ),
                             ),
                           ),
@@ -461,10 +444,21 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                       key: const ValueKey('narration-main-control'),
                       isPlaying: isPlaying,
                       tooltip: _mainButtonTooltip(status),
-                      size: compact ? 36 : 44,
+                      size: compact ? 32 : 44,
                       onPressed: _handleMainPressed,
                     ),
-                    const SizedBox(width: 8),
+                    if (compact) ...[
+                      const SizedBox(width: 2),
+                      _MiniIconButton(
+                        tooltip: '重新播放',
+                        icon: Icons.replay_rounded,
+                        compact: true,
+                        onPressed: canControl
+                            ? () => unawaited(_restartSession())
+                            : null,
+                      ),
+                    ],
+                    SizedBox(width: compact ? 4 : 8),
                     NarrationSpeedStepper(
                       key: const ValueKey('narration-speed-control'),
                       controller: widget.controller,
@@ -474,59 +468,75 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                     ),
                   ],
                 ),
-                SizedBox(height: compact ? 3 : 7),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(99),
-                            child: LinearProgressIndicator(
-                              value: progress,
-                              minHeight: compact ? 5 : 7,
-                              backgroundColor: Colors.white24,
-                              color: const Color(0xFFFFD879),
+                if (compact) ...[
+                  const SizedBox(height: 2),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(99),
+                    child: LinearProgressIndicator(
+                      key: const ValueKey('narration-compact-progress'),
+                      value: progress,
+                      minHeight: 3,
+                      backgroundColor: Colors.white24,
+                      color: const Color(0xFFFFD879),
+                    ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 7),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(99),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 7,
+                                backgroundColor: Colors.white24,
+                                color: const Color(0xFFFFD879),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Text(
-                                currentItem == null || itemCount == 0
-                                    ? '尚未开始'
-                                    : '第 ${currentItem + 1} / $itemCount 段',
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 9.5,
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Text(
+                                  currentItem == null || itemCount == 0
+                                      ? '尚未开始'
+                                      : '第 ${currentItem + 1} / $itemCount 段',
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 9.5,
+                                  ),
                                 ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                '$percent%',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  fontFeatures: [FontFeature.tabularFigures()],
+                                const Spacer(),
+                                Text(
+                                  '$percent%',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w900,
+                                    fontFeatures: [
+                                      FontFeature.tabularFigures()
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 5),
-                    _MiniIconButton(
-                      tooltip: '重新播放',
-                      icon: Icons.replay_rounded,
-                      onPressed: canControl
-                          ? () => unawaited(_restartSession())
-                          : null,
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 5),
+                      _MiniIconButton(
+                        tooltip: '重新播放',
+                        icon: Icons.replay_rounded,
+                        onPressed: canControl
+                            ? () => unawaited(_restartSession())
+                            : null,
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -559,11 +569,13 @@ class _MiniIconButton extends StatelessWidget {
     required this.tooltip,
     required this.icon,
     required this.onPressed,
+    this.compact = false,
   });
 
   final String tooltip;
   final IconData icon;
   final VoidCallback? onPressed;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -571,9 +583,12 @@ class _MiniIconButton extends StatelessWidget {
       tooltip: tooltip,
       onPressed: onPressed,
       visualDensity: VisualDensity.compact,
-      padding: const EdgeInsets.all(4),
-      constraints: const BoxConstraints.tightFor(width: 30, height: 30),
-      icon: Icon(icon, size: 17),
+      padding: EdgeInsets.all(compact ? 2 : 4),
+      constraints: BoxConstraints.tightFor(
+        width: compact ? 26 : 30,
+        height: compact ? 26 : 30,
+      ),
+      icon: Icon(icon, size: compact ? 15 : 17),
       color: Colors.white,
       disabledColor: Colors.white30,
     );
