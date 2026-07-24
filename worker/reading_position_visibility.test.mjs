@@ -8,7 +8,7 @@ const interactive = readFileSync(
   'utf8',
 );
 
-test('Story and Discovery show position only with the inline triangle', () => {
+test('Story and Discovery show position with text-only highlights', () => {
   assert.doesNotMatch(journey, /_NowReadingStrip/);
   assert.equal(
     (journey.match(
@@ -16,13 +16,16 @@ test('Story and Discovery show position only with the inline triangle', () => {
     ) ?? []).length,
     2,
   );
-  assert.match(interactive, /reading-triangle-/);
-  assert.match(interactive, /_ReadingTrianglePainter/);
+  assert.match(interactive, /reading-highlight-/);
+  assert.match(interactive, /class _InlineReadingMarker/);
+  assert.match(interactive, /color: const Color\(0xFFFFE7AA\)/);
+  assert.doesNotMatch(
+    interactive,
+    /_ReadingTrianglePainter|reading-triangle-|Size\(9,\s*5\)/,
+  );
 });
 
-test('no text or paragraph color change is used for narration position', () => {
-  assert.doesNotMatch(interactive, /isCurrentNarrationItem[\s\S]{0,200}color:/);
+test('no separate strip or paragraph background marks narration position', () => {
   assert.doesNotMatch(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
   assert.doesNotMatch(journey, /const Color\(0xFFFFF2EE\)/);
-  assert.doesNotMatch(journey, /Icons\.graphic_eq_rounded/);
 });
