@@ -29,5 +29,8 @@ test('Story and Discovery use a layout-stable inline triangle', () => {
 });
 
 test('playing percent never appears stuck at zero', () => {
-  assert.match(player, /final percent = isPlaying[\s\S]*roundedPercent\.clamp\(1, 99\)/);
+  assert.match(
+    player,
+    /final percent\s*=\s*isPlaying[\s\S]*roundedPercent\.clamp\(1, 99\)/,
+  );
 });
