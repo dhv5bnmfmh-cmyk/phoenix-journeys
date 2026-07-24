@@ -1,7 +1,7 @@
 name: Remove journey reading triangles
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
     types: [opened, reopened, synchronize]
@@ -239,10 +239,11 @@ test('Flutter verifies active narration uses text highlight without triangles', 
           cinematic_path = Path('worker/cinematic_narration_reveal_rule.test.mjs')
           cinematic = cinematic_path.read_text()
           cinematic = cinematic.replace('reading-triangle-', 'reading-highlight-')
-          cinematic = cinematic.replace(
-              "  assert.match(interactive, /reading-highlight-\\$\\{widget\\.narrationItemId/);",
-              "  assert.match(interactive, /reading-highlight-\\$\\{widget\\.narrationItemId/);\n  assert.doesNotMatch(interactive, /_ReadingTrianglePainter|reading-triangle-|CustomPaint/);",
-          )
+          if '_ReadingTrianglePainter|reading-triangle-|CustomPaint' not in cinematic:
+              cinematic = cinematic.replace(
+                  "  assert.match(interactive, /reading-highlight-\\$\\{widget\\.narrationItemId/);",
+                  "  assert.match(interactive, /reading-highlight-\\$\\{widget\\.narrationItemId/);\n  assert.doesNotMatch(interactive, /_ReadingTrianglePainter|reading-triangle-|CustomPaint/);",
+              )
           cinematic_path.write_text(cinematic)
           PY
 
