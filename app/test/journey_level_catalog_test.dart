@@ -25,19 +25,28 @@ void main() {
       expect(easy.storyAnnotations.length, easy.storyParagraphs.length);
     });
 
-    test('challenge journey increases depth without changing destination', () {
+    test('standard journey uses two balanced long paragraphs', () {
+      final standard = resolveJourneyLevel(journey, JourneyDifficulty.standard);
+      expect(standard.storyParagraphs, hasLength(2));
+      expect(standard.storyAnnotations, hasLength(2));
+      expect(standard.discoveries, hasLength(2));
+    });
+
+    test('challenge journey adds analytical depth without changing destination',
+        () {
       final standard = resolveJourneyLevel(journey, JourneyDifficulty.standard);
       final challenge =
           resolveJourneyLevel(journey, JourneyDifficulty.challenge);
 
-      expect(
-        challenge.storyParagraphs.join().length,
-        greaterThan(standard.storyParagraphs.join().length),
-      );
       expect(challenge.words.length, standard.words.length);
+      expect(
+        challenge.discoveries.length,
+        greaterThanOrEqualTo(standard.discoveries.length),
+      );
       expect(
           challenge.storyAnnotations.length, challenge.storyParagraphs.length);
       expect(challenge.wonderQuestion, contains('重新解释自然'));
+      expect(challenge.expressQuestion, contains('分析'));
     });
 
     test('storage parser safely falls back to standard', () {
