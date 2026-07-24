@@ -45,12 +45,13 @@ test('daily progress, Agent feedback and stamps use destination path namespaces'
   assert.match(state, /activateJourney/);
 });
 
-test('one stable Journey screen renders every city', () => {
+test('one stable Journey screen renders every city and supported level', () => {
   assert.match(journey, /final String\? journeyId/);
   assert.match(journey, /DailyJourneyExperience _experience/);
-  assert.match(journey, /_experience\.storyAnnotations/);
-  assert.match(journey, /_experience\.words/);
-  assert.match(journey, /_experience\.discoveries/);
+  assert.match(journey, /JourneyLevelContent get _levelContent/);
+  assert.match(journey, /_levelContent\.storyAnnotations/);
+  assert.match(journey, /_levelContent\.words/);
+  assert.match(journey, /_levelContent\.discoveries/);
   assert.match(journey, /AnimatedCityJourneyStamp/);
 });
 

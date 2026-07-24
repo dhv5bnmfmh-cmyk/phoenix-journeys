@@ -5,6 +5,7 @@ import 'package:pinyin/pinyin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/daily_journey_catalog.dart';
+import '../data/journey_level_catalog.dart';
 import '../services/journey_location_binding.dart';
 
 enum ScriptMode { simplified, traditional }
@@ -35,6 +36,8 @@ class AppState extends ChangeNotifier {
 
   ScriptMode scriptMode = ScriptMode.simplified;
   String translationLanguage = '越南语';
+  JourneyDifficulty journeyDifficulty = JourneyDifficulty.standard;
+  bool journeyDifficultyChosen = false;
   int selectedTab = 0;
   bool journeyCompleted = false;
   final List<String> memories = [];
@@ -175,32 +178,28 @@ class AppState extends ChangeNotifier {
 
   void _loadActiveJourney(SharedPreferences prefs) {
     final isLegacyBeijing = activeJourneyId == 'beijing-forbidden-city';
-    final storedStep =
-        _readJourneyInt(prefs, 'step') ??
+    final storedDifficulty = _readJourneyString(prefs, 'difficulty');
+    journeyDifficulty = parseJourneyDifficulty(storedDifficulty);
+    journeyDifficultyChosen = storedDifficulty != null;
+    final storedStep = _readJourneyInt(prefs, 'step') ??
         (isLegacyBeijing ? prefs.getInt('beijingJourneyStep') : null) ??
         0;
-    final storedFurthest =
-        _readJourneyInt(prefs, 'furthestStep') ??
+    final storedFurthest = _readJourneyInt(prefs, 'furthestStep') ??
         (isLegacyBeijing ? prefs.getInt('beijingJourneyFurthestStep') : null) ??
         storedStep;
 
     _journeyStep = _safeJourneyStep(storedStep);
-    _journeyFurthestStep = math
-        .max(_journeyStep, _safeJourneyStep(storedFurthest))
-        .toInt();
-    journeyCompleted =
-        _readJourneyBool(prefs, 'completed') ??
+    _journeyFurthestStep =
+        math.max(_journeyStep, _safeJourneyStep(storedFurthest)).toInt();
+    journeyCompleted = _readJourneyBool(prefs, 'completed') ??
         (isLegacyBeijing ? prefs.getBool('journeyCompleted') ?? false : false);
-    wonderDraft =
-        _readJourneyString(prefs, 'wonderDraft') ??
+    wonderDraft = _readJourneyString(prefs, 'wonderDraft') ??
         (isLegacyBeijing ? prefs.getString('wonderDraft') : null) ??
         '';
-    expressDraft =
-        _readJourneyString(prefs, 'expressDraft') ??
+    expressDraft = _readJourneyString(prefs, 'expressDraft') ??
         (isLegacyBeijing ? prefs.getString('expressDraft') : null) ??
         '';
-    memoryDraft =
-        _readJourneyString(prefs, 'memoryDraft') ??
+    memoryDraft = _readJourneyString(prefs, 'memoryDraft') ??
         (isLegacyBeijing ? prefs.getString('memoryDraft') : null) ??
         '';
     guideFeedbackReply = _readJourneyString(prefs, 'guideFeedbackReply') ?? '';
@@ -302,6 +301,15 @@ class AppState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('translationLanguage', value);
     notifyListeners();
+  }
+
+  Future<void> setJourneyDifficulty(JourneyDifficulty value) async {
+    journeyDifficulty = value;
+    journeyDifficultyChosen = true;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_key('difficulty'), value.storageValue);
   }
 
   Future<void> toggleSavedWord(String word) async {

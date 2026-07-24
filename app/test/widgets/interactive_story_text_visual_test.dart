@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 void main() {
   testWidgets(
-    'explicit narration range paints a triangle under the active text',
+    'explicit narration range highlights active text without a triangle',
     (tester) async {
       final state = AppState();
       await tester.pumpWidget(
@@ -28,10 +28,9 @@ void main() {
       );
 
       expect(
-        find.byKey(const ValueKey('reading-triangle-visual-test')),
+        find.byKey(const ValueKey('reading-highlight-visual-test')),
         findsOneWidget,
       );
-      expect(find.byType(CustomPaint), findsWidgets);
     },
   );
 }

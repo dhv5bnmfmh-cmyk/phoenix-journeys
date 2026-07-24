@@ -149,8 +149,7 @@ class NarrationController extends ChangeNotifier {
 
   static const double nativeDefaultRate = 1.0;
   static double _sharedSpeechRate = nativeDefaultRate;
-  static final Set<NarrationController> _instances =
-      <NarrationController>{};
+  static final Set<NarrationController> _instances = <NarrationController>{};
 
   static const double speechRateStep = 0.1;
 
@@ -239,7 +238,15 @@ class NarrationController extends ChangeNotifier {
     final rate = fasterSpeechRate;
     if (rate != null) await setSpeechRate(rate);
   }
+
   int get currentOffset => _currentOffset;
+  int? get currentItemStartOffset {
+    final index = _currentItemIndex ?? _plan.indexForOffset(_currentOffset);
+    if (index == null || index < 0 || index >= _plan.items.length) return null;
+    return _plan.itemStart(index);
+  }
+
+  int get speechSessionToken => _speechSessionToken;
   int get lastNativeOffset => _lastNativeOffset;
   bool get hasFreshNativeProgress {
     final last = _lastNativeProgressAt;
@@ -330,11 +337,15 @@ class NarrationController extends ChangeNotifier {
     if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
     final globalStart = _speechBaseOffset + startOffset;
     final globalEnd = _speechBaseOffset + endOffset;
-    final now = DateTime.now();
-    _lastNativeOffset = globalStart;
-    _lastNativeProgressAt = now;
-    _estimateAnchorTime = now;
-    _estimateAnchorOffset = globalStart;
+    if (globalStart < _currentOffset) return;
+    final nativeAdvanced = globalStart > _lastNativeOffset;
+    if (nativeAdvanced) {
+      final now = DateTime.now();
+      _lastNativeOffset = globalStart;
+      _lastNativeProgressAt = now;
+      _estimateAnchorTime = now;
+      _estimateAnchorOffset = globalStart;
+    }
     _applyProgress(globalStart, endOffset: globalEnd, word: word);
   }
 
@@ -626,8 +637,7 @@ class NarrationController extends ChangeNotifier {
     String text, {
     required String languageCode,
   }) async {
-    final shouldResume =
-        _status == NarrationStatus.playing && !_plan.isEmpty;
+    final shouldResume = _status == NarrationStatus.playing && !_plan.isEmpty;
     final resumeOffset = _currentOffset;
     final spoken = await speakWord(text, languageCode: languageCode);
     if (shouldResume && spoken && !_disposed) {
@@ -700,9 +710,7 @@ class NarrationController extends ChangeNotifier {
 
   double _ttsSpeechRate(double multiplier) {
     if (kIsWeb) return multiplier.clamp(0.5, 1.5).toDouble();
-    return (0.50 + (multiplier - 1.0) * 0.20)
-        .clamp(0.40, 0.70)
-        .toDouble();
+    return (0.50 + (multiplier - 1.0) * 0.20).clamp(0.40, 0.70).toDouble();
   }
 
   Future<void> _configureNaturalVoice(String languageCode) async {
@@ -714,8 +722,10 @@ class NarrationController extends ChangeNotifier {
       if (availableVoices is List) {
         Map<String, String>? bestVoice;
         var bestScore = -1;
-        final requestedPrefix =
-            languageCode.toLowerCase().split(RegExp('[-_]')).first;
+        final requestedPrefix = languageCode
+            .toLowerCase()
+            .split(RegExp('[-_]'))
+            .first;
         for (final dynamic rawVoice in availableVoices) {
           if (rawVoice is! Map) continue;
           final name = '${rawVoice['name'] ?? ''}';
@@ -769,6 +779,7 @@ class NarrationController extends ChangeNotifier {
       }
       if (_disposed) return;
 
+      final sessionToken = ++_speechSessionToken;
       _speechMode = _NarrationSpeechMode.narration;
       _lastNativeOffset = safeOffset;
       _lastNativeProgressAt = null;
@@ -779,7 +790,6 @@ class NarrationController extends ChangeNotifier {
       _errorMessage = null;
       _applyProgress(safeOffset);
       _safeNotify();
-      final sessionToken = ++_speechSessionToken;
 
       if (_webSpeech.isAvailable) {
         _webSpeechPausedInPlace = false;
@@ -791,6 +801,7 @@ class NarrationController extends ChangeNotifier {
           rate: _speechRate,
           pitch: .98,
           volume: 1,
+          cancelExisting: stopEngineFirst,
         );
         if (!started && !_disposed) {
           _cancelProgressClock();
@@ -809,7 +820,7 @@ class NarrationController extends ChangeNotifier {
       // Schedule Phoenix progress before invoking Safari. On iOS Web the
       // speak() call can hold the Dart continuation until the utterance ends.
       // Starting the watchdog first keeps percentage and the triangle marker
-      // moving while audio is audible.
+      // text reveal moving while audio is audible.
       unawaited(_startProgressWatchdog(sessionToken, safeOffset));
       final result = await _tts.speak(remainingText);
       if (result == 1 && !_disposed) {
@@ -888,8 +899,7 @@ class NarrationController extends ChangeNotifier {
 
   Future<void> _stopSpeechEngine() async {
     _speechSessionToken += 1;
-    if (_webSpeech.isAvailable &&
-        _speechMode != _NarrationSpeechMode.word) {
+    if (_webSpeech.isAvailable && _speechMode != _NarrationSpeechMode.word) {
       await _webSpeech.stop();
       _webSpeechPausedInPlace = false;
       _restartWebSpeechOnResume = false;

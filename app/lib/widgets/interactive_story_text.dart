@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,52 @@ class StoryTextSegment {
   final WordEntry? entry;
 
   bool get isVocabulary => entry != null;
+}
+
+@visibleForTesting
+int revealedSegmentLength({
+  required int segmentStart,
+  required int segmentEnd,
+  int? revealEnd,
+}) {
+  if (revealEnd == null) return segmentEnd - segmentStart;
+  return revealEnd.clamp(segmentStart, segmentEnd).toInt() - segmentStart;
+}
+
+const int cinematicRevealTailLength = 3;
+
+@visibleForTesting
+double cinematicDepthProgress({
+  required double revealCursor,
+  required int characterIndex,
+  int tailLength = cinematicRevealTailLength,
+}) {
+  final safeTailLength = tailLength.clamp(1, 12).toInt();
+  final raw = ((revealCursor - characterIndex) / safeTailLength)
+      .clamp(0.0, 1.0)
+      .toDouble();
+  return Curves.easeOutCubic.transform(raw);
+}
+
+@visibleForTesting
+double cinematicRevealProgress({
+  required double revealCursor,
+  required int characterIndex,
+}) {
+  return cinematicDepthProgress(
+    revealCursor: revealCursor,
+    characterIndex: characterIndex,
+    tailLength: 1,
+  );
+}
+
+@visibleForTesting
+Duration cinematicRevealDuration(double characterDistance) {
+  final milliseconds = (characterDistance.abs() * 210)
+      .round()
+      .clamp(160, 700)
+      .toInt();
+  return Duration(milliseconds: milliseconds);
 }
 
 @visibleForTesting
@@ -111,6 +158,8 @@ class InteractiveStoryText extends StatefulWidget {
     this.narrationController,
     this.highlightStart,
     this.highlightEnd,
+    this.revealEnd,
+    this.narrationSessionToken = 0,
     super.key,
   });
 
@@ -126,31 +175,92 @@ class InteractiveStoryText extends StatefulWidget {
   final NarrationController? narrationController;
   final int? highlightStart;
   final int? highlightEnd;
+  final int? revealEnd;
+  final int narrationSessionToken;
 
   @override
   State<InteractiveStoryText> createState() => _InteractiveStoryTextState();
 }
 
-class _InteractiveStoryTextState extends State<InteractiveStoryText> {
+class _InteractiveStoryTextState extends State<InteractiveStoryText>
+    with SingleTickerProviderStateMixin {
   final List<TapGestureRecognizer> _recognizers = [];
   late List<_InteractiveSegment> _segments;
   WordEntry? _selectedEntry;
   Timer? _hideTimer;
+  late final AnimationController _cinematicRevealController;
+  double _lastAcceptedRevealCursor = 0;
 
   @override
   void initState() {
     super.initState();
+    final initialReveal = _targetRevealCursor(widget.revealEnd);
+    _lastAcceptedRevealCursor = initialReveal;
+    _cinematicRevealController = AnimationController.unbounded(
+      vsync: this,
+      value: initialReveal,
+    );
     _buildSegments();
   }
 
   @override
   void didUpdateWidget(covariant InteractiveStoryText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text || oldWidget.entries != widget.entries) {
+    final textChanged = oldWidget.text != widget.text;
+    final sessionChanged =
+        oldWidget.narrationSessionToken != widget.narrationSessionToken;
+    if (textChanged || oldWidget.entries != widget.entries) {
       _disposeRecognizers();
       _selectedEntry = null;
       _buildSegments();
     }
+
+    if (textChanged || sessionChanged) {
+      _resetRevealTo(widget.revealEnd);
+    } else if (oldWidget.revealEnd != widget.revealEnd) {
+      _animateRevealTo(widget.revealEnd);
+    }
+  }
+
+  double _targetRevealCursor(int? revealEnd) {
+    final resolved = (revealEnd ?? widget.text.length).clamp(
+      0,
+      widget.text.length,
+    );
+    if (resolved >= widget.text.length) {
+      return (widget.text.length + cinematicRevealTailLength).toDouble();
+    }
+    return resolved.toDouble();
+  }
+
+  double get _currentRevealCursor => _cinematicRevealController.value;
+
+  void _resetRevealTo(int? revealEnd) {
+    final target = _targetRevealCursor(revealEnd);
+    _cinematicRevealController.stop();
+    _lastAcceptedRevealCursor = target;
+    _cinematicRevealController.value = target;
+  }
+
+  void _animateRevealTo(int? revealEnd) {
+    final requestedTarget = _targetRevealCursor(revealEnd);
+    final acceptedTarget = requestedTarget < _lastAcceptedRevealCursor
+        ? _lastAcceptedRevealCursor
+        : requestedTarget;
+    _lastAcceptedRevealCursor = acceptedTarget;
+
+    final current = _currentRevealCursor.clamp(
+      0.0,
+      (widget.text.length + cinematicRevealTailLength).toDouble(),
+    );
+    final distance = acceptedTarget - current;
+    if (distance <= 0.01) return;
+
+    _cinematicRevealController.animateTo(
+      acceptedTarget,
+      duration: cinematicRevealDuration(distance),
+      curve: Curves.linear,
+    );
   }
 
   void _buildSegments() {
@@ -213,6 +323,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
   @override
   void dispose() {
     _hideTimer?.cancel();
+    _cinematicRevealController.dispose();
     _disposeRecognizers();
     super.dispose();
   }
@@ -229,7 +340,10 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AnimatedBuilder(
-          animation: highlightSource,
+          animation: Listenable.merge(<Listenable>[
+            highlightSource,
+            _cinematicRevealController,
+          ]),
           builder: (context, _) {
             final snapshot =
                 widget.narrationController?.highlightSnapshot ??
@@ -263,6 +377,12 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
               key: ValueKey(
                 'interactive-highlight-${widget.narrationItemId ?? widget.text}',
               ),
+              strutStyle: StrutStyle(
+                fontSize: baseStyle?.fontSize,
+                height: baseStyle?.height,
+                fontWeight: baseStyle?.fontWeight,
+                forceStrutHeight: true,
+              ),
               TextSpan(
                 style: baseStyle,
                 children: _segments
@@ -273,6 +393,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
                         baseStyle: baseStyle,
                         highlightStart: highlightStart,
                         highlightEnd: highlightEnd,
+                        revealCursor: _currentRevealCursor,
                       );
                     })
                     .toList(growable: false),
@@ -299,7 +420,9 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
             child: selectedEntry == null
                 ? const SizedBox.shrink(key: ValueKey('word-popover-empty'))
                 : Padding(
-                    key: ValueKey('word-popover-auto-visible-${selectedEntry.word}'),
+                    key: ValueKey(
+                      'word-popover-auto-visible-${selectedEntry.word}',
+                    ),
                     padding: const EdgeInsets.only(top: 8),
                     child: _VocabularyPopover(
                       entry: selectedEntry,
@@ -319,6 +442,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
     required TextStyle? baseStyle,
     required int highlightStart,
     required int highlightEnd,
+    required double revealCursor,
   }) {
     final segmentStyle = segment.entry == null
         ? baseStyle
@@ -338,58 +462,121 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
               Shadow(color: Color(0xB3000000), blurRadius: 7),
             ],
           );
-
-    final overlapStart = highlightStart
-        .clamp(segment.start, segment.end)
+    final effectiveStyle = segmentStyle ?? baseStyle ?? const TextStyle();
+    final localCursor = (revealCursor - segment.start)
+        .clamp(0.0, segment.text.length.toDouble() + cinematicRevealTailLength)
+        .toDouble();
+    final visibleLength = localCursor
+        .floor()
+        .clamp(0, segment.text.length)
         .toInt();
-    final overlapEnd = highlightEnd.clamp(segment.start, segment.end).toInt();
-    final hasHighlight = highlightStart >= 0 && overlapEnd > overlapStart;
-
-    if (!hasHighlight) {
-      return [
-        _span(
-          state.displayText(segment.text),
-          segment,
-          style: segmentStyle,
-          state: state,
-        ),
-      ];
-    }
-
-    final beforeLength = overlapStart - segment.start;
-    final activeLength = overlapEnd - overlapStart;
+    final stableLength = (visibleLength - cinematicRevealTailLength)
+        .clamp(0, segment.text.length)
+        .toInt();
+    final stableEnd = segment.start + stableLength;
     final spans = <InlineSpan>[];
 
-    if (beforeLength > 0) {
+    if (stableLength > 0) {
+      final overlapStart = highlightStart
+          .clamp(segment.start, stableEnd)
+          .toInt();
+      final overlapEnd = highlightEnd.clamp(segment.start, stableEnd).toInt();
+      final hasHighlight = highlightStart >= 0 && overlapEnd > overlapStart;
+
+      if (!hasHighlight) {
+        spans.add(
+          _span(
+            state.displayText(segment.text.substring(0, stableLength)),
+            segment,
+            style: segmentStyle,
+            state: state,
+          ),
+        );
+      } else {
+        final beforeLength = overlapStart - segment.start;
+        final activeLength = overlapEnd - overlapStart;
+
+        if (beforeLength > 0) {
+          spans.add(
+            _span(
+              state.displayText(segment.text.substring(0, beforeLength)),
+              segment,
+              style: segmentStyle,
+              state: state,
+            ),
+          );
+        }
+
+        spans.add(
+          _readingMarkerSpan(
+            state.displayText(
+              segment.text.substring(beforeLength, beforeLength + activeLength),
+            ),
+            segment,
+            style: effectiveStyle,
+            state: state,
+          ),
+        );
+
+        final afterStart = beforeLength + activeLength;
+        if (afterStart < stableLength) {
+          spans.add(
+            _span(
+              state.displayText(
+                segment.text.substring(afterStart, stableLength),
+              ),
+              segment,
+              style: segmentStyle,
+              state: state,
+            ),
+          );
+        }
+      }
+    }
+
+    var hiddenStart = stableLength;
+    for (
+      var localIndex = stableLength;
+      localIndex < segment.text.length;
+      localIndex += 1
+    ) {
+      final characterIndex = segment.start + localIndex;
+      final depthProgress = cinematicDepthProgress(
+        revealCursor: revealCursor,
+        characterIndex: characterIndex,
+      );
+      if (depthProgress <= .001) break;
+      final isHighlighted =
+          highlightStart >= 0 &&
+          characterIndex >= highlightStart &&
+          characterIndex < highlightEnd;
       spans.add(
-        _span(
-          state.displayText(segment.text.substring(0, beforeLength)),
+        _cinematicFrontierSpan(
+          state.displayText(segment.text[localIndex]),
           segment,
-          style: segmentStyle,
+          style: effectiveStyle,
+          progress: depthProgress,
+          highlighted: isHighlighted,
           state: state,
         ),
       );
+      hiddenStart = localIndex + 1;
     }
 
-    spans.add(
-      _readingMarkerSpan(
-        state.displayText(
-          segment.text.substring(beforeLength, beforeLength + activeLength),
-        ),
-        segment,
-        style: segmentStyle ?? baseStyle ?? const TextStyle(),
-        state: state,
-      ),
-    );
-
-    final afterStart = beforeLength + activeLength;
-    if (afterStart < segment.text.length) {
+    if (hiddenStart < segment.text.length) {
+      final hiddenStyle = effectiveStyle.copyWith(
+        color: Colors.transparent,
+        decoration: TextDecoration.none,
+        shadows: const <Shadow>[],
+      );
       spans.add(
         _span(
-          state.displayText(segment.text.substring(afterStart)),
+          state.displayText(segment.text.substring(hiddenStart)),
           segment,
-          style: segmentStyle,
+          style: hiddenStyle,
           state: state,
+          interactive: false,
+          hidden: true,
         ),
       );
     }
@@ -397,18 +584,54 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
     return spans;
   }
 
-  TextSpan _span(
+  TextSpan _cinematicFrontierSpan(
     String text,
     _InteractiveSegment segment, {
-    required TextStyle? style,
+    required TextStyle style,
+    required double progress,
+    required bool highlighted,
     required AppState state,
   }) {
     final entry = segment.entry;
+    final t = progress.clamp(0.0, 1.0).toDouble();
+    final contrast = Curves.easeOutCubic.transform(t);
+    final opacity = lerpDouble(.35, 1, t) ?? 1;
+    final finalColor = style.color ?? Colors.white;
+    final paleColor = highlighted
+        ? const Color(0xFFFFE7AA)
+        : const Color(0xFFD8D0C2);
+    final cinematicColor =
+        Color.lerp(paleColor, finalColor, contrast) ?? finalColor;
+
     return TextSpan(
       text: text,
       recognizer: segment.recognizer,
       mouseCursor: entry == null ? MouseCursor.defer : SystemMouseCursors.click,
       semanticsLabel: entry == null
+          ? null
+          : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
+      style: style.copyWith(color: cinematicColor.withValues(alpha: opacity)),
+    );
+  }
+
+  TextSpan _span(
+    String text,
+    _InteractiveSegment segment, {
+    required TextStyle? style,
+    required AppState state,
+    bool interactive = true,
+    bool hidden = false,
+  }) {
+    final entry = segment.entry;
+    return TextSpan(
+      text: text,
+      recognizer: interactive ? segment.recognizer : null,
+      mouseCursor: interactive && entry != null
+          ? SystemMouseCursors.click
+          : MouseCursor.defer,
+      semanticsLabel: hidden
+          ? ''
+          : entry == null
           ? null
           : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
       style: style,
@@ -434,7 +657,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText> {
           onTap: entry == null ? null : () => _showEntry(entry),
           child: _InlineReadingMarker(
             key: ValueKey(
-              'reading-triangle-${widget.narrationItemId ?? widget.text}',
+              'reading-highlight-${widget.narrationItemId ?? widget.text}',
             ),
             text: text,
             style: style,
@@ -457,52 +680,23 @@ class _InlineReadingMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      // Reserve real layout space for the triangle. Painting below a Text
-      // baseline alone is clipped by Flutter Web on iOS Safari.
-      padding: const EdgeInsets.only(bottom: 5),
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
-        children: [
-          Text(text, style: style.copyWith(height: 1)),
-          const Positioned(
-            left: 0,
-            right: 0,
-            bottom: -4,
-            child: Center(
-              child: CustomPaint(
-                size: Size(9, 5),
-                painter: _ReadingTrianglePainter(),
-              ),
-            ),
+    final fontSize = style.fontSize ?? 14;
+    final lineHeight = style.height ?? 1.22;
+    return SizedBox(
+      height: fontSize * lineHeight,
+      child: Center(
+        widthFactor: 1,
+        child: Text(
+          text,
+          style: style.copyWith(
+            color: const Color(0xFFFFE7AA),
+            height: lineHeight,
+            fontWeight: FontWeight.w900,
           ),
-        ],
+        ),
       ),
     );
   }
-}
-
-class _ReadingTrianglePainter extends CustomPainter {
-  const _ReadingTrianglePainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final triangle = Path()
-      ..moveTo(size.width / 2, 0)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-    canvas.drawPath(
-      triangle,
-      Paint()
-        ..color = PhoenixTheme.red
-        ..style = PaintingStyle.fill,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _ReadingTrianglePainter oldDelegate) => false;
 }
 
 class _VocabularyPopover extends StatelessWidget {
@@ -527,77 +721,107 @@ class _VocabularyPopover extends StatelessWidget {
       child: DefaultTextStyle.merge(
         style: PhoenixTheme.journeyBodyStyle,
         child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(12, 9, 8, 9),
-        decoration: PhoenixTheme.destinationGlass(alpha: .12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(entry.symbol, style: const TextStyle(fontSize: 21)),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        state.displayText(entry.word),
-                        style: PhoenixTheme.journeyTitleStyle,
-                      ),
-                      const SizedBox(width: 7),
-                      Expanded(
-                        child: Text(
-                          entry.pinyin,
-                          overflow: TextOverflow.ellipsis,
-                          style: PhoenixTheme.journeyMetaStyle.copyWith(fontSize: 12),
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(12, 9, 8, 9),
+          decoration: PhoenixTheme.destinationGlass(alpha: .12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(entry.symbol, style: const TextStyle(fontSize: 21)),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          state.displayText(entry.word),
+                          style: PhoenixTheme.journeyTitleStyle,
                         ),
+                        const SizedBox(width: 7),
+                        Expanded(
+                          child: Text(
+                            entry.pinyin,
+                            overflow: TextOverflow.ellipsis,
+                            style: PhoenixTheme.journeyMetaStyle.copyWith(
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      state.displayText(entry.partOfSpeech),
+                      key: ValueKey('story-discovery-word-pos-${entry.word}'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w900,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    state.displayText(entry.partOfSpeech),
-                    key: ValueKey('story-discovery-word-pos-${entry.word}'),
-                    style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    state.displayText(nativeLabel),
-                    key: ValueKey('story-discovery-word-native-label-${entry.word}'),
-                    style: const TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    nativeDefinition,
-                    key: ValueKey('story-discovery-word-native-${entry.word}'),
-                    style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.3),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'English',
-                    key: ValueKey('story-discovery-word-english-label-${entry.word}'),
-                    style: const TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    englishDefinition.isEmpty ? '—' : englishDefinition,
-                    key: ValueKey('story-discovery-word-english-${entry.word}'),
-                    style: const TextStyle(color: Colors.white, fontSize: 11.5, height: 1.25),
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      state.displayText(nativeLabel),
+                      key: ValueKey(
+                        'story-discovery-word-native-label-${entry.word}',
+                      ),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      nativeDefinition,
+                      key: ValueKey(
+                        'story-discovery-word-native-${entry.word}',
+                      ),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'English',
+                      key: ValueKey(
+                        'story-discovery-word-english-label-${entry.word}',
+                      ),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      englishDefinition.isEmpty ? '—' : englishDefinition,
+                      key: ValueKey(
+                        'story-discovery-word-english-${entry.word}',
+                      ),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11.5,
+                        height: 1.25,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              visualDensity: VisualDensity.compact,
-              padding: const EdgeInsets.all(3),
-              constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-              tooltip: '关闭解释',
-              onPressed: onClose,
-              icon: const Icon(Icons.close_rounded, size: 17),
-            ),
-          ],
-        ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.all(3),
+                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                tooltip: '关闭解释',
+                onPressed: onClose,
+                icon: const Icon(Icons.close_rounded, size: 17),
+              ),
+            ],
+          ),
         ),
       ),
     );

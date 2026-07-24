@@ -23,6 +23,7 @@ final class PhoenixWebSpeech {
     required double rate,
     double pitch = .98,
     double volume = 1,
+    bool cancelExisting = true,
   }) async => false;
 
   Future<bool> pause() async => false;
