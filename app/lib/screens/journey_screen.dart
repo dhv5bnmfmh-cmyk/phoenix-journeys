@@ -906,45 +906,6 @@ class _JourneyScreenState extends State<JourneyScreen>
                 ),
                 SizedBox(height: compact ? 3 : 5),
               ],
-              SizedBox(
-                height: keyboardVisible ? 26 : null,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: PhoenixTheme.journeyTitleStyle.copyWith(
-                          fontSize: keyboardVisible ? 15 : (compact ? 17 : 19),
-                          height: 1.05,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    if (keyboardVisible)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: PhoenixTheme.gold.withValues(alpha: .12),
-                          borderRadius: BorderRadius.circular(99),
-                        ),
-                        child: const Text(
-                          '输入中',
-                          style: TextStyle(
-                            color: PhoenixTheme.red,
-                            fontSize: 8.5,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              SizedBox(height: keyboardVisible ? 3 : (compact ? 4 : 6)),
               Expanded(child: child),
               if (!keyboardVisible) ...[
                 SizedBox(height: compact ? 4 : 7),
