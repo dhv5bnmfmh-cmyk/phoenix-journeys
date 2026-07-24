@@ -35,6 +35,12 @@ jobs:
           path: phoenix
           fetch-depth: 0
 
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
       - name: Apply monotonic narration refinement
         working-directory: phoenix
         run: |
