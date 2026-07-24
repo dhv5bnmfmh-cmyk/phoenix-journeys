@@ -51,7 +51,6 @@ class DestinationBackground extends StatelessWidget {
         child: child,
       );
     }
-
     if (journeyId == _forbiddenCityJourneyId) {
       return _ForbiddenCityDynamicBackground(
         assetPath: asset?.assetPath,
@@ -59,7 +58,6 @@ class DestinationBackground extends StatelessWidget {
         child: child,
       );
     }
-
     if (journeyId == _shanghaiBundJourneyId) {
       return _ShanghaiBundDynamicBackground(
         assetPath: asset?.assetPath,
@@ -213,14 +211,12 @@ class _ForbiddenCityCameraLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final path = assetPath;
     if (path == null) return const _BackgroundFallback();
-
     return RepaintBoundary(
       key: const ValueKey('forbidden-city-camera-layer'),
       child: Transform.translate(
         key: const ValueKey('forbidden-city-camera-transform'),
         offset: Offset(-10 + 20 * progress, -18 + 22 * progress),
         child: Transform.scale(
-          alignment: Alignment.center,
           scale: 1.045 + .07 * progress,
           child: Image.asset(
             path,
@@ -320,25 +316,21 @@ class _ForbiddenCityGateDepth extends StatelessWidget {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: FractionallySizedBox(
-          widthFactor: 1,
           heightFactor: .48,
           child: Transform.translate(
             offset: Offset(0, 6 - 12 * progress),
-            child: Opacity(
-              opacity: .82 + .12 * progress,
-              child: DecoratedBox(
-                key: const ValueKey('forbidden-city-gate-depth'),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      const Color(0xFF6E201C).withValues(alpha: .04),
-                      const Color(0xFF24120F).withValues(alpha: .15),
-                    ],
-                    stops: const [0, .58, 1],
-                  ),
+            child: DecoratedBox(
+              key: const ValueKey('forbidden-city-gate-depth'),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    const Color(0xFF6E201C).withValues(alpha: .04),
+                    const Color(0xFF24120F).withValues(alpha: .15),
+                  ],
+                  stops: const [0, .58, 1],
                 ),
               ),
             ),
@@ -403,7 +395,7 @@ class _ShanghaiBundDynamicBackgroundState
       _motion.value = .47;
     } else if (!_motion.isAnimating) {
       _motion.value = .06;
-      _motion.repeat(reverse: true);
+      _motion.repeat();
     }
   }
 
@@ -433,18 +425,21 @@ class _ShanghaiBundDynamicBackgroundState
               animation: _motion,
               builder: (context, _) {
                 final raw = reduceMotion ? .47 : _motion.value;
-                final progress = Curves.easeInOutSine.transform(raw);
+                final sceneProgress = Curves.easeInOutSine.transform(
+                  raw <= .5 ? raw * 2 : (1 - raw) * 2,
+                );
+                final boatProgress = reduceMotion ? 1.0 : raw;
                 return ExcludeSemantics(
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
                       _ShanghaiBundCameraLayer(
                         assetPath: widget.assetPath,
-                        progress: progress,
+                        progress: sceneProgress,
                       ),
-                      _ShanghaiBundSkylineGlow(progress: progress),
-                      _ShanghaiBundRiverLight(progress: progress),
-                      _ShanghaiBundBoatShadow(progress: progress),
+                      _ShanghaiBundSkylineGlow(progress: sceneProgress),
+                      _ShanghaiBundRiverLight(progress: sceneProgress),
+                      _ShanghaiBundBoatShadow(progress: boatProgress),
                     ],
                   ),
                 );
@@ -472,14 +467,12 @@ class _ShanghaiBundCameraLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final path = assetPath;
     if (path == null) return const _BackgroundFallback();
-
     return RepaintBoundary(
       key: const ValueKey('shanghai-bund-camera-layer'),
       child: Transform.translate(
         key: const ValueKey('shanghai-bund-camera-transform'),
         offset: Offset(-12 + 24 * progress, -8 + 10 * progress),
         child: Transform.scale(
-          alignment: Alignment.center,
           scale: 1.035 + .055 * progress,
           child: Image.asset(
             path,
@@ -582,17 +575,27 @@ class _ShanghaiBundBoatShadow extends StatelessWidget {
     return IgnorePointer(
       child: LayoutBuilder(
         builder: (context, constraints) {
+          const startAt = .08;
+          const finishAt = .68;
+          final isVisible = progress >= startAt && progress <= finishAt;
+          final passage = ((progress - startAt) / (finishAt - startAt))
+              .clamp(0.0, 1.0);
           final travel = constraints.maxWidth + 110;
+          final fadeIn = (passage / .14).clamp(0.0, 1.0);
+          final fadeOut = ((1 - passage) / .14).clamp(0.0, 1.0);
+          final opacity = isVisible
+              ? .44 * (fadeIn < fadeOut ? fadeIn : fadeOut)
+              : 0.0;
           return Stack(
             fit: StackFit.expand,
             children: [
               Positioned(
-                left: -74 + travel * progress,
+                left: -74 + travel * Curves.easeInOut.transform(passage),
                 bottom: constraints.maxHeight * .2,
                 child: Opacity(
-                  opacity: .48,
+                  opacity: opacity,
                   child: Transform.scale(
-                    scale: .76 + .05 * progress,
+                    scale: .76 + .05 * passage,
                     child: SizedBox(
                       key: const ValueKey('shanghai-bund-boat-shadow'),
                       width: 62,
@@ -777,7 +780,6 @@ class _SummerPalaceCameraLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final path = assetPath;
     if (path == null) return const _BackgroundFallback();
-
     return RepaintBoundary(
       key: const ValueKey('summer-palace-camera-layer'),
       child: Transform.translate(
@@ -885,7 +887,6 @@ class _SummerPalaceForegroundBreath extends StatelessWidget {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: FractionallySizedBox(
-          widthFactor: 1,
           heightFactor: .44,
           child: Transform.translate(
             offset: Offset(0, 8 - 16 * progress),
