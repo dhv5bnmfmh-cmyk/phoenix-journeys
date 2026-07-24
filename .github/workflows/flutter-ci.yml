@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
@@ -26,27 +26,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: feature/shanghai-bund-dynamic-background
-          fetch-depth: 0
-
-      - name: Apply Shanghai Bund motion
-        if: github.ref == 'refs/heads/feature/shanghai-bund-dynamic-background' || github.head_ref == 'feature/shanghai-bund-dynamic-background'
-        working-directory: ${{ github.workspace }}
-        run: |
-          python3 - <<'PYRUN'
-          from pathlib import Path
-
-          workflow = Path('.github/workflows/build-shanghai-bund-motion.yml')
-          lines = workflow.read_text().splitlines()
-          start = lines.index("          python3 - <<'PY'") + 1
-          end = lines.index('          PY', start)
-          script = '\n'.join(
-              line[10:] if line.startswith('          ') else line
-              for line in lines[start:end]
-          )
-          exec(compile(script, str(workflow), 'exec'))
-          PYRUN
 
       - name: Test Phoenix agents
         id: agents
@@ -64,10 +43,6 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-
-      - name: Format Shanghai Bund motion
-        if: github.ref == 'refs/heads/feature/shanghai-bund-dynamic-background' || github.head_ref == 'feature/shanghai-bund-dynamic-background'
-        run: dart format lib/widgets/destination_background.dart
 
       - name: Analyze
         id: analyze
@@ -126,13 +101,3 @@ jobs:
             fi
           done
           exit "$failures"
-
-      - name: Publish Shanghai Bund motion
-        if: github.ref == 'refs/heads/feature/shanghai-bund-dynamic-background' || github.head_ref == 'feature/shanghai-bund-dynamic-background'
-        working-directory: ${{ github.workspace }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/lib/widgets/destination_background.dart worker/shanghai_bund_motion.test.mjs
-          git commit -m "feat: add Shanghai Bund cinematic background motion"
-          git push origin HEAD:feature/shanghai-bund-dynamic-background
