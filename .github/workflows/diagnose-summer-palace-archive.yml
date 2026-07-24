@@ -1,0 +1,52 @@
+name: Diagnose Summer Palace archive
+
+on:
+  push:
+    branches:
+      - fix/summer-palace-background-refresh
+    paths:
+      - '.github/workflows/diagnose-summer-palace-archive.yml'
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.event_name != 'pull_request' || github.event.pull_request.number == 85
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect reviewed archive blobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -u
+          candidates=(
+            02c0ddf5ed8e4278c9eee316d6e938d574bfa118
+            8064c36b3e9ff1ca2969d6e0a0cbb974f2d68900
+            23d592277d4652831baedc1f7d580a768f43f5ec
+            d0405e410bc43bdb8984458d123256d8ee808261
+          )
+          for sha in "${candidates[@]}"; do
+            echo "===== $sha ====="
+            if gh api "repos/$GITHUB_REPOSITORY/git/blobs/$sha" --jq '.content' \
+              | tr -d '\n' \
+              | base64 --decode > "/tmp/$sha.bin"; then
+              wc -c "/tmp/$sha.bin"
+              file "/tmp/$sha.bin" || true
+              xxd -l 32 "/tmp/$sha.bin" || true
+              gzip -t "/tmp/$sha.bin" && echo 'gzip: yes' || echo 'gzip: no'
+              tar -tf "/tmp/$sha.bin" | head -20 || true
+              unzip -l "/tmp/$sha.bin" | head -20 || true
+            else
+              echo 'blob unavailable'
+            fi
+          done

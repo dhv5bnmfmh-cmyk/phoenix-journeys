@@ -1,21 +1,21 @@
-name: Import Summer Palace backgrounds
+name: Refresh Summer Palace backgrounds
 
 on:
   push:
     branches:
       - fix/summer-palace-background-refresh
     paths:
-      - '.github/workflows/import-summer-palace-backgrounds.yml'
+      - '.github/workflows/refresh-summer-palace-backgrounds.yml'
 
 permissions:
   contents: write
 
 concurrency:
-  group: import-summer-palace-backgrounds-refresh
+  group: refresh-summer-palace-backgrounds
   cancel-in-progress: true
 
 jobs:
-  import-backgrounds:
+  refresh:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
