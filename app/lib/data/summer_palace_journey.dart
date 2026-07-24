@@ -29,44 +29,17 @@ const summerPalaceStorySources = <StorySourceRecord>[
 ];
 
 const summerPalaceStoryParagraphs = <String>[
-  '清晨，你沿着昆明湖慢慢向前走。湖面映着万寿山，远处的亭台像从水和树之间自然生长出来。',
-  '走进长廊以后，每一步都像在一幅不断展开的画里。山、水、桥、宫殿和花木彼此连接，却不会互相遮挡。',
-  '颐和园最早在一七五〇年建成，后来经历破坏，又在一八八六年按照原有基础重建。它保存的不只是一座皇家园林，也是一段不断修复的历史。',
-  '当你走到十七孔桥前，会发现这里真正特别的不是某一座建筑，而是人怎样借用自然，让湖光、山色和建筑共同完成一处风景。',
+  '清晨，你沿着昆明湖岸慢慢向前走，湖面先接住灰蓝色的天光，万寿山和佛香阁的轮廓随后从薄雾里显出来。远处的亭台看起来像自然生长在山水之间，但当脚步继续移动，你会发现眼前的风景并不是偶然形成的：树木遮住一部分山峰，桥梁把宽阔的水面分出层次，屋顶和廊柱又在视线将要散开时轻轻把它收回来。走进长廊，湖光从一根根柱子之间闪过，彩画、屋檐和不断变化的开口让行走变成一场缓慢展开的观看。你有时靠近画面，有时越过栏杆望向远山，同一座万寿山也会随着位置改变而显得更近、更高或更安静。颐和园最早在一七五〇年建成，后来在战火中受到严重破坏，并于一八八六年在原有基础上重建，因此今天看到的并不是一处从未改变的旧园，而是一座同时保存了设计、损失与修复痕迹的皇家园林。园中大约四分之三的面积是水，昆明湖并不是建筑旁边的空白，而是整个景观最重要的空间：它拉开山与人的距离，也把天空、桥梁、岛屿和屋顶放进同一幅不断变化的倒影。来到十七孔桥前，桥身没有把湖面切断，反而把岸、岛和远处山色连接起来；阳光穿过桥孔时，坚硬的石桥也像有了呼吸。走到这里，你会明白颐和园真正特别的地方并不只是某一座殿宇、某一条长廊或某一座桥，而是设计者怎样借景、对景和安排人的路线，让人工建筑逐渐退到山水之后，又在最需要的时候出现。离开之前再回头看，湖还是那片湖，山还是那座山，但你的目光已经不同了：你开始看见一处风景如何被行走、被修复，也被一代又一代的人重新理解。',
 ];
 
 const summerPalaceStoryAnnotations = <ReadingAnnotation>[
   ReadingAnnotation(
     pinyin:
-        'Qīngchén, nǐ yánzhe Kūnmíng Hú mànmàn xiàng qián zǒu. Húmiàn yìngzhe Wànshòu Shān, yuǎnchù de tíngtái xiàng cóng shuǐ hé shù zhījiān zìrán shēngzhǎng chūlái.',
+        'Qingchen, ni yanzhe Kunming Hu an manman xiang qian zou. Humian jie zhu hui lanse de tianguang, Wanshou Shan he Fuxiang Ge de lunkuo cong bowu li xian chulai. Suizhe jiaobu yidong, shumu, qiaoliang, wuding he langzhu buduan tiaozheng ni de shixian. Zoujin Changlang, huguang cong zhuzi zhijian shanguo, caihua he wuyan rang xingzou biancheng yi chang huanman zhankai de guankan. Yiheyuan zui zao zai yi qi wu ling nian jiancheng, hou zai zhanhuo zhong shoudao pohuai, bing yu yi ba ba liu nian zai yuanyou jichu shang chongjian. Yuan zhong dayue si fen zhi san de mianji shi shui, Kunming Hu ba tiankong, qiaoliang, daoyu he wuding fangjin tong yi fu buduan bianhua de daoying. Laidao Shiqikong Qiao qian, ni hui mingbai zheli zhenzheng tebie de shi ren ruhe jie jing, dui jing he anpai luxian, rang jianzhu yu shanshui gongtong wancheng yi chu fengjing.',
     vietnamese:
-        'Sáng sớm, bạn chậm rãi đi dọc hồ Côn Minh. Mặt hồ phản chiếu núi Vạn Thọ, còn những đình đài phía xa như mọc lên tự nhiên giữa nước và cây.',
+        'Vào buổi sớm, bạn chậm rãi đi dọc bờ hồ Côn Minh. Ánh trời xanh xám trải trên mặt nước, rồi đường nét của núi Vạn Thọ và Phật Hương Các dần hiện ra trong làn sương mỏng. Khi tiếp tục bước đi, bạn nhận ra cảnh vật không hề được sắp đặt ngẫu nhiên: cây cối che bớt đỉnh núi, cầu chia mặt hồ thành nhiều lớp, còn mái nhà và cột hành lang nhẹ nhàng dẫn ánh nhìn trở lại. Trong Trường Lang, ánh hồ lóe qua từng hàng cột, tranh màu và những khoảng mở thay đổi liên tục khiến việc đi bộ trở thành một cách ngắm cảnh chậm rãi. Di Hòa Viên được xây dựng lần đầu vào năm 1750, sau đó bị phá hủy nặng trong chiến tranh và được tái thiết trên nền cũ vào năm 1886, vì vậy khu vườn ngày nay lưu giữ cả thiết kế, mất mát và dấu vết phục hồi. Khoảng ba phần tư diện tích là mặt nước; hồ Côn Minh không phải khoảng trống bên cạnh kiến trúc mà là không gian trung tâm, phản chiếu bầu trời, cầu, đảo và mái nhà. Trước cầu Thập Thất Khổng, bạn dần hiểu điều đặc biệt của Di Hòa Viên không nằm ở một công trình riêng lẻ, mà ở cách con người mượn cảnh, sắp xếp lối đi và để kiến trúc cùng núi nước hoàn thành một phong cảnh.',
     english:
-        'At dawn, you walk slowly beside Kunming Lake. Longevity Hill is reflected on the water, while distant pavilions seem to grow naturally between the lake and trees.',
-  ),
-  ReadingAnnotation(
-    pinyin:
-        'Zǒujìn Chángláng yǐhòu, měi yí bù dōu xiàng zài yì fú bùduàn zhǎnkāi de huà lǐ. Shān, shuǐ, qiáo, gōngdiàn hé huāmù bǐcǐ liánjiē, què bú huì hùxiāng zhēdǎng.',
-    vietnamese:
-        'Sau khi bước vào Trường Lang, mỗi bước chân giống như đi trong một bức tranh đang dần mở ra. Núi, nước, cầu, cung điện và cây cỏ liên kết với nhau mà không che khuất nhau.',
-    english:
-        'Inside the Long Corridor, every step feels like moving through an unfolding painting. Hills, water, bridges, halls, and plants connect without blocking one another.',
-  ),
-  ReadingAnnotation(
-    pinyin:
-        'Yíhéyuán zuìzǎo zài yī qī wǔ líng nián jiànchéng, hòulái jīnglì pòhuài, yòu zài yī bā bā liù nián ànzhào yuányǒu jīchǔ chóngjiàn. Tā bǎocún de bù zhǐ shì yí zuò huángjiā yuánlín, yě shì yí duàn bùduàn xiūfù de lìshǐ.',
-    vietnamese:
-        'Di Hòa Viên ban đầu được xây dựng vào năm 1750, sau đó bị phá hủy và được dựng lại trên nền cũ vào năm 1886. Nơi đây lưu giữ không chỉ một khu vườn hoàng gia mà còn cả lịch sử của nhiều lần phục hồi.',
-    english:
-        'The Summer Palace was first built in 1750, later damaged, and reconstructed on its original foundations in 1886. It preserves both an imperial garden and a history of repeated restoration.',
-  ),
-  ReadingAnnotation(
-    pinyin:
-        'Dāng nǐ zǒu dào Shíqīkǒng Qiáo qián, huì fāxiàn zhèlǐ zhēnzhèng tèbié de bú shì mǒu yí zuò jiànzhù, ér shì rén zěnyàng jièyòng zìrán, ràng húguāng, shānsè hé jiànzhù gòngtóng wánchéng yí chù fēngjǐng.',
-    vietnamese:
-        'Khi đến trước cầu Thập Thất Khổng, bạn sẽ nhận ra điều đặc biệt không nằm ở riêng một công trình, mà ở cách con người mượn thiên nhiên để mặt hồ, núi non và kiến trúc cùng tạo nên phong cảnh.',
-    english:
-        'At the Seventeen-Arch Bridge, you realize the garden is special not because of one building, but because people borrowed from nature so lake, hills, and architecture could complete one landscape together.',
+        'At dawn, you walk slowly beside Kunming Lake as grey-blue light settles on the water and the outlines of Longevity Hill and the Tower of Buddhist Incense emerge from the mist. As you move, you realize that the view is carefully composed: trees partly conceal the hills, bridges divide the lake into layers, and roofs and corridor columns guide the eye. Inside the Long Corridor, changing openings, painted beams, and flashes of water turn walking into a slow act of seeing. The Summer Palace was first built in 1750, badly damaged in war, and reconstructed on its original foundations in 1886, so the garden preserves design, loss, and restoration together. With roughly three quarters of its area covered by water, Kunming Lake is not empty space beside the buildings but the centre of the landscape, holding sky, bridges, islands, and roofs in a shifting reflection. At the Seventeen-Arch Bridge, you begin to understand that the garden is remarkable not because of one monument, but because borrowed scenery, carefully arranged paths, architecture, and nature complete the view together.',
   ),
 ];
 
