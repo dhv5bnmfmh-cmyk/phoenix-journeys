@@ -7,6 +7,7 @@ const background = readFileSync(
   'utf8',
 );
 
+// Permanent guard for the first non-water cinematic destination.
 test('Forbidden City uses its own slow cinematic motion layers', () => {
   assert.match(background, /_forbiddenCityJourneyId = 'beijing-forbidden-city'/);
   assert.match(background, /class _ForbiddenCityDynamicBackground/);
