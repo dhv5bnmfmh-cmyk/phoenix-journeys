@@ -598,7 +598,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
           child: _CinematicRevealGlyph(
             key: highlighted
                 ? ValueKey(
-                    'reading-triangle-${widget.narrationItemId ?? widget.text}',
+                    'reading-highlight-${widget.narrationItemId ?? widget.text}',
                   )
                 : null,
             text: text,
@@ -654,7 +654,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
           onTap: entry == null ? null : () => _showEntry(entry),
           child: _InlineReadingMarker(
             key: ValueKey(
-              'reading-triangle-${widget.narrationItemId ?? widget.text}',
+              'reading-highlight-${widget.narrationItemId ?? widget.text}',
             ),
             text: text,
             style: style,
@@ -693,42 +693,22 @@ class _CinematicRevealGlyph extends StatelessWidget {
     final fontSize = style.fontSize ?? 14;
     final lineHeight = style.height ?? 1.22;
 
-    // Avoid ImageFiltered blur per glyph. On iPhone Flutter Web that created
-    // several offscreen layers every frame and made short passages stutter.
     return Transform.translate(
       offset: Offset(0, lift),
       child: Opacity(
         opacity: opacity,
         child: SizedBox(
 height: fontSize * lineHeight,
-child: Stack(
-  clipBehavior: Clip.hardEdge,
-  alignment: Alignment.center,
-  children: [
-    Padding(
-      padding: EdgeInsets.only(bottom: highlighted ? 3 : 0),
-      child: Text(
-        text,
-        style: style.copyWith(
-          color: cinematicColor,
-          height: lineHeight,
-          shadows: style.shadows,
-        ),
-      ),
+child: Center(
+  widthFactor: 1,
+  child: Text(
+    text,
+    style: style.copyWith(
+      color: cinematicColor,
+      height: lineHeight,
+      shadows: style.shadows,
     ),
-    if (highlighted)
-      const Positioned(
-        left: 0,
-        right: 0,
-        bottom: 0,
-        child: Center(
-          child: CustomPaint(
-            size: Size(7, 4),
-            painter: _ReadingTrianglePainter(),
-          ),
-        ),
-      ),
-  ],
+  ),
 ),
         ),
       ),
@@ -752,51 +732,19 @@ class _InlineReadingMarker extends StatelessWidget {
     final lineHeight = style.height ?? 1.22;
     return SizedBox(
       height: fontSize * lineHeight,
-      child: Stack(
-        clipBehavior: Clip.hardEdge,
-        alignment: Alignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 3),
-            child: Text(text, style: style.copyWith(height: lineHeight)),
-          ),
-          const Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Center(
-              child: CustomPaint(
-                size: Size(9, 5),
-                painter: _ReadingTrianglePainter(),
-              ),
-            ),
-          ),
-        ],
+      child: Center(
+        widthFactor: 1,
+        child: Text(
+text,
+style: style.copyWith(
+  color: const Color(0xFFFFE7AA),
+  height: lineHeight,
+  fontWeight: FontWeight.w900,
+),
+        ),
       ),
     );
   }
-}
-
-class _ReadingTrianglePainter extends CustomPainter {
-  const _ReadingTrianglePainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final triangle = Path()
-      ..moveTo(size.width / 2, 0)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-    canvas.drawPath(
-      triangle,
-      Paint()
-        ..color = PhoenixTheme.red
-        ..style = PaintingStyle.fill,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _ReadingTrianglePainter oldDelegate) => false;
 }
 
 class _VocabularyPopover extends StatelessWidget {

@@ -27,13 +27,12 @@ test('position derives from playback and is passed to Story and Discovery', () =
   );
 });
 
-test('Flutter verifies a real inline triangle is painted in a fixed line box', () => {
+test('Flutter verifies active narration uses text highlight without triangles', () => {
   assert.match(interactive, /class _InlineReadingMarker/);
-  assert.match(interactive, /class _ReadingTrianglePainter/);
-  assert.match(interactive, /size: Size\(9, 5\)/);
+  assert.match(interactive, /reading-highlight-/);
   assert.match(interactive, /alignment: PlaceholderAlignment\.middle/);
   assert.match(interactive, /height: fontSize \* lineHeight/);
-  assert.match(interactive, /clipBehavior: Clip\.hardEdge/);
-  assert.doesNotMatch(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
-  assert.match(widgetTest, /reading-triangle-visual-test/);
+  assert.doesNotMatch(interactive, /_ReadingTrianglePainter|reading-triangle-|CustomPaint/);
+  assert.match(widgetTest, /reading-highlight-visual-test/);
+  assert.match(widgetTest, /find\.byType\(CustomPaint\), findsNothing/);
 });

@@ -7,31 +7,31 @@ import 'package:provider/provider.dart';
 
 void main() {
   testWidgets(
-    'explicit narration range paints a triangle under the active text',
+    'explicit narration range highlights active text without a triangle',
     (tester) async {
       final state = AppState();
       await tester.pumpWidget(
         ChangeNotifierProvider<AppState>.value(
-          value: state,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: InteractiveStoryText(
-                text: '故宫很美',
-                entries: <WordEntry>[],
-                narrationItemId: 'visual-test',
-                highlightStart: 0,
-                highlightEnd: 1,
-              ),
-            ),
-          ),
+value: state,
+child: const MaterialApp(
+  home: Scaffold(
+    body: InteractiveStoryText(
+      text: '故宫很美',
+      entries: <WordEntry>[],
+      narrationItemId: 'visual-test',
+      highlightStart: 0,
+      highlightEnd: 1,
+    ),
+  ),
+),
         ),
       );
 
       expect(
-        find.byKey(const ValueKey('reading-triangle-visual-test')),
+        find.byKey(const ValueKey('reading-highlight-visual-test')),
         findsOneWidget,
       );
-      expect(find.byType(CustomPaint), findsWidgets);
+      expect(find.byType(CustomPaint), findsNothing);
     },
   );
 }
