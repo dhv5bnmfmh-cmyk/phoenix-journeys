@@ -8,6 +8,7 @@ import '../theme/phoenix_theme.dart';
 
 const _summerPalaceJourneyId = 'beijing-summer-palace';
 const _forbiddenCityJourneyId = 'beijing-forbidden-city';
+const _shanghaiBundJourneyId = 'shanghai-bund';
 
 bool _destinationReduceMotion(BuildContext context) {
   final forceMotion = Uri.base.queryParameters['motion'] == 'on';
@@ -53,6 +54,14 @@ class DestinationBackground extends StatelessWidget {
 
     if (journeyId == _forbiddenCityJourneyId) {
       return _ForbiddenCityDynamicBackground(
+        assetPath: asset?.assetPath,
+        scrimStrength: visibleScrimStrength,
+        child: child,
+      );
+    }
+
+    if (journeyId == _shanghaiBundJourneyId) {
+      return _ShanghaiBundDynamicBackground(
         assetPath: asset?.assetPath,
         scrimStrength: visibleScrimStrength,
         child: child,
@@ -335,6 +344,311 @@ class _ForbiddenCityGateDepth extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ShanghaiBundDynamicBackground extends StatefulWidget {
+  const _ShanghaiBundDynamicBackground({
+    required this.assetPath,
+    required this.scrimStrength,
+    required this.child,
+  });
+
+  final String? assetPath;
+  final double scrimStrength;
+  final Widget child;
+
+  @override
+  State<_ShanghaiBundDynamicBackground> createState() =>
+      _ShanghaiBundDynamicBackgroundState();
+}
+
+class _ShanghaiBundDynamicBackgroundState
+    extends State<_ShanghaiBundDynamicBackground>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _motion;
+  String? _preloadedAssetPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _motion = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 15),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncMotionPreference();
+    _preloadAsset();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ShanghaiBundDynamicBackground oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.assetPath != widget.assetPath) {
+      _preloadedAssetPath = null;
+      _preloadAsset();
+    }
+  }
+
+  void _syncMotionPreference() {
+    final reduceMotion = _destinationReduceMotion(context);
+    if (reduceMotion) {
+      _motion.stop();
+      _motion.value = .47;
+    } else if (!_motion.isAnimating) {
+      _motion.value = .06;
+      _motion.repeat(reverse: true);
+    }
+  }
+
+  void _preloadAsset() {
+    final path = widget.assetPath;
+    if (path == null || path == _preloadedAssetPath) return;
+    _preloadedAssetPath = path;
+    precacheImage(AssetImage(path), context);
+  }
+
+  @override
+  void dispose() {
+    _motion.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = _destinationReduceMotion(context);
+    return RepaintBoundary(
+      key: const ValueKey('shanghai-bund-dynamic-background'),
+      child: ClipRect(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            AnimatedBuilder(
+              animation: _motion,
+              builder: (context, _) {
+                final raw = reduceMotion ? .47 : _motion.value;
+                final progress = Curves.easeInOutSine.transform(raw);
+                return ExcludeSemantics(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _ShanghaiBundCameraLayer(
+                        assetPath: widget.assetPath,
+                        progress: progress,
+                      ),
+                      _ShanghaiBundSkylineGlow(progress: progress),
+                      _ShanghaiBundRiverLight(progress: progress),
+                      _ShanghaiBundBoatShadow(progress: progress),
+                    ],
+                  ),
+                );
+              },
+            ),
+            _JourneyBackgroundScrim(strength: widget.scrimStrength),
+            widget.child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ShanghaiBundCameraLayer extends StatelessWidget {
+  const _ShanghaiBundCameraLayer({
+    required this.assetPath,
+    required this.progress,
+  });
+
+  final String? assetPath;
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final path = assetPath;
+    if (path == null) return const _BackgroundFallback();
+
+    return RepaintBoundary(
+      key: const ValueKey('shanghai-bund-camera-layer'),
+      child: Transform.translate(
+        key: const ValueKey('shanghai-bund-camera-transform'),
+        offset: Offset(-12 + 24 * progress, -8 + 10 * progress),
+        child: Transform.scale(
+          alignment: Alignment.center,
+          scale: 1.035 + .055 * progress,
+          child: Image.asset(
+            path,
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.medium,
+            gaplessPlayback: true,
+            errorBuilder: (_, __, ___) => const _BackgroundFallback(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShanghaiBundSkylineGlow extends StatelessWidget {
+  const _ShanghaiBundSkylineGlow({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: FractionallySizedBox(
+          widthFactor: 1.5,
+          heightFactor: .72,
+          child: Transform.translate(
+            offset: Offset(-68 + 136 * progress, -10 + 8 * progress),
+            child: DecoratedBox(
+              key: const ValueKey('shanghai-bund-skyline-glow'),
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(-.68 + 1.18 * progress, -.28),
+                  radius: 1.08,
+                  colors: [
+                    const Color(0xFFFFE8B6).withValues(alpha: .18),
+                    const Color(0xFFFFB86D).withValues(alpha: .095),
+                    const Color(0xFF79B7D7).withValues(alpha: .035),
+                    Colors.transparent,
+                  ],
+                  stops: const [0, .34, .62, 1],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShanghaiBundRiverLight extends StatelessWidget {
+  const _ShanghaiBundRiverLight({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: FractionallySizedBox(
+          widthFactor: 1.74,
+          heightFactor: .5,
+          child: Transform.translate(
+            offset: Offset(110 - 220 * progress, 4 - 8 * progress),
+            child: DecoratedBox(
+              key: const ValueKey('shanghai-bund-river-light'),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: const Alignment(-1.2, -.75),
+                  end: const Alignment(1.2, .8),
+                  colors: [
+                    Colors.transparent,
+                    Colors.white.withValues(alpha: .03),
+                    const Color(0xFFFFD28C).withValues(alpha: .14),
+                    const Color(0xFF92D5E8).withValues(alpha: .07),
+                    Colors.white.withValues(alpha: .035),
+                    Colors.transparent,
+                  ],
+                  stops: const [0, .2, .43, .62, .8, 1],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShanghaiBundBoatShadow extends StatelessWidget {
+  const _ShanghaiBundBoatShadow({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final travel = constraints.maxWidth + 110;
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned(
+                left: -74 + travel * progress,
+                bottom: constraints.maxHeight * .2,
+                child: Opacity(
+                  opacity: .48,
+                  child: Transform.scale(
+                    scale: .76 + .05 * progress,
+                    child: SizedBox(
+                      key: const ValueKey('shanghai-bund-boat-shadow'),
+                      width: 62,
+                      height: 22,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            left: 4,
+                            right: 4,
+                            bottom: 3,
+                            child: Container(
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF182532)
+                                    .withValues(alpha: .76),
+                                borderRadius: BorderRadius.circular(99),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: 22,
+                            bottom: 8,
+                            child: Container(
+                              width: 20,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF243544)
+                                    .withValues(alpha: .72),
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(3),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: 30,
+                            bottom: 11,
+                            child: Container(
+                              width: 3,
+                              height: 3,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFD78B)
+                                    .withValues(alpha: .7),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
