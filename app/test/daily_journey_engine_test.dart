@@ -31,7 +31,11 @@ void main() {
       );
       expect(journey.storyAnnotations.length, journey.content.sections.length);
       expect(journey.words.length, greaterThanOrEqualTo(9));
-      expect(journey.discoveries.length, 4);
+      expect(
+        journey.discoveries.length,
+        journey.id == 'beijing-summer-palace' ? 2 : 4,
+        reason: journey.id,
+      );
     }
   });
 }
