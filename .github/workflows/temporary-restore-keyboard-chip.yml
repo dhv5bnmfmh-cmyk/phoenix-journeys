@@ -1,4 +1,4 @@
-name: Temporary restore keyboard input chip
+name: Temporary format journey screen
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  patch:
+  format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,63 +17,29 @@ jobs:
           ref: feature/shanghai-bund-dynamic-background
           fetch-depth: 0
 
-      - name: Restore input chip only
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Format journey screen
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path('app/lib/screens/journey_screen.dart')
-          source = path.read_text()
-          page_start = source.index('Widget _page({')
-          page_end = source.index('int? _narrationRevealEnd', page_start)
-          page = source[page_start:page_end]
-          if '输入中' in page:
-              raise SystemExit('Input chip already exists')
-          needle = '              Expanded(child: child),'
-          index = source.index(needle, page_start, page_end)
-          replacement = '''              if (keyboardVisible) ...[
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 7,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: PhoenixTheme.gold.withValues(alpha: .12),
-                      borderRadius: BorderRadius.circular(99),
-                    ),
-                    child: const Text(
-                      '输入中',
-                      style: TextStyle(
-                        color: PhoenixTheme.red,
-                        fontSize: 8.5,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 3),
-              ],
-              Expanded(child: child),'''
-          source = source[:index] + replacement + source[index + len(needle):]
-          page = source[page_start:source.index('int? _narrationRevealEnd', page_start)]
-          if 'PhoenixTheme.journeyTitleStyle' in page or 'Text(\n                        title,' in page:
-              raise SystemExit('Duplicate page title returned unexpectedly')
-          path.write_text(source)
-          PY
-
+          dart format app/lib/screens/journey_screen.dart
           node --test \
             worker/no_duplicate_journey_page_title.test.mjs \
             worker/keyboard_safe_writing_pages_rule.test.mjs
+
+          if git diff --quiet; then
+            echo 'Already formatted'
+            exit 0
+          fi
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add app/lib/screens/journey_screen.dart
           git diff --cached --check
-          git commit -m 'fix: keep keyboard input hint without duplicate titles'
+          git commit -m 'style: format shared journey page shell'
           git push origin HEAD:feature/shanghai-bund-dynamic-background
-
-# trigger restoration after workflow registration
