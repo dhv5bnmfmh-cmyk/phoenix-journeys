@@ -17,7 +17,16 @@ void main() {
 
   test('every journey has complete story and learning content', () {
     for (final journey in dailyJourneyExperiences) {
-      expect(journey.content.storyParagraphs.length, 4, reason: journey.id);
+      if (journey.id == 'beijing-summer-palace') {
+        expect(journey.content.storyParagraphs, hasLength(1), reason: journey.id);
+        expect(
+          journey.content.storyParagraphs.single.length,
+          greaterThanOrEqualTo(600),
+          reason: journey.id,
+        );
+      } else {
+        expect(journey.content.storyParagraphs.length, 4, reason: journey.id);
+      }
       expect(
         journey.storyAnnotations.length,
         journey.content.storyParagraphs.length,
