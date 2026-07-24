@@ -590,7 +590,7 @@ class _SummerPalaceDynamicBackgroundState
     super.initState();
     _motion = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 13),
+      duration: const Duration(seconds: 21),
     );
   }
 
@@ -614,7 +614,7 @@ class _SummerPalaceDynamicBackgroundState
     final reduceMotion = _destinationReduceMotion(context);
     if (reduceMotion) {
       _motion.stop();
-      _motion.value = .42;
+      _motion.value = .44;
     } else if (!_motion.isAnimating) {
       _motion.value = .08;
       _motion.repeat(reverse: true);
@@ -646,7 +646,7 @@ class _SummerPalaceDynamicBackgroundState
             AnimatedBuilder(
               animation: _motion,
               builder: (context, _) {
-                final raw = reduceMotion ? .42 : _motion.value;
+                final raw = reduceMotion ? .44 : _motion.value;
                 final progress = Curves.easeInOutSine.transform(raw);
                 return ExcludeSemantics(
                   child: Stack(
@@ -656,7 +656,9 @@ class _SummerPalaceDynamicBackgroundState
                         assetPath: widget.assetPath,
                         progress: progress,
                       ),
+                      _SummerPalaceColorGrade(progress: progress),
                       _SummerPalaceCloudLight(progress: progress),
+                      _SummerPalaceMistVeil(progress: progress),
                       _SummerPalaceWaterShimmer(progress: progress),
                       _SummerPalaceForegroundBreath(progress: progress),
                     ],
@@ -690,15 +692,44 @@ class _SummerPalaceCameraLayer extends StatelessWidget {
       key: const ValueKey('summer-palace-camera-layer'),
       child: Transform.translate(
         key: const ValueKey('summer-palace-camera-transform'),
-        offset: Offset(-18 + 36 * progress, -13 + 15 * progress),
+        offset: Offset(-9 + 18 * progress, -7 + 9 * progress),
         child: Transform.scale(
-          scale: 1.075 + .075 * progress,
+          scale: 1.045 + .045 * progress,
           child: Image.asset(
             path,
             fit: BoxFit.cover,
             filterQuality: FilterQuality.medium,
             gaplessPlayback: true,
             errorBuilder: (_, __, ___) => const _BackgroundFallback(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SummerPalaceColorGrade extends StatelessWidget {
+  const _SummerPalaceColorGrade({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: DecoratedBox(
+        key: const ValueKey('summer-palace-cinematic-color-grade'),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFFFFE7B8).withValues(alpha: .055 + .025 * progress),
+              Colors.transparent,
+              const Color(
+                0xFF163E42,
+              ).withValues(alpha: .035 + .02 * (1 - progress)),
+            ],
+            stops: const [0, .52, 1],
           ),
         ),
       ),
@@ -717,22 +748,61 @@ class _SummerPalaceCloudLight extends StatelessWidget {
       child: Align(
         alignment: Alignment.topCenter,
         child: FractionallySizedBox(
-          widthFactor: 1.55,
-          heightFactor: .66,
+          widthFactor: 1.7,
+          heightFactor: .72,
           child: Transform.translate(
-            offset: Offset(-80 + 160 * progress, -7 + 14 * progress),
+            offset: Offset(-68 + 136 * progress, -12 + 10 * progress),
             child: DecoratedBox(
               key: const ValueKey('summer-palace-cloud-light'),
               decoration: BoxDecoration(
                 gradient: RadialGradient(
-                  center: Alignment(-.72 + 1.44 * progress, -.34),
-                  radius: 1.05,
+                  center: Alignment(-.74 + 1.48 * progress, -.42),
+                  radius: 1.12,
                   colors: [
-                    Colors.white.withValues(alpha: .19),
-                    const Color(0xFFFFD89B).withValues(alpha: .105),
+                    Colors.white.withValues(alpha: .16),
+                    const Color(0xFFFFDCA3).withValues(alpha: .09),
                     Colors.transparent,
                   ],
-                  stops: const [0, .38, 1],
+                  stops: const [0, .42, 1],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SummerPalaceMistVeil extends StatelessWidget {
+  const _SummerPalaceMistVeil({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Align(
+        alignment: const Alignment(0, .18),
+        child: FractionallySizedBox(
+          widthFactor: 1.55,
+          heightFactor: .4,
+          child: Transform.translate(
+            offset: Offset(42 - 84 * progress, 2 + 4 * progress),
+            child: DecoratedBox(
+              key: const ValueKey('summer-palace-mist-veil'),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: const Alignment(-1.2, -.1),
+                  end: const Alignment(1.2, .15),
+                  colors: [
+                    Colors.transparent,
+                    const Color(0xFFEAF3EF).withValues(alpha: .04),
+                    Colors.white.withValues(alpha: .09),
+                    const Color(0xFFDDEBE8).withValues(alpha: .035),
+                    Colors.transparent,
+                  ],
+                  stops: const [0, .22, .5, .78, 1],
                 ),
               ),
             ),
@@ -754,24 +824,23 @@ class _SummerPalaceWaterShimmer extends StatelessWidget {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: FractionallySizedBox(
-          widthFactor: 1.62,
-          heightFactor: .58,
+          widthFactor: 1.5,
+          heightFactor: .56,
           child: Transform.translate(
-            offset: Offset(92 - 184 * progress, 5 - 10 * progress),
+            offset: Offset(70 - 140 * progress, 8 - 7 * progress),
             child: DecoratedBox(
               key: const ValueKey('summer-palace-water-shimmer'),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: const Alignment(-1.2, -.8),
-                  end: const Alignment(1.2, .8),
+                gradient: RadialGradient(
+                  center: Alignment(-.55 + 1.1 * progress, -.08),
+                  radius: .95,
                   colors: [
-                    Colors.transparent,
-                    Colors.white.withValues(alpha: .035),
-                    const Color(0xFFFFE1A9).withValues(alpha: .15),
+                    const Color(0xFFFFE4B0).withValues(alpha: .115),
                     Colors.white.withValues(alpha: .055),
+                    const Color(0xFFB9D9D5).withValues(alpha: .022),
                     Colors.transparent,
                   ],
-                  stops: const [0, .25, .5, .75, 1],
+                  stops: const [0, .3, .6, 1],
                 ),
               ),
             ),
@@ -793,12 +862,12 @@ class _SummerPalaceForegroundBreath extends StatelessWidget {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: FractionallySizedBox(
-          heightFactor: .44,
+          heightFactor: .46,
           child: Transform.translate(
-            offset: Offset(0, 8 - 16 * progress),
+            offset: Offset(0, 5 - 10 * progress),
             child: Transform.scale(
               alignment: Alignment.bottomCenter,
-              scale: 1 + .022 * progress,
+              scale: 1 + .012 * progress,
               child: DecoratedBox(
                 key: const ValueKey('summer-palace-foreground-breath'),
                 decoration: BoxDecoration(
@@ -807,10 +876,10 @@ class _SummerPalaceForegroundBreath extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      const Color(0xFF17382E).withValues(alpha: .045),
-                      const Color(0xFF0A211B).withValues(alpha: .14),
+                      const Color(0xFF17382E).withValues(alpha: .035),
+                      const Color(0xFF081C18).withValues(alpha: .12),
                     ],
-                    stops: const [0, .55, 1],
+                    stops: const [0, .58, 1],
                   ),
                 ),
               ),
