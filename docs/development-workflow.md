@@ -112,6 +112,7 @@
 - 禁止探索者打开生词时现场请求 AI 例句或等待模型生成。
 - 禁止在页面中绕过 `JourneyAccessPolicy` 自行决定免费、付费或随机旅程权限。
 - 禁止在开发体验版启用正式上市的免费旅程限制。
+- 故事与发现朗读时，未朗读文字必须保持版面位置但不可见，已朗读文字随 NarrationController 进度逐字显现；阅读内容不得再用大面积框遮挡目的地背景。
 
 ## 核心回归功能
 
@@ -144,3 +145,15 @@
 - 免费探索者每天稳定随机早晚各一段，且同日不重复
 - 付费探索者全部旅程开放
 - 城市印章和完成旅程流程
+
+- Adaptive journey rule: a destination may offer light, standard, and challenge Chinese content without changing its identity, background, progress, or stamp; the explorer can switch levels and the choice persists.
+
+
+## 永久电影级朗读显现准则
+
+- 故事页与发现页开始朗读后，文字显现不得使用逐字硬切或瞬间跳变。
+- 两次语音进度回调之间必须连续插值，新增文字使用淡入、轻微上浮与散焦收束，形成电影字幕式节奏。
+- 未朗读文字必须保留原版面位置，但不得显示、交互或进入辅助阅读语义。
+- 新一轮朗读开始时可以立即隐藏未来文字；暂停必须保留当前进度，结束后平滑恢复全文。
+- 动画最长不得超过 720ms，避免语音进度更新时产生明显拖尾。
+- 朗读跨越段落分隔符时，即使语音引擎短暂不给出高亮快照，也不得把全文显现进度清零或产生整页闪烁。
