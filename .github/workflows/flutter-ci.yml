@@ -131,11 +131,8 @@ jobs:
         if: github.ref == 'refs/heads/feature/shanghai-bund-dynamic-background' || github.head_ref == 'feature/shanghai-bund-dynamic-background'
         working-directory: ${{ github.workspace }}
         run: |
-          git checkout HEAD^ -- .github/workflows/flutter-ci.yml
-          rm -f .github/workflows/build-shanghai-bund-motion.yml
-          rm -f .github/workflows/enable-shanghai-bund-build.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/lib/widgets/destination_background.dart worker/shanghai_bund_motion.test.mjs .github/workflows
+          git add app/lib/widgets/destination_background.dart worker/shanghai_bund_motion.test.mjs
           git commit -m "feat: add Shanghai Bund cinematic background motion"
           git push origin HEAD:feature/shanghai-bund-dynamic-background
