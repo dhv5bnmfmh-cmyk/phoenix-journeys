@@ -68,8 +68,20 @@ jobs:
         run: flutter analyze
 
       - name: Test Flutter app
+        id: flutter_tests
+        continue-on-error: true
         working-directory: app
-        run: flutter test
+        run: |
+          set -o pipefail
+          flutter test 2>&1 | tee /tmp/cinematic-refinement-flutter-test.log
+
+      - name: Upload Flutter diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cinematic-refinement-flutter-test-log
+          path: /tmp/cinematic-refinement-flutter-test.log
+          if-no-files-found: error
 
       - name: Build web release
         working-directory: app
@@ -78,8 +90,10 @@ jobs:
       - name: Validate Cloudflare Worker bundle
         run: npx --yes wrangler@4 deploy --dry-run --outdir /tmp/phoenix-wrangler-dry-run
 
-      - name: Enforce Agent result
-        run: test "${{ steps.agents.outcome }}" = success
+      - name: Enforce verification results
+        run: |
+          test "${{ steps.agents.outcome }}" = success
+          test "${{ steps.flutter_tests.outcome }}" = success
 
       - name: Publish clean refinement commit
         run: |
