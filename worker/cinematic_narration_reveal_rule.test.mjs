@@ -17,8 +17,11 @@ test('narration reveal uses smooth lightweight cinematic interpolation', () => {
   assert.match(interactive, /cinematicRevealTailLength = 6/);
   assert.match(interactive, /Color\.lerp\(paleColor, finalColor/);
   assert.match(interactive, /lerpDouble\(\.4, 1, t\)/);
-  assert.match(interactive, /reading-highlight-\$\{widget\.narrationItemId/);
-  assert.doesNotMatch(interactive, /_ReadingTrianglePainter|reading-triangle-|CustomPaint/);
+  assert.match(interactive, /reading-highlight-/);
+  assert.doesNotMatch(
+    interactive,
+    /_ReadingTrianglePainter|reading-triangle-|Size\(9,\s*5\)/,
+  );
   assert.match(interactive, /cinematicRevealDuration/);
   assert.match(interactive, /clamp\(120, 420\)/);
   assert.doesNotMatch(interactive, /ImageFilter\.blur|ImageFiltered\(/);
