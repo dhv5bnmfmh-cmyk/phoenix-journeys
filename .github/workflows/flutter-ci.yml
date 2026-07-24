@@ -27,10 +27,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
+          ref: feature/shanghai-bund-dynamic-background
           fetch-depth: 0
 
       - name: Apply Shanghai Bund motion
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/shanghai-bund-dynamic-background'
+        if: github.ref == 'refs/heads/feature/shanghai-bund-dynamic-background' || github.head_ref == 'feature/shanghai-bund-dynamic-background'
         working-directory: ${{ github.workspace }}
         run: |
           python3 - <<'PYRUN'
@@ -65,7 +66,7 @@ jobs:
         run: flutter pub get
 
       - name: Format Shanghai Bund motion
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/shanghai-bund-dynamic-background'
+        if: github.ref == 'refs/heads/feature/shanghai-bund-dynamic-background' || github.head_ref == 'feature/shanghai-bund-dynamic-background'
         run: dart format lib/widgets/destination_background.dart
 
       - name: Analyze
@@ -127,7 +128,7 @@ jobs:
           exit "$failures"
 
       - name: Publish Shanghai Bund motion
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/shanghai-bund-dynamic-background'
+        if: github.ref == 'refs/heads/feature/shanghai-bund-dynamic-background' || github.head_ref == 'feature/shanghai-bund-dynamic-background'
         working-directory: ${{ github.workspace }}
         run: |
           git checkout HEAD^ -- .github/workflows/flutter-ci.yml
