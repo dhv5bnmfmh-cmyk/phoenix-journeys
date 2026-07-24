@@ -159,7 +159,8 @@ class AppState extends ChangeNotifier {
         earnedJourneyStampIds.add('beijing-forbidden-city');
       }
 
-      activeJourneyId = dailyJourneyForDate(_clock()).id;
+      activeJourneyId = _requestedPreviewJourneyId() ??
+          dailyJourneyForDate(_clock()).id;
       _loadActiveJourney(prefs);
       await _migrateActiveJourneyStorage(prefs);
       loadStatus = AppLoadStatus.ready;
@@ -171,6 +172,17 @@ class AppState extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  String? _requestedPreviewJourneyId() {
+    if (Uri.base.queryParameters['unlock'] != 'all') return null;
+    final requested = Uri.base.queryParameters['journey'];
+    if (requested == null || requested.isEmpty) return null;
+    try {
+      return requireDailyJourneyExperience(requested).id;
+    } on StateError {
+      return null;
+    }
   }
 
   void _loadActiveJourney(SharedPreferences prefs) {
