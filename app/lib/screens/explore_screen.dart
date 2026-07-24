@@ -52,9 +52,7 @@ class ExploreScreen extends StatelessWidget {
 
     return Stack(
       children: [
-        Positioned.fill(
-          child: const _PhoenixHomeBackground(),
-        ),
+        const Positioned.fill(child: _PhoenixHomeBackground()),
         Padding(
           padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
           child: Column(
@@ -1192,17 +1190,4 @@ class _PremiumMapPainter extends CustomPainter {
         oldDelegate.pulse != pulse ||
         oldDelegate.destinationPoint != destinationPoint;
   }
-}
-
-class _CloudPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.white.withValues(alpha: .34);
-    canvas.drawCircle(Offset(size.width * .08, 170), 65, paint);
-    canvas.drawCircle(Offset(size.width * .92, 360), 90, paint);
-    canvas.drawCircle(Offset(size.width * .18, size.height * .8), 75, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
