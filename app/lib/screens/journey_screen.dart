@@ -906,7 +906,31 @@ class _JourneyScreenState extends State<JourneyScreen>
                 ),
                 SizedBox(height: compact ? 3 : 5),
               ],
-              Expanded(child: child),
+              if (keyboardVisible) ...[
+      Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 7,
+            vertical: 2,
+          ),
+          decoration: BoxDecoration(
+            color: PhoenixTheme.gold.withValues(alpha: .12),
+            borderRadius: BorderRadius.circular(99),
+          ),
+          child: const Text(
+            '输入中',
+            style: TextStyle(
+              color: PhoenixTheme.red,
+              fontSize: 8.5,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(height: 3),
+    ],
+    Expanded(child: child),
               if (!keyboardVisible) ...[
                 SizedBox(height: compact ? 4 : 7),
                 SizedBox(
