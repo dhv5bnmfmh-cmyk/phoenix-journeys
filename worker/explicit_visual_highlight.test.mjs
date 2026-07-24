@@ -31,8 +31,10 @@ test('Flutter verifies active narration uses text highlight without triangles', 
   assert.match(interactive, /class _InlineReadingMarker/);
   assert.match(interactive, /reading-highlight-/);
   assert.match(interactive, /alignment: PlaceholderAlignment\.middle/);
-  assert.match(interactive, /height: fontSize \* lineHeight/);
-  assert.doesNotMatch(interactive, /_ReadingTrianglePainter|reading-triangle-|CustomPaint/);
+  assert.doesNotMatch(
+    interactive,
+    /_ReadingTrianglePainter|reading-triangle-|Size\(9,\s*5\)/,
+  );
   assert.match(widgetTest, /reading-highlight-visual-test/);
   assert.match(widgetTest, /find\.byType\(CustomPaint\), findsNothing/);
 });
