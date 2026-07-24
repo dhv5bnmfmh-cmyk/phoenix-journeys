@@ -27,12 +27,13 @@ test('position derives from playback and is passed to Story and Discovery', () =
   );
 });
 
-test('Flutter verifies a real inline triangle is painted', () => {
+test('Flutter verifies a real inline triangle is painted in a fixed line box', () => {
   assert.match(interactive, /class _InlineReadingMarker/);
   assert.match(interactive, /class _ReadingTrianglePainter/);
   assert.match(interactive, /size: Size\(9, 5\)/);
   assert.match(interactive, /alignment: PlaceholderAlignment\.middle/);
-  assert.match(interactive, /clipBehavior: Clip\.none/);
+  assert.match(interactive, /height: fontSize \* lineHeight/);
+  assert.match(interactive, /clipBehavior: Clip\.hardEdge/);
   assert.doesNotMatch(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
   assert.match(widgetTest, /reading-triangle-visual-test/);
 });

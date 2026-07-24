@@ -34,11 +34,11 @@ test('permanent rules prevent Story and Discovery vocabulary from drifting apart
   assert.match(template, /PhoenixVocabularyAgent/);
 });
 
-test('Story Continue enters the first vocabulary word automatically', () => {
+test('Story Continue enters the first vocabulary word from the selected level', () => {
   assert.match(journey, /Future<void> _enterVocabularyAtFirstWord\(\) async/);
   assert.match(journey, /await _goToStep\(1\);/);
   assert.match(journey, /await WidgetsBinding\.instance\.endOfFrame;/);
-  assert.match(journey, /await _openWord\(_experience\.words\.first\);/);
+  assert.match(journey, /await _openWord\(_levelContent\.words\.first\);/);
   assert.match(
     journey,
     /onNext: \(\) => unawaited\(_enterVocabularyAtFirstWord\(\)\),/,

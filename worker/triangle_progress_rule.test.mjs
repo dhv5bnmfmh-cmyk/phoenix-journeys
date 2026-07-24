@@ -13,13 +13,15 @@ test('Safari progress watchdog is scheduled before speak', () => {
   assert.ok(watchdog >= 0 && speak > watchdog);
 });
 
-test('Story and Discovery use an inline triangle rather than recoloring text', () => {
+test('Story and Discovery use a layout-stable inline triangle', () => {
   assert.match(interactive, /class _ReadingTrianglePainter/);
   assert.match(interactive, /reading-triangle-/);
   assert.match(interactive, /size: Size\(9, 5\)/);
   assert.match(interactive, /alignment: PlaceholderAlignment\.middle/);
-  assert.match(interactive, /padding: const EdgeInsets\.only\(bottom: 5\)/);
-  assert.match(interactive, /clipBehavior: Clip\.none/);
+  assert.match(interactive, /height: fontSize \* lineHeight/);
+  assert.match(interactive, /bottom: 0/);
+  assert.match(interactive, /clipBehavior: Clip\.hardEdge/);
+  assert.doesNotMatch(interactive, /padding: const EdgeInsets\.only\(bottom: 5\)/);
   assert.doesNotMatch(interactive, /backgroundColor: const Color\(0xFF8F1D18\)/);
   assert.equal((journey.match(/InteractiveStoryText\(/g) ?? []).length >= 2, true);
   assert.match(journey, /contentId: 'story'/);
@@ -27,5 +29,8 @@ test('Story and Discovery use an inline triangle rather than recoloring text', (
 });
 
 test('playing percent never appears stuck at zero', () => {
-  assert.match(player, /final percent = isPlaying[\s\S]*roundedPercent\.clamp\(1, 99\)/);
+  assert.match(
+    player,
+    /final percent\s*=\s*isPlaying[\s\S]*roundedPercent\.clamp\(1, 99\)/,
+  );
 });
