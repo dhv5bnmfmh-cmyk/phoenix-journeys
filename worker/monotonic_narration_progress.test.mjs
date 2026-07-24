@@ -30,6 +30,6 @@ test('stalled Safari offsets cannot freeze or rewind Phoenix progress', () => {
 test('visible percentage leaves zero immediately while narration is playing', () => {
   assert.match(
     player,
-    /final percent = isPlaying[\s\S]*roundedPercent\.clamp\(1, 99\)/,
+    /final percent\s*=\s*isPlaying[\s\S]*roundedPercent\.clamp\(1, 99\)/,
   );
 });
