@@ -27,7 +27,7 @@ test('position derives from playback and is passed to Story and Discovery', () =
   );
 });
 
-test('Flutter verifies active narration uses text highlight without triangles', () => {
+test('Flutter verifies active narration uses gold text without triangles', () => {
   assert.match(interactive, /class _InlineReadingMarker/);
   assert.match(interactive, /reading-highlight-/);
   assert.match(interactive, /alignment: PlaceholderAlignment\.middle/);
@@ -36,5 +36,6 @@ test('Flutter verifies active narration uses text highlight without triangles', 
     /_ReadingTrianglePainter|reading-triangle-|Size\(9,\s*5\)/,
   );
   assert.match(widgetTest, /reading-highlight-visual-test/);
-  assert.match(widgetTest, /find\.byType\(CustomPaint\), findsNothing/);
+  assert.match(widgetTest, /highlightedText\.style\?\.color/);
+  assert.match(widgetTest, /Color\(0xFFFFE7AA\)/);
 });
