@@ -1,0 +1,53 @@
+name: Refine Shanghai PR 105
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  refine:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'trigger/refine-pr-105-main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/shanghai-bund-dynamic-background
+          fetch-depth: 0
+
+      - name: Apply the reviewed Shanghai refinement
+        run: |
+          python3 <<'RUNNER'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/refine-pr-105.yml').read_text()
+          start_marker = "          python3 <<'PY'\n"
+          end_marker = "\n          PY"
+          start = workflow.index(start_marker) + len(start_marker)
+          end = workflow.index(end_marker, start)
+          source = workflow[start:end]
+          source = '\n'.join(
+              line[10:] if line.startswith('          ') else line
+              for line in source.splitlines()
+          )
+          exec(compile(source, 'refine-pr-105.py', 'exec'))
+          RUNNER
+
+      - name: Commit to the isolated feature branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/lib/widgets/destination_background.dart \
+            app/lib/widgets/interactive_story_text.dart \
+            app/test/narration_progressive_reveal_test.dart \
+            worker/shanghai_bund_motion.test.mjs \
+            worker/cinematic_narration_reveal_rule.test.mjs
+          git diff --cached --check
+          git commit -m 'fix: remove Bund boat and smooth short narration'
+          git push origin HEAD:feature/shanghai-bund-dynamic-background
