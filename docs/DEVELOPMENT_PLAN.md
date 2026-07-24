@@ -1,127 +1,474 @@
-# Phoenix Journeys Development Plan
+# Phoenix Journeys 产品方向与开发路线
 
-Last updated: 2026-07-17
+最后更新：2026-07-24
 
-## Current Architecture
+## 一句话定位
 
-- Client: Flutter
-- Application source: `app/`
-- State: Provider + SharedPreferences
-- Content: repository-managed Journey files under `content/`
-- Planned backend: Supabase
-- First Journey: Beijing · Forbidden City
-- Primary target: mobile web/PWA, then packaged mobile apps
+Phoenix Journeys 是一款故事驱动的世界探索产品。
 
-## Current Product Baseline
+探索者先被故事、人物、地点、历史细节和未解问题吸引，再在探索过程中自然获得语言、文化与知识。语言学习是旅程产生的结果，不是要求用户每天完成的任务。
 
-Already present:
+## 永久产品真相
 
-- Explore, Passport and Profile navigation
-- Beijing Journey starter experience
-- Simplified/traditional Chinese toggle
-- Word detail sheet with pinyin and Vietnamese explanation
-- Local learning memory persistence
-- Initial map/flight visual treatment
-- Product, AI, content and licensing principles
+1. **故事先于学习功能。** 每段 Journey 必须先回答“为什么探索者想继续看下去”。
+2. **好奇心驱动流程。** 用户继续前进是为了发现答案、理解人物或看见新的世界，不是为了完成课程进度。
+3. **语言帮助按需出现。** 拼音、释义、越南语、英语、朗读与写作反馈是隐藏在故事中的工具，不是页面主角。
+4. **AI 是同行者。** Phoenix AI 应观察、提醒、追问、连接线索并记住兴趣，不应持续扮演批改老师。
+5. **知识必须可信。** 历史、文化、人物、建筑和科学内容必须有审核来源；传说、推测、争议与虚构叙事框架必须清楚标注。
+6. **世界持续展开。** 一枚印章不是课程结束，而是打开下一条线索、下一地点或下一段故事的门。
+7. **视觉服务叙事。** 地图、飞机、背景、光影、声音与动画必须增强场景气氛，不能抢夺故事注意力。
+8. **不靠焦虑留人。** 不使用签到惩罚、连续天数、金币压力、机械刷题或第三方广告。
 
-Not production-ready yet:
+## Phoenix 不是什么
 
-- Flutter Web/PWA project files and install experience
-- Reliable Cloudflare build/deployment workflow
-- CI checks for analyze/test/web build
-- Real map data and route model
-- Text-to-speech and automatic reading
-- Long-press word segmentation across arbitrary Chinese text
-- AI guide and writing feedback backend
-- Authentication and cloud sync
-- Reviewed content sources and production asset licenses
-- Error, offline, loading and privacy states
+- 不是每天打卡的语言学习软件。
+- 不是以复习计划、题库、正确率或学习时长为核心的工具。
+- 不是把“故事、单词、思考、写作”简单排成课程的电子课本。
+- 不是只罗列景点资料的旅游百科。
+- 不是动态背景展示器，背景再漂亮也不能代替故事。
+- 不是独立 Demo 集合，所有开发都进入真实产品架构。
 
-## Development Mode
+“每日 Journey”可以继续作为内容发现与发布机制，但不得变成每日学习义务。
 
-### Small safe changes
+# 从开始到现在的开发路线
 
-Commit directly to `main` after checking affected files.
+## 阶段 0：产品起点，2026-07-14
 
-### Feature work
+最初目标是为已经会中文、但希望继续成长的人制作一款移动产品。早期骨架包括：
 
-Use a focused feature branch, run checks, open a pull request, then merge after review.
+- Explore、Passport、Profile
+- 北京紫禁城 Journey
+- 中文故事、词语、文化发现、思考、表达和回忆
+- 简体与繁体
+- 地图和飞机
+- 城市印章
 
-### Required checks
+这时 Phoenix 仍带有明显“语言学习 App”结构，但“不是上课，而是旅行”的方向已经出现。
 
-- `flutter analyze`
-- `flutter test`
-- `flutter build web`
-- Mobile viewport acceptance check
-- No secrets committed
-- Factual content and asset licenses recorded
+## 阶段 1：真实 Flutter PWA 基础，2026-07-17
 
-## Phase 1 — Stable PWA Foundation
+完成或建立：
 
-1. Audit and restore complete Flutter Web platform files.
-2. Configure PWA manifest, icons, theme, install metadata and offline shell.
-3. Add GitHub Actions for analyze, test and web build.
-4. Document Cloudflare deployment path.
-5. Improve responsive mobile shell, safe areas and loading/error states.
-6. Add basic route and state architecture that can scale beyond one Journey.
+- Flutter 移动优先客户端
+- PWA 与 Cloudflare 部署路径
+- Provider 与本地状态保存
+- 启动、错误、离线与响应式基础
+- GitHub CI、Flutter Analyze、Test、Web Build 与 Worker 校验
+- 不制作独立 Demo，直接开发真实产品
 
-Exit criteria:
+## 阶段 2：第一条完整旅程体验，2026-07-17 至 2026-07-18
 
-- A clean checkout can build for web.
-- CI passes on every push and pull request.
-- The app installs as a PWA on supported mobile browsers.
-- Main screens work at common iPhone and Android viewport widths.
+围绕北京紫禁城完成：
 
-## Phase 2 — Core Learning Experience
+- Story 与 Discovery 自动朗读
+- 播放、暂停、继续、重播与语速调整
+- 点词查看拼音、词性、探索者母语和英文
+- 预下载真实例句
+- 思考、表达、回忆和自动保存
+- PhoenixStampAgent 与真实盖章动作
+- 简繁切换
+- Explore 飞机路线和城市地图
 
-1. Structured Journey model loaded from content files.
-2. Story text with long-press/tap word lookup.
-3. Pinyin, Chinese definition and Vietnamese explanation.
-4. Word and Discovery text-to-speech.
-5. Vocabulary collection and automatic learning history.
-6. Real city route/map model and polished flight animation.
-7. City stamp and Passport progression.
+大量开发用于解决 iPhone Safari 朗读位置、暂停继续、进度同步和 PWA 缓存问题。这一阶段建立了 Phoenix 稳定的阅读与媒体底座。
 
-## Phase 3 — AI Guide and Writing
+## 阶段 3：AI 与世界故事基础，2026-07-17 至 2026-07-19
 
-1. Secure AI gateway with no client-side secret keys.
-2. AI guide grounded only in reviewed Journey sources.
-3. Contextual city questions and follow-up conversation.
-4. Writing task, scoring rubric and respectful correction flow.
-5. Safety, factuality and insufficient-evidence responses.
-6. Cost limits, logging and abuse protection.
+完成或建立：
 
-## Phase 4 — Accounts and Cloud Data
+- PhoenixGuideAgent
+- PhoenixWritingAgent
+- PhoenixBrainAgent 与 PhoenixModelGateway 方向
+- Cloudflare Worker 安全网关，客户端不保存密钥
+- PhoenixWorldStoryAgent
+- 全球通用 GeoNode：世界、国家、行政层级、城市、地区和地点
+- Journey 内容来源审核与发布检查
+- AI 回应与批改按地点保存，可再次打开回顾
 
-1. Supabase authentication.
-2. Cloud-synced memories, vocabulary and Passport stamps.
-3. Private-by-default photo uploads.
-4. Sharing cards and Journey timeline.
-5. Subscription capacity model without advertising or content paywalls.
+这一阶段已经为“世界故事内容中枢”打下架构基础，但内容体验仍主要按课程步骤呈现。
 
-## Immediate Sprint
+## 阶段 4：手机体验与稳定发布纪律，2026-07-18 至 2026-07-19
 
-### Sprint 1A — Build and PWA audit
+完成：
 
-- Inspect `app/web`, platform metadata and deployment files.
-- Add missing web/PWA files when needed.
-- Add CI workflow.
-- Verify the production build command.
-- Remove temporary repository test artifacts.
+- 首屏和 Journey 主信息适配一个手机视口
+- 移除横向翻页和拥挤布局
+- iPhone 键盘安全
+- 独立 PR Cloudflare Preview
+- Preview 使用准确分支 Commit
+- 用户手机确认后才允许合并 `main`
+- PWA 版本防缓存与线上 Commit 验证
+- Journey 分享
 
-### Sprint 1B — Mobile foundation
+这使 Phoenix 从原型进入可以持续安全迭代的真实产品状态。
 
-- Audit navigation and safe-area behavior.
-- Define reusable responsive spacing and screen constraints.
-- Add consistent loading, empty and error components.
-- Update widget tests to match the current interface.
+## 阶段 5：从单城市扩展到世界内容库，2026-07-20 至 2026-07-22
 
-## Product Rules
+完成：
 
-- Phoenix Journeys is the only active product project.
-- Build the real product, not standalone demos.
-- Mobile experience comes first.
-- No third-party advertising.
-- AI must not invent cultural, historical or scientific facts.
-- Every production Journey needs reviewed sources.
-- Every production visual/audio asset needs a recorded license or ownership status.
+- Daily Journey Engine
+- 北京、上海、西安三城轮换
+- 扩展到七座城市：北京、上海、西安、杭州、成都、南京、广州
+- 每个 Journey 独立进度、回答、AI 反馈和印章
+- Explore 可自由选择城市与地点
+- Passport 按城市收藏地点
+- 城市到地点两级数据层
+- 同一城市支持多个地点
+- 北京新增颐和园，形成七城八地点
+
+“每日”在这一阶段被用作内容轮换机制。根据最新产品定位，它今后应保持为发现故事的入口，而不是学习打卡系统。
+
+## 阶段 6：视觉系统与离线背景库，2026-07-21 至 2026-07-23
+
+完成：
+
+- PhoenixBackgroundAgent
+- PhoenixVisualComplianceAgent
+- PhoenixBackgroundLibrarianAgent
+- 城市、地点、图片三级目录
+- 七城共 70 张原创离线背景
+- 版权、Logo、水印、艺术家模仿与视觉重复检查
+- 页面稳定轮换与同日不撞图
+- Phoenix Typography 共用规则
+- 思考、表达、回忆透明玻璃面板
+- 全局简繁一致
+- 真实盖章动画
+
+这一阶段显著提升了产品气氛，但也出现新的风险：视觉品质开始领先于故事深度。
+
+## 阶段 7：电影感阅读与重点旅程动态背景，2026-07-23 至 2026-07-24
+
+完成或尝试：
+
+- 朗读文字电影字幕式渐显
+- 颐和园轻松、标准、挑战三级内容
+- 颐和园、紫禁城、上海外滩重点动态背景
+- 颐和园 21 秒慢循环、晨雾、湖光、调色和前景景深
+- 上海外滩河面与城市光影
+- 移除廉价水波、无意义小船和重复标题
+- 保留减少动态效果与手机性能保护
+
+到这一阶段，Phoenix 的技术、视觉和基础交互已经较完整，真正瓶颈转向故事本身。
+
+## 阶段 8：故事优先转向，2026-07-24 起
+
+新的核心决定：
+
+> 通过故事勾起好奇心，让探索者在没有“上课感”的情况下，无意中学到语言、历史、文化和其他知识。
+
+后续路线必须围绕这一决定重新排序。
+
+# 当前产品基线
+
+## 已具备
+
+- Flutter 移动优先 PWA
+- Cloudflare 正式发布与独立 PR Preview
+- 七座城市、八个地点
+- 城市和地点可继续扩展
+- Explore、Passport、Me
+- 地图、飞机路线与目的地定位
+- 故事、朗读、点词解释和多语言辅助
+- Discovery、思考、表达、回忆、分享和印章
+- AI 导游与写作反馈
+- 本地进度、词语、回忆、AI 结果和印章保存
+- 原创离线背景库与重点动态背景
+- 来源审核、版权登记、回归测试和发布保护
+
+## 仍未完成
+
+- 故事悬念系统
+- 轻量分支与选择后果
+- 城市内连续故事线
+- 跨城市线索和世界故事宇宙
+- AI 同行者身份与兴趣记忆
+- 大规模故事研究、验证、创作和本地化生产流水线
+- 原创环境声和声音叙事
+- 账号与跨设备云同步
+- iOS 与 Android 正式 App 包装
+- 面向故事体验的隐私友好分析指标
+
+# 当前真正的瓶颈
+
+## 1. 结构仍有课程感
+
+现有固定流程是：故事、单词、发现、思考、表达、回忆、完成。
+
+功能完整，但用户可以清楚感到自己正在走一套课程。下一阶段不一定立即删除这些能力，而是要把它们重新包装为叙事动作：
+
+- 故事：进入现场
+- 单词：发现线索词
+- 发现：揭开背景或旁支真相
+- 思考：作出判断
+- 表达：留下回应、信件、记录或选择
+- 回忆：保存旅程留下的东西
+- 完成：盖章并打开下一线索
+
+最终名称需要通过手机体验确定，不能只做文字替换。
+
+## 2. 故事多为资料型叙述
+
+当前内容可信、完整，但部分 Journey 更接近带朗读的文化介绍。缺少：
+
+- 开场悬念
+- 具体人物或叙述视角
+- 冲突、秘密、选择或未解问题
+- 分段揭示
+- 情绪余韵
+- 与下一地点连接的线索
+
+## 3. AI 仍像功能按钮
+
+PhoenixGuideAgent 和 PhoenixWritingAgent 已经存在，但 AI 主要在思考和表达页面出现。AI 应逐渐成为整段 Journey 的同行者：
+
+- 出发前抛出一个值得追的疑问
+- 途中提醒被忽略的细节
+- 根据选择展开不同内容
+- 只在必要时解释语言
+- 记住探索者更喜欢人物、建筑、历史、日常生活还是思想
+- 在旅程结束后连接下一段故事
+
+## 4. 地点之间没有形成故事宇宙
+
+七城八地点已经具备数据结构，但多数 Journey 仍是独立内容。需要建立：
+
+- 同一城市的故事主题
+- 重复出现的物件、人物、信件、声音或问题
+- 从一个地点延伸到另一个地点的线索
+- 跨城市但不强迫按顺序观看的故事连接
+
+## 5. 视觉优化的边际收益正在下降
+
+继续提升背景仍有价值，但不能再成为主开发方向。建议长期资源比例：
+
+- 55% 故事、内容和叙事交互
+- 25% AI 同行者和分支系统
+- 15% 视觉、动态背景与声音氛围
+- 5% 平台维护与技术债
+
+实际比例可按版本调整，但“故事投入高于背景投入”应保持稳定。
+
+# 下一阶段开发路线
+
+## P0：建立 Phoenix Story Blueprint
+
+每个 Journey 上线前必须具备：
+
+1. **一句钩子**：十秒内让人想知道下一句。
+2. **叙述视角**：人物、物件、地点声音、信件、现场观察者或可靠旁白。
+3. **核心疑问**：整段 Journey 要追踪的一个问题。
+4. **三到五个揭示节点**：每一步增加信息或改变理解。
+5. **至少一次探索选择**：没有标准答案，但会改变看到的内容。
+6. **知识层**：历史、文化、建筑、语言或社会知识自然附着在线索上。
+7. **语言层**：词语与表达必须来自故事需要，而不是为了凑学习项目。
+8. **情绪余韵**：结束后留下一个值得记住的问题、画面或声音。
+9. **下一线索**：连接同城其他地点或另一条相关 Journey。
+10. **事实边界**：真实、传说、推测和虚构叙事框架清楚区分。
+
+### 第一试点
+
+优先用“北京颐和园”完成一条完整 Story Blueprint 试点，因为它已经拥有：
+
+- 丰富视觉素材
+- 三级中文难度
+- 动态背景
+- 多个可连接的景观和历史节点
+
+试点通过后，再批量改造其他 Journey。不要同时重写全部城市。
+
+## P1：轻量故事分支
+
+第一版不做无限开放世界，也不让模型现场编造历史。
+
+建议结构：
+
+- 每个 Journey 设置 2 至 3 个经过审核的选择点
+- 选择决定下一段旁支、Discovery、AI 提问或结尾线索
+- 主线仍可完整结束，不制造失败惩罚
+- 所有分支内容预先研究和审核
+- AI 负责自然连接与回应，不负责现场发明事实
+- 保存探索者选择，供后续 Journey 呼应
+
+## P2：AI 同行者
+
+建立统一的 Phoenix Companion 体验：
+
+- 有稳定语气，但不抢戏
+- 少说正确答案，多指出值得看的细节
+- 能记住有限的兴趣偏好
+- 能引用已审核 Journey 知识
+- 不使用模板化称赞
+- 不把每次互动变成语法批改
+- 用户主动请求时才展开语言分析
+
+兴趣档案应保持有限、透明、客户端优先，例如：
+
+- 喜欢人物故事
+- 喜欢建筑细节
+- 喜欢城市日常
+- 喜欢历史转折
+- 喜欢语言表达
+
+## P3：城市故事宇宙
+
+每座城市建立一个可长期扩展的主题：
+
+- 北京：权力、园林、礼制、普通人的城市记忆
+- 上海：江河、商业、迁徙与现代城市
+- 西安：城墙、道路、帝国与交流
+- 杭州：山水、审美、商业与日常生活
+- 成都：街巷、闲适、手艺与城市性格
+- 南京：河流、记忆、繁华与历史层叠
+- 广州：宗族、工艺、海洋贸易与地方文化
+
+以上只是内容组织方向，具体故事必须经过研究与审核。
+
+## P4：声音叙事
+
+在不影响朗读清晰度的前提下逐步加入：
+
+- 原创或合法授权的环境声
+- 城市远景声
+- 水、风、脚步、钟声、市场和室内空间感
+- 关键时刻轻微声音提示
+
+禁止使用持续喧闹、抢夺文字注意力或来源不明的音乐。
+
+## P5：账号、云同步与 App 包装
+
+故事引擎稳定后再完成：
+
+- 账号与跨设备恢复
+- 私密回忆、词语和印章同步
+- 数据导出与删除
+- iOS 与 Android 包装
+- 商店发布、隐私说明与崩溃监控
+
+# 动态背景优化准则
+
+动态背景继续开发，但必须遵守以下原则。
+
+## 叙事优先
+
+- 每个背景先确定故事情绪和叙事焦点，再设计动画。
+- 同一地点不同图片不能只是换天空颜色。
+- 动态内容必须与地点真实特征相关。
+- 不加入与故事无关的小船、粒子、人物、动物或装饰物。
+
+## 电影感分层
+
+优先使用低成本分层：
+
+1. 远景：天空、云影、晨雾、城市光线。
+2. 中景：建筑、山水、街巷或河岸的缓慢镜头运动。
+3. 前景：树影、暗部景深、灯笼光、薄雾或柔和遮挡。
+
+镜头以慢推、慢移和轻微呼吸为主，禁止快速缩放、明显摇晃和循环感过强的移动。
+
+## 场景微动态
+
+可使用：
+
+- 云层和光影缓慢移动
+- 薄雾横向漂移
+- 水面低强度反光
+- 灯光和灯笼极轻微呼吸
+- 远景城市光线变化
+- 树影或叶影轻微摆动
+
+禁止：
+
+- 人工水波线
+- 明显重复的贴纸粒子
+- 廉价闪烁
+- 与地点无关的运动物体
+- 为了“看得出在动”而加大幅度
+
+## 性能与无障碍
+
+- 优先使用本地离线资源和 Flutter 低成本图层，不依赖在线流媒体。
+- 探索者端不得运行图片生成。
+- 动态层与故事文字隔离重绘。
+- 手机端必须保持稳定帧率和触控响应。
+- 系统开启“减少动态效果”时使用稳定静态构图。
+- 每个动态 Journey 必须保留静态回退背景。
+- 动态背景不得引起文字跳动、布局变化或朗读卡顿。
+
+## 当前顺序
+
+1. 完成颐和园、紫禁城、外滩质量统一。
+2. 补充西湖、宽窄巷子、秦淮河、陈家祠。
+3. 西安城墙加入重点动态版本。
+4. 每完成一个地点，先在手机上验证故事可读性，再继续下一个。
+
+# 内容生产流水线
+
+PhoenixWorldStoryAgent 的下一阶段应形成明确流水线：
+
+1. StoryResearch：收集官方资料、学术资料和可靠地方资料。
+2. Verification：建立事实清单、来源、争议和不可确定项。
+3. JourneyComposer：把事实变成有钩子、节点、选择和余韵的故事。
+4. Localization：处理简体、繁体、拼音、越南语、英语和文化解释。
+5. Vocabulary：只选择故事真正需要的词语和表达。
+6. VisualDirection：根据故事情绪设计背景、动态和印章。
+7. Quality：检查事实、语言、文化敏感性、版权、性能和移动体验。
+8. Publication：通过测试后写入 Journey 内容包，不在探索者打开页面后临时生成关键内容。
+
+# 产品衡量方式
+
+Phoenix 不以连续学习天数作为核心成功指标。
+
+更适合的指标：
+
+- 开场后继续看下一段的比例
+- 主动点开线索词和文化细节的比例
+- 探索者选择了哪条旁支
+- AI 追问后继续对话的比例
+- Journey 完成后打开下一条线索的比例
+- 同一城市第二个地点的进入率
+- 用户主动保存的回忆、句子或发现
+- 背景动画对帧率、朗读和阅读完成率的影响
+
+这些指标只用于改善产品，必须遵守隐私原则，不默认收集个人敏感内容。
+
+# 近期执行顺序
+
+## Sprint A：方向固定
+
+- 更新 README 与开发路线
+- 把“故事优先、学习隐形、AI 同行”写成永久产品规则
+- 后续 PR 描述必须说明它如何增强故事或好奇心
+
+## Sprint B：颐和园故事化试点
+
+- 创建 Story Blueprint
+- 明确真实事实、叙事框架和虚构边界
+- 加入一个核心疑问和 2 至 3 个选择
+- 将词语、Discovery、思考和表达改成故事中的自然动作
+- 让盖章后出现下一条北京线索
+
+## Sprint C：通用故事引擎
+
+- 将试点中可复用的数据结构提取为 Journey Story Engine
+- 支持节点、选择、线索、旁支、兴趣标签和下一 Journey 连接
+- 保持现有朗读、进度、背景、AI 和印章兼容
+
+## Sprint D：扩展与验证
+
+- 依次改造紫禁城、外滩、西安城墙
+- 再扩展其他城市
+- 同时继续剩余动态背景，但视觉开发不能阻塞故事引擎
+
+# 永久开发规则
+
+- Phoenix Journeys 是唯一开发项目。
+- 直接开发真实产品，不制作独立 Demo。
+- 手机体验优先。
+- 所有开发分支和 PR Preview 保持全部旅程开放。
+- 新功能从最新 `main` 建立独立分支。
+- 自动测试与 Preview 通过后，由用户手机体验确认。
+- 未经明确确认，不合并 `main`。
+- OpenAI 密钥不得写入代码、GitHub、网页或客户端。
+- AI 不得编造历史文化事实。
+- 图片、声音、字体与其他资产必须原创或有合法授权记录。
+- 动态背景必须服务故事，故事品质优先于动画数量。
+- 不把 Phoenix 改造成签到、复习日历或刷题中心。
