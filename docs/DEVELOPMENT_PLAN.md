@@ -1,6 +1,10 @@
 # Phoenix Journeys Development Plan
 
-Last updated: 2026-07-17
+> 当前产品北极星、完整历史路线、故事先行方向、AI 同行者、城市故事宇宙与动态背景品质准则，以 [`PHOENIX_PRODUCT_ROUTE.md`](./PHOENIX_PRODUCT_ROUTE.md) 为准。
+>
+> 本文件保留早期工程阶段计划，供回顾基础建设过程使用。任何新功能不得把 Phoenix 改成每日打卡学习软件。
+
+Last updated: 2026-07-24
 
 ## Current Architecture
 
@@ -125,3 +129,5 @@ Exit criteria:
 - AI must not invent cultural, historical or scientific facts.
 - Every production Journey needs reviewed sources.
 - Every production visual/audio asset needs a recorded license or ownership status.
+- Story and curiosity lead; language learning stays naturally embedded.
+- Do not add daily streak pressure, compulsory review or classroom-style progression as the main product loop.
