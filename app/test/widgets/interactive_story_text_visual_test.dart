@@ -12,26 +12,30 @@ void main() {
       final state = AppState();
       await tester.pumpWidget(
         ChangeNotifierProvider<AppState>.value(
-value: state,
-child: const MaterialApp(
-  home: Scaffold(
-    body: InteractiveStoryText(
-      text: '故宫很美',
-      entries: <WordEntry>[],
-      narrationItemId: 'visual-test',
-      highlightStart: 0,
-      highlightEnd: 1,
-    ),
-  ),
-),
+          value: state,
+          child: const MaterialApp(
+            home: Scaffold(
+              body: InteractiveStoryText(
+                text: '故宫很美',
+                entries: <WordEntry>[],
+                narrationItemId: 'visual-test',
+                highlightStart: 0,
+                highlightEnd: 1,
+              ),
+            ),
+          ),
         ),
       );
 
-      expect(
-        find.byKey(const ValueKey('reading-highlight-visual-test')),
-        findsOneWidget,
+      final highlight = find.byKey(
+        const ValueKey('reading-highlight-visual-test'),
       );
-      expect(find.byType(CustomPaint), findsNothing);
+      expect(highlight, findsOneWidget);
+
+      final highlightedText = tester.widget<Text>(
+        find.descendant(of: highlight, matching: find.byType(Text)).first,
+      );
+      expect(highlightedText.style?.color, const Color(0xFFFFE7AA));
     },
   );
 }
