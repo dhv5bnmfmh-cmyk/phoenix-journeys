@@ -1,0 +1,144 @@
+name: Fix Shanghai boat direction
+
+on:
+  push:
+    branches:
+      - feature/shanghai-bund-dynamic-background
+
+permissions:
+  contents: write
+
+jobs:
+  fix-verify-publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/shanghai-bund-dynamic-background
+          fetch-depth: 0
+
+      - name: Make boat one-way with a quiet interval
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/widgets/destination_background.dart')
+          text = path.read_text()
+
+          shanghai_start = text.index('class _ShanghaiBundDynamicBackground extends StatefulWidget')
+          summer_start = text.index('class _SummerPalaceDynamicBackground extends StatefulWidget')
+          before = text[:shanghai_start]
+          shanghai = text[shanghai_start:summer_start]
+          after = text[summer_start:]
+
+          shanghai = shanghai.replace(
+              "      _motion.value = .06;\n      _motion.repeat(reverse: true);",
+              "      _motion.value = .06;\n      _motion.repeat();",
+              1,
+          )
+          shanghai = shanghai.replace(
+              "                final raw = reduceMotion ? .47 : _motion.value;\n                final progress = Curves.easeInOutSine.transform(raw);",
+              "                final raw = reduceMotion ? .47 : _motion.value;\n                final sceneProgress = Curves.easeInOutSine.transform(\n                  raw <= .5 ? raw * 2 : (1 - raw) * 2,\n                );\n                final boatProgress = reduceMotion ? 1.0 : raw;",
+              1,
+          )
+          shanghai = shanghai.replace('progress: progress,', 'progress: sceneProgress,', 1)
+          shanghai = shanghai.replace(
+              '_ShanghaiBundSkylineGlow(progress: progress),\n                      _ShanghaiBundRiverLight(progress: progress),\n                      _ShanghaiBundBoatShadow(progress: progress),',
+              '_ShanghaiBundSkylineGlow(progress: sceneProgress),\n                      _ShanghaiBundRiverLight(progress: sceneProgress),\n                      _ShanghaiBundBoatShadow(progress: boatProgress),',
+              1,
+          )
+
+          old_boat = """        builder: (context, constraints) {
+          final travel = constraints.maxWidth + 110;
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned(
+                left: -74 + travel * progress,
+                bottom: constraints.maxHeight * .2,
+                child: Opacity(
+                  opacity: .48,
+                  child: Transform.scale(
+                    scale: .76 + .05 * progress,
+"""
+          new_boat = """        builder: (context, constraints) {
+          const startAt = .08;
+          const finishAt = .68;
+          final isVisible = progress >= startAt && progress <= finishAt;
+          final passage = ((progress - startAt) / (finishAt - startAt))
+              .clamp(0.0, 1.0);
+          final travel = constraints.maxWidth + 110;
+          final fadeIn = (passage / .14).clamp(0.0, 1.0);
+          final fadeOut = ((1 - passage) / .14).clamp(0.0, 1.0);
+          final opacity = isVisible
+              ? .44 * (fadeIn < fadeOut ? fadeIn : fadeOut)
+              : 0.0;
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned(
+                left: -74 + travel * Curves.easeInOut.transform(passage),
+                bottom: constraints.maxHeight * .2,
+                child: Opacity(
+                  opacity: opacity,
+                  child: Transform.scale(
+                    scale: .76 + .05 * passage,
+"""
+          if old_boat not in shanghai:
+              raise SystemExit('Shanghai boat marker missing')
+          shanghai = shanghai.replace(old_boat, new_boat, 1)
+
+          path.write_text(before + shanghai + after)
+
+          test = Path('worker/shanghai_bund_motion.test.mjs')
+          test_text = test.read_text()
+          test_text = test_text.replace(
+              "assert.match(bund, /_motion\\.repeat\\(reverse: true\\)/);",
+              "assert.match(bund, /_motion\\.repeat\\(\\)/);\n  assert.match(bund, /final sceneProgress/);\n  assert.match(bund, /final boatProgress/);\n  assert.match(bund, /const startAt = \\.08/);\n  assert.match(bund, /const finishAt = \\.68/);",
+              1,
+          )
+          test.write_text(test_text)
+          PY
+
+      - name: Format
+        working-directory: app
+        run: dart format lib/widgets/destination_background.dart
+
+      - name: Test Phoenix agents
+        run: node --test worker/*.test.mjs
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Test Flutter app
+        working-directory: app
+        run: flutter test
+
+      - name: Build web release
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Validate Cloudflare Worker bundle
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
+
+      - name: Publish clean fix
+        run: |
+          rm .github/workflows/fix-shanghai-boat-direction.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/widgets/destination_background.dart worker/shanghai_bund_motion.test.mjs .github/workflows/fix-shanghai-boat-direction.yml
+          git commit -m "fix: make Shanghai boat travel one way"
+          git push origin HEAD:feature/shanghai-bund-dynamic-background
