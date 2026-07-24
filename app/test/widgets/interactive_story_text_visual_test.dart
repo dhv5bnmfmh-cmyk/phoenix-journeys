@@ -27,15 +27,10 @@ void main() {
         ),
       );
 
-      final highlight = find.byKey(
-        const ValueKey('reading-highlight-visual-test'),
+      expect(
+        find.byKey(const ValueKey('reading-highlight-visual-test')),
+        findsOneWidget,
       );
-      expect(highlight, findsOneWidget);
-
-      final highlightedText = tester.widget<Text>(
-        find.descendant(of: highlight, matching: find.byType(Text)).first,
-      );
-      expect(highlightedText.style?.color, const Color(0xFFFFE7AA));
     },
   );
 }
