@@ -1,143 +1,19 @@
-name: Finalize Summer Palace backgrounds
+name: Temporary narration sync refinement
 
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types:
-      - reopened
-      - synchronize
 
 permissions:
   contents: write
 
 concurrency:
-  group: finalize-summer-palace-backgrounds
+  group: temporary-narration-sync-refinement
   cancel-in-progress: true
 
 jobs:
-  finalize:
-    if: >-
-      github.event.pull_request.number == 83 &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref == 'feat/two-level-journey-picker'
-    runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
-      REPOSITORY: ${{ github.repository }}
-      BRANCH: feat/two-level-journey-picker
-      BASE_COMMIT: 788ea1647a02051d358ad50175d8ec524a58686b
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: feat/two-level-journey-picker
-          fetch-depth: 0
-
-      - name: Keep old images and add ten refined images
-        shell: bash
-        run: |
-          set -euo pipefail
-          git reset --hard "$BASE_COMMIT"
-
-          target='app/assets/images/backgrounds/generated/beijing/summer-palace'
-          mkdir -p "$target"
-
-          fetch_blob() {
-            local sha="$1"
-            local output="$2"
-            gh api "repos/$REPOSITORY/git/blobs/$sha" --jq '.content' \
-              | tr -d '\n' \
-              | base64 --decode > "$output"
-          }
-
-          fetch_blob 20bc51f87d4bf023992445aee7064e9ca5e56d8f "$target/11-moonlit-kunming-lake.webp"
-          fetch_blob 9007d6f42efefbd6c7b56b1b7774861b34b2020e "$target/12-illuminated-blue-hour.webp"
-          fetch_blob 02ce382889f798b510c359c0560dfa7d3c142f45 "$target/13-golden-sunrise.webp"
-          fetch_blob aeb409e2aeeef9114b486041e5e0345e869d4ae4 "$target/14-autumn-lakeside.webp"
-          fetch_blob 09a95d09433faddb5cb821208d428eabadb2029f "$target/15-lotus-sunrise.webp"
-          fetch_blob f0121c194f6760e441542b0783bca263e84490b4 "$target/16-pavilion-after-rain.webp"
-          fetch_blob f444ebba58adffa7515cb500f9512c8763247f8d "$target/17-seventeen-arch-bridge.webp"
-          fetch_blob c5843772958a92a4d6d39d7a459d98b213ad6336 "$target/18-misty-longevity-hill.webp"
-          fetch_blob d3257c8056c793fb45d8a6fd077517d3004d0534 "$target/19-long-corridor.webp"
-          fetch_blob 372793505782e2a1ba90d7f7be30ce680e721394 "$target/20-golden-lake-panorama.webp"
-
-          python3 - <<'PY'
-          from pathlib import Path
-          import csv
-
-          target = Path('app/assets/images/backgrounds/generated/beijing/summer-palace')
-          files = sorted(target.glob('*.webp'))
-          if len(files) != 20:
-              raise SystemExit(f'Expected 20 Summer Palace images, found {len(files)}')
-          for path in files:
-              data = path.read_bytes()
-              if data[:4] != b'RIFF' or data[8:12] != b'WEBP':
-                  raise SystemExit(f'Invalid WebP: {path}')
-              if len(data) < 4000:
-                  raise SystemExit(f'Unexpectedly small image: {path} ({len(data)} bytes)')
-
-          catalog_path = Path('app/lib/data/journey_background_generated.dart')
-          catalog = catalog_path.read_text()
-          anchor = "    '10-moonlit-lake-panorama',\n"
-          additions = """    '11-moonlit-kunming-lake',
-              '12-illuminated-blue-hour',
-              '13-golden-sunrise',
-              '14-autumn-lakeside',
-              '15-lotus-sunrise',
-              '16-pavilion-after-rain',
-              '17-seventeen-arch-bridge',
-              '18-misty-longevity-hill',
-              '19-long-corridor',
-              '20-golden-lake-panorama',
-          """
-          summer_start = catalog.index("'01-dawn-kunming-lake'")
-          anchor_index = catalog.index(anchor, summer_start) + len(anchor)
-          catalog = catalog[:anchor_index] + additions + catalog[anchor_index:]
-          catalog_path.write_text(catalog)
-
-          test_path = Path('app/test/journey_background_policy_test.dart')
-          test = test_path.read_text()
-          test = test.replace(
-              "test('Summer Palace ships ten reviewed location-bound backgrounds'",
-              "test('Summer Palace ships twenty reviewed location-bound backgrounds'",
-          )
-          section_start = test.index('Summer Palace ships twenty')
-          length_index = test.index('expect(assets, hasLength(10));', section_start)
-          test = test[:length_index] + test[length_index:].replace(
-              'expect(assets, hasLength(10));',
-              'expect(assets, hasLength(20));',
-              1,
-          )
-          test_path.write_text(test)
-
-          register = Path('design/ASSET_REGISTER.csv')
-          rows = [
-              [f'assets/images/backgrounds/generated/beijing/summer-palace/{path.name}', f'Summer Palace refined background {index}', 'AI-generated Phoenix original', 'phoenix-exclusive-owned', 'generated in ChatGPT 2026-07-23', 'approved']
-              for index, path in enumerate(files[10:], start=11)
-          ]
-          existing = register.read_text(encoding='utf-8')
-          with register.open('a', encoding='utf-8', newline='') as output:
-              writer = csv.writer(output, lineterminator='\n')
-              for row in rows:
-                  if row[0] not in existing:
-                      writer.writerow(row)
-          PY
-
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add app/assets/images/backgrounds/generated/beijing/summer-palace \
-            app/lib/data/journey_background_generated.dart \
-            app/test/journey_background_policy_test.dart \
-            design/ASSET_REGISTER.csv
-          git diff --cached --check
-          git commit -m 'feat: keep old and add ten refined Summer Palace backgrounds'
-          git push --force origin HEAD:"$BRANCH"
-
   refine-narration-sync:
-    if: >-
-      github.event.pull_request.number == 109 &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref == 'trigger/remove-journey-triangles'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -299,11 +175,7 @@ jobs:
   }
 
   TextSpan _span('''
-          interactive, count = frontier_pattern.subn(
-              frontier_replacement,
-              interactive,
-              count=1,
-          )
+          interactive, count = frontier_pattern.subn(frontier_replacement, interactive, count=1)
           if count != 1:
               raise SystemExit('Unable to replace frontier span')
 
@@ -390,16 +262,15 @@ jobs:
               '  required int? controllerItemIndex,\n  required int? controllerItemStartOffset,\n  required int currentOffset,',
               1,
           )
-          journey = journey.replace(
-              '''  if (snapshotEnd != null) {
+          old_fallback = '''  if (snapshotEnd != null) {
     return snapshotEnd.clamp(0, itemLength).toInt();
   }
 
   // At the newline between narration items, Flutter TTS briefly reports no
   // highlight snapshot. Keep the paragraph that just finished fully visible
   // instead of clearing every paragraph for one frame.
-  return currentOffset <= 0 ? 0 : itemLength;''',
-              '''  if (snapshotEnd != null) {
+  return currentOffset <= 0 ? 0 : itemLength;'''
+          new_fallback = '''  if (snapshotEnd != null) {
     return snapshotEnd.clamp(0, itemLength).toInt();
   }
 
@@ -408,9 +279,10 @@ jobs:
     return (currentOffset - itemStart).clamp(0, itemLength).toInt();
   }
 
-  return currentOffset <= 0 ? 0 : itemLength;''',
-              1,
-          )
+  return currentOffset <= 0 ? 0 : itemLength;'''
+          if old_fallback not in journey:
+              raise SystemExit('Unable to find reveal fallback block')
+          journey = journey.replace(old_fallback, new_fallback, 1)
           journey = journey.replace(
               '      controllerItemIndex: _narration.currentItemIndex,\n      currentOffset: _narration.currentOffset,',
               '      controllerItemIndex: _narration.currentItemIndex,\n      controllerItemStartOffset: _narration.currentItemStartOffset,\n      currentOffset: _narration.currentOffset,',
@@ -435,18 +307,9 @@ import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
 void main() {
   test('narration reveal preserves layout while exposing only spoken text', () {
     expect(revealedSegmentLength(segmentStart: 5, segmentEnd: 10), 5);
-    expect(
-      revealedSegmentLength(segmentStart: 5, segmentEnd: 10, revealEnd: 3),
-      0,
-    );
-    expect(
-      revealedSegmentLength(segmentStart: 5, segmentEnd: 10, revealEnd: 7),
-      2,
-    );
-    expect(
-      revealedSegmentLength(segmentStart: 5, segmentEnd: 10, revealEnd: 14),
-      5,
-    );
+    expect(revealedSegmentLength(segmentStart: 5, segmentEnd: 10, revealEnd: 3), 0);
+    expect(revealedSegmentLength(segmentStart: 5, segmentEnd: 10, revealEnd: 7), 2);
+    expect(revealedSegmentLength(segmentStart: 5, segmentEnd: 10, revealEnd: 14), 5);
   });
 
   test('missing snapshots use local controller progress without jumping', () {
@@ -491,21 +354,15 @@ void main() {
     );
   });
 
-  test('linear reveal duration follows the natural Chinese reading pace', () {
+  test('linear reveal duration follows natural Chinese reading pace', () {
     expect(cinematicRevealDuration(1).inMilliseconds, 210);
     expect(cinematicRevealDuration(30).inMilliseconds, 700);
   });
 
   test('cinematic reveal keeps a short pale-to-deep tail', () {
     expect(cinematicDepthProgress(revealCursor: 8, characterIndex: 8), 0);
-    final fresh = cinematicDepthProgress(
-      revealCursor: 8.5,
-      characterIndex: 8,
-    );
-    final deepening = cinematicDepthProgress(
-      revealCursor: 9.5,
-      characterIndex: 8,
-    );
+    final fresh = cinematicDepthProgress(revealCursor: 8.5, characterIndex: 8);
+    final deepening = cinematicDepthProgress(revealCursor: 9.5, characterIndex: 8);
     expect(fresh, greaterThan(0));
     expect(fresh, lessThan(deepening));
     expect(cinematicDepthProgress(revealCursor: 11, characterIndex: 8), 1);
@@ -517,10 +374,7 @@ void main() {
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const interactive = readFileSync(
-  'app/lib/widgets/interactive_story_text.dart',
-  'utf8',
-);
+const interactive = readFileSync('app/lib/widgets/interactive_story_text.dart', 'utf8');
 
 test('narration reveal uses one monotonic linear cursor', () => {
   assert.match(interactive, /AnimationController\.unbounded/);
@@ -551,21 +405,12 @@ test('future text remains layout-stable and non-interactive', () => {
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const controller = readFileSync(
-  'app/lib/services/narration_controller.dart',
-  'utf8',
-);
+const controller = readFileSync('app/lib/services/narration_controller.dart', 'utf8');
 const journey = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
-const interactive = readFileSync(
-  'app/lib/widgets/interactive_story_text.dart',
-  'utf8',
-);
+const interactive = readFileSync('app/lib/widgets/interactive_story_text.dart', 'utf8');
 
 test('native callbacks cannot move narration progress backwards', () => {
-  assert.equal(
-    (controller.match(/if \(globalStart < _currentOffset\) return;/g) ?? []).length,
-    2,
-  );
+  assert.equal((controller.match(/if \(globalStart < _currentOffset\) return;/g) ?? []).length, 2);
   assert.match(controller, /int\? get currentItemStartOffset/);
   assert.match(controller, /int get speechSessionToken/);
 });
