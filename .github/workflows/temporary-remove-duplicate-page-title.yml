@@ -1,0 +1,89 @@
+name: Temporary duplicate journey title cleanup
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: >-
+      github.event.pull_request.number == 109 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'trigger/remove-journey-triangles'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/shanghai-bund-dynamic-background
+          fetch-depth: 0
+
+      - name: Remove duplicate titles
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          from textwrap import dedent
+
+          path = Path('app/lib/screens/journey_screen.dart')
+          source = path.read_text()
+          start_marker = dedent('''\
+                        SizedBox(
+                          height: keyboardVisible ? 26 : null,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  title,
+          ''')
+          start = source.find(start_marker)
+          if start < 0:
+              raise SystemExit('Unable to locate duplicate shared page title')
+
+          end_marker = dedent('''\
+                        SizedBox(height: keyboardVisible ? 3 : (compact ? 4 : 6)),
+                        Expanded(child: child),
+          ''')
+          end = source.find(end_marker, start)
+          if end < 0:
+              raise SystemExit('Unable to locate duplicate shared page title end')
+
+          replacement = '              Expanded(child: child),\n'
+          source = source[:start] + replacement + source[end + len(end_marker):]
+          if 'PhoenixTheme.journeyTitleStyle.copyWith' in source:
+              raise SystemExit('Duplicate shared page title remained after cleanup')
+          path.write_text(source)
+
+          Path('worker/no_duplicate_journey_page_title.test.mjs').write_text(dedent('''\
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+
+          const source = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
+          const start = source.indexOf('Widget _page({');
+          const end = source.indexOf('int? _narrationRevealEnd', start);
+          const pageChrome = source.slice(start, end);
+
+          test('journey progress header is the only shared page label', () => {
+            assert.match(pageChrome, /JourneyProgressHeader\\(/);
+            assert.doesNotMatch(pageChrome, /PhoenixTheme\\.journeyTitleStyle/);
+            assert.doesNotMatch(pageChrome, /Text\\(\\s*title/);
+          });
+          '''))
+          PY
+
+          rm -f .github/workflows/remove-duplicate-journey-page-title.yml
+          node --test worker/no_duplicate_journey_page_title.test.mjs
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'fix: remove duplicate journey page titles'
+          git push origin HEAD:feature/shanghai-bund-dynamic-background
