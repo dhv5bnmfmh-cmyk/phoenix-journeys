@@ -37,7 +37,7 @@ int revealedSegmentLength({
   return revealEnd.clamp(segmentStart, segmentEnd).toInt() - segmentStart;
 }
 
-const int cinematicRevealTailLength = 6;
+const int cinematicRevealTailLength = 3;
 
 @visibleForTesting
 double cinematicDepthProgress({
@@ -66,8 +66,10 @@ double cinematicRevealProgress({
 
 @visibleForTesting
 Duration cinematicRevealDuration(double characterDistance) {
-  final milliseconds =
-      (90 + characterDistance.abs() * 28).round().clamp(120, 420).toInt();
+  final milliseconds = (characterDistance.abs() * 210)
+      .round()
+      .clamp(160, 700)
+      .toInt();
   return Duration(milliseconds: milliseconds);
 }
 
@@ -157,6 +159,7 @@ class InteractiveStoryText extends StatefulWidget {
     this.highlightStart,
     this.highlightEnd,
     this.revealEnd,
+    this.narrationSessionToken = 0,
     super.key,
   });
 
@@ -173,6 +176,7 @@ class InteractiveStoryText extends StatefulWidget {
   final int? highlightStart;
   final int? highlightEnd;
   final int? revealEnd;
+  final int narrationSessionToken;
 
   @override
   State<InteractiveStoryText> createState() => _InteractiveStoryTextState();
@@ -185,19 +189,16 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   WordEntry? _selectedEntry;
   Timer? _hideTimer;
   late final AnimationController _cinematicRevealController;
-  double _revealFrom = 0;
-  double _revealTo = 0;
+  double _lastAcceptedRevealCursor = 0;
 
   @override
   void initState() {
     super.initState();
     final initialReveal = _targetRevealCursor(widget.revealEnd);
-    _revealFrom = initialReveal;
-    _revealTo = initialReveal;
-    _cinematicRevealController = AnimationController(
+    _lastAcceptedRevealCursor = initialReveal;
+    _cinematicRevealController = AnimationController.unbounded(
       vsync: this,
-      duration: const Duration(milliseconds: 360),
-      value: 1,
+      value: initialReveal,
     );
     _buildSegments();
   }
@@ -206,13 +207,15 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   void didUpdateWidget(covariant InteractiveStoryText oldWidget) {
     super.didUpdateWidget(oldWidget);
     final textChanged = oldWidget.text != widget.text;
+    final sessionChanged =
+        oldWidget.narrationSessionToken != widget.narrationSessionToken;
     if (textChanged || oldWidget.entries != widget.entries) {
       _disposeRecognizers();
       _selectedEntry = null;
       _buildSegments();
     }
 
-    if (textChanged) {
+    if (textChanged || sessionChanged) {
       _resetRevealTo(widget.revealEnd);
     } else if (oldWidget.revealEnd != widget.revealEnd) {
       _animateRevealTo(widget.revealEnd);
@@ -230,65 +233,60 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     return resolved.toDouble();
   }
 
-  double get _currentRevealCursor {
-    // Linear cursor movement avoids the tiny acceleration reset that used to
-    // happen every time mobile speech supplied a new short progress callback.
-    final progress = _cinematicRevealController.value;
-    return lerpDouble(_revealFrom, _revealTo, progress) ?? _revealTo;
-  }
+  double get _currentRevealCursor => _cinematicRevealController.value;
 
   void _resetRevealTo(int? revealEnd) {
     final target = _targetRevealCursor(revealEnd);
     _cinematicRevealController.stop();
-    _revealFrom = target;
-    _revealTo = target;
-    _cinematicRevealController.value = 1;
+    _lastAcceptedRevealCursor = target;
+    _cinematicRevealController.value = target;
   }
 
   void _animateRevealTo(int? revealEnd) {
-    final target = _targetRevealCursor(revealEnd);
+    final requestedTarget = _targetRevealCursor(revealEnd);
+    final acceptedTarget = requestedTarget < _lastAcceptedRevealCursor
+        ? _lastAcceptedRevealCursor
+        : requestedTarget;
+    _lastAcceptedRevealCursor = acceptedTarget;
+
     final current = _currentRevealCursor.clamp(
       0.0,
       (widget.text.length + cinematicRevealTailLength).toDouble(),
     );
-    final distance = target - current;
+    final distance = acceptedTarget - current;
+    if (distance <= 0.01) return;
 
-    // Starting a new narration should hide future text immediately. Forward
-    // progress is then interpolated continuously between speech callbacks.
-    if (distance <= 0.01) {
-      _resetRevealTo(revealEnd);
-      return;
-    }
-
-    _cinematicRevealController.stop();
-    _revealFrom = current;
-    _revealTo = target;
-    _cinematicRevealController.duration = cinematicRevealDuration(distance);
-    _cinematicRevealController.forward(from: 0);
+    _cinematicRevealController.animateTo(
+      acceptedTarget,
+      duration: cinematicRevealDuration(distance),
+      curve: Curves.linear,
+    );
   }
 
   void _buildSegments() {
-    _segments = segmentStoryText(widget.text, widget.entries).map((segment) {
-      final entry = segment.entry;
-      if (entry == null) {
-        return _InteractiveSegment(
-          text: segment.text,
-          start: segment.start,
-          end: segment.end,
-        );
-      }
+    _segments = segmentStoryText(widget.text, widget.entries)
+        .map((segment) {
+          final entry = segment.entry;
+          if (entry == null) {
+            return _InteractiveSegment(
+              text: segment.text,
+              start: segment.start,
+              end: segment.end,
+            );
+          }
 
-      final recognizer = TapGestureRecognizer()
-        ..onTap = () => _showEntry(entry);
-      _recognizers.add(recognizer);
-      return _InteractiveSegment(
-        text: segment.text,
-        start: segment.start,
-        end: segment.end,
-        entry: entry,
-        recognizer: recognizer,
-      );
-    }).toList(growable: false);
+          final recognizer = TapGestureRecognizer()
+            ..onTap = () => _showEntry(entry);
+          _recognizers.add(recognizer);
+          return _InteractiveSegment(
+            text: segment.text,
+            start: segment.start,
+            end: segment.end,
+            entry: entry,
+            recognizer: recognizer,
+          );
+        })
+        .toList(growable: false);
   }
 
   void _showEntry(WordEntry entry) {
@@ -347,12 +345,15 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
             _cinematicRevealController,
           ]),
           builder: (context, _) {
-            final snapshot = widget.narrationController?.highlightSnapshot ??
+            final snapshot =
+                widget.narrationController?.highlightSnapshot ??
                 NarrationHighlightBus.instance.snapshot;
-            final hasExplicitHighlight = widget.highlightStart != null &&
+            final hasExplicitHighlight =
+                widget.highlightStart != null &&
                 widget.highlightEnd != null &&
                 widget.highlightEnd! > widget.highlightStart!;
-            final isCurrentNarrationItem = hasExplicitHighlight ||
+            final isCurrentNarrationItem =
+                hasExplicitHighlight ||
                 narrationSnapshotMatches(
                   snapshot: snapshot,
                   contentId: widget.narrationContentId,
@@ -364,13 +365,13 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
             final highlightStart = hasExplicitHighlight
                 ? widget.highlightStart!
                 : isCurrentNarrationItem
-                    ? snapshot!.start
-                    : -1;
+                ? snapshot!.start
+                : -1;
             final highlightEnd = hasExplicitHighlight
                 ? widget.highlightEnd!
                 : isCurrentNarrationItem
-                    ? snapshot!.end
-                    : -1;
+                ? snapshot!.end
+                : -1;
 
             return Text.rich(
               key: ValueKey(
@@ -384,16 +385,18 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
               ),
               TextSpan(
                 style: baseStyle,
-                children: _segments.expand((segment) {
-                  return _buildSegmentSpans(
-                    segment,
-                    state: state,
-                    baseStyle: baseStyle,
-                    highlightStart: highlightStart,
-                    highlightEnd: highlightEnd,
-                    revealCursor: _currentRevealCursor,
-                  );
-                }).toList(growable: false),
+                children: _segments
+                    .expand((segment) {
+                      return _buildSegmentSpans(
+                        segment,
+                        state: state,
+                        baseStyle: baseStyle,
+                        highlightStart: highlightStart,
+                        highlightEnd: highlightEnd,
+                        revealCursor: _currentRevealCursor,
+                      );
+                    })
+                    .toList(growable: false),
               ),
             );
           },
@@ -418,7 +421,8 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
                 ? const SizedBox.shrink(key: ValueKey('word-popover-empty'))
                 : Padding(
                     key: ValueKey(
-                        'word-popover-auto-visible-${selectedEntry.word}'),
+                      'word-popover-auto-visible-${selectedEntry.word}',
+                    ),
                     padding: const EdgeInsets.only(top: 8),
                     child: _VocabularyPopover(
                       entry: selectedEntry,
@@ -460,13 +464,12 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
           );
     final effectiveStyle = segmentStyle ?? baseStyle ?? const TextStyle();
     final localCursor = (revealCursor - segment.start)
-        .clamp(
-          0.0,
-          segment.text.length.toDouble() + cinematicRevealTailLength,
-        )
+        .clamp(0.0, segment.text.length.toDouble() + cinematicRevealTailLength)
         .toDouble();
-    final visibleLength =
-        localCursor.floor().clamp(0, segment.text.length).toInt();
+    final visibleLength = localCursor
+        .floor()
+        .clamp(0, segment.text.length)
+        .toInt();
     final stableLength = (visibleLength - cinematicRevealTailLength)
         .clamp(0, segment.text.length)
         .toInt();
@@ -474,8 +477,9 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     final spans = <InlineSpan>[];
 
     if (stableLength > 0) {
-      final overlapStart =
-          highlightStart.clamp(segment.start, stableEnd).toInt();
+      final overlapStart = highlightStart
+          .clamp(segment.start, stableEnd)
+          .toInt();
       final overlapEnd = highlightEnd.clamp(segment.start, stableEnd).toInt();
       final hasHighlight = highlightStart >= 0 && overlapEnd > overlapStart;
 
@@ -506,10 +510,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
         spans.add(
           _readingMarkerSpan(
             state.displayText(
-              segment.text.substring(
-                beforeLength,
-                beforeLength + activeLength,
-              ),
+              segment.text.substring(beforeLength, beforeLength + activeLength),
             ),
             segment,
             style: effectiveStyle,
@@ -534,16 +535,19 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     }
 
     var hiddenStart = stableLength;
-    for (var localIndex = stableLength;
-        localIndex < segment.text.length;
-        localIndex += 1) {
+    for (
+      var localIndex = stableLength;
+      localIndex < segment.text.length;
+      localIndex += 1
+    ) {
       final characterIndex = segment.start + localIndex;
       final depthProgress = cinematicDepthProgress(
         revealCursor: revealCursor,
         characterIndex: characterIndex,
       );
       if (depthProgress <= .001) break;
-      final isHighlighted = highlightStart >= 0 &&
+      final isHighlighted =
+          highlightStart >= 0 &&
           characterIndex >= highlightStart &&
           characterIndex < highlightEnd;
       spans.add(
@@ -553,6 +557,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
           style: effectiveStyle,
           progress: depthProgress,
           highlighted: isHighlighted,
+          state: state,
         ),
       );
       hiddenStart = localIndex + 1;
@@ -579,35 +584,33 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     return spans;
   }
 
-  WidgetSpan _cinematicFrontierSpan(
+  TextSpan _cinematicFrontierSpan(
     String text,
     _InteractiveSegment segment, {
     required TextStyle style,
     required double progress,
     required bool highlighted,
+    required AppState state,
   }) {
     final entry = segment.entry;
-    return WidgetSpan(
-      alignment: PlaceholderAlignment.baseline,
-      baseline: TextBaseline.alphabetic,
-      child: Semantics(
-        label: text,
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: entry == null ? null : () => _showEntry(entry),
-          child: _CinematicRevealGlyph(
-            key: highlighted
-                ? ValueKey(
-                    'reading-highlight-${widget.narrationItemId ?? widget.text}',
-                  )
-                : null,
-            text: text,
-            style: style,
-            progress: progress,
-            highlighted: highlighted,
-          ),
-        ),
-      ),
+    final t = progress.clamp(0.0, 1.0).toDouble();
+    final contrast = Curves.easeOutCubic.transform(t);
+    final opacity = lerpDouble(.35, 1, t) ?? 1;
+    final finalColor = style.color ?? Colors.white;
+    final paleColor = highlighted
+        ? const Color(0xFFFFE7AA)
+        : const Color(0xFFD8D0C2);
+    final cinematicColor =
+        Color.lerp(paleColor, finalColor, contrast) ?? finalColor;
+
+    return TextSpan(
+      text: text,
+      recognizer: segment.recognizer,
+      mouseCursor: entry == null ? MouseCursor.defer : SystemMouseCursors.click,
+      semanticsLabel: entry == null
+          ? null
+          : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
+      style: style.copyWith(color: cinematicColor.withValues(alpha: opacity)),
     );
   }
 
@@ -629,8 +632,8 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       semanticsLabel: hidden
           ? ''
           : entry == null
-              ? null
-              : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
+          ? null
+          : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
       style: style,
     );
   }
@@ -665,57 +668,6 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   }
 }
 
-class _CinematicRevealGlyph extends StatelessWidget {
-  const _CinematicRevealGlyph({
-    required this.text,
-    required this.style,
-    required this.progress,
-    required this.highlighted,
-    super.key,
-  });
-
-  final String text;
-  final TextStyle style;
-  final double progress;
-  final bool highlighted;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = progress.clamp(0.0, 1.0).toDouble();
-    final contrast = Curves.easeOutCubic.transform(t);
-    final lift = (1 - t) * 1.8;
-    final opacity = lerpDouble(.4, 1, t) ?? 1;
-    final finalColor = style.color ?? Colors.white;
-    final paleColor =
-        highlighted ? const Color(0xFFFFE7AA) : const Color(0xFFD8D0C2);
-    final cinematicColor =
-        Color.lerp(paleColor, finalColor, contrast) ?? finalColor;
-    final fontSize = style.fontSize ?? 14;
-    final lineHeight = style.height ?? 1.22;
-
-    return Transform.translate(
-      offset: Offset(0, lift),
-      child: Opacity(
-        opacity: opacity,
-        child: SizedBox(
-height: fontSize * lineHeight,
-child: Center(
-  widthFactor: 1,
-  child: Text(
-    text,
-    style: style.copyWith(
-      color: cinematicColor,
-      height: lineHeight,
-      shadows: style.shadows,
-    ),
-  ),
-),
-        ),
-      ),
-    );
-  }
-}
-
 class _InlineReadingMarker extends StatelessWidget {
   const _InlineReadingMarker({
     required this.text,
@@ -735,12 +687,12 @@ class _InlineReadingMarker extends StatelessWidget {
       child: Center(
         widthFactor: 1,
         child: Text(
-text,
-style: style.copyWith(
-  color: const Color(0xFFFFE7AA),
-  height: lineHeight,
-  fontWeight: FontWeight.w900,
-),
+          text,
+          style: style.copyWith(
+            color: const Color(0xFFFFE7AA),
+            height: lineHeight,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
     );
@@ -792,8 +744,9 @@ class _VocabularyPopover extends StatelessWidget {
                           child: Text(
                             entry.pinyin,
                             overflow: TextOverflow.ellipsis,
-                            style: PhoenixTheme.journeyMetaStyle
-                                .copyWith(fontSize: 12),
+                            style: PhoenixTheme.journeyMetaStyle.copyWith(
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ],
@@ -803,45 +756,58 @@ class _VocabularyPopover extends StatelessWidget {
                       state.displayText(entry.partOfSpeech),
                       key: ValueKey('story-discovery-word-pos-${entry.word}'),
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w900),
+                        color: Colors.white,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       state.displayText(nativeLabel),
                       key: ValueKey(
-                          'story-discovery-word-native-label-${entry.word}'),
+                        'story-discovery-word-native-label-${entry.word}',
+                      ),
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w900),
+                        color: Colors.white,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                     const SizedBox(height: 1),
                     Text(
                       nativeDefinition,
-                      key:
-                          ValueKey('story-discovery-word-native-${entry.word}'),
+                      key: ValueKey(
+                        'story-discovery-word-native-${entry.word}',
+                      ),
                       style: const TextStyle(
-                          color: Colors.white, fontSize: 13, height: 1.3),
+                        color: Colors.white,
+                        fontSize: 13,
+                        height: 1.3,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'English',
                       key: ValueKey(
-                          'story-discovery-word-english-label-${entry.word}'),
+                        'story-discovery-word-english-label-${entry.word}',
+                      ),
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w900),
+                        color: Colors.white,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                     const SizedBox(height: 1),
                     Text(
                       englishDefinition.isEmpty ? '—' : englishDefinition,
                       key: ValueKey(
-                          'story-discovery-word-english-${entry.word}'),
+                        'story-discovery-word-english-${entry.word}',
+                      ),
                       style: const TextStyle(
-                          color: Colors.white, fontSize: 11.5, height: 1.25),
+                        color: Colors.white,
+                        fontSize: 11.5,
+                        height: 1.25,
+                      ),
                     ),
                   ],
                 ),

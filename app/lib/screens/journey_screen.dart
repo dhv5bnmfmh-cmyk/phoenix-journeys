@@ -31,6 +31,7 @@ int? stableNarrationRevealEnd({
   required int? snapshotItemIndex,
   required int? snapshotEnd,
   required int? controllerItemIndex,
+  required int? controllerItemStartOffset,
   required int currentOffset,
 }) {
   if (!sessionActive) return null;
@@ -44,9 +45,11 @@ int? stableNarrationRevealEnd({
     return snapshotEnd.clamp(0, itemLength).toInt();
   }
 
-  // At the newline between narration items, Flutter TTS briefly reports no
-  // highlight snapshot. Keep the paragraph that just finished fully visible
-  // instead of clearing every paragraph for one frame.
+  final itemStart = controllerItemStartOffset;
+  if (itemStart != null) {
+    return (currentOffset - itemStart).clamp(0, itemLength).toInt();
+  }
+
   return currentOffset <= 0 ? 0 : itemLength;
 }
 
@@ -124,9 +127,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
     }
     _initialized = true;
-    unawaited(
-      _narration.setSpeechRate(_appState.journeyDifficulty.speechRate),
-    );
+    unawaited(_narration.setSpeechRate(_appState.journeyDifficulty.speechRate));
     _scheduleDifficultyWelcome();
 
     if (step == 2) _scheduleDiscoveryAutoStart();
@@ -234,8 +235,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                       difficulty == JourneyDifficulty.easy
                           ? '轻'
                           : difficulty == JourneyDifficulty.standard
-                              ? '标'
-                              : '挑',
+                          ? '标'
+                          : '挑',
                       style: const TextStyle(
                         color: PhoenixTheme.red,
                         fontWeight: FontWeight.w900,
@@ -738,14 +739,14 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   JourneyBackgroundPage get _backgroundPageType => switch (step) {
-        0 => JourneyBackgroundPage.story,
-        1 => JourneyBackgroundPage.vocabulary,
-        2 => JourneyBackgroundPage.discovery,
-        3 => JourneyBackgroundPage.reflection,
-        4 => JourneyBackgroundPage.writing,
-        5 => JourneyBackgroundPage.memory,
-        _ => JourneyBackgroundPage.completion,
-      };
+    0 => JourneyBackgroundPage.story,
+    1 => JourneyBackgroundPage.vocabulary,
+    2 => JourneyBackgroundPage.discovery,
+    3 => JourneyBackgroundPage.reflection,
+    4 => JourneyBackgroundPage.writing,
+    5 => JourneyBackgroundPage.memory,
+    _ => JourneyBackgroundPage.completion,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -881,7 +882,8 @@ class _JourneyScreenState extends State<JourneyScreen>
     return LayoutBuilder(
       key: ValueKey(title),
       builder: (context, constraints) {
-        final keyboardVisible = keyboardAdaptive &&
+        final keyboardVisible =
+            keyboardAdaptive &&
             (keyboardFocusNode?.hasFocus ??
                 MediaQuery.viewInsetsOf(context).bottom > 0);
         final compact = constraints.maxHeight < 590 || keyboardVisible;
@@ -1048,7 +1050,8 @@ class _JourneyScreenState extends State<JourneyScreen>
     required int itemIndex,
     required int itemLength,
   }) {
-    final sessionActive = _narration.contentId == contentId &&
+    final sessionActive =
+        _narration.contentId == contentId &&
         (_narration.status == NarrationStatus.playing ||
             _narration.status == NarrationStatus.paused);
     final snapshot = _narration.highlightSnapshot;
@@ -1061,6 +1064,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       snapshotItemIndex: snapshotMatches ? snapshot?.itemIndex : null,
       snapshotEnd: snapshotMatches ? snapshot?.end : null,
       controllerItemIndex: _narration.currentItemIndex,
+      controllerItemStartOffset: _narration.currentItemStartOffset,
       currentOffset: _narration.currentOffset,
     );
   }
@@ -1109,65 +1113,71 @@ class _JourneyScreenState extends State<JourneyScreen>
                             .asMap()
                             .entries
                             .map((entry) {
-                          final annotation =
-                              _levelContent.storyAnnotations[entry.key];
-                          final snapshot = _narration.highlightSnapshot;
-                          final isActive = snapshot?.contentId == 'story' &&
-                              snapshot?.itemId == 'story-${entry.key}';
-                          return _CompactTextBlock(
-                            index: entry.key + 1,
-                            active: isActive,
-                            transparentSurface: true,
-                            onSupport: () => unawaited(
-                              _showReadingSupport(
-                                title: '故事第 ${entry.key + 1} 段',
-                                pinyin: annotation.pinyin,
-                                nativeLabel: annotation.nativeLabel(
-                                  language,
-                                ),
-                                nativeText: annotation.nativeText(
-                                  language,
-                                  entry.value,
-                                ),
-                                english: annotation.english,
-                              ),
-                            ),
-                            child: InteractiveStoryText(
-                              text: entry.value,
-                              entries: _levelContent.words,
-                              narrationController: _narration,
-                              highlightStart: isActive ? snapshot!.start : null,
-                              highlightEnd: isActive ? snapshot!.end : null,
-                              revealEnd: _narrationRevealEnd(
-                                contentId: 'story',
-                                itemIndex: entry.key,
-                                itemLength: entry.value.length,
-                              ),
-                              narrationContentId: 'story',
-                              narrationItemId: 'story-${entry.key}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: fontSize,
-                                height: 1.22,
-                                fontFamily: PhoenixTheme.chineseFontFamily,
-                                fontFamilyFallback:
-                                    PhoenixTheme.chineseFontFallback,
-                                fontWeight: FontWeight.w700,
-                                shadows: const [
-                                  Shadow(
-                                    color: Color(0xE6000000),
-                                    blurRadius: 3,
-                                    offset: Offset(0, 1),
+                              final annotation =
+                                  _levelContent.storyAnnotations[entry.key];
+                              final snapshot = _narration.highlightSnapshot;
+                              final isActive =
+                                  snapshot?.contentId == 'story' &&
+                                  snapshot?.itemId == 'story-${entry.key}';
+                              return _CompactTextBlock(
+                                index: entry.key + 1,
+                                active: isActive,
+                                transparentSurface: true,
+                                onSupport: () => unawaited(
+                                  _showReadingSupport(
+                                    title: '故事第 ${entry.key + 1} 段',
+                                    pinyin: annotation.pinyin,
+                                    nativeLabel: annotation.nativeLabel(
+                                      language,
+                                    ),
+                                    nativeText: annotation.nativeText(
+                                      language,
+                                      entry.value,
+                                    ),
+                                    english: annotation.english,
                                   ),
-                                  Shadow(
-                                    color: Color(0x99000000),
-                                    blurRadius: 8,
+                                ),
+                                child: InteractiveStoryText(
+                                  text: entry.value,
+                                  entries: _levelContent.words,
+                                  narrationController: _narration,
+                                  highlightStart: isActive
+                                      ? snapshot!.start
+                                      : null,
+                                  highlightEnd: isActive ? snapshot!.end : null,
+                                  revealEnd: _narrationRevealEnd(
+                                    contentId: 'story',
+                                    itemIndex: entry.key,
+                                    itemLength: entry.value.length,
                                   ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(growable: false),
+                                  narrationContentId: 'story',
+                                  narrationItemId: 'story-${entry.key}',
+                                  narrationSessionToken:
+                                      _narration.speechSessionToken,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: fontSize,
+                                    height: 1.22,
+                                    fontFamily: PhoenixTheme.chineseFontFamily,
+                                    fontFamilyFallback:
+                                        PhoenixTheme.chineseFontFallback,
+                                    fontWeight: FontWeight.w700,
+                                    shadows: const [
+                                      Shadow(
+                                        color: Color(0xE6000000),
+                                        blurRadius: 3,
+                                        offset: Offset(0, 1),
+                                      ),
+                                      Shadow(
+                                        color: Color(0x99000000),
+                                        blurRadius: 8,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            })
+                            .toList(growable: false),
                       ),
                     );
                   },
@@ -1420,43 +1430,49 @@ class _JourneyScreenState extends State<JourneyScreen>
                           .asMap()
                           .entries
                           .map((entry) {
-                        final item = entry.value;
-                        final snapshot = _narration.highlightSnapshot;
-                        final isActive = snapshot?.contentId == 'discovery' &&
-                            snapshot?.itemId == 'discovery-${entry.key}';
-                        return _CompactTextBlock(
-                          index: entry.key + 1,
-                          active: isActive,
-                          transparentSurface: true,
-                          onSupport: () => unawaited(
-                            _showReadingSupport(
-                              title: '今日发现 ${entry.key + 1}',
-                              pinyin: item.pinyin,
-                              nativeLabel: item.nativeLabel(language),
-                              nativeText: item.nativeText(language),
-                              english: item.english,
-                            ),
-                          ),
-                          child: InteractiveStoryText(
-                            text: item.text,
-                            entries: _levelContent.words,
-                            narrationController: _narration,
-                            highlightStart: isActive ? snapshot!.start : null,
-                            highlightEnd: isActive ? snapshot!.end : null,
-                            revealEnd: _narrationRevealEnd(
-                              contentId: 'discovery',
-                              itemIndex: entry.key,
-                              itemLength: item.text.length,
-                            ),
-                            narrationContentId: 'discovery',
-                            narrationItemId: 'discovery-${entry.key}',
-                            style: PhoenixTheme.journeyBodyStyle.copyWith(
-                              fontSize: fontSize,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        );
-                      }).toList(growable: false),
+                            final item = entry.value;
+                            final snapshot = _narration.highlightSnapshot;
+                            final isActive =
+                                snapshot?.contentId == 'discovery' &&
+                                snapshot?.itemId == 'discovery-${entry.key}';
+                            return _CompactTextBlock(
+                              index: entry.key + 1,
+                              active: isActive,
+                              transparentSurface: true,
+                              onSupport: () => unawaited(
+                                _showReadingSupport(
+                                  title: '今日发现 ${entry.key + 1}',
+                                  pinyin: item.pinyin,
+                                  nativeLabel: item.nativeLabel(language),
+                                  nativeText: item.nativeText(language),
+                                  english: item.english,
+                                ),
+                              ),
+                              child: InteractiveStoryText(
+                                text: item.text,
+                                entries: _levelContent.words,
+                                narrationController: _narration,
+                                highlightStart: isActive
+                                    ? snapshot!.start
+                                    : null,
+                                highlightEnd: isActive ? snapshot!.end : null,
+                                revealEnd: _narrationRevealEnd(
+                                  contentId: 'discovery',
+                                  itemIndex: entry.key,
+                                  itemLength: item.text.length,
+                                ),
+                                narrationContentId: 'discovery',
+                                narrationItemId: 'discovery-${entry.key}',
+                                narrationSessionToken:
+                                    _narration.speechSessionToken,
+                                style: PhoenixTheme.journeyBodyStyle.copyWith(
+                                  fontSize: fontSize,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            );
+                          })
+                          .toList(growable: false),
                     );
                   },
                 );
@@ -1779,8 +1795,9 @@ class _CompactTextBlock extends StatelessWidget {
             padding: const EdgeInsets.only(top: 1),
             child: CircleAvatar(
               radius: 9,
-              backgroundColor:
-                  active ? const Color(0xB33A1714) : const Color(0x99000000),
+              backgroundColor: active
+                  ? const Color(0xB33A1714)
+                  : const Color(0x99000000),
               child: Text(
                 '$index',
                 style: const TextStyle(

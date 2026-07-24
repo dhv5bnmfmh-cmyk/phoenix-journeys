@@ -2,32 +2,24 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const interactive = readFileSync(
-  'app/lib/widgets/interactive_story_text.dart',
-  'utf8',
-);
+const interactive = readFileSync('app/lib/widgets/interactive_story_text.dart', 'utf8');
 
-// Permanent guard: narration progress must animate between speech callbacks
-// while remaining light enough for iPhone Flutter Web.
-test('narration reveal uses smooth lightweight cinematic interpolation', () => {
-  assert.match(interactive, /SingleTickerProviderStateMixin/);
-  assert.match(interactive, /AnimationController/);
-  assert.match(interactive, /cinematicRevealProgress/);
-  assert.match(interactive, /cinematicDepthProgress/);
-  assert.match(interactive, /cinematicRevealTailLength = 6/);
-  assert.match(interactive, /Color\.lerp\(paleColor, finalColor/);
-  assert.match(interactive, /lerpDouble\(\.4, 1, t\)/);
-  assert.match(interactive, /reading-highlight-/);
-  assert.doesNotMatch(
-    interactive,
-    /_ReadingTrianglePainter|reading-triangle-|Size\(9,\s*5\)/,
-  );
-  assert.match(interactive, /cinematicRevealDuration/);
-  assert.match(interactive, /clamp\(120, 420\)/);
+test('narration reveal uses one monotonic linear cursor', () => {
+  assert.match(interactive, /AnimationController\.unbounded/);
+  assert.match(interactive, /_lastAcceptedRevealCursor/);
+  assert.match(interactive, /animateTo\(/);
+  assert.match(interactive, /curve: Curves\.linear/);
+  assert.match(interactive, /narrationSessionToken/);
+  assert.doesNotMatch(interactive, /_revealFrom|_revealTo/);
+  assert.match(interactive, /clamp\(160, 700\)/);
+});
+
+test('frontier characters stay lightweight on iPhone Flutter Web', () => {
+  assert.match(interactive, /TextSpan _cinematicFrontierSpan/);
+  assert.match(interactive, /lerpDouble\(\.35, 1, t\)/);
+  assert.doesNotMatch(interactive, /_CinematicRevealGlyph/);
   assert.doesNotMatch(interactive, /ImageFilter\.blur|ImageFiltered\(/);
-  assert.match(interactive, /Transform\.translate/);
-  assert.match(interactive, /final progress = _cinematicRevealController\.value/);
-  assert.match(interactive, /Listenable\.merge/);
+  assert.doesNotMatch(interactive, /reading-triangle-|_ReadingTrianglePainter/);
 });
 
 test('future text remains layout-stable and non-interactive', () => {

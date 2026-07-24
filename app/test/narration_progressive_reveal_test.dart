@@ -4,10 +4,7 @@ import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
 
 void main() {
   test('narration reveal preserves layout while exposing only spoken text', () {
-    expect(
-      revealedSegmentLength(segmentStart: 5, segmentEnd: 10),
-      5,
-    );
+    expect(revealedSegmentLength(segmentStart: 5, segmentEnd: 10), 5);
     expect(
       revealedSegmentLength(segmentStart: 5, segmentEnd: 10, revealEnd: 3),
       0,
@@ -22,19 +19,7 @@ void main() {
     );
   });
 
-  test('paragraph boundary never clears the whole narration for one frame', () {
-    expect(
-      stableNarrationRevealEnd(
-        sessionActive: true,
-        itemIndex: 0,
-        itemLength: 12,
-        snapshotItemIndex: null,
-        snapshotEnd: null,
-        controllerItemIndex: 0,
-        currentOffset: 12,
-      ),
-      12,
-    );
+  test('missing snapshots use local controller progress without jumping', () {
     expect(
       stableNarrationRevealEnd(
         sessionActive: true,
@@ -42,10 +27,11 @@ void main() {
         itemLength: 10,
         snapshotItemIndex: null,
         snapshotEnd: null,
-        controllerItemIndex: 0,
-        currentOffset: 12,
+        controllerItemIndex: 1,
+        controllerItemStartOffset: 13,
+        currentOffset: 17,
       ),
-      0,
+      4,
     );
     expect(
       stableNarrationRevealEnd(
@@ -54,51 +40,41 @@ void main() {
         itemLength: 12,
         snapshotItemIndex: null,
         snapshotEnd: null,
-        controllerItemIndex: 0,
-        currentOffset: 0,
+        controllerItemIndex: 1,
+        controllerItemStartOffset: 13,
+        currentOffset: 17,
+      ),
+      12,
+    );
+    expect(
+      stableNarrationRevealEnd(
+        sessionActive: true,
+        itemIndex: 2,
+        itemLength: 8,
+        snapshotItemIndex: null,
+        snapshotEnd: null,
+        controllerItemIndex: 1,
+        controllerItemStartOffset: 13,
+        currentOffset: 17,
       ),
       0,
     );
   });
 
-  test('cinematic reveal interpolates each glyph with a bounded duration', () {
-    expect(
-      cinematicRevealProgress(revealCursor: 4, characterIndex: 4),
-      0,
-    );
-    final half = cinematicRevealProgress(
-      revealCursor: 4.5,
-      characterIndex: 4,
-    );
-    expect(half, greaterThan(.5));
-    expect(half, lessThan(1));
-    expect(
-      cinematicRevealProgress(revealCursor: 5, characterIndex: 4),
-      1,
-    );
-    expect(cinematicRevealDuration(1).inMilliseconds, 120);
-    expect(cinematicRevealDuration(30).inMilliseconds, 420);
+  test('linear reveal duration follows natural Chinese reading pace', () {
+    expect(cinematicRevealDuration(1).inMilliseconds, 210);
+    expect(cinematicRevealDuration(30).inMilliseconds, 700);
   });
 
-  test('cinematic reveal keeps a pale-to-deep six-character tail', () {
-    expect(
-      cinematicDepthProgress(revealCursor: 8, characterIndex: 8),
-      0,
-    );
-    final fresh = cinematicDepthProgress(
-      revealCursor: 8.5,
-      characterIndex: 8,
-    );
+  test('cinematic reveal keeps a short pale-to-deep tail', () {
+    expect(cinematicDepthProgress(revealCursor: 8, characterIndex: 8), 0);
+    final fresh = cinematicDepthProgress(revealCursor: 8.5, characterIndex: 8);
     final deepening = cinematicDepthProgress(
-      revealCursor: 11,
+      revealCursor: 9.5,
       characterIndex: 8,
     );
     expect(fresh, greaterThan(0));
-    expect(fresh, lessThan(.5));
-    expect(deepening, greaterThan(fresh));
-    expect(
-      cinematicDepthProgress(revealCursor: 14, characterIndex: 8),
-      1,
-    );
+    expect(fresh, lessThan(deepening));
+    expect(cinematicDepthProgress(revealCursor: 11, characterIndex: 8), 1);
   });
 }
