@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -10,8 +9,6 @@ import '../services/journey_location_binding.dart';
 import '../theme/phoenix_theme.dart';
 
 const _summerPalaceJourneyId = 'beijing-summer-palace';
-const _summerPalaceFrameInterval = Duration(milliseconds: 50);
-const _summerPalaceFrameCount = 400;
 
 bool _summerPalaceReduceMotion(BuildContext context) {
   final forceMotion = Uri.base.queryParameters['motion'] == 'on';
@@ -49,6 +46,7 @@ class DestinationBackground extends StatelessWidget {
 
     if (journeyId == _summerPalaceJourneyId) {
       return _SummerPalaceDynamicBackground(
+        assetPath: asset?.assetPath,
         scrimStrength: visibleScrimStrength,
         child: child,
       );
@@ -78,10 +76,12 @@ class DestinationBackground extends StatelessWidget {
 
 class _SummerPalaceDynamicBackground extends StatefulWidget {
   const _SummerPalaceDynamicBackground({
+    required this.assetPath,
     required this.scrimStrength,
     required this.child,
   });
 
+  final String? assetPath;
   final double scrimStrength;
   final Widget child;
 
@@ -91,11 +91,19 @@ class _SummerPalaceDynamicBackground extends StatefulWidget {
 }
 
 class _SummerPalaceDynamicBackgroundState
-    extends State<_SummerPalaceDynamicBackground> {
-  final ValueNotifier<int> _frame = ValueNotifier<int>(70);
-  Timer? _motionTimer;
-  bool _motionActive = false;
-  bool _preloaded = false;
+    extends State<_SummerPalaceDynamicBackground>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _motion;
+  String? _preloadedAssetPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _motion = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 13),
+    );
+  }
 
   @override
   void didChangeDependencies() {
@@ -104,38 +112,36 @@ class _SummerPalaceDynamicBackgroundState
     _preloadAsset();
   }
 
+  @override
+  void didUpdateWidget(covariant _SummerPalaceDynamicBackground oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.assetPath != widget.assetPath) {
+      _preloadedAssetPath = null;
+      _preloadAsset();
+    }
+  }
+
   void _syncMotionPreference() {
-    final shouldAnimate = !_summerPalaceReduceMotion(context) &&
-        TickerMode.valuesOf(context).enabled;
-    if (_motionActive == shouldAnimate) return;
-
-    _motionActive = shouldAnimate;
-    _motionTimer?.cancel();
-    _motionTimer = null;
-
-    if (shouldAnimate) {
-      _motionTimer = Timer.periodic(_summerPalaceFrameInterval, (_) {
-        if (!mounted) return;
-        _frame.value = (_frame.value + 1) % _summerPalaceFrameCount;
-      });
-    } else {
-      _frame.value = 70;
+    final reduceMotion = _summerPalaceReduceMotion(context);
+    if (reduceMotion) {
+      _motion.stop();
+      _motion.value = .42;
+    } else if (!_motion.isAnimating) {
+      _motion.value = .08;
+      _motion.repeat(reverse: true);
     }
   }
 
   void _preloadAsset() {
-    if (_preloaded) return;
-    _preloaded = true;
-    precacheImage(
-      const AssetImage(summerPalaceLivingBackgroundAssetPath),
-      context,
-    );
+    final path = widget.assetPath;
+    if (path == null || path == _preloadedAssetPath) return;
+    _preloadedAssetPath = path;
+    precacheImage(AssetImage(path), context);
   }
 
   @override
   void dispose() {
-    _motionTimer?.cancel();
-    _frame.dispose();
+    _motion.dispose();
     super.dispose();
   }
 
@@ -148,31 +154,27 @@ class _SummerPalaceDynamicBackgroundState
         child: Stack(
           fit: StackFit.expand,
           children: [
-            ExcludeSemantics(
-              child: ValueListenableBuilder<int>(
-                valueListenable: _frame,
-                builder: (context, frame, _) {
-                  final progress = reduceMotion
-                      ? .175
-                      : frame / _summerPalaceFrameCount;
-                  return Stack(
+            AnimatedBuilder(
+              animation: _motion,
+              builder: (context, _) {
+                final raw = reduceMotion ? .42 : _motion.value;
+                final progress = Curves.easeInOutSine.transform(raw);
+                return ExcludeSemantics(
+                  child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      _SummerPalaceCameraLayer(progress: progress),
-                      if (!reduceMotion)
-                        RepaintBoundary(
-                          child: CustomPaint(
-                            key: const ValueKey(
-                              'summer-palace-living-layer',
-                            ),
-                            painter: _SummerPalaceLivingPainter(progress),
-                            size: Size.infinite,
-                          ),
-                        ),
+                      _SummerPalaceCameraLayer(
+                        assetPath: widget.assetPath,
+                        progress: progress,
+                      ),
+                      _SummerPalaceCloudLight(progress: progress),
+                      _SummerPalaceWaterShimmer(progress: progress),
+                      _SummerPalaceWaterRipples(progress: progress),
+                      _SummerPalaceForegroundBreath(progress: progress),
                     ],
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
             _JourneyBackgroundScrim(strength: widget.scrimStrength),
             widget.child,
@@ -184,27 +186,28 @@ class _SummerPalaceDynamicBackgroundState
 }
 
 class _SummerPalaceCameraLayer extends StatelessWidget {
-  const _SummerPalaceCameraLayer({required this.progress});
+  const _SummerPalaceCameraLayer({
+    required this.assetPath,
+    required this.progress,
+  });
 
+  final String? assetPath;
   final double progress;
 
   @override
   Widget build(BuildContext context) {
-    final cycle = progress * math.pi * 2;
-    final horizontal = math.sin(cycle) * 6;
-    final vertical = math.cos(cycle) * 2.5;
-    final scale = 1.045 + (math.sin(cycle - math.pi / 2) + 1) * .006;
+    final path = assetPath;
+    if (path == null) return const _BackgroundFallback();
 
     return RepaintBoundary(
       key: const ValueKey('summer-palace-camera-layer'),
       child: Transform.translate(
         key: const ValueKey('summer-palace-camera-transform'),
-        offset: Offset(horizontal, vertical),
+        offset: Offset(-18 + 36 * progress, -13 + 15 * progress),
         child: Transform.scale(
-          scale: scale,
+          scale: 1.075 + .075 * progress,
           child: Image.asset(
-            summerPalaceLivingBackgroundAssetPath,
-            key: const ValueKey('summer-palace-static-background'),
+            path,
             fit: BoxFit.cover,
             filterQuality: FilterQuality.medium,
             gaplessPlayback: true,
@@ -216,81 +219,133 @@ class _SummerPalaceCameraLayer extends StatelessWidget {
   }
 }
 
-class _SummerPalaceLivingPainter extends CustomPainter {
-  const _SummerPalaceLivingPainter(this.progress);
+class _SummerPalaceCloudLight extends StatelessWidget {
+  const _SummerPalaceCloudLight({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: FractionallySizedBox(
+          widthFactor: 1.55,
+          heightFactor: .66,
+          child: Transform.translate(
+            offset: Offset(-80 + 160 * progress, -7 + 14 * progress),
+            child: DecoratedBox(
+              key: const ValueKey('summer-palace-cloud-light'),
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(-.72 + 1.44 * progress, -.34),
+                  radius: 1.05,
+                  colors: [
+                    Colors.white.withValues(alpha: .19),
+                    const Color(0xFFFFD89B).withValues(alpha: .105),
+                    Colors.transparent,
+                  ],
+                  stops: const [0, .38, 1],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SummerPalaceWaterShimmer extends StatelessWidget {
+  const _SummerPalaceWaterShimmer({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: FractionallySizedBox(
+          widthFactor: 1.62,
+          heightFactor: .58,
+          child: Transform.translate(
+            offset: Offset(92 - 184 * progress, 5 - 10 * progress),
+            child: DecoratedBox(
+              key: const ValueKey('summer-palace-water-shimmer'),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: const Alignment(-1.2, -.8),
+                  end: const Alignment(1.2, .8),
+                  colors: [
+                    Colors.transparent,
+                    Colors.white.withValues(alpha: .035),
+                    const Color(0xFFFFE1A9).withValues(alpha: .15),
+                    Colors.white.withValues(alpha: .055),
+                    Colors.transparent,
+                  ],
+                  stops: const [0, .25, .5, .75, 1],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SummerPalaceWaterRipples extends StatelessWidget {
+  const _SummerPalaceWaterRipples({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: FractionallySizedBox(
+          widthFactor: 1,
+          heightFactor: .46,
+          child: CustomPaint(
+            key: const ValueKey('summer-palace-water-ripples'),
+            painter: _SummerPalaceRipplePainter(progress),
+            size: Size.infinite,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SummerPalaceRipplePainter extends CustomPainter {
+  const _SummerPalaceRipplePainter(this.progress);
 
   final double progress;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final cycle = progress * math.pi * 2;
-    _paintCloudLight(canvas, size, cycle);
-    _paintWater(canvas, size, cycle);
-    _paintBoat(canvas, size, cycle);
-    _paintVisitors(canvas, size, cycle);
-  }
-
-  void _paintCloudLight(Canvas canvas, Size size, double cycle) {
-    final centerX = size.width * (.56 + math.sin(cycle) * .045);
-    final rect = Rect.fromCircle(
-      center: Offset(centerX, size.height * .17),
-      radius: size.width * .48,
-    );
-    final paint = Paint()
-      ..shader = const RadialGradient(
-        colors: [Color(0x24FFE4B6), Color(0x0DFFD69A), Colors.transparent],
-        stops: [0, .42, 1],
-      ).createShader(rect);
-    canvas.drawOval(rect, paint);
-  }
-
-  void _paintWater(Canvas canvas, Size size, double cycle) {
-    final waterTop = size.height * .52;
-    final waterRect = Rect.fromLTWH(
-      0,
-      waterTop,
-      size.width,
-      size.height - waterTop,
-    );
-    canvas.save();
-    canvas.clipRect(waterRect);
-
-    final shimmerX = size.width * (.22 + .13 * math.sin(cycle));
-    final shimmerRect = Rect.fromLTWH(
-      shimmerX,
-      waterTop + size.height * .035,
-      size.width * .42,
-      size.height * .31,
-    );
-    final shimmer = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Colors.transparent, Color(0x25FFE3AA), Colors.transparent],
-        stops: [0, .5, 1],
-      ).createShader(shimmerRect);
-    canvas.drawRect(shimmerRect, shimmer);
-
     final bright = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = const Color(0x24FFE7B8);
+      ..strokeWidth = 1.15
+      ..color = const Color(0xFFFFE7B8).withValues(alpha: .11);
     final soft = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = .7
-      ..color = const Color(0x16FFFFFF);
+      ..color = Colors.white.withValues(alpha: .07);
 
-    for (var row = 0; row < 8; row += 1) {
+    for (var row = 0; row < 11; row += 1) {
       final path = Path();
-      final yBase = waterTop + size.height * (.035 + row * .047);
-      final amplitude = 1.1 + (row % 3) * .45;
-      final wavelength = 62.0 + row * 7;
-      final phase = cycle * 1.35 + row * .76;
+      final yBase = size.height * (.12 + row * .075);
+      final amplitude = 1.4 + (row % 3) * .65;
+      final wavelength = 52.0 + row * 5.0;
+      final phase = progress * math.pi * 4 + row * .72;
 
-      for (var x = -12.0; x <= size.width + 12; x += 12) {
+      for (var x = -8.0; x <= size.width + 8; x += 6) {
         final y = yBase +
             math.sin((x / wavelength) * math.pi * 2 + phase) * amplitude;
-        if (x <= -12) {
+        if (x <= -8) {
           path.moveTo(x, y);
         } else {
           path.lineTo(x, y);
@@ -298,55 +353,52 @@ class _SummerPalaceLivingPainter extends CustomPainter {
       }
       canvas.drawPath(path, row.isEven ? bright : soft);
     }
-
-    canvas.restore();
-  }
-
-  void _paintBoat(Canvas canvas, Size size, double cycle) {
-    final x = size.width * (.73 + .025 * math.sin(cycle * .72));
-    final y = size.height * (.61 + .0025 * math.sin(cycle * 1.6));
-    final hull = Paint()..color = const Color(0x98502F21);
-    final roof = Paint()..color = const Color(0x9E35231A);
-    final line = Paint()
-      ..color = const Color(0xA8D6B77B)
-      ..strokeWidth = 1;
-
-    final hullPath = Path()
-      ..moveTo(x - 12, y)
-      ..lineTo(x + 13, y)
-      ..lineTo(x + 8, y + 5)
-      ..lineTo(x - 8, y + 5)
-      ..close();
-    canvas.drawPath(hullPath, hull);
-    canvas.drawRect(Rect.fromLTWH(x - 8, y - 6, 16, 5), roof);
-    canvas.drawLine(Offset(x - 7, y - 6), Offset(x - 9, y), line);
-    canvas.drawLine(Offset(x + 7, y - 6), Offset(x + 9, y), line);
-  }
-
-  void _paintVisitors(Canvas canvas, Size size, double cycle) {
-    final pathY = size.height * .505;
-    final body = Paint()
-      ..color = const Color(0x8E49382E)
-      ..strokeWidth = 1.3
-      ..strokeCap = StrokeCap.round;
-    final head = Paint()..color = const Color(0x9BE8D4AE);
-
-    for (var index = 0; index < 3; index += 1) {
-      final drift = ((progress + index * .29) % 1) * size.width * .018;
-      final x = size.width * (.35 + index * .045) + drift;
-      final bob = math.sin(cycle * 2 + index) * .7;
-      canvas.drawCircle(Offset(x, pathY - 4 + bob), 1.15, head);
-      canvas.drawLine(
-        Offset(x, pathY - 2.5 + bob),
-        Offset(x, pathY + 3.5 + bob),
-        body,
-      );
-    }
   }
 
   @override
-  bool shouldRepaint(covariant _SummerPalaceLivingPainter oldDelegate) {
+  bool shouldRepaint(covariant _SummerPalaceRipplePainter oldDelegate) {
     return oldDelegate.progress != progress;
+  }
+}
+
+class _SummerPalaceForegroundBreath extends StatelessWidget {
+  const _SummerPalaceForegroundBreath({required this.progress});
+
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: FractionallySizedBox(
+          widthFactor: 1,
+          heightFactor: .44,
+          child: Transform.translate(
+            offset: Offset(0, 8 - 16 * progress),
+            child: Transform.scale(
+              alignment: Alignment.bottomCenter,
+              scale: 1 + .022 * progress,
+              child: DecoratedBox(
+                key: const ValueKey('summer-palace-foreground-breath'),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      const Color(0xFF17382E).withValues(alpha: .045),
+                      const Color(0xFF0A211B).withValues(alpha: .14),
+                    ],
+                    stops: const [0, .55, 1],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -383,7 +435,7 @@ class _BackgroundFallback extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFF1E6CF), Color(0xFFD7E3DA)],
+          colors: [Color(0xFFFFF7EA), Color(0xFFF2DFCA), PhoenixTheme.paper],
         ),
       ),
     );
