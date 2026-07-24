@@ -7,6 +7,8 @@ const player = readFileSync(
   'utf8',
 );
 
+// Compact mode moves replay beside play/pause and leaves only a thin progress
+// rail below, so the card becomes shorter without dropping any control.
 test('compact narration player preserves controls in a shorter layout', () => {
   assert.match(player, /compact \? 6 : 10/);
   assert.match(player, /compact \? 3 : 8/);
