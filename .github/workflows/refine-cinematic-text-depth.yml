@@ -26,7 +26,9 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/refine_cinematic_text_and_background.py
+          python3 tools/fix_cinematic_refinement_followup.py
           rm -f tools/refine_cinematic_text_and_background.py
+          rm -f tools/fix_cinematic_refinement_followup.py
           rm -f .github/workflows/refine-cinematic-text-depth.yml
           git diff --check
 
