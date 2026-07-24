@@ -4,13 +4,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/journey_background.dart';
 import '../services/journey_location_binding.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
-import '../widgets/destination_background.dart';
 import '../widgets/journey_picker_sheet.dart';
 import 'journey_screen.dart';
+
+const _phoenixHomeHeroAsset =
+    'assets/images/home/phoenix-world-language-journey-v1.webp';
 
 @visibleForTesting
 double compactExploreMapHeight(double viewportHeight) {
@@ -52,7 +53,7 @@ class ExploreScreen extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: _JourneyBackground(journeyId: state.activeJourneyId),
+          child: const _PhoenixHomeBackground(),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
@@ -176,18 +177,115 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-class _JourneyBackground extends StatelessWidget {
-  const _JourneyBackground({required this.journeyId});
+class _PhoenixHomeBackground extends StatefulWidget {
+  const _PhoenixHomeBackground();
 
-  final String journeyId;
+  @override
+  State<_PhoenixHomeBackground> createState() => _PhoenixHomeBackgroundState();
+}
+
+class _PhoenixHomeBackgroundState extends State<_PhoenixHomeBackground>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _motion;
+
+  @override
+  void initState() {
+    super.initState();
+    _motion = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 28),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final forceMotion = Uri.base.queryParameters['motion'] == 'on';
+    final reduceMotion =
+        !forceMotion &&
+        (MediaQuery.maybeOf(context)?.disableAnimations ?? false);
+    if (reduceMotion) {
+      _motion
+        ..stop()
+        ..value = .18;
+    } else if (!_motion.isAnimating) {
+      _motion.repeat();
+    }
+    precacheImage(const AssetImage(_phoenixHomeHeroAsset), context);
+  }
+
+  @override
+  void dispose() {
+    _motion.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return DestinationBackground(
-      journeyId: journeyId,
-      pageType: JourneyBackgroundPage.explore,
-      scrimStrength: .28,
-      child: CustomPaint(painter: _CloudPainter()),
+    final forceMotion = Uri.base.queryParameters['motion'] == 'on';
+    final reduceMotion =
+        !forceMotion &&
+        (MediaQuery.maybeOf(context)?.disableAnimations ?? false);
+    return RepaintBoundary(
+      key: const ValueKey('phoenix-home-world-language-background'),
+      child: ClipRect(
+        child: AnimatedBuilder(
+          animation: _motion,
+          builder: (context, _) {
+            final phase = reduceMotion ? .18 : _motion.value;
+            final camera = math.sin(phase * math.pi * 2);
+            final glow = .5 + .5 * math.sin(phase * math.pi * 2 + 1.2);
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                Transform.translate(
+                  offset: Offset(camera * 4, camera * -3),
+                  child: Transform.scale(
+                    scale: 1.055 + glow * .012,
+                    child: Image.asset(
+                      _phoenixHomeHeroAsset,
+                      key: const ValueKey('phoenix-home-hero-image'),
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                      filterQuality: FilterQuality.high,
+                      gaplessPlayback: true,
+                    ),
+                  ),
+                ),
+                DecoratedBox(
+                  key: const ValueKey('phoenix-home-route-glow'),
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      center: Alignment(.18 + camera * .08, .22),
+                      radius: .82,
+                      colors: [
+                        const Color(0xFFFFE0A0)
+                            .withValues(alpha: .035 + glow * .035),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0x3AFFF8EA),
+                        Color(0x16FFF8EA),
+                        Color(0x08FFF8EA),
+                        Color(0x1E2C1712),
+                      ],
+                      stops: [0, .28, .66, 1],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 }

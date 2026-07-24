@@ -12,8 +12,12 @@ test('Summer Palace background uses premium local pseudo-dynamic layers', () => 
   assert.match(widget, /beijing-summer-palace/);
   assert.match(widget, /summer-palace-dynamic-background/);
   assert.match(widget, /AnimationController/);
-  assert.match(widget, /Duration\(seconds: 21\)/);
-  assert.match(widget, /repeat\(reverse: true\)/);
+  assert.match(widget, /Duration\(seconds: 28\)/);
+  assert.match(widget, /_motion\.repeat\(\)/);
+  assert.match(widget, /cameraProgress/);
+  assert.match(widget, /mistProgress/);
+  assert.match(widget, /waterProgress/);
+  assert.match(widget, /FilterQuality\.high/);
   assert.match(widget, /summer-palace-camera-layer/);
   assert.match(widget, /summer-palace-camera-transform/);
   assert.match(widget, /summer-palace-cinematic-color-grade/);

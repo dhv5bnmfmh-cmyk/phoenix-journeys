@@ -11,8 +11,13 @@ const background = readFileSync(
 test('Forbidden City uses its own slow cinematic motion layers', () => {
   assert.match(background, /_forbiddenCityJourneyId = 'beijing-forbidden-city'/);
   assert.match(background, /class _ForbiddenCityDynamicBackground/);
-  assert.match(background, /Duration\(seconds: 16\)/);
-  assert.match(background, /_motion\.repeat\(reverse: true\)/);
+  assert.match(background, /Duration\(seconds: 24\)/);
+  assert.match(background, /_motion\.repeat\(\)/);
+  assert.match(background, /cameraProgress/);
+  assert.match(background, /lightProgress/);
+  assert.match(background, /shadowProgress/);
+  assert.match(background, /depthProgress/);
+  assert.match(background, /FilterQuality\.high/);
   assert.match(background, /forbidden-city-camera-transform/);
   assert.match(background, /forbidden-city-dawn-light/);
   assert.match(background, /forbidden-city-cloud-shadow/);

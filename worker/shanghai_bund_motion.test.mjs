@@ -10,7 +10,7 @@ const background = readFileSync(
 test('Shanghai Bund uses calm cinematic river and skyline motion', () => {
   assert.match(background, /_shanghaiBundJourneyId = 'shanghai-bund'/);
   assert.match(background, /class _ShanghaiBundDynamicBackground/);
-  assert.match(background, /Duration\(seconds: 15\)/);
+  assert.match(background, /Duration\(seconds: 24\)/);
   assert.match(background, /shanghai-bund-camera-transform/);
   assert.match(background, /shanghai-bund-skyline-glow/);
   assert.match(background, /shanghai-bund-river-light/);
@@ -26,5 +26,8 @@ test('Shanghai Bund keeps low-cost looped motion without decorative objects', ()
   assert.match(bund, /_motion\.repeat\(\)/);
   assert.doesNotMatch(bund, /_motion\.repeat\(reverse: true\)/);
   assert.match(bund, /final sceneProgress/);
+  assert.match(bund, /final skylineProgress/);
+  assert.match(bund, /final riverProgress/);
+  assert.match(bund, /FilterQuality\.high/);
   assert.doesNotMatch(bund, /Boat|boat|ship|vessel/);
 });

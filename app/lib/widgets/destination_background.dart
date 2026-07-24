@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../data/journey_background_catalog.dart';
@@ -115,7 +117,7 @@ class _ForbiddenCityDynamicBackgroundState
     super.initState();
     _motion = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 16),
+      duration: const Duration(seconds: 24),
     );
   }
 
@@ -141,8 +143,7 @@ class _ForbiddenCityDynamicBackgroundState
       _motion.stop();
       _motion.value = .46;
     } else if (!_motion.isAnimating) {
-      _motion.value = .1;
-      _motion.repeat(reverse: true);
+      _motion.repeat();
     }
   }
 
@@ -172,18 +173,25 @@ class _ForbiddenCityDynamicBackgroundState
               animation: _motion,
               builder: (context, _) {
                 final raw = reduceMotion ? .46 : _motion.value;
-                final progress = Curves.easeInOutSine.transform(raw);
+                final cameraProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 2);
+                final lightProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 2 + 1.1);
+                final shadowProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 2 - .7);
+                final depthProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 3 + .4);
                 return ExcludeSemantics(
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
                       _ForbiddenCityCameraLayer(
                         assetPath: widget.assetPath,
-                        progress: progress,
+                        progress: cameraProgress,
                       ),
-                      _ForbiddenCityDawnLight(progress: progress),
-                      _ForbiddenCityCloudShadow(progress: progress),
-                      _ForbiddenCityGateDepth(progress: progress),
+                      _ForbiddenCityDawnLight(progress: lightProgress),
+                      _ForbiddenCityCloudShadow(progress: shadowProgress),
+                      _ForbiddenCityGateDepth(progress: depthProgress),
                     ],
                   ),
                 );
@@ -215,13 +223,13 @@ class _ForbiddenCityCameraLayer extends StatelessWidget {
       key: const ValueKey('forbidden-city-camera-layer'),
       child: Transform.translate(
         key: const ValueKey('forbidden-city-camera-transform'),
-        offset: Offset(-10 + 20 * progress, -18 + 22 * progress),
+        offset: Offset(-6 + 12 * progress, -10 + 12 * progress),
         child: Transform.scale(
-          scale: 1.045 + .07 * progress,
+          scale: 1.065 + .025 * progress,
           child: Image.asset(
             path,
             fit: BoxFit.cover,
-            filterQuality: FilterQuality.medium,
+            filterQuality: FilterQuality.high,
             gaplessPlayback: true,
             errorBuilder: (_, __, ___) => const _BackgroundFallback(),
           ),
@@ -368,7 +376,7 @@ class _ShanghaiBundDynamicBackgroundState
     super.initState();
     _motion = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 15),
+      duration: const Duration(seconds: 24),
     );
   }
 
@@ -428,6 +436,10 @@ class _ShanghaiBundDynamicBackgroundState
                 final sceneProgress = Curves.easeInOutSine.transform(
                   raw <= .5 ? raw * 2 : (1 - raw) * 2,
                 );
+                final skylineProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 2 + 1.35);
+                final riverProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 3 - .55);
                 return ExcludeSemantics(
                   child: Stack(
                     fit: StackFit.expand,
@@ -436,8 +448,8 @@ class _ShanghaiBundDynamicBackgroundState
                         assetPath: widget.assetPath,
                         progress: sceneProgress,
                       ),
-                      _ShanghaiBundSkylineGlow(progress: sceneProgress),
-                      _ShanghaiBundRiverLight(progress: sceneProgress),
+                      _ShanghaiBundSkylineGlow(progress: skylineProgress),
+                      _ShanghaiBundRiverLight(progress: riverProgress),
                     ],
                   ),
                 );
@@ -469,13 +481,13 @@ class _ShanghaiBundCameraLayer extends StatelessWidget {
       key: const ValueKey('shanghai-bund-camera-layer'),
       child: Transform.translate(
         key: const ValueKey('shanghai-bund-camera-transform'),
-        offset: Offset(-12 + 24 * progress, -8 + 10 * progress),
+        offset: Offset(-7 + 14 * progress, -5 + 6 * progress),
         child: Transform.scale(
-          scale: 1.035 + .055 * progress,
+          scale: 1.06 + .025 * progress,
           child: Image.asset(
             path,
             fit: BoxFit.cover,
-            filterQuality: FilterQuality.medium,
+            filterQuality: FilterQuality.high,
             gaplessPlayback: true,
             errorBuilder: (_, __, ___) => const _BackgroundFallback(),
           ),
@@ -590,7 +602,7 @@ class _SummerPalaceDynamicBackgroundState
     super.initState();
     _motion = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 21),
+      duration: const Duration(seconds: 28),
     );
   }
 
@@ -616,8 +628,7 @@ class _SummerPalaceDynamicBackgroundState
       _motion.stop();
       _motion.value = .44;
     } else if (!_motion.isAnimating) {
-      _motion.value = .08;
-      _motion.repeat(reverse: true);
+      _motion.repeat();
     }
   }
 
@@ -647,20 +658,33 @@ class _SummerPalaceDynamicBackgroundState
               animation: _motion,
               builder: (context, _) {
                 final raw = reduceMotion ? .44 : _motion.value;
-                final progress = Curves.easeInOutSine.transform(raw);
+                final cameraProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 2);
+                final gradeProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 2 + .8);
+                final lightProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 2 + 1.5);
+                final mistProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 2 - .6);
+                final waterProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 3 + .25);
+                final breathProgress =
+                    .5 + .5 * math.sin(raw * math.pi * 2.5 - 1.1);
                 return ExcludeSemantics(
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
                       _SummerPalaceCameraLayer(
                         assetPath: widget.assetPath,
-                        progress: progress,
+                        progress: cameraProgress,
                       ),
-                      _SummerPalaceColorGrade(progress: progress),
-                      _SummerPalaceCloudLight(progress: progress),
-                      _SummerPalaceMistVeil(progress: progress),
-                      _SummerPalaceWaterShimmer(progress: progress),
-                      _SummerPalaceForegroundBreath(progress: progress),
+                      _SummerPalaceColorGrade(progress: gradeProgress),
+                      _SummerPalaceCloudLight(progress: lightProgress),
+                      _SummerPalaceMistVeil(progress: mistProgress),
+                      _SummerPalaceWaterShimmer(progress: waterProgress),
+                      _SummerPalaceForegroundBreath(
+                        progress: breathProgress,
+                      ),
                     ],
                   ),
                 );
@@ -692,13 +716,13 @@ class _SummerPalaceCameraLayer extends StatelessWidget {
       key: const ValueKey('summer-palace-camera-layer'),
       child: Transform.translate(
         key: const ValueKey('summer-palace-camera-transform'),
-        offset: Offset(-9 + 18 * progress, -7 + 9 * progress),
+        offset: Offset(-5 + 10 * progress, -4 + 5 * progress),
         child: Transform.scale(
-          scale: 1.045 + .045 * progress,
+          scale: 1.065 + .022 * progress,
           child: Image.asset(
             path,
             fit: BoxFit.cover,
-            filterQuality: FilterQuality.medium,
+            filterQuality: FilterQuality.high,
             gaplessPlayback: true,
             errorBuilder: (_, __, ___) => const _BackgroundFallback(),
           ),

@@ -13,9 +13,9 @@ const end = source.indexOf('class _JourneyBackgroundScrim', start);
 const summerPalace = source.slice(start, end);
 
 test('Summer Palace uses a slow premium cinematic cycle', () => {
-  assert.match(summerPalace, /Duration\(seconds: 21\)/);
-  assert.match(summerPalace, /repeat\(reverse: true\)/);
-  assert.match(summerPalace, /Curves\.easeInOutSine/);
+  assert.match(summerPalace, /Duration\(seconds: 28\)/);
+  assert.match(summerPalace, /_motion\.repeat\(\)/);
+  assert.match(summerPalace, /math\.sin/);
 });
 
 test('Summer Palace keeps layered depth without artificial ripple lines', () => {
