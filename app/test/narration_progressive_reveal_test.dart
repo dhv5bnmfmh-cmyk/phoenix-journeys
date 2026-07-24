@@ -79,4 +79,26 @@ void main() {
     expect(cinematicRevealDuration(1).inMilliseconds, 260);
     expect(cinematicRevealDuration(30).inMilliseconds, 720);
   });
+
+  test('cinematic reveal keeps a pale-to-deep six-character tail', () {
+    expect(
+      cinematicDepthProgress(revealCursor: 8, characterIndex: 8),
+      0,
+    );
+    final fresh = cinematicDepthProgress(
+      revealCursor: 8.5,
+      characterIndex: 8,
+    );
+    final deepening = cinematicDepthProgress(
+      revealCursor: 11,
+      characterIndex: 8,
+    );
+    expect(fresh, greaterThan(0));
+    expect(fresh, lessThan(.5));
+    expect(deepening, greaterThan(fresh));
+    expect(
+      cinematicDepthProgress(revealCursor: 14, characterIndex: 8),
+      1,
+    );
+  });
 }

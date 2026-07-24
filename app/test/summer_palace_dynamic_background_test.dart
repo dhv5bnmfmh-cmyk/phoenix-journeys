@@ -37,10 +37,6 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey('summer-palace-water-ripples')),
-      findsOneWidget,
-    );
-    expect(
       find.byKey(const ValueKey('summer-palace-foreground-breath')),
       findsOneWidget,
     );

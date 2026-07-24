@@ -18,7 +18,7 @@ test('story and discovery side controls keep stable geometry during narration', 
 test('cinematic glyphs and reading marker use one fixed line box', () => {
   assert.match(interactive, /strutStyle: StrutStyle\(/);
   assert.match(interactive, /forceStrutHeight: true/);
-  assert.match(interactive, /height: style\.height \?\? 1\.22/);
+  assert.match(interactive, /final lineHeight = style\.height \?\? 1\.22/);
   assert.match(interactive, /height: fontSize \* lineHeight/);
   assert.doesNotMatch(interactive, /padding: const EdgeInsets\.only\(bottom: 5\)/);
 });

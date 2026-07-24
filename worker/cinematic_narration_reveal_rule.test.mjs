@@ -12,6 +12,10 @@ test('narration reveal uses cinematic interpolation instead of hard cuts', () =>
   assert.match(interactive, /SingleTickerProviderStateMixin/);
   assert.match(interactive, /AnimationController/);
   assert.match(interactive, /cinematicRevealProgress/);
+  assert.match(interactive, /cinematicDepthProgress/);
+  assert.match(interactive, /cinematicRevealTailLength = 6/);
+  assert.match(interactive, /Color\.lerp\(paleColor, finalColor/);
+  assert.match(interactive, /lerpDouble\(\.28, 1, t\)/);
   assert.match(interactive, /cinematicRevealDuration/);
   assert.match(interactive, /ImageFilter\.blur/);
   assert.match(interactive, /Transform\.translate/);

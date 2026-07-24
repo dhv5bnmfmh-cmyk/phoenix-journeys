@@ -18,7 +18,7 @@ test('Summer Palace background uses clearly visible local pseudo-dynamic layers'
   assert.match(widget, /summer-palace-camera-transform/);
   assert.match(widget, /summer-palace-cloud-light/);
   assert.match(widget, /summer-palace-water-shimmer/);
-  assert.match(widget, /summer-palace-water-ripples/);
+  assert.doesNotMatch(widget, /summer-palace-water-ripples|_SummerPalaceRipplePainter/);
   assert.match(widget, /summer-palace-foreground-breath/);
   assert.match(widget, /queryParameters\['motion'\] == 'on'/);
   assert.match(widget, /disableAnimations/);

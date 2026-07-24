@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../data/journey_background_catalog.dart';
@@ -169,7 +167,6 @@ class _SummerPalaceDynamicBackgroundState
                       ),
                       _SummerPalaceCloudLight(progress: progress),
                       _SummerPalaceWaterShimmer(progress: progress),
-                      _SummerPalaceWaterRipples(progress: progress),
                       _SummerPalaceForegroundBreath(progress: progress),
                     ],
                   ),
@@ -292,72 +289,6 @@ class _SummerPalaceWaterShimmer extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _SummerPalaceWaterRipples extends StatelessWidget {
-  const _SummerPalaceWaterRipples({required this.progress});
-
-  final double progress;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: FractionallySizedBox(
-          widthFactor: 1,
-          heightFactor: .46,
-          child: CustomPaint(
-            key: const ValueKey('summer-palace-water-ripples'),
-            painter: _SummerPalaceRipplePainter(progress),
-            size: Size.infinite,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SummerPalaceRipplePainter extends CustomPainter {
-  const _SummerPalaceRipplePainter(this.progress);
-
-  final double progress;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final bright = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.15
-      ..color = const Color(0xFFFFE7B8).withValues(alpha: .11);
-    final soft = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = .7
-      ..color = Colors.white.withValues(alpha: .07);
-
-    for (var row = 0; row < 11; row += 1) {
-      final path = Path();
-      final yBase = size.height * (.12 + row * .075);
-      final amplitude = 1.4 + (row % 3) * .65;
-      final wavelength = 52.0 + row * 5.0;
-      final phase = progress * math.pi * 4 + row * .72;
-
-      for (var x = -8.0; x <= size.width + 8; x += 6) {
-        final y = yBase +
-            math.sin((x / wavelength) * math.pi * 2 + phase) * amplitude;
-        if (x <= -8) {
-          path.moveTo(x, y);
-        } else {
-          path.lineTo(x, y);
-        }
-      }
-      canvas.drawPath(path, row.isEven ? bright : soft);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _SummerPalaceRipplePainter oldDelegate) {
-    return oldDelegate.progress != progress;
   }
 }
 

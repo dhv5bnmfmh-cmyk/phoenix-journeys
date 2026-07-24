@@ -37,13 +37,31 @@ int revealedSegmentLength({
   return revealEnd.clamp(segmentStart, segmentEnd).toInt() - segmentStart;
 }
 
+const int cinematicRevealTailLength = 6;
+
+@visibleForTesting
+double cinematicDepthProgress({
+  required double revealCursor,
+  required int characterIndex,
+  int tailLength = cinematicRevealTailLength,
+}) {
+  final safeTailLength = tailLength.clamp(1, 12).toInt();
+  final raw = ((revealCursor - characterIndex) / safeTailLength)
+      .clamp(0.0, 1.0)
+      .toDouble();
+  return Curves.easeOutCubic.transform(raw);
+}
+
 @visibleForTesting
 double cinematicRevealProgress({
   required double revealCursor,
   required int characterIndex,
 }) {
-  final raw = (revealCursor - characterIndex).clamp(0.0, 1.0).toDouble();
-  return Curves.easeOutCubic.transform(raw);
+  return cinematicDepthProgress(
+    revealCursor: revealCursor,
+    characterIndex: characterIndex,
+    tailLength: 1,
+  );
 }
 
 @visibleForTesting
@@ -202,9 +220,14 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   }
 
   double _targetRevealCursor(int? revealEnd) {
-    return (revealEnd ?? widget.text.length)
-        .clamp(0, widget.text.length)
-        .toDouble();
+    final resolved = (revealEnd ?? widget.text.length).clamp(
+      0,
+      widget.text.length,
+    );
+    if (resolved >= widget.text.length) {
+      return (widget.text.length + cinematicRevealTailLength).toDouble();
+    }
+    return resolved.toDouble();
   }
 
   double get _currentRevealCursor {
@@ -224,8 +247,10 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
 
   void _animateRevealTo(int? revealEnd) {
     final target = _targetRevealCursor(revealEnd);
-    final current =
-        _currentRevealCursor.clamp(0.0, widget.text.length.toDouble());
+    final current = _currentRevealCursor.clamp(
+      0.0,
+      (widget.text.length + cinematicRevealTailLength).toDouble(),
+    );
     final distance = target - current;
 
     // Starting a new narration should hide future text immediately. Forward
@@ -433,24 +458,31 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
               Shadow(color: Color(0xB3000000), blurRadius: 7),
             ],
           );
-
+    final effectiveStyle = segmentStyle ?? baseStyle ?? const TextStyle();
     final localCursor = (revealCursor - segment.start)
-        .clamp(0.0, segment.text.length.toDouble())
+        .clamp(
+          0.0,
+          segment.text.length.toDouble() + cinematicRevealTailLength,
+        )
         .toDouble();
-    final visibleLength = localCursor.floor();
-    final visibleEnd = segment.start + visibleLength;
+    final visibleLength =
+        localCursor.floor().clamp(0, segment.text.length).toInt();
+    final stableLength = (visibleLength - cinematicRevealTailLength)
+        .clamp(0, segment.text.length)
+        .toInt();
+    final stableEnd = segment.start + stableLength;
     final spans = <InlineSpan>[];
 
-    if (visibleLength > 0) {
+    if (stableLength > 0) {
       final overlapStart =
-          highlightStart.clamp(segment.start, visibleEnd).toInt();
-      final overlapEnd = highlightEnd.clamp(segment.start, visibleEnd).toInt();
+          highlightStart.clamp(segment.start, stableEnd).toInt();
+      final overlapEnd = highlightEnd.clamp(segment.start, stableEnd).toInt();
       final hasHighlight = highlightStart >= 0 && overlapEnd > overlapStart;
 
       if (!hasHighlight) {
         spans.add(
           _span(
-            state.displayText(segment.text.substring(0, visibleLength)),
+            state.displayText(segment.text.substring(0, stableLength)),
             segment,
             style: segmentStyle,
             state: state,
@@ -480,17 +512,17 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
               ),
             ),
             segment,
-            style: segmentStyle ?? baseStyle ?? const TextStyle(),
+            style: effectiveStyle,
             state: state,
           ),
         );
 
         final afterStart = beforeLength + activeLength;
-        if (afterStart < visibleLength) {
+        if (afterStart < stableLength) {
           spans.add(
             _span(
               state.displayText(
-                segment.text.substring(afterStart, visibleLength),
+                segment.text.substring(afterStart, stableLength),
               ),
               segment,
               style: segmentStyle,
@@ -501,33 +533,33 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       }
     }
 
-    var hiddenStart = visibleLength;
-    if (visibleLength < segment.text.length) {
-      final characterIndex = segment.start + visibleLength;
-      final frontierProgress = cinematicRevealProgress(
+    var hiddenStart = stableLength;
+    for (var localIndex = stableLength;
+        localIndex < segment.text.length;
+        localIndex += 1) {
+      final characterIndex = segment.start + localIndex;
+      final depthProgress = cinematicDepthProgress(
         revealCursor: revealCursor,
         characterIndex: characterIndex,
       );
-      if (frontierProgress > .001) {
-        final isHighlighted = highlightStart >= 0 &&
-            characterIndex >= highlightStart &&
-            characterIndex < highlightEnd;
-        spans.add(
-          _cinematicFrontierSpan(
-            state.displayText(segment.text[visibleLength]),
-            segment,
-            style: segmentStyle ?? baseStyle ?? const TextStyle(),
-            progress: frontierProgress,
-            highlighted: isHighlighted,
-          ),
-        );
-        hiddenStart += 1;
-      }
+      if (depthProgress <= .001) break;
+      final isHighlighted = highlightStart >= 0 &&
+          characterIndex >= highlightStart &&
+          characterIndex < highlightEnd;
+      spans.add(
+        _cinematicFrontierSpan(
+          state.displayText(segment.text[localIndex]),
+          segment,
+          style: effectiveStyle,
+          progress: depthProgress,
+          highlighted: isHighlighted,
+        ),
+      );
+      hiddenStart = localIndex + 1;
     }
 
     if (hiddenStart < segment.text.length) {
-      final hiddenStyle =
-          (segmentStyle ?? baseStyle ?? const TextStyle()).copyWith(
+      final hiddenStyle = effectiveStyle.copyWith(
         color: Colors.transparent,
         decoration: TextDecoration.none,
         shadows: const <Shadow>[],
@@ -564,6 +596,11 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
           behavior: HitTestBehavior.translucent,
           onTap: entry == null ? null : () => _showEntry(entry),
           child: _CinematicRevealGlyph(
+            key: highlighted
+                ? ValueKey(
+                    'reading-triangle-${widget.narrationItemId ?? widget.text}',
+                  )
+                : null,
             text: text,
             style: style,
             progress: progress,
@@ -634,6 +671,7 @@ class _CinematicRevealGlyph extends StatelessWidget {
     required this.style,
     required this.progress,
     required this.highlighted,
+    super.key,
   });
 
   final String text;
@@ -644,28 +682,62 @@ class _CinematicRevealGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = progress.clamp(0.0, 1.0).toDouble();
-    final blur = (1 - t) * 3.8;
-    final lift = (1 - t) * 4.5;
-    final baseColor = style.color ?? Colors.white;
-    final glowColor = highlighted ? const Color(0xFFFFD879) : baseColor;
+    final contrast = Curves.easeInOutCubic.transform(t);
+    final blur = (1 - t) * 2.8;
+    final lift = (1 - t) * 3.2;
+    final opacity = lerpDouble(.28, 1, t) ?? 1;
+    final finalColor = style.color ?? Colors.white;
+    final paleColor =
+        highlighted ? const Color(0xFFFFE7AA) : const Color(0xFFD8D0C2);
+    final cinematicColor =
+        Color.lerp(paleColor, finalColor, contrast) ?? finalColor;
+    final fontSize = style.fontSize ?? 14;
+    final lineHeight = style.height ?? 1.22;
 
     return Transform.translate(
       offset: Offset(0, lift),
       child: Opacity(
-        opacity: t,
+        opacity: opacity,
         child: ImageFiltered(
           imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: Text(
-            text,
-            style: style.copyWith(
-              height: style.height ?? 1.22,
-              shadows: <Shadow>[
-                ...?style.shadows,
-                Shadow(
-                  color: glowColor.withValues(alpha: .4 * t),
-                  blurRadius: 2 + (1 - t) * 8,
-                  offset: Offset(0, 1 + (1 - t) * 1.5),
+          child: SizedBox(
+            height: fontSize * lineHeight,
+            child: Stack(
+              clipBehavior: Clip.hardEdge,
+              alignment: Alignment.center,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(bottom: highlighted ? 3 : 0),
+                  child: Text(
+                    text,
+                    style: style.copyWith(
+                      color: cinematicColor,
+                      height: lineHeight,
+                      shadows: <Shadow>[
+                        ...?style.shadows,
+                        Shadow(
+                          color: cinematicColor.withValues(
+                            alpha: .14 + .18 * t,
+                          ),
+                          blurRadius: 2 + (1 - t) * 7,
+                          offset: Offset(0, 1 + (1 - t)),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
+                if (highlighted)
+                  const Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: CustomPaint(
+                        size: Size(7, 4),
+                        painter: _ReadingTrianglePainter(),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
