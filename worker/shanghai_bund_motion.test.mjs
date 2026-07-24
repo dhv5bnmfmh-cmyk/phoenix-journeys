@@ -17,11 +17,17 @@ test('Shanghai Bund uses its own cinematic river and skyline motion', () => {
   assert.match(background, /shanghai-bund-boat-shadow/);
 });
 
-test('Shanghai Bund motion remains lightweight', () => {
+test('Shanghai Bund boat travels one way and rests between passages', () => {
   const start = background.indexOf('class _ShanghaiBundDynamicBackground');
   const end = background.indexOf('class _SummerPalaceDynamicBackground');
   const bund = background.slice(start, end);
   assert.doesNotMatch(bund, /CustomPaint|VideoPlayer|\.mp4|animated.*webp/i);
   assert.match(bund, /RepaintBoundary/);
-  assert.match(bund, /_motion\.repeat\(reverse: true\)/);
+  assert.match(bund, /_motion\.repeat\(\)/);
+  assert.doesNotMatch(bund, /_motion\.repeat\(reverse: true\)/);
+  assert.match(bund, /final sceneProgress/);
+  assert.match(bund, /final boatProgress/);
+  assert.match(bund, /const startAt = \.08/);
+  assert.match(bund, /const finishAt = \.68/);
+  assert.match(bund, /opacity: opacity/);
 });
