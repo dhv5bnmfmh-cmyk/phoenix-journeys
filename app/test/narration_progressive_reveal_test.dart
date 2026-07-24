@@ -76,8 +76,8 @@ void main() {
       cinematicRevealProgress(revealCursor: 5, characterIndex: 4),
       1,
     );
-    expect(cinematicRevealDuration(1).inMilliseconds, 260);
-    expect(cinematicRevealDuration(30).inMilliseconds, 720);
+    expect(cinematicRevealDuration(1).inMilliseconds, 120);
+    expect(cinematicRevealDuration(30).inMilliseconds, 420);
   });
 
   test('cinematic reveal keeps a pale-to-deep six-character tail', () {

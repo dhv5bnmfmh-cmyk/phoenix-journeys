@@ -428,7 +428,6 @@ class _ShanghaiBundDynamicBackgroundState
                 final sceneProgress = Curves.easeInOutSine.transform(
                   raw <= .5 ? raw * 2 : (1 - raw) * 2,
                 );
-                final boatProgress = reduceMotion ? 1.0 : raw;
                 return ExcludeSemantics(
                   child: Stack(
                     fit: StackFit.expand,
@@ -439,7 +438,6 @@ class _ShanghaiBundDynamicBackgroundState
                       ),
                       _ShanghaiBundSkylineGlow(progress: sceneProgress),
                       _ShanghaiBundRiverLight(progress: sceneProgress),
-                      _ShanghaiBundBoatShadow(progress: boatProgress),
                     ],
                   ),
                 );
@@ -560,98 +558,6 @@ class _ShanghaiBundRiverLight extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ShanghaiBundBoatShadow extends StatelessWidget {
-  const _ShanghaiBundBoatShadow({required this.progress});
-
-  final double progress;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          const startAt = .08;
-          const finishAt = .68;
-          final isVisible = progress >= startAt && progress <= finishAt;
-          final passage = ((progress - startAt) / (finishAt - startAt))
-              .clamp(0.0, 1.0);
-          final travel = constraints.maxWidth + 110;
-          final fadeIn = (passage / .14).clamp(0.0, 1.0);
-          final fadeOut = ((1 - passage) / .14).clamp(0.0, 1.0);
-          final opacity = isVisible
-              ? .44 * (fadeIn < fadeOut ? fadeIn : fadeOut)
-              : 0.0;
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned(
-                left: -74 + travel * Curves.easeInOut.transform(passage),
-                bottom: constraints.maxHeight * .2,
-                child: Opacity(
-                  opacity: opacity,
-                  child: Transform.scale(
-                    scale: .76 + .05 * passage,
-                    child: SizedBox(
-                      key: const ValueKey('shanghai-bund-boat-shadow'),
-                      width: 62,
-                      height: 22,
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            left: 4,
-                            right: 4,
-                            bottom: 3,
-                            child: Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF182532)
-                                    .withValues(alpha: .76),
-                                borderRadius: BorderRadius.circular(99),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 22,
-                            bottom: 8,
-                            child: Container(
-                              width: 20,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF243544)
-                                    .withValues(alpha: .72),
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(3),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 30,
-                            bottom: 11,
-                            child: Container(
-                              width: 3,
-                              height: 3,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFD78B)
-                                    .withValues(alpha: .7),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
       ),
     );
   }

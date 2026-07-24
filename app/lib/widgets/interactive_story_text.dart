@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:ui' show ImageFilter, lerpDouble;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +67,7 @@ double cinematicRevealProgress({
 @visibleForTesting
 Duration cinematicRevealDuration(double characterDistance) {
   final milliseconds =
-      (210 + characterDistance.abs() * 34).round().clamp(260, 720).toInt();
+      (90 + characterDistance.abs() * 28).round().clamp(120, 420).toInt();
   return Duration(milliseconds: milliseconds);
 }
 
@@ -231,10 +231,10 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   }
 
   double get _currentRevealCursor {
-    final eased = Curves.easeOutCubic.transform(
-      _cinematicRevealController.value,
-    );
-    return lerpDouble(_revealFrom, _revealTo, eased) ?? _revealTo;
+    // Linear cursor movement avoids the tiny acceleration reset that used to
+    // happen every time mobile speech supplied a new short progress callback.
+    final progress = _cinematicRevealController.value;
+    return lerpDouble(_revealFrom, _revealTo, progress) ?? _revealTo;
   }
 
   void _resetRevealTo(int? revealEnd) {
@@ -682,10 +682,9 @@ class _CinematicRevealGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = progress.clamp(0.0, 1.0).toDouble();
-    final contrast = Curves.easeInOutCubic.transform(t);
-    final blur = (1 - t) * 2.8;
-    final lift = (1 - t) * 3.2;
-    final opacity = lerpDouble(.28, 1, t) ?? 1;
+    final contrast = Curves.easeOutCubic.transform(t);
+    final lift = (1 - t) * 1.8;
+    final opacity = lerpDouble(.4, 1, t) ?? 1;
     final finalColor = style.color ?? Colors.white;
     final paleColor =
         highlighted ? const Color(0xFFFFE7AA) : const Color(0xFFD8D0C2);
@@ -694,53 +693,43 @@ class _CinematicRevealGlyph extends StatelessWidget {
     final fontSize = style.fontSize ?? 14;
     final lineHeight = style.height ?? 1.22;
 
+    // Avoid ImageFiltered blur per glyph. On iPhone Flutter Web that created
+    // several offscreen layers every frame and made short passages stutter.
     return Transform.translate(
       offset: Offset(0, lift),
       child: Opacity(
         opacity: opacity,
-        child: ImageFiltered(
-          imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: SizedBox(
-            height: fontSize * lineHeight,
-            child: Stack(
-              clipBehavior: Clip.hardEdge,
-              alignment: Alignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(bottom: highlighted ? 3 : 0),
-                  child: Text(
-                    text,
-                    style: style.copyWith(
-                      color: cinematicColor,
-                      height: lineHeight,
-                      shadows: <Shadow>[
-                        ...?style.shadows,
-                        Shadow(
-                          color: cinematicColor.withValues(
-                            alpha: .14 + .18 * t,
-                          ),
-                          blurRadius: 2 + (1 - t) * 7,
-                          offset: Offset(0, 1 + (1 - t)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (highlighted)
-                  const Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: CustomPaint(
-                        size: Size(7, 4),
-                        painter: _ReadingTrianglePainter(),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+        child: SizedBox(
+height: fontSize * lineHeight,
+child: Stack(
+  clipBehavior: Clip.hardEdge,
+  alignment: Alignment.center,
+  children: [
+    Padding(
+      padding: EdgeInsets.only(bottom: highlighted ? 3 : 0),
+      child: Text(
+        text,
+        style: style.copyWith(
+          color: cinematicColor,
+          height: lineHeight,
+          shadows: style.shadows,
+        ),
+      ),
+    ),
+    if (highlighted)
+      const Positioned(
+        left: 0,
+        right: 0,
+        bottom: 0,
+        child: Center(
+          child: CustomPaint(
+            size: Size(7, 4),
+            painter: _ReadingTrianglePainter(),
           ),
+        ),
+      ),
+  ],
+),
         ),
       ),
     );

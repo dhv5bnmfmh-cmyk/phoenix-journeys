@@ -7,17 +7,17 @@ const background = readFileSync(
   'utf8',
 );
 
-test('Shanghai Bund uses its own cinematic river and skyline motion', () => {
+test('Shanghai Bund uses calm cinematic river and skyline motion', () => {
   assert.match(background, /_shanghaiBundJourneyId = 'shanghai-bund'/);
   assert.match(background, /class _ShanghaiBundDynamicBackground/);
   assert.match(background, /Duration\(seconds: 15\)/);
   assert.match(background, /shanghai-bund-camera-transform/);
   assert.match(background, /shanghai-bund-skyline-glow/);
   assert.match(background, /shanghai-bund-river-light/);
-  assert.match(background, /shanghai-bund-boat-shadow/);
+  assert.doesNotMatch(background, /shanghai-bund-boat-shadow|boatProgress/);
 });
 
-test('Shanghai Bund boat travels one way and rests between passages', () => {
+test('Shanghai Bund keeps low-cost looped motion without decorative objects', () => {
   const start = background.indexOf('class _ShanghaiBundDynamicBackground');
   const end = background.indexOf('class _SummerPalaceDynamicBackground');
   const bund = background.slice(start, end);
@@ -26,8 +26,5 @@ test('Shanghai Bund boat travels one way and rests between passages', () => {
   assert.match(bund, /_motion\.repeat\(\)/);
   assert.doesNotMatch(bund, /_motion\.repeat\(reverse: true\)/);
   assert.match(bund, /final sceneProgress/);
-  assert.match(bund, /final boatProgress/);
-  assert.match(bund, /const startAt = \.08/);
-  assert.match(bund, /const finishAt = \.68/);
-  assert.match(bund, /opacity: opacity/);
+  assert.doesNotMatch(bund, /Boat|boat|ship|vessel/);
 });
