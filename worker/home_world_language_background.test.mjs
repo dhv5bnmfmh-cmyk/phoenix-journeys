@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 
 const explore = readFileSync('app/lib/screens/explore_screen.dart', 'utf8');
+const pubspec = readFileSync('app/pubspec.yaml', 'utf8');
 const hero =
   'app/assets/images/home/phoenix-world-language-journey-v1.webp';
 
@@ -14,6 +15,7 @@ test('home uses an original world travel and language-learning hero', () => {
   assert.match(explore, /phoenix-home-route-glow/);
   assert.match(explore, /Duration\(seconds: 28\)/);
   assert.match(explore, /FilterQuality\.high/);
+  assert.match(pubspec, /- assets\/images\/home\//);
   assert.doesNotMatch(explore, /CustomPaint\(painter: _CloudPainter\(\)\)/);
 });
 
