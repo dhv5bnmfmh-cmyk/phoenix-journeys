@@ -21,4 +21,8 @@ test('vocabulary to Discovery starts speech inside the continue gesture', () => 
   assert.match(journey, /unawaited\(_playDiscoveries\(stopEngineFirst: false\)\)/);
   assert.match(narration, /bool stopEngineFirst = true/);
   assert.match(narration, /_speakFrom\(0, stopEngineFirst: stopEngineFirst\)/);
+  assert.match(narration, /cancelExisting: stopEngineFirst/);
+  const webSpeech = read('app/lib/services/phoenix_web_speech_web.dart');
+  assert.match(webSpeech, /bool cancelExisting = true/);
+  assert.match(webSpeech, /if \(cancelExisting\) synth\.cancel\(\)/);
 });

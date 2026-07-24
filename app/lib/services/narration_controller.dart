@@ -801,6 +801,7 @@ class NarrationController extends ChangeNotifier {
           rate: _speechRate,
           pitch: .98,
           volume: 1,
+          cancelExisting: stopEngineFirst,
         );
         if (!started && !_disposed) {
           _cancelProgressClock();

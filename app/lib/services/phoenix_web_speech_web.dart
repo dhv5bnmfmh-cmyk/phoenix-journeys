@@ -46,6 +46,7 @@ final class PhoenixWebSpeech {
     required double rate,
     double pitch = .98,
     double volume = 1,
+    bool cancelExisting = true,
   }) async {
     final synth = _synth;
     if (synth == null || text.trim().isEmpty) return false;
@@ -53,7 +54,10 @@ final class PhoenixWebSpeech {
     final token = ++_sessionToken;
     _paused = false;
     _cancelSubscriptions();
-    synth.cancel();
+    // iOS Safari can silently discard the utterance that immediately follows
+    // cancel(). Discovery autoplay is already entered from the Continue tap,
+    // so preserve that user-gesture speech start instead of cancelling again.
+    if (cancelExisting) synth.cancel();
 
     final utterance = html.SpeechSynthesisUtterance(text)
       ..lang = languageCode
