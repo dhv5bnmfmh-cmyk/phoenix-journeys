@@ -2,9 +2,9 @@ import '../models/language_proficiency.dart';
 import 'journey_data.dart';
 import 'summer_palace_journey.dart';
 
-const summerPalaceAdaptiveWords = <WordEntry>[
-  ...summerPalaceWords,
-  WordEntry(
+final summerPalaceAdaptiveWords = <WordEntry>[
+  ...summerPalaceWords.where((entry) => entry.word != '融合'),
+  const WordEntry(
     word: '构图',
     pinyin: 'gòutú',
     partOfSpeech: '动词／名词',
@@ -13,7 +13,7 @@ const summerPalaceAdaptiveWords = <WordEntry>[
     englishDefinition: 'to compose a view; visual composition',
     symbol: '🖼️',
   ),
-  WordEntry(
+  const WordEntry(
     word: '对景',
     pinyin: 'duìjǐng',
     partOfSpeech: '名词／动词',
@@ -22,7 +22,7 @@ const summerPalaceAdaptiveWords = <WordEntry>[
     englishDefinition: 'a framed or opposite view in garden design',
     symbol: '🎯',
   ),
-  WordEntry(
+  const WordEntry(
     word: '痕迹',
     pinyin: 'hénjì',
     partOfSpeech: '名词',
@@ -31,7 +31,7 @@ const summerPalaceAdaptiveWords = <WordEntry>[
     englishDefinition: 'a trace, mark, or sign left behind',
     symbol: '🪶',
   ),
-  WordEntry(
+  const WordEntry(
     word: '规划',
     pinyin: 'guīhuà',
     partOfSpeech: '动词／名词',
@@ -39,6 +39,15 @@ const summerPalaceAdaptiveWords = <WordEntry>[
     translation: 'Quy hoạch hoặc sắp xếp có hệ thống cho không gian và phát triển.',
     englishDefinition: 'to plan systematically; planning',
     symbol: '📐',
+  ),
+  const WordEntry(
+    word: '层次',
+    pinyin: 'céngcì',
+    partOfSpeech: '名词',
+    simpleChinese: '事物按照前后、高低或深浅形成的不同层级。',
+    translation: 'Các lớp hoặc cấp độ tạo nên chiều sâu và trật tự.',
+    englishDefinition: 'layers, levels, or visual depth',
+    symbol: '🪜',
   ),
 ];
 
@@ -66,7 +75,6 @@ const summerPalaceVocabularyLevels = <String, VocabularyLevelTag>{
     tocflLevel: 6,
     kind: VocabularyKind.cultural,
   ),
-  '融合': VocabularyLevelTag(hskLevel: 5, tocflLevel: 4),
   '皇家园林': VocabularyLevelTag(
     kind: VocabularyKind.cultural,
     evidence: VocabularyLevelEvidence.cultural,
@@ -96,4 +104,5 @@ const summerPalaceVocabularyLevels = <String, VocabularyLevelTag>{
   ),
   '痕迹': VocabularyLevelTag(hskLevel: 5, tocflLevel: 4),
   '规划': VocabularyLevelTag(hskLevel: 4, tocflLevel: 3),
+  '层次': VocabularyLevelTag(hskLevel: 5, tocflLevel: 4),
 };
