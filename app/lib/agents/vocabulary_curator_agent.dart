@@ -51,9 +51,20 @@ class VocabularyCuratorAgent {
     }
 
     final available = unique.values.toList(growable: false);
-    final total = plan.targetVocabularyCount.clamp(1, available.length);
-    final culturalTarget = total >= 8 ? (total * 0.15).round().clamp(1, 3) : 1;
-    final reviewTarget = (total * 0.25).round().clamp(0, total - culturalTarget);
+    if (available.isEmpty) {
+      return const VocabularySelection(
+        coreNewWords: <WordEntry>[],
+        reviewWords: <WordEntry>[],
+        culturalWords: <WordEntry>[],
+      );
+    }
+
+    final total = plan.targetVocabularyCount.clamp(1, available.length).toInt();
+    final culturalTarget = total >= 8
+        ? (total * 0.15).round().clamp(1, 3).toInt()
+        : 1;
+    final reviewTarget =
+        (total * 0.25).round().clamp(0, total - culturalTarget).toInt();
     final coreTarget = total - culturalTarget - reviewTarget;
 
     final cultural = available
@@ -65,7 +76,10 @@ class VocabularyCuratorAgent {
     final used = selectedCultural.map((item) => item.entry.word).toSet();
 
     final review = available
-        .where((item) => !used.contains(item.entry.word) && item.mastery > 0 && item.mastery < 0.8)
+        .where((item) =>
+            !used.contains(item.entry.word) &&
+            item.mastery > 0 &&
+            item.mastery < 0.8)
         .toList()
       ..sort((a, b) => _reviewScore(b).compareTo(_reviewScore(a)));
     final selectedReview = review.take(reviewTarget).toList();
@@ -119,7 +133,9 @@ class VocabularyCuratorAgent {
       item.expressionValue * 0.20;
 
   double _culturalScore(VocabularyCandidate item) =>
-      item.culturalValue * 0.65 + item.expressionValue * 0.20 + item.frequencyScore * 0.15;
+      item.culturalValue * 0.65 +
+      item.expressionValue * 0.20 +
+      item.frequencyScore * 0.15;
 
   double _fallbackScore(VocabularyCandidate item) =>
       item.expressionValue * 0.45 +
