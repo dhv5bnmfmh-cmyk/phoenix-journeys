@@ -351,3 +351,5 @@ jobs:
           git add app/lib/screens/journey_screen.dart .github/workflows/apply-language-level-agent.yml
           git commit -m "feat: connect HSK TOCFL agent to Journey experience"
           git push origin HEAD:feature/summer-palace-story-engine-pilot
+
+# trigger: 2
