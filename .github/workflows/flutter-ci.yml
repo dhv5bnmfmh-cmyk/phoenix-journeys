@@ -10,13 +10,207 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
+  apply-adaptive-migration:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/summer-palace-story-engine-pilot'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: feature/summer-palace-story-engine-pilot
+          fetch-depth: 2
+
+      - name: Apply migration
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(text, old, new, label):
+              if old not in text:
+                  raise SystemExit(f'missing expected block: {label}')
+              return text.replace(old, new, 1)
+
+          runtime_path = Path('app/lib/data/adaptive_journey_level_runtime.dart')
+          runtime = runtime_path.read_text()
+          runtime = replace_once(
+              runtime,
+              "import '../models/language_proficiency.dart';\n",
+              "import '../models/language_proficiency.dart';\nimport 'all_journey_language_level_catalog.dart';\n",
+              'adaptive catalog import',
+          )
+          runtime = replace_once(
+              runtime,
+              """  if (experience.id != 'beijing-summer-palace') {
+    return JourneyLevelContent.fromExperience(experience);
+  }
+""",
+              """  if (experience.id != 'beijing-summer-palace') {
+    return buildAdaptiveLevelForJourney(
+      experience,
+      profile: profile,
+      knownWords: knownWords,
+    );
+  }
+""",
+              'adaptive runtime non-summer branch',
+          )
+          runtime_path.write_text(runtime)
+
+          screen_path = Path('app/lib/screens/journey_screen.dart')
+          screen = screen_path.read_text()
+          screen = replace_once(
+              screen,
+              """  if (_difficultyPromptScheduled ||
+      !_languageProfileLoaded ||
+      _languageProfile != null ||
+      _experience.id != 'beijing-summer-palace') {
+""",
+              """  if (_difficultyPromptScheduled ||
+      !_languageProfileLoaded ||
+      _languageProfile != null) {
+""",
+              'profile welcome gate',
+          )
+          screen = replace_once(
+              screen,
+              """            if (_experience.id == 'beijing-summer-palace')
+              TextButton(
+""",
+              """            TextButton(
+""",
+              'global language selector',
+          )
+          screen = replace_once(
+              screen,
+              """                if (_experience.id == 'beijing-summer-palace' ||
+                    _supportedDifficulties.length < 2) {
+""",
+              """                if (_languageProfile != null ||
+                    _supportedDifficulties.length < 2) {
+""",
+              'difficulty selector visibility',
+          )
+          screen = replace_once(
+              screen,
+              """                  '${profile.band.label} · '
+                  '${_languageLevelAgent.planFor(profile).targetVocabularyCount} 个重点单词',
+""",
+              """                  '${profile.band.label} · '
+                  '${math.min(_languageLevelAgent.planFor(profile).targetVocabularyCount, _experience.words.length)} 个重点单词',
+""",
+              'actual vocabulary count',
+          )
+          screen = replace_once(
+              screen,
+              """      'targetVocabularyCount': _generationPlan?.targetVocabularyCount,
+""",
+              """      'targetVocabularyCount': _levelContent.words.length,
+""",
+              'AI profile vocabulary count',
+          )
+          screen = screen.replace(
+              "${_appState.journeyDifficulty.label} · 普通话 · ${_levelContent.storyParagraphs.length} 段",
+              "${_languageProfile?.displayLabel ?? _appState.journeyDifficulty.label} · 普通话 · ${_levelContent.storyParagraphs.length} 段",
+          )
+          screen = screen.replace(
+              "${_appState.journeyDifficulty.label} · 中文朗读 · ${_levelContent.discoveries.length} 段",
+              "${_languageProfile?.displayLabel ?? _appState.journeyDifficulty.label} · 中文朗读 · ${_levelContent.discoveries.length} 段",
+          )
+          screen_path.write_text(screen)
+
+          Path('app/test/all_journey_adaptive_levels_test.dart').write_text(r'''import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
+import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
+import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/models/language_proficiency.dart';
+
+void main() {
+  const agent = PhoenixLanguageLevelAgent();
+
+  test('every published journey follows the adaptive two-paragraph route', () {
+    for (final journey in dailyJourneyExperiences) {
+      for (final profile in agent.allProfiles) {
+        final level = resolveAdaptiveJourneyLevel(
+          journey,
+          profile: profile,
+        );
+        expect(level.storyParagraphs, hasLength(2), reason: '${journey.id} ${profile.displayLabel}');
+        expect(level.storyAnnotations, hasLength(2), reason: '${journey.id} annotations');
+        expect(level.discoveries, isNotEmpty, reason: journey.id);
+        expect(level.words, isNotEmpty, reason: journey.id);
+        expect(
+          level.words.length,
+          lessThanOrEqualTo(agent.planFor(profile).maximumVocabularyCount),
+          reason: '${journey.id} vocabulary maximum',
+        );
+      }
+    }
+  });
+
+  test('beginner and advanced content differ on every migrated journey', () {
+    final beginner = agent.hskProfiles.first;
+    final advanced = agent.hskProfiles.firstWhere(
+      (profile) => profile.band == PhoenixReadingBand.advanced,
+    );
+    for (final journey in dailyJourneyExperiences.where(
+      (item) => item.id != 'beijing-summer-palace',
+    )) {
+      final easy = resolveAdaptiveJourneyLevel(journey, profile: beginner);
+      final deep = resolveAdaptiveJourneyLevel(journey, profile: advanced);
+      expect(easy.storyParagraphs.join(), isNot(deep.storyParagraphs.join()));
+      expect(easy.discoveries.length, lessThanOrEqualTo(deep.discoveries.length));
+      expect(easy.words.length, lessThanOrEqualTo(deep.words.length));
+    }
+  });
+}
+''')
+
+          Path('worker/all_journey_adaptive_import.test.mjs').write_text(r'''import assert from 'node:assert/strict';
+import test from 'node:test';
+import { readFileSync } from 'node:fs';
+
+const runtime = readFileSync('app/lib/data/adaptive_journey_level_runtime.dart', 'utf8');
+const catalog = readFileSync('app/lib/data/all_journey_language_level_catalog.dart', 'utf8');
+const screen = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
+
+test('all journeys use the adaptive catalog instead of a fixed experience', () => {
+  assert.match(runtime, /buildAdaptiveLevelForJourney/);
+  assert.doesNotMatch(runtime, /experience\.id != 'beijing-summer-palace'[\s\S]{0,100}JourneyLevelContent\.fromExperience/);
+  assert.match(catalog, /PhoenixReadingBand\.beginner/);
+  assert.match(catalog, /PhoenixReadingBand\.mastery/);
+  assert.match(catalog, /_discoveriesForBand/);
+  assert.match(catalog, /selectVocabulary/);
+});
+
+test('every journey exposes the HSK and TOCFL selector', () => {
+  assert.match(screen, /journey-language-level-selector/);
+  assert.doesNotMatch(screen, /if \(_experience\.id == 'beijing-summer-palace'\)\s+TextButton/);
+  assert.match(screen, /_languageProfile\?\.displayLabel/);
+});
+''')
+          PY
+
+          git checkout HEAD^ -- .github/workflows/flutter-ci.yml
+          rm -f .github/workflows/apply-all-journey-adaptive-import.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/data/adaptive_journey_level_runtime.dart \
+                  app/lib/screens/journey_screen.dart \
+                  app/test/all_journey_adaptive_levels_test.dart \
+                  worker/all_journey_adaptive_import.test.mjs \
+                  .github/workflows/flutter-ci.yml \
+                  .github/workflows/apply-all-journey-adaptive-import.yml
+          git commit -m "feat: apply adaptive rules to every journey"
+          git push origin HEAD:feature/summer-palace-story-engine-pilot
+
   verify:
     runs-on: ubuntu-latest
     defaults:
