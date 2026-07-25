@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
+# One-shot integration patch for the isolated prototype branch.
 path = Path('app/lib/screens/journey_screen.dart')
 text = path.read_text(encoding='utf-8')
 
