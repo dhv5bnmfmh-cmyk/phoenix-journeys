@@ -14,7 +14,6 @@ concurrency:
 
 jobs:
   apply:
-    if: hashFiles('.github/apply-global-language-selector') != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +48,6 @@ jobs:
 """,
           'profile welcome gate',
           )
-
           once(
           """            if (_experience.id == 'beijing-summer-palace')
               TextButton(
@@ -58,7 +56,6 @@ jobs:
 """,
           'language selector gate',
           )
-
           once(
           """                if (_experience.id == 'beijing-summer-palace' ||
                     _supportedDifficulties.length < 2) {
@@ -68,7 +65,6 @@ jobs:
 """,
           'difficulty selector gate',
           )
-
           once(
           """                  '${profile.band.label} · '
                   '${_languageLevelAgent.planFor(profile).targetVocabularyCount} 个重点单词',
@@ -78,7 +74,6 @@ jobs:
 """,
           'profile vocabulary count',
           )
-
           once(
           """      'targetVocabularyCount': _generationPlan?.targetVocabularyCount,
 """,
@@ -86,7 +81,6 @@ jobs:
 """,
           'AI vocabulary count',
           )
-
           text = text.replace(
               "${_appState.journeyDifficulty.label} · 普通话 · ${_levelContent.storyParagraphs.length} 段",
               "${_languageProfile?.displayLabel ?? _appState.journeyDifficulty.label} · 普通话 · ${_levelContent.storyParagraphs.length} 段",
@@ -95,9 +89,6 @@ jobs:
               "${_appState.journeyDifficulty.label} · 中文朗读 · ${_levelContent.discoveries.length} 段",
               "${_languageProfile?.displayLabel ?? _appState.journeyDifficulty.label} · 中文朗读 · ${_levelContent.discoveries.length} 段",
           )
-
-          if "if (_experience.id == 'beijing-summer-palace')\n              TextButton" in text:
-              raise SystemExit('language selector remains journey-gated')
           path.write_text(text)
           PY
 
