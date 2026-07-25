@@ -2,7 +2,7 @@ part of 'summer_palace_journey_arsenal.dart';
 
 extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
   Widget _arena(bool compact) {
-    final height = compact ? 122.0 : 145.0;
+    final height = compact ? 126.0 : 150.0;
     return Container(
       height: height,
       decoration: BoxDecoration(
@@ -10,12 +10,14 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
           center: const Alignment(0, -.1),
           radius: 1.25,
           colors: [
-            PhoenixTheme.red.withValues(alpha: .19),
-            Colors.black.withValues(alpha: .08),
+            const Color(0xFF8F3029).withValues(alpha: .2),
+            const Color(0xFF0E1512).withValues(alpha: .2),
           ],
         ),
         border: Border(
-          bottom: BorderSide(color: Colors.white.withValues(alpha: .1)),
+          bottom: BorderSide(
+            color: const Color(0xFFC79B57).withValues(alpha: .24),
+          ),
         ),
       ),
       child: AnimatedBuilder(
@@ -23,6 +25,7 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
         builder: (context, _) {
           final p = _idleController.value;
           final attacking = _effect == _BattleEffect.playerAttack;
+          final insight = _effect == _BattleEffect.insight;
           final recoil = _effect == _BattleEffect.playerRecoil;
           final bossHit = _effect == _BattleEffect.bossHit;
           final counter = _effect == _BattleEffect.bossCounter;
@@ -40,19 +43,19 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
                 child: Transform.translate(
                   offset: Offset(
                     attacking
-                        ? 24
+                        ? 28
                         : recoil
                             ? -10
                             : 0,
                     math.sin(p * math.pi * 2) * 3,
                   ),
                   child: AnimatedScale(
-                    scale: recoil ? .86 : 1,
+                    scale: recoil ? .86 : insight ? 1.08 : 1,
                     duration: const Duration(milliseconds: 200),
                     child: _PhoenixCharacter(
                       progress: p,
-                      size: compact ? 70 : 86,
-                      charged: attacking,
+                      size: compact ? 72 : 88,
+                      charged: attacking || insight,
                     ),
                   ),
                 ),
@@ -74,7 +77,7 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
                       child: _BeastCharacter(
                         progress: p,
                         armor: _bossArmor,
-                        size: compact ? 82 : 100,
+                        size: compact ? 84 : 102,
                         hit: bossHit,
                         countering: counter,
                       ),
@@ -84,8 +87,8 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
               ),
               if (attacking)
                 Positioned(
-                  left: compact ? 92 : 118,
-                  right: compact ? 92 : 118,
+                  left: compact ? 90 : 115,
+                  right: compact ? 88 : 112,
                   top: height / 2 - 8,
                   child: TweenAnimationBuilder<double>(
                     tween: Tween(begin: 0, end: 1),
@@ -99,17 +102,37 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
                           borderRadius: BorderRadius.circular(99),
                           gradient: const LinearGradient(
                             colors: [
-                              PhoenixTheme.gold,
-                              Colors.white,
-                              PhoenixTheme.red,
+                              Color(0xFFE7C07B),
+                              Color(0xFFFFF0C9),
+                              Color(0xFF9A322C),
                             ],
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: PhoenixTheme.gold.withValues(alpha: .65),
+                              color: const Color(0xFFE7C07B).withValues(alpha: .65),
                               blurRadius: 12,
                             ),
                           ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              if (insight)
+                Positioned(
+                  left: compact ? 78 : 100,
+                  top: compact ? 15 : 18,
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: .3, end: 1),
+                    duration: const Duration(milliseconds: 500),
+                    builder: (_, value, __) => Opacity(
+                      opacity: value,
+                      child: Transform.scale(
+                        scale: value,
+                        child: const Icon(
+                          Icons.flare_rounded,
+                          color: Color(0xFFFFE7B7),
+                          size: 28,
                         ),
                       ),
                     ),
@@ -123,9 +146,9 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
                   children: [
                     const Expanded(
                       child: Text(
-                        '小凰 · 旅程守护者',
+                        '小凰少侠 · 金羽引路',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFFFFE7B7),
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
                         ),
@@ -133,10 +156,10 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
                     ),
                     Expanded(
                       child: Text(
-                        _currentRound.title,
+                        '${_currentRound.form} · ${_currentRound.title}',
                         textAlign: TextAlign.right,
                         style: const TextStyle(
-                          color: PhoenixTheme.gold,
+                          color: Color(0xFFE7C07B),
                           fontSize: 9,
                           fontWeight: FontWeight.w900,
                         ),
@@ -168,17 +191,18 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
               child: _BeastCharacter(
                 progress: _idleController.value,
                 armor: _bossArmor,
-                size: compact ? 100 : 124,
+                size: compact ? 104 : 128,
                 countering: true,
               ),
             ),
           ),
           const SizedBox(height: 8),
           const Text(
-            '这次失真占了上风',
+            '此阵暂未破',
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 19,
+              color: Color(0xFFFFE7B7),
+              fontSize: 20,
+              letterSpacing: 1.2,
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -203,10 +227,13 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
           FilledButton.icon(
             key: const ValueKey('lore-battle-retry'),
             onPressed: () => _restart(rotateScenario: false),
-            style: FilledButton.styleFrom(backgroundColor: PhoenixTheme.red),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF8F3029),
+              foregroundColor: const Color(0xFFFFE7B7),
+            ),
             icon: const Icon(Icons.replay_rounded),
             label: const Text(
-              '保留装备 · 重新配装',
+              '武学不失 · 重新运功',
               style: TextStyle(fontWeight: FontWeight.w900),
             ),
           ),
@@ -229,13 +256,13 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
                 alignment: Alignment.center,
                 children: [
                   Container(
-                    width: compact ? 120 : 148,
-                    height: compact ? 120 : 148,
+                    width: compact ? 126 : 154,
+                    height: compact ? 126 : 154,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          PhoenixTheme.gold.withValues(alpha: .28),
+                          const Color(0xFFE7C07B).withValues(alpha: .28),
                           Colors.transparent,
                         ],
                       ),
@@ -245,7 +272,7 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
                     offset: Offset(0, math.sin(p * math.pi * 2) * 4 - 4),
                     child: _PhoenixCharacter(
                       progress: p,
-                      size: compact ? 92 : 116,
+                      size: compact ? 96 : 120,
                       charged: true,
                     ),
                   ),
@@ -254,21 +281,22 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
             },
           ),
           const Text(
-            '失序巨兽已被净化',
+            '幻阵已破',
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 19,
+              color: Color(0xFFFFE7B7),
+              fontSize: 21,
+              letterSpacing: 2,
               fontWeight: FontWeight.w900,
             ),
           ),
           const SizedBox(height: 4),
           const Text(
-            '你没有用战力压过它，而是用故事、词义与文化关系让世界恢复秩序。',
+            '你用已经学过的故事、字诀与文化发现贯通两式，失序魇兽无法继续扭曲这段记忆。',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white70,
               fontSize: 10.5,
-              height: 1.35,
+              height: 1.4,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -276,17 +304,17 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: PhoenixTheme.gold.withValues(alpha: .12),
-              borderRadius: BorderRadius.circular(13),
+              color: const Color(0xFFC79B57).withValues(alpha: .11),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: PhoenixTheme.gold.withValues(alpha: .45),
+                color: const Color(0xFFC79B57).withValues(alpha: .48),
               ),
             ),
             child: const Row(
               children: [
                 Icon(
                   Icons.workspace_premium_rounded,
-                  color: PhoenixTheme.gold,
+                  color: Color(0xFFE7C07B),
                   size: 25,
                 ),
                 SizedBox(width: 9),
@@ -295,15 +323,15 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '装备共鸣解锁',
+                        '侠游武学共鸣',
                         style: TextStyle(
-                          color: PhoenixTheme.gold,
+                          color: Color(0xFFE7C07B),
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                       Text(
-                        '长廊回声卷 × 借景符文 × 昆明湖罗盘',
+                        '长廊回声卷 × 借景字诀 × 昆明湖山水盘',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 11,
@@ -320,8 +348,12 @@ extension _SummerPalaceBattleEndViews on _SummerPalaceLoreBattleState {
           OutlinedButton.icon(
             key: const ValueKey('lore-battle-restart'),
             onPressed: _restart,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFE7C07B),
+              side: const BorderSide(color: Color(0xFFC79B57)),
+            ),
             icon: const Icon(Icons.shuffle_rounded),
-            label: const Text('更换失真顺序再战'),
+            label: const Text('换一座幻阵再破'),
           ),
         ],
       ),
