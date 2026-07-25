@@ -16,26 +16,25 @@ class DailyMixPrototype extends StatefulWidget {
 
 class _DailyMixPrototypeState extends State<DailyMixPrototype> {
   final TextEditingController _sentenceController = TextEditingController();
-  final List<String?> _layerSlots = <String?>[null, null, null];
-  int _gameIndex = 0;
-  String? _selectedLayer;
+  final List<String?> _slots = <String?>[null, null, null];
+  int _stage = 0;
+  String? _selectedCard;
   String? _message;
-  bool _wrongAnomaly = false;
 
-  static const List<String> _layerCards = ['远山', '湖面', '廊窗'];
-  static const List<String> _correctLayers = ['廊窗', '湖面', '远山'];
+  static const List<String> _cards = ['远山', '湖面', '廊窗'];
+  static const List<String> _correctOrder = ['廊窗', '湖面', '远山'];
+
+  String t(String value) => widget.text(value);
 
   String get _targetWord {
-    for (final word in ['借景', '层次', '规划']) {
+    for (final word in const ['借景', '层次', '规划']) {
       if (widget.learnedWords.contains(word) ||
-          (word == '层次' && widget.learnedWords.contains('層次'))) {
+          widget.learnedWords.contains(t(word))) {
         return word;
       }
     }
     return '借景';
   }
-
-  String t(String value) => widget.text(value);
 
   @override
   void dispose() {
@@ -43,77 +42,75 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
     super.dispose();
   }
 
-  void _placeLayer(int slot) {
-    final selected = _selectedLayer;
-    if (selected == null) {
-      setState(() => _message = '先点选一张景物卡，再放进位置。');
+  void _placeCard(int index) {
+    final card = _selectedCard;
+    if (card == null) {
+      setState(() => _message = '先选择一张景物卡。');
       return;
     }
     setState(() {
-      for (var index = 0; index < _layerSlots.length; index++) {
-        if (_layerSlots[index] == selected) _layerSlots[index] = null;
+      for (var slot = 0; slot < _slots.length; slot++) {
+        if (_slots[slot] == card) _slots[slot] = null;
       }
-      _layerSlots[slot] = selected;
-      _selectedLayer = null;
+      _slots[index] = card;
+      _selectedCard = null;
       _message = null;
     });
   }
 
-  void _checkLayers() {
-    if (_layerSlots.any((item) => item == null)) {
-      setState(() => _message = '三个位置都放好后，再检查画面。');
+  void _checkOrder() {
+    if (_slots.any((item) => item == null)) {
+      setState(() => _message = '三个位置都放好后再检查。');
       return;
     }
-    if (_layerSlots.join('|') == _correctLayers.join('|')) {
+    if (_slots.join('|') == _correctOrder.join('|')) {
       setState(() {
-        _gameIndex = 1;
+        _stage = 1;
         _message = null;
       });
       return;
     }
-    setState(() => _message = '想想离你最近的是廊窗，最远的才是远山。可以继续调整。');
+    setState(() => _message = '离你最近的是廊窗，最远的是远山。继续调整就好。');
   }
 
-  void _tapAnomaly(bool correct) {
+  void _chooseAnomaly(bool correct) {
     if (correct) {
       setState(() {
-        _gameIndex = 2;
+        _stage = 2;
         _message = null;
-        _wrongAnomaly = false;
       });
       return;
     }
-    setState(() {
-      _wrongAnomaly = true;
-      _message = '这里本来就是合理景色。再找一处阻断观看关系的地方。';
-    });
+    setState(() => _message = '这部分本来合理。再找一处阻断游客观看的地方。');
   }
 
   void _checkSentence() {
-    final sentence = _sentenceController.text.trim();
-    if (sentence.length >= 8 && sentence.contains(_targetWord)) {
+    final answer = _sentenceController.text.trim();
+    final displayedTarget = t(_targetWord);
+    final containsTarget =
+        answer.contains(_targetWord) || answer.contains(displayedTarget);
+    if (answer.length >= 8 && containsTarget) {
       setState(() {
-        _gameIndex = 3;
+        _stage = 3;
         _message = null;
       });
       return;
     }
     setState(() {
-      _message = sentence.isEmpty
-          ? '写一句自己的话，再把“$_targetWord”放进去。'
-          : '再补充一点场景，让“$_targetWord”真正用在句子里。';
+      _message = answer.isEmpty
+          ? '写一句自己的话，并使用“$displayedTarget”。'
+          : '再补充一点场景，让“$displayedTarget”真正进入句子。';
     });
   }
 
   void _restart() {
     _sentenceController.clear();
     setState(() {
-      _gameIndex = 0;
-      _selectedLayer = null;
+      _stage = 0;
+      _selectedCard = null;
       _message = null;
-      _wrongAnomaly = false;
-      for (var index = 0; index < _layerSlots.length; index++) {
-        _layerSlots[index] = null;
+      for (var index = 0; index < _slots.length; index++) {
+        _slots[index] = null;
       }
     });
   }
@@ -129,21 +126,21 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
         ),
       ),
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 230),
-        child: switch (_gameIndex) {
-          0 => _buildLayerGame(),
-          1 => _buildAnomalyGame(),
-          2 => _buildSentenceGame(),
-          _ => _buildComplete(),
+        duration: const Duration(milliseconds: 220),
+        child: switch (_stage) {
+          0 => _orderView(),
+          1 => _anomalyView(),
+          2 => _sentenceView(),
+          _ => _completeView(),
         },
       ),
     );
   }
 
-  Widget _buildLayerGame() {
+  Widget _orderView() {
     return ListView(
       key: const ValueKey('daily-mix-layers'),
-      padding: const EdgeInsets.fromLTRB(15, 15, 15, 28),
+      padding: const EdgeInsets.all(16),
       children: [
         _DailyHeader(
           progress: '1 / 3',
@@ -156,22 +153,14 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            for (final card in _layerCards)
+            for (final card in _cards)
               ChoiceChip(
                 key: ValueKey<String>('daily-layer-card-$card'),
-                selected: _selectedLayer == card,
+                selected: _selectedCard == card,
                 onSelected: (_) => setState(() {
-                  _selectedLayer = card;
+                  _selectedCard = card;
                   _message = null;
                 }),
-                avatar: Icon(
-                  card == '远山'
-                      ? Icons.landscape_rounded
-                      : card == '湖面'
-                          ? Icons.water_rounded
-                          : Icons.window_rounded,
-                  size: 18,
-                ),
                 label: Text(
                   t(card),
                   style: const TextStyle(fontWeight: FontWeight.w900),
@@ -179,7 +168,7 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
               ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 13),
         Container(
           padding: const EdgeInsets.all(13),
           decoration: BoxDecoration(
@@ -188,27 +177,26 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
           ),
           child: Column(
             children: [
-              for (var index = 0; index < 3; index++) ...[
-                _LayerSlot(
-                  key: ValueKey<String>('daily-layer-slot-$index'),
-                  position: ['近景', '中景', '远景'][index],
-                  value: _layerSlots[index],
-                  text: widget.text,
-                  onTap: () => _placeLayer(index),
+              for (var index = 0; index < _slots.length; index++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _SlotCard(
+                    key: ValueKey<String>('daily-layer-slot-$index'),
+                    position: t(['近景', '中景', '远景'][index]),
+                    value: _slots[index] == null ? null : t(_slots[index]!),
+                    onTap: () => _placeCard(index),
+                  ),
                 ),
-                if (index < 2) const SizedBox(height: 8),
-              ],
             ],
           ),
         ),
-        _DailyMessage(message: _message == null ? null : t(_message!)),
-        const SizedBox(height: 9),
+        _DailyHint(message: _message == null ? null : t(_message!)),
+        const SizedBox(height: 8),
         FilledButton.icon(
           key: const ValueKey('daily-check-layers'),
-          onPressed: _checkLayers,
+          onPressed: _checkOrder,
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFF2F7566),
-            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 13),
           ),
           icon: const Icon(Icons.visibility_rounded),
@@ -221,10 +209,10 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
     );
   }
 
-  Widget _buildAnomalyGame() {
+  Widget _anomalyView() {
     return ListView(
       key: const ValueKey('daily-mix-anomaly'),
-      padding: const EdgeInsets.fromLTRB(15, 15, 15, 28),
+      padding: const EdgeInsets.all(16),
       children: [
         _DailyHeader(
           progress: '2 / 3',
@@ -234,71 +222,64 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
         ),
         const SizedBox(height: 13),
         Container(
-          height: 330,
+          height: 320,
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: const Color(0xFFF0E0B8),
             borderRadius: BorderRadius.circular(21),
-            border: Border.all(color: const Color(0xFFD3AA67)),
           ),
-          clipBehavior: Clip.antiAlias,
           child: Stack(
             children: [
               const Positioned.fill(
-                child: CustomPaint(painter: _AnomalyScenePainter()),
+                child: CustomPaint(painter: _DailyScenePainter()),
               ),
               Positioned(
-                left: 15,
-                top: 35,
-                child: _HotspotButton(
+                left: 18,
+                top: 38,
+                child: _Hotspot(
                   key: const ValueKey('daily-anomaly-window'),
                   label: t('封死的廊窗'),
-                  icon: Icons.window_rounded,
-                  warning: _wrongAnomaly,
-                  onTap: () => _tapAnomaly(true),
+                  onTap: () => _chooseAnomaly(true),
                 ),
               ),
               Positioned(
-                right: 16,
-                top: 95,
-                child: _HotspotButton(
+                right: 20,
+                top: 90,
+                child: _Hotspot(
                   key: const ValueKey('daily-anomaly-mountain'),
                   label: t('远山'),
-                  icon: Icons.landscape_rounded,
-                  warning: false,
-                  onTap: () => _tapAnomaly(false),
+                  onTap: () => _chooseAnomaly(false),
                 ),
               ),
               Positioned(
-                right: 46,
-                bottom: 27,
-                child: _HotspotButton(
+                right: 43,
+                bottom: 30,
+                child: _Hotspot(
                   key: const ValueKey('daily-anomaly-water'),
                   label: t('湖面倒影'),
-                  icon: Icons.water_rounded,
-                  warning: false,
-                  onTap: () => _tapAnomaly(false),
+                  onTap: () => _chooseAnomaly(false),
                 ),
               ),
             ],
           ),
         ),
-        _DailyMessage(message: _message == null ? null : t(_message!)),
+        _DailyHint(message: _message == null ? null : t(_message!)),
       ],
     );
   }
 
-  Widget _buildSentenceGame() {
+  Widget _sentenceView() {
     return ListView(
       key: const ValueKey('daily-mix-sentence'),
-      padding: const EdgeInsets.fromLTRB(15, 15, 15, 28),
+      padding: const EdgeInsets.all(16),
       children: [
         _DailyHeader(
           progress: '3 / 3',
           title: t('一句话创作'),
-          subtitle: t('最后不选答案。用你自己的话，把今天的知识放进一个真实场景。'),
+          subtitle: t('最后不选答案。用自己的话把知识放进真实场景。'),
           icon: Icons.edit_note_rounded,
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 13),
         Container(
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
@@ -309,21 +290,16 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                t('本轮必须使用'),
+                t('必须使用'),
                 style: const TextStyle(
-                  color: Color(0xFF66503B),
-                  fontSize: 11,
+                  color: Color(0xFF65503C),
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2F7566),
-                  borderRadius: BorderRadius.circular(99),
-                ),
-                child: Text(
+              Chip(
+                backgroundColor: const Color(0xFF2F7566),
+                label: Text(
                   t(_targetWord),
                   style: const TextStyle(
                     color: Colors.white,
@@ -332,7 +308,7 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 9),
               TextField(
                 key: const ValueKey('daily-sentence-input'),
                 controller: _sentenceController,
@@ -354,14 +330,13 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
             ],
           ),
         ),
-        _DailyMessage(message: _message == null ? null : t(_message!)),
-        const SizedBox(height: 9),
+        _DailyHint(message: _message == null ? null : t(_message!)),
+        const SizedBox(height: 8),
         FilledButton.icon(
           key: const ValueKey('daily-check-sentence'),
           onPressed: _checkSentence,
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFF2F7566),
-            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 13),
           ),
           icon: const Icon(Icons.auto_awesome_rounded),
@@ -374,17 +349,16 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
     );
   }
 
-  Widget _buildComplete() {
+  Widget _completeView() {
     return ListView(
       key: const ValueKey('daily-mix-complete'),
-      padding: const EdgeInsets.fromLTRB(15, 24, 15, 30),
+      padding: const EdgeInsets.all(18),
       children: [
         const Icon(
           Icons.celebration_rounded,
-          size: 62,
           color: Color(0xFFFFD467),
+          size: 62,
         ),
-        const SizedBox(height: 8),
         Text(
           t('今日三练完成'),
           textAlign: TextAlign.center,
@@ -394,18 +368,17 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
             fontWeight: FontWeight.w900,
           ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 6),
         Text(
           t('同一份知识，经过排序、观察和创作三种不同操作。'),
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.white70,
-            fontSize: 12,
             height: 1.4,
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 14),
         for (final result in const [
           ('层次拼景', Icons.layers_rounded),
           ('找出异常', Icons.search_rounded),
@@ -420,17 +393,13 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
             ),
             child: Row(
               children: [
-                CircleAvatar(
-                  backgroundColor: const Color(0xFF2F7566),
-                  child: Icon(result.$2, color: Colors.white),
-                ),
-                const SizedBox(width: 11),
+                Icon(result.$2, color: const Color(0xFF2F7566)),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     t(result.$1),
                     style: const TextStyle(
                       color: Color(0xFF3C3025),
-                      fontSize: 15,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -442,14 +411,12 @@ class _DailyMixPrototypeState extends State<DailyMixPrototype> {
               ],
             ),
           ),
-        const SizedBox(height: 5),
         OutlinedButton.icon(
           key: const ValueKey('daily-mix-restart'),
           onPressed: _restart,
           style: OutlinedButton.styleFrom(
             foregroundColor: const Color(0xFFFFD98B),
             side: const BorderSide(color: Color(0xFF5BA593)),
-            padding: const EdgeInsets.symmetric(vertical: 12),
           ),
           icon: const Icon(Icons.replay_rounded),
           label: Text(
@@ -487,14 +454,9 @@ class _DailyHeader extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2F7566).withValues(alpha: .35),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: const Color(0xFF9ED8C9)),
+          CircleAvatar(
+            backgroundColor: const Color(0xFF2F7566).withValues(alpha: .4),
+            child: Icon(icon, color: const Color(0xFFA7DCCF)),
           ),
           const SizedBox(width: 11),
           Expanded(
@@ -509,7 +471,6 @@ class _DailyHeader extends StatelessWidget {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                const SizedBox(height: 2),
                 Text(
                   title,
                   style: const TextStyle(
@@ -518,7 +479,6 @@ class _DailyHeader extends StatelessWidget {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                const SizedBox(height: 3),
                 Text(
                   subtitle,
                   style: const TextStyle(
@@ -537,18 +497,16 @@ class _DailyHeader extends StatelessWidget {
   }
 }
 
-class _LayerSlot extends StatelessWidget {
-  const _LayerSlot({
+class _SlotCard extends StatelessWidget {
+  const _SlotCard({
     super.key,
     required this.position,
     required this.value,
-    required this.text,
     required this.onTap,
   });
 
   final String position;
   final String? value;
-  final String Function(String) text;
   final VoidCallback onTap;
 
   @override
@@ -562,44 +520,33 @@ class _LayerSlot extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           decoration: BoxDecoration(
             color: value == null
-                ? Colors.white.withValues(alpha: .45)
-                : const Color(0xFFD6E4D9),
+                ? Colors.white.withValues(alpha: .5)
+                : const Color(0xFFD7E4DA),
             borderRadius: BorderRadius.circular(13),
-            border: Border.all(
-              color: value == null
-                  ? const Color(0xFFBEA273)
-                  : const Color(0xFF2F7566),
-            ),
+            border: Border.all(color: const Color(0xFF2F7566)),
           ),
           child: Row(
             children: [
               SizedBox(
-                width: 45,
+                width: 46,
                 child: Text(
-                  text(position),
+                  position,
                   style: const TextStyle(
                     color: Color(0xFF6F5138),
-                    fontSize: 11,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
               Expanded(
                 child: Text(
-                  value == null ? text('点这里放入') : text(value!),
+                  value ?? '＋',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: value == null
-                        ? const Color(0xFF8B7861)
-                        : const Color(0xFF205A4E),
+                  style: const TextStyle(
+                    color: Color(0xFF205A4E),
                     fontSize: 14,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-              ),
-              Icon(
-                value == null ? Icons.add_rounded : Icons.swap_horiz_rounded,
-                color: const Color(0xFF2F7566),
               ),
             ],
           ),
@@ -609,18 +556,14 @@ class _LayerSlot extends StatelessWidget {
   }
 }
 
-class _HotspotButton extends StatelessWidget {
-  const _HotspotButton({
+class _Hotspot extends StatelessWidget {
+  const _Hotspot({
     super.key,
     required this.label,
-    required this.icon,
-    required this.warning,
     required this.onTap,
   });
 
   final String label;
-  final IconData icon;
-  final bool warning;
   final VoidCallback onTap;
 
   @override
@@ -633,26 +576,17 @@ class _HotspotButton extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
           decoration: BoxDecoration(
-            color: warning
-                ? const Color(0xFF9D3A31)
-                : const Color(0xFF241A13).withValues(alpha: .82),
+            color: const Color(0xFF241A13).withValues(alpha: .84),
             borderRadius: BorderRadius.circular(99),
             border: Border.all(color: const Color(0xFFFFD98B)),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 16, color: const Color(0xFFFFD98B)),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ],
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
       ),
@@ -660,97 +594,67 @@ class _HotspotButton extends StatelessWidget {
   }
 }
 
-class _DailyMessage extends StatelessWidget {
-  const _DailyMessage({required this.message});
+class _DailyHint extends StatelessWidget {
+  const _DailyHint({required this.message});
 
   final String? message;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 180),
+      duration: const Duration(milliseconds: 160),
       child: message == null
           ? const SizedBox(height: 5)
           : Container(
               key: ValueKey<String>(message!),
               margin: const EdgeInsets.only(top: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: const Color(0xFF31584F),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.tips_and_updates_rounded,
-                    color: Color(0xFFA9E0D2),
-                    size: 18,
-                  ),
-                  const SizedBox(width: 7),
-                  Expanded(
-                    child: Text(
-                      message!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        height: 1.35,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
+              child: Text(
+                message!,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
     );
   }
 }
 
-class _AnomalyScenePainter extends CustomPainter {
-  const _AnomalyScenePainter();
+class _DailyScenePainter extends CustomPainter {
+  const _DailyScenePainter();
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFF0E0B8));
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height * .6),
-      Paint()..color = const Color(0xFFD5DDD0),
-    );
-
-    final mountains = Path()
-      ..moveTo(0, size.height * .58)
-      ..lineTo(size.width * .2, size.height * .29)
-      ..lineTo(size.width * .35, size.height * .54)
-      ..lineTo(size.width * .55, size.height * .24)
-      ..lineTo(size.width * .72, size.height * .56)
-      ..lineTo(size.width, size.height * .35)
-      ..lineTo(size.width, size.height * .65)
-      ..lineTo(0, size.height * .65)
+    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFD7DDD0));
+    final mountain = Path()
+      ..moveTo(0, size.height * .62)
+      ..lineTo(size.width * .2, size.height * .3)
+      ..lineTo(size.width * .38, size.height * .58)
+      ..lineTo(size.width * .56, size.height * .25)
+      ..lineTo(size.width * .74, size.height * .58)
+      ..lineTo(size.width, size.height * .38)
+      ..lineTo(size.width, size.height * .68)
+      ..lineTo(0, size.height * .68)
       ..close();
-    canvas.drawPath(mountains, Paint()..color = const Color(0xFF657B69));
-
+    canvas.drawPath(mountain, Paint()..color = const Color(0xFF627767));
     canvas.drawRect(
-      Rect.fromLTWH(0, size.height * .6, size.width, size.height * .4),
-      Paint()..color = const Color(0xFF8EB1AB),
+      Rect.fromLTWH(0, size.height * .62, size.width, size.height * .38),
+      Paint()..color = const Color(0xFF91B0A8),
     );
-
-    final wood = Paint()..color = const Color(0xFF84362F);
-    canvas.drawRect(Rect.fromLTWH(0, 0, 20, size.height), wood);
-    canvas.drawRect(Rect.fromLTWH(size.width * .33, 0, 20, size.height), wood);
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width * .4, 22), wood);
     canvas.drawRect(
-      Rect.fromLTWH(20, 22, size.width * .28, size.height * .5),
-      Paint()..color = const Color(0xFF514941),
+      Rect.fromLTWH(0, 0, size.width * .33, size.height * .58),
+      Paint()..color = const Color(0xFF504841),
     );
-    for (var index = 0; index < 7; index++) {
-      final y = size.height * (.68 + index * .035);
-      canvas.drawLine(
-        Offset(size.width * .43, y),
-        Offset(size.width * .9, y),
-        Paint()
-          ..color = Colors.white.withValues(alpha: .28)
-          ..strokeWidth = 1.3,
-      );
-    }
+    canvas.drawRect(
+      Rect.fromLTWH(size.width * .33, 0, 16, size.height),
+      Paint()..color = const Color(0xFF81372F),
+    );
   }
 
   @override
