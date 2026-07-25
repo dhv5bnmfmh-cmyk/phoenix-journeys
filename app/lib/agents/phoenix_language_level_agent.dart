@@ -99,7 +99,9 @@ class PhoenixLanguageLevelAgent {
 
   ChineseProficiencyProfile? profileFromStorage(String? value) {
     if (value == null || !value.contains(':')) return null;
-    return allProfiles.where((profile) => profile.storageValue == value).firstOrNull;
+    return allProfiles
+        .where((profile) => profile.storageValue == value)
+        .firstOrNull;
   }
 
   List<ChineseProficiencyProfile> get allProfiles => [
@@ -192,6 +194,7 @@ class PhoenixLanguageLevelAgent {
 
   List<WordEntry> selectVocabulary({
     required Iterable<WordEntry> words,
+    required Map<String, VocabularyLevelTag> levelCatalog,
     required ChineseProficiencyProfile profile,
     Set<String> knownWords = const <String>{},
   }) {
@@ -199,6 +202,9 @@ class PhoenixLanguageLevelAgent {
     final targetLevel = _numericLevel(profile);
     final candidates = words.toList(growable: false);
     final selected = <WordEntry>[];
+
+    VocabularyLevelTag tagFor(WordEntry entry) =>
+        levelCatalog[entry.word] ?? const VocabularyLevelTag.ungraded();
 
     void addWhere(bool Function(WordEntry entry) predicate, {int? limit}) {
       for (final entry in candidates) {
@@ -211,8 +217,9 @@ class PhoenixLanguageLevelAgent {
     final newCoreTarget = (plan.targetVocabularyCount * .60).round();
     addWhere(
       (entry) {
-        final level = entry.levelTag.levelFor(profile.track);
-        return !entry.levelTag.isCulture &&
+        final tag = tagFor(entry);
+        final level = tag.levelFor(profile.track);
+        return !tag.isCulture &&
             !knownWords.contains(entry.word) &&
             level != null &&
             level <= targetLevel &&
@@ -223,8 +230,9 @@ class PhoenixLanguageLevelAgent {
 
     addWhere(
       (entry) {
-        final level = entry.levelTag.levelFor(profile.track);
-        return !entry.levelTag.isCulture &&
+        final tag = tagFor(entry);
+        final level = tag.levelFor(profile.track);
+        return !tag.isCulture &&
             !knownWords.contains(entry.word) &&
             level != null &&
             level <= targetLevel;
@@ -237,8 +245,9 @@ class PhoenixLanguageLevelAgent {
             .clamp(0, plan.targetVocabularyCount);
     addWhere(
       (entry) {
-        final level = entry.levelTag.levelFor(profile.track);
-        return !entry.levelTag.isCulture &&
+        final tag = tagFor(entry);
+        final level = tag.levelFor(profile.track);
+        return !tag.isCulture &&
             knownWords.contains(entry.word) &&
             level != null &&
             level <= targetLevel;
@@ -246,13 +255,13 @@ class PhoenixLanguageLevelAgent {
       limit: reviewTarget,
     );
 
-    final cultureLimit =
-        (selected.length + plan.cultureWordQuota).clamp(0, plan.targetVocabularyCount);
-    addWhere((entry) => entry.levelTag.isCulture, limit: cultureLimit);
+    final cultureLimit = (selected.length + plan.cultureWordQuota)
+        .clamp(0, plan.targetVocabularyCount);
+    addWhere((entry) => tagFor(entry).isCulture, limit: cultureLimit);
 
     addWhere(
       (entry) {
-        final level = entry.levelTag.levelFor(profile.track);
+        final level = tagFor(entry).levelFor(profile.track);
         return level == null || level <= targetLevel + 1;
       },
       limit: plan.targetVocabularyCount,
