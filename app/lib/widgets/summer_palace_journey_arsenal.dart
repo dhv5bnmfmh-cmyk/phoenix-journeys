@@ -7,6 +7,7 @@ import '../theme/phoenix_theme.dart';
 part 'summer_palace_battle_components.dart';
 part 'summer_palace_battle_characters.dart';
 part 'summer_palace_battle_views.dart';
+part 'summer_palace_battle_end_views.dart';
 
 class SummerPalaceLoreBattle extends StatefulWidget {
   const SummerPalaceLoreBattle({
