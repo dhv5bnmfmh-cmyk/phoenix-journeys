@@ -24,6 +24,7 @@ class _SummerPalaceLoreBattleState extends State<SummerPalaceLoreBattle> {
   final Set<int> _selectedEvidence = <int>{};
   String? _feedback;
   bool _completedNotified = false;
+  bool _replaying = false;
 
   static const _weapons = <_BattleChoice>[
     _BattleChoice(
@@ -68,7 +69,7 @@ class _SummerPalaceLoreBattleState extends State<SummerPalaceLoreBattle> {
     '建筑数量很多',
   ];
 
-  bool get _isComplete => widget.completed || _phase >= 4;
+  bool get _isComplete => !_replaying && (widget.completed || _phase >= 4);
 
   @override
   void didUpdateWidget(covariant SummerPalaceLoreBattle oldWidget) {
@@ -81,6 +82,7 @@ class _SummerPalaceLoreBattleState extends State<SummerPalaceLoreBattle> {
   void _start() {
     setState(() {
       _phase = 1;
+      _replaying = false;
       _feedback = null;
     });
   }
@@ -148,6 +150,7 @@ class _SummerPalaceLoreBattleState extends State<SummerPalaceLoreBattle> {
 
     setState(() {
       _phase = 4;
+      _replaying = false;
       _feedback = null;
     });
     if (!_completedNotified) {
@@ -159,6 +162,7 @@ class _SummerPalaceLoreBattleState extends State<SummerPalaceLoreBattle> {
   void _restart() {
     setState(() {
       _phase = 0;
+      _replaying = true;
       _selectedWeapon = null;
       _selectedReply = null;
       _selectedEvidence.clear();
