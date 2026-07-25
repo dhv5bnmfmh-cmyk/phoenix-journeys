@@ -60,6 +60,7 @@ void main() {
     await tester.tap(
       find.byKey(const ValueKey('lore-equipment-story-scroll')),
     );
+    await tester.pump();
     await tester.tap(find.byKey(const ValueKey('lore-cast-combo')));
     await _finishEffect(tester);
 
@@ -70,6 +71,7 @@ void main() {
     await tester.tap(
       find.byKey(const ValueKey('lore-equipment-discovery-compass')),
     );
+    await tester.pump();
     await tester.tap(find.byKey(const ValueKey('lore-cast-combo')));
     await _finishEffect(tester);
 
@@ -88,6 +90,7 @@ void main() {
     await tester.tap(
       find.byKey(const ValueKey('lore-equipment-word-rune')),
     );
+    await tester.pump();
     await tester.tap(find.byKey(const ValueKey('lore-cast-combo')));
     await _finishEffect(tester);
 
