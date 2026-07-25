@@ -4,13 +4,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/screens/lost_scroll_prototype_screen.dart';
 
-Widget _app({Set<String> learnedWords = const <String>{}}) {
+String _identity(String text) => text;
+
+String _traditionalPreview(String text) {
+  return text
+      .replaceAll('修复', '修復')
+      .replaceAll('画卷', '畫卷')
+      .replaceAll('远山', '遠山')
+      .replaceAll('已学', '已學')
+      .replaceAll('旧游', '舊遊')
+      .replaceAll('层次', '層次');
+}
+
+Widget _app({
+  Set<String> learnedWords = const <String>{},
+  String Function(String) displayText = _identity,
+}) {
   return MaterialApp(
     home: Scaffold(
       body: SizedBox(
         width: 390,
         height: 900,
-        child: LostScrollGame(learnedWords: learnedWords),
+        child: LostScrollGame(
+          learnedWords: learnedWords,
+          displayText: displayText,
+        ),
       ),
     ),
   );
@@ -39,6 +57,15 @@ void main() {
     expect(find.text('借景'), findsOneWidget);
     expect(find.text('旧游印记'), findsOneWidget);
     expect(find.text('已修复 0 / 3'), findsOneWidget);
+  });
+
+  testWidgets('the prototype honors the supplied Chinese script converter', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(displayText: _traditionalPreview));
+
+    expect(find.text('修復失落畫卷'), findsOneWidget);
+    expect(find.textContaining('遠山消失了'), findsOneWidget);
   });
 
   testWidgets('a wrong choice gives a clue without failing the player', (
