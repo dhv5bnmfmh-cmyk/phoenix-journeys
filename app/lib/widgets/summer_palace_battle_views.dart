@@ -83,7 +83,7 @@ extension _SummerPalaceBattleViews on _SummerPalaceLoreBattleState {
             ),
           ),
           SizedBox(height: compact ? 7 : 10),
-          ..._equipment.map(
+          ..._SummerPalaceLoreBattleState._equipment.map(
             (item) => Padding(
               padding: const EdgeInsets.only(bottom: 6),
               child: _EquipmentOriginCard(item: item),
@@ -210,19 +210,25 @@ extension _SummerPalaceBattleViews on _SummerPalaceLoreBattleState {
                 const SizedBox(height: 7),
                 Row(
                   children: [
-                    for (var index = 0; index < _equipment.length; index++) ...[
+                    for (
+                      var index = 0;
+                      index < _SummerPalaceLoreBattleState._equipment.length;
+                      index++
+                    ) ...[
                       if (index > 0) const SizedBox(width: 6),
                       Expanded(
                         child: _EquipmentBattleCard(
                           key: ValueKey<String>(
-                            'lore-equipment-${_equipment[index].id}',
+                            'lore-equipment-${_SummerPalaceLoreBattleState._equipment[index].id}',
                           ),
-                          item: _equipment[index],
+                          item: _SummerPalaceLoreBattleState._equipment[index],
                           selected: _selectedEquipment.contains(
-                            _equipment[index].id,
+                            _SummerPalaceLoreBattleState._equipment[index].id,
                           ),
                           disabled: _resolving,
-                          onTap: () => _toggleEquipment(_equipment[index].id),
+                          onTap: () => _toggleEquipment(
+                            _SummerPalaceLoreBattleState._equipment[index].id,
+                          ),
                         ),
                       ),
                     ],
