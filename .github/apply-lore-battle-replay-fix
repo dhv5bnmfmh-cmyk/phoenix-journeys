@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+from pathlib import Path
+
+path = Path('app/lib/widgets/summer_palace_lore_battle.dart')
+text = path.read_text(encoding='utf-8')
+
+if 'bool _replaying = false;' not in text:
+    text = text.replace(
+        '  bool _completedNotified = false;\n',
+        '  bool _completedNotified = false;\n  bool _replaying = false;\n',
+        1,
+    )
+
+text = text.replace(
+    '  bool get _isComplete => widget.completed || _phase >= 4;\n',
+    '  bool get _isComplete => !_replaying && (widget.completed || _phase >= 4);\n',
+    1,
+)
+
+text = text.replace(
+    '      _phase = 1;\n      _feedback = null;\n',
+    '      _phase = 1;\n      _replaying = false;\n      _feedback = null;\n',
+    1,
+)
+
+text = text.replace(
+    '      _phase = 4;\n      _feedback = null;\n',
+    '      _phase = 4;\n      _replaying = false;\n      _feedback = null;\n',
+    1,
+)
+
+text = text.replace(
+    '      _phase = 0;\n      _selectedWeapon = null;\n',
+    '      _phase = 0;\n      _replaying = true;\n      _selectedWeapon = null;\n',
+    1,
+)
+
+path.write_text(text, encoding='utf-8')
