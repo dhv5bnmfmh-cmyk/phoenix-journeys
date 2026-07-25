@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../data/journey_data.dart';
@@ -135,7 +136,7 @@ class PhoenixVocabularyService {
           qualityScore: 100,
         );
     _validate(preloaded, entry.word);
-    return Future<PhoenixVocabularyExample>.value(preloaded);
+    return SynchronousFuture<PhoenixVocabularyExample>(preloaded);
   }
 
   /// Content-authoring path only.
