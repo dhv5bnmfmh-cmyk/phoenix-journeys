@@ -109,7 +109,7 @@ test('explorers read bundled examples and never wait for a model request', () =>
   assert.match(sheet, /PhoenixVocabularyService/);
   assert.doesNotMatch(sheet, /entry\.studyExamples/);
   assert.match(runtime, /phoenix-preloaded-pack/);
-  assert.match(runtime, /Future<PhoenixVocabularyExample>\.value\(preloaded\)/);
+  assert.match(runtime, /SynchronousFuture<PhoenixVocabularyExample>\(preloaded\)/);
   assert.doesNotMatch(runtime, /_client\s*\.post/);
   assert.match(service, /generateExampleForContentPipeline/);
   assert.match(service, /forbidden\.any/);
