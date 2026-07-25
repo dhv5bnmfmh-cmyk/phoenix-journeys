@@ -17,10 +17,14 @@ const guideSchema = {
 };
 
 const writingFeedbackProperties = {
+  understanding: { type: 'string' },
   corrected: { type: 'string' },
   explanation: { type: 'string' },
   natural: { type: 'string' },
+  abilityFocus: { type: 'string' },
+  rewriteTask: { type: 'string' },
   encouragement: { type: 'string' },
+  learnerScore: { type: 'integer', minimum: 0, maximum: 100 },
 };
 
 const writingSchema = {
@@ -38,7 +42,16 @@ const writingSchema = {
     revisedFeedback: {
       type: 'object',
       additionalProperties: false,
-      required: ['corrected', 'explanation', 'natural', 'encouragement'],
+      required: [
+        'understanding',
+        'corrected',
+        'explanation',
+        'natural',
+        'abilityFocus',
+        'rewriteTask',
+        'encouragement',
+        'learnerScore',
+      ],
       properties: writingFeedbackProperties,
     },
   },
@@ -219,8 +232,11 @@ export class PhoenixQualityAgent {
         role: 'system',
         content: [
           '你是隐藏的 PhoenixQualityAgent，只负责审核中文写作批改。',
-          '核对 corrected 是否只做必要修改，explanation 是否指出真实且最重要的问题，natural 是否自然但不改变原意，encouragement 是否具体而不空泛。',
-          '不得虚构错误；原文正确时必须明确说明表达已正确，并解释可选的语体优化。',
+          'understanding 必须准确复述学习者真正的意思并引用原文，不能套模板或添加原文没有的观点。',
+          '核对 corrected 是否只做必要修改，explanation 是否指出真实且最重要的问题，natural 是否自然但不改变原意。',
+          'abilityFocus 必须只聚焦一项最值得迁移的能力；rewriteTask 必须具体到学习者可以立刻改写并重新提交。',
+          'learnerScore 只是 Phoenix 内部的本次表达完成度，不得冒充 HSK、TOCFL 或正式考试分数；分数必须与反馈严重程度一致。',
+          'encouragement 必须具体且有证据，不得空泛赞美。原文正确时必须明确说明，并把重点转向逻辑、细节或语体优化。',
           '如果质量不足，请重写完整 revisedFeedback；如果合格，原样返回。',
           '只输出符合 JSON Schema 的对象。',
         ].join('\n'),
@@ -240,9 +256,9 @@ export class PhoenixQualityAgent {
       messages,
       schema: writingSchema,
       schemaName: 'phoenix_writing_quality',
-      maxOutputTokens: 1300,
+      maxOutputTokens: 1800,
       reasoningEffort: 'medium',
-      temperature: 0.1,
+      temperature: 0.08,
       purpose: 'quality-writing',
     });
     const review = result.value;
@@ -250,10 +266,14 @@ export class PhoenixQualityAgent {
     const revised = review.revisedFeedback;
     const validRevision =
       revised &&
+      typeof revised.understanding === 'string' &&
       typeof revised.corrected === 'string' &&
       typeof revised.explanation === 'string' &&
       typeof revised.natural === 'string' &&
-      typeof revised.encouragement === 'string';
+      typeof revised.abilityFocus === 'string' &&
+      typeof revised.rewriteTask === 'string' &&
+      typeof revised.encouragement === 'string' &&
+      Number.isFinite(Number(revised.learnerScore));
 
     return {
       feedback: status.approved || !validRevision ? candidate : revised,
