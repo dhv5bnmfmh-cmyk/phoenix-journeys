@@ -55,4 +55,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .github/workflows/apply-language-level-agent.yml .github/workflows/fix-language-level-installer.yml
           git commit -m "fix: remove unavailable formatter from language agent installer"
+          git fetch origin feature/summer-palace-story-engine-pilot
+          git rebase origin/feature/summer-palace-story-engine-pilot
           git push origin HEAD:feature/summer-palace-story-engine-pilot
