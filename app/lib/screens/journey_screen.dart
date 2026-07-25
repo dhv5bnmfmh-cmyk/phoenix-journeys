@@ -25,6 +25,7 @@ import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
 import '../widgets/narration_speed_stepper.dart';
 import '../widgets/phoenix_agent_cards.dart';
+import '../widgets/summer_palace_lore_battle.dart';
 import '../widgets/word_detail_sheet.dart';
 
 @visibleForTesting
@@ -92,6 +93,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       LanguageLevelPreferenceStore();
   ChineseProficiencyProfile? _languageProfile;
   bool _languageProfileLoaded = false;
+  bool _loreBattleCompleted = false;
 
   @override
   void initState() {
@@ -846,8 +848,14 @@ Future<void> _showDifficultyWelcome() async {
     _guideLoading = false;
     _writingLoading = false;
     _discoveryAutoStarted = false;
+    _loreBattleCompleted = false;
     if (mounted) setState(() => step = 0);
   }
+
+  List<String> get _journeyStepLabels =>
+      _experience.id == 'beijing-summer-palace'
+          ? const ['故事', '单词', '发现', '挑战', '表达', '回忆', '完成']
+          : AppState.journeyStepLabels;
 
   JourneyBackgroundPage get _backgroundPageType => switch (step) {
     0 => JourneyBackgroundPage.story,
@@ -865,7 +873,9 @@ Future<void> _showDifficultyWelcome() async {
       _storyPage(),
       _wordsPage(),
       _discoveryPage(),
-      _wonderPage(),
+      _experience.id == 'beijing-summer-palace'
+          ? _loreBattlePage()
+          : _wonderPage(),
       _expressPage(),
       _memoryPage(),
       _completePage(),
@@ -1030,7 +1040,7 @@ Future<void> _showDifficultyWelcome() async {
                   currentStep: step,
                   furthestStep: state.beijingJourneyFurthestStep,
                   isCompleted: state.journeyCompleted,
-                  labels: AppState.journeyStepLabels,
+                  labels: _journeyStepLabels,
                   onStepSelected: (value) => unawaited(_goToStep(value)),
                 ),
                 SizedBox(height: compact ? 3 : 5),
@@ -1594,6 +1604,24 @@ Future<void> _showDifficultyWelcome() async {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _loreBattlePage() {
+    return _page(
+      title: '挑战',
+      buttonText: _loreBattleCompleted ? '继续' : '完成挑战后继续',
+      buttonIcon: _loreBattleCompleted
+          ? Icons.arrow_forward_rounded
+          : Icons.lock_outline_rounded,
+      primaryEnabled: _loreBattleCompleted,
+      child: SummerPalaceLoreBattle(
+        completed: _loreBattleCompleted,
+        onCompleted: () {
+          if (!mounted || _loreBattleCompleted) return;
+          setState(() => _loreBattleCompleted = true);
+        },
       ),
     );
   }
