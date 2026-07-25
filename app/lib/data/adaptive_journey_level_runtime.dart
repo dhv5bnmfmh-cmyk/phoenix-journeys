@@ -3,7 +3,6 @@ import '../models/language_proficiency.dart';
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
-import 'summer_palace_journey.dart';
 import 'summer_palace_language_level_catalog.dart';
 
 const _languageLevelAgent = PhoenixLanguageLevelAgent();
