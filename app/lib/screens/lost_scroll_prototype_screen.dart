@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 
+String _identityText(String text) => text;
+
 class LostScrollPrototypeScreen extends StatelessWidget {
   const LostScrollPrototypeScreen({super.key});
 
@@ -18,14 +20,17 @@ class LostScrollPrototypeScreen extends StatelessWidget {
           appBar: AppBar(
             backgroundColor: const Color(0xFF241A13),
             foregroundColor: const Color(0xFFFFE9BA),
-            title: const Text(
-              'Phoenix · 失落画卷',
-              style: TextStyle(fontWeight: FontWeight.w900),
+            title: Text(
+              state.displayText('Phoenix · 失落画卷'),
+              style: const TextStyle(fontWeight: FontWeight.w900),
             ),
             centerTitle: true,
           ),
           body: SafeArea(
-            child: LostScrollGame(learnedWords: state.savedWords),
+            child: LostScrollGame(
+              learnedWords: state.savedWords,
+              displayText: state.displayText,
+            ),
           ),
         );
       },
@@ -39,11 +44,13 @@ class LostScrollGame extends StatefulWidget {
     this.learnedWords = const <String>{},
     this.completed = false,
     this.onCompleted,
+    this.displayText = _identityText,
   });
 
   final Set<String> learnedWords;
   final bool completed;
   final VoidCallback? onCompleted;
+  final String Function(String) displayText;
 
   @override
   State<LostScrollGame> createState() => _LostScrollGameState();
@@ -159,6 +166,7 @@ class _LostScrollGameState extends State<LostScrollGame>
 
   bool get _isFinished => !_replaying && (widget.completed || _finished);
   _ScrollScene get _scene => _scenes[_sceneIndex];
+  String _t(String text) => widget.displayText(text);
 
   @override
   void initState() {
@@ -251,18 +259,10 @@ class _LostScrollGameState extends State<LostScrollGame>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        const Positioned.fill(child: CustomPaint(painter: _SilkBackdropPainter())),
-        AnimatedBuilder(
-          animation: Listenable.merge([
-            _ambientController,
-            _revealController,
-          ]),
-          builder: (context, _) {
-            return _isFinished
-                ? _buildFinished(context)
-                : _buildGame(context);
-          },
+        const Positioned.fill(
+          child: CustomPaint(painter: _SilkBackdropPainter()),
         ),
+        _isFinished ? _buildFinished(context) : _buildGame(context),
       ],
     );
   }
@@ -280,7 +280,7 @@ class _LostScrollGameState extends State<LostScrollGame>
               _buildGuideHeader(compact),
               SizedBox(height: compact ? 8 : 12),
               Text(
-                '修复失落画卷',
+                _t('修复失落画卷'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: const Color(0xFFFFE7B7),
@@ -290,10 +290,10 @@ class _LostScrollGameState extends State<LostScrollGame>
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                '看缺口，选一个已学知识，小凰会立刻把它写回画卷。',
+              Text(
+                _t('看缺口，选一个已学知识，小凰会立刻把它写回画卷。'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 12,
                   height: 1.35,
@@ -305,11 +305,17 @@ class _LostScrollGameState extends State<LostScrollGame>
               const SizedBox(height: 8),
               SizedBox(
                 height: compact ? 190 : 225,
-                child: CustomPaint(
-                  painter: _LostScrollPainter(
-                    restoredCount: _restoredCount,
-                    activeReveal: _revealController.value,
-                    ambient: _ambientController.value,
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([
+                    _ambientController,
+                    _revealController,
+                  ]),
+                  builder: (context, _) => CustomPaint(
+                    painter: _LostScrollPainter(
+                      restoredCount: _restoredCount,
+                      activeReveal: _revealController.value,
+                      ambient: _ambientController.value,
+                    ),
                   ),
                 ),
               ),
@@ -327,7 +333,7 @@ class _LostScrollGameState extends State<LostScrollGame>
                     ? const SizedBox.shrink()
                     : _HintCard(
                         key: ValueKey<String>('hint-$_sceneIndex'),
-                        text: _scene.hint,
+                        text: _t('小凰提示：${_scene.hint}'),
                       ),
               ),
             ],
@@ -351,27 +357,30 @@ class _LostScrollGameState extends State<LostScrollGame>
         children: [
           SizedBox.square(
             dimension: compact ? 54 : 62,
-            child: CustomPaint(
-              painter: _PhoenixPainter(progress: _ambientController.value),
+            child: AnimatedBuilder(
+              animation: _ambientController,
+              builder: (context, _) => CustomPaint(
+                painter: _PhoenixPainter(progress: _ambientController.value),
+              ),
             ),
           ),
           const SizedBox(width: 10),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '小凰画师',
-                  style: TextStyle(
+                  _t('小凰画师'),
+                  style: const TextStyle(
                     color: Color(0xFFFFE7B7),
                     fontSize: 14,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
-                  '“别背规则。找到能修好眼前缺口的知识就行。”',
-                  style: TextStyle(
+                  _t('“别背规则。找到能修好眼前缺口的知识就行。”'),
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 11,
                     height: 1.3,
@@ -408,7 +417,7 @@ class _LostScrollGameState extends State<LostScrollGame>
         ],
         const SizedBox(width: 9),
         Text(
-          '已修复 $_restoredCount / ${_scenes.length}',
+          _t('已修复 $_restoredCount / ${_scenes.length}'),
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 10.5,
@@ -438,7 +447,7 @@ class _LostScrollGameState extends State<LostScrollGame>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '画卷缺口 ${_sceneIndex + 1} · ${_scene.title}',
+            _t('画卷缺口 ${_sceneIndex + 1} · ${_scene.title}'),
             style: const TextStyle(
               color: Color(0xFF8E342D),
               fontSize: 12,
@@ -447,7 +456,7 @@ class _LostScrollGameState extends State<LostScrollGame>
           ),
           const SizedBox(height: 5),
           Text(
-            _scene.problem,
+            _t(_scene.problem),
             style: const TextStyle(
               color: Color(0xFF2B2119),
               fontSize: 14,
@@ -457,7 +466,7 @@ class _LostScrollGameState extends State<LostScrollGame>
           ),
           const SizedBox(height: 6),
           Text(
-            _scene.question,
+            _t(_scene.question),
             style: const TextStyle(
               color: Color(0xFF5D4937),
               fontSize: 11.5,
@@ -523,7 +532,7 @@ class _LostScrollGameState extends State<LostScrollGame>
                         children: [
                           Flexible(
                             child: Text(
-                              choice.label,
+                              _t(choice.label),
                               style: const TextStyle(
                                 color: Color(0xFFFFE7B7),
                                 fontSize: 13,
@@ -533,13 +542,13 @@ class _LostScrollGameState extends State<LostScrollGame>
                           ),
                           if (oldMemory) ...[
                             const SizedBox(width: 6),
-                            const _SmallBadge(text: '旧游印记'),
+                            _SmallBadge(text: _t('旧游印记')),
                           ],
                         ],
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${choice.source} · ${choice.explanation}',
+                        _t('${choice.source} · ${choice.explanation}'),
                         style: const TextStyle(
                           color: Colors.white60,
                           fontSize: 10,
@@ -574,17 +583,20 @@ class _LostScrollGameState extends State<LostScrollGame>
             children: [
               SizedBox.square(
                 dimension: compact ? 72 : 88,
-                child: CustomPaint(
-                  painter: _PhoenixPainter(
-                    progress: _ambientController.value,
-                    celebrating: true,
+                child: AnimatedBuilder(
+                  animation: _ambientController,
+                  builder: (context, _) => CustomPaint(
+                    painter: _PhoenixPainter(
+                      progress: _ambientController.value,
+                      celebrating: true,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 5),
-              const Text(
-                '画卷已复原',
-                style: TextStyle(
+              Text(
+                _t('画卷已复原'),
+                style: const TextStyle(
                   color: Color(0xFFFFE7B7),
                   fontSize: 27,
                   letterSpacing: 2,
@@ -592,10 +604,10 @@ class _LostScrollGameState extends State<LostScrollGame>
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                '你用故事、生词和文化发现，让颐和园重新流动起来。',
+              Text(
+                _t('你用故事、生词和文化发现，让颐和园重新流动起来。'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 12,
                   height: 1.4,
@@ -605,12 +617,15 @@ class _LostScrollGameState extends State<LostScrollGame>
               const SizedBox(height: 12),
               SizedBox(
                 height: compact ? 235 : 280,
-                child: CustomPaint(
-                  painter: _LostScrollPainter(
-                    restoredCount: _scenes.length,
-                    activeReveal: 0,
-                    ambient: _ambientController.value,
-                    completed: true,
+                child: AnimatedBuilder(
+                  animation: _ambientController,
+                  builder: (context, _) => CustomPaint(
+                    painter: _LostScrollPainter(
+                      restoredCount: _scenes.length,
+                      activeReveal: 0,
+                      ambient: _ambientController.value,
+                      completed: true,
+                    ),
                   ),
                 ),
               ),
@@ -623,22 +638,22 @@ class _LostScrollGameState extends State<LostScrollGame>
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: const Color(0xFFD1A35C)),
                 ),
-                child: const Column(
+                child: Column(
                   children: [
-                    _SmallBadge(text: '体验纪念'),
-                    SizedBox(height: 7),
+                    _SmallBadge(text: _t('体验纪念')),
+                    const SizedBox(height: 7),
                     Text(
-                      '颐和园 · 借景长卷',
-                      style: TextStyle(
+                      _t('颐和园 · 借景长卷'),
+                      style: const TextStyle(
                         color: Color(0xFF7F2D28),
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      '借景 · 层次 · 移步换景',
-                      style: TextStyle(
+                      _t('借景 · 层次 · 移步换景'),
+                      style: const TextStyle(
                         color: Color(0xFF5D4937),
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -659,9 +674,9 @@ class _LostScrollGameState extends State<LostScrollGame>
                     padding: const EdgeInsets.symmetric(vertical: 13),
                   ),
                   icon: const Icon(Icons.replay_rounded),
-                  label: const Text(
-                    '再修复一次',
-                    style: TextStyle(fontWeight: FontWeight.w900),
+                  label: Text(
+                    _t('再修复一次'),
+                    style: const TextStyle(fontWeight: FontWeight.w900),
                   ),
                 ),
               ),
@@ -693,7 +708,7 @@ class _HintCard extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '小凰提示：$text',
+              text,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 11,
@@ -876,7 +891,7 @@ class _LostScrollPainter extends CustomPainter {
   }
 
   void _drawMountainSegment(Canvas canvas, Size size, double progress) {
-    final gray = const Color(0xFF686D65);
+    const gray = Color(0xFF686D65);
     final mountainColor = Color.lerp(gray, const Color(0xFF52715F), progress)!;
     final path = Path()
       ..moveTo(size.width * .05, size.height * .62)
