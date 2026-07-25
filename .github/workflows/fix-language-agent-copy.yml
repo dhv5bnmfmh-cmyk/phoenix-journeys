@@ -1,0 +1,50 @@
+name: Fix Phoenix Language Agent Copy
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/fix-language-agent-copy.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/summer-palace-story-engine-pilot
+          fetch-depth: 0
+
+      - name: Align language agent copy with Phoenix rules
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          for path in Path('app/lib').rglob('*.dart'):
+              text = path.read_text()
+              updated = text.replace('生词', '单词')
+              if path.as_posix() == 'app/lib/screens/journey_screen.dart':
+                  updated = updated.replace(
+                      "showIntro ? '先选择你的中文考试路线' : '选择中文考试路线'",
+                      "showIntro ? '选择适合你的旅程' : '选择中文考试路线'",
+                  )
+              if updated != text:
+                  path.write_text(updated)
+          PY
+
+      - name: Commit copy alignment
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib
+          git commit -m "fix: align language level agent copy with Phoenix rules"
+          git fetch origin feature/summer-palace-story-engine-pilot
+          git rebase origin/feature/summer-palace-story-engine-pilot
+          git push origin HEAD:feature/summer-palace-story-engine-pilot
