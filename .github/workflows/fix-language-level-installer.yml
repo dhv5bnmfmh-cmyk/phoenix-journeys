@@ -27,14 +27,24 @@ jobs:
           from pathlib import Path
 
           installer = Path('.github/workflows/apply-language-level-agent.yml')
-          text = installer.read_text()
-          block = """      - name: Format Journey screen
-                run: dart format app/lib/screens/journey_screen.dart
-
-          """
-          if block not in text:
+          lines = installer.read_text().splitlines()
+          output = []
+          removed = False
+          index = 0
+          while index < len(lines):
+              if lines[index].strip() == '- name: Format Journey screen':
+                  removed = True
+                  index += 1
+                  if index < len(lines) and lines[index].strip().startswith('run: dart format'):
+                      index += 1
+                  if index < len(lines) and not lines[index].strip():
+                      index += 1
+                  continue
+              output.append(lines[index])
+              index += 1
+          if not removed:
               raise SystemExit('format step not found')
-          installer.write_text(text.replace(block, '', 1))
+          installer.write_text('\n'.join(output) + '\n')
           PY
           rm .github/workflows/fix-language-level-installer.yml
 
