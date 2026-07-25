@@ -17,51 +17,51 @@ class InteractiveDramaPrototype extends StatefulWidget {
 
 class _InteractiveDramaPrototypeState
     extends State<InteractiveDramaPrototype> {
-  int _episode = 0;
-  _DramaAlly? _ally;
-  final Set<_DramaClue> _clues = <_DramaClue>{};
-  _DramaDecision? _decision;
+  int _stage = 0;
+  _Ally? _ally;
+  final Set<_Clue> _clues = <_Clue>{};
+  _Decision? _decision;
   String? _message;
 
   String t(String value) => widget.text(value);
 
-  void _chooseAlly(_DramaAlly ally) {
+  void _chooseAlly(_Ally ally) {
     setState(() {
       _ally = ally;
-      _episode = 1;
+      _stage = 1;
       _message = null;
     });
   }
 
-  void _collectClue(_DramaClue clue) {
+  void _collect(_Clue clue) {
     setState(() {
       _clues.add(clue);
       _message = clue.discovery;
     });
   }
 
-  void _continueFromClues() {
+  void _continueEvidence() {
     if (_clues.isEmpty) {
-      setState(() => _message = '先在场景里找到至少一条证据。');
+      setState(() => _message = '先找到至少一条证据。');
       return;
     }
     setState(() {
-      _episode = 2;
+      _stage = 2;
       _message = null;
     });
   }
 
-  void _decide(_DramaDecision decision) {
+  void _chooseDecision(_Decision decision) {
     setState(() {
       _decision = decision;
-      _episode = 3;
+      _stage = 3;
       _message = null;
     });
   }
 
   void _restart() {
     setState(() {
-      _episode = 0;
+      _stage = 0;
       _ally = null;
       _clues.clear();
       _decision = null;
@@ -69,42 +69,57 @@ class _InteractiveDramaPrototypeState
     });
   }
 
-  _DramaEnding get _ending {
+  _Ending get _ending {
+    final ally = _ally!;
     final decision = _decision!;
-    final hasBoth = _clues.length == _DramaClue.values.length;
-    if (decision == _DramaDecision.spreadRumor) {
-      return const _DramaEnding(
-        title: '结局：传说扩散',
-        subtitle: '一句未经核对的话传遍了湖岸。故事热闹了，真相却更模糊。',
-        seal: '轻信',
+    final hasBoth = _clues.length == _Clue.values.length;
+
+    if (decision == _Decision.rumor) {
+      return _Ending(
+        title: ally == _Ally.guide ? '结局：旧闻成真' : '结局：画坛轰动',
+        subtitle: ally == _Ally.guide
+            ? '你和福伯把老故事讲了出去。听众越来越多，证据却被热闹淹没。'
+            : '你和阿澄让画稿迅速走红。它得到关注，也引来更多真假难辨的说法。',
+        seal: '传闻',
         icon: Icons.campaign_rounded,
-        accent: Color(0xFFB44A3C),
+        accent: const Color(0xFFB44A3C),
       );
     }
-    if (decision == _DramaDecision.verify && hasBoth) {
-      return const _DramaEnding(
-        title: '结局：真相守护者',
-        subtitle: '纸张水印与旧印章互相证明，这页画稿来自后来的临摹，并非宫廷原作。',
-        seal: '求证',
-        icon: Icons.verified_rounded,
-        accent: Color(0xFF2F7566),
+
+    if (decision == _Decision.verify && hasBoth) {
+      return _Ending(
+        title: ally == _Ally.guide ? '结局：旧园证言' : '结局：真相守护者',
+        subtitle: ally == _Ally.guide
+            ? '福伯用园林记忆解释印章来源，你用水印补上年代证据，口述与实物终于互相证明。'
+            : '阿澄比对材料和画法，你用印章补上出处证据，确认它是后来的临摹作品。',
+        seal: ally == _Ally.guide ? '见证' : '求证',
+        icon: ally == _Ally.guide
+            ? Icons.record_voice_over_rounded
+            : Icons.verified_rounded,
+        accent: const Color(0xFF2F7566),
       );
     }
-    if (decision == _DramaDecision.keepQuestion) {
-      return const _DramaEnding(
-        title: '结局：未完手卷',
-        subtitle: '你没有急着给出答案，而是把疑问写进游记，等待下一座城市出现新证据。',
+
+    if (decision == _Decision.question) {
+      return _Ending(
+        title: ally == _Ally.guide ? '结局：福伯的约定' : '结局：未完手卷',
+        subtitle: ally == _Ally.guide
+            ? '你和福伯把疑问写进园志，约定找到更多旧照片后再继续讲述。'
+            : '你和阿澄保留画稿，让下一座城市的纸张专家继续调查。',
         seal: '存疑',
         icon: Icons.menu_book_rounded,
-        accent: Color(0xFF6652A5),
+        accent: const Color(0xFF6652A5),
       );
     }
-    return const _DramaEnding(
-      title: '结局：谨慎的判断',
-      subtitle: '你根据现有证据作出判断，同时明确告诉众人：目前仍缺少另一条证据。',
+
+    return _Ending(
+      title: ally == _Ally.guide ? '结局：谨慎的口述' : '结局：谨慎的鉴定',
+      subtitle: ally == _Ally.guide
+          ? '福伯讲出记忆，你明确标注目前只有一条证据，不把回忆当成最终结论。'
+          : '阿澄提出材料判断，你明确标注证据仍不完整，等待进一步核对。',
       seal: '谨慎',
       icon: Icons.balance_rounded,
-      accent: Color(0xFFD09A3E),
+      accent: const Color(0xFFD09A3E),
     );
   }
 
@@ -119,122 +134,142 @@ class _InteractiveDramaPrototypeState
         ),
       ),
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
-        child: switch (_episode) {
-          0 => _buildOpening(),
-          1 => _buildInvestigation(),
-          2 => _buildDecision(),
-          _ => _buildEnding(),
+        duration: const Duration(milliseconds: 220),
+        child: switch (_stage) {
+          0 => _openingView(),
+          1 => _evidenceView(),
+          2 => _decisionView(),
+          _ => _endingView(),
         },
       ),
     );
   }
 
-  Widget _buildOpening() {
+  Widget _openingView() {
     return ListView(
       key: const ValueKey('drama-opening'),
-      padding: const EdgeInsets.fromLTRB(15, 16, 15, 28),
+      padding: const EdgeInsets.all(16),
       children: [
-        _EpisodeHeader(
-          episode: '第一幕',
+        _DramaHeader(
+          episode: t('第一幕'),
           title: t('湖边出现一页神秘画稿'),
-          subtitle: t('有人说它是宫廷原作，也有人认为只是后来临摹。你必须选择先跟谁行动。'),
+          subtitle: t('有人说它是宫廷原作，也有人认为只是后来的临摹。先选择同行者。'),
         ),
         const SizedBox(height: 13),
         Container(
-          height: 240,
+          height: 225,
           decoration: BoxDecoration(
             color: const Color(0xFFEAD8AE),
             borderRadius: BorderRadius.circular(21),
-            border: Border.all(color: const Color(0xFFCDA660)),
           ),
-          clipBehavior: Clip.antiAlias,
-          child: const CustomPaint(painter: _DramaOpeningPainter()),
+          child: const CustomPaint(painter: _OpeningPainter()),
         ),
         const SizedBox(height: 13),
-        _AllyCard(
+        _DramaChoiceCard(
           key: const ValueKey('drama-ally-guide'),
-          name: t('守园人 福伯'),
-          quote: t('“我在园里四十年，这印章的样子我见过。”'),
-          detail: t('擅长旧物、故事与园林记忆'),
+          title: t('守园人 福伯'),
+          subtitle: t('熟悉旧物、口述故事和园林记忆。'),
+          quote: t('“这枚印章，我年轻时似乎见过。”'),
           icon: Icons.park_rounded,
           accent: const Color(0xFF8C5B35),
-          onTap: () => _chooseAlly(_DramaAlly.guide),
+          onTap: () => _chooseAlly(_Ally.guide),
         ),
         const SizedBox(height: 9),
-        _AllyCard(
+        _DramaChoiceCard(
           key: const ValueKey('drama-ally-painter'),
-          name: t('青年画师 阿澄'),
-          quote: t('“先别相信传说。纸张本身会留下年代的痕迹。”'),
-          detail: t('擅长材料、画法与细节观察'),
+          title: t('青年画师 阿澄'),
+          subtitle: t('熟悉纸张、画法和材料细节。'),
+          quote: t('“先看纸张，材料比传说更难伪装。”'),
           icon: Icons.brush_rounded,
           accent: const Color(0xFF6652A5),
-          onTap: () => _chooseAlly(_DramaAlly.painter),
+          onTap: () => _chooseAlly(_Ally.painter),
         ),
       ],
     );
   }
 
-  Widget _buildInvestigation() {
+  Widget _evidenceView() {
     final ally = _ally!;
     return ListView(
       key: const ValueKey('drama-investigation'),
-      padding: const EdgeInsets.fromLTRB(15, 15, 15, 28),
+      padding: const EdgeInsets.all(16),
       children: [
-        _EpisodeHeader(
-          episode: '第二幕',
+        _DramaHeader(
+          episode: t('第二幕'),
           title: t('搜查画稿'),
-          subtitle: t('${ally.displayName}陪你调查。点击场景中的可疑位置，证据会进入随身卷袋。'),
+          subtitle: t('${ally.name}陪你调查。点击场景中的可疑位置，把证据放进卷袋。'),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 13),
         Container(
-          height: 350,
+          height: 330,
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: const Color(0xFFEAD8AE),
             borderRadius: BorderRadius.circular(21),
-            border: Border.all(color: const Color(0xFFCDA660)),
           ),
-          clipBehavior: Clip.antiAlias,
           child: Stack(
             children: [
               const Positioned.fill(
-                child: CustomPaint(painter: _DramaEvidencePainter()),
+                child: CustomPaint(painter: _EvidencePainter()),
               ),
               Positioned(
-                left: 25,
+                left: 22,
                 top: 48,
-                child: _EvidenceHotspot(
+                child: _EvidenceButton(
                   key: const ValueKey('drama-clue-seal'),
                   label: t('朱砂印章'),
-                  collected: _clues.contains(_DramaClue.seal),
-                  icon: Icons.approval_rounded,
-                  onTap: () => _collectClue(_DramaClue.seal),
+                  collected: _clues.contains(_Clue.seal),
+                  onTap: () => _collect(_Clue.seal),
                 ),
               ),
               Positioned(
-                right: 24,
-                bottom: 46,
-                child: _EvidenceHotspot(
+                right: 22,
+                bottom: 45,
+                child: _EvidenceButton(
                   key: const ValueKey('drama-clue-watermark'),
                   label: t('纸张水印'),
-                  collected: _clues.contains(_DramaClue.watermark),
-                  icon: Icons.water_drop_rounded,
-                  onTap: () => _collectClue(_DramaClue.watermark),
+                  collected: _clues.contains(_Clue.watermark),
+                  onTap: () => _collect(_Clue.watermark),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 10),
-        _ClueBag(clues: _clues, text: widget.text),
-        _DramaMessage(message: _message == null ? null : t(_message!)),
         const SizedBox(height: 9),
+        Container(
+          padding: const EdgeInsets.all(11),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .06),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            children: [
+              Text(
+                t('卷袋：'),
+                style: const TextStyle(
+                  color: Color(0xFFFFD98B),
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              if (_clues.isEmpty)
+                Text(
+                  t('还没有证据'),
+                  style: const TextStyle(color: Colors.white60),
+                ),
+              for (final clue in _clues)
+                Chip(label: Text(t(clue.label))),
+            ],
+          ),
+        ),
+        _DramaHint(message: _message == null ? null : t(_message!)),
+        const SizedBox(height: 8),
         FilledButton.icon(
           key: const ValueKey('drama-continue-evidence'),
-          onPressed: _continueFromClues,
+          onPressed: _continueEvidence,
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFF6652A5),
-            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 13),
           ),
           icon: const Icon(Icons.arrow_forward_rounded),
@@ -247,98 +282,74 @@ class _InteractiveDramaPrototypeState
     );
   }
 
-  Widget _buildDecision() {
+  Widget _decisionView() {
     final ally = _ally!;
     return ListView(
       key: const ValueKey('drama-decision'),
-      padding: const EdgeInsets.fromLTRB(15, 15, 15, 28),
+      padding: const EdgeInsets.all(16),
       children: [
-        _EpisodeHeader(
-          episode: '第三幕',
+        _DramaHeader(
+          episode: t('第三幕'),
           title: t('众人等待你的判断'),
-          subtitle: t('你的选择会改变这页画稿以后被怎样讲述。没有系统替你决定。'),
+          subtitle: t('最后的决定会和同行者、证据一起改变结局。'),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 13),
         Container(
-          padding: const EdgeInsets.all(15),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: const Color(0xFFEAD8AE),
-            borderRadius: BorderRadius.circular(19),
+            borderRadius: BorderRadius.circular(18),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: ally.accent,
-                    child: Icon(ally.icon, color: Colors.white),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      t(ally.decisionQuote),
-                      style: const TextStyle(
-                        color: Color(0xFF3F3026),
-                        fontSize: 13,
-                        height: 1.4,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const Divider(height: 24),
-              Text(
-                t('你掌握的证据：${_clues.map((clue) => clue.label).join('、')}'),
-                style: const TextStyle(
-                  color: Color(0xFF70523B),
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
+          child: Text(
+            t(ally.quote),
+            style: const TextStyle(
+              color: Color(0xFF423126),
+              height: 1.4,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
         const SizedBox(height: 12),
-        _DecisionCard(
+        _DramaChoiceCard(
           key: const ValueKey('drama-decision-verify'),
           title: t('先核对，再公开'),
-          subtitle: t('让两条证据互相证明，再给出结论。'),
+          subtitle: t('让现有证据互相证明，再给出判断。'),
+          quote: t('“故事可以动人，但结论必须站得住。”'),
           icon: Icons.fact_check_rounded,
           accent: const Color(0xFF2F7566),
-          onTap: () => _decide(_DramaDecision.verify),
+          onTap: () => _chooseDecision(_Decision.verify),
         ),
         const SizedBox(height: 9),
-        _DecisionCard(
+        _DramaChoiceCard(
           key: const ValueKey('drama-decision-question'),
           title: t('保留疑问，继续追查'),
-          subtitle: t('把不确定写进游记，让后续旅程继续寻找答案。'),
+          subtitle: t('把不确定写进游记，让未来旅程继续寻找答案。'),
+          quote: t('“不知道，也可以是诚实的答案。”'),
           icon: Icons.help_outline_rounded,
           accent: const Color(0xFF6652A5),
-          onTap: () => _decide(_DramaDecision.keepQuestion),
+          onTap: () => _chooseDecision(_Decision.question),
         ),
         const SizedBox(height: 9),
-        _DecisionCard(
+        _DramaChoiceCard(
           key: const ValueKey('drama-decision-rumor'),
           title: t('先把宫廷传说讲出去'),
           subtitle: t('故事最吸引人，但证据可能还不够。'),
+          quote: t('“先让大家听见，真假以后再说。”'),
           icon: Icons.campaign_rounded,
           accent: const Color(0xFFB44A3C),
-          onTap: () => _decide(_DramaDecision.spreadRumor),
+          onTap: () => _chooseDecision(_Decision.rumor),
         ),
       ],
     );
   }
 
-  Widget _buildEnding() {
+  Widget _endingView() {
     final ending = _ending;
     return ListView(
       key: const ValueKey('drama-ending'),
-      padding: const EdgeInsets.fromLTRB(15, 23, 15, 30),
+      padding: const EdgeInsets.all(18),
       children: [
         Icon(ending.icon, size: 66, color: ending.accent),
-        const SizedBox(height: 8),
         Text(
           t(ending.title),
           textAlign: TextAlign.center,
@@ -348,20 +359,19 @@ class _InteractiveDramaPrototypeState
             fontWeight: FontWeight.w900,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 7),
         Text(
           t(ending.subtitle),
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.white70,
-            fontSize: 12,
             height: 1.45,
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 15),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: const Color(0xFFEAD8AE),
             borderRadius: BorderRadius.circular(21),
@@ -374,7 +384,6 @@ class _InteractiveDramaPrototypeState
                 height: 82,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: ending.accent.withValues(alpha: .12),
                   border: Border.all(color: ending.accent, width: 4),
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -387,9 +396,9 @@ class _InteractiveDramaPrototypeState
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 11),
               Text(
-                t('同一集故事会因为盟友、证据和最后判断而进入不同结局。'),
+                t('同行者、找到的证据和最后判断，都真实参与了这个结局。'),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Color(0xFF5E4938),
@@ -398,13 +407,12 @@ class _InteractiveDramaPrototypeState
                 ),
               ),
               if (widget.learnedWords.isNotEmpty) ...[
-                const SizedBox(height: 9),
+                const SizedBox(height: 8),
                 Text(
-                  t('你带着 ${widget.learnedWords.length} 个已收藏词进入了这一集。'),
+                  t('本集带入 ${widget.learnedWords.length} 个已收藏词。'),
                   style: const TextStyle(
                     color: Color(0xFF78614D),
                     fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -418,7 +426,6 @@ class _InteractiveDramaPrototypeState
           style: OutlinedButton.styleFrom(
             foregroundColor: const Color(0xFFFFD98B),
             side: const BorderSide(color: Color(0xFF8A73C7)),
-            padding: const EdgeInsets.symmetric(vertical: 12),
           ),
           icon: const Icon(Icons.replay_rounded),
           label: Text(
@@ -431,32 +438,21 @@ class _InteractiveDramaPrototypeState
   }
 }
 
-enum _DramaAlly {
+enum _Ally {
   guide,
   painter;
 
-  String get displayName => switch (this) {
+  String get name => switch (this) {
         guide => '福伯',
         painter => '阿澄',
       };
-
-  IconData get icon => switch (this) {
-        guide => Icons.park_rounded,
-        painter => Icons.brush_rounded,
-      };
-
-  Color get accent => switch (this) {
-        guide => const Color(0xFF8C5B35),
-        painter => const Color(0xFF6652A5),
-      };
-
-  String get decisionQuote => switch (this) {
-        guide => '福伯说：“老故事值得尊重，但我也想知道证据究竟怎么说。”',
-        painter => '阿澄说：“画法可以模仿，材料年代却很难说谎。”',
+  String get quote => switch (this) {
+        guide => '福伯：“老故事值得尊重，但我也想知道证据怎么说。”',
+        painter => '阿澄：“画法可以模仿，材料年代却很难说谎。”',
       };
 }
 
-enum _DramaClue {
+enum _Clue {
   seal,
   watermark;
 
@@ -464,22 +460,16 @@ enum _DramaClue {
         seal => '朱砂印章',
         watermark => '纸张水印',
       };
-
   String get discovery => switch (this) {
-        seal => '印章的字形与宫廷旧印不同，更像后人仿刻。',
-        watermark => '迎光能看到近代纸厂水印，年代比传说晚得多。',
-      };
-
-  IconData get icon => switch (this) {
-        seal => Icons.approval_rounded,
-        watermark => Icons.water_drop_rounded,
+        seal => '印章字形与宫廷旧印不同，更像后人仿刻。',
+        watermark => '迎光能看到近代纸厂水印，年代比传说晚。',
       };
 }
 
-enum _DramaDecision { verify, keepQuestion, spreadRumor }
+enum _Decision { verify, question, rumor }
 
-class _DramaEnding {
-  const _DramaEnding({
+class _Ending {
+  const _Ending({
     required this.title,
     required this.subtitle,
     required this.seal,
@@ -494,8 +484,8 @@ class _DramaEnding {
   final Color accent;
 }
 
-class _EpisodeHeader extends StatelessWidget {
-  const _EpisodeHeader({
+class _DramaHeader extends StatelessWidget {
+  const _DramaHeader({
     required this.episode,
     required this.title,
     required this.subtitle,
@@ -525,7 +515,6 @@ class _EpisodeHeader extends StatelessWidget {
               fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(height: 3),
           Text(
             title,
             style: const TextStyle(
@@ -534,7 +523,6 @@ class _EpisodeHeader extends StatelessWidget {
               fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(height: 4),
           Text(
             subtitle,
             style: const TextStyle(
@@ -550,20 +538,20 @@ class _EpisodeHeader extends StatelessWidget {
   }
 }
 
-class _AllyCard extends StatelessWidget {
-  const _AllyCard({
+class _DramaChoiceCard extends StatelessWidget {
+  const _DramaChoiceCard({
     super.key,
-    required this.name,
+    required this.title,
+    required this.subtitle,
     required this.quote,
-    required this.detail,
     required this.icon,
     required this.accent,
     required this.onTap,
   });
 
-  final String name;
+  final String title;
+  final String subtitle;
   final String quote;
-  final String detail;
   final IconData icon;
   final Color accent;
   final VoidCallback onTap;
@@ -580,41 +568,38 @@ class _AllyCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: const Color(0xFF28211F),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: accent.withValues(alpha: .7)),
+            border: Border.all(color: accent.withValues(alpha: .72)),
           ),
           child: Row(
             children: [
               CircleAvatar(
-                radius: 27,
                 backgroundColor: accent,
                 child: Icon(icon, color: Colors.white),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 11),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      title,
                       style: const TextStyle(
                         color: Color(0xFFFFE8B8),
                         fontSize: 15,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 10.5,
+                        height: 1.3,
+                      ),
+                    ),
                     const SizedBox(height: 3),
                     Text(
                       quote,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 11,
-                        height: 1.35,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      detail,
                       style: TextStyle(
                         color: accent,
                         fontSize: 10,
@@ -636,18 +621,16 @@ class _AllyCard extends StatelessWidget {
   }
 }
 
-class _EvidenceHotspot extends StatelessWidget {
-  const _EvidenceHotspot({
+class _EvidenceButton extends StatelessWidget {
+  const _EvidenceButton({
     super.key,
     required this.label,
     required this.collected,
-    required this.icon,
     required this.onTap,
   });
 
   final String label;
   final bool collected;
-  final IconData icon;
   final VoidCallback onTap;
 
   @override
@@ -666,24 +649,13 @@ class _EvidenceHotspot extends StatelessWidget {
             borderRadius: BorderRadius.circular(99),
             border: Border.all(color: const Color(0xFFFFD98B)),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                collected ? Icons.check_rounded : icon,
-                size: 17,
-                color: const Color(0xFFFFD98B),
-              ),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ],
+          child: Text(
+            collected ? '✓ $label' : label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
       ),
@@ -691,280 +663,96 @@ class _EvidenceHotspot extends StatelessWidget {
   }
 }
 
-class _ClueBag extends StatelessWidget {
-  const _ClueBag({required this.clues, required this.text});
-
-  final Set<_DramaClue> clues;
-  final String Function(String) text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .06),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.white12),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.inventory_2_rounded,
-            color: Color(0xFFFFD98B),
-          ),
-          const SizedBox(width: 9),
-          Expanded(
-            child: clues.isEmpty
-                ? Text(
-                    text('随身卷袋还是空的'),
-                    style: const TextStyle(
-                      color: Colors.white60,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  )
-                : Wrap(
-                    spacing: 7,
-                    runSpacing: 6,
-                    children: [
-                      for (final clue in clues)
-                        Chip(
-                          avatar: Icon(clue.icon, size: 16),
-                          label: Text(
-                            text(clue.label),
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                        ),
-                    ],
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DecisionCard extends StatelessWidget {
-  const _DecisionCard({
-    super.key,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.accent,
-    required this.onTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color accent;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(17),
-        child: Ink(
-          padding: const EdgeInsets.all(13),
-          decoration: BoxDecoration(
-            color: const Color(0xFF29221F),
-            borderRadius: BorderRadius.circular(17),
-            border: Border.all(color: accent.withValues(alpha: .75)),
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: accent.withValues(alpha: .28),
-                child: Icon(icon, color: accent),
-              ),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: Color(0xFFFFE8B8),
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        color: Colors.white60,
-                        fontSize: 10.5,
-                        height: 1.35,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.arrow_forward_rounded,
-                color: Color(0xFFFFD98B),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DramaMessage extends StatelessWidget {
-  const _DramaMessage({required this.message});
+class _DramaHint extends StatelessWidget {
+  const _DramaHint({required this.message});
 
   final String? message;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 180),
+      duration: const Duration(milliseconds: 160),
       child: message == null
           ? const SizedBox(height: 5)
           : Container(
               key: ValueKey<String>(message!),
               margin: const EdgeInsets.only(top: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: const Color(0xFF4A3B66),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.search_rounded,
-                    color: Color(0xFFC6B3F3),
-                    size: 18,
-                  ),
-                  const SizedBox(width: 7),
-                  Expanded(
-                    child: Text(
-                      message!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        height: 1.35,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
+              child: Text(
+                message!,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
     );
   }
 }
 
-class _DramaOpeningPainter extends CustomPainter {
-  const _DramaOpeningPainter();
+class _OpeningPainter extends CustomPainter {
+  const _OpeningPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFEAD8AE));
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height * .62),
-      Paint()..color = const Color(0xFFD4DDD1),
-    );
-    final mountains = Path()
-      ..moveTo(0, size.height * .6)
-      ..lineTo(size.width * .2, size.height * .3)
-      ..lineTo(size.width * .38, size.height * .57)
-      ..lineTo(size.width * .55, size.height * .26)
-      ..lineTo(size.width * .74, size.height * .58)
-      ..lineTo(size.width, size.height * .4)
-      ..lineTo(size.width, size.height * .68)
-      ..lineTo(0, size.height * .68)
-      ..close();
-    canvas.drawPath(mountains, Paint()..color = const Color(0xFF667A68));
+    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFD7DDD0));
     canvas.drawRect(
       Rect.fromLTWH(0, size.height * .62, size.width, size.height * .38),
-      Paint()..color = const Color(0xFF90ADA7),
+      Paint()..color = const Color(0xFF91B0A8),
     );
-    final paperRect = Rect.fromCenter(
-      center: Offset(size.width * .52, size.height * .58),
+    final paper = Rect.fromCenter(
+      center: Offset(size.width * .52, size.height * .55),
       width: size.width * .42,
-      height: size.height * .52,
+      height: size.height * .58,
     );
-    canvas.save();
-    canvas.translate(paperRect.center.dx, paperRect.center.dy);
-    canvas.rotate(-.08);
-    canvas.translate(-paperRect.center.dx, -paperRect.center.dy);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(paperRect, const Radius.circular(5)),
+      RRect.fromRectAndRadius(paper, const Radius.circular(6)),
       Paint()..color = const Color(0xFFFFF3D0),
     );
-    canvas.drawPath(
-      Path()
-        ..moveTo(paperRect.left + 20, paperRect.bottom - 25)
-        ..lineTo(paperRect.left + 65, paperRect.top + 35)
-        ..lineTo(paperRect.center.dx, paperRect.bottom - 32)
-        ..lineTo(paperRect.right - 35, paperRect.top + 45),
-      Paint()
-        ..color = const Color(0xFF6A756A)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 5,
-    );
     canvas.drawCircle(
-      Offset(paperRect.right - 28, paperRect.bottom - 28),
+      Offset(paper.right - 25, paper.bottom - 25),
       15,
       Paint()..color = const Color(0xFFB7493D),
     );
-    canvas.restore();
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _DramaEvidencePainter extends CustomPainter {
-  const _DramaEvidencePainter();
+class _EvidencePainter extends CustomPainter {
+  const _EvidencePainter();
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFEAD8AE));
-    final desk = Rect.fromLTWH(0, size.height * .64, size.width, size.height * .36);
-    canvas.drawRect(desk, Paint()..color = const Color(0xFF77513A));
-    final paperRect = Rect.fromLTWH(
+    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFF77513A));
+    final paper = Rect.fromLTWH(
       size.width * .12,
-      size.height * .12,
-      size.width * .74,
-      size.height * .68,
+      size.height * .11,
+      size.width * .76,
+      size.height * .72,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(paperRect, const Radius.circular(8)),
+      RRect.fromRectAndRadius(paper, const Radius.circular(8)),
       Paint()..color = const Color(0xFFFFF2CF),
     );
-    canvas.drawPath(
-      Path()
-        ..moveTo(paperRect.left + 24, paperRect.bottom - 35)
-        ..lineTo(paperRect.left + 90, paperRect.top + 55)
-        ..lineTo(paperRect.center.dx, paperRect.bottom - 45)
-        ..lineTo(paperRect.right - 45, paperRect.top + 65),
-      Paint()
-        ..color = const Color(0xFF667469)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 7,
-    );
     canvas.drawCircle(
-      Offset(paperRect.left + 55, paperRect.top + 60),
-      23,
-      Paint()..color = const Color(0xFFB6483D).withValues(alpha: .86),
+      Offset(paper.left + 52, paper.top + 52),
+      22,
+      Paint()..color = const Color(0xFFB6483D),
     );
     for (var index = 0; index < 4; index++) {
-      final y = paperRect.top + 105 + index * 28;
+      final y = paper.top + 115 + index * 30;
       canvas.drawLine(
-        Offset(paperRect.left + 35, y),
-        Offset(paperRect.right - 35, y),
+        Offset(paper.left + 36, y),
+        Offset(paper.right - 36, y),
         Paint()
-          ..color = const Color(0xFF8FA9A4).withValues(alpha: .5)
+          ..color = const Color(0xFF91AAA5).withValues(alpha: .55)
           ..strokeWidth = 2,
       );
     }
