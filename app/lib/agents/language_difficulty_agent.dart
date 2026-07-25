@@ -58,7 +58,8 @@ class LanguageDifficultyAgent {
     final adjustedIndex = (baseBand.index +
             performanceOffset +
             profile.preferredChallengeOffset)
-        .clamp(0, PhoenixReadingBand.values.length - 1);
+        .clamp(0, PhoenixReadingBand.values.length - 1)
+        .toInt();
     return _planFor(PhoenixReadingBand.values[adjustedIndex]);
   }
 
