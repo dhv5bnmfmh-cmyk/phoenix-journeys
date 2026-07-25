@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+from pathlib import Path
+
+path = Path('app/lib/screens/journey_screen.dart')
+text = path.read_text(encoding='utf-8')
+
+if "summer_palace_lore_battle.dart" not in text:
+    text = text.replace(
+        "import '../widgets/phoenix_agent_cards.dart';\n",
+        "import '../widgets/phoenix_agent_cards.dart';\n"
+        "import '../widgets/summer_palace_lore_battle.dart';\n",
+        1,
+    )
+
+if "bool _loreBattleCompleted = false;" not in text:
+    text = text.replace(
+        "  bool _languageProfileLoaded = false;\n",
+        "  bool _languageProfileLoaded = false;\n"
+        "  bool _loreBattleCompleted = false;\n",
+        1,
+    )
+
+restart_marker = "    _writingLoading = false;\n    _discoveryAutoStarted = false;\n"
+if "    _loreBattleCompleted = false;\n" not in text:
+    text = text.replace(
+        restart_marker,
+        "    _writingLoading = false;\n"
+        "    _discoveryAutoStarted = false;\n"
+        "    _loreBattleCompleted = false;\n",
+        1,
+    )
+
+if "List<String> get _journeyStepLabels" not in text:
+    marker = "  JourneyBackgroundPage get _backgroundPageType => switch (step) {\n"
+    replacement = (
+        "  List<String> get _journeyStepLabels =>\n"
+        "      _experience.id == 'beijing-summer-palace'\n"
+        "          ? const ['故事', '单词', '发现', '挑战', '表达', '回忆', '完成']\n"
+        "          : AppState.journeyStepLabels;\n\n"
+        + marker
+    )
+    text = text.replace(marker, replacement, 1)
+
+text = text.replace(
+    "      _wonderPage(),\n",
+    "      _experience.id == 'beijing-summer-palace'\n"
+    "          ? _loreBattlePage()\n"
+    "          : _wonderPage(),\n",
+    1,
+)
+
+text = text.replace(
+    "                  labels: AppState.journeyStepLabels,\n",
+    "                  labels: _journeyStepLabels,\n",
+    1,
+)
+
+if "Widget _loreBattlePage()" not in text:
+    marker = "  Widget _wonderPage() {\n"
+    method = """  Widget _loreBattlePage() {
+    return _page(
+      title: '挑战',
+      buttonText: _loreBattleCompleted ? '继续' : '完成挑战后继续',
+      buttonIcon: _loreBattleCompleted
+          ? Icons.arrow_forward_rounded
+          : Icons.lock_outline_rounded,
+      primaryEnabled: _loreBattleCompleted,
+      child: SummerPalaceLoreBattle(
+        completed: _loreBattleCompleted,
+        onCompleted: () {
+          if (!mounted || _loreBattleCompleted) return;
+          setState(() => _loreBattleCompleted = true);
+        },
+      ),
+    );
+  }
+
+"""
+    text = text.replace(marker, method + marker, 1)
+
+path.write_text(text, encoding='utf-8')
