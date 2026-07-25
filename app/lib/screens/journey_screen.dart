@@ -120,6 +120,8 @@ class _JourneyScreenState extends State<JourneyScreen>
 
     _appState = context.read<AppState>();
     step = _appState.beijingJourneyStep;
+    _loreBattleCompleted = _experience.id == 'beijing-summer-palace' &&
+        _appState.beijingJourneyFurthestStep > 3;
     wonderController.text = _appState.wonderDraft;
     expressController.text = _appState.expressDraft;
     memoryController.text = _appState.memoryDraft;
@@ -170,8 +172,14 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Future<void> _persistProgress({int? overrideStep}) {
+    final persistedStep = overrideStep ??
+        (_experience.id == 'beijing-summer-palace' &&
+                _loreBattleCompleted &&
+                step == 3
+            ? 4
+            : step);
     return _appState.saveJourneyProgress(
-      step: overrideStep ?? step,
+      step: persistedStep,
       wonder: wonderController.text,
       express: expressController.text,
       memory: memoryController.text,
@@ -1621,6 +1629,7 @@ Future<void> _showDifficultyWelcome() async {
         onCompleted: () {
           if (!mounted || _loreBattleCompleted) return;
           setState(() => _loreBattleCompleted = true);
+          unawaited(_persistProgress(overrideStep: 4));
         },
       ),
     );
