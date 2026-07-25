@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
+# One-shot replay-state patch for the isolated culture battle prototype.
 path = Path('app/lib/widgets/summer_palace_lore_battle.dart')
 text = path.read_text(encoding='utf-8')
 
