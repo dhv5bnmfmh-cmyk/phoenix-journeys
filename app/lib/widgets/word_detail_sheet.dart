@@ -12,12 +12,12 @@ import '../theme/phoenix_theme.dart';
 import 'narration_speed_stepper.dart';
 import 'word_mark.dart';
 
-const _popupInk = Color(0xFF2B1B0E);
-const _popupMuted = Color(0xFF68533C);
-const _popupCream = Color(0xFFFFF4D8);
-const _popupBlue = Color(0xFFEAF3FF);
-const _popupGreen = Color(0xFFEAF6E8);
-const _popupGoldLine = Color(0xFFE1B85D);
+const _ink = Color(0xFF2B1B0E);
+const _muted = Color(0xFF68533C);
+const _cream = Color(0xFFFFF4D8);
+const _blue = Color(0xFFEAF3FF);
+const _green = Color(0xFFEAF6E8);
+const _goldLine = Color(0xFFE1B85D);
 
 Future<void> showWordDetail(
   BuildContext context,
@@ -31,29 +31,20 @@ Future<void> showWordDetail(
   final studyEntries = entries == null || entries.isEmpty
       ? <WordEntry>[entry]
       : List<WordEntry>.unmodifiable(entries);
-  final matchingIndex = studyEntries.indexWhere(
-    (candidate) => candidate.word == entry.word,
-  );
-  final requestedIndex = initialIndex ?? matchingIndex;
+  final found = studyEntries.indexWhere((item) => item.word == entry.word);
+  final requestedIndex = initialIndex ?? found;
   final safeIndex = requestedIndex < 0
       ? 0
       : requestedIndex.clamp(0, studyEntries.length - 1);
-  final speedController = narrationController ?? NarrationController();
+  final controller = narrationController ?? NarrationController();
   final appState = context.read<AppState>();
 
-  Future<bool> speakWithController(WordEntry currentEntry) {
-    return speedController.speakWord(
-      appState.displayText(currentEntry.word),
+  Future<bool> speakLocally(WordEntry current) {
+    return controller.speakWord(
+      appState.displayText(current.word),
       languageCode: appState.isTraditional ? 'zh-TW' : 'zh-CN',
     );
   }
-
-  final effectiveOnSpeak = narrationController == null
-      ? () => speakWithController(entry)
-      : onSpeak;
-  final effectiveOnSpeakEntry = narrationController == null
-      ? speakWithController
-      : onSpeakEntry;
 
   return showModalBottomSheet<void>(
     context: context,
@@ -62,18 +53,35 @@ Future<void> showWordDetail(
     showDragHandle: true,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (sheetContext) => FractionallySizedBox(
-      heightFactor: .62,
-      child: _WordDetailSheet(
-        narrationController: speedController,
-        entries: studyEntries,
-        initialIndex: safeIndex,
-        onSpeak: effectiveOnSpeak,
-        onSpeakEntry: effectiveOnSpeakEntry,
-      ),
-    ),
+    builder: (sheetContext) {
+      final size = MediaQuery.sizeOf(sheetContext);
+      final sheetWidth = size.width;
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: size.height * .52),
+        child: ClipRect(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: sheetWidth,
+              child: _WordDetailSheet(
+                narrationController: controller,
+                entries: studyEntries,
+                initialIndex: safeIndex,
+                onSpeak: narrationController == null
+                    ? () => speakLocally(entry)
+                    : onSpeak,
+                onSpeakEntry: narrationController == null
+                    ? speakLocally
+                    : onSpeakEntry,
+              ),
+            ),
+          ),
+        ),
+      );
+    },
   ).whenComplete(() {
-    if (narrationController == null) speedController.dispose();
+    if (narrationController == null) controller.dispose();
   });
 }
 
@@ -122,12 +130,12 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
     if (bundled != null) return bundled;
 
     if (entry.examples.isNotEmpty) {
-      final curated = entry.examples.first;
+      final item = entry.examples.first;
       return PhoenixVocabularyExample(
-        chinese: curated.chinese,
-        pinyin: curated.pinyin,
-        native: curated.nativeText(state.translationLanguage),
-        english: curated.english,
+        chinese: item.chinese,
+        pinyin: item.pinyin,
+        native: item.nativeText(state.translationLanguage),
+        english: item.english,
         usageNote: '来自 Phoenix 已审核并随旅程下载的实际应用例句。',
         isOfflineFallback: true,
         provider: 'phoenix-preloaded-pack',
@@ -138,7 +146,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
     }
 
     final contextData = _findVocabularyContext(state, entry);
-    if (contextData.chinese.trim().isNotEmpty) {
+    if (contextData.chinese.isNotEmpty) {
       return PhoenixVocabularyExample(
         chinese: contextData.chinese,
         pinyin: contextData.pinyin,
@@ -173,7 +181,6 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
       _isSpeaking = true;
       _speechUnavailable = false;
     });
-
     final callback = widget.onSpeakEntry;
     final success = callback == null
         ? await widget.onSpeak()
@@ -189,8 +196,8 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
     if (_isSpeaking || _isFirst) return;
     setState(() {
       _index -= 1;
-      _speechUnavailable = false;
       _example = _resolveDownloadedExample(_entry);
+      _speechUnavailable = false;
     });
     await _speak();
   }
@@ -203,289 +210,23 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
     }
     setState(() {
       _index += 1;
-      _speechUnavailable = false;
       _example = _resolveDownloadedExample(_entry);
+      _speechUnavailable = false;
     });
     await _speak();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final entry = _entry;
-    final isSaved = state.isWordSaved(entry.word);
-    final language = state.translationLanguage;
-    final example = _example.toWordExample(nativeLanguage: language);
-
-    return Container(
-      margin: EdgeInsets.only(
-        bottom: 8 + MediaQuery.viewInsetsOf(context).bottom,
-      ),
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-      decoration: PhoenixTheme.journeySolidPanelDecoration,
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          _Header(
-            entry: entry,
-            currentIndex: _index,
-            total: widget.entries.length,
-            isSpeaking: _isSpeaking,
-            narrationController: widget.narrationController,
-            onSpeak: _speak,
-          ),
-          const SizedBox(height: 7),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(99),
-            child: LinearProgressIndicator(
-              minHeight: 4,
-              value: (_index + 1) / widget.entries.length,
-              color: PhoenixTheme.red,
-              backgroundColor: Colors.white.withValues(alpha: .34),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _DefinitionRow(
-                    label: '中文',
-                    text: entry.simpleChinese,
-                    background: _popupCream,
-                    accent: PhoenixTheme.red,
-                  ),
-                  const SizedBox(height: 5),
-                  _DefinitionRow(
-                    label: 'English',
-                    text: entry.englishDefinition,
-                    background: _popupBlue,
-                    accent: PhoenixTheme.translation,
-                  ),
-                  const SizedBox(height: 5),
-                  _DefinitionRow(
-                    label: entry.nativeLabel(language),
-                    text: entry.nativeDefinition(language),
-                    background: _popupGreen,
-                    accent: const Color(0xFF39734A),
-                  ),
-                  const SizedBox(height: 8),
-                  _DownloadedExampleCard(
-                    example: example,
-                    nativeLabel: entry.nativeLabel(language),
-                    nativeText: example.nativeText(language),
-                    usageNote: _example.usageNote,
-                    qualityReviewed: _example.qualityReviewed,
-                  ),
-                  if (_speechUnavailable) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      state.displayText('当前浏览器没有提供中文语音，请检查静音设置。'),
-                      style: PhoenixTheme.journeyMetaStyle.copyWith(
-                        color: const Color(0xFF5A1E1E),
-                        shadows: const [],
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const ValueKey('save-word-button'),
-                  onPressed: () => state.toggleSavedWord(entry.word),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(40),
-                    foregroundColor: _popupInk,
-                    backgroundColor: Colors.white.withValues(alpha: .78),
-                    side: const BorderSide(color: _popupGoldLine),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  icon: Icon(
-                    isSaved ? Icons.bookmark : Icons.bookmark_add_outlined,
-                    size: 16,
-                  ),
-                  label: Text(
-                    state.displayText(isSaved ? '已收藏' : '收藏单词'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const ValueKey('previous-word-button'),
-                  onPressed: _isSpeaking || _isFirst ? null : _previousWord,
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(40),
-                    foregroundColor: _popupInk,
-                    backgroundColor: Colors.white.withValues(alpha: .78),
-                    side: const BorderSide(color: _popupGoldLine),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  icon: const Icon(Icons.arrow_back, size: 16),
-                  label: Text(
-                    state.displayText('上一个'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: FilledButton.icon(
-                  key: const ValueKey('next-word-button'),
-                  onPressed: _isSpeaking ? null : _nextWord,
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(40),
-                    backgroundColor: PhoenixTheme.red,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  icon: Icon(
-                    _isLast ? Icons.keyboard_arrow_down : Icons.arrow_forward,
-                    size: 16,
-                  ),
-                  label: Text(
-                    state.displayText(_isLast ? '完成' : '下一个'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.entry,
-    required this.currentIndex,
-    required this.total,
-    required this.isSpeaking,
-    required this.narrationController,
-    required this.onSpeak,
-  });
-
-  final WordEntry entry;
-  final int currentIndex;
-  final int total;
-  final bool isSpeaking;
-  final NarrationController narrationController;
-  final Future<void> Function() onSpeak;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _infoLine({
+    required String label,
+    required String text,
+    required Color background,
+    required Color accent,
+    int maxLines = 2,
+  }) {
     final state = context.watch<AppState>();
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(9, 8, 9, 7),
-      decoration: BoxDecoration(
-        color: const Color(0xFF6A3E12).withValues(alpha: .58),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFFE39A)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              WordMark(word: entry.word, size: 30),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  state.displayText(entry.word),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: PhoenixTheme.journeyWordTitleStyle.copyWith(
-                    fontSize: 17,
-                  ),
-                ),
-              ),
-              Text(
-                '${currentIndex + 1} / $total',
-                style: PhoenixTheme.journeyMetaStyle.copyWith(
-                  color: const Color(0xFFFFF2C9),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      entry.pinyin,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: PhoenixTheme.journeyMetaStyle.copyWith(
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      state.displayText(entry.partOfSpeech),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: PhoenixTheme.journeyMetaStyle.copyWith(
-                        color: const Color(0xFFFFE5A5),
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              NarrationSpeedStepper(
-                key: const ValueKey('word-detail-speed-control'),
-                controller: narrationController,
-                compact: true,
-              ),
-              const SizedBox(width: 4),
-              IconButton.filledTonal(
-                tooltip: isSpeaking ? '正在朗读' : '重新朗读',
-                onPressed: isSpeaking ? null : () => unawaited(onSpeak()),
-                visualDensity: VisualDensity.compact,
-                iconSize: 17,
-                icon: Icon(
-                  isSpeaking ? Icons.graphic_eq : Icons.volume_up_outlined,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DefinitionRow extends StatelessWidget {
-  const _DefinitionRow({
-    required this.label,
-    required this.text,
-    required this.background,
-    required this.accent,
-  });
-
-  final String label;
-  final String text;
-  final Color background;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(10),
@@ -512,10 +253,12 @@ class _DefinitionRow extends StatelessWidget {
           Expanded(
             child: Text(
               state.displayText(text),
+              maxLines: maxLines,
+              overflow: TextOverflow.ellipsis,
               style: PhoenixTheme.journeyBodyStyle.copyWith(
-                color: _popupInk,
+                color: _ink,
                 fontSize: 11.5,
-                height: 1.25,
+                height: 1.2,
                 shadows: const [],
               ),
             ),
@@ -524,112 +267,8 @@ class _DefinitionRow extends StatelessWidget {
       ),
     );
   }
-}
 
-class _DownloadedExampleCard extends StatelessWidget {
-  const _DownloadedExampleCard({
-    required this.example,
-    required this.nativeLabel,
-    required this.nativeText,
-    required this.usageNote,
-    required this.qualityReviewed,
-  });
-
-  final WordExample example;
-  final String nativeLabel;
-  final String nativeText;
-  final String usageNote;
-  final bool qualityReviewed;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(9),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: PhoenixTheme.red.withValues(alpha: .45)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x22000000),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  state.displayText('已下载例句'),
-                  style: PhoenixTheme.journeyMetaStyle.copyWith(
-                    color: PhoenixTheme.red,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    shadows: const [],
-                  ),
-                ),
-              ),
-              if (qualityReviewed)
-                Text(
-                  state.displayText('已审核'),
-                  style: PhoenixTheme.journeyMetaStyle.copyWith(
-                    color: const Color(0xFF39734A),
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    shadows: const [],
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            state.displayText(example.chinese),
-            style: PhoenixTheme.journeyBodyStyle.copyWith(
-              color: _popupInk,
-              fontSize: 12.5,
-              height: 1.25,
-              fontWeight: FontWeight.w800,
-              shadows: const [],
-            ),
-          ),
-          const SizedBox(height: 5),
-          _ExampleLine(label: '拼音', text: example.pinyin),
-          const SizedBox(height: 3),
-          _ExampleLine(label: nativeLabel, text: nativeText),
-          const SizedBox(height: 3),
-          _ExampleLine(label: 'English', text: example.english),
-          if (usageNote.trim().isNotEmpty) ...[
-            const SizedBox(height: 5),
-            Text(
-              state.displayText('用法：$usageNote'),
-              style: PhoenixTheme.journeyMetaStyle.copyWith(
-                color: _popupMuted,
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
-                shadows: const [],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ExampleLine extends StatelessWidget {
-  const _ExampleLine({required this.label, required this.text});
-
-  final String label;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _exampleLine(String label, String text) {
     final state = context.watch<AppState>();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -638,6 +277,8 @@ class _ExampleLine extends StatelessWidget {
           width: 68,
           child: Text(
             state.displayText(label),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: PhoenixTheme.journeyMetaStyle.copyWith(
               color: PhoenixTheme.translation,
               fontSize: 9.5,
@@ -650,15 +291,313 @@ class _ExampleLine extends StatelessWidget {
         Expanded(
           child: Text(
             state.displayText(text),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: PhoenixTheme.journeyMetaStyle.copyWith(
-              color: _popupInk,
-              fontSize: 10.5,
-              height: 1.25,
+              color: _ink,
+              fontSize: 10.2,
+              height: 1.2,
               shadows: const [],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buttonLabel(String text) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(text, maxLines: 1, softWrap: false),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final entry = _entry;
+    final language = state.translationLanguage;
+    final isSaved = state.isWordSaved(entry.word);
+    final example = _example.toWordExample(nativeLanguage: language);
+
+    return Container(
+      margin: EdgeInsets.only(
+        bottom: 8 + MediaQuery.viewInsetsOf(context).bottom,
+      ),
+      padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
+      decoration: PhoenixTheme.journeySolidPanelDecoration,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(8, 7, 8, 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF6A3E12).withValues(alpha: .58),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFFFE39A)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    WordMark(word: entry.word, size: 30),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        state.displayText(entry.word),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: PhoenixTheme.journeyWordTitleStyle.copyWith(
+                          fontSize: 17,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${_index + 1} / ${widget.entries.length}',
+                      style: PhoenixTheme.journeyMetaStyle.copyWith(
+                        color: const Color(0xFFFFF2C9),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            entry.pinyin,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: PhoenixTheme.journeyMetaStyle.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            state.displayText(entry.partOfSpeech),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: PhoenixTheme.journeyMetaStyle.copyWith(
+                              color: const Color(0xFFFFE5A5),
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    NarrationSpeedStepper(
+                      key: const ValueKey('word-detail-speed-control'),
+                      controller: widget.narrationController,
+                      compact: true,
+                    ),
+                    const SizedBox(width: 3),
+                    IconButton.filledTonal(
+                      tooltip: _isSpeaking ? '正在朗读' : '重新朗读',
+                      onPressed: _isSpeaking ? null : () => unawaited(_speak()),
+                      visualDensity: VisualDensity.compact,
+                      iconSize: 16,
+                      icon: Icon(
+                        _isSpeaking
+                            ? Icons.graphic_eq
+                            : Icons.volume_up_outlined,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: LinearProgressIndicator(
+              minHeight: 4,
+              value: (_index + 1) / widget.entries.length,
+              color: PhoenixTheme.red,
+              backgroundColor: Colors.white.withValues(alpha: .34),
+            ),
+          ),
+          const SizedBox(height: 7),
+          _infoLine(
+            label: '中文',
+            text: entry.simpleChinese,
+            background: _cream,
+            accent: PhoenixTheme.red,
+          ),
+          const SizedBox(height: 4),
+          _infoLine(
+            label: 'English',
+            text: entry.englishDefinition,
+            background: _blue,
+            accent: PhoenixTheme.translation,
+          ),
+          const SizedBox(height: 4),
+          _infoLine(
+            label: entry.nativeLabel(language),
+            text: entry.nativeDefinition(language),
+            background: _green,
+            accent: const Color(0xFF39734A),
+          ),
+          const SizedBox(height: 7),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: PhoenixTheme.red.withValues(alpha: .45),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        state.displayText('已下载例句'),
+                        style: PhoenixTheme.journeyMetaStyle.copyWith(
+                          color: PhoenixTheme.red,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          shadows: const [],
+                        ),
+                      ),
+                    ),
+                    if (_example.qualityReviewed)
+                      Text(
+                        state.displayText('已审核'),
+                        style: PhoenixTheme.journeyMetaStyle.copyWith(
+                          color: const Color(0xFF39734A),
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          shadows: const [],
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  state.displayText(example.chinese),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: PhoenixTheme.journeyBodyStyle.copyWith(
+                    color: _ink,
+                    fontSize: 12,
+                    height: 1.18,
+                    fontWeight: FontWeight.w800,
+                    shadows: const [],
+                  ),
+                ),
+                const SizedBox(height: 3),
+                _exampleLine('拼音', example.pinyin),
+                const SizedBox(height: 2),
+                _exampleLine(
+                  entry.nativeLabel(language),
+                  example.nativeText(language),
+                ),
+                const SizedBox(height: 2),
+                _exampleLine('English', example.english),
+                if (_example.usageNote.trim().isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    state.displayText('用法：${_example.usageNote}'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: PhoenixTheme.journeyMetaStyle.copyWith(
+                      color: _muted,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w600,
+                      shadows: const [],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (_speechUnavailable) ...[
+            const SizedBox(height: 4),
+            Text(
+              state.displayText('当前浏览器没有提供中文语音，请检查静音设置。'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: PhoenixTheme.journeyMetaStyle.copyWith(
+                color: const Color(0xFF5A1E1E),
+                shadows: const [],
+              ),
+            ),
+          ],
+          const SizedBox(height: 7),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  key: const ValueKey('save-word-button'),
+                  onPressed: () => state.toggleSavedWord(entry.word),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(40),
+                    foregroundColor: _ink,
+                    backgroundColor: Colors.white.withValues(alpha: .78),
+                    side: const BorderSide(color: _goldLine),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  icon: Icon(
+                    isSaved ? Icons.bookmark : Icons.bookmark_add_outlined,
+                    size: 16,
+                  ),
+                  label: _buttonLabel(
+                    state.displayText(isSaved ? '已收藏' : '收藏单词'),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: OutlinedButton.icon(
+                  key: const ValueKey('previous-word-button'),
+                  onPressed: _isSpeaking || _isFirst ? null : _previousWord,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(40),
+                    foregroundColor: _ink,
+                    backgroundColor: Colors.white.withValues(alpha: .78),
+                    side: const BorderSide(color: _goldLine),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  icon: const Icon(Icons.arrow_back, size: 16),
+                  label: _buttonLabel(state.displayText('上一个单词')),
+                ),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: FilledButton.icon(
+                  key: const ValueKey('next-word-button'),
+                  onPressed: _isSpeaking ? null : _nextWord,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(40),
+                    backgroundColor: PhoenixTheme.red,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  icon: Icon(
+                    _isLast ? Icons.keyboard_arrow_down : Icons.arrow_forward,
+                    size: 16,
+                  ),
+                  label: _buttonLabel(
+                    state.displayText(
+                      _isLast ? '完成并收起' : '下一个单词',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
