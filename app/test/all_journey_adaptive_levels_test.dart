@@ -36,8 +36,8 @@ void main() {
   });
 
   test('beginner and advanced content differ on every migrated journey', () {
-    final beginner = agent.hskProfiles.first;
-    final advanced = agent.hskProfiles.firstWhere(
+    final beginner = PhoenixLanguageLevelAgent.hskProfiles.first;
+    final advanced = PhoenixLanguageLevelAgent.hskProfiles.firstWhere(
       (profile) => profile.band == PhoenixReadingBand.advanced,
     );
 
