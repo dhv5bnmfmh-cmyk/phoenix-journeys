@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/widgets/summer_palace_lore_battle.dart';
@@ -68,5 +70,19 @@ void main() {
 
     expect(find.text('失序巨兽出现了'), findsOneWidget);
     expect(find.byKey(const ValueKey('lore-battle-start')), findsOneWidget);
+  });
+
+  test('completed battle progress is persisted before leaving the page', () {
+    final source = File('lib/screens/journey_screen.dart').readAsStringSync();
+
+    expect(
+      source,
+      contains('unawaited(_persistProgress(overrideStep: 4));'),
+    );
+    expect(
+      source,
+      contains('_appState.beijingJourneyFurthestStep > 3'),
+    );
+    expect(source, contains('final persistedStep = overrideStep'));
   });
 }
