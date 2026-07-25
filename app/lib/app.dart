@@ -9,12 +9,16 @@ class PhoenixApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prototype = Uri.base.queryParameters['prototype'];
+    final uri = Uri.base;
+    final prototype = uri.queryParameters['prototype'];
+    final isLearningLab = prototype == 'learning-lab' ||
+        (prototype == null &&
+            uri.host == 'phoenix-journeys-pr-115.7hn5tyrjgh.workers.dev');
     return MaterialApp(
       title: 'Phoenix Journeys',
       debugShowCheckedModeBanner: false,
       theme: PhoenixTheme.light,
-      home: prototype == 'learning-lab'
+      home: isLearningLab
           ? const LearningPlaygroundScreen()
           : const StartupGate(),
     );
