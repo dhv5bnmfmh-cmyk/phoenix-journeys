@@ -179,8 +179,8 @@ class PhoenixLanguageLevelAgent {
       PhoenixReadingBand.mastery => const ReadingGenerationPlan(
           band: PhoenixReadingBand.mastery,
           paragraphCount: 2,
-          minTotalCharacters: 700,
-          maxTotalCharacters: 1000,
+          minTotalCharacters: 600,
+          maxTotalCharacters: 900,
           targetVocabularyCount: 16,
           maximumVocabularyCount: 20,
           cultureWordQuota: 5,
