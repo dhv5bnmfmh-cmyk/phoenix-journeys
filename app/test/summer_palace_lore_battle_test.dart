@@ -59,21 +59,21 @@ void main() {
 
     expect(find.textContaining('因果断层'), findsWidgets);
     await tester.tap(
-      find.byKey(const ValueKey('lore-equipment-story-scroll')),
+      find.byKey(const ValueKey('lore-equipment-story-scroll')).last,
     );
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('lore-cast-combo')));
+    await tester.tap(find.byKey(const ValueKey('lore-cast-combo')).last);
     await _finishEffect(tester);
 
     expect(find.textContaining('空间错位'), findsWidgets);
     await tester.tap(
-      find.byKey(const ValueKey('lore-equipment-word-rune')),
+      find.byKey(const ValueKey('lore-equipment-word-rune')).last,
     );
     await tester.tap(
-      find.byKey(const ValueKey('lore-equipment-discovery-compass')),
+      find.byKey(const ValueKey('lore-equipment-discovery-compass')).last,
     );
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('lore-cast-combo')));
+    await tester.tap(find.byKey(const ValueKey('lore-cast-combo')).last);
     await _finishEffect(tester);
 
     expect(completed, isTrue);
@@ -89,10 +89,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     await tester.tap(
-      find.byKey(const ValueKey('lore-equipment-word-rune')),
+      find.byKey(const ValueKey('lore-equipment-word-rune')).last,
     );
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('lore-cast-combo')));
+    await tester.tap(find.byKey(const ValueKey('lore-cast-combo')).last);
     await _finishEffect(tester);
 
     expect(find.text('失真 1/3'), findsOneWidget);
