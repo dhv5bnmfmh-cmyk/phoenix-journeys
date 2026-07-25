@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'screens/lost_scroll_prototype_screen.dart';
 import 'theme/phoenix_theme.dart';
 import 'widgets/startup_gate.dart';
 
@@ -8,11 +9,14 @@ class PhoenixApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final prototype = Uri.base.queryParameters['prototype'];
     return MaterialApp(
       title: 'Phoenix Journeys',
       debugShowCheckedModeBanner: false,
       theme: PhoenixTheme.light,
-      home: const StartupGate(),
+      home: prototype == 'lost-scroll'
+          ? const LostScrollPrototypeScreen()
+          : const StartupGate(),
     );
   }
 }
