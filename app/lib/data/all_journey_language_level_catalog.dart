@@ -13,7 +13,8 @@ JourneyLevelContent buildAdaptiveLevelForJourney(
 }) {
   final story = _buildStory(experience, profile.band);
   final discoveries = _discoveriesForBand(experience, profile.band);
-  final searchable = '${story.paragraphs.join()}${discoveries.map((item) => item.text).join()}';
+  final searchable =
+      '${story.paragraphs.join()}${discoveries.map((item) => item.text).join()}';
   final wordsInContent = experience.words
       .where((entry) => searchable.contains(entry.word))
       .toList(growable: false);
@@ -76,6 +77,11 @@ _AdaptiveStory _buildStory(
   final lastIndex = paragraphs.length - 1;
   final secondIndex = paragraphs.length > 1 ? 1 : 0;
   final thirdIndex = paragraphs.length > 2 ? 2 : lastIndex;
+  final lastAnnotationIndex = lastIndex.clamp(0, annotations.length - 1).toInt();
+  final secondAnnotationIndex =
+      secondIndex.clamp(0, annotations.length - 1).toInt();
+  final thirdAnnotationIndex =
+      thirdIndex.clamp(0, annotations.length - 1).toInt();
 
   switch (band) {
     case PhoenixReadingBand.beginner:
@@ -92,9 +98,7 @@ _AdaptiveStory _buildStory(
         ],
         annotations: <ReadingAnnotation>[
           _combineAnnotation(
-            annotations: <ReadingAnnotation>[
-              annotations.first,
-            ],
+            annotations: <ReadingAnnotation>[annotations.first],
             discoveries: discoveries.isEmpty
                 ? const <DiscoveryEntry>[]
                 : <DiscoveryEntry>[discoveries.first],
@@ -102,7 +106,7 @@ _AdaptiveStory _buildStory(
           ),
           _combineAnnotation(
             annotations: <ReadingAnnotation>[
-              annotations[lastIndex.clamp(0, annotations.length - 1)],
+              annotations[lastAnnotationIndex],
             ],
             discoveries: discoveries.length > 1
                 ? <DiscoveryEntry>[discoveries[1]]
@@ -121,13 +125,13 @@ _AdaptiveStory _buildStory(
           _combineAnnotation(
             annotations: <ReadingAnnotation>[
               annotations.first,
-              annotations[secondIndex.clamp(0, annotations.length - 1)],
+              annotations[secondAnnotationIndex],
             ],
           ),
           _combineAnnotation(
             annotations: <ReadingAnnotation>[
-              annotations[thirdIndex.clamp(0, annotations.length - 1)],
-              annotations[lastIndex.clamp(0, annotations.length - 1)],
+              annotations[thirdAnnotationIndex],
+              annotations[lastAnnotationIndex],
             ],
           ),
         ],
@@ -301,7 +305,7 @@ String _firstChineseSentence(String value) {
 String _firstLatinSentence(String value) {
   final text = value.trim();
   if (text.isEmpty) return text;
-  final match = RegExp(r'(?<=[.!?])\s').firstMatch(text);
+  final match = RegExp(r'[.!?](?:\s|$)').firstMatch(text);
   return match == null ? text : text.substring(0, match.start + 1).trim();
 }
 
