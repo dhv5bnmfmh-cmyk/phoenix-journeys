@@ -45,4 +45,28 @@ void main() {
     expect(find.text('失序巨兽已被净化'), findsOneWidget);
     expect(find.text('借景之镜'), findsOneWidget);
   });
+
+  testWidgets('a completed battle can be replayed', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 390,
+            height: 720,
+            child: SummerPalaceLoreBattle(
+              completed: true,
+              onCompleted: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('失序巨兽已被净化'), findsOneWidget);
+    await tester.tap(find.text('重新挑战'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('失序巨兽出现了'), findsOneWidget);
+    expect(find.byKey(const ValueKey('lore-battle-start')), findsOneWidget);
+  });
 }
