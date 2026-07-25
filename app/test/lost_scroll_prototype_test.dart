@@ -49,7 +49,10 @@ void main() {
     await _tapChoice(tester, 'repair-building');
 
     expect(find.textContaining('小凰提示'), findsOneWidget);
-    expect(find.textContaining('把远处景物纳入眼前构图'), findsOneWidget);
+    expect(
+      find.text('小凰提示：想想“把远处景物纳入眼前构图”的方法。'),
+      findsOneWidget,
+    );
     expect(find.text('已修复 0 / 3'), findsOneWidget);
     expect(find.textContaining('远山消失了'), findsOneWidget);
   });
