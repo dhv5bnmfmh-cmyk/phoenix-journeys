@@ -61,7 +61,7 @@ void main() {
 
   testWidgets('role adventure creates a route-specific ending', (tester) async {
     await tester.pumpWidget(
-      _frame(RoleAdventurePrototype(text: _identity)),
+      _frame(const RoleAdventurePrototype(text: _identity)),
     );
 
     await _tapVisible(
@@ -94,7 +94,9 @@ void main() {
   testWidgets('daily mix rotates through three different interactions', (
     tester,
   ) async {
-    await tester.pumpWidget(_frame(DailyMixPrototype(text: _identity)));
+    await tester.pumpWidget(
+      _frame(const DailyMixPrototype(text: _identity)),
+    );
 
     for (final placement in const [
       ('廊窗', 0),
@@ -137,7 +139,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      _frame(InteractiveDramaPrototype(text: _identity)),
+      _frame(const InteractiveDramaPrototype(text: _identity)),
     );
 
     await _tapVisible(
