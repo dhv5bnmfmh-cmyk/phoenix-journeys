@@ -1,0 +1,115 @@
+name: Apply global journey language selector
+
+on:
+  push:
+    branches:
+      - feature/summer-palace-story-engine-pilot
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-global-journey-language-selector
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: hashFiles('.github/apply-global-language-selector') != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/summer-palace-story-engine-pilot
+          fetch-depth: 0
+
+      - name: Patch Journey screen
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/screens/journey_screen.dart')
+          text = path.read_text()
+
+          def once(old, new, label):
+              global text
+              if old not in text:
+                  raise SystemExit(f'missing expected block: {label}')
+              text = text.replace(old, new, 1)
+
+          once(
+          """  if (_difficultyPromptScheduled ||
+      !_languageProfileLoaded ||
+      _languageProfile != null ||
+      _experience.id != 'beijing-summer-palace') {
+""",
+          """  if (_difficultyPromptScheduled ||
+      !_languageProfileLoaded ||
+      _languageProfile != null) {
+""",
+          'profile welcome gate',
+          )
+
+          once(
+          """            if (_experience.id == 'beijing-summer-palace')
+              TextButton(
+""",
+          """            TextButton(
+""",
+          'language selector gate',
+          )
+
+          once(
+          """                if (_experience.id == 'beijing-summer-palace' ||
+                    _supportedDifficulties.length < 2) {
+""",
+          """                if (_languageProfile != null ||
+                    _supportedDifficulties.length < 2) {
+""",
+          'difficulty selector gate',
+          )
+
+          once(
+          """                  '${profile.band.label} · '
+                  '${_languageLevelAgent.planFor(profile).targetVocabularyCount} 个重点单词',
+""",
+          """                  '${profile.band.label} · '
+                  '${math.min(_languageLevelAgent.planFor(profile).targetVocabularyCount, _experience.words.length)} 个重点单词',
+""",
+          'profile vocabulary count',
+          )
+
+          once(
+          """      'targetVocabularyCount': _generationPlan?.targetVocabularyCount,
+""",
+          """      'targetVocabularyCount': _levelContent.words.length,
+""",
+          'AI vocabulary count',
+          )
+
+          text = text.replace(
+              "${_appState.journeyDifficulty.label} · 普通话 · ${_levelContent.storyParagraphs.length} 段",
+              "${_languageProfile?.displayLabel ?? _appState.journeyDifficulty.label} · 普通话 · ${_levelContent.storyParagraphs.length} 段",
+          )
+          text = text.replace(
+              "${_appState.journeyDifficulty.label} · 中文朗读 · ${_levelContent.discoveries.length} 段",
+              "${_languageProfile?.displayLabel ?? _appState.journeyDifficulty.label} · 中文朗读 · ${_levelContent.discoveries.length} 段",
+          )
+
+          if "if (_experience.id == 'beijing-summer-palace')\n              TextButton" in text:
+              raise SystemExit('language selector remains journey-gated')
+          path.write_text(text)
+          PY
+
+      - name: Commit selector migration
+        shell: bash
+        run: |
+          rm -f .github/apply-global-language-selector
+          rm -f .github/workflows/apply-global-language-selector.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart \
+                  .github/apply-global-language-selector \
+                  .github/workflows/apply-global-language-selector.yml
+          git commit -m "feat: expose adaptive language levels in every journey"
+          git push origin HEAD:feature/summer-palace-story-engine-pilot
