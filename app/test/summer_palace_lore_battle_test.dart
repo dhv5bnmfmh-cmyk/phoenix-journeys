@@ -29,6 +29,7 @@ Widget _app({
 Future<void> _finishEffect(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 700));
   await tester.pump(const Duration(milliseconds: 800));
+  await tester.pump();
 }
 
 void main() {
