@@ -5,10 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../agents/phoenix_language_level_agent.dart';
+import '../data/adaptive_journey_level_runtime.dart';
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
 import '../models/journey_background.dart';
+import '../models/language_proficiency.dart';
+import '../services/language_level_preference_store.dart';
 import '../services/narration_controller.dart';
 import '../services/phoenix_ai_service.dart';
 import '../state/app_state.dart';
@@ -82,6 +86,12 @@ class _JourneyScreenState extends State<JourneyScreen>
   bool _initialized = false;
   bool _discoveryAutoStarted = false;
   bool _difficultyPromptScheduled = false;
+  static const PhoenixLanguageLevelAgent _languageLevelAgent =
+      PhoenixLanguageLevelAgent();
+  static const LanguageLevelPreferenceStore _languageLevelStore =
+      LanguageLevelPreferenceStore();
+  ChineseProficiencyProfile? _languageProfile;
+  bool _languageProfileLoaded = false;
 
   @override
   void initState() {
@@ -127,8 +137,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
     }
     _initialized = true;
-    unawaited(_narration.setSpeechRate(_appState.journeyDifficulty.speechRate));
-    _scheduleDifficultyWelcome();
+    unawaited(_loadLanguageProfile());
 
     if (step == 2) _scheduleDiscoveryAutoStart();
   }
@@ -167,11 +176,177 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  JourneyLevelContent get _levelContent =>
-      resolveJourneyLevel(_experience, _appState.journeyDifficulty);
+  JourneyLevelContent get _levelContent {
+  final profile = _languageProfile;
+  if (profile == null) {
+    return resolveJourneyLevel(
+      _experience,
+      _appState.journeyDifficulty,
+    );
+  }
+  return resolveAdaptiveJourneyLevel(
+    _experience,
+    profile: profile,
+    knownWords: _appState.savedWords,
+  );
+}
 
-  List<JourneyDifficulty> get _supportedDifficulties =>
-      supportedJourneyDifficulties(_experience);
+ReadingGenerationPlan? get _generationPlan {
+  final profile = _languageProfile;
+  return profile == null ? null : _languageLevelAgent.planFor(profile);
+}
+
+List<JourneyDifficulty> get _supportedDifficulties =>
+    supportedJourneyDifficulties(_experience);
+
+Future<void> _loadLanguageProfile() async {
+  final profile = await _languageLevelStore.load();
+  if (!mounted) return;
+  final rate = profile == null
+      ? _appState.journeyDifficulty.speechRate
+      : _languageLevelAgent.planFor(profile).speechRate;
+  await _narration.setSpeechRate(rate);
+  if (!mounted) return;
+  setState(() {
+    _languageProfile = profile;
+    _languageProfileLoaded = true;
+  });
+  _scheduleDifficultyWelcome();
+}
+
+Future<void> _selectLanguageProfile(
+  ChineseProficiencyProfile profile,
+) async {
+  await _narration.stop();
+  await _languageLevelStore.save(profile);
+  await _narration.setSpeechRate(
+    _languageLevelAgent.planFor(profile).speechRate,
+  );
+  if (!mounted) return;
+  setState(() {
+    _languageProfile = profile;
+    _languageProfileLoaded = true;
+    _discoveryAutoStarted = false;
+  });
+  if (step == 2) _scheduleDiscoveryAutoStart();
+}
+
+Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
+  if (!mounted) return;
+  final track = await showModalBottomSheet<ChineseExamTrack>(
+    context: context,
+    useSafeArea: true,
+    showDragHandle: true,
+    builder: (sheetContext) => Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _appState.displayText(
+              showIntro ? '选择适合你的旅程' : '选择中文考试路线',
+            ),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _appState.displayText(
+              'Phoenix 会调整短文长度、句子复杂度和重点单词数量。',
+            ),
+            style: const TextStyle(fontSize: 12, height: 1.35),
+          ),
+          const SizedBox(height: 10),
+          for (final item in ChineseExamTrack.values)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: CircleAvatar(
+                backgroundColor:
+                    PhoenixTheme.red.withValues(alpha: .12),
+                child: Text(
+                  item == ChineseExamTrack.hsk ? '汉' : '华',
+                  style: const TextStyle(
+                    color: PhoenixTheme.red,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              title: Text(
+                item.label,
+                style: const TextStyle(fontWeight: FontWeight.w900),
+              ),
+              subtitle: Text(
+                _appState.displayText(
+                  item == ChineseExamTrack.hsk
+                      ? 'HSK 1 至 HSK 7–9'
+                      : '准备级至 TOCFL Level 6',
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(sheetContext).pop(item),
+            ),
+        ],
+      ),
+    ),
+  );
+  if (!mounted || track == null) return;
+
+  final selected = await showModalBottomSheet<ChineseProficiencyProfile>(
+    context: context,
+    useSafeArea: true,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (sheetContext) => FractionallySizedBox(
+      heightFactor: .78,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+        children: [
+          Text(
+            _appState.displayText('选择 ${track.label} 等级'),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _appState.displayText(
+              '两套考试独立映射，不把 HSK 和 TOCFL 强行画等号。',
+            ),
+            style: const TextStyle(fontSize: 12, height: 1.35),
+          ),
+          const SizedBox(height: 8),
+          for (final profile in _languageLevelAgent.profilesFor(track))
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                profile.displayLabel,
+                style: const TextStyle(fontWeight: FontWeight.w900),
+              ),
+              subtitle: Text(
+                _appState.displayText(
+                  '${profile.band.label} · '
+                  '${_languageLevelAgent.planFor(profile).targetVocabularyCount} 个重点单词',
+                ),
+              ),
+              trailing: _languageProfile?.storageValue ==
+                      profile.storageValue
+                  ? const Icon(
+                      Icons.check_rounded,
+                      color: PhoenixTheme.red,
+                    )
+                  : const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(sheetContext).pop(profile),
+            ),
+        ],
+      ),
+    ),
+  );
+  if (selected != null) await _selectLanguageProfile(selected);
+}
 
   Future<void> _changeDifficulty(JourneyDifficulty value) async {
     if (value == _appState.journeyDifficulty &&
@@ -187,92 +362,21 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   void _scheduleDifficultyWelcome() {
-    if (_difficultyPromptScheduled ||
-        _appState.journeyDifficultyChosen ||
-        _supportedDifficulties.length < 2) {
-      return;
-    }
-    _difficultyPromptScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) unawaited(_showDifficultyWelcome());
-    });
+  if (_difficultyPromptScheduled ||
+      !_languageProfileLoaded ||
+      _languageProfile != null ||
+      _experience.id != 'beijing-summer-palace') {
+    return;
   }
+  _difficultyPromptScheduled = true;
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (mounted) unawaited(_showDifficultyWelcome());
+  });
+}
 
-  Future<void> _showDifficultyWelcome() async {
-    final selected = await showModalBottomSheet<JourneyDifficulty>(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (sheetContext) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _appState.displayText('选择适合你的旅程'),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _appState.displayText('目的地不变，只调整中文难度。之后可以随时更换。'),
-                style: const TextStyle(fontSize: 12, height: 1.35),
-              ),
-              const SizedBox(height: 10),
-              for (final difficulty in _supportedDifficulties)
-                ListTile(
-                  key: ValueKey(
-                    'journey-difficulty-welcome-${difficulty.storageValue}',
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: PhoenixTheme.red.withValues(alpha: .12),
-                    child: Text(
-                      difficulty == JourneyDifficulty.easy
-                          ? '轻'
-                          : difficulty == JourneyDifficulty.standard
-                          ? '标'
-                          : '挑',
-                      style: const TextStyle(
-                        color: PhoenixTheme.red,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                  title: Row(
-                    children: [
-                      Text(
-                        _appState.displayText(difficulty.label),
-                        style: const TextStyle(fontWeight: FontWeight.w900),
-                      ),
-                      if (difficulty == JourneyDifficulty.standard) ...[
-                        const SizedBox(width: 7),
-                        const Text(
-                          '推荐',
-                          style: TextStyle(
-                            color: PhoenixTheme.red,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  subtitle: Text(_appState.displayText(difficulty.hint)),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => Navigator.of(sheetContext).pop(difficulty),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-    await _changeDifficulty(selected ?? JourneyDifficulty.standard);
-  }
+Future<void> _showDifficultyWelcome() async {
+  await _showLanguageProfilePicker(showIntro: true);
+}
 
   Future<void> _goToStep(int targetStep) async {
     final safeStep = targetStep.clamp(0, AppState.journeyLastStep);
@@ -446,7 +550,14 @@ class _JourneyScreenState extends State<JourneyScreen>
     return <String, dynamic>{
       'interfaceLanguage': _appState.translationLanguage,
       'scriptMode': _appState.isTraditional ? 'traditional' : 'simplified',
-      'currentLevel': _appState.journeyDifficulty.label,
+      'currentLevel':
+          _languageProfile?.displayLabel ?? _appState.journeyDifficulty.label,
+      'readingBand': _languageProfile?.band.label,
+      'targetVocabularyCount': _generationPlan?.targetVocabularyCount,
+      'targetCharacterRange': _generationPlan == null
+          ? null
+          : '${_generationPlan!.minTotalCharacters}-'
+              '${_generationPlan!.maxTotalCharacters}',
       'savedWords': _appState.savedWords.toList(growable: false),
       'completedJourneys': _appState.earnedJourneyStampIds.toList(
         growable: false,
@@ -773,9 +884,27 @@ class _JourneyScreenState extends State<JourneyScreen>
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
           ),
           actions: [
+            if (_experience.id == 'beijing-summer-palace')
+              TextButton(
+                key: const ValueKey('journey-language-level-selector'),
+                onPressed: () => unawaited(_showLanguageProfilePicker()),
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                ),
+                child: Text(
+                  _languageProfile?.displayLabel ?? 'HSK / TOCFL',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
             Consumer<AppState>(
               builder: (_, state, __) {
-                if (_supportedDifficulties.length < 2) {
+                if (_experience.id == 'beijing-summer-palace' ||
+                    _supportedDifficulties.length < 2) {
                   return const SizedBox.shrink();
                 }
                 return PopupMenuButton<JourneyDifficulty>(

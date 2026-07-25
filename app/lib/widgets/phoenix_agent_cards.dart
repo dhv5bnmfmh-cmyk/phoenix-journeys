@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../services/phoenix_ai_service.dart';
 import '../theme/phoenix_theme.dart';
@@ -70,8 +71,28 @@ class PhoenixWritingFeedbackCard extends StatelessWidget {
 
   final PhoenixWritingFeedback feedback;
 
+  Future<void> _copyText(
+    BuildContext context,
+    String text,
+    String label,
+  ) async {
+    if (text.trim().isEmpty) return;
+    await Clipboard.setData(ClipboardData(text: text.trim()));
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('$label已复制。返回输入框继续改写，再提交一次。'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hasScore = feedback.learnerScore > 0;
     return Container(
       key: const ValueKey('phoenix-writing-feedback'),
       width: double.infinity,
@@ -112,6 +133,31 @@ class PhoenixWritingFeedbackCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (hasScore) ...[
+                Tooltip(
+                  message: 'Phoenix 内部练习分，不是 HSK 或 TOCFL 考试成绩。',
+                  child: Container(
+                    key: const ValueKey('phoenix-learner-writing-score'),
+                    margin: const EdgeInsets.only(right: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: PhoenixTheme.red.withValues(alpha: .08),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                    child: Text(
+                      '完成度 ${feedback.learnerScore}',
+                      style: const TextStyle(
+                        color: PhoenixTheme.red,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               _AgentStatusChip(
                 isOffline: feedback.isOfflineFallback,
                 provider: feedback.provider,
@@ -120,6 +166,24 @@ class PhoenixWritingFeedbackCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
+          if (feedback.originalText.trim().isNotEmpty) ...[
+            _FeedbackSection(
+              icon: Icons.notes_rounded,
+              title: '你的原文',
+              text: feedback.originalText,
+              color: Colors.blueGrey,
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (feedback.understanding.trim().isNotEmpty) ...[
+            _FeedbackSection(
+              icon: Icons.psychology_alt_outlined,
+              title: 'AI 理解到的意思',
+              text: feedback.understanding,
+              color: PhoenixTheme.ai,
+            ),
+            const SizedBox(height: 12),
+          ],
           _FeedbackSection(
             icon: Icons.check_circle_outline,
             title: '修改后',
@@ -140,12 +204,83 @@ class PhoenixWritingFeedbackCard extends StatelessWidget {
             text: feedback.natural,
             color: PhoenixTheme.ai,
           ),
+          if (feedback.abilityFocus.trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _FeedbackSection(
+              icon: Icons.center_focus_strong_outlined,
+              title: '这次最值得提升的能力',
+              text: feedback.abilityFocus,
+              color: PhoenixTheme.translation,
+            ),
+          ],
+          if (feedback.rewriteTask.trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _FeedbackSection(
+              icon: Icons.restart_alt_rounded,
+              title: '下一轮改写任务',
+              text: feedback.rewriteTask,
+              color: PhoenixTheme.red,
+            ),
+          ],
           const SizedBox(height: 12),
           _FeedbackSection(
             icon: Icons.local_fire_department_outlined,
             title: '给你的回应',
             text: feedback.encouragement,
             color: PhoenixTheme.translation,
+          ),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: PhoenixTheme.gold.withValues(alpha: .07),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: PhoenixTheme.gold.withValues(alpha: .18),
+              ),
+            ),
+            child: const Text(
+              '复制一个版本作为起点，返回表达页按“下一轮改写任务”修改，再提交一次。Phoenix 会继续结合前一次建议批改。',
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 11.5,
+                height: 1.45,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton.icon(
+                key: const ValueKey('copy-corrected-writing'),
+                onPressed: feedback.corrected.trim().isEmpty
+                    ? null
+                    : () => _copyText(context, feedback.corrected, '修改版'),
+                icon: const Icon(Icons.copy_rounded, size: 16),
+                label: const Text('复制修改版'),
+              ),
+              OutlinedButton.icon(
+                key: const ValueKey('copy-natural-writing'),
+                onPressed: feedback.natural.trim().isEmpty
+                    ? null
+                    : () => _copyText(context, feedback.natural, '自然表达'),
+                icon: const Icon(Icons.content_copy_rounded, size: 16),
+                label: const Text('复制自然版'),
+              ),
+              FilledButton.icon(
+                key: const ValueKey('return-to-rewrite'),
+                onPressed: () => Navigator.of(context).maybePop(),
+                style: FilledButton.styleFrom(
+                  backgroundColor: PhoenixTheme.red,
+                ),
+                icon: const Icon(Icons.edit_rounded, size: 16),
+                label: const Text('返回改写'),
+              ),
+            ],
           ),
         ],
       ),
@@ -216,12 +351,14 @@ class _FeedbackSection extends StatelessWidget {
           children: [
             Icon(icon, size: 17, color: color),
             const SizedBox(width: 6),
-            Text(
-              title,
-              style: TextStyle(
-                color: color,
-                fontSize: 11,
-                fontWeight: FontWeight.w900,
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
           ],

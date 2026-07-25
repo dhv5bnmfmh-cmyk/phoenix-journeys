@@ -28,16 +28,26 @@ class PhoenixWritingFeedback {
     required this.natural,
     required this.encouragement,
     required this.isOfflineFallback,
+    this.originalText = '',
+    this.understanding = '',
+    this.abilityFocus = '',
+    this.rewriteTask = '',
+    this.learnerScore = 0,
     this.provider = 'local',
     this.model = '',
     this.qualityReviewed = false,
     this.qualityScore = 0,
   });
 
+  final String originalText;
+  final String understanding;
   final String corrected;
   final String explanation;
   final String natural;
+  final String abilityFocus;
+  final String rewriteTask;
   final String encouragement;
+  final int learnerScore;
   final bool isOfflineFallback;
   final String provider;
   final String model;
@@ -162,6 +172,9 @@ class PhoenixAiService {
         explanation: '请先写两三句话，我才能帮你分析。',
         natural: '',
         encouragement: '先把想法写出来，不需要一开始就追求完美。',
+        understanding: '目前还没有足够内容可以判断你的意思。',
+        abilityFocus: '先完成一段能够表达观点和原因的文字。',
+        rewriteTask: '写两到三句话，并至少使用一次“因为……”。',
         isOfflineFallback: true,
       );
     }
@@ -178,6 +191,12 @@ class PhoenixAiService {
       if (feedback.isNotEmpty) {
         final quality = _readObject(body, 'quality');
         return PhoenixWritingFeedback(
+          originalText: writing,
+          understanding: _readText(
+            feedback,
+            'understanding',
+            'Phoenix 已读取你的原文，并会围绕你的核心意思进行批改。',
+          ),
           corrected: _readText(feedback, 'corrected', writing),
           explanation: _readText(
             feedback,
@@ -185,11 +204,22 @@ class PhoenixAiService {
             '整体意思清楚，可以再补充一个具体细节。',
           ),
           natural: _readText(feedback, 'natural', writing),
+          abilityFocus: _readText(
+            feedback,
+            'abilityFocus',
+            '本次先练习让观点和原因连接得更清楚。',
+          ),
+          rewriteTask: _readText(
+            feedback,
+            'rewriteTask',
+            '保留原意，再补充一个具体原因或画面，然后重新提交。',
+          ),
           encouragement: _readText(
             feedback,
             'encouragement',
-            '你已经把意思表达出来了，继续保持。',
+            '你已经把核心意思表达出来了，下一步可以让细节更具体。',
           ),
+          learnerScore: _readInt(feedback, 'learnerScore').clamp(0, 100),
           isOfflineFallback: false,
           provider: _readText(body, 'provider', 'cloudflare'),
           model: _readText(body, 'model', ''),
@@ -203,9 +233,13 @@ class PhoenixAiService {
 
     final punctuated = _ensureChinesePunctuation(writing);
     return PhoenixWritingFeedback(
+      originalText: writing,
+      understanding: '本地模式已保留你的原意，但暂时不能完成深度内容分析。',
       corrected: punctuated,
       explanation: '目前无法连接 PhoenixWritingAgent，所以只完成了基础标点检查。',
       natural: punctuated,
+      abilityFocus: '先检查每句话是否完整表达了对象、动作和原因。',
+      rewriteTask: '在原文后补充一句“因为……”，说明你这样观察的原因。',
       encouragement: '你的内容已经保存，可以稍后重新请求完整 AI 批改。',
       isOfflineFallback: true,
     );
@@ -309,7 +343,7 @@ class PhoenixAiService {
       summary: '目前无法连接 PhoenixLearningAgent，学习资料仍保存在本机。',
       strengths: <String>[],
       focusAreas: <String>['稍后重新生成完整学习分析。'],
-      nextActions: <String>['复习本次 Journey 的生词并再写两句话。'],
+      nextActions: <String>['复习本次 Journey 的单词并再写两句话。'],
       recommendedWords: <String>[],
       recommendedPattern: '因为……，所以……',
       isOfflineFallback: true,

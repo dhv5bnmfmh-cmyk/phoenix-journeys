@@ -125,10 +125,14 @@ test('hidden quality agent replaces weak guide and writing results', async () =>
         score: 78,
         issues: ['解释不够具体'],
         revisedFeedback: {
+          understanding: '学习者正在表达一个清楚的核心意思。',
           corrected: '修改后',
           explanation: '具体解释',
           natural: '自然表达',
+          abilityFocus: '优先练习句间衔接。',
+          rewriteTask: '用两句话重新表达，并补充一个具体原因。',
           encouragement: '具体鼓励',
+          learnerScore: 72,
         },
       },
       provider: 'openai',
@@ -152,15 +156,20 @@ test('hidden quality agent replaces weak guide and writing results', async () =>
   const writingReview = await quality.reviewWriting({
     learnerText: '原文',
     candidate: {
+      understanding: '学习者想表达一个观点。',
       corrected: '原文',
       explanation: '很好',
       natural: '原文',
+      abilityFocus: '句间衔接',
+      rewriteTask: '补充一个原因。',
       encouragement: '加油',
+      learnerScore: 60,
     },
     language: '越南语',
     profile: {},
   });
   assert.equal(writingReview.feedback.explanation, '具体解释');
+  assert.equal(writingReview.feedback.learnerScore, 72);
 });
 
 test('Guide and Writing are expert agents with a hidden quality pass', () => {
@@ -173,6 +182,8 @@ test('Guide and Writing are expert agents with a hidden quality pass', () => {
   assert.match(writing, /reviewWriting/);
   assert.match(writing, /不得为了.*制造错误/);
   assert.match(writing, /writingFeedbackSchema/);
+  assert.match(writing, /rewriteTask/);
+  assert.match(writing, /learnerScore/);
 });
 
 test('learner memory is sanitized, sent by Flutter, and used by both agents', () => {
