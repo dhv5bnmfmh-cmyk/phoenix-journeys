@@ -291,16 +291,16 @@ class PhoenixLanguageLevelAgent {
       issues.add('短文超过 ${plan.maxTotalCharacters} 字');
     }
     if (vocabulary.length < plan.targetVocabularyCount) {
-      issues.add('重点生词少于 ${plan.targetVocabularyCount} 个');
+      issues.add('重点单词少于 ${plan.targetVocabularyCount} 个');
     }
     if (vocabulary.length > plan.maximumVocabularyCount) {
-      issues.add('重点生词超过 ${plan.maximumVocabularyCount} 个');
+      issues.add('重点单词超过 ${plan.maximumVocabularyCount} 个');
     }
 
     final searchable = '${paragraphs.join()}$sourceText';
     for (final entry in vocabulary) {
       if (!searchable.contains(entry.word)) {
-        issues.add('生词“${entry.word}”没有出现在故事或发现内容中');
+        issues.add('单词“${entry.word}”没有出现在故事或发现内容中');
       }
     }
 

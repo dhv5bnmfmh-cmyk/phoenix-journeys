@@ -309,7 +309,7 @@ class PhoenixAiService {
       summary: '目前无法连接 PhoenixLearningAgent，学习资料仍保存在本机。',
       strengths: <String>[],
       focusAreas: <String>['稍后重新生成完整学习分析。'],
-      nextActions: <String>['复习本次 Journey 的生词并再写两句话。'],
+      nextActions: <String>['复习本次 Journey 的单词并再写两句话。'],
       recommendedWords: <String>[],
       recommendedPattern: '因为……，所以……',
       isOfflineFallback: true,

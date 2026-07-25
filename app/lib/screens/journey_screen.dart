@@ -245,7 +245,7 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
         children: [
           Text(
             _appState.displayText(
-              showIntro ? '先选择你的中文考试路线' : '选择中文考试路线',
+              showIntro ? '选择适合你的旅程' : '选择中文考试路线',
             ),
             style: const TextStyle(
               fontSize: 18,
@@ -255,7 +255,7 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
           const SizedBox(height: 4),
           Text(
             _appState.displayText(
-              'Phoenix 会调整短文长度、句子复杂度和重点生词数量。',
+              'Phoenix 会调整短文长度、句子复杂度和重点单词数量。',
             ),
             style: const TextStyle(fontSize: 12, height: 1.35),
           ),
@@ -329,7 +329,7 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
               subtitle: Text(
                 _appState.displayText(
                   '${profile.band.label} · '
-                  '${_languageLevelAgent.planFor(profile).targetVocabularyCount} 个重点生词',
+                  '${_languageLevelAgent.planFor(profile).targetVocabularyCount} 个重点单词',
                 ),
               ),
               trailing: _languageProfile?.storageValue ==
