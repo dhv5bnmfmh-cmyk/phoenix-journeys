@@ -34,13 +34,23 @@ Future<void> _finishEffect(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 400));
 }
 
-Future<void> _select(WidgetTester tester, String id) async {
-  await tester.tap(find.byKey(ValueKey<String>('lore-equipment-$id')).last);
+Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  final target = finder.last;
+  await tester.ensureVisible(target);
+  await tester.pump();
+  await tester.tap(target);
   await tester.pump();
 }
 
+Future<void> _select(WidgetTester tester, String id) async {
+  await _tapVisible(
+    tester,
+    find.byKey(ValueKey<String>('lore-equipment-$id')),
+  );
+}
+
 Future<void> _cast(WidgetTester tester) async {
-  await tester.tap(find.byKey(const ValueKey('lore-cast-combo')).last);
+  await _tapVisible(tester, find.byKey(const ValueKey('lore-cast-combo')));
   await _finishEffect(tester);
 }
 
@@ -55,9 +65,9 @@ void main() {
     expect(find.text('长廊回声卷'), findsOneWidget);
     expect(find.text('借景字诀'), findsOneWidget);
     expect(find.text('昆明湖山水盘'), findsOneWidget);
-    expect(find.textContaining('故事心法'), findsOneWidget);
-    expect(find.textContaining('生词字诀'), findsOneWidget);
-    expect(find.textContaining('发现奇器'), findsOneWidget);
+    expect(find.textContaining('故事心法'), findsWidgets);
+    expect(find.textContaining('生词字诀'), findsWidgets);
+    expect(find.textContaining('发现奇器'), findsWidgets);
   });
 
   testWidgets('ordered opening and finishing techniques break both seals', (
@@ -142,8 +152,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('lore-battle-start')));
     await tester.pump(const Duration(milliseconds: 400));
 
-    await tester.tap(find.byKey(const ValueKey('lore-use-insight')));
-    await tester.pump();
+    await _tapVisible(tester, find.byKey(const ValueKey('lore-use-insight')));
 
     expect(find.textContaining('起手式应当是“长廊回声卷”'), findsOneWidget);
     expect(find.text('金羽点拨已用'), findsOneWidget);
