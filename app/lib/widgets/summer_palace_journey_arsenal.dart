@@ -52,7 +52,7 @@ class _SummerPalaceLoreBattleState extends State<SummerPalaceLoreBattle>
   String _message = '先查看旅途中获得的装备，再决定怎样出战。';
   _BattleEffect _effect = _BattleEffect.idle;
 
-  static const List<_LoreEquipment> _equipment = [
+  final List<_LoreEquipment> _equipment = const [
     _LoreEquipment(
       id: 'story-scroll',
       source: '故事',
