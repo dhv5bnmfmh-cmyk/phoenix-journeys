@@ -227,7 +227,8 @@ const _mythWords = <WordEntry>[
     pinyin: 'xiāngchuán',
     partOfSpeech: '动词',
     simpleChinese: '表示一个说法长期流传，但不一定已经证实。',
-    translation: 'Tương truyền, một lời kể được lưu truyền nhưng chưa chắc đã được chứng thực.',
+    translation:
+        'Tương truyền, một lời kể được lưu truyền nhưng chưa chắc đã được chứng thực.',
     englishDefinition: 'it is traditionally said or passed down',
     symbol: '🌙',
   ),

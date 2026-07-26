@@ -85,7 +85,6 @@ class _JourneyScreenState extends State<JourneyScreen>
   bool _guideLoading = false;
   bool _writingLoading = false;
   bool _challengeResolved = false;
-  String? _challengeReward;
   late int _challengeSeed;
   bool _initialized = false;
   static const PhoenixLanguageLevelAgent _languageLevelAgent =
@@ -788,7 +787,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (mounted) {
       setState(() {
         _challengeResolved = false;
-        _challengeReward = null;
         _challengeSeed += 1;
         step = 0;
       });
@@ -1640,17 +1638,15 @@ class _JourneyScreenState extends State<JourneyScreen>
         profile: _languageProfile,
         seed: _challengeSeed,
         displayText: state.displayText,
-        initialReward: _challengeReward,
         onResolved: (reward, awardId) async {
           await state.awardChallengeRewardOnce(
             reward: reward,
             awardId: awardId,
           );
-          if (!mounted) return;
-          setState(() {
-            _challengeResolved = true;
-            _challengeReward = reward;
-          });
+        },
+        onAllCompleted: () async {
+          if (!mounted || _challengeResolved) return;
+          setState(() => _challengeResolved = true);
         },
       ),
     );

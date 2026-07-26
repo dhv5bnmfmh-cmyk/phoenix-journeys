@@ -6,10 +6,8 @@ import 'package:flutter/material.dart';
 import '../models/language_proficiency.dart';
 import '../theme/phoenix_theme.dart';
 
-typedef JourneyChallengeResolved = Future<void> Function(
-  String reward,
-  String awardId,
-);
+typedef JourneyChallengeResolved =
+    Future<void> Function(String reward, String awardId);
 typedef JourneyChallengeCompleted = Future<void> Function();
 
 enum JourneyChallengeType { paragraphRebuild, grammarRepair, missingSentence }
@@ -29,13 +27,11 @@ JourneyChallengeDifficulty challengeDifficultyForProfile(
   return switch (profile?.band) {
     null ||
     PhoenixReadingBand.beginner ||
-    PhoenixReadingBand.elementary =>
-      JourneyChallengeDifficulty.beginner,
+    PhoenixReadingBand.elementary => JourneyChallengeDifficulty.beginner,
     PhoenixReadingBand.intermediate ||
-    PhoenixReadingBand.upperIntermediate =>
-      JourneyChallengeDifficulty.standard,
-    PhoenixReadingBand.advanced || PhoenixReadingBand.mastery =>
-      JourneyChallengeDifficulty.advanced,
+    PhoenixReadingBand.upperIntermediate => JourneyChallengeDifficulty.standard,
+    PhoenixReadingBand.advanced ||
+    PhoenixReadingBand.mastery => JourneyChallengeDifficulty.advanced,
   };
 }
 
@@ -174,8 +170,9 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
                 const SizedBox(height: 9),
                 FilledButton.icon(
                   key: const ValueKey('challenge-submit'),
-                  onPressed:
-                      _session.canSubmit && !_sendingReward ? _submit : null,
+                  onPressed: _session.canSubmit && !_sendingReward
+                      ? _submit
+                      : null,
                   style: FilledButton.styleFrom(
                     backgroundColor: PhoenixTheme.red.withValues(alpha: .92),
                     foregroundColor: Colors.white,
@@ -194,7 +191,10 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
                             color: Colors.white,
                           ),
                         )
-                      : const Icon(Icons.check_circle_outline_rounded, size: 17),
+                      : const Icon(
+                          Icons.check_circle_outline_rounded,
+                          size: 17,
+                        ),
                   label: Text(
                     t('提交第 ${_session.attempts + 1} / 3 次答案'),
                     style: const TextStyle(fontWeight: FontWeight.w900),
@@ -457,9 +457,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           decoration: BoxDecoration(
             color: PhoenixTheme.gold.withValues(alpha: .13),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: PhoenixTheme.gold.withValues(alpha: .54),
-            ),
+            border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .54)),
           ),
           child: Text(
             _session.selectedSingleOption == null
@@ -730,7 +728,9 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
   Widget _modeFinishButton() {
     final finalMode = _activeIndex == _sessions.length - 1;
     return OutlinedButton.icon(
-      key: ValueKey(finalMode ? 'challenge-all-complete' : 'challenge-next-mode'),
+      key: ValueKey(
+        finalMode ? 'challenge-all-complete' : 'challenge-next-mode',
+      ),
       onPressed: finalMode ? null : _nextMode,
       style: OutlinedButton.styleFrom(
         foregroundColor: Colors.white,
@@ -790,7 +790,7 @@ class _ModeChip extends StatelessWidget {
               Icon(
                 completed
                     ? Icons.check_circle_rounded
-                    : Icons.filter_${1}_rounded,
+                    : Icons.radio_button_unchecked_rounded,
                 color: foreground,
                 size: 14,
               ),
@@ -1021,21 +1021,16 @@ class _ChallengeSession {
   }
 
   String get firstHint => switch (type) {
-    JourneyChallengeType.paragraphRebuild =>
-      '先找交代地点或时间的句子，再安排人物行动和最后的变化。',
-    JourneyChallengeType.grammarRepair =>
-      '先检查句子有没有明确主语，再看关联词和前后句式是否平行。',
-    JourneyChallengeType.missingSentence =>
-      '同时观察前一句留下的主语，以及后一句出现的结果或转折。',
+    JourneyChallengeType.paragraphRebuild => '先找交代地点或时间的句子，再安排人物行动和最后的变化。',
+    JourneyChallengeType.grammarRepair => '先检查句子有没有明确主语，再看关联词和前后句式是否平行。',
+    JourneyChallengeType.missingSentence => '同时观察前一句留下的主语，以及后一句出现的结果或转折。',
   };
 
   String get secondHint => switch (type) {
-    JourneyChallengeType.paragraphRebuild =>
-      '开头介绍整体，中间发生行动，最后才出现观察、决定或结果。',
+    JourneyChallengeType.paragraphRebuild => '开头介绍整体，中间发生行动，最后才出现观察、决定或结果。',
     JourneyChallengeType.grammarRepair =>
       '“通过……使……”容易拿走主语；“不但……而且……”要保持前后结构一致。',
-    JourneyChallengeType.missingSentence =>
-      '正确句必须既接住前文，又能解释后文为什么会出现。',
+    JourneyChallengeType.missingSentence => '正确句必须既接住前文，又能解释后文为什么会出现。',
   };
 
   static _ChallengeSession _buildParagraph(
@@ -1141,19 +1136,10 @@ class _ChallengeSession {
     int seed,
   ) {
     final source = _extractSentences(storyParagraphs);
-    final before = source.isNotEmpty
-        ? source[0]
-        : '清晨，探索者来到今天的目的地。';
-    final correct = source.length >= 2
-        ? source[1]
-        : '他沿着主要路线慢慢向前走。';
-    final after = source.length >= 3
-        ? source[2]
-        : '一路上的景色因此不断发生变化。';
-    final distractors = _missingDistractors(
-      journeyId,
-      discoveryTexts,
-    );
+    final before = source.isNotEmpty ? source[0] : '清晨，探索者来到今天的目的地。';
+    final correct = source.length >= 2 ? source[1] : '他沿着主要路线慢慢向前走。';
+    final after = source.length >= 3 ? source[2] : '一路上的景色因此不断发生变化。';
+    final distractors = _missingDistractors(journeyId, discoveryTexts);
     final optionTexts = <String>[correct, ...distractors];
     final options = <_ChallengeOption>[
       for (var index = 0; index < 4; index++)
@@ -1290,27 +1276,11 @@ class _ChallengeSession {
 
   static List<String> _paragraphDistractors(String journeyId) {
     return switch (journeyId) {
-      'literary-roaming' => [
-        '蝴蝶停在原地，竹林也从来没有出现变化。',
-        '探索者没有做梦，也没有看见任何岔路。',
-      ],
-      'myth-tracing' => [
-        '太阳升起以后，遗简才第一次从海底出现。',
-        '白兔离开桂林，故事也没有留下任何选择。',
-      ],
-      'strange-night-talks' => [
-        '客栈从来没有下雨，夜客也一直拥有清楚的影子。',
-        '天刚亮时，门外才第一次有人轻轻敲门。',
-      ],
-      'folk-secret-land' => [
-        '所有河灯都停在岸上，从未进入水中。',
-        '写着名字的灯顺流远去，没有出现任何倒影。',
-      ],
-      _ => [
-        '游客没有停留，很快就离开了这里。',
-        '所有景色完全相同，不需要继续观察。',
-        '故事突然中断，也没有留下任何结果。',
-      ],
+      'literary-roaming' => ['蝴蝶停在原地，竹林也从来没有出现变化。', '探索者没有做梦，也没有看见任何岔路。'],
+      'myth-tracing' => ['太阳升起以后，遗简才第一次从海底出现。', '白兔离开桂林，故事也没有留下任何选择。'],
+      'strange-night-talks' => ['客栈从来没有下雨，夜客也一直拥有清楚的影子。', '天刚亮时，门外才第一次有人轻轻敲门。'],
+      'folk-secret-land' => ['所有河灯都停在岸上，从未进入水中。', '写着名字的灯顺流远去，没有出现任何倒影。'],
+      _ => ['游客没有停留，很快就离开了这里。', '所有景色完全相同，不需要继续观察。', '故事突然中断，也没有留下任何结果。'],
     };
   }
 
@@ -1339,11 +1309,7 @@ class _ChallengeSession {
         '灯纸上写的是菜单，与前后的名字无关。',
         '河水完全停止流动，因此不存在上游和下游。',
       ],
-      _ => [
-        '他没有进入景区，直接回到了住处。',
-        '所有建筑完全一样，所以不必继续观察。',
-        '天气突然改变，但这与前后内容没有关系。',
-      ],
+      _ => ['他没有进入景区，直接回到了住处。', '所有建筑完全一样，所以不必继续观察。', '天气突然改变，但这与前后内容没有关系。'],
     };
     if (discoveries.isNotEmpty && specific.length < 3) {
       return [...specific, discoveries.last];

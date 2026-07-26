@@ -26,8 +26,7 @@ class SpecialRealmBackground extends StatefulWidget {
   }
 
   @override
-  State<SpecialRealmBackground> createState() =>
-      _SpecialRealmBackgroundState();
+  State<SpecialRealmBackground> createState() => _SpecialRealmBackgroundState();
 }
 
 class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
@@ -81,13 +80,9 @@ class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(
-                      alpha: widget.scrimStrength * .35,
-                    ),
+                    Colors.black.withValues(alpha: widget.scrimStrength * .35),
                     Colors.transparent,
-                    Colors.black.withValues(
-                      alpha: widget.scrimStrength * .92,
-                    ),
+                    Colors.black.withValues(alpha: widget.scrimStrength * .92),
                   ],
                   stops: const [0, .46, 1],
                 ),
@@ -102,10 +97,7 @@ class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
 }
 
 class _SpecialRealmPainter extends CustomPainter {
-  const _SpecialRealmPainter({
-    required this.journeyId,
-    required this.progress,
-  });
+  const _SpecialRealmPainter({required this.journeyId, required this.progress});
 
   final String journeyId;
   final double progress;
@@ -115,12 +107,16 @@ class _SpecialRealmPainter extends CustomPainter {
     switch (journeyId) {
       case 'literary-roaming':
         _paintDreamButterfly(canvas, size);
+        return;
       case 'myth-tracing':
         _paintMoonLetter(canvas, size);
+        return;
       case 'strange-night-talks':
         _paintShadowlessInn(canvas, size);
+        return;
       case 'folk-secret-land':
         _paintUpstreamLantern(canvas, size);
+        return;
     }
   }
 
@@ -237,14 +233,15 @@ class _SpecialRealmPainter extends CustomPainter {
       moonCenter,
       moonRadius * 1.45,
       Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFFFFF1B7).withValues(alpha: .32),
-            Colors.transparent,
-          ],
-        ).createShader(
-          Rect.fromCircle(center: moonCenter, radius: moonRadius * 1.45),
-        ),
+        ..shader =
+            RadialGradient(
+              colors: [
+                const Color(0xFFFFF1B7).withValues(alpha: .32),
+                Colors.transparent,
+              ],
+            ).createShader(
+              Rect.fromCircle(center: moonCenter, radius: moonRadius * 1.45),
+            ),
     );
     canvas.drawCircle(
       moonCenter,
@@ -253,9 +250,7 @@ class _SpecialRealmPainter extends CustomPainter {
         ..shader = const RadialGradient(
           center: Alignment(-.35, -.35),
           colors: [Color(0xFFFFF8DB), Color(0xFFE4D2A7), Color(0xFFB7A57E)],
-        ).createShader(
-          Rect.fromCircle(center: moonCenter, radius: moonRadius),
-        ),
+        ).createShader(Rect.fromCircle(center: moonCenter, radius: moonRadius)),
     );
 
     final mountain = Path()
@@ -295,7 +290,10 @@ class _SpecialRealmPainter extends CustomPainter {
       branch,
     );
     for (var index = 0; index < 8; index++) {
-      final start = Offset(size.width * (.03 + index * .065), size.height * (.2 + index * .03));
+      final start = Offset(
+        size.width * (.03 + index * .065),
+        size.height * (.2 + index * .03),
+      );
       final end = start + Offset(36 + index * 2, index.isEven ? -48 : 38);
       canvas.drawLine(start, end, branch..strokeWidth = 2.6);
       for (var flower = 0; flower < 4; flower++) {
@@ -317,9 +315,9 @@ class _SpecialRealmPainter extends CustomPainter {
         Offset(x, y),
         1.3 + (index % 3) * .7,
         Paint()
-          ..color = const Color(0xFFFFD46B).withValues(
-            alpha: .18 + .46 * math.sin(phase * math.pi).abs(),
-          ),
+          ..color = const Color(
+            0xFFFFD46B,
+          ).withValues(alpha: .18 + .46 * math.sin(phase * math.pi).abs()),
       );
     }
 
@@ -389,10 +387,7 @@ class _SpecialRealmPainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            const Color(0xFF5A2B21).withValues(alpha: .2),
-            Colors.black,
-          ],
+          colors: [const Color(0xFF5A2B21).withValues(alpha: .2), Colors.black],
         ).createShader(door),
     );
 
@@ -401,14 +396,15 @@ class _SpecialRealmPainter extends CustomPainter {
       lanternCenter,
       size.width * .17,
       Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFFFF7A3A).withValues(alpha: .35),
-            Colors.transparent,
-          ],
-        ).createShader(
-          Rect.fromCircle(center: lanternCenter, radius: size.width * .17),
-        ),
+        ..shader =
+            RadialGradient(
+              colors: [
+                const Color(0xFFFF7A3A).withValues(alpha: .35),
+                Colors.transparent,
+              ],
+            ).createShader(
+              Rect.fromCircle(center: lanternCenter, radius: size.width * .17),
+            ),
     );
     final lanternRect = Rect.fromCenter(
       center: lanternCenter,
@@ -480,7 +476,12 @@ class _SpecialRealmPainter extends CustomPainter {
       ..close();
     canvas.drawPath(farBank, Paint()..color = const Color(0xFF120E17));
 
-    final riverRect = Rect.fromLTWH(0, size.height * .37, size.width, size.height * .63);
+    final riverRect = Rect.fromLTWH(
+      0,
+      size.height * .37,
+      size.width,
+      size.height * .63,
+    );
     canvas.drawRect(
       riverRect,
       Paint()
@@ -526,14 +527,15 @@ class _SpecialRealmPainter extends CustomPainter {
       specialCenter,
       size.width * .22,
       Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFFFF7A42).withValues(alpha: .28),
-            Colors.transparent,
-          ],
-        ).createShader(
-          Rect.fromCircle(center: specialCenter, radius: size.width * .22),
-        ),
+        ..shader =
+            RadialGradient(
+              colors: [
+                const Color(0xFFFF7A42).withValues(alpha: .28),
+                Colors.transparent,
+              ],
+            ).createShader(
+              Rect.fromCircle(center: specialCenter, radius: size.width * .22),
+            ),
     );
     _paintLantern(canvas, specialCenter, 22, const Color(0xFFFF7442));
 
