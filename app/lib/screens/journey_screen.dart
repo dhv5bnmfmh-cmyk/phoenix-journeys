@@ -83,6 +83,10 @@ class _JourneyScreenState extends State<JourneyScreen>
   PhoenixWritingFeedback? _writingFeedback;
   bool _guideLoading = false;
   bool _writingLoading = false;
+  int _challengeAttempts = 0;
+  int? _selectedChallengeOption;
+  bool _challengeResolved = false;
+  String? _challengeReward;
   bool _initialized = false;
   bool _discoveryAutoStarted = false;
   bool _difficultyPromptScheduled = false;
@@ -854,8 +858,7 @@ Future<void> _showDifficultyWelcome() async {
     1 => JourneyBackgroundPage.vocabulary,
     2 => JourneyBackgroundPage.discovery,
     3 => JourneyBackgroundPage.reflection,
-    4 => JourneyBackgroundPage.writing,
-    5 => JourneyBackgroundPage.memory,
+    4 => JourneyBackgroundPage.memory,
     _ => JourneyBackgroundPage.completion,
   };
 
@@ -865,8 +868,7 @@ Future<void> _showDifficultyWelcome() async {
       _storyPage(),
       _wordsPage(),
       _discoveryPage(),
-      _wonderPage(),
-      _expressPage(),
+      _challengePage(),
       _memoryPage(),
       _completePage(),
     ];
@@ -1655,6 +1657,182 @@ Future<void> _showDifficultyWelcome() async {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _challengePage() {
+    final state = context.watch<AppState>();
+    final correctText = _levelContent.discoveries.first.text;
+    final options = <String>[
+      correctText,
+      '这里的景色只是静止的背景，与人的行走和观察没有关系。',
+      '旅程最重要的是尽快走完路线，不需要留意沿途的变化。',
+    ];
+
+    return _page(
+      title: '挑战',
+      buttonText: _challengeResolved ? '继续留下回忆' : '请选择答案',
+      buttonIcon:
+          _challengeResolved ? Icons.arrow_forward : Icons.lock_outline_rounded,
+      primaryEnabled: _challengeResolved,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: .34),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: PhoenixTheme.gold.withValues(alpha: .45),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  state.displayText('钱币挑战 · 理解今天的发现'),
+                  style: const TextStyle(
+                    color: PhoenixTheme.gold,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  state.displayText('哪一句最符合刚才的故事与发现？'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    height: 1.35,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  state.displayText(
+                    '第一次通过得金币，第二次得银币，第三次得铜币；三次未通过会自动继续。',
+                  ),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: .72),
+                    fontSize: 10.5,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 9),
+          Expanded(
+            child: ListView.separated(
+              padding: EdgeInsets.zero,
+              itemCount: options.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 7),
+              itemBuilder: (context, index) {
+                final selected = _selectedChallengeOption == index;
+                final correct = index == 0;
+                final showCorrect = _challengeResolved && correct;
+                final showWrong = selected && !correct;
+                final color = showCorrect
+                    ? const Color(0xFF77C89A)
+                    : showWrong
+                    ? const Color(0xFFE08076)
+                    : Colors.white;
+                return Material(
+                  color: Colors.black.withValues(alpha: .28),
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: _challengeResolved
+                        ? null
+                        : () {
+                            final nextAttempts = _challengeAttempts + 1;
+                            final isCorrect = index == 0;
+                            final exhausted = nextAttempts >= 3;
+                            setState(() {
+                              _challengeAttempts = nextAttempts;
+                              _selectedChallengeOption = index;
+                              _challengeResolved = isCorrect || exhausted;
+                              if (_challengeResolved) {
+                                _challengeReward = isCorrect
+                                    ? switch (nextAttempts) {
+                                        1 => '金币',
+                                        2 => '银币',
+                                        _ => '铜币',
+                                      }
+                                    : '碎银';
+                              }
+                            });
+                          },
+                    child: Container(
+                      padding: const EdgeInsets.all(11),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: color.withValues(alpha: selected || showCorrect
+                              ? .8
+                              : .2),
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 24,
+                            height: 24,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: color.withValues(alpha: .14),
+                            ),
+                            child: Text(
+                              String.fromCharCode(65 + index),
+                              style: TextStyle(
+                                color: color,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 9),
+                          Expanded(
+                            child: Text(
+                              state.displayText(options[index]),
+                              style: TextStyle(
+                                color: color,
+                                fontSize: 12,
+                                height: 1.42,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          if (_challengeAttempts > 0) ...[
+            const SizedBox(height: 7),
+            Text(
+              state.displayText(
+                _challengeResolved
+                    ? '挑战完成 · 获得 ${_challengeReward ?? '碎银'}'
+                    : '这次还不对。已尝试 $_challengeAttempts 次，还可尝试 ${3 - _challengeAttempts} 次。',
+              ),
+              style: TextStyle(
+                color: _challengeResolved
+                    ? PhoenixTheme.gold
+                    : Colors.white.withValues(alpha: .78),
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

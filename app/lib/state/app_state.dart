@@ -17,13 +17,12 @@ class AppState extends ChangeNotifier {
     activeJourneyId = dailyJourneyForDate(_clock()).id;
   }
 
-  static const int journeyLastStep = 6;
+  static const int journeyLastStep = 5;
   static const List<String> journeyStepLabels = [
     '故事',
     '单词',
     '发现',
-    '思考',
-    '表达',
+    '挑战',
     '回忆',
     '完成',
   ];

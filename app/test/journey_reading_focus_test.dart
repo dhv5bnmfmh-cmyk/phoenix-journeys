@@ -12,7 +12,7 @@ void main() {
             currentStep: 2,
             furthestStep: 2,
             isCompleted: false,
-            labels: const ['故事', '生词', '发现', '思考'],
+            labels: const ['故事', '生词', '发现', '挑战'],
             onStepSelected: (_) {},
           ),
         ),
@@ -22,7 +22,7 @@ void main() {
     expect(find.byKey(const ValueKey('journey-progress-strip')), findsOneWidget);
     expect(find.text('3/4'), findsOneWidget);
     expect(find.text('发现'), findsOneWidget);
-    expect(find.text('下一步 思考'), findsOneWidget);
+    expect(find.text('下一步 挑战'), findsOneWidget);
     expect(find.byIcon(Icons.lock_outline), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('journey-progress-strip')));
@@ -40,7 +40,7 @@ void main() {
             currentStep: 3,
             furthestStep: 3,
             isCompleted: true,
-            labels: const ['故事', '生词', '发现', '思考'],
+            labels: const ['故事', '生词', '发现', '挑战'],
             onStepSelected: (_) {},
           ),
         ),
