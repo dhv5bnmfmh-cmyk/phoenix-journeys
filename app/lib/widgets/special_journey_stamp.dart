@@ -111,7 +111,10 @@ class _SpecialStampPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    painter.paint(canvas, center - Offset(painter.width / 2, painter.height / 2));
+    painter.paint(
+      canvas,
+      center - Offset(painter.width / 2, painter.height / 2),
+    );
   }
 
   void _paintButterfly(Canvas canvas, Offset center, double radius) {
@@ -245,7 +248,8 @@ class _SpecialStampPainter extends CustomPainter {
         final angle = petal * math.pi / 2;
         canvas.drawOval(
           Rect.fromCenter(
-            center: point + Offset(math.cos(angle), math.sin(angle)) * radius * .07,
+            center:
+                point + Offset(math.cos(angle), math.sin(angle)) * radius * .07,
             width: radius * .12,
             height: radius * .06,
           ),
@@ -327,21 +331,22 @@ class _SpecialStampPainter extends CustomPainter {
           height: radius * .92,
         ),
         Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFFFFF1A8).withValues(alpha: _alpha),
-              const Color(0xFFFFA04E).withValues(alpha: _alpha),
-              const Color(0xFFFF5F72).withValues(alpha: _alpha),
-            ],
-          ).createShader(
-            Rect.fromCenter(
-              center: Offset.zero,
-              width: radius,
-              height: radius * 1.4,
-            ),
-          ),
+          ..shader =
+              LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFFFFF1A8).withValues(alpha: _alpha),
+                  const Color(0xFFFFA04E).withValues(alpha: _alpha),
+                  const Color(0xFFFF5F72).withValues(alpha: _alpha),
+                ],
+              ).createShader(
+                Rect.fromCenter(
+                  center: Offset.zero,
+                  width: radius,
+                  height: radius * 1.4,
+                ),
+              ),
       );
       canvas.restore();
     }
@@ -392,7 +397,8 @@ class _SpecialStampPainter extends CustomPainter {
   ) {
     for (var index = 0; index < 9; index++) {
       final angle = index * math.pi * 2 / 9;
-      final point = center + Offset(math.cos(angle), math.sin(angle)) * radius * .92;
+      final point =
+          center + Offset(math.cos(angle), math.sin(angle)) * radius * .92;
       canvas.drawCircle(
         point,
         radius * (.025 + (index % 3) * .012),
@@ -414,7 +420,10 @@ class _SpecialStampPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    painter.paint(canvas, center - Offset(painter.width / 2, painter.height / 2));
+    painter.paint(
+      canvas,
+      center - Offset(painter.width / 2, painter.height / 2),
+    );
   }
 
   @override

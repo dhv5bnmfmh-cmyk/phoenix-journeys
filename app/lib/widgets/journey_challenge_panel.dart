@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../models/language_proficiency.dart';
+import '../services/narration_controller.dart';
 import '../theme/phoenix_theme.dart';
 
 typedef JourneyChallengeResolved =
@@ -45,6 +47,7 @@ class JourneyChallengePanel extends StatefulWidget {
     required this.displayText,
     required this.onResolved,
     required this.onAllCompleted,
+    this.autoNarrate = true,
   });
 
   final String journeyId;
@@ -55,6 +58,7 @@ class JourneyChallengePanel extends StatefulWidget {
   final String Function(String) displayText;
   final JourneyChallengeResolved onResolved;
   final JourneyChallengeCompleted onAllCompleted;
+  final bool autoNarrate;
 
   @override
   State<JourneyChallengePanel> createState() => _JourneyChallengePanelState();
@@ -66,6 +70,8 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
   bool _sendingReward = false;
   bool _completionSent = false;
   final Set<int> _rewardedModes = <int>{};
+  late final NarrationController _narration;
+  int _narrationToken = 0;
 
   String t(String value) => widget.displayText(value);
   _ChallengeSession get _session => _sessions[_activeIndex];
@@ -73,7 +79,9 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
   @override
   void initState() {
     super.initState();
+    _narration = NarrationController();
     _buildSessions();
+    _scheduleAutoNarration();
   }
 
   @override
@@ -85,6 +93,13 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
       return;
     }
     _buildSessions();
+    _scheduleAutoNarration();
+  }
+
+  @override
+  void dispose() {
+    _narration.dispose();
+    super.dispose();
   }
 
   void _buildSessions() {
@@ -106,6 +121,112 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     _rewardedModes.clear();
   }
 
+  void _scheduleAutoNarration() {
+    if (!widget.autoNarrate) return;
+    final token = ++_narrationToken;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || token != _narrationToken) return;
+      unawaited(_speak(_questionNarration(_session)));
+    });
+  }
+
+  Future<void> _speak(String value) async {
+    final text = t(value).trim();
+    if (text.isEmpty) return;
+    await _narration.speakTemporaryText(text, languageCode: 'zh-CN');
+  }
+
+  String _questionNarration(_ChallengeSession session) {
+    return switch (session.type) {
+      JourneyChallengeType.paragraphRebuild =>
+        '${session.questionTitle}。${session.instruction}',
+      JourneyChallengeType.grammarRepair =>
+        '${session.questionTitle}。${session.grammar!.originalSentence}。${session.instruction}',
+      JourneyChallengeType.missingSentence =>
+        '${session.questionTitle}。${session.contextBefore}。空缺。${session.contextAfter}。${session.instruction}',
+    };
+  }
+
+  String _explanationNarration(_ChallengeSession session) {
+    if (session.type == JourneyChallengeType.grammarRepair) {
+      final grammar = session.grammar!;
+      return '本模式获得${session.reward ?? '碎银'}。病句类型，${grammar.errorType}。错误位置，${grammar.errorLocation}。原句，${grammar.originalSentence}。修改后，${grammar.correctedSentence}。为什么错误，${grammar.whyWrong}。修改原则，${grammar.revisionRule}。记忆方法，${grammar.memoryTip}。';
+    }
+    return '本模式获得${session.reward ?? '碎银'}。正确答案，${session.correctAnswerText}。为什么，${session.explanation}。记忆方法，${session.memoryTip}。';
+  }
+
+  Widget _speakerButton(
+    String value, {
+    String keyName = 'challenge-speaker',
+    Color color = Colors.white,
+    double size = 18,
+  }) {
+    return IconButton(
+      key: ValueKey(keyName),
+      tooltip: t('朗读'),
+      visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.all(3),
+      constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+      onPressed: () => unawaited(_speak(value)),
+      icon: Icon(Icons.volume_up_rounded, color: color, size: size),
+    );
+  }
+
+  Future<void> _showResolutionDialog(_ChallengeSession session) async {
+    final finalMode = _activeIndex == _sessions.length - 1;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        key: const ValueKey('challenge-explanation-dialog'),
+        titlePadding: const EdgeInsets.fromLTRB(18, 14, 8, 4),
+        contentPadding: const EdgeInsets.fromLTRB(14, 4, 14, 8),
+        actionsPadding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+        title: Row(
+          children: [
+            const Icon(Icons.auto_awesome_rounded, color: PhoenixTheme.gold),
+            const SizedBox(width: 7),
+            Expanded(
+              child: Text(
+                t('${session.typeLabel} · 讲解'),
+                style: const TextStyle(fontWeight: FontWeight.w900),
+              ),
+            ),
+            _speakerButton(
+              _explanationNarration(session),
+              keyName: 'challenge-explanation-speaker',
+              color: PhoenixTheme.red,
+            ),
+          ],
+        ),
+        content: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(dialogContext).height * .62,
+          ),
+          child: SingleChildScrollView(child: _explanationCard()),
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const ValueKey('challenge-dialog-action'),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              icon: Icon(
+                finalMode
+                    ? Icons.verified_rounded
+                    : Icons.arrow_forward_rounded,
+              ),
+              label: Text(
+                t(finalMode ? '完成三连挑战' : '进入下一种挑战'),
+                style: const TextStyle(fontWeight: FontWeight.w900),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     final session = _session;
     if (!session.canSubmit || session.resolved || _sendingReward) return;
@@ -119,24 +240,34 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
       if (_rewardedModes.add(_activeIndex)) {
         await widget.onResolved(result.reward!, session.awardId);
       }
-      if (_sessions.every((item) => item.resolved) && !_completionSent) {
-        _completionSent = true;
-        await widget.onAllCompleted();
-      }
     } finally {
       if (mounted) setState(() => _sendingReward = false);
     }
+    if (!mounted) return;
+
+    await _showResolutionDialog(session);
+    if (!mounted) return;
+
+    final allCompleted = _sessions.every((item) => item.resolved);
+    if (allCompleted && !_completionSent) {
+      _completionSent = true;
+      await widget.onAllCompleted();
+      return;
+    }
+    _nextMode();
   }
 
   void _openMode(int index) {
     final canOpen = index <= _activeIndex || _sessions[index].resolved;
     if (!canOpen || index == _activeIndex) return;
     setState(() => _activeIndex = index);
+    _scheduleAutoNarration();
   }
 
   void _nextMode() {
     if (!_session.resolved || _activeIndex >= _sessions.length - 1) return;
     setState(() => _activeIndex += 1);
+    _scheduleAutoNarration();
   }
 
   @override
@@ -146,61 +277,73 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _modeStrip(),
-        const SizedBox(height: 8),
+        const SizedBox(height: 7),
         Expanded(
-          child: ListView(
-            key: const ValueKey('challenge-scroll-area'),
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.only(bottom: 10),
-            children: [
-              _questionCard(),
-              const SizedBox(height: 9),
-              _answerArea(),
-              if (_session.feedback.isNotEmpty) ...[
-                const SizedBox(height: 9),
-                _hintCard(),
-              ],
-              if (_session.resolved) ...[
-                const SizedBox(height: 9),
-                _explanationCard(),
-                const SizedBox(height: 9),
-                _modeFinishButton(),
-              ] else ...[
-                const SizedBox(height: 9),
-                FilledButton.icon(
-                  key: const ValueKey('challenge-submit'),
-                  onPressed: _session.canSubmit && !_sendingReward
-                      ? _submit
-                      : null,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: PhoenixTheme.red.withValues(alpha: .92),
-                    foregroundColor: Colors.white,
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(vertical: 11),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13),
-                    ),
-                  ),
-                  icon: _sendingReward
-                      ? const SizedBox(
-                          width: 15,
-                          height: 15,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return FittedBox(
+                key: const ValueKey('challenge-fit-area'),
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: constraints.maxWidth,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _questionCard(),
+                      const SizedBox(height: 7),
+                      _answerArea(),
+                      if (_session.feedback.isNotEmpty &&
+                          !_session.resolved) ...[
+                        const SizedBox(height: 7),
+                        _hintCard(),
+                      ],
+                      if (!_session.resolved) ...[
+                        const SizedBox(height: 7),
+                        FilledButton.icon(
+                          key: const ValueKey('challenge-submit'),
+                          onPressed: _session.canSubmit && !_sendingReward
+                              ? _submit
+                              : null,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: PhoenixTheme.red.withValues(
+                              alpha: .92,
+                            ),
+                            foregroundColor: Colors.white,
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(13),
+                            ),
                           ),
-                        )
-                      : const Icon(
-                          Icons.check_circle_outline_rounded,
-                          size: 17,
+                          icon: _sendingReward
+                              ? const SizedBox(
+                                  width: 15,
+                                  height: 15,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.check_circle_outline_rounded,
+                                  size: 17,
+                                ),
+                          label: Text(
+                            t('提交第 ${_session.attempts + 1} / 3 次答案'),
+                            style: const TextStyle(fontWeight: FontWeight.w900),
+                          ),
                         ),
-                  label: Text(
-                    t('提交第 ${_session.attempts + 1} / 3 次答案'),
-                    style: const TextStyle(fontWeight: FontWeight.w900),
+                      ] else if (_activeIndex == _sessions.length - 1) ...[
+                        const SizedBox(height: 7),
+                        _modeFinishButton(),
+                      ],
+                    ],
                   ),
                 ),
-              ],
-            ],
+              );
+            },
           ),
         ),
       ],
@@ -264,6 +407,12 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
                   ),
                 ),
               ),
+              _speakerButton(
+                _questionNarration(_session),
+                keyName: 'challenge-question-speaker',
+                color: const Color(0xFF7A4B2B),
+              ),
+              const SizedBox(width: 2),
               Container(
                 key: ValueKey(
                   'challenge-difficulty-${_session.difficulty.name}',
@@ -486,14 +635,24 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
         color: Colors.black.withValues(alpha: .25),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(
-        t(value),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 11.5,
-          height: 1.4,
-          fontWeight: FontWeight.w700,
-        ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              t(value),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11.5,
+                height: 1.4,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          _speakerButton(
+            value,
+            keyName: 'challenge-context-speaker-${value.hashCode}',
+          ),
+        ],
       ),
     );
   }
@@ -575,6 +734,12 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
                   ),
                 ),
               ),
+              _speakerButton(
+                option.text,
+                keyName: 'challenge-option-speaker-${option.id}',
+                color: accent,
+                size: 17,
+              ),
             ],
           ),
         ),
@@ -631,6 +796,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
               ],
             ),
           ),
+          _speakerButton(_session.feedback, keyName: 'challenge-hint-speaker'),
         ],
       ),
     );
@@ -666,6 +832,11 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
+              ),
+              _speakerButton(
+                _explanationNarration(_session),
+                keyName: 'challenge-card-explanation-speaker',
+                color: const Color(0xFF315B32),
               ),
             ],
           ),

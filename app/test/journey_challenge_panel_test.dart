@@ -42,15 +42,13 @@ Future<void> _pumpChallenge(
               '远山进入廊窗形成的画面。',
               '最后，他把这次发现记了下来。',
             ],
-            discoveryTexts: const [
-              '长廊让游人在行走中不断看到新的景色。',
-              '借景把远处的山纳入眼前的构图。',
-            ],
+            discoveryTexts: const ['长廊让游人在行走中不断看到新的景色。', '借景把远处的山纳入眼前的构图。'],
             profile: profile,
             seed: seed,
             displayText: _identity,
             onResolved: onResolved,
             onAllCompleted: onAllCompleted ?? () async {},
+            autoNarrate: false,
           ),
         ),
       ),
@@ -78,13 +76,10 @@ Future<Finder> _ensureKeyVisible(WidgetTester tester, String key) async {
 }
 
 Future<void> _tapKey(WidgetTester tester, String key) async {
-  final finder = await _ensureKeyVisible(tester, key);
+  final finder = find.byKey(ValueKey(key));
+  await tester.ensureVisible(finder);
   await tester.tap(finder);
   await tester.pumpAndSettle();
-  if (key == 'challenge-next-mode') {
-    await tester.fling(_challengeView(), const Offset(0, 1000), 1800);
-    await tester.pumpAndSettle();
-  }
 }
 
 Future<void> _completeParagraph(WidgetTester tester) async {
@@ -175,6 +170,9 @@ void main() {
         find.byKey(const ValueKey('challenge-option-distractor-2')),
         findsNothing,
       );
+      expect(find.byKey(const ValueKey('challenge-scroll-area')), findsNothing);
+      expect(find.byKey(const ValueKey('challenge-fit-area')), findsOneWidget);
+      expect(find.byIcon(Icons.volume_up_rounded), findsWidgets);
     },
   );
 
@@ -215,7 +213,7 @@ void main() {
     expect(rewards, ['金币']);
     expect(completed, 0);
 
-    await _tapKey(tester, 'challenge-next-mode');
+    await _tapKey(tester, 'challenge-dialog-action');
     expect(find.text('修好这句不自然的话'), findsOneWidget);
     expect(
       find.byKey(const ValueKey('challenge-option-distractor-3')),
@@ -237,7 +235,7 @@ void main() {
     }
     expect(find.textContaining('夜客不但留下了铜钱'), findsWidgets);
 
-    await _tapKey(tester, 'challenge-next-mode');
+    await _tapKey(tester, 'challenge-dialog-action');
     expect(find.text('补回故事中消失的一句'), findsOneWidget);
     expect(
       find.byKey(const ValueKey('challenge-option-distractor-3')),

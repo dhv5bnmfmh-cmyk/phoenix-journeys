@@ -3,10 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class SpecialRealmCinematicOverlay extends StatefulWidget {
-  const SpecialRealmCinematicOverlay({
-    super.key,
-    required this.journeyId,
-  });
+  const SpecialRealmCinematicOverlay({super.key, required this.journeyId});
 
   final String journeyId;
 
@@ -209,9 +206,9 @@ class _CinematicRealmPainter extends CustomPainter {
     for (var ring = 0; ring < 5; ring++) {
       final pulse = (progress + ring * .16) % 1;
       final radius = size.width * (.19 + pulse * .18);
-      ringPaint.color = const Color(0xFFFFE8A8).withValues(
-        alpha: .22 * (1 - pulse),
-      );
+      ringPaint.color = const Color(
+        0xFFFFE8A8,
+      ).withValues(alpha: .22 * (1 - pulse));
       canvas.drawCircle(moonCenter, radius, ringPaint);
     }
 
@@ -219,7 +216,8 @@ class _CinematicRealmPainter extends CustomPainter {
       final phase = (progress * .28 + index / 34) % 1;
       final angle = index * 2.399 + progress * .35;
       final radius = size.width * (.12 + .5 * phase);
-      final point = moonCenter + Offset(math.cos(angle), math.sin(angle)) * radius;
+      final point =
+          moonCenter + Offset(math.cos(angle), math.sin(angle)) * radius;
       canvas.save();
       canvas.translate(point.dx, point.dy);
       canvas.rotate(angle + progress * 2);
@@ -230,9 +228,9 @@ class _CinematicRealmPainter extends CustomPainter {
       canvas.drawRRect(
         petal,
         Paint()
-          ..color = const Color(0xFFFFD670).withValues(
-            alpha: .12 + .55 * (1 - phase),
-          ),
+          ..color = const Color(
+            0xFFFFD670,
+          ).withValues(alpha: .12 + .55 * (1 - phase)),
       );
       canvas.restore();
     }
@@ -243,7 +241,8 @@ class _CinematicRealmPainter extends CustomPainter {
       ..strokeWidth = 1.2;
     for (var index = 0; index < 7; index++) {
       final x = size.width * (.09 + index * .13);
-      final y = size.height * (.54 + .04 * math.sin(progress * math.pi * 2 + index));
+      final y =
+          size.height * (.54 + .04 * math.sin(progress * math.pi * 2 + index));
       final glyph = Path()
         ..moveTo(x - 7, y)
         ..lineTo(x + 7, y)
@@ -296,7 +295,9 @@ class _CinematicRealmPainter extends CustomPainter {
       ).createShader(Offset.zero & size)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
     for (var index = 0; index < 5; index++) {
-      final x = size.width * (((progress * (.06 + index * .01) + index * .24) % 1) - .3);
+      final x =
+          size.width *
+          (((progress * (.06 + index * .01) + index * .24) % 1) - .3);
       final y = size.height * (.55 + index * .075);
       canvas.drawOval(
         Rect.fromCenter(
@@ -344,9 +345,9 @@ class _CinematicRealmPainter extends CustomPainter {
       ..strokeWidth = 1;
     for (var index = 0; index < 8; index++) {
       final phase = (progress * .9 + index / 8) % 1;
-      ripplePaint.color = const Color(0xFFBFD4DD).withValues(
-        alpha: .18 * (1 - phase),
-      );
+      ripplePaint.color = const Color(
+        0xFFBFD4DD,
+      ).withValues(alpha: .18 * (1 - phase));
       canvas.drawOval(
         Rect.fromCenter(
           center: Offset(size.width * .5, size.height * .92),
@@ -414,11 +415,7 @@ class _CinematicRealmPainter extends CustomPainter {
       canvas.translate(lotusCenter.dx, lotusCenter.dy);
       canvas.rotate(angle);
       canvas.drawOval(
-        Rect.fromCenter(
-          center: const Offset(0, -13),
-          width: 10,
-          height: 28,
-        ),
+        Rect.fromCenter(center: const Offset(0, -13), width: 10, height: 28),
         Paint()
           ..shader = const LinearGradient(
             begin: Alignment.topCenter,
@@ -524,6 +521,7 @@ class _CinematicRealmPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _CinematicRealmPainter oldDelegate) {
-    return oldDelegate.progress != progress || oldDelegate.journeyId != journeyId;
+    return oldDelegate.progress != progress ||
+        oldDelegate.journeyId != journeyId;
   }
 }

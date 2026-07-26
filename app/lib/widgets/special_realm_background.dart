@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'special_realm_cinematic_overlay.dart';
+
 class SpecialRealmBackground extends StatefulWidget {
   const SpecialRealmBackground({
     super.key,
@@ -74,6 +76,7 @@ class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
                 progress: _motion.value,
               ),
             ),
+            SpecialRealmCinematicOverlay(journeyId: widget.journeyId),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
