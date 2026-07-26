@@ -9,24 +9,29 @@ String _identity(String value) => value;
 Widget _app() {
   return const MaterialApp(
     home: Scaffold(
-      body: SizedBox(
-        width: 390,
-        height: 900,
-        child: CoinJourneyGame(text: _identity),
-      ),
+      body: CoinJourneyGame(text: _identity),
     ),
   );
 }
 
+Future<void> _pumpPhoneApp(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(390, 844));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+  await tester.pumpWidget(_app());
+  await tester.pumpAndSettle();
+}
+
+Future<void> _reveal(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    220,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.pumpAndSettle();
+}
+
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
-  if (finder.evaluate().isEmpty) {
-    await tester.scrollUntilVisible(
-      finder,
-      220,
-      scrollable: find.byType(Scrollable).first,
-    );
-  }
-  await tester.ensureVisible(finder);
+  await _reveal(tester, finder);
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
@@ -65,10 +70,12 @@ void main() {
   testWidgets('the prototype explains the coin and hidden journey loop', (
     tester,
   ) async {
-    await tester.pumpWidget(_app());
+    await _pumpPhoneApp(tester);
 
     expect(find.text('学习闯关 · 钱币收藏 · 异境解锁'), findsOneWidget);
+    await _reveal(tester, find.text('普通挑战：颐和园'));
     expect(find.text('普通挑战：颐和园'), findsOneWidget);
+    await _reveal(tester, find.text('隐藏旅程：聊斋夜客'));
     expect(find.text('隐藏旅程：聊斋夜客'), findsOneWidget);
     expect(find.textContaining('第一次答对'), findsOneWidget);
   });
@@ -76,9 +83,10 @@ void main() {
   testWidgets('a corrected grammar sentence receives a clear explanation', (
     tester,
   ) async {
-    await tester.pumpWidget(_app());
+    await _pumpPhoneApp(tester);
     await _completeFirstChallenge(tester);
 
+    await _reveal(tester, find.text('获得金币'));
     expect(find.text('获得金币'), findsOneWidget);
     await _tapVisible(tester, find.text('进入语病修复'));
 
@@ -98,17 +106,22 @@ void main() {
       find.byKey(const ValueKey('grammar-submit')),
     );
 
+    await _reveal(
+      tester,
+      find.byKey(const ValueKey('grammar-explanation')),
+    );
     expect(find.byKey(const ValueKey('grammar-explanation')), findsOneWidget);
     expect(find.text('成分残缺：主语缺失'), findsOneWidget);
     expect(find.textContaining('两个结构叠在一起'), findsOneWidget);
     expect(find.textContaining('删除“使”'), findsOneWidget);
+    await _reveal(tester, find.text('获得银币'));
     expect(find.text('获得银币'), findsOneWidget);
   });
 
   testWidgets('three perfect challenges unlock the supernatural journey', (
     tester,
   ) async {
-    await tester.pumpWidget(_app());
+    await _pumpPhoneApp(tester);
     await _completeFirstChallenge(tester);
     await _tapVisible(tester, find.text('进入语病修复'));
 
@@ -134,7 +147,12 @@ void main() {
     );
     await _tapVisible(tester, find.text('查看钱币与异境'));
 
+    await _reveal(tester, find.textContaining('旅程值：9 点'));
     expect(find.textContaining('旅程值：9 点'), findsOneWidget);
+    await _reveal(
+      tester,
+      find.byKey(const ValueKey('rare-rui-silver-coin')),
+    );
     expect(find.byKey(const ValueKey('rare-rui-silver-coin')), findsOneWidget);
 
     await _tapVisible(
