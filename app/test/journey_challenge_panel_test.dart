@@ -199,6 +199,8 @@ void main() {
     var completed = 0;
     await _pumpChallenge(
       tester,
+      journeyId: 'strange-night-talks',
+      profile: _profile(PhoenixReadingBand.intermediate),
       onResolved: (reward, _) async => rewards.add(reward),
       onAllCompleted: () async => completed += 1,
     );
@@ -216,6 +218,18 @@ void main() {
     await _completeGrammar(tester);
     expect(rewards, ['金币', '金币']);
     expect(completed, 0);
+    for (final label in [
+      '病句类型',
+      '错误位置',
+      '原句',
+      '修改后',
+      '为什么错误',
+      '修改原则',
+      '记忆方法',
+    ]) {
+      expect(find.text(label), findsOneWidget);
+    }
+    expect(find.textContaining('夜客不但留下了铜钱'), findsWidgets);
 
     await _tapKey(tester, 'challenge-next-mode');
     expect(find.text('补回故事中消失的一句'), findsOneWidget);
@@ -277,35 +291,6 @@ void main() {
     expect(find.textContaining('三次机会已经结束'), findsOneWidget);
     final nextMode = await _ensureKeyVisible(tester, 'challenge-next-mode');
     expect(nextMode, findsOneWidget);
-  });
-
-  testWidgets('grammar repair shows every explanation field', (tester) async {
-    final rewards = <String>[];
-    await _pumpChallenge(
-      tester,
-      journeyId: 'strange-night-talks',
-      profile: _profile(PhoenixReadingBand.intermediate),
-      onResolved: (reward, _) async => rewards.add(reward),
-    );
-
-    await _completeParagraph(tester);
-    await _tapKey(tester, 'challenge-next-mode');
-    await _completeGrammar(tester);
-    await _ensureKeyVisible(tester, 'challenge-explanation');
-
-    expect(rewards, ['金币', '金币']);
-    for (final label in [
-      '病句类型',
-      '错误位置',
-      '原句',
-      '修改后',
-      '为什么错误',
-      '修改原则',
-      '记忆方法',
-    ]) {
-      expect(find.text(label), findsOneWidget);
-    }
-    expect(find.textContaining('夜客不但留下了铜钱'), findsWidgets);
   });
 
   testWidgets('rapid taps cannot award one mode twice', (tester) async {
