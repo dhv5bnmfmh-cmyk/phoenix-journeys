@@ -16,44 +16,59 @@ test('PR118 keeps language level in settings and does not autoplay restored disc
   assert.match(settings, /HSK／TOCFL 能力设置/);
 });
 
-test('PR118 exposes the rotating three-attempt challenge pool', async () => {
+test('PR118 always presents three sequential four-choice challenge modes', async () => {
   const [journey, challenge] = await Promise.all([
     read('app/lib/screens/journey_screen.dart'),
     read('app/lib/widgets/journey_challenge_panel.dart'),
   ]);
 
-  assert.match(journey, /JourneyChallengePanel/);
+  assert.match(journey, /onAllCompleted/);
+  assert.match(challenge, /fixedJourneyChallengeTypes/);
   assert.match(challenge, /JourneyChallengeType\.paragraphRebuild/);
   assert.match(challenge, /JourneyChallengeType\.grammarRepair/);
   assert.match(challenge, /JourneyChallengeType\.missingSentence/);
+  assert.match(challenge, /options\.length == 4/);
+  assert.match(challenge, /challenge-question-card/);
+  assert.match(challenge, /challenge-hint-card/);
+  assert.match(challenge, /challenge-answer-area/);
+  assert.doesNotMatch(challenge, /challengeTypeForSeed/);
   assert.match(challenge, /attempts >= 3/);
   assert.match(challenge, /1 => '金币'/);
   assert.match(challenge, /2 => '银币'/);
   assert.match(challenge, /_ => '铜币'/);
   assert.match(challenge, /: '碎银'/);
   assert.match(challenge, /病句类型/);
-  assert.match(challenge, /错误位置/);
   assert.match(challenge, /为什么错误/);
-  assert.match(challenge, /修改原则/);
-  assert.match(challenge, /记忆方法/);
 });
 
-test('PR118 persists wallet rewards and permanently unlocks 万象奇旅', async () => {
-  const [state, passport, special, home] = await Promise.all([
-    read('app/lib/state/app_state.dart'),
-    read('app/lib/screens/city_passport_screen.dart'),
+test('PR118 registers full cinematic special journeys in the stable flow', async () => {
+  const [catalog, location, background, passport, state, home] = await Promise.all([
+    read('app/lib/data/special_journey_catalog.dart'),
+    read('app/lib/services/journey_location_binding.dart'),
+    read('app/lib/widgets/special_realm_background.dart'),
     read('app/lib/widgets/special_journey_passport.dart'),
+    read('app/lib/state/app_state.dart'),
     read('app/lib/screens/explore_screen.dart'),
   ]);
 
-  assert.match(state, /awardChallengeRewardOnce/);
-  assert.match(state, /challenge\.awardedIds/);
+  for (const id of [
+    'literary-roaming',
+    'myth-tracing',
+    'strange-night-talks',
+    'folk-secret-land',
+  ]) {
+    assert.match(catalog, new RegExp(id));
+    assert.match(background, new RegExp(id));
+    assert.match(passport, new RegExp(id));
+  }
+  assert.match(catalog, /庄周梦蝶/);
+  assert.match(catalog, /月宫遗简/);
+  assert.match(catalog, /无影客栈/);
+  assert.match(catalog, /逆流河灯/);
+  assert.match(location, /allJourneyExperiences/);
+  assert.match(passport, /JourneyScreen\(journeyId: journeyId\)/);
+  assert.doesNotMatch(passport, /完整章节正在编写中/);
   assert.match(state, /unlockSpecialJourney/);
   assert.match(state, /specialJourney\.unlockedIds/);
-  assert.match(passport, /SpecialJourneyPassport/);
-  assert.match(special, /passport-special-journeys/);
-  assert.match(special, /万象奇旅 · 特别旅程/);
-  assert.match(special, /确认扣币/);
-  assert.match(special, /永久收藏/);
   assert.match(home, /home-coin-wallet-hint/);
 });
