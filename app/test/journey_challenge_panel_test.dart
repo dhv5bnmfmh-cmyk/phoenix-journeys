@@ -90,6 +90,12 @@ Future<void> _tapKey(WidgetTester tester, String key) async {
 Future<void> _completeParagraph(WidgetTester tester) async {
   await _tapKey(tester, 'challenge-option-correct-0');
   await _tapKey(tester, 'challenge-option-correct-1');
+  if (find
+      .byKey(const ValueKey('challenge-option-correct-2'))
+      .evaluate()
+      .isNotEmpty) {
+    await _tapKey(tester, 'challenge-option-correct-2');
+  }
   await _tapKey(tester, 'challenge-submit');
 }
 
