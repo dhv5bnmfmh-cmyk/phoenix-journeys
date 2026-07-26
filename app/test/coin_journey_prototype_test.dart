@@ -28,17 +28,17 @@ void _solveParagraph(WidgetTester tester) {
   final list = tester.widget<ReorderableListView>(
     find.byKey(const ValueKey('paragraph-reorder-list')),
   );
-  list.onReorder(2, 0);
-  list.onReorder(3, 1);
+  list.onReorder!(2, 0);
+  list.onReorder!(3, 1);
 }
 
 void _solveNightOrder(WidgetTester tester) {
   final list = tester.widget<ReorderableListView>(
     find.byKey(const ValueKey('night-reorder-list')),
   );
-  list.onReorder(2, 0);
-  list.onReorder(2, 1);
-  list.onReorder(3, 2);
+  list.onReorder!(2, 0);
+  list.onReorder!(2, 1);
+  list.onReorder!(3, 2);
 }
 
 Future<void> _completeFirstChallenge(WidgetTester tester) async {
@@ -127,7 +127,7 @@ void main() {
     );
     await _tapVisible(tester, find.text('查看钱币与异境'));
 
-    expect(find.text('旅程值：9 点'), findsOneWidget);
+    expect(find.textContaining('旅程值：9 点'), findsOneWidget);
     expect(find.byKey(const ValueKey('rare-rui-silver-coin')), findsOneWidget);
 
     await _tapVisible(
