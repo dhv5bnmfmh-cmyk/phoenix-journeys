@@ -12,13 +12,13 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
-  test('every Journey has one GeoNode, map point and location path', () {
-    expect(journeyLocationBindings, hasLength(dailyJourneyExperiences.length));
+  test('every regular and special Journey has a unique location binding', () {
+    expect(journeyLocationBindings, hasLength(allJourneyExperiences.length));
 
     final paths = <String>{};
     final geoNodes = <String>{};
     final mapPoints = <JourneyMapPoint>{};
-    for (final journey in dailyJourneyExperiences) {
+    for (final journey in allJourneyExperiences) {
       final binding = requireJourneyLocation(journey.id);
       expect(binding.locationPath, journey.locationPath);
       expect(binding.geoNodeId, journey.geoNodeId);
@@ -36,7 +36,28 @@ void main() {
       mapPoints.add(binding.mapPoint);
     }
 
-    expect(mapPoints.length, greaterThan(4));
+    expect(mapPoints.length, greaterThan(8));
+  });
+
+  test('daily rotation stays regular while four special journeys are registered',
+      () {
+    const specialIds = {
+      'literary-roaming',
+      'myth-tracing',
+      'strange-night-talks',
+      'folk-secret-land',
+    };
+    expect(
+      allJourneyExperiences.where((journey) => specialIds.contains(journey.id)),
+      hasLength(4),
+    );
+    expect(
+      dailyJourneyExperiences.any((journey) => specialIds.contains(journey.id)),
+      isFalse,
+    );
+    for (final id in specialIds) {
+      expect(requireDailyJourneyExperience(id).id, id);
+    }
   });
 
   test('legacy Journey keys migrate to city/destination path keys', () async {
