@@ -15,12 +15,7 @@ def replace_once(text: str, old: str, new: str, label: str) -> str:
 def main() -> None:
     challenge_path = ROOT / 'app/lib/widgets/journey_challenge_panel.dart'
     challenge = challenge_path.read_text(encoding='utf-8')
-    challenge = replace_once(
-        challenge,
-        "import 'package:flutter/foundation.dart';\n",
-        '',
-        'remove unnecessary foundation import',
-    )
+    challenge = challenge.replace("import 'package:flutter/foundation.dart';\n", '')
     challenge_path.write_text(challenge, encoding='utf-8')
 
     passport_path = ROOT / 'app/lib/widgets/special_journey_passport.dart'
@@ -68,13 +63,36 @@ def main() -> None:
         return;
     }
 """
-    passport = replace_once(
-        passport,
-        old_switch,
-        new_switch,
-        'stop special journey unlock switch fallthrough',
-    )
+    if old_switch in passport:
+        passport = passport.replace(old_switch, new_switch, 1)
     passport_path.write_text(passport, encoding='utf-8')
+
+    test_path = ROOT / 'app/test/journey_challenge_panel_test.dart'
+    test_text = test_path.read_text(encoding='utf-8')
+    old_helper = """Future<void> _tapKey(WidgetTester tester, String key) async {
+  final finder = find.byKey(ValueKey(key));
+  await tester.ensureVisible(finder);
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
+}
+"""
+    new_helper = """Future<void> _tapKey(WidgetTester tester, String key) async {
+  final finder = find.byKey(ValueKey(key));
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      finder,
+      220,
+      scrollable: find.byKey(const ValueKey('challenge-scroll-area')),
+    );
+  }
+  await tester.ensureVisible(finder);
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
+}
+"""
+    if old_helper in test_text:
+        test_text = test_text.replace(old_helper, new_helper, 1)
+    test_path.write_text(test_text, encoding='utf-8')
 
     print('three-mode follow-up fixes applied')
 
