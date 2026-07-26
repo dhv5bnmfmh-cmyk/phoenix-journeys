@@ -853,6 +853,13 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
         _title(t('拼回失落的夜记'), pale: true),
         const SizedBox(height: 6),
         _body(t('按照发生顺序点击四段记录。')),
+        if (_nightAttempts > 0) ...[
+          const SizedBox(height: 4),
+          Text(
+            t('已尝试 $_nightAttempts 次'),
+            style: const TextStyle(color: Colors.white54, fontSize: 11),
+          ),
+        ],
         const SizedBox(height: 12),
         _answerBox(_nightAnswer, t('依次点击下方夜记'), dark: true, key: const ValueKey('night-answer')),
         const SizedBox(height: 11),
