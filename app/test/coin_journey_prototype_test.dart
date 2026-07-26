@@ -127,12 +127,15 @@ void main() {
   ) async {
     await _pumpPhoneApp(tester);
 
-    expect(find.text('学习闯关 · 钱币收藏 · 异境解锁'), findsOneWidget);
+    expect(find.text('学习闯关 · 钱币收藏 · 万象奇旅'), findsOneWidget);
     await _reveal(tester, find.text('普通挑战：颐和园'));
     expect(find.text('普通挑战：颐和园'), findsOneWidget);
-    await _reveal(tester, find.text('隐藏旅程：聊斋夜客'));
-    expect(find.text('隐藏旅程：聊斋夜客'), findsOneWidget);
+    await _reveal(tester, find.text('万象奇旅 · 神话寻踪'));
+    expect(find.text('万象奇旅 · 神话寻踪'), findsOneWidget);
     expect(find.textContaining('第一次答对'), findsOneWidget);
+    expect(find.textContaining('金币 · 面值 3'), findsOneWidget);
+    expect(find.textContaining('银币 · 面值 2'), findsOneWidget);
+    expect(find.textContaining('铜币 · 面值 1'), findsOneWidget);
   });
 
   testWidgets('a corrected grammar sentence receives a clear explanation', (
@@ -249,9 +252,9 @@ void main() {
 
     await _reveal(
       tester,
-      find.text('已收藏 1 枚钱币 · 3 点旅程值'),
+      find.text('已收藏 1 枚钱币 · 可用币值 3'),
     );
-    expect(find.text('已收藏 1 枚钱币 · 3 点旅程值'), findsOneWidget);
+    expect(find.text('已收藏 1 枚钱币 · 可用币值 3'), findsOneWidget);
     await _reveal(
       tester,
       find.byKey(const ValueKey('enter-persisted-special')),
@@ -268,8 +271,8 @@ void main() {
     await _pumpPhoneApp(tester);
     await _reachSummary(tester);
 
-    await _reveal(tester, find.text('已收藏 4 枚钱币 · 9 点旅程值'));
-    expect(find.text('已收藏 4 枚钱币 · 9 点旅程值'), findsOneWidget);
+    await _reveal(tester, find.text('已收藏 4 枚钱币 · 可用币值 9'));
+    expect(find.text('已收藏 4 枚钱币 · 可用币值 9'), findsOneWidget);
     expect(find.byKey(const ValueKey('rare-rui-silver-coin')), findsOneWidget);
 
     await _tapVisible(
@@ -277,6 +280,8 @@ void main() {
       find.byKey(const ValueKey('unlock-special-journey')),
     );
     expect(find.byKey(const ValueKey('special-journey-intro')), findsOneWidget);
+    expect(find.textContaining('万象奇旅 · 神话寻踪'), findsOneWidget);
+    expect(find.textContaining('亲身进入故事'), findsOneWidget);
 
     await _tapVisible(tester, find.byKey(const ValueKey('special-start')));
     for (final id in ['knock', 'mirror', 'promise', 'leaf']) {
