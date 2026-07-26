@@ -19,6 +19,13 @@ Widget _app() {
 }
 
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      finder,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
   await tester.ensureVisible(finder);
   await tester.tap(finder);
   await tester.pumpAndSettle();
