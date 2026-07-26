@@ -16,7 +16,7 @@ class CoinJourneyPrototypeScreen extends StatelessWidget {
           backgroundColor: const Color(0xFF241A13),
           foregroundColor: const Color(0xFFFFE7B0),
           title: Text(
-            state.displayText('Phoenix · 钱币异境'),
+            state.displayText('Phoenix · 钱币与万象奇旅'),
             style: const TextStyle(fontWeight: FontWeight.w900),
           ),
           centerTitle: true,
@@ -458,10 +458,10 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
     return _page(const ValueKey('coin-journey-intro'), [
       const Icon(Icons.monetization_on_rounded, size: 68, color: Color(0xFFFFD166)),
       const SizedBox(height: 9),
-      _title(t('学习闯关 · 钱币收藏 · 异境解锁')),
+      _title(t('学习闯关 · 钱币收藏 · 万象奇旅')),
       const SizedBox(height: 8),
       _body(
-        t('每关最多作答三次：第一次获得金币、第二次获得银币、第三次获得铜币。三次后系统会给出答案，不会卡关。'),
+        t('每关最多作答三次：第一次获得金币（面值 3）、第二次获得银币（面值 2）、第三次获得铜币（面值 1）。三次后系统会给出答案，不会卡关。'),
         centered: true,
       ),
       const SizedBox(height: 14),
@@ -479,8 +479,8 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
       ),
       const SizedBox(height: 9),
       _journeyCard(
-        title: t('隐藏旅程：聊斋夜客'),
-        subtitle: unlocked ? t('已经解锁，可以直接进入') : t('收集至少 3 点旅程值'),
+        title: t('万象奇旅 · 神话寻踪'),
+        subtitle: unlocked ? t('《聊斋夜客》已永久收录护照，可以直接进入') : t('《聊斋夜客》· 收集至少 3 币值永久解锁'),
         icon: Icons.nightlight_round,
         locked: !unlocked,
       ),
@@ -497,7 +497,7 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
           key: const ValueKey('enter-persisted-special'),
           onPressed: () => _go(_Stage.specialIntro),
           icon: const Icon(Icons.lock_open_rounded),
-          label: Text(t('进入已解锁的聊斋夜客')),
+          label: Text(t('从护照进入《聊斋夜客》')),
         ),
       ],
     ]);
@@ -792,7 +792,7 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
         children: [
           _coinDisc(coin, 31),
           const SizedBox(width: 10),
-          Expanded(child: Text(t('${coin.reason} · ${coin.points} 点'), style: const TextStyle(color: Color(0xFF4E3C2D), fontWeight: FontWeight.w800))),
+          Expanded(child: Text(t('${coin.label} · 面值 ${coin.points} · ${coin.reason}'), style: const TextStyle(color: Color(0xFF4E3C2D), fontWeight: FontWeight.w800))),
         ],
       );
 
@@ -805,7 +805,7 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
           shape: BoxShape.circle,
           border: Border.all(color: const Color(0xFF7E5A26), width: 2),
         ),
-        child: Text(t(coin.mark), style: const TextStyle(color: Color(0xFF5F3A17), fontWeight: FontWeight.w900)),
+        child: Text(t('${coin.mark}${coin.points}'), style: const TextStyle(color: Color(0xFF5F3A17), fontWeight: FontWeight.w900)),
       );
 
   Widget _coinReward(_CoinKind coin) => Container(
@@ -816,7 +816,7 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
           children: [
             _coinDisc(coin, 47),
             const SizedBox(width: 11),
-            Expanded(child: Text(t('获得${coin.label}\n${coin.reason} · ${coin.points} 点旅程值'), style: TextStyle(color: coin.color, height: 1.4, fontWeight: FontWeight.w900))),
+            Expanded(child: Text(t('获得${coin.label} · 面值 ${coin.points}\n${coin.reason}'), style: TextStyle(color: coin.color, height: 1.4, fontWeight: FontWeight.w900))),
           ],
         ),
       );
@@ -826,7 +826,7 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
         padding: const EdgeInsets.all(13),
         decoration: BoxDecoration(color: const Color(0xFFF1DFB8), borderRadius: BorderRadius.circular(16)),
         child: Text(
-          t('已收藏 ${_coins.length + (_rareCoin ? 1 : 0)} 枚钱币 · $_points 点旅程值'),
+          t('已收藏 ${_coins.length + (_rareCoin ? 1 : 0)} 枚钱币 · 可用币值 $_points'),
           textAlign: TextAlign.center,
           style: const TextStyle(color: Color(0xFF6F2925), fontSize: 16, fontWeight: FontWeight.w900),
         ),
@@ -894,14 +894,14 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(color: const Color(0xFF25213A), borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFF57527B))),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(t('异境录 · 聊斋夜客\n解锁需要 3 点 · 当前 $_points 点'), style: const TextStyle(color: Color(0xFFE9E7FF), height: 1.45, fontWeight: FontWeight.w900)),
+          Text(t('PHOENIX PASSPORT · 万象奇旅\n神话寻踪 · 《聊斋夜客》\n解锁需要 3 币值 · 当前 $_points 币值'), style: const TextStyle(color: Color(0xFFE9E7FF), height: 1.45, fontWeight: FontWeight.w900)),
           const SizedBox(height: 10),
           FilledButton.icon(
             key: const ValueKey('unlock-special-journey'),
             onPressed: _points >= 3 ? () => _go(_Stage.specialIntro) : null,
             style: FilledButton.styleFrom(backgroundColor: const Color(0xFF6E5CA5), foregroundColor: Colors.white),
             icon: const Icon(Icons.lock_open_rounded),
-            label: Text(t('用旅程值进入')),
+            label: Text(t('收录护照并进入')),
           ),
         ]),
       );
@@ -909,11 +909,11 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
   Widget _specialIntro() => _page(const ValueKey('special-journey-intro'), [
         const Icon(Icons.nightlight_round, color: Color(0xFFB9C7FF), size: 64),
         const SizedBox(height: 8),
-        _title(t('异境录 · 聊斋夜客'), pale: true),
+        _title(t('万象奇旅 · 神话寻踪\n《聊斋夜客》'), pale: true),
         const SizedBox(height: 10),
         _nightStory(t('子夜，一名没有影子的旅客走进湖边客栈。他把一枚湿漉漉的铜钱放在柜台上，只说：“天亮前，别让镜子照见我。”第二天，掌柜留下的夜记却被风吹乱了。')),
         const SizedBox(height: 13),
-        _body(t('这不是普通景点介绍。你要拼回一段志怪夜记，并决定掌柜是否守住承诺。'), centered: true),
+        _body(t('像原有旅程一样亲身进入故事：阅读沿途线索、拼回志怪夜记，并决定掌柜是否守住承诺。'), centered: true),
         const SizedBox(height: 16),
         _primary(key: const ValueKey('special-start'), label: t('进入午夜客栈'), icon: Icons.door_front_door_rounded, onPressed: () => _go(_Stage.specialOrder)),
       ]);
@@ -995,13 +995,13 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(color: const Color(0xFFE5DFC7), borderRadius: BorderRadius.circular(16)),
         child: Column(children: [
-          Text(t('异境收藏品'), style: const TextStyle(color: Color(0xFF6C2E2A), fontWeight: FontWeight.w900)),
+          Text(t('万象奇旅纪念 · 神话寻踪'), style: const TextStyle(color: Color(0xFF6C2E2A), fontWeight: FontWeight.w900)),
           const SizedBox(height: 4),
           Text(t(kept ? '鬼市灯票' : '墙缝湿印拓片'), style: const TextStyle(color: Color(0xFF2F281F), fontSize: 19, fontWeight: FontWeight.w900)),
         ]),
       ),
       const SizedBox(height: 15),
-      _primary(key: const ValueKey('coin-prototype-restart'), label: t('返回钱币收藏'), icon: Icons.replay_rounded, onPressed: _returnToCollection),
+      _primary(key: const ValueKey('coin-prototype-restart'), label: t('返回护照与钱币收藏'), icon: Icons.replay_rounded, onPressed: _returnToCollection),
     ]);
   }
 
