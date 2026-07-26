@@ -16,18 +16,25 @@ ChineseProficiencyProfile _profile(PhoenixReadingBand band) {
 
 Future<void> _pumpChallenge(
   WidgetTester tester, {
-  required int seed,
+  int seed = 0,
+  String journeyId = 'beijing-summer-palace',
   ChineseProficiencyProfile? profile,
   required JourneyChallengeResolved onResolved,
+  JourneyChallengeCompleted? onAllCompleted,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
-        body: SizedBox(
+        body: Container(
           width: 430,
           height: 900,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF274C5C), Color(0xFF67462F)],
+            ),
+          ),
           child: JourneyChallengePanel(
-            journeyId: 'beijing-summer-palace',
+            journeyId: journeyId,
             storyParagraphs: const [
               '清晨，探索者来到颐和园。',
               '他沿着长廊慢慢向前走。',
@@ -43,6 +50,7 @@ Future<void> _pumpChallenge(
             seed: seed,
             displayText: _identity,
             onResolved: onResolved,
+            onAllCompleted: onAllCompleted ?? () async {},
           ),
         ),
       ),
@@ -56,6 +64,23 @@ Future<void> _tapKey(WidgetTester tester, String key) async {
   await tester.ensureVisible(finder);
   await tester.tap(finder);
   await tester.pumpAndSettle();
+}
+
+Future<void> _completeParagraph(WidgetTester tester) async {
+  await _tapKey(tester, 'challenge-option-correct-0');
+  await _tapKey(tester, 'challenge-option-correct-1');
+  await _tapKey(tester, 'challenge-submit');
+}
+
+Future<void> _completeGrammar(WidgetTester tester) async {
+  await _tapKey(tester, 'challenge-grammar-segment-1');
+  await _tapKey(tester, 'challenge-option-correct');
+  await _tapKey(tester, 'challenge-submit');
+}
+
+Future<void> _completeMissingSentence(WidgetTester tester) async {
+  await _tapKey(tester, 'challenge-option-correct');
+  await _tapKey(tester, 'challenge-submit');
 }
 
 void main() {
@@ -78,73 +103,131 @@ void main() {
     );
   });
 
-  test('seed rotates through all three challenge types', () {
-    expect(challengeTypeForSeed(0), JourneyChallengeType.paragraphRebuild);
-    expect(challengeTypeForSeed(1), JourneyChallengeType.grammarRepair);
-    expect(challengeTypeForSeed(2), JourneyChallengeType.missingSentence);
-    expect(challengeTypeForSeed(3), JourneyChallengeType.paragraphRebuild);
+  test('challenge order is fixed instead of random', () {
+    expect(
+      fixedJourneyChallengeTypes,
+      const [
+        JourneyChallengeType.paragraphRebuild,
+        JourneyChallengeType.grammarRepair,
+        JourneyChallengeType.missingSentence,
+      ],
+    );
   });
 
-  testWidgets('paragraph rebuild awards gold on the first correct attempt',
+  testWidgets('all three modes are always visible and start with four choices',
       (tester) async {
-    final rewards = <String>[];
-    await _pumpChallenge(
-      tester,
-      seed: 0,
-      onResolved: (reward, _) async => rewards.add(reward),
-    );
+    await _pumpChallenge(tester, onResolved: (_, __) async {});
 
     expect(
-      find.byKey(const ValueKey('challenge-type-paragraphRebuild')),
+      find.byKey(const ValueKey('challenge-mode-paragraphRebuild')),
       findsOneWidget,
     );
+    expect(
+      find.byKey(const ValueKey('challenge-mode-grammarRepair')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('challenge-mode-missingSentence')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('challenge-option-correct-0')),
+        findsOneWidget);
+    expect(find.byKey(const ValueKey('challenge-option-correct-1')),
+        findsOneWidget);
     expect(find.byKey(const ValueKey('challenge-option-distractor-0')),
         findsOneWidget);
+    expect(find.byKey(const ValueKey('challenge-option-distractor-1')),
+        findsOneWidget);
+    expect(find.byKey(const ValueKey('challenge-option-distractor-2')),
+        findsNothing);
+  });
 
-    await _tapKey(tester, 'challenge-option-correct-0');
+  testWidgets('question and hint are separate surfaces', (tester) async {
+    await _pumpChallenge(tester, onResolved: (_, __) async {});
+
+    expect(
+      find.byKey(const ValueKey('challenge-question-card')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('challenge-hint-card')), findsNothing);
+
     await _tapKey(tester, 'challenge-option-correct-1');
-    await _tapKey(tester, 'challenge-option-correct-2');
+    await _tapKey(tester, 'challenge-option-correct-0');
     await _tapKey(tester, 'challenge-submit');
 
+    expect(
+      find.byKey(const ValueKey('challenge-question-card')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('challenge-hint-card')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('three modes run in sequence and complete the whole challenge',
+      (tester) async {
+    final rewards = <String>[];
+    var completed = 0;
+    await _pumpChallenge(
+      tester,
+      onResolved: (reward, _) async => rewards.add(reward),
+      onAllCompleted: () async => completed += 1,
+    );
+
+    await _completeParagraph(tester);
     expect(rewards, ['金币']);
-    expect(find.byKey(const ValueKey('challenge-reward-gold')), findsOneWidget);
+    expect(completed, 0);
+
+    await _tapKey(tester, 'challenge-next-mode');
+    expect(find.text('修好这句不自然的话'), findsOneWidget);
+    expect(find.byKey(const ValueKey('challenge-option-distractor-3')),
+        findsOneWidget);
+    await _completeGrammar(tester);
+    expect(rewards, ['金币', '金币']);
+    expect(completed, 0);
+
+    await _tapKey(tester, 'challenge-next-mode');
+    expect(find.text('补回故事中消失的一句'), findsOneWidget);
+    expect(find.byKey(const ValueKey('challenge-option-distractor-3')),
+        findsOneWidget);
+    await _completeMissingSentence(tester);
+
+    expect(rewards, ['金币', '金币', '金币']);
+    expect(completed, 1);
+    expect(
+      find.byKey(const ValueKey('challenge-all-complete')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('second correct submission awards silver', (tester) async {
     final rewards = <String>[];
     await _pumpChallenge(
       tester,
-      seed: 0,
       onResolved: (reward, _) async => rewards.add(reward),
     );
 
     await _tapKey(tester, 'challenge-option-correct-1');
     await _tapKey(tester, 'challenge-option-correct-0');
-    await _tapKey(tester, 'challenge-option-correct-2');
     await _tapKey(tester, 'challenge-submit');
-
-    await _tapKey(tester, 'challenge-option-correct-0');
-    await _tapKey(tester, 'challenge-option-correct-1');
-    await _tapKey(tester, 'challenge-option-correct-2');
-    await _tapKey(tester, 'challenge-submit');
+    await _completeParagraph(tester);
 
     expect(rewards, ['银币']);
     expect(find.byKey(const ValueKey('challenge-reward-silver')), findsOneWidget);
   });
 
-  testWidgets('three failed submissions reveal answer and award silver fragment',
+  testWidgets('third failure reveals answer and awards silver fragment',
       (tester) async {
     final rewards = <String>[];
     await _pumpChallenge(
       tester,
-      seed: 0,
       onResolved: (reward, _) async => rewards.add(reward),
     );
 
     for (var attempt = 0; attempt < 3; attempt++) {
       await _tapKey(tester, 'challenge-option-correct-1');
       await _tapKey(tester, 'challenge-option-correct-0');
-      await _tapKey(tester, 'challenge-option-correct-2');
       await _tapKey(tester, 'challenge-submit');
     }
 
@@ -154,28 +237,27 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const ValueKey('challenge-explanation')), findsOneWidget);
-    expect(find.textContaining('自动展示正确答案'), findsOneWidget);
+    expect(find.textContaining('三次机会已经结束'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('challenge-next-mode')),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('grammar repair shows every required explanation field',
-      (tester) async {
+  testWidgets('grammar repair shows every explanation field', (tester) async {
     final rewards = <String>[];
     await _pumpChallenge(
       tester,
-      seed: 1,
+      journeyId: 'strange-night-talks',
       profile: _profile(PhoenixReadingBand.intermediate),
       onResolved: (reward, _) async => rewards.add(reward),
     );
 
-    expect(
-      find.byKey(const ValueKey('challenge-type-grammarRepair')),
-      findsOneWidget,
-    );
-    await _tapKey(tester, 'challenge-grammar-segment-1');
-    await _tapKey(tester, 'challenge-option-correct');
-    await _tapKey(tester, 'challenge-submit');
+    await _completeParagraph(tester);
+    await _tapKey(tester, 'challenge-next-mode');
+    await _completeGrammar(tester);
 
-    expect(rewards, ['金币']);
+    expect(rewards, ['金币', '金币']);
     for (final label in [
       '病句类型',
       '错误位置',
@@ -187,43 +269,21 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
+    expect(find.textContaining('夜客不但留下了铜钱'), findsWidgets);
   });
 
-  testWidgets('missing sentence challenge uses six choices and resolves',
-      (tester) async {
-    final rewards = <String>[];
-    await _pumpChallenge(
-      tester,
-      seed: 2,
-      onResolved: (reward, _) async => rewards.add(reward),
-    );
-
-    expect(
-      find.byKey(const ValueKey('challenge-type-missingSentence')),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('challenge-option-correct')), findsOneWidget);
-    expect(find.byKey(const ValueKey('challenge-option-distractor-4')),
-        findsOneWidget);
-
-    await _tapKey(tester, 'challenge-option-correct');
-    await _tapKey(tester, 'challenge-submit');
-    expect(rewards, ['金币']);
-  });
-
-  testWidgets('resolved challenge cannot send the same reward twice',
-      (tester) async {
+  testWidgets('rapid taps cannot award one mode twice', (tester) async {
     var rewardCalls = 0;
     await _pumpChallenge(
       tester,
-      seed: 2,
       onResolved: (_, __) async {
         rewardCalls += 1;
         await Future<void>.delayed(const Duration(milliseconds: 20));
       },
     );
 
-    await _tapKey(tester, 'challenge-option-correct');
+    await _tapKey(tester, 'challenge-option-correct-0');
+    await _tapKey(tester, 'challenge-option-correct-1');
     final submit = find.byKey(const ValueKey('challenge-submit'));
     await tester.ensureVisible(submit);
     await tester.tap(submit);
