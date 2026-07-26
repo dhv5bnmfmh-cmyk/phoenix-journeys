@@ -89,7 +89,6 @@ class _JourneyScreenState extends State<JourneyScreen>
   String? _challengeReward;
   late final int _challengeVariant;
   bool _initialized = false;
-  bool _discoveryAutoStarted = false;
   static const PhoenixLanguageLevelAgent _languageLevelAgent =
       PhoenixLanguageLevelAgent();
   static const LanguageLevelPreferenceStore _languageLevelStore =
@@ -226,7 +225,6 @@ Future<void> _selectLanguageProfile(
   if (!mounted) return;
   setState(() {
     _languageProfile = profile;
-    _discoveryAutoStarted = false;
   });
 }
 
@@ -356,7 +354,6 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
     await _narration.setSpeechRate(value.speechRate);
     await _appState.setJourneyDifficulty(value);
     if (!mounted) return;
-    setState(() => _discoveryAutoStarted = false);
   }
 
   Future<void> _goToStep(int targetStep) async {
@@ -372,7 +369,6 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
     // iOS display "playing" while silently blocking the actual utterance.
     if (safeStep == 2 && safeStep != step) {
       setState(() => step = safeStep);
-      _discoveryAutoStarted = true;
       unawaited(_playDiscoveries(stopEngineFirst: false));
       await _persistProgress(overrideStep: safeStep);
       return;
@@ -381,13 +377,8 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
     await _narration.stop();
     if (!mounted || safeStep == step) return;
 
-    if (step == 2 && safeStep != 2) {
-      _discoveryAutoStarted = false;
-    }
-
     setState(() => step = safeStep);
     await _persistProgress(overrideStep: safeStep);
-
   }
 
   Future<void> _playStory() {
@@ -817,7 +808,6 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
     _writingFeedback = null;
     _guideLoading = false;
     _writingLoading = false;
-    _discoveryAutoStarted = false;
     if (mounted) setState(() => step = 0);
   }
 

@@ -119,10 +119,26 @@ class _CoinWalletHint extends StatelessWidget {
             style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900),
           ),
           const Spacer(),
-          _CoinCount(icon: '●', color: Color(0xFFFFC94A), count: state.goldCoins),
-          _CoinCount(icon: '●', color: Color(0xFFC9D0D6), count: state.silverCoins),
-          _CoinCount(icon: '●', color: Color(0xFFC87941), count: state.bronzeCoins),
-          _CoinCount(icon: '✦', color: Color(0xFF9EA7B0), count: state.silverFragments),
+          _CoinCount(
+            icon: '●',
+            color: const Color(0xFFFFC94A),
+            count: state.goldCoins,
+          ),
+          _CoinCount(
+            icon: '●',
+            color: const Color(0xFFC9D0D6),
+            count: state.silverCoins,
+          ),
+          _CoinCount(
+            icon: '●',
+            color: const Color(0xFFC87941),
+            count: state.bronzeCoins,
+          ),
+          _CoinCount(
+            icon: '✦',
+            color: const Color(0xFF9EA7B0),
+            count: state.silverFragments,
+          ),
         ],
       ),
     );
