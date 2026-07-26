@@ -22,6 +22,7 @@ import '../widgets/destination_background.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_challenge_panel.dart';
 import '../widgets/journey_share_button.dart';
+import '../widgets/special_realm_story_intro.dart';
 import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
 import '../widgets/narration_speed_stepper.dart';
@@ -1134,6 +1135,11 @@ class _JourneyScreenState extends State<JourneyScreen>
       onNext: () => unawaited(_enterVocabularyAtFirstWord()),
       child: Column(
         children: [
+          if (SpecialRealmStoryIntro.supports(_experience.id))
+            SpecialRealmStoryIntro(
+              journeyId: _experience.id,
+              displayText: _appState.displayText,
+            ),
           NarrationPlayerCard(
             controller: _narration,
             contentId: 'story',
