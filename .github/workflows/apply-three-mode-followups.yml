@@ -33,14 +33,16 @@ jobs:
         run: |
           dart format \
             app/lib/widgets/journey_challenge_panel.dart \
-            app/lib/widgets/special_journey_passport.dart
+            app/lib/widgets/special_journey_passport.dart \
+            app/test/journey_challenge_panel_test.dart
 
       - name: Commit follow-up fixes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app/lib/widgets/journey_challenge_panel.dart \
-            app/lib/widgets/special_journey_passport.dart
+            app/lib/widgets/special_journey_passport.dart \
+            app/test/journey_challenge_panel_test.dart
           if git diff --cached --quiet; then
             echo "No follow-up changes to commit"
             exit 0
@@ -48,4 +50,4 @@ jobs:
           git commit -m "fix: polish three-mode challenges and special journey entry"
           git push origin HEAD:preview/stable-journey-bf5fdf
 
-# Triggered after the workflow was present on the branch.
+# Includes scroll-aware challenge tests for long explanation cards.
