@@ -42,7 +42,10 @@ Future<void> _pumpChallenge(
               '远山进入廊窗形成的画面。',
               '最后，他把这次发现记了下来。',
             ],
-            discoveryTexts: const ['长廊让游人在行走中不断看到新的景色。', '借景把远处的山纳入眼前的构图。'],
+            discoveryTexts: const [
+              '长廊让游人在行走中不断看到新的景色。',
+              '借景把远处的山纳入眼前的构图。',
+            ],
             profile: profile,
             seed: seed,
             displayText: _identity,
@@ -56,16 +59,29 @@ Future<void> _pumpChallenge(
   await tester.pumpAndSettle();
 }
 
-Future<void> _tapKey(WidgetTester tester, String key) async {
+Finder _challengeScrollable() {
+  return find.descendant(
+    of: find.byKey(const ValueKey('challenge-scroll-area')),
+    matching: find.byType(Scrollable),
+  );
+}
+
+Future<Finder> _ensureKeyVisible(WidgetTester tester, String key) async {
   final finder = find.byKey(ValueKey(key));
   if (finder.evaluate().isEmpty) {
     await tester.scrollUntilVisible(
       finder,
       220,
-      scrollable: find.byKey(const ValueKey('challenge-scroll-area')),
+      scrollable: _challengeScrollable(),
     );
   }
   await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+  return finder;
+}
+
+Future<void> _tapKey(WidgetTester tester, String key) async {
+  final finder = await _ensureKeyVisible(tester, key);
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
@@ -210,10 +226,11 @@ void main() {
 
     expect(rewards, ['金币', '金币', '金币']);
     expect(completed, 1);
-    expect(
-      find.byKey(const ValueKey('challenge-all-complete')),
-      findsOneWidget,
+    final completeButton = await _ensureKeyVisible(
+      tester,
+      'challenge-all-complete',
     );
+    expect(completeButton, findsOneWidget);
   });
 
   testWidgets('second correct submission awards silver', (tester) async {
@@ -257,7 +274,8 @@ void main() {
     );
     expect(find.byKey(const ValueKey('challenge-explanation')), findsOneWidget);
     expect(find.textContaining('三次机会已经结束'), findsOneWidget);
-    expect(find.byKey(const ValueKey('challenge-next-mode')), findsOneWidget);
+    final nextMode = await _ensureKeyVisible(tester, 'challenge-next-mode');
+    expect(nextMode, findsOneWidget);
   });
 
   testWidgets('grammar repair shows every explanation field', (tester) async {
@@ -272,6 +290,7 @@ void main() {
     await _completeParagraph(tester);
     await _tapKey(tester, 'challenge-next-mode');
     await _completeGrammar(tester);
+    await _ensureKeyVisible(tester, 'challenge-explanation');
 
     expect(rewards, ['金币', '金币']);
     for (final label in [
