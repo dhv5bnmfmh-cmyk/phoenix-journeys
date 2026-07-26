@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/coin_journey_prototype_screen.dart';
+import 'screens/coin_journey_persistent_screen.dart';
 import 'theme/phoenix_theme.dart';
 import 'widgets/startup_gate.dart';
 
