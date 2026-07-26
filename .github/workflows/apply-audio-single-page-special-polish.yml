@@ -1,0 +1,57 @@
+name: Apply audio single-page special polish
+
+on:
+  push:
+    branches:
+      - preview/stable-journey-bf5fdf
+    paths:
+      - tools/apply_audio_single_page_special_polish.py
+      - .github/workflows/apply-audio-single-page-special-polish.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR118 branch
+        uses: actions/checkout@v4
+        with:
+          ref: preview/stable-journey-bf5fdf
+
+      - name: Set up Flutter formatter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Apply product polish
+        run: python3 tools/apply_audio_single_page_special_polish.py
+
+      - name: Format changed Dart files
+        run: |
+          dart format \
+            app/lib/widgets/special_realm_background.dart \
+            app/lib/widgets/special_realm_cinematic_overlay.dart \
+            app/lib/widgets/city_journey_stamp.dart \
+            app/lib/widgets/special_journey_stamp.dart \
+            app/lib/widgets/journey_challenge_panel.dart \
+            app/test/journey_challenge_panel_test.dart
+
+      - name: Commit product polish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/widgets/special_realm_background.dart \
+            app/lib/widgets/special_realm_cinematic_overlay.dart \
+            app/lib/widgets/city_journey_stamp.dart \
+            app/lib/widgets/special_journey_stamp.dart \
+            app/lib/widgets/journey_challenge_panel.dart \
+            app/test/journey_challenge_panel_test.dart
+          if git diff --cached --quiet; then
+            echo "No product polish changes to commit"
+            exit 0
+          fi
+          git commit -m "feat: add narrated single-page challenges and collectible realm stamps"
+          git push origin HEAD:preview/stable-journey-bf5fdf
