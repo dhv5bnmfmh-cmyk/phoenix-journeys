@@ -69,7 +69,11 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
 }
 
 Future<void> _solveParagraph(WidgetTester tester) async {
-  for (final id in ['overview', 'walk', 'windows', 'borrow']) {
+  final ids = ['overview', 'walk', 'windows'];
+  if (find.byKey(const ValueKey('paragraph-choice-borrow')).evaluate().isNotEmpty) {
+    ids.add('borrow');
+  }
+  for (final id in ids) {
     await _tapVisible(
       tester,
       find.byKey(ValueKey<String>('paragraph-choice-$id')),
@@ -156,6 +160,50 @@ void main() {
     expect(find.textContaining('两个结构叠在一起'), findsOneWidget);
     expect(find.textContaining('删除“使”'), findsOneWidget);
     expect(find.byKey(const ValueKey('coin-reward-silver')), findsOneWidget);
+  });
+
+  testWidgets('the third wrong paragraph answer reveals the solution and awards bronze', (
+    tester,
+  ) async {
+    await _pumpPhoneApp(tester, persistRewards: false);
+    await _tapVisible(
+      tester,
+      find.byKey(const ValueKey('coin-start-challenges')),
+    );
+
+    for (var attempt = 0; attempt < 3; attempt++) {
+      for (final id in ['walk', 'overview', 'windows']) {
+        await _tapVisible(
+          tester,
+          find.byKey(ValueKey<String>('paragraph-choice-$id')),
+        );
+      }
+      await _tapVisible(tester, find.text('提交答案'));
+    }
+
+    expect(find.textContaining('系统已排出正确顺序'), findsOneWidget);
+    expect(find.byKey(const ValueKey('coin-reward-bronze')), findsOneWidget);
+    expect(find.text('进入语病修复'), findsOneWidget);
+    expect(find.textContaining('1. 颐和园长廊连接着湖边的多个景点。'), findsOneWidget);
+  });
+
+  testWidgets('paragraph difficulty follows the explorer ability score', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'phoenix.coinJourney.ability.v1': 8,
+    });
+    await _pumpPhoneApp(tester);
+
+    expect(find.textContaining('探索者能力：探索'), findsOneWidget);
+    await _tapVisible(
+      tester,
+      find.byKey(const ValueKey('coin-start-challenges')),
+    );
+    expect(
+      find.byKey(const ValueKey('paragraph-choice-borrow')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('fragment choices are visibly shuffled from the answer key', (

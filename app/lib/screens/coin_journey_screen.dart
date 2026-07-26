@@ -46,6 +46,7 @@ class CoinJourneyGame extends StatefulWidget {
 class _CoinJourneyGameState extends State<CoinJourneyGame> {
   static const _rewardKey = 'phoenix.coinJourney.rewards.v1';
   static const _rareKey = 'phoenix.coinJourney.rare.v1';
+  static const _abilityKey = 'phoenix.coinJourney.ability.v1';
   static const _wrongGrammar = '通过游览长廊，使游客可以看到不同的风景。';
   static const _correctGrammar = '通过游览长廊，游客可以看到不同的风景。';
 
@@ -60,6 +61,16 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
     _Piece('borrow', '有些廊窗还把远山纳入眼前的画面。'),
     _Piece('overview', '颐和园长廊连接着湖边的多个景点。'),
     _Piece('walk', '游人沿着长廊前进，可以不断看到新的景色。'),
+  ];
+  static const _beginnerParagraphSolution = <_Piece>[
+    _Piece('overview', '颐和园长廊连接着湖边的多个景点。'),
+    _Piece('walk', '游人沿着长廊前进，可以不断看到新的景色。'),
+    _Piece('windows', '长廊上的廊窗形状各不相同。'),
+  ];
+  static const _beginnerParagraphChoices = <_Piece>[
+    _Piece('walk', '游人沿着长廊前进，可以不断看到新的景色。'),
+    _Piece('overview', '颐和园长廊连接着湖边的多个景点。'),
+    _Piece('windows', '长廊上的廊窗形状各不相同。'),
   ];
   static const _fragmentSolution = <_Piece>[
     _Piece('time', '每走一段，'),
@@ -98,6 +109,8 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
   bool _rareCoin = false;
   bool _loading = true;
   bool _resolved = false;
+  int _abilityScore = 0;
+  _AbilityLevel _journeyLevel = _AbilityLevel.beginner;
   int _paragraphAttempts = 0;
   int _grammarAttempts = 0;
   int _fragmentAttempts = 0;
@@ -120,6 +133,15 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
 
   int get _points => _coins.values.fold(0, (sum, coin) => sum + coin.points);
   bool get _allGold => _challenges.every((name) => _coins[name] == _CoinKind.gold);
+  _AbilityLevel get _abilityLevel => _AbilityLevel.fromScore(_abilityScore);
+  List<_Piece> get _activeParagraphSolution =>
+      _journeyLevel == _AbilityLevel.beginner
+          ? _beginnerParagraphSolution
+          : _paragraphSolution;
+  List<_Piece> get _activeParagraphChoices =>
+      _journeyLevel == _AbilityLevel.beginner
+          ? _beginnerParagraphChoices
+          : _paragraphChoices;
 
   Future<void> _restoreRewards() async {
     if (!widget.persistRewards) {
@@ -140,6 +162,8 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
         ..clear()
         ..addAll(restored);
       _rareCoin = prefs.getBool(_rareKey) ?? false;
+      _abilityScore = prefs.getInt(_abilityKey) ?? 0;
+      _journeyLevel = _AbilityLevel.fromScore(_abilityScore);
       _loading = false;
     });
   }
@@ -154,6 +178,7 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
     await Future.wait([
       prefs.setStringList(_rewardKey, records),
       prefs.setBool(_rareKey, _rareCoin),
+      prefs.setInt(_abilityKey, _abilityScore),
     ]);
   }
 
@@ -163,7 +188,11 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
     return _CoinKind.bronze;
   }
 
-  Future<void> _award(String challenge, int attempts) async {
+  Future<void> _award(
+    String challenge,
+    int attempts, {
+    required bool correct,
+  }) async {
     final earned = _coinFor(attempts);
     final previous = _coins[challenge];
     setState(() {
@@ -172,6 +201,13 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
       }
       _currentCoin = earned;
       _resolved = true;
+      if (correct && attempts == 1) {
+        _abilityScore = (_abilityScore + 2).clamp(0, 12).toInt();
+      } else if (correct && attempts == 2) {
+        _abilityScore = (_abilityScore + 1).clamp(0, 12).toInt();
+      } else if (!correct) {
+        _abilityScore = (_abilityScore - 1).clamp(0, 12).toInt();
+      }
       if (_allGold) _rareCoin = true;
     });
     await _saveRewards();
@@ -204,14 +240,24 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
   Future<void> _checkParagraph() async {
     if (_resolved) return;
     final attempt = ++_paragraphAttempts;
-    final correct = _matches(_paragraphAnswer, _paragraphSolution);
+    final correct = _matches(_paragraphAnswer, _activeParagraphSolution);
+    final exhausted = !correct && attempt >= 3;
     setState(() {
-      _feedback = correct
-          ? '段落已经恢复。先介绍整体位置，再写游人的行动，最后补充廊窗与借景细节。'
-          : '先找介绍长廊整体位置的句子，再安排游人的行动，最后放观察细节。';
-      if (!correct) _paragraphAnswer.clear();
+      if (correct) {
+        _feedback = '段落已经恢复。先介绍整体位置，再写游人的行动，最后补充观察细节。';
+      } else if (exhausted) {
+        _feedback = '已完成三次作答。系统已排出正确顺序并发放铜币，可以查看讲解后继续。';
+        _paragraphAnswer
+          ..clear()
+          ..addAll(_activeParagraphSolution);
+      } else {
+        _feedback = '先找介绍长廊整体位置的句子，再安排游人的行动，最后放观察细节。';
+        _paragraphAnswer.clear();
+      }
     });
-    if (correct) await _award('短文复原', attempt);
+    if (correct || exhausted) {
+      await _award('短文复原', attempt, correct: correct);
+    }
   }
 
   String _normalize(String value) =>
@@ -235,29 +281,50 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
     final attempt = ++_grammarAttempts;
     final answer = _grammarController.text.trim();
     final correct = _grammarAccepted(answer);
+    final exhausted = !correct && attempt >= 3;
     setState(() {
       if (correct) {
         _feedback = null;
+      } else if (exhausted) {
+        _grammarController.text = t(_correctGrammar);
+        _feedback = '已完成三次作答。系统已填入参考答案并发放铜币，可以查看完整讲解后继续。';
       } else if (_normalize(answer).contains(_normalize('通过游览长廊使'))) {
         _feedback = '“通过……”和“使……”仍然同时存在，句子还是没有明确主语。';
       } else {
         _feedback = '请让“游客”成为明确主语，并保留“看到不同风景”的原意。';
       }
     });
-    if (correct) await _award('语病修复', attempt);
+    if (correct || exhausted) {
+      await _award('语病修复', attempt, correct: correct);
+    }
   }
 
   Future<void> _checkFragments() async {
     if (_resolved) return;
     final attempt = ++_fragmentAttempts;
     final correct = _matches(_fragmentAnswer, _fragmentSolution);
+    final exhausted = !correct && attempt >= 3;
     setState(() {
-      _feedback = correct
-          ? '“每走一段”承接移动，“都会发生变化”说明反复出现的结果。'
-          : '先说时间或条件，再说变化的对象，最后说明结果。';
-      if (!correct) _fragmentAnswer.clear();
+      if (correct) {
+        _feedback = '“每走一段”承接移动，“都会发生变化”说明反复出现的结果。';
+      } else if (exhausted) {
+        _feedback = '已完成三次作答。系统已补回正确句子并发放铜币，可以查看讲解后继续。';
+        _fragmentAnswer
+          ..clear()
+          ..addAll(_fragmentSolution);
+      } else {
+        _feedback = '先说时间或条件，再说变化的对象，最后说明结果。';
+        _fragmentAnswer.clear();
+      }
     });
-    if (correct) await _award('补回句子', attempt);
+    if (correct || exhausted) {
+      await _award('补回句子', attempt, correct: correct);
+    }
+  }
+
+  void _startChallenges() {
+    _journeyLevel = _abilityLevel;
+    _go(_Stage.paragraph);
   }
 
   void _go(_Stage next) {
@@ -394,7 +461,7 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
       _title(t('学习闯关 · 钱币收藏 · 异境解锁')),
       const SizedBox(height: 8),
       _body(
-        t('完成中文挑战，根据答对次数获得金币、银币或铜币。收集旅程值，就能打开神话与志怪世界。'),
+        t('每关最多作答三次：第一次获得金币、第二次获得银币、第三次获得铜币。三次后系统会给出答案，不会卡关。'),
         centered: true,
       ),
       const SizedBox(height: 14),
@@ -407,7 +474,7 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
       const SizedBox(height: 13),
       _journeyCard(
         title: t('普通挑战：颐和园'),
-        subtitle: t('短文复原、语病修复、补回句子'),
+        subtitle: t('探索者能力：${_abilityLevel.label} · 本次自动安排${_abilityLevel.description}'),
         icon: Icons.account_balance_rounded,
       ),
       const SizedBox(height: 9),
@@ -422,7 +489,7 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
         key: const ValueKey('coin-start-challenges'),
         label: t('开始三关挑战'),
         icon: Icons.play_arrow_rounded,
-        onPressed: _loading ? null : () => _go(_Stage.paragraph),
+        onPressed: _loading ? null : _startChallenges,
       ),
       if (unlocked) ...[
         const SizedBox(height: 9),
@@ -447,7 +514,7 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
         _body(instruction),
         if (attempts > 0 && !_resolved) ...[
           const SizedBox(height: 4),
-          Text(t('已尝试 $attempts 次'), style: const TextStyle(color: Colors.white54, fontSize: 11)),
+          Text(t('已尝试 $attempts 次 · 还可作答 ${3 - attempts} 次'), style: const TextStyle(color: Colors.white54, fontSize: 11)),
         ],
       ],
     );
@@ -458,7 +525,7 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
         const SizedBox(height: 13),
         _answerBox(_paragraphAnswer, t('依次点击下方句子')),
         const SizedBox(height: 11),
-        _choices(_paragraphChoices, _paragraphAnswer, 'paragraph-choice', (piece) => _choose(_paragraphAnswer, piece)),
+        _choices(_activeParagraphChoices, _paragraphAnswer, 'paragraph-choice', (piece) => _choose(_paragraphAnswer, piece)),
         const SizedBox(height: 8),
         _undoButton(_paragraphAnswer, () => _undo(_paragraphAnswer)),
         if (!_resolved) ...[
@@ -466,7 +533,9 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
           _primary(label: t('提交答案'), icon: Icons.check_circle_rounded, onPressed: _checkParagraph),
         ],
         ..._resultWidgets(
-          explanation: t('正确逻辑是“整体位置 → 游人行动 → 廊窗细节 → 借景效果”。读者先知道长廊在哪里，再跟随游人移动。'),
+          explanation: t(_journeyLevel == _AbilityLevel.beginner
+              ? '正确逻辑是“整体位置 → 游人行动 → 廊窗细节”。先找总起句，再看动作与观察细节。'
+              : '正确逻辑是“整体位置 → 游人行动 → 廊窗细节 → 借景效果”。读者先知道长廊在哪里，再跟随游人移动。'),
           continueLabel: t('进入语病修复'),
           onContinue: () => _go(_Stage.grammar),
         ),
@@ -945,6 +1014,30 @@ class _CoinJourneyGameState extends State<CoinJourneyGame> {
 
 enum _Stage { intro, paragraph, grammar, fragments, summary, specialIntro, specialOrder, specialDecision, specialEnding }
 
+enum _AbilityLevel {
+  beginner,
+  developing,
+  explorer;
+
+  static _AbilityLevel fromScore(int score) {
+    if (score >= 8) return explorer;
+    if (score >= 3) return developing;
+    return beginner;
+  }
+
+  String get label => switch (this) {
+        beginner => '起步',
+        developing => '进阶',
+        explorer => '探索',
+      };
+
+  String get description => switch (this) {
+        beginner => '较短、线索更清楚的题目',
+        developing => '标准难度题目',
+        explorer => '更完整的段落题目',
+      };
+}
+
 enum _CoinKind {
   bronze,
   silver,
@@ -962,7 +1055,7 @@ enum _CoinKind {
   String get label => switch (this) { bronze => '铜币', silver => '银币', gold => '金币' };
   String get mark => switch (this) { bronze => '铜', silver => '银', gold => '金' };
   String get reason => switch (this) {
-        bronze => '第三次或练习后答对',
+        bronze => '第三次作答或系统讲解',
         silver => '第二次答对',
         gold => '第一次答对',
       };
