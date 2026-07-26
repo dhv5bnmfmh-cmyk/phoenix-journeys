@@ -59,3 +59,5 @@ jobs:
           fi
           git commit -m "feat: integrate three-mode challenges and full special journeys"
           git push origin HEAD:preview/stable-journey-bf5fdf
+
+# Triggered after the workflow file was present on the branch.
