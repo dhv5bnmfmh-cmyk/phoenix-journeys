@@ -55,3 +55,5 @@ jobs:
           fi
           git commit -m "feat: add narrated single-page challenges and collectible realm stamps"
           git push origin HEAD:preview/stable-journey-bf5fdf
+
+# Triggered after the workflow file was available on the branch.
