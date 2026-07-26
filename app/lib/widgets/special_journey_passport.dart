@@ -63,7 +63,11 @@ class SpecialJourneyPassport extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome, color: PhoenixTheme.gold, size: 15),
+              const Icon(
+                Icons.auto_awesome,
+                color: PhoenixTheme.gold,
+                size: 15,
+              ),
               const SizedBox(width: 5),
               Expanded(
                 child: Text(
@@ -227,7 +231,9 @@ class SpecialJourneyPassport extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFFF4E9D0),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .36)),
+                    border: Border.all(
+                      color: PhoenixTheme.gold.withValues(alpha: .36),
+                    ),
                   ),
                   child: Text(
                     state.displayText(journey.preview),
@@ -323,17 +329,16 @@ class SpecialJourneyPassport extends StatelessWidget {
     if (!sheetContext.mounted) return;
 
     final message = switch (result.status) {
-      SpecialJourneyUnlockStatus.unlocked =>
-        '${journey.title}已开启，并永久收藏。',
+      SpecialJourneyUnlockStatus.unlocked => '${journey.title}已开启，并永久收藏。',
       SpecialJourneyUnlockStatus.alreadyUnlocked =>
         '${journey.title}已经收藏，不会再次扣币。',
       SpecialJourneyUnlockStatus.insufficientFunds =>
         '${journey.currency}不足，还需要 ${result.missing} 枚。',
       SpecialJourneyUnlockStatus.busy => '正在处理，请稍候再试。',
     };
-    ScaffoldMessenger.of(sheetContext).showSnackBar(
-      SnackBar(content: Text(state.displayText(message))),
-    );
+    ScaffoldMessenger.of(
+      sheetContext,
+    ).showSnackBar(SnackBar(content: Text(state.displayText(message))));
   }
 
   Future<void> _showCollectedPreview(

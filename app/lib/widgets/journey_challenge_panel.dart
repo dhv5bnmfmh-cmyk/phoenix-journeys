@@ -6,10 +6,8 @@ import 'package:flutter/material.dart';
 import '../models/language_proficiency.dart';
 import '../theme/phoenix_theme.dart';
 
-typedef JourneyChallengeResolved = Future<void> Function(
-  String reward,
-  String awardId,
-);
+typedef JourneyChallengeResolved =
+    Future<void> Function(String reward, String awardId);
 
 enum JourneyChallengeType { paragraphRebuild, grammarRepair, missingSentence }
 
@@ -22,19 +20,18 @@ JourneyChallengeDifficulty challengeDifficultyForProfile(
   return switch (profile?.band) {
     null ||
     PhoenixReadingBand.beginner ||
-    PhoenixReadingBand.elementary =>
-      JourneyChallengeDifficulty.beginner,
+    PhoenixReadingBand.elementary => JourneyChallengeDifficulty.beginner,
     PhoenixReadingBand.intermediate ||
-    PhoenixReadingBand.upperIntermediate =>
-      JourneyChallengeDifficulty.standard,
-    PhoenixReadingBand.advanced || PhoenixReadingBand.mastery =>
-      JourneyChallengeDifficulty.advanced,
+    PhoenixReadingBand.upperIntermediate => JourneyChallengeDifficulty.standard,
+    PhoenixReadingBand.advanced ||
+    PhoenixReadingBand.mastery => JourneyChallengeDifficulty.advanced,
   };
 }
 
 @visibleForTesting
 JourneyChallengeType challengeTypeForSeed(int seed) {
-  return JourneyChallengeType.values[seed.abs() % JourneyChallengeType.values.length];
+  return JourneyChallengeType.values[seed.abs() %
+      JourneyChallengeType.values.length];
 }
 
 class JourneyChallengePanel extends StatefulWidget {
@@ -153,7 +150,9 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
               width: double.infinity,
               child: FilledButton.icon(
                 key: const ValueKey('challenge-submit'),
-                onPressed: _session.canSubmit && !_sendingReward ? _submit : null,
+                onPressed: _session.canSubmit && !_sendingReward
+                    ? _submit
+                    : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: PhoenixTheme.red,
                   foregroundColor: Colors.white,
@@ -194,7 +193,11 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
         children: [
           Row(
             children: [
-              const Icon(Icons.extension_rounded, color: PhoenixTheme.gold, size: 17),
+              const Icon(
+                Icons.extension_rounded,
+                color: PhoenixTheme.gold,
+                size: 17,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -208,7 +211,9 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
                 ),
               ),
               Container(
-                key: ValueKey('challenge-difficulty-${_session.difficulty.name}'),
+                key: ValueKey(
+                  'challenge-difficulty-${_session.difficulty.name}',
+                ),
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: .09),
@@ -237,9 +242,11 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           ),
           const SizedBox(height: 5),
           Text(
-            t(_session.resolved
-                ? '挑战已结束'
-                : '第 ${_session.attempts + 1} / 3 次 · 一次金币，二次银币，三次铜币'),
+            t(
+              _session.resolved
+                  ? '挑战已结束'
+                  : '第 ${_session.attempts + 1} / 3 次 · 一次金币，二次银币，三次铜币',
+            ),
             style: TextStyle(
               color: Colors.white.withValues(alpha: .64),
               fontSize: 9.5,
@@ -340,7 +347,9 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
                 selected: _session.selectedGrammarSegment == index,
                 onSelected: _session.resolved
                     ? null
-                    : (_) => setState(() => _session.selectedGrammarSegment = index),
+                    : (_) => setState(
+                        () => _session.selectedGrammarSegment = index,
+                      ),
                 selectedColor: const Color(0xFFFFD89A),
                 backgroundColor: const Color(0xFFF1E4C8),
                 label: Text(
@@ -433,10 +442,10 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     final accent = revealedCorrect
         ? const Color(0xFF79D09D)
         : selectedWrong
-            ? const Color(0xFFE07D73)
-            : selected
-                ? PhoenixTheme.gold
-                : Colors.white70;
+        ? const Color(0xFFE07D73)
+        : selected
+        ? PhoenixTheme.gold
+        : Colors.white70;
     return Material(
       key: ValueKey('challenge-option-${option.id}'),
       color: Colors.black.withValues(alpha: .28),
@@ -451,7 +460,11 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           padding: const EdgeInsets.fromLTRB(9, 8, 9, 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: accent.withValues(alpha: selected || revealedCorrect ? .8 : .2)),
+            border: Border.all(
+              color: accent.withValues(
+                alpha: selected || revealedCorrect ? .8 : .2,
+              ),
+            ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -546,7 +559,11 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
         children: [
           Row(
             children: [
-              const Icon(Icons.monetization_on_rounded, color: Color(0xFF7A5A1D), size: 19),
+              const Icon(
+                Icons.monetization_on_rounded,
+                color: Color(0xFF7A5A1D),
+                size: 19,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -656,26 +673,26 @@ class _ChallengeSession {
     final type = challengeTypeForSeed(seed);
     return switch (type) {
       JourneyChallengeType.paragraphRebuild => _buildParagraph(
-          journeyId,
-          storyParagraphs,
-          difficulty,
-          seed,
-          initialReward,
-        ),
+        journeyId,
+        storyParagraphs,
+        difficulty,
+        seed,
+        initialReward,
+      ),
       JourneyChallengeType.grammarRepair => _buildGrammar(
-          journeyId,
-          difficulty,
-          seed,
-          initialReward,
-        ),
+        journeyId,
+        difficulty,
+        seed,
+        initialReward,
+      ),
       JourneyChallengeType.missingSentence => _buildMissing(
-          journeyId,
-          storyParagraphs,
-          discoveryTexts,
-          difficulty,
-          seed,
-          initialReward,
-        ),
+        journeyId,
+        storyParagraphs,
+        discoveryTexts,
+        difficulty,
+        seed,
+        initialReward,
+      ),
     };
   }
 
@@ -703,31 +720,31 @@ class _ChallengeSession {
   String get awardId => '$journeyId:${type.name}:$seed';
 
   String get typeLabel => switch (type) {
-        JourneyChallengeType.paragraphRebuild => '短文复原',
-        JourneyChallengeType.grammarRepair => '语病修复',
-        JourneyChallengeType.missingSentence => '补回句子',
-      };
+    JourneyChallengeType.paragraphRebuild => '短文复原',
+    JourneyChallengeType.grammarRepair => '语病修复',
+    JourneyChallengeType.missingSentence => '补回句子',
+  };
 
   String get difficultyLabel => switch (difficulty) {
-        JourneyChallengeDifficulty.beginner => '轻松',
-        JourneyChallengeDifficulty.standard => '标准',
-        JourneyChallengeDifficulty.advanced => '挑战',
-      };
+    JourneyChallengeDifficulty.beginner => '轻松',
+    JourneyChallengeDifficulty.standard => '标准',
+    JourneyChallengeDifficulty.advanced => '挑战',
+  };
 
   bool get canSubmit => switch (type) {
-        JourneyChallengeType.paragraphRebuild =>
-          selectedIds.length == correctIds.length,
-        JourneyChallengeType.grammarRepair =>
-          selectedGrammarSegment != null && selectedIds.length == 1,
-        JourneyChallengeType.missingSentence => selectedIds.length == 1,
-      };
+    JourneyChallengeType.paragraphRebuild =>
+      selectedIds.length == correctIds.length,
+    JourneyChallengeType.grammarRepair =>
+      selectedGrammarSegment != null && selectedIds.length == 1,
+    JourneyChallengeType.missingSentence => selectedIds.length == 1,
+  };
 
   String get rewardCode => switch (reward) {
-        '金币' => 'gold',
-        '银币' => 'silver',
-        '铜币' => 'bronze',
-        _ => 'fragment',
-      };
+    '金币' => 'gold',
+    '银币' => 'silver',
+    '铜币' => 'bronze',
+    _ => 'fragment',
+  };
 
   List<_ChallengeOption> get selectedParagraphOptions => selectedIds
       .map((id) => options.firstWhere((option) => option.id == id))
@@ -824,22 +841,16 @@ class _ChallengeSession {
   }
 
   String get _firstHint => switch (type) {
-        JourneyChallengeType.paragraphRebuild =>
-          '先找能介绍整体地点或时间的句子，再安排人物行动。',
-        JourneyChallengeType.grammarRepair =>
-          '先检查句子有没有明确主语，再看关联词是否重复。',
-        JourneyChallengeType.missingSentence =>
-          '留意前一句的主语，以及后一句的结果或转折。',
-      };
+    JourneyChallengeType.paragraphRebuild => '先找能介绍整体地点或时间的句子，再安排人物行动。',
+    JourneyChallengeType.grammarRepair => '先检查句子有没有明确主语，再看关联词是否重复。',
+    JourneyChallengeType.missingSentence => '留意前一句的主语，以及后一句的结果或转折。',
+  };
 
   String get _secondHint => switch (type) {
-        JourneyChallengeType.paragraphRebuild =>
-          '开头通常交代整体，中间写行动，结尾才出现细节或结果。',
-        JourneyChallengeType.grammarRepair =>
-          '“通过……使……”常会拿走主语；成套关联词也不要重复堆叠。',
-        JourneyChallengeType.missingSentence =>
-          '正确句既要承接前文，也必须为后文的因果关系铺路。',
-      };
+    JourneyChallengeType.paragraphRebuild => '开头通常交代整体，中间写行动，结尾才出现细节或结果。',
+    JourneyChallengeType.grammarRepair => '“通过……使……”常会拿走主语；成套关联词也不要重复堆叠。',
+    JourneyChallengeType.missingSentence => '正确句既要承接前文，也必须为后文的因果关系铺路。',
+  };
 
   static _ChallengeSession _buildParagraph(
     String journeyId,
@@ -853,7 +864,9 @@ class _ChallengeSession {
       JourneyChallengeDifficulty.standard => 4,
       JourneyChallengeDifficulty.advanced => 5,
     };
-    final candidateCount = difficulty == JourneyChallengeDifficulty.advanced ? 7 : 6;
+    final candidateCount = difficulty == JourneyChallengeDifficulty.advanced
+        ? 7
+        : 6;
     final source = _extractSentences(storyParagraphs);
     final fallback = <String>[
       '清晨，探索者来到今天的目的地。',
@@ -896,8 +909,10 @@ class _ChallengeSession {
       distractorIndex += 1;
     }
     _shuffleOptions(options, seed + 17);
-    if (_leadingIds(options, correctOptions.length)
-        .equals(correctOptions.map((option) => option.id).toList())) {
+    if (_leadingIds(
+      options,
+      correctOptions.length,
+    ).equals(correctOptions.map((option) => option.id).toList())) {
       options.add(options.removeAt(0));
     }
     return _ChallengeSession(
@@ -922,44 +937,44 @@ class _ChallengeSession {
   ) {
     final grammar = switch (difficulty) {
       JourneyChallengeDifficulty.beginner => const _GrammarSpec(
-          segments: ['通过参观这里，', '使游客', '可以看到不同的风景。'],
-          problemSegmentIndex: 1,
-          originalSentence: '通过参观这里，使游客可以看到不同的风景。',
-          correctedSentence: '通过参观这里，游客可以看到不同的风景。',
-          correctOptionId: 'correct',
-          correctReplacement: '游客',
-          errorType: '成分残缺：主语缺失',
-          errorLocation: '“使游客”中的“使”',
-          whyWrong: '“通过……”已经形成介词结构，“使……”又引出结果，整句话便没有明确主语。',
-          revisionRule: '删除“使”，让“游客”直接成为主语。',
-          memoryTip: '看到“通过……使……”时，先检查句子里还剩不剩主语。',
-        ),
+        segments: ['通过参观这里，', '使游客', '可以看到不同的风景。'],
+        problemSegmentIndex: 1,
+        originalSentence: '通过参观这里，使游客可以看到不同的风景。',
+        correctedSentence: '通过参观这里，游客可以看到不同的风景。',
+        correctOptionId: 'correct',
+        correctReplacement: '游客',
+        errorType: '成分残缺：主语缺失',
+        errorLocation: '“使游客”中的“使”',
+        whyWrong: '“通过……”已经形成介词结构，“使……”又引出结果，整句话便没有明确主语。',
+        revisionRule: '删除“使”，让“游客”直接成为主语。',
+        memoryTip: '看到“通过……使……”时，先检查句子里还剩不剩主语。',
+      ),
       JourneyChallengeDifficulty.standard => const _GrammarSpec(
-          segments: ['这条长廊不但可以避雨，', '而且游客还', '看到不同的风景。'],
-          problemSegmentIndex: 1,
-          originalSentence: '这条长廊不但可以避雨，而且游客还看到不同的风景。',
-          correctedSentence: '这条长廊不但可以避雨，而且可以让游客看到不同的风景。',
-          correctOptionId: 'correct',
-          correctReplacement: '而且可以让游客',
-          errorType: '搭配不当：前后主语不一致',
-          errorLocation: '“而且游客还”',
-          whyWrong: '“不但”后的主语是“长廊”，后半句突然换成“游客”，关联结构不平行。',
-          revisionRule: '保持前后主语一致，用“可以让游客”承接“长廊”。',
-          memoryTip: '使用“不但……而且……”时，要检查两部分的主语和句式是否平行。',
-        ),
+        segments: ['这条长廊不但可以避雨，', '而且游客还', '看到不同的风景。'],
+        problemSegmentIndex: 1,
+        originalSentence: '这条长廊不但可以避雨，而且游客还看到不同的风景。',
+        correctedSentence: '这条长廊不但可以避雨，而且可以让游客看到不同的风景。',
+        correctOptionId: 'correct',
+        correctReplacement: '而且可以让游客',
+        errorType: '搭配不当：前后主语不一致',
+        errorLocation: '“而且游客还”',
+        whyWrong: '“不但”后的主语是“长廊”，后半句突然换成“游客”，关联结构不平行。',
+        revisionRule: '保持前后主语一致，用“可以让游客”承接“长廊”。',
+        memoryTip: '使用“不但……而且……”时，要检查两部分的主语和句式是否平行。',
+      ),
       JourneyChallengeDifficulty.advanced => const _GrammarSpec(
-          segments: ['由于园林采用了借景手法，', '因此使远山', '成为画面的一部分。'],
-          problemSegmentIndex: 1,
-          originalSentence: '由于园林采用了借景手法，因此使远山成为画面的一部分。',
-          correctedSentence: '由于园林采用了借景手法，远山因此成为画面的一部分。',
-          correctOptionId: 'correct',
-          correctReplacement: '远山因此',
-          errorType: '关联词赘余并导致主语缺失',
-          errorLocation: '“因此使远山”',
-          whyWrong: '“由于”已经引出原因，再用“因此使”会堆叠关系词，同时让结果句缺少自然主语。',
-          revisionRule: '让“远山”成为结果句主语，只保留一个自然的因果标记。',
-          memoryTip: '“由于”与“因此”可以呼应，但不要再叠加“使”拿走主语。',
-        ),
+        segments: ['由于园林采用了借景手法，', '因此使远山', '成为画面的一部分。'],
+        problemSegmentIndex: 1,
+        originalSentence: '由于园林采用了借景手法，因此使远山成为画面的一部分。',
+        correctedSentence: '由于园林采用了借景手法，远山因此成为画面的一部分。',
+        correctOptionId: 'correct',
+        correctReplacement: '远山因此',
+        errorType: '关联词赘余并导致主语缺失',
+        errorLocation: '“因此使远山”',
+        whyWrong: '“由于”已经引出原因，再用“因此使”会堆叠关系词，同时让结果句缺少自然主语。',
+        revisionRule: '让“远山”成为结果句主语，只保留一个自然的因果标记。',
+        memoryTip: '“由于”与“因此”可以呼应，但不要再叠加“使”拿走主语。',
+      ),
     };
     final distractors = <String>[
       grammar.correctReplacement,
@@ -984,7 +999,9 @@ class _ChallengeSession {
       seed: seed,
       type: JourneyChallengeType.grammarRepair,
       difficulty: difficulty,
-      options: options.take(difficulty == JourneyChallengeDifficulty.advanced ? 7 : 6).toList(),
+      options: options
+          .take(difficulty == JourneyChallengeDifficulty.advanced ? 7 : 6)
+          .toList(),
       correctIds: const ['correct'],
       instruction: '先找出病句位置，再从至少六个修改方案中选出最自然的一项。',
       explanation: grammar.whyWrong,
@@ -1007,12 +1024,8 @@ class _ChallengeSession {
     final before = beginner || source.length < 3
         ? '清晨，探索者来到今天的目的地。'
         : source[0];
-    final correct = beginner || source.length < 3
-        ? '他沿着主要路线慢慢向前走。'
-        : source[1];
-    final after = beginner || source.length < 3
-        ? '一路上的景色因此不断发生变化。'
-        : source[2];
+    final correct = beginner || source.length < 3 ? '他沿着主要路线慢慢向前走。' : source[1];
+    final after = beginner || source.length < 3 ? '一路上的景色因此不断发生变化。' : source[2];
     final distractors = <String>[
       correct,
       '他没有进入景区，直接回到了住处。',
@@ -1020,9 +1033,7 @@ class _ChallengeSession {
       '天气突然改变，但这与前后内容没有关系。',
       '游客只计算路程，并没有看见周围景色。',
       '故事在这里结束，后面没有出现任何结果。',
-      discoveryTexts.isNotEmpty
-          ? discoveryTexts.last
-          : '这句话只补充资料，却无法连接前后的行动。',
+      discoveryTexts.isNotEmpty ? discoveryTexts.last : '这句话只补充资料，却无法连接前后的行动。',
     ];
     final options = <_ChallengeOption>[
       for (var index = 0; index < distractors.length; index++)
@@ -1038,7 +1049,9 @@ class _ChallengeSession {
       seed: seed,
       type: JourneyChallengeType.missingSentence,
       difficulty: difficulty,
-      options: options.take(difficulty == JourneyChallengeDifficulty.advanced ? 7 : 6).toList(),
+      options: options
+          .take(difficulty == JourneyChallengeDifficulty.advanced ? 7 : 6)
+          .toList(),
       correctIds: const ['correct'],
       instruction: '阅读前后文，从至少六个相近选项中补回最自然的一句。',
       explanation: '中间句承接前文的人物和地点，并为后文“景色发生变化”的结果铺垫。',

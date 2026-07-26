@@ -12,6 +12,29 @@ enum ScriptMode { simplified, traditional }
 
 enum AppLoadStatus { loading, ready, error }
 
+enum SpecialJourneyUnlockStatus {
+  unlocked,
+  alreadyUnlocked,
+  insufficientFunds,
+  busy,
+}
+
+class SpecialJourneyUnlockResult {
+  const SpecialJourneyUnlockResult({
+    required this.status,
+    required this.currency,
+    required this.cost,
+    required this.balance,
+  });
+
+  final SpecialJourneyUnlockStatus status;
+  final String currency;
+  final int cost;
+  final int balance;
+
+  int get missing => math.max(0, cost - balance).toInt();
+}
+
 class AppState extends ChangeNotifier {
   AppState({DateTime Function()? clock}) : _clock = clock ?? DateTime.now {
     activeJourneyId = dailyJourneyForDate(_clock()).id;
@@ -46,6 +69,9 @@ class AppState extends ChangeNotifier {
   int silverCoins = 0;
   int bronzeCoins = 0;
   int silverFragments = 0;
+  final Set<String> awardedChallengeIds = <String>{};
+  final Set<String> unlockedSpecialJourneyIds = <String>{};
+  final Set<String> _specialJourneyUnlocksInFlight = <String>{};
 
   late String activeJourneyId;
   int _journeyStep = 0;
@@ -162,6 +188,14 @@ class AppState extends ChangeNotifier {
       silverCoins = prefs.getInt('wallet.silver') ?? 0;
       bronzeCoins = prefs.getInt('wallet.bronze') ?? 0;
       silverFragments = prefs.getInt('wallet.fragment') ?? 0;
+      awardedChallengeIds
+        ..clear()
+        ..addAll(prefs.getStringList('challenge.awardedIds') ?? <String>[]);
+      unlockedSpecialJourneyIds
+        ..clear()
+        ..addAll(
+          prefs.getStringList('specialJourney.unlockedIds') ?? <String>[],
+        );
 
       // Migrate the original single-city stamp without losing it.
       if (prefs.getBool('beijingStampEarned') == true ||
@@ -188,25 +222,32 @@ class AppState extends ChangeNotifier {
     final storedDifficulty = _readJourneyString(prefs, 'difficulty');
     journeyDifficulty = parseJourneyDifficulty(storedDifficulty);
     journeyDifficultyChosen = storedDifficulty != null;
-    final storedStep = _readJourneyInt(prefs, 'step') ??
+    final storedStep =
+        _readJourneyInt(prefs, 'step') ??
         (isLegacyBeijing ? prefs.getInt('beijingJourneyStep') : null) ??
         0;
-    final storedFurthest = _readJourneyInt(prefs, 'furthestStep') ??
+    final storedFurthest =
+        _readJourneyInt(prefs, 'furthestStep') ??
         (isLegacyBeijing ? prefs.getInt('beijingJourneyFurthestStep') : null) ??
         storedStep;
 
     _journeyStep = _safeJourneyStep(storedStep);
-    _journeyFurthestStep =
-        math.max(_journeyStep, _safeJourneyStep(storedFurthest)).toInt();
-    journeyCompleted = _readJourneyBool(prefs, 'completed') ??
+    _journeyFurthestStep = math
+        .max(_journeyStep, _safeJourneyStep(storedFurthest))
+        .toInt();
+    journeyCompleted =
+        _readJourneyBool(prefs, 'completed') ??
         (isLegacyBeijing ? prefs.getBool('journeyCompleted') ?? false : false);
-    wonderDraft = _readJourneyString(prefs, 'wonderDraft') ??
+    wonderDraft =
+        _readJourneyString(prefs, 'wonderDraft') ??
         (isLegacyBeijing ? prefs.getString('wonderDraft') : null) ??
         '';
-    expressDraft = _readJourneyString(prefs, 'expressDraft') ??
+    expressDraft =
+        _readJourneyString(prefs, 'expressDraft') ??
         (isLegacyBeijing ? prefs.getString('expressDraft') : null) ??
         '';
-    memoryDraft = _readJourneyString(prefs, 'memoryDraft') ??
+    memoryDraft =
+        _readJourneyString(prefs, 'memoryDraft') ??
         (isLegacyBeijing ? prefs.getString('memoryDraft') : null) ??
         '';
     guideFeedbackReply = _readJourneyString(prefs, 'guideFeedbackReply') ?? '';
@@ -319,24 +360,118 @@ class AppState extends ChangeNotifier {
     await prefs.setString(_key('difficulty'), value.storageValue);
   }
 
-  Future<void> awardChallengeReward(String reward) async {
-    switch (reward) {
-      case '金币':
-        goldCoins += 1;
-      case '银币':
-        silverCoins += 1;
-      case '铜币':
-        bronzeCoins += 1;
-      default:
-        silverFragments += 1;
-    }
+  bool isSpecialJourneyUnlocked(String journeyId) {
+    return unlockedSpecialJourneyIds.contains(journeyId);
+  }
+
+  int walletBalance(String currency) {
+    return switch (currency) {
+      '金币' => goldCoins,
+      '银币' => silverCoins,
+      '铜币' => bronzeCoins,
+      _ => silverFragments,
+    };
+  }
+
+  Future<bool> awardChallengeRewardOnce({
+    required String reward,
+    required String awardId,
+  }) async {
+    if (!awardedChallengeIds.add(awardId)) return false;
+    _addCurrency(reward, 1);
     notifyListeners();
+    await _persistWallet();
+    return true;
+  }
+
+  Future<void> awardChallengeReward(String reward) async {
+    await awardChallengeRewardOnce(
+      reward: reward,
+      awardId:
+          'legacy:${_clock().microsecondsSinceEpoch}:${awardedChallengeIds.length}',
+    );
+  }
+
+  Future<SpecialJourneyUnlockResult> unlockSpecialJourney({
+    required String journeyId,
+    required String currency,
+    required int cost,
+  }) async {
+    final initialBalance = walletBalance(currency);
+    if (isSpecialJourneyUnlocked(journeyId)) {
+      return SpecialJourneyUnlockResult(
+        status: SpecialJourneyUnlockStatus.alreadyUnlocked,
+        currency: currency,
+        cost: cost,
+        balance: initialBalance,
+      );
+    }
+    if (!_specialJourneyUnlocksInFlight.add(journeyId)) {
+      return SpecialJourneyUnlockResult(
+        status: SpecialJourneyUnlockStatus.busy,
+        currency: currency,
+        cost: cost,
+        balance: initialBalance,
+      );
+    }
+
+    try {
+      if (isSpecialJourneyUnlocked(journeyId)) {
+        return SpecialJourneyUnlockResult(
+          status: SpecialJourneyUnlockStatus.alreadyUnlocked,
+          currency: currency,
+          cost: cost,
+          balance: walletBalance(currency),
+        );
+      }
+      final currentBalance = walletBalance(currency);
+      if (cost < 0 || currentBalance < cost) {
+        return SpecialJourneyUnlockResult(
+          status: SpecialJourneyUnlockStatus.insufficientFunds,
+          currency: currency,
+          cost: cost,
+          balance: currentBalance,
+        );
+      }
+
+      _addCurrency(currency, -cost);
+      unlockedSpecialJourneyIds.add(journeyId);
+      notifyListeners();
+      await _persistWallet();
+      return SpecialJourneyUnlockResult(
+        status: SpecialJourneyUnlockStatus.unlocked,
+        currency: currency,
+        cost: cost,
+        balance: walletBalance(currency),
+      );
+    } finally {
+      _specialJourneyUnlocksInFlight.remove(journeyId);
+    }
+  }
+
+  void _addCurrency(String currency, int amount) {
+    if (currency == '金币') {
+      goldCoins = math.max(0, goldCoins + amount).toInt();
+    } else if (currency == '银币') {
+      silverCoins = math.max(0, silverCoins + amount).toInt();
+    } else if (currency == '铜币') {
+      bronzeCoins = math.max(0, bronzeCoins + amount).toInt();
+    } else {
+      silverFragments = math.max(0, silverFragments + amount).toInt();
+    }
+  }
+
+  Future<void> _persistWallet() async {
     final prefs = await SharedPreferences.getInstance();
+    final awarded = awardedChallengeIds.toList()..sort();
+    final unlocked = unlockedSpecialJourneyIds.toList()..sort();
     await Future.wait([
       prefs.setInt('wallet.gold', goldCoins),
       prefs.setInt('wallet.silver', silverCoins),
       prefs.setInt('wallet.bronze', bronzeCoins),
       prefs.setInt('wallet.fragment', silverFragments),
+      prefs.setStringList('challenge.awardedIds', awarded),
+      prefs.setStringList('specialJourney.unlockedIds', unlocked),
     ]);
   }
 

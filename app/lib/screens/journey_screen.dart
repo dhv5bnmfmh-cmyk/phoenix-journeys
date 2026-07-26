@@ -20,6 +20,7 @@ import '../theme/phoenix_theme.dart';
 import '../widgets/city_journey_stamp.dart';
 import '../widgets/destination_background.dart';
 import '../widgets/interactive_story_text.dart';
+import '../widgets/journey_challenge_panel.dart';
 import '../widgets/journey_share_button.dart';
 import '../widgets/journey_progress_header.dart';
 import '../widgets/narration_player_card.dart';
@@ -83,11 +84,9 @@ class _JourneyScreenState extends State<JourneyScreen>
   PhoenixWritingFeedback? _writingFeedback;
   bool _guideLoading = false;
   bool _writingLoading = false;
-  int _challengeAttempts = 0;
-  int? _selectedChallengeOption;
   bool _challengeResolved = false;
   String? _challengeReward;
-  late final int _challengeVariant;
+  late int _challengeSeed;
   bool _initialized = false;
   static const PhoenixLanguageLevelAgent _languageLevelAgent =
       PhoenixLanguageLevelAgent();
@@ -103,8 +102,8 @@ class _JourneyScreenState extends State<JourneyScreen>
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
     _experience = requireDailyJourneyExperience(journeyId);
-    _challengeVariant =
-        (DateTime.now().millisecondsSinceEpoch + journeyId.hashCode).abs() % 3;
+    _challengeSeed =
+        (DateTime.now().millisecondsSinceEpoch + journeyId.hashCode).abs();
     _ai = PhoenixAiService();
     wonderFocusNode.addListener(_handleWritingFocusChanged);
     expressFocusNode.addListener(_handleWritingFocusChanged);
@@ -179,171 +178,149 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   JourneyLevelContent get _levelContent {
-  final profile = _languageProfile;
-  if (profile == null) {
-    return resolveJourneyLevel(
+    final profile = _languageProfile;
+    if (profile == null) {
+      return resolveJourneyLevel(_experience, _appState.journeyDifficulty);
+    }
+    return resolveAdaptiveJourneyLevel(
       _experience,
-      _appState.journeyDifficulty,
+      profile: profile,
+      knownWords: _appState.savedWords,
     );
   }
-  return resolveAdaptiveJourneyLevel(
-    _experience,
-    profile: profile,
-    knownWords: _appState.savedWords,
-  );
-}
 
-ReadingGenerationPlan? get _generationPlan {
-  final profile = _languageProfile;
-  return profile == null ? null : _languageLevelAgent.planFor(profile);
-}
+  ReadingGenerationPlan? get _generationPlan {
+    final profile = _languageProfile;
+    return profile == null ? null : _languageLevelAgent.planFor(profile);
+  }
 
-List<JourneyDifficulty> get _supportedDifficulties =>
-    supportedJourneyDifficulties(_experience);
+  List<JourneyDifficulty> get _supportedDifficulties =>
+      supportedJourneyDifficulties(_experience);
 
-Future<void> _loadLanguageProfile() async {
-  final profile = await _languageLevelStore.load();
-  if (!mounted) return;
-  final rate = profile == null
-      ? _appState.journeyDifficulty.speechRate
-      : _languageLevelAgent.planFor(profile).speechRate;
-  await _narration.setSpeechRate(rate);
-  if (!mounted) return;
-  setState(() {
-    _languageProfile = profile;
-  });
-}
+  Future<void> _loadLanguageProfile() async {
+    final profile = await _languageLevelStore.load();
+    if (!mounted) return;
+    final rate = profile == null
+        ? _appState.journeyDifficulty.speechRate
+        : _languageLevelAgent.planFor(profile).speechRate;
+    await _narration.setSpeechRate(rate);
+    if (!mounted) return;
+    setState(() {
+      _languageProfile = profile;
+    });
+  }
 
-Future<void> _selectLanguageProfile(
-  ChineseProficiencyProfile profile,
-) async {
-  await _narration.stop();
-  await _languageLevelStore.save(profile);
-  await _narration.setSpeechRate(
-    _languageLevelAgent.planFor(profile).speechRate,
-  );
-  if (!mounted) return;
-  setState(() {
-    _languageProfile = profile;
-  });
-}
+  Future<void> _selectLanguageProfile(ChineseProficiencyProfile profile) async {
+    await _narration.stop();
+    await _languageLevelStore.save(profile);
+    await _narration.setSpeechRate(
+      _languageLevelAgent.planFor(profile).speechRate,
+    );
+    if (!mounted) return;
+    setState(() {
+      _languageProfile = profile;
+    });
+  }
 
-Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
-  if (!mounted) return;
-  final track = await showModalBottomSheet<ChineseExamTrack>(
-    context: context,
-    useSafeArea: true,
-    showDragHandle: true,
-    builder: (sheetContext) => Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _appState.displayText(
-              showIntro ? '选择适合你的旅程' : '选择中文考试路线',
+  Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
+    if (!mounted) return;
+    final track = await showModalBottomSheet<ChineseExamTrack>(
+      context: context,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _appState.displayText(showIntro ? '选择适合你的旅程' : '选择中文考试路线'),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
             ),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
+            const SizedBox(height: 4),
+            Text(
+              _appState.displayText('Phoenix 会调整短文长度、句子复杂度和重点单词数量。'),
+              style: const TextStyle(fontSize: 12, height: 1.35),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _appState.displayText(
-              'Phoenix 会调整短文长度、句子复杂度和重点单词数量。',
-            ),
-            style: const TextStyle(fontSize: 12, height: 1.35),
-          ),
-          const SizedBox(height: 10),
-          for (final item in ChineseExamTrack.values)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: CircleAvatar(
-                backgroundColor:
-                    PhoenixTheme.red.withValues(alpha: .12),
-                child: Text(
-                  item == ChineseExamTrack.hsk ? '汉' : '华',
-                  style: const TextStyle(
-                    color: PhoenixTheme.red,
-                    fontWeight: FontWeight.w900,
+            const SizedBox(height: 10),
+            for (final item in ChineseExamTrack.values)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  backgroundColor: PhoenixTheme.red.withValues(alpha: .12),
+                  child: Text(
+                    item == ChineseExamTrack.hsk ? '汉' : '华',
+                    style: const TextStyle(
+                      color: PhoenixTheme.red,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
-              ),
-              title: Text(
-                item.label,
-                style: const TextStyle(fontWeight: FontWeight.w900),
-              ),
-              subtitle: Text(
-                _appState.displayText(
-                  item == ChineseExamTrack.hsk
-                      ? 'HSK 1 至 HSK 7–9'
-                      : '准备级至 TOCFL Level 6',
+                title: Text(
+                  item.label,
+                  style: const TextStyle(fontWeight: FontWeight.w900),
                 ),
+                subtitle: Text(
+                  _appState.displayText(
+                    item == ChineseExamTrack.hsk
+                        ? 'HSK 1 至 HSK 7–9'
+                        : '准备级至 TOCFL Level 6',
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => Navigator.of(sheetContext).pop(item),
               ),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => Navigator.of(sheetContext).pop(item),
-            ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-  if (!mounted || track == null) return;
+    );
+    if (!mounted || track == null) return;
 
-  final selected = await showModalBottomSheet<ChineseProficiencyProfile>(
-    context: context,
-    useSafeArea: true,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (sheetContext) => FractionallySizedBox(
-      heightFactor: .78,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-        children: [
-          Text(
-            _appState.displayText('选择 ${track.label} 等级'),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
+    final selected = await showModalBottomSheet<ChineseProficiencyProfile>(
+      context: context,
+      useSafeArea: true,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => FractionallySizedBox(
+        heightFactor: .78,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          children: [
+            Text(
+              _appState.displayText('选择 ${track.label} 等级'),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _appState.displayText(
-              '两套考试独立映射，不把 HSK 和 TOCFL 强行画等号。',
+            const SizedBox(height: 4),
+            Text(
+              _appState.displayText('两套考试独立映射，不把 HSK 和 TOCFL 强行画等号。'),
+              style: const TextStyle(fontSize: 12, height: 1.35),
             ),
-            style: const TextStyle(fontSize: 12, height: 1.35),
-          ),
-          const SizedBox(height: 8),
-          for (final profile in _languageLevelAgent.profilesFor(track))
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                profile.displayLabel,
-                style: const TextStyle(fontWeight: FontWeight.w900),
-              ),
-              subtitle: Text(
-                _appState.displayText(
-                  '${profile.band.label} · '
-                  '${_languageLevelAgent.planFor(profile).targetVocabularyCount} 个重点单词',
+            const SizedBox(height: 8),
+            for (final profile in _languageLevelAgent.profilesFor(track))
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  profile.displayLabel,
+                  style: const TextStyle(fontWeight: FontWeight.w900),
                 ),
+                subtitle: Text(
+                  _appState.displayText(
+                    '${profile.band.label} · '
+                    '${_languageLevelAgent.planFor(profile).targetVocabularyCount} 个重点单词',
+                  ),
+                ),
+                trailing: _languageProfile?.storageValue == profile.storageValue
+                    ? const Icon(Icons.check_rounded, color: PhoenixTheme.red)
+                    : const Icon(Icons.chevron_right_rounded),
+                onTap: () => Navigator.of(sheetContext).pop(profile),
               ),
-              trailing: _languageProfile?.storageValue ==
-                      profile.storageValue
-                  ? const Icon(
-                      Icons.check_rounded,
-                      color: PhoenixTheme.red,
-                    )
-                  : const Icon(Icons.chevron_right_rounded),
-              onTap: () => Navigator.of(sheetContext).pop(profile),
-            ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-  if (selected != null) await _selectLanguageProfile(selected);
-}
+    );
+    if (selected != null) await _selectLanguageProfile(selected);
+  }
 
   Future<void> _changeDifficulty(JourneyDifficulty value) async {
     if (value == _appState.journeyDifficulty &&
@@ -520,7 +497,7 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
       'targetCharacterRange': _generationPlan == null
           ? null
           : '${_generationPlan!.minTotalCharacters}-'
-              '${_generationPlan!.maxTotalCharacters}',
+                '${_generationPlan!.maxTotalCharacters}',
       'savedWords': _appState.savedWords.toList(growable: false),
       'completedJourneys': _appState.earnedJourneyStampIds.toList(
         growable: false,
@@ -808,7 +785,14 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
     _writingFeedback = null;
     _guideLoading = false;
     _writingLoading = false;
-    if (mounted) setState(() => step = 0);
+    if (mounted) {
+      setState(() {
+        _challengeResolved = false;
+        _challengeReward = null;
+        _challengeSeed += 1;
+        step = 0;
+      });
+    }
   }
 
   JourneyBackgroundPage get _backgroundPageType => switch (step) {
@@ -1277,10 +1261,11 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
           final rows = (_levelContent.words.length / columns).ceil();
           final cellWidth =
               (constraints.maxWidth - spacing * (columns - 1)) / columns;
-          final availableHeight =
-              math.min(constraints.maxHeight, rows * 116 + spacing * (rows - 1));
-          final cellHeight =
-              (availableHeight - spacing * (rows - 1)) / rows;
+          final availableHeight = math.min(
+            constraints.maxHeight,
+            rows * 116 + spacing * (rows - 1),
+          );
+          final cellHeight = (availableHeight - spacing * (rows - 1)) / rows;
           final safeCellHeight = math.max(1.0, cellHeight);
           final ratio = cellWidth / safeCellHeight;
           const showPartOfSpeech = true;
@@ -1316,149 +1301,154 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
                       onTap: () => unawaited(_openWord(entry)),
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 3,
-                    ),
-                    decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
-                      color: Colors.black.withValues(alpha: .26),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 3,
+                        ),
+                        decoration: PhoenixTheme.journeyPanelDecoration
+                            .copyWith(
+                              color: Colors.black.withValues(alpha: .26),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                         child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Flexible(
-                              child: Text(
-                                state.displayText(entry.word),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    state.displayText(entry.word),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      height: 1,
+                                      fontFamily:
+                                          PhoenixTheme.chineseFontFamily,
+                                      fontFamilyFallback:
+                                          PhoenixTheme.chineseFontFallback,
+                                      fontWeight: FontWeight.w900,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black,
+                                          blurRadius: 4,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                if (state.isWordSaved(entry.word)) ...[
+                                  const SizedBox(width: 2),
+                                  const Icon(
+                                    Icons.bookmark_rounded,
+                                    size: 11,
+                                    color: PhoenixTheme.red,
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              entry.pinyin,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: cellHeight >= 120 ? 10 : 8,
+                                height: 1,
+                                fontFamily: PhoenixTheme.chineseFontFamily,
+                                fontFamilyFallback:
+                                    PhoenixTheme.chineseFontFallback,
+                                shadows: const [
+                                  Shadow(color: Colors.black, blurRadius: 4),
+                                ],
+                              ),
+                            ),
+                            if (showPartOfSpeech) ...[
+                              const SizedBox(height: 7),
+                              Text(
+                                state.displayText(entry.partOfSpeech),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 11,
-                                  height: 1,
+                                  fontSize: 9.5,
                                   fontFamily: PhoenixTheme.chineseFontFamily,
                                   fontFamilyFallback:
                                       PhoenixTheme.chineseFontFallback,
-                                  fontWeight: FontWeight.w900,
+                                  fontWeight: FontWeight.w800,
                                   shadows: [
                                     Shadow(color: Colors.black, blurRadius: 4),
                                   ],
                                 ),
                               ),
-                            ),
-                            if (state.isWordSaved(entry.word)) ...[
-                              const SizedBox(width: 2),
-                              const Icon(
-                                Icons.bookmark_rounded,
-                                size: 11,
-                                color: PhoenixTheme.red,
+                            ],
+                            if (showNativeMeaning) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                '$nativeLabel · ${state.displayText(entry.nativeDefinition(language))}',
+                                maxLines: cellHeight >= 112 ? 2 : 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8.6,
+                                  height: 1.15,
+                                  fontFamily: PhoenixTheme.chineseFontFamily,
+                                  fontFamilyFallback:
+                                      PhoenixTheme.chineseFontFallback,
+                                  fontWeight: FontWeight.w700,
+                                  shadows: [
+                                    Shadow(color: Colors.black, blurRadius: 4),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            if (showEnglishMeaning) ...[
+                              const SizedBox(height: 3),
+                              Text(
+                                'EN · ${entry.englishDefinition}',
+                                maxLines: cellHeight >= 126 ? 2 : 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8.4,
+                                  height: 1.15,
+                                  fontFamily: PhoenixTheme.chineseFontFamily,
+                                  fontFamilyFallback:
+                                      PhoenixTheme.chineseFontFallback,
+                                  shadows: [
+                                    Shadow(color: Colors.black, blurRadius: 4),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            if (showChineseMeaning) ...[
+                              const SizedBox(height: 3),
+                              Text(
+                                state.displayText('中 · ${entry.simpleChinese}'),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8.4,
+                                  height: 1.15,
+                                  fontFamily: PhoenixTheme.chineseFontFamily,
+                                  fontFamilyFallback:
+                                      PhoenixTheme.chineseFontFallback,
+                                  shadows: [
+                                    Shadow(color: Colors.black, blurRadius: 4),
+                                  ],
+                                ),
                               ),
                             ],
                           ],
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          entry.pinyin,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: cellHeight >= 120 ? 10 : 8,
-                            height: 1,
-                            fontFamily: PhoenixTheme.chineseFontFamily,
-                            fontFamilyFallback:
-                                PhoenixTheme.chineseFontFallback,
-                            shadows: const [
-                              Shadow(color: Colors.black, blurRadius: 4),
-                            ],
-                          ),
-                        ),
-                        if (showPartOfSpeech) ...[
-                          const SizedBox(height: 7),
-                          Text(
-                            state.displayText(entry.partOfSpeech),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9.5,
-                              fontFamily: PhoenixTheme.chineseFontFamily,
-                              fontFamilyFallback:
-                                  PhoenixTheme.chineseFontFallback,
-                              fontWeight: FontWeight.w800,
-                              shadows: [
-                                Shadow(color: Colors.black, blurRadius: 4),
-                              ],
-                            ),
-                          ),
-                        ],
-                        if (showNativeMeaning) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            '$nativeLabel · ${state.displayText(entry.nativeDefinition(language))}',
-                            maxLines: cellHeight >= 112 ? 2 : 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 8.6,
-                              height: 1.15,
-                              fontFamily: PhoenixTheme.chineseFontFamily,
-                              fontFamilyFallback:
-                                  PhoenixTheme.chineseFontFallback,
-                              fontWeight: FontWeight.w700,
-                              shadows: [
-                                Shadow(color: Colors.black, blurRadius: 4),
-                              ],
-                            ),
-                          ),
-                        ],
-                        if (showEnglishMeaning) ...[
-                          const SizedBox(height: 3),
-                          Text(
-                            'EN · ${entry.englishDefinition}',
-                            maxLines: cellHeight >= 126 ? 2 : 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 8.4,
-                              height: 1.15,
-                              fontFamily: PhoenixTheme.chineseFontFamily,
-                              fontFamilyFallback:
-                                  PhoenixTheme.chineseFontFallback,
-                              shadows: [
-                                Shadow(color: Colors.black, blurRadius: 4),
-                              ],
-                            ),
-                          ),
-                        ],
-                        if (showChineseMeaning) ...[
-                          const SizedBox(height: 3),
-                          Text(
-                            state.displayText('中 · ${entry.simpleChinese}'),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 8.4,
-                              height: 1.15,
-                              fontFamily: PhoenixTheme.chineseFontFamily,
-                              fontFamilyFallback:
-                                  PhoenixTheme.chineseFontFallback,
-                              shadows: [
-                                Shadow(color: Colors.black, blurRadius: 4),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
                       ),
                     ),
                   );
@@ -1633,192 +1623,35 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
 
   Widget _challengePage() {
     final state = context.watch<AppState>();
-    final correctText = _levelContent.discoveries.first.text;
-    final distractors = <String>[
-      '沿途景物只用来说明地点，与人物当时的心情和选择没有联系。',
-      '这段旅程强调快速抵达终点，因此不必观察环境发生的细微变化。',
-      '故事主要介绍建筑的年代，并没有让探索者留意人与空间的关系。',
-      '这里最值得记住的是路线长度，声音、光影和行人的动作并不重要。',
-      '发现页只补充了旅游资料，没有延续故事中观察世界的方式。',
-    ];
-    final correctIndex = (_challengeVariant * 2 + 1) % 6;
-    final options = <String>[...distractors]..insert(correctIndex, correctText);
-    final questions = <String>[
-      '哪一句最准确地概括了刚才的故事与发现？',
-      '如果把刚才的内容讲给朋友，哪一句最接近原意？',
-      '哪一项最能说明故事中的景物为什么值得观察？',
-    ];
-
     return _page(
       title: '挑战',
-      buttonText: _challengeResolved ? '继续留下回忆' : '请选择答案',
-      buttonIcon:
-          _challengeResolved ? Icons.arrow_forward : Icons.lock_outline_rounded,
+      buttonText: _challengeResolved ? '继续留下回忆' : '完成挑战后继续',
+      buttonIcon: _challengeResolved
+          ? Icons.arrow_forward_rounded
+          : Icons.lock_outline_rounded,
       primaryEnabled: _challengeResolved,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: .34),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: PhoenixTheme.gold.withValues(alpha: .45),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  state.displayText('钱币挑战 · 理解今天的发现'),
-                  style: const TextStyle(
-                    color: PhoenixTheme.gold,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  state.displayText(questions[_challengeVariant]),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    height: 1.35,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  state.displayText(
-                    '第一次通过得金币，第二次得银币，第三次得铜币；三次未通过会自动继续。',
-                  ),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: .72),
-                    fontSize: 10.5,
-                    height: 1.35,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 9),
-          Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              itemCount: options.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 7),
-              itemBuilder: (context, index) {
-                final selected = _selectedChallengeOption == index;
-                final correct = index == correctIndex;
-                final showCorrect = _challengeResolved && correct;
-                final showWrong = selected && !correct;
-                final color = showCorrect
-                    ? const Color(0xFF77C89A)
-                    : showWrong
-                    ? const Color(0xFFE08076)
-                    : Colors.white;
-                return Material(
-                  color: Colors.black.withValues(alpha: .28),
-                  borderRadius: BorderRadius.circular(14),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(14),
-                    onTap: _challengeResolved
-                        ? null
-                        : () {
-                            final nextAttempts = _challengeAttempts + 1;
-                            final isCorrect = index == correctIndex;
-                            final exhausted = nextAttempts >= 3;
-                            setState(() {
-                              _challengeAttempts = nextAttempts;
-                              _selectedChallengeOption = index;
-                              _challengeResolved = isCorrect || exhausted;
-                              if (_challengeResolved) {
-                                _challengeReward = isCorrect
-                                    ? switch (nextAttempts) {
-                                        1 => '金币',
-                                        2 => '银币',
-                                        _ => '铜币',
-                                      }
-                                    : '碎银';
-                              }
-                            });
-                            if (_challengeResolved) {
-                              unawaited(
-                                state.awardChallengeReward(
-                                  _challengeReward ?? '碎银',
-                                ),
-                              );
-                            }
-                          },
-                    child: Container(
-                      padding: const EdgeInsets.all(11),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: color.withValues(alpha: selected || showCorrect
-                              ? .8
-                              : .2),
-                        ),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 24,
-                            height: 24,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: color.withValues(alpha: .14),
-                            ),
-                            child: Text(
-                              String.fromCharCode(65 + index),
-                              style: TextStyle(
-                                color: color,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 9),
-                          Expanded(
-                            child: Text(
-                              state.displayText(options[index]),
-                              style: TextStyle(
-                                color: color,
-                                fontSize: 12,
-                                height: 1.42,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          if (_challengeAttempts > 0) ...[
-            const SizedBox(height: 7),
-            Text(
-              state.displayText(
-                _challengeResolved
-                    ? '挑战完成 · 获得 ${_challengeReward ?? '碎银'}'
-                    : '这次还不对。已尝试 $_challengeAttempts 次，还可尝试 ${3 - _challengeAttempts} 次。',
-              ),
-              style: TextStyle(
-                color: _challengeResolved
-                    ? PhoenixTheme.gold
-                    : Colors.white.withValues(alpha: .78),
-                fontSize: 11,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ],
-        ],
+      child: JourneyChallengePanel(
+        key: ValueKey('journey-challenge-${_experience.id}-$_challengeSeed'),
+        journeyId: _experience.id,
+        storyParagraphs: _levelContent.storyParagraphs,
+        discoveryTexts: _levelContent.discoveries
+            .map((item) => item.text)
+            .toList(growable: false),
+        profile: _languageProfile,
+        seed: _challengeSeed,
+        displayText: state.displayText,
+        initialReward: _challengeReward,
+        onResolved: (reward, awardId) async {
+          await state.awardChallengeRewardOnce(
+            reward: reward,
+            awardId: awardId,
+          );
+          if (!mounted) return;
+          setState(() {
+            _challengeResolved = true;
+            _challengeReward = reward;
+          });
+        },
       ),
     );
   }

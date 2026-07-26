@@ -9,6 +9,7 @@ import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/city_journey_stamp.dart';
 import '../widgets/journey_share_button.dart';
+import '../widgets/special_journey_passport.dart';
 import 'journey_screen.dart';
 
 bool get _passportAllAccessPreview {
@@ -32,7 +33,7 @@ class CityPassportScreen extends StatelessWidget {
           const SizedBox(height: 8),
           _CityOverview(state: state),
           const SizedBox(height: 8),
-          _SpecialJourneyPassport(state: state),
+          SpecialJourneyPassport(state: state),
           const SizedBox(height: 8),
           Expanded(
             child: ListView.separated(
@@ -43,109 +44,6 @@ class CityPassportScreen extends StatelessWidget {
                 state: state,
                 city: journeyCityCatalog[index],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SpecialJourneyPassport extends StatelessWidget {
-  const _SpecialJourneyPassport({required this.state});
-
-  final AppState state;
-
-  @override
-  Widget build(BuildContext context) {
-    const collections = [
-      ('文学漫游', '金币', Icons.auto_stories_rounded),
-      ('神话寻踪', '金币', Icons.brightness_7_rounded),
-      ('志怪夜话', '银币', Icons.nights_stay_rounded),
-      ('民俗秘境', '铜币', Icons.temple_buddhist_rounded),
-    ];
-    return Container(
-      key: const ValueKey('passport-special-journeys'),
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(10, 8, 10, 9),
-      decoration: BoxDecoration(
-        color: const Color(0xFF231A2D).withValues(alpha: .82),
-        borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .42)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.auto_awesome, color: PhoenixTheme.gold, size: 15),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  state.displayText('万象奇旅 · 特别旅程'),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              Text(
-                state.displayText('在这里选择并用钱币开启'),
-                style: const TextStyle(color: Colors.white60, fontSize: 8.5),
-              ),
-            ],
-          ),
-          const SizedBox(height: 7),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (final item in collections) ...[
-                  Container(
-                    width: 91,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 7,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: .075),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white12),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(item.$3, color: PhoenixTheme.gold, size: 16),
-                        const SizedBox(width: 5),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                state.displayText(item.$1),
-                                maxLines: 1,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                              Text(
-                                state.displayText('${item.$2}开启'),
-                                style: const TextStyle(
-                                  color: Colors.white60,
-                                  fontSize: 7.8,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                ],
-              ],
             ),
           ),
         ],
@@ -574,9 +472,7 @@ class _DestinationStampCard extends StatelessWidget {
     if (state.journeyCompleted) await state.restartJourney();
     if (!context.mounted) return;
     await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => JourneyScreen(journeyId: journey.id),
-      ),
+      MaterialPageRoute(builder: (_) => JourneyScreen(journeyId: journey.id)),
     );
   }
 
@@ -686,8 +582,12 @@ class _DestinationStampCard extends StatelessWidget {
                             const SizedBox(width: 6),
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: () => unawaited(_openJourney(context)),
-                                icon: const Icon(Icons.replay_rounded, size: 16),
+                                onPressed: () =>
+                                    unawaited(_openJourney(context)),
+                                icon: const Icon(
+                                  Icons.replay_rounded,
+                                  size: 16,
+                                ),
                                 label: Text(
                                   state.displayText('再次体验'),
                                   style: const TextStyle(fontSize: 10),
