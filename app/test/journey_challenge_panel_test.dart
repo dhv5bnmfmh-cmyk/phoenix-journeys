@@ -57,19 +57,8 @@ Future<void> _pumpChallenge(
   await tester.pumpAndSettle();
 }
 
-Finder _challengeView() {
-  return find.byKey(const ValueKey('challenge-scroll-area'));
-}
-
 Future<Finder> _ensureKeyVisible(WidgetTester tester, String key) async {
   final finder = find.byKey(ValueKey(key));
-  if (finder.evaluate().isEmpty) {
-    await tester.dragUntilVisible(
-      finder,
-      _challengeView(),
-      const Offset(0, -220),
-    );
-  }
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
   return finder;
@@ -244,6 +233,12 @@ void main() {
     await _completeMissingSentence(tester);
 
     expect(rewards, ['金币', '金币', '金币']);
+    expect(completed, 0);
+    expect(
+      find.byKey(const ValueKey('challenge-explanation-dialog')),
+      findsOneWidget,
+    );
+    await _tapKey(tester, 'challenge-dialog-action');
     expect(completed, 1);
     final completeButton = await _ensureKeyVisible(
       tester,
@@ -292,9 +287,15 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const ValueKey('challenge-explanation')), findsOneWidget);
-    expect(find.textContaining('三次机会已经结束'), findsOneWidget);
-    final nextMode = await _ensureKeyVisible(tester, 'challenge-next-mode');
-    expect(nextMode, findsOneWidget);
+    expect(find.text('正确答案'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('challenge-explanation-dialog')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('challenge-dialog-action')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('rapid taps cannot award one mode twice', (tester) async {
