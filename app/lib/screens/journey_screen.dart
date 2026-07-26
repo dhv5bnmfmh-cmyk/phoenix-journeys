@@ -1600,6 +1600,9 @@ Future<void> _showDifficultyWelcome() async {
     );
   }
 
+  // Kept temporarily for stored-draft compatibility, but no longer part of
+  // the explorer-facing journey flow.
+  // ignore: unused_element
   Widget _wonderPage() {
     final keyboardVisible = wonderFocusNode.hasFocus;
     final hasFeedback = _guideFeedback != null;
@@ -1837,6 +1840,9 @@ Future<void> _showDifficultyWelcome() async {
     );
   }
 
+  // Kept temporarily for stored-draft compatibility, but no longer part of
+  // the explorer-facing journey flow.
+  // ignore: unused_element
   Widget _expressPage() {
     final keyboardVisible = expressFocusNode.hasFocus;
     final hasFeedback = _writingFeedback != null;
