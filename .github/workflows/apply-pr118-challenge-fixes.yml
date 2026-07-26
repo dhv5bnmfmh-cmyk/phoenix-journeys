@@ -1,0 +1,45 @@
+name: Apply PR118 challenge option safety fixes
+
+on:
+  push:
+    branches:
+      - preview/stable-journey-bf5fdf
+    paths:
+      - tools/fix_pr118_challenge_options.py
+      - .github/workflows/apply-pr118-challenge-fixes.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR118 branch
+        uses: actions/checkout@v4
+        with:
+          ref: preview/stable-journey-bf5fdf
+
+      - name: Set up Flutter formatter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Apply option safety fixes
+        run: python3 tools/fix_pr118_challenge_options.py
+
+      - name: Format challenge panel
+        run: dart format app/lib/widgets/journey_challenge_panel.dart
+
+      - name: Commit fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/widgets/journey_challenge_panel.dart
+          if git diff --cached --quiet; then
+            echo "No challenge fixes to commit"
+            exit 0
+          fi
+          git commit -m "fix: keep correct challenge options available"
+          git push origin HEAD:preview/stable-journey-bf5fdf
