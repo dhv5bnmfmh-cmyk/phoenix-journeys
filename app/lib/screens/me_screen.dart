@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
+import '../agents/phoenix_language_level_agent.dart';
+import '../models/language_proficiency.dart';
+import '../services/language_level_preference_store.dart';
 import '../services/narration_controller.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
@@ -19,6 +22,100 @@ class MeScreen extends StatefulWidget {
 
 class _MeScreenState extends State<MeScreen> {
   int _section = 0;
+  static const _levelAgent = PhoenixLanguageLevelAgent();
+  static const _levelStore = LanguageLevelPreferenceStore();
+  ChineseProficiencyProfile? _profile;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final profile = await _levelStore.load();
+    if (mounted) setState(() => _profile = profile);
+  }
+
+  Future<void> _chooseLevel(AppState state) async {
+    final track = await showModalBottomSheet<ChineseExamTrack>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              state.displayText('中文能力设置'),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            ),
+            Text(
+              state.displayText('选择考试体系后，Phoenix 会自动调整旅程难度。'),
+              style: const TextStyle(fontSize: 11.5, color: Colors.black54),
+            ),
+            const SizedBox(height: 8),
+            for (final item in ChineseExamTrack.values)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  item == ChineseExamTrack.hsk
+                      ? Icons.translate_rounded
+                      : Icons.menu_book_rounded,
+                  color: PhoenixTheme.red,
+                ),
+                title: Text(item.label,
+                    style: const TextStyle(fontWeight: FontWeight.w900)),
+                subtitle: Text(
+                  state.displayText(
+                    item == ChineseExamTrack.hsk
+                        ? 'HSK 1 至 HSK 7–9'
+                        : '准备级至 TOCFL Level 6',
+                  ),
+                ),
+                onTap: () => Navigator.of(sheetContext).pop(item),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted || track == null) return;
+    final selected = await showModalBottomSheet<ChineseProficiencyProfile>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => FractionallySizedBox(
+        heightFactor: .75,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          children: [
+            Text(
+              state.displayText('选择 ${track.label} 等级'),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 8),
+            for (final item in _levelAgent.profilesFor(track))
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(item.displayLabel,
+                    style: const TextStyle(fontWeight: FontWeight.w900)),
+                subtitle: Text(state.displayText(item.band.label)),
+                trailing: _profile?.storageValue == item.storageValue
+                    ? const Icon(Icons.check_rounded, color: PhoenixTheme.red)
+                    : const Icon(Icons.chevron_right_rounded),
+                onTap: () => Navigator.of(sheetContext).pop(item),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (selected == null) return;
+    await _levelStore.save(selected);
+    if (mounted) setState(() => _profile = selected);
+  }
 
   Future<void> _openSavedWord(
     BuildContext context,
@@ -62,6 +159,12 @@ class _MeScreenState extends State<MeScreen> {
               ],
               _LanguageControl(state: state),
               SizedBox(height: compact ? 5 : 7),
+              _AbilityControl(
+                state: state,
+                profile: _profile,
+                onTap: () => _chooseLevel(state),
+              ),
+              SizedBox(height: compact ? 5 : 7),
               _MeSectionSwitch(
                 state: state,
                 selected: _section,
@@ -91,6 +194,60 @@ class _MeScreenState extends State<MeScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+class _AbilityControl extends StatelessWidget {
+  const _AbilityControl({
+    required this.state,
+    required this.profile,
+    required this.onTap,
+  });
+
+  final AppState state;
+  final ChineseProficiencyProfile? profile;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: .78),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        key: const ValueKey('settings-language-level'),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .28)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.tune_rounded, size: 18, color: PhoenixTheme.red),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  state.displayText('HSK／TOCFL 能力设置'),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                ),
+              ),
+              Text(
+                profile?.displayLabel ?? state.displayText('请选择'),
+                style: const TextStyle(
+                  color: PhoenixTheme.red,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, size: 17),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

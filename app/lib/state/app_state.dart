@@ -42,6 +42,10 @@ class AppState extends ChangeNotifier {
   final List<String> memories = [];
   final Set<String> savedWords = <String>{};
   final Set<String> earnedJourneyStampIds = <String>{};
+  int goldCoins = 0;
+  int silverCoins = 0;
+  int bronzeCoins = 0;
+  int silverFragments = 0;
 
   late String activeJourneyId;
   int _journeyStep = 0;
@@ -154,6 +158,10 @@ class AppState extends ChangeNotifier {
       earnedJourneyStampIds
         ..clear()
         ..addAll(prefs.getStringList('earnedJourneyStampIds') ?? <String>[]);
+      goldCoins = prefs.getInt('wallet.gold') ?? 0;
+      silverCoins = prefs.getInt('wallet.silver') ?? 0;
+      bronzeCoins = prefs.getInt('wallet.bronze') ?? 0;
+      silverFragments = prefs.getInt('wallet.fragment') ?? 0;
 
       // Migrate the original single-city stamp without losing it.
       if (prefs.getBool('beijingStampEarned') == true ||
@@ -309,6 +317,27 @@ class AppState extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_key('difficulty'), value.storageValue);
+  }
+
+  Future<void> awardChallengeReward(String reward) async {
+    switch (reward) {
+      case '金币':
+        goldCoins += 1;
+      case '银币':
+        silverCoins += 1;
+      case '铜币':
+        bronzeCoins += 1;
+      default:
+        silverFragments += 1;
+    }
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.setInt('wallet.gold', goldCoins),
+      prefs.setInt('wallet.silver', silverCoins),
+      prefs.setInt('wallet.bronze', bronzeCoins),
+      prefs.setInt('wallet.fragment', silverFragments),
+    ]);
   }
 
   Future<void> toggleSavedWord(String word) async {

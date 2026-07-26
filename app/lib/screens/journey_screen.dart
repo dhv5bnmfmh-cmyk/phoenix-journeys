@@ -87,15 +87,14 @@ class _JourneyScreenState extends State<JourneyScreen>
   int? _selectedChallengeOption;
   bool _challengeResolved = false;
   String? _challengeReward;
+  late final int _challengeVariant;
   bool _initialized = false;
   bool _discoveryAutoStarted = false;
-  bool _difficultyPromptScheduled = false;
   static const PhoenixLanguageLevelAgent _languageLevelAgent =
       PhoenixLanguageLevelAgent();
   static const LanguageLevelPreferenceStore _languageLevelStore =
       LanguageLevelPreferenceStore();
   ChineseProficiencyProfile? _languageProfile;
-  bool _languageProfileLoaded = false;
 
   @override
   void initState() {
@@ -105,6 +104,8 @@ class _JourneyScreenState extends State<JourneyScreen>
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
     _experience = requireDailyJourneyExperience(journeyId);
+    _challengeVariant =
+        (DateTime.now().millisecondsSinceEpoch + journeyId.hashCode).abs() % 3;
     _ai = PhoenixAiService();
     wonderFocusNode.addListener(_handleWritingFocusChanged);
     expressFocusNode.addListener(_handleWritingFocusChanged);
@@ -142,8 +143,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     }
     _initialized = true;
     unawaited(_loadLanguageProfile());
-
-    if (step == 2) _scheduleDiscoveryAutoStart();
   }
 
   @override
@@ -213,9 +212,7 @@ Future<void> _loadLanguageProfile() async {
   if (!mounted) return;
   setState(() {
     _languageProfile = profile;
-    _languageProfileLoaded = true;
   });
-  _scheduleDifficultyWelcome();
 }
 
 Future<void> _selectLanguageProfile(
@@ -229,10 +226,8 @@ Future<void> _selectLanguageProfile(
   if (!mounted) return;
   setState(() {
     _languageProfile = profile;
-    _languageProfileLoaded = true;
     _discoveryAutoStarted = false;
   });
-  if (step == 2) _scheduleDiscoveryAutoStart();
 }
 
 Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
@@ -362,25 +357,7 @@ Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
     await _appState.setJourneyDifficulty(value);
     if (!mounted) return;
     setState(() => _discoveryAutoStarted = false);
-    if (step == 2) _scheduleDiscoveryAutoStart();
   }
-
-  void _scheduleDifficultyWelcome() {
-  if (_difficultyPromptScheduled ||
-      !_languageProfileLoaded ||
-      _languageProfile != null ||
-      _experience.id != 'beijing-summer-palace') {
-    return;
-  }
-  _difficultyPromptScheduled = true;
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (mounted) unawaited(_showDifficultyWelcome());
-  });
-}
-
-Future<void> _showDifficultyWelcome() async {
-  await _showLanguageProfilePicker(showIntro: true);
-}
 
   Future<void> _goToStep(int targetStep) async {
     final safeStep = targetStep.clamp(0, AppState.journeyLastStep);
@@ -411,15 +388,6 @@ Future<void> _showDifficultyWelcome() async {
     setState(() => step = safeStep);
     await _persistProgress(overrideStep: safeStep);
 
-    if (safeStep == 2) _scheduleDiscoveryAutoStart();
-  }
-
-  void _scheduleDiscoveryAutoStart() {
-    if (_discoveryAutoStarted) return;
-    _discoveryAutoStarted = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && step == 2) unawaited(_playDiscoveries());
-    });
   }
 
   Future<void> _playStory() {
@@ -1319,13 +1287,15 @@ Future<void> _showDifficultyWelcome() async {
           final rows = (_levelContent.words.length / columns).ceil();
           final cellWidth =
               (constraints.maxWidth - spacing * (columns - 1)) / columns;
+          final availableHeight =
+              math.min(constraints.maxHeight, rows * 116 + spacing * (rows - 1));
           final cellHeight =
-              (constraints.maxHeight - spacing * (rows - 1)) / rows;
+              (availableHeight - spacing * (rows - 1)) / rows;
           final safeCellHeight = math.max(1.0, cellHeight);
           final ratio = cellWidth / safeCellHeight;
-          final showPartOfSpeech = cellHeight >= 52;
-          final showNativeMeaning = cellHeight >= 72;
-          final showEnglishMeaning = cellHeight >= 96 && language != '英语';
+          const showPartOfSpeech = true;
+          const showNativeMeaning = true;
+          const showEnglishMeaning = true;
           final showChineseMeaning = cellHeight >= 122 && language != '中文解释';
           final nativeLabel = switch (language) {
             '英语' => 'English',
@@ -1333,33 +1303,38 @@ Future<void> _showDifficultyWelcome() async {
             _ => '母语',
           };
 
-          return GridView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.zero,
-            itemCount: _levelContent.words.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columns,
-              mainAxisSpacing: spacing,
-              crossAxisSpacing: spacing,
-              childAspectRatio: ratio,
-            ),
-            itemBuilder: (context, index) {
-              final entry = _levelContent.words[index];
-              return Material(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(10),
-                child: InkWell(
-                  onTap: () => unawaited(_openWord(entry)),
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
+          return Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              height: availableHeight,
+              child: GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                itemCount: _levelContent.words.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columns,
+                  mainAxisSpacing: spacing,
+                  crossAxisSpacing: spacing,
+                  childAspectRatio: ratio,
+                ),
+                itemBuilder: (context, index) {
+                  final entry = _levelContent.words[index];
+                  return Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                    child: InkWell(
+                      onTap: () => unawaited(_openWord(entry)),
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 5,
                       vertical: 3,
                     ),
                     decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
+                      color: Colors.black.withValues(alpha: .26),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Column(
+                        child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Row(
@@ -1494,10 +1469,12 @@ Future<void> _showDifficultyWelcome() async {
                         ],
                       ],
                     ),
-                  ),
-                ),
-              );
-            },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           );
         },
       ),
@@ -1667,10 +1644,19 @@ Future<void> _showDifficultyWelcome() async {
   Widget _challengePage() {
     final state = context.watch<AppState>();
     final correctText = _levelContent.discoveries.first.text;
-    final options = <String>[
-      correctText,
-      '这里的景色只是静止的背景，与人的行走和观察没有关系。',
-      '旅程最重要的是尽快走完路线，不需要留意沿途的变化。',
+    final distractors = <String>[
+      '沿途景物只用来说明地点，与人物当时的心情和选择没有联系。',
+      '这段旅程强调快速抵达终点，因此不必观察环境发生的细微变化。',
+      '故事主要介绍建筑的年代，并没有让探索者留意人与空间的关系。',
+      '这里最值得记住的是路线长度，声音、光影和行人的动作并不重要。',
+      '发现页只补充了旅游资料，没有延续故事中观察世界的方式。',
+    ];
+    final correctIndex = (_challengeVariant * 2 + 1) % 6;
+    final options = <String>[...distractors]..insert(correctIndex, correctText);
+    final questions = <String>[
+      '哪一句最准确地概括了刚才的故事与发现？',
+      '如果把刚才的内容讲给朋友，哪一句最接近原意？',
+      '哪一项最能说明故事中的景物为什么值得观察？',
     ];
 
     return _page(
@@ -1705,7 +1691,7 @@ Future<void> _showDifficultyWelcome() async {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  state.displayText('哪一句最符合刚才的故事与发现？'),
+                  state.displayText(questions[_challengeVariant]),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -1735,7 +1721,7 @@ Future<void> _showDifficultyWelcome() async {
               separatorBuilder: (_, __) => const SizedBox(height: 7),
               itemBuilder: (context, index) {
                 final selected = _selectedChallengeOption == index;
-                final correct = index == 0;
+                final correct = index == correctIndex;
                 final showCorrect = _challengeResolved && correct;
                 final showWrong = selected && !correct;
                 final color = showCorrect
@@ -1752,7 +1738,7 @@ Future<void> _showDifficultyWelcome() async {
                         ? null
                         : () {
                             final nextAttempts = _challengeAttempts + 1;
-                            final isCorrect = index == 0;
+                            final isCorrect = index == correctIndex;
                             final exhausted = nextAttempts >= 3;
                             setState(() {
                               _challengeAttempts = nextAttempts;
@@ -1768,6 +1754,13 @@ Future<void> _showDifficultyWelcome() async {
                                     : '碎银';
                               }
                             });
+                            if (_challengeResolved) {
+                              unawaited(
+                                state.awardChallengeReward(
+                                  _challengeReward ?? '碎银',
+                                ),
+                              );
+                            }
                           },
                     child: Container(
                       padding: const EdgeInsets.all(11),
