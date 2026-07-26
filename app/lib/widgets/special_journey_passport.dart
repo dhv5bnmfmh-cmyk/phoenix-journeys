@@ -77,7 +77,11 @@ class SpecialJourneyPassport extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome, color: PhoenixTheme.gold, size: 16),
+              const Icon(
+                Icons.auto_awesome,
+                color: PhoenixTheme.gold,
+                size: 16,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Column(
@@ -94,14 +98,20 @@ class SpecialJourneyPassport extends StatelessWidget {
                     const SizedBox(height: 1),
                     Text(
                       state.displayText('同样的完整流程，不一样的世界、故事与限定印章'),
-                      style: const TextStyle(color: Colors.white60, fontSize: 8.5),
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 8.5,
+                      ),
                     ),
                   ],
                 ),
               ),
               if (_specialJourneyAllAccessPreview)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: PhoenixTheme.gold.withValues(alpha: .16),
                     borderRadius: BorderRadius.circular(99),
@@ -125,10 +135,8 @@ class SpecialJourneyPassport extends StatelessWidget {
               physics: const BouncingScrollPhysics(),
               itemCount: _journeys.length,
               separatorBuilder: (_, __) => const SizedBox(width: 7),
-              itemBuilder: (context, index) => _journeyCard(
-                context,
-                _journeys[index],
-              ),
+              itemBuilder: (context, index) =>
+                  _journeyCard(context, _journeys[index]),
             ),
           ),
         ],
@@ -137,7 +145,8 @@ class SpecialJourneyPassport extends StatelessWidget {
   }
 
   Widget _journeyCard(BuildContext context, _SpecialJourneyGate journey) {
-    final unlocked = _specialJourneyAllAccessPreview ||
+    final unlocked =
+        _specialJourneyAllAccessPreview ||
         state.isSpecialJourneyUnlocked(journey.id);
     return Material(
       key: ValueKey('special-journey-${journey.id}'),
@@ -227,7 +236,8 @@ class SpecialJourneyPassport extends StatelessWidget {
     BuildContext context,
     _SpecialJourneyGate journey,
   ) async {
-    final unlocked = _specialJourneyAllAccessPreview ||
+    final unlocked =
+        _specialJourneyAllAccessPreview ||
         state.isSpecialJourneyUnlocked(journey.id);
     if (unlocked) {
       await _openFullJourney(context, journey.id);
@@ -271,6 +281,7 @@ class SpecialJourneyPassport extends StatelessWidget {
       case SpecialJourneyUnlockStatus.unlocked:
       case SpecialJourneyUnlockStatus.alreadyUnlocked:
         await _openFullJourney(context, journey.id);
+        return;
       case SpecialJourneyUnlockStatus.insufficientFunds:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -281,10 +292,12 @@ class SpecialJourneyPassport extends StatelessWidget {
             ),
           ),
         );
+        return;
       case SpecialJourneyUnlockStatus.busy:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(state.displayText('正在处理，请稍候再试。'))),
         );
+        return;
     }
   }
 
