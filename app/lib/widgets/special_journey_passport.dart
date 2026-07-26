@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 
+bool get _specialJourneyAllAccessPreview {
+  final uri = Uri.base;
+  return uri.queryParameters['unlock'] == 'all' ||
+      uri.host.startsWith('phoenix-journeys-pr-');
+}
+
 class SpecialJourneyPassport extends StatelessWidget {
   const SpecialJourneyPassport({super.key, required this.state});
 
@@ -49,6 +55,7 @@ class SpecialJourneyPassport extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final allAccess = _specialJourneyAllAccessPreview;
     return Container(
       key: const ValueKey('passport-special-journeys'),
       width: double.infinity,
@@ -80,7 +87,9 @@ class SpecialJourneyPassport extends StatelessWidget {
                 ),
               ),
               Text(
-                state.displayText('钱币开启 · 永久收藏'),
+                state.displayText(
+                  allAccess ? '体验版 · 全部开放' : '钱币开启 · 永久收藏',
+                ),
                 style: const TextStyle(color: Colors.white60, fontSize: 8.5),
               ),
             ],
@@ -103,7 +112,8 @@ class SpecialJourneyPassport extends StatelessWidget {
   }
 
   Widget _journeyCard(BuildContext context, _SpecialJourneyPreview journey) {
-    final unlocked = state.isSpecialJourneyUnlocked(journey.id);
+    final previewAccess = _specialJourneyAllAccessPreview;
+    final unlocked = previewAccess || state.isSpecialJourneyUnlocked(journey.id);
     return Material(
       key: ValueKey('special-journey-${journey.id}'),
       color: Colors.transparent,
@@ -145,9 +155,11 @@ class SpecialJourneyPassport extends StatelessWidget {
                     ),
                     Text(
                       state.displayText(
-                        unlocked
-                            ? '已收藏'
-                            : '${journey.cost} 枚${journey.currency}',
+                        previewAccess
+                            ? '体验版已开放'
+                            : unlocked
+                                ? '已收藏'
+                                : '${journey.cost} 枚${journey.currency}',
                       ),
                       style: TextStyle(
                         color: unlocked ? PhoenixTheme.gold : Colors.white60,
@@ -182,7 +194,9 @@ class SpecialJourneyPassport extends StatelessWidget {
       builder: (sheetContext) => AnimatedBuilder(
         animation: state,
         builder: (context, _) {
-          final unlocked = state.isSpecialJourneyUnlocked(journey.id);
+          final previewAccess = _specialJourneyAllAccessPreview;
+          final unlocked =
+              previewAccess || state.isSpecialJourneyUnlocked(journey.id);
           final balance = state.walletBalance(journey.currency);
           return Padding(
             padding: const EdgeInsets.fromLTRB(18, 2, 18, 22),
@@ -247,9 +261,11 @@ class SpecialJourneyPassport extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   state.displayText(
-                    unlocked
-                        ? '这段万象奇旅已经永久收藏，再次打开不会扣币。'
-                        : '开启需要 ${journey.cost} 枚${journey.currency} · 当前 $balance 枚',
+                    previewAccess
+                        ? '体验版已为你直接开放，不扣除任何钱币。'
+                        : unlocked
+                            ? '这段万象奇旅已经永久收藏，再次打开不会扣币。'
+                            : '开启需要 ${journey.cost} 枚${journey.currency} · 当前 $balance 枚',
                   ),
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -262,7 +278,11 @@ class SpecialJourneyPassport extends StatelessWidget {
                 FilledButton.icon(
                   key: ValueKey('special-journey-action-${journey.id}'),
                   onPressed: unlocked
-                      ? () => _showCollectedPreview(sheetContext, journey)
+                      ? () => _showCollectedPreview(
+                            sheetContext,
+                            journey,
+                            previewAccess: previewAccess,
+                          )
                       : () => _confirmUnlock(sheetContext, journey),
                   style: FilledButton.styleFrom(
                     backgroundColor: unlocked
@@ -278,9 +298,11 @@ class SpecialJourneyPassport extends StatelessWidget {
                   ),
                   label: Text(
                     state.displayText(
-                      unlocked
-                          ? '打开旅程预览'
-                          : '用 ${journey.cost} 枚${journey.currency}开启',
+                      previewAccess
+                          ? '直接打开旅程预览'
+                          : unlocked
+                              ? '打开旅程预览'
+                              : '用 ${journey.cost} 枚${journey.currency}开启',
                     ),
                     style: const TextStyle(fontWeight: FontWeight.w900),
                   ),
@@ -343,23 +365,32 @@ class SpecialJourneyPassport extends StatelessWidget {
 
   Future<void> _showCollectedPreview(
     BuildContext context,
-    _SpecialJourneyPreview journey,
-  ) async {
+    _SpecialJourneyPreview journey, {
+    required bool previewAccess,
+  }) async {
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         icon: Icon(journey.icon, color: PhoenixTheme.red, size: 34),
-        title: Text(state.displayText('${journey.title} · 已收藏')),
+        title: Text(
+          state.displayText(
+            previewAccess
+                ? '${journey.title} · 体验版已开放'
+                : '${journey.title} · 已收藏',
+          ),
+        ),
         content: Text(
           state.displayText(
-            '${journey.preview}\n\n完整章节正在编写中。你的开启记录已经保存，正式内容上线后可以直接进入。',
+            previewAccess
+                ? '${journey.preview}\n\n当前体验版已直接开放这段旅程，不会扣除钱币。完整章节正在继续编写。'
+                : '${journey.preview}\n\n完整章节正在编写中。你的开启记录已经保存，正式内容上线后可以直接进入。',
           ),
           style: const TextStyle(height: 1.5),
         ),
         actions: [
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(state.displayText('收好旅程')),
+            child: Text(state.displayText('继续探索')),
           ),
         ],
       ),
