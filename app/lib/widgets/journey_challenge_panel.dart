@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../models/language_proficiency.dart';
@@ -985,8 +984,11 @@ class _ChallengeSession {
       '让这里的游客',
       '从而使得游客',
     ];
+    final optionCount = difficulty == JourneyChallengeDifficulty.advanced
+        ? 7
+        : 6;
     final options = <_ChallengeOption>[
-      for (var index = 0; index < distractors.length; index++)
+      for (var index = 0; index < optionCount; index++)
         _ChallengeOption(
           id: index == 0 ? 'correct' : 'distractor-$index',
           text: distractors[index],
@@ -999,9 +1001,7 @@ class _ChallengeSession {
       seed: seed,
       type: JourneyChallengeType.grammarRepair,
       difficulty: difficulty,
-      options: options
-          .take(difficulty == JourneyChallengeDifficulty.advanced ? 7 : 6)
-          .toList(),
+      options: options,
       correctIds: const ['correct'],
       instruction: '先找出病句位置，再从至少六个修改方案中选出最自然的一项。',
       explanation: grammar.whyWrong,
@@ -1035,8 +1035,11 @@ class _ChallengeSession {
       '故事在这里结束，后面没有出现任何结果。',
       discoveryTexts.isNotEmpty ? discoveryTexts.last : '这句话只补充资料，却无法连接前后的行动。',
     ];
+    final optionCount = difficulty == JourneyChallengeDifficulty.advanced
+        ? 7
+        : 6;
     final options = <_ChallengeOption>[
-      for (var index = 0; index < distractors.length; index++)
+      for (var index = 0; index < optionCount; index++)
         _ChallengeOption(
           id: index == 0 ? 'correct' : 'distractor-$index',
           text: distractors[index],
@@ -1049,9 +1052,7 @@ class _ChallengeSession {
       seed: seed,
       type: JourneyChallengeType.missingSentence,
       difficulty: difficulty,
-      options: options
-          .take(difficulty == JourneyChallengeDifficulty.advanced ? 7 : 6)
-          .toList(),
+      options: options,
       correctIds: const ['correct'],
       instruction: '阅读前后文，从至少六个相近选项中补回最自然的一句。',
       explanation: '中间句承接前文的人物和地点，并为后文“景色发生变化”的结果铺垫。',
