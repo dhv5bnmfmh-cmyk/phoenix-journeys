@@ -42,10 +42,7 @@ Future<void> _pumpChallenge(
               '远山进入廊窗形成的画面。',
               '最后，他把这次发现记了下来。',
             ],
-            discoveryTexts: const [
-              '长廊让游人在行走中不断看到新的景色。',
-              '借景把远处的山纳入眼前的构图。',
-            ],
+            discoveryTexts: const ['长廊让游人在行走中不断看到新的景色。', '借景把远处的山纳入眼前的构图。'],
             profile: profile,
             seed: seed,
             displayText: _identity,
@@ -61,6 +58,13 @@ Future<void> _pumpChallenge(
 
 Future<void> _tapKey(WidgetTester tester, String key) async {
   final finder = find.byKey(ValueKey(key));
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      finder,
+      220,
+      scrollable: find.byKey(const ValueKey('challenge-scroll-area')),
+    );
+  }
   await tester.ensureVisible(finder);
   await tester.tap(finder);
   await tester.pumpAndSettle();
@@ -104,43 +108,52 @@ void main() {
   });
 
   test('challenge order is fixed instead of random', () {
-    expect(
-      fixedJourneyChallengeTypes,
-      const [
-        JourneyChallengeType.paragraphRebuild,
-        JourneyChallengeType.grammarRepair,
-        JourneyChallengeType.missingSentence,
-      ],
-    );
+    expect(fixedJourneyChallengeTypes, const [
+      JourneyChallengeType.paragraphRebuild,
+      JourneyChallengeType.grammarRepair,
+      JourneyChallengeType.missingSentence,
+    ]);
   });
 
-  testWidgets('all three modes are always visible and start with four choices',
-      (tester) async {
-    await _pumpChallenge(tester, onResolved: (_, __) async {});
+  testWidgets(
+    'all three modes are always visible and start with four choices',
+    (tester) async {
+      await _pumpChallenge(tester, onResolved: (_, __) async {});
 
-    expect(
-      find.byKey(const ValueKey('challenge-mode-paragraphRebuild')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey('challenge-mode-grammarRepair')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey('challenge-mode-missingSentence')),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('challenge-option-correct-0')),
-        findsOneWidget);
-    expect(find.byKey(const ValueKey('challenge-option-correct-1')),
-        findsOneWidget);
-    expect(find.byKey(const ValueKey('challenge-option-distractor-0')),
-        findsOneWidget);
-    expect(find.byKey(const ValueKey('challenge-option-distractor-1')),
-        findsOneWidget);
-    expect(find.byKey(const ValueKey('challenge-option-distractor-2')),
-        findsNothing);
-  });
+      expect(
+        find.byKey(const ValueKey('challenge-mode-paragraphRebuild')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('challenge-mode-grammarRepair')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('challenge-mode-missingSentence')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('challenge-option-correct-0')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('challenge-option-correct-1')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('challenge-option-distractor-0')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('challenge-option-distractor-1')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('challenge-option-distractor-2')),
+        findsNothing,
+      );
+    },
+  );
 
   testWidgets('question and hint are separate surfaces', (tester) async {
     await _pumpChallenge(tester, onResolved: (_, __) async {});
@@ -159,14 +172,12 @@ void main() {
       find.byKey(const ValueKey('challenge-question-card')),
       findsOneWidget,
     );
-    expect(
-      find.byKey(const ValueKey('challenge-hint-card')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const ValueKey('challenge-hint-card')), findsOneWidget);
   });
 
-  testWidgets('three modes run in sequence and complete the whole challenge',
-      (tester) async {
+  testWidgets('three modes run in sequence and complete the whole challenge', (
+    tester,
+  ) async {
     final rewards = <String>[];
     var completed = 0;
     await _pumpChallenge(
@@ -181,16 +192,20 @@ void main() {
 
     await _tapKey(tester, 'challenge-next-mode');
     expect(find.text('修好这句不自然的话'), findsOneWidget);
-    expect(find.byKey(const ValueKey('challenge-option-distractor-3')),
-        findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('challenge-option-distractor-3')),
+      findsOneWidget,
+    );
     await _completeGrammar(tester);
     expect(rewards, ['金币', '金币']);
     expect(completed, 0);
 
     await _tapKey(tester, 'challenge-next-mode');
     expect(find.text('补回故事中消失的一句'), findsOneWidget);
-    expect(find.byKey(const ValueKey('challenge-option-distractor-3')),
-        findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('challenge-option-distractor-3')),
+      findsOneWidget,
+    );
     await _completeMissingSentence(tester);
 
     expect(rewards, ['金币', '金币', '金币']);
@@ -214,11 +229,15 @@ void main() {
     await _completeParagraph(tester);
 
     expect(rewards, ['银币']);
-    expect(find.byKey(const ValueKey('challenge-reward-silver')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('challenge-reward-silver')),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('third failure reveals answer and awards silver fragment',
-      (tester) async {
+  testWidgets('third failure reveals answer and awards silver fragment', (
+    tester,
+  ) async {
     final rewards = <String>[];
     await _pumpChallenge(
       tester,
@@ -238,10 +257,7 @@ void main() {
     );
     expect(find.byKey(const ValueKey('challenge-explanation')), findsOneWidget);
     expect(find.textContaining('三次机会已经结束'), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('challenge-next-mode')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const ValueKey('challenge-next-mode')), findsOneWidget);
   });
 
   testWidgets('grammar repair shows every explanation field', (tester) async {
