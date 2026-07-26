@@ -21,7 +21,7 @@ Widget _app() {
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
   await tester.ensureVisible(finder);
   await tester.tap(finder);
-  await tester.pump();
+  await tester.pumpAndSettle();
 }
 
 void _solveParagraph(WidgetTester tester) {
@@ -47,7 +47,7 @@ Future<void> _completeFirstChallenge(WidgetTester tester) async {
     find.byKey(const ValueKey('coin-start-challenges')),
   );
   _solveParagraph(tester);
-  await tester.pump();
+  await tester.pumpAndSettle();
   await _tapVisible(
     tester,
     find.byKey(const ValueKey('paragraph-submit')),
@@ -138,7 +138,7 @@ void main() {
 
     await _tapVisible(tester, find.byKey(const ValueKey('special-start')));
     _solveNightOrder(tester);
-    await tester.pump();
+    await tester.pumpAndSettle();
     await _tapVisible(tester, find.byKey(const ValueKey('night-submit')));
 
     expect(find.byKey(const ValueKey('special-decision')), findsOneWidget);
