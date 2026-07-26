@@ -59,20 +59,17 @@ Future<void> _pumpChallenge(
   await tester.pumpAndSettle();
 }
 
-Finder _challengeScrollable() {
-  return find.descendant(
-    of: find.byKey(const ValueKey('challenge-scroll-area')),
-    matching: find.byType(Scrollable),
-  );
+Finder _challengeView() {
+  return find.byKey(const ValueKey('challenge-scroll-area'));
 }
 
 Future<Finder> _ensureKeyVisible(WidgetTester tester, String key) async {
   final finder = find.byKey(ValueKey(key));
   if (finder.evaluate().isEmpty) {
-    await tester.scrollUntilVisible(
+    await tester.dragUntilVisible(
       finder,
-      220,
-      scrollable: _challengeScrollable(),
+      _challengeView(),
+      const Offset(0, -220),
     );
   }
   await tester.ensureVisible(finder);
@@ -84,6 +81,10 @@ Future<void> _tapKey(WidgetTester tester, String key) async {
   final finder = await _ensureKeyVisible(tester, key);
   await tester.tap(finder);
   await tester.pumpAndSettle();
+  if (key == 'challenge-next-mode') {
+    await tester.fling(_challengeView(), const Offset(0, 1000), 1800);
+    await tester.pumpAndSettle();
+  }
 }
 
 Future<void> _completeParagraph(WidgetTester tester) async {
