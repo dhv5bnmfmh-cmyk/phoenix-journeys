@@ -2,10 +2,17 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../models/journey_background.dart';
+
 class SpecialRealmCinematicOverlay extends StatefulWidget {
-  const SpecialRealmCinematicOverlay({super.key, required this.journeyId});
+  const SpecialRealmCinematicOverlay({
+    super.key,
+    required this.journeyId,
+    required this.pageType,
+  });
 
   final String journeyId;
+  final JourneyBackgroundPage pageType;
 
   @override
   State<SpecialRealmCinematicOverlay> createState() =>
@@ -55,6 +62,7 @@ class _SpecialRealmCinematicOverlayState
           builder: (context, _) => CustomPaint(
             painter: _CinematicRealmPainter(
               journeyId: widget.journeyId,
+              pageType: widget.pageType,
               progress: _controller.value,
             ),
             size: Size.infinite,
@@ -68,16 +76,28 @@ class _SpecialRealmCinematicOverlayState
 class _CinematicRealmPainter extends CustomPainter {
   const _CinematicRealmPainter({
     required this.journeyId,
+    required this.pageType,
     required this.progress,
   });
 
   final String journeyId;
+  final JourneyBackgroundPage pageType;
   final double progress;
 
   double get _wave => math.sin(progress * math.pi * 2);
+  double get _chapter =>
+      JourneyBackgroundPage.values.indexOf(pageType) /
+      (JourneyBackgroundPage.values.length - 1);
 
   @override
   void paint(Canvas canvas, Size size) {
+    canvas.save();
+    final travel = Offset(
+      math.sin(progress * math.pi * 2) * (3 + _chapter * 6),
+      math.cos(progress * math.pi * 2) * (2 + _chapter * 4),
+    );
+    canvas.translate(travel.dx, travel.dy);
+    canvas.scale(1 + _chapter * .025);
     _paintVignette(canvas, size);
     switch (journeyId) {
       case 'literary-roaming':
@@ -90,6 +110,7 @@ class _CinematicRealmPainter extends CustomPainter {
         _paintLanternRiver(canvas, size);
     }
     _paintFilmGrain(canvas, size);
+    canvas.restore();
   }
 
   void _paintVignette(Canvas canvas, Size size) {
@@ -522,6 +543,7 @@ class _CinematicRealmPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _CinematicRealmPainter oldDelegate) {
     return oldDelegate.progress != progress ||
-        oldDelegate.journeyId != journeyId;
+        oldDelegate.journeyId != journeyId ||
+        oldDelegate.pageType != pageType;
   }
 }
