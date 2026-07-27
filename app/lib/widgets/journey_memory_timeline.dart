@@ -55,8 +55,7 @@ class JourneyMemoryEntry {
 
   String get locationLabel {
     final matched = journey;
-    if (matched != null) return '${matched.city} · ${matched.place}';
-    return title;
+    return matched == null ? title : '${matched.city} · ${matched.place}';
   }
 
   String get stampSymbol => journey?.stampSymbol ?? '记';
@@ -143,15 +142,19 @@ class JourneyMemoryTimeline extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 20),
                 itemCount: entries.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 7),
-                itemBuilder: (context, index) {
+                itemBuilder: (_, index) {
                   final entry = entries[index];
-                  return _JourneyMemoryListTile(
+                  return _JourneyMemoryTile(
                     key: ValueKey('journey-memory-list-$index'),
                     state: state,
                     entry: entry,
+                    compact: false,
                     onTap: () {
                       Navigator.of(sheetContext).pop();
-                      _showDetail(context, entry);
+                      Future<void>.delayed(
+                        Duration.zero,
+                        () => _showDetail(context, entry),
+                      );
                     },
                   );
                 },
@@ -172,26 +175,21 @@ class JourneyMemoryTimeline extends StatelessWidget {
     return Column(
       children: [
         Expanded(
-          child: Column(
-            children: preview
-                .asMap()
-                .entries
-                .map(
-                  (item) => Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: item.key == preview.length - 1 ? 0 : 6,
-                      ),
-                      child: _JourneyMemoryCard(
-                        key: ValueKey('journey-memory-card-${item.key}'),
-                        state: state,
-                        entry: item.value,
-                        onTap: () => _showDetail(context, item.value),
-                      ),
-                    ),
-                  ),
-                )
-                .toList(growable: false),
+          child: ListView.separated(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            itemCount: preview.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 6),
+            itemBuilder: (_, index) {
+              final entry = preview[index];
+              return _JourneyMemoryTile(
+                key: ValueKey('journey-memory-card-$index'),
+                state: state,
+                entry: entry,
+                compact: true,
+                onTap: () => _showDetail(context, entry),
+              );
+            },
           ),
         ),
         if (entries.length > preview.length) ...[
@@ -215,16 +213,18 @@ class JourneyMemoryTimeline extends StatelessWidget {
   }
 }
 
-class _JourneyMemoryCard extends StatelessWidget {
-  const _JourneyMemoryCard({
+class _JourneyMemoryTile extends StatelessWidget {
+  const _JourneyMemoryTile({
     required this.state,
     required this.entry,
+    required this.compact,
     required this.onTap,
     super.key,
   });
 
   final AppState state;
   final JourneyMemoryEntry entry;
+  final bool compact;
   final VoidCallback onTap;
 
   @override
@@ -237,7 +237,10 @@ class _JourneyMemoryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          padding: EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: compact ? 7 : 10,
+          ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             border: Border.all(
@@ -250,7 +253,6 @@ class _JourneyMemoryCard extends StatelessWidget {
               const SizedBox(width: 9),
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -260,8 +262,8 @@ class _JourneyMemoryCard extends StatelessWidget {
                             state.displayText(entry.displayTitle),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 11.5,
+                            style: TextStyle(
+                              fontSize: compact ? 11.5 : 13,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -280,14 +282,25 @@ class _JourneyMemoryCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       state.displayText(entry.memory),
-                      maxLines: 2,
+                      maxLines: compact ? 2 : 3,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.black54,
-                        fontSize: 10,
-                        height: 1.18,
+                        fontSize: compact ? 10 : 10.5,
+                        height: 1.2,
                       ),
                     ),
+                    if (!compact) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        state.displayText(entry.locationLabel),
+                        style: const TextStyle(
+                          color: PhoenixTheme.red,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -295,82 +308,6 @@ class _JourneyMemoryCard extends StatelessWidget {
               const Icon(
                 Icons.chevron_right_rounded,
                 size: 17,
-                color: Colors.black38,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _JourneyMemoryListTile extends StatelessWidget {
-  const _JourneyMemoryListTile({
-    required this.state,
-    required this.entry,
-    required this.onTap,
-    super.key,
-  });
-
-  final AppState state;
-  final JourneyMemoryEntry entry;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 9, 8, 9),
-          child: Row(
-            children: [
-              _MemoryStamp(symbol: state.displayText(entry.stampSymbol)),
-              const SizedBox(width: 9),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      state.displayText(entry.displayTitle),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      state.displayText(entry.memory),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 10.5,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      state.displayText(
-                        '第 ${entry.sequence} 段收藏 · ${entry.locationLabel}',
-                      ),
-                      style: const TextStyle(
-                        color: PhoenixTheme.red,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
                 color: Colors.black38,
               ),
             ],
@@ -433,7 +370,10 @@ class _JourneyMemoryDetailSheet extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: PhoenixTheme.gold.withValues(alpha: .14),
                     borderRadius: BorderRadius.circular(99),
