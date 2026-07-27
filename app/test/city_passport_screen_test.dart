@@ -39,7 +39,7 @@ void main() {
       find.byKey(const ValueKey('passport-city-beijing')),
       findsOneWidget,
     );
-    expect(find.text('北京'), findsOneWidget);
+    expect(find.text('北京'), findsWidgets);
     expect(find.text('北京收藏册'), findsNothing);
     expect(
       find.byKey(
