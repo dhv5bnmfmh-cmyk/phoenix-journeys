@@ -13,7 +13,7 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
-  testWidgets('Passport groups every destination under its city collection', (
+  testWidgets('Passport shows journeys over the transparent HD atlas', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(430, 900);
@@ -36,10 +36,14 @@ void main() {
 
     expect(find.text('探索护照'), findsOneWidget);
     expect(
+      find.byKey(const ValueKey('passport-hd-atlas-image')),
+      findsOneWidget,
+    );
+    expect(
       find.byKey(const ValueKey('passport-city-beijing')),
       findsOneWidget,
     );
-    expect(find.text('北京收藏册'), findsOneWidget);
+    expect(find.text('北京收藏册'), findsNothing);
     expect(
       find.byKey(
         const ValueKey('passport-destination-beijing-forbidden-city'),
