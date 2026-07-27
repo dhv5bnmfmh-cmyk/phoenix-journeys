@@ -41,7 +41,7 @@ test('every special realm has ten valid story images including its retained plat
 test('special realm image mapping covers all ten scene positions', async () => {
   const source = await readFile(backgroundSource, 'utf8');
 
-  assert.match(source, /JourneyBackgroundPage\.story => 1 \+/);
+  assert.match(source, /JourneyBackgroundPage\.story\s*=>\s*1 \+/);
   assert.match(source, /JourneyBackgroundPage\.vocabulary => 4/);
   assert.match(source, /JourneyBackgroundPage\.discovery => 5/);
   assert.match(source, /JourneyBackgroundPage\.reflection => 6/);
