@@ -69,6 +69,6 @@ test('special realm motion remains slow and respects reduced motion', async () =
 
   assert.match(source, /Duration\(seconds: 30\)/);
   assert.match(source, /disableAnimations/);
-  assert.match(source, /_motion\.stop\(\)/);
+  assert.match(source, /_motion\s*\.\.stop\(\)/);
   assert.match(source, /_motion\.repeat\(\)/);
 });
