@@ -41,7 +41,7 @@ test('every special realm has ten valid story images including its retained plat
 test('special realm image mapping covers all ten scene positions', async () => {
   const source = await readFile(backgroundSource, 'utf8');
 
-  assert.match(source, /JourneyBackgroundPage\.story\s*=>\s*1 \+/);
+  assert.match(source, /JourneyBackgroundPage\.story\s*=>\s*\n?\s*1 \+/);
   assert.match(source, /JourneyBackgroundPage\.vocabulary => 4/);
   assert.match(source, /JourneyBackgroundPage\.discovery => 5/);
   assert.match(source, /JourneyBackgroundPage\.reflection => 6/);
@@ -50,11 +50,25 @@ test('special realm image mapping covers all ten scene positions', async () => {
   assert.match(source, /JourneyBackgroundPage\.completion => 9/);
 });
 
-test('special realm plates stay clean and transition without procedural effects', async () => {
+test('special realm plates stay image-first, clean and transition safely', async () => {
   const source = await readFile(backgroundSource, 'utf8');
 
   assert.doesNotMatch(source, /SpecialRealmCinematicOverlay/);
-  assert.match(source, /precacheImage\(AssetImage\(asset\), context\)/);
+  assert.doesNotMatch(source, /_SpecialRealmPainter|CustomPaint\(|drawCircle\(|drawPath\(/);
+  assert.match(source, /await precacheImage\(AssetImage\(asset\), context\)/);
+  assert.match(source, /await Future<void>\.delayed\(Duration\.zero\)/);
   assert.match(source, /AnimatedSwitcher\(/);
-  assert.match(source, /Duration\(milliseconds: 1400\)/);
+  assert.match(source, /Duration\(milliseconds: 1800\)/);
+  assert.match(source, /gaplessPlayback: true/);
+  assert.match(source, /errorBuilder:/);
+  assert.match(source, /special-realm-premium-fallback/);
+});
+
+test('special realm motion remains slow and respects reduced motion', async () => {
+  const source = await readFile(backgroundSource, 'utf8');
+
+  assert.match(source, /Duration\(seconds: 30\)/);
+  assert.match(source, /disableAnimations/);
+  assert.match(source, /_motion\.stop\(\)/);
+  assert.match(source, /_motion\.repeat\(\)/);
 });
