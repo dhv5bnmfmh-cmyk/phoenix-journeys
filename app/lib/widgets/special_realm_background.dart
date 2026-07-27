@@ -73,12 +73,10 @@ class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
         builder: (context, _) => Stack(
           fit: StackFit.expand,
           children: [
-            CustomPaint(
-              painter: _SpecialRealmPainter(
-                journeyId: widget.journeyId,
-                pageType: widget.pageType,
-                progress: _motion.value,
-              ),
+            _PremiumRealmPlate(
+              journeyId: widget.journeyId,
+              pageType: widget.pageType,
+              progress: _motion.value,
             ),
             SpecialRealmCinematicOverlay(
               journeyId: widget.journeyId,
@@ -106,6 +104,111 @@ class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
   }
 }
 
+class _PremiumRealmPlate extends StatelessWidget {
+  const _PremiumRealmPlate({
+    required this.journeyId,
+    required this.pageType,
+    required this.progress,
+  });
+
+  final String journeyId;
+  final JourneyBackgroundPage pageType;
+  final double progress;
+
+  static const _assets = <String, String>{
+    'literary-roaming':
+        'assets/images/special-realms/dream-butterfly-v2.webp',
+    'myth-tracing': 'assets/images/special-realms/moon-letter-v2.webp',
+    'strange-night-talks':
+        'assets/images/special-realms/shadowless-inn-v2.webp',
+    'folk-secret-land':
+        'assets/images/special-realms/upstream-lantern-v2.webp',
+  };
+
+  double get _chapter =>
+      JourneyBackgroundPage.values.indexOf(pageType) /
+      (JourneyBackgroundPage.values.length - 1);
+
+  @override
+  Widget build(BuildContext context) {
+    final phase = progress * math.pi * 2;
+    final chapterTravel = (_chapter - .5) * 18;
+    final horizontalDrift = switch (journeyId) {
+      'literary-roaming' => math.sin(phase) * 5,
+      'myth-tracing' => math.cos(phase * .7) * 4,
+      'strange-night-talks' => math.sin(phase * .55) * 3,
+      'folk-secret-land' => math.sin(phase * .8) * 6,
+      _ => 0.0,
+    };
+    final verticalDrift = switch (journeyId) {
+      'literary-roaming' => chapterTravel + math.cos(phase * .7) * 4,
+      'myth-tracing' => -chapterTravel + math.sin(phase * .6) * 3,
+      'strange-night-talks' => chapterTravel * .45,
+      'folk-secret-land' => -chapterTravel * .55 + math.cos(phase * .5) * 3,
+      _ => 0.0,
+    };
+    final scale = 1.08 + _chapter * .035 + math.sin(phase * .5) * .004;
+    final tone = switch (pageType) {
+      JourneyBackgroundPage.story => const Color(0x0DFFF0CD),
+      JourneyBackgroundPage.vocabulary => const Color(0x0A9BD9FF),
+      JourneyBackgroundPage.discovery => const Color(0x0FFFF1B8),
+      JourneyBackgroundPage.reflection => const Color(0x123C7DFF),
+      JourneyBackgroundPage.memory => const Color(0x0FE8A4FF),
+      JourneyBackgroundPage.completion => const Color(0x16FFD36B),
+      _ => Colors.transparent,
+    };
+
+    return ClipRect(
+      child: Transform.translate(
+        offset: Offset(horizontalDrift, verticalDrift),
+        child: Transform.scale(
+          scale: scale,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                _assets[journeyId]!,
+                fit: BoxFit.cover,
+                alignment: _alignmentForChapter,
+                filterQuality: FilterQuality.high,
+                gaplessPlayback: true,
+              ),
+              ColoredBox(color: tone),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: .04 + _chapter * .02),
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: .16),
+                    ],
+                    stops: const [0, .56, 1],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Alignment get _alignmentForChapter {
+    final y = -.18 + _chapter * .34;
+    return switch (journeyId) {
+      'literary-roaming' => Alignment(.1 - _chapter * .18, y),
+      'myth-tracing' => Alignment(.18 - _chapter * .22, y),
+      'strange-night-talks' => Alignment(.12 - _chapter * .14, y),
+      'folk-secret-land' => Alignment(-.08 + _chapter * .16, y),
+      _ => Alignment(0, y),
+    };
+  }
+}
+
+// Kept as a fallback for devices that cannot decode the premium WebP plates.
+// ignore: unused_element
 class _SpecialRealmPainter extends CustomPainter {
   const _SpecialRealmPainter({
     required this.journeyId,
