@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../data/daily_journey_catalog.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
-import '../widgets/city_journey_stamp.dart';
+import '../widgets/journey_symbol_badge.dart';
 import '../widgets/journey_share_button.dart';
 import 'journey_screen.dart';
 
@@ -300,10 +300,10 @@ class _CityStampCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CityJourneyStamp(
-            journey: journey,
-            isUnlocked: earned || allAccess,
-            size: 82,
+          JourneySymbolBadge(
+            journeyId: journey.id,
+            isUnlocked: earned || allAccess || isToday,
+            size: 70,
           ),
           const SizedBox(width: 10),
           Expanded(

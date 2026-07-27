@@ -6,6 +6,7 @@ import '../data/daily_journey_catalog.dart';
 import '../screens/journey_screen.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import 'journey_symbol_badge.dart';
 
 bool get _specialJourneyAllAccessPreview {
   final uri = Uri.base;
@@ -22,7 +23,6 @@ class SpecialJourneyPassport extends StatelessWidget {
     _SpecialJourneyGate(
       id: 'literary-roaming',
       chapter: '庄周梦蝶',
-      stamp: '蝶',
       currency: '金币',
       cost: 2,
       accent: Color(0xFF28769A),
@@ -30,7 +30,6 @@ class SpecialJourneyPassport extends StatelessWidget {
     _SpecialJourneyGate(
       id: 'myth-tracing',
       chapter: '月宫遗简',
-      stamp: '月',
       currency: '金币',
       cost: 3,
       accent: Color(0xFF9A6A13),
@@ -38,7 +37,6 @@ class SpecialJourneyPassport extends StatelessWidget {
     _SpecialJourneyGate(
       id: 'strange-night-talks',
       chapter: '无影客栈',
-      stamp: '客',
       currency: '银币',
       cost: 3,
       accent: Color(0xFFA33E2D),
@@ -46,7 +44,6 @@ class SpecialJourneyPassport extends StatelessWidget {
     _SpecialJourneyGate(
       id: 'folk-secret-land',
       chapter: '逆流河灯',
-      stamp: '灯',
       currency: '铜币',
       cost: 4,
       accent: Color(0xFF9A5319),
@@ -172,33 +169,12 @@ class SpecialJourneyPassport extends StatelessWidget {
           height: 62,
           child: Row(
             children: [
-              Container(
-                width: 32,
-                height: 32,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.transparent,
-                  border: Border.all(
-                    color: journey.accent.withValues(
-                      alpha: unlocked ? .82 : .42,
-                    ),
-                    width: 1.4,
-                  ),
-                ),
-                child: Text(
-                  state.displayText(journey.stamp),
-                  style: TextStyle(
-                    color: journey.accent.withValues(
-                      alpha: unlocked ? .95 : .55,
-                    ),
-                    fontSize: 13,
-                    height: 1,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
+              JourneySymbolBadge(
+                journeyId: journey.id,
+                size: 52,
+                isUnlocked: unlocked,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 9),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -325,7 +301,6 @@ class _SpecialJourneyGate {
   const _SpecialJourneyGate({
     required this.id,
     required this.chapter,
-    required this.stamp,
     required this.currency,
     required this.cost,
     required this.accent,
@@ -333,7 +308,6 @@ class _SpecialJourneyGate {
 
   final String id;
   final String chapter;
-  final String stamp;
   final String currency;
   final int cost;
   final Color accent;

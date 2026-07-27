@@ -25,10 +25,9 @@ test('Passport keeps every city journey reachable on the transparent atlas', () 
   assert.match(passport, /选择旅程/);
 });
 
-test('Passport tiles only render a small transparent stamp and journey name', () => {
-  assert.match(passport, /CityJourneyStamp\(/);
-  assert.match(passport, /size: 36/);
-  assert.match(passport, /transparentInk: true/);
+test('Passport tiles render a compact layered journey symbol and name', () => {
+  assert.match(passport, /JourneySymbolBadge\(/);
+  assert.match(passport, /size: 50/);
   assert.match(passport, /state\.displayText\(journey\.place\)/);
   assert.match(passport, /JourneyScreen\(journeyId: journey\.id\)/);
   assert.match(passport, /state\.activateJourney\(journey\.id\)/);
