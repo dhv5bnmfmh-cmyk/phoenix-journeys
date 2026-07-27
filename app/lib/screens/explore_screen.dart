@@ -12,6 +12,8 @@ import 'journey_screen.dart';
 
 const _phoenixHomeHeroAsset =
     'assets/images/home/phoenix-world-language-journey-v1.webp';
+const _phoenixFlightMapAsset =
+    'assets/images/home/east-asia-flight-map-hd.webp';
 
 @visibleForTesting
 double compactExploreMapHeight(double viewportHeight) {
@@ -379,6 +381,7 @@ class _FlightMapCard extends StatefulWidget {
 class _FlightMapCardState extends State<_FlightMapCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  bool _mapPrecached = false;
 
   @override
   void initState() {
@@ -393,6 +396,14 @@ class _FlightMapCardState extends State<_FlightMapCard>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_mapPrecached) return;
+    _mapPrecached = true;
+    precacheImage(const AssetImage(_phoenixFlightMapAsset), context);
   }
 
   @override
@@ -448,6 +459,32 @@ class _FlightMapCardState extends State<_FlightMapCard>
 
               return Stack(
                 children: [
+                  Positioned.fill(
+                    child: Image.asset(
+                      _phoenixFlightMapAsset,
+                      key: const ValueKey('phoenix-flight-map-hd-image'),
+                      fit: BoxFit.cover,
+                      alignment: const Alignment(.08, .02),
+                      filterQuality: FilterQuality.high,
+                      gaplessPlayback: true,
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            const Color(0xFF061D28).withValues(alpha: .30),
+                            const Color(0xFF061D28).withValues(alpha: .05),
+                            const Color(0xFF061D28).withValues(alpha: .58),
+                          ],
+                          stops: const [0, .48, 1],
+                        ),
+                      ),
+                    ),
+                  ),
                   Positioned.fill(
                     child: CustomPaint(
                       painter: _PremiumMapPainter(
@@ -1066,173 +1103,7 @@ class _PremiumMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    _drawGrid(canvas, size);
-    _drawStars(canvas, size);
-    _drawLand(canvas, size);
-    _drawComicDetails(canvas, size);
     _drawRoute(canvas, size);
-  }
-
-  void _drawComicDetails(Canvas canvas, Size size) {
-    final ink = Paint()
-      ..color = const Color(0xFFFFE6A5).withValues(alpha: .22)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.1;
-    final wash = Paint()
-      ..color = const Color(0xFFFFD879).withValues(alpha: .09)
-      ..style = PaintingStyle.fill;
-    final sun = Offset(size.width * .12, size.height * .25);
-    canvas.drawCircle(sun, 15, wash);
-    canvas.drawCircle(sun, 15, ink);
-    for (var index = 0; index < 10; index++) {
-      final angle = index * math.pi / 5;
-      canvas.drawLine(
-        sun + Offset(math.cos(angle) * 20, math.sin(angle) * 20),
-        sun + Offset(math.cos(angle) * 25, math.sin(angle) * 25),
-        ink,
-      );
-    }
-    final cloud = Path()
-      ..moveTo(size.width * .70, size.height * .18)
-      ..cubicTo(size.width * .74, size.height * .10, size.width * .80,
-          size.height * .11, size.width * .82, size.height * .18)
-      ..cubicTo(size.width * .88, size.height * .15, size.width * .91,
-          size.height * .23, size.width * .86, size.height * .26)
-      ..lineTo(size.width * .71, size.height * .26)
-      ..cubicTo(size.width * .67, size.height * .24, size.width * .67,
-          size.height * .20, size.width * .70, size.height * .18);
-    canvas.drawPath(cloud, ink);
-  }
-
-  void _drawGrid(Canvas canvas, Size size) {
-    final grid = Paint()
-      ..color = Colors.white.withValues(alpha: .045)
-      ..strokeWidth = .8;
-
-    for (double x = 8; x < size.width; x += 36) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-    }
-    for (double y = 8; y < size.height; y += 36) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-    }
-  }
-
-  void _drawStars(Canvas canvas, Size size) {
-    final star = Paint()..color = Colors.white.withValues(alpha: .24);
-    const points = <Offset>[
-      Offset(.08, .18),
-      Offset(.18, .33),
-      Offset(.34, .17),
-      Offset(.57, .13),
-      Offset(.88, .22),
-      Offset(.93, .58),
-      Offset(.12, .54),
-      Offset(.43, .68),
-      Offset(.69, .72),
-    ];
-    for (final point in points) {
-      canvas.drawCircle(
-        Offset(size.width * point.dx, size.height * point.dy),
-        1.2,
-        star,
-      );
-    }
-  }
-
-  void _drawLand(Canvas canvas, Size size) {
-    final land = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF2D6870), Color(0xFF1A4B55)],
-      ).createShader(Offset.zero & size)
-      ..style = PaintingStyle.fill;
-    final coast = Paint()
-      ..color = const Color(0xFF89ADB0).withValues(alpha: .40)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.1;
-
-    final mainland = Path()
-      ..moveTo(size.width * .31, size.height * .28)
-      ..cubicTo(
-        size.width * .43,
-        size.height * .17,
-        size.width * .67,
-        size.height * .16,
-        size.width * .89,
-        size.height * .29,
-      )
-      ..lineTo(size.width * .91, size.height * .47)
-      ..cubicTo(
-        size.width * .84,
-        size.height * .49,
-        size.width * .82,
-        size.height * .57,
-        size.width * .72,
-        size.height * .58,
-      )
-      ..cubicTo(
-        size.width * .62,
-        size.height * .59,
-        size.width * .58,
-        size.height * .67,
-        size.width * .49,
-        size.height * .63,
-      )
-      ..cubicTo(
-        size.width * .39,
-        size.height * .59,
-        size.width * .37,
-        size.height * .45,
-        size.width * .31,
-        size.height * .28,
-      )
-      ..close();
-    canvas.drawPath(mainland, land);
-    canvas.drawPath(mainland, coast);
-
-    final peninsula = Path()
-      ..moveTo(size.width * .43, size.height * .56)
-      ..cubicTo(
-        size.width * .46,
-        size.height * .61,
-        size.width * .43,
-        size.height * .76,
-        size.width * .35,
-        size.height * .79,
-      )
-      ..cubicTo(
-        size.width * .31,
-        size.height * .72,
-        size.width * .35,
-        size.height * .62,
-        size.width * .43,
-        size.height * .56,
-      )
-      ..close();
-    canvas.drawPath(peninsula, land);
-    canvas.drawPath(peninsula, coast);
-
-    final islands = Paint()
-      ..color = const Color(0xFF316B72)
-      ..style = PaintingStyle.fill;
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(size.width * .83, size.height * .56),
-        width: 7,
-        height: 18,
-      ),
-      islands,
-    );
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(size.width * .47, size.height * .80),
-        width: 18,
-        height: 6,
-      ),
-      islands,
-    );
-    canvas.drawCircle(Offset(size.width * .54, size.height * .76), 4, islands);
   }
 
   void _drawRoute(Canvas canvas, Size size) {

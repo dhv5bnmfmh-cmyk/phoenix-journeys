@@ -7,6 +7,10 @@ const passport = readFileSync(
   'app/lib/screens/city_passport_screen.dart',
   'utf8',
 );
+const specialPassport = readFileSync(
+  'app/lib/widgets/special_journey_passport.dart',
+  'utf8',
+);
 
 test('Home uses the city-grouped Passport screen', () => {
   assert.match(shell, /import 'city_passport_screen\.dart';/);
@@ -16,15 +20,30 @@ test('Home uses the city-grouped Passport screen', () => {
 
 test('Passport creates one collection for every city', () => {
   assert.match(passport, /itemCount: journeyCityCatalog\.length/);
-  assert.match(passport, /_CityCollection\(/);
-  assert.match(passport, /city\.destinations\.length/);
+  assert.match(passport, /_CityStampSection\(/);
+  assert.match(passport, /city\.destinationCount/);
   assert.match(passport, /passport-city-\$\{city\.id\}/);
   assert.match(passport, /passport-destination-\$\{journey\.id\}/);
 });
 
 test('city collections preserve stamp progress and journey actions', () => {
-  assert.match(passport, /earnedCount \/ city\.destinationCount/);
-  assert.match(passport, /JourneyShareButton\(/);
+  assert.match(passport, /'\$earnedCount\/\$\{city\.destinationCount\}'/);
+  assert.match(passport, /isJourneyStampEarned\(journey\.id\)/);
   assert.match(passport, /JourneyScreen\(journeyId: journey\.id\)/);
   assert.match(passport, /state\.activateJourney\(journey\.id\)/);
+});
+
+test('passport reveals its background with name-and-stamp-only tiles', () => {
+  assert.match(passport, /height: 39/);
+  assert.match(passport, /size: 28/);
+  assert.match(passport, /: Colors\.transparent/);
+  assert.doesNotMatch(passport, /JourneyShareButton/);
+  assert.doesNotMatch(passport, /journey\.description/);
+  assert.doesNotMatch(passport, /LinearProgressIndicator/);
+
+  assert.match(specialPassport, /height: 39/);
+  assert.match(specialPassport, /size: 28/);
+  assert.match(specialPassport, /Colors\.transparent/);
+  assert.doesNotMatch(specialPassport, /border: Border\.all/);
+  assert.doesNotMatch(specialPassport, /journey\.subtitle/);
 });

@@ -6,6 +6,7 @@ import '../data/daily_journey_catalog.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../screens/journey_screen.dart';
+import 'city_journey_stamp.dart';
 
 bool get _specialJourneyAllAccessPreview {
   final uri = Uri.base;
@@ -21,9 +22,7 @@ class SpecialJourneyPassport extends StatelessWidget {
   static const _journeys = <_SpecialJourneyGate>[
     _SpecialJourneyGate(
       id: 'literary-roaming',
-      title: '文学漫游',
       chapter: '庄周梦蝶',
-      subtitle: '梦与醒之间的竹林',
       currency: '金币',
       cost: 2,
       icon: Icons.auto_stories_rounded,
@@ -31,9 +30,7 @@ class SpecialJourneyPassport extends StatelessWidget {
     ),
     _SpecialJourneyGate(
       id: 'myth-tracing',
-      title: '神话寻踪',
       chapter: '月宫遗简',
-      subtitle: '沿桂香寻找月中旧信',
       currency: '金币',
       cost: 3,
       icon: Icons.brightness_7_rounded,
@@ -41,9 +38,7 @@ class SpecialJourneyPassport extends StatelessWidget {
     ),
     _SpecialJourneyGate(
       id: 'strange-night-talks',
-      title: '志怪夜话',
       chapter: '无影客栈',
-      subtitle: '鸡鸣以前不要开门',
       currency: '银币',
       cost: 3,
       icon: Icons.nights_stay_rounded,
@@ -51,9 +46,7 @@ class SpecialJourneyPassport extends StatelessWidget {
     ),
     _SpecialJourneyGate(
       id: 'folk-secret-land',
-      title: '民俗秘境',
       chapter: '逆流河灯',
-      subtitle: '接住未来留下的灯火',
       currency: '铜币',
       cost: 4,
       icon: Icons.temple_buddhist_rounded,
@@ -63,81 +56,36 @@ class SpecialJourneyPassport extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       key: const ValueKey('passport-special-journeys'),
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF171122).withValues(alpha: .72),
-        borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .38)),
-      ),
+      padding: const EdgeInsets.fromLTRB(3, 2, 3, 3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.auto_awesome,
-                color: PhoenixTheme.gold,
-                size: 16,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      state.displayText('万象奇旅 · 完整特别旅程'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      state.displayText('同样的完整流程，不一样的世界、故事与限定印章'),
-                      style: const TextStyle(
-                        color: Colors.white60,
-                        fontSize: 8.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (_specialJourneyAllAccessPreview)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: PhoenixTheme.gold.withValues(alpha: .16),
-                    borderRadius: BorderRadius.circular(99),
-                  ),
-                  child: Text(
-                    state.displayText('体验全开'),
-                    style: const TextStyle(
-                      color: PhoenixTheme.gold,
-                      fontSize: 8,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 104,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: _journeys.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 7),
-              itemBuilder: (context, index) =>
-                  _journeyCard(context, _journeys[index]),
+          Text(
+            state.displayText('万象奇旅'),
+            style: const TextStyle(
+              color: PhoenixTheme.red,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w900,
             ),
+          ),
+          const SizedBox(height: 2),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final tileWidth = (constraints.maxWidth - 4) / 2;
+              return Wrap(
+                spacing: 4,
+                runSpacing: 3,
+                children: [
+                  for (final journey in _journeys)
+                    SizedBox(
+                      width: tileWidth,
+                      child: _journeyCard(context, journey),
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -148,81 +96,41 @@ class SpecialJourneyPassport extends StatelessWidget {
     final unlocked =
         _specialJourneyAllAccessPreview ||
         state.isSpecialJourneyUnlocked(journey.id);
+    final experience = requireDailyJourneyExperience(journey.id);
     return Material(
       key: ValueKey('special-journey-${journey.id}'),
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: () => unawaited(_handleJourneyTap(context, journey)),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(8),
         child: Container(
-          width: 150,
-          padding: const EdgeInsets.fromLTRB(9, 8, 9, 8),
+          height: 39,
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                journey.accent.withValues(alpha: unlocked ? .24 : .12),
-                Colors.black.withValues(alpha: .24),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: journey.accent.withValues(alpha: unlocked ? .62 : .28),
-            ),
+            color: unlocked
+                ? journey.accent.withValues(alpha: .045)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Icon(journey.icon, color: journey.accent, size: 19),
-                  const Spacer(),
-                  Icon(
-                    unlocked ? Icons.lock_open_rounded : Icons.lock_rounded,
-                    color: unlocked ? journey.accent : Colors.white38,
-                    size: 14,
+              CityJourneyStamp(
+                journey: experience,
+                isUnlocked: unlocked,
+                size: 28,
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  state.displayText(journey.chapter),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: unlocked ? Colors.black87 : Colors.black45,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
                   ),
-                ],
-              ),
-              const Spacer(),
-              Text(
-                state.displayText(journey.title),
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 8.5,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              Text(
-                state.displayText(journey.chapter),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                state.displayText(journey.subtitle),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white60, fontSize: 8),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                state.displayText(
-                  unlocked
-                      ? '进入完整旅程'
-                      : '${journey.cost} 枚${journey.currency}开启',
-                ),
-                style: TextStyle(
-                  color: unlocked ? journey.accent : Colors.white54,
-                  fontSize: 8,
-                  fontWeight: FontWeight.w900,
                 ),
               ),
             ],
@@ -317,9 +225,7 @@ class SpecialJourneyPassport extends StatelessWidget {
 class _SpecialJourneyGate {
   const _SpecialJourneyGate({
     required this.id,
-    required this.title,
     required this.chapter,
-    required this.subtitle,
     required this.currency,
     required this.cost,
     required this.icon,
@@ -327,9 +233,7 @@ class _SpecialJourneyGate {
   });
 
   final String id;
-  final String title;
   final String chapter;
-  final String subtitle;
   final String currency;
   final int cost;
   final IconData icon;
