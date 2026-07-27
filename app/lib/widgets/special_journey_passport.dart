@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../data/daily_journey_catalog.dart';
+import '../screens/journey_screen.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
-import '../screens/journey_screen.dart';
 
 bool get _specialJourneyAllAccessPreview {
   final uri = Uri.base;
@@ -66,41 +66,62 @@ class SpecialJourneyPassport extends StatelessWidget {
     return Container(
       key: const ValueKey('passport-special-journeys'),
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
+      padding: const EdgeInsets.fromLTRB(9, 8, 9, 9),
       decoration: BoxDecoration(
-        color: const Color(0xFF171122).withValues(alpha: .72),
-        borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .38)),
+        color: const Color(0xFF171122).withValues(alpha: .56),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: PhoenixTheme.gold.withValues(alpha: .30),
+          width: .8,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x16000000),
+            blurRadius: 12,
+            offset: Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.auto_awesome,
-                color: PhoenixTheme.gold,
-                size: 16,
+              Container(
+                width: 25,
+                height: 25,
+                decoration: BoxDecoration(
+                  color: PhoenixTheme.gold.withValues(alpha: .12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.auto_awesome_rounded,
+                  color: PhoenixTheme.gold,
+                  size: 14,
+                ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 7),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      state.displayText('万象奇旅 · 完整特别旅程'),
+                      state.displayText('护照 · 特别旅程'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
+                        height: 1.05,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                     const SizedBox(height: 1),
                     Text(
-                      state.displayText('同样的完整流程，不一样的世界、故事与限定印章'),
+                      state.displayText('四个异境，完整旅程，限定收藏章'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: Colors.white60,
-                        fontSize: 8.5,
+                        color: Colors.white54,
+                        fontSize: 8,
                       ),
                     ),
                   ],
@@ -109,32 +130,32 @@ class SpecialJourneyPassport extends StatelessWidget {
               if (_specialJourneyAllAccessPreview)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 3,
+                    horizontal: 6,
+                    vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: PhoenixTheme.gold.withValues(alpha: .16),
+                    color: PhoenixTheme.gold.withValues(alpha: .13),
                     borderRadius: BorderRadius.circular(99),
                   ),
                   child: Text(
-                    state.displayText('体验全开'),
+                    state.displayText('全开'),
                     style: const TextStyle(
                       color: PhoenixTheme.gold,
-                      fontSize: 8,
+                      fontSize: 7.5,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 7),
           SizedBox(
-            height: 104,
+            height: 84,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               itemCount: _journeys.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 7),
+              separatorBuilder: (_, __) => const SizedBox(width: 6),
               itemBuilder: (context, index) =>
                   _journeyCard(context, _journeys[index]),
             ),
@@ -148,28 +169,30 @@ class SpecialJourneyPassport extends StatelessWidget {
     final unlocked =
         _specialJourneyAllAccessPreview ||
         state.isSpecialJourneyUnlocked(journey.id);
+
     return Material(
       key: ValueKey('special-journey-${journey.id}'),
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () => unawaited(_handleJourneyTap(context, journey)),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
-          width: 150,
-          padding: const EdgeInsets.fromLTRB(9, 8, 9, 8),
+          width: 126,
+          padding: const EdgeInsets.fromLTRB(8, 7, 8, 7),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                journey.accent.withValues(alpha: unlocked ? .24 : .12),
-                Colors.black.withValues(alpha: .24),
+                journey.accent.withValues(alpha: unlocked ? .20 : .09),
+                Colors.black.withValues(alpha: .15),
               ],
             ),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: journey.accent.withValues(alpha: unlocked ? .62 : .28),
+              color: journey.accent.withValues(alpha: unlocked ? .50 : .22),
+              width: .8,
             ),
           ),
           child: Column(
@@ -177,31 +200,44 @@ class SpecialJourneyPassport extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(journey.icon, color: journey.accent, size: 19),
-                  const Spacer(),
+                  Container(
+                    width: 23,
+                    height: 23,
+                    decoration: BoxDecoration(
+                      color: journey.accent.withValues(alpha: .10),
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    child: Icon(journey.icon, color: journey.accent, size: 14),
+                  ),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text(
+                      state.displayText(journey.title),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 7.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
                   Icon(
                     unlocked ? Icons.lock_open_rounded : Icons.lock_rounded,
-                    color: unlocked ? journey.accent : Colors.white38,
-                    size: 14,
+                    color: unlocked ? journey.accent : Colors.white30,
+                    size: 12,
                   ),
                 ],
               ),
-              const Spacer(),
-              Text(
-                state.displayText(journey.title),
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 8.5,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+              const SizedBox(height: 5),
               Text(
                 state.displayText(journey.chapter),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 11.5,
+                  height: 1,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -210,20 +246,36 @@ class SpecialJourneyPassport extends StatelessWidget {
                 state.displayText(journey.subtitle),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white60, fontSize: 8),
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 7.5,
+                ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                state.displayText(
-                  unlocked
-                      ? '进入完整旅程'
-                      : '${journey.cost} 枚${journey.currency}开启',
-                ),
-                style: TextStyle(
-                  color: unlocked ? journey.accent : Colors.white54,
-                  fontSize: 8,
-                  fontWeight: FontWeight.w900,
-                ),
+              const Spacer(),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      state.displayText(
+                        unlocked
+                            ? '进入旅程'
+                            : '${journey.cost} ${journey.currency}开启',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: unlocked ? journey.accent : Colors.white46,
+                        fontSize: 7.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: unlocked ? journey.accent : Colors.white30,
+                    size: 9,
+                  ),
+                ],
               ),
             ],
           ),
@@ -251,7 +303,7 @@ class SpecialJourneyPassport extends StatelessWidget {
         title: Text(state.displayText('开启${journey.chapter}？')),
         content: Text(
           state.displayText(
-            '这不是预览页。开启后会进入与普通 Journey 相同的完整流程，并永久收藏。\n\n需要 ${journey.cost} 枚${journey.currency}。',
+            '开启后会进入与普通旅程相同的完整流程，并永久收藏限定印章。\n\n需要 ${journey.cost} 枚${journey.currency}。',
           ),
           style: const TextStyle(height: 1.5),
         ),
