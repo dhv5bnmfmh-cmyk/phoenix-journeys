@@ -219,7 +219,25 @@ class PhoenixTheme {
         style: OutlinedButton.styleFrom(textStyle: journeyButtonStyle),
       ),
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(textStyle: journeyButtonStyle),
+        style: FilledButton.styleFrom(
+          backgroundColor: red,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: red.withValues(alpha: .32),
+          disabledForegroundColor: Colors.white60,
+          minimumSize: const Size(48, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: gold.withValues(alpha: .58), width: .8),
+          ),
+          elevation: 4,
+          shadowColor: const Color(0x73000000),
+          textStyle: journeyButtonStyle,
+        ).copyWith(
+          overlayColor: WidgetStatePropertyAll(
+            gold.withValues(alpha: .16),
+          ),
+        ),
       ),
     );
   }
