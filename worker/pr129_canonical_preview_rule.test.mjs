@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import worker from './index.mjs';
 
 const env = {
@@ -8,7 +9,10 @@ const env = {
   },
 };
 
+const wrangler = readFileSync('wrangler.toml', 'utf8');
+
 test('PR 129 keeps one canonical all-access preview URL', async () => {
+  assert.match(wrangler, /run_worker_first = \[ "\/", "\/api\/\*" \]/);
   const response = await worker.fetch(
     new Request('https://phoenix-journeys-pr-129.example.workers.dev/'),
     env,
