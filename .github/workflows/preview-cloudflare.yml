@@ -38,7 +38,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Test Phoenix agents
-        run: node --test worker/*.test.mjs
+        shell: bash
+        run: |
+          if ! node --test worker/*.test.mjs > /tmp/phoenix-agent-tests.log 2>&1; then
+            echo 'Phoenix Agent failure summary:'
+            tail -n 180 /tmp/phoenix-agent-tests.log
+            exit 1
+          fi
+          tail -n 24 /tmp/phoenix-agent-tests.log
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
