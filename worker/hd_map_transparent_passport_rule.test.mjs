@@ -60,7 +60,7 @@ test('special journeys open from a featured wallet-aware button', () => {
   assert.match(special, /open-special-journey-menu/);
   assert.match(special, /height: 48/);
   assert.match(special, /JourneySymbolBadge\(/);
-  assert.match(special, /size: 42/);
+  assert.match(special, /size: 52/);
   assert.match(special, /state\.displayText\(journey\.chapter\)/);
   assert.match(special, /state\.walletBalance\(journey\.currency\)/);
   assert.match(special, /showModalBottomSheet<void>/);
