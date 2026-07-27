@@ -33,7 +33,10 @@ test('both circled map pages use project-owned retina WebP artwork', () => {
 test('world camera zooms into the real route and lands from above', () => {
   assert.match(explore, /Interval\(0, \.34/);
   assert.match(explore, /scale: 1 \+ cameraT \* 1\.7/);
-  assert.match(explore, /Interval\(\s*\.82,\s*1/);
+  assert.match(explore, /destinationFocusT/);
+  assert.match(explore, /scale: 1 \+ destinationFocusT \* \.72/);
+  assert.match(explore, /destination\.mapPoint\.x \* 2 - 1/);
+  assert.match(explore, /Interval\(\s*\.68,\s*\.82/);
   assert.match(explore, /geometry\.landingPoint\(landingT\)/);
   assert.match(explore, /math\.pi \/ 2/);
   assert.match(explore, /void paint\(Canvas canvas, Size size\) \{\s*_drawRoute/);
@@ -48,6 +51,9 @@ test('passport removes large overview and card furniture', () => {
   assert.doesNotMatch(passport, /FilledButton/);
   assert.match(passport, /showModalBottomSheet<void>/);
   assert.match(passport, /requireJourneyLocation\(city\.primaryDestination\.id\)/);
+  assert.match(passport, /InteractiveViewer\(/);
+  assert.match(passport, /maxScale: 4/);
+  assert.match(passport, /_collisionOffset/);
 });
 
 test('special journeys open from a featured wallet-aware button', () => {
