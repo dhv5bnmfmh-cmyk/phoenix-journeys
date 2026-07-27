@@ -16,12 +16,23 @@ const specialPassport = fs.readFileSync(
 );
 
 test('journey list symbols use reviewed high-detail illustrated badges', () => {
-  assert.match(badge, /SvgPicture\.asset/);
   assert.match(badge, /Image\.asset/);
   assert.match(badge, /LinearGradient/);
   assert.match(badge, /FilterQuality\.high/);
   assert.match(cityPassport, /JourneySymbolBadge\(/);
   assert.match(specialPassport, /JourneySymbolBadge\(/);
+});
+
+test('special and regular journeys share high-resolution WebP treatment', () => {
+  for (const asset of [
+    'dream-butterfly-v3.webp',
+    'moon-letter-v2.webp',
+    'shadowless-inn-v2.webp',
+    'upstream-lantern-v3.webp',
+  ]) {
+    assert.ok(badge.includes(asset), `missing special realm plate ${asset}`);
+  }
+  assert.doesNotMatch(badge, /\.svg/);
 });
 
 test('every published journey family has dedicated illustrated artwork', () => {
