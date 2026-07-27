@@ -26,20 +26,20 @@ class CityPassportScreen extends StatelessWidget {
     final state = context.watch<AppState>();
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 7),
       child: Column(
         children: [
           _PassportHeader(state: state),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           _CityOverview(state: state),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           SpecialJourneyPassport(state: state),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Expanded(
             child: ListView.separated(
               physics: const BouncingScrollPhysics(),
               itemCount: journeyCityCatalog.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, __) => const SizedBox(height: 9),
               itemBuilder: (context, index) => _CityCollection(
                 state: state,
                 city: journeyCityCatalog[index],
@@ -132,19 +132,23 @@ class _CityOverview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(13, 10, 13, 11),
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 9),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF12353A), Color(0xFF285E61), Color(0xFF143B40)],
+          colors: [Color(0xC412353A), Color(0xC4285E61), Color(0xC4143B40)],
         ),
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: PhoenixTheme.gold.withValues(alpha: .16),
+          width: .8,
+        ),
         boxShadow: const [
           BoxShadow(
-            blurRadius: 14,
-            offset: Offset(0, 7),
-            color: Color(0x1D000000),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+            color: Color(0x12000000),
           ),
         ],
       ),
@@ -155,12 +159,12 @@ class _CityOverview extends StatelessWidget {
             'CHINA CITY COLLECTIONS',
             style: TextStyle(
               color: Colors.white60,
-              fontSize: 8.5,
+              fontSize: 8,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.1,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 1),
           Row(
             children: [
               Expanded(
@@ -168,7 +172,7 @@ class _CityOverview extends StatelessWidget {
                   state.displayText('城市收藏地图'),
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -177,19 +181,19 @@ class _CityOverview extends StatelessWidget {
                 state.displayText('${journeyCityCatalog.length} 座城市'),
                 style: const TextStyle(
                   color: Color(0xFFFFD879),
-                  fontSize: 10,
+                  fontSize: 9.5,
                   fontWeight: FontWeight.w900,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 7),
           SizedBox(
-            height: 70,
+            height: 60,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: journeyCityCatalog.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 9),
+              separatorBuilder: (_, __) => const SizedBox(width: 7),
               itemBuilder: (context, index) {
                 final city = journeyCityCatalog[index];
                 final earnedCount = city.destinations
@@ -200,27 +204,27 @@ class _CityOverview extends StatelessWidget {
                     _passportAllAccessPreview || earnedCount > 0 || today;
 
                 return SizedBox(
-                  width: 58,
+                  width: 52,
                   child: Column(
                     children: [
                       Container(
-                        width: 38,
-                        height: 38,
+                        width: 33,
+                        height: 33,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: const Color(0xFF102E33),
+                          color: const Color(0xFF102E33).withValues(alpha: .78),
                           border: Border.all(
                             color: available
-                                ? const Color(0xFFFFD879)
-                                : Colors.white30,
-                            width: today ? 2.2 : 1.4,
+                                ? const Color(0xFFFFD879).withValues(alpha: .82)
+                                : Colors.white24,
+                            width: today ? 1.8 : 1.1,
                           ),
                           boxShadow: earnedCount > 0
                               ? const [
                                   BoxShadow(
-                                    color: Color(0x55FFD879),
-                                    blurRadius: 10,
+                                    color: Color(0x33FFD879),
+                                    blurRadius: 7,
                                   ),
                                 ]
                               : null,
@@ -233,19 +237,19 @@ class _CityOverview extends StatelessWidget {
                             color: available
                                 ? const Color(0xFFFFD879)
                                 : Colors.white54,
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 2),
                       Text(
                         state.displayText(city.name),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 8.5,
+                          fontSize: 8,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -253,7 +257,7 @@ class _CityOverview extends StatelessWidget {
                         '$earnedCount/${city.destinationCount}',
                         style: const TextStyle(
                           color: Colors.white54,
-                          fontSize: 7.5,
+                          fontSize: 7,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -290,20 +294,21 @@ class _CityCollection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Container(
-          padding: const EdgeInsets.fromLTRB(12, 10, 10, 9),
+          padding: const EdgeInsets.fromLTRB(9, 7, 8, 7),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: active
-                  ? const [Color(0xFF7B1E1E), Color(0xFFA83A32)]
-                  : const [Color(0xFFF8EBD9), Color(0xFFFFF8EC)],
+                  ? const [Color(0xC47B1E1E), Color(0xC4A83A32)]
+                  : const [Color(0xB8F8EBD9), Color(0xB8FFF8EC)],
             ),
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: active
-                  ? PhoenixTheme.red.withValues(alpha: .55)
-                  : PhoenixTheme.gold.withValues(alpha: .45),
+                  ? PhoenixTheme.red.withValues(alpha: .32)
+                  : PhoenixTheme.gold.withValues(alpha: .26),
+              width: .8,
             ),
           ),
           child: Column(
@@ -311,25 +316,25 @@ class _CityCollection extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 38,
-                    height: 38,
+                    width: 32,
+                    height: 32,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: active
-                          ? Colors.white.withValues(alpha: .14)
-                          : PhoenixTheme.red.withValues(alpha: .09),
-                      borderRadius: BorderRadius.circular(12),
+                          ? Colors.white.withValues(alpha: .11)
+                          : PhoenixTheme.red.withValues(alpha: .06),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       city.cityCode,
                       style: TextStyle(
                         color: active ? Colors.white : PhoenixTheme.red,
-                        fontSize: 9,
+                        fontSize: 8,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 9),
+                  const SizedBox(width: 7),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,25 +348,25 @@ class _CityCollection extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: active ? Colors.white : Colors.black87,
-                                  fontSize: 14.5,
+                                  fontSize: 13.5,
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
                             ),
                             if (today) ...[
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 5),
                               _TodayBadge(active: active),
                             ],
                           ],
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 1),
                         Text(
                           state.displayText(
                             '${city.destinationCount} 个地点 · $earnedCount 枚印章',
                           ),
                           style: TextStyle(
                             color: active ? Colors.white70 : Colors.black54,
-                            fontSize: 9.5,
+                            fontSize: 9,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -370,13 +375,13 @@ class _CityCollection extends StatelessWidget {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 5,
+                      horizontal: 7,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
                       color: active
-                          ? Colors.white.withValues(alpha: .13)
-                          : PhoenixTheme.gold.withValues(alpha: .14),
+                          ? Colors.white.withValues(alpha: .10)
+                          : PhoenixTheme.gold.withValues(alpha: .10),
                       borderRadius: BorderRadius.circular(99),
                     ),
                     child: Row(
@@ -389,14 +394,14 @@ class _CityCollection extends StatelessWidget {
                           color: active
                               ? const Color(0xFFFFD879)
                               : PhoenixTheme.red,
-                          size: 13,
+                          size: 12,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 3),
                         Text(
                           '$earnedCount/${city.destinationCount}',
                           style: TextStyle(
                             color: active ? Colors.white : PhoenixTheme.red,
-                            fontSize: 10,
+                            fontSize: 9.5,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -405,24 +410,24 @@ class _CityCollection extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               ClipRRect(
                 borderRadius: BorderRadius.circular(99),
                 child: LinearProgressIndicator(
                   value: progress,
-                  minHeight: 4,
+                  minHeight: 3,
                   color: active ? const Color(0xFFFFD879) : PhoenixTheme.red,
                   backgroundColor: active
-                      ? Colors.white.withValues(alpha: .16)
-                      : PhoenixTheme.gold.withValues(alpha: .18),
+                      ? Colors.white.withValues(alpha: .12)
+                      : PhoenixTheme.gold.withValues(alpha: .13),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 5),
         for (var index = 0; index < city.destinations.length; index++) ...[
-          if (index > 0) const SizedBox(height: 7),
+          if (index > 0) const SizedBox(height: 6),
           _DestinationStampCard(
             state: state,
             journey: city.destinations[index],
@@ -442,18 +447,18 @@ class _TodayBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
       decoration: BoxDecoration(
         color: active
-            ? const Color(0xFFFFD879).withValues(alpha: .18)
-            : PhoenixTheme.red.withValues(alpha: .08),
+            ? const Color(0xFFFFD879).withValues(alpha: .14)
+            : PhoenixTheme.red.withValues(alpha: .06),
         borderRadius: BorderRadius.circular(99),
       ),
       child: Text(
         state.displayText('今日'),
         style: TextStyle(
           color: active ? const Color(0xFFFFD879) : PhoenixTheme.red,
-          fontSize: 8,
+          fontSize: 7.5,
           fontWeight: FontWeight.w900,
         ),
       ),
@@ -494,16 +499,17 @@ class _DestinationStampCard extends StatelessWidget {
 
     return Container(
       key: ValueKey('passport-destination-${journey.id}'),
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .72),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white.withValues(alpha: .46),
+        borderRadius: BorderRadius.circular(13),
         border: Border.all(
           color: earned
-              ? PhoenixTheme.red.withValues(alpha: .30)
+              ? PhoenixTheme.red.withValues(alpha: .22)
               : allAccess || isToday
-              ? PhoenixTheme.gold.withValues(alpha: .70)
-              : PhoenixTheme.gold.withValues(alpha: .28),
+              ? PhoenixTheme.gold.withValues(alpha: .48)
+              : PhoenixTheme.gold.withValues(alpha: .20),
+          width: .8,
         ),
       ),
       child: Row(
@@ -511,9 +517,9 @@ class _DestinationStampCard extends StatelessWidget {
           CityJourneyStamp(
             journey: journey,
             isUnlocked: earned || allAccess,
-            size: 62,
+            size: 54,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -526,47 +532,47 @@ class _DestinationStampCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 3,
+                        horizontal: 6,
+                        vertical: 2,
                       ),
                       decoration: BoxDecoration(
                         color: earned
-                            ? PhoenixTheme.red.withValues(alpha: .08)
-                            : PhoenixTheme.gold.withValues(alpha: .13),
+                            ? PhoenixTheme.red.withValues(alpha: .06)
+                            : PhoenixTheme.gold.withValues(alpha: .09),
                         borderRadius: BorderRadius.circular(99),
                       ),
                       child: Text(
                         state.displayText(status),
                         style: TextStyle(
                           color: earned ? PhoenixTheme.red : Colors.black54,
-                          fontSize: 9,
+                          fontSize: 8.5,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   state.displayText(journey.description),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.black54,
-                    fontSize: 10.5,
-                    height: 1.22,
+                    fontSize: 10,
+                    height: 1.18,
                   ),
                 ),
-                const SizedBox(height: 7),
+                const SizedBox(height: 5),
                 SizedBox(
-                  height: 34,
+                  height: 32,
                   child: earned
                       ? Row(
                           children: [
@@ -586,11 +592,11 @@ class _DestinationStampCard extends StatelessWidget {
                                     unawaited(_openJourney(context)),
                                 icon: const Icon(
                                   Icons.replay_rounded,
-                                  size: 16,
+                                  size: 15,
                                 ),
                                 label: Text(
                                   state.displayText('再次体验'),
-                                  style: const TextStyle(fontSize: 10),
+                                  style: const TextStyle(fontSize: 9.5),
                                 ),
                               ),
                             ),
@@ -608,7 +614,7 @@ class _DestinationStampCard extends StatelessWidget {
                             active && state.hasJourneyInProgress
                                 ? Icons.play_arrow_rounded
                                 : Icons.flight_takeoff_rounded,
-                            size: 16,
+                            size: 15,
                           ),
                           label: Text(
                             state.displayText(
@@ -620,7 +626,7 @@ class _DestinationStampCard extends StatelessWidget {
                                   ? '开始今日旅程'
                                   : '等待成为今日旅程',
                             ),
-                            style: const TextStyle(fontSize: 10.5),
+                            style: const TextStyle(fontSize: 10),
                           ),
                         ),
                 ),
