@@ -63,14 +63,10 @@ class SpecialJourneyPassport extends StatelessWidget {
     return Container(
       key: const ValueKey('passport-special-journeys'),
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(7, 6, 7, 7),
+      padding: const EdgeInsets.fromLTRB(3, 3, 3, 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF24182D).withValues(alpha: .16),
-        borderRadius: BorderRadius.circular(13),
-        border: Border.all(
-          color: PhoenixTheme.gold.withValues(alpha: .16),
-          width: .7,
-        ),
+        color: const Color(0xFF24182D).withValues(alpha: .055),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,13 +99,13 @@ class SpecialJourneyPassport extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 2),
           LayoutBuilder(
             builder: (context, constraints) {
-              final tileWidth = (constraints.maxWidth - 6) / 2;
+              final tileWidth = (constraints.maxWidth - 4) / 2;
               return Wrap(
-                spacing: 6,
-                runSpacing: 5,
+                spacing: 4,
+                runSpacing: 2,
                 children: [
                   for (final journey in _journeys)
                     SizedBox(
@@ -132,31 +128,27 @@ class SpecialJourneyPassport extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(9),
       child: InkWell(
         key: ValueKey('special-journey-${gate.id}'),
         onTap: () => unawaited(_handleJourneyTap(context, gate)),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(9),
         child: Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          height: 43,
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
           decoration: BoxDecoration(
-            color: gate.accent.withValues(alpha: unlocked ? .09 : .035),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: gate.accent.withValues(alpha: unlocked ? .22 : .09),
-              width: .7,
-            ),
+            color: gate.accent.withValues(alpha: unlocked ? .055 : .015),
+            borderRadius: BorderRadius.circular(9),
           ),
           child: Row(
             children: [
               SpecialJourneyStamp(
                 journey: journey,
                 isUnlocked: unlocked,
-                size: 34,
+                size: 30,
                 transparentInk: true,
               ),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

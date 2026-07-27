@@ -7,6 +7,10 @@ const passport = readFileSync(
   'app/lib/screens/city_passport_screen.dart',
   'utf8',
 );
+const specialPassport = readFileSync(
+  'app/lib/widgets/special_journey_passport.dart',
+  'utf8',
+);
 
 test('Home uses the city-grouped Passport screen', () => {
   assert.match(shell, /import 'city_passport_screen\.dart';/);
@@ -16,15 +20,25 @@ test('Home uses the city-grouped Passport screen', () => {
 
 test('Passport creates one collection for every city', () => {
   assert.match(passport, /itemCount: journeyCityCatalog\.length/);
-  assert.match(passport, /_CityCollection\(/);
-  assert.match(passport, /city\.destinations\.length/);
+  assert.match(passport, /_CityStampSection\(/);
+  assert.match(passport, /city\.destinationCount/);
   assert.match(passport, /passport-city-\$\{city\.id\}/);
   assert.match(passport, /passport-destination-\$\{journey\.id\}/);
 });
 
 test('city collections preserve stamp progress and journey actions', () => {
-  assert.match(passport, /earnedCount \/ city\.destinationCount/);
-  assert.match(passport, /JourneyShareButton\(/);
+  assert.match(passport, /'\$earnedCount\/\$\{city\.destinationCount\}'/);
+  assert.match(passport, /isJourneyStampEarned\(journey\.id\)/);
   assert.match(passport, /JourneyScreen\(journeyId: journey\.id\)/);
   assert.match(passport, /state\.activateJourney\(journey\.id\)/);
+});
+
+test('passport tiles stay compact and reveal destination artwork', () => {
+  assert.match(passport, /height: 43/);
+  assert.match(passport, /size: 30/);
+  assert.match(passport, /: Colors\.transparent/);
+  assert.doesNotMatch(passport, /Colors\.white\.withValues\(alpha: \.14\)/);
+  assert.match(specialPassport, /height: 43/);
+  assert.match(specialPassport, /size: 30/);
+  assert.doesNotMatch(specialPassport, /border: Border\.all/);
 });

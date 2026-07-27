@@ -25,18 +25,18 @@ class CityPassportScreen extends StatelessWidget {
     final state = context.watch<AppState>();
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 7, 8, 5),
+      padding: const EdgeInsets.fromLTRB(7, 6, 7, 4),
       child: Column(
         children: [
           _PassportHeader(state: state),
-          const SizedBox(height: 5),
+          const SizedBox(height: 3),
           SpecialJourneyPassport(state: state),
-          const SizedBox(height: 5),
+          const SizedBox(height: 3),
           Expanded(
             child: ListView.separated(
               physics: const BouncingScrollPhysics(),
               itemCount: journeyCityCatalog.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 5),
+              separatorBuilder: (_, __) => const SizedBox(height: 3),
               itemBuilder: (context, index) => _CityStampSection(
                 state: state,
                 city: journeyCityCatalog[index],
@@ -124,18 +124,12 @@ class _CityStampSection extends StatelessWidget {
 
     return Container(
       key: ValueKey('passport-city-${city.id}'),
-      padding: const EdgeInsets.fromLTRB(6, 5, 6, 6),
+      padding: const EdgeInsets.fromLTRB(3, 3, 3, 4),
       decoration: BoxDecoration(
         color: active
-            ? PhoenixTheme.red.withValues(alpha: .08)
-            : Colors.white.withValues(alpha: .10),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: active
-              ? PhoenixTheme.red.withValues(alpha: .18)
-              : PhoenixTheme.gold.withValues(alpha: .12),
-          width: .7,
-        ),
+            ? PhoenixTheme.red.withValues(alpha: .055)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,13 +186,13 @@ class _CityStampSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           LayoutBuilder(
             builder: (context, constraints) {
-              final tileWidth = (constraints.maxWidth - 5) / 2;
+              final tileWidth = (constraints.maxWidth - 4) / 2;
               return Wrap(
-                spacing: 5,
-                runSpacing: 4,
+                spacing: 4,
+                runSpacing: 2,
                 children: [
                   for (final journey in city.destinations)
                     SizedBox(
@@ -252,36 +246,30 @@ class _DestinationStampTile extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(9),
       child: InkWell(
         key: ValueKey('passport-destination-${journey.id}'),
         onTap: available ? () => unawaited(_openJourney(context)) : null,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(9),
         child: Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+          height: 43,
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
           decoration: BoxDecoration(
             color: active
-                ? PhoenixTheme.red.withValues(alpha: .075)
-                : Colors.white.withValues(alpha: .14),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: earned
-                  ? PhoenixTheme.red.withValues(alpha: .16)
-                  : available
-                      ? PhoenixTheme.gold.withValues(alpha: .18)
-                      : Colors.black.withValues(alpha: .045),
-              width: .7,
-            ),
+                ? PhoenixTheme.red.withValues(alpha: .06)
+                : earned
+                    ? Colors.white.withValues(alpha: .08)
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
           ),
           child: Row(
             children: [
               CityJourneyStamp(
                 journey: journey,
                 isUnlocked: earned || allAccess,
-                size: 34,
+                size: 30,
               ),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

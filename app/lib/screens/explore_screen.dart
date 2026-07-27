@@ -12,6 +12,8 @@ import 'journey_screen.dart';
 
 const _phoenixHomeHeroAsset =
     'assets/images/home/phoenix-world-language-journey-v1.webp';
+const _phoenixFlightMapAsset =
+    'assets/images/home/east-asia-flight-map-v2.webp';
 
 @visibleForTesting
 double compactExploreMapHeight(double viewportHeight) {
@@ -379,6 +381,7 @@ class _FlightMapCard extends StatefulWidget {
 class _FlightMapCardState extends State<_FlightMapCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  bool _mapPrecached = false;
 
   @override
   void initState() {
@@ -393,6 +396,15 @@ class _FlightMapCardState extends State<_FlightMapCard>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_mapPrecached) {
+      _mapPrecached = true;
+      precacheImage(const AssetImage(_phoenixFlightMapAsset), context);
+    }
   }
 
   @override
@@ -448,6 +460,31 @@ class _FlightMapCardState extends State<_FlightMapCard>
 
               return Stack(
                 children: [
+                  Positioned.fill(
+                    child: Image.asset(
+                      _phoenixFlightMapAsset,
+                      key: const ValueKey('phoenix-flight-map-hd-image'),
+                      fit: BoxFit.cover,
+                      alignment: const Alignment(.08, .05),
+                      filterQuality: FilterQuality.high,
+                      gaplessPlayback: true,
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            const Color(0xFF061D28).withValues(alpha: .28),
+                            const Color(0xFF061D28).withValues(alpha: .08),
+                            const Color(0xFF061D28).withValues(alpha: .56),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   Positioned.fill(
                     child: CustomPaint(
                       painter: _PremiumMapPainter(
@@ -1066,10 +1103,6 @@ class _PremiumMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    _drawGrid(canvas, size);
-    _drawStars(canvas, size);
-    _drawLand(canvas, size);
-    _drawComicDetails(canvas, size);
     _drawRoute(canvas, size);
   }
 
