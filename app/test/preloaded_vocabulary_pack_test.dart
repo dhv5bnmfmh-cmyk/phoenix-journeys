@@ -8,6 +8,9 @@ void main() {
     final missing = <String>[];
 
     for (final journey in dailyJourneyExperiences) {
+      final storyParagraphs = journey.content.storyParagraphs;
+      final annotations = journey.storyAnnotations;
+
       for (final entry in journey.words) {
         final bundled = PhoenixVocabularyService.bundledExampleForWord(
           entry.word,
@@ -35,13 +38,12 @@ void main() {
         }
 
         var found = false;
-        for (var index = 0; index < journey.content.sections.length; index += 1) {
-          final section = journey.content.sections[index];
-          if (!section.text.contains(entry.word) ||
-              index >= journey.storyAnnotations.length) {
+        for (var index = 0; index < storyParagraphs.length; index += 1) {
+          final paragraph = storyParagraphs[index];
+          if (!paragraph.contains(entry.word) || index >= annotations.length) {
             continue;
           }
-          final annotation = journey.storyAnnotations[index];
+          final annotation = annotations[index];
           if (annotation.pinyin.trim().isNotEmpty &&
               annotation.vietnamese.trim().isNotEmpty &&
               annotation.english.trim().isNotEmpty) {
