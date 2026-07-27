@@ -25,18 +25,18 @@ class CityPassportScreen extends StatelessWidget {
     final state = context.watch<AppState>();
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 7, 8, 5),
+      padding: const EdgeInsets.fromLTRB(7, 6, 7, 4),
       child: Column(
         children: [
           _PassportHeader(state: state),
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
           SpecialJourneyPassport(state: state),
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
           Expanded(
             child: ListView.separated(
               physics: const BouncingScrollPhysics(),
               itemCount: journeyCityCatalog.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 5),
+              separatorBuilder: (_, __) => const SizedBox(height: 4),
               itemBuilder: (context, index) => _CityStampSection(
                 state: state,
                 city: journeyCityCatalog[index],
@@ -59,16 +59,16 @@ class _PassportHeader extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 27,
-          height: 27,
+          width: 26,
+          height: 26,
           decoration: BoxDecoration(
-            color: PhoenixTheme.red.withValues(alpha: .72),
-            borderRadius: BorderRadius.circular(9),
+            color: PhoenixTheme.red.withValues(alpha: .68),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(
             Icons.auto_stories_rounded,
             color: Colors.white,
-            size: 15,
+            size: 14,
           ),
         ),
         const SizedBox(width: 6),
@@ -76,20 +76,20 @@ class _PassportHeader extends StatelessWidget {
           child: Text(
             state.displayText('探索护照'),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontSize: 15,
+                  fontSize: 14.5,
                   height: 1,
                   fontWeight: FontWeight.w900,
                 ),
           ),
         ),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: .22),
+            color: Colors.white.withValues(alpha: .12),
             borderRadius: BorderRadius.circular(99),
             border: Border.all(
-              color: PhoenixTheme.red.withValues(alpha: .10),
-              width: .7,
+              color: PhoenixTheme.red.withValues(alpha: .07),
+              width: .6,
             ),
           ),
           child: Text(
@@ -98,7 +98,7 @@ class _PassportHeader extends StatelessWidget {
                 : state.displayText('${state.earnedStampCount} 枚印章'),
             style: const TextStyle(
               color: PhoenixTheme.red,
-              fontSize: 8,
+              fontSize: 7.5,
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -124,17 +124,17 @@ class _CityStampSection extends StatelessWidget {
 
     return Container(
       key: ValueKey('passport-city-${city.id}'),
-      padding: const EdgeInsets.fromLTRB(6, 5, 6, 6),
+      padding: const EdgeInsets.fromLTRB(5, 4, 5, 5),
       decoration: BoxDecoration(
         color: active
-            ? PhoenixTheme.red.withValues(alpha: .08)
-            : Colors.white.withValues(alpha: .10),
-        borderRadius: BorderRadius.circular(12),
+            ? PhoenixTheme.red.withValues(alpha: .05)
+            : Colors.white.withValues(alpha: .045),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: active
-              ? PhoenixTheme.red.withValues(alpha: .18)
-              : PhoenixTheme.gold.withValues(alpha: .12),
-          width: .7,
+              ? PhoenixTheme.red.withValues(alpha: .12)
+              : PhoenixTheme.gold.withValues(alpha: .08),
+          width: .6,
         ),
       ),
       child: Column(
@@ -143,28 +143,28 @@ class _CityStampSection extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 21,
-                height: 21,
+                width: 19,
+                height: 19,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: PhoenixTheme.red.withValues(alpha: .06),
-                  borderRadius: BorderRadius.circular(7),
+                  color: PhoenixTheme.red.withValues(alpha: .04),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   city.cityCode,
                   style: const TextStyle(
                     color: PhoenixTheme.red,
-                    fontSize: 6.5,
+                    fontSize: 6,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   state.displayText(city.name),
                   style: const TextStyle(
-                    fontSize: 10.5,
+                    fontSize: 10,
                     height: 1,
                     fontWeight: FontWeight.w900,
                   ),
@@ -172,12 +172,12 @@ class _CityStampSection extends StatelessWidget {
               ),
               if (today)
                 Padding(
-                  padding: const EdgeInsets.only(right: 5),
+                  padding: const EdgeInsets.only(right: 4),
                   child: Text(
                     state.displayText('今日'),
                     style: const TextStyle(
                       color: PhoenixTheme.red,
-                      fontSize: 7,
+                      fontSize: 6.5,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -186,19 +186,19 @@ class _CityStampSection extends StatelessWidget {
                 '$earnedCount/${city.destinationCount}',
                 style: const TextStyle(
                   color: Colors.black38,
-                  fontSize: 7,
+                  fontSize: 6.5,
                   fontWeight: FontWeight.w800,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           LayoutBuilder(
             builder: (context, constraints) {
-              final tileWidth = (constraints.maxWidth - 5) / 2;
+              final tileWidth = (constraints.maxWidth - 4) / 2;
               return Wrap(
-                spacing: 5,
-                runSpacing: 4,
+                spacing: 4,
+                runSpacing: 3,
                 children: [
                   for (final journey in city.destinations)
                     SizedBox(
@@ -252,26 +252,26 @@ class _DestinationStampTile extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(9),
       child: InkWell(
         key: ValueKey('passport-destination-${journey.id}'),
         onTap: available ? () => unawaited(_openJourney(context)) : null,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(9),
         child: Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+          height: 42,
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
           decoration: BoxDecoration(
             color: active
-                ? PhoenixTheme.red.withValues(alpha: .075)
-                : Colors.white.withValues(alpha: .14),
-            borderRadius: BorderRadius.circular(10),
+                ? PhoenixTheme.red.withValues(alpha: .045)
+                : Colors.white.withValues(alpha: .055),
+            borderRadius: BorderRadius.circular(9),
             border: Border.all(
               color: earned
-                  ? PhoenixTheme.red.withValues(alpha: .16)
+                  ? PhoenixTheme.red.withValues(alpha: .11)
                   : available
-                      ? PhoenixTheme.gold.withValues(alpha: .18)
-                      : Colors.black.withValues(alpha: .045),
-              width: .7,
+                      ? PhoenixTheme.gold.withValues(alpha: .10)
+                      : Colors.black.withValues(alpha: .025),
+              width: .6,
             ),
           ),
           child: Row(
@@ -279,9 +279,9 @@ class _DestinationStampTile extends StatelessWidget {
               CityJourneyStamp(
                 journey: journey,
                 isUnlocked: earned || allAccess,
-                size: 34,
+                size: 30,
               ),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -292,21 +292,21 @@ class _DestinationStampTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 10,
+                        fontSize: 9.5,
                         height: 1,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2.5),
                     Text(
                       state.displayText(status),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: earned
-                            ? PhoenixTheme.red.withValues(alpha: .82)
+                            ? PhoenixTheme.red.withValues(alpha: .76)
                             : Colors.black38,
-                        fontSize: 7,
+                        fontSize: 6.5,
                         height: 1,
                         fontWeight: FontWeight.w800,
                       ),
@@ -317,8 +317,8 @@ class _DestinationStampTile extends StatelessWidget {
               if (available)
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: Colors.black.withValues(alpha: .20),
-                  size: 13,
+                  color: Colors.black.withValues(alpha: .15),
+                  size: 12,
                 ),
             ],
           ),
