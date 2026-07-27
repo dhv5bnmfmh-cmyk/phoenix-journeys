@@ -35,6 +35,9 @@ JourneyLevelContent buildAdaptiveLevelForJourney(
     discoveries: discoveries,
     wonderQuestion: _wonderQuestion(experience, profile.band),
     expressQuestion: _expressQuestion(experience, profile.band),
+  ).withReadingLimit(
+    paragraphCount: _languageLevelAgent.planFor(profile).paragraphCount,
+    discoveryCount: _discoveryParagraphCount(profile.band),
   );
 }
 
@@ -54,7 +57,6 @@ _AdaptiveStory _buildStory(
 ) {
   final paragraphs = experience.content.storyParagraphs;
   final annotations = experience.storyAnnotations;
-  final discoveries = experience.discoveries;
 
   if (paragraphs.isEmpty || annotations.isEmpty) {
     return const _AdaptiveStory(
@@ -89,28 +91,15 @@ _AdaptiveStory _buildStory(
         paragraphs: <String>[
           _joinChinese(<String>[
             _firstChineseSentence(paragraphs.first),
-            if (discoveries.isNotEmpty) discoveries.first.text,
-          ]),
-          _joinChinese(<String>[
             _firstChineseSentence(paragraphs[lastIndex]),
-            if (discoveries.length > 1) discoveries[1].text,
           ]),
         ],
         annotations: <ReadingAnnotation>[
           _combineAnnotation(
-            annotations: <ReadingAnnotation>[annotations.first],
-            discoveries: discoveries.isEmpty
-                ? const <DiscoveryEntry>[]
-                : <DiscoveryEntry>[discoveries.first],
-            firstSentenceOnly: true,
-          ),
-          _combineAnnotation(
             annotations: <ReadingAnnotation>[
+              annotations.first,
               annotations[lastAnnotationIndex],
             ],
-            discoveries: discoveries.length > 1
-                ? <DiscoveryEntry>[discoveries[1]]
-                : const <DiscoveryEntry>[],
             firstSentenceOnly: true,
           ),
         ],
@@ -140,15 +129,19 @@ _AdaptiveStory _buildStory(
       return _pairedStory(
         paragraphs: paragraphs,
         annotations: annotations,
-        discoveries: discoveries.take(2).toList(growable: false),
       );
     case PhoenixReadingBand.upperIntermediate:
-    case PhoenixReadingBand.advanced:
-    case PhoenixReadingBand.mastery:
       return _pairedStory(
         paragraphs: paragraphs,
         annotations: annotations,
-        discoveries: discoveries,
+      );
+    case PhoenixReadingBand.advanced:
+    case PhoenixReadingBand.mastery:
+      return _AdaptiveStory(
+        paragraphs: <String>[_joinChinese(paragraphs)],
+        annotations: <ReadingAnnotation>[
+          _combineAnnotation(annotations: annotations),
+        ],
       );
   }
 }
@@ -156,41 +149,21 @@ _AdaptiveStory _buildStory(
 _AdaptiveStory _pairedStory({
   required List<String> paragraphs,
   required List<ReadingAnnotation> annotations,
-  required List<DiscoveryEntry> discoveries,
 }) {
   final split = (paragraphs.length / 2).ceil();
   final firstParagraphs = paragraphs.take(split).toList(growable: false);
   final secondParagraphs = paragraphs.skip(split).toList(growable: false);
   final firstAnnotations = annotations.take(split).toList(growable: false);
   final secondAnnotations = annotations.skip(split).toList(growable: false);
-  final discoverySplit = (discoveries.length / 2).ceil();
-  final firstDiscoveries = discoveries
-      .take(discoverySplit)
-      .toList(growable: false);
-  final secondDiscoveries = discoveries
-      .skip(discoverySplit)
-      .toList(growable: false);
 
   return _AdaptiveStory(
     paragraphs: <String>[
-      _joinChinese(<String>[
-        ...firstParagraphs,
-        ...firstDiscoveries.map((item) => item.text),
-      ]),
-      _joinChinese(<String>[
-        ...secondParagraphs,
-        ...secondDiscoveries.map((item) => item.text),
-      ]),
+      _joinChinese(firstParagraphs),
+      _joinChinese(secondParagraphs),
     ],
     annotations: <ReadingAnnotation>[
-      _combineAnnotation(
-        annotations: firstAnnotations,
-        discoveries: firstDiscoveries,
-      ),
-      _combineAnnotation(
-        annotations: secondAnnotations,
-        discoveries: secondDiscoveries,
-      ),
+      _combineAnnotation(annotations: firstAnnotations),
+      _combineAnnotation(annotations: secondAnnotations),
     ],
   );
 }
@@ -224,15 +197,37 @@ List<DiscoveryEntry> _discoveriesForBand(
   DailyJourneyExperience experience,
   PhoenixReadingBand band,
 ) {
-  final count = switch (band) {
-    PhoenixReadingBand.beginner => 2,
-    PhoenixReadingBand.elementary => 3,
-    PhoenixReadingBand.intermediate ||
-    PhoenixReadingBand.upperIntermediate ||
-    PhoenixReadingBand.advanced ||
-    PhoenixReadingBand.mastery => 4,
-  };
-  return experience.discoveries.take(count).toList(growable: false);
+  final count = _discoveryParagraphCount(band);
+  final source = experience.discoveries;
+  if (source.length <= count) return source;
+  if (count == 1) return <DiscoveryEntry>[_mergeDiscoveryEntries(source)];
+  final split = (source.length / 2).ceil();
+  return <DiscoveryEntry>[
+    _mergeDiscoveryEntries(source.take(split)),
+    _mergeDiscoveryEntries(source.skip(split)),
+  ];
+}
+
+int _discoveryParagraphCount(PhoenixReadingBand band) => switch (band) {
+  PhoenixReadingBand.beginner ||
+  PhoenixReadingBand.advanced ||
+  PhoenixReadingBand.mastery => 1,
+  PhoenixReadingBand.elementary ||
+  PhoenixReadingBand.intermediate ||
+  PhoenixReadingBand.upperIntermediate => 2,
+};
+
+DiscoveryEntry _mergeDiscoveryEntries(Iterable<DiscoveryEntry> source) {
+  final entries = source.toList(growable: false);
+  return DiscoveryEntry(
+    text: _joinChinese(entries.map((entry) => entry.text)),
+    pinyin: _joinLatin(entries.map((entry) => entry.pinyin)),
+    simpleChinese: _joinChinese(
+      entries.map((entry) => entry.simpleChinese),
+    ),
+    vietnamese: _joinLatin(entries.map((entry) => entry.vietnamese)),
+    english: _joinLatin(entries.map((entry) => entry.english)),
+  );
 }
 
 Map<String, VocabularyLevelTag> _buildVocabularyCatalog(
