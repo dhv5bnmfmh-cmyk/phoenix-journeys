@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 /// A high-detail illustrated journey medallion.
 ///
 /// Regular journeys reuse their reviewed 864×1536 scene artwork. Special
-/// journeys use the dedicated 512×512 illustrated symbols first introduced in
-/// PR #131. The frame supplies the metallic depth visible in the Passport UI.
+/// journeys use their reviewed 900×1600 story plates. The frame supplies the
+/// metallic depth visible in the Passport UI.
 class JourneySymbolBadge extends StatelessWidget {
   const JourneySymbolBadge({
     super.key,
@@ -17,8 +16,6 @@ class JourneySymbolBadge extends StatelessWidget {
   final String journeyId;
   final double size;
   final bool isUnlocked;
-
-  bool get _isSvg => _assetFor(journeyId).endsWith('.svg');
 
   @override
   Widget build(BuildContext context) {
@@ -69,16 +66,13 @@ class JourneySymbolBadge extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                if (_isSvg)
-                  SvgPicture.asset(asset, fit: BoxFit.cover)
-                else
-                  Image.asset(
-                    asset,
-                    fit: BoxFit.cover,
-                    alignment: _alignmentFor(journeyId),
-                    filterQuality: FilterQuality.high,
-                    gaplessPlayback: true,
-                  ),
+                Image.asset(
+                  asset,
+                  fit: BoxFit.cover,
+                  alignment: _alignmentFor(journeyId),
+                  filterQuality: FilterQuality.high,
+                  gaplessPlayback: true,
+                ),
                 const DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -113,16 +107,16 @@ class JourneySymbolBadge extends StatelessWidget {
 
 String _assetFor(String id) {
   if (id == 'literary-roaming') {
-    return 'assets/images/special-realms/literary-roaming-symbol.svg';
+    return 'assets/images/special-realms/dream-butterfly-v3.webp';
   }
   if (id == 'myth-tracing') {
-    return 'assets/images/special-realms/myth-tracing-symbol.svg';
+    return 'assets/images/special-realms/moon-letter-v2.webp';
   }
   if (id == 'strange-night-talks') {
-    return 'assets/images/special-realms/strange-night-talks-symbol.svg';
+    return 'assets/images/special-realms/shadowless-inn-v2.webp';
   }
   if (id == 'folk-secret-land') {
-    return 'assets/images/special-realms/folk-secret-land-symbol.svg';
+    return 'assets/images/special-realms/upstream-lantern-v3.webp';
   }
   if (id.contains('summer-palace')) {
     return 'assets/images/backgrounds/generated/beijing/summer-palace/08-golden-hour-tower.webp';
@@ -149,6 +143,10 @@ String _assetFor(String id) {
 }
 
 Alignment _alignmentFor(String id) {
+  if (id == 'literary-roaming') return const Alignment(0, -.18);
+  if (id == 'myth-tracing') return const Alignment(.05, -.10);
+  if (id == 'strange-night-talks') return const Alignment(0, -.04);
+  if (id == 'folk-secret-land') return const Alignment(0, -.12);
   if (id.contains('shanghai')) return const Alignment(.12, -.10);
   if (id.contains('hangzhou')) return const Alignment(.18, -.05);
   if (id.contains('nanjing')) return const Alignment(.10, .05);
