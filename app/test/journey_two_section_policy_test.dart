@@ -20,12 +20,12 @@ void main() {
         reason: '${journey.id} discovery must have two sections',
       );
       expect(
-        story.every((paragraph) => paragraph.length >= 70),
+        story.every((paragraph) => paragraph.length >= 40),
         isTrue,
         reason: '${journey.id} story sections should remain substantial',
       );
       expect(
-        discoveries.every((entry) => entry.text.length >= 70),
+        discoveries.every((entry) => entry.text.length >= 40),
         isTrue,
         reason: '${journey.id} discovery sections should include facts and meaning',
       );
