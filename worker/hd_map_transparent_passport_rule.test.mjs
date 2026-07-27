@@ -12,6 +12,13 @@ const special = readFileSync(
   'utf8',
 );
 
+const specialArtwork = [
+  'literary-roaming-symbol.svg',
+  'myth-tracing-symbol.svg',
+  'strange-night-talks-symbol.svg',
+  'folk-secret-land-symbol.svg',
+];
+
 test('both circled map pages use project-owned retina WebP artwork', () => {
   assert.match(explore, /world-flight-atlas-v1\.webp/);
   assert.match(explore, /east-asia-flight-relief-v2\.webp/);
@@ -56,17 +63,13 @@ test('passport removes large overview and card furniture', () => {
   assert.match(passport, /_collisionOffset/);
 });
 
-test('special journeys use compact cards with sharp symbolic artwork', () => {
+test('special journeys use compact cards with layered high-resolution SVG artwork', () => {
   assert.match(special, /open-special-journey-menu/);
-  assert.match(special, /height: 60/);
   assert.match(special, /height: 58/);
-  assert.match(special, /margin: const EdgeInsets\.only\(bottom: 5\)/);
-  assert.match(special, /class _JourneySymbolTile/);
-  assert.match(special, /class _JourneySymbolPainter/);
-  assert.match(special, /_JourneySymbol\.butterfly/);
-  assert.match(special, /_JourneySymbol\.moonPalace/);
-  assert.match(special, /_JourneySymbol\.shadowInn/);
-  assert.match(special, /_JourneySymbol\.riverLantern/);
+  assert.match(special, /height: 72/);
+  assert.match(special, /margin: const EdgeInsets\.only\(bottom: 7\)/);
+  assert.match(special, /class _JourneySeal/);
+  assert.match(special, /SvgPicture\.asset/);
   assert.match(special, /special-journey-unlock-sheet/);
   assert.match(special, /旅程钱袋/);
   assert.match(special, /state\.displayText\(journey\.chapter\)/);
@@ -74,4 +77,12 @@ test('special journeys use compact cards with sharp symbolic artwork', () => {
   assert.match(special, /balance >= journey\.cost/);
   assert.match(special, /showModalBottomSheet<void>/);
   assert.doesNotMatch(special, /journey\.subtitle/);
+
+  for (const filename of specialArtwork) {
+    assert.match(special, new RegExp(filename.replace('.', '\\.')));
+    const svg = readFileSync(`app/assets/images/special-realms/${filename}`, 'utf8');
+    assert.match(svg, /viewBox="0 0 512 512"/);
+    assert.match(svg, /linearGradient|radialGradient/);
+    assert.ok(svg.length > 1_500);
+  }
 });
