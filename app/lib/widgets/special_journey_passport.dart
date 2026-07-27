@@ -66,11 +66,14 @@ class SpecialJourneyPassport extends StatelessWidget {
     return Container(
       key: const ValueKey('passport-special-journeys'),
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
+      padding: const EdgeInsets.fromLTRB(8, 7, 8, 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF171122).withValues(alpha: .72),
-        borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .38)),
+        color: const Color(0xFF171122).withValues(alpha: .48),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: PhoenixTheme.gold.withValues(alpha: .24),
+          width: .8,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,9 +83,9 @@ class SpecialJourneyPassport extends StatelessWidget {
               const Icon(
                 Icons.auto_awesome,
                 color: PhoenixTheme.gold,
-                size: 16,
+                size: 15,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 5),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +94,7 @@ class SpecialJourneyPassport extends StatelessWidget {
                       state.displayText('万象奇旅 · 完整特别旅程'),
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
+                        fontSize: 11.5,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -100,7 +103,7 @@ class SpecialJourneyPassport extends StatelessWidget {
                       state.displayText('同样的完整流程，不一样的世界、故事与限定印章'),
                       style: const TextStyle(
                         color: Colors.white60,
-                        fontSize: 8.5,
+                        fontSize: 8,
                       ),
                     ),
                   ],
@@ -109,32 +112,32 @@ class SpecialJourneyPassport extends StatelessWidget {
               if (_specialJourneyAllAccessPreview)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 3,
+                    horizontal: 6,
+                    vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: PhoenixTheme.gold.withValues(alpha: .16),
+                    color: PhoenixTheme.gold.withValues(alpha: .11),
                     borderRadius: BorderRadius.circular(99),
                   ),
                   child: Text(
                     state.displayText('体验全开'),
                     style: const TextStyle(
                       color: PhoenixTheme.gold,
-                      fontSize: 8,
+                      fontSize: 7.5,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           SizedBox(
-            height: 104,
+            height: 90,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               itemCount: _journeys.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 7),
+              separatorBuilder: (_, __) => const SizedBox(width: 6),
               itemBuilder: (context, index) =>
                   _journeyCard(context, _journeys[index]),
             ),
@@ -151,25 +154,26 @@ class SpecialJourneyPassport extends StatelessWidget {
     return Material(
       key: ValueKey('special-journey-${journey.id}'),
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () => unawaited(_handleJourneyTap(context, journey)),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
-          width: 150,
-          padding: const EdgeInsets.fromLTRB(9, 8, 9, 8),
+          width: 136,
+          padding: const EdgeInsets.fromLTRB(7, 6, 7, 6),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                journey.accent.withValues(alpha: unlocked ? .24 : .12),
-                Colors.black.withValues(alpha: .24),
+                journey.accent.withValues(alpha: unlocked ? .18 : .09),
+                Colors.black.withValues(alpha: .16),
               ],
             ),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: journey.accent.withValues(alpha: unlocked ? .62 : .28),
+              color: journey.accent.withValues(alpha: unlocked ? .44 : .20),
+              width: .8,
             ),
           ),
           child: Column(
@@ -177,12 +181,12 @@ class SpecialJourneyPassport extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(journey.icon, color: journey.accent, size: 19),
+                  Icon(journey.icon, color: journey.accent, size: 18),
                   const Spacer(),
                   Icon(
                     unlocked ? Icons.lock_open_rounded : Icons.lock_rounded,
                     color: unlocked ? journey.accent : Colors.white38,
-                    size: 14,
+                    size: 13,
                   ),
                 ],
               ),
@@ -191,7 +195,7 @@ class SpecialJourneyPassport extends StatelessWidget {
                 state.displayText(journey.title),
                 style: const TextStyle(
                   color: Colors.white70,
-                  fontSize: 8.5,
+                  fontSize: 8,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -201,18 +205,18 @@ class SpecialJourneyPassport extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 11.5,
                   fontWeight: FontWeight.w900,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 1),
               Text(
                 state.displayText(journey.subtitle),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white60, fontSize: 8),
+                style: const TextStyle(color: Colors.white60, fontSize: 7.5),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 3),
               Text(
                 state.displayText(
                   unlocked
@@ -221,7 +225,7 @@ class SpecialJourneyPassport extends StatelessWidget {
                 ),
                 style: TextStyle(
                   color: unlocked ? journey.accent : Colors.white54,
-                  fontSize: 8,
+                  fontSize: 7.5,
                   fontWeight: FontWeight.w900,
                 ),
               ),
