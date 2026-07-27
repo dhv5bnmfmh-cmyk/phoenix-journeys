@@ -9,8 +9,9 @@ import '../services/journey_location_binding.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/city_journey_stamp.dart';
-import '../widgets/special_journey_passport.dart';
+import '../widgets/journey_level_selector_button.dart';
 import '../widgets/journey_symbol_badge.dart';
+import '../widgets/special_journey_passport.dart';
 import 'journey_screen.dart';
 
 bool get _passportAllAccessPreview {
@@ -84,6 +85,8 @@ class _PassportHeader extends StatelessWidget {
             ),
           ),
         ),
+        const JourneyLevelSelectorButton(compact: true),
+        const SizedBox(width: 6),
         Text(
           _passportAllAccessPreview
               ? state.displayText('全开放')
@@ -319,6 +322,9 @@ class _CityMapMarker extends StatelessWidget {
                       color: Color(0xFF2B211C),
                       fontSize: 8.5,
                       fontWeight: FontWeight.w900,
+                      shadows: [
+                        Shadow(color: Color(0xCCFFF8E8), blurRadius: 7),
+                      ],
                     ),
                   ),
                 ],
