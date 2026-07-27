@@ -385,7 +385,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 12),
     )..repeat();
   }
 
@@ -441,8 +441,8 @@ class _FlightMapCardState extends State<_FlightMapCard>
                   : CurvedAnimation(
                       parent: _controller,
                       curve: const Interval(
-                        .34,
-                        .82,
+                        .28,
+                        .68,
                         curve: Curves.easeInOutCubic,
                       ),
                     ).value;
@@ -451,9 +451,19 @@ class _FlightMapCardState extends State<_FlightMapCard>
                   : CurvedAnimation(
                       parent: _controller,
                       curve: const Interval(
+                        .68,
                         .82,
-                        1,
                         curve: Curves.easeInCubic,
+                      ),
+                    ).value;
+              final destinationFocusT = state.journeyCompleted
+                  ? 1.0
+                  : CurvedAnimation(
+                      parent: _controller,
+                      curve: const Interval(
+                        .72,
+                        .90,
+                        curve: Curves.easeInOutCubic,
                       ),
                     ).value;
               final geometry = _FlightGeometry(
@@ -490,39 +500,96 @@ class _FlightMapCardState extends State<_FlightMapCard>
                     child: Opacity(
                       opacity: cameraT,
                       child: Transform.scale(
-                        scale: 1.12 - cameraT * .12,
-                        child: Image.asset(
-                          'assets/images/maps/east-asia-flight-relief-v2.webp',
-                          key: const ValueKey('phoenix-home-hd-flight-map'),
-                          fit: BoxFit.cover,
-                          alignment: Alignment.center,
-                          filterQuality: FilterQuality.high,
-                          gaplessPlayback: true,
+                        key: const ValueKey('phoenix-destination-camera'),
+                        scale: 1 + destinationFocusT * .72,
+                        alignment: Alignment(
+                          destination.mapPoint.x * 2 - 1,
+                          destination.mapPoint.y * 2 - 1,
                         ),
-                      ),
-                    ),
-                  ),
-                  const Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Color(0x4D062A31),
-                            Color(0x16062A31),
-                            Color(0x5004141A),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.asset(
+                              'assets/images/maps/east-asia-flight-relief-v2.webp',
+                              key: const ValueKey('phoenix-home-hd-flight-map'),
+                              fit: BoxFit.cover,
+                              alignment: Alignment.center,
+                              filterQuality: FilterQuality.high,
+                              gaplessPlayback: true,
+                            ),
+                            const DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Color(0x3A062A31),
+                                    Color(0x0C062A31),
+                                    Color(0x4004141A),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            CustomPaint(
+                              painter: _PremiumMapPainter(
+                                routeProgress: journeyProgress,
+                                pulse: _controller.value,
+                                destinationPoint: destination.mapPoint,
+                              ),
+                            ),
+                            Positioned(
+                              left: plane.dx - 13,
+                              top: plane.dy - 13,
+                              child: Transform.rotate(
+                                angle: angle,
+                                child: Container(
+                                  width: 26,
+                                  height: 26,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFD879),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(
+                                          0xFFFFD879,
+                                        ).withValues(alpha: .45),
+                                        blurRadius: 10,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.flight_rounded,
+                                    color: Color(0xFF713016),
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: geometry.hanoi.dx - 16,
+                              top: geometry.hanoi.dy - 16,
+                              child: _CityMarker(
+                                label: state.displayText('河内'),
+                                subtitle: 'HAN',
+                                active: false,
+                                pulse: _controller.value,
+                              ),
+                            ),
+                            Positioned(
+                              left: geometry.destination.dx - 16,
+                              top: geometry.destination.dy - 16,
+                              child: _CityMarker(
+                                label: state.displayText(
+                                  state.activeJourney.city,
+                                ),
+                                subtitle: state.activeJourney.cityCode,
+                                active: state.activeJourneyStampEarned,
+                                pulse: _controller.value,
+                              ),
+                            ),
                           ],
                         ),
-                      ),
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _PremiumMapPainter(
-                        routeProgress: journeyProgress,
-                        pulse: _controller.value,
-                        destinationPoint: destination.mapPoint,
                       ),
                     ),
                   ),
@@ -591,55 +658,6 @@ class _FlightMapCardState extends State<_FlightMapCard>
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                  Positioned(
-                    left: plane.dx - 13,
-                    top: plane.dy - 13,
-                    child: Transform.rotate(
-                      angle: angle,
-                      child: Container(
-                        width: 26,
-                        height: 26,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFD879),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(
-                                0xFFFFD879,
-                              ).withValues(alpha: .45),
-                              blurRadius: 10,
-                              spreadRadius: 1,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.flight_rounded,
-                          color: Color(0xFF713016),
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: geometry.hanoi.dx - 16,
-                    top: geometry.hanoi.dy - 16,
-                    child: _CityMarker(
-                      label: state.displayText('河内'),
-                      subtitle: 'HAN',
-                      active: false,
-                      pulse: _controller.value,
-                    ),
-                  ),
-                  Positioned(
-                    left: geometry.destination.dx - 16,
-                    top: geometry.destination.dy - 16,
-                    child: _CityMarker(
-                      label: state.displayText(state.activeJourney.city),
-                      subtitle: state.activeJourney.cityCode,
-                      active: state.activeJourneyStampEarned,
-                      pulse: _controller.value,
                     ),
                   ),
                   Positioned(
