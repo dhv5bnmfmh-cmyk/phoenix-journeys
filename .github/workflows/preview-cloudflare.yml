@@ -57,7 +57,14 @@ jobs:
             if (!fs.existsSync(path)) return;
             const marker = '<!-- phoenix-agent-failure -->';
             const lines = fs.readFileSync(path, 'utf8').trim().split('\n');
-            const log = lines.slice(-180).join('\n').slice(-30000);
+            const failureIndexes = [];
+            lines.forEach((line, index) => {
+              if (/^not ok\b/.test(line.trim())) failureIndexes.push(index);
+            });
+            const chunks = failureIndexes.map((index) =>
+              lines.slice(Math.max(0, index - 2), Math.min(lines.length, index + 48)).join('\n'),
+            );
+            const log = (chunks.length ? chunks.join('\n\n') : lines.slice(-100).join('\n')).slice(-30000);
             const body = `${marker}\n## Phoenix Agent failure\n\n~~~text\n${log}\n~~~`;
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
