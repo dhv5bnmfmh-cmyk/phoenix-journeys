@@ -1,5 +1,6 @@
 import '../models/story_content.dart';
 import 'journey_data.dart';
+import 'journey_narrative_policy.dart';
 
 class DailyJourneyExperience {
   const DailyJourneyExperience({
@@ -15,12 +16,13 @@ class DailyJourneyExperience {
     required this.distanceLabel,
     required this.stampSymbol,
     required this.content,
-    required this.storyAnnotations,
+    required List<ReadingAnnotation> storyAnnotations,
     required this.words,
-    required this.discoveries,
+    required List<DiscoveryEntry> discoveries,
     required this.wonderQuestion,
     required this.expressQuestion,
-  });
+  })  : _storyAnnotations = storyAnnotations,
+        _discoveries = discoveries;
 
   final String id;
   final String city;
@@ -34,11 +36,26 @@ class DailyJourneyExperience {
   final String distanceLabel;
   final String stampSymbol;
   final JourneyContentRecord content;
-  final List<ReadingAnnotation> storyAnnotations;
+  final List<ReadingAnnotation> _storyAnnotations;
   final List<WordEntry> words;
-  final List<DiscoveryEntry> discoveries;
+  final List<DiscoveryEntry> _discoveries;
   final String wonderQuestion;
   final String expressQuestion;
+
+  JourneyNarrativeTone get narrativeTone => resolveJourneyNarrativeTone(
+        title: content.title,
+        tags: content.tags,
+      );
+
+  List<ReadingAnnotation> get storyAnnotations => condenseStoryAnnotations(
+        tone: narrativeTone,
+        annotations: _storyAnnotations,
+      );
+
+  List<DiscoveryEntry> get discoveries => condenseDiscoveries(
+        tone: narrativeTone,
+        discoveries: _discoveries,
+      );
 
   String get cityId {
     final separator = id.indexOf('-');
