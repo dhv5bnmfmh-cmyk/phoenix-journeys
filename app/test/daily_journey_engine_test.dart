@@ -34,11 +34,3 @@ void main() {
     }
   });
 }
-ℹ tests 226
-ℹ suites 0
-ℹ pass 226
-ℹ fail 0
-ℹ cancelled 0
-ℹ skipped 0
-ℹ todo 0
-ℹ duration_ms 834.726681
