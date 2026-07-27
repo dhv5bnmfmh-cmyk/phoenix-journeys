@@ -49,14 +49,14 @@ class JourneyLocationBinding {
 
     final longitudeRatio =
         ((longitude - minLongitude) / (maxLongitude - minLongitude)).clamp(
-      0.0,
-      1.0,
-    );
+          0.0,
+          1.0,
+        );
     final latitudeRatio =
         ((latitude - minLatitude) / (maxLatitude - minLatitude)).clamp(
-      0.0,
-      1.0,
-    );
+          0.0,
+          1.0,
+        );
 
     return JourneyMapPoint(
       x: (0.38 + longitudeRatio * 0.50).clamp(0.38, 0.88).toDouble(),
@@ -77,7 +77,7 @@ Map<String, JourneyLocationBinding> _buildJourneyLocationBindings() {
   final paths = <String>{};
   final geoNodeIds = <String>{};
 
-  for (final journey in dailyJourneyExperiences) {
+  for (final journey in allJourneyExperiences) {
     final node = _journeyGeoAgent.find(journey.content.geoNodeId);
     if (node == null) {
       throw StateError(

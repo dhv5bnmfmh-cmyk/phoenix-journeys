@@ -28,6 +28,8 @@ flutter:
   assets:
     - assets/images/
     - assets/images/home/
+    - assets/images/special-realms/
+    - assets/images/special-realms/ten-scene/
     - assets/images/backgrounds/seed/
     - assets/images/backgrounds/generated/
     - assets/images/backgrounds/generated/beijing/forbidden-city/

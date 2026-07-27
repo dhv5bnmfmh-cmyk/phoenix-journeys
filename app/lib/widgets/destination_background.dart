@@ -7,6 +7,7 @@ import '../models/journey_background.dart';
 import '../services/journey_background_policy.dart';
 import '../services/journey_location_binding.dart';
 import '../theme/phoenix_theme.dart';
+import 'special_realm_background.dart';
 
 const _summerPalaceJourneyId = 'beijing-summer-palace';
 const _forbiddenCityJourneyId = 'beijing-forbidden-city';
@@ -95,6 +96,15 @@ class DestinationBackground extends StatelessWidget {
       catalog: journeyBackgroundCatalog,
     );
     final visibleScrimStrength = (scrimStrength * .55).clamp(0.0, 1.0);
+
+    if (SpecialRealmBackground.supports(journeyId)) {
+      return SpecialRealmBackground(
+        journeyId: journeyId,
+        pageType: pageType,
+        scrimStrength: visibleScrimStrength,
+        child: child,
+      );
+    }
 
     if (journeyId == _summerPalaceJourneyId) {
       return _SummerPalaceDynamicBackground(
@@ -232,8 +242,7 @@ class _ForbiddenCityDynamicBackgroundState
               animation: _motion,
               builder: (context, _) {
                 final raw = reduceMotion ? .46 : _motion.value;
-                final cameraProgress =
-                    .5 + .5 * math.sin(raw * math.pi * 2);
+                final cameraProgress = .5 + .5 * math.sin(raw * math.pi * 2);
                 final lightProgress =
                     .5 + .5 * math.sin(raw * math.pi * 2 + 1.1);
                 final shadowProgress =
@@ -717,14 +726,12 @@ class _SummerPalaceDynamicBackgroundState
               animation: _motion,
               builder: (context, _) {
                 final raw = reduceMotion ? .44 : _motion.value;
-                final cameraProgress =
-                    .5 + .5 * math.sin(raw * math.pi * 2);
+                final cameraProgress = .5 + .5 * math.sin(raw * math.pi * 2);
                 final gradeProgress =
                     .5 + .5 * math.sin(raw * math.pi * 2 + .8);
                 final lightProgress =
                     .5 + .5 * math.sin(raw * math.pi * 2 + 1.5);
-                final mistProgress =
-                    .5 + .5 * math.sin(raw * math.pi * 2 - .6);
+                final mistProgress = .5 + .5 * math.sin(raw * math.pi * 2 - .6);
                 final waterProgress =
                     .5 + .5 * math.sin(raw * math.pi * 3 + .25);
                 final breathProgress =
@@ -741,9 +748,7 @@ class _SummerPalaceDynamicBackgroundState
                       _SummerPalaceCloudLight(progress: lightProgress),
                       _SummerPalaceMistVeil(progress: mistProgress),
                       _SummerPalaceWaterShimmer(progress: waterProgress),
-                      _SummerPalaceForegroundBreath(
-                        progress: breathProgress,
-                      ),
+                      _SummerPalaceForegroundBreath(progress: breathProgress),
                     ],
                   ),
                 );
@@ -1021,10 +1026,7 @@ class _CinematicDestinationBackgroundState
   @override
   void initState() {
     super.initState();
-    _motion = AnimationController(
-      vsync: this,
-      duration: widget.style.duration,
-    );
+    _motion = AnimationController(vsync: this, duration: widget.style.duration);
   }
 
   @override
@@ -1083,8 +1085,7 @@ class _CinematicDestinationBackgroundState
               animation: _motion,
               builder: (context, _) {
                 final raw = reduceMotion ? .42 : _motion.value;
-                final cameraProgress =
-                    .5 + .5 * math.sin(raw * math.pi * 2);
+                final cameraProgress = .5 + .5 * math.sin(raw * math.pi * 2);
                 final lightProgress =
                     .5 + .5 * math.sin(raw * math.pi * 2 + 1.15);
                 final atmosphereProgress =
@@ -1170,10 +1171,7 @@ class _CinematicCameraLayer extends StatelessWidget {
 }
 
 class _CinematicMovingLight extends StatelessWidget {
-  const _CinematicMovingLight({
-    required this.progress,
-    required this.style,
-  });
+  const _CinematicMovingLight({required this.progress, required this.style});
 
   final double progress;
   final _CinematicBackgroundStyle style;
@@ -1211,10 +1209,7 @@ class _CinematicMovingLight extends StatelessWidget {
 }
 
 class _CinematicAtmosphere extends StatelessWidget {
-  const _CinematicAtmosphere({
-    required this.progress,
-    required this.style,
-  });
+  const _CinematicAtmosphere({required this.progress, required this.style});
 
   final double progress;
   final _CinematicBackgroundStyle style;
@@ -1292,10 +1287,7 @@ class _CinematicForegroundDepth extends StatelessWidget {
 }
 
 class _CinematicWaterLight extends StatelessWidget {
-  const _CinematicWaterLight({
-    required this.progress,
-    required this.style,
-  });
+  const _CinematicWaterLight({required this.progress, required this.style});
 
   final double progress;
   final _CinematicBackgroundStyle style;

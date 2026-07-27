@@ -14,7 +14,7 @@ void main() {
     await state.load();
 
     await state.saveJourneyProgress(
-      step: 4,
+      step: 3,
       wonder: '我想观察红墙和屋顶。',
       express: '故宫保存了很多历史记忆。',
       memory: '今天记住了太和殿。',
@@ -23,10 +23,10 @@ void main() {
     final restored = AppState();
     await restored.load();
 
-    expect(restored.beijingJourneyStep, 4);
-    expect(restored.beijingJourneyFurthestStep, 4);
-    expect(restored.beijingJourneyStepLabel, '表达');
-    expect(restored.beijingJourneyProgressPercent, 71);
+    expect(restored.beijingJourneyStep, 3);
+    expect(restored.beijingJourneyFurthestStep, 3);
+    expect(restored.beijingJourneyStepLabel, '挑战');
+    expect(restored.beijingJourneyProgressPercent, 67);
     expect(restored.wonderDraft, '我想观察红墙和屋顶。');
     expect(restored.expressDraft, '故宫保存了很多历史记忆。');
     expect(restored.memoryDraft, '今天记住了太和殿。');
@@ -38,7 +38,7 @@ void main() {
     await state.load();
 
     await state.saveJourneyProgress(
-      step: 5,
+      step: 4,
       wonder: '',
       express: '',
       memory: '',
@@ -51,7 +51,7 @@ void main() {
     );
 
     expect(state.beijingJourneyStep, 2);
-    expect(state.beijingJourneyFurthestStep, 5);
+    expect(state.beijingJourneyFurthestStep, 4);
     expect(state.beijingJourneyFurthestStepLabel, '回忆');
   });
 
@@ -63,7 +63,7 @@ void main() {
     expect(state.activeJourneyId, 'beijing-forbidden-city');
 
     await state.saveJourneyProgress(
-      step: 5,
+      step: 4,
       wonder: '草稿一',
       express: '草稿二',
       memory: '北京的红墙',

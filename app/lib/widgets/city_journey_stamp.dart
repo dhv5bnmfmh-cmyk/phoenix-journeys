@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../agents/phoenix_stamp_agent.dart';
 import '../data/daily_journey_catalog.dart';
 import '../theme/phoenix_theme.dart';
+import 'special_journey_stamp.dart';
 
 class CityJourneyStamp extends StatelessWidget {
   const CityJourneyStamp({
@@ -22,6 +23,15 @@ class CityJourneyStamp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (SpecialJourneyStamp.supports(journey.id)) {
+      return SpecialJourneyStamp(
+        journey: journey,
+        isUnlocked: isUnlocked,
+        size: size,
+        transparentInk: transparentInk,
+      );
+    }
+
     final foreground = transparentInk
         ? PhoenixTheme.red.withValues(alpha: .62)
         : isUnlocked
@@ -88,7 +98,9 @@ class CityJourneyStamp extends StatelessWidget {
             Positioned(
               bottom: size * .11,
               child: Text(
-                isUnlocked ? '${journey.cityCode} · 已点亮' : '${journey.cityCode} · 未解锁',
+                isUnlocked
+                    ? '${journey.cityCode} · 已点亮'
+                    : '${journey.cityCode} · 未解锁',
                 style: TextStyle(
                   color: foreground,
                   fontSize: size * .074,

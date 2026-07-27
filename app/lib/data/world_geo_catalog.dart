@@ -1,12 +1,7 @@
 import '../models/geo_node.dart';
 
 const worldGeoCatalog = <GeoNode>[
-  GeoNode(
-    id: 'world',
-    name: '世界',
-    kind: GeoNodeKind.world,
-    localType: '世界',
-  ),
+  GeoNode(id: 'world', name: '世界', kind: GeoNodeKind.world, localType: '世界'),
   GeoNode(
     id: 'cn',
     name: '中国',
@@ -238,5 +233,54 @@ const worldGeoCatalog = <GeoNode>[
     latitude: 23.1290,
     longitude: 113.2420,
     aliases: ['陈氏书院', 'Chen Clan Ancestral Hall', 'Chen Clan Academy'],
+  ),
+
+  GeoNode(
+    id: 'phoenix-realms',
+    name: '万象异境',
+    kind: GeoNodeKind.country,
+    localType: '幻想文化世界',
+    parentId: 'world',
+    aliases: ['Phoenix Realms', '万象奇旅'],
+  ),
+  GeoNode(
+    id: 'phoenix-realms-dream-butterfly',
+    name: '梦蝶竹林',
+    kind: GeoNodeKind.place,
+    localType: '文学幻想之境',
+    parentId: 'phoenix-realms',
+    latitude: 38.2,
+    longitude: 105.8,
+    aliases: ['庄周梦蝶', 'Dream Butterfly Grove'],
+  ),
+  GeoNode(
+    id: 'phoenix-realms-moon-letter',
+    name: '桂影山径',
+    kind: GeoNodeKind.place,
+    localType: '神话幻想之境',
+    parentId: 'phoenix-realms',
+    latitude: 36.4,
+    longitude: 112.6,
+    aliases: ['月宫遗简', 'Moon Letter Path'],
+  ),
+  GeoNode(
+    id: 'phoenix-realms-shadowless-inn',
+    name: '无影客栈',
+    kind: GeoNodeKind.place,
+    localType: '志怪幻想之境',
+    parentId: 'phoenix-realms',
+    latitude: 29.7,
+    longitude: 109.4,
+    aliases: ['聊斋夜客', 'Shadowless Inn'],
+  ),
+  GeoNode(
+    id: 'phoenix-realms-upstream-lantern',
+    name: '逆流渡口',
+    kind: GeoNodeKind.place,
+    localType: '民俗幻想之境',
+    parentId: 'phoenix-realms',
+    latitude: 25.8,
+    longitude: 117.8,
+    aliases: ['逆流河灯', 'Upstream Lantern Ford'],
   ),
 ];

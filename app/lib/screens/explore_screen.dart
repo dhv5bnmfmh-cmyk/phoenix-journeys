@@ -78,6 +78,8 @@ class ExploreScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               _FlightMapCard(state: state, height: mapHeight),
+              const SizedBox(height: 5),
+              _CoinWalletHint(state: state),
               const SizedBox(height: 8),
               _JourneyCard(
                 state: state,
@@ -90,6 +92,82 @@ class ExploreScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CoinWalletHint extends StatelessWidget {
+  const _CoinWalletHint({required this.state});
+
+  final AppState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('home-coin-wallet-hint'),
+      height: 30,
+      padding: const EdgeInsets.symmetric(horizontal: 9),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .68),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .34)),
+      ),
+      child: Row(
+        children: [
+          Text(
+            state.displayText('旅程钱袋'),
+            style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900),
+          ),
+          const Spacer(),
+          _CoinCount(
+            icon: '●',
+            color: const Color(0xFFFFC94A),
+            count: state.goldCoins,
+          ),
+          _CoinCount(
+            icon: '●',
+            color: const Color(0xFFC9D0D6),
+            count: state.silverCoins,
+          ),
+          _CoinCount(
+            icon: '●',
+            color: const Color(0xFFC87941),
+            count: state.bronzeCoins,
+          ),
+          _CoinCount(
+            icon: '✦',
+            color: const Color(0xFF9EA7B0),
+            count: state.silverFragments,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CoinCount extends StatelessWidget {
+  const _CoinCount({
+    required this.icon,
+    required this.color,
+    required this.count,
+  });
+
+  final String icon;
+  final Color color;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: Row(
+        children: [
+          Text(icon, style: TextStyle(color: color, fontSize: 12)),
+          const SizedBox(width: 2),
+          Text('$count',
+              style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900)),
+        ],
+      ),
     );
   }
 }
@@ -991,7 +1069,39 @@ class _PremiumMapPainter extends CustomPainter {
     _drawGrid(canvas, size);
     _drawStars(canvas, size);
     _drawLand(canvas, size);
+    _drawComicDetails(canvas, size);
     _drawRoute(canvas, size);
+  }
+
+  void _drawComicDetails(Canvas canvas, Size size) {
+    final ink = Paint()
+      ..color = const Color(0xFFFFE6A5).withValues(alpha: .22)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.1;
+    final wash = Paint()
+      ..color = const Color(0xFFFFD879).withValues(alpha: .09)
+      ..style = PaintingStyle.fill;
+    final sun = Offset(size.width * .12, size.height * .25);
+    canvas.drawCircle(sun, 15, wash);
+    canvas.drawCircle(sun, 15, ink);
+    for (var index = 0; index < 10; index++) {
+      final angle = index * math.pi / 5;
+      canvas.drawLine(
+        sun + Offset(math.cos(angle) * 20, math.sin(angle) * 20),
+        sun + Offset(math.cos(angle) * 25, math.sin(angle) * 25),
+        ink,
+      );
+    }
+    final cloud = Path()
+      ..moveTo(size.width * .70, size.height * .18)
+      ..cubicTo(size.width * .74, size.height * .10, size.width * .80,
+          size.height * .11, size.width * .82, size.height * .18)
+      ..cubicTo(size.width * .88, size.height * .15, size.width * .91,
+          size.height * .23, size.width * .86, size.height * .26)
+      ..lineTo(size.width * .71, size.height * .26)
+      ..cubicTo(size.width * .67, size.height * .24, size.width * .67,
+          size.height * .20, size.width * .70, size.height * .18);
+    canvas.drawPath(cloud, ink);
   }
 
   void _drawGrid(Canvas canvas, Size size) {

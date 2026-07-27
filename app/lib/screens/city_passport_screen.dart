@@ -9,6 +9,7 @@ import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/city_journey_stamp.dart';
 import '../widgets/journey_share_button.dart';
+import '../widgets/special_journey_passport.dart';
 import 'journey_screen.dart';
 
 bool get _passportAllAccessPreview {
@@ -31,6 +32,8 @@ class CityPassportScreen extends StatelessWidget {
           _PassportHeader(state: state),
           const SizedBox(height: 8),
           _CityOverview(state: state),
+          const SizedBox(height: 8),
+          SpecialJourneyPassport(state: state),
           const SizedBox(height: 8),
           Expanded(
             child: ListView.separated(
@@ -469,9 +472,7 @@ class _DestinationStampCard extends StatelessWidget {
     if (state.journeyCompleted) await state.restartJourney();
     if (!context.mounted) return;
     await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => JourneyScreen(journeyId: journey.id),
-      ),
+      MaterialPageRoute(builder: (_) => JourneyScreen(journeyId: journey.id)),
     );
   }
 
@@ -493,10 +494,10 @@ class _DestinationStampCard extends StatelessWidget {
 
     return Container(
       key: ValueKey('passport-destination-${journey.id}'),
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .95),
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white.withValues(alpha: .72),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: earned
               ? PhoenixTheme.red.withValues(alpha: .30)
@@ -510,7 +511,7 @@ class _DestinationStampCard extends StatelessWidget {
           CityJourneyStamp(
             journey: journey,
             isUnlocked: earned || allAccess,
-            size: 76,
+            size: 62,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -581,8 +582,12 @@ class _DestinationStampCard extends StatelessWidget {
                             const SizedBox(width: 6),
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: () => unawaited(_openJourney(context)),
-                                icon: const Icon(Icons.replay_rounded, size: 16),
+                                onPressed: () =>
+                                    unawaited(_openJourney(context)),
+                                icon: const Icon(
+                                  Icons.replay_rounded,
+                                  size: 16,
+                                ),
                                 label: Text(
                                   state.displayText('再次体验'),
                                   style: const TextStyle(fontSize: 10),
