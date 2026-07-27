@@ -7,24 +7,32 @@ import 'package:phoenix_journeys/models/language_proficiency.dart';
 void main() {
   const agent = PhoenixLanguageLevelAgent();
 
-  test('every published journey follows the adaptive two-paragraph route', () {
+  test('every published journey follows its adaptive reading shape', () {
     for (final journey in dailyJourneyExperiences) {
       for (final profile in agent.allProfiles) {
         final level = resolveAdaptiveJourneyLevel(
           journey,
           profile: profile,
         );
+        final oneBlock = profile.band == PhoenixReadingBand.beginner ||
+            profile.band == PhoenixReadingBand.advanced ||
+            profile.band == PhoenixReadingBand.mastery;
+        final expectedCount = oneBlock ? 1 : 2;
         expect(
           level.storyParagraphs,
-          hasLength(2),
+          hasLength(expectedCount),
           reason: '${journey.id} ${profile.displayLabel}',
         );
         expect(
           level.storyAnnotations,
-          hasLength(2),
+          hasLength(expectedCount),
           reason: '${journey.id} annotations',
         );
-        expect(level.discoveries, isNotEmpty, reason: journey.id);
+        expect(
+          level.discoveries,
+          hasLength(expectedCount),
+          reason: '${journey.id} discoveries',
+        );
         expect(level.words, isNotEmpty, reason: journey.id);
         expect(
           level.words.length,
