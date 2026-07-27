@@ -71,7 +71,7 @@ void main() {
     for (final journey in allJourneyExperiences) {
       final content = resolveAdaptiveJourneyLevel(
         journey,
-        profile: levelAgent.hskProfiles[2],
+        profile: PhoenixLanguageLevelAgent.hskProfiles[2],
       );
       final story = content.storyParagraphs.join();
       for (final discovery in content.discoveries) {
