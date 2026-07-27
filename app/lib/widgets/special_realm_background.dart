@@ -2,17 +2,20 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../models/journey_background.dart';
 import 'special_realm_cinematic_overlay.dart';
 
 class SpecialRealmBackground extends StatefulWidget {
   const SpecialRealmBackground({
     super.key,
     required this.journeyId,
+    required this.pageType,
     required this.child,
     required this.scrimStrength,
   });
 
   final String journeyId;
+  final JourneyBackgroundPage pageType;
   final Widget child;
   final double scrimStrength;
 
@@ -73,10 +76,14 @@ class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
             CustomPaint(
               painter: _SpecialRealmPainter(
                 journeyId: widget.journeyId,
+                pageType: widget.pageType,
                 progress: _motion.value,
               ),
             ),
-            SpecialRealmCinematicOverlay(journeyId: widget.journeyId),
+            SpecialRealmCinematicOverlay(
+              journeyId: widget.journeyId,
+              pageType: widget.pageType,
+            ),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -100,10 +107,19 @@ class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
 }
 
 class _SpecialRealmPainter extends CustomPainter {
-  const _SpecialRealmPainter({required this.journeyId, required this.progress});
+  const _SpecialRealmPainter({
+    required this.journeyId,
+    required this.pageType,
+    required this.progress,
+  });
 
   final String journeyId;
+  final JourneyBackgroundPage pageType;
   final double progress;
+
+  double get _chapter =>
+      JourneyBackgroundPage.values.indexOf(pageType) /
+      (JourneyBackgroundPage.values.length - 1);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -137,6 +153,13 @@ class _SpecialRealmPainter extends CustomPainter {
         stops: [0, .34, .7, 1],
       ).createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, sky);
+
+    _paintChapterLight(
+      canvas,
+      size,
+      const Color(0xFF7CE4FF),
+      Alignment(-.82 + _chapter * 1.64, -.62 + _chapter * .34),
+    );
 
     final mist = Paint()
       ..shader = RadialGradient(
@@ -203,11 +226,12 @@ class _SpecialRealmPainter extends CustomPainter {
       ..close();
     canvas.drawPath(path, pathPaint);
 
-    for (var index = 0; index < 13; index++) {
+    for (var index = 0; index < 18; index++) {
       final phase = (progress + index / 13) % 1;
       final x = size.width * (.12 + .75 * ((index * .37 + phase * .22) % 1));
       final y = size.height * (.15 + .62 * ((index * .23 + phase) % 1));
-      final scale = 3.5 + 4 * math.sin((phase + index) * math.pi).abs();
+      final scale =
+          3.5 + _chapter * 4 + 4 * math.sin((phase + index) * math.pi).abs();
       _paintButterfly(
         canvas,
         Offset(x, y),
@@ -226,12 +250,18 @@ class _SpecialRealmPainter extends CustomPainter {
         colors: [Color(0xFF071426), Color(0xFF192D52), Color(0xFF5D5064)],
       ).createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, sky);
+    _paintChapterLight(
+      canvas,
+      size,
+      const Color(0xFFFFE5A0),
+      Alignment(.78 - _chapter * 1.15, -.72 + _chapter * .42),
+    );
 
     final moonCenter = Offset(
       size.width * (.68 + .018 * math.sin(progress * math.pi * 2)),
       size.height * .22,
     );
-    final moonRadius = size.width * .22;
+    final moonRadius = size.width * (.19 + _chapter * .07);
     canvas.drawCircle(
       moonCenter,
       moonRadius * 1.45,
@@ -350,6 +380,12 @@ class _SpecialRealmPainter extends CustomPainter {
         colors: [Color(0xFF080B12), Color(0xFF17202B), Color(0xFF0E1215)],
       ).createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, sky);
+    _paintChapterLight(
+      canvas,
+      size,
+      _chapter > .58 ? const Color(0xFF9DCBFF) : const Color(0xFFFF6A3D),
+      Alignment(.72 - _chapter * 1.42, -.2 + _chapter * .65),
+    );
 
     final innBody = Rect.fromLTWH(
       size.width * .08,
@@ -429,7 +465,7 @@ class _SpecialRealmPainter extends CustomPainter {
     final rain = Paint()
       ..color = const Color(0xFFA8C8DD).withValues(alpha: .22)
       ..strokeWidth = 1.2;
-    for (var index = 0; index < 80; index++) {
+    for (var index = 0; index < 80 + (_chapter * 55).round(); index++) {
       final x = size.width * ((index * .618 + progress * .34) % 1);
       final y = size.height * ((index * .347 + progress * 1.8) % 1);
       canvas.drawLine(Offset(x, y), Offset(x - 6, y + 18), rain);
@@ -459,6 +495,12 @@ class _SpecialRealmPainter extends CustomPainter {
         colors: [Color(0xFF130D25), Color(0xFF35234F), Color(0xFF261534)],
       ).createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, sky);
+    _paintChapterLight(
+      canvas,
+      size,
+      const Color(0xFFFF9A5A),
+      Alignment(-.72 + _chapter * 1.44, .62 - _chapter * .78),
+    );
 
     final farBank = Path()
       ..moveTo(0, size.height * .34)
@@ -508,7 +550,7 @@ class _SpecialRealmPainter extends CustomPainter {
       );
     }
 
-    for (var index = 0; index < 28; index++) {
+    for (var index = 0; index < 28 + (_chapter * 18).round(); index++) {
       final downstream = (progress * .18 + index / 28) % 1;
       final perspective = .38 + .58 * downstream;
       final x = size.width * ((index * .357 + downstream * .28) % 1);
@@ -569,6 +611,30 @@ class _SpecialRealmPainter extends CustomPainter {
             Colors.transparent,
           ],
         ).createShader(reflection.getBounds()),
+    );
+  }
+
+  void _paintChapterLight(
+    Canvas canvas,
+    Size size,
+    Color color,
+    Alignment center,
+  ) {
+    final pulse = .86 + .14 * math.sin(progress * math.pi * 2);
+    final rect = Offset.zero & size;
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = RadialGradient(
+          center: center,
+          radius: .48 + _chapter * .32,
+          colors: [
+            color.withValues(alpha: (.16 + _chapter * .18) * pulse),
+            color.withValues(alpha: .035),
+            Colors.transparent,
+          ],
+          stops: const [0, .48, 1],
+        ).createShader(rect),
     );
   }
 
@@ -641,6 +707,7 @@ class _SpecialRealmPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SpecialRealmPainter oldDelegate) {
     return oldDelegate.progress != progress ||
-        oldDelegate.journeyId != journeyId;
+        oldDelegate.journeyId != journeyId ||
+        oldDelegate.pageType != pageType;
   }
 }
