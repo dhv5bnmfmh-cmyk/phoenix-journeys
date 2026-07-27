@@ -84,5 +84,7 @@ test('PR118 registers full cinematic special journeys in the stable flow', async
   assert.match(state, /specialJourney\.unlockedIds/);
   assert.match(home, /home-coin-wallet-hint/);
   assert.match(background, /JourneyBackgroundPage/);
-  assert.match(background, /_paintChapterLight/);
+  assert.match(background, /_PremiumRealmPlate/);
+  assert.match(background, /preloadOrderFor/);
+  assert.doesNotMatch(background, /_paintChapterLight/);
 });
