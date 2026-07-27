@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a9742b"/><stop offset="0.5" stop-color="#4b3b55"/><stop offset="1" stop-color="#171c3c"/></linearGradient>
+  <radialGradient id="moon" cx="0.4" cy="0.35" r="0.65"><stop offset="0" stop-color="#fff9cf"/><stop offset="0.68" stop-color="#ffe5a1"/><stop offset="1" stop-color="#dbad52"/></radialGradient>
+  <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0b45e"/><stop offset="1" stop-color="#7a3a1e"/></linearGradient>
+  <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e7c17b"/><stop offset="1" stop-color="#7b552b"/></linearGradient>
+  <clipPath id="round"><rect width="512" height="512" rx="88"/></clipPath>
+</defs>
+<g clip-path="url(#round)">
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <path d="M0 0h340L0 250z" fill="#fff" opacity="0.09"/>
+  <circle cx="157" cy="142" r="112" fill="url(#moon)"/>
+  <circle cx="205" cy="110" r="101" fill="#2a2b57"/>
+  <g fill="#fff1b1" opacity="0.9">
+    <circle cx="385" cy="84" r="4"/><circle cx="426" cy="130" r="3"/><circle cx="338" cy="105" r="3"/>
+    <path d="M386 165h18M395 156v18" stroke="#fff1b1" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <path d="M0 442L118 323l82 72 105-139 87 114 120-79v221H0z" fill="#1d2851"/>
+  <path d="M0 467L135 355l73 63 106-114 96 87 102-60v181H0z" fill="#273763" opacity="0.88"/>
+  <g transform="translate(256 322)">
+    <path d="M-154-34H154L115-76H-115z" fill="url(#roof)" stroke="#ffd893" stroke-width="5"/>
+    <rect x="-116" y="-30" width="232" height="60" rx="10" fill="#7e4525" stroke="#e8bd73" stroke-width="5"/>
+    <g fill="#f8d18a"><rect x="-88" y="-18" width="14" height="39"/><rect x="-46" y="-18" width="14" height="39"/><rect x="-7" y="-18" width="14" height="39"/><rect x="32" y="-18" width="14" height="39"/><rect x="74" y="-18" width="14" height="39"/></g>
+    <path d="M-118 38H118L87 8H-87z" fill="url(#roof)" stroke="#ffd893" stroke-width="5"/>
+    <rect x="-82" y="40" width="164" height="54" rx="8" fill="#6f3b24" stroke="#d9aa63" stroke-width="5"/>
+    <g fill="#f3cc84"><rect x="-56" y="51" width="13" height="31"/><rect x="-20" y="51" width="13" height="31"/><rect x="16" y="51" width="13" height="31"/><rect x="52" y="51" width="13" height="31"/></g>
+    <path d="M-80 102H80L57 80H-57z" fill="url(#roof)" stroke="#ffd893" stroke-width="5"/>
+    <rect x="-51" y="104" width="102" height="48" rx="7" fill="url(#stone)" stroke="#f0cd8e" stroke-width="4"/>
+    <path d="M-92 160H92L70 142H-70z" fill="#8f6235" stroke="#e4c082" stroke-width="4"/>
+  </g>
+  <g fill="#ffbd62"><circle cx="167" cy="369" r="10"/><circle cx="344" cy="369" r="10"/></g>
+  <g stroke="#fff1be" stroke-width="2"><path d="M167 349v20"/><path d="M344 349v20"/></g>
+  <path d="M30 417c118-30 305-26 452 13" fill="none" stroke="#f7e5bd" stroke-width="18" opacity="0.13" stroke-linecap="round"/>
+</g>
+</svg>
