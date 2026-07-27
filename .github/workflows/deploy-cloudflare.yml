@@ -1,0 +1,158 @@
+name: Deploy Cloudflare
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Test Phoenix agents
+        id: agent_tests
+        run: node --test worker/*.test.mjs
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        id: dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Build Flutter web release
+        id: web_build
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Validate Worker bundle
+        id: worker_validation
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
+
+      - name: Check Cloudflare credentials
+        id: cloudflare_credentials
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Cloudflare deployment skipped: add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID as repository secrets."
+          fi
+
+      - name: Deploy to Cloudflare Workers
+        id: cloudflare_deploy
+        if: steps.cloudflare_credentials.outputs.ready == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4"
+          command: "deploy --var PHOENIX_RELEASE:${{ github.sha }}"
+
+      - name: Verify production Agent health
+        id: production_health
+        if: steps.cloudflare_credentials.outputs.ready == 'true'
+        shell: bash
+        run: |
+          health_url="https://phoenix-journeys-alpha.7hn5tyrjgh.workers.dev/api/health?commit=${GITHUB_SHA}"
+          verified="false"
+
+          for attempt in {1..18}; do
+            response="$(curl --fail --silent --show-error "$health_url" || true)"
+            echo "Cloudflare release check ${attempt}/18: ${response:-no response}"
+
+            if node -e '
+              let health;
+              try {
+                health = JSON.parse(process.argv[1]);
+              } catch (_) {
+                process.exit(1);
+              }
+              const expectedRelease = process.argv[2];
+              if (!health.ok ||
+                  !health.ai ||
+                  health.service !== "phoenix-journeys" ||
+                  health.release !== expectedRelease) {
+                process.exit(1);
+              }
+            ' "$response" "$GITHUB_SHA"; then
+              verified="true"
+              break
+            fi
+
+            sleep 5
+          done
+
+          if [[ "$verified" != "true" ]]; then
+            echo "Phoenix Agent health check failed: the expected release did not propagate."
+            exit 1
+          fi
+
+      - name: Publish Cloudflare deployment receipt
+        if: always()
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CREDENTIALS_READY: ${{ steps.cloudflare_credentials.outputs.ready }}
+          AGENT_TESTS: ${{ steps.agent_tests.outcome }}
+          DEPENDENCIES: ${{ steps.dependencies.outcome }}
+          WEB_BUILD: ${{ steps.web_build.outcome }}
+          WORKER_VALIDATION: ${{ steps.worker_validation.outcome }}
+          CLOUDFLARE_DEPLOY: ${{ steps.cloudflare_deploy.outcome }}
+          PRODUCTION_HEALTH: ${{ steps.production_health.outcome }}
+        run: |
+          state="success"
+          description="Cloudflare deployed; Phoenix Agents healthy"
+
+          if [[ "$CREDENTIALS_READY" != "true" ]]; then
+            state="error"
+            description="Deployment skipped: Cloudflare secrets missing"
+          elif [[ "$AGENT_TESTS" != "success" || \
+                  "$DEPENDENCIES" != "success" || \
+                  "$WEB_BUILD" != "success" || \
+                  "$WORKER_VALIDATION" != "success" || \
+                  "$CLOUDFLARE_DEPLOY" != "success" || \
+                  "$PRODUCTION_HEALTH" != "success" ]]; then
+            state="failure"
+            description="Cloudflare deployment or Agent health check failed"
+          fi
+
+          payload="$(node -e '
+            const [state, description] = process.argv.slice(1);
+            process.stdout.write(JSON.stringify({
+              state,
+              description,
+              context: "cloudflare/production",
+              target_url: "https://phoenix-journeys-alpha.7hn5tyrjgh.workers.dev/"
+            }));
+          ' "$state" "$description")"
+
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            --data "$payload"

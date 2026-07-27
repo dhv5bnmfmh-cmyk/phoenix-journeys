@@ -1,0 +1,38 @@
+name: Phoenix offline background library
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/daily-background-refresh.yml'
+      - 'worker/agents/phoenix_background_agent.mjs'
+      - 'worker/agents/phoenix_background_scheduler.mjs'
+      - 'worker/agents/phoenix_visual_compliance_agent.mjs'
+      - 'worker/scripts/plan_offline_background_library.mjs'
+      - 'worker/background_agent.test.mjs'
+      - 'docs/destination-background-policy.md'
+      - 'app/lib/services/journey_background_policy.dart'
+      - 'app/test/journey_background_policy_test.dart'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phoenix-offline-background-library
+  cancel-in-progress: true
+
+jobs:
+  validate-library-rule:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Validate 10-image city plans
+        run: node worker/scripts/plan_offline_background_library.mjs --check
+
+      - name: Run visual agent regression tests
+        run: node --test worker/background_agent.test.mjs

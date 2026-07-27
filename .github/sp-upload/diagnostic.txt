@@ -1,0 +1,13 @@
+error=Error('Incorrect padding')
+chunk_count=7
+encoded_length=140003
+encoded_mod_4=3
+first_32=H4sIAAAAAAAAA+zXZ1QT66IG4EQEpPcm
+last_32=vkRHTn2lMINXF+5TOzb52qGptSIbdgD9
+chunk_00=20004
+chunk_01=20000
+chunk_02=20000
+chunk_03=20000
+chunk_04=20000
+chunk_05=19999
+chunk_07=20000

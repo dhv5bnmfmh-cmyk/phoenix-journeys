@@ -1,0 +1,144 @@
+name: Import Summer Palace backgrounds
+
+on:
+  push:
+    branches: [feat/two-level-journey-picker]
+    paths:
+      - '.github/sp-upload/**'
+      - '.github/workflows/import-summer-palace-backgrounds.yml'
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/sp-upload/**'
+      - '.github/workflows/import-summer-palace-backgrounds.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: import-summer-palace-backgrounds
+  cancel-in-progress: true
+
+jobs:
+  import-backgrounds:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: feat/two-level-journey-picker
+
+      - name: Decode and validate the ten backgrounds
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import csv
+          import gzip
+          import io
+          import shutil
+          import tarfile
+
+          expected = [
+              '01-dawn-kunming-lake.webp',
+              '02-morning-long-corridor.webp',
+              '03-misty-longevity-hill.webp',
+              '04-bright-seventeen-arch-bridge.webp',
+              '05-after-rain-pavilion.webp',
+              '06-summer-lotus-lake.webp',
+              '07-autumn-west-dike.webp',
+              '08-golden-hour-tower.webp',
+              '09-blue-hour-reflection.webp',
+              '10-moonlit-lake-panorama.webp',
+          ]
+          chunks = sorted(Path('.github/sp-upload').glob('chunk_*'))
+          if not chunks:
+              raise SystemExit('No staged Summer Palace archive chunks were found.')
+
+          encoded = ''.join(path.read_text(encoding='utf-8').strip() for path in chunks)
+          try:
+              compressed = base64.b64decode(encoded, validate=True)
+              tar_bytes = gzip.decompress(compressed)
+          except Exception as error:
+              diagnostic = [
+                  f'error={error!r}',
+                  f'chunk_count={len(chunks)}',
+                  f'encoded_length={len(encoded)}',
+                  f'encoded_mod_4={len(encoded) % 4}',
+                  f'first_32={encoded[:32]}',
+                  f'last_32={encoded[-32:]}',
+              ]
+              diagnostic.extend(f'{path.name}={path.stat().st_size}' for path in chunks)
+              Path('.github/sp-upload/diagnostic.txt').write_text('\n'.join(diagnostic) + '\n', encoding='utf-8')
+              raise SystemExit(f'Staged Summer Palace archive is incomplete or corrupt: {error}')
+
+          found = {}
+          with tarfile.open(fileobj=io.BytesIO(tar_bytes), mode='r:') as archive:
+              for member in archive.getmembers():
+                  name = Path(member.name).name
+                  if not member.isfile() or name not in expected:
+                      continue
+                  handle = archive.extractfile(member)
+                  if handle is not None:
+                      found[name] = handle.read()
+
+          missing = [name for name in expected if name not in found]
+          if missing:
+              raise SystemExit(f'Archive is missing required backgrounds: {missing}')
+
+          target = Path('app/assets/images/backgrounds/generated/beijing/summer-palace')
+          target.mkdir(parents=True, exist_ok=True)
+          for name in expected:
+              data = found[name]
+              if len(data) < 20000:
+                  raise SystemExit(f'{name} is unexpectedly small: {len(data)} bytes')
+              if data[:4] != b'RIFF' or data[8:12] != b'WEBP':
+                  raise SystemExit(f'{name} is not a valid WebP container')
+              (target / name).write_bytes(data)
+              print(f'Imported {name}: {len(data)} bytes')
+
+          register = Path('design/ASSET_REGISTER.csv')
+          rows = [
+              ['assets/images/backgrounds/generated/beijing/summer-palace/01-dawn-kunming-lake.webp', 'Summer Palace moonlit Kunming Lake', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
+              ['assets/images/backgrounds/generated/beijing/summer-palace/02-morning-long-corridor.webp', 'Summer Palace illuminated blue hour', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
+              ['assets/images/backgrounds/generated/beijing/summer-palace/03-misty-longevity-hill.webp', 'Summer Palace golden sunrise', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
+              ['assets/images/backgrounds/generated/beijing/summer-palace/04-bright-seventeen-arch-bridge.webp', 'Summer Palace autumn lakeside', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
+              ['assets/images/backgrounds/generated/beijing/summer-palace/05-after-rain-pavilion.webp', 'Summer Palace lotus sunrise', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
+              ['assets/images/backgrounds/generated/beijing/summer-palace/06-summer-lotus-lake.webp', 'Summer Palace lakeside pavilion after rain', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
+              ['assets/images/backgrounds/generated/beijing/summer-palace/07-autumn-west-dike.webp', 'Summer Palace Seventeen-Arch Bridge daylight', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
+              ['assets/images/backgrounds/generated/beijing/summer-palace/08-golden-hour-tower.webp', 'Summer Palace misty Longevity Hill', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
+              ['assets/images/backgrounds/generated/beijing/summer-palace/09-blue-hour-reflection.webp', 'Summer Palace Long Corridor', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
+              ['assets/images/backgrounds/generated/beijing/summer-palace/10-moonlit-lake-panorama.webp', 'Summer Palace golden lake panorama', 'user-provided Phoenix original', 'phoenix-exclusive-owned', 'user-provided source file 2026-07-23', 'approved'],
+          ]
+          existing = register.read_text(encoding='utf-8')
+          with register.open('a', encoding='utf-8', newline='') as output:
+              writer = csv.writer(output, lineterminator='\n')
+              for row in rows:
+                  if row[0] not in existing:
+                      writer.writerow(row)
+
+          shutil.rmtree('.github/sp-upload')
+          Path('.github/workflows/import-summer-palace-backgrounds.yml').unlink()
+          PY
+
+      - name: Record archive diagnostics
+        if: failure()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/sp-upload/diagnostic.txt
+          git commit -m 'chore: record Summer Palace archive diagnostics [skip ci]'
+          git push origin HEAD:feat/two-level-journey-picker
+
+      - name: Replace staging commits with one clean import commit
+        if: success()
+        env:
+          BASE_COMMIT: 788ea1647a02051d358ad50175d8ec524a58686b
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git reset --soft "$BASE_COMMIT"
+          git commit -m 'feat: import user-approved Summer Palace backgrounds [summer-palace-imported]'
+          git push --force-with-lease origin HEAD:feat/two-level-journey-picker
