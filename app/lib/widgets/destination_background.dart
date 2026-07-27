@@ -100,6 +100,7 @@ class DestinationBackground extends StatelessWidget {
     if (SpecialRealmBackground.supports(journeyId)) {
       return SpecialRealmBackground(
         journeyId: journeyId,
+        pageType: pageType,
         scrimStrength: visibleScrimStrength,
         child: child,
       );
