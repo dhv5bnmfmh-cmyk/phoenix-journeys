@@ -15,12 +15,14 @@ test('Home uses the city-grouped Passport screen', () => {
 });
 
 test('Passport keeps every city journey reachable on the transparent atlas', () => {
-  assert.match(passport, /itemCount: journeyCityCatalog\.length/);
-  assert.match(passport, /_CityCollection\(/);
+  assert.match(passport, /for \(final city in journeyCityCatalog\)/);
+  assert.match(passport, /_CityMapMarker\(/);
   assert.match(passport, /city\.destinations/);
   assert.match(passport, /passport-city-\$\{city\.id\}/);
   assert.match(passport, /passport-destination-\$\{journey\.id\}/);
   assert.match(passport, /china-passport-atlas-v2\.webp/);
+  assert.match(passport, /showModalBottomSheet<void>/);
+  assert.match(passport, /选择旅程/);
 });
 
 test('Passport tiles only render a small transparent stamp and journey name', () => {

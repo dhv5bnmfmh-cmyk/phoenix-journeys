@@ -385,7 +385,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 7),
+      duration: const Duration(seconds: 10),
     )..repeat();
   }
 
@@ -432,26 +432,74 @@ class _FlightMapCardState extends State<_FlightMapCard>
                   : state.hasJourneyInProgress
                       ? state.beijingJourneyProgress
                       : _controller.value;
+              final cameraT = CurvedAnimation(
+                parent: _controller,
+                curve: const Interval(0, .34, curve: Curves.easeInOutCubic),
+              ).value;
               final flightT = state.journeyCompleted
                   ? 1.0
-                  : Curves.easeInOutCubic.transform(_controller.value);
+                  : CurvedAnimation(
+                      parent: _controller,
+                      curve: const Interval(
+                        .34,
+                        .82,
+                        curve: Curves.easeInOutCubic,
+                      ),
+                    ).value;
+              final landingT = state.journeyCompleted
+                  ? 1.0
+                  : CurvedAnimation(
+                      parent: _controller,
+                      curve: const Interval(
+                        .82,
+                        1,
+                        curve: Curves.easeInCubic,
+                      ),
+                    ).value;
               final geometry = _FlightGeometry(
                 Size(constraints.maxWidth, constraints.maxHeight),
                 destination.mapPoint,
               );
-              final plane = geometry.pointAt(flightT);
-              final angle = geometry.angleAt(flightT);
+              final plane = landingT > 0
+                  ? geometry.landingPoint(landingT)
+                  : geometry.pointAt(flightT);
+              final angle = landingT > 0
+                  ? math.pi / 2
+                  : geometry.angleAt(flightT);
 
               return Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.asset(
-                      'assets/images/maps/east-asia-flight-relief-v2.webp',
-                      key: const ValueKey('phoenix-home-hd-flight-map'),
-                      fit: BoxFit.cover,
-                      alignment: Alignment.center,
-                      filterQuality: FilterQuality.high,
-                      gaplessPlayback: true,
+                    child: Transform.scale(
+                      scale: 1 + cameraT * 1.7,
+                      alignment: const Alignment(.72, -.12),
+                      child: Opacity(
+                        opacity: (1 - cameraT * 1.15).clamp(0, 1),
+                        child: Image.asset(
+                          'assets/images/maps/world-flight-atlas-v1.webp',
+                          key: const ValueKey('phoenix-world-flight-map'),
+                          fit: BoxFit.cover,
+                          alignment: Alignment.center,
+                          filterQuality: FilterQuality.high,
+                          gaplessPlayback: true,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Opacity(
+                      opacity: cameraT,
+                      child: Transform.scale(
+                        scale: 1.12 - cameraT * .12,
+                        child: Image.asset(
+                          'assets/images/maps/east-asia-flight-relief-v2.webp',
+                          key: const ValueKey('phoenix-home-hd-flight-map'),
+                          fit: BoxFit.cover,
+                          alignment: Alignment.center,
+                          filterQuality: FilterQuality.high,
+                          gaplessPlayback: true,
+                        ),
+                      ),
                     ),
                   ),
                   const Positioned.fill(
@@ -663,30 +711,37 @@ class _FlightGeometry {
         destination = Offset(
           size.width * destinationPoint.x,
           size.height * destinationPoint.y,
+        ),
+        approach = Offset(
+          size.width * destinationPoint.x,
+          math.max(42, size.height * destinationPoint.y - 52),
         );
 
   final Size size;
   final Offset hanoi;
   final Offset control;
   final Offset destination;
+  final Offset approach;
 
   Offset pointAt(double t) {
     final oneMinus = 1 - t;
     return Offset(
       oneMinus * oneMinus * hanoi.dx +
           2 * oneMinus * t * control.dx +
-          t * t * destination.dx,
+          t * t * approach.dx,
       oneMinus * oneMinus * hanoi.dy +
           2 * oneMinus * t * control.dy +
-          t * t * destination.dy,
+          t * t * approach.dy,
     );
   }
 
+  Offset landingPoint(double t) => Offset.lerp(approach, destination, t)!;
+
   double angleAt(double t) {
     final dx = 2 * (1 - t) * (control.dx - hanoi.dx) +
-        2 * t * (destination.dx - control.dx);
+        2 * t * (approach.dx - control.dx);
     final dy = 2 * (1 - t) * (control.dy - hanoi.dy) +
-        2 * t * (destination.dy - control.dy);
+        2 * t * (approach.dy - control.dy);
     return math.atan2(dy, dx);
   }
 }
@@ -1097,9 +1152,10 @@ class _PremiumMapPainter extends CustomPainter {
       ..quadraticBezierTo(
         geometry.control.dx,
         geometry.control.dy,
-        geometry.destination.dx,
-        geometry.destination.dy,
-      );
+        geometry.approach.dx,
+        geometry.approach.dy,
+      )
+      ..lineTo(geometry.destination.dx, geometry.destination.dy);
 
     final glow = Paint()
       ..color = const Color(0xFFFFD879).withValues(alpha: .20)

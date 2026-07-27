@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../data/daily_journey_catalog.dart';
 import '../screens/journey_screen.dart';
 import '../state/app_state.dart';
+import '../theme/phoenix_theme.dart';
 
 bool get _specialJourneyAllAccessPreview {
   final uri = Uri.base;
@@ -54,17 +55,104 @@ class SpecialJourneyPassport extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Material(
       key: const ValueKey('passport-special-journeys'),
-      width: double.infinity,
-      height: 48,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: _journeys.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 5),
-        itemBuilder: (context, index) =>
-            _journeyTile(context, _journeys[index]),
+      color: Colors.transparent,
+      child: InkWell(
+        key: const ValueKey('open-special-journey-menu'),
+        onTap: () => unawaited(_showSpecialJourneys(context)),
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          height: 48,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF7E171D), Color(0xFFB83A32), Color(0xFF6C1118)],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFFFFD879), width: 1.2),
+            boxShadow: const [
+              BoxShadow(color: Color(0x3D5A1015), blurRadius: 12, offset: Offset(0, 5)),
+            ],
+          ),
+          child: Row(
+            children: [
+              const SizedBox(width: 12),
+              const Icon(Icons.auto_awesome_rounded, color: Color(0xFFFFD879), size: 19),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  state.displayText('特别旅程'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+              _walletBadge('金', state.goldCoins, const Color(0xFFFFD879)),
+              const SizedBox(width: 4),
+              _walletBadge('银', state.silverCoins, const Color(0xFFE3E8EE)),
+              const SizedBox(width: 4),
+              _walletBadge('铜', state.bronzeCoins, const Color(0xFFD98A54)),
+              const SizedBox(width: 7),
+              const Icon(Icons.chevron_right_rounded, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _walletBadge(String label, int value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: .18),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Text(
+        '$label$value',
+        style: TextStyle(color: color, fontSize: 8.5, fontWeight: FontWeight.w900),
+      ),
+    );
+  }
+
+  Future<void> _showSpecialJourneys(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFFFFBF3),
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                state.displayText('万象奇旅 · 特别旅程'),
+                style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
+                  color: PhoenixTheme.red,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                state.displayText('使用旅程钱币开启，解锁后即可进入完整故事。'),
+                style: const TextStyle(color: Colors.black54, fontSize: 12),
+              ),
+              const SizedBox(height: 12),
+              for (final journey in _journeys)
+                _journeyTile(sheetContext, journey),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -76,12 +164,12 @@ class SpecialJourneyPassport extends StatelessWidget {
 
     return Material(
       key: ValueKey('special-journey-${journey.id}'),
-      color: Colors.transparent,
+      color: const Color(0x0FFFFFFF),
       child: InkWell(
         onTap: () => unawaited(_handleJourneyTap(context, journey)),
         borderRadius: BorderRadius.circular(10),
         child: SizedBox(
-          width: 106,
+          height: 62,
           child: Row(
             children: [
               Container(
@@ -112,21 +200,40 @@ class SpecialJourneyPassport extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Expanded(
-                child: Text(
-                  state.displayText(journey.chapter),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFF2B211C),
-                    fontSize: 10.5,
-                    height: 1.05,
-                    fontWeight: FontWeight.w900,
-                    shadows: [
-                      Shadow(color: Color(0xCCFFF8E8), blurRadius: 7),
-                    ],
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      state.displayText(journey.chapter),
+                      style: const TextStyle(
+                        color: Color(0xFF2B211C),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      unlocked
+                          ? state.displayText('已开启 · 点击进入')
+                          : state.displayText(
+                              '${journey.cost} 枚${journey.currency} · 当前 ${state.walletBalance(journey.currency)} 枚',
+                            ),
+                      style: TextStyle(
+                        color: unlocked ? PhoenixTheme.red : Colors.black54,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              Icon(
+                unlocked ? Icons.play_circle_fill_rounded : Icons.lock_open_rounded,
+                color: journey.accent,
+                size: 22,
+              ),
+              const SizedBox(width: 4),
             ],
           ),
         ),

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_city_catalog.dart';
+import '../services/journey_location_binding.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/city_journey_stamp.dart';
@@ -54,20 +55,10 @@ class CityPassportScreen extends StatelessWidget {
           child: Column(
             children: [
               _PassportHeader(state: state),
-              const SizedBox(height: 5),
+              const SizedBox(height: 7),
               SpecialJourneyPassport(state: state),
-              const SizedBox(height: 4),
-              Expanded(
-                child: ListView.builder(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.zero,
-                  itemCount: journeyCityCatalog.length,
-                  itemBuilder: (context, index) => _CityCollection(
-                    state: state,
-                    city: journeyCityCatalog[index],
-                  ),
-                ),
-              ),
+              const SizedBox(height: 7),
+              Expanded(child: _PassportMap(state: state)),
             ],
           ),
         ),
@@ -127,20 +118,143 @@ class _PassportHeader extends StatelessWidget {
   }
 }
 
-class _CityCollection extends StatelessWidget {
-  const _CityCollection({required this.state, required this.city});
+class _PassportMap extends StatelessWidget {
+  const _PassportMap({required this.state});
 
   final AppState state;
-  final JourneyCityCatalogEntry city;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return LayoutBuilder(
+      builder: (context, constraints) => Stack(
+        clipBehavior: Clip.none,
+        children: [
+          for (final city in journeyCityCatalog)
+            _CityMapMarker(
+              state: state,
+              city: city,
+              mapSize: constraints.biggest,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CityMapMarker extends StatelessWidget {
+  const _CityMapMarker({
+    required this.state,
+    required this.city,
+    required this.mapSize,
+  });
+
+  final AppState state;
+  final JourneyCityCatalogEntry city;
+  final Size mapSize;
+
+  Offset get _mapPoint {
+    final binding = requireJourneyLocation(city.primaryDestination.id);
+    final longitudeRatio = ((binding.longitude - 73) / (135 - 73)).clamp(0, 1);
+    final latitudeRatio = ((binding.latitude - 18) / (54 - 18)).clamp(0, 1);
+    return Offset(
+      mapSize.width * (.10 + longitudeRatio * .78),
+      mapSize.height * (.08 + (1 - latitudeRatio) * .82),
+    );
+  }
+
+  Future<void> _showCityJourneys(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFFFFBF3),
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                state.displayText('${city.name} · 选择旅程'),
+                style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                state.displayText('点击地点，打开它的故事与学习旅程。'),
+                style: const TextStyle(color: Colors.black54, fontSize: 12),
+              ),
+              const SizedBox(height: 12),
+              for (final journey in city.destinations)
+                _DestinationStampTile(state: state, journey: journey),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final point = _mapPoint;
+    final earned = city.destinations.any(
+      (journey) => state.isJourneyStampEarned(journey.id),
+    );
+    return Positioned(
       key: ValueKey('passport-city-${city.id}'),
-      children: [
-        for (final journey in city.destinations)
-          _DestinationStampTile(state: state, journey: journey),
-      ],
+      left: (point.dx - 29).clamp(0, mapSize.width - 70),
+      top: (point.dy - 25).clamp(0, mapSize.height - 58),
+      child: Semantics(
+        button: true,
+        label: state.displayText('${city.name}旅程地点'),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => unawaited(_showCityJourneys(context)),
+            borderRadius: BorderRadius.circular(18),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(5, 4, 7, 4),
+              decoration: BoxDecoration(
+                color: const Color(0xEFFFF8E8),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: earned
+                      ? PhoenixTheme.gold
+                      : PhoenixTheme.red.withValues(alpha: .52),
+                ),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x26000000), blurRadius: 8),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CityJourneyStamp(
+                    journey: city.primaryDestination,
+                    isUnlocked: earned || _passportAllAccessPreview,
+                    size: 27,
+                    transparentInk: true,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    state.displayText(city.name),
+                    style: const TextStyle(
+                      color: Color(0xFF2B211C),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -152,6 +266,7 @@ class _DestinationStampTile extends StatelessWidget {
   final DailyJourneyExperience journey;
 
   Future<void> _openJourney(BuildContext context) async {
+    Navigator.of(context).pop();
     await state.activateJourney(journey.id);
     if (state.journeyCompleted) await state.restartJourney();
     if (!context.mounted) return;
@@ -173,14 +288,14 @@ class _DestinationStampTile extends StatelessWidget {
       label: state.displayText('${journey.place}旅程'),
       child: Material(
         key: ValueKey('passport-destination-${journey.id}'),
-        color: Colors.transparent,
+        color: const Color(0x0FFFFFFF),
         child: InkWell(
           onTap: enabled ? () => unawaited(_openJourney(context)) : null,
           borderRadius: BorderRadius.circular(12),
           splashColor: PhoenixTheme.red.withValues(alpha: .08),
           highlightColor: PhoenixTheme.gold.withValues(alpha: .06),
           child: SizedBox(
-            height: 52,
+            height: 58,
             child: Row(
               children: [
                 CityJourneyStamp(

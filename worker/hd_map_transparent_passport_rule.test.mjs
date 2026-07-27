@@ -13,6 +13,7 @@ const special = readFileSync(
 );
 
 test('both circled map pages use project-owned retina WebP artwork', () => {
+  assert.match(explore, /world-flight-atlas-v1\.webp/);
   assert.match(explore, /east-asia-flight-relief-v2\.webp/);
   assert.match(passport, /china-passport-atlas-v2\.webp/);
   assert.ok(
@@ -23,9 +24,18 @@ test('both circled map pages use project-owned retina WebP artwork', () => {
     statSync('app/assets/images/maps/china-passport-atlas-v2.webp').size >
       150_000,
   );
+  assert.ok(
+    statSync('app/assets/images/maps/world-flight-atlas-v1.webp').size >
+      40_000,
+  );
 });
 
-test('route painter only overlays the route instead of fake flat land', () => {
+test('world camera zooms into the real route and lands from above', () => {
+  assert.match(explore, /Interval\(0, \.34/);
+  assert.match(explore, /scale: 1 \+ cameraT \* 1\.7/);
+  assert.match(explore, /Interval\(\s*\.82,\s*1/);
+  assert.match(explore, /geometry\.landingPoint\(landingT\)/);
+  assert.match(explore, /math\.pi \/ 2/);
   assert.match(explore, /void paint\(Canvas canvas, Size size\) \{\s*_drawRoute/);
   assert.doesNotMatch(explore, /void _drawLand/);
   assert.doesNotMatch(explore, /void _drawGrid/);
@@ -36,12 +46,16 @@ test('passport removes large overview and card furniture', () => {
   assert.doesNotMatch(passport, /LinearProgressIndicator/);
   assert.doesNotMatch(passport, /journey\.description/);
   assert.doesNotMatch(passport, /FilledButton/);
-  assert.match(passport, /height: 52/);
+  assert.match(passport, /showModalBottomSheet<void>/);
+  assert.match(passport, /requireJourneyLocation\(city\.primaryDestination\.id\)/);
 });
 
-test('special journeys follow the same small stamp plus name rule', () => {
+test('special journeys open from a featured wallet-aware button', () => {
+  assert.match(special, /open-special-journey-menu/);
   assert.match(special, /height: 48/);
   assert.match(special, /width: 32/);
   assert.match(special, /state\.displayText\(journey\.chapter\)/);
+  assert.match(special, /state\.walletBalance\(journey\.currency\)/);
+  assert.match(special, /showModalBottomSheet<void>/);
   assert.doesNotMatch(special, /journey\.subtitle/);
 });
