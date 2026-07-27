@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../data/daily_journey_catalog.dart';
@@ -151,10 +150,7 @@ class JourneyMemoryTimeline extends StatelessWidget {
                     compact: false,
                     onTap: () {
                       Navigator.of(sheetContext).pop();
-                      Future<void>.delayed(
-                        Duration.zero,
-                        () => _showDetail(context, entry),
-                      );
+                      _showDetail(context, entry);
                     },
                   );
                 },
