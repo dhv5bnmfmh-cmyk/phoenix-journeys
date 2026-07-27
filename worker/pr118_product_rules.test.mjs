@@ -39,6 +39,18 @@ test('PR118 always presents three sequential four-choice challenge modes', async
   assert.match(challenge, /: '碎银'/);
   assert.match(challenge, /病句类型/);
   assert.match(challenge, /为什么错误/);
+  for (const errorType of [
+    '成分赘余',
+    '主语错位',
+    '动宾搭配不当',
+    '指代不明',
+    '时态逻辑矛盾',
+    '关联词搭配错误',
+    '语序不当',
+  ]) {
+    assert.match(challenge, new RegExp(errorType));
+  }
+  assert.match(challenge, /replayVariant/);
 });
 
 test('PR118 registers full cinematic special journeys in the stable flow', async () => {
@@ -71,4 +83,6 @@ test('PR118 registers full cinematic special journeys in the stable flow', async
   assert.match(state, /unlockSpecialJourney/);
   assert.match(state, /specialJourney\.unlockedIds/);
   assert.match(home, /home-coin-wallet-hint/);
+  assert.match(background, /JourneyBackgroundPage/);
+  assert.match(background, /_paintChapterLight/);
 });
