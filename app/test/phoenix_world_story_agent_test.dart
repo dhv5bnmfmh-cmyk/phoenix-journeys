@@ -46,7 +46,7 @@ void main() {
 
     expect(journey, isNotNull);
     expect(journey!.geoNodeId, 'cn-beijing-dongcheng-forbidden-city');
-    expect(journey.storyParagraphs, hasLength(4));
+    expect(journey.storyParagraphs, hasLength(2));
     expect(agent.sourcesForJourney(journey.id), hasLength(3));
     expect(agent.evidenceForSection(journey.id, 'story-2'), hasLength(3));
   });

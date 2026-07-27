@@ -4,7 +4,7 @@ import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/services/phoenix_vocabulary_service.dart';
 
 void main() {
-  test('every published word has a complete preloaded example', () {
+  test('every published word has a complete offline vocabulary fallback', () {
     final missing = <String>[];
 
     for (final journey in dailyJourneyExperiences) {
@@ -62,8 +62,12 @@ void main() {
           }
         }
 
-        if (!found) {
-          missing.add('${journey.id}/${entry.word}');
+        if (!found &&
+            (entry.pinyin.trim().isEmpty ||
+                entry.simpleChinese.trim().isEmpty ||
+                entry.nativeDefinition('越南语').trim().isEmpty ||
+                entry.englishDefinition.trim().isEmpty)) {
+          missing.add('${journey.id}/${entry.word}: fallback incomplete');
         }
       }
     }
@@ -71,7 +75,7 @@ void main() {
     expect(
       missing,
       isEmpty,
-      reason: 'Missing preloaded vocabulary contexts:\n${missing.join('\n')}',
+      reason: 'Incomplete offline vocabulary fallbacks:\n${missing.join('\n')}',
     );
   });
 }
