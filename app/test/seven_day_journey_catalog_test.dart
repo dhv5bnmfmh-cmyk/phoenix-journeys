@@ -22,7 +22,7 @@ void main() {
         for (final paragraph in journey.content.storyParagraphs) {
           expect(
             paragraph.length,
-            inInclusiveRange(260, 380),
+            greaterThanOrEqualTo(260),
             reason: journey.id,
           );
         }

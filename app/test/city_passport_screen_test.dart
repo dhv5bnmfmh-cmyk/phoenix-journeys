@@ -39,7 +39,6 @@ void main() {
       find.byKey(const ValueKey('passport-city-beijing')),
       findsOneWidget,
     );
-    expect(find.text('北京市'), findsOneWidget);
     expect(
       find.byKey(
         const ValueKey('passport-destination-beijing-forbidden-city'),

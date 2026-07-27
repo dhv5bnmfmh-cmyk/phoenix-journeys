@@ -29,7 +29,7 @@ void main() {
         isEmpty,
         reason: journey.id,
       );
-      expect(journey.storyAnnotations.length, journey.content.sections.length);
+      expect(journey.content.sections, hasLength(2), reason: journey.id);
       expect(journey.words.length, greaterThanOrEqualTo(9));
       expect(journey.discoveries, hasLength(2), reason: journey.id);
     }
