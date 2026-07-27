@@ -171,7 +171,7 @@ class SpecialJourneyPassport extends StatelessWidget {
             children: [
               JourneySymbolBadge(
                 journeyId: journey.id,
-                size: 42,
+                size: 52,
                 isUnlocked: unlocked,
               ),
               const SizedBox(width: 9),
