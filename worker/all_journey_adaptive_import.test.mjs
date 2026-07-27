@@ -19,12 +19,13 @@ test('all journeys use the adaptive catalog instead of fixed content', () => {
   );
   assert.match(catalog, /PhoenixReadingBand\.beginner/);
   assert.match(catalog, /PhoenixReadingBand\.mastery/);
-  assert.match(catalog, /_discoveriesForBand/);
+  assert.match(catalog, /_discoveriesForProfile/);
   assert.match(catalog, /selectVocabulary/);
 });
 
-test('adaptive catalog keeps two story paragraphs and level-specific tasks', () => {
-  assert.match(catalog, /paragraphs: <String>\[/);
+test('adaptive catalog keeps one-or-two story paragraphs and level-specific tasks', () => {
+  assert.match(catalog, /_partitionPackets/);
+  assert.match(catalog, /paragraphCount/);
   assert.match(catalog, /_wonderQuestion/);
   assert.match(catalog, /_expressQuestion/);
   assert.match(catalog, /请使用“既……也……”或“不是……而是……”/);
