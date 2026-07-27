@@ -45,6 +45,15 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     profile: profile,
     knownWords: knownWords,
   );
+  final plan = _languageLevelAgent.planFor(profile);
+  final discoveryCount = switch (profile.band) {
+    PhoenixReadingBand.beginner ||
+    PhoenixReadingBand.advanced ||
+    PhoenixReadingBand.mastery => 1,
+    PhoenixReadingBand.elementary ||
+    PhoenixReadingBand.intermediate ||
+    PhoenixReadingBand.upperIntermediate => 2,
+  };
 
   return JourneyLevelContent(
     storyParagraphs: base.storyParagraphs,
@@ -53,6 +62,9 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     discoveries: base.discoveries,
     wonderQuestion: base.wonderQuestion,
     expressQuestion: base.expressQuestion,
+  ).withReadingLimit(
+    paragraphCount: plan.paragraphCount,
+    discoveryCount: discoveryCount,
   );
 }
 
