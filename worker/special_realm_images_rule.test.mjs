@@ -49,3 +49,12 @@ test('special realm image mapping covers all ten scene positions', async () => {
   assert.match(source, /JourneyBackgroundPage\.memory => 8/);
   assert.match(source, /JourneyBackgroundPage\.completion => 9/);
 });
+
+test('special realm plates stay clean and transition without procedural effects', async () => {
+  const source = await readFile(backgroundSource, 'utf8');
+
+  assert.doesNotMatch(source, /SpecialRealmCinematicOverlay/);
+  assert.match(source, /precacheImage\(AssetImage\(asset\), context\)/);
+  assert.match(source, /AnimatedSwitcher\(/);
+  assert.match(source, /Duration\(milliseconds: 1400\)/);
+});
