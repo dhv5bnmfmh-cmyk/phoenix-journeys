@@ -8,6 +8,20 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (
+      url.hostname.startsWith('phoenix-journeys-pr-129.') &&
+      url.pathname === '/' &&
+      (url.searchParams.get('unlock') !== 'all' ||
+        url.searchParams.get('prototype') !== 'journeys' ||
+        url.searchParams.get('v') !== '211086ef')
+    ) {
+      const canonical = new URL(url.origin);
+      canonical.searchParams.set('unlock', 'all');
+      canonical.searchParams.set('prototype', 'journeys');
+      canonical.searchParams.set('v', '211086ef');
+      return Response.redirect(canonical.toString(), 308);
+    }
+
     if (url.pathname === '/api/health') {
       const openaiConfigured = Boolean(
         typeof env?.OPENAI_API_KEY === 'string' && env.OPENAI_API_KEY.trim(),

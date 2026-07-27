@@ -6,7 +6,7 @@ compatibility_date = "2026-07-17"
 directory = "./app/build/web"
 not_found_handling = "single-page-application"
 binding = "ASSETS"
-run_worker_first = [ "/api/*" ]
+run_worker_first = [ "/", "/api/*" ]
 
 [ai]
 binding = "AI"

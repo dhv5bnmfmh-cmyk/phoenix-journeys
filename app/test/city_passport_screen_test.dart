@@ -13,7 +13,7 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
-  testWidgets('Passport groups every destination under its city collection', (
+  testWidgets('Passport opens city journeys from geographic map markers', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(430, 900);
@@ -36,16 +36,38 @@ void main() {
 
     expect(find.text('探索护照'), findsOneWidget);
     expect(
+      find.byKey(const ValueKey('passport-hd-atlas-image')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('passport-pinch-zoom-map')),
+      findsOneWidget,
+    );
+    expect(find.text('双指缩放 · 拖动地图'), findsOneWidget);
+    expect(
       find.byKey(const ValueKey('passport-city-beijing')),
       findsOneWidget,
     );
-    expect(find.text('北京收藏册'), findsOneWidget);
+    expect(find.text('北京收藏册'), findsNothing);
+    expect(find.text('紫禁城'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('passport-city-beijing')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('北京 · 选择旅程'), findsOneWidget);
     expect(
       find.byKey(
         const ValueKey('passport-destination-beijing-forbidden-city'),
       ),
       findsOneWidget,
     );
+    expect(
+      find.byKey(
+        const ValueKey('passport-destination-beijing-summer-palace'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('紫禁城'), findsOneWidget);
+    expect(find.text('颐和园'), findsOneWidget);
   });
 }

@@ -385,7 +385,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 7),
+      duration: const Duration(seconds: 12),
     )..repeat();
   }
 
@@ -411,11 +411,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
       height: widget.height,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF0A2834), Color(0xFF124B54), Color(0xFF0C303A)],
-        ),
+        color: const Color(0xFF173D42),
         borderRadius: BorderRadius.circular(23),
         border: Border.all(color: Colors.white12),
         boxShadow: const [
@@ -436,24 +432,164 @@ class _FlightMapCardState extends State<_FlightMapCard>
                   : state.hasJourneyInProgress
                       ? state.beijingJourneyProgress
                       : _controller.value;
+              final cameraT = CurvedAnimation(
+                parent: _controller,
+                curve: const Interval(0, .34, curve: Curves.easeInOutCubic),
+              ).value;
               final flightT = state.journeyCompleted
                   ? 1.0
-                  : Curves.easeInOutCubic.transform(_controller.value);
+                  : CurvedAnimation(
+                      parent: _controller,
+                      curve: const Interval(
+                        .28,
+                        .68,
+                        curve: Curves.easeInOutCubic,
+                      ),
+                    ).value;
+              final landingT = state.journeyCompleted
+                  ? 1.0
+                  : CurvedAnimation(
+                      parent: _controller,
+                      curve: const Interval(
+                        .68,
+                        .82,
+                        curve: Curves.easeInCubic,
+                      ),
+                    ).value;
+              final destinationFocusT = state.journeyCompleted
+                  ? 1.0
+                  : CurvedAnimation(
+                      parent: _controller,
+                      curve: const Interval(
+                        .72,
+                        .90,
+                        curve: Curves.easeInOutCubic,
+                      ),
+                    ).value;
               final geometry = _FlightGeometry(
                 Size(constraints.maxWidth, constraints.maxHeight),
                 destination.mapPoint,
               );
-              final plane = geometry.pointAt(flightT);
-              final angle = geometry.angleAt(flightT);
+              final plane = landingT > 0
+                  ? geometry.landingPoint(landingT)
+                  : geometry.pointAt(flightT);
+              final angle = landingT > 0
+                  ? math.pi / 2
+                  : geometry.angleAt(flightT);
 
               return Stack(
                 children: [
                   Positioned.fill(
-                    child: CustomPaint(
-                      painter: _PremiumMapPainter(
-                        routeProgress: journeyProgress,
-                        pulse: _controller.value,
-                        destinationPoint: destination.mapPoint,
+                    child: Transform.scale(
+                      scale: 1 + cameraT * 1.7,
+                      alignment: const Alignment(.72, -.12),
+                      child: Opacity(
+                        opacity: (1 - cameraT * 1.15).clamp(0, 1),
+                        child: Image.asset(
+                          'assets/images/maps/world-flight-atlas-v1.webp',
+                          key: const ValueKey('phoenix-world-flight-map'),
+                          fit: BoxFit.cover,
+                          alignment: Alignment.center,
+                          filterQuality: FilterQuality.high,
+                          gaplessPlayback: true,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Opacity(
+                      opacity: cameraT,
+                      child: Transform.scale(
+                        key: const ValueKey('phoenix-destination-camera'),
+                        scale: 1 + destinationFocusT * .72,
+                        alignment: Alignment(
+                          destination.mapPoint.x * 2 - 1,
+                          destination.mapPoint.y * 2 - 1,
+                        ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.asset(
+                              'assets/images/maps/east-asia-flight-relief-v2.webp',
+                              key: const ValueKey('phoenix-home-hd-flight-map'),
+                              fit: BoxFit.cover,
+                              alignment: Alignment.center,
+                              filterQuality: FilterQuality.high,
+                              gaplessPlayback: true,
+                            ),
+                            const DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Color(0x3A062A31),
+                                    Color(0x0C062A31),
+                                    Color(0x4004141A),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            CustomPaint(
+                              painter: _PremiumMapPainter(
+                                routeProgress: journeyProgress,
+                                pulse: _controller.value,
+                                destinationPoint: destination.mapPoint,
+                              ),
+                            ),
+                            Positioned(
+                              left: plane.dx - 13,
+                              top: plane.dy - 13,
+                              child: Transform.rotate(
+                                angle: angle,
+                                child: Container(
+                                  width: 26,
+                                  height: 26,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFD879),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(
+                                          0xFFFFD879,
+                                        ).withValues(alpha: .45),
+                                        blurRadius: 10,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.flight_rounded,
+                                    color: Color(0xFF713016),
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: geometry.hanoi.dx - 16,
+                              top: geometry.hanoi.dy - 16,
+                              child: _CityMarker(
+                                label: state.displayText('河内'),
+                                subtitle: 'HAN',
+                                active: false,
+                                pulse: _controller.value,
+                              ),
+                            ),
+                            Positioned(
+                              left: geometry.destination.dx - 16,
+                              top: geometry.destination.dy - 16,
+                              child: _CityMarker(
+                                label: state.displayText(
+                                  state.activeJourney.city,
+                                ),
+                                subtitle: state.activeJourney.cityCode,
+                                active: state.activeJourneyStampEarned,
+                                pulse: _controller.value,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -525,55 +661,6 @@ class _FlightMapCardState extends State<_FlightMapCard>
                     ),
                   ),
                   Positioned(
-                    left: plane.dx - 13,
-                    top: plane.dy - 13,
-                    child: Transform.rotate(
-                      angle: angle,
-                      child: Container(
-                        width: 26,
-                        height: 26,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFD879),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(
-                                0xFFFFD879,
-                              ).withValues(alpha: .45),
-                              blurRadius: 10,
-                              spreadRadius: 1,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.flight_rounded,
-                          color: Color(0xFF713016),
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: geometry.hanoi.dx - 16,
-                    top: geometry.hanoi.dy - 16,
-                    child: _CityMarker(
-                      label: state.displayText('河内'),
-                      subtitle: 'HAN',
-                      active: false,
-                      pulse: _controller.value,
-                    ),
-                  ),
-                  Positioned(
-                    left: geometry.destination.dx - 16,
-                    top: geometry.destination.dy - 16,
-                    child: _CityMarker(
-                      label: state.displayText(state.activeJourney.city),
-                      subtitle: state.activeJourney.cityCode,
-                      active: state.activeJourneyStampEarned,
-                      pulse: _controller.value,
-                    ),
-                  ),
-                  Positioned(
                     left: 12,
                     right: 12,
                     bottom: 9,
@@ -642,30 +729,37 @@ class _FlightGeometry {
         destination = Offset(
           size.width * destinationPoint.x,
           size.height * destinationPoint.y,
+        ),
+        approach = Offset(
+          size.width * destinationPoint.x,
+          math.max(42, size.height * destinationPoint.y - 52),
         );
 
   final Size size;
   final Offset hanoi;
   final Offset control;
   final Offset destination;
+  final Offset approach;
 
   Offset pointAt(double t) {
     final oneMinus = 1 - t;
     return Offset(
       oneMinus * oneMinus * hanoi.dx +
           2 * oneMinus * t * control.dx +
-          t * t * destination.dx,
+          t * t * approach.dx,
       oneMinus * oneMinus * hanoi.dy +
           2 * oneMinus * t * control.dy +
-          t * t * destination.dy,
+          t * t * approach.dy,
     );
   }
 
+  Offset landingPoint(double t) => Offset.lerp(approach, destination, t)!;
+
   double angleAt(double t) {
     final dx = 2 * (1 - t) * (control.dx - hanoi.dx) +
-        2 * t * (destination.dx - control.dx);
+        2 * t * (approach.dx - control.dx);
     final dy = 2 * (1 - t) * (control.dy - hanoi.dy) +
-        2 * t * (destination.dy - control.dy);
+        2 * t * (approach.dy - control.dy);
     return math.atan2(dy, dx);
   }
 }
@@ -1066,173 +1160,7 @@ class _PremiumMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    _drawGrid(canvas, size);
-    _drawStars(canvas, size);
-    _drawLand(canvas, size);
-    _drawComicDetails(canvas, size);
     _drawRoute(canvas, size);
-  }
-
-  void _drawComicDetails(Canvas canvas, Size size) {
-    final ink = Paint()
-      ..color = const Color(0xFFFFE6A5).withValues(alpha: .22)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.1;
-    final wash = Paint()
-      ..color = const Color(0xFFFFD879).withValues(alpha: .09)
-      ..style = PaintingStyle.fill;
-    final sun = Offset(size.width * .12, size.height * .25);
-    canvas.drawCircle(sun, 15, wash);
-    canvas.drawCircle(sun, 15, ink);
-    for (var index = 0; index < 10; index++) {
-      final angle = index * math.pi / 5;
-      canvas.drawLine(
-        sun + Offset(math.cos(angle) * 20, math.sin(angle) * 20),
-        sun + Offset(math.cos(angle) * 25, math.sin(angle) * 25),
-        ink,
-      );
-    }
-    final cloud = Path()
-      ..moveTo(size.width * .70, size.height * .18)
-      ..cubicTo(size.width * .74, size.height * .10, size.width * .80,
-          size.height * .11, size.width * .82, size.height * .18)
-      ..cubicTo(size.width * .88, size.height * .15, size.width * .91,
-          size.height * .23, size.width * .86, size.height * .26)
-      ..lineTo(size.width * .71, size.height * .26)
-      ..cubicTo(size.width * .67, size.height * .24, size.width * .67,
-          size.height * .20, size.width * .70, size.height * .18);
-    canvas.drawPath(cloud, ink);
-  }
-
-  void _drawGrid(Canvas canvas, Size size) {
-    final grid = Paint()
-      ..color = Colors.white.withValues(alpha: .045)
-      ..strokeWidth = .8;
-
-    for (double x = 8; x < size.width; x += 36) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-    }
-    for (double y = 8; y < size.height; y += 36) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-    }
-  }
-
-  void _drawStars(Canvas canvas, Size size) {
-    final star = Paint()..color = Colors.white.withValues(alpha: .24);
-    const points = <Offset>[
-      Offset(.08, .18),
-      Offset(.18, .33),
-      Offset(.34, .17),
-      Offset(.57, .13),
-      Offset(.88, .22),
-      Offset(.93, .58),
-      Offset(.12, .54),
-      Offset(.43, .68),
-      Offset(.69, .72),
-    ];
-    for (final point in points) {
-      canvas.drawCircle(
-        Offset(size.width * point.dx, size.height * point.dy),
-        1.2,
-        star,
-      );
-    }
-  }
-
-  void _drawLand(Canvas canvas, Size size) {
-    final land = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF2D6870), Color(0xFF1A4B55)],
-      ).createShader(Offset.zero & size)
-      ..style = PaintingStyle.fill;
-    final coast = Paint()
-      ..color = const Color(0xFF89ADB0).withValues(alpha: .40)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.1;
-
-    final mainland = Path()
-      ..moveTo(size.width * .31, size.height * .28)
-      ..cubicTo(
-        size.width * .43,
-        size.height * .17,
-        size.width * .67,
-        size.height * .16,
-        size.width * .89,
-        size.height * .29,
-      )
-      ..lineTo(size.width * .91, size.height * .47)
-      ..cubicTo(
-        size.width * .84,
-        size.height * .49,
-        size.width * .82,
-        size.height * .57,
-        size.width * .72,
-        size.height * .58,
-      )
-      ..cubicTo(
-        size.width * .62,
-        size.height * .59,
-        size.width * .58,
-        size.height * .67,
-        size.width * .49,
-        size.height * .63,
-      )
-      ..cubicTo(
-        size.width * .39,
-        size.height * .59,
-        size.width * .37,
-        size.height * .45,
-        size.width * .31,
-        size.height * .28,
-      )
-      ..close();
-    canvas.drawPath(mainland, land);
-    canvas.drawPath(mainland, coast);
-
-    final peninsula = Path()
-      ..moveTo(size.width * .43, size.height * .56)
-      ..cubicTo(
-        size.width * .46,
-        size.height * .61,
-        size.width * .43,
-        size.height * .76,
-        size.width * .35,
-        size.height * .79,
-      )
-      ..cubicTo(
-        size.width * .31,
-        size.height * .72,
-        size.width * .35,
-        size.height * .62,
-        size.width * .43,
-        size.height * .56,
-      )
-      ..close();
-    canvas.drawPath(peninsula, land);
-    canvas.drawPath(peninsula, coast);
-
-    final islands = Paint()
-      ..color = const Color(0xFF316B72)
-      ..style = PaintingStyle.fill;
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(size.width * .83, size.height * .56),
-        width: 7,
-        height: 18,
-      ),
-      islands,
-    );
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(size.width * .47, size.height * .80),
-        width: 18,
-        height: 6,
-      ),
-      islands,
-    );
-    canvas.drawCircle(Offset(size.width * .54, size.height * .76), 4, islands);
   }
 
   void _drawRoute(Canvas canvas, Size size) {
@@ -1242,9 +1170,10 @@ class _PremiumMapPainter extends CustomPainter {
       ..quadraticBezierTo(
         geometry.control.dx,
         geometry.control.dy,
-        geometry.destination.dx,
-        geometry.destination.dy,
-      );
+        geometry.approach.dx,
+        geometry.approach.dy,
+      )
+      ..lineTo(geometry.destination.dx, geometry.destination.dy);
 
     final glow = Paint()
       ..color = const Color(0xFFFFD879).withValues(alpha: .20)
