@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../models/journey_background.dart';
-import 'special_realm_cinematic_overlay.dart';
 
 class SpecialRealmBackground extends StatefulWidget {
   const SpecialRealmBackground({
@@ -37,6 +36,7 @@ class SpecialRealmBackground extends StatefulWidget {
 class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
     with SingleTickerProviderStateMixin {
   late final AnimationController _motion;
+  bool _platesPrecached = false;
 
   @override
   void initState() {
@@ -50,6 +50,12 @@ class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (!_platesPrecached) {
+      _platesPrecached = true;
+      for (final asset in _PremiumRealmPlate.assetsFor(widget.journeyId)) {
+        precacheImage(AssetImage(asset), context);
+      }
+    }
     if (MediaQuery.maybeOf(context)?.disableAnimations ?? false) {
       _motion.stop();
       _motion.value = .42;
@@ -78,16 +84,6 @@ class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
               pageType: widget.pageType,
               progress: _motion.value,
             ),
-            // The premium plates for Dream Butterfly and Upstream Lantern
-            // already carry their story detail. Keep them calm and readable:
-            // the old procedural overlay added a synthetic butterfly, lotus,
-            // and dark foreground shapes that obscured the finished artwork.
-            if (widget.journeyId != 'literary-roaming' &&
-                widget.journeyId != 'folk-secret-land')
-              SpecialRealmCinematicOverlay(
-                journeyId: widget.journeyId,
-                pageType: widget.pageType,
-              ),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -172,6 +168,9 @@ class _PremiumRealmPlate extends StatelessWidget {
     ],
   };
 
+  static List<String> assetsFor(String journeyId) =>
+      _assets[journeyId] ?? const <String>[];
+
   int get _assetIndex {
     return switch (pageType) {
       JourneyBackgroundPage.story =>
@@ -227,12 +226,27 @@ class _PremiumRealmPlate extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(
-                _assets[journeyId]![_assetIndex],
-                fit: BoxFit.cover,
-                alignment: _alignmentForChapter,
-                filterQuality: FilterQuality.high,
-                gaplessPlayback: true,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 1400),
+                switchInCurve: Curves.easeInOutCubic,
+                switchOutCurve: Curves.easeInOutCubic,
+                layoutBuilder: (currentChild, previousChildren) => Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    ...previousChildren,
+                    if (currentChild != null) currentChild,
+                  ],
+                ),
+                child: Image.asset(
+                  _assets[journeyId]![_assetIndex],
+                  key: ValueKey(
+                    'special-realm-plate-$journeyId-$_assetIndex',
+                  ),
+                  fit: BoxFit.cover,
+                  alignment: _alignmentForChapter,
+                  filterQuality: FilterQuality.high,
+                  gaplessPlayback: true,
+                ),
               ),
               ColoredBox(color: tone),
               DecoratedBox(
