@@ -73,10 +73,26 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('journey-memory-card-0')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('journey-memory-detail')), findsOneWidget);
-    expect(find.text('醒来以后，我还记得那只蝴蝶。'), findsOneWidget);
-    expect(find.textContaining('梦境 · 梦蝶竹林'), findsOneWidget);
-    expect(find.text('永久收藏'), findsOneWidget);
+    final detail = find.byKey(const ValueKey('journey-memory-detail'));
+    expect(detail, findsOneWidget);
+    expect(
+      find.descendant(
+        of: detail,
+        matching: find.text('醒来以后，我还记得那只蝴蝶。'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: detail,
+        matching: find.textContaining('梦境 · 梦蝶竹林'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: detail, matching: find.text('永久收藏')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('traditional mode converts collection labels consistently', (
