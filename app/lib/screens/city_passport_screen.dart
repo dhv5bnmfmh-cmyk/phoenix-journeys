@@ -29,27 +29,7 @@ class CityPassportScreen extends StatelessWidget {
       key: const ValueKey('passport-hd-atlas-page'),
       fit: StackFit.expand,
       children: [
-        Image.asset(
-          'assets/images/maps/china-passport-atlas-v2.webp',
-          key: const ValueKey('passport-hd-atlas-image'),
-          fit: BoxFit.cover,
-          alignment: Alignment.center,
-          filterQuality: FilterQuality.high,
-          gaplessPlayback: true,
-        ),
-        const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0x24FFF8E8),
-                Color(0x08FFF8E8),
-                Color(0x16FFF8E8),
-              ],
-            ),
-          ),
-        ),
+        const ColoredBox(color: Color(0xFFF2E2BD)),
         Padding(
           padding: const EdgeInsets.fromLTRB(14, 9, 14, 7),
           child: Column(
@@ -126,17 +106,92 @@ class _PassportMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, constraints) => Stack(
-        clipBehavior: Clip.none,
-        children: [
-          for (final city in journeyCityCatalog)
-            _CityMapMarker(
-              state: state,
-              city: city,
-              mapSize: constraints.biggest,
+      builder: (context, constraints) {
+        final mapSize = constraints.biggest;
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: InteractiveViewer(
+            key: const ValueKey('passport-pinch-zoom-map'),
+            minScale: .85,
+            maxScale: 4,
+            boundaryMargin: const EdgeInsets.all(90),
+            panEnabled: true,
+            scaleEnabled: true,
+            clipBehavior: Clip.hardEdge,
+            child: SizedBox.fromSize(
+              size: mapSize,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned.fill(
+                    child: ColorFiltered(
+                      colorFilter: const ColorFilter.matrix(<double>[
+                        1.12, -.04, -.04, 0, 0,
+                        -.04, 1.12, -.04, 0, 0,
+                        -.04, -.04, 1.12, 0, 0,
+                        0, 0, 0, 1, 0,
+                      ]),
+                      child: Image.asset(
+                        'assets/images/maps/china-passport-atlas-v2.webp',
+                        key: const ValueKey('passport-hd-atlas-image'),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.center,
+                        filterQuality: FilterQuality.high,
+                        gaplessPlayback: true,
+                      ),
+                    ),
+                  ),
+                  const Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment(.18, -.20),
+                          radius: 1.12,
+                          colors: [
+                            Color(0x00FFF8E8),
+                            Color(0x120D4A45),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  for (final city in journeyCityCatalog)
+                    _CityMapMarker(
+                      state: state,
+                      city: city,
+                      mapSize: mapSize,
+                    ),
+                  Positioned(
+                    left: 9,
+                    bottom: 9,
+                    child: IgnorePointer(
+                      child: Container(
+                        key: const ValueKey('passport-pinch-hint'),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xD92A2019),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          state.displayText('双指缩放 · 拖动地图'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-        ],
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -156,10 +211,26 @@ class _CityMapMarker extends StatelessWidget {
     final binding = requireJourneyLocation(city.primaryDestination.id);
     final longitudeRatio = ((binding.longitude - 73) / (135 - 73)).clamp(0, 1);
     final latitudeRatio = ((binding.latitude - 18) / (54 - 18)).clamp(0, 1);
-    return Offset(
+    final anchor = Offset(
       mapSize.width * (.10 + longitudeRatio * .78),
       mapSize.height * (.08 + (1 - latitudeRatio) * .82),
     );
+    return anchor + _collisionOffset;
+  }
+
+  Offset get _collisionOffset {
+    switch (city.id) {
+      case 'xian':
+        return const Offset(-18, -8);
+      case 'chengdu':
+        return const Offset(-44, 16);
+      case 'nanjing':
+        return const Offset(24, -14);
+      case 'hangzhou':
+        return const Offset(48, 18);
+      default:
+        return Offset.zero;
+    }
   }
 
   Future<void> _showCityJourneys(BuildContext context) {
@@ -207,8 +278,8 @@ class _CityMapMarker extends StatelessWidget {
     );
     return Positioned(
       key: ValueKey('passport-city-${city.id}'),
-      left: (point.dx - 29).clamp(0, mapSize.width - 70),
-      top: (point.dy - 25).clamp(0, mapSize.height - 58),
+      left: (point.dx - 23).clamp(0, mapSize.width - 56),
+      top: (point.dy - 19).clamp(0, mapSize.height - 44),
       child: Semantics(
         button: true,
         label: state.displayText('${city.name}旅程地点'),
@@ -216,19 +287,19 @@ class _CityMapMarker extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () => unawaited(_showCityJourneys(context)),
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(14),
             child: Container(
-              padding: const EdgeInsets.fromLTRB(5, 4, 7, 4),
+              padding: const EdgeInsets.fromLTRB(3, 3, 5, 3),
               decoration: BoxDecoration(
-                color: const Color(0xEFFFF8E8),
-                borderRadius: BorderRadius.circular(18),
+                color: const Color(0xE8FFF8E8),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: earned
                       ? PhoenixTheme.gold
                       : PhoenixTheme.red.withValues(alpha: .52),
                 ),
                 boxShadow: const [
-                  BoxShadow(color: Color(0x26000000), blurRadius: 8),
+                  BoxShadow(color: Color(0x26000000), blurRadius: 6),
                 ],
               ),
               child: Row(
@@ -237,15 +308,15 @@ class _CityMapMarker extends StatelessWidget {
                   CityJourneyStamp(
                     journey: city.primaryDestination,
                     isUnlocked: earned || _passportAllAccessPreview,
-                    size: 27,
+                    size: 21,
                     transparentInk: true,
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 3),
                   Text(
                     state.displayText(city.name),
                     style: const TextStyle(
                       color: Color(0xFF2B211C),
-                      fontSize: 10,
+                      fontSize: 8.5,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
