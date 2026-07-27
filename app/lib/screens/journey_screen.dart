@@ -194,6 +194,12 @@ class _JourneyScreenState extends State<JourneyScreen>
     return profile == null ? null : _languageLevelAgent.planFor(profile);
   }
 
+  String get _readingLevelLabel =>
+      _languageProfile?.displayLabel ?? _appState.journeyDifficulty.label;
+
+  String _readingShapeLabel(int count) =>
+      count == 1 ? '深度长文' : '分段短文';
+
   List<JourneyDifficulty> get _supportedDifficulties =>
       supportedJourneyDifficulties(_experience);
 
@@ -1145,7 +1151,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             contentId: 'story',
             title: _appState.displayText(_experience.storyTitle),
             subtitle:
-                '${_appState.journeyDifficulty.label} · 普通话 · ${_levelContent.storyParagraphs.length} 段',
+                '$_readingLevelLabel · ${_readingShapeLabel(_levelContent.storyParagraphs.length)} · ${_levelContent.storyParagraphs.length} 段',
             compact: true,
             onPlay: _playStory,
           ),
@@ -1483,7 +1489,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             contentId: 'discovery',
             title: 'Discovery',
             subtitle:
-                '${_appState.journeyDifficulty.label} · 中文朗读 · ${_levelContent.discoveries.length} 段',
+                '$_readingLevelLabel · ${_readingShapeLabel(_levelContent.discoveries.length)} · ${_levelContent.discoveries.length} 段',
             compact: true,
             onPlay: _playDiscoveries,
           ),
