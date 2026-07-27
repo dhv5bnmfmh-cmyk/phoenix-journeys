@@ -44,8 +44,9 @@ test('every reading band has an approved one-or-two paragraph shape', () => {
 test('passport exposes one global HSK and TOCFL selector', () => {
   assert.match(passport, /JourneyLevelSelectorButton\(compact: true\)/);
   assert.match(selector, /global-journey-level-selector/);
+  assert.match(selector, /ChineseExamTrack\.values/);
   assert.match(selector, /ChineseExamTrack\.hsk/);
-  assert.match(selector, /ChineseExamTrack\.tocfl/);
+  assert.match(selector, /TOCFL/);
   assert.match(selector, /所有普通旅程与特殊旅程/);
 });
 
