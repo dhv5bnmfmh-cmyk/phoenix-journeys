@@ -13,7 +13,7 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
-  testWidgets('Passport groups every destination under its city collection', (
+  testWidgets('Passport groups compact stamp tiles under every city name', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(430, 900);
@@ -39,7 +39,8 @@ void main() {
       find.byKey(const ValueKey('passport-city-beijing')),
       findsOneWidget,
     );
-    expect(find.text('北京收藏册'), findsOneWidget);
+    expect(find.text('北京'), findsWidgets);
+    expect(find.text('北京收藏册'), findsNothing);
     expect(
       find.byKey(
         const ValueKey('passport-destination-beijing-forbidden-city'),
