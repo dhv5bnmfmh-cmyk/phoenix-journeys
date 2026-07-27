@@ -56,12 +56,15 @@ test('passport removes large overview and card furniture', () => {
   assert.match(passport, /_collisionOffset/);
 });
 
-test('special journeys open from a featured wallet-aware button', () => {
+test('special journeys open from a tactile wallet-aware realm sheet', () => {
   assert.match(special, /open-special-journey-menu/);
-  assert.match(special, /height: 48/);
-  assert.match(special, /width: 32/);
+  assert.match(special, /height: 60/);
+  assert.match(special, /class _JourneySeal/);
+  assert.match(special, /special-journey-unlock-sheet/);
+  assert.match(special, /旅程钱袋/);
   assert.match(special, /state\.displayText\(journey\.chapter\)/);
   assert.match(special, /state\.walletBalance\(journey\.currency\)/);
+  assert.match(special, /balance >= journey\.cost/);
   assert.match(special, /showModalBottomSheet<void>/);
   assert.doesNotMatch(special, /journey\.subtitle/);
 });
