@@ -56,7 +56,7 @@ class JourneyLevelContent {
       discoveries: experience.discoveries,
       wonderQuestion: experience.wonderQuestion,
       expressQuestion: experience.expressQuestion,
-    );
+    ).withReadingLimit();
   }
 
   final List<String> storyParagraphs;
@@ -65,6 +65,102 @@ class JourneyLevelContent {
   final List<DiscoveryEntry> discoveries;
   final String wonderQuestion;
   final String expressQuestion;
+
+  JourneyLevelContent withReadingLimit({
+    int paragraphCount = 2,
+    int discoveryCount = 2,
+  }) {
+    final safeParagraphCount = paragraphCount.clamp(1, 2).toInt();
+    final safeDiscoveryCount = discoveryCount.clamp(1, 2).toInt();
+    final storyRanges = _balancedRanges(
+      storyParagraphs.length,
+      safeParagraphCount,
+    );
+    final discoveryRanges = _balancedRanges(
+      discoveries.length,
+      safeDiscoveryCount,
+    );
+
+    return JourneyLevelContent(
+      storyParagraphs: storyRanges
+          .map(
+            (range) => _joinChinese(
+              storyParagraphs.sublist(range.start, range.end),
+            ),
+          )
+          .toList(growable: false),
+      storyAnnotations: storyRanges
+          .map(
+            (range) => _mergeAnnotations(
+              storyAnnotations.sublist(
+                range.start.clamp(0, storyAnnotations.length).toInt(),
+                range.end.clamp(0, storyAnnotations.length).toInt(),
+              ),
+            ),
+          )
+          .toList(growable: false),
+      words: words,
+      discoveries: discoveryRanges
+          .map(
+            (range) => _mergeDiscoveries(
+              discoveries.sublist(range.start, range.end),
+            ),
+          )
+          .toList(growable: false),
+      wonderQuestion: wonderQuestion,
+      expressQuestion: expressQuestion,
+    );
+  }
+}
+
+class _ContentRange {
+  const _ContentRange(this.start, this.end);
+
+  final int start;
+  final int end;
+}
+
+List<_ContentRange> _balancedRanges(int length, int maximumCount) {
+  if (length <= 0) return const <_ContentRange>[];
+  final count = length.clamp(1, maximumCount).toInt();
+  return List<_ContentRange>.generate(count, (index) {
+    final start = (index * length / count).floor();
+    final end = ((index + 1) * length / count).floor();
+    return _ContentRange(start, end);
+  }, growable: false);
+}
+
+String _joinChinese(Iterable<String> values) => values
+    .map((value) => value.trim())
+    .where((value) => value.isNotEmpty)
+    .join();
+
+String _joinLatin(Iterable<String> values) => values
+    .map((value) => value.trim())
+    .where((value) => value.isNotEmpty)
+    .join(' ');
+
+ReadingAnnotation _mergeAnnotations(List<ReadingAnnotation> entries) {
+  if (entries.isEmpty) {
+    return const ReadingAnnotation(pinyin: '', vietnamese: '', english: '');
+  }
+  return ReadingAnnotation(
+    pinyin: _joinLatin(entries.map((entry) => entry.pinyin)),
+    vietnamese: _joinLatin(entries.map((entry) => entry.vietnamese)),
+    english: _joinLatin(entries.map((entry) => entry.english)),
+  );
+}
+
+DiscoveryEntry _mergeDiscoveries(List<DiscoveryEntry> entries) {
+  return DiscoveryEntry(
+    text: _joinChinese(entries.map((entry) => entry.text)),
+    pinyin: _joinLatin(entries.map((entry) => entry.pinyin)),
+    simpleChinese: _joinChinese(
+      entries.map((entry) => entry.simpleChinese),
+    ),
+    vietnamese: _joinLatin(entries.map((entry) => entry.vietnamese)),
+    english: _joinLatin(entries.map((entry) => entry.english)),
+  );
 }
 
 List<JourneyDifficulty> supportedJourneyDifficulties(
@@ -84,12 +180,12 @@ JourneyLevelContent resolveJourneyLevel(
     return JourneyLevelContent.fromExperience(experience);
   }
 
-  return switch (difficulty) {
+  return (switch (difficulty) {
     JourneyDifficulty.easy => summerPalaceEasyLevel,
     JourneyDifficulty.standard =>
       JourneyLevelContent.fromExperience(experience),
     JourneyDifficulty.challenge => summerPalaceChallengeLevel,
-  };
+  }).withReadingLimit();
 }
 
 List<WordEntry> _selectSummerPalaceWords(List<String> selectedWords) {

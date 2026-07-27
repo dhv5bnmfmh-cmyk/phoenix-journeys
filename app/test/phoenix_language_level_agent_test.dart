@@ -39,7 +39,7 @@ void main() {
     );
   });
 
-  test('TOCFL Level 5 receives a two-paragraph advanced journey', () {
+  test('TOCFL Level 5 receives one integrated advanced reading block', () {
     final profile = agent.profilesFor(ChineseExamTrack.tocfl).firstWhere(
           (item) => item.levelCode == '5',
         );
@@ -48,9 +48,9 @@ void main() {
       profile: profile,
     );
 
-    expect(content.storyParagraphs, hasLength(2));
-    expect(content.storyAnnotations, hasLength(2));
-    expect(content.discoveries, hasLength(2));
+    expect(content.storyParagraphs, hasLength(1));
+    expect(content.storyAnnotations, hasLength(1));
+    expect(content.discoveries, hasLength(1));
     expect(content.words, hasLength(14));
 
     final issues = agent.validateJourney(
@@ -76,19 +76,31 @@ void main() {
     );
   });
 
-  test('beginner, elementary, and intermediate remain two-part journeys', () {
-    for (final profile in <ChineseProficiencyProfile>[
-      agent.profilesFor(ChineseExamTrack.hsk)[0],
-      agent.profilesFor(ChineseExamTrack.hsk)[1],
-      agent.profilesFor(ChineseExamTrack.hsk)[2],
-    ]) {
+  test('reading shape follows the Phoenix reading band', () {
+    for (final profile in agent.allProfiles) {
       final content = resolveAdaptiveJourneyLevel(
         journey,
         profile: profile,
       );
-      expect(content.storyParagraphs, hasLength(2), reason: profile.displayLabel);
-      expect(content.storyAnnotations, hasLength(2), reason: profile.displayLabel);
-      expect(content.discoveries, hasLength(2), reason: profile.displayLabel);
+      final oneBlock = profile.band == PhoenixReadingBand.beginner ||
+          profile.band == PhoenixReadingBand.advanced ||
+          profile.band == PhoenixReadingBand.mastery;
+      final expectedCount = oneBlock ? 1 : 2;
+      expect(
+        content.storyParagraphs,
+        hasLength(expectedCount),
+        reason: profile.displayLabel,
+      );
+      expect(
+        content.storyAnnotations,
+        hasLength(expectedCount),
+        reason: profile.displayLabel,
+      );
+      expect(
+        content.discoveries,
+        hasLength(expectedCount),
+        reason: profile.displayLabel,
+      );
       expect(
         content.words.length,
         agent.planFor(profile).targetVocabularyCount,
