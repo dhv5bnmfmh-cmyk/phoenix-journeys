@@ -373,7 +373,7 @@ class _DestinationStampTile extends StatelessWidget {
                 JourneySymbolBadge(
                   journeyId: journey.id,
                   isUnlocked: enabled,
-                  size: 42,
+                  size: 50,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
