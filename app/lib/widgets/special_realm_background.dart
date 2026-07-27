@@ -121,15 +121,70 @@ class _PremiumRealmPlate extends StatelessWidget {
   final JourneyBackgroundPage pageType;
   final double progress;
 
-  static const _assets = <String, String>{
-    'literary-roaming':
-        'assets/images/special-realms/dream-butterfly-v3.webp',
-    'myth-tracing': 'assets/images/special-realms/moon-letter-v2.webp',
-    'strange-night-talks':
-        'assets/images/special-realms/shadowless-inn-v2.webp',
-    'folk-secret-land':
-        'assets/images/special-realms/upstream-lantern-v3.webp',
+  static const _assets = <String, List<String>>{
+    'literary-roaming': [
+      'assets/images/special-realms/dream-butterfly-v3.webp',
+      'assets/images/special-realms/ten-scene/dream-butterfly-02.webp',
+      'assets/images/special-realms/ten-scene/dream-butterfly-03.webp',
+      'assets/images/special-realms/ten-scene/dream-butterfly-04.webp',
+      'assets/images/special-realms/ten-scene/dream-butterfly-05.webp',
+      'assets/images/special-realms/ten-scene/dream-butterfly-06.webp',
+      'assets/images/special-realms/ten-scene/dream-butterfly-07.webp',
+      'assets/images/special-realms/ten-scene/dream-butterfly-08.webp',
+      'assets/images/special-realms/ten-scene/dream-butterfly-09.webp',
+      'assets/images/special-realms/ten-scene/dream-butterfly-10.webp',
+    ],
+    'myth-tracing': [
+      'assets/images/special-realms/moon-letter-v2.webp',
+      'assets/images/special-realms/ten-scene/moon-letter-02.webp',
+      'assets/images/special-realms/ten-scene/moon-letter-03.webp',
+      'assets/images/special-realms/ten-scene/moon-letter-04.webp',
+      'assets/images/special-realms/ten-scene/moon-letter-05.webp',
+      'assets/images/special-realms/ten-scene/moon-letter-06.webp',
+      'assets/images/special-realms/ten-scene/moon-letter-07.webp',
+      'assets/images/special-realms/ten-scene/moon-letter-08.webp',
+      'assets/images/special-realms/ten-scene/moon-letter-09.webp',
+      'assets/images/special-realms/ten-scene/moon-letter-10.webp',
+    ],
+    'strange-night-talks': [
+      'assets/images/special-realms/shadowless-inn-v2.webp',
+      'assets/images/special-realms/ten-scene/shadowless-inn-02.webp',
+      'assets/images/special-realms/ten-scene/shadowless-inn-03.webp',
+      'assets/images/special-realms/ten-scene/shadowless-inn-04.webp',
+      'assets/images/special-realms/ten-scene/shadowless-inn-05.webp',
+      'assets/images/special-realms/ten-scene/shadowless-inn-06.webp',
+      'assets/images/special-realms/ten-scene/shadowless-inn-07.webp',
+      'assets/images/special-realms/ten-scene/shadowless-inn-08.webp',
+      'assets/images/special-realms/ten-scene/shadowless-inn-09.webp',
+      'assets/images/special-realms/ten-scene/shadowless-inn-10.webp',
+    ],
+    'folk-secret-land': [
+      'assets/images/special-realms/upstream-lantern-v3.webp',
+      'assets/images/special-realms/ten-scene/upstream-lantern-02.webp',
+      'assets/images/special-realms/ten-scene/upstream-lantern-03.webp',
+      'assets/images/special-realms/ten-scene/upstream-lantern-04.webp',
+      'assets/images/special-realms/ten-scene/upstream-lantern-05.webp',
+      'assets/images/special-realms/ten-scene/upstream-lantern-06.webp',
+      'assets/images/special-realms/ten-scene/upstream-lantern-07.webp',
+      'assets/images/special-realms/ten-scene/upstream-lantern-08.webp',
+      'assets/images/special-realms/ten-scene/upstream-lantern-09.webp',
+      'assets/images/special-realms/ten-scene/upstream-lantern-10.webp',
+    ],
   };
+
+  int get _assetIndex {
+    return switch (pageType) {
+      JourneyBackgroundPage.story =>
+          1 + (progress * 3).floor().clamp(0, 2).toInt(),
+      JourneyBackgroundPage.vocabulary => 4,
+      JourneyBackgroundPage.discovery => 5,
+      JourneyBackgroundPage.reflection => 6,
+      JourneyBackgroundPage.writing => 7,
+      JourneyBackgroundPage.memory => 8,
+      JourneyBackgroundPage.completion => 9,
+      _ => 0,
+    };
+  }
 
   double get _chapter =>
       JourneyBackgroundPage.values.indexOf(pageType) /
@@ -173,7 +228,7 @@ class _PremiumRealmPlate extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               Image.asset(
-                _assets[journeyId]!,
+                _assets[journeyId]![_assetIndex],
                 fit: BoxFit.cover,
                 alignment: _alignmentForChapter,
                 filterQuality: FilterQuality.high,
