@@ -15,34 +15,17 @@ void main() {
     expect(cycle.toSet(), hasLength(8));
   });
 
-  test('every journey has complete story and learning content', () {
+  test('every journey has complete two-section story and learning content', () {
     for (final journey in dailyJourneyExperiences) {
-      if (journey.id == 'beijing-summer-palace') {
-        expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
-        for (final paragraph in journey.content.storyParagraphs) {
-          expect(
-            paragraph.length,
-            inInclusiveRange(260, 380),
-            reason: journey.id,
-          );
-        }
-      } else {
-        expect(journey.content.storyParagraphs.length, 4, reason: journey.id);
+      expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
+      for (final paragraph in journey.content.storyParagraphs) {
+        expect(paragraph.length, greaterThanOrEqualTo(70), reason: journey.id);
       }
-      expect(
-        journey.storyAnnotations.length,
-        journey.content.storyParagraphs.length,
-        reason: journey.id,
-      );
+      expect(journey.storyAnnotations, hasLength(2), reason: journey.id);
       expect(journey.words.length, greaterThanOrEqualTo(9), reason: journey.id);
-      if (journey.id == 'beijing-summer-palace') {
-        expect(journey.discoveries, hasLength(2), reason: journey.id);
-      } else {
-        expect(
-          journey.discoveries.length,
-          greaterThanOrEqualTo(4),
-          reason: journey.id,
-        );
+      expect(journey.discoveries, hasLength(2), reason: journey.id);
+      for (final discovery in journey.discoveries) {
+        expect(discovery.text.length, greaterThanOrEqualTo(70), reason: journey.id);
       }
       expect(journey.wonderQuestion.trim(), isNotEmpty, reason: journey.id);
       expect(journey.expressQuestion.trim(), isNotEmpty, reason: journey.id);
