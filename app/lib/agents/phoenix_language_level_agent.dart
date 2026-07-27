@@ -113,7 +113,7 @@ class PhoenixLanguageLevelAgent {
     return switch (profile.band) {
       PhoenixReadingBand.beginner => const ReadingGenerationPlan(
           band: PhoenixReadingBand.beginner,
-          paragraphCount: 2,
+          paragraphCount: 1,
           minTotalCharacters: 80,
           maxTotalCharacters: 140,
           targetVocabularyCount: 4,
@@ -165,7 +165,7 @@ class PhoenixLanguageLevelAgent {
         ),
       PhoenixReadingBand.advanced => const ReadingGenerationPlan(
           band: PhoenixReadingBand.advanced,
-          paragraphCount: 2,
+          paragraphCount: 1,
           minTotalCharacters: 600,
           maxTotalCharacters: 800,
           targetVocabularyCount: 14,
@@ -178,7 +178,7 @@ class PhoenixLanguageLevelAgent {
         ),
       PhoenixReadingBand.mastery => const ReadingGenerationPlan(
           band: PhoenixReadingBand.mastery,
-          paragraphCount: 2,
+          paragraphCount: 1,
           minTotalCharacters: 600,
           maxTotalCharacters: 900,
           targetVocabularyCount: 16,
