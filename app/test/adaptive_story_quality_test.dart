@@ -83,4 +83,30 @@ void main() {
       }
     }
   });
+
+  test('generic journeys stay inside the configured reading range', () {
+    for (final journey in allJourneyExperiences.where(
+      (item) => item.id != 'beijing-summer-palace',
+    )) {
+      for (final profile in levelAgent.allProfiles) {
+        final content = resolveAdaptiveJourneyLevel(
+          journey,
+          profile: profile,
+        );
+        final plan = levelAgent.planFor(profile);
+        final totalCharacters = content.storyParagraphs.join().length;
+
+        expect(
+          totalCharacters,
+          greaterThanOrEqualTo(plan.minTotalCharacters),
+          reason: '${journey.id} ${profile.displayLabel} minimum depth',
+        );
+        expect(
+          totalCharacters,
+          lessThanOrEqualTo(plan.maxTotalCharacters),
+          reason: '${journey.id} ${profile.displayLabel} maximum depth',
+        );
+      }
+    }
+  });
 }
