@@ -15,15 +15,16 @@ const specialPassport = fs.readFileSync(
   'utf8',
 );
 
-test('journey list symbols use resolution-independent layered badges', () => {
-  assert.match(badge, /CustomPaint/);
+test('journey list symbols use reviewed high-detail illustrated badges', () => {
+  assert.match(badge, /SvgPicture\.asset/);
+  assert.match(badge, /Image\.asset/);
   assert.match(badge, /LinearGradient/);
-  assert.match(badge, /MaskFilter\.blur/);
+  assert.match(badge, /FilterQuality\.high/);
   assert.match(cityPassport, /JourneySymbolBadge\(/);
   assert.match(specialPassport, /JourneySymbolBadge\(/);
 });
 
-test('every published journey family has a dedicated visual motif', () => {
+test('every published journey family has dedicated illustrated artwork', () => {
   for (const identity of [
     'forbidden-city',
     'summer-palace',
