@@ -1321,7 +1321,7 @@ class _ChallengeSession {
     JourneyChallengeDifficulty difficulty,
     int seed,
   ) {
-    final grammar = _grammarForJourney(journeyId, difficulty);
+    final grammar = _grammarForJourney(journeyId, difficulty, seed);
     final replacementTexts = <String>[
       grammar.correctReplacement,
       ...grammar.distractors,
@@ -1391,8 +1391,9 @@ class _ChallengeSession {
   static _GrammarSpec _grammarForJourney(
     String journeyId,
     JourneyChallengeDifficulty difficulty,
+    int seed,
   ) {
-    return switch (journeyId) {
+    final journeySpec = switch (journeyId) {
       'literary-roaming' => const _GrammarSpec(
         segments: ['通过追随蓝色蝴蝶，', '使探索者', '进入了更深的梦境。'],
         problemSegmentIndex: 1,
@@ -1494,6 +1495,112 @@ class _ChallengeSession {
         ),
       },
     };
+    final variedSpecs = <_GrammarSpec>[
+      journeySpec,
+      const _GrammarSpec(
+        segments: ['探索者', '大约走了', '一个小时左右。'],
+        problemSegmentIndex: 2,
+        originalSentence: '探索者大约走了一个小时左右。',
+        correctedSentence: '探索者大约走了一个小时。',
+        correctOptionId: 'correct',
+        correctReplacement: '一个小时',
+        distractors: ['差不多一个小时左右', '大约一小时上下', '约有一个小时左右'],
+        errorType: '成分赘余：意思重复',
+        errorLocation: '“大约”与“左右”',
+        whyWrong: '“大约”和“左右”都表示估计，同时使用会重复表达同一个意思。',
+        revisionRule: '估计词只保留一个。',
+        memoryTip: '看到“大约、左右、上下、约”连用时，先删去重复的一项。',
+      ),
+      const _GrammarSpec(
+        segments: ['沿着石阶，', '古老的钟声', '被探索者听见了。'],
+        problemSegmentIndex: 1,
+        originalSentence: '沿着石阶，古老的钟声被探索者听见了。',
+        correctedSentence: '沿着石阶前行时，探索者听见了古老的钟声。',
+        correctOptionId: 'correct',
+        correctReplacement: '前行时，探索者听见了古老的钟声',
+        distractors: ['古老的钟声正在前行', '钟声沿着探索者前进', '使古老钟声被听见'],
+        errorType: '主语错位：施事对象不清',
+        errorLocation: '“沿着石阶”的动作执行者',
+        whyWrong: '能沿着石阶行走的是探索者，不是钟声；句首状语必须和后面的主语搭配。',
+        revisionRule: '让真正执行动作的人紧接在状语后面。',
+        memoryTip: '先问“谁在做这个动作”，就能发现主语错位。',
+      ),
+      const _GrammarSpec(
+        segments: ['他把灯放在桌上，', '然后仔细地', '端详它的声音。'],
+        problemSegmentIndex: 2,
+        originalSentence: '他把灯放在桌上，然后仔细地端详它的声音。',
+        correctedSentence: '他把灯放在桌上，然后仔细聆听它发出的声音。',
+        correctOptionId: 'correct',
+        correctReplacement: '聆听它发出的声音',
+        distractors: ['观看它响起的声音', '端详它传来的响声', '观察声音的颜色'],
+        errorType: '动宾搭配不当',
+        errorLocation: '“端详……声音”',
+        whyWrong: '“端详”用于仔细看具体形象，声音应当用“听、聆听”等动词。',
+        revisionRule: '动词必须符合宾语能够被怎样感知。',
+        memoryTip: '画面用“看”，声音用“听”，气味用“闻”。',
+      ),
+      const _GrammarSpec(
+        segments: ['回到渡口以后，', '他想起那位老人，', '他说的话仍在耳边。'],
+        problemSegmentIndex: 2,
+        originalSentence: '回到渡口以后，他想起那位老人，他说的话仍在耳边。',
+        correctedSentence: '回到渡口以后，他想起那位老人，老人的话仍在耳边。',
+        correctOptionId: 'correct',
+        correctReplacement: '老人的话仍在耳边',
+        distractors: ['他的话也被他说起', '那个人说他的那些话', '这句话想起了老人'],
+        errorType: '指代不明',
+        errorLocation: '第二个“他”',
+        whyWrong: '句中有探索者和老人两个人，“他”无法明确指向谁。',
+        revisionRule: '出现多个可能对象时，直接写出具体称呼。',
+        memoryTip: '一句话里有两个人，再出现“他”就要检查指的是谁。',
+      ),
+      const _GrammarSpec(
+        segments: ['那扇门', '在三百年前', '即将已经关闭。'],
+        problemSegmentIndex: 2,
+        originalSentence: '那扇门在三百年前即将已经关闭。',
+        correctedSentence: '那扇门在三百年前已经关闭。',
+        correctOptionId: 'correct',
+        correctReplacement: '已经关闭',
+        distractors: ['即将关闭过了', '马上已经关上', '将要曾经关闭'],
+        errorType: '时态逻辑矛盾',
+        errorLocation: '“即将”与“已经”',
+        whyWrong: '“即将”表示还没发生，“已经”表示事情完成，不能描述同一动作。',
+        revisionRule: '根据时间线选择完成或将来标记。',
+        memoryTip: '“即将”看未来，“已经”看过去，两者不要同时修饰一个动作。',
+      ),
+      const _GrammarSpec(
+        segments: ['只有认真观察，', '就能发现', '故事里的暗线。'],
+        problemSegmentIndex: 1,
+        originalSentence: '只有认真观察，就能发现故事里的暗线。',
+        correctedSentence: '只有认真观察，才能发现故事里的暗线。',
+        correctOptionId: 'correct',
+        correctReplacement: '才能发现',
+        distractors: ['所以能发现', '也就发现了', '但是会发现'],
+        errorType: '关联词搭配错误',
+        errorLocation: '“只有……就……”',
+        whyWrong: '必要条件“只有”通常和“才”搭配，“就”更常和“只要”搭配。',
+        revisionRule: '使用“只有……才……”或“只要……就……”。',
+        memoryTip: '只有配才，只要配就。',
+      ),
+      const _GrammarSpec(
+        segments: ['探索者', '认真地几乎', '读完了整封遗简。'],
+        problemSegmentIndex: 1,
+        originalSentence: '探索者认真地几乎读完了整封遗简。',
+        correctedSentence: '探索者几乎认真地读完了整封遗简。',
+        correctOptionId: 'correct',
+        correctReplacement: '几乎认真地',
+        distractors: ['认真几乎地', '读完几乎认真地', '地认真几乎'],
+        errorType: '语序不当',
+        errorLocation: '“认真地”和“几乎”的位置',
+        whyWrong: '范围副词“几乎”应先限定整个动作，方式状语“认真地”再说明怎样读。',
+        revisionRule: '范围副词通常放在方式状语之前。',
+        memoryTip: '先说做到什么程度，再说用什么方式做。',
+      ),
+    ];
+    // The grammar session receives the journey seed plus 997. Keeping the
+    // first run at index zero preserves the authored journey-specific item;
+    // each replay then advances to a different, clearly named error family.
+    final replayVariant = (seed - 997).abs() % variedSpecs.length;
+    return variedSpecs[replayVariant];
   }
 
   static List<String> _paragraphDistractors(String journeyId) {
