@@ -10,6 +10,7 @@ import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/city_journey_stamp.dart';
 import '../widgets/special_journey_passport.dart';
+import '../widgets/journey_symbol_badge.dart';
 import 'journey_screen.dart';
 
 bool get _passportAllAccessPreview {
@@ -369,11 +370,10 @@ class _DestinationStampTile extends StatelessWidget {
             height: 58,
             child: Row(
               children: [
-                CityJourneyStamp(
-                  journey: journey,
-                  isUnlocked: earned || _passportAllAccessPreview,
-                  size: 36,
-                  transparentInk: true,
+                JourneySymbolBadge(
+                  journeyId: journey.id,
+                  isUnlocked: enabled,
+                  size: 42,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
