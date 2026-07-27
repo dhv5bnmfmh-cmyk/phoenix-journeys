@@ -29,13 +29,10 @@ void main() {
         isEmpty,
         reason: journey.id,
       );
-      expect(journey.storyAnnotations.length, journey.content.sections.length);
+      expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
+      expect(journey.storyAnnotations, hasLength(2), reason: journey.id);
       expect(journey.words.length, greaterThanOrEqualTo(9));
-      expect(
-        journey.discoveries.length,
-        journey.id == 'beijing-summer-palace' ? 2 : 4,
-        reason: journey.id,
-      );
+      expect(journey.discoveries, hasLength(2), reason: journey.id);
     }
   });
 }
