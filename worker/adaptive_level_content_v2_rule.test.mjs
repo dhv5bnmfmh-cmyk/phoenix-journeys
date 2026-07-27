@@ -13,6 +13,10 @@ const passport = fs.readFileSync(
   new URL('../app/lib/screens/passport_screen.dart', import.meta.url),
   'utf8',
 );
+const cityPassport = fs.readFileSync(
+  new URL('../app/lib/screens/city_passport_screen.dart', import.meta.url),
+  'utf8',
+);
 const selector = fs.readFileSync(
   new URL(
     '../app/lib/widgets/journey_level_selector_button.dart',
@@ -41,8 +45,10 @@ test('every reading band has an approved one-or-two paragraph shape', () => {
   );
 });
 
-test('passport exposes one global HSK and TOCFL selector', () => {
+test('the active atlas passport exposes one global HSK and TOCFL selector', () => {
   assert.match(passport, /JourneyLevelSelectorButton\(compact: true\)/);
+  assert.match(cityPassport, /JourneyLevelSelectorButton\(compact: true\)/);
+  assert.match(cityPassport, /class CityPassportScreen/);
   assert.match(selector, /global-journey-level-selector/);
   assert.match(selector, /ChineseExamTrack\.values/);
   assert.match(selector, /ChineseExamTrack\.hsk/);
