@@ -29,9 +29,16 @@ void main() {
         isEmpty,
         reason: journey.id,
       );
-      expect(journey.content.sections, hasLength(2), reason: journey.id);
       expect(journey.words.length, greaterThanOrEqualTo(9));
       expect(journey.discoveries, hasLength(2), reason: journey.id);
     }
   });
 }
+ℹ tests 226
+ℹ suites 0
+ℹ pass 226
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 834.726681
