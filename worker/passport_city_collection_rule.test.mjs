@@ -27,7 +27,7 @@ test('Passport keeps every city journey reachable on the transparent atlas', () 
 
 test('Passport tiles render a compact layered journey symbol and name', () => {
   assert.match(passport, /JourneySymbolBadge\(/);
-  assert.match(passport, /size: 42/);
+  assert.match(passport, /size: 50/);
   assert.match(passport, /state\.displayText\(journey\.place\)/);
   assert.match(passport, /JourneyScreen\(journeyId: journey\.id\)/);
   assert.match(passport, /state\.activateJourney\(journey\.id\)/);
