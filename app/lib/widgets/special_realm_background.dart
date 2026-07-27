@@ -78,10 +78,16 @@ class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
               pageType: widget.pageType,
               progress: _motion.value,
             ),
-            SpecialRealmCinematicOverlay(
-              journeyId: widget.journeyId,
-              pageType: widget.pageType,
-            ),
+            // The premium plates for Dream Butterfly and Upstream Lantern
+            // already carry their story detail. Keep them calm and readable:
+            // the old procedural overlay added a synthetic butterfly, lotus,
+            // and dark foreground shapes that obscured the finished artwork.
+            if (widget.journeyId != 'literary-roaming' &&
+                widget.journeyId != 'folk-secret-land')
+              SpecialRealmCinematicOverlay(
+                journeyId: widget.journeyId,
+                pageType: widget.pageType,
+              ),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -117,12 +123,12 @@ class _PremiumRealmPlate extends StatelessWidget {
 
   static const _assets = <String, String>{
     'literary-roaming':
-        'assets/images/special-realms/dream-butterfly-v2.webp',
+        'assets/images/special-realms/dream-butterfly-v3.webp',
     'myth-tracing': 'assets/images/special-realms/moon-letter-v2.webp',
     'strange-night-talks':
         'assets/images/special-realms/shadowless-inn-v2.webp',
     'folk-secret-land':
-        'assets/images/special-realms/upstream-lantern-v2.webp',
+        'assets/images/special-realms/upstream-lantern-v3.webp',
   };
 
   double get _chapter =>
