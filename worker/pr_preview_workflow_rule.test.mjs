@@ -57,5 +57,6 @@ test('merge checklist protects stable Phoenix behavior', () => {
 test('development process forbids direct main development', () => {
   assert.match(processDoc, /禁止直接在 `main` 开发或试验/);
   assert.match(processDoc, /用户明确确认后，才允许合并到 `main`/);
-  assert.match(processDoc, /stable\/phoenix-baseline-2026-07-19/);
+  assert.match(processDoc, /当前稳定版本来源：PR #132/);
+  assert.match(processDoc, /唯一稳定基线/);
 });
