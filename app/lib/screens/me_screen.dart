@@ -10,6 +10,7 @@ import '../services/language_level_preference_store.dart';
 import '../services/narration_controller.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/journey_memory_timeline.dart';
 import '../widgets/word_detail_sheet.dart';
 import '../widgets/word_mark.dart';
 
@@ -66,8 +67,10 @@ class _MeScreenState extends State<MeScreen> {
                       : Icons.menu_book_rounded,
                   color: PhoenixTheme.red,
                 ),
-                title: Text(item.label,
-                    style: const TextStyle(fontWeight: FontWeight.w900)),
+                title: Text(
+                  item.label,
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
                 subtitle: Text(
                   state.displayText(
                     item == ChineseExamTrack.hsk
@@ -100,8 +103,10 @@ class _MeScreenState extends State<MeScreen> {
             for (final item in _levelAgent.profilesFor(track))
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(item.displayLabel,
-                    style: const TextStyle(fontWeight: FontWeight.w900)),
+                title: Text(
+                  item.displayLabel,
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
                 subtitle: Text(state.displayText(item.band.label)),
                 trailing: _profile?.storageValue == item.storageValue
                     ? const Icon(Icons.check_rounded, color: PhoenixTheme.red)
@@ -232,7 +237,10 @@ class _AbilityControl extends StatelessWidget {
               Expanded(
                 child: Text(
                   state.displayText('HSK／TOCFL 能力设置'),
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
               Text(
@@ -660,123 +668,10 @@ class _MemoryPanel extends StatelessWidget {
 
   final AppState state;
 
-  Future<void> _showAll(BuildContext context) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      useSafeArea: true,
-      builder: (_) => FractionallySizedBox(
-        heightFactor: .78,
-        child: ListView.separated(
-          padding: const EdgeInsets.fromLTRB(14, 0, 14, 20),
-          itemCount: state.memories.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 5),
-          itemBuilder: (context, index) {
-            final memory = state.memories[index];
-            return ListTile(
-              dense: true,
-              tileColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              leading: const Text('📖', style: TextStyle(fontSize: 21)),
-              title: Text(memory),
-              subtitle: Text(
-                state.displayText('第 ${state.memories.length - index} 次北京之旅'),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (state.memories.isEmpty) return const _EmptyMemoryCard();
-    final preview = state.memories.take(4).toList(growable: false);
-
-    return Column(
-      children: [
-        Expanded(
-          child: Column(
-            children: preview
-                .asMap()
-                .entries
-                .map((entry) {
-                  final index = state.memories.indexOf(entry.value);
-                  return Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .92),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: PhoenixTheme.gold.withValues(alpha: .24),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Text('📖', style: TextStyle(fontSize: 21)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  entry.value,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    height: 1.2,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  state.displayText(
-                                    '第 ${state.memories.length - index} 次北京之旅',
-                                  ),
-                                  style: const TextStyle(
-                                    fontSize: 9,
-                                    color: Colors.black45,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                })
-                .toList(growable: false),
-          ),
-        ),
-        if (state.memories.length > preview.length) ...[
-          const SizedBox(height: 5),
-          SizedBox(
-            height: 32,
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => _showAll(context),
-              icon: const Icon(Icons.history_rounded, size: 16),
-              label: Text(
-                state.displayText('查看全部 ${state.memories.length} 条回忆'),
-                style: const TextStyle(fontSize: 10.5),
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
+    return JourneyMemoryTimeline(state: state);
   }
 }
 
