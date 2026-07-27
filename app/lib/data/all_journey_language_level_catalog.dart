@@ -11,16 +11,16 @@ JourneyLevelContent buildAdaptiveLevelForJourney(
   required ChineseProficiencyProfile profile,
   Set<String> knownWords = const <String>{},
 }) {
-  final story = _buildStory(experience, profile.band);
-  final discoveries = _discoveriesForBand(experience, profile.band);
+  final plan = _languageLevelAgent.planFor(profile);
+  final story = _buildStory(experience, profile);
+  final discoveries = _discoveriesForProfile(experience, profile);
   final searchable =
       '${story.paragraphs.join()}${discoveries.map((item) => item.text).join()}';
   final wordsInContent = experience.words
       .where((entry) => searchable.contains(entry.word))
       .toList(growable: false);
-  final vocabularyCandidates = wordsInContent.isEmpty
-      ? experience.words
-      : wordsInContent;
+  final vocabularyCandidates =
+      wordsInContent.isEmpty ? experience.words : wordsInContent;
   final selectedWords = _languageLevelAgent.selectVocabulary(
     words: vocabularyCandidates,
     levelCatalog: _buildVocabularyCatalog(experience.words),
@@ -36,7 +36,7 @@ JourneyLevelContent buildAdaptiveLevelForJourney(
     wonderQuestion: _wonderQuestion(experience, profile.band),
     expressQuestion: _expressQuestion(experience, profile.band),
   ).withReadingLimit(
-    paragraphCount: _languageLevelAgent.planFor(profile).paragraphCount,
+    paragraphCount: plan.paragraphCount,
     discoveryCount: _discoveryParagraphCount(profile.band),
   );
 }
@@ -51,161 +51,287 @@ class _AdaptiveStory {
   final List<ReadingAnnotation> annotations;
 }
 
+class _StorySentence {
+  const _StorySentence({
+    required this.chinese,
+    required this.pinyin,
+    required this.vietnamese,
+    required this.english,
+  });
+
+  final String chinese;
+  final String pinyin;
+  final String vietnamese;
+  final String english;
+}
+
 _AdaptiveStory _buildStory(
   DailyJourneyExperience experience,
-  PhoenixReadingBand band,
+  ChineseProficiencyProfile profile,
+) {
+  final packets = _storySentencePackets(experience);
+  if (packets.isEmpty) return _fallbackStory();
+
+  final plan = _languageLevelAgent.planFor(profile);
+  final sentenceLimit = switch (profile.band) {
+    PhoenixReadingBand.beginner => 4,
+    PhoenixReadingBand.elementary => 7,
+    PhoenixReadingBand.intermediate => 10,
+    PhoenixReadingBand.upperIntermediate => 14,
+    PhoenixReadingBand.advanced || PhoenixReadingBand.mastery => packets.length,
+  };
+  final selected = _selectNarrativePackets(
+    packets,
+    maximumSentences: sentenceLimit,
+    maximumCharacters: plan.maxTotalCharacters,
+  );
+  final groups = _partitionPackets(selected, plan.paragraphCount);
+
+  return _AdaptiveStory(
+    paragraphs: groups
+        .map((group) => _joinChinese(group.map((item) => item.chinese)))
+        .where((text) => text.isNotEmpty)
+        .toList(growable: false),
+    annotations: groups
+        .map(
+          (group) => ReadingAnnotation(
+            pinyin: _joinLatin(group.map((item) => item.pinyin)),
+            vietnamese: _joinLatin(group.map((item) => item.vietnamese)),
+            english: _joinLatin(group.map((item) => item.english)),
+          ),
+        )
+        .toList(growable: false),
+  );
+}
+
+List<_StorySentence> _storySentencePackets(
+  DailyJourneyExperience experience,
 ) {
   final paragraphs = experience.content.storyParagraphs;
   final annotations = experience.storyAnnotations;
+  if (paragraphs.isEmpty || annotations.isEmpty) return const [];
 
-  if (paragraphs.isEmpty || annotations.isEmpty) {
-    return const _AdaptiveStory(
-      paragraphs: <String>['这段旅程正在准备中。', '请稍后再来继续探索。'],
-      annotations: <ReadingAnnotation>[
-        ReadingAnnotation(
-          pinyin: 'Zhè duàn lǚchéng zhèngzài zhǔnbèi zhōng.',
-          vietnamese: 'Hành trình này đang được chuẩn bị.',
-          english: 'This journey is being prepared.',
+  final packets = <_StorySentence>[];
+  for (var paragraphIndex = 0;
+      paragraphIndex < paragraphs.length;
+      paragraphIndex += 1) {
+    final chinese = _splitChineseSentences(paragraphs[paragraphIndex]);
+    if (chinese.isEmpty) continue;
+    final annotation =
+        annotations[paragraphIndex.clamp(0, annotations.length - 1).toInt()];
+    final pinyin = _splitLatinSentences(annotation.pinyin);
+    final vietnamese = _splitLatinSentences(annotation.vietnamese);
+    final english = _splitLatinSentences(annotation.english);
+
+    for (var sentenceIndex = 0;
+        sentenceIndex < chinese.length;
+        sentenceIndex += 1) {
+      packets.add(
+        _StorySentence(
+          chinese: chinese[sentenceIndex],
+          pinyin: _alignedSentence(pinyin, sentenceIndex),
+          vietnamese: _alignedSentence(vietnamese, sentenceIndex),
+          english: _alignedSentence(english, sentenceIndex),
         ),
-        ReadingAnnotation(
-          pinyin: 'Qǐng shāohòu zài lái jìxù tànsuǒ.',
-          vietnamese: 'Hãy quay lại sau để tiếp tục khám phá.',
-          english: 'Please return later to continue exploring.',
-        ),
-      ],
-    );
+      );
+    }
   }
-
-  final lastIndex = paragraphs.length - 1;
-  final secondIndex = paragraphs.length > 1 ? 1 : 0;
-  final thirdIndex = paragraphs.length > 2 ? 2 : lastIndex;
-  final lastAnnotationIndex = lastIndex.clamp(0, annotations.length - 1).toInt();
-  final secondAnnotationIndex =
-      secondIndex.clamp(0, annotations.length - 1).toInt();
-  final thirdAnnotationIndex =
-      thirdIndex.clamp(0, annotations.length - 1).toInt();
-
-  switch (band) {
-    case PhoenixReadingBand.beginner:
-      return _AdaptiveStory(
-        paragraphs: <String>[
-          _joinChinese(<String>[
-            _firstChineseSentence(paragraphs.first),
-            _firstChineseSentence(paragraphs[lastIndex]),
-          ]),
-        ],
-        annotations: <ReadingAnnotation>[
-          _combineAnnotation(
-            annotations: <ReadingAnnotation>[
-              annotations.first,
-              annotations[lastAnnotationIndex],
-            ],
-            firstSentenceOnly: true,
-          ),
-        ],
-      );
-    case PhoenixReadingBand.elementary:
-      return _AdaptiveStory(
-        paragraphs: <String>[
-          _joinChinese(<String>[paragraphs.first, paragraphs[secondIndex]]),
-          _joinChinese(<String>[paragraphs[thirdIndex], paragraphs[lastIndex]]),
-        ],
-        annotations: <ReadingAnnotation>[
-          _combineAnnotation(
-            annotations: <ReadingAnnotation>[
-              annotations.first,
-              annotations[secondAnnotationIndex],
-            ],
-          ),
-          _combineAnnotation(
-            annotations: <ReadingAnnotation>[
-              annotations[thirdAnnotationIndex],
-              annotations[lastAnnotationIndex],
-            ],
-          ),
-        ],
-      );
-    case PhoenixReadingBand.intermediate:
-      return _pairedStory(
-        paragraphs: paragraphs,
-        annotations: annotations,
-      );
-    case PhoenixReadingBand.upperIntermediate:
-      return _pairedStory(
-        paragraphs: paragraphs,
-        annotations: annotations,
-      );
-    case PhoenixReadingBand.advanced:
-    case PhoenixReadingBand.mastery:
-      return _AdaptiveStory(
-        paragraphs: <String>[_joinChinese(paragraphs)],
-        annotations: <ReadingAnnotation>[
-          _combineAnnotation(annotations: annotations),
-        ],
-      );
-  }
+  return packets;
 }
 
-_AdaptiveStory _pairedStory({
-  required List<String> paragraphs,
-  required List<ReadingAnnotation> annotations,
+List<_StorySentence> _selectNarrativePackets(
+  List<_StorySentence> source, {
+  required int maximumSentences,
+  required int maximumCharacters,
 }) {
-  final split = (paragraphs.length / 2).ceil();
-  final firstParagraphs = paragraphs.take(split).toList(growable: false);
-  final secondParagraphs = paragraphs.skip(split).toList(growable: false);
-  final firstAnnotations = annotations.take(split).toList(growable: false);
-  final secondAnnotations = annotations.skip(split).toList(growable: false);
-
-  return _AdaptiveStory(
-    paragraphs: <String>[
-      _joinChinese(firstParagraphs),
-      _joinChinese(secondParagraphs),
-    ],
-    annotations: <ReadingAnnotation>[
-      _combineAnnotation(annotations: firstAnnotations),
-      _combineAnnotation(annotations: secondAnnotations),
-    ],
-  );
-}
-
-ReadingAnnotation _combineAnnotation({
-  required List<ReadingAnnotation> annotations,
-  List<DiscoveryEntry> discoveries = const <DiscoveryEntry>[],
-  bool firstSentenceOnly = false,
-}) {
-  String prepare(String value) {
-    return firstSentenceOnly ? _firstLatinSentence(value) : value.trim();
+  if (source.length <= maximumSentences &&
+      _storyCharacterCount(source) <= maximumCharacters) {
+    return source;
   }
+  if (source.length <= 2) return source;
 
-  return ReadingAnnotation(
-    pinyin: _joinLatin(<String>[
-      ...annotations.map((item) => prepare(item.pinyin)),
-      ...discoveries.map((item) => item.pinyin.trim()),
-    ]),
-    vietnamese: _joinLatin(<String>[
-      ...annotations.map((item) => prepare(item.vietnamese)),
-      ...discoveries.map((item) => item.vietnamese.trim()),
-    ]),
-    english: _joinLatin(<String>[
-      ...annotations.map((item) => prepare(item.english)),
-      ...discoveries.map((item) => item.english.trim()),
-    ]),
-  );
+  var target = maximumSentences.clamp(2, source.length).toInt();
+  var selected = _evenlySample(source, target);
+  while (selected.length > 2 &&
+      _storyCharacterCount(selected) > maximumCharacters) {
+    target -= 1;
+    selected = _evenlySample(source, target);
+  }
+  return selected;
 }
 
-List<DiscoveryEntry> _discoveriesForBand(
-  DailyJourneyExperience experience,
-  PhoenixReadingBand band,
+List<_StorySentence> _evenlySample(
+  List<_StorySentence> source,
+  int target,
 ) {
-  final count = _discoveryParagraphCount(band);
+  if (target >= source.length) return source;
+  if (target <= 1) return <_StorySentence>[source.first];
+
+  final indexes = <int>{0, source.length - 1};
+  for (var position = 1; position < target - 1; position += 1) {
+    final ratio = position / (target - 1);
+    indexes.add((ratio * (source.length - 1)).round());
+  }
+  final ordered = indexes.toList()..sort();
+  return ordered.map((index) => source[index]).toList(growable: false);
+}
+
+int _storyCharacterCount(Iterable<_StorySentence> packets) =>
+    packets.fold(0, (total, item) => total + item.chinese.length);
+
+List<List<_StorySentence>> _partitionPackets(
+  List<_StorySentence> packets,
+  int paragraphCount,
+) {
+  if (paragraphCount <= 1 || packets.length <= 1) {
+    return <List<_StorySentence>>[packets];
+  }
+
+  final groups = <List<_StorySentence>>[];
+  var start = 0;
+  for (var index = 0; index < paragraphCount; index += 1) {
+    final remainingItems = packets.length - start;
+    final remainingGroups = paragraphCount - index;
+    final take = (remainingItems / remainingGroups).ceil();
+    groups.add(packets.sublist(start, start + take));
+    start += take;
+  }
+  return groups.where((group) => group.isNotEmpty).toList(growable: false);
+}
+
+_AdaptiveStory _fallbackStory() {
+  return const _AdaptiveStory(
+    paragraphs: <String>['这段旅程正在准备中。请稍后再来继续探索。'],
+    annotations: <ReadingAnnotation>[
+      ReadingAnnotation(
+        pinyin:
+            'Zhè duàn lǚchéng zhèngzài zhǔnbèi zhōng. Qǐng shāohòu zài lái jìxù tànsuǒ.',
+        vietnamese:
+            'Hành trình này đang được chuẩn bị. Hãy quay lại sau để tiếp tục khám phá.',
+        english:
+            'This journey is being prepared. Please return later to continue exploring.',
+      ),
+    ],
+  );
+}
+
+List<DiscoveryEntry> _discoveriesForProfile(
+  DailyJourneyExperience experience,
+  ChineseProficiencyProfile profile,
+) {
   final source = experience.discoveries;
-  if (source.length <= count) return source;
-  if (count == 1) return <DiscoveryEntry>[_mergeDiscoveryEntries(source)];
+  if (source.isEmpty) return const <DiscoveryEntry>[];
+
+  final targetCount = _discoveryParagraphCount(profile.band);
+  return switch (profile.band) {
+    PhoenixReadingBand.beginner => <DiscoveryEntry>[
+        _compressDiscovery(source.first, maximumSentences: 2),
+      ],
+    PhoenixReadingBand.elementary => _selectDiscoveryArc(
+        source,
+        targetCount: targetCount,
+        maximumSentencesPerEntry: 2,
+      ),
+    PhoenixReadingBand.intermediate => _selectDiscoveryArc(
+        source,
+        targetCount: targetCount,
+        maximumSentencesPerEntry: 3,
+      ),
+    PhoenixReadingBand.upperIntermediate => _groupDiscoveries(
+        source,
+        targetCount: targetCount,
+      ),
+    PhoenixReadingBand.advanced || PhoenixReadingBand.mastery =>
+      <DiscoveryEntry>[_mergeDiscoveryEntries(source)],
+  };
+}
+
+List<DiscoveryEntry> _selectDiscoveryArc(
+  List<DiscoveryEntry> source, {
+  required int targetCount,
+  required int maximumSentencesPerEntry,
+}) {
+  if (targetCount <= 1) {
+    return <DiscoveryEntry>[
+      _compressDiscovery(
+        source.first,
+        maximumSentences: maximumSentencesPerEntry,
+      ),
+    ];
+  }
+  if (source.length == 1) {
+    return <DiscoveryEntry>[
+      _compressDiscovery(
+        source.first,
+        maximumSentences: maximumSentencesPerEntry,
+      ),
+    ];
+  }
+
+  return <DiscoveryEntry>[
+    _compressDiscovery(
+      source.first,
+      maximumSentences: maximumSentencesPerEntry,
+    ),
+    _compressDiscovery(
+      source.last,
+      maximumSentences: maximumSentencesPerEntry,
+    ),
+  ];
+}
+
+List<DiscoveryEntry> _groupDiscoveries(
+  List<DiscoveryEntry> source, {
+  required int targetCount,
+}) {
+  if (source.length <= targetCount) return source;
+  if (targetCount <= 1) return <DiscoveryEntry>[_mergeDiscoveryEntries(source)];
+
   final split = (source.length / 2).ceil();
   return <DiscoveryEntry>[
     _mergeDiscoveryEntries(source.take(split)),
     _mergeDiscoveryEntries(source.skip(split)),
   ];
+}
+
+DiscoveryEntry _compressDiscovery(
+  DiscoveryEntry entry, {
+  required int maximumSentences,
+}) {
+  return DiscoveryEntry(
+    text: _selectSentences(entry.text, maximumSentences, chinese: true),
+    pinyin: _selectSentences(entry.pinyin, maximumSentences),
+    simpleChinese:
+        _selectSentences(entry.simpleChinese, maximumSentences, chinese: true),
+    vietnamese: _selectSentences(entry.vietnamese, maximumSentences),
+    english: _selectSentences(entry.english, maximumSentences),
+  );
+}
+
+String _selectSentences(
+  String value,
+  int maximumSentences, {
+  bool chinese = false,
+}) {
+  final sentences =
+      chinese ? _splitChineseSentences(value) : _splitLatinSentences(value);
+  if (sentences.length <= maximumSentences) return value.trim();
+
+  final selected = _evenlySampleStrings(sentences, maximumSentences);
+  return chinese ? _joinChinese(selected) : _joinLatin(selected);
+}
+
+List<String> _evenlySampleStrings(List<String> source, int target) {
+  if (target >= source.length) return source;
+  if (target <= 1) return <String>[source.first];
+
+  final indexes = <int>{0, source.length - 1};
+  for (var position = 1; position < target - 1; position += 1) {
+    final ratio = position / (target - 1);
+    indexes.add((ratio * (source.length - 1)).round());
+  }
+  final ordered = indexes.toList()..sort();
+  return ordered.map((index) => source[index]).toList(growable: false);
 }
 
 int _discoveryParagraphCount(PhoenixReadingBand band) => switch (band) {
@@ -222,9 +348,8 @@ DiscoveryEntry _mergeDiscoveryEntries(Iterable<DiscoveryEntry> source) {
   return DiscoveryEntry(
     text: _joinChinese(entries.map((entry) => entry.text)),
     pinyin: _joinLatin(entries.map((entry) => entry.pinyin)),
-    simpleChinese: _joinChinese(
-      entries.map((entry) => entry.simpleChinese),
-    ),
+    simpleChinese:
+        _joinChinese(entries.map((entry) => entry.simpleChinese)),
     vietnamese: _joinLatin(entries.map((entry) => entry.vietnamese)),
     english: _joinLatin(entries.map((entry) => entry.english)),
   );
@@ -242,16 +367,21 @@ Map<String, VocabularyLevelTag> _buildVocabularyCatalog(
 VocabularyLevelTag _tagFor(WordEntry entry, int index) {
   final isProperNoun = entry.partOfSpeech.contains('专名');
   final isPhrase = entry.partOfSpeech.contains('短语');
-  final level = (1 + index ~/ 2).clamp(1, 6).toInt();
+  final isCulture = entry.partOfSpeech.contains('文化');
+  final hskLevel = (1 + index ~/ 2).clamp(1, 6).toInt();
+  final tocflLevel = (1 + (index + 1) ~/ 2).clamp(1, 6).toInt();
+
   return VocabularyLevelTag(
-    hskLevel: isProperNoun ? null : level,
-    tocflLevel: isProperNoun ? null : level,
+    hskLevel: isProperNoun ? null : hskLevel,
+    tocflLevel: isProperNoun ? null : tocflLevel,
     kind: isProperNoun
         ? VocabularyKind.properNoun
         : isPhrase
             ? VocabularyKind.idiom
-            : VocabularyKind.general,
-    evidence: isProperNoun || isPhrase
+            : isCulture
+                ? VocabularyKind.cultural
+                : VocabularyKind.general,
+    evidence: isProperNoun || isPhrase || isCulture
         ? VocabularyLevelEvidence.cultural
         : VocabularyLevelEvidence.curated,
   );
@@ -263,13 +393,15 @@ String _wonderQuestion(
 ) {
   return switch (band) {
     PhoenixReadingBand.beginner =>
-      '在${experience.place}，你最想先看什么？为什么？',
-    PhoenixReadingBand.elementary || PhoenixReadingBand.intermediate =>
-      experience.wonderQuestion,
+      '在${experience.place}，你最想先看什么？请用一到两句话说明原因。',
+    PhoenixReadingBand.elementary =>
+      '请引用故事中的一个细节回答：${experience.wonderQuestion}',
+    PhoenixReadingBand.intermediate =>
+      '请结合故事中的两个细节回答，并说明原因：${experience.wonderQuestion}',
     PhoenixReadingBand.upperIntermediate =>
-      '请结合故事中的两个细节回答：${experience.wonderQuestion}',
+      '请从空间、历史或人物感受中选择两个角度回答：${experience.wonderQuestion}',
     PhoenixReadingBand.advanced || PhoenixReadingBand.mastery =>
-      '请从历史、空间和今天的使用中选择一个角度深入回答：${experience.wonderQuestion}',
+      '请从历史语境、空间设计和今天的使用中选择一个角度深入回答：${experience.wonderQuestion}',
   };
 }
 
@@ -279,29 +411,42 @@ String _expressQuestion(
 ) {
   return switch (band) {
     PhoenixReadingBand.beginner =>
-      '请用一到两句话介绍${experience.place}。',
-    PhoenixReadingBand.elementary => experience.expressQuestion,
+      '请用一到两句话介绍${experience.place}，尽量使用一个重点单词。',
+    PhoenixReadingBand.elementary =>
+      '${experience.expressQuestion}请加入一个具体画面。',
     PhoenixReadingBand.intermediate =>
-      '${experience.expressQuestion}请补充一个具体画面或原因。',
+      '${experience.expressQuestion}请补充一个原因，并使用两个重点单词。',
     PhoenixReadingBand.upperIntermediate =>
-      '${experience.expressQuestion}请使用“既……也……”或“不是……而是……”。',
+      '${experience.expressQuestion}请使用“既……也……”或“不是……而是……”，并引用故事细节。',
     PhoenixReadingBand.advanced || PhoenixReadingBand.mastery =>
-      '${experience.expressQuestion}请说明景观、历史与今天生活之间的关系。',
+      '${experience.expressQuestion}请说明景观、历史与今天生活之间的关系，并形成完整论述。',
   };
 }
 
-String _firstChineseSentence(String value) {
+List<String> _splitChineseSentences(String value) {
   final text = value.trim();
-  if (text.isEmpty) return text;
-  final end = text.indexOf('。');
-  return end < 0 ? text : text.substring(0, end + 1);
+  if (text.isEmpty) return const <String>[];
+  return RegExp(r'[^。！？!?]+[。！？!?]?')
+      .allMatches(text)
+      .map((match) => match.group(0)?.trim() ?? '')
+      .where((sentence) => sentence.isNotEmpty)
+      .toList(growable: false);
 }
 
-String _firstLatinSentence(String value) {
+List<String> _splitLatinSentences(String value) {
   final text = value.trim();
-  if (text.isEmpty) return text;
-  final match = RegExp(r'[.!?](?:\s|$)').firstMatch(text);
-  return match == null ? text : text.substring(0, match.start + 1).trim();
+  if (text.isEmpty) return const <String>[];
+  return RegExp(r'[^.!?]+[.!?]?')
+      .allMatches(text)
+      .map((match) => match.group(0)?.trim() ?? '')
+      .where((sentence) => sentence.isNotEmpty)
+      .toList(growable: false);
+}
+
+String _alignedSentence(List<String> sentences, int index) {
+  if (sentences.isEmpty) return '';
+  if (index < sentences.length) return sentences[index];
+  return '';
 }
 
 String _joinChinese(Iterable<String> values) => values
