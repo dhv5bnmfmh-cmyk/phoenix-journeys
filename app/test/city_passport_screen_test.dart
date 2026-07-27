@@ -40,6 +40,11 @@ void main() {
       findsOneWidget,
     );
     expect(
+      find.byKey(const ValueKey('passport-pinch-zoom-map')),
+      findsOneWidget,
+    );
+    expect(find.text('双指缩放 · 拖动地图'), findsOneWidget);
+    expect(
       find.byKey(const ValueKey('passport-city-beijing')),
       findsOneWidget,
     );
