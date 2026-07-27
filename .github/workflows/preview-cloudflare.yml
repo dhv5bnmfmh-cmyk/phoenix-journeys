@@ -56,7 +56,59 @@ jobs:
 
       - name: Test Flutter app
         working-directory: app
-        run: flutter test
+        shell: bash
+        run: |
+          if ! flutter test --reporter expanded > /tmp/flutter-tests.log 2>&1; then
+            tail -n 260 /tmp/flutter-tests.log
+            exit 1
+          fi
+          tail -n 30 /tmp/flutter-tests.log
+
+      - name: Publish Flutter test failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = '/tmp/flutter-tests.log';
+            if (!fs.existsSync(path)) return;
+            const marker = '<!-- alpha-passport-flutter-failure -->';
+            const lines = fs.readFileSync(path, 'utf8').trim().split('\n');
+            const failureIndexes = [];
+            lines.forEach((line, index) => {
+              if (/\[E\]|Test failed|EXCEPTION CAUGHT|Expected:|Actual:|Failing tests:/.test(line)) {
+                failureIndexes.push(index);
+              }
+            });
+            const chunks = failureIndexes.slice(0, 12).map((index) =>
+              lines.slice(Math.max(0, index - 12), Math.min(lines.length, index + 42)).join('\n'),
+            );
+            const log = (chunks.length ? chunks.join('\n\n') : lines.slice(-220).join('\n')).slice(-30000);
+            const body = `${marker}\n## Alpha passport Flutter failure\n\n~~~text\n${log}\n~~~`;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find(
+              (comment) => comment.user.type === 'Bot' && comment.body?.includes(marker),
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
 
       - name: Build preview web app
         working-directory: app
@@ -143,7 +195,7 @@ jobs:
           script: |
             const marker = '<!-- phoenix-pr-preview -->';
             const shortRelease = process.env.PHOENIX_PREVIEW_RELEASE.slice(0, 8);
-            const body = `${marker}\n## Phoenix 独立体验版 ✅\n\n[打开 PR 体验链接](${process.env.PHOENIX_PREVIEW_URL}/?v=${shortRelease})\n\n- PR：#${context.issue.number}\n- Commit：\`${shortRelease}\`\n- 与正式版 main 完全隔离\n- 只有确认通过后才会合并上线`;
+            const body = `${marker}\n## Phoenix 独立体验版 ✅\n\n[打开 PR 体验链接](${process.env.PHOENIX_PREVIEW_URL}/?unlock=all&v=${shortRelease})\n\n- PR：#${context.issue.number}\n- Commit：\`${shortRelease}\`\n- 与正式版 main 完全隔离\n- 只有确认通过后才会合并上线`;
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
               repo: context.repo.repo,
