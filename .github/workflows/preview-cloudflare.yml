@@ -124,7 +124,7 @@ jobs:
               context: "cloudflare/preview",
               target_url: url
             }));
-          ' "${PREVIEW_URL}/?unlock=all&prototype=journeys&v=211086ef")"
+          ' "${PREVIEW_URL}/?unlock=all&prototype=journeys&v=${PREVIEW_RELEASE}")"
 
           curl --fail --silent --show-error \
             --request POST \
@@ -142,8 +142,9 @@ jobs:
         with:
           script: |
             const marker = '<!-- phoenix-pr-preview -->';
-            const shortRelease = process.env.PHOENIX_PREVIEW_RELEASE.slice(0, 8);
-            const canonicalUrl = `${process.env.PHOENIX_PREVIEW_URL}/?unlock=all&prototype=journeys&v=211086ef`;
+            const release = process.env.PHOENIX_PREVIEW_RELEASE;
+            const shortRelease = release.slice(0, 8);
+            const canonicalUrl = `${process.env.PHOENIX_PREVIEW_URL}/?unlock=all&prototype=journeys&v=${release}`;
             const body = `${marker}\n## Phoenix 独立体验版 ✅\n\n[打开 PR 体验链接](${canonicalUrl})\n\n- PR：#${context.issue.number}\n- Commit：\`${shortRelease}\`\n- 与正式版 main 完全隔离\n- 其他入口会自动跳转至此全开放体验版\n- 只有确认通过后才会合并上线`;
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
