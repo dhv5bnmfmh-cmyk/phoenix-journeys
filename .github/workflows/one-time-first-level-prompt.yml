@@ -1,0 +1,200 @@
+name: One-time first language level prompt
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-remove:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: agent/adaptive-level-content-v2
+          fetch-depth: 0
+
+      - name: Add one-time non-blocking level guidance
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          store_path = Path('app/lib/services/language_level_preference_store.dart')
+          store_path.write_text("""import 'package:shared_preferences/shared_preferences.dart';
+
+import '../agents/phoenix_language_level_agent.dart';
+import '../models/language_proficiency.dart';
+
+class LanguageLevelPreferenceStore {
+  const LanguageLevelPreferenceStore();
+
+  static const String _profileKey = 'phoenix.languageProficiency';
+  static const String _promptSeenKey =
+      'phoenix.languageProficiencyPromptSeen';
+
+  Future<ChineseProficiencyProfile?> load() async {
+    final preferences = await SharedPreferences.getInstance();
+    return const PhoenixLanguageLevelAgent().profileFromStorage(
+      preferences.getString(_profileKey),
+    );
+  }
+
+  Future<bool> shouldShowJourneyPrompt() async {
+    final preferences = await SharedPreferences.getInstance();
+    final hasProfile = preferences.getString(_profileKey)?.isNotEmpty ?? false;
+    final promptSeen = preferences.getBool(_promptSeenKey) ?? false;
+    return !hasProfile && !promptSeen;
+  }
+
+  Future<void> markJourneyPromptSeen() async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool(_promptSeenKey, true);
+  }
+
+  Future<void> save(ChineseProficiencyProfile profile) async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setString(_profileKey, profile.storageValue);
+    await preferences.setBool(_promptSeenKey, true);
+  }
+
+  Future<void> clear() async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove(_profileKey);
+    await preferences.remove(_promptSeenKey);
+  }
+}
+""")
+
+          screen_path = Path('app/lib/screens/journey_screen.dart')
+          screen = screen_path.read_text()
+
+          profile_marker = '  ChineseProficiencyProfile? _languageProfile;\n'
+          if profile_marker not in screen:
+            raise SystemExit('language profile field not found')
+          screen = screen.replace(
+              profile_marker,
+              profile_marker + '  bool _languageProfilePromptScheduled = false;\n',
+              1,
+          )
+
+          load_start = screen.index('  Future<void> _loadLanguageProfile() async {')
+          select_start = screen.index(
+              '  Future<void> _selectLanguageProfile(ChineseProficiencyProfile profile) async {',
+              load_start,
+          )
+          replacement = """  Future<void> _loadLanguageProfile() async {
+    final profile = await _languageLevelStore.load();
+    if (!mounted) return;
+    final rate = profile == null
+        ? _appState.journeyDifficulty.speechRate
+        : _languageLevelAgent.planFor(profile).speechRate;
+    await _narration.setSpeechRate(rate);
+    if (!mounted) return;
+    setState(() {
+      _languageProfile = profile;
+    });
+    if (profile == null) {
+      unawaited(_showFirstLanguageProfilePrompt());
+    }
+  }
+
+  Future<void> _showFirstLanguageProfilePrompt() async {
+    if (_languageProfilePromptScheduled || _languageProfile != null) return;
+    final shouldShow = await _languageLevelStore.shouldShowJourneyPrompt();
+    if (!mounted || !shouldShow || _languageProfile != null) return;
+
+    _languageProfilePromptScheduled = true;
+    await _languageLevelStore.markJourneyPromptSeen();
+    if (!mounted) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _languageProfile != null) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _appState.displayText(
+              '选择中文等级后，故事、发现和重点单词会更适合你。',
+            ),
+          ),
+          duration: const Duration(seconds: 8),
+          action: SnackBarAction(
+            label: _appState.displayText('选择等级'),
+            onPressed: () =>
+                unawaited(_showLanguageProfilePicker(showIntro: true)),
+          ),
+        ),
+      );
+    });
+  }
+
+"""
+          screen = screen[:load_start] + replacement + screen[select_start:]
+          screen_path.write_text(screen)
+
+          test_path = Path('app/test/language_level_preference_store_test.dart')
+          test_path.write_text("""import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
+import 'package:phoenix_journeys/models/language_proficiency.dart';
+import 'package:phoenix_journeys/services/language_level_preference_store.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  const store = LanguageLevelPreferenceStore();
+  const agent = PhoenixLanguageLevelAgent();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+  });
+
+  test('first journey prompt appears once when no profile exists', () async {
+    expect(await store.shouldShowJourneyPrompt(), isTrue);
+
+    await store.markJourneyPromptSeen();
+
+    expect(await store.shouldShowJourneyPrompt(), isFalse);
+  });
+
+  test('saving a profile also suppresses the first journey prompt', () async {
+    final profile = agent.profilesFor(ChineseExamTrack.hsk).first;
+
+    await store.save(profile);
+
+    expect(await store.load(), profile);
+    expect(await store.shouldShowJourneyPrompt(), isFalse);
+  });
+
+  test('clearing preferences restores the first journey prompt', () async {
+    final profile = agent.profilesFor(ChineseExamTrack.tocfl).first;
+    await store.save(profile);
+
+    await store.clear();
+
+    expect(await store.load(), isNull);
+    expect(await store.shouldShowJourneyPrompt(), isTrue);
+  });
+}
+""")
+          PY
+
+      - name: Commit product changes and remove this workflow
+        shell: bash
+        run: |
+          rm .github/workflows/one-time-first-level-prompt.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart \
+            app/lib/services/language_level_preference_store.dart \
+            app/test/language_level_preference_store_test.dart \
+            .github/workflows/one-time-first-level-prompt.yml
+          git commit -m "Guide first-time explorers to choose a language level"
+          git push origin HEAD:agent/adaptive-level-content-v2
