@@ -86,7 +86,7 @@ test('all eight regular journeys receive destination-specific enrichment', () =>
   for (const [journeyId, enrichment] of mappings) {
     assert.match(
       expander,
-      new RegExp(`journeyId == '${journeyId}'[^\\n]*${enrichment}`),
+      new RegExp(`journeyId == '${journeyId}'[\\s\\S]{0,120}${enrichment}`),
     );
   }
 });
