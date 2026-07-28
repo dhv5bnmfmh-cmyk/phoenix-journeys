@@ -4,7 +4,6 @@ import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/journey_data.dart';
 import 'package:phoenix_journeys/data/journey_level_catalog.dart';
-import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/journey_content_quality_auditor.dart';
 
 void main() {
@@ -104,6 +103,17 @@ void main() {
     expect(
       report.issues.map((issue) => issue.code),
       contains('dependent-paragraph-opening-1'),
+    );
+  });
+
+  test('allows a paragraph to reopen the scene with a clear place anchor', () {
+    expect(
+      startsWithDependentNarrativeReference('这里曾经是皇帝处理国家事务的地方。'),
+      isFalse,
+    );
+    expect(
+      startsWithDependentNarrativeReference('因此，人们重新理解了这座宫殿。'),
+      isTrue,
     );
   });
 
