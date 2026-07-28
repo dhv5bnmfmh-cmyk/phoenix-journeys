@@ -54,11 +54,14 @@ class _JourneyLevelSelectorButtonState
     if (next == current) return;
 
     setState(() => _changing = true);
-    await HapticFeedback.selectionClick();
     _controller.setLevel(next);
-    await _store.savePhoenixLevel(next);
-    if (!mounted) return;
-    setState(() => _changing = false);
+    unawaited(HapticFeedback.selectionClick());
+
+    try {
+      await _store.savePhoenixLevel(next);
+    } finally {
+      if (mounted) setState(() => _changing = false);
+    }
   }
 
   @override
@@ -70,9 +73,11 @@ class _JourneyLevelSelectorButtonState
     return ValueListenableBuilder<int>(
       valueListenable: _controller,
       builder: (context, level, _) {
-        final canDecrease = !_loading && !_changing &&
+        final canDecrease = !_loading &&
+            !_changing &&
             level > PhoenixLevelController.minimumLevel;
-        final canIncrease = !_loading && !_changing &&
+        final canIncrease = !_loading &&
+            !_changing &&
             level < PhoenixLevelController.maximumLevel;
 
         return Semantics(
