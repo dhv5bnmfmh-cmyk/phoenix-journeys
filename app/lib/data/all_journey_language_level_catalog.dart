@@ -242,7 +242,10 @@ List<DiscoveryEntry> _discoveriesForProfile(
         targetCount: targetCount,
       ),
     PhoenixReadingBand.advanced || PhoenixReadingBand.mastery =>
-      <DiscoveryEntry>[_mergeDiscoveryEntries(source)],
+      _groupDiscoveries(
+        source,
+        targetCount: targetCount,
+      ),
   };
 }
 
@@ -335,12 +338,12 @@ List<String> _evenlySampleStrings(List<String> source, int target) {
 }
 
 int _discoveryParagraphCount(PhoenixReadingBand band) => switch (band) {
-  PhoenixReadingBand.beginner ||
-  PhoenixReadingBand.advanced ||
-  PhoenixReadingBand.mastery => 1,
+  PhoenixReadingBand.beginner => 1,
   PhoenixReadingBand.elementary ||
   PhoenixReadingBand.intermediate ||
-  PhoenixReadingBand.upperIntermediate => 2,
+  PhoenixReadingBand.upperIntermediate ||
+  PhoenixReadingBand.advanced ||
+  PhoenixReadingBand.mastery => 2,
 };
 
 DiscoveryEntry _mergeDiscoveryEntries(Iterable<DiscoveryEntry> source) {
