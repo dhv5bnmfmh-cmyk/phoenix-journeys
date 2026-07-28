@@ -119,3 +119,21 @@ test('grammar replays never leave the selected journey theme', () => {
     assert.ok(!panel.includes(genericReplay));
   }
 });
+
+
+test('challenge cards explain the active level and training goal', () => {
+  assert.match(panel, /challenge-difficulty-\${_session\.difficulty\.name}/);
+  assert.match(panel, /难度 · \${_session\.difficultyLabel}/);
+  assert.match(panel, /challenge-training-goal/);
+  assert.match(panel, /训练目标 · \${_session\.trainingGoal}/);
+  for (const level of ['初级', '标准', '高级']) {
+    assert.ok(panel.includes(`=> '${level}'`));
+  }
+  for (const goal of [
+    '辨认地点、行动与结果顺序',
+    '检查搭配、语序与句式平行',
+    '保持主题链、指代与因果连续',
+  ]) {
+    assert.ok(panel.includes(goal));
+  }
+});
