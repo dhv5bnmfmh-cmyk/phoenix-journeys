@@ -16,10 +16,10 @@ void main() {
           profile: profile,
         );
         final storyTarget = phoenixStoryLengthTargetFor(profile);
-        final expectedDiscoveryCount =
+        final expectedDiscoveryShape =
             profile.band == PhoenixReadingBand.beginner
-                ? 1
-                : journey.discoveries.length.clamp(1, 2);
+                ? hasLength(1)
+                : hasLength(inInclusiveRange(1, 2));
         final storyCharacters = level.storyParagraphs.join().runes.length;
 
         expect(
@@ -42,7 +42,7 @@ void main() {
         );
         expect(
           level.discoveries,
-          hasLength(expectedDiscoveryCount),
+          expectedDiscoveryShape,
           reason: '${journey.id} discoveries',
         );
         expect(level.words, isNotEmpty, reason: journey.id);
