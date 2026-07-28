@@ -390,6 +390,66 @@ VocabularyLevelTag _tagFor(WordEntry entry, int index) {
   );
 }
 
+String _advancedWonderLens(DailyJourneyExperience experience) {
+  return switch (experience.id) {
+    'beijing-forbidden-city' =>
+      '请分析中轴线、建筑色彩或进入路线怎样呈现权力秩序：',
+    'beijing-summer-palace' =>
+      '请分析借景、倒影或行走视线怎样重新组织自然：',
+    'shanghai-bund' =>
+      '请分析历史建筑与浦东天际线怎样共同讲述城市转型：',
+    'xian-city-wall' =>
+      '请分析防御体系与现代开放使用之间的张力：',
+    'hangzhou-west-lake' =>
+      '请分析季节、天气与文化命名怎样改变同一片湖景：',
+    'chengdu-kuanzhai-alley' =>
+      '请分析居民生活、商业更新与旅游展示之间的关系：',
+    'nanjing-qinhuai-river' =>
+      '请分析灯影繁华与科举、文学及居民记忆之间的关系：',
+    'guangzhou-chen-clan-academy' =>
+      '请分析建筑工艺怎样保存宗族记忆并进入现代博物馆语境：',
+    'literary-roaming' =>
+      '请从梦与醒、主体与蝴蝶的身份转换深入回答：',
+    'myth-tracing' =>
+      '请从神话版本、残缺文字与返回人间的选择深入回答：',
+    'strange-night-talks' =>
+      '请从恐惧、守约与承担后果之间的关系深入回答：',
+    'folk-secret-land' =>
+      '请从逆流、未来倒影与个人选择之间的关系深入回答：',
+    _ => '请结合故事的转折与结尾深入回答：',
+  };
+}
+
+String _advancedExpressLens(DailyJourneyExperience experience) {
+  return switch (experience.id) {
+    'beijing-forbidden-city' =>
+      '请引用午门、中轴线或建筑色彩中的两个细节，形成完整论述。',
+    'beijing-summer-palace' =>
+      '请引用昆明湖、长廊或十七孔桥中的两个细节，形成完整论述。',
+    'shanghai-bund' =>
+      '请比较黄浦江两岸的两个时代，并说明你的判断依据。',
+    'xian-city-wall' =>
+      '请结合城门、墙顶或护城河说明系统功能与当代意义。',
+    'hangzhou-west-lake' =>
+      '请用苏堤、白堤或西湖十景说明自然如何成为文化记忆。',
+    'chengdu-kuanzhai-alley' =>
+      '请结合院落、茶馆或街巷尺度讨论保护与商业化。',
+    'nanjing-qinhuai-river' =>
+      '请结合夫子庙、桥梁或灯会讨论景观背后的多重历史。',
+    'guangzhou-chen-clan-academy' =>
+      '请结合陶塑、灰塑或木石雕刻说明工艺与社群记忆。',
+    'literary-roaming' =>
+      '请围绕“我是谁”的变化组织论点，并引用梦境与醒来的细节。',
+    'myth-tracing' =>
+      '请比较至少两种可能解释，并说明竹简与白兔的叙事作用。',
+    'strange-night-talks' =>
+      '请以铜钱、更鼓和鸡鸣为证据，分析守约如何推动结局。',
+    'folk-secret-land' =>
+      '请以河灯、逆流和倒影为证据，说明选择怎样改变未来。',
+    _ => '请引用两个故事细节，形成完整论述。',
+  };
+}
+
 String _wonderQuestion(
   DailyJourneyExperience experience,
   PhoenixReadingBand band,
@@ -404,7 +464,7 @@ String _wonderQuestion(
     PhoenixReadingBand.upperIntermediate =>
       '请从空间、历史或人物感受中选择两个角度回答：${experience.wonderQuestion}',
     PhoenixReadingBand.advanced || PhoenixReadingBand.mastery =>
-      '请从历史语境、空间设计和今天的使用中选择一个角度深入回答：${experience.wonderQuestion}',
+      '${_advancedWonderLens(experience)}${experience.wonderQuestion}',
   };
 }
 
@@ -422,7 +482,7 @@ String _expressQuestion(
     PhoenixReadingBand.upperIntermediate =>
       '${experience.expressQuestion}请使用“既……也……”或“不是……而是……”，并引用故事细节。',
     PhoenixReadingBand.advanced || PhoenixReadingBand.mastery =>
-      '${experience.expressQuestion}请说明景观、历史与今天生活之间的关系，并形成完整论述。',
+      '${experience.expressQuestion}${_advancedExpressLens(experience)}',
   };
 }
 
