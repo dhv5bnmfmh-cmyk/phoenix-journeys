@@ -71,3 +71,22 @@ test('quality gate blocks stories outside the active level range', () => {
   assert.match(auditor, /story-above-level-range/);
   assert.match(auditor, /phoenixStoryLengthTargetFor\(profile\)/);
 });
+
+test('all eight regular journeys receive destination-specific enrichment', () => {
+  const mappings = [
+    ['beijing-forbidden-city', '_forbiddenCityEnrichment'],
+    ['beijing-summer-palace', '_summerPalaceEnrichment'],
+    ['shanghai-bund', '_bundEnrichment'],
+    ['xian-city-wall', '_xianCityWallEnrichment'],
+    ['hangzhou-west-lake', '_westLakeEnrichment'],
+    ['chengdu-kuanzhai-alley', '_kuanzhaiEnrichment'],
+    ['nanjing-qinhuai-river', '_qinhuaiEnrichment'],
+    ['guangzhou-chen-clan-academy', '_chenClanAcademyEnrichment'],
+  ];
+  for (const [journeyId, enrichment] of mappings) {
+    assert.match(
+      expander,
+      new RegExp(`journeyId == '${journeyId}'[^\\n]*${enrichment}`),
+    );
+  }
+});
