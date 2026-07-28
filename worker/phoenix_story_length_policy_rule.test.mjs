@@ -55,6 +55,17 @@ test('every journey passes through the story length expander', () => {
   assert.match(expander, /_urbanHeritageEnrichment/);
 });
 
+test('special journeys receive genre-specific enrichment instead of urban filler', () => {
+  assert.match(expander, /journeyId == 'literary-roaming'/);
+  assert.match(expander, /journeyId == 'myth-tracing'/);
+  assert.match(expander, /journeyId == 'strange-night-talks'/);
+  assert.match(expander, /journeyId == 'folk-secret-land'/);
+  assert.match(expander, /_literaryRoamingEnrichment/);
+  assert.match(expander, /_mythTracingEnrichment/);
+  assert.match(expander, /_strangeNightTalksEnrichment/);
+  assert.match(expander, /_folkSecretLandEnrichment/);
+});
+
 test('quality gate blocks stories outside the active level range', () => {
   assert.match(auditor, /story-below-level-range/);
   assert.match(auditor, /story-above-level-range/);
