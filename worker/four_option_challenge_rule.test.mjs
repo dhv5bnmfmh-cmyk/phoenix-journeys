@@ -104,3 +104,18 @@ test('all journey grammar repairs stay theme-specific at every level', () => {
     assert.ok(panel.includes(destinationMarker));
   }
 });
+
+
+test('grammar replays never leave the selected journey theme', () => {
+  assert.match(panel, /return journeySpec;/);
+  assert.doesNotMatch(panel, /final variedSpecs = <_GrammarSpec>/);
+  for (const genericReplay of [
+    '探索者大约走了一个小时左右',
+    '古老的钟声被探索者听见了',
+    '端详它的声音',
+    '那扇门在三百年前即将已经关闭',
+    '认真地几乎读完了整封遗简',
+  ]) {
+    assert.ok(!panel.includes(genericReplay));
+  }
+});
