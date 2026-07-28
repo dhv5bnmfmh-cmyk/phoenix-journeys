@@ -1,0 +1,85 @@
+name: One-time fix journey tooltip
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-remove:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v6
+        with:
+          ref: agent/adaptive-level-content-v2
+          fetch-depth: 0
+
+      - name: Wrap the journey selector with Tooltip
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          screen_path = Path('app/lib/screens/journey_screen.dart')
+          text = screen_path.read_text()
+          start = text.index(
+              "            TextButton.icon(\n"
+              "              key: const ValueKey('journey-language-level-selector')"
+          )
+          end = text.index('            Consumer<AppState>(', start)
+          replacement = '\n'.join([
+              '            Tooltip(',
+              "              message: _appState.displayText('切换 HSK / TOCFL 等级'),",
+              '              child: TextButton.icon(',
+              "                key: const ValueKey('journey-language-level-selector'),",
+              '                onPressed: () => unawaited(_showLanguageProfilePicker()),',
+              '                style: TextButton.styleFrom(',
+              '                  visualDensity: VisualDensity.compact,',
+              '                  padding: const EdgeInsets.symmetric(horizontal: 5),',
+              '                ),',
+              '                icon: const Icon(',
+              '                  Icons.tune_rounded,',
+              '                  color: Colors.white,',
+              '                  size: 13,',
+              '                ),',
+              '                label: Text(',
+              "                  _languageProfile?.displayLabel ?? 'HSK / TOCFL',",
+              '                  maxLines: 1,',
+              '                  overflow: TextOverflow.ellipsis,',
+              '                  style: const TextStyle(',
+              '                    color: Colors.white,',
+              '                    fontSize: 9.5,',
+              '                    fontWeight: FontWeight.w900,',
+              '                  ),',
+              '                ),',
+              '              ),',
+              '            ),',
+              '',
+          ])
+          screen_path.write_text(text[:start] + replacement + text[end:])
+
+          rule_path = Path('worker/adaptive_level_content_v2_rule.test.mjs')
+          rule = rule_path.read_text()
+          old = "tooltip: _appState.displayText('切换 HSK / TOCFL 等级')"
+          new = "message: _appState.displayText('切换 HSK / TOCFL 等级')"
+          if old not in rule:
+              raise SystemExit('tooltip rule marker not found')
+          rule_path.write_text(rule.replace(old, new, 1))
+          PY
+
+      - name: Commit compatibility fix and remove this workflow
+        shell: bash
+        run: |
+          rm .github/workflows/one-time-fix-journey-tooltip.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart worker/adaptive_level_content_v2_rule.test.mjs .github/workflows/one-time-fix-journey-tooltip.yml
+          git commit -m "Use a compatible tooltip for journey level controls"
+          git push origin HEAD:agent/adaptive-level-content-v2
