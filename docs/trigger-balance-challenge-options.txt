@@ -1,2 +1,0 @@
-Trigger the one-time balanced challenge option migration for PR #133.
-Focused migration sync: 3
