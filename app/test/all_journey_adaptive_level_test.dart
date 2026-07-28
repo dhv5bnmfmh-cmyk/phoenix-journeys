@@ -60,7 +60,7 @@ void main() {
           content.discoveries.length,
           profile.band == PhoenixReadingBand.beginner
               ? 1
-              : journey.discoveries.length.clamp(1, 2),
+              : inInclusiveRange(1, 2),
           reason: '${journey.id} should use the approved discovery shape',
         );
         expect(
