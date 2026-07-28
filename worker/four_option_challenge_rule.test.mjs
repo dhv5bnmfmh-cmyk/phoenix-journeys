@@ -62,3 +62,22 @@ test('regular journeys never fall back to generic challenge filler', () => {
   assert.doesNotMatch(panel, /所有景色完全相同，不需要继续观察/);
   assert.doesNotMatch(panel, /他没有进入景区，直接回到了住处/);
 });
+
+
+test('regular journeys use destination-specific grammar repairs', () => {
+  const expectedRepairs = new Map([
+    ['beijing-forbidden-city', '午门不但规定进入路线'],
+    ['beijing-summer-palace', '由于昆明湖产生倒影'],
+    ['shanghai-bund', '外滩不仅保存历史建筑'],
+    ['xian-city-wall', '通过登上城墙'],
+    ['hangzhou-west-lake', '只有天气和季节发生变化'],
+    ['chengdu-kuanzhai-alley', '各不相同不一样'],
+    ['nanjing-qinhuai-river', '在古代即将已经'],
+    ['guangzhou-chen-clan-academy', '通过观察屋脊陶塑'],
+  ]);
+
+  for (const [journeyId, sentenceMarker] of expectedRepairs) {
+    assert.ok(panel.includes(`'${journeyId}' => const _GrammarSpec(`));
+    assert.ok(panel.includes(sentenceMarker));
+  }
+});
