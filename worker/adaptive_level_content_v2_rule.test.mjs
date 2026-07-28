@@ -18,6 +18,10 @@ const selector = fs.readFileSync(
   new URL('../app/lib/widgets/journey_level_selector_button.dart', import.meta.url),
   'utf8',
 );
+const narrationPlayer = fs.readFileSync(
+  new URL('../app/lib/widgets/narration_player_card.dart', import.meta.url),
+  'utf8',
+);
 const agent = fs.readFileSync(
   new URL('../app/lib/agents/phoenix_language_level_agent.dart', import.meta.url),
   'utf8',
@@ -47,7 +51,24 @@ test('all home tabs expose one fixed Phoenix plus-minus control', () => {
   assert.match(selector, /phoenix-level-plus/);
   assert.match(selector, /Lv\.\$level/);
   assert.doesNotMatch(selector, /ChineseExamTrack\.values/);
-  assert.doesNotMatch(selector, /showModalBottomSheet/);
+});
+
+test('the level control explains its reading load without restoring the exam picker', () => {
+  assert.match(selector, /phoenix-level-guide/);
+  assert.match(selector, /phoenixStoryLengthTargetForLevel/);
+  assert.match(selector, /故事长度/);
+  assert.match(selector, /内容结构/);
+  assert.match(selector, /阅读时间/);
+  assert.match(selector, /使用 − \/ \+ 调整等级后/);
+  assert.doesNotMatch(selector, /HSK|TOCFL|考试等级/);
+});
+
+test('compact narration exposes paragraph percent and remaining text', () => {
+  assert.match(narrationPlayer, /compactNarrationProgressLabel/);
+  assert.match(narrationPlayer, /第 \$item \/ \$itemCount 段/);
+  assert.match(narrationPlayer, /剩余 \$remaining 字/);
+  assert.match(narrationPlayer, /narration-compact-label/);
+  assert.match(narrationPlayer, /minHeight: 4/);
 });
 
 test('every journey step keeps the level stepper in the upper-right app bar', () => {
