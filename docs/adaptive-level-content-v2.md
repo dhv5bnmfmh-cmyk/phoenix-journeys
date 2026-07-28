@@ -1,32 +1,38 @@
-# Adaptive Level Content V2
+# Adaptive Phoenix Levels 1–10
 
 Base: `main@7d5a7b6ec767dcb9807396239e4464da6ddb8510`
 
-## Scope
+## Explorer experience
 
-- Apply the saved HSK or TOCFL profile to every regular and special journey.
-- Build story reading from aligned Chinese, pinyin, Vietnamese, and English sentence packets.
-- Keep the approved reading shape: one deep paragraph or two shorter paragraphs.
-- Adjust discoveries, vocabulary selection, reflection prompts, and writing prompts together.
-- Expose one global level selector in the active Passport header.
-- Expose the same HSK and TOCFL selector inside every journey, not only the Summer Palace journey.
-- Apply a newly selected profile immediately to the current journey, stop outdated narration, clear stale AI feedback, and reset the active challenge.
-- Show first-time explorers one non-blocking prompt when no exam profile exists, with a direct action to open the existing HSK or TOCFL picker.
-- Persist the prompt state so it does not interrupt later journeys; saving a profile also suppresses the prompt.
-- Keep the legacy three-level catalog only as a safe fallback until an explorer selects an exam profile.
-- Give every adaptive challenge four candidate answers, with closer content-based distractors at higher levels.
-- Rank distractors by distance from the correct answer length, remove duplicate candidates, and keep a common minimum option-card height so answer length does not reveal the solution.
-- Adapt both challenge hints by level: beginner guidance is direct, standard guidance preserves the complete learning path, and advanced guidance emphasizes discourse structure, reference chains, and logical relationships.
-- Adapt challenge explanations and memory tips by level; advanced grammar repair adds a dedicated structure-analysis line while beginner grammar repair keeps only the essential correction steps.
+- Replace the public HSK and TOCFL picker with one compact `− Lv.N +` control.
+- Keep the control fixed in the upper-right corner of Explore, Passport, and Me, and in the Journey app bar for every story, vocabulary, discovery, challenge, memory, and completion step.
+- Let explorers change freely from Phoenix Level 1 through Level 10.
+- Apply a level change immediately without leaving the current page or losing journey progress, drafts, coins, stamps, or unlocks.
+- Stop narration that belongs to the previous level, update speech rate, clear stale AI feedback, and rebuild the current challenge.
+- Disable minus at Level 1 and plus at Level 10.
 
-## Guardrails
+## Unified content model
+
+- Phoenix Level 1–10 is the only difficulty model shown to explorers.
+- HSK and TOCFL catalogs remain internal calibration evidence for vocabulary selection and legacy-setting migration; Phoenix does not present the levels as official certificate equivalence.
+- Existing `hsk:*` and `tocfl:*` preferences migrate automatically to the nearest Phoenix level.
+- New explorers begin at Phoenix Level 5 and can adjust immediately.
+- The ten plans gradually change paragraph shape, character range, sentence length, vocabulary count, cultural vocabulary quota, grammar load, known-word coverage, and narration speed.
+- Story, discovery, vocabulary, comprehension prompts, expression prompts, and challenge pedagogy respond together.
+
+## Reading and challenge behavior
+
+- Keep the approved reading shape: one integrated deep paragraph or two shorter paragraphs.
+- Build stories from aligned Chinese, pinyin, Vietnamese, and English sentence packets.
+- Preserve one or two discoveries while ensuring each discovery adds information rather than repeats the story.
+- Keep all three challenge modes, the three-attempt limit, the gold, silver, bronze, and fragment reward ladder, and four unique answer candidates.
+- When the level changes on the challenge page, reset only the active level-dependent challenge state and regenerate its distractors, hints, explanations, and narration.
+
+## Quality and release guardrails
 
 - `main` remains untouched until founder approval.
-- Every journey keeps multilingual reading support aligned with the selected story sentences.
-- HSK and TOCFL retain independent profile identities.
-- The first-use prompt must remain optional, non-blocking, and limited to one appearance per stored preference cycle.
-- The legacy in-journey difficulty menu must not return after the unified exam selector is enabled.
-- Every challenge mode must keep four unique candidates while preserving the three-attempt reward ladder.
-- Candidate balancing must never truncate the answer text or introduce a duplicate of the correct answer.
-- Adaptive teaching support must not change the correct answer, the three-attempt limit, or the gold, silver, bronze, and fragment reward ladder.
-- Flutter tests and Node product-rule tests cover the published journey catalog, first-use guidance, unified selector behavior, four-option challenges, answer-length balancing, and level-adaptive challenge pedagogy.
+- `PhoenixJourneyContentQualityAgent` inspects every published journey across all ten Phoenix levels before a preview may deploy.
+- The expected release matrix is eight published journeys × ten Phoenix levels = eighty journey-level inspections.
+- A critical issue, warning, missing multilingual annotation, duplicated discovery, invalid vocabulary entry, or failed level rule blocks release.
+- Flutter tests cover persistence, legacy migration, level boundaries, plus/minus interaction, immediate journey refresh, challenge rebuilding, and every journey at every Phoenix level.
+- Node product rules prevent the modal exam picker, legacy journey selector, or partial-page-only level control from returning.
