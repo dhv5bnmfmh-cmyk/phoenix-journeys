@@ -9,8 +9,9 @@ const catalog = readFileSync(
 const state = readFileSync('app/lib/state/app_state.dart', 'utf8');
 const screen = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
 
-// Guards the first adaptive destination rollout before wider catalog expansion.
-test('Summer Palace provides three persistent journey levels', () => {
+// Keeps the legacy difficulty catalog available as a safe fallback for users
+// who have not selected an HSK or TOCFL profile yet.
+test('Summer Palace keeps the persistent fallback journey levels', () => {
   assert.match(catalog, /enum JourneyDifficulty \{ easy, standard, challenge \}/);
   assert.match(catalog, /summerPalaceEasyLevel/);
   assert.match(catalog, /const summerPalaceChallengeLevel = JourneyLevelContent/);
@@ -19,10 +20,13 @@ test('Summer Palace provides three persistent journey levels', () => {
   assert.match(state, /_key\('difficulty'\)/);
 });
 
-test('journey UI lets explorers choose and change level', () => {
-  assert.match(screen, /journey-difficulty-selector/);
+test('every journey UI lets explorers choose and change an exam profile', () => {
+  assert.match(screen, /journey-language-level-selector/);
   assert.match(screen, /选择适合你的旅程/);
-  assert.match(screen, /supportedJourneyDifficulties/);
-  assert.match(screen, /resolveJourneyLevel/);
-  assert.match(screen, /currentLevel.*journeyDifficulty\.label/s);
+  assert.match(screen, /_showLanguageProfilePicker/);
+  assert.match(screen, /resolveAdaptiveJourneyLevel/);
+  assert.match(screen, /_languageProfile\?\.displayLabel/);
+  assert.match(screen, /已应用到当前旅程/);
+  assert.doesNotMatch(screen, /journey-difficulty-selector/);
+  assert.doesNotMatch(screen, /supportedJourneyDifficulties/);
 });
