@@ -522,7 +522,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
                   borderRadius: BorderRadius.circular(99),
                 ),
                 child: Text(
-                  t(_session.difficultyLabel),
+                  t('难度 · ${_session.difficultyLabel}'),
                   style: const TextStyle(
                     color: Color(0xFF7A4B2B),
                     fontSize: 9,
@@ -541,6 +541,30 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
               height: 1.45,
               fontWeight: FontWeight.w700,
             ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            key: const ValueKey('challenge-training-goal'),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.track_changes_rounded,
+                color: Color(0xFF7A4B2B),
+                size: 13,
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  t('训练目标 · ${_session.trainingGoal}'),
+                  style: const TextStyle(
+                    color: Color(0xFF7A4B2B),
+                    fontSize: 10,
+                    height: 1.35,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 6),
           Text(
@@ -1252,9 +1276,57 @@ class _ChallengeSession {
   };
 
   String get difficultyLabel => switch (difficulty) {
-    JourneyChallengeDifficulty.beginner => '轻松',
+    JourneyChallengeDifficulty.beginner => '初级',
     JourneyChallengeDifficulty.standard => '标准',
-    JourneyChallengeDifficulty.advanced => '挑战',
+    JourneyChallengeDifficulty.advanced => '高级',
+  };
+
+  String get trainingGoal => switch ((type, difficulty)) {
+    (
+      JourneyChallengeType.paragraphRebuild,
+      JourneyChallengeDifficulty.beginner,
+    ) =>
+      '辨认地点、行动与结果顺序',
+    (
+      JourneyChallengeType.paragraphRebuild,
+      JourneyChallengeDifficulty.standard,
+    ) =>
+      '建立背景、行动与转折结构',
+    (
+      JourneyChallengeType.paragraphRebuild,
+      JourneyChallengeDifficulty.advanced,
+    ) =>
+      '判断叙事视角、因果与收束',
+    (
+      JourneyChallengeType.grammarRepair,
+      JourneyChallengeDifficulty.beginner,
+    ) =>
+      '找出主语和明显的不自然词语',
+    (
+      JourneyChallengeType.grammarRepair,
+      JourneyChallengeDifficulty.standard,
+    ) =>
+      '检查搭配、语序与句式平行',
+    (
+      JourneyChallengeType.grammarRepair,
+      JourneyChallengeDifficulty.advanced,
+    ) =>
+      '分析句法中心、指向与逻辑',
+    (
+      JourneyChallengeType.missingSentence,
+      JourneyChallengeDifficulty.beginner,
+    ) =>
+      '连接前文人物与后文结果',
+    (
+      JourneyChallengeType.missingSentence,
+      JourneyChallengeDifficulty.standard,
+    ) =>
+      '同时完成承接与铺垫',
+    (
+      JourneyChallengeType.missingSentence,
+      JourneyChallengeDifficulty.advanced,
+    ) =>
+      '保持主题链、指代与因果连续',
   };
 
   bool get canSubmit => switch (type) {
