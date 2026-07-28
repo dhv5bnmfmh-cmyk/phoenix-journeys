@@ -7,6 +7,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  Finder control(String key) => find.descendant(
+        of: find.byKey(ValueKey(key)),
+        matching: find.byType(IconButton),
+      );
+
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{
       'phoenix.level': 5,
@@ -26,11 +31,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Lv.5'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('phoenix-level-plus')));
+    await tester.tap(control('phoenix-level-plus'));
     await tester.pumpAndSettle();
     expect(find.text('Lv.6'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('phoenix-level-minus')));
+    await tester.tap(control('phoenix-level-minus'));
     await tester.pumpAndSettle();
     expect(find.text('Lv.5'), findsOneWidget);
   });
@@ -49,22 +54,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final minus = tester.widget<IconButton>(
-      find.descendant(
-        of: find.byKey(const ValueKey('phoenix-level-minus')),
-        matching: find.byType(IconButton),
-      ),
+    expect(
+      tester.widget<IconButton>(control('phoenix-level-minus')).onPressed,
+      isNull,
     );
-    expect(minus.onPressed, isNull);
 
     PhoenixLevelController.instance.setLevel(10);
     await tester.pumpAndSettle();
-    final plus = tester.widget<IconButton>(
-      find.descendant(
-        of: find.byKey(const ValueKey('phoenix-level-plus')),
-        matching: find.byType(IconButton),
-      ),
+    expect(
+      tester.widget<IconButton>(control('phoenix-level-plus')).onPressed,
+      isNull,
     );
-    expect(plus.onPressed, isNull);
   });
 }
