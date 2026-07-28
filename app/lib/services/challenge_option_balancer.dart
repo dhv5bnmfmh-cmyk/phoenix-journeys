@@ -34,15 +34,67 @@ List<String> selectBalancedChallengeDistractors({
 
   final ranked = uniqueCandidates.asMap().entries.toList()
     ..sort((left, right) {
-      final leftDelta = (challengeTextLength(left.value) - targetLength).abs();
-      final rightDelta = (challengeTextLength(right.value) - targetLength).abs();
-      final byLength = leftDelta.compareTo(rightDelta);
-      return byLength != 0 ? byLength : left.key.compareTo(right.key);
+      final leftScore = _distractorPlausibilityScore(
+        left.value,
+        correct: correct,
+        targetLength: targetLength,
+      );
+      final rightScore = _distractorPlausibilityScore(
+        right.value,
+        correct: correct,
+        targetLength: targetLength,
+      );
+      final byPlausibility = leftScore.compareTo(rightScore);
+      return byPlausibility != 0
+          ? byPlausibility
+          : left.key.compareTo(right.key);
     });
   return ranked
       .take(count)
       .map((entry) => entry.value)
       .toList(growable: false);
+}
+
+int _distractorPlausibilityScore(
+  String candidate, {
+  required List<String> correct,
+  required int targetLength,
+}) {
+  final lengthDelta = (challengeTextLength(candidate) - targetLength).abs();
+  final similarity = correct
+      .map((answer) => challengeKeywordOverlap(candidate, answer))
+      .fold<double>(0, (best, value) => value > best ? value : best);
+  const idealOverlap = .5;
+  final overlapDelta = (similarity - idealOverlap).abs();
+  return (lengthDelta * 12 + overlapDelta * 100).round();
+}
+
+@visibleForTesting
+double challengeKeywordOverlap(String left, String right) {
+  final leftKeywords = _challengeKeywords(left);
+  final rightKeywords = _challengeKeywords(right);
+  if (leftKeywords.isEmpty || rightKeywords.isEmpty) return 0;
+  final shared = leftKeywords.intersection(rightKeywords).length;
+  final union = leftKeywords.union(rightKeywords).length;
+  return union == 0 ? 0 : shared / union;
+}
+
+Set<int> _challengeKeywords(String value) {
+  const ignored = <int>{
+    0x3002,
+    0xff0c,
+    0xff1a,
+    0xff1b,
+    0xff01,
+    0xff1f,
+    0x201c,
+    0x201d,
+    0x2018,
+    0x2019,
+  };
+  return value.runes
+      .where((rune) => !ignored.contains(rune) && rune > 0x20)
+      .toSet();
 }
 
 @visibleForTesting
