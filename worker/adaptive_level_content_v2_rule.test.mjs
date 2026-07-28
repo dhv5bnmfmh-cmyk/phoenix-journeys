@@ -61,23 +61,38 @@ test('the active atlas passport exposes one global HSK and TOCFL selector', () =
 });
 
 test('every journey screen exposes the same exam-level selector', () => {
-  assert.match(
-    journeyScreen,
-    /actions: \[\s*TextButton\.icon\([\s\S]*journey-language-level-selector/,
+  assert.ok(
+    journeyScreen.includes("key: const ValueKey('journey-language-level-selector')"),
+    'journey screen must expose the shared exam-level selector',
   );
-  assert.match(journeyScreen, /切换 HSK \/ TOCFL 等级/);
-  assert.match(journeyScreen, /_showLanguageProfilePicker\(\)/);
-  assert.doesNotMatch(journeyScreen, /journey-difficulty-selector/);
-  assert.doesNotMatch(journeyScreen, /_changeDifficulty/);
-  assert.doesNotMatch(journeyScreen, /_supportedDifficulties/);
+  assert.ok(
+    journeyScreen.includes("tooltip: _appState.displayText('切换 HSK / TOCFL 等级')"),
+    'journey selector must explain HSK and TOCFL switching',
+  );
+  assert.ok(
+    journeyScreen.includes('onPressed: () => unawaited(_showLanguageProfilePicker())'),
+    'journey selector must open the shared profile picker',
+  );
+  assert.ok(
+    !journeyScreen.includes('journey-difficulty-selector'),
+    'legacy journey difficulty selector must stay removed',
+  );
+  assert.ok(
+    !journeyScreen.includes('_changeDifficulty'),
+    'legacy journey difficulty handler must stay removed',
+  );
+  assert.ok(
+    !journeyScreen.includes('_supportedDifficulties'),
+    'legacy journey difficulty catalog must stay removed',
+  );
 });
 
 test('changing level refreshes current journey learning state', () => {
-  assert.match(journeyScreen, /_appState\.clearGuideFeedback\(\)/);
-  assert.match(journeyScreen, /_appState\.clearWritingFeedback\(\)/);
-  assert.match(journeyScreen, /_challengeResolved = false/);
-  assert.match(journeyScreen, /_challengeSeed \+= 1/);
-  assert.match(journeyScreen, /已应用到当前旅程/);
+  assert.ok(journeyScreen.includes('_appState.clearGuideFeedback()'));
+  assert.ok(journeyScreen.includes('_appState.clearWritingFeedback()'));
+  assert.ok(journeyScreen.includes('_challengeResolved = false'));
+  assert.ok(journeyScreen.includes('_challengeSeed += 1'));
+  assert.ok(journeyScreen.includes('已应用到当前旅程'));
 });
 
 test('level changes adjust all learning surfaces together', () => {
