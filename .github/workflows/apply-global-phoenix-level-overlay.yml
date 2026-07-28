@@ -1,0 +1,39 @@
+name: Apply global Phoenix level overlay
+
+on:
+  push:
+    branches:
+      - agent/adaptive-level-content-v2
+    paths:
+      - tool/apply_global_phoenix_level_overlay.py
+      - .github/workflows/apply-global-phoenix-level-overlay.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-global-phoenix-level-overlay
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v6
+        with:
+          ref: agent/adaptive-level-content-v2
+          fetch-depth: 0
+
+      - name: Apply source migration
+        run: python3 tool/apply_global_phoenix_level_overlay.py
+
+      - name: Commit migrated source
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/home_shell.dart app/lib/screens/city_passport_screen.dart tool/apply_global_phoenix_level_overlay.py .github/workflows/apply-global-phoenix-level-overlay.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix Phoenix level control across every page"
+          git push origin HEAD:agent/adaptive-level-content-v2
