@@ -40,7 +40,7 @@ void main() {
     );
   });
 
-  test('TOCFL Level 5 receives one integrated advanced reading block', () {
+  test('TOCFL Level 5 receives two focused advanced discoveries', () {
     final profile = agent.profilesFor(ChineseExamTrack.tocfl).firstWhere(
           (item) => item.levelCode == '5',
         );
@@ -51,7 +51,7 @@ void main() {
 
     expect(content.storyParagraphs, hasLength(1));
     expect(content.storyAnnotations, hasLength(1));
-    expect(content.discoveries, hasLength(1));
+    expect(content.discoveries, hasLength(2));
     expect(content.words, hasLength(14));
 
     final issues = agent.validateJourney(
@@ -85,11 +85,7 @@ void main() {
       );
       final storyTarget = phoenixStoryLengthTargetFor(profile);
       final expectedDiscoveryCount =
-          profile.band == PhoenixReadingBand.beginner ||
-                  profile.band == PhoenixReadingBand.advanced ||
-                  profile.band == PhoenixReadingBand.mastery
-              ? 1
-              : 2;
+          profile.band == PhoenixReadingBand.beginner ? 1 : 2;
 
       expect(
         content.storyParagraphs,
