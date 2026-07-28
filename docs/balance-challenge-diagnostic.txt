@@ -1,4 +1,0 @@
-PYTHON_COMPILE=PASS
-PYTHON_EXIT=1
-STDERR:
-option container marker not found
