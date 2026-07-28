@@ -66,7 +66,7 @@ test('every journey screen exposes the same exam-level selector', () => {
     'journey screen must expose the shared exam-level selector',
   );
   assert.ok(
-    journeyScreen.includes("tooltip: _appState.displayText('切换 HSK / TOCFL 等级')"),
+    journeyScreen.includes("message: _appState.displayText('切换 HSK / TOCFL 等级')"),
     'journey selector must explain HSK and TOCFL switching',
   );
   assert.ok(

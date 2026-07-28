@@ -836,27 +836,29 @@ class _JourneyScreenState extends State<JourneyScreen>
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
           ),
           actions: [
-            TextButton.icon(
-              key: const ValueKey('journey-language-level-selector'),
-              tooltip: _appState.displayText('切换 HSK / TOCFL 等级'),
-              onPressed: () => unawaited(_showLanguageProfilePicker()),
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-              ),
-              icon: const Icon(
-                Icons.tune_rounded,
-                color: Colors.white,
-                size: 13,
-              ),
-              label: Text(
-                _languageProfile?.displayLabel ?? 'HSK / TOCFL',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+            Tooltip(
+              message: _appState.displayText('切换 HSK / TOCFL 等级'),
+              child: TextButton.icon(
+                key: const ValueKey('journey-language-level-selector'),
+                onPressed: () => unawaited(_showLanguageProfilePicker()),
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                ),
+                icon: const Icon(
+                  Icons.tune_rounded,
                   color: Colors.white,
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w900,
+                  size: 13,
+                ),
+                label: Text(
+                  _languageProfile?.displayLabel ?? 'HSK / TOCFL',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ),
