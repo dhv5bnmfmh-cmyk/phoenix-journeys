@@ -222,7 +222,7 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
-    expect(find.textContaining('夜客不但留下了铜钱'), findsWidgets);
+    expect(find.textContaining('夜客留下的铜钱不但证明陌生人曾经来过'), findsWidgets);
 
     await _tapKey(tester, 'challenge-dialog-action');
     expect(find.text('补回故事中消失的一句'), findsOneWidget);
