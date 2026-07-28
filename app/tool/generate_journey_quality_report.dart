@@ -159,6 +159,7 @@ String _buildMarkdown({
     ..writeln('# Phoenix 全旅程内容品质报告')
     ..writeln()
     ..writeln('- Agent：`PhoenixJourneyContentQualityAgent`')
+    ..writeln('- 等级体系：`Phoenix Lv.1–10`')
     ..writeln('- 生成时间：`${generatedAt.toIso8601String()}`')
     ..writeln('- 发布判定：`${releaseStatus.toUpperCase()}`')
     ..writeln('- 检查组合：`${batch.decisions.length}`')
@@ -186,7 +187,7 @@ String _buildMarkdown({
     ..writeln('## Agent 结论');
 
   if (findings.isEmpty) {
-    buffer.writeln('所有普通旅程、特别旅程及 HSK／TOCFL 等级均通过，允许进入发布流程。');
+    buffer.writeln('所有普通旅程、特别旅程及 Phoenix Lv.1–10 均通过，允许进入发布流程。');
     return buffer.toString();
   }
 
