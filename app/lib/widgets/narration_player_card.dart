@@ -60,6 +60,27 @@ int resolveNarrationContinuationOffset({
   );
 }
 
+@visibleForTesting
+String compactNarrationProgressLabel({
+  required int? currentItemIndex,
+  required int itemCount,
+  required int currentOffset,
+  required int totalCharacters,
+  required bool finished,
+}) {
+  if (totalCharacters <= 0) return '准备朗读';
+  if (finished) return '朗读完成 · 100%';
+
+  final safeOffset = currentOffset.clamp(0, totalCharacters).toInt();
+  final percent = ((safeOffset / totalCharacters) * 100).round().clamp(0, 99);
+  final remaining = math.max(0, totalCharacters - safeOffset);
+  if (currentItemIndex == null || itemCount <= 0) {
+    return '总计 $totalCharacters 字';
+  }
+  final item = (currentItemIndex + 1).clamp(1, itemCount).toInt();
+  return '第 $item / $itemCount 段 · $percent% · 剩余 $remaining 字';
+}
+
 class NarrationPlayerCard extends StatefulWidget {
   const NarrationPlayerCard({
     required this.controller,
@@ -368,13 +389,18 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
         final activeSubtitle = hasError
             ? widget.controller.errorMessage ?? '朗读暂时不可用'
             : isPlaying
-                ? widget.controller.currentItemLabel != null
-                    ? '${widget.controller.currentItemLabel} · $percent%'
-                    : '正在朗读 · $percent%'
+                ? widget.controller.currentItemLabel ?? '正在朗读'
                 : isPaused
                     ? '已暂停 · $percent%'
                     : widget.subtitle;
         final compact = widget.compact;
+        final compactProgress = compactNarrationProgressLabel(
+          currentItemIndex: currentItem,
+          itemCount: itemCount,
+          currentOffset: visibleOffset,
+          totalCharacters: total,
+          finished: finished,
+        );
 
         return Semantics(
           container: true,
@@ -469,15 +495,34 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                   ],
                 ),
                 if (compact) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(99),
                     child: LinearProgressIndicator(
                       key: const ValueKey('narration-compact-progress'),
                       value: progress,
-                      minHeight: 3,
+                      minHeight: 4,
                       backgroundColor: Colors.white24,
                       color: const Color(0xFFFFD879),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 160),
+                      child: Text(
+                        compactProgress,
+                        key: ValueKey('narration-compact-label-$compactProgress'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 8.4,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        ),
+                      ),
                     ),
                   ),
                 ] else ...[
