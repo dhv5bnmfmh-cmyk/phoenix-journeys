@@ -34,7 +34,7 @@ Future<void> main(List<String> arguments) async {
 
   final decisions = batch.decisions;
   final averageScore = decisions.isEmpty
-      ? 0
+      ? 0.0
       : decisions.fold<int>(0, (total, item) => total + item.score) /
           decisions.length;
   final journeySummaries = _summariesByJourney(decisions);
@@ -93,7 +93,10 @@ Future<void> main(List<String> arguments) async {
     journeySummaries: journeySummaries,
   );
 
-  await _writeText(jsonPath, const JsonEncoder.withIndent('  ').convert(jsonReport));
+  await _writeText(
+    jsonPath,
+    const JsonEncoder.withIndent('  ').convert(jsonReport),
+  );
   await _writeText(markdownPath, markdownReport);
 
   stdout.writeln(
