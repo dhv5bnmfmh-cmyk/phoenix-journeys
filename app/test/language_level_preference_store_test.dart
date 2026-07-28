@@ -1,43 +1,61 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
-import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/language_level_preference_store.dart';
+import 'package:phoenix_journeys/services/phoenix_level_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   const store = LanguageLevelPreferenceStore();
-  const agent = PhoenixLanguageLevelAgent();
 
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
+    PhoenixLevelController.instance.setLevel(
+      PhoenixLevelController.defaultLevel,
+    );
   });
 
-  test('first journey prompt appears once when no profile exists', () async {
-    expect(await store.shouldShowJourneyPrompt(), isTrue);
-
-    await store.markJourneyPromptSeen();
-
+  test('new explorers start at Phoenix level five', () async {
+    expect(await store.initializePhoenixLevel(), 5);
+    expect((await store.load())?.displayLabel, 'Lv.5');
     expect(await store.shouldShowJourneyPrompt(), isFalse);
   });
 
-  test('saving a profile also suppresses the first journey prompt', () async {
-    final profile = agent.profilesFor(ChineseExamTrack.hsk).first;
+  test('saving a Phoenix level persists the unified profile', () async {
+    await store.savePhoenixLevel(8);
 
-    await store.save(profile);
-
-    expect(await store.load(), profile);
-    expect(await store.shouldShowJourneyPrompt(), isFalse);
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getInt('phoenix.level'), 8);
+    expect(preferences.getString('phoenix.languageProficiency'), 'phoenix:8');
+    expect((await store.load())?.displayLabel, 'Lv.8');
   });
 
-  test('clearing preferences restores the first journey prompt', () async {
-    final profile = agent.profilesFor(ChineseExamTrack.tocfl).first;
-    await store.save(profile);
+  test('legacy HSK and TOCFL settings migrate to nearby Phoenix levels', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'phoenix.languageProficiency': 'hsk:6',
+    });
+    expect(await store.initializePhoenixLevel(), 8);
 
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'phoenix.languageProficiency': 'tocfl:4',
+    });
+    expect(await store.initializePhoenixLevel(), 7);
+  });
+
+  test('levels clamp between one and ten', () async {
+    await store.savePhoenixLevel(-4);
+    expect(PhoenixLevelController.instance.level, 1);
+
+    await store.savePhoenixLevel(99);
+    expect(PhoenixLevelController.instance.level, 10);
+  });
+
+  test('clearing preferences returns to the default level', () async {
+    await store.savePhoenixLevel(9);
     await store.clear();
 
-    expect(await store.load(), isNull);
-    expect(await store.shouldShowJourneyPrompt(), isTrue);
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getInt('phoenix.level'), isNull);
+    expect(PhoenixLevelController.instance.level, 5);
   });
 }
