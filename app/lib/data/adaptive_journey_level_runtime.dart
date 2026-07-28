@@ -26,6 +26,7 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
       content,
       profile: profile,
     );
+    if (!profile.isPhoenix) return refined;
     return expandJourneyStoryToTarget(
       experience,
       refined,
@@ -79,6 +80,7 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     discoveryCount: discoveryCount,
   );
 
+  if (!profile.isPhoenix) return limited;
   return expandJourneyStoryToTarget(
     experience,
     limited,
