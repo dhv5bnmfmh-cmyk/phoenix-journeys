@@ -46,29 +46,29 @@ test('all home tabs expose one fixed Phoenix plus-minus control', () => {
   assert.match(homeShell, /final content = Stack/);
   assert.match(homeShell, /Positioned\([\s\S]*top: 6,[\s\S]*right: 8/);
   assert.match(homeShell, /JourneyLevelSelectorButton\(compact: true\)/);
-  assert.match(selector, /global-journey-level-selector/);
-  assert.match(selector, /phoenix-level-minus/);
-  assert.match(selector, /phoenix-level-plus/);
-  assert.match(selector, /Lv\.\$level/);
+  assert.ok(selector.includes('global-journey-level-selector'));
+  assert.ok(selector.includes('phoenix-level-minus'));
+  assert.ok(selector.includes('phoenix-level-plus'));
+  assert.ok(selector.includes("'Lv.$level'"));
   assert.doesNotMatch(selector, /ChineseExamTrack\.values/);
 });
 
 test('the level control explains its reading load without restoring the exam picker', () => {
-  assert.match(selector, /phoenix-level-guide/);
-  assert.match(selector, /phoenixStoryLengthTargetForLevel/);
-  assert.match(selector, /故事长度/);
-  assert.match(selector, /内容结构/);
-  assert.match(selector, /阅读时间/);
-  assert.match(selector, /使用 − \/ \+ 调整等级后/);
+  assert.ok(selector.includes('phoenix-level-guide'));
+  assert.ok(selector.includes('phoenixStoryLengthTargetForLevel'));
+  assert.ok(selector.includes('故事长度'));
+  assert.ok(selector.includes('内容结构'));
+  assert.ok(selector.includes('阅读时间'));
+  assert.ok(selector.includes('使用 − / + 调整等级后'));
   assert.doesNotMatch(selector, /HSK|TOCFL|考试等级/);
 });
 
 test('compact narration exposes paragraph percent and remaining text', () => {
-  assert.match(narrationPlayer, /compactNarrationProgressLabel/);
-  assert.match(narrationPlayer, /第 \$item \/ \$itemCount 段/);
-  assert.match(narrationPlayer, /剩余 \$remaining 字/);
-  assert.match(narrationPlayer, /narration-compact-label/);
-  assert.match(narrationPlayer, /minHeight: 4/);
+  assert.ok(narrationPlayer.includes('compactNarrationProgressLabel'));
+  assert.ok(narrationPlayer.includes('第 $item / $itemCount 段'));
+  assert.ok(narrationPlayer.includes('剩余 $remaining 字'));
+  assert.ok(narrationPlayer.includes('narration-compact-label'));
+  assert.ok(narrationPlayer.includes('minHeight: 4'));
 });
 
 test('every journey step keeps the level stepper in the upper-right app bar', () => {
