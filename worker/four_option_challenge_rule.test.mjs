@@ -57,7 +57,7 @@ test('regular journeys never fall back to generic challenge filler', () => {
     'nanjing-qinhuai-river',
     'guangzhou-chen-clan-academy',
   ]) {
-    assert.match(panel, new RegExp(`'${journeyId}' => \\\[`));
+    assert.ok(panel.includes(`'${journeyId}' => [`));
   }
   assert.doesNotMatch(panel, /所有景色完全相同，不需要继续观察/);
   assert.doesNotMatch(panel, /他没有进入景区，直接回到了住处/);
