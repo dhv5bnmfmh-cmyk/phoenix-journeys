@@ -15,6 +15,7 @@ Base: `main@7d5a7b6ec767dcb9807396239e4464da6ddb8510`
 - Persist the prompt state so it does not interrupt later journeys; saving a profile also suppresses the prompt.
 - Keep the legacy three-level catalog only as a safe fallback until an explorer selects an exam profile.
 - Give every adaptive challenge five candidate answers, with closer content-based distractors at higher levels.
+- Rank distractors by distance from the correct answer length, remove duplicate candidates, and keep a common minimum option-card height so answer length does not reveal the solution.
 
 ## Guardrails
 
@@ -24,4 +25,5 @@ Base: `main@7d5a7b6ec767dcb9807396239e4464da6ddb8510`
 - The first-use prompt must remain optional, non-blocking, and limited to one appearance per stored preference cycle.
 - The legacy in-journey difficulty menu must not return after the unified exam selector is enabled.
 - Every challenge mode must keep five unique candidates while preserving the three-attempt reward ladder.
-- Flutter tests and Node product-rule tests cover the published journey catalog, first-use guidance, unified selector behavior, and five-option challenges.
+- Candidate balancing must never truncate the answer text or introduce a duplicate of the correct answer.
+- Flutter tests and Node product-rule tests cover the published journey catalog, first-use guidance, unified selector behavior, five-option challenges, and answer-length balancing.
