@@ -5,6 +5,7 @@ import 'package:phoenix_journeys/agents/phoenix_journey_content_quality_agent.da
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/special_journey_catalog.dart';
 
 const _qualityAgent = PhoenixJourneyContentQualityAgent();
 const _languageAgent = PhoenixLanguageLevelAgent();
