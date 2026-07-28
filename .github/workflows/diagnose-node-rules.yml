@@ -1,0 +1,41 @@
+name: Diagnose Node rules
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Run rule files separately
+        shell: bash
+        run: |
+          set -uo pipefail
+          for file in worker/*.test.mjs; do
+            output="$(mktemp)"
+            if node --test "$file" >"$output" 2>&1; then
+              echo "PASS $file"
+              rm -f "$output"
+              continue
+            fi
+
+            echo "FAIL $file"
+            echo "----- compact failure -----"
+            tail -n 80 "$output"
+            echo "----- end failure -----"
+            rm -f "$output"
+            exit 1
+          done
