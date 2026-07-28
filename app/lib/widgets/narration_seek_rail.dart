@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class NarrationSeekRail extends StatelessWidget {
+class NarrationSeekRail extends StatefulWidget {
   const NarrationSeekRail({
     required this.value,
     required this.minHeight,
@@ -18,18 +18,41 @@ class NarrationSeekRail extends StatelessWidget {
   final ValueChanged<double>? onSeekUpdate;
   final ValueChanged<double>? onSeekEnd;
 
+  @override
+  State<NarrationSeekRail> createState() => _NarrationSeekRailState();
+}
+
+class _NarrationSeekRailState extends State<NarrationSeekRail> {
+  double? _gestureProgress;
+
   double _progressFor(Offset localPosition, double width) {
     if (width <= 0) return 0;
     return (localPosition.dx / width).clamp(0.0, 1.0).toDouble();
   }
 
+  void _start(double progress) {
+    _gestureProgress = progress;
+    widget.onSeekStart?.call(progress);
+  }
+
+  void _update(double progress) {
+    _gestureProgress = progress;
+    widget.onSeekUpdate?.call(progress);
+  }
+
+  void _finish([double? progress]) {
+    final value = progress ?? _gestureProgress ?? widget.value;
+    _gestureProgress = null;
+    widget.onSeekEnd?.call(value.clamp(0.0, 1.0).toDouble());
+  }
+
   @override
   Widget build(BuildContext context) {
-    final progress = value.clamp(0.0, 1.0).toDouble();
+    final progress = widget.value.clamp(0.0, 1.0).toDouble();
 
     return Semantics(
       slider: true,
-      enabled: enabled,
+      enabled: widget.enabled,
       value: '${(progress * 100).round()}%',
       label: '朗读进度，可拖动跳转',
       child: LayoutBuilder(
@@ -37,33 +60,38 @@ class NarrationSeekRail extends StatelessWidget {
           final width = constraints.maxWidth;
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTapDown: enabled && onSeekStart != null
+            onTapDown: widget.enabled && widget.onSeekStart != null
                 ? (details) {
                     final next = _progressFor(details.localPosition, width);
-                    onSeekStart!(next);
-                    onSeekEnd?.call(next);
+                    _start(next);
+                    _finish(next);
                   }
                 : null,
-            onHorizontalDragStart: enabled && onSeekStart != null
-                ? (details) => onSeekStart!(
+            onHorizontalDragStart:
+                widget.enabled && widget.onSeekStart != null
+                ? (details) => _start(
                     _progressFor(details.localPosition, width),
                   )
                 : null,
-            onHorizontalDragUpdate: enabled && onSeekUpdate != null
-                ? (details) => onSeekUpdate!(
+            onHorizontalDragUpdate:
+                widget.enabled && widget.onSeekUpdate != null
+                ? (details) => _update(
                     _progressFor(details.localPosition, width),
                   )
                 : null,
-            onHorizontalDragEnd: enabled && onSeekEnd != null
-                ? (_) => onSeekEnd!(progress)
+            onHorizontalDragEnd: widget.enabled && widget.onSeekEnd != null
+                ? (_) => _finish()
+                : null,
+            onHorizontalDragCancel: widget.enabled && widget.onSeekEnd != null
+                ? _finish
                 : null,
             child: SizedBox(
-              height: minHeight + 12,
+              height: widget.minHeight + 12,
               child: Center(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(99),
                   child: SizedBox(
-                    height: minHeight,
+                    height: widget.minHeight,
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
