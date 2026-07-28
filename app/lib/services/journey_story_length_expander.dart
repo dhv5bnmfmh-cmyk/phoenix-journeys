@@ -233,6 +233,16 @@ List<JourneyStoryEnrichmentPacket> _categoryPackets(String journeyId) {
     return _strangeNightTalksEnrichment;
   }
   if (journeyId == 'folk-secret-land') return _folkSecretLandEnrichment;
+  if (journeyId == 'beijing-forbidden-city') return _forbiddenCityEnrichment;
+  if (journeyId == 'beijing-summer-palace') return _summerPalaceEnrichment;
+  if (journeyId == 'shanghai-bund') return _bundEnrichment;
+  if (journeyId == 'xian-city-wall') return _xianCityWallEnrichment;
+  if (journeyId == 'hangzhou-west-lake') return _westLakeEnrichment;
+  if (journeyId == 'chengdu-kuanzhai-alley') return _kuanzhaiEnrichment;
+  if (journeyId == 'nanjing-qinhuai-river') return _qinhuaiEnrichment;
+  if (journeyId == 'guangzhou-chen-clan-academy') {
+    return _chenClanAcademyEnrichment;
+  }
   if (journeyId.contains('forbidden-city') ||
       journeyId.contains('summer-palace')) {
     return _palaceAndGardenEnrichment;
@@ -455,6 +465,126 @@ const _folkSecretLandEnrichment = <JourneyStoryEnrichmentPacket>[
     pinyin: 'Ànbiān rén de shuōfǎ bǐcǐ máodùn, dìfāng chuánwén yīncǐ bú shì dáàn, ér shì bī nǐ juédìng yào zhuīsuí nǎ yì zhǒng wèilái.',
     vietnamese: 'Những lời kể ven bờ mâu thuẫn nhau; truyền thuyết địa phương không cho đáp án mà buộc bạn chọn tương lai muốn đi theo.',
     english: 'Conflicting voices along the bank turn local lore into no answer at all, but a demand to choose which future to follow.',
+  ),
+];
+
+const _forbiddenCityEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '午门的城台、门洞与楼阁共同塑造进入宫城的仪式感，人的路线在这里被权力秩序清楚规定。',
+    pinyin: 'Wǔmén de chéngtái, méndòng yǔ lóugé gòngtóng sùzào jìnrù gōngchéng de yíshìgǎn, rén de lùxiàn zài zhèlǐ bèi quánlì zhìxù qīngchǔ guīdìng.',
+    vietnamese: 'Nền thành, cổng vòm và lầu gác Ngọ Môn tạo nên nghi thức bước vào hoàng thành; lộ trình con người được trật tự quyền lực quy định rõ ràng.',
+    english: 'The platform, gateways, and towers of the Meridian Gate choreograph entry into the palace, making power visible through movement.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '黄色琉璃瓦、红墙与中轴线不只是装饰，它们把等级、方向和皇权观念写进可见的空间。',
+    pinyin: 'Huángsè liúlíwǎ, hóngqiáng yǔ zhōngzhóuxiàn bù zhǐ shì zhuāngshì, tāmen bǎ děngjí, fāngxiàng hé huángquán guānniàn xiě jìn kějiàn de kōngjiān.',
+    vietnamese: 'Ngói lưu ly vàng, tường đỏ và trục giữa không chỉ để trang trí mà còn đưa cấp bậc, phương hướng và quyền lực hoàng gia vào không gian hữu hình.',
+    english: 'Yellow glazed tiles, red walls, and the central axis turn hierarchy, direction, and imperial authority into visible space.',
+  ),
+];
+
+const _summerPalaceEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '昆明湖与万寿山并不是分开的景点，水面倒影、山势和长廊共同组织一场不断变化的观看。',
+    pinyin: 'Kūnmíng Hú yǔ Wànshòu Shān bìng bú shì fēnkāi de jǐngdiǎn, shuǐmiàn dàoyǐng, shānshì hé Chángláng gòngtóng zǔzhī yì chǎng bùduàn biànhuà de guānkàn.',
+    vietnamese: 'Hồ Côn Minh và núi Vạn Thọ không phải hai điểm tách rời; phản chiếu, thế núi và Trường Lang cùng tạo nên một quá trình ngắm cảnh biến đổi.',
+    english: 'Kunming Lake and Longevity Hill are not separate sights; reflection, terrain, and corridor compose a changing act of seeing.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '十七孔桥既连接南湖岛，也在宽阔水面上建立水平尺度，使远山、湖光和近景获得清楚层次。',
+    pinyin: 'Shíqīkǒng Qiáo jì liánjiē Nánhú Dǎo, yě zài kuānkuò shuǐmiàn shàng jiànlì shuǐpíng chǐdù, shǐ yuǎnshān, húguāng hé jìnjǐng huòdé qīngchǔ céngcì.',
+    vietnamese: 'Cầu Thập Thất Khổng vừa nối đảo Nam Hồ vừa tạo một thước ngang trên mặt nước, phân lớp núi xa, ánh hồ và cảnh gần.',
+    english: 'The Seventeen-Arch Bridge links Nanhu Island and sets a horizontal measure across the lake, layering distant hills, water, and foreground.',
+  ),
+];
+
+const _bundEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '外滩西岸的银行与贸易建筑记录近代商业网络，隔江的浦东天际线则把城市转型放进同一视野。',
+    pinyin: 'Wàitān xī àn de yínháng yǔ màoyì jiànzhù jìlù jìndài shāngyè wǎngluò, gé jiāng de Pǔdōng tiānjìxiàn zé bǎ chéngshì zhuǎnxíng fàng jìn tóng yí shìyě.',
+    vietnamese: 'Các tòa nhà ngân hàng và thương mại ở bờ tây ghi lại mạng lưới kinh doanh cận đại, còn đường chân trời Phố Đông đặt chuyển đổi đô thị trong cùng tầm nhìn.',
+    english: 'Banks and trading houses on the west bank record modern commerce, while Pudong places urban transformation in the same view.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '沿黄浦江行走时，约一点五公里的历史街区不只是建筑展览，也揭示港口、资本与城市生活怎样彼此塑造。',
+    pinyin: 'Yán Huángpǔ Jiāng xíngzǒu shí, yuē yì diǎn wǔ gōnglǐ de lìshǐ jiēqū bù zhǐ shì jiànzhù zhǎnlǎn, yě jiēshì gǎngkǒu, zīběn yǔ chéngshì shēnghuó zěnyàng bǐcǐ sùzào.',
+    vietnamese: 'Đi dọc sông Hoàng Phố, khu lịch sử dài khoảng 1,5 km không chỉ trưng bày kiến trúc mà còn cho thấy cảng, vốn và đời sống đô thị định hình nhau.',
+    english: 'Along the Huangpu, the 1.5-kilometre heritage district reveals how port, capital, architecture, and daily life shaped one another.',
+  ),
+];
+
+const _xianCityWallEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '永宁门、角楼、护城河与宽阔墙顶构成连续防御系统，单看一座城门无法理解它的军事逻辑。',
+    pinyin: 'Yǒngníngmén, jiǎolóu, hùchénghé yǔ kuānkuò qiángdǐng gòuchéng liánxù fángyù xìtǒng, dān kàn yí zuò chéngmén wúfǎ lǐjiě tā de jūnshì luójí.',
+    vietnamese: 'Cổng Vĩnh Ninh, tháp góc, hào nước và mặt thành rộng tạo thành một hệ phòng thủ liên tục; nhìn riêng một cổng không thể hiểu logic quân sự.',
+    english: 'Yongning Gate, corner towers, moat, and broad wall top form one defensive system whose logic exceeds any single gate.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '从墙顶向内外同时观看，明代形成的城市边界与今天扩张的道路和高楼发生直接对话。',
+    pinyin: 'Cóng qiángdǐng xiàng nèiwài tóngshí guānkàn, Míngdài xíngchéng de chéngshì biānjiè yǔ jīntiān kuòzhāng de dàolù hé gāolóu fāshēng zhíjiē duìhuà.',
+    vietnamese: 'Nhìn đồng thời vào trong và ra ngoài từ mặt thành, ranh giới đô thị thời Minh đối thoại trực tiếp với đường sá và cao ốc đang mở rộng.',
+    english: 'Looking inward and outward from the wall brings a Ming urban boundary into direct dialogue with today’s expanding roads and towers.',
+  ),
+];
+
+const _westLakeEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '苏堤与白堤把步行路线伸入湖面，桥、柳树与远山在移动中不断改变前后关系。',
+    pinyin: 'Sūdī yǔ Báidī bǎ bùxíng lùxiàn shēnrù húmiàn, qiáo, liǔshù yǔ yuǎnshān zài yídòng zhōng bùduàn gǎibiàn qiánhòu guānxì.',
+    vietnamese: 'Đê Tô và đê Bạch đưa lối đi sâu vào mặt hồ; cầu, liễu và núi xa liên tục đổi quan hệ trước sau theo bước chân.',
+    english: 'The Su and Bai causeways carry walkers into the lake, continually rearranging bridges, willows, and distant hills.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '“西湖十景”把季节、天气、时间与地点连成文化记忆，因此同一湖面在不同条件下会成为不同故事。',
+    pinyin: '“Xīhú Shíjǐng” bǎ jìjié, tiānqì, shíjiān yǔ dìdiǎn lián chéng wénhuà jìyì, yīncǐ tóng yì húmiàn zài bùtóng tiáojiàn xià huì chéngwéi bùtóng gùshì.',
+    vietnamese: '“Mười cảnh Tây Hồ” nối mùa, thời tiết, thời gian và địa điểm thành ký ức văn hóa, khiến cùng một mặt hồ trở thành những câu chuyện khác nhau.',
+    english: 'The Ten Scenes of West Lake bind season, weather, time, and place into cultural memory, giving one lake many stories.',
+  ),
+];
+
+const _kuanzhaiEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '宽巷子、窄巷子与井巷子的尺度和节奏不同，院落、店铺与茶馆因此形成多层次的街巷生活。',
+    pinyin: 'Kuān Xiàngzi, Zhǎi Xiàngzi yǔ Jǐng Xiàngzi de chǐdù hé jiézòu bùtóng, yuànluò, diànpù yǔ cháguǎn yīncǐ xíngchéng duō céngcì de jiēxiàng shēnghuó.',
+    vietnamese: 'Ngõ Rộng, ngõ Hẹp và ngõ Giếng có tỷ lệ và nhịp khác nhau, tạo nên đời sống nhiều lớp giữa sân nhà, cửa hàng và quán trà.',
+    english: 'Wide, Narrow, and Well alleys differ in scale and rhythm, layering courtyards, shops, teahouses, and street life.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '保护后的街区同时承担居住、商业与旅游功能，成都的“慢”由此既是生活经验，也成为被展示的城市形象。',
+    pinyin: 'Bǎohù hòu de jiēqū tóngshí chéngdān jūzhù, shāngyè yǔ lǚyóu gōngnéng, Chéngdū de “màn” yóucǐ jì shì shēnghuó jīngyàn, yě chéngwéi bèi zhǎnshì de chéngshì xíngxiàng.',
+    vietnamese: 'Khu phố sau bảo tồn đồng thời phục vụ cư trú, thương mại và du lịch; cái “chậm” của Thành Đô vừa là trải nghiệm sống vừa là hình ảnh đô thị được trình bày.',
+    english: 'The conserved quarter serves residents, commerce, and tourism, making Chengdu’s “slowness” both lived experience and displayed identity.',
+  ),
+];
+
+const _qinhuaiEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '秦淮河把夫子庙、桥梁、街市与灯影连成夜间路线，水面既运输人群，也承载城市记忆。',
+    pinyin: 'Qínhuái Hé bǎ Fūzǐmiào, qiáoliáng, jiēshì yǔ dēngyǐng lián chéng yèjiān lùxiàn, shuǐmiàn jì yùnshū rénqún, yě chéngzài chéngshì jìyì.',
+    vietnamese: 'Sông Tần Hoài nối Phu Tử Miếu, cầu, phố chợ và ánh đèn thành tuyến đêm; mặt nước vừa đưa người qua lại vừa chở ký ức đô thị.',
+    english: 'The Qinhuai links Confucius Temple, bridges, markets, and lantern light into a night route carrying both people and urban memory.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '繁华景象背后还有科举、文人书写与普通居民的生活，河流的文化意义不能只由灯会概括。',
+    pinyin: 'Fánhuá jǐngxiàng bèihòu hái yǒu kējǔ, wénrén shūxiě yǔ pǔtōng jūmín de shēnghuó, héliú de wénhuà yìyì bùnéng zhǐ yóu dēnghuì gàikuò.',
+    vietnamese: 'Sau cảnh phồn hoa còn có khoa cử, trước tác văn nhân và đời sống cư dân; ý nghĩa văn hóa của dòng sông không thể chỉ gói trong lễ hội đèn.',
+    english: 'Behind the spectacle lie examinations, literary writing, and residents’ lives; lantern festivals alone cannot define the river.',
+  ),
+];
+
+const _chenClanAcademyEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '屋脊上的陶塑、灰塑与木石雕刻把人物、花鸟和故事铺满建筑表面，工艺本身成为阅读岭南文化的入口。',
+    pinyin: 'Wūjǐ shàng de táosù, huīsù yǔ mùshí diāokè bǎ rénwù, huāniǎo hé gùshì pūmǎn jiànzhù biǎomiàn, gōngyì běnshēn chéngwéi yuèdú Lǐngnán wénhuà de rùkǒu.',
+    vietnamese: 'Gốm, đắp vữa và chạm gỗ đá trên mái phủ nhân vật, hoa chim và truyện tích lên bề mặt; kỹ nghệ trở thành lối vào văn hóa Lĩnh Nam.',
+    english: 'Ceramic, plaster, wood, and stone ornament cover the building with figures and stories, making craft an entry into Lingnan culture.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '陈家祠原有宗族教育与联络功能，今天作为博物馆开放，使建筑用途改变而社群记忆仍可继续传递。',
+    pinyin: 'Chénjiācí yuányǒu zōngzú jiàoyù yǔ liánluò gōngnéng, jīntiān zuòwéi bówùguǎn kāifàng, shǐ jiànzhù yòngtú gǎibiàn ér shèqún jìyì réng kě jìxù chuándì.',
+    vietnamese: 'Trần Gia Từ từng phục vụ giáo dục và liên kết dòng họ; nay mở cửa như bảo tàng, công năng đổi nhưng ký ức cộng đồng vẫn được truyền tiếp.',
+    english: 'Once serving clan education and connection, the academy now functions as a museum while continuing to transmit community memory.',
   ),
 ];
 
