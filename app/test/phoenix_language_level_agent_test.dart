@@ -4,6 +4,7 @@ import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/summer_palace_language_level_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
+import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 void main() {
   const agent = PhoenixLanguageLevelAgent();
@@ -76,29 +77,41 @@ void main() {
     );
   });
 
-  test('reading shape follows the Phoenix reading band', () {
+  test('reading shape follows the Phoenix level policy', () {
     for (final profile in agent.allProfiles) {
       final content = resolveAdaptiveJourneyLevel(
         journey,
         profile: profile,
       );
-      final oneBlock = profile.band == PhoenixReadingBand.beginner ||
-          profile.band == PhoenixReadingBand.advanced ||
-          profile.band == PhoenixReadingBand.mastery;
-      final expectedCount = oneBlock ? 1 : 2;
+      final storyTarget = phoenixStoryLengthTargetFor(profile);
+      final expectedDiscoveryCount =
+          profile.band == PhoenixReadingBand.beginner ||
+                  profile.band == PhoenixReadingBand.advanced ||
+                  profile.band == PhoenixReadingBand.mastery
+              ? 1
+              : 2;
+
       expect(
         content.storyParagraphs,
-        hasLength(expectedCount),
+        hasLength(storyTarget.paragraphCount),
         reason: profile.displayLabel,
       );
       expect(
         content.storyAnnotations,
-        hasLength(expectedCount),
+        hasLength(storyTarget.paragraphCount),
+        reason: profile.displayLabel,
+      );
+      expect(
+        content.storyParagraphs.join().runes.length,
+        inInclusiveRange(
+          storyTarget.minimumCharacters,
+          storyTarget.maximumCharacters,
+        ),
         reason: profile.displayLabel,
       );
       expect(
         content.discoveries,
-        hasLength(expectedCount),
+        hasLength(expectedDiscoveryCount),
         reason: profile.displayLabel,
       );
       expect(
