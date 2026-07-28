@@ -1573,63 +1573,12 @@ class _ChallengeSession {
       'chengdu-kuanzhai-alley' ||
       'nanjing-qinhuai-river' ||
       'guangzhou-chen-clan-academy' =>
-        _regularGrammarForJourney(journeyId, difficulty),
-      'literary-roaming' => const _GrammarSpec(
-        segments: ['通过追随蓝色蝴蝶，', '使探索者', '进入了更深的梦境。'],
-        problemSegmentIndex: 1,
-        originalSentence: '通过追随蓝色蝴蝶，使探索者进入了更深的梦境。',
-        correctedSentence: '通过追随蓝色蝴蝶，探索者进入了更深的梦境。',
-        correctOptionId: 'correct',
-        correctReplacement: '探索者',
-        distractors: ['因此使探索者', '而且探索者还', '让探索者因此'],
-        errorType: '成分残缺：主语缺失',
-        errorLocation: '“使探索者”中的“使”',
-        whyWrong: '“通过……”已经形成介词结构，再用“使”引出结果，整句便没有明确主语。',
-        revisionRule: '删除“使”，让“探索者”直接成为主语。',
-        memoryTip: '看到“通过……使……”时，先检查主语还在不在。',
-      ),
-      'myth-tracing' => const _GrammarSpec(
-        segments: ['由于遗简已经残缺，', '因此使线索', '变得更难理解。'],
-        problemSegmentIndex: 1,
-        originalSentence: '由于遗简已经残缺，因此使线索变得更难理解。',
-        correctedSentence: '由于遗简已经残缺，线索因此变得更难理解。',
-        correctOptionId: 'correct',
-        correctReplacement: '线索因此',
-        distractors: ['所以使线索', '而且线索还', '因此让线索也'],
-        errorType: '关联词赘余并导致主语缺失',
-        errorLocation: '“因此使线索”',
-        whyWrong: '“由于”已经说明原因，“因此使”又叠加关系词，并把结果句的主语变得不自然。',
-        revisionRule: '让“线索”成为主语，只保留自然的因果标记。',
-        memoryTip: '“由于”可以和“因此”呼应，但不要再叠加“使”。',
-      ),
-      'strange-night-talks' => const _GrammarSpec(
-        segments: ['夜客不但留下了铜钱，', '而且门外的声音还', '不断叫你的名字。'],
-        problemSegmentIndex: 1,
-        originalSentence: '夜客不但留下了铜钱，而且门外的声音还不断叫你的名字。',
-        correctedSentence: '夜客留下了铜钱，而门外的声音还不断叫你的名字。',
-        correctOptionId: 'correct',
-        correctReplacement: '而门外的声音还',
-        distractors: ['而且夜客也', '所以门外声音', '并且使声音还'],
-        errorType: '关联结构不平行',
-        errorLocation: '“不但……而且……”连接了两个不同主语',
-        whyWrong: '前半句主语是“夜客”，后半句突然换成“门外的声音”，不适合直接用成套递进结构。',
-        revisionRule: '改用“而”表示并列或转折，让两个不同主语各自完整。',
-        memoryTip: '使用“不但……而且……”时，检查前后主语和句式是否平行。',
-      ),
-      'folk-secret-land' => const _GrammarSpec(
-        segments: ['河灯不仅承载祈愿，', '而且人们还', '把它放进水中。'],
-        problemSegmentIndex: 1,
-        originalSentence: '河灯不仅承载祈愿，而且人们还把它放进水中。',
-        correctedSentence: '河灯不仅承载祈愿，也被人们放进水中。',
-        correctOptionId: 'correct',
-        correctReplacement: '也被人们',
-        distractors: ['而且人们也', '所以让人们', '并且人们还'],
-        errorType: '前后主语与句式不平行',
-        errorLocation: '“而且人们还”',
-        whyWrong: '“不仅”后的主语是“河灯”，后半句突然换成“人们”，两部分结构不一致。',
-        revisionRule: '保持“河灯”为主语，把后半句改成被动结构。',
-        memoryTip: '关联词连接的两部分，最好保持同一个主语和相近句式。',
-      ),
+        _adaptiveGrammarForJourney(journeyId, difficulty),
+      'literary-roaming' ||
+      'myth-tracing' ||
+      'strange-night-talks' ||
+      'folk-secret-land' =>
+        _adaptiveGrammarForJourney(journeyId, difficulty),
       _ => switch (difficulty) {
         JourneyChallengeDifficulty.beginner => const _GrammarSpec(
           segments: ['通过参观这里，', '使游客', '可以看到不同的风景。'],
@@ -1784,7 +1733,7 @@ class _ChallengeSession {
   }
 
 
-  static _GrammarSpec _regularGrammarForJourney(
+  static _GrammarSpec _adaptiveGrammarForJourney(
     String journeyId,
     JourneyChallengeDifficulty difficulty,
   ) {
@@ -1868,6 +1817,46 @@ class _ChallengeSession {
           cause: '多种雕塑共同讲述地方故事',
           resultSubject: '建筑细节',
           resultAction: '成为可阅读的文化线索',
+        ),
+      'literary-roaming' => (
+          focus: '蓝色蝴蝶和竹林梦境',
+          insight: '分辨梦与醒的边界',
+          subject: '蓝色蝴蝶',
+          action: '引导探索者穿过竹林',
+          result: '发现梦境深处的岔路',
+          cause: '蓝色蝴蝶在岔路前消失',
+          resultSubject: '梦境道路',
+          resultAction: '显出醒来与继续追寻的两种方向',
+        ),
+      'myth-tracing' => (
+          focus: '月宫遗简和守匣白兔',
+          insight: '辨认月光留下的线索',
+          subject: '残缺遗简',
+          action: '保存月宫旧事',
+          result: '追踪白兔守候的秘密',
+          cause: '遗简只在月光下显出文字',
+          resultSubject: '隐藏线索',
+          resultAction: '随着月色逐渐清晰',
+        ),
+      'strange-night-talks' => (
+          focus: '无影夜客和门外呼声',
+          insight: '判断客栈异象的来源',
+          subject: '夜客留下的铜钱',
+          action: '证明陌生人曾经来过',
+          result: '怀疑消失的影子',
+          cause: '雨夜脚步与敲门声反复出现',
+          resultSubject: '客栈走廊',
+          resultAction: '变得更加诡异难辨',
+        ),
+      'folk-secret-land' => (
+          focus: '逆流河灯和灯纸姓名',
+          insight: '理解祈愿与记忆的联系',
+          subject: '逆流河灯',
+          action: '承载岸边人们的祈愿',
+          result: '寻找名字指向的故事',
+          cause: '写有名字的河灯逆流而上',
+          resultSubject: '上游倒影',
+          resultAction: '显出被遗忘的旧日记忆',
         ),
       _ => throw ArgumentError.value(journeyId, 'journeyId'),
     };
