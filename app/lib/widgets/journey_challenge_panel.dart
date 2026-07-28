@@ -1565,118 +1565,15 @@ class _ChallengeSession {
     int seed,
   ) {
     final journeySpec = switch (journeyId) {
-      'beijing-forbidden-city' => const _GrammarSpec(
-        segments: ['午门不但规定进入路线，', '而且游客还', '感受到宫城秩序。'],
-        problemSegmentIndex: 1,
-        originalSentence: '午门不但规定进入路线，而且游客还感受到宫城秩序。',
-        correctedSentence: '午门不但规定进入路线，而且让游客感受到宫城秩序。',
-        correctOptionId: 'correct',
-        correctReplacement: '而且让游客',
-        distractors: ['所以游客也', '并且游客还', '而且游客会'],
-        errorType: '前后主语不一致',
-        errorLocation: '“而且游客还”',
-        whyWrong: '“不但”后的主语是“午门”，后半句突然改用“游客”作主语，句式不平行。',
-        revisionRule: '保持“午门”为主语，用“让游客”承接它产生的作用。',
-        memoryTip: '使用“不但……而且……”时，先检查两部分主语是否一致。',
-      ),
-      'beijing-summer-palace' => const _GrammarSpec(
-        segments: ['由于昆明湖产生倒影，', '因此使万寿山', '进入画面。'],
-        problemSegmentIndex: 1,
-        originalSentence: '由于昆明湖产生倒影，因此使万寿山进入画面。',
-        correctedSentence: '由于昆明湖产生倒影，万寿山因此进入画面。',
-        correctOptionId: 'correct',
-        correctReplacement: '万寿山因此',
-        distractors: ['所以使万寿山', '而且万寿山也', '从而让万寿山'],
-        errorType: '关联词赘余并导致主语缺失',
-        errorLocation: '“因此使万寿山”',
-        whyWrong: '“由于”已经引出原因，“因此使”又叠加关系词，使结果句缺少自然主语。',
-        revisionRule: '让“万寿山”成为结果句主语，只保留自然的因果呼应。',
-        memoryTip: '“由于”可以和“因此”呼应，但不要再加“使”拿走主语。',
-      ),
-      'shanghai-bund' => const _GrammarSpec(
-        segments: ['外滩不仅保存历史建筑，', '而且浦东还', '形成现代天际线。'],
-        problemSegmentIndex: 1,
-        originalSentence: '外滩不仅保存历史建筑，而且浦东还形成现代天际线。',
-        correctedSentence: '外滩保存历史建筑，而浦东形成现代天际线。',
-        correctOptionId: 'correct',
-        correctReplacement: '而浦东',
-        distractors: ['所以浦东也', '并且浦东还', '而且让浦东'],
-        errorType: '关联结构不平行',
-        errorLocation: '“不仅……而且……”连接的两个主语',
-        whyWrong: '“不仅……而且……”通常连接同一主语的并列内容，原句却分别描述外滩和浦东。',
-        revisionRule: '两个不同主语形成对照时，改用“而”直接连接。',
-        memoryTip: '同一主语可用“不仅……而且……”，不同主语对照可用“而”。',
-      ),
-      'xian-city-wall' => const _GrammarSpec(
-        segments: ['通过登上城墙，', '使游客', '同时看见古城和现代城市。'],
-        problemSegmentIndex: 1,
-        originalSentence: '通过登上城墙，使游客同时看见古城和现代城市。',
-        correctedSentence: '通过登上城墙，游客同时看见古城和现代城市。',
-        correctOptionId: 'correct',
-        correctReplacement: '游客',
-        distractors: ['因此使游客', '而且游客还', '让游客因此'],
-        errorType: '成分残缺：主语缺失',
-        errorLocation: '“使游客”中的“使”',
-        whyWrong: '“通过……”已经形成介词结构，再用“使”会让整句话失去明确主语。',
-        revisionRule: '删除“使”，让“游客”直接成为主语。',
-        memoryTip: '看到“通过……使……”时，先检查句子里还剩不剩主语。',
-      ),
-      'hangzhou-west-lake' => const _GrammarSpec(
-        segments: ['只有天气和季节发生变化，', '就能看见', '不同的西湖。'],
-        problemSegmentIndex: 1,
-        originalSentence: '只有天气和季节发生变化，就能看见不同的西湖。',
-        correctedSentence: '只有天气和季节发生变化，才能看见不同的西湖。',
-        correctOptionId: 'correct',
-        correctReplacement: '才能看见',
-        distractors: ['所以能看见', '也就看见了', '但是会看见'],
-        errorType: '关联词搭配错误',
-        errorLocation: '“只有……就……”',
-        whyWrong: '必要条件“只有”应与“才”搭配，“就”更常与“只要”搭配。',
-        revisionRule: '使用“只有……才……”或“只要……就……”。',
-        memoryTip: '只有配才，只要配就。',
-      ),
-      'chengdu-kuanzhai-alley' => const _GrammarSpec(
-        segments: ['宽巷子、窄巷子和井巷子的尺度', '各不相同不一样，', '形成了不同的生活节奏。'],
-        problemSegmentIndex: 1,
-        originalSentence: '宽巷子、窄巷子和井巷子的尺度各不相同不一样，形成了不同的生活节奏。',
-        correctedSentence: '宽巷子、窄巷子和井巷子的尺度各不相同，形成了不同的生活节奏。',
-        correctOptionId: 'correct',
-        correctReplacement: '各不相同，',
-        distractors: ['都各不一样，', '各自不同不一，', '分别各不相同，'],
-        errorType: '成分赘余：意思重复',
-        errorLocation: '“各不相同不一样”',
-        whyWrong: '“各不相同”和“不一样”表达同一个意思，连续使用造成重复。',
-        revisionRule: '保留一个完整的差异表达即可。',
-        memoryTip: '相同意思的近义说法不要重复堆叠。',
-      ),
-      'nanjing-qinhuai-river' => const _GrammarSpec(
-        segments: ['秦淮灯会', '在古代即将已经', '成为重要夜景。'],
-        problemSegmentIndex: 1,
-        originalSentence: '秦淮灯会在古代即将已经成为重要夜景。',
-        correctedSentence: '秦淮灯会在古代已经成为重要夜景。',
-        correctOptionId: 'correct',
-        correctReplacement: '在古代已经',
-        distractors: ['在古代即将', '在古代马上已经', '在古代将要曾经'],
-        errorType: '时态逻辑矛盾',
-        errorLocation: '“即将”与“已经”',
-        whyWrong: '“即将”表示事情尚未发生，“已经”表示事情完成，不能同时描述古代发生的同一变化。',
-        revisionRule: '根据明确的过去时间，只保留完成标记“已经”。',
-        memoryTip: '“即将”看未来，“已经”看过去，不要同时修饰一个动作。',
-      ),
-      'guangzhou-chen-clan-academy' => const _GrammarSpec(
-        segments: ['通过观察屋脊陶塑，', '使游客', '读懂其中的岭南故事。'],
-        problemSegmentIndex: 1,
-        originalSentence: '通过观察屋脊陶塑，使游客读懂其中的岭南故事。',
-        correctedSentence: '通过观察屋脊陶塑，游客读懂其中的岭南故事。',
-        correctOptionId: 'correct',
-        correctReplacement: '游客',
-        distractors: ['因此使游客', '而且游客还', '让游客因此'],
-        errorType: '成分残缺：主语缺失',
-        errorLocation: '“使游客”中的“使”',
-        whyWrong: '“通过……”已经形成介词结构，再用“使”会让整句话没有明确主语。',
-        revisionRule: '删除“使”，让“游客”直接成为主语。',
-        memoryTip: '“通过”和“使”同时出现时，要检查主语是否被遮住。',
-      ),
+      'beijing-forbidden-city' ||
+      'beijing-summer-palace' ||
+      'shanghai-bund' ||
+      'xian-city-wall' ||
+      'hangzhou-west-lake' ||
+      'chengdu-kuanzhai-alley' ||
+      'nanjing-qinhuai-river' ||
+      'guangzhou-chen-clan-academy' =>
+        _regularGrammarForJourney(journeyId, difficulty),
       'literary-roaming' => const _GrammarSpec(
         segments: ['通过追随蓝色蝴蝶，', '使探索者', '进入了更深的梦境。'],
         problemSegmentIndex: 1,
@@ -1884,6 +1781,159 @@ class _ChallengeSession {
     // each replay then advances to a different, clearly named error family.
     final replayVariant = (seed - 997).abs() % variedSpecs.length;
     return variedSpecs[replayVariant];
+  }
+
+
+  static _GrammarSpec _regularGrammarForJourney(
+    String journeyId,
+    JourneyChallengeDifficulty difficulty,
+  ) {
+    final context = switch (journeyId) {
+      'beijing-forbidden-city' => (
+          focus: '午门和中轴线',
+          insight: '理解宫城的进入秩序',
+          subject: '午门',
+          action: '规定进入路线',
+          result: '感受到宫城秩序',
+          cause: '午门控制了进入方向',
+          resultSubject: '中轴线',
+          resultAction: '显得更加庄严清晰',
+        ),
+      'beijing-summer-palace' => (
+          focus: '昆明湖的倒影',
+          insight: '看见万寿山进入画面',
+          subject: '长廊',
+          action: '连接沿湖景点',
+          result: '改变观看节奏',
+          cause: '昆明湖产生了倒影',
+          resultSubject: '万寿山',
+          resultAction: '进入完整的湖山画面',
+        ),
+      'shanghai-bund' => (
+          focus: '外滩与浦东两岸',
+          insight: '比较城市的新旧层次',
+          subject: '外滩建筑群',
+          action: '保存历史街景',
+          result: '理解近代商业记忆',
+          cause: '黄浦江连接了两岸视线',
+          resultSubject: '新旧天际线',
+          resultAction: '形成鲜明的时代对照',
+        ),
+      'xian-city-wall' => (
+          focus: '城墙和护城河',
+          insight: '看懂连续防御体系',
+          subject: '宽阔的墙顶',
+          action: '方便守军巡查',
+          result: '观察古城格局',
+          cause: '城墙围合了古城空间',
+          resultSubject: '古今城市边界',
+          resultAction: '变得清楚可辨',
+        ),
+      'hangzhou-west-lake' => (
+          focus: '苏堤、桥与远山',
+          insight: '发现西湖景色的变化',
+          subject: '苏堤',
+          action: '组织沿湖路线',
+          result: '逐步看见不同景层',
+          cause: '天气和季节不断变化',
+          resultSubject: '西湖十景',
+          resultAction: '呈现不同的观看感受',
+        ),
+      'chengdu-kuanzhai-alley' => (
+          focus: '宽、窄、井三条巷子',
+          insight: '分辨不同的生活节奏',
+          subject: '院落和茶馆',
+          action: '保留街巷生活',
+          result: '感受成都的慢节奏',
+          cause: '三条巷子的尺度各不相同',
+          resultSubject: '街区生活',
+          resultAction: '形成丰富的空间层次',
+        ),
+      'nanjing-qinhuai-river' => (
+          focus: '秦淮河的桥梁与灯影',
+          insight: '理解夜游路线的文化记忆',
+          subject: '秦淮河',
+          action: '串联夫子庙和街市',
+          result: '读懂夜间文化空间',
+          cause: '灯会连接了河流与街市',
+          resultSubject: '夜游路线',
+          resultAction: '承载更多历史记忆',
+        ),
+      'guangzhou-chen-clan-academy' => (
+          focus: '屋脊陶塑和木石雕刻',
+          insight: '读懂其中的岭南故事',
+          subject: '陈家祠装饰',
+          action: '保存岭南工艺',
+          result: '理解宗族文化记忆',
+          cause: '多种雕塑共同讲述地方故事',
+          resultSubject: '建筑细节',
+          resultAction: '成为可阅读的文化线索',
+        ),
+      _ => throw ArgumentError.value(journeyId, 'journeyId'),
+    };
+
+    return switch (difficulty) {
+      JourneyChallengeDifficulty.beginner => _GrammarSpec(
+          segments: ['通过观察${context.focus}，', '使游客', '可以${context.insight}。'],
+          problemSegmentIndex: 1,
+          originalSentence:
+              '通过观察${context.focus}，使游客可以${context.insight}。',
+          correctedSentence:
+              '通过观察${context.focus}，游客可以${context.insight}。',
+          correctOptionId: 'correct',
+          correctReplacement: '游客',
+          distractors: const ['因此使游客', '而且游客还', '让游客因此'],
+          errorType: '成分残缺：主语缺失',
+          errorLocation: '“使游客”中的“使”',
+          whyWrong: '“通过……”已经形成介词结构，再用“使”会让整句话没有明确主语。',
+          revisionRule: '删除“使”，让“游客”直接成为主语。',
+          memoryTip: '看到“通过……使……”时，先检查句子里还剩不剩主语。',
+        ),
+      JourneyChallengeDifficulty.standard => _GrammarSpec(
+          segments: [
+            '${context.subject}不但${context.action}，',
+            '而且游客还',
+            '${context.result}。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence:
+              '${context.subject}不但${context.action}，而且游客还${context.result}。',
+          correctedSentence:
+              '${context.subject}不但${context.action}，而且让游客${context.result}。',
+          correctOptionId: 'correct',
+          correctReplacement: '而且让游客',
+          distractors: const ['所以游客也', '并且游客还', '而且游客会'],
+          errorType: '前后主语与句式不平行',
+          errorLocation: '“而且游客还”',
+          whyWrong: '“不但”后的主语是景物，后半句突然改用“游客”作主语，关联结构不平行。',
+          revisionRule: '保持景物为主语，用“让游客”承接它产生的作用。',
+          memoryTip: '使用“不但……而且……”时，要检查两部分主语和句式是否一致。',
+        ),
+      JourneyChallengeDifficulty.advanced => _GrammarSpec(
+          segments: [
+            '由于${context.cause}，',
+            '因此使${context.resultSubject}',
+            '${context.resultAction}。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence:
+              '由于${context.cause}，因此使${context.resultSubject}${context.resultAction}。',
+          correctedSentence:
+              '由于${context.cause}，${context.resultSubject}因此${context.resultAction}。',
+          correctOptionId: 'correct',
+          correctReplacement: '${context.resultSubject}因此',
+          distractors: [
+            '所以使${context.resultSubject}',
+            '而且${context.resultSubject}还',
+            '从而让${context.resultSubject}',
+          ],
+          errorType: '关联词赘余并导致主语缺失',
+          errorLocation: '“因此使${context.resultSubject}”',
+          whyWrong: '“由于”已经引出原因，再叠加“因此使”会让结果句缺少自然主语。',
+          revisionRule: '让结果对象直接成为主语，只保留一个自然的因果标记。',
+          memoryTip: '“由于”与“因此”可以呼应，但不要再叠加“使”拿走主语。',
+        ),
+    };
   }
 
 
