@@ -1,4 +1,2 @@
 EXIT=1
-  File "/tmp/adaptive_challenge_pedagogy.py", line 1
-    from pathlib import Path
-IndentationError: unexpected indent
+non-grammar explanation marker missing
