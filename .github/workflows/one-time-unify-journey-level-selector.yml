@@ -1,0 +1,136 @@
+name: One-time unify journey level selector
+
+on:
+  push:
+    branches:
+      - agent/adaptive-level-content-v2
+    paths:
+      - .github/workflows/one-time-unify-journey-level-selector.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-remove:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v6
+        with:
+          ref: agent/adaptive-level-content-v2
+          fetch-depth: 0
+
+      - name: Unify the in-journey level selector
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/screens/journey_screen.dart')
+          text = path.read_text()
+
+          old_getter = """  List<JourneyDifficulty> get _supportedDifficulties =>
+              supportedJourneyDifficulties(_experience);
+
+          """
+          if old_getter not in text:
+              raise SystemExit('supported difficulty getter not found')
+          text = text.replace(old_getter, '', 1)
+
+          old_select = """  Future<void> _selectLanguageProfile(ChineseProficiencyProfile profile) async {
+            await _narration.stop();
+            await _languageLevelStore.save(profile);
+            await _narration.setSpeechRate(
+              _languageLevelAgent.planFor(profile).speechRate,
+            );
+            if (!mounted) return;
+            setState(() {
+              _languageProfile = profile;
+            });
+          }
+          """
+          new_select = """  Future<void> _selectLanguageProfile(ChineseProficiencyProfile profile) async {
+            await _narration.stop();
+            await _languageLevelStore.save(profile);
+            await _narration.setSpeechRate(
+              _languageLevelAgent.planFor(profile).speechRate,
+            );
+            await Future.wait([
+              _appState.clearGuideFeedback(),
+              _appState.clearWritingFeedback(),
+            ]);
+            if (!mounted) return;
+            setState(() {
+              _languageProfile = profile;
+              _guideFeedback = null;
+              _writingFeedback = null;
+              _challengeResolved = false;
+              _challengeSeed += 1;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  _appState.displayText('${profile.displayLabel} 已应用到当前旅程'),
+                ),
+                duration: const Duration(milliseconds: 1400),
+              ),
+            );
+          }
+          """
+          if old_select not in text:
+              raise SystemExit('language profile selection method not found')
+          text = text.replace(old_select, new_select, 1)
+
+          change_start = text.index(
+              '  Future<void> _changeDifficulty(JourneyDifficulty value) async {'
+          )
+          change_end = text.index('  Future<void> _goToStep(int targetStep) async {', change_start)
+          text = text[:change_start] + text[change_end:]
+
+          actions_start = text.index(
+              "            if (_experience.id == 'beijing-summer-palace')"
+          )
+          script_toggle_start = text.index(
+              "            Consumer<AppState>(\n"
+              "              builder: (_, state, __) => TextButton(",
+              actions_start,
+          )
+          level_button = """            TextButton.icon(
+              key: const ValueKey('journey-language-level-selector'),
+              tooltip: _appState.displayText('切换 HSK / TOCFL 等级'),
+              onPressed: () => unawaited(_showLanguageProfilePicker()),
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+              ),
+              icon: const Icon(
+                Icons.tune_rounded,
+                color: Colors.white,
+                size: 13,
+              ),
+              label: Text(
+                _languageProfile?.displayLabel ?? 'HSK / TOCFL',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          """
+          text = text[:actions_start] + level_button + text[script_toggle_start:]
+
+          path.write_text(text)
+          PY
+
+      - name: Commit the migration and remove this workflow
+        shell: bash
+        run: |
+          rm .github/workflows/one-time-unify-journey-level-selector.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart .github/workflows/one-time-unify-journey-level-selector.yml
+          git commit -m "Unify HSK and TOCFL controls across journeys"
+          git push origin HEAD:agent/adaptive-level-content-v2
