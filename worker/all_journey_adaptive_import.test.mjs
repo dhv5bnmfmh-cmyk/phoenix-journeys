@@ -45,3 +45,24 @@ test('advanced and mastery discoveries stay in two focused sections', () => {
     /PhoenixReadingBand\.upperIntermediate \|\|\s*PhoenixReadingBand\.advanced \|\|\s*PhoenixReadingBand\.mastery => 2/,
   );
 });
+
+test('advanced prompts use journey-specific analysis lenses', () => {
+  assert.match(catalog, /_advancedWonderLens\(experience\)/);
+  assert.match(catalog, /_advancedExpressLens\(experience\)/);
+  for (const journeyId of [
+    'beijing-forbidden-city',
+    'beijing-summer-palace',
+    'shanghai-bund',
+    'xian-city-wall',
+    'hangzhou-west-lake',
+    'chengdu-kuanzhai-alley',
+    'nanjing-qinhuai-river',
+    'guangzhou-chen-clan-academy',
+    'literary-roaming',
+    'myth-tracing',
+    'strange-night-talks',
+    'folk-secret-land',
+  ]) {
+    assert.match(catalog, new RegExp(`'${journeyId}'`));
+  }
+});
