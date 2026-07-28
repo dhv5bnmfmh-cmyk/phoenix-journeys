@@ -6,12 +6,8 @@ const catalog = fs.readFileSync(
   new URL('../app/lib/data/all_journey_language_level_catalog.dart', import.meta.url),
   'utf8',
 );
-const passport = fs.readFileSync(
-  new URL('../app/lib/screens/passport_screen.dart', import.meta.url),
-  'utf8',
-);
-const cityPassport = fs.readFileSync(
-  new URL('../app/lib/screens/city_passport_screen.dart', import.meta.url),
+const homeShell = fs.readFileSync(
+  new URL('../app/lib/screens/home_shell.dart', import.meta.url),
   'utf8',
 );
 const journeyScreen = fs.readFileSync(
@@ -27,7 +23,7 @@ const agent = fs.readFileSync(
   'utf8',
 );
 
- test('adaptive journeys select aligned sentence packets instead of raw paragraph pairs', () => {
+test('adaptive journeys select aligned sentence packets instead of raw paragraph pairs', () => {
   assert.match(catalog, /_storySentencePackets/);
   assert.match(catalog, /_selectNarrativePackets/);
   assert.match(catalog, /_partitionPackets/);
@@ -42,9 +38,10 @@ test('every reading band keeps an approved one-or-two paragraph shape', () => {
   assert.match(agent, /paragraphCount: 2/);
 });
 
-test('passport surfaces expose the shared Phoenix plus-minus control', () => {
-  assert.match(passport, /JourneyLevelSelectorButton\(compact: true\)/);
-  assert.match(cityPassport, /JourneyLevelSelectorButton\(compact: true\)/);
+test('all home tabs expose one fixed Phoenix plus-minus control', () => {
+  assert.match(homeShell, /final content = Stack/);
+  assert.match(homeShell, /Positioned\([\s\S]*top: 6,[\s\S]*right: 8/);
+  assert.match(homeShell, /JourneyLevelSelectorButton\(compact: true\)/);
   assert.match(selector, /global-journey-level-selector/);
   assert.match(selector, /phoenix-level-minus/);
   assert.match(selector, /phoenix-level-plus/);
