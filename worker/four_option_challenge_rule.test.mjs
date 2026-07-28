@@ -44,3 +44,21 @@ test('option cards share a visual height floor without truncating answers', () =
   assert.match(panel, /BoxConstraints\(minHeight: 56\)/);
   assert.doesNotMatch(panel, /maxLines: 1,[\s\S]{0,120}option\.text/);
 });
+
+test('regular journeys never fall back to generic challenge filler', () => {
+  assert.match(panel, /_regularJourneyDistractors\(journeyId\)/);
+  for (const journeyId of [
+    'beijing-forbidden-city',
+    'beijing-summer-palace',
+    'shanghai-bund',
+    'xian-city-wall',
+    'hangzhou-west-lake',
+    'chengdu-kuanzhai-alley',
+    'nanjing-qinhuai-river',
+    'guangzhou-chen-clan-academy',
+  ]) {
+    assert.match(panel, new RegExp(`'${journeyId}' => \\\[`));
+  }
+  assert.doesNotMatch(panel, /所有景色完全相同，不需要继续观察/);
+  assert.doesNotMatch(panel, /他没有进入景区，直接回到了住处/);
+});
