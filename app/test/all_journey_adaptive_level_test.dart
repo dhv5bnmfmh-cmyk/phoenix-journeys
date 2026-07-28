@@ -58,11 +58,9 @@ void main() {
         );
         expect(
           content.discoveries.length,
-          profile.band == PhoenixReadingBand.beginner ||
-                  profile.band == PhoenixReadingBand.advanced ||
-                  profile.band == PhoenixReadingBand.mastery
+          profile.band == PhoenixReadingBand.beginner
               ? 1
-              : 2,
+              : journey.discoveries.length.clamp(1, 2),
           reason: '${journey.id} should use the approved discovery shape',
         );
         expect(
