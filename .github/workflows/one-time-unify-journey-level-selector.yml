@@ -26,66 +26,68 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path('app/lib/screens/journey_screen.dart')
           text = path.read_text()
 
-          old_getter = """  List<JourneyDifficulty> get _supportedDifficulties =>
-              supportedJourneyDifficulties(_experience);
-
-          """
-          if old_getter not in text:
+          text, getter_count = re.subn(
+              r"\n  List<JourneyDifficulty> get _supportedDifficulties =>\n"
+              r"\s+supportedJourneyDifficulties\(_experience\);\n",
+              "\n",
+              text,
+              count=1,
+          )
+          if getter_count != 1:
               raise SystemExit('supported difficulty getter not found')
-          text = text.replace(old_getter, '', 1)
 
-          old_select = """  Future<void> _selectLanguageProfile(ChineseProficiencyProfile profile) async {
-            await _narration.stop();
-            await _languageLevelStore.save(profile);
-            await _narration.setSpeechRate(
-              _languageLevelAgent.planFor(profile).speechRate,
-            );
-            if (!mounted) return;
-            setState(() {
-              _languageProfile = profile;
-            });
-          }
-          """
-          new_select = """  Future<void> _selectLanguageProfile(ChineseProficiencyProfile profile) async {
-            await _narration.stop();
-            await _languageLevelStore.save(profile);
-            await _narration.setSpeechRate(
-              _languageLevelAgent.planFor(profile).speechRate,
-            );
-            await Future.wait([
-              _appState.clearGuideFeedback(),
-              _appState.clearWritingFeedback(),
-            ]);
-            if (!mounted) return;
-            setState(() {
-              _languageProfile = profile;
-              _guideFeedback = null;
-              _writingFeedback = null;
-              _challengeResolved = false;
-              _challengeSeed += 1;
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  _appState.displayText('${profile.displayLabel} 已应用到当前旅程'),
-                ),
-                duration: const Duration(milliseconds: 1400),
-              ),
-            );
-          }
-          """
-          if old_select not in text:
-              raise SystemExit('language profile selection method not found')
-          text = text.replace(old_select, new_select, 1)
+          select_start = text.index(
+              '  Future<void> _selectLanguageProfile(ChineseProficiencyProfile profile) async {'
+          )
+          select_end = text.index(
+              '  Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {',
+              select_start,
+          )
+          new_select = '\n'.join([
+              '  Future<void> _selectLanguageProfile(ChineseProficiencyProfile profile) async {',
+              '    await _narration.stop();',
+              '    await _languageLevelStore.save(profile);',
+              '    await _narration.setSpeechRate(',
+              '      _languageLevelAgent.planFor(profile).speechRate,',
+              '    );',
+              '    await Future.wait([',
+              '      _appState.clearGuideFeedback(),',
+              '      _appState.clearWritingFeedback(),',
+              '    ]);',
+              '    if (!mounted) return;',
+              '    setState(() {',
+              '      _languageProfile = profile;',
+              '      _guideFeedback = null;',
+              '      _writingFeedback = null;',
+              '      _challengeResolved = false;',
+              '      _challengeSeed += 1;',
+              '    });',
+              '    ScaffoldMessenger.of(context).showSnackBar(',
+              '      SnackBar(',
+              '        content: Text(',
+              "          _appState.displayText('${profile.displayLabel} 已应用到当前旅程'),",
+              '        ),',
+              '        duration: const Duration(milliseconds: 1400),',
+              '      ),',
+              '    );',
+              '  }',
+              '',
+              '',
+          ])
+          text = text[:select_start] + new_select + text[select_end:]
 
           change_start = text.index(
               '  Future<void> _changeDifficulty(JourneyDifficulty value) async {'
           )
-          change_end = text.index('  Future<void> _goToStep(int targetStep) async {', change_start)
+          change_end = text.index(
+              '  Future<void> _goToStep(int targetStep) async {',
+              change_start,
+          )
           text = text[:change_start] + text[change_end:]
 
           actions_start = text.index(
@@ -96,31 +98,33 @@ jobs:
               "              builder: (_, state, __) => TextButton(",
               actions_start,
           )
-          level_button = """            TextButton.icon(
-              key: const ValueKey('journey-language-level-selector'),
-              tooltip: _appState.displayText('切换 HSK / TOCFL 等级'),
-              onPressed: () => unawaited(_showLanguageProfilePicker()),
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-              ),
-              icon: const Icon(
-                Icons.tune_rounded,
-                color: Colors.white,
-                size: 13,
-              ),
-              label: Text(
-                _languageProfile?.displayLabel ?? 'HSK / TOCFL',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          """
+          level_button = '\n'.join([
+              '            TextButton.icon(',
+              "              key: const ValueKey('journey-language-level-selector'),",
+              "              tooltip: _appState.displayText('切换 HSK / TOCFL 等级'),",
+              '              onPressed: () => unawaited(_showLanguageProfilePicker()),',
+              '              style: TextButton.styleFrom(',
+              '                visualDensity: VisualDensity.compact,',
+              '                padding: const EdgeInsets.symmetric(horizontal: 5),',
+              '              ),',
+              '              icon: const Icon(',
+              '                Icons.tune_rounded,',
+              '                color: Colors.white,',
+              '                size: 13,',
+              '              ),',
+              '              label: Text(',
+              "                _languageProfile?.displayLabel ?? 'HSK / TOCFL',",
+              '                maxLines: 1,',
+              '                overflow: TextOverflow.ellipsis,',
+              '                style: const TextStyle(',
+              '                  color: Colors.white,',
+              '                  fontSize: 9.5,',
+              '                  fontWeight: FontWeight.w900,',
+              '                ),',
+              '              ),',
+              '            ),',
+              '',
+          ])
           text = text[:actions_start] + level_button + text[script_toggle_start:]
 
           path.write_text(text)
