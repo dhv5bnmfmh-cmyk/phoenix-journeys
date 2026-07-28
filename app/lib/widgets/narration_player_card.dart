@@ -4,7 +4,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../services/narration_controller.dart';
+import '../services/narration_seek.dart';
 import '../theme/phoenix_theme.dart';
+import 'narration_seek_rail.dart';
 import 'narration_speed_stepper.dart';
 import 'phoenix_media_button.dart';
 
@@ -109,6 +111,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
   int _commandVersion = 0;
   int _resumeOffset = 0;
   int _lastObservedOffset = 0;
+  double? _seekPreviewProgress;
+  bool _seekResumePlayback = false;
+  int? _seekCommandId;
+  Future<void>? _seekPauseFuture;
 
   bool get _controllerIsCurrent =>
       widget.controller.contentId == widget.contentId;
@@ -140,6 +146,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     _sessionPaused = false;
     _resumeOffset = 0;
     _lastObservedOffset = 0;
+    _seekPreviewProgress = null;
+    _seekResumePlayback = false;
+    _seekCommandId = null;
+    _seekPauseFuture = null;
   }
 
   void _beginLocalPlayback(int offset) {
@@ -152,7 +162,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
   }
 
   void _observeControllerOffset(NarrationStatus status) {
-    if (!_controllerIsCurrent) return;
+    if (!_controllerIsCurrent || _seekPreviewProgress != null) return;
 
     // The controller is the single source of truth. Temporary word and
     // support speech can pause the same engine outside this card.
@@ -332,6 +342,86 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     }
   }
 
+  void _handleSeekStart(double progress) {
+    final total = widget.controller.totalCharacters;
+    if (!_controllerIsCurrent || total <= 0) return;
+
+    final commandId = ++_commandVersion;
+    final pauseOffset = _captureContinuationOffset();
+    final targetOffset = narrationSeekOffset(
+      progress: progress,
+      totalCharacters: total,
+    );
+    _seekResumePlayback = _sessionPlaying ||
+        widget.controller.status == NarrationStatus.playing;
+    _seekCommandId = commandId;
+    _seekPauseFuture = widget.controller.pauseAtOffset(pauseOffset);
+
+    setState(() {
+      _seekPreviewProgress = progress.clamp(0.0, 1.0).toDouble();
+      _sessionPlaying = false;
+      _sessionPaused = true;
+      _resumeOffset = targetOffset;
+      _lastObservedOffset = targetOffset;
+    });
+  }
+
+  void _handleSeekUpdate(double progress) {
+    final total = widget.controller.totalCharacters;
+    if (_seekCommandId == null || total <= 0) return;
+    final targetOffset = narrationSeekOffset(
+      progress: progress,
+      totalCharacters: total,
+    );
+    setState(() {
+      _seekPreviewProgress = progress.clamp(0.0, 1.0).toDouble();
+      _resumeOffset = targetOffset;
+      _lastObservedOffset = targetOffset;
+    });
+  }
+
+  void _handleSeekEnd(double progress) {
+    final total = widget.controller.totalCharacters;
+    if (total <= 0) return;
+    final commandId = _seekCommandId ?? ++_commandVersion;
+    final targetOffset = narrationSeekOffset(
+      progress: progress,
+      totalCharacters: total,
+    );
+    final resumePlayback = _seekResumePlayback;
+
+    setState(() {
+      _seekPreviewProgress = null;
+      _seekCommandId = null;
+      _resumeOffset = targetOffset;
+      _lastObservedOffset = targetOffset;
+      _sessionPlaying = resumePlayback;
+      _sessionPaused = !resumePlayback;
+    });
+    unawaited(_commitSeek(commandId, targetOffset, resumePlayback));
+  }
+
+  Future<void> _commitSeek(
+    int commandId,
+    int targetOffset,
+    bool resumePlayback,
+  ) async {
+    await _seekPauseFuture;
+    if (!mounted || commandId != _commandVersion) return;
+    await widget.controller.seekToOffset(
+      targetOffset,
+      resumePlayback: resumePlayback,
+    );
+    if (!mounted || commandId != _commandVersion) return;
+    setState(() {
+      _seekPauseFuture = null;
+      _resumeOffset = targetOffset;
+      _lastObservedOffset = targetOffset;
+      _sessionPlaying = resumePlayback;
+      _sessionPaused = !resumePlayback;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -369,38 +459,61 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
 
         final total =
             controllerIsCurrent ? widget.controller.totalCharacters : 0;
-        final visibleOffset = controllerIsCurrent
+        final controllerVisibleOffset = controllerIsCurrent
             ? isPaused
                 ? math.max(widget.controller.currentOffset, _resumeOffset)
                 : widget.controller.currentOffset
             : 0;
-        final progress = total <= 0
+        final controllerProgress = total <= 0
             ? 0.0
-            : (visibleOffset / total).clamp(0.0, 1.0).toDouble();
+            : (controllerVisibleOffset / total)
+                .clamp(0.0, 1.0)
+                .toDouble();
+        final displayProgress =
+            (_seekPreviewProgress ?? controllerProgress)
+                .clamp(0.0, 1.0)
+                .toDouble();
+        final displayOffset = _seekPreviewProgress == null
+            ? controllerVisibleOffset
+            : narrationSeekOffset(
+                progress: displayProgress,
+                totalCharacters: total,
+              );
         final currentItem =
             controllerIsCurrent ? widget.controller.currentItemIndex : null;
         final itemCount = controllerIsCurrent ? widget.controller.itemCount : 0;
         final canControl = _sessionPlaying ||
             _sessionPaused ||
             (controllerIsCurrent && widget.controller.hasContent);
-        final roundedPercent = (progress * 100).round();
-        final percent =
-            isPlaying ? roundedPercent.clamp(1, 99) : roundedPercent;
+        final canSeek = canControl && total > 0 && !hasError && !finished;
+        final roundedPercent = (displayProgress * 100).round();
+        final percent = isPlaying && _seekPreviewProgress == null
+            ? roundedPercent.clamp(1, 99)
+            : roundedPercent;
+        final seeking = _seekPreviewProgress != null;
         final activeSubtitle = hasError
             ? widget.controller.errorMessage ?? '朗读暂时不可用'
-            : isPlaying
-                ? widget.controller.currentItemLabel ?? '正在朗读'
-                : isPaused
-                    ? '已暂停 · $percent%'
-                    : widget.subtitle;
+            : seeking
+                ? '定位到 $percent% · 松开跳转'
+                : isPlaying
+                    ? widget.controller.currentItemLabel ?? '正在朗读'
+                    : isPaused
+                        ? '已暂停 · $percent%'
+                        : widget.subtitle;
         final compact = widget.compact;
-        final compactProgress = compactNarrationProgressLabel(
-          currentItemIndex: currentItem,
-          itemCount: itemCount,
-          currentOffset: visibleOffset,
-          totalCharacters: total,
-          finished: finished,
-        );
+        final compactProgress = seeking
+            ? '定位 $percent% · 第 $displayOffset 字 · 松开跳转'
+            : compactNarrationProgressLabel(
+                currentItemIndex: currentItem,
+                itemCount: itemCount,
+                currentOffset: displayOffset,
+                totalCharacters: total,
+                finished: finished,
+              );
+
+        void startSeek(double value) => _handleSeekStart(value);
+        void updateSeek(double value) => _handleSeekUpdate(value);
+        void endSeek(double value) => _handleSeekEnd(value);
 
         return Semantics(
           container: true,
@@ -495,18 +608,16 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                   ],
                 ),
                 if (compact) ...[
-                  const SizedBox(height: 3),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(99),
-                    child: LinearProgressIndicator(
-                      key: const ValueKey('narration-compact-progress'),
-                      value: progress,
-                      minHeight: 4,
-                      backgroundColor: Colors.white24,
-                      color: const Color(0xFFFFD879),
-                    ),
+                  const SizedBox(height: 1),
+                  NarrationSeekRail(
+                    key: const ValueKey('narration-compact-progress'),
+                    value: displayProgress,
+                    minHeight: 4,
+                    enabled: canSeek,
+                    onSeekStart: canSeek ? startSeek : null,
+                    onSeekUpdate: canSeek ? updateSeek : null,
+                    onSeekEnd: canSeek ? endSeek : null,
                   ),
-                  const SizedBox(height: 3),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: AnimatedSwitcher(
@@ -526,29 +637,30 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                     ),
                   ),
                 ] else ...[
-                  const SizedBox(height: 7),
+                  const SizedBox(height: 3),
                   Row(
                     children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(99),
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                minHeight: 7,
-                                backgroundColor: Colors.white24,
-                                color: const Color(0xFFFFD879),
-                              ),
+                            NarrationSeekRail(
+                              key: const ValueKey('narration-full-progress'),
+                              value: displayProgress,
+                              minHeight: 7,
+                              enabled: canSeek,
+                              onSeekStart: canSeek ? startSeek : null,
+                              onSeekUpdate: canSeek ? updateSeek : null,
+                              onSeekEnd: canSeek ? endSeek : null,
                             ),
-                            const SizedBox(height: 4),
                             Row(
                               children: [
                                 Text(
-                                  currentItem == null || itemCount == 0
-                                      ? '尚未开始'
-                                      : '第 ${currentItem + 1} / $itemCount 段',
+                                  seeking
+                                      ? '正在定位第 $displayOffset 字'
+                                      : currentItem == null || itemCount == 0
+                                          ? '尚未开始'
+                                          : '第 ${currentItem + 1} / $itemCount 段',
                                   style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 9.5,
