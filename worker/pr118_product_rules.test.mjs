@@ -16,7 +16,7 @@ test('PR118 keeps language level in settings and does not autoplay restored disc
   assert.match(settings, /HSK／TOCFL 能力设置/);
 });
 
-test('PR118 always presents three sequential four-choice challenge modes', async () => {
+test('PR118 always presents three sequential five-choice challenge modes', async () => {
   const [journey, challenge] = await Promise.all([
     read('app/lib/screens/journey_screen.dart'),
     read('app/lib/widgets/journey_challenge_panel.dart'),
@@ -27,7 +27,8 @@ test('PR118 always presents three sequential four-choice challenge modes', async
   assert.match(challenge, /JourneyChallengeType\.paragraphRebuild/);
   assert.match(challenge, /JourneyChallengeType\.grammarRepair/);
   assert.match(challenge, /JourneyChallengeType\.missingSentence/);
-  assert.match(challenge, /options\.length == 4/);
+  assert.match(challenge, /journeyChallengeOptionCount = 5/);
+  assert.match(challenge, /options\.length == journeyChallengeOptionCount/);
   assert.match(challenge, /challenge-question-card/);
   assert.match(challenge, /challenge-hint-card/);
   assert.match(challenge, /challenge-answer-area/);
