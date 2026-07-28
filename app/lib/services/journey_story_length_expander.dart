@@ -227,6 +227,12 @@ List<JourneyStoryEnrichmentPacket> _enrichmentFor(String journeyId) {
 }
 
 List<JourneyStoryEnrichmentPacket> _categoryPackets(String journeyId) {
+  if (journeyId == 'literary-roaming') return _literaryRoamingEnrichment;
+  if (journeyId == 'myth-tracing') return _mythTracingEnrichment;
+  if (journeyId == 'strange-night-talks') {
+    return _strangeNightTalksEnrichment;
+  }
+  if (journeyId == 'folk-secret-land') return _folkSecretLandEnrichment;
   if (journeyId.contains('forbidden-city') ||
       journeyId.contains('summer-palace')) {
     return _palaceAndGardenEnrichment;
@@ -389,6 +395,66 @@ const _advancedEnrichment = <JourneyStoryEnrichmentPacket>[
     pinyin: 'Líkāi qián nǐ zàicì huíwàng, zuìchū fēnsàn de xìjié yǐjīng xíngchéng guānxì, ér xīn de wèntí bǐ yí gè biāozhǔn dáàn gèng zhíde dàizǒu.',
     vietnamese: 'Trước khi rời đi, bạn nhìn lại: những chi tiết rời rạc ban đầu đã tạo thành quan hệ, và câu hỏi mới đáng mang theo hơn một đáp án chuẩn.',
     english: 'Before leaving, you look back: scattered details now form relationships, and a new question is more valuable than a standard answer.',
+  ),
+];
+
+const _literaryRoamingEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '竹影被风拆散又重合，蝴蝶忽远忽近，使梦境没有固定边界。',
+    pinyin: 'Zhúyǐng bèi fēng chāisàn yòu chónghé, húdié hū yuǎn hū jìn, shǐ mèngjìng méiyǒu gùdìng biānjiè.',
+    vietnamese: 'Bóng tre bị gió tách ra rồi chồng lại; cánh bướm lúc xa lúc gần khiến giấc mộng không có ranh giới cố định.',
+    english: 'Bamboo shadows separate and overlap in the wind, while the butterfly makes the dream’s boundary unstable.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '醒来并没有终止疑问：究竟是人梦见蝴蝶，还是身份本来就会随感知改变。',
+    pinyin: 'Xǐnglái bìng méiyǒu zhōngzhǐ yíwèn: jiūjìng shì rén mèngjiàn húdié, háishi shēnfèn běnlái jiù huì suí gǎnzhī gǎibiàn.',
+    vietnamese: 'Tỉnh dậy không chấm dứt câu hỏi: con người mơ thấy bướm, hay bản ngã vốn thay đổi theo nhận thức.',
+    english: 'Waking does not end the question: did a person dream of a butterfly, or does identity shift with perception?',
+  ),
+];
+
+const _mythTracingEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '桂香从月色里浮出，竹简上的残字却比传说更沉，像在等待另一种解释。',
+    pinyin: 'Guìxiāng cóng yuèsè lǐ fúchū, zhújiǎn shàng de cánzì què bǐ chuánshuō gèng chén, xiàng zài děngdài lìng yì zhǒng jiěshì.',
+    vietnamese: 'Hương quế nổi lên trong ánh trăng, còn chữ sót trên thẻ tre nặng hơn truyền thuyết như đang chờ một cách giải thích khác.',
+    english: 'Osmanthus rises through the moonlight, while the surviving characters on the bamboo slip await another interpretation.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '白兔引你返回人间，也提醒你：神话并非唯一版本，而是每次讲述都重新选择的道路。',
+    pinyin: 'Báitù yǐn nǐ fǎnhuí rénjiān, yě tíxǐng nǐ: shénhuà bìngfēi wéiyī bǎnběn, ér shì měi cì jiǎngshù dōu chóngxīn xuǎnzé de dàolù.',
+    vietnamese: 'Thỏ trắng dẫn bạn về nhân gian và nhắc rằng thần thoại không có một bản duy nhất; mỗi lần kể là một lần chọn lại con đường.',
+    english: 'The white rabbit leads you back and reminds you that myth has no single version; every retelling chooses a path anew.',
+  ),
+];
+
+const _strangeNightTalksEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '风雨压住客栈的灯火，无影客留下的铜钱却微微发热，使承诺显得比恐惧更真实。',
+    pinyin: 'Fēngyǔ yāzhù kèzhàn de dēnghuǒ, wúyǐng kè liúxià de tóngqián què wēiwēi fārè, shǐ chéngnuò xiǎnde bǐ kǒngjù gèng zhēnshí.',
+    vietnamese: 'Mưa gió đè thấp ánh đèn quán trọ, nhưng đồng tiền người khách không bóng để lại vẫn ấm, khiến lời hứa thật hơn nỗi sợ.',
+    english: 'Stormlight dims in the inn, yet the shadowless guest’s warm coin makes the promise feel more real than fear.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '更鼓一遍遍响起，直到鸡鸣切开黑夜，你才明白守约不是等待奇迹，而是承担选择。',
+    pinyin: 'Gēnggǔ yí biàn biàn xiǎngqǐ, zhídào jīmíng qiēkāi hēiyè, nǐ cái míngbai shǒuyuē bú shì děngdài qíjì, ér shì chéngdān xuǎnzé.',
+    vietnamese: 'Trống canh vang hết lượt này đến lượt khác; tới khi tiếng gà cắt màn đêm, bạn hiểu giữ lời không phải chờ phép màu mà là gánh lấy lựa chọn.',
+    english: 'The watch drum repeats until a rooster splits the night, revealing that keeping faith means carrying a choice, not awaiting a miracle.',
+  ),
+];
+
+const _folkSecretLandEnrichment = <JourneyStoryEnrichmentPacket>[
+  JourneyStoryEnrichmentPacket(
+    chinese: '河灯偏离水势，缓慢逆流而上；倒影里出现的不是过去，而是尚未发生的自己。',
+    pinyin: 'Hédēng piānlí shuǐshì, huǎnmàn nìliú ér shàng; dàoyǐng lǐ chūxiàn de bú shì guòqù, ér shì shàngwèi fāshēng de zìjǐ.',
+    vietnamese: 'Đèn sông rời dòng nước và chậm rãi trôi ngược; trong bóng phản chiếu không phải quá khứ mà là chính bạn chưa xảy đến.',
+    english: 'The river lantern turns against the current; its reflection shows not the past but a self that has not yet happened.',
+  ),
+  JourneyStoryEnrichmentPacket(
+    chinese: '岸边人的说法彼此矛盾，地方传闻因此不是答案，而是逼你决定要追随哪一种未来。',
+    pinyin: 'Ànbiān rén de shuōfǎ bǐcǐ máodùn, dìfāng chuánwén yīncǐ bú shì dáàn, ér shì bī nǐ juédìng yào zhuīsuí nǎ yì zhǒng wèilái.',
+    vietnamese: 'Những lời kể ven bờ mâu thuẫn nhau; truyền thuyết địa phương không cho đáp án mà buộc bạn chọn tương lai muốn đi theo.',
+    english: 'Conflicting voices along the bank turn local lore into no answer at all, but a demand to choose which future to follow.',
   ),
 ];
 
