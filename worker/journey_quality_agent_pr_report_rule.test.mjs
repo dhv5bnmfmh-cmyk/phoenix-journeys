@@ -35,18 +35,23 @@ test('generates and publishes the quality agent report before preview deployment
   assert.match(workflow, /actions\/upload-artifact@v4/);
 });
 
-test('Flutter-backed runner writes and validates the release evidence', () => {
+test('Flutter-backed runner requires twelve journeys and 120 inspections', () => {
   assert.match(reportRunner, /generate_journey_quality_report\.dart/);
   assert.match(reportRunner, /PHOENIX_QUALITY_MARKDOWN/);
   assert.match(reportRunner, /PHOENIX_QUALITY_JSON/);
+  assert.match(reportRunner, /report\['journeyCount'\], 12/);
+  assert.match(reportRunner, /report\['specialJourneyCount'\], 4/);
+  assert.match(reportRunner, /report\['inspectionCount'\], 120/);
   assert.match(reportRunner, /report\['canPublish'\], isTrue/);
   assert.match(reportRunner, /report\['blockedCount'\], 0/);
 });
 
-test('report covers the published catalog and exposes release evidence', () => {
+test('report covers regular and special catalogs and exposes release evidence', () => {
   assert.match(reportTool, /PhoenixJourneyContentQualityAgent/);
   assert.match(reportTool, /inspectPublishedCatalog/);
-  assert.match(reportTool, /dailyJourneyExperiences/);
+  assert.match(reportTool, /allJourneyExperiences/);
+  assert.match(reportTool, /dailyJourneyExperiences\.length/);
+  assert.match(reportTool, /specialJourneyExperiences\.length/);
   assert.match(reportTool, /allProfiles/);
   assert.match(reportTool, /'canPublish': batch\.canPublish/);
   assert.match(reportTool, /'minimumScore': batch\.minimumScore/);
