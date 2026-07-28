@@ -39,14 +39,17 @@ void main() {
     final topLeft = tester.getTopLeft(rail);
     final centerY = tester.getCenter(rail).dy;
     final gesture = await tester.startGesture(Offset(topLeft.dx + 40, centerY));
+    await gesture.moveTo(Offset(topLeft.dx + 80, centerY));
+    await tester.pump();
     await gesture.moveTo(Offset(topLeft.dx + 160, centerY));
+    await tester.pump();
     await gesture.up();
     await tester.pump();
 
     // Flutter reports drag start after the pointer crosses the gesture slop,
     // so the exact starting percentage can vary slightly by test runner.
     expect(started, isNotNull);
-    expect(started!, inInclusiveRange(.15, .40));
+    expect(started!, inInclusiveRange(.15, .50));
     expect(updated, closeTo(.8, .03));
     expect(ended, closeTo(.8, .03));
   });
