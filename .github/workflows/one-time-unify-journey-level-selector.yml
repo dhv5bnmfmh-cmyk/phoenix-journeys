@@ -1,17 +1,18 @@
 name: One-time unify journey level selector
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/adaptive-level-content-v2
-    paths:
-      - .github/workflows/one-time-unify-journey-level-selector.yml
+      - main
+    types:
+      - synchronize
 
 permissions:
   contents: write
 
 jobs:
   patch-and-remove:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Check out branch
