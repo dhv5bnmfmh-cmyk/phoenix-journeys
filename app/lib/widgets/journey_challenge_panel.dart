@@ -21,6 +21,8 @@ const fixedJourneyChallengeTypes = <JourneyChallengeType>[
   JourneyChallengeType.missingSentence,
 ];
 
+const int journeyChallengeOptionCount = 5;
+
 @visibleForTesting
 JourneyChallengeDifficulty challengeDifficultyForProfile(
   ChineseProficiencyProfile? profile,
@@ -448,7 +450,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
             t(
               _session.resolved
                   ? '本模式已完成'
-                  : '第 ${_session.attempts + 1} / 3 次 · 候选答案固定为 4 个',
+                  : '第 ${_session.attempts + 1} / 3 次 · 候选答案 ${_session.options.length} 个',
             ),
             style: TextStyle(
               color: const Color(0xFF49382C).withValues(alpha: .62),
@@ -530,7 +532,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           ),
         ),
         const SizedBox(height: 7),
-        _fourOptions(),
+        _challengeOptions(),
         const SizedBox(height: 7),
         Align(
           alignment: Alignment.centerLeft,
@@ -630,7 +632,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           ),
         ),
         const SizedBox(height: 6),
-        _fourOptions(),
+        _challengeOptions(),
       ],
     );
   }
@@ -675,7 +677,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
         const SizedBox(height: 6),
         _contextSentence(_session.contextAfter),
         const SizedBox(height: 8),
-        _fourOptions(),
+        _challengeOptions(),
       ],
     );
   }
@@ -709,10 +711,10 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     );
   }
 
-  Widget _fourOptions() {
-    assert(_session.options.length == 4);
+  Widget _challengeOptions() {
+    assert(_session.options.length == journeyChallengeOptionCount);
     return Column(
-      key: const ValueKey('challenge-four-options'),
+      key: const ValueKey('challenge-five-options'),
       children: [
         for (var index = 0; index < _session.options.length; index++) ...[
           _optionTile(_session.options[index], index),
@@ -1289,7 +1291,7 @@ class _ChallengeSession {
     final distractorTexts = _paragraphDistractors(journeyId);
     final options = <_ChallengeOption>[...correctOptions];
     var distractorIndex = 0;
-    while (options.length < 4) {
+    while (options.length < journeyChallengeOptionCount) {
       options.add(
         _ChallengeOption(
           id: 'distractor-$distractorIndex',
@@ -1310,7 +1312,7 @@ class _ChallengeSession {
       options: options,
       correctIds: correctOptions.map((option) => option.id).toList(),
       questionTitle: '把散开的故事拼回来',
-      instruction: '四个候选句中有 ${correctOptions.length} 句属于原文。请按故事发生的顺序依次点击。',
+      instruction: '五个候选句中有 ${correctOptions.length} 句属于原文。请按故事发生的顺序依次点击。',
       explanation: '段落通常先交代地点或时间，再写行动，最后出现观察、变化或决定。',
       memoryTip: '记住“整体 → 行动 → 变化”，不要只看单句是否通顺。',
     );
@@ -1322,12 +1324,40 @@ class _ChallengeSession {
     int seed,
   ) {
     final grammar = _grammarForJourney(journeyId, difficulty, seed);
-    final replacementTexts = <String>[
+
+    final replacementCandidates = <String>[
       grammar.correctReplacement,
       ...grammar.distractors,
+      grammar.segments[grammar.problemSegmentIndex],
+      ...switch (difficulty) {
+        JourneyChallengeDifficulty.beginner => <String>[
+            '因此${grammar.correctReplacement}',
+            '而且${grammar.correctReplacement}',
+          ],
+        JourneyChallengeDifficulty.standard => <String>[
+            '同时${grammar.correctReplacement}',
+            '${grammar.correctReplacement}还',
+          ],
+        JourneyChallengeDifficulty.advanced => <String>[
+            '从而${grammar.correctReplacement}',
+            '由此${grammar.correctReplacement}',
+          ],
+      },
     ];
+    final replacementTexts = <String>[];
+    for (final candidate in replacementCandidates) {
+      final value = candidate.trim();
+      if (value.isEmpty || replacementTexts.contains(value)) continue;
+      replacementTexts.add(value);
+      if (replacementTexts.length >= journeyChallengeOptionCount) break;
+    }
+    if (replacementTexts.length < journeyChallengeOptionCount) {
+      throw StateError('Grammar challenge requires five unique options.');
+    }
     final options = <_ChallengeOption>[
-      for (var index = 0; index < 4; index++)
+      for (var index = 0;
+          index < journeyChallengeOptionCount;
+          index++)
         _ChallengeOption(
           id: index == 0 ? 'correct' : 'distractor-$index',
           text: replacementTexts[index],
@@ -1343,7 +1373,7 @@ class _ChallengeSession {
       options: options,
       correctIds: const ['correct'],
       questionTitle: '修好这句不自然的话',
-      instruction: '先点击病句位置，再从四个修改方案中选出最自然的一项。',
+      instruction: '先点击病句位置，再从五个修改方案中选出最自然的一项。',
       explanation: grammar.whyWrong,
       memoryTip: grammar.memoryTip,
       grammar: grammar,
@@ -1361,10 +1391,14 @@ class _ChallengeSession {
     final before = source.isNotEmpty ? source[0] : '清晨，探索者来到今天的目的地。';
     final correct = source.length >= 2 ? source[1] : '他沿着主要路线慢慢向前走。';
     final after = source.length >= 3 ? source[2] : '一路上的景色因此不断发生变化。';
-    final distractors = _missingDistractors(journeyId, discoveryTexts);
+    final distractors = _missingDistractors(
+  journeyId,
+  discoveryTexts,
+  difficulty,
+);
     final optionTexts = <String>[correct, ...distractors];
     final options = <_ChallengeOption>[
-      for (var index = 0; index < 4; index++)
+      for (var index = 0; index < journeyChallengeOptionCount; index++)
         _ChallengeOption(
           id: index == 0 ? 'correct' : 'distractor-$index',
           text: optionTexts[index],
@@ -1380,7 +1414,7 @@ class _ChallengeSession {
       options: options,
       correctIds: const ['correct'],
       questionTitle: '补回故事中消失的一句',
-      instruction: '阅读前后文，从四个相近答案中选出最能连接上下文的一句。',
+      instruction: '阅读前后文，从五个相近答案中选出最能连接上下文的一句。',
       explanation: '正确句承接前文的人物与地点，同时为后文的变化、因果或决定铺路。',
       memoryTip: '补句要同时看两边：前一句留下什么，后一句为什么出现。',
       contextBefore: before,
@@ -1603,19 +1637,42 @@ class _ChallengeSession {
     return variedSpecs[replayVariant];
   }
 
+
   static List<String> _paragraphDistractors(String journeyId) {
     return switch (journeyId) {
-      'literary-roaming' => ['蝴蝶停在原地，竹林也从来没有出现变化。', '探索者没有做梦，也没有看见任何岔路。'],
-      'myth-tracing' => ['太阳升起以后，遗简才第一次从海底出现。', '白兔离开桂林，故事也没有留下任何选择。'],
-      'strange-night-talks' => ['客栈从来没有下雨，夜客也一直拥有清楚的影子。', '天刚亮时，门外才第一次有人轻轻敲门。'],
-      'folk-secret-land' => ['所有河灯都停在岸上，从未进入水中。', '写着名字的灯顺流远去，没有出现任何倒影。'],
-      _ => ['游客没有停留，很快就离开了这里。', '所有景色完全相同，不需要继续观察。', '故事突然中断，也没有留下任何结果。'],
+      'literary-roaming' => [
+        '蝴蝶停在原地，竹林也从来没有出现变化。',
+        '探索者没有做梦，也没有看见任何岔路。',
+        '他只沿着直路前进，始终没有回头寻找梦的入口。',
+      ],
+      'myth-tracing' => [
+        '太阳升起以后，遗简才第一次从海底出现。',
+        '白兔离开桂林，故事也没有留下任何选择。',
+        '探索者把空匣留在岸边，没有继续辨认月光中的文字。',
+      ],
+      'strange-night-talks' => [
+        '客栈从来没有下雨，夜客也一直拥有清楚的影子。',
+        '天刚亮时，门外才第一次有人轻轻敲门。',
+        '掌柜点亮所有灯火，走廊立刻恢复了白日的安静。',
+      ],
+      'folk-secret-land' => [
+        '所有河灯都停在岸上，从未进入水中。',
+        '写着名字的灯顺流远去，没有出现任何倒影。',
+        '探索者把灯放回石阶，河面也没有改变流动方向。',
+      ],
+      _ => [
+        '游客没有停留，很快就离开了这里。',
+        '所有景色完全相同，不需要继续观察。',
+        '故事突然中断，也没有留下任何结果。',
+      ],
     };
   }
+
 
   static List<String> _missingDistractors(
     String journeyId,
     List<String> discoveries,
+    JourneyChallengeDifficulty difficulty,
   ) {
     final specific = switch (journeyId) {
       'literary-roaming' => [
@@ -1638,12 +1695,45 @@ class _ChallengeSession {
         '灯纸上写的是菜单，与前后的名字无关。',
         '河水完全停止流动，因此不存在上游和下游。',
       ],
-      _ => ['他没有进入景区，直接回到了住处。', '所有建筑完全一样，所以不必继续观察。', '天气突然改变，但这与前后内容没有关系。'],
+      _ => [
+        '他没有进入景区，直接回到了住处。',
+        '所有建筑完全一样，所以不必继续观察。',
+        '天气突然改变，但这与前后内容没有关系。',
+      ],
     };
-    if (discoveries.isNotEmpty && specific.length < 3) {
-      return [...specific, discoveries.last];
+    final discoverySentences = _extractSentences(discoveries);
+    final discoveryCandidate = discoverySentences.isEmpty
+        ? null
+        : discoverySentences.last;
+    final levelCandidates = switch (difficulty) {
+      JourneyChallengeDifficulty.beginner => <String>[
+          ...specific,
+          '他很快离开了这里，故事也在这一刻结束。',
+        ],
+      JourneyChallengeDifficulty.standard => <String>[
+          ...specific,
+          if (discoveryCandidate != null) discoveryCandidate,
+          '他停下脚步，把沿途景色逐一写进记录里。',
+        ],
+      JourneyChallengeDifficulty.advanced => <String>[
+          if (discoveryCandidate != null) discoveryCandidate,
+          ...specific,
+          '他重新检查前文线索，却没有改变原来的判断。',
+        ],
+    };
+    final result = <String>[];
+    for (final candidate in levelCandidates) {
+      final value = candidate.trim();
+      if (value.isEmpty || result.contains(value)) continue;
+      result.add(value);
+      if (result.length >= journeyChallengeOptionCount - 1) break;
     }
-    return specific;
+    if (result.length < journeyChallengeOptionCount - 1) {
+      throw StateError(
+        'Missing-sentence challenge requires four distractors.',
+      );
+    }
+    return result;
   }
 
   static bool _startsWithCorrectOrder(

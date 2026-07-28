@@ -14,6 +14,7 @@ Base: `main@7d5a7b6ec767dcb9807396239e4464da6ddb8510`
 - Show first-time explorers one non-blocking prompt when no exam profile exists, with a direct action to open the existing HSK or TOCFL picker.
 - Persist the prompt state so it does not interrupt later journeys; saving a profile also suppresses the prompt.
 - Keep the legacy three-level catalog only as a safe fallback until an explorer selects an exam profile.
+- Give every adaptive challenge five candidate answers, with closer content-based distractors at higher levels.
 
 ## Guardrails
 
