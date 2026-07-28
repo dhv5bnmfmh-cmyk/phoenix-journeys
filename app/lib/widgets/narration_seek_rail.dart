@@ -60,7 +60,7 @@ class _NarrationSeekRailState extends State<NarrationSeekRail> {
           final width = constraints.maxWidth;
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTapDown: widget.enabled && widget.onSeekStart != null
+            onTapUp: widget.enabled && widget.onSeekStart != null
                 ? (details) {
                     final next = _progressFor(details.localPosition, width);
                     _start(next);
