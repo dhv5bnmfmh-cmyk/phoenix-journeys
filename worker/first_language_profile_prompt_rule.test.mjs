@@ -10,31 +10,26 @@ const journeyScreen = readFileSync(
   'app/lib/screens/journey_screen.dart',
   'utf8',
 );
+const main = readFileSync('app/lib/main.dart', 'utf8');
 
-test('the first journey level prompt is persistent and appears only without a profile', () => {
-  assert.match(store, /phoenix\.languageProficiencyPromptSeen/);
-  assert.match(store, /Future<bool> shouldShowJourneyPrompt\(\)/);
-  assert.match(store, /return !hasProfile && !promptSeen/);
-  assert.match(store, /Future<void> markJourneyPromptSeen\(\)/);
-  assert.match(store, /setBool\(_promptSeenKey, true\)/);
+test('Phoenix level initializes before the app renders', () => {
+  assert.match(main, /Future<void> main\(\) async/);
+  assert.match(main, /initializePhoenixLevel\(\)/);
+  assert.match(store, /phoenix\.level/);
+  assert.match(store, /PhoenixLevelController\.defaultLevel/);
 });
 
-test('saving a profile suppresses the first-use prompt', () => {
-  assert.match(
-    store,
-    /setString\(_profileKey, profile\.storageValue\)[\s\S]*setBool\(_promptSeenKey, true\)/,
-  );
-  assert.match(
-    store,
-    /remove\(_profileKey\)[\s\S]*remove\(_promptSeenKey\)/,
-  );
+test('legacy exam settings migrate without showing a blocking picker', () => {
+  assert.match(store, /phoenixLevelFromStorage/);
+  assert.match(store, /setString\([\s\S]*profileForPhoenixLevel/);
+  assert.match(store, /Future<bool> shouldShowJourneyPrompt\(\) async => false/);
+  assert.doesNotMatch(journeyScreen, /_showFirstLanguageProfilePrompt/);
+  assert.doesNotMatch(journeyScreen, /_showLanguageProfilePicker/);
+  assert.doesNotMatch(journeyScreen, /SnackBarAction/);
 });
 
-test('journey guidance is non-blocking and opens the existing profile picker', () => {
-  assert.match(journeyScreen, /_showFirstLanguageProfilePrompt/);
-  assert.match(journeyScreen, /WidgetsBinding\.instance\.addPostFrameCallback/);
-  assert.match(journeyScreen, /ScaffoldMessenger\.of\(context\)\.showSnackBar/);
-  assert.match(journeyScreen, /SnackBarAction/);
-  assert.match(journeyScreen, /选择中文等级后，故事、发现和重点单词会更适合你。/);
-  assert.match(journeyScreen, /_showLanguageProfilePicker\(showIntro: true\)/);
+test('the journey screen loads one unified profile and listens for changes', () => {
+  assert.match(journeyScreen, /_languageLevelStore\.load\(\)/);
+  assert.match(journeyScreen, /_phoenixLevelController\.addListener/);
+  assert.match(journeyScreen, /_applyPhoenixLevelChange/);
 });
