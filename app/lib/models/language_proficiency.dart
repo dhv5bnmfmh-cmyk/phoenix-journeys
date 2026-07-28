@@ -42,15 +42,25 @@ class ChineseProficiencyProfile {
     required this.levelCode,
     required this.levelLabel,
     required this.band,
-  });
+    this.phoenixLevel,
+  }) : assert(
+          phoenixLevel == null ||
+              (phoenixLevel >= 1 && phoenixLevel <= 10),
+        );
 
   final ChineseExamTrack track;
   final String levelCode;
   final String levelLabel;
   final PhoenixReadingBand band;
+  final int? phoenixLevel;
 
-  String get storageValue => '${track.storageValue}:$levelCode';
-  String get displayLabel => '${track.label} $levelLabel';
+  bool get isPhoenix => phoenixLevel != null;
+
+  String get storageValue => isPhoenix
+      ? 'phoenix:$phoenixLevel'
+      : '${track.storageValue}:$levelCode';
+
+  String get displayLabel => isPhoenix ? 'Lv.$phoenixLevel' : '${track.label} $levelLabel';
 }
 
 class ReadingGenerationPlan {
@@ -108,5 +118,38 @@ class VocabularyLevelTag {
   int? levelFor(ChineseExamTrack track) => switch (track) {
         ChineseExamTrack.hsk => hskLevel,
         ChineseExamTrack.tocfl => tocflLevel,
+      };
+
+  int? levelForProfile(ChineseProficiencyProfile profile) {
+    if (!profile.isPhoenix) return levelFor(profile.track);
+
+    final anchors = <int>[
+      if (hskLevel != null) _phoenixFromHsk(hskLevel!),
+      if (tocflLevel != null) _phoenixFromTocfl(tocflLevel!),
+    ];
+    if (anchors.isEmpty) return null;
+    return (anchors.reduce((left, right) => left + right) / anchors.length)
+        .round()
+        .clamp(1, 10)
+        .toInt();
+  }
+
+  int _phoenixFromHsk(int level) => switch (level) {
+        <= 1 => 1,
+        2 => 2,
+        3 => 3,
+        4 => 5,
+        5 => 6,
+        6 => 8,
+        _ => 9,
+      };
+
+  int _phoenixFromTocfl(int level) => switch (level) {
+        <= 1 => 2,
+        2 => 4,
+        3 => 5,
+        4 => 7,
+        5 => 8,
+        _ => 9,
       };
 }
