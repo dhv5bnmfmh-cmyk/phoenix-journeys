@@ -1,0 +1,79 @@
+name: Diagnose balance challenge option migration
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: agent/adaptive-level-content-v2
+          fetch-depth: 0
+
+      - name: Compile and execute embedded migration script
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import py_compile
+          import subprocess
+          import traceback
+
+          workflow_path = Path('.github/workflows/one-time-balance-challenge-options.yml')
+          workflow = workflow_path.read_text()
+          start_token = "          python - <<'PY'\n"
+          end_token = "\n          PY\n"
+          report = []
+          try:
+            block = workflow.split(start_token, 1)[1].split(end_token, 1)[0]
+            script_lines = []
+            for line in block.splitlines():
+              script_lines.append(line[10:] if line.startswith('          ') else line)
+            script = '\n'.join(script_lines) + '\n'
+            script_path = Path('/tmp/balance_migration.py')
+            script_path.write_text(script)
+            py_compile.compile(str(script_path), doraise=True)
+            report.append('PYTHON_COMPILE=PASS')
+            result = subprocess.run(
+              ['python', str(script_path)],
+              text=True,
+              capture_output=True,
+              check=False,
+            )
+            report.append(f'PYTHON_EXIT={result.returncode}')
+            if result.stdout.strip():
+              report.append('STDOUT:')
+              report.append(result.stdout[-2000:])
+            if result.stderr.strip():
+              report.append('STDERR:')
+              report.append(result.stderr[-4000:])
+          except Exception:
+            report.append('DIAGNOSTIC_EXCEPTION:')
+            report.append(traceback.format_exc())
+
+          subprocess.run(['git', 'reset', '--hard', 'HEAD'], check=True)
+          subprocess.run(['git', 'clean', '-fd'], check=True)
+          Path('docs/balance-challenge-diagnostic.txt').write_text('\n'.join(report))
+          PY
+
+      - name: Commit report and remove diagnostics
+        shell: bash
+        run: |
+          rm -f .github/workflows/diagnose-balance-challenge-options.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/balance-challenge-diagnostic.txt \
+            .github/workflows/diagnose-balance-challenge-options.yml
+          git commit -m "Capture balance migration failure"
+          git push origin HEAD:agent/adaptive-level-content-v2
