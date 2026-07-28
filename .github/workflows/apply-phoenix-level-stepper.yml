@@ -1,0 +1,39 @@
+name: Apply Phoenix level stepper
+
+on:
+  push:
+    branches:
+      - agent/adaptive-level-content-v2
+    paths:
+      - tool/apply_phoenix_level_stepper.py
+      - .github/workflows/apply-phoenix-level-stepper.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-phoenix-level-stepper
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v6
+        with:
+          ref: agent/adaptive-level-content-v2
+          fetch-depth: 0
+
+      - name: Apply source migration
+        run: python3 tool/apply_phoenix_level_stepper.py
+
+      - name: Commit migrated source
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart tool/apply_phoenix_level_stepper.py .github/workflows/apply-phoenix-level-stepper.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "Connect Phoenix levels to live journey content"
+          git push origin HEAD:agent/adaptive-level-content-v2
