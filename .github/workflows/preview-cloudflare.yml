@@ -60,10 +60,13 @@ jobs:
 
       - name: Generate journey quality agent report
         working-directory: app
+        env:
+          PHOENIX_GENERATE_QUALITY_REPORT: '1'
+          PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
+          PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
         run: >-
-          dart run tool/generate_journey_quality_report.dart
-          --markdown=../journey-quality-report.md
-          --json=../journey-quality-report.json
+          flutter test test/journey_quality_report_ci_test.dart
+          --reporter expanded
 
       - name: Upload journey quality report
         uses: actions/upload-artifact@v4
