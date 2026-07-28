@@ -1,2 +1,0 @@
-Trigger adaptive challenge pedagogy migration for PR #133.
-Registered workflow sync: 3
