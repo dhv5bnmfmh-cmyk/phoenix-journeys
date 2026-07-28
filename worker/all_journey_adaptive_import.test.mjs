@@ -30,3 +30,18 @@ test('adaptive catalog keeps one-or-two story paragraphs and level-specific task
   assert.match(catalog, /_expressQuestion/);
   assert.match(catalog, /请使用“既……也……”或“不是……而是……”/);
 });
+
+test('advanced and mastery discoveries stay in two focused sections', () => {
+  assert.match(
+    catalog,
+    /PhoenixReadingBand\.advanced \|\| PhoenixReadingBand\.mastery =>\s*_groupDiscoveries/,
+  );
+  assert.match(
+    catalog,
+    /PhoenixReadingBand\.upperIntermediate \|\|\s*PhoenixReadingBand\.advanced \|\|\s*PhoenixReadingBand\.mastery => 2/,
+  );
+  assert.match(
+    runtime,
+    /PhoenixReadingBand\.upperIntermediate \|\|\s*PhoenixReadingBand\.advanced \|\|\s*PhoenixReadingBand\.mastery => 2/,
+  );
+});
