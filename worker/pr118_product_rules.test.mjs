@@ -41,17 +41,15 @@ test('PR118 always presents three sequential four-choice challenge modes', async
   assert.match(challenge, /病句类型/);
   assert.match(challenge, /为什么错误/);
   for (const errorType of [
-    '成分赘余',
-    '主语错位',
-    '动宾搭配不当',
-    '指代不明',
-    '时态逻辑矛盾',
-    '关联词搭配错误',
-    '语序不当',
+    '成分残缺：主语缺失',
+    '前后主语与句式不平行',
+    '成分赘余：关联词堆叠并导致主语缺失',
   ]) {
     assert.match(challenge, new RegExp(errorType));
   }
-  assert.match(challenge, /replayVariant/);
+  assert.match(challenge, /_adaptiveGrammarForJourney/);
+  assert.match(challenge, /return journeySpec/);
+  assert.doesNotMatch(challenge, /replayVariant/);
 });
 
 test('PR118 registers full cinematic special journeys in the stable flow', async () => {
