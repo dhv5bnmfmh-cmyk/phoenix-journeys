@@ -35,9 +35,15 @@ void main() {
         as Map<String, dynamic>;
 
     expect(markdown, contains('Phoenix 全旅程内容品质报告'));
+    expect(markdown, contains('特别旅程：`4`'));
     expect(report['agent'], 'PhoenixJourneyContentQualityAgent');
-    expect(report['inspectionCount'], greaterThan(0));
+    expect(report['journeyCount'], 12);
+    expect(report['regularJourneyCount'], 8);
+    expect(report['specialJourneyCount'], 4);
+    expect(report['profileCount'], 10);
+    expect(report['inspectionCount'], 120);
     expect(report['canPublish'], isTrue);
+    expect(report['approvedCount'], 120);
     expect(report['needsRevisionCount'], 0);
     expect(report['blockedCount'], 0);
   });
