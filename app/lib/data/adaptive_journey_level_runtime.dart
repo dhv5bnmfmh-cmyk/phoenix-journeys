@@ -1,5 +1,6 @@
 import '../agents/phoenix_language_level_agent.dart';
 import '../models/language_proficiency.dart';
+import '../services/narrative_quality_shaper.dart';
 import 'all_journey_language_level_catalog.dart';
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
@@ -14,10 +15,15 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   Set<String> knownWords = const <String>{},
 }) {
   if (experience.id != 'beijing-summer-palace') {
-    return buildAdaptiveLevelForJourney(
+    final content = buildAdaptiveLevelForJourney(
       experience,
       profile: profile,
       knownWords: knownWords,
+    );
+    return refineAdaptiveNarrativeQuality(
+      experience,
+      content,
+      profile: profile,
     );
   }
 
