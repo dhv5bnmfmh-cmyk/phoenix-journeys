@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-@visibleForTesting
 List<String> selectBalancedChallengeDistractors({
   required Iterable<String> correctAnswers,
   required Iterable<String> candidates,
