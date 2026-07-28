@@ -32,6 +32,25 @@ void main() {
     );
   });
 
+  test('prefers a plausible near-miss over an unrelated same-length option', () {
+    const correct = '长廊连接湖岸，也改变观看节奏。';
+    final selected = selectBalancedChallengeDistractors(
+      correctAnswers: const <String>[correct],
+      candidates: const <String>[
+        '月光照亮河灯，也提醒人们回家。',
+        '长廊连接景点，却没有改变行走节奏。',
+        '游客经过入口，也准备开始拍照。',
+      ],
+      count: 1,
+    );
+
+    expect(selected, <String>['长廊连接景点，却没有改变行走节奏。']);
+    expect(
+      challengeKeywordOverlap(selected.single, correct),
+      inInclusiveRange(.25, .75),
+    );
+  });
+
   test('balanced distractors reject an insufficient unique pool', () {
     expect(
       () => selectBalancedChallengeDistractors(
