@@ -3,6 +3,7 @@ import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/services/narrative_quality_shaper.dart';
+import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 void main() {
   const agent = PhoenixLanguageLevelAgent();
@@ -28,7 +29,7 @@ void main() {
 
   for (final profile in agent.allProfiles) {
     test('${profile.displayLabel} keeps the narrative spine of every journey', () {
-      final plan = agent.planFor(profile);
+      final storyTarget = phoenixStoryLengthTargetFor(profile);
 
       for (final journey in dailyJourneyExperiences) {
         if (journey.id == 'beijing-summer-palace') continue;
@@ -43,6 +44,7 @@ void main() {
         final shapedSentences = splitChineseNarrativeSentences(
           content.storyParagraphs.join(),
         );
+        final storyCharacters = content.storyParagraphs.join().runes.length;
 
         expect(
           shapedSentences.first,
@@ -56,7 +58,7 @@ void main() {
         );
         expect(
           content.storyParagraphs.length,
-          plan.paragraphCount,
+          storyTarget.paragraphCount,
           reason: '${journey.id} should keep the approved reading shape',
         );
         expect(
@@ -75,9 +77,12 @@ void main() {
           reason: '${journey.id} should not produce an empty annotation',
         );
         expect(
-          content.storyParagraphs.join().runes.length,
-          lessThanOrEqualTo(plan.maxTotalCharacters),
-          reason: '${journey.id} should respect the reading character ceiling',
+          storyCharacters,
+          inInclusiveRange(
+            storyTarget.minimumCharacters,
+            storyTarget.maximumCharacters,
+          ),
+          reason: '${journey.id} should meet the Phoenix reading range',
         );
       }
     });
