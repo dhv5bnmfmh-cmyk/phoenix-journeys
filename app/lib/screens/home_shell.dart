@@ -5,6 +5,7 @@ import '../models/journey_background.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/destination_background.dart';
+import '../widgets/journey_level_selector_button.dart';
 import 'city_passport_screen.dart';
 import 'explore_screen.dart';
 import 'me_screen.dart';
@@ -30,13 +31,24 @@ class HomeShell extends StatelessWidget {
           2 => JourneyBackgroundPage.profile,
           _ => JourneyBackgroundPage.explore,
         };
-        final content = state.selectedTab == 0
+        final baseContent = state.selectedTab == 0
             ? indexedPages
             : DestinationBackground(
                 journeyId: state.activeJourneyId,
                 pageType: pageType,
                 child: indexedPages,
               );
+        final content = Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(child: baseContent),
+            const Positioned(
+              top: 6,
+              right: 8,
+              child: JourneyLevelSelectorButton(compact: true),
+            ),
+          ],
+        );
 
         if (isWide) {
           return Scaffold(

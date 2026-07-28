@@ -9,7 +9,6 @@ import '../services/journey_location_binding.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/city_journey_stamp.dart';
-import '../widgets/journey_level_selector_button.dart';
 import '../widgets/journey_symbol_badge.dart';
 import '../widgets/special_journey_passport.dart';
 import 'journey_screen.dart';
@@ -85,8 +84,6 @@ class _PassportHeader extends StatelessWidget {
             ),
           ),
         ),
-        const JourneyLevelSelectorButton(compact: true),
-        const SizedBox(width: 6),
         Text(
           _passportAllAccessPreview
               ? state.displayText('全开放')
