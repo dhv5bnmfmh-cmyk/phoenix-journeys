@@ -59,17 +59,33 @@ jobs:
           Path('/tmp/adaptive_challenge_pedagogy.py').write_text(textwrap.dedent(script))
           PY
 
-          python /tmp/adaptive_challenge_pedagogy.py
+          set +e
+          python /tmp/adaptive_challenge_pedagogy.py > /tmp/adaptive-pedagogy.log 2>&1
+          migration_status=$?
+          set -e
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if [[ "$migration_status" -ne 0 ]]; then
+            git restore app/lib/widgets/journey_challenge_panel.dart || true
+            rm -f app/test/adaptive_challenge_pedagogy_test.dart
+            rm -f worker/adaptive_challenge_pedagogy_rule.test.mjs
+            {
+              echo "EXIT=$migration_status"
+              cat /tmp/adaptive-pedagogy.log
+            } > docs/adaptive-pedagogy-migration-failure.txt
+            git add docs/adaptive-pedagogy-migration-failure.txt
+            git commit -m "Record adaptive pedagogy migration failure"
+            git push origin HEAD:agent/adaptive-level-content-v2
+            exit 1
+          fi
+
           git add app/lib/widgets/journey_challenge_panel.dart
           git add app/test/adaptive_challenge_pedagogy_test.dart
           git add worker/adaptive_challenge_pedagogy_rule.test.mjs
           git commit -m "Adapt challenge teaching support by language level"
           git push origin HEAD:agent/adaptive-level-content-v2
-
-          echo "Adaptive pedagogy product commit pushed. Connector cleanup is required."
           exit 1
       # END ADAPTIVE PEDAGOGY MIGRATION
 
