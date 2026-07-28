@@ -3,6 +3,7 @@ import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
+import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 void main() {
   const agent = PhoenixLanguageLevelAgent();
@@ -10,17 +11,28 @@ void main() {
   for (final profile in agent.allProfiles) {
     test('${profile.displayLabel} shapes every published journey', () {
       final plan = agent.planFor(profile);
+      final storyTarget = phoenixStoryLengthTargetFor(profile);
 
       for (final journey in dailyJourneyExperiences) {
         final content = resolveAdaptiveJourneyLevel(
           journey,
           profile: profile,
         );
+        final storyCharacters = content.storyParagraphs.join().runes.length;
 
         expect(
           content.storyParagraphs.length,
-          plan.paragraphCount,
+          storyTarget.paragraphCount,
           reason: '${journey.id} should follow ${profile.displayLabel}',
+        );
+        expect(
+          storyCharacters,
+          inInclusiveRange(
+            storyTarget.minimumCharacters,
+            storyTarget.maximumCharacters,
+          ),
+          reason: '${journey.id} should meet the ${profile.displayLabel} '
+              'story range, but produced $storyCharacters characters',
         );
         expect(
           content.storyAnnotations.length,
