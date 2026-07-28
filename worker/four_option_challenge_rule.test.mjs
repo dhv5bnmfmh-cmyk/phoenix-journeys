@@ -64,8 +64,8 @@ test('regular journeys never fall back to generic challenge filler', () => {
 });
 
 
-test('regular grammar repairs stay destination-specific at every level', () => {
-  assert.match(panel, /_regularGrammarForJourney\(journeyId, difficulty\)/);
+test('all journey grammar repairs stay theme-specific at every level', () => {
+  assert.match(panel, /_adaptiveGrammarForJourney\(journeyId, difficulty\)/);
   assert.match(panel, /JourneyChallengeDifficulty\.beginner => _GrammarSpec/);
   assert.match(panel, /JourneyChallengeDifficulty\.standard => _GrammarSpec/);
   assert.match(panel, /JourneyChallengeDifficulty\.advanced => _GrammarSpec/);
@@ -79,8 +79,12 @@ test('regular grammar repairs stay destination-specific at every level', () => {
     'chengdu-kuanzhai-alley',
     'nanjing-qinhuai-river',
     'guangzhou-chen-clan-academy',
+    'literary-roaming',
+    'myth-tracing',
+    'strange-night-talks',
+    'folk-secret-land',
   ]) {
-    assert.ok(panel.includes(`'${journeyId}' => (`));
+    assert.ok(panel.includes(`'${journeyId}'`));
   }
 
   for (const destinationMarker of [
@@ -92,6 +96,10 @@ test('regular grammar repairs stay destination-specific at every level', () => {
     '宽、窄、井三条巷子',
     '秦淮河的桥梁与灯影',
     '屋脊陶塑和木石雕刻',
+    '蓝色蝴蝶和竹林梦境',
+    '月宫遗简和守匣白兔',
+    '无影夜客和门外呼声',
+    '逆流河灯和灯纸姓名',
   ]) {
     assert.ok(panel.includes(destinationMarker));
   }
