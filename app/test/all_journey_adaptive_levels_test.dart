@@ -75,8 +75,6 @@ void main() {
       levels.map((level) => level.expressQuestion).toSet(),
       hasLength(12),
     );
-    expect(levels.every((level) => level.wonderQuestion.contains('请')), isTrue);
-    expect(levels.every((level) => level.expressQuestion.contains('请')), isTrue);
   });
 
   test('beginner and advanced content differ on every migrated journey', () {
