@@ -24,7 +24,7 @@ Future<void> main(List<String> arguments) async {
   final generatedAt = DateTime.now().toUtc();
   final profiles = _languageAgent.allProfiles;
   final batch = _qualityAgent.inspectPublishedCatalog(
-    journeys: dailyJourneyExperiences,
+    journeys: allJourneyExperiences,
     profiles: profiles,
     resolveContent: (journey, profile) => resolveAdaptiveJourneyLevel(
       journey,
@@ -45,7 +45,9 @@ Future<void> main(List<String> arguments) async {
     'generatedAt': generatedAt.toIso8601String(),
     'releaseStatus': releaseStatus,
     'canPublish': batch.canPublish,
-    'journeyCount': dailyJourneyExperiences.length,
+    'journeyCount': allJourneyExperiences.length,
+    'regularJourneyCount': dailyJourneyExperiences.length,
+    'specialJourneyCount': specialJourneyExperiences.length,
     'profileCount': profiles.length,
     'inspectionCount': decisions.length,
     'approvedCount': batch.approvedCount,
@@ -160,6 +162,9 @@ String _buildMarkdown({
     ..writeln()
     ..writeln('- Agent：`PhoenixJourneyContentQualityAgent`')
     ..writeln('- 等级体系：`Phoenix Lv.1–10`')
+    ..writeln('- 普通旅程：`${dailyJourneyExperiences.length}`')
+    ..writeln('- 特别旅程：`${specialJourneyExperiences.length}`')
+    ..writeln('- 旅程总数：`${allJourneyExperiences.length}`')
     ..writeln('- 生成时间：`${generatedAt.toIso8601String()}`')
     ..writeln('- 发布判定：`${releaseStatus.toUpperCase()}`')
     ..writeln('- 检查组合：`${batch.decisions.length}`')
