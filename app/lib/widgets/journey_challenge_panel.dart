@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../models/language_proficiency.dart';
+import '../services/challenge_option_balancer.dart';
 import '../services/narration_controller.dart';
 import '../theme/phoenix_theme.dart';
 
@@ -747,6 +748,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
             : () => setState(() => _session.selectOption(option)),
         child: Container(
           width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 56),
           padding: const EdgeInsets.fromLTRB(9, 8, 9, 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(13),
@@ -1288,7 +1290,11 @@ class _ChallengeSession {
           isCorrect: true,
         ),
     ];
-    final distractorTexts = _paragraphDistractors(journeyId);
+    final distractorTexts = selectBalancedChallengeDistractors(
+    correctAnswers: correctTexts,
+    candidates: _paragraphDistractors(journeyId),
+    count: journeyChallengeOptionCount - correctOptions.length,
+  );
     final options = <_ChallengeOption>[...correctOptions];
     var distractorIndex = 0;
     while (options.length < journeyChallengeOptionCount) {
@@ -1344,16 +1350,15 @@ class _ChallengeSession {
           ],
       },
     ];
-    final replacementTexts = <String>[];
-    for (final candidate in replacementCandidates) {
-      final value = candidate.trim();
-      if (value.isEmpty || replacementTexts.contains(value)) continue;
-      replacementTexts.add(value);
-      if (replacementTexts.length >= journeyChallengeOptionCount) break;
-    }
-    if (replacementTexts.length < journeyChallengeOptionCount) {
-      throw StateError('Grammar challenge requires five unique options.');
-    }
+    final distractorTexts = selectBalancedChallengeDistractors(
+    correctAnswers: <String>[grammar.correctReplacement],
+    candidates: replacementCandidates,
+    count: journeyChallengeOptionCount - 1,
+  );
+  final replacementTexts = <String>[
+    grammar.correctReplacement,
+    ...distractorTexts,
+  ];
     final options = <_ChallengeOption>[
       for (var index = 0;
           index < journeyChallengeOptionCount;
@@ -1373,7 +1378,7 @@ class _ChallengeSession {
       options: options,
       correctIds: const ['correct'],
       questionTitle: '修好这句不自然的话',
-      instruction: '先点击病句位置，再从五个修改方案中选出最自然的一项。',
+      instruction: '先点击病句位置，再从五个长度接近的修改方案中选出最自然的一项。',
       explanation: grammar.whyWrong,
       memoryTip: grammar.memoryTip,
       grammar: grammar,
@@ -1391,11 +1396,15 @@ class _ChallengeSession {
     final before = source.isNotEmpty ? source[0] : '清晨，探索者来到今天的目的地。';
     final correct = source.length >= 2 ? source[1] : '他沿着主要路线慢慢向前走。';
     final after = source.length >= 3 ? source[2] : '一路上的景色因此不断发生变化。';
-    final distractors = _missingDistractors(
-  journeyId,
-  discoveryTexts,
-  difficulty,
-);
+    final distractors = selectBalancedChallengeDistractors(
+    correctAnswers: <String>[correct],
+    candidates: _missingDistractors(
+      journeyId,
+      discoveryTexts,
+      difficulty,
+    ),
+    count: journeyChallengeOptionCount - 1,
+  );
     final optionTexts = <String>[correct, ...distractors];
     final options = <_ChallengeOption>[
       for (var index = 0; index < journeyChallengeOptionCount; index++)
@@ -1414,7 +1423,7 @@ class _ChallengeSession {
       options: options,
       correctIds: const ['correct'],
       questionTitle: '补回故事中消失的一句',
-      instruction: '阅读前后文，从五个相近答案中选出最能连接上下文的一句。',
+      instruction: '阅读前后文，从五个长度接近的答案中选出最能连接上下文的一句。',
       explanation: '正确句承接前文的人物与地点，同时为后文的变化、因果或决定铺路。',
       memoryTip: '补句要同时看两边：前一句留下什么，后一句为什么出现。',
       contextBefore: before,
@@ -1709,16 +1718,19 @@ class _ChallengeSession {
       JourneyChallengeDifficulty.beginner => <String>[
           ...specific,
           '他很快离开了这里，故事也在这一刻结束。',
+          '他继续向前走，却没有留意周围发生的变化。',
         ],
       JourneyChallengeDifficulty.standard => <String>[
           ...specific,
           if (discoveryCandidate != null) discoveryCandidate,
           '他停下脚步，把沿途景色逐一写进记录里。',
+          '他沿着原来的路线前进，却忽略了前后线索。',
         ],
       JourneyChallengeDifficulty.advanced => <String>[
           if (discoveryCandidate != null) discoveryCandidate,
           ...specific,
           '他重新检查前文线索，却没有改变原来的判断。',
+          '他看似回应了前文，却无法解释后面出现的结果。',
         ],
     };
     final result = <String>[];
@@ -1726,12 +1738,6 @@ class _ChallengeSession {
       final value = candidate.trim();
       if (value.isEmpty || result.contains(value)) continue;
       result.add(value);
-      if (result.length >= journeyChallengeOptionCount - 1) break;
-    }
-    if (result.length < journeyChallengeOptionCount - 1) {
-      throw StateError(
-        'Missing-sentence challenge requires four distractors.',
-      );
     }
     return result;
   }
