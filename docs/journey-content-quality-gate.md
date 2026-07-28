@@ -28,6 +28,18 @@ Every journey/profile combination receives:
 - issue dimensions and priorities;
 - concrete repair actions, such as rebuilding paragraph two, restoring multilingual support, or replacing repeated discoveries with historical or cultural context.
 
+## Visible PR report
+
+Every pull-request update runs `app/tool/generate_journey_quality_report.dart` before the preview build. The workflow:
+
+1. inspects the complete published catalog across all HSK and TOCFL profiles;
+2. writes both Markdown and JSON evidence;
+3. uploads the evidence as a workflow artifact;
+4. creates or updates one dedicated quality-agent comment on the pull request;
+5. blocks the preview build when any profile is `needsRevision` or `blocked`.
+
+The PR report displays the inspection total, approved count, minimum score, average score, and a per-journey summary. Failed combinations include concrete repair actions, while a clean report explicitly authorizes preview publication.
+
 ## CI enforcement
 
-Flutter tests call `inspectPublishedCatalog` across the complete journey catalog and every HSK/TOCFL profile. CI and the Cloudflare preview require the entire batch to be publishable. A critical issue, warning, missing profile, or failed agent rule stops the release.
+Flutter tests call `inspectPublishedCatalog` across the complete journey catalog and every HSK/TOCFL profile. CI and the Cloudflare preview require the entire batch to be publishable. A critical issue, warning, missing profile, failed agent rule, or failed report decision stops the release.
