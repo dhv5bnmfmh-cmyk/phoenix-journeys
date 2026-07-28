@@ -17,6 +17,10 @@ const cityPassport = fs.readFileSync(
   new URL('../app/lib/screens/city_passport_screen.dart', import.meta.url),
   'utf8',
 );
+const journeyScreen = fs.readFileSync(
+  new URL('../app/lib/screens/journey_screen.dart', import.meta.url),
+  'utf8',
+);
 const selector = fs.readFileSync(
   new URL(
     '../app/lib/widgets/journey_level_selector_button.dart',
@@ -54,6 +58,26 @@ test('the active atlas passport exposes one global HSK and TOCFL selector', () =
   assert.match(selector, /ChineseExamTrack\.hsk/);
   assert.match(selector, /TOCFL/);
   assert.match(selector, /所有普通旅程与特殊旅程/);
+});
+
+test('every journey screen exposes the same exam-level selector', () => {
+  assert.match(
+    journeyScreen,
+    /actions: \[\s*TextButton\.icon\([\s\S]*journey-language-level-selector/,
+  );
+  assert.match(journeyScreen, /切换 HSK \/ TOCFL 等级/);
+  assert.match(journeyScreen, /_showLanguageProfilePicker\(\)/);
+  assert.doesNotMatch(journeyScreen, /journey-difficulty-selector/);
+  assert.doesNotMatch(journeyScreen, /_changeDifficulty/);
+  assert.doesNotMatch(journeyScreen, /_supportedDifficulties/);
+});
+
+test('changing level refreshes current journey learning state', () => {
+  assert.match(journeyScreen, /_appState\.clearGuideFeedback\(\)/);
+  assert.match(journeyScreen, /_appState\.clearWritingFeedback\(\)/);
+  assert.match(journeyScreen, /_challengeResolved = false/);
+  assert.match(journeyScreen, /_challengeSeed \+= 1/);
+  assert.match(journeyScreen, /已应用到当前旅程/);
 });
 
 test('level changes adjust all learning surfaces together', () => {
