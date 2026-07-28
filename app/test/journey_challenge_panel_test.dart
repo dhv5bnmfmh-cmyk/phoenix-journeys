@@ -123,7 +123,7 @@ void main() {
   });
 
   testWidgets(
-    'all three modes are always visible and start with five choices',
+    'all three modes are always visible and start with four choices',
     (tester) async {
       await _pumpChallenge(tester, onResolved: (_, __) async {});
 
@@ -140,7 +140,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.byKey(const ValueKey('challenge-five-options')),
+        find.byKey(const ValueKey('challenge-four-options')),
         findsOneWidget,
       );
       expect(
@@ -157,10 +157,6 @@ void main() {
       );
       expect(
         find.byKey(const ValueKey('challenge-option-distractor-1')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(const ValueKey('challenge-option-distractor-2')),
         findsOneWidget,
       );
       expect(find.byKey(const ValueKey('challenge-scroll-area')), findsNothing);

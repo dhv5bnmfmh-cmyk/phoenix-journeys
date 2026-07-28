@@ -15,11 +15,11 @@ void main() {
         '他沿着长廊缓缓向前走。',
         '这是一个非常非常长并且会明显暴露答案位置的候选句。',
       ],
-      count: 4,
+      count: 3,
     );
 
-    expect(selected, hasLength(4));
-    expect(selected.toSet(), hasLength(4));
+    expect(selected, hasLength(3));
+    expect(selected.toSet(), hasLength(3));
     expect(selected, isNot(contains(correct)));
     expect(selected, isNot(contains('短。')));
     expect(

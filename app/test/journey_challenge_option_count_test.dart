@@ -22,8 +22,8 @@ void main() {
     band: PhoenixReadingBand.mastery,
   );
 
-  test('every adaptive challenge exposes five candidate answers', () {
-    expect(journeyChallengeOptionCount, 5);
+  test('every adaptive challenge exposes four candidate answers', () {
+    expect(journeyChallengeOptionCount, 4);
   });
 
   test('challenge difficulty follows the selected reading band', () {

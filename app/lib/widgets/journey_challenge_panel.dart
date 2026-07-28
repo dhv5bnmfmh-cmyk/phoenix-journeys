@@ -22,7 +22,7 @@ const fixedJourneyChallengeTypes = <JourneyChallengeType>[
   JourneyChallengeType.missingSentence,
 ];
 
-const int journeyChallengeOptionCount = 5;
+const int journeyChallengeOptionCount = 4;
 
 
 @visibleForTesting
@@ -811,7 +811,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
   Widget _challengeOptions() {
     assert(_session.options.length == journeyChallengeOptionCount);
     return Column(
-      key: const ValueKey('challenge-five-options'),
+      key: const ValueKey('challenge-four-options'),
       children: [
         for (var index = 0; index < _session.options.length; index++) ...[
           _optionTile(_session.options[index], index),
@@ -1446,7 +1446,7 @@ class _ChallengeSession {
       options: options,
       correctIds: correctOptions.map((option) => option.id).toList(),
       questionTitle: '把散开的故事拼回来',
-      instruction: '五个候选句中有 ${correctOptions.length} 句属于原文。请按故事发生的顺序依次点击。',
+      instruction: '四个候选句中有 ${correctOptions.length} 句属于原文。请按故事发生的顺序依次点击。',
       explanation: '段落通常先交代地点或时间，再写行动，最后出现观察、变化或决定。',
       memoryTip: '记住“整体 → 行动 → 变化”，不要只看单句是否通顺。',
     );
@@ -1506,7 +1506,7 @@ class _ChallengeSession {
       options: options,
       correctIds: const ['correct'],
       questionTitle: '修好这句不自然的话',
-      instruction: '先点击病句位置，再从五个长度接近的修改方案中选出最自然的一项。',
+      instruction: '先点击病句位置，再从四个长度接近的修改方案中选出最自然的一项。',
       explanation: grammar.whyWrong,
       memoryTip: grammar.memoryTip,
       grammar: grammar,
@@ -1551,7 +1551,7 @@ class _ChallengeSession {
       options: options,
       correctIds: const ['correct'],
       questionTitle: '补回故事中消失的一句',
-      instruction: '阅读前后文，从五个长度接近的答案中选出最能连接上下文的一句。',
+      instruction: '阅读前后文，从四个长度接近的答案中选出最能连接上下文的一句。',
       explanation: '正确句承接前文的人物与地点，同时为后文的变化、因果或决定铺路。',
       memoryTip: '补句要同时看两边：前一句留下什么，后一句为什么出现。',
       contextBefore: before,

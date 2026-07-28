@@ -12,13 +12,11 @@ const balancer = readFileSync(
   'utf8',
 );
 
-test('every challenge mode keeps five candidate answers', () => {
-  assert.match(panel, /journeyChallengeOptionCount = 5/);
+test('every challenge mode keeps four candidate answers', () => {
+  assert.match(panel, /journeyChallengeOptionCount = 4/);
   assert.match(panel, /options\.length == journeyChallengeOptionCount/);
   assert.match(panel, /while \(options\.length < journeyChallengeOptionCount\)/);
   assert.match(panel, /index < journeyChallengeOptionCount/);
-  assert.doesNotMatch(panel, /候选答案固定为 4 个/);
-  assert.doesNotMatch(panel, /_fourOptions/);
 });
 
 test('all challenge modes use unique length-balanced distractors', () => {
@@ -30,8 +28,8 @@ test('all challenge modes use unique length-balanced distractors', () => {
   assert.match(panel, /grammar\.segments\[grammar\.problemSegmentIndex\]/);
   assert.match(panel, /discoveryCandidate/);
   assert.match(panel, /JourneyChallengeDifficulty\.advanced/);
-  assert.match(panel, /五个长度接近的修改方案/);
-  assert.match(panel, /五个长度接近的答案/);
+  assert.match(panel, /四个长度接近的修改方案/);
+  assert.match(panel, /四个长度接近的答案/);
 
   assert.match(balancer, /correctSet\.contains\(value\)/);
   assert.match(balancer, /uniqueCandidates\.contains\(value\)/);
