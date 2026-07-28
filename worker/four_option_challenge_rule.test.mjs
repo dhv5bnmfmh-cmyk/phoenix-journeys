@@ -64,20 +64,35 @@ test('regular journeys never fall back to generic challenge filler', () => {
 });
 
 
-test('regular journeys use destination-specific grammar repairs', () => {
-  const expectedRepairs = new Map([
-    ['beijing-forbidden-city', '午门不但规定进入路线'],
-    ['beijing-summer-palace', '由于昆明湖产生倒影'],
-    ['shanghai-bund', '外滩不仅保存历史建筑'],
-    ['xian-city-wall', '通过登上城墙'],
-    ['hangzhou-west-lake', '只有天气和季节发生变化'],
-    ['chengdu-kuanzhai-alley', '各不相同不一样'],
-    ['nanjing-qinhuai-river', '在古代即将已经'],
-    ['guangzhou-chen-clan-academy', '通过观察屋脊陶塑'],
-  ]);
+test('regular grammar repairs stay destination-specific at every level', () => {
+  assert.match(panel, /_regularGrammarForJourney\(journeyId, difficulty\)/);
+  assert.match(panel, /JourneyChallengeDifficulty\.beginner => _GrammarSpec/);
+  assert.match(panel, /JourneyChallengeDifficulty\.standard => _GrammarSpec/);
+  assert.match(panel, /JourneyChallengeDifficulty\.advanced => _GrammarSpec/);
 
-  for (const [journeyId, sentenceMarker] of expectedRepairs) {
-    assert.ok(panel.includes(`'${journeyId}' => const _GrammarSpec(`));
-    assert.ok(panel.includes(sentenceMarker));
+  for (const journeyId of [
+    'beijing-forbidden-city',
+    'beijing-summer-palace',
+    'shanghai-bund',
+    'xian-city-wall',
+    'hangzhou-west-lake',
+    'chengdu-kuanzhai-alley',
+    'nanjing-qinhuai-river',
+    'guangzhou-chen-clan-academy',
+  ]) {
+    assert.ok(panel.includes(`'${journeyId}' => (`));
+  }
+
+  for (const destinationMarker of [
+    '午门和中轴线',
+    '昆明湖的倒影',
+    '外滩与浦东两岸',
+    '城墙和护城河',
+    '苏堤、桥与远山',
+    '宽、窄、井三条巷子',
+    '秦淮河的桥梁与灯影',
+    '屋脊陶塑和木石雕刻',
+  ]) {
+    assert.ok(panel.includes(destinationMarker));
   }
 });
