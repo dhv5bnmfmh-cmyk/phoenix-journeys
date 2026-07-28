@@ -232,7 +232,7 @@ JourneyContentQualityReport auditJourneyContentQuality(
 }
 
 bool startsWithDependentNarrativeReference(String value) => RegExp(
-      r'^(它|他|她|他们|她们|这|那|因此|于是|所以|然而|但是|但|同时|其中|此时|后来|随后|最后|而且|也|其|这种|这些|这里|那里)',
+      r'^(它|他|她|他们|她们|因此|于是|所以|然而|但是|但|同时|其中|此时|后来|随后|最后|而且|也|其(?!中))',
     ).hasMatch(value.trim());
 
 List<String> splitChineseQualitySentences(String value) {
