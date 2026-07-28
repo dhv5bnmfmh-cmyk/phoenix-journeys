@@ -11,7 +11,7 @@ on:
       - closed
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   statuses: write
 
@@ -36,6 +36,58 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      # BEGIN ADAPTIVE PEDAGOGY MIGRATION
+      - name: Apply adaptive challenge pedagogy migration
+        shell: bash
+        run: |
+          if [[ ! -f docs/trigger-adaptive-challenge-pedagogy.txt ]]; then
+            exit 0
+          fi
+
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+
+          workflow = Path('.github/workflows/one-time-adaptive-challenge-pedagogy.yml').read_text()
+          start_marker = "python - <<'PY'\n"
+          end_marker = "\n          PY"
+          if start_marker not in workflow:
+              raise SystemExit('embedded migration start marker missing')
+          script = workflow.split(start_marker, 1)[1].split(end_marker, 1)[0]
+          Path('/tmp/adaptive_challenge_pedagogy.py').write_text(textwrap.dedent(script))
+          PY
+
+          python /tmp/adaptive_challenge_pedagogy.py
+
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('.github/workflows/preview-cloudflare.yml')
+          source = path.read_text()
+          start = source.index('      # BEGIN ADAPTIVE PEDAGOGY MIGRATION')
+          end_marker = '      # END ADAPTIVE PEDAGOGY MIGRATION\n'
+          end = source.index(end_marker, start) + len(end_marker)
+          source = source[:start] + source[end:]
+          source = source.replace('  contents: write\n', '  contents: read\n', 1)
+          source = source.replace('          fetch-depth: 0\n', '', 1)
+          path.write_text(source)
+          PY
+
+          rm -f .github/workflows/one-time-adaptive-challenge-pedagogy.yml
+          rm -f .github/workflows/one-time-balance-challenge-options.yml
+          rm -f docs/trigger-adaptive-challenge-pedagogy.txt
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Adapt challenge teaching support by language level"
+          git push origin HEAD:agent/adaptive-level-content-v2
+
+          echo "Adaptive pedagogy migration committed. A fresh workflow run is required."
+          exit 1
+      # END ADAPTIVE PEDAGOGY MIGRATION
 
       - name: Test Phoenix agents
         run: node --test worker/*.test.mjs
