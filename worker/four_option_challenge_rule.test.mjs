@@ -34,6 +34,9 @@ test('all challenge modes use unique length-balanced distractors', () => {
   assert.match(balancer, /correctSet\.contains\(value\)/);
   assert.match(balancer, /uniqueCandidates\.contains\(value\)/);
   assert.match(balancer, /challengeTextLength/);
+  assert.match(balancer, /challengeKeywordOverlap/);
+  assert.match(balancer, /_distractorPlausibilityScore/);
+  assert.match(balancer, /idealOverlap = \.5/);
   assert.match(balancer, /Challenge requires \$count unique distractors/);
 });
 
