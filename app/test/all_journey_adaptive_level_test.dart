@@ -28,7 +28,9 @@ void main() {
           reason: '${journey.id} should keep reading support aligned',
         );
         expect(
-          content.storyParagraphs.every((paragraph) => paragraph.trim().isNotEmpty),
+          content.storyParagraphs.every(
+            (paragraph) => paragraph.trim().isNotEmpty,
+          ),
           isTrue,
           reason: '${journey.id} should not produce an empty story paragraph',
         );
@@ -60,16 +62,22 @@ void main() {
     });
   }
 
-  test('HSK and TOCFL keep independent profile identities', () {
+  test('Phoenix exposes exactly ten fused levels', () {
+    expect(agent.allProfiles, hasLength(10));
     expect(
-      agent.profilesFor(ChineseExamTrack.hsk).map((item) => item.storageValue),
-      isNot(
-        equals(
-          agent
-              .profilesFor(ChineseExamTrack.tocfl)
-              .map((item) => item.storageValue),
-        ),
-      ),
+      agent.allProfiles.map((item) => item.phoenixLevel),
+      orderedEquals(List<int>.generate(10, (index) => index + 1)),
     );
+    expect(
+      agent.allProfiles.map((item) => item.storageValue).toSet(),
+      hasLength(10),
+    );
+  });
+
+  test('legacy HSK and TOCFL profiles remain available for migration', () {
+    expect(agent.profilesFor(ChineseExamTrack.hsk), isNotEmpty);
+    expect(agent.profilesFor(ChineseExamTrack.tocfl), isNotEmpty);
+    expect(agent.phoenixLevelFromStorage('hsk:6'), 8);
+    expect(agent.phoenixLevelFromStorage('tocfl:4'), 7);
   });
 }
