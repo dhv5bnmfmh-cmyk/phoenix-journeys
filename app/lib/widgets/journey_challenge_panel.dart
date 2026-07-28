@@ -1616,7 +1616,7 @@ class _ChallengeSession {
           correctOptionId: 'correct',
           correctReplacement: '远山因此',
           distractors: ['所以使远山', '而且远山还', '从而让远山也'],
-          errorType: '关联词赘余并导致主语缺失',
+          errorType: '成分赘余：关联词堆叠并导致主语缺失',
           errorLocation: '“因此使远山”',
           whyWrong: '“由于”已经引出原因，再用“因此使”会堆叠关系词，同时让结果句缺少自然主语。',
           revisionRule: '让“远山”成为结果句主语，只保留一个自然的因果标记。',
