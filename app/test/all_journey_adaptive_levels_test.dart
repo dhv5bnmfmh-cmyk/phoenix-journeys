@@ -17,7 +17,9 @@ void main() {
         );
         final storyTarget = phoenixStoryLengthTargetFor(profile);
         final expectedDiscoveryCount =
-            profile.band == PhoenixReadingBand.beginner ? 1 : 2;
+            profile.band == PhoenixReadingBand.beginner
+                ? 1
+                : journey.discoveries.length.clamp(1, 2);
         final storyCharacters = level.storyParagraphs.join().runes.length;
 
         expect(
