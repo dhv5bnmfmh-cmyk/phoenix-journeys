@@ -1,14 +1,33 @@
-# Journey Content Quality Gate
+# Phoenix Journey Content Quality Agent
 
-The quality gate runs against every published regular and special journey for every HSK and TOCFL profile.
+`PhoenixJourneyContentQualityAgent` is the release authority for journey content. The existing auditor remains the deterministic detection engine; the agent turns those findings into scores, release decisions, and repair instructions.
 
-It blocks releases when adaptive content:
+## Release decisions
 
-- breaks the approved one- or two-paragraph reading shape;
-- loses the original opening scene or closing meaning;
-- begins paragraph two with an unresolved pronoun or connector;
-- loses pinyin, Vietnamese, or English reading support;
-- duplicates a discovery or repeats the story as a discovery;
-- produces empty prompts or invalid vocabulary entries.
+- `approved`: no detected issues; content may be published.
+- `needsRevision`: only improvement-level findings remain; content stays out of release until refined.
+- `blocked`: one or more critical findings exist; publishing is prohibited.
 
-Each journey/profile combination receives a score from 0 to 100. CI requires no critical issues and a score of at least 90.
+## What the agent reviews
+
+The agent runs against every published regular and special journey for every HSK and TOCFL profile. It reviews:
+
+- narrative shape, opening scene, turning flow, paragraph boundaries, and closing meaning;
+- pinyin, Vietnamese, and English alignment;
+- discovery novelty, depth, and one- or two-entry structure;
+- vocabulary validity and duplication;
+- separation between comprehension and expression prompts;
+- fit with the selected language profile.
+
+## Agent output
+
+Every journey/profile combination receives:
+
+- a score from 0 to 100 and a quality grade;
+- an `approved`, `needsRevision`, or `blocked` release status;
+- issue dimensions and priorities;
+- concrete repair actions, such as rebuilding paragraph two, restoring multilingual support, or replacing repeated discoveries with historical or cultural context.
+
+## CI enforcement
+
+Flutter tests call `inspectPublishedCatalog` across the complete journey catalog and every HSK/TOCFL profile. CI and the Cloudflare preview require the entire batch to be publishable. A critical issue, warning, missing profile, or failed agent rule stops the release.
