@@ -4,10 +4,12 @@ import test from 'node:test';
 
 const workflowPath = '.github/workflows/preview-cloudflare.yml';
 const reportToolPath = 'app/tool/generate_journey_quality_report.dart';
+const reportRunnerPath = 'app/test/journey_quality_report_ci_test.dart';
 
-const [workflow, reportTool] = await Promise.all([
+const [workflow, reportTool, reportRunner] = await Promise.all([
   readFile(workflowPath, 'utf8'),
   readFile(reportToolPath, 'utf8'),
+  readFile(reportRunnerPath, 'utf8'),
 ]);
 
 test('generates and publishes the quality agent report before preview deployment', () => {
@@ -22,11 +24,23 @@ test('generates and publishes the quality agent report before preview deployment
   assert.ok(enforceIndex > commentIndex);
   assert.ok(buildIndex > enforceIndex);
   assert.ok(deployIndex > buildIndex);
-  assert.match(workflow, /dart run tool\/generate_journey_quality_report\.dart/);
+  assert.match(
+    workflow,
+    /flutter test test\/journey_quality_report_ci_test\.dart/,
+  );
+  assert.match(workflow, /PHOENIX_GENERATE_QUALITY_REPORT/);
   assert.match(workflow, /phoenix-content-quality-agent-report/);
   assert.match(workflow, /journey-quality-report\.json/);
   assert.match(workflow, /if \(!report\.canPublish\)/);
   assert.match(workflow, /actions\/upload-artifact@v4/);
+});
+
+test('Flutter-backed runner writes and validates the release evidence', () => {
+  assert.match(reportRunner, /generate_journey_quality_report\.dart/);
+  assert.match(reportRunner, /PHOENIX_QUALITY_MARKDOWN/);
+  assert.match(reportRunner, /PHOENIX_QUALITY_JSON/);
+  assert.match(reportRunner, /report\['canPublish'\], isTrue/);
+  assert.match(reportRunner, /report\['blockedCount'\], 0/);
 });
 
 test('report covers the published catalog and exposes release evidence', () => {
