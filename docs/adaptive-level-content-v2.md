@@ -23,4 +23,5 @@ Base: `main@7d5a7b6ec767dcb9807396239e4464da6ddb8510`
 - HSK and TOCFL retain independent profile identities.
 - The first-use prompt must remain optional, non-blocking, and limited to one appearance per stored preference cycle.
 - The legacy in-journey difficulty menu must not return after the unified exam selector is enabled.
-- Flutter tests and Node product-rule tests cover the published journey catalog, first-use guidance, and unified selector behavior.
+- Every challenge mode must keep five unique candidates while preserving the three-attempt reward ladder.
+- Flutter tests and Node product-rule tests cover the published journey catalog, first-use guidance, unified selector behavior, and five-option challenges.
