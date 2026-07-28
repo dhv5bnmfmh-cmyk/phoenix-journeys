@@ -8,10 +8,14 @@ const catalog = readFileSync(
 );
 const state = readFileSync('app/lib/state/app_state.dart', 'utf8');
 const screen = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
+const controller = readFileSync(
+  'app/lib/services/phoenix_level_controller.dart',
+  'utf8',
+);
 
-// Keeps the legacy difficulty catalog available as a safe fallback for users
-// who have not selected an HSK or TOCFL profile yet.
-test('Summer Palace keeps the persistent fallback journey levels', () => {
+// Keeps the legacy difficulty catalog as a safe fallback while Phoenix level
+// initialization is loading.
+test('Summer Palace keeps persistent fallback journey levels', () => {
   assert.match(catalog, /enum JourneyDifficulty \{ easy, standard, challenge \}/);
   assert.match(catalog, /summerPalaceEasyLevel/);
   assert.match(catalog, /const summerPalaceChallengeLevel = JourneyLevelContent/);
@@ -20,13 +24,19 @@ test('Summer Palace keeps the persistent fallback journey levels', () => {
   assert.match(state, /_key\('difficulty'\)/);
 });
 
-test('every journey UI lets explorers choose and change an exam profile', () => {
-  assert.match(screen, /journey-language-level-selector/);
-  assert.match(screen, /选择适合你的旅程/);
-  assert.match(screen, /_showLanguageProfilePicker/);
+test('every journey UI reacts to the unified Phoenix level controller', () => {
+  assert.match(screen, /JourneyLevelSelectorButton\(compact: true\)/);
   assert.match(screen, /resolveAdaptiveJourneyLevel/);
-  assert.match(screen, /_languageProfile\?\.displayLabel/);
-  assert.match(screen, /已应用到当前旅程/);
+  assert.match(screen, /_phoenixLevelController\.profile/);
+  assert.match(screen, /_languageProfile = profile/);
+  assert.match(screen, /已即时应用到当前故事与挑战/);
   assert.doesNotMatch(screen, /journey-difficulty-selector/);
-  assert.doesNotMatch(screen, /supportedJourneyDifficulties/);
+  assert.doesNotMatch(screen, /_showLanguageProfilePicker/);
+});
+
+test('the global controller clamps explorers between level one and ten', () => {
+  assert.match(controller, /minimumLevel = 1/);
+  assert.match(controller, /maximumLevel = 10/);
+  assert.match(controller, /defaultLevel = 5/);
+  assert.match(controller, /level\.clamp\(minimumLevel, maximumLevel\)/);
 });
