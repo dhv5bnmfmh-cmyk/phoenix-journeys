@@ -23,13 +23,13 @@ extension NarrationSeekController on NarrationController {
         .clamp(0, math.max(0, totalCharacters - 1))
         .toInt();
 
-    // Stop the active browser/native utterance first. This prevents Safari's
-    // paused-in-place session from resuming at the old position after a seek.
+    // Stop the active browser/native utterance first. Registering the new
+    // offset as a paused position clears Safari's paused-in-place session, so
+    // a later resume cannot jump back to the old browser utterance.
     await stop(resetPosition: false);
+    await pauseAtOffset(safeOffset);
     if (resumePlayback) {
       await resumeFromOffset(safeOffset);
-    } else {
-      await pauseAtOffset(safeOffset);
     }
   }
 }
