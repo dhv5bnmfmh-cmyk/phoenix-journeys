@@ -1,9 +1,7 @@
-import '../agents/phoenix_language_level_agent.dart';
 import '../data/daily_journey_experience.dart';
 import '../data/journey_level_catalog.dart';
 import '../models/language_proficiency.dart';
-
-const _languageLevelAgent = PhoenixLanguageLevelAgent();
+import 'phoenix_story_length_policy.dart';
 
 enum JourneyContentQualitySeverity { warning, critical }
 
@@ -49,7 +47,7 @@ JourneyContentQualityReport auditJourneyContentQuality(
   required ChineseProficiencyProfile profile,
 }) {
   final issues = <JourneyContentQualityIssue>[];
-  final plan = _languageLevelAgent.planFor(profile);
+  final storyTarget = phoenixStoryLengthTargetFor(profile);
 
   void add(
     String code,
@@ -65,10 +63,10 @@ JourneyContentQualityReport auditJourneyContentQuality(
     );
   }
 
-  if (content.storyParagraphs.length != plan.paragraphCount) {
+  if (content.storyParagraphs.length != storyTarget.paragraphCount) {
     add(
       'story-paragraph-shape',
-      'Story paragraph count does not match the selected reading profile.',
+      'Story paragraph count does not match the selected Phoenix level.',
       JourneyContentQualitySeverity.critical,
     );
   }
@@ -77,6 +75,27 @@ JourneyContentQualityReport auditJourneyContentQuality(
     add(
       'empty-story-paragraph',
       'Story contains an empty paragraph.',
+      JourneyContentQualitySeverity.critical,
+    );
+  }
+
+  final storyCharacterCount = content.storyParagraphs
+      .join()
+      .runes
+      .length;
+  if (storyCharacterCount < storyTarget.minimumCharacters) {
+    add(
+      'story-below-level-range',
+      'Story has $storyCharacterCount characters, below the Phoenix '
+          '${profile.displayLabel} minimum of ${storyTarget.minimumCharacters}.',
+      JourneyContentQualitySeverity.critical,
+    );
+  }
+  if (storyCharacterCount > storyTarget.maximumCharacters) {
+    add(
+      'story-above-level-range',
+      'Story has $storyCharacterCount characters, above the Phoenix '
+          '${profile.displayLabel} maximum of ${storyTarget.maximumCharacters}.',
       JourneyContentQualitySeverity.critical,
     );
   }
