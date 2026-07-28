@@ -200,8 +200,6 @@ class _JourneyScreenState extends State<JourneyScreen>
   String _readingShapeLabel(int count) =>
       count == 1 ? '深度长文' : '分段短文';
 
-  List<JourneyDifficulty> get _supportedDifficulties =>
-      supportedJourneyDifficulties(_experience);
 
   Future<void> _loadLanguageProfile() async {
     final profile = await _languageLevelStore.load();
@@ -222,10 +220,26 @@ class _JourneyScreenState extends State<JourneyScreen>
     await _narration.setSpeechRate(
       _languageLevelAgent.planFor(profile).speechRate,
     );
+    await Future.wait([
+      _appState.clearGuideFeedback(),
+      _appState.clearWritingFeedback(),
+    ]);
     if (!mounted) return;
     setState(() {
       _languageProfile = profile;
+      _guideFeedback = null;
+      _writingFeedback = null;
+      _challengeResolved = false;
+      _challengeSeed += 1;
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _appState.displayText('${profile.displayLabel} 已应用到当前旅程'),
+        ),
+        duration: const Duration(milliseconds: 1400),
+      ),
+    );
   }
 
   Future<void> _showLanguageProfilePicker({bool showIntro = false}) async {
@@ -326,17 +340,6 @@ class _JourneyScreenState extends State<JourneyScreen>
       ),
     );
     if (selected != null) await _selectLanguageProfile(selected);
-  }
-
-  Future<void> _changeDifficulty(JourneyDifficulty value) async {
-    if (value == _appState.journeyDifficulty &&
-        _appState.journeyDifficultyChosen) {
-      return;
-    }
-    await _narration.stop();
-    await _narration.setSpeechRate(value.speechRate);
-    await _appState.setJourneyDifficulty(value);
-    if (!mounted) return;
   }
 
   Future<void> _goToStep(int targetStep) async {
@@ -833,89 +836,29 @@ class _JourneyScreenState extends State<JourneyScreen>
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
           ),
           actions: [
-            if (_experience.id == 'beijing-summer-palace')
-              TextButton(
-                key: const ValueKey('journey-language-level-selector'),
-                onPressed: () => unawaited(_showLanguageProfilePicker()),
-                style: TextButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                ),
-                child: Text(
-                  _languageProfile?.displayLabel ?? 'HSK / TOCFL',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w900,
-                  ),
+            TextButton.icon(
+              key: const ValueKey('journey-language-level-selector'),
+              tooltip: _appState.displayText('切换 HSK / TOCFL 等级'),
+              onPressed: () => unawaited(_showLanguageProfilePicker()),
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+              ),
+              icon: const Icon(
+                Icons.tune_rounded,
+                color: Colors.white,
+                size: 13,
+              ),
+              label: Text(
+                _languageProfile?.displayLabel ?? 'HSK / TOCFL',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-            Consumer<AppState>(
-              builder: (_, state, __) {
-                if (_experience.id == 'beijing-summer-palace' ||
-                    _supportedDifficulties.length < 2) {
-                  return const SizedBox.shrink();
-                }
-                return PopupMenuButton<JourneyDifficulty>(
-                  key: const ValueKey('journey-difficulty-selector'),
-                  tooltip: _appState.displayText('选择旅程难度'),
-                  initialValue: state.journeyDifficulty,
-                  onSelected: (value) => unawaited(_changeDifficulty(value)),
-                  itemBuilder: (_) => [
-                    for (final difficulty in _supportedDifficulties)
-                      PopupMenuItem<JourneyDifficulty>(
-                        value: difficulty,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    state.displayText(difficulty.label),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  ),
-                                  Text(
-                                    state.displayText(difficulty.hint),
-                                    style: const TextStyle(fontSize: 10.5),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (state.journeyDifficulty == difficulty)
-                              const Icon(
-                                Icons.check_rounded,
-                                size: 18,
-                                color: PhoenixTheme.red,
-                              ),
-                          ],
-                        ),
-                      ),
-                  ],
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: .22),
-                      borderRadius: BorderRadius.circular(99),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: .2),
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      state.displayText('${state.journeyDifficulty.label} ▾'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                );
-              },
             ),
             Consumer<AppState>(
               builder: (_, state, __) => TextButton(
