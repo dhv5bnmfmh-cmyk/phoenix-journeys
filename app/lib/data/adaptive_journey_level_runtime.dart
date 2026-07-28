@@ -74,12 +74,12 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   );
   final plan = _languageLevelAgent.planFor(profile);
   final discoveryCount = switch (profile.band) {
-    PhoenixReadingBand.beginner ||
-    PhoenixReadingBand.advanced ||
-    PhoenixReadingBand.mastery => 1,
+    PhoenixReadingBand.beginner => 1,
     PhoenixReadingBand.elementary ||
     PhoenixReadingBand.intermediate ||
-    PhoenixReadingBand.upperIntermediate => 2,
+    PhoenixReadingBand.upperIntermediate ||
+    PhoenixReadingBand.advanced ||
+    PhoenixReadingBand.mastery => 2,
   };
 
   final limited = JourneyLevelContent(
