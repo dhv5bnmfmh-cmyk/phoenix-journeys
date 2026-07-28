@@ -93,6 +93,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   static const LanguageLevelPreferenceStore _languageLevelStore =
       LanguageLevelPreferenceStore();
   ChineseProficiencyProfile? _languageProfile;
+  bool _languageProfilePromptScheduled = false;
 
   @override
   void initState() {
@@ -211,6 +212,38 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (!mounted) return;
     setState(() {
       _languageProfile = profile;
+    });
+    if (profile == null) {
+      unawaited(_showFirstLanguageProfilePrompt());
+    }
+  }
+
+  Future<void> _showFirstLanguageProfilePrompt() async {
+    if (_languageProfilePromptScheduled || _languageProfile != null) return;
+    final shouldShow = await _languageLevelStore.shouldShowJourneyPrompt();
+    if (!mounted || !shouldShow || _languageProfile != null) return;
+
+    _languageProfilePromptScheduled = true;
+    await _languageLevelStore.markJourneyPromptSeen();
+    if (!mounted) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _languageProfile != null) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _appState.displayText(
+              '选择中文等级后，故事、发现和重点单词会更适合你。',
+            ),
+          ),
+          duration: const Duration(seconds: 8),
+          action: SnackBarAction(
+            label: _appState.displayText('选择等级'),
+            onPressed: () =>
+                unawaited(_showLanguageProfilePicker(showIntro: true)),
+          ),
+        ),
+      );
     });
   }
 
