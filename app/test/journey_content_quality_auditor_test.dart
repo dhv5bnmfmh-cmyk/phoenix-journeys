@@ -4,6 +4,7 @@ import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/journey_data.dart';
 import 'package:phoenix_journeys/data/journey_level_catalog.dart';
+import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/journey_content_quality_auditor.dart';
 
 void main() {
