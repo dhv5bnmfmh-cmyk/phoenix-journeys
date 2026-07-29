@@ -8,6 +8,10 @@ const narration = readFileSync(
   'app/lib/services/narration_controller.dart',
   'utf8',
 );
+const player = readFileSync(
+  'app/lib/widgets/narration_player_card.dart',
+  'utf8',
+);
 
 test('journey narration position is namespaced and restored without autoplay', () => {
   assert.match(state, /saveJourneyNarrationPosition/);
@@ -18,6 +22,8 @@ test('journey narration position is namespaced and restored without autoplay', (
   assert.match(journey, /_narration\.preparePaused/);
   assert.match(narration, /void preparePaused/);
   assert.match(narration, /_status = NarrationStatus\.paused/);
+  assert.match(narration, /bool get isRestoredPosition/);
+  assert.match(player, /上次停在这里 · \$percent% · 点击继续/);
 });
 
 test('restart and completion remove stale narration positions', () => {
