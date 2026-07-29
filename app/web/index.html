@@ -22,7 +22,7 @@
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preload" as="image" href="assets/assets/images/phoenix-time-earth.webp" type="image/webp">
-  <link rel="preload" as="image" href="assets/assets/images/phoenix-flight-sprite.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/assets/images/phoenix-flight-cycle-v2.webp" type="image/webp">
   <link rel="manifest" href="manifest.json">
 
   <title>Phoenix Journeys</title>
@@ -338,7 +338,7 @@
         0 0 18px rgba(255, 181, 62, .48),
         inset 0 0 22px rgba(255, 207, 105, .28);
       transform: translate(-50%, -50%);
-      animation: phoenix-time-portal 3.6s ease-in-out infinite;
+      animation: phoenix-time-portal 6.4s ease-in-out infinite;
       pointer-events: none;
     }
 
@@ -365,15 +365,17 @@
       z-index: 1;
       top: 31%;
       left: 50%;
-      width: min(58vw, 330px);
-      aspect-ratio: 3 / 2;
-      background: url("assets/assets/images/phoenix-flight-sprite.webp") center / contain no-repeat;
-      mix-blend-mode: screen;
+      width: min(52vw, 300px);
+      aspect-ratio: 1;
+      background: url("assets/assets/images/phoenix-flight-cycle-v2.webp") 0 center / 300% 100% no-repeat;
+      backface-visibility: hidden;
       filter: drop-shadow(0 0 10px rgba(255, 168, 44, .75));
       transform-origin: center;
       pointer-events: none;
-      will-change: transform, opacity, filter;
-      animation: phoenix-time-flight 7.2s cubic-bezier(.38, .05, .26, .98) -1.15s infinite;
+      will-change: transform, opacity, filter, background-position;
+      animation:
+        phoenix-wing-cycle .96s steps(1, end) infinite,
+        phoenix-time-flight 12.8s cubic-bezier(.4, .04, .22, .98) -2.4s infinite;
     }
 
     .phoenix-loading__traveler::after {
@@ -403,12 +405,44 @@
       font-size: 10px;
       letter-spacing: .12em;
       backdrop-filter: blur(5px);
-      animation: phoenix-era-breathe 3.2s ease-in-out infinite alternate;
+      animation: phoenix-era-breathe 5.2s ease-in-out infinite alternate;
     }
 
     .phoenix-loading__era--ancient { left: 7%; }
     .phoenix-loading__era--transition { left: 50%; transform: translateX(-50%); animation-delay: -.9s; }
     .phoenix-loading__era--modern { right: 7%; animation-delay: -1.8s; }
+
+
+    @keyframes phoenix-wing-cycle {
+      0%, 100% { background-position: 0 center; }
+      34% { background-position: 50% center; }
+      67% { background-position: 100% center; }
+    }
+
+    .phoenix-loading__motion {
+      background:
+        radial-gradient(ellipse at 50% 34%, rgba(246, 182, 73, .11), transparent 27%),
+        linear-gradient(112deg, rgba(61, 13, 10, .15), transparent 38%, rgba(21, 62, 82, .12));
+    }
+
+    .phoenix-loading__motion::after {
+      content: "";
+      position: absolute;
+      inset: 12% -18% 28%;
+      background:
+        radial-gradient(ellipse at 18% 62%, rgba(227, 111, 44, .20), transparent 34%),
+        radial-gradient(ellipse at 72% 31%, rgba(111, 186, 216, .14), transparent 31%),
+        linear-gradient(178deg, transparent 43%, rgba(235, 186, 103, .09) 57%, transparent 73%);
+      filter: blur(16px);
+      opacity: .6;
+      transform: translate3d(-3%, 0, 0) scale(1.08);
+      animation: phoenix-time-mist 11s ease-in-out infinite alternate;
+    }
+
+    @keyframes phoenix-time-mist {
+      from { opacity: .42; transform: translate3d(-3%, 1.5%, 0) scale(1.06); }
+      to { opacity: .78; transform: translate3d(4%, -1.5%, 0) scale(1.13); }
+    }
 
     @keyframes phoenix-time-flight {
       0% {
@@ -464,10 +498,11 @@
 
     #phoenix-loading::after {
       animation-name: phoenix-earth-drift;
-      animation-duration: 7.5s;
+      animation-duration: 14s;
     }
 
     @media (prefers-reduced-motion: reduce) {
+      .phoenix-loading__motion::after,
       .phoenix-loading__portal,
       .phoenix-loading__portal::before,
       .phoenix-loading__portal::after,
