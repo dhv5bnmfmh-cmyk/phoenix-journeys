@@ -35,7 +35,7 @@ test('saved position is discarded when narration content changes', () => {
   assert.match(journey, /String narrationContentSignature/);
   assert.match(
     journey,
-    /journeyNarrationContentSignature ==[\s\S]*narrationContentSignature\(items\)/,
+    /journeyNarrationSignatureFor\(contentId\)[\s\S]*narrationContentSignature\(items\)/,
   );
   assert.match(
     journey,
@@ -107,4 +107,40 @@ test('unrelated feedback cleanup preserves narration and completion clears it', 
   assert.match(completionBody, /journeyNarrationContentId = null/);
   assert.match(completionBody, /prefs\.remove\(_key\('narrationContentId'\)\)/);
   assert.match(completionBody, /prefs\.remove\(_key\('narrationOffset'\)\)/);
+});
+
+
+test('story and discovery keep independent narration checkpoints', () => {
+  assert.match(state, /_journeyNarrationSignatures/);
+  assert.match(state, /_journeyNarrationOffsets/);
+  assert.match(state, /journeyNarrationSignatureFor\(String contentId\)/);
+  assert.match(state, /journeyNarrationOffsetFor\(String contentId\)/);
+  assert.match(state, /_key\('narration\.\$contentId\.\$suffix'\)/);
+  assert.match(
+    state,
+    /prefs\.setString\(_narrationKey\(contentId, 'signature'\)/,
+  );
+  assert.match(
+    state,
+    /prefs\.setInt\(_narrationKey\(contentId, 'offset'\)/,
+  );
+});
+
+test('returning to a narration page restores its own checkpoint', () => {
+  assert.match(
+    journey,
+    /void _restoreNarrationPosition\(\[String\? requestedContentId\]\)/,
+  );
+  assert.match(
+    journey,
+    /journeyNarrationOffsetFor\('discovery'\) > 0[\s\S]*_restoreNarrationPosition\('discovery'\)/,
+  );
+  assert.match(
+    journey,
+    /safeStep == 0[\s\S]*_restoreNarrationPosition\('story'\)/,
+  );
+  assert.match(
+    journey,
+    /clearJourneyNarrationPosition\(contentId: contentId\)/,
+  );
 });
