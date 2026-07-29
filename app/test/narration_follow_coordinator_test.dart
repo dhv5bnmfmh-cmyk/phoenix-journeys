@@ -3,6 +3,8 @@ import 'package:phoenix_journeys/services/narration_controller.dart';
 import 'package:phoenix_journeys/services/narration_follow_coordinator.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('remaining hold reports only future time', () {
     final now = DateTime(2026, 7, 29, 12);
     expect(
