@@ -134,7 +134,7 @@ class _SentenceShadowingPracticeState extends State<SentenceShadowingPractice> {
     if (!mounted) return;
 
     final started = await _speech.start(
-      onResult: (text, {required isFinal}) {
+      onResult: (text, {required bool isFinal}) {
         if (!mounted) return;
         setState(() => _recognized = text);
         if (isFinal) _finishEvaluation();
