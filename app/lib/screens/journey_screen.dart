@@ -259,9 +259,11 @@ class _JourneyScreenState extends State<JourneyScreen>
         offset >= total) {
       _narrationCheckpointTimer?.cancel();
       _narrationCheckpointTimer = null;
-      if (_appState.journeyNarrationOffset > 0) {
+      if (_appState.journeyNarrationOffsetFor(contentId!) > 0) {
         _lastSavedNarrationOffset = 0;
-        unawaited(_appState.clearJourneyNarrationPosition());
+        unawaited(
+          _appState.clearJourneyNarrationPosition(contentId: contentId),
+        );
       }
       return;
     }
@@ -344,22 +346,31 @@ class _JourneyScreenState extends State<JourneyScreen>
           )
           .toList(growable: false);
 
-  void _restoreNarrationPosition() {
-    if (_narration.hasContent || _appState.journeyNarrationOffset <= 0) return;
-    final contentId = _appState.journeyNarrationContentId;
+  void _restoreNarrationPosition([String? requestedContentId]) {
+    final contentId = requestedContentId ??
+        switch (step) {
+          0 => 'story',
+          2 => 'discovery',
+          _ => null,
+        };
+    if (contentId == null) return;
+    final offset = _appState.journeyNarrationOffsetFor(contentId);
+    if (offset <= 0) return;
+    if (_narration.hasContent && _narration.contentId == contentId) return;
+
     final items = contentId == 'story'
         ? _storyNarrationItems
         : _discoveryNarrationItems;
     final matchesStep =
         (step == 0 && contentId == 'story') ||
         (step == 2 && contentId == 'discovery');
-    final matchesContent = contentId != null &&
-        _appState.journeyNarrationContentSignature ==
-            narrationContentSignature(items);
+    final matchesContent =
+        _appState.journeyNarrationSignatureFor(contentId) ==
+        narrationContentSignature(items);
     if (!matchesStep || !matchesContent) {
-      if (contentId != null) {
-        unawaited(_appState.clearJourneyNarrationPosition());
-      }
+      unawaited(
+        _appState.clearJourneyNarrationPosition(contentId: contentId),
+      );
       return;
     }
 
@@ -367,9 +378,9 @@ class _JourneyScreenState extends State<JourneyScreen>
       contentId: contentId,
       languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
       items: items,
-      offset: _appState.journeyNarrationOffset,
+      offset: offset,
     );
-    _lastSavedNarrationOffset = _appState.journeyNarrationOffset;
+    _lastSavedNarrationOffset = offset;
   }
 
   void _handlePhoenixLevelChanged() {
@@ -440,7 +451,13 @@ class _JourneyScreenState extends State<JourneyScreen>
     // iOS display "playing" while silently blocking the actual utterance.
     if (safeStep == 2 && safeStep != step) {
       setState(() => step = safeStep);
-      unawaited(_playDiscoveries(stopEngineFirst: false));
+      if (_appState.journeyNarrationOffsetFor('discovery') > 0) {
+        await _narration.stop();
+        if (!mounted) return;
+        _restoreNarrationPosition('discovery');
+      } else {
+        unawaited(_playDiscoveries(stopEngineFirst: false));
+      }
       await _persistProgress(overrideStep: safeStep);
       return;
     }
@@ -449,6 +466,9 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (!mounted || safeStep == step) return;
 
     setState(() => step = safeStep);
+    if (safeStep == 0) {
+      _restoreNarrationPosition('story');
+    }
     await _persistProgress(overrideStep: safeStep);
   }
 
