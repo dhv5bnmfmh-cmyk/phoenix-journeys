@@ -39,7 +39,7 @@ test('saved position is discarded when narration content changes', () => {
   );
   assert.match(
     journey,
-    /if \(!matchesStep \|\| !matchesContent \|\| contentId == null\)/,
+    /if \(!matchesStep \|\| !matchesContent\)/,
   );
   assert.match(
     journey,
