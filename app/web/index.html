@@ -13,7 +13,7 @@
     name="description"
     content="Phoenix Journeys — 通过语言、故事与文化探索世界。"
   >
-  <meta name="theme-color" content="#9D1C20">
+  <meta name="theme-color" content="#180908">
 
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,15 +21,16 @@
   <meta name="apple-mobile-web-app-title" content="Phoenix Journeys">
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preload" as="image" href="phoenix-launch-cover.webp" type="image/webp">
   <link rel="manifest" href="manifest.json">
 
   <title>Phoenix Journeys</title>
 
   <style>
     :root {
-      color-scheme: light;
+      color-scheme: dark;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #fff7ea;
+      background: #180908;
     }
 
     html,
@@ -40,7 +41,7 @@
       padding: 0;
       overflow: hidden;
       overscroll-behavior: none;
-      background: #fff7ea;
+      background: #180908;
     }
 
     body {
@@ -52,14 +53,36 @@
       inset: 0;
       z-index: 9999;
       display: grid;
-      place-items: center;
-      padding: 28px;
+      place-items: end center;
       box-sizing: border-box;
+      padding:
+        max(34px, env(safe-area-inset-top))
+        28px
+        max(64px, calc(env(safe-area-inset-bottom) + 38px));
+      overflow: hidden;
       background:
-        radial-gradient(circle at 12% 18%, rgba(255,255,255,.95) 0 70px, transparent 72px),
-        radial-gradient(circle at 88% 70%, rgba(255,255,255,.72) 0 95px, transparent 97px),
-        linear-gradient(145deg, #fff7ea, #f5e4cf);
-      transition: opacity 220ms ease, visibility 220ms ease;
+        linear-gradient(
+          180deg,
+          rgba(12, 3, 3, .04) 0%,
+          rgba(17, 5, 4, .10) 44%,
+          rgba(13, 4, 4, .74) 73%,
+          rgba(10, 3, 3, .96) 100%
+        ),
+        url("phoenix-launch-cover.webp") center 24% / cover no-repeat,
+        #180908;
+      transition: opacity 360ms ease, visibility 360ms ease;
+    }
+
+    #phoenix-loading::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(224, 166, 72, .13), transparent 31%),
+        linear-gradient(90deg, transparent, rgba(231, 184, 100, .12), transparent);
+      mix-blend-mode: screen;
+      opacity: .8;
     }
 
     #phoenix-loading.phoenix-loading--hidden {
@@ -69,63 +92,98 @@
     }
 
     .phoenix-loading__content {
-      width: min(100%, 360px);
+      position: relative;
+      z-index: 1;
+      width: min(100%, 380px);
       text-align: center;
-      color: #2d2421;
+      color: #fff8e9;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, .72);
     }
 
     .phoenix-loading__mark {
       display: grid;
       place-items: center;
-      width: 78px;
-      height: 78px;
-      margin: 0 auto 24px;
-      border-radius: 26px;
-      background: #9d1c20;
-      box-shadow: 0 16px 32px rgba(61, 23, 20, .22);
-      color: white;
-      font-size: 38px;
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 16px;
+      border: 1px solid rgba(239, 194, 105, .72);
+      border-radius: 50%;
+      background: rgba(91, 19, 17, .56);
+      box-shadow:
+        0 0 0 5px rgba(207, 143, 49, .08),
+        0 10px 34px rgba(0, 0, 0, .42);
+      color: #f1c66d;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 25px;
+      font-weight: 700;
+      backdrop-filter: blur(8px);
     }
 
     .phoenix-loading__title {
       margin: 0;
-      font-size: 21px;
-      font-weight: 800;
-      letter-spacing: .02em;
+      color: #fff8e9;
+      font-size: clamp(22px, 6vw, 28px);
+      font-weight: 850;
+      letter-spacing: .12em;
     }
 
     .phoenix-loading__text {
-      margin: 10px 0 20px;
-      color: rgba(45, 36, 33, .68);
+      margin: 9px 0 22px;
+      color: rgba(255, 238, 205, .78);
+      font-size: 14px;
       line-height: 1.5;
+      letter-spacing: .08em;
     }
 
     .phoenix-loading__bar {
       width: 100%;
-      height: 5px;
+      height: 3px;
       overflow: hidden;
       border-radius: 999px;
-      background: rgba(157, 28, 32, .12);
+      background: rgba(243, 205, 129, .18);
+      box-shadow: inset 0 0 0 1px rgba(255, 235, 190, .06);
     }
 
     .phoenix-loading__bar::after {
       content: "";
       display: block;
-      width: 42%;
+      width: 38%;
       height: 100%;
       border-radius: inherit;
-      background: #9d1c20;
-      animation: phoenix-loading 1.25s ease-in-out infinite;
+      background: linear-gradient(90deg, #a76520, #ffd98a, #c88a32);
+      box-shadow: 0 0 14px rgba(255, 201, 104, .72);
+      animation: phoenix-loading 1.55s cubic-bezier(.4, 0, .2, 1) infinite;
     }
 
     @keyframes phoenix-loading {
-      from { transform: translateX(-115%); }
-      to { transform: translateX(340%); }
+      from { transform: translateX(-125%); }
+      to { transform: translateX(365%); }
+    }
+
+    @media (max-height: 680px) {
+      #phoenix-loading {
+        padding-bottom: max(34px, calc(env(safe-area-inset-bottom) + 20px));
+      }
+
+      .phoenix-loading__mark {
+        width: 46px;
+        height: 46px;
+        margin-bottom: 12px;
+        font-size: 21px;
+      }
+
+      .phoenix-loading__text {
+        margin-bottom: 16px;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .phoenix-loading__bar::after {
-        animation-duration: 2.5s;
+        animation-duration: 3s;
+      }
+
+      #phoenix-loading {
+        transition-duration: 0ms;
       }
     }
   </style>
@@ -133,10 +191,10 @@
 <body>
   <div id="phoenix-loading" role="status" aria-live="polite">
     <div class="phoenix-loading__content">
-      <div class="phoenix-loading__mark" aria-hidden="true">🔥</div>
+      <div class="phoenix-loading__mark" aria-hidden="true">凤</div>
       <p class="phoenix-loading__title">PHOENIX JOURNEYS</p>
       <p id="phoenix-loading-text" class="phoenix-loading__text">
-        正在准备你的语言旅程…
+        正在展开你的语言旅程…
       </p>
       <div class="phoenix-loading__bar" aria-hidden="true"></div>
     </div>
