@@ -156,12 +156,19 @@ class _PassportMap extends StatelessWidget {
                       ),
                     ),
                   ),
-                  for (final city in journeyCityCatalog)
+                  for (final city in journeyCityCatalog) ...[
+                    _CityMarkerLeader(
+                      placement: markerPlacements[city.id]!,
+                      earned: city.destinations.any(
+                        (journey) => state.isJourneyStampEarned(journey.id),
+                      ),
+                    ),
                     _CityMapMarker(
                       state: state,
                       city: city,
                       placement: markerPlacements[city.id]!,
                     ),
+                  ],
                   Positioned(
                     left: 9,
                     bottom: 9,
@@ -198,15 +205,20 @@ class _PassportMap extends StatelessWidget {
 }
 
 class _CityMarkerPlacement {
-  const _CityMarkerPlacement({required this.rect, required this.labelOnLeft});
+  const _CityMarkerPlacement({
+    required this.anchor,
+    required this.rect,
+    required this.labelOnLeft,
+  });
 
+  final Offset anchor;
   final Rect rect;
   final bool labelOnLeft;
 }
 
 Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Size mapSize) {
-  const markerSize = Size(51, 23);
-  const mapPadding = 5.0;
+  const markerSize = Size(72, 28);
+  const mapPadding = 7.0;
   final occupied = <Rect>[];
   final placements = <String, _CityMarkerPlacement>{};
 
@@ -219,29 +231,40 @@ Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Size mapSize) {
       mapSize.height * (.08 + (1 - latitudeRatio) * .82),
     );
     final candidates = <({Offset offset, bool labelOnLeft})>[
-      (offset: const Offset(-5, -11.5), labelOnLeft: false),
-      (offset: const Offset(-46, -11.5), labelOnLeft: true),
-      (offset: const Offset(-5, -36), labelOnLeft: false),
-      (offset: const Offset(-46, -36), labelOnLeft: true),
-      (offset: const Offset(-5, 13), labelOnLeft: false),
-      (offset: const Offset(-46, 13), labelOnLeft: true),
-      (offset: const Offset(9, -24), labelOnLeft: false),
-      (offset: const Offset(-60, 1), labelOnLeft: true),
+      (offset: const Offset(10, -14), labelOnLeft: false),
+      (offset: const Offset(-82, -14), labelOnLeft: true),
+      (offset: const Offset(9, -48), labelOnLeft: false),
+      (offset: const Offset(-81, -48), labelOnLeft: true),
+      (offset: const Offset(9, 20), labelOnLeft: false),
+      (offset: const Offset(-81, 20), labelOnLeft: true),
+      (offset: const Offset(28, -38), labelOnLeft: false),
+      (offset: const Offset(-100, -38), labelOnLeft: true),
+      (offset: const Offset(28, 10), labelOnLeft: false),
+      (offset: const Offset(-100, 10), labelOnLeft: true),
+      (offset: const Offset(-36, -58), labelOnLeft: false),
+      (offset: const Offset(-36, 30), labelOnLeft: true),
+      (offset: const Offset(48, -14), labelOnLeft: false),
+      (offset: const Offset(-120, -14), labelOnLeft: true),
     ];
 
     _CityMarkerPlacement? selected;
     for (final candidate in candidates) {
-      final rawRect = candidate.offset & markerSize;
-      final translated = rawRect.shift(anchor);
+      final translated = (candidate.offset & markerSize).shift(anchor);
       final rect = Rect.fromLTWH(
-        translated.left.clamp(mapPadding, mapSize.width - markerSize.width - mapPadding),
-        translated.top.clamp(mapPadding, mapSize.height - markerSize.height - mapPadding),
+        translated.left.clamp(
+          mapPadding,
+          mapSize.width - markerSize.width - mapPadding,
+        ),
+        translated.top.clamp(
+          mapPadding,
+          mapSize.height - markerSize.height - mapPadding,
+        ),
         markerSize.width,
         markerSize.height,
       );
-      final paddedRect = rect.inflate(3);
-      if (occupied.every((other) => !other.overlaps(paddedRect))) {
+      if (occupied.every((other) => !other.overlaps(rect.inflate(5)))) {
         selected = _CityMarkerPlacement(
+          anchor: anchor,
           rect: rect,
           labelOnLeft: candidate.labelOnLeft,
         );
@@ -249,22 +272,130 @@ Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Size mapSize) {
       }
     }
 
+    if (selected == null) {
+      for (var row = 0; row < 12 && selected == null; row += 1) {
+        for (final onLeft in const [false, true]) {
+          final left = onLeft
+              ? anchor.dx - markerSize.width - 16
+              : anchor.dx + 16;
+          final top = anchor.dy - 14 + (row.isEven ? 1 : -1) * ((row + 1) ~/ 2) * 34;
+          final rect = Rect.fromLTWH(
+            left.clamp(
+              mapPadding,
+              mapSize.width - markerSize.width - mapPadding,
+            ),
+            top.clamp(
+              mapPadding,
+              mapSize.height - markerSize.height - mapPadding,
+            ),
+            markerSize.width,
+            markerSize.height,
+          );
+          if (occupied.every((other) => !other.overlaps(rect.inflate(5)))) {
+            selected = _CityMarkerPlacement(
+              anchor: anchor,
+              rect: rect,
+              labelOnLeft: onLeft,
+            );
+            break;
+          }
+        }
+      }
+    }
+
     selected ??= _CityMarkerPlacement(
+      anchor: anchor,
       rect: Rect.fromLTWH(
-        (anchor.dx - markerSize.width / 2)
-            .clamp(mapPadding, mapSize.width - markerSize.width - mapPadding),
-        (anchor.dy - markerSize.height / 2)
-            .clamp(mapPadding, mapSize.height - markerSize.height - mapPadding),
+        (anchor.dx + 12).clamp(
+          mapPadding,
+          mapSize.width - markerSize.width - mapPadding,
+        ),
+        (anchor.dy - 14).clamp(
+          mapPadding,
+          mapSize.height - markerSize.height - mapPadding,
+        ),
         markerSize.width,
         markerSize.height,
       ),
       labelOnLeft: false,
     );
-    occupied.add(selected.rect.inflate(3));
+    occupied.add(selected.rect.inflate(5));
     placements[city.id] = selected;
   }
 
   return placements;
+}
+
+class _CityMarkerLeader extends StatelessWidget {
+  const _CityMarkerLeader({required this.placement, required this.earned});
+
+  final _CityMarkerPlacement placement;
+  final bool earned;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: CustomPaint(
+          painter: _CityMarkerLeaderPainter(
+            anchor: placement.anchor,
+            labelRect: placement.rect,
+            color: earned ? PhoenixTheme.gold : PhoenixTheme.red,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CityMarkerLeaderPainter extends CustomPainter {
+  const _CityMarkerLeaderPainter({
+    required this.anchor,
+    required this.labelRect,
+    required this.color,
+  });
+
+  final Offset anchor;
+  final Rect labelRect;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final target = Offset(
+      anchor.dx < labelRect.left
+          ? labelRect.left
+          : anchor.dx > labelRect.right
+              ? labelRect.right
+              : anchor.dx,
+      anchor.dy.clamp(labelRect.top + 5, labelRect.bottom - 5),
+    );
+    final linePaint = Paint()
+      ..color = color.withValues(alpha: .72)
+      ..strokeWidth = 1.15
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(anchor, target, linePaint);
+    canvas.drawCircle(
+      anchor,
+      3.6,
+      Paint()
+        ..color = const Color(0xFFFFF4D6)
+        ..style = PaintingStyle.fill,
+    );
+    canvas.drawCircle(
+      anchor,
+      2.35,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.fill,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _CityMarkerLeaderPainter oldDelegate) {
+    return oldDelegate.anchor != anchor ||
+        oldDelegate.labelRect != labelRect ||
+        oldDelegate.color != color;
+  }
 }
 
 class _CityMapMarker extends StatelessWidget {
@@ -320,32 +451,20 @@ class _CityMapMarker extends StatelessWidget {
     final earned = city.destinations.any(
       (journey) => state.isJourneyStampEarned(journey.id),
     );
-    final pin = Container(
-      key: ValueKey('passport-city-pin-${city.id}'),
-      width: 9,
-      height: 9,
-      decoration: BoxDecoration(
-        color: earned ? PhoenixTheme.gold : PhoenixTheme.red,
-        shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFFFFF7E5), width: 1.5),
-        boxShadow: const [
-          BoxShadow(color: Color(0x55000000), blurRadius: 4),
-        ],
-      ),
+    final badge = JourneySymbolBadge(
+      journeyId: city.primaryDestination.id,
+      isUnlocked: earned || _passportAllAccessPreview,
+      size: 22,
     );
     final label = Text(
       state.displayText(city.name),
       maxLines: 1,
-      overflow: TextOverflow.visible,
+      overflow: TextOverflow.ellipsis,
       style: const TextStyle(
-        color: Color(0xFF2B211C),
-        fontSize: 8.5,
+        color: Color(0xFF2A1D16),
+        fontSize: 9.5,
         height: 1,
         fontWeight: FontWeight.w900,
-        shadows: [
-          Shadow(color: Color(0xFFFFF8E8), blurRadius: 5),
-          Shadow(color: Color(0xFFFFF8E8), blurRadius: 9),
-        ],
       ),
     );
 
@@ -362,17 +481,42 @@ class _CityMapMarker extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () => unawaited(_showCityJourneys(context)),
-            borderRadius: BorderRadius.circular(10),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 3),
+            borderRadius: BorderRadius.circular(14),
+            child: Ink(
+              key: ValueKey('passport-city-landmark-${city.id}'),
+              padding: const EdgeInsets.fromLTRB(3, 2, 6, 2),
+              decoration: BoxDecoration(
+                color: const Color(0xEFFFF8E8),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: earned
+                      ? PhoenixTheme.gold.withValues(alpha: .90)
+                      : PhoenixTheme.red.withValues(alpha: .48),
+                  width: .8,
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x28000000),
+                    blurRadius: 5,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
               child: Row(
                 mainAxisAlignment: placement.labelOnLeft
                     ? MainAxisAlignment.end
                     : MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
                 children: placement.labelOnLeft
-                    ? [label, const SizedBox(width: 3), pin]
-                    : [pin, const SizedBox(width: 3), label],
+                    ? [
+                        Flexible(child: label),
+                        const SizedBox(width: 4),
+                        badge,
+                      ]
+                    : [
+                        badge,
+                        const SizedBox(width: 4),
+                        Flexible(child: label),
+                      ],
               ),
             ),
           ),
