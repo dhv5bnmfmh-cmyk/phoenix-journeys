@@ -18,6 +18,10 @@ const player = readFileSync(
   'app/lib/widgets/narration_player_card.dart',
   'utf8',
 );
+const mediaButton = readFileSync(
+  'app/lib/widgets/phoenix_media_button.dart',
+  'utf8',
+);
 
 test('web narration warms and ranks natural voices before playback', () => {
   assert.match(webSpeech, /_primeVoiceCatalog\(\)/);
@@ -47,6 +51,12 @@ test('explicit web retry keeps cancel and speak inside the same tap', () => {
     controller,
     /if \(useWebSpeech\)[\s\S]*cancelExisting: stopEngineFirst/,
   );
+});
+
+test('blocked narration exposes an unmistakable retry control', () => {
+  assert.match(player, /isError: hasError/);
+  assert.match(mediaButton, /Icons\.refresh_rounded/);
+  assert.match(mediaButton, /phoenix-retry/);
 });
 
 test('language-specific prosody preserves user speed within safe bounds', () => {
