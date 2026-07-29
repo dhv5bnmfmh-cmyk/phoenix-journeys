@@ -7,8 +7,10 @@ import '../theme/phoenix_theme.dart';
 Future<String?> showJourneyPickerSheet({
   required BuildContext context,
   required AppState state,
+  String? initialCityId,
+  bool lockToInitialCity = false,
 }) async {
-  var selectedCityId = state.activeJourney.cityId;
+  var selectedCityId = initialCityId ?? state.activeJourney.cityId;
 
   return showModalBottomSheet<String>(
     context: context,
@@ -28,7 +30,11 @@ Future<String?> showJourneyPickerSheet({
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    state.displayText('选择城市与地点'),
+                    state.displayText(
+                      lockToInitialCity
+                          ? '选择${selectedCity.name}景点'
+                          : '选择城市与地点',
+                    ),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontSize: 19,
                       fontWeight: FontWeight.w900,
@@ -36,7 +42,11 @@ Future<String?> showJourneyPickerSheet({
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    state.displayText('先选择城市，再进入这座城市的具体旅程。'),
+                    state.displayText(
+                      lockToInitialCity
+                          ? '你已抵达${selectedCity.name}，请选择本城景点。'
+                          : '先选择城市，再进入这座城市的具体旅程。',
+                    ),
                     style: const TextStyle(color: Colors.black54, fontSize: 11),
                   ),
                   const SizedBox(height: 12),
@@ -44,10 +54,12 @@ Future<String?> showJourneyPickerSheet({
                     height: 58,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: journeyCityCatalog.length,
+                      itemCount: lockToInitialCity ? 1 : journeyCityCatalog.length,
                       separatorBuilder: (_, __) => const SizedBox(width: 7),
                       itemBuilder: (context, index) {
-                        final city = journeyCityCatalog[index];
+                        final city = lockToInitialCity
+                            ? selectedCity
+                            : journeyCityCatalog[index];
                         final selected = city.id == selectedCityId;
                         final earnedCount = city.destinations
                             .where(
@@ -63,8 +75,11 @@ Future<String?> showJourneyPickerSheet({
                           borderRadius: BorderRadius.circular(15),
                           child: InkWell(
                             key: ValueKey('journey-city-${city.id}'),
-                            onTap: () =>
-                                setSheetState(() => selectedCityId = city.id),
+                            onTap: lockToInitialCity
+                                ? null
+                                : () => setSheetState(
+                                      () => selectedCityId = city.id,
+                                    ),
                             borderRadius: BorderRadius.circular(15),
                             child: Container(
                               width: 92,
