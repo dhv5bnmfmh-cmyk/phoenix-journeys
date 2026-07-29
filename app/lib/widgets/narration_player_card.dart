@@ -63,6 +63,14 @@ int resolveNarrationContinuationOffset({
 }
 
 @visibleForTesting
+bool shouldClearNarrationLocalSession({
+  required NarrationStatus controllerStatus,
+  required bool finished,
+}) {
+  return finished || controllerStatus == NarrationStatus.error;
+}
+
+@visibleForTesting
 String compactNarrationProgressLabel({
   required int? currentItemIndex,
   required int itemCount,
@@ -172,7 +180,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     } else if (status == NarrationStatus.paused) {
       _sessionPlaying = false;
       _sessionPaused = true;
-    } else if (_controllerFinished) {
+    } else if (shouldClearNarrationLocalSession(
+      controllerStatus: status,
+      finished: _controllerFinished,
+    )) {
       _sessionPlaying = false;
       _sessionPaused = false;
     }
