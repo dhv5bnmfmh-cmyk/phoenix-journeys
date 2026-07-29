@@ -122,10 +122,10 @@ void main() {
 
   test('narration signature changes when the spoken content changes', () {
     const original = [
-      NarrationItem(id: 'story-0', text: '原来的故事。'),
+      NarrationItem(id: 'story-0', text: '原来的故事。', label: '故事'),
     ];
     const updated = [
-      NarrationItem(id: 'story-0', text: '更新后的故事。'),
+      NarrationItem(id: 'story-0', text: '更新后的故事。', label: '故事'),
     ];
 
     expect(narrationContentSignature(original), hasLength(8));
