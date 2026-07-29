@@ -35,7 +35,7 @@ test('generates and publishes the quality agent report before preview deployment
   assert.match(workflow, /actions\/upload-artifact@v4/);
 });
 
-test('Flutter-backed runner requires twelve journeys and 120 inspections', () => {
+test('Flutter-backed runner requires fifteen journeys and 150 inspections', () => {
   assert.match(reportRunner, /generate_journey_quality_report\.dart/);
   assert.match(reportRunner, /PHOENIX_QUALITY_MARKDOWN/);
   assert.match(reportRunner, /PHOENIX_QUALITY_JSON/);
