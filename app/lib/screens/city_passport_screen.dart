@@ -8,7 +8,6 @@ import '../data/journey_city_catalog.dart';
 import '../services/journey_location_binding.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
-import '../widgets/city_journey_stamp.dart';
 import '../widgets/journey_symbol_badge.dart';
 import '../widgets/special_journey_passport.dart';
 import 'journey_screen.dart';
