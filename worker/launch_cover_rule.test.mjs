@@ -8,7 +8,7 @@ test('Phoenix launch cover uses the premium phoenix artwork', async () => {
   const [index, manifest, artwork] = await Promise.all([
     read('app/web/index.html'),
     read('app/web/manifest.json'),
-    stat(new URL('../app/web/launch-phoenix-cover.webp', import.meta.url)),
+    stat(new URL('../app/assets/images/phoenix-launch-cover.webp', import.meta.url)),
   ]);
 
   assert.match(index, /phoenix-launch-cover\.webp/);
@@ -16,6 +16,8 @@ test('Phoenix launch cover uses the premium phoenix artwork', async () => {
   assert.match(index, /正在展开你的语言旅程/);
   assert.match(index, /env\(safe-area-inset-bottom\)/);
   assert.match(index, /prefers-reduced-motion/);
+  assert.match(index, /phoenix-cover-breathe/);
+  assert.match(index, /phoenix-cover-glow/);
   assert.doesNotMatch(index, /🔥/);
   assert.doesNotMatch(index, /radial-gradient\(circle at 12% 18%/);
   assert.ok(artwork.size > 80_000);
