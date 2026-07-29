@@ -46,8 +46,8 @@ class JourneyLocationBinding {
     // projection. These points are art-directed against the actual coastline
     // so the aircraft lands on the city represented by the label.
     const calibratedPoints = <String, JourneyMapPoint>{
-      'beijing/forbidden-city': JourneyMapPoint(x: 0.63, y: 0.25),
-      'beijing/summer-palace': JourneyMapPoint(x: 0.63, y: 0.25),
+      'beijing/forbidden-city': JourneyMapPoint(x: 0.63, y: 0.29),
+      'beijing/summer-palace': JourneyMapPoint(x: 0.63, y: 0.29),
       'shanghai/bund': JourneyMapPoint(x: 0.76, y: 0.43),
       'xian/city-wall': JourneyMapPoint(x: 0.49, y: 0.39),
       'hangzhou/west-lake': JourneyMapPoint(x: 0.70, y: 0.49),
