@@ -186,4 +186,37 @@ final generatedJourneyBackgrounds = <JourneyBackgroundAsset>[
       complianceScore: 100,
       varietyScore: 100,
     ),
+  JourneyBackgroundAsset(
+    id: 'suzhou-humble-administrators-garden-v1',
+    journeyId: 'suzhou-humble-administrators-garden',
+    assetPath:
+        'assets/images/backgrounds/generated/suzhou/humble-administrators-garden/suzhou-humble-administrators-garden-v1.webp',
+    generatedOn: DateTime.utc(2026, 7, 29),
+    origin: JourneyBackgroundOrigin.aiGenerated,
+    complianceReviewed: true,
+    complianceScore: 100,
+    varietyScore: 100,
+  ),
+  JourneyBackgroundAsset(
+    id: 'luoyang-longmen-grottoes-v1',
+    journeyId: 'luoyang-longmen-grottoes',
+    assetPath:
+        'assets/images/backgrounds/generated/luoyang/longmen-grottoes/luoyang-longmen-grottoes-v1.webp',
+    generatedOn: DateTime.utc(2026, 7, 29),
+    origin: JourneyBackgroundOrigin.aiGenerated,
+    complianceReviewed: true,
+    complianceScore: 100,
+    varietyScore: 100,
+  ),
+  JourneyBackgroundAsset(
+    id: 'quanzhou-kaiyuan-temple-v1',
+    journeyId: 'quanzhou-kaiyuan-temple',
+    assetPath:
+        'assets/images/backgrounds/generated/quanzhou/kaiyuan-temple/quanzhou-kaiyuan-temple-v1.webp',
+    generatedOn: DateTime.utc(2026, 7, 29),
+    origin: JourneyBackgroundOrigin.aiGenerated,
+    complianceReviewed: true,
+    complianceScore: 100,
+    varietyScore: 100,
+  ),
 ];
