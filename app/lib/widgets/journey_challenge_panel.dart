@@ -302,7 +302,18 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           constraints: BoxConstraints(
             maxHeight: MediaQuery.sizeOf(dialogContext).height * .62,
           ),
-          child: SingleChildScrollView(child: _explanationCard()),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _explanationCard(),
+                if (finalMode) ...[
+                  const SizedBox(height: 9),
+                  _journeyMasterySummary(),
+                ],
+              ],
+            ),
+          ),
         ),
         actions: [
           SizedBox(
@@ -1050,6 +1061,93 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
             _explanationLine('为什么', _session.adaptiveExplanation),
             _explanationLine('记忆方法', _session.adaptiveMemoryTip),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _journeyMasterySummary() {
+    final passed = _sessions.where((session) => session.correct).length;
+    final firstTry = _sessions
+        .where((session) => session.correct && session.attempts == 1)
+        .length;
+    final weakest = _sessions.reduce((current, candidate) {
+      if (!candidate.correct && current.correct) return candidate;
+      if (candidate.correct == current.correct &&
+          candidate.attempts > current.attempts) {
+        return candidate;
+      }
+      return current;
+    });
+    final headline = firstTry == _sessions.length
+        ? '三项能力已掌握'
+        : passed == _sessions.length
+        ? '三项挑战已完成'
+        : '已完成 $passed / ${_sessions.length} 项';
+
+    return Container(
+      key: const ValueKey('challenge-journey-mastery-summary'),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6EBD4).withValues(alpha: .94),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFD9BC82)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            t('旅程学习总结 · $headline'),
+            style: const TextStyle(
+              color: Color(0xFF5D3B22),
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 7),
+          for (final session in _sessions)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: Row(
+                key: ValueKey('challenge-summary-${session.type.name}'),
+                children: [
+                  Icon(
+                    session.correct
+                        ? Icons.check_circle_rounded
+                        : Icons.replay_circle_filled_rounded,
+                    color: session.correct
+                        ? const Color(0xFF315B32)
+                        : const Color(0xFF9A5B31),
+                    size: 15,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      t(
+                        '${session.typeLabel} · ${session.masteryLabel}'
+                        ' · ${session.attempts} 次',
+                      ),
+                      style: const TextStyle(
+                        color: Color(0xFF49382C),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 2),
+          Text(
+            t('下一步 · 重点复习${weakest.typeLabel}：${weakest.trainingGoal}。'
+                '${weakest.masteryAdvice}'),
+            style: const TextStyle(
+              color: Color(0xFF6D4A2B),
+              fontSize: 10,
+              height: 1.4,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ],
       ),
     );
