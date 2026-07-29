@@ -17,6 +17,27 @@ void main() {
     );
   });
 
+  test('active voice labels distinguish automatic and custom selection', () {
+    expect(narrationVoiceNameFromId(null), isNull);
+    expect(
+      narrationVoiceNameFromId('zh-cn::Xiaoxiao Natural'),
+      'Xiaoxiao Natural',
+    );
+    expect(compactNarrationVoiceSelectionLabel(null), '自动');
+    expect(
+      compactNarrationVoiceSelectionLabel('zh-tw::Meijia'),
+      '自选',
+    );
+    expect(
+      narrationVoiceSelectionSummary(null),
+      '自动选择最佳声线',
+    );
+    expect(
+      narrationVoiceSelectionSummary('zh-tw::Meijia'),
+      '当前使用：Meijia',
+    );
+  });
+
   test('ranked picker keeps the strongest exact-locale voices first', () {
     final ranked = rankNarrationVoiceOptions(
       languageCode: 'zh-CN',
