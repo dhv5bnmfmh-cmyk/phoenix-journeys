@@ -46,8 +46,9 @@ void main() {
     );
 
     expect(ranked.first.name, 'Xiaoxiao Natural');
+    expect(ranked.first.locale, 'zh-CN');
     expect(ranked.first.qualityLabel, '自然声线');
-    expect(ranked.last.name, isNot('Meijia'));
+    expect(ranked.last.locale, 'zh-TW');
   });
 
   test('voice option limit keeps the picker concise', () {
