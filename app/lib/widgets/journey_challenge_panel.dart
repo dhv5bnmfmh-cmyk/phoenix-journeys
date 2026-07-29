@@ -249,9 +249,9 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
   String _explanationNarration(_ChallengeSession session) {
     if (session.type == JourneyChallengeType.grammarRepair) {
       final grammar = session.grammar!;
-      return '本模式获得${session.reward ?? '碎银'}。病句类型，${grammar.errorType}。错误位置，${grammar.errorLocation}。原句，${grammar.originalSentence}。修改后，${grammar.correctedSentence}。为什么错误，${grammar.whyWrong}。修改原则，${grammar.revisionRule}。记忆方法，${grammar.memoryTip}。';
+      return '本模式获得${session.reward ?? '碎银'}。掌握情况，${session.masteryLabel}。训练目标，${session.trainingGoal}。${session.masteryAdvice}。病句类型，${grammar.errorType}。错误位置，${grammar.errorLocation}。原句，${grammar.originalSentence}。修改后，${grammar.correctedSentence}。为什么错误，${grammar.whyWrong}。修改原则，${grammar.revisionRule}。记忆方法，${grammar.memoryTip}。';
     }
-    return '本模式获得${session.reward ?? '碎银'}。正确答案，${session.correctAnswerText}。为什么，${session.explanation}。记忆方法，${session.memoryTip}。';
+    return '本模式获得${session.reward ?? '碎银'}。掌握情况，${session.masteryLabel}。训练目标，${session.trainingGoal}。${session.masteryAdvice}。正确答案，${session.correctAnswerText}。为什么，${session.explanation}。记忆方法，${session.memoryTip}。';
   }
 
   Widget _speakerButton(
@@ -1017,6 +1017,32 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
             ],
           ),
           const SizedBox(height: 7),
+          Container(
+            key: const ValueKey('challenge-mastery-summary'),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+            decoration: BoxDecoration(
+              color: const Color(0xFF315B32).withValues(alpha: .07),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: const Color(0xFF315B32).withValues(alpha: .14),
+              ),
+            ),
+            child: Text(
+              t(
+                '掌握情况 · ${_session.masteryLabel}\n'
+                '训练目标 · ${_session.trainingGoal}\n'
+                '${_session.masteryAdvice}',
+              ),
+              style: const TextStyle(
+                color: Color(0xFF315B32),
+                fontSize: 10,
+                height: 1.4,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(height: 2),
           if (_session.type == JourneyChallengeType.grammarRepair)
             ..._grammarExplanationLines()
           else ...[
@@ -1328,6 +1354,26 @@ class _ChallengeSession {
     ) =>
       '保持主题链、指代与因果连续',
   };
+
+  String get masteryLabel {
+    if (!correct) return '需要复习';
+    return switch (attempts) {
+      1 => '已掌握',
+      2 => '基本掌握',
+      _ => '正在巩固',
+    };
+  }
+
+  String get masteryAdvice {
+    if (!correct) {
+      return '先按提示重读正确答案，再回到相同训练目标练习一次。';
+    }
+    return switch (attempts) {
+      1 => '可以继续挑战更复杂的表达与逻辑。',
+      2 => '已经理解核心方法，建议用记忆提示再检查一次。',
+      _ => '已经完成修正，建议复述规则后再进入下一题。',
+    };
+  }
 
   bool get canSubmit => switch (type) {
     JourneyChallengeType.paragraphRebuild =>
