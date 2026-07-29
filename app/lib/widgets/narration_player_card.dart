@@ -593,6 +593,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                     PhoenixMediaButton(
                       key: const ValueKey('narration-main-control'),
                       isPlaying: isPlaying,
+                      isError: hasError,
                       tooltip: _mainButtonTooltip(status),
                       size: compact ? 32 : 44,
                       onPressed: _handleMainPressed,
