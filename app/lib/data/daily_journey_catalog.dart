@@ -5,6 +5,7 @@ import 'beijing_story_catalog.dart';
 import 'daily_journey_experience.dart';
 import 'extended_journey_catalog.dart';
 import 'journey_data.dart';
+import 'journey_expansion_catalog.dart';
 import 'summer_palace_journey.dart';
 import 'special_journey_catalog.dart';
 
@@ -496,6 +497,7 @@ final dailyStorySources = <StorySourceRecord>[
   ...shanghaiStorySources,
   ...xianStorySources,
   ...extendedJourneySources,
+  ...journeyExpansionSources,
 ];
 
 final dailyJourneyRecords = <JourneyContentRecord>[
@@ -504,6 +506,7 @@ final dailyJourneyRecords = <JourneyContentRecord>[
   shanghaiBundJourney,
   xianCityWallJourney,
   ...extendedJourneyRecords,
+  ...journeyExpansionRecords,
 ];
 
 final dailyJourneyExperiences = <DailyJourneyExperience>[
@@ -566,6 +569,7 @@ final dailyJourneyExperiences = <DailyJourneyExperience>[
     expressQuestion: '请用两到三句话介绍你想从西安城墙上看到的景象。',
   ),
   ...extendedJourneyExperiences,
+  ...journeyExpansionExperiences,
 ];
 
 final allJourneyExperiences = <DailyJourneyExperience>[
