@@ -18,6 +18,13 @@ test('Phoenix launch cover uses the premium phoenix artwork', async () => {
   assert.match(index, /prefers-reduced-motion/);
   assert.match(index, /phoenix-cover-breathe/);
   assert.match(index, /phoenix-cover-glow/);
+  assert.match(index, /phoenix-light-sweep/);
+  assert.match(index, /phoenix-ember-rise/);
+  assert.match(index, /phoenix-seal-pulse/);
+  assert.equal(
+    (index.match(/class="phoenix-loading__ember"/g) ?? []).length,
+    8,
+  );
   assert.doesNotMatch(index, /🔥/);
   assert.doesNotMatch(index, /radial-gradient\(circle at 12% 18%/);
   assert.ok(artwork.size > 80_000);
