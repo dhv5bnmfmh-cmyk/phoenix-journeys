@@ -773,10 +773,14 @@ class NarrationController extends ChangeNotifier {
     final maxOffset = math.max(0, _plan.text.length - 1);
     final safeOffset = offset.clamp(0, maxOffset).toInt();
     final remainingText = _plan.text.substring(safeOffset);
+    final useWebSpeech = _webSpeech.isAvailable;
 
     try {
       _cancelProgressClock();
-      if (stopEngineFirst) {
+      // Web Speech must cancel and speak synchronously inside the same tap.
+      // Awaiting the shared engine first can consume Safari's user activation
+      // and make an explicit retry fail exactly like blocked autoplay.
+      if (stopEngineFirst && !useWebSpeech) {
         await _stopSpeechEngine();
       }
       if (_disposed) return;
@@ -793,7 +797,7 @@ class NarrationController extends ChangeNotifier {
       _applyProgress(safeOffset);
       _safeNotify();
 
-      if (_webSpeech.isAvailable) {
+      if (useWebSpeech) {
         _webSpeechPausedInPlace = false;
         _restartWebSpeechOnResume = false;
         unawaited(_startProgressWatchdog(sessionToken, safeOffset));
