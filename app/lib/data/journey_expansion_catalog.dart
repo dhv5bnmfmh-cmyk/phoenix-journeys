@@ -15,6 +15,17 @@ const journeyExpansionSources = <StorySourceRecord>[
     accessedOn: '2026-07-29',
   ),
   StorySourceRecord(
+    id: 'suzhou-garden-bureau-humble-administrators-garden',
+    title: '拙政园',
+    publisher: '苏州市园林和绿化管理局',
+    url: 'https://ylj.suzhou.gov.cn/szsylj/sjyc/201905/c1df393edc8745abb20e8a9bd5525782.shtml',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-jiangsu-suzhou-gusu-humble-administrators-garden'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-29',
+  ),
+  StorySourceRecord(
     id: 'unesco-luoyang-longmen-grottoes',
     title: 'Longmen Grottoes',
     publisher: 'UNESCO World Heritage Centre',
@@ -26,12 +37,34 @@ const journeyExpansionSources = <StorySourceRecord>[
     accessedOn: '2026-07-29',
   ),
   StorySourceRecord(
+    id: 'ncha-luoyang-longmen-grottoes',
+    title: '龙门石窟',
+    publisher: '国家文物局',
+    url: 'https://www.ncha.gov.cn/art/2024/8/8/art_2791_190649.html',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-henan-luoyang-luolong-longmen-grottoes'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-29',
+  ),
+  StorySourceRecord(
     id: 'unesco-quanzhou-emporium',
     title: 'Quanzhou: Emporium of the World in Song-Yuan China',
     publisher: 'UNESCO World Heritage Centre',
     url: 'https://whc.unesco.org/en/list/1561',
     kind: StorySourceKind.unesco,
     languageCode: 'en',
+    geoNodeIds: ['cn-fujian-quanzhou-licheng-kaiyuan-temple'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-29',
+  ),
+  StorySourceRecord(
+    id: 'quanzhou-government-kaiyuan-temple',
+    title: '开元寺：从海洋贸易中崛起的多元文化家园',
+    publisher: '泉州市人民政府',
+    url: 'https://www.quanzhou.gov.cn/lyb/lyxw/202104/t20210421_2547183.htm',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
     geoNodeIds: ['cn-fujian-quanzhou-licheng-kaiyuan-temple'],
     verificationStatus: StoryVerificationStatus.verified,
     accessedOn: '2026-07-29',
@@ -100,12 +133,16 @@ const _suzhouWords = <WordEntry>[
   WordEntry(word: '漏窗', pinyin: 'lòuchuāng', partOfSpeech: '名词', simpleChinese: '带有镂空图案的园林窗。', translation: 'Cửa sổ hoa văn rỗng trong vườn.', englishDefinition: 'decorative openwork window', symbol: '🪟'),
   WordEntry(word: '长廊', pinyin: 'chángláng', partOfSpeech: '名词', simpleChinese: '连接不同空间的长走廊。', translation: 'Hành lang dài nối các không gian.', englishDefinition: 'long covered corridor', symbol: '🚶'),
   WordEntry(word: '借景', pinyin: 'jièjǐng', partOfSpeech: '名词', simpleChinese: '把远处景色引入园内的设计方法。', translation: 'Kỹ thuật mượn cảnh bên ngoài.', englishDefinition: 'borrowed scenery', symbol: '🖼️'),
+  WordEntry(word: '池水', pinyin: 'chíshuǐ', partOfSpeech: '名词', simpleChinese: '池塘里的水。', translation: 'Nước trong ao.', englishDefinition: 'pond water', symbol: '💧'),
+  WordEntry(word: '曲桥', pinyin: 'qūqiáo', partOfSpeech: '名词', simpleChinese: '弯曲转折的小桥。', translation: 'Cầu nhỏ uốn cong.', englishDefinition: 'curved bridge', symbol: '🌉'),
+  WordEntry(word: '山水画', pinyin: 'shānshuǐhuà', partOfSpeech: '名词', simpleChinese: '表现山川自然的中国画。', translation: 'Tranh sơn thủy Trung Hoa.', englishDefinition: 'Chinese landscape painting', symbol: '🖌️'),
   WordEntry(word: '层次', pinyin: 'céngcì', partOfSpeech: '名词', simpleChinese: '空间前后形成的不同层面。', translation: 'Các lớp không gian trước sau.', englishDefinition: 'visual layers and depth', symbol: '🌫️'),
 ];
 
 const _suzhouDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '苏州古典园林以精细设计在有限空间中重现自然山水。', pinyin: 'Sūzhōu Gǔdiǎn Yuánlín yǐ jīngxì shèjì zài yǒuxiàn kōngjiān zhōng chóngxiàn zìrán shānshuǐ.', simpleChinese: '苏州园林用小空间表现大自然。', vietnamese: 'Vườn cổ điển Tô Châu tái hiện thiên nhiên trong không gian nhỏ bằng thiết kế tinh tế.', english: 'Suzhou gardens recreate natural landscapes within limited space.'),
   DiscoveryEntry(text: '世界遗产项目包括苏州历史城区内九座具有代表性的园林。', pinyin: 'Shìjiè Yíchǎn xiàngmù bāokuò Sūzhōu lìshǐ chéngqū nèi jiǔ zuò jùyǒu dàibiǎoxìng de yuánlín.', simpleChinese: '九座代表性园林共同组成世界遗产。', vietnamese: 'Chín khu vườn tiêu biểu tạo thành quần thể Di sản Thế giới.', english: 'Nine representative gardens form the World Heritage property.'),
+  DiscoveryEntry(text: '拙政园以池水为中心，通过回廊、漏窗与借景组织出丰富层次。', pinyin: 'Zhuōzhèng Yuán yǐ chíshuǐ wéi zhōngxīn, tōngguò huíláng, lòuchuāng yǔ jièjǐng zǔzhī chū fēngfù céngcì.', simpleChinese: '池水、回廊和漏窗让园林更有层次。', vietnamese: 'Chuyết Chính Viên lấy ao nước làm trung tâm, dùng hành lang, cửa hoa và mượn cảnh để tạo nhiều lớp không gian.', english: 'Ponds, corridors, openwork windows, and borrowed scenery create layered depth.'),
   DiscoveryEntry(text: '这些园林集中体现水、山石、植物与建筑之间的关系。', pinyin: 'Zhèxiē yuánlín jízhōng tǐxiàn shuǐ, shānshí, zhíwù yǔ jiànzhù zhījiān de guānxì.', simpleChinese: '园林把水、石、植物和建筑组合在一起。', vietnamese: 'Các khu vườn thể hiện mối quan hệ giữa nước, đá, cây và kiến trúc.', english: 'The gardens unite water, rocks, planting, and architecture.'),
 ];
 
@@ -129,12 +166,16 @@ const _luoyangWords = <WordEntry>[
   WordEntry(word: '开凿', pinyin: 'kāizáo', partOfSpeech: '动词', simpleChinese: '在石头上挖掘和雕刻。', translation: 'Đào và tạc vào đá.', englishDefinition: 'to excavate and carve', symbol: '⛏️'),
   WordEntry(word: '造像', pinyin: 'zàoxiàng', partOfSpeech: '名词', simpleChinese: '宗教或纪念用途的雕像。', translation: 'Tượng dùng cho tôn giáo hoặc tưởng niệm.', englishDefinition: 'religious sculpted image', symbol: '🗿'),
   WordEntry(word: '庄严', pinyin: 'zhuāngyán', partOfSpeech: '形容词', simpleChinese: '严肃而令人尊敬。', translation: 'Trang nghiêm và đáng kính.', englishDefinition: 'solemn and dignified', symbol: '✨'),
+  WordEntry(word: '山崖', pinyin: 'shānyá', partOfSpeech: '名词', simpleChinese: '陡峭的山壁。', translation: 'Vách núi dựng đứng.', englishDefinition: 'cliff face', symbol: '⛰️'),
+  WordEntry(word: '岩壁', pinyin: 'yánbì', partOfSpeech: '名词', simpleChinese: '由岩石形成的陡壁。', translation: 'Vách đá.', englishDefinition: 'rock wall', symbol: '🪨'),
+  WordEntry(word: '细节', pinyin: 'xìjié', partOfSpeech: '名词', simpleChinese: '事物中细小而重要的部分。', translation: 'Chi tiết nhỏ nhưng quan trọng.', englishDefinition: 'detail', symbol: '🔍'),
   WordEntry(word: '雕刻', pinyin: 'diāokè', partOfSpeech: '动词', simpleChinese: '在材料上刻出形象或图案。', translation: 'Điêu khắc hình hoặc hoa văn.', englishDefinition: 'to carve or sculpt', symbol: '🔨'),
 ];
 
 const _luoyangDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '龙门石窟集中保存北魏晚期至唐代的重要佛教石刻艺术。', pinyin: 'Lóngmén Shíkū jízhōng bǎocún Běiwèi wǎnqī zhì Tángdài de zhòngyào Fójiào shíkè yìshù.', simpleChinese: '这里保存了北魏到唐代的重要石刻。', vietnamese: 'Long Môn bảo tồn nghệ thuật khắc đá Phật giáo quan trọng từ cuối Bắc Ngụy đến thời Đường.', english: 'Longmen preserves major Buddhist stone art from the late Northern Wei through the Tang.'),
   DiscoveryEntry(text: '洞窟与佛龛沿伊河两岸的石灰岩山崖分布。', pinyin: 'Dòngkū yǔ Fókān yán Yī Hé liǎng àn de shíhuīyán shānyá fēnbù.', simpleChinese: '许多洞窟分布在伊河边的山崖上。', vietnamese: 'Các hang và hốc tượng phân bố trên vách đá vôi dọc hai bờ sông Y.', english: 'Caves and niches line limestone cliffs beside the Yi River.'),
+  DiscoveryEntry(text: '奉先寺的大型造像群以规模、布局和细节形成完整的视觉中心。', pinyin: 'Fèngxiān Sì de dàxíng zàoxiàng qún yǐ guīmó, bùjú hé xìjié xíngchéng wánzhěng de shìjué zhōngxīn.', simpleChinese: '奉先寺的大型造像构成视觉中心。', vietnamese: 'Quần thể tượng lớn ở Phụng Tiên Tự tạo thành một trung tâm thị giác hoàn chỉnh nhờ quy mô, bố cục và chi tiết.', english: 'The monumental figures at Fengxian Temple form a coherent visual focus through scale, arrangement, and detail.'),
   DiscoveryEntry(text: '龙门造像体现了中国石刻艺术在不同历史阶段的发展。', pinyin: 'Lóngmén zàoxiàng tǐxiàn le Zhōngguó shíkè yìshù zài bùtóng lìshǐ jiēduàn de fāzhǎn.', simpleChinese: '不同造像展示了艺术风格的变化。', vietnamese: 'Các tượng Long Môn cho thấy sự phát triển của nghệ thuật điêu khắc đá Trung Hoa.', english: 'The sculptures show the development of Chinese stone carving across periods.'),
 ];
 
@@ -158,12 +199,16 @@ const _quanzhouWords = <WordEntry>[
   WordEntry(word: '贸易', pinyin: 'màoyì', partOfSpeech: '名词', simpleChinese: '商品与服务的交换活动。', translation: 'Hoạt động trao đổi hàng hóa và dịch vụ.', englishDefinition: 'trade', symbol: '⛵'),
   WordEntry(word: '信仰', pinyin: 'xìnyǎng', partOfSpeech: '名词', simpleChinese: '人所相信并尊重的宗教或思想。', translation: 'Tín ngưỡng hoặc niềm tin.', englishDefinition: 'faith or belief', symbol: '🕊️'),
   WordEntry(word: '多元', pinyin: 'duōyuán', partOfSpeech: '形容词', simpleChinese: '由多种不同部分组成。', translation: 'Đa dạng, gồm nhiều thành phần.', englishDefinition: 'diverse and plural', symbol: '🌍'),
+  WordEntry(word: '殿宇', pinyin: 'diànyǔ', partOfSpeech: '名词', simpleChinese: '寺院或宫殿中的建筑。', translation: 'Điện thờ hoặc công trình trong đền chùa.', englishDefinition: 'temple halls', symbol: '🏛️'),
+  WordEntry(word: '古树', pinyin: 'gǔshù', partOfSpeech: '名词', simpleChinese: '生长了很多年的老树。', translation: 'Cây cổ thụ.', englishDefinition: 'ancient tree', symbol: '🌳'),
+  WordEntry(word: '街巷', pinyin: 'jiēxiàng', partOfSpeech: '名词', simpleChinese: '城市里的街道和小巷。', translation: 'Đường phố và ngõ nhỏ.', englishDefinition: 'streets and lanes', symbol: '🏘️'),
   WordEntry(word: '海上交通', pinyin: 'hǎishàng jiāotōng', partOfSpeech: '名词', simpleChinese: '通过海洋进行的运输与往来。', translation: 'Giao thông và đi lại trên biển.', englishDefinition: 'maritime transport', symbol: '🚢'),
 ];
 
 const _quanzhouDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '泉州在宋元时期是连接中国内陆与海外市场的重要海洋商贸中心。', pinyin: 'Quánzhōu zài Sòng Yuán shíqī shì liánjiē Zhōngguó nèilù yǔ hǎiwài shìchǎng de zhòngyào hǎiyáng shāngmào zhōngxīn.', simpleChinese: '宋元时期，泉州是重要的国际港口。', vietnamese: 'Thời Tống Nguyên, Tuyền Châu là trung tâm thương mại biển nối nội địa Trung Quốc với thị trường hải ngoại.', english: 'In the Song-Yuan period, Quanzhou linked China’s interior with overseas markets.'),
   DiscoveryEntry(text: '世界遗产由二十二处代表行政、交通、生产、贸易与多元文化的遗产点组成。', pinyin: 'Shìjiè Yíchǎn yóu èrshíèr chù dàibiǎo xíngzhèng, jiāotōng, shēngchǎn, màoyì yǔ duōyuán wénhuà de yíchǎndiǎn zǔchéng.', simpleChinese: '二十二处遗产点共同讲述港口城市的运作。', vietnamese: 'Di sản gồm 22 địa điểm đại diện cho quản lý, giao thông, sản xuất, thương mại và văn hóa đa dạng.', english: 'Twenty-two component sites explain the port’s administration, transport, production, trade, and diversity.'),
+  DiscoveryEntry(text: '开元寺的殿宇、古树与双塔共同保存了古城街巷中的历史层次。', pinyin: 'Kāiyuán Sì de diànyǔ, gǔshù yǔ shuāngtǎ gòngtóng bǎocún le gǔchéng jiēxiàng zhōng de lìshǐ céngcì.', simpleChinese: '殿宇、古树和双塔保留了古城历史。', vietnamese: 'Điện thờ, cây cổ và tháp đôi của Khai Nguyên Tự cùng lưu giữ những lớp lịch sử trong phố cổ.', english: 'Temple halls, old trees, and twin pagodas preserve layers of history in the old city.'),
   DiscoveryEntry(text: '开元寺及其东西塔是泉州系列世界遗产的重要组成部分。', pinyin: 'Kāiyuán Sì jí qí Dōngxī Tǎ shì Quánzhōu xìliè Shìjiè Yíchǎn de zhòngyào zǔchéng bùfen.', simpleChinese: '开元寺和双塔属于泉州世界遗产。', vietnamese: 'Chùa Khai Nguyên và hai tháp đông tây là thành phần quan trọng của Di sản Thế giới Tuyền Châu.', english: 'Kaiyuan Temple and its twin pagodas are important components of the serial World Heritage property.'),
 ];
 
@@ -173,7 +218,7 @@ final suzhouGardenJourney = _journeyRecord(
   geoNodeId: 'cn-jiangsu-suzhou-gusu-humble-administrators-garden',
   tags: const ['苏州', '拙政园', '古典园林', '借景', '世界遗产'],
   paragraphs: _suzhouParagraphs,
-  sourceIds: const ['unesco-suzhou-classical-gardens'],
+  sourceIds: const ['unesco-suzhou-classical-gardens', 'suzhou-garden-bureau-humble-administrators-garden'],
 );
 
 final luoyangLongmenJourney = _journeyRecord(
@@ -182,7 +227,7 @@ final luoyangLongmenJourney = _journeyRecord(
   geoNodeId: 'cn-henan-luoyang-luolong-longmen-grottoes',
   tags: const ['洛阳', '龙门石窟', '北魏', '唐代', '石刻艺术'],
   paragraphs: _luoyangParagraphs,
-  sourceIds: const ['unesco-luoyang-longmen-grottoes'],
+  sourceIds: const ['unesco-luoyang-longmen-grottoes', 'ncha-luoyang-longmen-grottoes'],
 );
 
 final quanzhouKaiyuanJourney = _journeyRecord(
@@ -191,7 +236,7 @@ final quanzhouKaiyuanJourney = _journeyRecord(
   geoNodeId: 'cn-fujian-quanzhou-licheng-kaiyuan-temple',
   tags: const ['泉州', '开元寺', '海上丝绸之路', '宋元', '世界遗产'],
   paragraphs: _quanzhouParagraphs,
-  sourceIds: const ['unesco-quanzhou-emporium'],
+  sourceIds: const ['unesco-quanzhou-emporium', 'quanzhou-government-kaiyuan-temple'],
 );
 
 final journeyExpansionRecords = <JourneyContentRecord>[
