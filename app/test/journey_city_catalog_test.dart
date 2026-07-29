@@ -5,7 +5,7 @@ import 'package:phoenix_journeys/data/journey_city_catalog.dart';
 
 void main() {
   test('published journeys expose stable city and destination paths', () {
-    expect(journeyCityCatalog, hasLength(7));
+    expect(journeyCityCatalog, hasLength(10));
     expect(
       journeyCityCatalog.map((city) => city.id),
       orderedEquals([
@@ -16,6 +16,9 @@ void main() {
         'chengdu',
         'nanjing',
         'guangzhou',
+        'suzhou',
+        'luoyang',
+        'quanzhou',
       ]),
     );
 
