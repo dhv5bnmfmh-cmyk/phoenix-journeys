@@ -29,7 +29,6 @@ void main() {
     final second = NarrationFollowCoordinator.forController(controller);
 
     expect(identical(first, second), isTrue);
-    controller.dispose();
   });
 
   test('manual follow hold can be resumed immediately', () {
@@ -42,6 +41,5 @@ void main() {
     coordinator.resume();
     expect(coordinator.isManualHoldActive, isFalse);
     expect(coordinator.remainingHold, Duration.zero);
-    controller.dispose();
   });
 }
