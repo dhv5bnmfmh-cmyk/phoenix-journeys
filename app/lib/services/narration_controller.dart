@@ -513,6 +513,33 @@ class NarrationController extends ChangeNotifier {
     await _speakFrom(0, stopEngineFirst: stopEngineFirst);
   }
 
+  void preparePaused({
+    required String contentId,
+    required List<NarrationItem> items,
+    required int offset,
+    String languageCode = 'zh-CN',
+  }) {
+    final plan = NarrationTextPlan.fromItems(items);
+    if (plan.isEmpty || offset <= 0) return;
+
+    final safeOffset = offset
+        .clamp(0, math.max(0, plan.text.length - 1))
+        .toInt();
+    _contentId = contentId;
+    _narrationLanguageCode = languageCode;
+    _plan = plan;
+    _currentOffset = safeOffset;
+    _speechBaseOffset = safeOffset;
+    _lastNativeOffset = safeOffset;
+    _currentItemIndex = plan.indexForOffset(safeOffset);
+    _errorMessage = null;
+    _status = NarrationStatus.paused;
+    _speechMode = _NarrationSpeechMode.idle;
+    _highlightSnapshot = null;
+    _applyProgress(safeOffset);
+    _safeNotify();
+  }
+
   Future<void> pause() async {
     await pauseAtOffset(_currentOffset);
   }
