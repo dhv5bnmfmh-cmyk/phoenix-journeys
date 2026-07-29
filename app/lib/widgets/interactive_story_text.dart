@@ -338,7 +338,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     final acceptedTarget = requestedTarget < _lastAcceptedRevealCursor
         ? _lastAcceptedRevealCursor
         : requestedTarget;
-    _lastAcceptedAcceptedRevealCursor = acceptedTarget;
+    _lastAcceptedRevealCursor = acceptedTarget;
 
     final current = _currentRevealCursor.clamp(
       0.0,
