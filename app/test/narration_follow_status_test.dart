@@ -46,6 +46,34 @@ void main() {
     );
   });
 
+  test('sentence guide resolves the active Chinese sentence', () {
+    const text = '风从湖面吹来。月光落在古桥上！旅人停下脚步？';
+    expect(
+      narrationSentenceAtOffset(text: text, offset: 8),
+      '月光落在古桥上！',
+    );
+    expect(
+      narrationSentenceAtOffset(text: text, offset: 0),
+      '风从湖面吹来。',
+    );
+    expect(
+      narrationSentenceAtOffset(text: text, offset: text.length - 1),
+      '旅人停下脚步？',
+    );
+  });
+
+  test('sentence guide keeps closing quotation marks with the sentence', () {
+    const text = '他说：“河灯亮了。”然后继续前行。';
+    expect(
+      narrationSentenceAtOffset(text: text, offset: 6),
+      '他说：“河灯亮了。”',
+    );
+  });
+
+  test('sentence guide handles empty content safely', () {
+    expect(narrationSentenceAtOffset(text: '   ', offset: 0), isEmpty);
+  });
+
   test('follow status distinguishes ready, complete, and error states', () {
     expect(
       narrationFollowStatusLabel(
