@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../services/narration_controller.dart';
 import '../theme/phoenix_theme.dart';
+import 'narration_voice_picker_button.dart';
 
 typedef NarrationRateChange = Future<void> Function(double rate);
 
@@ -47,12 +48,12 @@ class NarrationSpeedStepper extends StatelessWidget {
 
         return Semantics(
           container: true,
-          label: '当前朗读速度 ${controller.speedLabel}，可减速或加速',
+          label: '当前朗读速度 ${controller.speedLabel}，可选择声线、减速或加速',
           child: Container(
             key: const ValueKey('narration-speed-stepper'),
             padding: EdgeInsets.fromLTRB(
               compact ? 5 : 7,
-              compact ? 3 : 4,
+              compact ? 2 : 3,
               compact ? 5 : 7,
               compact ? 2 : 3,
             ),
@@ -64,17 +65,27 @@ class NarrationSpeedStepper extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  controller.speedLabel,
-                  key: const ValueKey('narration-current-speed'),
-                  style: TextStyle(
-                    color: foreground,
-                    fontSize: compact ? 9 : 10,
-                    height: 1,
-                    fontWeight: FontWeight.w900,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      controller.speedLabel,
+                      key: const ValueKey('narration-current-speed'),
+                      style: TextStyle(
+                        color: foreground,
+                        fontSize: compact ? 9 : 10,
+                        height: 1,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    NarrationVoicePickerButton(
+                      dark: dark,
+                      compact: compact,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 1),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
