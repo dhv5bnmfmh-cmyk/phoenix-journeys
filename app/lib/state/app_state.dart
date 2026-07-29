@@ -87,6 +87,7 @@ class AppState extends ChangeNotifier {
   String writingFeedbackEncouragement = '';
   bool writingFeedbackOffline = false;
   String? journeyNarrationContentId;
+  String? journeyNarrationContentSignature;
   int journeyNarrationOffset = 0;
   DateTime? journeyUpdatedAt;
 
@@ -268,6 +269,10 @@ class AppState extends ChangeNotifier {
     journeyNarrationContentId = _readJourneyString(
       prefs,
       'narrationContentId',
+    );
+    journeyNarrationContentSignature = _readJourneyString(
+      prefs,
+      'narrationContentSignature',
     );
     journeyNarrationOffset = math.max(
       0,
@@ -526,23 +531,28 @@ class AppState extends ChangeNotifier {
 
   Future<void> saveJourneyNarrationPosition({
     required String contentId,
+    required String contentSignature,
     required int offset,
   }) async {
     journeyNarrationContentId = contentId;
+    journeyNarrationContentSignature = contentSignature;
     journeyNarrationOffset = math.max(0, offset);
     final prefs = await SharedPreferences.getInstance();
     await Future.wait([
       prefs.setString(_key('narrationContentId'), contentId),
+      prefs.setString(_key('narrationContentSignature'), contentSignature),
       prefs.setInt(_key('narrationOffset'), journeyNarrationOffset),
     ]);
   }
 
   Future<void> clearJourneyNarrationPosition() async {
     journeyNarrationContentId = null;
+    journeyNarrationContentSignature = null;
     journeyNarrationOffset = 0;
     final prefs = await SharedPreferences.getInstance();
     await Future.wait([
       prefs.remove(_key('narrationContentId')),
+      prefs.remove(_key('narrationContentSignature')),
       prefs.remove(_key('narrationOffset')),
     ]);
   }
@@ -616,6 +626,7 @@ class AppState extends ChangeNotifier {
     writingFeedbackEncouragement = '';
     writingFeedbackOffline = false;
     journeyNarrationContentId = null;
+    journeyNarrationContentSignature = null;
     journeyNarrationOffset = 0;
     notifyListeners();
 
@@ -627,6 +638,7 @@ class AppState extends ChangeNotifier {
       prefs.remove(_key('writingFeedbackEncouragement')),
       prefs.remove(_key('writingFeedbackOffline')),
       prefs.remove(_key('narrationContentId')),
+      prefs.remove(_key('narrationContentSignature')),
       prefs.remove(_key('narrationOffset')),
     ]);
   }
@@ -639,6 +651,7 @@ class AppState extends ChangeNotifier {
     expressDraft = '';
     memoryDraft = '';
     journeyNarrationContentId = null;
+    journeyNarrationContentSignature = null;
     journeyNarrationOffset = 0;
     guideFeedbackReply = '';
     guideFeedbackOffline = false;
@@ -659,6 +672,7 @@ class AppState extends ChangeNotifier {
       prefs.remove(_key('expressDraft')),
       prefs.remove(_key('memoryDraft')),
       prefs.remove(_key('narrationContentId')),
+      prefs.remove(_key('narrationContentSignature')),
       prefs.remove(_key('narrationOffset')),
       prefs.remove(_key('guideFeedbackReply')),
       prefs.remove(_key('guideFeedbackOffline')),
