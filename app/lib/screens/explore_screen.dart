@@ -540,6 +540,8 @@ class _FlightMapCardState extends State<_FlightMapCard>
               final angle = landingT > 0
                   ? math.pi / 2
                   : geometry.angleAt(flightT);
+              final aircraftScale =
+                  .88 + Curves.easeOutCubic.transform(flightT) * .12;
 
               return Stack(
                 children: [
@@ -602,30 +604,14 @@ class _FlightMapCardState extends State<_FlightMapCard>
                               ),
                             ),
                             Positioned(
-                              left: plane.dx - 13,
-                              top: plane.dy - 13,
-                              child: Transform.rotate(
-                                angle: angle,
-                                child: Container(
-                                  width: 26,
-                                  height: 26,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFFD879),
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(
-                                          0xFFFFD879,
-                                        ).withValues(alpha: .45),
-                                        blurRadius: 10,
-                                        spreadRadius: 1,
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Icon(
-                                    Icons.flight_rounded,
-                                    color: Color(0xFF713016),
-                                    size: 16,
+                              left: plane.dx - 25,
+                              top: plane.dy - 28,
+                              child: Transform.scale(
+                                scale: aircraftScale,
+                                child: Transform.rotate(
+                                  angle: angle + math.pi / 2,
+                                  child: _PremiumAircraft(
+                                    lightProgress: _controller.value,
                                   ),
                                 ),
                               ),
@@ -820,11 +806,165 @@ class _FlightMapCardState extends State<_FlightMapCard>
   }
 }
 
+class _PremiumAircraft extends StatelessWidget {
+  const _PremiumAircraft({required this.lightProgress});
+
+  final double lightProgress;
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: CustomPaint(
+        key: const ValueKey('phoenix-premium-map-aircraft'),
+        size: const Size(50, 56),
+        painter: _PremiumAircraftPainter(lightProgress),
+      ),
+    );
+  }
+}
+
+class _PremiumAircraftPainter extends CustomPainter {
+  const _PremiumAircraftPainter(this.lightProgress);
+
+  final double lightProgress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final sx = size.width / 50;
+    final sy = size.height / 56;
+    canvas.scale(sx, sy);
+
+    final silhouette = Path()
+      ..moveTo(25, 1.5)
+      ..cubicTo(21.5, 3.5, 20.4, 9, 20.2, 16)
+      ..lineTo(19.8, 21)
+      ..lineTo(3.2, 33.5)
+      ..cubicTo(1.6, 34.7, 1.2, 36.7, 2.7, 37.4)
+      ..lineTo(19.4, 33.3)
+      ..lineTo(20, 44)
+      ..lineTo(13.2, 50)
+      ..lineTo(13.7, 53)
+      ..lineTo(22, 50.4)
+      ..cubicTo(22.8, 54.2, 24, 55.5, 25, 55.8)
+      ..cubicTo(26, 55.5, 27.2, 54.2, 28, 50.4)
+      ..lineTo(36.3, 53)
+      ..lineTo(36.8, 50)
+      ..lineTo(30, 44)
+      ..lineTo(30.6, 33.3)
+      ..lineTo(47.3, 37.4)
+      ..cubicTo(48.8, 36.7, 48.4, 34.7, 46.8, 33.5)
+      ..lineTo(30.2, 21)
+      ..lineTo(29.8, 16)
+      ..cubicTo(29.6, 9, 28.5, 3.5, 25, 1.5)
+      ..close();
+
+    canvas.drawShadow(
+      silhouette.shift(const Offset(0, 2)),
+      const Color(0xAA04141A),
+      5,
+      false,
+    );
+
+    final bodyPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment(-1, -.2),
+        end: Alignment(1, .3),
+        colors: [
+          Color(0xFF9A815C),
+          Color(0xFFF5E7C9),
+          Color(0xFFFFFFFF),
+          Color(0xFFE1C99F),
+          Color(0xFF8A6C43),
+        ],
+        stops: [0, .18, .48, .79, 1],
+      ).createShader(const Rect.fromLTWH(1, 1, 48, 55));
+    canvas.drawPath(silhouette, bodyPaint);
+
+    final outlinePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = .75
+      ..color = const Color(0xFF5B452D).withValues(alpha: .72);
+    canvas.drawPath(silhouette, outlinePaint);
+
+    final cockpit = Path()
+      ..moveTo(25, 5)
+      ..cubicTo(22.7, 6.7, 22.1, 9.2, 22, 12)
+      ..lineTo(25, 10.5)
+      ..lineTo(28, 12)
+      ..cubicTo(27.9, 9.2, 27.3, 6.7, 25, 5)
+      ..close();
+    canvas.drawPath(
+      cockpit,
+      Paint()
+        ..shader = const LinearGradient(
+          colors: [Color(0xFF0B2530), Color(0xFF52727A)],
+        ).createShader(const Rect.fromLTWH(22, 5, 6, 7)),
+    );
+
+    final gold = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.25
+      ..strokeCap = StrokeCap.round
+      ..color = const Color(0xFFE6B84F);
+    canvas.drawLine(const Offset(20.3, 22), const Offset(4.8, 34.3), gold);
+    canvas.drawLine(const Offset(29.7, 22), const Offset(45.2, 34.3), gold);
+    canvas.drawLine(const Offset(20.5, 44.8), const Offset(14.8, 50), gold);
+    canvas.drawLine(const Offset(29.5, 44.8), const Offset(35.2, 50), gold);
+
+    final enginePaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFFF8EBD1), Color(0xFF80633D)],
+      ).createShader(const Rect.fromLTWH(12, 25, 26, 12));
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(13.2, 27, 4.2, 9),
+        const Radius.circular(2),
+      ),
+      enginePaint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(32.6, 27, 4.2, 9),
+        const Radius.circular(2),
+      ),
+      enginePaint,
+    );
+
+    final windowPaint = Paint()
+      ..color = const Color(0xFF31474B)
+      ..strokeWidth = 1.15
+      ..strokeCap = StrokeCap.round;
+    for (var y = 15.0; y < 39; y += 3.1) {
+      canvas.drawPoints(
+        PointMode.points,
+        [Offset(22.4, y), Offset(27.6, y)],
+        windowPaint,
+      );
+    }
+
+    final glintX = 21 + 8 * lightProgress;
+    canvas.drawLine(
+      Offset(glintX, 13),
+      Offset(glintX - 1, 39),
+      Paint()
+        ..color = Colors.white.withValues(alpha: .24)
+        ..strokeWidth = 1.1
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _PremiumAircraftPainter oldDelegate) =>
+      oldDelegate.lightProgress != lightProgress;
+}
+
 class _FlightGeometry {
   _FlightGeometry(this.size, JourneyMapPoint destinationPoint)
-      : hanoi = Offset(size.width * .23, size.height * .68),
+      : hanoi = Offset(size.width * .30, size.height * .76),
         control = Offset(
-          size.width * ((.23 + destinationPoint.x) / 2),
+          size.width * ((.30 + destinationPoint.x) / 2),
           size.height * .22,
         ),
         destination = Offset(
