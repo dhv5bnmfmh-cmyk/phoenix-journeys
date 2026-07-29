@@ -9,6 +9,7 @@ import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/journey_picker_sheet.dart';
 import 'journey_screen.dart';
+import 'shadowing_training_screen.dart';
 
 const _phoenixHomeHeroAsset =
     'assets/images/home/phoenix-world-language-journey-v1.webp';
@@ -95,7 +96,19 @@ class ExploreScreen extends StatelessWidget {
                 onArrived: () => unawaited(chooseArrivedCityDestination()),
               ),
               const SizedBox(height: 5),
-              _CoinWalletHint(state: state),
+              Row(
+                children: [
+                  Expanded(child: _CoinWalletHint(state: state)),
+                  const SizedBox(width: 6),
+                  _ShadowingHomeEntry(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const ShadowingTrainingScreen(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 8),
               _JourneyCard(
                 state: state,
@@ -156,6 +169,38 @@ class _CoinWalletHint extends StatelessWidget {
             count: state.silverFragments,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ShadowingHomeEntry extends StatelessWidget {
+  const _ShadowingHomeEntry({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 30,
+      child: FilledButton.icon(
+        key: const ValueKey('home-shadowing-training-entry'),
+        onPressed: onTap,
+        style: FilledButton.styleFrom(
+          backgroundColor: PhoenixTheme.red,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        icon: const Icon(Icons.mic_rounded, size: 14),
+        label: const Text(
+          '跟读训练',
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+        ),
       ),
     );
   }
