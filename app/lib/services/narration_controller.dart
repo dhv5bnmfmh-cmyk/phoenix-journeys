@@ -470,7 +470,9 @@ class NarrationController extends ChangeNotifier {
       _cancelProgressClock();
       _speechMode = _NarrationSpeechMode.idle;
       _status = NarrationStatus.error;
-      _errorMessage = '当前设备暂时无法朗读，请检查声音设置后重试。';
+      _errorMessage = message == 'speech-start-blocked'
+          ? '自动朗读被浏览器拦截，请点击播放重试。'
+          : '当前设备暂时无法朗读，请检查声音设置后重试。';
       _currentItemIndex = null;
       _highlightSnapshot = null;
       NarrationHighlightBus.instance.clear(contentId: _contentId);
