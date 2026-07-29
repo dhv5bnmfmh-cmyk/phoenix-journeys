@@ -477,7 +477,7 @@ const worldGeoCatalog = <GeoNode>[
   GeoNode(
     id: 'cn-guangdong-jiangmen-kaiping',
     name: '开平市',
-    kind: GeoNodeKind.county,
+    kind: GeoNodeKind.adminLevel3,
     localType: '县级市',
     parentId: 'cn-guangdong-jiangmen',
     countryCode: 'CN',
