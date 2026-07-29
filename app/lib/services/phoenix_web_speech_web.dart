@@ -85,7 +85,12 @@ final class PhoenixWebSpeech {
     final voices = _voiceCatalog.isNotEmpty
         ? _voiceCatalog
         : synth.getVoices();
-    final selectedVoice = _selectNaturalVoice(voices, languageCode);
+    final selectedVoice = _selectNaturalVoice(
+      voices,
+      languageCode,
+      preferredVoiceId:
+          html.window.localStorage[narrationVoicePreferenceKey(languageCode)],
+    );
     if (selectedVoice != null) utterance.voice = selectedVoice;
     _utterance = utterance;
 
@@ -252,8 +257,26 @@ final class PhoenixWebSpeech {
 
   html.SpeechSynthesisVoice? _selectNaturalVoice(
     List<html.SpeechSynthesisVoice> voices,
-    String languageCode,
-  ) {
+    String languageCode, {
+    String? preferredVoiceId,
+  }) {
+    final preferred = preferredVoiceId?.trim();
+    if (preferred != null && preferred.isNotEmpty) {
+      for (final voice in voices) {
+        final score = narrationVoiceScore(
+          name: voice.name ?? '',
+          locale: voice.lang ?? '',
+          requestedLanguageCode: languageCode,
+          localService: voice.localService == true,
+        );
+        final id = narrationVoiceId(
+          name: voice.name ?? '',
+          locale: voice.lang ?? '',
+        );
+        if (score > -10000 && id == preferred) return voice;
+      }
+    }
+
     html.SpeechSynthesisVoice? bestVoice;
     var bestScore = -10000;
     for (final voice in voices) {
