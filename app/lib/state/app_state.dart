@@ -86,6 +86,8 @@ class AppState extends ChangeNotifier {
   String writingFeedbackNatural = '';
   String writingFeedbackEncouragement = '';
   bool writingFeedbackOffline = false;
+  String? journeyNarrationContentId;
+  int journeyNarrationOffset = 0;
   DateTime? journeyUpdatedAt;
 
   AppLoadStatus loadStatus = AppLoadStatus.loading;
@@ -263,6 +265,14 @@ class AppState extends ChangeNotifier {
         _readJourneyString(prefs, 'writingFeedbackEncouragement') ?? '';
     writingFeedbackOffline =
         _readJourneyBool(prefs, 'writingFeedbackOffline') ?? false;
+    journeyNarrationContentId = _readJourneyString(
+      prefs,
+      'narrationContentId',
+    );
+    journeyNarrationOffset = math.max(
+      0,
+      _readJourneyInt(prefs, 'narrationOffset') ?? 0,
+    );
     journeyUpdatedAt = DateTime.tryParse(
       _readJourneyString(prefs, 'updatedAt') ??
           (isLegacyBeijing ? prefs.getString('journeyUpdatedAt') : null) ??
@@ -514,6 +524,29 @@ class AppState extends ChangeNotifier {
     ]);
   }
 
+  Future<void> saveJourneyNarrationPosition({
+    required String contentId,
+    required int offset,
+  }) async {
+    journeyNarrationContentId = contentId;
+    journeyNarrationOffset = math.max(0, offset);
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.setString(_key('narrationContentId'), contentId),
+      prefs.setInt(_key('narrationOffset'), journeyNarrationOffset),
+    ]);
+  }
+
+  Future<void> clearJourneyNarrationPosition() async {
+    journeyNarrationContentId = null;
+    journeyNarrationOffset = 0;
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.remove(_key('narrationContentId')),
+      prefs.remove(_key('narrationOffset')),
+    ]);
+  }
+
   Future<void> saveGuideFeedback({
     required String reply,
     required bool isOfflineFallback,
@@ -582,6 +615,8 @@ class AppState extends ChangeNotifier {
     writingFeedbackNatural = '';
     writingFeedbackEncouragement = '';
     writingFeedbackOffline = false;
+    journeyNarrationContentId = null;
+    journeyNarrationOffset = 0;
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
@@ -591,6 +626,8 @@ class AppState extends ChangeNotifier {
       prefs.remove(_key('writingFeedbackNatural')),
       prefs.remove(_key('writingFeedbackEncouragement')),
       prefs.remove(_key('writingFeedbackOffline')),
+      prefs.remove(_key('narrationContentId')),
+      prefs.remove(_key('narrationOffset')),
     ]);
   }
 
@@ -601,6 +638,8 @@ class AppState extends ChangeNotifier {
     wonderDraft = '';
     expressDraft = '';
     memoryDraft = '';
+    journeyNarrationContentId = null;
+    journeyNarrationOffset = 0;
     guideFeedbackReply = '';
     guideFeedbackOffline = false;
     writingFeedbackCorrected = '';
@@ -619,6 +658,8 @@ class AppState extends ChangeNotifier {
       prefs.remove(_key('wonderDraft')),
       prefs.remove(_key('expressDraft')),
       prefs.remove(_key('memoryDraft')),
+      prefs.remove(_key('narrationContentId')),
+      prefs.remove(_key('narrationOffset')),
       prefs.remove(_key('guideFeedbackReply')),
       prefs.remove(_key('guideFeedbackOffline')),
       prefs.remove(_key('writingFeedbackCorrected')),
