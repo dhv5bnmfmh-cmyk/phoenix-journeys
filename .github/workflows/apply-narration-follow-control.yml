@@ -36,6 +36,7 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           story_path = Path('app/lib/widgets/interactive_story_text.dart')
           story = story_path.read_text(encoding='utf-8')
@@ -47,40 +48,34 @@ jobs:
                   raise SystemExit('missing narration import anchor')
               story = story.replace(import_anchor, import_insert, 1)
 
-          helper_block = """const Duration narrationAutoFollowManualHold = Duration(milliseconds: 2400);
+          helper_pattern = re.compile(
+              r"const Duration narrationAutoFollowManualHold = Duration\(milliseconds: 2400\);\n\n"
+              r"@visibleForTesting\n"
+              r"Duration narrationAutoFollowRemainingHold\(\{.*?\n\}\n\n",
+              re.S,
+          )
+          story, helper_count = helper_pattern.subn('', story, count=1)
+          if helper_count != 1:
+              raise SystemExit(f'unexpected helper match count: {helper_count}')
 
-          @visibleForTesting
-          Duration narrationAutoFollowRemainingHold({
-            required DateTime now,
-            required DateTime? holdUntil,
-          }) {
-            if (holdUntil == null || !holdUntil.isAfter(now)) {
-              return Duration.zero;
-            }
-            return holdUntil.difference(now);
-          }
-
-          """
-          if helper_block in story:
-              story = story.replace(helper_block, '', 1)
-
-          field_anchor = """  int _autoFollowRequest = 0;
-            static final Expando<DateTime> _manualHoldUntilByController =
-                Expando<DateTime>('narration-manual-follow-hold');
-
-          """
-          field_insert = """  int _autoFollowRequest = 0;
-            NarrationFollowCoordinator? _followCoordinator;
-
-          """
-          if field_anchor not in story:
-              raise SystemExit('missing follow field anchor')
-          story = story.replace(field_anchor, field_insert, 1)
+          field_pattern = re.compile(
+              r"  int _autoFollowRequest = 0;\n"
+              r"  static final Expando<DateTime> _manualHoldUntilByController =\n"
+              r"      Expando<DateTime>\('narration-manual-follow-hold'\);\n"
+          )
+          story, field_count = field_pattern.subn(
+              "  int _autoFollowRequest = 0;\n"
+              "  NarrationFollowCoordinator? _followCoordinator;\n",
+              story,
+              count=1,
+          )
+          if field_count != 1:
+              raise SystemExit(f'unexpected field match count: {field_count}')
 
           getter_anchor = """  bool get _hasExplicitHighlight =>
-                widget.highlightStart != null &&
-                widget.highlightEnd != null &&
-                widget.highlightEnd! > widget.highlightStart!;
+              widget.highlightStart != null &&
+              widget.highlightEnd != null &&
+              widget.highlightEnd! > widget.highlightStart!;
 
           """
           getter_insert = getter_anchor + """  void _attachNarrationFollowCoordinator() {
@@ -115,55 +110,47 @@ jobs:
               raise SystemExit('missing highlight getter anchor')
           story = story.replace(getter_anchor, getter_insert, 1)
 
-          init_anchor = """    _buildSegments();
-            if (_hasExplicitHighlight &&
-          """
-          init_insert = """    _buildSegments();
-            _attachNarrationFollowCoordinator();
-            if (_hasExplicitHighlight &&
-          """
-          if init_anchor not in story:
-              raise SystemExit('missing init anchor')
-          story = story.replace(init_anchor, init_insert, 1)
+          init_pattern = re.compile(
+              r"(?m)^(\s*)_buildSegments\(\);\n(\s*)if \(_hasExplicitHighlight &&"
+          )
+          story, init_count = init_pattern.subn(
+              lambda match: (
+                  f"{match.group(1)}_buildSegments();\n"
+                  f"{match.group(1)}_attachNarrationFollowCoordinator();\n"
+                  f"{match.group(2)}if (_hasExplicitHighlight &&"
+              ),
+              story,
+              count=1,
+          )
+          if init_count != 1:
+              raise SystemExit(f'unexpected init match count: {init_count}')
 
-          update_anchor = """    final isActive = _hasExplicitHighlight;
-            if (textChanged || oldWidget.entries != widget.entries) {
-          """
-          update_insert = """    final isActive = _hasExplicitHighlight;
-            if (!identical(
-              oldWidget.narrationController,
-              widget.narrationController,
-            )) {
-              _detachNarrationFollowCoordinator();
-              _attachNarrationFollowCoordinator();
-            }
-            if (textChanged || oldWidget.entries != widget.entries) {
-          """
-          if update_anchor not in story:
-              raise SystemExit('missing didUpdate anchor')
-          story = story.replace(update_anchor, update_insert, 1)
+          update_pattern = re.compile(
+              r"(?m)^(\s*)final isActive = _hasExplicitHighlight;\n"
+          )
+          story, update_count = update_pattern.subn(
+              lambda match: (
+                  f"{match.group(1)}final isActive = _hasExplicitHighlight;\n"
+                  f"{match.group(1)}if (!identical(\n"
+                  f"{match.group(1)}  oldWidget.narrationController,\n"
+                  f"{match.group(1)}  widget.narrationController,\n"
+                  f"{match.group(1)})) {{\n"
+                  f"{match.group(1)}  _detachNarrationFollowCoordinator();\n"
+                  f"{match.group(1)}  _attachNarrationFollowCoordinator();\n"
+                  f"{match.group(1)}}}\n"
+              ),
+              story,
+              count=1,
+          )
+          if update_count != 1:
+              raise SystemExit(f'unexpected didUpdate match count: {update_count}')
 
-          methods_anchor = """  void _suspendNarrationAutoFollow() {
-            final controller = widget.narrationController;
-            if (controller == null || controller.status != NarrationStatus.playing) {
-              return;
-            }
-            _manualHoldUntilByController[controller] = DateTime.now().add(
-              narrationAutoFollowManualHold,
-            );
-          }
-
-            Duration _remainingNarrationAutoFollowHold() {
-            final controller = widget.narrationController;
-            return narrationAutoFollowRemainingHold(
-              now: DateTime.now(),
-              holdUntil: controller == null
-                  ? null
-                  : _manualHoldUntilByController[controller],
-            );
-          }
-
-          """
+          methods_pattern = re.compile(
+              r"  void _suspendNarrationAutoFollow\(\) \{.*?\n"
+              r"  Duration _remainingNarrationAutoFollowHold\(\) \{.*?\n"
+              r"  \}\n\n(?=  void _scheduleNarrationAutoFollow)",
+              re.S,
+          )
           methods_insert = """  void _suspendNarrationAutoFollow() {
             if (widget.narrationController?.status != NarrationStatus.playing) {
               return;
@@ -176,22 +163,29 @@ jobs:
           }
 
           """
-          if methods_anchor not in story:
-              raise SystemExit('missing manual follow methods anchor')
-          story = story.replace(methods_anchor, methods_insert, 1)
+          story, methods_count = methods_pattern.subn(
+              methods_insert,
+              story,
+              count=1,
+          )
+          if methods_count != 1:
+              raise SystemExit(f'unexpected methods match count: {methods_count}')
 
-          dispose_anchor = """    _hideTimer?.cancel();
-            _autoFollowTimer?.cancel();
-            _cinematicRevealController.dispose();
-          """
-          dispose_insert = """    _hideTimer?.cancel();
-            _autoFollowTimer?.cancel();
-            _detachNarrationFollowCoordinator();
-            _cinematicRevealController.dispose();
-          """
-          if dispose_anchor not in story:
-              raise SystemExit('missing dispose anchor')
-          story = story.replace(dispose_anchor, dispose_insert, 1)
+          dispose_pattern = re.compile(
+              r"(\s*_hideTimer\?\.cancel\(\);\n\s*_autoFollowTimer\?\.cancel\(\);\n)"
+              r"(\s*_cinematicRevealController\.dispose\(\);)"
+          )
+          story, dispose_count = dispose_pattern.subn(
+              lambda match: (
+                  f"{match.group(1)}"
+                  "    _detachNarrationFollowCoordinator();\n"
+                  f"{match.group(2)}"
+              ),
+              story,
+              count=1,
+          )
+          if dispose_count != 1:
+              raise SystemExit(f'unexpected dispose match count: {dispose_count}')
 
           story_path.write_text(story, encoding='utf-8')
 
