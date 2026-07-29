@@ -45,3 +45,16 @@ test('compact narration controls expose the voice picker without a new panel', (
   assert.match(button, /自动选择最佳声线/);
   assert.match(button, /试听后选择/);
 });
+
+test('voice and speed controls remain visually separate and tactile', () => {
+  assert.match(speed, /narration-speed-group/);
+  assert.match(speed, /Icons\.remove_rounded/);
+  assert.match(speed, /Icons\.add_rounded/);
+  assert.match(speed, /AnimatedScale/);
+  assert.match(speed, /onTapDown:/);
+  assert.match(speed, /onTapCancel:/);
+  assert.match(button, /Text\(\s*'声线'/);
+  assert.match(button, /AnimatedScale/);
+  assert.match(button, /splashColor:/);
+  assert.match(button, /boxShadow:/);
+});
