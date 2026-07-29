@@ -39,6 +39,7 @@ test('saved voice preference overrides automatic ranking when available', () => 
 
 test('compact narration controls expose the voice picker without a new panel', () => {
   assert.match(speed, /NarrationVoicePickerButton/);
+  assert.match(speed, /controller: controller/);
   assert.match(button, /narration-voice-picker/);
   assert.match(button, /简体普通话/);
   assert.match(button, /台湾国语/);
@@ -57,4 +58,29 @@ test('voice and speed controls remain visually separate and tactile', () => {
   assert.match(button, /AnimatedScale/);
   assert.match(button, /splashColor:/);
   assert.match(button, /boxShadow:/);
+});
+
+test('the active voice is visible before the picker opens', () => {
+  assert.match(quality, /compactNarrationVoiceSelectionLabel/);
+  assert.match(quality, /narrationVoiceSelectionSummary/);
+  assert.match(button, /narration-active-voice-label/);
+  assert.match(button, /narration-custom-voice-dot/);
+  assert.match(button, /narration-current-voice-summary/);
+});
+
+test('voice previews report progress and can be stopped', () => {
+  assert.match(webService, /utterance\.onBoundary\.listen/);
+  assert.match(webService, /onProgress\?\.call/);
+  assert.match(webService, /utterance\.onEnd\.listen/);
+  assert.match(button, /narration-voice-preview-progress/);
+  assert.match(button, /停止试听/);
+  assert.match(button, /Icons\.stop_rounded/);
+});
+
+test('opening the voice picker preserves the journey playback state', () => {
+  assert.match(button, /controller\.stop\(resetPosition: false\)/);
+  assert.match(button, /controller\.resumeFromOffset\(resumeOffset\)/);
+  assert.match(button, /controller\.pauseAtOffset\(resumeOffset\)/);
+  assert.match(button, /wasPlaying/);
+  assert.match(button, /wasPaused/);
 });
