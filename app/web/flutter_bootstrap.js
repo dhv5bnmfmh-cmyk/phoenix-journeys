@@ -3,6 +3,8 @@
 
 const loading = document.getElementById('phoenix-loading');
 const loadingText = document.getElementById('phoenix-loading-text');
+const loadingStartedAt = window.performance.now();
+const minimumJourneyDurationMs = 11550;
 const legacyWorkerResetKey = 'phoenix-legacy-flutter-worker-reset';
 
 function updateLoadingText(message) {
@@ -11,13 +13,20 @@ function updateLoadingText(message) {
   }
 }
 
-function hideLoading() {
+async function hideLoading() {
   if (!loading) {
     return;
   }
 
+  const elapsed = window.performance.now() - loadingStartedAt;
+  const remaining = Math.max(0, minimumJourneyDurationMs - elapsed);
+  if (remaining > 0) {
+    updateLoadingText('凤凰即将抵达现代世界…');
+    await new Promise((resolve) => window.setTimeout(resolve, remaining));
+  }
+
   loading.classList.add('phoenix-loading--hidden');
-  window.setTimeout(() => loading.remove(), 260);
+  window.setTimeout(() => loading.remove(), 760);
 }
 
 function showLoadingError() {
@@ -114,7 +123,7 @@ function reloadAfterLegacyWorkerRetirement() {
         const appRunner = await engineInitializer.initializeEngine();
         updateLoadingText('正在打开 Phoenix…');
         await appRunner.runApp();
-        hideLoading();
+        await hideLoading();
       },
     });
   } catch (error) {
