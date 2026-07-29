@@ -50,4 +50,30 @@ void main() {
       isTrue,
     );
   });
+  test('manual interaction keeps auto-follow asleep during the hold window', () {
+    final now = DateTime(2026, 7, 29, 12);
+    expect(
+      narrationAutoFollowRemainingHold(
+        now: now,
+        holdUntil: now.add(const Duration(milliseconds: 2400)),
+      ),
+      const Duration(milliseconds: 2400),
+    );
+  });
+
+  test('auto-follow may resume after the manual hold expires', () {
+    final now = DateTime(2026, 7, 29, 12);
+    expect(
+      narrationAutoFollowRemainingHold(
+        now: now,
+        holdUntil: now.subtract(const Duration(milliseconds: 1)),
+      ),
+      Duration.zero,
+    );
+    expect(
+      narrationAutoFollowRemainingHold(now: now, holdUntil: null),
+      Duration.zero,
+    );
+  });
+
 }

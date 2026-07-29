@@ -159,6 +159,19 @@ bool shouldAutoFollowNarrationItem({
       (!wasActive || sessionChanged);
 }
 
+const Duration narrationAutoFollowManualHold = Duration(milliseconds: 2400);
+
+@visibleForTesting
+Duration narrationAutoFollowRemainingHold({
+  required DateTime now,
+  required DateTime? holdUntil,
+}) {
+  if (holdUntil == null || !holdUntil.isAfter(now)) {
+    return Duration.zero;
+  }
+  return holdUntil.difference(now);
+}
+
 class InteractiveStoryText extends StatefulWidget {
   const InteractiveStoryText({
     required this.text,
@@ -204,6 +217,8 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   late final AnimationController _cinematicRevealController;
   double _lastAcceptedRevealCursor = 0;
   int _autoFollowRequest = 0;
+static final Expando<DateTime> _manualHoldUntilByController =
+    Expando<DateTime>('narration-manual-follow-hold');
 
   bool get _hasExplicitHighlight =>
       widget.highlightStart != null &&
@@ -300,13 +315,44 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     );
   }
 
-  void _scheduleNarrationAutoFollow() {
-    _autoFollowTimer?.cancel();
-    final request = ++_autoFollowRequest;
-    _autoFollowTimer = Timer(const Duration(milliseconds: 180), () {
+  void _suspendNarrationAutoFollow() {
+  final controller = widget.narrationController;
+  if (controller == null || controller.status != NarrationStatus.playing) {
+    return;
+  }
+  _manualHoldUntilByController[controller] =
+      DateTime.now().add(narrationAutoFollowManualHold);
+}
+
+Duration _remainingNarrationAutoFollowHold() {
+  final controller = widget.narrationController;
+  return narrationAutoFollowRemainingHold(
+    now: DateTime.now(),
+    holdUntil: controller == null
+        ? null
+        : _manualHoldUntilByController[controller],
+  );
+}
+
+void _scheduleNarrationAutoFollow() {
+  _autoFollowTimer?.cancel();
+  final request = ++_autoFollowRequest;
+
+  void scheduleAfter(Duration delay) {
+    _autoFollowTimer = Timer(delay, () {
       if (!mounted || request != _autoFollowRequest) return;
-      if (widget.narrationController?.status != NarrationStatus.playing) return;
+      if (widget.narrationController?.status != NarrationStatus.playing) {
+        return;
+      }
       if (!_hasExplicitHighlight) return;
+
+      final remainingHold = _remainingNarrationAutoFollowHold();
+      if (remainingHold > Duration.zero) {
+        scheduleAfter(
+          remainingHold + const Duration(milliseconds: 80),
+        );
+        return;
+      }
 
       Scrollable.ensureVisible(
         context,
@@ -316,6 +362,9 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       );
     });
   }
+
+  scheduleAfter(const Duration(milliseconds: 180));
+}
 
   void _buildSegments() {
     _segments = segmentStoryText(widget.text, widget.entries)
@@ -391,7 +440,13 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     final Listenable highlightSource =
         widget.narrationController ?? NarrationHighlightBus.instance;
 
-    return Column(
+    return Listener(
+    key: ValueKey(
+      'narration-auto-follow-touch-${widget.narrationItemId ?? widget.text}',
+    ),
+    behavior: HitTestBehavior.translucent,
+    onPointerDown: (_) => _suspendNarrationAutoFollow(),
+    child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AnimatedBuilder(
@@ -515,11 +570,12 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
                   ),
           ),
         ),
-      ],
-    );
-  }
+        ],
+    ),
+  );
+}
 
-  List<InlineSpan> _buildSegmentSpans(
+List<InlineSpan> _buildSegmentSpans(
     _InteractiveSegment segment, {
     required AppState state,
     required TextStyle? baseStyle,
