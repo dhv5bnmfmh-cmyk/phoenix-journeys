@@ -1,5 +1,40 @@
 enum NarrationStartupDecision { wait, confirmStarted, fail }
 
+class NarrationVoiceOption {
+  const NarrationVoiceOption({
+    required this.id,
+    required this.name,
+    required this.locale,
+    required this.localService,
+    required this.score,
+  });
+
+  final String id;
+  final String name;
+  final String locale;
+  final bool localService;
+  final int score;
+
+  String get qualityLabel {
+    final lower = name.toLowerCase();
+    if (lower.contains('natural') || lower.contains('neural')) return '自然声线';
+    if (lower.contains('premium') || lower.contains('enhanced')) return '高品质声线';
+    return localService ? '设备声线' : '在线声线';
+  }
+}
+
+String normalizeNarrationLanguageCode(String value) {
+  return value.toLowerCase().replaceAll('_', '-');
+}
+
+String narrationVoicePreferenceKey(String languageCode) {
+  return 'phoenix.narration.voice.${normalizeNarrationLanguageCode(languageCode)}';
+}
+
+String narrationVoiceId({required String name, required String locale}) {
+  return '${normalizeNarrationLanguageCode(locale)}::${name.trim()}';
+}
+
 int narrationVoiceScore({
   required String name,
   required String locale,
@@ -7,8 +42,8 @@ int narrationVoiceScore({
   required bool localService,
 }) {
   final normalizedName = name.toLowerCase();
-  final normalizedLocale = locale.toLowerCase().replaceAll('_', '-');
-  final requested = requestedLanguageCode.toLowerCase().replaceAll('_', '-');
+  final normalizedLocale = normalizeNarrationLanguageCode(locale);
+  final requested = normalizeNarrationLanguageCode(requestedLanguageCode);
   final requestedPrefix = requested.split('-').first;
 
   if (!normalizedLocale.startsWith(requestedPrefix)) return -10000;
@@ -87,6 +122,40 @@ int narrationVoiceScore({
   }
 
   return score;
+}
+
+List<NarrationVoiceOption> rankNarrationVoiceOptions({
+  required Iterable<NarrationVoiceOption> voices,
+  required String languageCode,
+  int limit = 8,
+}) {
+  final ranked = <NarrationVoiceOption>[];
+  final seen = <String>{};
+  for (final voice in voices) {
+    if (!seen.add(voice.id)) continue;
+    final score = narrationVoiceScore(
+      name: voice.name,
+      locale: voice.locale,
+      requestedLanguageCode: languageCode,
+      localService: voice.localService,
+    );
+    if (score <= -10000) continue;
+    ranked.add(
+      NarrationVoiceOption(
+        id: voice.id,
+        name: voice.name,
+        locale: voice.locale,
+        localService: voice.localService,
+        score: score,
+      ),
+    );
+  }
+  ranked.sort((a, b) {
+    final score = b.score.compareTo(a.score);
+    if (score != 0) return score;
+    return a.name.compareTo(b.name);
+  });
+  return ranked.take(limit).toList(growable: false);
 }
 
 double resolveNaturalNarrationPitch(String languageCode) {
