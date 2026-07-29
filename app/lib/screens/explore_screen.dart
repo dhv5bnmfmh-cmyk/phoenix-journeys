@@ -50,6 +50,18 @@ class ExploreScreen extends StatelessWidget {
       }
     }
 
+    Future<void> chooseArrivedCityDestination() async {
+      final journeyId = await showJourneyPickerSheet(
+        context: context,
+        state: state,
+        initialCityId: state.activeJourney.cityId,
+        lockToInitialCity: true,
+      );
+      if (journeyId != null) {
+        await openJourneyById(journeyId);
+      }
+    }
+
     return Stack(
       children: [
         const Positioned.fill(child: _PhoenixHomeBackground()),
@@ -80,7 +92,7 @@ class ExploreScreen extends StatelessWidget {
               _FlightMapCard(
                 state: state,
                 height: mapHeight,
-                onArrived: () => unawaited(chooseJourney()),
+                onArrived: () => unawaited(chooseArrivedCityDestination()),
               ),
               const SizedBox(height: 5),
               _CoinWalletHint(state: state),
