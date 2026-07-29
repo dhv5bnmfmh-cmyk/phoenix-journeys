@@ -138,10 +138,6 @@ jobs:
           if method_count != 1:
             raise SystemExit(f'unexpected method match count: {method_count}')
 
-          build_open = """    return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-          """
           build_replace = """    return Listener(
               key: ValueKey(
                 'narration-auto-follow-touch-${widget.narrationItemId ?? widget.text}',
@@ -150,28 +146,34 @@ jobs:
               onPointerDown: (_) => _suspendNarrationAutoFollow(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-          """
-          if build_open not in story:
-            raise SystemExit('missing build open anchor')
-          story = story.replace(build_open, build_replace, 1)
+                children: ["""
+          build_open_pattern = re.compile(
+              r"    return Column\(\n\s+crossAxisAlignment: CrossAxisAlignment\.start,\n\s+children: \[",
+          )
+          story, build_open_count = build_open_pattern.subn(
+              build_replace,
+              story,
+              count=1,
+          )
+          if build_open_count != 1:
+            raise SystemExit(f'unexpected build open match count: {build_open_count}')
 
-          build_close = """      ],
-            );
-          }
-
-          List<InlineSpan> _buildSegmentSpans(
-          """
+          build_close_pattern = re.compile(
+              r"      \],\n    \);\n  \}\n\n  List<InlineSpan> _buildSegmentSpans\(",
+          )
           build_close_replace = """        ],
               ),
             );
           }
 
-          List<InlineSpan> _buildSegmentSpans(
-          """
-          if build_close not in story:
-            raise SystemExit('missing build close anchor')
-          story = story.replace(build_close, build_close_replace, 1)
+          List<InlineSpan> _buildSegmentSpans("""
+          story, build_close_count = build_close_pattern.subn(
+              build_close_replace,
+              story,
+              count=1,
+          )
+          if build_close_count != 1:
+            raise SystemExit(f'unexpected build close match count: {build_close_count}')
           story_path.write_text(story, encoding='utf-8')
 
           test_path = Path('app/test/narration_auto_follow_test.dart')
