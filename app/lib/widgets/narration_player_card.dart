@@ -512,6 +512,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
             ? roundedPercent.clamp(1, 99)
             : roundedPercent;
         final seeking = _seekPreviewProgress != null;
+        final showRestoreChoices = compact &&
+            isPaused &&
+            controllerIsCurrent &&
+            widget.controller.isRestoredPosition;
         final activeSubtitle = hasError
             ? widget.controller.errorMessage ?? '朗读暂时不可用'
             : seeking
@@ -633,6 +637,63 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                     ),
                   ],
                 ),
+                if (showRestoreChoices) ...[
+                  const SizedBox(height: 3),
+                  Row(
+                    key: const ValueKey('narration-restore-choices'),
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 28,
+                          child: FilledButton(
+                            key: const ValueKey(
+                              'narration-restore-continue',
+                            ),
+                            onPressed: _handleMainPressed,
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              backgroundColor: PhoenixTheme.red,
+                              foregroundColor: Colors.white,
+                              textStyle: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            child: const Text('继续朗读'),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: SizedBox(
+                          height: 28,
+                          child: OutlinedButton(
+                            key: const ValueKey(
+                              'narration-restore-restart',
+                            ),
+                            onPressed: () => unawaited(_restartSession()),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              foregroundColor: Colors.white,
+                              side: BorderSide(
+                                color: Colors.white.withValues(alpha: .46),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            child: const Text('从头朗读'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 if (compact) ...[
                   const SizedBox(height: 1),
                   NarrationSeekRail(
