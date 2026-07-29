@@ -6,7 +6,7 @@ import '../services/narration_voice_picker_service.dart';
 import '../services/narration_voice_quality.dart';
 import '../theme/phoenix_theme.dart';
 
-class NarrationVoicePickerButton extends StatelessWidget {
+class NarrationVoicePickerButton extends StatefulWidget {
   const NarrationVoicePickerButton({
     this.dark = false,
     this.compact = false,
@@ -15,6 +15,15 @@ class NarrationVoicePickerButton extends StatelessWidget {
 
   final bool dark;
   final bool compact;
+
+  @override
+  State<NarrationVoicePickerButton> createState() =>
+      _NarrationVoicePickerButtonState();
+}
+
+class _NarrationVoicePickerButtonState
+    extends State<NarrationVoicePickerButton> {
+  bool _pressed = false;
 
   Future<void> _open(BuildContext context) async {
     await showModalBottomSheet<void>(
@@ -29,23 +38,108 @@ class NarrationVoicePickerButton extends StatelessWidget {
     );
   }
 
+  void _setPressed(bool value) {
+    if (_pressed == value || !mounted) return;
+    setState(() => _pressed = value);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final foreground = dark ? Colors.white : PhoenixTheme.red;
-    return IconButton(
-      key: const ValueKey('narration-voice-picker'),
-      tooltip: '选择朗读声线',
-      onPressed: () => unawaited(_open(context)),
-      visualDensity: VisualDensity.compact,
-      padding: EdgeInsets.zero,
-      constraints: BoxConstraints.tightFor(
-        width: compact ? 18 : 21,
-        height: compact ? 18 : 21,
-      ),
-      icon: Icon(
-        Icons.record_voice_over_rounded,
-        size: compact ? 12 : 14,
-        color: foreground,
+    final foreground = widget.dark ? Colors.white : PhoenixTheme.red;
+    final background = widget.dark
+        ? Colors.white.withValues(alpha: _pressed ? .24 : .12)
+        : Colors.white.withValues(alpha: _pressed ? .96 : .88);
+    final border = widget.dark
+        ? Colors.white.withValues(alpha: _pressed ? .48 : .24)
+        : PhoenixTheme.red.withValues(alpha: _pressed ? .48 : .26);
+    final radius = BorderRadius.circular(widget.compact ? 11 : 13);
+
+    return Tooltip(
+      message: '选择朗读声线',
+      child: Semantics(
+        button: true,
+        label: '声线选择',
+        child: AnimatedScale(
+          scale: _pressed ? .92 : 1,
+          duration: const Duration(milliseconds: 90),
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            key: const ValueKey('narration-voice-picker'),
+            duration: const Duration(milliseconds: 100),
+            width: widget.compact ? 36 : 49,
+            height: widget.compact ? 31 : 36,
+            decoration: BoxDecoration(
+              color: background,
+              borderRadius: radius,
+              border: Border.all(color: border),
+              boxShadow: _pressed
+                  ? const []
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: widget.dark ? .12 : .08,
+                        ),
+                        blurRadius: widget.compact ? 4 : 7,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: radius,
+              child: InkWell(
+                onTap: () => unawaited(_open(context)),
+                onTapDown: (_) => _setPressed(true),
+                onTapUp: (_) => _setPressed(false),
+                onTapCancel: () => _setPressed(false),
+                borderRadius: radius,
+                splashColor: foreground.withValues(alpha: .20),
+                highlightColor: foreground.withValues(alpha: .10),
+                child: widget.compact
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.record_voice_over_rounded,
+                            size: 13,
+                            color: foreground,
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            '声线',
+                            style: TextStyle(
+                              color: foreground,
+                              fontSize: 6.8,
+                              height: 1,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.record_voice_over_rounded,
+                            size: 14,
+                            color: foreground,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            '声线',
+                            style: TextStyle(
+                              color: foreground,
+                              fontSize: 9,
+                              height: 1,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -167,17 +261,29 @@ class _NarrationVoicePickerSheetState
                       return ListTile(
                         key: const ValueKey('narration-voice-auto'),
                         contentPadding: EdgeInsets.zero,
+                        selected: selected,
+                        selectedTileColor:
+                            PhoenixTheme.red.withValues(alpha: .06),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         leading: const CircleAvatar(
                           backgroundColor: Color(0xFFF7E6C2),
-                          child: Icon(Icons.auto_awesome_rounded,
-                              color: PhoenixTheme.red),
+                          child: Icon(
+                            Icons.auto_awesome_rounded,
+                            color: PhoenixTheme.red,
+                          ),
                         ),
-                        title: const Text('自动选择最佳声线',
-                            style: TextStyle(fontWeight: FontWeight.w900)),
+                        title: const Text(
+                          '自动选择最佳声线',
+                          style: TextStyle(fontWeight: FontWeight.w900),
+                        ),
                         subtitle: const Text('根据设备与中文地区自动匹配'),
                         trailing: selected
-                            ? const Icon(Icons.check_circle_rounded,
-                                color: PhoenixTheme.red)
+                            ? const Icon(
+                                Icons.check_circle_rounded,
+                                color: PhoenixTheme.red,
+                              )
                             : null,
                         onTap: () => unawaited(_select(null)),
                       );
@@ -189,11 +295,19 @@ class _NarrationVoicePickerSheetState
                     return ListTile(
                       key: ValueKey('narration-voice-${voice.id}'),
                       contentPadding: EdgeInsets.zero,
+                      selected: selected,
+                      selectedTileColor:
+                          PhoenixTheme.red.withValues(alpha: .06),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       leading: CircleAvatar(
                         backgroundColor:
                             PhoenixTheme.red.withValues(alpha: .08),
-                        child: const Icon(Icons.multitrack_audio_rounded,
-                            color: PhoenixTheme.red),
+                        child: const Icon(
+                          Icons.multitrack_audio_rounded,
+                          color: PhoenixTheme.red,
+                        ),
                       ),
                       title: Text(
                         voice.name,
@@ -205,19 +319,24 @@ class _NarrationVoicePickerSheetState
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
+                          IconButton.filledTonal(
                             tooltip: '试听',
                             onPressed: () => unawaited(_preview(voice)),
                             icon: Icon(
                               previewing
                                   ? Icons.graphic_eq_rounded
-                                  : Icons.play_circle_outline_rounded,
+                                  : Icons.play_arrow_rounded,
                               color: PhoenixTheme.red,
                             ),
                           ),
                           if (selected)
-                            const Icon(Icons.check_circle_rounded,
-                                color: PhoenixTheme.red),
+                            const Padding(
+                              padding: EdgeInsets.only(left: 4),
+                              child: Icon(
+                                Icons.check_circle_rounded,
+                                color: PhoenixTheme.red,
+                              ),
+                            ),
                         ],
                       ),
                       onTap: () => unawaited(_select(voice.id)),
