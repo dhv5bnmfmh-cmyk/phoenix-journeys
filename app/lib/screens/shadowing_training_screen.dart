@@ -10,6 +10,7 @@ import '../data/shadowing_passage_catalog.dart';
 import '../services/narration_controller.dart';
 import '../services/phoenix_level_controller.dart';
 import '../services/shadowing_score.dart';
+import '../services/shadowing_training_history.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/journey_level_selector_button.dart';
@@ -31,6 +32,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   final SpeechToText _speech = SpeechToText();
   final NarrationController _narration = NarrationController();
   final Map<String, int> _bestScores = <String, int>{};
+  ShadowingTrainingHistory _history = const ShadowingTrainingHistory();
 
   ShadowingPassage? _passage;
   int _sentenceIndex = 0;
@@ -54,6 +56,9 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       _bestScores[passage.id] =
           prefs.getInt('phoenix.shadowing.best.${passage.id}') ?? 0;
     }
+    _history = ShadowingTrainingHistory.decode(
+      prefs.getString('phoenix.shadowing.history'),
+    );
     var ready = false;
     try {
       ready = await _speech.initialize(
@@ -211,6 +216,17 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   Future<void> _showCompletion() async {
     final passage = _passage;
     if (passage == null || !mounted) return;
+    final completedScore = _bestScores[passage.id] ?? _score?.overall ?? 0;
+    final history = _history.record(
+      passageId: passage.id,
+      title: passage.title,
+      score: completedScore,
+      completedAt: DateTime.now(),
+    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('phoenix.shadowing.history', history.encode());
+    if (!mounted) return;
+    setState(() => _history = history);
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -300,6 +316,11 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
             ],
           ),
         ),
+        const SizedBox(height: 10),
+        _TrainingDashboard(
+          history: _history,
+          displayText: state.displayText,
+        ),
         const SizedBox(height: 12),
         for (final passage in passages) ...[
           _PassageCard(
@@ -372,6 +393,127 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
           FilledButton.icon(onPressed: _nextSentence, icon: const Icon(Icons.arrow_forward_rounded), label: Text(state.displayText(_sentenceIndex == passage.sentences.length - 1 ? '完成这篇短文' : '练习下一句'))),
         ],
       ],
+    );
+  }
+}
+
+class _TrainingDashboard extends StatelessWidget {
+  const _TrainingDashboard({
+    required this.history,
+    required this.displayText,
+  });
+
+  final ShadowingTrainingHistory history;
+  final String Function(String) displayText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('shadowing-training-history'),
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .42)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            displayText('训练记录'),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 9),
+          Row(
+            children: [
+              _HistoryMetric(
+                icon: Icons.local_fire_department_rounded,
+                value: '${history.currentStreak}',
+                label: displayText('连续天数'),
+              ),
+              _HistoryMetric(
+                icon: Icons.check_circle_rounded,
+                value: '${history.totalSessions}',
+                label: displayText('完成篇数'),
+              ),
+              _HistoryMetric(
+                icon: Icons.workspace_premium_rounded,
+                value: '${history.bestRecentScore}',
+                label: displayText('近期最佳'),
+              ),
+            ],
+          ),
+          if (history.recentSessions.isNotEmpty) ...[
+            const Divider(height: 20),
+            for (final session in history.recentSessions.take(3))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 5),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.history_rounded,
+                      size: 15,
+                      color: Colors.black45,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        displayText(session.title),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 11.5),
+                      ),
+                    ),
+                    Text(
+                      displayText('${session.score} 分'),
+                      style: const TextStyle(
+                        color: PhoenixTheme.red,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ] else
+            Text(
+              displayText('完成第一篇短文后，这里会保存你的练习轨迹。'),
+              style: const TextStyle(color: Colors.black54, fontSize: 11),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryMetric extends StatelessWidget {
+  const _HistoryMetric({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, size: 19, color: PhoenixTheme.red),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+          ),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.black54, fontSize: 9.5),
+          ),
+        ],
+      ),
     );
   }
 }
