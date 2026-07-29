@@ -379,14 +379,47 @@ class _FlightMapCard extends StatefulWidget {
 class _FlightMapCardState extends State<_FlightMapCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  late String _animatedJourneyId;
 
   @override
   void initState() {
     super.initState();
+    _animatedJourneyId = widget.state.activeJourneyId;
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 12),
-    )..repeat();
+      duration: const Duration(seconds: 14),
+    );
+    if (widget.state.journeyCompleted) {
+      _controller.value = 1;
+    } else {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _FlightMapCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final journeyId = widget.state.activeJourneyId;
+    if (journeyId != _animatedJourneyId) {
+      _animatedJourneyId = journeyId;
+      _controller
+        ..stop()
+        ..value = 0
+        ..forward();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final forceMotion = Uri.base.queryParameters['motion'] == 'on';
+    final reduceMotion =
+        !forceMotion && (MediaQuery.maybeOf(context)?.disableAnimations ?? false);
+    if (reduceMotion) {
+      _controller
+        ..stop()
+        ..value = 1;
+    }
   }
 
   @override
@@ -434,15 +467,15 @@ class _FlightMapCardState extends State<_FlightMapCard>
                       : _controller.value;
               final cameraT = CurvedAnimation(
                 parent: _controller,
-                curve: const Interval(0, .34, curve: Curves.easeInOutCubic),
+                curve: const Interval(0, .38, curve: Curves.easeInOutCubic),
               ).value;
               final flightT = state.journeyCompleted
                   ? 1.0
                   : CurvedAnimation(
                       parent: _controller,
                       curve: const Interval(
-                        .28,
-                        .68,
+                        .20,
+                        .78,
                         curve: Curves.easeInOutCubic,
                       ),
                     ).value;
@@ -451,8 +484,8 @@ class _FlightMapCardState extends State<_FlightMapCard>
                   : CurvedAnimation(
                       parent: _controller,
                       curve: const Interval(
-                        .68,
-                        .82,
+                        .78,
+                        .94,
                         curve: Curves.easeInCubic,
                       ),
                     ).value;
@@ -461,8 +494,8 @@ class _FlightMapCardState extends State<_FlightMapCard>
                   : CurvedAnimation(
                       parent: _controller,
                       curve: const Interval(
-                        .72,
-                        .90,
+                        .68,
+                        1.0,
                         curve: Curves.easeInOutCubic,
                       ),
                     ).value;
@@ -584,7 +617,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
                                   state.activeJourney.city,
                                 ),
                                 subtitle: state.activeJourney.cityCode,
-                                active: state.activeJourneyStampEarned,
+                                active: state.activeJourneyStampEarned || landingT > .35,
                                 pulse: _controller.value,
                               ),
                             ),
