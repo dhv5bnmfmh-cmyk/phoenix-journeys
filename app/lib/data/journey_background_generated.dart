@@ -285,4 +285,9 @@ final generatedJourneyBackgrounds = <JourneyBackgroundAsset>[
     complianceScore: 100,
     varietyScore: 100,
   ),
+  JourneyBackgroundAsset(id:'pingyao-ancient-city-v1',journeyId:'pingyao-ancient-city',assetPath:'assets/images/backgrounds/generated/pingyao/ancient-city/pingyao-ancient-city-v1.webp',generatedOn:DateTime.utc(2026,7,29),origin:JourneyBackgroundOrigin.aiGenerated,complianceReviewed:true,complianceScore:100,varietyScore:100),
+  JourneyBackgroundAsset(id:'qufu-confucius-sites-v1',journeyId:'qufu-confucius-sites',assetPath:'assets/images/backgrounds/generated/qufu/confucius-sites/qufu-confucius-v1.webp',generatedOn:DateTime.utc(2026,7,29),origin:JourneyBackgroundOrigin.aiGenerated,complianceReviewed:true,complianceScore:100,varietyScore:100),
+  JourneyBackgroundAsset(id:'leshan-giant-buddha-v1',journeyId:'leshan-giant-buddha',assetPath:'assets/images/backgrounds/generated/leshan/giant-buddha/leshan-giant-buddha-v1.webp',generatedOn:DateTime.utc(2026,7,29),origin:JourneyBackgroundOrigin.aiGenerated,complianceReviewed:true,complianceScore:100,varietyScore:100),
+  JourneyBackgroundAsset(id:'wuyishan-nine-bend-stream-v1',journeyId:'wuyishan-nine-bend-stream',assetPath:'assets/images/backgrounds/generated/wuyishan/nine-bend-stream/wuyishan-nine-bend-v1.webp',generatedOn:DateTime.utc(2026,7,29),origin:JourneyBackgroundOrigin.aiGenerated,complianceReviewed:true,complianceScore:100,varietyScore:100),
+  JourneyBackgroundAsset(id:'honghe-hani-rice-terraces-v1',journeyId:'honghe-hani-rice-terraces',assetPath:'assets/images/backgrounds/generated/honghe/hani-rice-terraces/honghe-hani-terraces-v1.webp',generatedOn:DateTime.utc(2026,7,29),origin:JourneyBackgroundOrigin.aiGenerated,complianceReviewed:true,complianceScore:100,varietyScore:100),
 ];

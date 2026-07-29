@@ -166,6 +166,11 @@ String _assetFor(String id) {
   if (id.contains('xiamen')) {
     return 'assets/images/backgrounds/generated/xiamen/kulangsu/xiamen-kulangsu-v1.webp';
   }
+  if (id.contains('pingyao')) return 'assets/images/backgrounds/generated/pingyao/ancient-city/pingyao-ancient-city-v1.webp';
+  if (id.contains('qufu')) return 'assets/images/backgrounds/generated/qufu/confucius-sites/qufu-confucius-v1.webp';
+  if (id.contains('leshan')) return 'assets/images/backgrounds/generated/leshan/giant-buddha/leshan-giant-buddha-v1.webp';
+  if (id.contains('wuyishan')) return 'assets/images/backgrounds/generated/wuyishan/nine-bend-stream/wuyishan-nine-bend-v1.webp';
+  if (id.contains('honghe')) return 'assets/images/backgrounds/generated/honghe/hani-rice-terraces/honghe-hani-terraces-v1.webp';
   return 'assets/images/backgrounds/generated/beijing/forbidden-city/03-golden-gate.webp';
 }
 
