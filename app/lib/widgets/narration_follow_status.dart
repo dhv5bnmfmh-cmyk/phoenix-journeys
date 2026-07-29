@@ -95,14 +95,13 @@ class NarrationFollowStatus extends StatelessWidget {
         final error = status == NarrationStatus.error;
         final snapshot = controller.highlightSnapshot;
         final currentWord = snapshot?.word.trim();
-        final currentSentence = snapshot == null
-            ? ''
-            : narrationSentenceAtOffset(
-                text: snapshot.itemText,
-                offset: snapshot.start,
-              );
-        final showSentenceGuide =
-            (playing || paused) && currentSentence.isNotEmpty;
+        final sentenceSource =
+            snapshot?.itemText ?? controller.currentItemText ?? '';
+        final currentSentence = narrationSentenceAtOffset(
+          text: sentenceSource,
+          offset: snapshot?.start ?? controller.currentItemLocalOffset,
+        );
+        final showSentenceGuide = currentSentence.isNotEmpty;
         final manualFollowPaused =
             playing && coordinator.isManualHoldActive;
         final label = narrationFollowStatusLabel(
