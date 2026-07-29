@@ -61,6 +61,22 @@ int? stableNarrationRevealEnd({
   return currentOffset <= 0 ? 0 : itemLength;
 }
 
+@visibleForTesting
+bool shouldCheckpointNarration({
+  required NarrationStatus status,
+  required String? contentId,
+  required int offset,
+  required int totalCharacters,
+  required int lastSavedOffset,
+}) {
+  final supported = contentId == 'story' || contentId == 'discovery';
+  return status == NarrationStatus.playing &&
+      supported &&
+      offset > 0 &&
+      offset < totalCharacters &&
+      (offset - lastSavedOffset).abs() >= 12;
+}
+
 class JourneyScreen extends StatefulWidget {
   const JourneyScreen({super.key, this.journeyId});
 
@@ -98,12 +114,15 @@ class _JourneyScreenState extends State<JourneyScreen>
       PhoenixLevelController.instance;
   ChineseProficiencyProfile? _languageProfile;
   int _levelChangeToken = 0;
+  Timer? _narrationCheckpointTimer;
+  int _lastSavedNarrationOffset = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _narration = NarrationController();
+    _narration.addListener(_handleNarrationCheckpoint);
     _phoenixLevelController.addListener(_handlePhoenixLevelChanged);
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
@@ -152,6 +171,8 @@ class _JourneyScreenState extends State<JourneyScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) return;
+    _narrationCheckpointTimer?.cancel();
+    _narrationCheckpointTimer = null;
     unawaited(_persistNarrationPosition());
     unawaited(_narration.stop());
     if (_initialized) unawaited(_persistProgress());
@@ -165,6 +186,8 @@ class _JourneyScreenState extends State<JourneyScreen>
       unawaited(_persistProgress());
     }
     _phoenixLevelController.removeListener(_handlePhoenixLevelChanged);
+    _narration.removeListener(_handleNarrationCheckpoint);
+    _narrationCheckpointTimer?.cancel();
     _narration.dispose();
     _ai.close();
     wonderController.dispose();
@@ -195,12 +218,52 @@ class _JourneyScreenState extends State<JourneyScreen>
     if ((contentId == 'story' || contentId == 'discovery') &&
         offset > 0 &&
         offset < total) {
+      _lastSavedNarrationOffset = offset;
       return _appState.saveJourneyNarrationPosition(
         contentId: contentId!,
         offset: offset,
       );
     }
+    if ((contentId == 'story' || contentId == 'discovery') &&
+        total > 0 &&
+        offset >= total) {
+      _lastSavedNarrationOffset = 0;
+      return _appState.clearJourneyNarrationPosition();
+    }
     return Future<void>.value();
+  }
+
+  void _handleNarrationCheckpoint() {
+    final contentId = _narration.contentId;
+    final offset = _narration.currentOffset;
+    final total = _narration.totalCharacters;
+    if (_narration.status == NarrationStatus.idle &&
+        (contentId == 'story' || contentId == 'discovery') &&
+        total > 0 &&
+        offset >= total) {
+      _narrationCheckpointTimer?.cancel();
+      _narrationCheckpointTimer = null;
+      if (_appState.journeyNarrationOffset > 0) {
+        _lastSavedNarrationOffset = 0;
+        unawaited(_appState.clearJourneyNarrationPosition());
+      }
+      return;
+    }
+    if (!shouldCheckpointNarration(
+      status: _narration.status,
+      contentId: contentId,
+      offset: offset,
+      totalCharacters: total,
+      lastSavedOffset: _lastSavedNarrationOffset,
+    )) {
+      return;
+    }
+    if (_narrationCheckpointTimer != null) return;
+
+    _narrationCheckpointTimer = Timer(const Duration(seconds: 2), () {
+      _narrationCheckpointTimer = null;
+      if (mounted) unawaited(_persistNarrationPosition());
+    });
   }
 
   JourneyLevelContent get _levelContent {
@@ -281,6 +344,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           : _discoveryNarrationItems,
       offset: _appState.journeyNarrationOffset,
     );
+    _lastSavedNarrationOffset = _appState.journeyNarrationOffset;
   }
 
   void _handlePhoenixLevelChanged() {
