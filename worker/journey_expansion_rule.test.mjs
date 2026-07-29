@@ -30,7 +30,7 @@ test('first city expansion batch follows journey and passport contracts', () => 
   }
 });
 
-test('every expanded journey has a verified UNESCO source and geo node', () => {
+test('every expanded journey has two verified authoritative sources and a geo node', () => {
   assert.equal((expansion.match(/StoryVerificationStatus\.verified/g) ?? []).length, 3);
   for (const [, , place] of journeys) {
     assert.match(geo, new RegExp(`name: '${place}'`));
