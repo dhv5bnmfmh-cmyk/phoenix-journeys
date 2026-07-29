@@ -9,11 +9,17 @@ import '../widgets/journey_level_selector_button.dart';
 import 'city_passport_screen.dart';
 import 'explore_screen.dart';
 import 'me_screen.dart';
+import 'shadowing_training_screen.dart';
 
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key});
 
-  static const _pages = [ExploreScreen(), CityPassportScreen(), MeScreen()];
+  static const _pages = [
+    ExploreScreen(),
+    CityPassportScreen(),
+    ShadowingTrainingScreen(embedded: true),
+    MeScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +34,7 @@ class HomeShell extends StatelessWidget {
         );
         final pageType = switch (state.selectedTab) {
           1 => JourneyBackgroundPage.passport,
-          2 => JourneyBackgroundPage.profile,
+          3 => JourneyBackgroundPage.profile,
           _ => JourneyBackgroundPage.explore,
         };
         final baseContent = state.selectedTab == 0
@@ -72,6 +78,10 @@ class HomeShell extends StatelessWidget {
                       NavigationRailDestination(
                         icon: const Icon(Icons.auto_stories),
                         label: Text(state.displayText('护照')),
+                      ),
+                      NavigationRailDestination(
+                        icon: const Icon(Icons.mic_rounded),
+                        label: Text(state.displayText('跟读训练')),
                       ),
                       NavigationRailDestination(
                         icon: const Icon(Icons.person_outline),
@@ -147,10 +157,16 @@ class _CompactBottomNavigation extends StatelessWidget {
                 onTap: () => state.setTab(1),
               ),
               _CompactNavItem(
-                icon: Icons.person_outline_rounded,
-                label: state.displayText('我的'),
+                icon: Icons.mic_rounded,
+                label: state.displayText('跟读训练'),
                 selected: state.selectedTab == 2,
                 onTap: () => state.setTab(2),
+              ),
+              _CompactNavItem(
+                icon: Icons.person_outline_rounded,
+                label: state.displayText('我的'),
+                selected: state.selectedTab == 3,
+                onTap: () => state.setTab(3),
               ),
             ],
           ),
