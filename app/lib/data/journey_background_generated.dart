@@ -209,17 +209,29 @@ final generatedJourneyBackgrounds = <JourneyBackgroundAsset>[
       complianceScore: 100,
       varietyScore: 100,
     ),
-  JourneyBackgroundAsset(
-    id: 'luoyang-longmen-grottoes-v1',
-    journeyId: 'luoyang-longmen-grottoes',
-    assetPath:
-        'assets/images/backgrounds/generated/luoyang/longmen-grottoes/luoyang-longmen-grottoes-v1.webp',
-    generatedOn: DateTime.utc(2026, 7, 29),
-    origin: JourneyBackgroundOrigin.aiGenerated,
-    complianceReviewed: true,
-    complianceScore: 100,
-    varietyScore: 100,
-  ),
+  for (final assetName in <String>[
+    'luoyang-longmen-grottoes-v1',
+    '02-clear-morning',
+    '03-river-mist',
+    '04-cliff-panorama',
+    '05-after-rain',
+    '06-winter-snow',
+    '07-golden-hour',
+    '08-blue-hour',
+    '09-moonlit-grottoes',
+    '10-night-panorama',
+  ])
+    JourneyBackgroundAsset(
+      id: 'luoyang-longmen-grottoes-$assetName',
+      journeyId: 'luoyang-longmen-grottoes',
+      assetPath:
+          'assets/images/backgrounds/generated/luoyang/longmen-grottoes/$assetName.webp',
+      generatedOn: DateTime.utc(2026, 7, 29),
+      origin: JourneyBackgroundOrigin.aiGenerated,
+      complianceReviewed: true,
+      complianceScore: 100,
+      varietyScore: 100,
+    ),
   JourneyBackgroundAsset(
     id: 'quanzhou-kaiyuan-temple-v1',
     journeyId: 'quanzhou-kaiyuan-temple',
