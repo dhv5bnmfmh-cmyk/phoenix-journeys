@@ -416,6 +416,14 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
   }
 
+  void _checkpointNarrationBeforeStepChange() {
+    final contentId = _narration.contentId;
+    if (contentId != 'story' && contentId != 'discovery') return;
+    _narrationCheckpointTimer?.cancel();
+    _narrationCheckpointTimer = null;
+    unawaited(_persistNarrationPosition());
+  }
+
   Future<void> _goToStep(int targetStep) async {
     final safeStep = targetStep.clamp(0, AppState.journeyLastStep);
     if (!_appState.journeyCompleted &&
@@ -423,6 +431,9 @@ class _JourneyScreenState extends State<JourneyScreen>
         safeStep != step - 1 &&
         safeStep != step + 1) {
       return;
+    }
+    if (safeStep != step) {
+      _checkpointNarrationBeforeStepChange();
     }
     // Discovery autoplay must enter the browser speech API in the same user
     // gesture that pressed Continue. Awaiting storage/animation first can make
