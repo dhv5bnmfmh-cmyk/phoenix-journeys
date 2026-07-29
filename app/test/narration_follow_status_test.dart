@@ -17,6 +17,21 @@ void main() {
     );
   });
 
+  test('manual reading has a clear paused-follow label', () {
+    expect(
+      narrationFollowStatusLabel(
+        status: NarrationStatus.playing,
+        hasContent: true,
+        currentItemLabel: '今日发现 1',
+        currentWord: '微光',
+        currentOffset: 22,
+        totalCharacters: 70,
+        manualFollowPaused: true,
+      ),
+      '今日发现 1 · 已暂停跟随',
+    );
+  });
+
   test('follow status preserves a clear paused location', () {
     expect(
       narrationFollowStatusLabel(
