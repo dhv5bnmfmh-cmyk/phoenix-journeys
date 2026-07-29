@@ -37,13 +37,13 @@ void main() {
     expect(markdown, contains('Phoenix 全旅程内容品质报告'));
     expect(markdown, contains('特别旅程：`4`'));
     expect(report['agent'], 'PhoenixJourneyContentQualityAgent');
-    expect(report['journeyCount'], 12);
-    expect(report['regularJourneyCount'], 8);
+    expect(report['journeyCount'], 15);
+    expect(report['regularJourneyCount'], 11);
     expect(report['specialJourneyCount'], 4);
     expect(report['profileCount'], 10);
-    expect(report['inspectionCount'], 120);
+    expect(report['inspectionCount'], 150);
     expect(report['canPublish'], isTrue);
-    expect(report['approvedCount'], 120);
+    expect(report['approvedCount'], 150);
     expect(report['needsRevisionCount'], 0);
     expect(report['blockedCount'], 0);
   });
