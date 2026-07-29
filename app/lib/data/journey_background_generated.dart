@@ -186,17 +186,29 @@ final generatedJourneyBackgrounds = <JourneyBackgroundAsset>[
       complianceScore: 100,
       varietyScore: 100,
     ),
-  JourneyBackgroundAsset(
-    id: 'suzhou-humble-administrators-garden-v1',
-    journeyId: 'suzhou-humble-administrators-garden',
-    assetPath:
-        'assets/images/backgrounds/generated/suzhou/humble-administrators-garden/suzhou-humble-administrators-garden-v1.webp',
-    generatedOn: DateTime.utc(2026, 7, 29),
-    origin: JourneyBackgroundOrigin.aiGenerated,
-    complianceReviewed: true,
-    complianceScore: 100,
-    varietyScore: 100,
-  ),
+  for (final assetName in <String>[
+    'suzhou-humble-administrators-garden-v1',
+    '02-clear-morning',
+    '03-misty-detail',
+    '04-bright-panorama',
+    '05-after-rain',
+    '06-autumn-maples',
+    '07-golden-hour',
+    '08-blue-hour',
+    '09-lantern-night',
+    '10-moonlit-panorama',
+  ])
+    JourneyBackgroundAsset(
+      id: 'suzhou-humble-administrators-garden-$assetName',
+      journeyId: 'suzhou-humble-administrators-garden',
+      assetPath:
+          'assets/images/backgrounds/generated/suzhou/humble-administrators-garden/$assetName.webp',
+      generatedOn: DateTime.utc(2026, 7, 29),
+      origin: JourneyBackgroundOrigin.aiGenerated,
+      complianceReviewed: true,
+      complianceScore: 100,
+      varietyScore: 100,
+    ),
   JourneyBackgroundAsset(
     id: 'luoyang-longmen-grottoes-v1',
     journeyId: 'luoyang-longmen-grottoes',
