@@ -73,7 +73,7 @@ void main() {
     );
     expect(
       levels.map((level) => level.expressQuestion).toSet(),
-      hasLength(12),
+      hasLength(allJourneyExperiences.length),
     );
   });
 
