@@ -217,8 +217,8 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   late final AnimationController _cinematicRevealController;
   double _lastAcceptedRevealCursor = 0;
   int _autoFollowRequest = 0;
-static final Expando<DateTime> _manualHoldUntilByController =
-    Expando<DateTime>('narration-manual-follow-hold');
+  static final Expando<DateTime> _manualHoldUntilByController =
+      Expando<DateTime>('narration-manual-follow-hold');
 
   bool get _hasExplicitHighlight =>
       widget.highlightStart != null &&
@@ -316,55 +316,54 @@ static final Expando<DateTime> _manualHoldUntilByController =
   }
 
   void _suspendNarrationAutoFollow() {
-  final controller = widget.narrationController;
-  if (controller == null || controller.status != NarrationStatus.playing) {
-    return;
+    final controller = widget.narrationController;
+    if (controller == null || controller.status != NarrationStatus.playing) {
+      return;
+    }
+    _manualHoldUntilByController[controller] = DateTime.now().add(
+      narrationAutoFollowManualHold,
+    );
   }
-  _manualHoldUntilByController[controller] =
-      DateTime.now().add(narrationAutoFollowManualHold);
-}
 
-Duration _remainingNarrationAutoFollowHold() {
-  final controller = widget.narrationController;
-  return narrationAutoFollowRemainingHold(
-    now: DateTime.now(),
-    holdUntil: controller == null
-        ? null
-        : _manualHoldUntilByController[controller],
-  );
-}
+  Duration _remainingNarrationAutoFollowHold() {
+    final controller = widget.narrationController;
+    return narrationAutoFollowRemainingHold(
+      now: DateTime.now(),
+      holdUntil: controller == null
+          ? null
+          : _manualHoldUntilByController[controller],
+    );
+  }
 
-void _scheduleNarrationAutoFollow() {
-  _autoFollowTimer?.cancel();
-  final request = ++_autoFollowRequest;
+  void _scheduleNarrationAutoFollow() {
+    _autoFollowTimer?.cancel();
+    final request = ++_autoFollowRequest;
 
-  void scheduleAfter(Duration delay) {
-    _autoFollowTimer = Timer(delay, () {
-      if (!mounted || request != _autoFollowRequest) return;
-      if (widget.narrationController?.status != NarrationStatus.playing) {
-        return;
-      }
-      if (!_hasExplicitHighlight) return;
+    void scheduleAfter(Duration delay) {
+      _autoFollowTimer = Timer(delay, () {
+        if (!mounted || request != _autoFollowRequest) return;
+        if (widget.narrationController?.status != NarrationStatus.playing) {
+          return;
+        }
+        if (!_hasExplicitHighlight) return;
 
-      final remainingHold = _remainingNarrationAutoFollowHold();
-      if (remainingHold > Duration.zero) {
-        scheduleAfter(
-          remainingHold + const Duration(milliseconds: 80),
+        final remainingHold = _remainingNarrationAutoFollowHold();
+        if (remainingHold > Duration.zero) {
+          scheduleAfter(remainingHold + const Duration(milliseconds: 80));
+          return;
+        }
+
+        Scrollable.ensureVisible(
+          context,
+          alignment: .34,
+          duration: const Duration(milliseconds: 360),
+          curve: Curves.easeOutCubic,
         );
-        return;
-      }
+      });
+    }
 
-      Scrollable.ensureVisible(
-        context,
-        alignment: .34,
-        duration: const Duration(milliseconds: 360),
-        curve: Curves.easeOutCubic,
-      );
-    });
+    scheduleAfter(const Duration(milliseconds: 180));
   }
-
-  scheduleAfter(const Duration(milliseconds: 180));
-}
 
   void _buildSegments() {
     _segments = segmentStoryText(widget.text, widget.entries)
@@ -441,141 +440,141 @@ void _scheduleNarrationAutoFollow() {
         widget.narrationController ?? NarrationHighlightBus.instance;
 
     return Listener(
-    key: ValueKey(
-      'narration-auto-follow-touch-${widget.narrationItemId ?? widget.text}',
-    ),
-    behavior: HitTestBehavior.translucent,
-    onPointerDown: (_) => _suspendNarrationAutoFollow(),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AnimatedBuilder(
-          animation: Listenable.merge(<Listenable>[
-            highlightSource,
-            _cinematicRevealController,
-          ]),
-          builder: (context, _) {
-            final snapshot =
-                widget.narrationController?.highlightSnapshot ??
-                NarrationHighlightBus.instance.snapshot;
-            final hasExplicitHighlight =
-                widget.highlightStart != null &&
-                widget.highlightEnd != null &&
-                widget.highlightEnd! > widget.highlightStart!;
-            final isCurrentNarrationItem =
-                hasExplicitHighlight ||
-                narrationSnapshotMatches(
-                  snapshot: snapshot,
-                  contentId: widget.narrationContentId,
-                  itemId: widget.narrationItemId,
-                  sourceText: widget.text,
-                  displayedText: state.displayText(widget.text),
-                  displayText: state.displayText,
-                );
-            final highlightStart = hasExplicitHighlight
-                ? widget.highlightStart!
-                : isCurrentNarrationItem
-                ? snapshot!.start
-                : -1;
-            final highlightEnd = hasExplicitHighlight
-                ? widget.highlightEnd!
-                : isCurrentNarrationItem
-                ? snapshot!.end
-                : -1;
+      key: ValueKey(
+        'narration-auto-follow-touch-${widget.narrationItemId ?? widget.text}',
+      ),
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _suspendNarrationAutoFollow(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AnimatedBuilder(
+            animation: Listenable.merge(<Listenable>[
+              highlightSource,
+              _cinematicRevealController,
+            ]),
+            builder: (context, _) {
+              final snapshot =
+                  widget.narrationController?.highlightSnapshot ??
+                  NarrationHighlightBus.instance.snapshot;
+              final hasExplicitHighlight =
+                  widget.highlightStart != null &&
+                  widget.highlightEnd != null &&
+                  widget.highlightEnd! > widget.highlightStart!;
+              final isCurrentNarrationItem =
+                  hasExplicitHighlight ||
+                  narrationSnapshotMatches(
+                    snapshot: snapshot,
+                    contentId: widget.narrationContentId,
+                    itemId: widget.narrationItemId,
+                    sourceText: widget.text,
+                    displayedText: state.displayText(widget.text),
+                    displayText: state.displayText,
+                  );
+              final highlightStart = hasExplicitHighlight
+                  ? widget.highlightStart!
+                  : isCurrentNarrationItem
+                  ? snapshot!.start
+                  : -1;
+              final highlightEnd = hasExplicitHighlight
+                  ? widget.highlightEnd!
+                  : isCurrentNarrationItem
+                  ? snapshot!.end
+                  : -1;
 
-            return AnimatedContainer(
-              key: ValueKey(
-                'narration-follow-surface-${widget.narrationItemId ?? widget.text}',
-              ),
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
-              decoration: BoxDecoration(
-                color: isCurrentNarrationItem
-                    ? const Color(0x16FFD879)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isCurrentNarrationItem
-                      ? const Color(0x38FFD879)
-                      : Colors.transparent,
-                ),
-                boxShadow: isCurrentNarrationItem
-                    ? const [
-                        BoxShadow(
-                          color: Color(0x16FFD879),
-                          blurRadius: 10,
-                          spreadRadius: 1,
-                        ),
-                      ]
-                    : const [],
-              ),
-              child: Text.rich(
+              return AnimatedContainer(
                 key: ValueKey(
-                  'interactive-highlight-${widget.narrationItemId ?? widget.text}',
+                  'narration-follow-surface-${widget.narrationItemId ?? widget.text}',
                 ),
-                strutStyle: StrutStyle(
-                  fontSize: baseStyle?.fontSize,
-                  height: baseStyle?.height,
-                  fontWeight: baseStyle?.fontWeight,
-                  forceStrutHeight: true,
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isCurrentNarrationItem
+                      ? const Color(0x16FFD879)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isCurrentNarrationItem
+                        ? const Color(0x38FFD879)
+                        : Colors.transparent,
+                  ),
+                  boxShadow: isCurrentNarrationItem
+                      ? const [
+                          BoxShadow(
+                            color: Color(0x16FFD879),
+                            blurRadius: 10,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : const [],
                 ),
-                TextSpan(
-                  style: baseStyle,
-                  children: _segments
-                      .expand((segment) {
-                        return _buildSegmentSpans(
-                          segment,
-                          state: state,
-                          baseStyle: baseStyle,
-                          highlightStart: highlightStart,
-                          highlightEnd: highlightEnd,
-                          revealCursor: _currentRevealCursor,
-                        );
-                      })
-                      .toList(growable: false),
-                ),
-              ),
-            );
-          },
-        ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
-            reverseDuration: const Duration(milliseconds: 130),
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(
-                  scale: Tween<double>(begin: .96, end: 1).animate(animation),
-                  alignment: Alignment.topLeft,
-                  child: child,
+                child: Text.rich(
+                  key: ValueKey(
+                    'interactive-highlight-${widget.narrationItemId ?? widget.text}',
+                  ),
+                  strutStyle: StrutStyle(
+                    fontSize: baseStyle?.fontSize,
+                    height: baseStyle?.height,
+                    fontWeight: baseStyle?.fontWeight,
+                    forceStrutHeight: true,
+                  ),
+                  TextSpan(
+                    style: baseStyle,
+                    children: _segments
+                        .expand((segment) {
+                          return _buildSegmentSpans(
+                            segment,
+                            state: state,
+                            baseStyle: baseStyle,
+                            highlightStart: highlightStart,
+                            highlightEnd: highlightEnd,
+                            revealCursor: _currentRevealCursor,
+                          );
+                        })
+                        .toList(growable: false),
+                  ),
                 ),
               );
             },
-            child: selectedEntry == null
-                ? const SizedBox.shrink(key: ValueKey('word-popover-empty'))
-                : Padding(
-                    key: ValueKey(
-                      'word-popover-auto-visible-${selectedEntry.word}',
-                    ),
-                    padding: const EdgeInsets.only(top: 8),
-                    child: _VocabularyPopover(
-                      entry: selectedEntry,
-                      state: state,
-                      onClose: _hideEntry,
-                    ),
-                  ),
           ),
-        ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              reverseDuration: const Duration(milliseconds: 130),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: .96, end: 1).animate(animation),
+                    alignment: Alignment.topLeft,
+                    child: child,
+                  ),
+                );
+              },
+              child: selectedEntry == null
+                  ? const SizedBox.shrink(key: ValueKey('word-popover-empty'))
+                  : Padding(
+                      key: ValueKey(
+                        'word-popover-auto-visible-${selectedEntry.word}',
+                      ),
+                      padding: const EdgeInsets.only(top: 8),
+                      child: _VocabularyPopover(
+                        entry: selectedEntry,
+                        state: state,
+                        onClose: _hideEntry,
+                      ),
+                    ),
+            ),
+          ),
         ],
-    ),
-  );
-}
+      ),
+    );
+  }
 
-List<InlineSpan> _buildSegmentSpans(
+  List<InlineSpan> _buildSegmentSpans(
     _InteractiveSegment segment, {
     required AppState state,
     required TextStyle? baseStyle,
