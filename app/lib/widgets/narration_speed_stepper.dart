@@ -145,21 +145,25 @@ class NarrationSpeedStepper extends StatelessWidget {
         return Semantics(
           container: true,
           label: '声线与朗读速度控制，当前速度 ${controller.speedLabel}',
-          child: compact
-              ? controls
-              : Column(
-                  key: const ValueKey('narration-controls-with-follow-status'),
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    controls,
-                    const SizedBox(height: 4),
-                    NarrationFollowStatus(
-                      controller: controller,
-                      dark: dark,
-                    ),
-                  ],
-                ),
+          child: Column(
+            key: ValueKey(
+              compact
+                  ? 'compact-narration-controls-with-follow-status'
+                  : 'narration-controls-with-follow-status',
+            ),
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: compact
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.stretch,
+            children: [
+              controls,
+              SizedBox(height: compact ? 3 : 4),
+              NarrationFollowStatus(
+                controller: controller,
+                dark: dark,
+              ),
+            ],
+          ),
         );
       },
     );
