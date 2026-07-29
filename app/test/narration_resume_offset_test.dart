@@ -3,6 +3,8 @@ import 'package:phoenix_journeys/services/narration_controller.dart';
 import 'package:phoenix_journeys/widgets/narration_player_card.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('uses exact native word start when progress is fresh', () {
     expect(
       resolveNarrationPauseOffset(
