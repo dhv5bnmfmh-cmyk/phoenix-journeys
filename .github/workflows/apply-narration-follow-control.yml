@@ -1,0 +1,227 @@
+name: Apply narration follow control
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/apply-narration-follow-control.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-narration-follow-control-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  patch:
+    if: github.event.pull_request.head.ref == 'agent/narration-voice-picker-v1'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/narration-voice-picker-v1
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Connect reading text to follow coordinator
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          story_path = Path('app/lib/widgets/interactive_story_text.dart')
+          story = story_path.read_text(encoding='utf-8')
+
+          import_anchor = "import '../services/narration_controller.dart';\n"
+          import_insert = import_anchor + "import '../services/narration_follow_coordinator.dart';\n"
+          if "narration_follow_coordinator.dart" not in story:
+              if import_anchor not in story:
+                  raise SystemExit('missing narration import anchor')
+              story = story.replace(import_anchor, import_insert, 1)
+
+          helper_block = """const Duration narrationAutoFollowManualHold = Duration(milliseconds: 2400);
+
+          @visibleForTesting
+          Duration narrationAutoFollowRemainingHold({
+            required DateTime now,
+            required DateTime? holdUntil,
+          }) {
+            if (holdUntil == null || !holdUntil.isAfter(now)) {
+              return Duration.zero;
+            }
+            return holdUntil.difference(now);
+          }
+
+          """
+          if helper_block in story:
+              story = story.replace(helper_block, '', 1)
+
+          field_anchor = """  int _autoFollowRequest = 0;
+            static final Expando<DateTime> _manualHoldUntilByController =
+                Expando<DateTime>('narration-manual-follow-hold');
+
+          """
+          field_insert = """  int _autoFollowRequest = 0;
+            NarrationFollowCoordinator? _followCoordinator;
+
+          """
+          if field_anchor not in story:
+              raise SystemExit('missing follow field anchor')
+          story = story.replace(field_anchor, field_insert, 1)
+
+          getter_anchor = """  bool get _hasExplicitHighlight =>
+                widget.highlightStart != null &&
+                widget.highlightEnd != null &&
+                widget.highlightEnd! > widget.highlightStart!;
+
+          """
+          getter_insert = getter_anchor + """  void _attachNarrationFollowCoordinator() {
+            final controller = widget.narrationController;
+            _followCoordinator = controller == null
+                ? null
+                : NarrationFollowCoordinator.forController(controller);
+            _followCoordinator?.addListener(_handleNarrationFollowChanged);
+          }
+
+            void _detachNarrationFollowCoordinator() {
+            _followCoordinator?.removeListener(_handleNarrationFollowChanged);
+            _followCoordinator = null;
+          }
+
+            void _handleNarrationFollowChanged() {
+            final coordinator = _followCoordinator;
+            if (coordinator == null) return;
+            if (coordinator.isManualHoldActive) {
+              _autoFollowTimer?.cancel();
+              _autoFollowRequest += 1;
+              return;
+            }
+            if (_hasExplicitHighlight &&
+                widget.narrationController?.status == NarrationStatus.playing) {
+              _scheduleNarrationAutoFollow();
+            }
+          }
+
+          """
+          if getter_anchor not in story:
+              raise SystemExit('missing highlight getter anchor')
+          story = story.replace(getter_anchor, getter_insert, 1)
+
+          init_anchor = """    _buildSegments();
+            if (_hasExplicitHighlight &&
+          """
+          init_insert = """    _buildSegments();
+            _attachNarrationFollowCoordinator();
+            if (_hasExplicitHighlight &&
+          """
+          if init_anchor not in story:
+              raise SystemExit('missing init anchor')
+          story = story.replace(init_anchor, init_insert, 1)
+
+          update_anchor = """    final isActive = _hasExplicitHighlight;
+            if (textChanged || oldWidget.entries != widget.entries) {
+          """
+          update_insert = """    final isActive = _hasExplicitHighlight;
+            if (!identical(
+              oldWidget.narrationController,
+              widget.narrationController,
+            )) {
+              _detachNarrationFollowCoordinator();
+              _attachNarrationFollowCoordinator();
+            }
+            if (textChanged || oldWidget.entries != widget.entries) {
+          """
+          if update_anchor not in story:
+              raise SystemExit('missing didUpdate anchor')
+          story = story.replace(update_anchor, update_insert, 1)
+
+          methods_anchor = """  void _suspendNarrationAutoFollow() {
+            final controller = widget.narrationController;
+            if (controller == null || controller.status != NarrationStatus.playing) {
+              return;
+            }
+            _manualHoldUntilByController[controller] = DateTime.now().add(
+              narrationAutoFollowManualHold,
+            );
+          }
+
+            Duration _remainingNarrationAutoFollowHold() {
+            final controller = widget.narrationController;
+            return narrationAutoFollowRemainingHold(
+              now: DateTime.now(),
+              holdUntil: controller == null
+                  ? null
+                  : _manualHoldUntilByController[controller],
+            );
+          }
+
+          """
+          methods_insert = """  void _suspendNarrationAutoFollow() {
+            if (widget.narrationController?.status != NarrationStatus.playing) {
+              return;
+            }
+            _followCoordinator?.suspend();
+          }
+
+            Duration _remainingNarrationAutoFollowHold() {
+            return _followCoordinator?.remainingHold ?? Duration.zero;
+          }
+
+          """
+          if methods_anchor not in story:
+              raise SystemExit('missing manual follow methods anchor')
+          story = story.replace(methods_anchor, methods_insert, 1)
+
+          dispose_anchor = """    _hideTimer?.cancel();
+            _autoFollowTimer?.cancel();
+            _cinematicRevealController.dispose();
+          """
+          dispose_insert = """    _hideTimer?.cancel();
+            _autoFollowTimer?.cancel();
+            _detachNarrationFollowCoordinator();
+            _cinematicRevealController.dispose();
+          """
+          if dispose_anchor not in story:
+              raise SystemExit('missing dispose anchor')
+          story = story.replace(dispose_anchor, dispose_insert, 1)
+
+          story_path.write_text(story, encoding='utf-8')
+
+          test_path = Path('app/test/narration_auto_follow_test.dart')
+          tests = test_path.read_text(encoding='utf-8')
+          test_import_anchor = (
+              "import 'package:phoenix_journeys/services/narration_controller.dart';\n"
+          )
+          test_import_insert = test_import_anchor + (
+              "import 'package:phoenix_journeys/services/"
+              "narration_follow_coordinator.dart';\n"
+          )
+          if 'narration_follow_coordinator.dart' not in tests:
+              if test_import_anchor not in tests:
+                  raise SystemExit('missing auto-follow test import anchor')
+              tests = tests.replace(test_import_anchor, test_import_insert, 1)
+          test_path.write_text(tests, encoding='utf-8')
+          PY
+
+          dart format \
+            app/lib/widgets/interactive_story_text.dart \
+            app/test/narration_auto_follow_test.dart
+          git diff --check
+
+      - name: Commit connected follow controls
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/widgets/interactive_story_text.dart \
+            app/test/narration_auto_follow_test.dart
+          git commit -m "Connect narration text to follow controls"
+          git push origin HEAD:agent/narration-voice-picker-v1
