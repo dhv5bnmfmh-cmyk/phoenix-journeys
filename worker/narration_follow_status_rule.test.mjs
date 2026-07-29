@@ -10,6 +10,10 @@ const speed = readFileSync(
   'app/lib/widgets/narration_speed_stepper.dart',
   'utf8',
 );
+const controller = readFileSync(
+  'app/lib/services/narration_controller.dart',
+  'utf8',
+);
 
 test('compact and full narration controls expose live follow status', () => {
   assert.match(speed, /NarrationFollowStatus/);
@@ -46,4 +50,12 @@ test('current sentence guidance changes only at sentence boundaries', () => {
   assert.match(follow, /BoxConstraints\(maxWidth:\s*246\)/);
   assert.match(follow, /maxLines:\s*2/);
   assert.match(follow, /backgroundColor:\s*activeColor/);
+});
+
+test('shadowing remains reachable when narration is unavailable', () => {
+  assert.match(controller, /String\? get currentItemText/);
+  assert.match(controller, /int get currentItemLocalOffset/);
+  assert.match(follow, /controller\.currentItemText/);
+  assert.match(follow, /controller\.currentItemLocalOffset/);
+  assert.match(follow, /showSentenceGuide = currentSentence\.isNotEmpty/);
 });
