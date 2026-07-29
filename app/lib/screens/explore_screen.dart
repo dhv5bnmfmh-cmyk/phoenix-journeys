@@ -77,7 +77,11 @@ class ExploreScreen extends StatelessWidget {
                     ),
               ),
               const SizedBox(height: 8),
-              _FlightMapCard(state: state, height: mapHeight),
+              _FlightMapCard(
+                state: state,
+                height: mapHeight,
+                onArrived: () => unawaited(chooseJourney()),
+              ),
               const SizedBox(height: 5),
               _CoinWalletHint(state: state),
               const SizedBox(height: 8),
@@ -367,10 +371,15 @@ class _PhoenixHomeBackgroundState extends State<_PhoenixHomeBackground>
 }
 
 class _FlightMapCard extends StatefulWidget {
-  const _FlightMapCard({required this.state, required this.height});
+  const _FlightMapCard({
+    required this.state,
+    required this.height,
+    required this.onArrived,
+  });
 
   final AppState state;
   final double height;
+  final VoidCallback onArrived;
 
   @override
   State<_FlightMapCard> createState() => _FlightMapCardState();
@@ -497,6 +506,16 @@ class _FlightMapCardState extends State<_FlightMapCard>
                         .68,
                         1.0,
                         curve: Curves.easeInOutCubic,
+                      ),
+                    ).value;
+              final arrivalT = state.journeyCompleted
+                  ? 1.0
+                  : CurvedAnimation(
+                      parent: _controller,
+                      curve: const Interval(
+                        .92,
+                        1.0,
+                        curve: Curves.easeOutCubic,
                       ),
                     ).value;
               final geometry = _FlightGeometry(
@@ -720,7 +739,11 @@ class _FlightMapCardState extends State<_FlightMapCard>
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              state.displayText(status),
+                              state.displayText(
+                                arrivalT >= .96
+                                    ? '${state.activeJourney.city}已抵达 · 选择景点继续'
+                                    : status,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -730,13 +753,46 @@ class _FlightMapCardState extends State<_FlightMapCard>
                               ),
                             ),
                           ),
-                          Text(
-                            '${state.beijingJourneyProgressPercent}%',
-                            style: const TextStyle(
-                              color: Color(0xFFFFD879),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 10,
-                            ),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 320),
+                            child: arrivalT >= .96
+                                ? TextButton.icon(
+                                    key: const ValueKey(
+                                      'flight-arrival-destination-picker',
+                                    ),
+                                    onPressed: widget.onArrived,
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: const Color(0xFFFFD879),
+                                      minimumSize: const Size(0, 28),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                      ),
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.location_on_rounded,
+                                      size: 13,
+                                    ),
+                                    label: Text(
+                                      state.displayText('选择景点'),
+                                      style: const TextStyle(
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  )
+                                : Text(
+                                    '${state.beijingJourneyProgressPercent}%',
+                                    key: const ValueKey(
+                                      'flight-arrival-progress',
+                                    ),
+                                    style: const TextStyle(
+                                      color: Color(0xFFFFD879),
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 10,
+                                    ),
+                                  ),
                           ),
                         ],
                       ),
