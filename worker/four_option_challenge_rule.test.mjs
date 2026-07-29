@@ -137,3 +137,16 @@ test('challenge cards explain the active level and training goal', () => {
     assert.ok(panel.includes(goal));
   }
 });
+
+
+test('challenge explanations turn attempts into mastery feedback', () => {
+  assert.match(panel, /challenge-mastery-summary/);
+  assert.match(panel, /String get masteryLabel/);
+  assert.match(panel, /String get masteryAdvice/);
+  for (const state of ['已掌握', '基本掌握', '正在巩固', '需要复习']) {
+    assert.ok(panel.includes(state));
+  }
+  assert.match(panel, /掌握情况 · \${_session\.masteryLabel}/);
+  assert.match(panel, /训练目标 · \${_session\.trainingGoal}/);
+  assert.match(panel, /if \(!correct\) return '需要复习'/);
+});
