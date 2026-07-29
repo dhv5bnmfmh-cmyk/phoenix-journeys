@@ -15,7 +15,12 @@ import '../theme/phoenix_theme.dart';
 import '../widgets/journey_level_selector_button.dart';
 
 class ShadowingTrainingScreen extends StatefulWidget {
-  const ShadowingTrainingScreen({super.key});
+  const ShadowingTrainingScreen({
+    super.key,
+    this.embedded = false,
+  });
+
+  final bool embedded;
 
   @override
   State<ShadowingTrainingScreen> createState() =>
@@ -243,16 +248,23 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       backgroundColor: PhoenixTheme.paper,
       appBar: AppBar(
         title: Text(state.displayText(_passage == null ? '跟读训练' : _passage!.title)),
-        leading: IconButton(
-          onPressed: _passage == null ? () => Navigator.of(context).pop() : _closePassage,
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 8),
-            child: JourneyLevelSelectorButton(compact: true),
-          ),
-        ],
+        automaticallyImplyLeading: false,
+        leading: widget.embedded
+            ? null
+            : IconButton(
+                onPressed: _passage == null
+                    ? () => Navigator.of(context).pop()
+                    : _closePassage,
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
+        actions: widget.embedded
+            ? null
+            : const [
+                Padding(
+                  padding: EdgeInsets.only(right: 8),
+                  child: JourneyLevelSelectorButton(compact: true),
+                ),
+              ],
       ),
       body: SafeArea(
         child: _loading
