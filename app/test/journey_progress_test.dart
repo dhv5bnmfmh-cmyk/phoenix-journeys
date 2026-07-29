@@ -60,16 +60,19 @@ void main() {
     await state.load();
     await state.saveJourneyNarrationPosition(
       contentId: 'discovery',
+      contentSignature: 'discovery-v1',
       offset: 42,
     );
 
     final restored = AppState();
     await restored.load();
     expect(restored.journeyNarrationContentId, 'discovery');
+    expect(restored.journeyNarrationContentSignature, 'discovery-v1');
     expect(restored.journeyNarrationOffset, 42);
 
     await restored.clearJourneyNarrationPosition();
     expect(restored.journeyNarrationContentId, isNull);
+    expect(restored.journeyNarrationContentSignature, isNull);
     expect(restored.journeyNarrationOffset, 0);
   });
 
