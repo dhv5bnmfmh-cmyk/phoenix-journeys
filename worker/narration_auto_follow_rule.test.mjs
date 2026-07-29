@@ -6,6 +6,10 @@ const storyText = readFileSync(
   'app/lib/widgets/interactive_story_text.dart',
   'utf8',
 );
+const coordinator = readFileSync(
+  'app/lib/services/narration_follow_coordinator.dart',
+  'utf8',
+);
 
 test('narration auto-follow is paragraph-scoped and pause-safe', () => {
   assert.match(storyText, /shouldAutoFollowNarrationItem/);
@@ -24,15 +28,12 @@ test('active narration paragraph has a bounded visual surface', () => {
 });
 
 test('manual reading temporarily suspends narration auto-follow', () => {
-  assert.match(storyText, /narrationAutoFollowManualHold/);
-  assert.match(storyText, /Expando<DateTime>/);
+  assert.match(coordinator, /narrationAutoFollowManualHold/);
+  assert.match(coordinator, /Expando<NarrationFollowCoordinator>/);
   assert.match(
     storyText,
     /onPointerDown: \(_\) => _suspendNarrationAutoFollow\(\)/,
   );
-  assert.match(
-    storyText,
-    /remainingHold \+ const Duration\(milliseconds: 80\)/,
-  );
+  assert.match(storyText, /_followCoordinator\?\.remainingHold/);
   assert.match(storyText, /HitTestBehavior\.translucent/);
 });
