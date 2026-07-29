@@ -934,14 +934,10 @@ class _PremiumAircraftPainter extends CustomPainter {
 
     final windowPaint = Paint()
       ..color = const Color(0xFF31474B)
-      ..strokeWidth = 1.15
-      ..strokeCap = StrokeCap.round;
+      ..style = PaintingStyle.fill;
     for (var y = 15.0; y < 39; y += 3.1) {
-      canvas.drawPoints(
-        PointMode.points,
-        [Offset(22.4, y), Offset(27.6, y)],
-        windowPaint,
-      );
+      canvas.drawCircle(Offset(22.4, y), .58, windowPaint);
+      canvas.drawCircle(Offset(27.6, y), .58, windowPaint);
     }
 
     final glintX = 21 + 8 * lightProgress;
