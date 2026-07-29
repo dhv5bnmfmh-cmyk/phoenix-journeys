@@ -55,6 +55,24 @@ void main() {
     expect(state.beijingJourneyFurthestStepLabel, '回忆');
   });
 
+  test('restores and clears a journey narration position', () async {
+    final state = AppState();
+    await state.load();
+    await state.saveJourneyNarrationPosition(
+      contentId: 'discovery',
+      offset: 42,
+    );
+
+    final restored = AppState();
+    await restored.load();
+    expect(restored.journeyNarrationContentId, 'discovery');
+    expect(restored.journeyNarrationOffset, 42);
+
+    await restored.clearJourneyNarrationPosition();
+    expect(restored.journeyNarrationContentId, isNull);
+    expect(restored.journeyNarrationOffset, 0);
+  });
+
   test('completion earns a permanent Beijing stamp and restart keeps it', () async {
     DateTime clock() => DateTime(2026, 1, 1);
     final state = AppState(clock: clock);
