@@ -43,7 +43,7 @@ test('saved position is discarded when narration content changes', () => {
   );
   assert.match(
     journey,
-    /unawaited\(_appState\.clearJourneyNarrationPosition\(\)\)/,
+    /clearJourneyNarrationPosition\(contentId: contentId\)/,
   );
 });
 
