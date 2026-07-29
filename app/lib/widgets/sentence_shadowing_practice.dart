@@ -1,8 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
-
+import '../services/sentence_recognition_service.dart';
 import '../theme/phoenix_theme.dart';
 
 @immutable
@@ -92,7 +91,7 @@ class SentenceShadowingPractice extends StatefulWidget {
 }
 
 class _SentenceShadowingPracticeState extends State<SentenceShadowingPractice> {
-  final stt.SpeechToText _speech = stt.SpeechToText();
+  final SentenceRecognitionService _speech = SentenceRecognitionService();
   bool _initializing = false;
   bool _listening = false;
   String _recognized = '';
@@ -132,13 +131,18 @@ class _SentenceShadowingPracticeState extends State<SentenceShadowingPractice> {
       _message = null;
     });
     await widget.onBeforeListen();
-    final available = await _speech.initialize(
-      onStatus: (status) {
+    if (!mounted) return;
+
+    final started = await _speech.start(
+      onResult: (text, {required isFinal}) {
         if (!mounted) return;
-        final done = status == 'done' || status == 'notListening';
-        if (done && _listening) _finishEvaluation();
+        setState(() => _recognized = text);
+        if (isFinal) _finishEvaluation();
       },
-      onError: (_) {
+      onComplete: () {
+        if (mounted && _listening) _finishEvaluation();
+      },
+      onError: () {
         if (!mounted) return;
         setState(() {
           _listening = false;
@@ -148,7 +152,7 @@ class _SentenceShadowingPracticeState extends State<SentenceShadowingPractice> {
       },
     );
     if (!mounted) return;
-    if (!available) {
+    if (!started) {
       setState(() {
         _initializing = false;
         _message = '当前浏览器暂不支持跟读识别';
@@ -160,16 +164,6 @@ class _SentenceShadowingPracticeState extends State<SentenceShadowingPractice> {
       _initializing = false;
       _listening = true;
     });
-    await _speech.listen(
-      localeId: 'zh_CN',
-      listenFor: const Duration(seconds: 12),
-      pauseFor: const Duration(seconds: 3),
-      onResult: (result) {
-        if (!mounted) return;
-        setState(() => _recognized = result.recognizedWords);
-        if (result.finalResult) _finishEvaluation();
-      },
-    );
   }
 
   void _finishEvaluation() {
