@@ -144,3 +144,16 @@ test('returning to a narration page restores its own checkpoint', () => {
     /clearJourneyNarrationPosition\(contentId: contentId\)/,
   );
 });
+
+
+test('restored narration offers explicit continue and restart choices', () => {
+  assert.match(player, /showRestoreChoices/);
+  assert.match(player, /widget\.controller\.isRestoredPosition/);
+  assert.match(player, /narration-restore-choices/);
+  assert.match(player, /narration-restore-continue/);
+  assert.match(player, /narration-restore-restart/);
+  assert.match(player, /继续朗读/);
+  assert.match(player, /从头朗读/);
+  assert.match(player, /onPressed: _handleMainPressed/);
+  assert.match(player, /unawaited\(_restartSession\(\)\)/);
+});
