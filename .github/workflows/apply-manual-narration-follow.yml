@@ -1,17 +1,22 @@
 name: Apply manual narration follow guard
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/narration-voice-picker-v1
+      - main
     paths:
       - .github/workflows/apply-manual-narration-follow.yml
 
 permissions:
   contents: write
 
+concurrency:
+  group: manual-narration-follow-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   patch:
+    if: github.event.pull_request.head.ref == 'agent/narration-voice-picker-v1'
     runs-on: ubuntu-latest
     steps:
       - name: Check out feature branch
