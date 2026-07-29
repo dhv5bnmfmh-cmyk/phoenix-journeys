@@ -20,6 +20,7 @@ const resumeTest = readFileSync(
 test('journey narration position is namespaced and restored without autoplay', () => {
   assert.match(state, /saveJourneyNarrationPosition/);
   assert.match(state, /_key\('narrationContentId'\)/);
+  assert.match(state, /_key\('narrationContentSignature'\)/);
   assert.match(state, /_key\('narrationOffset'\)/);
   assert.match(journey, /_persistNarrationPosition/);
   assert.match(journey, /_restoreNarrationPosition/);
@@ -28,6 +29,22 @@ test('journey narration position is namespaced and restored without autoplay', (
   assert.match(narration, /_status = NarrationStatus\.paused/);
   assert.match(narration, /bool get isRestoredPosition/);
   assert.match(player, /上次停在这里 · \$percent% · 点击继续/);
+});
+
+test('saved position is discarded when narration content changes', () => {
+  assert.match(journey, /String narrationContentSignature/);
+  assert.match(
+    journey,
+    /journeyNarrationContentSignature ==[\s\S]*narrationContentSignature\(items\)/,
+  );
+  assert.match(
+    journey,
+    /if \(!matchesStep \|\| !matchesContent \|\| contentId == null\)/,
+  );
+  assert.match(
+    journey,
+    /unawaited\(_appState\.clearJourneyNarrationPosition\(\)\)/,
+  );
 });
 
 test('restart and completion remove stale narration positions', () => {
