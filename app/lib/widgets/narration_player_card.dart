@@ -91,6 +91,16 @@ String compactNarrationProgressLabel({
   return '第 $item / $itemCount 段 · $percent% · 剩余 $remaining 字';
 }
 
+@visibleForTesting
+String narrationPausedLabel({
+  required bool restoredPosition,
+  required int percent,
+}) {
+  return restoredPosition
+      ? '上次停在这里 · $percent% · 点击继续'
+      : '已暂停 · $percent%';
+}
+
 class NarrationPlayerCard extends StatefulWidget {
   const NarrationPlayerCard({
     required this.controller,
@@ -509,7 +519,11 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                 : isPlaying
                     ? widget.controller.currentItemLabel ?? '正在朗读'
                     : isPaused
-                        ? '已暂停 · $percent%'
+                        ? narrationPausedLabel(
+                            restoredPosition:
+                                widget.controller.isRestoredPosition,
+                            percent: percent,
+                          )
                         : widget.subtitle;
         final compact = widget.compact;
         final compactProgress = seeking
