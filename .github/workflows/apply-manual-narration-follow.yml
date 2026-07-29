@@ -1,0 +1,240 @@
+name: Apply manual narration follow guard
+
+on:
+  push:
+    branches:
+      - agent/narration-voice-picker-v1
+    paths:
+      - .github/workflows/apply-manual-narration-follow.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/narration-voice-picker-v1
+          fetch-depth: 0
+
+      - name: Patch manual-scroll respect into narration follow
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          story_path = Path('app/lib/widgets/interactive_story_text.dart')
+          story = story_path.read_text(encoding='utf-8')
+
+          helper_anchor = """bool shouldAutoFollowNarrationItem({
+            required NarrationStatus status,
+            required bool wasActive,
+            required bool isActive,
+            required bool sessionChanged,
+          }) {
+            return status == NarrationStatus.playing &&
+                isActive &&
+                (!wasActive || sessionChanged);
+          }
+          """
+          helper_insert = helper_anchor + """
+          const Duration narrationAutoFollowManualHold = Duration(milliseconds: 2400);
+
+          @visibleForTesting
+          Duration narrationAutoFollowRemainingHold({
+            required DateTime now,
+            required DateTime? holdUntil,
+          }) {
+            if (holdUntil == null || !holdUntil.isAfter(now)) {
+              return Duration.zero;
+            }
+            return holdUntil.difference(now);
+          }
+          """
+          if helper_anchor not in story:
+            raise SystemExit('missing helper anchor')
+          story = story.replace(helper_anchor, helper_insert, 1)
+
+          field_anchor = """  int _autoFollowRequest = 0;
+
+          """
+          field_insert = """  int _autoFollowRequest = 0;
+          static final Expando<DateTime> _manualHoldUntilByController =
+              Expando<DateTime>('narration-manual-follow-hold');
+
+          """
+          if field_anchor not in story:
+            raise SystemExit('missing field anchor')
+          story = story.replace(field_anchor, field_insert, 1)
+
+          method_anchor = """  void _scheduleNarrationAutoFollow() {
+            _autoFollowTimer?.cancel();
+            final request = ++_autoFollowRequest;
+            _autoFollowTimer = Timer(const Duration(milliseconds: 180), () {
+              if (!mounted || request != _autoFollowRequest) return;
+              if (widget.narrationController?.status != NarrationStatus.playing) return;
+              if (!_hasExplicitHighlight) return;
+
+              Scrollable.ensureVisible(
+                context,
+                alignment: .34,
+                duration: const Duration(milliseconds: 360),
+                curve: Curves.easeOutCubic,
+              );
+            });
+          }
+          """
+          method_insert = """  void _suspendNarrationAutoFollow() {
+            final controller = widget.narrationController;
+            if (controller == null || controller.status != NarrationStatus.playing) {
+              return;
+            }
+            _manualHoldUntilByController[controller] =
+                DateTime.now().add(narrationAutoFollowManualHold);
+          }
+
+          Duration _remainingNarrationAutoFollowHold() {
+            final controller = widget.narrationController;
+            return narrationAutoFollowRemainingHold(
+              now: DateTime.now(),
+              holdUntil: controller == null
+                  ? null
+                  : _manualHoldUntilByController[controller],
+            );
+          }
+
+          void _scheduleNarrationAutoFollow() {
+            _autoFollowTimer?.cancel();
+            final request = ++_autoFollowRequest;
+
+            void scheduleAfter(Duration delay) {
+              _autoFollowTimer = Timer(delay, () {
+                if (!mounted || request != _autoFollowRequest) return;
+                if (widget.narrationController?.status != NarrationStatus.playing) {
+                  return;
+                }
+                if (!_hasExplicitHighlight) return;
+
+                final remainingHold = _remainingNarrationAutoFollowHold();
+                if (remainingHold > Duration.zero) {
+                  scheduleAfter(
+                    remainingHold + const Duration(milliseconds: 80),
+                  );
+                  return;
+                }
+
+                Scrollable.ensureVisible(
+                  context,
+                  alignment: .34,
+                  duration: const Duration(milliseconds: 360),
+                  curve: Curves.easeOutCubic,
+                );
+              });
+            }
+
+            scheduleAfter(const Duration(milliseconds: 180));
+          }
+          """
+          if method_anchor not in story:
+            raise SystemExit('missing method anchor')
+          story = story.replace(method_anchor, method_insert, 1)
+
+          build_open = """    return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+          """
+          build_replace = """    return Listener(
+              key: ValueKey(
+                'narration-auto-follow-touch-${widget.narrationItemId ?? widget.text}',
+              ),
+              behavior: HitTestBehavior.translucent,
+              onPointerDown: (_) => _suspendNarrationAutoFollow(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+          """
+          if build_open not in story:
+            raise SystemExit('missing build open anchor')
+          story = story.replace(build_open, build_replace, 1)
+
+          build_close = """      ],
+            );
+          }
+
+          List<InlineSpan> _buildSegmentSpans(
+          """
+          build_close_replace = """        ],
+              ),
+            );
+          }
+
+          List<InlineSpan> _buildSegmentSpans(
+          """
+          if build_close not in story:
+            raise SystemExit('missing build close anchor')
+          story = story.replace(build_close, build_close_replace, 1)
+          story_path.write_text(story, encoding='utf-8')
+
+          test_path = Path('app/test/narration_auto_follow_test.dart')
+          tests = test_path.read_text(encoding='utf-8')
+          test_insert = """
+            test('manual interaction keeps auto-follow asleep during the hold window', () {
+              final now = DateTime(2026, 7, 29, 12);
+              expect(
+                narrationAutoFollowRemainingHold(
+                  now: now,
+                  holdUntil: now.add(const Duration(milliseconds: 2400)),
+                ),
+                const Duration(milliseconds: 2400),
+              );
+            });
+
+            test('auto-follow may resume after the manual hold expires', () {
+              final now = DateTime(2026, 7, 29, 12);
+              expect(
+                narrationAutoFollowRemainingHold(
+                  now: now,
+                  holdUntil: now.subtract(const Duration(milliseconds: 1)),
+                ),
+                Duration.zero,
+              );
+              expect(
+                narrationAutoFollowRemainingHold(now: now, holdUntil: null),
+                Duration.zero,
+              );
+            });
+          """
+          marker = '\n}\n'
+          if not tests.endswith(marker):
+            raise SystemExit('unexpected test file ending')
+          tests = tests[:-len(marker)] + test_insert + marker
+          test_path.write_text(tests, encoding='utf-8')
+
+          rule_path = Path('worker/narration_auto_follow_rule.test.mjs')
+          rules = rule_path.read_text(encoding='utf-8')
+          rules += """
+
+          test('manual reading temporarily suspends narration auto-follow', () => {
+            assert.match(storyText, /narrationAutoFollowManualHold/);
+            assert.match(storyText, /Expando<DateTime>/);
+            assert.match(storyText, /onPointerDown: \(_\) => _suspendNarrationAutoFollow\(\)/);
+            assert.match(storyText, /remainingHold \+ const Duration\(milliseconds: 80\)/);
+            assert.match(storyText, /HitTestBehavior\.translucent/);
+          });
+          """
+          rule_path.write_text(rules, encoding='utf-8')
+          PY
+
+      - name: Commit patched source
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/widgets/interactive_story_text.dart \
+            app/test/narration_auto_follow_test.dart \
+            worker/narration_auto_follow_rule.test.mjs
+          git commit -m "Respect manual reading during narration"
+          git push origin HEAD:agent/narration-voice-picker-v1
