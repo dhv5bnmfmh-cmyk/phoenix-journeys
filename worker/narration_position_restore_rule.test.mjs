@@ -12,6 +12,10 @@ const player = readFileSync(
   'app/lib/widgets/narration_player_card.dart',
   'utf8',
 );
+const resumeTest = readFileSync(
+  'app/test/narration_resume_offset_test.dart',
+  'utf8',
+);
 
 test('journey narration position is namespaced and restored without autoplay', () => {
   assert.match(state, /saveJourneyNarrationPosition/);
@@ -52,5 +56,10 @@ test('active narration creates bounded checkpoints and clears completion', () =>
   assert.match(
     journey,
     /offset >= total[\s\S]*clearJourneyNarrationPosition/,
+  );
+  assert.doesNotMatch(
+    resumeTest,
+    /addTearDown\(controller\.dispose\)/,
+    'restore tests must not invoke a real device TTS plugin',
   );
 });
