@@ -159,7 +159,7 @@ test('the final challenge dialog summarizes all three abilities', () => {
   assert.match(panel, /三项能力已掌握/);
   assert.match(panel, /三项挑战已完成/);
   assert.match(panel, /重点复习\${weakest\.typeLabel}/);
-  assert.match(panel, /if \(finalMode\)/);
+  assert.match(panel, /if \(showJourneySummary\)/);
 });
 
 
