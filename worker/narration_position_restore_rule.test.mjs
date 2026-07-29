@@ -80,3 +80,31 @@ test('active narration creates bounded checkpoints and clears completion', () =>
     'restore tests must not invoke a real device TTS plugin',
   );
 });
+
+
+test('step changes checkpoint narration before replacing the active plan', () => {
+  assert.match(journey, /void _checkpointNarrationBeforeStepChange\(\)/);
+  assert.match(
+    journey,
+    /if \(safeStep != step\) \{\s*_checkpointNarrationBeforeStepChange\(\);\s*\}/,
+  );
+  assert.match(
+    journey,
+    /_narrationCheckpointTimer\?\.cancel\(\);[\s\S]*unawaited\(_persistNarrationPosition\(\)\)/,
+  );
+});
+
+test('unrelated feedback cleanup preserves narration and completion clears it', () => {
+  const feedbackStart = state.indexOf('Future<void> clearWritingFeedback()');
+  const restartStart = state.indexOf('Future<void> restartJourney()');
+  const feedbackBody = state.slice(feedbackStart, restartStart);
+  assert.doesNotMatch(feedbackBody, /journeyNarrationContentId = null/);
+  assert.doesNotMatch(feedbackBody, /narrationContentSignature/);
+  assert.doesNotMatch(feedbackBody, /narrationOffset/);
+
+  const completionStart = state.indexOf('Future<void> completeJourney(');
+  const completionBody = state.slice(completionStart);
+  assert.match(completionBody, /journeyNarrationContentId = null/);
+  assert.match(completionBody, /prefs\.remove\(_key\('narrationContentId'\)\)/);
+  assert.match(completionBody, /prefs\.remove\(_key\('narrationOffset'\)\)/);
+});
