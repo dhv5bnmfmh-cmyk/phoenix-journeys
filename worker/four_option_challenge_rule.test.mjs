@@ -161,3 +161,15 @@ test('the final challenge dialog summarizes all three abilities', () => {
   assert.match(panel, /重点复习\${weakest\.typeLabel}/);
   assert.match(panel, /if \(finalMode\)/);
 });
+
+
+test('explorers can replay the weakest mode without earning twice', () => {
+  assert.match(panel, /challenge-replay-weakest/);
+  assert.match(panel, /再练重点项/);
+  assert.match(panel, /int get _weakestSessionIndex/);
+  assert.match(panel, /void _restartWeakestMode\(\)/);
+  assert.match(panel, /_focusedReplayActive = true/);
+  assert.match(panel, /if \(_rewardedModes\.add\(_activeIndex\)\)/);
+  assert.match(panel, /if \(replayWeakest\)/);
+  assert.match(panel, /_restartWeakestMode\(\)/);
+});
