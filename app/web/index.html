@@ -21,7 +21,7 @@
   <meta name="apple-mobile-web-app-title" content="Phoenix Journeys">
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="preload" as="image" href="phoenix-launch-cover.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/assets/images/phoenix-launch-cover.webp" type="image/webp">
   <link rel="manifest" href="manifest.json">
 
   <title>Phoenix Journeys</title>
@@ -60,29 +60,41 @@
         28px
         max(64px, calc(env(safe-area-inset-bottom) + 38px));
       overflow: hidden;
-      background:
-        linear-gradient(
-          180deg,
-          rgba(12, 3, 3, .04) 0%,
-          rgba(17, 5, 4, .10) 44%,
-          rgba(13, 4, 4, .74) 73%,
-          rgba(10, 3, 3, .96) 100%
-        ),
-        url("phoenix-launch-cover.webp") center 24% / cover no-repeat,
-        #180908;
+      isolation: isolate;
+      background: #180908;
       transition: opacity 360ms ease, visibility 360ms ease;
+    }
+
+    #phoenix-loading::after {
+      content: "";
+      position: absolute;
+      z-index: -2;
+      inset: -3%;
+      pointer-events: none;
+      background:
+        url("assets/assets/images/phoenix-launch-cover.webp")
+        center 24% / cover no-repeat;
+      transform: scale(1.035) translate3d(0, 0, 0);
+      animation: phoenix-cover-breathe 8s ease-in-out infinite alternate;
+      will-change: transform, filter;
     }
 
     #phoenix-loading::before {
       content: "";
       position: absolute;
+      z-index: -1;
       inset: 0;
       pointer-events: none;
       background:
-        radial-gradient(circle at 50% 35%, rgba(224, 166, 72, .13), transparent 31%),
-        linear-gradient(90deg, transparent, rgba(231, 184, 100, .12), transparent);
-      mix-blend-mode: screen;
-      opacity: .8;
+        radial-gradient(circle at 50% 34%, rgba(245, 183, 75, .16), transparent 32%),
+        linear-gradient(
+          180deg,
+          rgba(12, 3, 3, .02) 0%,
+          rgba(17, 5, 4, .10) 44%,
+          rgba(13, 4, 4, .72) 73%,
+          rgba(10, 3, 3, .96) 100%
+        );
+      animation: phoenix-cover-glow 3.8s ease-in-out infinite alternate;
     }
 
     #phoenix-loading.phoenix-loading--hidden {
@@ -155,6 +167,22 @@
       animation: phoenix-loading 1.55s cubic-bezier(.4, 0, .2, 1) infinite;
     }
 
+    @keyframes phoenix-cover-breathe {
+      from {
+        transform: scale(1.035) translate3d(0, 0, 0);
+        filter: saturate(.94) brightness(.92);
+      }
+      to {
+        transform: scale(1.085) translate3d(0, -1.2%, 0);
+        filter: saturate(1.08) brightness(1.04);
+      }
+    }
+
+    @keyframes phoenix-cover-glow {
+      from { opacity: .82; }
+      to { opacity: 1; }
+    }
+
     @keyframes phoenix-loading {
       from { transform: translateX(-125%); }
       to { transform: translateX(365%); }
@@ -184,6 +212,11 @@
 
       #phoenix-loading {
         transition-duration: 0ms;
+      }
+
+      #phoenix-loading::after,
+      #phoenix-loading::before {
+        animation: none;
       }
     }
   </style>
