@@ -26,6 +26,35 @@ test('camera, cruise and landing form one continuous arrival sequence', () => {
   assert.match(explore, /active: state\.activeJourneyStampEarned \|\| landingT > \.35/);
 });
 
+test('premium aircraft replaces the low-resolution system icon', () => {
+  assert.match(explore, /class _PremiumAircraftPainter extends CustomPainter/);
+  assert.match(explore, /phoenix-premium-map-aircraft/);
+  assert.match(explore, /size: const Size\(50, 56\)/);
+  assert.match(explore, /angle: angle \+ math\.pi \/ 2/);
+  assert.doesNotMatch(explore, /Icons\.flight_rounded/);
+});
+
+test('painted relief map uses per-city calibrated destinations', () => {
+  const binding = readFileSync(
+    'app/lib/services/journey_location_binding.dart',
+    'utf8',
+  );
+  for (const location of [
+    'beijing/forbidden-city',
+    'beijing/summer-palace',
+    'shanghai/bund',
+    'xian/city-wall',
+    'hangzhou/west-lake',
+    'chengdu/kuanzhai-alley',
+    'nanjing/qinhuai-river',
+    'guangzhou/chen-clan-ancestral-hall',
+  ]) {
+    assert.match(binding, new RegExp(`'${location}'`));
+  }
+  assert.match(binding, /'hangzhou\/west-lake': JourneyMapPoint\(x: 0\.70, y: 0\.49\)/);
+  assert.match(explore, /hanoi = Offset\(size\.width \* \.30, size\.height \* \.76\)/);
+});
+
 test('map flight respects reduced-motion accessibility', () => {
   assert.match(explore, /disableAnimations/);
   assert.match(explore, /queryParameters\['motion'\] == 'on'/);
