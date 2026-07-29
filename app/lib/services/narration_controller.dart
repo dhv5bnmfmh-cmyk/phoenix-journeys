@@ -206,6 +206,7 @@ class NarrationController extends ChangeNotifier {
   int _speechSessionToken = 0;
   bool _webSpeechPausedInPlace = false;
   bool _restartWebSpeechOnResume = false;
+  bool _isRestoredPosition = false;
 
   NarrationStatus get status => _status;
   String? get contentId => _contentId;
@@ -213,6 +214,7 @@ class NarrationController extends ChangeNotifier {
   int? get currentItemIndex => _currentItemIndex;
   int get itemCount => _plan.items.length;
   bool get hasContent => !_plan.isEmpty;
+  bool get isRestoredPosition => _isRestoredPosition;
   double get speechRate => _speechRate;
   int get _speechRateIndex {
     final index = speedOptions.indexWhere(
@@ -335,6 +337,7 @@ class NarrationController extends ChangeNotifier {
   void _handleWebStart() {
     if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
     _status = NarrationStatus.playing;
+    _isRestoredPosition = false;
     _errorMessage = null;
     _startProgressClock(_currentOffset);
     _safeNotify();
@@ -366,6 +369,7 @@ class NarrationController extends ChangeNotifier {
   void _handleWebPause() {
     if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
     _status = NarrationStatus.paused;
+    _isRestoredPosition = false;
     _cancelProgressClock();
     _safeNotify();
   }
@@ -506,6 +510,7 @@ class NarrationController extends ChangeNotifier {
     _currentItemIndex = 0;
     _errorMessage = null;
     _status = NarrationStatus.playing;
+    _isRestoredPosition = false;
     _speechMode = _NarrationSpeechMode.narration;
     _webSpeechPausedInPlace = false;
     _restartWebSpeechOnResume = false;
@@ -534,6 +539,7 @@ class NarrationController extends ChangeNotifier {
     _currentItemIndex = plan.indexForOffset(safeOffset);
     _errorMessage = null;
     _status = NarrationStatus.paused;
+    _isRestoredPosition = true;
     _speechMode = _NarrationSpeechMode.idle;
     _highlightSnapshot = null;
     _applyProgress(safeOffset);
@@ -550,6 +556,7 @@ class NarrationController extends ChangeNotifier {
     final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
     final safeOffset = offset.clamp(0, maxOffset).toInt();
     _status = NarrationStatus.paused;
+    _isRestoredPosition = false;
     _currentOffset = safeOffset;
     _currentItemIndex = _plan.indexForOffset(safeOffset);
     _cancelProgressClock();
@@ -584,6 +591,7 @@ class NarrationController extends ChangeNotifier {
 
   Future<void> resumeFromOffset(int offset) async {
     if (_plan.isEmpty || _disposed) return;
+    _isRestoredPosition = false;
 
     final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
     final safeOffset = offset.clamp(0, maxOffset).toInt();
@@ -683,6 +691,7 @@ class NarrationController extends ChangeNotifier {
 
   Future<void> restart() async {
     if (_plan.isEmpty || _contentId == null) return;
+    _isRestoredPosition = false;
     await _speakFrom(0);
   }
 
@@ -728,6 +737,7 @@ class NarrationController extends ChangeNotifier {
     _errorMessage = null;
     _currentItemIndex = null;
     _highlightSnapshot = null;
+    _isRestoredPosition = false;
     NarrationHighlightBus.instance.clear(contentId: _contentId);
     if (resetPosition) {
       _currentOffset = 0;
