@@ -160,6 +160,22 @@ bool shouldAutoFollowNarrationItem({
       (!wasActive || sessionChanged);
 }
 
+const Duration vocabularyPopoverAutoHideDuration = Duration(seconds: 12);
+
+@visibleForTesting
+bool vocabularyWordListsEquivalent(
+  Iterable<String> previousWords,
+  Iterable<String> currentWords,
+) {
+  final previous = previousWords.toList(growable: false)..sort();
+  final current = currentWords.toList(growable: false)..sort();
+  if (previous.length != current.length) return false;
+  for (var index = 0; index < previous.length; index += 1) {
+    if (previous[index] != current[index]) return false;
+  }
+  return true;
+}
+
 class InteractiveStoryText extends StatefulWidget {
   const InteractiveStoryText({
     required this.text,
@@ -271,7 +287,11 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       _detachNarrationFollowCoordinator();
       _attachNarrationFollowCoordinator();
     }
-    if (textChanged || oldWidget.entries != widget.entries) {
+    final entriesChanged = !vocabularyWordListsEquivalent(
+      oldWidget.entries.map((entry) => entry.word),
+      widget.entries.map((entry) => entry.word),
+    );
+    if (textChanged || entriesChanged) {
       _disposeRecognizers();
       _selectedEntry = null;
       _buildSegments();
@@ -318,7 +338,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     final acceptedTarget = requestedTarget < _lastAcceptedRevealCursor
         ? _lastAcceptedRevealCursor
         : requestedTarget;
-    _lastAcceptedRevealCursor = acceptedTarget;
+    _lastAcceptedAcceptedRevealCursor = acceptedTarget;
 
     final current = _currentRevealCursor.clamp(
       0.0,
@@ -413,7 +433,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
         curve: Curves.easeOutCubic,
       );
     });
-    _hideTimer = Timer(const Duration(milliseconds: 3200), () {
+    _hideTimer = Timer(vocabularyPopoverAutoHideDuration, () {
       if (mounted && identical(_selectedEntry, entry)) {
         setState(() => _selectedEntry = null);
       }
