@@ -150,3 +150,14 @@ test('challenge explanations turn attempts into mastery feedback', () => {
   assert.match(panel, /训练目标 · \${_session\.trainingGoal}/);
   assert.match(panel, /if \(!correct\) return '需要复习'/);
 });
+
+
+test('the final challenge dialog summarizes all three abilities', () => {
+  assert.match(panel, /challenge-journey-mastery-summary/);
+  assert.match(panel, /旅程学习总结 · \$headline/);
+  assert.match(panel, /challenge-summary-\${session\.type\.name}/);
+  assert.match(panel, /三项能力已掌握/);
+  assert.match(panel, /三项挑战已完成/);
+  assert.match(panel, /重点复习\${weakest\.typeLabel}/);
+  assert.match(panel, /if \(finalMode\)/);
+});
