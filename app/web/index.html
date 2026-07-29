@@ -75,7 +75,7 @@
         url("assets/assets/images/phoenix-launch-cover.webp")
         center 24% / cover no-repeat;
       transform: scale(1.035) translate3d(0, 0, 0);
-      animation: phoenix-cover-breathe 8s ease-in-out infinite alternate;
+      animation: phoenix-cover-breathe 5.2s cubic-bezier(.42, 0, .35, 1) infinite alternate;
       will-change: transform, filter;
     }
 
@@ -94,7 +94,7 @@
           rgba(13, 4, 4, .72) 73%,
           rgba(10, 3, 3, .96) 100%
         );
-      animation: phoenix-cover-glow 3.8s ease-in-out infinite alternate;
+      animation: phoenix-cover-glow 2.4s ease-in-out infinite alternate;
     }
 
     #phoenix-loading.phoenix-loading--hidden {
@@ -102,6 +102,58 @@
       visibility: hidden;
       pointer-events: none;
     }
+
+    .phoenix-loading__motion {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .phoenix-loading__motion::before {
+      content: "";
+      position: absolute;
+      top: 4%;
+      left: -55%;
+      width: 42%;
+      height: 72%;
+      background: linear-gradient(
+        100deg,
+        transparent,
+        rgba(255, 221, 147, .13),
+        transparent
+      );
+      filter: blur(10px);
+      transform: skewX(-14deg);
+      animation: phoenix-light-sweep 3.4s ease-in-out infinite;
+    }
+
+    .phoenix-loading__ember {
+      --size: 3px;
+      --drift: 18px;
+      position: absolute;
+      bottom: 22%;
+      left: 50%;
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      background: #ffd37c;
+      box-shadow:
+        0 0 7px rgba(255, 181, 67, .95),
+        0 0 14px rgba(190, 66, 24, .55);
+      opacity: 0;
+      animation: phoenix-ember-rise 3.2s ease-out infinite;
+    }
+
+    .phoenix-loading__ember:nth-child(1) { left: 28%; --size: 2px; --drift: -20px; animation-delay: -.3s; }
+    .phoenix-loading__ember:nth-child(2) { left: 36%; --size: 4px; --drift: 24px; animation-delay: -1.8s; animation-duration: 4.1s; }
+    .phoenix-loading__ember:nth-child(3) { left: 44%; --size: 2px; --drift: -12px; animation-delay: -2.4s; animation-duration: 3.7s; }
+    .phoenix-loading__ember:nth-child(4) { left: 53%; --size: 3px; --drift: 18px; animation-delay: -.9s; animation-duration: 4.4s; }
+    .phoenix-loading__ember:nth-child(5) { left: 61%; --size: 2px; --drift: -26px; animation-delay: -2.9s; animation-duration: 3.9s; }
+    .phoenix-loading__ember:nth-child(6) { left: 70%; --size: 4px; --drift: 16px; animation-delay: -1.2s; animation-duration: 4.6s; }
+    .phoenix-loading__ember:nth-child(7) { left: 32%; --size: 3px; --drift: 32px; animation-delay: -3.5s; animation-duration: 5s; }
+    .phoenix-loading__ember:nth-child(8) { left: 66%; --size: 2px; --drift: -18px; animation-delay: -2.1s; animation-duration: 4.8s; }
 
     .phoenix-loading__content {
       position: relative;
@@ -129,6 +181,7 @@
       font-size: 25px;
       font-weight: 700;
       backdrop-filter: blur(8px);
+      animation: phoenix-seal-pulse 2.6s ease-in-out infinite alternate;
     }
 
     .phoenix-loading__title {
@@ -167,14 +220,61 @@
       animation: phoenix-loading 1.55s cubic-bezier(.4, 0, .2, 1) infinite;
     }
 
+    @keyframes phoenix-light-sweep {
+      0%, 18% {
+        opacity: 0;
+        transform: translateX(0) skewX(-14deg);
+      }
+      48% {
+        opacity: 1;
+      }
+      82%, 100% {
+        opacity: 0;
+        transform: translateX(390%) skewX(-14deg);
+      }
+    }
+
+    @keyframes phoenix-ember-rise {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(.55);
+      }
+      18% {
+        opacity: .9;
+      }
+      72% {
+        opacity: .55;
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--drift), -42vh, 0) scale(.15);
+      }
+    }
+
+    @keyframes phoenix-seal-pulse {
+      from {
+        transform: scale(.98);
+        box-shadow:
+          0 0 0 5px rgba(207, 143, 49, .06),
+          0 10px 34px rgba(0, 0, 0, .42);
+      }
+      to {
+        transform: scale(1.035);
+        box-shadow:
+          0 0 0 8px rgba(207, 143, 49, .12),
+          0 0 28px rgba(240, 171, 60, .22),
+          0 12px 38px rgba(0, 0, 0, .46);
+      }
+    }
+
     @keyframes phoenix-cover-breathe {
       from {
         transform: scale(1.035) translate3d(0, 0, 0);
         filter: saturate(.94) brightness(.92);
       }
       to {
-        transform: scale(1.085) translate3d(0, -1.2%, 0);
-        filter: saturate(1.08) brightness(1.04);
+        transform: scale(1.105) translate3d(0, -2.4%, 0);
+        filter: saturate(1.12) brightness(1.08);
       }
     }
 
@@ -215,7 +315,10 @@
       }
 
       #phoenix-loading::after,
-      #phoenix-loading::before {
+      #phoenix-loading::before,
+      .phoenix-loading__motion::before,
+      .phoenix-loading__ember,
+      .phoenix-loading__mark {
         animation: none;
       }
     }
@@ -223,6 +326,16 @@
 </head>
 <body>
   <div id="phoenix-loading" role="status" aria-live="polite">
+    <div class="phoenix-loading__motion" aria-hidden="true">
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+    </div>
     <div class="phoenix-loading__content">
       <div class="phoenix-loading__mark" aria-hidden="true">凤</div>
       <p class="phoenix-loading__title">PHOENIX JOURNEYS</p>
