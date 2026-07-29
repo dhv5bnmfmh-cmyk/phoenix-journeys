@@ -66,7 +66,7 @@ void main() {
         )
         .toList(growable: false);
 
-    expect(allJourneyExperiences, hasLength(18));
+    expect(allJourneyExperiences, hasLength(21));
     expect(
       levels.map((level) => level.wonderQuestion).toSet(),
       hasLength(allJourneyExperiences.length),

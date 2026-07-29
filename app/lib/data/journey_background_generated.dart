@@ -252,4 +252,37 @@ final generatedJourneyBackgrounds = <JourneyBackgroundAsset>[
     complianceScore: 100,
     varietyScore: 100,
   ),
+  JourneyBackgroundAsset(
+    id: 'dunhuang-mogao-caves-v1',
+    journeyId: 'dunhuang-mogao-caves',
+    assetPath:
+        'assets/images/backgrounds/generated/dunhuang/mogao-caves/dunhuang-mogao-caves-v1.webp',
+    generatedOn: DateTime.utc(2026, 7, 29),
+    origin: JourneyBackgroundOrigin.aiGenerated,
+    complianceReviewed: true,
+    complianceScore: 100,
+    varietyScore: 100,
+  ),
+  JourneyBackgroundAsset(
+    id: 'chengde-mountain-resort-v1',
+    journeyId: 'chengde-mountain-resort',
+    assetPath:
+        'assets/images/backgrounds/generated/chengde/mountain-resort/chengde-mountain-resort-v1.webp',
+    generatedOn: DateTime.utc(2026, 7, 29),
+    origin: JourneyBackgroundOrigin.aiGenerated,
+    complianceReviewed: true,
+    complianceScore: 100,
+    varietyScore: 100,
+  ),
+  JourneyBackgroundAsset(
+    id: 'xiamen-kulangsu-v1',
+    journeyId: 'xiamen-kulangsu',
+    assetPath:
+        'assets/images/backgrounds/generated/xiamen/kulangsu/xiamen-kulangsu-v1.webp',
+    generatedOn: DateTime.utc(2026, 7, 29),
+    origin: JourneyBackgroundOrigin.aiGenerated,
+    complianceReviewed: true,
+    complianceScore: 100,
+    varietyScore: 100,
+  ),
 ];

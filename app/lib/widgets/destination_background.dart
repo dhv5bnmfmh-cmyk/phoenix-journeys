@@ -23,6 +23,9 @@ const _quanzhouKaiyuanJourneyId = 'quanzhou-kaiyuan-temple';
 const _datongYungangJourneyId = 'datong-yungang-grottoes';
 const _lijiangOldTownJourneyId = 'lijiang-old-town';
 const _jiangmenKaipingJourneyId = 'jiangmen-kaiping-diaolou';
+const _dunhuangMogaoJourneyId = 'dunhuang-mogao-caves';
+const _chengdeMountainResortJourneyId = 'chengde-mountain-resort';
+const _xiamenKulangsuJourneyId = 'xiamen-kulangsu';
 
 const _remainingDynamicBackgrounds = <String, _CinematicBackgroundStyle>{
   _xianCityWallJourneyId: _CinematicBackgroundStyle(
@@ -117,6 +120,32 @@ const _remainingDynamicBackgrounds = <String, _CinematicBackgroundStyle>{
     atmosphereColor: Color(0xFF8AA06F),
     foregroundColor: Color(0xFF24331F),
     cameraTravel: Offset(12, 8),
+    waterLight: true,
+  ),
+  _dunhuangMogaoJourneyId: _CinematicBackgroundStyle(
+    keyName: 'dunhuang-mogao-caves',
+    duration: Duration(seconds: 31),
+    skyColor: Color(0xFFFFD38A),
+    atmosphereColor: Color(0xFFB2794E),
+    foregroundColor: Color(0xFF2A1D17),
+    cameraTravel: Offset(10, 10),
+  ),
+  _chengdeMountainResortJourneyId: _CinematicBackgroundStyle(
+    keyName: 'chengde-mountain-resort',
+    duration: Duration(seconds: 32),
+    skyColor: Color(0xFFE6F0DF),
+    atmosphereColor: Color(0xFF73958A),
+    foregroundColor: Color(0xFF17352D),
+    cameraTravel: Offset(9, 7),
+    waterLight: true,
+  ),
+  _xiamenKulangsuJourneyId: _CinematicBackgroundStyle(
+    keyName: 'xiamen-kulangsu',
+    duration: Duration(seconds: 30),
+    skyColor: Color(0xFFFFD9A1),
+    atmosphereColor: Color(0xFF5F9EAA),
+    foregroundColor: Color(0xFF173A38),
+    cameraTravel: Offset(11, 8),
     waterLight: true,
   ),
 };

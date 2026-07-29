@@ -157,6 +157,15 @@ String _assetFor(String id) {
   if (id.contains('jiangmen')) {
     return 'assets/images/backgrounds/generated/jiangmen/kaiping-diaolou/jiangmen-kaiping-diaolou-v1.webp';
   }
+  if (id.contains('dunhuang')) {
+    return 'assets/images/backgrounds/generated/dunhuang/mogao-caves/dunhuang-mogao-caves-v1.webp';
+  }
+  if (id.contains('chengde')) {
+    return 'assets/images/backgrounds/generated/chengde/mountain-resort/chengde-mountain-resort-v1.webp';
+  }
+  if (id.contains('xiamen')) {
+    return 'assets/images/backgrounds/generated/xiamen/kulangsu/xiamen-kulangsu-v1.webp';
+  }
   return 'assets/images/backgrounds/generated/beijing/forbidden-city/03-golden-gate.webp';
 }
 

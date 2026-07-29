@@ -7,6 +7,7 @@ import 'extended_journey_catalog.dart';
 import 'journey_data.dart';
 import 'journey_expansion_catalog.dart';
 import 'journey_expansion_batch_two.dart';
+import 'journey_expansion_batch_three.dart';
 import 'summer_palace_journey.dart';
 import 'special_journey_catalog.dart';
 
@@ -500,6 +501,7 @@ final dailyStorySources = <StorySourceRecord>[
   ...extendedJourneySources,
   ...journeyExpansionSources,
   ...journeyExpansionBatchTwoSources,
+  ...journeyExpansionBatchThreeSources,
 ];
 
 final dailyJourneyRecords = <JourneyContentRecord>[
@@ -510,6 +512,7 @@ final dailyJourneyRecords = <JourneyContentRecord>[
   ...extendedJourneyRecords,
   ...journeyExpansionRecords,
   ...journeyExpansionBatchTwoRecords,
+  ...journeyExpansionBatchThreeRecords,
 ];
 
 final dailyJourneyExperiences = <DailyJourneyExperience>[
@@ -574,6 +577,7 @@ final dailyJourneyExperiences = <DailyJourneyExperience>[
   ...extendedJourneyExperiences,
   ...journeyExpansionExperiences,
   ...journeyExpansionBatchTwoExperiences,
+  ...journeyExpansionBatchThreeExperiences,
 ];
 
 final allJourneyExperiences = <DailyJourneyExperience>[
