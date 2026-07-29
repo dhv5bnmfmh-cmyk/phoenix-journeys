@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../services/narration_controller.dart';
 import '../services/narration_follow_coordinator.dart';
 import '../theme/phoenix_theme.dart';
-import 'sentence_shadowing_practice.dart';
 
 @visibleForTesting
 String narrationFollowStatusLabel({
@@ -95,13 +94,14 @@ class NarrationFollowStatus extends StatelessWidget {
         final error = status == NarrationStatus.error;
         final snapshot = controller.highlightSnapshot;
         final currentWord = snapshot?.word.trim();
-        final sentenceSource =
-            snapshot?.itemText ?? controller.currentItemText ?? '';
-        final currentSentence = narrationSentenceAtOffset(
-          text: sentenceSource,
-          offset: snapshot?.start ?? controller.currentItemLocalOffset,
-        );
-        final showSentenceGuide = currentSentence.isNotEmpty;
+        final currentSentence = snapshot == null
+            ? ''
+            : narrationSentenceAtOffset(
+                text: snapshot.itemText,
+                offset: snapshot.start,
+              );
+        final showSentenceGuide =
+            (playing || paused) && currentSentence.isNotEmpty;
         final manualFollowPaused =
             playing && coordinator.isManualHoldActive;
         final label = narrationFollowStatusLabel(
@@ -257,32 +257,15 @@ class NarrationFollowStatus extends StatelessWidget {
                     switchInCurve: Curves.easeOutCubic,
                     switchOutCurve: Curves.easeInCubic,
                     child: showSentenceGuide
-                        ? Column(
+                        ? _NarrationSentenceGuide(
                             key: ValueKey(
                               'narration-sentence-guide-$currentSentence',
                             ),
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _NarrationSentenceGuide(
-                                sentence: currentSentence,
-                                currentWord: currentWord,
-                                foreground: foreground,
-                                activeColor: activeColor,
-                                dark: dark,
-                              ),
-                              SentenceShadowingPractice(
-                                sentence: currentSentence,
-                                foreground: foreground,
-                                activeColor: activeColor,
-                                dark: dark,
-                                onBeforeListen: () async {
-                                  if (controller.status ==
-                                      NarrationStatus.playing) {
-                                    await controller.pause();
-                                  }
-                                },
-                              ),
-                            ],
+                            sentence: currentSentence,
+                            currentWord: currentWord,
+                            foreground: foreground,
+                            activeColor: activeColor,
+                            dark: dark,
                           )
                         : const SizedBox.shrink(
                             key: ValueKey('narration-sentence-guide-empty'),
@@ -305,6 +288,7 @@ class _NarrationSentenceGuide extends StatelessWidget {
     required this.foreground,
     required this.activeColor,
     required this.dark,
+    super.key,
   });
 
   final String sentence;
