@@ -77,6 +77,18 @@ bool shouldCheckpointNarration({
       (offset - lastSavedOffset).abs() >= 12;
 }
 
+@visibleForTesting
+String narrationContentSignature(List<NarrationItem> items) {
+  var hash = 0x811c9dc5;
+  for (final item in items) {
+    for (final unit in '${item.id}\u0000${item.text}\u0001'.codeUnits) {
+      hash ^= unit;
+      hash = (hash * 0x01000193) & 0xffffffff;
+    }
+  }
+  return hash.toRadixString(16).padLeft(8, '0');
+}
+
 class JourneyScreen extends StatefulWidget {
   const JourneyScreen({super.key, this.journeyId});
 
@@ -219,8 +231,12 @@ class _JourneyScreenState extends State<JourneyScreen>
         offset > 0 &&
         offset < total) {
       _lastSavedNarrationOffset = offset;
+      final items = contentId == 'story'
+          ? _storyNarrationItems
+          : _discoveryNarrationItems;
       return _appState.saveJourneyNarrationPosition(
         contentId: contentId!,
+        contentSignature: narrationContentSignature(items),
         offset: offset,
       );
     }
@@ -331,17 +347,26 @@ class _JourneyScreenState extends State<JourneyScreen>
   void _restoreNarrationPosition() {
     if (_narration.hasContent || _appState.journeyNarrationOffset <= 0) return;
     final contentId = _appState.journeyNarrationContentId;
+    final items = contentId == 'story'
+        ? _storyNarrationItems
+        : _discoveryNarrationItems;
     final matchesStep =
         (step == 0 && contentId == 'story') ||
         (step == 2 && contentId == 'discovery');
-    if (!matchesStep || contentId == null) return;
+    final matchesContent = contentId != null &&
+        _appState.journeyNarrationContentSignature ==
+            narrationContentSignature(items);
+    if (!matchesStep || !matchesContent || contentId == null) {
+      if (contentId != null) {
+        unawaited(_appState.clearJourneyNarrationPosition());
+      }
+      return;
+    }
 
     _narration.preparePaused(
       contentId: contentId,
       languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
-      items: contentId == 'story'
-          ? _storyNarrationItems
-          : _discoveryNarrationItems,
+      items: items,
       offset: _appState.journeyNarrationOffset,
     );
     _lastSavedNarrationOffset = _appState.journeyNarrationOffset;
