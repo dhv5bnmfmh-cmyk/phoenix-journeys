@@ -9,7 +9,7 @@ test('Phoenix launch cover animates a journey from ancient to modern worlds', as
     read('app/web/index.html'),
     read('app/web/manifest.json'),
     stat(new URL('../app/assets/images/phoenix-time-earth.webp', import.meta.url)),
-    stat(new URL('../app/assets/images/phoenix-flight-sprite.webp', import.meta.url)),
+    stat(new URL('../app/assets/images/phoenix-flight-cycle-v2.webp', import.meta.url)),
   ]);
 
   assert.match(index, /phoenix-time-earth\.webp/);
@@ -24,6 +24,10 @@ test('Phoenix launch cover animates a journey from ancient to modern worlds', as
   assert.match(index, /prefers-reduced-motion/);
   assert.match(index, /phoenix-earth-drift/);
   assert.match(index, /phoenix-time-flight/);
+  assert.match(index, /phoenix-wing-cycle/);
+  assert.match(index, /phoenix-time-mist/);
+  assert.match(index, /12\.8s cubic-bezier/);
+  assert.doesNotMatch(index, /mix-blend-mode: screen/);
   assert.match(index, /phoenix-time-portal/);
   assert.match(index, /phoenix-portal-spin/);
   assert.match(index, /phoenix-cover-glow/);
