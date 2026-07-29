@@ -33,50 +33,28 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY'
+          import re
           from pathlib import Path
 
           path = Path('app/lib/widgets/interactive_story_text.dart')
           text = path.read_text(encoding='utf-8')
 
-          constant_anchor = """bool shouldAutoFollowNarrationItem({
-            required NarrationStatus status,
-            required bool wasActive,
-            required bool isActive,
-            required bool sessionChanged,
-          }) {
-            return status == NarrationStatus.playing &&
-                isActive &&
-                (!wasActive || sessionChanged);
-          }
-
-          """
-          constant_insert = constant_anchor + "const Duration vocabularyPopoverAutoHideDuration = Duration(seconds: 12);\n\n"
+          class_anchor = 'class InteractiveStoryText extends StatefulWidget {'
           if 'vocabularyPopoverAutoHideDuration' not in text:
-              if constant_anchor not in text:
-                  raise SystemExit('missing vocabulary duration anchor')
-              text = text.replace(constant_anchor, constant_insert, 1)
+              if class_anchor not in text:
+                  raise SystemExit('missing InteractiveStoryText class anchor')
+              text = text.replace(
+                  class_anchor,
+                  'const Duration vocabularyPopoverAutoHideDuration = Duration(seconds: 12);\n\n' + class_anchor,
+                  1,
+              )
 
-          old_show = """  void _showEntry(WordEntry entry) {
-            _hideTimer?.cancel();
-            setState(() => _selectedEntry = entry);
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (!mounted) return;
-              Scrollable.ensureVisible(
-                context,
-                alignment: .18,
-                duration: const Duration(milliseconds: 240),
-                curve: Curves.easeOutCubic,
-              );
-            });
-            _hideTimer = Timer(const Duration(milliseconds: 3200), () {
-              if (mounted && identical(_selectedEntry, entry)) {
-                setState(() => _selectedEntry = null);
-              }
-            });
-          }
-
-          """
-          new_show = """  void _showEntry(WordEntry entry) {
+          if '_scheduleEntryHide(WordEntry entry)' not in text:
+              show_pattern = re.compile(
+                  r'  void _showEntry\(WordEntry entry\) \{.*?\n  void _hideEntry\(\)',
+                  re.S,
+              )
+              new_show = '''  void _showEntry(WordEntry entry) {
             setState(() => _selectedEntry = entry);
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
@@ -90,49 +68,54 @@ jobs:
             _scheduleEntryHide(entry);
           }
 
-            void _scheduleEntryHide(WordEntry entry) {
-              _hideTimer?.cancel();
-              _hideTimer = Timer(vocabularyPopoverAutoHideDuration, () {
-                if (mounted && identical(_selectedEntry, entry)) {
-                  setState(() => _selectedEntry = null);
-                }
-              });
-            }
+          void _scheduleEntryHide(WordEntry entry) {
+            _hideTimer?.cancel();
+            _hideTimer = Timer(vocabularyPopoverAutoHideDuration, () {
+              if (mounted && identical(_selectedEntry, entry)) {
+                setState(() => _selectedEntry = null);
+              }
+            });
+          }
 
-            void _keepEntryVisible() {
-              final entry = _selectedEntry;
-              if (entry != null) _scheduleEntryHide(entry);
-            }
+          void _keepEntryVisible() {
+            final entry = _selectedEntry;
+            if (entry != null) _scheduleEntryHide(entry);
+          }
 
-          """
-          if '_scheduleEntryHide(WordEntry entry)' not in text:
-              if old_show not in text:
-                  raise SystemExit('missing vocabulary popover timer block')
-              text = text.replace(old_show, new_show, 1)
+          void _hideEntry()'''
+              text, count = show_pattern.subn(new_show, text, count=1)
+              if count != 1:
+                  raise SystemExit(f'unexpected vocabulary timer match count: {count}')
 
-          old_popover = """                      child: _VocabularyPopover(
-                                entry: selectedEntry,
-                                state: state,
-                                onClose: _hideEntry,
-                              ),
-          """
-          new_popover = """                      child: Listener(
-                                key: ValueKey(
-                                  'word-popover-reading-hold-${selectedEntry.word}',
-                                ),
-                                behavior: HitTestBehavior.translucent,
-                                onPointerDown: (_) => _keepEntryVisible(),
-                                child: _VocabularyPopover(
-                                  entry: selectedEntry,
-                                  state: state,
-                                  onClose: _hideEntry,
-                                ),
-                              ),
-          """
           if 'word-popover-reading-hold-' not in text:
-              if old_popover not in text:
-                  raise SystemExit('missing vocabulary popover widget anchor')
-              text = text.replace(old_popover, new_popover, 1)
+              popover_pattern = re.compile(
+                  r'(?P<indent>\s*)child: _VocabularyPopover\(\s*'
+                  r'entry: selectedEntry,\s*'
+                  r'state: state,\s*'
+                  r'onClose: _hideEntry,\s*'
+                  r'\),'
+              )
+
+              def wrap_popover(match):
+                  indent = match.group('indent')
+                  return (
+                      f"{indent}child: Listener(\n"
+                      f"{indent}  key: ValueKey(\n"
+                      f"{indent}    'word-popover-reading-hold-${{selectedEntry.word}}',\n"
+                      f"{indent}  ),\n"
+                      f"{indent}  behavior: HitTestBehavior.translucent,\n"
+                      f"{indent}  onPointerDown: (_) => _keepEntryVisible(),\n"
+                      f"{indent}  child: _VocabularyPopover(\n"
+                      f"{indent}    entry: selectedEntry,\n"
+                      f"{indent}    state: state,\n"
+                      f"{indent}    onClose: _hideEntry,\n"
+                      f"{indent}  ),\n"
+                      f"{indent}),"
+                  )
+
+              text, count = popover_pattern.subn(wrap_popover, text, count=1)
+              if count != 1:
+                  raise SystemExit(f'unexpected vocabulary widget match count: {count}')
 
           path.write_text(text, encoding='utf-8')
           PY
