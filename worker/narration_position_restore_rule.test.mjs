@@ -36,3 +36,21 @@ test('restart and completion remove stale narration positions', () => {
       .length >= 2,
   );
 });
+
+test('active narration creates bounded checkpoints and clears completion', () => {
+  assert.match(journey, /bool shouldCheckpointNarration/);
+  assert.match(journey, /\(offset - lastSavedOffset\)\.abs\(\) >= 12/);
+  assert.match(
+    journey,
+    /Timer\(const Duration\(seconds: 2\), \(\) \{/,
+  );
+  assert.match(journey, /_narration\.addListener\(_handleNarrationCheckpoint\)/);
+  assert.match(
+    journey,
+    /_narration\.removeListener\(_handleNarrationCheckpoint\)/,
+  );
+  assert.match(
+    journey,
+    /offset >= total[\s\S]*clearJourneyNarrationPosition/,
+  );
+});
