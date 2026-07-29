@@ -625,9 +625,6 @@ class AppState extends ChangeNotifier {
     writingFeedbackNatural = '';
     writingFeedbackEncouragement = '';
     writingFeedbackOffline = false;
-    journeyNarrationContentId = null;
-    journeyNarrationContentSignature = null;
-    journeyNarrationOffset = 0;
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
@@ -637,9 +634,6 @@ class AppState extends ChangeNotifier {
       prefs.remove(_key('writingFeedbackNatural')),
       prefs.remove(_key('writingFeedbackEncouragement')),
       prefs.remove(_key('writingFeedbackOffline')),
-      prefs.remove(_key('narrationContentId')),
-      prefs.remove(_key('narrationContentSignature')),
-      prefs.remove(_key('narrationOffset')),
     ]);
   }
 
@@ -696,6 +690,9 @@ class AppState extends ChangeNotifier {
     wonderDraft = '';
     expressDraft = '';
     memoryDraft = '';
+    journeyNarrationContentId = null;
+    journeyNarrationContentSignature = null;
+    journeyNarrationOffset = 0;
     journeyUpdatedAt = _clock();
 
     final prefs = await SharedPreferences.getInstance();
@@ -709,6 +706,9 @@ class AppState extends ChangeNotifier {
       prefs.remove(_key('wonderDraft')),
       prefs.remove(_key('expressDraft')),
       prefs.remove(_key('memoryDraft')),
+      prefs.remove(_key('narrationContentId')),
+      prefs.remove(_key('narrationContentSignature')),
+      prefs.remove(_key('narrationOffset')),
       prefs.setString(_key('updatedAt'), journeyUpdatedAt!.toIso8601String()),
     ]);
     notifyListeners();
