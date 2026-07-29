@@ -219,4 +219,37 @@ final generatedJourneyBackgrounds = <JourneyBackgroundAsset>[
     complianceScore: 100,
     varietyScore: 100,
   ),
+  JourneyBackgroundAsset(
+    id: 'datong-yungang-grottoes-v1',
+    journeyId: 'datong-yungang-grottoes',
+    assetPath:
+        'assets/images/backgrounds/generated/datong/yungang-grottoes/datong-yungang-grottoes-v1.webp',
+    generatedOn: DateTime.utc(2026, 7, 29),
+    origin: JourneyBackgroundOrigin.aiGenerated,
+    complianceReviewed: true,
+    complianceScore: 100,
+    varietyScore: 100,
+  ),
+  JourneyBackgroundAsset(
+    id: 'lijiang-old-town-v1',
+    journeyId: 'lijiang-old-town',
+    assetPath:
+        'assets/images/backgrounds/generated/lijiang/old-town/lijiang-old-town-v1.webp',
+    generatedOn: DateTime.utc(2026, 7, 29),
+    origin: JourneyBackgroundOrigin.aiGenerated,
+    complianceReviewed: true,
+    complianceScore: 100,
+    varietyScore: 100,
+  ),
+  JourneyBackgroundAsset(
+    id: 'jiangmen-kaiping-diaolou-v1',
+    journeyId: 'jiangmen-kaiping-diaolou',
+    assetPath:
+        'assets/images/backgrounds/generated/jiangmen/kaiping-diaolou/jiangmen-kaiping-diaolou-v1.webp',
+    generatedOn: DateTime.utc(2026, 7, 29),
+    origin: JourneyBackgroundOrigin.aiGenerated,
+    complianceReviewed: true,
+    complianceScore: 100,
+    varietyScore: 100,
+  ),
 ];
