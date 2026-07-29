@@ -23,11 +23,16 @@ test('active narration paragraph has a bounded visual surface', () => {
   assert.match(storyText, /BorderRadius\.circular\(8\)/);
 });
 
-
 test('manual reading temporarily suspends narration auto-follow', () => {
   assert.match(storyText, /narrationAutoFollowManualHold/);
   assert.match(storyText, /Expando<DateTime>/);
-  assert.match(storyText, /onPointerDown: \(_\) => _suspendNarrationAutoFollow\(\)/);
-  assert.match(storyText, /remainingHold \+ const Duration\(milliseconds: 80\)/);
+  assert.match(
+    storyText,
+    /onPointerDown: \(_\) => _suspendNarrationAutoFollow\(\)/,
+  );
+  assert.match(
+    storyText,
+    /remainingHold \+ const Duration\(milliseconds: 80\)/,
+  );
   assert.match(storyText, /HitTestBehavior\.translucent/);
 });
