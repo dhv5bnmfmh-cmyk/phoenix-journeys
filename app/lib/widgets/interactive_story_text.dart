@@ -147,6 +147,18 @@ bool narrationSnapshotMatches({
   return displayedText.trim() == displayText(spoken).trim();
 }
 
+@visibleForTesting
+bool shouldAutoFollowNarrationItem({
+  required NarrationStatus status,
+  required bool wasActive,
+  required bool isActive,
+  required bool sessionChanged,
+}) {
+  return status == NarrationStatus.playing &&
+      isActive &&
+      (!wasActive || sessionChanged);
+}
+
 class InteractiveStoryText extends StatefulWidget {
   const InteractiveStoryText({
     required this.text,
@@ -188,8 +200,15 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   late List<_InteractiveSegment> _segments;
   WordEntry? _selectedEntry;
   Timer? _hideTimer;
+  Timer? _autoFollowTimer;
   late final AnimationController _cinematicRevealController;
   double _lastAcceptedRevealCursor = 0;
+  int _autoFollowRequest = 0;
+
+  bool get _hasExplicitHighlight =>
+      widget.highlightStart != null &&
+      widget.highlightEnd != null &&
+      widget.highlightEnd! > widget.highlightStart!;
 
   @override
   void initState() {
@@ -201,6 +220,10 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       value: initialReveal,
     );
     _buildSegments();
+    if (_hasExplicitHighlight &&
+        widget.narrationController?.status == NarrationStatus.playing) {
+      _scheduleNarrationAutoFollow();
+    }
   }
 
   @override
@@ -209,6 +232,11 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     final textChanged = oldWidget.text != widget.text;
     final sessionChanged =
         oldWidget.narrationSessionToken != widget.narrationSessionToken;
+    final wasActive =
+        oldWidget.highlightStart != null &&
+        oldWidget.highlightEnd != null &&
+        oldWidget.highlightEnd! > oldWidget.highlightStart!;
+    final isActive = _hasExplicitHighlight;
     if (textChanged || oldWidget.entries != widget.entries) {
       _disposeRecognizers();
       _selectedEntry = null;
@@ -219,6 +247,15 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       _resetRevealTo(widget.revealEnd);
     } else if (oldWidget.revealEnd != widget.revealEnd) {
       _animateRevealTo(widget.revealEnd);
+    }
+
+    if (shouldAutoFollowNarrationItem(
+      status: widget.narrationController?.status ?? NarrationStatus.idle,
+      wasActive: wasActive,
+      isActive: isActive,
+      sessionChanged: sessionChanged,
+    )) {
+      _scheduleNarrationAutoFollow();
     }
   }
 
@@ -261,6 +298,23 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       duration: cinematicRevealDuration(distance),
       curve: Curves.linear,
     );
+  }
+
+  void _scheduleNarrationAutoFollow() {
+    _autoFollowTimer?.cancel();
+    final request = ++_autoFollowRequest;
+    _autoFollowTimer = Timer(const Duration(milliseconds: 180), () {
+      if (!mounted || request != _autoFollowRequest) return;
+      if (widget.narrationController?.status != NarrationStatus.playing) return;
+      if (!_hasExplicitHighlight) return;
+
+      Scrollable.ensureVisible(
+        context,
+        alignment: .34,
+        duration: const Duration(milliseconds: 360),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   void _buildSegments() {
@@ -323,6 +377,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   @override
   void dispose() {
     _hideTimer?.cancel();
+    _autoFollowTimer?.cancel();
     _cinematicRevealController.dispose();
     _disposeRecognizers();
     super.dispose();
@@ -373,30 +428,58 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
                 ? snapshot!.end
                 : -1;
 
-            return Text.rich(
+            return AnimatedContainer(
               key: ValueKey(
-                'interactive-highlight-${widget.narrationItemId ?? widget.text}',
+                'narration-follow-surface-${widget.narrationItemId ?? widget.text}',
               ),
-              strutStyle: StrutStyle(
-                fontSize: baseStyle?.fontSize,
-                height: baseStyle?.height,
-                fontWeight: baseStyle?.fontWeight,
-                forceStrutHeight: true,
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+              decoration: BoxDecoration(
+                color: isCurrentNarrationItem
+                    ? const Color(0x16FFD879)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isCurrentNarrationItem
+                      ? const Color(0x38FFD879)
+                      : Colors.transparent,
+                ),
+                boxShadow: isCurrentNarrationItem
+                    ? const [
+                        BoxShadow(
+                          color: Color(0x16FFD879),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : const [],
               ),
-              TextSpan(
-                style: baseStyle,
-                children: _segments
-                    .expand((segment) {
-                      return _buildSegmentSpans(
-                        segment,
-                        state: state,
-                        baseStyle: baseStyle,
-                        highlightStart: highlightStart,
-                        highlightEnd: highlightEnd,
-                        revealCursor: _currentRevealCursor,
-                      );
-                    })
-                    .toList(growable: false),
+              child: Text.rich(
+                key: ValueKey(
+                  'interactive-highlight-${widget.narrationItemId ?? widget.text}',
+                ),
+                strutStyle: StrutStyle(
+                  fontSize: baseStyle?.fontSize,
+                  height: baseStyle?.height,
+                  fontWeight: baseStyle?.fontWeight,
+                  forceStrutHeight: true,
+                ),
+                TextSpan(
+                  style: baseStyle,
+                  children: _segments
+                      .expand((segment) {
+                        return _buildSegmentSpans(
+                          segment,
+                          state: state,
+                          baseStyle: baseStyle,
+                          highlightStart: highlightStart,
+                          highlightEnd: highlightEnd,
+                          revealCursor: _currentRevealCursor,
+                        );
+                      })
+                      .toList(growable: false),
+                ),
               ),
             );
           },
