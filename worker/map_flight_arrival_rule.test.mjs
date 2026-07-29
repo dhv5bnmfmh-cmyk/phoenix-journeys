@@ -3,6 +3,10 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 const explore = readFileSync('app/lib/screens/explore_screen.dart', 'utf8');
+const picker = readFileSync(
+  'app/lib/widgets/journey_picker_sheet.dart',
+  'utf8',
+);
 
 test('home flight runs once and remains at the selected destination', () => {
   assert.match(explore, /duration: const Duration\(seconds: 14\)/);
@@ -37,4 +41,18 @@ test('arrival reveals a direct destination-selection handoff', () => {
   assert.match(explore, /选择景点/);
   assert.match(explore, /已抵达 · 选择景点继续/);
   assert.match(explore, /onArrived: \(\) => unawaited\(chooseJourney\(\)\)/);
+});
+
+test('arrival picker is locked to landmarks in the landed city', () => {
+  assert.match(explore, /chooseArrivedCityDestination/);
+  assert.match(explore, /initialCityId: state\.activeJourney\.cityId/);
+  assert.match(explore, /lockToInitialCity: true/);
+  assert.match(explore, /onArrived: \(\) => unawaited\(chooseArrivedCityDestination\(\)\)/);
+
+  assert.match(picker, /String\? initialCityId/);
+  assert.match(picker, /bool lockToInitialCity = false/);
+  assert.match(picker, /initialCityId \?\? state\.activeJourney\.cityId/);
+  assert.match(picker, /lockToInitialCity \? 1 : journeyCityCatalog\.length/);
+  assert.match(picker, /lockToInitialCity[\s\S]{0,80}\? selectedCity[\s\S]{0,80}: journeyCityCatalog\[index\]/);
+  assert.match(picker, /你已抵达\$\{selectedCity\.name\}，请选择本城景点/);
 });
