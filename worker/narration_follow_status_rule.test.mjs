@@ -21,7 +21,7 @@ test('non-compact narration controls expose a separate live follow status', () =
 
 test('follow status reports paragraph, word, pause, completion, and error', () => {
   assert.match(follow, /controller\.currentItemLabel/);
-  assert.match(follow, /controller\.highlightSnapshot\?\.word/);
+  assert.match(follow, /controller\.highlightSnapshot/);
   assert.match(follow, /跟读中/);
   assert.match(follow, /已暂停/);
   assert.match(follow, /本次朗读完成/);
@@ -35,4 +35,15 @@ test('follow status is animated, bounded, and accessible', () => {
   assert.match(follow, /AnimatedSwitcher/);
   assert.match(follow, /TweenAnimationBuilder<double>/);
   assert.match(follow, /BoxConstraints\(maxWidth:\s*154\)/);
+});
+
+test('current sentence guidance changes only at sentence boundaries', () => {
+  assert.match(follow, /String narrationSentenceAtOffset/);
+  assert.match(follow, /。！？!\?；;/);
+  assert.match(follow, /snapshot\.itemText/);
+  assert.match(follow, /snapshot\.start/);
+  assert.match(follow, /narration-sentence-guide-/);
+  assert.match(follow, /BoxConstraints\(maxWidth:\s*246\)/);
+  assert.match(follow, /maxLines:\s*2/);
+  assert.match(follow, /backgroundColor:\s*activeColor/);
 });
