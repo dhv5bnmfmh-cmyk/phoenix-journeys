@@ -12,7 +12,12 @@ test('Phoenix launch cover animates a journey from ancient to modern worlds', as
     stat(new URL('../app/assets/images/phoenix-flight-sprite.webp', import.meta.url)),
   ]);
 
-  assert.match(index, /phoenix-launch-cover\.webp/);
+  assert.match(index, /phoenix-time-earth\.webp/);
+  assert.match(index, /phoenix-flight-sprite\.webp/);
+  assert.match(index, /phoenix-loading__traveler/);
+  assert.match(index, /phoenix-loading__portal/);
+  assert.match(index, /古代 · 文明/);
+  assert.match(index, /现代 · 世界/);
   assert.match(index, /<div class="phoenix-loading__mark" aria-hidden="true">凤<\/div>/);
   assert.match(index, /凤凰正穿越古今，展开你的语言旅程/);
   assert.match(index, /env\(safe-area-inset-bottom\)/);
