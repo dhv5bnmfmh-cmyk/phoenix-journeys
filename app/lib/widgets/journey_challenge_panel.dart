@@ -168,6 +168,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
   int _activeIndex = 0;
   bool _sendingReward = false;
   bool _completionSent = false;
+  bool _focusedReplayActive = false;
   final Set<int> _rewardedModes = <int>{};
   late final NarrationController _narration;
   int _narrationToken = 0;
@@ -217,6 +218,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     _activeIndex = 0;
     _sendingReward = false;
     _completionSent = false;
+    _focusedReplayActive = false;
     _rewardedModes.clear();
   }
 
@@ -271,8 +273,10 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     );
   }
 
-  Future<void> _showResolutionDialog(_ChallengeSession session) async {
-    final finalMode = _activeIndex == _sessions.length - 1;
+  Future<bool> _showResolutionDialog(_ChallengeSession session) async {
+    final showJourneySummary =
+        _activeIndex == _sessions.length - 1 || _focusedReplayActive;
+    var replayWeakest = false;
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -307,7 +311,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _explanationCard(),
-                if (finalMode) ...[
+                if (showJourneySummary) ...[
                   const SizedBox(height: 9),
                   _journeyMasterySummary(),
                 ],
@@ -316,18 +320,36 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           ),
         ),
         actions: [
+          if (showJourneySummary && _needsFocusedReplay) ...[
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                key: const ValueKey('challenge-replay-weakest'),
+                onPressed: () {
+                  replayWeakest = true;
+                  Navigator.of(dialogContext).pop();
+                },
+                icon: const Icon(Icons.replay_rounded),
+                label: Text(
+                  t('再练重点项'),
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+          ],
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
               key: const ValueKey('challenge-dialog-action'),
               onPressed: () => Navigator.of(dialogContext).pop(),
               icon: Icon(
-                finalMode
+                showJourneySummary
                     ? Icons.verified_rounded
                     : Icons.arrow_forward_rounded,
               ),
               label: Text(
-                t(finalMode ? '完成三连挑战' : '进入下一种挑战'),
+                t(showJourneySummary ? '完成三连挑战' : '进入下一种挑战'),
                 style: const TextStyle(fontWeight: FontWeight.w900),
               ),
             ),
@@ -335,6 +357,44 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
         ],
       ),
     );
+    return replayWeakest;
+  }
+
+  int get _weakestSessionIndex {
+    var weakestIndex = 0;
+    for (var index = 1; index < _sessions.length; index++) {
+      final current = _sessions[weakestIndex];
+      final candidate = _sessions[index];
+      if (!candidate.correct && current.correct ||
+          candidate.correct == current.correct &&
+              candidate.attempts > current.attempts) {
+        weakestIndex = index;
+      }
+    }
+    return weakestIndex;
+  }
+
+  bool get _needsFocusedReplay => _sessions.any(
+        (session) => !session.correct || session.attempts > 1,
+      );
+
+  void _restartWeakestMode() {
+    final index = _weakestSessionIndex;
+    final previous = _sessions[index];
+    setState(() {
+      _sessions[index] = _ChallengeSession.build(
+        journeyId: widget.journeyId,
+        storyParagraphs: widget.storyParagraphs,
+        discoveryTexts: widget.discoveryTexts,
+        difficulty: previous.difficulty,
+        type: previous.type,
+        seed: previous.seed,
+      );
+      _activeIndex = index;
+      _completionSent = false;
+      _focusedReplayActive = true;
+    });
+    _scheduleAutoNarration();
   }
 
   Future<void> _submit() async {
@@ -355,12 +415,17 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     }
     if (!mounted) return;
 
-    await _showResolutionDialog(session);
+    final replayWeakest = await _showResolutionDialog(session);
     if (!mounted) return;
+    if (replayWeakest) {
+      _restartWeakestMode();
+      return;
+    }
 
     final allCompleted = _sessions.every((item) => item.resolved);
     if (allCompleted && !_completionSent) {
       _completionSent = true;
+      _focusedReplayActive = false;
       await widget.onAllCompleted();
       return;
     }
