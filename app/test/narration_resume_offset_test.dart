@@ -119,4 +119,19 @@ void main() {
       isFalse,
     );
   });
+
+  test('narration signature changes when the spoken content changes', () {
+    const original = [
+      NarrationItem(id: 'story-0', text: '原来的故事。'),
+    ];
+    const updated = [
+      NarrationItem(id: 'story-0', text: '更新后的故事。'),
+    ];
+
+    expect(narrationContentSignature(original), hasLength(8));
+    expect(
+      narrationContentSignature(original),
+      isNot(narrationContentSignature(updated)),
+    );
+  });
 }
