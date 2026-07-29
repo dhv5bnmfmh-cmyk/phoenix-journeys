@@ -306,7 +306,6 @@ class _NarrationSentenceGuide extends StatelessWidget {
     required this.foreground,
     required this.activeColor,
     required this.dark,
-    super.key,
   });
 
   final String sentence;
