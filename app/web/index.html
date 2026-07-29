@@ -21,7 +21,8 @@
   <meta name="apple-mobile-web-app-title" content="Phoenix Journeys">
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="preload" as="image" href="assets/assets/images/phoenix-launch-cover.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/assets/images/phoenix-time-earth.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/assets/images/phoenix-flight-sprite.webp" type="image/webp">
   <link rel="manifest" href="manifest.json">
 
   <title>Phoenix Journeys</title>
@@ -72,7 +73,7 @@
       inset: -3%;
       pointer-events: none;
       background:
-        url("assets/assets/images/phoenix-launch-cover.webp")
+        url("assets/assets/images/phoenix-time-earth.webp")
         center 24% / cover no-repeat;
       transform: scale(1.035) translate3d(0, 0, 0);
       animation: phoenix-cover-breathe 5.2s cubic-bezier(.42, 0, .35, 1) infinite alternate;
@@ -322,6 +323,164 @@
         animation: none;
       }
     }
+
+    /* Phoenix time journey: independent earth, portal and flying character layers. */
+    .phoenix-loading__portal {
+      position: absolute;
+      z-index: 0;
+      top: 29%;
+      left: 50%;
+      width: min(34vw, 150px);
+      aspect-ratio: 1;
+      border: 1px solid rgba(255, 211, 118, .66);
+      border-radius: 50%;
+      box-shadow:
+        0 0 18px rgba(255, 181, 62, .48),
+        inset 0 0 22px rgba(255, 207, 105, .28);
+      transform: translate(-50%, -50%);
+      animation: phoenix-time-portal 3.6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .phoenix-loading__portal::before,
+    .phoenix-loading__portal::after {
+      content: "";
+      position: absolute;
+      border: 1px dashed rgba(255, 225, 163, .54);
+      border-radius: 50%;
+      inset: 12%;
+      animation: phoenix-portal-spin 8s linear infinite;
+    }
+
+    .phoenix-loading__portal::after {
+      inset: 27%;
+      border-style: solid;
+      background: radial-gradient(circle, rgba(255, 246, 209, .9) 0 3%, rgba(255, 176, 54, .34) 18%, transparent 62%);
+      animation-direction: reverse;
+      animation-duration: 5s;
+    }
+
+    .phoenix-loading__traveler {
+      position: absolute;
+      z-index: 1;
+      top: 31%;
+      left: 50%;
+      width: min(58vw, 330px);
+      aspect-ratio: 3 / 2;
+      background: url("assets/assets/images/phoenix-flight-sprite.webp") center / contain no-repeat;
+      mix-blend-mode: screen;
+      filter: drop-shadow(0 0 10px rgba(255, 168, 44, .75));
+      transform-origin: center;
+      pointer-events: none;
+      will-change: transform, opacity, filter;
+      animation: phoenix-time-flight 7.2s cubic-bezier(.38, .05, .26, .98) -1.15s infinite;
+    }
+
+    .phoenix-loading__traveler::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: 58%;
+      right: 69%;
+      width: 54vw;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(238, 105, 39, .18), rgba(255, 208, 105, .9));
+      box-shadow: 0 0 10px rgba(255, 156, 48, .72);
+      transform: rotate(8deg);
+      transform-origin: right;
+    }
+
+    .phoenix-loading__era {
+      position: absolute;
+      z-index: 1;
+      top: 17%;
+      padding: 5px 9px;
+      border: 1px solid rgba(238, 201, 127, .25);
+      border-radius: 999px;
+      color: rgba(255, 239, 207, .82);
+      background: rgba(18, 8, 8, .42);
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 10px;
+      letter-spacing: .12em;
+      backdrop-filter: blur(5px);
+      animation: phoenix-era-breathe 3.2s ease-in-out infinite alternate;
+    }
+
+    .phoenix-loading__era--ancient { left: 7%; }
+    .phoenix-loading__era--transition { left: 50%; transform: translateX(-50%); animation-delay: -.9s; }
+    .phoenix-loading__era--modern { right: 7%; animation-delay: -1.8s; }
+
+    @keyframes phoenix-time-flight {
+      0% {
+        opacity: 0;
+        transform: translate3d(-92vw, 18vh, 0) scale(.42) rotate(-10deg);
+        filter: brightness(.72) drop-shadow(0 0 5px rgba(255, 125, 30, .4));
+      }
+      10% { opacity: 1; }
+      34% {
+        opacity: 1;
+        transform: translate3d(-35vw, 2vh, 0) scale(.66) rotate(-4deg);
+      }
+      55% {
+        opacity: 1;
+        transform: translate3d(-5vw, -12vh, 0) scale(1.02) rotate(3deg);
+        filter: brightness(1.22) drop-shadow(0 0 18px rgba(255, 204, 99, .95));
+      }
+      76% {
+        opacity: .96;
+        transform: translate3d(35vw, -18vh, 0) scale(.78) rotate(9deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(92vw, -30vh, 0) scale(.38) rotate(14deg);
+        filter: brightness(.78) drop-shadow(0 0 4px rgba(255, 125, 30, .3));
+      }
+    }
+
+    @keyframes phoenix-time-portal {
+      0%, 100% { opacity: .46; transform: translate(-50%, -50%) scale(.86); }
+      52% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+    }
+
+    @keyframes phoenix-portal-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes phoenix-era-breathe {
+      from { opacity: .46; }
+      to { opacity: .92; box-shadow: 0 0 16px rgba(231, 156, 55, .12); }
+    }
+
+    @keyframes phoenix-earth-drift {
+      from {
+        transform: scale(1.035) translate3d(-1%, 0, 0);
+        filter: saturate(.92) brightness(.88);
+      }
+      to {
+        transform: scale(1.11) translate3d(1.5%, -2.6%, 0);
+        filter: saturate(1.12) brightness(1.04);
+      }
+    }
+
+    #phoenix-loading::after {
+      animation-name: phoenix-earth-drift;
+      animation-duration: 7.5s;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .phoenix-loading__portal,
+      .phoenix-loading__portal::before,
+      .phoenix-loading__portal::after,
+      .phoenix-loading__traveler,
+      .phoenix-loading__era {
+        animation: none;
+      }
+
+      .phoenix-loading__traveler {
+        opacity: .88;
+        transform: translate3d(-50%, -7vh, 0) scale(.76);
+      }
+    }
   </style>
 </head>
 <body>
@@ -336,11 +495,16 @@
       <i class="phoenix-loading__ember"></i>
       <i class="phoenix-loading__ember"></i>
     </div>
+    <div class="phoenix-loading__portal" aria-hidden="true"></div>
+    <div class="phoenix-loading__traveler" aria-hidden="true"></div>
+    <span class="phoenix-loading__era phoenix-loading__era--ancient" aria-hidden="true">古代 · 文明</span>
+    <span class="phoenix-loading__era phoenix-loading__era--transition" aria-hidden="true">时空 · 交汇</span>
+    <span class="phoenix-loading__era phoenix-loading__era--modern" aria-hidden="true">现代 · 世界</span>
     <div class="phoenix-loading__content">
       <div class="phoenix-loading__mark" aria-hidden="true">凤</div>
       <p class="phoenix-loading__title">PHOENIX JOURNEYS</p>
       <p id="phoenix-loading-text" class="phoenix-loading__text">
-        正在展开你的语言旅程…
+        凤凰正穿越古今，展开你的语言旅程…
       </p>
       <div class="phoenix-loading__bar" aria-hidden="true"></div>
     </div>
