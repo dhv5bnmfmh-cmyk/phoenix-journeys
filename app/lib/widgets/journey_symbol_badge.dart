@@ -139,6 +139,15 @@ String _assetFor(String id) {
   if (id.contains('guangzhou')) {
     return 'assets/images/backgrounds/generated/guangzhou/chen-clan-ancestral-hall/07-golden-hour.webp';
   }
+  if (id.contains('suzhou')) {
+    return 'assets/images/backgrounds/generated/suzhou/humble-administrators-garden/suzhou-humble-administrators-garden-v1.webp';
+  }
+  if (id.contains('luoyang')) {
+    return 'assets/images/backgrounds/generated/luoyang/longmen-grottoes/luoyang-longmen-grottoes-v1.webp';
+  }
+  if (id.contains('quanzhou')) {
+    return 'assets/images/backgrounds/generated/quanzhou/kaiyuan-temple/quanzhou-kaiyuan-temple-v1.webp';
+  }
   return 'assets/images/backgrounds/generated/beijing/forbidden-city/03-golden-gate.webp';
 }
 
