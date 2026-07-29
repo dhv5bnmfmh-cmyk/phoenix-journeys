@@ -44,8 +44,8 @@ test('follow status is animated, bounded, and accessible', () => {
 test('current sentence guidance changes only at sentence boundaries', () => {
   assert.match(follow, /String narrationSentenceAtOffset/);
   assert.match(follow, /。！？!\?；;/);
-  assert.match(follow, /snapshot\.itemText/);
-  assert.match(follow, /snapshot\.start/);
+  assert.match(follow, /snapshot\?\.itemText/);
+  assert.match(follow, /snapshot\?\.start/);
   assert.match(follow, /narration-sentence-guide-/);
   assert.match(follow, /BoxConstraints\(maxWidth:\s*246\)/);
   assert.match(follow, /maxLines:\s*2/);
