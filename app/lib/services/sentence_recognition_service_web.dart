@@ -35,7 +35,7 @@ final class SentenceRecognitionService {
       _recognition = recognition;
       _ending = false;
 
-      recognition['onresult'] = js.allowInterop((dynamic event) {
+      recognition['onresult'] = js.JsFunction.withThis((dynamic _, dynamic event) {
         if (!identical(_recognition, recognition)) return;
         final results = js.JsObject.fromBrowserObject(event)['results'];
         if (results == null) return;
@@ -57,7 +57,7 @@ final class SentenceRecognitionService {
         final text = buffer.toString().trim();
         if (text.isNotEmpty) onResult(text, isFinal: finalResult);
       });
-      recognition['onend'] = js.allowInterop((dynamic _) {
+      recognition['onend'] = js.JsFunction.withThis((dynamic _, dynamic event) {
         if (!identical(_recognition, recognition)) return;
         _recognition = null;
         if (_ending) return;
@@ -69,7 +69,7 @@ final class SentenceRecognitionService {
         if (_ending) return;
         onError();
       });
-      recognition.callMethod<void>('start');
+      recognition.callMethod('start');
       return true;
     } catch (_) {
       _recognition = null;
@@ -82,7 +82,7 @@ final class SentenceRecognitionService {
     final recognition = _recognition;
     if (recognition == null) return;
     try {
-      recognition.callMethod<void>('stop');
+      recognition.callMethod('stop');
     } catch (_) {
       _recognition = null;
     }
@@ -94,7 +94,7 @@ final class SentenceRecognitionService {
     _ending = true;
     _recognition = null;
     try {
-      recognition.callMethod<void>('abort');
+      recognition.callMethod('abort');
     } catch (_) {
       // The browser may already have ended the short recognition session.
     } finally {
