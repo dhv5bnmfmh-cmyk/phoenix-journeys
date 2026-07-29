@@ -356,7 +356,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     final matchesContent = contentId != null &&
         _appState.journeyNarrationContentSignature ==
             narrationContentSignature(items);
-    if (!matchesStep || !matchesContent || contentId == null) {
+    if (!matchesStep || !matchesContent) {
       if (contentId != null) {
         unawaited(_appState.clearJourneyNarrationPosition());
       }
