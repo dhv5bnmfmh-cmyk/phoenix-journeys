@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/services/narration_controller.dart';
 import 'package:phoenix_journeys/services/narration_voice_quality.dart';
 
 void main() {
@@ -69,6 +70,17 @@ void main() {
   });
 
   group('narration startup reliability', () {
+    test('turns blocked browser startup into an actionable retry message', () {
+      expect(
+        narrationStartupErrorMessage('speech-start-blocked'),
+        '自动朗读被浏览器拦截，请点击播放重试。',
+      );
+      expect(
+        narrationStartupErrorMessage('audio-busy'),
+        '当前设备暂时无法朗读，请检查声音设置后重试。',
+      );
+    });
+
     test('confirms playback when the browser reports speaking', () {
       expect(
         resolveNarrationStartupDecision(
