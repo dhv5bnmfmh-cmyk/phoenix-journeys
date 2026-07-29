@@ -55,8 +55,9 @@ test('passport removes large overview and card furniture', () => {
   assert.match(passport, /maxScale: 4/);
   assert.match(passport, /_resolveCityMarkerPlacements/);
   assert.match(passport, /occupied\.every/);
-  assert.match(passport, /passport-city-pin-/);
-  assert.doesNotMatch(passport, /CityJourneyStamp\(\s*journey: city\.primaryDestination/);
+  assert.match(passport, /passport-city-landmark-/);
+  assert.match(passport, /_CityMarkerLeaderPainter/);
+  assert.match(passport, /JourneySymbolBadge\(\s*journeyId: city\.primaryDestination\.id/);
 });
 
 test('special journeys open from a featured wallet-aware button', () => {
