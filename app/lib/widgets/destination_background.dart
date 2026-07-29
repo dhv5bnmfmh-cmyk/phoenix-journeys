@@ -17,6 +17,9 @@ const _hangzhouWestLakeJourneyId = 'hangzhou-west-lake';
 const _chengduKuanzhaiJourneyId = 'chengdu-kuanzhai-alley';
 const _nanjingQinhuaiJourneyId = 'nanjing-qinhuai-river';
 const _guangzhouChenClanJourneyId = 'guangzhou-chen-clan-academy';
+const _suzhouGardenJourneyId = 'suzhou-humble-administrators-garden';
+const _luoyangLongmenJourneyId = 'luoyang-longmen-grottoes';
+const _quanzhouKaiyuanJourneyId = 'quanzhou-kaiyuan-temple';
 
 const _remainingDynamicBackgrounds = <String, _CinematicBackgroundStyle>{
   _xianCityWallJourneyId: _CinematicBackgroundStyle(
@@ -60,6 +63,32 @@ const _remainingDynamicBackgrounds = <String, _CinematicBackgroundStyle>{
     atmosphereColor: Color(0xFFB86D45),
     foregroundColor: Color(0xFF2B3025),
     cameraTravel: Offset(10, 8),
+  ),
+  _suzhouGardenJourneyId: _CinematicBackgroundStyle(
+    keyName: 'suzhou-humble-administrators-garden',
+    duration: Duration(seconds: 30),
+    skyColor: Color(0xFFFFE9B9),
+    atmosphereColor: Color(0xFF8DB5A1),
+    foregroundColor: Color(0xFF18382B),
+    cameraTravel: Offset(9, 7),
+    waterLight: true,
+  ),
+  _luoyangLongmenJourneyId: _CinematicBackgroundStyle(
+    keyName: 'luoyang-longmen-grottoes',
+    duration: Duration(seconds: 28),
+    skyColor: Color(0xFFFFD79C),
+    atmosphereColor: Color(0xFFA47758),
+    foregroundColor: Color(0xFF2D211B),
+    cameraTravel: Offset(8, 11),
+    waterLight: true,
+  ),
+  _quanzhouKaiyuanJourneyId: _CinematicBackgroundStyle(
+    keyName: 'quanzhou-kaiyuan-temple',
+    duration: Duration(seconds: 29),
+    skyColor: Color(0xFFFFE2AD),
+    atmosphereColor: Color(0xFF8DA783),
+    foregroundColor: Color(0xFF243429),
+    cameraTravel: Offset(11, 8),
   ),
 };
 
