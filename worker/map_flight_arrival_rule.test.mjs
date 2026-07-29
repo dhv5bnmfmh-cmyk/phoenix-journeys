@@ -27,3 +27,14 @@ test('map flight respects reduced-motion accessibility', () => {
   assert.match(explore, /queryParameters\['motion'\] == 'on'/);
   assert.match(explore, /if \(reduceMotion\)[\s\S]{0,100}_controller[\s\S]{0,80}\.\.value = 1/);
 });
+
+test('arrival reveals a direct destination-selection handoff', () => {
+  assert.match(explore, /required this\.onArrived/);
+  assert.match(explore, /final VoidCallback onArrived/);
+  assert.match(explore, /\.92,\s*1\.0,\s*curve: Curves\.easeOutCubic/);
+  assert.match(explore, /flight-arrival-destination-picker/);
+  assert.match(explore, /onPressed: widget\.onArrived/);
+  assert.match(explore, /选择景点/);
+  assert.match(explore, /已抵达 · 选择景点继续/);
+  assert.match(explore, /onArrived: \(\) => unawaited\(chooseJourney\(\)\)/);
+});
