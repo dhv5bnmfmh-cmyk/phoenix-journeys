@@ -3,6 +3,23 @@ import 'package:phoenix_journeys/services/narration_controller.dart';
 import 'package:phoenix_journeys/widgets/narration_player_card.dart';
 
 void main() {
+  test('clears optimistic playback when browser speech is blocked', () {
+    expect(
+      shouldClearNarrationLocalSession(
+        controllerStatus: NarrationStatus.error,
+        finished: false,
+      ),
+      isTrue,
+    );
+    expect(
+      shouldClearNarrationLocalSession(
+        controllerStatus: NarrationStatus.playing,
+        finished: false,
+      ),
+      isFalse,
+    );
+  });
+
   test('ignores a premature idle completion jump from Safari', () {
     final offset = resolveNarrationDisplayOffset(
       estimatedOffset: 18,
