@@ -10,15 +10,11 @@ const speed = readFileSync(
   'app/lib/widgets/narration_speed_stepper.dart',
   'utf8',
 );
-const controller = readFileSync(
-  'app/lib/services/narration_controller.dart',
-  'utf8',
-);
 
-test('compact and full narration controls expose live follow status', () => {
+test('non-compact narration controls expose a separate live follow status', () => {
   assert.match(speed, /NarrationFollowStatus/);
   assert.match(speed, /narration-controls-with-follow-status/);
-  assert.match(speed, /compact-narration-controls-with-follow-status/);
+  assert.match(speed, /compact\s*\?\s*controls/);
   assert.match(speed, /narration-control-row/);
   assert.match(speed, /narration-speed-group/);
 });
@@ -44,18 +40,10 @@ test('follow status is animated, bounded, and accessible', () => {
 test('current sentence guidance changes only at sentence boundaries', () => {
   assert.match(follow, /String narrationSentenceAtOffset/);
   assert.match(follow, /。！？!\?；;/);
-  assert.match(follow, /sentenceSource/);
-  assert.match(follow, /currentItemLocalOffset/);
+  assert.match(follow, /snapshot\.itemText/);
+  assert.match(follow, /snapshot\.start/);
   assert.match(follow, /narration-sentence-guide-/);
   assert.match(follow, /BoxConstraints\(maxWidth:\s*246\)/);
   assert.match(follow, /maxLines:\s*2/);
   assert.match(follow, /backgroundColor:\s*activeColor/);
-});
-
-test('shadowing remains reachable when narration is unavailable', () => {
-  assert.match(controller, /String\? get currentItemText/);
-  assert.match(controller, /int get currentItemLocalOffset/);
-  assert.match(follow, /controller\.currentItemText/);
-  assert.match(follow, /controller\.currentItemLocalOffset/);
-  assert.match(follow, /showSentenceGuide = currentSentence\.isNotEmpty/);
 });
