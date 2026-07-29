@@ -40,6 +40,15 @@ test('narration startup cannot remain silently stuck in playing state', () => {
   assert.match(controller, /自动朗读被浏览器拦截，请点击播放重试。/);
 });
 
+test('explicit web retry keeps cancel and speak inside the same tap', () => {
+  assert.match(controller, /final useWebSpeech = _webSpeech\.isAvailable/);
+  assert.match(controller, /if \(stopEngineFirst && !useWebSpeech\)/);
+  assert.match(
+    controller,
+    /if \(useWebSpeech\)[\s\S]*cancelExisting: stopEngineFirst/,
+  );
+});
+
 test('language-specific prosody preserves user speed within safe bounds', () => {
   assert.match(webSpeech, /resolveNaturalNarrationRate/);
   assert.match(webSpeech, /resolveNaturalNarrationPitch/);
