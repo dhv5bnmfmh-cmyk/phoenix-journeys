@@ -1,5 +1,8 @@
 enum NarrationStartupDecision { wait, confirmStarted, fail }
 
+typedef NarrationVoicePreviewProgress = void Function(double progress);
+typedef NarrationVoicePreviewCallback = void Function();
+
 class NarrationVoiceOption {
   const NarrationVoiceOption({
     required this.id,
@@ -33,6 +36,24 @@ String narrationVoicePreferenceKey(String languageCode) {
 
 String narrationVoiceId({required String name, required String locale}) {
   return '${normalizeNarrationLanguageCode(locale)}::${name.trim()}';
+}
+
+String? narrationVoiceNameFromId(String? voiceId) {
+  final value = voiceId?.trim();
+  if (value == null || value.isEmpty) return null;
+  final separator = value.indexOf('::');
+  if (separator < 0 || separator >= value.length - 2) return value;
+  final name = value.substring(separator + 2).trim();
+  return name.isEmpty ? null : name;
+}
+
+String compactNarrationVoiceSelectionLabel(String? voiceId) {
+  return narrationVoiceNameFromId(voiceId) == null ? '自动' : '自选';
+}
+
+String narrationVoiceSelectionSummary(String? voiceId) {
+  final name = narrationVoiceNameFromId(voiceId);
+  return name == null ? '自动选择最佳声线' : '当前使用：$name';
 }
 
 int narrationVoiceScore({
