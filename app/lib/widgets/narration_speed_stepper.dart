@@ -79,7 +79,7 @@ class NarrationSpeedStepper extends StatelessWidget {
                     _SpeedAction(
                       key: const ValueKey('narration-slow-down'),
                       icon: Icons.remove_rounded,
-                      tooltip: '减速',
+                      label: '减速',
                       enabled: controller.canDecreaseSpeechRate,
                       foreground: foreground,
                       disabled: muted,
@@ -129,7 +129,7 @@ class NarrationSpeedStepper extends StatelessWidget {
                     _SpeedAction(
                       key: const ValueKey('narration-speed-up'),
                       icon: Icons.add_rounded,
-                      tooltip: '加速',
+                      label: '加速',
                       enabled: controller.canIncreaseSpeechRate,
                       foreground: foreground,
                       disabled: muted,
@@ -150,7 +150,7 @@ class NarrationSpeedStepper extends StatelessWidget {
 class _SpeedAction extends StatefulWidget {
   const _SpeedAction({
     required this.icon,
-    required this.tooltip,
+    required this.label,
     required this.enabled,
     required this.foreground,
     required this.disabled,
@@ -160,7 +160,7 @@ class _SpeedAction extends StatefulWidget {
   });
 
   final IconData icon;
-  final String tooltip;
+  final String label;
   final bool enabled;
   final Color foreground;
   final Color disabled;
@@ -186,11 +186,11 @@ class _SpeedActionState extends State<_SpeedAction> {
     final size = widget.compact ? 27.0 : 32.0;
 
     return Tooltip(
-      message: widget.tooltip,
+      message: widget.label,
       child: Semantics(
         button: true,
         enabled: enabled,
-        label: widget.tooltip,
+        label: widget.label,
         child: AnimatedScale(
           scale: _pressed && enabled ? .90 : 1,
           duration: const Duration(milliseconds: 90),
