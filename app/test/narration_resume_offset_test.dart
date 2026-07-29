@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/screens/journey_screen.dart';
 import 'package:phoenix_journeys/services/narration_controller.dart';
 import 'package:phoenix_journeys/widgets/narration_player_card.dart';
 
@@ -85,5 +86,38 @@ void main() {
     expect(controller.isRestoredPosition, isTrue);
     expect(controller.currentOffset, 8);
     expect(controller.currentItemIndex, 1);
+  });
+
+  test('checkpoints only meaningful active narration movement', () {
+    expect(
+      shouldCheckpointNarration(
+        status: NarrationStatus.playing,
+        contentId: 'discovery',
+        offset: 24,
+        totalCharacters: 100,
+        lastSavedOffset: 8,
+      ),
+      isTrue,
+    );
+    expect(
+      shouldCheckpointNarration(
+        status: NarrationStatus.paused,
+        contentId: 'discovery',
+        offset: 24,
+        totalCharacters: 100,
+        lastSavedOffset: 8,
+      ),
+      isFalse,
+    );
+    expect(
+      shouldCheckpointNarration(
+        status: NarrationStatus.playing,
+        contentId: 'discovery',
+        offset: 15,
+        totalCharacters: 100,
+        lastSavedOffset: 8,
+      ),
+      isFalse,
+    );
   });
 }
