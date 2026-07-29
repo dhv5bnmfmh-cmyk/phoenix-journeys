@@ -75,12 +75,13 @@ final class PhoenixWebSpeech {
         : pitch;
     final utterance = html.SpeechSynthesisUtterance(text)
       ..lang = languageCode
-      ..rate = resolveNaturalNarrationRate(
-        languageCode: languageCode,
-        requestedRate: rate,
-      )
+      ..rate = rate
       ..pitch = naturalPitch
       ..volume = volume;
+    utterance.rate = resolveNaturalNarrationRate(
+      languageCode: languageCode,
+      requestedRate: rate,
+    );
     final voices = _voiceCatalog.isNotEmpty
         ? _voiceCatalog
         : synth.getVoices();
