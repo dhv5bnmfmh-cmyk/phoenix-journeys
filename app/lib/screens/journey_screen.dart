@@ -152,6 +152,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) return;
+    unawaited(_persistNarrationPosition());
     unawaited(_narration.stop());
     if (_initialized) unawaited(_persistProgress());
   }
@@ -159,7 +160,10 @@ class _JourneyScreenState extends State<JourneyScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    if (_initialized) unawaited(_persistProgress());
+    if (_initialized) {
+      unawaited(_persistNarrationPosition());
+      unawaited(_persistProgress());
+    }
     _phoenixLevelController.removeListener(_handlePhoenixLevelChanged);
     _narration.dispose();
     _ai.close();
@@ -182,6 +186,21 @@ class _JourneyScreenState extends State<JourneyScreen>
       express: expressController.text,
       memory: memoryController.text,
     );
+  }
+
+  Future<void> _persistNarrationPosition() {
+    final contentId = _narration.contentId;
+    final offset = _narration.currentOffset;
+    final total = _narration.totalCharacters;
+    if ((contentId == 'story' || contentId == 'discovery') &&
+        offset > 0 &&
+        offset < total) {
+      return _appState.saveJourneyNarrationPosition(
+        contentId: contentId!,
+        offset: offset,
+      );
+    }
+    return Future<void>.value();
   }
 
   JourneyLevelContent get _levelContent {
@@ -210,12 +229,58 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Future<void> _loadLanguageProfile() async {
     final profile = await _languageLevelStore.load();
-    if (!mounted || profile == null) return;
-    await _narration.setSpeechRate(
-      _languageLevelAgent.planFor(profile).speechRate,
-    );
     if (!mounted) return;
-    setState(() => _languageProfile = profile);
+    if (profile != null) {
+      await _narration.setSpeechRate(
+        _languageLevelAgent.planFor(profile).speechRate,
+      );
+      if (!mounted) return;
+      setState(() => _languageProfile = profile);
+    }
+    _restoreNarrationPosition();
+  }
+
+  List<NarrationItem> get _storyNarrationItems => _levelContent.storyParagraphs
+      .asMap()
+      .entries
+      .map(
+        (entry) => NarrationItem(
+          id: 'story-${entry.key}',
+          text: entry.value,
+          label: '故事第 ${entry.key + 1} 段',
+        ),
+      )
+      .toList(growable: false);
+
+  List<NarrationItem> get _discoveryNarrationItems =>
+      _levelContent.discoveries
+          .asMap()
+          .entries
+          .map(
+            (entry) => NarrationItem(
+              id: 'discovery-${entry.key}',
+              text: entry.value.text,
+              label: '今日发现 ${entry.key + 1}',
+            ),
+          )
+          .toList(growable: false);
+
+  void _restoreNarrationPosition() {
+    if (_narration.hasContent || _appState.journeyNarrationOffset <= 0) return;
+    final contentId = _appState.journeyNarrationContentId;
+    final matchesStep =
+        (step == 0 && contentId == 'story') ||
+        (step == 2 && contentId == 'discovery');
+    if (!matchesStep || contentId == null) return;
+
+    _narration.preparePaused(
+      contentId: contentId,
+      languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
+      items: contentId == 'story'
+          ? _storyNarrationItems
+          : _discoveryNarrationItems,
+      offset: _appState.journeyNarrationOffset,
+    );
   }
 
   void _handlePhoenixLevelChanged() {
@@ -228,6 +293,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     final profile = _phoenixLevelController.profile;
 
     await _narration.stop();
+    await _appState.clearJourneyNarrationPosition();
     await _narration.setSpeechRate(
       _languageLevelAgent.planFor(profile).speechRate,
     );
@@ -290,17 +356,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return _narration.play(
       contentId: 'story',
       languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
-      items: _levelContent.storyParagraphs
-          .asMap()
-          .entries
-          .map(
-            (entry) => NarrationItem(
-              id: 'story-${entry.key}',
-              text: entry.value,
-              label: '故事第 ${entry.key + 1} 段',
-            ),
-          )
-          .toList(growable: false),
+      items: _storyNarrationItems,
     );
   }
 
@@ -308,17 +364,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return _narration.play(
       contentId: 'discovery',
       languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
-      items: _levelContent.discoveries
-          .asMap()
-          .entries
-          .map(
-            (entry) => NarrationItem(
-              id: 'discovery-${entry.key}',
-              text: entry.value.text,
-              label: '今日发现 ${entry.key + 1}',
-            ),
-          )
-          .toList(growable: false),
+      items: _discoveryNarrationItems,
       stopEngineFirst: stopEngineFirst,
     );
   }
