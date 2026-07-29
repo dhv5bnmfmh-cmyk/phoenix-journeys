@@ -82,6 +82,7 @@ void main() {
 
     expect(controller.contentId, 'discovery');
     expect(controller.status, NarrationStatus.paused);
+    expect(controller.isRestoredPosition, isTrue);
     expect(controller.currentOffset, 8);
     expect(controller.currentItemIndex, 1);
   });
