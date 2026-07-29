@@ -14,7 +14,7 @@ const speed = readFileSync(
 test('compact and full narration controls expose live follow status', () => {
   assert.match(speed, /NarrationFollowStatus/);
   assert.match(speed, /narration-controls-with-follow-status/);
-  assert.match(speed, /compact\s*\?\s*controls/);
+  assert.match(speed, /compact-narration-controls-with-follow-status/);
   assert.match(speed, /narration-control-row/);
   assert.match(speed, /narration-speed-group/);
 });
