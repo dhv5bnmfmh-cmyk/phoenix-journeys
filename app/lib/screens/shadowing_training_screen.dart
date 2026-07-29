@@ -135,7 +135,10 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       setState(() => _speechMessage = '当前设备未开放语音识别，请允许麦克风权限后重试。');
       return;
     }
+    final localeId =
+        context.read<AppState>().isTraditional ? 'zh_TW' : 'zh_CN';
     await _narration.stop();
+    if (!mounted) return;
     setState(() {
       _recognized = '';
       _score = null;
@@ -144,10 +147,12 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     });
     await _speech.listen(
       onResult: _handleSpeechResult,
-      localeId: context.read<AppState>().isTraditional ? 'zh_TW' : 'zh_CN',
-      partialResults: true,
-      cancelOnError: true,
-      listenMode: ListenMode.dictation,
+      listenOptions: SpeechListenOptions(
+        localeId: localeId,
+        partialResults: true,
+        cancelOnError: true,
+        listenMode: ListenMode.dictation,
+      ),
     );
   }
 
