@@ -70,7 +70,6 @@ void main() {
 
   test('restored narration is prepared paused at the saved offset', () {
     final controller = NarrationController();
-    addTearDown(controller.dispose);
 
     controller.preparePaused(
       contentId: 'discovery',
