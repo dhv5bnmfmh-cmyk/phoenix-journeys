@@ -148,6 +148,15 @@ String _assetFor(String id) {
   if (id.contains('quanzhou')) {
     return 'assets/images/backgrounds/generated/quanzhou/kaiyuan-temple/quanzhou-kaiyuan-temple-v1.webp';
   }
+  if (id.contains('datong')) {
+    return 'assets/images/backgrounds/generated/datong/yungang-grottoes/datong-yungang-grottoes-v1.webp';
+  }
+  if (id.contains('lijiang')) {
+    return 'assets/images/backgrounds/generated/lijiang/old-town/lijiang-old-town-v1.webp';
+  }
+  if (id.contains('jiangmen')) {
+    return 'assets/images/backgrounds/generated/jiangmen/kaiping-diaolou/jiangmen-kaiping-diaolou-v1.webp';
+  }
   return 'assets/images/backgrounds/generated/beijing/forbidden-city/03-golden-gate.webp';
 }
 
