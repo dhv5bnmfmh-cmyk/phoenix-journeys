@@ -110,7 +110,8 @@ class NarrationFollowStatus extends StatelessWidget {
               child: Icon(icon, size: 13, color: activeColor),
             ),
             const SizedBox(width: 5),
-            Flexible(
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 154),
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 160),
                 switchInCurve: Curves.easeOutCubic,
