@@ -39,9 +39,9 @@ test('Flutter-backed runner requires fifteen journeys and 150 inspections', () =
   assert.match(reportRunner, /generate_journey_quality_report\.dart/);
   assert.match(reportRunner, /PHOENIX_QUALITY_MARKDOWN/);
   assert.match(reportRunner, /PHOENIX_QUALITY_JSON/);
-  assert.match(reportRunner, /report\['journeyCount'\], 12/);
+  assert.match(reportRunner, /report\['journeyCount'\], 15/);
   assert.match(reportRunner, /report\['specialJourneyCount'\], 4/);
-  assert.match(reportRunner, /report\['inspectionCount'\], 120/);
+  assert.match(reportRunner, /report\['inspectionCount'\], 150/);
   assert.match(reportRunner, /report\['canPublish'\], isTrue/);
   assert.match(reportRunner, /report\['blockedCount'\], 0/);
 });
