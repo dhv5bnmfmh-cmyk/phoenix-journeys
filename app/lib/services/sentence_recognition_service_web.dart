@@ -63,7 +63,7 @@ final class SentenceRecognitionService {
         if (_ending) return;
         onComplete();
       });
-      recognition['onerror'] = js.allowInterop((dynamic _) {
+      recognition['onerror'] = js.JsFunction.withThis((dynamic _, dynamic event) {
         if (!identical(_recognition, recognition)) return;
         _recognition = null;
         if (_ending) return;
