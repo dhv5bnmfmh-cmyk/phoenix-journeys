@@ -20,7 +20,7 @@ test('every Phoenix voice starts from the platform native speaking rate', () => 
 test('all Chinese narration paths use the matching local locale', () => {
   assert.equal(
     (journey.match(/languageCode: _appState\.isTraditional \? 'zh-TW' : 'zh-CN'/g) ?? []).length,
-    4,
+    5,
   );
   assert.match(narration, /String _narrationLanguageCode = 'zh-CN'/);
   assert.match(narration, /languageCode: _narrationLanguageCode/);
