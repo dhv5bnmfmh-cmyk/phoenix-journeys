@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../data/journey_data.dart';
 import '../services/narration_controller.dart';
+import '../services/narration_follow_coordinator.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 
@@ -159,19 +160,6 @@ bool shouldAutoFollowNarrationItem({
       (!wasActive || sessionChanged);
 }
 
-const Duration narrationAutoFollowManualHold = Duration(milliseconds: 2400);
-
-@visibleForTesting
-Duration narrationAutoFollowRemainingHold({
-  required DateTime now,
-  required DateTime? holdUntil,
-}) {
-  if (holdUntil == null || !holdUntil.isAfter(now)) {
-    return Duration.zero;
-  }
-  return holdUntil.difference(now);
-}
-
 class InteractiveStoryText extends StatefulWidget {
   const InteractiveStoryText({
     required this.text,
@@ -217,13 +205,39 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   late final AnimationController _cinematicRevealController;
   double _lastAcceptedRevealCursor = 0;
   int _autoFollowRequest = 0;
-  static final Expando<DateTime> _manualHoldUntilByController =
-      Expando<DateTime>('narration-manual-follow-hold');
+  NarrationFollowCoordinator? _followCoordinator;
 
   bool get _hasExplicitHighlight =>
       widget.highlightStart != null &&
       widget.highlightEnd != null &&
       widget.highlightEnd! > widget.highlightStart!;
+
+  void _attachNarrationFollowCoordinator() {
+    final controller = widget.narrationController;
+    _followCoordinator = controller == null
+        ? null
+        : NarrationFollowCoordinator.forController(controller);
+    _followCoordinator?.addListener(_handleNarrationFollowChanged);
+  }
+
+  void _detachNarrationFollowCoordinator() {
+    _followCoordinator?.removeListener(_handleNarrationFollowChanged);
+    _followCoordinator = null;
+  }
+
+  void _handleNarrationFollowChanged() {
+    final coordinator = _followCoordinator;
+    if (coordinator == null) return;
+    if (coordinator.isManualHoldActive) {
+      _autoFollowTimer?.cancel();
+      _autoFollowRequest += 1;
+      return;
+    }
+    if (_hasExplicitHighlight &&
+        widget.narrationController?.status == NarrationStatus.playing) {
+      _scheduleNarrationAutoFollow();
+    }
+  }
 
   @override
   void initState() {
@@ -235,6 +249,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       value: initialReveal,
     );
     _buildSegments();
+    _attachNarrationFollowCoordinator();
     if (_hasExplicitHighlight &&
         widget.narrationController?.status == NarrationStatus.playing) {
       _scheduleNarrationAutoFollow();
@@ -252,6 +267,10 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
         oldWidget.highlightEnd != null &&
         oldWidget.highlightEnd! > oldWidget.highlightStart!;
     final isActive = _hasExplicitHighlight;
+    if (!identical(oldWidget.narrationController, widget.narrationController)) {
+      _detachNarrationFollowCoordinator();
+      _attachNarrationFollowCoordinator();
+    }
     if (textChanged || oldWidget.entries != widget.entries) {
       _disposeRecognizers();
       _selectedEntry = null;
@@ -316,23 +335,14 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   }
 
   void _suspendNarrationAutoFollow() {
-    final controller = widget.narrationController;
-    if (controller == null || controller.status != NarrationStatus.playing) {
+    if (widget.narrationController?.status != NarrationStatus.playing) {
       return;
     }
-    _manualHoldUntilByController[controller] = DateTime.now().add(
-      narrationAutoFollowManualHold,
-    );
+    _followCoordinator?.suspend();
   }
 
   Duration _remainingNarrationAutoFollowHold() {
-    final controller = widget.narrationController;
-    return narrationAutoFollowRemainingHold(
-      now: DateTime.now(),
-      holdUntil: controller == null
-          ? null
-          : _manualHoldUntilByController[controller],
-    );
+    return _followCoordinator?.remainingHold ?? Duration.zero;
   }
 
   void _scheduleNarrationAutoFollow() {
@@ -426,6 +436,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   void dispose() {
     _hideTimer?.cancel();
     _autoFollowTimer?.cancel();
+    _detachNarrationFollowCoordinator();
     _cinematicRevealController.dispose();
     _disposeRecognizers();
     super.dispose();
