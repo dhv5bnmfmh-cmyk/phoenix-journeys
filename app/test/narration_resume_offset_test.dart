@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/services/narration_controller.dart';
 import 'package:phoenix_journeys/widgets/narration_player_card.dart';
 
 void main() {
@@ -62,5 +63,24 @@ void main() {
       ),
       47,
     );
+  });
+
+  test('restored narration is prepared paused at the saved offset', () {
+    final controller = NarrationController();
+    addTearDown(controller.dispose);
+
+    controller.preparePaused(
+      contentId: 'discovery',
+      items: const [
+        NarrationItem(id: 'first', text: '第一段内容。', label: '第一段'),
+        NarrationItem(id: 'second', text: '第二段内容。', label: '第二段'),
+      ],
+      offset: 8,
+    );
+
+    expect(controller.contentId, 'discovery');
+    expect(controller.status, NarrationStatus.paused);
+    expect(controller.currentOffset, 8);
+    expect(controller.currentItemIndex, 1);
   });
 }
