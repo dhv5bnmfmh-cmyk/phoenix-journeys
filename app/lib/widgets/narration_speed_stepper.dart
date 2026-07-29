@@ -53,6 +53,7 @@ class NarrationSpeedStepper extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               NarrationVoicePickerButton(
+                controller: controller,
                 dark: dark,
                 compact: compact,
               ),
