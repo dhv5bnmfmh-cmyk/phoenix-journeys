@@ -41,6 +41,10 @@ test('narration startup cannot remain silently stuck in playing state', () => {
   assert.match(webSpeech, /speech-start-blocked/);
   assert.match(quality, /NarrationStartupDecision\.fail/);
   assert.match(player, /controllerStatus == NarrationStatus\.error/);
+  assert.match(
+    controller,
+    /void _handleWebError\(String message\)[\s\S]*narrationStartupErrorMessage\(message\)/,
+  );
   assert.match(controller, /自动朗读被浏览器拦截，请点击播放重试。/);
 });
 
