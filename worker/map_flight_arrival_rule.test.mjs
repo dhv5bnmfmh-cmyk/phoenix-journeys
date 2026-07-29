@@ -40,7 +40,7 @@ test('arrival reveals a direct destination-selection handoff', () => {
   assert.match(explore, /onPressed: widget\.onArrived/);
   assert.match(explore, /选择景点/);
   assert.match(explore, /已抵达 · 选择景点继续/);
-  assert.match(explore, /onArrived: \(\) => unawaited\(chooseJourney\(\)\)/);
+  assert.match(explore, /onArrived: \(\) => unawaited\(chooseArrivedCityDestination\(\)\)/);
 });
 
 test('arrival picker is locked to landmarks in the landed city', () => {
