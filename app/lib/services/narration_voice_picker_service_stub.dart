@@ -15,6 +15,9 @@ final class NarrationVoicePickerService {
     required NarrationVoiceOption voice,
     required String languageCode,
     required String sample,
+    NarrationVoicePreviewProgress? onProgress,
+    NarrationVoicePreviewCallback? onComplete,
+    NarrationVoicePreviewCallback? onError,
   }) async {
     return false;
   }
