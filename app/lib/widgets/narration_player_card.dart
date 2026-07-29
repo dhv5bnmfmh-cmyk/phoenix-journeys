@@ -512,7 +512,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
             ? roundedPercent.clamp(1, 99)
             : roundedPercent;
         final seeking = _seekPreviewProgress != null;
-        final showRestoreChoices = compact &&
+        final showRestoreChoices = widget.compact &&
             isPaused &&
             controllerIsCurrent &&
             widget.controller.isRestoredPosition;
