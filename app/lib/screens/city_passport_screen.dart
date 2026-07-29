@@ -109,6 +109,7 @@ class _PassportMap extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final mapSize = constraints.biggest;
+        final markerPlacements = _resolveCityMarkerPlacements(mapSize);
         return ClipRRect(
           borderRadius: BorderRadius.circular(18),
           child: InteractiveViewer(
@@ -160,7 +161,7 @@ class _PassportMap extends StatelessWidget {
                     _CityMapMarker(
                       state: state,
                       city: city,
-                      mapSize: mapSize,
+                      placement: markerPlacements[city.id]!,
                     ),
                   Positioned(
                     left: 9,
@@ -197,18 +198,20 @@ class _PassportMap extends StatelessWidget {
   }
 }
 
-class _CityMapMarker extends StatelessWidget {
-  const _CityMapMarker({
-    required this.state,
-    required this.city,
-    required this.mapSize,
-  });
+class _CityMarkerPlacement {
+  const _CityMarkerPlacement({required this.rect, required this.labelOnLeft});
 
-  final AppState state;
-  final JourneyCityCatalogEntry city;
-  final Size mapSize;
+  final Rect rect;
+  final bool labelOnLeft;
+}
 
-  Offset get _mapPoint {
+Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Size mapSize) {
+  const markerSize = Size(51, 23);
+  const mapPadding = 5.0;
+  final occupied = <Rect>[];
+  final placements = <String, _CityMarkerPlacement>{};
+
+  for (final city in journeyCityCatalog) {
     final binding = requireJourneyLocation(city.primaryDestination.id);
     final longitudeRatio = ((binding.longitude - 73) / (135 - 73)).clamp(0, 1);
     final latitudeRatio = ((binding.latitude - 18) / (54 - 18)).clamp(0, 1);
@@ -216,23 +219,65 @@ class _CityMapMarker extends StatelessWidget {
       mapSize.width * (.10 + longitudeRatio * .78),
       mapSize.height * (.08 + (1 - latitudeRatio) * .82),
     );
-    return anchor + _collisionOffset;
+    final candidates = <({Offset offset, bool labelOnLeft})>[
+      (offset: const Offset(-5, -11.5), labelOnLeft: false),
+      (offset: const Offset(-46, -11.5), labelOnLeft: true),
+      (offset: const Offset(-5, -36), labelOnLeft: false),
+      (offset: const Offset(-46, -36), labelOnLeft: true),
+      (offset: const Offset(-5, 13), labelOnLeft: false),
+      (offset: const Offset(-46, 13), labelOnLeft: true),
+      (offset: const Offset(9, -24), labelOnLeft: false),
+      (offset: const Offset(-60, 1), labelOnLeft: true),
+    ];
+
+    _CityMarkerPlacement? selected;
+    for (final candidate in candidates) {
+      final rawRect = candidate.offset & markerSize;
+      final translated = rawRect.shift(anchor);
+      final rect = Rect.fromLTWH(
+        translated.left.clamp(mapPadding, mapSize.width - markerSize.width - mapPadding),
+        translated.top.clamp(mapPadding, mapSize.height - markerSize.height - mapPadding),
+        markerSize.width,
+        markerSize.height,
+      );
+      final paddedRect = rect.inflate(3);
+      if (occupied.every((other) => !other.overlaps(paddedRect))) {
+        selected = _CityMarkerPlacement(
+          rect: rect,
+          labelOnLeft: candidate.labelOnLeft,
+        );
+        break;
+      }
+    }
+
+    selected ??= _CityMarkerPlacement(
+      rect: Rect.fromLTWH(
+        (anchor.dx - markerSize.width / 2)
+            .clamp(mapPadding, mapSize.width - markerSize.width - mapPadding),
+        (anchor.dy - markerSize.height / 2)
+            .clamp(mapPadding, mapSize.height - markerSize.height - mapPadding),
+        markerSize.width,
+        markerSize.height,
+      ),
+      labelOnLeft: false,
+    );
+    occupied.add(selected.rect.inflate(3));
+    placements[city.id] = selected;
   }
 
-  Offset get _collisionOffset {
-    switch (city.id) {
-      case 'xian':
-        return const Offset(-18, -8);
-      case 'chengdu':
-        return const Offset(-44, 16);
-      case 'nanjing':
-        return const Offset(24, -14);
-      case 'hangzhou':
-        return const Offset(48, 18);
-      default:
-        return Offset.zero;
-    }
-  }
+  return placements;
+}
+
+class _CityMapMarker extends StatelessWidget {
+  const _CityMapMarker({
+    required this.state,
+    required this.city,
+    required this.placement,
+  });
+
+  final AppState state;
+  final JourneyCityCatalogEntry city;
+  final _CityMarkerPlacement placement;
 
   Future<void> _showCityJourneys(BuildContext context) {
     return showModalBottomSheet<void>(
@@ -273,14 +318,44 @@ class _CityMapMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final point = _mapPoint;
     final earned = city.destinations.any(
       (journey) => state.isJourneyStampEarned(journey.id),
     );
+    final pin = Container(
+      key: ValueKey('passport-city-pin-${city.id}'),
+      width: 9,
+      height: 9,
+      decoration: BoxDecoration(
+        color: earned ? PhoenixTheme.gold : PhoenixTheme.red,
+        shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xFFFFF7E5), width: 1.5),
+        boxShadow: const [
+          BoxShadow(color: Color(0x55000000), blurRadius: 4),
+        ],
+      ),
+    );
+    final label = Text(
+      state.displayText(city.name),
+      maxLines: 1,
+      overflow: TextOverflow.visible,
+      style: const TextStyle(
+        color: Color(0xFF2B211C),
+        fontSize: 8.5,
+        height: 1,
+        fontWeight: FontWeight.w900,
+        shadows: [
+          Shadow(color: Color(0xFFFFF8E8), blurRadius: 5),
+          Shadow(color: Color(0xFFFFF8E8), blurRadius: 9),
+        ],
+      ),
+    );
+
     return Positioned(
       key: ValueKey('passport-city-${city.id}'),
-      left: (point.dx - 23).clamp(0, mapSize.width - 56),
-      top: (point.dy - 19).clamp(0, mapSize.height - 44),
+      left: placement.rect.left,
+      top: placement.rect.top,
+      width: placement.rect.width,
+      height: placement.rect.height,
       child: Semantics(
         button: true,
         label: state.displayText('${city.name}旅程地点'),
@@ -288,43 +363,17 @@ class _CityMapMarker extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () => unawaited(_showCityJourneys(context)),
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(3, 3, 5, 3),
-              decoration: BoxDecoration(
-                color: const Color(0xE8FFF8E8),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: earned
-                      ? PhoenixTheme.gold
-                      : PhoenixTheme.red.withValues(alpha: .52),
-                ),
-                boxShadow: const [
-                  BoxShadow(color: Color(0x26000000), blurRadius: 6),
-                ],
-              ),
+            borderRadius: BorderRadius.circular(10),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 3),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CityJourneyStamp(
-                    journey: city.primaryDestination,
-                    isUnlocked: earned || _passportAllAccessPreview,
-                    size: 21,
-                    transparentInk: true,
-                  ),
-                  const SizedBox(width: 3),
-                  Text(
-                    state.displayText(city.name),
-                    style: const TextStyle(
-                      color: Color(0xFF2B211C),
-                      fontSize: 8.5,
-                      fontWeight: FontWeight.w900,
-                      shadows: [
-                        Shadow(color: Color(0xCCFFF8E8), blurRadius: 7),
-                      ],
-                    ),
-                  ),
-                ],
+                mainAxisAlignment: placement.labelOnLeft
+                    ? MainAxisAlignment.end
+                    : MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                children: placement.labelOnLeft
+                    ? [label, const SizedBox(width: 3), pin]
+                    : [pin, const SizedBox(width: 3), label],
               ),
             ),
           ),
