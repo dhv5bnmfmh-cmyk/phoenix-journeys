@@ -42,6 +42,25 @@ class JourneyLocationBinding {
   double get longitude => placeNode.longitude!;
 
   JourneyMapPoint get mapPoint {
+    // The home map is a hand-painted oblique relief, not a geographic
+    // projection. These points are art-directed against the actual coastline
+    // so the aircraft lands on the city represented by the label.
+    const calibratedPoints = <String, JourneyMapPoint>{
+      'beijing/forbidden-city': JourneyMapPoint(x: 0.63, y: 0.29),
+      'beijing/summer-palace': JourneyMapPoint(x: 0.63, y: 0.29),
+      'shanghai/bund': JourneyMapPoint(x: 0.76, y: 0.43),
+      'xian/city-wall': JourneyMapPoint(x: 0.49, y: 0.39),
+      'hangzhou/west-lake': JourneyMapPoint(x: 0.70, y: 0.49),
+      'chengdu/kuanzhai-alley': JourneyMapPoint(x: 0.38, y: 0.54),
+      'nanjing/qinhuai-river': JourneyMapPoint(x: 0.64, y: 0.44),
+      'guangzhou/chen-clan-ancestral-hall': JourneyMapPoint(
+        x: 0.53,
+        y: 0.67,
+      ),
+    };
+    final calibratedPoint = calibratedPoints[locationPath];
+    if (calibratedPoint != null) return calibratedPoint;
+
     const minLongitude = 100.0;
     const maxLongitude = 123.0;
     const minLatitude = 22.0;

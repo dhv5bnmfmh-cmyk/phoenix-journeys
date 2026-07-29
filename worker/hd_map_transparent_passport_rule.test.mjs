@@ -31,12 +31,12 @@ test('both circled map pages use project-owned retina WebP artwork', () => {
 });
 
 test('world camera zooms into the real route and lands from above', () => {
-  assert.match(explore, /Interval\(0, \.34/);
+  assert.match(explore, /Interval\(0, \.38/);
   assert.match(explore, /scale: 1 \+ cameraT \* 1\.7/);
   assert.match(explore, /destinationFocusT/);
   assert.match(explore, /scale: 1 \+ destinationFocusT \* \.72/);
   assert.match(explore, /destination\.mapPoint\.x \* 2 - 1/);
-  assert.match(explore, /Interval\(\s*\.68,\s*\.82/);
+  assert.match(explore, /Interval\(\s*\.78,\s*\.94/);
   assert.match(explore, /geometry\.landingPoint\(landingT\)/);
   assert.match(explore, /math\.pi \/ 2/);
   assert.match(explore, /void paint\(Canvas canvas, Size size\) \{\s*_drawRoute/);
