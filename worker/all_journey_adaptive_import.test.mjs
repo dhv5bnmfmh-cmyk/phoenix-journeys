@@ -19,13 +19,50 @@ test('all journeys use the adaptive catalog instead of fixed content', () => {
   );
   assert.match(catalog, /PhoenixReadingBand\.beginner/);
   assert.match(catalog, /PhoenixReadingBand\.mastery/);
-  assert.match(catalog, /_discoveriesForBand/);
+  assert.match(catalog, /_discoveriesForProfile/);
   assert.match(catalog, /selectVocabulary/);
 });
 
-test('adaptive catalog keeps two story paragraphs and level-specific tasks', () => {
-  assert.match(catalog, /paragraphs: <String>\[/);
+test('adaptive catalog keeps one-or-two story paragraphs and level-specific tasks', () => {
+  assert.match(catalog, /_partitionPackets/);
+  assert.match(catalog, /paragraphCount/);
   assert.match(catalog, /_wonderQuestion/);
   assert.match(catalog, /_expressQuestion/);
   assert.match(catalog, /请使用“既……也……”或“不是……而是……”/);
+});
+
+test('advanced and mastery discoveries stay in two focused sections', () => {
+  assert.match(
+    catalog,
+    /PhoenixReadingBand\.advanced \|\| PhoenixReadingBand\.mastery =>\s*_groupDiscoveries/,
+  );
+  assert.match(
+    catalog,
+    /PhoenixReadingBand\.upperIntermediate \|\|\s*PhoenixReadingBand\.advanced \|\|\s*PhoenixReadingBand\.mastery => 2/,
+  );
+  assert.match(
+    runtime,
+    /PhoenixReadingBand\.upperIntermediate \|\|\s*PhoenixReadingBand\.advanced \|\|\s*PhoenixReadingBand\.mastery => 2/,
+  );
+});
+
+test('advanced prompts use journey-specific analysis lenses', () => {
+  assert.match(catalog, /_advancedWonderLens\(experience\)/);
+  assert.match(catalog, /_advancedExpressLens\(experience\)/);
+  for (const journeyId of [
+    'beijing-forbidden-city',
+    'beijing-summer-palace',
+    'shanghai-bund',
+    'xian-city-wall',
+    'hangzhou-west-lake',
+    'chengdu-kuanzhai-alley',
+    'nanjing-qinhuai-river',
+    'guangzhou-chen-clan-academy',
+    'literary-roaming',
+    'myth-tracing',
+    'strange-night-talks',
+    'folk-secret-land',
+  ]) {
+    assert.match(catalog, new RegExp(`'${journeyId}'`));
+  }
 });

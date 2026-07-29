@@ -140,6 +140,10 @@ void main() {
         findsOneWidget,
       );
       expect(
+        find.byKey(const ValueKey('challenge-four-options')),
+        findsOneWidget,
+      );
+      expect(
         find.byKey(const ValueKey('challenge-option-correct-0')),
         findsOneWidget,
       );
@@ -154,10 +158,6 @@ void main() {
       expect(
         find.byKey(const ValueKey('challenge-option-distractor-1')),
         findsOneWidget,
-      );
-      expect(
-        find.byKey(const ValueKey('challenge-option-distractor-2')),
-        findsNothing,
       );
       expect(find.byKey(const ValueKey('challenge-scroll-area')), findsNothing);
       expect(find.byKey(const ValueKey('challenge-fit-area')), findsOneWidget);
@@ -222,7 +222,7 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
-    expect(find.textContaining('夜客不但留下了铜钱'), findsWidgets);
+    expect(find.textContaining('夜客留下的铜钱不但证明陌生人曾经来过'), findsWidgets);
 
     await _tapKey(tester, 'challenge-dialog-action');
     expect(find.text('补回故事中消失的一句'), findsOneWidget);

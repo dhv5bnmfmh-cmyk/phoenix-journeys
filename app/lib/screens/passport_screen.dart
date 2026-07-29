@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../data/daily_journey_catalog.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/journey_level_selector_button.dart';
 import '../widgets/journey_symbol_badge.dart';
 import '../widgets/journey_share_button.dart';
 import 'journey_screen.dart';
@@ -99,22 +100,31 @@ class _PassportHeader extends StatelessWidget {
             ],
           ),
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-          decoration: BoxDecoration(
-            color: PhoenixTheme.red.withValues(alpha: .08),
-            borderRadius: BorderRadius.circular(99),
-          ),
-          child: Text(
-            _passportAllAccessPreview
-                ? state.displayText('全开放')
-                : '${state.earnedStampCount} 枚',
-            style: const TextStyle(
-              color: PhoenixTheme.red,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w900,
+        const SizedBox(width: 6),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            const JourneyLevelSelectorButton(compact: true),
+            const SizedBox(height: 3),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: PhoenixTheme.red.withValues(alpha: .08),
+                borderRadius: BorderRadius.circular(99),
+              ),
+              child: Text(
+                _passportAllAccessPreview
+                    ? state.displayText('全开放')
+                    : '${state.earnedStampCount} 枚',
+                style: const TextStyle(
+                  color: PhoenixTheme.red,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ],
     );

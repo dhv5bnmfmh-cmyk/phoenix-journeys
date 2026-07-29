@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../models/language_proficiency.dart';
+import '../services/challenge_option_balancer.dart';
 import '../services/narration_controller.dart';
 import '../theme/phoenix_theme.dart';
 
@@ -20,6 +21,104 @@ const fixedJourneyChallengeTypes = <JourneyChallengeType>[
   JourneyChallengeType.grammarRepair,
   JourneyChallengeType.missingSentence,
 ];
+
+const int journeyChallengeOptionCount = 4;
+
+
+@visibleForTesting
+String adaptiveChallengeHint({
+  required JourneyChallengeType type,
+  required JourneyChallengeDifficulty difficulty,
+  required int attempt,
+}) {
+  final secondAttempt = attempt >= 2;
+  return switch (difficulty) {
+    JourneyChallengeDifficulty.beginner => switch (type) {
+        JourneyChallengeType.paragraphRebuild => secondAttempt
+            ? '先选开头，再找最后发生的变化。'
+            : '先找写地点、时间或人物出现的句子。',
+        JourneyChallengeType.grammarRepair => secondAttempt
+            ? '读一遍修改后的句子，看看主语和动作是否搭配。'
+            : '先找主语，再看哪个词让句子变得不自然。',
+        JourneyChallengeType.missingSentence => secondAttempt
+            ? '正确句要能连接前一句的人物和后一句的结果。'
+            : '先看前一句说的是谁，再看后一句发生了什么。',
+      },
+    JourneyChallengeDifficulty.standard => switch (type) {
+        JourneyChallengeType.paragraphRebuild => secondAttempt
+            ? '开头介绍整体，中间发生行动，最后才出现观察、决定或结果。'
+            : '先找交代地点或时间的句子，再安排人物行动和最后的变化。',
+        JourneyChallengeType.grammarRepair => secondAttempt
+            ? '检查关联词搭配、主语位置和前后句式是否平行。'
+            : '先检查句子有没有明确主语，再看动词与宾语是否自然。',
+        JourneyChallengeType.missingSentence => secondAttempt
+            ? '正确句必须既接住前文，又能解释后文为什么会出现。'
+            : '同时观察前一句留下的主语，以及后一句出现的结果或转折。',
+      },
+    JourneyChallengeDifficulty.advanced => switch (type) {
+        JourneyChallengeType.paragraphRebuild => secondAttempt
+            ? '比较叙事视角、时间推进和因果落点，排除只在局部通顺的句子。'
+            : '先建立段落骨架，再判断每句承担背景、行动、转折还是收束功能。',
+        JourneyChallengeType.grammarRepair => secondAttempt
+            ? '比较每个方案的句法中心、语义指向与关联结构，排除表面通顺但逻辑松动的修改。'
+            : '先定位错误层级：成分、搭配、指代、语序或逻辑，再选择最小且完整的修正。',
+        JourneyChallengeType.missingSentence => secondAttempt
+            ? '检验候选句是否同时完成指代回接、逻辑过渡和后文铺垫。'
+            : '观察前后文的主题链、时间线与因果关系，不要只凭关键词重复判断。',
+      },
+  };
+}
+
+@visibleForTesting
+String adaptiveChallengeExplanation({
+  required JourneyChallengeType type,
+  required JourneyChallengeDifficulty difficulty,
+  required String baseExplanation,
+}) {
+  return switch (difficulty) {
+    JourneyChallengeDifficulty.beginner => switch (type) {
+        JourneyChallengeType.paragraphRebuild =>
+          '故事通常先介绍地点或人物，再写行动，最后写结果。',
+        JourneyChallengeType.grammarRepair =>
+          '修改后要有清楚的主语，词语也要和动作自然搭配。',
+        JourneyChallengeType.missingSentence =>
+          '正确句要接住前一句，并让后一句自然发生。',
+      },
+    JourneyChallengeDifficulty.standard => baseExplanation,
+    JourneyChallengeDifficulty.advanced => switch (type) {
+        JourneyChallengeType.paragraphRebuild =>
+          '$baseExplanation 还要检查叙事焦点、时间推进与段落收束是否连续。',
+        JourneyChallengeType.grammarRepair =>
+          '$baseExplanation 判断时应同时验证句法中心、语义指向和关联结构。',
+        JourneyChallengeType.missingSentence =>
+          '$baseExplanation 高质量衔接还要保持主题链、指代对象和逻辑方向一致。',
+      },
+  };
+}
+
+@visibleForTesting
+String adaptiveChallengeMemoryTip({
+  required JourneyChallengeType type,
+  required JourneyChallengeDifficulty difficulty,
+  required String baseTip,
+}) {
+  return switch (difficulty) {
+    JourneyChallengeDifficulty.beginner => switch (type) {
+        JourneyChallengeType.paragraphRebuild => '记住：地点 → 行动 → 结果。',
+        JourneyChallengeType.grammarRepair => '先找谁，再看做什么。',
+        JourneyChallengeType.missingSentence => '前一句是谁，后一句为什么。',
+      },
+    JourneyChallengeDifficulty.standard => baseTip,
+    JourneyChallengeDifficulty.advanced => switch (type) {
+        JourneyChallengeType.paragraphRebuild =>
+          '$baseTip 再标出每句的篇章功能。',
+        JourneyChallengeType.grammarRepair =>
+          '$baseTip 优先选择改动最小、结构最完整的方案。',
+        JourneyChallengeType.missingSentence =>
+          '$baseTip 最后反读整段，确认逻辑没有断层。',
+      },
+  };
+}
 
 @visibleForTesting
 JourneyChallengeDifficulty challengeDifficultyForProfile(
@@ -69,6 +168,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
   int _activeIndex = 0;
   bool _sendingReward = false;
   bool _completionSent = false;
+  bool _focusedReplayActive = false;
   final Set<int> _rewardedModes = <int>{};
   late final NarrationController _narration;
   int _narrationToken = 0;
@@ -118,6 +218,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     _activeIndex = 0;
     _sendingReward = false;
     _completionSent = false;
+    _focusedReplayActive = false;
     _rewardedModes.clear();
   }
 
@@ -150,9 +251,9 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
   String _explanationNarration(_ChallengeSession session) {
     if (session.type == JourneyChallengeType.grammarRepair) {
       final grammar = session.grammar!;
-      return '本模式获得${session.reward ?? '碎银'}。病句类型，${grammar.errorType}。错误位置，${grammar.errorLocation}。原句，${grammar.originalSentence}。修改后，${grammar.correctedSentence}。为什么错误，${grammar.whyWrong}。修改原则，${grammar.revisionRule}。记忆方法，${grammar.memoryTip}。';
+      return '本模式获得${session.reward ?? '碎银'}。掌握情况，${session.masteryLabel}。训练目标，${session.trainingGoal}。${session.masteryAdvice}。病句类型，${grammar.errorType}。错误位置，${grammar.errorLocation}。原句，${grammar.originalSentence}。修改后，${grammar.correctedSentence}。为什么错误，${grammar.whyWrong}。修改原则，${grammar.revisionRule}。记忆方法，${grammar.memoryTip}。';
     }
-    return '本模式获得${session.reward ?? '碎银'}。正确答案，${session.correctAnswerText}。为什么，${session.explanation}。记忆方法，${session.memoryTip}。';
+    return '本模式获得${session.reward ?? '碎银'}。掌握情况，${session.masteryLabel}。训练目标，${session.trainingGoal}。${session.masteryAdvice}。正确答案，${session.correctAnswerText}。为什么，${session.explanation}。记忆方法，${session.memoryTip}。';
   }
 
   Widget _speakerButton(
@@ -172,8 +273,10 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     );
   }
 
-  Future<void> _showResolutionDialog(_ChallengeSession session) async {
-    final finalMode = _activeIndex == _sessions.length - 1;
+  Future<bool> _showResolutionDialog(_ChallengeSession session) async {
+    final showJourneySummary =
+        _activeIndex == _sessions.length - 1 || _focusedReplayActive;
+    var replayWeakest = false;
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -203,21 +306,50 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           constraints: BoxConstraints(
             maxHeight: MediaQuery.sizeOf(dialogContext).height * .62,
           ),
-          child: SingleChildScrollView(child: _explanationCard()),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _explanationCard(),
+                if (showJourneySummary) ...[
+                  const SizedBox(height: 9),
+                  _journeyMasterySummary(),
+                ],
+              ],
+            ),
+          ),
         ),
         actions: [
+          if (showJourneySummary && _needsFocusedReplay) ...[
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                key: const ValueKey('challenge-replay-weakest'),
+                onPressed: () {
+                  replayWeakest = true;
+                  Navigator.of(dialogContext).pop();
+                },
+                icon: const Icon(Icons.replay_rounded),
+                label: Text(
+                  t('再练重点项'),
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+          ],
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
               key: const ValueKey('challenge-dialog-action'),
               onPressed: () => Navigator.of(dialogContext).pop(),
               icon: Icon(
-                finalMode
+                showJourneySummary
                     ? Icons.verified_rounded
                     : Icons.arrow_forward_rounded,
               ),
               label: Text(
-                t(finalMode ? '完成三连挑战' : '进入下一种挑战'),
+                t(showJourneySummary ? '完成三连挑战' : '进入下一种挑战'),
                 style: const TextStyle(fontWeight: FontWeight.w900),
               ),
             ),
@@ -225,6 +357,44 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
         ],
       ),
     );
+    return replayWeakest;
+  }
+
+  int get _weakestSessionIndex {
+    var weakestIndex = 0;
+    for (var index = 1; index < _sessions.length; index++) {
+      final current = _sessions[weakestIndex];
+      final candidate = _sessions[index];
+      if (!candidate.correct && current.correct ||
+          candidate.correct == current.correct &&
+              candidate.attempts > current.attempts) {
+        weakestIndex = index;
+      }
+    }
+    return weakestIndex;
+  }
+
+  bool get _needsFocusedReplay => _sessions.any(
+        (session) => !session.correct || session.attempts > 1,
+      );
+
+  void _restartWeakestMode() {
+    final index = _weakestSessionIndex;
+    final previous = _sessions[index];
+    setState(() {
+      _sessions[index] = _ChallengeSession.build(
+        journeyId: widget.journeyId,
+        storyParagraphs: widget.storyParagraphs,
+        discoveryTexts: widget.discoveryTexts,
+        difficulty: previous.difficulty,
+        type: previous.type,
+        seed: previous.seed,
+      );
+      _activeIndex = index;
+      _completionSent = false;
+      _focusedReplayActive = true;
+    });
+    _scheduleAutoNarration();
   }
 
   Future<void> _submit() async {
@@ -245,12 +415,17 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     }
     if (!mounted) return;
 
-    await _showResolutionDialog(session);
+    final replayWeakest = await _showResolutionDialog(session);
     if (!mounted) return;
+    if (replayWeakest) {
+      _restartWeakestMode();
+      return;
+    }
 
     final allCompleted = _sessions.every((item) => item.resolved);
     if (allCompleted && !_completionSent) {
       _completionSent = true;
+      _focusedReplayActive = false;
       await widget.onAllCompleted();
       return;
     }
@@ -423,7 +598,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
                   borderRadius: BorderRadius.circular(99),
                 ),
                 child: Text(
-                  t(_session.difficultyLabel),
+                  t('难度 · ${_session.difficultyLabel}'),
                   style: const TextStyle(
                     color: Color(0xFF7A4B2B),
                     fontSize: 9,
@@ -444,11 +619,35 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
             ),
           ),
           const SizedBox(height: 6),
+          Row(
+            key: const ValueKey('challenge-training-goal'),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.track_changes_rounded,
+                color: Color(0xFF7A4B2B),
+                size: 13,
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  t('训练目标 · ${_session.trainingGoal}'),
+                  style: const TextStyle(
+                    color: Color(0xFF7A4B2B),
+                    fontSize: 10,
+                    height: 1.35,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
           Text(
             t(
               _session.resolved
                   ? '本模式已完成'
-                  : '第 ${_session.attempts + 1} / 3 次 · 候选答案固定为 4 个',
+                  : '第 ${_session.attempts + 1} / 3 次 · 候选答案 ${_session.options.length} 个',
             ),
             style: TextStyle(
               color: const Color(0xFF49382C).withValues(alpha: .62),
@@ -530,7 +729,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           ),
         ),
         const SizedBox(height: 7),
-        _fourOptions(),
+        _challengeOptions(),
         const SizedBox(height: 7),
         Align(
           alignment: Alignment.centerLeft,
@@ -630,7 +829,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           ),
         ),
         const SizedBox(height: 6),
-        _fourOptions(),
+        _challengeOptions(),
       ],
     );
   }
@@ -675,7 +874,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
         const SizedBox(height: 6),
         _contextSentence(_session.contextAfter),
         const SizedBox(height: 8),
-        _fourOptions(),
+        _challengeOptions(),
       ],
     );
   }
@@ -709,8 +908,8 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     );
   }
 
-  Widget _fourOptions() {
-    assert(_session.options.length == 4);
+  Widget _challengeOptions() {
+    assert(_session.options.length == journeyChallengeOptionCount);
     return Column(
       key: const ValueKey('challenge-four-options'),
       children: [
@@ -745,6 +944,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
             : () => setState(() => _session.selectOption(option)),
         child: Container(
           width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 56),
           padding: const EdgeInsets.fromLTRB(9, 8, 9, 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(13),
@@ -893,13 +1093,126 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
             ],
           ),
           const SizedBox(height: 7),
+          Container(
+            key: const ValueKey('challenge-mastery-summary'),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+            decoration: BoxDecoration(
+              color: const Color(0xFF315B32).withValues(alpha: .07),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: const Color(0xFF315B32).withValues(alpha: .14),
+              ),
+            ),
+            child: Text(
+              t(
+                '掌握情况 · ${_session.masteryLabel}\n'
+                '训练目标 · ${_session.trainingGoal}\n'
+                '${_session.masteryAdvice}',
+              ),
+              style: const TextStyle(
+                color: Color(0xFF315B32),
+                fontSize: 10,
+                height: 1.4,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(height: 2),
           if (_session.type == JourneyChallengeType.grammarRepair)
             ..._grammarExplanationLines()
           else ...[
             _explanationLine('正确答案', _session.correctAnswerText),
-            _explanationLine('为什么', _session.explanation),
-            _explanationLine('记忆方法', _session.memoryTip),
+            _explanationLine('为什么', _session.adaptiveExplanation),
+            _explanationLine('记忆方法', _session.adaptiveMemoryTip),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _journeyMasterySummary() {
+    final passed = _sessions.where((session) => session.correct).length;
+    final firstTry = _sessions
+        .where((session) => session.correct && session.attempts == 1)
+        .length;
+    final weakest = _sessions.reduce((current, candidate) {
+      if (!candidate.correct && current.correct) return candidate;
+      if (candidate.correct == current.correct &&
+          candidate.attempts > current.attempts) {
+        return candidate;
+      }
+      return current;
+    });
+    final headline = firstTry == _sessions.length
+        ? '三项能力已掌握'
+        : passed == _sessions.length
+        ? '三项挑战已完成'
+        : '已完成 $passed / ${_sessions.length} 项';
+
+    return Container(
+      key: const ValueKey('challenge-journey-mastery-summary'),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6EBD4).withValues(alpha: .94),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFD9BC82)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            t('旅程学习总结 · $headline'),
+            style: const TextStyle(
+              color: Color(0xFF5D3B22),
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 7),
+          for (final session in _sessions)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: Row(
+                key: ValueKey('challenge-summary-${session.type.name}'),
+                children: [
+                  Icon(
+                    session.correct
+                        ? Icons.check_circle_rounded
+                        : Icons.replay_circle_filled_rounded,
+                    color: session.correct
+                        ? const Color(0xFF315B32)
+                        : const Color(0xFF9A5B31),
+                    size: 15,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      t(
+                        '${session.typeLabel} · ${session.masteryLabel}'
+                        ' · ${session.attempts} 次',
+                      ),
+                      style: const TextStyle(
+                        color: Color(0xFF49382C),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 2),
+          Text(
+            t('下一步 · 重点复习${weakest.typeLabel}：${weakest.trainingGoal}。'
+                '${weakest.masteryAdvice}'),
+            style: const TextStyle(
+              color: Color(0xFF6D4A2B),
+              fontSize: 10,
+              height: 1.4,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ],
       ),
     );
@@ -907,15 +1220,36 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
 
   List<Widget> _grammarExplanationLines() {
     final grammar = _session.grammar!;
-    return [
-      _explanationLine('病句类型', grammar.errorType),
-      _explanationLine('错误位置', grammar.errorLocation),
-      _explanationLine('原句', grammar.originalSentence),
-      _explanationLine('修改后', grammar.correctedSentence),
-      _explanationLine('为什么错误', grammar.whyWrong),
-      _explanationLine('修改原则', grammar.revisionRule),
-      _explanationLine('记忆方法', grammar.memoryTip),
-    ];
+    return switch (_session.difficulty) {
+      JourneyChallengeDifficulty.beginner => [
+          _explanationLine('错误位置', grammar.errorLocation),
+          _explanationLine('修改后', grammar.correctedSentence),
+          _explanationLine('简单规则', grammar.revisionRule),
+          _explanationLine('记忆方法', grammar.memoryTip),
+        ],
+      JourneyChallengeDifficulty.standard => [
+          _explanationLine('病句类型', grammar.errorType),
+          _explanationLine('错误位置', grammar.errorLocation),
+          _explanationLine('原句', grammar.originalSentence),
+          _explanationLine('修改后', grammar.correctedSentence),
+          _explanationLine('为什么错误', grammar.whyWrong),
+          _explanationLine('修改原则', grammar.revisionRule),
+          _explanationLine('记忆方法', grammar.memoryTip),
+        ],
+      JourneyChallengeDifficulty.advanced => [
+          _explanationLine('病句类型', grammar.errorType),
+          _explanationLine('错误位置', grammar.errorLocation),
+          _explanationLine('原句', grammar.originalSentence),
+          _explanationLine('修改后', grammar.correctedSentence),
+          _explanationLine('为什么错误', grammar.whyWrong),
+          _explanationLine('修改原则', grammar.revisionRule),
+          _explanationLine(
+            '结构分析',
+            '${grammar.errorType}。${grammar.whyWrong} ${grammar.revisionRule}',
+          ),
+          _explanationLine('记忆方法', grammar.memoryTip),
+        ],
+    };
   }
 
   Widget _explanationLine(String label, String value) {
@@ -1131,10 +1465,78 @@ class _ChallengeSession {
   };
 
   String get difficultyLabel => switch (difficulty) {
-    JourneyChallengeDifficulty.beginner => '轻松',
+    JourneyChallengeDifficulty.beginner => '初级',
     JourneyChallengeDifficulty.standard => '标准',
-    JourneyChallengeDifficulty.advanced => '挑战',
+    JourneyChallengeDifficulty.advanced => '高级',
   };
+
+  String get trainingGoal => switch ((type, difficulty)) {
+    (
+      JourneyChallengeType.paragraphRebuild,
+      JourneyChallengeDifficulty.beginner,
+    ) =>
+      '辨认地点、行动与结果顺序',
+    (
+      JourneyChallengeType.paragraphRebuild,
+      JourneyChallengeDifficulty.standard,
+    ) =>
+      '建立背景、行动与转折结构',
+    (
+      JourneyChallengeType.paragraphRebuild,
+      JourneyChallengeDifficulty.advanced,
+    ) =>
+      '判断叙事视角、因果与收束',
+    (
+      JourneyChallengeType.grammarRepair,
+      JourneyChallengeDifficulty.beginner,
+    ) =>
+      '找出主语和明显的不自然词语',
+    (
+      JourneyChallengeType.grammarRepair,
+      JourneyChallengeDifficulty.standard,
+    ) =>
+      '检查搭配、语序与句式平行',
+    (
+      JourneyChallengeType.grammarRepair,
+      JourneyChallengeDifficulty.advanced,
+    ) =>
+      '分析句法中心、指向与逻辑',
+    (
+      JourneyChallengeType.missingSentence,
+      JourneyChallengeDifficulty.beginner,
+    ) =>
+      '连接前文人物与后文结果',
+    (
+      JourneyChallengeType.missingSentence,
+      JourneyChallengeDifficulty.standard,
+    ) =>
+      '同时完成承接与铺垫',
+    (
+      JourneyChallengeType.missingSentence,
+      JourneyChallengeDifficulty.advanced,
+    ) =>
+      '保持主题链、指代与因果连续',
+  };
+
+  String get masteryLabel {
+    if (!correct) return '需要复习';
+    return switch (attempts) {
+      1 => '已掌握',
+      2 => '基本掌握',
+      _ => '正在巩固',
+    };
+  }
+
+  String get masteryAdvice {
+    if (!correct) {
+      return '先按提示重读正确答案，再回到相同训练目标练习一次。';
+    }
+    return switch (attempts) {
+      1 => '可以继续挑战更复杂的表达与逻辑。',
+      2 => '已经理解核心方法，建议用记忆提示再检查一次。',
+      _ => '已经完成修正，建议复述规则后再进入下一题。',
+    };
+  }
 
   bool get canSubmit => switch (type) {
     JourneyChallengeType.paragraphRebuild =>
@@ -1242,18 +1644,29 @@ class _ChallengeSession {
     }
   }
 
-  String get firstHint => switch (type) {
-    JourneyChallengeType.paragraphRebuild => '先找交代地点或时间的句子，再安排人物行动和最后的变化。',
-    JourneyChallengeType.grammarRepair => '先检查句子有没有明确主语，再看关联词和前后句式是否平行。',
-    JourneyChallengeType.missingSentence => '同时观察前一句留下的主语，以及后一句出现的结果或转折。',
-  };
+  String get firstHint => adaptiveChallengeHint(
+    type: type,
+    difficulty: difficulty,
+    attempt: 1,
+  );
 
-  String get secondHint => switch (type) {
-    JourneyChallengeType.paragraphRebuild => '开头介绍整体，中间发生行动，最后才出现观察、决定或结果。',
-    JourneyChallengeType.grammarRepair =>
-      '“通过……使……”容易拿走主语；“不但……而且……”要保持前后结构一致。',
-    JourneyChallengeType.missingSentence => '正确句必须既接住前文，又能解释后文为什么会出现。',
-  };
+  String get secondHint => adaptiveChallengeHint(
+    type: type,
+    difficulty: difficulty,
+    attempt: 2,
+  );
+
+  String get adaptiveExplanation => adaptiveChallengeExplanation(
+    type: type,
+    difficulty: difficulty,
+    baseExplanation: explanation,
+  );
+
+  String get adaptiveMemoryTip => adaptiveChallengeMemoryTip(
+    type: type,
+    difficulty: difficulty,
+    baseTip: memoryTip,
+  );
 
   static _ChallengeSession _buildParagraph(
     String journeyId,
@@ -1286,10 +1699,14 @@ class _ChallengeSession {
           isCorrect: true,
         ),
     ];
-    final distractorTexts = _paragraphDistractors(journeyId);
+    final distractorTexts = selectBalancedChallengeDistractors(
+    correctAnswers: correctTexts,
+    candidates: _paragraphDistractors(journeyId),
+    count: journeyChallengeOptionCount - correctOptions.length,
+  );
     final options = <_ChallengeOption>[...correctOptions];
     var distractorIndex = 0;
-    while (options.length < 4) {
+    while (options.length < journeyChallengeOptionCount) {
       options.add(
         _ChallengeOption(
           id: 'distractor-$distractorIndex',
@@ -1322,12 +1739,39 @@ class _ChallengeSession {
     int seed,
   ) {
     final grammar = _grammarForJourney(journeyId, difficulty, seed);
-    final replacementTexts = <String>[
+
+    final replacementCandidates = <String>[
       grammar.correctReplacement,
       ...grammar.distractors,
+      grammar.segments[grammar.problemSegmentIndex],
+      ...switch (difficulty) {
+        JourneyChallengeDifficulty.beginner => <String>[
+            '因此${grammar.correctReplacement}',
+            '而且${grammar.correctReplacement}',
+          ],
+        JourneyChallengeDifficulty.standard => <String>[
+            '同时${grammar.correctReplacement}',
+            '${grammar.correctReplacement}还',
+          ],
+        JourneyChallengeDifficulty.advanced => <String>[
+            '从而${grammar.correctReplacement}',
+            '由此${grammar.correctReplacement}',
+          ],
+      },
     ];
+    final distractorTexts = selectBalancedChallengeDistractors(
+    correctAnswers: <String>[grammar.correctReplacement],
+    candidates: replacementCandidates,
+    count: journeyChallengeOptionCount - 1,
+  );
+  final replacementTexts = <String>[
+    grammar.correctReplacement,
+    ...distractorTexts,
+  ];
     final options = <_ChallengeOption>[
-      for (var index = 0; index < 4; index++)
+      for (var index = 0;
+          index < journeyChallengeOptionCount;
+          index++)
         _ChallengeOption(
           id: index == 0 ? 'correct' : 'distractor-$index',
           text: replacementTexts[index],
@@ -1343,7 +1787,7 @@ class _ChallengeSession {
       options: options,
       correctIds: const ['correct'],
       questionTitle: '修好这句不自然的话',
-      instruction: '先点击病句位置，再从四个修改方案中选出最自然的一项。',
+      instruction: '先点击病句位置，再从四个长度接近的修改方案中选出最自然的一项。',
       explanation: grammar.whyWrong,
       memoryTip: grammar.memoryTip,
       grammar: grammar,
@@ -1361,10 +1805,18 @@ class _ChallengeSession {
     final before = source.isNotEmpty ? source[0] : '清晨，探索者来到今天的目的地。';
     final correct = source.length >= 2 ? source[1] : '他沿着主要路线慢慢向前走。';
     final after = source.length >= 3 ? source[2] : '一路上的景色因此不断发生变化。';
-    final distractors = _missingDistractors(journeyId, discoveryTexts);
+    final distractors = selectBalancedChallengeDistractors(
+    correctAnswers: <String>[correct],
+    candidates: _missingDistractors(
+      journeyId,
+      discoveryTexts,
+      difficulty,
+    ),
+    count: journeyChallengeOptionCount - 1,
+  );
     final optionTexts = <String>[correct, ...distractors];
     final options = <_ChallengeOption>[
-      for (var index = 0; index < 4; index++)
+      for (var index = 0; index < journeyChallengeOptionCount; index++)
         _ChallengeOption(
           id: index == 0 ? 'correct' : 'distractor-$index',
           text: optionTexts[index],
@@ -1380,7 +1832,7 @@ class _ChallengeSession {
       options: options,
       correctIds: const ['correct'],
       questionTitle: '补回故事中消失的一句',
-      instruction: '阅读前后文，从四个相近答案中选出最能连接上下文的一句。',
+      instruction: '阅读前后文，从四个长度接近的答案中选出最能连接上下文的一句。',
       explanation: '正确句承接前文的人物与地点，同时为后文的变化、因果或决定铺路。',
       memoryTip: '补句要同时看两边：前一句留下什么，后一句为什么出现。',
       contextBefore: before,
@@ -1394,62 +1846,20 @@ class _ChallengeSession {
     int seed,
   ) {
     final journeySpec = switch (journeyId) {
-      'literary-roaming' => const _GrammarSpec(
-        segments: ['通过追随蓝色蝴蝶，', '使探索者', '进入了更深的梦境。'],
-        problemSegmentIndex: 1,
-        originalSentence: '通过追随蓝色蝴蝶，使探索者进入了更深的梦境。',
-        correctedSentence: '通过追随蓝色蝴蝶，探索者进入了更深的梦境。',
-        correctOptionId: 'correct',
-        correctReplacement: '探索者',
-        distractors: ['因此使探索者', '而且探索者还', '让探索者因此'],
-        errorType: '成分残缺：主语缺失',
-        errorLocation: '“使探索者”中的“使”',
-        whyWrong: '“通过……”已经形成介词结构，再用“使”引出结果，整句便没有明确主语。',
-        revisionRule: '删除“使”，让“探索者”直接成为主语。',
-        memoryTip: '看到“通过……使……”时，先检查主语还在不在。',
-      ),
-      'myth-tracing' => const _GrammarSpec(
-        segments: ['由于遗简已经残缺，', '因此使线索', '变得更难理解。'],
-        problemSegmentIndex: 1,
-        originalSentence: '由于遗简已经残缺，因此使线索变得更难理解。',
-        correctedSentence: '由于遗简已经残缺，线索因此变得更难理解。',
-        correctOptionId: 'correct',
-        correctReplacement: '线索因此',
-        distractors: ['所以使线索', '而且线索还', '因此让线索也'],
-        errorType: '关联词赘余并导致主语缺失',
-        errorLocation: '“因此使线索”',
-        whyWrong: '“由于”已经说明原因，“因此使”又叠加关系词，并把结果句的主语变得不自然。',
-        revisionRule: '让“线索”成为主语，只保留自然的因果标记。',
-        memoryTip: '“由于”可以和“因此”呼应，但不要再叠加“使”。',
-      ),
-      'strange-night-talks' => const _GrammarSpec(
-        segments: ['夜客不但留下了铜钱，', '而且门外的声音还', '不断叫你的名字。'],
-        problemSegmentIndex: 1,
-        originalSentence: '夜客不但留下了铜钱，而且门外的声音还不断叫你的名字。',
-        correctedSentence: '夜客留下了铜钱，而门外的声音还不断叫你的名字。',
-        correctOptionId: 'correct',
-        correctReplacement: '而门外的声音还',
-        distractors: ['而且夜客也', '所以门外声音', '并且使声音还'],
-        errorType: '关联结构不平行',
-        errorLocation: '“不但……而且……”连接了两个不同主语',
-        whyWrong: '前半句主语是“夜客”，后半句突然换成“门外的声音”，不适合直接用成套递进结构。',
-        revisionRule: '改用“而”表示并列或转折，让两个不同主语各自完整。',
-        memoryTip: '使用“不但……而且……”时，检查前后主语和句式是否平行。',
-      ),
-      'folk-secret-land' => const _GrammarSpec(
-        segments: ['河灯不仅承载祈愿，', '而且人们还', '把它放进水中。'],
-        problemSegmentIndex: 1,
-        originalSentence: '河灯不仅承载祈愿，而且人们还把它放进水中。',
-        correctedSentence: '河灯不仅承载祈愿，也被人们放进水中。',
-        correctOptionId: 'correct',
-        correctReplacement: '也被人们',
-        distractors: ['而且人们也', '所以让人们', '并且人们还'],
-        errorType: '前后主语与句式不平行',
-        errorLocation: '“而且人们还”',
-        whyWrong: '“不仅”后的主语是“河灯”，后半句突然换成“人们”，两部分结构不一致。',
-        revisionRule: '保持“河灯”为主语，把后半句改成被动结构。',
-        memoryTip: '关联词连接的两部分，最好保持同一个主语和相近句式。',
-      ),
+      'beijing-forbidden-city' ||
+      'beijing-summer-palace' ||
+      'shanghai-bund' ||
+      'xian-city-wall' ||
+      'hangzhou-west-lake' ||
+      'chengdu-kuanzhai-alley' ||
+      'nanjing-qinhuai-river' ||
+      'guangzhou-chen-clan-academy' =>
+        _adaptiveGrammarForJourney(journeyId, difficulty),
+      'literary-roaming' ||
+      'myth-tracing' ||
+      'strange-night-talks' ||
+      'folk-secret-land' =>
+        _adaptiveGrammarForJourney(journeyId, difficulty),
       _ => switch (difficulty) {
         JourneyChallengeDifficulty.beginner => const _GrammarSpec(
           segments: ['通过参观这里，', '使游客', '可以看到不同的风景。'],
@@ -1487,7 +1897,7 @@ class _ChallengeSession {
           correctOptionId: 'correct',
           correctReplacement: '远山因此',
           distractors: ['所以使远山', '而且远山还', '从而让远山也'],
-          errorType: '关联词赘余并导致主语缺失',
+          errorType: '成分赘余：关联词堆叠并导致主语缺失',
           errorLocation: '“因此使远山”',
           whyWrong: '“由于”已经引出原因，再用“因此使”会堆叠关系词，同时让结果句缺少自然主语。',
           revisionRule: '让“远山”成为结果句主语，只保留一个自然的因果标记。',
@@ -1495,127 +1905,294 @@ class _ChallengeSession {
         ),
       },
     };
-    final variedSpecs = <_GrammarSpec>[
-      journeySpec,
-      const _GrammarSpec(
-        segments: ['探索者', '大约走了', '一个小时左右。'],
-        problemSegmentIndex: 2,
-        originalSentence: '探索者大约走了一个小时左右。',
-        correctedSentence: '探索者大约走了一个小时。',
-        correctOptionId: 'correct',
-        correctReplacement: '一个小时',
-        distractors: ['差不多一个小时左右', '大约一小时上下', '约有一个小时左右'],
-        errorType: '成分赘余：意思重复',
-        errorLocation: '“大约”与“左右”',
-        whyWrong: '“大约”和“左右”都表示估计，同时使用会重复表达同一个意思。',
-        revisionRule: '估计词只保留一个。',
-        memoryTip: '看到“大约、左右、上下、约”连用时，先删去重复的一项。',
-      ),
-      const _GrammarSpec(
-        segments: ['沿着石阶，', '古老的钟声', '被探索者听见了。'],
-        problemSegmentIndex: 1,
-        originalSentence: '沿着石阶，古老的钟声被探索者听见了。',
-        correctedSentence: '沿着石阶前行时，探索者听见了古老的钟声。',
-        correctOptionId: 'correct',
-        correctReplacement: '前行时，探索者听见了古老的钟声',
-        distractors: ['古老的钟声正在前行', '钟声沿着探索者前进', '使古老钟声被听见'],
-        errorType: '主语错位：施事对象不清',
-        errorLocation: '“沿着石阶”的动作执行者',
-        whyWrong: '能沿着石阶行走的是探索者，不是钟声；句首状语必须和后面的主语搭配。',
-        revisionRule: '让真正执行动作的人紧接在状语后面。',
-        memoryTip: '先问“谁在做这个动作”，就能发现主语错位。',
-      ),
-      const _GrammarSpec(
-        segments: ['他把灯放在桌上，', '然后仔细地', '端详它的声音。'],
-        problemSegmentIndex: 2,
-        originalSentence: '他把灯放在桌上，然后仔细地端详它的声音。',
-        correctedSentence: '他把灯放在桌上，然后仔细聆听它发出的声音。',
-        correctOptionId: 'correct',
-        correctReplacement: '聆听它发出的声音',
-        distractors: ['观看它响起的声音', '端详它传来的响声', '观察声音的颜色'],
-        errorType: '动宾搭配不当',
-        errorLocation: '“端详……声音”',
-        whyWrong: '“端详”用于仔细看具体形象，声音应当用“听、聆听”等动词。',
-        revisionRule: '动词必须符合宾语能够被怎样感知。',
-        memoryTip: '画面用“看”，声音用“听”，气味用“闻”。',
-      ),
-      const _GrammarSpec(
-        segments: ['回到渡口以后，', '他想起那位老人，', '他说的话仍在耳边。'],
-        problemSegmentIndex: 2,
-        originalSentence: '回到渡口以后，他想起那位老人，他说的话仍在耳边。',
-        correctedSentence: '回到渡口以后，他想起那位老人，老人的话仍在耳边。',
-        correctOptionId: 'correct',
-        correctReplacement: '老人的话仍在耳边',
-        distractors: ['他的话也被他说起', '那个人说他的那些话', '这句话想起了老人'],
-        errorType: '指代不明',
-        errorLocation: '第二个“他”',
-        whyWrong: '句中有探索者和老人两个人，“他”无法明确指向谁。',
-        revisionRule: '出现多个可能对象时，直接写出具体称呼。',
-        memoryTip: '一句话里有两个人，再出现“他”就要检查指的是谁。',
-      ),
-      const _GrammarSpec(
-        segments: ['那扇门', '在三百年前', '即将已经关闭。'],
-        problemSegmentIndex: 2,
-        originalSentence: '那扇门在三百年前即将已经关闭。',
-        correctedSentence: '那扇门在三百年前已经关闭。',
-        correctOptionId: 'correct',
-        correctReplacement: '已经关闭',
-        distractors: ['即将关闭过了', '马上已经关上', '将要曾经关闭'],
-        errorType: '时态逻辑矛盾',
-        errorLocation: '“即将”与“已经”',
-        whyWrong: '“即将”表示还没发生，“已经”表示事情完成，不能描述同一动作。',
-        revisionRule: '根据时间线选择完成或将来标记。',
-        memoryTip: '“即将”看未来，“已经”看过去，两者不要同时修饰一个动作。',
-      ),
-      const _GrammarSpec(
-        segments: ['只有认真观察，', '就能发现', '故事里的暗线。'],
-        problemSegmentIndex: 1,
-        originalSentence: '只有认真观察，就能发现故事里的暗线。',
-        correctedSentence: '只有认真观察，才能发现故事里的暗线。',
-        correctOptionId: 'correct',
-        correctReplacement: '才能发现',
-        distractors: ['所以能发现', '也就发现了', '但是会发现'],
-        errorType: '关联词搭配错误',
-        errorLocation: '“只有……就……”',
-        whyWrong: '必要条件“只有”通常和“才”搭配，“就”更常和“只要”搭配。',
-        revisionRule: '使用“只有……才……”或“只要……就……”。',
-        memoryTip: '只有配才，只要配就。',
-      ),
-      const _GrammarSpec(
-        segments: ['探索者', '认真地几乎', '读完了整封遗简。'],
-        problemSegmentIndex: 1,
-        originalSentence: '探索者认真地几乎读完了整封遗简。',
-        correctedSentence: '探索者几乎认真地读完了整封遗简。',
-        correctOptionId: 'correct',
-        correctReplacement: '几乎认真地',
-        distractors: ['认真几乎地', '读完几乎认真地', '地认真几乎'],
-        errorType: '语序不当',
-        errorLocation: '“认真地”和“几乎”的位置',
-        whyWrong: '范围副词“几乎”应先限定整个动作，方式状语“认真地”再说明怎样读。',
-        revisionRule: '范围副词通常放在方式状语之前。',
-        memoryTip: '先说做到什么程度，再说用什么方式做。',
-      ),
-    ];
-    // The grammar session receives the journey seed plus 997. Keeping the
-    // first run at index zero preserves the authored journey-specific item;
-    // each replay then advances to a different, clearly named error family.
-    final replayVariant = (seed - 997).abs() % variedSpecs.length;
-    return variedSpecs[replayVariant];
+    // Replays stay anchored to the selected destination and proficiency.
+    // Generic grammar drills would break the journey's narrative continuity.
+    return journeySpec;
   }
+
+  static _GrammarSpec _adaptiveGrammarForJourney(
+    String journeyId,
+    JourneyChallengeDifficulty difficulty,
+  ) {
+    final context = switch (journeyId) {
+      'beijing-forbidden-city' => (
+          focus: '午门和中轴线',
+          insight: '理解宫城的进入秩序',
+          subject: '午门',
+          action: '规定进入路线',
+          result: '感受到宫城秩序',
+          cause: '午门控制了进入方向',
+          resultSubject: '中轴线',
+          resultAction: '显得更加庄严清晰',
+        ),
+      'beijing-summer-palace' => (
+          focus: '昆明湖的倒影',
+          insight: '看见万寿山进入画面',
+          subject: '长廊',
+          action: '连接沿湖景点',
+          result: '改变观看节奏',
+          cause: '昆明湖产生了倒影',
+          resultSubject: '万寿山',
+          resultAction: '进入完整的湖山画面',
+        ),
+      'shanghai-bund' => (
+          focus: '外滩与浦东两岸',
+          insight: '比较城市的新旧层次',
+          subject: '外滩建筑群',
+          action: '保存历史街景',
+          result: '理解近代商业记忆',
+          cause: '黄浦江连接了两岸视线',
+          resultSubject: '新旧天际线',
+          resultAction: '形成鲜明的时代对照',
+        ),
+      'xian-city-wall' => (
+          focus: '城墙和护城河',
+          insight: '看懂连续防御体系',
+          subject: '宽阔的墙顶',
+          action: '方便守军巡查',
+          result: '观察古城格局',
+          cause: '城墙围合了古城空间',
+          resultSubject: '古今城市边界',
+          resultAction: '变得清楚可辨',
+        ),
+      'hangzhou-west-lake' => (
+          focus: '苏堤、桥与远山',
+          insight: '发现西湖景色的变化',
+          subject: '苏堤',
+          action: '组织沿湖路线',
+          result: '逐步看见不同景层',
+          cause: '天气和季节不断变化',
+          resultSubject: '西湖十景',
+          resultAction: '呈现不同的观看感受',
+        ),
+      'chengdu-kuanzhai-alley' => (
+          focus: '宽、窄、井三条巷子',
+          insight: '分辨不同的生活节奏',
+          subject: '院落和茶馆',
+          action: '保留街巷生活',
+          result: '感受成都的慢节奏',
+          cause: '三条巷子的尺度各不相同',
+          resultSubject: '街区生活',
+          resultAction: '形成丰富的空间层次',
+        ),
+      'nanjing-qinhuai-river' => (
+          focus: '秦淮河的桥梁与灯影',
+          insight: '理解夜游路线的文化记忆',
+          subject: '秦淮河',
+          action: '串联夫子庙和街市',
+          result: '读懂夜间文化空间',
+          cause: '灯会连接了河流与街市',
+          resultSubject: '夜游路线',
+          resultAction: '承载更多历史记忆',
+        ),
+      'guangzhou-chen-clan-academy' => (
+          focus: '屋脊陶塑和木石雕刻',
+          insight: '读懂其中的岭南故事',
+          subject: '陈家祠装饰',
+          action: '保存岭南工艺',
+          result: '理解宗族文化记忆',
+          cause: '多种雕塑共同讲述地方故事',
+          resultSubject: '建筑细节',
+          resultAction: '成为可阅读的文化线索',
+        ),
+      'literary-roaming' => (
+          focus: '蓝色蝴蝶和竹林梦境',
+          insight: '分辨梦与醒的边界',
+          subject: '蓝色蝴蝶',
+          action: '引导探索者穿过竹林',
+          result: '发现梦境深处的岔路',
+          cause: '蓝色蝴蝶在岔路前消失',
+          resultSubject: '梦境道路',
+          resultAction: '显出醒来与继续追寻的两种方向',
+        ),
+      'myth-tracing' => (
+          focus: '月宫遗简和守匣白兔',
+          insight: '辨认月光留下的线索',
+          subject: '残缺遗简',
+          action: '保存月宫旧事',
+          result: '追踪白兔守候的秘密',
+          cause: '遗简只在月光下显出文字',
+          resultSubject: '隐藏线索',
+          resultAction: '随着月色逐渐清晰',
+        ),
+      'strange-night-talks' => (
+          focus: '无影夜客和门外呼声',
+          insight: '判断客栈异象的来源',
+          subject: '夜客留下的铜钱',
+          action: '证明陌生人曾经来过',
+          result: '怀疑消失的影子',
+          cause: '雨夜脚步与敲门声反复出现',
+          resultSubject: '客栈走廊',
+          resultAction: '变得更加诡异难辨',
+        ),
+      'folk-secret-land' => (
+          focus: '逆流河灯和灯纸姓名',
+          insight: '理解祈愿与记忆的联系',
+          subject: '逆流河灯',
+          action: '承载岸边人们的祈愿',
+          result: '寻找名字指向的故事',
+          cause: '写有名字的河灯逆流而上',
+          resultSubject: '上游倒影',
+          resultAction: '显出被遗忘的旧日记忆',
+        ),
+      _ => throw ArgumentError.value(journeyId, 'journeyId'),
+    };
+
+    return switch (difficulty) {
+      JourneyChallengeDifficulty.beginner => _GrammarSpec(
+          segments: ['通过观察${context.focus}，', '使游客', '可以${context.insight}。'],
+          problemSegmentIndex: 1,
+          originalSentence:
+              '通过观察${context.focus}，使游客可以${context.insight}。',
+          correctedSentence:
+              '通过观察${context.focus}，游客可以${context.insight}。',
+          correctOptionId: 'correct',
+          correctReplacement: '游客',
+          distractors: const ['因此使游客', '而且游客还', '让游客因此'],
+          errorType: '成分残缺：主语缺失',
+          errorLocation: '“使游客”中的“使”',
+          whyWrong: '“通过……”已经形成介词结构，再用“使”会让整句话没有明确主语。',
+          revisionRule: '删除“使”，让“游客”直接成为主语。',
+          memoryTip: '看到“通过……使……”时，先检查句子里还剩不剩主语。',
+        ),
+      JourneyChallengeDifficulty.standard => _GrammarSpec(
+          segments: [
+            '${context.subject}不但${context.action}，',
+            '而且游客还',
+            '${context.result}。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence:
+              '${context.subject}不但${context.action}，而且游客还${context.result}。',
+          correctedSentence:
+              '${context.subject}不但${context.action}，而且让游客${context.result}。',
+          correctOptionId: 'correct',
+          correctReplacement: '而且让游客',
+          distractors: const ['所以游客也', '并且游客还', '而且游客会'],
+          errorType: '前后主语与句式不平行',
+          errorLocation: '“而且游客还”',
+          whyWrong: '“不但”后的主语是景物，后半句突然改用“游客”作主语，关联结构不平行。',
+          revisionRule: '保持景物为主语，用“让游客”承接它产生的作用。',
+          memoryTip: '使用“不但……而且……”时，要检查两部分主语和句式是否一致。',
+        ),
+      JourneyChallengeDifficulty.advanced => _GrammarSpec(
+          segments: [
+            '由于${context.cause}，',
+            '因此使${context.resultSubject}',
+            '${context.resultAction}。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence:
+              '由于${context.cause}，因此使${context.resultSubject}${context.resultAction}。',
+          correctedSentence:
+              '由于${context.cause}，${context.resultSubject}因此${context.resultAction}。',
+          correctOptionId: 'correct',
+          correctReplacement: '${context.resultSubject}因此',
+          distractors: [
+            '所以使${context.resultSubject}',
+            '而且${context.resultSubject}还',
+            '从而让${context.resultSubject}',
+          ],
+          errorType: '关联词赘余并导致主语缺失',
+          errorLocation: '“因此使${context.resultSubject}”',
+          whyWrong: '“由于”已经引出原因，再叠加“因此使”会让结果句缺少自然主语。',
+          revisionRule: '让结果对象直接成为主语，只保留一个自然的因果标记。',
+          memoryTip: '“由于”与“因此”可以呼应，但不要再叠加“使”拿走主语。',
+        ),
+    };
+  }
+
 
   static List<String> _paragraphDistractors(String journeyId) {
     return switch (journeyId) {
-      'literary-roaming' => ['蝴蝶停在原地，竹林也从来没有出现变化。', '探索者没有做梦，也没有看见任何岔路。'],
-      'myth-tracing' => ['太阳升起以后，遗简才第一次从海底出现。', '白兔离开桂林，故事也没有留下任何选择。'],
-      'strange-night-talks' => ['客栈从来没有下雨，夜客也一直拥有清楚的影子。', '天刚亮时，门外才第一次有人轻轻敲门。'],
-      'folk-secret-land' => ['所有河灯都停在岸上，从未进入水中。', '写着名字的灯顺流远去，没有出现任何倒影。'],
-      _ => ['游客没有停留，很快就离开了这里。', '所有景色完全相同，不需要继续观察。', '故事突然中断，也没有留下任何结果。'],
+      'literary-roaming' => [
+        '蝴蝶停在原地，竹林也从来没有出现变化。',
+        '探索者没有做梦，也没有看见任何岔路。',
+        '他只沿着直路前进，始终没有回头寻找梦的入口。',
+      ],
+      'myth-tracing' => [
+        '太阳升起以后，遗简才第一次从海底出现。',
+        '白兔离开桂林，故事也没有留下任何选择。',
+        '探索者把空匣留在岸边，没有继续辨认月光中的文字。',
+      ],
+      'strange-night-talks' => [
+        '客栈从来没有下雨，夜客也一直拥有清楚的影子。',
+        '天刚亮时，门外才第一次有人轻轻敲门。',
+        '掌柜点亮所有灯火，走廊立刻恢复了白日的安静。',
+      ],
+      'folk-secret-land' => [
+        '所有河灯都停在岸上，从未进入水中。',
+        '写着名字的灯顺流远去，没有出现任何倒影。',
+        '探索者把灯放回石阶，河面也没有改变流动方向。',
+      ],
+      _ => _regularJourneyDistractors(journeyId),
+    };
+  }
+
+
+  static List<String> _regularJourneyDistractors(String journeyId) {
+    return switch (journeyId) {
+      'beijing-forbidden-city' => [
+        '游客绕过午门，从侧门直接进入了不存在的现代广场。',
+        '黄色琉璃瓦说明这里过去只是一处普通民居。',
+        '中轴线让所有人随意改变路线，不再区分空间秩序。',
+        '红墙与城台只负责装饰，从未影响进入宫城的方式。',
+      ],
+      'beijing-summer-palace' => [
+        '昆明湖的倒影始终不变，与光线和视角没有关系。',
+        '长廊只为缩短距离，不会改变游人的观看节奏。',
+        '十七孔桥遮住全部远山，使湖面失去空间层次。',
+        '万寿山与昆明湖彼此分离，无法组成完整景观。',
+      ],
+      'shanghai-bund' => [
+        '外滩西岸只保留住宅，与银行和贸易没有联系。',
+        '浦东天际线与历史建筑属于同一时期，没有对比。',
+        '黄浦江把两岸完全隔开，从未参与城市商业发展。',
+        '历史街区只有一栋建筑，无法形成连续滨水景观。',
+      ],
+      'xian-city-wall' => [
+        '护城河位于城墙内部，主要用于装饰宫殿庭院。',
+        '宽阔墙顶阻止人员移动，因此不能承担巡查功能。',
+        '永宁门与角楼彼此独立，没有组成连续防御体系。',
+        '站在城墙上只能看见过去，看不到现代城市扩张。',
+      ],
+      'hangzhou-west-lake' => [
+        '苏堤和白堤远离湖面，不会改变游人的观看路线。',
+        '西湖十景只记录固定地点，与季节天气没有关系。',
+        '桥、柳树与远山始终保持同一位置和视觉层次。',
+        '文化命名消除了湖景变化，使每次观看完全相同。',
+      ],
+      'chengdu-kuanzhai-alley' => [
+        '三条巷子的尺度完全相同，也没有不同生活节奏。',
+        '院落、茶馆与店铺彼此隔绝，无法形成街巷生活。',
+        '保护后的街区只允许游客进入，不再服务居民。',
+        '成都的慢生活只是一句广告，与空间使用无关。',
+      ],
+      'nanjing-qinhuai-river' => [
+        '秦淮河只在白天使用，与灯影和夜间路线无关。',
+        '夫子庙、桥梁和街市互不相连，无法形成文化空间。',
+        '灯会已经概括全部历史，不必讨论科举与文学。',
+        '河流只负责分隔两岸，从未承载居民生活记忆。',
+      ],
+      'guangzhou-chen-clan-academy' => [
+        '屋脊装饰全部来自现代印刷，与岭南工艺没有关系。',
+        '陶塑、灰塑和木石雕刻只重复一种图案和故事。',
+        '陈家祠从未承担宗族教育或成员联络功能。',
+        '改为博物馆以后，建筑与社群记忆完全失去联系。',
+      ],
+      _ => [
+        '故事中的地点突然改变，却没有任何前文线索。',
+        '人物作出决定以后，后面的结果与决定完全无关。',
+        '这一句重复表面景色，却没有推进观察或理解。',
+        '时间顺序突然倒转，也没有说明变化发生的原因。',
+      ],
     };
   }
 
   static List<String> _missingDistractors(
     String journeyId,
     List<String> discoveries,
+    JourneyChallengeDifficulty difficulty,
   ) {
     final specific = switch (journeyId) {
       'literary-roaming' => [
@@ -1638,12 +2215,38 @@ class _ChallengeSession {
         '灯纸上写的是菜单，与前后的名字无关。',
         '河水完全停止流动，因此不存在上游和下游。',
       ],
-      _ => ['他没有进入景区，直接回到了住处。', '所有建筑完全一样，所以不必继续观察。', '天气突然改变，但这与前后内容没有关系。'],
+      _ => _regularJourneyDistractors(journeyId),
     };
-    if (discoveries.isNotEmpty && specific.length < 3) {
-      return [...specific, discoveries.last];
+    final discoverySentences = _extractSentences(discoveries);
+    final discoveryCandidate = discoverySentences.isEmpty
+        ? null
+        : discoverySentences.last;
+    final levelCandidates = switch (difficulty) {
+      JourneyChallengeDifficulty.beginner => <String>[
+          ...specific,
+          '他很快离开了这里，故事也在这一刻结束。',
+          '他继续向前走，却没有留意周围发生的变化。',
+        ],
+      JourneyChallengeDifficulty.standard => <String>[
+          ...specific,
+          if (discoveryCandidate != null) discoveryCandidate,
+          '他停下脚步，把沿途景色逐一写进记录里。',
+          '他沿着原来的路线前进，却忽略了前后线索。',
+        ],
+      JourneyChallengeDifficulty.advanced => <String>[
+          if (discoveryCandidate != null) discoveryCandidate,
+          ...specific,
+          '他重新检查前文线索，却没有改变原来的判断。',
+          '他看似回应了前文，却无法解释后面出现的结果。',
+        ],
+    };
+    final result = <String>[];
+    for (final candidate in levelCandidates) {
+      final value = candidate.trim();
+      if (value.isEmpty || result.contains(value)) continue;
+      result.add(value);
     }
-    return specific;
+    return result;
   }
 
   static bool _startsWithCorrectOrder(

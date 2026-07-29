@@ -3,6 +3,7 @@ import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
+import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 void main() {
   const agent = PhoenixLanguageLevelAgent();
@@ -14,23 +15,34 @@ void main() {
           journey,
           profile: profile,
         );
-        final oneBlock = profile.band == PhoenixReadingBand.beginner ||
-            profile.band == PhoenixReadingBand.advanced ||
-            profile.band == PhoenixReadingBand.mastery;
-        final expectedCount = oneBlock ? 1 : 2;
+        final storyTarget = phoenixStoryLengthTargetFor(profile);
+        final expectedDiscoveryShape =
+            profile.band == PhoenixReadingBand.beginner
+                ? hasLength(1)
+                : hasLength(inInclusiveRange(1, 2));
+        final storyCharacters = level.storyParagraphs.join().runes.length;
+
         expect(
           level.storyParagraphs,
-          hasLength(expectedCount),
+          hasLength(storyTarget.paragraphCount),
           reason: '${journey.id} ${profile.displayLabel}',
         );
         expect(
           level.storyAnnotations,
-          hasLength(expectedCount),
+          hasLength(storyTarget.paragraphCount),
           reason: '${journey.id} annotations',
         );
         expect(
+          storyCharacters,
+          inInclusiveRange(
+            storyTarget.minimumCharacters,
+            storyTarget.maximumCharacters,
+          ),
+          reason: '${journey.id} ${profile.displayLabel} story length',
+        );
+        expect(
           level.discoveries,
-          hasLength(expectedCount),
+          expectedDiscoveryShape,
           reason: '${journey.id} discoveries',
         );
         expect(level.words, isNotEmpty, reason: journey.id);
@@ -41,6 +53,28 @@ void main() {
         );
       }
     }
+  });
+
+  test('Lv.10 prompts stay specific across all twelve journeys', () {
+    final mastery = agent.allProfiles.last;
+    final levels = allJourneyExperiences
+        .map(
+          (journey) => resolveAdaptiveJourneyLevel(
+            journey,
+            profile: mastery,
+          ),
+        )
+        .toList(growable: false);
+
+    expect(allJourneyExperiences, hasLength(12));
+    expect(
+      levels.map((level) => level.wonderQuestion).toSet(),
+      hasLength(12),
+    );
+    expect(
+      levels.map((level) => level.expressQuestion).toSet(),
+      hasLength(12),
+    );
   });
 
   test('beginner and advanced content differ on every migrated journey', () {

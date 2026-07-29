@@ -58,6 +58,78 @@ jobs:
         working-directory: app
         run: flutter test
 
+      - name: Generate journey quality agent report
+        working-directory: app
+        env:
+          PHOENIX_GENERATE_QUALITY_REPORT: '1'
+          PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
+          PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
+        run: >-
+          flutter test test/journey_quality_report_ci_test.dart
+          --reporter expanded
+
+      - name: Upload journey quality report
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-journey-content-quality-pr-${{ github.event.pull_request.number }}
+          path: |
+            journey-quality-report.md
+            journey-quality-report.json
+          if-no-files-found: error
+
+      - name: Add or update quality agent comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const marker = '<!-- phoenix-content-quality-agent-report -->';
+            const body = fs.readFileSync('journey-quality-report.md', 'utf8');
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find(
+              (comment) => comment.user.type === 'Bot' && comment.body?.includes(marker),
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Enforce quality agent release decision
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const report = JSON.parse(
+            fs.readFileSync('journey-quality-report.json', 'utf8'),
+          );
+          console.log(
+            `Phoenix quality gate: ${report.approvedCount}/${report.inspectionCount} approved; ` +
+            `minimum ${report.minimumScore}; average ${report.averageScore}.`,
+          );
+          if (!report.canPublish) {
+            console.error(
+              `Release blocked: ${report.needsRevisionCount} need revision and ` +
+              `${report.blockedCount} are blocked.`,
+            );
+            process.exit(1);
+          }
+          NODE
+
       - name: Build preview web app
         working-directory: app
         run: flutter build web --release
@@ -124,7 +196,7 @@ jobs:
               context: "cloudflare/preview",
               target_url: url
             }));
-          ' "${PREVIEW_URL}/?unlock=all&prototype=journeys&v=211086ef")"
+          ' "${PREVIEW_URL}/?unlock=all&prototype=journeys&v=${PREVIEW_RELEASE}")"
 
           curl --fail --silent --show-error \
             --request POST \
@@ -142,8 +214,9 @@ jobs:
         with:
           script: |
             const marker = '<!-- phoenix-pr-preview -->';
-            const shortRelease = process.env.PHOENIX_PREVIEW_RELEASE.slice(0, 8);
-            const canonicalUrl = `${process.env.PHOENIX_PREVIEW_URL}/?unlock=all&prototype=journeys&v=211086ef`;
+            const release = process.env.PHOENIX_PREVIEW_RELEASE;
+            const shortRelease = release.slice(0, 8);
+            const canonicalUrl = `${process.env.PHOENIX_PREVIEW_URL}/?unlock=all&prototype=journeys&v=${release}`;
             const body = `${marker}\n## Phoenix 独立体验版 ✅\n\n[打开 PR 体验链接](${canonicalUrl})\n\n- PR：#${context.issue.number}\n- Commit：\`${shortRelease}\`\n- 与正式版 main 完全隔离\n- 其他入口会自动跳转至此全开放体验版\n- 只有确认通过后才会合并上线`;
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,

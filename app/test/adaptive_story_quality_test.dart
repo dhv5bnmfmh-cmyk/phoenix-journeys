@@ -5,6 +5,7 @@ import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/journey_level_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
+import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
@@ -58,12 +59,23 @@ void main() {
         journey,
         profile: profile,
       );
-      final oneBlock = profile.band == PhoenixReadingBand.beginner ||
-          profile.band == PhoenixReadingBand.advanced ||
-          profile.band == PhoenixReadingBand.mastery;
+      final storyTarget = phoenixStoryLengthTargetFor(profile);
+      final expectedDiscoveryCount =
+          profile.band == PhoenixReadingBand.beginner ||
+                  profile.band == PhoenixReadingBand.advanced ||
+                  profile.band == PhoenixReadingBand.mastery
+              ? 1
+              : 2;
 
-      expect(content.storyParagraphs.length, oneBlock ? 1 : 2);
-      expect(content.discoveries.length, oneBlock ? 1 : 2);
+      expect(content.storyParagraphs.length, storyTarget.paragraphCount);
+      expect(content.discoveries.length, expectedDiscoveryCount);
+      expect(
+        content.storyParagraphs.join().runes.length,
+        inInclusiveRange(
+          storyTarget.minimumCharacters,
+          storyTarget.maximumCharacters,
+        ),
+      );
     }
   });
 

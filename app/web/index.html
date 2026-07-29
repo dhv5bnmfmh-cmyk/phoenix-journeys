@@ -13,7 +13,7 @@
     name="description"
     content="Phoenix Journeys — 通过语言、故事与文化探索世界。"
   >
-  <meta name="theme-color" content="#9D1C20">
+  <meta name="theme-color" content="#180908">
 
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,15 +21,17 @@
   <meta name="apple-mobile-web-app-title" content="Phoenix Journeys">
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preload" as="image" href="assets/assets/images/phoenix-time-earth-v2.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/assets/images/phoenix-flight-cycle-v4.webp" type="image/webp">
   <link rel="manifest" href="manifest.json">
 
   <title>Phoenix Journeys</title>
 
   <style>
     :root {
-      color-scheme: light;
+      color-scheme: dark;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #fff7ea;
+      background: #180908;
     }
 
     html,
@@ -40,7 +42,7 @@
       padding: 0;
       overflow: hidden;
       overscroll-behavior: none;
-      background: #fff7ea;
+      background: #180908;
     }
 
     body {
@@ -52,14 +54,48 @@
       inset: 0;
       z-index: 9999;
       display: grid;
-      place-items: center;
-      padding: 28px;
+      place-items: end center;
       box-sizing: border-box;
+      padding:
+        max(34px, env(safe-area-inset-top))
+        28px
+        max(64px, calc(env(safe-area-inset-bottom) + 38px));
+      overflow: hidden;
+      isolation: isolate;
+      background: #180908;
+      transition: opacity 620ms ease, visibility 620ms ease;
+    }
+
+    #phoenix-loading::after {
+      content: "";
+      position: absolute;
+      z-index: -2;
+      inset: -3%;
+      pointer-events: none;
       background:
-        radial-gradient(circle at 12% 18%, rgba(255,255,255,.95) 0 70px, transparent 72px),
-        radial-gradient(circle at 88% 70%, rgba(255,255,255,.72) 0 95px, transparent 97px),
-        linear-gradient(145deg, #fff7ea, #f5e4cf);
-      transition: opacity 220ms ease, visibility 220ms ease;
+        url("assets/assets/images/phoenix-time-earth-v2.webp")
+        center 24% / cover no-repeat;
+      transform: scale(1.035) translate3d(0, 0, 0);
+      animation: phoenix-cover-breathe 5.2s cubic-bezier(.42, 0, .35, 1) infinite alternate;
+      will-change: transform, filter;
+    }
+
+    #phoenix-loading::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 34%, rgba(245, 183, 75, .16), transparent 32%),
+        linear-gradient(
+          180deg,
+          rgba(12, 3, 3, .02) 0%,
+          rgba(17, 5, 4, .10) 44%,
+          rgba(13, 4, 4, .72) 73%,
+          rgba(10, 3, 3, .96) 100%
+        );
+      animation: phoenix-cover-glow 2.4s ease-in-out infinite alternate;
     }
 
     #phoenix-loading.phoenix-loading--hidden {
@@ -68,75 +104,453 @@
       pointer-events: none;
     }
 
+    .phoenix-loading__motion {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .phoenix-loading__motion::before {
+      content: "";
+      position: absolute;
+      top: 4%;
+      left: -55%;
+      width: 42%;
+      height: 72%;
+      background: linear-gradient(
+        100deg,
+        transparent,
+        rgba(255, 221, 147, .13),
+        transparent
+      );
+      filter: blur(10px);
+      transform: skewX(-14deg);
+      animation: phoenix-light-sweep 7.6s ease-in-out infinite;
+    }
+
+    .phoenix-loading__ember {
+      --size: 3px;
+      --drift: 18px;
+      position: absolute;
+      bottom: 22%;
+      left: 50%;
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      background: #ffd37c;
+      box-shadow:
+        0 0 7px rgba(255, 181, 67, .95),
+        0 0 14px rgba(190, 66, 24, .55);
+      opacity: 0;
+      animation: phoenix-ember-rise 3.2s ease-out infinite;
+    }
+
+    .phoenix-loading__ember:nth-child(1) { left: 28%; --size: 2px; --drift: -20px; animation-delay: -.3s; }
+    .phoenix-loading__ember:nth-child(2) { left: 36%; --size: 4px; --drift: 24px; animation-delay: -1.8s; animation-duration: 4.1s; }
+    .phoenix-loading__ember:nth-child(3) { left: 44%; --size: 2px; --drift: -12px; animation-delay: -2.4s; animation-duration: 3.7s; }
+    .phoenix-loading__ember:nth-child(4) { left: 53%; --size: 3px; --drift: 18px; animation-delay: -.9s; animation-duration: 4.4s; }
+    .phoenix-loading__ember:nth-child(5) { left: 61%; --size: 2px; --drift: -26px; animation-delay: -2.9s; animation-duration: 3.9s; }
+    .phoenix-loading__ember:nth-child(6) { left: 70%; --size: 4px; --drift: 16px; animation-delay: -1.2s; animation-duration: 4.6s; }
+    .phoenix-loading__ember:nth-child(7) { left: 32%; --size: 3px; --drift: 32px; animation-delay: -3.5s; animation-duration: 5s; }
+    .phoenix-loading__ember:nth-child(8) { left: 66%; --size: 2px; --drift: -18px; animation-delay: -2.1s; animation-duration: 4.8s; }
+
     .phoenix-loading__content {
-      width: min(100%, 360px);
+      position: relative;
+      z-index: 1;
+      width: min(100%, 380px);
       text-align: center;
-      color: #2d2421;
+      color: #fff8e9;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, .72);
     }
 
     .phoenix-loading__mark {
       display: grid;
       place-items: center;
-      width: 78px;
-      height: 78px;
-      margin: 0 auto 24px;
-      border-radius: 26px;
-      background: #9d1c20;
-      box-shadow: 0 16px 32px rgba(61, 23, 20, .22);
-      color: white;
-      font-size: 38px;
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 16px;
+      border: 1px solid rgba(239, 194, 105, .72);
+      border-radius: 50%;
+      background: rgba(91, 19, 17, .56);
+      box-shadow:
+        0 0 0 5px rgba(207, 143, 49, .08),
+        0 10px 34px rgba(0, 0, 0, .42);
+      color: #f1c66d;
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 25px;
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+      animation: phoenix-seal-pulse 2.6s ease-in-out infinite alternate;
     }
 
     .phoenix-loading__title {
       margin: 0;
-      font-size: 21px;
-      font-weight: 800;
-      letter-spacing: .02em;
+      color: #fff8e9;
+      font-size: clamp(22px, 6vw, 28px);
+      font-weight: 850;
+      letter-spacing: .12em;
     }
 
     .phoenix-loading__text {
-      margin: 10px 0 20px;
-      color: rgba(45, 36, 33, .68);
+      margin: 9px 0 22px;
+      color: rgba(255, 238, 205, .78);
+      font-size: 14px;
       line-height: 1.5;
+      letter-spacing: .08em;
     }
 
     .phoenix-loading__bar {
       width: 100%;
-      height: 5px;
+      height: 3px;
       overflow: hidden;
       border-radius: 999px;
-      background: rgba(157, 28, 32, .12);
+      background: rgba(243, 205, 129, .18);
+      box-shadow: inset 0 0 0 1px rgba(255, 235, 190, .06);
     }
 
     .phoenix-loading__bar::after {
       content: "";
       display: block;
-      width: 42%;
+      width: 38%;
       height: 100%;
       border-radius: inherit;
-      background: #9d1c20;
-      animation: phoenix-loading 1.25s ease-in-out infinite;
+      background: linear-gradient(90deg, #a76520, #ffd98a, #c88a32);
+      box-shadow: 0 0 14px rgba(255, 201, 104, .72);
+      animation: phoenix-loading 2.8s cubic-bezier(.4, 0, .2, 1) infinite;
+    }
+
+    @keyframes phoenix-light-sweep {
+      0%, 18% {
+        opacity: 0;
+        transform: translateX(0) skewX(-14deg);
+      }
+      48% {
+        opacity: 1;
+      }
+      82%, 100% {
+        opacity: 0;
+        transform: translateX(390%) skewX(-14deg);
+      }
+    }
+
+    @keyframes phoenix-ember-rise {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(.55);
+      }
+      18% {
+        opacity: .9;
+      }
+      72% {
+        opacity: .55;
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--drift), -42vh, 0) scale(.15);
+      }
+    }
+
+    @keyframes phoenix-seal-pulse {
+      from {
+        transform: scale(.98);
+        box-shadow:
+          0 0 0 5px rgba(207, 143, 49, .06),
+          0 10px 34px rgba(0, 0, 0, .42);
+      }
+      to {
+        transform: scale(1.035);
+        box-shadow:
+          0 0 0 8px rgba(207, 143, 49, .12),
+          0 0 28px rgba(240, 171, 60, .22),
+          0 12px 38px rgba(0, 0, 0, .46);
+      }
+    }
+
+    @keyframes phoenix-cover-breathe {
+      from {
+        transform: scale(1.035) translate3d(0, 0, 0);
+        filter: saturate(.94) brightness(.92);
+      }
+      to {
+        transform: scale(1.105) translate3d(0, -2.4%, 0);
+        filter: saturate(1.12) brightness(1.08);
+      }
+    }
+
+    @keyframes phoenix-cover-glow {
+      from { opacity: .82; }
+      to { opacity: 1; }
     }
 
     @keyframes phoenix-loading {
-      from { transform: translateX(-115%); }
-      to { transform: translateX(340%); }
+      from { transform: translateX(-125%); }
+      to { transform: translateX(365%); }
+    }
+
+    @media (max-height: 680px) {
+      #phoenix-loading {
+        padding-bottom: max(34px, calc(env(safe-area-inset-bottom) + 20px));
+      }
+
+      .phoenix-loading__mark {
+        width: 46px;
+        height: 46px;
+        margin-bottom: 12px;
+        font-size: 21px;
+      }
+
+      .phoenix-loading__text {
+        margin-bottom: 16px;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .phoenix-loading__bar::after {
-        animation-duration: 2.5s;
+        animation-duration: 3s;
+      }
+
+      #phoenix-loading {
+        transition-duration: 0ms;
+      }
+
+      #phoenix-loading::after,
+      #phoenix-loading::before,
+      .phoenix-loading__motion::before,
+      .phoenix-loading__ember,
+      .phoenix-loading__mark {
+        animation: none;
+      }
+    }
+
+    /* Phoenix time journey: independent earth, portal and flying character layers. */
+    .phoenix-loading__portal {
+      position: absolute;
+      z-index: 0;
+      top: 29%;
+      left: 50%;
+      width: min(34vw, 150px);
+      aspect-ratio: 1;
+      border: 1px solid rgba(255, 211, 118, .66);
+      border-radius: 50%;
+      box-shadow:
+        0 0 18px rgba(255, 181, 62, .48),
+        inset 0 0 22px rgba(255, 207, 105, .28);
+      transform: translate(-50%, -50%);
+      animation: phoenix-time-portal 8.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .phoenix-loading__portal::before,
+    .phoenix-loading__portal::after {
+      content: "";
+      position: absolute;
+      border: 1px dashed rgba(255, 225, 163, .54);
+      border-radius: 50%;
+      inset: 12%;
+      animation: phoenix-portal-spin 8s linear infinite;
+    }
+
+    .phoenix-loading__portal::after {
+      inset: 27%;
+      border-style: solid;
+      background: radial-gradient(circle, rgba(255, 246, 209, .9) 0 3%, rgba(255, 176, 54, .34) 18%, transparent 62%);
+      animation-direction: reverse;
+      animation-duration: 5s;
+    }
+
+    .phoenix-loading__traveler {
+      position: absolute;
+      z-index: 1;
+      top: 31%;
+      left: 50%;
+      width: min(52vw, 300px);
+      aspect-ratio: 1;
+      background: url("assets/assets/images/phoenix-flight-cycle-v4.webp") 0 center / 300% 100% no-repeat;
+      backface-visibility: hidden;
+      filter: drop-shadow(0 0 10px rgba(255, 168, 44, .75));
+      transform-origin: center;
+      pointer-events: none;
+      will-change: transform, opacity, filter, background-position;
+      animation:
+        phoenix-wing-cycle 1.12s steps(1, end) infinite,
+        phoenix-time-flight-v2 12.4s cubic-bezier(.38, .03, .2, .99) 0s 1 both;
+    }
+
+    .phoenix-loading__traveler::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: 58%;
+      right: 69%;
+      width: 54vw;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(238, 105, 39, .18), rgba(255, 208, 105, .9));
+      box-shadow: 0 0 10px rgba(255, 156, 48, .72);
+      transform: rotate(8deg);
+      transform-origin: right;
+    }
+
+    .phoenix-loading__era {
+      position: absolute;
+      z-index: 1;
+      top: 17%;
+      padding: 5px 9px;
+      border: 1px solid rgba(238, 201, 127, .25);
+      border-radius: 999px;
+      color: rgba(255, 239, 207, .82);
+      background: rgba(18, 8, 8, .42);
+      font-family: "Songti SC", "STSong", serif;
+      font-size: 10px;
+      letter-spacing: .12em;
+      backdrop-filter: blur(5px);
+      animation: phoenix-era-breathe 5.2s ease-in-out infinite alternate;
+    }
+
+    .phoenix-loading__era--ancient { left: 7%; }
+    .phoenix-loading__era--transition { left: 50%; transform: translateX(-50%); animation-delay: -.9s; }
+    .phoenix-loading__era--modern { right: 7%; animation-delay: -1.8s; }
+
+
+    @keyframes phoenix-wing-cycle {
+      0%, 100% { background-position: 0 center; }
+      34% { background-position: 50% center; }
+      67% { background-position: 100% center; }
+    }
+
+    .phoenix-loading__motion {
+      background:
+        radial-gradient(ellipse at 50% 34%, rgba(246, 182, 73, .11), transparent 27%),
+        linear-gradient(112deg, rgba(61, 13, 10, .15), transparent 38%, rgba(21, 62, 82, .12));
+    }
+
+    .phoenix-loading__motion::after {
+      content: "";
+      position: absolute;
+      inset: 12% -18% 28%;
+      background:
+        radial-gradient(ellipse at 18% 62%, rgba(227, 111, 44, .20), transparent 34%),
+        radial-gradient(ellipse at 72% 31%, rgba(111, 186, 216, .14), transparent 31%),
+        linear-gradient(178deg, transparent 43%, rgba(235, 186, 103, .09) 57%, transparent 73%);
+      filter: blur(16px);
+      opacity: .6;
+      transform: translate3d(-3%, 0, 0) scale(1.08);
+      animation: phoenix-time-mist 16s ease-in-out infinite alternate;
+    }
+
+    @keyframes phoenix-time-mist {
+      from { opacity: .42; transform: translate3d(-3%, 1.5%, 0) scale(1.06); }
+      to { opacity: .78; transform: translate3d(4%, -1.5%, 0) scale(1.13); }
+    }
+
+    @keyframes phoenix-time-flight {
+      0% {
+        opacity: 0;
+        transform: translate3d(-92vw, 18vh, 0) scale(.42) rotate(-10deg);
+        filter: brightness(.72) drop-shadow(0 0 5px rgba(255, 125, 30, .4));
+      }
+      10% { opacity: 1; }
+      34% {
+        opacity: 1;
+        transform: translate3d(-35vw, 2vh, 0) scale(.66) rotate(-4deg);
+      }
+      55% {
+        opacity: 1;
+        transform: translate3d(-5vw, -12vh, 0) scale(1.02) rotate(3deg);
+        filter: brightness(1.22) drop-shadow(0 0 18px rgba(255, 204, 99, .95));
+      }
+      76% {
+        opacity: .96;
+        transform: translate3d(35vw, -18vh, 0) scale(.78) rotate(9deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(92vw, -30vh, 0) scale(.38) rotate(14deg);
+        filter: brightness(.78) drop-shadow(0 0 4px rgba(255, 125, 30, .3));
+      }
+    }
+
+
+    @keyframes phoenix-time-flight-v2 {
+      0% { opacity: 0; transform: translate3d(-88vw, 18vh, 0) scale(.38) rotate(-9deg); filter: brightness(.76) drop-shadow(0 0 5px rgba(255, 125, 30, .38)); }
+      10% { opacity: 1; transform: translate3d(-70vw, 13vh, 0) scale(.46) rotate(-7deg); }
+      34% { opacity: 1; transform: translate3d(-37vw, 3vh, 0) scale(.66) rotate(-3deg); }
+      58% { opacity: 1; transform: translate3d(-7vw, -10vh, 0) scale(.98) rotate(2deg); filter: brightness(1.2) drop-shadow(0 0 20px rgba(255, 204, 99, .92)); }
+      80% { opacity: 1; transform: translate3d(29vw, -15vh, 0) scale(.78) rotate(7deg); }
+      92% { opacity: 1; transform: translate3d(49vw, -18vh, 0) scale(.62) rotate(9deg); filter: brightness(1.05) drop-shadow(0 0 12px rgba(255, 175, 65, .75)); }
+      100% { opacity: 1; transform: translate3d(52vw, -18.5vh, 0) scale(.60) rotate(8deg); filter: brightness(1.08) drop-shadow(0 0 15px rgba(255, 190, 76, .82)); }
+    }
+
+    @keyframes phoenix-time-portal {
+      0%, 100% { opacity: .46; transform: translate(-50%, -50%) scale(.86); }
+      52% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+    }
+
+    @keyframes phoenix-portal-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes phoenix-era-breathe {
+      from { opacity: .46; }
+      to { opacity: .92; box-shadow: 0 0 16px rgba(231, 156, 55, .12); }
+    }
+
+    @keyframes phoenix-earth-drift {
+      from {
+        transform: scale(1.035) translate3d(-1%, 0, 0);
+        filter: saturate(.92) brightness(.88);
+      }
+      to {
+        transform: scale(1.11) translate3d(1.5%, -2.6%, 0);
+        filter: saturate(1.12) brightness(1.04);
+      }
+    }
+
+    #phoenix-loading::after {
+      animation-name: phoenix-earth-drift;
+      animation-duration: 18s;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .phoenix-loading__motion::after,
+      .phoenix-loading__portal,
+      .phoenix-loading__portal::before,
+      .phoenix-loading__portal::after,
+      .phoenix-loading__traveler,
+      .phoenix-loading__era {
+        animation: none;
+      }
+
+      .phoenix-loading__traveler {
+        opacity: .88;
+        transform: translate3d(-50%, -7vh, 0) scale(.76);
       }
     }
   </style>
 </head>
 <body>
   <div id="phoenix-loading" role="status" aria-live="polite">
+    <div class="phoenix-loading__motion" aria-hidden="true">
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+      <i class="phoenix-loading__ember"></i>
+    </div>
+    <div class="phoenix-loading__portal" aria-hidden="true"></div>
+    <div class="phoenix-loading__traveler" aria-hidden="true"></div>
+    <span class="phoenix-loading__era phoenix-loading__era--ancient" aria-hidden="true">古代 · 文明</span>
+    <span class="phoenix-loading__era phoenix-loading__era--transition" aria-hidden="true">时空 · 交汇</span>
+    <span class="phoenix-loading__era phoenix-loading__era--modern" aria-hidden="true">现代 · 世界</span>
     <div class="phoenix-loading__content">
-      <div class="phoenix-loading__mark" aria-hidden="true">🔥</div>
+      <div class="phoenix-loading__mark" aria-hidden="true">凤</div>
       <p class="phoenix-loading__title">PHOENIX JOURNEYS</p>
       <p id="phoenix-loading-text" class="phoenix-loading__text">
-        正在准备你的语言旅程…
+        凤凰正穿越古今，展开你的语言旅程…
       </p>
       <div class="phoenix-loading__bar" aria-hidden="true"></div>
     </div>
