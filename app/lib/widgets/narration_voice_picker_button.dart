@@ -54,7 +54,7 @@ class _NarrationVoicePickerButtonState
     if (wasPlaying || wasPaused) {
       await controller.stop(resetPosition: false);
     }
-    if (!mounted) return;
+    if (!mounted || !context.mounted) return;
 
     try {
       await showModalBottomSheet<void>(
