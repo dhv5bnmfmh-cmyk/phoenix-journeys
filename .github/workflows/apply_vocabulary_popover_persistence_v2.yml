@@ -1,6 +1,9 @@
 name: Apply vocabulary popover persistence v2
 
 on:
+  push:
+    branches:
+      - agent/narration-voice-picker-v1
   pull_request:
     branches:
       - main
@@ -14,7 +17,7 @@ concurrency:
 
 jobs:
   patch:
-    if: github.head_ref == 'agent/narration-voice-picker-v1'
+    if: github.ref == 'refs/heads/agent/narration-voice-picker-v1' || github.head_ref == 'agent/narration-voice-picker-v1'
     runs-on: ubuntu-latest
     steps:
       - name: Check out feature branch
