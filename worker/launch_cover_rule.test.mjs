@@ -13,8 +13,8 @@ test('Phoenix launch cover animates a journey from ancient to modern worlds', as
     stat(new URL('../app/assets/images/phoenix-flight-cycle-v3.webp', import.meta.url)),
   ]);
 
-  assert.match(index, /phoenix-time-earth\.webp/);
-  assert.match(index, /phoenix-flight-cycle-v2\.webp/);
+  assert.match(index, /phoenix-time-earth-v2\.webp/);
+  assert.match(index, /phoenix-flight-cycle-v3\.webp/);
   assert.match(index, /phoenix-loading__traveler/);
   assert.match(index, /phoenix-loading__portal/);
   assert.match(index, /古代 · 文明/);
