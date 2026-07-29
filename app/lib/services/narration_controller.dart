@@ -313,24 +313,6 @@ class NarrationController extends ChangeNotifier {
     return _plan.items[index].label;
   }
 
-  String? get currentItemText {
-    final index =
-        _currentItemIndex ??
-        (_plan.isEmpty ? null : _plan.indexForOffset(_currentOffset));
-    if (index == null || index < 0 || index >= _plan.items.length) return null;
-    return _plan.items[index].text;
-  }
-
-  int get currentItemLocalOffset {
-    final index =
-        _currentItemIndex ??
-        (_plan.isEmpty ? null : _plan.indexForOffset(_currentOffset));
-    if (index == null || index < 0 || index >= _plan.items.length) return 0;
-    return (_currentOffset - _plan.itemStart(index))
-        .clamp(0, _plan.items[index].text.length)
-        .toInt();
-  }
-
   double get progress {
     if (_plan.text.isEmpty) return 0;
     final value = _currentOffset / _plan.text.length;
