@@ -65,12 +65,22 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const ValueKey('passport-city-option-beijing')),
+      find.byKey(const ValueKey('passport-province-beijing')),
       findsOneWidget,
     );
     expect(
       find.byKey(const ValueKey('passport-city-beijing')),
       findsNothing,
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey('passport-province-beijing')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('passport-city-option-beijing')),
+      findsOneWidget,
     );
 
     await tester.tap(
