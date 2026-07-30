@@ -11,6 +11,7 @@ class ShadowingScore {
     required this.referenceCharacters,
     required this.recognizedCharacters,
     required this.omittedCharacters,
+    required this.wrongCharacters,
     required this.extraCharacters,
   });
 
@@ -23,6 +24,7 @@ class ShadowingScore {
   final int referenceCharacters;
   final int recognizedCharacters;
   final int omittedCharacters;
+  final int wrongCharacters;
   final int extraCharacters;
 
   String get label {
@@ -35,16 +37,36 @@ class ShadowingScore {
   String get diagnosisSummary =>
       '准确度 $accuracy% · 完整度 $completeness% · 流利度 $fluency%';
 
+  String get issueSummary =>
+      '漏读 $omittedCharacters · 错读 $wrongCharacters · 多读 $extraCharacters';
+
+  String get weakestMetric {
+    final metrics = <(String, int)>[
+      ('准确度', accuracy),
+      ('完整度', completeness),
+      ('流利度', fluency),
+    ]..sort((left, right) => left.$2.compareTo(right.$2));
+    return metrics.first.$1;
+  }
+
   String get coaching {
     final metrics = '$diagnosisSummary。';
-    if (overall >= 90 && omittedCharacters == 0 && extraCharacters == 0) {
+    if (overall >= 90 &&
+        omittedCharacters == 0 &&
+        wrongCharacters == 0 &&
+        extraCharacters == 0) {
       return '$metrics 三项表现稳定，下一次保持自然停顿和连读。';
     }
-    if (omittedCharacters > extraCharacters) {
+    if (omittedCharacters >= wrongCharacters &&
+        omittedCharacters >= extraCharacters &&
+        omittedCharacters > 0) {
       return '$metrics 漏读 $omittedCharacters 个字，注意红色文字，先分短语读清楚再完整跟读。';
     }
-    if (extraCharacters > omittedCharacters) {
-      return '$metrics 多读或错读 $extraCharacters 个字，重新听本句后放慢速度对照练习。';
+    if (wrongCharacters >= extraCharacters && wrongCharacters > 0) {
+      return '$metrics 错读 $wrongCharacters 个字，逐字对照红色提示，修正发音后再自然连读。';
+    }
+    if (extraCharacters > 0) {
+      return '$metrics 多读 $extraCharacters 个字，重新听本句后放慢速度，避免重复或加入多余内容。';
     }
     if (fluency < 70) {
       return '$metrics 内容基本到位，建议使用清晰语速，减少停顿后再读一次。';
@@ -68,11 +90,17 @@ class _ShadowingAlignment {
     required this.matchedReferenceIndexes,
     required this.matchedRecognizedIndexes,
     required this.longestContinuousRun,
+    required this.omittedCharacters,
+    required this.wrongCharacters,
+    required this.extraCharacters,
   });
 
   final Set<int> matchedReferenceIndexes;
   final Set<int> matchedRecognizedIndexes;
   final int longestContinuousRun;
+  final int omittedCharacters;
+  final int wrongCharacters;
+  final int extraCharacters;
 
   int get matchedCharacters => matchedReferenceIndexes.length;
 }
@@ -89,28 +117,58 @@ _ShadowingAlignment _alignShadowingText(
 ) {
   final table = List.generate(
     referenceRunes.length + 1,
-    (_) => List<int>.filled(recognizedRunes.length + 1, 0),
+    (row) => List<int>.generate(
+      recognizedRunes.length + 1,
+      (column) => row == 0 ? column : column == 0 ? row : 0,
+    ),
   );
 
   for (var i = 1; i <= referenceRunes.length; i += 1) {
     for (var j = 1; j <= recognizedRunes.length; j += 1) {
-      table[i][j] = referenceRunes[i - 1] == recognizedRunes[j - 1]
-          ? table[i - 1][j - 1] + 1
-          : math.max(table[i - 1][j], table[i][j - 1]);
+      final substitutionCost =
+          referenceRunes[i - 1] == recognizedRunes[j - 1] ? 0 : 1;
+      table[i][j] = math.min(
+        table[i - 1][j - 1] + substitutionCost,
+        math.min(table[i - 1][j] + 1, table[i][j - 1] + 1),
+      );
     }
   }
 
   final matchedPairs = <(int, int)>[];
+  var omittedCharacters = 0;
+  var wrongCharacters = 0;
+  var extraCharacters = 0;
   var i = referenceRunes.length;
   var j = recognizedRunes.length;
-  while (i > 0 && j > 0) {
-    if (referenceRunes[i - 1] == recognizedRunes[j - 1]) {
+
+  while (i > 0 || j > 0) {
+    if (i > 0 &&
+        j > 0 &&
+        referenceRunes[i - 1] == recognizedRunes[j - 1] &&
+        table[i][j] == table[i - 1][j - 1]) {
       matchedPairs.add((i - 1, j - 1));
       i -= 1;
       j -= 1;
-    } else if (table[i - 1][j] >= table[i][j - 1]) {
+      continue;
+    }
+
+    if (i > 0 &&
+        j > 0 &&
+        table[i][j] == table[i - 1][j - 1] + 1) {
+      wrongCharacters += 1;
       i -= 1;
-    } else {
+      j -= 1;
+      continue;
+    }
+
+    if (i > 0 && table[i][j] == table[i - 1][j] + 1) {
+      omittedCharacters += 1;
+      i -= 1;
+      continue;
+    }
+
+    if (j > 0) {
+      extraCharacters += 1;
       j -= 1;
     }
   }
@@ -135,6 +193,9 @@ _ShadowingAlignment _alignShadowingText(
     matchedReferenceIndexes: orderedPairs.map((pair) => pair.$1).toSet(),
     matchedRecognizedIndexes: orderedPairs.map((pair) => pair.$2).toSet(),
     longestContinuousRun: longestRun,
+    omittedCharacters: omittedCharacters,
+    wrongCharacters: wrongCharacters,
+    extraCharacters: extraCharacters,
   );
 }
 
@@ -194,16 +255,21 @@ ShadowingScore scoreShadowing({
       referenceCharacters: 0,
       recognizedCharacters: 0,
       omittedCharacters: 0,
+      wrongCharacters: 0,
       extraCharacters: 0,
     );
   }
 
   final alignment = _alignShadowingText(referenceRunes, recognizedRunes);
   final matched = alignment.matchedCharacters;
-  final completeness = ((matched / referenceRunes.length) * 100).round();
-  final accuracy = recognizedRunes.isEmpty
+  final attemptedReferenceCharacters = matched + alignment.wrongCharacters;
+  final accuracyDenominator =
+      matched + alignment.wrongCharacters + alignment.extraCharacters;
+  final completeness =
+      ((attemptedReferenceCharacters / referenceRunes.length) * 100).round();
+  final accuracy = accuracyDenominator == 0
       ? 0
-      : ((matched / recognizedRunes.length) * 100).round();
+      : ((matched / accuracyDenominator) * 100).round();
   final fallbackConfidence = ((accuracy + completeness) / 2).round();
   final safeConfidence = recognitionConfidence <= 0
       ? fallbackConfidence
@@ -236,7 +302,8 @@ ShadowingScore scoreShadowing({
     matchedCharacters: matched,
     referenceCharacters: referenceRunes.length,
     recognizedCharacters: recognizedRunes.length,
-    omittedCharacters: (referenceRunes.length - matched).clamp(0, 1000000),
-    extraCharacters: (recognizedRunes.length - matched).clamp(0, 1000000),
+    omittedCharacters: alignment.omittedCharacters,
+    wrongCharacters: alignment.wrongCharacters,
+    extraCharacters: alignment.extraCharacters,
   );
 }
