@@ -31,6 +31,32 @@ void main() {
 
       expect(partial.overall, lessThan(100));
       expect(partial.matchedCharacters, lessThan(partial.referenceCharacters));
+      expect(partial.coaching, contains('红色文字'));
+    });
+
+    test('marks omitted reference characters for focused retry', () {
+      final feedback = buildShadowingReferenceFeedback(
+        reference: '今天的新鲜菜',
+        recognized: '今天的菜',
+      );
+
+      expect(
+        feedback
+            .where((unit) => !unit.matched)
+            .map((unit) => unit.text)
+            .join(),
+        '新鲜',
+      );
+    });
+
+    test('uses every sentence when calculating the passage score', () {
+      expect(
+        averageShadowingSessionScore(
+          sentenceScores: const [90, 60, 75],
+          sentenceCount: 3,
+        ),
+        75,
+      );
     });
   });
 }
