@@ -15,6 +15,7 @@ void main() {
       expect(score.completeness, 100);
       expect(score.fluency, 100);
       expect(score.omittedCharacters, 0);
+      expect(score.wrongCharacters, 0);
       expect(score.extraCharacters, 0);
       expect(score.label, '非常自然');
       expect(score.diagnosisSummary, contains('准确度 100%'));
@@ -38,6 +39,7 @@ void main() {
       expect(partial.completeness, lessThan(partial.accuracy));
       expect(partial.matchedCharacters, lessThan(partial.referenceCharacters));
       expect(partial.omittedCharacters, greaterThan(0));
+      expect(partial.wrongCharacters, 0);
       expect(partial.coaching, contains('红色文字'));
     });
 
@@ -51,7 +53,24 @@ void main() {
       expect(score.completeness, 100);
       expect(score.accuracy, lessThan(100));
       expect(score.extraCharacters, 2);
-      expect(score.coaching, contains('多读或错读'));
+      expect(score.wrongCharacters, 0);
+      expect(score.coaching, contains('多读'));
+    });
+
+    test('distinguishes a wrong character from omission and addition', () {
+      final score = scoreShadowing(
+        reference: '今天去旅行',
+        recognized: '今天去旅形',
+        recognitionConfidence: .9,
+      );
+
+      expect(score.completeness, 100);
+      expect(score.accuracy, lessThan(100));
+      expect(score.omittedCharacters, 0);
+      expect(score.wrongCharacters, 1);
+      expect(score.extraCharacters, 0);
+      expect(score.issueSummary, '漏读 0 · 错读 1 · 多读 0');
+      expect(score.coaching, contains('错读 1 个字'));
     });
 
     test('recognition confidence contributes to fluency', () {
