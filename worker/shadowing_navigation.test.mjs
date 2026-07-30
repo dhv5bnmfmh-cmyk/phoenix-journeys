@@ -94,3 +94,10 @@ test('shadowing compares repeated attempts and reports metric gains', () => {
   assert.match(scoring, /完整度 \$\{_signed\(completeness\)\}/);
   assert.match(scoring, /流利度 \$\{_signed\(fluency\)\}/);
 });
+
+test('shadowing prepares the recommended rate before focused retry playback', () => {
+  assert.match(scoring, /import 'narration_controller\.dart'/);
+  assert.match(scoring, /_applyShadowingPracticeRate\(recommendedPracticeRate\)/);
+  assert.match(scoring, /prepareRecommendedPractice\(\);/);
+  assert.match(scoring, /bridge\.setSpeechRate\(rate\)/);
+});
