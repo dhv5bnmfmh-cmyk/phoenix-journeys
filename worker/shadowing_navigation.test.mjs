@@ -22,6 +22,10 @@ const weaknessLibrary = readFileSync(
   new URL('../app/lib/services/shadowing_weakness_library.dart', import.meta.url),
   'utf8',
 );
+const dailyPlan = readFileSync(
+  new URL('../app/lib/services/shadowing_daily_plan.dart', import.meta.url),
+  'utf8',
+);
 
 test('shadowing is a fixed navigation tab immediately after passport', () => {
   const passport = homeShell.indexOf("label: state.displayText('护照')");
@@ -117,4 +121,19 @@ test('shadowing persists a personal cross-passage weakness library', () => {
   assert.match(weaknessLibrary, /pendingMetricCounts/);
   assert.match(weaknessLibrary, /consecutiveStrongAttempts >= 2/);
   assert.match(weaknessLibrary, /focusCharacters/);
+});
+
+
+test('shadowing exposes an adaptive daily route with persistent guided progress', () => {
+  assert.match(training, /shadowing-daily-plan-entry/);
+  assert.match(training, /shadowing-daily-plan-sheet/);
+  assert.match(training, /shadowing-daily-plan-active-step/);
+  assert.match(training, /phoenix\.shadowing\.dailyPlan/);
+  assert.match(training, /_continueDailyPlan/);
+  assert.match(training, /今日训练路线完成/);
+  assert.match(dailyPlan, /class ShadowingDailyPlan/);
+  assert.match(dailyPlan, /restoreOrGenerate/);
+  assert.match(dailyPlan, /firstIncompleteStep/);
+  assert.match(dailyPlan, /kind == 'focus'/);
+  assert.match(dailyPlan, /kind == 'challenge'/);
 });

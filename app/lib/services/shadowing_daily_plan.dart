@@ -31,7 +31,8 @@ class ShadowingDailyPlanStep {
   final int estimatedMinutes;
 
   bool matches(String candidatePassageId, int candidateSentenceIndex) =>
-      passageId == candidatePassageId && sentenceIndex == candidateSentenceIndex;
+      passageId == candidatePassageId &&
+      sentenceIndex == candidateSentenceIndex;
 
   bool accepts(ShadowingScore score) {
     if (score.overall < targetScore) return false;
@@ -43,15 +44,15 @@ class ShadowingDailyPlanStep {
   }
 
   Map<String, Object?> toJson() => {
-        'id': id,
-        'kind': kind,
-        'title': title,
-        'passageId': passageId,
-        'sentenceIndex': sentenceIndex,
-        'focusMetric': focusMetric,
-        'targetScore': targetScore,
-        'estimatedMinutes': estimatedMinutes,
-      };
+    'id': id,
+    'kind': kind,
+    'title': title,
+    'passageId': passageId,
+    'sentenceIndex': sentenceIndex,
+    'focusMetric': focusMetric,
+    'targetScore': targetScore,
+    'estimatedMinutes': estimatedMinutes,
+  };
 
   factory ShadowingDailyPlanStep.fromJson(Map<String, dynamic> json) {
     return ShadowingDailyPlanStep(
@@ -62,8 +63,8 @@ class ShadowingDailyPlanStep {
       sentenceIndex: (json['sentenceIndex'] as num?)?.toInt() ?? 0,
       focusMetric: json['focusMetric'] as String? ?? '综合',
       targetScore: ((json['targetScore'] as num?)?.toInt() ?? 80).clamp(0, 100),
-      estimatedMinutes:
-          ((json['estimatedMinutes'] as num?)?.toInt() ?? 2).clamp(1, 9),
+      estimatedMinutes: ((json['estimatedMinutes'] as num?)?.toInt() ?? 2)
+          .clamp(1, 9),
     );
   }
 }
@@ -123,11 +124,11 @@ class ShadowingDailyPlan {
   }
 
   String encode() => jsonEncode({
-        'dayKey': dayKey,
-        'level': level,
-        'steps': steps.map((step) => step.toJson()).toList(),
-        'completedStepIds': completedStepIds.toList(),
-      });
+    'dayKey': dayKey,
+    'level': level,
+    'steps': steps.map((step) => step.toJson()).toList(),
+    'completedStepIds': completedStepIds.toList(),
+  });
 
   factory ShadowingDailyPlan.decode(String value) {
     final json = jsonDecode(value) as Map<String, dynamic>;
@@ -139,10 +140,9 @@ class ShadowingDailyPlan {
           .map(ShadowingDailyPlanStep.fromJson)
           .where((step) => step.id.isNotEmpty && step.passageId.isNotEmpty)
           .toList(growable: false),
-      completedStepIds:
-          (json['completedStepIds'] as List<dynamic>? ?? const [])
-              .whereType<String>()
-              .toSet(),
+      completedStepIds: (json['completedStepIds'] as List<dynamic>? ?? const [])
+          .whereType<String>()
+          .toSet(),
     );
   }
 
@@ -259,11 +259,14 @@ class ShadowingDailyPlan {
     final challengeCandidates = shadowingPassages
         .where((passage) => passage.level <= safeLevel + 1)
         .toList(growable: false);
-    final dayOffset = DateTime.utc(date.year, date.month, date.day)
-        .difference(DateTime.utc(2026))
-        .inDays;
+    final dayOffset = DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+    ).difference(DateTime.utc(2026)).inDays;
     for (var offset = 0; offset < challengeCandidates.length; offset += 1) {
-      final index = (dayOffset + safeLevel * 5 + offset).abs() %
+      final index =
+          (dayOffset + safeLevel * 5 + offset).abs() %
           challengeCandidates.length;
       final passage = challengeCandidates[index];
       final before = steps.length;

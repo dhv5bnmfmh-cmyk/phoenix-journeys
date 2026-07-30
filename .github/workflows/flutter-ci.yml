@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
@@ -101,52 +101,3 @@ jobs:
             fi
           done
           exit "$failures"
-
-  integrate-daily-plan:
-    if: github.event_name == 'pull_request' && github.head_ref == 'agent/shadowing-pronunciation-diagnosis-v2'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Check out feature branch
-        uses: actions/checkout@v4
-        with:
-          ref: agent/shadowing-pronunciation-diagnosis-v2
-          fetch-depth: 0
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Integrate daily plan experience
-        run: |
-          python3 tool/integrate_shadowing_daily_plan.py
-          dart format \
-            app/lib/screens/shadowing_training_screen.dart \
-            app/lib/services/shadowing_daily_plan.dart \
-            app/test/shadowing_daily_plan_test.dart
-
-      - name: Verify focused feature
-        run: |
-          cd app
-          flutter pub get
-          flutter test test/shadowing_daily_plan_test.dart test/shadowing_weakness_library_test.dart
-          cd ..
-          node --test worker/shadowing_navigation.test.mjs
-
-      - name: Commit feature and restore workflows
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout origin/main -- .github/workflows/flutter-ci.yml
-          rm -f .github/workflows/phoenix-shadowing-daily-plan.yml
-          rm -f .github/workflows/trigger-shadowing-daily-plan.yml
-          rm -f tool/integrate_shadowing_daily_plan.py
-          git add -A
-          git commit -m "feat: add adaptive daily shadowing route"
-          git push origin HEAD:agent/shadowing-pronunciation-diagnosis-v2
