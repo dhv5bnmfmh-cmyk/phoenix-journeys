@@ -87,6 +87,22 @@ void main() {
       findsOneWidget,
     );
     expect(
+      find.byKey(
+        const ValueKey(
+          'passport-place-option-beijing-forbidden-city',
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(
+        const ValueKey(
+          'passport-place-option-beijing-summer-palace',
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
       find.byKey(const ValueKey('passport-place-back')),
       findsOneWidget,
     );
