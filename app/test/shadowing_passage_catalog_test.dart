@@ -91,4 +91,36 @@ void main() {
     );
     expect(recommendation.id, 'lake-evening');
   });
+
+  test('library surfaces the daily recommendation as the first card', () {
+    final passages = shadowingPassagesForLevel(
+      6,
+      date: DateTime(2026, 7, 30),
+    );
+    expect(passages.first.theme, startsWith('今日推荐'));
+    expect(passages.first.theme, contains('适合当前等级'));
+  });
+
+  test('surfaced recommendation is not duplicated in the library', () {
+    final passages = shadowingPassagesForLevel(
+      6,
+      date: DateTime(2026, 7, 30),
+    );
+    final ids = passages.map((passage) => passage.id).toList();
+    expect(ids.toSet().length, ids.length);
+  });
+
+  test('surfaced recommendation explains a weak-content revisit', () {
+    final passages = shadowingPassagesForLevel(
+      6,
+      date: DateTime(2026, 7, 30),
+      bestScores: const {
+        'museum-time-bridge': 82,
+        'lake-evening': 64,
+        'work-study-journey': 76,
+      },
+    );
+    expect(passages.first.id, 'lake-evening');
+    expect(passages.first.theme, contains('薄弱内容巩固'));
+  });
 }
