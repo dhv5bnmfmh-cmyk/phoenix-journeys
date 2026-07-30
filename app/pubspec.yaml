@@ -17,6 +17,8 @@ dependencies:
   http: ^1.2.2
   pinyin: ^3.3.0
   share_plus: ^12.0.2
+  # Local speech recognition for shadowing practice.
+  speech_to_text: ^7.0.0
 
 dev_dependencies:
   flutter_test:
@@ -41,3 +43,17 @@ flutter:
     - assets/images/backgrounds/generated/chengdu/kuanzhai-alley/
     - assets/images/backgrounds/generated/nanjing/qinhuai-river/
     - assets/images/backgrounds/generated/guangzhou/chen-clan-ancestral-hall/
+    - assets/images/backgrounds/generated/suzhou/humble-administrators-garden/
+    - assets/images/backgrounds/generated/luoyang/longmen-grottoes/
+    - assets/images/backgrounds/generated/quanzhou/kaiyuan-temple/
+    - assets/images/backgrounds/generated/datong/yungang-grottoes/
+    - assets/images/backgrounds/generated/lijiang/old-town/
+    - assets/images/backgrounds/generated/jiangmen/kaiping-diaolou/
+    - assets/images/backgrounds/generated/dunhuang/mogao-caves/
+    - assets/images/backgrounds/generated/chengde/mountain-resort/
+    - assets/images/backgrounds/generated/xiamen/kulangsu/
+    - assets/images/backgrounds/generated/pingyao/ancient-city/
+    - assets/images/backgrounds/generated/qufu/confucius-sites/
+    - assets/images/backgrounds/generated/leshan/giant-buddha/
+    - assets/images/backgrounds/generated/wuyishan/nine-bend-stream/
+    - assets/images/backgrounds/generated/honghe/hani-rice-terraces/

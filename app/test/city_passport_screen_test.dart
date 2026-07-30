@@ -13,7 +13,7 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
-  testWidgets('Passport opens city journeys from geographic map markers', (
+  testWidgets('Passport drills from continent to country and one city', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(430, 900);
@@ -45,11 +45,67 @@ void main() {
     );
     expect(find.text('双指缩放 · 拖动地图'), findsOneWidget);
     expect(
-      find.byKey(const ValueKey('passport-city-beijing')),
+      find.byKey(const ValueKey('passport-continent-asia')),
       findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('passport-country-china')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('passport-city-beijing')),
+      findsNothing,
     );
     expect(find.text('北京收藏册'), findsNothing);
     expect(find.text('紫禁城'), findsNothing);
+
+    await tester.tap(
+      find.byKey(const ValueKey('passport-country-china')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('passport-province-beijing')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('passport-city-beijing')),
+      findsNothing,
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey('passport-province-beijing')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('passport-city-option-beijing')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('passport-city-beijing')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(
+        const ValueKey(
+          'passport-place-option-beijing-forbidden-city',
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(
+        const ValueKey(
+          'passport-place-option-beijing-summer-palace',
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('passport-place-back')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const ValueKey('passport-city-beijing')));
     await tester.pumpAndSettle();
@@ -67,7 +123,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('紫禁城'), findsOneWidget);
-    expect(find.text('颐和园'), findsOneWidget);
+    expect(find.text('紫禁城'), findsNWidgets(2));
+    expect(find.text('颐和园'), findsNWidgets(2));
   });
 }

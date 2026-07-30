@@ -86,6 +86,11 @@ class AppState extends ChangeNotifier {
   String writingFeedbackNatural = '';
   String writingFeedbackEncouragement = '';
   bool writingFeedbackOffline = false;
+  String? journeyNarrationContentId;
+  String? journeyNarrationContentSignature;
+  int journeyNarrationOffset = 0;
+  final Map<String, String> _journeyNarrationSignatures = <String, String>{};
+  final Map<String, int> _journeyNarrationOffsets = <String, int>{};
   DateTime? journeyUpdatedAt;
 
   AppLoadStatus loadStatus = AppLoadStatus.loading;
@@ -144,6 +149,15 @@ class AppState extends ChangeNotifier {
   bool isWordSaved(String word) => savedWords.contains(word);
   bool isJourneyStampEarned(String journeyId) =>
       earnedJourneyStampIds.contains(journeyId);
+
+  String? journeyNarrationSignatureFor(String contentId) =>
+      _journeyNarrationSignatures[contentId];
+
+  int journeyNarrationOffsetFor(String contentId) =>
+      _journeyNarrationOffsets[contentId] ?? 0;
+
+  String _narrationKey(String contentId, String suffix) =>
+      _key('narration.$contentId.$suffix');
 
   String _key(String suffix, [String? journeyId]) {
     final binding = requireJourneyLocation(journeyId ?? activeJourneyId);
@@ -263,6 +277,36 @@ class AppState extends ChangeNotifier {
         _readJourneyString(prefs, 'writingFeedbackEncouragement') ?? '';
     writingFeedbackOffline =
         _readJourneyBool(prefs, 'writingFeedbackOffline') ?? false;
+    journeyNarrationContentId = _readJourneyString(
+      prefs,
+      'narrationContentId',
+    );
+    journeyNarrationContentSignature = _readJourneyString(
+      prefs,
+      'narrationContentSignature',
+    );
+    journeyNarrationOffset = math.max(
+      0,
+      _readJourneyInt(prefs, 'narrationOffset') ?? 0,
+    );
+    _journeyNarrationSignatures.clear();
+    _journeyNarrationOffsets.clear();
+    for (final contentId in const ['story', 'discovery']) {
+      final signature =
+          prefs.getString(_narrationKey(contentId, 'signature')) ??
+          (journeyNarrationContentId == contentId
+              ? journeyNarrationContentSignature
+              : null);
+      final offset =
+          prefs.getInt(_narrationKey(contentId, 'offset')) ??
+          (journeyNarrationContentId == contentId
+              ? journeyNarrationOffset
+              : 0);
+      if (signature != null && offset > 0) {
+        _journeyNarrationSignatures[contentId] = signature;
+        _journeyNarrationOffsets[contentId] = offset;
+      }
+    }
     journeyUpdatedAt = DateTime.tryParse(
       _readJourneyString(prefs, 'updatedAt') ??
           (isLegacyBeijing ? prefs.getString('journeyUpdatedAt') : null) ??
@@ -514,6 +558,60 @@ class AppState extends ChangeNotifier {
     ]);
   }
 
+  Future<void> saveJourneyNarrationPosition({
+    required String contentId,
+    required String contentSignature,
+    required int offset,
+  }) async {
+    final safeOffset = math.max(0, offset);
+    journeyNarrationContentId = contentId;
+    journeyNarrationContentSignature = contentSignature;
+    journeyNarrationOffset = safeOffset;
+    _journeyNarrationSignatures[contentId] = contentSignature;
+    _journeyNarrationOffsets[contentId] = safeOffset;
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.setString(_key('narrationContentId'), contentId),
+      prefs.setString(_key('narrationContentSignature'), contentSignature),
+      prefs.setInt(_key('narrationOffset'), safeOffset),
+      prefs.setString(_narrationKey(contentId, 'signature'), contentSignature),
+      prefs.setInt(_narrationKey(contentId, 'offset'), safeOffset),
+    ]);
+  }
+
+  Future<void> clearJourneyNarrationPosition({String? contentId}) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (contentId != null) {
+      _journeyNarrationSignatures.remove(contentId);
+      _journeyNarrationOffsets.remove(contentId);
+      if (journeyNarrationContentId == contentId) {
+        journeyNarrationContentId = null;
+        journeyNarrationContentSignature = null;
+        journeyNarrationOffset = 0;
+      }
+      await Future.wait([
+        prefs.remove(_narrationKey(contentId, 'signature')),
+        prefs.remove(_narrationKey(contentId, 'offset')),
+      ]);
+      return;
+    }
+
+    journeyNarrationContentId = null;
+    journeyNarrationContentSignature = null;
+    journeyNarrationOffset = 0;
+    _journeyNarrationSignatures.clear();
+    _journeyNarrationOffsets.clear();
+    await Future.wait([
+      prefs.remove(_key('narrationContentId')),
+      prefs.remove(_key('narrationContentSignature')),
+      prefs.remove(_key('narrationOffset')),
+      for (final id in const ['story', 'discovery'])
+        prefs.remove(_narrationKey(id, 'signature')),
+      for (final id in const ['story', 'discovery'])
+        prefs.remove(_narrationKey(id, 'offset')),
+    ]);
+  }
+
   Future<void> saveGuideFeedback({
     required String reply,
     required bool isOfflineFallback,
@@ -601,6 +699,11 @@ class AppState extends ChangeNotifier {
     wonderDraft = '';
     expressDraft = '';
     memoryDraft = '';
+    journeyNarrationContentId = null;
+    journeyNarrationContentSignature = null;
+    journeyNarrationOffset = 0;
+    _journeyNarrationSignatures.clear();
+    _journeyNarrationOffsets.clear();
     guideFeedbackReply = '';
     guideFeedbackOffline = false;
     writingFeedbackCorrected = '';
@@ -619,6 +722,13 @@ class AppState extends ChangeNotifier {
       prefs.remove(_key('wonderDraft')),
       prefs.remove(_key('expressDraft')),
       prefs.remove(_key('memoryDraft')),
+      prefs.remove(_key('narrationContentId')),
+      prefs.remove(_key('narrationContentSignature')),
+      prefs.remove(_key('narrationOffset')),
+      for (final id in const ['story', 'discovery'])
+        prefs.remove(_narrationKey(id, 'signature')),
+      for (final id in const ['story', 'discovery'])
+        prefs.remove(_narrationKey(id, 'offset')),
       prefs.remove(_key('guideFeedbackReply')),
       prefs.remove(_key('guideFeedbackOffline')),
       prefs.remove(_key('writingFeedbackCorrected')),
@@ -641,6 +751,11 @@ class AppState extends ChangeNotifier {
     wonderDraft = '';
     expressDraft = '';
     memoryDraft = '';
+    journeyNarrationContentId = null;
+    journeyNarrationContentSignature = null;
+    journeyNarrationOffset = 0;
+    _journeyNarrationSignatures.clear();
+    _journeyNarrationOffsets.clear();
     journeyUpdatedAt = _clock();
 
     final prefs = await SharedPreferences.getInstance();
@@ -654,6 +769,13 @@ class AppState extends ChangeNotifier {
       prefs.remove(_key('wonderDraft')),
       prefs.remove(_key('expressDraft')),
       prefs.remove(_key('memoryDraft')),
+      prefs.remove(_key('narrationContentId')),
+      prefs.remove(_key('narrationContentSignature')),
+      prefs.remove(_key('narrationOffset')),
+      for (final id in const ['story', 'discovery'])
+        prefs.remove(_narrationKey(id, 'signature')),
+      for (final id in const ['story', 'discovery'])
+        prefs.remove(_narrationKey(id, 'offset')),
       prefs.setString(_key('updatedAt'), journeyUpdatedAt!.toIso8601String()),
     ]);
     notifyListeners();

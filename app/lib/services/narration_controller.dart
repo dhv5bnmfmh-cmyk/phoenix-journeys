@@ -10,6 +10,13 @@ enum NarrationStatus { idle, playing, paused, error }
 
 enum _NarrationSpeechMode { idle, narration, word }
 
+@visibleForTesting
+String narrationStartupErrorMessage(String message) {
+  return message == 'speech-start-blocked'
+      ? '自动朗读被浏览器拦截，请点击播放重试。'
+      : '当前设备暂时无法朗读，请检查声音设置后重试。';
+}
+
 @immutable
 class NarrationSpeedOption {
   const NarrationSpeedOption({required this.label, required this.rate});
@@ -199,6 +206,7 @@ class NarrationController extends ChangeNotifier {
   int _speechSessionToken = 0;
   bool _webSpeechPausedInPlace = false;
   bool _restartWebSpeechOnResume = false;
+  bool _isRestoredPosition = false;
 
   NarrationStatus get status => _status;
   String? get contentId => _contentId;
@@ -206,6 +214,7 @@ class NarrationController extends ChangeNotifier {
   int? get currentItemIndex => _currentItemIndex;
   int get itemCount => _plan.items.length;
   bool get hasContent => !_plan.isEmpty;
+  bool get isRestoredPosition => _isRestoredPosition;
   double get speechRate => _speechRate;
   int get _speechRateIndex {
     final index = speedOptions.indexWhere(
@@ -328,6 +337,7 @@ class NarrationController extends ChangeNotifier {
   void _handleWebStart() {
     if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
     _status = NarrationStatus.playing;
+    _isRestoredPosition = false;
     _errorMessage = null;
     _startProgressClock(_currentOffset);
     _safeNotify();
@@ -359,6 +369,7 @@ class NarrationController extends ChangeNotifier {
   void _handleWebPause() {
     if (_disposed || _speechMode != _NarrationSpeechMode.narration) return;
     _status = NarrationStatus.paused;
+    _isRestoredPosition = false;
     _cancelProgressClock();
     _safeNotify();
   }
@@ -375,7 +386,7 @@ class NarrationController extends ChangeNotifier {
     _cancelProgressClock();
     _speechMode = _NarrationSpeechMode.idle;
     _status = NarrationStatus.error;
-    _errorMessage = '当前设备暂时无法朗读，请检查声音设置后重试。';
+    _errorMessage = narrationStartupErrorMessage(message);
     _currentItemIndex = null;
     _highlightSnapshot = null;
     NarrationHighlightBus.instance.clear(contentId: _contentId);
@@ -470,7 +481,7 @@ class NarrationController extends ChangeNotifier {
       _cancelProgressClock();
       _speechMode = _NarrationSpeechMode.idle;
       _status = NarrationStatus.error;
-      _errorMessage = '当前设备暂时无法朗读，请检查声音设置后重试。';
+      _errorMessage = narrationStartupErrorMessage(message);
       _currentItemIndex = null;
       _highlightSnapshot = null;
       NarrationHighlightBus.instance.clear(contentId: _contentId);
@@ -499,11 +510,40 @@ class NarrationController extends ChangeNotifier {
     _currentItemIndex = 0;
     _errorMessage = null;
     _status = NarrationStatus.playing;
+    _isRestoredPosition = false;
     _speechMode = _NarrationSpeechMode.narration;
     _webSpeechPausedInPlace = false;
     _restartWebSpeechOnResume = false;
     _applyProgress(0);
     await _speakFrom(0, stopEngineFirst: stopEngineFirst);
+  }
+
+  void preparePaused({
+    required String contentId,
+    required List<NarrationItem> items,
+    required int offset,
+    String languageCode = 'zh-CN',
+  }) {
+    final plan = NarrationTextPlan.fromItems(items);
+    if (plan.isEmpty || offset <= 0) return;
+
+    final safeOffset = offset
+        .clamp(0, math.max(0, plan.text.length - 1))
+        .toInt();
+    _contentId = contentId;
+    _narrationLanguageCode = languageCode;
+    _plan = plan;
+    _currentOffset = safeOffset;
+    _speechBaseOffset = safeOffset;
+    _lastNativeOffset = safeOffset;
+    _currentItemIndex = plan.indexForOffset(safeOffset);
+    _errorMessage = null;
+    _status = NarrationStatus.paused;
+    _isRestoredPosition = true;
+    _speechMode = _NarrationSpeechMode.idle;
+    _highlightSnapshot = null;
+    _applyProgress(safeOffset);
+    _safeNotify();
   }
 
   Future<void> pause() async {
@@ -516,6 +556,7 @@ class NarrationController extends ChangeNotifier {
     final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
     final safeOffset = offset.clamp(0, maxOffset).toInt();
     _status = NarrationStatus.paused;
+    _isRestoredPosition = false;
     _currentOffset = safeOffset;
     _currentItemIndex = _plan.indexForOffset(safeOffset);
     _cancelProgressClock();
@@ -550,6 +591,7 @@ class NarrationController extends ChangeNotifier {
 
   Future<void> resumeFromOffset(int offset) async {
     if (_plan.isEmpty || _disposed) return;
+    _isRestoredPosition = false;
 
     final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
     final safeOffset = offset.clamp(0, maxOffset).toInt();
@@ -649,6 +691,7 @@ class NarrationController extends ChangeNotifier {
 
   Future<void> restart() async {
     if (_plan.isEmpty || _contentId == null) return;
+    _isRestoredPosition = false;
     await _speakFrom(0);
   }
 
@@ -694,6 +737,7 @@ class NarrationController extends ChangeNotifier {
     _errorMessage = null;
     _currentItemIndex = null;
     _highlightSnapshot = null;
+    _isRestoredPosition = false;
     NarrationHighlightBus.instance.clear(contentId: _contentId);
     if (resetPosition) {
       _currentOffset = 0;
@@ -771,10 +815,14 @@ class NarrationController extends ChangeNotifier {
     final maxOffset = math.max(0, _plan.text.length - 1);
     final safeOffset = offset.clamp(0, maxOffset).toInt();
     final remainingText = _plan.text.substring(safeOffset);
+    final useWebSpeech = _webSpeech.isAvailable;
 
     try {
       _cancelProgressClock();
-      if (stopEngineFirst) {
+      // Web Speech must cancel and speak synchronously inside the same tap.
+      // Awaiting the shared engine first can consume Safari's user activation
+      // and make an explicit retry fail exactly like blocked autoplay.
+      if (stopEngineFirst && !useWebSpeech) {
         await _stopSpeechEngine();
       }
       if (_disposed) return;
@@ -791,7 +839,7 @@ class NarrationController extends ChangeNotifier {
       _applyProgress(safeOffset);
       _safeNotify();
 
-      if (_webSpeech.isAvailable) {
+      if (useWebSpeech) {
         _webSpeechPausedInPlace = false;
         _restartWebSpeechOnResume = false;
         unawaited(_startProgressWatchdog(sessionToken, safeOffset));

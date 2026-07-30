@@ -139,6 +139,38 @@ String _assetFor(String id) {
   if (id.contains('guangzhou')) {
     return 'assets/images/backgrounds/generated/guangzhou/chen-clan-ancestral-hall/07-golden-hour.webp';
   }
+  if (id.contains('suzhou')) {
+    return 'assets/images/backgrounds/generated/suzhou/humble-administrators-garden/suzhou-humble-administrators-garden-v1.webp';
+  }
+  if (id.contains('luoyang')) {
+    return 'assets/images/backgrounds/generated/luoyang/longmen-grottoes/luoyang-longmen-grottoes-v1.webp';
+  }
+  if (id.contains('quanzhou')) {
+    return 'assets/images/backgrounds/generated/quanzhou/kaiyuan-temple/quanzhou-kaiyuan-temple-v1.webp';
+  }
+  if (id.contains('datong')) {
+    return 'assets/images/backgrounds/generated/datong/yungang-grottoes/datong-yungang-grottoes-v1.webp';
+  }
+  if (id.contains('lijiang')) {
+    return 'assets/images/backgrounds/generated/lijiang/old-town/lijiang-old-town-v1.webp';
+  }
+  if (id.contains('jiangmen')) {
+    return 'assets/images/backgrounds/generated/jiangmen/kaiping-diaolou/jiangmen-kaiping-diaolou-v1.webp';
+  }
+  if (id.contains('dunhuang')) {
+    return 'assets/images/backgrounds/generated/dunhuang/mogao-caves/dunhuang-mogao-caves-v1.webp';
+  }
+  if (id.contains('chengde')) {
+    return 'assets/images/backgrounds/generated/chengde/mountain-resort/chengde-mountain-resort-v1.webp';
+  }
+  if (id.contains('xiamen')) {
+    return 'assets/images/backgrounds/generated/xiamen/kulangsu/xiamen-kulangsu-v1.webp';
+  }
+  if (id.contains('pingyao')) return 'assets/images/backgrounds/generated/pingyao/ancient-city/pingyao-ancient-city-v1.webp';
+  if (id.contains('qufu')) return 'assets/images/backgrounds/generated/qufu/confucius-sites/qufu-confucius-v1.webp';
+  if (id.contains('leshan')) return 'assets/images/backgrounds/generated/leshan/giant-buddha/leshan-giant-buddha-v1.webp';
+  if (id.contains('wuyishan')) return 'assets/images/backgrounds/generated/wuyishan/nine-bend-stream/wuyishan-nine-bend-v1.webp';
+  if (id.contains('honghe')) return 'assets/images/backgrounds/generated/honghe/hani-rice-terraces/honghe-hani-terraces-v1.webp';
   return 'assets/images/backgrounds/generated/beijing/forbidden-city/03-golden-gate.webp';
 }
 

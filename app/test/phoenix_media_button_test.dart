@@ -35,4 +35,25 @@ void main() {
     expect(find.byKey(const ValueKey<String>('phoenix-pause')), findsOneWidget);
     expect(find.byTooltip('暂停朗读'), findsOneWidget);
   });
+
+  testWidgets('shows an explicit retry state after narration fails', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PhoenixMediaButton(
+            isPlaying: false,
+            isError: true,
+            tooltip: '重新尝试朗读',
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('phoenix-retry')), findsOneWidget);
+    expect(find.byTooltip('重新尝试朗读'), findsOneWidget);
+  });
 }

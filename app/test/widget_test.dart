@@ -53,7 +53,13 @@ void main() {
     state.setTab(2);
     await tester.pump();
 
-    expect(find.text('我的旅程'), findsOneWidget);
+    expect(find.text('跟读训练'), findsWidgets);
     expect(state.selectedTab, 2);
+
+    state.setTab(3);
+    await tester.pump();
+
+    expect(find.text('我的旅程'), findsOneWidget);
+    expect(state.selectedTab, 3);
   });
 }

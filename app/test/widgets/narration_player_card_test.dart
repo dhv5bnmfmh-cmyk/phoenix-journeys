@@ -3,6 +3,34 @@ import 'package:phoenix_journeys/services/narration_controller.dart';
 import 'package:phoenix_journeys/widgets/narration_player_card.dart';
 
 void main() {
+  test('labels restored progress separately from an ordinary pause', () {
+    expect(
+      narrationPausedLabel(restoredPosition: true, percent: 42),
+      '上次停在这里 · 42% · 点击继续',
+    );
+    expect(
+      narrationPausedLabel(restoredPosition: false, percent: 42),
+      '已暂停 · 42%',
+    );
+  });
+
+  test('clears optimistic playback when browser speech is blocked', () {
+    expect(
+      shouldClearNarrationLocalSession(
+        controllerStatus: NarrationStatus.error,
+        finished: false,
+      ),
+      isTrue,
+    );
+    expect(
+      shouldClearNarrationLocalSession(
+        controllerStatus: NarrationStatus.playing,
+        finished: false,
+      ),
+      isFalse,
+    );
+  });
+
   test('ignores a premature idle completion jump from Safari', () {
     final offset = resolveNarrationDisplayOffset(
       estimatedOffset: 18,

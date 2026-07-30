@@ -61,6 +61,34 @@ int? stableNarrationRevealEnd({
   return currentOffset <= 0 ? 0 : itemLength;
 }
 
+@visibleForTesting
+bool shouldCheckpointNarration({
+  required NarrationStatus status,
+  required String? contentId,
+  required int offset,
+  required int totalCharacters,
+  required int lastSavedOffset,
+}) {
+  final supported = contentId == 'story' || contentId == 'discovery';
+  return status == NarrationStatus.playing &&
+      supported &&
+      offset > 0 &&
+      offset < totalCharacters &&
+      (offset - lastSavedOffset).abs() >= 12;
+}
+
+@visibleForTesting
+String narrationContentSignature(List<NarrationItem> items) {
+  var hash = 0x811c9dc5;
+  for (final item in items) {
+    for (final unit in '${item.id}\u0000${item.text}\u0001'.codeUnits) {
+      hash ^= unit;
+      hash = (hash * 0x01000193) & 0xffffffff;
+    }
+  }
+  return hash.toRadixString(16).padLeft(8, '0');
+}
+
 class JourneyScreen extends StatefulWidget {
   const JourneyScreen({super.key, this.journeyId});
 
@@ -98,12 +126,15 @@ class _JourneyScreenState extends State<JourneyScreen>
       PhoenixLevelController.instance;
   ChineseProficiencyProfile? _languageProfile;
   int _levelChangeToken = 0;
+  Timer? _narrationCheckpointTimer;
+  int _lastSavedNarrationOffset = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _narration = NarrationController();
+    _narration.addListener(_handleNarrationCheckpoint);
     _phoenixLevelController.addListener(_handlePhoenixLevelChanged);
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
@@ -152,6 +183,9 @@ class _JourneyScreenState extends State<JourneyScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) return;
+    _narrationCheckpointTimer?.cancel();
+    _narrationCheckpointTimer = null;
+    unawaited(_persistNarrationPosition());
     unawaited(_narration.stop());
     if (_initialized) unawaited(_persistProgress());
   }
@@ -159,8 +193,13 @@ class _JourneyScreenState extends State<JourneyScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    if (_initialized) unawaited(_persistProgress());
+    if (_initialized) {
+      unawaited(_persistNarrationPosition());
+      unawaited(_persistProgress());
+    }
     _phoenixLevelController.removeListener(_handlePhoenixLevelChanged);
+    _narration.removeListener(_handleNarrationCheckpoint);
+    _narrationCheckpointTimer?.cancel();
     _narration.dispose();
     _ai.close();
     wonderController.dispose();
@@ -182,6 +221,67 @@ class _JourneyScreenState extends State<JourneyScreen>
       express: expressController.text,
       memory: memoryController.text,
     );
+  }
+
+  Future<void> _persistNarrationPosition() {
+    final contentId = _narration.contentId;
+    final offset = _narration.currentOffset;
+    final total = _narration.totalCharacters;
+    if ((contentId == 'story' || contentId == 'discovery') &&
+        offset > 0 &&
+        offset < total) {
+      _lastSavedNarrationOffset = offset;
+      final items = contentId == 'story'
+          ? _storyNarrationItems
+          : _discoveryNarrationItems;
+      return _appState.saveJourneyNarrationPosition(
+        contentId: contentId!,
+        contentSignature: narrationContentSignature(items),
+        offset: offset,
+      );
+    }
+    if ((contentId == 'story' || contentId == 'discovery') &&
+        total > 0 &&
+        offset >= total) {
+      _lastSavedNarrationOffset = 0;
+      return _appState.clearJourneyNarrationPosition();
+    }
+    return Future<void>.value();
+  }
+
+  void _handleNarrationCheckpoint() {
+    final contentId = _narration.contentId;
+    final offset = _narration.currentOffset;
+    final total = _narration.totalCharacters;
+    if (_narration.status == NarrationStatus.idle &&
+        (contentId == 'story' || contentId == 'discovery') &&
+        total > 0 &&
+        offset >= total) {
+      _narrationCheckpointTimer?.cancel();
+      _narrationCheckpointTimer = null;
+      if (_appState.journeyNarrationOffsetFor(contentId!) > 0) {
+        _lastSavedNarrationOffset = 0;
+        unawaited(
+          _appState.clearJourneyNarrationPosition(contentId: contentId),
+        );
+      }
+      return;
+    }
+    if (!shouldCheckpointNarration(
+      status: _narration.status,
+      contentId: contentId,
+      offset: offset,
+      totalCharacters: total,
+      lastSavedOffset: _lastSavedNarrationOffset,
+    )) {
+      return;
+    }
+    if (_narrationCheckpointTimer != null) return;
+
+    _narrationCheckpointTimer = Timer(const Duration(seconds: 2), () {
+      _narrationCheckpointTimer = null;
+      if (mounted) unawaited(_persistNarrationPosition());
+    });
   }
 
   JourneyLevelContent get _levelContent {
@@ -210,12 +310,77 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Future<void> _loadLanguageProfile() async {
     final profile = await _languageLevelStore.load();
-    if (!mounted || profile == null) return;
-    await _narration.setSpeechRate(
-      _languageLevelAgent.planFor(profile).speechRate,
-    );
     if (!mounted) return;
-    setState(() => _languageProfile = profile);
+    if (profile != null) {
+      await _narration.setSpeechRate(
+        _languageLevelAgent.planFor(profile).speechRate,
+      );
+      if (!mounted) return;
+      setState(() => _languageProfile = profile);
+    }
+    _restoreNarrationPosition();
+  }
+
+  List<NarrationItem> get _storyNarrationItems => _levelContent.storyParagraphs
+      .asMap()
+      .entries
+      .map(
+        (entry) => NarrationItem(
+          id: 'story-${entry.key}',
+          text: entry.value,
+          label: '故事第 ${entry.key + 1} 段',
+        ),
+      )
+      .toList(growable: false);
+
+  List<NarrationItem> get _discoveryNarrationItems =>
+      _levelContent.discoveries
+          .asMap()
+          .entries
+          .map(
+            (entry) => NarrationItem(
+              id: 'discovery-${entry.key}',
+              text: entry.value.text,
+              label: '今日发现 ${entry.key + 1}',
+            ),
+          )
+          .toList(growable: false);
+
+  void _restoreNarrationPosition([String? requestedContentId]) {
+    final contentId = requestedContentId ??
+        switch (step) {
+          0 => 'story',
+          2 => 'discovery',
+          _ => null,
+        };
+    if (contentId == null) return;
+    final offset = _appState.journeyNarrationOffsetFor(contentId);
+    if (offset <= 0) return;
+    if (_narration.hasContent && _narration.contentId == contentId) return;
+
+    final items = contentId == 'story'
+        ? _storyNarrationItems
+        : _discoveryNarrationItems;
+    final matchesStep =
+        (step == 0 && contentId == 'story') ||
+        (step == 2 && contentId == 'discovery');
+    final matchesContent =
+        _appState.journeyNarrationSignatureFor(contentId) ==
+        narrationContentSignature(items);
+    if (!matchesStep || !matchesContent) {
+      unawaited(
+        _appState.clearJourneyNarrationPosition(contentId: contentId),
+      );
+      return;
+    }
+
+    _narration.preparePaused(
+      contentId: contentId,
+      languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
+      items: items,
+      offset: offset,
+    );
+    _lastSavedNarrationOffset = offset;
   }
 
   void _handlePhoenixLevelChanged() {
@@ -228,6 +393,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     final profile = _phoenixLevelController.profile;
 
     await _narration.stop();
+    await _appState.clearJourneyNarrationPosition();
     await _narration.setSpeechRate(
       _languageLevelAgent.planFor(profile).speechRate,
     );
@@ -261,6 +427,14 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
   }
 
+  void _checkpointNarrationBeforeStepChange() {
+    final contentId = _narration.contentId;
+    if (contentId != 'story' && contentId != 'discovery') return;
+    _narrationCheckpointTimer?.cancel();
+    _narrationCheckpointTimer = null;
+    unawaited(_persistNarrationPosition());
+  }
+
   Future<void> _goToStep(int targetStep) async {
     final safeStep = targetStep.clamp(0, AppState.journeyLastStep);
     if (!_appState.journeyCompleted &&
@@ -269,12 +443,21 @@ class _JourneyScreenState extends State<JourneyScreen>
         safeStep != step + 1) {
       return;
     }
+    if (safeStep != step) {
+      _checkpointNarrationBeforeStepChange();
+    }
     // Discovery autoplay must enter the browser speech API in the same user
     // gesture that pressed Continue. Awaiting storage/animation first can make
     // iOS display "playing" while silently blocking the actual utterance.
     if (safeStep == 2 && safeStep != step) {
       setState(() => step = safeStep);
-      unawaited(_playDiscoveries(stopEngineFirst: false));
+      if (_appState.journeyNarrationOffsetFor('discovery') > 0) {
+        await _narration.stop();
+        if (!mounted) return;
+        _restoreNarrationPosition('discovery');
+      } else {
+        unawaited(_playDiscoveries(stopEngineFirst: false));
+      }
       await _persistProgress(overrideStep: safeStep);
       return;
     }
@@ -283,6 +466,9 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (!mounted || safeStep == step) return;
 
     setState(() => step = safeStep);
+    if (safeStep == 0) {
+      _restoreNarrationPosition('story');
+    }
     await _persistProgress(overrideStep: safeStep);
   }
 
@@ -290,17 +476,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return _narration.play(
       contentId: 'story',
       languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
-      items: _levelContent.storyParagraphs
-          .asMap()
-          .entries
-          .map(
-            (entry) => NarrationItem(
-              id: 'story-${entry.key}',
-              text: entry.value,
-              label: '故事第 ${entry.key + 1} 段',
-            ),
-          )
-          .toList(growable: false),
+      items: _storyNarrationItems,
     );
   }
 
@@ -308,17 +484,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return _narration.play(
       contentId: 'discovery',
       languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
-      items: _levelContent.discoveries
-          .asMap()
-          .entries
-          .map(
-            (entry) => NarrationItem(
-              id: 'discovery-${entry.key}',
-              text: entry.value.text,
-              label: '今日发现 ${entry.key + 1}',
-            ),
-          )
-          .toList(growable: false),
+      items: _discoveryNarrationItems,
       stopEngineFirst: stopEngineFirst,
     );
   }

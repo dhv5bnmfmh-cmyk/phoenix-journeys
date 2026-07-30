@@ -63,6 +63,14 @@ int resolveNarrationContinuationOffset({
 }
 
 @visibleForTesting
+bool shouldClearNarrationLocalSession({
+  required NarrationStatus controllerStatus,
+  required bool finished,
+}) {
+  return finished || controllerStatus == NarrationStatus.error;
+}
+
+@visibleForTesting
 String compactNarrationProgressLabel({
   required int? currentItemIndex,
   required int itemCount,
@@ -81,6 +89,16 @@ String compactNarrationProgressLabel({
   }
   final item = (currentItemIndex + 1).clamp(1, itemCount).toInt();
   return '第 $item / $itemCount 段 · $percent% · 剩余 $remaining 字';
+}
+
+@visibleForTesting
+String narrationPausedLabel({
+  required bool restoredPosition,
+  required int percent,
+}) {
+  return restoredPosition
+      ? '上次停在这里 · $percent% · 点击继续'
+      : '已暂停 · $percent%';
 }
 
 class NarrationPlayerCard extends StatefulWidget {
@@ -172,7 +190,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
     } else if (status == NarrationStatus.paused) {
       _sessionPlaying = false;
       _sessionPaused = true;
-    } else if (_controllerFinished) {
+    } else if (shouldClearNarrationLocalSession(
+      controllerStatus: status,
+      finished: _controllerFinished,
+    )) {
       _sessionPlaying = false;
       _sessionPaused = false;
     }
@@ -491,6 +512,10 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
             ? roundedPercent.clamp(1, 99)
             : roundedPercent;
         final seeking = _seekPreviewProgress != null;
+        final showRestoreChoices = widget.compact &&
+            isPaused &&
+            controllerIsCurrent &&
+            widget.controller.isRestoredPosition;
         final activeSubtitle = hasError
             ? widget.controller.errorMessage ?? '朗读暂时不可用'
             : seeking
@@ -498,7 +523,11 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                 : isPlaying
                     ? widget.controller.currentItemLabel ?? '正在朗读'
                     : isPaused
-                        ? '已暂停 · $percent%'
+                        ? narrationPausedLabel(
+                            restoredPosition:
+                                widget.controller.isRestoredPosition,
+                            percent: percent,
+                          )
                         : widget.subtitle;
         final compact = widget.compact;
         final compactProgress = seeking
@@ -582,6 +611,7 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                     PhoenixMediaButton(
                       key: const ValueKey('narration-main-control'),
                       isPlaying: isPlaying,
+                      isError: hasError,
                       tooltip: _mainButtonTooltip(status),
                       size: compact ? 32 : 44,
                       onPressed: _handleMainPressed,
@@ -607,6 +637,63 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                     ),
                   ],
                 ),
+                if (showRestoreChoices) ...[
+                  const SizedBox(height: 3),
+                  Row(
+                    key: const ValueKey('narration-restore-choices'),
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 28,
+                          child: FilledButton(
+                            key: const ValueKey(
+                              'narration-restore-continue',
+                            ),
+                            onPressed: _handleMainPressed,
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              backgroundColor: PhoenixTheme.red,
+                              foregroundColor: Colors.white,
+                              textStyle: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            child: const Text('继续朗读'),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: SizedBox(
+                          height: 28,
+                          child: OutlinedButton(
+                            key: const ValueKey(
+                              'narration-restore-restart',
+                            ),
+                            onPressed: () => unawaited(_restartSession()),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              foregroundColor: Colors.white,
+                              side: BorderSide(
+                                color: Colors.white.withValues(alpha: .46),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            child: const Text('从头朗读'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 if (compact) ...[
                   const SizedBox(height: 1),
                   NarrationSeekRail(

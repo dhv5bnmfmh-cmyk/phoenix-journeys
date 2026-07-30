@@ -8,6 +8,7 @@ class PhoenixMediaButton extends StatelessWidget {
     required this.onPressed,
     required this.tooltip,
     this.size = 50,
+    this.isError = false,
     super.key,
   });
 
@@ -15,13 +16,16 @@ class PhoenixMediaButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String tooltip;
   final double size;
+  final bool isError;
 
   @override
   Widget build(BuildContext context) {
     final iconSize = size * .44;
     final innerColors = isPlaying
         ? const [Color(0xFFB92A2C), Color(0xFF71161A)]
-        : const [Color(0xFFFFFCF3), Color(0xFFF1D79F)];
+        : isError
+            ? const [Color(0xFFFFF4D1), Color(0xFFE9B94E)]
+            : const [Color(0xFFFFFCF3), Color(0xFFF1D79F)];
     final iconColor = isPlaying ? const Color(0xFFFFF5D6) : PhoenixTheme.red;
 
     return Tooltip(
@@ -119,9 +123,15 @@ class PhoenixMediaButton extends StatelessWidget {
                       child: Icon(
                         isPlaying
                             ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
+                            : isError
+                                ? Icons.refresh_rounded
+                                : Icons.play_arrow_rounded,
                         key: ValueKey<String>(
-                          isPlaying ? 'phoenix-pause' : 'phoenix-play',
+                          isPlaying
+                              ? 'phoenix-pause'
+                              : isError
+                                  ? 'phoenix-retry'
+                                  : 'phoenix-play',
                         ),
                         color: iconColor,
                         size: iconSize,

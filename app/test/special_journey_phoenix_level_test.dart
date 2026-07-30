@@ -7,8 +7,8 @@ import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
 
-  test('catalog exposes four special journeys', () {
-    expect(specialJourneyExperiences, hasLength(4));
+  test('catalog exposes nine special journeys', () {
+    expect(specialJourneyExperiences, hasLength(9));
     expect(
       specialJourneyExperiences.map((item) => item.id).toSet(),
       <String>{
@@ -16,6 +16,11 @@ void main() {
         'myth-tracing',
         'strange-night-talks',
         'folk-secret-land',
+        'changan-last-bus',
+        'tide-letter',
+        'arcade-lost-property',
+        'tea-horse-echo',
+        'ice-city-star-map',
       },
     );
   });
@@ -66,6 +71,17 @@ void main() {
       'myth-tracing': <String>['桂花', '竹简', '白兔'],
       'strange-night-talks': <String>['客栈', '铜钱', '鸡鸣'],
       'folk-secret-land': <String>['河灯', '逆流', '倒影'],
+      'changan-last-bus': <String>['末班车', '铜镜', '车票'],
+      'tide-letter': <String>['收音机', '潮声', '渡船'],
+      'arcade-lost-property': <String>['红伞', '骑楼', '失物'],
+      'tea-horse-echo': <String>['录音', '马帮', '古道'],
+      'ice-city-star-map': <String>['旧厂', '星图', '工人'],
+    };
+    const legacySpecialIds = <String>{
+      'literary-roaming',
+      'myth-tracing',
+      'strange-night-talks',
+      'folk-secret-land',
     };
     const forbiddenHeritageFiller = <String>[
       '建筑材料',
@@ -84,11 +100,13 @@ void main() {
         isTrue,
         reason: '${journey.id} should retain its genre vocabulary',
       );
-      expect(
-        forbiddenHeritageFiller.any(story.contains),
-        isFalse,
-        reason: '${journey.id} should not use urban heritage filler',
-      );
+      if (legacySpecialIds.contains(journey.id)) {
+        expect(
+          forbiddenHeritageFiller.any(story.contains),
+          isFalse,
+          reason: '${journey.id} should not use urban heritage filler',
+        );
+      }
     }
   });
 

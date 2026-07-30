@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../data/journey_data.dart';
 import '../services/narration_controller.dart';
+import '../services/narration_follow_coordinator.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 
@@ -147,6 +148,34 @@ bool narrationSnapshotMatches({
   return displayedText.trim() == displayText(spoken).trim();
 }
 
+@visibleForTesting
+bool shouldAutoFollowNarrationItem({
+  required NarrationStatus status,
+  required bool wasActive,
+  required bool isActive,
+  required bool sessionChanged,
+}) {
+  return status == NarrationStatus.playing &&
+      isActive &&
+      (!wasActive || sessionChanged);
+}
+
+const Duration vocabularyPopoverAutoHideDuration = Duration(seconds: 12);
+
+@visibleForTesting
+bool vocabularyWordListsEquivalent(
+  Iterable<String> previousWords,
+  Iterable<String> currentWords,
+) {
+  final previous = previousWords.toList(growable: false)..sort();
+  final current = currentWords.toList(growable: false)..sort();
+  if (previous.length != current.length) return false;
+  for (var index = 0; index < previous.length; index += 1) {
+    if (previous[index] != current[index]) return false;
+  }
+  return true;
+}
+
 class InteractiveStoryText extends StatefulWidget {
   const InteractiveStoryText({
     required this.text,
@@ -188,8 +217,43 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   late List<_InteractiveSegment> _segments;
   WordEntry? _selectedEntry;
   Timer? _hideTimer;
+  Timer? _autoFollowTimer;
   late final AnimationController _cinematicRevealController;
   double _lastAcceptedRevealCursor = 0;
+  int _autoFollowRequest = 0;
+  NarrationFollowCoordinator? _followCoordinator;
+
+  bool get _hasExplicitHighlight =>
+      widget.highlightStart != null &&
+      widget.highlightEnd != null &&
+      widget.highlightEnd! > widget.highlightStart!;
+
+  void _attachNarrationFollowCoordinator() {
+    final controller = widget.narrationController;
+    _followCoordinator = controller == null
+        ? null
+        : NarrationFollowCoordinator.forController(controller);
+    _followCoordinator?.addListener(_handleNarrationFollowChanged);
+  }
+
+  void _detachNarrationFollowCoordinator() {
+    _followCoordinator?.removeListener(_handleNarrationFollowChanged);
+    _followCoordinator = null;
+  }
+
+  void _handleNarrationFollowChanged() {
+    final coordinator = _followCoordinator;
+    if (coordinator == null) return;
+    if (coordinator.isManualHoldActive) {
+      _autoFollowTimer?.cancel();
+      _autoFollowRequest += 1;
+      return;
+    }
+    if (_hasExplicitHighlight &&
+        widget.narrationController?.status == NarrationStatus.playing) {
+      _scheduleNarrationAutoFollow();
+    }
+  }
 
   @override
   void initState() {
@@ -201,6 +265,11 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       value: initialReveal,
     );
     _buildSegments();
+    _attachNarrationFollowCoordinator();
+    if (_hasExplicitHighlight &&
+        widget.narrationController?.status == NarrationStatus.playing) {
+      _scheduleNarrationAutoFollow();
+    }
   }
 
   @override
@@ -209,7 +278,20 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     final textChanged = oldWidget.text != widget.text;
     final sessionChanged =
         oldWidget.narrationSessionToken != widget.narrationSessionToken;
-    if (textChanged || oldWidget.entries != widget.entries) {
+    final wasActive =
+        oldWidget.highlightStart != null &&
+        oldWidget.highlightEnd != null &&
+        oldWidget.highlightEnd! > oldWidget.highlightStart!;
+    final isActive = _hasExplicitHighlight;
+    if (!identical(oldWidget.narrationController, widget.narrationController)) {
+      _detachNarrationFollowCoordinator();
+      _attachNarrationFollowCoordinator();
+    }
+    final entriesChanged = !vocabularyWordListsEquivalent(
+      oldWidget.entries.map((entry) => entry.word),
+      widget.entries.map((entry) => entry.word),
+    );
+    if (textChanged || entriesChanged) {
       _disposeRecognizers();
       _selectedEntry = null;
       _buildSegments();
@@ -219,6 +301,15 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       _resetRevealTo(widget.revealEnd);
     } else if (oldWidget.revealEnd != widget.revealEnd) {
       _animateRevealTo(widget.revealEnd);
+    }
+
+    if (shouldAutoFollowNarrationItem(
+      status: widget.narrationController?.status ?? NarrationStatus.idle,
+      wasActive: wasActive,
+      isActive: isActive,
+      sessionChanged: sessionChanged,
+    )) {
+      _scheduleNarrationAutoFollow();
     }
   }
 
@@ -263,6 +354,47 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     );
   }
 
+  void _suspendNarrationAutoFollow() {
+    if (widget.narrationController?.status != NarrationStatus.playing) {
+      return;
+    }
+    _followCoordinator?.suspend();
+  }
+
+  Duration _remainingNarrationAutoFollowHold() {
+    return _followCoordinator?.remainingHold ?? Duration.zero;
+  }
+
+  void _scheduleNarrationAutoFollow() {
+    _autoFollowTimer?.cancel();
+    final request = ++_autoFollowRequest;
+
+    void scheduleAfter(Duration delay) {
+      _autoFollowTimer = Timer(delay, () {
+        if (!mounted || request != _autoFollowRequest) return;
+        if (widget.narrationController?.status != NarrationStatus.playing) {
+          return;
+        }
+        if (!_hasExplicitHighlight) return;
+
+        final remainingHold = _remainingNarrationAutoFollowHold();
+        if (remainingHold > Duration.zero) {
+          scheduleAfter(remainingHold + const Duration(milliseconds: 80));
+          return;
+        }
+
+        Scrollable.ensureVisible(
+          context,
+          alignment: .34,
+          duration: const Duration(milliseconds: 360),
+          curve: Curves.easeOutCubic,
+        );
+      });
+    }
+
+    scheduleAfter(const Duration(milliseconds: 180));
+  }
+
   void _buildSegments() {
     _segments = segmentStoryText(widget.text, widget.entries)
         .map((segment) {
@@ -301,7 +433,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
         curve: Curves.easeOutCubic,
       );
     });
-    _hideTimer = Timer(const Duration(milliseconds: 3200), () {
+    _hideTimer = Timer(vocabularyPopoverAutoHideDuration, () {
       if (mounted && identical(_selectedEntry, entry)) {
         setState(() => _selectedEntry = null);
       }
@@ -323,6 +455,8 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   @override
   void dispose() {
     _hideTimer?.cancel();
+    _autoFollowTimer?.cancel();
+    _detachNarrationFollowCoordinator();
     _cinematicRevealController.dispose();
     _disposeRecognizers();
     super.dispose();
@@ -336,103 +470,138 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
     final Listenable highlightSource =
         widget.narrationController ?? NarrationHighlightBus.instance;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AnimatedBuilder(
-          animation: Listenable.merge(<Listenable>[
-            highlightSource,
-            _cinematicRevealController,
-          ]),
-          builder: (context, _) {
-            final snapshot =
-                widget.narrationController?.highlightSnapshot ??
-                NarrationHighlightBus.instance.snapshot;
-            final hasExplicitHighlight =
-                widget.highlightStart != null &&
-                widget.highlightEnd != null &&
-                widget.highlightEnd! > widget.highlightStart!;
-            final isCurrentNarrationItem =
-                hasExplicitHighlight ||
-                narrationSnapshotMatches(
-                  snapshot: snapshot,
-                  contentId: widget.narrationContentId,
-                  itemId: widget.narrationItemId,
-                  sourceText: widget.text,
-                  displayedText: state.displayText(widget.text),
-                  displayText: state.displayText,
-                );
-            final highlightStart = hasExplicitHighlight
-                ? widget.highlightStart!
-                : isCurrentNarrationItem
-                ? snapshot!.start
-                : -1;
-            final highlightEnd = hasExplicitHighlight
-                ? widget.highlightEnd!
-                : isCurrentNarrationItem
-                ? snapshot!.end
-                : -1;
+    return Listener(
+      key: ValueKey(
+        'narration-auto-follow-touch-${widget.narrationItemId ?? widget.text}',
+      ),
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _suspendNarrationAutoFollow(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AnimatedBuilder(
+            animation: Listenable.merge(<Listenable>[
+              highlightSource,
+              _cinematicRevealController,
+            ]),
+            builder: (context, _) {
+              final snapshot =
+                  widget.narrationController?.highlightSnapshot ??
+                  NarrationHighlightBus.instance.snapshot;
+              final hasExplicitHighlight =
+                  widget.highlightStart != null &&
+                  widget.highlightEnd != null &&
+                  widget.highlightEnd! > widget.highlightStart!;
+              final isCurrentNarrationItem =
+                  hasExplicitHighlight ||
+                  narrationSnapshotMatches(
+                    snapshot: snapshot,
+                    contentId: widget.narrationContentId,
+                    itemId: widget.narrationItemId,
+                    sourceText: widget.text,
+                    displayedText: state.displayText(widget.text),
+                    displayText: state.displayText,
+                  );
+              final highlightStart = hasExplicitHighlight
+                  ? widget.highlightStart!
+                  : isCurrentNarrationItem
+                  ? snapshot!.start
+                  : -1;
+              final highlightEnd = hasExplicitHighlight
+                  ? widget.highlightEnd!
+                  : isCurrentNarrationItem
+                  ? snapshot!.end
+                  : -1;
 
-            return Text.rich(
-              key: ValueKey(
-                'interactive-highlight-${widget.narrationItemId ?? widget.text}',
-              ),
-              strutStyle: StrutStyle(
-                fontSize: baseStyle?.fontSize,
-                height: baseStyle?.height,
-                fontWeight: baseStyle?.fontWeight,
-                forceStrutHeight: true,
-              ),
-              TextSpan(
-                style: baseStyle,
-                children: _segments
-                    .expand((segment) {
-                      return _buildSegmentSpans(
-                        segment,
-                        state: state,
-                        baseStyle: baseStyle,
-                        highlightStart: highlightStart,
-                        highlightEnd: highlightEnd,
-                        revealCursor: _currentRevealCursor,
-                      );
-                    })
-                    .toList(growable: false),
-              ),
-            );
-          },
-        ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
-            reverseDuration: const Duration(milliseconds: 130),
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(
-                  scale: Tween<double>(begin: .96, end: 1).animate(animation),
-                  alignment: Alignment.topLeft,
-                  child: child,
+              return AnimatedContainer(
+                key: ValueKey(
+                  'narration-follow-surface-${widget.narrationItemId ?? widget.text}',
+                ),
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isCurrentNarrationItem
+                      ? const Color(0x16FFD879)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isCurrentNarrationItem
+                        ? const Color(0x38FFD879)
+                        : Colors.transparent,
+                  ),
+                  boxShadow: isCurrentNarrationItem
+                      ? const [
+                          BoxShadow(
+                            color: Color(0x16FFD879),
+                            blurRadius: 10,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : const [],
+                ),
+                child: Text.rich(
+                  key: ValueKey(
+                    'interactive-highlight-${widget.narrationItemId ?? widget.text}',
+                  ),
+                  strutStyle: StrutStyle(
+                    fontSize: baseStyle?.fontSize,
+                    height: baseStyle?.height,
+                    fontWeight: baseStyle?.fontWeight,
+                    forceStrutHeight: true,
+                  ),
+                  TextSpan(
+                    style: baseStyle,
+                    children: _segments
+                        .expand((segment) {
+                          return _buildSegmentSpans(
+                            segment,
+                            state: state,
+                            baseStyle: baseStyle,
+                            highlightStart: highlightStart,
+                            highlightEnd: highlightEnd,
+                            revealCursor: _currentRevealCursor,
+                          );
+                        })
+                        .toList(growable: false),
+                  ),
                 ),
               );
             },
-            child: selectedEntry == null
-                ? const SizedBox.shrink(key: ValueKey('word-popover-empty'))
-                : Padding(
-                    key: ValueKey(
-                      'word-popover-auto-visible-${selectedEntry.word}',
-                    ),
-                    padding: const EdgeInsets.only(top: 8),
-                    child: _VocabularyPopover(
-                      entry: selectedEntry,
-                      state: state,
-                      onClose: _hideEntry,
-                    ),
-                  ),
           ),
-        ),
-      ],
+          AnimatedSize(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              reverseDuration: const Duration(milliseconds: 130),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: .96, end: 1).animate(animation),
+                    alignment: Alignment.topLeft,
+                    child: child,
+                  ),
+                );
+              },
+              child: selectedEntry == null
+                  ? const SizedBox.shrink(key: ValueKey('word-popover-empty'))
+                  : Padding(
+                      key: ValueKey(
+                        'word-popover-auto-visible-${selectedEntry.word}',
+                      ),
+                      padding: const EdgeInsets.only(top: 8),
+                      child: _VocabularyPopover(
+                        entry: selectedEntry,
+                        state: state,
+                        onClose: _hideEntry,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
