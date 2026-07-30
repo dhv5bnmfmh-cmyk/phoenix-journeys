@@ -25,7 +25,7 @@ class ShadowingScore {
   String get coaching {
     if (completeness >= 90) return '句子很完整，下一次可以更自然地连读。';
     if (completeness >= 70) return '再听一次示范，注意红色文字后重新跟读。';
-    return '先放慢速度，分成短语读清楚，再尝试完整句子。';
+    return '先放慢速度，注意红色文字，分成短语读清楚后再尝试完整句子。';
   }
 }
 
