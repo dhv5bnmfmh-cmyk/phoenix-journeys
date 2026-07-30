@@ -422,6 +422,18 @@ class _PassportPlaceRail extends StatelessWidget {
   final ValueChanged<String> onSelectProvince;
   final ValueChanged<String> onSelectCity;
 
+  Future<void> _openDestination(
+    BuildContext context,
+    DailyJourneyExperience journey,
+  ) async {
+    await state.activateJourney(journey.id);
+    if (state.journeyCompleted) await state.restartJourney();
+    if (!context.mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => JourneyScreen(journeyId: journey.id)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final canGoBack = level != _PassportMapLevel.continent;
@@ -489,24 +501,30 @@ class _PassportPlaceRail extends StatelessWidget {
                               );
                             },
                           )
-                    : level == _PassportMapLevel.city &&
-                            requireJourneyProvince(
-                              selectedProvinceId!,
-                            ).isMunicipality
-                        ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Text(
-                                state.displayText('点击地图\n查看地点'),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Color(0xFF6F4A3B),
-                                  fontSize: 10,
-                                  height: 1.45,
-                                  fontWeight: FontWeight.w900,
+                    : level == _PassportMapLevel.city
+                        ? ListView.separated(
+                            key: const ValueKey('passport-destination-list'),
+                            padding: const EdgeInsets.all(6),
+                            itemCount: requireJourneyCity(
+                              selectedCityId!,
+                            ).destinations.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 4),
+                            itemBuilder: (context, index) {
+                              final journey = requireJourneyCity(
+                                selectedCityId!,
+                              ).destinations[index];
+                              return _PlaceRailButton(
+                                key: ValueKey(
+                                  'passport-place-option-${journey.id}',
                                 ),
-                              ),
-                            ),
+                                label: state.displayText(journey.place),
+                                selected: state.activeJourneyId == journey.id,
+                                onTap: () => unawaited(
+                                  _openDestination(context, journey),
+                                ),
+                              );
+                            },
                           )
                     : ListView.separated(
                         key: const ValueKey('passport-city-list'),
