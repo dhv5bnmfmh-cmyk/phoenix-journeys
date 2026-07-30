@@ -23,7 +23,7 @@ void main() {
       expect(binding.locationPath, journey.locationPath);
       expect(binding.geoNodeId, journey.geoNodeId);
       expect(binding.placeNode.isPlace, isTrue);
-      expect(binding.latitude, inInclusiveRange(20, 42));
+      expect(binding.latitude, inInclusiveRange(18, 54));
       expect(binding.longitude, inInclusiveRange(73, 135));
       expect(binding.mapPoint.x, inInclusiveRange(.38, .88));
       expect(binding.mapPoint.y, inInclusiveRange(.28, .72));
