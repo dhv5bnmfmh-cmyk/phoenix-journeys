@@ -35,8 +35,8 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   final Map<String, int> _bestScores = <String, int>{};
   final Map<int, int> _sessionSentenceScores = <int, int>{};
   final List<int> _reviewQueue = <int>[];
-  ShadowingTrainingHistory _history = const ShadowingTrainingHistory();
 
+  ShadowingTrainingHistory _history = const ShadowingTrainingHistory();
   ShadowingPassage? _passage;
   int _sentenceIndex = 0;
   int _reviewPosition = 0;
@@ -70,6 +70,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     _history = ShadowingTrainingHistory.decode(
       prefs.getString('phoenix.shadowing.history'),
     );
+
     var ready = false;
     try {
       ready = await _speech.initialize(
@@ -85,6 +86,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     } catch (_) {
       ready = false;
     }
+
     if (!mounted) return;
     setState(() {
       _speechReady = ready;
@@ -142,10 +144,14 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   Future<void> _playText({bool wholePassage = false}) async {
     final passage = _passage;
     if (passage == null) return;
-    final text = wholePassage ? passage.text : passage.sentences[_sentenceIndex];
+    final text =
+        wholePassage ? passage.text : passage.sentences[_sentenceIndex];
     await _narration.play(
-      contentId: 'shadowing-${passage.id}-${wholePassage ? 'all' : _sentenceIndex}',
-      items: [NarrationItem(id: 'prompt', text: text, label: passage.title)],
+      contentId:
+          'shadowing-${passage.id}-${wholePassage ? 'all' : _sentenceIndex}',
+      items: [
+        NarrationItem(id: 'prompt', text: text, label: passage.title),
+      ],
       languageCode: context.read<AppState>().isTraditional ? 'zh-TW' : 'zh-CN',
     );
   }
@@ -164,10 +170,14 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       if (_recognized.trim().isNotEmpty) _scoreCurrentAttempt();
       return;
     }
+
     if (!_speechReady) {
-      setState(() => _speechMessage = '当前设备未开放语音识别，请允许麦克风权限后重试。');
+      setState(
+        () => _speechMessage = '当前设备未开放语音识别，请允许麦克风权限后重试。',
+      );
       return;
     }
+
     final localeId =
         context.read<AppState>().isTraditional ? 'zh_TW' : 'zh_CN';
     await _narration.stop();
@@ -218,9 +228,21 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     });
   }
 
+  void _retryCurrentWeakness(ShadowingScore score) {
+    unawaited(_speech.cancel());
+    setState(() {
+      _listening = false;
+      _recognized = '';
+      _score = null;
+      _speechMessage = '已定位${score.weakestMetric}弱项，先听示范，再跟读一次。';
+    });
+    unawaited(_playText());
+  }
+
   void _nextSentence() {
     final passage = _passage;
     if (passage == null) return;
+
     if (_reviewQueue.isNotEmpty) {
       if (_reviewPosition >= _reviewQueue.length - 1) {
         unawaited(_showReviewCompletion());
@@ -236,10 +258,12 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       });
       return;
     }
+
     if (_sentenceIndex >= passage.sentences.length - 1) {
       unawaited(_showCompletion());
       return;
     }
+
     setState(() {
       _sentenceIndex += 1;
       _attempts = 0;
@@ -301,6 +325,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     await prefs.setString('phoenix.shadowing.history', history.encode());
     if (!mounted) return;
     setState(() => _history = history);
+
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -309,11 +334,24 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.verified_rounded, color: PhoenixTheme.red, size: 54),
+            const Icon(
+              Icons.verified_rounded,
+              color: PhoenixTheme.red,
+              size: 54,
+            ),
             const SizedBox(height: 8),
-            Text(t('短文跟读完成'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+            Text(
+              t('短文跟读完成'),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
             const SizedBox(height: 6),
-            Text(t('已完成《${passage.title}》的全部 ${passage.sentences.length} 句。'), textAlign: TextAlign.center),
+            Text(
+              t('已完成《${passage.title}》的全部 ${passage.sentences.length} 句。'),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 8),
             Text(
               t('本篇平均 $completedScore 分'),
@@ -361,6 +399,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     final completedScore = await _savePassageBest(passage);
     final weakSentences = _weakSentenceIndexes(passage);
     if (!mounted) return;
+
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -377,7 +416,10 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
             const SizedBox(height: 8),
             Text(
               t('薄弱句复练完成'),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -425,7 +467,9 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     return Scaffold(
       backgroundColor: PhoenixTheme.paper,
       appBar: AppBar(
-        title: Text(state.displayText(_passage == null ? '跟读训练' : _passage!.title)),
+        title: Text(
+          state.displayText(_passage == null ? '跟读训练' : _passage!.title),
+        ),
         automaticallyImplyLeading: false,
         leading: widget.embedded
             ? null
@@ -482,45 +526,93 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
                   color: Colors.black.withValues(alpha: .18),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.record_voice_over_rounded, color: Color(0xFFFFD879), size: 22),
+                child: const Icon(
+                  Icons.record_voice_over_rounded,
+                  color: Color(0xFFFFD879),
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(state.displayText('跟读训练'), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, shadows: PhoenixTheme.contentShadow)),
+                    Text(
+                      state.displayText('跟读训练'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        shadows: PhoenixTheme.contentShadow,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(state.displayText('听一句 · 跟一句 · 逐字对照 · 薄弱句复练'), style: const TextStyle(color: Colors.white, fontSize: 10.5, height: 1.25, fontWeight: FontWeight.w700, shadows: PhoenixTheme.contentShadow)),
+                    Text(
+                      state.displayText('听一句 · 跟一句 · 三维诊断 · 薄弱句复练'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10.5,
+                        height: 1.25,
+                        fontWeight: FontWeight.w700,
+                        shadows: PhoenixTheme.contentShadow,
+                      ),
+                    ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFE3A0),
                   borderRadius: BorderRadius.circular(99),
                 ),
-                child: Text('Lv.$level', key: ValueKey('shadowing-active-level-$level'), style: const TextStyle(color: Color(0xFF7A201B), fontSize: 10.5, fontWeight: FontWeight.w900)),
+                child: Text(
+                  'Lv.$level',
+                  key: ValueKey('shadowing-active-level-$level'),
+                  style: const TextStyle(
+                    color: Color(0xFF7A201B),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 6),
-        _TrainingDashboard(history: _history, displayText: state.displayText),
+        _TrainingDashboard(
+          history: _history,
+          displayText: state.displayText,
+        ),
         const SizedBox(height: 9),
         Row(
           children: [
-            Text(state.displayText('适合当前等级'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+            Text(
+              state.displayText('适合当前等级'),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
             const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: .82),
                 borderRadius: BorderRadius.circular(99),
-                border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .42)),
+                border: Border.all(
+                  color: PhoenixTheme.gold.withValues(alpha: .42),
+                ),
               ),
-              child: Text(state.displayText('${passages.length} 篇短文'), style: const TextStyle(color: PhoenixTheme.red, fontSize: 10.5, fontWeight: FontWeight.w900)),
+              child: Text(
+                state.displayText('${passages.length} 篇短文'),
+                style: const TextStyle(
+                  color: PhoenixTheme.red,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
             ),
           ],
         ),
@@ -564,7 +656,13 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
               style: const TextStyle(fontWeight: FontWeight.w900),
             ),
             const Spacer(),
-            Text(state.displayText('已练 $_attempts 次'), style: const TextStyle(color: Colors.black54, fontSize: 11)),
+            Text(
+              state.displayText('已练 $_attempts 次'),
+              style: const TextStyle(
+                color: Colors.black54,
+                fontSize: 11,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 6),
@@ -578,7 +676,9 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
         Row(
           key: const ValueKey('shadowing-sentence-score-strip'),
           children: [
-            for (var index = 0; index < passage.sentences.length; index += 1)
+            for (var index = 0;
+                index < passage.sentences.length;
+                index += 1)
               Expanded(
                 child: Container(
                   margin: EdgeInsets.only(
@@ -615,16 +715,45 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
         const SizedBox(height: 14),
         Container(
           padding: const EdgeInsets.all(11),
-          decoration: BoxDecoration(color: Colors.white.withValues(alpha: .30), borderRadius: BorderRadius.circular(18), border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .24))),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .30),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: PhoenixTheme.gold.withValues(alpha: .24),
+            ),
+          ),
           child: Column(
             children: [
-              Text(state.displayText(sentence), textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, height: 1.55, fontWeight: FontWeight.w900)),
+              Text(
+                state.displayText(sentence),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 22,
+                  height: 1.55,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Expanded(child: OutlinedButton.icon(onPressed: () => unawaited(_playText()), style: _shadowingListenButtonStyle(), icon: const Icon(Icons.volume_up_rounded), label: Text(state.displayText('听本句')))),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => unawaited(_playText()),
+                      style: _shadowingListenButtonStyle(),
+                      icon: const Icon(Icons.volume_up_rounded),
+                      label: Text(state.displayText('听本句')),
+                    ),
+                  ),
                   const SizedBox(width: 8),
-                  Expanded(child: OutlinedButton.icon(onPressed: () => unawaited(_playText(wholePassage: true)), style: _shadowingListenButtonStyle(), icon: const Icon(Icons.headphones_rounded), label: Text(state.displayText('听全文')))),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () =>
+                          unawaited(_playText(wholePassage: true)),
+                      style: _shadowingListenButtonStyle(),
+                      icon: const Icon(Icons.headphones_rounded),
+                      label: Text(state.displayText('听全文')),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
@@ -667,14 +796,30 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: _listening
-                  ? const [Color(0xFFD84A3C), Color(0xFF8D1E1B)]
-                  : const [Color(0xFFC13B30), Color(0xFF8B1D1B), Color(0xFFB9862F)],
+                  ? const [
+                      Color(0xFFD84A3C),
+                      Color(0xFF8D1E1B),
+                    ]
+                  : const [
+                      Color(0xFFC13B30),
+                      Color(0xFF8B1D1B),
+                      Color(0xFFB9862F),
+                    ],
             ),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFFFD879).withValues(alpha: .78)),
+            border: Border.all(
+              color: const Color(0xFFFFD879).withValues(alpha: .78),
+            ),
             boxShadow: const [
-              BoxShadow(color: Color(0x4D7A201B), blurRadius: 17, offset: Offset(0, 8)),
-              BoxShadow(color: Color(0x33FFD879), blurRadius: 7),
+              BoxShadow(
+                color: Color(0x4D7A201B),
+                blurRadius: 17,
+                offset: Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Color(0x33FFD879),
+                blurRadius: 7,
+              ),
             ],
           ),
           child: FilledButton.icon(
@@ -684,19 +829,51 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
               backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
             ),
-            icon: Icon(_listening ? Icons.stop_circle_rounded : Icons.mic_rounded, size: 28),
-            label: Text(state.displayText(_listening ? '正在听你朗读 · 点击结束' : '开始跟读 · 让声音带你前进'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900)),
+            icon: Icon(
+              _listening
+                  ? Icons.stop_circle_rounded
+                  : Icons.mic_rounded,
+              size: 28,
+            ),
+            label: Text(
+              state.displayText(
+                _listening
+                    ? '正在听你朗读 · 点击结束'
+                    : '开始跟读 · 让声音带你前进',
+              ),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ),
         ),
         if (_speechMessage != null) ...[
           const SizedBox(height: 10),
-          Text(state.displayText(_speechMessage!), textAlign: TextAlign.center, style: const TextStyle(color: PhoenixTheme.red, fontWeight: FontWeight.w800)),
+          Text(
+            state.displayText(_speechMessage!),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: PhoenixTheme.red,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ],
         if (_recognized.isNotEmpty) ...[
           const SizedBox(height: 12),
-          _ResultPanel(reference: sentence, recognized: _recognized, score: score, displayText: state.displayText),
+          _ResultPanel(
+            reference: sentence,
+            recognized: _recognized,
+            score: score,
+            displayText: state.displayText,
+            onRetry: score == null
+                ? null
+                : () => _retryCurrentWeakness(score),
+          ),
         ],
         if (score != null) ...[
           const SizedBox(height: 12),
@@ -725,10 +902,14 @@ ButtonStyle _shadowingListenButtonStyle() {
   return OutlinedButton.styleFrom(
     foregroundColor: PhoenixTheme.red,
     backgroundColor: Colors.white.withValues(alpha: .88),
-    side: BorderSide(color: PhoenixTheme.gold.withValues(alpha: .68)),
+    side: BorderSide(
+      color: PhoenixTheme.gold.withValues(alpha: .68),
+    ),
     elevation: 3,
     shadowColor: const Color(0x29000000),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(15),
+    ),
   );
 }
 
@@ -753,7 +934,11 @@ class _ShadowingBackground extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0x00FFF5DE), Color(0x10FFF7E8), Color(0x2CFFF7E8)],
+              colors: [
+                Color(0x00FFF5DE),
+                Color(0x10FFF7E8),
+                Color(0x2CFFF7E8),
+              ],
               stops: [0, .48, 1],
             ),
           ),
@@ -780,7 +965,9 @@ class _TrainingDashboard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: .18),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .18)),
+        border: Border.all(
+          color: PhoenixTheme.gold.withValues(alpha: .18),
+        ),
       ),
       child: Row(
         children: [
@@ -789,13 +976,21 @@ class _TrainingDashboard extends StatelessWidget {
             value: '${history.currentStreak}',
             label: displayText('连续天数'),
           ),
-          Container(width: 1, height: 30, color: PhoenixTheme.gold.withValues(alpha: .28)),
+          Container(
+            width: 1,
+            height: 30,
+            color: PhoenixTheme.gold.withValues(alpha: .28),
+          ),
           _HistoryMetric(
             icon: Icons.check_circle_rounded,
             value: '${history.totalSessions}',
             label: displayText('完成篇数'),
           ),
-          Container(width: 1, height: 30, color: PhoenixTheme.gold.withValues(alpha: .28)),
+          Container(
+            width: 1,
+            height: 30,
+            color: PhoenixTheme.gold.withValues(alpha: .28),
+          ),
           _HistoryMetric(
             icon: Icons.workspace_premium_rounded,
             value: '${history.bestRecentScore}',
@@ -824,11 +1019,35 @@ class _HistoryMetric extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 15, color: const Color(0xFFFFD879), shadows: PhoenixTheme.contentShadow),
+          Icon(
+            icon,
+            size: 15,
+            color: const Color(0xFFFFD879),
+            shadows: PhoenixTheme.contentShadow,
+          ),
           const SizedBox(width: 4),
-          Text(value, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900, shadows: PhoenixTheme.contentShadow)),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+              shadows: PhoenixTheme.contentShadow,
+            ),
+          ),
           const SizedBox(width: 3),
-          Flexible(child: Text(label, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.w700, shadows: PhoenixTheme.contentShadow))),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 8.5,
+                fontWeight: FontWeight.w700,
+                shadows: PhoenixTheme.contentShadow,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -836,7 +1055,13 @@ class _HistoryMetric extends StatelessWidget {
 }
 
 class _PassageCard extends StatelessWidget {
-  const _PassageCard({required this.passage, required this.bestScore, required this.displayText, required this.onTap});
+  const _PassageCard({
+    required this.passage,
+    required this.bestScore,
+    required this.displayText,
+    required this.onTap,
+  });
+
   final ShadowingPassage passage;
   final int bestScore;
   final String Function(String) displayText;
@@ -856,7 +1081,9 @@ class _PassageCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(17),
-            border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .20)),
+            border: Border.all(
+              color: PhoenixTheme.gold.withValues(alpha: .20),
+            ),
           ),
           child: Row(
             children: [
@@ -864,23 +1091,56 @@ class _PassageCard extends StatelessWidget {
                 width: 37,
                 height: 37,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFFB83931), Color(0xFF7E1C1B)]),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFFB83931),
+                      Color(0xFF7E1C1B),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
-                child: Text('Lv.${passage.level}', style: const TextStyle(color: Color(0xFFFFDF8A), fontSize: 12, fontWeight: FontWeight.w900)),
+                child: Text(
+                  'Lv.${passage.level}',
+                  style: const TextStyle(
+                    color: Color(0xFFFFDF8A),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(displayText(passage.title), style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900)),
+                    Text(
+                      displayText(passage.title),
+                      style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(displayText('${passage.theme} · ${passage.sentences.length} 句 · 约 ${passage.estimatedMinutes} 分钟'), style: const TextStyle(color: Colors.black54, fontSize: 11)),
+                    Text(
+                      displayText(
+                        '${passage.theme} · ${passage.sentences.length} 句 · 约 ${passage.estimatedMinutes} 分钟',
+                      ),
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 11,
+                      ),
+                    ),
                     if (bestScore > 0) ...[
                       const SizedBox(height: 5),
-                      Text(displayText('最佳成绩 $bestScore 分'), style: const TextStyle(color: PhoenixTheme.red, fontSize: 10.5, fontWeight: FontWeight.w900)),
+                      Text(
+                        displayText('最佳成绩 $bestScore 分'),
+                        style: const TextStyle(
+                          color: PhoenixTheme.red,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
                     ],
                   ],
                 ),
@@ -888,8 +1148,15 @@ class _PassageCard extends StatelessWidget {
               Container(
                 width: 27,
                 height: 27,
-                decoration: BoxDecoration(color: PhoenixTheme.red.withValues(alpha: .08), shape: BoxShape.circle),
-                child: const Icon(Icons.arrow_forward_rounded, color: PhoenixTheme.red, size: 18),
+                decoration: BoxDecoration(
+                  color: PhoenixTheme.red.withValues(alpha: .08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: PhoenixTheme.red,
+                  size: 18,
+                ),
               ),
             ],
           ),
@@ -900,11 +1167,19 @@ class _PassageCard extends StatelessWidget {
 }
 
 class _ResultPanel extends StatelessWidget {
-  const _ResultPanel({required this.reference, required this.recognized, required this.score, required this.displayText});
+  const _ResultPanel({
+    required this.reference,
+    required this.recognized,
+    required this.score,
+    required this.displayText,
+    required this.onRetry,
+  });
+
   final String reference;
   final String recognized;
   final ShadowingScore? score;
   final String Function(String) displayText;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -914,61 +1189,348 @@ class _ResultPanel extends StatelessWidget {
             reference: reference,
             recognized: recognized,
           );
+
     return Container(
       key: const ValueKey('shadowing-result-panel'),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: const Color(0xFFFFF4DF).withValues(alpha: .46), borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFFE8C788)), boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 4))]),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (score != null) Row(children: [
-          CircleAvatar(backgroundColor: PhoenixTheme.red, foregroundColor: Colors.white, child: Text('${score!.overall}', style: const TextStyle(fontWeight: FontWeight.w900))),
-          const SizedBox(width: 9),
-          Expanded(child: Text(displayText('${score!.label} · 完整度 ${score!.completeness}%'), style: const TextStyle(fontWeight: FontWeight.w900))),
-        ]),
-        const SizedBox(height: 9),
-        Text(displayText('识别结果'), style: const TextStyle(color: Colors.black54, fontSize: 10, fontWeight: FontWeight.w900)),
-        Text(displayText(recognized), style: const TextStyle(fontSize: 15, height: 1.4, fontWeight: FontWeight.w800)),
-        const SizedBox(height: 7),
-        Text(displayText('逐字对照'), style: const TextStyle(color: Colors.black54, fontSize: 10, fontWeight: FontWeight.w900)),
-        if (feedback.isEmpty)
-          Text(displayText(reference), style: const TextStyle(fontSize: 13, height: 1.35))
-        else
-          Text.rich(
-            key: const ValueKey('shadowing-character-feedback'),
-            TextSpan(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4DF).withValues(alpha: .56),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE8C788)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (score != null) ...[
+            Row(
               children: [
-                for (final unit in feedback)
-                  TextSpan(
-                    text: displayText(unit.text),
-                    style: TextStyle(
-                      color: unit.matched
-                          ? const Color(0xFF254A32)
-                          : PhoenixTheme.red,
-                      backgroundColor: unit.matched
-                          ? Colors.transparent
-                          : const Color(0xFFFFD8CF),
-                      fontWeight: unit.matched
-                          ? FontWeight.w700
-                          : FontWeight.w900,
-                    ),
+                CircleAvatar(
+                  backgroundColor: PhoenixTheme.red,
+                  foregroundColor: Colors.white,
+                  child: Text(
+                    '${score!.overall}',
+                    style: const TextStyle(fontWeight: FontWeight.w900),
                   ),
+                ),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayText(score!.label),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        displayText('当前重点：${score!.weakestMetric}'),
+                        key: const ValueKey('shadowing-primary-weakness'),
+                        style: const TextStyle(
+                          color: PhoenixTheme.red,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-            style: const TextStyle(fontSize: 16, height: 1.55),
-          ),
-        if (score != null) ...[
-          const SizedBox(height: 8),
+            const SizedBox(height: 12),
+            Row(
+              key: const ValueKey('shadowing-diagnostic-metrics'),
+              children: [
+                Expanded(
+                  child: _DiagnosticMetric(
+                    key: const ValueKey('shadowing-metric-accuracy'),
+                    label: displayText('准确度'),
+                    value: score!.accuracy,
+                    highlighted: score!.weakestMetric == '准确度',
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: _DiagnosticMetric(
+                    key: const ValueKey('shadowing-metric-completeness'),
+                    label: displayText('完整度'),
+                    value: score!.completeness,
+                    highlighted: score!.weakestMetric == '完整度',
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: _DiagnosticMetric(
+                    key: const ValueKey('shadowing-metric-fluency'),
+                    label: displayText('流利度'),
+                    value: score!.fluency,
+                    highlighted: score!.weakestMetric == '流利度',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              key: const ValueKey('shadowing-issue-counts'),
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                _IssueChip(
+                  icon: Icons.remove_circle_outline_rounded,
+                  label: displayText('漏读 ${score!.omittedCharacters}'),
+                  active: score!.omittedCharacters > 0,
+                ),
+                _IssueChip(
+                  icon: Icons.change_circle_outlined,
+                  label: displayText('错读 ${score!.wrongCharacters}'),
+                  active: score!.wrongCharacters > 0,
+                ),
+                _IssueChip(
+                  icon: Icons.add_circle_outline_rounded,
+                  label: displayText('多读 ${score!.extraCharacters}'),
+                  active: score!.extraCharacters > 0,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
           Text(
-            displayText(score!.coaching),
-            key: const ValueKey('shadowing-coaching'),
+            displayText('识别结果'),
             style: const TextStyle(
-              color: Color(0xFF6F4A3B),
-              fontSize: 11.5,
+              color: Colors.black54,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          Text(
+            displayText(recognized),
+            style: const TextStyle(
+              fontSize: 15,
               height: 1.4,
               fontWeight: FontWeight.w800,
             ),
           ),
+          const SizedBox(height: 7),
+          Text(
+            displayText('逐字对照'),
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          if (feedback.isEmpty)
+            Text(
+              displayText(reference),
+              style: const TextStyle(fontSize: 13, height: 1.35),
+            )
+          else
+            Text.rich(
+              key: const ValueKey('shadowing-character-feedback'),
+              TextSpan(
+                children: [
+                  for (final unit in feedback)
+                    TextSpan(
+                      text: displayText(unit.text),
+                      style: TextStyle(
+                        color: unit.matched
+                            ? const Color(0xFF254A32)
+                            : PhoenixTheme.red,
+                        backgroundColor: unit.matched
+                            ? Colors.transparent
+                            : const Color(0xFFFFD8CF),
+                        fontWeight: unit.matched
+                            ? FontWeight.w700
+                            : FontWeight.w900,
+                      ),
+                    ),
+                ],
+              ),
+              style: const TextStyle(fontSize: 16, height: 1.55),
+            ),
+          if (score != null) ...[
+            const SizedBox(height: 9),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 9,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: .38),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: PhoenixTheme.gold.withValues(alpha: .28),
+                ),
+              ),
+              child: Text(
+                displayText(score!.coaching),
+                key: const ValueKey('shadowing-coaching'),
+                style: const TextStyle(
+                  color: Color(0xFF6F4A3B),
+                  fontSize: 11.5,
+                  height: 1.4,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                key: const ValueKey('shadowing-retry-weakness'),
+                onPressed: onRetry,
+                icon: const Icon(Icons.replay_circle_filled_rounded),
+                label: Text(
+                  displayText('针对${score!.weakestMetric}再练一次'),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: PhoenixTheme.red,
+                  backgroundColor: Colors.white.withValues(alpha: .68),
+                  side: BorderSide(
+                    color: PhoenixTheme.gold.withValues(alpha: .72),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
-      ]),
+      ),
+    );
+  }
+}
+
+class _DiagnosticMetric extends StatelessWidget {
+  const _DiagnosticMetric({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.highlighted,
+  });
+
+  final String label;
+  final int value;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(8, 7, 8, 8),
+      decoration: BoxDecoration(
+        color: highlighted
+            ? const Color(0xFFFFE0C8)
+            : Colors.white.withValues(alpha: .54),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: highlighted
+              ? PhoenixTheme.red.withValues(alpha: .46)
+              : PhoenixTheme.gold.withValues(alpha: .24),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: highlighted
+                        ? PhoenixTheme.red
+                        : const Color(0xFF6F4A3B),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              Text(
+                '$value%',
+                style: TextStyle(
+                  color: highlighted
+                      ? PhoenixTheme.red
+                      : const Color(0xFF3E4A38),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: LinearProgressIndicator(
+              value: value.clamp(0, 100) / 100,
+              minHeight: 5,
+              backgroundColor: const Color(0xFFEADCC8),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                highlighted
+                    ? PhoenixTheme.red
+                    : const Color(0xFF6F8B65),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IssueChip extends StatelessWidget {
+  const _IssueChip({
+    required this.icon,
+    required this.label,
+    required this.active,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: active
+            ? const Color(0xFFFFDDD3)
+            : Colors.white.withValues(alpha: .42),
+        borderRadius: BorderRadius.circular(99),
+        border: Border.all(
+          color: active
+              ? PhoenixTheme.red.withValues(alpha: .38)
+              : PhoenixTheme.gold.withValues(alpha: .20),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: active ? PhoenixTheme.red : Colors.black38,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: active ? PhoenixTheme.red : Colors.black54,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
