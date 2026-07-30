@@ -6,8 +6,12 @@ import 'narration_controller.dart';
 NarrationController? _shadowingPracticeRateBridge;
 
 void _applyShadowingPracticeRate(double rate) {
-  final bridge = _shadowingPracticeRateBridge ??= NarrationController();
-  unawaited(bridge.setSpeechRate(rate));
+  try {
+    final bridge = _shadowingPracticeRateBridge ??= NarrationController();
+    unawaited(bridge.setSpeechRate(rate));
+  } catch (_) {
+    // Pure scoring tests can run before Flutter bindings are available.
+  }
 }
 
 class ShadowingAttemptDelta {
