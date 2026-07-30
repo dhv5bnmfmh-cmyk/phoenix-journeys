@@ -31,4 +31,38 @@ void main() {
       expect(shadowingPassagesForLevel(level).length, greaterThanOrEqualTo(2));
     }
   });
+
+  test('daily recommendation stays stable during the same day', () {
+    final morning = recommendedShadowingPassageForLevel(
+      6,
+      date: DateTime(2026, 7, 30, 8),
+    );
+    final evening = recommendedShadowingPassageForLevel(
+      6,
+      date: DateTime(2026, 7, 30, 20),
+    );
+    expect(evening.id, morning.id);
+  });
+
+  test('daily recommendation rotates on the next day', () {
+    final today = recommendedShadowingPassageForLevel(
+      6,
+      date: DateTime(2026, 7, 30),
+    );
+    final tomorrow = recommendedShadowingPassageForLevel(
+      6,
+      date: DateTime(2026, 7, 31),
+    );
+    expect(tomorrow.id, isNot(today.id));
+  });
+
+  test('daily recommendation stays near the learner level', () {
+    for (var level = 1; level <= 10; level += 1) {
+      final recommendation = recommendedShadowingPassageForLevel(
+        level,
+        date: DateTime(2026, 8, level),
+      );
+      expect((recommendation.level - level).abs(), lessThanOrEqualTo(1));
+    }
+  });
 }
