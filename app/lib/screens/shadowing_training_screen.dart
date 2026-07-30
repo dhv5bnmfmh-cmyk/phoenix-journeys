@@ -32,6 +32,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   final SpeechToText _speech = SpeechToText();
   final NarrationController _narration = NarrationController();
   final Map<String, int> _bestScores = <String, int>{};
+  final Map<int, int> _sessionSentenceScores = <int, int>{};
   ShadowingTrainingHistory _history = const ShadowingTrainingHistory();
 
   ShadowingPassage? _passage;
@@ -104,7 +105,9 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       _passage = passage;
       _sentenceIndex = 0;
       _attempts = 0;
+      _sessionSentenceScores.clear();
       _recognized = '';
+      _sessionSentenceScores.clear();
       _score = null;
       _speechMessage = null;
     });
@@ -187,14 +190,12 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     setState(() {
       _attempts = attempts;
       _score = score;
+      final previous = _sessionSentenceScores[_sentenceIndex] ?? 0;
+      if (score.overall > previous) {
+        _sessionSentenceScores[_sentenceIndex] = score.overall;
+      }
       _speechMessage = null;
     });
-    if (score.overall > (_bestScores[passage.id] ?? 0)) {
-      _bestScores[passage.id] = score.overall;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('phoenix.shadowing.best.${passage.id}', score.overall);
-      if (mounted) setState(() {});
-    }
   }
 
   void _nextSentence() {
@@ -216,7 +217,18 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   Future<void> _showCompletion() async {
     final passage = _passage;
     if (passage == null || !mounted) return;
-    final completedScore = _bestScores[passage.id] ?? _score?.overall ?? 0;
+    final completedScore = averageShadowingSessionScore(
+      sentenceScores: _sessionSentenceScores.values,
+      sentenceCount: passage.sentences.length,
+    );
+    if (completedScore > (_bestScores[passage.id] ?? 0)) {
+      _bestScores[passage.id] = completedScore;
+      final scorePrefs = await SharedPreferences.getInstance();
+      await scorePrefs.setInt(
+        'phoenix.shadowing.best.${passage.id}',
+        completedScore,
+      );
+    }
     final history = _history.record(
       passageId: passage.id,
       title: passage.title,
@@ -240,6 +252,15 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
             Text(t('短文跟读完成'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
             const SizedBox(height: 6),
             Text(t('已完成《${passage.title}》的全部 ${passage.sentences.length} 句。'), textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text(
+              t('本篇平均 $completedScore 分'),
+              style: const TextStyle(
+                color: PhoenixTheme.red,
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -351,6 +372,44 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
         ),
         const SizedBox(height: 6),
         LinearProgressIndicator(value: (_sentenceIndex + 1) / passage.sentences.length, minHeight: 5),
+        const SizedBox(height: 9),
+        Row(
+          key: const ValueKey('shadowing-sentence-score-strip'),
+          children: [
+            for (var index = 0; index < passage.sentences.length; index += 1)
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(
+                    right: index == passage.sentences.length - 1 ? 0 : 5,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  decoration: BoxDecoration(
+                    color: index == _sentenceIndex
+                        ? PhoenixTheme.red
+                        : _sessionSentenceScores.containsKey(index)
+                            ? const Color(0xFFFFE4AD)
+                            : Colors.white,
+                    borderRadius: BorderRadius.circular(9),
+                    border: Border.all(
+                      color: PhoenixTheme.red.withValues(alpha: .22),
+                    ),
+                  ),
+                  child: Text(
+                    _sessionSentenceScores[index]?.toString() ??
+                        '${index + 1}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: index == _sentenceIndex
+                          ? Colors.white
+                          : const Color(0xFF4A3026),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
         const SizedBox(height: 14),
         Container(
           padding: const EdgeInsets.all(18),
@@ -408,6 +467,12 @@ class _TrainingDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final feedback = score == null
+        ? const <ShadowingReferenceUnit>[]
+        : buildShadowingReferenceFeedback(
+            reference: reference,
+            recognized: recognized,
+          );
     return Container(
       key: const ValueKey('shadowing-training-history'),
       padding: const EdgeInsets.all(13),
@@ -578,8 +643,46 @@ class _ResultPanel extends StatelessWidget {
         Text(displayText('识别结果'), style: const TextStyle(color: Colors.black54, fontSize: 10, fontWeight: FontWeight.w900)),
         Text(displayText(recognized), style: const TextStyle(fontSize: 15, height: 1.4, fontWeight: FontWeight.w800)),
         const SizedBox(height: 7),
-        Text(displayText('参考句'), style: const TextStyle(color: Colors.black54, fontSize: 10, fontWeight: FontWeight.w900)),
-        Text(displayText(reference), style: const TextStyle(fontSize: 13, height: 1.35)),
+        Text(displayText('逐字对照'), style: const TextStyle(color: Colors.black54, fontSize: 10, fontWeight: FontWeight.w900)),
+        if (feedback.isEmpty)
+          Text(displayText(reference), style: const TextStyle(fontSize: 13, height: 1.35))
+        else
+          Text.rich(
+            key: const ValueKey('shadowing-character-feedback'),
+            TextSpan(
+              children: [
+                for (final unit in feedback)
+                  TextSpan(
+                    text: displayText(unit.text),
+                    style: TextStyle(
+                      color: unit.matched
+                          ? const Color(0xFF254A32)
+                          : PhoenixTheme.red,
+                      backgroundColor: unit.matched
+                          ? Colors.transparent
+                          : const Color(0xFFFFD8CF),
+                      fontWeight: unit.matched
+                          ? FontWeight.w700
+                          : FontWeight.w900,
+                    ),
+                  ),
+              ],
+            ),
+            style: const TextStyle(fontSize: 16, height: 1.55),
+          ),
+        if (score != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            displayText(score!.coaching),
+            key: const ValueKey('shadowing-coaching'),
+            style: const TextStyle(
+              color: Color(0xFF6F4A3B),
+              fontSize: 11.5,
+              height: 1.4,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ]),
     );
   }
