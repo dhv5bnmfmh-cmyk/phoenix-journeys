@@ -33,10 +33,12 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   final NarrationController _narration = NarrationController();
   final Map<String, int> _bestScores = <String, int>{};
   final Map<int, int> _sessionSentenceScores = <int, int>{};
+  final List<int> _reviewQueue = <int>[];
   ShadowingTrainingHistory _history = const ShadowingTrainingHistory();
 
   ShadowingPassage? _passage;
   int _sentenceIndex = 0;
+  int _reviewPosition = 0;
   int _attempts = 0;
   bool _loading = true;
   bool _speechReady = false;
@@ -105,7 +107,9 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     setState(() {
       _passage = passage;
       _sentenceIndex = 0;
+      _reviewPosition = 0;
       _attempts = 0;
+      _reviewQueue.clear();
       _sessionSentenceScores.clear();
       _recognized = '';
       _score = null;
@@ -118,6 +122,8 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     unawaited(_narration.stop());
     setState(() {
       _passage = null;
+      _reviewPosition = 0;
+      _reviewQueue.clear();
       _listening = false;
       _recognized = '';
       _score = null;
@@ -207,8 +213,23 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   void _nextSentence() {
     final passage = _passage;
     if (passage == null) return;
+    if (_reviewQueue.isNotEmpty) {
+      if (_reviewPosition >= _reviewQueue.length - 1) {
+        unawaited(_showReviewCompletion());
+        return;
+      }
+      setState(() {
+        _reviewPosition += 1;
+        _sentenceIndex = _reviewQueue[_reviewPosition];
+        _attempts = 0;
+        _recognized = '';
+        _score = null;
+        _speechMessage = null;
+      });
+      return;
+    }
     if (_sentenceIndex >= passage.sentences.length - 1) {
-      _showCompletion();
+      unawaited(_showCompletion());
       return;
     }
     setState(() {
@@ -220,21 +241,48 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     });
   }
 
-  Future<void> _showCompletion() async {
-    final passage = _passage;
-    if (passage == null || !mounted) return;
+  List<int> _weakSentenceIndexes(ShadowingPassage passage) {
+    return List<int>.generate(passage.sentences.length, (index) => index)
+        .where((index) => (_sessionSentenceScores[index] ?? 0) < 75)
+        .toList(growable: false);
+  }
+
+  void _startWeakReview(List<int> sentenceIndexes) {
+    if (sentenceIndexes.isEmpty) return;
+    setState(() {
+      _reviewQueue
+        ..clear()
+        ..addAll(sentenceIndexes);
+      _reviewPosition = 0;
+      _sentenceIndex = _reviewQueue.first;
+      _attempts = 0;
+      _recognized = '';
+      _score = null;
+      _speechMessage = null;
+    });
+  }
+
+  Future<int> _savePassageBest(ShadowingPassage passage) async {
     final completedScore = averageShadowingSessionScore(
       sentenceScores: _sessionSentenceScores.values,
       sentenceCount: passage.sentences.length,
     );
     if (completedScore > (_bestScores[passage.id] ?? 0)) {
       _bestScores[passage.id] = completedScore;
-      final scorePrefs = await SharedPreferences.getInstance();
-      await scorePrefs.setInt(
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(
         'phoenix.shadowing.best.${passage.id}',
         completedScore,
       );
     }
+    return completedScore;
+  }
+
+  Future<void> _showCompletion() async {
+    final passage = _passage;
+    if (passage == null || !mounted) return;
+    final completedScore = await _savePassageBest(passage);
+    final weakSentences = _weakSentenceIndexes(passage);
     final history = _history.record(
       passageId: passage.id,
       title: passage.title,
@@ -268,14 +316,93 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
               ),
             ),
             const SizedBox(height: 16),
+            if (weakSentences.isNotEmpty) ...[
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  key: const ValueKey('shadowing-review-weak-sentences'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _startWeakReview(weakSentences);
+                  },
+                  icon: const Icon(Icons.replay_rounded),
+                  label: Text(t('重练 ${weakSentences.length} 个薄弱句')),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             SizedBox(
               width: double.infinity,
-              child: FilledButton(
+              child: OutlinedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                   _closePassage();
                 },
                 child: Text(t('选择下一篇短文')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showReviewCompletion() async {
+    final passage = _passage;
+    if (passage == null || !mounted) return;
+    final completedScore = await _savePassageBest(passage);
+    final weakSentences = _weakSentenceIndexes(passage);
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.fromLTRB(22, 4, 22, 26),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.trending_up_rounded,
+              color: PhoenixTheme.red,
+              size: 54,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              t('薄弱句复练完成'),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              t('更新后的本篇平均分：$completedScore 分'),
+              style: const TextStyle(
+                color: PhoenixTheme.red,
+                fontSize: 17,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (weakSentences.isNotEmpty) ...[
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _startWeakReview(weakSentences);
+                  },
+                  icon: const Icon(Icons.replay_rounded),
+                  label: Text(t('再练 ${weakSentences.length} 个薄弱句')),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _closePassage();
+                },
+                child: Text(t('完成复练')),
               ),
             ),
           ],
@@ -371,13 +498,25 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       children: [
         Row(
           children: [
-            Text(state.displayText('第 ${_sentenceIndex + 1} / ${passage.sentences.length} 句'), style: const TextStyle(fontWeight: FontWeight.w900)),
+            Text(
+              state.displayText(
+                _reviewQueue.isEmpty
+                    ? '第 ${_sentenceIndex + 1} / ${passage.sentences.length} 句'
+                    : '薄弱句复练 ${_reviewPosition + 1} / ${_reviewQueue.length}',
+              ),
+              style: const TextStyle(fontWeight: FontWeight.w900),
+            ),
             const Spacer(),
             Text(state.displayText('已练 $_attempts 次'), style: const TextStyle(color: Colors.black54, fontSize: 11)),
           ],
         ),
         const SizedBox(height: 6),
-        LinearProgressIndicator(value: (_sentenceIndex + 1) / passage.sentences.length, minHeight: 5),
+        LinearProgressIndicator(
+          value: _reviewQueue.isEmpty
+              ? (_sentenceIndex + 1) / passage.sentences.length
+              : (_reviewPosition + 1) / _reviewQueue.length,
+          minHeight: 5,
+        ),
         const SizedBox(height: 9),
         Row(
           key: const ValueKey('shadowing-sentence-score-strip'),
@@ -486,7 +625,21 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
         ],
         if (score != null) ...[
           const SizedBox(height: 12),
-          FilledButton.icon(onPressed: _nextSentence, icon: const Icon(Icons.arrow_forward_rounded), label: Text(state.displayText(_sentenceIndex == passage.sentences.length - 1 ? '完成这篇短文' : '练习下一句'))),
+          FilledButton.icon(
+            onPressed: _nextSentence,
+            icon: const Icon(Icons.arrow_forward_rounded),
+            label: Text(
+              state.displayText(
+                _reviewQueue.isNotEmpty
+                    ? _reviewPosition == _reviewQueue.length - 1
+                        ? '完成薄弱句复练'
+                        : '复练下一句'
+                    : _sentenceIndex == passage.sentences.length - 1
+                        ? '完成这篇短文'
+                        : '练习下一句',
+              ),
+            ),
+          ),
         ],
       ],
     );
