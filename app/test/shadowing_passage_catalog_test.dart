@@ -65,4 +65,30 @@ void main() {
       expect((recommendation.level - level).abs(), lessThanOrEqualTo(1));
     }
   });
+
+  test('daily recommendation prioritizes an uncompleted passage', () {
+    final recommendation = recommendedShadowingPassageForLevel(
+      6,
+      date: DateTime(2026, 7, 30),
+      bestScores: const {
+        'museum-time-bridge': 88,
+        'lake-evening': 91,
+        'work-study-journey': 0,
+      },
+    );
+    expect(recommendation.id, 'work-study-journey');
+  });
+
+  test('daily recommendation revisits the lowest scoring nearby passage', () {
+    final recommendation = recommendedShadowingPassageForLevel(
+      6,
+      date: DateTime(2026, 7, 30),
+      bestScores: const {
+        'museum-time-bridge': 82,
+        'lake-evening': 64,
+        'work-study-journey': 76,
+      },
+    );
+    expect(recommendation.id, 'lake-evening');
+  });
 }
