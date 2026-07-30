@@ -34,6 +34,17 @@ const shadowingPassages = <ShadowingPassage>[
     ],
   ),
   ShadowingPassage(
+    id: 'station-first-trip',
+    title: '第一次独自出发',
+    level: 1,
+    theme: '旅行启程',
+    sentences: [
+      '我背好小包，提前来到车站。',
+      '车票、手机和水都已经准备好了。',
+      '列车开动时，我看着窗外，心里又紧张又期待。',
+    ],
+  ),
+  ShadowingPassage(
     id: 'rainy-bus-stop',
     title: '雨天的公交站',
     level: 2,
@@ -42,6 +53,17 @@ const shadowingPassages = <ShadowingPassage>[
       '下午突然下起大雨，公交站里挤满了人。',
       '一位学生把雨伞往旁边移了移，给老人留出位置。',
       '车来了，大家没有着急，而是一个接一个地上车。',
+    ],
+  ),
+  ShadowingPassage(
+    id: 'night-study-room',
+    title: '夜里的自习室',
+    level: 3,
+    theme: '勤学成长',
+    sentences: [
+      '晚饭以后，自习室里还亮着灯。',
+      '有人练听力，有人把今天的生词重新写了一遍。',
+      '窗外很安静，翻书和写字的声音让人慢慢静下心来。',
     ],
   ),
   ShadowingPassage(
@@ -56,6 +78,17 @@ const shadowingPassages = <ShadowingPassage>[
     ],
   ),
   ShadowingPassage(
+    id: 'museum-time-bridge',
+    title: '博物馆里的时间桥',
+    level: 5,
+    theme: '古今相遇',
+    sentences: [
+      '展柜里的一封旧信，记录了百年前一次漫长的远行。',
+      '旁边的电子地图，把古人的路线重新呈现在今天的城市上。',
+      '站在两种时代之间，我忽然明白，出发和思念从来没有真正改变。',
+    ],
+  ),
+  ShadowingPassage(
     id: 'lake-evening',
     title: '湖边的傍晚',
     level: 6,
@@ -64,6 +97,17 @@ const shadowingPassages = <ShadowingPassage>[
       '傍晚的风从湖面吹来，把白天的暑气慢慢带走。',
       '远处的灯光倒映在水里，随着波纹一层一层地散开。',
       '旅行者没有急着拍照，只是站在岸边，认真记住眼前的颜色和声音。',
+    ],
+  ),
+  ShadowingPassage(
+    id: 'work-study-journey',
+    title: '边工作边看世界',
+    level: 7,
+    theme: '勤工俭学',
+    sentences: [
+      '白天完成工作以后，他把晚上的时间留给语言学习。',
+      '每存下一点旅费，他就在地图上标记一个想去的地方。',
+      '这段旅程走得不快，却让每一次出发都带着努力换来的踏实感。',
     ],
   ),
   ShadowingPassage(
@@ -78,6 +122,17 @@ const shadowingPassages = <ShadowingPassage>[
     ],
   ),
   ShadowingPassage(
+    id: 'mountain-letter',
+    title: '山路上的一封信',
+    level: 9,
+    theme: '旅途叙事',
+    sentences: [
+      '山路被晨雾遮住以后，原本熟悉的方向忽然变得难以判断。',
+      '同行的人没有催促，而是在路边读起一封从故乡寄来的信。',
+      '那些平常的话语在陌生的山谷里显得格外清楚，也让人重新找到继续前行的勇气。',
+    ],
+  ),
+  ShadowingPassage(
     id: 'journey-and-language',
     title: '旅行与语言',
     level: 10,
@@ -86,6 +141,17 @@ const shadowingPassages = <ShadowingPassage>[
       '学习一门语言的意义，不只在于准确地交换信息，也在于理解另一种观察世界的方式。',
       '当旅行者能够听懂一句玩笑、回应一次善意，陌生的城市便不再只是地图上的目的地。',
       '语言让短暂的相遇留下温度，而旅行又把书本里的词语变成可以触摸和回忆的经验。',
+    ],
+  ),
+  ShadowingPassage(
+    id: 'ancient-modern-phoenix',
+    title: '古城上空的凤凰',
+    level: 10,
+    theme: '古今想象',
+    sentences: [
+      '古城的屋脊保存着旧时代的秩序，而远处的高楼正把新的生活带向天际线。',
+      '想象中的凤凰从两者之间飞过，它没有选择停在过去，也没有催促人们忘记来处。',
+      '真正有力量的成长，是带着记忆继续向前，让传统和现代在同一座城市里彼此照亮。',
     ],
   ),
 ];
