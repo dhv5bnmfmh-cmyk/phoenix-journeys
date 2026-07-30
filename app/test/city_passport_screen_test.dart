@@ -123,7 +123,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('紫禁城'), findsOneWidget);
-    expect(find.text('颐和园'), findsOneWidget);
+    expect(find.text('紫禁城'), findsNWidgets(2));
+    expect(find.text('颐和园'), findsNWidgets(2));
   });
 }
