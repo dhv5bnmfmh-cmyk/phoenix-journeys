@@ -1,0 +1,57 @@
+name: Run shadowing weakness builder
+
+on:
+  push:
+    branches:
+      - agent/shadowing-pronunciation-diagnosis-v2
+    paths:
+      - .github/phoenix-shadowing-weakness.trigger
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/shadowing-pronunciation-diagnosis-v2
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Apply feature
+        run: python3 .github/scripts/build_shadowing_weakness.py
+
+      - name: Format Dart
+        run: dart format app/lib/services/shadowing_weakness_library.dart app/lib/screens/shadowing_training_screen.dart app/test/shadowing_weakness_library_test.dart
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Test feature
+        working-directory: app
+        run: flutter test test/shadowing_weakness_library_test.dart test/shadowing_training_history_test.dart test/shadowing_score_test.dart
+
+      - name: Test navigation contracts
+        run: node --test worker/shadowing_navigation.test.mjs
+
+      - name: Commit feature
+        run: |
+          git config user.name "Phoenix Development Agent"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/run-shadowing-weakness-builder.yml \
+                 .github/workflows/phoenix-shadowing-weakness-library.yml \
+                 .github/scripts/build_shadowing_weakness.py \
+                 .github/phoenix-shadowing-weakness.trigger
+          git add app/lib/services/shadowing_weakness_library.dart \
+                  app/lib/screens/shadowing_training_screen.dart \
+                  app/test/shadowing_weakness_library_test.dart \
+                  worker/shadowing_navigation.test.mjs
+          git commit -m "feat: add personal shadowing weakness library"
+          git push origin HEAD:agent/shadowing-pronunciation-diagnosis-v2
