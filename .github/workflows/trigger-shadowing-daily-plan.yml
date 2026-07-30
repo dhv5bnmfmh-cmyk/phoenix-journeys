@@ -28,3 +28,5 @@ jobs:
           git add .github/workflows/phoenix-shadowing-daily-plan.yml
           git commit -m "build: trigger daily plan integration"
           git push origin HEAD:agent/shadowing-pronunciation-diagnosis-v2
+
+# start-trigger
