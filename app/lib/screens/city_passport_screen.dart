@@ -168,7 +168,7 @@ class _PassportMapState extends State<_PassportMap> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 2),
             itemCount: _continents.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 5),
+            separatorBuilder: (context, index) => const SizedBox(width: 5),
             itemBuilder: (context, index) {
               final continent = _continents[index];
               final selected = continent.id == _continentId;
@@ -419,7 +419,8 @@ class _PassportPlaceRail extends StatelessWidget {
                         key: const ValueKey('passport-city-list'),
                         padding: const EdgeInsets.all(6),
                         itemCount: journeyCityCatalog.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 4),
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 4),
                         itemBuilder: (context, index) {
                           final city = journeyCityCatalog[index];
                           return _PlaceRailButton(
