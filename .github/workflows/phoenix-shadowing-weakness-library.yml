@@ -1,0 +1,1055 @@
+name: Build shadowing weakness library
+
+on:
+  push:
+    branches:
+      - agent/shadowing-pronunciation-diagnosis-v2
+    paths:
+      - .github/workflows/phoenix-shadowing-weakness-library.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build-feature:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/shadowing-pronunciation-diagnosis-v2
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Implement personal weakness library
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          service = r'''import 'dart:convert';
+
+          import 'shadowing_score.dart';
+
+          class ShadowingWeaknessItem {
+            const ShadowingWeaknessItem({
+              required this.id,
+              required this.passageId,
+              required this.passageTitle,
+              required this.sentenceIndex,
+              required this.sentence,
+              required this.focusCharacters,
+              required this.weakestMetric,
+              required this.bestScore,
+              required this.lastScore,
+              required this.accuracy,
+              required this.completeness,
+              required this.fluency,
+              required this.omittedCharacters,
+              required this.wrongCharacters,
+              required this.extraCharacters,
+              required this.attempts,
+              required this.consecutiveStrongAttempts,
+              required this.lastPracticedAt,
+              this.masteredAt,
+            });
+
+            final String id;
+            final String passageId;
+            final String passageTitle;
+            final int sentenceIndex;
+            final String sentence;
+            final String focusCharacters;
+            final String weakestMetric;
+            final int bestScore;
+            final int lastScore;
+            final int accuracy;
+            final int completeness;
+            final int fluency;
+            final int omittedCharacters;
+            final int wrongCharacters;
+            final int extraCharacters;
+            final int attempts;
+            final int consecutiveStrongAttempts;
+            final DateTime lastPracticedAt;
+            final DateTime? masteredAt;
+
+            bool get mastered => masteredAt != null;
+            int get issueCount =>
+                omittedCharacters + wrongCharacters + extraCharacters;
+            int get severity =>
+                ((100 - lastScore) * 2 + issueCount * 8 + attempts.clamp(0, 10))
+                    .clamp(0, 260)
+                    .toInt();
+
+            String get issueSummary =>
+                '漏读 $omittedCharacters · 错读 $wrongCharacters · 多读 $extraCharacters';
+
+            Map<String, Object?> toJson() => {
+                  'id': id,
+                  'passageId': passageId,
+                  'passageTitle': passageTitle,
+                  'sentenceIndex': sentenceIndex,
+                  'sentence': sentence,
+                  'focusCharacters': focusCharacters,
+                  'weakestMetric': weakestMetric,
+                  'bestScore': bestScore,
+                  'lastScore': lastScore,
+                  'accuracy': accuracy,
+                  'completeness': completeness,
+                  'fluency': fluency,
+                  'omittedCharacters': omittedCharacters,
+                  'wrongCharacters': wrongCharacters,
+                  'extraCharacters': extraCharacters,
+                  'attempts': attempts,
+                  'consecutiveStrongAttempts': consecutiveStrongAttempts,
+                  'lastPracticedAt': lastPracticedAt.toIso8601String(),
+                  'masteredAt': masteredAt?.toIso8601String(),
+                };
+
+            factory ShadowingWeaknessItem.fromJson(Map<String, dynamic> json) {
+              return ShadowingWeaknessItem(
+                id: json['id'] as String? ?? '',
+                passageId: json['passageId'] as String? ?? '',
+                passageTitle: json['passageTitle'] as String? ?? '',
+                sentenceIndex: (json['sentenceIndex'] as num?)?.toInt() ?? 0,
+                sentence: json['sentence'] as String? ?? '',
+                focusCharacters: json['focusCharacters'] as String? ?? '',
+                weakestMetric: json['weakestMetric'] as String? ?? '准确度',
+                bestScore: (json['bestScore'] as num?)?.toInt() ?? 0,
+                lastScore: (json['lastScore'] as num?)?.toInt() ?? 0,
+                accuracy: (json['accuracy'] as num?)?.toInt() ?? 0,
+                completeness: (json['completeness'] as num?)?.toInt() ?? 0,
+                fluency: (json['fluency'] as num?)?.toInt() ?? 0,
+                omittedCharacters:
+                    (json['omittedCharacters'] as num?)?.toInt() ?? 0,
+                wrongCharacters:
+                    (json['wrongCharacters'] as num?)?.toInt() ?? 0,
+                extraCharacters:
+                    (json['extraCharacters'] as num?)?.toInt() ?? 0,
+                attempts: (json['attempts'] as num?)?.toInt() ?? 0,
+                consecutiveStrongAttempts:
+                    (json['consecutiveStrongAttempts'] as num?)?.toInt() ?? 0,
+                lastPracticedAt:
+                    DateTime.tryParse(json['lastPracticedAt'] as String? ?? '') ??
+                        DateTime.fromMillisecondsSinceEpoch(0),
+                masteredAt:
+                    DateTime.tryParse(json['masteredAt'] as String? ?? ''),
+              );
+            }
+          }
+
+          class ShadowingWeaknessLibrary {
+            const ShadowingWeaknessLibrary({this.items = const []});
+
+            final List<ShadowingWeaknessItem> items;
+
+            int get pendingCount => items.where((item) => !item.mastered).length;
+            int get masteredCount => items.where((item) => item.mastered).length;
+
+            Map<String, int> get pendingMetricCounts {
+              final counts = <String, int>{
+                '准确度': 0,
+                '完整度': 0,
+                '流利度': 0,
+              };
+              for (final item in items.where((item) => !item.mastered)) {
+                counts[item.weakestMetric] = (counts[item.weakestMetric] ?? 0) + 1;
+              }
+              return counts;
+            }
+
+            List<ShadowingWeaknessItem> dailyQueue({int limit = 5}) {
+              final queue = items.where((item) => !item.mastered).toList();
+              queue.sort((left, right) {
+                final bySeverity = right.severity.compareTo(left.severity);
+                if (bySeverity != 0) return bySeverity;
+                return left.lastPracticedAt.compareTo(right.lastPracticedAt);
+              });
+              return queue.take(limit).toList(growable: false);
+            }
+
+            ShadowingWeaknessLibrary recordAttempt({
+              required String passageId,
+              required String passageTitle,
+              required int sentenceIndex,
+              required String sentence,
+              required String recognized,
+              required ShadowingScore score,
+              required DateTime practicedAt,
+            }) {
+              final id = '$passageId::$sentenceIndex';
+              ShadowingWeaknessItem? existing;
+              for (final item in items) {
+                if (item.id == id) {
+                  existing = item;
+                  break;
+                }
+              }
+
+              final strongAttempt = score.overall >= 85 &&
+                  score.accuracy >= 80 &&
+                  score.completeness >= 85 &&
+                  score.fluency >= 75 &&
+                  score.omittedCharacters == 0 &&
+                  score.wrongCharacters == 0 &&
+                  score.extraCharacters == 0;
+              if (existing == null && strongAttempt) return this;
+
+              final consecutiveStrongAttempts = strongAttempt
+                  ? (existing?.consecutiveStrongAttempts ?? 0) + 1
+                  : 0;
+              final masteredAt = consecutiveStrongAttempts >= 2
+                  ? practicedAt
+                  : strongAttempt
+                      ? existing?.masteredAt
+                      : null;
+              final focusCharacters = _focusCharacters(
+                reference: sentence,
+                recognized: recognized,
+              );
+              final bestScore = existing == null || score.overall > existing.bestScore
+                  ? score.overall
+                  : existing.bestScore;
+              final updated = ShadowingWeaknessItem(
+                id: id,
+                passageId: passageId,
+                passageTitle: passageTitle,
+                sentenceIndex: sentenceIndex,
+                sentence: sentence,
+                focusCharacters: focusCharacters.isEmpty
+                    ? existing?.focusCharacters ?? ''
+                    : focusCharacters,
+                weakestMetric: score.weakestMetric,
+                bestScore: bestScore,
+                lastScore: score.overall,
+                accuracy: score.accuracy,
+                completeness: score.completeness,
+                fluency: score.fluency,
+                omittedCharacters: score.omittedCharacters,
+                wrongCharacters: score.wrongCharacters,
+                extraCharacters: score.extraCharacters,
+                attempts: (existing?.attempts ?? 0) + 1,
+                consecutiveStrongAttempts: consecutiveStrongAttempts,
+                lastPracticedAt: practicedAt,
+                masteredAt: masteredAt,
+              );
+              final nextItems = <ShadowingWeaknessItem>[
+                updated,
+                ...items.where((item) => item.id != id),
+              ].take(80).toList(growable: false);
+              return ShadowingWeaknessLibrary(items: nextItems);
+            }
+
+            String encode() => jsonEncode({
+                  'items': items.map((item) => item.toJson()).toList(),
+                });
+
+            factory ShadowingWeaknessLibrary.decode(String? value) {
+              if (value == null || value.isEmpty) {
+                return const ShadowingWeaknessLibrary();
+              }
+              try {
+                final json = jsonDecode(value) as Map<String, dynamic>;
+                final items = (json['items'] as List<dynamic>? ?? const [])
+                    .whereType<Map<String, dynamic>>()
+                    .map(ShadowingWeaknessItem.fromJson)
+                    .where((item) =>
+                        item.id.isNotEmpty &&
+                        item.passageId.isNotEmpty &&
+                        item.sentence.isNotEmpty)
+                    .take(80)
+                    .toList(growable: false);
+                return ShadowingWeaknessLibrary(items: items);
+              } catch (_) {
+                return const ShadowingWeaknessLibrary();
+              }
+            }
+          }
+
+          String _focusCharacters({
+            required String reference,
+            required String recognized,
+          }) {
+            final feedback = buildShadowingReferenceFeedback(
+              reference: reference,
+              recognized: recognized,
+            );
+            final seen = <String>{};
+            final focus = <String>[];
+            for (final unit in feedback) {
+              if (!unit.matched && seen.add(unit.text)) focus.add(unit.text);
+              if (focus.length >= 8) break;
+            }
+            return focus.join(' · ');
+          }
+          '''
+          Path('app/lib/services/shadowing_weakness_library.dart').write_text(
+              service, encoding='utf-8')
+
+          test_file = r'''import 'package:flutter_test/flutter_test.dart';
+          import 'package:phoenix_journeys/services/shadowing_score.dart';
+          import 'package:phoenix_journeys/services/shadowing_weakness_library.dart';
+
+          ShadowingScore score({
+            required int overall,
+            int accuracy = 70,
+            int completeness = 70,
+            int fluency = 70,
+            int omitted = 0,
+            int wrong = 0,
+            int extra = 0,
+          }) {
+            return ShadowingScore(
+              overall: overall,
+              accuracy: accuracy,
+              completeness: completeness,
+              fluency: fluency,
+              confidence: 80,
+              matchedCharacters: 6,
+              referenceCharacters: 8,
+              recognizedCharacters: 7,
+              omittedCharacters: omitted,
+              wrongCharacters: wrong,
+              extraCharacters: extra,
+            );
+          }
+
+          void main() {
+            test('weak attempts enter the personal review library', () {
+              final library = const ShadowingWeaknessLibrary().recordAttempt(
+                passageId: 'station',
+                passageTitle: '第一次独自出发',
+                sentenceIndex: 0,
+                sentence: '我背好小包，提前来到车站。',
+                recognized: '我背好包来到车站',
+                score: score(overall: 62, completeness: 68, omitted: 2),
+                practicedAt: DateTime(2026, 7, 30, 8),
+              );
+
+              expect(library.pendingCount, 1);
+              expect(library.items.single.passageId, 'station');
+              expect(library.items.single.focusCharacters, isNotEmpty);
+              expect(library.items.single.issueCount, 2);
+            });
+
+            test('two strong retries mark a weakness as mastered', () {
+              var library = const ShadowingWeaknessLibrary().recordAttempt(
+                passageId: 'station',
+                passageTitle: '第一次独自出发',
+                sentenceIndex: 0,
+                sentence: '我背好小包，提前来到车站。',
+                recognized: '我背好小包来到车站',
+                score: score(overall: 60, omitted: 2),
+                practicedAt: DateTime(2026, 7, 30, 8),
+              );
+              final strong = score(
+                overall: 92,
+                accuracy: 95,
+                completeness: 100,
+                fluency: 88,
+              );
+              library = library.recordAttempt(
+                passageId: 'station',
+                passageTitle: '第一次独自出发',
+                sentenceIndex: 0,
+                sentence: '我背好小包，提前来到车站。',
+                recognized: '我背好小包提前来到车站',
+                score: strong,
+                practicedAt: DateTime(2026, 7, 30, 9),
+              );
+              library = library.recordAttempt(
+                passageId: 'station',
+                passageTitle: '第一次独自出发',
+                sentenceIndex: 0,
+                sentence: '我背好小包，提前来到车站。',
+                recognized: '我背好小包提前来到车站',
+                score: strong,
+                practicedAt: DateTime(2026, 7, 30, 10),
+              );
+
+              expect(library.pendingCount, 0);
+              expect(library.masteredCount, 1);
+              expect(library.items.single.mastered, isTrue);
+            });
+
+            test('a regression reopens a mastered weakness', () {
+              var library = const ShadowingWeaknessLibrary();
+              final weak = score(overall: 55, omitted: 3);
+              final strong = score(
+                overall: 94,
+                accuracy: 96,
+                completeness: 100,
+                fluency: 90,
+              );
+              for (final attempt in [weak, strong, strong, weak]) {
+                library = library.recordAttempt(
+                  passageId: 'station',
+                  passageTitle: '第一次独自出发',
+                  sentenceIndex: 0,
+                  sentence: '我背好小包，提前来到车站。',
+                  recognized: attempt.overall > 80
+                      ? '我背好小包提前来到车站'
+                      : '我来到车站',
+                  score: attempt,
+                  practicedAt: DateTime(2026, 7, 30, 8 + library.items.length),
+                );
+              }
+
+              expect(library.pendingCount, 1);
+              expect(library.items.single.mastered, isFalse);
+            });
+
+            test('daily queue prioritizes the most severe unresolved sentence', () {
+              var library = const ShadowingWeaknessLibrary();
+              library = library.recordAttempt(
+                passageId: 'mild',
+                passageTitle: '较轻弱项',
+                sentenceIndex: 0,
+                sentence: '今天的天气很好。',
+                recognized: '今天天气很好',
+                score: score(overall: 74, omitted: 1),
+                practicedAt: DateTime(2026, 7, 29),
+              );
+              library = library.recordAttempt(
+                passageId: 'severe',
+                passageTitle: '重点弱项',
+                sentenceIndex: 1,
+                sentence: '列车开动时我看着窗外。',
+                recognized: '列车窗外',
+                score: score(overall: 42, omitted: 5, wrong: 1),
+                practicedAt: DateTime(2026, 7, 30),
+              );
+
+              expect(library.dailyQueue(limit: 1).single.passageId, 'severe');
+              expect(
+                ShadowingWeaknessLibrary.decode(library.encode()).items.length,
+                2,
+              );
+            });
+          }
+          '''
+          Path('app/test/shadowing_weakness_library_test.dart').write_text(
+              test_file, encoding='utf-8')
+
+          screen_path = Path('app/lib/screens/shadowing_training_screen.dart')
+          screen = screen_path.read_text(encoding='utf-8')
+
+          def replace_once(old, new):
+              global screen
+              if old not in screen:
+                  raise SystemExit(f'anchor not found: {old[:120]!r}')
+              screen = screen.replace(old, new, 1)
+
+          replace_once(
+              "import '../services/shadowing_training_history.dart';\n",
+              "import '../services/shadowing_training_history.dart';\n"
+              "import '../services/shadowing_weakness_library.dart';\n",
+          )
+          replace_once(
+              "  ShadowingTrainingHistory _history = const ShadowingTrainingHistory();\n"
+              "  ShadowingPassage? _passage;",
+              "  ShadowingTrainingHistory _history = const ShadowingTrainingHistory();\n"
+              "  ShadowingWeaknessLibrary _weaknessLibrary =\n"
+              "      const ShadowingWeaknessLibrary();\n"
+              "  ShadowingPassage? _passage;",
+          )
+          replace_once(
+              "    _history = ShadowingTrainingHistory.decode(\n"
+              "      prefs.getString('phoenix.shadowing.history'),\n"
+              "    );\n\n"
+              "    var ready = false;",
+              "    _history = ShadowingTrainingHistory.decode(\n"
+              "      prefs.getString('phoenix.shadowing.history'),\n"
+              "    );\n"
+              "    _weaknessLibrary = ShadowingWeaknessLibrary.decode(\n"
+              "      prefs.getString('phoenix.shadowing.weaknesses'),\n"
+              "    );\n\n"
+              "    var ready = false;",
+          )
+          replace_once(
+              "  void _openPassage(ShadowingPassage passage) {\n"
+              "    setState(() {\n"
+              "      _passage = passage;\n"
+              "      _sentenceIndex = 0;\n"
+              "      _reviewPosition = 0;\n"
+              "      _attempts = 0;\n"
+              "      _reviewQueue.clear();\n"
+              "      _sessionSentenceScores.clear();\n"
+              "      _recognized = '';\n"
+              "      _score = null;\n"
+              "      _speechMessage = null;\n"
+              "    });\n"
+              "  }",
+              "  void _openPassage(\n"
+              "    ShadowingPassage passage, {\n"
+              "    int startSentenceIndex = 0,\n"
+              "    String? message,\n"
+              "  }) {\n"
+              "    final safeIndex = startSentenceIndex < 0\n"
+              "        ? 0\n"
+              "        : startSentenceIndex >= passage.sentences.length\n"
+              "            ? passage.sentences.length - 1\n"
+              "            : startSentenceIndex;\n"
+              "    setState(() {\n"
+              "      _passage = passage;\n"
+              "      _sentenceIndex = safeIndex;\n"
+              "      _reviewPosition = 0;\n"
+              "      _attempts = 0;\n"
+              "      _reviewQueue.clear();\n"
+              "      _sessionSentenceScores.clear();\n"
+              "      _recognized = '';\n"
+              "      _score = null;\n"
+              "      _speechMessage = message;\n"
+              "    });\n"
+              "  }",
+          )
+          replace_once(
+              "  Future<void> _scoreCurrentAttempt({double confidence = 0}) async {\n"
+              "    final passage = _passage;\n"
+              "    if (passage == null || _recognized.trim().isEmpty) return;\n"
+              "    final score = scoreShadowing(\n"
+              "      reference: passage.sentences[_sentenceIndex],\n"
+              "      recognized: _recognized,\n"
+              "      recognitionConfidence: confidence,\n"
+              "    );\n"
+              "    final attempts = _attempts + 1;\n"
+              "    setState(() {\n"
+              "      _attempts = attempts;\n"
+              "      _score = score;\n"
+              "      final previous = _sessionSentenceScores[_sentenceIndex] ?? 0;\n"
+              "      if (score.overall > previous) {\n"
+              "        _sessionSentenceScores[_sentenceIndex] = score.overall;\n"
+              "      }\n"
+              "      _speechMessage = null;\n"
+              "    });\n"
+              "  }",
+              "  Future<void> _scoreCurrentAttempt({double confidence = 0}) async {\n"
+              "    final passage = _passage;\n"
+              "    if (passage == null || _recognized.trim().isEmpty) return;\n"
+              "    final sentence = passage.sentences[_sentenceIndex];\n"
+              "    final score = scoreShadowing(\n"
+              "      reference: sentence,\n"
+              "      recognized: _recognized,\n"
+              "      recognitionConfidence: confidence,\n"
+              "    );\n"
+              "    final attempts = _attempts + 1;\n"
+              "    final weaknessLibrary = _weaknessLibrary.recordAttempt(\n"
+              "      passageId: passage.id,\n"
+              "      passageTitle: passage.title,\n"
+              "      sentenceIndex: _sentenceIndex,\n"
+              "      sentence: sentence,\n"
+              "      recognized: _recognized,\n"
+              "      score: score,\n"
+              "      practicedAt: DateTime.now(),\n"
+              "    );\n"
+              "    final prefs = await SharedPreferences.getInstance();\n"
+              "    await prefs.setString(\n"
+              "      'phoenix.shadowing.weaknesses',\n"
+              "      weaknessLibrary.encode(),\n"
+              "    );\n"
+              "    if (!mounted) return;\n"
+              "    setState(() {\n"
+              "      _attempts = attempts;\n"
+              "      _score = score;\n"
+              "      _weaknessLibrary = weaknessLibrary;\n"
+              "      final previous = _sessionSentenceScores[_sentenceIndex] ?? 0;\n"
+              "      if (score.overall > previous) {\n"
+              "        _sessionSentenceScores[_sentenceIndex] = score.overall;\n"
+              "      }\n"
+              "      _speechMessage = null;\n"
+              "    });\n"
+              "  }",
+          )
+          anchor = "  void _nextSentence() {\n"
+          methods = r'''  void _practiceWeakness(ShadowingWeaknessItem item) {
+            ShadowingPassage? passage;
+            for (final candidate in shadowingPassages) {
+              if (candidate.id == item.passageId) {
+                passage = candidate;
+                break;
+              }
+            }
+            if (passage == null) return;
+            _openPassage(
+              passage,
+              startSentenceIndex: item.sentenceIndex,
+              message: '来自个人弱项复练库 · 重点修正${item.weakestMetric}',
+            );
+          }
+
+          Future<void> _showWeaknessLibrary() async {
+            if (!mounted) return;
+            await showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: const Color(0xFFFFF8E9),
+              showDragHandle: true,
+              builder: (sheetContext) => _WeaknessLibrarySheet(
+                library: _weaknessLibrary,
+                displayText: context.read<AppState>().displayText,
+                onPractice: (item) {
+                  Navigator.of(sheetContext).pop();
+                  _practiceWeakness(item);
+                },
+              ),
+            );
+          }
+
+          '''
+          if anchor not in screen:
+              raise SystemExit('next sentence anchor not found')
+          screen = screen.replace(anchor, methods + anchor, 1)
+
+          replace_once(
+              "        _TrainingDashboard(\n"
+              "          history: _history,\n"
+              "          displayText: state.displayText,\n"
+              "        ),\n"
+              "        const SizedBox(height: 9),",
+              "        _TrainingDashboard(\n"
+              "          history: _history,\n"
+              "          displayText: state.displayText,\n"
+              "        ),\n"
+              "        const SizedBox(height: 7),\n"
+              "        _WeaknessLibraryCard(\n"
+              "          library: _weaknessLibrary,\n"
+              "          displayText: state.displayText,\n"
+              "          onTap: () => unawaited(_showWeaknessLibrary()),\n"
+              "        ),\n"
+              "        const SizedBox(height: 9),",
+          )
+
+          class_anchor = "class _HistoryMetric extends StatelessWidget {\n"
+          widgets = r'''class _WeaknessLibraryCard extends StatelessWidget {
+            const _WeaknessLibraryCard({
+              required this.library,
+              required this.displayText,
+              required this.onTap,
+            });
+
+            final ShadowingWeaknessLibrary library;
+            final String Function(String) displayText;
+            final VoidCallback onTap;
+
+            @override
+            Widget build(BuildContext context) {
+              final todayCount = library.dailyQueue().length;
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  key: const ValueKey('shadowing-weakness-library-entry'),
+                  onTap: onTap,
+                  borderRadius: BorderRadius.circular(15),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF0D1).withValues(alpha: .72),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: PhoenixTheme.gold.withValues(alpha: .46),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: PhoenixTheme.red.withValues(alpha: .10),
+                            borderRadius: BorderRadius.circular(13),
+                          ),
+                          child: const Icon(
+                            Icons.psychology_alt_rounded,
+                            color: PhoenixTheme.red,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                displayText('个人弱项复练库'),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                displayText(
+                                  library.pendingCount == 0
+                                      ? '当前没有待复练句子 · 已掌握 ${library.masteredCount}'
+                                      : '今日推荐 $todayCount 句 · 已掌握 ${library.masteredCount}',
+                                ),
+                                style: const TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: library.pendingCount == 0
+                                ? const Color(0xFFE2E8D7)
+                                : const Color(0xFFFFD8C7),
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                          child: Text(
+                            displayText('待练 ${library.pendingCount}'),
+                            style: TextStyle(
+                              color: library.pendingCount == 0
+                                  ? const Color(0xFF47603E)
+                                  : PhoenixTheme.red,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          color: PhoenixTheme.red,
+                          size: 15,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+          }
+
+          class _WeaknessLibrarySheet extends StatelessWidget {
+            const _WeaknessLibrarySheet({
+              required this.library,
+              required this.displayText,
+              required this.onPractice,
+            });
+
+            final ShadowingWeaknessLibrary library;
+            final String Function(String) displayText;
+            final ValueChanged<ShadowingWeaknessItem> onPractice;
+
+            @override
+            Widget build(BuildContext context) {
+              final queue = library.dailyQueue(limit: 20);
+              final metrics = library.pendingMetricCounts;
+              return SafeArea(
+                child: DraggableScrollableSheet(
+                  expand: false,
+                  initialChildSize: .74,
+                  minChildSize: .46,
+                  maxChildSize: .92,
+                  builder: (context, controller) => ListView(
+                    key: const ValueKey('shadowing-weakness-library-sheet'),
+                    controller: controller,
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.psychology_alt_rounded,
+                            color: PhoenixTheme.red,
+                            size: 30,
+                          ),
+                          const SizedBox(width: 9),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  displayText('个人弱项复练库'),
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                Text(
+                                  displayText('自动积累薄弱句，连续两次稳定达标后标记掌握'),
+                                  style: const TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 7,
+                        runSpacing: 7,
+                        children: [
+                          _WeaknessSummaryChip(
+                            label: displayText('待练 ${library.pendingCount}'),
+                          ),
+                          _WeaknessSummaryChip(
+                            label: displayText('准确度 ${metrics['准确度'] ?? 0}'),
+                          ),
+                          _WeaknessSummaryChip(
+                            label: displayText('完整度 ${metrics['完整度'] ?? 0}'),
+                          ),
+                          _WeaknessSummaryChip(
+                            label: displayText('流利度 ${metrics['流利度'] ?? 0}'),
+                          ),
+                          _WeaknessSummaryChip(
+                            label: displayText('已掌握 ${library.masteredCount}'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      if (queue.isEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(22),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: .72),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: PhoenixTheme.gold.withValues(alpha: .30),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.verified_rounded,
+                                color: Color(0xFF5E7A50),
+                                size: 44,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                displayText('今天没有待复练的薄弱句'),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else ...[
+                        Text(
+                          displayText('今日优先复练'),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 7),
+                        for (final item in queue) ...[
+                          _WeaknessItemCard(
+                            item: item,
+                            displayText: displayText,
+                            onPractice: () => onPractice(item),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            }
+          }
+
+          class _WeaknessSummaryChip extends StatelessWidget {
+            const _WeaknessSummaryChip({required this.label});
+
+            final String label;
+
+            @override
+            Widget build(BuildContext context) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: .78),
+                  borderRadius: BorderRadius.circular(99),
+                  border: Border.all(
+                    color: PhoenixTheme.gold.withValues(alpha: .30),
+                  ),
+                ),
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: Color(0xFF6F4A3B),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              );
+            }
+          }
+
+          class _WeaknessItemCard extends StatelessWidget {
+            const _WeaknessItemCard({
+              required this.item,
+              required this.displayText,
+              required this.onPractice,
+            });
+
+            final ShadowingWeaknessItem item;
+            final String Function(String) displayText;
+            final VoidCallback onPractice;
+
+            @override
+            Widget build(BuildContext context) {
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: .82),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: PhoenixTheme.gold.withValues(alpha: .34),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            displayText(item.passageTitle),
+                            style: const TextStyle(
+                              color: PhoenixTheme.red,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          displayText('最近 ${item.lastScore} · 最佳 ${item.bestScore}'),
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 7),
+                    Text(
+                      displayText(item.sentence),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        height: 1.42,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        _IssueChip(
+                          icon: Icons.track_changes_rounded,
+                          label: displayText('重点 ${item.weakestMetric}'),
+                          active: true,
+                        ),
+                        _IssueChip(
+                          icon: Icons.fact_check_outlined,
+                          label: displayText(item.issueSummary),
+                          active: item.issueCount > 0,
+                        ),
+                      ],
+                    ),
+                    if (item.focusCharacters.isNotEmpty) ...[
+                      const SizedBox(height: 7),
+                      Text(
+                        displayText('重点文字：${item.focusCharacters}'),
+                        style: const TextStyle(
+                          color: PhoenixTheme.red,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 9),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        key: ValueKey('shadowing-practice-weakness-${item.id}'),
+                        onPressed: onPractice,
+                        icon: const Icon(Icons.play_arrow_rounded),
+                        label: Text(displayText('开始复练这一句')),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+          }
+
+          '''
+          if class_anchor not in screen:
+              raise SystemExit('history metric class anchor not found')
+          screen = screen.replace(class_anchor, widgets + class_anchor, 1)
+          screen_path.write_text(screen, encoding='utf-8')
+
+          worker_path = Path('worker/shadowing_navigation.test.mjs')
+          worker = worker_path.read_text(encoding='utf-8')
+          scoring_anchor = "const scoring = readFileSync(\n  new URL('../app/lib/services/shadowing_score.dart', import.meta.url),\n  'utf8',\n);\n"
+          if scoring_anchor not in worker:
+              raise SystemExit('worker scoring anchor not found')
+          worker = worker.replace(
+              scoring_anchor,
+              scoring_anchor +
+              "const weaknessLibrary = readFileSync(\n"
+              "  new URL('../app/lib/services/shadowing_weakness_library.dart', import.meta.url),\n"
+              "  'utf8',\n"
+              ");\n",
+              1,
+          )
+          worker += r'''
+
+          test('shadowing persists a personal cross-passage weakness library', () => {
+            assert.match(training, /shadowing-weakness-library-entry/);
+            assert.match(training, /shadowing-weakness-library-sheet/);
+            assert.match(training, /phoenix\.shadowing\.weaknesses/);
+            assert.match(training, /_practiceWeakness/);
+            assert.match(weaknessLibrary, /class ShadowingWeaknessLibrary/);
+            assert.match(weaknessLibrary, /dailyQueue/);
+            assert.match(weaknessLibrary, /consecutiveStrongAttempts >= 2/);
+            assert.match(weaknessLibrary, /重点文字/);
+          });
+          '''
+          worker_path.write_text(worker, encoding='utf-8')
+          PY
+
+      - name: Format Dart sources
+        run: dart format app/lib/services/shadowing_weakness_library.dart app/lib/screens/shadowing_training_screen.dart app/test/shadowing_weakness_library_test.dart
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Run focused Flutter tests
+        working-directory: app
+        run: flutter test test/shadowing_weakness_library_test.dart test/shadowing_training_history_test.dart test/shadowing_score_test.dart
+
+      - name: Run navigation contract tests
+        run: node --test worker/shadowing_navigation.test.mjs
+
+      - name: Commit feature
+        shell: bash
+        run: |
+          git config user.name "Phoenix Development Agent"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/phoenix-shadowing-weakness-library.yml
+          git add app/lib/services/shadowing_weakness_library.dart \
+                  app/lib/screens/shadowing_training_screen.dart \
+                  app/test/shadowing_weakness_library_test.dart \
+                  worker/shadowing_navigation.test.mjs
+          git commit -m "feat: add personal shadowing weakness library"
+          git push origin HEAD:agent/shadowing-pronunciation-diagnosis-v2
