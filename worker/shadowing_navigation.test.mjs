@@ -56,3 +56,12 @@ test('shadowing uses Phoenix visual surfaces and updates immediately with level 
   assert.match(training, /_ShadowingBackground/);
   assert.match(training, /phoenix-world-language-journey-v1\.webp/);
 });
+
+
+test('shadowing uses original Phoenix training art and layered action buttons', () => {
+  assert.match(training, /phoenixShadowingTrainingBackgroundBytes/);
+  assert.match(training, /phoenix-shadowing-original-background/);
+  assert.match(training, /_shadowingListenButtonStyle/);
+  assert.match(training, /开始跟读 · 让声音带你前进/);
+  assert.match(training, /BoxShadow\(color: Color\(0x4D7A201B\)/);
+});
