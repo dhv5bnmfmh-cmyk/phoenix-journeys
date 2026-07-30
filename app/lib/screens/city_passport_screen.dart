@@ -98,17 +98,143 @@ class _PassportHeader extends StatelessWidget {
   }
 }
 
-class _PassportMap extends StatelessWidget {
+class _PassportMap extends StatefulWidget {
   const _PassportMap({required this.state});
 
   final AppState state;
 
   @override
+  State<_PassportMap> createState() => _PassportMapState();
+}
+
+enum _PassportMapLevel { continent, country, city }
+
+class _PassportMapState extends State<_PassportMap> {
+  static const _continents = <({String id, String name})>[
+    (id: 'asia', name: '亚洲'),
+    (id: 'europe', name: '欧洲'),
+    (id: 'africa', name: '非洲'),
+    (id: 'america', name: '美洲'),
+    (id: 'oceania', name: '大洋洲'),
+  ];
+
+  String _continentId = 'asia';
+  _PassportMapLevel _level = _PassportMapLevel.continent;
+  String? _selectedCityId;
+
+  AppState get state => widget.state;
+
+  void _selectContinent(String continentId) {
+    setState(() {
+      _continentId = continentId;
+      _level = _PassportMapLevel.continent;
+      _selectedCityId = null;
+    });
+  }
+
+  void _selectChina() {
+    setState(() {
+      _level = _PassportMapLevel.country;
+      _selectedCityId = null;
+    });
+  }
+
+  void _selectCity(String cityId) {
+    setState(() {
+      _level = _PassportMapLevel.city;
+      _selectedCityId = cityId;
+    });
+  }
+
+  void _goBack() {
+    setState(() {
+      if (_level == _PassportMapLevel.city) {
+        _level = _PassportMapLevel.country;
+        _selectedCityId = null;
+      } else if (_level == _PassportMapLevel.country) {
+        _level = _PassportMapLevel.continent;
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 34,
+          child: ListView.separated(
+            key: const ValueKey('passport-continent-tabs'),
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            itemCount: _continents.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 5),
+            itemBuilder: (context, index) {
+              final continent = _continents[index];
+              final selected = continent.id == _continentId;
+              return ChoiceChip(
+                key: ValueKey('passport-continent-${continent.id}'),
+                selected: selected,
+                showCheckmark: false,
+                visualDensity: VisualDensity.compact,
+                label: Text(state.displayText(continent.name)),
+                onSelected: (_) => _selectContinent(continent.id),
+                selectedColor: PhoenixTheme.red,
+                backgroundColor: const Color(0xEFFFF8E8),
+                side: BorderSide(
+                  color: selected
+                      ? PhoenixTheme.red
+                      : PhoenixTheme.red.withValues(alpha: .22),
+                ),
+                labelStyle: TextStyle(
+                  color: selected ? Colors.white : const Color(0xFF38231A),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 6),
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: 88,
+                child: _PassportPlaceRail(
+                  state: state,
+                  continentId: _continentId,
+                  level: _level,
+                  selectedCityId: _selectedCityId,
+                  onBack: _goBack,
+                  onSelectChina: _selectChina,
+                  onSelectCity: _selectCity,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(child: _buildMap()),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMap() {
     return LayoutBuilder(
       builder: (context, constraints) {
         final mapSize = constraints.biggest;
         final markerPlacements = _resolveCityMarkerPlacements(mapSize);
+        final selectedCity = _selectedCityId == null
+            ? null
+            : requireJourneyCity(_selectedCityId!);
+        final showChinaMap = _level != _PassportMapLevel.continent;
+        final mapAsset = showChinaMap
+            ? 'assets/images/maps/china-passport-atlas-v2.webp'
+            : _continentId == 'asia'
+                ? 'assets/images/maps/east-asia-flight-relief-v2.webp'
+                : 'assets/images/maps/world-flight-atlas-v1.webp';
         return ClipRRect(
           borderRadius: BorderRadius.circular(18),
           child: InteractiveViewer(
@@ -133,7 +259,7 @@ class _PassportMap extends StatelessWidget {
                         0, 0, 0, 1, 0,
                       ]),
                       child: Image.asset(
-                        'assets/images/maps/china-passport-atlas-v2.webp',
+                        mapAsset,
                         key: const ValueKey('passport-hd-atlas-image'),
                         fit: BoxFit.cover,
                         alignment: Alignment.center,
@@ -156,19 +282,37 @@ class _PassportMap extends StatelessWidget {
                       ),
                     ),
                   ),
-                  for (final city in journeyCityCatalog) ...[
+                  if (selectedCity != null) ...[
                     _CityMarkerLeader(
-                      placement: markerPlacements[city.id]!,
-                      earned: city.destinations.any(
+                      placement: markerPlacements[selectedCity.id]!,
+                      earned: selectedCity.destinations.any(
                         (journey) => state.isJourneyStampEarned(journey.id),
                       ),
                     ),
                     _CityMapMarker(
                       state: state,
-                      city: city,
-                      placement: markerPlacements[city.id]!,
+                      city: selectedCity,
+                      placement: markerPlacements[selectedCity.id]!,
                     ),
                   ],
+                  if (_level == _PassportMapLevel.continent)
+                    Center(
+                      child: _MapLevelCaption(
+                        title: _continentId == 'asia'
+                            ? state.displayText('亚洲')
+                            : state.displayText('目的地即将开放'),
+                        subtitle: _continentId == 'asia'
+                            ? state.displayText('请从左侧选择国家')
+                            : state.displayText('请选择其他洲继续探索'),
+                      ),
+                    )
+                  else if (_level == _PassportMapLevel.country)
+                    Center(
+                      child: _MapLevelCaption(
+                        title: state.displayText('中国'),
+                        subtitle: state.displayText('请从左侧选择城市'),
+                      ),
+                    ),
                   Positioned(
                     left: 9,
                     bottom: 9,
@@ -200,6 +344,176 @@ class _PassportMap extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _PassportPlaceRail extends StatelessWidget {
+  const _PassportPlaceRail({
+    required this.state,
+    required this.continentId,
+    required this.level,
+    required this.selectedCityId,
+    required this.onBack,
+    required this.onSelectChina,
+    required this.onSelectCity,
+  });
+
+  final AppState state;
+  final String continentId;
+  final _PassportMapLevel level;
+  final String? selectedCityId;
+  final VoidCallback onBack;
+  final VoidCallback onSelectChina;
+  final ValueChanged<String> onSelectCity;
+
+  @override
+  Widget build(BuildContext context) {
+    final canGoBack = level != _PassportMapLevel.continent;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xDFFFF8E8),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: PhoenixTheme.red.withValues(alpha: .18)),
+      ),
+      child: Column(
+        children: [
+          if (canGoBack)
+            IconButton(
+              key: const ValueKey('passport-place-back'),
+              onPressed: onBack,
+              tooltip: state.displayText('返回上一级'),
+              icon: const Icon(Icons.arrow_back_rounded, size: 18),
+              color: PhoenixTheme.red,
+              visualDensity: VisualDensity.compact,
+            ),
+          Expanded(
+            child: continentId != 'asia'
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(
+                        state.displayText('即将开放'),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.black45,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  )
+                : level == _PassportMapLevel.continent
+                    ? ListView(
+                        padding: const EdgeInsets.all(6),
+                        children: [
+                          _PlaceRailButton(
+                            key: const ValueKey('passport-country-china'),
+                            label: state.displayText('中国'),
+                            selected: false,
+                            onTap: onSelectChina,
+                          ),
+                        ],
+                      )
+                    : ListView.separated(
+                        key: const ValueKey('passport-city-list'),
+                        padding: const EdgeInsets.all(6),
+                        itemCount: journeyCityCatalog.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 4),
+                        itemBuilder: (context, index) {
+                          final city = journeyCityCatalog[index];
+                          return _PlaceRailButton(
+                            key: ValueKey('passport-city-option-${city.id}'),
+                            label: state.displayText(city.name),
+                            selected: selectedCityId == city.id,
+                            onTap: () => onSelectCity(city.id),
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlaceRailButton extends StatelessWidget {
+  const _PlaceRailButton({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? PhoenixTheme.red : Colors.transparent,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 9),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: selected ? Colors.white : const Color(0xFF38231A),
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MapLevelCaption extends StatelessWidget {
+  const _MapLevelCaption({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xEFFFF8E8),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: PhoenixTheme.red.withValues(alpha: .32)),
+          boxShadow: const [
+            BoxShadow(color: Color(0x26000000), blurRadius: 10),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: Color(0xFF2A1D16),
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: const TextStyle(color: Colors.black54, fontSize: 9),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
