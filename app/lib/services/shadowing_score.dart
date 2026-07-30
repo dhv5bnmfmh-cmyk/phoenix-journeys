@@ -1,4 +1,14 @@
+import 'dart:async';
 import 'dart:math' as math;
+
+import 'narration_controller.dart';
+
+NarrationController? _shadowingPracticeRateBridge;
+
+void _applyShadowingPracticeRate(double rate) {
+  final bridge = _shadowingPracticeRateBridge ??= NarrationController();
+  unawaited(bridge.setSpeechRate(rate));
+}
 
 class ShadowingAttemptDelta {
   const ShadowingAttemptDelta({
@@ -134,6 +144,10 @@ class ShadowingScore {
     return '清晰 0.9×';
   }
 
+  void prepareRecommendedPractice() {
+    _applyShadowingPracticeRate(recommendedPracticeRate);
+  }
+
   String get focusedPracticePlan {
     switch (weakestMetric) {
       case '准确度':
@@ -156,6 +170,7 @@ class ShadowingScore {
   }
 
   String get coaching {
+    prepareRecommendedPractice();
     final metrics = '$diagnosisSummary。';
     final adaptivePlan = '智能复练：$focusedPracticePlan';
     if (overall >= 90 &&
