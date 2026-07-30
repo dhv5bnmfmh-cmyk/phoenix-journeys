@@ -468,7 +468,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       children: [
         Container(
           key: const ValueKey('shadowing-premium-hero'),
-          padding: const EdgeInsets.all(17),
+          padding: const EdgeInsets.all(13),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
@@ -484,28 +484,28 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
           child: Row(
             children: [
               Container(
-                width: 54,
-                height: 54,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: .12),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: const Color(0xFFFFD879).withValues(alpha: .55)),
                 ),
-                child: const Icon(Icons.record_voice_over_rounded, color: Color(0xFFFFD879), size: 31),
+                child: const Icon(Icons.record_voice_over_rounded, color: Color(0xFFFFD879), size: 26),
               ),
-              const SizedBox(width: 13),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(state.displayText('跟读训练'), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
+                    Text(state.displayText('跟读训练'), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
                     const SizedBox(height: 4),
                     Text(state.displayText('听一句 · 跟一句 · 逐字对照 · 薄弱句复练'), style: const TextStyle(color: Colors.white70, fontSize: 11.5, height: 1.35, fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFE3A0),
                   borderRadius: BorderRadius.circular(99),
@@ -623,8 +623,8 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
         ),
         const SizedBox(height: 14),
         Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22), border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .55))),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(color: Colors.white.withValues(alpha: .72), borderRadius: BorderRadius.circular(20), border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .58)), boxShadow: const [BoxShadow(color: Color(0x1F000000), blurRadius: 12, offset: Offset(0, 5))]),
           child: Column(
             children: [
               Text(state.displayText(sentence), textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, height: 1.55, fontWeight: FontWeight.w900)),
@@ -762,7 +762,7 @@ class _ShadowingBackground extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0x52FFF5DE), Color(0xA6FFF7E8), Color(0xEFFFF7E8)],
+              colors: [Color(0x22FFF5DE), Color(0x55FFF7E8), Color(0xA6FFF7E8)],
               stops: [0, .48, 1],
             ),
           ),
@@ -785,79 +785,34 @@ class _TrainingDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const ValueKey('shadowing-training-history'),
-      padding: const EdgeInsets.all(13),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .88),
-        borderRadius: BorderRadius.circular(19),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .56)),
+        color: Colors.white.withValues(alpha: .64),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .48)),
         boxShadow: const [
-          BoxShadow(color: Color(0x26000000), blurRadius: 15, offset: Offset(0, 6)),
+          BoxShadow(color: Color(0x18000000), blurRadius: 10, offset: Offset(0, 4)),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            displayText('训练记录'),
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
+          _HistoryMetric(
+            icon: Icons.local_fire_department_rounded,
+            value: '${history.currentStreak}',
+            label: displayText('连续天数'),
           ),
-          const SizedBox(height: 9),
-          Row(
-            children: [
-              _HistoryMetric(
-                icon: Icons.local_fire_department_rounded,
-                value: '${history.currentStreak}',
-                label: displayText('连续天数'),
-              ),
-              _HistoryMetric(
-                icon: Icons.check_circle_rounded,
-                value: '${history.totalSessions}',
-                label: displayText('完成篇数'),
-              ),
-              _HistoryMetric(
-                icon: Icons.workspace_premium_rounded,
-                value: '${history.bestRecentScore}',
-                label: displayText('近期最佳'),
-              ),
-            ],
+          Container(width: 1, height: 30, color: PhoenixTheme.gold.withValues(alpha: .28)),
+          _HistoryMetric(
+            icon: Icons.check_circle_rounded,
+            value: '${history.totalSessions}',
+            label: displayText('完成篇数'),
           ),
-          if (history.recentSessions.isNotEmpty) ...[
-            const Divider(height: 20),
-            for (final session in history.recentSessions.take(3))
-              Padding(
-                padding: const EdgeInsets.only(bottom: 5),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.history_rounded,
-                      size: 15,
-                      color: Colors.black45,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        displayText(session.title),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11.5),
-                      ),
-                    ),
-                    Text(
-                      displayText('${session.score} 分'),
-                      style: const TextStyle(
-                        color: PhoenixTheme.red,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ] else
-            Text(
-              displayText('完成第一篇短文后，这里会保存你的练习轨迹。'),
-              style: const TextStyle(color: Colors.black54, fontSize: 11),
-            ),
+          Container(width: 1, height: 30, color: PhoenixTheme.gold.withValues(alpha: .28)),
+          _HistoryMetric(
+            icon: Icons.workspace_premium_rounded,
+            value: '${history.bestRecentScore}',
+            label: displayText('近期最佳'),
+          ),
         ],
       ),
     );
@@ -906,25 +861,25 @@ class _PassageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: .92),
+      color: Colors.white.withValues(alpha: .70),
       elevation: 0,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
         key: ValueKey('shadowing-passage-${passage.id}'),
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(17),
         child: Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(17),
             border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .42)),
             boxShadow: const [BoxShadow(color: Color(0x16000000), blurRadius: 12, offset: Offset(0, 5))],
           ),
           child: Row(
             children: [
               Container(
-                width: 52,
-                height: 52,
+                width: 43,
+                height: 43,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(colors: [Color(0xFFB83931), Color(0xFF7E1C1B)]),
                   borderRadius: BorderRadius.circular(17),
@@ -933,12 +888,12 @@ class _PassageCard extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text('Lv.${passage.level}', style: const TextStyle(color: Color(0xFFFFDF8A), fontSize: 12, fontWeight: FontWeight.w900)),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(displayText(passage.title), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                    Text(displayText(passage.title), style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900)),
                     const SizedBox(height: 4),
                     Text(displayText('${passage.theme} · ${passage.sentences.length} 句 · 约 ${passage.estimatedMinutes} 分钟'), style: const TextStyle(color: Colors.black54, fontSize: 11)),
                     if (bestScore > 0) ...[
@@ -949,8 +904,8 @@ class _PassageCard extends StatelessWidget {
                 ),
               ),
               Container(
-                width: 30,
-                height: 30,
+                width: 27,
+                height: 27,
                 decoration: BoxDecoration(color: PhoenixTheme.red.withValues(alpha: .08), shape: BoxShape.circle),
                 child: const Icon(Icons.arrow_forward_rounded, color: PhoenixTheme.red, size: 18),
               ),
@@ -980,7 +935,7 @@ class _ResultPanel extends StatelessWidget {
     return Container(
       key: const ValueKey('shadowing-result-panel'),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: const Color(0xFFFFF4DF), borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFFE8C788))),
+      decoration: BoxDecoration(color: const Color(0xFFFFF4DF).withValues(alpha: .82), borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFFE8C788)), boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 4))]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (score != null) Row(children: [
           CircleAvatar(backgroundColor: PhoenixTheme.red, foregroundColor: Colors.white, child: Text('${score!.overall}', style: const TextStyle(fontWeight: FontWeight.w900))),
