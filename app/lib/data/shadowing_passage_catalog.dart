@@ -19,6 +19,22 @@ class ShadowingPassage {
   String get text => sentences.join();
   int get characterCount => text.runes.length;
   int get estimatedMinutes => (characterCount / 80).ceil().clamp(1, 9);
+
+  ShadowingPassage copyWith({
+    String? id,
+    String? title,
+    int? level,
+    String? theme,
+    List<String>? sentences,
+  }) {
+    return ShadowingPassage(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      level: level ?? this.level,
+      theme: theme ?? this.theme,
+      sentences: sentences ?? this.sentences,
+    );
+  }
 }
 
 const shadowingPassages = <ShadowingPassage>[
@@ -156,12 +172,44 @@ const shadowingPassages = <ShadowingPassage>[
   ),
 ];
 
-List<ShadowingPassage> shadowingPassagesForLevel(int level) {
+List<ShadowingPassage> _availableShadowingPassagesForLevel(int level) {
   final safeLevel = level.clamp(1, 10);
   final available = shadowingPassages
       .where((passage) => passage.level <= safeLevel + 1)
       .toList(growable: false);
   return available.isEmpty ? shadowingPassages.take(1).toList() : available;
+}
+
+String _recommendationReason(
+  ShadowingPassage passage,
+  Map<String, int> bestScores,
+) {
+  if (bestScores.isEmpty) return '适合当前等级';
+  final score = bestScores[passage.id] ?? 0;
+  if (score == 0) return '新内容优先';
+  if (score < 75) return '薄弱内容巩固';
+  return '每日轮换';
+}
+
+List<ShadowingPassage> shadowingPassagesForLevel(
+  int level, {
+  DateTime? date,
+  Map<String, int> bestScores = const <String, int>{},
+}) {
+  final available = _availableShadowingPassagesForLevel(level);
+  final recommendation = recommendedShadowingPassageForLevel(
+    level,
+    date: date,
+    bestScores: bestScores,
+  );
+  final recommendedCard = recommendation.copyWith(
+    theme:
+        '今日推荐 · ${_recommendationReason(recommendation, bestScores)} · ${recommendation.theme}',
+  );
+  return <ShadowingPassage>[
+    recommendedCard,
+    ...available.where((passage) => passage.id != recommendation.id),
+  ];
 }
 
 ShadowingPassage recommendedShadowingPassageForLevel(
@@ -177,7 +225,7 @@ ShadowingPassage recommendedShadowingPassageForLevel(
       )
       .toList(growable: false);
   final candidates = nearby.isEmpty
-      ? shadowingPassagesForLevel(safeLevel)
+      ? _availableShadowingPassagesForLevel(safeLevel)
       : nearby;
   final lowestScore = candidates
       .map((passage) => bestScores[passage.id] ?? 0)
