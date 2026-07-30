@@ -145,6 +145,45 @@ void main() {
       expect(score.attemptDelta, isNull);
     });
 
+    test('recommends slow practice when accuracy is weakest', () {
+      final score = scoreShadowing(
+        reference: '今天去旅行',
+        recognized: '今天去旅形',
+        recognitionConfidence: .9,
+      );
+
+      expect(score.weakestMetric, '准确度');
+      expect(score.recommendedPracticeRate, .7);
+      expect(score.focusedPracticePlan, contains('慢速 0.7×'));
+      expect(score.coaching, contains('智能复练'));
+    });
+
+    test('recommends clear phrase practice when completeness is weakest', () {
+      final score = scoreShadowing(
+        reference: '今天去旅行',
+        recognized: '今天去',
+        recognitionConfidence: .8,
+      );
+
+      expect(score.weakestMetric, '完整度');
+      expect(score.recommendedPracticeRate, .9);
+      expect(score.focusedPracticePlan, contains('清晰 0.9×'));
+      expect(score.focusedPracticePlan, contains('按短语完整读完'));
+    });
+
+    test('recommends natural continuous reading when fluency is weakest', () {
+      final score = scoreShadowing(
+        reference: '语言让旅行留下温度',
+        recognized: '语言让旅行留下温度',
+        recognitionConfidence: .1,
+      );
+
+      expect(score.weakestMetric, '流利度');
+      expect(score.recommendedPracticeRate, 1);
+      expect(score.focusedPracticePlan, contains('原速 1.0×'));
+      expect(score.focusedPracticePlan, contains('连续朗读'));
+    });
+
     test('marks omitted reference characters for focused retry', () {
       final feedback = buildShadowingReferenceFeedback(
         reference: '今天的新鲜菜',
