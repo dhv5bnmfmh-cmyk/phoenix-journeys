@@ -123,7 +123,6 @@ test('shadowing persists a personal cross-passage weakness library', () => {
   assert.match(weaknessLibrary, /focusCharacters/);
 });
 
-
 test('shadowing exposes an adaptive daily route with persistent guided progress', () => {
   assert.match(training, /shadowing-daily-plan-entry/);
   assert.match(training, /shadowing-daily-plan-sheet/);
