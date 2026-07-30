@@ -489,6 +489,25 @@ class _PassportPlaceRail extends StatelessWidget {
                               );
                             },
                           )
+                    : level == _PassportMapLevel.city &&
+                            requireJourneyProvince(
+                              selectedProvinceId!,
+                            ).isMunicipality
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                state.displayText('点击地图\n查看地点'),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Color(0xFF6F4A3B),
+                                  fontSize: 10,
+                                  height: 1.45,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          )
                     : ListView.separated(
                         key: const ValueKey('passport-city-list'),
                         padding: const EdgeInsets.all(6),
