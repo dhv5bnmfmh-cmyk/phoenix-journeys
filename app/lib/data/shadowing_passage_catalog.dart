@@ -163,3 +163,25 @@ List<ShadowingPassage> shadowingPassagesForLevel(int level) {
       .toList(growable: false);
   return available.isEmpty ? shadowingPassages.take(1).toList() : available;
 }
+
+ShadowingPassage recommendedShadowingPassageForLevel(
+  int level, {
+  DateTime? date,
+}) {
+  final safeLevel = level.clamp(1, 10);
+  final nearby = shadowingPassages
+      .where(
+        (passage) =>
+            passage.level >= safeLevel - 1 && passage.level <= safeLevel + 1,
+      )
+      .toList(growable: false);
+  final candidates = nearby.isEmpty
+      ? shadowingPassagesForLevel(safeLevel)
+      : nearby;
+  final day = date ?? DateTime.now();
+  final dayKey = DateTime.utc(day.year, day.month, day.day)
+      .difference(DateTime.utc(2026))
+      .inDays;
+  final index = (dayKey + safeLevel * 7).abs() % candidates.length;
+  return candidates[index];
+}
