@@ -38,3 +38,11 @@ test('shadowing offers slow, clear, and natural demonstration speeds', () => {
   assert.match(training, /\('原速', 1\.0\)/);
   assert.match(training, /_narration\.setSpeechRate\(rate\)/);
 });
+
+test('shadowing completion routes low-scoring sentences into focused review', () => {
+  assert.match(training, /_weakSentenceIndexes/);
+  assert.match(training, /shadowing-review-weak-sentences/);
+  assert.match(training, /重练 \$\{weakSentences\.length\} 个薄弱句/);
+  assert.match(training, /薄弱句复练 \$\{_reviewPosition \+ 1\}/);
+  assert.match(training, /更新后的本篇平均分/);
+});
