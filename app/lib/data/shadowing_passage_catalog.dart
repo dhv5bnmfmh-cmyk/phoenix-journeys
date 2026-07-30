@@ -167,6 +167,7 @@ List<ShadowingPassage> shadowingPassagesForLevel(int level) {
 ShadowingPassage recommendedShadowingPassageForLevel(
   int level, {
   DateTime? date,
+  Map<String, int> bestScores = const <String, int>{},
 }) {
   final safeLevel = level.clamp(1, 10);
   final nearby = shadowingPassages
@@ -178,10 +179,16 @@ ShadowingPassage recommendedShadowingPassageForLevel(
   final candidates = nearby.isEmpty
       ? shadowingPassagesForLevel(safeLevel)
       : nearby;
+  final lowestScore = candidates
+      .map((passage) => bestScores[passage.id] ?? 0)
+      .reduce((current, next) => current < next ? current : next);
+  final priorityCandidates = candidates
+      .where((passage) => (bestScores[passage.id] ?? 0) == lowestScore)
+      .toList(growable: false);
   final day = date ?? DateTime.now();
   final dayKey = DateTime.utc(day.year, day.month, day.day)
       .difference(DateTime.utc(2026))
       .inDays;
-  final index = (dayKey + safeLevel * 7).abs() % candidates.length;
-  return candidates[index];
+  final index = (dayKey + safeLevel * 7).abs() % priorityCandidates.length;
+  return priorityCandidates[index];
 }
