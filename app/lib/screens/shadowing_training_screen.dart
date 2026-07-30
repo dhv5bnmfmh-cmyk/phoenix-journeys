@@ -107,7 +107,6 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       _attempts = 0;
       _sessionSentenceScores.clear();
       _recognized = '';
-      _sessionSentenceScores.clear();
       _score = null;
       _speechMessage = null;
     });
