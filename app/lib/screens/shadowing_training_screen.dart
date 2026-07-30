@@ -41,6 +41,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   bool _loading = true;
   bool _speechReady = false;
   bool _listening = false;
+  double _practiceRate = 1;
   String _recognized = '';
   ShadowingScore? _score;
   String? _speechMessage;
@@ -133,6 +134,12 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       items: [NarrationItem(id: 'prompt', text: text, label: passage.title)],
       languageCode: context.read<AppState>().isTraditional ? 'zh-TW' : 'zh-CN',
     );
+  }
+
+  Future<void> _setPracticeRate(double rate) async {
+    await _narration.setSpeechRate(rate);
+    if (!mounted) return;
+    setState(() => _practiceRate = _narration.speechRate);
   }
 
   Future<void> _toggleListening() async {
@@ -422,6 +429,37 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
                   Expanded(child: OutlinedButton.icon(onPressed: () => unawaited(_playText()), icon: const Icon(Icons.volume_up_rounded), label: Text(state.displayText('听本句')))),
                   const SizedBox(width: 8),
                   Expanded(child: OutlinedButton.icon(onPressed: () => unawaited(_playText(wholePassage: true)), icon: const Icon(Icons.headphones_rounded), label: Text(state.displayText('听全文')))),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                key: const ValueKey('shadowing-speed-control'),
+                children: [
+                  Text(
+                    state.displayText('示范语速'),
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const Spacer(),
+                  for (final option in const [
+                    ('慢速', .7),
+                    ('清晰', .9),
+                    ('原速', 1.0),
+                  ]) ...[
+                    ChoiceChip(
+                      label: Text(
+                        state.displayText('${option.$1} ${option.$2}×'),
+                      ),
+                      selected: (_practiceRate - option.$2).abs() < .01,
+                      onSelected: (_) =>
+                          unawaited(_setPracticeRate(option.$2)),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    if (option.$2 != 1.0) const SizedBox(width: 5),
+                  ],
                 ],
               ),
             ],
