@@ -18,6 +18,10 @@ const scoring = readFileSync(
   new URL('../app/lib/services/shadowing_score.dart', import.meta.url),
   'utf8',
 );
+const weaknessLibrary = readFileSync(
+  new URL('../app/lib/services/shadowing_weakness_library.dart', import.meta.url),
+  'utf8',
+);
 
 test('shadowing is a fixed navigation tab immediately after passport', () => {
   const passport = homeShell.indexOf("label: state.displayText('护照')");
@@ -100,4 +104,18 @@ test('shadowing prepares the recommended rate before focused retry playback', ()
   assert.match(scoring, /_applyShadowingPracticeRate\(recommendedPracticeRate\)/);
   assert.match(scoring, /prepareRecommendedPractice\(\);/);
   assert.match(scoring, /bridge\.setSpeechRate\(rate\)/);
+});
+
+
+
+test('shadowing persists a personal cross-passage weakness library', () => {
+  assert.match(training, /shadowing-weakness-library-entry/);
+  assert.match(training, /shadowing-weakness-library-sheet/);
+  assert.match(training, /phoenix\.shadowing\.weaknesses/);
+  assert.match(training, /_practiceWeakness/);
+  assert.match(training, /重点文字/);
+  assert.match(weaknessLibrary, /class ShadowingWeaknessLibrary/);
+  assert.match(weaknessLibrary, /dailyQueue/);
+  assert.match(weaknessLibrary, /consecutiveStrongAttempts >= 2/);
+  assert.match(weaknessLibrary, /focusCharacters/);
 });

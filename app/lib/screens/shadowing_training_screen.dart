@@ -12,15 +12,13 @@ import '../services/narration_controller.dart';
 import '../services/phoenix_level_controller.dart';
 import '../services/shadowing_score.dart';
 import '../services/shadowing_training_history.dart';
+import '../services/shadowing_weakness_library.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/journey_level_selector_button.dart';
 
 class ShadowingTrainingScreen extends StatefulWidget {
-  const ShadowingTrainingScreen({
-    super.key,
-    this.embedded = false,
-  });
+  const ShadowingTrainingScreen({super.key, this.embedded = false});
 
   final bool embedded;
 
@@ -37,6 +35,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   final List<int> _reviewQueue = <int>[];
 
   ShadowingTrainingHistory _history = const ShadowingTrainingHistory();
+  ShadowingWeaknessLibrary _weaknessLibrary = const ShadowingWeaknessLibrary();
   ShadowingPassage? _passage;
   int _sentenceIndex = 0;
   int _reviewPosition = 0;
@@ -69,6 +68,9 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     }
     _history = ShadowingTrainingHistory.decode(
       prefs.getString('phoenix.shadowing.history'),
+    );
+    _weaknessLibrary = ShadowingWeaknessLibrary.decode(
+      prefs.getString('phoenix.shadowing.weaknesses'),
     );
 
     var ready = false;
@@ -113,17 +115,26 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
 
   String t(String value) => context.read<AppState>().displayText(value);
 
-  void _openPassage(ShadowingPassage passage) {
+  void _openPassage(
+    ShadowingPassage passage, {
+    int startSentenceIndex = 0,
+    String? message,
+  }) {
+    final safeIndex = startSentenceIndex < 0
+        ? 0
+        : startSentenceIndex >= passage.sentences.length
+        ? passage.sentences.length - 1
+        : startSentenceIndex;
     setState(() {
       _passage = passage;
-      _sentenceIndex = 0;
+      _sentenceIndex = safeIndex;
       _reviewPosition = 0;
       _attempts = 0;
       _reviewQueue.clear();
       _sessionSentenceScores.clear();
       _recognized = '';
       _score = null;
-      _speechMessage = null;
+      _speechMessage = message;
     });
   }
 
@@ -144,14 +155,13 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   Future<void> _playText({bool wholePassage = false}) async {
     final passage = _passage;
     if (passage == null) return;
-    final text =
-        wholePassage ? passage.text : passage.sentences[_sentenceIndex];
+    final text = wholePassage
+        ? passage.text
+        : passage.sentences[_sentenceIndex];
     await _narration.play(
       contentId:
           'shadowing-${passage.id}-${wholePassage ? 'all' : _sentenceIndex}',
-      items: [
-        NarrationItem(id: 'prompt', text: text, label: passage.title),
-      ],
+      items: [NarrationItem(id: 'prompt', text: text, label: passage.title)],
       languageCode: context.read<AppState>().isTraditional ? 'zh-TW' : 'zh-CN',
     );
   }
@@ -172,14 +182,11 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
     }
 
     if (!_speechReady) {
-      setState(
-        () => _speechMessage = '当前设备未开放语音识别，请允许麦克风权限后重试。',
-      );
+      setState(() => _speechMessage = '当前设备未开放语音识别，请允许麦克风权限后重试。');
       return;
     }
 
-    final localeId =
-        context.read<AppState>().isTraditional ? 'zh_TW' : 'zh_CN';
+    final localeId = context.read<AppState>().isTraditional ? 'zh_TW' : 'zh_CN';
     await _narration.stop();
     if (!mounted) return;
     setState(() {
@@ -211,15 +218,32 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   Future<void> _scoreCurrentAttempt({double confidence = 0}) async {
     final passage = _passage;
     if (passage == null || _recognized.trim().isEmpty) return;
+    final sentence = passage.sentences[_sentenceIndex];
     final score = scoreShadowing(
-      reference: passage.sentences[_sentenceIndex],
+      reference: sentence,
       recognized: _recognized,
       recognitionConfidence: confidence,
     );
     final attempts = _attempts + 1;
+    final weaknessLibrary = _weaknessLibrary.recordAttempt(
+      passageId: passage.id,
+      passageTitle: passage.title,
+      sentenceIndex: _sentenceIndex,
+      sentence: sentence,
+      recognized: _recognized,
+      score: score,
+      practicedAt: DateTime.now(),
+    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'phoenix.shadowing.weaknesses',
+      weaknessLibrary.encode(),
+    );
+    if (!mounted) return;
     setState(() {
       _attempts = attempts;
       _score = score;
+      _weaknessLibrary = weaknessLibrary;
       final previous = _sessionSentenceScores[_sentenceIndex] ?? 0;
       if (score.overall > previous) {
         _sessionSentenceScores[_sentenceIndex] = score.overall;
@@ -237,6 +261,40 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       _speechMessage = '已定位${score.weakestMetric}弱项，先听示范，再跟读一次。';
     });
     unawaited(_playText());
+  }
+
+  void _practiceWeakness(ShadowingWeaknessItem item) {
+    ShadowingPassage? passage;
+    for (final candidate in shadowingPassages) {
+      if (candidate.id == item.passageId) {
+        passage = candidate;
+        break;
+      }
+    }
+    if (passage == null) return;
+    _openPassage(
+      passage,
+      startSentenceIndex: item.sentenceIndex,
+      message: '来自个人弱项复练库 · 重点修正${item.weakestMetric}',
+    );
+  }
+
+  Future<void> _showWeaknessLibrary() async {
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFFFF8E9),
+      showDragHandle: true,
+      builder: (sheetContext) => _WeaknessLibrarySheet(
+        library: _weaknessLibrary,
+        displayText: context.read<AppState>().displayText,
+        onPractice: (item) {
+          Navigator.of(sheetContext).pop();
+          _practiceWeakness(item);
+        },
+      ),
+    );
   }
 
   void _nextSentence() {
@@ -342,10 +400,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
             const SizedBox(height: 8),
             Text(
               t('短文跟读完成'),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 6),
             Text(
@@ -416,10 +471,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
             const SizedBox(height: 8),
             Text(
               t('薄弱句复练完成'),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 8),
             Text(
@@ -495,8 +547,8 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _passage == null
-                    ? _passageLibrary(state)
-                    : _practicePage(state, _passage!),
+                ? _passageLibrary(state)
+                : _practicePage(state, _passage!),
           ),
         ],
       ),
@@ -561,8 +613,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFE3A0),
                   borderRadius: BorderRadius.circular(99),
@@ -581,19 +632,19 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
           ),
         ),
         const SizedBox(height: 6),
-        _TrainingDashboard(
-          history: _history,
+        _TrainingDashboard(history: _history, displayText: state.displayText),
+        const SizedBox(height: 7),
+        _WeaknessLibraryCard(
+          library: _weaknessLibrary,
           displayText: state.displayText,
+          onTap: () => unawaited(_showWeaknessLibrary()),
         ),
         const SizedBox(height: 9),
         Row(
           children: [
             Text(
               state.displayText('适合当前等级'),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
             ),
             const Spacer(),
             Container(
@@ -658,10 +709,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
             const Spacer(),
             Text(
               state.displayText('已练 $_attempts 次'),
-              style: const TextStyle(
-                color: Colors.black54,
-                fontSize: 11,
-              ),
+              style: const TextStyle(color: Colors.black54, fontSize: 11),
             ),
           ],
         ),
@@ -676,9 +724,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
         Row(
           key: const ValueKey('shadowing-sentence-score-strip'),
           children: [
-            for (var index = 0;
-                index < passage.sentences.length;
-                index += 1)
+            for (var index = 0; index < passage.sentences.length; index += 1)
               Expanded(
                 child: Container(
                   margin: EdgeInsets.only(
@@ -689,16 +735,15 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
                     color: index == _sentenceIndex
                         ? PhoenixTheme.red
                         : _sessionSentenceScores.containsKey(index)
-                            ? const Color(0xFFFFE4AD)
-                            : Colors.white,
+                        ? const Color(0xFFFFE4AD)
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(9),
                     border: Border.all(
                       color: PhoenixTheme.red.withValues(alpha: .22),
                     ),
                   ),
                   child: Text(
-                    _sessionSentenceScores[index]?.toString() ??
-                        '${index + 1}',
+                    _sessionSentenceScores[index]?.toString() ?? '${index + 1}',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: index == _sentenceIndex
@@ -718,9 +763,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: .30),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: PhoenixTheme.gold.withValues(alpha: .24),
-            ),
+            border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .24)),
           ),
           child: Column(
             children: [
@@ -747,8 +790,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () =>
-                          unawaited(_playText(wholePassage: true)),
+                      onPressed: () => unawaited(_playText(wholePassage: true)),
                       style: _shadowingListenButtonStyle(),
                       icon: const Icon(Icons.headphones_rounded),
                       label: Text(state.displayText('听全文')),
@@ -779,8 +821,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
                         state.displayText('${option.$1} ${option.$2}×'),
                       ),
                       selected: (_practiceRate - option.$2).abs() < .01,
-                      onSelected: (_) =>
-                          unawaited(_setPracticeRate(option.$2)),
+                      onSelected: (_) => unawaited(_setPracticeRate(option.$2)),
                       visualDensity: VisualDensity.compact,
                     ),
                     if (option.$2 != 1.0) const SizedBox(width: 5),
@@ -796,10 +837,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: _listening
-                  ? const [
-                      Color(0xFFD84A3C),
-                      Color(0xFF8D1E1B),
-                    ]
+                  ? const [Color(0xFFD84A3C), Color(0xFF8D1E1B)]
                   : const [
                       Color(0xFFC13B30),
                       Color(0xFF8B1D1B),
@@ -816,10 +854,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
                 blurRadius: 17,
                 offset: Offset(0, 8),
               ),
-              BoxShadow(
-                color: Color(0x33FFD879),
-                blurRadius: 7,
-              ),
+              BoxShadow(color: Color(0x33FFD879), blurRadius: 7),
             ],
           ),
           child: FilledButton.icon(
@@ -834,21 +869,14 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
               ),
             ),
             icon: Icon(
-              _listening
-                  ? Icons.stop_circle_rounded
-                  : Icons.mic_rounded,
+              _listening ? Icons.stop_circle_rounded : Icons.mic_rounded,
               size: 28,
             ),
             label: Text(
               state.displayText(
-                _listening
-                    ? '正在听你朗读 · 点击结束'
-                    : '开始跟读 · 让声音带你前进',
+                _listening ? '正在听你朗读 · 点击结束' : '开始跟读 · 让声音带你前进',
               ),
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w900,
-              ),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
             ),
           ),
         ),
@@ -870,9 +898,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
             recognized: _recognized,
             score: score,
             displayText: state.displayText,
-            onRetry: score == null
-                ? null
-                : () => _retryCurrentWeakness(score),
+            onRetry: score == null ? null : () => _retryCurrentWeakness(score),
           ),
         ],
         if (score != null) ...[
@@ -884,11 +910,11 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
               state.displayText(
                 _reviewQueue.isNotEmpty
                     ? _reviewPosition == _reviewQueue.length - 1
-                        ? '完成薄弱句复练'
-                        : '复练下一句'
+                          ? '完成薄弱句复练'
+                          : '复练下一句'
                     : _sentenceIndex == passage.sentences.length - 1
-                        ? '完成这篇短文'
-                        : '练习下一句',
+                    ? '完成这篇短文'
+                    : '练习下一句',
               ),
             ),
           ),
@@ -902,14 +928,10 @@ ButtonStyle _shadowingListenButtonStyle() {
   return OutlinedButton.styleFrom(
     foregroundColor: PhoenixTheme.red,
     backgroundColor: Colors.white.withValues(alpha: .88),
-    side: BorderSide(
-      color: PhoenixTheme.gold.withValues(alpha: .68),
-    ),
+    side: BorderSide(color: PhoenixTheme.gold.withValues(alpha: .68)),
     elevation: 3,
     shadowColor: const Color(0x29000000),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
   );
 }
 
@@ -934,11 +956,7 @@ class _ShadowingBackground extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0x00FFF5DE),
-                Color(0x10FFF7E8),
-                Color(0x2CFFF7E8),
-              ],
+              colors: [Color(0x00FFF5DE), Color(0x10FFF7E8), Color(0x2CFFF7E8)],
               stops: [0, .48, 1],
             ),
           ),
@@ -949,10 +967,7 @@ class _ShadowingBackground extends StatelessWidget {
 }
 
 class _TrainingDashboard extends StatelessWidget {
-  const _TrainingDashboard({
-    required this.history,
-    required this.displayText,
-  });
+  const _TrainingDashboard({required this.history, required this.displayText});
 
   final ShadowingTrainingHistory history;
   final String Function(String) displayText;
@@ -965,9 +980,7 @@ class _TrainingDashboard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: .18),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: PhoenixTheme.gold.withValues(alpha: .18),
-        ),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .18)),
       ),
       child: Row(
         children: [
@@ -995,6 +1008,362 @@ class _TrainingDashboard extends StatelessWidget {
             icon: Icons.workspace_premium_rounded,
             value: '${history.bestRecentScore}',
             label: displayText('近期最佳'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeaknessLibraryCard extends StatelessWidget {
+  const _WeaknessLibraryCard({
+    required this.library,
+    required this.displayText,
+    required this.onTap,
+  });
+
+  final ShadowingWeaknessLibrary library;
+  final String Function(String) displayText;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final todayCount = library.dailyQueue().length;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const ValueKey('shadowing-weakness-library-entry'),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF0D1).withValues(alpha: .72),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .46)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: PhoenixTheme.red.withValues(alpha: .10),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: const Icon(
+                  Icons.psychology_alt_rounded,
+                  color: PhoenixTheme.red,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayText('个人弱项复练库'),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      displayText(
+                        library.pendingCount == 0
+                            ? '当前没有待复练句子 · 已掌握 ${library.masteredCount}'
+                            : '今日推荐 $todayCount 句 · 已掌握 ${library.masteredCount}',
+                      ),
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                decoration: BoxDecoration(
+                  color: library.pendingCount == 0
+                      ? const Color(0xFFE2E8D7)
+                      : const Color(0xFFFFD8C7),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+                child: Text(
+                  displayText('待练 ${library.pendingCount}'),
+                  style: TextStyle(
+                    color: library.pendingCount == 0
+                        ? const Color(0xFF47603E)
+                        : PhoenixTheme.red,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 5),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: PhoenixTheme.red,
+                size: 15,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WeaknessLibrarySheet extends StatelessWidget {
+  const _WeaknessLibrarySheet({
+    required this.library,
+    required this.displayText,
+    required this.onPractice,
+  });
+
+  final ShadowingWeaknessLibrary library;
+  final String Function(String) displayText;
+  final ValueChanged<ShadowingWeaknessItem> onPractice;
+
+  @override
+  Widget build(BuildContext context) {
+    final queue = library.dailyQueue(limit: 20);
+    final metrics = library.pendingMetricCounts;
+    return SafeArea(
+      child: DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: .74,
+        minChildSize: .46,
+        maxChildSize: .92,
+        builder: (context, controller) => ListView(
+          key: const ValueKey('shadowing-weakness-library-sheet'),
+          controller: controller,
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.psychology_alt_rounded,
+                  color: PhoenixTheme.red,
+                  size: 30,
+                ),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayText('个人弱项复练库'),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Text(
+                        displayText('自动积累薄弱句，连续两次稳定达标后标记掌握'),
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 7,
+              runSpacing: 7,
+              children: [
+                _WeaknessSummaryChip(
+                  label: displayText('待练 ${library.pendingCount}'),
+                ),
+                _WeaknessSummaryChip(
+                  label: displayText('准确度 ${metrics['准确度'] ?? 0}'),
+                ),
+                _WeaknessSummaryChip(
+                  label: displayText('完整度 ${metrics['完整度'] ?? 0}'),
+                ),
+                _WeaknessSummaryChip(
+                  label: displayText('流利度 ${metrics['流利度'] ?? 0}'),
+                ),
+                _WeaknessSummaryChip(
+                  label: displayText('已掌握 ${library.masteredCount}'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            if (queue.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: .72),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: PhoenixTheme.gold.withValues(alpha: .30),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.verified_rounded,
+                      color: Color(0xFF5E7A50),
+                      size: 44,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      displayText('今天没有待复练的薄弱句'),
+                      style: const TextStyle(fontWeight: FontWeight.w900),
+                    ),
+                  ],
+                ),
+              )
+            else ...[
+              Text(
+                displayText('今日优先复练'),
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 7),
+              for (final item in queue) ...[
+                _WeaknessItemCard(
+                  item: item,
+                  displayText: displayText,
+                  onPractice: () => onPractice(item),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WeaknessSummaryChip extends StatelessWidget {
+  const _WeaknessSummaryChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .78),
+        borderRadius: BorderRadius.circular(99),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .30)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Color(0xFF6F4A3B),
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _WeaknessItemCard extends StatelessWidget {
+  const _WeaknessItemCard({
+    required this.item,
+    required this.displayText,
+    required this.onPractice,
+  });
+
+  final ShadowingWeaknessItem item;
+  final String Function(String) displayText;
+  final VoidCallback onPractice;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .82),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .34)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  displayText(item.passageTitle),
+                  style: const TextStyle(
+                    color: PhoenixTheme.red,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              Text(
+                displayText('最近 ${item.lastScore} · 最佳 ${item.bestScore}'),
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 7),
+          Text(
+            displayText(item.sentence),
+            style: const TextStyle(
+              fontSize: 15,
+              height: 1.42,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              _IssueChip(
+                icon: Icons.track_changes_rounded,
+                label: displayText('重点 ${item.weakestMetric}'),
+                active: true,
+              ),
+              _IssueChip(
+                icon: Icons.fact_check_outlined,
+                label: displayText(item.issueSummary),
+                active: item.issueCount > 0,
+              ),
+            ],
+          ),
+          if (item.focusCharacters.isNotEmpty) ...[
+            const SizedBox(height: 7),
+            Text(
+              displayText('重点文字：${item.focusCharacters}'),
+              style: const TextStyle(
+                color: PhoenixTheme.red,
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+          const SizedBox(height: 9),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: ValueKey('shadowing-practice-weakness-${item.id}'),
+              onPressed: onPractice,
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: Text(displayText('开始复练这一句')),
+            ),
           ),
         ],
       ),
@@ -1081,9 +1450,7 @@ class _PassageCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(17),
-            border: Border.all(
-              color: PhoenixTheme.gold.withValues(alpha: .20),
-            ),
+            border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .20)),
           ),
           child: Row(
             children: [
@@ -1092,10 +1459,7 @@ class _PassageCard extends StatelessWidget {
                 height: 37,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFB83931),
-                      Color(0xFF7E1C1B),
-                    ],
+                    colors: [Color(0xFFB83931), Color(0xFF7E1C1B)],
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -1361,10 +1725,7 @@ class _ResultPanel extends StatelessWidget {
             const SizedBox(height: 9),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 9,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: .38),
                 borderRadius: BorderRadius.circular(12),
@@ -1390,9 +1751,7 @@ class _ResultPanel extends StatelessWidget {
                 key: const ValueKey('shadowing-retry-weakness'),
                 onPressed: onRetry,
                 icon: const Icon(Icons.replay_circle_filled_rounded),
-                label: Text(
-                  displayText('针对${score!.weakestMetric}再练一次'),
-                ),
+                label: Text(displayText('针对${score!.weakestMetric}再练一次')),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: PhoenixTheme.red,
                   backgroundColor: Colors.white.withValues(alpha: .68),
@@ -1474,9 +1833,7 @@ class _DiagnosticMetric extends StatelessWidget {
               minHeight: 5,
               backgroundColor: const Color(0xFFEADCC8),
               valueColor: AlwaysStoppedAnimation<Color>(
-                highlighted
-                    ? PhoenixTheme.red
-                    : const Color(0xFF6F8B65),
+                highlighted ? PhoenixTheme.red : const Color(0xFF6F8B65),
               ),
             ),
           ),
