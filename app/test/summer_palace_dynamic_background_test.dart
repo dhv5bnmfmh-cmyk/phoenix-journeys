@@ -26,22 +26,23 @@ void main() {
       );
       await tester.pump();
 
-      expect(
-        find.byKey(
-          ValueKey(
-            'journey-complete-background-beijing-summer-palace-${page.name}',
-          ),
-        ),
-        findsOneWidget,
-      );
-      final image = tester.widget<Image>(
-        find.byKey(
-          ValueKey(
-            'journey-complete-image-beijing-summer-palace-${page.name}',
-          ),
+      final completeFrame = find.byKey(
+        ValueKey(
+          'journey-complete-background-beijing-summer-palace-${page.name}',
         ),
       );
-      expect(image.fit, BoxFit.contain);
+      expect(completeFrame, findsOneWidget);
+
+      final completeImages = tester
+          .widgetList<Image>(
+            find.descendant(
+              of: completeFrame,
+              matching: find.byType(Image),
+            ),
+          )
+          .toList(growable: false);
+      expect(completeImages, hasLength(1));
+      expect(completeImages.single.fit, BoxFit.contain);
       expect(
         find.byKey(const ValueKey('summer-palace-camera-transform')),
         findsNothing,
@@ -70,7 +71,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey('summer-palace-camera-layer')),
+      find.byKey(const ValueKey('summer-palace-camera-transform')),
       findsOneWidget,
     );
     expect(
