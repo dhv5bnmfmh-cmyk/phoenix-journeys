@@ -4,7 +4,52 @@ import 'package:phoenix_journeys/models/journey_background.dart';
 import 'package:phoenix_journeys/widgets/destination_background.dart';
 
 void main() {
-  testWidgets('Summer Palace dynamic background respects reduced motion',
+  const completePages = <JourneyBackgroundPage>[
+    JourneyBackgroundPage.story,
+    JourneyBackgroundPage.vocabulary,
+    JourneyBackgroundPage.discovery,
+    JourneyBackgroundPage.reflection,
+    JourneyBackgroundPage.memory,
+  ];
+
+  for (final page in completePages) {
+    testWidgets('Summer Palace ${page.name} shows the complete background',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DestinationBackground(
+            journeyId: 'beijing-summer-palace',
+            pageType: page,
+            child: const SizedBox.expand(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        find.byKey(
+          ValueKey(
+            'journey-complete-background-beijing-summer-palace-${page.name}',
+          ),
+        ),
+        findsOneWidget,
+      );
+      final image = tester.widget<Image>(
+        find.byKey(
+          ValueKey(
+            'journey-complete-image-beijing-summer-palace-${page.name}',
+          ),
+        ),
+      );
+      expect(image.fit, BoxFit.contain);
+      expect(
+        find.byKey(const ValueKey('summer-palace-camera-transform')),
+        findsNothing,
+      );
+    });
+  }
+
+  testWidgets('Summer Palace completion keeps reduced-motion cinematic layers',
       (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -12,7 +57,7 @@ void main() {
           data: MediaQueryData(disableAnimations: true),
           child: DestinationBackground(
             journeyId: 'beijing-summer-palace',
-            pageType: JourneyBackgroundPage.story,
+            pageType: JourneyBackgroundPage.completion,
             child: SizedBox.expand(),
           ),
         ),
@@ -42,13 +87,13 @@ void main() {
     );
   });
 
-  testWidgets('Summer Palace camera visibly changes position over time',
+  testWidgets('Summer Palace completion camera changes position over time',
       (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: DestinationBackground(
           journeyId: 'beijing-summer-palace',
-          pageType: JourneyBackgroundPage.story,
+          pageType: JourneyBackgroundPage.completion,
           child: SizedBox.expand(),
         ),
       ),
