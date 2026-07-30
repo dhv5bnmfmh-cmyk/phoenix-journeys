@@ -26,7 +26,7 @@ ShadowingScore score({
 
 void main() {
   test('daily plan combines warmup, weakness review, and challenge', () {
-    final weakScore = ShadowingScore(
+    const weakScore = ShadowingScore(
       overall: 60,
       accuracy: 65,
       completeness: 70,
@@ -85,7 +85,10 @@ void main() {
 
     expect(restored.completedCount, 1);
     expect(restored.isStepCompleted(first.id), isTrue);
-    expect(restored.steps.map((step) => step.id), original.steps.map((step) => step.id));
+    expect(
+      restored.steps.map((step) => step.id),
+      original.steps.map((step) => step.id),
+    );
   });
 
   test('new calendar day regenerates the route and clears completion', () {
