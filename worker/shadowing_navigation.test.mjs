@@ -10,6 +10,10 @@ const explore = readFileSync(
   new URL('../app/lib/screens/explore_screen.dart', import.meta.url),
   'utf8',
 );
+const training = readFileSync(
+  new URL('../app/lib/screens/shadowing_training_screen.dart', import.meta.url),
+  'utf8',
+);
 
 test('shadowing is a fixed navigation tab immediately after passport', () => {
   const passport = homeShell.indexOf("label: state.displayText('护照')");
@@ -25,4 +29,12 @@ test('shadowing is a fixed navigation tab immediately after passport', () => {
 test('explore page no longer carries an inline shadowing shortcut', () => {
   assert.doesNotMatch(explore, /home-shadowing-training-entry/);
   assert.doesNotMatch(explore, /_ShadowingHomeEntry/);
+});
+
+test('shadowing offers slow, clear, and natural demonstration speeds', () => {
+  assert.match(training, /shadowing-speed-control/);
+  assert.match(training, /\('慢速', \.7\)/);
+  assert.match(training, /\('清晰', \.9\)/);
+  assert.match(training, /\('原速', 1\.0\)/);
+  assert.match(training, /_narration\.setSpeechRate\(rate\)/);
 });
