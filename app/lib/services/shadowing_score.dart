@@ -13,6 +13,7 @@ class ShadowingScore {
     required this.omittedCharacters,
     required this.wrongCharacters,
     required this.extraCharacters,
+    this.attemptDelta,
   });
 
   final int overall;
@@ -26,6 +27,7 @@ class ShadowingScore {
   final int omittedCharacters;
   final int wrongCharacters;
   final int extraCharacters;
+  final ShadowingAttemptDelta? attemptDelta;
 
   String get label {
     if (overall >= 90) return '非常自然';
@@ -85,33 +87,70 @@ class ShadowingScore {
     return '$recommendedPracticeRateLabel，听一句、跟一句，再完整复读。';
   }
 
+  String _withAttemptProgress(String message) {
+    final delta = attemptDelta;
+    return delta == null ? message : '$message ${delta.summary}';
+  }
+
   String get coaching {
     final metrics = '$diagnosisSummary。';
     final adaptivePlan = '智能复练：$focusedPracticePlan';
     if (overall >= 90 &&
+        accuracy >= 90 &&
+        completeness >= 90 &&
+        fluency >= 90 &&
         omittedCharacters == 0 &&
         wrongCharacters == 0 &&
         extraCharacters == 0) {
-      return '$metrics 三项表现稳定，保持原速 1.0×，继续练自然停顿和连读。';
+      return _withAttemptProgress(
+        '$metrics 三项表现稳定，保持原速 1.0×，继续练自然停顿和连读。',
+      );
     }
     if (omittedCharacters >= wrongCharacters &&
         omittedCharacters >= extraCharacters &&
         omittedCharacters > 0) {
-      return '$metrics 漏读 $omittedCharacters 个字，注意红色文字。$adaptivePlan';
+      return _withAttemptProgress(
+        '$metrics 漏读 $omittedCharacters 个字，注意红色文字。$adaptivePlan',
+      );
     }
     if (wrongCharacters >= extraCharacters && wrongCharacters > 0) {
-      return '$metrics 错读 $wrongCharacters 个字，逐字对照红色提示。$adaptivePlan';
+      return _withAttemptProgress(
+        '$metrics 错读 $wrongCharacters 个字，逐字对照红色提示。$adaptivePlan',
+      );
     }
     if (extraCharacters > 0) {
-      return '$metrics 多读 $extraCharacters 个字，避免重复或加入多余内容。$adaptivePlan';
+      return _withAttemptProgress(
+        '$metrics 多读 $extraCharacters 个字，避免重复或加入多余内容。$adaptivePlan',
+      );
     }
     if (fluency < 70) {
-      return '$metrics 内容基本到位，但停顿较多。$adaptivePlan';
+      return _withAttemptProgress(
+        '$metrics 内容基本到位，但停顿较多。$adaptivePlan',
+      );
     }
     if (accuracy < 80) {
-      return '$metrics 注意红色文字，先修正发音。$adaptivePlan';
+      return _withAttemptProgress(
+        '$metrics 注意红色文字，先修正发音。$adaptivePlan',
+      );
     }
-    return '$metrics 已接近示范。$adaptivePlan';
+    return _withAttemptProgress('$metrics 已接近示范。$adaptivePlan');
+  }
+
+  ShadowingScore withAttemptDelta(ShadowingAttemptDelta? delta) {
+    return ShadowingScore(
+      overall: overall,
+      accuracy: accuracy,
+      completeness: completeness,
+      fluency: fluency,
+      confidence: confidence,
+      matchedCharacters: matchedCharacters,
+      referenceCharacters: referenceCharacters,
+      recognizedCharacters: recognizedCharacters,
+      omittedCharacters: omittedCharacters,
+      wrongCharacters: wrongCharacters,
+      extraCharacters: extraCharacters,
+      attemptDelta: delta,
+    );
   }
 }
 
@@ -142,12 +181,11 @@ class ShadowingAttemptDelta {
   }
 
   String get summary {
-    final sign = overall > 0 ? '+' : '';
-    if (unchanged) return '与上次表现持平';
+    if (unchanged) return '与上次表现持平。';
     if (overall > 0) {
-      return '比上次 $sign$overall 分 · ${strongestImprovement}进步最明显';
+      return '比上次提升 $overall 分，本次进步最大的是$strongestImprovement。';
     }
-    return '比上次 $overall 分 · 先稳住节奏再试一次';
+    return '比上次下降 ${overall.abs()} 分，先稳住节奏再试一次。';
   }
 }
 
@@ -161,6 +199,30 @@ ShadowingAttemptDelta compareShadowingAttempts({
     completeness: current.completeness - previous.completeness,
     fluency: current.fluency - previous.fluency,
   );
+}
+
+String? _previousShadowingReference;
+ShadowingScore? _previousShadowingScore;
+
+void resetShadowingAttemptProgress() {
+  _previousShadowingReference = null;
+  _previousShadowingScore = null;
+}
+
+ShadowingScore _recordShadowingAttempt({
+  required String reference,
+  required ShadowingScore score,
+}) {
+  final referenceKey = normalizeShadowingText(reference);
+  final previous = _previousShadowingReference == referenceKey
+      ? _previousShadowingScore
+      : null;
+  final delta = previous == null
+      ? null
+      : compareShadowingAttempts(previous: previous, current: score);
+  _previousShadowingReference = referenceKey;
+  _previousShadowingScore = score;
+  return score.withAttemptDelta(delta);
 }
 
 class ShadowingReferenceUnit {
@@ -378,7 +440,7 @@ ShadowingScore scoreShadowing({
     fluency * .25
   ).round();
 
-  return ShadowingScore(
+  final score = ShadowingScore(
     overall: overall.clamp(0, 100),
     accuracy: accuracy.clamp(0, 100),
     completeness: completeness.clamp(0, 100),
@@ -391,4 +453,5 @@ ShadowingScore scoreShadowing({
     wrongCharacters: alignment.wrongCharacters,
     extraCharacters: alignment.extraCharacters,
   );
+  return _recordShadowingAttempt(reference: reference, score: score);
 }
