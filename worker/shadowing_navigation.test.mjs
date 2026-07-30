@@ -106,8 +106,6 @@ test('shadowing prepares the recommended rate before focused retry playback', ()
   assert.match(scoring, /bridge\.setSpeechRate\(rate\)/);
 });
 
-
-
 test('shadowing persists a personal cross-passage weakness library', () => {
   assert.match(training, /shadowing-weakness-library-entry/);
   assert.match(training, /shadowing-weakness-library-sheet/);
@@ -116,6 +114,7 @@ test('shadowing persists a personal cross-passage weakness library', () => {
   assert.match(training, /重点文字/);
   assert.match(weaknessLibrary, /class ShadowingWeaknessLibrary/);
   assert.match(weaknessLibrary, /dailyQueue/);
+  assert.match(weaknessLibrary, /pendingMetricCounts/);
   assert.match(weaknessLibrary, /consecutiveStrongAttempts >= 2/);
   assert.match(weaknessLibrary, /focusCharacters/);
 });
