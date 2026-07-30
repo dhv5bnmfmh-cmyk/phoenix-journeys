@@ -21,6 +21,19 @@ class ShadowingScore {
     if (overall >= 60) return '基本清楚';
     return '再跟读一次';
   }
+
+  String get coaching {
+    if (completeness >= 90) return '句子很完整，下一次可以更自然地连读。';
+    if (completeness >= 70) return '再听一次示范，注意红色文字后重新跟读。';
+    return '先放慢速度，分成短语读清楚，再尝试完整句子。';
+  }
+}
+
+class ShadowingReferenceUnit {
+  const ShadowingReferenceUnit({required this.text, required this.matched});
+
+  final String text;
+  final bool matched;
 }
 
 String normalizeShadowingText(String value) {
@@ -42,6 +55,72 @@ int _longestCommonSubsequence(List<int> left, List<int> right) {
     previous = current;
   }
   return previous.last;
+}
+
+List<ShadowingReferenceUnit> buildShadowingReferenceFeedback({
+  required String reference,
+  required String recognized,
+}) {
+  final normalizedRecognized = normalizeShadowingText(recognized);
+  final recognizedRunes = normalizedRecognized.runes.toList();
+  final referenceUnits = reference.runes
+      .map((rune) => String.fromCharCode(rune))
+      .where(
+        (unit) => normalizeShadowingText(unit).isNotEmpty,
+      )
+      .toList(growable: false);
+  final referenceRunes = referenceUnits
+      .map((unit) => normalizeShadowingText(unit).runes.single)
+      .toList(growable: false);
+  final table = List.generate(
+    referenceRunes.length + 1,
+    (_) => List<int>.filled(recognizedRunes.length + 1, 0),
+  );
+
+  for (var i = 1; i <= referenceRunes.length; i += 1) {
+    for (var j = 1; j <= recognizedRunes.length; j += 1) {
+      table[i][j] = referenceRunes[i - 1] == recognizedRunes[j - 1]
+          ? table[i - 1][j - 1] + 1
+          : math.max(table[i - 1][j], table[i][j - 1]);
+    }
+  }
+
+  final matchedIndexes = <int>{};
+  var i = referenceRunes.length;
+  var j = recognizedRunes.length;
+  while (i > 0 && j > 0) {
+    if (referenceRunes[i - 1] == recognizedRunes[j - 1]) {
+      matchedIndexes.add(i - 1);
+      i -= 1;
+      j -= 1;
+    } else if (table[i - 1][j] >= table[i][j - 1]) {
+      i -= 1;
+    } else {
+      j -= 1;
+    }
+  }
+
+  return List.generate(
+    referenceUnits.length,
+    (index) => ShadowingReferenceUnit(
+      text: referenceUnits[index],
+      matched: matchedIndexes.contains(index),
+    ),
+    growable: false,
+  );
+}
+
+int averageShadowingSessionScore({
+  required Iterable<int> sentenceScores,
+  required int sentenceCount,
+}) {
+  if (sentenceCount <= 0) return 0;
+  final scores = sentenceScores.toList(growable: false);
+  final total = scores.fold<int>(
+    0,
+    (sum, score) => sum + score.clamp(0, 100),
+  );
+  return (total / sentenceCount).round().clamp(0, 100);
 }
 
 ShadowingScore scoreShadowing({
