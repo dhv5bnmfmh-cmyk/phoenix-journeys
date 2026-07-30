@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../services/shadowing_training_history.dart';
+
 @immutable
 class ShadowingPassage {
   const ShadowingPassage({
@@ -180,10 +182,27 @@ List<ShadowingPassage> _availableShadowingPassagesForLevel(int level) {
   return available.isEmpty ? shadowingPassages.take(1).toList() : available;
 }
 
+ShadowingPassage? _passageById(
+  Iterable<ShadowingPassage> passages,
+  String? passageId,
+) {
+  if (passageId == null) return null;
+  for (final passage in passages) {
+    if (passage.id == passageId) return passage;
+  }
+  return null;
+}
+
 String _recommendationReason(
   ShadowingPassage passage,
   Map<String, int> bestScores,
+  DateTime day,
 ) {
+  final completedScore = shadowingScoreCompletedOnDay(
+    passage.id,
+    date: day,
+  );
+  if (completedScore != null) return '✓ 今日已完成 $completedScore 分';
   if (bestScores.isEmpty) return '适合当前等级';
   final score = bestScores[passage.id] ?? 0;
   if (score == 0) return '新内容优先';
@@ -196,15 +215,28 @@ List<ShadowingPassage> shadowingPassagesForLevel(
   DateTime? date,
   Map<String, int> bestScores = const <String, int>{},
 }) {
+  final day = date ?? DateTime.now();
   final available = _availableShadowingPassagesForLevel(level);
-  final recommendation = recommendedShadowingPassageForLevel(
+  final resolvedScores =
+      bestScores.isEmpty ? recentBestShadowingScores() : bestScores;
+  final rememberedId = rememberedShadowingDailyRecommendationForLevel(
     level,
-    date: date,
-    bestScores: bestScores,
+    date: day,
+  );
+  final recommendation = _passageById(available, rememberedId) ??
+      recommendedShadowingPassageForLevel(
+        level,
+        date: day,
+        bestScores: resolvedScores,
+      );
+  rememberShadowingDailyRecommendation(
+    level: level,
+    passageId: recommendation.id,
+    date: day,
   );
   final recommendedCard = recommendation.copyWith(
     theme:
-        '今日推荐 · ${_recommendationReason(recommendation, bestScores)} · ${recommendation.theme}',
+        '今日推荐 · ${_recommendationReason(recommendation, resolvedScores, day)} · ${recommendation.theme}',
   );
   return <ShadowingPassage>[
     recommendedCard,
