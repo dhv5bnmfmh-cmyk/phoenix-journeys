@@ -11,8 +11,13 @@ void main() {
       );
 
       expect(score.overall, 100);
+      expect(score.accuracy, 100);
       expect(score.completeness, 100);
+      expect(score.fluency, 100);
+      expect(score.omittedCharacters, 0);
+      expect(score.extraCharacters, 0);
       expect(score.label, '非常自然');
+      expect(score.diagnosisSummary, contains('准确度 100%'));
     });
 
     test('ignores punctuation and whitespace', () {
@@ -30,8 +35,39 @@ void main() {
       );
 
       expect(partial.overall, lessThan(100));
+      expect(partial.completeness, lessThan(partial.accuracy));
       expect(partial.matchedCharacters, lessThan(partial.referenceCharacters));
+      expect(partial.omittedCharacters, greaterThan(0));
       expect(partial.coaching, contains('红色文字'));
+    });
+
+    test('extra words lower accuracy without lowering completeness', () {
+      final score = scoreShadowing(
+        reference: '今天去旅行',
+        recognized: '今天去旅行旅行',
+        recognitionConfidence: .9,
+      );
+
+      expect(score.completeness, 100);
+      expect(score.accuracy, lessThan(100));
+      expect(score.extraCharacters, 2);
+      expect(score.coaching, contains('多读或错读'));
+    });
+
+    test('recognition confidence contributes to fluency', () {
+      final confident = scoreShadowing(
+        reference: '语言让旅行留下温度',
+        recognized: '语言让旅行留下温度',
+        recognitionConfidence: 1,
+      );
+      final hesitant = scoreShadowing(
+        reference: '语言让旅行留下温度',
+        recognized: '语言让旅行留下温度',
+        recognitionConfidence: .4,
+      );
+
+      expect(confident.fluency, greaterThan(hesitant.fluency));
+      expect(confident.overall, greaterThan(hesitant.overall));
     });
 
     test('marks omitted reference characters for focused retry', () {
