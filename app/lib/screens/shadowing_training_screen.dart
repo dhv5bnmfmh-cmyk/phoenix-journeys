@@ -467,12 +467,6 @@ class _TrainingDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final feedback = score == null
-        ? const <ShadowingReferenceUnit>[]
-        : buildShadowingReferenceFeedback(
-            reference: reference,
-            recognized: recognized,
-          );
     return Container(
       key: const ValueKey('shadowing-training-history'),
       padding: const EdgeInsets.all(13),
@@ -629,6 +623,12 @@ class _ResultPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final feedback = score == null
+        ? const <ShadowingReferenceUnit>[]
+        : buildShadowingReferenceFeedback(
+            reference: reference,
+            recognized: recognized,
+          );
     return Container(
       key: const ValueKey('shadowing-result-panel'),
       padding: const EdgeInsets.all(14),
