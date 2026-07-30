@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_city_catalog.dart';
+import '../data/journey_geography_catalog.dart';
 import '../services/journey_location_binding.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
@@ -109,62 +110,6 @@ class _PassportMap extends StatefulWidget {
 
 enum _PassportMapLevel { continent, country, province, city }
 
-class _PassportProvince {
-  const _PassportProvince({
-    required this.id,
-    required this.name,
-    required this.cityIds,
-  });
-
-  final String id;
-  final String name;
-  final List<String> cityIds;
-}
-
-const _chinaProvinces = <_PassportProvince>[
-  _PassportProvince(id: 'beijing', name: '北京', cityIds: ['beijing']),
-  _PassportProvince(id: 'shanghai', name: '上海', cityIds: ['shanghai']),
-  _PassportProvince(id: 'hebei', name: '河北', cityIds: ['chengde']),
-  _PassportProvince(
-    id: 'heilongjiang',
-    name: '黑龙江',
-    cityIds: ['harbin'],
-  ),
-  _PassportProvince(id: 'shanxi', name: '山西', cityIds: ['datong', 'pingyao']),
-  _PassportProvince(id: 'shandong', name: '山东', cityIds: ['qufu']),
-  _PassportProvince(id: 'henan', name: '河南', cityIds: ['luoyang', 'kaifeng']),
-  _PassportProvince(id: 'shaanxi', name: '陕西', cityIds: ['xian']),
-  _PassportProvince(id: 'gansu', name: '甘肃', cityIds: ['dunhuang']),
-  _PassportProvince(
-    id: 'jiangsu',
-    name: '江苏',
-    cityIds: ['nanjing', 'suzhou'],
-  ),
-  _PassportProvince(id: 'zhejiang', name: '浙江', cityIds: ['hangzhou']),
-  _PassportProvince(id: 'anhui', name: '安徽', cityIds: ['huangshan']),
-  _PassportProvince(
-    id: 'fujian',
-    name: '福建',
-    cityIds: ['quanzhou', 'xiamen', 'wuyishan'],
-  ),
-  _PassportProvince(
-    id: 'guangdong',
-    name: '广东',
-    cityIds: ['guangzhou', 'jiangmen'],
-  ),
-  _PassportProvince(id: 'hunan', name: '湖南', cityIds: ['zhangjiajie']),
-  _PassportProvince(
-    id: 'sichuan',
-    name: '四川',
-    cityIds: ['chengdu', 'leshan'],
-  ),
-  _PassportProvince(
-    id: 'yunnan',
-    name: '云南',
-    cityIds: ['lijiang', 'honghe', 'dali'],
-  ),
-];
-
 class _PassportMapState extends State<_PassportMap> {
   static const _continents = <({String id, String name})>[
     (id: 'asia', name: '亚洲'),
@@ -199,10 +144,16 @@ class _PassportMapState extends State<_PassportMap> {
   }
 
   void _selectProvince(String provinceId) {
+    final province = requireJourneyProvince(provinceId);
     setState(() {
-      _level = _PassportMapLevel.province;
       _selectedProvinceId = provinceId;
-      _selectedCityId = null;
+      if (province.isMunicipality) {
+        _level = _PassportMapLevel.city;
+        _selectedCityId = province.cityIds.single;
+      } else {
+        _level = _PassportMapLevel.province;
+        _selectedCityId = null;
+      }
     });
   }
 
@@ -216,7 +167,11 @@ class _PassportMapState extends State<_PassportMap> {
   void _goBack() {
     setState(() {
       if (_level == _PassportMapLevel.city) {
-        _level = _PassportMapLevel.province;
+        final province = requireJourneyProvince(_selectedProvinceId!);
+        _level = province.isMunicipality
+            ? _PassportMapLevel.country
+            : _PassportMapLevel.province;
+        if (province.isMunicipality) _selectedProvinceId = null;
         _selectedCityId = null;
       } else if (_level == _PassportMapLevel.province) {
         _level = _PassportMapLevel.country;
@@ -298,7 +253,18 @@ class _PassportMapState extends State<_PassportMap> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final mapSize = constraints.biggest;
-        final markerPlacements = _resolveCityMarkerPlacements(mapSize);
+        final fittedMap = applyBoxFit(
+          BoxFit.contain,
+          const Size(941, 1672),
+          mapSize,
+        );
+        final geographicMapRect = Alignment.center.inscribe(
+          fittedMap.destination,
+          Offset.zero & mapSize,
+        );
+        final markerPlacements = _resolveCityMarkerPlacements(
+          geographicMapRect,
+        );
         final selectedCity = _selectedCityId == null
             ? null
             : requireJourneyCity(_selectedCityId!);
@@ -324,20 +290,23 @@ class _PassportMapState extends State<_PassportMap> {
                 clipBehavior: Clip.none,
                 children: [
                   Positioned.fill(
-                    child: ColorFiltered(
-                      colorFilter: const ColorFilter.matrix(<double>[
-                        1.12, -.04, -.04, 0, 0,
-                        -.04, 1.12, -.04, 0, 0,
-                        -.04, -.04, 1.12, 0, 0,
-                        0, 0, 0, 1, 0,
-                      ]),
-                      child: Image.asset(
-                        mapAsset,
-                        key: const ValueKey('passport-hd-atlas-image'),
-                        fit: BoxFit.cover,
-                        alignment: Alignment.center,
-                        filterQuality: FilterQuality.high,
-                        gaplessPlayback: true,
+                    child: ColoredBox(
+                      color: const Color(0xFFE8D7AF),
+                      child: ColorFiltered(
+                        colorFilter: const ColorFilter.matrix(<double>[
+                          1.28, -.08, -.08, 0, -4,
+                          -.08, 1.28, -.08, 0, -4,
+                          -.08, -.08, 1.28, 0, -4,
+                          0, 0, 0, 1, 0,
+                        ]),
+                        child: Image.asset(
+                          mapAsset,
+                          key: const ValueKey('passport-hd-atlas-image'),
+                          fit: BoxFit.contain,
+                          alignment: Alignment.center,
+                          filterQuality: FilterQuality.high,
+                          gaplessPlayback: true,
+                        ),
                       ),
                     ),
                   ),
@@ -390,12 +359,7 @@ class _PassportMapState extends State<_PassportMap> {
                     Center(
                       child: _MapLevelCaption(
                         title: state.displayText(
-                          _chinaProvinces
-                              .firstWhere(
-                                (province) =>
-                                    province.id == _selectedProvinceId,
-                              )
-                              .name,
+                          requireJourneyProvince(_selectedProvinceId!).name,
                         ),
                         subtitle: state.displayText('请从左侧选择城市'),
                       ),
@@ -510,11 +474,11 @@ class _PassportPlaceRail extends StatelessWidget {
                         ? ListView.separated(
                             key: const ValueKey('passport-province-list'),
                             padding: const EdgeInsets.all(6),
-                            itemCount: _chinaProvinces.length,
+                            itemCount: chinaProvinceCatalog.length,
                             separatorBuilder: (context, index) =>
                                 const SizedBox(height: 4),
                             itemBuilder: (context, index) {
-                              final province = _chinaProvinces[index];
+                              final province = chinaProvinceCatalog[index];
                               return _PlaceRailButton(
                                 key: ValueKey(
                                   'passport-province-${province.id}',
@@ -528,17 +492,14 @@ class _PassportPlaceRail extends StatelessWidget {
                     : ListView.separated(
                         key: const ValueKey('passport-city-list'),
                         padding: const EdgeInsets.all(6),
-                        itemCount: _chinaProvinces
-                            .firstWhere(
-                              (province) => province.id == selectedProvinceId,
-                            )
-                            .cityIds
-                            .length,
+                        itemCount: requireJourneyProvince(
+                          selectedProvinceId!,
+                        ).cityIds.length,
                         separatorBuilder: (context, index) =>
                             const SizedBox(height: 4),
                         itemBuilder: (context, index) {
-                          final province = _chinaProvinces.firstWhere(
-                            (entry) => entry.id == selectedProvinceId,
+                          final province = requireJourneyProvince(
+                            selectedProvinceId!,
                           );
                           final city = requireJourneyCity(
                             province.cityIds[index],
@@ -651,7 +612,7 @@ class _CityMarkerPlacement {
   final bool labelOnLeft;
 }
 
-Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Size mapSize) {
+Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Rect mapRect) {
   const markerSize = Size(72, 28);
   const mapPadding = 7.0;
   final occupied = <Rect>[];
@@ -662,8 +623,8 @@ Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Size mapSize) {
     final longitudeRatio = ((binding.longitude - 73) / (135 - 73)).clamp(0, 1);
     final latitudeRatio = ((binding.latitude - 18) / (54 - 18)).clamp(0, 1);
     final anchor = Offset(
-      mapSize.width * (.10 + longitudeRatio * .78),
-      mapSize.height * (.08 + (1 - latitudeRatio) * .82),
+      mapRect.left + mapRect.width * (.10 + longitudeRatio * .78),
+      mapRect.top + mapRect.height * (.08 + (1 - latitudeRatio) * .82),
     );
     final candidates = <({Offset offset, bool labelOnLeft})>[
       (offset: const Offset(10, -14), labelOnLeft: false),
@@ -687,12 +648,12 @@ Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Size mapSize) {
       final translated = (candidate.offset & markerSize).shift(anchor);
       final rect = Rect.fromLTWH(
         translated.left.clamp(
-          mapPadding,
-          mapSize.width - markerSize.width - mapPadding,
+          mapRect.left + mapPadding,
+          mapRect.right - markerSize.width - mapPadding,
         ),
         translated.top.clamp(
-          mapPadding,
-          mapSize.height - markerSize.height - mapPadding,
+          mapRect.top + mapPadding,
+          mapRect.bottom - markerSize.height - mapPadding,
         ),
         markerSize.width,
         markerSize.height,
@@ -716,12 +677,12 @@ Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Size mapSize) {
           final top = anchor.dy - 14 + (row.isEven ? 1 : -1) * ((row + 1) ~/ 2) * 34;
           final rect = Rect.fromLTWH(
             left.clamp(
-              mapPadding,
-              mapSize.width - markerSize.width - mapPadding,
+              mapRect.left + mapPadding,
+              mapRect.right - markerSize.width - mapPadding,
             ),
             top.clamp(
-              mapPadding,
-              mapSize.height - markerSize.height - mapPadding,
+              mapRect.top + mapPadding,
+              mapRect.bottom - markerSize.height - mapPadding,
             ),
             markerSize.width,
             markerSize.height,
@@ -742,12 +703,12 @@ Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Size mapSize) {
       anchor: anchor,
       rect: Rect.fromLTWH(
         (anchor.dx + 12).clamp(
-          mapPadding,
-          mapSize.width - markerSize.width - mapPadding,
+          mapRect.left + mapPadding,
+          mapRect.right - markerSize.width - mapPadding,
         ),
         (anchor.dy - 14).clamp(
-          mapPadding,
-          mapSize.height - markerSize.height - mapPadding,
+          mapRect.top + mapPadding,
+          mapRect.bottom - markerSize.height - mapPadding,
         ),
         markerSize.width,
         markerSize.height,
