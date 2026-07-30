@@ -68,8 +68,8 @@ test('shadowing uses original Phoenix training art and layered action buttons', 
 
 
 test('shadowing keeps compact translucent panels so original art remains visible', () => {
-  assert.match(training, /Color\(0x22FFF5DE\)/);
-  assert.match(training, /Colors\.white\.withValues\(alpha: \.64\)/);
-  assert.match(training, /Colors\.white\.withValues\(alpha: \.70\)/);
+  assert.match(training, /Color\(0x00FFF5DE\)/);
+  assert.match(training, /Colors\.white\.withValues\(alpha: \.18\)/);
+  assert.match(training, /Colors\.white\.withValues\(alpha: \.30\)/);
   assert.doesNotMatch(training, /for \(final session in history\.recentSessions\.take\(3\)\)/);
 });
