@@ -47,7 +47,6 @@ test('shadowing completion routes low-scoring sentences into focused review', ()
   assert.match(training, /更新后的本篇平均分/);
 });
 
-
 test('shadowing uses Phoenix visual surfaces and updates immediately with level changes', () => {
   assert.match(training, /PhoenixLevelController\.instance\.addListener\(_handleLevelChange\)/);
   assert.match(training, /PhoenixLevelController\.instance\.removeListener\(_handleLevelChange\)/);
@@ -57,19 +56,27 @@ test('shadowing uses Phoenix visual surfaces and updates immediately with level 
   assert.match(training, /phoenix-shadowing-original-background/);
 });
 
-
 test('shadowing uses original Phoenix training art and layered action buttons', () => {
   assert.match(training, /phoenixShadowingTrainingBackgroundBytes/);
   assert.match(training, /phoenix-shadowing-original-background/);
   assert.match(training, /_shadowingListenButtonStyle/);
   assert.match(training, /开始跟读 · 让声音带你前进/);
-  assert.match(training, /BoxShadow\(color: Color\(0x4D7A201B\)/);
+  assert.match(training, /BoxShadow\(\s*color:\s*Color\(0x4D7A201B\)/s);
 });
-
 
 test('shadowing keeps compact translucent panels so original art remains visible', () => {
   assert.match(training, /Color\(0x00FFF5DE\)/);
   assert.match(training, /Colors\.white\.withValues\(alpha: \.18\)/);
   assert.match(training, /Colors\.white\.withValues\(alpha: \.30\)/);
   assert.doesNotMatch(training, /for \(final session in history\.recentSessions\.take\(3\)\)/);
+});
+
+test('shadowing exposes three diagnostic metrics and focused retry controls', () => {
+  assert.match(training, /shadowing-diagnostic-metrics/);
+  assert.match(training, /shadowing-metric-accuracy/);
+  assert.match(training, /shadowing-metric-completeness/);
+  assert.match(training, /shadowing-metric-fluency/);
+  assert.match(training, /shadowing-issue-counts/);
+  assert.match(training, /shadowing-retry-weakness/);
+  assert.match(training, /针对\$\{score!\.weakestMetric\}再练一次/);
 });
