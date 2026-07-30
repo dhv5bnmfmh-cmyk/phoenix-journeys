@@ -1,0 +1,219 @@
+name: Apply actionable shadowing retry patch
+
+on:
+  push:
+    branches:
+      - agent/shadowing-pronunciation-diagnosis-v2
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.head_commit.message == 'chore: apply actionable shadowing retry patch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: agent/shadowing-pronunciation-diagnosis-v2
+          fetch-depth: 0
+
+      - name: Apply smart retry flow
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          screen_path = Path('app/lib/screens/shadowing_training_screen.dart')
+          screen = screen_path.read_text()
+
+          old_retry = """  void _retryCurrentWeakness(ShadowingScore score) {
+            unawaited(_speech.cancel());
+            setState(() {
+              _listening = false;
+              _recognized = '';
+              _score = null;
+              _speechMessage = '已定位${score.weakestMetric}弱项，先听示范，再跟读一次。';
+            });
+            unawaited(_playText());
+          }
+          """
+          new_retry = """  Future<void> _retryCurrentWeakness(ShadowingScore score) async {
+            await _speech.cancel();
+            await _narration.stop();
+            await _narration.setSpeechRate(score.recommendedPracticeRate);
+            if (!mounted) return;
+            setState(() {
+              _practiceRate = _narration.speechRate;
+              _listening = false;
+              _recognized = '';
+              _score = null;
+              _speechMessage =
+                  '智能复练已切换为${score.recommendedPracticeRateLabel}：${score.focusedPracticePlan}';
+            });
+            await _playText();
+          }
+          """
+          if old_retry not in screen:
+              raise SystemExit('retry snippet not found')
+          screen = screen.replace(old_retry, new_retry, 1)
+
+          old_callback = """                : () => _retryCurrentWeakness(score),
+          """
+          new_callback = """                : () => unawaited(_retryCurrentWeakness(score)),
+          """
+          if old_callback not in screen:
+              raise SystemExit('retry callback not found')
+          screen = screen.replace(old_callback, new_callback, 1)
+
+          old_coaching = """            const SizedBox(height: 9),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 9,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: .38),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: PhoenixTheme.gold.withValues(alpha: .28),
+                ),
+              ),
+              child: Text(
+                displayText(score!.coaching),
+                key: const ValueKey('shadowing-coaching'),
+                style: const TextStyle(
+                  color: Color(0xFF6F4A3B),
+                  fontSize: 11.5,
+                  height: 1.4,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          """
+          new_coaching = """            const SizedBox(height: 9),
+            Container(
+              key: const ValueKey('shadowing-adaptive-practice-plan'),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 9,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFE5B8).withValues(alpha: .62),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: PhoenixTheme.gold.withValues(alpha: .48),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: PhoenixTheme.red,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displayText(
+                            '智能复练 · ${score!.recommendedPracticeRateLabel}',
+                          ),
+                          style: const TextStyle(
+                            color: PhoenixTheme.red,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          displayText(score!.focusedPracticePlan),
+                          style: const TextStyle(
+                            color: Color(0xFF6F4A3B),
+                            fontSize: 11,
+                            height: 1.35,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 9,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: .38),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: PhoenixTheme.gold.withValues(alpha: .28),
+                ),
+              ),
+              child: Text(
+                displayText(score!.coaching),
+                key: const ValueKey('shadowing-coaching'),
+                style: const TextStyle(
+                  color: Color(0xFF6F4A3B),
+                  fontSize: 11.5,
+                  height: 1.4,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          """
+          if old_coaching not in screen:
+              raise SystemExit('coaching block not found')
+          screen = screen.replace(old_coaching, new_coaching, 1)
+
+          old_label = """                  displayText('针对${score!.weakestMetric}再练一次'),
+          """
+          new_label = """                  displayText(
+                    '针对${score!.weakestMetric}再练一次 · ${score!.recommendedPracticeRateLabel}',
+                  ),
+          """
+          if old_label not in screen:
+              raise SystemExit('retry label not found')
+          screen = screen.replace(old_label, new_label, 1)
+          screen_path.write_text(screen)
+
+          test_path = Path('worker/shadowing_navigation.test.mjs')
+          tests = test_path.read_text()
+          new_test = """
+
+          test('shadowing smart retry applies the recommended rate and shows an actionable plan', () => {
+            assert.match(training, /shadowing-adaptive-practice-plan/);
+            assert.match(training, /_narration\.setSpeechRate\(score\.recommendedPracticeRate\)/);
+            assert.match(training, /_practiceRate = _narration\.speechRate/);
+            assert.match(training, /智能复练已切换为\$\{score\.recommendedPracticeRateLabel\}/);
+            assert.match(training, /score!\.focusedPracticePlan/);
+            assert.match(training, /score!\.recommendedPracticeRateLabel/);
+          });
+          """
+          if 'shadowing smart retry applies the recommended rate' not in tests:
+              tests += new_test
+          test_path.write_text(tests)
+          PY
+
+      - name: Commit patch and remove helper workflow
+        shell: bash
+        run: |
+          git config user.name "phoenix-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-shadowing-smart-retry.yml
+          git add app/lib/screens/shadowing_training_screen.dart worker/shadowing_navigation.test.mjs
+          git commit -m "feat: make shadowing smart retry actionable"
+          git push origin HEAD:agent/shadowing-pronunciation-diagnosis-v2
