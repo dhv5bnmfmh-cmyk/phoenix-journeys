@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/shadowing_passage_catalog.dart';
+import 'package:phoenix_journeys/services/shadowing_training_history.dart';
 
 void main() {
+  setUp(resetShadowingTrainingRuntimeState);
+
   test('catalog provides short multi-sentence passages', () {
     expect(shadowingPassages.length, greaterThanOrEqualTo(12));
     for (final passage in shadowingPassages) {
@@ -92,35 +95,69 @@ void main() {
     expect(recommendation.id, 'lake-evening');
   });
 
-  test('library surfaces the daily recommendation as the first card', () {
-    final passages = shadowingPassagesForLevel(
+  test('daily card stays fixed after completion and shows todays score', () {
+    final day = DateTime(2026, 7, 30);
+    final before = shadowingPassagesForLevel(
       6,
-      date: DateTime(2026, 7, 30),
-    );
-    expect(passages.first.theme, startsWith('今日推荐'));
-    expect(passages.first.theme, contains('适合当前等级'));
-  });
-
-  test('surfaced recommendation is not duplicated in the library', () {
-    final passages = shadowingPassagesForLevel(
-      6,
-      date: DateTime(2026, 7, 30),
-    );
-    final ids = passages.map((passage) => passage.id).toList();
-    expect(ids.toSet().length, ids.length);
-  });
-
-  test('surfaced recommendation explains a weak-content revisit', () {
-    final passages = shadowingPassagesForLevel(
-      6,
-      date: DateTime(2026, 7, 30),
+      date: day,
       bestScores: const {
         'museum-time-bridge': 82,
         'lake-evening': 64,
         'work-study-journey': 76,
       },
     );
-    expect(passages.first.id, 'lake-evening');
-    expect(passages.first.theme, contains('薄弱内容巩固'));
+    final recommended = before.first;
+
+    const ShadowingTrainingHistory().record(
+      passageId: recommended.id,
+      title: recommended.title,
+      score: 92,
+      completedAt: DateTime(2026, 7, 30, 20),
+    );
+
+    final after = shadowingPassagesForLevel(
+      6,
+      date: day,
+      bestScores: const {
+        'museum-time-bridge': 99,
+        'lake-evening': 99,
+        'work-study-journey': 99,
+      },
+    );
+    expect(after.first.id, recommended.id);
+    expect(after.first.theme, contains('✓ 今日已完成 92 分'));
+    expect(
+      after.where((passage) => passage.id == recommended.id),
+      hasLength(1),
+    );
+  });
+
+  test('library uses recent history when explicit best scores are absent', () {
+    var history = const ShadowingTrainingHistory().record(
+      passageId: 'museum-time-bridge',
+      title: '博物馆里的时间桥',
+      score: 82,
+      completedAt: DateTime(2026, 7, 27),
+    );
+    history = history.record(
+      passageId: 'lake-evening',
+      title: '湖边的傍晚',
+      score: 64,
+      completedAt: DateTime(2026, 7, 28),
+    );
+    history = history.record(
+      passageId: 'work-study-journey',
+      title: '边工作边看世界',
+      score: 76,
+      completedAt: DateTime(2026, 7, 29),
+    );
+
+    expect(history.totalSessions, 3);
+    final cards = shadowingPassagesForLevel(
+      6,
+      date: DateTime(2026, 7, 31),
+    );
+    expect(cards.first.id, 'lake-evening');
+    expect(cards.first.theme, contains('薄弱内容巩固'));
   });
 }
