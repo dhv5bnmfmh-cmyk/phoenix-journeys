@@ -349,6 +349,11 @@ const worldGeoCatalog = <GeoNode>[
     parentId: 'world',
     aliases: ['Phoenix Realms', '万象奇旅'],
   ),
+  GeoNode(id: 'phoenix-realms-changan-last-bus', name: '城门夜线', kind: GeoNodeKind.place, localType: '传奇都市异境', parentId: 'phoenix-realms', latitude: 34.26, longitude: 108.95, aliases: ['长安末班车', 'Changan Last Bus']),
+  GeoNode(id: 'phoenix-realms-tide-letter', name: '回声渡口', kind: GeoNodeKind.place, localType: '词境海岸异境', parentId: 'phoenix-realms', latitude: 24.48, longitude: 118.08, aliases: ['潮声旧信', 'Tide Letter']),
+  GeoNode(id: 'phoenix-realms-arcade-lost-property', name: '花砖失物局', kind: GeoNodeKind.place, localType: '岭南公案异境', parentId: 'phoenix-realms', latitude: 23.13, longitude: 113.26, aliases: ['骑楼失物局', 'Arcade Lost Property']),
+  GeoNode(id: 'phoenix-realms-tea-horse-echo', name: '回声古道', kind: GeoNodeKind.place, localType: '山川笔记异境', parentId: 'phoenix-realms', latitude: 25.61, longitude: 100.27, aliases: ['茶马回声档案', 'Tea Horse Echo']),
+  GeoNode(id: 'phoenix-realms-ice-city-star-map', name: '星图旧厂', kind: GeoNodeKind.place, localType: '工业文学异境', parentId: 'phoenix-realms', latitude: 45.77, longitude: 126.64, aliases: ['冰城旧厂星图', 'Ice City Star Map']),
   GeoNode(
     id: 'phoenix-realms-dream-butterfly',
     name: '梦蝶竹林',

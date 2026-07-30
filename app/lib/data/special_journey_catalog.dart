@@ -1,6 +1,7 @@
 import '../models/story_content.dart';
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
+import 'special_journey_expansion_batch_one.dart';
 
 const _literaryStory = <String>[
   '你在一棵老树下醒来，手背停着一只蓝色蝴蝶。梦里，你曾拥有它的翅膀，也曾从高处看见自己仍睡在树下。',
@@ -588,6 +589,7 @@ final specialJourneyRecords = <JourneyContentRecord>[
   mythTracingRecord,
   strangeNightRecord,
   folkSecretRecord,
+  ...specialJourneyExpansionBatchOneRecords,
 ];
 
 final specialJourneyExperiences = <DailyJourneyExperience>[
@@ -667,4 +669,5 @@ final specialJourneyExperiences = <DailyJourneyExperience>[
     wonderQuestion: '如果未来的你只能留下一句话，你最希望现在的自己听见什么？',
     expressQuestion: '请写下你会接住河灯还是让它继续逆流，并说明你的理由。',
   ),
+  ...specialJourneyExpansionBatchOneExperiences,
 ];

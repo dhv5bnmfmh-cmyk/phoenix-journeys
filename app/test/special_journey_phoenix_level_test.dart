@@ -7,8 +7,8 @@ import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
 
-  test('catalog exposes four special journeys', () {
-    expect(specialJourneyExperiences, hasLength(4));
+  test('catalog exposes nine special journeys', () {
+    expect(specialJourneyExperiences, hasLength(9));
     expect(
       specialJourneyExperiences.map((item) => item.id).toSet(),
       <String>{
