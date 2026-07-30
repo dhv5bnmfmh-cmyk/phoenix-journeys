@@ -468,39 +468,30 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
       children: [
         Container(
           key: const ValueKey('shadowing-premium-hero'),
-          padding: const EdgeInsets.all(13),
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF8E211F), Color(0xFFB83A30), Color(0xFF6E1718)],
-            ),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFFFFD879).withValues(alpha: .56)),
-            boxShadow: const [
-              BoxShadow(color: Color(0x3D5A1714), blurRadius: 20, offset: Offset(0, 9)),
-            ],
+            color: Colors.black.withValues(alpha: .12),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .12),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFFFD879).withValues(alpha: .55)),
+                  color: Colors.black.withValues(alpha: .18),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.record_voice_over_rounded, color: Color(0xFFFFD879), size: 26),
+                child: const Icon(Icons.record_voice_over_rounded, color: Color(0xFFFFD879), size: 22),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(state.displayText('跟读训练'), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
+                    Text(state.displayText('跟读训练'), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, shadows: PhoenixTheme.contentShadow)),
                     const SizedBox(height: 4),
-                    Text(state.displayText('听一句 · 跟一句 · 逐字对照 · 薄弱句复练'), style: const TextStyle(color: Colors.white70, fontSize: 11.5, height: 1.35, fontWeight: FontWeight.w700)),
+                    Text(state.displayText('听一句 · 跟一句 · 逐字对照 · 薄弱句复练'), style: const TextStyle(color: Colors.white, fontSize: 10.5, height: 1.25, fontWeight: FontWeight.w700, shadows: PhoenixTheme.contentShadow)),
                   ],
                 ),
               ),
@@ -510,14 +501,14 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
                   color: const Color(0xFFFFE3A0),
                   borderRadius: BorderRadius.circular(99),
                 ),
-                child: Text('Lv.$level', key: ValueKey('shadowing-active-level-$level'), style: const TextStyle(color: Color(0xFF7A201B), fontSize: 12, fontWeight: FontWeight.w900)),
+                child: Text('Lv.$level', key: ValueKey('shadowing-active-level-$level'), style: const TextStyle(color: Color(0xFF7A201B), fontSize: 10.5, fontWeight: FontWeight.w900)),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 11),
+        const SizedBox(height: 6),
         _TrainingDashboard(history: _history, displayText: state.displayText),
-        const SizedBox(height: 16),
+        const SizedBox(height: 9),
         Row(
           children: [
             Text(state.displayText('适合当前等级'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
@@ -533,7 +524,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 9),
+        const SizedBox(height: 5),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 220),
           child: Column(
@@ -546,7 +537,7 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
                   displayText: state.displayText,
                   onTap: () => _openPassage(passage),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
               ],
             ],
           ),
@@ -623,8 +614,8 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
         ),
         const SizedBox(height: 14),
         Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(color: Colors.white.withValues(alpha: .72), borderRadius: BorderRadius.circular(20), border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .58)), boxShadow: const [BoxShadow(color: Color(0x1F000000), blurRadius: 12, offset: Offset(0, 5))]),
+          padding: const EdgeInsets.all(11),
+          decoration: BoxDecoration(color: Colors.white.withValues(alpha: .30), borderRadius: BorderRadius.circular(18), border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .24))),
           child: Column(
             children: [
               Text(state.displayText(sentence), textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, height: 1.55, fontWeight: FontWeight.w900)),
@@ -762,7 +753,7 @@ class _ShadowingBackground extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0x22FFF5DE), Color(0x55FFF7E8), Color(0xA6FFF7E8)],
+              colors: [Color(0x00FFF5DE), Color(0x10FFF7E8), Color(0x2CFFF7E8)],
               stops: [0, .48, 1],
             ),
           ),
@@ -785,14 +776,11 @@ class _TrainingDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const ValueKey('shadowing-training-history'),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .64),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .48)),
-        boxShadow: const [
-          BoxShadow(color: Color(0x18000000), blurRadius: 10, offset: Offset(0, 4)),
-        ],
+        color: Colors.white.withValues(alpha: .18),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .18)),
       ),
       child: Row(
         children: [
@@ -833,18 +821,14 @@ class _HistoryMetric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 19, color: PhoenixTheme.red),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
-          ),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.black54, fontSize: 9.5),
-          ),
+          Icon(icon, size: 15, color: const Color(0xFFFFD879), shadows: PhoenixTheme.contentShadow),
+          const SizedBox(width: 4),
+          Text(value, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900, shadows: PhoenixTheme.contentShadow)),
+          const SizedBox(width: 3),
+          Flexible(child: Text(label, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.w700, shadows: PhoenixTheme.contentShadow))),
         ],
       ),
     );
@@ -861,7 +845,7 @@ class _PassageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: .70),
+      color: Colors.white.withValues(alpha: .30),
       elevation: 0,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
@@ -869,21 +853,19 @@ class _PassageCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(17),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(17),
-            border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .42)),
-            boxShadow: const [BoxShadow(color: Color(0x16000000), blurRadius: 12, offset: Offset(0, 5))],
+            border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .20)),
           ),
           child: Row(
             children: [
               Container(
-                width: 43,
-                height: 43,
+                width: 37,
+                height: 37,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(colors: [Color(0xFFB83931), Color(0xFF7E1C1B)]),
-                  borderRadius: BorderRadius.circular(17),
-                  boxShadow: const [BoxShadow(color: Color(0x2E7E1C1B), blurRadius: 9, offset: Offset(0, 4))],
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
                 child: Text('Lv.${passage.level}', style: const TextStyle(color: Color(0xFFFFDF8A), fontSize: 12, fontWeight: FontWeight.w900)),
@@ -935,7 +917,7 @@ class _ResultPanel extends StatelessWidget {
     return Container(
       key: const ValueKey('shadowing-result-panel'),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: const Color(0xFFFFF4DF).withValues(alpha: .82), borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFFE8C788)), boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 4))]),
+      decoration: BoxDecoration(color: const Color(0xFFFFF4DF).withValues(alpha: .46), borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFFE8C788)), boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 4))]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (score != null) Row(children: [
           CircleAvatar(backgroundColor: PhoenixTheme.red, foregroundColor: Colors.white, child: Text('${score!.overall}', style: const TextStyle(fontWeight: FontWeight.w900))),
