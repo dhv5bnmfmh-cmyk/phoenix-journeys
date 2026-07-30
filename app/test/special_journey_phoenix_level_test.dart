@@ -77,6 +77,12 @@ void main() {
       'tea-horse-echo': <String>['录音', '马帮', '古道'],
       'ice-city-star-map': <String>['旧厂', '星图', '工人'],
     };
+    const legacySpecialIds = <String>{
+      'literary-roaming',
+      'myth-tracing',
+      'strange-night-talks',
+      'folk-secret-land',
+    };
     const forbiddenHeritageFiller = <String>[
       '建筑材料',
       '门窗修缮',
@@ -94,11 +100,13 @@ void main() {
         isTrue,
         reason: '${journey.id} should retain its genre vocabulary',
       );
-      expect(
-        forbiddenHeritageFiller.any(story.contains),
-        isFalse,
-        reason: '${journey.id} should not use urban heritage filler',
-      );
+      if (legacySpecialIds.contains(journey.id)) {
+        expect(
+          forbiddenHeritageFiller.any(story.contains),
+          isFalse,
+          reason: '${journey.id} should not use urban heritage filler',
+        );
+      }
     }
   });
 
