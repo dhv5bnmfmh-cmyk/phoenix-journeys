@@ -7,6 +7,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import '../data/shadowing_passage_catalog.dart';
+import '../generated/phoenix_shadowing_training_background.dart';
 import '../services/narration_controller.dart';
 import '../services/phoenix_level_controller.dart';
 import '../services/shadowing_score.dart';
@@ -630,9 +631,9 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Expanded(child: OutlinedButton.icon(onPressed: () => unawaited(_playText()), icon: const Icon(Icons.volume_up_rounded), label: Text(state.displayText('听本句')))),
+                  Expanded(child: OutlinedButton.icon(onPressed: () => unawaited(_playText()), style: _shadowingListenButtonStyle(), icon: const Icon(Icons.volume_up_rounded), label: Text(state.displayText('听本句')))),
                   const SizedBox(width: 8),
-                  Expanded(child: OutlinedButton.icon(onPressed: () => unawaited(_playText(wholePassage: true)), icon: const Icon(Icons.headphones_rounded), label: Text(state.displayText('听全文')))),
+                  Expanded(child: OutlinedButton.icon(onPressed: () => unawaited(_playText(wholePassage: true)), style: _shadowingListenButtonStyle(), icon: const Icon(Icons.headphones_rounded), label: Text(state.displayText('听全文')))),
                 ],
               ),
               const SizedBox(height: 10),
@@ -670,14 +671,32 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
           ),
         ),
         const SizedBox(height: 14),
-        SizedBox(
-          height: 58,
+        Container(
+          height: 60,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: _listening
+                  ? const [Color(0xFFD84A3C), Color(0xFF8D1E1B)]
+                  : const [Color(0xFFC13B30), Color(0xFF8B1D1B), Color(0xFFB9862F)],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFFFFD879).withValues(alpha: .78)),
+            boxShadow: const [
+              BoxShadow(color: Color(0x4D7A201B), blurRadius: 17, offset: Offset(0, 8)),
+              BoxShadow(color: Color(0x33FFD879), blurRadius: 7),
+            ],
+          ),
           child: FilledButton.icon(
             key: const ValueKey('shadowing-record-button'),
             onPressed: _toggleListening,
-            style: FilledButton.styleFrom(backgroundColor: _listening ? const Color(0xFFC53A32) : PhoenixTheme.red),
-            icon: Icon(_listening ? Icons.stop_circle_rounded : Icons.mic_rounded, size: 27),
-            label: Text(state.displayText(_listening ? '正在听你朗读 · 点击结束' : '点击开始跟读'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900)),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            ),
+            icon: Icon(_listening ? Icons.stop_circle_rounded : Icons.mic_rounded, size: 28),
+            label: Text(state.displayText(_listening ? '正在听你朗读 · 点击结束' : '开始跟读 · 让声音带你前进'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900)),
           ),
         ),
         if (_speechMessage != null) ...[
@@ -711,6 +730,17 @@ class _ShadowingTrainingScreenState extends State<ShadowingTrainingScreen> {
   }
 }
 
+ButtonStyle _shadowingListenButtonStyle() {
+  return OutlinedButton.styleFrom(
+    foregroundColor: PhoenixTheme.red,
+    backgroundColor: Colors.white.withValues(alpha: .88),
+    side: BorderSide(color: PhoenixTheme.gold.withValues(alpha: .68)),
+    elevation: 3,
+    shadowColor: const Color(0x29000000),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+  );
+}
+
 class _ShadowingBackground extends StatelessWidget {
   const _ShadowingBackground();
 
@@ -719,19 +749,21 @@ class _ShadowingBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset(
-          'assets/images/home/phoenix-world-language-journey-v1.webp',
+        Image.memory(
+          phoenixShadowingTrainingBackgroundBytes,
+          key: const ValueKey('phoenix-shadowing-original-background'),
           fit: BoxFit.cover,
           alignment: Alignment.topCenter,
           filterQuality: FilterQuality.high,
+          gaplessPlayback: true,
         ),
         const DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xDFFFF8E9), Color(0xF5FFF8E9), Color(0xFFFFF7E8)],
-              stops: [0, .42, 1],
+              colors: [Color(0x52FFF5DE), Color(0xA6FFF7E8), Color(0xEFFFF7E8)],
+              stops: [0, .48, 1],
             ),
           ),
         ),
@@ -755,9 +787,12 @@ class _TrainingDashboard extends StatelessWidget {
       key: const ValueKey('shadowing-training-history'),
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withValues(alpha: .88),
         borderRadius: BorderRadius.circular(19),
-        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .42)),
+        border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .56)),
+        boxShadow: const [
+          BoxShadow(color: Color(0x26000000), blurRadius: 15, offset: Offset(0, 6)),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
