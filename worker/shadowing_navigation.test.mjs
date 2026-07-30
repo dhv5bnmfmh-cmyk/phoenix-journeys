@@ -46,3 +46,13 @@ test('shadowing completion routes low-scoring sentences into focused review', ()
   assert.match(training, /薄弱句复练 \$\{_reviewPosition \+ 1\}/);
   assert.match(training, /更新后的本篇平均分/);
 });
+
+
+test('shadowing uses Phoenix visual surfaces and updates immediately with level changes', () => {
+  assert.match(training, /PhoenixLevelController\.instance\.addListener\(_handleLevelChange\)/);
+  assert.match(training, /PhoenixLevelController\.instance\.removeListener\(_handleLevelChange\)/);
+  assert.match(training, /shadowing-premium-hero/);
+  assert.match(training, /shadowing-level-passages-\$level/);
+  assert.match(training, /_ShadowingBackground/);
+  assert.match(training, /phoenix-world-language-journey-v1\.webp/);
+});
