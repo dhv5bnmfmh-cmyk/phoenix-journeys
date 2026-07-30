@@ -14,6 +14,10 @@ const training = readFileSync(
   new URL('../app/lib/screens/shadowing_training_screen.dart', import.meta.url),
   'utf8',
 );
+const scoring = readFileSync(
+  new URL('../app/lib/services/shadowing_score.dart', import.meta.url),
+  'utf8',
+);
 
 test('shadowing is a fixed navigation tab immediately after passport', () => {
   const passport = homeShell.indexOf("label: state.displayText('护照')");
@@ -79,4 +83,14 @@ test('shadowing exposes three diagnostic metrics and focused retry controls', ()
   assert.match(training, /shadowing-issue-counts/);
   assert.match(training, /shadowing-retry-weakness/);
   assert.match(training, /针对\$\{score!\.weakestMetric\}再练一次/);
+});
+
+test('shadowing compares repeated attempts and reports metric gains', () => {
+  assert.match(scoring, /class ShadowingAttemptDelta/);
+  assert.match(scoring, /resetShadowingAttemptProgress/);
+  assert.match(scoring, /_attachAttemptProgress/);
+  assert.match(scoring, /比上次提升/);
+  assert.match(scoring, /准确度 \$\{_signed\(accuracy\)\}/);
+  assert.match(scoring, /完整度 \$\{_signed\(completeness\)\}/);
+  assert.match(scoring, /流利度 \$\{_signed\(fluency\)\}/);
 });
