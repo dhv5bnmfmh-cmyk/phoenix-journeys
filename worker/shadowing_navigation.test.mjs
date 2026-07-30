@@ -54,7 +54,7 @@ test('shadowing uses Phoenix visual surfaces and updates immediately with level 
   assert.match(training, /shadowing-premium-hero/);
   assert.match(training, /shadowing-level-passages-\$level/);
   assert.match(training, /_ShadowingBackground/);
-  assert.match(training, /phoenix-world-language-journey-v1\.webp/);
+  assert.match(training, /phoenix-shadowing-original-background/);
 });
 
 
