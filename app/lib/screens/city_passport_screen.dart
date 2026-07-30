@@ -107,7 +107,63 @@ class _PassportMap extends StatefulWidget {
   State<_PassportMap> createState() => _PassportMapState();
 }
 
-enum _PassportMapLevel { continent, country, city }
+enum _PassportMapLevel { continent, country, province, city }
+
+class _PassportProvince {
+  const _PassportProvince({
+    required this.id,
+    required this.name,
+    required this.cityIds,
+  });
+
+  final String id;
+  final String name;
+  final List<String> cityIds;
+}
+
+const _chinaProvinces = <_PassportProvince>[
+  _PassportProvince(id: 'beijing', name: '北京', cityIds: ['beijing']),
+  _PassportProvince(id: 'shanghai', name: '上海', cityIds: ['shanghai']),
+  _PassportProvince(id: 'hebei', name: '河北', cityIds: ['chengde']),
+  _PassportProvince(
+    id: 'heilongjiang',
+    name: '黑龙江',
+    cityIds: ['harbin'],
+  ),
+  _PassportProvince(id: 'shanxi', name: '山西', cityIds: ['datong', 'pingyao']),
+  _PassportProvince(id: 'shandong', name: '山东', cityIds: ['qufu']),
+  _PassportProvince(id: 'henan', name: '河南', cityIds: ['luoyang', 'kaifeng']),
+  _PassportProvince(id: 'shaanxi', name: '陕西', cityIds: ['xian']),
+  _PassportProvince(id: 'gansu', name: '甘肃', cityIds: ['dunhuang']),
+  _PassportProvince(
+    id: 'jiangsu',
+    name: '江苏',
+    cityIds: ['nanjing', 'suzhou'],
+  ),
+  _PassportProvince(id: 'zhejiang', name: '浙江', cityIds: ['hangzhou']),
+  _PassportProvince(id: 'anhui', name: '安徽', cityIds: ['huangshan']),
+  _PassportProvince(
+    id: 'fujian',
+    name: '福建',
+    cityIds: ['quanzhou', 'xiamen', 'wuyishan'],
+  ),
+  _PassportProvince(
+    id: 'guangdong',
+    name: '广东',
+    cityIds: ['guangzhou', 'jiangmen'],
+  ),
+  _PassportProvince(id: 'hunan', name: '湖南', cityIds: ['zhangjiajie']),
+  _PassportProvince(
+    id: 'sichuan',
+    name: '四川',
+    cityIds: ['chengdu', 'leshan'],
+  ),
+  _PassportProvince(
+    id: 'yunnan',
+    name: '云南',
+    cityIds: ['lijiang', 'honghe', 'dali'],
+  ),
+];
 
 class _PassportMapState extends State<_PassportMap> {
   static const _continents = <({String id, String name})>[
@@ -120,6 +176,7 @@ class _PassportMapState extends State<_PassportMap> {
 
   String _continentId = 'asia';
   _PassportMapLevel _level = _PassportMapLevel.continent;
+  String? _selectedProvinceId;
   String? _selectedCityId;
 
   AppState get state => widget.state;
@@ -128,6 +185,7 @@ class _PassportMapState extends State<_PassportMap> {
     setState(() {
       _continentId = continentId;
       _level = _PassportMapLevel.continent;
+      _selectedProvinceId = null;
       _selectedCityId = null;
     });
   }
@@ -135,6 +193,15 @@ class _PassportMapState extends State<_PassportMap> {
   void _selectChina() {
     setState(() {
       _level = _PassportMapLevel.country;
+      _selectedProvinceId = null;
+      _selectedCityId = null;
+    });
+  }
+
+  void _selectProvince(String provinceId) {
+    setState(() {
+      _level = _PassportMapLevel.province;
+      _selectedProvinceId = provinceId;
       _selectedCityId = null;
     });
   }
@@ -149,7 +216,11 @@ class _PassportMapState extends State<_PassportMap> {
   void _goBack() {
     setState(() {
       if (_level == _PassportMapLevel.city) {
+        _level = _PassportMapLevel.province;
+        _selectedCityId = null;
+      } else if (_level == _PassportMapLevel.province) {
         _level = _PassportMapLevel.country;
+        _selectedProvinceId = null;
         _selectedCityId = null;
       } else if (_level == _PassportMapLevel.country) {
         _level = _PassportMapLevel.continent;
@@ -206,9 +277,11 @@ class _PassportMapState extends State<_PassportMap> {
                   state: state,
                   continentId: _continentId,
                   level: _level,
+                  selectedProvinceId: _selectedProvinceId,
                   selectedCityId: _selectedCityId,
                   onBack: _goBack,
                   onSelectChina: _selectChina,
+                  onSelectProvince: _selectProvince,
                   onSelectCity: _selectCity,
                 ),
               ),
@@ -310,6 +383,20 @@ class _PassportMapState extends State<_PassportMap> {
                     Center(
                       child: _MapLevelCaption(
                         title: state.displayText('中国'),
+                        subtitle: state.displayText('请从左侧选择省份'),
+                      ),
+                    )
+                  else if (_level == _PassportMapLevel.province)
+                    Center(
+                      child: _MapLevelCaption(
+                        title: state.displayText(
+                          _chinaProvinces
+                              .firstWhere(
+                                (province) =>
+                                    province.id == _selectedProvinceId,
+                              )
+                              .name,
+                        ),
                         subtitle: state.displayText('请从左侧选择城市'),
                       ),
                     ),
@@ -353,18 +440,22 @@ class _PassportPlaceRail extends StatelessWidget {
     required this.state,
     required this.continentId,
     required this.level,
+    required this.selectedProvinceId,
     required this.selectedCityId,
     required this.onBack,
     required this.onSelectChina,
+    required this.onSelectProvince,
     required this.onSelectCity,
   });
 
   final AppState state;
   final String continentId;
   final _PassportMapLevel level;
+  final String? selectedProvinceId;
   final String? selectedCityId;
   final VoidCallback onBack;
   final VoidCallback onSelectChina;
+  final ValueChanged<String> onSelectProvince;
   final ValueChanged<String> onSelectCity;
 
   @override
@@ -415,14 +506,43 @@ class _PassportPlaceRail extends StatelessWidget {
                           ),
                         ],
                       )
+                    : level == _PassportMapLevel.country
+                        ? ListView.separated(
+                            key: const ValueKey('passport-province-list'),
+                            padding: const EdgeInsets.all(6),
+                            itemCount: _chinaProvinces.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 4),
+                            itemBuilder: (context, index) {
+                              final province = _chinaProvinces[index];
+                              return _PlaceRailButton(
+                                key: ValueKey(
+                                  'passport-province-${province.id}',
+                                ),
+                                label: state.displayText(province.name),
+                                selected: false,
+                                onTap: () => onSelectProvince(province.id),
+                              );
+                            },
+                          )
                     : ListView.separated(
                         key: const ValueKey('passport-city-list'),
                         padding: const EdgeInsets.all(6),
-                        itemCount: journeyCityCatalog.length,
+                        itemCount: _chinaProvinces
+                            .firstWhere(
+                              (province) => province.id == selectedProvinceId,
+                            )
+                            .cityIds
+                            .length,
                         separatorBuilder: (context, index) =>
                             const SizedBox(height: 4),
                         itemBuilder: (context, index) {
-                          final city = journeyCityCatalog[index];
+                          final province = _chinaProvinces.firstWhere(
+                            (entry) => entry.id == selectedProvinceId,
+                          );
+                          final city = requireJourneyCity(
+                            province.cityIds[index],
+                          );
                           return _PlaceRailButton(
                             key: ValueKey('passport-city-option-${city.id}'),
                             label: state.displayText(city.name),
