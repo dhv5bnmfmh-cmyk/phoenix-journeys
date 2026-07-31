@@ -25,19 +25,31 @@ import 'journey_expansion_batch_six.dart';
 import 'special_journey_catalog.dart';
 import '../models/story_content.dart';
 
+final _baseJourneyIds = base.dailyJourneyRecords.map((item) => item.id).toSet();
+final _batchSixRecords = journeyExpansionBatchSixRecords
+    .where((item) => !_baseJourneyIds.contains(item.id))
+    .toList(growable: false);
+final _batchSixJourneyIds = _batchSixRecords.map((item) => item.id).toSet();
+final _batchSixSourceIds =
+    _batchSixRecords.expand((item) => item.sourceIds).toSet();
+
 final dailyStorySources = <StorySourceRecord>[
   ...base.dailyStorySources,
-  ...journeyExpansionBatchSixSources,
+  ...journeyExpansionBatchSixSources.where(
+    (item) => _batchSixSourceIds.contains(item.id),
+  ),
 ];
 
 final dailyJourneyRecords = <JourneyContentRecord>[
   ...base.dailyJourneyRecords,
-  ...journeyExpansionBatchSixRecords,
+  ..._batchSixRecords,
 ];
 
 final dailyJourneyExperiences = <DailyJourneyExperience>[
   ...base.dailyJourneyExperiences,
-  ...journeyExpansionBatchSixExperiences,
+  ...journeyExpansionBatchSixExperiences.where(
+    (item) => _batchSixJourneyIds.contains(item.id),
+  ),
 ];
 
 final allJourneyExperiences = <DailyJourneyExperience>[
