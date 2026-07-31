@@ -521,7 +521,7 @@ class _PassagePreview extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.w900),
               ),
               const Spacer(),
-              if (bestScore != null) _ScoreBadge(score: bestScore),
+              if (bestScore != null) _ScoreBadge(score: bestScore!),
             ],
           ),
           const SizedBox(height: 12),
