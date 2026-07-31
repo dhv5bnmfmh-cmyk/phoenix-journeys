@@ -5,7 +5,7 @@ import 'package:phoenix_journeys/data/journey_city_catalog.dart';
 
 void main() {
   test('published journeys expose stable city and destination paths', () {
-    expect(journeyCityCatalog, hasLength(26));
+    expect(journeyCityCatalog, hasLength(31));
     expect(
       journeyCityCatalog.map((city) => city.id),
       orderedEquals([
@@ -35,6 +35,11 @@ void main() {
         'kaifeng',
         'dali',
         'harbin',
+        'dujiangyan',
+        'chongqing',
+        'shiyan',
+        'longyan',
+        'shenyang',
       ]),
     );
 
@@ -44,6 +49,11 @@ void main() {
     expect(paths, contains('beijing/forbidden-city'));
     expect(paths, contains('beijing/summer-palace'));
     expect(paths, contains('guangzhou/chen-clan-ancestral-hall'));
+    expect(paths, contains('dujiangyan/irrigation-system'));
+    expect(paths, contains('chongqing/dazu-rock-carvings'));
+    expect(paths, contains('shiyan/wudang-mountains'));
+    expect(paths, contains('longyan/fujian-tulou'));
+    expect(paths, contains('shenyang/imperial-palace'));
   });
 
   test('Beijing publishes two independent destination journeys', () {
