@@ -2,6 +2,8 @@ import '../models/story_content.dart';
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
 
+export 'journey_data.dart' show ReadingAnnotation;
+
 class EditorialStoryRevision {
   const EditorialStoryRevision({
     required this.id,
@@ -34,6 +36,7 @@ DailyJourneyExperience applyEditorialStoryRevision(
   if (revision == null) return journey;
 
   final originalSections = journey.content.sections;
+  if (originalSections.isEmpty) return journey;
   final revisedSections = List<JourneyStorySection>.generate(
     revision.sections.length,
     (index) {
@@ -83,7 +86,7 @@ JourneyContentRecord applyEditorialContentRevision(
   Map<String, EditorialStoryRevision> revisions,
 ) {
   final revision = revisions[content.id];
-  if (revision == null) return content;
+  if (revision == null || content.sections.isEmpty) return content;
   final originalSections = content.sections;
   return JourneyContentRecord(
     id: content.id,
