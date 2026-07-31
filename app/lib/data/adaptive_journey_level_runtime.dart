@@ -47,9 +47,8 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     );
   }
 
-  // Summer Palace keeps its curated vocabulary ladder, but every level now
-  // begins from the same Founder-approved formal editorial story. This avoids
-  // lower levels silently falling back to the old guidebook-style narrative.
+  // Summer Palace keeps its curated vocabulary ladder, while every Phoenix,
+  // HSK, and TOCFL profile starts from the same formal editorial story.
   final base = JourneyLevelContent.fromExperience(experience);
   final selectedWords = _languageLevelAgent.selectVocabulary(
     words: summerPalaceAdaptiveWords,
@@ -79,7 +78,6 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     discoveryCount: discoveryCount,
   );
 
-  if (!profile.isPhoenix) return limited;
   return expandJourneyStoryToTarget(
     experience,
     limited,
