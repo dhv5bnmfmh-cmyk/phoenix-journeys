@@ -96,6 +96,34 @@ class PhoenixVocabularyService {
       qualityReviewed: true,
       qualityScore: 100,
     ),
+    '灌溉': PhoenixVocabularyExample(
+      chinese: '都江堰把岷江水引入成都平原，用于农田灌溉。',
+      pinyin: 'Dūjiāngyàn bǎ Mínjiāng shuǐ yǐnrù Chéngdū Píngyuán, yòngyú nóngtián guàngài.',
+      native:
+          'Đô Giang Yển dẫn nước sông Mân vào đồng bằng Thành Đô để tưới tiêu đồng ruộng.',
+      english:
+          'Dujiangyan channels Min River water into the Chengdu Plain for farmland irrigation.',
+      usageNote: '“农田灌溉”和“灌溉系统”是常见搭配。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
+    '多元': PhoenixVocabularyExample(
+      chinese: '沈阳故宫的建筑体现了多元文化传统的交流与融合。',
+      pinyin: 'Shěnyáng Gùgōng de jiànzhù tǐxiàn le duōyuán wénhuà chuántǒng de jiāoliú yǔ rónghé.',
+      native:
+          'Kiến trúc Cố Cung Thẩm Dương thể hiện sự giao lưu và hòa hợp của nhiều truyền thống văn hóa.',
+      english:
+          'The architecture of the Shenyang Imperial Palace reflects interaction and integration among diverse cultural traditions.',
+      usageNote: '“多元文化”和“多元传统”常用于描述并存的文化来源。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
   };
 
   final http.Client _client;
@@ -106,10 +134,6 @@ class PhoenixVocabularyService {
     return _bundledExamples[word];
   }
 
-  /// Explorer runtime path.
-  ///
-  /// Published vocabulary examples are prepared before release and bundled
-  /// with the Journey pack. Opening a word must never wait for a model request.
   Future<PhoenixVocabularyExample> generateExample({
     required WordEntry entry,
     required String language,
@@ -139,12 +163,6 @@ class PhoenixVocabularyService {
     return SynchronousFuture<PhoenixVocabularyExample>(preloaded);
   }
 
-  /// Content-authoring path only.
-  ///
-  /// PhoenixVocabularyAgent and PhoenixQualityAgent can generate and review
-  /// examples while a Journey pack is being prepared. Their result must be
-  /// saved into the pack before explorers receive it; the app UI does not call
-  /// this method when a learner opens a word.
   Future<PhoenixVocabularyExample> generateExampleForContentPipeline({
     required WordEntry entry,
     required String language,
