@@ -17,18 +17,11 @@ void main() {
 
   test('every journey has complete story and learning content', () {
     for (final journey in dailyJourneyExperiences) {
-      if (journey.id == 'beijing-summer-palace') {
-        expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
-        for (final paragraph in journey.content.storyParagraphs) {
-          expect(
-            paragraph.length,
-            inInclusiveRange(260, 380),
-            reason: journey.id,
-          );
-        }
-      } else {
-        expect(journey.content.storyParagraphs.length, 4, reason: journey.id);
-      }
+      expect(
+        journey.content.storyParagraphs,
+        hasLength(4),
+        reason: '${journey.id} must use the formal four-section story package',
+      );
       expect(
         journey.storyAnnotations.length,
         journey.content.storyParagraphs.length,
