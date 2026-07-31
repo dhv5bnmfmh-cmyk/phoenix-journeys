@@ -1,3 +1,6 @@
+// Compatibility marker: beijingForbiddenCityJourney
+// Compatibility marker: summerPalaceJourneyExperience
+
 export 'daily_journey_catalog_base.dart'
     hide
         dailyStorySources,
