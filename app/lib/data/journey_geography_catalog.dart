@@ -34,10 +34,23 @@ const _chinaProvinceSpecs = <JourneyProvinceCatalogEntry>[
     isMunicipality: true,
   ),
   JourneyProvinceCatalogEntry(
+    id: 'chongqing',
+    name: '重庆',
+    geoNodeId: 'cn-chongqing',
+    cityIds: ['chongqing'],
+    isMunicipality: true,
+  ),
+  JourneyProvinceCatalogEntry(
     id: 'hebei',
     name: '河北',
     geoNodeId: 'cn-hebei',
     cityIds: ['chengde'],
+  ),
+  JourneyProvinceCatalogEntry(
+    id: 'liaoning',
+    name: '辽宁',
+    geoNodeId: 'cn-liaoning',
+    cityIds: ['shenyang'],
   ),
   JourneyProvinceCatalogEntry(
     id: 'heilongjiang',
@@ -62,6 +75,12 @@ const _chinaProvinceSpecs = <JourneyProvinceCatalogEntry>[
     name: '河南',
     geoNodeId: 'cn-henan',
     cityIds: ['luoyang', 'kaifeng'],
+  ),
+  JourneyProvinceCatalogEntry(
+    id: 'hubei',
+    name: '湖北',
+    geoNodeId: 'cn-hubei',
+    cityIds: ['shiyan'],
   ),
   JourneyProvinceCatalogEntry(
     id: 'shaanxi',
@@ -97,7 +116,7 @@ const _chinaProvinceSpecs = <JourneyProvinceCatalogEntry>[
     id: 'fujian',
     name: '福建',
     geoNodeId: 'cn-fujian',
-    cityIds: ['quanzhou', 'xiamen', 'wuyishan'],
+    cityIds: ['quanzhou', 'xiamen', 'wuyishan', 'longyan'],
   ),
   JourneyProvinceCatalogEntry(
     id: 'guangdong',
@@ -115,7 +134,7 @@ const _chinaProvinceSpecs = <JourneyProvinceCatalogEntry>[
     id: 'sichuan',
     name: '四川',
     geoNodeId: 'cn-sichuan',
-    cityIds: ['chengdu', 'leshan'],
+    cityIds: ['chengdu', 'leshan', 'dujiangyan'],
   ),
   JourneyProvinceCatalogEntry(
     id: 'yunnan',
