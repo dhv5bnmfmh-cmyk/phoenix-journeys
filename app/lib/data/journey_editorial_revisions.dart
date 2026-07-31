@@ -1,4 +1,4 @@
-import 'editorial_story_revision.dart';
+import 'editorial_story_revision_model.dart';
 import 'ordinary_editorial_revisions_a.dart';
 import 'ordinary_editorial_revisions_b.dart';
 import 'ordinary_editorial_revisions_c.dart';
