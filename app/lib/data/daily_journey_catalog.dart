@@ -129,6 +129,34 @@ final _batchSixRecords = journeyExpansionBatchSixRecords
 final _batchSixJourneyIds = _batchSixRecords.map((item) => item.id).toSet();
 final _batchSixSourceIds =
     _batchSixRecords.expand((item) => item.sourceIds).toSet();
+final _batchSixRecordById = <String, JourneyContentRecord>{
+  for (final record in _batchSixRecords) record.id: record,
+};
+
+DailyJourneyExperience _normalizeBatchSixExperience(
+  DailyJourneyExperience experience,
+) {
+  final content = _batchSixRecordById[experience.id] ?? experience.content;
+  return DailyJourneyExperience(
+    id: experience.id,
+    city: experience.city,
+    cityCode: experience.cityCode,
+    place: experience.place,
+    appBarTitle: experience.appBarTitle,
+    storyTitle: experience.storyTitle,
+    headline: experience.headline,
+    description: experience.description,
+    discoveryTeaser: experience.discoveryTeaser,
+    distanceLabel: experience.distanceLabel,
+    stampSymbol: experience.stampSymbol,
+    content: content,
+    storyAnnotations: experience.storyAnnotations,
+    words: experience.words,
+    discoveries: experience.discoveries,
+    wonderQuestion: experience.wonderQuestion,
+    expressQuestion: experience.expressQuestion,
+  );
+}
 
 final dailyStorySources = <StorySourceRecord>[
   ...base.dailyStorySources,
@@ -150,9 +178,9 @@ final dailyJourneyRecords = <JourneyContentRecord>[
 
 final dailyJourneyExperiences = <DailyJourneyExperience>[
   ...base.dailyJourneyExperiences,
-  ...journeyExpansionBatchSixExperiences.where(
-    (item) => _batchSixJourneyIds.contains(item.id),
-  ),
+  ...journeyExpansionBatchSixExperiences
+      .where((item) => _batchSixJourneyIds.contains(item.id))
+      .map(_normalizeBatchSixExperience),
 ];
 
 final allJourneyExperiences = <DailyJourneyExperience>[
