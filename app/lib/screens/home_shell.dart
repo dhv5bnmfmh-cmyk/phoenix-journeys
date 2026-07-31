@@ -9,7 +9,7 @@ import '../widgets/journey_level_selector_button.dart';
 import 'city_passport_screen.dart';
 import 'explore_screen.dart';
 import 'me_screen.dart';
-import 'shadowing_home_screen.dart';
+import 'shadowing_training_screen.dart';
 
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key});
@@ -17,7 +17,7 @@ class HomeShell extends StatelessWidget {
   static const _pages = [
     ExploreScreen(),
     CityPassportScreen(),
-    ShadowingHomeScreen(),
+    ShadowingTrainingScreen(embedded: true),
     MeScreen(),
   ];
 
