@@ -216,16 +216,27 @@ class _LibraryBodyState extends State<_LibraryBody> {
   int? _selectedLevel;
   String? _selectedPassageId;
 
+  ShadowingPassage? get _selectedPassage {
+    for (final passage in shadowingPassages) {
+      if (passage.id == _selectedPassageId) return passage;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final passages = shadowingPassages
-        .where((passage) => _selectedLevel == null || passage.level == _selectedLevel)
+        .where(
+          (passage) =>
+              _selectedLevel == null || passage.level == _selectedLevel,
+        )
         .toList(growable: false);
     final recentScores = <String, int>{};
     for (final session in widget.history.recentSessions) {
       final previous = recentScores[session.passageId] ?? 0;
       if (session.score > previous) recentScores[session.passageId] = session.score;
     }
+    final selectedPassage = _selectedPassage;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -325,15 +336,103 @@ class _LibraryBodyState extends State<_LibraryBody> {
             ),
           );
         }),
-        const SizedBox(height: 4),
+        if (selectedPassage != null) ...[
+          const SizedBox(height: 4),
+          _PassagePreview(
+            passage: selectedPassage,
+            bestScore: recentScores[selectedPassage.id],
+          ),
+          const SizedBox(height: 12),
+        ],
         FilledButton.icon(
-          onPressed: _selectedPassageId == null ? null : widget.onStartTraining,
+          onPressed: selectedPassage == null ? null : widget.onStartTraining,
           icon: const Icon(Icons.play_arrow_rounded),
           label: Text(
-            _selectedPassageId == null ? '先选择一篇内容' : '开始所选内容',
+            selectedPassage == null
+                ? '先选择一篇内容'
+                : '开始《${selectedPassage.title}》',
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PassagePreview extends StatelessWidget {
+  const _PassagePreview({required this.passage, this.bestScore});
+
+  final ShadowingPassage passage;
+  final int? bestScore;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('shadowing-library-preview'),
+      padding: const EdgeInsets.all(17),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4D8),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: PhoenixTheme.red.withValues(alpha: .16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.visibility_rounded, color: PhoenixTheme.red),
+              const SizedBox(width: 8),
+              const Text(
+                '训练内容预览',
+                style: TextStyle(fontWeight: FontWeight.w900),
+              ),
+              const Spacer(),
+              if (bestScore != null)
+                Text(
+                  '最佳 $bestScore 分',
+                  style: const TextStyle(
+                    color: PhoenixTheme.red,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          for (var index = 0; index < passage.sentences.length; index++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 9),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFE7BE),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '${index + 1}',
+                      style: const TextStyle(
+                        color: PhoenixTheme.red,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 9),
+                  Expanded(
+                    child: Text(
+                      passage.sentences[index],
+                      style: const TextStyle(height: 1.45),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
