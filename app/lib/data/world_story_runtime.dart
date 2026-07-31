@@ -1,11 +1,12 @@
 import '../agents/phoenix_world_story_agent.dart';
 import '../models/story_content.dart';
 import 'journey_evidence_catalog.dart';
+import 'journey_expansion_batch_six.dart';
 import 'world_geo_catalog.dart';
 
 PhoenixWorldStoryAgent createPhoenixWorldStoryAgent() {
   return PhoenixWorldStoryAgent(
-    nodes: worldGeoCatalog,
+    nodes: [...worldGeoCatalog, ...journeyExpansionBatchSixGeoNodes],
     sources: reviewedDailyStorySources,
     journeys: reviewedDailyJourneyRecords,
   );
