@@ -1,4 +1,4 @@
-import '../data/editorial_story_revision.dart';
+import '../data/editorial_story_revision_model.dart';
 import 'journey_content_quality_auditor.dart';
 
 enum LiteraryIssueSeverity { severe, medium, light }
