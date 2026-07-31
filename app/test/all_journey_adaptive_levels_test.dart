@@ -13,58 +13,30 @@ void main() {
       for (final profile in agent.allProfiles) {
         final level = resolveAdaptiveJourneyLevel(journey, profile: profile);
         final storyTarget = phoenixStoryLengthTargetFor(profile);
-        final expectedDiscoveryShape =
-            profile.band == PhoenixReadingBand.beginner
-                ? hasLength(1)
-                : hasLength(inInclusiveRange(1, 2));
+        final expectedDiscoveryShape = profile.band == PhoenixReadingBand.beginner ? hasLength(1) : hasLength(inInclusiveRange(1, 2));
         final storyCharacters = level.storyParagraphs.join().runes.length;
-
-        expect(level.storyParagraphs, hasLength(storyTarget.paragraphCount),
-            reason: '${journey.id} ${profile.displayLabel}');
-        expect(level.storyAnnotations, hasLength(storyTarget.paragraphCount),
-            reason: '${journey.id} annotations');
-        expect(
-          storyCharacters,
-          inInclusiveRange(
-            storyTarget.minimumCharacters,
-            storyTarget.maximumCharacters,
-          ),
-          reason: '${journey.id} ${profile.displayLabel} story length',
-        );
-        expect(level.discoveries, expectedDiscoveryShape,
-            reason: '${journey.id} discoveries');
+        expect(level.storyParagraphs, hasLength(storyTarget.paragraphCount), reason: '${journey.id} ${profile.displayLabel}');
+        expect(level.storyAnnotations, hasLength(storyTarget.paragraphCount), reason: '${journey.id} annotations');
+        expect(storyCharacters, inInclusiveRange(storyTarget.minimumCharacters, storyTarget.maximumCharacters), reason: '${journey.id} ${profile.displayLabel} story length');
+        expect(level.discoveries, expectedDiscoveryShape, reason: '${journey.id} discoveries');
         expect(level.words, isNotEmpty, reason: journey.id);
-        expect(
-          level.words.length,
-          lessThanOrEqualTo(agent.planFor(profile).maximumVocabularyCount),
-          reason: '${journey.id} vocabulary maximum',
-        );
+        expect(level.words.length, lessThanOrEqualTo(agent.planFor(profile).maximumVocabularyCount), reason: '${journey.id} vocabulary maximum');
       }
     }
   });
 
   test('Lv.10 prompts stay specific across all journeys', () {
     final mastery = agent.allProfiles.last;
-    final levels = allJourneyExperiences
-        .map((journey) => resolveAdaptiveJourneyLevel(journey, profile: mastery))
-        .toList(growable: false);
-
-    expect(allJourneyExperiences, hasLength(38));
-    expect(levels.map((level) => level.wonderQuestion).toSet(),
-        hasLength(allJourneyExperiences.length));
-    expect(levels.map((level) => level.expressQuestion).toSet(),
-        hasLength(allJourneyExperiences.length));
+    final levels = allJourneyExperiences.map((journey) => resolveAdaptiveJourneyLevel(journey, profile: mastery)).toList(growable: false);
+    expect(allJourneyExperiences, hasLength(43));
+    expect(levels.map((level) => level.wonderQuestion).toSet(), hasLength(allJourneyExperiences.length));
+    expect(levels.map((level) => level.expressQuestion).toSet(), hasLength(allJourneyExperiences.length));
   });
 
   test('beginner and advanced content differ on every migrated journey', () {
     final beginner = PhoenixLanguageLevelAgent.hskProfiles.first;
-    final advanced = PhoenixLanguageLevelAgent.hskProfiles.firstWhere(
-      (profile) => profile.band == PhoenixReadingBand.advanced,
-    );
-
-    for (final journey in dailyJourneyExperiences.where(
-      (item) => item.id != 'beijing-summer-palace',
-    )) {
+    final advanced = PhoenixLanguageLevelAgent.hskProfiles.firstWhere((profile) => profile.band == PhoenixReadingBand.advanced);
+    for (final journey in dailyJourneyExperiences.where((item) => item.id != 'beijing-summer-palace')) {
       final easy = resolveAdaptiveJourneyLevel(journey, profile: beginner);
       final deep = resolveAdaptiveJourneyLevel(journey, profile: advanced);
       expect(easy.storyParagraphs.join(), isNot(deep.storyParagraphs.join()));
