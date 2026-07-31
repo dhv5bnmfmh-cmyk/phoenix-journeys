@@ -7,15 +7,10 @@ import 'all_journey_language_level_catalog.dart';
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
+import 'special_journey_story_enrichment_story_system.dart';
 import 'summer_palace_language_level_catalog.dart';
 
 const _languageLevelAgent = PhoenixLanguageLevelAgent();
-const _specialJourneyIds = <String>{
-  'literary-roaming',
-  'myth-tracing',
-  'strange-night-talks',
-  'folk-secret-land',
-};
 
 JourneyLevelContent resolveAdaptiveJourneyLevel(
   DailyJourneyExperience experience, {
@@ -34,7 +29,7 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
       profile: profile,
     );
     if (!profile.isPhoenix) return refined;
-    if (_specialJourneyIds.contains(experience.id)) {
+    if (storySystemSpecialJourneyIds.contains(experience.id)) {
       return expandSpecialJourneyStoryToTarget(
         experience.id,
         refined,
