@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/shadowing_training_history.dart';
 import '../services/shadowing_weakness_library.dart';
 import '../theme/phoenix_theme.dart';
+import 'shadowing_plan_screen.dart';
 import 'shadowing_section_screen.dart';
 import 'shadowing_training_screen.dart';
 
@@ -54,6 +55,22 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
           history: _history,
           weaknesses: _weaknesses,
           onStartTraining: _openTraining,
+        ),
+      ),
+    );
+    await _loadSummary();
+  }
+
+  Future<void> _openPlan() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ShadowingPlanScreen(
+          history: _history,
+          weaknesses: _weaknesses,
+          onStartTraining: _openTraining,
+          onOpenWeakness: () => _openSection(ShadowingSection.weakness),
+          onOpenLibrary: () => _openSection(ShadowingSection.library),
+          onOpenProgress: () => _openSection(ShadowingSection.progress),
         ),
       ),
     );
@@ -138,6 +155,61 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
                     ),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Material(
+              color: const Color(0xFFFFF4D8),
+              borderRadius: BorderRadius.circular(22),
+              child: InkWell(
+                key: const ValueKey('shadowing-home-plan'),
+                borderRadius: BorderRadius.circular(22),
+                onTap: _openPlan,
+                child: Padding(
+                  padding: const EdgeInsets.all(17),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFE7BE),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.route_rounded,
+                          color: PhoenixTheme.red,
+                        ),
+                      ),
+                      const SizedBox(width: 13),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              '训练计划中心',
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '周目标、趋势、弱项与推荐素材集中查看',
+                              style: TextStyle(
+                                color: Colors.black.withValues(alpha: .58),
+                                fontSize: 12,
+                                height: 1.35,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right_rounded),
+                    ],
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 18),
