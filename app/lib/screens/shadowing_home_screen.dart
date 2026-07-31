@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/shadowing_training_history.dart';
 import '../services/shadowing_weakness_library.dart';
 import '../theme/phoenix_theme.dart';
+import 'shadowing_achievements_screen.dart';
 import 'shadowing_plan_screen.dart';
 import 'shadowing_section_screen.dart';
 import 'shadowing_training_screen.dart';
@@ -77,6 +78,19 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
     await _loadSummary();
   }
 
+  Future<void> _openAchievements() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ShadowingAchievementsScreen(
+          history: _history,
+          weaknesses: _weaknesses,
+          onStartTraining: _openTraining,
+        ),
+      ),
+    );
+    await _loadSummary();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,6 +98,13 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text('跟读训练'),
+        actions: [
+          IconButton(
+            tooltip: '成就与成长',
+            onPressed: _openAchievements,
+            icon: const Icon(Icons.emoji_events_rounded),
+          ),
+        ],
       ),
       body: SafeArea(
         child: ListView(
@@ -256,6 +277,22 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
                   subtitle: '查看成绩与训练记录',
                   badge: '${_history.totalSessions}',
                   onTap: () => _openSection(ShadowingSection.progress),
+                ),
+                _TrainingEntryCard(
+                  key: const ValueKey('shadowing-home-achievements'),
+                  icon: Icons.emoji_events_rounded,
+                  title: '成就与成长',
+                  subtitle: '徽章、等级与下一目标',
+                  badge: '${_weaknesses.masteredCount} 修复',
+                  onTap: _openAchievements,
+                ),
+                _TrainingEntryCard(
+                  key: const ValueKey('shadowing-home-plan-shortcut'),
+                  icon: Icons.route_rounded,
+                  title: '本周计划',
+                  subtitle: '目标、趋势与推荐素材',
+                  badge: '${_history.currentStreak} 天',
+                  onTap: _openPlan,
                 ),
               ],
             ),
