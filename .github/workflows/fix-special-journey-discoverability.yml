@@ -1,0 +1,64 @@
+name: Fix special journey discoverability
+
+on:
+  push:
+    branches:
+      - agent/enable-missing-dynamic-backgrounds
+    paths:
+      - .github/workflows/fix-special-journey-discoverability.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/enable-missing-dynamic-backgrounds
+
+      - name: Add visible nine-journey scroll cue
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('app/lib/widgets/special_journey_passport.dart')
+          s = p.read_text()
+          old = "state.displayText('使用旅程钱币开启，解锁后即可进入完整故事。')"
+          new = "state.displayText('共 9 个特别旅程 · 上滑查看更多，解锁后即可进入完整故事。')"
+          if old not in s and new not in s:
+              raise SystemExit('subtitle anchor not found')
+          s = s.replace(old, new, 1)
+          marker = """              for (final journey in _journeys)
+                _journeyTile(sheetContext, journey),
+"""
+          addition = marker + """              const SizedBox(height: 6),
+              Center(
+                child: Text(
+                  state.displayText('已显示全部 9 个特别旅程'),
+                  key: const ValueKey('special-journey-all-visible'),
+                  style: const TextStyle(
+                    color: Colors.black45,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+"""
+          if "special-journey-all-visible" not in s:
+              if marker not in s:
+                  raise SystemExit('journey list anchor not found')
+              s = s.replace(marker, addition, 1)
+          p.write_text(s)
+          PY
+
+      - name: Remove one-time workflow
+        run: rm .github/workflows/fix-special-journey-discoverability.yml
+
+      - name: Commit and push
+        run: |
+          git config user.name "Phoenix Journey Agent"
+          git config user.email "actions@users.noreply.github.com"
+          git add app/lib/widgets/special_journey_passport.dart .github/workflows/fix-special-journey-discoverability.yml
+          git commit -m "Make all nine special journeys discoverable"
+          git push origin HEAD:agent/enable-missing-dynamic-backgrounds
