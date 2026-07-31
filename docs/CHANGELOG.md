@@ -7,6 +7,14 @@
 
 ### Added
 
+- 将 `AI_DEVELOPMENT_GUIDE.md` 升级为 Phoenix 全项目最高级开发规范入口。
+- 增加项目使命、目标用户、学习理念、产品定位与长期规划。
+- 固化 `Review → Plan → Implement → QA → Challenge → Preview → Merge` 开发闭环。
+- 增加故事、短文、发现、挑战、生词、图片与动画统一规范。
+- 增加五星内容与开发质量评分体系、一票否决项和正式版发布门槛。
+- 增加故事、图片、动画、UI、代码、学习价值、AI 痕迹、重复率、HSK 与 TOCFL 审核流程。
+- 在主指南内增加 110 项编号 Review Checklist。
+- 增加“任务完成后自动 Review、自动 QA、自动寻找提升点”的正式规则，并限制在批准任务范围内持续优化。
 - 建立完整 AI Development Guide 文档体系：
   - `AI_DEVELOPMENT_GUIDE.md`
   - `ROADMAP.md`
@@ -31,6 +39,7 @@
 - 明确“思考/表达”只可作为兼容数据或独立 AI 能力存在，不得恢复为主流程步骤。
 - 明确跟读训练使用独立导航入口。
 - 删除规范中的重复规则，改用专项文件和交叉引用维护。
+- 明确 Founder Preview 至少达到四星，合并 `main` 必须达到五星且获得 Founder 明确批准。
 
 ### Runtime Impact
 
