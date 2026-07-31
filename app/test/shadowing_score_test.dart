@@ -18,6 +18,8 @@ void main() {
       expect(score.extraCharacters, 0);
       expect(score.label, '非常自然');
       expect(score.diagnosisSummary, contains('准确度 100%'));
+      expect(score.recommendedPracticeRate, 1);
+      expect(score.coaching, contains('原速 1.0×'));
     });
 
     test('ignores punctuation and whitespace', () {
@@ -38,7 +40,10 @@ void main() {
       expect(partial.completeness, lessThan(partial.accuracy));
       expect(partial.matchedCharacters, lessThan(partial.referenceCharacters));
       expect(partial.omittedCharacters, greaterThan(0));
-      expect(partial.coaching, contains('红色文字'));
+      expect(partial.recommendedPracticeRate, .7);
+      expect(partial.primaryWeakness, '完整度');
+      expect(partial.coaching, contains('慢速 0.7×'));
+      expect(partial.coaching, contains('短语完整朗读'));
     });
 
     test('extra words lower accuracy without lowering completeness', () {
@@ -51,7 +56,10 @@ void main() {
       expect(score.completeness, 100);
       expect(score.accuracy, lessThan(100));
       expect(score.extraCharacters, 2);
+      expect(score.recommendedPracticeRate, .9);
+      expect(score.primaryWeakness, '准确度');
       expect(score.coaching, contains('多读或错读'));
+      expect(score.coaching, contains('逐字修正'));
     });
 
     test('recognition confidence contributes to fluency', () {
@@ -68,6 +76,9 @@ void main() {
 
       expect(confident.fluency, greaterThan(hesitant.fluency));
       expect(confident.overall, greaterThan(hesitant.overall));
+      expect(hesitant.recommendedPracticeRate, .9);
+      expect(hesitant.primaryWeakness, '流利度');
+      expect(hesitant.coaching, contains('连续读两遍'));
     });
 
     test('marks omitted reference characters for focused retry', () {
