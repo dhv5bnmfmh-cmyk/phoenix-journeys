@@ -152,3 +152,5 @@ void main() {
           git add app/lib/widgets/special_journey_passport.dart app/test/special_journey_gate_catalog_test.dart .github/workflows/add-all-special-journey-gates.yml
           git commit -m "Expose all special journeys in passport"
           git push origin HEAD:agent/enable-missing-dynamic-backgrounds
+
+# trigger: 2026-07-31
