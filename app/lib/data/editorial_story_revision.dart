@@ -1,6 +1,5 @@
 import '../models/story_content.dart';
 import 'daily_journey_experience.dart';
-import 'editorial_story_revision_model.dart';
 import 'journey_data.dart';
 
 export 'journey_data.dart' show ReadingAnnotation;
