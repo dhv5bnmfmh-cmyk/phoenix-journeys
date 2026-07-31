@@ -6,7 +6,6 @@ import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
 import 'daily_journey_experience.dart';
 import 'journey_level_catalog.dart';
-import 'summer_palace_adaptive_story_levels.dart';
 import 'summer_palace_language_level_catalog.dart';
 
 const _languageLevelAgent = PhoenixLanguageLevelAgent();
@@ -48,24 +47,10 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     );
   }
 
-  final base = switch (profile.band) {
-    PhoenixReadingBand.beginner => summerPalaceBeginnerLevel,
-    PhoenixReadingBand.elementary => summerPalaceElementaryLevel,
-    PhoenixReadingBand.intermediate => summerPalaceIntermediateLevel,
-    PhoenixReadingBand.upperIntermediate => JourneyLevelContent.fromExperience(
-        experience,
-      ),
-    PhoenixReadingBand.advanced || PhoenixReadingBand.mastery =>
-      JourneyLevelContent(
-        storyParagraphs: experience.content.storyParagraphs,
-        storyAnnotations: experience.storyAnnotations,
-        words: experience.words,
-        discoveries: experience.discoveries,
-        wonderQuestion: summerPalaceChallengeLevel.wonderQuestion,
-        expressQuestion: summerPalaceChallengeLevel.expressQuestion,
-      ),
-  };
-
+  // Summer Palace keeps its curated vocabulary ladder, but every level now
+  // begins from the same Founder-approved formal editorial story. This avoids
+  // lower levels silently falling back to the old guidebook-style narrative.
+  final base = JourneyLevelContent.fromExperience(experience);
   final selectedWords = _languageLevelAgent.selectVocabulary(
     words: summerPalaceAdaptiveWords,
     levelCatalog: summerPalaceVocabularyLevels,
