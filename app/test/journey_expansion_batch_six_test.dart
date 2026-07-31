@@ -7,7 +7,7 @@ void main() {
       'dunhuang-mogao-caves',
       'suzhou-classical-gardens',
       'quanzhou-maritime-emporium',
-      'lhasa-potala-palace',
+      'datong-yungang-grottoes',
       'luoyang-longmen-grottoes',
     ];
     for (final id in ids) {
@@ -15,7 +15,7 @@ void main() {
       expect(journey.id, id);
       expect(journey.content.sections.length, greaterThanOrEqualTo(4));
       expect(journey.storyAnnotations.length, journey.content.sections.length);
-      expect(journey.words.length, greaterThanOrEqualTo(8));
+      expect(journey.words.length, greaterThanOrEqualTo(9));
       expect(journey.discoveries.length, greaterThanOrEqualTo(4));
       expect(journey.stampSymbol, isNotEmpty);
       expect(dailyJourneyExperiences.any((item) => item.id == id), isTrue);
