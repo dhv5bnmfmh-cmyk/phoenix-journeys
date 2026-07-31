@@ -7,6 +7,7 @@ import '../theme/phoenix_theme.dart';
 import 'shadowing_achievements_screen.dart';
 import 'shadowing_plan_screen.dart';
 import 'shadowing_preferences_screen.dart';
+import 'shadowing_profile_screen.dart';
 import 'shadowing_section_screen.dart';
 import 'shadowing_training_screen.dart';
 
@@ -42,9 +43,7 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
 
   Future<void> _openTraining() async {
     await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => const ShadowingTrainingScreen(),
-      ),
+      MaterialPageRoute<void>(builder: (_) => const ShadowingTrainingScreen()),
     );
     await _loadSummary();
   }
@@ -92,6 +91,20 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
     await _loadSummary();
   }
 
+  Future<void> _openProfile() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ShadowingProfileScreen(
+          history: _history,
+          weaknesses: _weaknesses,
+          onStartTraining: _openTraining,
+          onOpenWeakness: () => _openSection(ShadowingSection.weakness),
+        ),
+      ),
+    );
+    await _loadSummary();
+  }
+
   Future<void> _openPreferences() async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -121,182 +134,32 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
           key: const ValueKey('shadowing-home'),
           padding: const EdgeInsets.fromLTRB(18, 18, 18, 30),
           children: [
-            Container(
-              key: const ValueKey('shadowing-home-hero'),
-              padding: const EdgeInsets.all(22),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF7F1D1D), Color(0xFFB23A2A)],
-                ),
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x33000000),
-                    blurRadius: 20,
-                    offset: Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.record_voice_over_rounded,
-                    color: Color(0xFFFFD879),
-                    size: 42,
-                  ),
-                  const SizedBox(height: 14),
-                  const Text(
-                    '今天，让中文更像你自己的声音',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 23,
-                      height: 1.25,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '听一句、跟一句，获得准确度、完整度与流利度三维诊断。',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: .88),
-                      fontSize: 14,
-                      height: 1.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      key: const ValueKey('shadowing-home-start'),
-                      onPressed: () => _openSection(ShadowingSection.daily),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFD879),
-                        foregroundColor: const Color(0xFF542010),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      icon: const Icon(Icons.play_arrow_rounded),
-                      label: const Text(
-                        '查看今日训练',
-                        style: TextStyle(fontWeight: FontWeight.w900),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _Hero(onOpenDaily: () => _openSection(ShadowingSection.daily)),
             const SizedBox(height: 16),
-            Material(
-              color: const Color(0xFFFFF4D8),
-              borderRadius: BorderRadius.circular(22),
-              child: InkWell(
-                key: const ValueKey('shadowing-home-plan'),
-                borderRadius: BorderRadius.circular(22),
-                onTap: _openPlan,
-                child: Padding(
-                  padding: const EdgeInsets.all(17),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFE7BE),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(
-                          Icons.route_rounded,
-                          color: PhoenixTheme.red,
-                        ),
-                      ),
-                      const SizedBox(width: 13),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              '训练计划中心',
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '周目标、趋势、弱项与推荐素材集中查看',
-                              style: TextStyle(
-                                color: Colors.black.withValues(alpha: .58),
-                                fontSize: 12,
-                                height: 1.35,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right_rounded),
-                    ],
-                  ),
-                ),
-              ),
+            _FeatureTile(
+              key: const ValueKey('shadowing-home-plan'),
+              icon: Icons.route_rounded,
+              title: '训练计划中心',
+              subtitle: '周目标、趋势、弱项与推荐素材集中查看',
+              highlighted: true,
+              onTap: _openPlan,
             ),
-            const SizedBox(height: 12),
-            Material(
-              color: Colors.white.withValues(alpha: .86),
-              borderRadius: BorderRadius.circular(22),
-              child: InkWell(
-                key: const ValueKey('shadowing-home-achievements'),
-                borderRadius: BorderRadius.circular(22),
-                onTap: _openAchievements,
-                child: Padding(
-                  padding: const EdgeInsets.all(17),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFE7BE),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(
-                          Icons.emoji_events_rounded,
-                          color: PhoenixTheme.red,
-                        ),
-                      ),
-                      const SizedBox(width: 13),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              '成就与成长',
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '查看能力称号、徽章与下一成长目标',
-                              style: TextStyle(
-                                color: Colors.black.withValues(alpha: .58),
-                                fontSize: 12,
-                                height: 1.35,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right_rounded),
-                    ],
-                  ),
-                ),
-              ),
+            const SizedBox(height: 10),
+            _FeatureTile(
+              key: const ValueKey('shadowing-home-profile'),
+              icon: Icons.face_retouching_natural_rounded,
+              title: '个人发音档案',
+              subtitle: '查看能力画像、常错字、长期弱项与改善建议',
+              badge: '${_weaknesses.pendingCount}',
+              onTap: _openProfile,
+            ),
+            const SizedBox(height: 10),
+            _FeatureTile(
+              key: const ValueKey('shadowing-home-achievements'),
+              icon: Icons.emoji_events_rounded,
+              title: '成就与成长',
+              subtitle: '查看能力称号、徽章与下一成长目标',
+              onTap: _openAchievements,
             ),
             const SizedBox(height: 18),
             const Text(
@@ -360,7 +223,7 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '首次训练建议先听示范，再使用推荐语速跟读。系统会自动记录错读、漏读和多读。',
+                      '系统会持续记录错读、漏读、多读与重点字音，并自动更新个人发音档案。',
                       style: TextStyle(height: 1.5, fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -368,6 +231,174 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Hero extends StatelessWidget {
+  const _Hero({required this.onOpenDaily});
+  final VoidCallback onOpenDaily;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('shadowing-home-hero'),
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF7F1D1D), Color(0xFFB23A2A)],
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 20,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.record_voice_over_rounded,
+            color: Color(0xFFFFD879),
+            size: 42,
+          ),
+          const SizedBox(height: 14),
+          const Text(
+            '今天，让中文更像你自己的声音',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 23,
+              height: 1.25,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '听一句、跟一句，获得准确度、完整度与流利度三维诊断。',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: .88),
+              fontSize: 14,
+              height: 1.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const ValueKey('shadowing-home-start'),
+              onPressed: onOpenDaily,
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFFFD879),
+                foregroundColor: const Color(0xFF542010),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: const Text(
+                '查看今日训练',
+                style: TextStyle(fontWeight: FontWeight.w900),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeatureTile extends StatelessWidget {
+  const _FeatureTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.badge,
+    this.highlighted = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final String? badge;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: highlighted
+          ? const Color(0xFFFFF4D8)
+          : Colors.white.withValues(alpha: .86),
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(17),
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFE7BE),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, color: PhoenixTheme.red),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.black.withValues(alpha: .58),
+                        fontSize: 12,
+                        height: 1.35,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (badge != null)
+                Container(
+                  margin: const EdgeInsets.only(right: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: PhoenixTheme.red.withValues(alpha: .1),
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                  child: Text(
+                    badge!,
+                    style: const TextStyle(
+                      color: PhoenixTheme.red,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              const Icon(Icons.chevron_right_rounded),
+            ],
+          ),
         ),
       ),
     );
@@ -417,10 +448,7 @@ class _TrainingEntryCard extends StatelessWidget {
                   const Spacer(),
                   if (badge != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: PhoenixTheme.red.withValues(alpha: .1),
                         borderRadius: BorderRadius.circular(99),
@@ -439,10 +467,7 @@ class _TrainingEntryCard extends StatelessWidget {
               const Spacer(),
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                ),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 4),
               Text(
