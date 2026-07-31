@@ -24,6 +24,7 @@ import 'daily_journey_experience.dart';
 import 'journey_data.dart';
 import 'journey_expansion_batch_six.dart';
 import 'journey_expansion_batch_seven.dart';
+import 'journey_expansion_batch_eight.dart';
 import 'special_journey_catalog.dart';
 
 const _suzhouGeoNodeId =
@@ -71,24 +72,30 @@ DailyJourneyExperience _normalizeBatchSixExperience(DailyJourneyExperience exper
 final _existingAfterSixIds = <String>{..._baseJourneyIds, ..._batchSixJourneyIds};
 final _batchSevenRecords = journeyExpansionBatchSevenRecords.where((item) => !_existingAfterSixIds.contains(item.id)).toList(growable: false);
 final _batchSevenIds = _batchSevenRecords.map((item) => item.id).toSet();
+final _existingAfterSevenIds = <String>{..._existingAfterSixIds, ..._batchSevenIds};
+final _batchEightRecords = journeyExpansionBatchEightRecords.where((item) => !_existingAfterSevenIds.contains(item.id)).toList(growable: false);
+final _batchEightIds = _batchEightRecords.map((item) => item.id).toSet();
 
 final dailyStorySources = <StorySourceRecord>[
   ...base.dailyStorySources,
   ...journeyExpansionBatchSixSources.where((item) => _batchSixSourceIds.contains(item.id) && item.id != 'unesco-suzhou-gardens' && item.id != 'unesco-quanzhou'),
   ..._additionalBatchSixSources.where((item) => _batchSixSourceIds.contains(item.id)),
   ...journeyExpansionBatchSevenSources,
+  ...journeyExpansionBatchEightSources,
 ];
 
 final dailyJourneyRecords = <JourneyContentRecord>[
   ...base.dailyJourneyRecords,
   ..._batchSixRecords,
   ..._batchSevenRecords,
+  ..._batchEightRecords,
 ];
 
 final dailyJourneyExperiences = <DailyJourneyExperience>[
   ...base.dailyJourneyExperiences,
   ...journeyExpansionBatchSixExperiences.where((item) => _batchSixJourneyIds.contains(item.id)).map(_normalizeBatchSixExperience),
   ...journeyExpansionBatchSevenExperiences.where((item) => _batchSevenIds.contains(item.id)),
+  ...journeyExpansionBatchEightExperiences.where((item) => _batchEightIds.contains(item.id)),
 ];
 
 final allJourneyExperiences = <DailyJourneyExperience>[
