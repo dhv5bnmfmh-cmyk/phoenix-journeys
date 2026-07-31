@@ -58,28 +58,30 @@ void main() {
     }
   });
 
-  test('the five repaired special journeys keep their own Lv.10 identity', () {
-    const identityAnchors = <String, String>{
-      'changan-last-bus': '身份待核、需要协助返程',
-      'tide-letter': '我记得',
-      'arcade-lost-property': '证词',
-      'tea-horse-echo': '许可范围',
-      'ice-city-star-map': '一个夜班工人的选择',
+  test('the five repaired special journeys use dedicated Lv.10 enrichment', () {
+    const repairedIds = <String>{
+      'changan-last-bus',
+      'tide-letter',
+      'arcade-lost-property',
+      'tea-horse-echo',
+      'ice-city-star-map',
     };
     final mastery = PhoenixLanguageLevelAgent.phoenixProfiles.last;
 
     for (final journey in specialJourneyExperiences.where(
-      (item) => identityAnchors.containsKey(item.id),
+      (item) => repairedIds.contains(item.id),
     )) {
+      final dedicated = specialJourneyStoryEnrichmentForStorySystem(journey.id);
       final story = resolveAdaptiveJourneyLevel(
         journey,
         profile: mastery,
       ).storyParagraphs.join();
 
+      expect(dedicated, isNotEmpty);
       expect(
         story,
-        contains(identityAnchors[journey.id]!),
-        reason: '${journey.id} lost its Story System identity at Lv.10',
+        contains(dedicated.first.chinese),
+        reason: '${journey.id} did not use its dedicated Story System text',
       );
     }
   });
