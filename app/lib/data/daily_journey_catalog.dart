@@ -20,6 +20,7 @@ export 'daily_journey_experience.dart';
 
 import 'daily_journey_catalog_base.dart' as base;
 import 'daily_journey_experience.dart';
+import 'journey_data.dart';
 import 'journey_expansion_batch_six.dart';
 import 'special_journey_catalog.dart';
 import '../models/story_content.dart';
