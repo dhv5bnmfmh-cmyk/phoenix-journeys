@@ -5,7 +5,49 @@
 
 ## [Unreleased]
 
-### Added
+### Story System Version 1.0.0
+
+#### Added
+
+- 新增 `docs/README.md`，作为全项目文档导航与优先级入口。
+- 建立 `docs/story/` Phoenix Story System：
+  - `README.md`
+  - `STORY_GUIDELINES.md`
+  - `STORY_STYLE_GUIDE.md`
+  - `STORY_QUALITY_GATE.md`
+  - `STORY_REVIEW_PROMPT.md`
+  - `STORY_GENERATION_GUIDE.md`
+  - `STORY_LIBRARY_RULES.md`
+  - `SPECIAL_JOURNEY_GUIDE.md`
+  - `CONTENT_VARIETY_GUIDE.md`
+- 将 41 篇正式故事整理为人物、叙事任务、情绪、节奏、文化、高潮、结局与主题矩阵。
+- 建立十道 Story 发布 Gate：故事结构、角色、文学质量、阅读体验、学习价值、Phoenix 流程、文化真实性、故事差异化、AI 痕迹与最终评分。
+- 新增固定 Story Review Prompt，以出版社总编辑、儿童文学编辑、语言学家、HSK／TOCFL 教材专家、文化编辑、产品经理与 UX 设计师共同审核。
+- 新增 AI 故事生成前重复检查、全库维护规则、特别 Journey 原典与改编边界。
+- 新增 Story System 文档契约测试，检查九份规范、版本、永久预读规则、十道 Gate 与 41 篇矩阵。
+- 新增 Story System 运行时测试，检查 9 个特别 Journey 的分类、专属扩展、多语言对齐和普通城市 filler 隔离。
+- 为 `changan-last-bus`、`tide-letter`、`arcade-lost-property`、`tea-horse-echo`、`ice-city-star-map` 增加独立中拼越英高级短文扩展语料。
+
+#### Changed
+
+- 任何 AI 开发、修改、审核或生成故事前，必须完整读取 `docs/story/` 全部规范。
+- 故事工作不再只审核单篇，必须同时检查整个故事库与全部 Phoenix Lv.1–10 短文。
+- 全故事库被定义为一本持续出版的作品，而不是互相独立的小作文集合。
+- 全部 9 个特别 Journey 统一进入特别短文扩展链，不再有 5 个特别 Journey 落入普通城市扩展器。
+- Story、单词、Discovery、Challenge、回忆与盖章被纳入同一出版单元审核。
+- `ROADMAP.md` 与 `TODO.md` 已按 Story System v1.0.0 更新。
+
+#### Quality Standard
+
+- Story 发布要求：severe = 0、medium = 0。
+- 任一 Story Gate 未通过即禁止 Preview 发布。
+- 修改一篇故事后必须检查相邻故事、同城市、同类型、同主题与完整矩阵。
+- 修改造成其他故事显得相似时，必须同步调整相关故事。
+- 41 Journey × 10 Levels 仍必须全部达到 `approved`。
+
+### Previous Unreleased Work
+
+#### Added
 
 - 将 `AI_DEVELOPMENT_GUIDE.md` 升级为 Phoenix 全项目最高级开发规范入口。
 - 增加项目使命、目标用户、学习理念、产品定位与长期规划。
@@ -35,12 +77,12 @@
 - 新增 `JourneyLiteraryQualityAuditor`，自动检查通用开场、保护式结尾、角色建立、直接人物声音、叙事模式、结尾模式、AI 固定句式与跨故事相似度。
 - 新增全库文学质量测试，要求 41 个运行时 Journey 全部拥有正式编辑稿、四段故事与四组中拼越英阅读支持。
 
-### Changed
+#### Changed
 
 - 将旧的英文产品原则扩展并整理为中文长期规范。
 - 统一产品访问规则：免费 Explorer 每日上午与下午各一次普通 Journey；付费 Explorer 普通 Journey 无次数限制；开发 Preview 全开放。
 - 明确公开 Journey 流程固定为“故事 → 单词 → 发现 → 挑战 → 回忆 → 完成”。
-- 明确“思考/表达”只可作为兼容数据或独立 AI 能力存在，不得恢复为主流程步骤。
+- 明确“思考／表达”只可作为兼容数据或独立 AI 能力存在，不得恢复为主流程步骤。
 - 明确跟读训练使用独立导航入口。
 - 删除规范中的重复规则，改用专项文件和交叉引用维护。
 - 明确 Founder Preview 至少达到四星，合并 `main` 必须达到五星且获得 Founder 明确批准。
@@ -50,12 +92,12 @@
 - 颐和园 Phoenix Lv.1–10 统一从正式编辑母版适配，低等级不再静默回退到旧导览稿。
 - 修正一批第六批 Journey 词语的机械词性标注，例如“灌溉、监测、修复、融合”等按真实用法标为动词。
 
-### Runtime Impact
+#### Runtime Impact
 
-- Flutter 运行目录现在会为全部 41 个 Journey 应用正式编辑稿。
-- Story 仍按 Phoenix Lv.1–10 自适应，原有生词、发现、挑战、回忆、完成、地图、护照与盖章流程不变。
+- Flutter 运行目录会为全部 41 个 Journey 应用正式编辑稿。
+- Story 按 Phoenix Lv.1–10 自适应，原有单词、发现、挑战、回忆、完成、地图、护照与盖章流程不变。
 - 原始来源绑定按 section 顺序保留；新增人物与情节用于学习叙事，不伪造历史人物、日期或机构事实。
-- 文学质量 Gate 与原有内容质量 Gate 同时生效；任何 severe 或 medium 文学问题都会阻止正式版发布。
+- 文学质量 Gate、Story Quality Gate 与原有内容质量 Gate 同时生效。
 
 ## [PR #140] - 2026-07-31
 
@@ -108,14 +150,15 @@
 ### PR #118
 
 - 确立稳定 Journey 主流程：故事、单词、发现、挑战、回忆、完成。
-- 从主流程移除“思考/表达”。
-- 将 HSK / TOCFL 选择从阻塞弹窗移向设置与统一等级体系。
+- 从主流程移除“思考／表达”。
+- 将 HSK／TOCFL 选择从阻塞弹窗移向设置与统一等级体系。
 - 建立三连挑战方向与特别 Journey 接入。
 - 修复恢复 Discovery 时不应未经用户操作自动朗读的规则。
 
 ## Changelog Maintenance
 
 - 新增、修改或删除 Journey 时记录数量与品质快照。
+- Story System 版本、矩阵、Gate 或固定审核 Prompt 变化必须记录。
 - 用户可感知 UI、学习规则、奖励、访问权限或隐私变化必须记录。
 - 仅内部重构且无行为变化时，可在 PR 说明，不必制造版本条目。
 - 已完成 TODO 应从 `TODO.md` 移除，并在本文件留下结果。
