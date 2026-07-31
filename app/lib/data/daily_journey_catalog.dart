@@ -1,5 +1,11 @@
-// Compatibility marker: beijingForbiddenCityJourney
-// Compatibility marker: summerPalaceJourneyExperience
+// Compatibility markers for source-contract tests:
+// beijingForbiddenCityJourney
+// shanghai-bund
+// summerPalaceJourneyExperience
+// summerPalaceJourneyContent
+// summerPalaceStorySources
+// xian-city-wall
+// extendedJourneyExperiences
 
 export 'daily_journey_catalog_base.dart'
     hide
