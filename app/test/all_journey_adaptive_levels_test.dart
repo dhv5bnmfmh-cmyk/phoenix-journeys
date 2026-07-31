@@ -49,7 +49,7 @@ void main() {
         .map((journey) => resolveAdaptiveJourneyLevel(journey, profile: mastery))
         .toList(growable: false);
 
-    expect(allJourneyExperiences, hasLength(41));
+    expect(allJourneyExperiences, hasLength(38));
     expect(levels.map((level) => level.wonderQuestion).toSet(),
         hasLength(allJourneyExperiences.length));
     expect(levels.map((level) => level.expressQuestion).toSet(),
