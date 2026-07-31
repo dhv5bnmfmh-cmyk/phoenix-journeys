@@ -28,7 +28,7 @@ void main() {
   test('Lv.10 prompts stay specific across all journeys', () {
     final mastery = agent.allProfiles.last;
     final levels = allJourneyExperiences.map((journey) => resolveAdaptiveJourneyLevel(journey, profile: mastery)).toList(growable: false);
-    expect(allJourneyExperiences, hasLength(43));
+    expect(allJourneyExperiences, hasLength(48));
     expect(levels.map((level) => level.wonderQuestion).toSet(), hasLength(allJourneyExperiences.length));
     expect(levels.map((level) => level.expressQuestion).toSet(), hasLength(allJourneyExperiences.length));
   });
