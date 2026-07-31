@@ -22,4 +22,9 @@ const missingJourneyCinematicStyles = <String, JourneyCinematicStyle>{
   'kaiping-diaolou-villages': JourneyCinematicStyle(duration: Duration(seconds: 32), skyColor: Color(0xFFE6E9D5), atmosphereColor: Color(0xFF87956B), foregroundColor: Color(0xFF304129), cameraTravel: Offset(11, 8), waterLight: true),
   'yuanyang-hani-rice-terraces': JourneyCinematicStyle(duration: Duration(seconds: 35), skyColor: Color(0xFFF0CFAE), atmosphereColor: Color(0xFF8FA0A0), foregroundColor: Color(0xFF27463A), cameraTravel: Offset(9, 12), waterLight: true),
   'wudang-mountains-ancient-buildings': JourneyCinematicStyle(duration: Duration(seconds: 34), skyColor: Color(0xFFDDE6E2), atmosphereColor: Color(0xFF71877F), foregroundColor: Color(0xFF1C302A), cameraTravel: Offset(9, 11)),
+  'taishan-sacred-mountain': JourneyCinematicStyle(duration: Duration(seconds: 34), skyColor: Color(0xFFE4E8E1), atmosphereColor: Color(0xFF7A8174), foregroundColor: Color(0xFF273328), cameraTravel: Offset(9, 12)),
+  'lushan-cultural-landscape': JourneyCinematicStyle(duration: Duration(seconds: 35), skyColor: Color(0xFFE6EDF0), atmosphereColor: Color(0xFF82959C), foregroundColor: Color(0xFF213A35), cameraTravel: Offset(10, 11), waterLight: true),
+  'emeishan-sacred-ecology': JourneyCinematicStyle(duration: Duration(seconds: 36), skyColor: Color(0xFFDDE9E4), atmosphereColor: Color(0xFF708C80), foregroundColor: Color(0xFF18372B), cameraTravel: Offset(9, 12)),
+  'hangzhou-west-lake': JourneyCinematicStyle(duration: Duration(seconds: 33), skyColor: Color(0xFFE9F1EE), atmosphereColor: Color(0xFF88A59F), foregroundColor: Color(0xFF28443C), cameraTravel: Offset(12, 7), waterLight: true),
+  'xiamen-gulangyu': JourneyCinematicStyle(duration: Duration(seconds: 32), skyColor: Color(0xFFE8F2F4), atmosphereColor: Color(0xFF80A2A8), foregroundColor: Color(0xFF28413F), cameraTravel: Offset(11, 8), waterLight: true),
 };
