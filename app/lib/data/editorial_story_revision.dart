@@ -40,11 +40,12 @@ DailyJourneyExperience applyEditorialStoryRevision(
   final revisedSections = List<JourneyStorySection>.generate(
     revision.sections.length,
     (index) {
-      final original = originalSections[
-        index < originalSections.length ? index : originalSections.length - 1
-      ];
+      final originalIndex = index < originalSections.length
+          ? index
+          : originalSections.length - 1;
+      final original = originalSections[originalIndex];
       return JourneyStorySection(
-        id: original.id,
+        id: index < originalSections.length ? original.id : 'story-$index',
         text: revision.sections[index],
         sourceIds: original.sourceIds,
       );
@@ -74,7 +75,9 @@ DailyJourneyExperience applyEditorialStoryRevision(
       tags: journey.content.tags,
     ),
     storyAnnotations: revision.annotations,
-    words: journey.words.map(_correctWordMetadata).toList(growable: false),
+    words: journey.words
+        .map((entry) => _preserveNaturalVocabularyContext(entry, journey))
+        .toList(growable: false),
     discoveries: journey.discoveries,
     wonderQuestion: revision.wonderQuestion,
     expressQuestion: revision.expressQuestion,
@@ -98,11 +101,12 @@ JourneyContentRecord applyEditorialContentRevision(
     sections: List<JourneyStorySection>.generate(
       revision.sections.length,
       (index) {
-        final original = originalSections[
-          index < originalSections.length ? index : originalSections.length - 1
-        ];
+        final originalIndex = index < originalSections.length
+            ? index
+            : originalSections.length - 1;
+        final original = originalSections[originalIndex];
         return JourneyStorySection(
-          id: original.id,
+          id: index < originalSections.length ? original.id : 'story-$index',
           text: revision.sections[index],
           sourceIds: original.sourceIds,
         );
@@ -112,18 +116,53 @@ JourneyContentRecord applyEditorialContentRevision(
   );
 }
 
-WordEntry _correctWordMetadata(WordEntry entry) {
-  final correctedPart = _partOfSpeechCorrections[entry.word];
-  if (correctedPart == null || correctedPart == entry.partOfSpeech) return entry;
+WordEntry _preserveNaturalVocabularyContext(
+  WordEntry entry,
+  DailyJourneyExperience originalJourney,
+) {
+  final correctedPart = _partOfSpeechCorrections[entry.word] ?? entry.partOfSpeech;
+  if (entry.examples.isNotEmpty) {
+    return _copyWord(entry, partOfSpeech: correctedPart);
+  }
+
+  for (var index = 0; index < originalJourney.content.sections.length; index += 1) {
+    final section = originalJourney.content.sections[index];
+    if (!section.text.contains(entry.word) ||
+        index >= originalJourney.storyAnnotations.length) {
+      continue;
+    }
+    final annotation = originalJourney.storyAnnotations[index];
+    return _copyWord(
+      entry,
+      partOfSpeech: correctedPart,
+      examples: [
+        WordExample(
+          chinese: section.text,
+          pinyin: annotation.pinyin,
+          vietnamese: annotation.vietnamese,
+          english: annotation.english,
+        ),
+      ],
+    );
+  }
+
+  return _copyWord(entry, partOfSpeech: correctedPart);
+}
+
+WordEntry _copyWord(
+  WordEntry entry, {
+  required String partOfSpeech,
+  List<WordExample>? examples,
+}) {
   return WordEntry(
     word: entry.word,
     pinyin: entry.pinyin,
-    partOfSpeech: correctedPart,
+    partOfSpeech: partOfSpeech,
     simpleChinese: entry.simpleChinese,
     translation: entry.translation,
     englishDefinition: entry.englishDefinition,
     symbol: entry.symbol,
-    examples: entry.examples,
+    examples: examples ?? entry.examples,
   );
 }
 
