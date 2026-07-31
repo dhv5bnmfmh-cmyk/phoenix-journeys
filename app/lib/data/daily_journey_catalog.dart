@@ -25,8 +25,10 @@ import 'journey_data.dart';
 import 'journey_expansion_batch_six.dart';
 import 'special_journey_catalog.dart';
 
-const _suzhouGeoNodeId = 'cn-jiangsu-suzhou-gusu';
-const _quanzhouGeoNodeId = 'cn-fujian-quanzhou-licheng';
+const _suzhouGeoNodeId =
+    'cn-jiangsu-suzhou-gusu-humble-administrators-garden';
+const _quanzhouGeoNodeId =
+    'cn-fujian-quanzhou-licheng-kaiyuan-temple';
 
 const _additionalBatchSixSources = <StorySourceRecord>[
   StorySourceRecord(
