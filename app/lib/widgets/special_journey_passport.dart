@@ -49,6 +49,41 @@ class SpecialJourneyPassport extends StatelessWidget {
       cost: 4,
       accent: Color(0xFF9A5319),
     ),
+    _SpecialJourneyGate(
+      id: 'changan-last-bus',
+      chapter: '长安末班车',
+      currency: '银币',
+      cost: 4,
+      accent: Color(0xFF6D4C41),
+    ),
+    _SpecialJourneyGate(
+      id: 'ice-city-star-map',
+      chapter: '冰城星图',
+      currency: '碎银',
+      cost: 8,
+      accent: Color(0xFF4F7FA5),
+    ),
+    _SpecialJourneyGate(
+      id: 'tea-horse-echo',
+      chapter: '茶马回声',
+      currency: '铜币',
+      cost: 5,
+      accent: Color(0xFF7B5B35),
+    ),
+    _SpecialJourneyGate(
+      id: 'tide-letter',
+      chapter: '潮汐来信',
+      currency: '银币',
+      cost: 5,
+      accent: Color(0xFF287A83),
+    ),
+    _SpecialJourneyGate(
+      id: 'arcade-lost-property',
+      chapter: '街机厅失物招领',
+      currency: '碎银',
+      cost: 10,
+      accent: Color(0xFF7B3FA0),
+    ),
   ];
 
   @override
@@ -144,11 +179,7 @@ class SpecialJourneyPassport extends StatelessWidget {
       ),
       child: Text(
         '$label$value',
-        style: TextStyle(
-          color: color,
-          fontSize: 8,
-          fontWeight: FontWeight.w900,
-        ),
+        style: TextStyle(color: color, fontSize: 8, fontWeight: FontWeight.w900),
       ),
     );
   }
@@ -163,11 +194,13 @@ class SpecialJourneyPassport extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(sheetContext).height * .82,
+          ),
+          child: ListView(
+            key: const ValueKey('special-journey-scroll-list'),
+            padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
             children: [
               Text(
                 state.displayText('万象奇旅 · 特别旅程'),
@@ -208,16 +241,11 @@ class SpecialJourneyPassport extends StatelessWidget {
     final balance = state.walletBalance(journey.currency);
     final affordable = balance >= journey.cost;
     final missing = (journey.cost - balance).clamp(0, journey.cost);
-
     final statusText = unlocked
         ? state.displayText('已开启 · 点击进入')
         : affordable
-            ? state.displayText(
-                '${journey.cost} 枚${journey.currency} · 余额充足',
-              )
-            : state.displayText(
-                '${journey.cost} 枚${journey.currency} · 还差 $missing 枚',
-              );
+            ? state.displayText('${journey.cost} 枚${journey.currency} · 余额充足')
+            : state.displayText('${journey.cost} 枚${journey.currency} · 还差 $missing 枚');
 
     return Material(
       key: ValueKey('special-journey-${journey.id}'),
@@ -271,9 +299,7 @@ class SpecialJourneyPassport extends StatelessWidget {
                     : affordable
                         ? Icons.lock_open_rounded
                         : Icons.lock_outline_rounded,
-                color: unlocked || affordable
-                    ? journey.accent
-                    : Colors.black38,
+                color: unlocked || affordable ? journey.accent : Colors.black38,
                 size: 22,
               ),
               const SizedBox(width: 4),
