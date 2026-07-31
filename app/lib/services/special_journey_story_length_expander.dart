@@ -43,21 +43,52 @@ JourneyLevelContent expandSpecialJourneyStoryToTarget(
       ? source.sublist(1, source.length - 1)
       : const <_SpecialStoryPacket>[];
   final selected = <_SpecialStoryPacket>[opening];
-  final candidates = <_SpecialStoryPacket>[...middle, ...enrichment];
+  final closingCharacters = closing?.chinese.runes.length ?? 0;
+  final requiredIdentity =
+      target.minimumCharacters >= 520 ? enrichment.first : null;
+  final requiredIdentityCharacters =
+      requiredIdentity?.chinese.runes.length ?? 0;
 
-  for (final packet in candidates) {
+  // Advanced special Journeys must preserve room for a type-specific scene.
+  // Without this reservation, the formal source can fill the target before the
+  // dedicated literary material is considered, silently producing ordinary
+  // city-style expansion for Lv.7–10.
+  for (final packet in middle) {
     final projected = _characterCount(selected) +
         packet.chinese.runes.length +
-        (closing?.chinese.runes.length ?? 0);
+        closingCharacters +
+        requiredIdentityCharacters;
     if (projected > target.maximumCharacters) continue;
     selected.add(packet);
+    if (requiredIdentity == null && projected >= target.preferredCharacters) {
+      break;
+    }
+  }
+
+  if (requiredIdentity != null) {
+    final projected = _characterCount(selected) +
+        requiredIdentity.chinese.runes.length +
+        closingCharacters;
+    if (projected <= target.maximumCharacters) {
+      selected.add(requiredIdentity);
+    }
+  }
+
+  final used = selected.map((item) => item.chinese).toSet();
+  for (final packet in enrichment) {
+    if (used.contains(packet.chinese)) continue;
+    final projected = _characterCount(selected) +
+        packet.chinese.runes.length +
+        closingCharacters;
+    if (projected > target.maximumCharacters) continue;
+    selected.add(packet);
+    used.add(packet.chinese);
     if (projected >= target.preferredCharacters) break;
   }
 
   if (closing != null) selected.add(closing);
 
   if (_characterCount(selected) < target.minimumCharacters) {
-    final used = selected.map((item) => item.chinese).toSet();
     final insertionIndex = closing == null ? selected.length : selected.length - 1;
     for (final packet in enrichment) {
       if (used.contains(packet.chinese)) continue;
