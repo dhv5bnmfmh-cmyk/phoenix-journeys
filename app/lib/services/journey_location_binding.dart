@@ -1,5 +1,6 @@
 import '../agents/phoenix_world_story_agent.dart';
 import '../data/daily_journey_catalog.dart';
+import '../data/journey_expansion_batch_six.dart';
 import '../data/world_geo_catalog.dart';
 import '../models/geo_node.dart';
 
@@ -42,9 +43,6 @@ class JourneyLocationBinding {
   double get longitude => placeNode.longitude!;
 
   JourneyMapPoint get mapPoint {
-    // The home map is a hand-painted oblique relief, not a geographic
-    // projection. These points are art-directed against the actual coastline
-    // so the aircraft lands on the city represented by the label.
     const calibratedPoints = <String, JourneyMapPoint>{
       'beijing/forbidden-city': JourneyMapPoint(x: 0.63, y: 0.29),
       'beijing/summer-palace': JourneyMapPoint(x: 0.63, y: 0.29),
@@ -85,7 +83,10 @@ class JourneyLocationBinding {
 }
 
 final PhoenixWorldStoryAgent _journeyGeoAgent = PhoenixWorldStoryAgent(
-  nodes: worldGeoCatalog,
+  nodes: <GeoNode>[
+    ...worldGeoCatalog,
+    ...journeyExpansionBatchSixGeoNodes,
+  ],
 );
 
 final Map<String, JourneyLocationBinding> journeyLocationBindings =
