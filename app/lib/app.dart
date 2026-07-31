@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'screens/coin_journey_screen.dart';
 import 'screens/five_more_journeys_screen.dart';
+import 'screens/five_new_journeys_screen.dart';
 import 'screens/journey_expedition_screen.dart';
 import 'screens/shadowing_home_screen.dart';
 import 'theme/phoenix_theme.dart';
@@ -18,13 +19,15 @@ class PhoenixApp extends StatelessWidget {
     final showShadowingHome = prototype == 'shadowing';
     final showFiveJourneys = prototype == 'journeys';
     final showFiveMoreJourneys = prototype == 'journeys2';
+    final showFiveNewJourneys = prototype == 'journeys3';
     final showCoinJourney =
         prototype == 'coin-journey' ||
         (isPreviewHost &&
             prototype == null &&
             !showShadowingHome &&
             !showFiveJourneys &&
-            !showFiveMoreJourneys);
+            !showFiveMoreJourneys &&
+            !showFiveNewJourneys);
 
     return MaterialApp(
       title: 'Phoenix Journeys',
@@ -36,6 +39,8 @@ class PhoenixApp extends StatelessWidget {
           ? const JourneyExpeditionScreen()
           : showFiveMoreJourneys
           ? const FiveMoreJourneysScreen()
+          : showFiveNewJourneys
+          ? const FiveNewJourneysScreen()
           : showCoinJourney
           ? const CoinJourneyPrototypeScreen()
           : const StartupGate(),
