@@ -20,7 +20,9 @@ export 'daily_journey_experience.dart';
 import '../models/story_content.dart';
 import 'daily_journey_catalog_base.dart' as base;
 import 'daily_journey_experience.dart';
+import 'editorial_story_revision.dart';
 import 'journey_data.dart';
+import 'journey_editorial_revisions.dart';
 import 'journey_expansion_batch_six.dart';
 import 'special_journey_catalog.dart';
 
@@ -32,12 +34,22 @@ final dailyStorySources = <StorySourceRecord>[
 final dailyJourneyRecords = <JourneyContentRecord>[
   ...base.dailyJourneyRecords,
   ...journeyExpansionBatchSixRecords,
-];
+].map(
+  (content) => applyEditorialContentRevision(
+    content,
+    editorialStoryRevisions,
+  ),
+).toList(growable: false);
 
 final dailyJourneyExperiences = <DailyJourneyExperience>[
   ...base.dailyJourneyExperiences,
   ...journeyExpansionBatchSixExperiences.map(_withVocabularyContexts),
-];
+].map(
+  (journey) => applyEditorialStoryRevision(
+    journey,
+    editorialStoryRevisions,
+  ),
+).toList(growable: false);
 
 DailyJourneyExperience _withVocabularyContexts(DailyJourneyExperience journey) {
   final words = journey.words.map((entry) {
@@ -92,7 +104,12 @@ DailyJourneyExperience _withVocabularyContexts(DailyJourneyExperience journey) {
 
 final allJourneyExperiences = <DailyJourneyExperience>[
   ...dailyJourneyExperiences,
-  ...specialJourneyExperiences,
+  ...specialJourneyExperiences.map(
+    (journey) => applyEditorialStoryRevision(
+      journey,
+      editorialStoryRevisions,
+    ),
+  ),
 ];
 
 final List<WordEntry> allDailyJourneyWords = List<WordEntry>.unmodifiable(
