@@ -50,6 +50,66 @@ const supplementalDailyStorySources = <StorySourceRecord>[
     verificationStatus: StoryVerificationStatus.verified,
     accessedOn: '2026-07-20',
   ),
+  StorySourceRecord(
+    id: 'dujiangyan-sichuan-water-resources',
+    title: '都江堰水利工程保护与传承',
+    publisher: '四川省水利厅',
+    url:
+        'https://slt.sc.gov.cn/scsslt/c112517/2025/7/16/d72e4374c5fc41848df897bcf9fba5cf.shtml',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-sichuan-chengdu-dujiangyan-irrigation-system'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-31',
+  ),
+  StorySourceRecord(
+    id: 'dazu-chongqing-protection-regulation',
+    title: '重庆市大足石刻保护条例',
+    publisher: '重庆市文化和旅游发展委员会',
+    url:
+        'https://whlyw.cq.gov.cn/zwgk_221/fdzdgknr/lzyj/xzfg/201808/t20180802_9153291.html',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-chongqing-dazu-rock-carvings'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-31',
+  ),
+  StorySourceRecord(
+    id: 'wudang-hubei-cultural-heritage',
+    title: '世界文化遗产·武当山古建筑群',
+    publisher: '湖北省文化和旅游厅',
+    url:
+        'https://wlt.hubei.gov.cn/bmdt/ztzl/lszt/sjwhyc/sjyzcd/wdsgjzq/201911/t20191121_1366117.shtml',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-hubei-shiyan-wudang-mountains'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-31',
+  ),
+  StorySourceRecord(
+    id: 'fujian-tulou-provincial-government',
+    title: '福建土楼文化遗产保护规划',
+    publisher: '福建省人民政府',
+    url:
+        'https://www.fujian.gov.cn/zwgk/zfxxgk/szfwj/jgzz/kjwwzcwj/201302/t20130207_1183721.htm',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-fujian-longyan-yongding-tulou'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-31',
+  ),
+  StorySourceRecord(
+    id: 'shenyang-palace-liaoning-government',
+    title: '沈阳故宫博物院',
+    publisher: '辽宁省人民政府',
+    url:
+        'https://www.ln.gov.cn/web/sqgk/whly/ajjq/sy/2025101511142611813/index.shtml',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-liaoning-shenyang-shenhe-imperial-palace'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-31',
+  ),
 ];
 
 const _supplementalSourceByJourney = <String, String>{
@@ -57,6 +117,11 @@ const _supplementalSourceByJourney = <String, String>{
   'chengdu-kuanzhai-alley': 'chengdu-kuanzhai-academic-study',
   'nanjing-qinhuai-river': 'nanjing-qinhuai-legislature',
   'guangzhou-chen-clan-academy': 'guangzhou-chen-clan-museum',
+  'dujiangyan-irrigation-system': 'dujiangyan-sichuan-water-resources',
+  'chongqing-dazu-rock-carvings': 'dazu-chongqing-protection-regulation',
+  'shiyan-wudang-mountains': 'wudang-hubei-cultural-heritage',
+  'longyan-fujian-tulou': 'fujian-tulou-provincial-government',
+  'shenyang-imperial-palace': 'shenyang-palace-liaoning-government',
 };
 
 final reviewedDailyStorySources = <StorySourceRecord>[
