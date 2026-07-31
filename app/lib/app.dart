@@ -5,6 +5,7 @@ import 'screens/five_fourth_journeys_screen.dart';
 import 'screens/five_more_journeys_screen.dart';
 import 'screens/five_new_journeys_screen.dart';
 import 'screens/journey_expedition_screen.dart';
+import 'screens/journey_passport_screen.dart';
 import 'screens/shadowing_home_screen.dart';
 import 'theme/phoenix_theme.dart';
 import 'widgets/startup_gate.dart';
@@ -18,7 +19,8 @@ class PhoenixApp extends StatelessWidget {
     final prototype = uri.queryParameters['prototype'];
     final isPreviewHost = uri.host.startsWith('phoenix-journeys-pr-');
     final showShadowingHome = prototype == 'shadowing';
-    final showFiveJourneys = prototype == 'journeys';
+    final showJourneyPassport = prototype == 'journeys';
+    final showFiveJourneys = prototype == 'journeys1';
     final showFiveMoreJourneys = prototype == 'journeys2';
     final showFiveNewJourneys = prototype == 'journeys3';
     final showFiveFourthJourneys = prototype == 'journeys4';
@@ -27,6 +29,7 @@ class PhoenixApp extends StatelessWidget {
         (isPreviewHost &&
             prototype == null &&
             !showShadowingHome &&
+            !showJourneyPassport &&
             !showFiveJourneys &&
             !showFiveMoreJourneys &&
             !showFiveNewJourneys &&
@@ -38,6 +41,8 @@ class PhoenixApp extends StatelessWidget {
       theme: PhoenixTheme.light,
       home: showShadowingHome
           ? const ShadowingHomeScreen()
+          : showJourneyPassport
+          ? const JourneyPassportScreen()
           : showFiveJourneys
           ? const JourneyExpeditionScreen()
           : showFiveMoreJourneys
