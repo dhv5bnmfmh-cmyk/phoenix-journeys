@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'screens/coin_journey_screen.dart';
-import 'screens/five_journeys_screen.dart';
+import 'screens/journey_expedition_screen.dart';
 import 'screens/shadowing_home_screen.dart';
 import 'theme/phoenix_theme.dart';
 import 'widgets/startup_gate.dart';
@@ -27,7 +27,7 @@ class PhoenixApp extends StatelessWidget {
       home: showShadowingHome
           ? const ShadowingHomeScreen()
           : showFiveJourneys
-          ? const FiveJourneysScreen()
+          ? const JourneyExpeditionScreen()
           : showCoinJourney
           ? const CoinJourneyPrototypeScreen()
           : const StartupGate(),
