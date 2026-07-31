@@ -12,6 +12,7 @@ export 'daily_journey_experience.dart';
 import 'daily_journey_catalog_base.dart' as base;
 import 'daily_journey_experience.dart';
 import 'journey_expansion_batch_six.dart';
+import 'special_journey_catalog.dart';
 import '../models/story_content.dart';
 
 final dailyStorySources = <StorySourceRecord>[
@@ -31,7 +32,7 @@ final dailyJourneyExperiences = <DailyJourneyExperience>[
 
 final allJourneyExperiences = <DailyJourneyExperience>[
   ...dailyJourneyExperiences,
-  ...base.specialJourneyExperiences,
+  ...specialJourneyExperiences,
 ];
 
 final List<WordEntry> allDailyJourneyWords = List<WordEntry>.unmodifiable(
