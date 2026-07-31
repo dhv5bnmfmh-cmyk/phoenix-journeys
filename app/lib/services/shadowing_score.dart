@@ -35,24 +35,65 @@ class ShadowingScore {
   String get diagnosisSummary =>
       '准确度 $accuracy% · 完整度 $completeness% · 流利度 $fluency%';
 
+  double get recommendedPracticeRate {
+    if (omittedCharacters >= 2 || completeness < 80) return .7;
+    if (extraCharacters > 0 || accuracy < 88 || fluency < 90) return .9;
+    return 1;
+  }
+
+  String get recommendedPracticeSpeed {
+    if (recommendedPracticeRate == .7) return '慢速 0.7×';
+    if (recommendedPracticeRate == .9) return '清晰 0.9×';
+    return '原速 1.0×';
+  }
+
+  String get primaryWeakness {
+    if (overall >= 90 &&
+        accuracy >= 90 &&
+        completeness >= 90 &&
+        fluency >= 90 &&
+        omittedCharacters == 0 &&
+        extraCharacters == 0) {
+      return '稳定自然度';
+    }
+    if (omittedCharacters > extraCharacters ||
+        completeness <= math.min(accuracy, fluency)) {
+      return '完整度';
+    }
+    if (extraCharacters > omittedCharacters ||
+        accuracy <= math.min(completeness, fluency)) {
+      return '准确度';
+    }
+    return '流利度';
+  }
+
+  String get retryPlan {
+    switch (primaryWeakness) {
+      case '完整度':
+        return '先看红色提示逐字补齐，再分成短语完整朗读，最后合句跟读。';
+      case '准确度':
+        return '重新听示范，定位多读或错读位置，逐字修正后再完整跟读。';
+      case '流利度':
+        return '先跟随清晰节奏连续读两遍，减少停顿后再回到原速。';
+      default:
+        return '保持原速，继续注意自然停顿、重音和连读。';
+    }
+  }
+
   String get coaching {
     final metrics = '$diagnosisSummary。';
+    final recommendation =
+        '建议使用$recommendedPracticeSpeed，重点练习$primaryWeakness：$retryPlan';
     if (overall >= 90 && omittedCharacters == 0 && extraCharacters == 0) {
-      return '$metrics 三项表现稳定，下一次保持自然停顿和连读。';
+      return '$metrics $recommendation';
     }
     if (omittedCharacters > extraCharacters) {
-      return '$metrics 漏读 $omittedCharacters 个字，注意红色文字，先分短语读清楚再完整跟读。';
+      return '$metrics 漏读 $omittedCharacters 个字。$recommendation';
     }
     if (extraCharacters > omittedCharacters) {
-      return '$metrics 多读或错读 $extraCharacters 个字，重新听本句后放慢速度对照练习。';
+      return '$metrics 多读或错读 $extraCharacters 个字。$recommendation';
     }
-    if (fluency < 70) {
-      return '$metrics 内容基本到位，建议使用清晰语速，减少停顿后再读一次。';
-    }
-    if (accuracy < 80) {
-      return '$metrics 注意红色文字，逐字修正后再尝试自然连读。';
-    }
-    return '$metrics 已接近示范，下一次把节奏读得更连贯。';
+    return '$metrics $recommendation';
   }
 }
 
