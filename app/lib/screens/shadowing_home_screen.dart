@@ -6,6 +6,7 @@ import '../services/shadowing_weakness_library.dart';
 import '../theme/phoenix_theme.dart';
 import 'shadowing_achievements_screen.dart';
 import 'shadowing_plan_screen.dart';
+import 'shadowing_preferences_screen.dart';
 import 'shadowing_section_screen.dart';
 import 'shadowing_training_screen.dart';
 
@@ -91,6 +92,14 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
     await _loadSummary();
   }
 
+  Future<void> _openPreferences() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const ShadowingPreferencesScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,9 +109,10 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
         title: const Text('跟读训练'),
         actions: [
           IconButton(
-            tooltip: '成就与成长',
-            onPressed: _openAchievements,
-            icon: const Icon(Icons.emoji_events_rounded),
+            key: const ValueKey('shadowing-home-preferences'),
+            tooltip: '训练偏好',
+            onPressed: _openPreferences,
+            icon: const Icon(Icons.tune_rounded),
           ),
         ],
       ),
@@ -233,6 +243,61 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+            Material(
+              color: Colors.white.withValues(alpha: .86),
+              borderRadius: BorderRadius.circular(22),
+              child: InkWell(
+                key: const ValueKey('shadowing-home-achievements'),
+                borderRadius: BorderRadius.circular(22),
+                onTap: _openAchievements,
+                child: Padding(
+                  padding: const EdgeInsets.all(17),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFE7BE),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.emoji_events_rounded,
+                          color: PhoenixTheme.red,
+                        ),
+                      ),
+                      const SizedBox(width: 13),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              '成就与成长',
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '查看能力称号、徽章与下一成长目标',
+                              style: TextStyle(
+                                color: Colors.black.withValues(alpha: .58),
+                                fontSize: 12,
+                                height: 1.35,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right_rounded),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 18),
             const Text(
               '训练入口',
@@ -277,22 +342,6 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
                   subtitle: '查看成绩与训练记录',
                   badge: '${_history.totalSessions}',
                   onTap: () => _openSection(ShadowingSection.progress),
-                ),
-                _TrainingEntryCard(
-                  key: const ValueKey('shadowing-home-achievements'),
-                  icon: Icons.emoji_events_rounded,
-                  title: '成就与成长',
-                  subtitle: '徽章、等级与下一目标',
-                  badge: '${_weaknesses.masteredCount} 修复',
-                  onTap: _openAchievements,
-                ),
-                _TrainingEntryCard(
-                  key: const ValueKey('shadowing-home-plan-shortcut'),
-                  icon: Icons.route_rounded,
-                  title: '本周计划',
-                  subtitle: '目标、趋势与推荐素材',
-                  badge: '${_history.currentStreak} 天',
-                  onTap: _openPlan,
                 ),
               ],
             ),
@@ -368,7 +417,10 @@ class _TrainingEntryCard extends StatelessWidget {
                   const Spacer(),
                   if (badge != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: PhoenixTheme.red.withValues(alpha: .1),
                         borderRadius: BorderRadius.circular(99),
@@ -387,7 +439,10 @@ class _TrainingEntryCard extends StatelessWidget {
               const Spacer(),
               Text(
                 title,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
