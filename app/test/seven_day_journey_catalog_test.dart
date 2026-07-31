@@ -3,7 +3,7 @@ import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 
 void main() {
   test('reviewed destinations rotate without repeating during one cycle', () {
-    expect(dailyJourneyExperiences, hasLength(32));
+    expect(dailyJourneyExperiences, hasLength(29));
     expect(
       dailyJourneyExperiences.map((item) => item.id).toSet(),
       hasLength(dailyJourneyExperiences.length),
