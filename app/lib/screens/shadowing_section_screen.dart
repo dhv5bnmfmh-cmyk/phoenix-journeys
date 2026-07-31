@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/shadowing_passage_catalog.dart';
 import '../services/shadowing_training_history.dart';
 import '../services/shadowing_weakness_library.dart';
 import '../theme/phoenix_theme.dart';
@@ -48,6 +49,7 @@ class ShadowingSectionScreen extends StatelessWidget {
                   onStartTraining: onStartTraining,
                 ),
               ShadowingSection.library => _LibraryBody(
+                  history: history,
                   onStartTraining: onStartTraining,
                 ),
               ShadowingSection.progress => _ProgressBody(history: history),
@@ -200,35 +202,162 @@ class _WeaknessBody extends StatelessWidget {
   }
 }
 
-class _LibraryBody extends StatelessWidget {
-  const _LibraryBody({required this.onStartTraining});
+class _LibraryBody extends StatefulWidget {
+  const _LibraryBody({required this.history, required this.onStartTraining});
 
+  final ShadowingTrainingHistory history;
   final Future<void> Function() onStartTraining;
 
   @override
+  State<_LibraryBody> createState() => _LibraryBodyState();
+}
+
+class _LibraryBodyState extends State<_LibraryBody> {
+  int? _selectedLevel;
+  String? _selectedPassageId;
+
+  @override
   Widget build(BuildContext context) {
-    const levels = [
-      ('基础短句', '适合热身与纠正单句节奏', Icons.short_text_rounded),
-      ('生活对话', '训练自然语速与常用表达', Icons.forum_rounded),
-      ('短文跟读', '练习连贯表达与停顿', Icons.article_rounded),
-    ];
+    final passages = shadowingPassages
+        .where((passage) => _selectedLevel == null || passage.level == _selectedLevel)
+        .toList(growable: false);
+    final recentScores = <String, int>{};
+    for (final session in widget.history.recentSessions) {
+      final previous = recentScores[session.passageId] ?? 0;
+      if (session.score > previous) recentScores[session.passageId] = session.score;
+    }
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ...levels.map(
-          (item) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: _InfoCard(icon: item.$3, title: item.$1, subtitle: item.$2),
+        SizedBox(
+          height: 42,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              _LevelChip(
+                label: '全部',
+                selected: _selectedLevel == null,
+                onTap: () => setState(() => _selectedLevel = null),
+              ),
+              for (var level = 1; level <= 10; level++)
+                _LevelChip(
+                  label: 'L$level',
+                  selected: _selectedLevel == level,
+                  onTap: () => setState(() => _selectedLevel = level),
+                ),
+            ],
           ),
         ),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: onStartTraining,
-            icon: const Icon(Icons.menu_book_rounded),
-            label: const Text('进入选文库'),
+        const SizedBox(height: 12),
+        ...passages.map((passage) {
+          final selected = _selectedPassageId == passage.id;
+          final bestScore = recentScores[passage.id];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Material(
+              color: selected
+                  ? const Color(0xFFFFE7BE)
+                  : Colors.white.withValues(alpha: .84),
+              borderRadius: BorderRadius.circular(18),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(18),
+                onTap: () => setState(() => _selectedPassageId = passage.id),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 46,
+                        height: 46,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: PhoenixTheme.red.withValues(alpha: .1),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Text(
+                          'L${passage.level}',
+                          style: const TextStyle(
+                            color: PhoenixTheme.red,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              passage.title,
+                              style: const TextStyle(fontWeight: FontWeight.w900),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${passage.theme} · ${passage.sentences.length} 句 · 约 ${passage.estimatedMinutes} 分钟',
+                              style: const TextStyle(
+                                color: Colors.black54,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (bestScore != null)
+                        Text(
+                          '$bestScore 分',
+                          style: const TextStyle(
+                            color: PhoenixTheme.red,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        )
+                      else
+                        Icon(
+                          selected
+                              ? Icons.check_circle_rounded
+                              : Icons.chevron_right_rounded,
+                          color: selected ? PhoenixTheme.red : Colors.black38,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 4),
+        FilledButton.icon(
+          onPressed: _selectedPassageId == null ? null : widget.onStartTraining,
+          icon: const Icon(Icons.play_arrow_rounded),
+          label: Text(
+            _selectedPassageId == null ? '先选择一篇内容' : '开始所选内容',
           ),
         ),
       ],
+    );
+  }
+}
+
+class _LevelChip extends StatelessWidget {
+  const _LevelChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => onTap(),
+      ),
     );
   }
 }
@@ -267,8 +396,13 @@ class _ProgressBody extends StatelessWidget {
                 foregroundColor: PhoenixTheme.red,
                 child: Text('${session.score}'),
               ),
-              title: Text(session.title, style: const TextStyle(fontWeight: FontWeight.w800)),
-              subtitle: Text('${session.completedAt.month}月${session.completedAt.day}日'),
+              title: Text(
+                session.title,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              subtitle: Text(
+                '${session.completedAt.month}月${session.completedAt.day}日',
+              ),
             ),
           ),
       ],
@@ -277,7 +411,11 @@ class _ProgressBody extends StatelessWidget {
 }
 
 class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.icon, required this.title, required this.subtitle});
+  const _InfoCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
 
   final IconData icon;
   final String title;
@@ -301,7 +439,10 @@ class _InfoCard extends StatelessWidget {
               children: [
                 Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
                 const SizedBox(height: 4),
-                Text(subtitle, style: const TextStyle(height: 1.4, color: Colors.black54)),
+                Text(
+                  subtitle,
+                  style: const TextStyle(height: 1.4, color: Colors.black54),
+                ),
               ],
             ),
           ),
@@ -328,9 +469,15 @@ class _MetricTile extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+            ),
             const SizedBox(height: 4),
-            Text(label, style: const TextStyle(fontSize: 11, color: Colors.black54)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: Colors.black54),
+            ),
           ],
         ),
       ),
@@ -365,9 +512,16 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(icon, size: 42, color: PhoenixTheme.red),
           const SizedBox(height: 12),
-          Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 6),
-          Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(height: 1.45)),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(height: 1.45),
+          ),
           if (buttonLabel != null && onPressed != null) ...[
             const SizedBox(height: 16),
             FilledButton(onPressed: onPressed, child: Text(buttonLabel!)),
