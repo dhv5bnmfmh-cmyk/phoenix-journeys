@@ -1,7 +1,7 @@
 import '../models/story_content.dart';
 import 'journey_data.dart';
 
-export 'journey_data.dart' show ReadingAnnotation;
+export 'editorial_story_revision_model.dart';
 
 class DailyJourneyExperience {
   const DailyJourneyExperience({
