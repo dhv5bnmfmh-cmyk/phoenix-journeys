@@ -1,0 +1,154 @@
+name: Add all special journey gates
+
+on:
+  push:
+    branches:
+      - agent/enable-missing-dynamic-backgrounds
+    paths:
+      - .github/workflows/add-all-special-journey-gates.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/enable-missing-dynamic-backgrounds
+
+      - name: Add remaining special journey entrances
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/widgets/special_journey_passport.dart')
+          text = path.read_text()
+
+          anchor = """    _SpecialJourneyGate(
+      id: 'folk-secret-land',
+      chapter: '逆流河灯',
+      currency: '铜币',
+      cost: 4,
+      accent: Color(0xFF9A5319),
+    ),
+"""
+          addition = anchor + """    _SpecialJourneyGate(
+      id: 'changan-last-bus',
+      chapter: '长安末班车',
+      currency: '银币',
+      cost: 4,
+      accent: Color(0xFF6D4C41),
+    ),
+    _SpecialJourneyGate(
+      id: 'ice-city-star-map',
+      chapter: '冰城星图',
+      currency: '碎银',
+      cost: 8,
+      accent: Color(0xFF4F7FA5),
+    ),
+    _SpecialJourneyGate(
+      id: 'tea-horse-echo',
+      chapter: '茶马回声',
+      currency: '铜币',
+      cost: 5,
+      accent: Color(0xFF7B5B35),
+    ),
+    _SpecialJourneyGate(
+      id: 'tide-letter',
+      chapter: '潮汐来信',
+      currency: '银币',
+      cost: 5,
+      accent: Color(0xFF287A83),
+    ),
+    _SpecialJourneyGate(
+      id: 'arcade-lost-property',
+      chapter: '街机厅失物招领',
+      currency: '碎银',
+      cost: 10,
+      accent: Color(0xFF7B3FA0),
+    ),
+"""
+          if "id: 'changan-last-bus'" not in text:
+              if anchor not in text:
+                  raise SystemExit('special journey gate anchor not found')
+              text = text.replace(anchor, addition, 1)
+
+          old = """      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
+          child: Column(
+"""
+          new = """      builder: (sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
+            child: Column(
+"""
+          if old in text:
+              text = text.replace(old, new, 1)
+              closing = """            ],
+          ),
+        ),
+      ),
+    );
+"""
+              replacement = """              ],
+            ),
+          ),
+        ),
+      ),
+    );
+"""
+              if closing not in text:
+                  raise SystemExit('scroll closing anchor not found')
+              text = text.replace(closing, replacement, 1)
+          elif 'child: SingleChildScrollView(' not in text:
+              raise SystemExit('special journey sheet anchor not found')
+
+          path.write_text(text)
+
+          test_path = Path('app/test/special_journey_gate_catalog_test.dart')
+          test_path.write_text("""import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  test('passport exposes all nine special journey gates', () {
+    final source = File(
+      'lib/widgets/special_journey_passport.dart',
+    ).readAsStringSync();
+
+    const ids = <String>[
+      'literary-roaming',
+      'myth-tracing',
+      'strange-night-talks',
+      'folk-secret-land',
+      'changan-last-bus',
+      'ice-city-star-map',
+      'tea-horse-echo',
+      'tide-letter',
+      'arcade-lost-property',
+    ];
+
+    for (final id in ids) {
+      expect(source, contains("id: '$id'"));
+    }
+    expect(RegExp(r"id: '[^']+'").allMatches(source).length, 9);
+    expect(source, contains('SingleChildScrollView'));
+  });
+}
+""")
+          PY
+
+      - name: Remove one-time workflow
+        run: rm .github/workflows/add-all-special-journey-gates.yml
+
+      - name: Commit all special journey entrances
+        run: |
+          git config user.name "Phoenix Journey Agent"
+          git config user.email "actions@users.noreply.github.com"
+          git add app/lib/widgets/special_journey_passport.dart app/test/special_journey_gate_catalog_test.dart .github/workflows/add-all-special-journey-gates.yml
+          git commit -m "Expose all special journeys in passport"
+          git push origin HEAD:agent/enable-missing-dynamic-backgrounds
