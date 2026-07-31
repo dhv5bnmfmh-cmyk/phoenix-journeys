@@ -5,6 +5,7 @@ import '../services/shadowing_training_history.dart';
 import '../services/shadowing_weakness_library.dart';
 import '../theme/phoenix_theme.dart';
 import 'shadowing_achievements_screen.dart';
+import 'shadowing_collection_screen.dart';
 import 'shadowing_plan_screen.dart';
 import 'shadowing_preferences_screen.dart';
 import 'shadowing_pronunciation_profile_screen.dart';
@@ -120,6 +121,18 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
     await _loadSummary();
   }
 
+  Future<void> _openCollection() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ShadowingCollectionScreen(
+          history: _history,
+          onStartTraining: _openTraining,
+        ),
+      ),
+    );
+    await _loadSummary();
+  }
+
   Future<void> _openPreferences() async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const ShadowingPreferencesScreen()),
@@ -134,6 +147,12 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
         automaticallyImplyLeading: false,
         title: const Text('跟读训练'),
         actions: [
+          IconButton(
+            key: const ValueKey('shadowing-home-collection-action'),
+            tooltip: '收藏与稍后练',
+            onPressed: _openCollection,
+            icon: const Icon(Icons.collections_bookmark_rounded),
+          ),
           IconButton(
             key: const ValueKey('shadowing-home-report'),
             tooltip: '本周复盘',
@@ -165,6 +184,14 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
             ),
             const SizedBox(height: 12),
             _FeatureCard(
+              key: const ValueKey('shadowing-home-collection'),
+              icon: Icons.collections_bookmark_rounded,
+              title: '收藏与稍后练',
+              subtitle: '收藏短文、稍后练清单、最近训练与快捷开练',
+              onTap: _openCollection,
+            ),
+            const SizedBox(height: 12),
+            _FeatureCard(
               key: const ValueKey('shadowing-home-profile'),
               icon: Icons.face_retouching_natural_rounded,
               title: '个人发音档案',
@@ -188,8 +215,10 @@ class _ShadowingHomeScreenState extends State<ShadowingHomeScreen> {
               onTap: _openAchievements,
             ),
             const SizedBox(height: 18),
-            const Text('训练入口',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+            const Text(
+              '训练入口',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            ),
             const SizedBox(height: 10),
             GridView.count(
               shrinkWrap: true,
@@ -278,14 +307,21 @@ class _Hero extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(28),
         boxShadow: const [
-          BoxShadow(color: Color(0x33000000), blurRadius: 20, offset: Offset(0, 10)),
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 20,
+            offset: Offset(0, 10),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.record_voice_over_rounded,
-              color: Color(0xFFFFD879), size: 42),
+          const Icon(
+            Icons.record_voice_over_rounded,
+            color: Color(0xFFFFD879),
+            size: 42,
+          ),
           const SizedBox(height: 14),
           const Text(
             '今天，让中文更像你自己的声音',
@@ -318,8 +354,10 @@ class _Hero extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               icon: const Icon(Icons.play_arrow_rounded),
-              label: const Text('查看今日训练',
-                  style: TextStyle(fontWeight: FontWeight.w900)),
+              label: const Text(
+                '查看今日训练',
+                style: TextStyle(fontWeight: FontWeight.w900),
+              ),
             ),
           ),
         ],
@@ -372,11 +410,13 @@ class _FeatureCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
-                        )),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
@@ -442,7 +482,10 @@ class _TrainingEntryCard extends StatelessWidget {
                   const Spacer(),
                   if (badge != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: PhoenixTheme.red.withValues(alpha: .1),
                         borderRadius: BorderRadius.circular(99),
@@ -459,8 +502,13 @@ class _TrainingEntryCard extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              Text(title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
