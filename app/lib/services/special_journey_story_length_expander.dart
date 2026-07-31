@@ -1,6 +1,6 @@
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
-import '../data/special_journey_story_enrichment.dart';
+import '../data/special_journey_story_enrichment_story_system.dart';
 import '../models/language_proficiency.dart';
 import 'phoenix_story_length_policy.dart';
 
@@ -24,7 +24,7 @@ JourneyLevelContent expandSpecialJourneyStoryToTarget(
   required ChineseProficiencyProfile profile,
 }) {
   final source = _packetsFromContent(content);
-  final enrichment = specialJourneyStoryEnrichmentFor(journeyId)
+  final enrichment = specialJourneyStoryEnrichmentForStorySystem(journeyId)
       .map(
         (item) => _SpecialStoryPacket(
           chinese: item.chinese,
