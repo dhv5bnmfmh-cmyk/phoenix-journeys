@@ -18,16 +18,113 @@ export 'daily_journey_catalog_base.dart'
         dailyJourneyForDate;
 export 'daily_journey_experience.dart';
 
+import '../models/story_content.dart';
 import 'daily_journey_catalog_base.dart' as base;
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
 import 'journey_expansion_batch_six.dart';
 import 'special_journey_catalog.dart';
-import '../models/story_content.dart';
+
+const _suzhouGeoNodeId = 'cn-jiangsu-suzhou-gusu';
+const _quanzhouGeoNodeId = 'cn-fujian-quanzhou-licheng';
+
+const _additionalBatchSixSources = <StorySourceRecord>[
+  StorySourceRecord(
+    id: 'unesco-suzhou-gardens',
+    title: 'Classical Gardens of Suzhou',
+    publisher: 'UNESCO World Heritage Centre',
+    url: 'https://whc.unesco.org/en/list/813',
+    kind: StorySourceKind.unesco,
+    languageCode: 'en',
+    geoNodeIds: [_suzhouGeoNodeId],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-31',
+  ),
+  StorySourceRecord(
+    id: 'suzhou-gov-classical-gardens',
+    title: '苏州园林',
+    publisher: '苏州市园林和绿化管理局',
+    url: 'https://ylj.suzhou.gov.cn/',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: [_suzhouGeoNodeId],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-31',
+  ),
+  StorySourceRecord(
+    id: 'unesco-quanzhou',
+    title: 'Quanzhou: Emporium of the World in Song-Yuan China',
+    publisher: 'UNESCO World Heritage Centre',
+    url: 'https://whc.unesco.org/en/list/1561',
+    kind: StorySourceKind.unesco,
+    languageCode: 'en',
+    geoNodeIds: [_quanzhouGeoNodeId],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-31',
+  ),
+  StorySourceRecord(
+    id: 'quanzhou-gov-world-heritage',
+    title: '泉州：宋元中国的世界海洋商贸中心',
+    publisher: '泉州市人民政府',
+    url: 'https://www.quanzhou.gov.cn/',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: [_quanzhouGeoNodeId],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-31',
+  ),
+];
+
+JourneyContentRecord _rebindRecord(
+  JourneyContentRecord record, {
+  required String geoNodeId,
+  required List<String> sourceIds,
+}) {
+  return JourneyContentRecord(
+    id: record.id,
+    title: record.title,
+    geoNodeId: geoNodeId,
+    languageCode: record.languageCode,
+    verificationStatus: record.verificationStatus,
+    tags: record.tags,
+    sections: record.sections
+        .map(
+          (section) => JourneyStorySection(
+            id: section.id,
+            text: section.text,
+            sourceIds: sourceIds,
+          ),
+        )
+        .toList(growable: false),
+  );
+}
+
+JourneyContentRecord _normalizeBatchSixRecord(JourneyContentRecord record) {
+  return switch (record.id) {
+    'suzhou-classical-gardens' => _rebindRecord(
+        record,
+        geoNodeId: _suzhouGeoNodeId,
+        sourceIds: const [
+          'unesco-suzhou-gardens',
+          'suzhou-gov-classical-gardens',
+        ],
+      ),
+    'quanzhou-maritime-emporium' => _rebindRecord(
+        record,
+        geoNodeId: _quanzhouGeoNodeId,
+        sourceIds: const [
+          'unesco-quanzhou',
+          'quanzhou-gov-world-heritage',
+        ],
+      ),
+    _ => record,
+  };
+}
 
 final _baseJourneyIds = base.dailyJourneyRecords.map((item) => item.id).toSet();
 final _batchSixRecords = journeyExpansionBatchSixRecords
     .where((item) => !_baseJourneyIds.contains(item.id))
+    .map(_normalizeBatchSixRecord)
     .toList(growable: false);
 final _batchSixJourneyIds = _batchSixRecords.map((item) => item.id).toSet();
 final _batchSixSourceIds =
@@ -36,6 +133,12 @@ final _batchSixSourceIds =
 final dailyStorySources = <StorySourceRecord>[
   ...base.dailyStorySources,
   ...journeyExpansionBatchSixSources.where(
+    (item) =>
+        _batchSixSourceIds.contains(item.id) &&
+        item.id != 'unesco-suzhou-gardens' &&
+        item.id != 'unesco-quanzhou',
+  ),
+  ..._additionalBatchSixSources.where(
     (item) => _batchSixSourceIds.contains(item.id),
   ),
 ];
