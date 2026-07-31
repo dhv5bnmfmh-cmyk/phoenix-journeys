@@ -2,11 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 
 void main() {
-  test('reviewed destinations rotate without repeating during one cycle',
-      () {
-    expect(dailyJourneyExperiences, hasLength(27));
+  test('reviewed destinations rotate without repeating during one cycle', () {
+    expect(dailyJourneyExperiences, hasLength(32));
     expect(
-        dailyJourneyExperiences.map((item) => item.id).toSet(), hasLength(27));
+      dailyJourneyExperiences.map((item) => item.id).toSet(),
+      hasLength(dailyJourneyExperiences.length),
+    );
 
     final cycle = List.generate(
       dailyJourneyExperiences.length,
@@ -20,11 +21,8 @@ void main() {
       if (journey.id == 'beijing-summer-palace') {
         expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
         for (final paragraph in journey.content.storyParagraphs) {
-          expect(
-            paragraph.length,
-            inInclusiveRange(260, 380),
-            reason: journey.id,
-          );
+          expect(paragraph.length, inInclusiveRange(260, 380),
+              reason: journey.id);
         }
       } else {
         expect(journey.content.storyParagraphs.length, 4, reason: journey.id);
@@ -38,11 +36,8 @@ void main() {
       if (journey.id == 'beijing-summer-palace') {
         expect(journey.discoveries, hasLength(2), reason: journey.id);
       } else {
-        expect(
-          journey.discoveries.length,
-          greaterThanOrEqualTo(4),
-          reason: journey.id,
-        );
+        expect(journey.discoveries.length, greaterThanOrEqualTo(4),
+            reason: journey.id);
       }
       expect(journey.wonderQuestion.trim(), isNotEmpty, reason: journey.id);
       expect(journey.expressQuestion.trim(), isNotEmpty, reason: journey.id);
