@@ -1,0 +1,65 @@
+name: Apply missing journey background bindings
+
+on:
+  push:
+    branches:
+      - agent/enable-missing-dynamic-backgrounds
+    paths:
+      - .github/workflows/apply-missing-background-bindings.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/enable-missing-dynamic-backgrounds
+      - name: Patch destination background renderer
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/widgets/destination_background.dart')
+          text = path.read_text()
+
+          import_anchor = "import '../data/journey_background_catalog.dart';\n"
+          import_line = "import '../data/missing_dynamic_background_styles.dart';\n"
+          if import_line not in text:
+              if import_anchor not in text:
+                  raise SystemExit('import anchor not found')
+              text = text.replace(import_anchor, import_anchor + import_line, 1)
+
+          old = "    final cinematicStyle = _remainingDynamicBackgrounds[journeyId];\n"
+          new = """    final configuredStyle = missingJourneyCinematicStyles[journeyId];
+    final cinematicStyle = _remainingDynamicBackgrounds[journeyId] ??
+        (configuredStyle == null
+            ? null
+            : _CinematicBackgroundStyle(
+                keyName: journeyId,
+                duration: configuredStyle.duration,
+                skyColor: configuredStyle.skyColor,
+                atmosphereColor: configuredStyle.atmosphereColor,
+                foregroundColor: configuredStyle.foregroundColor,
+                cameraTravel: configuredStyle.cameraTravel,
+                waterLight: configuredStyle.waterLight,
+              ));
+"""
+          if old in text:
+              text = text.replace(old, new, 1)
+          elif new not in text:
+              raise SystemExit('cinematic style anchor not found')
+
+          path.write_text(text)
+          PY
+      - name: Remove one-time workflow
+        run: rm .github/workflows/apply-missing-background-bindings.yml
+      - name: Commit renderer integration
+        run: |
+          git config user.name "Phoenix Background Agent"
+          git config user.email "actions@users.noreply.github.com"
+          git add app/lib/widgets/destination_background.dart .github/workflows/apply-missing-background-bindings.yml
+          git commit -m "Connect remaining journeys to cinematic renderer"
+          git push origin HEAD:agent/enable-missing-dynamic-backgrounds
