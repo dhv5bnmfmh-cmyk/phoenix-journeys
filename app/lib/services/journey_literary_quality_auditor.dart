@@ -49,7 +49,7 @@ class JourneyLiteraryQualityReport {
         LiteraryIssueSeverity.light => 2,
       };
     }
-    return result.clamp(0, 100);
+    return result.clamp(0, 100).toInt();
   }
 }
 
@@ -86,7 +86,7 @@ JourneyLiteraryQualityReport auditJourneyLiteraryQuality(
         message: '${story.id} is missing protagonist, mode, arc, or ending identity.',
       ));
     }
-    if (!story.sections.first.contains(_firstCharacterName(story.protagonist))) {
+    if (!_openingEstablishesProtagonist(story)) {
       issues.add(LiteraryQualityIssue(
         code: 'protagonist-not-established-${story.id}',
         severity: LiteraryIssueSeverity.medium,
@@ -225,13 +225,19 @@ JourneyLiteraryQualityReport auditJourneyLiteraryQuality(
   );
 }
 
-String _firstCharacterName(String protagonist) {
-  final separators = ['与', '和', '、', ' '];
-  var result = protagonist;
-  for (final separator in separators) {
-    if (result.contains(separator)) result = result.split(separator).first;
+bool _openingEstablishesProtagonist(EditorialStoryRevision story) {
+  final opening = story.sections.first;
+  final names = story.protagonist
+      .split(RegExp(r'[与和、/ ]'))
+      .map((name) => name.trim())
+      .where((name) => name.isNotEmpty);
+  for (final name in names) {
+    final candidates = <String>{name};
+    if (name.length >= 2) candidates.add(name.substring(name.length - 2));
+    if (name.length >= 3) candidates.add(name.substring(name.length - 3));
+    if (candidates.any(opening.contains)) return true;
   }
-  return result.trim();
+  return false;
 }
 
 Set<String> _duplicates(Iterable<String> values) {
