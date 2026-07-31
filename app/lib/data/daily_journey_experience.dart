@@ -1,6 +1,8 @@
 import '../models/story_content.dart';
 import 'journey_data.dart';
 
+export 'journey_data.dart' show ReadingAnnotation;
+
 class DailyJourneyExperience {
   const DailyJourneyExperience({
     required this.id,
