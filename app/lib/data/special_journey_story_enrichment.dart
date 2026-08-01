@@ -99,6 +99,36 @@ const _literarySignature = <SpecialJourneyEnrichmentText>[
     vietnamese: 'Cuối cùng bướm trở lại mu bàn tay, trao câu hỏi “tôi là ai” cho con người vừa tỉnh.',
     english: 'The butterfly returns to your hand, giving the question “who am I?” back to the waking you.',
   ),
+  SpecialJourneyEnrichmentText(
+    chinese: '你没有追问哪一条路才是真实的，而是在两行脚印之间坐下，听它们被风一点点抹平。',
+    pinyin: 'Nǐ méiyǒu zhuīwèn nǎ yì tiáo lù cái shì zhēnshí de, ér shì zài liǎng háng jiǎoyìn zhījiān zuòxià, tīng tāmen bèi fēng yìdiǎn diǎn mǒpíng.',
+    vietnamese: 'Bạn không còn truy hỏi con đường nào mới là thật, mà ngồi giữa hai hàng dấu chân, lắng nghe gió dần xóa chúng.',
+    english: 'You stop asking which path is real and sit between the two trails of footprints, listening as the wind slowly erases them.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '竹林没有给出结论；一只蝴蝶离开以后，另一只从你的袖口飞出，世界仍容得下两种解释。',
+    pinyin: 'Zhúlín méiyǒu gěichū jiélùn; yì zhī húdié líkāi yǐhòu, lìng yì zhī cóng nǐ de xiùkǒu fēichū, shìjiè réng róng de xià liǎng zhǒng jiěshì.',
+    vietnamese: 'Rừng trúc không đưa ra kết luận; một con bướm bay đi, con khác lại bay khỏi tay áo bạn, và thế giới vẫn chứa được hai cách hiểu.',
+    english: 'The bamboo grove offers no verdict; one butterfly leaves and another flies from your sleeve, while the world holds both explanations.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '晨光照见树下压弯的草，也照见翅膀停过的细小鳞粉，两种证据彼此并不服从。',
+    pinyin: 'Chénguāng zhàojiàn shùxià yāwān de cǎo, yě zhàojiàn chìbǎng tíngguo de xìxiǎo línfěn, liǎng zhǒng zhèngjù bǐcǐ bìng bù fúcóng.',
+    vietnamese: 'Ánh sớm soi cỏ bị ép dưới gốc cây và cả lớp phấn nhỏ nơi cánh từng đậu; hai bằng chứng không chịu khuất phục nhau.',
+    english: 'Morning light reveals bent grass beneath the tree and fine scales where wings had rested; neither piece of evidence yields to the other.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '你带着未解的问题下山，不把梦当成答案，也不把醒来当成胜利；脚步因此比来时更安静。',
+    pinyin: 'Nǐ dàizhe wèijiě de wèntí xiàshān, bù bǎ mèng dàngchéng dá’àn, yě bù bǎ xǐnglái dàngchéng shènglì; jiǎobù yīncǐ bǐ láishí gèng ānjìng.',
+    vietnamese: 'Bạn mang câu hỏi chưa giải xuống núi, không xem giấc mơ là đáp án hay tỉnh dậy là chiến thắng; bước chân vì thế lặng hơn lúc đến.',
+    english: 'You descend with the question unresolved, treating neither the dream as an answer nor waking as a victory; your steps are quieter than before.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '山脚的炊烟提醒你日常仍在继续，可当有人问起竹林，你只摊开空空的手掌，没有替那只蝴蝶作证。',
+    pinyin: 'Shānjiǎo de chuīyān tíxǐng nǐ rìcháng réng zài jìxù, kě dāng yǒurén wènqǐ zhúlín, nǐ zhǐ tānkāi kōngkōng de shǒuzhǎng, méiyǒu tì nà zhī húdié zuòzhèng.',
+    vietnamese: 'Khói bếp dưới chân núi nhắc rằng đời thường vẫn tiếp diễn; nhưng khi có người hỏi về rừng trúc, bạn chỉ xòe bàn tay trống, không làm chứng thay con bướm.',
+    english: 'Cooking smoke below says ordinary life continues; when someone asks about the grove, you open an empty palm and offer no testimony for the butterfly.',
+  ),
 ];
 
 const _mythSignature = <SpecialJourneyEnrichmentText>[
