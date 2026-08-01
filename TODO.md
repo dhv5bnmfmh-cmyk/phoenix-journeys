@@ -12,13 +12,13 @@ Execution Authority: Phoenix 唯一近期执行队列。
 
 本文件将 [`roadmap/ROADMAP.md`](roadmap/ROADMAP.md) 转化为有顺序、可审核的工作队列。ROADMAP 管阶段顺序与 Sprint 编号；本文件管可执行准备、依赖与完成证据；`CHANGELOG` 只记录已经发生的工作。
 
-当前没有整改 Sprint 处于活动状态。Sprint 27–32 全部为 `Planned`。本次规划更新不启动 Sprint 27，也不声称当前软件已经符合 Story System v1.0 或 Visual System v1.0。
+Sprint 27 已完成 Story 全量合规审查与 P0/P1 直接修复。Sprint 28–32 保持 `Planned`，本次不启动 Sprint 28，也不声称 Visual System 运行时整改已经完成。
 
 ## 2. Planned 执行队列
 
 | 顺序 | Sprint | 状态 | 必须取得的结果 | 允许开始条件 |
 |---:|---|---|---|---|
-| 1 | 27 — Story 全量合规审查与 P0/P1 直接修复 | Planned | 审查全部真实 Story 范围；修复并复审全部已发现 P0/P1 及受影响学习内容。 | Story System v1.0 基线可用，且 Sprint 27 获得明确执行指令。 |
+| 1 | 27 — Story 全量合规审查与 P0/P1 直接修复 | Completed | 36 个 Journey 已全量复审；普通/特别 Journey 与关联学习内容的 P0/P1 已修复并复审为零。 | 退出证据：106 条普通 Journey ReadingAnnotation 同步、WordEntry/Discovery/Challenge 输入复核、Node `340/340`、静态校验通过。 |
 | 2 | 28 — Story 深度质量修复与最终复审 | Planned | 修复 P2 与累积 P3；Story Gate、Checklist、Review 通过；P0/P1/P2 清零。 | Sprint 27 退出证据完整。 |
 | 3 | 29 — Visual 全量合规审查与 P0/P1 直接修复 | Planned | 审查真实页面和资源；修复或替换全部 Visual P0/P1，包括版权和 AI 阻断项。 | Sprint 28 退出证据建立当前 Story 基线。 |
 | 4 | 30 — Visual 深度质量、素材替换与性能整改 | Planned | 解决 Release 所需 P2/P3、响应式、性能、Reduced Motion、Static Fallback、失败和生命周期问题。 | Sprint 29 退出证据完整。 |
@@ -29,11 +29,11 @@ Execution Authority: Phoenix 唯一近期执行队列。
 
 ## 3. Sprint 27–32 执行控制
 
-- [ ] 审查当前 Sprint 范围内的真实代码、页面、内容、数据和资源。
-- [ ] 每个问题记录等级、来源位置、受影响 Journey/页面、违反规范和证据。
-- [ ] 修复真实来源中的每个范围内失败项，不得以报告替代修复。
-- [ ] P0/P1 优先于 P2/P3；按权威 Gate 阻断 Preview 或 Release。
-- [ ] Story 修改同步生词、发现、挑战、留下印象、盖章及其他受影响学习数据。
+- [x] Sprint 27 已审查全部 27 个普通 Journey、9 个特别 Journey 及其真实 Story 学习数据。
+- [x] Sprint 27 已记录并复审问题等级、来源位置、受影响 Journey、规范与证据。
+- [x] Sprint 27 已在真实内容源中修复全部已识别 P0/P1，没有以报告替代修复。
+- [x] Sprint 27 已完成 P0/P1 清零；P2/P3 文学精修仍由 Planned Sprint 28 负责。
+- [x] Sprint 27 Story 修改已同步复核生词、发现、动态挑战输入、回忆与盖章流程。
 - [ ] Visual 修改同步版权记录、响应式版本、性能证据、Reduced Motion、Static Fallback 和失败恢复。
 - [ ] 修复后重跑全部受影响 Gate、Checklist、Review 和页面级 QA。
 - [ ] 保留 Commit、PR、测试、CI、设备与 Review 证据；状态文字不能证明完成。
@@ -73,4 +73,4 @@ Execution Authority: Phoenix 唯一近期执行队列。
 - `Blocked`：入口依赖或不可 Waive 要求阻止继续。
 - `Completed`：全部退出条件和证据已存在并通过审核。
 
-本次更新后 Sprint 27–32 必须保持 `Planned`。不得通过改状态伪造进度，也不得在工作真实发生前把计划移入 `CHANGELOG`。
+本次更新后 Sprint 27 为 `Completed`，Sprint 28–32 必须保持 `Planned`。项目当前不存在权威 CHANGELOG 文件，因此没有创建第二套变更记录；真实变更证据保留在 Commit、PR、本文件与 ROADMAP。

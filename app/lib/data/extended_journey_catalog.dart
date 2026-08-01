@@ -78,44 +78,44 @@ JourneyContentRecord _buildJourney({
 }
 
 const hangzhouStoryParagraphs = <String>[
-  '清晨，你沿着苏堤慢慢向前走。湖面像一张安静的镜子，远处的山、桥和柳树倒映在水中。',
-  '西湖不是完全自然形成的风景。历代人们修筑堤岸、疏浚湖水，又建起亭台、宝塔和园林，让自然与人的设计彼此融合。',
-  '从唐宋以来，诗人、画家和学者不断描写这里。许多景点因此不仅有形状，也有名字、故事和情感。',
-  '站在湖边，你会发现西湖真正特别的地方，是人们没有把自然变成背景，而是让城市生活与山水一起呼吸。',
+  '杭州高中生顾遥每天清晨从苏堤骑车送早餐，今天却要在上课前把一只受伤水鸟送到救护点。封闭维修的堤岸让她只能在迟到与绕行之间选择。',
+  '她熟悉西湖并非纯粹自然：疏浚、堤岸、亭台和园林共同安排水与人的距离。为了抄近路穿过草岸，她已经抬起车轮，却看见新栽柳树根旁的警示绳。',
+  '顾遥选择沿白堤绕远，请常客接力带走早餐，自己护着纸箱过桥。她错过早读，却让水鸟和脆弱堤岸都没有为她的急切付出代价。',
+  '傍晚再经过湖边，顾遥第一次不把倒映当作景点背景。人工设计与山水彼此融合，城市一起呼吸，意味着每个日常决定都要给另一种生命留下位置。',
 ];
 
 const hangzhouStoryAnnotations = <ReadingAnnotation>[
   ReadingAnnotation(
     pinyin:
-        'Qīngchén, nǐ yánzhe Sūdī mànmàn xiàng qián zǒu. Húmiàn xiàng yì zhāng ānjìng de jìngzi, yuǎnchù de shān, qiáo hé liǔshù dàoyìng zài shuǐ zhōng.',
+        'háng zhōu gāo zhōng shēng gù yáo měi tiān qīng chén cóng sū dī qí chē sòng zǎo cān ， jīn tiān què yào zài shàng kè qián bǎ yì zhī shòu shāng shuǐ niǎo sòng dào jiù hù diǎn 。 fēng bì wéi xiū de dī àn ràng tā zhǐ néng zài chí dào yǔ rào xíng zhī jiān xuǎn zé 。',
     vietnamese:
-        'Sáng sớm, bạn chậm rãi đi dọc đê Tô. Mặt hồ như một tấm gương yên tĩnh, phản chiếu núi, cầu và hàng liễu phía xa.',
+        'Học sinh Cố Dao thường đạp xe giao bữa sáng qua đê Tô, nhưng hôm nay phải đưa một chim nước bị thương tới trạm cứu hộ trước giờ học. Đoạn đê đóng sửa khiến cô phải chọn đi vòng hay đến muộn.',
     english:
-        'At dawn, you walk slowly along Su Causeway. The lake is a quiet mirror reflecting distant hills, bridges, and willows.',
+        'Student Gu Yao usually delivers breakfast along Su Causeway, but today she must take an injured waterbird to a rescue station before class. A closure forces her to choose between a detour and being late.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Xīhú bú shì wánquán zìrán xíngchéng de fēngjǐng. Lìdài rénmen xiūzhù dī àn, shūjùn húshuǐ, yòu jiànqǐ tíngtái, bǎotǎ hé yuánlín, ràng zìrán yǔ rén de shèjì bǐcǐ rónghé.',
+        'tā shú xī xī hú bìng fēi chún cuì zì rán ： shū jùn 、 dī àn 、 tíng tái hé yuán lín gòng tóng ān pái shuǐ yǔ rén de jù lí 。 wèi le chāo jìn lù chuān guò cǎo àn ， tā yǐ jīng tái qǐ chē lún ， què kàn jiàn xīn zāi liǔ shù gēn páng de jǐng shì shéng 。',
     vietnamese:
-        'Tây Hồ không phải là cảnh quan hoàn toàn tự nhiên. Qua nhiều triều đại, con người xây đê, nạo vét hồ và dựng đình, tháp, vườn để kết hợp thiên nhiên với thiết kế của con người.',
+        'Cô biết Tây Hồ được tạo nên bởi nạo vét, đê, đình và vườn. Định cắt qua bờ cỏ, cô nhìn thấy dây cảnh báo bên rễ liễu mới trồng.',
     english:
-        'West Lake is not a wholly natural landscape. Generations built causeways, dredged the lake, and added pavilions, pagodas, and gardens.',
+        'She knows West Lake was shaped by dredging, causeways, pavilions, and gardens. About to cut across the bank, she notices a warning rope beside newly planted willow roots.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Cóng Táng Sòng yǐlái, shīrén, huàjiā hé xuézhě bùduàn miáoxiě zhèlǐ. Xǔduō jǐngdiǎn yīncǐ bùjǐn yǒu xíngzhuàng, yě yǒu míngzi, gùshì hé qínggǎn.',
+        'gù yáo xuǎn zé yán bái dī rào yuǎn ， qǐng cháng kè jiē lì dài zǒu zǎo cān ， zì jǐ hù zhe zhǐ xiāng guò qiáo 。 tā cuò guò zǎo dú ， què ràng shuǐ niǎo hé cuì ruò dī àn dōu méi yǒu wèi tā de jí qiè fù chū dài jià 。',
     vietnamese:
-        'Từ thời Đường Tống, thi nhân, họa sĩ và học giả liên tục miêu tả nơi đây. Vì vậy nhiều thắng cảnh không chỉ có hình dáng mà còn có tên gọi, câu chuyện và cảm xúc.',
+        'Cố Dao chọn đi vòng qua đê Bạch, nhờ khách quen chuyển bữa sáng và tự bảo vệ chiếc hộp. Cô lỡ giờ đọc bài nhưng không để chim hay bờ đê trả giá cho sự vội vàng.',
     english:
-        'Since the Tang and Song periods, poets, painters, and scholars have given the scenery names, stories, and emotion.',
+        'Gu Yao detours along Bai Causeway, asks regular customers to relay the breakfasts, and protects the box herself. She misses morning reading but makes neither bird nor embankment pay for her haste.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Zhàn zài húbiān, nǐ huì fāxiàn Xīhú zhēnzhèng tèbié de dìfang, shì rénmen méiyǒu bǎ zìrán biàn chéng bèijǐng, ér shì ràng chéngshì shēnghuó yǔ shānshuǐ yìqǐ hūxī.',
+        'bàng wǎn zài jīng guò hú biān ， gù yáo dì yī cì bù bǎ dǎo yìng dàng zuò jǐng diǎn bèi jǐng 。 rén gōng shè jì yǔ shān shuǐ bǐ cǐ róng hé ， chéng shì yì qǐ hū xī ， yì wèi zhe měi gè rì cháng jué dìng dū yào gěi lìng yì zhǒng shēng mìng liú xià wèi zhì 。',
     vietnamese:
-        'Đứng bên hồ, bạn nhận ra điều đặc biệt của Tây Hồ là con người không biến thiên nhiên thành phông nền, mà để đời sống đô thị cùng hít thở với núi nước.',
+        'Chiều tối, cô không còn xem phản chiếu như phông nền điểm tham quan. Thiết kế nhân tạo hòa với núi nước nghĩa là mỗi quyết định hằng ngày phải chừa chỗ cho sự sống khác.',
     english:
-        'West Lake is special because nature is not merely a backdrop; city life and landscape breathe together.',
+        'That evening, she no longer treats reflections as scenic backdrop. Human design blending with landscape means every daily decision must leave room for another life.',
   ),
 ];
 
@@ -139,17 +139,17 @@ const hangzhouDiscoveries = <DiscoveryEntry>[
 ];
 
 const chengduStoryParagraphs = <String>[
-  '午后，你走进成都宽窄巷子。青砖墙、木门和一座座院落，把城市的声音慢慢放低。',
-  '这里由宽巷子、窄巷子和井巷子组成。三条平行街巷保留了清代街区的空间，也装进了今天的茶馆、餐厅和小店。',
-  '你在院门前停下，听见盖碗茶的杯盖轻轻碰响。老建筑没有停止使用，而是在新的生活方式里继续存在。',
-  '宽窄巷子的意义，也许不只是“看古街”，而是观察一座城市怎样把慢生活、商业与历史放在同一个院子里。',
+  '成都茶馆学徒余声要在宽窄巷子接待一场直播。老板要求他把盖碗茶动作加快一倍，三分钟卖完套餐，可常来的陈婆婆仍等着他按旧节奏冲第一碗。',
+  '宽、窄、井三条巷子同时挤满客人，商业噪声盖过杯盖轻响。余声若照脚本走能得到转正机会，若先照顾老客，直播可能冷场。',
+  '镜头亮起时，他选择让陈婆婆教观众听水温，并删掉夸张口号。节奏慢下来，原本催单的人开始问院落怎样继续使用，老板却当场扣掉了他的奖金。',
+  '收摊后，陈婆婆把杯盖放回碗上。青砖院落与三条平行巷子仍保留慢生活，余声不反对商业，却不愿老建筑只剩适合镜头的三分钟。',
 ];
 
 const chengduStoryAnnotations = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Wǔhòu, nǐ zǒujìn Chéngdū Kuānzhǎi Xiàngzi. Qīngzhuān qiáng, mùmén hé yí zuò zuò yuànluò, bǎ chéngshì de shēngyīn mànmàn fàng dī.', vietnamese: 'Buổi chiều, bạn bước vào ngõ Rộng Hẹp ở Thành Đô. Tường gạch xanh, cửa gỗ và những sân nhà khiến âm thanh thành phố dần dịu xuống.', english: 'In the afternoon, you enter Chengdu’s Kuanzhai Alley, where grey-brick walls, wooden doors, and courtyards soften the city’s noise.'),
-  ReadingAnnotation(pinyin: 'Zhèlǐ yóu Kuān Xiàngzi, Zhǎi Xiàngzi hé Jǐng Xiàngzi zǔchéng. Sān tiáo píngxíng jiēxiàng bǎoliú le Qīngdài jiēqū de kōngjiān, yě zhuāngjìn le jīntiān de cháguǎn, cāntīng hé xiǎodiàn.', vietnamese: 'Nơi đây gồm ngõ Rộng, ngõ Hẹp và ngõ Giếng. Ba con ngõ song song giữ cấu trúc khu phố thời Thanh và chứa những quán trà, nhà hàng, cửa tiệm hôm nay.', english: 'Three parallel lanes preserve a Qing-era urban pattern while hosting today’s teahouses, restaurants, and shops.'),
-  ReadingAnnotation(pinyin: 'Nǐ zài yuànmén qián tíngxià, tīngjiàn gàiwǎnchá de bēigài qīngqīng pèngxiǎng. Lǎo jiànzhù méiyǒu tíngzhǐ shǐyòng, ér shì zài xīn de shēnghuó fāngshì lǐ jìxù cúnzài.', vietnamese: 'Bạn dừng trước cổng sân và nghe nắp chén trà khẽ chạm. Các công trình cũ không ngừng được sử dụng mà tiếp tục sống trong lối sống mới.', english: 'The old buildings remain in use, continuing their lives through contemporary ways of living.'),
-  ReadingAnnotation(pinyin: 'Kuānzhǎi Xiàngzi de yìyì, yěxǔ bù zhǐ shì “kàn gǔjiē”, ér shì guānchá yí zuò chéngshì zěnyàng bǎ màn shēnghuó, shāngyè yǔ lìshǐ fàng zài tóng yí gè yuànzi lǐ.', vietnamese: 'Ý nghĩa của ngõ Rộng Hẹp không chỉ là ngắm phố cổ, mà còn là quan sát cách một thành phố đặt nhịp sống chậm, thương mại và lịch sử trong cùng một khoảng sân.', english: 'Kuanzhai Alley shows how slow living, commerce, and history can occupy the same courtyard.'),
+  ReadingAnnotation(pinyin: 'chéng dū chá guǎn xué tú yú shēng yào zài kuān zhǎi xiàng zǐ jiē dài yì chǎng zhí bō 。 lǎo bǎn yāo qiú tā bǎ gài wǎn chá dòng zuò jiā kuài yí bèi ， sān fēn zhōng mài wán tào cān ， kě cháng lái de chén pó po réng děng zhe tā àn jiù jié zòu chōng dì yī wǎn 。', vietnamese: 'Học việc quán trà Dư Thanh phải đón một buổi phát trực tiếp ở ngõ Rộng Hẹp. Chủ yêu cầu tăng gấp đôi tốc độ pha trà, nhưng bà Trần vẫn chờ chén đầu theo nhịp cũ.', english: 'Teahouse apprentice Yu Sheng must host a livestream in Kuanzhai Alley. His boss demands double-speed tea service, while regular customer Granny Chen waits for the first bowl at the old pace.'),
+  ReadingAnnotation(pinyin: 'kuān 、 zhǎi 、 jǐng sān tiáo xiàng zǐ tóng shí jǐ mǎn kè rén ， shāng yè zào shēng gài guò bēi gài qīng xiǎng 。 yú shēng ruò zhào jiǎo běn zǒu néng dé dào zhuǎn zhèng jī huì ， ruò xiān zhào gù lǎo kè ， zhí bō kě néng lěng chǎng 。', vietnamese: 'Ba ngõ Rộng, Hẹp và Giếng đông nghịt, tiếng buôn bán lấn át tiếng nắp chén. Theo kịch bản có thể được chính thức nhận việc; phục vụ khách cũ trước có thể làm buổi phát nguội đi.', english: 'Wide, Narrow, and Well alleys are packed, and commerce drowns the cup-lid sound. Following the script may secure his job; serving the regular first may stall the stream.'),
+  ReadingAnnotation(pinyin: 'jìng tóu liàng qǐ shí ， tā xuǎn zé ràng chén pó po jiào guān zhòng tīng shuǐ wēn ， bìng shān diào kuā zhāng kǒu hào 。 jié zòu màn xià lái ， yuán běn cuī dān de rén kāi shǐ wèn yuàn luò zěn yàng jì xù shǐ yòng ， lǎo bǎn què dāng chǎng kòu diào le tā de jiǎng jīn 。', vietnamese: 'Khi máy quay bật, anh để bà Trần dạy khán giả nghe nhiệt độ nước và bỏ khẩu hiệu phóng đại. Khán giả bắt đầu hỏi về đời sống trong sân, nhưng chủ trừ tiền thưởng của anh.', english: 'When the camera starts, he lets Granny Chen teach viewers to hear water temperature and drops the slogans. Viewers ask how courtyards remain in use, but his boss deducts his bonus.'),
+  ReadingAnnotation(pinyin: 'shōu tān hòu ， chén pó po bǎ bēi gài fàng huí wǎn shàng 。 qīng zhuān yuàn luò yǔ sān tiáo píng xíng xiàng zi réng bǎo liú màn shēng huó ， yú shēng bù fǎn duì shāng yè ， què bú yuàn lǎo jiàn zhù zhī shèng shì hé jìng tóu de sān fēn zhōng 。', vietnamese: 'Sau giờ đóng cửa, Dư Thanh chọn nhịp kinh doanh của mình: sân gạch xanh và đời sống chậm không thể chỉ còn ba phút phù hợp với máy quay.', english: 'After closing, Yu Sheng chooses the pace at which he wants to work: grey-brick courtyards and slow living cannot be reduced to three camera-friendly minutes.'),
 ];
 
 const chengduWords = <WordEntry>[
@@ -172,17 +172,17 @@ const chengduDiscoveries = <DiscoveryEntry>[
 ];
 
 const nanjingStoryParagraphs = <String>[
-  '夜色降临，你沿着秦淮河走向夫子庙。水面映着灯光，石桥、牌坊和街巷把河岸连接成一条缓慢展开的历史线。',
-  '夫子庙是这片风光带的核心，附近还有江南贡院、古桥和传统街区。教育、考试、商业和民俗曾在这里彼此交织。',
-  '河边不只有古建筑。灯会、小吃、曲艺和手工艺，让历史文化继续进入今天的节日和日常生活。',
-  '当你看见游船从桥下经过，会明白秦淮河保存的不是一个静止的旧南京，而是一种仍然会发光、会说话的城市记忆。',
+  '南京剪纸学徒苏禾为秦淮灯会设计主灯，评审却要她删掉江南贡院考生的小窗，说游客只喜欢大而亮的图案。她若拒绝，师傅的摊位可能失去今年的位置。',
+  '苏禾沿夫子庙、古桥和牌坊收集旧纹样，也听曲艺艺人讲考试、商业与民俗怎样在河岸交织。主灯尺寸有限，她必须在夺目的游船轮廓与普通人的窗格之间取舍。',
+  '她保留小窗，把最大的灯面剪成可从桥下看见的空格。点灯时，水面反光穿过窗格，观众先看见光，靠近后才发现一个等待放榜的人。',
+  '摊位没有拿到最佳位置，师傅却把纸窗挂在秦淮河边。苏禾让城市记忆继续发光的方式，不是把过去做成静止布景，而是没有删掉其中安静的人。',
 ];
 
 const nanjingStoryAnnotations = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Yèsè jiànglín, nǐ yánzhe Qínhuái Hé zǒuxiàng Fūzǐmiào. Shuǐmiàn yìngzhe dēngguāng, shíqiáo, páifāng hé jiēxiàng bǎ hé àn liánjiē chéng yì tiáo huǎnmàn zhǎnkāi de lìshǐ xiàn.', vietnamese: 'Khi đêm xuống, bạn đi dọc sông Tần Hoài về phía Phu Tử Miếu. Ánh đèn phản chiếu trên nước, còn cầu đá, cổng bài và ngõ phố nối bờ sông thành một tuyến lịch sử.', english: 'At night, lights on the Qinhuai River connect stone bridges, ceremonial gates, and lanes into a slowly unfolding line of history.'),
-  ReadingAnnotation(pinyin: 'Fūzǐmiào shì zhè piàn fēngguāngdài de héxīn, fùjìn hái yǒu Jiāngnán Gòngyuàn, gǔqiáo hé chuántǒng jiēqū. Jiàoyù, kǎoshì, shāngyè hé mínsú céng zài zhèlǐ bǐcǐ jiāozhī.', vietnamese: 'Phu Tử Miếu là trung tâm của khu thắng cảnh; gần đó có Giang Nam Cống Viện, cầu cổ và phố truyền thống. Giáo dục, thi cử, thương mại và dân tục từng đan xen tại đây.', english: 'The Confucius Temple area links education, examinations, commerce, folk culture, historic bridges, and traditional streets.'),
-  ReadingAnnotation(pinyin: 'Hébiān bù zhǐ yǒu gǔ jiànzhù. Dēnghuì, xiǎochī, qǔyì hé shǒugōngyì, ràng lìshǐ wénhuà jìxù jìnrù jīntiān de jiérì hé rìcháng shēnghuó.', vietnamese: 'Bên sông không chỉ có kiến trúc cổ. Hội đèn, món ăn, nghệ thuật dân gian và thủ công đưa văn hóa lịch sử vào lễ hội và đời sống hôm nay.', english: 'Lantern festivals, food, folk performance, and crafts carry history into contemporary festivals and daily life.'),
-  ReadingAnnotation(pinyin: 'Dāng nǐ kànjiàn yóuchuán cóng qiáoxià jīngguò, huì míngbai Qínhuái Hé bǎocún de bú shì yí gè jìngzhǐ de jiù Nánjīng, ér shì yì zhǒng réngrán huì fāguāng, huì shuōhuà de chéngshì jìyì.', vietnamese: 'Khi thuyền đi qua dưới cầu, bạn hiểu rằng sông Tần Hoài không lưu giữ một Nam Kinh cũ bất động, mà là ký ức đô thị vẫn phát sáng và kể chuyện.', english: 'The river preserves not a frozen old Nanjing, but an urban memory that still shines and speaks.'),
+  ReadingAnnotation(pinyin: 'nán jīng jiǎn zhǐ xué tú sū hé wèi qín huái dēng huì shè jì zhǔ dēng ， píng shěn què yào tā shān diào jiāng nán gòng yuàn kǎo shēng de xiǎo chuāng ， shuō yóu kè zhī xǐ huan dà ér liàng de tú àn 。 tā ruò jù jué ， shī fu de tān wèi kě néng shī qù jīn nián de wèi zhì 。', vietnamese: 'Học việc cắt giấy Tô Hòa thiết kế đèn chính cho lễ hội Tần Hoài. Ban giám khảo muốn xóa ô cửa nhỏ của thí sinh Cống Viện; nếu từ chối, quầy của thầy có thể mất chỗ.', english: 'Paper-cutting apprentice Su He designs the main Qinhuai lantern. Judges want the examination candidate\'s small window removed; refusing may cost her mentor\'s stall its place.'),
+  ReadingAnnotation(pinyin: 'sū hé yán fū zǐ miào 、 gǔ qiáo hé pái fāng shōu jí jiù wén yàng ， yě tīng qǔ yì yì rén jiǎng kǎo shì 、 shāng yè yǔ mín sú zěn yàng zài hé àn jiāo zhī 。 zhǔ dēng chǐ cùn yǒu xiàn ， tā bì xū zài duó mù dì yóu chuán lún kuò yǔ pǔ tōng rén de chuāng gé zhī jiān qǔ shě 。', vietnamese: 'Cô thu thập hoa văn quanh Phu Tử Miếu, cầu cổ và cổng bài, nghe nghệ nhân kể chuyện thi cử, thương mại và dân tục. Mặt đèn có hạn, cô phải chọn đường nét thuyền nổi bật hay ô cửa của người bình thường.', english: 'She gathers patterns near the Confucius Temple, old bridges, and archways, hearing how examinations, commerce, and custom intertwined. Limited space forces a choice between a bright boat and an ordinary person\'s window.'),
+  ReadingAnnotation(pinyin: 'tā bǎo liú xiǎo chuāng ， bǎ zuì dà de dēng miàn jiǎn chéng kě cóng qiáo xià kàn jiàn de kòng gé 。 diǎn dēng shí ， shuǐ miàn fǎn guāng chuān guò chuāng gé ， guān zhòng xiān kàn jiàn guāng ， kào jìn hòu cái fā xiàn yí gè děng dài fàng bǎng de rén 。', vietnamese: 'Cô giữ ô cửa và cắt mặt đèn lớn thành khoảng trống nhìn thấy từ dưới cầu. Ánh nước xuyên qua; người xem thấy ánh sáng trước rồi mới thấy người chờ bảng kết quả.', english: 'She keeps the window and cuts the large lantern face into openings visible from beneath the bridge. Reflected light passes through; viewers see the glow before noticing a person awaiting results.'),
+  ReadingAnnotation(pinyin: 'tān wèi méi yǒu ná dào zuì jiā wèi zhì ， shī fu què bǎ zhǐ chuāng guà zài qín huái hé biān 。 sū hé ràng chéng shì jì yì jì xù fā guāng de fāng shì ， bú shì bǎ guò qù zuò chéng jìng zhǐ bù jǐng ， ér shì méi yǒu shān diào qí zhōng ān jìng de rén 。', vietnamese: 'Quầy không được chỗ tốt nhất, nhưng thầy treo cửa giấy bên sông. Tô Hòa giữ ký ức đô thị sống động bằng cách không xóa người im lặng khỏi quá khứ.', english: 'The stall does not get the best location, but her mentor hangs the paper window by the river. Su He keeps urban memory alive by refusing to erase its quiet people.'),
 ];
 
 const nanjingWords = <WordEntry>[
@@ -205,17 +205,17 @@ const nanjingDiscoveries = <DiscoveryEntry>[
 ];
 
 const guangzhouStoryParagraphs = <String>[
-  '走进广州陈家祠，你最先注意到的也许不是大厅，而是屋脊、门窗和墙面上密密层层的装饰。',
-  '木雕、砖雕、石雕、陶塑和灰塑同时出现在建筑上。人物、花鸟和故事被工匠放进梁架、屋顶与墙壁。',
-  '这座晚清建筑曾与广东各地陈姓宗族和读书人有关，后来成为广东民间工艺博物馆。',
-  '陈家祠像一本不能快速翻完的立体图书。你越靠近细节，越能看见岭南工艺怎样把建筑变成文化记忆。',
+  '广州灰塑修复学徒陈澄在陈家祠屋脊上找到一只缺翅的陶鸟。师傅让她按对称图样补齐，博物馆开放在即；她却发现另一侧并没有同样的鸟。',
+  '陈澄在木雕、砖雕、石雕和陶塑之间寻找线索，人物花鸟各有叙事位置。照模板补最快，也最整齐，但可能把晚清工匠原本故意留下的方向感抹掉。',
+  '她选择只加固断面，不凭想象造出翅膀，并把判断依据公开写进修复记录。开放日有人嫌它“不完整”，孩子却沿着鸟的朝向找到了屋脊另一端的故事。',
+  '陈澄没有把宗族建筑修成一本崭新的图书。她学会让缺页仍可辨认：岭南工艺的文化记忆，既在精密细节里，也在不伪造答案的克制里。',
 ];
 
 const guangzhouStoryAnnotations = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Zǒujìn Guǎngzhōu Chénjiācí, nǐ zuìxiān zhùyì dào de yěxǔ bú shì dàtīng, ér shì wūjǐ, ménchuāng hé qiángmiàn shàng mìmì céngcéng de zhuāngshì.', vietnamese: 'Bước vào Trần Gia Từ ở Quảng Châu, điều bạn chú ý đầu tiên có lẽ không phải đại sảnh mà là lớp trang trí dày đặc trên nóc, cửa và tường.', english: 'At Chen Clan Ancestral Hall, the first thing you notice may be the dense decoration on roof ridges, doors, windows, and walls.'),
-  ReadingAnnotation(pinyin: 'Mùdiāo, zhuāndiāo, shídiāo, táosù hé huīsù tóngshí chūxiàn zài jiànzhù shàng. Rénwù, huāniǎo hé gùshì bèi gōngjiàng fàngjìn liángjià, wūdǐng yǔ qiángbì.', vietnamese: 'Chạm gỗ, chạm gạch, chạm đá, tượng gốm và phù điêu vữa cùng xuất hiện trên kiến trúc; nhân vật, hoa chim và câu chuyện được đặt lên khung, mái và tường.', english: 'Wood, brick, and stone carving, ceramic sculpture, and lime sculpture fill the structure with figures, flowers, birds, and stories.'),
-  ReadingAnnotation(pinyin: 'Zhè zuò Wǎnqīng jiànzhù céng yǔ Guǎngdōng gèdì Chén xìng zōngzú hé dúshūrén yǒuguān, hòulái chéngwéi Guǎngdōng Mínjiān Gōngyì Bówùguǎn.', vietnamese: 'Công trình cuối thời Thanh này từng gắn với các dòng họ Trần và người đi học từ nhiều nơi ở Quảng Đông, sau trở thành Bảo tàng Mỹ thuật Dân gian Quảng Đông.', english: 'The late-Qing complex served Chen clans and students from across Guangdong and later became the Guangdong Folk Arts Museum.'),
-  ReadingAnnotation(pinyin: 'Chénjiācí xiàng yì běn bùnéng kuàisù fānwán de lìtǐ túshū. Nǐ yuè kàojìn xìjié, yuè néng kànjiàn Lǐngnán gōngyì zěnyàng bǎ jiànzhù biàn chéng wénhuà jìyì.', vietnamese: 'Trần Gia Từ giống một cuốn sách ba chiều không thể lật nhanh. Càng đến gần chi tiết, bạn càng thấy nghệ thuật Lĩnh Nam biến kiến trúc thành ký ức văn hóa.', english: 'The hall is a three-dimensional book: the closer you look, the more clearly Lingnan craft turns architecture into cultural memory.'),
+  ReadingAnnotation(pinyin: 'guǎng zhōu huī sù xiū fù xué tú chén chéng zài chén jiā cí wū jǐ shàng zhǎo dào yì zhī quē chì de táo niǎo 。 shī fu ràng tā àn duì chèn tú yàng bǔ qí ， bó wù guǎn kāi fàng zài jí ； tā què fā xiàn lìng yí cè bìng méi yǒu tóng yàng de niǎo 。', vietnamese: 'Học việc phục chế phù điêu vữa Trần Trừng tìm thấy một chim gốm gãy cánh trên nóc Trần Gia Từ. Thầy bảo bổ theo mẫu đối xứng, nhưng phía kia không có con chim giống vậy.', english: 'Lime-sculpture apprentice Chen Cheng finds a ceramic bird with a broken wing on the Chen Clan Ancestral Hall roof. Her mentor says to restore it symmetrically, but no matching bird exists opposite.'),
+  ReadingAnnotation(pinyin: 'chén chéng zài mù diāo 、 zhuān diāo 、 shí diāo hé táo sù zhī jiān xún zhǎo xiàn suǒ ， rén wù huā niǎo gè yǒu xù shì wèi zhì 。 zhào mú bǎn bǔ zuì kuài ， yě zuì zhěng qí ， dàn kě néng bǎ wǎn qīng gōng jiàng yuán běn gù yì liú xià de fāng xiàng gǎn mǒ diào 。', vietnamese: 'Cô tìm manh mối giữa chạm gỗ, gạch, đá và tượng gốm. Làm theo mẫu nhanh và đều, nhưng có thể xóa hướng nhìn mà nghệ nhân cuối Thanh cố ý để lại.', english: 'She searches wood, brick, stone, and ceramic work for clues. A template would be quick and neat but might erase the direction intended by the late-Qing artisan.'),
+  ReadingAnnotation(pinyin: 'tā xuǎn zé zhī jiā gù duàn miàn ， bù píng xiǎng xiàng zào chū chì bǎng ， bìng bǎ pàn duàn yī jù gōng kāi xiě jìn xiū fù jì lù 。 kāi fàng rì yǒu rén xián tā “ bù wán zhěng ”， hái zi què yán zhe niǎo de cháo xiàng zhǎo dào le wū jǐ lìng yì duān de gù shì 。', vietnamese: 'Cô chỉ gia cố mặt gãy, không tưởng tượng thêm cánh, và công khai căn cứ trong hồ sơ. Có người chê chưa hoàn chỉnh, nhưng trẻ em theo hướng chim tìm thấy câu chuyện ở đầu mái kia.', english: 'She stabilizes the break without inventing a wing and publishes the reasoning. Some call it incomplete, but children follow the bird\'s direction to another story on the roof.'),
+  ReadingAnnotation(pinyin: 'chén chéng méi yǒu bǎ zōng zú jiàn zhù xiū chéng yì běn zhǎn xīn de tú shū 。 tā xué huì ràng quē yè réng kě biàn rèn ： lǐng nán gōng yì de wén huà jì yì ， jì zài jīng mì xì jié lǐ ， yě zài bù wěi zào dá àn de kè zhì lǐ 。', vietnamese: 'Trần Trừng học cách giữ một trang thiếu vẫn đọc được: ký ức thủ công Lĩnh Nam nằm cả trong chi tiết chính xác và sự kiềm chế không bịa đáp án.', english: 'Chen Cheng learns to keep a missing page readable: Lingnan craft memory lies both in precise detail and in the restraint not to invent an answer.'),
 ];
 
 const guangzhouWords = <WordEntry>[

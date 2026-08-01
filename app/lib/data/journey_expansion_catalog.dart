@@ -98,32 +98,32 @@ JourneyContentRecord _journeyRecord({
 }
 
 const _suzhouParagraphs = <String>[
-  '清晨，你走进苏州拙政园。池水占据庭园中央，亭子、曲桥和白墙并不排成直线，而是随着脚步一层一层出现。',
-  '古典园林把水、石头、植物和建筑安排在有限空间里，让人感觉正在穿过一幅不断变化的山水画。',
-  '一扇漏窗框住竹影，一条长廊又把视线引向远处。借景让园内与园外彼此连接，小空间因此显得更深。',
-  '拙政园的故事不只关于美景，也关于人怎样观察自然。每一次转身，都可能重新理解同一片水和同一座亭。',
+  '苏州园林实习生沈栀要为一位低视力访客设计拙政园路线。主管只给她一张最上镜的导览图，图上漏窗、曲桥与亭子漂亮，却没有标出长廊的台阶。',
+  '沈栀蒙住自己的眼睛，沿池水声和墙面触感试走，才发现借景不仅靠远望，也能由竹叶、回声与脚下转折形成。原路线最短，却会把访客困在窄桥前。',
+  '她舍弃必到的摄影点，把路线引向缓坡，并请花匠用不同叶香标记转弯。访客错过一扇著名漏窗，却在长廊尽头准确说出池水与亭台的位置。',
+  '沈栀重画地图时不再把园林当作一幅固定山水画。真正的层次来自每个人怎样进入空间，也来自设计者愿不愿为另一种观察方式改变路线。',
 ];
 
 const _suzhouAnnotations = <ReadingAnnotation>[
   ReadingAnnotation(
-    pinyin: 'Qīngchén, nǐ zǒujìn Sūzhōu Zhuōzhèng Yuán. Chíshuǐ zhànjù tíngyuán zhōngyāng, tíngzi, qūqiáo hé báiqiáng bìng bù páichéng zhíxiàn, ér shì suízhe jiǎobù yì céng yì céng chūxiàn.',
-    vietnamese: 'Sáng sớm, bạn bước vào Chuyết Chính Viên ở Tô Châu. Ao nước nằm giữa vườn; đình, cầu cong và tường trắng lần lượt hiện ra theo bước chân.',
-    english: 'At dawn, you enter Suzhou’s Humble Administrator’s Garden. Pond, pavilions, curved bridges, and white walls reveal themselves layer by layer.',
+    pinyin: 'sū zhōu yuán lín shí xí shēng shěn zhī yào wèi yí wèi dī shì lì fǎng kè shè jì zhuō zhèng yuán lù xiàn 。 zhǔ guǎn zhī gěi tā yì zhāng zuì shàng jìng de dǎo lǎn tú ， tú shàng lòu chuāng 、 qǔ qiáo yǔ tíng zi piào liang ， què méi yǒu biāo chū cháng láng de tái jiē 。',
+    vietnamese: 'Thực tập sinh vườn Thẩm Chi phải thiết kế tuyến Chuyết Chính Viên cho khách thị lực yếu. Bản đồ đẹp có cửa hoa, cầu cong và đình nhưng không đánh dấu bậc ở hành lang.',
+    english: 'Garden intern Shen Zhi must design a Humble Administrator\'s Garden route for a visitor with low vision. The photogenic map shows windows, bridges, and pavilions but omits corridor steps.',
   ),
   ReadingAnnotation(
-    pinyin: 'Gǔdiǎn yuánlín bǎ shuǐ, shítou, zhíwù hé jiànzhù ānpái zài yǒuxiàn kōngjiān lǐ, ràng rén gǎnjué zhèngzài chuānguò yì fú bùduàn biànhuà de shānshuǐhuà.',
-    vietnamese: 'Vườn cổ điển sắp xếp nước, đá, cây và kiến trúc trong không gian hữu hạn, tạo cảm giác đang đi qua một bức tranh sơn thủy luôn thay đổi.',
-    english: 'Classical gardens arrange water, rocks, plants, and buildings in limited space like a changing landscape painting.',
+    pinyin: 'shěn zhī méng zhù zì jǐ de yǎn jīng ， yán chí shuǐ shēng hé qiáng miàn chù gǎn shì zǒu ， cái fā xiàn jiè jǐng bù jǐn kào yuǎn wàng ， yě néng yóu zhú yè 、 huí shēng yǔ jiǎo xià zhuǎn zhé xíng chéng 。 yuán lù xiàn zuì duǎn ， què huì bǎ fǎng kè kùn zài zhǎi qiáo qián 。',
+    vietnamese: 'Cô bịt mắt đi thử theo tiếng nước và mặt tường, nhận ra mượn cảnh cũng có thể hình thành bằng lá tre, tiếng vọng và khúc ngoặt. Tuyến ngắn nhất sẽ chặn khách trước cầu hẹp.',
+    english: 'She walks blindfolded by water sound and wall texture, learning that borrowed scenery can also come through leaves, echoes, and turns. The shortest route would strand the visitor at a narrow bridge.',
   ),
   ReadingAnnotation(
-    pinyin: 'Yí shàn lòuchuāng kuàngzhù zhúyǐng, yì tiáo chángláng yòu bǎ shìxiàn yǐnxiàng yuǎnchù. Jièjǐng ràng yuánnèi yǔ yuánwài bǐcǐ liánjiē, xiǎo kōngjiān yīncǐ xiǎnde gèng shēn.',
-    vietnamese: 'Một ô cửa trang trí đóng khung bóng tre, còn hành lang dẫn tầm mắt ra xa. Kỹ thuật mượn cảnh nối trong và ngoài vườn, làm không gian nhỏ trở nên sâu hơn.',
-    english: 'A patterned window frames bamboo while a corridor leads the eye outward. Borrowed scenery gives a small garden greater depth.',
+    pinyin: 'tā shè qì bì dào de shè yǐng diǎn ， bǎ lù xiàn yǐn xiàng huǎn pō ， bìng qǐng huā jiàng yòng bù tóng yè xiāng biāo jì zhuǎn wān 。 fǎng kè cuò guò yí shàn zhù míng lòu chuāng ， què zài cháng láng jìn tóu zhǔn què shuō chū chí shuǐ yǔ tíng tái de wèi zhì 。',
+    vietnamese: 'Cô bỏ điểm chụp bắt buộc, chuyển sang dốc thoải và dùng mùi lá đánh dấu lối rẽ. Khách bỏ lỡ cửa sổ nổi tiếng nhưng xác định đúng ao và đình ở cuối hành lang.',
+    english: 'She drops the mandatory photo stop, chooses a gentle slope, and marks turns with leaf scents. The visitor misses a famous window but accurately locates pond and pavilion at the corridor\'s end.',
   ),
   ReadingAnnotation(
-    pinyin: 'Zhuōzhèng Yuán de gùshì bù zhǐ guānyú měijǐng, yě guānyú rén zěnyàng guānchá zìrán. Měi yí cì zhuǎnshēn, dōu kěnéng chóngxīn lǐjiě tóng yí piàn shuǐ hé tóng yí zuò tíng.',
-    vietnamese: 'Câu chuyện của Chuyết Chính Viên không chỉ là cảnh đẹp mà còn là cách con người quan sát thiên nhiên. Mỗi lần quay lại có thể đem đến một cách hiểu mới.',
-    english: 'The garden is about how people observe nature: every turn can renew the same pond and pavilion.',
+    pinyin: 'shěn zhī zhòng huà dì tú shí bú zài bǎ yuán lín dāng zuò yì fú gù dìng shān shuǐ huà 。 zhēn zhèng de céng cì lái zì měi gè rén zěn yàng jìn rù kōng jiān ， yě lái zì shè jì zhě yuàn bu yuàn wèi lìng yì zhǒng guān chá fāng shì gǎi biàn lù xiàn 。',
+    vietnamese: 'Khi vẽ lại bản đồ, Thẩm Chi không còn xem vườn là tranh cố định. Chiều sâu đến từ cách mỗi người đi vào không gian và sự sẵn lòng thay đổi tuyến cho một cách quan sát khác.',
+    english: 'Redrawing the map, Shen Zhi no longer treats the garden as a fixed painting. Depth comes from how each person enters the space and from willingness to change a route for another way of seeing.',
   ),
 ];
 
@@ -147,17 +147,17 @@ const _suzhouDiscoveries = <DiscoveryEntry>[
 ];
 
 const _luoyangParagraphs = <String>[
-  '傍晚，你沿伊河走到龙门石窟。两岸山崖像一道石门，密集的洞窟和佛龛分布在灰色岩壁上。',
-  '从北魏到唐代，工匠在这里持续开凿。不同年代的造像留下服饰、面容和雕刻风格的变化。',
-  '走近奉先寺，巨大的主像与两侧造像共同形成庄严空间。石头上的细节，让遥远历史突然有了人的尺度。',
-  '龙门石窟不仅是一组宏伟雕像，也是一部刻在山崖上的艺术史。河水向前流，石刻则保存着时代留下的表情。',
+  '洛阳美术生唐墨答应替祖母在龙门石窟寻找一张旧照片中的佛龛。照片只剩半张脸，傍晚前他还要赶回学校交一幅奉先寺主像速写。',
+  '他沿伊河辨认北魏到唐代不同的服饰、面容与雕刻风格，却发现祖母记错了山崖方向。继续寻找会失去交作业的时间，放弃则让家庭记忆停在模糊纸面。',
+  '唐墨收起画板，改用照片残留的衣褶逐窟比对，终于在一处小佛龛旁找到同样石纹。那不是名作中心，却让祖母年轻时的站位重新有了尺度。',
+  '他次日交了一张未完成的主像，补上岩壁、小龛与伊河，也标出工匠开凿、雕刻造像的细节。画面不够庄严，唐墨却知道艺术史也由普通人选择凝视哪里而延续。',
 ];
 
 const _luoyangAnnotations = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Bàngwǎn, nǐ yán Yī Hé zǒudào Lóngmén Shíkū. Liǎng àn shānyá xiàng yí dào shímén, mìjí de dòngkū hé Fókān fēnbù zài huīsè yánbì shàng.', vietnamese: 'Chiều tối, bạn đi dọc sông Y đến hang đá Long Môn. Vách núi hai bờ như một cánh cổng đá, đầy hang và hốc tượng.', english: 'At dusk, you follow the Yi River to Longmen, where cliffs form a stone gate covered with caves and niches.'),
-  ReadingAnnotation(pinyin: 'Cóng Běiwèi dào Tángdài, gōngjiàng zài zhèlǐ chíxù kāizáo. Bùtóng niándài de zàoxiàng liúxià fúshì, miànróng hé diāokè fēnggé de biànhuà.', vietnamese: 'Từ Bắc Ngụy đến thời Đường, nghệ nhân liên tục tạc đá, để lại thay đổi về trang phục, gương mặt và phong cách điêu khắc.', english: 'From the Northern Wei through the Tang, artisans recorded changing dress, faces, and carving styles.'),
-  ReadingAnnotation(pinyin: 'Zǒujìn Fèngxiān Sì, jùdà de zhǔxiàng yǔ liǎngcè zàoxiàng gòngtóng xíngchéng zhuāngyán kōngjiān. Shítou shàng de xìjié, ràng yáoyuǎn lìshǐ tūrán yǒule rén de chǐdù.', vietnamese: 'Đến gần Phụng Tiên Tự, tượng chính lớn cùng các tượng hai bên tạo nên không gian trang nghiêm. Chi tiết trên đá khiến lịch sử xa xôi trở nên gần với con người.', english: 'At Fengxian Temple, monumental figures create a solemn space whose details bring distant history to human scale.'),
-  ReadingAnnotation(pinyin: 'Lóngmén Shíkū bùjǐn shì yì zǔ hóngwěi diāoxiàng, yě shì yí bù kè zài shānyá shàng de yìshùshǐ. Héshuǐ xiàng qián liú, shíkè zé bǎocúnzhe shídài liúxià de biǎoqíng.', vietnamese: 'Long Môn không chỉ là nhóm tượng hùng vĩ mà còn là lịch sử nghệ thuật khắc trên vách núi. Dòng sông trôi đi, còn đá giữ lại nét mặt của thời đại.', english: 'Longmen is art history carved into a cliff: the river moves on while stone preserves the faces of an era.'),
+  ReadingAnnotation(pinyin: 'luò yáng měi shù shēng táng mò dā ying tì zǔ mǔ zài lóng mén shí kū xún zhǎo yì zhāng jiù zhào piàn zhōng de fó kān 。 zhào piàn zhī shèng bàn zhāng liǎn ， bàng wǎn qián tā hái yào gǎn huí xué xiào jiāo yì fú fèng xiān sì zhǔ xiàng sù xiě 。', vietnamese: 'Sinh viên mỹ thuật Đường Mặc hứa giúp bà tìm một hốc tượng trong tấm ảnh cũ ở hang đá Long Môn. Ảnh chỉ còn nửa khuôn mặt, trong khi trước tối cậu còn phải nộp bản phác họa tượng chính ở Phụng Tiên Tự.', english: 'Art student Tang Mo promises to find the niche shown in his grandmother\'s old Longmen photograph. Only half a face remains in the picture, and he must still submit a sketch of Fengxian Temple\'s main figure before evening.'),
+  ReadingAnnotation(pinyin: 'tā yán yī hé biàn rèn běi wèi dào táng dài bù tóng de fú shì 、 miàn róng yǔ diāo kè fēng gé ， què fā xiàn zǔ mǔ jì cuò le shān yá fāng xiàng 。 jì xù xún zhǎo huì shī qù jiāo zuò yè de shí jiān ， fàng qì zé ràng jiā tíng jì yì tíng zài mó hu zhǐ miàn 。', vietnamese: 'Dọc sông Y, cậu phân biệt trang phục, gương mặt và phong cách chạm khắc từ Bắc Ngụy đến Đường, rồi phát hiện bà nhớ nhầm phía vách đá. Tìm tiếp sẽ khiến cậu lỡ hạn; bỏ cuộc sẽ để ký ức gia đình mãi mơ hồ.', english: 'Along the Yi River, he compares dress, faces, and carving styles from the Northern Wei to the Tang, then realizes his grandmother remembered the wrong cliff. Continuing risks the deadline; quitting leaves the family memory blurred.'),
+  ReadingAnnotation(pinyin: 'táng mò shōu qǐ huà bǎn ， gǎi yòng zhào piàn cán liú de yī zhě zhú kū bǐ duì ， zhōng yú zài yí chù xiǎo fó kān páng zhǎo dào tóng yàng shí wén 。 nà bú shì míng zuò zhōng xīn ， què ràng zǔ mǔ nián qīng shí de zhàn wèi chóng xīn yǒu le chǐ dù 。', vietnamese: 'Đường Mặc cất bảng vẽ, dùng nếp áo còn lại trong ảnh để so từng hang và tìm thấy vân đá giống nhau bên một hốc nhỏ. Đó không phải trung tâm của kiệt tác, nhưng giúp xác định lại nơi bà từng đứng khi còn trẻ.', english: 'Tang Mo puts away his drawing board and compares the surviving drapery fold cave by cave. He finds the same stone pattern beside a small niche—not a celebrated centerpiece, but enough to recover where his grandmother once stood.'),
+  ReadingAnnotation(pinyin: 'tā cì rì jiāo le yì zhāng wèi wán chéng de zhǔ xiàng ， bǔ shàng yán bì 、 xiǎo kān yǔ yī hé ， yě biāo chū gōng jiàng kāi záo 、 diāo kè zào xiàng de xì jié 。 huà miàn bú gòu zhuāng yán ， táng mò què zhī dào yì shù shǐ yě yóu pǔ tōng rén xuǎn zé níng shì nǎ lǐ ér yán xù 。', vietnamese: 'Hôm sau, cậu nộp bức tượng chính chưa hoàn tất, bổ sung vách đá, hốc nhỏ, sông Y và chi tiết nghệ nhân tạc tượng. Bức vẽ kém trang nghiêm hơn, nhưng cậu hiểu lịch sử nghệ thuật cũng tiếp nối qua nơi người bình thường chọn nhìn.', english: 'The next day he submits an unfinished main figure, adding the cliff, small niche, Yi River, and details of artisans carving images. The drawing is less monumental, but he learns that art history also endures through what ordinary people choose to see.'),
 ];
 
 const _luoyangWords = <WordEntry>[
@@ -180,17 +180,17 @@ const _luoyangDiscoveries = <DiscoveryEntry>[
 ];
 
 const _quanzhouParagraphs = <String>[
-  '上午，你走进泉州开元寺。东西两座石塔越过树梢，安静地标记着这座古代港口城市的天际线。',
-  '宋元时期，泉州与遥远海域保持贸易往来。商人、旅行者和不同信仰的人在这里相遇，留下多元的城市遗产。',
-  '开元寺的石塔、殿宇和古树属于这张交流网络的一部分。建筑细节既有地方传统，也见证海上交通带来的文化碰撞。',
-  '离开寺院时，你会发现泉州的世界性并不只存在于港口。它藏在石塔、街巷和人们长期共同生活的痕迹里。',
+  '泉州中学生蔡海要替祖父修复一只旧木箱，箱底夹着三种文字的货签。祖父坚持它来自开元寺附近的老铺，市场商人却说那只是仿古纪念品。',
+  '蔡海沿东西石塔下的街巷寻找同样木纹，向不同信仰的邻居询问旧港贸易。每个人只认出货签的一部分；若急着选一个“正确来历”，就能赶上学校展览。',
+  '他选择保留分歧，把木箱放在古树下请三位长者共同讲述。零散词语最终指向同一批海上货物，却仍无法证明具体店铺；蔡海在展签上诚实写下“来源未定”。',
+  '祖父起初失望，后来把自己的记忆也署名为口述线索。蔡海懂得港口的多元不是把不同声音揉成一个答案，而是让海上交通、殿宇、石塔与街巷彼此作证。',
 ];
 
 const _quanzhouAnnotations = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Shàngwǔ, nǐ zǒujìn Quánzhōu Kāiyuán Sì. Dōngxī liǎng zuò shítǎ yuèguò shùshāo, ānjìng de biāojìzhe zhè zuò gǔdài gǎngkǒu chéngshì de tiānjìxiàn.', vietnamese: 'Buổi sáng, bạn bước vào chùa Khai Nguyên ở Tuyền Châu. Hai tháp đá đông tây vượt trên ngọn cây, đánh dấu đường chân trời của thành phố cảng cổ.', english: 'In the morning, you enter Kaiyuan Temple. Its east and west stone pagodas mark the skyline of the ancient port city.'),
-  ReadingAnnotation(pinyin: 'Sòng Yuán shíqī, Quánzhōu yǔ yáoyuǎn hǎiyù bǎochí màoyì wǎnglái. Shāngrén, lǚxíngzhě hé bùtóng xìnyǎng de rén zài zhèlǐ xiāngyù, liúxià duōyuán de chéngshì yíchǎn.', vietnamese: 'Thời Tống Nguyên, Tuyền Châu giao thương với những vùng biển xa. Thương nhân, lữ khách và người thuộc nhiều tín ngưỡng gặp nhau, để lại di sản đô thị đa dạng.', english: 'During the Song and Yuan periods, merchants, travellers, and many faiths met in Quanzhou’s far-reaching trade network.'),
-  ReadingAnnotation(pinyin: 'Kāiyuán Sì de shítǎ, diànyǔ hé gǔshù shǔyú zhè zhāng jiāoliú wǎngluò de yí bùfen. Jiànzhù xìjié jì yǒu dìfāng chuántǒng, yě jiànzhèng hǎishàng jiāotōng dàilái de wénhuà pèngzhuàng.', vietnamese: 'Tháp đá, điện thờ và cây cổ trong chùa là một phần của mạng lưới giao lưu ấy, vừa mang truyền thống địa phương vừa chứng kiến tiếp xúc văn hóa đường biển.', english: 'The temple’s pagodas, halls, and old trees belong to that network, joining local tradition with maritime exchange.'),
-  ReadingAnnotation(pinyin: 'Líkāi sìyuàn shí, nǐ huì fāxiàn Quánzhōu de shìjièxìng bìng bù zhǐ cúnzài yú gǎngkǒu. Tā cáng zài shítǎ, jiēxiàng hé rénmen chángqī gòngtóng shēnghuó de hénjì lǐ.', vietnamese: 'Khi rời chùa, bạn nhận ra tính quốc tế của Tuyền Châu không chỉ ở cảng mà còn trong tháp đá, phố ngõ và dấu vết chung sống lâu dài.', english: 'Quanzhou’s global character survives not only at the port, but in pagodas, lanes, and traces of shared life.'),
+  ReadingAnnotation(pinyin: 'quán zhōu zhōng xué shēng cài hǎi yào tì zǔ fù xiū fù yì zhī jiù mù xiāng ， xiāng dǐ jiá zhe sān zhǒng wén zì de huò qiān 。 zǔ fù jiān chí tā lái zì kāi yuán sì fù jìn de lǎo pù ， shì chǎng shāng rén què shuō nà zhǐ shì fǎng gǔ jì niàn pǐn 。', vietnamese: 'Học sinh Thái Hải ở Tuyền Châu sửa một hòm gỗ cũ cho ông nội và tìm thấy nhãn hàng bằng ba thứ tiếng dưới đáy. Ông tin nó đến từ một cửa hiệu gần chùa Khai Nguyên, còn người bán ở chợ cho rằng đó chỉ là đồ lưu niệm giả cổ.', english: 'Quanzhou student Cai Hai repairs an old wooden chest for his grandfather and finds a cargo label in three languages underneath. His grandfather says it came from a shop near Kaiyuan Temple, while a market trader calls it a modern imitation.'),
+  ReadingAnnotation(pinyin: 'cài hǎi yán dōng xī shí tǎ xià de jiē xiàng xún zhǎo tóng yàng mù wén ， xiàng bù tóng xìn yǎng de lín jū xún wèn jiù gǎng mào yì 。 měi gè rén zhī rèn chū huò qiān de yí bù fēn ； ruò jí zhe xuǎn yí gè “ zhèng què lái lì ”， jiù néng gǎn shàng xué xiào zhǎn lǎn 。', vietnamese: 'Thái Hải đi qua những ngõ dưới tháp đá đông tây để tìm cùng loại gỗ và hỏi các láng giềng thuộc nhiều tín ngưỡng về thương mại cảng xưa. Mỗi người chỉ đọc được một phần; chọn vội một nguồn gốc sẽ giúp cậu kịp triển lãm trường.', english: 'Cai Hai searches the lanes beneath the east and west pagodas for matching wood and asks neighbors of different faiths about the old port trade. Each recognizes only part of the label; choosing one origin quickly would make the school exhibition deadline.'),
+  ReadingAnnotation(pinyin: 'tā xuǎn zé bǎo liú fēn qí ， bǎ mù xiāng fàng zài gǔ shù xià qǐng sān wèi zhǎng zhě gòng tóng jiǎng shù 。 líng sǎn cí yǔ zuì zhōng zhǐ xiàng tóng yì pī hǎi shàng huò wù ， què réng wú fǎ zhèng míng jù tǐ diàn pù ； cài hǎi zài zhǎn qiān shàng chéng shí xiě xià “ lái yuán wèi dìng ”。', vietnamese: 'Cậu giữ nguyên các ý kiến khác nhau, đặt hòm dưới cây cổ và mời ba người lớn tuổi cùng kể. Những từ rời rạc chỉ tới cùng một lô hàng biển nhưng không chứng minh được cửa hiệu; cậu ghi trung thực ‘chưa xác định nguồn’.', english: 'He preserves the disagreement, places the chest beneath an old tree, and invites three elders to speak together. The fragments point to one maritime shipment but not a specific shop, so he honestly labels the origin undetermined.'),
+  ReadingAnnotation(pinyin: 'zǔ fù qǐ chū shī wàng ， hòu lái bǎ zì jǐ de jì yì yě shǔ míng wèi kǒu shù xiàn suǒ 。 cài hǎi dǒng de gǎng kǒu de duō yuán bú shì bǎ bù tóng shēng yīn róu chéng yí gè dá àn ， ér shì ràng hǎi shàng jiāo tōng 、 diàn yǔ 、 shí tǎ yǔ jiē xiàng bǐ cǐ zuò zhèng 。', vietnamese: 'Ông nội ban đầu thất vọng rồi ký tên ký ức của mình như một nguồn truyền khẩu. Thái Hải hiểu tính đa dạng của thành cảng không phải ép mọi giọng nói thành một đáp án, mà để giao thông biển, điện thờ, tháp đá và ngõ phố chứng thực lẫn nhau.', english: 'His grandfather is disappointed at first, then signs his memory as oral evidence. Cai Hai learns that a port\'s plurality does not force every voice into one answer; maritime travel, temple halls, pagodas, and lanes can testify alongside one another.'),
 ];
 
 const _quanzhouWords = <WordEntry>[

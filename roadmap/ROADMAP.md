@@ -20,7 +20,7 @@ Roadmap 状态不是实现证据。只有在所需文档、代码或内容修改
 |---|---|---|
 | Story System v1.0 Documentation | Completed and Reviewed | Story 规范已成为权威标准；不代表全部运行时故事已合规。 |
 | Visual System v1.0 Documentation | Completed and Reviewed | Final Decision：`VISUAL_SYSTEM_V1_APPROVED`；不代表全部运行时视觉已合规。 |
-| Story 与 Visual 软件合规整改 | Not Started | Sprint 27–32 均为 `Planned`，未声称整改完成。 |
+| Story 与 Visual 软件合规整改 | In Progress | Sprint 27 已完成 Story P0/P1 全量整改；Sprint 28–32 保持 `Planned`。 |
 | Learning System | Planned | 仅可在 Sprint 32 完成后开始。 |
 | UI/UX System | Planned | 依赖 Learning System 完成。 |
 | Audio System | Planned | 依赖 UI/UX System 完成。 |
@@ -31,7 +31,7 @@ Roadmap 状态不是实现证据。只有在所需文档、代码或内容修改
 |---|---|---|---|
 | 01–12 | Story System Documentation and Review | Completed | 当前 Documentation Recovery 与 Review 记录构成有效基线。 |
 | 13–26 | Visual System Documentation and v1.0 Review | Completed | Systems Documentation 与 Story System 接口。 |
-| 27–32 | Story & Visual Conformance and Remediation Phase | Planned | Story System v1.0 与 Visual System v1.0 已通过 Review。 |
+| 27–32 | Story & Visual Conformance and Remediation Phase | In Progress | Sprint 27 已完成；Sprint 28–32 保持 `Planned`。 |
 | 33–46 | Learning System | Planned | Sprint 32 具备真实回归证据并完成。 |
 | 47–60 | UI/UX System | Planned | Learning System 阶段完成。 |
 | 61–74 | Audio System | Planned | UI/UX System 阶段完成。 |
@@ -45,7 +45,7 @@ Roadmap 状态不是实现证据。只有在所需文档、代码或内容修改
 
 ### Sprint 27 — Story 全量合规审查与 P0/P1 直接修复
 
-Status: Planned
+Status: Completed
 
 范围：全部普通 Journey、特别 Journey、故事、短文、角色、故事标题与文案，以及关联生词、发现页、挑战题、留下印象、盖章文案和 Story 与学习流程关联数据。
 
@@ -57,6 +57,8 @@ Status: Planned
 - 保留问题、修复、受影响 Journey 与回归结果之间的可追踪证据。
 
 退出条件：审查范围内已识别 Story P0/P1 全部修复并复审。不得用未分级或仅报告的结果进入 Sprint 28。
+
+完成证据（2026-08-01）：27 个普通 Journey 与 9 个特别 Journey 已全量复审；普通 Journey 已完成独立人物叙事整改，特别 Journey 已移除共享幻想扩展并修复三个无后果结尾。106 条普通 Journey ReadingAnnotation、WordEntry、Discovery 与动态 Challenge 输入已同步复核；Story P0/P1 复审结果均为零。Node 回归 `340/340` 通过，`git diff --check` 与本地静态内容校验通过；本地环境未提供 Flutter/Dart SDK，Flutter 结果以远端 CI 状态为准。
 
 ### Sprint 28 — Story 深度质量修复与最终复审
 
@@ -202,5 +204,5 @@ Sprint 32 完成前不得开始 Sprint 33。Learning、UI/UX 和 Audio 均保持
 - 一个 Sprint 编号只属于一个阶段，不得复用。
 - Audio System 之后的新工作从 Sprint 75 开始，除非先明确修订本 Roadmap。
 - 调整顺序必须记录依赖理由，不能静默绕过上游 Gate。
-- `Completed`、`In Progress` 与 `Planned` 必须严格区分；Sprint 27–32 当前全部为 `Planned`。
+- `Completed`、`In Progress` 与 `Planned` 必须严格区分；Sprint 27 为 `Completed`，Sprint 28–32 保持 `Planned`。
 - 只有真实完成并具备证据的实现事实才能写入 `CHANGELOG`。

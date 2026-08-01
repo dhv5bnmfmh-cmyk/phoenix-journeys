@@ -67,44 +67,44 @@ const xianStorySources = <StorySourceRecord>[
 ];
 
 const shanghaiStoryParagraphs = <String>[
-  '清晨，你站在黄浦江边。江风掠过外滩，老建筑的轮廓在柔和的光线中慢慢清晰。',
-  '沿着滨水步道向前走，你会看到一排风格不同的历史建筑。它们曾经见证上海的金融、贸易和城市发展。',
-  '江的另一边，浦东的高楼组成现代天际线。旧建筑与新城市隔江相望，像是两个时代正在对话。',
-  '外滩最特别的地方，不只是夜晚的灯火，而是它让人看见一座城市怎样保存过去，同时不断走向未来。',
+  '上海实习记者许棠清晨赶到外滩，要采访一位即将退休的轮渡调度员。编辑只要浦东天际线的漂亮镜头，老人却坚持先带她看黄浦江水位记录。',
+  '滨水步道旁的历史建筑见证金融与贸易，江对岸高楼催着城市向前。突发浓雾使一班轮渡延误，编辑要求许棠放弃老人，立刻直播乘客抱怨。',
+  '她选择关掉直播提示，帮助调度员核对水位与能见度，再让被耽搁的通勤者讲述每天为何过江。新闻晚了十分钟，却解释了等待背后的安全选择。',
+  '灯火亮起时，许棠把标题从“雾锁外滩”改成“看不见天际线的十分钟”。老建筑轮廓与高楼隔江相望，她不再用两个时代“走向未来”的套话，而写人怎样承担城市运行的责任。',
 ];
 
 const shanghaiStoryAnnotations = <ReadingAnnotation>[
   ReadingAnnotation(
     pinyin:
-        'Qīngchén, nǐ zhàn zài Huángpǔ Jiāng biān. Jiāngfēng lüèguò Wàitān, lǎo jiànzhù de lúnkuò zài róuhé de guāngxiàn zhōng mànmàn qīngxī.',
+        'shàng hǎi shí xí jì zhě xǔ táng qīng chén gǎn dào wài tān ， yào cǎi fǎng yí wèi jí jiāng tuì xiū de lún dù diào dù yuán 。 biān jí zhǐ yào pǔ dōng tiān jì xiàn de piào liang jìng tóu ， lǎo rén què jiān chí xiān dài tā kàn huáng pǔ jiāng shuǐ wèi jì lù 。',
     vietnamese:
-        'Sáng sớm, bạn đứng bên sông Hoàng Phố. Gió sông lướt qua Bến Thượng Hải, đường nét của những tòa nhà cổ dần hiện rõ trong ánh sáng dịu.',
+        'Phóng viên thực tập Hứa Đường đến Bến Thượng Hải phỏng vấn một điều độ viên phà sắp nghỉ hưu. Biên tập chỉ muốn cảnh đường chân trời Phố Đông, còn ông muốn cô xem hồ sơ mực nước.',
     english:
-        'At dawn, you stand beside the Huangpu River. The river breeze crosses the Bund as the outlines of historic buildings slowly sharpen in the soft light.',
+        'Intern reporter Xu Tang reaches the Bund to interview a retiring ferry dispatcher. Her editor wants a Pudong skyline shot, while the dispatcher insists she first examine the Huangpu water-level records.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Yánzhe bīnshuǐ bùdào xiàng qián zǒu, nǐ huì kàndào yì pái fēnggé bùtóng de lìshǐ jiànzhù. Tāmen céngjīng jiànzhèng Shànghǎi de jīnróng, màoyì hé chéngshì fāzhǎn.',
+        'bīn shuǐ bù dào páng de lì shǐ jiàn zhù jiàn zhèng jīn róng yǔ mào yì ， jiāng duì àn gāo lóu cuī zhe chéng shì xiàng qián 。 tū fā nóng wù shǐ yì bān lún dù yán wù ， biān jí yāo qiú xǔ táng fàng qì lǎo rén ， lì kè zhí bō chéng kè bào yuàn 。',
     vietnamese:
-        'Đi dọc lối đi ven sông, bạn sẽ thấy một dãy công trình lịch sử với nhiều phong cách khác nhau. Chúng từng chứng kiến sự phát triển tài chính, thương mại và đô thị của Thượng Hải.',
+        'Các công trình lịch sử chứng kiến tài chính và thương mại, còn cao ốc bên kia sông thúc thành phố tiến lên. Sương dày làm phà chậm, và biên tập yêu cầu cô bỏ cuộc phỏng vấn để phát trực tiếp lời phàn nàn.',
     english:
-        'Along the waterfront promenade, historic buildings in varied styles recall Shanghai’s financial, trading, and urban development.',
+        'Historic waterfront buildings witnessed finance and trade while towers across the river push the city forward. Fog delays a ferry, and the editor orders her to abandon the interview and stream complaints.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Jiāng de lìng yì biān, Pǔdōng de gāolóu zǔchéng xiàndài tiānjìxiàn. Jiù jiànzhù yǔ xīn chéngshì gé jiāng xiāngwàng, xiàng shì liǎng gè shídài zhèngzài duìhuà.',
+        'tā xuǎn zé guān diào zhí bō tí shì ， bāng zhù diào dù yuán hé duì shuǐ wèi yǔ néng jiàn dù ， zài ràng bèi dān gē de tōng qín zhě jiǎng shù měi tiān wèi hé guò jiāng 。 xīn wén wǎn le shí fēn zhōng ， què jiě shì le děng dài bèi hòu de ān quán xuǎn zé 。',
     vietnamese:
-        'Bên kia sông, các tòa nhà cao tầng Phố Đông tạo thành đường chân trời hiện đại. Thành phố cũ và mới nhìn nhau qua sông như hai thời đại đang trò chuyện.',
+        'Cô tắt nhắc phát sóng, giúp kiểm tra mực nước và tầm nhìn rồi lắng nghe người đi làm. Bản tin muộn mười phút nhưng giải thích lựa chọn an toàn phía sau sự chờ đợi.',
     english:
-        'Across the river, Pudong’s towers form a modern skyline. Old and new Shanghai face one another like two eras in conversation.',
+        'She turns off the live prompt, helps check water level and visibility, and listens to commuters. The report is ten minutes late but explains the safety decision behind the wait.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Wàitān zuì tèbié de dìfang, bù zhǐ shì yèwǎn de dēnghuǒ, ér shì tā ràng rén kànjiàn yí zuò chéngshì zěnyàng bǎocún guòqù, tóngshí bùduàn zǒuxiàng wèilái.',
+        'dēng huǒ liàng qǐ shí ， xǔ táng bǎ biāo tí cóng “ wù suǒ wài tān ” gǎi chéng “ kàn bú jiàn tiān jì xiàn de shí fēn zhōng ”。 lǎo jiàn zhù lún kuò yǔ gāo lóu gé jiāng xiāng wàng ， tā bú zài yòng liǎng gè shí dài “ zǒu xiàng wèi lái ” de tào huà ， ér xiě rén zěn yàng chéng dān chéng shì yùn xíng de zé rèn 。',
     vietnamese:
-        'Điều đặc biệt nhất của Bến Thượng Hải không chỉ là ánh đèn ban đêm, mà là cách nơi đây cho thấy một thành phố gìn giữ quá khứ trong khi không ngừng hướng tới tương lai.',
+        'Khi đèn sáng, Hứa Đường đổi tiêu đề thành ‘Mười phút không thấy đường chân trời’. Cô viết về trách nhiệm giúp thành phố vận hành thay vì sáo ngữ về hai thời đại.',
     english:
-        'The Bund is more than its evening lights: it reveals how a city can preserve its past while continually moving toward the future.',
+        'When the lights come on, Xu Tang retitles the story ‘Ten Minutes Without a Skyline.’ She writes about responsibility that keeps a city running rather than clichés about two eras.',
   ),
 ];
 
@@ -263,44 +263,44 @@ const shanghaiDiscoveries = <DiscoveryEntry>[
 ];
 
 const xianStoryParagraphs = <String>[
-  '傍晚，你从永宁门走上西安城墙。脚下的砖石向两边延伸，城门、角楼和护城河组成清晰的防御线。',
-  '现存城墙的主要规模形成于明代，并在后来的修缮中不断完善。宽阔的墙顶曾经方便守城人员巡查和调动。',
-  '站在城墙上向内看，是街巷与老城；向外看，是道路、高楼和不断扩大的现代城市。',
-  '绕城墙行走，就像沿着西安的时间边界前进。古都没有停在过去，而是把历史留在今天的生活里。',
+  '西安自行车维修员马骁在城墙闭园前接到一辆坏车，车主是赶去角楼参加演出的学生。若推到下个服务点，她一定迟到；私自拆护链又可能损伤城砖。',
+  '马骁熟悉明代城墙宽阔墙顶的坡度，也看得见城内街巷与城外新路同时展开。他想迅速解决问题，却发现真正卡住车轮的是游客丢下的金属扣。',
+  '他选择不冒险拆车，而是用工具取出金属扣，再陪学生跑完最后一段。演出开场晚了，学生当众说明原因，并把沿路杂物交给巡护员。',
+  '暮色落在永宁门和护城河时，马骁踩着砖石返回。现存防御规模来自明代并经修缮延续；城墙连接过去与古都今天，也因人们肯让速度服从巡查与保护边界。',
 ];
 
 const xianStoryAnnotations = <ReadingAnnotation>[
   ReadingAnnotation(
     pinyin:
-        'Bàngwǎn, nǐ cóng Yǒngníngmén zǒu shàng Xī’ān Chéngqiáng. Jiǎoxià de zhuānshí xiàng liǎngbiān yánshēn, chéngmén, jiǎolóu hé hùchénghé zǔchéng qīngxī de fángyùxiàn.',
+        'xī ān zì xíng chē wéi xiū yuán mǎ xiāo zài chéng qiáng bì yuán qián jiē dào yí liàng huài chē ， chē zhǔ shì gǎn qù jiǎo lóu cān jiā yǎn chū de xué shēng 。 ruò tuī dào xià gè fú wù diǎn ， tā yí dìng chí dào ； sī zì chāi hù liàn yòu kě néng sǔn shāng chéng zhuān 。',
     vietnamese:
-        'Chiều tối, bạn bước lên tường thành Tây An từ cổng Vĩnh Ninh. Gạch đá kéo dài sang hai phía, còn cổng thành, tháp góc và hào nước tạo nên một tuyến phòng thủ rõ ràng.',
+        'Thợ sửa xe Mã Kiêu nhận một chiếc xe hỏng trước giờ đóng cửa tường thành. Chủ xe phải đến tháp góc biểu diễn; đẩy tới trạm sau sẽ muộn, còn tự tháo xích bảo vệ có thể làm hại gạch thành.',
     english:
-        'At dusk, you climb Xi’an City Wall from Yongning Gate. Brickwork, gates, corner towers, and the moat form a clear defensive line.',
+        'Bicycle mechanic Ma Xiao receives a broken bike before the city wall closes. Its owner must reach a corner-tower performance; pushing it to the next station means being late, while removing the guard may damage the bricks.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Xiàncún chéngqiáng de zhǔyào guīmó xíngchéng yú Míngdài, bìng zài hòulái de xiūshàn zhōng bùduàn wánshàn. Kuānkuò de qiángdǐng céngjīng fāngbiàn shǒuchéng rényuán xúnchá hé diàodòng.',
+        'mǎ xiāo shú xī míng dài chéng qiáng kuān kuò qiáng dǐng de pō dù ， yě kàn dé jiàn chéng nèi jiē xiàng yǔ chéng wài xīn lù tóng shí zhǎn kāi 。 tā xiǎng xùn sù jiě jué wèn tí ， què fā xiàn zhēn zhèng kǎ zhù chē lún de shì yóu kè diū xià de jīn shǔ kòu 。',
     vietnamese:
-        'Quy mô chính của tường thành hiện nay được hình thành vào thời Minh và tiếp tục hoàn thiện qua các lần tu bổ. Mặt thành rộng từng giúp binh lính tuần tra và di chuyển.',
+        'Anh hiểu độ dốc của mặt thành thời Minh và nhìn thấy phố cũ cùng đường mới. Muốn xử lý thật nhanh, anh phát hiện một khóa kim loại do du khách bỏ lại mới là thứ kẹt bánh.',
     english:
-        'The present wall took its main form in the Ming dynasty and was refined through later repairs. Its broad top supported patrol and movement.',
+        'He knows the slope of the broad Ming wall and sees old lanes and new roads together. Eager for a quick fix, he discovers that a discarded metal clasp is jamming the wheel.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Zhàn zài chéngqiáng shàng xiàng nèi kàn, shì jiēxiàng yǔ lǎochéng; xiàng wài kàn, shì dàolù, gāolóu hé bùduàn kuòdà de xiàndài chéngshì.',
+        'tā xuǎn zé bú mào xiǎn chāi chē ， ér shì yòng gōng jù qǔ chū jīn shǔ kòu ， zài péi xué shēng pǎo wán zuì hòu yí duàn 。 yǎn chū kāi chǎng wǎn le ， xué shēng dāng zhòng shuō míng yuán yīn ， bìng bǎ yán lù zá wù jiāo gěi xún hù yuán 。',
     vietnamese:
-        'Nhìn vào trong từ tường thành là những ngõ phố và khu thành cổ; nhìn ra ngoài là đường sá, nhà cao tầng và đô thị hiện đại đang mở rộng.',
+        'Anh không mạo hiểm tháo xe mà lấy khóa ra rồi chạy cùng học sinh đoạn cuối. Buổi diễn bắt đầu muộn; cô giải thích nguyên nhân và giao rác nhặt được cho người tuần tra.',
     english:
-        'Inside the wall lie lanes and the old city; outside are roads, towers, and an expanding modern metropolis.',
+        'He avoids risky dismantling, removes the clasp, and runs the final stretch with the student. The performance starts late; she explains why and hands collected debris to a patrol worker.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Rào chéngqiáng xíngzǒu, jiù xiàng yánzhe Xī’ān de shíjiān biānjiè qiánjìn. Gǔdū méiyǒu tíng zài guòqù, ér shì bǎ lìshǐ liú zài jīntiān de shēnghuó lǐ.',
+        'mù sè luò zài yǒng níng mén hé hù chéng hé shí ， mǎ xiāo cǎi zhe zhuān shí fǎn huí 。 xiàn cún fáng yù guī mó lái zì míng dài bìng jīng xiū shàn yán xù ； chéng qiáng lián jiē guò qù yǔ gǔ dōu jīn tiān ， yě yīn rén men kěn ràng sù dù fú cóng xún chá yǔ bǎo hù biān jiè 。',
     vietnamese:
-        'Đi dọc tường thành giống như bước theo ranh giới thời gian của Tây An. Cố đô không dừng lại trong quá khứ mà giữ lịch sử trong đời sống hôm nay.',
+        'Trong hoàng hôn ở Vĩnh Ninh Môn, Mã Kiêu hiểu tường thành nối quá khứ với hôm nay vì con người để tốc độ tuân theo ranh giới tuần tra và bảo vệ.',
     english:
-        'Walking the wall follows Xi’an’s boundary through time. The ancient capital keeps history inside contemporary life.',
+        'At dusk by Yongning Gate, Ma Xiao understands that the wall connects past and present because people let speed yield to inspection and conservation boundaries.',
   ),
 ];
 

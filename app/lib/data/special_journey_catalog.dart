@@ -139,7 +139,7 @@ const _mythStory = <String>[
   '满月升起时，一页残缺的竹简落在你的窗前。上面只剩“归去”二字，边缘还带着刚刚折下的桂花香。',
   '你循着香气走进山中。每当月光被云遮住，玉白色的脚印便在石阶上出现，引你走向一扇悬在半空的门。',
   '门后没有宫殿，只有一片安静的桂树林。树下的白兔守着一只空匣子，仿佛已经等待这页遗简很多年。',
-  '天亮以前，你必须决定把遗简放回匣中，还是留下它。月光没有给出答案，只照亮你伸出去的手。',
+  '天亮以前，你把遗简放回匣中，却抄下“归去”二字留在人间。匣盖合拢时，白兔退入桂影；你带走的不是月宫证物，而是一个仍可继续解释的缺口。',
 ];
 
 const _mythAnnotations = <ReadingAnnotation>[
@@ -169,11 +169,11 @@ const _mythAnnotations = <ReadingAnnotation>[
   ),
   ReadingAnnotation(
     pinyin:
-        'Tiānliàng yǐqián, nǐ bìxū juédìng bǎ yíjiǎn fàng huí xiá zhōng, háishì liúxià tā. Yuèguāng méiyǒu gěichū dá’àn, zhǐ zhàoliàng nǐ shēn chūqù de shǒu.',
+        'Tiānliàng yǐqián, nǐ bǎ yíjiǎn fànghuí xiá zhōng, què chāoxià “guīqù” èr zì liú zài rénjiān. Xiágài hélǒng shí, báitù tuìrù guìyǐng; nǐ dàizǒu de bú shì Yuègōng zhèngwù, ér shì yí gè réng kě jìxù jiěshì de quēkǒu.',
     vietnamese:
-        'Trước bình minh, bạn phải quyết định trả mảnh thẻ vào hộp hay giữ lại. Ánh trăng không cho đáp án, chỉ soi sáng bàn tay bạn.',
+        'Trước bình minh, bạn trả thẻ tre vào hộp nhưng chép lại hai chữ “trở về” cho nhân gian. Khi nắp hộp khép lại, thỏ trắng lùi vào bóng quế; bạn mang về một khoảng trống còn có thể tiếp tục lý giải, không phải vật chứng của cung trăng.',
     english:
-        'Before dawn, you must return the slip to the box or keep it. Moonlight offers no answer, only illumination for your outstretched hand.',
+        'Before dawn, you return the slip but copy the words “go home” for the human world. As the box closes and the rabbit withdraws, you carry away an open question rather than a relic from the moon.',
   ),
 ];
 
@@ -272,7 +272,7 @@ const _strangeStory = <String>[
   '子夜，一名没有影子的客人敲响客栈木门。他站在大雨里，衣角却没有沾上一滴水。',
   '客人把一枚冰冷的铜钱放在柜上：“鸡鸣以前，无论听见谁叫你的名字，都不要开门。”说完，他走进最里面的空房。',
   '三更过后，门外传来你最熟悉的声音。它先轻声请求，随后用力拍门，最后准确说出只有你知道的一段往事。',
-  '掌心里的铜钱慢慢变成一片湿叶。第一声鸡鸣将至，而门缝下出现了一双朝屋内生长的脚印。',
+  '掌心里的铜钱变成湿叶时，你没有去堵门，反而推开夜客住过的空房。第一声鸡鸣响起，门外的声音消失，床下却蜷着一个受伤的陌生人；你守住了承诺，也必须面对承诺没有说完的后果。',
 ];
 
 const _strangeAnnotations = <ReadingAnnotation>[
@@ -302,11 +302,11 @@ const _strangeAnnotations = <ReadingAnnotation>[
   ),
   ReadingAnnotation(
     pinyin:
-        'Zhǎngxīn lǐ de tóngqián mànmàn biàn chéng yí piàn shīyè. Dì yì shēng jīmíng jiāng zhì, ér ménfèng xià chūxiàn le yì shuāng cháo wūnèi shēngzhǎng de jiǎoyìn.',
+        'Zhǎngxīn lǐ de tóngqián biànchéng shīyè shí, nǐ méiyǒu qù dǔmén, fǎn’ér tuīkāi yèkè zhùguo de kōngfáng. Dì yì shēng jīmíng xiǎngqǐ, ménwài de shēngyīn xiāoshī, chuángxià què quánzhe yí gè shòushāng de mòshēngrén; nǐ shǒuzhù le chéngnuò, yě bìxū miànduì chéngnuò méiyǒu shuōwán de hòuguǒ.',
     vietnamese:
-        'Đồng tiền trong tay dần hóa thành chiếc lá ướt. Tiếng gà đầu tiên sắp vang lên, còn dưới khe cửa xuất hiện dấu chân mọc về phía trong phòng.',
+        'Khi đồng tiền hóa thành lá ướt, bạn không chặn cửa mà mở căn phòng vị khách đã ở. Tiếng gà đầu tiên làm giọng ngoài cửa biến mất, nhưng dưới giường có một người lạ bị thương; bạn đã giữ lời và vẫn phải đối diện hậu quả chưa được nói hết.',
     english:
-        'The coin becomes a wet leaf. The first rooster call approaches, while footprints begin growing inward beneath the door.',
+        'When the coin becomes a wet leaf, you open the guest’s empty room instead of barricading the door. The first rooster call silences the voice outside, but an injured stranger lies beneath the bed; you kept the promise and still inherit its unfinished consequence.',
   ),
 ];
 
@@ -404,7 +404,7 @@ const _folkStory = <String>[
   '入夜后，河面漂满纸灯。老人提醒你，今晚不要捞起任何逆流而上的灯，除非灯纸上写着你的名字。',
   '午夜将近，成百上千盏灯顺流远去，只有一盏停在你面前。它没有被风吹动，却缓慢地向上游退去。',
   '你俯身看见灯纸内侧写着自己的名字。水中的倒影却不是现在的你，而是一张苍老许多、正想开口说话的脸。',
-  '灯火即将熄灭。你可以伸手接住未来的留言，也可以让它继续逆流，回到它真正属于的那一年。',
+  '灯火将熄时，你撕下写着名字的一角，却没有捞起河灯。灯继续逆流，水中的老脸终于闭口；多年以后，你仍保留那片空白灯纸，用它提醒自己：未来可以被倾听，却不能被提前占有。',
 ];
 
 const _folkAnnotations = <ReadingAnnotation>[
@@ -434,11 +434,11 @@ const _folkAnnotations = <ReadingAnnotation>[
   ),
   ReadingAnnotation(
     pinyin:
-        'Dēnghuǒ jíjiāng xīmiè. Nǐ kěyǐ shēnshǒu jiēzhù wèilái de liúyán, yě kěyǐ ràng tā jìxù nìliú, huídào tā zhēnzhèng shǔyú de nà yì nián.',
+        'Dēnghuǒ jiāng xī shí, nǐ sīxià xiězhe míngzi de yì jiǎo, què méiyǒu lāoqǐ hédēng. Dēng jìxù nìliú, shuǐ zhōng de lǎoliǎn zhōngyú bìkǒu; duōnián yǐhòu, nǐ réng bǎoliú nà piàn kòngbái dēngzhǐ, yòng tā tíxǐng zìjǐ: wèilái kěyǐ bèi qīngtīng, què bùnéng bèi tíqián zhànyǒu.',
     vietnamese:
-        'Ngọn lửa sắp tắt. Bạn có thể nhận lời nhắn từ tương lai hoặc để chiếc đèn tiếp tục ngược dòng, trở về năm thật sự thuộc về nó.',
+        'Khi lửa sắp tắt, bạn xé góc giấy mang tên mình nhưng không vớt đèn. Chiếc đèn tiếp tục ngược dòng; nhiều năm sau, mảnh giấy trắng vẫn nhắc bạn rằng có thể lắng nghe tương lai nhưng không thể sở hữu nó trước thời điểm.',
     english:
-        'The flame is fading. You may receive the message from the future or let the lantern continue upstream toward the year where it belongs.',
+        'As the flame fades, you tear off the corner bearing your name but do not lift the lantern. It continues upstream; years later, the blank paper reminds you that the future may be heard but not possessed in advance.',
   ),
 ];
 

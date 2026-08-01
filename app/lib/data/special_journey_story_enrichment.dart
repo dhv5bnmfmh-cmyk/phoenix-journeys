@@ -23,7 +23,7 @@ List<SpecialJourneyEnrichmentText> specialJourneyStoryEnrichmentFor(
     _ => const <SpecialJourneyEnrichmentText>[],
   };
   if (signature.isEmpty) return const <SpecialJourneyEnrichmentText>[];
-  return <SpecialJourneyEnrichmentText>[...signature, ..._sharedImmersiveArc];
+  return signature;
 }
 
 const _literarySignature = <SpecialJourneyEnrichmentText>[
@@ -323,80 +323,5 @@ const _folkSignature = <SpecialJourneyEnrichmentText>[
     pinyin: 'Nǐ shēnshǒu huò shōushǒu de shùnjiān, héliú dōu huì jìxù qiánjìn, zhēnzhèng gǎibiàn de shì nǐ zěnyàng lǐjiě nà jù méiyǒu tīngqīng de huà.',
     vietnamese: 'Dù bạn đưa hay rút tay, sông vẫn chảy; điều thay đổi là cách bạn hiểu câu nói chưa nghe rõ.',
     english: 'Whether you reach or withdraw, the river continues; what changes is how you interpret the unheard message.',
-  ),
-];
-
-const _sharedImmersiveArc = <SpecialJourneyEnrichmentText>[
-  SpecialJourneyEnrichmentText(
-    chinese: '你没有立刻前进，而是先确认光线、声音和脚下的方向。',
-    pinyin: 'Nǐ méiyǒu lìkè qiánjìn, ér shì xiān quèrèn guāngxiàn, shēngyīn hé jiǎoxià de fāngxiàng.',
-    vietnamese: 'Bạn chưa bước tiếp ngay mà trước hết xác nhận ánh sáng, âm thanh và hướng dưới chân.',
-    english: 'You do not move at once; first you check the light, sound, and direction beneath your feet.',
-  ),
-  SpecialJourneyEnrichmentText(
-    chinese: '每一次停顿都让场景多出一层，熟悉的东西也开始变得可疑。',
-    pinyin: 'Měi yí cì tíngdùn dōu ràng chǎngjǐng duōchū yì céng, shúxī de dōngxi yě kāishǐ biànde kěyí.',
-    vietnamese: 'Mỗi lần dừng lại khiến cảnh vật thêm một lớp và điều quen thuộc cũng trở nên đáng ngờ.',
-    english: 'Each pause adds another layer, making even familiar things uncertain.',
-  ),
-  SpecialJourneyEnrichmentText(
-    chinese: '你试着记住来路，却发现身后的景物正在悄悄改变位置。',
-    pinyin: 'Nǐ shìzhe jìzhù láilù, què fāxiàn shēnhòu de jǐngwù zhèngzài qiāoqiāo gǎibiàn wèizhi.',
-    vietnamese: 'Bạn cố nhớ đường đến nhưng cảnh phía sau đang lặng lẽ đổi vị trí.',
-    english: 'You try to remember the route, but the scenery behind you is quietly changing position.',
-  ),
-  SpecialJourneyEnrichmentText(
-    chinese: '风带来的气味比路标更可靠，它不断提醒你仍在故事内部。',
-    pinyin: 'Fēng dàilái de qìwèi bǐ lùbiāo gèng kěkào, tā bùduàn tíxǐng nǐ réng zài gùshì nèibù.',
-    vietnamese: 'Mùi trong gió đáng tin hơn biển chỉ đường, nhắc rằng bạn vẫn ở bên trong câu chuyện.',
-    english: 'Scent carried by wind is more reliable than signs, reminding you that you remain inside the story.',
-  ),
-  SpecialJourneyEnrichmentText(
-    chinese: '当你伸手触碰某件东西时，温度证明它真实，意义却仍不确定。',
-    pinyin: 'Dāng nǐ shēnshǒu chùpèng mǒu jiàn dōngxi shí, wēndù zhèngmíng tā zhēnshí, yìyì què réng bù quèdìng.',
-    vietnamese: 'Khi chạm vào một vật, nhiệt độ chứng minh nó có thật nhưng ý nghĩa vẫn chưa chắc chắn.',
-    english: 'Temperature proves an object is real, while its meaning remains uncertain.',
-  ),
-  SpecialJourneyEnrichmentText(
-    chinese: '远处传来的声音没有说明来源，只把你的注意力引向下一处选择。',
-    pinyin: 'Yuǎnchù chuánlái de shēngyīn méiyǒu shuōmíng láiyuán, zhǐ bǎ nǐ de zhùyìlì yǐnxiàng xià yí chù xuǎnzé.',
-    vietnamese: 'Âm thanh xa không cho biết nguồn, chỉ kéo sự chú ý của bạn tới lựa chọn tiếp theo.',
-    english: 'A distant sound reveals no source and only draws you toward the next choice.',
-  ),
-  SpecialJourneyEnrichmentText(
-    chinese: '你开始明白，旅程不是等待答案，而是观察自己怎样作出判断。',
-    pinyin: 'Nǐ kāishǐ míngbai, lǚchéng bú shì děngdài dá’àn, ér shì guānchá zìjǐ zěnyàng zuòchū pànduàn.',
-    vietnamese: 'Bạn hiểu hành trình không phải chờ đáp án mà là quan sát cách mình phán đoán.',
-    english: 'The journey is not about waiting for an answer but watching how you form a judgment.',
-  ),
-  SpecialJourneyEnrichmentText(
-    chinese: '时间在这里不按钟表前进，有些瞬间被拉长，有些年月一闪而过。',
-    pinyin: 'Shíjiān zài zhèlǐ bú àn zhōngbiǎo qiánjìn, yǒuxiē shùnjiān bèi lācháng, yǒuxiē niányuè yì shǎn ér guò.',
-    vietnamese: 'Thời gian không chạy theo đồng hồ; có khoảnh khắc kéo dài và có năm tháng vụt qua.',
-    english: 'Time does not follow clocks here; moments stretch while years pass in a flash.',
-  ),
-  SpecialJourneyEnrichmentText(
-    chinese: '每一条线索都可能解释过去，也可能只是为了改变你接下来的行动。',
-    pinyin: 'Měi yì tiáo xiànsuǒ dōu kěnéng jiěshì guòqù, yě kěnéng zhǐ shì wèile gǎibiàn nǐ jiēxiàlái de xíngdòng.',
-    vietnamese: 'Mỗi manh mối có thể giải thích quá khứ hoặc chỉ nhằm đổi hành động tiếp theo của bạn.',
-    english: 'Each clue may explain the past or merely alter what you do next.',
-  ),
-  SpecialJourneyEnrichmentText(
-    chinese: '你把恐惧、好奇和责任放在一起比较，才发现它们常常指向不同方向。',
-    pinyin: 'Nǐ bǎ kǒngjù, hàoqí hé zérèn fàng zài yìqǐ bǐjiào, cái fāxiàn tāmen chángcháng zhǐxiàng bùtóng fāngxiàng.',
-    vietnamese: 'Khi so sánh sợ hãi, tò mò và trách nhiệm, bạn thấy chúng thường chỉ về những hướng khác nhau.',
-    english: 'Fear, curiosity, and responsibility often point in different directions.',
-  ),
-  SpecialJourneyEnrichmentText(
-    chinese: '真正困难的不是看见异常，而是决定看见以后是否仍然相信自己。',
-    pinyin: 'Zhēnzhèng kùnnan de bú shì kànjiàn yìcháng, ér shì juédìng kànjiàn yǐhòu shìfǒu réngrán xiāngxìn zìjǐ.',
-    vietnamese: 'Điều khó không phải nhìn thấy bất thường mà là quyết định sau đó còn tin mình hay không.',
-    english: 'The real difficulty is not seeing the impossible, but deciding whether to trust yourself afterward.',
-  ),
-  SpecialJourneyEnrichmentText(
-    chinese: '当出口终于出现时，你已经不能用进入以前的眼光理解这段经历。',
-    pinyin: 'Dāng chūkǒu zhōngyú chūxiàn shí, nǐ yǐjīng bù néng yòng jìnrù yǐqián de yǎnguāng lǐjiě zhè duàn jīnglì.',
-    vietnamese: 'Khi lối ra xuất hiện, bạn không còn có thể hiểu trải nghiệm bằng cách nhìn trước lúc bước vào.',
-    english: 'When the exit appears, you can no longer understand the experience with the eyes you had before entering.',
   ),
 ];

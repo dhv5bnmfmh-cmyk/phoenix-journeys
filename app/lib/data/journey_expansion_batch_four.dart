@@ -22,16 +22,16 @@ JourneyContentRecord _record(String id, String title, String geo, List<String> p
 );
 
 const _pingyaoP = <String>[
-  '晨光越过城墙，你从迎薰门走进平遥古城。灰砖街巷保持明清县城的格局，市楼、店铺与院落沿中轴和支路展开。',
-  '古城并不是一组孤立建筑。城墙、衙署、寺庙、民居和商业街彼此连接，四大街、八小街与众多巷道共同组织居民生活。',
-  '十九世纪到二十世纪初，平遥成为重要金融中心。票号用汇兑连接远方商路，深宅院落和店面至今保存晋商经营留下的痕迹。',
-  '古城仍有居民生活。保护既要修缮灰砖木构，也要管理消防、排水与游客压力，让活态社区和历史格局继续共存。',
+  '平遥雨季将至，社区会计赵禾发现巷口排水沟被新摊位挡住。摊主是刚回乡的表弟，指望在票号旧街卖点心还债；她若上报，摊位当天就得拆。',
+  '赵禾带着旧汇兑账册穿过灰砖街巷核对门牌，才看清城墙、院落、店铺与排水并非各自孤立。消防员又提醒，木构密集的巷子不能留下任何堵点。',
+  '她没有替表弟隐瞒，也没有只贴一张整改单，而是请邻里把摊位移进闲置院落，以一笔真实的票号汇兑故事设计菜单。雨落下时，水顺利穿过原来的沟口。',
+  '表弟少了街面客流，却有了长久屋檐。赵禾在账册末页补上衙署、金融与古城格局：活态修缮不是赶走居民，而是让生活服从共同安全后继续发生。',
 ];
 const _pingyaoA = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Chénguāng yuèguò chéngqiáng, nǐ cóng Yíngxūn Mén zǒujìn Píngyáo Gǔchéng. Huīzhuān jiēxiàng bǎochí Míng-Qīng xiànchéng de géjú.', vietnamese: 'Ánh sớm vượt tường thành; phố gạch xám giữ bố cục huyện thành Minh–Thanh.', english: 'Grey-brick streets preserve the plan of a Ming-Qing county town.'),
-  ReadingAnnotation(pinyin: 'Chéngqiáng, yáshǔ, sìmiào, mínjū hé shāngyèjiē bǐcǐ liánjiē, gòngtóng zǔzhī jūmín shēnghuó.', vietnamese: 'Tường thành, nha môn, chùa, nhà ở và phố buôn bán cùng tổ chức đời sống.', english: 'Walls, offices, temples, homes, and markets form one living city.'),
-  ReadingAnnotation(pinyin: 'Shíjiǔ shìjì dào èrshí shìjì chū, Píngyáo chéngwéi zhòngyào jīnróng zhōngxīn. Piàohào yòng huìduì liánjiē yuǎnfāng shānglù.', vietnamese: 'Thế kỷ XIX–đầu XX, các phiếu hiệu Bình Dao kết nối thương lộ bằng chuyển tiền.', english: 'Draft banks made Pingyao an important financial centre.'),
-  ReadingAnnotation(pinyin: 'Bǎohù jì yào xiūshàn huīzhuān mùgòu, yě yào guǎnlǐ xiāofáng, páishuǐ yǔ yóukè yālì.', vietnamese: 'Bảo tồn gồm tu bổ, phòng cháy, thoát nước và quản lý áp lực du khách.', english: 'Conservation balances repair, fire safety, drainage, and visitor pressure.'),
+  ReadingAnnotation(pinyin: 'píng yáo yǔ jì jiāng zhì ， shè qū kuài jì zhào hé fā xiàn xiàng kǒu pái shuǐ gōu bèi xīn tān wèi dǎng zhù 。 tān zhǔ shì gāng huí xiāng de biǎo dì ， zhǐ wàng zài piào hào jiù jiē mài diǎn xīn huán zhài ； tā ruò shàng bào ， tān wèi dāng tiān jiù dé chāi 。', vietnamese: 'Trước mùa mưa ở Bình Dao, kế toán cộng đồng Triệu Hòa phát hiện quầy mới chặn rãnh thoát nước. Chủ quầy là em họ mới về quê bán bánh ở phố phiếu hiệu để trả nợ; nếu báo, quầy phải tháo ngay.', english: 'Before Pingyao\'s rainy season, community accountant Zhao He finds a new stall blocking a drain. The owner is her cousin, recently returned to sell pastries on the draft-bank street and repay debts; reporting it means immediate removal.'),
+  ReadingAnnotation(pinyin: 'zhào hé dài zhe jiù huì duì zhàng cè chuān guò huī zhuān jiē xiàng hé duì mén pái ， cái kàn qīng chéng qiáng 、 yuàn luò 、 diàn pù yǔ pái shuǐ bìng fēi gè zì gū lì 。 xiāo fáng yuán yòu tí xǐng ， mù gòu mì jí de xiàng zi bù néng liú xià rèn hé dǔ diǎn 。', vietnamese: 'Triệu Hòa cầm sổ chuyển tiền cũ đi qua ngõ gạch xám kiểm số nhà và nhận ra tường thành, sân, cửa hiệu cùng thoát nước không tách rời. Lính cứu hỏa nhắc rằng ngõ nhà gỗ dày đặc không thể có điểm nghẽn.', english: 'Zhao He checks addresses through grey-brick lanes with an old remittance ledger and sees that walls, courtyards, shops, and drainage form one system. A firefighter warns that dense timber lanes cannot tolerate a blockage.'),
+  ReadingAnnotation(pinyin: 'tā méi yǒu tì biǎo dì yǐn mán ， yě méi yǒu zhī tiē yì zhāng zhěng gǎi dān ， ér shì qǐng lín lǐ bǎ tān wèi yí jìn xián zhì yuàn luò ， yǐ yì bǐ zhēn shí de piào hào huì duì gù shì shè jì cài dān 。 yǔ luò xià shí ， shuǐ shùn lì chuān guò yuán lái de gōu kǒu 。', vietnamese: 'Cô không che giấu cho em cũng không chỉ dán lệnh sửa, mà nhờ hàng xóm chuyển quầy vào sân trống và dùng câu chuyện chuyển tiền thật của phiếu hiệu làm thực đơn. Khi mưa xuống, nước chảy qua miệng rãnh cũ.', english: 'She neither hides the problem nor simply posts an order. Neighbors move the stall into an unused courtyard and build its menu around a real draft-bank remittance story. When rain falls, water passes through the old drain.'),
+  ReadingAnnotation(pinyin: 'biǎo dì shǎo le jiē miàn kè liú ， què yǒu le cháng jiǔ wū yán 。 zhào hé zài zhàng cè mò yè bǔ shàng yá shǔ 、 jīn róng yǔ gǔ chéng gé jú ： huó tài xiū shàn bú shì gǎn zǒu jū mín ， ér shì ràng shēng huó fú cóng gòng tóng ān quán hòu jì xù fā shēng 。', vietnamese: 'Em họ mất khách mặt phố nhưng lần đầu có mái che bền vững. Triệu Hòa ghi thêm nha môn, tài chính và bố cục thành cổ: bảo tồn sống không đuổi cư dân đi mà cho đời sống tiếp tục sau khi tuân thủ an toàn chung.', english: 'Her cousin loses street traffic but gains a lasting roof. Zhao He adds offices, finance, and urban layout to the ledger: living conservation does not expel residents; it lets life continue after shared safety comes first.'),
 ];
 const _pingyaoW = <WordEntry>[
   WordEntry(word:'城墙',pinyin:'chéngqiáng',partOfSpeech:'名词',simpleChinese:'围绕古城的高墙。',translation:'Tường bao quanh thành cổ.',englishDefinition:'city wall',symbol:'🧱'),
@@ -52,16 +52,16 @@ const _pingyaoD = <DiscoveryEntry>[
 ];
 
 const _qufuP = <String>[
-  '清晨，你沿中轴走进曲阜孔庙。古柏遮住一部分天空，门坊、碑亭与院落层层展开，脚步自然慢下来。',
-  '孔庙始建于公元前四百七十八年，后来多次重建扩展。今天的建筑群保存一百多座建筑、众多石碑与古树，记录历代纪念孔子的方式。',
-  '孔府曾是孔子后裔生活与处理事务的地方，孔林则保存家族墓地。孔庙、孔府、孔林合称三孔，把教育、礼制与家族记忆连在一起。',
-  '参观三孔不只是背诵名句。观察中轴、礼仪空间和碑刻，可以理解儒家思想如何通过建筑、教育与日常秩序长期传播。',
+  '曲阜学生孔言要在孔庙主持成年礼彩排，却发现同伴把礼辞背得一字不差，却不肯让行动不便的同学进入中轴旁唯一平缓的通道。仪式准时开始与所有人参加发生了冲突。',
+  '老师说门坊、碑亭和院落有既定秩序，临时改线会打乱队伍。孔言想到孔府、孔林保存的不只是礼制，也是后裔与家族的生活，于是拒绝独自站上主位。',
+  '他带全班重新丈量侧廊，把领诵改成接力：每个人在不同院落读一句，并为同学留出转身空间。彩排晚了，原本整齐的中轴画面却变成彼此等待的队伍。',
+  '正式仪式那天，古柏下的孔言没有讲大道理，只在石碑的碑刻前说“礼也要看见人”。他从背诵者变成安排者，也懂得传统传播不靠动作永远不变。',
 ];
 const _qufuA = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin:'Qīngchén, nǐ yán zhōngzhóu zǒujìn Qūfù Kǒngmiào. Gǔbǎi, ménfāng, bēitíng yǔ yuànluò céngcéng zhǎnkāi.',vietnamese:'Buổi sớm, trục giữa dẫn qua cây bách, cổng, đình bia và sân nối tiếp.',english:'The central axis unfolds through cypress, gates, stele pavilions, and courtyards.'),
-  ReadingAnnotation(pinyin:'Kǒngmiào shǐjiàn yú gōngyuánqián sìbǎi qīshíbā nián, hòulái duōcì chóngjiàn kuòzhǎn.',vietnamese:'Khổng Miếu khởi dựng năm 478 TCN và nhiều lần tái thiết, mở rộng.',english:'The temple began in 478 BCE and expanded through repeated rebuilding.'),
-  ReadingAnnotation(pinyin:'Kǒngmiào, Kǒngfǔ, Kǒnglín héchēng Sānkǒng, bǎ jiàoyù, lǐzhì yǔ jiāzú jìyì lián zài yìqǐ.',vietnamese:'Ba di tích nối giáo dục, lễ chế và ký ức gia tộc.',english:'The Three Confucian Sites connect education, ritual, and family memory.'),
-  ReadingAnnotation(pinyin:'Guānchá zhōngzhóu, lǐyí kōngjiān hé bēikè, kěyǐ lǐjiě Rújiā sīxiǎng rúhé chángqī chuánbō.',vietnamese:'Trục, không gian nghi lễ và bia khắc cho thấy tư tưởng Nho gia được truyền bá.',english:'Axes, ritual spaces, and stelae show how Confucian ideas endured.'),
+  ReadingAnnotation(pinyin:'qū fù xué shēng kǒng yán yào zài kǒng miào zhǔ chí chéng nián lǐ cǎi pái ， què fā xiàn tóng bàn bǎ lǐ cí bèi dé yí zì bú chà ， què bù kěn ràng xíng dòng bú biàn de tóng xué jìn rù zhōng zhóu páng wéi yì píng huǎn de tōng dào 。 yí shì zhǔn shí kāi shǐ yǔ suǒ yǒu rén shēn jiā fā shēng le chōng tū 。',vietnamese:'Học sinh Khổng Ngôn ở Khúc Phụ chuẩn bị dẫn lễ trưởng thành tại Khổng Miếu, nhưng các bạn thuộc lời lễ lại không muốn nhường lối bằng phẳng duy nhất cho bạn đi lại khó khăn. Bắt đầu đúng giờ xung đột với việc để mọi người cùng tham gia.',english:'Qufu student Kong Yan is preparing to lead a coming-of-age ceremony at the Confucius Temple, but classmates who know every ritual line refuse to share the only level route with a student who has limited mobility. Starting on time conflicts with including everyone.'),
+  ReadingAnnotation(pinyin:'lǎo shī shuō mén fāng 、 bēi tíng hé yuàn luò yǒu jì dìng zhì xù ， lín shí gǎi xiàn huì dǎ luàn duì wu 。 kǒng yán xiǎng dào kǒng fǔ 、 kǒng lín bǎo cún de bù zhǐ shì lǐ zhì ， yě shì hòu yì yǔ jiā zú de shēng huó ， yú shì jù jué dú zì zhàn shàng zhǔ wèi 。',vietnamese:'Giáo viên nói cổng, đình bia và sân có trật tự cố định, đổi tuyến sẽ làm rối đội hình. Nghĩ rằng Khổng Phủ và Khổng Lâm lưu cả lễ chế lẫn đời sống gia đình, Khổng Ngôn từ chối đứng một mình ở vị trí chính.',english:'The teacher says the gateways, stele pavilions, and courtyards follow an established order. Remembering that the Kong Mansion and Cemetery preserve family life as well as ritual, Kong Yan refuses to stand alone in the leading position.'),
+  ReadingAnnotation(pinyin:'tā dài quán bān chóng xīn zhàng liáng cè láng ， bǎ lǐng sòng gǎi chéng jiē lì ： měi gè rén zài bù tóng yuàn luò dú yí jù ， bìng wèi tóng xué liú chū zhuǎn shēn kōng jiān 。 cǎi pái wǎn le ， yuán běn zhěng qí de zhōng zhóu huà miàn què biàn chéng bǐ cǐ děng dài de duì wu 。',vietnamese:'Cậu cùng lớp đo lại hành lang bên, biến phần lĩnh xướng thành tiếp sức và chừa chỗ quay xe. Buổi tập bị muộn, nhưng đội hình thẳng tắp trở thành một đoàn người biết chờ nhau.',english:'He helps the class measure the side corridor, turns the recitation into a relay, and leaves turning space. Rehearsal runs late, but the formerly rigid line becomes a group that waits for one another.'),
+  ReadingAnnotation(pinyin:'zhèng shì yí shì nà tiān ， gǔ bǎi xià de kǒng yán méi yǒu jiǎng dà dào lǐ ， zhī zài shí bēi de bēi kè qián shuō “ lǐ yě yào kàn jiàn rén ”。 tā cóng bèi sòng zhě biàn chéng ān pái zhě ， yě dǒng de chuán tǒng chuán bō bú kào dòng zuò yǒng yuǎn bú biàn 。',vietnamese:'Ngày chính lễ, dưới cây bách cổ, Khổng Ngôn chỉ nói trước bia đá rằng ‘lễ cũng phải nhìn thấy con người’. Cậu chuyển từ người đọc thuộc sang người biết sắp xếp, hiểu rằng truyền thống không sống nhờ động tác bất biến.',english:'On the ceremony day beneath ancient cypresses, Kong Yan says only, ‘Ritual must also see people.’ He changes from a reciter into an organizer and learns that tradition does not endure through unchanging motions.'),
 ];
 const _qufuW = <WordEntry>[
   WordEntry(word:'中轴',pinyin:'zhōngzhóu',partOfSpeech:'名词',simpleChinese:'建筑群中央的主要线。',translation:'Trục chính giữa.',englishDefinition:'central axis',symbol:'↕️'),
@@ -82,16 +82,16 @@ const _qufuD = <DiscoveryEntry>[
 ];
 
 const _leshanP = <String>[
-  '船行到岷江、青衣江和大渡河交汇处，乐山大佛从凌云山崖壁间显现。七十一米高的坐像俯瞰水面，人与山的尺度忽然改变。',
-  '大佛开凿于八世纪。工匠直接在红砂岩中塑造头部、肩膀与双足，并把排水沟藏进发髻、衣纹和身体结构，减少雨水侵蚀。',
-  '三江水流曾给行船带来风险。大佛营造与人们祈求平安有关，开凿产生的石料也落入江中，改变了岸边部分水势。',
-  '红砂岩会受风化、渗水和生物生长影响。今天的保护结合监测、排水和石刻修复，让千年造像继续面对三江。',
+  '青年船工何川在三江交汇处练习掌舵，父亲却因病把第一次夜航交给了他。水位上涨，游客催着靠近崖壁看乐山大佛，何川必须证明自己，却发现航线已偏向急流。',
+  '七十一米坐像从红砂岩间显现时，他想起父亲教的不是贴得越近越好，而是读懂岷江、青衣江和大渡河相遇后的水纹。靠近能赢得掌声，转向则会错过最佳位置。',
+  '何川选择提前掉头，让船在安全水域停稳，并用发髻与衣纹里隐藏的排水沟解释工匠怎样让石刻抵抗侵蚀。抱怨声渐渐停下，一场急雨正好越过崖壁。',
+  '返航后，父亲问他有没有让人平安回岸。何川想到八世纪开凿的石像仍受风化，明白勇敢不是逼近风险，而是在三江催促时仍肯改变方向。',
 ];
 const _leshanA = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin:'Chuán xíngdào Mínjiāng, Qīngyī Jiāng hé Dàdù Hé jiāohuìchù, Lèshān Dàfó cóng Língyún Shān yábì jiān xiǎnxiàn.',vietnamese:'Từ nơi ba sông gặp nhau, Đại Phật Lạc Sơn hiện trên vách Lăng Vân.',english:'The Giant Buddha appears above the confluence of three rivers.'),
-  ReadingAnnotation(pinyin:'Dàfó kāizáo yú bā shìjì. Gōngjiàng zài hóngshāyán zhōng sùzào zàoxiàng, bǎ páishuǐgōu cáng jìn fàjì hé yīwén.',vietnamese:'Tượng được tạc thế kỷ VIII, với rãnh thoát nước ẩn trong tóc và nếp áo.',english:'Eighth-century builders hid drainage channels within the sculpture.'),
-  ReadingAnnotation(pinyin:'Sānjiāng shuǐliú céng gěi xíngchuán dàilái fēngxiǎn, Dàfó yíngzào yǔ rénmen qíqiú píngān yǒuguān.',vietnamese:'Dòng ba sông từng nguy hiểm; việc tạo tượng gắn với ước nguyện bình an.',english:'The sculpture is tied to hopes for safety at a dangerous confluence.'),
-  ReadingAnnotation(pinyin:'Hóngshāyán huì shòu fēnghuà, shènshuǐ hé shēngwù shēngzhǎng yǐngxiǎng.',vietnamese:'Sa thạch đỏ chịu phong hóa, thấm nước và sinh vật phát triển.',english:'Weathering, seepage, and biological growth affect the sandstone.'),
+  ReadingAnnotation(pinyin:'qīng nián chuán gōng hé chuān zài sān jiāng jiāo huì chù liàn xí zhǎng duò ， fù qīn què yīn bìng bǎ dì yí cì yè háng jiāo gěi le tā 。 shuǐ wèi shàng zhǎng ， yóu kè cuī zhe kào jìn yá bì kàn lè shān dà fó ， hé chuān bì xū zhèng míng zì jǐ ， què fā xiàn háng xiàn yǐ piān xiàng jí liú 。',vietnamese:'Thủy thủ trẻ Hà Xuyên lần đầu tự cầm lái ở nơi ba sông gặp nhau vì cha bị ốm. Nước lên, du khách thúc tàu đến gần vách để ngắm Đại Phật; muốn chứng tỏ mình, cậu lại thấy tuyến tàu lệch về dòng xiết.',english:'Young boatman He Chuan takes the helm alone for the first time at the three-river confluence because his father is ill. As water rises, passengers demand a closer Buddha view, but the route is drifting toward the current.'),
+  ReadingAnnotation(pinyin:'qī shí yī mǐ zuò xiàng cóng hóng shā yán jiān xiǎn xiàn shí ， tā xiǎng qǐ fù qīn jiào de bú shì tiē dé yuè jìn yuè hǎo ， ér shì dú dǒng mín jiāng 、 qīng yī jiāng hé dà dù hé xiāng yù hòu de shuǐ wén 。 kào jìn néng yíng dé zhǎng shēng ， zhuǎn xiàng zé huì cuò guò zuì jiā wèi zhì 。',vietnamese:'Khi tượng ngồi 71 mét hiện ra trong sa thạch đỏ, cậu nhớ cha dạy đọc đường nước nơi Mân Giang, Thanh Y Giang và Đại Độ Hà gặp nhau, không phải áp sát. Đến gần được vỗ tay; đổi hướng sẽ mất vị trí đẹp.',english:'As the seventy-one-metre seated figure appears in red sandstone, he recalls that his father taught him to read the currents where the Min, Qingyi, and Dadu rivers meet—not to get as close as possible. Nearness wins applause; turning loses the view.'),
+  ReadingAnnotation(pinyin:'hé chuān xuǎn zé tí qián diào tóu ， ràng chuán zài ān quán shuǐ yù tíng wěn ， bìng yòng fà jì yǔ yī wén lǐ yǐn cáng de pái shuǐ gōu jiě shì gōng jiàng zěn yàng ràng shí kè dǐ kàng qīn shí 。 bào yuàn shēng jiàn jiàn tíng xià ， yì chǎng jí yǔ zhèng hǎo yuè guò yá bì 。',vietnamese:'Hà Xuyên quay đầu sớm, dừng ở vùng nước an toàn và giải thích cách rãnh thoát ẩn trong tóc cùng nếp áo giảm xói mòn. Lời phàn nàn lắng xuống khi một trận mưa gấp tràn qua vách.',english:'He Chuan turns early, steadies the boat in safe water, and explains how drainage hidden in hair and robe folds limits erosion. Complaints fade as a sudden shower crosses the cliff.'),
+  ReadingAnnotation(pinyin:'fǎn háng hòu ， fù qīn wèn tā yǒu méi yǒu ràng rén píng ān huí àn 。 hé chuān xiǎng dào bā shì jì kāi záo de shí xiàng réng shòu fēng huà ， míng bái yǒng gǎn bú shì bī jìn fēng xiǎn ， ér shì zài sān jiāng cuī cù shí réng kěn gǎi biàn fāng xiàng 。',vietnamese:'Về bến, cha chỉ hỏi mọi người có an toàn không. Nghĩ tới tượng thế kỷ VIII vẫn chịu phong hóa, Hà Xuyên hiểu dũng cảm là đổi hướng khi ba dòng sông đang thúc ép, không phải tiến sát nguy hiểm.',english:'Back ashore, his father asks only whether everyone returned safely. Thinking of the eighth-century carving still weathering, He Chuan learns that courage means changing course when three rivers press forward, not approaching danger.'),
 ];
 const _leshanW = <WordEntry>[
   WordEntry(word:'交汇',pinyin:'jiāohuì',partOfSpeech:'动词',simpleChinese:'不同水流相遇。',translation:'Các dòng nước gặp nhau.',englishDefinition:'to converge',symbol:'🌊'),
@@ -112,16 +112,16 @@ const _leshanD = <DiscoveryEntry>[
 ];
 
 const _wuyiP = <String>[
-  '竹筏顺九曲溪缓缓前行，武夷山丹霞峰林从水边升起。近处茶树带着雨珠，远处峡谷和云雾把山水分成多层。',
-  '武夷山保存大片亚热带森林，是许多古老与特有物种的栖息地。九曲溪切过红色岩层，水流与峰岩共同塑造独特景观。',
-  '这里也是文化交流空间。寺观、书院和摩崖石刻分布山水之间，朱熹曾在此讲学，推动理学发展并影响东亚思想文化。',
-  '游览需要尊重河流承载量、森林生态和文化遗迹。保护自然多样性，也保护书院、石刻与山水相依的历史环境。',
+  '武夷山筏工叶岚准备陪母亲完成退休前最后一趟九曲溪。母亲听力渐弱，却仍坚持亲自执篙；第一曲刚过，前方浅滩的水声就与往日不同。',
+  '游客催着加速追赶日照下的丹霞崖壁，母亲也不愿被人看作老去。叶岚在急弯前必须选择：让母亲继续证明自己，还是接过长篙、承受她的责怪。',
+  '她先请母亲用手势判断流速，再在最窄处接篙转向。竹筏擦过倒影而没有撞上浅石，岸边昆虫声重新清晰；游客也安静下来，留意森林与溪水。',
+  '第九曲后，母亲把长篙交给她。峡谷、特有物种的栖息地、书院与摩崖石刻都有承载量；叶岚没有夺走告别，而让旧经验继续领航。',
 ];
 const _wuyiA = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin:'Zhúfá shùn Jiǔqǔ Xī huǎnhuǎn qiánxíng, Wǔyí Shān dānxiá fēnglín cóng shuǐbiān shēngqǐ.',vietnamese:'Bè tre trôi theo Cửu Khúc; núi sa thạch đỏ vươn từ bờ nước.',english:'A bamboo raft follows the Nine Bend River beneath Danxia peaks.'),
-  ReadingAnnotation(pinyin:'Wǔyí Shān bǎocún dàpiàn yàrèdài sēnlín, shì xǔduō gǔlǎo yǔ tèyǒu wùzhǒng de qīxīdì.',vietnamese:'Rừng cận nhiệt là nơi sống của nhiều loài cổ và đặc hữu.',english:'Subtropical forests shelter ancient and endemic species.'),
-  ReadingAnnotation(pinyin:'Sìguàn, shūyuàn hé móyá shíkè fēnbù shānshuǐ zhījiān, Zhū Xī céng zài cǐ jiǎngxué.',vietnamese:'Chùa quán, thư viện và khắc đá gắn với việc Chu Hy giảng học.',english:'Temples, academies, and cliff inscriptions mark a landscape of learning.'),
-  ReadingAnnotation(pinyin:'Bǎohù zìrán duōyàngxìng, yě bǎohù shūyuàn, shíkè yǔ shānshuǐ xiāngyī de lìshǐ huánjìng.',vietnamese:'Bảo vệ đa dạng tự nhiên và môi trường lịch sử gắn với núi nước.',english:'Protection joins biodiversity with the historic cultural setting.'),
+  ReadingAnnotation(pinyin:'wǔ yí shān fá gōng yè lán zhǔn bèi péi mǔ qīn wán chéng tuì xiū qián zuì hòu yí tàng jiǔ qū xī 。 mǔ qīn tīng lì jiàn ruò ， què réng jiān chí qīn zì zhí gāo ； dì yī qǔ gāng guò ， qián fāng qiǎn tān de shuǐ shēng jiù yǔ wǎng rì bù tóng 。',vietnamese:'Người chèo bè Diệp Lam đi cùng mẹ trong chuyến Cửu Khúc cuối trước khi bà nghỉ việc. Mẹ nghe kém nhưng vẫn muốn tự chống sào; ngay sau khúc đầu, tiếng nước ở bãi cạn đã khác thường.',english:'Raft guide Ye Lan accompanies her mother on her final Nine Bend journey before retirement. Her mother\'s hearing has weakened, yet she insists on poling; just beyond the first bend, the shoal sounds different.'),
+  ReadingAnnotation(pinyin:'yóu kè cuī zhe jiā sù zhuī gǎn rì zhào xià de dān xiá yá bì ， mǔ qīn yě bú yuàn bèi rén kàn zuò lǎo qù 。 yè lán zài jí wān qián bì xū xuǎn zé ： ràng mǔ qīn jì xù zhèng míng zì jǐ ， hái shì jiē guò cháng gāo 、 chéng shòu tā de zé guài 。',vietnamese:'Du khách giục tăng tốc để đuổi ánh nắng trên vách Đan Hà, còn mẹ không muốn bị coi là già. Trước khúc gấp, Diệp Lam phải chọn để mẹ tiếp tục chứng minh mình hay cầm sào và chịu lời trách.',english:'Passengers urge them to chase sunlight on the Danxia cliffs, while her mother refuses to appear old. Before the sharp turn, Ye Lan must let her mother keep proving herself or take the pole and accept her anger.'),
+  ReadingAnnotation(pinyin:'tā xiān qǐng mǔ qīn yòng shǒu shì pàn duàn liú sù ， zài zài zuì zhǎi chù jiē gāo zhuǎn xiàng 。 zhú fá cā guò dǎo yǐng ér méi yǒu zhuàng shàng qiǎn shí ， àn biān kūn chóng shēng chóng xīn qīng xī ； yóu kè yě ān jìng xià lái ， liú yì sēn lín yǔ xī shuǐ 。',vietnamese:'Cô để mẹ dùng tay ra hiệu tốc độ nước rồi nhận sào ở chỗ hẹp nhất. Bè lướt qua bóng nước mà không va đá; tiếng côn trùng rõ lại và du khách bắt đầu chú ý rừng cùng dòng suối.',english:'She first asks her mother to signal the current by hand, then takes the pole at the narrowest point. The raft clears the submerged rock, insects become audible again, and passengers notice forest and stream.'),
+  ReadingAnnotation(pinyin:'dì jiǔ qū hòu ， mǔ qīn bǎ cháng gāo jiāo gěi tā 。 xiá gǔ 、 tè yǒu wù zhǒng de qī xī dì 、 shū yuàn yǔ mó yá shí kè dōu yǒu chéng zài liáng ； yè lán méi yǒu duó zǒu gào bié ， ér ràng jiù jīng yàn jì xù lǐng háng 。',vietnamese:'Sau khúc thứ chín, mẹ trao hẳn cây sào và nói: ‘Con đã nghe thấy nước.’ Hẻm núi, sinh cảnh loài đặc hữu, thư viện và bia vách đều có sức chịu tải; Diệp Lam để kinh nghiệm cũ tiếp tục dẫn đường theo cách mới.',english:'After the ninth bend, her mother hands over the pole and says, ‘You heard the water.’ Gorges, endemic habitats, academies, and cliff inscriptions all have limits; Ye Lan lets old experience continue guiding in a new form.'),
 ];
 const _wuyiW = <WordEntry>[
   WordEntry(word:'竹筏',pinyin:'zhúfá',partOfSpeech:'名词',simpleChinese:'竹子做的水上工具。',translation:'Bè tre.',englishDefinition:'bamboo raft',symbol:'🛶'),
@@ -142,16 +142,16 @@ const _wuyiD = <DiscoveryEntry>[
 ];
 
 const _hongheP = <String>[
-  '日出越过哀牢山，元阳哈尼梯田的水面逐层亮起。森林在山顶蓄水，蘑菇房村寨位于中部，梯田沿陡坡一直延伸到河谷。',
-  '哈尼族等各族居民用一千三百多年营造这套农耕系统。沟渠把森林水源引过村寨，分入层层田块，维持红米、水牛、鱼鸭共同参与的生产。',
-  '森林、村寨、梯田与水系不是四幅分开的风景。上方森林涵养水源，村寨连接生活与肥料循环，下方梯田利用水和养分，形成完整生态。',
-  '梯田仍在生产，也面对缺水、人口变化与旅游压力。保护需要维护沟渠、传统知识和社区收益，让农耕文化继续活在日常劳动中。',
+  '红河雾季，年轻稻农白索回村接管家里最高的一片梯田。插秧前夜，木刻分水记录显示今年水少，叔父却让他悄悄多开一道沟，否则新苗可能全部枯死。',
+  '白索沿森林、村寨到田地查看水路，发现下游寡妇家的田埂已经开裂。多取一夜能救自家，代价却是把缺水推给看不见的人；祖父留下的木刻在他手里沉得像石头。',
+  '他选择敲响分水会议的木板，当众承认自家风险，并提出先修漏水沟渠、错开灌溉。村民忙到天亮，第一股水经过他的田却没有停留，继续流向下游。',
+  '几周后，新苗没有最齐，却都活了。森林蓄水、涵养水源，蘑菇房与农耕循环彼此相连；白索补刻一线，记住梯田依靠共同承担。',
 ];
 const _hongheA = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin:'Rìchū yuèguò Āiláo Shān, Yuányáng Hāní Tītián de shuǐmiàn zhúcéng liàngqǐ.',vietnamese:'Mặt nước ruộng bậc thang Nguyên Dương sáng dần dưới bình minh Ai Lao.',english:'Sunrise lights the flooded terraces below Ailao Mountain.'),
-  ReadingAnnotation(pinyin:'Gōuqú bǎ sēnlín shuǐyuán yǐnguò cūnzhài, fēnrù céngcéng tiánkuài.',vietnamese:'Kênh dẫn nước rừng qua làng rồi chia vào từng thửa ruộng.',english:'Channels carry forest water through villages into layered fields.'),
-  ReadingAnnotation(pinyin:'Sēnlín, cūnzhài, tītián yǔ shuǐxì xíngchéng wánzhěng shēngtài.',vietnamese:'Rừng, làng, ruộng và hệ nước tạo thành một sinh thái hoàn chỉnh.',english:'Forest, villages, terraces, and water form one integrated ecology.'),
-  ReadingAnnotation(pinyin:'Bǎohù xūyào wéihù gōuqú, chuántǒng zhīshi hé shèqū shōuyì.',vietnamese:'Bảo tồn cần giữ kênh, tri thức truyền thống và lợi ích cộng đồng.',english:'Conservation sustains channels, knowledge, and community benefit.'),
+  ReadingAnnotation(pinyin:'hóng hé wù jì ， nián qīng dào nóng bái suǒ huí cūn jiē guǎn jiā lǐ zuì gāo de yí piàn tī tián 。 chā yāng qián yè ， mù kè fēn shuǐ jì lù xiǎn shì jīn nián shuǐ shǎo ， shū fù què ràng tā qiāo qiāo duō kāi yí dào gōu ， fǒu zé xīn miáo kě néng quán bù kū sǐ 。',vietnamese:'Trong mùa sương Hồng Hà, nông dân trẻ Bạch Tác về nhận thửa ruộng bậc thang cao nhất của gia đình. Trước đêm cấy, bản khắc chia nước báo năm nay thiếu, nhưng chú bảo cậu lén mở thêm rãnh để cứu mạ.',english:'During Honghe\'s mist season, young farmer Bai Suo returns to manage his family\'s highest terrace. On the eve of planting, the water-allocation carving shows a shortage, but his uncle urges him to open an extra channel in secret to save the seedlings.'),
+  ReadingAnnotation(pinyin:'bái suǒ yán sēn lín 、 cūn zhài dào tián dì chá kàn shuǐ lù ， fā xiàn xià yóu guǎ fù jiā de tián gěng yǐ jīng kāi liè 。 duō qǔ yí yè néng jiù zì jiā ， dài jià què shì bǎ quē shuǐ tuī gěi kàn bú jiàn de rén ； zǔ fù liú xià de mù kè zài tā shǒu lǐ chén dé xiàng shí tou 。',vietnamese:'Cậu theo đường nước từ rừng qua làng đến ruộng và thấy bờ của một góa phụ phía dưới đã nứt. Lấy thêm một đêm có thể cứu nhà mình nhưng đẩy thiếu nước cho người khuất tầm mắt; tấm khắc của ông nặng như đá trong tay.',english:'He follows the water from forest through village to field and finds a downstream widow\'s bund cracked. One extra night may save his crop but pass the shortage to someone unseen; his grandfather\'s carving feels heavy as stone.'),
+  ReadingAnnotation(pinyin:'tā xuǎn zé qiāo xiǎng fēn shuǐ huì yì de mù bǎn ， dāng zhòng chéng rèn zì jiā fēng xiǎn ， bìng tí chū xiān xiū lòu shuǐ gōu qú 、 cuò kāi guàn gài 。 cūn mín máng dào tiān liàng ， dì yī gǔ shuǐ jīng guò tā de tián què méi yǒu tíng liú ， jì xù liú xiàng xià yóu 。',vietnamese:'Cậu gõ bảng gọi họp chia nước, công khai rủi ro nhà mình và đề nghị sửa kênh rò rồi tưới luân phiên. Mọi người làm đến sáng; dòng đầu đi qua ruộng cậu mà không dừng, tiếp tục xuống dưới.',english:'He sounds the water-meeting board, admits his family\'s risk, and proposes repairing leaks and staggering irrigation. The village works until dawn; the first flow passes his field without stopping and continues downstream.'),
+  ReadingAnnotation(pinyin:'jǐ zhōu hòu ， xīn miáo méi yǒu zuì qí ， què dōu huó le 。 sēn lín xù shuǐ 、 hán yǎng shuǐ yuán ， mó gu fáng yǔ nóng gēng xún huán bǐ cǐ xiāng lián ； bái suǒ bǔ kè yí xiàn ， jì zhù tī tián yī kào gòng tóng chéng dān 。',vietnamese:'Vài tuần sau, mạ không đều nhất nhưng đều sống. Rừng tích và giữ nguồn nước, nhà nấm cùng canh tác tạo vòng tuần hoàn; Bạch Tác khắc thêm một nét để nhớ rằng ruộng bậc thang tồn tại nhờ cùng gánh trách nhiệm.',english:'Weeks later, the seedlings are uneven but alive. Forests retain water, while mushroom houses and farming form a cycle; Bai Suo adds one mark to remember that the terraces depend on shared responsibility.'),
 ];
 const _hongheW = <WordEntry>[
   WordEntry(word:'梯田',pinyin:'tītián',partOfSpeech:'名词',simpleChinese:'山坡上的阶梯状农田。',translation:'Ruộng bậc thang.',englishDefinition:'rice terrace',symbol:'🌾'),

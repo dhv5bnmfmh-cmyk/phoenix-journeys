@@ -169,44 +169,44 @@ class DiscoveryEntry {
 }
 
 const storyParagraphs = [
-  '清晨，北京的天空刚刚泛白。你站在一扇巨大的红色宫门前，微风从护城河上轻轻吹来。',
-  '厚重的宫门慢慢打开。红墙、金色屋顶和宽阔的石路，一点一点出现在你的眼前。',
-  '这里曾经是皇帝生活和处理国家事务的地方。今天，它被称为故宫，也被世界认识为紫禁城。',
-  '你不是来背诵年代的。你是来看看，一座宫殿怎样保存一个国家数百年的记忆。',
+  '北京天空刚刚泛白，微风越过护城河。故宫钟表修复实习生林砚在清晨收到一只停摆的宫廷钟；展览下午开放，师傅却不在北京，他必须判断是立刻拆开机芯，还是让展品暂时空缺。',
+  '厚重宫门打开后，红墙、金色屋顶和宽阔石路渐渐亮起。这座宫殿曾属于皇帝处理国家事务的紫禁城；林砚在旧记录里发现，一个看似多余的零件连接着最脆弱的发条。',
+  '主管催他按常见型号处理，林砚没有靠背诵年代壮胆，也没有把午门、太和殿的宏大当成冒险的理由。他停止拆解，承认自己不能独立完成，并用透明展签说明停摆与等待专家的原因。',
+  '几天后，师傅带他完成文物修复。林砚终于懂得，故宫保存数百年记忆，不靠每件东西永远运转，而靠有人在不知道时肯停手。',
 ];
 
 const storyAnnotations = [
   ReadingAnnotation(
     pinyin:
-        'Qīngchén, Běijīng de tiānkōng gānggāng fànbái. Nǐ zhàn zài yí shàn jùdà de hóngsè gōngmén qián, wēifēng cóng hùchénghé shàng qīngqīng chuī lái.',
+        'běi jīng tiān kōng gāng gāng fàn bái ， wēi fēng yuè guò hù chéng hé 。 gù gōng zhōng biǎo xiū fù shí xí shēng lín yàn zài qīng chén shōu dào yì zhī tíng bǎi de gōng tíng zhōng ； zhǎn lǎn xià wǔ kāi fàng ， shī fu què bú zài běi jīng ， tā bì xū pàn duàn shì lì kè chāi kāi jī xīn ， hái shì ràng zhǎn pǐn zàn shí kòng quē 。',
     vietnamese:
-        'Sáng sớm, bầu trời Bắc Kinh vừa hửng sáng. Bạn đứng trước một cánh cổng cung điện màu đỏ khổng lồ, làn gió nhẹ thổi từ hào nước bao quanh thành.',
+        'Bầu trời Bắc Kinh vừa hửng sáng, gió nhẹ vượt qua hào thành. Thực tập sinh phục chế đồng hồ Lâm Nghiên nhận một chiếc đồng hồ cung đình đã dừng; triển lãm mở buổi chiều nhưng thầy vắng mặt, nên anh phải chọn tháo máy ngay hay để trống hiện vật.',
     english:
-        'At dawn, the sky over Beijing is just beginning to brighten. You stand before a massive red palace gate as a light breeze drifts across the moat.',
+        'The Beijing sky pales as a breeze crosses the moat. Palace Museum clock-restoration intern Lin Yan receives a stopped court clock; the exhibition opens that afternoon, but his mentor is away, so he must open it now or leave the display empty.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Hòuzhòng de gōngmén mànmàn dǎkāi. Hóngqiáng, jīnsè wūdǐng hé kuānkuò de shílù, yìdiǎn yìdiǎn chūxiàn zài nǐ de yǎnqián.',
+        'hòu zhòng gōng mén dǎ kāi hòu ， hóng qiáng 、 jīn sè wū dǐng hé kuān kuò shí lù jiàn jiàn liàng qǐ 。 zhè zuò gōng diàn céng shǔ yú huáng dì chǔ lǐ guó jiā shì wù de zǐ jìn chéng ； lín yàn zài jiù jì lù lǐ fā xiàn ， yí gè kàn sì duō yú de líng jiàn lián jiē zhe zuì cuì ruò de fā tiáo 。',
     vietnamese:
-        'Cánh cổng nặng nề từ từ mở ra. Những bức tường đỏ, mái vàng và con đường đá rộng lớn dần hiện ra trước mắt bạn.',
+        'Khi cổng cung nặng mở ra, tường đỏ, mái vàng và đường đá rộng dần sáng. Cung điện này từng là Tử Cấm Thành, nơi hoàng đế xử lý việc nước; hồ sơ cũ cho thấy một bộ phận tưởng thừa nối với dây cót yếu nhất.',
     english:
-        'The heavy palace gate slowly opens. Red walls, golden roofs, and broad stone paths gradually appear before you.',
+        'As the heavy gate opens, red walls, golden roofs, and broad stone paths brighten. This palace was the Forbidden City, where emperors handled state affairs; an old record shows that a seemingly unnecessary part connects to the most fragile spring.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Zhèlǐ céngjīng shì huángdì shēnghuó hé chǔlǐ guójiā shìwù de dìfang. Jīntiān, tā bèi chēngwéi Gùgōng, yě bèi shìjiè rènshi wéi Zǐjìnchéng.',
+        'zhǔ guǎn cuī tā àn cháng jiàn xíng hào chù lǐ ， lín yàn méi yǒu kào bèi sòng nián dài zhuàng dǎn ， yě méi yǒu bǎ wǔ mén 、 tài hé diàn de hóng dà dàng chéng mào xiǎn de lǐ yóu 。 tā tíng zhǐ chāi jiě ， chéng rèn zì jǐ bù néng dú lì wán chéng ， bìng yòng tòu míng zhǎn qiān shuō míng tíng bǎi yǔ děng dài zhuān jiā de yuán yīn 。',
     vietnamese:
-        'Nơi đây từng là chỗ hoàng đế sinh sống và xử lý việc quốc gia. Ngày nay, nơi này được gọi là Cố Cung và được thế giới biết đến với tên Tử Cấm Thành.',
+        'Quản lý giục làm theo mẫu thường gặp, nhưng Lâm Nghiên không dựa vào niên đại đã học thuộc hay vẻ đồ sộ của Ngọ Môn và Điện Thái Hòa để mạo hiểm. Anh dừng tháo, thừa nhận chưa thể làm một mình và ghi rõ lý do chờ chuyên gia.',
     english:
-        'This was once where emperors lived and handled affairs of state. Today it is called the Palace Museum and is known around the world as the Forbidden City.',
+        'A supervisor urges the usual repair, but Lin Yan does not let memorized dates or the scale of Meridian Gate and the Hall of Supreme Harmony justify a risk. He stops, admits he cannot finish alone, and explains the wait for an expert.',
   ),
   ReadingAnnotation(
     pinyin:
-        'Nǐ bú shì lái bèisòng niándài de. Nǐ shì lái kànkan, yí zuò gōngdiàn zěnyàng bǎocún yí gè guójiā shù bǎi nián de jìyì.',
+        'jǐ tiān hòu ， shī fu dài tā wán chéng wén wù xiū fù 。 lín yàn zhōng yú dǒng de ， gù gōng bǎo cún shù bǎi nián jì yì ， bú kào měi jiàn dōng xī yǒng yuǎn yùn zhuǎn ， ér kào yǒu rén zài bù zhī dào shí kěn tíng shǒu 。',
     vietnamese:
-        'Bạn không đến đây để học thuộc niên đại. Bạn đến để xem một cung điện đã lưu giữ ký ức của một đất nước suốt hàng trăm năm như thế nào.',
+        'Vài ngày sau, thầy cùng anh hoàn tất phục chế hiện vật. Lâm Nghiên hiểu rằng ký ức hàng trăm năm của Cố Cung được gìn giữ vì có người biết dừng tay khi chưa chắc chắn.',
     english:
-        'You are not here to memorize dates. You are here to see how a palace can preserve a nation’s memories across centuries.',
+        'Days later, his mentor helps complete the artifact conservation. Lin Yan learns that the Palace Museum preserves centuries of memory because someone is willing to stop when they do not know.',
   ),
 ];
 

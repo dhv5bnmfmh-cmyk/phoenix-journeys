@@ -21,16 +21,16 @@ JourneyContentRecord _record(String id,String title,String geo,List<String> para
 );
 
 const _huangshanP=<String>[
-  '天还没有亮，你沿石阶走向黄山观景台。花岗岩峰从夜色中浮出轮廓，云层在山谷里缓慢移动，迎客松一类的黄山松扎根在岩缝之间。',
-  '太阳越过云海时，峰林被分成明暗不同的层次。黄山以花岗岩峰、奇松、云海、温泉和冬雪闻名，自古进入诗歌、绘画与旅行书写。',
-  '山水之美也依赖脆弱生态。高差、气候和岩石环境形成多样栖息地，古树根系、薄土和山顶植被经不起离开步道的反复踩踏。',
-  '今天的游览用步道、索道、容量管理和监测平衡体验与保护。看见壮阔云海时，也要意识到每一条安全边界都在守护山体与生命。',
+  '护林员程雁赶在天亮前登上黄山观景台。她要为一株根系裸露的老松划出保护线，却发现摄影队已经把三脚架架进岩缝，谁也不肯错过将出现的云海。',
+  '领队说只占十分钟，程雁却看见薄土正从鞋底往坡下掉。太阳越过花岗岩峰时，她必须选择：让所有人留下，还是关闭最好的机位并承担投诉。',
+  '她拉起绳带，又把自己的监测相机借给摄影队远程取景。人群退回步道，峰林在屏幕与眼前同时亮起；那株黄山松没有成为照片中心，却保住了岩缝里的根。',
+  '下山前，领队帮她记录踩踏点、栖息地与游客容量。程雁把峰林轮廓的照片留在巡护日志旁：壮阔不必以越界为代价，取景也可以包含克制。',
 ];
 const _huangshanA=<ReadingAnnotation>[
-  ReadingAnnotation(pinyin:'Tiān hái méiyǒu liàng, nǐ yán shíjiē zǒuxiàng Huángshān guānjǐngtái.',vietnamese:'Trước bình minh, bạn theo bậc đá lên điểm ngắm Hoàng Sơn.',english:'Before dawn, you climb stone steps toward a Huangshan overlook.'),
-  ReadingAnnotation(pinyin:'Tàiyáng yuèguò yúnhǎi shí, fēnglín bèi fēn chéng míng’àn bùtóng de céngcì.',vietnamese:'Khi mặt trời vượt biển mây, các đỉnh núi tách thành nhiều lớp sáng tối.',english:'Sunrise divides the peaks into layers of light and shadow.'),
-  ReadingAnnotation(pinyin:'Gǔshù gēnxì, báotǔ hé shāndǐng zhíbèi jīngbuqǐ fǎnfù cǎità.',vietnamese:'Rễ cây cổ, đất mỏng và thảm thực vật không chịu được giẫm đạp.',english:'Ancient roots, thin soil, and summit plants cannot withstand trampling.'),
-  ReadingAnnotation(pinyin:'Bùdào, suǒdào, róngliàng guǎnlǐ hé jiāncè pínghéng tǐyàn yǔ bǎohù.',vietnamese:'Đường đi, cáp treo, giới hạn sức chứa và quan trắc cân bằng trải nghiệm với bảo tồn.',english:'Trails, cableways, capacity limits, and monitoring balance access with protection.'),
+  ReadingAnnotation(pinyin:'hù lín yuán chéng yàn gǎn zài tiān liàng qián dēng shàng huáng shān guān jǐng tái 。 tā yào wèi yì zhū gēn xì luǒ lù de lǎo sōng huà chū bǎo hù xiàn ， què fā xiàn shè yǐng duì yǐ jīng bǎ sān jiǎo jià jià jìn yán fèng ， shuí yě bù kěn cuò guò jiāng chū xiàn de yún hǎi 。',vietnamese:'Kiểm lâm Trình Nhạn lên điểm ngắm Hoàng Sơn trước bình minh để khoanh vùng bảo vệ một cây thông lộ rễ. Một đoàn nhiếp ảnh đã đặt chân máy vào khe đá và không ai muốn bỏ biển mây sắp xuất hiện.',english:'Ranger Cheng Yan reaches a Huangshan overlook before dawn to protect an old pine with exposed roots. A photography group has placed tripods in the rock crevice, unwilling to miss the approaching sea of clouds.'),
+  ReadingAnnotation(pinyin:'lǐng duì shuō zhī zhàn shí fēn zhōng ， chéng yàn què kàn jiàn báo tǔ zhèng cóng xié dǐ wǎng pō xià diào 。 tài yáng yuè guò huā gǎng yán fēng shí ， tā bì xū xuǎn zé ： ràng suǒ yǒu rén liú xià ， hái shì guān bì zuì hǎo de jī wèi bìng chéng dān tóu sù 。',vietnamese:'Trưởng đoàn xin đứng mười phút, nhưng Trình Nhạn thấy đất mỏng rơi theo đế giày. Khi nắng vượt các đỉnh granit, cô phải chọn để họ ở lại hay đóng vị trí đẹp nhất và nhận khiếu nại.',english:'The leader asks for ten minutes, but Cheng Yan sees thin soil falling from their shoes. As sunlight crosses the granite peaks, she must allow them to stay or close the best viewpoint and face complaints.'),
+  ReadingAnnotation(pinyin:'tā lā qǐ shéng dài ， yòu bǎ zì jǐ de jiān cè xiàng jī jiè gěi shè yǐng duì yuǎn chéng qǔ jǐng 。 rén qún tuì huí bù dào ， fēng lín zài píng mù yǔ yǎn qián tóng shí liàng qǐ ； nà zhū huáng shān sōng méi yǒu chéng wéi zhào piàn zhōng xīn ， què bǎo zhù le yán fèng lǐ de gēn 。',vietnamese:'Cô kéo dây bảo vệ và cho đoàn dùng máy quan trắc của mình để chụp từ xa. Mọi người lùi về đường, rừng đỉnh sáng lên cả trên màn hình lẫn trước mắt; cây thông không vào trung tâm ảnh nhưng giữ được rễ.',english:'She raises the barrier and lends them her monitoring camera for a remote view. The group returns to the trail, and the peaks brighten both on screen and before them; the pine stays out of the photograph\'s center but keeps its roots.'),
+  ReadingAnnotation(pinyin:'xià shān qián ， lǐng duì bāng tā jì lù cǎi tà diǎn 、 qī xī dì yǔ yóu kè róng liàng 。 chéng yàn bǎ fēng lín lún kuò de zhào piàn liú zài xún hù rì zhì páng ： zhuàng kuò bú bì yǐ yuè jiè wèi dài jià ， qǔ jǐng yě kě yǐ bāo hán kè zhì 。',vietnamese:'Trước khi xuống núi, trưởng đoàn giúp ghi điểm giẫm đạp, sinh cảnh và sức chứa. Trình Nhạn đặt ảnh đường nét rừng đỉnh cạnh nhật ký tuần tra: cảnh hùng vĩ không cần đánh đổi bằng vượt ranh giới.',english:'Before descending, the leader helps record trampling, habitat, and visitor capacity. Cheng Yan files the peak-outline photograph beside the patrol log: grandeur need not be purchased by crossing a boundary.'),
 ];
 const _huangshanW=<WordEntry>[
   WordEntry(word:'云海',pinyin:'yúnhǎi',partOfSpeech:'名词',simpleChinese:'像大海一样铺开的云。',translation:'Biển mây.',englishDefinition:'sea of clouds',symbol:'☁️'),
@@ -51,16 +51,16 @@ const _huangshanD=<DiscoveryEntry>[
 ];
 
 const _zhangjiajieP=<String>[
-  '清晨的雾从峡谷升起，武陵源数千根石英砂岩柱逐渐出现。峰柱狭长而陡峭，森林覆盖顶部与坡脚，溪流在深谷中连接水潭和瀑布。',
-  '这些峰柱并不是突然形成。岩层经过抬升、流水切割、风化和崩塌，长期分离成今天的峰林、峡谷、洞穴与天然桥。',
-  '武陵源也保存多样植物和动物。垂直岩壁、谷底水系与不同海拔森林提供多种微环境，景观价值和生态价值不能分开。',
-  '观景设施让人接近高差巨大的峰林，也带来客流、工程和噪声压力。遵守步道与容量管理，是把震撼留给下一位旅行者。',
+  '地质讲解员罗晴第一次独自带学生进入武陵源，清晨的雾却把预定观景点全部遮住。孩子们嫌什么也看不见，她答应在返程前让大家真正读懂一根峰柱。',
+  '近路旁传来落石声，有人提议越过围栏去天然桥。罗晴也怕行程失败，但她选择带队下到安全的谷边，让学生从溪流切割、风化和崩塌的痕迹倒推石英砂岩峰林的形成。',
+  '雾仍未散，孩子们却用身体排出“完整岩层”如何分离成峡谷与孤峰。最后一刻风口打开，数千峰柱只显现了几十秒，没有人再把它们叫作突然冒出的石头。',
+  '回程车上，罗晴删掉只求震撼的讲稿，保留从岩层抬升、高差到微环境的剖面图。她没有交付标准风景照，却完成了第一次自己的地质课。',
 ];
 const _zhangjiajieA=<ReadingAnnotation>[
-  ReadingAnnotation(pinyin:'Qīngchén de wù cóng xiágǔ shēngqǐ, Wǔlíngyuán shùqiān gēn shíyīng shāyánzhù zhújiàn chūxiàn.',vietnamese:'Sương sớm dâng từ hẻm núi, để lộ hàng nghìn cột sa thạch thạch anh.',english:'Morning mist reveals thousands of quartz-sandstone pillars.'),
-  ReadingAnnotation(pinyin:'Yáncéng jīngguò táishēng, liúshuǐ qiēgē, fēnghuà hé bēngtā, chángqī fēnlí chéng fēnglín.',vietnamese:'Nâng địa tầng, xói cắt, phong hóa và sụp đổ dần tạo nên rừng đỉnh.',english:'Uplift, erosion, weathering, and collapse shaped the pillar landscape.'),
-  ReadingAnnotation(pinyin:'Chuízhí yánbì, gǔdǐ shuǐxì yǔ bùtóng hǎibá sēnlín tígōng duōzhǒng wēihuánjìng.',vietnamese:'Vách đứng, nước đáy thung và rừng theo độ cao tạo nhiều vi môi trường.',english:'Cliffs, valley waters, and elevational forests create varied microhabitats.'),
-  ReadingAnnotation(pinyin:'Zūnshǒu bùdào yǔ róngliàng guǎnlǐ, shì bǎ zhènhàn liú gěi xià yí wèi lǚxíngzhě.',vietnamese:'Tuân thủ đường đi và sức chứa giúp giữ cảnh quan cho người đến sau.',english:'Trail and capacity rules preserve the experience for future visitors.'),
+  ReadingAnnotation(pinyin:'dì zhì jiǎng jiě yuán luó qíng dì yī cì dú zì dài xué shēng jìn rù wǔ líng yuán ， qīng chén de wù què bǎ yù dìng guān jǐng diǎn quán bù zhē zhù 。 hái zi men xián shén me yě kàn bú jiàn ， tā dā ying zài fǎn chéng qián ràng dà jiā zhēn zhèng dú dǒng yì gēn fēng zhù 。',vietnamese:'Thuyết minh viên địa chất La Tình lần đầu tự dẫn học sinh vào Vũ Lăng Nguyên, nhưng sương che mọi điểm ngắm. Trẻ em phàn nàn chẳng thấy gì; cô hứa trước khi về sẽ giúp chúng thật sự đọc hiểu một cột núi.',english:'Geology guide Luo Qing leads students alone in Wulingyuan for the first time, but fog hides every viewpoint. The children complain that they can see nothing; she promises they will truly read one pillar before returning.'),
+  ReadingAnnotation(pinyin:'jìn lù páng chuán lái luò shí shēng ， yǒu rén tí yì yuè guò wéi lán qù tiān rán qiáo 。 luó qíng yě pà xíng chéng shī bài ， dàn tā xuǎn zé dài duì xià dào ān quán de gǔ biān ， ràng xué shēng cóng xī liú qiē gē 、 fēng huà hé bēng tā de hén jì dǎo tuī shí yīng shā yán fēng lín de xíng chéng 。',vietnamese:'Tiếng đá rơi vang gần đường tắt và có người muốn vượt rào tới cầu tự nhiên. Sợ chuyến đi thất bại, La Tình vẫn dẫn cả nhóm xuống mép thung lũng an toàn để suy ra quá trình hình thành từ xói cắt, phong hóa và sụp đổ.',english:'Falling rock sounds near a shortcut, and someone suggests crossing the barrier toward a natural bridge. Afraid the trip may fail, Luo Qing still leads the group to a safe valley edge to reconstruct the pillars through erosion, weathering, and collapse.'),
+  ReadingAnnotation(pinyin:'wù réng wèi sàn ， hái zi men què yòng shēn tǐ pái chū “ wán zhěng yán céng ” rú hé fēn lí chéng xiá gǔ yǔ gū fēng 。 zuì hòu yí kè fēng kǒu dǎ kāi ， shù qiān fēng zhù zhī xiǎn xiàn le jǐ shí miǎo ， méi yǒu rén zài bǎ tā men jiào zuò tū rán mào chū de shí tou 。',vietnamese:'Sương chưa tan, nhưng học sinh dùng cơ thể biểu diễn lớp đá nguyên tách thành hẻm và đỉnh cô lập. Cuối cùng gió mở tầm nhìn vài chục giây; không ai còn gọi hàng nghìn cột là đá đột nhiên mọc lên.',english:'The fog remains, but students use their bodies to show a whole rock layer separating into gorges and isolated peaks. Wind opens the view for seconds; no one now calls the thousands of pillars rocks that suddenly appeared.'),
+  ReadingAnnotation(pinyin:'huí chéng chē shàng ， luó qíng shān diào zhī qiú zhèn hàn de jiǎng gǎo ， bǎo liú cóng yán céng tái shēng 、 gāo chā dào wēi huán jìng de pōu miàn tú 。 tā méi yǒu jiāo fù biāo zhǔn fēng jǐng zhào ， què wán chéng le dì yī cì zì jǐ de dì zhì kè 。',vietnamese:'Trên xe về, La Tình bỏ bài giảng chỉ tìm sự choáng ngợp và giữ mặt cắt đã sửa từ nâng địa tầng, chênh cao đến vi môi trường. Không có ảnh phong cảnh chuẩn, cô vẫn hoàn thành tiết địa chất đầu tiên của riêng mình.',english:'On the return bus, Luo Qing deletes the spectacle-only script and keeps the corrected section from uplift and elevation differences to microhabitats. She has no standard scenic photograph, but she completes her first geology lesson of her own.'),
 ];
 const _zhangjiajieW=<WordEntry>[
   WordEntry(word:'峰柱',pinyin:'fēngzhù',partOfSpeech:'名词',simpleChinese:'像柱子一样的山峰。',translation:'Cột núi.',englishDefinition:'stone pillar peak',symbol:'🗿'),
@@ -81,16 +81,16 @@ const _zhangjiajieD=<DiscoveryEntry>[
 ];
 
 const _kaifengP=<String>[
-  '晨光照亮开封城墙和水系。你从古城街巷走向铁塔，今天看到的城市由不同时代的遗迹、重建空间和持续生活共同组成。',
-  '北宋时期，东京开封府是人口密集、商业活跃的都城。街市、河道、桥梁、寺院与官署交织，夜市和坊市变化反映城市管理的新方式。',
-  '黄河带来交通与土地，也多次改变城市。洪水和泥沙让旧城遗址层层叠压，因此理解开封不能只看地面建筑，还要关注考古与城市水系。',
-  '今天的宋都体验需要区分历史遗存、考古证据和现代演绎。旅行不是把复原场景当作原物，而是学习它们依据什么讲述过去。',
+  '中学生周北要为校报画一张“北宋东京地图”。他照着景区复原街市画到一半，却被考古队员母亲指出：漂亮的牌楼没有证据，真正的旧城还压在黄河泥沙之下。',
+  '周北不服，带着速写本沿城墙、水系和铁塔核对。街市、河道、桥梁与官署的关系能从资料里找到，夜市的灯色和招牌样式却只是现代演绎；截稿时间越来越近。',
+  '他必须决定交一幅完整但混淆真假的图，还是留下刺眼的空白。周北擦掉想象的楼阁，用不同线型标出遗存、考古推测和复原场景，并在叠压的城层旁写明依据。',
+  '主编起初嫌地图“不够热闹”，读完图例后却把空白放到版面中央。周北明白，寻找北宋都城不是替过去补齐一切，而是画出知道与不知道的边界。',
 ];
 const _kaifengA=<ReadingAnnotation>[
-  ReadingAnnotation(pinyin:'Chénguāng zhàoliàng Kāifēng chéngqiáng hé shuǐxì.',vietnamese:'Ánh sớm chiếu lên tường thành và hệ nước Khai Phong.',english:'Morning light reaches Kaifeng’s walls and waterways.'),
-  ReadingAnnotation(pinyin:'Běisòng shíqī, Dōngjīng Kāifēng Fǔ shì rénkǒu mìjí, shāngyè huóyuè de dūchéng.',vietnamese:'Thời Bắc Tống, Đông Kinh Khai Phong là kinh đô đông dân và thương mại sôi động.',english:'Northern Song Kaifeng was a dense and commercially active capital.'),
-  ReadingAnnotation(pinyin:'Hóngshuǐ hé níshā ràng jiùchéng yízhǐ céngcéng diéyā.',vietnamese:'Lũ và phù sa khiến di tích các thành cũ chồng lớp.',english:'Floods and sediment buried successive layers of the old city.'),
-  ReadingAnnotation(pinyin:'Sòngdū tǐyàn xūyào qūfēn lìshǐ yícún, kǎogǔ zhèngjù hé xiàndài yǎnyì.',vietnamese:'Trải nghiệm Tống đô phải phân biệt di tích, chứng cứ khảo cổ và diễn giải hiện đại.',english:'Visitors should distinguish remains, archaeological evidence, and modern interpretation.'),
+  ReadingAnnotation(pinyin:'zhōng xué shēng zhōu běi yào wèi xiào bào huà yì zhāng “ běi sòng dōng jīng dì tú ”。 tā zhào zhe jǐng qū fù yuán jiē shì huà dào yí bàn ， què bèi kǎo gǔ duì yuán mǔ qīn zhǐ chū ： piāo liàng de pái lóu méi yǒu zhèng jù ， zhēn zhèng de jiù chéng hái yā zài huáng hé ní shā zhī xià 。',vietnamese:'Học sinh Chu Bắc phải vẽ ‘bản đồ Đông Kinh Bắc Tống’ cho báo trường. Mẹ làm khảo cổ chỉ ra rằng cổng lầu đẹp trong khu phục dựng không có chứng cứ, còn thành cũ thật nằm dưới phù sa Hoàng Hà.',english:'Student Zhou Bei must draw a ‘Northern Song Dongjing map’ for the school paper. His archaeologist mother points out that the attractive reconstructed gate lacks evidence, while the real old city lies beneath Yellow River sediment.'),
+  ReadingAnnotation(pinyin:'zhōu běi bù fú ， dài zhe sù xiě běn yán chéng qiáng 、 shuǐ xì hé tiě tǎ hé duì 。 jiē shì 、 hé dào 、 qiáo liáng yǔ guān shǔ de guān xì néng cóng zī liào lǐ zhǎo dào ， yè shì de dēng sè hé zhāo pái yàng shì què zhǐ shì xiàn dài yǎn yì ； jié gǎo shí jiān yuè lái yuè jìn 。',vietnamese:'Cậu mang sổ đi kiểm tra tường, hệ nước và Thiết Tháp. Quan hệ giữa phố chợ, sông, cầu và công sở có tư liệu; màu đèn chợ đêm và biển hiệu chỉ là diễn giải hiện đại, trong khi hạn nộp tới gần.',english:'He checks walls, waterways, and the Iron Pagoda with his sketchbook. Sources support the relationship among markets, rivers, bridges, and offices, but night-market colors and signs are modern interpretation, and the deadline is near.'),
+  ReadingAnnotation(pinyin:'tā bì xū jué dìng jiāo yì fú wán zhěng dàn hùn xiáo zhēn jiǎ de tú ， hái shì liú xià cì yǎn de kòng bái 。 zhōu běi cā diào xiǎng xiàng de lóu gé ， yòng bù tóng xiàn xíng biāo chū yí cún 、 kǎo gǔ tuī cè hé fù yuán chǎng jǐng ， bìng zài dié yā de chéng céng páng xiě míng yī jù 。',vietnamese:'Cậu phải chọn nộp bức tranh đầy đủ nhưng lẫn thật giả hay để khoảng trống khó chịu. Chu Bắc xóa lầu tưởng tượng, dùng các nét khác nhau cho di tích, suy đoán khảo cổ và phục dựng, rồi ghi căn cứ bên các lớp thành chồng.',english:'He must submit a complete but misleading picture or leave uncomfortable gaps. Zhou Bei erases imagined towers, uses different lines for remains, archaeological inference, and reconstruction, and cites evidence beside the layered city.'),
+  ReadingAnnotation(pinyin:'zhǔ biān qǐ chū xián dì tú “ bú gòu rè nào ”， dú wán tú lì hòu què bǎ kòng bái fàng dào bǎn miàn zhōng yāng 。 zhōu běi míng bái ， xún zhǎo běi sòng dōu chéng bú shì tì guò qù bǔ qí yí qiè ， ér shì huà chū zhī dào yǔ bù zhī dào de biān jiè 。',vietnamese:'Chủ biên chê bản đồ thiếu náo nhiệt nhưng sau đó đặt khoảng trống giữa trang. Chu Bắc hiểu tìm kinh đô Bắc Tống không phải lấp kín quá khứ mà là vẽ trung thực ranh giới giữa điều biết và chưa biết.',english:'The editor first calls the map dull, then places its blank area at the page center. Zhou Bei learns that finding the Northern Song capital means drawing the boundary between what is known and unknown, not filling every gap.'),
 ];
 const _kaifengW=<WordEntry>[
   WordEntry(word:'都城',pinyin:'dūchéng',partOfSpeech:'名词',simpleChinese:'国家首都。',translation:'Kinh đô.',englishDefinition:'imperial capital',symbol:'🏯'),
@@ -111,16 +111,16 @@ const _kaifengD=<DiscoveryEntry>[
 ];
 
 const _daliP=<String>[
-  '清晨，苍山在洱海西岸拉出长长的山影。你从大理古城的石板路出发，白墙灰瓦、院落和远处湖面组成山、城、水三层景象。',
-  '大理曾是南诏和大理国的重要中心，也是多民族往来之地。古城格局、崇圣寺三塔、白族建筑与手工艺记录不同历史阶段。',
-  '洱海不是城市背景板，而是高原湖泊生态系统。入湖河流、湿地、村落生活和旅游活动都会影响水质与湖岸空间。',
-  '理解大理，需要同时观察文化延续和生态边界。尊重社区、减少污染、不过度装饰传统，才能让苍山洱海保持真实层次。',
+  '白族扎染学徒阿月接到第一笔大订单：客栈要一百块“洱海蓝”桌布，第二天就交。清晨苍山影子落在古城院落里，她却发现赶工后的染水来不及按师傅教的方法处理。',
+  '老板催她把水倒进巷口沟渠，说一桶水不会改变高原湖泊。阿月望见沟渠通向入湖河流，也知道拒绝可能失去订单；家里正等这笔钱添置新的手工艺工具。',
+  '她选择停工，带着已染好的样布去客栈说明水质风险，并提出分批交货。老板不高兴，住客却愿意在院里看真实的扎染过程，订单改成少量预约制作。',
+  '傍晚，阿月把处理后的清水倒回清洗缸。她向客人讲南诏以来的多民族生活，也标清洱海生态边界；守住的不是旅行背景，而是手艺、村落与湖水的联系。',
 ];
 const _daliA=<ReadingAnnotation>[
-  ReadingAnnotation(pinyin:'Qīngchén, Cāngshān zài Ěrhǎi xī’àn lāchū chángcháng de shānyǐng.',vietnamese:'Buổi sớm, Thương Sơn đổ bóng dài trên bờ tây Nhĩ Hải.',english:'At dawn, Cangshan casts a long shadow along Erhai’s western shore.'),
-  ReadingAnnotation(pinyin:'Dàlǐ céng shì Nánzhào hé Dàlǐ Guó de zhòngyào zhōngxīn, yě shì duō mínzú wǎnglái zhī dì.',vietnamese:'Đại Lý từng là trung tâm của Nam Chiếu, Đại Lý và giao lưu nhiều dân tộc.',english:'Dali was a centre of Nanzhao, the Dali Kingdom, and multiethnic exchange.'),
-  ReadingAnnotation(pinyin:'Ěrhǎi shì gāoyuán húpō shēngtài xìtǒng, bù shì chéngshì bèijǐngbǎn.',vietnamese:'Nhĩ Hải là hệ sinh thái hồ cao nguyên, không chỉ là phông nền đô thị.',english:'Erhai is a plateau-lake ecosystem, not merely a city backdrop.'),
-  ReadingAnnotation(pinyin:'Zūnzhòng shèqū, jiǎnshǎo wūrǎn, bù guòdù zhuāngshì chuántǒng.',vietnamese:'Tôn trọng cộng đồng, giảm ô nhiễm và không trang trí hóa truyền thống.',english:'Respect communities, reduce pollution, and avoid turning tradition into decoration.'),
+  ReadingAnnotation(pinyin:'bái zú zā rǎn xué tú ā yuè jiē dào dì yī bǐ dà dìng dān ： kè zhàn yào yì bǎi kuài “ ěr hǎi lán ” zhuō bù ， dì èr tiān jiù jiāo 。 qīng chén cāng shān yǐng zi luò zài gǔ chéng yuàn luò lǐ ， tā què fā xiàn gǎn gōng hòu de rǎn shuǐ lái bù jí àn shī fu jiào de fāng fǎ chǔ lǐ 。',vietnamese:'Học việc nhuộm của người Bạch tên A Nguyệt nhận đơn đầu tiên: một trăm khăn bàn ‘xanh Nhĩ Hải’ giao ngày mai. Trong sân cổ dưới bóng Thương Sơn, cô phát hiện nước nhuộm gấp không kịp xử lý theo lời thầy.',english:'Bai tie-dye apprentice A Yue receives her first large order: one hundred ‘Erhai blue’ tablecloths due tomorrow. In the old-city courtyard beneath Cangshan\'s shadow, she finds that rushed dye water cannot be treated as her mentor taught.'),
+  ReadingAnnotation(pinyin:'lǎo bǎn cuī tā bǎ shuǐ dǎo jìn xiàng kǒu gōu qú ， shuō yì tǒng shuǐ bú huì gǎi biàn gāo yuán hú bó 。 ā yuè wàng jiàn gōu qú tōng xiàng rù hú hé liú ， yě zhī dào jù jué kě néng shī qù dìng dān ； jiā lǐ zhèng děng zhè bǐ qián tiān zhì xīn de shǒu gōng yì gōng jù 。',vietnamese:'Chủ khách sạn bảo đổ xuống rãnh, nói một thùng không đổi được hồ cao nguyên. A Nguyệt thấy rãnh nối sông vào hồ; từ chối có thể mất tiền gia đình cần mua dụng cụ thủ công.',english:'The hotel owner says to pour it into the drain because one bucket cannot change a plateau lake. A Yue sees that the drain reaches an inflow river; refusing may cost the money her family needs for craft tools.'),
+  ReadingAnnotation(pinyin:'tā xuǎn zé tíng gōng ， dài zhe yǐ rǎn hǎo de yàng bù qù kè zhàn shuō míng shuǐ zhì fēng xiǎn ， bìng tí chū fēn pī jiāo huò 。 lǎo bǎn bù gāo xìng ， zhù kè què yuàn yì zài yuàn lǐ kàn zhēn shí de zā rǎn guò chéng ， dìng dān gǎi chéng shǎo liàng yù yuē zhì zuò 。',vietnamese:'Cô dừng việc, mang mẫu đã nhuộm tới giải thích rủi ro nước và đề nghị giao từng đợt. Chủ không vui, nhưng khách muốn xem quy trình thật trong sân, nên đơn đổi thành sản xuất đặt trước số lượng nhỏ.',english:'She stops work, takes finished samples to explain the water risk, and proposes staged delivery. The owner is unhappy, but guests want to observe the real courtyard process, so the order becomes small-batch reservation work.'),
+  ReadingAnnotation(pinyin:'bàng wǎn ， ā yuè bǎ chǔ lǐ hòu de qīng shuǐ dǎo huí qīng xǐ gāng 。 tā xiàng kè rén jiǎng nán zhào yǐ lái de duō mín zú shēng huó ， yě biāo qīng ěr hǎi shēng tài biān jiè ； shǒu zhù de bú shì lǚ xíng bèi jǐng ， ér shì shǒu yì 、 cūn luò yǔ hú shuǐ de lián xì 。',vietnamese:'Chiều tối, A Nguyệt trả nước đã xử lý vào bể rửa, kể về đời sống đa dân tộc từ Nam Chiếu và nêu rõ ranh giới sinh thái Nhĩ Hải. Cô bảo vệ mối nối giữa nghề, làng và hồ, không phải một phông nền du lịch.',english:'That evening, A Yue returns treated water to the wash tank, describes multiethnic life since Nanzhao, and marks Erhai\'s ecological limits. She protects the link among craft, village, and lake—not a travel backdrop.'),
 ];
 const _daliW=<WordEntry>[
   WordEntry(word:'苍山',pinyin:'Cāngshān',partOfSpeech:'名词',simpleChinese:'大理西侧的山脉。',translation:'Núi Thương Sơn.',englishDefinition:'Cangshan Mountains',symbol:'⛰️'),
@@ -141,16 +141,16 @@ const _daliD=<DiscoveryEntry>[
 ];
 
 const _harbinP=<String>[
-  '冬日清晨，松花江边的冷雾慢慢散开。你走进中央大街，面包石路面、砖墙、圆拱窗和积雪一起讲述这座城市不长却复杂的现代史。',
-  '十九世纪末到二十世纪初，铁路建设和人口迁移推动哈尔滨快速发展。不同背景的居民带来建筑、商业、宗教、音乐与饮食交流。',
-  '中央大街保存文艺复兴、巴洛克、折衷主义和新艺术运动等多种建筑影响，但这些建筑已经进入中国东北的气候、材料和城市生活。',
-  '历史街区保护不只修外墙，还要记录用途、结构和居民记忆。活化利用如果失去真实信息，漂亮立面也可能变成没有内容的布景。',
+  '修表匠宋维收到通知：中央大街的老铺要改成统一橱窗，他必须在今晚前搬走墙上的铁路时刻表。那张纸记录祖父随人口迁移来到哈尔滨后第一次找到工作的日期。',
+  '改造负责人只想保留圆拱窗和漂亮砖墙，认为旧纸会破坏折衷主义立面的整洁。宋维想守住店面，却也明白拒绝签字可能让租约终止，冷雾外的面包石上已经堆着施工材料。',
+  '他没有把时刻表偷偷带走，而是暂停营业，邀请邻铺居民在背面写下这间屋子的用途与记忆。负责人面对排队的人群，最终同意把原件连同结构说明嵌入室内展示。',
+  '雪落下来时，新橱窗仍未亮，修表声却响起。宋维让活化利用适应东北气候，保住的不是怀旧布景，而是建筑进入铁路、迁移和日常生活的证词。',
 ];
 const _harbinA=<ReadingAnnotation>[
-  ReadingAnnotation(pinyin:'Dōngrì qīngchén, Sōnghuā Jiāng biān de lěngwù mànmàn sànkāi.',vietnamese:'Sáng mùa đông, sương lạnh bên sông Tùng Hoa dần tan.',english:'On a winter morning, cold mist lifts from the Songhua River.'),
-  ReadingAnnotation(pinyin:'Tiělù jiànshè hé rénkǒu qiānyí tuīdòng Hā’ěrbīn kuàisù fāzhǎn.',vietnamese:'Đường sắt và di cư thúc đẩy Cáp Nhĩ Tân phát triển nhanh.',english:'Railway construction and migration accelerated Harbin’s growth.'),
-  ReadingAnnotation(pinyin:'Duōzhǒng jiànzhù yǐngxiǎng jìnrù Zhōngguó Dōngběi de qìhòu, cáiliào hé chéngshì shēnghuó.',vietnamese:'Nhiều ảnh hưởng kiến trúc thích nghi với khí hậu, vật liệu và đời sống Đông Bắc.',english:'Architectural influences adapted to Northeast China’s climate and urban life.'),
-  ReadingAnnotation(pinyin:'Lìshǐ jiēqū bǎohù bù zhǐ xiū wàiqiáng, hái yào jìlù yòngtú, jiégòu hé jūmín jìyì.',vietnamese:'Bảo tồn khu lịch sử không chỉ sửa mặt tiền mà còn ghi chức năng, kết cấu và ký ức cư dân.',english:'Historic-district conservation includes use, structure, and community memory.'),
+  ReadingAnnotation(pinyin:'xiū biǎo jiàng sòng wéi shōu dào tōng zhī ： zhōng yāng dà jiē de lǎo pù yào gǎi chéng tǒng yī chú chuāng ， tā bì xū zài jīn wǎn qián bān zǒu qiáng shàng de tiě lù shí kè biǎo 。 nà zhāng zhǐ jì lù zǔ fù suí rén kǒu qiān yí lái dào hā ěr bīn hòu dì yī cì zhǎo dào gōng zuò de rì qī 。',vietnamese:'Thợ sửa đồng hồ Tống Duy được báo rằng cửa hiệu cũ trên Phố Trung Ương sẽ đổi thành cửa kính thống nhất; trước tối anh phải dỡ thời gian biểu đường sắt trên tường. Tờ giấy ghi ngày ông nội nhập cư tới Cáp Nhĩ Tân và tìm được việc đầu tiên.',english:'Watch repairer Song Wei is told that his old Central Street shop will receive a standardized storefront; by evening he must remove the railway timetable from the wall. It records the day his migrant grandfather found his first Harbin job.'),
+  ReadingAnnotation(pinyin:'gǎi zào fù zé rén zhī xiǎng bǎo liú yuán gǒng chuāng hé piào liang zhuān qiáng ， rèn wéi jiù zhǐ huì pò huài zhé zhōng zhǔ yì lì miàn de zhěng jié 。 sòng wéi xiǎng shǒu zhù diàn miàn ， què yě míng bái jù jué qiān zì kě néng ràng zū yuē zhōng zhǐ ， lěng wù wài de miàn bāo shí shàng yǐ jīng duī zhe shī gōng cái liào 。',vietnamese:'Người phụ trách cải tạo chỉ muốn giữ cửa vòm và tường gạch đẹp, cho rằng giấy cũ làm hỏng mặt đứng chiết trung. Tống Duy muốn giữ cửa hiệu nhưng biết không ký có thể mất hợp đồng thuê; vật liệu thi công đã nằm trên đá lát ngoài sương lạnh.',english:'The renovation manager wants only arched windows and attractive brickwork, calling the old paper a blemish on the eclectic facade. Song Wei wants to keep the shop but may lose the lease by refusing; materials already cover the paving outside.'),
+  ReadingAnnotation(pinyin:'tā méi yǒu bǎ shí kè biǎo tōu tōu dài zǒu ， ér shì zàn tíng yíng yè ， yāo qǐng lín pù jū mín zài bèi miàn xiě xià zhè jiān wū zi de yòng tú yǔ jì yì 。 fù zé rén miàn duì pái duì de rén qún ， zuì zhōng tóng yì bǎ yuán jiàn lián tóng jié gòu shuō míng qiàn rù shì nèi zhǎn shì 。',vietnamese:'Anh không lén mang tờ lịch đi mà đóng cửa, mời hàng xóm viết công năng và ký ức của căn phòng lên mặt sau. Trước hàng người chờ, quản lý đồng ý trưng bản gốc cùng giải thích kết cấu bên trong.',english:'He does not secretly take the timetable. He closes the shop and invites neighbors to record the room\'s uses and memories on its back. Faced with the queue, the manager agrees to display the original with an account of the structure.'),
+  ReadingAnnotation(pinyin:'xuě luò xià lái shí ， xīn chú chuāng réng wèi liàng ， xiū biǎo shēng què xiǎng qǐ 。 sòng wéi ràng huó huà lì yòng shì yìng dōng běi qì hòu ， bǎo zhù de bú shì huái jiù bù jǐng ， ér shì jiàn zhù jìn rù tiě lù 、 qiān yí hé rì cháng shēng huó de zhèng cí 。',vietnamese:'Khi tuyết rơi, cửa kính mới chưa sáng nhưng tiếng sửa đồng hồ trở lại. Tống Duy để việc tái sử dụng thích ứng với khí hậu Đông Bắc, giữ bằng chứng về đường sắt, di cư và đời sống hằng ngày thay vì một phông hoài cổ.',english:'As snow falls, the new window remains dark but watch-repair sounds return. Song Wei makes adaptive reuse fit the Northeast climate, preserving evidence of railway, migration, and daily life rather than a nostalgic stage set.'),
 ];
 const _harbinW=<WordEntry>[
   WordEntry(word:'冷雾',pinyin:'lěngwù',partOfSpeech:'名词',simpleChinese:'低温形成的雾。',translation:'Sương lạnh.',englishDefinition:'cold mist',symbol:'🌫️'),
