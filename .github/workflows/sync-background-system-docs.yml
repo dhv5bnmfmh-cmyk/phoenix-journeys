@@ -1,0 +1,103 @@
+name: Sync dynamic background docs
+
+on:
+  push:
+    branches:
+      - agent/shadowing-pronunciation-diagnosis-v2
+    paths:
+      - '.github/workflows/sync-background-system-docs.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/shadowing-pronunciation-diagnosis-v2
+          fetch-depth: 0
+
+      - name: Update ROADMAP TODO and CHANGELOG
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          roadmap = Path('docs/ROADMAP.md')
+          text = roadmap.read_text()
+          marker = '- 全目录内容品质 Gate、文学 Gate、Story Quality Gate、Flutter CI 与 Cloudflare Preview\n'
+          addition = marker + '- Dynamic Background System v1.0.0：全页面程序化电影环境层、持久化减少动态效果、静态降级与低性能保护\n'
+          if 'Dynamic Background System v1.0.0' not in text:
+              text = text.replace(marker, addition)
+          phase_marker = '- 降低动态效果、性能与可访问性\n'
+          phase_addition = phase_marker + '- 持续校准全页面动态背景的文字安全区、设备性能与目的地差异化\n'
+          if '持续校准全页面动态背景' not in text:
+              text = text.replace(phase_marker, phase_addition)
+          roadmap.write_text(text)
+
+          todo = Path('docs/TODO.md')
+          text = todo.read_text()
+          completed_blocks = [
+          '''- [ ] **清理低清晰度、灰柱、闪烁或不自然动效**  
+          验收：问题资源被高质量静态或轻量伪动态背景替换；无外露符号、异常圈线或廉价粒子效果。
+
+''',
+          '''- [ ] **统一普通与特别 Journey 的高清视觉处理**  
+          验收：原创 WebP、移动竖屏构图、文字可读、安全裁切、降低动态效果兼容。
+
+''',
+          ]
+          for block in completed_blocks:
+              text = text.replace(block, '')
+          remaining = '''- [ ] **建立动态背景设备性能实测基线**  
+  验收：在 iPhone Safari、Android 中端机与平板记录首屏、帧率和内存；任何明显掉帧的目的地自动降级为静态帧。
+
+'''
+          heading = '## P1：视觉与声音\n\n'
+          if '建立动态背景设备性能实测基线' not in text:
+              text = text.replace(heading, heading + remaining)
+          todo.write_text(text)
+
+          changelog = Path('docs/CHANGELOG.md')
+          text = changelog.read_text()
+          entry = '''## [Unreleased]
+
+### Dynamic Background System 1.0.0
+
+#### Added
+
+- 新增全应用 `PhoenixDynamicBackground`，覆盖启动、探索、护照、跟读、我的以及完整 Journey 流程。
+- 新增 `PhoenixAmbientOverlay`，在保留现有高质量目的地图片的前提下加入克制的雾光、景深和前景漂移。
+- 新增原创程序化视觉系统：远景天空、中景层次、前景轮廓、水面微光与 Journey 专属确定性配色。
+- 新增全局“减少动态效果”设置，使用本地 SharedPreferences 保存并在刷新、返回页面后恢复。
+- 新增系统 reduced-motion、`motion=off` 静态降级、`motion=on` QA 强制模式与窄屏高密度设备保护。
+- 新增动态背景 Widget 测试，覆盖渲染、按钮可操作、设置持久化与 Journey 配色差异。
+- 新增 `VISUAL_BACKGROUND_SYSTEM.md`，记录原创来源、技术方案、动态标准、降级策略与 QA 清单。
+
+#### Changed
+
+- Phoenix 所有页面现在共享同一轻量电影环境层，相同页面类型保持统一，Journey 仍保留自己的视觉配色和现有目的地素材。
+- 背景动态使用 Flutter CustomPainter、长周期循环、RepaintBoundary 与 IgnorePointer，不增加第三方视觉或动画依赖。
+- 慢网络和图片加载失败时不会出现黑屏；程序化静态帧立即可用，现有图片错误回退继续生效。
+
+#### Copyright
+
+- 本次新增视觉全部由 Phoenix 项目程序化原创生成，不包含网络下载素材、品牌、Logo、受保护角色或特定艺术家风格模仿。
+
+'''
+          if '### Dynamic Background System 1.0.0' not in text:
+              text = text.replace('## [Unreleased]\n\n', entry, 1)
+          changelog.write_text(text)
+          PY
+
+      - name: Commit documentation synchronization
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "phoenix-docs-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/ROADMAP.md docs/TODO.md docs/CHANGELOG.md
+          git commit -m "docs: record dynamic background system"
+          git push origin HEAD:agent/shadowing-pronunciation-diagnosis-v2
