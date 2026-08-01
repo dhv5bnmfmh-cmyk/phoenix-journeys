@@ -2,7 +2,8 @@
 
 > 状态：方向性文件，不是发布日期承诺  
 > 最后整理：2026-08-01  
-> Story System Version：`1.0.0`
+> Story System Version：`1.0.0`  
+> Dynamic Background System Version：`1.0.0`
 
 本文只描述 Phoenix 的阶段目标与先后关系。具体可执行事项放在 `TODO.md`，固定产品原则见 `PRODUCT_PRINCIPLES.md`，故事体系见 `story/README.md`。
 
@@ -16,6 +17,7 @@
 - 普通旅程与特别旅程统一目录
 - 32 个普通 Journey、9 个特别 Journey、41 篇正式故事母版
 - Story System v1.0.0 与九份强制专项规范
+- Dynamic Background System v1.0.0：全页面程序化电影环境层、持久化减少动态效果、静态降级与低性能保护
 - 41 篇人物、剧情、情绪、节奏、结局与主题矩阵
 - 地图抵达、城市目的地、护照、盖章与分享
 - 简繁切换、越南语与英语辅助
@@ -75,6 +77,7 @@
 - 世界地图到城市的真实路线、缩放与落点
 - 护照透明地图、城市热点与紧凑盖章布局
 - 简繁全局一致性
+- 持续校准全页面动态背景的文字安全区、设备性能与目的地差异化
 - 降低动态效果、性能与可访问性
 - 清理不再公开的旧流程兼容代码，但必须先完成数据迁移与测试
 
@@ -189,3 +192,4 @@
 - 已完成的重要里程碑移入 `CHANGELOG.md`。
 - Founder 改变产品方向时，先更新 `PRODUCT_PRINCIPLES.md`，再调整本文件。
 - Story System 规则变化时，同步更新 `docs/story/`、运行时、自动 Gate、测试和 Changelog。
+- Dynamic Background System 变化时，同步更新 `VISUAL_BACKGROUND_SYSTEM.md`、设置、降级测试与 Changelog。
