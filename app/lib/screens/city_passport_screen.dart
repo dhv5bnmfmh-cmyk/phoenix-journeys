@@ -306,6 +306,20 @@ class _PassportMapState extends State<_PassportMap> {
                           alignment: Alignment.center,
                           filterQuality: FilterQuality.high,
                           gaplessPlayback: true,
+                          errorBuilder: (_, __, ___) => const DecoratedBox(
+                            key: ValueKey('passport-atlas-static-fallback'),
+                            decoration: BoxDecoration(
+                              gradient: RadialGradient(
+                                center: Alignment(.18, -.2),
+                                radius: 1.1,
+                                colors: [
+                                  Color(0xFFF1E3BF),
+                                  Color(0xFFD1BD91),
+                                  Color(0xFF6A8C79),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),

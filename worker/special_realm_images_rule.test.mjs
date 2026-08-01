@@ -58,3 +58,15 @@ test('special realm plates stay clean and transition without procedural effects'
   assert.match(source, /AnimatedSwitcher\(/);
   assert.match(source, /Duration\(milliseconds: 1400\)/);
 });
+
+test('special realm plates preload within the mobile decode budget and fail safely', async () => {
+  const source = await readFile(backgroundSource, 'utf8');
+
+  assert.match(source, /_precacheVisiblePlates\(\)/);
+  assert.match(source, /assets\[current\], assets\.first/);
+  assert.doesNotMatch(source, /for \(final asset in _PremiumRealmPlate\.assetsFor/);
+  assert.match(source, /errorBuilder:/);
+  assert.match(source, /_programmaticFallback/);
+  assert.match(source, /didUpdateWidget/);
+  assert.match(source, /_motion\.dispose\(\)/);
+});

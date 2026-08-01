@@ -20,7 +20,7 @@ Roadmap 状态不是实现证据。只有在所需文档、代码或内容修改
 |---|---|---|
 | Story System v1.0 Documentation | Completed and Reviewed | Story 规范已成为权威标准；不代表全部运行时故事已合规。 |
 | Visual System v1.0 Documentation | Completed and Reviewed | Final Decision：`VISUAL_SYSTEM_V1_APPROVED`；不代表全部运行时视觉已合规。 |
-| Story 与 Visual 软件合规整改 | In Progress | Sprint 27–28 已完成 Story 合规整改与深度质量封版；Sprint 29–32 保持 `Planned`。 |
+| Story 与 Visual 软件合规整改 | In Progress | Sprint 27–28 已完成 Story 合规整改与深度质量封版；Sprint 29 为 `In Progress`，Sprint 30–32 保持 `Planned`。 |
 | Learning System | Planned | 仅可在 Sprint 32 完成后开始。 |
 | UI/UX System | Planned | 依赖 Learning System 完成。 |
 | Audio System | Planned | 依赖 UI/UX System 完成。 |
@@ -31,7 +31,7 @@ Roadmap 状态不是实现证据。只有在所需文档、代码或内容修改
 |---|---|---|---|
 | 01–12 | Story System Documentation and Review | Completed | 当前 Documentation Recovery 与 Review 记录构成有效基线。 |
 | 13–26 | Visual System Documentation and v1.0 Review | Completed | Systems Documentation 与 Story System 接口。 |
-| 27–32 | Story & Visual Conformance and Remediation Phase | In Progress | Sprint 27–28 已完成；Sprint 29–32 保持 `Planned`。 |
+| 27–32 | Story & Visual Conformance and Remediation Phase | In Progress | Sprint 27–28 已完成；Sprint 29 为 `In Progress`，Sprint 30–32 保持 `Planned`。 |
 | 33–46 | Learning System | Planned | Sprint 32 具备真实回归证据并完成。 |
 | 47–60 | UI/UX System | Planned | Learning System 阶段完成。 |
 | 61–74 | Audio System | Planned | UI/UX System 阶段完成。 |
@@ -78,7 +78,7 @@ Status: Completed
 
 ### Sprint 29 — Visual 全量合规审查与 P0/P1 直接修复
 
-Status: Planned
+Status: In Progress
 
 范围：全部静态和动态背景、Journey 图片、首页、世界地图、城市地图、护照、故事页、生词页、发现页、挑战页、留下印象页、盖章页、特别 Journey 入口、Banner、Loading、Splash、UI 插画、Icon 及手机和平板视觉状态。
 
@@ -90,6 +90,8 @@ Status: Planned
 - 每个替换资源必须保留生成、版权、资产、Gate 和设备证据。
 
 退出条件：审查范围内已识别 Visual P0/P1 全部修复或替换并复审；版权不明或存在严重 AI 错误的资源不得保留 Preview 或 Release 资格。
+
+进行中证据（2026-08-01）：已枚举并登记 397 个有效视觉资源，删除 1 个损坏且未被运行时引用的旧 WebP；特别 Journey 已改为按需预载当前图片与静态后备，并补充加载失败的程序化最终降级及生命周期回归；首页、飞行地图、护照地图与 Journey 徽章也已补齐资源失败时的程序化静态降级。版权证据恢复仍在进行：291 个资源为 `EVIDENCE_PARTIAL`，106 个为 `EVIDENCE_MISSING`，全部保持 Preview/Release 不可用，未推断来源、所有权或商业授权。Sprint 29 在权利证据 P0 阻断解除前不得标记为 Completed；Sprint 30–32 保持 Planned。
 
 ### Sprint 30 — Visual 深度质量、素材替换与性能整改
 
@@ -206,5 +208,5 @@ Sprint 32 完成前不得开始 Sprint 33。Learning、UI/UX 和 Audio 均保持
 - 一个 Sprint 编号只属于一个阶段，不得复用。
 - Audio System 之后的新工作从 Sprint 75 开始，除非先明确修订本 Roadmap。
 - 调整顺序必须记录依赖理由，不能静默绕过上游 Gate。
-- `Completed`、`In Progress` 与 `Planned` 必须严格区分；Sprint 27–28 为 `Completed`，Sprint 29–32 保持 `Planned`。
+- `Completed`、`In Progress` 与 `Planned` 必须严格区分；Sprint 27–28 为 `Completed`，Sprint 29 为 `In Progress`，Sprint 30–32 保持 `Planned`。
 - 只有真实完成并具备证据的实现事实才能写入 `CHANGELOG`。

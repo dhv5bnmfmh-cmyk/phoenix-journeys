@@ -72,6 +72,15 @@ class JourneySymbolBadge extends StatelessWidget {
                   alignment: _alignmentFor(journeyId),
                   filterQuality: FilterQuality.high,
                   gaplessPlayback: true,
+                  errorBuilder: (_, __, ___) => ColoredBox(
+                    key: const ValueKey('journey-symbol-static-fallback'),
+                    color: rim,
+                    child: Icon(
+                      Icons.explore_rounded,
+                      color: const Color(0xFFFFE7A0),
+                      size: size * .44,
+                    ),
+                  ),
                 ),
                 const DecoratedBox(
                   decoration: BoxDecoration(

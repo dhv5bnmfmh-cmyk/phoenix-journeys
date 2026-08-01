@@ -341,6 +341,15 @@ class _PhoenixHomeBackgroundState extends State<_PhoenixHomeBackground>
                       alignment: Alignment.topCenter,
                       filterQuality: FilterQuality.high,
                       gaplessPlayback: true,
+                      errorBuilder: (_, __, ___) => const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0xFF173D42), Color(0xFF7A4C32)],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -558,6 +567,8 @@ class _FlightMapCardState extends State<_FlightMapCard>
                           alignment: Alignment.center,
                           filterQuality: FilterQuality.high,
                           gaplessPlayback: true,
+                          errorBuilder: (_, __, ___) =>
+                              const _FlightMapFallback(),
                         ),
                       ),
                     ),
@@ -582,6 +593,8 @@ class _FlightMapCardState extends State<_FlightMapCard>
                               alignment: Alignment.center,
                               filterQuality: FilterQuality.high,
                               gaplessPlayback: true,
+                              errorBuilder: (_, __, ___) =>
+                                  const _FlightMapFallback(),
                             ),
                             const DecoratedBox(
                               decoration: BoxDecoration(
@@ -818,6 +831,24 @@ class _PremiumAircraft extends StatelessWidget {
         key: const ValueKey('phoenix-premium-map-aircraft'),
         size: const Size(50, 56),
         painter: _PremiumAircraftPainter(lightProgress),
+      ),
+    );
+  }
+}
+
+class _FlightMapFallback extends StatelessWidget {
+  const _FlightMapFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return const DecoratedBox(
+      key: ValueKey('phoenix-flight-map-static-fallback'),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF174A53), Color(0xFF2A6A67), Color(0xFFB68A57)],
+        ),
       ),
     );
   }

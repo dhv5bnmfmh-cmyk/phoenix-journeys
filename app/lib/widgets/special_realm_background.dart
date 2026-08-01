@@ -41,7 +41,7 @@ class SpecialRealmBackground extends StatefulWidget {
 class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
     with SingleTickerProviderStateMixin {
   late final AnimationController _motion;
-  bool _platesPrecached = false;
+  final Set<String> _preloadedPlates = <String>{};
 
   @override
   void initState() {
@@ -55,17 +55,38 @@ class _SpecialRealmBackgroundState extends State<SpecialRealmBackground>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_platesPrecached) {
-      _platesPrecached = true;
-      for (final asset in _PremiumRealmPlate.assetsFor(widget.journeyId)) {
-        precacheImage(AssetImage(asset), context);
-      }
-    }
+    _precacheVisiblePlates();
     if (MediaQuery.maybeOf(context)?.disableAnimations ?? false) {
       _motion.stop();
       _motion.value = .42;
     } else if (!_motion.isAnimating) {
       _motion.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant SpecialRealmBackground oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.journeyId != widget.journeyId ||
+        oldWidget.pageType != widget.pageType) {
+      _precacheVisiblePlates();
+    }
+  }
+
+  void _precacheVisiblePlates() {
+    final assets = _PremiumRealmPlate.assetsFor(widget.journeyId);
+    if (assets.isEmpty) return;
+    final current = _PremiumRealmPlate.assetIndexFor(
+      widget.pageType,
+      _motion.value,
+    );
+    // Keep only the active plate and its retained static fallback warm. Loading
+    // all ten HD plates at once can exceed a mobile device's decoded-image
+    // memory budget by hundreds of megabytes.
+    for (final asset in <String>{assets[current], assets.first}) {
+      if (_preloadedPlates.add(asset)) {
+        precacheImage(AssetImage(asset), context);
+      }
     }
   }
 
@@ -236,7 +257,7 @@ class _PremiumRealmPlate extends StatelessWidget {
   static List<String> assetsFor(String journeyId) =>
       _assets[journeyId] ?? const <String>[];
 
-  int get _assetIndex {
+  static int assetIndexFor(JourneyBackgroundPage pageType, double progress) {
     return switch (pageType) {
       JourneyBackgroundPage.story =>
           1 + (progress * 3).floor().clamp(0, 2).toInt(),
@@ -249,6 +270,8 @@ class _PremiumRealmPlate extends StatelessWidget {
       _ => 0,
     };
   }
+
+  int get _assetIndex => assetIndexFor(pageType, progress);
 
   double get _chapter =>
       JourneyBackgroundPage.values.indexOf(pageType) /
@@ -311,6 +334,20 @@ class _PremiumRealmPlate extends StatelessWidget {
                   alignment: _alignmentForChapter,
                   filterQuality: FilterQuality.high,
                   gaplessPlayback: true,
+                  errorBuilder: (context, error, stackTrace) {
+                    final retainedPlate = _assets[journeyId]!.first;
+                    if (_assetIndex != 0) {
+                      return Image.asset(
+                        retainedPlate,
+                        fit: BoxFit.cover,
+                        alignment: _alignmentForChapter,
+                        filterQuality: FilterQuality.high,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _programmaticFallback,
+                      );
+                    }
+                    return _programmaticFallback;
+                  },
                 ),
               ),
               ColoredBox(color: tone),
@@ -334,6 +371,14 @@ class _PremiumRealmPlate extends StatelessWidget {
       ),
     );
   }
+
+  Widget get _programmaticFallback => CustomPaint(
+    painter: _SpecialRealmPainter(
+      journeyId: journeyId,
+      pageType: pageType,
+      progress: progress,
+    ),
+  );
 
   Alignment get _alignmentForChapter {
     final y = -.18 + _chapter * .34;
@@ -379,7 +424,86 @@ class _SpecialRealmPainter extends CustomPainter {
       case 'folk-secret-land':
         _paintUpstreamLantern(canvas, size);
         return;
+      case 'changan-last-bus':
+        _paintEmergencyPlate(
+          canvas,
+          size,
+          const [Color(0xFF18131F), Color(0xFF59402A), Color(0xFFB78A50)],
+          const Alignment(-.62, .18),
+        );
+        return;
+      case 'tide-letter':
+        _paintEmergencyPlate(
+          canvas,
+          size,
+          const [Color(0xFF071D2A), Color(0xFF17606B), Color(0xFFB6D7C9)],
+          const Alignment(.62, .34),
+        );
+        return;
+      case 'arcade-lost-property':
+        _paintEmergencyPlate(
+          canvas,
+          size,
+          const [Color(0xFF201420), Color(0xFF71333E), Color(0xFFF0B45B)],
+          const Alignment(-.45, -.18),
+        );
+        return;
+      case 'tea-horse-echo':
+        _paintEmergencyPlate(
+          canvas,
+          size,
+          const [Color(0xFF172218), Color(0xFF52643D), Color(0xFFC49A64)],
+          const Alignment(.48, -.08),
+        );
+        return;
+      case 'ice-city-star-map':
+        _paintEmergencyPlate(
+          canvas,
+          size,
+          const [Color(0xFF07182B), Color(0xFF345F82), Color(0xFFCBE8F2)],
+          const Alignment(.08, -.55),
+        );
+        return;
     }
+  }
+
+  void _paintEmergencyPlate(
+    Canvas canvas,
+    Size size,
+    List<Color> colors,
+    Alignment lightCenter,
+  ) {
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: colors,
+        ).createShader(Offset.zero & size),
+    );
+    _paintChapterLight(canvas, size, colors.last, lightCenter);
+    final horizon = Path()
+      ..moveTo(0, size.height)
+      ..lineTo(0, size.height * (.68 - _chapter * .05))
+      ..quadraticBezierTo(
+        size.width * .28,
+        size.height * (.56 + _chapter * .03),
+        size.width * .5,
+        size.height * .7,
+      )
+      ..quadraticBezierTo(
+        size.width * .74,
+        size.height * (.58 - _chapter * .02),
+        size.width,
+        size.height * .66,
+      )
+      ..lineTo(size.width, size.height)
+      ..close();
+    canvas.drawPath(
+      horizon,
+      Paint()..color = colors.first.withValues(alpha: .88),
+    );
   }
 
   void _paintDreamButterfly(Canvas canvas, Size size) {
