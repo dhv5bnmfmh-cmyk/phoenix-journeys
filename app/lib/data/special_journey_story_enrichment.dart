@@ -204,6 +204,30 @@ const _mythSignature = <SpecialJourneyEnrichmentText>[
     vietnamese: 'Khi tia sáng đầu tiên xuất hiện, rừng quế, chiếc hộp và cánh cửa cùng trở nên trong suốt.',
     english: 'At first light, the grove, empty box, and suspended door all begin to turn transparent.',
   ),
+  SpecialJourneyEnrichmentText(
+    chinese: '你把竹简放回空匣，字迹没有消失，反而沿着匣底连成一幅缺少终点的月宫图。',
+    pinyin: 'Nǐ bǎ zhújiǎn fànghuí kōngxiá, zìjì méiyǒu xiāoshī, fǎn’ér yánzhe xiádǐ liánchéng yì fú quēshǎo zhōngdiǎn de yuègōng tú.',
+    vietnamese: 'Bạn đặt thẻ tre lại vào hộp; chữ không biến mất mà nối thành bản đồ cung trăng không có điểm cuối.',
+    english: 'You return the slip to the box; its writing becomes a moon-palace map with no final destination.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '白兔从树影里回望一次，随后不再领路；归还遗简以后的方向必须由你自己辨认。',
+    pinyin: 'Báitù cóng shùyǐng lǐ huíwàng yí cì, suíhòu bú zài lǐnglù; guīhuán yíjiǎn yǐhòu de fāngxiàng bìxū yóu nǐ zìjǐ biànrèn.',
+    vietnamese: 'Thỏ trắng ngoái nhìn từ bóng cây rồi thôi dẫn đường; sau khi trả thẻ tre, bạn phải tự nhận ra hướng đi.',
+    english: 'The white rabbit looks back once and stops guiding; after returning the slip, you must find the direction yourself.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '悬空之门合拢时没有声响，只有桂花落在原来门缝的位置，排成一个尚未写完的“归”字。',
+    pinyin: 'Xuánkōng zhī mén hélǒng shí méiyǒu shēngxiǎng, zhǐyǒu guìhuā luò zài yuánlái ménfèng de wèizhi, páichéng yí gè shàngwèi xiěwán de “guī” zì.',
+    vietnamese: 'Cánh cửa lơ lửng khép không tiếng; hoa quế rơi nơi khe cửa cũ, xếp thành chữ “quy” còn viết dở.',
+    english: 'The suspended door closes silently; osmanthus falls along its former seam, forming an unfinished character for return.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '下山以后，掌心还留着竹简缺口压出的浅痕，提醒你归还并不等于从未拥有。',
+    pinyin: 'Xiàshān yǐhòu, zhǎngxīn hái liúzhe zhújiǎn quēkǒu yāchū de qiǎnhén, tíxǐng nǐ guīhuán bìng bù děngyú cóngwèi yǒngyǒu.',
+    vietnamese: 'Xuống núi, lòng bàn tay vẫn còn vết nông do mảnh tre in lại, nhắc rằng hoàn trả không có nghĩa là chưa từng sở hữu.',
+    english: 'After you descend, a faint mark from the broken slip remains in your palm: returning something does not mean never having held it.',
+  ),
 ];
 
 const _strangeSignature = <SpecialJourneyEnrichmentText>[
@@ -279,6 +303,30 @@ const _strangeSignature = <SpecialJourneyEnrichmentText>[
     vietnamese: 'Dấu chân mọc vào trong cho thấy thứ cần đề phòng có lẽ đã vào từ lâu.',
     english: 'Footprints growing inward suggest that what you feared may already be inside.',
   ),
+  SpecialJourneyEnrichmentText(
+    chinese: '你没有追逐脚印，而是把湿叶放回桌面；它立刻恢复成铜钱，寒霜却移到了你的袖口。',
+    pinyin: 'Nǐ méiyǒu zhuīzhú jiǎoyìn, ér shì bǎ shīyè fànghuí zhuōmiàn; tā lìkè huīfù chéng tóngqián, hánshuāng què yí dào le nǐ de xiùkǒu.',
+    vietnamese: 'Bạn không đuổi theo dấu chân mà đặt lá ướt lên bàn; nó trở lại thành đồng tiền, còn sương giá chuyển sang tay áo bạn.',
+    english: 'You do not follow the footprints. The wet leaf becomes a coin again on the table, while frost moves to your sleeve.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '真正的鸡鸣从远村传来时，客栈里的无焰灯一盏盏熄灭，夜客坐过的椅子仍向后轻摇。',
+    pinyin: 'Zhēnzhèng de jīmíng cóng yuǎncūn chuánlái shí, kèzhàn lǐ de wúyàn dēng yì zhǎn zhǎn xīmiè, yèkè zuòguo de yǐzi réng xiànghòu qīngyáo.',
+    vietnamese: 'Khi tiếng gà thật vọng từ làng xa, những ngọn đèn không lửa lần lượt tắt, còn chiếc ghế khách đêm từng ngồi vẫn khẽ đung đưa.',
+    english: 'When a real rooster calls from a distant village, the flameless lamps go dark one by one, but the night guest’s chair keeps rocking.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '你终于明白守诺不是拒绝所有求救，而是在无法辨认真假时，不让恐惧替自己开门。',
+    pinyin: 'Nǐ zhōngyú míngbai shǒunuò bú shì jùjué suǒyǒu qiújiù, ér shì zài wúfǎ biànrèn zhēnjiǎ shí, bú ràng kǒngjù tì zìjǐ kāimén.',
+    vietnamese: 'Bạn hiểu giữ lời không phải từ chối mọi lời cầu cứu, mà là không để nỗi sợ mở cửa thay mình khi chưa phân biệt được thật giả.',
+    english: 'You understand that keeping the promise is not refusing every plea; it is refusing to let fear open the door when truth is unclear.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '天亮后道路已经干燥，只有门槛内侧的一枚湿脚印证明昨夜并非一场可以轻易解释的梦。',
+    pinyin: 'Tiānliàng hòu dàolù yǐjīng gānzào, zhǐyǒu ménkǎn nèicè de yì méi shī jiǎoyìn zhèngmíng zuóyè bìng fēi yì chǎng kěyǐ qīngyì jiěshì de mèng.',
+    vietnamese: 'Sau bình minh đường đã khô, chỉ một dấu chân ướt phía trong ngưỡng cửa chứng tỏ đêm qua không phải giấc mơ dễ giải thích.',
+    english: 'By daylight the road is dry; one wet footprint inside the threshold proves the night was not a dream easily explained.',
+  ),
 ];
 
 const _folkSignature = <SpecialJourneyEnrichmentText>[
@@ -353,5 +401,23 @@ const _folkSignature = <SpecialJourneyEnrichmentText>[
     pinyin: 'Nǐ shēnshǒu huò shōushǒu de shùnjiān, héliú dōu huì jìxù qiánjìn, zhēnzhèng gǎibiàn de shì nǐ zěnyàng lǐjiě nà jù méiyǒu tīngqīng de huà.',
     vietnamese: 'Dù bạn đưa hay rút tay, sông vẫn chảy; điều thay đổi là cách bạn hiểu câu nói chưa nghe rõ.',
     english: 'Whether you reach or withdraw, the river continues; what changes is how you interpret the unheard message.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '你最终没有捞起河灯，而是沿岸追随它；每经过一处浅滩，老年倒影便年轻一点。',
+    pinyin: 'Nǐ zuìzhōng méiyǒu lāoqǐ hédēng, ér shì yán’àn zhuīsuí tā; měi jīngguò yí chù qiǎntān, lǎonián dàoyǐng biàn niánqīng yìdiǎn.',
+    vietnamese: 'Cuối cùng bạn không vớt đèn mà đi dọc bờ theo nó; qua mỗi bãi cạn, bóng già lại trẻ thêm một chút.',
+    english: 'You leave the lantern in the river and follow from shore; at each shoal, the older reflection grows a little younger.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '渡口的钟声响起时，灯纸上的名字被水洗去，留下的空白不再像威胁，更像一次重新书写。',
+    pinyin: 'Dùkǒu de zhōngshēng xiǎngqǐ shí, dēngzhǐ shàng de míngzi bèi shuǐ xǐqù, liúxià de kòngbái bú zài xiàng wēixié, gèng xiàng yí cì chóngxīn shūxiě.',
+    vietnamese: 'Khi chuông bến vang lên, nước xóa tên trên giấy đèn; khoảng trống không còn giống lời đe dọa mà giống cơ hội viết lại.',
+    english: 'When the crossing bell sounds, water erases the name; the blank paper feels less like a threat than a chance to write again.',
+  ),
+  SpecialJourneyEnrichmentText(
+    chinese: '河灯在上游转过最后一道弯，未来的倒影随之散开；你仍不知道警告指向什么，却知道今天要如何生活。',
+    pinyin: 'Hédēng zài shàngyóu zhuǎnguò zuìhòu yí dào wān, wèilái de dàoyǐng suízhī sànkāi; nǐ réng bù zhīdào jǐnggào zhǐxiàng shénme, què zhīdào jīntiān yào rúhé shēnghuó.',
+    vietnamese: 'Đèn khuất sau khúc cong thượng nguồn và bóng tương lai tan đi; bạn vẫn chưa biết lời cảnh báo nói gì, nhưng biết hôm nay mình phải sống thế nào.',
+    english: 'The lantern rounds the last upstream bend and the future reflection dissolves; you still cannot name the warning, but you know how to live today.',
   ),
 ];
