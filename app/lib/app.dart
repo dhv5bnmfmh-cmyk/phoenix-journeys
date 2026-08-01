@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'screens/coin_journey_screen.dart';
+import 'state/app_state.dart';
 import 'theme/phoenix_theme.dart';
+import 'widgets/phoenix_dynamic_background.dart';
 import 'widgets/startup_gate.dart';
 
 class PhoenixApp extends StatelessWidget {
@@ -19,6 +22,13 @@ class PhoenixApp extends StatelessWidget {
       title: 'Phoenix Journeys',
       debugShowCheckedModeBanner: false,
       theme: PhoenixTheme.light,
+      builder: (context, child) {
+        final state = context.watch<AppState>();
+        return PhoenixDynamicBackground(
+          journeyId: state.activeJourneyId,
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: showCoinJourney
           ? const CoinJourneyPrototypeScreen()
           : const StartupGate(),
