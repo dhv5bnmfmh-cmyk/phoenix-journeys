@@ -1,6 +1,6 @@
 # Phoenix Story System
 
-Documentation Status: Reconstructed
+Documentation Status: Reconstructed and Reviewed
 Documentation Version: 1.0.0
 Priority: ★★★★★ (Highest within Story Documentation Entry)
 Owner: Phoenix Story System
@@ -81,7 +81,7 @@ Story 工作必须遵守：
 
 发生冲突时，必须使用 `SYSTEM_PRIORITY.md` 裁决。
 
-当前正式 Story Constitution、Philosophy、Guidelines、Pipeline、Quality Gate、Checklist 与 Review Prompt 尚未在本目录重建。它们保留应有的权威层级，但不得被虚构为已经存在或已经批准。
+当前 Story Constitution、Philosophy、Decision Tree、Pipeline 与 Checklist 已在本目录重建并通过 Recovery Review。Story Guidelines、Ordinary/Special Journey Guidelines、Quality Gate 与 Review Prompt 尚未建立；缺失文件保留应有的目标权威层级，但不得被虚构为已经存在或已经批准。
 
 在这些文件重建前，本 README 与现有 Systems 规范提供 Story System 的入口治理；现有实现型文档和代码只提供当前事实与验证证据。
 
@@ -181,18 +181,19 @@ Story System 禁止：
 
 | File | Responsibility | Current documentation state |
 | --- | --- | --- |
-| `README.md` | Story System 唯一入口、导航、边界与总体治理 | Reconstructed in this Sprint |
-| `STORY_CONSTITUTION.md` | Story 不可违反的最高专业规则 | Not yet reconstructed |
-| `STORY_PHILOSOPHY.md` | 长期叙事判断、体验与取舍原则 | Not yet reconstructed |
+| `README.md` | Story System 唯一入口、导航、边界与总体治理 | Reconstructed and Reviewed |
+| `STORY_CONSTITUTION.md` | Story 不可违反的最高专业规则 | Reconstructed and Reviewed |
+| `STORY_PHILOSOPHY.md` | 长期叙事判断、体验与取舍原则 | Reconstructed and Reviewed |
 | `STORY_GUIDELINES.md` | 可执行的生成、编辑与审校规范 | Not yet reconstructed |
 | `ORDINARY_JOURNEY_GUIDELINES.md` | 普通 Journey 的真实世界叙事规范 | Not yet reconstructed |
 | `SPECIAL_JOURNEY_GUIDELINES.md` | 特别 Journey 的文学与幻想叙事规范 | Not yet reconstructed |
-| `STORY_PIPELINE.md` | Story Production 输入、动作、输出、Owner 与回退 | Not yet reconstructed |
+| `STORY_DECISION_TREE.md` | Story 类型、用户适配与质量问题处理路径 | Reconstructed and Reviewed |
+| `STORY_PIPELINE.md` | Story Production 输入、动作、输出、Owner 与回退 | Reconstructed and Reviewed |
 | `STORY_QUALITY_GATE.md` | 正式 Story 强制质量门槛 | Not yet reconstructed |
-| `STORY_CHECKLIST.md` | 写作、编辑与审核完整性核对 | Not yet reconstructed |
+| `STORY_CHECKLIST.md` | 写作、编辑与审核完整性核对 | Reconstructed and Reviewed |
 | `STORY_REVIEW_PROMPT.md` | AI 与人工 Review 的标准输入与输出 | Not yet reconstructed |
 
-以上未重建文件是 Documentation Architecture 中的目标结构，不是 TODO，也不代表内容已存在。未来每个文件必须在单独 Recovery Sprint 或 Documentation Sprint 中建立、审查与提交。
+表中标记 `Not yet reconstructed` 的文件是 Documentation Architecture 中的目标结构，不是 TODO，也不代表内容已存在。未来每个文件必须在单独 Recovery Sprint 或 Documentation Sprint 中建立、审查与提交。
 
 现有 `docs/journey-content-quality-gate.md` 记录当前实现型内容审计与 CI 行为。它是重要 Evidence，但不能替代尚未重建的正式 `docs/story/STORY_QUALITY_GATE.md`。
 
@@ -217,10 +218,11 @@ Story System 禁止：
 9. 真实存在且适用的 Story Philosophy。
 10. 真实存在且适用的 Story Guidelines。
 11. Ordinary 或 Special Journey 专项规范。
-12. Journey Purpose、Metadata、现有 Story、Source 与 Decision Evidence。
-13. 适用的 Learning、Visual、Audio、Accessibility 与 QA 规范。
-14. Story Pipeline、Quality Gate、Checklist 与 Review Prompt。
-15. 目标 Catalog、代码、测试、Preview 与 Release Evidence。
+12. Story Decision Tree。
+13. Journey Purpose、Metadata、现有 Story、Source 与 Decision Evidence。
+14. 适用的 Learning、Visual、Audio、Accessibility 与 QA 规范。
+15. Story Pipeline、Quality Gate、Checklist 与 Review Prompt。
+16. 目标 Catalog、代码、测试、Preview 与 Release Evidence。
 
 文件缺失时必须按 `SYSTEM_PRIORITY.md` 的 Missing Authority 规则处理，不得猜测。
 
@@ -678,6 +680,8 @@ AI Review 不可以：
 
 Phoenix 必须严格区分 Documentation Status、Content Status、Implementation Status 与 Release Status。
 
+当前 Journey 学习流程的用户可见名称统一为：Story → 生词 → 发现 → 挑战 → 留下印象 → 盖章。Story Documentation 中的 `Memory` 指“留下印象”的内容与状态接口；已恢复 Visual Documentation 中的 `Reflection` 是同一阶段的历史专业名称，不代表新增页面或不同流程。
+
 ## 18.1 Completed
 
 只有同时满足对应范围的正式规范、批准证据、实现、测试、QA 与 Release Record，才可声称该范围已完成。
@@ -699,7 +703,7 @@ Phoenix 必须严格区分 Documentation Status、Content Status、Implementatio
 - Level Variant、翻译或 Story Consumer 尚未同步。
 - Story Gate、Library Review、QA 或 Preview 尚未通过。
 - 代码已存在但 Release Evidence 不完整。
-- 正式 Story Documentation 正在恢复。
+- 任务依赖的 Story 专项规范尚未重建。
 
 开发中内容不得显示为正式完成。
 
@@ -720,12 +724,12 @@ ROADMAP、设计提案、未创建文件、未写入 Catalog 的故事概念和�
 
 - 五份 Systems Documentation 已重建并存在。
 - 六份 Visual Documentation 已恢复并存在。
-- 本 Story README 在本 Sprint 重建。
+- Story README、Constitution、Philosophy、Decision Tree、Pipeline 与 Checklist 已重建并通过 Recovery Review。
 - 当前代码包含普通与特别 Journey、Level Adaptation、Story Agent、Content Auditor 与测试实现。
 
 当前不能确认：
 
-- Story System 其余正式规范已经重建。
+- Story Guidelines、Ordinary/Special Journey Guidelines、Story Quality Gate 与 Story Review Prompt 已经重建。
 - 所有代码故事均已完成正式 Story、Library、QA 与 Release Gate。
 - `content/` 中每个 Journey 已形成完整、可发布的独立内容包。
 

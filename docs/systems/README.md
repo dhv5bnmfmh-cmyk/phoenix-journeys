@@ -1,6 +1,6 @@
 # Phoenix Documentation System
 
-Documentation Status: Reconstructed
+Documentation Status: Reconstructed and Reviewed
 Documentation Version: 1.0.0
 Priority: ★★★★★ (Highest)
 Owner: Phoenix Documentation Architecture
@@ -222,9 +222,19 @@ CHANGELOG.md
 
 截至本版本，Documentation 状态必须按仓库事实理解。
 
-## 5.1 已完成或已恢复
+## 5.1 已重建、恢复并通过本次 Review
 
-- `docs/systems/README.md`：本次重建的 Documentation System 总入口。
+- `docs/systems/README.md`：Documentation System 总入口。
+- `docs/systems/SYSTEM_ARCHITECTURE.md`：Professional Systems 架构、边界与接口。
+- `docs/systems/SYSTEM_DEPENDENCY.md`：系统、开发、Review 与 Release 依赖。
+- `docs/systems/SYSTEM_LIFECYCLE.md`：从需求到维护或退役的生命周期。
+- `docs/systems/SYSTEM_PRIORITY.md`：规范冲突的唯一优先级。
+- `docs/story/README.md`：Story System 唯一入口。
+- `docs/story/STORY_CONSTITUTION.md`：Story System 最高专业规范。
+- `docs/story/STORY_PHILOSOPHY.md`：Story 文学与阅读理念。
+- `docs/story/STORY_DECISION_TREE.md`：Story 类型与问题处理路径。
+- `docs/story/STORY_PIPELINE.md`：Story Production Pipeline。
+- `docs/story/STORY_CHECKLIST.md`：Story 发布前检查清单。
 - `docs/visual/README.md`：Visual System 导航。
 - `docs/visual/VISUAL_CONSTITUTION.md`：Visual System 最高规范。
 - `docs/visual/VISUAL_PHILOSOPHY.md`：Visual 思想与美学基础。
@@ -232,20 +242,19 @@ CHANGELOG.md
 - `docs/visual/BACKGROUND_GUIDELINES.md`：Background 专项规范。
 - `docs/visual/AI_IMAGE_GENERATION_GUIDE.md`：AI 原创视觉生成规范。
 
-Visual 文件的“Official Standard”状态只在 Visual System 职责范围内生效。
+Visual 文件的 Review 状态只在 Visual System 职责范围内生效。
 
 它们不拥有 Product、Story、Learning、UI、Audio、Code、QA 或 Release 的解释权。
 
-## 5.2 重建中
+## 5.2 尚未重建或尚未恢复
 
-- `docs/systems/` 中除本 README 以外的架构文档。
-- `docs/story/` 正式 Story System 文档。
+- Story Guidelines、Ordinary/Special Journey Guidelines、Story Quality Gate 与 Story Review Prompt。
 - 其它曾经存在但无法逐字安全恢复的 Documentation。
 
 重建文件必须标记：
 
 ```text
-Documentation Status: Reconstructed
+Documentation Status: Reconstructed and Reviewed
 ```
 
 重建表示：
@@ -550,7 +559,7 @@ Adjacent System Dependencies
 
 ↓
 
-Task-specific Pipeline / Gate / Checklist / Review
+Task-specific Decision Tree / Pipeline / Gate / Checklist / Review
 
 ↓
 
@@ -617,9 +626,10 @@ Visual 只表达该世界。
 2. Story README。
 3. Story Constitution、Philosophy 与 Guidelines。
 4. Ordinary 或 Special Journey 专项规范。
-5. Story Source、文化资料与事实审核要求。
-6. Learning Level 规范。
-7. Story Quality Gate 与 Review。
+5. Story Decision Tree。
+6. Story Source、文化资料与事实审核要求。
+7. Learning Level 规范。
+8. Story Pipeline、Quality Gate、Checklist 与 Review。
 
 Visual Documentation 只在需要视觉关联时读取。
 
@@ -801,7 +811,8 @@ Documentation Status 与 Product Status 必须分别记录。
 允许状态：
 
 - `Official Standard`：正式生效的规范。
-- `Reconstructed`：依据当前证据重建，非旧文档逐字恢复。
+- `Reconstructed`：依据当前证据重建，非旧文档逐字恢复，尚未完成正式 Recovery Review。
+- `Reconstructed and Reviewed`：重建文件已经过跨文档 Recovery Review；仍不表示与旧文档逐字相同。
 - `Working Draft`：正在编写，尚未正式生效。
 - `Deprecated`：已被正式替代，不得用于新工作。
 - `Historical Reference`：只用于理解历史，不具有当前规范权威。

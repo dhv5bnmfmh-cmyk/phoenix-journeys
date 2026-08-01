@@ -1,6 +1,6 @@
 # Phoenix System Architecture
 
-Documentation Status: Reconstructed
+Documentation Status: Reconstructed and Reviewed
 Documentation Version: 1.0.0
 Priority: ★★★★★ (Highest)
 Owner: Phoenix System Architecture
@@ -1632,7 +1632,7 @@ Runtime Evidence and Feedback
 | System | Current repository evidence | Current interpretation |
 | --- | --- | --- |
 | Core | `README.md`、`docs/PRODUCT_BIBLE.md`、`docs/PRODUCT_PRINCIPLES.md` | 存在早期产品原则；正式 Core Documentation 仍需恢复或重建。 |
-| Story | Journey Catalog、Story Model、Story Agent、Story Tests | 存在大量 Story 实现；正式 Story Documentation 正在恢复。 |
+| Story | Journey Catalog、Story Model、Story Agent、Story Tests | 存在大量 Story 实现；Story 入口、Constitution、Philosophy、Decision Tree、Pipeline 与 Checklist 已重建并通过 Recovery Review，其余专项规范仍未建立。 |
 | Visual | `docs/visual/`、`design/`、运行时图片、Background Widgets 与 Tests | 6 份 Visual 规范已恢复；完整 Visual 文档链与全资源复核仍未由本架构宣称完成。 |
 | Learning | Level、Vocabulary、Challenge、Progress、Stamp Services 与 Tests | 存在真实实现；正式 Learning System 文档仍规划中。 |
 | UI/UX | `app/lib/screens/`、`widgets/`、`theme/` 与 Widget Tests | 存在真实界面实现；全设备与正式 UI System 状态仍需独立验证。 |
