@@ -7,7 +7,7 @@ const _literaryStory = <String>[
   '你在一棵老树下醒来，手背停着一只蓝色蝴蝶。梦里，你曾拥有它的翅膀，也曾从高处看见自己仍睡在树下。',
   '风穿过竹林，蝴蝶向一条没有脚印的小路飞去。你越想分辨梦与现实，周围的景物就越像水中的倒影。',
   '山路忽然分成两条。一条通往熟悉的人间，另一条跟随蝴蝶进入更深的梦境。两块路牌上却都写着“醒来”。',
-  '你终于明白，这段旅程并不要求证明谁梦见了谁。真正的问题是，醒来后的你是否已经被这场梦改变。',
+  '你没有证明谁梦见了谁。手背贴上树皮时，鳞粉与晨露同时留下；下山的脚步已经改变，你却说不清是哪一个自己先迈出。',
 ];
 
 const _literaryAnnotations = <ReadingAnnotation>[
@@ -37,11 +37,11 @@ const _literaryAnnotations = <ReadingAnnotation>[
   ),
   ReadingAnnotation(
     pinyin:
-        'Nǐ zhōngyú míngbai, zhè duàn lǚchéng bìng bù yāoqiú zhèngmíng shéi mèngjiàn le shéi. Zhēnzhèng de wèntí shì, xǐng lái hòu de nǐ shìfǒu yǐjīng bèi zhè chǎng mèng gǎibiàn.',
+        'Nǐ méiyǒu zhèngmíng shéi mèngjiàn le shéi. Shǒubèi tiē shàng shùpí shí, línfěn yǔ chénlù tóngshí liúxià; xiàshān de jiǎobù yǐjīng gǎibiàn, nǐ què shuō bu qīng shì nǎ yí gè zìjǐ xiān màichū.',
     vietnamese:
-        'Cuối cùng bạn hiểu rằng chuyến đi không yêu cầu chứng minh ai mơ thấy ai. Câu hỏi thật sự là sau khi tỉnh dậy, bạn đã bị giấc mơ này thay đổi hay chưa.',
+        'Bạn không chứng minh ai đã mơ thấy ai. Khi mu bàn tay chạm vỏ cây, phấn cánh và sương sớm cùng lưu lại; bước chân xuống núi đã khác, nhưng bạn không biết bản thân nào đã bước trước.',
     english:
-        'At last you understand that the journey does not ask who dreamed whom. It asks whether the person who woke has already been changed by the dream.',
+        'You do not prove who dreamed whom. When your hand touches the bark, wing dust and morning dew remain together; your steps downhill have changed, though you cannot say which self moved first.',
   ),
 ];
 

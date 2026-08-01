@@ -172,7 +172,7 @@ const storyParagraphs = [
   '北京天空刚刚泛白，微风越过护城河。故宫钟表修复实习生林砚在清晨收到一只停摆的宫廷钟；展览下午开放，师傅却不在北京，他必须判断是立刻拆开机芯，还是让展品暂时空缺。',
   '厚重宫门打开后，红墙、金色屋顶和宽阔石路渐渐亮起。这座宫殿曾属于皇帝处理国家事务的紫禁城；林砚在旧记录里发现，一个看似多余的零件连接着最脆弱的发条。',
   '主管催他按常见型号处理，林砚没有靠背诵年代壮胆，也没有把午门、太和殿的宏大当成冒险的理由。他停止拆解，承认自己不能独立完成，并用透明展签说明停摆与等待专家的原因。',
-  '几天后，师傅带他完成文物修复。林砚终于懂得，故宫保存数百年记忆，不靠每件东西永远运转，而靠有人在不知道时肯停手。',
+  '几天后，师傅回来，先问展柜为什么空着。林砚把透明展签翻过来，背面记满停摆后的检查步骤。宫廷钟仍未运转，记录却没有缺页；师傅看完，把第一枚螺丝交到他手里。',
 ];
 
 const storyAnnotations = [
@@ -202,11 +202,11 @@ const storyAnnotations = [
   ),
   ReadingAnnotation(
     pinyin:
-        'jǐ tiān hòu ， shī fu dài tā wán chéng wén wù xiū fù 。 lín yàn zhōng yú dǒng de ， gù gōng bǎo cún shù bǎi nián jì yì ， bú kào měi jiàn dōng xī yǒng yuǎn yùn zhuǎn ， ér kào yǒu rén zài bù zhī dào shí kěn tíng shǒu 。',
+        'jǐ tiān hòu ， shī fu huí lái ， xiān wèn zhǎn guì wèi shén me kōng zhe 。 lín yàn bǎ tòu míng zhǎn qiān fān guò lái ， bèi miàn jì mǎn tíng bǎi hòu de jiǎn chá bù zhòu 。 gōng tíng zhōng réng wèi yùn zhuǎn ， jì lù què méi yǒu quē yè ； shī fu kàn wán ， bǎ dì yī méi luó sī jiāo dào tā shǒu lǐ 。',
     vietnamese:
-        'Vài ngày sau, thầy cùng anh hoàn tất phục chế hiện vật. Lâm Nghiên hiểu rằng ký ức hàng trăm năm của Cố Cung được gìn giữ vì có người biết dừng tay khi chưa chắc chắn.',
+        'Vài ngày sau, người thầy trở về và hỏi vì sao tủ trưng bày còn trống. Lâm Nghiên lật tấm nhãn trong suốt, cho thấy mặt sau ghi đầy các bước kiểm tra. Chiếc đồng hồ vẫn chưa chạy nhưng hồ sơ không thiếu trang; đọc xong, thầy đặt con vít đầu tiên vào tay anh.',
     english:
-        'Days later, his mentor helps complete the artifact conservation. Lin Yan learns that the Palace Museum preserves centuries of memory because someone is willing to stop when they do not know.',
+        'Days later, his mentor returns and asks why the display case is empty. Lin Yan turns over the transparent label, revealing every inspection step recorded on its back. The court clock is still stopped, but the record has no missing page; after reading it, his mentor places the first screw in his hand.',
   ),
 ];
 

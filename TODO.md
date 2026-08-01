@@ -12,14 +12,14 @@ Execution Authority: Phoenix 唯一近期执行队列。
 
 本文件将 [`roadmap/ROADMAP.md`](roadmap/ROADMAP.md) 转化为有顺序、可审核的工作队列。ROADMAP 管阶段顺序与 Sprint 编号；本文件管可执行准备、依赖与完成证据；`CHANGELOG` 只记录已经发生的工作。
 
-Sprint 27 已完成 Story 全量合规审查与 P0/P1 直接修复。Sprint 28–32 保持 `Planned`，本次不启动 Sprint 28，也不声称 Visual System 运行时整改已经完成。
+Sprint 27 已完成 Story 全量合规审查与 P0/P1 直接修复，Sprint 28 已完成 Story 深度质量修复与最终复审。Sprint 29–32 保持 `Planned`，本次不启动 Sprint 29，也不声称 Visual System 运行时整改已经完成。
 
 ## 2. Planned 执行队列
 
 | 顺序 | Sprint | 状态 | 必须取得的结果 | 允许开始条件 |
 |---:|---|---|---|---|
 | 1 | 27 — Story 全量合规审查与 P0/P1 直接修复 | Completed | 36 个 Journey 已全量复审；普通/特别 Journey 与关联学习内容的 P0/P1 已修复并复审为零。 | 退出证据：106 条普通 Journey ReadingAnnotation 同步、WordEntry/Discovery/Challenge 输入复核、Node `340/340`、静态校验通过。 |
-| 2 | 28 — Story 深度质量修复与最终复审 | Planned | 修复 P2 与累积 P3；Story Gate、Checklist、Review 通过；P0/P1/P2 清零。 | Sprint 27 退出证据完整。 |
+| 2 | 28 — Story 深度质量修复与最终复审 | Completed | 36/36 深度复审；9 个 P2 已精确修复；Story Gate、Checklist、Review 通过；P0/P1/P2/P3 清零。 | 4 个普通与 4 个特别 Journey 精确修复；6 条 ReadingAnnotation 四语同步；Node `340/340` 与静态校验通过。 |
 | 3 | 29 — Visual 全量合规审查与 P0/P1 直接修复 | Planned | 审查真实页面和资源；修复或替换全部 Visual P0/P1，包括版权和 AI 阻断项。 | Sprint 28 退出证据建立当前 Story 基线。 |
 | 4 | 30 — Visual 深度质量、素材替换与性能整改 | Planned | 解决 Release 所需 P2/P3、响应式、性能、Reduced Motion、Static Fallback、失败和生命周期问题。 | Sprint 29 退出证据完整。 |
 | 5 | 31 — Story–Visual 跨系统一致性审查与直接修复 | Planned | 逐 Journey 联合审查，修复 Story、Visual 或两者，并复查受影响学习/UI 接口。 | Sprint 28 与 Sprint 30 退出证据完整。 |
@@ -34,6 +34,10 @@ Sprint 27 已完成 Story 全量合规审查与 P0/P1 直接修复。Sprint 28�
 - [x] Sprint 27 已在真实内容源中修复全部已识别 P0/P1，没有以报告替代修复。
 - [x] Sprint 27 已完成 P0/P1 清零；P2/P3 文学精修仍由 Planned Sprint 28 负责。
 - [x] Sprint 27 Story 修改已同步复核生词、发现、动态挑战输入、回忆与盖章流程。
+- [x] Sprint 28 已完成 36/36 深度文学复审、故事库差异性与文化真实性复查。
+- [x] Sprint 28 已修复 9 个 P2；最终 P0/P1/P2/P3 均为零，没有以降级或改规则伪造通过。
+- [x] Sprint 28 已同步 6 条 ReadingAnnotation 的中文、拼音、英文与越南语，并复核全部学习流程接口。
+- [x] Sprint 28 Story Quality Gate、Checklist、Review、Node `340/340` 与静态内容校验通过；本地 Flutter/Dart 不可用，结果以远端 CI 为准。
 - [ ] Visual 修改同步版权记录、响应式版本、性能证据、Reduced Motion、Static Fallback 和失败恢复。
 - [ ] 修复后重跑全部受影响 Gate、Checklist、Review 和页面级 QA。
 - [ ] 保留 Commit、PR、测试、CI、设备与 Review 证据；状态文字不能证明完成。
@@ -73,4 +77,4 @@ Sprint 27 已完成 Story 全量合规审查与 P0/P1 直接修复。Sprint 28�
 - `Blocked`：入口依赖或不可 Waive 要求阻止继续。
 - `Completed`：全部退出条件和证据已存在并通过审核。
 
-本次更新后 Sprint 27 为 `Completed`，Sprint 28–32 必须保持 `Planned`。项目当前不存在权威 CHANGELOG 文件，因此没有创建第二套变更记录；真实变更证据保留在 Commit、PR、本文件与 ROADMAP。
+本次更新后 Sprint 27–28 为 `Completed`，Sprint 29–32 必须保持 `Planned`。项目当前不存在权威 CHANGELOG 文件，因此没有创建第二套变更记录；真实变更证据保留在 Commit、PR、本文件与 ROADMAP。

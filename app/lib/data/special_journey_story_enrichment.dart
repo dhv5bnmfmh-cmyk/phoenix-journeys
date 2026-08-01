@@ -64,16 +64,16 @@ const _literarySignature = <SpecialJourneyEnrichmentText>[
     english: 'The butterfly rests on the sign marked “wake,” while its wings reveal the words “keep dreaming.”',
   ),
   SpecialJourneyEnrichmentText(
-    chinese: '你想起庄周梦蝶并不是一道需要解出的谜，而是一面不断改变角度的镜子。',
-    pinyin: 'Nǐ xiǎngqǐ Zhuāng Zhōu mèng dié bìng bú shì yí dào xūyào jiěchū de mí, ér shì yí miàn bùduàn gǎibiàn jiǎodù de jìngzi.',
-    vietnamese: 'Bạn hiểu mộng bướm của Trang Chu không phải câu đố cần giải, mà là tấm gương luôn đổi góc nhìn.',
-    english: 'The butterfly dream is not a riddle to solve but a mirror that keeps changing its angle.',
+    chinese: '你在水洼两边各放一片竹叶；一边映出庄周，另一边只有蝴蝶掠过，风起时两幅影子同时碎开。',
+    pinyin: 'Nǐ zài shuǐwā liǎngbiān gè fàng yí piàn zhúyè; yìbiān yìngchū Zhuāng Zhōu, lìng yìbiān zhǐyǒu húdié lüèguò, fēng qǐ shí liǎng fú yǐngzi tóngshí suìkāi.',
+    vietnamese: 'Bạn đặt một lá trúc ở mỗi bên vũng nước; một bên phản chiếu Trang Chu, bên kia chỉ có bướm lướt qua, rồi gió làm cả hai bóng cùng vỡ.',
+    english: 'You place a bamboo leaf on either side of the pool; one reflects Zhuang Zhou, the other only a passing butterfly, and wind breaks both images at once.',
   ),
   SpecialJourneyEnrichmentText(
-    chinese: '梦中的你拥有飞行的自由，树下的你却拥有醒来以后承担选择的责任。',
-    pinyin: 'Mèng zhōng de nǐ yǒngyǒu fēixíng de zìyóu, shù xià de nǐ què yǒngyǒu xǐnglái yǐhòu chéngdān xuǎnzé de zérèn.',
-    vietnamese: 'Bạn trong mơ có tự do bay, còn bạn dưới gốc cây phải chịu trách nhiệm cho lựa chọn sau khi tỉnh.',
-    english: 'The dreaming you has freedom to fly; the waking you bears responsibility for the choice.',
+    chinese: '翅膀越过山谷时轻得没有重量，树下那只手却仍握着未走完的路；两个你都没有替对方作答。',
+    pinyin: 'Chìbǎng yuèguò shāngǔ shí qīng de méiyǒu zhòngliàng, shùxià nà zhī shǒu què réng wòzhe wèi zǒuwán de lù; liǎng gè nǐ dōu méiyǒu tì duìfāng zuòdá.',
+    vietnamese: 'Đôi cánh vượt thung lũng nhẹ không trọng lượng, còn bàn tay dưới gốc cây vẫn nắm con đường chưa đi hết; không bản thân nào trả lời thay bản thân kia.',
+    english: 'The wings cross the valley without weight, while the hand beneath the tree still holds an unfinished road; neither self answers for the other.',
   ),
   SpecialJourneyEnrichmentText(
     chinese: '当竹叶落到掌心，它一瞬间变成鳞粉，又在眨眼之间恢复原样。',
@@ -316,10 +316,10 @@ const _strangeSignature = <SpecialJourneyEnrichmentText>[
     english: 'When a real rooster calls from a distant village, the flameless lamps go dark one by one, but the night guest’s chair keeps rocking.',
   ),
   SpecialJourneyEnrichmentText(
-    chinese: '你终于明白守诺不是拒绝所有求救，而是在无法辨认真假时，不让恐惧替自己开门。',
-    pinyin: 'Nǐ zhōngyú míngbai shǒunuò bú shì jùjué suǒyǒu qiújiù, ér shì zài wúfǎ biànrèn zhēnjiǎ shí, bú ràng kǒngjù tì zìjǐ kāimén.',
-    vietnamese: 'Bạn hiểu giữ lời không phải từ chối mọi lời cầu cứu, mà là không để nỗi sợ mở cửa thay mình khi chưa phân biệt được thật giả.',
-    english: 'You understand that keeping the promise is not refusing every plea; it is refusing to let fear open the door when truth is unclear.',
+    chinese: '你把铜钱压在门槛内侧，转身包扎床下陌生人的伤口；门外再次叫你的名字，你没有回头。',
+    pinyin: 'Nǐ bǎ tóngqián yā zài ménkǎn nèicè, zhuǎnshēn bāozā chuángxià mòshēngrén de shāngkǒu; ménwài zàicì jiào nǐ de míngzi, nǐ méiyǒu huítóu.',
+    vietnamese: 'Bạn chặn đồng tiền phía trong ngưỡng cửa rồi quay lại băng vết thương cho người lạ dưới gầm giường; ngoài cửa lại gọi tên bạn, nhưng bạn không ngoảnh lại.',
+    english: 'You pin the coin inside the threshold and turn to bandage the stranger beneath the bed; the voice outside calls your name again, but you do not look back.',
   ),
   SpecialJourneyEnrichmentText(
     chinese: '天亮后道路已经干燥，只有门槛内侧的一枚湿脚印证明昨夜并非一场可以轻易解释的梦。',
@@ -331,10 +331,10 @@ const _strangeSignature = <SpecialJourneyEnrichmentText>[
 
 const _folkSignature = <SpecialJourneyEnrichmentText>[
   SpecialJourneyEnrichmentText(
-    chinese: '老人把最后一盏河灯放入水中，再次提醒你不要把幻想当成所有地方共有的习俗。',
-    pinyin: 'Lǎorén bǎ zuìhòu yì zhǎn hédēng fàngrù shuǐ zhōng, zàicì tíxǐng nǐ bú yào bǎ huànxiǎng dàngchéng suǒyǒu dìfang gòngyǒu de xísú.',
-    vietnamese: 'Ông lão thả chiếc đèn cuối và nhắc đừng coi câu chuyện tưởng tượng là phong tục chung ở mọi nơi.',
-    english: 'The elder releases the final lantern and warns you not to treat fantasy as a universal custom.',
+    chinese: '老人把最后一盏河灯放入水中，只说：“今夜、此河、这座渡口，各有自己的规矩。”',
+    pinyin: 'Lǎorén bǎ zuìhòu yì zhǎn hédēng fàngrù shuǐ zhōng, zhǐ shuō: “Jīnyè, cǐ hé, zhè zuò dùkǒu, gè yǒu zìjǐ de guījǔ.”',
+    vietnamese: 'Ông lão thả chiếc đèn cuối xuống nước và chỉ nói: “Đêm nay, con sông này, bến này đều có quy tắc riêng.”',
+    english: 'The elder releases the final lantern and says only, “This night, this river, and this crossing each have their own rules.”',
   ),
   SpecialJourneyEnrichmentText(
     chinese: '顺流而下的灯火越来越远，只有写着你名字的那一盏停在渡口中央。',
@@ -385,10 +385,10 @@ const _folkSignature = <SpecialJourneyEnrichmentText>[
     english: 'Lantern customs vary by place, time, purpose, and taboo and cannot be reduced to one universal rule.',
   ),
   SpecialJourneyEnrichmentText(
-    chinese: '这段逆流情节属于 Phoenix 原创，它借用了河灯意象，却不冒充任何地方的固定仪式。',
-    pinyin: 'Zhè duàn nìliú qíngjié shǔyú Phoenix yuánchuàng, tā jièyòng le hédēng yìxiàng, què bù màochōng rènhé dìfang de gùdìng yíshì.',
-    vietnamese: 'Chi tiết ngược dòng là sáng tác của Phoenix, mượn hình tượng đèn sông nhưng không giả làm nghi lễ thật.',
-    english: 'The upstream episode is Phoenix fiction inspired by river lanterns, not a claim about a fixed ritual.',
+    chinese: '灯纸被水浸透一半，陌生的花纹便从纤维里浮起；老人看见后退了一步，没有替你解释。',
+    pinyin: 'Dēngzhǐ bèi shuǐ jìntòu yíbàn, mòshēng de huāwén biàn cóng xiānwéi lǐ fúqǐ; lǎorén kànjiàn hòutuì le yíbù, méiyǒu tì nǐ jiěshì.',
+    vietnamese: 'Khi giấy đèn ngấm nước một nửa, hoa văn lạ nổi lên từ thớ giấy; ông lão thấy vậy liền lùi một bước, không giải thích thay bạn.',
+    english: 'When water soaks halfway through the lantern paper, an unfamiliar pattern rises from its fibres; the elder steps back and offers no explanation.',
   ),
   SpecialJourneyEnrichmentText(
     chinese: '灯火越来越弱，未来倒影的嘴唇终于动了，却被水声盖住最后一个词。',

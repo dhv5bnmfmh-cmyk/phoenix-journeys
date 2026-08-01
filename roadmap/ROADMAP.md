@@ -20,7 +20,7 @@ Roadmap 状态不是实现证据。只有在所需文档、代码或内容修改
 |---|---|---|
 | Story System v1.0 Documentation | Completed and Reviewed | Story 规范已成为权威标准；不代表全部运行时故事已合规。 |
 | Visual System v1.0 Documentation | Completed and Reviewed | Final Decision：`VISUAL_SYSTEM_V1_APPROVED`；不代表全部运行时视觉已合规。 |
-| Story 与 Visual 软件合规整改 | In Progress | Sprint 27 已完成 Story P0/P1 全量整改；Sprint 28–32 保持 `Planned`。 |
+| Story 与 Visual 软件合规整改 | In Progress | Sprint 27–28 已完成 Story 合规整改与深度质量封版；Sprint 29–32 保持 `Planned`。 |
 | Learning System | Planned | 仅可在 Sprint 32 完成后开始。 |
 | UI/UX System | Planned | 依赖 Learning System 完成。 |
 | Audio System | Planned | 依赖 UI/UX System 完成。 |
@@ -31,7 +31,7 @@ Roadmap 状态不是实现证据。只有在所需文档、代码或内容修改
 |---|---|---|---|
 | 01–12 | Story System Documentation and Review | Completed | 当前 Documentation Recovery 与 Review 记录构成有效基线。 |
 | 13–26 | Visual System Documentation and v1.0 Review | Completed | Systems Documentation 与 Story System 接口。 |
-| 27–32 | Story & Visual Conformance and Remediation Phase | In Progress | Sprint 27 已完成；Sprint 28–32 保持 `Planned`。 |
+| 27–32 | Story & Visual Conformance and Remediation Phase | In Progress | Sprint 27–28 已完成；Sprint 29–32 保持 `Planned`。 |
 | 33–46 | Learning System | Planned | Sprint 32 具备真实回归证据并完成。 |
 | 47–60 | UI/UX System | Planned | Learning System 阶段完成。 |
 | 61–74 | Audio System | Planned | UI/UX System 阶段完成。 |
@@ -62,7 +62,7 @@ Status: Completed
 
 ### Sprint 28 — Story 深度质量修复与最终复审
 
-Status: Planned
+Status: Completed
 
 范围：P2/P3、AI 腔、流水账、人物模板化、相似开场或结尾、重复冲突或情绪曲线、城市差异不足、特别 Journey 文学性不足、文化真实性、HSK/TOCFL 难度、故事库重复率及 Story 与学习内容不一致。
 
@@ -73,6 +73,8 @@ Status: Planned
 - 修复后重跑受影响的 Story Quality Gate、Story Checklist、Story Review 与页面级 QA。
 
 退出条件：Story Quality Gate、Story Checklist、Story Review 全部通过；P0/P1/P2 清零；P3 不得累积为故事库整体质量或出版风险。
+
+完成证据（2026-08-01）：36 个 Journey 已完成逐篇深度文学复审与故事库级差异性复查。审核识别并修复 9 个 P2：4 个普通 Journey 的说明式结尾，以及 4 个特别 Journey 中 5 处说理、元叙事或模板化表达；未大幅重写 Story。6 条受影响 ReadingAnnotation 已同步中文、拼音、英文与越南语，WordEntry、Discovery、动态 Challenge、Memory、Impression 与 Stamp 保持一致。最终 P0/P1/P2/P3 均为零；Node 回归 `340/340`、静态内容校验与 `git diff --check` 通过。本地环境未提供 Flutter/Dart SDK，Flutter 结果以本 Sprint 远端 CI 为准。
 
 ### Sprint 29 — Visual 全量合规审查与 P0/P1 直接修复
 
@@ -204,5 +206,5 @@ Sprint 32 完成前不得开始 Sprint 33。Learning、UI/UX 和 Audio 均保持
 - 一个 Sprint 编号只属于一个阶段，不得复用。
 - Audio System 之后的新工作从 Sprint 75 开始，除非先明确修订本 Roadmap。
 - 调整顺序必须记录依赖理由，不能静默绕过上游 Gate。
-- `Completed`、`In Progress` 与 `Planned` 必须严格区分；Sprint 27 为 `Completed`，Sprint 28–32 保持 `Planned`。
+- `Completed`、`In Progress` 与 `Planned` 必须严格区分；Sprint 27–28 为 `Completed`，Sprint 29–32 保持 `Planned`。
 - 只有真实完成并具备证据的实现事实才能写入 `CHANGELOG`。

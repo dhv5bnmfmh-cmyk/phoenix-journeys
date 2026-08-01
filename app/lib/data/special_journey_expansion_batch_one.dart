@@ -273,7 +273,7 @@ final _teaHorseExperience = DailyJourneyExperience(
 const _iceCityStory = <String>[
   '冰城旧厂停产后的第十二个冬天，你在工人更衣柜里发现一张星图。图上没有星名，只有管道、车床和夜班路线组成的坐标。',
   '你启动最后一台模拟控制台，厂房天窗依次亮起。高处管线与真实星空重合，像一部以机器为山河的现代赋。',
-  '暴雪进入破窗，星图却指向父辈用过的保温杯和手套。你终于明白，所谓坐标不是宝藏，而是每个普通岗位曾经发光的位置。',
+  '暴雪进入破窗，星图一路落到父辈用过的保温杯和手套。你把它们按坐标放回工作台，空着的最后一格正好对着夜班门口。',
   '春天到来前，旧厂被改成社区档案馆。孩子们在涡轮大厅仰望星图，新的章节从“话说当年”之后慢慢展开。',
 ];
 
@@ -300,7 +300,7 @@ final _iceCityExperience = DailyJourneyExperience(
   storyAnnotations: [
     _note('Nǐ zài gōngrén gēngyīguì lǐ fāxiàn yì zhāng xīngtú.', 'Bạn tìm thấy bản đồ sao trong tủ thay đồ công nhân.', 'You find a star map in a worker’s locker.'),
     _note('Guǎndào yǔ zhēnshí xīngkōng chónghé, xiàng yí bù yǐ jīqì wéi shānhé de fù.', 'Đường ống trùng bầu sao như bài phú lấy máy móc làm sơn hà.', 'The pipes align with the stars like a fu rhapsody made of machines.'),
-    _note('Zuòbiāo shì měi gè pǔtōng gǎngwèi céngjīng fāguāng de wèizhì.', 'Tọa độ là nơi từng vị trí bình thường đã tỏa sáng.', 'The coordinates mark where ordinary jobs once shone.'),
+    _note('Nǐ àn zuòbiāo bǎ bǎowēnbēi hé shǒutào fànghuí gōngzuòtái.', 'Bạn đặt bình giữ nhiệt và găng tay trở lại bàn theo tọa độ.', 'You return the flask and gloves to the workbench according to the coordinates.'),
     _note('Xīn de zhāngjié cóng “huàshuō dāngnián” zhīhòu mànmàn zhǎnkāi.', 'Chương mới mở ra sau câu “chuyện kể năm xưa”.', 'A new chapter opens after the words “the story goes, long ago.”'),
   ],
   words: [
