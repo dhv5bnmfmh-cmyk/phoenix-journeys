@@ -172,7 +172,7 @@ const storyParagraphs = [
   '北京天空刚刚泛白，微风越过护城河。故宫钟表修复实习生林砚在清晨收到一只停摆的宫廷钟；展览下午开放，师傅却不在北京，他必须判断是立刻拆开机芯，还是让展品暂时空缺。',
   '厚重宫门打开后，红墙、金色屋顶和宽阔石路渐渐亮起。这座宫殿曾属于皇帝处理国家事务的紫禁城；林砚在旧记录里发现，一个看似多余的零件连接着最脆弱的发条。',
   '主管催他按常见型号处理，林砚没有靠背诵年代壮胆，也没有把午门、太和殿的宏大当成冒险的理由。他停止拆解，承认自己不能独立完成，并用透明展签说明停摆与等待专家的原因。',
-  '几天后，师傅回来，先问展柜为什么空着。林砚把透明展签翻过来，背面记满停摆后的检查步骤。宫廷钟仍未运转，记录却没有缺页；师傅看完，把第一枚螺丝交到他手里。',
+  '几天后，师傅回来，先问展柜为什么空着。林砚把透明展签翻过来，背面保存着停摆后的每一步检查。宫廷钟仍未运转，旧档案与他的新记录却接成了完整的工作记忆；师傅看完，把第一枚螺丝交到他手里。',
 ];
 
 const storyAnnotations = [
@@ -202,11 +202,11 @@ const storyAnnotations = [
   ),
   ReadingAnnotation(
     pinyin:
-        'jǐ tiān hòu ， shī fu huí lái ， xiān wèn zhǎn guì wèi shén me kōng zhe 。 lín yàn bǎ tòu míng zhǎn qiān fān guò lái ， bèi miàn jì mǎn tíng bǎi hòu de jiǎn chá bù zhòu 。 gōng tíng zhōng réng wèi yùn zhuǎn ， jì lù què méi yǒu quē yè ； shī fu kàn wán ， bǎ dì yī méi luó sī jiāo dào tā shǒu lǐ 。',
+        'jǐ tiān hòu ， shī fu huí lái ， xiān wèn zhǎn guì wèi shén me kōng zhe 。 lín yàn bǎ tòu míng zhǎn qiān fān guò lái ， bèi miàn bǎo cún zhe tíng bǎi hòu de měi yí bù jiǎn chá 。 gōng tíng zhōng réng wèi yùn zhuǎn ， jiù dàng àn yǔ tā de xīn jì lù què jiē chéng le wán zhěng de gōng zuò jì yì ； shī fu kàn wán ， bǎ dì yī méi luó sī jiāo dào tā shǒu lǐ 。',
     vietnamese:
-        'Vài ngày sau, người thầy trở về và hỏi vì sao tủ trưng bày còn trống. Lâm Nghiên lật tấm nhãn trong suốt, cho thấy mặt sau ghi đầy các bước kiểm tra. Chiếc đồng hồ vẫn chưa chạy nhưng hồ sơ không thiếu trang; đọc xong, thầy đặt con vít đầu tiên vào tay anh.',
+        'Vài ngày sau, người thầy trở về và hỏi vì sao tủ trưng bày còn trống. Lâm Nghiên lật tấm nhãn trong suốt; mặt sau lưu từng bước kiểm tra sau khi đồng hồ dừng. Đồng hồ vẫn chưa chạy, nhưng hồ sơ cũ nối với ghi chép mới thành một ký ức công việc trọn vẹn; đọc xong, thầy đặt con vít đầu tiên vào tay anh.',
     english:
-        'Days later, his mentor returns and asks why the display case is empty. Lin Yan turns over the transparent label, revealing every inspection step recorded on its back. The court clock is still stopped, but the record has no missing page; after reading it, his mentor places the first screw in his hand.',
+        'Days later, his mentor returns and asks why the display case is empty. Lin Yan turns over the transparent label; its back preserves every inspection step after the clock stopped. The clock is still silent, but the old file and his new record form one complete working memory; after reading it, his mentor places the first screw in his hand.',
   ),
 ];
 
