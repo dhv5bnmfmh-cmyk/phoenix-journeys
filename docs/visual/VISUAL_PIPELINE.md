@@ -135,7 +135,7 @@ Phoenix Visual Production Pipeline（简称 Visual Pipeline）定义视觉资源
 
 | Result | Meaning | Required action |
 | --- | --- | --- |
-| `PASS` | 当前阶段全部进入与退出条件满足，Evidence 完整 | 允许进入下一阶段 |
+| `PASSED` | 当前阶段全部进入与退出条件满足，Evidence 完整 | 允许进入下一阶段 |
 | `NEEDS_REVISION` | 问题可由明确上游阶段修正 | 停止下游并按 Return Path 返回 |
 | `BLOCKED` | 权威、来源、版权、真实性、设备、性能或必要依赖无法确认 | 禁止导入与发布，直到阻断解除 |
 | `REJECTED` | Candidate 根本方向、权利或质量不符合 Phoenix | 终止 Candidate；如需继续，建立新版本并从指定上游重启 |
@@ -761,7 +761,7 @@ Requirement Record
 1. 锁定 Branch、Commit、Candidate ID、Asset ID、Journey ID 与 Story Version。
 2. 按第 2 章完成 Documentation Reading Record。
 3. 从 Stage 01 开始，不得因已有 Candidate 而倒推 Requirement 或研究。
-4. 每个 Stage 只消费已 PASS 的上游输出。
+4. 每个 Stage 只消费已 `PASSED` 的上游输出。文中历史性短语“Gate PASS”只表示 Gate 的 `PASSED` 状态，不是第二个状态值。
 5. 每个输出记录 Owner、Version、Date、Evidence Location 与 Result。
 6. 不用对话记忆、缩略图、代码文件存在或旧截图代替正式 Evidence。
 7. 不让生成 AI 自动批准自己的素材。

@@ -1,9 +1,10 @@
 # Phoenix Background Guidelines
 
-Documentation Status: Reconstructed and Reviewed
+Documentation Status: Active
 Documentation Version: 1.0.0
-Priority: ★★★★★ (Highest)  
+Priority: ★★★★★ (Mandatory Background Standard)
 Owner: Phoenix Visual Architecture
+Documentation History: Reconstructed and Reviewed; activated by Phoenix Visual System v1.0 Review.
 
 ---
 
@@ -1601,7 +1602,7 @@ Background Guidelines 长期维护遵循：
 
 ## Rule Three
 
-不得代替 Animation Guidelines。
+不得代替 Performance Guide 中的动画性能、生命周期与降级规则。
 
 ## Rule Four
 

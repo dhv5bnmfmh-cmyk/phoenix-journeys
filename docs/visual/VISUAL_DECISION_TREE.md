@@ -434,10 +434,10 @@ flowchart TD
 
 | Severity | Definition | Decision |
 | --- | --- | --- |
-| 阻断级 | 人体/建筑根本错误、错误文化/文字/Logo、权利风险、Story Identity 错误、主要透视/光影体系失败 | `REGENERATE`；禁止导入 |
-| 严重级 | 清晰可见且影响可信度、构图、阅读、文化或正式品质的错误 | `REGENERATE`；禁止导入 |
-| 中等级 | 范围有限、不改变主体/结构/文化/权利，可被可审计局部修复 | `LOCAL_REPAIR_AND_REVIEW` |
-| 轻微级 | 不影响正常尺寸、目标裁切、可信度、文化、安全区与正式品质的微小 Finding | 记录后才可决定 `RECORD_AND_CONTINUE` |
+| `BLOCKER`（阻断级） | 人体/建筑根本错误、错误文化/文字/Logo、权利风险、Story Identity 错误、主要透视/光影体系失败 | `REGENERATE`；禁止导入 |
+| `CRITICAL`（严重级） | 清晰可见且影响可信度、构图、阅读、文化或正式品质的错误 | `REGENERATE`；禁止导入 |
+| `MAJOR`（主要问题；原“中等级”） | 范围有限、不改变主体/结构/文化/权利，可被可审计局部修复 | `LOCAL_REPAIR_AND_REVIEW` |
+| `MINOR`（轻微级） | 不影响正常尺寸、目标裁切、可信度、文化、安全区与正式品质的微小 Finding | 记录后才可决定 `RECORD_AND_CONTINUE` |
 
 ## 13.3 Decision Nodes
 
@@ -445,17 +445,17 @@ flowchart TD
 | --- | --- | --- | --- |
 | ERR01 | 是否完成原始分辨率、100% 尺寸、四角、主体与目标裁切检查？ | ERR02 | `BLOCKED → Pipeline Stage 11` |
 | ERR02 | 是否发现任一 AI Error 或明显 AI 痕迹？ | ERR03 | `AI Error PASS → COPY01` |
-| ERR03 | 是否影响人体/建筑结构、Story/Culture、文字/符号、版权、主要透视/光影或安全区？ | `阻断级 → REGENERATE` | ERR04 |
-| ERR04 | 错误是否清晰可见并影响可信度、构图或正式品质？ | `严重级 → REGENERATE` | ERR05 |
-| ERR05 | 是否仅为有限局部且修复不会改变主体、结构、文化、权利或构图？ | `中等级 → LOCAL_REPAIR_AND_REVIEW` | ERR06 |
-| ERR06 | Finding 在正常尺寸和全部目标裁切中是否不可察觉，且不影响任何正式质量条件？ | `轻微级 → 记录 Finding 与保留理由后继续` | `严重级 → REGENERATE` |
+| ERR03 | 是否影响人体/建筑结构、Story/Culture、文字/符号、版权、主要透视/光影或安全区？ | `BLOCKER → REGENERATE` | ERR04 |
+| ERR04 | 错误是否清晰可见并影响可信度、构图或正式品质？ | `CRITICAL → REGENERATE` | ERR05 |
+| ERR05 | 是否仅为有限局部且修复不会改变主体、结构、文化、权利或构图？ | `MAJOR → LOCAL_REPAIR_AND_REVIEW` | ERR06 |
+| ERR06 | Finding 在正常尺寸和全部目标裁切中是否不可察觉，且不影响任何正式质量条件？ | `MINOR → 记录 Finding 与保留理由后继续` | `CRITICAL → REGENERATE` |
 | ERR07 | 局部修复后是否重新通过 AI Error、Culture、Copyright、Journey、Device 与 Quality Review？ | `继续 COPY01` | `REGENERATE` |
 
-阻断级和严重级必须重新生成。
+`BLOCKER` 和 `CRITICAL` 必须重新生成。
 
-中等级只能局部修复后重新 Review。
+`MAJOR` 只能局部修复后重新 Review。
 
-轻微级只有不影响正式版质量时才可保留，并必须记录 Candidate、位置、判断依据与 Reviewer。
+`MINOR` 只有不影响正式版质量时才可保留，并必须记录 Candidate、位置、判断依据与 Reviewer。
 
 ---
 

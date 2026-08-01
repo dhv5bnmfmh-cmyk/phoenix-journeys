@@ -1,9 +1,10 @@
 # Phoenix Visual Constitution
 
-Documentation Status: Reconstructed and Reviewed
+Documentation Status: Active
 Documentation Version: 1.0.0
 Priority: ★★★★★ (Highest)  
 Owner: Phoenix Visual Architecture
+Documentation History: Reconstructed and Reviewed; activated by Phoenix Visual System v1.0 Review.
 
 ---
 
@@ -31,10 +32,8 @@ Phoenix Visual Constitution 回答的是：
 
 - VISUAL_PHILOSOPHY
 - VISUAL_GUIDELINES
-- VISUAL_STYLE_GUIDE
 - BACKGROUND_GUIDELINES
 - AI_IMAGE_GENERATION_GUIDE
-- ANIMATION_GUIDELINES
 - VISUAL_PIPELINE
 - VISUAL_DECISION_TREE
 - IMAGE_QUALITY_GATE
@@ -587,10 +586,8 @@ Visual Constitution 是 Phoenix Visual System 的最高规范。
 
 - VISUAL_PHILOSOPHY
 - VISUAL_GUIDELINES
-- VISUAL_STYLE_GUIDE
 - BACKGROUND_GUIDELINES
 - AI_IMAGE_GENERATION_GUIDE
-- ANIMATION_GUIDELINES
 - VISUAL_PIPELINE
 - VISUAL_DECISION_TREE
 - IMAGE_QUALITY_GATE
