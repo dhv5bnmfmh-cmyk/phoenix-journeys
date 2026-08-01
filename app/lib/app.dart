@@ -26,7 +26,19 @@ class PhoenixApp extends StatelessWidget {
         final state = context.watch<AppState>();
         return PhoenixDynamicBackground(
           journeyId: state.activeJourneyId,
-          child: child ?? const SizedBox.shrink(),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              child ?? const SizedBox.shrink(),
+              const Positioned(
+                top: 8,
+                left: 8,
+                child: SafeArea(
+                  child: BackgroundMotionSettingButton(),
+                ),
+              ),
+            ],
+          ),
         );
       },
       home: showCoinJourney
