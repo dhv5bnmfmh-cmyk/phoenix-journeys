@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'screens/coin_journey_screen.dart';
 import 'state/app_state.dart';
 import 'theme/phoenix_theme.dart';
+import 'widgets/phoenix_ambient_overlay.dart';
 import 'widgets/phoenix_dynamic_background.dart';
 import 'widgets/startup_gate.dart';
 
@@ -30,6 +31,7 @@ class PhoenixApp extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               child ?? const SizedBox.shrink(),
+              PhoenixAmbientOverlay(journeyId: state.activeJourneyId),
               const Positioned(
                 top: 8,
                 left: 8,
