@@ -45,6 +45,15 @@ Each entrance plate establishes place and the Story's opening tension without il
 
 Rights Evidence, Originality, Trademark, Likeness/Privacy, Cultural Accuracy, Visual Quality, Story–Visual, Responsive, Accessibility, Reduced Motion, Static Fallback, Performance, Runtime Integration and Test gates passed locally. Remote CI identifiers are recorded only after their real conclusions are available.
 
+## Remote verification
+
+- Phase 3A content commit: `0e35d139211dabb65052987bdb1ea85c28c10fa2`
+- Flutter test-contract commits: `ace244c828788235e31525136b40a5c525b9265e`, `237572a868a7e58f8c0df3300cc2d3375b91c81d`
+- Flutter CI run `30728217016`: `success` (Analyze, Flutter Test, Web Release Build and Worker Bundle validation)
+- Cloudflare PR Preview run `30728217001`: `success` (quality checks, Flutter Test, web build, deployment and release verification)
+- Preview build status: `PREVIEW_BUILD_TECHNICALLY_SUCCESSFUL`
+- Rights approval status: `RIGHTS_APPROVAL_BLOCKED` while 271 active assets remain pending safe replacement
+
 External Visual Disclosure: `NOT_PERMITTED`
 
 External Visual Service Used: `NONE`
