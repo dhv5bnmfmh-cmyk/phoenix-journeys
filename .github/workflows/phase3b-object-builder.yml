@@ -6,7 +6,7 @@ on:
       - agent/documentation-sprint-01-18-recovery
     paths:
       - .github/workflows/phase3b-object-builder.yml
-      - worker/phase3b-batch1-full-patch.part05
+      - worker/phase3b-batch1-full-patch.part18
 
 permissions:
   contents: write
@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           ready=true
-          for n in 01 02 03 04 05; do
+          for n in $(seq -w 1 18); do
             [[ -f "worker/phase3b-batch1-full-patch.part${n}" ]] || ready=false
           done
           echo "ready=$ready" >> "$GITHUB_OUTPUT"
@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat worker/phase3b-batch1-full-patch.part0{1,2,3,4,5} | base64 -d | gzip -dc > /tmp/phase3b-batch1.patch
+          for n in $(seq -w 1 18); do cat "worker/phase3b-batch1-full-patch.part${n}"; done | base64 -d | gzip -dc > /tmp/phase3b-batch1.patch
           git reset --hard "$GITHUB_SHA"
           git clean -fdx
           git apply /tmp/phase3b-batch1.patch
@@ -48,18 +48,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-save --ignore-scripts sharp@0.34.1
+          npm install --no-save sharp@0.34.1
           node worker/scripts/generate_ordinary_learning_rights_safe_assets.mjs --jobs=4
           node --input-type=module <<'NODE'
           import {readFileSync,rmSync} from 'node:fs';
           const rows=JSON.parse(readFileSync('design/evidence/ordinary-learning-v1/journey-rows-1.json','utf8'));
           if(rows.length!==9) throw new Error(`Expected 9 journeys, got ${rows.length}`);
           for(const row of rows){for(const p of Object.values(row[8])) rmSync(p.oldPath,{force:true});}
-          for(const p of [
+          const cleanup=[
             '.github/workflows/phase3b-materialize.yml','.github/workflows/phase3b-toolchain.yml','.github/workflows/phase3b-object-builder.yml',
             'worker/phase3b-compact-bundle.part01','worker/phase3b-compact-bundle.part02','worker/phase3b-compact-bundle.part03',
-            'worker/phase3b-batch1-full-patch.part01','worker/phase3b-batch1-full-patch.part02','worker/phase3b-batch1-full-patch.part03',
-            'worker/phase3b-batch1-full-patch.part04','worker/phase3b-batch1-full-patch.part05']) rmSync(p,{force:true});
+          ];
+          for(let i=1;i<=18;i++) cleanup.push(`worker/phase3b-batch1-full-patch.part${String(i).padStart(2,'0')}`);
+          for(const p of cleanup) rmSync(p,{force:true});
           NODE
 
       - name: Verify Batch 1 candidate
