@@ -12,6 +12,8 @@ const backgrounds = readFileSync(
 const pubspec = readFileSync('app/pubspec.yaml', 'utf8');
 const summerPalaceBackgroundDirectory =
   'app/assets/images/backgrounds/generated/beijing/summer-palace';
+const summerPalaceCoreEntry =
+  'app/assets/images/backgrounds/rights-safe-core-v1/beijing-summer-palace/beijing-summer-palace-core-entry-portrait-v1.webp';
 
 test('Beijing publishes Forbidden City and Summer Palace as separate destinations', () => {
   assert.match(catalog, /summerPalaceJourneyExperience/);
@@ -42,7 +44,7 @@ test('Summer Palace backgrounds are production-quality vertical assets', () => {
     .filter((filename) => filename.endsWith('.webp'))
     .sort();
 
-  assert.equal(images.length, 10);
+  assert.equal(images.length, 9);
   for (const filename of images) {
     const path = `${summerPalaceBackgroundDirectory}/${filename}`;
     assert.ok(
@@ -51,4 +53,6 @@ test('Summer Palace backgrounds are production-quality vertical assets', () => {
     );
     assert.equal(readFileSync(path).subarray(0, 4).toString('ascii'), 'RIFF');
   }
+  assert.equal(readFileSync(summerPalaceCoreEntry).subarray(0, 4).toString('ascii'), 'RIFF');
+  assert.match(backgrounds, /beijing-summer-palace-core-entry-portrait-v1/);
 });

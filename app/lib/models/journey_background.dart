@@ -11,7 +11,7 @@ enum JourneyBackgroundPage {
   completion,
 }
 
-enum JourneyBackgroundOrigin { aiGenerated, originalSeed }
+enum JourneyBackgroundOrigin { aiGenerated, programmaticOriginal, originalSeed }
 
 class JourneyBackgroundAsset {
   const JourneyBackgroundAsset({

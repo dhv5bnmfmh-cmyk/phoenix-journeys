@@ -44,10 +44,20 @@ class JourneyBackgroundPolicy {
         )
         .toList(growable: false);
 
+    final programmaticOriginal = eligible
+        .where(
+          (asset) =>
+              asset.origin == JourneyBackgroundOrigin.programmaticOriginal,
+        )
+        .toList(growable: false);
     final aiGenerated = eligible
         .where((asset) => asset.origin == JourneyBackgroundOrigin.aiGenerated)
         .toList(growable: false);
-    final candidates = aiGenerated.isNotEmpty ? aiGenerated : eligible;
+    final candidates = programmaticOriginal.isNotEmpty
+        ? programmaticOriginal
+        : aiGenerated.isNotEmpty
+            ? aiGenerated
+            : eligible;
 
     if (candidates.isEmpty) return null;
     candidates.sort((left, right) => left.id.compareTo(right.id));
@@ -71,7 +81,9 @@ class JourneyBackgroundPolicy {
               asset.journeyId == journeyId &&
               _matchesLocation(asset, locationPath) &&
               asset.approved &&
-              asset.origin == JourneyBackgroundOrigin.aiGenerated,
+              (asset.origin == JourneyBackgroundOrigin.aiGenerated ||
+                  asset.origin ==
+                      JourneyBackgroundOrigin.programmaticOriginal),
         )
         .toList(growable: false);
     final pageAssets = destinationAssets
@@ -88,10 +100,16 @@ class JourneyBackgroundPolicy {
 
   bool _matchesLocation(JourneyBackgroundAsset asset, String? locationPath) {
     if (locationPath == null ||
-        asset.origin != JourneyBackgroundOrigin.aiGenerated) {
+        (asset.origin != JourneyBackgroundOrigin.aiGenerated &&
+            asset.origin != JourneyBackgroundOrigin.programmaticOriginal)) {
       return true;
     }
     final normalizedAssetPath = asset.assetPath.replaceAll('\\', '/');
+    if (asset.origin == JourneyBackgroundOrigin.programmaticOriginal) {
+      return normalizedAssetPath.contains(
+        '/backgrounds/rights-safe-core-v1/${asset.journeyId}/',
+      );
+    }
     final normalizedLocationPath = locationPath.replaceAll('\\', '/');
     return normalizedAssetPath.contains(
       '/backgrounds/generated/$normalizedLocationPath/',

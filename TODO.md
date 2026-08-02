@@ -12,7 +12,7 @@ Execution Authority: Phoenix 唯一近期执行队列。
 
 本文件将 [`roadmap/ROADMAP.md`](roadmap/ROADMAP.md) 转化为有顺序、可审核的工作队列。ROADMAP 管阶段顺序与 Sprint 编号；本文件管可执行准备、依赖与完成证据；`CHANGELOG` 只记录已经发生的工作。
 
-Sprint 27 已完成 Story 全量合规审查与 P0/P1 直接修复，Sprint 28 已完成 Story 深度质量修复与最终复审。Sprint 29 保持 `In Progress`：Safe Replacement Phase 0–2 已完成 9 项全局关键资源和 90 项特别 Journey 资源的本地原创替换；其余 298 项版权证据仍存在不可 Waive 的 P0 缺口。Sprint 30–32 保持 `Planned`。
+Sprint 27 已完成 Story 全量合规审查与 P0/P1 直接修复，Sprint 28 已完成 Story 深度质量修复与最终复审。Sprint 29 保持 `In Progress`：Safe Replacement Phase 0–3A 已完成 9 项全局关键资源、90 项特别 Journey 资源和 27 项普通 Journey 核心入口背景的本地原创替换；其余 271 项版权证据仍存在不可 Waive 的 P0 缺口。Sprint 30–32 保持 `Planned`。
 
 ## 2. Planned 执行队列
 
@@ -20,7 +20,7 @@ Sprint 27 已完成 Story 全量合规审查与 P0/P1 直接修复，Sprint 28 �
 |---:|---|---|---|---|
 | 1 | 27 — Story 全量合规审查与 P0/P1 直接修复 | Completed | 36 个 Journey 已全量复审；普通/特别 Journey 与关联学习内容的 P0/P1 已修复并复审为零。 | 退出证据：106 条普通 Journey ReadingAnnotation 同步、WordEntry/Discovery/Challenge 输入复核、Node `340/340`、静态校验通过。 |
 | 2 | 28 — Story 深度质量修复与最终复审 | Completed | 36/36 深度复审；9 个 P2 已精确修复；Story Gate、Checklist、Review 通过；P0/P1/P2/P3 清零。 | 4 个普通与 4 个特别 Journey 精确修复；6 条 ReadingAnnotation 四语同步；Node `340/340` 与静态校验通过。 |
-| 3 | 29 — Visual 全量合规审查与 P0/P1 直接修复 | In Progress | 397 个有效资源已登记。Phase 0–2 已完成 99 项安全替换；99 项新资源为 `EVIDENCE_COMPLETE`，99 项旧资源为 `RETIRED_REPLACED`。剩余 291 个 `EVIDENCE_PARTIAL`、7 个 `EVIDENCE_MISSING` 仍阻止整体 Preview/Release 资格。 | Phase 3A 为 `Planned`，未经用户再次批准不得开始；版权证据 P0 全部解除后方可退出。 |
+| 3 | 29 — Visual 全量合规审查与 P0/P1 直接修复 | In Progress | 397 个有效资源已登记。Phase 0–3A 已完成 126 项安全替换；126 项新资源为 `EVIDENCE_COMPLETE`，126 项旧资源为 `RETIRED_REPLACED`。剩余 264 个 `EVIDENCE_PARTIAL`、7 个 `EVIDENCE_MISSING` 仍阻止整体 Preview/Release 资格。 | Phase 3A `Completed`；Phase 3B、3C 为 `Planned` 且需用户再次批准；版权证据 P0 全部解除后方可退出。 |
 | 4 | 30 — Visual 深度质量、素材替换与性能整改 | Planned | 解决 Release 所需 P2/P3、响应式、性能、Reduced Motion、Static Fallback、失败和生命周期问题。 | Sprint 29 退出证据完整。 |
 | 5 | 31 — Story–Visual 跨系统一致性审查与直接修复 | Planned | 逐 Journey 联合审查，修复 Story、Visual 或两者，并复查受影响学习/UI 接口。 | Sprint 28 与 Sprint 30 退出证据完整。 |
 | 6 | 32 — Story & Visual 全量回归、Quality Gate、CI 与 Preview | Planned | 通过 Story/Visual 全量回归、Gate、设备状态、构建、自动化测试、CI 和已验证公开 Preview。 | Sprint 31 联合审核退出证据完整。 |

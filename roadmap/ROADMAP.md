@@ -91,7 +91,7 @@ Status: In Progress
 
 退出条件：审查范围内已识别 Visual P0/P1 全部修复或替换并复审；版权不明或存在严重 AI 错误的资源不得保留 Preview 或 Release 资格。
 
-进行中证据（2026-08-02）：已枚举并登记 397 个有效视觉资源，技术预载、失败降级、Reduced Motion 与生命周期修复保持有效。Safe Replacement Phase 0 已建立唯一命名、稳定 Asset ID、可编辑源文件、权利证据包与 14 项 Gate 流程；Phase 1 已替换 9 项全局关键运行时资源；Phase 2 已为 9 个特别 Journey 建立互相独立的视觉圣经、参数记录和 90 个可编辑 SVG 母版，并以本地确定性流程替换全部 90 项特别 Journey 运行时资源。Phase 0–2 累计 99 项新资源为 `EVIDENCE_COMPLETE`，99 项旧资源为 `RETIRED_REPLACED`；当前仍有 291 项 `EVIDENCE_PARTIAL`、7 项 `EVIDENCE_MISSING`，合计 298 项保持 `BLOCKED_PENDING_EVIDENCE`。Phase 3A 为 `Planned`，未经用户再次批准不得开始。Sprint 29 在剩余权利证据 P0 阻断解除前不得标记为 Completed；Sprint 30–32 保持 Planned。
+进行中证据（2026-08-02）：已枚举并登记 397 个有效视觉资源，技术预载、失败降级、Reduced Motion 与生命周期修复保持有效。Safe Replacement Phase 0 已建立唯一命名、稳定 Asset ID、可编辑源文件、权利证据包与 14 项 Gate 流程；Phase 1 已替换 9 项全局关键运行时资源；Phase 2 已以本地确定性流程替换 90 项特别 Journey 资源；Phase 3A 已为 27 个普通 Journey 建立独立城市生活场景矩阵，并完成 27 项核心入口背景的原创 SVG/WebP 替换。Phase 0–3A 累计 126 项新资源为 `EVIDENCE_COMPLETE`，126 项旧资源为 `RETIRED_REPLACED`；当前仍有 264 项 `EVIDENCE_PARTIAL`、7 项 `EVIDENCE_MISSING`，合计 271 项保持 `BLOCKED_PENDING_EVIDENCE`。Phase 3B 与 Phase 3C 为 `Planned`，未经用户再次批准不得开始。Sprint 29 在剩余权利证据 P0 阻断解除前不得标记为 Completed；Sprint 30–32 保持 Planned。
 
 ### Sprint 30 — Visual 深度质量、素材替换与性能整改
 

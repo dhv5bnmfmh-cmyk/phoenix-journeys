@@ -64,14 +64,14 @@ test('asset register covers every current visual file with reproducible hashes',
     .filter((path) => existsSync(new URL(`../${path}`, import.meta.url)))
     .sort();
 
-  assert.equal(visualRows.length, 496);
+  assert.equal(visualRows.length, 523);
   assert.equal(activeRows.length, 397);
   assert.deepEqual(
     activeRows.map((row) => row['Repository Path']).sort(),
     tracked,
   );
-  assert.equal(new Set(visualRows.map((row) => row['Asset ID'])).size, 496);
-  assert.equal(new Set(visualRows.map((row) => row['Repository Path'])).size, 496);
+  assert.equal(new Set(visualRows.map((row) => row['Asset ID'])).size, 523);
+  assert.equal(new Set(visualRows.map((row) => row['Repository Path'])).size, 523);
 
   for (const row of activeRows) {
     const path = new URL(`../${row['Repository Path']}`, import.meta.url);
@@ -109,10 +109,10 @@ test('rights states preserve evidence gaps without granting preview eligibility'
     'RETIRED_REPLACED',
   ]);
 
-  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_PARTIAL').length, 291);
+  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_PARTIAL').length, 264);
   assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_MISSING').length, 7);
-  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_COMPLETE').length, 99);
-  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'RETIRED_REPLACED').length, 99);
+  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_COMPLETE').length, 126);
+  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'RETIRED_REPLACED').length, 126);
   assert.equal(visualRows.filter((row) => row['Existing Registry Entry'] === 'YES').length, 70);
   for (const row of visualRows) {
     assert.ok(allowed.has(row['Rights Status']), row['Repository Path']);

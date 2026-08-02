@@ -36,7 +36,12 @@ test('batch five connects story, passport, geography, and ten backgrounds', () =
     );
     const listEnd = backgrounds.indexOf('])', listStart);
     const names = backgrounds.slice(listStart, listEnd).match(/'[^']+'/g) ?? [];
-    assert.equal(names.length, 10, `${id} has exactly ten backgrounds`);
+    assert.equal(names.length, 9, `${id} retains nine story-stage backgrounds`);
+    assert.match(
+      backgrounds,
+      new RegExp(`id: '${id}-core-entry-portrait-v1'[\\s\\S]*?origin: JourneyBackgroundOrigin\\.programmaticOriginal`),
+      `${id} has one rights-safe core entry background`,
+    );
   }
 });
 

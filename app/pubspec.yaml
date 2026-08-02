@@ -41,6 +41,33 @@ flutter:
     - assets/images/special-realms/rights-safe-v1/myth-tracing/
     - assets/images/special-realms/rights-safe-v1/strange-night-talks/
     - assets/images/special-realms/rights-safe-v1/folk-secret-land/
+    - assets/images/backgrounds/rights-safe-core-v1/harbin-central-street/
+    - assets/images/backgrounds/rights-safe-core-v1/dali-cangshan-erhai/
+    - assets/images/backgrounds/rights-safe-core-v1/kaifeng-song-capital/
+    - assets/images/backgrounds/rights-safe-core-v1/zhangjiajie-wulingyuan/
+    - assets/images/backgrounds/rights-safe-core-v1/huangshan-cloud-peaks/
+    - assets/images/backgrounds/rights-safe-core-v1/honghe-hani-rice-terraces/
+    - assets/images/backgrounds/rights-safe-core-v1/wuyishan-nine-bend-stream/
+    - assets/images/backgrounds/rights-safe-core-v1/leshan-giant-buddha/
+    - assets/images/backgrounds/rights-safe-core-v1/qufu-confucius-sites/
+    - assets/images/backgrounds/rights-safe-core-v1/pingyao-ancient-city/
+    - assets/images/backgrounds/rights-safe-core-v1/xiamen-kulangsu/
+    - assets/images/backgrounds/rights-safe-core-v1/chengde-mountain-resort/
+    - assets/images/backgrounds/rights-safe-core-v1/dunhuang-mogao-caves/
+    - assets/images/backgrounds/rights-safe-core-v1/jiangmen-kaiping-diaolou/
+    - assets/images/backgrounds/rights-safe-core-v1/lijiang-old-town/
+    - assets/images/backgrounds/rights-safe-core-v1/datong-yungang-grottoes/
+    - assets/images/backgrounds/rights-safe-core-v1/quanzhou-kaiyuan-temple/
+    - assets/images/backgrounds/rights-safe-core-v1/luoyang-longmen-grottoes/
+    - assets/images/backgrounds/rights-safe-core-v1/suzhou-humble-administrators-garden/
+    - assets/images/backgrounds/rights-safe-core-v1/guangzhou-chen-clan-academy/
+    - assets/images/backgrounds/rights-safe-core-v1/nanjing-qinhuai-river/
+    - assets/images/backgrounds/rights-safe-core-v1/chengdu-kuanzhai-alley/
+    - assets/images/backgrounds/rights-safe-core-v1/hangzhou-west-lake/
+    - assets/images/backgrounds/rights-safe-core-v1/xian-city-wall/
+    - assets/images/backgrounds/rights-safe-core-v1/shanghai-bund/
+    - assets/images/backgrounds/rights-safe-core-v1/beijing-summer-palace/
+    - assets/images/backgrounds/rights-safe-core-v1/beijing-forbidden-city/
     - assets/images/backgrounds/seed/
     - assets/images/backgrounds/generated/
     - assets/images/backgrounds/generated/beijing/forbidden-city/
