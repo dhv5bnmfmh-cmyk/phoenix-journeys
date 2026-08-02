@@ -6,6 +6,11 @@ on:
       - agent/documentation-sprint-01-18-recovery
     paths:
       - .github/workflows/phase3b-object-builder.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/phase3b-object-builder.yml
 
 permissions:
   contents: write
@@ -138,13 +143,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PHASE3B_BRANCH: agent/documentation-sprint-01-18-recovery
-          PHASE3B_EXPECTED_PARENT: ${{ github.sha }}
+          PHASE3B_EXPECTED_PARENT: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node worker/scripts/build_phase3b_commit_objects.mjs | tee /tmp/phase3b-object-build.txt
 
       - name: Upload object and generation evidence
         uses: actions/upload-artifact@v4
         with:
-          name: phase3b-commit-objects-${{ github.sha }}
+          name: phase3b-commit-objects-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             phase3b-commit-objects.json
             /tmp/phase3b-generation.json
