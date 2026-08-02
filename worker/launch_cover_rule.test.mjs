@@ -9,12 +9,12 @@ test('Phoenix launch cover animates a journey from ancient to modern worlds', as
     read('app/web/index.html'),
     read('app/web/flutter_bootstrap.js'),
     read('app/web/manifest.json'),
-    stat(new URL('../app/assets/images/phoenix-time-earth-v2.webp', import.meta.url)),
-    stat(new URL('../app/assets/images/phoenix-flight-cycle-v4.webp', import.meta.url)),
+    stat(new URL('../app/assets/images/phoenix-launch-journey-cover-portrait-v1.webp', import.meta.url)),
+    stat(new URL('../app/assets/images/phoenix-launch-flight-sprite-landscape-v1.webp', import.meta.url)),
   ]);
 
-  assert.match(index, /phoenix-time-earth-v2\.webp/);
-  assert.match(index, /phoenix-flight-cycle-v4\.webp/);
+  assert.match(index, /phoenix-launch-journey-cover-portrait-v1\.webp/);
+  assert.match(index, /phoenix-launch-flight-sprite-landscape-v1\.webp/);
   assert.match(index, /phoenix-loading__traveler/);
   assert.match(index, /phoenix-loading__portal/);
   assert.match(index, /古代 · 文明/);
@@ -46,9 +46,9 @@ test('Phoenix launch cover animates a journey from ancient to modern worlds', as
   );
   assert.doesNotMatch(index, /🔥/);
   assert.doesNotMatch(index, /radial-gradient\(circle at 12% 18%/);
-  assert.ok(earthArtwork.size > 80_000);
+  assert.ok(earthArtwork.size > 5_000);
   assert.ok(earthArtwork.size < 500_000);
-  assert.ok(phoenixArtwork.size > 60_000);
+  assert.ok(phoenixArtwork.size > 5_000);
   assert.ok(phoenixArtwork.size < 500_000);
   assert.equal(JSON.parse(manifest).background_color, '#180908');
   assert.equal(JSON.parse(manifest).theme_color, '#180908');

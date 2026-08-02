@@ -5,12 +5,12 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 const explore = readFileSync('app/lib/screens/explore_screen.dart', 'utf8');
 const pubspec = readFileSync('app/pubspec.yaml', 'utf8');
 const hero =
-  'app/assets/images/home/phoenix-world-language-journey-v1.webp';
+  'app/assets/images/home/phoenix-home-journey-keyart-portrait-v1.webp';
 
 test('home uses an original world travel and language-learning hero', () => {
   assert.equal(existsSync(hero), true);
   assert.ok(statSync(hero).size < 350_000);
-  assert.match(explore, /phoenix-world-language-journey-v1\.webp/);
+  assert.match(explore, /phoenix-home-journey-keyart-portrait-v1\.webp/);
   assert.match(explore, /phoenix-home-world-language-background/);
   assert.match(explore, /phoenix-home-route-glow/);
   assert.match(explore, /Duration\(seconds: 28\)/);

@@ -270,10 +270,10 @@ class _PassportMapState extends State<_PassportMap> {
             : requireJourneyCity(_selectedCityId!);
         final showChinaMap = _level != _PassportMapLevel.continent;
         final mapAsset = showChinaMap
-            ? 'assets/images/maps/china-passport-atlas-v2.webp'
+            ? 'assets/images/maps/phoenix-china-passport-atlas-portrait-v1.webp'
             : _continentId == 'asia'
-                ? 'assets/images/maps/east-asia-flight-relief-v2.webp'
-                : 'assets/images/maps/world-flight-atlas-v1.webp';
+                ? 'assets/images/maps/phoenix-east-asia-route-atlas-landscape-v1.webp'
+                : 'assets/images/maps/phoenix-world-route-atlas-landscape-v1.webp';
         return ClipRRect(
           borderRadius: BorderRadius.circular(18),
           child: InteractiveViewer(

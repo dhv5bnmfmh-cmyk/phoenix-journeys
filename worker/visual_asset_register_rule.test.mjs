@@ -52,6 +52,7 @@ function readRegister() {
 test('asset register covers every current visual file with reproducible hashes', () => {
   const rows = readRegister();
   const visualRows = rows.filter((row) => row['File Format'] !== 'PLACEHOLDER');
+  const activeRows = visualRows.filter((row) => row['Rights Status'] !== 'RETIRED_REPLACED');
   const tracked = execFileSync('git', ['ls-files'], {
     cwd: root,
     encoding: 'utf8',
@@ -59,18 +60,20 @@ test('asset register covers every current visual file with reproducible hashes',
     .trim()
     .split('\n')
     .filter((path) => /\.(?:webp|svg)$/i.test(path))
+    .filter((path) => !path.startsWith('design/sources/'))
     .filter((path) => existsSync(new URL(`../${path}`, import.meta.url)))
     .sort();
 
-  assert.equal(visualRows.length, 397);
+  assert.equal(visualRows.length, 406);
+  assert.equal(activeRows.length, 397);
   assert.deepEqual(
-    visualRows.map((row) => row['Repository Path']).sort(),
+    activeRows.map((row) => row['Repository Path']).sort(),
     tracked,
   );
-  assert.equal(new Set(visualRows.map((row) => row['Asset ID'])).size, 397);
-  assert.equal(new Set(visualRows.map((row) => row['Repository Path'])).size, 397);
+  assert.equal(new Set(visualRows.map((row) => row['Asset ID'])).size, 406);
+  assert.equal(new Set(visualRows.map((row) => row['Repository Path'])).size, 406);
 
-  for (const row of visualRows) {
+  for (const row of activeRows) {
     const path = new URL(`../${row['Repository Path']}`, import.meta.url);
     const content = readFileSync(path);
     assert.equal(Number(row['File Size']), statSync(path).size, row['Repository Path']);
@@ -103,17 +106,33 @@ test('rights states preserve evidence gaps without granting preview eligibility'
     'PUBLIC_DOMAIN_VERIFIED',
     'BLOCKED_PENDING_EVIDENCE',
     'BLOCKED_REPLACEMENT_REQUIRED',
+    'RETIRED_REPLACED',
   ]);
 
   assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_PARTIAL').length, 291);
-  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_MISSING').length, 106);
+  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_MISSING').length, 97);
+  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_COMPLETE').length, 9);
+  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'RETIRED_REPLACED').length, 9);
   assert.equal(visualRows.filter((row) => row['Existing Registry Entry'] === 'YES').length, 70);
   for (const row of visualRows) {
     assert.ok(allowed.has(row['Rights Status']), row['Repository Path']);
-    assert.equal(row['Preview Eligibility'], 'NO', row['Repository Path']);
-    assert.equal(row['Release Eligibility'], 'NO', row['Repository Path']);
-    assert.notEqual(row['Missing Evidence'], '', row['Repository Path']);
-    assert.match(row.Notes, /Repository provenance does not establish legal rights/);
+    if (row['Rights Status'] === 'EVIDENCE_COMPLETE') {
+      assert.equal(row['Preview Eligibility'], 'YES_ASSET_ONLY_LIBRARY_BLOCKED', row['Repository Path']);
+      assert.equal(row['Release Eligibility'], 'YES_ASSET_ONLY_LIBRARY_BLOCKED', row['Repository Path']);
+      assert.equal(row['Missing Evidence'], 'NOT_APPLICABLE', row['Repository Path']);
+      assert.equal(row['Gate Result'], 'LOCAL_14_GATES_PASSED_REMOTE_CI_PENDING', row['Repository Path']);
+      assert.notEqual(row['Source File'], 'UNKNOWN', row['Repository Path']);
+      assert.notEqual(row['Editable Master'], 'UNKNOWN', row['Repository Path']);
+      assert.ok(existsSync(new URL(`../${row['Editable Master']}`, import.meta.url)), row['Repository Path']);
+    } else if (row['Rights Status'] === 'RETIRED_REPLACED') {
+      assert.equal(row['Preview Eligibility'], 'NO_RETIRED', row['Repository Path']);
+      assert.equal(row['Release Eligibility'], 'NO_RETIRED', row['Repository Path']);
+    } else {
+      assert.equal(row['Preview Eligibility'], 'NO', row['Repository Path']);
+      assert.equal(row['Release Eligibility'], 'NO', row['Repository Path']);
+      assert.notEqual(row['Missing Evidence'], '', row['Repository Path']);
+      assert.match(row.Notes, /Repository provenance does not establish legal rights/);
+    }
   }
 });
 
@@ -128,5 +147,8 @@ test('the corrupt legacy lantern is removed and exact variants are recorded', ()
     false,
   );
   assert.equal(rows.filter((row) => row['Variant Relationship'] === 'EXACT_DUPLICATE').length, 3);
-  assert.equal(rows.filter((row) => row.Unused === 'YES' && row['File Format'] !== 'PLACEHOLDER').length, 28);
+  assert.equal(
+    rows.filter((row) => row.Unused === 'YES' && row['File Format'] !== 'PLACEHOLDER' && row['Rights Status'] !== 'RETIRED_REPLACED').length,
+    28,
+  );
 });

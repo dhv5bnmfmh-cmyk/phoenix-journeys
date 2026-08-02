@@ -57,7 +57,8 @@ for (const [name,w,h,body,defs,release] of assets) {
 
 for (const size of [64,192,512]) {
   const name = `phoenix-app-mark-square-${size}-v1`;
-  const content = svg(64,64,iconBody,commonDefs);
+  const content = svg(64,64,iconBody,commonDefs)
+    .replace('width="64" height="64"', `width="${size}" height="${size}"`);
   const master = resolve(sourceRoot, `${name}.svg`);
   const release = resolve(root, size === 64 ? `app/web/${name}.svg` : `app/web/icons/${name}.svg`);
   await mkdir(dirname(master), { recursive: true });

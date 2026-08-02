@@ -20,7 +20,7 @@ test('Passport keeps every city journey reachable on the transparent atlas', () 
   assert.match(passport, /city\.destinations/);
   assert.match(passport, /passport-city-\$\{city\.id\}/);
   assert.match(passport, /passport-destination-\$\{journey\.id\}/);
-  assert.match(passport, /china-passport-atlas-v2\.webp/);
+  assert.match(passport, /phoenix-china-passport-atlas-portrait-v1\.webp/);
   assert.match(passport, /showModalBottomSheet<void>/);
   assert.match(passport, /选择旅程/);
 });

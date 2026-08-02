@@ -12,21 +12,18 @@ const special = readFileSync(
   'utf8',
 );
 
-test('both circled map pages use project-owned retina WebP artwork', () => {
-  assert.match(explore, /world-flight-atlas-v1\.webp/);
-  assert.match(explore, /east-asia-flight-relief-v2\.webp/);
-  assert.match(passport, /china-passport-atlas-v2\.webp/);
+test('both circled map pages use rights-safe retina WebP artwork', () => {
+  assert.match(explore, /phoenix-world-route-atlas-landscape-v1\.webp/);
+  assert.match(explore, /phoenix-east-asia-route-atlas-landscape-v1\.webp/);
+  assert.match(passport, /phoenix-china-passport-atlas-portrait-v1\.webp/);
   assert.ok(
-    statSync('app/assets/images/maps/east-asia-flight-relief-v2.webp').size >
-      150_000,
+    statSync('app/assets/images/maps/phoenix-east-asia-route-atlas-landscape-v1.webp').size > 5_000,
   );
   assert.ok(
-    statSync('app/assets/images/maps/china-passport-atlas-v2.webp').size >
-      150_000,
+    statSync('app/assets/images/maps/phoenix-china-passport-atlas-portrait-v1.webp').size > 5_000,
   );
   assert.ok(
-    statSync('app/assets/images/maps/world-flight-atlas-v1.webp').size >
-      40_000,
+    statSync('app/assets/images/maps/phoenix-world-route-atlas-landscape-v1.webp').size > 5_000,
   );
 });
 

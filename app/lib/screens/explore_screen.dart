@@ -11,7 +11,7 @@ import '../widgets/journey_picker_sheet.dart';
 import 'journey_screen.dart';
 
 const _phoenixHomeHeroAsset =
-    'assets/images/home/phoenix-world-language-journey-v1.webp';
+    'assets/images/home/phoenix-home-journey-keyart-portrait-v1.webp';
 
 @visibleForTesting
 double compactExploreMapHeight(double viewportHeight) {
@@ -561,7 +561,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
                       child: Opacity(
                         opacity: (1 - cameraT * 1.15).clamp(0, 1),
                         child: Image.asset(
-                          'assets/images/maps/world-flight-atlas-v1.webp',
+                          'assets/images/maps/phoenix-world-route-atlas-landscape-v1.webp',
                           key: const ValueKey('phoenix-world-flight-map'),
                           fit: BoxFit.cover,
                           alignment: Alignment.center,
@@ -587,7 +587,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
                           fit: StackFit.expand,
                           children: [
                             Image.asset(
-                              'assets/images/maps/east-asia-flight-relief-v2.webp',
+                              'assets/images/maps/phoenix-east-asia-route-atlas-landscape-v1.webp',
                               key: const ValueKey('phoenix-home-hd-flight-map'),
                               fit: BoxFit.cover,
                               alignment: Alignment.center,
