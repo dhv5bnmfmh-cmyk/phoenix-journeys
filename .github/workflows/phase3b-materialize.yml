@@ -1,0 +1,87 @@
+name: Phase 3B Materialize
+
+on:
+  push:
+    branches:
+      - agent/documentation-sprint-01-18-recovery
+    paths:
+      - .github/workflows/phase3b-materialize.yml
+
+permissions:
+  contents: read
+
+env:
+  PHASE3B_BASE_SHA: 93cc4a6d87c961714c2c57e468bc40fa3602dda5
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Materialize approved Phase 3B bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+          import { dirname, resolve } from 'node:path';
+          import { gunzipSync } from 'node:zlib';
+
+          const root = process.cwd();
+          const parts = readdirSync(resolve(root, 'worker'))
+            .filter((name) => name.startsWith('phase3b-prep-bundle.part'))
+            .sort();
+          if (parts.length !== 9) throw new Error(`Expected 9 bundle parts, got ${parts.length}`);
+
+          const payload = JSON.parse(
+            gunzipSync(Buffer.concat(parts.map((name) => readFileSync(resolve(root, 'worker', name)))))
+              .toString('utf8'),
+          );
+
+          for (const [path, b64] of Object.entries(payload)) {
+            const full = resolve(root, path);
+            if (!full.startsWith(`${root}/`)) throw new Error(`Unsafe payload path: ${path}`);
+            mkdirSync(dirname(full), { recursive: true });
+            writeFileSync(full, Buffer.from(b64, 'base64'));
+          }
+
+          const prep = resolve(root, 'worker/scripts/prepare_ordinary_learning_phase3b_artifacts.mjs');
+          let source = readFileSync(prep, 'utf8');
+          const oldBlock = `  for (const j of selected) for (const s of j.stages) {\n    if (!stageByOldPath.has(s.currentOldRuntimePath)) stageByOldPath.set(s.currentOldRuntimePath,[]);\n    stageByOldPath.get(s.currentOldRuntimePath).push(s.newAssetId);\n  }`;
+          const newBlock = [
+            '  for (const j of selected) for (const [stage,path] of Object.entries(j.currentRuntimeMapping)) {',
+            '    if (!stageByOldPath.has(path)) stageByOldPath.set(path,[]);',
+            '    const asset=manifest.assets.find(a=>a.journeyId===j.journeyId&&a.learningStage===stage);',
+            "    if (!asset) throw new Error(`Missing stage asset ${j.journeyId}/${stage}`);",
+            '    stageByOldPath.get(path).push(asset.assetId);',
+            '  }',
+          ].join('\n');
+          if (!source.includes(oldBlock)) throw new Error('Expected preparation source block not found');
+          writeFileSync(prep, source.replace(oldBlock, newBlock));
+
+          const out = resolve(root, 'phase3b-prepared-output');
+          mkdirSync(out, { recursive: true });
+          execFileSync(process.execPath, [prep, out], { cwd: root, stdio: 'inherit' });
+          NODE
+
+      - name: Package materialized workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar --exclude=.git -czf /tmp/phoenix-phase3b-workspace.tar.gz .
+          sha256sum /tmp/phoenix-phase3b-workspace.tar.gz > /tmp/phoenix-phase3b-workspace.tar.gz.sha256
+
+      - name: Upload materialized workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-phase3b-workspace-${{ github.sha }}
+          path: |
+            /tmp/phoenix-phase3b-workspace.tar.gz
+            /tmp/phoenix-phase3b-workspace.tar.gz.sha256
+          retention-days: 1
+          if-no-files-found: error
