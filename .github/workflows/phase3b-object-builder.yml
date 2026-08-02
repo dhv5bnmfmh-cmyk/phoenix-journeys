@@ -1,0 +1,157 @@
+name: Phase 3B Object Builder
+
+on:
+  push:
+    branches:
+      - agent/documentation-sprint-01-18-recovery
+    paths:
+      - .github/workflows/phase3b-object-builder.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build-objects:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact existing branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/documentation-sprint-01-18-recovery
+          fetch-depth: 1
+
+      - name: Restore approved Phase 3B preparation and compact execution files
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+          import { dirname, resolve } from 'node:path';
+          import { gunzipSync } from 'node:zlib';
+
+          const root = process.cwd();
+          const prepParts = readdirSync(resolve(root, 'worker'))
+            .filter((name) => name.startsWith('phase3b-prep-bundle.part'))
+            .sort();
+          if (prepParts.length !== 9) throw new Error(`Expected 9 preparation parts, got ${prepParts.length}`);
+          const prepPayload = JSON.parse(
+            gunzipSync(Buffer.concat(prepParts.map((name) => readFileSync(resolve(root, 'worker', name)))))
+              .toString('utf8'),
+          );
+          for (const [path, b64] of Object.entries(prepPayload)) {
+            const full = resolve(root, path);
+            if (!full.startsWith(`${root}/`)) throw new Error(`Unsafe preparation path: ${path}`);
+            mkdirSync(dirname(full), { recursive: true });
+            writeFileSync(full, Buffer.from(b64, 'base64'));
+          }
+
+          for (const path of [
+            'design/evidence/ordinary-learning-v1/asset-rows-1.json',
+            'design/evidence/ordinary-learning-v1/asset-rows-2.json',
+            'design/evidence/ordinary-learning-v1/asset-rows-3.json',
+            'design/evidence/ordinary-learning-v1/journey-rows-1.json',
+            'design/evidence/ordinary-learning-v1/journey-rows-2.json',
+            'design/evidence/ordinary-learning-v1/journey-rows-3.json',
+            'design/sources/ordinary-learning-v1/fragments/journeys-1.json',
+            'design/sources/ordinary-learning-v1/fragments/journeys-2.json',
+            'design/sources/ordinary-learning-v1/fragments/journeys-3.json',
+          ]) {
+            const gz = resolve(root, `${path}.gz`);
+            const full = resolve(root, path);
+            mkdirSync(dirname(full), { recursive: true });
+            writeFileSync(full, gunzipSync(readFileSync(gz)));
+          }
+
+          const baseDocuments = {
+            register: readFileSync(resolve(root, 'design/ASSET_REGISTER.csv'), 'utf8'),
+            roadmap: readFileSync(resolve(root, 'roadmap/ROADMAP.md'), 'utf8'),
+            todo: readFileSync(resolve(root, 'TODO.md'), 'utf8'),
+          };
+          const basePath = resolve(root, 'design/evidence/ordinary-learning-v1/phase3b-base-documents.json');
+          mkdirSync(dirname(basePath), { recursive: true });
+          writeFileSync(basePath, `${JSON.stringify(baseDocuments, null, 2)}\n`);
+
+          const compactParts = readdirSync(resolve(root, 'worker'))
+            .filter((name) => name.startsWith('phase3b-compact-bundle.part'))
+            .sort();
+          if (compactParts.length !== 3) throw new Error(`Expected 3 compact parts, got ${compactParts.length}`);
+          const compactPayload = JSON.parse(
+            gunzipSync(Buffer.from(compactParts.map((name) => readFileSync(resolve(root, 'worker', name), 'utf8')).join(''), 'base64'))
+              .toString('utf8'),
+          );
+          for (const [path, text] of Object.entries(compactPayload)) {
+            const full = resolve(root, path);
+            if (!full.startsWith(`${root}/`)) throw new Error(`Unsafe compact path: ${path}`);
+            mkdirSync(dirname(full), { recursive: true });
+            writeFileSync(full, text);
+          }
+          NODE
+
+      - name: Install deterministic local renderer
+        shell: bash
+        run: npm install --no-save --ignore-scripts=false sharp@0.34.1
+
+      - name: Generate and independently regenerate 81 SVG and WebP pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node worker/scripts/generate_ordinary_learning_rights_safe_assets.mjs --jobs=8 > /tmp/phase3b-generation.json
+          rm -rf /tmp/phase3b-regen
+          mkdir -p /tmp/phase3b-regen
+          node worker/scripts/generate_ordinary_learning_rights_safe_assets.mjs --root=/tmp/phase3b-regen --jobs=8 > /tmp/phase3b-regeneration.json
+          node --input-type=module <<'NODE'
+          import { createHash } from 'node:crypto';
+          import { readFileSync } from 'node:fs';
+          import { resolve } from 'node:path';
+          const first=JSON.parse(readFileSync('/tmp/phase3b-generation.json','utf8'));
+          const second=JSON.parse(readFileSync('/tmp/phase3b-regeneration.json','utf8'));
+          if(first.count!==81||second.count!==81) throw new Error(`Expected 81/81, got ${first.count}/${second.count}`);
+          const sha=(path)=>createHash('sha256').update(readFileSync(path)).digest('hex');
+          let compared=0;
+          for(const asset of first.assets){
+            for(const key of ['svg','webp']){
+              const a=resolve(process.cwd(),asset[key]);
+              const b=resolve('/tmp/phase3b-regen',asset[key]);
+              if(sha(a)!==sha(b)) throw new Error(`Non-deterministic ${asset.journeyId}/${asset.stage}/${key}`);
+              compared++;
+            }
+          }
+          if(compared!==162) throw new Error(`Expected 162 comparisons, got ${compared}`);
+          console.log(JSON.stringify({assets:81,comparisons:162,mismatches:0},null,2));
+          NODE
+
+      - name: Finalize hashes, mappings, registers, evidence, and local Node gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node worker/scripts/finalize_ordinary_learning_phase3b_hashes.mjs > /tmp/phase3b-hashes.json
+          rm -rf phase3b-prepared-output
+          mkdir -p phase3b-prepared-output
+          node worker/scripts/prepare_ordinary_learning_phase3b_artifacts.mjs phase3b-prepared-output > /tmp/phase3b-prepare.json
+          cp phase3b-prepared-output/journey_background_generated.phase3b-3.dart app/lib/data/journey_background_generated.dart
+          cp phase3b-prepared-output/ASSET_REGISTER.phase3b-3-staged.csv design/ASSET_REGISTER.csv
+          cp worker/phase3b-support/pubspec-phase3b-3.yaml app/pubspec.yaml
+          node --test worker/*.test.mjs | tee /tmp/phase3b-node-tests.txt
+
+      - name: Create four Git commit objects without moving any ref
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PHASE3B_BRANCH: agent/documentation-sprint-01-18-recovery
+          PHASE3B_EXPECTED_PARENT: ${{ github.sha }}
+        run: node worker/scripts/build_phase3b_commit_objects.mjs | tee /tmp/phase3b-object-build.txt
+
+      - name: Upload object and generation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase3b-commit-objects-${{ github.sha }}
+          path: |
+            phase3b-commit-objects.json
+            /tmp/phase3b-generation.json
+            /tmp/phase3b-regeneration.json
+            /tmp/phase3b-hashes.json
+            /tmp/phase3b-prepare.json
+            /tmp/phase3b-node-tests.txt
+            /tmp/phase3b-object-build.txt
+          retention-days: 2
+          if-no-files-found: error
