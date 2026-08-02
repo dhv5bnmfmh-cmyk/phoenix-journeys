@@ -8,7 +8,7 @@ void main() {
     final assets = journeyBackgroundCatalog
         .where((asset) =>
             asset.journeyId == 'guangzhou-chen-clan-academy' &&
-            asset.origin == JourneyBackgroundOrigin.aiGenerated)
+            asset.origin != JourneyBackgroundOrigin.originalSeed)
         .toList(growable: false);
     expect(assets, hasLength(10));
     expect(assets.map((asset) => asset.id).toSet(), hasLength(10));

@@ -9,7 +9,7 @@ void main() {
         .where(
           (asset) =>
               asset.journeyId == 'shanghai-bund' &&
-              asset.origin == JourneyBackgroundOrigin.aiGenerated,
+              asset.origin != JourneyBackgroundOrigin.originalSeed,
         )
         .toList(growable: false);
 

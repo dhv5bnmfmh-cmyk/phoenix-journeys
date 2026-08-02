@@ -8,7 +8,7 @@ void main() {
     final assets = journeyBackgroundCatalog
         .where((asset) =>
             asset.journeyId == 'hangzhou-west-lake' &&
-            asset.origin == JourneyBackgroundOrigin.aiGenerated)
+            asset.origin != JourneyBackgroundOrigin.originalSeed)
         .toList(growable: false);
 
     expect(assets, hasLength(10));

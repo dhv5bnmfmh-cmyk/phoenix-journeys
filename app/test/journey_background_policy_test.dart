@@ -77,7 +77,7 @@ void main() {
     expect(selected!.id, 'seed');
   });
 
-  test('inventory KPI counts reviewed AI assets rather than fallbacks', () {
+  test('inventory KPI counts reviewed release assets rather than fallbacks', () {
     final kpi = policy.inspect(
       journeyId: 'beijing-forbidden-city',
       page: JourneyBackgroundPage.story,
@@ -134,12 +134,26 @@ void main() {
     expect(assets, hasLength(10));
     expect(
       assets.every(
-        (asset) => asset.assetPath.contains(
-          '/generated/beijing/summer-palace/',
-        ),
+        (asset) =>
+            asset.assetPath.contains('/generated/beijing/summer-palace/') ||
+            asset.assetPath.contains(
+              '/rights-safe-core-v1/beijing-summer-palace/',
+            ),
       ),
       isTrue,
     );
+  });
+
+  test('rights-safe core entry is preferred on an entry surface', () {
+    final selected = policy.select(
+      journeyId: 'beijing-forbidden-city',
+      page: JourneyBackgroundPage.explore,
+      localDate: DateTime(2026, 8, 2),
+      catalog: journeyBackgroundCatalog,
+    );
+
+    expect(selected, isNotNull);
+    expect(selected!.origin, JourneyBackgroundOrigin.programmaticOriginal);
   });
 
   test('KPI constants permanently require ten offline images per city', () {
