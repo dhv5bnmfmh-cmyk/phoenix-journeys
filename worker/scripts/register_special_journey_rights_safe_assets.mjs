@@ -63,7 +63,7 @@ for(const journey of parameters.journeys) for(const scene of parameters.scenes){
     'Likeness or Privacy Risk':'REVIEWED_NONE','Trademark Risk':'REVIEWED_NONE','Reviewer':'Phoenix Visual Architecture','Review Date':'2026-08-02','Rights Status':'EVIDENCE_COMPLETE','Missing Evidence':'NOT_APPLICABLE',
     'Preview Eligibility':'YES_ASSET_ONLY_LIBRARY_BLOCKED','Release Eligibility':'YES_ASSET_ONLY_LIBRARY_BLOCKED','Replacement Required':'NO',
     'Source File':master,'Editable Master':master,'Responsive Variants':'900x1600 portrait; BoxFit.cover phone/tablet crop-safe composition','Static Fallback':`scene 01 for ${journey.id}; programmatic CustomPainter final fallback`,
-    'Reduced Motion Behavior':'animation controller stops at fixed phase; static plate remains','Gate Result':'LOCAL_14_GATES_PASSED_REMOTE_CI_PENDING',
+    'Reduced Motion Behavior':'animation controller stops at fixed phase; static plate remains','Gate Result':'ALL_14_GATES_PASSED_REMOTE_CI_SUCCESS',
     'Notes':`Story ID ${journey.storyId}; purpose ${scene.purpose}; story phase ${scene.storyPhase}. Original primitive geometry with no external input. Whole-library rights approval remains blocked.`,
   });
   const existing=rows.findIndex(r=>r['Asset ID']===id);if(existing>=0)rows[existing]=record;else rows.push(record);

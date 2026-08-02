@@ -48,6 +48,15 @@ Each Journey contains exactly ten independently registered files: threshold fall
 
 All 90 assets require and are tested against: Rights Evidence, Originality, Trademark, Likeness/Privacy, Cultural Accuracy, Visual Quality, Story–Visual, Responsive, Accessibility, Reduced Motion, Static Fallback, Performance, Runtime Integration and Test gates. Local results are recorded in `design/ASSET_REGISTER.csv`; remote CI run identifiers are appended only after their real conclusions are available.
 
+## Remote verification
+
+- Phase 2 content commit: `81a0288aca17171b3aa78f2d94a11f3a0c1958a5`
+- CI correction commit: `f218ecccd834b46d9a833bdf3f77100f18233721`
+- Flutter CI run `30726511741`: `success` (Analyze, Test, Web Release Build and Worker Bundle validation)
+- Cloudflare PR Preview run `30726511761`: `success` (quality checks, build, deployment and release verification)
+- Preview build status: `PREVIEW_BUILD_TECHNICALLY_SUCCESSFUL`
+- Rights approval status: `RIGHTS_APPROVAL_BLOCKED` while 298 active assets remain pending safe replacement
+
 External Visual Disclosure: `NOT_PERMITTED`
 
 External Visual Service Used: `NONE`
