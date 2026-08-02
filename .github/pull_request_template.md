@@ -1,95 +1,221 @@
-## 本次修改
+# Phoenix Pull Request Evidence Record
 
-- 
+> Checkboxes are declarations, not evidence. Every material claim MUST be supported by one or more exact paths, SHAs, Trees, CI runs, command outputs, screenshots, reproducible Preview paths, or Founder approval records.
 
-## 独立体验链接
-
-- 等待 `cloudflare/preview` 自动生成
-
-## 当前稳定基线
+## 1. PR identity
 
 - Stable PR: `#137`
 - Stable Commit: `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
-- Stable Experience: `main` production deployment
+- Candidate Commit: `<full sha>`
+- Candidate Tree: `<full sha>`
+- Parent Commit: `<full sha>`
+- Task scope: `<exact authorized scope>`
+- Changed paths: `<exact added / modified / deleted paths>`
+- Affected routes: `<exact routes or NONE>`
+- Affected Journeys: `<exact Journey IDs or NONE>`
 
-## STABLE_BASELINE_COMPARISON
+## 2. Change declarations
 
-每次开发完成后，必须使用相同设备、相同页面、相同操作路径和相同内容条件，与当前最稳定版本逐项对比。
+- Visual change: `YES / NO`
+- Core interaction change: `YES / NO`
+- Audio change: `YES / NO`
+- Rights impact: `YES / NO`
+- Closed PR used as baseline: `YES / NO`
+- Programmatic placeholder entered runtime: `YES / NO`
+- Runtime code change: `YES / NO`
+- Image or asset change: `YES / NO`
+- Story or Journey data change: `YES / NO`
+- Dependency change: `YES / NO`
+- Workflow change: `YES / NO`
+- External disclosure of unpublished Phoenix content: `YES / NO`
 
-- Candidate Commit: `<sha>`
-- Compared Pages: `<list>`
-- Compared Features: `<list>`
-- Visual Result: `PASS / FAIL`
-- Functional Result: `PASS / FAIL`
-- Interaction Result: `PASS / FAIL`
-- Performance Result: `PASS / FAIL`
-- Content Result: `PASS / FAIL`
-- Rights Result: `PASS / FAIL`
-- Unexpected Regression: `NONE / <details>`
-- Founder Mobile Preview Required: `YES / NO`
-- Founder Mobile Preview Result: `APPROVED / REJECTED / PENDING / NOT_REQUIRED`
-- Final Comparison Decision: `PASS / FAIL`
+`Closed PR used as baseline` and `Programmatic placeholder entered runtime` MUST be `NO`. Closed PRs `#138`–`#141` are historical evidence only and are not valid development baselines.
 
-缺少该报告时，本 PR 状态只能是：
+## 3. Changed-path inventory
+
+### Added
+
+- `<path or NONE>`
+
+### Modified
+
+- `<path or NONE>`
+
+### Deleted
+
+- `<path or NONE>`
+
+### Unexpected paths
+
+- `NONE / <exact paths and reason>`
+
+## 4. Implementation proof
+
+Provide evidence for every applicable item:
+
+- Correct page component: `<path + evidence>`
+- Correct route and parameters: `<route + evidence>`
+- Correct Journey ID / Story ID: `<IDs + evidence>`
+- Correct data and language records: `<paths + evidence>`
+- Correct asset paths: `<paths + runtime evidence>`
+- Stable resources preserved: `<diff / mapping evidence>`
+- Loading / Error / Empty / Fallback: `<routes + evidence>`
+- Progress / Persistence / Reward / Entitlement: `<evidence>`
+- Accessibility: `<evidence>`
+- No unrelated changes: `<comparison evidence>`
+
+## 5. STABLE_BASELINE_COMPARISON
+
+```text
+Stable PR: #137
+Stable Commit: 5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977
+Candidate Commit:
+Changed Scope:
+Changed Paths:
+Compared Pages:
+Compared Journeys:
+Compared Features:
+Compared Assets:
+Visual Result:
+Functional Result:
+Interaction Result:
+Mobile Result:
+Performance Result:
+Content Result:
+Audio Result:
+Accessibility Result:
+Rights Result:
+Unexpected Regression:
+Founder Preview Required:
+Founder Preview Link:
+Founder Preview Result:
+Final Comparison Decision:
+```
+
+Allowed result values:
+
+- `PASS`
+- `REQUIRES_REVISION`
+- `REGRESSION`
+- `BLOCKED`
+- `NOT_APPLICABLE`
+
+Allowed evidence levels:
+
+- `VERIFIED`
+- `PARTIALLY_VERIFIED`
+- `UNVERIFIED`
+- `CONTRADICTORY`
+
+Missing or materially incomplete report status:
 
 `INCOMPLETE_STABLE_BASELINE_COMPARISON_MISSING`
 
-## 合并前检查
+Any downgrade below the current stable baseline status:
 
-- [ ] 本 PR 基于当前稳定 `main` 创建
-- [ ] 已确认当前稳定 PR 与 Commit
-- [ ] 已完成 `STABLE_BASELINE_COMPARISON`
-- [ ] 新版本功能不低于稳定版本
-- [ ] 新版本视觉不低于稳定版本
-- [ ] 新版本交互不低于稳定版本
-- [ ] 新版本性能不低于稳定版本
-- [ ] 没有把关闭 PR 的分支当作产品基线
-- [ ] 没有用低细节程序化 SVG/WebP、统一模板、换色复制品或占位图替换稳定视觉
-- [ ] 涉及视觉修改时，已通过真实手机 Preview 并取得 Founder 明确批准
-- [ ] Phoenix Agent 规则测试通过
-- [ ] Flutter Analyze 通过
-- [ ] Flutter Test 通过
-- [ ] Web Release 构建通过
-- [ ] 独立 PR 体验链接可以打开
-- [ ] 故事页朗读、暂停、继续、调速正常
-- [ ] 发现页朗读、暂停、继续、调速正常
-- [ ] 所有朗读默认 `1.0×` 本地自然语速，范围为 `0.5×–1.5×`
-- [ ] 速度数字下方显示“减速 / 加速”，每次固定变化 `0.1×`，调整后全部朗读入口同步同一倍率
-- [ ] 中文、英文、越南语使用正确本地语言与自然声音
-- [ ] 声音、三角形、短文高亮同步
-- [ ] 声音、进度、百分比、当前段落和字符三角形同步
-- [ ] 生词与「注」临时朗读后从原准确位置继续
-- [ ] 所有朗读入口共用 `NarrationController`，没有独立播放状态或计时器
-- [ ] 故事页与发现页生词均显示词性、探索者母语和英文释义
-- [ ] 所有普通与特别旅程的故事、发现均为 1–2 段，并随 HSK / TOCFL 水平变化
-- [ ] 故事保持叙事与意义，发现保持文化解释，两者没有复制粘贴凑长度
-- [ ] 每个已发布生词都随 Journey 内容包预下载真实应用例句
-- [ ] 点开生词立即读取本地例句，不现场请求 AI，也不显示等待生成状态
-- [ ] 预下载例句包含目标词、完整拼音、探索者母语、英文和用法说明
-- [ ] PhoenixVocabularyAgent 与 PhoenixQualityAgent 只在内容制作阶段生成并复核例句
-- [ ] 例句没有“故事里出现了这个词”等万能占位句
-- [ ] 生词查看与朗读正常
-- [ ] 开发分支与 PR 体验版保持全部旅程开放
-- [ ] 免费探索者每天稳定随机早晚各一段，同日两段不重复
-- [ ] 付费探索者可以打开全部已发布旅程
-- [ ] 免费、付费与随机旅程权限统一经过 `JourneyAccessPolicy`
-- [ ] PhoenixBrainAgent 是唯一 AI 总调度入口
-- [ ] Guide / Writing / Conversation / Learning 在线功能由 PhoenixBrainAgent 调度并经过 PhoenixQualityAgent 隐藏复核
-- [ ] Vocabulary 内容制作由 PhoenixBrainAgent 调度并在发布前写入 Journey 内容包
-- [ ] GPT-5.6 通过 OpenAI Responses API 优先运行，Cloudflare Workers AI 自动回退
-- [ ] PhoenixMemoryAgent 只处理有限客户端学习档案，服务器不持久保存
-- [ ] PhoenixKnowledgeAgent 只提供已审核 Journey 背景
-- [ ] 在线 AI 返回 orchestrator / provider / model / quality / memory / knowledge
-- [ ] `OPENAI_API_KEY` 仅存在于 Cloudflare Secret，仓库与客户端没有密钥
-- [ ] 思考、表达、旅程回忆键盘稳定
-- [ ] 进度保存、简繁切换正常
-- [ ] 用户已确认可以合并到 `main`
+`REGRESSION_BLOCKS_READY_AND_MERGE`
 
-## 规则
+## 6. Visual and mobile evidence
 
-未经体验确认，不合并到 `main`。一个 PR 只开发或修复一项功能。
-所有开发必须遵守 `docs/PHOENIX_STABLE_BASELINE_STANDARD.md`，完成后必须与当前最稳定版本对比；任何功能、视觉、交互、性能或内容退化都禁止转 Ready 和合并。
-朗读功能必须遵守 `docs/development-workflow.md` 中的「永久朗读开发准则」。
-故事、发现生词与预下载真实例句必须遵守同文件中的「永久生词展示与例句准则」。
-所有 AI 功能必须遵守同文件中的「永久 AI Agent 开发准则」。
-旅程开放、免费随机与付费权限必须遵守同文件中的「永久旅程访问与订阅准则」。
+- Visual change: `YES / NO`
+- Stable comparison captures: `<links / paths / NONE>`
+- Candidate captures: `<links / paths / NONE>`
+- Tested devices and viewports: `<details / NONE>`
+- Mobile crop and focal point result: `<result + evidence / NOT_APPLICABLE>`
+- Safe-area and small-screen result: `<result + evidence / NOT_APPLICABLE>`
+- Reduced-motion result: `<result + evidence / NOT_APPLICABLE>`
+- Founder approval state: `APPROVED / REJECTED / PENDING / NOT_REQUIRED`
+- Founder approval record: `<exact record / NONE>`
+
+PR `#137` is the minimum visual standard. Rights evidence, file existence, hashes, dimensions, automated fields, or CI success do not establish visual approval.
+
+Production use is prohibited for low-detail programmatic SVG/WebP, flat backgrounds, recolored templates, repeated compositions, placeholders, or visuals below the stable baseline. Batch visual replacement requires Founder mobile approval.
+
+## 7. CI and technical evidence
+
+| Check | Candidate Commit | Run / Command | Status | Evidence |
+|---|---|---|---|---|
+| Required analysis |  |  | `NOT_TRIGGERED / QUEUED / IN_PROGRESS / SUCCESS / FAILURE / CANCELLED / NOT_RUN_NO_LOCAL_EXECUTION_ENVIRONMENT` |  |
+| Required tests |  |  |  |  |
+| Required build |  |  |  |  |
+| Route / data validation |  |  |  |  |
+| Asset validation |  |  |  |  |
+| Accessibility validation |  |  |  |  |
+| Other |  |  |  |  |
+
+Do not report a local command as run when no local execution environment was available. A non-terminal check is not `SUCCESS`.
+
+## 8. Preview evidence
+
+- Preview link: `<reproducible link / NOT_AVAILABLE>`
+- Candidate Commit tied to Preview: `<sha / UNVERIFIED>`
+- Entry route and steps: `<exact instructions>`
+- Pages and Journeys tested: `<list>`
+- Tested account/access states: `<list>`
+- Preview result: `<result + evidence level>`
+
+A deployed Preview does not by itself prove functional, visual, interaction, audio, performance, accessibility, or mobile quality.
+
+## 9. Rights and disclosure
+
+- Rights-impact paths: `<paths / NONE>`
+- Source / license / permission / creation evidence: `<records / NONE>`
+- Technical gate: `<result>`
+- Visual quality gate: `<result>`
+- Stable comparison gate: `<result>`
+- Founder approval gate: `<result>`
+- External services used with unpublished content: `<approved services and scope / NONE>`
+
+Rights approval is separate from visual approval.
+
+## 10. Regression result
+
+- Unexpected regression: `NONE / <details>`
+- Severity: `P0 / P1 / P2 / P3 / NOT_APPLICABLE`
+- Affected stable evidence: `<details>`
+- Required repair or restoration: `<details / NONE>`
+- Verification after repair: `<details / NONE>`
+
+Any regression blocks Completed, Ready, merge, batch expansion, and the next stage.
+
+## 11. Final decision
+
+- CI evidence: `<actual terminal status and run IDs>`
+- Stable comparison: `PASS / REQUIRES_REVISION / REGRESSION / BLOCKED`
+- Founder approval state: `APPROVED / REJECTED / PENDING / NOT_REQUIRED`
+- Final decision: `DRAFT / REQUIRES_REVISION / BLOCKED / READY_REQUESTED / MERGE_REQUESTED`
+- Explicit authorization for Ready: `YES / NO`
+- Explicit authorization for merge: `YES / NO`
+
+## 12. Mandatory review checklist
+
+- [ ] PR is based on the latest approved stable `main`.
+- [ ] Stable PR and Stable Commit are exact.
+- [ ] Candidate Commit, Tree, and Parent are recorded.
+- [ ] Task scope and changed paths are complete.
+- [ ] No closed PR is used as the baseline.
+- [ ] No unauthorized or unrelated file is changed.
+- [ ] Correct pages, routes, IDs, records, and assets are proven.
+- [ ] Required Loading, Error, Empty, and Fallback states are verified.
+- [ ] Required technical checks reached actual terminal conclusions.
+- [ ] The complete `STABLE_BASELINE_COMPARISON` is present.
+- [ ] Function, visual, interaction, mobile, performance, content, audio, accessibility, rights, and persistence results are not below the stable baseline.
+- [ ] Visual or core interaction changes have explicit Founder mobile approval.
+- [ ] Programmatic placeholders did not enter runtime.
+- [ ] Rights evidence is not being used as visual approval.
+- [ ] No unpublished Phoenix content was disclosed to an unapproved external service.
+- [ ] No regression remains unresolved.
+- [ ] Ready and merge actions match explicit authorization.
+
+## 13. Governing standards
+
+- `docs/PHOENIX_STABLE_BASELINE_STANDARD.md`
+- `docs/PHOENIX_PRODUCT_QUALITY_STANDARD.md`
+- `docs/PHOENIX_UI_VISUAL_STANDARD.md`
+- `docs/PHOENIX_JOURNEY_SYSTEM_STANDARD.md`
+- `docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md`
+- `docs/PHOENIX_FULL_APPLICATION_AUDIT_STANDARD.md`
+- `docs/PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md`
+- `docs/PHOENIX_QUALITY_UNIFICATION_ROADMAP.md`
+
+Unchecked or checked boxes do not override contradictory evidence or missing proof.
