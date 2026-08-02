@@ -1,0 +1,818 @@
+{
+  "version": "1.0.0",
+  "created": "2026-08-02",
+  "generator": "worker/scripts/generate_special_journey_rights_safe_assets.mjs",
+  "parameters": "design/sources/special-journeys-v1/parameters.json",
+  "records": [
+    {
+      "journeyId": "changan-last-bus",
+      "storyId": "changan-last-bus",
+      "scene": 1,
+      "purpose": "explore-profile-static-fallback",
+      "storyPhase": "threshold",
+      "master": "design/sources/special-journeys-v1/masters/changan-last-bus/changan-last-bus-01-opening-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/changan-last-bus/changan-last-bus-01-opening-portrait-v1.webp"
+    },
+    {
+      "journeyId": "changan-last-bus",
+      "storyId": "changan-last-bus",
+      "scene": 2,
+      "purpose": "story-opening",
+      "storyPhase": "arrival",
+      "master": "design/sources/special-journeys-v1/masters/changan-last-bus/changan-last-bus-02-story-arrival-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/changan-last-bus/changan-last-bus-02-story-arrival-portrait-v1.webp"
+    },
+    {
+      "journeyId": "changan-last-bus",
+      "storyId": "changan-last-bus",
+      "scene": 3,
+      "purpose": "story-middle",
+      "storyPhase": "tension",
+      "master": "design/sources/special-journeys-v1/masters/changan-last-bus/changan-last-bus-03-story-tension-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/changan-last-bus/changan-last-bus-03-story-tension-portrait-v1.webp"
+    },
+    {
+      "journeyId": "changan-last-bus",
+      "storyId": "changan-last-bus",
+      "scene": 4,
+      "purpose": "story-choice",
+      "storyPhase": "choice",
+      "master": "design/sources/special-journeys-v1/masters/changan-last-bus/changan-last-bus-04-story-choice-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/changan-last-bus/changan-last-bus-04-story-choice-portrait-v1.webp"
+    },
+    {
+      "journeyId": "changan-last-bus",
+      "storyId": "changan-last-bus",
+      "scene": 5,
+      "purpose": "vocabulary",
+      "storyPhase": "objects",
+      "master": "design/sources/special-journeys-v1/masters/changan-last-bus/changan-last-bus-05-vocabulary-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/changan-last-bus/changan-last-bus-05-vocabulary-portrait-v1.webp"
+    },
+    {
+      "journeyId": "changan-last-bus",
+      "storyId": "changan-last-bus",
+      "scene": 6,
+      "purpose": "discovery",
+      "storyPhase": "context",
+      "master": "design/sources/special-journeys-v1/masters/changan-last-bus/changan-last-bus-06-discovery-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/changan-last-bus/changan-last-bus-06-discovery-portrait-v1.webp"
+    },
+    {
+      "journeyId": "changan-last-bus",
+      "storyId": "changan-last-bus",
+      "scene": 7,
+      "purpose": "reflection",
+      "storyPhase": "question",
+      "master": "design/sources/special-journeys-v1/masters/changan-last-bus/changan-last-bus-07-reflection-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/changan-last-bus/changan-last-bus-07-reflection-portrait-v1.webp"
+    },
+    {
+      "journeyId": "changan-last-bus",
+      "storyId": "changan-last-bus",
+      "scene": 8,
+      "purpose": "writing",
+      "storyPhase": "response",
+      "master": "design/sources/special-journeys-v1/masters/changan-last-bus/changan-last-bus-08-writing-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/changan-last-bus/changan-last-bus-08-writing-portrait-v1.webp"
+    },
+    {
+      "journeyId": "changan-last-bus",
+      "storyId": "changan-last-bus",
+      "scene": 9,
+      "purpose": "memory",
+      "storyPhase": "imprint",
+      "master": "design/sources/special-journeys-v1/masters/changan-last-bus/changan-last-bus-09-memory-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/changan-last-bus/changan-last-bus-09-memory-portrait-v1.webp"
+    },
+    {
+      "journeyId": "changan-last-bus",
+      "storyId": "changan-last-bus",
+      "scene": 10,
+      "purpose": "completion",
+      "storyPhase": "afterglow",
+      "master": "design/sources/special-journeys-v1/masters/changan-last-bus/changan-last-bus-10-completion-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/changan-last-bus/changan-last-bus-10-completion-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tide-letter",
+      "storyId": "tide-letter",
+      "scene": 1,
+      "purpose": "explore-profile-static-fallback",
+      "storyPhase": "threshold",
+      "master": "design/sources/special-journeys-v1/masters/tide-letter/tide-letter-01-opening-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tide-letter/tide-letter-01-opening-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tide-letter",
+      "storyId": "tide-letter",
+      "scene": 2,
+      "purpose": "story-opening",
+      "storyPhase": "arrival",
+      "master": "design/sources/special-journeys-v1/masters/tide-letter/tide-letter-02-story-arrival-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tide-letter/tide-letter-02-story-arrival-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tide-letter",
+      "storyId": "tide-letter",
+      "scene": 3,
+      "purpose": "story-middle",
+      "storyPhase": "tension",
+      "master": "design/sources/special-journeys-v1/masters/tide-letter/tide-letter-03-story-tension-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tide-letter/tide-letter-03-story-tension-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tide-letter",
+      "storyId": "tide-letter",
+      "scene": 4,
+      "purpose": "story-choice",
+      "storyPhase": "choice",
+      "master": "design/sources/special-journeys-v1/masters/tide-letter/tide-letter-04-story-choice-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tide-letter/tide-letter-04-story-choice-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tide-letter",
+      "storyId": "tide-letter",
+      "scene": 5,
+      "purpose": "vocabulary",
+      "storyPhase": "objects",
+      "master": "design/sources/special-journeys-v1/masters/tide-letter/tide-letter-05-vocabulary-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tide-letter/tide-letter-05-vocabulary-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tide-letter",
+      "storyId": "tide-letter",
+      "scene": 6,
+      "purpose": "discovery",
+      "storyPhase": "context",
+      "master": "design/sources/special-journeys-v1/masters/tide-letter/tide-letter-06-discovery-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tide-letter/tide-letter-06-discovery-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tide-letter",
+      "storyId": "tide-letter",
+      "scene": 7,
+      "purpose": "reflection",
+      "storyPhase": "question",
+      "master": "design/sources/special-journeys-v1/masters/tide-letter/tide-letter-07-reflection-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tide-letter/tide-letter-07-reflection-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tide-letter",
+      "storyId": "tide-letter",
+      "scene": 8,
+      "purpose": "writing",
+      "storyPhase": "response",
+      "master": "design/sources/special-journeys-v1/masters/tide-letter/tide-letter-08-writing-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tide-letter/tide-letter-08-writing-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tide-letter",
+      "storyId": "tide-letter",
+      "scene": 9,
+      "purpose": "memory",
+      "storyPhase": "imprint",
+      "master": "design/sources/special-journeys-v1/masters/tide-letter/tide-letter-09-memory-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tide-letter/tide-letter-09-memory-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tide-letter",
+      "storyId": "tide-letter",
+      "scene": 10,
+      "purpose": "completion",
+      "storyPhase": "afterglow",
+      "master": "design/sources/special-journeys-v1/masters/tide-letter/tide-letter-10-completion-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tide-letter/tide-letter-10-completion-portrait-v1.webp"
+    },
+    {
+      "journeyId": "arcade-lost-property",
+      "storyId": "arcade-lost-property",
+      "scene": 1,
+      "purpose": "explore-profile-static-fallback",
+      "storyPhase": "threshold",
+      "master": "design/sources/special-journeys-v1/masters/arcade-lost-property/arcade-lost-property-01-opening-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/arcade-lost-property/arcade-lost-property-01-opening-portrait-v1.webp"
+    },
+    {
+      "journeyId": "arcade-lost-property",
+      "storyId": "arcade-lost-property",
+      "scene": 2,
+      "purpose": "story-opening",
+      "storyPhase": "arrival",
+      "master": "design/sources/special-journeys-v1/masters/arcade-lost-property/arcade-lost-property-02-story-arrival-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/arcade-lost-property/arcade-lost-property-02-story-arrival-portrait-v1.webp"
+    },
+    {
+      "journeyId": "arcade-lost-property",
+      "storyId": "arcade-lost-property",
+      "scene": 3,
+      "purpose": "story-middle",
+      "storyPhase": "tension",
+      "master": "design/sources/special-journeys-v1/masters/arcade-lost-property/arcade-lost-property-03-story-tension-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/arcade-lost-property/arcade-lost-property-03-story-tension-portrait-v1.webp"
+    },
+    {
+      "journeyId": "arcade-lost-property",
+      "storyId": "arcade-lost-property",
+      "scene": 4,
+      "purpose": "story-choice",
+      "storyPhase": "choice",
+      "master": "design/sources/special-journeys-v1/masters/arcade-lost-property/arcade-lost-property-04-story-choice-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/arcade-lost-property/arcade-lost-property-04-story-choice-portrait-v1.webp"
+    },
+    {
+      "journeyId": "arcade-lost-property",
+      "storyId": "arcade-lost-property",
+      "scene": 5,
+      "purpose": "vocabulary",
+      "storyPhase": "objects",
+      "master": "design/sources/special-journeys-v1/masters/arcade-lost-property/arcade-lost-property-05-vocabulary-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/arcade-lost-property/arcade-lost-property-05-vocabulary-portrait-v1.webp"
+    },
+    {
+      "journeyId": "arcade-lost-property",
+      "storyId": "arcade-lost-property",
+      "scene": 6,
+      "purpose": "discovery",
+      "storyPhase": "context",
+      "master": "design/sources/special-journeys-v1/masters/arcade-lost-property/arcade-lost-property-06-discovery-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/arcade-lost-property/arcade-lost-property-06-discovery-portrait-v1.webp"
+    },
+    {
+      "journeyId": "arcade-lost-property",
+      "storyId": "arcade-lost-property",
+      "scene": 7,
+      "purpose": "reflection",
+      "storyPhase": "question",
+      "master": "design/sources/special-journeys-v1/masters/arcade-lost-property/arcade-lost-property-07-reflection-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/arcade-lost-property/arcade-lost-property-07-reflection-portrait-v1.webp"
+    },
+    {
+      "journeyId": "arcade-lost-property",
+      "storyId": "arcade-lost-property",
+      "scene": 8,
+      "purpose": "writing",
+      "storyPhase": "response",
+      "master": "design/sources/special-journeys-v1/masters/arcade-lost-property/arcade-lost-property-08-writing-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/arcade-lost-property/arcade-lost-property-08-writing-portrait-v1.webp"
+    },
+    {
+      "journeyId": "arcade-lost-property",
+      "storyId": "arcade-lost-property",
+      "scene": 9,
+      "purpose": "memory",
+      "storyPhase": "imprint",
+      "master": "design/sources/special-journeys-v1/masters/arcade-lost-property/arcade-lost-property-09-memory-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/arcade-lost-property/arcade-lost-property-09-memory-portrait-v1.webp"
+    },
+    {
+      "journeyId": "arcade-lost-property",
+      "storyId": "arcade-lost-property",
+      "scene": 10,
+      "purpose": "completion",
+      "storyPhase": "afterglow",
+      "master": "design/sources/special-journeys-v1/masters/arcade-lost-property/arcade-lost-property-10-completion-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/arcade-lost-property/arcade-lost-property-10-completion-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tea-horse-echo",
+      "storyId": "tea-horse-echo",
+      "scene": 1,
+      "purpose": "explore-profile-static-fallback",
+      "storyPhase": "threshold",
+      "master": "design/sources/special-journeys-v1/masters/tea-horse-echo/tea-horse-echo-01-opening-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tea-horse-echo/tea-horse-echo-01-opening-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tea-horse-echo",
+      "storyId": "tea-horse-echo",
+      "scene": 2,
+      "purpose": "story-opening",
+      "storyPhase": "arrival",
+      "master": "design/sources/special-journeys-v1/masters/tea-horse-echo/tea-horse-echo-02-story-arrival-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tea-horse-echo/tea-horse-echo-02-story-arrival-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tea-horse-echo",
+      "storyId": "tea-horse-echo",
+      "scene": 3,
+      "purpose": "story-middle",
+      "storyPhase": "tension",
+      "master": "design/sources/special-journeys-v1/masters/tea-horse-echo/tea-horse-echo-03-story-tension-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tea-horse-echo/tea-horse-echo-03-story-tension-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tea-horse-echo",
+      "storyId": "tea-horse-echo",
+      "scene": 4,
+      "purpose": "story-choice",
+      "storyPhase": "choice",
+      "master": "design/sources/special-journeys-v1/masters/tea-horse-echo/tea-horse-echo-04-story-choice-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tea-horse-echo/tea-horse-echo-04-story-choice-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tea-horse-echo",
+      "storyId": "tea-horse-echo",
+      "scene": 5,
+      "purpose": "vocabulary",
+      "storyPhase": "objects",
+      "master": "design/sources/special-journeys-v1/masters/tea-horse-echo/tea-horse-echo-05-vocabulary-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tea-horse-echo/tea-horse-echo-05-vocabulary-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tea-horse-echo",
+      "storyId": "tea-horse-echo",
+      "scene": 6,
+      "purpose": "discovery",
+      "storyPhase": "context",
+      "master": "design/sources/special-journeys-v1/masters/tea-horse-echo/tea-horse-echo-06-discovery-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tea-horse-echo/tea-horse-echo-06-discovery-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tea-horse-echo",
+      "storyId": "tea-horse-echo",
+      "scene": 7,
+      "purpose": "reflection",
+      "storyPhase": "question",
+      "master": "design/sources/special-journeys-v1/masters/tea-horse-echo/tea-horse-echo-07-reflection-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tea-horse-echo/tea-horse-echo-07-reflection-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tea-horse-echo",
+      "storyId": "tea-horse-echo",
+      "scene": 8,
+      "purpose": "writing",
+      "storyPhase": "response",
+      "master": "design/sources/special-journeys-v1/masters/tea-horse-echo/tea-horse-echo-08-writing-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tea-horse-echo/tea-horse-echo-08-writing-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tea-horse-echo",
+      "storyId": "tea-horse-echo",
+      "scene": 9,
+      "purpose": "memory",
+      "storyPhase": "imprint",
+      "master": "design/sources/special-journeys-v1/masters/tea-horse-echo/tea-horse-echo-09-memory-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tea-horse-echo/tea-horse-echo-09-memory-portrait-v1.webp"
+    },
+    {
+      "journeyId": "tea-horse-echo",
+      "storyId": "tea-horse-echo",
+      "scene": 10,
+      "purpose": "completion",
+      "storyPhase": "afterglow",
+      "master": "design/sources/special-journeys-v1/masters/tea-horse-echo/tea-horse-echo-10-completion-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/tea-horse-echo/tea-horse-echo-10-completion-portrait-v1.webp"
+    },
+    {
+      "journeyId": "ice-city-star-map",
+      "storyId": "ice-city-star-map",
+      "scene": 1,
+      "purpose": "explore-profile-static-fallback",
+      "storyPhase": "threshold",
+      "master": "design/sources/special-journeys-v1/masters/ice-city-star-map/ice-city-star-map-01-opening-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/ice-city-star-map/ice-city-star-map-01-opening-portrait-v1.webp"
+    },
+    {
+      "journeyId": "ice-city-star-map",
+      "storyId": "ice-city-star-map",
+      "scene": 2,
+      "purpose": "story-opening",
+      "storyPhase": "arrival",
+      "master": "design/sources/special-journeys-v1/masters/ice-city-star-map/ice-city-star-map-02-story-arrival-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/ice-city-star-map/ice-city-star-map-02-story-arrival-portrait-v1.webp"
+    },
+    {
+      "journeyId": "ice-city-star-map",
+      "storyId": "ice-city-star-map",
+      "scene": 3,
+      "purpose": "story-middle",
+      "storyPhase": "tension",
+      "master": "design/sources/special-journeys-v1/masters/ice-city-star-map/ice-city-star-map-03-story-tension-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/ice-city-star-map/ice-city-star-map-03-story-tension-portrait-v1.webp"
+    },
+    {
+      "journeyId": "ice-city-star-map",
+      "storyId": "ice-city-star-map",
+      "scene": 4,
+      "purpose": "story-choice",
+      "storyPhase": "choice",
+      "master": "design/sources/special-journeys-v1/masters/ice-city-star-map/ice-city-star-map-04-story-choice-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/ice-city-star-map/ice-city-star-map-04-story-choice-portrait-v1.webp"
+    },
+    {
+      "journeyId": "ice-city-star-map",
+      "storyId": "ice-city-star-map",
+      "scene": 5,
+      "purpose": "vocabulary",
+      "storyPhase": "objects",
+      "master": "design/sources/special-journeys-v1/masters/ice-city-star-map/ice-city-star-map-05-vocabulary-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/ice-city-star-map/ice-city-star-map-05-vocabulary-portrait-v1.webp"
+    },
+    {
+      "journeyId": "ice-city-star-map",
+      "storyId": "ice-city-star-map",
+      "scene": 6,
+      "purpose": "discovery",
+      "storyPhase": "context",
+      "master": "design/sources/special-journeys-v1/masters/ice-city-star-map/ice-city-star-map-06-discovery-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/ice-city-star-map/ice-city-star-map-06-discovery-portrait-v1.webp"
+    },
+    {
+      "journeyId": "ice-city-star-map",
+      "storyId": "ice-city-star-map",
+      "scene": 7,
+      "purpose": "reflection",
+      "storyPhase": "question",
+      "master": "design/sources/special-journeys-v1/masters/ice-city-star-map/ice-city-star-map-07-reflection-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/ice-city-star-map/ice-city-star-map-07-reflection-portrait-v1.webp"
+    },
+    {
+      "journeyId": "ice-city-star-map",
+      "storyId": "ice-city-star-map",
+      "scene": 8,
+      "purpose": "writing",
+      "storyPhase": "response",
+      "master": "design/sources/special-journeys-v1/masters/ice-city-star-map/ice-city-star-map-08-writing-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/ice-city-star-map/ice-city-star-map-08-writing-portrait-v1.webp"
+    },
+    {
+      "journeyId": "ice-city-star-map",
+      "storyId": "ice-city-star-map",
+      "scene": 9,
+      "purpose": "memory",
+      "storyPhase": "imprint",
+      "master": "design/sources/special-journeys-v1/masters/ice-city-star-map/ice-city-star-map-09-memory-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/ice-city-star-map/ice-city-star-map-09-memory-portrait-v1.webp"
+    },
+    {
+      "journeyId": "ice-city-star-map",
+      "storyId": "ice-city-star-map",
+      "scene": 10,
+      "purpose": "completion",
+      "storyPhase": "afterglow",
+      "master": "design/sources/special-journeys-v1/masters/ice-city-star-map/ice-city-star-map-10-completion-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/ice-city-star-map/ice-city-star-map-10-completion-portrait-v1.webp"
+    },
+    {
+      "journeyId": "literary-roaming",
+      "storyId": "literary-roaming",
+      "scene": 1,
+      "purpose": "explore-profile-static-fallback",
+      "storyPhase": "threshold",
+      "master": "design/sources/special-journeys-v1/masters/literary-roaming/literary-roaming-01-opening-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/literary-roaming/literary-roaming-01-opening-portrait-v1.webp"
+    },
+    {
+      "journeyId": "literary-roaming",
+      "storyId": "literary-roaming",
+      "scene": 2,
+      "purpose": "story-opening",
+      "storyPhase": "arrival",
+      "master": "design/sources/special-journeys-v1/masters/literary-roaming/literary-roaming-02-story-arrival-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/literary-roaming/literary-roaming-02-story-arrival-portrait-v1.webp"
+    },
+    {
+      "journeyId": "literary-roaming",
+      "storyId": "literary-roaming",
+      "scene": 3,
+      "purpose": "story-middle",
+      "storyPhase": "tension",
+      "master": "design/sources/special-journeys-v1/masters/literary-roaming/literary-roaming-03-story-tension-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/literary-roaming/literary-roaming-03-story-tension-portrait-v1.webp"
+    },
+    {
+      "journeyId": "literary-roaming",
+      "storyId": "literary-roaming",
+      "scene": 4,
+      "purpose": "story-choice",
+      "storyPhase": "choice",
+      "master": "design/sources/special-journeys-v1/masters/literary-roaming/literary-roaming-04-story-choice-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/literary-roaming/literary-roaming-04-story-choice-portrait-v1.webp"
+    },
+    {
+      "journeyId": "literary-roaming",
+      "storyId": "literary-roaming",
+      "scene": 5,
+      "purpose": "vocabulary",
+      "storyPhase": "objects",
+      "master": "design/sources/special-journeys-v1/masters/literary-roaming/literary-roaming-05-vocabulary-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/literary-roaming/literary-roaming-05-vocabulary-portrait-v1.webp"
+    },
+    {
+      "journeyId": "literary-roaming",
+      "storyId": "literary-roaming",
+      "scene": 6,
+      "purpose": "discovery",
+      "storyPhase": "context",
+      "master": "design/sources/special-journeys-v1/masters/literary-roaming/literary-roaming-06-discovery-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/literary-roaming/literary-roaming-06-discovery-portrait-v1.webp"
+    },
+    {
+      "journeyId": "literary-roaming",
+      "storyId": "literary-roaming",
+      "scene": 7,
+      "purpose": "reflection",
+      "storyPhase": "question",
+      "master": "design/sources/special-journeys-v1/masters/literary-roaming/literary-roaming-07-reflection-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/literary-roaming/literary-roaming-07-reflection-portrait-v1.webp"
+    },
+    {
+      "journeyId": "literary-roaming",
+      "storyId": "literary-roaming",
+      "scene": 8,
+      "purpose": "writing",
+      "storyPhase": "response",
+      "master": "design/sources/special-journeys-v1/masters/literary-roaming/literary-roaming-08-writing-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/literary-roaming/literary-roaming-08-writing-portrait-v1.webp"
+    },
+    {
+      "journeyId": "literary-roaming",
+      "storyId": "literary-roaming",
+      "scene": 9,
+      "purpose": "memory",
+      "storyPhase": "imprint",
+      "master": "design/sources/special-journeys-v1/masters/literary-roaming/literary-roaming-09-memory-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/literary-roaming/literary-roaming-09-memory-portrait-v1.webp"
+    },
+    {
+      "journeyId": "literary-roaming",
+      "storyId": "literary-roaming",
+      "scene": 10,
+      "purpose": "completion",
+      "storyPhase": "afterglow",
+      "master": "design/sources/special-journeys-v1/masters/literary-roaming/literary-roaming-10-completion-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/literary-roaming/literary-roaming-10-completion-portrait-v1.webp"
+    },
+    {
+      "journeyId": "myth-tracing",
+      "storyId": "myth-tracing",
+      "scene": 1,
+      "purpose": "explore-profile-static-fallback",
+      "storyPhase": "threshold",
+      "master": "design/sources/special-journeys-v1/masters/myth-tracing/myth-tracing-01-opening-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/myth-tracing/myth-tracing-01-opening-portrait-v1.webp"
+    },
+    {
+      "journeyId": "myth-tracing",
+      "storyId": "myth-tracing",
+      "scene": 2,
+      "purpose": "story-opening",
+      "storyPhase": "arrival",
+      "master": "design/sources/special-journeys-v1/masters/myth-tracing/myth-tracing-02-story-arrival-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/myth-tracing/myth-tracing-02-story-arrival-portrait-v1.webp"
+    },
+    {
+      "journeyId": "myth-tracing",
+      "storyId": "myth-tracing",
+      "scene": 3,
+      "purpose": "story-middle",
+      "storyPhase": "tension",
+      "master": "design/sources/special-journeys-v1/masters/myth-tracing/myth-tracing-03-story-tension-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/myth-tracing/myth-tracing-03-story-tension-portrait-v1.webp"
+    },
+    {
+      "journeyId": "myth-tracing",
+      "storyId": "myth-tracing",
+      "scene": 4,
+      "purpose": "story-choice",
+      "storyPhase": "choice",
+      "master": "design/sources/special-journeys-v1/masters/myth-tracing/myth-tracing-04-story-choice-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/myth-tracing/myth-tracing-04-story-choice-portrait-v1.webp"
+    },
+    {
+      "journeyId": "myth-tracing",
+      "storyId": "myth-tracing",
+      "scene": 5,
+      "purpose": "vocabulary",
+      "storyPhase": "objects",
+      "master": "design/sources/special-journeys-v1/masters/myth-tracing/myth-tracing-05-vocabulary-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/myth-tracing/myth-tracing-05-vocabulary-portrait-v1.webp"
+    },
+    {
+      "journeyId": "myth-tracing",
+      "storyId": "myth-tracing",
+      "scene": 6,
+      "purpose": "discovery",
+      "storyPhase": "context",
+      "master": "design/sources/special-journeys-v1/masters/myth-tracing/myth-tracing-06-discovery-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/myth-tracing/myth-tracing-06-discovery-portrait-v1.webp"
+    },
+    {
+      "journeyId": "myth-tracing",
+      "storyId": "myth-tracing",
+      "scene": 7,
+      "purpose": "reflection",
+      "storyPhase": "question",
+      "master": "design/sources/special-journeys-v1/masters/myth-tracing/myth-tracing-07-reflection-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/myth-tracing/myth-tracing-07-reflection-portrait-v1.webp"
+    },
+    {
+      "journeyId": "myth-tracing",
+      "storyId": "myth-tracing",
+      "scene": 8,
+      "purpose": "writing",
+      "storyPhase": "response",
+      "master": "design/sources/special-journeys-v1/masters/myth-tracing/myth-tracing-08-writing-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/myth-tracing/myth-tracing-08-writing-portrait-v1.webp"
+    },
+    {
+      "journeyId": "myth-tracing",
+      "storyId": "myth-tracing",
+      "scene": 9,
+      "purpose": "memory",
+      "storyPhase": "imprint",
+      "master": "design/sources/special-journeys-v1/masters/myth-tracing/myth-tracing-09-memory-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/myth-tracing/myth-tracing-09-memory-portrait-v1.webp"
+    },
+    {
+      "journeyId": "myth-tracing",
+      "storyId": "myth-tracing",
+      "scene": 10,
+      "purpose": "completion",
+      "storyPhase": "afterglow",
+      "master": "design/sources/special-journeys-v1/masters/myth-tracing/myth-tracing-10-completion-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/myth-tracing/myth-tracing-10-completion-portrait-v1.webp"
+    },
+    {
+      "journeyId": "strange-night-talks",
+      "storyId": "strange-night-talks",
+      "scene": 1,
+      "purpose": "explore-profile-static-fallback",
+      "storyPhase": "threshold",
+      "master": "design/sources/special-journeys-v1/masters/strange-night-talks/strange-night-talks-01-opening-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/strange-night-talks/strange-night-talks-01-opening-portrait-v1.webp"
+    },
+    {
+      "journeyId": "strange-night-talks",
+      "storyId": "strange-night-talks",
+      "scene": 2,
+      "purpose": "story-opening",
+      "storyPhase": "arrival",
+      "master": "design/sources/special-journeys-v1/masters/strange-night-talks/strange-night-talks-02-story-arrival-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/strange-night-talks/strange-night-talks-02-story-arrival-portrait-v1.webp"
+    },
+    {
+      "journeyId": "strange-night-talks",
+      "storyId": "strange-night-talks",
+      "scene": 3,
+      "purpose": "story-middle",
+      "storyPhase": "tension",
+      "master": "design/sources/special-journeys-v1/masters/strange-night-talks/strange-night-talks-03-story-tension-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/strange-night-talks/strange-night-talks-03-story-tension-portrait-v1.webp"
+    },
+    {
+      "journeyId": "strange-night-talks",
+      "storyId": "strange-night-talks",
+      "scene": 4,
+      "purpose": "story-choice",
+      "storyPhase": "choice",
+      "master": "design/sources/special-journeys-v1/masters/strange-night-talks/strange-night-talks-04-story-choice-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/strange-night-talks/strange-night-talks-04-story-choice-portrait-v1.webp"
+    },
+    {
+      "journeyId": "strange-night-talks",
+      "storyId": "strange-night-talks",
+      "scene": 5,
+      "purpose": "vocabulary",
+      "storyPhase": "objects",
+      "master": "design/sources/special-journeys-v1/masters/strange-night-talks/strange-night-talks-05-vocabulary-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/strange-night-talks/strange-night-talks-05-vocabulary-portrait-v1.webp"
+    },
+    {
+      "journeyId": "strange-night-talks",
+      "storyId": "strange-night-talks",
+      "scene": 6,
+      "purpose": "discovery",
+      "storyPhase": "context",
+      "master": "design/sources/special-journeys-v1/masters/strange-night-talks/strange-night-talks-06-discovery-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/strange-night-talks/strange-night-talks-06-discovery-portrait-v1.webp"
+    },
+    {
+      "journeyId": "strange-night-talks",
+      "storyId": "strange-night-talks",
+      "scene": 7,
+      "purpose": "reflection",
+      "storyPhase": "question",
+      "master": "design/sources/special-journeys-v1/masters/strange-night-talks/strange-night-talks-07-reflection-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/strange-night-talks/strange-night-talks-07-reflection-portrait-v1.webp"
+    },
+    {
+      "journeyId": "strange-night-talks",
+      "storyId": "strange-night-talks",
+      "scene": 8,
+      "purpose": "writing",
+      "storyPhase": "response",
+      "master": "design/sources/special-journeys-v1/masters/strange-night-talks/strange-night-talks-08-writing-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/strange-night-talks/strange-night-talks-08-writing-portrait-v1.webp"
+    },
+    {
+      "journeyId": "strange-night-talks",
+      "storyId": "strange-night-talks",
+      "scene": 9,
+      "purpose": "memory",
+      "storyPhase": "imprint",
+      "master": "design/sources/special-journeys-v1/masters/strange-night-talks/strange-night-talks-09-memory-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/strange-night-talks/strange-night-talks-09-memory-portrait-v1.webp"
+    },
+    {
+      "journeyId": "strange-night-talks",
+      "storyId": "strange-night-talks",
+      "scene": 10,
+      "purpose": "completion",
+      "storyPhase": "afterglow",
+      "master": "design/sources/special-journeys-v1/masters/strange-night-talks/strange-night-talks-10-completion-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/strange-night-talks/strange-night-talks-10-completion-portrait-v1.webp"
+    },
+    {
+      "journeyId": "folk-secret-land",
+      "storyId": "folk-secret-land",
+      "scene": 1,
+      "purpose": "explore-profile-static-fallback",
+      "storyPhase": "threshold",
+      "master": "design/sources/special-journeys-v1/masters/folk-secret-land/folk-secret-land-01-opening-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/folk-secret-land/folk-secret-land-01-opening-portrait-v1.webp"
+    },
+    {
+      "journeyId": "folk-secret-land",
+      "storyId": "folk-secret-land",
+      "scene": 2,
+      "purpose": "story-opening",
+      "storyPhase": "arrival",
+      "master": "design/sources/special-journeys-v1/masters/folk-secret-land/folk-secret-land-02-story-arrival-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/folk-secret-land/folk-secret-land-02-story-arrival-portrait-v1.webp"
+    },
+    {
+      "journeyId": "folk-secret-land",
+      "storyId": "folk-secret-land",
+      "scene": 3,
+      "purpose": "story-middle",
+      "storyPhase": "tension",
+      "master": "design/sources/special-journeys-v1/masters/folk-secret-land/folk-secret-land-03-story-tension-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/folk-secret-land/folk-secret-land-03-story-tension-portrait-v1.webp"
+    },
+    {
+      "journeyId": "folk-secret-land",
+      "storyId": "folk-secret-land",
+      "scene": 4,
+      "purpose": "story-choice",
+      "storyPhase": "choice",
+      "master": "design/sources/special-journeys-v1/masters/folk-secret-land/folk-secret-land-04-story-choice-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/folk-secret-land/folk-secret-land-04-story-choice-portrait-v1.webp"
+    },
+    {
+      "journeyId": "folk-secret-land",
+      "storyId": "folk-secret-land",
+      "scene": 5,
+      "purpose": "vocabulary",
+      "storyPhase": "objects",
+      "master": "design/sources/special-journeys-v1/masters/folk-secret-land/folk-secret-land-05-vocabulary-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/folk-secret-land/folk-secret-land-05-vocabulary-portrait-v1.webp"
+    },
+    {
+      "journeyId": "folk-secret-land",
+      "storyId": "folk-secret-land",
+      "scene": 6,
+      "purpose": "discovery",
+      "storyPhase": "context",
+      "master": "design/sources/special-journeys-v1/masters/folk-secret-land/folk-secret-land-06-discovery-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/folk-secret-land/folk-secret-land-06-discovery-portrait-v1.webp"
+    },
+    {
+      "journeyId": "folk-secret-land",
+      "storyId": "folk-secret-land",
+      "scene": 7,
+      "purpose": "reflection",
+      "storyPhase": "question",
+      "master": "design/sources/special-journeys-v1/masters/folk-secret-land/folk-secret-land-07-reflection-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/folk-secret-land/folk-secret-land-07-reflection-portrait-v1.webp"
+    },
+    {
+      "journeyId": "folk-secret-land",
+      "storyId": "folk-secret-land",
+      "scene": 8,
+      "purpose": "writing",
+      "storyPhase": "response",
+      "master": "design/sources/special-journeys-v1/masters/folk-secret-land/folk-secret-land-08-writing-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/folk-secret-land/folk-secret-land-08-writing-portrait-v1.webp"
+    },
+    {
+      "journeyId": "folk-secret-land",
+      "storyId": "folk-secret-land",
+      "scene": 9,
+      "purpose": "memory",
+      "storyPhase": "imprint",
+      "master": "design/sources/special-journeys-v1/masters/folk-secret-land/folk-secret-land-09-memory-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/folk-secret-land/folk-secret-land-09-memory-portrait-v1.webp"
+    },
+    {
+      "journeyId": "folk-secret-land",
+      "storyId": "folk-secret-land",
+      "scene": 10,
+      "purpose": "completion",
+      "storyPhase": "afterglow",
+      "master": "design/sources/special-journeys-v1/masters/folk-secret-land/folk-secret-land-10-completion-portrait-v1.svg",
+      "release": "app/assets/images/special-realms/rights-safe-v1/folk-secret-land/folk-secret-land-10-completion-portrait-v1.webp"
+    }
+  ]
+}

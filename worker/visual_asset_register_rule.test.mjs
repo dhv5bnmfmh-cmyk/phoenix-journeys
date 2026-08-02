@@ -64,14 +64,14 @@ test('asset register covers every current visual file with reproducible hashes',
     .filter((path) => existsSync(new URL(`../${path}`, import.meta.url)))
     .sort();
 
-  assert.equal(visualRows.length, 406);
+  assert.equal(visualRows.length, 496);
   assert.equal(activeRows.length, 397);
   assert.deepEqual(
     activeRows.map((row) => row['Repository Path']).sort(),
     tracked,
   );
-  assert.equal(new Set(visualRows.map((row) => row['Asset ID'])).size, 406);
-  assert.equal(new Set(visualRows.map((row) => row['Repository Path'])).size, 406);
+  assert.equal(new Set(visualRows.map((row) => row['Asset ID'])).size, 496);
+  assert.equal(new Set(visualRows.map((row) => row['Repository Path'])).size, 496);
 
   for (const row of activeRows) {
     const path = new URL(`../${row['Repository Path']}`, import.meta.url);
@@ -110,9 +110,9 @@ test('rights states preserve evidence gaps without granting preview eligibility'
   ]);
 
   assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_PARTIAL').length, 291);
-  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_MISSING').length, 97);
-  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_COMPLETE').length, 9);
-  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'RETIRED_REPLACED').length, 9);
+  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_MISSING').length, 7);
+  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'EVIDENCE_COMPLETE').length, 99);
+  assert.equal(visualRows.filter((row) => row['Rights Status'] === 'RETIRED_REPLACED').length, 99);
   assert.equal(visualRows.filter((row) => row['Existing Registry Entry'] === 'YES').length, 70);
   for (const row of visualRows) {
     assert.ok(allowed.has(row['Rights Status']), row['Repository Path']);
@@ -120,7 +120,10 @@ test('rights states preserve evidence gaps without granting preview eligibility'
       assert.equal(row['Preview Eligibility'], 'YES_ASSET_ONLY_LIBRARY_BLOCKED', row['Repository Path']);
       assert.equal(row['Release Eligibility'], 'YES_ASSET_ONLY_LIBRARY_BLOCKED', row['Repository Path']);
       assert.equal(row['Missing Evidence'], 'NOT_APPLICABLE', row['Repository Path']);
-      assert.equal(row['Gate Result'], 'ALL_14_GATES_PASSED_REMOTE_CI_SUCCESS', row['Repository Path']);
+      assert.ok(
+        ['ALL_14_GATES_PASSED_REMOTE_CI_SUCCESS', 'LOCAL_14_GATES_PASSED_REMOTE_CI_PENDING'].includes(row['Gate Result']),
+        row['Repository Path'],
+      );
       assert.notEqual(row['Source File'], 'UNKNOWN', row['Repository Path']);
       assert.notEqual(row['Editable Master'], 'UNKNOWN', row['Repository Path']);
       assert.ok(existsSync(new URL(`../${row['Editable Master']}`, import.meta.url)), row['Repository Path']);

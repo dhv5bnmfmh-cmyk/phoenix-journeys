@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "canvas": { "width": 900, "height": 1600 },
+  "scenes": [
+    { "index": 1, "slug": "opening", "purpose": "explore-profile-static-fallback", "storyPhase": "threshold" },
+    { "index": 2, "slug": "story-arrival", "purpose": "story-opening", "storyPhase": "arrival" },
+    { "index": 3, "slug": "story-tension", "purpose": "story-middle", "storyPhase": "tension" },
+    { "index": 4, "slug": "story-choice", "purpose": "story-choice", "storyPhase": "choice" },
+    { "index": 5, "slug": "vocabulary", "purpose": "vocabulary", "storyPhase": "objects" },
+    { "index": 6, "slug": "discovery", "purpose": "discovery", "storyPhase": "context" },
+    { "index": 7, "slug": "reflection", "purpose": "reflection", "storyPhase": "question" },
+    { "index": 8, "slug": "writing", "purpose": "writing", "storyPhase": "response" },
+    { "index": 9, "slug": "memory", "purpose": "memory", "storyPhase": "imprint" },
+    { "index": 10, "slug": "completion", "purpose": "completion", "storyPhase": "afterglow" }
+  ],
+  "journeys": [
+    { "id": "changan-last-bus", "name": "传奇夜行 · 长安末班车", "storyId": "changan-last-bus", "dataFile": "app/lib/data/special_journey_expansion_batch_one.dart", "palette": ["#090D18", "#25364C", "#9A563B", "#E7B45A", "#D9E7E5"], "motif": "night-bus-wall-rain", "composition": "lateral-transit", "light": "wet-street-amber", "forbidden": "moon,stars,lantern-field,portal,hero-poster" },
+    { "id": "tide-letter", "name": "词境回声 · 潮声旧信", "storyId": "tide-letter", "dataFile": "app/lib/data/special_journey_expansion_batch_one.dart", "palette": ["#071B24", "#1F5962", "#77A9A4", "#D7C9A4", "#F1E5C9"], "motif": "tide-radio-envelope", "composition": "horizontal-tidal-bands", "light": "coastal-dawn", "forbidden": "moon,lantern,door,mirror,star-particles" },
+    { "id": "arcade-lost-property", "name": "公案新编 · 骑楼失物局", "storyId": "arcade-lost-property", "dataFile": "app/lib/data/special_journey_expansion_batch_one.dart", "palette": ["#211A22", "#5F4544", "#A43A36", "#D69D62", "#E9D8B6"], "motif": "arcade-umbrella-tile-ledger", "composition": "receding-arcades", "light": "rain-to-sun", "forbidden": "fog,moon,stars,magic-door,game-card" },
+    { "id": "tea-horse-echo", "name": "山川笔记 · 茶马回声档案", "storyId": "tea-horse-echo", "dataFile": "app/lib/data/special_journey_expansion_batch_one.dart", "palette": ["#14211C", "#3D5945", "#78906B", "#B68B56", "#DED0A9"], "motif": "mountain-path-bell-soundwave", "composition": "diagonal-route", "light": "highland-morning", "forbidden": "temple,lantern,mirror,portal,blue-gold-filter" },
+    { "id": "ice-city-star-map", "name": "章回新声 · 冰城旧厂星图", "storyId": "ice-city-star-map", "dataFile": "app/lib/data/special_journey_expansion_batch_one.dart", "palette": ["#071420", "#21425C", "#4E7184", "#91B5C3", "#E0D1A4"], "motif": "factory-pipes-star-coordinates", "composition": "industrial-grid", "light": "winter-skylight", "forbidden": "fantasy-palace,lantern,mirror,portal,purple-gold" },
+    { "id": "literary-roaming", "name": "文学漫游 · 庄周梦蝶", "storyId": "literary-roaming", "dataFile": "app/lib/data/special_journey_catalog.dart", "palette": ["#10211D", "#315B4A", "#6E9B78", "#77B8BD", "#E2D7A9"], "motif": "bamboo-butterfly-reflection", "composition": "split-reflection", "light": "leaf-filtered-morning", "forbidden": "door,lantern,moon,scroll,prophecy" },
+    { "id": "myth-tracing", "name": "神话寻踪 · 月宫遗简", "storyId": "myth-tracing", "dataFile": "app/lib/data/special_journey_catalog.dart", "palette": ["#151621", "#3A3D50", "#73786F", "#B9AA7C", "#E8DFC4"], "motif": "cassia-terrace-bamboo-slips", "composition": "ascending-stone-terraces", "light": "cool-cassia-shadow", "forbidden": "spaceship,game-palace,lantern-field,portal,neon" },
+    { "id": "strange-night-talks", "name": "志怪夜话 · 无影客栈", "storyId": "strange-night-talks", "dataFile": "app/lib/data/special_journey_catalog.dart", "palette": ["#120F12", "#34282A", "#68504A", "#A47C58", "#D8C3A1"], "motif": "inn-ledger-shadowless-chair", "composition": "off-center-interior", "light": "single-window-raking", "forbidden": "moon,mirror,magic-door,purple-fog,hero-poster" },
+    { "id": "folk-secret-land", "name": "民俗秘境 · 逆流河灯", "storyId": "folk-secret-land", "dataFile": "app/lib/data/special_journey_catalog.dart", "palette": ["#071C22", "#164A4E", "#39746A", "#B77A45", "#E0C889"], "motif": "river-current-paper-vessel-future-reflection", "composition": "upstream-current", "light": "riverbank-ember", "forbidden": "fixed-real-ritual,lantern-field,moon,portal,festival-spectacle" }
+  ]
+}

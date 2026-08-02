@@ -3,7 +3,7 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import test from 'node:test';
 
 const assetDirectory = new URL(
-  '../app/assets/images/special-realms/ten-scene/',
+  '../app/assets/images/special-realms/rights-safe-v1/',
   import.meta.url,
 );
 const backgroundSource = new URL(
@@ -12,27 +12,25 @@ const backgroundSource = new URL(
 );
 
 const realms = [
-  ['dream-butterfly', 'dream-butterfly-v3.webp'],
-  ['moon-letter', 'moon-letter-v2.webp'],
-  ['shadowless-inn', 'shadowless-inn-v2.webp'],
-  ['upstream-lantern', 'upstream-lantern-v3.webp'],
+  'changan-last-bus', 'tide-letter', 'arcade-lost-property',
+  'tea-horse-echo', 'ice-city-star-map', 'literary-roaming',
+  'myth-tracing', 'strange-night-talks', 'folk-secret-land',
 ];
 
-test('every special realm has ten valid story images including its retained plate', async () => {
-  const files = await readdir(assetDirectory);
+test('every special realm has ten rights-safe narrative plates', async () => {
   const source = await readFile(backgroundSource, 'utf8');
 
-  for (const [prefix, retainedPlate] of realms) {
-    const generated = files
-      .filter((file) => file.startsWith(`${prefix}-`) && file.endsWith('.webp'))
+  for (const journeyId of realms) {
+    const journeyDirectory = new URL(`${journeyId}/`, assetDirectory);
+    const generated = (await readdir(journeyDirectory))
+      .filter((file) => file.endsWith('.webp'))
       .sort();
 
-    assert.equal(generated.length, 9, `${prefix} should add exactly nine images`);
-    assert.match(source, new RegExp(retainedPlate.replace('.', '\\.')));
+    assert.equal(generated.length, 10, `${journeyId} must own exactly ten images`);
 
     for (const file of generated) {
-      const info = await stat(new URL(file, assetDirectory));
-      assert.ok(info.size > 50_000, `${file} should be a real HD WebP`);
+      const info = await stat(new URL(file, journeyDirectory));
+      assert.ok(info.size > 8_000, `${file} should be a valid optimized vector-derived WebP`);
       assert.match(source, new RegExp(file.replace('.', '\\.')));
     }
   }

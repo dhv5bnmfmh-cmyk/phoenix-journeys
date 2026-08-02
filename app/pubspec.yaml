@@ -33,6 +33,15 @@ flutter:
     - assets/images/maps/
     - assets/images/special-realms/
     - assets/images/special-realms/ten-scene/
+    - assets/images/special-realms/rights-safe-v1/changan-last-bus/
+    - assets/images/special-realms/rights-safe-v1/tide-letter/
+    - assets/images/special-realms/rights-safe-v1/arcade-lost-property/
+    - assets/images/special-realms/rights-safe-v1/tea-horse-echo/
+    - assets/images/special-realms/rights-safe-v1/ice-city-star-map/
+    - assets/images/special-realms/rights-safe-v1/literary-roaming/
+    - assets/images/special-realms/rights-safe-v1/myth-tracing/
+    - assets/images/special-realms/rights-safe-v1/strange-night-talks/
+    - assets/images/special-realms/rights-safe-v1/folk-secret-land/
     - assets/images/backgrounds/seed/
     - assets/images/backgrounds/generated/
     - assets/images/backgrounds/generated/beijing/forbidden-city/

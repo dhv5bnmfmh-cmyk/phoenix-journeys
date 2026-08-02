@@ -91,7 +91,7 @@ Status: In Progress
 
 退出条件：审查范围内已识别 Visual P0/P1 全部修复或替换并复审；版权不明或存在严重 AI 错误的资源不得保留 Preview 或 Release 资格。
 
-进行中证据（2026-08-01）：已枚举并登记 397 个有效视觉资源，删除 1 个损坏且未被运行时引用的旧 WebP；特别 Journey 已改为按需预载当前图片与静态后备，并补充加载失败的程序化最终降级及生命周期回归；首页、飞行地图、护照地图与 Journey 徽章也已补齐资源失败时的程序化静态降级。Safe Replacement Phase 0 已建立唯一命名、稳定 Asset ID、可编辑源文件、权利证据包与 14 项 Gate 流程；Phase 1 已用本地程序化 SVG/矢量方法安全替换 9 项全局关键运行时资源（Home 1、Splash 1、Map 3、Icon 3、Dynamic Layer 1），9 项新资源为 `EVIDENCE_COMPLETE`，9 项旧资源为 `RETIRED_REPLACED`。当前 397 项有效资源中仍有 291 项 `EVIDENCE_PARTIAL`、97 项 `EVIDENCE_MISSING`，合计 388 项保持 `BLOCKED_PENDING_EVIDENCE`；下一阶段为特别 Journey 90 项，未经用户再次批准不得开始。Sprint 29 在剩余权利证据 P0 阻断解除前不得标记为 Completed；Sprint 30–32 保持 Planned。
+进行中证据（2026-08-02）：已枚举并登记 397 个有效视觉资源，技术预载、失败降级、Reduced Motion 与生命周期修复保持有效。Safe Replacement Phase 0 已建立唯一命名、稳定 Asset ID、可编辑源文件、权利证据包与 14 项 Gate 流程；Phase 1 已替换 9 项全局关键运行时资源；Phase 2 已为 9 个特别 Journey 建立互相独立的视觉圣经、参数记录和 90 个可编辑 SVG 母版，并以本地确定性流程替换全部 90 项特别 Journey 运行时资源。Phase 0–2 累计 99 项新资源为 `EVIDENCE_COMPLETE`，99 项旧资源为 `RETIRED_REPLACED`；当前仍有 291 项 `EVIDENCE_PARTIAL`、7 项 `EVIDENCE_MISSING`，合计 298 项保持 `BLOCKED_PENDING_EVIDENCE`。Phase 3A 为 `Planned`，未经用户再次批准不得开始。Sprint 29 在剩余权利证据 P0 阻断解除前不得标记为 Completed；Sprint 30–32 保持 Planned。
 
 ### Sprint 30 — Visual 深度质量、素材替换与性能整改
 
