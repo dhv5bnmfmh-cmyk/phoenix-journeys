@@ -81,6 +81,12 @@ jobs:
           tar --exclude=.git -czf /tmp/phoenix-phase3b-workspace.tar.gz .
           sha256sum /tmp/phoenix-phase3b-workspace.tar.gz > /tmp/phoenix-phase3b-workspace.tar.gz.sha256
 
+      - name: Record Git metadata
+        shell: bash
+        run: |
+          git rev-parse HEAD > /tmp/phoenix-phase3b-head.txt
+          git rev-parse 'HEAD^{tree}' > /tmp/phoenix-phase3b-tree.txt
+
       - name: Upload materialized workspace
         uses: actions/upload-artifact@v4
         with:
@@ -88,5 +94,7 @@ jobs:
           path: |
             /tmp/phoenix-phase3b-workspace.tar.gz
             /tmp/phoenix-phase3b-workspace.tar.gz.sha256
+            /tmp/phoenix-phase3b-head.txt
+            /tmp/phoenix-phase3b-tree.txt
           retention-days: 1
           if-no-files-found: error
