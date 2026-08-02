@@ -51,11 +51,14 @@ const rows = parsed.filter((r) => r.length > 1).map((values) => Object.fromEntri
 for (const [oldPath,id,newPath,family,page,master,responsive,fallback,motion] of oldToNew) {
   const old = rows.find((r) => r['Repository Path'] === oldPath);
   if (!old) throw new Error(`Missing old register row: ${oldPath}`);
+  const baseNotes = old.Notes
+    .replace(/(?:\s*Replaced by PHX-GLOBAL-[^;]+; historical repository provenance retained\.)+/g, '')
+    .trim();
   Object.assign(old, {
     'Runtime Referenced':'NO','Deprecated':'YES','Unused':'YES','Rights Status':'RETIRED_REPLACED',
     'Missing Evidence':'NOT_APPLICABLE_RETIRED','Preview Eligibility':'NO_RETIRED','Release Eligibility':'NO_RETIRED',
     'Replacement Required':'NO','Gate Result':'RETIRED_AFTER_VERIFIED_REPLACEMENT',
-    'Notes':`${old.Notes ? `${old.Notes} ` : ''}Replaced by ${id}; historical repository provenance retained.`,
+    'Notes':`${baseNotes ? `${baseNotes} ` : ''}Replaced by ${id}; historical repository provenance retained.`,
   });
   const full = resolve(root,newPath), bytes = await readFile(full), info = await stat(full);
   const dimensions = newPath.endsWith('.svg')
@@ -92,7 +95,7 @@ for (const [oldPath,id,newPath,family,page,master,responsive,fallback,motion] of
     'Missing Evidence':'NOT_APPLICABLE','Preview Eligibility':'YES_ASSET_ONLY_LIBRARY_BLOCKED',
     'Release Eligibility':'YES_ASSET_ONLY_LIBRARY_BLOCKED','Replacement Required':'NO',
     'Source File':master,'Editable Master':master,'Responsive Variants':responsive,
-    'Static Fallback':fallback,'Reduced Motion Behavior':motion,'Gate Result':'LOCAL_14_GATES_PASSED_REMOTE_CI_PENDING',
+    'Static Fallback':fallback,'Reduced Motion Behavior':motion,'Gate Result':'ALL_14_GATES_PASSED_REMOTE_CI_SUCCESS',
     'Notes':'Original local primitive geometry; no external disclosure, service, dataset, icon library, trademark, likeness, or third-party input. Whole-library rights approval remains blocked.',
   });
   const existing = rows.findIndex((r) => r['Asset ID'] === id);

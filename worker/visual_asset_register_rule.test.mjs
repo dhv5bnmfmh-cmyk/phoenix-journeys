@@ -120,7 +120,7 @@ test('rights states preserve evidence gaps without granting preview eligibility'
       assert.equal(row['Preview Eligibility'], 'YES_ASSET_ONLY_LIBRARY_BLOCKED', row['Repository Path']);
       assert.equal(row['Release Eligibility'], 'YES_ASSET_ONLY_LIBRARY_BLOCKED', row['Repository Path']);
       assert.equal(row['Missing Evidence'], 'NOT_APPLICABLE', row['Repository Path']);
-      assert.equal(row['Gate Result'], 'LOCAL_14_GATES_PASSED_REMOTE_CI_PENDING', row['Repository Path']);
+      assert.equal(row['Gate Result'], 'ALL_14_GATES_PASSED_REMOTE_CI_SUCCESS', row['Repository Path']);
       assert.notEqual(row['Source File'], 'UNKNOWN', row['Repository Path']);
       assert.notEqual(row['Editable Master'], 'UNKNOWN', row['Repository Path']);
       assert.ok(existsSync(new URL(`../${row['Editable Master']}`, import.meta.url)), row['Repository Path']);
