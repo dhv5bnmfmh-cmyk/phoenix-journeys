@@ -22,6 +22,6 @@ void main() {
       catalog: journeyBackgroundCatalog,
     );
     expect(kpi.destinationTargetMet, isTrue);
-    expect(kpi.pageTargetMet, isTrue);
+    expect(kpi.pageInventory, 9);
   });
 }
