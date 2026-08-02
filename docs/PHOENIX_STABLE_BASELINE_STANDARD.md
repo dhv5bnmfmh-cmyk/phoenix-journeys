@@ -1,310 +1,209 @@
 # Phoenix Stable Baseline Standard
 
-状态：**BINDING / 强制规范**  
-版本：1.0  
-生效基线：PR #137 合并后的 `main`  
-基线 Commit：`5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
+**System:** Phoenix Product Standard System v1.0  
+**Status:** BINDING  
+**Stable PR:** `#137`  
+**Stable Commit:** `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
 
-## 1. 规范目的
+## 1. Purpose
 
-Phoenix 后续开发必须建立在当前最稳定、且已经通过实际体验确认的版本之上。新功能、视觉、内容、交互、性能和合规工作只能在稳定基线之上提升，不得以技术便利、版权记录便利、批量生成便利或自动测试通过为理由降低产品质量。
+This standard defines the only approved Phoenix product baseline and the rules for comparing, approving, updating, and restoring that baseline. It applies to every developer, reviewer, Codex task, automation, pull request, Preview, and release decision.
 
-本规范用于防止以下问题再次发生：
+The binding rule is:
 
-- 高质量图片被简单程序化图片、扁平模板或占位图替换；
-- 只验证文件存在、哈希、来源或自动评分，却没有验证真实体验；
-- 一次批量替换大量资源，直到全部接入后才发现整体质量下降；
-- 新开发通过 CI，但在手机上的视觉、交互或阅读体验低于稳定版本；
-- 开发完成后没有与最稳定版本逐项对比，导致错误方向被误判为完成。
+> **NEW RESULT >= CURRENT STABLE BASELINE**
 
-## 2. 唯一稳定基线
+A candidate is not complete merely because files exist, tests pass, a Preview deploys, or rights records are present. The candidate must preserve or improve the verified stable product experience.
 
-当前唯一稳定产品基线为：
+## 2. Current binding baseline
 
-- Pull Request：`#137`
-- Main Commit：`5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
-- 产品原则：保留 PR #137 中已经稳定的功能、视觉、交互、导航、跟读训练、朗读体验、Journey 页面和资源路由。
+The current and only approved stable product baseline is:
 
-任何后续分支、Commit、Preview 或 PR 都不得自动成为新的稳定基线。
+- Stable PR: `#137`
+- Stable `main` Commit: `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
+- Stable branch: `main`
 
-只有满足以下全部条件，稳定基线才允许更新：
+Closed PRs `#138`, `#139`, `#140`, and `#141` are historical and problem evidence only. They MUST NOT be used as a development baseline, inherited implementation source, visual reference, or merge target.
 
-1. 所有必需测试通过；
-2. 与当前稳定基线完成逐项对比；
-3. 没有功能、视觉、交互、性能或内容退化；
-4. 视觉变更已由 Founder 在真实手机 Preview 中明确批准；
-5. PR 已明确声明将成为新的稳定基线；
-6. PR 合并进入 `main`；
-7. Founder 明确确认新的稳定 Commit。
+The stable baseline does not automatically move to the newest PR, newest Commit, newest Preview, newest successful CI run, or newest merged documentation. A candidate becomes the new stable baseline only after all update conditions in Section 4 are satisfied.
 
-## 3. 只允许向上升级
+## 3. Baseline scope
 
-所有开发必须遵守：
+Comparison against the stable baseline MUST cover every applicable category:
 
-> NEW RESULT >= CURRENT STABLE BASELINE
+- functional completeness;
+- page completeness and correct integration;
+- routes and navigation;
+- assets and resource paths;
+- visual quality;
+- interaction quality;
+- mobile experience and safe areas;
+- page stability;
+- performance;
+- loading, error, empty, and fallback states;
+- content quality;
+- multilingual consistency;
+- narration and audio;
+- progress and persistence;
+- accessibility;
+- privacy, secrets, and external disclosure;
+- rights and provenance evidence;
+- unexpected feature or resource loss.
 
-其中“>=”必须同时覆盖：
+Any applicable category below the stable baseline is `REGRESSION`.
 
-- 功能完整度；
-- 视觉完成度；
-- 场景丰富度；
-- 文化辨识度；
-- 阅读清晰度；
-- 手机适配；
-- 交互稳定性；
-- 页面切换稳定性；
-- 加载与失败回退；
-- 性能；
-- 无障碍；
-- 内容质量；
-- 权利与来源证据。
+## 4. Stable baseline update conditions
 
-任何一项低于稳定基线，都必须标记为 `REGRESSION`，不得标记 Completed，不得转 Ready，不得合并。
+The stable baseline MAY be updated only when all of the following are VERIFIED:
 
-## 4. PR #137 视觉规格
+1. The candidate started from the latest approved stable `main`.
+2. The authorized task scope and changed paths are exact and complete.
+3. Required automated validation reached a terminal successful state.
+4. The mandatory `STABLE_BASELINE_COMPARISON` is complete.
+5. No category is `REGRESSION`, `BLOCKED`, `UNVERIFIED`, or `CONTRADICTORY`.
+6. Relevant pages and flows are reproducible in an isolated Preview.
+7. Visual or core interaction changes received explicit Founder mobile Preview approval.
+8. Rights and provenance gates passed without reducing product quality.
+9. The PR explicitly states that it is proposed as the next stable baseline.
+10. The Founder explicitly approves the candidate and its exact Commit.
+11. The approved PR is merged into `main`.
+12. The resulting `main` Commit is recorded as the new stable Commit.
 
-PR #137 所代表的视觉规格是最低可接受产品标准，不是可选参考。
+Until all conditions are satisfied, the binding baseline remains PR `#137` and Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`.
 
-### 4.1 图片与场景
+## 5. PR #137 minimum product and visual standard
 
-必须保留或超越以下特征：
+PR `#137` is the minimum acceptable product experience, not an optional reference.
 
-- 使用经过审核的高分辨率 WebP 场景图；
-- 普通 Journey 使用具有明确地点特色的目的地画面；
-- 特别 Journey 使用独立故事画面，不得套用统一幻想模板；
-- 画面需要有清晰的前景、中景、远景；
-- 需要有光影、天气、材质、空间和氛围层次；
-- 不同城市、不同 Journey 和不同学习阶段必须有真实可感知的差异；
-- 手机裁切后仍保持主体、文字可读区和视觉焦点；
-- 页面图像不得只是同一模板换颜色、换天空或换少量图形。
+A candidate MUST preserve or exceed:
 
-### 4.2 视觉组件
+- stable page access and navigation;
+- complete Journey and learning flows;
+- correct resource routing;
+- high-resolution scene imagery;
+- clear foreground, midground, and background depth;
+- lighting, weather, material, atmosphere, and spatial detail;
+- independent city and Journey identity;
+- correct mobile crop, focal point, and readable text area;
+- stable narration, interaction, progress, and fallback behavior;
+- the verified visual completion of Home, Explore, Passport, Profile, Shadowing, normal Journeys, and special Journeys.
 
-必须保留或超越：
+Production visuals MUST NOT be replaced by low-detail programmatic SVG/WebP, flat backgrounds, recolored templates, repeated compositions, placeholders, or images with lower detail density than the stable baseline.
 
-- 统一且高质量的裁切策略；
-- 高质量图片过滤；
-- 分层金色边缘；
-- 内部高光；
-- 景深与阴影；
-- 页面与图片之间一致的视觉层级；
-- 稳定版本已经验证的首页、探索、护照、Journey、特别 Journey 和跟读训练体验。
+Rights completeness does not equal visual approval. Rights, technical validity, visual quality, stable comparison, and Founder approval are separate mandatory gates.
 
-### 4.3 明确禁止
+See [Phoenix UI and Visual Standard](PHOENIX_UI_VISUAL_STANDARD.md) and [Phoenix Product Quality Standard](PHOENIX_PRODUCT_QUALITY_STANDARD.md).
 
-以下资源不得直接作为正式产品视觉：
+## 6. Mandatory stable baseline comparison
 
-- 简单渐变加少量圆形、矩形或路径组成的程序化 SVG；
-- 扁平图标式 Journey 背景；
-- 统一模板批量换色；
-- 仅为了容易证明来源而制作的低细节替代图；
-- 占位图、临时图、测试图；
-- 低于稳定版本分辨率、细节密度或场景完成度的图片；
-- 只依赖 `complianceScore`、`varietyScore`、哈希或文件存在性判断通过的图片；
-- 未经过真实手机 Preview 审核的批量视觉替换。
+Every completed development task MUST submit the report defined by [Phoenix Development Completion Standard](PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md).
 
-程序化视觉只可用于：
+The comparison MUST use equivalent conditions wherever applicable:
 
-- 加载失败回退；
-- 极短暂占位且不得进入可发布构建；
-- 独立实验 Preview；
-- Founder 已明确批准的特定设计方向。
+- same device class and viewport;
+- same page or route;
+- same Journey and content state;
+- same user entitlement and unlock state;
+- same interaction path;
+- equivalent network and loading conditions;
+- stable and candidate evidence that another reviewer can reproduce.
 
-## 5. 权利合规不得造成视觉降级
-
-权利、版权、来源和商业使用证据必须完整，但它们不能替代产品质量验收。
-
-每个新视觉资源必须同时通过：
-
-1. Rights Gate；
-2. Technical Gate；
-3. Visual Quality Gate；
-4. Stable Baseline Comparison Gate；
-5. Founder Preview Approval Gate。
-
-只通过 Rights Gate 或 Technical Gate，不得进入正式运行时。
-
-当旧资源权利证据不足时：
-
-- 不得立即用低质量资源覆盖；
-- 应先隔离风险、补证据或制作同等及以上质量替代品；
-- 替代品未通过体验批准前，不能批量切换运行时；
-- 不得为了让登记表变得好看而牺牲用户体验。
-
-## 6. 每次开发完成后的强制稳定版对比
-
-这是所有开发任务的强制完成条件。
-
-每次开发完成后，开发者或 Agent 必须把结果与“当前最稳定版本”进行逐项对比，确认功能是否做对、视觉是否用对、路径是否接对、体验是否升级。
-
-### 6.1 开发开始前
-
-必须记录：
-
-- 当前稳定 PR；
-- 当前稳定 Commit；
-- 当前稳定体验链接；
-- 本次影响的页面、功能和资源；
-- 稳定版本对应页面的截图或可复现路径；
-- 本次允许改变和禁止改变的范围。
-
-### 6.2 开发完成后
-
-必须使用相同设备、相同页面、相同操作路径和相同内容条件进行 A/B 对比。
-
-至少检查：
-
-- 首页；
-- 探索页；
-- 护照页；
-- 我的页面；
-- 普通 Journey 入口与完整学习流程；
-- 特别 Journey 入口与完整学习流程；
-- 跟读训练；
-- 朗读、暂停、继续、切换语速和语音；
-- 图片加载、失败回退和页面切换；
-- 小屏手机布局；
-- 本次实际修改的所有页面。
-
-### 6.3 必须提交的比较报告
-
-每个开发 PR 必须包含以下报告：
-
-```text
-STABLE_BASELINE_COMPARISON
-Stable PR: #137
-Stable Commit: 5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977
-Candidate Commit: <sha>
-Compared Pages: <list>
-Compared Features: <list>
-Visual Result: PASS / FAIL
-Functional Result: PASS / FAIL
-Interaction Result: PASS / FAIL
-Performance Result: PASS / FAIL
-Content Result: PASS / FAIL
-Rights Result: PASS / FAIL
-Unexpected Regression: NONE / <details>
-Founder Mobile Preview Required: YES / NO
-Founder Mobile Preview Result: APPROVED / REJECTED / PENDING / NOT_REQUIRED
-Final Comparison Decision: PASS / FAIL
-```
-
-未提供该报告，开发状态只能是：
+Missing report status:
 
 `INCOMPLETE_STABLE_BASELINE_COMPARISON_MISSING`
 
-### 6.4 比较失败处理
+Any verified downgrade status:
 
-出现以下任一情况必须失败：
+`REGRESSION_BLOCKS_READY_AND_MERGE`
 
-- 新版看起来更简单、更平、更重复；
-- 稳定版图片被低细节资源替换；
-- 旧功能缺失或入口消失；
-- 交互步骤增加且没有明确价值；
-- 文字更难读；
-- 页面更慢、闪烁、黑屏或裁切异常；
-- 手机体验低于稳定版；
-- 资源路径接错、旧资源误删或错误页面使用新资源；
-- 自动测试通过但实际 Preview 体验退化；
-- Founder 对视觉或核心体验明确拒绝。
+Automated tests do not replace Preview evidence or human mobile evaluation.
 
-比较失败时：
+## 7. Regression blocking rule
 
-- 不得转 Ready；
-- 不得合并；
-- 不得扩大批次；
-- 不得开始下一阶段；
-- 必须回到稳定基线修正或撤销变更。
+When any regression is found:
 
-## 7. 小批次视觉开发规则
+- the task MUST NOT be marked Completed;
+- the PR MUST remain Draft or be returned to Draft;
+- the PR MUST NOT be merged;
+- the batch MUST NOT expand;
+- the next phase MUST NOT start;
+- the regression MUST be repaired, or the candidate MUST be restored to the stable behavior;
+- the comparison MUST be repeated after repair.
 
-任何视觉替换必须遵循：
+No numeric score, checkbox count, file hash, compliance field, or aggregate percentage may override a verified regression.
 
-1. 每次先做 1 个页面、1 个 Journey 或最多 1–3 张样图；
-2. 先部署隔离 Preview；
-3. 先完成稳定版 A/B 对比；
-4. 先获得 Founder 手机体验批准；
-5. 批准后才可扩大到下一小批；
-6. 不得一次制作并接入几十张或几百张图片；
-7. 不得以“已经全部生成”为理由绕过质量审核。
+## 8. Founder mobile approval
 
-## 8. 代码和资源范围保护
+Founder mobile Preview approval is mandatory for:
 
-每个 PR 必须列出：
+- visual changes;
+- image replacement or rerouting;
+- layout hierarchy changes;
+- core interaction changes;
+- navigation changes that affect user flow;
+- batch visual expansion;
+- any change whose quality cannot be established through repository evidence alone.
 
-- 新增路径；
-- 修改路径；
-- 删除路径；
-- 运行时映射变化；
-- 被替换资源；
-- 保留资源；
-- 与稳定基线不一致的全部内容。
+Approval MUST identify the candidate Commit or reproducible Preview. `PENDING`, absent, informal, or unrelated approval blocks Ready and merge.
 
-涉及稳定视觉路径时，必须额外验证：
+## 9. Small-batch pilot rule
 
-- 文件 SHA-256；
-- Git Blob SHA；
-- 运行时引用；
-- `pubspec.yaml` 资产声明；
-- 页面实际使用结果；
-- Preview 截图或视频证据。
+High-risk visual or Journey work MUST begin with a controlled pilot:
 
-未经批准不得删除、退役、重命名或重新路由稳定基线中的核心视觉资源。
+- one Journey or one page;
+- one to three sample images for a visual concept;
+- one isolated Preview;
+- one stable baseline comparison;
+- Founder mobile approval before expansion.
 
-## 9. PR 强制检查清单
+A completed batch of unapproved work does not create permission to keep or expand it.
 
-每个 PR 在 Ready 或合并前必须确认：
+New Journey creation follows [Phoenix New Journey Creation Standard](PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md). The first cycle permits only one new Journey pilot.
 
-- [ ] 基于当前稳定 `main` 创建；
-- [ ] 已记录稳定 Commit；
-- [ ] 没有误用关闭 PR 的分支作为产品基线；
-- [ ] 已完成 `STABLE_BASELINE_COMPARISON`；
-- [ ] 功能不低于稳定版；
-- [ ] 视觉不低于稳定版；
-- [ ] 交互不低于稳定版；
-- [ ] 性能不低于稳定版；
-- [ ] 内容质量不低于稳定版；
-- [ ] 权利证据完整；
-- [ ] 所有测试通过；
-- [ ] Preview 技术成功；
-- [ ] 视觉变更已取得 Founder 手机批准；
-- [ ] 没有批量低质量图片替换；
-- [ ] 没有越权修改稳定资源；
-- [ ] 没有外部披露未发布仓库内容；
-- [ ] 没有合并前未解决的回归。
+## 10. Rollback and restoration
 
-## 10. Agent 和 AI 执行约束
+When a candidate causes regression, incorrect routing, missing stable assets, failed fallback, or rejected visual direction, the safe default is restoration to the current stable behavior.
 
-所有 AI、Codex、自动化 Agent 和脚本必须遵守本规范。
+Rollback MUST:
 
-Agent 不得：
+1. identify the exact stable Commit and affected paths;
+2. preserve unrelated approved work;
+3. remove only the unauthorized or regressive candidate changes;
+4. verify routes, assets, pages, and persistence after restoration;
+5. repeat the stable baseline comparison;
+6. retain evidence of the incident and corrective action.
 
-- 把自动测试通过等同于产品完成；
-- 把权利证据完整等同于视觉批准；
-- 未查看稳定版本就重做现有页面；
-- 未完成 A/B 对比就宣布完成；
-- 用大量低细节程序化图片替换稳定资源；
-- 批量执行未经批准的视觉方向；
-- 在用户拒绝后继续沿用同一视觉策略；
-- 将关闭 PR 的内容当作默认继承基线。
+A rollback MUST NOT use a closed PR as the restoration source unless the exact content is independently proven to be identical to the approved stable baseline.
 
-Agent 最终报告必须明确给出：
+## 11. Evidence and decision language
 
-- 稳定基线；
-- 候选版本；
-- 比较范围；
-- 改进项；
-- 保持项；
-- 退化项；
-- 证据；
-- 最终 PASS 或 FAIL。
+Product results use only:
 
-没有证据时必须返回 `UNVERIFIED`，不得猜测。
+- `PASS`
+- `REQUIRES_REVISION`
+- `REGRESSION`
+- `BLOCKED`
+- `NOT_APPLICABLE`
 
-## 11. 当前项目决策
+Evidence levels use only:
 
-- PR #137 / `main` Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977` 为当前稳定基线；
-- PR #138、#139、#140、#141 不得作为后续开发基线；
-- 后续规范和开发必须从 PR #137 稳定结果继续；
-- 新版本必须在功能、视觉和体验上达到或超过 PR #137；
-- 任何低于 PR #137 的结果必须拒绝、回滚或重新设计。
+- `VERIFIED`
+- `PARTIALLY_VERIFIED`
+- `UNVERIFIED`
+- `CONTRADICTORY`
+
+A result may be `PASS` only when its required evidence is `VERIFIED`. Evidence gaps MUST remain visible and MUST NOT be converted into assumed success.
+
+## 12. Enforcement
+
+All Phoenix PRs MUST use `.github/pull_request_template.md` and comply with the related standards:
+
+- [Phoenix Product Quality Standard](PHOENIX_PRODUCT_QUALITY_STANDARD.md)
+- [Phoenix UI and Visual Standard](PHOENIX_UI_VISUAL_STANDARD.md)
+- [Phoenix Journey System Standard](PHOENIX_JOURNEY_SYSTEM_STANDARD.md)
+- [Phoenix New Journey Creation Standard](PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md)
+- [Phoenix Full Application Audit Standard](PHOENIX_FULL_APPLICATION_AUDIT_STANDARD.md)
+- [Phoenix Development Completion Standard](PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md)
+- [Phoenix Quality Unification Roadmap](PHOENIX_QUALITY_UNIFICATION_ROADMAP.md)
+
+No task, Agent, reviewer, or automation may weaken this standard through a narrower local instruction.
