@@ -6,7 +6,7 @@ on:
       - agent/documentation-sprint-01-18-recovery
     paths:
       - .github/workflows/phase3b-object-builder.yml
-      - worker/phase3b-batch1-full-patch.part18
+      - worker/phase3b-batch1-full-patch.part18b
 
 permissions:
   contents: write
@@ -22,23 +22,36 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Check complete Connector payload
+      - name: Verify complete content-addressed payload
         id: payload
         shell: bash
         run: |
-          ready=true
-          for n in $(seq -w 1 18); do
-            [[ -f "worker/phase3b-batch1-full-patch.part${n}" ]] || ready=false
-          done
-          echo "ready=$ready" >> "$GITHUB_OUTPUT"
-          [[ "$ready" == true ]] || echo 'Batch 1 payload incomplete; no Git object created.'
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {execFileSync} from 'node:child_process';
+          import {existsSync,writeFileSync} from 'node:fs';
+          const expected={
+            'part01':'22a6d1f1caebc280703f738c2389d1b54d960df8','part02':'8fa3d5787cb46d33be5d95938d1b4fdddf2cfa5a','part03':'e1bb8bc33175ef897e185310e0e60a78688eaf65','part04':'78e277d30509f20d946e83d348871ef9e6f11dfa','part05':'5f024f1a74d4517fec76a397f4f6fcd6540610af','part06':'39627618c28bd500ab2d0218f0172e46b3e8d8cb','part07':'e385c5a68181184fc4b65b079f243f29b0d9776b','part08':'daaf62f38367905c259b8318c867ba83f881f68e','part09':'4116174076971c675b68d9b273d02f59782017e2','part10':'f472c9bd7a4ce332514618de29a41e7e68ffb098','part11':'abdf515ca345e3e4fa16a66c217a1b378874c804','part12':'2e39e73cd1cc76da2afc8abae37b48701c06043b',
+            'part13a':'42106669d3f41d6f3c81d01ceee0de4a3c3d99a3','part13b':'68172d5c03a28ca298c73385cabc8e58acbe9119','part14a':'0fd07acef6befe93f03a2585c0da735acce3d49b','part14b':'bd1e7d8e854c7724bed756fb0860c1c903db5fd7','part15a':'abc33bc3bdc8908773a910a99f91387ef6527b21','part15b':'7112f4ac64dc22460d43e32a676599c508562496','part16a':'c8cd2cbbf31b39437cf78b34d01799594b62b938','part16b':'afbd95cd2345712a78127b8fa74e233419337007','part17a':'956f71f01b5227e88f3900734f35565b89a3ed0d','part17b':'c998a40cfa62823c0da8d9d2079857dedbb191c7','part18a':'c60d5e368d6b4920e9ba17abf544a9ebb6c02c5c','part18b':'9cd4cbf5d7d236e526f8e4c3a09844831854b762'};
+          for(const [suffix,want] of Object.entries(expected)){
+            const path=`worker/phase3b-batch1-full-patch.${suffix}`;
+            if(!existsSync(path)) throw new Error(`Missing ${path}`);
+            const got=execFileSync('git',['hash-object',path],{encoding:'utf8'}).trim();
+            if(got!==want) throw new Error(`${path}: ${got} != ${want}`);
+          }
+          writeFileSync('/tmp/phase3b-payload-ready','true\n');
+          NODE
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
 
       - name: Apply exact tested Batch 1 text state
         if: steps.payload.outputs.ready == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          for n in $(seq -w 1 18); do cat "worker/phase3b-batch1-full-patch.part${n}"; done | base64 -d | gzip -dc > /tmp/phase3b-batch1.patch
+          {
+            for n in $(seq -w 1 12); do cat "worker/phase3b-batch1-full-patch.part${n}"; done
+            for n in $(seq 13 18); do cat "worker/phase3b-batch1-full-patch.part${n}a" "worker/phase3b-batch1-full-patch.part${n}b"; done
+          } | base64 -d | gzip -dc > /tmp/phase3b-batch1.patch
           git reset --hard "$GITHUB_SHA"
           git clean -fdx
           git apply /tmp/phase3b-batch1.patch
@@ -58,8 +71,9 @@ jobs:
           const cleanup=[
             '.github/workflows/phase3b-materialize.yml','.github/workflows/phase3b-toolchain.yml','.github/workflows/phase3b-object-builder.yml',
             'worker/phase3b-compact-bundle.part01','worker/phase3b-compact-bundle.part02','worker/phase3b-compact-bundle.part03',
-          ];
-          for(let i=1;i<=18;i++) cleanup.push(`worker/phase3b-batch1-full-patch.part${String(i).padStart(2,'0')}`);
+            'worker/scripts/build_phase3b_commit_objects.mjs','worker/phase3b-batch1-full-patch.part13'];
+          for(let i=1;i<=12;i++) cleanup.push(`worker/phase3b-batch1-full-patch.part${String(i).padStart(2,'0')}`);
+          for(let i=13;i<=18;i++){cleanup.push(`worker/phase3b-batch1-full-patch.part${i}a`);cleanup.push(`worker/phase3b-batch1-full-patch.part${i}b`);}
           for(const p of cleanup) rmSync(p,{force:true});
           NODE
 
