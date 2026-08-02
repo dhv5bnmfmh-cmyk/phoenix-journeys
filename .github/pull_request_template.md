@@ -6,8 +6,46 @@
 
 - 等待 `cloudflare/preview` 自动生成
 
+## 当前稳定基线
+
+- Stable PR: `#137`
+- Stable Commit: `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
+- Stable Experience: `main` production deployment
+
+## STABLE_BASELINE_COMPARISON
+
+每次开发完成后，必须使用相同设备、相同页面、相同操作路径和相同内容条件，与当前最稳定版本逐项对比。
+
+- Candidate Commit: `<sha>`
+- Compared Pages: `<list>`
+- Compared Features: `<list>`
+- Visual Result: `PASS / FAIL`
+- Functional Result: `PASS / FAIL`
+- Interaction Result: `PASS / FAIL`
+- Performance Result: `PASS / FAIL`
+- Content Result: `PASS / FAIL`
+- Rights Result: `PASS / FAIL`
+- Unexpected Regression: `NONE / <details>`
+- Founder Mobile Preview Required: `YES / NO`
+- Founder Mobile Preview Result: `APPROVED / REJECTED / PENDING / NOT_REQUIRED`
+- Final Comparison Decision: `PASS / FAIL`
+
+缺少该报告时，本 PR 状态只能是：
+
+`INCOMPLETE_STABLE_BASELINE_COMPARISON_MISSING`
+
 ## 合并前检查
 
+- [ ] 本 PR 基于当前稳定 `main` 创建
+- [ ] 已确认当前稳定 PR 与 Commit
+- [ ] 已完成 `STABLE_BASELINE_COMPARISON`
+- [ ] 新版本功能不低于稳定版本
+- [ ] 新版本视觉不低于稳定版本
+- [ ] 新版本交互不低于稳定版本
+- [ ] 新版本性能不低于稳定版本
+- [ ] 没有把关闭 PR 的分支当作产品基线
+- [ ] 没有用低细节程序化 SVG/WebP、统一模板、换色复制品或占位图替换稳定视觉
+- [ ] 涉及视觉修改时，已通过真实手机 Preview 并取得 Founder 明确批准
 - [ ] Phoenix Agent 规则测试通过
 - [ ] Flutter Analyze 通过
 - [ ] Flutter Test 通过
@@ -50,6 +88,7 @@
 ## 规则
 
 未经体验确认，不合并到 `main`。一个 PR 只开发或修复一项功能。
+所有开发必须遵守 `docs/PHOENIX_STABLE_BASELINE_STANDARD.md`，完成后必须与当前最稳定版本对比；任何功能、视觉、交互、性能或内容退化都禁止转 Ready 和合并。
 朗读功能必须遵守 `docs/development-workflow.md` 中的「永久朗读开发准则」。
 故事、发现生词与预下载真实例句必须遵守同文件中的「永久生词展示与例句准则」。
 所有 AI 功能必须遵守同文件中的「永久 AI Agent 开发准则」。
