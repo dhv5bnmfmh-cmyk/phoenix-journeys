@@ -3,24 +3,25 @@
 ## 稳定基线
 
 - 正式分支：`main`
-- 当前稳定版本来源：PR #132
-- 稳定版本源提交：`d6d2a435b123839153f756d28df9c8ba369c2aeb`
+- 当前稳定产品 PR：`#137`
+- 当前稳定 main Commit：`5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
 - 正式体验版：`https://phoenix-journeys-alpha.7hn5tyrjgh.workers.dev`
+- 基线身份唯一权威来源：`docs/PHOENIX_STABLE_BASELINE_STANDARD.md`
 
-PR #132 合并后的 `main` 是 Phoenix 唯一稳定基线。`main` 只保存已经
-手机体验确认、完整测试通过并可以正式上线的版本。
+PR #137 对应的已批准 `main` 是 Phoenix 当前唯一稳定产品基线。PR #132 是历史已合并版本，不是当前开发基线。关闭的 PR #138–#141 只可作为历史或问题证据，不得作为开发基线、实现来源、视觉参考或合并目标。
+
+最新 PR、Preview、分支、Commit 或成功 CI 不会自动成为稳定版本。稳定基线只有在 Founder 明确批准候选 Commit、相关 PR 合并进 `main`，并在 `docs/PHOENIX_STABLE_BASELINE_STANDARD.md` 中记录后才能更新。
+
+当本文件或其他治理文档中的基线身份与 `docs/PHOENIX_STABLE_BASELINE_STANDARD.md` 冲突时，以 Stable Baseline Standard 为准；冲突文件必须在同一修订中修正，不得静默忽略，也不得通过删除有效永久产品规则来隐藏冲突。
 
 ### 唯一基线永久规则
 
-1. 今后所有新功能、修复、视觉升级和实验版本，必须从当时最新的
-   `origin/main` 创建全新独立分支。
-2. 新分支创建前必须先确认其基准包含 PR #132；禁止从 PR #131 或更早的
-   PR、旧体验分支、旧提交、关闭分支继续开发。
-3. 同一时间只保留用户正在验收的开发 PR；版本确认合并后，必须关闭其他
-   所有开发 PR，并由清理工作流删除它们的 Cloudflare Preview Worker。
-4. 任何新 PR 都必须在说明中记录 `base` 的 `main` Commit；如果不是最新
-   稳定 `main`，CI 或人工检查必须阻止发布与合并。
+1. 今后所有新功能、修复、视觉升级和实验版本，必须从当时最新且已批准的稳定 `main` 创建全新独立分支。
+2. 新分支创建前必须核对 `docs/PHOENIX_STABLE_BASELINE_STANDARD.md` 中记录的 Stable PR 与 Stable Commit；禁止从历史 PR、旧体验分支、旧提交或关闭分支继续开发。
+3. 同一时间只保留用户正在验收的开发 PR；版本确认合并后，必须关闭其他所有开发 PR，并由清理工作流删除它们的 Cloudflare Preview Worker。
+4. 任何新 PR 都必须在说明中记录 `base` 的 `main` Commit；如果不是当时最新批准的稳定 `main`，CI 或人工检查必须阻止发布与合并。
 5. 不得用旧体验链接替代正式稳定版；开发体验只允许使用当前 PR 的独立链接。
+6. 所有后续开发必须遵守 `NEW RESULT >= CURRENT STABLE BASELINE`，并提交完整 `STABLE_BASELINE_COMPARISON`。
 
 ## 分支规则
 
@@ -33,7 +34,7 @@ PR #132 合并后的 `main` 是 Phoenix 唯一稳定基线。`main` 只保存已
 
 ## 标准流程
 
-1. 从最新 `main` 创建独立分支。
+1. 从最新批准的稳定 `main` 创建独立分支。
 2. 只在独立分支修改代码。
 3. 创建 Pull Request。
 4. 自动运行 Agent 测试、Flutter Analyze、Flutter Test 和 Web Release 构建。
@@ -84,7 +85,7 @@ PR #132 合并后的 `main` 是 Phoenix 唯一稳定基线。`main` 只保存已
 4. 合并段落时必须同步合并拼音、探索者母语和英文支持，任何语言都不得错段。
 5. 故事负责人物、场景、变化与意义；发现负责历史、文化、空间或现实解释。禁止把发现原文直接粘贴进故事凑长度。
 6. 高级内容要增加因果、对照、历史连续性或当代意义，不能只是增加字数。
-12. 修改任一页的生词展示或例句逻辑时，必须同步验证另一页并更新回归测试；违反规则时 CI 必须失败。
+7. 修改任一页的生词展示或例句逻辑时，必须同步验证另一页并更新回归测试；违反规则时 CI 必须失败。
 
 ## 永久 AI Agent 开发准则
 
@@ -170,7 +171,6 @@ PR #132 合并后的 `main` 是 Phoenix 唯一稳定基线。`main` 只保存已
 - 城市印章和完成旅程流程
 
 - Adaptive journey rule: a destination may offer light, standard, and challenge Chinese content without changing its identity, background, progress, or stamp; the explorer can switch levels and the choice persists.
-
 
 ## 永久电影级朗读显现准则
 
