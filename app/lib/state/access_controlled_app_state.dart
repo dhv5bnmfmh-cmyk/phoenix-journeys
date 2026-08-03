@@ -68,6 +68,7 @@ class AccessControlledAppState extends AppState {
   static const String _activeJourneyVersionStorageKey =
       'activeJourney.identityVersion';
   static const int _activeJourneyIdentityVersion = 1;
+  static const String _trustedPreviewAccount = '7hn5tyrjgh';
 
   static const Set<String> heldSpecialJourneyIds = <String>{
     'changan-last-bus',
@@ -144,7 +145,9 @@ class AccessControlledAppState extends AppState {
   @override
   DailyJourneyExperience get todayJourney {
     if (!_isValidExplorerSeed(localExplorerSeed)) {
-      return dailyJourneyForDate(_clock());
+      throw StateError(
+        'Daily Journey cannot be resolved without a valid local Explorer Seed.',
+      );
     }
     return requireDailyJourneyExperience(
       dailyAssignment.journeyIdFor(currentDailySlot),
@@ -156,13 +159,19 @@ class AccessControlledAppState extends AppState {
     if (journey == null) return false;
 
     if (_isRegularJourneyId(journeyId)) {
-      if (policyAccessibleRegularJourneyIds.contains(journeyId)) return true;
-      return _activeIdentityReady && journeyId == activeJourneyId;
+      return policyAccessibleRegularJourneyIds.contains(journeyId);
     }
 
     if (isDevelopmentExperience) return true;
     if (heldSpecialJourneyIds.contains(journeyId)) return false;
     return isSpecialJourneyUnlocked(journeyId);
+  }
+
+  bool canResumeActiveJourney(String journeyId) {
+    if (!_activeIdentityReady || journeyId != activeJourneyId) return false;
+    if (!_isRegularJourneyId(journeyId)) return canOpenJourney(journeyId);
+    if (policyAccessibleRegularJourneyIds.contains(journeyId)) return true;
+    return _hasResumableActiveJourney;
   }
 
   String? dailySlotLabelForJourney(String journeyId) {
@@ -213,7 +222,7 @@ class AccessControlledAppState extends AppState {
   @override
   Future<void> activateJourney(String journeyId) async {
     requireDailyJourneyExperience(journeyId);
-    if (!canOpenJourney(journeyId)) {
+    if (!canOpenJourney(journeyId) && !canResumeActiveJourney(journeyId)) {
       throw JourneyAccessDeniedException(
         journeyId: journeyId,
         reason: _accessDenialReason(journeyId),
@@ -323,13 +332,21 @@ class AccessControlledAppState extends AppState {
     return isSpecialJourneyUnlocked(journeyId);
   }
 
+  bool get _hasResumableActiveJourney =>
+      !journeyCompleted &&
+      (hasJourneyInProgress ||
+          wonderDraft.trim().isNotEmpty ||
+          expressDraft.trim().isNotEmpty ||
+          memoryDraft.trim().isNotEmpty ||
+          journeyNarrationOffset > 0);
+
   bool _isRegularJourneyId(String journeyId) =>
       dailyJourneyExperiences.any((journey) => journey.id == journeyId);
 
   String _accessDenialReason(String journeyId) {
     if (_isRegularJourneyId(journeyId)) {
       return 'Regular Journey is outside the released Daily slots and is not '
-          'the persisted resumable active Journey.';
+          'an eligible resumable active Journey.';
     }
     if (heldSpecialJourneyIds.contains(journeyId)) {
       return 'Special Journey is held from publication.';
@@ -345,7 +362,7 @@ class AccessControlledAppState extends AppState {
   static bool _isTrustedPreviewUri(Uri uri) {
     if (uri.scheme != 'https') return false;
     return RegExp(
-      r'^phoenix-journeys-pr-\d+\.[a-z0-9-]+\.workers\.dev$',
+      '^phoenix-journeys-pr-\\d+\\.$_trustedPreviewAccount\\.workers\\.dev\$',
     ).hasMatch(uri.host.toLowerCase());
   }
 
@@ -390,6 +407,11 @@ extension JourneyAccessAppState on AppState {
   bool canOpenJourney(String journeyId) =>
       _accessControlledState?.canOpenJourney(journeyId) ??
       journeyExperienceById(journeyId) != null;
+
+  bool canResumeActiveJourney(String journeyId) =>
+      _accessControlledState?.canResumeActiveJourney(journeyId) ??
+      (journeyId == activeJourneyId &&
+          journeyExperienceById(journeyId) != null);
 
   Future<bool> tryActivateJourney(String journeyId) async {
     final accessState = _accessControlledState;
