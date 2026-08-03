@@ -61,6 +61,77 @@ void main() {
     );
   });
 
+  test('Journey lookup is exact for normal and special IDs', () {
+    final normal = journeyExperienceById('beijing-summer-palace');
+    final special = journeyExperienceById('literary-roaming');
+
+    expect(normal?.id, 'beijing-summer-palace');
+    expect(special?.id, 'literary-roaming');
+    expect(requireDailyJourneyExperience(normal!.id), same(normal));
+    expect(requireDailyJourneyExperience(special!.id), same(special));
+  });
+
+  test('unknown, empty, and stale Journey IDs never select another Journey', () {
+    final firstNormalId = dailyJourneyExperiences.first.id;
+
+    for (final invalidId in const [
+      'unknown-journey',
+      '',
+      'removed-journey-v0',
+    ]) {
+      expect(journeyExperienceById(invalidId), isNull);
+      expect(
+        () => requireDailyJourneyExperience(invalidId),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            contains(invalidId),
+          ),
+        ),
+      );
+      expect(invalidId, isNot(firstNormalId));
+    }
+  });
+
+  test('city lookup is exact and invalid IDs never select the first city', () {
+    final beijing = journeyCityById('beijing');
+
+    expect(beijing?.id, 'beijing');
+    expect(requireJourneyCity('beijing'), same(beijing));
+    for (final invalidId in const ['unknown-city', '', 'removed-city-v0']) {
+      expect(journeyCityById(invalidId), isNull);
+      expect(
+        () => requireJourneyCity(invalidId),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            contains(invalidId),
+          ),
+        ),
+      );
+      expect(() => journeysForCity(invalidId), throwsStateError);
+    }
+  });
+
+  test('Journey-to-city mismatch cannot substitute a different destination', () {
+    final beijing = requireJourneyCity('beijing');
+    final shanghai = requireDailyJourneyExperience('shanghai-bund');
+
+    expect(beijing.destinationById(shanghai.destinationId), isNull);
+    expect(
+      beijing.destinations.any((journey) => journey.id == shanghai.id),
+      isFalse,
+    );
+    expect(
+      journeyCityById(shanghai.cityId)?.destinationById(
+        shanghai.destinationId,
+      ),
+      same(shanghai),
+    );
+  });
+
   test('duplicate destination ids inside one city are rejected', () {
     final journey = requireDailyJourneyExperience('shanghai-bund');
 
