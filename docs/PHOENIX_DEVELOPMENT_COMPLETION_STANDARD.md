@@ -27,29 +27,60 @@ A task may be Completed only when all applicable conditions are `PASS` with `VER
 
 ## 3. Mandatory STABLE_BASELINE_COMPARISON
 
-Every development task MUST include the following exact report structure:
+Every development task MUST include the following exact report structure. Candidate Tree and Parent Commit MUST appear in this report body and MUST NOT be satisfied only by a separate PR identity section. Routes and Journey IDs MUST be recorded independently. Persistence and Access / Entitlement MUST be evaluated as independent product domains.
 
 ```text
 STABLE_BASELINE_COMPARISON
 
 Stable PR:
 Stable Commit:
+
 Candidate Commit:
+Candidate Tree:
+Parent Commit:
+
 Changed Scope:
 Changed Paths:
+
 Compared Pages:
-Compared Journeys:
+Compared Routes:
+Compared Journey IDs:
 Compared Features:
 Compared Assets:
+
 Visual Result:
+Visual Evidence Level:
+
 Functional Result:
+Functional Evidence Level:
+
 Interaction Result:
+Interaction Evidence Level:
+
 Mobile Result:
+Mobile Evidence Level:
+
 Performance Result:
+Performance Evidence Level:
+
 Content Result:
+Content Evidence Level:
+
 Audio Result:
+Audio Evidence Level:
+
 Accessibility Result:
+Accessibility Evidence Level:
+
+Persistence Result:
+Persistence Evidence Level:
+
+Access / Entitlement Result:
+Access / Entitlement Evidence Level:
+
 Rights Result:
+Rights Evidence Level:
+
 Unexpected Regression:
 Founder Preview Required:
 Founder Preview Link:
@@ -57,7 +88,30 @@ Founder Preview Result:
 Final Comparison Decision:
 ```
 
-Each result field MUST use `PASS`, `REQUIRES_REVISION`, `REGRESSION`, `BLOCKED`, or `NOT_APPLICABLE`. Every material claim MUST also identify an evidence level: `VERIFIED`, `PARTIALLY_VERIFIED`, `UNVERIFIED`, or `CONTRADICTORY`.
+Every Result field MUST use only:
+
+- `PASS`
+- `REQUIRES_REVISION`
+- `REGRESSION`
+- `BLOCKED`
+- `NOT_APPLICABLE`
+
+Every Evidence Level field MUST use only:
+
+- `VERIFIED`
+- `PARTIALLY_VERIFIED`
+- `UNVERIFIED`
+- `CONTRADICTORY`
+
+`NOT_APPLICABLE` MUST include a scoped applicability reason and supporting evidence. It is not automatic `PASS` and MUST NOT conceal missing verification.
+
+Missing any required field, required result, required evidence level, or required applicability reason makes the report materially incomplete and requires:
+
+`INCOMPLETE_STABLE_BASELINE_COMPARISON_MISSING`
+
+Any domain below the current stable baseline requires:
+
+`REGRESSION_BLOCKS_READY_AND_MERGE`
 
 ## 4. Comparison method
 
@@ -65,9 +119,9 @@ The comparison MUST use equivalent conditions wherever applicable:
 
 - same device class and viewport;
 - same route and entry path;
-- same Journey and stage;
+- same Journey ID and stage;
 - same language;
-- same account, free/paid, locked/unlocked, and progress state;
+- same account, free/paid, locked/unlocked, random-access, and progress state;
 - same interaction sequence;
 - equivalent network and cache conditions;
 - exact stable and candidate identities.
@@ -88,9 +142,9 @@ The developer or executing Agent MUST prove:
 - no unauthorized file was changed;
 - no task-unrelated change was included;
 - loading, error, empty, and fallback paths remain correct;
-- persistence, reward, entitlement, and accessibility behavior remain correct where affected.
+- persistence, reward, entitlement, access, and accessibility behavior remain correct where affected.
 
-Assertions without exact paths, SHA, diff, runtime evidence, or reproducible output are `UNVERIFIED`.
+A Function Result does not implicitly verify Persistence. A Journey access checkbox does not implicitly verify Access / Entitlement. Assertions without exact paths, SHA, diff, runtime evidence, or reproducible output are `UNVERIFIED`.
 
 ## 6. Evidence package
 
@@ -111,6 +165,8 @@ The completion package MUST include applicable:
 - content and multilingual review evidence;
 - narration/audio evidence;
 - accessibility evidence;
+- persistence evidence;
+- access and entitlement evidence;
 - rights and source evidence;
 - Founder approval record;
 - final comparison decision.
@@ -155,14 +211,14 @@ A queued or in-progress check is not terminal success. A check from another Comm
 
 ## 9. Preview and mobile validation
 
-A Preview deployment proves only that a Preview was deployed. It does not prove correct routes, visuals, interactions, content, audio, performance, or mobile quality.
+A Preview deployment proves only that a Preview was deployed. It does not prove correct routes, visuals, interactions, content, audio, performance, persistence, access, accessibility, or mobile quality.
 
 The report MUST identify:
 
 - exact candidate Commit;
 - Preview URL;
 - route and state instructions;
-- tested pages and Journeys;
+- tested pages and Journey IDs;
 - device or viewport;
 - result and evidence level;
 - known limitations.
@@ -185,7 +241,7 @@ No file hash, source record, dimensions, compliance field, or automated score ma
 
 ## 11. Missing report status
 
-When the `STABLE_BASELINE_COMPARISON` is absent or materially incomplete, the only allowed completion status is:
+When the `STABLE_BASELINE_COMPARISON` is absent or materially incomplete, including any missing mandatory identity, comparison domain, Result, Evidence Level, or required `NOT_APPLICABLE` reason, the only allowed completion status is:
 
 `INCOMPLETE_STABLE_BASELINE_COMPARISON_MISSING`
 
@@ -210,7 +266,7 @@ The response MUST identify:
 
 Completion is blocked when any of the following is true:
 
-- wrong repository, branch, parent, base, or candidate identity;
+- wrong repository, branch, parent, base, candidate Commit, or candidate Tree identity;
 - candidate started from an unapproved baseline;
 - closed PR used as baseline;
 - unauthorized or unrelated path changed;
@@ -220,14 +276,14 @@ Completion is blocked when any of the following is true:
 - Founder approval is pending, absent, rejected, or tied to another Commit;
 - an applicable result is `REQUIRES_REVISION`, `REGRESSION`, or `BLOCKED`;
 - material evidence is `PARTIALLY_VERIFIED`, `UNVERIFIED`, or `CONTRADICTORY`;
-- stable feature, route, content, resource, or user data is lost;
+- stable feature, route, content, resource, persistence, entitlement, access behavior, or user data is lost;
 - rights approval is used as a substitute for product quality.
 
 ## 14. Final decision rules
 
 ### `PASS`
 
-May be used only when all Mandatory conditions are satisfied with VERIFIED evidence and no blocker exists.
+May be used only when all REQUIRED conditions are satisfied with `VERIFIED` evidence and no blocker exists.
 
 ### `REQUIRES_REVISION`
 
@@ -243,7 +299,7 @@ Use when evidence, environment, dependency, permission, Preview, or approval pre
 
 ### `NOT_APPLICABLE`
 
-Use only with an explicit reason tied to scope.
+Use only with an explicit reason tied to scope and supporting evidence. It is not `PASS`.
 
 ## 15. Ready and merge authorization
 
