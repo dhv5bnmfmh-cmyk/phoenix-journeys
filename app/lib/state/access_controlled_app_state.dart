@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/daily_journey_catalog.dart';
+import '../data/journey_level_catalog.dart';
 import '../services/critical_persistence_store.dart';
 import '../services/journey_access_policy.dart';
 import '../services/journey_location_binding.dart';
@@ -281,7 +282,7 @@ class AccessControlledAppState extends AppState {
         final legacy = await _buildLegacySnapshot(preferences);
         legacy.snapshot.validate();
         if (legacy.generatedSeed && _legacySeedCommitGuard != null) {
-          final allowed = await _legacySeedCommitGuard!(
+          final allowed = await _legacySeedCommitGuard(
             preferences,
             legacy.snapshot.explorerSeed,
             explorerSeedVersion,
@@ -1102,9 +1103,7 @@ class AccessControlledAppState extends AppState {
           journeyNarrationOffset > 0);
 
   bool _isRegularJourneyId(String journeyId) =>
-      dailyJourneyExperiences
-          .where((journey) => !journey.isSpecial)
-          .any((journey) => journey.id == journeyId);
+      dailyJourneyExperiences.any((journey) => journey.id == journeyId);
 
   String _accessDenialReason(String journeyId) {
     if (_isRegularJourneyId(journeyId)) {
