@@ -282,7 +282,7 @@ Expand only after the first pilot completes controlled approval.
 
 ### Completion evidence
 
-- each Journey independently passes Mandatory acceptance items;
+- each Journey independently passes all REQUIRED and applicable CONDITIONALLY_REQUIRED acceptance items with VERIFIED evidence;
 - batch quality remains at or above the approved pilot and stable baseline;
 - no unreviewed scaling.
 
@@ -319,16 +319,27 @@ Skipping a stage, starting product repair during the read-only audit, beginning 
 
 [Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md) adds the following binding order before broad content expansion:
 
-1. Finish routing, access, and critical-persistence P1 repairs.
-2. Merge Narrative and Discovery Standard after Founder review.
-3. Founder confirms the content model.
-4. Complete one normal Story pilot, recommended `beijing-summer-palace`.
-5. Obtain Founder mobile approval for that exact normal pilot Commit and Preview.
-6. Complete one special Story pilot, recommended `tide-letter`.
-7. Obtain Founder mobile approval for that exact special pilot Commit and Preview.
-8. Expand only in controlled batches of two to three Journeys.
-9. Re-run library differentiation after every batch.
-10. No new Journey expansion until existing pilot quality is proven.
+1. Merge Narrative and Discovery Standard after Founder review.
+2. Founder confirms the content model.
+3. Finish routing, access, and critical-persistence P1 repairs.
+4. No normal or special Story pilot may enter implementation until those technical P1 repairs are complete with VERIFIED evidence and no regression.
+5. Complete one normal Story pilot, recommended `beijing-summer-palace`.
+6. Obtain Founder mobile approval for the exact normal pilot Commit and Preview.
+7. Complete one special Story pilot, recommended `tide-letter`.
+8. Obtain Founder mobile approval for the exact special pilot Commit and Preview.
+9. Expand only in controlled batches of two to three Journeys.
+10. Re-run library differentiation after every batch.
+11. No new Journey expansion until both existing-library pilots have completed their required decisions.
+
+The sequence distinguishes four separate governance and delivery boundaries:
+
+A. Governance standard merge: merge the Narrative and Discovery Standard after Founder review. This governance merge is not a Story Pilot and MUST NOT be blocked by unfinished technical P1 repairs.
+
+B. Technical P1 repair: complete routing, access, and critical-persistence P1 repairs with VERIFIED evidence and no regression. These repairs block Story pilot implementation, not governance-standard merge.
+
+C. Story pilot implementation: implement the normal pilot first, obtain a Founder decision tied to its exact Commit and Preview, then implement the special pilot and obtain its exact-Commit and Preview decision.
+
+D. Controlled content expansion: begin only after both existing-library pilot decisions and expand in batches of two to three Journeys with renewed library differentiation.
 
 The roadmap explicitly prohibits:
 
@@ -341,4 +352,4 @@ The roadmap explicitly prohibits:
 - inferring a reusable template from the first pilot draft;
 - using `360 / 360 PASS`, `score 100`, `average 100`, or `all fields present` as literary approval.
 
-A rejected pilot returns to revision. It does not authorize a replacement pilot, a second pilot, or mass production. Every approved batch retains independent Journey acceptance records and is blocked if quality falls below the approved pilot or stable baseline.
+A rejected pilot returns to revision. It does not authorize a replacement pilot, a second pilot, or mass production. Founder approval MUST be tied to the exact candidate Commit and Preview. Every approved batch retains independent Journey acceptance records and is blocked if quality falls below the approved pilot or stable baseline.
