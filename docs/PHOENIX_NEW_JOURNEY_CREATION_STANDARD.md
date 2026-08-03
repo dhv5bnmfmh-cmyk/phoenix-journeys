@@ -10,7 +10,7 @@ This standard defines the only permitted lifecycle for creating a new Phoenix Jo
 
 The first new-Journey cycle permits exactly **one Journey pilot**. No second Journey may enter implementation before the first pilot receives controlled approval.
 
-## 2. Global gates
+## 2. Global gates and requirement classes
 
 Every phase MUST record:
 
@@ -21,9 +21,17 @@ Every phase MUST record:
 - responsible owner;
 - completion state.
 
+Canonical requirement classes are:
+
+- `REQUIRED`
+- `CONDITIONALLY_REQUIRED`
+- `OPTIONAL`
+
+Legacy terms map only as follows when reading historical records: `MANDATORY` = `REQUIRED`; `CONDITIONAL` = `CONDITIONALLY_REQUIRED`. New records and tables MUST use the canonical terms.
+
 Canonical completion states are `PASS`, `REQUIRES_REVISION`, `REGRESSION`, `BLOCKED`, and `NOT_APPLICABLE`. Canonical evidence levels are `VERIFIED`, `PARTIALLY_VERIFIED`, `UNVERIFIED`, and `CONTRADICTORY`.
 
-A phase may advance only when every Mandatory item is `PASS` with `VERIFIED` evidence and no regression exists.
+A phase may advance only when every `REQUIRED` item and every applicable `CONDITIONALLY_REQUIRED` item is `PASS` with `VERIFIED` evidence and no regression exists. `NOT_APPLICABLE` requires a reason and evidence.
 
 ## 3. Phase A: Journey Proposal
 
@@ -58,7 +66,7 @@ A phase may advance only when every Mandatory item is `PASS` with `VERIFIED` evi
 ### Blocking conditions
 
 - interchangeable city or realm;
-- repeated protagonist, conflict, choice, consequence, or structure;
+- repeated protagonist, relationship, goal, conflict, choice, consequence, or structure;
 - no meaningful learning value;
 - no credible cultural anchor;
 - unresolved rights or disclosure risk;
@@ -70,7 +78,7 @@ Product owner with Story/Learning and Quality review.
 
 ### Completion state
 
-`PASS` only after proposal uniqueness and scope are VERIFIED.
+`PASS` only after proposal uniqueness and scope are `VERIFIED`.
 
 ## 4. Phase B: Story and Learning Design
 
@@ -80,32 +88,69 @@ Product owner with Story/Learning and Quality review.
 - Journey System Standard;
 - target language level and supported languages.
 
+### Requirement classification
+
+Phase B MUST classify its design elements as follows:
+
+- Protagonist: `REQUIRED`
+- Relationship: `REQUIRED`
+- Goal: `REQUIRED`
+- Conflict: `REQUIRED`
+- Choice: `REQUIRED`
+- Consequence: `REQUIRED`
+- Emotional Arc: `REQUIRED`
+- Story: `REQUIRED`
+- Vocabulary: `REQUIRED`
+- ReadingAnnotation: `CONDITIONALLY_REQUIRED` when Story, Discovery, or other explorer-readable learning text exists
+- Discovery: `REQUIRED`
+- Challenge: `REQUIRED`
+- Reflection: `REQUIRED`
+- Writing: `REQUIRED`
+- Memory: `REQUIRED`
+- Completion: `REQUIRED`
+- Reward: `REQUIRED`
+- Stamp: `CONDITIONALLY_REQUIRED` when completion, reward, Passport, collection, or progress design includes a Stamp
+- Other product-approved fields: `OPTIONAL` only when omission does not weaken the required flow
+
+ReadingAnnotation may be `NOT_APPLICABLE` only when no applicable explorer-readable text exists, with reason and evidence. Stamp may be `NOT_APPLICABLE` only when an explicit product design decision excludes it, with design basis and evidence. Neither may be left blank or hidden as `OPTIONAL`.
+
 ### Required deliverables
 
 - complete independent story design;
-- protagonist, relationship, goal, conflict, choice, consequence, and emotional arc;
+- independent protagonist;
+- Relationship identity, narrative function, and evidence path;
+- protagonist Goal, why it matters, relationship to the Conflict, and evidence path;
+- conflict, choice, consequence, and emotional arc;
 - cultural anchor integrated into action;
-- Story, Vocabulary, ReadingAnnotation, Discovery, Challenge, Reflection, Writing, Memory, Completion, Reward, and Stamp design as applicable;
+- Story, Vocabulary, Discovery, Challenge, Reflection, Writing, Memory, Completion, and Reward designs;
+- ReadingAnnotation applicability decision and design;
+- Stamp applicability decision and design;
 - multilingual alignment plan;
 - narration plan;
 - progression and persistence rules;
 - content rights and source record;
-- acceptance criteria for every stage.
+- acceptance criteria for every applicable stage.
 
 ### Validation evidence
 
 - story structure review;
 - learning-purpose review;
 - cultural authenticity review;
+- Relationship and Goal evidence review;
+- ReadingAnnotation applicability review;
+- Stamp applicability review;
 - cross-language meaning matrix;
 - duplication review against existing Journeys;
-- required/optional element checklist.
+- canonical requirement-class checklist.
 
 ### Blocking conditions
 
 - generic tourism text;
 - copied or lightly recolored narrative template;
-- missing choice or consequence;
+- missing Relationship, Goal, Choice, or Consequence;
+- applicable ReadingAnnotation omitted or unverified;
+- applicable Stamp omitted or unverified;
+- `NOT_APPLICABLE` used without reason and evidence;
 - stage text duplicated only to fill fields;
 - unsupported cultural claims;
 - multilingual meaning drift;
@@ -117,7 +162,7 @@ Story/Learning owner with cultural, language, and Quality review.
 
 ### Completion state
 
-`PASS` only when the complete design is VERIFIED and no implementation begins early.
+`PASS` only when the complete design is `VERIFIED` and no implementation begins early.
 
 ## 5. Phase C: Visual Concept Pilot
 
@@ -182,7 +227,7 @@ Visual owner with Product, Rights, Quality, and Founder review.
 
 ### Required deliverables
 
-- correct Journey ID, Story ID, route, components, data, assets, languages, narration, progression, persistence, reward, stamp, loading, error, fallback, and accessibility implementation;
+- correct Journey ID, Story ID, route, components, data, assets, languages, narration, progression, persistence, reward, conditionally applicable Stamp, loading, error, fallback, and accessibility implementation;
 - changed-path inventory;
 - implementation notes linking every change to an approved requirement;
 - no unrelated changes;
@@ -200,7 +245,7 @@ Visual owner with Product, Rights, Quality, and Founder review.
 ### Blocking conditions
 
 - unauthorized path;
-- wrong route, ID, component, content, language, asset, reward, or persistence mapping;
+- wrong route, ID, component, content, language, asset, reward, Stamp, or persistence mapping;
 - runtime placeholder;
 - unrelated refactor;
 - closed-PR implementation inherited without independent stable-baseline proof;
@@ -262,7 +307,7 @@ When no local environment exists, local status MUST be `NOT_RUN_NO_LOCAL_EXECUTI
 ### Required deliverables
 
 - complete `STABLE_BASELINE_COMPARISON` from [Phoenix Development Completion Standard](PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md);
-- comparison of function, pages, routes, assets, visuals, interaction, mobile, performance, content, audio, accessibility, rights, and unexpected loss;
+- comparison of function, pages, routes, Journey IDs, assets, visuals, interaction, mobile, performance, content, audio, accessibility, persistence, access/entitlement, rights, and unexpected loss;
 - exact evidence for all affected surfaces.
 
 ### Validation evidence
@@ -274,6 +319,7 @@ When no local environment exists, local status MUST be `NOT_RUN_NO_LOCAL_EXECUTI
 ### Blocking conditions
 
 - missing report;
+- missing required field or evidence level;
 - non-equivalent comparison conditions;
 - `UNVERIFIED` or `CONTRADICTORY` material claim;
 - any `REGRESSION`;
@@ -344,7 +390,8 @@ Founder decision, coordinated by Product/Quality.
 
 ### Validation evidence
 
-- all Mandatory acceptance items `PASS` with `VERIFIED` evidence;
+- all `REQUIRED` and applicable `CONDITIONALLY_REQUIRED` acceptance items `PASS` with `VERIFIED` evidence;
+- every `NOT_APPLICABLE` item has a reason and evidence;
 - PR remains within scope;
 - CI terminal success where required;
 - exact approval record;
@@ -352,7 +399,8 @@ Founder decision, coordinated by Product/Quality.
 
 ### Blocking conditions
 
-- any missing Mandatory item;
+- any missing `REQUIRED` item;
+- any missing applicable `CONDITIONALLY_REQUIRED` item;
 - candidate differs from approved Commit;
 - additional Journey or unapproved batch included;
 - regression, blocked evidence, or unauthorized path;
@@ -378,7 +426,7 @@ Until the first new Journey completes Phase H:
 
 ## 12. Acceptance matrix
 
-Every phase MUST update [Phoenix New Journey Acceptance Matrix](templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md). Any missing Mandatory item blocks Completed, Ready, merge, expansion, and the next phase.
+Every phase MUST update [Phoenix New Journey Acceptance Matrix](templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md). Any missing `REQUIRED` item or applicable `CONDITIONALLY_REQUIRED` item blocks Completed, Ready, merge, expansion, and the next phase.
 
 ## 13. Final rule
 
