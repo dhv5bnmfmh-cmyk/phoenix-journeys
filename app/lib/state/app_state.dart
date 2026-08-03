@@ -36,7 +36,12 @@ class SpecialJourneyUnlockResult {
 }
 
 class AppState extends ChangeNotifier {
-  AppState({DateTime Function()? clock}) : _clock = clock ?? DateTime.now {
+  AppState({
+    DateTime Function()? clock,
+    Future<SharedPreferences> Function()? preferencesLoader,
+  })  : _clock = clock ?? DateTime.now,
+        _preferencesLoader =
+            preferencesLoader ?? SharedPreferences.getInstance {
     activeJourneyId = dailyJourneyForDate(_clock()).id;
   }
 
@@ -54,7 +59,19 @@ class AppState extends ChangeNotifier {
   static const int beijingJourneyLastStep = journeyLastStep;
   static const List<String> beijingJourneyStepLabels = journeyStepLabels;
 
+  @visibleForTesting
+  static const String activeJourneyIdStorageKey = 'activeJourney.id';
+  @visibleForTesting
+  static const String activeJourneyNamespaceStorageKey =
+      'activeJourney.storageNamespace';
+  @visibleForTesting
+  static const String activeJourneyVersionStorageKey =
+      'activeJourney.identityVersion';
+  @visibleForTesting
+  static const int activeJourneyIdentityVersion = 1;
+
   final DateTime Function() _clock;
+  final Future<SharedPreferences> Function() _preferencesLoader;
 
   ScriptMode scriptMode = ScriptMode.simplified;
   String translationLanguage = '越南语';
@@ -95,6 +112,8 @@ class AppState extends ChangeNotifier {
 
   AppLoadStatus loadStatus = AppLoadStatus.loading;
   String? loadErrorMessage;
+  String? activeJourneyRestoreFailureId;
+  String? activeJourneyRestoreFailureReason;
 
   bool get isReady => loadStatus == AppLoadStatus.ready;
   bool get isTraditional => scriptMode == ScriptMode.traditional;
@@ -181,10 +200,12 @@ class AppState extends ChangeNotifier {
   Future<void> load() async {
     loadStatus = AppLoadStatus.loading;
     loadErrorMessage = null;
+    activeJourneyRestoreFailureId = null;
+    activeJourneyRestoreFailureReason = null;
     notifyListeners();
 
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _preferencesLoader();
       scriptMode = prefs.getBool('traditional') == true
           ? ScriptMode.traditional
           : ScriptMode.simplified;
@@ -217,18 +238,108 @@ class AppState extends ChangeNotifier {
         earnedJourneyStampIds.add('beijing-forbidden-city');
       }
 
-      activeJourneyId = dailyJourneyForDate(_clock()).id;
-      _loadActiveJourney(prefs);
-      await _migrateActiveJourneyStorage(prefs);
+      await _restoreActiveJourneyIdentity(prefs);
       loadStatus = AppLoadStatus.ready;
     } catch (error, stackTrace) {
-      debugPrint('Failed to load Phoenix state: $error');
+      debugPrint(
+        'Failed to load Phoenix state'
+        '${activeJourneyRestoreFailureId == null ? '' : ' '
+            '(activeJourneyId=${activeJourneyRestoreFailureId!})'}: $error',
+      );
       debugPrintStack(stackTrace: stackTrace);
       loadStatus = AppLoadStatus.error;
-      loadErrorMessage = '暂时无法读取你的旅程记录，请重新尝试。';
+      loadErrorMessage = activeJourneyRestoreFailureId == null
+          ? '暂时无法读取你的旅程记录，请重新尝试。'
+          : '无法安全恢复旅程“${activeJourneyRestoreFailureId!}”，'
+              '没有加载其他旅程。请重新尝试。';
     }
 
     notifyListeners();
+  }
+
+  Future<void> _restoreActiveJourneyIdentity(
+    SharedPreferences prefs,
+  ) async {
+    final hasId = prefs.containsKey(activeJourneyIdStorageKey);
+    final hasNamespace = prefs.containsKey(activeJourneyNamespaceStorageKey);
+    final hasVersion = prefs.containsKey(activeJourneyVersionStorageKey);
+
+    if (!hasId && !hasNamespace && !hasVersion) {
+      final defaultJourney = dailyJourneyForDate(_clock());
+      activeJourneyId = defaultJourney.id;
+      _loadActiveJourney(prefs);
+      await _migrateActiveJourneyStorage(prefs);
+      await _persistActiveJourneyIdentity(
+        prefs,
+        requireJourneyLocation(defaultJourney.id),
+      );
+      return;
+    }
+
+    final persistedId = prefs.getString(activeJourneyIdStorageKey) ?? '';
+    activeJourneyId = persistedId;
+    if (persistedId.trim().isEmpty) {
+      _failActiveJourneyRestore(
+        persistedId,
+        'Persisted active Journey ID is missing or empty.',
+      );
+    }
+
+    final journey = journeyExperienceById(persistedId);
+    if (journey == null) {
+      _failActiveJourneyRestore(
+        persistedId,
+        'Persisted active Journey is no longer registered.',
+      );
+    }
+
+    final binding = requireJourneyLocation(journey.id);
+    final persistedNamespace = prefs.getString(
+      activeJourneyNamespaceStorageKey,
+    );
+    final persistedVersion = prefs.getInt(activeJourneyVersionStorageKey);
+    if (persistedVersion != activeJourneyIdentityVersion) {
+      _failActiveJourneyRestore(
+        persistedId,
+        'Active Journey identity version is missing or unsupported: '
+        '$persistedVersion.',
+      );
+    }
+    if (persistedNamespace != binding.storageNamespace) {
+      _failActiveJourneyRestore(
+        persistedId,
+        'Active Journey namespace mismatch: expected '
+        '${binding.storageNamespace}, found $persistedNamespace.',
+      );
+    }
+
+    _loadActiveJourney(prefs);
+    await _migrateActiveJourneyStorage(prefs);
+  }
+
+  Never _failActiveJourneyRestore(String requestedId, String reason) {
+    activeJourneyRestoreFailureId = requestedId;
+    activeJourneyRestoreFailureReason = reason;
+    throw StateError(
+      'Cannot restore active Journey "$requestedId": $reason',
+    );
+  }
+
+  Future<void> _persistActiveJourneyIdentity(
+    SharedPreferences prefs,
+    JourneyLocationBinding binding,
+  ) async {
+    await Future.wait([
+      prefs.setString(activeJourneyIdStorageKey, binding.journeyId),
+      prefs.setString(
+        activeJourneyNamespaceStorageKey,
+        binding.storageNamespace,
+      ),
+      prefs.setInt(
+        activeJourneyVersionStorageKey,
+        activeJourneyIdentityVersion,
+      ),
+    ]);
   }
 
   void _loadActiveJourney(SharedPreferences prefs) {
@@ -359,11 +470,19 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> activateJourney(String journeyId) async {
-    if (journeyId == activeJourneyId) return;
-    activeJourneyId = requireDailyJourneyExperience(journeyId).id;
+    final journey = requireDailyJourneyExperience(journeyId);
+    final binding = requireJourneyLocation(journey.id);
     final prefs = await SharedPreferences.getInstance();
-    _loadActiveJourney(prefs);
-    await _migrateActiveJourneyStorage(prefs);
+
+    if (journey.id != activeJourneyId) {
+      activeJourneyId = journey.id;
+      activeJourneyRestoreFailureId = null;
+      activeJourneyRestoreFailureReason = null;
+      _loadActiveJourney(prefs);
+      await _migrateActiveJourneyStorage(prefs);
+    }
+
+    await _persistActiveJourneyIdentity(prefs, binding);
     notifyListeners();
   }
 

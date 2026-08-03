@@ -79,11 +79,20 @@ List<JourneyCityCatalogEntry> buildJourneyCityCatalog(
 final List<JourneyCityCatalogEntry> journeyCityCatalog =
     buildJourneyCityCatalog(dailyJourneyExperiences);
 
+JourneyCityCatalogEntry? journeyCityById(String cityId) {
+  if (cityId.isEmpty) return null;
+  for (final city in journeyCityCatalog) {
+    if (city.id == cityId) return city;
+  }
+  return null;
+}
+
 JourneyCityCatalogEntry requireJourneyCity(String cityId) {
-  return journeyCityCatalog.firstWhere(
-    (city) => city.id == cityId,
-    orElse: () => journeyCityCatalog.first,
-  );
+  final city = journeyCityById(cityId);
+  if (city == null) {
+    throw StateError('Journey city is not registered: "$cityId".');
+  }
+  return city;
 }
 
 List<DailyJourneyExperience> journeysForCity(String cityId) {

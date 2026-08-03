@@ -600,11 +600,20 @@ final List<WordEntry> allDailyJourneyWords = List<WordEntry>.unmodifiable(
   }.values,
 );
 
+DailyJourneyExperience? journeyExperienceById(String id) {
+  if (id.isEmpty) return null;
+  for (final journey in allJourneyExperiences) {
+    if (journey.id == id) return journey;
+  }
+  return null;
+}
+
 DailyJourneyExperience requireDailyJourneyExperience(String id) {
-  return allJourneyExperiences.firstWhere(
-    (journey) => journey.id == id,
-    orElse: () => dailyJourneyExperiences.first,
-  );
+  final journey = journeyExperienceById(id);
+  if (journey == null) {
+    throw StateError('Journey is not registered: "$id".');
+  }
+  return journey;
 }
 
 DailyJourneyExperience dailyJourneyForDate(DateTime date) {
