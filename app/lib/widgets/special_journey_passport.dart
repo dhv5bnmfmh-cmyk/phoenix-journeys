@@ -4,15 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../data/daily_journey_catalog.dart';
 import '../screens/journey_screen.dart';
+import '../state/access_controlled_app_state.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import 'journey_symbol_badge.dart';
-
-bool get _specialJourneyAllAccessPreview {
-  final uri = Uri.base;
-  return uri.queryParameters['unlock'] == 'all' ||
-      uri.host.startsWith('phoenix-journeys-pr-');
-}
 
 class SpecialJourneyPassport extends StatelessWidget {
   const SpecialJourneyPassport({super.key, required this.state});
@@ -155,9 +150,7 @@ class SpecialJourneyPassport extends StatelessWidget {
   }
 
   Widget _journeyTile(BuildContext context, _SpecialJourneyGate journey) {
-    final unlocked =
-        _specialJourneyAllAccessPreview ||
-        state.isSpecialJourneyUnlocked(journey.id);
+    final unlocked = state.canOpenJourney(journey.id);
 
     return Material(
       key: ValueKey('special-journey-${journey.id}'),
@@ -221,10 +214,7 @@ class SpecialJourneyPassport extends StatelessWidget {
     BuildContext context,
     _SpecialJourneyGate journey,
   ) async {
-    final unlocked =
-        _specialJourneyAllAccessPreview ||
-        state.isSpecialJourneyUnlocked(journey.id);
-    if (unlocked) {
+    if (state.canOpenJourney(journey.id)) {
       await _openFullJourney(context, journey.id);
       return;
     }
