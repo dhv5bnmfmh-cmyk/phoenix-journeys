@@ -14,7 +14,9 @@
 - Affected routes: `<exact routes or NONE>`
 - Affected Journeys: `<exact Journey IDs or NONE>`
 
-Closed PRs `#138`–`#141` are historical or problem evidence only. They MUST NOT be used as a development baseline.
+`docs/PHOENIX_STABLE_BASELINE_STANDARD.md` is the single normative authority for the current Stable PR and Stable Commit. Other governance documents may preserve permanent product rules but MUST NOT define a conflicting current baseline. Any conflict must be corrected, not silently ignored or hidden by deleting valid permanent-rule references.
+
+PR `#132` is historical and is not the current development baseline. Closed PRs `#138`–`#141` are historical or problem evidence only. They MUST NOT be used as a development baseline.
 
 ## 2. Change declarations
 
@@ -72,25 +74,60 @@ Every development task MUST compare the candidate with the current approved stab
 
 `NEW RESULT >= CURRENT STABLE BASELINE`
 
+Candidate Tree and Parent Commit MUST be present inside this comparison report, not only in PR identity. Compared Routes and Compared Journey IDs MUST be separate. Persistence and Access / Entitlement require independent results and evidence and are not implied by Function Result or by a checkbox.
+
 ```text
+STABLE_BASELINE_COMPARISON
+
 Stable PR: #137
 Stable Commit: 5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977
+
 Candidate Commit:
+Candidate Tree:
+Parent Commit:
+
 Changed Scope:
 Changed Paths:
+
 Compared Pages:
-Compared Journeys:
+Compared Routes:
+Compared Journey IDs:
 Compared Features:
 Compared Assets:
+
 Visual Result:
+Visual Evidence Level:
+
 Functional Result:
+Functional Evidence Level:
+
 Interaction Result:
+Interaction Evidence Level:
+
 Mobile Result:
+Mobile Evidence Level:
+
 Performance Result:
+Performance Evidence Level:
+
 Content Result:
+Content Evidence Level:
+
 Audio Result:
+Audio Evidence Level:
+
 Accessibility Result:
+Accessibility Evidence Level:
+
+Persistence Result:
+Persistence Evidence Level:
+
+Access / Entitlement Result:
+Access / Entitlement Evidence Level:
+
 Rights Result:
+Rights Evidence Level:
+
 Unexpected Regression:
 Founder Preview Required:
 Founder Preview Link:
@@ -98,7 +135,7 @@ Founder Preview Result:
 Final Comparison Decision:
 ```
 
-Allowed result values:
+Allowed Result values:
 
 - `PASS`
 - `REQUIRES_REVISION`
@@ -106,18 +143,20 @@ Allowed result values:
 - `BLOCKED`
 - `NOT_APPLICABLE`
 
-Allowed evidence levels:
+Allowed Evidence Level values:
 
 - `VERIFIED`
 - `PARTIALLY_VERIFIED`
 - `UNVERIFIED`
 - `CONTRADICTORY`
 
-Missing or materially incomplete report status:
+`NOT_APPLICABLE` requires a scoped applicability reason and supporting evidence. It is not automatic `PASS`.
+
+Missing any required field, Result, Evidence Level, or required applicability reason:
 
 `INCOMPLETE_STABLE_BASELINE_COMPARISON_MISSING`
 
-Any downgrade below the current stable baseline status:
+Any downgrade below the current stable baseline:
 
 `REGRESSION_BLOCKS_READY_AND_MERGE`
 
@@ -172,9 +211,12 @@ Journey access behavior MUST be proven for the applicable development, Preview, 
 
 - [ ] 开发分支与 PR 体验版保持全部旅程开放
 - [ ] 免费探索者每天稳定随机早晚各一段，同日两段不重复
+- [ ] 同一用户、同一日期、同一时段在刷新、重启与重新登录后不重新抽取
+- [ ] 下午释放后，当天已释放的 Journey 仍可继续使用
 - [ ] 付费探索者可以打开全部已发布旅程
 - [ ] 免费、付费与随机旅程权限统一经过 `JourneyAccessPolicy`
-- [ ] Journey access evidence includes the exact account state, Journey ID, route, expected result, actual result, and persistence result
+- [ ] 商业时段与策略保持可配置，没有硬编码进 Journey 内容
+- [ ] Journey access evidence includes account state, mode, stable test identifier, local date/timezone, slot, Journey ID, route, expected result, actual result, and persistence result
 
 ## 10. AI orchestration, privacy, Secret and disclosure verification
 
@@ -198,9 +240,9 @@ All online AI behavior MUST use the approved orchestration path, provider order,
 - Stable comparison captures: `<links / paths / NONE>`
 - Candidate captures: `<links / paths / NONE>`
 - Tested devices and viewports: `<details / NONE>`
-- Mobile crop and focal point result: `<result + evidence / NOT_APPLICABLE>`
-- Safe-area and small-screen result: `<result + evidence / NOT_APPLICABLE>`
-- Reduced-motion result: `<result + evidence / NOT_APPLICABLE>`
+- Mobile crop and focal point result: `<result + evidence / NOT_APPLICABLE with reason>`
+- Safe-area and small-screen result: `<result + evidence / NOT_APPLICABLE with reason>`
+- Reduced-motion result: `<result + evidence / NOT_APPLICABLE with reason>`
 - Founder approval state: `APPROVED / REJECTED / PENDING / NOT_REQUIRED`
 - Founder approval record: `<exact record / NONE>`
 - Rights-impact paths: `<paths / NONE>`
@@ -243,12 +285,12 @@ Do not report a local command as run when no local execution environment was ava
 - Tested account/access states: `<list>`
 - Preview result: `<result + evidence level>`
 
-A deployed Preview does not by itself prove functional, visual, interaction, audio, performance, accessibility, or mobile quality.
+A deployed Preview does not by itself prove functional, visual, interaction, audio, performance, persistence, access, accessibility, or mobile quality.
 
 ### Regression result
 
 - Unexpected regression: `NONE / <details>`
-- Severity: `P0 / P1 / P2 / P3 / NOT_APPLICABLE`
+- Issue Severity: `NONE / P0 / P1 / P2 / P3`
 - Affected stable evidence: `<details>`
 - Required repair or restoration: `<details / NONE>`
 - Verification after repair: `<details / NONE>`
@@ -266,9 +308,9 @@ Any regression blocks Completed, Ready, merge, batch expansion, and the next sta
 
 ## 14. Merge checklist
 
-- [ ] PR is based on the latest approved stable `main`.
+- [ ] PR is based on the latest approved stable `main` identified by `docs/PHOENIX_STABLE_BASELINE_STANDARD.md`.
 - [ ] Stable PR and Stable Commit are exact.
-- [ ] Candidate Commit, Tree, and Parent are recorded.
+- [ ] Candidate Commit, Tree, and Parent are recorded inside the comparison report.
 - [ ] Task scope and changed paths are complete.
 - [ ] No closed PR is used as the baseline.
 - [ ] No unauthorized or unrelated file is changed.
@@ -278,6 +320,7 @@ Any regression blocks Completed, Ready, merge, batch expansion, and the next sta
 - [ ] Required technical checks reached actual terminal conclusions.
 - [ ] The complete `STABLE_BASELINE_COMPARISON` is present.
 - [ ] Function, visual, interaction, mobile, performance, content, audio, accessibility, rights, persistence and access results are not below the stable baseline.
+- [ ] Every `NOT_APPLICABLE` result has a reason and evidence.
 - [ ] Visual or core interaction changes have explicit Founder mobile approval.
 - [ ] Programmatic placeholders did not enter runtime.
 - [ ] Rights evidence is not being used as visual approval.
@@ -290,7 +333,12 @@ Any regression blocks Completed, Ready, merge, batch expansion, and the next sta
 
 ## 15. Permanent rule references
 
-- `docs/PHOENIX_STABLE_BASELINE_STANDARD.md`
+### Stable-baseline authority
+
+- `docs/PHOENIX_STABLE_BASELINE_STANDARD.md` is the single normative authority for Stable PR and Stable Commit identity.
+
+### Product standards
+
 - `docs/PHOENIX_PRODUCT_QUALITY_STANDARD.md`
 - `docs/PHOENIX_UI_VISUAL_STANDARD.md`
 - `docs/PHOENIX_JOURNEY_SYSTEM_STANDARD.md`
@@ -298,9 +346,12 @@ Any regression blocks Completed, Ready, merge, batch expansion, and the next sta
 - `docs/PHOENIX_FULL_APPLICATION_AUDIT_STANDARD.md`
 - `docs/PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md`
 - `docs/PHOENIX_QUALITY_UNIFICATION_ROADMAP.md`
+
+### Permanent product rules
+
 - `docs/development-workflow.md` → 「永久朗读开发准则」
 - `docs/development-workflow.md` → 「永久生词展示与例句准则」
 - `docs/development-workflow.md` → 「永久 AI Agent 开发准则」
 - `docs/development-workflow.md` → 「永久旅程访问与订阅准则」
 
-The latest approved stable `main` remains the only valid development baseline. The stable baseline does not automatically move to the newest PR; it changes only after explicit Founder approval and merge into `main`.
+The permanent product rules and the mandatory Stable Baseline Comparison apply together. Neither replaces the other. The latest approved stable `main` remains the only valid development baseline. It changes only after explicit Founder approval and merge into `main`.
