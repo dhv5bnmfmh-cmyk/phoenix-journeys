@@ -7,6 +7,9 @@ import 'widgets/startup_gate.dart';
 class PhoenixApp extends StatelessWidget {
   const PhoenixApp({super.key});
 
+  static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+
   @override
   Widget build(BuildContext context) {
     final uri = Uri.base;
@@ -18,6 +21,7 @@ class PhoenixApp extends StatelessWidget {
     return MaterialApp(
       title: 'Phoenix Journeys',
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: scaffoldMessengerKey,
       theme: PhoenixTheme.light,
       home: showCoinJourney
           ? const CoinJourneyPrototypeScreen()
