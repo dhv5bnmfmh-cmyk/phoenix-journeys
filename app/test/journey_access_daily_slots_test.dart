@@ -122,6 +122,7 @@ void main() {
 
     await first.load();
     final preferences = await SharedPreferences.getInstance();
+    final committed = await first.readCommittedCriticalPayload();
 
     expect(generatorCalls, 1);
     expect(first.localExplorerSeed, seedA);
@@ -130,17 +131,22 @@ void main() {
     expect(first.localExplorerSeed, isNot(contains('@')));
     expect(first.localExplorerSeed, isNot(contains('name')));
     expect(first.localExplorerSeed, isNot(contains('email')));
+    expect(committed['explorerSeed'], seedA);
+    expect(
+      committed['explorerSeedVersion'],
+      AccessControlledAppState.explorerSeedVersion,
+    );
     expect(
       preferences.getString(
         AccessControlledAppState.explorerSeedStorageKey,
       ),
-      seedA,
+      isNull,
     );
     expect(
       preferences.getInt(
         AccessControlledAppState.explorerSeedVersionStorageKey,
       ),
-      AccessControlledAppState.explorerSeedVersion,
+      isNull,
     );
 
     final restored = productionState(
@@ -383,6 +389,7 @@ void main() {
 
     final originalId = state.activeJourneyId;
     final originalStorage = state.activeJourneyStoragePath;
+    final originalCommitted = await state.readCommittedCriticalPayload();
     final lockedId = dailyJourneyExperiences
         .map((journey) => journey.id)
         .firstWhere(
@@ -398,10 +405,16 @@ void main() {
     expect(state.activeJourneyId, originalId);
     expect(state.activeJourneyStoragePath, originalStorage);
 
+    final committed = await state.readCommittedCriticalPayload();
+    expect(committed['activeJourneyId'], originalId);
+    expect(
+      committed['activeJourneyNamespace'],
+      originalCommitted['activeJourneyNamespace'],
+    );
     final preferences = await SharedPreferences.getInstance();
     expect(
       preferences.getString(AppState.activeJourneyIdStorageKey),
-      originalId,
+      isNull,
     );
   });
 
@@ -496,12 +509,11 @@ void main() {
   });
 
   test('published Special Journey wallet unlock remains unchanged', () async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'wallet.gold': 3});
     final state = productionState(
       clock: () => DateTime(2026, 8, 3, 13),
     );
     await state.load();
-    state.goldCoins = 3;
 
     expect(state.canOpenJourney('literary-roaming'), isFalse);
     final result = await state.unlockSpecialJourney(
