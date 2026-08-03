@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../data/daily_journey_catalog.dart';
 import '../screens/journey_screen.dart';
 import '../state/access_controlled_app_state.dart';
-import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import 'journey_symbol_badge.dart';
 
