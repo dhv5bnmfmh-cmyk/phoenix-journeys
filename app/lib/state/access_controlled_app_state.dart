@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/daily_journey_catalog.dart';
+import '../services/critical_persistence_store.dart';
 import '../services/journey_access_policy.dart';
 import '../services/journey_location_binding.dart';
 import 'app_state.dart';
@@ -42,6 +43,7 @@ class AccessControlledAppState extends AppState {
     JourneyAccessMode? accessMode,
     String Function()? explorerSeedGenerator,
     ExplorerSeedPersister? explorerSeedPersister,
+    CriticalPersistenceBackend? criticalPersistenceBackend,
   })  : _clock = clock ?? DateTime.now,
         _preferencesLoader =
             preferencesLoader ?? SharedPreferences.getInstance,
@@ -50,8 +52,8 @@ class AccessControlledAppState extends AppState {
         _forcedAccessMode = accessMode,
         _explorerSeedGenerator =
             explorerSeedGenerator ?? _generateOpaqueExplorerSeed,
-        _explorerSeedPersister =
-            explorerSeedPersister ?? _persistExplorerSeed,
+        _legacySeedCommitGuard = explorerSeedPersister,
+        _injectedCriticalBackend = criticalPersistenceBackend,
         super(clock: clock, preferencesLoader: preferencesLoader);
 
   @visibleForTesting
@@ -84,11 +86,23 @@ class AccessControlledAppState extends AppState {
   final bool _debugBuild;
   final JourneyAccessMode? _forcedAccessMode;
   final String Function() _explorerSeedGenerator;
-  final ExplorerSeedPersister _explorerSeedPersister;
+  final ExplorerSeedPersister? _legacySeedCommitGuard;
+  final CriticalPersistenceBackend? _injectedCriticalBackend;
 
-  String localExplorerSeed = '';
-  String? explorerSeedFailureReason;
+  CriticalPersistenceStore? _criticalStore;
+  _PhoenixCriticalSnapshot? _committedSnapshot;
+  SharedPreferences? _preferences;
   bool _activeIdentityReady = false;
+  int _criticalStep = 0;
+  int _criticalFurthestStep = 0;
+  final Map<String, String> _criticalNarrationSignatures = <String, String>{};
+  final Map<String, int> _criticalNarrationOffsets = <String, int>{};
+
+  String? criticalPersistenceFailureReason;
+  String? explorerSeedFailureReason;
+  int criticalRevision = 0;
+
+  String get localExplorerSeed => _committedSnapshot?.explorerSeed ?? '';
 
   JourneyAccessMode get journeyAccessMode =>
       _forcedAccessMode ??
@@ -106,7 +120,7 @@ class AccessControlledAppState extends AppState {
 
   DailyJourneyAssignment get dailyAssignment {
     if (!_isValidExplorerSeed(localExplorerSeed)) {
-      throw StateError('A valid local Explorer Seed is required.');
+      throw StateError('A valid committed local Explorer Seed is required.');
     }
     return JourneyAccessPolicy.assignDailyJourneys(
       journeyIds: eligibleRegularJourneyIds,
@@ -146,13 +160,68 @@ class AccessControlledAppState extends AppState {
   DailyJourneyExperience get todayJourney {
     if (!_isValidExplorerSeed(localExplorerSeed)) {
       throw StateError(
-        'Daily Journey cannot be resolved without a valid local Explorer Seed.',
+        'Daily Journey cannot be resolved without a valid committed '
+        'local Explorer Seed.',
       );
     }
     return requireDailyJourneyExperience(
       dailyAssignment.journeyIdFor(currentDailySlot),
     );
   }
+
+  @override
+  int get journeyStep => _criticalStep;
+
+  @override
+  int get journeyFurthestStep => _criticalFurthestStep;
+
+  @override
+  int get beijingJourneyStep => _criticalStep;
+
+  @override
+  int get beijingJourneyFurthestStep => _criticalFurthestStep;
+
+  @override
+  bool get hasJourneyInProgress => !journeyCompleted && _criticalStep > 0;
+
+  @override
+  double get journeyProgress {
+    if (journeyCompleted) return 1;
+    return (_criticalStep + 1) / (AppState.journeyLastStep + 1);
+  }
+
+  @override
+  int get journeyProgressPercent => (journeyProgress * 100).round();
+
+  @override
+  double get beijingJourneyProgress => journeyProgress;
+
+  @override
+  int get beijingJourneyProgressPercent => journeyProgressPercent;
+
+  @override
+  String get journeyStepLabel => displayText(
+        AppState.journeyStepLabels[_safeJourneyStep(_criticalStep)],
+      );
+
+  @override
+  String get journeyFurthestStepLabel => displayText(
+        AppState.journeyStepLabels[_safeJourneyStep(_criticalFurthestStep)],
+      );
+
+  @override
+  String get beijingJourneyStepLabel => journeyStepLabel;
+
+  @override
+  String get beijingJourneyFurthestStepLabel => journeyFurthestStepLabel;
+
+  @override
+  String? journeyNarrationSignatureFor(String contentId) =>
+      _criticalNarrationSignatures[contentId];
+
+  @override
+  int journeyNarrationOffsetFor(String contentId) =>
+      _criticalNarrationOffsets[contentId] ?? 0;
 
   bool canOpenJourney(String journeyId) {
     final journey = journeyExperienceById(journeyId);
@@ -189,47 +258,97 @@ class AccessControlledAppState extends AppState {
 
   @override
   Future<void> load() async {
+    loadStatus = AppLoadStatus.loading;
+    loadErrorMessage = null;
+    activeJourneyRestoreFailureId = null;
+    activeJourneyRestoreFailureReason = null;
     explorerSeedFailureReason = null;
+    criticalPersistenceFailureReason = null;
     _activeIdentityReady = false;
+    notifyListeners();
 
     try {
       final preferences = await _preferencesLoader();
-      await _restoreOrCreateExplorerSeed(preferences);
-      await _ensureFreshInstallActiveIdentity(preferences);
+      _preferences = preferences;
+      _restoreNonCriticalPreferences(preferences);
+      _criticalStore ??= CriticalPersistenceStore(
+        _injectedCriticalBackend ??
+            SharedPreferencesCriticalPersistenceBackend(preferences),
+      );
+
+      var committed = await _criticalStore!.readCommitted();
+      if (committed == null) {
+        final legacy = await _buildLegacySnapshot(preferences);
+        legacy.snapshot.validate();
+        if (legacy.generatedSeed && _legacySeedCommitGuard != null) {
+          final allowed = await _legacySeedCommitGuard!(
+            preferences,
+            legacy.snapshot.explorerSeed,
+            explorerSeedVersion,
+          );
+          if (!allowed) {
+            _failExplorerSeed('Explorer Seed persistence failed.');
+          }
+        }
+        committed = await _criticalStore!.commitInitial(
+          legacy.snapshot.toJson(),
+        );
+      }
+
+      final snapshot = _PhoenixCriticalSnapshot.fromJson(committed.payload)
+        ..validate();
+      _applyCommitted(snapshot, revision: committed.revision);
+
+      if (!_canRestoreActiveJourney(activeJourneyId)) {
+        throw StateError(
+          'Persisted active Journey is not eligible for safe restore.',
+        );
+      }
+
+      _activeIdentityReady = true;
+      loadStatus = AppLoadStatus.ready;
     } catch (error, stackTrace) {
-      debugPrint('Failed to restore local Explorer identity: $error');
+      final reason = error.toString();
+      criticalPersistenceFailureReason = reason;
+      if (reason.contains('Explorer Seed')) {
+        explorerSeedFailureReason ??= reason;
+      }
+      debugPrint('Failed to restore committed Phoenix state: $error');
       debugPrintStack(stackTrace: stackTrace);
       loadStatus = AppLoadStatus.error;
-      loadErrorMessage = '无法安全恢复本机 Explorer 身份，没有重新抽取旅程。请重新尝试。';
-      notifyListeners();
-      return;
+      loadErrorMessage = activeJourneyRestoreFailureId == null
+          ? '无法安全恢复本机关键状态，上一份记录仍被保留。请重新尝试。'
+          : '无法安全恢复旅程“${activeJourneyRestoreFailureId!}”，'
+              '没有加载其他旅程。请重新尝试。';
     }
 
-    await super.load();
-    if (loadStatus != AppLoadStatus.ready) return;
-
-    if (!_canRestoreActiveJourney(activeJourneyId)) {
-      loadStatus = AppLoadStatus.error;
-      loadErrorMessage = '当前旅程不再具备安全恢复条件，没有打开其他旅程。';
-      notifyListeners();
-      return;
-    }
-
-    _activeIdentityReady = true;
     notifyListeners();
   }
 
   @override
   Future<void> activateJourney(String journeyId) async {
-    requireDailyJourneyExperience(journeyId);
+    final journey = requireDailyJourneyExperience(journeyId);
     if (!canOpenJourney(journeyId) && !canResumeActiveJourney(journeyId)) {
       throw JourneyAccessDeniedException(
         journeyId: journeyId,
         reason: _accessDenialReason(journeyId),
       );
     }
+    final binding = requireJourneyLocation(journey.id);
 
-    await super.activateJourney(journeyId);
+    await _transact<void>((current) {
+      if (current.activeJourneyId == journey.id &&
+          current.activeJourneyNamespace == binding.storageNamespace) {
+        return const _SnapshotMutation<void>.unchanged(null);
+      }
+      return _SnapshotMutation<void>.changed(
+        current.copyWith(
+          activeJourneyId: journey.id,
+          activeJourneyNamespace: binding.storageNamespace,
+        ),
+        null,
+      );
+    });
     _activeIdentityReady = true;
   }
 
@@ -247,82 +366,724 @@ class AccessControlledAppState extends AppState {
     await activateJourney(todayJourney.id);
   }
 
-  Future<void> _restoreOrCreateExplorerSeed(
-    SharedPreferences preferences,
-  ) async {
-    final hasSeed = preferences.containsKey(explorerSeedStorageKey);
-    final hasVersion = preferences.containsKey(explorerSeedVersionStorageKey);
-
-    if (!hasSeed && !hasVersion) {
-      final generated = _explorerSeedGenerator();
-      if (!_isValidExplorerSeed(generated)) {
-        _failExplorerSeed('Generated Explorer Seed is invalid.');
-      }
-      final persisted = await _explorerSeedPersister(
-        preferences,
-        generated,
-        explorerSeedVersion,
+  @override
+  Future<void> saveJourneyProgress({
+    required int step,
+    required String wonder,
+    required String express,
+    required String memory,
+  }) async {
+    final journeyId = activeJourneyId;
+    await _transact<void>((current) {
+      final existing = current.requireJourney(journeyId);
+      final safeStep = _safeJourneyStep(step);
+      final updated = existing.copyWith(
+        step: safeStep,
+        furthestStep: math.max(existing.furthestStep, safeStep).toInt(),
+        wonderDraft: wonder,
+        expressDraft: express,
+        memoryDraft: memory,
+        updatedAt: _clock().toIso8601String(),
       );
-      if (!persisted) {
-        _failExplorerSeed('Explorer Seed persistence failed.');
-      }
-      localExplorerSeed = generated;
-      return;
-    }
-
-    if (!hasSeed || !hasVersion) {
-      _failExplorerSeed('Explorer Seed record is incomplete.');
-    }
-
-    final persistedSeed = preferences.getString(explorerSeedStorageKey) ?? '';
-    final persistedVersion = preferences.getInt(
-      explorerSeedVersionStorageKey,
-    );
-    if (persistedVersion != explorerSeedVersion) {
-      _failExplorerSeed(
-        'Explorer Seed version is missing or unsupported: '
-        '$persistedVersion.',
+      return _SnapshotMutation<void>.changed(
+        current.withJourney(updated),
+        null,
       );
-    }
-    if (!_isValidExplorerSeed(persistedSeed)) {
-      _failExplorerSeed('Persisted Explorer Seed is empty or corrupt.');
-    }
-
-    localExplorerSeed = persistedSeed;
+    });
   }
 
-  Future<void> _ensureFreshInstallActiveIdentity(
-    SharedPreferences preferences,
-  ) async {
-    final hasId = preferences.containsKey(_activeJourneyIdStorageKey);
-    final hasNamespace = preferences.containsKey(
-      _activeJourneyNamespaceStorageKey,
-    );
-    final hasVersion = preferences.containsKey(
-      _activeJourneyVersionStorageKey,
-    );
+  @override
+  Future<void> saveJourneyNarrationPosition({
+    required String contentId,
+    required String contentSignature,
+    required int offset,
+  }) async {
+    final journeyId = activeJourneyId;
+    final safeOffset = math.max(0, offset);
+    await _transact<void>((current) {
+      final existing = current.requireJourney(journeyId);
+      final signatures = Map<String, String>.from(
+        existing.narrationSignatures,
+      )..[contentId] = contentSignature;
+      final offsets = Map<String, int>.from(existing.narrationOffsets)
+        ..[contentId] = safeOffset;
+      final updated = existing.copyWith(
+        narrationContentId: contentId,
+        narrationContentSignature: contentSignature,
+        narrationOffset: safeOffset,
+        narrationSignatures: signatures,
+        narrationOffsets: offsets,
+        updatedAt: _clock().toIso8601String(),
+      );
+      return _SnapshotMutation<void>.changed(
+        current.withJourney(updated),
+        null,
+      );
+    });
+  }
 
-    if (hasId || hasNamespace || hasVersion) return;
+  @override
+  Future<void> clearJourneyNarrationPosition({String? contentId}) async {
+    final journeyId = activeJourneyId;
+    await _transact<void>((current) {
+      final existing = current.requireJourney(journeyId);
+      if (contentId == null) {
+        if (!existing.hasNarration) {
+          return const _SnapshotMutation<void>.unchanged(null);
+        }
+        return _SnapshotMutation<void>.changed(
+          current.withJourney(existing.clearNarration()),
+          null,
+        );
+      }
 
-    final initialJourneyId = dailyAssignment.journeyIdFor(currentDailySlot);
-    final binding = requireJourneyLocation(initialJourneyId);
-    final writes = await Future.wait<bool>([
-      preferences.setString(
-        _activeJourneyIdStorageKey,
-        binding.journeyId,
-      ),
-      preferences.setString(
-        _activeJourneyNamespaceStorageKey,
-        binding.storageNamespace,
-      ),
-      preferences.setInt(
-        _activeJourneyVersionStorageKey,
-        _activeJourneyIdentityVersion,
-      ),
-    ]);
-    if (writes.any((result) => !result)) {
-      throw StateError('Initial active Journey identity persistence failed.');
+      final signatures = Map<String, String>.from(
+        existing.narrationSignatures,
+      )..remove(contentId);
+      final offsets = Map<String, int>.from(existing.narrationOffsets)
+        ..remove(contentId);
+      final clearsCurrent = existing.narrationContentId == contentId;
+      final updated = existing.copyWith(
+        narrationContentId: clearsCurrent
+            ? null
+            : existing.narrationContentId,
+        narrationContentSignature: clearsCurrent
+            ? null
+            : existing.narrationContentSignature,
+        narrationOffset: clearsCurrent ? 0 : existing.narrationOffset,
+        narrationSignatures: signatures,
+        narrationOffsets: offsets,
+        updatedAt: _clock().toIso8601String(),
+        replaceNullableNarration: true,
+      );
+      return _SnapshotMutation<void>.changed(
+        current.withJourney(updated),
+        null,
+      );
+    });
+  }
+
+  @override
+  Future<void> saveGuideFeedback({
+    required String reply,
+    required bool isOfflineFallback,
+  }) async {
+    final journeyId = activeJourneyId;
+    await _transact<void>((current) {
+      final existing = current.requireJourney(journeyId);
+      return _SnapshotMutation<void>.changed(
+        current.withJourney(
+          existing.copyWith(
+            guideFeedbackReply: reply.trim(),
+            guideFeedbackOffline: isOfflineFallback,
+            updatedAt: _clock().toIso8601String(),
+          ),
+        ),
+        null,
+      );
+    });
+  }
+
+  @override
+  Future<void> clearGuideFeedback() async {
+    final journeyId = activeJourneyId;
+    await _transact<void>((current) {
+      final existing = current.requireJourney(journeyId);
+      if (existing.guideFeedbackReply.isEmpty &&
+          !existing.guideFeedbackOffline) {
+        return const _SnapshotMutation<void>.unchanged(null);
+      }
+      return _SnapshotMutation<void>.changed(
+        current.withJourney(
+          existing.copyWith(
+            guideFeedbackReply: '',
+            guideFeedbackOffline: false,
+            updatedAt: _clock().toIso8601String(),
+          ),
+        ),
+        null,
+      );
+    });
+  }
+
+  @override
+  Future<void> saveWritingFeedback({
+    required String corrected,
+    required String explanation,
+    required String natural,
+    required String encouragement,
+    required bool isOfflineFallback,
+  }) async {
+    final journeyId = activeJourneyId;
+    await _transact<void>((current) {
+      final existing = current.requireJourney(journeyId);
+      return _SnapshotMutation<void>.changed(
+        current.withJourney(
+          existing.copyWith(
+            writingFeedbackCorrected: corrected.trim(),
+            writingFeedbackExplanation: explanation.trim(),
+            writingFeedbackNatural: natural.trim(),
+            writingFeedbackEncouragement: encouragement.trim(),
+            writingFeedbackOffline: isOfflineFallback,
+            updatedAt: _clock().toIso8601String(),
+          ),
+        ),
+        null,
+      );
+    });
+  }
+
+  @override
+  Future<void> clearWritingFeedback() async {
+    final journeyId = activeJourneyId;
+    await _transact<void>((current) {
+      final existing = current.requireJourney(journeyId);
+      if (!existing.hasWritingFeedback) {
+        return const _SnapshotMutation<void>.unchanged(null);
+      }
+      return _SnapshotMutation<void>.changed(
+        current.withJourney(
+          existing.copyWith(
+            writingFeedbackCorrected: '',
+            writingFeedbackExplanation: '',
+            writingFeedbackNatural: '',
+            writingFeedbackEncouragement: '',
+            writingFeedbackOffline: false,
+            updatedAt: _clock().toIso8601String(),
+          ),
+        ),
+        null,
+      );
+    });
+  }
+
+  @override
+  Future<void> restartJourney() async {
+    final journeyId = activeJourneyId;
+    await _transact<void>((current) {
+      final existing = current.requireJourney(journeyId);
+      final restarted = existing.copyWith(
+        step: 0,
+        furthestStep: 0,
+        completed: false,
+        wonderDraft: '',
+        expressDraft: '',
+        memoryDraft: '',
+        guideFeedbackReply: '',
+        guideFeedbackOffline: false,
+        writingFeedbackCorrected: '',
+        writingFeedbackExplanation: '',
+        writingFeedbackNatural: '',
+        writingFeedbackEncouragement: '',
+        writingFeedbackOffline: false,
+        updatedAt: _clock().toIso8601String(),
+      ).clearNarration();
+      return _SnapshotMutation<void>.changed(
+        current.withJourney(restarted),
+        null,
+      );
+    });
+  }
+
+  @override
+  Future<void> completeJourney(String memory) async {
+    final journeyId = activeJourneyId;
+    await _transact<void>((current) {
+      final existing = current.requireJourney(journeyId);
+      if (existing.completed &&
+          current.earnedJourneyStampIds.contains(journeyId)) {
+        return const _SnapshotMutation<void>.unchanged(null);
+      }
+
+      final stamps = Set<String>.from(current.earnedJourneyStampIds)
+        ..add(journeyId);
+      final nextMemories = List<String>.from(current.memories);
+      final trimmed = memory.trim();
+      if (trimmed.isNotEmpty) {
+        final entry =
+            '${requireDailyJourneyExperience(journeyId).stampTitle}｜$trimmed';
+        if (!nextMemories.contains(entry)) nextMemories.insert(0, entry);
+      }
+      final completedJourney = existing.copyWith(
+        step: AppState.journeyLastStep,
+        furthestStep: AppState.journeyLastStep,
+        completed: true,
+        wonderDraft: '',
+        expressDraft: '',
+        memoryDraft: '',
+        updatedAt: _clock().toIso8601String(),
+      ).clearNarration();
+      return _SnapshotMutation<void>.changed(
+        current.copyWith(
+          journeys: <String, _JourneyCriticalState>{
+            ...current.journeys,
+            journeyId: completedJourney,
+          },
+          earnedJourneyStampIds: stamps.toList()..sort(),
+          memories: nextMemories,
+        ),
+        null,
+      );
+    });
+  }
+
+  @override
+  Future<bool> awardChallengeRewardOnce({
+    required String reward,
+    required String awardId,
+  }) async {
+    return _transact<bool>((current) {
+      if (current.awardedChallengeIds.contains(awardId)) {
+        return const _SnapshotMutation<bool>.unchanged(false);
+      }
+      final awards = Set<String>.from(current.awardedChallengeIds)
+        ..add(awardId);
+      var gold = current.goldCoins;
+      var silver = current.silverCoins;
+      var bronze = current.bronzeCoins;
+      var fragments = current.silverFragments;
+      switch (reward) {
+        case '金币':
+          gold += 1;
+        case '银币':
+          silver += 1;
+        case '铜币':
+          bronze += 1;
+        default:
+          fragments += 1;
+      }
+      return _SnapshotMutation<bool>.changed(
+        current.copyWith(
+          goldCoins: gold,
+          silverCoins: silver,
+          bronzeCoins: bronze,
+          silverFragments: fragments,
+          awardedChallengeIds: awards.toList()..sort(),
+        ),
+        true,
+      );
+    });
+  }
+
+  @override
+  Future<void> awardChallengeReward(String reward) async {
+    await awardChallengeRewardOnce(
+      reward: reward,
+      awardId:
+          'legacy:${_clock().microsecondsSinceEpoch}:${awardedChallengeIds.length}',
+    );
+  }
+
+  @override
+  Future<SpecialJourneyUnlockResult> unlockSpecialJourney({
+    required String journeyId,
+    required String currency,
+    required int cost,
+  }) async {
+    requireDailyJourneyExperience(journeyId);
+    return _transact<SpecialJourneyUnlockResult>((current) {
+      final balance = current.walletBalance(currency);
+      if (current.unlockedSpecialJourneyIds.contains(journeyId)) {
+        return _SnapshotMutation<SpecialJourneyUnlockResult>.unchanged(
+          SpecialJourneyUnlockResult(
+            status: SpecialJourneyUnlockStatus.alreadyUnlocked,
+            currency: currency,
+            cost: cost,
+            balance: balance,
+          ),
+        );
+      }
+      if (cost < 0 || balance < cost) {
+        return _SnapshotMutation<SpecialJourneyUnlockResult>.unchanged(
+          SpecialJourneyUnlockResult(
+            status: SpecialJourneyUnlockStatus.insufficientFunds,
+            currency: currency,
+            cost: cost,
+            balance: balance,
+          ),
+        );
+      }
+
+      var gold = current.goldCoins;
+      var silver = current.silverCoins;
+      var bronze = current.bronzeCoins;
+      var fragments = current.silverFragments;
+      switch (currency) {
+        case '金币':
+          gold -= cost;
+        case '银币':
+          silver -= cost;
+        case '铜币':
+          bronze -= cost;
+        default:
+          fragments -= cost;
+      }
+      final unlocked = Set<String>.from(current.unlockedSpecialJourneyIds)
+        ..add(journeyId);
+      final candidate = current.copyWith(
+        goldCoins: gold,
+        silverCoins: silver,
+        bronzeCoins: bronze,
+        silverFragments: fragments,
+        unlockedSpecialJourneyIds: unlocked.toList()..sort(),
+      );
+      return _SnapshotMutation<SpecialJourneyUnlockResult>.changed(
+        candidate,
+        SpecialJourneyUnlockResult(
+          status: SpecialJourneyUnlockStatus.unlocked,
+          currency: currency,
+          cost: cost,
+          balance: candidate.walletBalance(currency),
+        ),
+      );
+    });
+  }
+
+  @visibleForTesting
+  Future<Map<String, dynamic>> readCommittedCriticalPayload() async {
+    final record = await _criticalStore?.readCommitted();
+    if (record == null) {
+      throw StateError('Critical state is not committed.');
     }
+    return record.payload;
+  }
+
+  Future<T> _transact<T>(
+    _SnapshotMutation<T> Function(_PhoenixCriticalSnapshot current) build,
+  ) async {
+    final store = _criticalStore;
+    if (store == null || _committedSnapshot == null) {
+      throw const CriticalPersistenceException(
+        'Critical state is not ready for mutation.',
+      );
+    }
+
+    try {
+      final transaction = await store.transact<T>((record) {
+        final current = _PhoenixCriticalSnapshot.fromJson(record.payload)
+          ..validate();
+        final mutation = build(current);
+        if (!mutation.changed) {
+          return CriticalMutation<T>.unchanged(result: mutation.result);
+        }
+        final candidate = mutation.snapshot!;
+        candidate.validate();
+        return CriticalMutation<T>.changed(
+          payload: candidate.toJson(),
+          result: mutation.result,
+        );
+      });
+      final committed = _PhoenixCriticalSnapshot.fromJson(
+        transaction.record.payload,
+      )..validate();
+      if (transaction.committed) {
+        _applyCommitted(
+          committed,
+          revision: transaction.record.revision,
+        );
+        notifyListeners();
+      }
+      return transaction.result;
+    } catch (error) {
+      criticalPersistenceFailureReason = error.toString();
+      rethrow;
+    }
+  }
+
+  void _applyCommitted(
+    _PhoenixCriticalSnapshot snapshot, {
+    required int revision,
+  }) {
+    _committedSnapshot = snapshot;
+    criticalRevision = revision;
+    activeJourneyId = snapshot.activeJourneyId;
+    activeJourneyRestoreFailureId = null;
+    activeJourneyRestoreFailureReason = null;
+
+    memories
+      ..clear()
+      ..addAll(snapshot.memories);
+    earnedJourneyStampIds
+      ..clear()
+      ..addAll(snapshot.earnedJourneyStampIds);
+    goldCoins = snapshot.goldCoins;
+    silverCoins = snapshot.silverCoins;
+    bronzeCoins = snapshot.bronzeCoins;
+    silverFragments = snapshot.silverFragments;
+    awardedChallengeIds
+      ..clear()
+      ..addAll(snapshot.awardedChallengeIds);
+    unlockedSpecialJourneyIds
+      ..clear()
+      ..addAll(snapshot.unlockedSpecialJourneyIds);
+
+    final journey = snapshot.requireJourney(snapshot.activeJourneyId);
+    _criticalStep = journey.step;
+    _criticalFurthestStep = journey.furthestStep;
+    journeyCompleted = journey.completed;
+    wonderDraft = journey.wonderDraft;
+    expressDraft = journey.expressDraft;
+    memoryDraft = journey.memoryDraft;
+    guideFeedbackReply = journey.guideFeedbackReply;
+    guideFeedbackOffline = journey.guideFeedbackOffline;
+    writingFeedbackCorrected = journey.writingFeedbackCorrected;
+    writingFeedbackExplanation = journey.writingFeedbackExplanation;
+    writingFeedbackNatural = journey.writingFeedbackNatural;
+    writingFeedbackEncouragement = journey.writingFeedbackEncouragement;
+    writingFeedbackOffline = journey.writingFeedbackOffline;
+    journeyNarrationContentId = journey.narrationContentId;
+    journeyNarrationContentSignature = journey.narrationContentSignature;
+    journeyNarrationOffset = journey.narrationOffset;
+    _criticalNarrationSignatures
+      ..clear()
+      ..addAll(journey.narrationSignatures);
+    _criticalNarrationOffsets
+      ..clear()
+      ..addAll(journey.narrationOffsets);
+    journeyUpdatedAt = DateTime.tryParse(journey.updatedAt ?? '');
+
+    final preferences = _preferences;
+    if (preferences != null) {
+      final binding = requireJourneyLocation(activeJourneyId);
+      final storedDifficulty =
+          preferences.getString('${binding.storageNamespace}.difficulty') ??
+              preferences.getString(
+                '${binding.legacyStorageNamespace}.difficulty',
+              );
+      journeyDifficulty = parseJourneyDifficulty(storedDifficulty);
+      journeyDifficultyChosen = storedDifficulty != null;
+    }
+  }
+
+  void _restoreNonCriticalPreferences(SharedPreferences preferences) {
+    scriptMode = preferences.getBool('traditional') == true
+        ? ScriptMode.traditional
+        : ScriptMode.simplified;
+    translationLanguage =
+        preferences.getString('translationLanguage') ?? '越南语';
+    savedWords
+      ..clear()
+      ..addAll(preferences.getStringList('savedWords') ?? <String>[]);
+  }
+
+  Future<({bool generatedSeed, _PhoenixCriticalSnapshot snapshot})>
+      _buildLegacySnapshot(SharedPreferences preferences) async {
+    final hasSeed = preferences.containsKey(explorerSeedStorageKey);
+    final hasSeedVersion =
+        preferences.containsKey(explorerSeedVersionStorageKey);
+    var generatedSeed = false;
+    late final String seed;
+
+    if (!hasSeed && !hasSeedVersion) {
+      generatedSeed = true;
+      seed = _explorerSeedGenerator();
+      if (!_isValidExplorerSeed(seed)) {
+        _failExplorerSeed('Generated Explorer Seed is invalid.');
+      }
+    } else {
+      if (!hasSeed || !hasSeedVersion) {
+        _failExplorerSeed('Explorer Seed record is incomplete.');
+      }
+      seed = preferences.getString(explorerSeedStorageKey) ?? '';
+      final version = preferences.getInt(explorerSeedVersionStorageKey);
+      if (version != explorerSeedVersion) {
+        _failExplorerSeed(
+          'Explorer Seed version is missing or unsupported: $version.',
+        );
+      }
+      if (!_isValidExplorerSeed(seed)) {
+        _failExplorerSeed('Persisted Explorer Seed is empty or corrupt.');
+      }
+    }
+
+    final hasActiveId = preferences.containsKey(_activeJourneyIdStorageKey);
+    final hasActiveNamespace =
+        preferences.containsKey(_activeJourneyNamespaceStorageKey);
+    final hasActiveVersion =
+        preferences.containsKey(_activeJourneyVersionStorageKey);
+
+    late final String initialJourneyId;
+    late final String initialNamespace;
+    if (!hasActiveId && !hasActiveNamespace && !hasActiveVersion) {
+      final assignment = JourneyAccessPolicy.assignDailyJourneys(
+        journeyIds: eligibleRegularJourneyIds,
+        explorerSeed: seed,
+        localDate: _clock(),
+      );
+      initialJourneyId = assignment.journeyIdFor(currentDailySlot);
+      initialNamespace =
+          requireJourneyLocation(initialJourneyId).storageNamespace;
+    } else {
+      if (!hasActiveId || !hasActiveNamespace || !hasActiveVersion) {
+        final requested =
+            preferences.getString(_activeJourneyIdStorageKey) ?? '';
+        _failActiveIdentity(
+          requested,
+          'Persisted active Journey identity is incomplete.',
+        );
+      }
+      initialJourneyId =
+          preferences.getString(_activeJourneyIdStorageKey) ?? '';
+      if (initialJourneyId.trim().isEmpty ||
+          journeyExperienceById(initialJourneyId) == null) {
+        _failActiveIdentity(
+          initialJourneyId,
+          'Persisted active Journey is missing or no longer registered.',
+        );
+      }
+      final binding = requireJourneyLocation(initialJourneyId);
+      initialNamespace =
+          preferences.getString(_activeJourneyNamespaceStorageKey) ?? '';
+      final version = preferences.getInt(_activeJourneyVersionStorageKey);
+      if (version != _activeJourneyIdentityVersion) {
+        _failActiveIdentity(
+          initialJourneyId,
+          'Active Journey identity version is missing or unsupported: '
+          '$version.',
+        );
+      }
+      if (initialNamespace != binding.storageNamespace) {
+        _failActiveIdentity(
+          initialJourneyId,
+          'Active Journey namespace mismatch: expected '
+          '${binding.storageNamespace}, found $initialNamespace.',
+        );
+      }
+    }
+
+    final journeys = <String, _JourneyCriticalState>{};
+    for (final journey in dailyJourneyExperiences) {
+      journeys[journey.id] = _readLegacyJourney(preferences, journey.id);
+    }
+
+    final stamps = <String>{
+      ...?preferences.getStringList('earnedJourneyStampIds'),
+    };
+    if (preferences.getBool('beijingStampEarned') == true ||
+        preferences.getBool('journeyCompleted') == true) {
+      stamps.add('beijing-forbidden-city');
+    }
+
+    return (
+      generatedSeed: generatedSeed,
+      snapshot: _PhoenixCriticalSnapshot(
+        explorerSeed: seed,
+        explorerSeedVersion: explorerSeedVersion,
+        activeJourneyId: initialJourneyId,
+        activeJourneyNamespace: initialNamespace,
+        activeIdentityVersion: _activeJourneyIdentityVersion,
+        journeys: journeys,
+        earnedJourneyStampIds: stamps.toList()..sort(),
+        memories: List<String>.from(
+          preferences.getStringList('memories') ?? <String>[],
+        ),
+        awardedChallengeIds: <String>{
+          ...?preferences.getStringList('challenge.awardedIds'),
+        }.toList()
+          ..sort(),
+        goldCoins: math.max(0, preferences.getInt('wallet.gold') ?? 0),
+        silverCoins: math.max(0, preferences.getInt('wallet.silver') ?? 0),
+        bronzeCoins: math.max(0, preferences.getInt('wallet.bronze') ?? 0),
+        silverFragments:
+            math.max(0, preferences.getInt('wallet.fragment') ?? 0),
+        unlockedSpecialJourneyIds: <String>{
+          ...?preferences.getStringList('specialJourney.unlockedIds'),
+        }.toList()
+          ..sort(),
+      ),
+    );
+  }
+
+  _JourneyCriticalState _readLegacyJourney(
+    SharedPreferences preferences,
+    String journeyId,
+  ) {
+    final binding = requireJourneyLocation(journeyId);
+    final current = binding.storageNamespace;
+    final legacy = binding.legacyStorageNamespace;
+    final isBeijing = journeyId == 'beijing-forbidden-city';
+
+    int? readInt(String suffix) =>
+        preferences.getInt('$current.$suffix') ??
+        preferences.getInt('$legacy.$suffix');
+    bool? readBool(String suffix) =>
+        preferences.getBool('$current.$suffix') ??
+        preferences.getBool('$legacy.$suffix');
+    String? readString(String suffix) =>
+        preferences.getString('$current.$suffix') ??
+        preferences.getString('$legacy.$suffix');
+
+    final rawStep = readInt('step') ??
+        (isBeijing ? preferences.getInt('beijingJourneyStep') : null) ??
+        0;
+    final rawFurthest = readInt('furthestStep') ??
+        (isBeijing
+            ? preferences.getInt('beijingJourneyFurthestStep')
+            : null) ??
+        rawStep;
+    final completed = readBool('completed') ??
+        (isBeijing ? preferences.getBool('journeyCompleted') : null) ??
+        false;
+    final step = completed
+        ? AppState.journeyLastStep
+        : _safeJourneyStep(rawStep);
+    final furthest = completed
+        ? AppState.journeyLastStep
+        : math.max(step, _safeJourneyStep(rawFurthest)).toInt();
+
+    final contentId = readString('narrationContentId');
+    final contentSignature = readString('narrationContentSignature');
+    final narrationOffset = math.max(0, readInt('narrationOffset') ?? 0);
+    final signatures = <String, String>{};
+    final offsets = <String, int>{};
+    for (final id in const ['story', 'discovery']) {
+      final signature =
+          preferences.getString('$current.narration.$id.signature') ??
+          preferences.getString('$legacy.narration.$id.signature') ??
+          (contentId == id ? contentSignature : null);
+      final offset =
+          preferences.getInt('$current.narration.$id.offset') ??
+          preferences.getInt('$legacy.narration.$id.offset') ??
+          (contentId == id ? narrationOffset : 0);
+      if (signature != null && offset > 0) {
+        signatures[id] = signature;
+        offsets[id] = offset;
+      }
+    }
+
+    return _JourneyCriticalState(
+      journeyId: journeyId,
+      storageNamespace: binding.storageNamespace,
+      step: step,
+      furthestStep: furthest,
+      completed: completed,
+      wonderDraft: readString('wonderDraft') ??
+          (isBeijing ? preferences.getString('wonderDraft') : null) ??
+          '',
+      expressDraft: readString('expressDraft') ??
+          (isBeijing ? preferences.getString('expressDraft') : null) ??
+          '',
+      memoryDraft: readString('memoryDraft') ??
+          (isBeijing ? preferences.getString('memoryDraft') : null) ??
+          '',
+      guideFeedbackReply: readString('guideFeedbackReply') ?? '',
+      guideFeedbackOffline: readBool('guideFeedbackOffline') ?? false,
+      writingFeedbackCorrected:
+          readString('writingFeedbackCorrected') ?? '',
+      writingFeedbackExplanation:
+          readString('writingFeedbackExplanation') ?? '',
+      writingFeedbackNatural: readString('writingFeedbackNatural') ?? '',
+      writingFeedbackEncouragement:
+          readString('writingFeedbackEncouragement') ?? '',
+      writingFeedbackOffline: readBool('writingFeedbackOffline') ?? false,
+      narrationContentId: contentId,
+      narrationContentSignature: contentSignature,
+      narrationOffset: narrationOffset,
+      narrationSignatures: signatures,
+      narrationOffsets: offsets,
+      updatedAt: readString('updatedAt') ??
+          (isBeijing ? preferences.getString('journeyUpdatedAt') : null),
+    );
   }
 
   bool _canRestoreActiveJourney(String journeyId) {
@@ -341,7 +1102,9 @@ class AccessControlledAppState extends AppState {
           journeyNarrationOffset > 0);
 
   bool _isRegularJourneyId(String journeyId) =>
-      dailyJourneyExperiences.any((journey) => journey.id == journeyId);
+      dailyJourneyExperiences
+          .where((journey) => !journey.isSpecial)
+          .any((journey) => journey.id == journeyId);
 
   String _accessDenialReason(String journeyId) {
     if (_isRegularJourneyId(journeyId)) {
@@ -354,9 +1117,20 @@ class AccessControlledAppState extends AppState {
     return 'Special Journey is not unlocked.';
   }
 
+  int _safeJourneyStep(int value) =>
+      value.clamp(0, AppState.journeyLastStep).toInt();
+
   Never _failExplorerSeed(String reason) {
     explorerSeedFailureReason = reason;
     throw StateError(reason);
+  }
+
+  Never _failActiveIdentity(String requestedId, String reason) {
+    activeJourneyRestoreFailureId = requestedId;
+    activeJourneyRestoreFailureReason = reason;
+    throw StateError(
+      'Cannot restore active Journey "$requestedId": $reason',
+    );
   }
 
   static bool _isTrustedPreviewUri(Uri uri) {
@@ -377,22 +1151,523 @@ class AccessControlledAppState extends AppState {
     }
     return buffer.toString();
   }
+}
 
-  static Future<bool> _persistExplorerSeed(
-    SharedPreferences preferences,
-    String seed,
-    int version,
-  ) async {
-    final seedWritten = await preferences.setString(
-      explorerSeedStorageKey,
-      seed,
+class _SnapshotMutation<T> {
+  const _SnapshotMutation.changed(this.snapshot, this.result) : changed = true;
+
+  const _SnapshotMutation.unchanged(this.result)
+      : changed = false,
+        snapshot = null;
+
+  final bool changed;
+  final _PhoenixCriticalSnapshot? snapshot;
+  final T result;
+}
+
+class _PhoenixCriticalSnapshot {
+  const _PhoenixCriticalSnapshot({
+    required this.explorerSeed,
+    required this.explorerSeedVersion,
+    required this.activeJourneyId,
+    required this.activeJourneyNamespace,
+    required this.activeIdentityVersion,
+    required this.journeys,
+    required this.earnedJourneyStampIds,
+    required this.memories,
+    required this.awardedChallengeIds,
+    required this.goldCoins,
+    required this.silverCoins,
+    required this.bronzeCoins,
+    required this.silverFragments,
+    required this.unlockedSpecialJourneyIds,
+  });
+
+  factory _PhoenixCriticalSnapshot.fromJson(Map<String, dynamic> json) {
+    final rawJourneys = json['journeys'];
+    if (rawJourneys is! Map) {
+      throw const CriticalPersistenceException(
+        'Critical Journey map is missing or invalid.',
+      );
+    }
+    return _PhoenixCriticalSnapshot(
+      explorerSeed: json['explorerSeed'] as String? ?? '',
+      explorerSeedVersion: json['explorerSeedVersion'] as int? ?? -1,
+      activeJourneyId: json['activeJourneyId'] as String? ?? '',
+      activeJourneyNamespace:
+          json['activeJourneyNamespace'] as String? ?? '',
+      activeIdentityVersion: json['activeIdentityVersion'] as int? ?? -1,
+      journeys: <String, _JourneyCriticalState>{
+        for (final entry in rawJourneys.entries)
+          entry.key.toString(): _JourneyCriticalState.fromJson(
+            _asStringMap(entry.value, 'Journey ${entry.key}'),
+          ),
+      },
+      earnedJourneyStampIds:
+          _stringList(json['earnedJourneyStampIds'], 'earned Journey stamps'),
+      memories: _stringList(json['memories'], 'memories'),
+      awardedChallengeIds:
+          _stringList(json['awardedChallengeIds'], 'awarded Challenge IDs'),
+      goldCoins: json['goldCoins'] as int? ?? -1,
+      silverCoins: json['silverCoins'] as int? ?? -1,
+      bronzeCoins: json['bronzeCoins'] as int? ?? -1,
+      silverFragments: json['silverFragments'] as int? ?? -1,
+      unlockedSpecialJourneyIds: _stringList(
+        json['unlockedSpecialJourneyIds'],
+        'unlocked Special Journey IDs',
+      ),
     );
-    final versionWritten = await preferences.setInt(
-      explorerSeedVersionStorageKey,
-      version,
-    );
-    return seedWritten && versionWritten;
   }
+
+  final String explorerSeed;
+  final int explorerSeedVersion;
+  final String activeJourneyId;
+  final String activeJourneyNamespace;
+  final int activeIdentityVersion;
+  final Map<String, _JourneyCriticalState> journeys;
+  final List<String> earnedJourneyStampIds;
+  final List<String> memories;
+  final List<String> awardedChallengeIds;
+  final int goldCoins;
+  final int silverCoins;
+  final int bronzeCoins;
+  final int silverFragments;
+  final List<String> unlockedSpecialJourneyIds;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'explorerSeed': explorerSeed,
+        'explorerSeedVersion': explorerSeedVersion,
+        'activeJourneyId': activeJourneyId,
+        'activeJourneyNamespace': activeJourneyNamespace,
+        'activeIdentityVersion': activeIdentityVersion,
+        'journeys': <String, dynamic>{
+          for (final entry in journeys.entries)
+            entry.key: entry.value.toJson(),
+        },
+        'earnedJourneyStampIds': earnedJourneyStampIds,
+        'memories': memories,
+        'awardedChallengeIds': awardedChallengeIds,
+        'goldCoins': goldCoins,
+        'silverCoins': silverCoins,
+        'bronzeCoins': bronzeCoins,
+        'silverFragments': silverFragments,
+        'unlockedSpecialJourneyIds': unlockedSpecialJourneyIds,
+      };
+
+  _PhoenixCriticalSnapshot copyWith({
+    String? activeJourneyId,
+    String? activeJourneyNamespace,
+    Map<String, _JourneyCriticalState>? journeys,
+    List<String>? earnedJourneyStampIds,
+    List<String>? memories,
+    List<String>? awardedChallengeIds,
+    int? goldCoins,
+    int? silverCoins,
+    int? bronzeCoins,
+    int? silverFragments,
+    List<String>? unlockedSpecialJourneyIds,
+  }) {
+    return _PhoenixCriticalSnapshot(
+      explorerSeed: explorerSeed,
+      explorerSeedVersion: explorerSeedVersion,
+      activeJourneyId: activeJourneyId ?? this.activeJourneyId,
+      activeJourneyNamespace:
+          activeJourneyNamespace ?? this.activeJourneyNamespace,
+      activeIdentityVersion: activeIdentityVersion,
+      journeys: journeys ?? this.journeys,
+      earnedJourneyStampIds:
+          earnedJourneyStampIds ?? this.earnedJourneyStampIds,
+      memories: memories ?? this.memories,
+      awardedChallengeIds:
+          awardedChallengeIds ?? this.awardedChallengeIds,
+      goldCoins: goldCoins ?? this.goldCoins,
+      silverCoins: silverCoins ?? this.silverCoins,
+      bronzeCoins: bronzeCoins ?? this.bronzeCoins,
+      silverFragments: silverFragments ?? this.silverFragments,
+      unlockedSpecialJourneyIds:
+          unlockedSpecialJourneyIds ?? this.unlockedSpecialJourneyIds,
+    );
+  }
+
+  _PhoenixCriticalSnapshot withJourney(_JourneyCriticalState journey) {
+    return copyWith(
+      journeys: <String, _JourneyCriticalState>{
+        ...journeys,
+        journey.journeyId: journey,
+      },
+    );
+  }
+
+  _JourneyCriticalState requireJourney(String journeyId) {
+    final journey = journeys[journeyId];
+    if (journey == null) {
+      throw CriticalPersistenceException(
+        'Critical state has no Journey payload for $journeyId.',
+      );
+    }
+    return journey;
+  }
+
+  int walletBalance(String currency) {
+    return switch (currency) {
+      '金币' => goldCoins,
+      '银币' => silverCoins,
+      '铜币' => bronzeCoins,
+      _ => silverFragments,
+    };
+  }
+
+  void validate() {
+    if (!AccessControlledAppState._isValidExplorerSeed(explorerSeed)) {
+      throw const CriticalPersistenceException(
+        'Committed Explorer Seed is empty or corrupt.',
+      );
+    }
+    if (explorerSeedVersion != AccessControlledAppState.explorerSeedVersion) {
+      throw CriticalPersistenceException(
+        'Unsupported committed Explorer Seed version: '
+        '$explorerSeedVersion.',
+      );
+    }
+    final active = journeyExperienceById(activeJourneyId);
+    if (active == null) {
+      throw CriticalPersistenceException(
+        'Committed active Journey is not registered: $activeJourneyId.',
+      );
+    }
+    final binding = requireJourneyLocation(activeJourneyId);
+    if (activeJourneyNamespace != binding.storageNamespace) {
+      throw CriticalPersistenceException(
+        'Committed active Journey namespace mismatch for $activeJourneyId.',
+      );
+    }
+    if (activeIdentityVersion !=
+        AccessControlledAppState._activeJourneyIdentityVersion) {
+      throw CriticalPersistenceException(
+        'Unsupported active Journey identity version: '
+        '$activeIdentityVersion.',
+      );
+    }
+    if (!journeys.containsKey(activeJourneyId)) {
+      throw const CriticalPersistenceException(
+        'Committed active Journey payload is missing.',
+      );
+    }
+    for (final entry in journeys.entries) {
+      if (entry.key != entry.value.journeyId ||
+          journeyExperienceById(entry.key) == null) {
+        throw CriticalPersistenceException(
+          'Invalid committed Journey domain identity: ${entry.key}.',
+        );
+      }
+      entry.value.validate();
+    }
+    _validateUniqueIds(earnedJourneyStampIds, 'earned Journey stamps');
+    _validateUniqueIds(awardedChallengeIds, 'awarded Challenge IDs');
+    _validateUniqueIds(
+      unlockedSpecialJourneyIds,
+      'unlocked Special Journey IDs',
+    );
+    for (final id in <String>{
+      ...earnedJourneyStampIds,
+      ...unlockedSpecialJourneyIds,
+    }) {
+      if (journeyExperienceById(id) == null) {
+        throw CriticalPersistenceException(
+          'Committed Journey ID is not registered: $id.',
+        );
+      }
+    }
+    if (goldCoins < 0 ||
+        silverCoins < 0 ||
+        bronzeCoins < 0 ||
+        silverFragments < 0) {
+      throw const CriticalPersistenceException(
+        'Committed wallet contains a negative balance.',
+      );
+    }
+    for (final journey in journeys.values.where((item) => item.completed)) {
+      if (!earnedJourneyStampIds.contains(journey.journeyId)) {
+        throw CriticalPersistenceException(
+          'Completed Journey ${journey.journeyId} has no committed Stamp.',
+        );
+      }
+    }
+  }
+
+  static void _validateUniqueIds(List<String> values, String label) {
+    if (values.any((value) => value.trim().isEmpty) ||
+        values.toSet().length != values.length) {
+      throw CriticalPersistenceException(
+        'Committed $label contains empty or duplicate IDs.',
+      );
+    }
+  }
+}
+
+class _JourneyCriticalState {
+  const _JourneyCriticalState({
+    required this.journeyId,
+    required this.storageNamespace,
+    required this.step,
+    required this.furthestStep,
+    required this.completed,
+    required this.wonderDraft,
+    required this.expressDraft,
+    required this.memoryDraft,
+    required this.guideFeedbackReply,
+    required this.guideFeedbackOffline,
+    required this.writingFeedbackCorrected,
+    required this.writingFeedbackExplanation,
+    required this.writingFeedbackNatural,
+    required this.writingFeedbackEncouragement,
+    required this.writingFeedbackOffline,
+    required this.narrationContentId,
+    required this.narrationContentSignature,
+    required this.narrationOffset,
+    required this.narrationSignatures,
+    required this.narrationOffsets,
+    required this.updatedAt,
+  });
+
+  factory _JourneyCriticalState.fromJson(Map<String, dynamic> json) {
+    return _JourneyCriticalState(
+      journeyId: json['journeyId'] as String? ?? '',
+      storageNamespace: json['storageNamespace'] as String? ?? '',
+      step: json['step'] as int? ?? -1,
+      furthestStep: json['furthestStep'] as int? ?? -1,
+      completed: json['completed'] as bool? ?? false,
+      wonderDraft: json['wonderDraft'] as String? ?? '',
+      expressDraft: json['expressDraft'] as String? ?? '',
+      memoryDraft: json['memoryDraft'] as String? ?? '',
+      guideFeedbackReply: json['guideFeedbackReply'] as String? ?? '',
+      guideFeedbackOffline: json['guideFeedbackOffline'] as bool? ?? false,
+      writingFeedbackCorrected:
+          json['writingFeedbackCorrected'] as String? ?? '',
+      writingFeedbackExplanation:
+          json['writingFeedbackExplanation'] as String? ?? '',
+      writingFeedbackNatural:
+          json['writingFeedbackNatural'] as String? ?? '',
+      writingFeedbackEncouragement:
+          json['writingFeedbackEncouragement'] as String? ?? '',
+      writingFeedbackOffline:
+          json['writingFeedbackOffline'] as bool? ?? false,
+      narrationContentId: json['narrationContentId'] as String?,
+      narrationContentSignature:
+          json['narrationContentSignature'] as String?,
+      narrationOffset: json['narrationOffset'] as int? ?? 0,
+      narrationSignatures: _stringMap(
+        json['narrationSignatures'],
+        'narration signatures',
+      ),
+      narrationOffsets: _intMap(
+        json['narrationOffsets'],
+        'narration offsets',
+      ),
+      updatedAt: json['updatedAt'] as String?,
+    );
+  }
+
+  final String journeyId;
+  final String storageNamespace;
+  final int step;
+  final int furthestStep;
+  final bool completed;
+  final String wonderDraft;
+  final String expressDraft;
+  final String memoryDraft;
+  final String guideFeedbackReply;
+  final bool guideFeedbackOffline;
+  final String writingFeedbackCorrected;
+  final String writingFeedbackExplanation;
+  final String writingFeedbackNatural;
+  final String writingFeedbackEncouragement;
+  final bool writingFeedbackOffline;
+  final String? narrationContentId;
+  final String? narrationContentSignature;
+  final int narrationOffset;
+  final Map<String, String> narrationSignatures;
+  final Map<String, int> narrationOffsets;
+  final String? updatedAt;
+
+  bool get hasNarration =>
+      narrationContentId != null ||
+      narrationContentSignature != null ||
+      narrationOffset > 0 ||
+      narrationSignatures.isNotEmpty ||
+      narrationOffsets.isNotEmpty;
+
+  bool get hasWritingFeedback =>
+      writingFeedbackCorrected.isNotEmpty ||
+      writingFeedbackExplanation.isNotEmpty ||
+      writingFeedbackNatural.isNotEmpty ||
+      writingFeedbackEncouragement.isNotEmpty ||
+      writingFeedbackOffline;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'journeyId': journeyId,
+        'storageNamespace': storageNamespace,
+        'step': step,
+        'furthestStep': furthestStep,
+        'completed': completed,
+        'wonderDraft': wonderDraft,
+        'expressDraft': expressDraft,
+        'memoryDraft': memoryDraft,
+        'guideFeedbackReply': guideFeedbackReply,
+        'guideFeedbackOffline': guideFeedbackOffline,
+        'writingFeedbackCorrected': writingFeedbackCorrected,
+        'writingFeedbackExplanation': writingFeedbackExplanation,
+        'writingFeedbackNatural': writingFeedbackNatural,
+        'writingFeedbackEncouragement': writingFeedbackEncouragement,
+        'writingFeedbackOffline': writingFeedbackOffline,
+        'narrationContentId': narrationContentId,
+        'narrationContentSignature': narrationContentSignature,
+        'narrationOffset': narrationOffset,
+        'narrationSignatures': narrationSignatures,
+        'narrationOffsets': narrationOffsets,
+        'updatedAt': updatedAt,
+      };
+
+  _JourneyCriticalState copyWith({
+    int? step,
+    int? furthestStep,
+    bool? completed,
+    String? wonderDraft,
+    String? expressDraft,
+    String? memoryDraft,
+    String? guideFeedbackReply,
+    bool? guideFeedbackOffline,
+    String? writingFeedbackCorrected,
+    String? writingFeedbackExplanation,
+    String? writingFeedbackNatural,
+    String? writingFeedbackEncouragement,
+    bool? writingFeedbackOffline,
+    String? narrationContentId,
+    String? narrationContentSignature,
+    int? narrationOffset,
+    Map<String, String>? narrationSignatures,
+    Map<String, int>? narrationOffsets,
+    String? updatedAt,
+    bool replaceNullableNarration = false,
+  }) {
+    return _JourneyCriticalState(
+      journeyId: journeyId,
+      storageNamespace: storageNamespace,
+      step: step ?? this.step,
+      furthestStep: furthestStep ?? this.furthestStep,
+      completed: completed ?? this.completed,
+      wonderDraft: wonderDraft ?? this.wonderDraft,
+      expressDraft: expressDraft ?? this.expressDraft,
+      memoryDraft: memoryDraft ?? this.memoryDraft,
+      guideFeedbackReply: guideFeedbackReply ?? this.guideFeedbackReply,
+      guideFeedbackOffline:
+          guideFeedbackOffline ?? this.guideFeedbackOffline,
+      writingFeedbackCorrected:
+          writingFeedbackCorrected ?? this.writingFeedbackCorrected,
+      writingFeedbackExplanation:
+          writingFeedbackExplanation ?? this.writingFeedbackExplanation,
+      writingFeedbackNatural:
+          writingFeedbackNatural ?? this.writingFeedbackNatural,
+      writingFeedbackEncouragement:
+          writingFeedbackEncouragement ?? this.writingFeedbackEncouragement,
+      writingFeedbackOffline:
+          writingFeedbackOffline ?? this.writingFeedbackOffline,
+      narrationContentId: replaceNullableNarration
+          ? narrationContentId
+          : narrationContentId ?? this.narrationContentId,
+      narrationContentSignature: replaceNullableNarration
+          ? narrationContentSignature
+          : narrationContentSignature ?? this.narrationContentSignature,
+      narrationOffset: narrationOffset ?? this.narrationOffset,
+      narrationSignatures:
+          narrationSignatures ?? this.narrationSignatures,
+      narrationOffsets: narrationOffsets ?? this.narrationOffsets,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  _JourneyCriticalState clearNarration() => copyWith(
+        narrationContentId: null,
+        narrationContentSignature: null,
+        narrationOffset: 0,
+        narrationSignatures: const <String, String>{},
+        narrationOffsets: const <String, int>{},
+        replaceNullableNarration: true,
+      );
+
+  void validate() {
+    final binding = requireJourneyLocation(journeyId);
+    if (storageNamespace != binding.storageNamespace) {
+      throw CriticalPersistenceException(
+        'Journey namespace mismatch for $journeyId.',
+      );
+    }
+    if (step < 0 ||
+        step > AppState.journeyLastStep ||
+        furthestStep < step ||
+        furthestStep > AppState.journeyLastStep) {
+      throw CriticalPersistenceException(
+        'Journey step range is invalid for $journeyId.',
+      );
+    }
+    if (completed &&
+        (step != AppState.journeyLastStep ||
+            furthestStep != AppState.journeyLastStep)) {
+      throw CriticalPersistenceException(
+        'Journey completion state is inconsistent for $journeyId.',
+      );
+    }
+    if (narrationOffset < 0 ||
+        narrationOffsets.values.any((offset) => offset < 0)) {
+      throw CriticalPersistenceException(
+        'Journey narration offset is invalid for $journeyId.',
+      );
+    }
+    if (narrationOffsets.keys.toSet().difference(
+          narrationSignatures.keys.toSet(),
+        ).isNotEmpty) {
+      throw CriticalPersistenceException(
+        'Journey narration signature binding is incomplete for $journeyId.',
+      );
+    }
+    if (updatedAt != null && DateTime.tryParse(updatedAt!) == null) {
+      throw CriticalPersistenceException(
+        'Journey updatedAt is invalid for $journeyId.',
+      );
+    }
+  }
+}
+
+Map<String, dynamic> _asStringMap(Object? value, String label) {
+  if (value is! Map) {
+    throw CriticalPersistenceException('$label is not a JSON object.');
+  }
+  return value.map((key, item) => MapEntry(key.toString(), item));
+}
+
+List<String> _stringList(Object? value, String label) {
+  if (value is! List || value.any((item) => item is! String)) {
+    throw CriticalPersistenceException('$label is not a string list.');
+  }
+  return value.cast<String>().toList(growable: false);
+}
+
+Map<String, String> _stringMap(Object? value, String label) {
+  if (value is! Map || value.values.any((item) => item is! String)) {
+    throw CriticalPersistenceException('$label is not a string map.');
+  }
+  return value.map(
+    (key, item) => MapEntry(key.toString(), item as String),
+  );
+}
+
+Map<String, int> _intMap(Object? value, String label) {
+  if (value is! Map || value.values.any((item) => item is! int)) {
+    throw CriticalPersistenceException('$label is not an integer map.');
+  }
+  return value.map(
+    (key, item) => MapEntry(key.toString(), item as int),
+  );
 }
 
 extension JourneyAccessAppState on AppState {
