@@ -10,13 +10,20 @@ This standard defines the common product skeleton for all existing and future Ph
 
 Shared product structure MUST create consistency without turning Journeys into repeated story or visual templates.
 
-## 2. Requirement classes
+## 2. Canonical requirement classes
+
+All Phoenix Journey standards, matrices, and reviews MUST use only:
 
 - `REQUIRED`: Every Journey MUST provide the element or an explicit validated equivalent.
-- `CONDITIONALLY_REQUIRED`: The element MUST exist when the Journey type, learning design, entitlement, or feature uses it.
+- `CONDITIONALLY_REQUIRED`: The element MUST exist when its stated applicability condition is true.
 - `OPTIONAL`: The element MAY be omitted without weakening required flow; omission MUST not create an incomplete stage.
 
-`NOT_APPLICABLE` requires a documented reason.
+Legacy terms, when encountered in historical records, map only as follows:
+
+- `MANDATORY` = `REQUIRED`
+- `CONDITIONAL` = `CONDITIONALLY_REQUIRED`
+
+New rules, tables, and records MUST use the canonical terms. `NOT_APPLICABLE` requires a documented applicability reason and supporting evidence; it is not automatic `PASS`.
 
 ## 3. Canonical Journey identity
 
@@ -28,20 +35,22 @@ Shared product structure MUST create consistency without turning Journeys into r
 | Story ID | REQUIRED | Unique and linked to the correct Journey. |
 | Cultural Anchor | REQUIRED | Specific, meaningful, integrated into action or learning, and not decorative trivia. |
 | Protagonist | REQUIRED | Independent identity, agency, and relation to the Journey. |
-| Relationship | REQUIRED | Defines the meaningful human or narrative relationship that shapes the Journey. |
-| Goal | REQUIRED | Concrete goal understandable to the learner. |
+| Relationship | REQUIRED | Defines the relationship identity, narrative function, and influence on the Journey. |
+| Goal | REQUIRED | Defines the protagonist goal, why it matters, and how it relates to the conflict. |
 | Conflict | REQUIRED | Real obstacle, tension, or dilemma that affects the goal. |
 | Choice | REQUIRED | A meaningful decision or commitment, not a cosmetic branch. |
 | Consequence | REQUIRED | A visible result caused by action or choice. |
 | Emotional Arc | REQUIRED | Identifiable emotional movement from opening through consequence and ending. |
 
+Relationship and Goal MUST be accepted as independent requirements with their own evidence paths, Result, and Evidence Level. They MUST NOT be inferred only from a general Story review.
+
 ## 4. Learning and narrative stages
 
-| Stage or element | Requirement | Product purpose |
+| Stage or element | Requirement | Product purpose and applicability |
 |---|---|---|
 | Story | REQUIRED | Delivers the independent narrative, language input, context, conflict, choice, and consequence. |
 | Vocabulary | REQUIRED | Teaches selected words in the Journey context with correct language support. |
-| ReadingAnnotation | REQUIRED when reading text is present | Aligns source text, pronunciation or annotation, translations, and segmentation. |
+| ReadingAnnotation | CONDITIONALLY_REQUIRED | Required when the Journey contains Story, Discovery, or other learning text intended for explorer reading. It aligns source text, pronunciation or annotation, translations, and segmentation. If no applicable reading text exists, use `NOT_APPLICABLE` with reason and evidence. |
 | Discovery | REQUIRED | Explains culture, context, place, practice, or meaning without duplicating Story. |
 | Challenge | REQUIRED | Tests understanding or application with valid feedback. |
 | Reflection | REQUIRED | Connects the Journey to interpretation, feeling, or personal thought. |
@@ -49,7 +58,7 @@ Shared product structure MUST create consistency without turning Journeys into r
 | Memory | REQUIRED | Creates a durable Journey-specific recall anchor. |
 | Completion | REQUIRED | Confirms completion, progress, next action, and saved state. |
 | Reward | REQUIRED | Provides the approved progression or recognition outcome. |
-| Stamp | REQUIRED when Passport uses stamps | Uses the correct Journey identity and saved completion state. |
+| Stamp | CONDITIONALLY_REQUIRED | Required when completion, reward, Passport, collection, or progress design includes a Stamp. If an explicit product decision excludes Stamp, use `NOT_APPLICABLE` with the design basis and evidence; do not use `OPTIONAL` to hide a missing Stamp. |
 | Visual Stages | REQUIRED | Provides stage-appropriate visual direction and runtime mapping. |
 | Narration | CONDITIONALLY_REQUIRED | Required wherever the product provides reading or audio playback. |
 | Multilingual Content | REQUIRED | All supported language variants remain meaning-aligned and correctly routed. |
@@ -60,7 +69,7 @@ Shared product structure MUST create consistency without turning Journeys into r
 | Error | REQUIRED | Handles invalid, unavailable, permission, network, and service failures as applicable. |
 | Fallback | REQUIRED | Provides safe degradation without wrong content or low-quality runtime substitution. |
 | Accessibility | REQUIRED | Meets semantic, focus, text, contrast, motion, and input requirements. |
-| Rights Evidence | REQUIRED for protected or sourced material | Records approved source, permission, license, or creation evidence without replacing visual approval. |
+| Rights Evidence | CONDITIONALLY_REQUIRED | Required for protected, sourced, licensed, or permission-controlled material; it records approved provenance without replacing visual approval. |
 
 ## 5. Story requirements
 
@@ -88,7 +97,7 @@ Stages MAY reuse shared page components, navigation logic, and state handling. E
 - Writing is learner production.
 - Memory is durable recall design.
 - Completion records outcome and next action.
-- Reward and Stamp represent approved progression.
+- Reward and conditionally applicable Stamp represent approved progression.
 
 Copying the same text across stages to satisfy field presence is prohibited.
 
@@ -131,7 +140,7 @@ Each special Journey MUST independently define:
 
 - literary structure;
 - protagonist and relationship;
-- conflict, choice, and consequence;
+- goal, conflict, choice, and consequence;
 - emotional arc;
 - imagery and visual composition;
 - environment and color relationships;
@@ -170,7 +179,7 @@ For every Journey, reviewers MUST verify:
 - correct data record and language variant;
 - correct asset path and visual stage;
 - correct progress key and completion event;
-- correct reward and stamp mapping;
+- correct reward and conditionally applicable stamp mapping;
 - no fallback to another Journey's content;
 - no implementation inherited from closed PRs `#138`–`#141` as a baseline.
 
@@ -221,7 +230,7 @@ The Journey MUST define and verify:
 - completion criteria;
 - replay behavior;
 - reward issuance and idempotency;
-- stamp issuance when applicable;
+- Stamp applicability decision and issuance when applicable;
 - unlock effects;
 - migration behavior when IDs or content versions change.
 
@@ -257,6 +266,9 @@ Journey acceptance MUST include applicable:
 
 - proposal and design record;
 - exact paths, IDs, routes, and candidate Commit;
+- independent Relationship and Goal evidence;
+- ReadingAnnotation applicability and evidence;
+- Stamp applicability and evidence;
 - stable and candidate page evidence;
 - multilingual alignment evidence;
 - narration and interaction evidence;
@@ -274,12 +286,13 @@ Use [Phoenix New Journey Acceptance Matrix](templates/PHOENIX_NEW_JOURNEY_ACCEPT
 
 A Journey MUST NOT be marked Completed when:
 
-- any REQUIRED element is missing;
-- a Mandatory acceptance item is not `PASS` with `VERIFIED` evidence;
+- any `REQUIRED` element is missing;
+- any applicable `CONDITIONALLY_REQUIRED` element is missing or lacks an evidence-backed `NOT_APPLICABLE` decision;
+- a REQUIRED acceptance item is not `PASS` with `VERIFIED` evidence;
 - content or visuals are interchangeable templates;
 - route, ID, asset, language, progress, reward, or stamp mapping is unverified;
 - the stable comparison is missing;
 - any regression exists;
-- Founder mobile approval is required but not APPROVED.
+- Founder mobile approval is required but not `APPROVED`.
 
 New Journey execution follows [Phoenix New Journey Creation Standard](PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md).
