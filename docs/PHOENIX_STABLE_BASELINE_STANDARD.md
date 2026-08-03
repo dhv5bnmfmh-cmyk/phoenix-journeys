@@ -23,9 +23,20 @@ The current and only approved stable product baseline is:
 - Stable `main` Commit: `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
 - Stable branch: `main`
 
-Closed PRs `#138`, `#139`, `#140`, and `#141` are historical and problem evidence only. They MUST NOT be used as a development baseline, inherited implementation source, visual reference, or merge target.
+PR `#132` is a historical merged version and is not the current development baseline. Closed PRs `#138`, `#139`, `#140`, and `#141` are historical and problem evidence only. They MUST NOT be used as a development baseline, inherited implementation source, visual reference, or merge target.
 
 The stable baseline does not automatically move to the newest PR, newest Commit, newest Preview, newest successful CI run, or newest merged documentation. A candidate becomes the new stable baseline only after all update conditions in Section 4 are satisfied.
+
+### 2.1 Authority and precedence
+
+This file, `docs/PHOENIX_STABLE_BASELINE_STANDARD.md`, is the single normative authority for Phoenix stable-baseline identity.
+
+- Other governance documents MAY reference the current Stable PR and Stable Commit, but MUST NOT independently define a different current baseline.
+- When any document conflicts with this standard, this standard controls the baseline decision and the conflicting document MUST be corrected in the same revision.
+- A conflict MUST NOT be silently ignored.
+- Permanent product-rule references MUST NOT be deleted merely to hide a baseline conflict; the valid permanent rules must be preserved while the obsolete baseline identity is corrected.
+- After any approved stable-baseline update, every governance document containing a hard-coded Stable PR or Stable Commit MUST be updated in the same controlled change.
+- Every future development task MUST begin from the latest approved stable `main` identified by this standard.
 
 ## 3. Baseline scope
 
@@ -46,6 +57,7 @@ Comparison against the stable baseline MUST cover every applicable category:
 - narration and audio;
 - progress and persistence;
 - accessibility;
+- access and entitlement;
 - privacy, secrets, and external disclosure;
 - rights and provenance evidence;
 - unexpected feature or resource loss.
@@ -68,6 +80,7 @@ The stable baseline MAY be updated only when all of the following are VERIFIED:
 10. The Founder explicitly approves the candidate and its exact Commit.
 11. The approved PR is merged into `main`.
 12. The resulting `main` Commit is recorded as the new stable Commit.
+13. Every governance document with a hard-coded baseline identity is synchronized to the new approved identity.
 
 Until all conditions are satisfied, the binding baseline remains PR `#137` and Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`.
 
@@ -85,7 +98,7 @@ A candidate MUST preserve or exceed:
 - lighting, weather, material, atmosphere, and spatial detail;
 - independent city and Journey identity;
 - correct mobile crop, focal point, and readable text area;
-- stable narration, interaction, progress, and fallback behavior;
+- stable narration, interaction, progress, access, and fallback behavior;
 - the verified visual completion of Home, Explore, Passport, Profile, Shadowing, normal Journeys, and special Journeys.
 
 Production visuals MUST NOT be replaced by low-detail programmatic SVG/WebP, flat backgrounds, recolored templates, repeated compositions, placeholders, or images with lower detail density than the stable baseline.
@@ -192,7 +205,7 @@ Evidence levels use only:
 - `UNVERIFIED`
 - `CONTRADICTORY`
 
-A result may be `PASS` only when its required evidence is `VERIFIED`. Evidence gaps MUST remain visible and MUST NOT be converted into assumed success.
+A result may be `PASS` only when its required evidence is `VERIFIED`. `NOT_APPLICABLE` requires a scoped applicability reason and evidence; it is not automatic `PASS`. Evidence gaps MUST remain visible and MUST NOT be converted into assumed success.
 
 ## 12. Enforcement
 
@@ -205,5 +218,6 @@ All Phoenix PRs MUST use `.github/pull_request_template.md` and comply with the 
 - [Phoenix Full Application Audit Standard](PHOENIX_FULL_APPLICATION_AUDIT_STANDARD.md)
 - [Phoenix Development Completion Standard](PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md)
 - [Phoenix Quality Unification Roadmap](PHOENIX_QUALITY_UNIFICATION_ROADMAP.md)
+- [Phoenix Journeys Development Workflow](development-workflow.md) for permanent narration, vocabulary, access, AI, privacy, Secret, and user-experience rules.
 
-No task, Agent, reviewer, or automation may weaken this standard through a narrower local instruction.
+No task, Agent, reviewer, automation, or conflicting governance document may weaken this standard through a narrower local instruction.
