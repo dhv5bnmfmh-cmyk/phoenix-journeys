@@ -5,17 +5,22 @@ import 'package:phoenix_journeys/services/critical_persistence_store.dart';
 
 class _MemoryBackend implements CriticalPersistenceBackend {
   final Map<String, String> values = <String, String>{};
+  final Map<String, int> readsBeforeMismatch = <String, int>{};
   String? failWriteKey;
   String? throwWriteKey;
-  String? mismatchReadKey;
   int writes = 0;
 
   @override
   Future<String?> read(String key) async {
     final value = values[key];
-    if (mismatchReadKey == key) {
-      mismatchReadKey = null;
-      return value == null ? 'mismatch' : '$value-mismatch';
+    final remaining = readsBeforeMismatch[key];
+    if (remaining != null) {
+      if (remaining > 0) {
+        readsBeforeMismatch[key] = remaining - 1;
+      } else {
+        readsBeforeMismatch.remove(key);
+        return value == null ? 'mismatch' : '$value-mismatch';
+      }
     }
     return value;
   }
@@ -103,7 +108,9 @@ void main() {
     final backend = _MemoryBackend();
     final store = CriticalPersistenceStore(backend);
     final first = await store.commitInitial(_payload(1));
-    backend.mismatchReadKey = CriticalPersistenceStore.recordKeyForSlot('b');
+    backend.readsBeforeMismatch[
+      CriticalPersistenceStore.recordKeyForSlot('b')
+    ] = 1;
 
     await expectLater(
       store.commitPayload(_payload(2), expectedRevision: first.revision),
