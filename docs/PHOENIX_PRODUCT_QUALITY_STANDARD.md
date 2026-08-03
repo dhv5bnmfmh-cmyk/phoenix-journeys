@@ -241,3 +241,23 @@ A task MUST NOT be Completed when:
 - CI or required validation has not reached a successful terminal state.
 
 All completion decisions follow [Phoenix Development Completion Standard](PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md).
+
+## 7. Binding Narrative and Discovery quality extension
+
+[Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md) is binding for new Journeys, existing Story repairs, Discovery creation or repair, level adaptation, translations, content review, audit, and controlled expansion.
+
+Content Quality additionally requires:
+
+- factual accuracy does not replace narrative quality;
+- polished language does not replace causal Story structure;
+- exact-text difference does not prove Story / Discovery separation;
+- aggregate content scores cannot approve library differentiation;
+- Story, Discovery, Reflection, Writing, and Memory MUST have distinct product functions;
+- content changes require Journey-level and library-level evidence;
+- protagonist mode, causal Relationship, Goal-connected Conflict, enacted Choice, caused Consequence, Emotional Arc, cultural anchor in action, narrative engine, independent opening, decisive climax, and changed ending state require human literary review;
+- Phoenix Lv.1 through Lv.10 MUST preserve the narrative invariants defined by the binding standard;
+- automated structural Result and human literary Result MUST be recorded separately.
+
+Automated validation MAY verify fields, IDs, length, paragraph count, language records, annotations, exact duplication, and structural integrity. It cannot by itself approve protagonist independence, Relationship quality, Goal significance, Conflict quality, Choice meaning, Consequence strength, Emotional Arc, cultural integration, Story / Discovery functional separation, library differentiation, literary quality, or Founder experience.
+
+Statements such as `360 / 360 PASS`, `score 100`, `average 100`, and `all fields present` MUST identify the checks actually implemented and MUST NOT produce overall Story Quality `PASS`.

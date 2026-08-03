@@ -431,3 +431,40 @@ Every phase MUST update [Phoenix New Journey Acceptance Matrix](templates/PHOENI
 ## 13. Final rule
 
 A new Journey is not complete when its files, content, images, tests, or Preview merely exist. It is complete only after all phases pass, the stable baseline is preserved or exceeded, and Founder mobile approval authorizes controlled release.
+
+## 14. Binding Narrative and Discovery extension
+
+This standard is binding together with [Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md).
+
+### Phase A additional REQUIRED deliverables
+
+- narrative engine;
+- Story Function;
+- Discovery Function;
+- opening type;
+- climax type;
+- ending type and changed state;
+- catalog differentiation matrix;
+- Phoenix Lv.1 through Lv.10 level-invariant plan.
+
+### Phase B additional REQUIRED evidence
+
+- complete Story / Discovery Design Matrix;
+- causal Relationship evidence;
+- enacted Choice evidence;
+- Consequence caused-by-choice evidence;
+- Story / Discovery functional separation evidence;
+- opening independence and ending independence;
+- catalog-level similarity and differentiation review;
+- automated-score limitation acknowledgment;
+- separate automated structural Result and human literary Result.
+
+All applicable blocking codes from Phoenix Narrative and Discovery Standard apply, including `PROTAGONIST_IDENTITY_MISSING`, `RELATIONSHIP_NOT_CAUSAL`, `CHOICE_NOT_ENACTED`, `CONSEQUENCE_NOT_CAUSED`, `STORY_DISCOVERY_FUNCTION_OVERLAP`, `OPENING_TEMPLATE_REUSE`, `ENDING_TEMPLATE_REUSE`, `NARRATIVE_ENGINE_DUPLICATION`, `LIBRARY_DIFFERENTIATION_UNVERIFIED`, `LEVEL_ADAPTATION_IDENTITY_LOSS`, `SPECIAL_MECHANISM_FLATTENED`, `AUTOMATED_SCORE_NOT_LITERARY_APPROVAL`, and `BATCH_EXPANSION_BEFORE_PILOT_APPROVAL`.
+
+Phase E rule:
+
+> Automated validation success does not establish literary `PASS`.
+
+Phase G Founder mobile review MUST include Story identity, Discovery distinction, emotional continuity, level adaptation, and Journey memorability.
+
+Existing-library repair follows Pilot N1 (`beijing-summer-palace`), Founder decision, Pilot S1 (`tide-letter`), Founder decision, then controlled batches of two to three Journeys. There is no batch rewrite, no 27-Journey rewrite, no nine-special-Journey rewrite, and no Story / Discovery functional duplication before pilot approval. A rejected pilot returns to revision and does not authorize another pilot or mass production.

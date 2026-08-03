@@ -296,3 +296,23 @@ A Journey MUST NOT be marked Completed when:
 - Founder mobile approval is required but not `APPROVED`.
 
 New Journey execution follows [Phoenix New Journey Creation Standard](PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md).
+
+## 20. Binding Narrative and Discovery extension
+
+[Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md) is binding. This Journey System Standard defines the common skeleton while the Narrative and Discovery Standard defines content differentiation and causal quality.
+
+Additional REQUIRED rules:
+
+- Story and Discovery MUST each submit a one-sentence Function Contract.
+- Generic second-person perspective alone does not satisfy protagonist identity.
+- Normal Journey and special Journey protagonist modes follow Phoenix Narrative and Discovery Standard.
+- Relationship MUST causally affect Goal, Conflict, Choice, Consequence, Emotional Arc, or Ending.
+- Choice MUST be enacted and Consequence MUST be visibly caused by the Choice.
+- Every Journey MUST declare a primary narrative engine.
+- Story / Discovery separation MUST be demonstrated functionally; exact-text difference is insufficient.
+- Library-level differentiation is REQUIRED evidence.
+- Phoenix Lv.1 through Lv.10 MUST preserve protagonist identity, Relationship, Goal, Conflict, key Choice, Consequence, event order, Emotional Arc, cultural anchor, ending state, memory anchor, and applicable special mechanism.
+- All special Journeys MUST use an explicitly approved special or Journey-specific adaptation policy.
+- Automated scores cannot approve literary quality.
+
+Use [Phoenix Story / Discovery Design Matrix](templates/PHOENIX_STORY_DISCOVERY_DESIGN_MATRIX.md) for proposals, pilots, repairs, controlled batches, and new Journeys. Automated structural Result and human literary Result MUST be recorded separately.

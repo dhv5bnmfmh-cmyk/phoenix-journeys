@@ -355,3 +355,64 @@ Any regression blocks Completed, Ready, merge, batch expansion, and the next sta
 - `docs/development-workflow.md` → 「永久旅程访问与订阅准则」
 
 The permanent product rules and the mandatory Stable Baseline Comparison apply together. Neither replaces the other. The latest approved stable `main` remains the only valid development baseline. It changes only after explicit Founder approval and merge into `main`.
+
+## 16. Narrative and Discovery Evidence
+
+Required for every Story, Discovery, or Journey-content PR under [Phoenix Narrative and Discovery Standard](docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md).
+
+```text
+Affected Journey IDs:
+Story Function:
+Discovery Function:
+Protagonist Mode:
+Protagonist Identity Evidence:
+Relationship:
+Relationship Causal Function:
+Goal:
+Why Goal Matters:
+Conflict:
+Conflict Connection to Goal:
+Enacted Choice:
+Choice Evidence:
+Caused Consequence:
+Consequence Causal Evidence:
+Emotional Arc:
+Cultural Anchor in Action:
+Narrative Engine:
+Opening Type:
+Progression Structure:
+Climax:
+Ending State:
+Memory Anchor:
+Special Mechanism:
+Catalog Comparison:
+Level Invariants:
+Automated Check Scope:
+Checks Not Covered by Automation:
+Automated Structural Result:
+Human Literary Review:
+Human Literary Result:
+Founder Preview Requirement:
+```
+
+Required declarations:
+
+```text
+Story / Discovery functional overlap: NONE / DETAILS
+Narrative template reuse: NONE / DETAILS
+Automated score used as literary approval: NO
+Batch size: <count>
+Pilot approval: APPROVED / REJECTED / PENDING / NOT_APPLICABLE
+```
+
+- [ ] Story and Discovery each submit a Function Contract.
+- [ ] Generic second-person perspective alone is not used as protagonist identity.
+- [ ] Relationship causality, enacted Choice, and caused Consequence have exact evidence.
+- [ ] Opening, climax, and ending state are independently reviewed.
+- [ ] Story / Discovery functional separation is reviewed beyond exact-text difference.
+- [ ] A current-catalog differentiation matrix is attached.
+- [ ] Phoenix Lv.1 through Lv.10 narrative invariants are recorded.
+- [ ] Automated structural checks are separated from human literary approval.
+- [ ] One normal pilot and one special pilot follow the binding order.
+- [ ] Default controlled batch size is two to three Journeys after pilot approval.
+- [ ] No second pilot or batch rewrite begins before the required prior Founder decision.

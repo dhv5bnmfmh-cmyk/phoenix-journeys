@@ -145,3 +145,26 @@ Next Authorized Action:
 ```
 
 The audit conclusion MUST NOT authorize fixes, merge, or a new Journey unless a separate task explicitly does so.
+
+## Narrative and Discovery audit coverage extension
+
+Use this extension with [Phoenix Narrative and Discovery Standard](../PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md). Existing audit rows and Issue Severity rules remain unchanged.
+
+| Audit ID | Coverage row | Required evidence | Actual evidence | Result | Evidence Level | Issue Severity | Finding ID | Owner | Required action |
+|---|---|---|---|---|---|---|---|---|---|
+| FA-ND-001 | Story Function | One-sentence Story Function Contract and unique narrative value per Journey |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-002 | Discovery Function | One-sentence Discovery Function Contract and unique explanatory value per Journey |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-003 | Story / Discovery Separation | Story-only and Discovery-only information, intentional overlap, justification, functional review |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-004 | Narrative Engines | Declared engine, causal operation, closest catalog comparison, substitution test |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-005 | Opening Patterns | Opening type, active situation, scenic-opening justification, repeated pattern review |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-006 | Ending Patterns | Caused result, changed ending state, philosophical-summary and repeated pattern review |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-007 | Protagonist Modes | Normal and special mode compliance; generic second person rejected |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-008 | Relationship Causality | Relationship affects Goal, Conflict, Choice, Consequence, Emotional Arc, or Ending |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-009 | Enacted Choice | Exact action or commitment, not internal thought or summary alone |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-010 | Consequence Causality | Visible result caused by the enacted Choice |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-011 | Cultural Anchor in Action | Anchor affects stakes or action and fails the interchangeability test |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-012 | Catalog Differentiation | Complete library-level differentiation matrix and materially similar Journey comparisons |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-013 | Level Invariants | Phoenix Lv.1 through Lv.10 preserve identity, causality, event order, anchor, ending, memory, and special mechanism |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-014 | Automated Literary Approval Boundary | Separate automated structural Result from human literary Result and identify exact automated scope |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+
+For every Journey, attach or reference a completed Story / Discovery Design Matrix. A high aggregate score, field count, exact-text difference, or automated structural PASS cannot close a human literary row.

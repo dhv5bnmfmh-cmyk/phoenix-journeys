@@ -395,3 +395,38 @@ The audit output MUST contain:
 - explicit statement that no fixes were made during a read-only audit.
 
 No phase or audit area may be marked Completed without evidence. The roadmap in [Phoenix Quality Unification Roadmap](PHOENIX_QUALITY_UNIFICATION_ROADMAP.md) governs work after the audit.
+
+## 23. Binding Narrative and Discovery audit extension
+
+[Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md) is binding for Story and Discovery audit coverage.
+
+The audit MUST require one Story Function Contract and one Discovery Function Contract per Journey and MUST also verify:
+
+- a complete library differentiation matrix;
+- opening pattern review;
+- ending pattern review;
+- narrative-engine review;
+- normal and special protagonist-mode review;
+- Relationship causality;
+- enacted Choice;
+- Consequence causality;
+- cultural anchor in action;
+- climax and changed ending state;
+- Story / Discovery functional separation beyond exact-text difference;
+- Phoenix Lv.1 through Lv.10 narrative invariants;
+- applicable special-mechanism preservation.
+
+Automated scores cannot approve literary quality. The audit MUST separate:
+
+```text
+Automated Structural Result:
+Automated Structural Evidence Level:
+Implemented automated checks:
+Human Literary Result:
+Human Literary Evidence Level:
+Human reviewer:
+```
+
+A structural field count, exact-duplication test, `360 / 360 PASS`, `score 100`, `average 100`, or `all fields present` proves only its implemented check. It MUST NOT create human literary PASS, close Story / Discovery functional overlap, or approve library differentiation.
+
+Use [Phoenix Story / Discovery Design Matrix](templates/PHOENIX_STORY_DISCOVERY_DESIGN_MATRIX.md) for candidate design evidence and the Narrative and Discovery coverage rows in the Full Application Audit Matrix for audit results. Existing Issue Severity rules remain unchanged.

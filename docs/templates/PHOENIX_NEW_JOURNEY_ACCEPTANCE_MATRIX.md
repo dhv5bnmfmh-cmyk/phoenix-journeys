@@ -76,6 +76,20 @@ Every `REQUIRED` item and every applicable `CONDITIONALLY_REQUIRED` item MUST be
 | NJ-036 | Stable comparison | REQUIRED | Complete `STABLE_BASELINE_COMPARISON`, including Tree, Parent, Routes, Journey IDs, Persistence, Access/Entitlement, and Evidence Levels |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 | NJ-037 | Founder mobile approval | REQUIRED | Explicit approval tied to candidate Commit or Preview |  | BLOCKED | UNVERIFIED |  |  | PENDING |
 | NJ-038 | Single-pilot rule | REQUIRED | No second Journey entered implementation |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-039 | Story Function Contract | REQUIRED | Exact one-sentence Story Function, unique learner value, inputs, outputs, path, Result, Evidence Level, issue/action, and owner |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-040 | Discovery Function Contract | REQUIRED | Exact one-sentence Discovery Function, unique learner value, inputs, outputs, path, Result, Evidence Level, issue/action, and owner |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-041 | Story / Discovery Functional Separation | REQUIRED | Story-only and Discovery-only information, intentional overlap, justification, human review, Result, Evidence Level, issue/action, and owner |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-042 | Narrative Engine Independence | REQUIRED | Declared engine, causal operation, closest catalog engines, substitution test, Result, Evidence Level, issue/action, and owner |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-043 | Opening Independence | REQUIRED | Opening type, exact evidence, catalog pattern comparison, Result, Evidence Level, issue/action, and owner |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-044 | Relationship Causality | REQUIRED | Parties, opening state, causal function, affected Goal/Conflict/Choice/Consequence/Arc/Ending, Result, Evidence Level, issue/action, and owner |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-045 | Enacted Choice | REQUIRED | Exact action or commitment evidence, changed state, Result, Evidence Level, issue/action, and owner |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-046 | Caused Consequence | REQUIRED | Exact causal link from Choice to visible Consequence, Result, Evidence Level, issue/action, and owner |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-047 | Climax and Changed Ending State | REQUIRED | Decisive moment, before/after state, non-summary ending, Result, Evidence Level, issue/action, and owner |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-048 | Cultural Anchor in Action | REQUIRED | Approved source, effect on action/stakes, non-interchangeability, Result, Evidence Level, issue/action, and owner |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-049 | Catalog-Level Differentiation Matrix | REQUIRED | Complete current-catalog matrix, risks, decisions, exact evidence, Result, Evidence Level, issue/action, owner, and Founder state |  | BLOCKED | UNVERIFIED |  |  | PENDING |
+| NJ-050 | Level-Adaptation Narrative Invariants | REQUIRED | Phoenix Lv.1–Lv.10 matrix preserving identity, causality, event order, anchor, ending, memory, and special mechanism with Result/Evidence Level |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-051 | Automated Literary Approval Limitation | REQUIRED | Exact automated scope, excluded literary judgments, separate human review, declaration `Automated score used as literary approval: NO`, Result/Evidence Level |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-052 | Repair / Creation Pilot Batch Gate | REQUIRED | Work type, batch size, prior pilot Commit and Founder decision, next-phase authorization, Result, Evidence Level, issue/action, owner, Founder state |  | BLOCKED | UNVERIFIED |  |  | PENDING |
 
 ## Conditional applicability record
 
@@ -105,6 +119,13 @@ A blank conditional decision is `BLOCKED`.
 | F: Stable Baseline Comparison |  |  |  |  |  | BLOCKED | UNVERIFIED | NO |
 | G: Founder Mobile Preview |  |  |  |  |  | BLOCKED | UNVERIFIED | NO |
 | H: Approval and Controlled Release |  |  |  |  |  | BLOCKED | UNVERIFIED | NO |
+
+Narrative extension for phase records:
+
+- Phase A additionally requires narrative engine, Story Function, Discovery Function, opening type, climax type, ending type, catalog differentiation matrix, and level-invariant plan.
+- Phase B additionally requires the complete Story / Discovery Design Matrix, causal Relationship evidence, enacted Choice evidence, caused Consequence evidence, functional separation, opening and ending independence, library review, and automated-score limitation acknowledgment.
+- Phase E records that automated validation success does not establish literary PASS.
+- Phase G reviews Story identity, Discovery distinction, emotional continuity, level adaptation, and Journey memorability.
 
 ## Final decision
 
