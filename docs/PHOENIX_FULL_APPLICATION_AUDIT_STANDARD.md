@@ -2,87 +2,421 @@
 
 **System:** Phoenix Product Standard System v1.0  
 **Status:** BINDING  
-**Audit mode:** READ_ONLY unless a separate repair task is explicitly authorized  
 **Stable baseline:** PR `#137`, Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
 
 ## 1. Purpose
 
-A Full Application Audit establishes one deduplicated product ledger across runtime identity, major pages, Journeys, Story and Discovery, learning stages, language, narration, mobile, accessibility, persistence, access, visuals, rights, privacy, and stable comparison.
+This standard defines the required method for a read-only, evidence-based audit of the complete Phoenix application. The audit begins only after the Product Standard System is approved and merged. It does not authorize fixes, runtime changes, new Journeys, or visual replacement.
 
-Audit does not authorize repair. Every claim MUST identify Result, Evidence Level, exact scope, and evidence.
+## 2. Audit principles
 
-This standard is binding with [Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), Journey System Standard, Product Quality Standard, UI and Visual Standard, and the audit matrix.
+The audit MUST:
 
-## 2. Baseline and read-only gate
+- start from the latest approved stable `main`;
+- use PR `#137` and Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977` until a later baseline is explicitly approved;
+- remain read-only unless a separate repair task is authorized;
+- distinguish repository evidence, automated evidence, Preview evidence, mobile evidence, and Founder approval;
+- record uncertainty instead of guessing;
+- compare current candidate behavior with the stable baseline;
+- avoid treating PR `#132` or closed PRs `#138`–`#141` as the current baseline;
+- use the matrix in [Phoenix Full Application Audit Matrix](templates/PHOENIX_FULL_APPLICATION_AUDIT_MATRIX.md).
 
-Before audit:
+## 3. Mandatory audit scope
 
-- verify exact repository, branch, audited Commit, Stable PR, Stable Commit, and current main;
-- verify `docs/PHOENIX_STABLE_BASELINE_STANDARD.md` remains the single normative baseline authority;
-- freeze Remote Writes at `0` for read-only audit;
-- inventory major surfaces, normal Journeys, special Journeys, vocabulary, visual mappings, and applicable providers;
-- stop if main differs from the expected audited Commit.
+The audit MUST cover, where present:
 
-## 3. Evidence rules
+- all routes;
+- all major pages;
+- all normal Journeys;
+- all special Journeys;
+- all learning stages;
+- all runtime images and asset mappings;
+- all narration and audio flows;
+- all supported languages;
+- free and paid states;
+- locked and unlocked states;
+- Random / Daily Journey Access;
+- loading states;
+- error states;
+- empty states;
+- fallback states;
+- small-screen layouts;
+- safe-area behavior;
+- reduced-motion behavior;
+- progress and persistence;
+- migration behavior;
+- privacy and secrets;
+- external disclosure;
+- current stable-baseline comparison.
 
-Allowed Results: `PASS`, `REQUIRES_REVISION`, `REGRESSION`, `BLOCKED`, `NOT_APPLICABLE`.
+An item omitted from coverage MUST be recorded as `BLOCKED` or `NOT_APPLICABLE` with a reason and evidence. Silence is not coverage.
 
-Allowed Evidence Levels: `VERIFIED`, `PARTIALLY_VERIFIED`, `UNVERIFIED`, `CONTRADICTORY`.
+## 4. Audit preparation
 
-A static finding does not become PASS because the app opens. Desktop evidence does not create mobile PASS. File existence does not create visual PASS. Production identity cannot be assumed from a reachable hostname.
+Before reviewing product behavior, the auditor MUST record:
 
-## 4. Required audit domains
+- repository;
+- audited branch and Commit;
+- audited Tree when available;
+- stable PR and Commit;
+- PR or candidate identity, if any;
+- authorized read-only scope;
+- available environments;
+- available CI and Preview evidence;
+- supported devices and viewport plan;
+- supported language list;
+- Journey inventory;
+- route inventory;
+- known entitlement states;
+- Random / Daily Journey Access configuration and test identities;
+- known limitations and inaccessible evidence.
 
-The audit MUST independently cover:
+If repository, Commit, stable baseline, or scope cannot be established, the audit is `BLOCKED`.
 
-- release identity;
-- Startup, HomeShell, Explore, Picker, Passport, special Passport, Profile, Shadowing, all Journey stages, dialogs, and fallback states;
-- normal and special Journey inventory;
-- routing and invalid IDs;
-- access and entitlement;
-- Random / Daily behavior;
-- persistence, migration, duplicate writes, and failure recovery;
-- language and translations;
-- narration and Shadowing;
-- accessibility and mobile behavior;
-- visual mapping and runtime visual quality;
-- physical assets, rights, and provenance;
-- privacy, external processors, Secret storage, logging, retention, and disclosure;
-- stable comparison.
+## 5. Audit units
 
-## 5. Narrative and Discovery audit
+Each audit row MUST represent one independently verifiable requirement. Do not combine unrelated failures into a single row.
 
-Each Journey MUST provide one Story Function Contract and one Discovery Function Contract. The audit MUST record them per Journey, not infer them from field presence.
+Every final audit row MUST include:
 
-For every Journey, audit:
+- Audit ID;
+- Area;
+- Route;
+- File Path;
+- Journey ID;
+- Stage;
+- Standard Requirement;
+- Stable Evidence;
+- Candidate Evidence;
+- Expected;
+- Actual;
+- Result;
+- Issue Severity;
+- Evidence Level;
+- Issue;
+- Required Action;
+- Owner;
+- Verification;
+- Founder Approval Required.
 
-- protagonist mode and independent identity;
+Use `NONE` or `NOT_APPLICABLE` explicitly when a field does not apply. Blank Issue Severity is prohibited in a final audit record.
+
+## 6. Result states
+
+Use only:
+
+- `PASS`;
+- `REQUIRES_REVISION`;
+- `REGRESSION`;
+- `BLOCKED`;
+- `NOT_APPLICABLE`.
+
+`PASS` requires `VERIFIED` evidence. `NOT_APPLICABLE` requires an applicability reason and evidence and is not `PASS`. A finding below the stable baseline MUST be `REGRESSION`, even when it also violates a new standard.
+
+## 7. Evidence levels
+
+Use only:
+
+- `VERIFIED`;
+- `PARTIALLY_VERIFIED`;
+- `UNVERIFIED`;
+- `CONTRADICTORY`.
+
+Evidence MUST identify its source and candidate Commit. A screenshot without route, state, and candidate identity is incomplete. A test without command, output, and Commit is incomplete. A rights record without runtime and visual evidence cannot approve the visual result.
+
+Evidence Level and Issue Severity are separate fields and MUST NOT substitute for one another.
+
+## 8. Issue Severity
+
+Allowed Issue Severity values are:
+
+- `NONE`
+- `P0`
+- `P1`
+- `P2`
+- `P3`
+
+`NONE` is not a fifth problem severity. It means the row contains no identified Issue.
+
+| Issue Severity | Definition | Required response |
+|---|---|---|
+| `NONE` | No Issue is identified for the row. Required for `PASS` and `NOT_APPLICABLE`. | Do not include in P0/P1/P2/P3 counts. |
+| `P0` | Critical safety, privacy, secret exposure, severe data corruption/loss, unusable core application, or release-wide failure. | Immediate block. No release or unrelated expansion. Isolate risk and authorize a dedicated repair. |
+| `P1` | Major core flow, access, payment/entitlement, routing, persistence, widespread visual/interaction regression, or major accessibility failure. | Blocks Ready and merge. Repair before P2/P3 improvement work. |
+| `P2` | Material quality, consistency, content, performance, visual differentiation, or localized functional problem that harms the product but does not meet P0/P1. | Record and prioritize after P0/P1 according to roadmap. |
+| `P3` | Minor wording, polish, local spacing, low-impact consistency, or maintainability issue with no material user harm. | Record and schedule without masking higher severity. |
+
+Rules:
+
+1. When `Result = PASS`, `Issue Severity` MUST be `NONE`.
+2. When `Result = NOT_APPLICABLE`, `Issue Severity` MUST be `NONE`, and the row MUST include the applicability reason and evidence.
+3. When `Result = REQUIRES_REVISION`, `REGRESSION`, or `BLOCKED` and an Issue exists, `Issue Severity` MUST be `P0`, `P1`, `P2`, or `P3`.
+4. A PASS row MUST NOT be assigned a fabricated `P3`.
+5. `NONE` MUST NOT be counted in P0/P1/P2/P3 totals.
+6. Blank Issue Severity is prohibited in final audit records.
+7. Issue Severity is based on impact, reach, recoverability, and stable-baseline loss, not effort to fix.
+
+## 9. Route audit
+
+For every route, verify:
+
+- route exists and is reachable through the intended entry;
+- parameters and Journey IDs are validated;
+- the correct page component opens;
+- invalid or missing parameters fail safely;
+- back, deep-link, refresh, and restore behavior are correct where supported;
+- entitlement and unlock state are enforced;
+- loading, error, empty, and fallback states are defined;
+- route does not load content or assets from another Journey;
+- route matches or exceeds the stable behavior.
+
+## 10. Major page audit
+
+Audit Home, Explore, Passport, Profile, Shadowing, and all other major pages for:
+
+- complete function and navigation;
+- correct hierarchy and components;
+- loading, error, empty, and fallback;
+- small-screen and safe-area behavior;
+- text scaling and accessibility;
+- performance and state restoration;
+- multilingual behavior;
+- stable-baseline visual and interaction comparison.
+
+## 11. Journey audit
+
+For every normal and special Journey, verify all `REQUIRED` and applicable `CONDITIONALLY_REQUIRED` elements in [Phoenix Journey System Standard](PHOENIX_JOURNEY_SYSTEM_STANDARD.md), including:
+
+- identity and IDs;
+- protagonist, relationship, goal, conflict, choice, consequence, emotional arc, and cultural anchor;
+- Story, Vocabulary, ReadingAnnotation applicability, Discovery, Challenge, Reflection, Writing, Memory, Completion, Reward, and Stamp applicability;
+- multilingual alignment;
+- visual differentiation and mobile crop;
+- narration and audio;
+- progression and persistence;
+- routing and fallback;
+- rights evidence;
+- stable-baseline comparison.
+
+The audit MUST detect repeated story templates, repeated visual compositions, generic city substitution, and shared fantasy mechanisms that erase special-Journey independence.
+
+## 12. Runtime image audit
+
+For every runtime image or visual mapping, verify:
+
+- exact path and referencing code/data path;
+- intended route, Journey, and stage;
+- file type, dimensions, and technical validity;
+- actual runtime load and crop;
+- focal point and readable region;
+- visual quality and differentiation;
+- loading and failure fallback;
+- rights evidence;
+- stable-baseline visual comparison;
+- Founder approval record when required.
+
+File existence, hash, or compliance metadata alone cannot produce `PASS`.
+
+## 13. Narration and audio audit
+
+For every supported narration or audio flow, verify:
+
+- correct language, text, and stage;
+- play, pause, resume, stop, replay, speed, and voice behavior where available;
+- highlight and progress synchronization;
+- temporary vocabulary or annotation playback and correct continuation;
+- route changes and system interruptions;
+- error, retry, offline, and silent-device behavior;
+- no unintended overlap;
+- accessibility and non-audio alternative;
+- stable-baseline comparison.
+
+## 14. Language audit
+
+For every supported language, verify:
+
+- UI completeness;
+- correct locale and script;
+- Journey content completeness;
+- meaning alignment;
+- annotations and segmentation;
+- narration language;
+- challenge answer validity;
+- accessibility labels;
+- text expansion and layout;
+- no unintended mixed-language leakage.
+
+## 15. Access and entitlement audit
+
+Verify applicable:
+
+- free and paid behavior;
+- locked and unlocked behavior;
+- upgrade and downgrade behavior;
+- entitlement restoration;
+- direct-link protection;
+- offline or stale entitlement handling;
+- reward and Journey access consistency;
+- no exposure of paid content through fallback or incorrect route;
+- all access decisions use `JourneyAccessPolicy`.
+
+### 15.1 Random / Daily Journey Access audit
+
+Random / Daily Journey Access MUST be audited independently from generic free/paid and locked/unlocked coverage. Record:
+
+- account state;
+- Development / Preview / Production mode;
+- stable user identifier or test identifier;
+- local date;
+- local timezone;
+- morning / afternoon slot;
+- generated Journey ID;
+- expected Journey ID behavior;
+- actual Journey ID behavior;
+- same-slot refresh result;
+- app restart result;
+- re-login result;
+- persistence result;
+- morning and afternoon duplication result;
+- Journey library size;
+- configuration evidence;
+- route;
+- exact code or policy path;
+- Result;
+- Issue Severity when an Issue exists;
+- Evidence Level.
+
+The audit MUST verify:
+
+1. The same user, local date, and slot produce a stable result.
+2. Refresh does not redraw the Journey.
+3. App restart does not redraw the Journey.
+4. Re-login remains consistent with the approved design.
+5. When the Journey library size is greater than one, morning and afternoon do not duplicate on the same day.
+6. After the afternoon release, Journeys already released that day remain usable.
+7. The logic is unified through `JourneyAccessPolicy`.
+8. Development and PR Preview remain open under `developmentExperience` rules.
+9. Commercial slot times and strategy remain configurable and are not hard-coded into Journey content.
+
+Missing Random / Daily evidence is not covered merely because free/paid behavior passed.
+
+## 16. State audit
+
+Loading, error, empty, and fallback MUST be audited as separate states, not inferred from the success state. Each state must be reachable or supported by direct code and reproducible evidence.
+
+Fallback MUST NOT silently substitute the wrong Journey, language, image, content, reward, or entitlement.
+
+## 17. Mobile, safe area, and reduced motion audit
+
+The audit MUST include representative small phones and supported target viewports. Verify:
+
+- no overflow or clipping;
+- safe-area compliance;
+- keyboard reachability;
+- tap areas and spacing;
+- scrolling and persistent controls;
+- image crop and focal point;
+- text scaling;
+- dialogs and sheets;
+- reduced-motion alternatives;
+- route and lifecycle stability.
+
+Desktop-only evidence cannot fully verify mobile quality.
+
+## 18. Persistence and migration audit
+
+Verify applicable:
+
+- partial progress save and resume;
+- completion, reward, stamp, and unlock state;
+- preference persistence;
+- sign-out/sign-in and account changes;
+- duplicate event handling;
+- stale state and schema migration;
+- Journey ID or content-version migration;
+- failed write recovery;
+- cross-Journey isolation;
+- preservation of stable user data.
+
+## 19. Privacy, secrets, and external disclosure audit
+
+Verify:
+
+- no secrets in repository, client, logs, errors, screenshots, or Preview URLs;
+- approved data collection and retention;
+- least-privilege access;
+- external processors and data paths;
+- no unauthorized external disclosure of unpublished Phoenix content;
+- privacy behavior in analytics, AI, translation, image, and audio services;
+- safe failure messages.
+
+Any confirmed secret exposure or severe private-data leak is P0.
+
+## 20. Stable baseline comparison
+
+Every material audit area MUST compare the audited candidate with the stable baseline. Record:
+
+- stable route, page, Journey, feature, or asset evidence;
+- candidate evidence under equivalent conditions;
+- expected preserved or improved behavior;
+- actual result;
+- any unexpected loss.
+
+A full audit summary MUST use the report in [Phoenix Development Completion Standard](PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md) when evaluating a development candidate.
+
+## 21. Audit execution order
+
+The approved order is:
+
+1. establish inventories and evidence availability;
+2. audit P0/P1 risk domains first: secrets, privacy, data, access, core routes, persistence, critical failures;
+3. audit major pages and shared systems;
+4. audit normal Journeys;
+5. audit special Journeys;
+6. audit visuals, audio, languages, accessibility, states, and Random / Daily Journey Access;
+7. compare all material areas with stable baseline;
+8. deduplicate findings without losing evidence;
+9. create the P0/P1/P2/P3 ledger; `NONE` is excluded from severity counts;
+10. stop. Do not fix without separate authorization.
+
+## 22. Audit output
+
+The audit output MUST contain:
+
+- audit identity and scope;
+- coverage inventory;
+- completed matrix;
+- evidence limitations;
+- findings grouped by Issue Severity;
+- stable-baseline regressions;
+- blocked areas;
+- exact recommended repair order;
+- Founder approvals required;
+- explicit statement that no fixes were made during a read-only audit.
+
+No phase or audit area may be marked Completed without evidence. The roadmap in [Phoenix Quality Unification Roadmap](PHOENIX_QUALITY_UNIFICATION_ROADMAP.md) governs work after the audit.
+
+## 23. Binding Narrative and Discovery audit extension
+
+[Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md) is binding for Story and Discovery audit coverage.
+
+The audit MUST require one Story Function Contract and one Discovery Function Contract per Journey and MUST also verify:
+
+- a complete library differentiation matrix;
+- opening pattern review;
+- ending pattern review;
+- narrative-engine review;
+- normal and special protagonist-mode review;
 - Relationship causality;
-- Goal significance;
-- Conflict connection to Goal;
 - enacted Choice;
 - Consequence causality;
-- Emotional Arc;
 - cultural anchor in action;
-- narrative engine;
-- opening pattern;
-- progression structure;
-- climax;
-- changed ending state;
-- Story / Discovery functional separation;
-- memory anchor;
-- special mechanism when applicable;
-- Phoenix Lv.1 through Lv.10 narrative invariants.
+- climax and changed ending state;
+- Story / Discovery functional separation beyond exact-text difference;
+- Phoenix Lv.1 through Lv.10 narrative invariants;
+- applicable special-mechanism preservation.
 
-The audit MUST maintain a library differentiation matrix covering title, opening, protagonist, role, Relationship, Goal, Conflict, Choice, Consequence, Emotional Arc, engine, climax, ending, daily-life setting, cultural anchor, perspective, interpersonal method, pace, theme, memory anchor, visual motif, and special mechanism.
-
-Opening-pattern and ending-pattern review MUST identify repeated systems, not only exact repeated text.
-
-Exact-text difference is insufficient for Story / Discovery separation. Functional duplication is blocking.
-
-## 6. Automated and human results
-
-The audit MUST separate:
+Automated scores cannot approve literary quality. The audit MUST separate:
 
 ```text
 Automated Structural Result:
@@ -93,75 +427,6 @@ Human Literary Evidence Level:
 Human reviewer:
 ```
 
-Automated scores cannot approve literary quality. `360 / 360 PASS`, `score 100`, `average 100`, and `all fields present` may be reported only for their implemented structural checks.
+A structural field count, exact-duplication test, `360 / 360 PASS`, `score 100`, `average 100`, or `all fields present` proves only its implemented check. It MUST NOT create human literary PASS, close Story / Discovery functional overlap, or approve library differentiation.
 
-## 7. Journey-level and library-level evidence
-
-Every Journey receives an independent record. Library-level findings MUST be deduplicated by root cause without losing affected Journey IDs.
-
-Use [Phoenix Story / Discovery Design Matrix](templates/PHOENIX_STORY_DISCOVERY_DESIGN_MATRIX.md) for candidate repair evidence and [Phoenix Full Application Audit Matrix](templates/PHOENIX_FULL_APPLICATION_AUDIT_MATRIX.md) for audit coverage.
-
-## 8. Runtime and device evidence
-
-Runtime evidence MUST identify environment, release marker, candidate or audited Commit, route, device or viewport, orientation, text size, language, Journey ID, stage, state, expected result, actual result, Result, Evidence Level, and screenshot or reproducible record where available.
-
-If a real phone, microphone, physical voice, production account, failure injection, or identity-tied runtime is unavailable, retain `BLOCKED` or `PARTIALLY_VERIFIED` and produce exact Founder verification steps.
-
-## 9. Severity and findings
-
-Issue Severity remains:
-
-- `P0`: critical safety, security, legal, destructive-data, or release-isolation impact;
-- `P1`: core product failure, broad access/routing/persistence failure, or library-wide material violation;
-- `P2`: material quality, governance, content, visual, rights, or evidence gap;
-- `P3`: localized minor defect.
-
-Severity MUST follow impact, reach, recoverability, and stable-baseline effect. It MUST NOT be changed to manipulate totals.
-
-One root cause MUST NOT be duplicated across pages. Existing findings are expanded when new evidence belongs to the same cause.
-
-## 10. Required finding record
-
-Every finding includes:
-
-```text
-Finding ID:
-Related Findings:
-Audit IDs:
-Issue Severity:
-Result:
-Evidence Level:
-Area:
-Pages:
-Paths:
-Routes:
-Journey IDs:
-Stages:
-Expected:
-Actual:
-Stable Baseline Evidence:
-Candidate Evidence:
-Runtime Evidence:
-User Impact:
-Reach:
-Recoverability:
-Required Action:
-Owner:
-Verification Needed:
-Founder Approval Required:
-Repair Dependencies:
-Status:
-```
-
-## 11. Audit completion
-
-The final report MUST contain baseline identity, Remote Writes, coverage counts, domain decisions, deduplicated counts, blocked evidence, regressions, severity changes, new findings, full ledger, Founder decisions, repair dependencies, recommended repair waves, and read-only confirmation.
-
-Decision values:
-
-- `P0_REQUIRES_IMMEDIATE_ISOLATION`
-- `BLOCKED_CRITICAL_COVERAGE`
-- `FINAL_AUDIT_COMPLETE_WITH_BLOCKED_EVIDENCE`
-- `FINAL_AUDIT_COMPLETE`
-
-Audit completion does not mean product repair, release approval, literary approval, visual approval, rights approval, or Founder approval.
+Use [Phoenix Story / Discovery Design Matrix](templates/PHOENIX_STORY_DISCOVERY_DESIGN_MATRIX.md) for candidate design evidence and the Narrative and Discovery coverage rows in the Full Application Audit Matrix for audit results. Existing Issue Severity rules remain unchanged.

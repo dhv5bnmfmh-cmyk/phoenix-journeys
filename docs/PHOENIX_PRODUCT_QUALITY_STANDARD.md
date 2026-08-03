@@ -4,63 +4,249 @@
 **Status:** BINDING  
 **Stable baseline:** PR `#137`, Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
 
-## 1. Quality law
+## 1. Purpose
 
-Every candidate MUST satisfy:
+This standard defines the minimum evidence and acceptance rules for Phoenix product quality. It applies to documentation, implementation, content, assets, Preview, audit, review, and release decisions.
 
-> `NEW RESULT >= CURRENT STABLE BASELINE`
+All work MUST comply with [Phoenix Stable Baseline Standard](PHOENIX_STABLE_BASELINE_STANDARD.md):
 
-Quality claims require exact scope, Result, Evidence Level, candidate Commit, and reproducible evidence. A checkbox, file existence, automated score, or terminal CI result proves only the check it actually performs.
+> **NEW RESULT >= CURRENT STABLE BASELINE**
 
-This standard is binding together with [Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), Journey System Standard, UI and Visual Standard, New Journey Creation Standard, Full Application Audit Standard, and Development Completion Standard.
+## 2. Canonical result states
 
-## 2. Evidence model
+Every evaluated requirement MUST use one result:
 
-Allowed Result values:
+| Result | Meaning | Release effect |
+|---|---|---|
+| `PASS` | Requirement is satisfied and required evidence is VERIFIED. | May proceed if no other blocker exists. |
+| `REQUIRES_REVISION` | Quality or completeness is insufficient but no verified stable-baseline downgrade has yet been established. | Blocks completion until revised and reverified. |
+| `REGRESSION` | Candidate is below the current stable baseline in an applicable category. | Blocks Completed, Ready, merge, expansion, and next stage. |
+| `BLOCKED` | Evaluation cannot proceed because a dependency, environment, permission, Preview, or evidence is unavailable. | Blocks completion and approval. |
+| `NOT_APPLICABLE` | Requirement genuinely does not apply to the authorized scope. | Must include a reason; never used to hide missing evidence. |
 
-- `PASS`
-- `REQUIRES_REVISION`
-- `REGRESSION`
-- `BLOCKED`
-- `NOT_APPLICABLE`
+## 3. Canonical evidence levels
 
-Allowed Evidence Level values:
+Every material claim MUST use one evidence level:
 
-- `VERIFIED`
-- `PARTIALLY_VERIFIED`
-- `UNVERIFIED`
-- `CONTRADICTORY`
+| Evidence level | Meaning |
+|---|---|
+| `VERIFIED` | Direct, reproducible evidence supports the claim. |
+| `PARTIALLY_VERIFIED` | Some direct evidence exists, but required coverage is incomplete. |
+| `UNVERIFIED` | No adequate direct evidence is available. |
+| `CONTRADICTORY` | Available evidence conflicts or disproves the claim. |
 
-`PASS` requires `VERIFIED` evidence. `NOT_APPLICABLE` requires a documented product decision, applicability reason, and evidence.
+`PASS` requires `VERIFIED` evidence. Checkboxes, assertions, summaries, aggregate scores, compliance fields, file existence, and hashes are not sufficient by themselves.
 
-## 3. Quality domains
+## 4. Quality domains
 
-Every applicable change and audit MUST independently assess:
+### 4.1 Functional completeness
 
-- Function;
-- Interaction;
-- Mobile;
-- Accessibility;
-- Performance;
-- Content;
-- Story and Discovery;
-- Language and translation;
-- Narration and audio;
-- Visual mapping and visual quality;
-- Rights and provenance;
-- Routing and identity;
-- Persistence and migration;
-- Access and entitlement;
-- Privacy, Secret storage, and external processing;
-- stable-baseline comparison.
+The candidate MUST:
 
-One domain's PASS does not imply another domain's PASS.
+- implement the authorized behavior completely;
+- preserve stable features outside the task scope;
+- expose the correct user entry points;
+- handle valid, invalid, delayed, interrupted, and repeated actions;
+- avoid dead controls, unreachable states, duplicated actions, and silent failure;
+- verify entitlement and access behavior when applicable.
 
-## 4. Content Quality
+Missing stable behavior is `REGRESSION`.
 
-Content Quality is not reducible to factual correctness, polished language, length, field presence, or an aggregate score.
+### 4.2 Page completeness
 
-Binding rules:
+Every affected page MUST verify:
+
+- correct route and route parameters;
+- correct page component;
+- correct Journey ID, stage, and data source;
+- complete header, body, controls, status states, and navigation exits;
+- no blank, partially wired, or placeholder page;
+- stable back navigation and state restoration.
+
+### 4.3 Visual quality
+
+Visual quality MUST meet [Phoenix UI and Visual Standard](PHOENIX_UI_VISUAL_STANDARD.md). PR `#137` is the minimum visual standard. Rights evidence, asset presence, dimensions, hashes, or successful loading do not establish visual approval.
+
+### 4.4 Interaction quality
+
+Interactions MUST be:
+
+- understandable without hidden knowledge;
+- responsive to tap, keyboard, and supported assistive input;
+- protected against accidental duplicate submission;
+- consistent across equivalent stages;
+- reversible where the stable experience permits reversal;
+- accompanied by visible feedback;
+- free from unexpected focus loss, gesture conflict, or navigation trap.
+
+### 4.5 Mobile quality
+
+Mobile verification MUST include applicable small-screen layouts, safe areas, orientation policy, keyboard appearance, scrolling, tap targets, image crop, text wrapping, modal reachability, and system-bar overlap. Desktop Preview alone cannot produce `PASS` for mobile quality.
+
+### 4.6 Performance
+
+The candidate MUST NOT introduce a user-visible slowdown below the stable baseline. Evidence SHOULD cover applicable startup, route transition, first meaningful content, image decode, interaction response, animation stability, audio start, and persistence operations.
+
+Measurements MUST state device, build, method, sample, and comparison condition. Unsupported precision or a context-free numeric score is prohibited.
+
+### 4.7 Loading state
+
+Every asynchronous user-visible operation MUST provide an appropriate loading state that:
+
+- begins promptly;
+- preserves layout stability where practical;
+- identifies the operation when ambiguity is possible;
+- prevents destructive duplicate actions;
+- resolves into success, empty, error, or fallback;
+- does not remain indefinitely without recovery.
+
+### 4.8 Error state
+
+Errors MUST:
+
+- be visible and understandable;
+- avoid exposing secrets or internal sensitive details;
+- explain the affected action;
+- preserve recoverable user input and progress;
+- provide retry, back, or safe alternative where applicable;
+- distinguish permanent, permission, validation, network, and service failures when user action differs.
+
+### 4.9 Empty state
+
+An empty state MUST be intentional, readable, and actionable. It MUST NOT resemble loading, failure, or a broken layout. It MUST explain why content is absent and what the user can do next when an action exists.
+
+### 4.10 Failure fallback
+
+Fallback behavior MUST:
+
+- preserve core use when the product design permits;
+- avoid routing to incorrect Journey, content, image, language, or entitlement;
+- clearly indicate degraded behavior when user understanding is affected;
+- return to the preferred path after recovery;
+- never promote a low-quality placeholder into the release experience.
+
+### 4.11 Accessibility
+
+Applicable verification MUST include:
+
+- semantic names, roles, values, and state changes;
+- logical focus and reading order;
+- keyboard and assistive navigation;
+- text scaling and reflow;
+- contrast and non-color cues;
+- meaningful image alternatives;
+- captions or equivalent treatment where required;
+- reduced motion;
+- touch target size and spacing;
+- error identification and recovery.
+
+An automated accessibility scan is supporting evidence, not complete user-experience proof.
+
+### 4.12 Multilingual quality
+
+All supported languages MUST maintain:
+
+- complete and correctly routed content;
+- meaning alignment across translations;
+- correct script, punctuation, segmentation, and locale behavior;
+- no mixed-language leakage unless intentionally authored;
+- layout resilience for text expansion;
+- correct language for narration, labels, errors, and accessibility text;
+- synchronized identifiers and learning intent.
+
+A change to one language MUST identify and verify all dependent language variants.
+
+### 4.13 Content quality
+
+Content MUST be accurate, coherent, purposeful, age-appropriate for the product, culturally grounded, and free of filler or repeated template language. Story, learning, discovery, challenge, reflection, writing, memory, completion, and reward content MUST serve distinct product functions.
+
+Journey-specific requirements are defined in [Phoenix Journey System Standard](PHOENIX_JOURNEY_SYSTEM_STANDARD.md).
+
+### 4.14 Narration and audio
+
+Applicable audio verification MUST cover:
+
+- correct content and language;
+- play, pause, resume, stop, replay, and interruption behavior;
+- progress and highlight synchronization;
+- speed and voice controls when provided;
+- switching pages, stages, language, or audio source;
+- headset, background, and system interruption behavior where supported;
+- failure, retry, and silent-device handling;
+- accessibility and non-audio alternatives;
+- no overlapping unintended playback.
+
+Repository inspection or successful file loading alone cannot establish audio experience `PASS`.
+
+### 4.15 Progress and persistence
+
+The candidate MUST preserve correct progress, completion, reward, entitlement, preferences, and resumable state. Verification MUST cover applicable restart, sign-out/sign-in, upgrade, migration, stale data, partial completion, and interrupted write behavior.
+
+Data loss, cross-Journey contamination, incorrect unlock, or rollback of stable progress is `REGRESSION` and may be P0 or P1 depending on impact.
+
+### 4.16 Privacy and secrets
+
+The product MUST:
+
+- collect and retain only authorized data;
+- keep credentials and secrets outside client code and repository content;
+- prevent sensitive information in logs, errors, analytics, screenshots, and Preview URLs;
+- document external processors and data paths;
+- avoid transmitting unpublished Phoenix content without explicit approval;
+- enforce least privilege and appropriate retention.
+
+### 4.17 External disclosure
+
+Unpublished Phoenix content MUST NOT be sent to external translation, image, AI, analysis, or storage services unless the Founder has explicitly approved that service and disclosure scope. Public repository access does not automatically authorize republishing or processing through a new third party.
+
+### 4.18 Technical validation
+
+Technical validation MUST identify exact commands, environment, Commit, results, logs, and terminal status. Required checks depend on scope and MAY include analysis, tests, build, route/data validation, asset validation, link validation, CI, and security checks.
+
+When no local execution environment exists, the report MUST state:
+
+`NOT_RUN_NO_LOCAL_EXECUTION_ENVIRONMENT`
+
+It MUST NOT convert unrun checks into `PASS`.
+
+### 4.19 User-experience validation
+
+User-experience validation MUST use reproducible routes and applicable real-device or representative Preview evidence. Founder mobile approval is mandatory for visual and core interaction changes. Automated validation cannot replace mobile experience evaluation.
+
+## 5. Evidence requirements
+
+Acceptable evidence includes one or more of:
+
+- exact repository path;
+- exact Commit SHA and Tree SHA;
+- exact diff or file content;
+- terminal command and complete relevant output;
+- CI run ID, job ID, and terminal conclusion;
+- reproducible Preview path;
+- screenshot or video tied to a candidate Commit;
+- measured comparison with stated method;
+- Founder approval record tied to the candidate.
+
+Evidence MUST be current, scoped, and attributable. Contradictory evidence blocks approval until resolved.
+
+## 6. Decision rules
+
+A task MUST NOT be Completed when:
+
+- any mandatory domain is `REQUIRES_REVISION`, `REGRESSION`, or `BLOCKED`;
+- required evidence is `PARTIALLY_VERIFIED`, `UNVERIFIED`, or `CONTRADICTORY`;
+- the stable baseline comparison is missing;
+- Founder approval is required but absent or pending;
+- changed paths exceed authorization;
+- CI or required validation has not reached a successful terminal state.
+
+All completion decisions follow [Phoenix Development Completion Standard](PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md).
+
+## 7. Binding Narrative and Discovery quality extension
+
+[Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md) is binding for new Journeys, existing Story repairs, Discovery creation or repair, level adaptation, translations, content review, audit, and controlled expansion.
+
+Content Quality additionally requires:
 
 - factual accuracy does not replace narrative quality;
 - polished language does not replace causal Story structure;
@@ -68,55 +254,10 @@ Binding rules:
 - aggregate content scores cannot approve library differentiation;
 - Story, Discovery, Reflection, Writing, and Memory MUST have distinct product functions;
 - content changes require Journey-level and library-level evidence;
-- Story MUST include an independently identifiable protagonist, causal Relationship, specific Goal, Goal-connected Conflict, enacted Choice, caused Consequence, Emotional Arc, cultural anchor in action, decisive climax, and changed ending state;
-- Discovery MUST add verified understanding without retelling Story;
-- generic tourism narration, repeated opening systems, repeated ending systems, and city substitution are prohibited;
-- Phoenix Lv.1 through Lv.10 MUST preserve narrative invariants;
-- special mechanisms MUST NOT be flattened by generic adaptation;
+- protagonist mode, causal Relationship, Goal-connected Conflict, enacted Choice, caused Consequence, Emotional Arc, cultural anchor in action, narrative engine, independent opening, decisive climax, and changed ending state require human literary review;
+- Phoenix Lv.1 through Lv.10 MUST preserve the narrative invariants defined by the binding standard;
 - automated structural Result and human literary Result MUST be recorded separately.
 
-Use Phoenix Narrative and Discovery Standard and Phoenix Story / Discovery Design Matrix for every Story, Discovery, repair pilot, controlled batch, and new Journey.
+Automated validation MAY verify fields, IDs, length, paragraph count, language records, annotations, exact duplication, and structural integrity. It cannot by itself approve protagonist independence, Relationship quality, Goal significance, Conflict quality, Choice meaning, Consequence strength, Emotional Arc, cultural integration, Story / Discovery functional separation, library differentiation, literary quality, or Founder experience.
 
-## 5. Visual and rights quality
-
-PR `#137` is the minimum visual-quality baseline. Runtime page evidence is required for visual PASS. Filenames, paths, hashes, dimensions, metadata, automated compliance fields, successful bundling, and rights records do not establish visual quality.
-
-Rights approval and visual approval are separate. Rights compliance MUST NOT be achieved by replacing an approved visual with a lower-quality placeholder or generic programmatic asset.
-
-## 6. Functional and interaction quality
-
-Correct behavior requires exact route, ID, component, state, input, output, Loading, Error, Empty, Fallback, back navigation, keyboard, lifecycle, accessibility, and persistence evidence. App launch alone is not functional PASS.
-
-## 7. Persistence and access quality
-
-Critical completion, reward, stamp, wallet, unlock, and entitlement changes require idempotent and recoverable behavior. Static code cannot prove injected failure recovery.
-
-Access decisions MUST be verified separately for development, production, free, paid, locked, unlocked, Random / Daily, direct entry, restored state, stale state, and offline behavior where applicable.
-
-## 8. Language, narration, and accessibility quality
-
-Supported language scope MUST distinguish interface script, explanation language, translation records, narration locale, and accessibility labels. No language may be declared complete without page and Journey evidence.
-
-Narration evidence includes play, pause, resume, stop, replay, speed, temporary playback, synchronization, interruption, route/lifecycle behavior, failed voice, and accessibility alternative.
-
-Accessibility includes semantics, reading/focus order, text scaling, reflow, contrast, non-color feedback, reduced motion, touch targets, keyboard, assistive input, and non-audio alternatives.
-
-## 9. Automated validation boundary
-
-Automated validation MAY verify fields, IDs, lengths, paragraph counts, language records, annotations, exact duplication, route mappings, and structural integrity.
-
-It cannot by itself approve protagonist independence, Relationship quality, Goal significance, Conflict quality, Choice meaning, Consequence strength, Emotional Arc, cultural integration, Story / Discovery functional separation, library differentiation, literary quality, visual quality, mobile experience, or Founder experience.
-
-Claims such as `360 / 360 PASS`, `score 100`, `average 100`, and `all fields present` MUST include the exact implemented check scope and MUST NOT create overall Story Quality PASS.
-
-## 10. Regression and blocking
-
-Any result below the current stable baseline is `REGRESSION`. Any missing critical evidence is `BLOCKED`. Regression blocks Completed, Ready, merge, content expansion, and the next phase.
-
-A repair is not accepted until the same domain, route, Journey, state, and device scope is reverified.
-
-## 11. Approval
-
-Technical success, human literary approval, visual approval, rights approval, and Founder approval are separate gates. Required Founder mobile approval MUST be tied to the exact candidate Commit and Preview.
-
-This standard does not authorize a content repair, pilot, new Journey, Ready action, or merge.
+Statements such as `360 / 360 PASS`, `score 100`, `average 100`, and `all fields present` MUST identify the checks actually implemented and MUST NOT produce overall Story Quality `PASS`.
