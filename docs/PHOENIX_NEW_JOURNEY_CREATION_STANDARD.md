@@ -1,433 +1,296 @@
 # Phoenix New Journey Creation Standard
 
 **System:** Phoenix Product Standard System v1.0  
-**Status:** BINDING  
+**Status:** BINDING PHASE GATE  
 **Stable baseline:** PR `#137`, Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
+
+This standard is binding together with [Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), [Phoenix Journey System Standard](PHOENIX_JOURNEY_SYSTEM_STANDARD.md), Phoenix Product Quality Standard, Phoenix UI and Visual Standard, and the acceptance matrix.
+
+All work MUST obey `NEW RESULT >= CURRENT STABLE BASELINE`.
 
 ## 1. Purpose
 
-This standard defines the only permitted lifecycle for creating a new Phoenix Journey. It prevents batch expansion before product, story, learning, visual, technical, and mobile quality are proven.
+This standard controls creation of exactly one new Journey at a time. It prevents premature implementation, copied Story structures, unverified cultural claims, batch image production, runtime placeholders, and expansion before Founder approval.
 
-The first new-Journey cycle permits exactly **one Journey pilot**. No second Journey may enter implementation before the first pilot receives controlled approval.
+It also governs an existing-Story repair pilot when the same phase evidence is required by Phoenix Narrative and Discovery Standard.
 
-## 2. Global gates and requirement classes
+## 2. Permanent limits
 
-Every phase MUST record:
+- One authorized task MUST NOT implement more than one Journey unless a later controlled batch is explicitly approved.
+- No new Journey begins before existing pilot quality is proven and the roadmap authorizes expansion.
+- No batch Story rewrite occurs before pilot approval.
+- A proposal, design, or concept does not authorize implementation.
+- Every phase keeps an independent acceptance record.
+- `PASS` requires `VERIFIED` evidence.
+- `NOT_APPLICABLE` requires reason and evidence.
+- Automated validation success does not establish literary `PASS`.
+- Founder approval MUST be tied to the exact candidate Commit and Preview.
 
-- input;
-- required deliverables;
-- validation evidence;
-- blocking conditions;
-- responsible owner;
-- completion state.
+## 3. Phase A: Proposal
 
-Canonical requirement classes are:
+### Allowed work
 
-- `REQUIRED`
-- `CONDITIONALLY_REQUIRED`
-- `OPTIONAL`
+Research, internal source review, proposal drafting, catalog comparison, and feasibility analysis. No product, Story data, Discovery data, visual asset, route, or runtime implementation.
 
-Legacy terms map only as follows when reading historical records: `MANDATORY` = `REQUIRED`; `CONDITIONAL` = `CONDITIONALLY_REQUIRED`. New records and tables MUST use the canonical terms.
+### Required evidence
 
-Canonical completion states are `PASS`, `REQUIRES_REVISION`, `REGRESSION`, `BLOCKED`, and `NOT_APPLICABLE`. Canonical evidence levels are `VERIFIED`, `PARTIALLY_VERIFIED`, `UNVERIFIED`, and `CONTRADICTORY`.
-
-A phase may advance only when every `REQUIRED` item and every applicable `CONDITIONALLY_REQUIRED` item is `PASS` with `VERIFIED` evidence and no regression exists. `NOT_APPLICABLE` requires a reason and evidence.
-
-## 3. Phase A: Journey Proposal
-
-### Input
-
-- current approved stable baseline;
-- product and learning goals;
-- proposed Journey type, city or realm, audience, and language level;
-- known rights and cultural constraints.
-
-### Required deliverables
-
-- unique Journey ID and proposed Story ID;
-- Journey type;
-- city or realm identity;
-- learner value and product value;
-- cultural anchor;
-- protagonist, relationship, goal, conflict, choice, consequence, and emotional arc summary;
-- explanation of how the proposal differs from every existing Journey;
-- proposed learning stages and reward outcome;
-- initial rights and external-disclosure plan;
-- authorized scope and responsible owners.
-
-### Validation evidence
-
-- comparison against existing Journey catalog;
-- duplicate-pattern review;
-- route and ID collision review;
-- cultural research source record;
-- proposal decision record.
+- Journey ID and Story ID proposal;
+- Journey Type and publication state;
+- city, place, or realm identity;
+- approved internal source evidence;
+- cultural anchor and substitution test;
+- protagonist mode;
+- Relationship;
+- Goal;
+- Conflict;
+- key Choice;
+- caused Consequence;
+- Emotional Arc;
+- primary narrative engine;
+- Story Function;
+- Discovery Function;
+- opening type;
+- climax type;
+- ending type and changed ending state;
+- memory anchor;
+- catalog differentiation matrix;
+- closest existing Journeys and risks;
+- Phoenix Lv.1 through Lv.10 invariant plan;
+- visual direction without batch generation;
+- product and technical feasibility;
+- rights and disclosure plan;
+- owner, reviewer, Result, and Evidence Level.
 
 ### Blocking conditions
 
-- interchangeable city or realm;
-- repeated protagonist, relationship, goal, conflict, choice, consequence, or structure;
-- no meaningful learning value;
-- no credible cultural anchor;
-- unresolved rights or disclosure risk;
-- second pilot proposed before the first is approved.
+Any applicable blocking code from Phoenix Narrative and Discovery Standard blocks Phase A. In particular:
 
-### Responsible owner
+- `PROTAGONIST_IDENTITY_MISSING`
+- `RELATIONSHIP_NOT_CAUSAL`
+- `GOAL_NOT_PERSONAL_OR_SPECIFIC`
+- `CONFLICT_NOT_CONNECTED_TO_GOAL`
+- `CHOICE_NOT_ENACTED`
+- `CONSEQUENCE_NOT_CAUSED`
+- `EMOTIONAL_ARC_UNVERIFIED`
+- `CULTURAL_ANCHOR_DECORATIVE`
+- `STORY_IS_PRIMARY_EXPOSITION`
+- `STORY_DISCOVERY_FUNCTION_OVERLAP`
+- `NARRATIVE_ENGINE_DUPLICATION`
+- `LIBRARY_DIFFERENTIATION_UNVERIFIED`
+- `LEVEL_ADAPTATION_IDENTITY_LOSS`
+- `SPECIAL_MECHANISM_FLATTENED`
+- `BATCH_EXPANSION_BEFORE_PILOT_APPROVAL`
 
-Product owner with Story/Learning and Quality review.
+### Exit gate
 
-### Completion state
+Founder approves the proposal direction only. Phase B is not automatically approved.
 
-`PASS` only after proposal uniqueness and scope are `VERIFIED`.
+## 4. Phase B: Story and learning design
 
-## 4. Phase B: Story and Learning Design
+### Allowed work
 
-### Input
+Design records and reviewable content specifications. No runtime implementation or asset batch.
 
-- approved Phase A proposal;
-- Journey System Standard;
-- target language level and supported languages.
+### Required evidence
 
-### Requirement classification
-
-Phase B MUST classify its design elements as follows:
-
-- Protagonist: `REQUIRED`
-- Relationship: `REQUIRED`
-- Goal: `REQUIRED`
-- Conflict: `REQUIRED`
-- Choice: `REQUIRED`
-- Consequence: `REQUIRED`
-- Emotional Arc: `REQUIRED`
-- Story: `REQUIRED`
-- Vocabulary: `REQUIRED`
-- ReadingAnnotation: `CONDITIONALLY_REQUIRED` when Story, Discovery, or other explorer-readable learning text exists
-- Discovery: `REQUIRED`
-- Challenge: `REQUIRED`
-- Reflection: `REQUIRED`
-- Writing: `REQUIRED`
-- Memory: `REQUIRED`
-- Completion: `REQUIRED`
-- Reward: `REQUIRED`
-- Stamp: `CONDITIONALLY_REQUIRED` when completion, reward, Passport, collection, or progress design includes a Stamp
-- Other product-approved fields: `OPTIONAL` only when omission does not weaken the required flow
-
-ReadingAnnotation may be `NOT_APPLICABLE` only when no applicable explorer-readable text exists, with reason and evidence. Stamp may be `NOT_APPLICABLE` only when an explicit product design decision excludes it, with design basis and evidence. Neither may be left blank or hidden as `OPTIONAL`.
-
-### Required deliverables
-
-- complete independent story design;
-- independent protagonist;
-- Relationship identity, narrative function, and evidence path;
-- protagonist Goal, why it matters, relationship to the Conflict, and evidence path;
-- conflict, choice, consequence, and emotional arc;
-- cultural anchor integrated into action;
-- Story, Vocabulary, Discovery, Challenge, Reflection, Writing, Memory, Completion, and Reward designs;
-- ReadingAnnotation applicability decision and design;
-- Stamp applicability decision and design;
-- multilingual alignment plan;
+- complete [Phoenix Story / Discovery Design Matrix](templates/PHOENIX_STORY_DISCOVERY_DESIGN_MATRIX.md);
+- Story Function Contract;
+- Discovery Function Contract;
+- Function Contracts for Challenge, Reflection, Writing, Memory, and Completion;
+- complete protagonist identity evidence;
+- causal Relationship evidence;
+- Goal significance;
+- Conflict connected to Goal;
+- enacted Choice evidence;
+- Consequence caused-by-choice evidence;
+- Emotional Arc opening, turning point, and ending;
+- cultural anchor effect on action;
+- narrative-engine independence;
+- opening independence;
+- causal progression;
+- climax and changed ending state;
+- Story / Discovery functional separation evidence;
+- catalog-level similarity and differentiation review;
+- Phoenix Lv.1 through Lv.10 invariant matrix;
+- ReadingAnnotation plan;
+- translation and segmentation plan;
+- vocabulary selection and provenance;
+- Challenge answer validity;
+- Reflection and Writing purpose;
+- Memory anchor;
+- Completion outcome;
 - narration plan;
-- progression and persistence rules;
-- content rights and source record;
-- acceptance criteria for every applicable stage.
+- automated-score limitation acknowledgment;
+- human literary-review owner.
 
-### Validation evidence
+### Required declaration
 
-- story structure review;
-- learning-purpose review;
-- cultural authenticity review;
-- Relationship and Goal evidence review;
-- ReadingAnnotation applicability review;
-- Stamp applicability review;
-- cross-language meaning matrix;
-- duplication review against existing Journeys;
-- canonical requirement-class checklist.
+```text
+Automated checks planned:
+Checks not covered by automation:
+Automated score used as literary approval: NO
+Human literary review required: YES
+```
 
 ### Blocking conditions
 
-- generic tourism text;
-- copied or lightly recolored narrative template;
-- missing Relationship, Goal, Choice, or Consequence;
-- applicable ReadingAnnotation omitted or unverified;
-- applicable Stamp omitted or unverified;
-- `NOT_APPLICABLE` used without reason and evidence;
-- stage text duplicated only to fill fields;
-- unsupported cultural claims;
-- multilingual meaning drift;
-- rights or attribution unresolved.
+All blocking codes in Phoenix Narrative and Discovery Standard apply. `OPENING_TEMPLATE_REUSE`, `ENDING_TEMPLATE_REUSE`, `STORY_DISCOVERY_FUNCTION_OVERLAP`, and `AUTOMATED_SCORE_NOT_LITERARY_APPROVAL` are explicit Phase B blockers.
 
-### Responsible owner
+### Exit gate
 
-Story/Learning owner with cultural, language, and Quality review.
+All required design rows are `PASS / VERIFIED`; Founder approves the exact Story and Discovery design before visual concept or implementation.
 
-### Completion state
+## 5. Phase C: Visual concept
 
-`PASS` only when the complete design is `VERIFIED` and no implementation begins early.
+### Allowed work
 
-## 5. Phase C: Visual Concept Pilot
+One Journey only, with one to three representative concept assets or existing approved internal references. No full batch, no replacement of product visuals, and no production mapping.
 
-### Input
+### Required evidence
 
-- approved Story and Learning Design;
-- PR `#137` visual baseline;
-- UI and Visual Standard;
-- approved rights plan.
+- visual motif linked to Story action and memory anchor;
+- stage intent;
+- crop, focal point, text-safe area, small-screen, Safe Area, and reduced-motion plan;
+- catalog visual-differentiation comparison;
+- source, license, permission, modification, and attribution evidence;
+- technical mapping plan;
+- isolated Preview plan;
+- Founder mobile review requirement.
 
-### Required deliverables
+### Exit gate
 
-The visual pilot is limited to:
-
-- one Journey;
-- one to three sample images;
-- one isolated Preview.
-
-It MUST also provide:
-
-- visual concept statement;
-- independent composition, environment, focal point, color relationships, lighting, material, weather, and cultural details;
-- target mobile crop and readable text region;
-- stage-to-image intent;
-- source, rights, and modification evidence;
-- explicit statement that unapproved pilot assets are excluded from release runtime.
-
-### Validation evidence
-
-- stable/candidate visual comparison;
-- target-phone screenshots;
-- crop and focal-point review;
-- visual differentiation review;
-- Rights, Technical, Visual Quality, and Stable Comparison gate evidence;
-- Founder mobile decision.
-
-### Blocking conditions
-
-- low-detail programmatic principal visual;
-- flat background;
-- recolored or repeated composition;
-- source-only approval without product review;
-- more than three sample images;
-- batch generation or runtime integration before approval;
-- Founder decision missing, pending, or rejected.
-
-### Responsible owner
-
-Visual owner with Product, Rights, Quality, and Founder review.
-
-### Completion state
-
-`PASS` only after Founder mobile approval of the concept. Rejection returns the work to revision; it does not authorize a new batch.
+Founder approves the visual direction. Approval is not approval for batch generation.
 
 ## 6. Phase D: Implementation
 
-### Input
+### Preconditions
 
-- approved proposal, Story/Learning design, and visual concept;
-- exact authorized paths and implementation scope;
-- latest approved stable `main`.
+Phases A, B, and C are approved. The branch starts from the latest approved stable `main`, as recorded by `docs/PHOENIX_STABLE_BASELINE_STANDARD.md`.
 
-### Required deliverables
+### Required implementation scope
 
-- correct Journey ID, Story ID, route, components, data, assets, languages, narration, progression, persistence, reward, conditionally applicable Stamp, loading, error, fallback, and accessibility implementation;
-- changed-path inventory;
-- implementation notes linking every change to an approved requirement;
-- no unrelated changes;
-- no use of closed PRs `#138`–`#141` as a baseline.
+- exact Journey and Story IDs;
+- exact route and parameters;
+- Story and Discovery records;
+- Reflection, Writing, Memory, Challenge, Completion, Reward, and conditionally applicable Stamp;
+- Lv.1 through Lv.10 content preserving narrative invariants;
+- ReadingAnnotations and translations;
+- vocabulary and reviewed examples;
+- narration and locale behavior;
+- progress, persistence, access, and migration;
+- Loading, Error, Empty, and Fallback states;
+- accessibility;
+- approved visual mapping;
+- rights records;
+- Journey-level acceptance evidence.
 
-### Validation evidence
+No unrelated repair or second Journey may be bundled.
+
+## 7. Phase E: Automated validation
 
-- exact diff, Commit, Tree, paths, and mappings;
-- route and ID evidence;
-- runtime page evidence;
-- content and asset mapping evidence;
-- progress and persistence evidence;
-- scope review.
+Required checks include, as applicable:
 
-### Blocking conditions
+- Worker governance tests;
+- Flutter Analyze;
+- Flutter Tests;
+- Web release build;
+- Cloudflare Worker bundle validation;
+- IDs, routes, records, annotations, translations, vocabulary, Challenge, level, progress, persistence, access, assets, and rights-record integrity;
+- exact changed-path verification;
+- no skipped or deleted stable tests.
 
-- unauthorized path;
-- wrong route, ID, component, content, language, asset, reward, Stamp, or persistence mapping;
-- runtime placeholder;
-- unrelated refactor;
-- closed-PR implementation inherited without independent stable-baseline proof;
-- batch implementation of additional Journeys.
+Automated validation success does not establish literary `PASS`.
 
-### Responsible owner
+Automated validation MAY establish only the checks it implements. `360 / 360 PASS`, `score 100`, `average 100`, or `all fields present` MUST NOT be promoted into Story Quality approval.
 
-Implementation owner with Product and Quality review.
+## 8. Phase F: Stable comparison and isolated Preview
 
-### Completion state
+Required:
 
-Implementation complete means ready for validation, not product Completed.
+- candidate Commit, Tree, and parent;
+- exact changed paths;
+- isolated PR Preview tied to candidate Head SHA;
+- `STABLE_BASELINE_COMPARISON` against PR `#137` and the current approved stable `main`;
+- separate content, interaction, mobile, visual, audio, accessibility, persistence, access, rights, and performance Results and Evidence Levels;
+- no regression;
+- no PR Preview used as production evidence;
+- no unsupported visual or literary approval.
 
-## 7. Phase E: Automated Validation
+## 9. Phase G: Founder mobile review
 
-### Input
+Founder mobile review MUST cover:
 
-- candidate Commit from Phase D;
-- exact required validation commands and CI workflows.
+- Story identity;
+- Discovery distinction;
+- protagonist mode and Relationship visibility;
+- Goal, Conflict, enacted Choice, and caused Consequence;
+- emotional continuity;
+- opening, climax, and ending independence;
+- cultural anchor in action;
+- level adaptation;
+- Journey memorability;
+- language, narration, mobile layout, keyboard, Safe Area, persistence, and completion where applicable.
 
-### Required deliverables
+Founder decision values:
 
-- analysis, tests, build, link, route/data, asset, security, or other scope-required results;
-- exact command, environment, Commit, output, and terminal status;
-- CI run and job identifiers where available.
+- `APPROVED`
+- `REJECTED`
+- `PENDING`
 
-### Validation evidence
+Only `APPROVED` tied to the exact candidate authorizes the next phase. A later material content or visual change requires reapproval.
 
-- reproducible command output;
-- CI terminal conclusions;
-- failed-test and retry history;
-- confirmation that validation did not modify unauthorized files.
+## 10. Pilot and batch gate
 
-### Blocking conditions
+Existing-library narrative repair MUST follow:
 
-- required validation not run;
-- non-terminal CI;
-- failure or cancellation;
-- stale result from another Commit;
-- summary without output or run ID;
-- local tests claimed despite no local environment.
+1. Pilot N1, one normal Journey, recommended `beijing-summer-palace`;
+2. Founder mobile decision on Pilot N1;
+3. Pilot S1, one special Journey, recommended `tide-letter`;
+4. Founder mobile decision on Pilot S1;
+5. controlled repair batches of two to three Journeys;
+6. library differentiation rerun after every batch.
 
-### Responsible owner
+Before Pilot N1 approval:
 
-Implementation owner with Quality verification.
+- no second pilot;
+- no batch rewrite;
+- no 27-normal-Journey rewrite;
+- no nine-special-Journey rewrite;
+- no template inferred from the pilot.
 
-### Completion state
+A rejected pilot returns to revision. It does not authorize replacing the pilot or mass production.
 
-When no local environment exists, local status MUST be `NOT_RUN_NO_LOCAL_EXECUTION_ENVIRONMENT`. Automated validation success does not replace Preview or Founder approval.
+## 11. Acceptance matrix
 
-## 8. Phase F: Stable Baseline Comparison
+Use [Phoenix New Journey Acceptance Matrix](templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md). NJ-001 through NJ-052 are cumulative. Existing rows MUST NOT be replaced by aggregate evidence.
 
-### Input
+Every row records exact evidence, Result, Evidence Level, Issue / Required Action, Owner, and Founder Approval state where applicable.
 
-- validated candidate Commit;
-- current approved stable PR and Commit;
-- equivalent stable and candidate routes and states.
+## 12. Prohibited shortcuts
 
-### Required deliverables
+The following are blocking:
 
-- complete `STABLE_BASELINE_COMPARISON` from [Phoenix Development Completion Standard](PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md);
-- comparison of function, pages, routes, Journey IDs, assets, visuals, interaction, mobile, performance, content, audio, accessibility, persistence, access/entitlement, rights, and unexpected loss;
-- exact evidence for all affected surfaces.
+- generic tourism narration as Story;
+- factual accuracy used as narrative approval;
+- exact-text difference used as functional separation;
+- generic second-person perspective used as protagonist identity;
+- mentioned person used as causal Relationship;
+- internal thought used as enacted Choice without action or commitment;
+- philosophical ending used as caused Consequence;
+- one unsupported similarity score used as catalog approval;
+- aggregate score used as literary approval;
+- batch rewrite before pilot approval;
+- Story / Discovery functional duplication;
+- shared Story template;
+- city or realm substitution inside the same causal structure;
+- special mechanism flattened by generic adaptation;
+- runtime placeholder or wrong-Journey fallback;
+- production use before rights and Founder gates.
 
-### Validation evidence
+## 13. Completion and expansion
 
-- reproducible stable and candidate paths;
-- screenshots, recordings, measurements, logs, and runtime observations as applicable;
-- scope and changed-path verification.
+A Journey is Completed only when every applicable acceptance row is `PASS / VERIFIED`, all blocking codes are closed, stable comparison passes, technical checks are terminal-success, and required Founder approval is `APPROVED`.
 
-### Blocking conditions
+A completed pilot does not automatically authorize a second Journey or batch. Expansion requires explicit scope and follows the two-to-three-Journey default batch limit.
 
-- missing report;
-- missing required field or evidence level;
-- non-equivalent comparison conditions;
-- `UNVERIFIED` or `CONTRADICTORY` material claim;
-- any `REGRESSION`;
-- accidental loss of stable feature or resource.
-
-### Responsible owner
-
-Quality owner with implementation support.
-
-### Completion state
-
-Missing report: `INCOMPLETE_STABLE_BASELINE_COMPARISON_MISSING`. Any regression: `REGRESSION_BLOCKS_READY_AND_MERGE`.
-
-## 9. Phase G: Founder Mobile Preview
-
-### Input
-
-- Phase F candidate with no known regression;
-- isolated reproducible Preview tied to exact candidate Commit;
-- target mobile test path.
-
-### Required deliverables
-
-- Preview link and route instructions;
-- affected Journey and stage list;
-- stable/candidate comparison summary;
-- known limitations;
-- explicit Founder decision.
-
-### Validation evidence
-
-- Founder approval record tied to candidate Commit or reproducible Preview;
-- mobile screenshots or recording where retained;
-- issue list for any rejection.
-
-### Blocking conditions
-
-- Preview unavailable or not tied to candidate;
-- mobile flow incomplete;
-- approval assumed from silence;
-- decision `PENDING` or `REJECTED`;
-- candidate changed after approval without reapproval.
-
-### Responsible owner
-
-Founder decision, coordinated by Product/Quality.
-
-### Completion state
-
-`PASS` only with explicit `APPROVED` decision.
-
-## 10. Phase H: Approval and Controlled Release
-
-### Input
-
-- all Phases A–G passed;
-- exact approved candidate Commit;
-- release and rollback plan.
-
-### Required deliverables
-
-- completed New Journey Acceptance Matrix;
-- final changed-path and evidence inventory;
-- release scope limited to the approved pilot;
-- rollback trigger and restoration procedure;
-- post-release verification plan;
-- Founder approval to release or merge.
-
-### Validation evidence
-
-- all `REQUIRED` and applicable `CONDITIONALLY_REQUIRED` acceptance items `PASS` with `VERIFIED` evidence;
-- every `NOT_APPLICABLE` item has a reason and evidence;
-- PR remains within scope;
-- CI terminal success where required;
-- exact approval record;
-- post-release comparison evidence when released.
-
-### Blocking conditions
-
-- any missing `REQUIRED` item;
-- any missing applicable `CONDITIONALLY_REQUIRED` item;
-- candidate differs from approved Commit;
-- additional Journey or unapproved batch included;
-- regression, blocked evidence, or unauthorized path;
-- missing rollback plan.
-
-### Responsible owner
-
-Product owner, Quality owner, and Founder.
-
-### Completion state
-
-Only this phase may authorize the pilot Journey as Completed and eligible for controlled release.
-
-## 11. Single-pilot enforcement
-
-Until the first new Journey completes Phase H:
-
-- no second new Journey may enter Phase D Implementation;
-- no batch visual generation may enter runtime;
-- no shared template may be inferred from one unapproved design;
-- reusable infrastructure changes must be separately scoped and compared against the stable baseline;
-- research proposals may be recorded, but they MUST remain outside implementation.
-
-## 12. Acceptance matrix
-
-Every phase MUST update [Phoenix New Journey Acceptance Matrix](templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md). Any missing `REQUIRED` item or applicable `CONDITIONALLY_REQUIRED` item blocks Completed, Ready, merge, expansion, and the next phase.
-
-## 13. Final rule
-
-A new Journey is not complete when its files, content, images, tests, or Preview merely exist. It is complete only after all phases pass, the stable baseline is preserved or exceeded, and Founder mobile approval authorizes controlled release.
+This governance document does not authorize a new Journey, Summer Palace pilot, Tide Letter pilot, content repair, Ready state, or merge.

@@ -4,295 +4,231 @@
 **Status:** BINDING  
 **Stable baseline:** PR `#137`, Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
 
-## 1. Purpose
+## 1. Purpose and binding relationship
 
-This standard defines the common product skeleton for all existing and future Phoenix Journeys while protecting narrative, cultural, emotional, literary, and visual independence.
+This standard defines the common product skeleton for all existing and future Phoenix Journeys. [Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md) is binding and defines content differentiation, causal quality, Story / Discovery separation, narrative-engine independence, level invariants, and repair-batch gates.
 
-Shared product structure MUST create consistency without turning Journeys into repeated story or visual templates.
+The Journey System Standard defines the common skeleton. The Narrative and Discovery Standard defines the independent narrative, cultural, emotional, and literary result inside that skeleton.
+
+Shared structure MUST create consistency without turning Journeys into repeated Story, Discovery, or visual templates. All work MUST obey `NEW RESULT >= CURRENT STABLE BASELINE`.
 
 ## 2. Canonical requirement classes
 
-All Phoenix Journey standards, matrices, and reviews MUST use only:
+Use only:
 
-- `REQUIRED`: Every Journey MUST provide the element or an explicit validated equivalent.
-- `CONDITIONALLY_REQUIRED`: The element MUST exist when its stated applicability condition is true.
-- `OPTIONAL`: The element MAY be omitted without weakening required flow; omission MUST not create an incomplete stage.
+- `REQUIRED`: every Journey MUST provide the element or a validated equivalent;
+- `CONDITIONALLY_REQUIRED`: the element MUST exist when its applicability condition is true;
+- `OPTIONAL`: omission does not weaken a required flow.
 
-Legacy terms, when encountered in historical records, map only as follows:
-
-- `MANDATORY` = `REQUIRED`
-- `CONDITIONAL` = `CONDITIONALLY_REQUIRED`
-
-New rules, tables, and records MUST use the canonical terms. `NOT_APPLICABLE` requires a documented applicability reason and supporting evidence; it is not automatic `PASS`.
+Historical `MANDATORY` maps to `REQUIRED`; historical `CONDITIONAL` maps to `CONDITIONALLY_REQUIRED`. `NOT_APPLICABLE` requires a documented decision, reason, and evidence. It is not automatic `PASS`.
 
 ## 3. Canonical Journey identity
 
-| Element | Requirement | Acceptance rule |
+The following are REQUIRED unless explicitly marked otherwise:
+
+- unique and stable Journey ID;
+- Journey Type: normal or special;
+- non-interchangeable city, place, realm, or experiential identity;
+- unique Story ID;
+- approved cultural anchor;
+- Protagonist;
+- Relationship;
+- Goal;
+- Conflict connected to Goal;
+- enacted Choice;
+- caused Consequence;
+- Emotional Arc;
+- narrative engine;
+- opening type;
+- climax;
+- changed ending state;
+- Journey-specific memory anchor.
+
+Relationship and Goal are independent requirements with their own evidence, Result, and Evidence Level.
+
+Generic second-person perspective alone does not satisfy protagonist identity.
+
+Normal Journey and special Journey protagonist modes MUST follow Phoenix Narrative and Discovery Standard.
+
+## 4. Canonical stages and Function Contracts
+
+| Stage or element | Requirement | Product purpose |
 |---|---|---|
-| Journey ID | REQUIRED | Unique, stable, correctly routed, and used consistently across data, progress, rewards, assets, and tests. |
-| Journey Type | REQUIRED | Declares normal or special Journey and any approved subtype. |
-| City / Realm Identity | REQUIRED | Establishes a non-interchangeable place, realm, or experiential identity. |
-| Story ID | REQUIRED | Unique and linked to the correct Journey. |
-| Cultural Anchor | REQUIRED | Specific, meaningful, integrated into action or learning, and not decorative trivia. |
-| Protagonist | REQUIRED | Independent identity, agency, and relation to the Journey. |
-| Relationship | REQUIRED | Defines the relationship identity, narrative function, and influence on the Journey. |
-| Goal | REQUIRED | Defines the protagonist goal, why it matters, and how it relates to the conflict. |
-| Conflict | REQUIRED | Real obstacle, tension, or dilemma that affects the goal. |
-| Choice | REQUIRED | A meaningful decision or commitment, not a cosmetic branch. |
-| Consequence | REQUIRED | A visible result caused by action or choice. |
-| Emotional Arc | REQUIRED | Identifiable emotional movement from opening through consequence and ending. |
+| Story | REQUIRED | Independent narrative input with causal movement. |
+| Vocabulary | REQUIRED | Journey-context lexical learning. |
+| ReadingAnnotation | CONDITIONALLY_REQUIRED | Pronunciation, translation, and segmentation for explorer-facing reading text. |
+| Discovery | REQUIRED | Verified cultural or contextual understanding without retelling Story. |
+| Challenge | REQUIRED | Validated understanding or application. |
+| Reflection | REQUIRED | Explorer interpretation or emotional response. |
+| Writing | REQUIRED | Meaningful learner production. |
+| Memory | REQUIRED | Durable Journey-specific recall. |
+| Completion | REQUIRED | Outcome, progress, saved state, and next action. |
+| Reward | REQUIRED | Approved progression or recognition. |
+| Stamp | CONDITIONALLY_REQUIRED | Required when Passport, collection, reward, or completion design includes it. |
+| Visual Stages | REQUIRED | Stage-appropriate visual direction and runtime mapping. |
+| Narration | CONDITIONALLY_REQUIRED | Required where reading or audio playback exists. |
+| Multilingual Content | REQUIRED | Meaning-aligned supported variants. |
+| Progression | REQUIRED | Order, unlock, completion, repeat, and return behavior. |
+| Persistence | REQUIRED | Correct Journey and stage save/restore. |
+| Routing | REQUIRED | Exact route, Journey ID, Story ID, and parameters. |
+| Loading / Error / Fallback | REQUIRED | Safe state behavior without wrong-content substitution. |
+| Accessibility | REQUIRED | Semantics, focus, text, contrast, motion, and input. |
+| Rights Evidence | CONDITIONALLY_REQUIRED | Approved provenance for sourced or protected material. |
 
-Relationship and Goal MUST be accepted as independent requirements with their own evidence paths, Result, and Evidence Level. They MUST NOT be inferred only from a general Story review.
+Story and Discovery MUST each submit a one-sentence Function Contract. Challenge, Reflection, Writing, Memory, and Completion MUST also submit Function Contracts under the Narrative and Discovery Standard.
 
-## 4. Learning and narrative stages
+Copying or paraphrasing the same content across stages is prohibited.
 
-| Stage or element | Requirement | Product purpose and applicability |
-|---|---|---|
-| Story | REQUIRED | Delivers the independent narrative, language input, context, conflict, choice, and consequence. |
-| Vocabulary | REQUIRED | Teaches selected words in the Journey context with correct language support. |
-| ReadingAnnotation | CONDITIONALLY_REQUIRED | Required when the Journey contains Story, Discovery, or other learning text intended for explorer reading. It aligns source text, pronunciation or annotation, translations, and segmentation. If no applicable reading text exists, use `NOT_APPLICABLE` with reason and evidence. |
-| Discovery | REQUIRED | Explains culture, context, place, practice, or meaning without duplicating Story. |
-| Challenge | REQUIRED | Tests understanding or application with valid feedback. |
-| Reflection | REQUIRED | Connects the Journey to interpretation, feeling, or personal thought. |
-| Writing | REQUIRED | Produces meaningful learner output aligned to level and Journey content. |
-| Memory | REQUIRED | Creates a durable Journey-specific recall anchor. |
-| Completion | REQUIRED | Confirms completion, progress, next action, and saved state. |
-| Reward | REQUIRED | Provides the approved progression or recognition outcome. |
-| Stamp | CONDITIONALLY_REQUIRED | Required when completion, reward, Passport, collection, or progress design includes a Stamp. If an explicit product decision excludes Stamp, use `NOT_APPLICABLE` with the design basis and evidence; do not use `OPTIONAL` to hide a missing Stamp. |
-| Visual Stages | REQUIRED | Provides stage-appropriate visual direction and runtime mapping. |
-| Narration | CONDITIONALLY_REQUIRED | Required wherever the product provides reading or audio playback. |
-| Multilingual Content | REQUIRED | All supported language variants remain meaning-aligned and correctly routed. |
-| Progression | REQUIRED | Defines order, unlock, completion, and repeat behavior. |
-| Persistence | REQUIRED | Saves and restores the correct Journey and stage state. |
-| Routing | REQUIRED | Uses exact route, Journey ID, stage ID, and parameters. |
-| Loading | REQUIRED | Handles every asynchronous stage entry or operation. |
-| Error | REQUIRED | Handles invalid, unavailable, permission, network, and service failures as applicable. |
-| Fallback | REQUIRED | Provides safe degradation without wrong content or low-quality runtime substitution. |
-| Accessibility | REQUIRED | Meets semantic, focus, text, contrast, motion, and input requirements. |
-| Rights Evidence | CONDITIONALLY_REQUIRED | Required for protected, sourced, licensed, or permission-controlled material; it records approved provenance without replacing visual approval. |
+## 5. Story contract
 
-## 5. Story requirements
+Every Story MUST:
 
-Every Journey Story MUST:
-
-- use an independent protagonist and relationship;
-- establish a specific place or realm through lived detail;
-- contain a concrete goal, conflict, meaningful choice, and consequence;
-- develop an emotional arc;
-- integrate the cultural anchor into the narrative rather than append it;
-- support the intended language level and learning outcomes;
-- avoid generic tourism narration, filler, and interchangeable city references;
+- use an independently identifiable protagonist and causal Relationship;
+- establish place or realm through lived action;
+- contain a specific Goal, connected Conflict, enacted Choice, and caused Consequence;
+- develop an Emotional Arc;
+- integrate the cultural anchor into action, stakes, relationship, choice, or consequence;
+- begin with an active situation, need, disruption, obligation, or relationship tension;
+- contain causal progression and a decisive climax;
+- end in a changed state;
 - remain distinguishable from every other Journey in opening, structure, climax, and ending;
-- maintain synchronized IDs, annotations, translations, learning items, and dependent stages.
+- avoid generic tourism narration, factual-exposition-first Story design, filler, and interchangeable city references;
+- keep IDs, annotations, translations, vocabulary, Challenge, Reflection, Writing, Memory, Completion, and narration aligned.
 
-## 6. Learning-stage integrity
+Automated scores cannot approve literary quality.
 
-Stages MAY reuse shared page components, navigation logic, and state handling. Each stage MUST retain a distinct function:
+## 6. Story / Discovery functional separation
 
-- Story is narrative input.
-- Vocabulary is targeted lexical learning.
-- Discovery is cultural or contextual understanding.
-- Challenge is validated comprehension or application.
-- Reflection is interpretation and emotional connection.
-- Writing is learner production.
-- Memory is durable recall design.
-- Completion records outcome and next action.
-- Reward and conditionally applicable Stamp represent approved progression.
+Story is narrative experience. Discovery is verified explanation that adds knowledge not already delivered by Story.
 
-Copying the same text across stages to satisfy field presence is prohibited.
+Every Journey MUST record:
+
+- Story Function;
+- Discovery Function;
+- Story-only information;
+- Discovery-only information;
+- intentional overlap and justification;
+- Functional Separation Result;
+- Evidence Level.
+
+Exact-text difference does not prove functional separation. Functional duplication is blocking.
 
 ## 7. Normal Journey rules
 
-Normal Journeys MAY share:
+Normal Journeys MAY share page skeleton, stage order, navigation, narration controls, multilingual rules, persistence, reward framework, state components, and evidence methods.
 
-- page skeleton;
-- learning-stage order;
-- navigation;
-- narration controls;
-- multilingual rules;
-- progress and persistence;
-- reward framework;
-- loading, error, empty, and fallback components;
-- acceptance and evidence methods.
+Each normal Journey MUST independently define protagonist identity, role, Relationship, Goal, Conflict, Choice, Consequence, Emotional Arc, cultural anchor, narrative engine, daily-life or place-specific setting, climax, ending, visual composition, and memory anchor.
 
-Normal Journeys MUST independently define:
-
-- protagonist;
-- relationship;
-- goal;
-- conflict;
-- choice;
-- consequence;
-- emotional arc;
-- cultural anchor;
-- city life or place-specific scene;
-- narrative structure;
-- visual composition and environment;
-- memory anchor.
-
-A city name, landmark, or recolor applied to the same narrative structure is not an independent Journey.
+A city name, landmark, fact swap, recolor, or weather change applied to the same causal structure is not an independent Journey.
 
 ## 8. Special Journey rules
 
-Special Journeys MAY share the same product and learning infrastructure as normal Journeys. They MUST preserve independent literary and visual identity.
+Special Journeys MAY share product infrastructure but MUST preserve literary and visual independence.
 
-Each special Journey MUST independently define:
+Each special Journey MUST independently define literary structure, protagonist mode, Relationship, Goal, Conflict, Choice, Consequence, Emotional Arc, narrative engine, imagery, environment, memory anchor, and approved extraordinary mechanism.
 
-- literary structure;
-- protagonist and relationship;
-- goal, conflict, choice, and consequence;
-- emotional arc;
-- imagery and visual composition;
-- environment and color relationships;
-- memory anchor;
-- approved mysterious, symbolic, or extraordinary mechanism.
+Anonymous second-person narration is permitted only under the conditions in the Narrative and Discovery Standard. Special Journeys MUST NOT use one shared fantasy filter, reveal pattern, magical device, generic level adaptation, or uniform visual composition.
 
-Special Journeys MUST NOT use one shared fantasy filter, identical reveal pattern, repeated magical device, or uniform visual composition.
+## 9. Library-level differentiation
 
-## 9. Shared systems that MUST remain consistent
+Library-level differentiation is REQUIRED evidence for every proposal, repair, pilot, batch, and new Journey.
 
-The following SHOULD be centralized or governed consistently where the existing architecture supports it:
+Use [Phoenix Story / Discovery Design Matrix](templates/PHOENIX_STORY_DISCOVERY_DESIGN_MATRIX.md) to compare title, opening, protagonist, role, Relationship, Goal, Conflict, Choice, Consequence, Emotional Arc, engine, climax, ending, daily-life setting, cultural anchor, perspective, interpersonal method, pace, theme, memory anchor, visual motif, and special mechanism.
 
-- route naming and parameter validation;
-- Journey access and entitlement policy;
-- stage navigation and progress rules;
-- narration state and interruption behavior;
+One numeric similarity score cannot approve the library result.
+
+## 10. Level adaptation
+
+Phoenix Lv.1 through Lv.10 MUST preserve protagonist, Relationship, Goal, Conflict, key Choice, Consequence, event order, Emotional Arc, cultural anchor, ending state, memory anchor, and special mechanism where applicable.
+
+Vocabulary, grammar, sentence length, paragraph density, dialogue quantity, and explanatory detail MAY change. Simplification MUST NOT remove causality or turn Story into tourism exposition.
+
+All special Journeys require an explicitly approved special or Journey-specific adaptation policy.
+
+## 11. Shared systems
+
+The following SHOULD remain centralized where architecture supports it:
+
+- route and parameter validation;
+- Journey access and entitlement;
+- stage navigation and progress;
+- narration and interruption state;
 - language and locale selection;
 - persistence and migration;
 - reward and stamp storage;
-- loading, error, and fallback presentation;
+- Loading, Error, Empty, and Fallback presentation;
 - accessibility semantics;
-- analytics and privacy boundaries;
-- stable-baseline comparison method.
+- privacy boundaries;
+- stable-baseline comparison.
 
-Consistency MUST NOT override Journey-specific content or visual identity.
+Consistency MUST NOT override Journey-specific identity.
 
-## 10. Routing and data integrity
+## 12. Routing and data integrity
 
-For every Journey, reviewers MUST verify:
+Review exact Journey ID, Story ID, route, parameters, Journey Type, page component, language record, asset path, stage mapping, progress key, completion event, reward, Stamp applicability, and fallback behavior.
 
-- exact Journey ID;
-- exact Story ID;
-- exact route and route parameters;
-- correct Journey type;
-- correct page component;
-- correct data record and language variant;
-- correct asset path and visual stage;
-- correct progress key and completion event;
-- correct reward and conditionally applicable stamp mapping;
-- no fallback to another Journey's content;
-- no implementation inherited from closed PRs `#138`–`#141` as a baseline.
+Fallback MUST NOT load another Journey's content. Closed PRs `#138` through `#141` are historical evidence only and MUST NOT be used as a development baseline.
 
-An incorrect route, ID, resource, reward, or progress mapping is at least `REQUIRES_REVISION`; loss or corruption of stable behavior is `REGRESSION`.
+## 13. Multilingual alignment
 
-## 11. Multilingual alignment
+Supported variants MUST preserve event order, protagonist, Relationship, Goal, Conflict, Choice, Consequence, cultural meaning, Story / Discovery separation, vocabulary, annotations, Challenge answers, Reflection and Writing intent, Memory, Completion, accessibility labels, and narration locale.
 
-All supported variants MUST align at the level of:
+Natural translation is allowed; factual, causal, emotional, or learning-objective drift is not.
 
-- story meaning and event order;
-- protagonist, relationship, goal, conflict, choice, and consequence;
-- vocabulary selection and explanation;
-- annotations and segmentation;
-- Discovery learning intent;
-- Challenge answer validity;
-- Reflection and Writing prompt intent;
-- Memory and Completion meaning;
-- accessibility labels and narration language.
+## 14. Narration, visual, progress, and states
 
-A translation MAY be natural rather than literal, but it MUST NOT change the Journey's facts, choice, consequence, cultural meaning, or learning objective.
+Where narration exists, verify correct text and locale, play, pause, resume, replay, stop, speed, temporary playback continuation, highlight/progress synchronization, interruption, lifecycle restore, error, and fallback.
 
-## 12. Narration and audio
+Visual stages MUST meet Phoenix UI and Visual Standard and preserve PR `#137` as the minimum quality. File existence, dimensions, hashes, automated scores, or rights records alone cannot produce visual `PASS`.
 
-Where narration exists, the Journey MUST verify:
+Progression MUST define entry, eligibility, stage order, permitted return, partial save, resume, completion, replay, reward idempotency, Stamp behavior, unlock effects, and migration. Cross-Journey contamination, duplicate rewards, or lost stable state is `REGRESSION`.
 
-- correct text, language, and stage;
-- play, pause, resume, replay, stop, and interruption behavior;
-- synchronization with visible progress or highlight where designed;
-- no unintended overlap between stages or temporary playback;
-- correct continuation after vocabulary or annotation playback;
-- restored state after route change or app lifecycle events;
-- safe error and fallback behavior.
+Loading, Error, Empty, and Fallback are separate evidence states. Failure MUST NOT silently load a different Journey, stale translation, unrelated image, or generic placeholder.
 
-## 13. Visual stages
+## 15. Accessibility, rights, and disclosure
 
-Visual stages MUST support the Journey's narrative and learning progression. They MUST follow [Phoenix UI and Visual Standard](PHOENIX_UI_VISUAL_STANDARD.md), preserve PR `#137` as the minimum quality level, and remain independently recognizable.
+Every Journey MUST support applicable semantic headings, reading/focus order, meaningful control states, text scaling, non-color feedback, image alternatives, reduced motion, keyboard and assistive input, accessible narration, and non-audio alternatives.
 
-Runtime mapping MUST be verified on the actual page. File existence, hash, dimensions, rights evidence, or data registration alone cannot produce visual `PASS`.
+Rights evidence MUST identify source, license or permission, modification constraints, attribution, and approved use. Rights approval does not establish literary, cultural, audio, or visual quality. Unpublished Phoenix content MUST NOT be sent to an unapproved external service.
 
-## 14. Progression, persistence, and reward
+## 16. Acceptance evidence
 
-The Journey MUST define and verify:
-
-- entry and eligibility;
-- stage order and permitted return paths;
-- partial progress save;
-- resume location;
-- completion criteria;
-- replay behavior;
-- reward issuance and idempotency;
-- Stamp applicability decision and issuance when applicable;
-- unlock effects;
-- migration behavior when IDs or content versions change.
-
-Cross-Journey progress contamination, duplicate rewards, missing completion, or incorrect entitlement is `REGRESSION` and may be P0 or P1.
-
-## 15. Loading, error, empty, and fallback
-
-Every Journey entry and stage MUST define applicable states. A failure MUST NOT silently load a different Journey, stale translation, unrelated image, or generic runtime placeholder. Recovery MUST preserve user progress and provide a reproducible next action.
-
-## 16. Accessibility
-
-Every Journey MUST support applicable:
-
-- semantic page and stage headings;
-- correct reading and focus order;
-- meaningful control names and states;
-- text scaling and reflow;
-- non-color feedback;
-- image alternatives;
-- reduced motion;
-- keyboard and assistive input;
-- accessible narration and non-audio alternatives.
-
-## 17. Rights and external disclosure
-
-Rights evidence MUST be attached to applicable text, image, audio, and sourced cultural material. Evidence MUST identify source, permission or license, modification constraints, and approved use.
-
-Rights approval does not establish content, cultural, audio, or visual quality. Unpublished Phoenix content MUST NOT be sent to external services without explicit approval.
-
-## 18. Acceptance evidence
-
-Journey acceptance MUST include applicable:
+Acceptance MUST include:
 
 - proposal and design record;
-- exact paths, IDs, routes, and candidate Commit;
-- independent Relationship and Goal evidence;
-- ReadingAnnotation applicability and evidence;
-- Stamp applicability and evidence;
-- stable and candidate page evidence;
-- multilingual alignment evidence;
-- narration and interaction evidence;
-- progress and persistence evidence;
-- asset mapping and mobile crop evidence;
-- rights evidence;
-- automated validation results;
+- complete Story / Discovery Design Matrix;
+- exact paths, IDs, routes, Commit, Tree, and parent;
+- Story and Discovery Function Contracts;
+- protagonist-mode evidence;
+- Relationship causality;
+- Goal, Conflict, enacted Choice, and caused Consequence evidence;
+- opening, climax, ending, and narrative-engine evidence;
+- library differentiation;
+- level invariants;
+- multilingual, narration, progress, persistence, visual, mobile, and rights evidence;
+- separate automated structural and human literary results;
 - isolated Preview;
 - `STABLE_BASELINE_COMPARISON`;
-- Founder mobile approval for visual or core interaction changes.
+- Founder mobile approval where required.
 
 Use [Phoenix New Journey Acceptance Matrix](templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md) for new Journeys.
 
-## 19. Blocking rules
+## 17. Blocking rules
 
 A Journey MUST NOT be marked Completed when:
 
-- any `REQUIRED` element is missing;
-- any applicable `CONDITIONALLY_REQUIRED` element is missing or lacks an evidence-backed `NOT_APPLICABLE` decision;
-- a REQUIRED acceptance item is not `PASS` with `VERIFIED` evidence;
+- a REQUIRED element is missing;
+- an applicable CONDITIONALLY_REQUIRED element is missing;
+- a required row is not `PASS` with `VERIFIED` evidence;
+- Story and Discovery functionally overlap;
+- protagonist identity or causal Relationship is unverified;
+- Choice is not enacted or Consequence is not caused;
 - content or visuals are interchangeable templates;
-- route, ID, asset, language, progress, reward, or stamp mapping is unverified;
-- the stable comparison is missing;
-- any regression exists;
-- Founder mobile approval is required but not `APPROVED`.
+- library differentiation or level invariants are unverified;
+- automated score is used as literary approval;
+- pilot or batch gates are violated;
+- route, ID, asset, language, progress, reward, or Stamp mapping is unverified;
+- stable comparison is missing or a regression exists;
+- required Founder approval is not `APPROVED`.
 
-New Journey execution follows [Phoenix New Journey Creation Standard](PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md).
+New Journey execution follows [Phoenix New Journey Creation Standard](PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md). This standard does not authorize content repair or pilot implementation.

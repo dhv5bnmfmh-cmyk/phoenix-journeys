@@ -1,147 +1,186 @@
 # Phoenix Full Application Audit Matrix
 
-Use this template with [Phoenix Full Application Audit Standard](../PHOENIX_FULL_APPLICATION_AUDIT_STANDARD.md).
+Use with [Phoenix Full Application Audit Standard](../PHOENIX_FULL_APPLICATION_AUDIT_STANDARD.md), [Phoenix Narrative and Discovery Standard](../PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), and [Phoenix Product Quality Standard](../PHOENIX_PRODUCT_QUALITY_STANDARD.md).
 
 **Stable PR:** `#137`  
 **Stable Commit:** `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
 
-## Audit identity
+## 1. Audit identity
 
 ```text
 Repository:
 Audited Branch:
 Audited Commit:
 Audited Tree:
-Stable PR:
-Stable Commit:
-Audit Scope:
+Expected Main:
+Actual Main:
+Stable PR: #137
+Stable Commit: 5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977
 Audit Mode: READ_ONLY
-Available Environments:
-Available Preview:
+Remote Writes:
 Auditor:
-Started:
-Completed:
+Audit Date:
 ```
 
-## Allowed values
+## 2. Allowed values
 
-**Result:** `PASS` / `REQUIRES_REVISION` / `REGRESSION` / `BLOCKED` / `NOT_APPLICABLE`  
-**Issue Severity:** `NONE` / `P0` / `P1` / `P2` / `P3`  
-**Evidence Level:** `VERIFIED` / `PARTIALLY_VERIFIED` / `UNVERIFIED` / `CONTRADICTORY`  
-**Founder Approval Required:** `YES` / `NO`
+- Result: `PASS` / `REQUIRES_REVISION` / `REGRESSION` / `BLOCKED` / `NOT_APPLICABLE`
+- Evidence Level: `VERIFIED` / `PARTIALLY_VERIFIED` / `UNVERIFIED` / `CONTRADICTORY`
+- Issue Severity: `NONE` / `P0` / `P1` / `P2` / `P3`
 
-`NONE` is not a fifth problem severity. It means no Issue was identified for the row.
+Issue Severity rules are defined by Phoenix Full Application Audit Standard and MUST NOT be changed by this matrix.
 
-Rules:
+## 3. Core coverage
 
-- `PASS` requires `VERIFIED` evidence and `Issue Severity = NONE`.
-- `NOT_APPLICABLE` requires an applicability reason, supporting evidence, and `Issue Severity = NONE`; it is not `PASS`.
-- `REQUIRES_REVISION`, `REGRESSION`, or `BLOCKED` with an identified Issue requires `P0`, `P1`, `P2`, or `P3`.
-- A result below the stable baseline MUST be `REGRESSION`.
-- Do not assign a fabricated `P3` to a PASS row.
-- Do not count `NONE` in P0/P1/P2/P3 totals.
-- Blank Issue Severity is prohibited in final audit records.
-- Evidence Level and Issue Severity are independent fields.
+| Audit ID | Area | Required scope | Exact evidence | Result | Evidence Level | Issue Severity | Finding ID | Owner | Required action |
+|---|---|---|---|---|---|---|---|---|---|
+| FA-001 | Baseline identity | Repository, branch, audited Commit, main, Stable PR, Stable Commit |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-002 | Runtime release identity | Reachability, release marker, deployed Commit, production hostname |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-003 | Major surfaces | Startup, HomeShell, Explore, Picker, Passport, special Passport, Profile, Shadowing, all Journey stages, dialogs, fallback |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-004 | Routing | Exact routes, IDs, invalid IDs, no wrong-content fallback |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-005 | Access / entitlement | Development, production, free, paid, locked, unlocked, direct, restored, stale, offline |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-006 | Random / Daily | Stable identifier, local date, timezone, morning/afternoon, refresh, restart |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-007 | Persistence | Active Journey, stage, drafts, narration, completion, reward, wallet, unlock, saved words, migration, failure recovery |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-008 | Language | Simplified, Traditional, English, Vietnamese, bilingual, fallback, accessibility labels |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-009 | Narration | Story and Discovery playback, speed, temporary audio, progress, interruption, failure, accessibility |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-010 | Shadowing | Permission, initialization, recording, recognition, route changes, history |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-011 | Mobile | Narrow phone, large phone, landscape, keyboard, large text, Safe Area, scrolling, reduced motion |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-012 | Accessibility | Semantics, focus, scaling, contrast, non-color feedback, assistive input |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-013 | Visual mapping | 36 Journeys, stage assets, badges, stamps, fallback identity |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-014 | Runtime visual quality | Crop, focal point, text-safe area, clarity, composition, placeholder, small-screen behavior |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-015 | Physical assets | Declarations, paths, existence, extension, bundle, mapping, orphan inventory |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-016 | Rights | Source, license, permission, modification, attribution, runtime path, approval |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-017 | Privacy / processors | OpenAI, Cloudflare, TTS, speech recognition, logs, retention, disclosure, account data, deletion |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-018 | Stable comparison | Domain-by-domain comparison and regressions |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
 
-## Copyable audit table
+## 4. Narrative and Discovery coverage
 
-| Audit ID | Area | Page or Route | File Path | Journey ID | Stage | Standard Requirement | Stable Baseline Evidence | Candidate Evidence | Expected | Actual | Result | Issue Severity | Evidence Level | Issue | Required Action | Owner | Verification | Founder Approval Required |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| AUD-0001 |  |  |  |  |  |  |  |  |  |  | `BLOCKED` | `P2` | `UNVERIFIED` |  |  |  |  | `NO` |
-| AUD-0002 |  |  |  |  |  |  |  |  |  |  | `PASS` | `NONE` | `VERIFIED` | `NONE` | `NONE` |  |  | `NO` |
-| AUD-0003 |  |  |  |  |  |  |  |  |  |  | `NOT_APPLICABLE` | `NONE` | `VERIFIED` | Applicability reason required | `NONE` |  |  | `NO` |
+Complete one Journey-level row per Journey and one library-level record for the full catalog.
 
-## Row rules
+| Audit ID | Coverage row | Required evidence | Actual evidence | Result | Evidence Level | Issue Severity | Finding ID | Owner | Required action |
+|---|---|---|---|---|---|---|---|---|---|
+| FA-ND-001 | Story Function | One-sentence Function Contract and unique Story value per Journey |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-002 | Discovery Function | One-sentence Function Contract and unique Discovery value per Journey |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-003 | Story / Discovery Separation | Story-only and Discovery-only information, overlap, justification, functional review |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-004 | Narrative Engines | Declared engine, causal operation, catalog comparison, substitution test |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-005 | Opening Patterns | Opening type, active situation, repeated opening-system review |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-006 | Ending Patterns | Caused result, changed state, repeated ending-system review |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-007 | Protagonist Modes | Normal and special mode compliance; generic second person rejected |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-008 | Relationship Causality | Relationship affects Goal, Conflict, Choice, Consequence, Arc, or Ending |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-009 | Enacted Choice | Exact action or commitment, not internal thought alone |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-010 | Consequence Causality | Visible result caused by Choice |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-011 | Cultural Anchor in Action | Non-decorative anchor affecting action or stakes |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-012 | Catalog Differentiation | Complete library differentiation matrix and closest comparisons |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-013 | Level Invariants | Phoenix Lv.1 through Lv.10 preserve narrative invariants |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
+| FA-ND-014 | Automated Literary Approval Boundary | Separate automated structural and human literary results |  | BLOCKED | UNVERIFIED | NONE |  |  |  |
 
-1. Use one independently verifiable requirement per row.
-2. Use exact repository paths, route names, Journey IDs, stage names, Commit SHAs, CI run IDs, and Preview paths.
-3. Do not use “looks good,” “mostly correct,” numeric quality scores, or checkbox counts as evidence.
-4. Use `NONE` or `NOT_APPLICABLE` explicitly rather than leaving a material field ambiguous.
-5. Record stable evidence and candidate evidence separately.
-6. A screenshot MUST identify route, state, viewport/device, and candidate Commit.
-7. A command result MUST identify command, environment, Commit, output, and terminal status.
-8. Rights evidence does not replace visual, content, audio, or mobile approval.
-9. Desktop evidence does not fully verify mobile behavior.
-10. A read-only audit MUST NOT modify product files.
-11. A PASS row MUST use `Issue Severity = NONE` and MUST NOT contain an unresolved Issue.
-12. A NOT_APPLICABLE row MUST use `Issue Severity = NONE` and include applicability reason plus evidence.
-13. Blank Issue Severity is prohibited in the final matrix.
+## 5. Journey-level narrative record
 
-## Coverage checklist
-
-| Coverage area | Inventory source | Total expected | Audited | PASS | REQUIRES_REVISION | REGRESSION | BLOCKED | NOT_APPLICABLE | Evidence level | Notes |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---|---|
-| Routes |  |  |  |  |  |  |  |  |  |  |
-| Major pages |  |  |  |  |  |  |  |  |  |  |
-| Normal Journeys |  |  |  |  |  |  |  |  |  |  |
-| Special Journeys |  |  |  |  |  |  |  |  |  |  |
-| Learning stages |  |  |  |  |  |  |  |  |  |  |
-| Runtime images |  |  |  |  |  |  |  |  |  |  |
-| Narration/audio flows |  |  |  |  |  |  |  |  |  |  |
-| Supported languages |  |  |  |  |  |  |  |  |  |  |
-| Free/paid states |  |  |  |  |  |  |  |  |  |  |
-| Locked/unlocked states |  |  |  |  |  |  |  |  |  |  |
-| Random / Daily Journey Access |  |  |  |  |  |  |  |  |  | Independent coverage required; not satisfied by free/paid or locked/unlocked rows |
-| Loading states |  |  |  |  |  |  |  |  |  |  |
-| Error states |  |  |  |  |  |  |  |  |  |  |
-| Empty states |  |  |  |  |  |  |  |  |  |  |
-| Fallback states |  |  |  |  |  |  |  |  |  |  |
-| Small-screen/Safe Area |  |  |  |  |  |  |  |  |  |  |
-| Reduced Motion |  |  |  |  |  |  |  |  |  |  |
-| Persistence/Migration |  |  |  |  |  |  |  |  |  |  |
-| Privacy/Secrets |  |  |  |  |  |  |  |  |  |  |
-| External disclosure |  |  |  |  |  |  |  |  |  |  |
-| Stable comparison |  |  |  |  |  |  |  |  |  |  |
-
-## Random / Daily Journey Access audit record
-
-Create one or more rows for each independently verifiable mode, account state, date, and slot. Do not combine all behavior into one unsupported summary.
-
-| Access Audit ID | Account state | Mode | Stable user/test identifier | Local date | Local timezone | Slot | Generated Journey ID | Expected behavior | Actual behavior | Same-slot refresh | App restart | Re-login | Persistence | Morning/afternoon duplication | Journey library size | Configuration evidence | Route | Exact code/policy path | Result | Issue Severity | Evidence Level | Issue / Required action |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---:|---|---|---|---|---|---|---|
-| ACCESS-0001 |  | `developmentExperience / preview / production` |  |  |  | `morning / afternoon` |  |  |  |  |  |  |  |  |  |  |  | `JourneyAccessPolicy` path | `BLOCKED` | `P1/P2/P3` | `UNVERIFIED` |  |
-
-### Required Random / Daily assertions
-
-Record evidence for each assertion:
-
-1. Same user + same local date + same slot produces a stable Journey ID.
-2. Refresh does not redraw the Journey.
-3. App restart does not redraw the Journey.
-4. Re-login remains consistent with the approved design.
-5. When Journey library size is greater than one, morning and afternoon do not duplicate on the same day.
-6. After the afternoon release, Journeys already released that day remain usable.
-7. Access logic is unified through `JourneyAccessPolicy`.
-8. Development and PR Preview use `developmentExperience` and keep all published Journeys open.
-9. Commercial slot times and strategy are configurable and are not hard-coded into Journey content.
-
-A missing assertion is `BLOCKED`, not silently covered.
-
-## Issue Severity ledger
-
-| Issue ID | Audit IDs | Issue Severity | User impact | Reach | Recoverability | Stable regression | Owner | Required action | Verification | Status |
-|---|---|---|---|---|---|---|---|---|---|---|
-| ISSUE-0001 |  | `P0/P1/P2/P3` |  |  |  | `YES/NO` |  |  |  |  |
-
-Rows with `Issue Severity = NONE` MUST NOT enter the issue ledger and MUST NOT be included in P0/P1/P2/P3 counts.
-
-## Audit conclusion
+Duplicate this block for all 36 Journeys or the current verified catalog total.
 
 ```text
-Coverage Decision:
-P0 Count:
-P1 Count:
-P2 Count:
-P3 Count:
-NONE Row Count:
-Regression Count:
-Blocked Count:
-Contradictory Evidence Count:
-Random / Daily Journey Access Coverage Decision:
-Founder Approval Items:
-Read-Only Confirmation: NO PRODUCT CHANGES MADE
-Final Audit Decision:
-Next Authorized Action:
+Journey ID:
+Journey Type:
+Story Function:
+Discovery Function:
+Protagonist Mode:
+Protagonist Identity:
+Relationship and causal function:
+Goal:
+Conflict:
+Enacted Choice:
+Caused Consequence:
+Emotional Arc:
+Cultural Anchor in Action:
+Narrative Engine:
+Opening Type:
+Progression:
+Climax:
+Ending State:
+Memory Anchor:
+Special Mechanism:
+Story-only Information:
+Discovery-only Information:
+Intentional Overlap:
+Functional Duplication Detected: YES / NO
+Closest Catalog Journeys:
+Automated Structural Result:
+Automated Structural Evidence Level:
+Human Literary Result:
+Human Literary Evidence Level:
+Blocking Codes:
+Finding ID:
 ```
 
-The audit conclusion MUST NOT authorize fixes, merge, or a new Journey unless a separate task explicitly does so.
+## 6. Library differentiation matrix
+
+| Journey ID | Title pattern | Opening pattern | Protagonist / role | Relationship | Goal / Conflict | Choice / Consequence | Emotional arc | Engine | Climax | Ending | Daily-life setting | Cultural anchor | Perspective | Interpersonal method | Pace | Theme | Memory anchor | Visual motif | Special mechanism | Result | Evidence Level |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | BLOCKED | UNVERIFIED |
+
+## 7. Level-invariant audit
+
+| Journey ID | Lv.1 | Lv.2 | Lv.3 | Lv.4 | Lv.5 | Lv.6 | Lv.7 | Lv.8 | Lv.9 | Lv.10 | Identity loss | Special mechanism flattened | Result | Evidence Level | Finding ID |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  |  |  |  |  |  |  | BLOCKED | UNVERIFIED |  |
+
+Each level cell records whether protagonist, Relationship, Goal, Conflict, Choice, Consequence, event order, Emotional Arc, cultural anchor, ending state, memory anchor, and special mechanism are preserved.
+
+## 8. Finding ledger
+
+```text
+Finding ID:
+Related Findings:
+Audit IDs:
+Issue Severity:
+Result:
+Evidence Level:
+Area:
+Pages:
+Paths:
+Routes:
+Journey IDs:
+Stages:
+Expected:
+Actual:
+Stable Baseline Evidence:
+Candidate Evidence:
+Runtime Evidence:
+User Impact:
+Reach:
+Recoverability:
+Required Action:
+Owner:
+Verification Needed:
+Founder Approval Required:
+Repair Dependencies:
+Status:
+```
+
+## 9. Final coverage and decision
+
+```text
+Major Surfaces Audited:
+Normal Journeys Audited:
+Special Journeys Audited:
+Story Function Contracts:
+Discovery Function Contracts:
+Story / Discovery Separation Records:
+Narrative Engines Reviewed:
+Opening Patterns Reviewed:
+Ending Patterns Reviewed:
+Catalog Differentiation Coverage:
+Level-Invariant Coverage:
+Automated Structural Coverage:
+Human Literary Coverage:
+P0:
+P1:
+P2:
+P3:
+Blocked Evidence Areas:
+Regression Count:
+Remote Writes:
+Final Audit Decision:
+```
+
+A complete matrix may still conclude `FINAL_AUDIT_COMPLETE_WITH_BLOCKED_EVIDENCE`. Missing core inventory or an incomplete deduplicated ledger requires `BLOCKED_CRITICAL_COVERAGE`.
