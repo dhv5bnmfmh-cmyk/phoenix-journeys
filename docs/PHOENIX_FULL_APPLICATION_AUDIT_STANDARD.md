@@ -18,7 +18,7 @@ The audit MUST:
 - distinguish repository evidence, automated evidence, Preview evidence, mobile evidence, and Founder approval;
 - record uncertainty instead of guessing;
 - compare current candidate behavior with the stable baseline;
-- avoid treating closed PRs `#138`–`#141` as a baseline;
+- avoid treating PR `#132` or closed PRs `#138`–`#141` as the current baseline;
 - use the matrix in [Phoenix Full Application Audit Matrix](templates/PHOENIX_FULL_APPLICATION_AUDIT_MATRIX.md).
 
 ## 3. Mandatory audit scope
@@ -35,6 +35,7 @@ The audit MUST cover, where present:
 - all supported languages;
 - free and paid states;
 - locked and unlocked states;
+- Random / Daily Journey Access;
 - loading states;
 - error states;
 - empty states;
@@ -48,7 +49,7 @@ The audit MUST cover, where present:
 - external disclosure;
 - current stable-baseline comparison.
 
-An item omitted from coverage MUST be recorded as `BLOCKED` or `NOT_APPLICABLE` with a reason. Silence is not coverage.
+An item omitted from coverage MUST be recorded as `BLOCKED` or `NOT_APPLICABLE` with a reason and evidence. Silence is not coverage.
 
 ## 4. Audit preparation
 
@@ -67,6 +68,7 @@ Before reviewing product behavior, the auditor MUST record:
 - Journey inventory;
 - route inventory;
 - known entitlement states;
+- Random / Daily Journey Access configuration and test identities;
 - known limitations and inaccessible evidence.
 
 If repository, Commit, stable baseline, or scope cannot be established, the audit is `BLOCKED`.
@@ -75,7 +77,7 @@ If repository, Commit, stable baseline, or scope cannot be established, the audi
 
 Each audit row MUST represent one independently verifiable requirement. Do not combine unrelated failures into a single row.
 
-Every finding MUST include:
+Every final audit row MUST include:
 
 - Audit ID;
 - Area;
@@ -89,7 +91,7 @@ Every finding MUST include:
 - Expected;
 - Actual;
 - Result;
-- Severity;
+- Issue Severity;
 - Evidence Level;
 - Issue;
 - Required Action;
@@ -97,7 +99,7 @@ Every finding MUST include:
 - Verification;
 - Founder Approval Required.
 
-Use `NONE` or `NOT_APPLICABLE` explicitly when a field does not apply.
+Use `NONE` or `NOT_APPLICABLE` explicitly when a field does not apply. Blank Issue Severity is prohibited in a final audit record.
 
 ## 6. Result states
 
@@ -109,7 +111,7 @@ Use only:
 - `BLOCKED`;
 - `NOT_APPLICABLE`.
 
-`PASS` requires `VERIFIED` evidence. A finding below the stable baseline MUST be `REGRESSION`, even when it also violates a new standard.
+`PASS` requires `VERIFIED` evidence. `NOT_APPLICABLE` requires an applicability reason and evidence and is not `PASS`. A finding below the stable baseline MUST be `REGRESSION`, even when it also violates a new standard.
 
 ## 7. Evidence levels
 
@@ -122,16 +124,37 @@ Use only:
 
 Evidence MUST identify its source and candidate Commit. A screenshot without route, state, and candidate identity is incomplete. A test without command, output, and Commit is incomplete. A rights record without runtime and visual evidence cannot approve the visual result.
 
-## 8. Severity
+Evidence Level and Issue Severity are separate fields and MUST NOT substitute for one another.
 
-| Severity | Definition | Required response |
+## 8. Issue Severity
+
+Allowed Issue Severity values are:
+
+- `NONE`
+- `P0`
+- `P1`
+- `P2`
+- `P3`
+
+`NONE` is not a fifth problem severity. It means the row contains no identified Issue.
+
+| Issue Severity | Definition | Required response |
 |---|---|---|
+| `NONE` | No Issue is identified for the row. Required for `PASS` and `NOT_APPLICABLE`. | Do not include in P0/P1/P2/P3 counts. |
 | `P0` | Critical safety, privacy, secret exposure, severe data corruption/loss, unusable core application, or release-wide failure. | Immediate block. No release or unrelated expansion. Isolate risk and authorize a dedicated repair. |
 | `P1` | Major core flow, access, payment/entitlement, routing, persistence, widespread visual/interaction regression, or major accessibility failure. | Blocks Ready and merge. Repair before P2/P3 improvement work. |
 | `P2` | Material quality, consistency, content, performance, visual differentiation, or localized functional problem that harms the product but does not meet P0/P1. | Record and prioritize after P0/P1 according to roadmap. |
 | `P3` | Minor wording, polish, local spacing, low-impact consistency, or maintainability issue with no material user harm. | Record and schedule without masking higher severity. |
 
-Severity MUST be based on impact, reach, recoverability, and stable-baseline loss, not on effort to fix.
+Rules:
+
+1. When `Result = PASS`, `Issue Severity` MUST be `NONE`.
+2. When `Result = NOT_APPLICABLE`, `Issue Severity` MUST be `NONE`, and the row MUST include the applicability reason and evidence.
+3. When `Result = REQUIRES_REVISION`, `REGRESSION`, or `BLOCKED` and an Issue exists, `Issue Severity` MUST be `P0`, `P1`, `P2`, or `P3`.
+4. A PASS row MUST NOT be assigned a fabricated `P3`.
+5. `NONE` MUST NOT be counted in P0/P1/P2/P3 totals.
+6. Blank Issue Severity is prohibited in final audit records.
+7. Issue Severity is based on impact, reach, recoverability, and stable-baseline loss, not effort to fix.
 
 ## 9. Route audit
 
@@ -162,11 +185,11 @@ Audit Home, Explore, Passport, Profile, Shadowing, and all other major pages for
 
 ## 11. Journey audit
 
-For every normal and special Journey, verify all Required elements in [Phoenix Journey System Standard](PHOENIX_JOURNEY_SYSTEM_STANDARD.md), including:
+For every normal and special Journey, verify all `REQUIRED` and applicable `CONDITIONALLY_REQUIRED` elements in [Phoenix Journey System Standard](PHOENIX_JOURNEY_SYSTEM_STANDARD.md), including:
 
 - identity and IDs;
 - protagonist, relationship, goal, conflict, choice, consequence, emotional arc, and cultural anchor;
-- Story, Vocabulary, ReadingAnnotation, Discovery, Challenge, Reflection, Writing, Memory, Completion, Reward, and Stamp;
+- Story, Vocabulary, ReadingAnnotation applicability, Discovery, Challenge, Reflection, Writing, Memory, Completion, Reward, and Stamp applicability;
 - multilingual alignment;
 - visual differentiation and mobile crop;
 - narration and audio;
@@ -229,13 +252,53 @@ Verify applicable:
 
 - free and paid behavior;
 - locked and unlocked behavior;
-- daily/random access rules;
 - upgrade and downgrade behavior;
 - entitlement restoration;
 - direct-link protection;
 - offline or stale entitlement handling;
 - reward and Journey access consistency;
-- no exposure of paid content through fallback or incorrect route.
+- no exposure of paid content through fallback or incorrect route;
+- all access decisions use `JourneyAccessPolicy`.
+
+### 15.1 Random / Daily Journey Access audit
+
+Random / Daily Journey Access MUST be audited independently from generic free/paid and locked/unlocked coverage. Record:
+
+- account state;
+- Development / Preview / Production mode;
+- stable user identifier or test identifier;
+- local date;
+- local timezone;
+- morning / afternoon slot;
+- generated Journey ID;
+- expected Journey ID behavior;
+- actual Journey ID behavior;
+- same-slot refresh result;
+- app restart result;
+- re-login result;
+- persistence result;
+- morning and afternoon duplication result;
+- Journey library size;
+- configuration evidence;
+- route;
+- exact code or policy path;
+- Result;
+- Issue Severity when an Issue exists;
+- Evidence Level.
+
+The audit MUST verify:
+
+1. The same user, local date, and slot produce a stable result.
+2. Refresh does not redraw the Journey.
+3. App restart does not redraw the Journey.
+4. Re-login remains consistent with the approved design.
+5. When the Journey library size is greater than one, morning and afternoon do not duplicate on the same day.
+6. After the afternoon release, Journeys already released that day remain usable.
+7. The logic is unified through `JourneyAccessPolicy`.
+8. Development and PR Preview remain open under `developmentExperience` rules.
+9. Commercial slot times and strategy remain configurable and are not hard-coded into Journey content.
+
+Missing Random / Daily evidence is not covered merely because free/paid behavior passed.
 
 ## 16. State audit
 
@@ -310,10 +373,10 @@ The approved order is:
 3. audit major pages and shared systems;
 4. audit normal Journeys;
 5. audit special Journeys;
-6. audit visuals, audio, languages, accessibility, and state coverage;
+6. audit visuals, audio, languages, accessibility, states, and Random / Daily Journey Access;
 7. compare all material areas with stable baseline;
 8. deduplicate findings without losing evidence;
-9. create the P0/P1/P2/P3 ledger;
+9. create the P0/P1/P2/P3 ledger; `NONE` is excluded from severity counts;
 10. stop. Do not fix without separate authorization.
 
 ## 22. Audit output
@@ -324,7 +387,7 @@ The audit output MUST contain:
 - coverage inventory;
 - completed matrix;
 - evidence limitations;
-- findings grouped by severity;
+- findings grouped by Issue Severity;
 - stable-baseline regressions;
 - blocked areas;
 - exact recommended repair order;
