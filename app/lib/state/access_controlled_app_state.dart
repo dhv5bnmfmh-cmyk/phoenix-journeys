@@ -953,7 +953,7 @@ class AccessControlledAppState extends AppState {
     }
 
     final journeys = <String, _JourneyCriticalState>{};
-    for (final journey in dailyJourneyExperiences) {
+    for (final journey in allJourneyExperiences) {
       journeys[journey.id] = _readLegacyJourney(preferences, journey.id);
     }
 
