@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../data/journey_city_catalog.dart';
 import '../state/access_controlled_app_state.dart';
-import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 
 Future<String?> showJourneyPickerSheet({
