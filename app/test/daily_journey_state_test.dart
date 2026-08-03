@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/state/app_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -50,14 +51,35 @@ void main() {
     expect(restored.memories.first, contains('我记住了今天的城市'));
   });
 
-  test('the next day automatically loads a different journey', () async {
+  test('date change preserves active journey until explicit Daily refresh', () async {
     SharedPreferences.setMockInitialValues({});
-    final dayOne = AppState(clock: () => DateTime(2026, 7, 20));
-    final dayTwo = AppState(clock: () => DateTime(2026, 7, 21));
+    var currentDate = DateTime(2026, 7, 20);
+    final state = AppState(clock: () => currentDate);
 
-    await dayOne.load();
-    await dayTwo.load();
+    await state.load();
+    final resumableJourneyId = state.activeJourneyId;
+    await state.saveJourneyProgress(
+      step: 2,
+      wonder: '继续当前旅程',
+      express: '',
+      memory: '',
+    );
 
-    expect(dayOne.activeJourneyId, isNot(dayTwo.activeJourneyId));
+    currentDate = DateTime(2026, 7, 21);
+    await state.load();
+
+    expect(state.activeJourneyId, resumableJourneyId);
+    expect(state.journeyStep, 2);
+    expect(state.wonderDraft, '继续当前旅程');
+
+    final expectedDailyJourneyId = dailyJourneyForDate(currentDate).id;
+    expect(expectedDailyJourneyId, isNot(resumableJourneyId));
+
+    await state.refreshDailyJourney();
+
+    expect(state.activeJourneyId, expectedDailyJourneyId);
+    await state.activateJourney(resumableJourneyId);
+    expect(state.journeyStep, 2);
+    expect(state.wonderDraft, '继续当前旅程');
   });
 }
