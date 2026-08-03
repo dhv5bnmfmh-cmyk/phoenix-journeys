@@ -3,7 +3,6 @@ import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/services/critical_persistence_store.dart';
 import 'package:phoenix_journeys/services/journey_access_policy.dart';
 import 'package:phoenix_journeys/state/access_controlled_app_state.dart';
-import 'package:phoenix_journeys/state/app_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _FaultBackend implements CriticalPersistenceBackend {
