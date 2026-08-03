@@ -33,6 +33,7 @@ typedef ExplorerSeedPersister = Future<bool> Function(
 );
 
 class AccessControlledAppState extends AppState {
+  // ignore: use_super_parameters
   AccessControlledAppState({
     DateTime Function()? clock,
     Future<SharedPreferences> Function()? preferencesLoader,
@@ -60,6 +61,13 @@ class AccessControlledAppState extends AppState {
       'explorer.localSeedVersion';
   @visibleForTesting
   static const int explorerSeedVersion = 1;
+
+  static const String _activeJourneyIdStorageKey = 'activeJourney.id';
+  static const String _activeJourneyNamespaceStorageKey =
+      'activeJourney.storageNamespace';
+  static const String _activeJourneyVersionStorageKey =
+      'activeJourney.identityVersion';
+  static const int _activeJourneyIdentityVersion = 1;
 
   static const Set<String> heldSpecialJourneyIds = <String>{
     'changan-last-bus',
@@ -277,11 +285,13 @@ class AccessControlledAppState extends AppState {
   Future<void> _ensureFreshInstallActiveIdentity(
     SharedPreferences preferences,
   ) async {
-    final hasId = preferences.containsKey(AppState.activeJourneyIdStorageKey);
-    final hasNamespace =
-        preferences.containsKey(AppState.activeJourneyNamespaceStorageKey);
-    final hasVersion =
-        preferences.containsKey(AppState.activeJourneyVersionStorageKey);
+    final hasId = preferences.containsKey(_activeJourneyIdStorageKey);
+    final hasNamespace = preferences.containsKey(
+      _activeJourneyNamespaceStorageKey,
+    );
+    final hasVersion = preferences.containsKey(
+      _activeJourneyVersionStorageKey,
+    );
 
     if (hasId || hasNamespace || hasVersion) return;
 
@@ -289,16 +299,16 @@ class AccessControlledAppState extends AppState {
     final binding = requireJourneyLocation(initialJourneyId);
     final writes = await Future.wait<bool>([
       preferences.setString(
-        AppState.activeJourneyIdStorageKey,
+        _activeJourneyIdStorageKey,
         binding.journeyId,
       ),
       preferences.setString(
-        AppState.activeJourneyNamespaceStorageKey,
+        _activeJourneyNamespaceStorageKey,
         binding.storageNamespace,
       ),
       preferences.setInt(
-        AppState.activeJourneyVersionStorageKey,
-        AppState.activeJourneyIdentityVersion,
+        _activeJourneyVersionStorageKey,
+        _activeJourneyIdentityVersion,
       ),
     ]);
     if (writes.any((result) => !result)) {
