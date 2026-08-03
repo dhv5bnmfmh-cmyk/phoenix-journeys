@@ -7,17 +7,11 @@ import '../data/daily_journey_catalog.dart';
 import '../data/journey_city_catalog.dart';
 import '../data/journey_geography_catalog.dart';
 import '../services/journey_location_binding.dart';
-import '../state/app_state.dart';
+import '../state/access_controlled_app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/journey_symbol_badge.dart';
 import '../widgets/special_journey_passport.dart';
 import 'journey_screen.dart';
-
-bool get _passportAllAccessPreview {
-  final uri = Uri.base;
-  return uri.queryParameters['unlock'] == 'all' ||
-      uri.host.startsWith('phoenix-journeys-pr-');
-}
 
 class CityPassportScreen extends StatelessWidget {
   const CityPassportScreen({super.key});
@@ -85,7 +79,7 @@ class _PassportHeader extends StatelessWidget {
           ),
         ),
         Text(
-          _passportAllAccessPreview
+          state.isDevelopmentExperience
               ? state.displayText('全开放')
               : '${state.earnedStampCount} 枚',
           style: const TextStyle(
@@ -514,15 +508,19 @@ class _PassportPlaceRail extends StatelessWidget {
                               final journey = requireJourneyCity(
                                 selectedCityId!,
                               ).destinations[index];
+                              final canOpen = state.canOpenJourney(journey.id);
                               return _PlaceRailButton(
                                 key: ValueKey(
                                   'passport-place-option-${journey.id}',
                                 ),
                                 label: state.displayText(journey.place),
-                                selected: state.activeJourneyId == journey.id,
-                                onTap: () => unawaited(
-                                  _openDestination(context, journey),
-                                ),
+                                selected: canOpen &&
+                                    state.activeJourneyId == journey.id,
+                                onTap: canOpen
+                                    ? () => unawaited(
+                                          _openDestination(context, journey),
+                                        )
+                                    : null,
                               );
                             },
                           )
@@ -566,27 +564,36 @@ class _PlaceRailButton extends StatelessWidget {
 
   final String label;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: selected ? PhoenixTheme.red : Colors.transparent,
-      borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        onTap: onTap,
+    final enabled = onTap != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      child: Material(
+        color: selected && enabled ? PhoenixTheme.red : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 9),
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: selected ? Colors.white : const Color(0xFF38231A),
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 9),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: selected && enabled
+                    ? Colors.white
+                    : enabled
+                        ? const Color(0xFF38231A)
+                        : Colors.black38,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ),
         ),
@@ -711,7 +718,8 @@ Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Rect mapRect) {
           final left = onLeft
               ? anchor.dx - markerSize.width - 16
               : anchor.dx + 16;
-          final top = anchor.dy - 14 + (row.isEven ? 1 : -1) * ((row + 1) ~/ 2) * 34;
+          final top =
+              anchor.dy - 14 + (row.isEven ? 1 : -1) * ((row + 1) ~/ 2) * 34;
           final rect = Rect.fromLTWH(
             left.clamp(
               mapRect.left + mapPadding,
@@ -884,9 +892,12 @@ class _CityMapMarker extends StatelessWidget {
     final earned = city.destinations.any(
       (journey) => state.isJourneyStampEarned(journey.id),
     );
+    final accessible = city.destinations.any(
+      (journey) => state.canOpenJourney(journey.id),
+    );
     final badge = JourneySymbolBadge(
       journeyId: city.primaryDestination.id,
-      isUnlocked: earned || _passportAllAccessPreview,
+      isUnlocked: accessible,
       size: 22,
     );
     final label = Text(
@@ -977,10 +988,7 @@ class _DestinationStampTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final earned = state.isJourneyStampEarned(journey.id);
-    final active = state.activeJourneyId == journey.id;
-    final isToday = state.todayJourney.id == journey.id;
-    final enabled = _passportAllAccessPreview || isToday || active || earned;
+    final enabled = state.canOpenJourney(journey.id);
 
     return Semantics(
       button: true,

@@ -1,14 +1,30 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
-import 'package:phoenix_journeys/state/app_state.dart';
+import 'package:phoenix_journeys/services/journey_access_policy.dart';
+import 'package:phoenix_journeys/state/access_controlled_app_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  const seed =
+      '0101010101010101010101010101010101010101010101010101010101010101';
+
+  AccessControlledAppState stateFor({
+    required DateTime Function() clock,
+    JourneyAccessMode accessMode = JourneyAccessMode.developmentExperience,
+  }) {
+    return AccessControlledAppState(
+      clock: clock,
+      accessMode: accessMode,
+      debugBuild: false,
+      runtimeUri: Uri.parse('https://phoenix.example.com/'),
+      explorerSeedGenerator: () => seed,
+    );
+  }
+
   test('progress is stored independently for each journey', () async {
     SharedPreferences.setMockInitialValues({});
-    final state = AppState(clock: () => DateTime(2026, 7, 20));
+    final state = stateFor(clock: () => DateTime(2026, 7, 20));
     await state.load();
     final firstJourney = state.activeJourneyId;
 
@@ -36,7 +52,7 @@ void main() {
 
   test('completing a journey permanently adds its city stamp', () async {
     SharedPreferences.setMockInitialValues({});
-    final state = AppState(clock: () => DateTime(2026, 7, 20));
+    final state = stateFor(clock: () => DateTime(2026, 7, 20));
     await state.load();
     final journeyId = state.activeJourneyId;
 
@@ -45,16 +61,19 @@ void main() {
     expect(state.isJourneyStampEarned(journeyId), isTrue);
     expect(state.earnedStampCount, 1);
 
-    final restored = AppState(clock: () => DateTime(2026, 7, 20));
+    final restored = stateFor(clock: () => DateTime(2026, 7, 20));
     await restored.load();
     expect(restored.isJourneyStampEarned(journeyId), isTrue);
     expect(restored.memories.first, contains('我记住了今天的城市'));
   });
 
-  test('date change preserves active journey until explicit Daily refresh', () async {
+  test('date change preserves only the resumable active exception', () async {
     SharedPreferences.setMockInitialValues({});
-    var currentDate = DateTime(2026, 7, 20);
-    final state = AppState(clock: () => currentDate);
+    var currentDate = DateTime(2026, 7, 20, 10);
+    final state = stateFor(
+      clock: () => currentDate,
+      accessMode: JourneyAccessMode.productionFreeExplorer,
+    );
 
     await state.load();
     final resumableJourneyId = state.activeJourneyId;
@@ -65,21 +84,31 @@ void main() {
       memory: '',
     );
 
-    currentDate = DateTime(2026, 7, 21);
+    do {
+      currentDate = DateTime(
+        currentDate.year,
+        currentDate.month,
+        currentDate.day + 1,
+        10,
+      );
+    } while (state.policyAccessibleRegularJourneyIds.contains(
+      resumableJourneyId,
+    ));
     await state.load();
 
     expect(state.activeJourneyId, resumableJourneyId);
     expect(state.journeyStep, 2);
     expect(state.wonderDraft, '继续当前旅程');
+    expect(state.canOpenJourney(resumableJourneyId), isFalse);
+    expect(state.canResumeActiveJourney(resumableJourneyId), isTrue);
 
-    final expectedDailyJourneyId = dailyJourneyForDate(currentDate).id;
-    expect(expectedDailyJourneyId, isNot(resumableJourneyId));
+    await state.activateJourney(resumableJourneyId);
+    expect(state.activeJourneyId, resumableJourneyId);
 
+    final expectedDailyJourneyId = state.dailyAssignment.morningJourneyId;
     await state.refreshDailyJourney();
 
     expect(state.activeJourneyId, expectedDailyJourneyId);
-    await state.activateJourney(resumableJourneyId);
-    expect(state.journeyStep, 2);
-    expect(state.wonderDraft, '继续当前旅程');
+    expect(state.canResumeActiveJourney(resumableJourneyId), isFalse);
   });
 }
