@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/journey_geography_catalog.dart';
+import 'package:phoenix_journeys/screens/city_passport_screen.dart';
 import 'package:phoenix_journeys/state/access_controlled_app_state.dart';
 import 'package:phoenix_journeys/widgets/journey_picker_sheet.dart';
 import 'package:phoenix_journeys/widgets/special_journey_passport.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -124,5 +127,68 @@ void main() {
     );
     expect(releasedTile.onTap, isNotNull);
     expect(find.textContaining('上午旅程 · 已开放'), findsOneWidget);
+  });
+
+  testWidgets('Passport ignores production unlock query and disables locked entry', (
+    tester,
+  ) async {
+    final state = await loadProductionState();
+    final lockedJourney = dailyJourneyExperiences.firstWhere(
+      (journey) => !state.canOpenJourney(journey.id),
+    );
+    final province = chinaProvinceCatalog.singleWhere(
+      (entry) => entry.cityIds.contains(lockedJourney.cityId),
+    );
+
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<AppState>.value(
+        value: state,
+        child: const MaterialApp(
+          home: Scaffold(body: CityPassportScreen()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('全开放'), findsNothing);
+    expect(find.text('${state.earnedStampCount} 枚'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('passport-country-china')));
+    await tester.pumpAndSettle();
+
+    final provinceFinder = find.byKey(
+      ValueKey('passport-province-${province.id}'),
+    );
+    await tester.ensureVisible(provinceFinder);
+    await tester.tap(provinceFinder);
+    await tester.pumpAndSettle();
+
+    if (!province.isMunicipality) {
+      final cityFinder = find.byKey(
+        ValueKey('passport-city-option-${lockedJourney.cityId}'),
+      );
+      await tester.ensureVisible(cityFinder);
+      await tester.tap(cityFinder);
+      await tester.pumpAndSettle();
+    }
+
+    final destinationFinder = find.byKey(
+      ValueKey('passport-place-option-${lockedJourney.id}'),
+    );
+    await tester.ensureVisible(destinationFinder);
+    final destinationTap = tester.widget<InkWell>(
+      find.descendant(
+        of: destinationFinder,
+        matching: find.byType(InkWell),
+      ),
+    );
+
+    expect(destinationTap.onTap, isNull);
+    expect(state.activeJourneyId, isNot(lockedJourney.id));
   });
 }
