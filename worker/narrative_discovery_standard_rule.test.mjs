@@ -237,12 +237,51 @@ test('normal and special pilots gate two-to-three-Journey controlled batches', (
     ],
     'Narrative Standard pilot gate',
   );
-  assert.match(roadmap, /Complete one normal Story pilot/);
-  assert.match(roadmap, /Complete one special Story pilot/);
-  assert.match(roadmap, /controlled batches of two to three Journeys/);
-  assert.match(roadmap, /rewriting 27 normal Journeys in one task/);
-  assert.match(roadmap, /rewriting nine special Journeys in one task/);
-  assert.match(roadmap, /starting a second pilot before the first is decided/);
+
+  const orderedRoadmapClauses = [
+    '1. Merge Narrative and Discovery Standard after Founder review.',
+    '2. Founder confirms the content model.',
+    '3. Finish routing, access, and critical-persistence P1 repairs.',
+    '4. No normal or special Story pilot may enter implementation until those technical P1 repairs are complete with VERIFIED evidence and no regression.',
+    '5. Complete one normal Story pilot, recommended `beijing-summer-palace`.',
+    '6. Obtain Founder mobile approval for the exact normal pilot Commit and Preview.',
+    '7. Complete one special Story pilot, recommended `tide-letter`.',
+    '8. Obtain Founder mobile approval for the exact special pilot Commit and Preview.',
+    '9. Expand only in controlled batches of two to three Journeys.',
+  ];
+  const clauseIndexes = orderedRoadmapClauses.map((clause) => {
+    const index = roadmap.indexOf(clause);
+    assert.notEqual(index, -1, `Roadmap must contain exact ordered clause: ${clause}`);
+    return index;
+  });
+  for (let index = 1; index < clauseIndexes.length; index += 1) {
+    assert.ok(
+      clauseIndexes[index - 1] < clauseIndexes[index],
+      `${orderedRoadmapClauses[index - 1]} must appear before ${orderedRoadmapClauses[index]}`,
+    );
+  }
+
+  requireAll(
+    roadmap,
+    [
+      'A. Governance standard merge:',
+      'B. Technical P1 repair:',
+      'C. Story pilot implementation:',
+      'D. Controlled content expansion:',
+      'This governance merge is not a Story Pilot and MUST NOT be blocked by unfinished technical P1 repairs.',
+      'These repairs block Story pilot implementation, not governance-standard merge.',
+      'rewriting 27 normal Journeys in one task',
+      'rewriting nine special Journeys in one task',
+      'using one shared Story template',
+      'approving a batch only through aggregate score',
+      'starting a second pilot before the first is decided',
+      'A rejected pilot returns to revision.',
+      'Founder approval MUST be tied to the exact candidate Commit and Preview.',
+      'each Journey independently passes all REQUIRED and applicable CONDITIONALLY_REQUIRED acceptance items with VERIFIED evidence',
+    ],
+    'Roadmap Founder correction',
+  );
+  assert.doesNotMatch(roadmap, /passes Mandatory acceptance items/);
   assert.match(acceptance, /NJ-052 \| Repair \/ Creation Pilot Batch Gate/);
 });
 
