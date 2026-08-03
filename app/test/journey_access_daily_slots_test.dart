@@ -230,23 +230,25 @@ void main() {
     );
   });
 
-  test('date rollover creates a new deterministic assignment', () async {
+  test('date rollover uses the new date deterministic assignment', () async {
     SharedPreferences.setMockInitialValues({});
     var now = DateTime(2026, 8, 3, 10);
     final state = productionState(clock: () => now);
     await state.load();
-    final dayOne = state.dailyAssignment;
 
     now = DateTime(2026, 8, 4, 10);
     final dayTwo = state.dailyAssignment;
     final dayTwoAgain = state.dailyAssignment;
+    final expectedDayTwo = JourneyAccessPolicy.assignDailyJourneys(
+      journeyIds: state.eligibleRegularJourneyIds,
+      explorerSeed: seedA,
+      localDate: now,
+    );
 
     expect(dayTwo.morningJourneyId, dayTwoAgain.morningJourneyId);
     expect(dayTwo.afternoonJourneyId, dayTwoAgain.afternoonJourneyId);
-    expect(
-      '${dayOne.morningJourneyId}|${dayOne.afternoonJourneyId}',
-      isNot('${dayTwo.morningJourneyId}|${dayTwo.afternoonJourneyId}'),
-    );
+    expect(dayTwo.morningJourneyId, expectedDayTwo.morningJourneyId);
+    expect(dayTwo.afternoonJourneyId, expectedDayTwo.afternoonJourneyId);
   });
 
   test('unreleased regular Journey activation fails without mutation', () async {
@@ -266,8 +268,8 @@ void main() {
               !state.policyAccessibleRegularJourneyIds.contains(id),
         );
 
-    expect(
-      () => state.activateJourney(lockedId),
+    await expectLater(
+      state.activateJourney(lockedId),
       throwsA(isA<JourneyAccessDeniedException>()),
     );
     expect(state.activeJourneyId, originalId);
@@ -320,8 +322,8 @@ void main() {
     state.unlockedSpecialJourneyIds.add('tide-letter');
 
     expect(state.canOpenJourney('tide-letter'), isFalse);
-    expect(
-      () => state.activateJourney('tide-letter'),
+    await expectLater(
+      state.activateJourney('tide-letter'),
       throwsA(isA<JourneyAccessDeniedException>()),
     );
   });
