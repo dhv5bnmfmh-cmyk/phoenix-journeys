@@ -70,6 +70,45 @@ void main() {
     expect(state.canOpenJourney('tide-letter'), isTrue);
   });
 
+  test('lookalike workers.dev host cannot obtain Preview all-access', () async {
+    SharedPreferences.setMockInitialValues({});
+    final state = productionState(
+      clock: () => DateTime(2026, 8, 3, 10),
+      runtimeUri: Uri.parse(
+        'https://phoenix-journeys-pr-145.attacker.workers.dev/'
+        '?unlock=all&prototype=journeys',
+      ),
+    );
+
+    await state.load();
+
+    expect(
+      state.journeyAccessMode,
+      JourneyAccessMode.productionFreeExplorer,
+    );
+    expect(state.policyAccessibleRegularJourneyIds.length, 1);
+    expect(state.canOpenJourney('literary-roaming'), isFalse);
+    expect(state.canOpenJourney('tide-letter'), isFalse);
+  });
+
+  test('non-HTTPS Preview-shaped host cannot obtain all-access', () async {
+    SharedPreferences.setMockInitialValues({});
+    final state = productionState(
+      clock: () => DateTime(2026, 8, 3, 10),
+      runtimeUri: Uri.parse(
+        'http://phoenix-journeys-pr-145.7hn5tyrjgh.workers.dev/'
+        '?unlock=all',
+      ),
+    );
+
+    await state.load();
+
+    expect(
+      state.journeyAccessMode,
+      JourneyAccessMode.productionFreeExplorer,
+    );
+  });
+
   test('fresh install creates one opaque local Seed and restores it', () async {
     SharedPreferences.setMockInitialValues({});
     var generatorCalls = 0;
@@ -89,6 +128,8 @@ void main() {
     expect(first.localExplorerSeed, hasLength(64));
     expect(first.localExplorerSeed, matches(RegExp(r'^[0-9a-f]+$')));
     expect(first.localExplorerSeed, isNot(contains('@')));
+    expect(first.localExplorerSeed, isNot(contains('name')));
+    expect(first.localExplorerSeed, isNot(contains('email')));
     expect(
       preferences.getString(
         AccessControlledAppState.explorerSeedStorageKey,
@@ -115,6 +156,15 @@ void main() {
     expect(generatorCalls, 1);
   });
 
+  test('Daily resolution cannot fall back before a valid Seed exists', () {
+    SharedPreferences.setMockInitialValues({});
+    final state = productionState(
+      clock: () => DateTime(2026, 8, 3, 10),
+    );
+
+    expect(() => state.todayJourney, throwsStateError);
+  });
+
   test('corrupt Seed fails closed without silently rerolling', () async {
     SharedPreferences.setMockInitialValues({
       AccessControlledAppState.explorerSeedStorageKey: '',
@@ -134,6 +184,27 @@ void main() {
 
     expect(state.loadStatus, AppLoadStatus.error);
     expect(state.explorerSeedFailureReason, contains('empty or corrupt'));
+    expect(generatorCalls, 0);
+    expect(() => state.todayJourney, throwsStateError);
+  });
+
+  test('partial Seed record fails closed without migration reroll', () async {
+    SharedPreferences.setMockInitialValues({
+      AccessControlledAppState.explorerSeedStorageKey: seedA,
+    });
+    var generatorCalls = 0;
+    final state = productionState(
+      clock: () => DateTime(2026, 8, 3, 10),
+      seedGenerator: () {
+        generatorCalls += 1;
+        return seedB;
+      },
+    );
+
+    await state.load();
+
+    expect(state.loadStatus, AppLoadStatus.error);
+    expect(state.explorerSeedFailureReason, contains('incomplete'));
     expect(generatorCalls, 0);
   });
 
@@ -170,7 +241,32 @@ void main() {
       first.morningJourneyId,
       first.afternoonJourneyId,
     });
+    expect(state.releasedDailyJourneyIds, hasLength(2));
     expect(state.todayJourney.id, first.afternoonJourneyId);
+  });
+
+  test('duplicate candidates do not duplicate or bias slot output', () {
+    final assignment = JourneyAccessPolicy.assignDailyJourneys(
+      journeyIds: const ['journey-a', 'journey-a', 'journey-b'],
+      explorerSeed: seedA,
+      localDate: DateTime(2026, 8, 3),
+    );
+
+    expect(
+      {assignment.morningJourneyId, assignment.afternoonJourneyId},
+      {'journey-a', 'journey-b'},
+    );
+  });
+
+  test('empty eligible catalog fails explicitly', () {
+    expect(
+      () => JourneyAccessPolicy.assignDailyJourneys(
+        journeyIds: const [],
+        explorerSeed: seedA,
+        localDate: DateTime(2026, 8, 3),
+      ),
+      throwsArgumentError,
+    );
   });
 
   test('slot boundary uses local 00:00, 11:59, 12:00, and 23:59', () async {
@@ -198,6 +294,30 @@ void main() {
     });
   });
 
+  test('local calendar date is used without UTC rollover drift', () async {
+    SharedPreferences.setMockInitialValues({});
+    var now = DateTime(2026, 8, 4, 0, 5);
+    final state = productionState(clock: () => now);
+    await state.load();
+
+    final localDay = state.dailyAssignment;
+    final expected = JourneyAccessPolicy.assignDailyJourneys(
+      journeyIds: state.eligibleRegularJourneyIds,
+      explorerSeed: seedA,
+      localDate: DateTime(2026, 8, 4),
+    );
+
+    expect(localDay.morningJourneyId, expected.morningJourneyId);
+    expect(localDay.afternoonJourneyId, expected.afternoonJourneyId);
+    expect(state.releasedDailySlots, {JourneyReleaseSlot.morning});
+
+    now = DateTime(2026, 8, 4, 12);
+    expect(state.releasedDailySlots, {
+      JourneyReleaseSlot.morning,
+      JourneyReleaseSlot.afternoon,
+    });
+  });
+
   test('same-day refresh and restart never reroll assignments', () async {
     SharedPreferences.setMockInitialValues({});
     final now = DateTime(2026, 8, 3, 16);
@@ -207,7 +327,10 @@ void main() {
 
     await first.refreshDailyJourney();
     expect(first.activeJourneyId, firstAssignment.afternoonJourneyId);
-    expect(first.dailyAssignment.morningJourneyId, firstAssignment.morningJourneyId);
+    expect(
+      first.dailyAssignment.morningJourneyId,
+      firstAssignment.morningJourneyId,
+    );
     expect(
       first.dailyAssignment.afternoonJourneyId,
       firstAssignment.afternoonJourneyId,
@@ -282,7 +405,22 @@ void main() {
     );
   });
 
-  test('previous-day active Journey is the only resumable exception', () async {
+  test('invalid direct activation retains B1 fail-closed behavior', () async {
+    SharedPreferences.setMockInitialValues({});
+    final state = productionState(
+      clock: () => DateTime(2026, 8, 3, 10),
+    );
+    await state.load();
+    final originalId = state.activeJourneyId;
+
+    await expectLater(
+      state.activateJourney('removed-or-forged-journey'),
+      throwsStateError,
+    );
+    expect(state.activeJourneyId, originalId);
+  });
+
+  test('previous-day active Journey resumes without opening its catalog entry', () async {
     SharedPreferences.setMockInitialValues({});
     var now = DateTime(2026, 8, 3, 10);
     final state = productionState(clock: () => now);
@@ -296,20 +434,49 @@ void main() {
       memory: '',
     );
 
-    now = DateTime(2026, 8, 4, 13);
+    do {
+      now = DateTime(now.year, now.month, now.day + 1, 13);
+    } while (state.policyAccessibleRegularJourneyIds.contains(previousDayId));
     await state.load();
 
     expect(state.activeJourneyId, previousDayId);
-    expect(state.canOpenJourney(previousDayId), isTrue);
+    expect(state.canOpenJourney(previousDayId), isFalse);
+    expect(state.canResumeActiveJourney(previousDayId), isTrue);
     expect(state.journeyStep, 2);
+
+    await state.activateJourney(previousDayId);
+    expect(state.activeJourneyId, previousDayId);
 
     final todayId = state.dailyAssignment.afternoonJourneyId;
     await state.activateJourney(todayId);
     expect(state.activeJourneyId, todayId);
+    expect(state.canResumeActiveJourney(previousDayId), isFalse);
+  });
 
-    if (!state.policyAccessibleRegularJourneyIds.contains(previousDayId)) {
-      expect(state.canOpenJourney(previousDayId), isFalse);
-    }
+  test('unstarted previous-day identity does not become a third Journey', () async {
+    SharedPreferences.setMockInitialValues({});
+    var now = DateTime(2026, 8, 3, 10);
+    final state = productionState(clock: () => now);
+    await state.load();
+    final previousDayId = state.activeJourneyId;
+
+    do {
+      now = DateTime(now.year, now.month, now.day + 1, 13);
+    } while (state.policyAccessibleRegularJourneyIds.contains(previousDayId));
+    await state.load();
+
+    expect(state.activeJourneyId, previousDayId);
+    expect(state.policyAccessibleRegularJourneyIds, hasLength(2));
+    expect(state.canOpenJourney(previousDayId), isFalse);
+    expect(state.canResumeActiveJourney(previousDayId), isFalse);
+    await expectLater(
+      state.activateJourney(previousDayId),
+      throwsA(isA<JourneyAccessDeniedException>()),
+    );
+
+    final todayId = state.dailyAssignment.afternoonJourneyId;
+    await state.activateJourney(todayId);
+    expect(state.activeJourneyId, todayId);
   });
 
   test('held Special Journeys stay unpublished even when locally listed', () async {
