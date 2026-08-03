@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/journey_city_catalog.dart';
+import '../state/access_controlled_app_state.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 
@@ -187,26 +188,37 @@ Future<String?> showJourneyPickerSheet({
                       itemBuilder: (context, index) {
                         final journey = selectedCity.destinations[index];
                         final active = journey.id == state.activeJourneyId;
-                        final today = journey.id == state.todayJourney.id;
                         final earned = state.isJourneyStampEarned(journey.id);
+                        final canOpen = state.canOpenJourney(journey.id);
+                        final slotLabel =
+                            state.dailySlotLabelForJourney(journey.id);
+                        final slotReleased =
+                            state.isDailyJourneyReleased(journey.id);
 
-                        final status = today
-                            ? '今日推荐'
-                            : active && state.hasJourneyInProgress
+                        final status = active && state.hasJourneyInProgress
                             ? '继续上次进度'
-                            : earned
-                            ? '印章已获得 · 可再次体验'
-                            : '可随时开始';
+                            : slotLabel != null
+                                ? state.isDevelopmentExperience || slotReleased
+                                    ? '$slotLabel · 已开放'
+                                    : '$slotLabel · 12:00 开放'
+                                : earned && canOpen
+                                    ? '印章已获得 · 可再次体验'
+                                    : canOpen
+                                        ? '可随时开始'
+                                        : '今日未开放';
 
                         return Material(
                           color: active
                               ? PhoenixTheme.gold.withValues(alpha: .14)
-                              : Colors.white,
+                              : canOpen
+                                  ? Colors.white
+                                  : const Color(0xFFF1EEE8),
                           borderRadius: BorderRadius.circular(16),
                           child: InkWell(
                             key: ValueKey('journey-destination-${journey.id}'),
-                            onTap: () =>
-                                Navigator.of(sheetContext).pop(journey.id),
+                            onTap: canOpen
+                                ? () => Navigator.of(sheetContext).pop(journey.id)
+                                : null,
                             borderRadius: BorderRadius.circular(16),
                             child: Container(
                               padding: const EdgeInsets.all(11),
@@ -215,21 +227,26 @@ Future<String?> showJourneyPickerSheet({
                                 border: Border.all(
                                   color: active
                                       ? PhoenixTheme.red.withValues(alpha: .45)
-                                      : PhoenixTheme.gold.withValues(
-                                          alpha: .28,
-                                        ),
+                                      : canOpen
+                                          ? PhoenixTheme.gold.withValues(
+                                              alpha: .28,
+                                            )
+                                          : Colors.black12,
                                 ),
                               ),
                               child: Row(
                                 children: [
                                   CircleAvatar(
                                     radius: 20,
-                                    backgroundColor: PhoenixTheme.red
-                                        .withValues(alpha: .10),
+                                    backgroundColor: canOpen
+                                        ? PhoenixTheme.red.withValues(alpha: .10)
+                                        : Colors.black.withValues(alpha: .06),
                                     child: Text(
                                       state.displayText(journey.stampSymbol),
-                                      style: const TextStyle(
-                                        color: PhoenixTheme.red,
+                                      style: TextStyle(
+                                        color: canOpen
+                                            ? PhoenixTheme.red
+                                            : Colors.black38,
                                         fontSize: 17,
                                         fontWeight: FontWeight.w900,
                                       ),
@@ -248,16 +265,27 @@ Future<String?> showJourneyPickerSheet({
                                                 state.displayText(
                                                   journey.place,
                                                 ),
-                                                style: const TextStyle(
+                                                style: TextStyle(
+                                                  color: canOpen
+                                                      ? Colors.black87
+                                                      : Colors.black45,
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w900,
                                                 ),
                                               ),
                                             ),
-                                            if (today)
-                                              const Icon(
-                                                Icons.auto_awesome,
-                                                color: PhoenixTheme.gold,
+                                            if (slotLabel != null)
+                                              Icon(
+                                                slotReleased ||
+                                                        state
+                                                            .isDevelopmentExperience
+                                                    ? Icons.auto_awesome
+                                                    : Icons.schedule_rounded,
+                                                color: slotReleased ||
+                                                        state
+                                                            .isDevelopmentExperience
+                                                    ? PhoenixTheme.gold
+                                                    : Colors.black38,
                                                 size: 16,
                                               ),
                                           ],
@@ -267,16 +295,20 @@ Future<String?> showJourneyPickerSheet({
                                           state.displayText(journey.headline),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: Colors.black54,
+                                          style: TextStyle(
+                                            color: canOpen
+                                                ? Colors.black54
+                                                : Colors.black38,
                                             fontSize: 10.5,
                                           ),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
                                           state.displayText(status),
-                                          style: const TextStyle(
-                                            color: PhoenixTheme.red,
+                                          style: TextStyle(
+                                            color: canOpen
+                                                ? PhoenixTheme.red
+                                                : Colors.black45,
                                             fontSize: 9.5,
                                             fontWeight: FontWeight.w800,
                                           ),
@@ -285,8 +317,13 @@ Future<String?> showJourneyPickerSheet({
                                     ),
                                   ),
                                   const SizedBox(width: 6),
-                                  const Icon(
-                                    Icons.arrow_forward_ios_rounded,
+                                  Icon(
+                                    canOpen
+                                        ? Icons.arrow_forward_ios_rounded
+                                        : Icons.lock_outline_rounded,
+                                    color: canOpen
+                                        ? Colors.black87
+                                        : Colors.black38,
                                     size: 15,
                                   ),
                                 ],
