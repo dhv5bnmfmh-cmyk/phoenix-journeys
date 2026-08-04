@@ -469,6 +469,18 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Future<void> _goToStep(int targetStep) async {
     final safeStep = targetStep.clamp(0, AppState.journeyLastStep);
+    if (_isSummerPalacePilot && safeStep == step + 1) {
+      if (step == 3 &&
+          _guideFeedback != null &&
+          !_pilotChallengeVisible) {
+        setState(() => _pilotChallengeVisible = true);
+        return;
+      }
+      if (step == 4 && _writingFeedback != null && !_pilotMemoryVisible) {
+        setState(() => _pilotMemoryVisible = true);
+        return;
+      }
+    }
     if (!_appState.journeyCompleted &&
         safeStep != step &&
         safeStep != step - 1 &&
@@ -1644,16 +1656,12 @@ class _JourneyScreenState extends State<JourneyScreen>
       keyboardAdaptive: true,
       keyboardFocusNode: wonderFocusNode,
       buttonText: hasFeedback
-          ? (_isSummerPalacePilot ? '进入挑战' : '继续')
+          ? '继续'
           : (_guideLoading ? 'AI 正在回应…' : '问 PhoenixGuideAgent'),
       buttonIcon: hasFeedback ? Icons.arrow_forward : Icons.auto_awesome,
       primaryLoading: _guideLoading,
       primaryEnabled: !_guideLoading,
-      onNext: hasFeedback
-          ? (_isSummerPalacePilot
-              ? () => setState(() => _pilotChallengeVisible = true)
-              : null)
-          : () => unawaited(_askGuide()),
+      onNext: hasFeedback ? null : () => unawaited(_askGuide()),
       secondaryButtonText: hasFeedback ? 'AI 回答' : null,
       secondaryButtonIcon: Icons.forum_outlined,
       onSecondary: hasFeedback ? () => unawaited(_showGuideFeedback()) : null,
@@ -1747,16 +1755,12 @@ class _JourneyScreenState extends State<JourneyScreen>
       keyboardAdaptive: true,
       keyboardFocusNode: expressFocusNode,
       buttonText: hasFeedback
-          ? (_isSummerPalacePilot ? '继续留下回忆' : '继续')
+          ? '继续'
           : (_writingLoading ? 'AI 正在批改…' : '请 PhoenixWritingAgent 批改'),
       buttonIcon: hasFeedback ? Icons.arrow_forward : Icons.spellcheck_rounded,
       primaryLoading: _writingLoading,
       primaryEnabled: !_writingLoading,
-      onNext: hasFeedback
-          ? (_isSummerPalacePilot
-              ? () => setState(() => _pilotMemoryVisible = true)
-              : null)
-          : () => unawaited(_reviewWriting()),
+      onNext: hasFeedback ? null : () => unawaited(_reviewWriting()),
       secondaryButtonText: hasFeedback ? 'AI 批改' : null,
       secondaryButtonIcon: Icons.fact_check_outlined,
       onSecondary: hasFeedback ? () => unawaited(_showWritingFeedback()) : null,
