@@ -1,6 +1,6 @@
 # Phoenix Pilot N1 — Beijing Summer Palace Matrix
 
-**Status:** CANDIDATE / FOUNDER REVIEW REQUIRED  
+**Status:** READY FOR FOUNDER MOBILE REVIEW  
 **Governance Phase ID:** `PILOT_N1`  
 **Primary Finding:** `PROTAGONIST_IDENTITY_MISSING`  
 **Journey ID:** `beijing-summer-palace`  
@@ -122,10 +122,11 @@ Every level must preserve:
 
 ## 8. Automated Validation Boundary
 
-- Automated checks implemented: Story shape, identity constants, enacted-choice evidence, Story/Discovery separation, language evidence, difficulty invariants, Phoenix Lv.1–10 invariants, composite page mapping, schema and step guards, full regression suite.
+- Automated checks implemented: Story shape, identity constants, enacted-choice evidence, Story/Discovery separation, language evidence, vocabulary-in-context evidence, difficulty invariants, Phoenix Lv.1–10 invariants, composite page mapping, schema and step guards, full regression suite.
 - Fields not approved by automation: literary naturalness, emotional credibility, cultural tone, final mobile experience.
-- Automated Structural Result: PENDING CI
-- Automated Structural Evidence Level: PENDING CI
+- Automated Structural Result: PASS
+- Automated Structural Evidence Level: VERIFIED
+- Full catalog quality report: APPROVED, 360 / 360, revision required 0, blocked 0
 - Human Literary Reviewer: Founder
 - Human Literary Result: PENDING
 - Human Literary Evidence Level: UNVERIFIED
@@ -144,10 +145,10 @@ Every level must preserve:
 ## 10. Candidate Decision
 
 - Blocking codes targeted: protagonist, relationship, goal, conflict, choice, consequence, emotional arc, tourism exposition, Story/Discovery overlap, opening reuse, catalog differentiation and level identity.
-- Stable comparison result: PENDING PREVIEW
-- Automated structural result: PENDING CI
+- Stable comparison result: PASS; candidate is ahead of PR #137 with no behind commits, while final visual and literary approval remains Founder-gated.
+- Automated structural result: PASS
 - Human literary result: PENDING
 - Founder approval required: YES
 - Founder approval state: PENDING
 - Next phase authorized: NO
-- Final Result: CANDIDATE
+- Final Result: READY_FOR_FOUNDER_MOBILE_REVIEW
