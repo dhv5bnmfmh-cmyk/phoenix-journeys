@@ -89,6 +89,30 @@ String narrationContentSignature(List<NarrationItem> items) {
   return hash.toRadixString(16).padLeft(8, '0');
 }
 
+@visibleForTesting
+enum PilotN1CompositePage { reflection, challenge, writing, memory }
+
+@visibleForTesting
+PilotN1CompositePage resolvePilotN1CompositePage({
+  required int step,
+  required bool challengeVisible,
+  required bool memoryVisible,
+}) {
+  return switch (step) {
+    3 => challengeVisible
+        ? PilotN1CompositePage.challenge
+        : PilotN1CompositePage.reflection,
+    4 => memoryVisible
+        ? PilotN1CompositePage.memory
+        : PilotN1CompositePage.writing,
+    _ => throw ArgumentError.value(
+        step,
+        'step',
+        'Pilot N1 composite pages exist only at committed steps 3 and 4.',
+      ),
+  };
+}
+
 class JourneyScreen extends StatefulWidget {
   const JourneyScreen({super.key, this.journeyId});
 
@@ -116,6 +140,8 @@ class _JourneyScreenState extends State<JourneyScreen>
   bool _guideLoading = false;
   bool _writingLoading = false;
   bool _challengeResolved = false;
+  bool _pilotChallengeVisible = false;
+  bool _pilotMemoryVisible = false;
   late int _challengeSeed;
   bool _initialized = false;
   static const PhoenixLanguageLevelAgent _languageLevelAgent =
@@ -128,6 +154,9 @@ class _JourneyScreenState extends State<JourneyScreen>
   int _levelChangeToken = 0;
   Timer? _narrationCheckpointTimer;
   int _lastSavedNarrationOffset = 0;
+
+  bool get _isSummerPalacePilot =>
+      _experience.id == 'beijing-summer-palace';
 
   @override
   void initState() {
@@ -176,6 +205,8 @@ class _JourneyScreenState extends State<JourneyScreen>
         isOfflineFallback: _appState.writingFeedbackOffline,
       );
     }
+    _pilotChallengeVisible = _isSummerPalacePilot && _guideFeedback != null;
+    _pilotMemoryVisible = _isSummerPalacePilot && _writingFeedback != null;
     _initialized = true;
     unawaited(_loadLanguageProfile());
   }
@@ -307,7 +338,6 @@ class _JourneyScreenState extends State<JourneyScreen>
   String _readingShapeLabel(int count) =>
       count == 1 ? '深度长文' : '分段短文';
 
-
   Future<void> _loadLanguageProfile() async {
     final profile = await _languageLevelStore.load();
     if (!mounted) return;
@@ -408,6 +438,8 @@ class _JourneyScreenState extends State<JourneyScreen>
       _guideFeedback = null;
       _writingFeedback = null;
       _challengeResolved = false;
+      _pilotChallengeVisible = false;
+      _pilotMemoryVisible = false;
       _challengeSeed += 1;
     });
 
@@ -446,9 +478,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (safeStep != step) {
       _checkpointNarrationBeforeStepChange();
     }
-    // Discovery autoplay must enter the browser speech API in the same user
-    // gesture that pressed Continue. Awaiting storage/animation first can make
-    // iOS display "playing" while silently blocking the actual utterance.
     if (safeStep == 2 && safeStep != step) {
       setState(() => step = safeStep);
       if (_appState.journeyNarrationOffsetFor('discovery') > 0) {
@@ -517,7 +546,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
     if (!mounted || !shouldResume) return;
 
-    // Wait until the sheet animation and iOS audio channel have fully closed.
     await Future<void>.delayed(const Duration(milliseconds: 360));
     if (!mounted) return;
     await _narration.resumeFromOffset(resumeOffset);
@@ -849,7 +877,10 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   void _onWonderChanged(String _) {
     if (_guideFeedback != null) {
-      setState(() => _guideFeedback = null);
+      setState(() {
+        _guideFeedback = null;
+        _pilotChallengeVisible = false;
+      });
       unawaited(_appState.clearGuideFeedback());
     }
     unawaited(_persistProgress());
@@ -857,7 +888,10 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   void _onExpressChanged(String _) {
     if (_writingFeedback != null) {
-      setState(() => _writingFeedback = null);
+      setState(() {
+        _writingFeedback = null;
+        _pilotMemoryVisible = false;
+      });
       unawaited(_appState.clearWritingFeedback());
     }
     unawaited(_persistProgress());
@@ -882,6 +916,8 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (mounted) {
       setState(() {
         _challengeResolved = false;
+        _pilotChallengeVisible = false;
+        _pilotMemoryVisible = false;
         _challengeSeed += 1;
         step = 0;
       });
@@ -899,12 +935,30 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   @override
   Widget build(BuildContext context) {
+    final stepThreePage = _isSummerPalacePilot
+        ? resolvePilotN1CompositePage(
+            step: 3,
+            challengeVisible: _pilotChallengeVisible,
+            memoryVisible: _pilotMemoryVisible,
+          )
+        : PilotN1CompositePage.challenge;
+    final stepFourPage = _isSummerPalacePilot
+        ? resolvePilotN1CompositePage(
+            step: 4,
+            challengeVisible: _pilotChallengeVisible,
+            memoryVisible: _pilotMemoryVisible,
+          )
+        : PilotN1CompositePage.memory;
     final pages = <Widget>[
       _storyPage(),
       _wordsPage(),
       _discoveryPage(),
-      _challengePage(),
-      _memoryPage(),
+      stepThreePage == PilotN1CompositePage.reflection
+          ? _wonderPage()
+          : _challengePage(),
+      stepFourPage == PilotN1CompositePage.writing
+          ? _expressPage()
+          : _memoryPage(),
       _completePage(),
     ];
 
@@ -954,6 +1008,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     String buttonText = '继续',
     IconData buttonIcon = Icons.arrow_forward,
     VoidCallback? onNext,
+    VoidCallback? onBack,
     bool showBack = true,
     bool keyboardAdaptive = false,
     FocusNode? keyboardFocusNode,
@@ -1028,7 +1083,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                           step < AppState.journeyLastStep) ...[
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () => unawaited(_goToStep(step - 1)),
+                            onPressed: onBack ??
+                                () => unawaited(_goToStep(step - 1)),
                             style: OutlinedButton.styleFrom(
                               visualDensity: VisualDensity.compact,
                               padding: const EdgeInsets.symmetric(
@@ -1580,9 +1636,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  // Kept temporarily for stored-draft compatibility, but no longer part of
-  // the explorer-facing journey flow.
-  // ignore: unused_element
   Widget _wonderPage() {
     final keyboardVisible = wonderFocusNode.hasFocus;
     final hasFeedback = _guideFeedback != null;
@@ -1591,12 +1644,16 @@ class _JourneyScreenState extends State<JourneyScreen>
       keyboardAdaptive: true,
       keyboardFocusNode: wonderFocusNode,
       buttonText: hasFeedback
-          ? '继续'
+          ? (_isSummerPalacePilot ? '进入挑战' : '继续')
           : (_guideLoading ? 'AI 正在回应…' : '问 PhoenixGuideAgent'),
       buttonIcon: hasFeedback ? Icons.arrow_forward : Icons.auto_awesome,
       primaryLoading: _guideLoading,
       primaryEnabled: !_guideLoading,
-      onNext: hasFeedback ? null : () => unawaited(_askGuide()),
+      onNext: hasFeedback
+          ? (_isSummerPalacePilot
+              ? () => setState(() => _pilotChallengeVisible = true)
+              : null)
+          : () => unawaited(_askGuide()),
       secondaryButtonText: hasFeedback ? 'AI 回答' : null,
       secondaryButtonIcon: Icons.forum_outlined,
       onSecondary: hasFeedback ? () => unawaited(_showGuideFeedback()) : null,
@@ -1648,7 +1705,12 @@ class _JourneyScreenState extends State<JourneyScreen>
     final state = context.watch<AppState>();
     return _page(
       title: '挑战',
-      buttonText: _challengeResolved ? '继续留下回忆' : '完成挑战后继续',
+      onBack: _isSummerPalacePilot
+          ? () => setState(() => _pilotChallengeVisible = false)
+          : null,
+      buttonText: _challengeResolved
+          ? (_isSummerPalacePilot ? '继续表达' : '继续留下回忆')
+          : '完成挑战后继续',
       buttonIcon: _challengeResolved
           ? Icons.arrow_forward_rounded
           : Icons.lock_outline_rounded,
@@ -1677,9 +1739,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  // Kept temporarily for stored-draft compatibility, but no longer part of
-  // the explorer-facing journey flow.
-  // ignore: unused_element
   Widget _expressPage() {
     final keyboardVisible = expressFocusNode.hasFocus;
     final hasFeedback = _writingFeedback != null;
@@ -1688,12 +1747,16 @@ class _JourneyScreenState extends State<JourneyScreen>
       keyboardAdaptive: true,
       keyboardFocusNode: expressFocusNode,
       buttonText: hasFeedback
-          ? '继续'
+          ? (_isSummerPalacePilot ? '继续留下回忆' : '继续')
           : (_writingLoading ? 'AI 正在批改…' : '请 PhoenixWritingAgent 批改'),
       buttonIcon: hasFeedback ? Icons.arrow_forward : Icons.spellcheck_rounded,
       primaryLoading: _writingLoading,
       primaryEnabled: !_writingLoading,
-      onNext: hasFeedback ? null : () => unawaited(_reviewWriting()),
+      onNext: hasFeedback
+          ? (_isSummerPalacePilot
+              ? () => setState(() => _pilotMemoryVisible = true)
+              : null)
+          : () => unawaited(_reviewWriting()),
       secondaryButtonText: hasFeedback ? 'AI 批改' : null,
       secondaryButtonIcon: Icons.fact_check_outlined,
       onSecondary: hasFeedback ? () => unawaited(_showWritingFeedback()) : null,
@@ -1747,6 +1810,9 @@ class _JourneyScreenState extends State<JourneyScreen>
       title: '旅程回忆',
       keyboardAdaptive: true,
       keyboardFocusNode: memoryFocusNode,
+      onBack: _isSummerPalacePilot
+          ? () => setState(() => _pilotMemoryVisible = false)
+          : null,
       buttonText: '结束旅程',
       buttonIcon: Icons.flag_rounded,
       onNext: () => unawaited(_finishJourney()),
