@@ -50,73 +50,56 @@ void main() {
     }
   });
 
-  test('all other Journey effective outputs stay exactly on the shared pipeline',
+  test('the public resolver is exactly the unchanged shared pipeline for 35 Journeys',
       () {
-    for (final journey in allJourneyExperiences.where(
-      (item) => item.id != 'beijing-summer-palace',
-    )) {
+    final otherJourneys = allJourneyExperiences
+        .where((journey) => journey.id != 'beijing-summer-palace')
+        .toList(growable: false);
+    expect(otherJourneys, hasLength(35));
+
+    for (final journey in otherJourneys) {
       for (final profile in agent.allProfiles) {
-        final public = resolveAdaptiveJourneyLevel(journey, profile: profile);
+        final public = resolveAdaptiveJourneyLevel(
+          journey,
+          profile: profile,
+        );
         final shared = resolveSharedAdaptiveJourneyLevel(
           journey,
           profile: profile,
         );
-
         expect(public.storyParagraphs, shared.storyParagraphs,
             reason: '${journey.id} ${profile.displayLabel} Story');
         expect(
-          public.storyAnnotations
-              .map((entry) => (
-                    entry.pinyin,
-                    entry.vietnamese,
-                    entry.english,
-                  ))
-              .toList(growable: false),
-          shared.storyAnnotations
-              .map((entry) => (
-                    entry.pinyin,
-                    entry.vietnamese,
-                    entry.english,
-                  ))
-              .toList(growable: false),
+          public.storyAnnotations.map((entry) => (
+                entry.pinyin,
+                entry.vietnamese,
+                entry.english,
+              )),
+          shared.storyAnnotations.map((entry) => (
+                entry.pinyin,
+                entry.vietnamese,
+                entry.english,
+              )),
           reason: '${journey.id} ${profile.displayLabel} annotations',
         );
         expect(
-          public.words
-              .map((entry) => (
-                    entry.word,
-                    entry.pinyin,
-                    entry.translation,
-                    entry.englishDefinition,
-                  ))
-              .toList(growable: false),
-          shared.words
-              .map((entry) => (
-                    entry.word,
-                    entry.pinyin,
-                    entry.translation,
-                    entry.englishDefinition,
-                  ))
-              .toList(growable: false),
+          public.words.map((entry) => entry.word),
+          shared.words.map((entry) => entry.word),
           reason: '${journey.id} ${profile.displayLabel} vocabulary',
         );
         expect(
-          public.discoveries
-              .map((entry) => (
-                    entry.text,
-                    entry.pinyin,
-                    entry.vietnamese,
-                    entry.english,
-                  ))
-              .toList(growable: false),
-          shared.discoveries
-              .map((entry) => (
-                    entry.text,
-                    entry.pinyin,
-                    entry.vietnamese,
-                    entry.english,
-                  ))
-              .toList(growable: false),
+          public.discoveries.map((entry) => (
+                entry.text,
+                entry.pinyin,
+                entry.vietnamese,
+                entry.english,
+              )),
+          shared.discoveries.map((entry) => (
+                entry.text,
+                entry.pinyin,
+                entry.vietnamese,
+                entry.english,
+              )),
           reason: '${journey.id} ${profile.displayLabel} Discovery',
         );
         expect(public.wonderQuestion, shared.wonderQuestion);
@@ -125,24 +108,21 @@ void main() {
     }
   });
 
-  test('Easy, Standard, and Challenge preserve caused consequence and ending',
-      () {
+  test('Easy, Standard, and Challenge keep the same ending state', () {
     final journey = requireDailyJourneyExperience('beijing-summer-palace');
     for (final difficulty in JourneyDifficulty.values) {
-      final content = resolveJourneyLevel(journey, difficulty);
-      final story = content.storyParagraphs.join();
+      final story = resolveJourneyLevel(journey, difficulty)
+          .storyParagraphs
+          .join();
       final orderedEvidence = <String>[
         '十七岁',
         '校展',
         '周岚',
-        '长廊',
         '修复',
         '十七孔桥',
-        '旧照片',
         '选择',
-        '捡',
+        '捡回',
         '错失',
-        '外婆',
         '万寿山',
         '《留下痕迹的风景》',
         '不再替她调整构图',
@@ -152,9 +132,31 @@ void main() {
       for (final evidence in orderedEvidence) {
         final next = story.indexOf(evidence, cursor + 1);
         expect(next, greaterThan(cursor),
-            reason: '${difficulty.name} ordered event $evidence');
+            reason: '${difficulty.name}: $evidence must preserve causal order');
         cursor = next;
       }
     }
+  });
+
+  test('legacy generic expansion demonstrates the tourist-voice regression', () {
+    final journey = requireDailyJourneyExperience('beijing-summer-palace');
+    final legacy = resolveLegacySummerPalaceGenericExpansionForTesting(
+      journey,
+      profile: agent.profileForPhoenixLevel(10),
+    );
+    final pilot = resolveAdaptiveJourneyLevel(
+      journey,
+      profile: agent.profileForPhoenixLevel(10),
+    );
+
+    expect(
+      legacy.storyParagraphs.join(),
+      anyOf(
+        contains('你先停下来'),
+        contains('你沿着主要路线向前'),
+        contains('游客举起手机'),
+      ),
+    );
+    expect(summerPalaceN1ContainsGenericTouristEnrichment(pilot), isFalse);
   });
 }

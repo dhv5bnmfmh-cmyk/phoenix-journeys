@@ -68,12 +68,40 @@ JourneyLevelContent resolveSharedAdaptiveJourneyLevel(
   );
 }
 
+/// Reconstructs the pre-remediation generic path for regression evidence.
+/// Production never calls this helper. It proves why Pilot N1 must remain
+/// isolated from shared tourist enrichment.
+JourneyLevelContent resolveLegacySummerPalaceGenericExpansionForTesting(
+  DailyJourneyExperience experience, {
+  required ChineseProficiencyProfile profile,
+  Set<String> knownWords = const <String>{},
+}) {
+  final content = buildAdaptiveLevelForJourney(
+    experience,
+    profile: profile,
+    knownWords: knownWords,
+  );
+  final refined = refineAdaptiveNarrativeQuality(
+    experience,
+    content,
+    profile: profile,
+  );
+  return expandJourneyStoryToTarget(
+    experience,
+    refined,
+    profile: profile,
+  );
+}
+
 JourneyLevelContent _resolveSummerPalaceN1Level({
   required ChineseProficiencyProfile profile,
   required Set<String> knownWords,
 }) {
   final level = profile.phoenixLevel ?? _legacySummerPalaceLevel(profile.band);
-  final base = summerPalaceN1LevelForPhoenixLevel(level);
+  final base = summerPalaceN1LevelForPhoenixLevel(level).withReadingLimit(
+    paragraphCount: level <= 2 ? 1 : 2,
+    discoveryCount: _summerPalaceN1DiscoveryCount(profile.band),
+  );
   final context = <String>[
     ...base.storyParagraphs,
     ...base.discoveries.map((entry) => entry.text),
@@ -97,6 +125,15 @@ JourneyLevelContent _resolveSummerPalaceN1Level({
     expressQuestion: base.expressQuestion,
   );
 }
+
+int _summerPalaceN1DiscoveryCount(PhoenixReadingBand band) => switch (band) {
+      PhoenixReadingBand.beginner => 1,
+      PhoenixReadingBand.elementary ||
+      PhoenixReadingBand.intermediate => 2,
+      PhoenixReadingBand.upperIntermediate ||
+      PhoenixReadingBand.advanced ||
+      PhoenixReadingBand.mastery => 2,
+    };
 
 int _legacySummerPalaceLevel(PhoenixReadingBand band) => switch (band) {
       PhoenixReadingBand.beginner => 1,
