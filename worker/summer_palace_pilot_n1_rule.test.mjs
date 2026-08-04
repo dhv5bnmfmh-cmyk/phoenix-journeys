@@ -103,8 +103,8 @@ test('Pilot matrix separates automated and human literary evidence', () => {
   requireAll(
     matrix,
     [
-      'Governance Phase ID: `PILOT_N1`',
-      'Primary Finding: `PROTAGONIST_IDENTITY_MISSING`',
+      '**Governance Phase ID:** `PILOT_N1`',
+      '**Primary Finding:** `PROTAGONIST_IDENTITY_MISSING`',
       'Story Function Contract',
       'Discovery Function Contract',
       'Automated Structural Result',
