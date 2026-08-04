@@ -1,152 +1,330 @@
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
+import 'summer_palace_journey.dart';
 
-const summerPalaceBeginnerLevel = JourneyLevelContent(
-  storyParagraphs: <String>[
-    '许澄要拍一张完美的颐和园照片。外婆周岚以前修复过长廊彩画。外婆让她看裂痕，许澄却只想拍没有缺点的风景。',
-    '十七孔桥前，旧照片被风吹落。许澄没有追着阳光拍山水，而是先捡照片，把外婆的手、旧照片和远山一起拍下。她明白修复不是把过去擦掉。',
-  ],
-  storyAnnotations: <ReadingAnnotation>[
-    ReadingAnnotation(
-      pinyin:
-          'Xǔ Chéng yào pāi yì zhāng wánměi de Yíhéyuán zhàopiàn. Wàipó Zhōu Lán yǐqián xiūfù guò Chángláng cǎihuà. Wàipó ràng tā kàn lièhén, Xǔ Chéng què zhǐ xiǎng pāi méiyǒu quēdiǎn de fēngjǐng.',
-      vietnamese:
-          'Hứa Trừng muốn chụp một bức ảnh Di Hòa Viên hoàn hảo. Bà ngoại Chu Lam từng phục hồi tranh màu ở Trường Lang. Bà muốn cô nhìn các vết nứt, nhưng Hứa Trừng chỉ muốn một phong cảnh không có khuyết điểm.',
-      english:
-          'Xu Cheng wants a perfect Summer Palace photograph. Her grandmother Zhou Lan once restored paintings in the Long Corridor. Zhou Lan asks her to notice the cracks, but Xu Cheng wants a view without flaws.',
-    ),
-    ReadingAnnotation(
-      pinyin:
-          'Shíqīkǒng Qiáo qián, jiù zhàopiàn bèi fēng chuīluò. Xǔ Chéng méiyǒu zhuīzhe yángguāng pāi shānshuǐ, ér shì xiān jiǎn zhàopiàn, bǎ wàipó de shǒu, jiù zhàopiàn hé yuǎnshān yìqǐ pāi xià. Tā míngbai xiūfù bú shì bǎ guòqù cādiào.',
-      vietnamese:
-          'Trước cầu Thập Thất Khổng, bức ảnh cũ bị gió thổi rơi. Hứa Trừng không chạy theo ánh sáng để chụp núi hồ mà nhặt ảnh trước, rồi chụp bàn tay bà, tấm ảnh cũ và núi xa trong cùng một khung hình. Cô hiểu phục hồi không phải xóa quá khứ.',
-      english:
-          'At the Seventeen-Arch Bridge, an old photograph falls in the wind. Xu Cheng stops chasing the light, retrieves it, and frames her grandmother’s hand, the old photograph, and the distant hill together. She understands that restoration does not erase the past.',
-    ),
-  ],
-  words: <WordEntry>[],
-  discoveries: <DiscoveryEntry>[
-    DiscoveryEntry(
-      text: '长廊的柱子会一会儿挡住远山，一会儿让湖面重新出现。这种边走边变化的画面，是颐和园安排视线的方法。',
-      pinyin:
-          'Chángláng de zhùzi huì yíhuìr dǎngzhù yuǎnshān, yíhuìr ràng húmiàn chóngxīn chūxiàn. Zhè zhǒng biān zǒu biān biànhuà de huàmiàn, shì Yíhéyuán ānpái shìxiàn de fāngfǎ.',
-      simpleChinese: '长廊用柱子和开口让风景随着脚步变化。',
-      vietnamese:
-          'Các cột Trường Lang lúc che núi xa, lúc lại mở ra mặt hồ. Cảnh thay đổi theo bước chân là một cách Di Hòa Viên tổ chức tầm nhìn.',
-      english:
-          'The Long Corridor columns alternately hide the distant hills and reopen the lake. This changing view is how the garden organizes sightlines through movement.',
-    ),
-    DiscoveryEntry(
-      text: '颐和园经历过破坏和重建。修复会保留能保存的旧材料，也会记录后来补上的部分，让人读出时间留下的痕迹。',
-      pinyin:
-          'Yíhéyuán jīnglì guò pòhuài hé chóngjiàn. Xiūfù huì bǎoliú néng bǎocún de jiù cáiliào, yě huì jìlù hòulái bǔshàng de bùfen, ràng rén dúchū shíjiān liúxià de hénjì.',
-      simpleChinese: '修复既保护旧材料，也记录后来补上的部分。',
-      vietnamese:
-          'Di Hòa Viên từng bị phá hủy và tái thiết. Việc phục hồi giữ lại vật liệu cũ có thể bảo tồn và ghi chép phần được bổ sung sau này.',
-      english:
-          'The Summer Palace experienced destruction and rebuilding. Restoration preserves surviving material and records later additions so traces of time remain readable.',
-    ),
-  ],
-  wonderQuestion: '许澄为什么最后没有拍那张“完美”的照片？',
-  expressQuestion: '请用一到两句话写出许澄最后拍进照片里的三样东西。',
-);
+enum SummerPalaceN1EventId {
+  protagonist,
+  schoolExhibitionGoal,
+  independenceMotive,
+  grandmotherConservationBackground,
+  valuesConflict,
+  photographFalls,
+  forcedChoice,
+  enactedChoice,
+  lostLight,
+  threeLayerComposition,
+  workTitle,
+  trustChange,
+  photographEntrusted,
+  changedUnderstanding,
+}
 
-const summerPalaceElementaryLevel = JourneyLevelContent(
-  storyParagraphs: <String>[
-    '十七岁的许澄带着相机来到颐和园，她要为校展拍一张没有缺点的风景。外婆周岚年轻时修复过长廊彩画，却总让她观察褪色、裂纹和补绘。许澄不耐烦，只想等雾散以后，把昆明湖、万寿山和佛香阁清楚地拍在一起。走进长廊后，外婆请她看廊柱怎样先遮住远山，又从下一个开口把湖面送回来。许澄第一次明白，借景不是把所有东西塞进镜头，而是决定什么出现、什么退后。',
-    '十七孔桥前，阳光终于出现，外婆手中的旧照片却被风吹落。照片里是修复前的长廊和年轻的外婆。许澄必须选择追着阳光拍标准风景，还是先捡回照片。她放下原来的构图，把外婆扶栏的手、旧照片和桥孔后的万寿山放进同一个画面。阳光错过了，照片却留下修复者与园林的关系。她把作品改名为《留下痕迹的风景》，也明白修复不是假装损伤从未发生。',
-  ],
-  storyAnnotations: <ReadingAnnotation>[
-    ReadingAnnotation(
-      pinyin:
-          'Shíqī suì de Xǔ Chéng dàizhe xiàngjī láidào Yíhéyuán, tā yào wèi xiàozhǎn pāi yì zhāng méiyǒu quēdiǎn de fēngjǐng. Wàipó Zhōu Lán niánqīng shí xiūfù guò Chángláng cǎihuà, què zǒng ràng tā guānchá tuìsè, lièwén hé bǔhuì. Zǒujìn Chángláng hòu, wàipó qǐng tā kàn lángzhù zěnyàng xiān zhēzhù yuǎnshān, yòu cóng xià yí gè kāikǒu bǎ húmiàn sòng huílai.',
-      vietnamese:
-          'Hứa Trừng mười bảy tuổi mang máy ảnh đến Di Hòa Viên để chụp một phong cảnh không khuyết điểm cho triển lãm trường. Bà ngoại Chu Lam từng phục hồi tranh màu Trường Lang, nhưng luôn yêu cầu cô quan sát màu phai, vết nứt và phần vẽ bổ sung. Trong hành lang, bà chỉ cho cô cách cột che núi xa rồi mở mặt hồ ở khung kế tiếp.',
-      english:
-          'Seventeen-year-old Xu Cheng comes to the Summer Palace to photograph a flawless landscape for a school exhibition. Her grandmother Zhou Lan once restored Long Corridor paintings and keeps asking her to notice faded pigment, cracks, and retouching. Inside the corridor, Zhou Lan shows how columns hide the distant hill and return the lake through the next opening.',
-    ),
-    ReadingAnnotation(
-      pinyin:
-          'Shíqīkǒng Qiáo qián, yángguāng zhōngyú chūxiàn, wàipó shǒu zhōng de jiù zhàopiàn què bèi fēng chuīluò. Xǔ Chéng bìxū xuǎnzé zhuīzhe yángguāng pāi biāozhǔn fēngjǐng, háishi xiān jiǎn huí zhàopiàn. Tā bǎ wàipó fúlán de shǒu, jiù zhàopiàn hé qiáokǒng hòu de Wànshòu Shān fàng jìn tóng yí gè huàmiàn. Tā míngbai xiūfù bú shì jiǎzhuāng sǔnshāng cóngwèi fāshēng.',
-      vietnamese:
-          'Trước cầu Thập Thất Khổng, nắng vừa xuất hiện thì bức ảnh cũ trong tay bà bị gió thổi rơi. Hứa Trừng phải chọn chạy theo ánh sáng hay nhặt ảnh trước. Cô đưa bàn tay bà trên lan can, tấm ảnh cũ và núi Vạn Thọ sau vòm cầu vào cùng một khung hình, rồi hiểu rằng phục hồi không phải giả vờ tổn hại chưa từng xảy ra.',
-      english:
-          'At the Seventeen-Arch Bridge, sunlight finally appears just as the old photograph falls from Zhou Lan’s hand. Xu Cheng must choose between chasing the standard view and retrieving the photograph. She frames her grandmother’s hand, the old image, and Longevity Hill beyond the arches, understanding that restoration does not pretend damage never happened.',
-    ),
-  ],
-  words: <WordEntry>[],
-  discoveries: <DiscoveryEntry>[
-    DiscoveryEntry(
-      text: '万寿山和昆明湖构成颐和园的山水骨架。长廊、桥梁和亭台通过方向、距离与开口安排视线，让人在移动时不断看到新的前景、中景和远景。',
-      pinyin:
-          'Wànshòu Shān hé Kūnmíng Hú gòuchéng Yíhéyuán de shānshuǐ gǔjià. Chángláng, qiáoliáng hé tíngtái tōngguò fāngxiàng, jùlí yǔ kāikǒu ānpái shìxiàn, ràng rén zài yídòng shí bùduàn kàndào xīn de qiánjǐng, zhōngjǐng hé yuǎnjǐng.',
-      simpleChinese: '山、湖、长廊和桥一起安排人的观看路线。',
-      vietnamese:
-          'Núi Vạn Thọ và hồ Côn Minh tạo bộ khung cảnh quan. Hành lang, cầu và đình sắp xếp tầm nhìn bằng hướng, khoảng cách và các khoảng mở.',
-      english:
-          'Longevity Hill and Kunming Lake form the landscape framework. Corridors, bridges, and pavilions arrange sightlines through direction, distance, and openings.',
-    ),
-    DiscoveryEntry(
-      text: '颐和园在一八六〇年受到严重破坏，后来在原有基础上重建。修复需要保留旧材料、加固损坏部分并记录补修内容，因此历史痕迹也是遗产的一部分。',
-      pinyin:
-          'Yíhéyuán zài yī bā liù líng nián shòudào yánzhòng pòhuài, hòulái zài yuányǒu jīchǔ shàng chóngjiàn. Xiūfù xūyào bǎoliú jiù cáiliào, jiāgù sǔnhuài bùfen bìng jìlù bǔxiū nèiróng, yīncǐ lìshǐ hénjì yě shì yíchǎn de yí bùfen.',
-      simpleChinese: '修复会保护旧材料，也会记录历史损伤和后来补修。',
-      vietnamese:
-          'Di Hòa Viên bị phá hủy nặng năm 1860 rồi được tái thiết. Phục hồi phải giữ vật liệu cũ, gia cố phần hư hại và ghi lại phần bổ sung.',
-      english:
-          'The Summer Palace was severely damaged in 1860 and later rebuilt. Restoration preserves old material, reinforces damage, and records later repairs.',
-    ),
-  ],
-  wonderQuestion: '许澄的选择怎样改变了她对外婆的理解？',
-  expressQuestion: '请用两到三句话说明旧照片为什么比“完美阳光”更重要。',
-);
+class SummerPalaceN1SemanticEvent {
+  const SummerPalaceN1SemanticEvent({
+    required this.id,
+    required this.coreChinese,
+    required this.corePinyin,
+    required this.coreVietnamese,
+    required this.coreEnglish,
+    required this.detailChinese,
+    required this.detailPinyin,
+    required this.detailVietnamese,
+    required this.detailEnglish,
+    required this.detailFromLevel,
+  });
 
-const summerPalaceIntermediateLevel = JourneyLevelContent(
-  storyParagraphs: <String>[
-    '校展截稿前一天，十七岁的许澄带着相机来到颐和园，想拍一张“没有缺点的皇家园林”，证明自己不需要外婆周岚指导。周岚年轻时参与过长廊彩画修复，如今视力衰退，却坚持陪她重走旧路线。许澄嫌外婆总把镜头停在褪色、裂纹和补绘处，只想等昆明湖上的雾散去，拍到万寿山、佛香阁和长廊同时清晰的画面。长廊里，周岚让她观察廊柱怎样遮住远山，又怎样从下一个开口把湖面送回来。许澄发现，借景不是把全部美景塞进镜头，而是选择什么出现、什么暂时退后，可她仍认定校展只接受无瑕的作品。',
-    '十七孔桥前，阳光终于穿过云层，周岚手中的旧照片却被风吹落。照片记录着修复前的长廊，也留下年轻的周岚与已故老师。许澄必须选择追着光线拍标准风景，还是先捡回照片。她放下原构图，退到桥侧，让斑驳纸角、外婆扶栏的手与桥孔后的万寿山形成三层对景。阳光偏移后，明信片式画面消失，照片却留下修复者与园林的关系。她把作品改名为《留下痕迹的风景》，在说明中写道：修复不是把损伤假装不存在，而是让后来的人仍能读到失去、选择与守护。周岚没有再替她调整构图，只把旧照片交给她保存。',
-  ],
-  storyAnnotations: <ReadingAnnotation>[
-    ReadingAnnotation(
-      pinyin:
-          'Xiàozhǎn jiégǎo qián yì tiān, shíqī suì de Xǔ Chéng dàizhe xiàngjī láidào Yíhéyuán, xiǎng pāi yì zhāng méiyǒu quēdiǎn de huángjiā yuánlín. Wàipó Zhōu Lán niánqīng shí cānyù guò Chángláng cǎihuà xiūfù, rújīn shìlì shuāituì, què jiānchí péi tā chóngzǒu jiù lùxiàn. Chángláng lǐ, Zhōu Lán ràng tā guānchá lángzhù zěnyàng zhēzhù yuǎnshān, yòu zěnyàng cóng xià yí gè kāikǒu bǎ húmiàn sòng huílai.',
-      vietnamese:
-          'Một ngày trước hạn triển lãm, Hứa Trừng mười bảy tuổi đến Di Hòa Viên để chụp một khu vườn hoàng gia “không khuyết điểm”, chứng minh mình không cần bà ngoại Chu Lam hướng dẫn. Chu Lam từng tham gia phục hồi tranh màu Trường Lang, nay thị lực suy giảm nhưng vẫn đi lại tuyến đường cũ cùng cháu. Trong hành lang, bà chỉ cách cột che núi xa rồi đưa mặt hồ trở lại ở khoảng mở kế tiếp.',
-      english:
-          'A day before the school exhibition deadline, seventeen-year-old Xu Cheng comes to the Summer Palace to photograph a “flawless imperial garden” and prove she needs no guidance from her grandmother Zhou Lan. Zhou Lan once restored Long Corridor paintings and, despite failing eyesight, retraces the old route with her. She shows Xu Cheng how columns conceal the distant hill and return the lake through the next opening.',
-    ),
-    ReadingAnnotation(
-      pinyin:
-          'Shíqīkǒng Qiáo qián, yángguāng zhōngyú chuānguò yúncéng, Zhōu Lán shǒu zhōng de jiù zhàopiàn què bèi fēng chuīluò. Xǔ Chéng bìxū xuǎnzé zhuīzhe guāngxiàn pāi biāozhǔn fēngjǐng, háishi xiān jiǎn huí zhàopiàn. Tā ràng bānbó zhǐjiǎo, wàipó fúlán de shǒu yǔ qiáokǒng hòu de Wànshòu Shān xíngchéng sān céng duìjǐng. Tā míngbai xiūfù bú shì bǎ sǔnshāng jiǎzhuāng bù cúnzài, ér shì ràng hòulái de rén réng néng dúdào shīqù, xuǎnzé yǔ shǒuhù.',
-      vietnamese:
-          'Trước cầu Thập Thất Khổng, nắng vừa xuyên mây thì bức ảnh cũ của Chu Lam bị gió cuốn rơi. Hứa Trừng phải chọn chạy theo ánh sáng hay nhặt ảnh trước. Cô tạo ba lớp đối cảnh bằng góc giấy cũ, bàn tay bà trên lan can và núi Vạn Thọ sau vòm cầu. Cô hiểu phục hồi không che giấu tổn hại mà giúp người sau đọc được mất mát, lựa chọn và sự gìn giữ.',
-      english:
-          'At the Seventeen-Arch Bridge, sunlight breaks through just as Zhou Lan’s old photograph falls. Xu Cheng must choose between chasing the standard view and retrieving it. She composes three layers: the worn photograph, her grandmother’s hand, and Longevity Hill beyond the arches. She understands restoration as preserving readable loss, choice, and care rather than denying damage.',
-    ),
-  ],
-  words: <WordEntry>[],
-  discoveries: <DiscoveryEntry>[
-    DiscoveryEntry(
-      text: '颐和园以万寿山和昆明湖建立山水骨架，再通过长廊、亭台、桥梁与岛屿安排人的观看次序。借景利用方向、比例、前景和路线把远处景物纳入当前画面；对景则在特定位置设置明确的视觉目标。',
-      pinyin:
-          'Yíhéyuán yǐ Wànshòu Shān hé Kūnmíng Hú jiànlì shānshuǐ gǔjià, zài tōngguò Chángláng, tíngtái, qiáoliáng yǔ dǎoyǔ ānpái rén de guānkàn cìxù. Jièjǐng lìyòng fāngxiàng, bǐlì, qiánjǐng hé lùxiàn bǎ yuǎnchù jǐngwù nàrù dāngqián huàmiàn; duìjǐng zé zài tèdìng wèizhì shèzhì míngquè de shìjué mùbiāo.',
-      simpleChinese: '借景把远处景物带进当前画面，对景让视线有明确目标。',
-      vietnamese:
-          'Di Hòa Viên dùng núi Vạn Thọ và hồ Côn Minh làm khung cảnh quan, rồi tổ chức thứ tự quan sát bằng hành lang, đình, cầu và đảo. Mượn cảnh đưa cảnh xa vào khung hiện tại; đối cảnh tạo mục tiêu thị giác rõ ràng.',
-      english:
-          'The garden uses Longevity Hill and Kunming Lake as a framework, then orders viewing through corridors, pavilions, bridges, and islands. Borrowed scenery incorporates distant elements, while opposite views establish a clear visual target.',
-    ),
-    DiscoveryEntry(
-      text: '颐和园在一八六〇年受到严重破坏，并于一八八六年在原有基础上重建。修复需要判断旧材料、加固部分和后补内容，保存记录使后来的人能够区分原作与修复。历史痕迹因此不是自动要被消除的缺点。',
-      pinyin:
-          'Yíhéyuán zài yī bā liù líng nián shòudào yánzhòng pòhuài, bìng yú yī bā bā liù nián zài yuányǒu jīchǔ shàng chóngjiàn. Xiūfù xūyào pànduàn jiù cáiliào, jiāgù bùfen hé hòubǔ nèiróng, bǎocún jìlù shǐ hòulái de rén nénggòu qūfēn yuánzuò yǔ xiūfù.',
-      simpleChinese: '修复要保护旧材料、加固损坏处并记录后来补上的内容。',
-      vietnamese:
-          'Di Hòa Viên bị phá hủy nặng năm 1860 và được tái thiết năm 1886. Phục hồi phải phân biệt vật liệu cũ, phần gia cố và phần bổ sung, đồng thời lưu hồ sơ để người sau nhận biết.',
-      english:
-          'The Summer Palace was severely damaged in 1860 and rebuilt in 1886. Restoration distinguishes surviving material, reinforcement, and later additions, preserving records so future viewers can tell them apart.',
-    ),
-  ],
-  wonderQuestion: '许澄的镜头为什么必须在“完美风景”和“可阅读的痕迹”之间作出选择？',
-  expressQuestion: '请用三到五句话说明许澄怎样利用前景、中景和远景表达她与外婆的关系。',
-);
+  final SummerPalaceN1EventId id;
+  final String coreChinese;
+  final String corePinyin;
+  final String coreVietnamese;
+  final String coreEnglish;
+  final String detailChinese;
+  final String detailPinyin;
+  final String detailVietnamese;
+  final String detailEnglish;
+  final int detailFromLevel;
+}
+
+const summerPalaceN1RequiredEventOrder = <SummerPalaceN1EventId>[
+  SummerPalaceN1EventId.protagonist,
+  SummerPalaceN1EventId.schoolExhibitionGoal,
+  SummerPalaceN1EventId.independenceMotive,
+  SummerPalaceN1EventId.grandmotherConservationBackground,
+  SummerPalaceN1EventId.valuesConflict,
+  SummerPalaceN1EventId.photographFalls,
+  SummerPalaceN1EventId.forcedChoice,
+  SummerPalaceN1EventId.enactedChoice,
+  SummerPalaceN1EventId.lostLight,
+  SummerPalaceN1EventId.threeLayerComposition,
+  SummerPalaceN1EventId.workTitle,
+  SummerPalaceN1EventId.trustChange,
+  SummerPalaceN1EventId.photographEntrusted,
+  SummerPalaceN1EventId.changedUnderstanding,
+];
+
+const summerPalaceN1SemanticEvents = <SummerPalaceN1SemanticEvent>[
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.protagonist,
+    coreChinese: '十七岁的学生摄影者许澄来到颐和园。',
+    corePinyin: 'Shíqī suì de xuéshēng shèyǐngzhě Xǔ Chéng láidào Yíhéyuán.',
+    coreVietnamese: 'Hứa Trừng, một nữ sinh nhiếp ảnh mười bảy tuổi, đến Di Hòa Viên.',
+    coreEnglish: 'Seventeen-year-old student photographer Xu Cheng arrives at the Summer Palace.',
+    detailChinese: '校展截稿只剩一天，她背着相机沿外婆熟悉的旧路线前行。',
+    detailPinyin: 'Xiàozhǎn jiégǎo zhǐ shèng yì tiān, tā bēizhe xiàngjī yán wàipó shúxī de jiù lùxiàn qiánxíng.',
+    detailVietnamese: 'Chỉ còn một ngày trước hạn triển lãm, cô mang máy ảnh đi theo tuyến đường cũ mà bà ngoại quen thuộc.',
+    detailEnglish: 'With one day left before the exhibition deadline, she carries her camera along the old route her grandmother knows.',
+    detailFromLevel: 3,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.schoolExhibitionGoal,
+    coreChinese: '她要为校展拍照。',
+    corePinyin: 'Tā yào wèi xiàozhǎn pāizhào.',
+    coreVietnamese: 'Cô phải chụp một tác phẩm cho triển lãm trường.',
+    coreEnglish: 'She must make a photograph for the school exhibition.',
+    detailChinese: '她想交出一张完整、明亮、看不见缺点的皇家园林作品。',
+    detailPinyin: 'Tā xiǎng jiāochū yì zhāng wánzhěng, míngliàng, kàn bú jiàn quēdiǎn de huángjiā yuánlín zuòpǐn.',
+    detailVietnamese: 'Cô muốn nộp một bức ảnh vườn hoàng gia hoàn chỉnh, sáng rõ và không thấy khuyết điểm.',
+    detailEnglish: 'She wants to submit a complete, bright imperial-garden image with no visible flaws.',
+    detailFromLevel: 5,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.independenceMotive,
+    coreChinese: '她想证明不需要外婆周岚指导。',
+    corePinyin: 'Tā xiǎng zhèngmíng bù xūyào wàipó Zhōu Lán zhǐdǎo.',
+    coreVietnamese: 'Cô muốn chứng minh mình không cần bà ngoại Chu Lam hướng dẫn.',
+    coreEnglish: 'She wants to prove she no longer needs guidance from her grandmother Zhou Lan.',
+    detailChinese: '对她来说，“无瑕”不只是审美，也是摆脱外婆意见的证明。',
+    detailPinyin: 'Duì tā láishuō, wúxiá bù zhǐ shì shěnměi, yě shì bǎituō wàipó yìjiàn de zhèngmíng.',
+    detailVietnamese: 'Với cô, “không tì vết” không chỉ là thẩm mỹ mà còn là bằng chứng thoát khỏi ý kiến của bà.',
+    detailEnglish: 'For her, flawlessness is not only an aesthetic but proof that she can work without her grandmother’s judgment.',
+    detailFromLevel: 6,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.grandmotherConservationBackground,
+    coreChinese: '周岚曾保护长廊彩画。',
+    corePinyin: 'Zhōu Lán céng bǎohù Chángláng cǎihuà.',
+    coreVietnamese: 'Chu Lam từng bảo tồn tranh màu ở Trường Lang.',
+    coreEnglish: 'Zhou Lan once conserved the painted decoration of the Long Corridor.',
+    detailChinese: '她年轻时参与修复，如今视力衰退，仍记得褪色、裂纹和补绘的位置。',
+    detailPinyin: 'Tā niánqīng shí cānyù xiūfù, rújīn shìlì shuāituì, réng jìde tuìsè, lièwén hé bǔhuì de wèizhì.',
+    detailVietnamese: 'Bà từng tham gia phục hồi; dù thị lực suy giảm, bà vẫn nhớ vị trí màu phai, vết nứt và phần vẽ bổ sung.',
+    detailEnglish: 'She took part in restoration and, despite failing eyesight, remembers the faded pigment, cracks, and retouching.',
+    detailFromLevel: 5,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.valuesConflict,
+    coreChinese: '许澄要无瑕画面，周岚要她看修复痕迹。',
+    corePinyin: 'Xǔ Chéng yào wúxiá huàmiàn, Zhōu Lán yào tā kàn xiūfù hénjì.',
+    coreVietnamese: 'Hứa Trừng muốn khung hình không tì vết, còn Chu Lam muốn cô nhìn dấu vết phục hồi.',
+    coreEnglish: 'Xu Cheng wants a flawless image, while Zhou Lan asks her to see restoration traces.',
+    detailChinese: '长廊里，外婆让她观察廊柱怎样遮住远山，又从下一个开口送回湖面；许澄却坚持把旧伤排除在镜头外。',
+    detailPinyin: 'Chángláng lǐ, wàipó ràng tā guānchá lángzhù zěnyàng zhēzhù yuǎnshān, yòu cóng xià yí gè kāikǒu sòng huí húmiàn; Xǔ Chéng què jiānchí bǎ jiùshāng páichú zài jìngtóu wài.',
+    detailVietnamese: 'Trong Trường Lang, bà bảo cô quan sát cột che núi xa rồi mở lại mặt hồ ở khoảng tiếp theo; Hứa Trừng vẫn muốn loại các vết thương cũ khỏi ống kính.',
+    detailEnglish: 'In the Long Corridor, Zhou Lan shows how columns hide the hill and return the lake at the next opening, but Xu Cheng insists on excluding old damage.',
+    detailFromLevel: 4,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.photographFalls,
+    coreChinese: '十七孔桥旁，最佳光线出现，旧照片也被风吹落。',
+    corePinyin: 'Shíqīkǒng Qiáo páng, zuìjiā guāngxiàn chūxiàn, jiù zhàopiàn yě bèi fēng chuīluò.',
+    coreVietnamese: 'Bên cầu Thập Thất Khổng, ánh sáng đẹp nhất xuất hiện đúng lúc bức ảnh cũ bị gió thổi rơi.',
+    coreEnglish: 'By the Seventeen-Arch Bridge, the best light arrives just as an old photograph falls in the wind.',
+    detailChinese: '照片里是修复前的长廊，裂开彩画旁站着年轻的周岚和已经去世的老师。',
+    detailPinyin: 'Zhàopiàn lǐ shì xiūfù qián de Chángláng, lièkāi cǎihuà páng zhànzhe niánqīng de Zhōu Lán hé yǐjīng qùshì de lǎoshī.',
+    detailVietnamese: 'Trong ảnh là Trường Lang trước phục hồi, với Chu Lam trẻ tuổi và người thầy đã mất đứng cạnh tranh màu nứt vỡ.',
+    detailEnglish: 'The photograph shows the corridor before restoration, with young Zhou Lan and her late teacher beside cracked paintings.',
+    detailFromLevel: 3,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.forcedChoice,
+    coreChinese: '她必须在追光和捡照片之间选择。',
+    corePinyin: 'Tā bìxū zài zhuīguāng hé jiǎn zhàopiàn zhījiān xuǎnzé.',
+    coreVietnamese: 'Cô phải chọn giữa đuổi theo ánh sáng và nhặt bức ảnh.',
+    coreEnglish: 'She must choose between chasing the light and retrieving the photograph.',
+    detailChinese: '两个动作不能同时完成：继续举起相机会保住标准风景，却可能让外婆的旧照片落入湖边。',
+    detailPinyin: 'Liǎng gè dòngzuò bùnéng tóngshí wánchéng: jìxù jǔqǐ xiàngjī huì bǎozhù biāozhǔn fēngjǐng, què kěnéng ràng wàipó de jiù zhàopiàn luòrù húbiān.',
+    detailVietnamese: 'Hai hành động không thể thực hiện cùng lúc: tiếp tục giơ máy sẽ giữ cảnh chuẩn nhưng có thể để ảnh cũ của bà rơi xuống mép hồ.',
+    detailEnglish: 'The actions are incompatible: keeping the camera raised preserves the standard view but risks losing her grandmother’s photograph.',
+    detailFromLevel: 7,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.enactedChoice,
+    coreChinese: '她放弃原构图，先捡回照片。',
+    corePinyin: 'Tā fàngqì yuán gòutú, xiān jiǎn huí zhàopiàn.',
+    coreVietnamese: 'Cô bỏ bố cục ban đầu và nhặt bức ảnh trước.',
+    coreEnglish: 'She abandons her original composition and retrieves the photograph first.',
+    detailChinese: '她放下相机，蹲身拾起斑驳纸角，再退到桥侧重新寻找位置。',
+    detailPinyin: 'Tā fàngxià xiàngjī, dūnshēn shíqǐ bānbó zhǐjiǎo, zài tuì dào qiáocè chóngxīn xúnzhǎo wèizhì.',
+    detailVietnamese: 'Cô hạ máy, cúi nhặt góc giấy sờn rồi lùi sang bên cầu để tìm lại vị trí.',
+    detailEnglish: 'She lowers the camera, crouches to lift the worn paper, and steps to the side of the bridge to find a new position.',
+    detailFromLevel: 5,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.lostLight,
+    coreChinese: '因此，她错失最佳光线。',
+    corePinyin: 'Yīncǐ, tā cuòshī zuìjiā guāngxiàn.',
+    coreVietnamese: 'Vì lựa chọn ấy, cô lỡ ánh sáng đẹp nhất.',
+    coreEnglish: 'Because of that choice, she loses the best light.',
+    detailChinese: '快门再次抬起时，阳光已经偏移，明信片式的湖山画面消失了。',
+    detailPinyin: 'Kuàimén zàicì táiqǐ shí, yángguāng yǐjīng piānyí, míngxìnpiàn shì de húshān huàmiàn xiāoshī le.',
+    detailVietnamese: 'Khi cô nâng máy trở lại, nắng đã lệch và khung hồ núi kiểu bưu thiếp biến mất.',
+    detailEnglish: 'When she raises the camera again, the sunlight has shifted and the postcard lake-and-hill view is gone.',
+    detailFromLevel: 2,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.threeLayerComposition,
+    coreChinese: '她重拍旧照、外婆的手和远处万寿山。',
+    corePinyin: 'Tā chóngpāi jiùzhào, wàipó de shǒu hé yuǎnchù Wànshòu Shān.',
+    coreVietnamese: 'Cô chụp lại bức ảnh cũ, bàn tay bà và núi Vạn Thọ phía xa.',
+    coreEnglish: 'She reframes the old photograph, her grandmother’s hand, and distant Longevity Hill.',
+    detailChinese: '近处斑驳纸角、中间扶栏的手和桥孔后的山形成三层对景，把修复者与被修复园林放进同一关系。',
+    detailPinyin: 'Jìnchù bānbó zhǐjiǎo, zhōngjiān fúlán de shǒu hé qiáokǒng hòu de shān xíngchéng sān céng duìjǐng, bǎ xiūfùzhě yǔ bèi xiūfù yuánlín fàng jìn tóng yí guānxì.',
+    detailVietnamese: 'Góc giấy sờn ở gần, bàn tay trên lan can ở giữa và ngọn núi sau vòm cầu tạo ba lớp đối cảnh, đặt người phục hồi và khu vườn trong cùng một quan hệ.',
+    detailEnglish: 'The worn paper in front, the hand on the railing in the middle, and the hill beyond the arches form three layers linking the restorer and garden.',
+    detailFromLevel: 4,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.workTitle,
+    coreChinese: '作品名为《留下痕迹的风景》。',
+    corePinyin: 'Zuòpǐn míng wéi “Liúxià Hénjì de Fēngjǐng”.',
+    coreVietnamese: 'Tác phẩm được đặt tên “Phong cảnh lưu lại dấu vết”.',
+    coreEnglish: 'The work is titled “A Landscape That Keeps Its Traces.”',
+    detailChinese: '这个名字拒绝把损毁伪装成从未发生，也让校展目标从“无瑕”转向“可阅读”。',
+    detailPinyin: 'Zhège míngzi jùjué bǎ sǔnhuǐ wěizhuāng chéng cóngwèi fāshēng, yě ràng xiàozhǎn mùbiāo cóng wúxiá zhuǎnxiàng kě yuèdú.',
+    detailVietnamese: 'Tên gọi từ chối giả vờ tổn hại chưa từng xảy ra và chuyển mục tiêu triển lãm từ “không tì vết” sang “có thể đọc được”.',
+    detailEnglish: 'The title refuses to pretend damage never happened and turns the exhibition goal from flawlessness toward readability.',
+    detailFromLevel: 8,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.trustChange,
+    coreChinese: '周岚不再替她调整构图。',
+    corePinyin: 'Zhōu Lán bù zài tì tā tiáozhěng gòutú.',
+    coreVietnamese: 'Chu Lam không còn chỉnh bố cục thay cô.',
+    coreEnglish: 'Zhou Lan no longer adjusts the composition for her.',
+    detailChinese: '她第一次用沉默承认许澄已经作出自己的摄影判断。',
+    detailPinyin: 'Tā dì yí cì yòng chénmò chéngrèn Xǔ Chéng yǐjīng zuòchū zìjǐ de shèyǐng pànduàn.',
+    detailVietnamese: 'Lần đầu tiên, sự im lặng của bà thừa nhận Hứa Trừng đã có phán đoán nhiếp ảnh của riêng mình.',
+    detailEnglish: 'For the first time, her silence acknowledges that Xu Cheng has made her own photographic judgment.',
+    detailFromLevel: 6,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.photographEntrusted,
+    coreChinese: '她把旧照片交给许澄保存。',
+    corePinyin: 'Tā bǎ jiù zhàopiàn jiāogěi Xǔ Chéng bǎocún.',
+    coreVietnamese: 'Bà giao bức ảnh cũ cho Hứa Trừng gìn giữ.',
+    coreEnglish: 'She entrusts the old photograph to Xu Cheng.',
+    detailChinese: '这份托付把外婆的修复记忆变成许澄今后要承担的责任。',
+    detailPinyin: 'Zhè fèn tuōfù bǎ wàipó de xiūfù jìyì biàn chéng Xǔ Chéng jīnhòu yào chéngdān de zérèn.',
+    detailVietnamese: 'Sự gửi gắm biến ký ức phục hồi của bà thành trách nhiệm Hứa Trừng phải mang về sau.',
+    detailEnglish: 'The trust turns her grandmother’s conservation memory into a responsibility Xu Cheng will carry.',
+    detailFromLevel: 7,
+  ),
+  SummerPalaceN1SemanticEvent(
+    id: SummerPalaceN1EventId.changedUnderstanding,
+    coreChinese: '许澄不再只想证明独立。',
+    corePinyin: 'Xǔ Chéng bù zài zhǐ xiǎng zhèngmíng dúlì.',
+    coreVietnamese: 'Hứa Trừng không còn chỉ muốn chứng minh sự độc lập.',
+    coreEnglish: 'Xu Cheng no longer seeks only to prove her independence.',
+    detailChinese: '她理解修复不是抹去痕迹，而是让失去、选择、守护与关系继续被后来的人读见。',
+    detailPinyin: 'Tā lǐjiě xiūfù bú shì mǒqù hénjì, ér shì ràng shīqù, xuǎnzé, shǒuhù yǔ guānxì jìxù bèi hòulái de rén dújiàn.',
+    detailVietnamese: 'Cô hiểu phục hồi không xóa dấu vết mà giúp người sau tiếp tục đọc được mất mát, lựa chọn, gìn giữ và quan hệ.',
+    detailEnglish: 'She understands that restoration does not erase traces; it keeps loss, choice, care, and relationship readable for later viewers.',
+    detailFromLevel: 2,
+  ),
+];
+
+List<SummerPalaceN1EventId> summerPalaceN1EventOrderForLevel(int level) =>
+    List<SummerPalaceN1EventId>.unmodifiable(
+      summerPalaceN1SemanticEvents.map((event) => event.id),
+    );
+
+JourneyLevelContent summerPalaceN1LevelForPhoenixLevel(int requestedLevel) {
+  final level = requestedLevel.clamp(1, 10).toInt();
+  final paragraphs = _paragraphEventRanges(level);
+  final storyParagraphs = <String>[];
+  final annotations = <ReadingAnnotation>[];
+
+  for (final range in paragraphs) {
+    final events = summerPalaceN1SemanticEvents.sublist(range.$1, range.$2);
+    storyParagraphs.add(events.map((event) => _eventChinese(event, level)).join());
+    annotations.add(
+      ReadingAnnotation(
+        pinyin: events.map((event) => _eventPinyin(event, level)).join(' '),
+        vietnamese: events.map((event) => _eventVietnamese(event, level)).join(' '),
+        english: events.map((event) => _eventEnglish(event, level)).join(' '),
+      ),
+    );
+  }
+
+  final discoveryCount = level <= 2 ? 1 : 2;
+  return JourneyLevelContent(
+    storyParagraphs: storyParagraphs,
+    storyAnnotations: annotations,
+    words: const <WordEntry>[],
+    discoveries: summerPalaceDiscoveries.take(discoveryCount).toList(growable: false),
+    wonderQuestion: level <= 3
+        ? '许澄的选择为什么让她错过光线，却得到外婆的信任？'
+        : '许澄怎样把“无瑕”的目标改成了对修复、时间与关系的判断？',
+    expressQuestion: level <= 3
+        ? '请按顺序写出旧照片掉落、许澄选择、错失光线和外婆托付四件事。'
+        : '请说明三层构图怎样连接许澄的选择、照片后果与周岚的信任。',
+  );
+}
+
+List<(int, int)> _paragraphEventRanges(int level) =>
+    level <= 2 ? const <(int, int)>[(0, 14)] : const <(int, int)>[(0, 7), (7, 14)];
+
+String _eventChinese(SummerPalaceN1SemanticEvent event, int level) =>
+    '${event.coreChinese}${level >= event.detailFromLevel ? event.detailChinese : ''}'
+    '${event.id == SummerPalaceN1EventId.changedUnderstanding ? _masteryChinese(level) : ''}';
+
+String _eventPinyin(SummerPalaceN1SemanticEvent event, int level) =>
+    '${event.corePinyin}${level >= event.detailFromLevel ? ' ${event.detailPinyin}' : ''}'
+    '${event.id == SummerPalaceN1EventId.changedUnderstanding ? _masteryPinyin(level) : ''}';
+
+String _eventVietnamese(SummerPalaceN1SemanticEvent event, int level) =>
+    '${event.coreVietnamese}${level >= event.detailFromLevel ? ' ${event.detailVietnamese}' : ''}'
+    '${event.id == SummerPalaceN1EventId.changedUnderstanding ? _masteryVietnamese(level) : ''}';
+
+String _eventEnglish(SummerPalaceN1SemanticEvent event, int level) =>
+    '${event.coreEnglish}${level >= event.detailFromLevel ? ' ${event.detailEnglish}' : ''}'
+    '${event.id == SummerPalaceN1EventId.changedUnderstanding ? _masteryEnglish(level) : ''}';
+
+String _masteryChinese(int level) {
+  if (level < 9) return '';
+  final analysis = ' 她也看见，所谓独立不是拒绝前人的经验，而是能够说明自己为何选择、愿意承担何种损失。';
+  if (level < 10) return analysis;
+  return '$analysis 她把园林保护理解为一种可追溯的责任：原作、损伤、补绘与修复者都不该被单一的“完美”遮蔽；摄影则必须公开自己的取舍，使观看者能够辨认时间如何进入画面。';
+}
+
+String _masteryPinyin(int level) {
+  if (level < 9) return '';
+  final analysis = ' Tā yě kànjiàn, suǒwèi dúlì bú shì jùjué qiánrén de jīngyàn, ér shì nénggòu shuōmíng zìjǐ wèihé xuǎnzé, yuànyì chéngdān hézhǒng sǔnshī.';
+  if (level < 10) return analysis;
+  return '$analysis Tā bǎ yuánlín bǎohù lǐjiě wéi yì zhǒng kě zhuīsù de zérèn: yuánzuò, sǔnshāng, bǔhuì yǔ xiūfùzhě dōu bù gāi bèi dānyī de wánměi zhēbì; shèyǐng zé bìxū gōngkāi zìjǐ de qǔshě, shǐ guānkànzhě nénggòu biànrèn shíjiān rúhé jìnrù huàmiàn.';
+}
+
+String _masteryVietnamese(int level) {
+  if (level < 9) return '';
+  final analysis = ' Cô cũng nhận ra độc lập không phải từ chối kinh nghiệm của người đi trước, mà là giải thích được vì sao mình lựa chọn và sẵn sàng chịu mất mát nào.';
+  if (level < 10) return analysis;
+  return '$analysis Cô hiểu bảo tồn khu vườn là trách nhiệm có thể truy nguyên: nguyên tác, hư hại, phần vẽ bổ sung và người phục hồi không được che khuất dưới một ý niệm “hoàn hảo”; nhiếp ảnh cũng phải công khai sự lựa chọn để người xem nhận ra thời gian đi vào hình ảnh thế nào.';
+}
+
+String _masteryEnglish(int level) {
+  if (level < 9) return '';
+  final analysis = ' She also sees that independence does not mean rejecting inherited experience, but explaining why she chooses and what loss she accepts.';
+  if (level < 10) return analysis;
+  return '$analysis She comes to understand conservation as traceable responsibility: original work, damage, retouching, and restorers must not be hidden by a single ideal of perfection; photography must disclose its choices so viewers can recognize how time enters the image.';
+}
+
+bool summerPalaceN1ContainsGenericTouristEnrichment(JourneyLevelContent level) {
+  final story = level.storyParagraphs.join();
+  return const <String>[
+    '你先停下来',
+    '你沿着主要路线向前',
+    '游客举起手机',
+    '探索者来到',
+    '景点不是孤立',
+  ].any(story.contains);
+}
