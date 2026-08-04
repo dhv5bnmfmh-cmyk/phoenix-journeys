@@ -196,173 +196,172 @@ List<WordEntry> _selectSummerPalaceWords(List<String> selectedWords) {
 
 final summerPalaceEasyLevel = JourneyLevelContent(
   storyParagraphs: const <String>[
-    '清晨，你来到颐和园。昆明湖很安静，万寿山倒映在水里。',
-    '你沿着长廊散步。长廊旁边有树、花和古老的建筑。',
-    '颐和园以前是皇家园林。它受过破坏，也经过重建和修复。',
-    '十七孔桥连接湖岸和小岛。湖、山、桥和建筑组成一幅美丽的画。',
+    '许澄要为校展拍一张完美的颐和园照片。',
+    '外婆周岚以前修复过长廊彩画。她让许澄看裂痕，许澄却只想拍没有缺点的风景。',
+    '十七孔桥前，外婆的旧照片被风吹落。许澄没有追着阳光，而是先把照片捡回来。',
+    '她把外婆的手、旧照片和远山一起拍下，明白修复不是把过去擦掉。',
   ],
   storyAnnotations: const <ReadingAnnotation>[
     ReadingAnnotation(
-      pinyin:
-          'Qīngchén, nǐ láidào Yíhéyuán. Kūnmíng Hú hěn ānjìng, Wànshòu Shān dàoyìng zài shuǐ lǐ.',
+      pinyin: 'Xǔ Chéng yào wèi xiàozhǎn pāi yì zhāng wánměi de Yíhéyuán zhàopiàn.',
       vietnamese:
-          'Sáng sớm, bạn đến Di Hòa Viên. Hồ Côn Minh rất yên tĩnh và núi Vạn Thọ phản chiếu trên mặt nước.',
+          'Hứa Trừng muốn chụp một bức ảnh Di Hòa Viên hoàn hảo cho triển lãm trường.',
       english:
-          'In the early morning, you arrive at the Summer Palace. Kunming Lake is quiet, with Longevity Hill reflected in the water.',
+          'Xu Cheng wants to take a perfect Summer Palace photograph for her school exhibition.',
     ),
     ReadingAnnotation(
       pinyin:
-          'Nǐ yánzhe Chángláng sànbù. Chángláng pángbiān yǒu shù, huā hé gǔlǎo de jiànzhù.',
+          'Wàipó Zhōu Lán yǐqián xiūfù guò Chángláng cǎihuà. Tā ràng Xǔ Chéng kàn lièhén, Xǔ Chéng què zhǐ xiǎng pāi méiyǒu quēdiǎn de fēngjǐng.',
       vietnamese:
-          'Bạn đi dạo dọc Trường Lang. Bên cạnh hành lang có cây, hoa và những công trình cổ.',
+          'Bà ngoại Chu Lam từng phục hồi tranh màu Trường Lang. Bà muốn Hứa Trừng nhìn các vết nứt, nhưng cô chỉ muốn phong cảnh không khuyết điểm.',
       english:
-          'You walk along the Long Corridor. Trees, flowers, and old buildings stand beside it.',
+          'Her grandmother Zhou Lan once restored Long Corridor paintings. She asks Xu Cheng to see the cracks, but Xu Cheng wants a flawless view.',
     ),
     ReadingAnnotation(
       pinyin:
-          'Yíhéyuán yǐqián shì huángjiā yuánlín. Tā shòuguò pòhuài, yě jīngguò chóngjiàn hé xiūfù.',
+          'Shíqīkǒng Qiáo qián, wàipó de jiù zhàopiàn bèi fēng chuīluò. Xǔ Chéng méiyǒu zhuīzhe yángguāng, ér shì xiān bǎ zhàopiàn jiǎn huílai.',
       vietnamese:
-          'Di Hòa Viên trước đây là vườn hoàng gia. Nơi này từng bị phá hủy và cũng đã được xây dựng, tu sửa lại.',
+          'Trước cầu Thập Thất Khổng, ảnh cũ của bà bị gió thổi rơi. Hứa Trừng không chạy theo ánh sáng mà nhặt ảnh trước.',
       english:
-          'The Summer Palace was once an imperial garden. It was damaged and later rebuilt and restored.',
+          'At the Seventeen-Arch Bridge, her grandmother’s old photograph falls. Xu Cheng stops chasing the light and retrieves it first.',
     ),
     ReadingAnnotation(
       pinyin:
-          'Shíqīkǒng Qiáo liánjiē hú àn hé xiǎodǎo. Hú, shān, qiáo hé jiànzhù zǔchéng yì fú měilì de huà.',
+          'Tā bǎ wàipó de shǒu, jiù zhàopiàn hé yuǎnshān yìqǐ pāi xià, míngbai xiūfù bú shì bǎ guòqù cādiào.',
       vietnamese:
-          'Cầu Thập Thất Khổng nối bờ hồ với hòn đảo nhỏ. Hồ, núi, cầu và kiến trúc tạo thành một bức tranh đẹp.',
+          'Cô chụp bàn tay bà, bức ảnh cũ và núi xa cùng nhau, rồi hiểu rằng phục hồi không phải xóa quá khứ.',
       english:
-          'The Seventeen-Arch Bridge connects the shore and an island. Lake, hill, bridge, and buildings form a beautiful picture.',
+          'She frames her grandmother’s hand, the old photograph, and the distant hill together, understanding that restoration does not erase the past.',
     ),
   ],
   words: _selectSummerPalaceWords(const <String>[
     '颐和园',
-    '昆明湖',
     '万寿山',
     '长廊',
     '修复',
+    '借景',
     '十七孔桥',
   ]),
   discoveries: const <DiscoveryEntry>[
     DiscoveryEntry(
-      text: '颐和园在北京，昆明湖和万寿山是这里最重要的景观。',
+      text: '长廊的柱子和开口会让远山与湖面随着脚步出现或消失。',
       pinyin:
-          'Yíhéyuán zài Běijīng, Kūnmíng Hú hé Wànshòu Shān shì zhèlǐ zuì zhòngyào de jǐngguān.',
-      simpleChinese: '颐和园在北京，主要景色是湖和山。',
+          'Chángláng de zhùzi hé kāikǒu huì ràng yuǎnshān yǔ húmiàn suízhe jiǎobù chūxiàn huò xiāoshī.',
+      simpleChinese: '长廊让风景随着脚步变化。',
       vietnamese:
-          'Di Hòa Viên nằm ở Bắc Kinh; hồ Côn Minh và núi Vạn Thọ là hai cảnh quan quan trọng nhất.',
+          'Cột và khoảng mở của Trường Lang làm núi xa và mặt hồ xuất hiện hoặc biến mất theo bước chân.',
       english:
-          'The Summer Palace is in Beijing, and Kunming Lake and Longevity Hill are its main landscapes.',
+          'The Long Corridor makes distant hills and the lake appear or disappear as a person walks.',
     ),
     DiscoveryEntry(
-      text: '颐和园大约四分之三的面积是水，所以昆明湖在风景中非常重要。',
+      text: '借景利用方向和距离，把远处景物放进当前画面。',
       pinyin:
-          'Yíhéyuán dàyuē sì fēn zhī sān de miànjī shì shuǐ, suǒyǐ Kūnmíng Hú zài fēngjǐng zhōng fēicháng zhòngyào.',
-      simpleChinese: '园里大部分面积是水。',
+          'Jièjǐng lìyòng fāngxiàng hé jùlí, bǎ yuǎnchù jǐngwù fàng jìn dāngqián huàmiàn.',
+      simpleChinese: '借景把远景带进眼前的画面。',
       vietnamese:
-          'Khoảng ba phần tư diện tích Di Hòa Viên là mặt nước, vì vậy hồ Côn Minh rất quan trọng trong cảnh quan.',
+          'Mượn cảnh dùng hướng và khoảng cách để đưa cảnh xa vào khung nhìn hiện tại.',
       english:
-          'About three quarters of the Summer Palace is water, so Kunming Lake is central to the scenery.',
+          'Borrowed scenery uses direction and distance to bring a distant view into the current frame.',
     ),
     DiscoveryEntry(
-      text: '十七孔桥有十七个桥孔，是颐和园最有代表性的桥之一。',
+      text: '修复会保护旧材料，也会记录后来补上的部分。',
       pinyin:
-          'Shíqīkǒng Qiáo yǒu shíqī gè qiáokǒng, shì Yíhéyuán zuì yǒu dàibiǎoxìng de qiáo zhī yī.',
-      simpleChinese: '这座桥有十七个桥孔。',
+          'Xiūfù huì bǎohù jiù cáiliào, yě huì jìlù hòulái bǔshàng de bùfen.',
+      simpleChinese: '修复既保护，也留下记录。',
       vietnamese:
-          'Cầu Thập Thất Khổng có mười bảy vòm và là một trong những cây cầu tiêu biểu nhất của Di Hòa Viên.',
+          'Phục hồi bảo vệ vật liệu cũ và ghi lại phần được bổ sung sau này.',
       english:
-          'The Seventeen-Arch Bridge has seventeen arches and is one of the garden’s best-known bridges.',
+          'Restoration protects old material and records later additions.',
     ),
   ],
-  wonderQuestion: '颐和园里有湖、山、长廊和桥。你最想先去哪里？为什么？',
-  expressQuestion: '请用一到两句话介绍颐和园里你最喜欢的景色。',
+  wonderQuestion: '许澄为什么先捡旧照片？',
+  expressQuestion: '请用一到两句话写出许澄最后的选择。',
 );
 
 const summerPalaceChallengeLevel = JourneyLevelContent(
   storyParagraphs: <String>[
-    '清晨的薄雾尚未散尽，昆明湖已经把万寿山的轮廓收进水面。远处亭台若隐若现，使人工营造的园林看起来像自然生成的山水。',
-    '长廊并非单纯连接景点的通道。它用连续的彩画、开合变化的视野和行走节奏，把湖岸上的不同空间组织成一场缓慢展开的观看。',
-    '从清漪园到颐和园，这座皇家园林经历兴建、破坏与重建。历史留下的裂痕并未完全消失，反而让修复本身也成为园林记忆的一部分。',
-    '站在十七孔桥前回望，所谓借景并不是复制自然，而是选择视线、距离和比例，让湖光山色与建筑彼此成全。',
+    '校展截稿前夕，许澄执意寻找一幅“无瑕”的皇家园林图景，以此证明自己的摄影不再依赖外婆周岚。',
+    '周岚曾参与长廊彩画修复。她借廊柱的遮蔽与开敞说明：构图和修复一样，都必须决定何者显现、何者退后，却不能伪造未曾受损的过去。',
+    '十七孔桥前，理想光线出现的同时，记录修复前长廊及周岚老师的旧照片被风吹落。许澄必须在标准风景与关系记忆之间作出不可兼得的选择。',
+    '她放弃追光，以旧照片、外婆扶栏的手和桥孔后的万寿山形成三层对景。失去明信片式画面的后果，换来《留下痕迹的风景》与外婆交付旧照片的信任。',
   ],
   storyAnnotations: <ReadingAnnotation>[
     ReadingAnnotation(
       pinyin:
-          'Qīngchén de báowù shàngwèi sànjìn, Kūnmíng Hú yǐjīng bǎ Wànshòu Shān de lúnkuò shōu jìn shuǐmiàn. Yuǎnchù tíngtái ruòyǐn-ruòxiàn, shǐ réngōng yíngzào de yuánlín kàn qǐlái xiàng zìrán shēngchéng de shānshuǐ.',
+          'Xiàozhǎn jiégǎo qiánxī, Xǔ Chéng zhíyì xúnzhǎo yì fú wúxiá de huángjiā yuánlín tújǐng, yǐcǐ zhèngmíng zìjǐ de shèyǐng bù zài yīlài wàipó Zhōu Lán.',
       vietnamese:
-          'Sương sớm chưa tan hết, mặt hồ Côn Minh đã thu đường nét núi Vạn Thọ vào trong nước. Đình đài xa xa ẩn hiện khiến khu vườn nhân tạo trông như cảnh sơn thủy tự nhiên.',
+          'Trước hạn triển lãm, Hứa Trừng cố tìm một hình ảnh vườn hoàng gia “không tì vết” để chứng minh nhiếp ảnh của mình không còn phụ thuộc vào bà ngoại Chu Lam.',
       english:
-          'Before the morning mist has cleared, Kunming Lake gathers the outline of Longevity Hill into its surface. Distant pavilions make the designed garden appear naturally formed.',
+          'Before the exhibition deadline, Xu Cheng insists on finding a flawless imperial-garden image to prove her photography no longer depends on Zhou Lan.',
     ),
     ReadingAnnotation(
       pinyin:
-          'Chángláng bìngfēi dānchún liánjiē jǐngdiǎn de tōngdào. Tā yòng liánxù de cǎihuà, kāihé biànhuà de shìyě hé xíngzǒu jiézòu, bǎ hú àn shàng de bùtóng kōngjiān zǔzhī chéng yì chǎng huǎnmàn zhǎnkāi de guānkàn.',
+          'Zhōu Lán céng cānyù Chángláng cǎihuà xiūfù. Tā jiè lángzhù de zhēbì yǔ kāichǎng shuōmíng: gòutú hé xiūfù yíyàng, dōu bìxū juédìng hézhě xiǎnxiàn, hézhě tuìhòu, què bùnéng wěizào wèicéng shòusǔn de guòqù.',
       vietnamese:
-          'Trường Lang không chỉ là lối nối các điểm tham quan. Tranh màu liên tục, tầm nhìn đóng mở và nhịp bước chân tổ chức các không gian ven hồ thành một quá trình ngắm cảnh từ từ mở ra.',
+          'Chu Lam từng phục hồi tranh màu Trường Lang. Bà dùng nhịp che và mở của cột để giải thích rằng bố cục và phục hồi đều phải chọn điều gì hiện ra, điều gì lùi lại, nhưng không được giả tạo một quá khứ chưa từng tổn hại.',
       english:
-          'The Long Corridor is more than a passage. Painted scenes, shifting views, and walking rhythm organize the lakeside into a slowly unfolding act of seeing.',
+          'Zhou Lan uses the corridor’s concealment and opening to explain that composition and restoration both decide what appears and recedes, without fabricating an undamaged past.',
     ),
     ReadingAnnotation(
       pinyin:
-          'Cóng Qīngyīyuán dào Yíhéyuán, zhè zuò huángjiā yuánlín jīnglì xīngjiàn, pòhuài yǔ chóngjiàn. Lìshǐ liúxià de lièhén bìngwèi wánquán xiāoshī, fǎn\'ér ràng xiūfù běnshēn yě chéngwéi yuánlín jìyì de yí bùfen.',
+          'Shíqīkǒng Qiáo qián, lǐxiǎng guāngxiàn chūxiàn de tóngshí, jìlù xiūfù qián Chángláng jí Zhōu Lán lǎoshī de jiù zhàopiàn bèi fēng chuīluò. Xǔ Chéng bìxū zài biāozhǔn fēngjǐng yǔ guānxì jìyì zhījiān zuòchū bùkě jiāndé de xuǎnzé.',
       vietnamese:
-          'Từ Thanh Y Viên đến Di Hòa Viên, khu vườn hoàng gia này trải qua xây dựng, phá hủy và tái thiết. Những vết nứt lịch sử không biến mất hoàn toàn mà khiến chính việc phục hồi trở thành một phần ký ức của khu vườn.',
+          'Trước cầu Thập Thất Khổng, đúng lúc ánh sáng lý tưởng xuất hiện, bức ảnh cũ ghi Trường Lang trước phục hồi và người thầy của Chu Lam bị gió cuốn. Hứa Trừng phải chọn giữa phong cảnh chuẩn và ký ức quan hệ.',
       english:
-          'From the Garden of Clear Ripples to the Summer Palace, the site experienced construction, destruction, and rebuilding. Restoration itself became part of its memory.',
+          'At the Seventeen-Arch Bridge, ideal light arrives as the old photograph of the unrestored corridor and Zhou Lan’s teacher falls, forcing an exclusive choice between a standard view and relational memory.',
     ),
     ReadingAnnotation(
       pinyin:
-          'Zhàn zài Shíqīkǒng Qiáo qián huíwàng, suǒwèi jièjǐng bìng bú shì fùzhì zìrán, ér shì xuǎnzé shìxiàn, jùlí hé bǐlì, ràng húguāng-shānsè yǔ jiànzhù bǐcǐ chéngquán.',
+          'Tā fàngqì zhuīguāng, yǐ jiù zhàopiàn, wàipó fúlán de shǒu hé qiáokǒng hòu de Wànshòu Shān xíngchéng sān céng duìjǐng. Shīqù míngxìnpiàn shì huàmiàn de hòuguǒ, huànlái Liúxià Hénjì de Fēngjǐng yǔ wàipó jiāofù jiù zhàopiàn de xìnrèn.',
       vietnamese:
-          'Đứng trước cầu Thập Thất Khổng nhìn lại, “mượn cảnh” không phải sao chép thiên nhiên mà là lựa chọn đường nhìn, khoảng cách và tỷ lệ để núi hồ và kiến trúc nâng đỡ lẫn nhau.',
+          'Cô bỏ ánh sáng lý tưởng, tạo ba lớp đối cảnh bằng ảnh cũ, bàn tay bà và núi Vạn Thọ sau vòm cầu. Việc mất hình ảnh kiểu bưu thiếp đổi lại tác phẩm “Phong cảnh lưu dấu vết” và niềm tin khi bà giao bức ảnh cho cô.',
       english:
-          'Looking back from the Seventeen-Arch Bridge, borrowed scenery is not a copy of nature but a selection of sightline, distance, and proportion so landscape and architecture complete one another.',
+          'She abandons the ideal light and composes the old photograph, her grandmother’s hand, and Longevity Hill in three layers. Losing the postcard image leads to a truer work and Zhou Lan’s trust.',
     ),
   ],
   words: summerPalaceWords,
   discoveries: <DiscoveryEntry>[
     DiscoveryEntry(
-      text: '颐和园的价值不仅在于单体建筑，而在于它把中国园林关于山水秩序的想象集中呈现在一个大型皇家园林中。',
+      text: '颐和园以万寿山和昆明湖建立山水骨架，长廊、桥梁和亭台再通过路线与视线进入整体秩序。',
       pinyin:
-          'Yíhéyuán de jiàzhí bùjǐn zàiyú dāntǐ jiànzhù, ér zàiyú tā bǎ Zhōngguó yuánlín guānyú shānshuǐ zhìxù de xiǎngxiàng jízhōng chéngxiàn zài yí gè dàxíng huángjiā yuánlín zhōng.',
-      simpleChinese: '它的重要性来自山水和建筑组成的整体。',
+          'Yíhéyuán yǐ Wànshòu Shān hé Kūnmíng Hú jiànlì shānshuǐ gǔjià, Chángláng, qiáoliáng hé tíngtái zài tōngguò lùxiàn yǔ shìxiàn jìnrù zhěngtǐ zhìxù.',
+      simpleChinese: '山和湖是骨架，建筑通过路线进入整体风景。',
       vietnamese:
-          'Giá trị của Di Hòa Viên không chỉ nằm ở từng công trình mà còn ở cách nơi đây tập trung quan niệm trật tự núi nước của vườn Trung Hoa trong một khu vườn hoàng gia lớn.',
+          'Núi Vạn Thọ và hồ Côn Minh tạo khung cảnh quan; hành lang, cầu và đình đi vào trật tự chung qua tuyến đường và tầm nhìn.',
       english:
-          'Its significance lies not only in individual buildings, but in the complete landscape order presented across a large imperial garden.',
+          'Longevity Hill and Kunming Lake form the framework, while corridors, bridges, and pavilions enter through routes and sightlines.',
     ),
     DiscoveryEntry(
-      text: '大面积水面既扩大了视觉距离，也通过倒影和光线变化，使同一组建筑在不同时间呈现不同气氛。',
+      text: '借景把远处景物纳入当前视野，对景在特定位置建立视觉目标；两者都依赖方向、比例和观看者的位置。',
       pinyin:
-          'Dà miànjī shuǐmiàn jì kuòdà le shìjué jùlí, yě tōngguò dàoyǐng hé guāngxiàn biànhuà, shǐ tóng yì zǔ jiànzhù zài bùtóng shíjiān chéngxiàn bùtóng qìfēn.',
-      simpleChinese: '湖面让景色看起来更远，也会改变建筑的倒影和气氛。',
+          'Jièjǐng bǎ yuǎnchù jǐngwù nàrù dāngqián shìyě, duìjǐng zài tèdìng wèizhì jiànlì shìjué mùbiāo; liǎngzhě dōu yīlài fāngxiàng, bǐlì hé guānkànzhě de wèizhì.',
+      simpleChinese: '借景和对景都需要安排方向、比例和人的位置。',
       vietnamese:
-          'Mặt nước rộng mở rộng khoảng cách thị giác; phản chiếu và ánh sáng thay đổi cũng khiến cùng một nhóm kiến trúc mang bầu không khí khác nhau theo thời gian.',
+          'Mượn cảnh đưa cảnh xa vào tầm nhìn, còn đối cảnh tạo mục tiêu thị giác tại vị trí cụ thể; cả hai dựa vào hướng, tỷ lệ và vị trí người xem.',
       english:
-          'The broad water surface extends visual distance, while reflections and changing light give the same buildings different moods throughout the day.',
+          'Borrowed scenery incorporates distant elements; opposite views establish a target. Both depend on direction, proportion, and viewer position.',
     ),
     DiscoveryEntry(
-      text: '长廊让移动本身成为观景方法：人在遮蔽与开敞之间前进，画面也随脚步不断重新构图。',
+      text: '颐和园经历破坏与重建，修复记录用于区分旧材料、加固部分和后来补绘，避免把历史层次伪装成从未改变。',
       pinyin:
-          'Chángláng ràng yídòng běnshēn chéngwéi guānjǐng fāngfǎ: rén zài zhēbì yǔ kāichǎng zhījiān qiánjìn, huàmiàn yě suí jiǎobù bùduàn chóngxīn gòutú.',
-      simpleChinese: '人在长廊里边走边看，景色会不断变化。',
+          'Yíhéyuán jīnglì pòhuài yǔ chóngjiàn, xiūfù jìlù yòngyú qūfēn jiù cáiliào, jiāgù bùfen hé hòulái bǔhuì, bìmiǎn bǎ lìshǐ céngcì wěizhuāng chéng cóngwèi gǎibiàn.',
+      simpleChinese: '修复记录帮助人们看懂旧材料和后来补上的部分。',
       vietnamese:
-          'Trường Lang biến việc di chuyển thành một cách ngắm cảnh: khi người đi qua những khoảng kín và mở, khung cảnh liên tục được bố cục lại theo bước chân.',
+          'Hồ sơ phục hồi phân biệt vật liệu cũ, phần gia cố và phần vẽ bổ sung, tránh giả vờ lịch sử chưa từng thay đổi.',
       english:
-          'The corridor turns movement into a viewing method: as visitors pass between enclosure and openness, the scene is continually recomposed.',
+          'Restoration records distinguish old material, reinforcement, and later retouching instead of disguising historical change.',
     ),
     DiscoveryEntry(
-      text: '十七孔桥在功能上连接湖岸与岛屿，在构图上又成为水面上的水平线，使远山、湖面和近处建筑形成层次。',
+      text: '十七孔桥兼具通行与构图功能，用水平线把石栏、水面和远山组织成有深度的前中远景。',
       pinyin:
-          'Shíqīkǒng Qiáo zài gōngnéng shàng liánjiē hú àn yǔ dǎoyǔ, zài gòutú shàng yòu chéngwéi shuǐmiàn shàng de shuǐpíngxiàn, shǐ yuǎnshān, húmiàn hé jìnchù jiànzhù xíngchéng céngcì.',
-      simpleChinese: '桥连接两地，也让远山、湖和建筑看起来更有层次。',
+          'Shíqīkǒng Qiáo jiānjù tōngxíng yǔ gòutú gōngnéng, yòng shuǐpíngxiàn bǎ shílán, shuǐmiàn hé yuǎnshān zǔzhī chéng yǒu shēndù de qián, zhōng, yuǎnjǐng.',
+      simpleChinese: '桥既能通行，也把近景、中景和远景组织在一起。',
       vietnamese:
-          'Cầu Thập Thất Khổng vừa nối bờ hồ với đảo, vừa tạo một đường ngang trên mặt nước để núi xa, hồ và kiến trúc gần tạo thành nhiều lớp.',
+          'Cầu Thập Thất Khổng vừa để đi lại vừa tổ chức lan can, mặt nước và núi xa thành các lớp có chiều sâu.',
       english:
-          'The bridge links shore and island while forming a horizontal line that layers distant hills, water, and nearby architecture.',
+          'The bridge serves movement and composition, organizing railings, water, and distant hills into foreground, middle ground, and background.',
     ),
   ],
-  wonderQuestion: '颐和园通过借景、倒影和行走视线组织风景。你认为这种设计是在模仿自然，还是在重新解释自然？为什么？',
-  expressQuestion: '请用三到五句话分析长廊或十七孔桥怎样同时承担实用功能和景观构图功能。',
+  wonderQuestion: '许澄的摄影选择如何把园林构图原则转化为对历史与关系的判断？',
+  expressQuestion: '请用四到六句话分析“无瑕”与“可阅读的修复痕迹”代表的两种遗产态度。',
 );
