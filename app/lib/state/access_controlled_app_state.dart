@@ -102,6 +102,7 @@ class AccessControlledAppState extends AppState {
   String? criticalPersistenceFailureReason;
   String? explorerSeedFailureReason;
   int criticalRevision = 0;
+  int criticalSchemaVersion = 0;
 
   String get localExplorerSeed => _committedSnapshot?.explorerSeed ?? '';
 
@@ -202,13 +203,25 @@ class AccessControlledAppState extends AppState {
 
   @override
   String get journeyStepLabel => displayText(
-        AppState.journeyStepLabels[_safeJourneyStep(_criticalStep)],
+        _journeyLabelFor(_criticalStep, journeyCompositeSubstage),
       );
 
   @override
   String get journeyFurthestStepLabel => displayText(
         AppState.journeyStepLabels[_safeJourneyStep(_criticalFurthestStep)],
       );
+
+  String _journeyLabelFor(int step, JourneyCompositeSubstage substage) {
+    if (activeJourneyId == 'beijing-summer-palace') {
+      if (step == 3) {
+        return substage == JourneyCompositeSubstage.challenge ? '挑战' : '思考';
+      }
+      if (step == 4) {
+        return substage == JourneyCompositeSubstage.memory ? '回忆' : '表达';
+      }
+    }
+    return AppState.journeyStepLabels[_safeJourneyStep(step)];
+  }
 
   @override
   String get beijingJourneyStepLabel => journeyStepLabel;
@@ -294,11 +307,31 @@ class AccessControlledAppState extends AppState {
         committed = await _criticalStore!.commitInitial(
           legacy.snapshot.toJson(),
         );
+      } else if (committed.schemaVersion ==
+          CriticalPersistenceStore.phoenixCriticalStateLegacySchemaVersion) {
+        final migrated = _PhoenixCriticalSnapshot.fromJson(committed.payload)
+            .migratedToV2()
+          ..validate();
+        committed = await _criticalStore!.commitPayload(
+          migrated.toJson(),
+          expectedRevision: committed.revision,
+        );
       }
 
+      if (committed.schemaVersion !=
+          CriticalPersistenceStore.phoenixCriticalStateSchemaVersion) {
+        throw CriticalPersistenceException(
+          'Critical state did not reach schema v2: '
+          '${committed.schemaVersion}.',
+        );
+      }
       final snapshot = _PhoenixCriticalSnapshot.fromJson(committed.payload)
         ..validate();
-      _applyCommitted(snapshot, revision: committed.revision);
+      _applyCommitted(
+        snapshot,
+        revision: committed.revision,
+        schemaVersion: committed.schemaVersion,
+      );
 
       if (!_canRestoreActiveJourney(activeJourneyId)) {
         throw StateError(
@@ -373,14 +406,19 @@ class AccessControlledAppState extends AppState {
     required String wonder,
     required String express,
     required String memory,
+    JourneyCompositeSubstage? compositeSubstage,
   }) async {
     final journeyId = activeJourneyId;
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
       final safeStep = _safeJourneyStep(step);
       final updated = existing.copyWith(
+        flowVersion: journeyFlowVersionFor(journeyId),
         step: safeStep,
         furthestStep: math.max(existing.furthestStep, safeStep).toInt(),
+        compositeSubstage: journeyId == 'beijing-summer-palace'
+            ? compositeSubstage ?? existing.compositeSubstage
+            : JourneyCompositeSubstage.none,
         wonderDraft: wonder,
         expressDraft: express,
         memoryDraft: memory,
@@ -389,6 +427,32 @@ class AccessControlledAppState extends AppState {
       return _SnapshotMutation<void>.changed(
         current.withJourney(updated),
         null,
+      );
+    });
+  }
+
+  @override
+  Future<String> ensureChallengeAttemptIdentity() async {
+    final journeyId = activeJourneyId;
+    return _transact<String>((current) {
+      final existing = current.requireJourney(journeyId);
+      if (existing.challengeAttemptId.isNotEmpty) {
+        return _SnapshotMutation<String>.unchanged(
+          existing.challengeAttemptId,
+        );
+      }
+      final sequence = existing.challengeAttemptSequence + 1;
+      final attemptId =
+          '$journeyId:flow-v${existing.flowVersion}:attempt-$sequence';
+      return _SnapshotMutation<String>.changed(
+        current.withJourney(
+          existing.copyWith(
+            challengeAttemptSequence: sequence,
+            challengeAttemptId: attemptId,
+            updatedAt: _clock().toIso8601String(),
+          ),
+        ),
+        attemptId,
       );
     });
   }
@@ -468,15 +532,25 @@ class AccessControlledAppState extends AppState {
   Future<void> saveGuideFeedback({
     required String reply,
     required bool isOfflineFallback,
+    String inputIdentity = '',
   }) async {
     final journeyId = activeJourneyId;
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
+      final resolvedIdentity = inputIdentity.isNotEmpty
+          ? inputIdentity
+          : existing.wonderDraft.trim().isNotEmpty
+              ? journeyFeedbackInputIdentity(existing.wonderDraft)
+              : '';
       return _SnapshotMutation<void>.changed(
         current.withJourney(
           existing.copyWith(
             guideFeedbackReply: reply.trim(),
             guideFeedbackOffline: isOfflineFallback,
+            guideFeedbackInputIdentity: resolvedIdentity,
+            compositeSubstage: journeyId == 'beijing-summer-palace'
+                ? JourneyCompositeSubstage.challenge
+                : JourneyCompositeSubstage.none,
             updatedAt: _clock().toIso8601String(),
           ),
         ),
@@ -491,7 +565,8 @@ class AccessControlledAppState extends AppState {
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
       if (existing.guideFeedbackReply.isEmpty &&
-          !existing.guideFeedbackOffline) {
+          !existing.guideFeedbackOffline &&
+          existing.guideFeedbackInputIdentity.isEmpty) {
         return const _SnapshotMutation<void>.unchanged(null);
       }
       return _SnapshotMutation<void>.changed(
@@ -499,6 +574,11 @@ class AccessControlledAppState extends AppState {
           existing.copyWith(
             guideFeedbackReply: '',
             guideFeedbackOffline: false,
+            guideFeedbackInputIdentity: '',
+            compositeSubstage: journeyId == 'beijing-summer-palace' &&
+                    existing.step == 3
+                ? JourneyCompositeSubstage.reflection
+                : existing.compositeSubstage,
             updatedAt: _clock().toIso8601String(),
           ),
         ),
@@ -514,10 +594,16 @@ class AccessControlledAppState extends AppState {
     required String natural,
     required String encouragement,
     required bool isOfflineFallback,
+    String inputIdentity = '',
   }) async {
     final journeyId = activeJourneyId;
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
+      final resolvedIdentity = inputIdentity.isNotEmpty
+          ? inputIdentity
+          : existing.expressDraft.trim().isNotEmpty
+              ? journeyFeedbackInputIdentity(existing.expressDraft)
+              : '';
       return _SnapshotMutation<void>.changed(
         current.withJourney(
           existing.copyWith(
@@ -526,6 +612,10 @@ class AccessControlledAppState extends AppState {
             writingFeedbackNatural: natural.trim(),
             writingFeedbackEncouragement: encouragement.trim(),
             writingFeedbackOffline: isOfflineFallback,
+            writingFeedbackInputIdentity: resolvedIdentity,
+            compositeSubstage: journeyId == 'beijing-summer-palace'
+                ? JourneyCompositeSubstage.memory
+                : JourneyCompositeSubstage.none,
             updatedAt: _clock().toIso8601String(),
           ),
         ),
@@ -539,7 +629,8 @@ class AccessControlledAppState extends AppState {
     final journeyId = activeJourneyId;
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
-      if (!existing.hasWritingFeedback) {
+      if (!existing.hasWritingFeedback &&
+          existing.writingFeedbackInputIdentity.isEmpty) {
         return const _SnapshotMutation<void>.unchanged(null);
       }
       return _SnapshotMutation<void>.changed(
@@ -550,6 +641,11 @@ class AccessControlledAppState extends AppState {
             writingFeedbackNatural: '',
             writingFeedbackEncouragement: '',
             writingFeedbackOffline: false,
+            writingFeedbackInputIdentity: '',
+            compositeSubstage: journeyId == 'beijing-summer-palace' &&
+                    existing.step == 4
+                ? JourneyCompositeSubstage.writing
+                : existing.compositeSubstage,
             updatedAt: _clock().toIso8601String(),
           ),
         ),
@@ -564,19 +660,24 @@ class AccessControlledAppState extends AppState {
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
       final restarted = existing.copyWith(
+        flowVersion: journeyFlowVersionFor(journeyId),
         step: 0,
         furthestStep: 0,
         completed: false,
+        compositeSubstage: JourneyCompositeSubstage.none,
+        challengeAttemptId: '',
         wonderDraft: '',
         expressDraft: '',
         memoryDraft: '',
         guideFeedbackReply: '',
         guideFeedbackOffline: false,
+        guideFeedbackInputIdentity: '',
         writingFeedbackCorrected: '',
         writingFeedbackExplanation: '',
         writingFeedbackNatural: '',
         writingFeedbackEncouragement: '',
         writingFeedbackOffline: false,
+        writingFeedbackInputIdentity: '',
         updatedAt: _clock().toIso8601String(),
       ).clearNarration();
       return _SnapshotMutation<void>.changed(
@@ -609,6 +710,10 @@ class AccessControlledAppState extends AppState {
         step: AppState.journeyLastStep,
         furthestStep: AppState.journeyLastStep,
         completed: true,
+        compositeSubstage: journeyId == 'beijing-summer-palace'
+            ? JourneyCompositeSubstage.completed
+            : JourneyCompositeSubstage.none,
+        challengeAttemptId: '',
         wonderDraft: '',
         expressDraft: '',
         memoryDraft: '',
@@ -749,6 +854,15 @@ class AccessControlledAppState extends AppState {
     return record.payload;
   }
 
+  @visibleForTesting
+  Future<CriticalCommittedRecord> readCommittedCriticalRecord() async {
+    final record = await _criticalStore?.readCommitted();
+    if (record == null) {
+      throw StateError('Critical state is not committed.');
+    }
+    return record;
+  }
+
   Future<T> _transact<T>(
     _SnapshotMutation<T> Function(_PhoenixCriticalSnapshot current) build,
   ) async {
@@ -761,6 +875,13 @@ class AccessControlledAppState extends AppState {
 
     try {
       final transaction = await store.transact<T>((record) {
+        if (record.schemaVersion !=
+            CriticalPersistenceStore.phoenixCriticalStateSchemaVersion) {
+          throw CriticalPersistenceException(
+            'Mutation requires critical schema v2, found '
+            '${record.schemaVersion}.',
+          );
+        }
         final current = _PhoenixCriticalSnapshot.fromJson(record.payload)
           ..validate();
         final mutation = build(current);
@@ -781,6 +902,7 @@ class AccessControlledAppState extends AppState {
         _applyCommitted(
           committed,
           revision: transaction.record.revision,
+          schemaVersion: transaction.record.schemaVersion,
         );
         notifyListeners();
       }
@@ -794,9 +916,11 @@ class AccessControlledAppState extends AppState {
   void _applyCommitted(
     _PhoenixCriticalSnapshot snapshot, {
     required int revision,
+    required int schemaVersion,
   }) {
     _committedSnapshot = snapshot;
     criticalRevision = revision;
+    criticalSchemaVersion = schemaVersion;
     activeJourneyId = snapshot.activeJourneyId;
     activeJourneyRestoreFailureId = null;
     activeJourneyRestoreFailureReason = null;
@@ -822,16 +946,22 @@ class AccessControlledAppState extends AppState {
     _criticalStep = journey.step;
     _criticalFurthestStep = journey.furthestStep;
     journeyCompleted = journey.completed;
+    journeyFlowVersion = journey.flowVersion;
+    journeyCompositeSubstage = journey.compositeSubstage;
+    journeyChallengeAttemptSequence = journey.challengeAttemptSequence;
+    journeyChallengeAttemptId = journey.challengeAttemptId;
     wonderDraft = journey.wonderDraft;
     expressDraft = journey.expressDraft;
     memoryDraft = journey.memoryDraft;
     guideFeedbackReply = journey.guideFeedbackReply;
     guideFeedbackOffline = journey.guideFeedbackOffline;
+    guideFeedbackInputIdentity = journey.guideFeedbackInputIdentity;
     writingFeedbackCorrected = journey.writingFeedbackCorrected;
     writingFeedbackExplanation = journey.writingFeedbackExplanation;
     writingFeedbackNatural = journey.writingFeedbackNatural;
     writingFeedbackEncouragement = journey.writingFeedbackEncouragement;
     writingFeedbackOffline = journey.writingFeedbackOffline;
+    writingFeedbackInputIdentity = journey.writingFeedbackInputIdentity;
     journeyNarrationContentId = journey.narrationContentId;
     journeyNarrationContentSignature = journey.narrationContentSignature;
     journeyNarrationOffset = journey.narrationOffset;
@@ -1032,6 +1162,26 @@ class AccessControlledAppState extends AppState {
         ? AppState.journeyLastStep
         : math.max(step, _safeJourneyStep(rawFurthest)).toInt();
 
+    final wonder = readString('wonderDraft') ??
+        (isBeijing ? preferences.getString('wonderDraft') : null) ??
+        '';
+    final express = readString('expressDraft') ??
+        (isBeijing ? preferences.getString('expressDraft') : null) ??
+        '';
+    final guideReply = readString('guideFeedbackReply') ?? '';
+    final writingCorrected = readString('writingFeedbackCorrected') ?? '';
+    final writingExplanation =
+        readString('writingFeedbackExplanation') ?? '';
+    final writingNatural = readString('writingFeedbackNatural') ?? '';
+    final writingEncouragement =
+        readString('writingFeedbackEncouragement') ?? '';
+    final writingOffline = readBool('writingFeedbackOffline') ?? false;
+    final hasWriting = writingCorrected.isNotEmpty ||
+        writingExplanation.isNotEmpty ||
+        writingNatural.isNotEmpty ||
+        writingEncouragement.isNotEmpty ||
+        writingOffline;
+
     final contentId = readString('narrationContentId');
     final contentSignature = readString('narrationContentSignature');
     final narrationOffset = math.max(0, readInt('narrationOffset') ?? 0);
@@ -1055,28 +1205,44 @@ class AccessControlledAppState extends AppState {
     return _JourneyCriticalState(
       journeyId: journeyId,
       storageNamespace: binding.storageNamespace,
+      flowVersion: journeyFlowVersionFor(journeyId),
       step: step,
       furthestStep: furthest,
       completed: completed,
-      wonderDraft: readString('wonderDraft') ??
-          (isBeijing ? preferences.getString('wonderDraft') : null) ??
-          '',
-      expressDraft: readString('expressDraft') ??
-          (isBeijing ? preferences.getString('expressDraft') : null) ??
-          '',
+      compositeSubstage: _inferCompositeSubstage(
+        journeyId: journeyId,
+        step: step,
+        completed: completed,
+        hasGuideFeedback: guideReply.isNotEmpty,
+        hasWritingFeedback: hasWriting,
+      ),
+      challengeAttemptSequence: math.max(
+        0,
+        readInt('challengeAttemptSequence') ?? 0,
+      ),
+      challengeAttemptId: readString('challengeAttemptId') ?? '',
+      wonderDraft: wonder,
+      expressDraft: express,
       memoryDraft: readString('memoryDraft') ??
           (isBeijing ? preferences.getString('memoryDraft') : null) ??
           '',
-      guideFeedbackReply: readString('guideFeedbackReply') ?? '',
+      guideFeedbackReply: guideReply,
       guideFeedbackOffline: readBool('guideFeedbackOffline') ?? false,
-      writingFeedbackCorrected:
-          readString('writingFeedbackCorrected') ?? '',
-      writingFeedbackExplanation:
-          readString('writingFeedbackExplanation') ?? '',
-      writingFeedbackNatural: readString('writingFeedbackNatural') ?? '',
-      writingFeedbackEncouragement:
-          readString('writingFeedbackEncouragement') ?? '',
-      writingFeedbackOffline: readBool('writingFeedbackOffline') ?? false,
+      guideFeedbackInputIdentity:
+          readString('guideFeedbackInputIdentity') ??
+              (guideReply.isNotEmpty && wonder.trim().isNotEmpty
+                  ? journeyFeedbackInputIdentity(wonder)
+                  : ''),
+      writingFeedbackCorrected: writingCorrected,
+      writingFeedbackExplanation: writingExplanation,
+      writingFeedbackNatural: writingNatural,
+      writingFeedbackEncouragement: writingEncouragement,
+      writingFeedbackOffline: writingOffline,
+      writingFeedbackInputIdentity:
+          readString('writingFeedbackInputIdentity') ??
+              (hasWriting && express.trim().isNotEmpty
+                  ? journeyFeedbackInputIdentity(express)
+                  : ''),
       narrationContentId: contentId,
       narrationContentSignature: contentSignature,
       narrationOffset: narrationOffset,
@@ -1253,6 +1419,15 @@ class _PhoenixCriticalSnapshot {
         'unlockedSpecialJourneyIds': unlockedSpecialJourneyIds,
       };
 
+  _PhoenixCriticalSnapshot migratedToV2() {
+    return copyWith(
+      journeys: <String, _JourneyCriticalState>{
+        for (final entry in journeys.entries)
+          entry.key: entry.value.migratedToV2(),
+      },
+    );
+  }
+
   _PhoenixCriticalSnapshot copyWith({
     String? activeJourneyId,
     String? activeJourneyNamespace,
@@ -1408,19 +1583,25 @@ class _JourneyCriticalState {
   const _JourneyCriticalState({
     required this.journeyId,
     required this.storageNamespace,
+    required this.flowVersion,
     required this.step,
     required this.furthestStep,
     required this.completed,
+    required this.compositeSubstage,
+    required this.challengeAttemptSequence,
+    required this.challengeAttemptId,
     required this.wonderDraft,
     required this.expressDraft,
     required this.memoryDraft,
     required this.guideFeedbackReply,
     required this.guideFeedbackOffline,
+    required this.guideFeedbackInputIdentity,
     required this.writingFeedbackCorrected,
     required this.writingFeedbackExplanation,
     required this.writingFeedbackNatural,
     required this.writingFeedbackEncouragement,
     required this.writingFeedbackOffline,
+    required this.writingFeedbackInputIdentity,
     required this.narrationContentId,
     required this.narrationContentSignature,
     required this.narrationOffset,
@@ -1430,27 +1611,68 @@ class _JourneyCriticalState {
   });
 
   factory _JourneyCriticalState.fromJson(Map<String, dynamic> json) {
+    final journeyId = json['journeyId'] as String? ?? '';
+    final step = json['step'] as int? ?? -1;
+    final completed = json['completed'] as bool? ?? false;
+    final wonder = json['wonderDraft'] as String? ?? '';
+    final express = json['expressDraft'] as String? ?? '';
+    final guideReply = json['guideFeedbackReply'] as String? ?? '';
+    final writingCorrected =
+        json['writingFeedbackCorrected'] as String? ?? '';
+    final writingExplanation =
+        json['writingFeedbackExplanation'] as String? ?? '';
+    final writingNatural =
+        json['writingFeedbackNatural'] as String? ?? '';
+    final writingEncouragement =
+        json['writingFeedbackEncouragement'] as String? ?? '';
+    final writingOffline = json['writingFeedbackOffline'] as bool? ?? false;
+    final hasWriting = writingCorrected.isNotEmpty ||
+        writingExplanation.isNotEmpty ||
+        writingNatural.isNotEmpty ||
+        writingEncouragement.isNotEmpty ||
+        writingOffline;
+    final rawSubstage = json['compositeSubstage'] as String?;
+
     return _JourneyCriticalState(
-      journeyId: json['journeyId'] as String? ?? '',
+      journeyId: journeyId,
       storageNamespace: json['storageNamespace'] as String? ?? '',
-      step: json['step'] as int? ?? -1,
+      flowVersion:
+          json['flowVersion'] as int? ?? journeyFlowVersionFor(journeyId),
+      step: step,
       furthestStep: json['furthestStep'] as int? ?? -1,
-      completed: json['completed'] as bool? ?? false,
-      wonderDraft: json['wonderDraft'] as String? ?? '',
-      expressDraft: json['expressDraft'] as String? ?? '',
+      completed: completed,
+      compositeSubstage: rawSubstage == null
+          ? _inferCompositeSubstage(
+              journeyId: journeyId,
+              step: step,
+              completed: completed,
+              hasGuideFeedback: guideReply.isNotEmpty,
+              hasWritingFeedback: hasWriting,
+            )
+          : parseJourneyCompositeSubstage(rawSubstage),
+      challengeAttemptSequence:
+          json['challengeAttemptSequence'] as int? ?? 0,
+      challengeAttemptId: json['challengeAttemptId'] as String? ?? '',
+      wonderDraft: wonder,
+      expressDraft: express,
       memoryDraft: json['memoryDraft'] as String? ?? '',
-      guideFeedbackReply: json['guideFeedbackReply'] as String? ?? '',
+      guideFeedbackReply: guideReply,
       guideFeedbackOffline: json['guideFeedbackOffline'] as bool? ?? false,
-      writingFeedbackCorrected:
-          json['writingFeedbackCorrected'] as String? ?? '',
-      writingFeedbackExplanation:
-          json['writingFeedbackExplanation'] as String? ?? '',
-      writingFeedbackNatural:
-          json['writingFeedbackNatural'] as String? ?? '',
-      writingFeedbackEncouragement:
-          json['writingFeedbackEncouragement'] as String? ?? '',
-      writingFeedbackOffline:
-          json['writingFeedbackOffline'] as bool? ?? false,
+      guideFeedbackInputIdentity:
+          json['guideFeedbackInputIdentity'] as String? ??
+              (guideReply.isNotEmpty && wonder.trim().isNotEmpty
+                  ? journeyFeedbackInputIdentity(wonder)
+                  : ''),
+      writingFeedbackCorrected: writingCorrected,
+      writingFeedbackExplanation: writingExplanation,
+      writingFeedbackNatural: writingNatural,
+      writingFeedbackEncouragement: writingEncouragement,
+      writingFeedbackOffline: writingOffline,
+      writingFeedbackInputIdentity:
+          json['writingFeedbackInputIdentity'] as String? ??
+              (hasWriting && express.trim().isNotEmpty
+                  ? journeyFeedbackInputIdentity(express)
+                  : ''),
       narrationContentId: json['narrationContentId'] as String?,
       narrationContentSignature:
           json['narrationContentSignature'] as String?,
@@ -1469,19 +1691,25 @@ class _JourneyCriticalState {
 
   final String journeyId;
   final String storageNamespace;
+  final int flowVersion;
   final int step;
   final int furthestStep;
   final bool completed;
+  final JourneyCompositeSubstage compositeSubstage;
+  final int challengeAttemptSequence;
+  final String challengeAttemptId;
   final String wonderDraft;
   final String expressDraft;
   final String memoryDraft;
   final String guideFeedbackReply;
   final bool guideFeedbackOffline;
+  final String guideFeedbackInputIdentity;
   final String writingFeedbackCorrected;
   final String writingFeedbackExplanation;
   final String writingFeedbackNatural;
   final String writingFeedbackEncouragement;
   final bool writingFeedbackOffline;
+  final String writingFeedbackInputIdentity;
   final String? narrationContentId;
   final String? narrationContentSignature;
   final int narrationOffset;
@@ -1503,22 +1731,49 @@ class _JourneyCriticalState {
       writingFeedbackEncouragement.isNotEmpty ||
       writingFeedbackOffline;
 
+  _JourneyCriticalState migratedToV2() => copyWith(
+        flowVersion: journeyFlowVersionFor(journeyId),
+        compositeSubstage: _inferCompositeSubstage(
+          journeyId: journeyId,
+          step: step,
+          completed: completed,
+          hasGuideFeedback: guideFeedbackReply.isNotEmpty,
+          hasWritingFeedback: hasWritingFeedback,
+        ),
+        guideFeedbackInputIdentity: guideFeedbackInputIdentity.isNotEmpty
+            ? guideFeedbackInputIdentity
+            : guideFeedbackReply.isNotEmpty && wonderDraft.trim().isNotEmpty
+                ? journeyFeedbackInputIdentity(wonderDraft)
+                : '',
+        writingFeedbackInputIdentity: writingFeedbackInputIdentity.isNotEmpty
+            ? writingFeedbackInputIdentity
+            : hasWritingFeedback && expressDraft.trim().isNotEmpty
+                ? journeyFeedbackInputIdentity(expressDraft)
+                : '',
+      );
+
   Map<String, dynamic> toJson() => <String, dynamic>{
         'journeyId': journeyId,
         'storageNamespace': storageNamespace,
+        'flowVersion': flowVersion,
         'step': step,
         'furthestStep': furthestStep,
         'completed': completed,
+        'compositeSubstage': compositeSubstage.storageValue,
+        'challengeAttemptSequence': challengeAttemptSequence,
+        'challengeAttemptId': challengeAttemptId,
         'wonderDraft': wonderDraft,
         'expressDraft': expressDraft,
         'memoryDraft': memoryDraft,
         'guideFeedbackReply': guideFeedbackReply,
         'guideFeedbackOffline': guideFeedbackOffline,
+        'guideFeedbackInputIdentity': guideFeedbackInputIdentity,
         'writingFeedbackCorrected': writingFeedbackCorrected,
         'writingFeedbackExplanation': writingFeedbackExplanation,
         'writingFeedbackNatural': writingFeedbackNatural,
         'writingFeedbackEncouragement': writingFeedbackEncouragement,
         'writingFeedbackOffline': writingFeedbackOffline,
+        'writingFeedbackInputIdentity': writingFeedbackInputIdentity,
         'narrationContentId': narrationContentId,
         'narrationContentSignature': narrationContentSignature,
         'narrationOffset': narrationOffset,
@@ -1528,19 +1783,25 @@ class _JourneyCriticalState {
       };
 
   _JourneyCriticalState copyWith({
+    int? flowVersion,
     int? step,
     int? furthestStep,
     bool? completed,
+    JourneyCompositeSubstage? compositeSubstage,
+    int? challengeAttemptSequence,
+    String? challengeAttemptId,
     String? wonderDraft,
     String? expressDraft,
     String? memoryDraft,
     String? guideFeedbackReply,
     bool? guideFeedbackOffline,
+    String? guideFeedbackInputIdentity,
     String? writingFeedbackCorrected,
     String? writingFeedbackExplanation,
     String? writingFeedbackNatural,
     String? writingFeedbackEncouragement,
     bool? writingFeedbackOffline,
+    String? writingFeedbackInputIdentity,
     String? narrationContentId,
     String? narrationContentSignature,
     int? narrationOffset,
@@ -1552,15 +1813,22 @@ class _JourneyCriticalState {
     return _JourneyCriticalState(
       journeyId: journeyId,
       storageNamespace: storageNamespace,
+      flowVersion: flowVersion ?? this.flowVersion,
       step: step ?? this.step,
       furthestStep: furthestStep ?? this.furthestStep,
       completed: completed ?? this.completed,
+      compositeSubstage: compositeSubstage ?? this.compositeSubstage,
+      challengeAttemptSequence:
+          challengeAttemptSequence ?? this.challengeAttemptSequence,
+      challengeAttemptId: challengeAttemptId ?? this.challengeAttemptId,
       wonderDraft: wonderDraft ?? this.wonderDraft,
       expressDraft: expressDraft ?? this.expressDraft,
       memoryDraft: memoryDraft ?? this.memoryDraft,
       guideFeedbackReply: guideFeedbackReply ?? this.guideFeedbackReply,
       guideFeedbackOffline:
           guideFeedbackOffline ?? this.guideFeedbackOffline,
+      guideFeedbackInputIdentity:
+          guideFeedbackInputIdentity ?? this.guideFeedbackInputIdentity,
       writingFeedbackCorrected:
           writingFeedbackCorrected ?? this.writingFeedbackCorrected,
       writingFeedbackExplanation:
@@ -1571,6 +1839,8 @@ class _JourneyCriticalState {
           writingFeedbackEncouragement ?? this.writingFeedbackEncouragement,
       writingFeedbackOffline:
           writingFeedbackOffline ?? this.writingFeedbackOffline,
+      writingFeedbackInputIdentity:
+          writingFeedbackInputIdentity ?? this.writingFeedbackInputIdentity,
       narrationContentId: replaceNullableNarration
           ? narrationContentId
           : narrationContentId ?? this.narrationContentId,
@@ -1601,6 +1871,11 @@ class _JourneyCriticalState {
         'Journey namespace mismatch for $journeyId.',
       );
     }
+    if (flowVersion != journeyFlowVersionFor(journeyId)) {
+      throw CriticalPersistenceException(
+        'Journey flow version is invalid for $journeyId: $flowVersion.',
+      );
+    }
     if (step < 0 ||
         step > AppState.journeyLastStep ||
         furthestStep < step ||
@@ -1614,6 +1889,60 @@ class _JourneyCriticalState {
             furthestStep != AppState.journeyLastStep)) {
       throw CriticalPersistenceException(
         'Journey completion state is inconsistent for $journeyId.',
+      );
+    }
+    if (journeyId == 'beijing-summer-palace') {
+      final allowedSubstages = switch (step) {
+        3 => const <JourneyCompositeSubstage>{
+            JourneyCompositeSubstage.reflection,
+            JourneyCompositeSubstage.challenge,
+          },
+        4 => const <JourneyCompositeSubstage>{
+            JourneyCompositeSubstage.writing,
+            JourneyCompositeSubstage.memory,
+          },
+        5 when completed => const <JourneyCompositeSubstage>{
+            JourneyCompositeSubstage.completed,
+          },
+        _ => const <JourneyCompositeSubstage>{
+            JourneyCompositeSubstage.none,
+          },
+      };
+      if (!allowedSubstages.contains(compositeSubstage)) {
+        throw CriticalPersistenceException(
+          'Composite substage ${compositeSubstage.name} is invalid for '
+          '$journeyId step $step.',
+        );
+      }
+    } else if (compositeSubstage != JourneyCompositeSubstage.none) {
+      throw CriticalPersistenceException(
+        'Non-pilot Journey $journeyId cannot persist a composite substage.',
+      );
+    }
+    if (challengeAttemptSequence < 0) {
+      throw CriticalPersistenceException(
+        'Challenge attempt sequence is invalid for $journeyId.',
+      );
+    }
+    if (challengeAttemptId.isNotEmpty &&
+        challengeAttemptId !=
+            '$journeyId:flow-v$flowVersion:attempt-$challengeAttemptSequence') {
+      throw CriticalPersistenceException(
+        'Challenge attempt identity is invalid for $journeyId.',
+      );
+    }
+    if (guideFeedbackReply.isNotEmpty &&
+        wonderDraft.trim().isNotEmpty &&
+        guideFeedbackInputIdentity.isEmpty) {
+      throw CriticalPersistenceException(
+        'Reflection feedback input identity is missing for $journeyId.',
+      );
+    }
+    if (hasWritingFeedback &&
+        expressDraft.trim().isNotEmpty &&
+        writingFeedbackInputIdentity.isEmpty) {
+      throw CriticalPersistenceException(
+        'Writing feedback input identity is missing for $journeyId.',
       );
     }
     if (narrationOffset < 0 ||
@@ -1635,6 +1964,32 @@ class _JourneyCriticalState {
       );
     }
   }
+}
+
+JourneyCompositeSubstage _inferCompositeSubstage({
+  required String journeyId,
+  required int step,
+  required bool completed,
+  required bool hasGuideFeedback,
+  required bool hasWritingFeedback,
+}) {
+  if (journeyId != 'beijing-summer-palace') {
+    return JourneyCompositeSubstage.none;
+  }
+  if (completed || step >= AppState.journeyLastStep) {
+    return JourneyCompositeSubstage.completed;
+  }
+  if (step == 3) {
+    return hasGuideFeedback
+        ? JourneyCompositeSubstage.challenge
+        : JourneyCompositeSubstage.reflection;
+  }
+  if (step == 4) {
+    return hasWritingFeedback
+        ? JourneyCompositeSubstage.memory
+        : JourneyCompositeSubstage.writing;
+  }
+  return JourneyCompositeSubstage.none;
 }
 
 Map<String, dynamic> _asStringMap(Object? value, String label) {
