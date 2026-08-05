@@ -123,7 +123,6 @@ void main() {
         '选择',
         '捡回',
         '错失',
-        '万寿山',
         '《留下痕迹的风景》',
         '不再替她调整构图',
         '交给她保存',
@@ -135,6 +134,11 @@ void main() {
             reason: '${difficulty.name}: $evidence must preserve causal order');
         cursor = next;
       }
+      expect(
+        story,
+        contains('万寿山'),
+        reason: '${difficulty.name}: relational photograph anchor',
+      );
     }
   });
 
