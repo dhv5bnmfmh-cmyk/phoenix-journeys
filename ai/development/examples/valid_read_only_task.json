@@ -1,0 +1,132 @@
+{
+  "task_id": "PHOENIX-PHASE-A-EXAMPLE-READ-ONLY",
+  "task_title": "Validate Phoenix governance structures without modifying product code",
+  "task_mode": "READ_ONLY_AUDIT",
+  "repository": "dhv5bnmfmh-cmyk/phoenix-journeys",
+  "expected_main": "d13129dfe2a7a25ea27d2a8f6d9b4da99f4b59f5",
+  "base_branch": "main",
+  "base_sha": "d13129dfe2a7a25ea27d2a8f6d9b4da99f4b59f5",
+  "head_branch": "main",
+  "initial_head_sha": "d13129dfe2a7a25ea27d2a8f6d9b4da99f4b59f5",
+  "current_head_sha": "d13129dfe2a7a25ea27d2a8f6d9b4da99f4b59f5",
+  "authorized_scope": "Read-only validation of Phoenix development-agent governance files.",
+  "allowed_paths": [
+    "docs/PHOENIX_DEVELOPMENT_AGENT_SYSTEM.md",
+    "ai/development/README.md",
+    "ai/development/agents/**",
+    "ai/development/policies/**",
+    "ai/development/schemas/**",
+    "ai/development/examples/**",
+    "tools/phoenix_agent_runner/**",
+    ".github/workflows/phoenix-agent-audit.yml",
+    ".github/pull_request_template.md"
+  ],
+  "forbidden_paths": [
+    "app/lib/**",
+    "app/test/**",
+    "worker/**",
+    "assets/**",
+    "audio/**",
+    "images/**",
+    ".github/workflows/deploy-cloudflare.yml",
+    ".github/workflows/preview-cloudflare.yml"
+  ],
+  "authorized_findings": [],
+  "prohibited_actions": [
+    "modify_audited_code",
+    "commit",
+    "push",
+    "direct_push_main",
+    "create_pr_comment",
+    "edit_pr_body",
+    "ready_pr",
+    "merge_pr",
+    "enable_auto_merge",
+    "release",
+    "deploy_production",
+    "delete_preview",
+    "delete_branch",
+    "start_next_phase"
+  ],
+  "applicable_rules": [
+    "PDA-R001",
+    "PDA-R002",
+    "PDA-R003",
+    "PDA-R004",
+    "PDA-R005",
+    "PDA-R006",
+    "PDA-R007",
+    "PDA-R008",
+    "PDA-R009",
+    "PDA-R010",
+    "PDA-R011",
+    "PDA-R012",
+    "PDA-R013",
+    "PDA-R014",
+    "PDA-R015",
+    "PDA-R016",
+    "PDA-R017",
+    "PDA-R018",
+    "PDA-R019",
+    "PDA-R020",
+    "PDA-R021",
+    "PDA-R022",
+    "PDA-R023",
+    "PDA-R024",
+    "PDA-R025",
+    "PDA-R026"
+  ],
+  "required_tests": [
+    "JSON parse validation",
+    "Agent Manifest validation",
+    "Rule Registry validation",
+    "Schema validation",
+    "Runner unit tests",
+    "Runner fixture tests"
+  ],
+  "required_evidence": [
+    "repository evidence",
+    "commit evidence",
+    "diff evidence",
+    "test evidence"
+  ],
+  "founder_gates": {
+    "founder_experience_required": false,
+    "founder_experience_result": "NOT_REQUIRED",
+    "founder_governance_review": "REQUIRED",
+    "ready_authorization": "NOT_PRESENT",
+    "merge_authorization": "NOT_PRESENT",
+    "preview_deletion_authorization": "NOT_PRESENT",
+    "next_phase_authorization": "NOT_PRESENT"
+  },
+  "external_disclosure": {
+    "permitted": false,
+    "services": [],
+    "content": []
+  },
+  "retry_limit": 0,
+  "stop_conditions": [
+    "repository_identity_mismatch",
+    "base_or_head_drift",
+    "unauthorized_path",
+    "scope_expansion",
+    "secret_detected"
+  ],
+  "builder_agent": "PhoenixBuilderAgent",
+  "auditor_agent": "PhoenixAuditAgent",
+  "requested_agents": [
+    "PhoenixGovernorAgent",
+    "PhoenixPlannerAgent",
+    "PhoenixVerifierAgent",
+    "PhoenixAuditAgent"
+  ],
+  "requested_actions": [
+    "READ_REPOSITORY",
+    "VALIDATE_CONFIG",
+    "GENERATE_AUDIT_REPORT"
+  ],
+  "evidence_manifest_path": "ai/development/examples/example_evidence_manifest.json",
+  "notes": [
+    "AI Review is not executed in Phase A and must remain NOT_RUN."
+  ]
+}

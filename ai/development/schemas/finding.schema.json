@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phoenix.local/schemas/finding.schema.json",
+  "title": "Phoenix Development Agent Finding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "finding_id",
+    "rule_id",
+    "title",
+    "area",
+    "severity",
+    "result",
+    "evidence_level",
+    "expected",
+    "actual",
+    "exact_paths",
+    "candidate_sha",
+    "stable_sha",
+    "evidence",
+    "root_cause",
+    "required_action",
+    "proposed_scope",
+    "auto_fix_permitted",
+    "founder_authorization_required",
+    "status"
+  ],
+  "properties": {
+    "finding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rule_id": {
+      "type": "string",
+      "pattern": "^PDA-R[0-9]{3}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "area": {
+      "type": "string",
+      "minLength": 1
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "P0",
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "REQUIRES_REVISION",
+        "REGRESSION",
+        "BLOCKED",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "evidence_level": {
+      "type": "string",
+      "enum": [
+        "VERIFIED",
+        "PARTIALLY_VERIFIED",
+        "UNVERIFIED",
+        "CONTRADICTORY"
+      ]
+    },
+    "expected": {
+      "type": "string"
+    },
+    "actual": {
+      "type": "string"
+    },
+    "exact_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "candidate_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "stable_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "root_cause": {
+      "type": "string"
+    },
+    "required_action": {
+      "type": "string"
+    },
+    "proposed_scope": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "auto_fix_permitted": {
+      "type": "boolean"
+    },
+    "founder_authorization_required": {
+      "type": "boolean"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "AUTHORIZATION_REQUIRED",
+        "AUTHORIZED",
+        "REMEDIATION_IN_PROGRESS",
+        "READY_FOR_REAUDIT",
+        "CLOSED",
+        "BLOCKED"
+      ]
+    }
+  }
+}

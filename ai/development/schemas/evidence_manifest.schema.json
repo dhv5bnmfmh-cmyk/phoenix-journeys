@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phoenix.local/schemas/evidence_manifest.schema.json",
+  "title": "Phoenix Evidence Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest_id",
+    "candidate_sha",
+    "evidence"
+  ],
+  "properties": {
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_id",
+          "evidence_type",
+          "source",
+          "command_or_path",
+          "candidate_sha",
+          "produced_at",
+          "result",
+          "evidence_level",
+          "limitations"
+        ],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_type": {
+            "type": "string",
+            "enum": [
+              "repository",
+              "commit",
+              "diff",
+              "test",
+              "ci",
+              "preview",
+              "mobile",
+              "ai_review",
+              "founder"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "command_or_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "candidate_sha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "produced_at": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_level": {
+            "type": "string",
+            "enum": [
+              "VERIFIED",
+              "PARTIALLY_VERIFIED",
+              "UNVERIFIED",
+              "CONTRADICTORY"
+            ]
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

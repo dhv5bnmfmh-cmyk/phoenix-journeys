@@ -1,0 +1,89 @@
+{
+  "policy_id": "phoenix-development-agent-founder-gate-policy",
+  "version": "1.0.0",
+  "gates": [
+    {
+      "gate_id": "founder_governance_review",
+      "purpose": "Approve governance design and evidence separation for Phase A.",
+      "required_for": [
+        "phase_a_completion"
+      ],
+      "independent_from": [
+        "deterministic_result",
+        "ai_review_result"
+      ],
+      "phase_a_state": "REQUIRED"
+    },
+    {
+      "gate_id": "founder_experience",
+      "purpose": "Evaluate product or mobile experience when applicable.",
+      "required_for": [
+        "visual_change",
+        "core_interaction_change",
+        "product_quality_judgment"
+      ],
+      "independent_from": [
+        "ci",
+        "ai_audit"
+      ],
+      "phase_a_state": "NOT_REQUIRED"
+    },
+    {
+      "gate_id": "ready_authorization",
+      "purpose": "Authorize Draft to Ready for an exact Candidate Head.",
+      "required_for": [
+        "ready_transition"
+      ],
+      "independent_from": [
+        "founder_experience",
+        "ai_audit",
+        "ci"
+      ],
+      "phase_a_state": "NOT_PRESENT"
+    },
+    {
+      "gate_id": "merge_authorization",
+      "purpose": "Authorize Merge for an exact Candidate Head.",
+      "required_for": [
+        "merge"
+      ],
+      "independent_from": [
+        "ready_authorization",
+        "founder_experience",
+        "ai_audit",
+        "ci"
+      ],
+      "phase_a_state": "NOT_PRESENT"
+    },
+    {
+      "gate_id": "preview_deletion_authorization",
+      "purpose": "Authorize destructive Preview cleanup under an explicit lifecycle rule.",
+      "required_for": [
+        "preview_delete"
+      ],
+      "independent_from": [
+        "merge_authorization"
+      ],
+      "phase_a_state": "NOT_PRESENT"
+    },
+    {
+      "gate_id": "next_phase_authorization",
+      "purpose": "Authorize Phase B or any other next phase.",
+      "required_for": [
+        "next_phase"
+      ],
+      "independent_from": [
+        "merge_authorization",
+        "ready_authorization"
+      ],
+      "phase_a_state": "NOT_PRESENT"
+    }
+  ],
+  "implication_rules": [
+    "CI_PASS_DOES_NOT_IMPLY_AI_AUDIT_PASS",
+    "AI_AUDIT_PASS_DOES_NOT_IMPLY_FOUNDER_EXPERIENCE_PASS",
+    "FOUNDER_EXPERIENCE_PASS_DOES_NOT_IMPLY_READY_AUTHORIZATION",
+    "READY_AUTHORIZATION_DOES_NOT_IMPLY_MERGE_AUTHORIZATION",
+    "MERGE_AUTHORIZATION_DOES_NOT_IMPLY_PREVIEW_DELETION_OR_NEXT_PHASE"
+  ]
+}

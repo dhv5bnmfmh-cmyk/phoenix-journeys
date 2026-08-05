@@ -1,0 +1,17 @@
+{
+  "manifest_id": "PDA-EVIDENCE-EXAMPLE-001",
+  "candidate_sha": "d13129dfe2a7a25ea27d2a8f6d9b4da99f4b59f5",
+  "evidence": [
+    {
+      "evidence_id": "PDA-EV-REPO-001",
+      "evidence_type": "repository",
+      "source": "local checkout",
+      "command_or_path": "git remote get-url origin",
+      "candidate_sha": "d13129dfe2a7a25ea27d2a8f6d9b4da99f4b59f5",
+      "produced_at": "2026-08-05T00:00:00Z",
+      "result": "PASS",
+      "evidence_level": "VERIFIED",
+      "limitations": []
+    }
+  ]
+}

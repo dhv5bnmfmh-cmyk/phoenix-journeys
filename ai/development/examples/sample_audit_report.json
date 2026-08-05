@@ -1,0 +1,43 @@
+{
+  "report_id": "PDA-AUDIT-EXAMPLE-001",
+  "task_id": "PHOENIX-PHASE-A-EXAMPLE-READ-ONLY",
+  "repository": "dhv5bnmfmh-cmyk/phoenix-journeys",
+  "base_sha": "d13129dfe2a7a25ea27d2a8f6d9b4da99f4b59f5",
+  "candidate_sha": "d13129dfe2a7a25ea27d2a8f6d9b4da99f4b59f5",
+  "generated_at": "2026-08-05T00:00:00Z",
+  "deterministic_result": "PASS",
+  "ai_review_result": "NOT_RUN",
+  "founder_gate_result": "REQUIRED",
+  "final_agent_decision": "DETERMINISTIC_GATES_PASS_FOUNDER_GOVERNANCE_REVIEW_REQUIRED",
+  "rule_results": [
+    {
+      "rule_id": "PDA-R001",
+      "enforcement_type": "HARD_GATE",
+      "result": "PASS",
+      "message": "Repository identity matches."
+    },
+    {
+      "rule_id": "PDA-R022",
+      "enforcement_type": "DETERMINISTIC_CHECK",
+      "result": "PASS",
+      "message": "AI Review Result is truthfully NOT_RUN."
+    },
+    {
+      "rule_id": "PDA-R011",
+      "enforcement_type": "FOUNDER_GATE",
+      "result": "REQUIRED",
+      "message": "Founder Governance Review remains required."
+    }
+  ],
+  "findings": [],
+  "summary": {
+    "changed_paths": [],
+    "unexpected_paths": [],
+    "hard_gate_failures": 0,
+    "deterministic_failures": 0
+  },
+  "limitations": [
+    "No external AI review was executed.",
+    "Deterministic PASS is not full product approval."
+  ]
+}

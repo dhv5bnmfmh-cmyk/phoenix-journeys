@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phoenix.local/schemas/audit_report.schema.json",
+  "title": "Phoenix Development Agent Audit Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_id",
+    "task_id",
+    "repository",
+    "base_sha",
+    "candidate_sha",
+    "generated_at",
+    "deterministic_result",
+    "ai_review_result",
+    "founder_gate_result",
+    "final_agent_decision",
+    "rule_results",
+    "findings",
+    "summary",
+    "limitations"
+  ],
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[^/]+/[^/]+$"
+    },
+    "base_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "candidate_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deterministic_result": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAILURE",
+        "BLOCKED"
+      ]
+    },
+    "ai_review_result": {
+      "type": "string",
+      "enum": [
+        "NOT_RUN",
+        "PASS",
+        "REQUIRES_REVISION",
+        "BLOCKED"
+      ]
+    },
+    "founder_gate_result": {
+      "type": "string",
+      "enum": [
+        "REQUIRED",
+        "PENDING",
+        "APPROVED",
+        "REJECTED",
+        "NOT_REQUIRED"
+      ]
+    },
+    "final_agent_decision": {
+      "type": "string",
+      "enum": [
+        "BLOCKED",
+        "FAILURE",
+        "DETERMINISTIC_GATES_PASS_FOUNDER_GOVERNANCE_REVIEW_REQUIRED",
+        "MODE_DISABLED_PENDING_FOUNDER_AUTHORIZATION",
+        "SCOPE_EXPANSION_REQUIRED"
+      ]
+    },
+    "rule_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "rule_id",
+          "enforcement_type",
+          "result",
+          "message"
+        ],
+        "properties": {
+          "rule_id": {
+            "type": "string"
+          },
+          "enforcement_type": {
+            "type": "string",
+            "enum": [
+              "HARD_GATE",
+              "DETERMINISTIC_CHECK",
+              "AI_REVIEW",
+              "FOUNDER_GATE"
+            ]
+          },
+          "result": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "changed_paths",
+        "unexpected_paths",
+        "hard_gate_failures",
+        "deterministic_failures"
+      ],
+      "properties": {
+        "changed_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unexpected_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hard_gate_failures": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deterministic_failures": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

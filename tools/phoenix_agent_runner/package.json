@@ -1,0 +1,15 @@
+{
+  "name": "phoenix-agent-runner",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "validate": "node src/cli.mjs validate-config --root ../..",
+    "audit": "node src/cli.mjs audit"
+  },
+  "dependencies": {}
+}

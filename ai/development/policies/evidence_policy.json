@@ -1,0 +1,44 @@
+{
+  "policy_id": "phoenix-development-agent-evidence-policy",
+  "version": "1.0.0",
+  "evidence_types": [
+    "repository",
+    "commit",
+    "diff",
+    "test",
+    "ci",
+    "preview",
+    "mobile",
+    "ai_review",
+    "founder"
+  ],
+  "required_fields": [
+    "evidence_id",
+    "evidence_type",
+    "source",
+    "command_or_path",
+    "candidate_sha",
+    "produced_at",
+    "result",
+    "evidence_level",
+    "limitations"
+  ],
+  "evidence_levels": [
+    "VERIFIED",
+    "PARTIALLY_VERIFIED",
+    "UNVERIFIED",
+    "CONTRADICTORY"
+  ],
+  "binding_rules": {
+    "candidate_sha_must_equal_current_head_for_pass": true,
+    "old_candidate_evidence_may_be_historical_only": true,
+    "queued_or_in_progress_is_not_success": true,
+    "not_run_must_remain_not_run": true,
+    "checkbox_is_not_evidence": true,
+    "preview_deployment_is_not_product_pass": true
+  },
+  "external_disclosure": {
+    "default": "NOT_PERMITTED",
+    "unpublished_content_to_unapproved_service": "BLOCKED"
+  }
+}

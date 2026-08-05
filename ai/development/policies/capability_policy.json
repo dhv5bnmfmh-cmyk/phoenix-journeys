@@ -1,0 +1,103 @@
+{
+  "policy_id": "phoenix-development-agent-capability-policy",
+  "version": "1.0.0",
+  "phase": "PHASE_A_READ_ONLY_FOUNDATION",
+  "allowed_task_modes": [
+    "READ_ONLY_AUDIT",
+    "GOVERNANCE_DOCUMENTATION"
+  ],
+  "disabled_task_modes": [
+    "AUTHORIZED_REMEDIATION",
+    "RUNTIME_DEVELOPMENT",
+    "VISUAL_REMEDIATION"
+  ],
+  "global_allowed_tools": [
+    "repository_read",
+    "git_read",
+    "filesystem_read",
+    "deterministic_local_process",
+    "github_event_read"
+  ],
+  "global_forbidden_tools": [
+    "external_ai",
+    "external_translation",
+    "external_image_generation",
+    "production_secret",
+    "repository_write_from_runner",
+    "github_comment_write",
+    "deployment_write"
+  ],
+  "global_forbidden_actions": [
+    "modify_audited_code",
+    "commit",
+    "push",
+    "direct_push_main",
+    "create_pr_comment",
+    "edit_pr_body",
+    "ready_pr",
+    "merge_pr",
+    "enable_auto_merge",
+    "release",
+    "deploy_production",
+    "delete_preview",
+    "delete_branch",
+    "start_next_phase"
+  ],
+  "agent_capabilities": {
+    "PhoenixGovernorAgent": {
+      "status": "ACTIVE_READ_ONLY",
+      "can_read": true,
+      "can_plan": false,
+      "can_verify": true,
+      "can_audit": false,
+      "can_write": false,
+      "can_approve": false
+    },
+    "PhoenixPlannerAgent": {
+      "status": "ACTIVE_READ_ONLY",
+      "can_read": true,
+      "can_plan": true,
+      "can_verify": false,
+      "can_audit": false,
+      "can_write": false,
+      "can_approve": false
+    },
+    "PhoenixBuilderAgent": {
+      "status": "DISABLED_PENDING_FOUNDER_AUTHORIZATION",
+      "can_read": false,
+      "can_plan": false,
+      "can_verify": false,
+      "can_audit": false,
+      "can_write": false,
+      "can_approve": false
+    },
+    "PhoenixVerifierAgent": {
+      "status": "ACTIVE_READ_ONLY",
+      "can_read": true,
+      "can_plan": false,
+      "can_verify": true,
+      "can_audit": false,
+      "can_write": false,
+      "can_approve": false
+    },
+    "PhoenixAuditAgent": {
+      "status": "ACTIVE_READ_ONLY",
+      "can_read": true,
+      "can_plan": false,
+      "can_verify": true,
+      "can_audit": true,
+      "can_write": false,
+      "can_approve": false
+    },
+    "PhoenixRemediationAgent": {
+      "status": "DISABLED_PENDING_FOUNDER_AUTHORIZATION",
+      "can_read": false,
+      "can_plan": false,
+      "can_verify": false,
+      "can_audit": false,
+      "can_write": false,
+      "can_approve": false
+    }
+  },
+  "mode_disabled_result": "MODE_DISABLED_PENDING_FOUNDER_AUTHORIZATION"
+}
