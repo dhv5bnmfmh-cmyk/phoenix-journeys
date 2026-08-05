@@ -91,11 +91,19 @@ class CriticalPersistenceStore {
     this.backend, {
     this.domain = phoenixCriticalStateDomain,
     this.schemaVersion = phoenixCriticalStateSchemaVersion,
-  });
+    Set<int>? readableSchemaVersions,
+  }) : readableSchemaVersions = Set<int>.unmodifiable(
+          readableSchemaVersions ??
+              <int>{
+                phoenixCriticalStateLegacySchemaVersion,
+                schemaVersion,
+              },
+        );
 
   static const String phoenixCriticalStateDomain =
       'phoenix.critical-local-state';
-  static const int phoenixCriticalStateSchemaVersion = 1;
+  static const int phoenixCriticalStateLegacySchemaVersion = 1;
+  static const int phoenixCriticalStateSchemaVersion = 2;
 
   static const String _recordAKey = 'phoenix.critical.record.a';
   static const String _recordBKey = 'phoenix.critical.record.b';
@@ -111,6 +119,7 @@ class CriticalPersistenceStore {
   final CriticalPersistenceBackend backend;
   final String domain;
   final int schemaVersion;
+  final Set<int> readableSchemaVersions;
 
   Future<void> _tail = Future<void>.value();
 
@@ -248,7 +257,8 @@ class CriticalPersistenceStore {
             'Critical witness domain mismatch in slot $slot.',
           );
         }
-        if (witnessSchema != schemaVersion) {
+        if (witnessSchema is! int ||
+            !readableSchemaVersions.contains(witnessSchema)) {
           throw CriticalPersistenceException(
             'Unsupported critical-state schema in witness $slot: '
             '$witnessSchema.',
@@ -273,7 +283,8 @@ class CriticalPersistenceStore {
         }
         final envelope = _decodeMap(recordText, 'record $slot');
         final record = _validateEnvelope(envelope, expectedSlot: slot);
-        if (record.revision != witnessRevision ||
+        if (record.schemaVersion != witnessSchema ||
+            record.revision != witnessRevision ||
             record.payloadHash != witnessHash) {
           throw CriticalPersistenceException(
             'Critical witness and record mismatch in slot $slot.',
@@ -369,6 +380,7 @@ class CriticalPersistenceStore {
 
     final committed = await _readCommittedUnlocked();
     if (committed == null ||
+        committed.schemaVersion != schemaVersion ||
         committed.revision != revision ||
         committed.payloadHash != hash ||
         committed.slot != slot) {
@@ -416,7 +428,8 @@ class CriticalPersistenceStore {
         'Critical record domain mismatch.',
       );
     }
-    if (envelopeSchema != schemaVersion) {
+    if (envelopeSchema is! int ||
+        !readableSchemaVersions.contains(envelopeSchema)) {
       throw CriticalPersistenceException(
         'Unsupported critical-state schema: $envelopeSchema.',
       );
@@ -441,7 +454,7 @@ class CriticalPersistenceStore {
     );
     final expectedHash = criticalPayloadHash(
       domain: domain,
-      schemaVersion: schemaVersion,
+      schemaVersion: envelopeSchema,
       revision: revision,
       payload: payload,
     );
@@ -452,7 +465,7 @@ class CriticalPersistenceStore {
     }
     return CriticalCommittedRecord(
       domain: domain,
-      schemaVersion: schemaVersion,
+      schemaVersion: envelopeSchema,
       revision: revision,
       slot: slot,
       payload: payload,
