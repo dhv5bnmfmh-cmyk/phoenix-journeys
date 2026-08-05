@@ -2,6 +2,7 @@ import '../agents/phoenix_language_level_agent.dart';
 import '../models/language_proficiency.dart';
 import '../services/journey_story_length_expander.dart';
 import '../services/narrative_quality_shaper.dart';
+import '../services/phoenix_story_length_policy.dart';
 import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
 import 'daily_journey_experience.dart';
@@ -98,9 +99,9 @@ JourneyLevelContent _resolveSummerPalaceN1Level({
   required Set<String> knownWords,
 }) {
   final level = profile.phoenixLevel ?? _legacySummerPalaceLevel(profile.band);
-  final plan = _languageLevelAgent.planFor(profile);
+  final target = phoenixStoryLengthTargetFor(profile);
   final base = summerPalaceN1LevelForPhoenixLevel(level).withReadingLimit(
-    paragraphCount: plan.paragraphCount,
+    paragraphCount: target.paragraphCount,
     discoveryCount: _summerPalaceN1DiscoveryCount(profile.band),
   );
   final context = <String>[
