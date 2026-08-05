@@ -55,6 +55,26 @@ void main() {
     }
   });
 
+  test('Summer Palace Lv.1 through Lv.10 preserve Pilot N1 invariants', () {
+    final journey = requireDailyJourneyExperience('beijing-summer-palace');
+    for (final profile in agent.allProfiles) {
+      final level = resolveAdaptiveJourneyLevel(journey, profile: profile);
+      final story = level.storyParagraphs.join();
+      expect(story, contains('许澄'), reason: profile.displayLabel);
+      expect(story, contains('周岚'), reason: profile.displayLabel);
+      expect(story, contains('旧照片'), reason: profile.displayLabel);
+      expect(story, contains('修复'), reason: profile.displayLabel);
+      expect(
+        story,
+        anyOf(contains('选择'), contains('先捡'), contains('放弃追光')),
+        reason: profile.displayLabel,
+      );
+      expect(level.storyAnnotations.length, level.storyParagraphs.length);
+      expect(level.wonderQuestion, isNotEmpty);
+      expect(level.expressQuestion, isNotEmpty);
+    }
+  });
+
   test('Lv.10 prompts stay specific across all journeys', () {
     final mastery = agent.allProfiles.last;
     final levels = allJourneyExperiences

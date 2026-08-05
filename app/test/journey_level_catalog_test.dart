@@ -44,9 +44,25 @@ void main() {
         greaterThanOrEqualTo(standard.discoveries.length),
       );
       expect(
-          challenge.storyAnnotations.length, challenge.storyParagraphs.length);
-      expect(challenge.wonderQuestion, contains('重新解释自然'));
-      expect(challenge.expressQuestion, contains('分析'));
+        challenge.storyAnnotations.length,
+        challenge.storyParagraphs.length,
+      );
+      expect(challenge.wonderQuestion, contains('摄影选择'));
+      expect(challenge.expressQuestion, contains('遗产态度'));
+    });
+
+    test('all difficulty modes preserve Pilot N1 causal identity', () {
+      for (final difficulty in JourneyDifficulty.values) {
+        final level = resolveJourneyLevel(journey, difficulty);
+        final story = level.storyParagraphs.join();
+        expect(story, contains('许澄'), reason: difficulty.name);
+        expect(story, contains('周岚'), reason: difficulty.name);
+        expect(story, contains('旧照片'), reason: difficulty.name);
+        expect(story, contains('修复'), reason: difficulty.name);
+        expect(story, anyOf(contains('选择'), contains('先把照片捡回来')),
+            reason: difficulty.name);
+        expect(level.storyAnnotations.length, level.storyParagraphs.length);
+      }
     });
 
     test('storage parser safely falls back to standard', () {

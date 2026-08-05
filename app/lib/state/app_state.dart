@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,41 @@ import '../services/journey_location_binding.dart';
 enum ScriptMode { simplified, traditional }
 
 enum AppLoadStatus { loading, ready, error }
+
+enum JourneyCompositeSubstage {
+  none,
+  reflection,
+  challenge,
+  writing,
+  memory,
+  completed,
+}
+
+extension JourneyCompositeSubstageStorage on JourneyCompositeSubstage {
+  String get storageValue => name;
+}
+
+JourneyCompositeSubstage parseJourneyCompositeSubstage(String? value) {
+  return JourneyCompositeSubstage.values.firstWhere(
+    (entry) => entry.storageValue == value,
+    orElse: () => JourneyCompositeSubstage.none,
+  );
+}
+
+const int summerPalaceJourneyFlowVersion = 2;
+
+int journeyFlowVersionFor(String journeyId) =>
+    journeyId == 'beijing-summer-palace' ? summerPalaceJourneyFlowVersion : 1;
+
+String journeyFeedbackInputIdentity(String input) {
+  final normalized = input.trim().replaceAll(RegExp(r'\s+'), ' ');
+  var hash = 0x811c9dc5;
+  for (final unit in utf8.encode(normalized)) {
+    hash ^= unit;
+    hash = (hash * 0x01000193) & 0xffffffff;
+  }
+  return 'fnv1a32:${hash.toRadixString(16).padLeft(8, '0')}:${normalized.length}';
+}
 
 enum SpecialJourneyUnlockStatus {
   unlocked,
@@ -93,16 +129,23 @@ class AppState extends ChangeNotifier {
   late String activeJourneyId;
   int _journeyStep = 0;
   int _journeyFurthestStep = 0;
+  int journeyFlowVersion = 1;
+  JourneyCompositeSubstage journeyCompositeSubstage =
+      JourneyCompositeSubstage.none;
+  int journeyChallengeAttemptSequence = 0;
+  String journeyChallengeAttemptId = '';
   String wonderDraft = '';
   String expressDraft = '';
   String memoryDraft = '';
   String guideFeedbackReply = '';
   bool guideFeedbackOffline = false;
+  String guideFeedbackInputIdentity = '';
   String writingFeedbackCorrected = '';
   String writingFeedbackExplanation = '';
   String writingFeedbackNatural = '';
   String writingFeedbackEncouragement = '';
   bool writingFeedbackOffline = false;
+  String writingFeedbackInputIdentity = '';
   String? journeyNarrationContentId;
   String? journeyNarrationContentSignature;
   int journeyNarrationOffset = 0;
@@ -151,12 +194,25 @@ class AppState extends ChangeNotifier {
   double get beijingJourneyProgress => journeyProgress;
   int get beijingJourneyProgressPercent => journeyProgressPercent;
 
-  String get journeyStepLabel =>
-      displayText(journeyStepLabels[_safeJourneyStep(_journeyStep)]);
+  String get journeyStepLabel => displayText(
+        _journeyLabelFor(_journeyStep, journeyCompositeSubstage),
+      );
   String get journeyFurthestStepLabel =>
       displayText(journeyStepLabels[_safeJourneyStep(_journeyFurthestStep)]);
   String get beijingJourneyStepLabel => journeyStepLabel;
   String get beijingJourneyFurthestStepLabel => journeyFurthestStepLabel;
+
+  String _journeyLabelFor(int step, JourneyCompositeSubstage substage) {
+    if (activeJourneyId == 'beijing-summer-palace') {
+      if (step == 3) {
+        return substage == JourneyCompositeSubstage.challenge ? '挑战' : '思考';
+      }
+      if (step == 4) {
+        return substage == JourneyCompositeSubstage.memory ? '回忆' : '表达';
+      }
+    }
+    return journeyStepLabels[_safeJourneyStep(step)];
+  }
 
   bool get hasGuideFeedback => guideFeedbackReply.trim().isNotEmpty;
   bool get hasWritingFeedback =>
@@ -164,6 +220,16 @@ class AppState extends ChangeNotifier {
       writingFeedbackExplanation.trim().isNotEmpty ||
       writingFeedbackNatural.trim().isNotEmpty ||
       writingFeedbackEncouragement.trim().isNotEmpty;
+
+  bool hasGuideFeedbackFor(String inputIdentity) =>
+      hasGuideFeedback &&
+      inputIdentity.isNotEmpty &&
+      guideFeedbackInputIdentity == inputIdentity;
+
+  bool hasWritingFeedbackFor(String inputIdentity) =>
+      hasWritingFeedback &&
+      inputIdentity.isNotEmpty &&
+      writingFeedbackInputIdentity == inputIdentity;
 
   bool isWordSaved(String word) => savedWords.contains(word);
   bool isJourneyStampEarned(String journeyId) =>
@@ -344,6 +410,7 @@ class AppState extends ChangeNotifier {
 
   void _loadActiveJourney(SharedPreferences prefs) {
     final isLegacyBeijing = activeJourneyId == 'beijing-forbidden-city';
+    final isSummerPalace = activeJourneyId == 'beijing-summer-palace';
     final storedDifficulty = _readJourneyString(prefs, 'difficulty');
     journeyDifficulty = parseJourneyDifficulty(storedDifficulty);
     journeyDifficultyChosen = storedDifficulty != null;
@@ -378,6 +445,11 @@ class AppState extends ChangeNotifier {
     guideFeedbackReply = _readJourneyString(prefs, 'guideFeedbackReply') ?? '';
     guideFeedbackOffline =
         _readJourneyBool(prefs, 'guideFeedbackOffline') ?? false;
+    guideFeedbackInputIdentity =
+        _readJourneyString(prefs, 'guideFeedbackInputIdentity') ??
+        (guideFeedbackReply.isNotEmpty && wonderDraft.trim().isNotEmpty
+            ? journeyFeedbackInputIdentity(wonderDraft)
+            : '');
     writingFeedbackCorrected =
         _readJourneyString(prefs, 'writingFeedbackCorrected') ?? '';
     writingFeedbackExplanation =
@@ -388,6 +460,26 @@ class AppState extends ChangeNotifier {
         _readJourneyString(prefs, 'writingFeedbackEncouragement') ?? '';
     writingFeedbackOffline =
         _readJourneyBool(prefs, 'writingFeedbackOffline') ?? false;
+    writingFeedbackInputIdentity =
+        _readJourneyString(prefs, 'writingFeedbackInputIdentity') ??
+        (hasWritingFeedback && expressDraft.trim().isNotEmpty
+            ? journeyFeedbackInputIdentity(expressDraft)
+            : '');
+    journeyFlowVersion =
+        _readJourneyInt(prefs, 'flowVersion') ??
+        journeyFlowVersionFor(activeJourneyId);
+    journeyChallengeAttemptSequence = math.max(
+      0,
+      _readJourneyInt(prefs, 'challengeAttemptSequence') ?? 0,
+    );
+    journeyChallengeAttemptId =
+        _readJourneyString(prefs, 'challengeAttemptId') ?? '';
+    final storedSubstage = _readJourneyString(prefs, 'compositeSubstage');
+    journeyCompositeSubstage = isSummerPalace
+        ? storedSubstage == null
+            ? _inferLegacySummerPalaceSubstage()
+            : parseJourneyCompositeSubstage(storedSubstage)
+        : JourneyCompositeSubstage.none;
     journeyNarrationContentId = _readJourneyString(
       prefs,
       'narrationContentId',
@@ -427,21 +519,59 @@ class AppState extends ChangeNotifier {
     if (journeyCompleted) {
       _journeyStep = journeyLastStep;
       _journeyFurthestStep = journeyLastStep;
+      journeyCompositeSubstage = isSummerPalace
+          ? JourneyCompositeSubstage.completed
+          : JourneyCompositeSubstage.none;
+      journeyChallengeAttemptId = '';
     }
   }
 
+  JourneyCompositeSubstage _inferLegacySummerPalaceSubstage() {
+    if (journeyCompleted || _journeyStep >= journeyLastStep) {
+      return JourneyCompositeSubstage.completed;
+    }
+    if (_journeyStep == 3) {
+      return hasGuideFeedback
+          ? JourneyCompositeSubstage.challenge
+          : JourneyCompositeSubstage.reflection;
+    }
+    if (_journeyStep == 4) {
+      return hasWritingFeedback
+          ? JourneyCompositeSubstage.memory
+          : JourneyCompositeSubstage.writing;
+    }
+    return JourneyCompositeSubstage.none;
+  }
+
   Future<void> _migrateActiveJourneyStorage(SharedPreferences prefs) async {
-    if (prefs.containsKey(_key('step'))) return;
+    if (prefs.containsKey(_key('step')) &&
+        prefs.containsKey(_key('flowVersion'))) {
+      return;
+    }
 
     final writes = <Future<bool>>[
       prefs.setInt(_key('step'), _journeyStep),
       prefs.setInt(_key('furthestStep'), _journeyFurthestStep),
       prefs.setBool(_key('completed'), journeyCompleted),
+      prefs.setInt(_key('flowVersion'), journeyFlowVersion),
+      prefs.setString(
+        _key('compositeSubstage'),
+        journeyCompositeSubstage.storageValue,
+      ),
+      prefs.setInt(
+        _key('challengeAttemptSequence'),
+        journeyChallengeAttemptSequence,
+      ),
+      prefs.setString(_key('challengeAttemptId'), journeyChallengeAttemptId),
       prefs.setString(_key('wonderDraft'), wonderDraft),
       prefs.setString(_key('expressDraft'), expressDraft),
       prefs.setString(_key('memoryDraft'), memoryDraft),
       prefs.setString(_key('guideFeedbackReply'), guideFeedbackReply),
       prefs.setBool(_key('guideFeedbackOffline'), guideFeedbackOffline),
+      prefs.setString(
+        _key('guideFeedbackInputIdentity'),
+        guideFeedbackInputIdentity,
+      ),
       prefs.setString(
         _key('writingFeedbackCorrected'),
         writingFeedbackCorrected,
@@ -456,6 +586,10 @@ class AppState extends ChangeNotifier {
         writingFeedbackEncouragement,
       ),
       prefs.setBool(_key('writingFeedbackOffline'), writingFeedbackOffline),
+      prefs.setString(
+        _key('writingFeedbackInputIdentity'),
+        writingFeedbackInputIdentity,
+      ),
     ];
     if (journeyUpdatedAt != null) {
       writes.add(
@@ -472,7 +606,7 @@ class AppState extends ChangeNotifier {
   Future<void> activateJourney(String journeyId) async {
     final journey = requireDailyJourneyExperience(journeyId);
     final binding = requireJourneyLocation(journey.id);
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
 
     if (journey.id != activeJourneyId) {
       activeJourneyId = journey.id;
@@ -498,7 +632,7 @@ class AppState extends ChangeNotifier {
         : ScriptMode.simplified;
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     await prefs.setBool('traditional', scriptMode == ScriptMode.traditional);
   }
 
@@ -509,7 +643,7 @@ class AppState extends ChangeNotifier {
 
   Future<void> setTranslationLanguage(String value) async {
     translationLanguage = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     await prefs.setString('translationLanguage', value);
     notifyListeners();
   }
@@ -519,7 +653,7 @@ class AppState extends ChangeNotifier {
     journeyDifficultyChosen = true;
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     await prefs.setString(_key('difficulty'), value.storageValue);
   }
 
@@ -625,7 +759,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> _persistWallet() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     final awarded = awardedChallengeIds.toList()..sort();
     final unlocked = unlockedSpecialJourneyIds.toList()..sort();
     await Future.wait([
@@ -646,7 +780,7 @@ class AppState extends ChangeNotifier {
     }
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     final orderedWords = savedWords.toList()..sort();
     await prefs.setStringList('savedWords', orderedWords);
   }
@@ -656,25 +790,54 @@ class AppState extends ChangeNotifier {
     required String wonder,
     required String express,
     required String memory,
+    JourneyCompositeSubstage? compositeSubstage,
   }) async {
     final safeStep = _safeJourneyStep(step);
     _journeyStep = safeStep;
     _journeyFurthestStep = math.max(_journeyFurthestStep, safeStep).toInt();
+    journeyFlowVersion = journeyFlowVersionFor(activeJourneyId);
+    journeyCompositeSubstage = activeJourneyId == 'beijing-summer-palace'
+        ? compositeSubstage ?? journeyCompositeSubstage
+        : JourneyCompositeSubstage.none;
     wonderDraft = wonder;
     expressDraft = express;
     memoryDraft = memory;
     journeyUpdatedAt = _clock();
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     await Future.wait([
       prefs.setInt(_key('step'), _journeyStep),
       prefs.setInt(_key('furthestStep'), _journeyFurthestStep),
+      prefs.setInt(_key('flowVersion'), journeyFlowVersion),
+      prefs.setString(
+        _key('compositeSubstage'),
+        journeyCompositeSubstage.storageValue,
+      ),
       prefs.setString(_key('wonderDraft'), wonderDraft),
       prefs.setString(_key('expressDraft'), expressDraft),
       prefs.setString(_key('memoryDraft'), memoryDraft),
       prefs.setString(_key('updatedAt'), journeyUpdatedAt!.toIso8601String()),
     ]);
+  }
+
+  Future<String> ensureChallengeAttemptIdentity() async {
+    if (journeyChallengeAttemptId.isNotEmpty) {
+      return journeyChallengeAttemptId;
+    }
+    journeyChallengeAttemptSequence += 1;
+    journeyChallengeAttemptId =
+        '$activeJourneyId:flow-v$journeyFlowVersion:attempt-$journeyChallengeAttemptSequence';
+    final prefs = await _preferencesLoader();
+    await Future.wait([
+      prefs.setInt(
+        _key('challengeAttemptSequence'),
+        journeyChallengeAttemptSequence,
+      ),
+      prefs.setString(_key('challengeAttemptId'), journeyChallengeAttemptId),
+    ]);
+    notifyListeners();
+    return journeyChallengeAttemptId;
   }
 
   Future<void> saveJourneyNarrationPosition({
@@ -688,7 +851,7 @@ class AppState extends ChangeNotifier {
     journeyNarrationOffset = safeOffset;
     _journeyNarrationSignatures[contentId] = contentSignature;
     _journeyNarrationOffsets[contentId] = safeOffset;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     await Future.wait([
       prefs.setString(_key('narrationContentId'), contentId),
       prefs.setString(_key('narrationContentSignature'), contentSignature),
@@ -699,7 +862,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> clearJourneyNarrationPosition({String? contentId}) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     if (contentId != null) {
       _journeyNarrationSignatures.remove(contentId);
       _journeyNarrationOffsets.remove(contentId);
@@ -734,28 +897,50 @@ class AppState extends ChangeNotifier {
   Future<void> saveGuideFeedback({
     required String reply,
     required bool isOfflineFallback,
+    String inputIdentity = '',
   }) async {
     guideFeedbackReply = reply.trim();
     guideFeedbackOffline = isOfflineFallback;
+    guideFeedbackInputIdentity = inputIdentity;
+    if (activeJourneyId == 'beijing-summer-palace') {
+      journeyCompositeSubstage = JourneyCompositeSubstage.challenge;
+    }
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     await Future.wait([
       prefs.setString(_key('guideFeedbackReply'), guideFeedbackReply),
       prefs.setBool(_key('guideFeedbackOffline'), guideFeedbackOffline),
+      prefs.setString(
+        _key('guideFeedbackInputIdentity'),
+        guideFeedbackInputIdentity,
+      ),
+      prefs.setString(
+        _key('compositeSubstage'),
+        journeyCompositeSubstage.storageValue,
+      ),
     ]);
   }
 
   Future<void> clearGuideFeedback() async {
-    if (!hasGuideFeedback) return;
+    if (!hasGuideFeedback && guideFeedbackInputIdentity.isEmpty) return;
     guideFeedbackReply = '';
     guideFeedbackOffline = false;
+    guideFeedbackInputIdentity = '';
+    if (activeJourneyId == 'beijing-summer-palace' && _journeyStep == 3) {
+      journeyCompositeSubstage = JourneyCompositeSubstage.reflection;
+    }
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     await Future.wait([
       prefs.remove(_key('guideFeedbackReply')),
       prefs.remove(_key('guideFeedbackOffline')),
+      prefs.remove(_key('guideFeedbackInputIdentity')),
+      prefs.setString(
+        _key('compositeSubstage'),
+        journeyCompositeSubstage.storageValue,
+      ),
     ]);
   }
 
@@ -765,15 +950,20 @@ class AppState extends ChangeNotifier {
     required String natural,
     required String encouragement,
     required bool isOfflineFallback,
+    String inputIdentity = '',
   }) async {
     writingFeedbackCorrected = corrected.trim();
     writingFeedbackExplanation = explanation.trim();
     writingFeedbackNatural = natural.trim();
     writingFeedbackEncouragement = encouragement.trim();
     writingFeedbackOffline = isOfflineFallback;
+    writingFeedbackInputIdentity = inputIdentity;
+    if (activeJourneyId == 'beijing-summer-palace') {
+      journeyCompositeSubstage = JourneyCompositeSubstage.memory;
+    }
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     await Future.wait([
       prefs.setString(
         _key('writingFeedbackCorrected'),
@@ -789,25 +979,42 @@ class AppState extends ChangeNotifier {
         writingFeedbackEncouragement,
       ),
       prefs.setBool(_key('writingFeedbackOffline'), writingFeedbackOffline),
+      prefs.setString(
+        _key('writingFeedbackInputIdentity'),
+        writingFeedbackInputIdentity,
+      ),
+      prefs.setString(
+        _key('compositeSubstage'),
+        journeyCompositeSubstage.storageValue,
+      ),
     ]);
   }
 
   Future<void> clearWritingFeedback() async {
-    if (!hasWritingFeedback) return;
+    if (!hasWritingFeedback && writingFeedbackInputIdentity.isEmpty) return;
     writingFeedbackCorrected = '';
     writingFeedbackExplanation = '';
     writingFeedbackNatural = '';
     writingFeedbackEncouragement = '';
     writingFeedbackOffline = false;
+    writingFeedbackInputIdentity = '';
+    if (activeJourneyId == 'beijing-summer-palace' && _journeyStep == 4) {
+      journeyCompositeSubstage = JourneyCompositeSubstage.writing;
+    }
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     await Future.wait([
       prefs.remove(_key('writingFeedbackCorrected')),
       prefs.remove(_key('writingFeedbackExplanation')),
       prefs.remove(_key('writingFeedbackNatural')),
       prefs.remove(_key('writingFeedbackEncouragement')),
       prefs.remove(_key('writingFeedbackOffline')),
+      prefs.remove(_key('writingFeedbackInputIdentity')),
+      prefs.setString(
+        _key('compositeSubstage'),
+        journeyCompositeSubstage.storageValue,
+      ),
     ]);
   }
 
@@ -815,6 +1022,9 @@ class AppState extends ChangeNotifier {
     journeyCompleted = false;
     _journeyStep = 0;
     _journeyFurthestStep = 0;
+    journeyFlowVersion = journeyFlowVersionFor(activeJourneyId);
+    journeyCompositeSubstage = JourneyCompositeSubstage.none;
+    journeyChallengeAttemptId = '';
     wonderDraft = '';
     expressDraft = '';
     memoryDraft = '';
@@ -825,19 +1035,27 @@ class AppState extends ChangeNotifier {
     _journeyNarrationOffsets.clear();
     guideFeedbackReply = '';
     guideFeedbackOffline = false;
+    guideFeedbackInputIdentity = '';
     writingFeedbackCorrected = '';
     writingFeedbackExplanation = '';
     writingFeedbackNatural = '';
     writingFeedbackEncouragement = '';
     writingFeedbackOffline = false;
+    writingFeedbackInputIdentity = '';
     journeyUpdatedAt = _clock();
     notifyListeners();
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     await Future.wait([
       prefs.setBool(_key('completed'), false),
       prefs.setInt(_key('step'), 0),
       prefs.setInt(_key('furthestStep'), 0),
+      prefs.setInt(_key('flowVersion'), journeyFlowVersion),
+      prefs.setString(
+        _key('compositeSubstage'),
+        journeyCompositeSubstage.storageValue,
+      ),
+      prefs.remove(_key('challengeAttemptId')),
       prefs.remove(_key('wonderDraft')),
       prefs.remove(_key('expressDraft')),
       prefs.remove(_key('memoryDraft')),
@@ -850,11 +1068,13 @@ class AppState extends ChangeNotifier {
         prefs.remove(_narrationKey(id, 'offset')),
       prefs.remove(_key('guideFeedbackReply')),
       prefs.remove(_key('guideFeedbackOffline')),
+      prefs.remove(_key('guideFeedbackInputIdentity')),
       prefs.remove(_key('writingFeedbackCorrected')),
       prefs.remove(_key('writingFeedbackExplanation')),
       prefs.remove(_key('writingFeedbackNatural')),
       prefs.remove(_key('writingFeedbackEncouragement')),
       prefs.remove(_key('writingFeedbackOffline')),
+      prefs.remove(_key('writingFeedbackInputIdentity')),
       prefs.setString(_key('updatedAt'), journeyUpdatedAt!.toIso8601String()),
     ]);
   }
@@ -864,6 +1084,10 @@ class AppState extends ChangeNotifier {
     earnedJourneyStampIds.add(activeJourneyId);
     _journeyStep = journeyLastStep;
     _journeyFurthestStep = journeyLastStep;
+    journeyCompositeSubstage = activeJourneyId == 'beijing-summer-palace'
+        ? JourneyCompositeSubstage.completed
+        : JourneyCompositeSubstage.none;
+    journeyChallengeAttemptId = '';
     if (memory.trim().isNotEmpty) {
       memories.insert(0, '${activeJourney.stampTitle}｜${memory.trim()}');
     }
@@ -877,7 +1101,7 @@ class AppState extends ChangeNotifier {
     _journeyNarrationOffsets.clear();
     journeyUpdatedAt = _clock();
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _preferencesLoader();
     final stamps = earnedJourneyStampIds.toList()..sort();
     await Future.wait([
       prefs.setBool(_key('completed'), true),
@@ -885,6 +1109,11 @@ class AppState extends ChangeNotifier {
       prefs.setStringList('memories', memories),
       prefs.setInt(_key('step'), journeyLastStep),
       prefs.setInt(_key('furthestStep'), journeyLastStep),
+      prefs.setString(
+        _key('compositeSubstage'),
+        journeyCompositeSubstage.storageValue,
+      ),
+      prefs.remove(_key('challengeAttemptId')),
       prefs.remove(_key('wonderDraft')),
       prefs.remove(_key('expressDraft')),
       prefs.remove(_key('memoryDraft')),

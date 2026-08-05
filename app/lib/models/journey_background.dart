@@ -9,6 +9,7 @@ enum JourneyBackgroundPage {
   writing,
   memory,
   completion,
+  challenge,
 }
 
 enum JourneyBackgroundOrigin { aiGenerated, originalSeed }
