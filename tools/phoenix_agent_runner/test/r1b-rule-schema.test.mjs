@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { assertMandatoryRuleInventory, assertTrustedSchemaInventory } from '../src/rule-authority.mjs';
+import { compileTrustedSchema, validateObject } from '../src/schema-validator.mjs';
+const root=resolve(import.meta.dirname,'../../..'), load=p=>JSON.parse(readFileSync(resolve(root,p),'utf8'));
+const registry=load('ai/development/policies/rule_registry.json'), inventory=load('ai/development/policies/trusted_rule_inventory.json'), si=load('ai/development/policies/trusted_schema_inventory.json'), schemas=Object.fromEntries(si.schemas.map(x=>[x.path,load(x.path)]));
+test('mandatory PDA-R001 through PDA-R026 inventory passes',()=>assert.match(assertMandatoryRuleInventory(registry,inventory),/^[0-9a-f]{64}$/));
+test('Missing PDA-R016 blocks',()=>{const c=structuredClone(registry);c.rules=c.rules.filter(r=>r.rule_id!=='PDA-R016');assert.throws(()=>assertMandatoryRuleInventory(c,inventory),/PDA-R016/)});
+test('Changed Rule severity blocks',()=>{const c=structuredClone(registry);c.rules[0].severity='P3';assert.throws(()=>assertMandatoryRuleInventory(c,inventory),/AUTHORITY_CHANGED/)});
+test('Changed enforcement type blocks',()=>{const c=structuredClone(registry);c.rules[0].enforcement_type='AI_REVIEW';assert.throws(()=>assertMandatoryRuleInventory(c,inventory),/AUTHORITY_CHANGED/)});
+test('Schema replaced by empty object blocks',()=>{const c={...schemas,[si.schemas[0].path]:{}};assert.throws(()=>assertTrustedSchemaInventory(c,si),/AUTHORITY_CHANGED/)});
+test('Unsupported Schema keyword blocks',()=>assert.throws(()=>compileTrustedSchema({$schema:'https://json-schema.org/draft/2020-12/schema',type:'object',phoenixUnknownKeyword:true},'unsupported'),/UNSUPPORTED|INVALID/));
+test('Invalid Finding blocks',()=>assert.throws(()=>validateObject(schemas['ai/development/schemas/finding.schema.json'],{finding_id:'x'},'finding'),/FINDING_SCHEMA_INVALID/));
+test('Invalid Audit Report blocks',()=>assert.throws(()=>validateObject(schemas['ai/development/schemas/audit_report.schema.json'],{report_id:'x'},'audit_report'),/AUDIT_REPORT_SCHEMA_INVALID/));
+test('Trusted schema inventory passes',()=>assert.match(assertTrustedSchemaInventory(schemas,si),/^[0-9a-f]{64}$/));

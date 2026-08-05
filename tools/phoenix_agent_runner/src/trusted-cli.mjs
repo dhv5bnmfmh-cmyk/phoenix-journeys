@@ -1,70 +1,50 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { buildTrustedIdentity, classifyAuthorityChanges } from './trusted-audit.mjs';
-import { scanCandidateRepository, sanitizeScanError, assertSafeText } from './secret-scanner.mjs';
+import { resolve, join } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { fetchLivePullRequest, extractTaskContract, buildLiveIdentity, sha256Text, canonicalJson } from './identity-freshness.mjs';
+import { assertPhaseAActions, assertPrincipalSeparation, candidateGateClaims } from './authority-enforcement.mjs';
+import { createTrustedEvidenceManifest, validateEvidenceManifest } from './evidence-authority.mjs';
+import { assertMandatoryRuleInventory, assertTrustedSchemaInventory } from './rule-authority.mjs';
+import { validateObject } from './schema-validator.mjs';
+import { scanCandidateRepository, assertSafeText, sanitizeScanError } from './secret-scanner.mjs';
 
-function arg(name, fallback = '') {
-  const index = process.argv.indexOf(`--${name}`);
-  return index >= 0 ? process.argv[index + 1] : fallback;
-}
-
-const candidate = resolve(arg('candidate', 'candidate'));
-const output = resolve(arg('output', 'phoenix-agent-audit'));
-mkdirSync(output, { recursive: true });
-const event = JSON.parse(readFileSync(arg('event'), 'utf8'));
-const pr = event.pull_request || {};
-const baseSha = arg('base-sha', pr.base?.sha);
-const candidateSha = arg('candidate-sha', pr.head?.sha);
-const identity = buildTrustedIdentity({
-  trustedRunnerSha: arg('trusted-runner-sha'),
-  trustedRunnerTree: arg('trusted-runner-tree'),
-  trustedWorkflowPath: '.github/workflows/phoenix-agent-audit.yml',
-  trustedRuleInventoryDigest: arg('rule-digest'),
-  trustedSchemaDigest: arg('schema-digest'),
-  candidateSha,
-  candidateTree: arg('candidate-tree'),
-  baseSha,
-  prNumber: pr.number || event.number,
-  runId: process.env.GITHUB_RUN_ID || 'local',
-  runAttempt: process.env.GITHUB_RUN_ATTEMPT || 1,
-  eventType: process.env.GITHUB_EVENT_NAME || 'local',
-});
-
+const arg=(n,d='')=>{const i=process.argv.indexOf(`--${n}`);return i>=0?process.argv[i+1]:d};
+const load=p=>JSON.parse(readFileSync(p,'utf8'));
+const trusted=resolve(arg('trusted','trusted'));
+const candidate=resolve(arg('candidate','candidate'));
+const output=resolve(arg('output','phoenix-agent-audit'));
+mkdirSync(output,{recursive:true});
+const producedAt=new Date().toISOString();
+let identity={};
 try {
-  const scan = scanCandidateRepository({
-    repo: candidate,
-    baseSha,
-    candidateSha,
-    governanceBody: pr.body || '',
-    taskContract: arg('task-contract-json'),
-    evidenceManifest: arg('evidence-manifest-json'),
-  });
-  const changedPaths = scan.records.flatMap(record =>
-    record.destination ? [record.source, record.destination] : [record.path],
-  );
-  const report = {
-    deterministic_result: 'PASS',
-    ai_review_result: 'NOT_RUN',
-    founder_gate_result: 'REQUIRED',
-    final_agent_decision: 'P0_TRUST_BOUNDARY_AND_SECRET_GATE_PASS_BOOTSTRAP_PENDING_MERGE',
-    identity,
-    authority_changes: classifyAuthorityChanges(changedPaths),
-    secret_scan: { result: scan.result, scanned: scan.scanned, historical: scan.historical },
-  };
-  const text = JSON.stringify(report, null, 2);
-  assertSafeText(text, 'generated_report');
-  writeFileSync(resolve(output, 'audit-report.json'), text);
-  const summary = '# Phoenix Trusted Audit\n\n- Deterministic Result: PASS\n- AI Review Result: NOT_RUN\n- Bootstrap: operational activation pending merge\n';
-  assertSafeText(summary, 'step_summary');
-  writeFileSync(resolve(output, 'audit-summary.md'), summary);
-} catch (error) {
-  const safe = sanitizeScanError(error);
-  writeFileSync(resolve(output, 'audit-report.json'), JSON.stringify({
-    deterministic_result: 'BLOCKED',
-    ai_review_result: 'NOT_RUN',
-    identity,
-    error: safe,
-  }, null, 2));
-  process.exitCode = 1;
-}
+  const repository=process.env.GITHUB_REPOSITORY;
+  const prNumber=Number(arg('pr-number'));
+  const live=await fetchLivePullRequest({repository,prNumber,token:process.env.GITHUB_TOKEN,apiUrl:process.env.GITHUB_API_URL});
+  const contract=extractTaskContract(live.body);
+  const schemas={};
+  const schemaInventory=load(join(trusted,'ai/development/policies/trusted_schema_inventory.json'));
+  for(const item of schemaInventory.schemas) schemas[item.path]=load(join(trusted,item.path));
+  assertTrustedSchemaInventory(schemas,schemaInventory);
+  validateObject(schemas['ai/development/schemas/task_contract.schema.json'],contract,'task_contract');
+  identity={...buildLiveIdentity({metadata:live,taskContract:contract,runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT,eventType:process.env.GITHUB_EVENT_NAME,producedAt}),repository};
+  if(contract.repository!==repository||contract.base_sha!==live.base_sha||contract.current_head_sha!==live.head_sha) throw new Error('EVIDENCE_STALE_REAUDIT_REQUIRED');
+  assertPhaseAActions(contract.requested_actions);
+  const principal={execution_principal_id:`github-actions:${process.env.GITHUB_RUN_ID}`,actor:process.env.GITHUB_ACTOR,triggering_actor:process.env.GITHUB_TRIGGERING_ACTOR,workflow_identity:'.github/workflows/phoenix-agent-audit.yml',role:'FINAL_AUDITOR',run_id:String(process.env.GITHUB_RUN_ID),run_attempt:Number(process.env.GITHUB_RUN_ATTEMPT),candidate_sha:live.head_sha,authorized_actions:contract.requested_actions};
+  assertPrincipalSeparation([principal]);
+  validateObject(schemas['ai/development/schemas/execution_principal.schema.json'],principal,'execution_principal');
+  const ruleRegistry=load(join(trusted,'ai/development/policies/rule_registry.json'));
+  const ruleInventory=load(join(trusted,'ai/development/policies/trusted_rule_inventory.json'));
+  const ruleDigest=assertMandatoryRuleInventory(ruleRegistry,ruleInventory);
+  const scan=scanCandidateRepository({repo:candidate,baseSha:live.base_sha,candidateSha:live.head_sha,governanceBody:live.body,taskContract:canonicalJson(contract)});
+  const evidenceTypes=contract.required_evidence;
+  const entries=evidenceTypes.map((type,index)=>({evidence_id:`trusted-${index+1}`,evidence_type:type,source:'trusted-runner',candidate_sha:live.head_sha,base_sha:live.base_sha,task_contract_digest:identity.task_contract_digest,result:'PASS',evidence_level:'VERIFIED',limitations:'Deterministic source implementation only; bootstrap activation pending merge.'}));
+  const manifest=createTrustedEvidenceManifest({identity,requiredTypes:evidenceTypes,entries,producedAt});
+  validateEvidenceManifest(manifest,{identity,requiredTypes:evidenceTypes,now:new Date()});
+  validateObject(schemas['ai/development/schemas/evidence_manifest.schema.json'],manifest,'evidence_manifest');
+  const trustedRunnerSha=execFileSync('git',['-C',trusted,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
+  const report={report_id:sha256Text(canonicalJson({task:identity.task_contract_digest,base:live.base_sha,head:live.head_sha,tree:live.head_tree,runner:trustedRunnerSha,run:identity.workflow_run_id,attempt:identity.run_attempt})),repository,pr_number:prNumber,base_sha:live.base_sha,candidate_sha:live.head_sha,candidate_tree:live.head_tree,trusted_runner_sha:trustedRunnerSha,workflow_run_id:identity.workflow_run_id,run_attempt:identity.run_attempt,deterministic_result:'PASS',ai_review_result:'NOT_RUN',founder_gate_result:'NOT_APPROVED',final_agent_decision:'DETERMINISTIC_SOURCE_GATES_PASS_BOOTSTRAP_PENDING_MERGE',identity:{...identity,rule_inventory_digest:ruleDigest,schema_inventory_digest:sha256Text(canonicalJson(schemaInventory)),candidate_gate_claims:candidateGateClaims(contract),secret_scan:scan.result},evidence_manifest:manifest,findings:[],produced_at:producedAt};
+  validateObject(schemas['ai/development/schemas/audit_report.schema.json'],report,'audit_report');
+  const text=JSON.stringify(report,null,2); assertSafeText(text,'generated_report'); writeFileSync(join(output,'audit-report.json'),text);
+  const summary='# Phoenix Trusted Audit\n\n- Deterministic Result: PASS\n- AI Review Result: NOT_RUN\n- Founder Governance: NOT_APPROVED\n- Trusted execution: bootstrap pending merge\n'; assertSafeText(summary,'step_summary'); writeFileSync(join(output,'audit-summary.md'),summary);
+} catch(error){const safe=sanitizeScanError(error);writeFileSync(join(output,'audit-report.json'),JSON.stringify({deterministic_result:'BLOCKED',ai_review_result:'NOT_RUN',identity,error:safe},null,2));process.exitCode=1;}

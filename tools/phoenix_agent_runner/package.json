@@ -1,15 +1,14 @@
 {
   "name": "phoenix-agent-runner",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
-  "engines": {
-    "node": ">=20"
-  },
+  "engines": {"node": ">=20"},
   "scripts": {
     "test": "node --test test/*.test.mjs",
+    "test:r1b": "node --test test/r1b-evidence-authority.test.mjs test/r1b-rule-schema.test.mjs",
     "validate": "node src/cli.mjs validate-config --root ../..",
-    "audit": "node src/cli.mjs audit"
+    "audit": "node src/trusted-cli.mjs"
   },
-  "dependencies": {}
+  "dependencies": {"ajv": "8.17.1"}
 }

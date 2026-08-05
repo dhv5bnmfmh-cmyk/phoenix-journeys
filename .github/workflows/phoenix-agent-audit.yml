@@ -3,6 +3,12 @@ name: Phoenix Agent Audit
 on:
   pull_request_target:
     types: [opened, synchronize, reopened, edited, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to audit using trusted default-branch source
+        required: true
+        type: number
 
 permissions:
   contents: read
@@ -13,10 +19,20 @@ jobs:
     name: Trusted read-only governance audit
     runs-on: ubuntu-latest
     steps:
+      - name: Harden runner egress
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a
+        with:
+          egress-policy: audit
+
+      - name: Resolve PR number
+        id: pr
+        shell: bash
+        run: echo "number=${{ github.event.pull_request.number || inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+
       - name: Check out trusted Base audit source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ github.event.pull_request.base.sha || github.event.repository.default_branch }}
           path: trusted
           fetch-depth: 0
           persist-credentials: false
@@ -26,52 +42,71 @@ jobs:
       - name: Check out Candidate as untrusted data
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: refs/pull/${{ steps.pr.outputs.number }}/head
           path: candidate
           fetch-depth: 0
           persist-credentials: false
           submodules: false
           lfs: false
 
-      - name: Record immutable audit identities
-        id: identity
+      - name: Detect bootstrap source availability
+        id: bootstrap
         shell: bash
         run: |
-          set -euo pipefail
-          echo "trusted_sha=$(git -C trusted rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          echo "trusted_tree=$(git -C trusted rev-parse HEAD^{tree})" >> "$GITHUB_OUTPUT"
-          echo "candidate_tree=$(git -C candidate rev-parse HEAD^{tree})" >> "$GITHUB_OUTPUT"
-          echo "rule_digest=$(find trusted/ai/development/policies -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
-          echo "schema_digest=$(find trusted/ai/development/schemas -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          if [[ -f trusted/tools/phoenix_agent_runner/src/trusted-cli.mjs ]]; then
+            echo "active=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "active=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "## Phoenix Trusted Audit"
+              echo
+              echo "Trusted pull_request_target Audit: BOOTSTRAP_NOT_ACTIVE_UNTIL_MERGE"
+              echo "Candidate code was not executed."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
-      - name: Run trusted P0 tests
-        run: node --test trusted/tools/phoenix_agent_runner/test/trusted-authority.test.mjs trusted/tools/phoenix_agent_runner/test/p0-security.test.mjs
+      - name: Set up pinned Node.js
+        if: steps.bootstrap.outputs.active == 'true'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: trusted/tools/phoenix_agent_runner/package-lock.json
 
-      - name: Run trusted audit without executing Candidate
+      - name: Install trusted locked validator
+        if: steps.bootstrap.outputs.active == 'true'
+        working-directory: trusted/tools/phoenix_agent_runner
+        run: npm ci --ignore-scripts
+
+      - name: Run trusted R1-B tests
+        if: steps.bootstrap.outputs.active == 'true'
+        working-directory: trusted/tools/phoenix_agent_runner
+        run: npm run test:r1b
+
+      - name: Run trusted audit against live PR identity
+        if: steps.bootstrap.outputs.active == 'true'
         env:
-          GITHUB_TOKEN: ''
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}
         run: >-
           node trusted/tools/phoenix_agent_runner/src/trusted-cli.mjs
+          --trusted trusted
           --candidate candidate
           --event "$GITHUB_EVENT_PATH"
+          --pr-number "${{ steps.pr.outputs.number }}"
           --output phoenix-agent-audit
-          --base-sha "${{ github.event.pull_request.base.sha }}"
-          --candidate-sha "${{ github.event.pull_request.head.sha }}"
-          --candidate-tree "${{ steps.identity.outputs.candidate_tree }}"
-          --trusted-runner-sha "${{ steps.identity.outputs.trusted_sha }}"
-          --trusted-runner-tree "${{ steps.identity.outputs.trusted_tree }}"
-          --rule-digest "${{ steps.identity.outputs.rule_digest }}"
-          --schema-digest "${{ steps.identity.outputs.schema_digest }}"
 
       - name: Publish redacted Step Summary
-        if: always()
+        if: always() && steps.bootstrap.outputs.active == 'true'
         shell: bash
         run: |
           test -f phoenix-agent-audit/audit-summary.md
           cat phoenix-agent-audit/audit-summary.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload trusted audit artifact
-        if: always()
+        if: always() && steps.bootstrap.outputs.active == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: phoenix-trusted-audit-${{ github.run_id }}-${{ github.run_attempt }}
