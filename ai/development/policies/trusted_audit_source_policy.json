@@ -1,0 +1,36 @@
+{
+  "policy_id": "PHOENIX_TRUSTED_AUDIT_SOURCE_V1",
+  "status": "SOURCE_IMPLEMENTED_OPERATIONAL_ACTIVATION_PENDING_MERGE",
+  "trusted_source": {
+    "workflow": ".github/workflows/phoenix-agent-audit.yml",
+    "runner": "tools/phoenix_agent_runner",
+    "rules": "ai/development/policies",
+    "schemas": "ai/development/schemas",
+    "load_from": "pull_request.base.sha"
+  },
+  "candidate_boundary": {
+    "checkout_path": "candidate",
+    "classification": "UNTRUSTED_DATA_ONLY",
+    "execute_candidate_code": false,
+    "expose_token_to_candidate": false
+  },
+  "required_identity_fields": [
+    "trusted_runner_sha",
+    "trusted_runner_tree",
+    "trusted_workflow_path",
+    "trusted_rule_inventory_digest",
+    "trusted_schema_digest",
+    "candidate_sha",
+    "candidate_tree",
+    "base_sha",
+    "pr_number",
+    "run_id",
+    "run_attempt",
+    "event_type"
+  ],
+  "bootstrap": {
+    "pr": 148,
+    "trusted_execution": "PENDING_MERGE",
+    "canary": "NOT_RUN"
+  }
+}
