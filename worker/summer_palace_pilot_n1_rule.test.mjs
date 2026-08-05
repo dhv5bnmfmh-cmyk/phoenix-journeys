@@ -13,6 +13,7 @@ const levels = read('app/lib/data/journey_level_catalog.dart');
 const screen = read('app/lib/screens/journey_screen.dart');
 const matrix = read('docs/PHOENIX_PILOT_N1_BEIJING_SUMMER_PALACE_MATRIX.md');
 const state = read('app/lib/state/app_state.dart');
+const accessState = read('app/lib/state/access_controlled_app_state.dart');
 const criticalStore = read('app/lib/services/critical_persistence_store.dart');
 
 function requireAll(text, values, label) {
@@ -88,14 +89,39 @@ test('Reflection and Writing are Pilot-scoped composite pages', () => {
     ],
     'Journey Screen',
   );
+  requireAll(
+    state,
+    [
+      'enum JourneyCompositeSubstage',
+      'summerPalaceJourneyFlowVersion = 2',
+      'journeyChallengeAttemptId',
+      'guideFeedbackInputIdentity',
+      'writingFeedbackInputIdentity',
+    ],
+    'Pilot N1 state identity',
+  );
   assert.ok(!screen.includes('AppState.journeyLastStep ='));
 });
 
-test('Critical State schema v1 and top-level step count remain unchanged', () => {
+test('Critical State migrates v1 to v2 while top-level steps remain 0-5', () => {
   assert.match(state, /static const int journeyLastStep = 5;/);
   assert.match(
     criticalStore,
-    /static const int phoenixCriticalStateSchemaVersion = 1;/,
+    /static const int phoenixCriticalStateLegacySchemaVersion = 1;/,
+  );
+  assert.match(
+    criticalStore,
+    /static const int phoenixCriticalStateSchemaVersion = 2;/,
+  );
+  requireAll(
+    accessState,
+    [
+      'phoenixCriticalStateLegacySchemaVersion',
+      '.migratedToV2()',
+      'commitPayload(',
+      'Critical state did not reach schema v2',
+    ],
+    'Critical State migration',
   );
 });
 
@@ -111,8 +137,11 @@ test('Pilot matrix separates automated and human literary evidence', () => {
       'Human Literary Result',
       'Automated score used as literary approval: NO',
       'Founder approval state: PENDING',
-      'Critical State schema version: `1`',
+      'Critical State schema version: `2`',
+      'Legacy readable schema version: `1`',
+      'Persisted composite substage field: YES',
       'Top-level step range: `0–5`',
+      'Global background zoom behavior: unchanged',
     ],
     'Pilot matrix',
   );
