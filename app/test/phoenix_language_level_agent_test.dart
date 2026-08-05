@@ -48,9 +48,10 @@ void main() {
       journey,
       profile: profile,
     );
+    final storyTarget = phoenixStoryLengthTargetFor(profile);
 
-    expect(content.storyParagraphs, hasLength(1));
-    expect(content.storyAnnotations, hasLength(1));
+    expect(content.storyParagraphs, hasLength(storyTarget.paragraphCount));
+    expect(content.storyAnnotations, hasLength(storyTarget.paragraphCount));
     expect(content.discoveries, hasLength(2));
     expect(content.words, hasLength(14));
 
