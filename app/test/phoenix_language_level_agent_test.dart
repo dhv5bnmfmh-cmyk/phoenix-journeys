@@ -48,10 +48,10 @@ void main() {
       journey,
       profile: profile,
     );
-    final storyTarget = phoenixStoryLengthTargetFor(profile);
+    final legacyPlan = agent.planFor(profile);
 
-    expect(content.storyParagraphs, hasLength(storyTarget.paragraphCount));
-    expect(content.storyAnnotations, hasLength(storyTarget.paragraphCount));
+    expect(content.storyParagraphs, hasLength(legacyPlan.paragraphCount));
+    expect(content.storyAnnotations, hasLength(legacyPlan.paragraphCount));
     expect(content.discoveries, hasLength(2));
     expect(content.words, hasLength(14));
 
