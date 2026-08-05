@@ -1,154 +1,111 @@
-import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
-import { extname } from 'node:path';
+import Ajv2020 from 'ajv/dist/2020.js';
 
-const SECRET_PATTERNS = [
-  ['GITHUB_TOKEN', /gh[opsu]_[A-Za-z0-9_]{20,}/g],
-  ['AWS_ACCESS_KEY', /AKIA[0-9A-Z]{16}/g],
-  ['PRIVATE_KEY', /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/g],
-  ['GENERIC_API_KEY', /\b(?:api[_-]?key|secret|token)\s*[:=]\s*["']?([A-Za-z0-9_\-]{16,})/gi],
-];
+const DRAFT_2020_12 = 'https://json-schema.org/draft/2020-12/schema';
 
-const TEXT_EXTENSIONS = new Set([
-  '', '.md', '.txt', '.json', '.jsonl', '.yml', '.yaml', '.js', '.mjs', '.cjs',
-  '.ts', '.tsx', '.jsx', '.dart', '.py', '.sh', '.bash', '.toml', '.ini', '.cfg',
-  '.xml', '.html', '.css', '.scss', '.sql', '.graphql', '.lock',
-]);
-
-export function fingerprint(value) {
-  return createHash('sha256').update(value).digest('hex').slice(0, 16);
+function normalizeLabel(label) {
+  return String(label || 'object')
+    .trim()
+    .replace(/[^A-Za-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toUpperCase() || 'OBJECT';
 }
 
-export function scanText(text, source = 'unknown') {
-  const findings = [];
-  for (const [type, pattern] of SECRET_PATTERNS) {
-    pattern.lastIndex = 0;
-    for (const match of text.matchAll(pattern)) {
-      const value = match[1] || match[0];
-      findings.push({ type, fingerprint: fingerprint(value), source });
-    }
-  }
-  return findings;
+function sanitizeErrors(errors = []) {
+  return errors.map(error => ({
+    instancePath: String(error.instancePath || ''),
+    schemaPath: String(error.schemaPath || ''),
+    keyword: String(error.keyword || 'unknown'),
+    message: String(error.message || 'validation failed'),
+    params: Object.fromEntries(
+      Object.entries(error.params || {}).map(([key, value]) => [
+        key,
+        typeof value === 'string' && value.length > 160
+          ? `${value.slice(0, 157)}...`
+          : value,
+      ]),
+    ),
+  }));
 }
 
-export function assertSafeText(text, source = 'unknown') {
-  const findings = scanText(text, source);
-  if (findings.length) throw new SecretScanError('SECRET_DETECTED', findings);
-}
-
-export class SecretScanError extends Error {
-  constructor(code, findings = []) {
+export class TrustedSchemaError extends Error {
+  constructor(code, errors = []) {
     super(code);
-    this.name = 'SecretScanError';
+    this.name = 'TrustedSchemaError';
     this.code = code;
-    this.findings = findings;
+    this.errors = sanitizeErrors(errors);
   }
 }
 
-export function parseNameStatusZ(buffer) {
-  const parts = buffer.toString('utf8').split('\0');
-  if (parts.at(-1) === '') parts.pop();
-  const records = [];
-  for (let i = 0; i < parts.length;) {
-    const status = parts[i++];
-    if (!status) throw new SecretScanError('NAME_STATUS_PARSE_FAILED');
-    const kind = status[0];
-    if (kind === 'R' || kind === 'C') {
-      if (i + 1 >= parts.length) throw new SecretScanError('NAME_STATUS_PARSE_FAILED');
-      records.push({ status, kind, source: parts[i++], destination: parts[i++] });
-    } else {
-      if (i >= parts.length) throw new SecretScanError('NAME_STATUS_PARSE_FAILED');
-      records.push({ status, kind, path: parts[i++] });
-    }
-  }
-  return records;
+function createAjv() {
+  return new Ajv2020({
+    strict: true,
+    strictSchema: true,
+    strictTypes: true,
+    strictTuples: true,
+    strictRequired: true,
+    allErrors: true,
+    validateFormats: false,
+    allowUnionTypes: false,
+    removeAdditional: false,
+    useDefaults: false,
+    coerceTypes: false,
+    messages: true,
+  });
 }
 
-function runGit(repo, args, encoding = null) {
+export function compileTrustedSchema(schema, label = 'schema') {
+  const code = `${normalizeLabel(label)}_SCHEMA_COMPILE_INVALID`;
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) {
+    throw new TrustedSchemaError(code, [{
+      keyword: 'type',
+      message: 'schema must be a non-null object',
+      instancePath: '',
+      schemaPath: '',
+      params: {},
+    }]);
+  }
+  if (schema.$schema !== DRAFT_2020_12) {
+    throw new TrustedSchemaError(code, [{
+      keyword: '$schema',
+      message: `schema must declare ${DRAFT_2020_12}`,
+      instancePath: '',
+      schemaPath: '/$schema',
+      params: { expected: DRAFT_2020_12 },
+    }]);
+  }
   try {
-    return execFileSync('git', ['-C', repo, ...args], {
-      encoding,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      maxBuffer: 64 * 1024 * 1024,
-    });
-  } catch {
-    throw new SecretScanError('SCANNER_EXECUTION_FAILED');
+    return createAjv().compile(structuredClone(schema));
+  } catch (error) {
+    throw new TrustedSchemaError(code, [{
+      keyword: 'compile',
+      message: error instanceof Error ? error.message : 'schema compilation failed',
+      instancePath: '',
+      schemaPath: '',
+      params: {},
+    }]);
   }
 }
 
-function blob(repo, ref, path) {
-  return runGit(repo, ['show', `${ref}:${path}`]);
-}
-
-function isBinary(buffer, path) {
-  if (buffer.includes(0)) return true;
-  if (!TEXT_EXTENSIONS.has(extname(path).toLowerCase())) {
-    const sample = buffer.subarray(0, Math.min(buffer.length, 8192));
-    let controls = 0;
-    for (const byte of sample) if (byte < 9 || (byte > 13 && byte < 32)) controls++;
-    if (sample.length && controls / sample.length > 0.01) return true;
+export function validateObject(schema, value, label = 'object') {
+  const normalized = normalizeLabel(label);
+  const validate = compileTrustedSchema(schema, label);
+  let valid;
+  try {
+    valid = validate(value);
+  } catch (error) {
+    throw new TrustedSchemaError(`${normalized}_SCHEMA_VALIDATION_FAILED`, [{
+      keyword: 'runtime',
+      message: error instanceof Error ? error.message : 'schema validation failed',
+      instancePath: '',
+      schemaPath: '',
+      params: {},
+    }]);
   }
-  return false;
-}
-
-export function scanCandidateRepository({
-  repo,
-  baseSha,
-  candidateSha,
-  governanceBody = '',
-  taskContract = '',
-  evidenceManifest = '',
-  generatedReport = '',
-  stepSummary = '',
-  artifactMetadata = '',
-  binaryAllowlist = [],
-}) {
-  const raw = runGit(repo, ['diff', '--name-status', '-z', '-M', '-C', baseSha, candidateSha]);
-  const records = parseNameStatusZ(raw);
-  const findings = [];
-  const scanned = [];
-  const historical = [];
-  const allow = new Set(binaryAllowlist);
-
-  for (const record of records) {
-    const currentPath = record.destination || record.path;
-    const sourcePath = record.source;
-    if (sourcePath) scanned.push({ path: sourcePath, role: 'rename_or_copy_source' });
-    if (record.kind === 'D') {
-      historical.push({ path: record.path, status: 'DELETED_HISTORICAL_EXPOSURE_REVIEW' });
-      continue;
-    }
-    const content = blob(repo, candidateSha, currentPath);
-    if (isBinary(content, currentPath)) {
-      if (!allow.has(currentPath)) {
-        throw new SecretScanError('UNSCANNABLE_BINARY_BLOCKED', [{ source: currentPath }]);
-      }
-      scanned.push({ path: currentPath, role: 'binary_allowlisted' });
-      continue;
-    }
-    findings.push(...scanText(content.toString('utf8'), currentPath));
-    scanned.push({ path: currentPath, role: 'current_blob' });
+  if (!valid) {
+    throw new TrustedSchemaError(
+      `${normalized}_SCHEMA_INVALID`,
+      validate.errors || [],
+    );
   }
-
-  const additions = runGit(repo, ['diff', '--unified=0', '--no-ext-diff', baseSha, candidateSha], 'utf8')
-    .split('\n').filter(line => line.startsWith('+') && !line.startsWith('+++')).join('\n');
-  findings.push(...scanText(additions, 'git_diff_additions'));
-  for (const [source, text] of Object.entries({
-    governanceBody, taskContract, evidenceManifest, generatedReport, stepSummary, artifactMetadata,
-  })) findings.push(...scanText(String(text), source));
-
-  if (findings.length) throw new SecretScanError('SECRET_DETECTED', findings);
-  return { result: 'PASS', records, scanned, historical };
-}
-
-export function sanitizeScanError(error) {
-  if (!(error instanceof SecretScanError)) return { code: 'SCANNER_EXECUTION_FAILED', findings: [] };
-  return {
-    code: error.code,
-    findings: error.findings.map(({ type = 'UNKNOWN', fingerprint: fp = 'unavailable', source = 'unknown' }) => ({
-      type,
-      fingerprint: fp,
-      source,
-    })),
-  };
+  return value;
 }
