@@ -200,6 +200,10 @@ JourneyLevelContent _normalizeSummerPalaceEventOrder(
       .replaceFirst(
         '校展截稿前夕，十七岁的学生摄影者许澄',
         '十七岁的学生摄影者许澄在校展截稿前夕',
+      )
+      .replaceFirst(
+        '她放下原来的构图，蹲身拾起照片，又退到桥侧，让近处斑驳的纸角、外婆扶栏的手和远处万寿山形成三层对景。快门落下后，她因此错失最佳光线；',
+        '她放下原来的构图，蹲身拾起照片，因此错失最佳光线。她又退到桥侧，让近处斑驳的纸角、外婆扶栏的手和远处万寿山形成三层对景；',
       );
 
   String normalizePinyin(String value) => value
@@ -210,6 +214,10 @@ JourneyLevelContent _normalizeSummerPalaceEventOrder(
       .replaceFirst(
         'Xiàozhǎn jiégǎo qiánxī, shíqī suì de xuéshēng shèyǐngzhě Xǔ Chéng',
         'Shíqī suì de xuéshēng shèyǐngzhě Xǔ Chéng zài xiàozhǎn jiégǎo qiánxī',
+      )
+      .replaceFirst(
+        'Tā fàngxià yuánlái de gòutú, dūnshēn shíqǐ zhàopiàn, ràng bānbó zhǐjiǎo, wàipó fúlán de shǒu hé yuǎnchù Wànshòu Shān xíngchéng sān céng duìjǐng. Guāngxiàn yǐjīng piānyí, tā yīncǐ cuòshī zuìjiā guāngxiàn,',
+        'Tā fàngxià yuánlái de gòutú, dūnshēn shíqǐ zhàopiàn, yīncǐ cuòshī zuìjiā guāngxiàn. Tā ràng bānbó zhǐjiǎo, wàipó fúlán de shǒu hé yuǎnchù Wànshòu Shān xíngchéng sān céng duìjǐng; guāngxiàn yǐjīng piānyí,',
       );
 
   String normalizeVietnamese(String value) => value
@@ -220,6 +228,10 @@ JourneyLevelContent _normalizeSummerPalaceEventOrder(
       .replaceFirst(
         'Trước hạn triển lãm, Hứa Trừng, một nữ sinh nhiếp ảnh mười bảy tuổi',
         'Hứa Trừng, một nữ sinh nhiếp ảnh mười bảy tuổi, trước hạn triển lãm,',
+      )
+      .replaceFirst(
+        'Cô bỏ bố cục cũ, nhặt ảnh trước rồi đặt góc giấy sờn, bàn tay bà và núi Vạn Thọ thành ba lớp. Cô vì thế lỡ ánh sáng đẹp nhất;',
+        'Cô bỏ bố cục cũ và nhặt ảnh trước, vì thế lỡ ánh sáng đẹp nhất. Sau đó cô đặt góc giấy sờn, bàn tay bà và núi Vạn Thọ thành ba lớp;',
       );
 
   String normalizeEnglish(String value) => value
@@ -230,6 +242,10 @@ JourneyLevelContent _normalizeSummerPalaceEventOrder(
       .replaceFirst(
         'Before the exhibition deadline, seventeen-year-old student photographer Xu Cheng',
         'Seventeen-year-old student photographer Xu Cheng, before the exhibition deadline,',
+      )
+      .replaceFirst(
+        'She abandons the old composition, recovers the photograph, and frames worn paper, her grandmother’s hand, and Longevity Hill in three layers. She therefore loses the best light and the postcard view disappears.',
+        'She abandons the old composition and recovers the photograph, therefore losing the best light. She then frames worn paper, her grandmother’s hand, and Longevity Hill in three layers as the postcard view disappears.',
       );
 
   return JourneyLevelContent(
@@ -281,7 +297,7 @@ final summerPalaceEasyLevel = JourneyLevelContent(
     '十七孔桥旁，最佳光线出现时，旧照片也被风吹落。许澄必须在追光和捡照片之间选择。她放弃原构图，先捡回照片，因此错失光线。她重新拍下斑驳旧照、外婆的手和远处万寿山，作品名为《留下痕迹的风景》。周岚不再替她调整构图，把旧照片交给她保存。许澄不再只想证明独立，也懂得修复要留下关系、时间和痕迹。',
   ],
   storyAnnotations: <ReadingAnnotation>[
-    ReadingAnnotation(
+    const ReadingAnnotation(
       pinyin:
           'Shíqī suì de xuéshēng shèyǐngzhě Xǔ Chéng yào wèi xiàozhǎn pāi yì zhāng Yíhéyuán zuòpǐn, zhèngmíng zìjǐ bù xūyào wàipó Zhōu Lán zhǐdǎo. Zhōu Lán céng bǎohù Chángláng cǎihuà, tā yào Xǔ Chéng kàn xiūfù hénjì, Xǔ Chéng què zhǐ xiǎng pāi wúxiá huàmiàn.',
       vietnamese:
@@ -289,7 +305,7 @@ final summerPalaceEasyLevel = JourneyLevelContent(
       english:
           'Seventeen-year-old student photographer Xu Cheng must make a Summer Palace work for the school exhibition to prove she needs no guidance from Zhou Lan. Zhou Lan once conserved Long Corridor paintings and asks her to see restoration traces, while Xu Cheng wants a flawless image.',
     ),
-    ReadingAnnotation(
+    const ReadingAnnotation(
       pinyin:
           'Shíqīkǒng Qiáo páng, zuìjiā guāngxiàn chūxiàn shí, jiù zhàopiàn yě bèi fēng chuīluò. Xǔ Chéng bìxū zài zhuīguāng hé jiǎn zhàopiàn zhījiān xuǎnzé. Tā fàngqì yuán gòutú, xiān jiǎn huí zhàopiàn, yīncǐ cuòshī guāngxiàn. Tā chóngxīn pāi xià bānbó jiùzhào, wàipó de shǒu hé yuǎnchù Wànshòu Shān, zuòpǐn míng wéi Liúxià Hénjì de Fēngjǐng. Zhōu Lán bù zài tì tā tiáozhěng gòutú, bǎ jiù zhàopiàn jiāogěi tā bǎocún. Xǔ Chéng bù zài zhǐ xiǎng zhèngmíng dúlì, yě dǒngde xiūfù yào liúxià guānxì, shíjiān hé hénjì.',
       vietnamese:
