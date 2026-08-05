@@ -1,6 +1,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { compileTrustedSchema } from './schema-validator.mjs';
 import { readJson } from './utils.mjs';
+
+export const MANDATORY_SCHEMA_FILES = Object.freeze([
+  'task_contract.schema.json',
+  'finding.schema.json',
+  'evidence_manifest.schema.json',
+  'audit_report.schema.json',
+  'execution_principal.schema.json',
+  'founder_authorization.schema.json',
+]);
 
 function valueType(value) {
   if (Array.isArray(value)) return 'array';
@@ -134,6 +144,66 @@ export function validateRuleRegistry(registry) {
   return errors;
 }
 
+export function validateTrustedSchemaInventory(schemaDir) {
+  const errors = [];
+  const schemaFiles = fs.readdirSync(schemaDir)
+    .filter((name) => name.endsWith('.schema.json'))
+    .sort();
+  const mandatory = new Set(MANDATORY_SCHEMA_FILES);
+
+  for (const name of MANDATORY_SCHEMA_FILES) {
+    if (!schemaFiles.includes(name)) {
+      errors.push(`Missing mandatory schema: ${name}.`);
+    }
+  }
+  for (const name of schemaFiles) {
+    if (!mandatory.has(name)) {
+      errors.push(`Unauthorized schema file: ${name}.`);
+    }
+  }
+
+  const schemas = {};
+  const ids = new Map();
+  for (const name of schemaFiles) {
+    let schema;
+    try {
+      schema = readJson(path.join(schemaDir, name));
+    } catch {
+      errors.push(`${name}: JSON parse failed.`);
+      continue;
+    }
+    schemas[name] = schema;
+
+    const schemaIdentity = typeof schema?.title === 'string' && schema.title.trim()
+      ? schema.title.trim()
+      : schema?.$id;
+    if (typeof schemaIdentity !== 'string' || !schemaIdentity.trim()) {
+      errors.push(`${name}: schema title or $id is required.`);
+    }
+    if (typeof schema?.$id !== 'string' || !schema.$id.trim()) {
+      errors.push(`${name}: unique $id is required.`);
+    } else if (ids.has(schema.$id)) {
+      errors.push(`${name}: duplicate schema $id also used by ${ids.get(schema.$id)}.`);
+    } else {
+      ids.set(schema.$id, name);
+    }
+    if (schema?.type !== 'object') {
+      errors.push(`${name}: top-level type must be object.`);
+    }
+    if (!schema?.properties || typeof schema.properties !== 'object'
+        || Array.isArray(schema.properties)) {
+      errors.push(`${name}: top-level properties object is required.`);
+    }
+    try {
+      compileTrustedSchema(schema, name);
+    } catch (error) {
+      errors.push(`${name}: trusted schema compilation failed (${error.code ?? 'SCHEMA_COMPILE_INVALID'}).`);
+    }
+  }
+
+  return { errors, schemas };
+}
+
 export function validateRepositoryConfig(root) {
   const errors = [];
   const agentDir = path.join(root, 'ai/development/agents');
@@ -157,38 +227,39 @@ export function validateRepositoryConfig(root) {
   errors.push(...validateRuleRegistry(registry));
 
   const schemaDir = path.join(root, 'ai/development/schemas');
-  const schemas = Object.fromEntries(
-    fs.readdirSync(schemaDir)
-      .filter((name) => name.endsWith('.schema.json'))
-      .map((name) => [name, readJson(path.join(schemaDir, name))]),
-  );
-  if (Object.keys(schemas).length !== 4) {
-    errors.push(`Expected 4 schemas, found ${Object.keys(schemas).length}.`);
-  }
+  const schemaInventory = validateTrustedSchemaInventory(schemaDir);
+  errors.push(...schemaInventory.errors);
+  const schemas = schemaInventory.schemas;
 
   const taskSchema = schemas['task_contract.schema.json'];
   const findingSchema = schemas['finding.schema.json'];
   const reportSchema = schemas['audit_report.schema.json'];
   const examples = path.join(root, 'ai/development/examples');
-  for (const file of ['valid_read_only_task.json','invalid_scope_task.json']) {
+  if (taskSchema) {
+    for (const file of ['valid_read_only_task.json','invalid_scope_task.json']) {
+      errors.push(
+        ...validateAgainstSchema(readJson(path.join(examples, file)), taskSchema, file),
+      );
+    }
+  }
+  if (findingSchema) {
     errors.push(
-      ...validateAgainstSchema(readJson(path.join(examples, file)), taskSchema, file),
+      ...validateAgainstSchema(
+        readJson(path.join(examples, 'sample_finding.json')),
+        findingSchema,
+        'sample_finding.json',
+      ),
     );
   }
-  errors.push(
-    ...validateAgainstSchema(
-      readJson(path.join(examples, 'sample_finding.json')),
-      findingSchema,
-      'sample_finding.json',
-    ),
-  );
-  errors.push(
-    ...validateAgainstSchema(
-      readJson(path.join(examples, 'sample_audit_report.json')),
-      reportSchema,
-      'sample_audit_report.json',
-    ),
-  );
+  if (reportSchema) {
+    errors.push(
+      ...validateAgainstSchema(
+        readJson(path.join(examples, 'sample_audit_report.json')),
+        reportSchema,
+        'sample_audit_report.json',
+      ),
+    );
+  }
 
   return { errors, manifests, registry, schemas };
 }
