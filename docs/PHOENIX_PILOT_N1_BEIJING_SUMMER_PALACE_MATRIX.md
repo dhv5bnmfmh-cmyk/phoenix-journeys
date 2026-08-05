@@ -1,6 +1,6 @@
 # Phoenix Pilot N1 — Beijing Summer Palace Matrix
 
-**Status:** READY FOR FOUNDER MOBILE REVIEW  
+**Status:** REMEDIATION IN PROGRESS  
 **Governance Phase ID:** `PILOT_N1`  
 **Primary Finding:** `PROTAGONIST_IDENTITY_MISSING`  
 **Journey ID:** `beijing-summer-palace`  
@@ -42,10 +42,10 @@ Discovery independently explains borrowed scenery, opposite views, corridor sigh
 
 - Vocabulary: teaches words used by the Story and Discovery.
 - Reflection: asks the explorer to interpret what changed when Xu Cheng abandoned the flawless image.
-- Challenge: validates understanding and keeps the existing Reward contract.
+- Challenge: validates understanding and keeps the existing Reward quantity contract.
 - Writing: asks the explorer to produce a school-exhibition explanation of the choice.
 - Memory: records a personal durable recall anchor.
-- Completion: commits completion, Stamp and Memory through the existing B3 transaction.
+- Completion: commits completion, Stamp and Memory through the existing critical transaction.
 
 ## 3. Story / Discovery Separation
 
@@ -96,37 +96,46 @@ Every level must preserve:
 
 ## 6. Reflection / Writing Composite Compatibility
 
-- Critical State schema version: `1`
+- Critical State schema version: `2`
+- Legacy readable schema version: `1`
+- Migration rule: a complete schema-v2 record and witness are committed atomically before v2 becomes authoritative.
+- Interrupted migration rule: a staged record without its matching witness is not authoritative and migration safely retries from the last committed generation.
 - Top-level step range: `0–5`
 - Step 3: Reflection followed by Challenge inside the same committed step.
 - Step 4: Writing followed by Memory inside the same committed step.
-- New persisted substage field: NO
+- Journey flow version: `2` for `beijing-summer-palace`; all other Journeys remain flow version `1`.
+- Persisted composite substage field: YES, scoped to the Summer Palace Pilot flow.
+- Legacy step 3 mapping: Guide feedback present → Challenge; otherwise Reflection.
+- Legacy step 4 mapping: Writing feedback present → Memory; otherwise Writing.
+- Legacy step 5 mapping: Completed, with existing Stamp and Memory semantics unchanged.
 - Journey ID or namespace change: NO
 - Existing completed `step=5` reinterpreted: NO
-- Reflection resume evidence: existing committed Guide feedback.
-- Writing resume evidence: existing committed Writing feedback.
-- Challenge restart after process closure: allowed; Award ID remains idempotent.
+- Reflection feedback identity: bound to the normalized Reflection input.
+- Writing feedback identity: bound to the normalized Writing input.
+- Challenge attempt identity: stable across retry and close/reopen within the persisted Journey flow.
+- Challenge Reward persistence: Award identity and wallet mutation commit together before UI success is accepted.
 - Old narration offset: cleared when the existing content signature does not match revised Story or Discovery.
 
 ## 7. Compatibility
 
 - B1 routing and Active Journey identity: unchanged.
 - B2 access and Morning/Afternoon assignment: unchanged.
-- B3 Critical State journal: unchanged.
+- Critical State domain and two-generation record/witness journal: unchanged.
+- Critical State payload schema: migrated from v1 to v2 under Founder authorization.
 - Wallet and Special unlock rules: unchanged.
 - Reward quantities and issuance rules: unchanged.
 - Held Special Journeys: unchanged and unpublished.
 - Images and audio assets: unchanged.
 - Other Journey content: unchanged.
+- Global background zoom behavior: unchanged and explicitly outside this PR.
 - Stable quality rule: `NEW RESULT >= CURRENT STABLE BASELINE`.
 
 ## 8. Automated Validation Boundary
 
-- Automated checks implemented: Story shape, identity constants, enacted-choice evidence, Story/Discovery separation, language evidence, vocabulary-in-context evidence, difficulty invariants, Phoenix Lv.1–10 invariants, composite page mapping, schema and step guards, full regression suite.
+- Automated checks implemented: Story shape, identity constants, enacted-choice evidence, Story/Discovery separation, language evidence, vocabulary-in-context evidence, difficulty invariants, Phoenix Lv.1–10 invariants, composite page mapping, schema v1→v2 migration, interrupted migration, Reward retry/reopen, feedback identity, top-level step guard and full regression suite.
 - Fields not approved by automation: literary naturalness, emotional credibility, cultural tone, final mobile experience.
-- Automated Structural Result: PASS
-- Automated Structural Evidence Level: VERIFIED
-- Full catalog quality report: APPROVED, 360 / 360, revision required 0, blocked 0
+- Automated Structural Result: PENDING FINAL HEAD GATES
+- Automated Structural Evidence Level: UNVERIFIED UNTIL FINAL HEAD
 - Human Literary Reviewer: Founder
 - Human Literary Result: PENDING
 - Human Literary Evidence Level: UNVERIFIED
@@ -145,10 +154,10 @@ Every level must preserve:
 ## 10. Candidate Decision
 
 - Blocking codes targeted: protagonist, relationship, goal, conflict, choice, consequence, emotional arc, tourism exposition, Story/Discovery overlap, opening reuse, catalog differentiation and level identity.
-- Stable comparison result: PASS; candidate is ahead of PR #137 with no behind commits, while final visual and literary approval remains Founder-gated.
-- Automated structural result: PASS
+- Stable comparison result: pending final-head gates and Founder experience.
+- Automated structural result: PENDING FINAL HEAD GATES
 - Human literary result: PENDING
 - Founder approval required: YES
 - Founder approval state: PENDING
 - Next phase authorized: NO
-- Final Result: READY_FOR_FOUNDER_MOBILE_REVIEW
+- Final Result: PENDING_FINAL_HEAD_EVIDENCE
