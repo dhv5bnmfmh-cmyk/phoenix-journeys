@@ -3,6 +3,8 @@ name: Phoenix Agent Audit
 on:
   pull_request_target:
     types: [opened, synchronize, reopened, edited, ready_for_review]
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -15,8 +17,189 @@ permissions:
   pull-requests: read
 
 jobs:
+  bootstrap-source-tests:
+    name: Phoenix Agent Bootstrap Source Tests
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner egress
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a
+        with:
+          egress-policy: audit
+
+      - name: Check out exact Candidate Head
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          submodules: false
+          lfs: false
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tools/phoenix_agent_runner/package-lock.json
+
+      - name: Record exact source-test identity
+        id: identity
+        working-directory: tools/phoenix_agent_runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p bootstrap-source-test
+          TESTED_SHA="$(git rev-parse HEAD)"
+          EXPECTED_SHA="${{ github.event.pull_request.head.sha }}"
+          if [[ "$TESTED_SHA" != "$EXPECTED_SHA" ]]; then
+            echo "Exact Candidate Head mismatch." >&2
+            exit 1
+          fi
+          NODE_VERSION="$(node --version)"
+          NPM_VERSION="$(npm --version)"
+          LOCK_DIGEST="$(sha256sum package-lock.json | awk '{print $1}')"
+          {
+            echo "tested_sha=$TESTED_SHA"
+            echo "node_version=$NODE_VERSION"
+            echo "npm_version=$NPM_VERSION"
+            echo "lock_digest=$LOCK_DIGEST"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "exact_candidate_sha=$TESTED_SHA"
+            echo "node_version=$NODE_VERSION"
+            echo "npm_version=$NPM_VERSION"
+            echo "package_lock_sha256=$LOCK_DIGEST"
+            echo "authority=NON_AUTHORITATIVE_BOOTSTRAP_SOURCE_TEST"
+            echo "trusted_governance_result=NOT_EVALUATED"
+            echo "founder_governance=NOT_APPROVED"
+          } > bootstrap-source-test/identity.txt
+
+      - name: Install Candidate locked dependencies
+        working-directory: tools/phoenix_agent_runner
+        run: npm ci --ignore-scripts
+
+      - name: Inventory tests and locked Ajv
+        id: inventory
+        working-directory: tools/phoenix_agent_runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          AJV_VERSION="$(node -p "require('./node_modules/ajv/package.json').version")"
+          find test -maxdepth 1 -type f -name '*.test.mjs' -print | LC_ALL=C sort \
+            > bootstrap-source-test/test-files.txt
+          {
+            echo "ajv_version=$AJV_VERSION"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "ajv_version=$AJV_VERSION"
+            echo
+            echo "test_files:"
+            sed 's/^/- /' bootstrap-source-test/test-files.txt
+          } > bootstrap-source-test/inventory.txt
+
+      - name: Run complete Candidate Node test suite
+        id: tests
+        working-directory: tools/phoenix_agent_runner
+        shell: bash
+        run: |
+          set -o pipefail
+          START_SECONDS="$SECONDS"
+          npm test 2>&1 | tee bootstrap-source-test/test-output.tap
+          TEST_EXIT="${PIPESTATUS[0]}"
+          DURATION_SECONDS="$((SECONDS - START_SECONDS))"
+
+          extract_count() {
+            local label="$1"
+            local value
+            value="$(grep -E "^# ${label} [0-9]+$" bootstrap-source-test/test-output.tap \
+              | tail -1 | awk '{print $3}' || true)"
+            printf '%s' "${value:-0}"
+          }
+
+          TOTAL="$(extract_count tests)"
+          PASSED="$(extract_count pass)"
+          FAILED="$(extract_count fail)"
+          SKIPPED="$(extract_count skipped)"
+
+          {
+            echo "total=$TOTAL"
+            echo "passed=$PASSED"
+            echo "failed=$FAILED"
+            echo "skipped=$SKIPPED"
+            echo "duration_seconds=$DURATION_SECONDS"
+            echo "exit_code=$TEST_EXIT"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "exact_candidate_sha=${{ steps.identity.outputs.tested_sha }}"
+            echo "test_files=$(wc -l < bootstrap-source-test/test-files.txt | tr -d ' ')"
+            echo "total_tests=$TOTAL"
+            echo "passed=$PASSED"
+            echo "failed=$FAILED"
+            echo "skipped=$SKIPPED"
+            echo "duration_seconds=$DURATION_SECONDS"
+            echo "exit_code=$TEST_EXIT"
+            echo "authority=NON_AUTHORITATIVE_BOOTSTRAP_SOURCE_TEST"
+            echo "trusted_governance_result=NOT_EVALUATED"
+            echo "founder_governance=NOT_APPROVED"
+          } > bootstrap-source-test/result.txt
+
+          exit "$TEST_EXIT"
+
+      - name: Scan source-test outputs for obvious secrets
+        if: always()
+        working-directory: tools/phoenix_agent_runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d bootstrap-source-test
+          if grep -RIE \
+            '(gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' \
+            bootstrap-source-test; then
+            echo "Potential secret detected in Bootstrap Source Test output." >&2
+            exit 1
+          fi
+
+      - name: Publish non-authoritative source-test summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Phoenix Agent Bootstrap Source Tests"
+            echo
+            echo "- Authority: \`NON_AUTHORITATIVE_BOOTSTRAP_SOURCE_TEST\`"
+            echo "- Trusted Governance Result: \`NOT_EVALUATED\`"
+            echo "- Founder Governance: \`NOT_APPROVED\`"
+            echo "- Exact Candidate SHA: \`${{ steps.identity.outputs.tested_sha }}\`"
+            echo "- Node: \`${{ steps.identity.outputs.node_version }}\`"
+            echo "- npm: \`${{ steps.identity.outputs.npm_version }}\`"
+            echo "- Ajv: \`${{ steps.inventory.outputs.ajv_version }}\`"
+            echo "- package-lock SHA-256: \`${{ steps.identity.outputs.lock_digest }}\`"
+            echo "- Tests: \`${{ steps.tests.outputs.total }}\`"
+            echo "- Passed: \`${{ steps.tests.outputs.passed }}\`"
+            echo "- Failed: \`${{ steps.tests.outputs.failed }}\`"
+            echo "- Skipped: \`${{ steps.tests.outputs.skipped }}\`"
+            echo "- Duration: \`${{ steps.tests.outputs.duration_seconds }}s\`"
+            echo
+            echo "This job proves only that Candidate source tests executed on the exact Candidate Head."
+            echo "It does not establish Trusted Audit PASS, Governance PASS, Founder PASS, Ready authorization, or Merge authorization."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload non-authoritative source-test artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: phoenix-agent-bootstrap-source-tests-${{ github.run_id }}-${{ github.run_attempt }}
+          path: tools/phoenix_agent_runner/bootstrap-source-test/
+          if-no-files-found: error
+          retention-days: 30
+
   trusted-audit:
     name: Trusted read-only governance audit
+    if: github.event_name == 'pull_request_target' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Harden runner egress
