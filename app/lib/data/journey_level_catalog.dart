@@ -184,7 +184,72 @@ JourneyLevelContent resolveJourneyLevel(
     JourneyDifficulty.standard => JourneyLevelContent.fromExperience(experience),
     JourneyDifficulty.challenge => summerPalaceChallengeLevel,
   }).withReadingLimit();
-  return _withVocabularyInContext(limited);
+  return _withVocabularyInContext(
+    _normalizeSummerPalaceEventOrder(limited),
+  );
+}
+
+JourneyLevelContent _normalizeSummerPalaceEventOrder(
+  JourneyLevelContent content,
+) {
+  String normalizeChinese(String value) => value
+      .replaceFirst(
+        '校展截稿前一天，十七岁的许澄',
+        '十七岁的许澄在校展截稿前一天',
+      )
+      .replaceFirst(
+        '校展截稿前夕，十七岁的学生摄影者许澄',
+        '十七岁的学生摄影者许澄在校展截稿前夕',
+      );
+
+  String normalizePinyin(String value) => value
+      .replaceFirst(
+        'Xiàozhǎn jiégǎo qián yì tiān, shíqī suì de Xǔ Chéng',
+        'Shíqī suì de Xǔ Chéng zài xiàozhǎn jiégǎo qián yì tiān',
+      )
+      .replaceFirst(
+        'Xiàozhǎn jiégǎo qiánxī, shíqī suì de xuéshēng shèyǐngzhě Xǔ Chéng',
+        'Shíqī suì de xuéshēng shèyǐngzhě Xǔ Chéng zài xiàozhǎn jiégǎo qiánxī',
+      );
+
+  String normalizeVietnamese(String value) => value
+      .replaceFirst(
+        'Một ngày trước hạn triển lãm trường, Hứa Trừng mười bảy tuổi',
+        'Hứa Trừng mười bảy tuổi, vào một ngày trước hạn triển lãm trường,',
+      )
+      .replaceFirst(
+        'Trước hạn triển lãm, Hứa Trừng, một nữ sinh nhiếp ảnh mười bảy tuổi',
+        'Hứa Trừng, một nữ sinh nhiếp ảnh mười bảy tuổi, trước hạn triển lãm,',
+      );
+
+  String normalizeEnglish(String value) => value
+      .replaceFirst(
+        'A day before her school exhibition deadline, seventeen-year-old Xu Cheng',
+        'Seventeen-year-old Xu Cheng, a day before her school exhibition deadline,',
+      )
+      .replaceFirst(
+        'Before the exhibition deadline, seventeen-year-old student photographer Xu Cheng',
+        'Seventeen-year-old student photographer Xu Cheng, before the exhibition deadline,',
+      );
+
+  return JourneyLevelContent(
+    storyParagraphs: content.storyParagraphs
+        .map(normalizeChinese)
+        .toList(growable: false),
+    storyAnnotations: content.storyAnnotations
+        .map(
+          (entry) => ReadingAnnotation(
+            pinyin: normalizePinyin(entry.pinyin),
+            vietnamese: normalizeVietnamese(entry.vietnamese),
+            english: normalizeEnglish(entry.english),
+          ),
+        )
+        .toList(growable: false),
+    words: content.words,
+    discoveries: content.discoveries,
+    wonderQuestion: content.wonderQuestion,
+    expressQuestion: content.expressQuestion,
+  );
 }
 
 JourneyLevelContent _withVocabularyInContext(JourneyLevelContent content) {
