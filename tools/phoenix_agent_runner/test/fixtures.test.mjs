@@ -26,7 +26,7 @@ test('JSON, Agent Manifest, Rule Registry, Schema, and example fixtures validate
   assert.deepEqual(errors, []);
   assert.equal(manifests.length, 6);
   assert.ok(loadedRegistry.rules.length >= 15);
-  assert.equal(Object.keys(schemas).length, 4);
+  assert.equal(Object.keys(schemas).length, 6);
 });
 
 test('valid_read_only_task fixture passes', () => {
@@ -85,7 +85,18 @@ test('GitHub workflow preserves read-only permissions and required triggers', ()
   ]) {
     assert.ok(!workflow.includes(forbidden), `forbidden workflow content: ${forbidden}`);
   }
-  assert.ok(workflow.includes('actions/upload-artifact@v4'));
+  const uploadArtifactRefs = [
+    ...workflow.matchAll(/actions\/upload-artifact@([^\s'"}]+)/gu),
+  ].map((match) => match[1]);
+  assert.ok(uploadArtifactRefs.length > 0, 'actions/upload-artifact must be used');
+  for (const ref of uploadArtifactRefs) {
+    assert.match(ref, /^[0-9a-f]{40}$/u, `upload-artifact must use a full Commit SHA: ${ref}`);
+  }
+  assert.ok(uploadArtifactRefs.includes('ea165f8d65b6e75b540449e92b4886f43607fa02'));
+  assert.doesNotMatch(
+    workflow,
+    /actions\/upload-artifact@(v\d+(?:\.\d+)*|main|master)\b/u,
+  );
   assert.ok(workflow.includes('GITHUB_STEP_SUMMARY'));
   assert.ok(workflow.includes('github.event.pull_request.head.sha || github.sha'));
 });
