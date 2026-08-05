@@ -100,8 +100,10 @@ JourneyLevelContent _resolveSummerPalaceN1Level({
 }) {
   final level = profile.phoenixLevel ?? _legacySummerPalaceLevel(profile.band);
   final target = phoenixStoryLengthTargetFor(profile);
+  final plan = _languageLevelAgent.planFor(profile);
   final base = summerPalaceN1LevelForPhoenixLevel(level).withReadingLimit(
-    paragraphCount: target.paragraphCount,
+    paragraphCount:
+        profile.isPhoenix ? target.paragraphCount : plan.paragraphCount,
     discoveryCount: _summerPalaceN1DiscoveryCount(profile.band),
   );
   final context = <String>[
