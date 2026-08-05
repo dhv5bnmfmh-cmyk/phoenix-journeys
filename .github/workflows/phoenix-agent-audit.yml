@@ -1,84 +1,80 @@
 name: Phoenix Agent Audit
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
-  workflow_dispatch:
-    inputs:
-      task_contract_path:
-        description: Repository-relative Task Contract path for a manual read-only audit
-        required: true
-        default: ai/development/examples/valid_read_only_task.json
-        type: string
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
 
 permissions:
   contents: read
   pull-requests: read
 
 jobs:
-  audit:
-    name: Read-only governance audit
+  trusted-audit:
+    name: Trusted read-only governance audit
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out exact Candidate Head
-        uses: actions/checkout@v6
+      - name: Check out trusted Base audit source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: trusted
           fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+          lfs: false
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Check out Candidate as untrusted data
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          node-version: '22'
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+          lfs: false
 
-      - name: Record Base and Head
+      - name: Record immutable audit identities
+        id: identity
         shell: bash
         run: |
-          {
-            echo "## Phoenix Agent Audit Identity"
-            echo
-            echo "- Repository: \`${GITHUB_REPOSITORY}\`"
-            echo "- Event: \`${GITHUB_EVENT_NAME}\`"
-            echo "- Base: \`${{ github.event.pull_request.base.sha || github.event.repository.default_branch }}\`"
-            echo "- Head: \`${{ github.event.pull_request.head.sha || github.sha }}\`"
-          } >> "$GITHUB_STEP_SUMMARY"
+          set -euo pipefail
+          echo "trusted_sha=$(git -C trusted rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "trusted_tree=$(git -C trusted rev-parse HEAD^{tree})" >> "$GITHUB_OUTPUT"
+          echo "candidate_tree=$(git -C candidate rev-parse HEAD^{tree})" >> "$GITHUB_OUTPUT"
+          echo "rule_digest=$(find trusted/ai/development/policies -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "schema_digest=$(find trusted/ai/development/schemas -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
-      - name: Validate JSON, manifests, registry, schemas, and examples
-        run: node tools/phoenix_agent_runner/src/cli.mjs validate-config --root .
+      - name: Run trusted P0 tests
+        run: node --test trusted/tools/phoenix_agent_runner/test/trusted-authority.test.mjs trusted/tools/phoenix_agent_runner/test/p0-security.test.mjs
 
-      - name: Run Phoenix Agent Runner unit and fixture tests
-        run: node --test tools/phoenix_agent_runner/test/*.test.mjs
-
-      - name: Run read-only Phoenix Agent audit
+      - name: Run trusted audit without executing Candidate
         env:
-          PHOENIX_NO_EXTERNAL_AI: '1'
+          GITHUB_TOKEN: ''
         run: >-
-          node tools/phoenix_agent_runner/src/cli.mjs audit
-          --root .
-          --repo-root .
+          node trusted/tools/phoenix_agent_runner/src/trusted-cli.mjs
+          --candidate candidate
           --event "$GITHUB_EVENT_PATH"
-          --output-dir phoenix-agent-audit
+          --output phoenix-agent-audit
+          --base-sha "${{ github.event.pull_request.base.sha }}"
+          --candidate-sha "${{ github.event.pull_request.head.sha }}"
+          --candidate-tree "${{ steps.identity.outputs.candidate_tree }}"
+          --trusted-runner-sha "${{ steps.identity.outputs.trusted_sha }}"
+          --trusted-runner-tree "${{ steps.identity.outputs.trusted_tree }}"
+          --rule-digest "${{ steps.identity.outputs.rule_digest }}"
+          --schema-digest "${{ steps.identity.outputs.schema_digest }}"
 
-      - name: Add audit summary
+      - name: Publish redacted Step Summary
         if: always()
         shell: bash
         run: |
-          if [[ -f phoenix-agent-audit/audit-summary.md ]]; then
-            cat phoenix-agent-audit/audit-summary.md >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "Phoenix Agent Audit summary was not produced." >> "$GITHUB_STEP_SUMMARY"
-          fi
+          test -f phoenix-agent-audit/audit-summary.md
+          cat phoenix-agent-audit/audit-summary.md >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload audit report
+      - name: Upload trusted audit artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: phoenix-agent-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          name: phoenix-trusted-audit-${{ github.run_id }}-${{ github.run_attempt }}
           path: phoenix-agent-audit/
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 30
