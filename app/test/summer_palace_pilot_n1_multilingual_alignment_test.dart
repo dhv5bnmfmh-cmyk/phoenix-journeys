@@ -70,7 +70,7 @@ void main() {
         summerPalaceStoryAnnotations.map((entry) => entry.english).join(' ');
 
     expect(chinese, contains('《留下痕迹的风景》'));
-    expect(chinese, contains('没有替她调整构图'));
+    expect(chinese, contains('不再替她调整构图'));
     expect(chinese, contains('旧照片交给她保存'));
 
     expect(pinyin, contains('Liúxià Hénjì de Fēngjǐng'));
