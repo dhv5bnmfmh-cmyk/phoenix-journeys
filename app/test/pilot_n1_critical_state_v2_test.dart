@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phoenix_journeys/data/journey_level_catalog.dart';
 import 'package:phoenix_journeys/services/critical_persistence_store.dart';
 import 'package:phoenix_journeys/services/journey_access_policy.dart';
 import 'package:phoenix_journeys/state/access_controlled_app_state.dart';
@@ -91,7 +90,7 @@ void main() {
     final source = await _newState(sourceBackend);
     await source.activateJourney(_summerPalaceId);
     final payload = _deepCopy(await source.readCommittedCriticalPayload());
-    final journey = _journeyPayload(payload)
+    _journeyPayload(payload)
       ..remove('flowVersion')
       ..remove('compositeSubstage')
       ..['step'] = 3
