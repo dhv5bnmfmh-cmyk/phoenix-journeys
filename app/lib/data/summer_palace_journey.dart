@@ -46,7 +46,7 @@ const summerPalaceStorySources = <StorySourceRecord>[
 
 const summerPalaceStoryParagraphs = <String>[
   '校展截稿前一天，十七岁的许澄带着相机来到颐和园。她想拍一张“没有缺点的皇家园林”，证明自己不需要外婆周岚的指导。周岚年轻时参与过长廊彩画修复，如今眼睛已经看不清细节，却坚持陪她走完旧路线。许澄嫌外婆总把镜头停在褪色、裂纹和补绘处，只想等昆明湖上的雾散去，拍到万寿山、佛香阁和长廊同时清晰的画面。走进长廊后，周岚让她别急着按快门，先看廊柱怎样遮住远山，又怎样在下一个开口把湖面送回来。许澄发现，同一座山会随着脚步忽近忽远，所谓借景不是把风景全部塞进镜头，而是选择什么出现、什么暂时退后。可她仍认定，校展需要一张完整、明亮、没有修补痕迹的作品。她还把“完整”理解为没有任何旧伤，仿佛时间也该从画面里被擦去。',
-  '来到十七孔桥前，阳光终于穿过云层，许澄等候的“完美时刻”出现了。就在她举起相机时，周岚扶着石栏停下，手中的旧照片被风吹落。照片里是修复前的长廊，裂开的彩画旁站着年轻的周岚和已经去世的老师。许澄必须选择：追着光线拍下标准风景，还是先捡回照片，把外婆、裂痕与桥孔后的湖山一起收入画面。她放下原来的构图，蹲身拾起照片，又退到桥侧，让近处斑驳的纸角、外婆扶栏的手和远处万寿山形成三层对景。快门落下后，光线已经偏移，明信片式的画面消失了，照片却留下了修复者与被修复园林之间的关系。许澄把作品改名为《留下痕迹的风景》，并在说明中写道：修复不是把损伤假装不存在，而是让后来的人仍能读到失去、选择与守护。周岚第一次没有替她调整构图，只把旧照片交给她保存。',
+  '来到十七孔桥前，阳光终于穿过云层，许澄等候的“完美时刻”出现了。就在她举起相机时，周岚扶着石栏停下，手中的旧照片被风吹落。照片里是修复前的长廊，裂开的彩画旁站着年轻的周岚和已经去世的老师。许澄必须选择：追着光线拍下标准风景，还是先捡回照片，把外婆、裂痕与桥孔后的湖山一起收入画面。她放下原来的构图，蹲身拾起照片，又退到桥侧，让近处斑驳的纸角、外婆扶栏的手和远处万寿山形成三层对景。快门落下后，她因此错失最佳光线；阳光已经偏移，明信片式的画面消失了，照片却留下了修复者与被修复园林之间的关系。许澄把作品改名为《留下痕迹的风景》，并在说明中写道：修复不是把损伤假装不存在，而是让后来的人仍能读到失去、选择与守护。周岚第一次没有替她调整构图，只把旧照片交给她保存。',
 ];
 
 const summerPalaceStoryAnnotations = <ReadingAnnotation>[
@@ -60,11 +60,11 @@ const summerPalaceStoryAnnotations = <ReadingAnnotation>[
   ),
   ReadingAnnotation(
     pinyin:
-        'Láidào Shíqīkǒng Qiáo qián, yángguāng zhōngyú chuānguò yúncéng, Xǔ Chéng děnghòu de wánměi shíkè chūxiàn le. Jiù zài tā jǔqǐ xiàngjī shí, Zhōu Lán fúzhe shílán tíngxià, shǒu zhōng de jiù zhàopiàn bèi fēng chuīluò. Zhàopiàn lǐ shì xiūfù qián de Chángláng, lièkāi de cǎihuà páng zhànzhe niánqīng de Zhōu Lán hé yǐjīng qùshì de lǎoshī. Xǔ Chéng bìxū xuǎnzé: zhuīzhe guāngxiàn pāi xià biāozhǔn fēngjǐng, háishi xiān jiǎn huí zhàopiàn. Tā fàngxià yuánlái de gòutú, dūnshēn shíqǐ zhàopiàn, ràng bānbó zhǐjiǎo, wàipó fúlán de shǒu hé yuǎnchù Wànshòu Shān xíngchéng sān céng duìjǐng. Guāngxiàn yǐjīng piānyí, míngxìnpiàn shì de huàmiàn xiāoshī le. Xǔ Chéng bǎ zuòpǐn gǎimíng wéi Liúxià Hénjì de Fēngjǐng, míngbai xiūfù bú shì mǒqù hénjì. Zhōu Lán bù zài tì tā tiáozhěng gòutú, bǎ jiù zhàopiàn jiāogěi tā bǎocún.',
+        'Láidào Shíqīkǒng Qiáo qián, yángguāng zhōngyú chuānguò yúncéng, Xǔ Chéng děnghòu de wánměi shíkè chūxiàn le. Jiù zài tā jǔqǐ xiàngjī shí, Zhōu Lán fúzhe shílán tíngxià, shǒu zhōng de jiù zhàopiàn bèi fēng chuīluò. Zhàopiàn lǐ shì xiūfù qián de Chángláng, lièkāi de cǎihuà páng zhànzhe niánqīng de Zhōu Lán hé yǐjīng qùshì de lǎoshī. Xǔ Chéng bìxū xuǎnzé: zhuīzhe guāngxiàn pāi xià biāozhǔn fēngjǐng, háishi xiān jiǎn huí zhàopiàn. Tā fàngxià yuánlái de gòutú, dūnshēn shíqǐ zhàopiàn, ràng bānbó zhǐjiǎo, wàipó fúlán de shǒu hé yuǎnchù Wànshòu Shān xíngchéng sān céng duìjǐng. Guāngxiàn yǐjīng piānyí, tā yīncǐ cuòshī zuìjiā guāngxiàn, míngxìnpiàn shì de huàmiàn xiāoshī le. Xǔ Chéng bǎ zuòpǐn gǎimíng wéi Liúxià Hénjì de Fēngjǐng, míngbai xiūfù bú shì mǒqù hénjì. Zhōu Lán bù zài tì tā tiáozhěng gòutú, bǎ jiù zhàopiàn jiāogěi tā bǎocún.',
     vietnamese:
-        'Trước cầu Thập Thất Khổng, ánh sáng hoàn hảo xuất hiện đúng lúc bức ảnh cũ của Chu Lam bị gió thổi rơi. Hứa Trừng phải chọn giữa đuổi theo ánh sáng và nhặt ảnh. Cô bỏ bố cục cũ, nhặt ảnh trước rồi đặt góc giấy sờn, bàn tay bà và núi Vạn Thọ thành ba lớp. Ánh sáng đã lệch và khung kiểu bưu thiếp biến mất. Cô đặt tên tác phẩm “Phong cảnh lưu lại dấu vết” và hiểu phục hồi không xóa dấu vết. Chu Lam không còn chỉnh bố cục thay cô, chỉ giao bức ảnh cũ cho cô gìn giữ.',
+        'Trước cầu Thập Thất Khổng, ánh sáng hoàn hảo xuất hiện đúng lúc bức ảnh cũ của Chu Lam bị gió thổi rơi. Hứa Trừng phải chọn giữa đuổi theo ánh sáng và nhặt ảnh. Cô bỏ bố cục cũ, nhặt ảnh trước rồi đặt góc giấy sờn, bàn tay bà và núi Vạn Thọ thành ba lớp. Cô vì thế lỡ ánh sáng đẹp nhất; khung kiểu bưu thiếp biến mất. Cô đặt tên tác phẩm “Phong cảnh lưu lại dấu vết” và hiểu phục hồi không xóa dấu vết. Chu Lam không còn chỉnh bố cục thay cô, chỉ giao bức ảnh cũ cho cô gìn giữ.',
     english:
-        'At the Seventeen-Arch Bridge, perfect light arrives as Zhou Lan’s old photograph falls. Xu Cheng must choose between chasing the light and retrieving it. She abandons the old composition, recovers the photograph, and frames worn paper, her grandmother’s hand, and Longevity Hill in three layers. The light shifts and the postcard view disappears. She titles the work “A Landscape That Keeps Its Traces” and understands that restoration does not erase traces. Zhou Lan no longer adjusts the composition and entrusts the old photograph to her.',
+        'At the Seventeen-Arch Bridge, perfect light arrives as Zhou Lan’s old photograph falls. Xu Cheng must choose between chasing the light and retrieving it. She abandons the old composition, recovers the photograph, and frames worn paper, her grandmother’s hand, and Longevity Hill in three layers. She therefore loses the best light and the postcard view disappears. She titles the work “A Landscape That Keeps Its Traces” and understands that restoration does not erase traces. Zhou Lan no longer adjusts the composition and entrusts the old photograph to her.',
   ),
 ];
 
@@ -82,18 +82,18 @@ const summerPalaceWords = <WordEntry>[
 
 const summerPalaceDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(
-    text: '颐和园的规划利用人的行走次序安排观看。万寿山和昆明湖构成山水骨架，长廊、亭台、桥梁与岛屿进入这个骨架。廊柱和开口交替遮蔽、放出远景，昆明湖倒影也随视角改变湖光山色的层次。“借景”通过方向、比例、前景和路线把远处景物纳入当前画面；“对景”让人在特定位置获得明确目标。观看者的脚步因此成为设计的一部分，风景在移动中连续重新构图，近处廊柱、中段湖面与远处山峰形成清楚层次。',
-    pinyin: 'Yíhéyuán de guīhuà lìyòng rén de xíngzǒu cìxù ānpái guānkàn. Wànshòu Shān hé Kūnmíng Hú gòuchéng shānshuǐ gǔjià. Jièjǐng bǎ yuǎnchù jǐngwù nàrù dāngqián huàmiàn, duìjǐng ràng rén huòdé míngquè mùbiāo.',
-    simpleChinese: '颐和园用山、湖、长廊和桥安排观看路线。借景把远处景物带进当前画面。',
-    vietnamese: 'Di Hòa Viên tổ chức tầm nhìn theo bước chân. Núi Vạn Thọ và hồ Côn Minh tạo khung; mượn cảnh đưa cảnh xa vào hình, còn đối cảnh tạo mục tiêu rõ ràng.',
-    english: 'The Summer Palace sequences views through movement. Longevity Hill and Kunming Lake form a framework; borrowed scenery brings distant elements into the frame and opposite views create a target.',
+    text: '颐和园的规划利用人的行走次序安排观看。万寿山和昆明湖构成山水骨架，长廊、亭台、桥梁与岛屿进入这个骨架。廊柱和开口交替遮蔽、放出远景，昆明湖倒影也随视角改变湖光山色的层次。“借景”通过方向、比例、前景和路线把远处景物纳入当前画面；“对景”让人在特定位置获得明确目标。观看者的脚步因此成为设计的一部分，风景在移动中连续重新构图，近处廊柱、中段湖面与远处山峰形成清楚层次。这种连续画框不是装饰性的巧合：游人从长廊转向桥岸时，视线先被建筑收紧，再被湖面打开；同一万寿山因前景变化而获得不同距离感，路线、停顿和回望共同决定景观如何被理解。',
+    pinyin: 'Yíhéyuán de guīhuà lìyòng rén de xíngzǒu cìxù ānpái guānkàn. Wànshòu Shān hé Kūnmíng Hú gòuchéng shānshuǐ gǔjià. Jièjǐng bǎ yuǎnchù jǐngwù nàrù dāngqián huàmiàn, duìjǐng ràng rén huòdé míngquè mùbiāo. Zhè zhǒng liánxù huàkuāng ràng shìxiàn xiān bèi jiànzhù shōujǐn, zài bèi húmiàn dǎkāi; lùxiàn, tíngdùn hé huíwàng gòngtóng juédìng jǐngguān rúhé bèi lǐjiě.',
+    simpleChinese: '颐和园用山、湖、长廊和桥安排观看路线。借景把远处景物带进当前画面，路线和停顿也会改变人怎样理解景观。',
+    vietnamese: 'Di Hòa Viên tổ chức tầm nhìn theo bước chân. Núi Vạn Thọ và hồ Côn Minh tạo khung; mượn cảnh đưa cảnh xa vào hình, còn đối cảnh tạo mục tiêu rõ ràng. Khi người xem rời Trường Lang hướng về bờ cầu, kiến trúc thu hẹp tầm nhìn rồi mặt hồ mở nó ra; tuyến đi, điểm dừng và cái ngoái nhìn cùng quyết định cách cảnh quan được hiểu.',
+    english: 'The Summer Palace sequences views through movement. Longevity Hill and Kunming Lake form a framework; borrowed scenery brings distant elements into the frame and opposite views create a target. As visitors move from the Long Corridor toward the bridge, architecture narrows the sightline before the lake opens it again; route, pause, and looking back shape how the landscape is understood.',
   ),
   DiscoveryEntry(
-    text: '颐和园最早建成于一七五〇年，一八六〇年受到严重破坏，后来于一八八六年重建。今天的建筑、彩画和园林空间同时包含原有设计、历史损毁与后续修复。修复需要区分可保留的旧材料、必须加固的部分和后补内容，并留下记录，使后来的人判断哪些属于原作、哪些来自修复。十七孔桥既连接湖岸与南湖岛，也用水平线组织近处石栏、开阔水面和远处万寿山。遗产价值因此来自自然、人工、时间与观看方式之间被保存的关系，修复记录让这种关系能够被核对。',
-    pinyin: 'Yíhéyuán jiànchéng yú yī qī wǔ líng nián, yī bā liù líng nián shòudào pòhuài, hòulái yú yī bā bā liù nián chóngjiàn. Xiūfù xūyào qūfēn jiù cáiliào, jiāgù bùfen hé hòubǔ nèiróng, bìng liúxià jìlù.',
-    simpleChinese: '颐和园经历过破坏和重建。修复会保护旧材料、加固损坏部分并记录补上的内容。',
-    vietnamese: 'Di Hòa Viên được xây năm 1750, bị phá hủy năm 1860 và tái thiết năm 1886. Bảo tồn phân biệt vật liệu cũ, phần gia cố và phần bổ sung, đồng thời lưu hồ sơ.',
-    english: 'The Summer Palace was built in 1750, damaged in 1860, and rebuilt in 1886. Conservation distinguishes surviving material, reinforcement, and later additions while preserving records.',
+    text: '颐和园最早建成于一七五〇年，一八六〇年受到严重破坏，后来于一八八六年重建。今天的建筑、彩画和园林空间同时包含原有设计、历史损毁与后续修复。修复需要区分可保留的旧材料、必须加固的部分和后补内容，并留下记录，使后来的人判断哪些属于原作、哪些来自修复。十七孔桥既连接湖岸与南湖岛，也用水平线组织近处石栏、开阔水面和远处万寿山。遗产价值因此来自自然、人工、时间与观看方式之间被保存的关系，修复记录让这种关系能够被核对。保护人员还会通过材料分析、照片、图样和施工档案建立可追溯证据；新补部分应与旧物协调，却不能冒充原作。公开记录既帮助下一次维护，也让公众理解今日所见是长期选择的结果。',
+    pinyin: 'Yíhéyuán jiànchéng yú yī qī wǔ líng nián, yī bā liù líng nián shòudào pòhuài, hòulái yú yī bā bā liù nián chóngjiàn. Xiūfù xūyào qūfēn jiù cáiliào, jiāgù bùfen hé hòubǔ nèiróng, bìng liúxià jìlù. Bǎohù rényuán hái huì tōngguò cáiliào fēnxī, zhàopiàn, túyàng hé shīgōng dàng'àn jiànlì kě zhuīsù zhèngjù; xīn bǔ bùfen bùnéng màochōng yuánzuò.',
+    simpleChinese: '颐和园经历过破坏和重建。修复会保护旧材料、加固损坏部分、记录补上的内容，并用照片和档案留下可以核对的证据。',
+    vietnamese: 'Di Hòa Viên được xây năm 1750, bị phá hủy năm 1860 và tái thiết năm 1886. Bảo tồn phân biệt vật liệu cũ, phần gia cố và phần bổ sung, đồng thời lưu hồ sơ. Chuyên gia còn dùng phân tích vật liệu, ảnh, bản vẽ và hồ sơ thi công để tạo bằng chứng có thể truy nguyên; phần mới phải hài hòa nhưng không được giả làm nguyên tác.',
+    english: 'The Summer Palace was built in 1750, damaged in 1860, and rebuilt in 1886. Conservation distinguishes surviving material, reinforcement, and later additions while preserving records. Conservators also use material analysis, photographs, drawings, and construction archives to create traceable evidence; new work should harmonize with old fabric without pretending to be original.',
   ),
 ];
 

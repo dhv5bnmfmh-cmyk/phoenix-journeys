@@ -5,6 +5,40 @@ import 'summer_palace_journey.dart';
 final summerPalaceAdaptiveWords = <WordEntry>[
   ...summerPalaceWords.where((entry) => entry.word != '融合'),
   const WordEntry(
+    word: '倒影',
+    pinyin: 'dàoyǐng',
+    partOfSpeech: '名词',
+    simpleChinese: '物体映在水面或镜面上的影像。',
+    translation: 'Hình phản chiếu của vật thể trên mặt nước hoặc mặt gương.',
+    englishDefinition: 'a reflection on water or a mirrored surface',
+    examples: [
+      WordExample(
+        chinese: '昆明湖的倒影随着观看角度改变。',
+        pinyin: 'Kūnmíng Hú de dàoyǐng suízhe guānkàn jiǎodù gǎibiàn.',
+        vietnamese: 'Hình phản chiếu trên hồ Côn Minh thay đổi theo góc nhìn.',
+        english: 'The reflection on Kunming Lake changes with the viewing angle.',
+      ),
+    ],
+    symbol: '🪞',
+  ),
+  const WordEntry(
+    word: '亭台',
+    pinyin: 'tíngtái',
+    partOfSpeech: '名词',
+    simpleChinese: '园林中的亭子和台榭等建筑。',
+    translation: 'Các đình và đài trong kiến trúc cảnh quan.',
+    englishDefinition: 'pavilions and terraces in a garden',
+    examples: [
+      WordExample(
+        chinese: '亭台、桥梁和岛屿共同组织颐和园的视线。',
+        pinyin: 'Tíngtái, qiáoliáng hé dǎoyǔ gòngtóng zǔzhī Yíhéyuán de shìxiàn.',
+        vietnamese: 'Đình, cầu và đảo cùng tổ chức đường nhìn trong Di Hòa Viên.',
+        english: 'Pavilions, bridges, and islands organize sightlines through the Summer Palace.',
+      ),
+    ],
+    symbol: '🏛️',
+  ),
+  const WordEntry(
     word: '构图',
     pinyin: 'gòutú',
     partOfSpeech: '动词／名词',

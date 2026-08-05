@@ -211,11 +211,11 @@ List<WordEntry> _selectSummerPalaceWords(List<String> selectedWords) {
 }
 
 final summerPalaceEasyLevel = JourneyLevelContent(
-  storyParagraphs: const <String>[
+  storyParagraphs: <String>[
     '十七岁的学生摄影者许澄要为校展拍一张颐和园作品，证明自己不需要外婆周岚指导。周岚曾保护长廊彩画，她要许澄看修复痕迹，许澄却只想拍无瑕画面。',
     '十七孔桥旁，最佳光线出现时，旧照片也被风吹落。许澄必须在追光和捡照片之间选择。她放弃原构图，先捡回照片，因此错失光线。她重新拍下斑驳旧照、外婆的手和远处万寿山，作品名为《留下痕迹的风景》。周岚不再替她调整构图，把旧照片交给她保存。许澄不再只想证明独立，也懂得修复要留下关系、时间和痕迹。',
   ],
-  storyAnnotations: const <ReadingAnnotation>[
+  storyAnnotations: <ReadingAnnotation>[
     ReadingAnnotation(
       pinyin:
           'Shíqī suì de xuéshēng shèyǐngzhě Xǔ Chéng yào wèi xiàozhǎn pāi yì zhāng Yíhéyuán zuòpǐn, zhèngmíng zìjǐ bù xūyào wàipó Zhōu Lán zhǐdǎo. Zhōu Lán céng bǎohù Chángláng cǎihuà, tā yào Xǔ Chéng kàn xiūfù hénjì, Xǔ Chéng què zhǐ xiǎng pāi wúxiá huàmiàn.',
@@ -246,11 +246,11 @@ final summerPalaceEasyLevel = JourneyLevelContent(
 );
 
 const summerPalaceChallengeLevel = JourneyLevelContent(
-  storyParagraphs: const <String>[
+  storyParagraphs: <String>[
     '校展截稿前夕，十七岁的学生摄影者许澄执意寻找一幅“无瑕”的皇家园林图景，以此证明自己的摄影不再依赖外婆周岚。周岚曾参与长廊彩画保护，她借廊柱的遮蔽与开敞说明：构图和修复一样，都必须决定何者显现、何者退后，却不能伪造未曾受损的过去。许澄仍坚持把褪色、裂纹和补绘排除在镜头外，两人的价值判断因此直接冲突。',
     '十七孔桥前，理想光线出现的同时，记录修复前长廊、年轻周岚及其已故老师的旧照片被风吹落。许澄必须在标准风景与关系记忆之间作出不可兼得的选择。她放弃追光，先捡回照片，再以斑驳旧照、外婆扶栏的手和桥孔后的万寿山形成三层对景。这个行动使她错失最佳光线，却换来《留下痕迹的风景》：周岚不再替她调整构图，并把旧照片交给她保存。许澄的目标从证明独立转为承担保存关系与时间的责任，也理解修复不是抹去痕迹，而是让损失、选择和守护继续可读。',
   ],
-  storyAnnotations: const <ReadingAnnotation>[
+  storyAnnotations: <ReadingAnnotation>[
     ReadingAnnotation(
       pinyin:
           'Xiàozhǎn jiégǎo qiánxī, shíqī suì de xuéshēng shèyǐngzhě Xǔ Chéng zhíyì xúnzhǎo yì fú wúxiá de huángjiā yuánlín tújǐng, yǐcǐ zhèngmíng zìjǐ de shèyǐng bù zài yīlài wàipó Zhōu Lán. Zhōu Lán céng cānyù Chángláng cǎihuà bǎohù, tā jiè lángzhù de zhēbì yǔ kāichǎng shuōmíng: gòutú hé xiūfù yíyàng, dōu bìxū juédìng hézhě xiǎnxiàn, hézhě tuìhòu, què bùnéng wěizào wèicéng shòusǔn de guòqù. Xǔ Chéng réng jiānchí bǎ tuìsè, lièwén hé bǔhuì páichú zài jìngtóu wài, liǎng rén de jiàzhí pànduàn yīncǐ zhíjiē chōngtū.',

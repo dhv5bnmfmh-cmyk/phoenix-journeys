@@ -149,10 +149,10 @@ const summerPalaceN1SemanticEvents = <SummerPalaceN1SemanticEvent>[
   ),
   SummerPalaceN1SemanticEvent(
     id: SummerPalaceN1EventId.enactedChoice,
-    coreChinese: '她放弃原构图，先捡回照片。',
-    corePinyin: 'Tā fàngqì yuán gòutú, xiān jiǎn huí zhàopiàn.',
-    coreVietnamese: 'Cô bỏ bố cục ban đầu và nhặt bức ảnh trước.',
-    coreEnglish: 'She abandons her original composition and retrieves the photograph first.',
+    coreChinese: '许澄放弃原构图，先捡回照片。',
+    corePinyin: 'Xǔ Chéng fàngqì yuán gòutú, xiān jiǎn huí zhàopiàn.',
+    coreVietnamese: 'Hứa Trừng bỏ bố cục ban đầu và nhặt bức ảnh trước.',
+    coreEnglish: 'Xu Cheng abandons her original composition and retrieves the photograph first.',
     detailChinese: '她放下相机，蹲身拾起斑驳纸角，再退到桥侧重新寻找位置。',
     detailPinyin: 'Tā fàngxià xiàngjī, dūnshēn shíqǐ bānbó zhǐjiǎo, zài tuì dào qiáocè chóngxīn xúnzhǎo wèizhì.',
     detailVietnamese: 'Cô hạ máy, cúi nhặt góc giấy sờn rồi lùi sang bên cầu để tìm lại vị trí.',
@@ -292,28 +292,28 @@ String _eventEnglish(SummerPalaceN1SemanticEvent event, int level) =>
 
 String _masteryChinese(int level) {
   if (level < 9) return '';
-  final analysis = ' 她也看见，所谓独立不是拒绝前人的经验，而是能够说明自己为何选择、愿意承担何种损失。';
+  const analysis = ' 她也看见，所谓独立不是拒绝前人的经验，而是能够说明自己为何选择、愿意承担何种损失。';
   if (level < 10) return analysis;
   return '$analysis 她把园林保护理解为一种可追溯的责任：原作、损伤、补绘与修复者都不该被单一的“完美”遮蔽；摄影则必须公开自己的取舍，使观看者能够辨认时间如何进入画面。';
 }
 
 String _masteryPinyin(int level) {
   if (level < 9) return '';
-  final analysis = ' Tā yě kànjiàn, suǒwèi dúlì bú shì jùjué qiánrén de jīngyàn, ér shì nénggòu shuōmíng zìjǐ wèihé xuǎnzé, yuànyì chéngdān hézhǒng sǔnshī.';
+  const analysis = ' Tā yě kànjiàn, suǒwèi dúlì bú shì jùjué qiánrén de jīngyàn, ér shì nénggòu shuōmíng zìjǐ wèihé xuǎnzé, yuànyì chéngdān hézhǒng sǔnshī.';
   if (level < 10) return analysis;
   return '$analysis Tā bǎ yuánlín bǎohù lǐjiě wéi yì zhǒng kě zhuīsù de zérèn: yuánzuò, sǔnshāng, bǔhuì yǔ xiūfùzhě dōu bù gāi bèi dānyī de wánměi zhēbì; shèyǐng zé bìxū gōngkāi zìjǐ de qǔshě, shǐ guānkànzhě nénggòu biànrèn shíjiān rúhé jìnrù huàmiàn.';
 }
 
 String _masteryVietnamese(int level) {
   if (level < 9) return '';
-  final analysis = ' Cô cũng nhận ra độc lập không phải từ chối kinh nghiệm của người đi trước, mà là giải thích được vì sao mình lựa chọn và sẵn sàng chịu mất mát nào.';
+  const analysis = ' Cô cũng nhận ra độc lập không phải từ chối kinh nghiệm của người đi trước, mà là giải thích được vì sao mình lựa chọn và sẵn sàng chịu mất mát nào.';
   if (level < 10) return analysis;
   return '$analysis Cô hiểu bảo tồn khu vườn là trách nhiệm có thể truy nguyên: nguyên tác, hư hại, phần vẽ bổ sung và người phục hồi không được che khuất dưới một ý niệm “hoàn hảo”; nhiếp ảnh cũng phải công khai sự lựa chọn để người xem nhận ra thời gian đi vào hình ảnh thế nào.';
 }
 
 String _masteryEnglish(int level) {
   if (level < 9) return '';
-  final analysis = ' She also sees that independence does not mean rejecting inherited experience, but explaining why she chooses and what loss she accepts.';
+  const analysis = ' She also sees that independence does not mean rejecting inherited experience, but explaining why she chooses and what loss she accepts.';
   if (level < 10) return analysis;
   return '$analysis She comes to understand conservation as traceable responsibility: original work, damage, retouching, and restorers must not be hidden by a single ideal of perfection; photography must disclose its choices so viewers can recognize how time enters the image.';
 }
