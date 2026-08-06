@@ -11,11 +11,19 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await const LanguageLevelPreferenceStore().initializePhoenixLevel();
 
+  final runtimeUri = Uri.base;
+  final unlockAllJourneys =
+      runtimeUri.queryParameters['unlock'] == 'all' &&
+      runtimeUri.queryParameters['prototype'] == 'journeys';
+
   runZonedGuarded(
     () {
       runApp(
         ChangeNotifierProvider<AppState>(
-          create: (_) => AccessControlledAppState()..load(),
+          create: (_) => AccessControlledAppState(
+            runtimeUri: runtimeUri,
+            debugBuild: unlockAllJourneys ? true : null,
+          )..load(),
           child: const PhoenixApp(),
         ),
       );
