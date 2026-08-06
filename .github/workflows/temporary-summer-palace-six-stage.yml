@@ -35,22 +35,24 @@ jobs:
 
           state_path = Path('app/lib/state/app_state.dart')
           state = state_path.read_text(encoding='utf-8')
-          old_state = """  String _journeyLabelFor(int step, JourneyCompositeSubstage substage) {
-    if (activeJourneyId == 'beijing-summer-palace') {
-      if (step == 3) {
-        return substage == JourneyCompositeSubstage.challenge ? '挑战' : '思考';
-      }
-      if (step == 4) {
-        return substage == JourneyCompositeSubstage.memory ? '回忆' : '表达';
-      }
-    }
-    return journeyStepLabels[_safeJourneyStep(step)];
-  }
-"""
-          new_state = """  String _journeyLabelFor(int step, JourneyCompositeSubstage substage) {
-    return journeyStepLabels[_safeJourneyStep(step)];
-  }
-"""
+          old_state = (
+              "  String _journeyLabelFor(int step, JourneyCompositeSubstage substage) {\n"
+              "    if (activeJourneyId == 'beijing-summer-palace') {\n"
+              "      if (step == 3) {\n"
+              "        return substage == JourneyCompositeSubstage.challenge ? '挑战' : '思考';\n"
+              "      }\n"
+              "      if (step == 4) {\n"
+              "        return substage == JourneyCompositeSubstage.memory ? '回忆' : '表达';\n"
+              "      }\n"
+              "    }\n"
+              "    return journeyStepLabels[_safeJourneyStep(step)];\n"
+              "  }\n"
+          )
+          new_state = (
+              "  String _journeyLabelFor(int step, JourneyCompositeSubstage substage) {\n"
+              "    return journeyStepLabels[_safeJourneyStep(step)];\n"
+              "  }\n"
+          )
           if state.count(old_state) != 1:
               raise SystemExit(f'Expected exactly one Journey label anchor, found {state.count(old_state)}')
           state_path.write_text(state.replace(old_state, new_state), encoding='utf-8')
