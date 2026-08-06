@@ -1,5 +1,5 @@
 import '../models/story_content.dart';
-import 'journey_data.dart';
+import 'batch_one_journey_remediation.dart';
 
 const beijingStorySources = <StorySourceRecord>[
   StorySourceRecord(
@@ -11,7 +11,7 @@ const beijingStorySources = <StorySourceRecord>[
     languageCode: 'zh-CN',
     geoNodeIds: ['cn-beijing-dongcheng-forbidden-city'],
     verificationStatus: StoryVerificationStatus.verified,
-    accessedOn: '2026-07-18',
+    accessedOn: '2026-08-06',
   ),
   StorySourceRecord(
     id: 'unesco-imperial-palaces-439',
@@ -22,66 +22,90 @@ const beijingStorySources = <StorySourceRecord>[
     languageCode: 'en',
     geoNodeIds: ['cn-beijing-dongcheng-forbidden-city'],
     verificationStatus: StoryVerificationStatus.verified,
-    accessedOn: '2026-07-18',
+    accessedOn: '2026-08-06',
   ),
   StorySourceRecord(
     id: 'beijing-gov-forbidden-city-2025',
     title: 'World Cultural Heritage Tour in Beijing: Forbidden City',
     publisher: 'The People’s Government of Beijing Municipality',
-    url:
-        'https://english.beijing.gov.cn/latest/news/202505/t20250504_4080361.html',
+    url: 'https://english.beijing.gov.cn/latest/news/202505/t20250504_4080361.html',
     kind: StorySourceKind.government,
     languageCode: 'en',
     geoNodeIds: ['cn-beijing-dongcheng-forbidden-city'],
     verificationStatus: StoryVerificationStatus.verified,
-    accessedOn: '2026-07-18',
+    accessedOn: '2026-08-06',
+  ),
+  StorySourceRecord(
+    id: 'unesco-temple-of-heaven-881',
+    title: 'Temple of Heaven: an Imperial Sacrificial Altar in Beijing',
+    publisher: 'UNESCO World Heritage Centre',
+    url: 'https://whc.unesco.org/en/list/881/',
+    kind: StorySourceKind.unesco,
+    languageCode: 'en',
+    geoNodeIds: ['cn-beijing-dongcheng-temple-of-heaven'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-08-06',
+  ),
+  StorySourceRecord(
+    id: 'beijing-gov-temple-of-heaven',
+    title: 'Temple of Heaven',
+    publisher: 'The People’s Government of Beijing Municipality',
+    url: 'https://english.beijing.gov.cn/specials/parktours/guidevisitors/templeofheaven/',
+    kind: StorySourceKind.government,
+    languageCode: 'en',
+    geoNodeIds: ['cn-beijing-dongcheng-temple-of-heaven'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-08-06',
+  ),
+  StorySourceRecord(
+    id: 'temple-of-heaven-park-guide',
+    title: '天坛公园导览',
+    publisher: '北京市天坛公园管理处',
+    url: 'http://www.tiantanpark.com/',
+    kind: StorySourceKind.museum,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-beijing-dongcheng-temple-of-heaven'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-08-06',
   ),
 ];
 
-final beijingForbiddenCityJourney = JourneyContentRecord(
-  id: 'beijing-forbidden-city',
-  title: '北京 · 故宫：一座宫殿怎样保存国家的记忆',
+JourneyContentRecord _recordFromRemediation({
+  required RemediatedJourney journey,
+  required String geoNodeId,
+  required List<String> tags,
+}) {
+  return JourneyContentRecord(
+    id: journey.id,
+    title: journey.title,
+    geoNodeId: geoNodeId,
+    languageCode: 'zh-CN',
+    verificationStatus: StoryVerificationStatus.published,
+    tags: tags,
+    sections: [
+      for (var index = 0; index < journey.levels.length; index++)
+        JourneyStorySection(
+          id: 'story-lv${index + 1}',
+          text: journey.levels[index],
+          sourceIds: journey.sourceIds,
+        ),
+    ],
+  );
+}
+
+final beijingForbiddenCityJourney = _recordFromRemediation(
+  journey: forbiddenCityRemediation,
   geoNodeId: 'cn-beijing-dongcheng-forbidden-city',
-  languageCode: 'zh-CN',
-  verificationStatus: StoryVerificationStatus.published,
-  tags: const ['北京', '故宫', '紫禁城', '明清', '文化遗产'],
-  sections: [
-    JourneyStorySection(
-      id: 'story-0',
-      text: storyParagraphs[0],
-      sourceIds: const [
-        'dpm-forbidden-city-guide',
-        'beijing-gov-forbidden-city-2025',
-      ],
-    ),
-    JourneyStorySection(
-      id: 'story-1',
-      text: storyParagraphs[1],
-      sourceIds: const [
-        'dpm-forbidden-city-guide',
-        'beijing-gov-forbidden-city-2025',
-      ],
-    ),
-    JourneyStorySection(
-      id: 'story-2',
-      text: storyParagraphs[2],
-      sourceIds: const [
-        'dpm-forbidden-city-guide',
-        'unesco-imperial-palaces-439',
-        'beijing-gov-forbidden-city-2025',
-      ],
-    ),
-    JourneyStorySection(
-      id: 'story-3',
-      text: storyParagraphs[3],
-      sourceIds: const [
-        'dpm-forbidden-city-guide',
-        'unesco-imperial-palaces-439',
-      ],
-    ),
-  ],
+  tags: const ['北京', '故宫', '紫禁城', '明清', '古建测绘', '修缮', '文化遗产'],
+);
+
+final beijingTempleOfHeavenJourney = _recordFromRemediation(
+  journey: templeOfHeavenRemediation,
+  geoNodeId: 'cn-beijing-dongcheng-temple-of-heaven',
+  tags: const ['北京', '天坛', '圜丘', '祈年殿', '皇穹宇', '回音壁', '文化遗产'],
 );
 
 final beijingJourneyCatalog = <JourneyContentRecord>[
   beijingForbiddenCityJourney,
+  beijingTempleOfHeavenJourney,
 ];
