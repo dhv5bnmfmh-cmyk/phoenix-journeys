@@ -67,6 +67,21 @@ class PhoenixVocabularyService {
       qualityReviewed: true,
       qualityScore: 100,
     ),
+    '紫禁城': PhoenixVocabularyExample(
+      chinese: '紫禁城以中轴线组织宫门、院落和主要宫殿。',
+      pinyin:
+          'Zǐjìnchéng yǐ zhōngzhóuxiàn zǔzhī gōngmén, yuànluò hé zhǔyào gōngdiàn.',
+      native:
+          'Tử Cấm Thành tổ chức các cổng cung, sân và điện chính dọc theo trục trung tâm.',
+      english:
+          'The Forbidden City arranges its gates, courtyards, and principal halls along a central axis.',
+      usageNote: '“紫禁城”是明清皇宫建筑群的历史名称，现代博物馆机构称“故宫博物院”。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
     '太和殿': PhoenixVocabularyExample(
       chinese: '参观太和殿时，请不要跨越前方的围栏。',
       pinyin: 'Cānguān Tàihédiàn shí, qǐng bú yào kuàyuè qiánfāng de wéilán.',
@@ -106,10 +121,6 @@ class PhoenixVocabularyService {
     return _bundledExamples[word];
   }
 
-  /// Explorer runtime path.
-  ///
-  /// Published vocabulary examples are prepared before release and bundled
-  /// with the Journey pack. Opening a word must never wait for a model request.
   Future<PhoenixVocabularyExample> generateExample({
     required WordEntry entry,
     required String language,
@@ -139,12 +150,6 @@ class PhoenixVocabularyService {
     return SynchronousFuture<PhoenixVocabularyExample>(preloaded);
   }
 
-  /// Content-authoring path only.
-  ///
-  /// PhoenixVocabularyAgent and PhoenixQualityAgent can generate and review
-  /// examples while a Journey pack is being prepared. Their result must be
-  /// saved into the pack before explorers receive it; the app UI does not call
-  /// this method when a learner opens a word.
   Future<PhoenixVocabularyExample> generateExampleForContentPipeline({
     required WordEntry entry,
     required String language,
@@ -264,9 +269,5 @@ class PhoenixVocabularyService {
   int _readInt(Map<String, dynamic> source, String key) {
     final value = source[key];
     return value is num ? value.round() : 0;
-  }
-
-  void close() {
-    _client.close();
   }
 }
