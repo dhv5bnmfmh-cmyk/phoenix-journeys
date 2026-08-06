@@ -54,7 +54,7 @@ jobs:
       - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a
         with:
           egress-policy: audit
-      - uses: actions/checkout@11bd71901bbe5ceea73d27597364c9af683
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 1
@@ -189,7 +189,7 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_OUTPUT, lines.join(lf) + lf);
           NODE
       - name: Check out exact live Base SHA as trusted source
-        uses: actions/checkout@11bd71901bbe5ceea73d27597364c9af683
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: ${{ steps.live.outputs.base_sha }}
           path: trusted
@@ -198,7 +198,7 @@ jobs:
           submodules: false
           lfs: false
       - name: Check out exact live Candidate SHA as untrusted data
-        uses: actions/checkout@11bd71901bbe5ceea73d27597364c9af683
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: ${{ steps.live.outputs.head_sha }}
           path: candidate
