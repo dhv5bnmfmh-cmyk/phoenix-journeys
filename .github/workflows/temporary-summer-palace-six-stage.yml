@@ -1,0 +1,71 @@
+name: Temporary Summer Palace Six Stage Fix
+
+on:
+  push:
+    branches:
+      - fix/summer-palace-six-stage-flow
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/summer-palace-six-stage-flow
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Apply exact flow correction
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('app/lib/screens/journey_screen.dart')
+          text = path.read_text(encoding='utf-8')
+          old = "  bool get _isSummerPalacePilot =>\n      _experience.id == 'beijing-summer-palace';"
+          new = "  // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.\n  bool get _isSummerPalacePilot => false;"
+          if text.count(old) != 1:
+              raise SystemExit(f'Expected exactly one Pilot flow anchor, found {text.count(old)}')
+          path.write_text(text.replace(old, new), encoding='utf-8')
+
+          workflow = Path('.github/workflows/temporary-summer-palace-six-stage.yml')
+          workflow.unlink()
+
+      - name: Verify exact changed paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t paths < <(git diff --name-only | sort)
+          printf '%s\n' "${paths[@]}"
+          test "${#paths[@]}" -eq 2
+          test "${paths[0]}" = ".github/workflows/temporary-summer-palace-six-stage.yml"
+          test "${paths[1]}" = "app/lib/screens/journey_screen.dart"
+          git diff --check
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Validate application
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+
+      - name: Commit correction and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/lib/screens/journey_screen.dart .github/workflows/temporary-summer-palace-six-stage.yml
+          git commit -m 'fix(journey): unify Summer Palace with six-stage flow'
+          git push origin HEAD:fix/summer-palace-six-stage-flow
