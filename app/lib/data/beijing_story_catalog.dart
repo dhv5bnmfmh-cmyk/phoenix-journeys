@@ -100,8 +100,8 @@ JourneyContentRecord _record({
 }
 
 final beijingForbiddenCityJourney = _record(
-  id: batchOneForbiddenCity.id,
-  title: batchOneForbiddenCity.title,
+  id: forbiddenCityRemediation.id,
+  title: forbiddenCityRemediation.title,
   geoNodeId: 'cn-beijing-dongcheng-forbidden-city',
   tags: const ['北京', '故宫', '紫禁城', '修复', '责任', '世界文化遗产'],
   paragraphs: _forbiddenCityCanonicalStory,
@@ -113,8 +113,8 @@ final beijingForbiddenCityJourney = _record(
 );
 
 final beijingTempleOfHeavenJourney = _record(
-  id: batchOneTempleOfHeaven.id,
-  title: batchOneTempleOfHeaven.title,
+  id: templeOfHeavenRemediation.id,
+  title: templeOfHeavenRemediation.title,
   geoNodeId: 'cn-beijing-dongcheng',
   tags: const ['北京', '天坛', '祭天礼制', '声学', '证据', '世界文化遗产'],
   paragraphs: _templeOfHeavenCanonicalStory,
