@@ -1,9 +1,23 @@
 import { createHash } from 'node:crypto';
 
+export const CANONICAL_FRESHNESS_FIELDS = Object.freeze([
+  'repository',
+  'pr_number',
+  'base_branch',
+  'base_sha',
+  'head_branch',
+  'candidate_sha',
+  'candidate_tree',
+  'task_contract_digest',
+  'governance_body_digest',
+  'workflow_run_id',
+  'run_attempt',
+]);
+
 export function canonicalJson(value) {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
   if (value && typeof value === 'object') {
-    return `{${Object.keys(value).sort().map(k => `${JSON.stringify(k)}:${canonicalJson(value[k])}`).join(',')}}`;
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(',')}}`;
   }
   return JSON.stringify(value);
 }
@@ -20,46 +34,129 @@ export function extractTaskContract(body) {
   const normalized = normalizeGovernanceBody(body);
   const match = normalized.match(/<!-- PHOENIX_TASK_CONTRACT_JSON_START -->\s*```json\s*([\s\S]*?)\s*```\s*<!-- PHOENIX_TASK_CONTRACT_JSON_END -->/);
   if (!match) throw new Error('TASK_CONTRACT_MISSING');
-  let contract;
-  try { contract = JSON.parse(match[1]); } catch { throw new Error('TASK_CONTRACT_MALFORMED'); }
-  return contract;
+  try {
+    return JSON.parse(match[1]);
+  } catch {
+    throw new Error('TASK_CONTRACT_MALFORMED');
+  }
 }
 
-export function buildLiveIdentity({ metadata, taskContract, runId, runAttempt, eventType, producedAt }) {
-  const required = ['number', 'base_branch', 'base_sha', 'head_sha', 'head_tree', 'body'];
-  for (const field of required) if (metadata[field] === undefined || metadata[field] === null || metadata[field] === '') throw new Error(`LIVE_METADATA_MISSING:${field}`);
+function requireMetadata(metadata, fields) {
+  for (const field of fields) {
+    if (metadata?.[field] === undefined || metadata[field] === null || metadata[field] === '') {
+      throw new Error(`LIVE_METADATA_MISSING:${field}`);
+    }
+  }
+}
+
+export function buildLiveIdentity({
+  metadata,
+  taskContract,
+  runId,
+  runAttempt,
+  eventType,
+  producedAt,
+}) {
+  requireMetadata(metadata, [
+    'repository',
+    'number',
+    'base_branch',
+    'base_sha',
+    'head_branch',
+    'head_sha',
+    'head_tree',
+    'body',
+  ]);
   const taskContractDigest = sha256Text(canonicalJson(taskContract));
   const bodyDigest = sha256Text(normalizeGovernanceBody(metadata.body));
+  const attempt = Number(runAttempt);
+  if (!Number.isInteger(attempt) || attempt < 1) throw new Error('RUN_ATTEMPT_INVALID');
   return {
+    repository: String(metadata.repository),
     pr_number: Number(metadata.number),
-    base_branch: metadata.base_branch,
-    base_sha: metadata.base_sha,
-    candidate_sha: metadata.head_sha,
-    candidate_tree: metadata.head_tree,
+    base_branch: String(metadata.base_branch),
+    base_sha: String(metadata.base_sha),
+    head_branch: String(metadata.head_branch),
+    candidate_sha: String(metadata.head_sha),
+    candidate_tree: String(metadata.head_tree),
     draft: Boolean(metadata.draft),
+    state: String(metadata.state ?? 'unknown').toLowerCase(),
     task_contract_digest: taskContractDigest,
     governance_body_digest: bodyDigest,
     workflow_run_id: String(runId),
-    run_attempt: Number(runAttempt),
+    run_attempt: attempt,
     event_type: String(eventType),
-    produced_at: producedAt,
+    produced_at: String(producedAt),
   };
 }
 
-export function assertEvidenceFresh(previous, current) {
-  const keys = ['pr_number','base_branch','base_sha','candidate_sha','candidate_tree','task_contract_digest','governance_body_digest','workflow_run_id','run_attempt'];
-  const stale = keys.filter(key => previous?.[key] !== current?.[key]);
-  if (stale.length) {
+export function assertCanonicalFreshness(expected, current) {
+  const stale = CANONICAL_FRESHNESS_FIELDS.filter(
+    (field) => expected?.[field] !== current?.[field],
+  );
+  if (stale.length > 0) {
     const error = new Error('EVIDENCE_STALE_REAUDIT_REQUIRED');
+    error.code = 'EVIDENCE_STALE_REAUDIT_REQUIRED';
     error.stale_fields = stale;
     throw error;
   }
   return true;
 }
 
-export async function fetchLivePullRequest({ repository, prNumber, token, apiUrl = 'https://api.github.com' }) {
+// Backward-compatible name used by existing trusted tests and callers.
+export const assertEvidenceFresh = assertCanonicalFreshness;
+
+export function assertTaskContractIdentity(taskContract, liveIdentity, prNumber) {
+  const mismatches = [];
+  const expected = {
+    repository: taskContract?.repository,
+    pr_number: Number(prNumber),
+    base_branch: taskContract?.base_branch,
+    base_sha: taskContract?.base_sha,
+    head_branch: taskContract?.head_branch,
+    candidate_sha: taskContract?.current_head_sha,
+  };
+  for (const [field, value] of Object.entries(expected)) {
+    if (value !== liveIdentity?.[field]) mismatches.push(field);
+  }
+  if (mismatches.length > 0) {
+    const error = new Error('EVIDENCE_STALE_REAUDIT_REQUIRED');
+    error.code = 'EVIDENCE_STALE_REAUDIT_REQUIRED';
+    error.stale_fields = mismatches;
+    throw error;
+  }
+  return true;
+}
+
+export function metadataFromPullRequestEvent(event, candidateTree) {
+  const pr = event?.pull_request;
+  if (!pr) return null;
+  return {
+    repository: event?.repository?.full_name,
+    number: pr.number,
+    base_branch: pr.base?.ref,
+    base_sha: pr.base?.sha,
+    head_branch: pr.head?.ref,
+    head_sha: pr.head?.sha,
+    head_tree: candidateTree,
+    body: pr.body ?? '',
+    draft: pr.draft,
+    state: pr.state,
+  };
+}
+
+export async function fetchLivePullRequest({
+  repository,
+  prNumber,
+  token,
+  apiUrl = 'https://api.github.com',
+}) {
   if (!token) throw new Error('TRUSTED_GITHUB_TOKEN_MISSING');
-  const headers = { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'X-GitHub-Api-Version': '2022-11-28' };
+  const headers = {
+    Accept: 'application/vnd.github+json',
+    Authorization: `Bearer ${token}`,
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
   const prResponse = await fetch(`${apiUrl}/repos/${repository}/pulls/${prNumber}`, { headers });
   if (!prResponse.ok) throw new Error(`LIVE_PR_FETCH_FAILED:${prResponse.status}`);
   const pr = await prResponse.json();
@@ -67,9 +164,11 @@ export async function fetchLivePullRequest({ repository, prNumber, token, apiUrl
   if (!commitResponse.ok) throw new Error(`LIVE_HEAD_FETCH_FAILED:${commitResponse.status}`);
   const commit = await commitResponse.json();
   return {
+    repository,
     number: pr.number,
     base_branch: pr.base.ref,
     base_sha: pr.base.sha,
+    head_branch: pr.head.ref,
     head_sha: pr.head.sha,
     head_tree: commit.tree.sha,
     body: pr.body ?? '',
