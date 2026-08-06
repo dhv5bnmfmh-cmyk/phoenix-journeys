@@ -25,13 +25,35 @@ jobs:
         run: |
           from pathlib import Path
 
-          path = Path('app/lib/screens/journey_screen.dart')
-          text = path.read_text(encoding='utf-8')
-          old = "  bool get _isSummerPalacePilot =>\n      _experience.id == 'beijing-summer-palace';"
-          new = "  // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.\n  bool get _isSummerPalacePilot => false;"
-          if text.count(old) != 1:
-              raise SystemExit(f'Expected exactly one Pilot flow anchor, found {text.count(old)}')
-          path.write_text(text.replace(old, new), encoding='utf-8')
+          screen_path = Path('app/lib/screens/journey_screen.dart')
+          screen = screen_path.read_text(encoding='utf-8')
+          old_screen = "  bool get _isSummerPalacePilot =>\n      _experience.id == 'beijing-summer-palace';"
+          new_screen = "  // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.\n  bool get _isSummerPalacePilot => false;"
+          if screen.count(old_screen) != 1:
+              raise SystemExit(f'Expected exactly one Pilot flow anchor, found {screen.count(old_screen)}')
+          screen_path.write_text(screen.replace(old_screen, new_screen), encoding='utf-8')
+
+          state_path = Path('app/lib/state/app_state.dart')
+          state = state_path.read_text(encoding='utf-8')
+          old_state = """  String _journeyLabelFor(int step, JourneyCompositeSubstage substage) {
+    if (activeJourneyId == 'beijing-summer-palace') {
+      if (step == 3) {
+        return substage == JourneyCompositeSubstage.challenge ? '挑战' : '思考';
+      }
+      if (step == 4) {
+        return substage == JourneyCompositeSubstage.memory ? '回忆' : '表达';
+      }
+    }
+    return journeyStepLabels[_safeJourneyStep(step)];
+  }
+"""
+          new_state = """  String _journeyLabelFor(int step, JourneyCompositeSubstage substage) {
+    return journeyStepLabels[_safeJourneyStep(step)];
+  }
+"""
+          if state.count(old_state) != 1:
+              raise SystemExit(f'Expected exactly one Journey label anchor, found {state.count(old_state)}')
+          state_path.write_text(state.replace(old_state, new_state), encoding='utf-8')
 
           workflow = Path('.github/workflows/temporary-summer-palace-six-stage.yml')
           workflow.unlink()
@@ -42,9 +64,10 @@ jobs:
           set -euo pipefail
           mapfile -t paths < <(git diff --name-only | sort)
           printf '%s\n' "${paths[@]}"
-          test "${#paths[@]}" -eq 2
+          test "${#paths[@]}" -eq 3
           test "${paths[0]}" = ".github/workflows/temporary-summer-palace-six-stage.yml"
           test "${paths[1]}" = "app/lib/screens/journey_screen.dart"
+          test "${paths[2]}" = "app/lib/state/app_state.dart"
           git diff --check
 
       - name: Set up Flutter
@@ -66,6 +89,6 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add app/lib/screens/journey_screen.dart .github/workflows/temporary-summer-palace-six-stage.yml
+          git add app/lib/screens/journey_screen.dart app/lib/state/app_state.dart .github/workflows/temporary-summer-palace-six-stage.yml
           git commit -m 'fix(journey): unify Summer Palace with six-stage flow'
           git push origin HEAD:fix/summer-palace-six-stage-flow
