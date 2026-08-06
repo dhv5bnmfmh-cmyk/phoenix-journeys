@@ -14,6 +14,15 @@ export const CANONICAL_FRESHNESS_FIELDS = Object.freeze([
   'run_attempt',
 ]);
 
+export const AUDIT_MODES = Object.freeze(['FRESH_AUDIT', 'REAUDIT']);
+
+function fail(code, staleFields = []) {
+  const error = new Error(code);
+  error.code = code;
+  if (staleFields.length > 0) error.stale_fields = staleFields;
+  throw error;
+}
+
 export function canonicalJson(value) {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
   if (value && typeof value === 'object') {
@@ -32,19 +41,19 @@ export function normalizeGovernanceBody(body) {
 
 export function extractTaskContract(body) {
   const normalized = normalizeGovernanceBody(body);
-  const match = normalized.match(/<!-- PHOENIX_TASK_CONTRACT_JSON_START -->\s*```json\s*([\s\S]*?)\s*```\s*<!-- PHOENIX_TASK_CONTRACT_JSON_END -->/);
-  if (!match) throw new Error('TASK_CONTRACT_MISSING');
+  const match = normalized.match(/<!-- PHOENIX_TASK_CONTRACT_JSON_START -->\s*```json\s*([\s\S]*?)\s*```\s*<!-- PHOENIX_TASK_CONTRACT_JSON_END -->/u);
+  if (!match) fail('TASK_CONTRACT_MISSING');
   try {
     return JSON.parse(match[1]);
   } catch {
-    throw new Error('TASK_CONTRACT_MALFORMED');
+    fail('TASK_CONTRACT_MALFORMED');
   }
 }
 
 function requireMetadata(metadata, fields) {
   for (const field of fields) {
     if (metadata?.[field] === undefined || metadata[field] === null || metadata[field] === '') {
-      throw new Error(`LIVE_METADATA_MISSING:${field}`);
+      fail(`LIVE_METADATA_MISSING:${field}`);
     }
   }
 }
@@ -67,10 +76,9 @@ export function buildLiveIdentity({
     'head_tree',
     'body',
   ]);
-  const taskContractDigest = sha256Text(canonicalJson(taskContract));
-  const bodyDigest = sha256Text(normalizeGovernanceBody(metadata.body));
   const attempt = Number(runAttempt);
-  if (!Number.isInteger(attempt) || attempt < 1) throw new Error('RUN_ATTEMPT_INVALID');
+  if (!Number.isInteger(attempt) || attempt < 1) fail('RUN_ATTEMPT_INVALID');
+  if (!String(runId ?? '').trim()) fail('WORKFLOW_RUN_ID_INVALID');
   return {
     repository: String(metadata.repository),
     pr_number: Number(metadata.number),
@@ -81,8 +89,8 @@ export function buildLiveIdentity({
     candidate_tree: String(metadata.head_tree),
     draft: Boolean(metadata.draft),
     state: String(metadata.state ?? 'unknown').toLowerCase(),
-    task_contract_digest: taskContractDigest,
-    governance_body_digest: bodyDigest,
+    task_contract_digest: sha256Text(canonicalJson(taskContract)),
+    governance_body_digest: sha256Text(normalizeGovernanceBody(metadata.body)),
     workflow_run_id: String(runId),
     run_attempt: attempt,
     event_type: String(eventType),
@@ -94,20 +102,72 @@ export function assertCanonicalFreshness(expected, current) {
   const stale = CANONICAL_FRESHNESS_FIELDS.filter(
     (field) => expected?.[field] !== current?.[field],
   );
-  if (stale.length > 0) {
-    const error = new Error('EVIDENCE_STALE_REAUDIT_REQUIRED');
-    error.code = 'EVIDENCE_STALE_REAUDIT_REQUIRED';
-    error.stale_fields = stale;
-    throw error;
+  if (stale.length > 0) fail('EVIDENCE_STALE_REAUDIT_REQUIRED', stale);
+  return true;
+}
+
+export const assertEvidenceFresh = assertCanonicalFreshness;
+
+export function canonicalIdentityFromEvidence(value) {
+  const source = value?.evidence_manifest ?? value?.identity ?? value;
+  if (!source || typeof source !== 'object' || Array.isArray(source)) {
+    fail('PREVIOUS_EVIDENCE_IDENTITY_INVALID');
+  }
+  const identity = Object.fromEntries(
+    CANONICAL_FRESHNESS_FIELDS.map((field) => [field, source[field]]),
+  );
+  const missing = CANONICAL_FRESHNESS_FIELDS.filter(
+    (field) => identity[field] === undefined || identity[field] === null || identity[field] === '',
+  );
+  if (missing.length > 0) fail('PREVIOUS_EVIDENCE_IDENTITY_INVALID', missing);
+  return identity;
+}
+
+export function normalizeAuditMode(value) {
+  const mode = String(value ?? '').trim().toUpperCase();
+  if (!mode) fail('AUDIT_MODE_REQUIRED');
+  if (!AUDIT_MODES.includes(mode)) fail('AUDIT_MODE_INVALID');
+  return mode;
+}
+
+export function assertAuditEvidenceMode({ auditMode, previousEvidence, currentIdentity }) {
+  const mode = normalizeAuditMode(auditMode);
+  if (mode === 'FRESH_AUDIT') {
+    if (previousEvidence !== null && previousEvidence !== undefined) {
+      fail('FRESH_AUDIT_PREVIOUS_EVIDENCE_FORBIDDEN');
+    }
+    return mode;
+  }
+  if (previousEvidence === null || previousEvidence === undefined) {
+    fail('PREVIOUS_EVIDENCE_REQUIRED');
+  }
+  assertCanonicalFreshness(canonicalIdentityFromEvidence(previousEvidence), currentIdentity);
+  return mode;
+}
+
+function validSha(value) {
+  return /^[0-9a-f]{40}$/u.test(String(value ?? ''));
+}
+
+export function assertTrustedSourceIdentity({
+  observedTrustedCheckoutSha,
+  declaredTrustedCheckoutSha,
+  authorizedTrustedSourceSha,
+  liveBaseSha,
+}) {
+  const values = [
+    observedTrustedCheckoutSha,
+    declaredTrustedCheckoutSha,
+    authorizedTrustedSourceSha,
+    liveBaseSha,
+  ];
+  if (!values.every(validSha) || new Set(values).size !== 1) {
+    fail('TRUSTED_SOURCE_IDENTITY_MISMATCH');
   }
   return true;
 }
 
-// Backward-compatible name used by existing trusted tests and callers.
-export const assertEvidenceFresh = assertCanonicalFreshness;
-
 export function assertTaskContractIdentity(taskContract, liveIdentity, prNumber) {
-  const mismatches = [];
   const expected = {
     repository: taskContract?.repository,
     pr_number: Number(prNumber),
@@ -116,15 +176,10 @@ export function assertTaskContractIdentity(taskContract, liveIdentity, prNumber)
     head_branch: taskContract?.head_branch,
     candidate_sha: taskContract?.current_head_sha,
   };
-  for (const [field, value] of Object.entries(expected)) {
-    if (value !== liveIdentity?.[field]) mismatches.push(field);
-  }
-  if (mismatches.length > 0) {
-    const error = new Error('EVIDENCE_STALE_REAUDIT_REQUIRED');
-    error.code = 'EVIDENCE_STALE_REAUDIT_REQUIRED';
-    error.stale_fields = mismatches;
-    throw error;
-  }
+  const mismatches = Object.entries(expected)
+    .filter(([field, value]) => value !== liveIdentity?.[field])
+    .map(([field]) => field);
+  if (mismatches.length > 0) fail('EVIDENCE_STALE_REAUDIT_REQUIRED', mismatches);
   return true;
 }
 
@@ -150,27 +205,33 @@ export async function fetchLivePullRequest({
   prNumber,
   token,
   apiUrl = 'https://api.github.com',
+  fetchImpl = fetch,
 }) {
-  if (!token) throw new Error('TRUSTED_GITHUB_TOKEN_MISSING');
+  if (!token) fail('TRUSTED_GITHUB_TOKEN_MISSING');
+  if (!/^[^/]+\/[^/]+$/u.test(String(repository))) fail('TRUSTED_REPOSITORY_INVALID');
+  if (!Number.isInteger(Number(prNumber)) || Number(prNumber) < 1) fail('TRUSTED_PR_NUMBER_INVALID');
   const headers = {
     Accept: 'application/vnd.github+json',
     Authorization: `Bearer ${token}`,
     'X-GitHub-Api-Version': '2022-11-28',
   };
-  const prResponse = await fetch(`${apiUrl}/repos/${repository}/pulls/${prNumber}`, { headers });
-  if (!prResponse.ok) throw new Error(`LIVE_PR_FETCH_FAILED:${prResponse.status}`);
+  const prResponse = await fetchImpl(`${apiUrl}/repos/${repository}/pulls/${prNumber}`, { headers });
+  if (!prResponse.ok) fail(`LIVE_PR_FETCH_FAILED:${prResponse.status}`);
   const pr = await prResponse.json();
-  const commitResponse = await fetch(`${apiUrl}/repos/${repository}/git/commits/${pr.head.sha}`, { headers });
-  if (!commitResponse.ok) throw new Error(`LIVE_HEAD_FETCH_FAILED:${commitResponse.status}`);
+  const commitResponse = await fetchImpl(
+    `${apiUrl}/repos/${repository}/git/commits/${pr?.head?.sha ?? ''}`,
+    { headers },
+  );
+  if (!commitResponse.ok) fail(`LIVE_HEAD_FETCH_FAILED:${commitResponse.status}`);
   const commit = await commitResponse.json();
   return {
     repository,
     number: pr.number,
-    base_branch: pr.base.ref,
-    base_sha: pr.base.sha,
-    head_branch: pr.head.ref,
-    head_sha: pr.head.sha,
-    head_tree: commit.tree.sha,
+    base_branch: pr.base?.ref,
+    base_sha: pr.base?.sha,
+    head_branch: pr.head?.ref,
+    head_sha: pr.head?.sha,
+    head_tree: commit?.tree?.sha,
     body: pr.body ?? '',
     draft: pr.draft,
     state: pr.state,
