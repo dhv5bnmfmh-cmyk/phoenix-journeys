@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phoenix Batch 1 Journey Preview</title>
+<style>
+:root{color-scheme:dark;--bg:#09111f;--card:#111d31;--soft:#182740;--text:#eef5ff;--muted:#a9b8cf;--gold:#f5c96a;--cyan:#65d6e8;--ok:#7de1a6}*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:radial-gradient(circle at top,#173052 0,#09111f 48%);color:var(--text);min-height:100vh}.wrap{max-width:900px;margin:auto;padding:22px 16px 60px}.hero{padding:24px 20px;border:1px solid #2b4367;border-radius:24px;background:linear-gradient(145deg,rgba(24,39,64,.95),rgba(9,17,31,.9));box-shadow:0 24px 80px rgba(0,0,0,.35)}h1{margin:0 0 8px;font-size:clamp(26px,6vw,44px)}.subtitle{color:var(--muted);line-height:1.7}.badge{display:inline-flex;padding:7px 11px;border-radius:999px;background:#223857;color:var(--gold);font-size:13px;font-weight:700;margin-bottom:12px}.journeys,.stages{display:flex;gap:8px;overflow:auto;padding:14px 0}.journeys button,.stages button{white-space:nowrap;border:1px solid #38557f;background:#13233a;color:var(--text);border-radius:999px;padding:10px 14px;font-weight:700}.journeys button.active,.stages button.active{background:var(--gold);color:#172033;border-color:var(--gold)}.card{margin-top:10px;padding:20px;border-radius:20px;background:rgba(17,29,49,.96);border:1px solid #294264}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:15px}.meta div{background:var(--soft);padding:12px;border-radius:14px}.meta b{display:block;color:var(--cyan);font-size:12px;margin-bottom:5px}.level-nav{display:flex;align-items:center;gap:10px;margin:14px 0}.level-nav button{border:0;border-radius:12px;padding:10px 14px;background:#28456d;color:white}.level-nav span{flex:1;text-align:center;color:var(--gold);font-weight:800}.body{font-size:17px;line-height:1.9}.list{display:grid;gap:10px}.item{padding:13px 14px;border-radius:13px;background:var(--soft);line-height:1.7}.challenge-title{color:var(--gold);margin:18px 0 8px}.footer{margin-top:20px;padding:15px;border-left:4px solid var(--ok);background:#102a29;border-radius:10px;color:#c9f6dc}.small{font-size:12px;color:var(--muted);margin-top:18px}.hidden{display:none}@media(max-width:500px){.wrap{padding:12px 10px 40px}.hero,.card{border-radius:17px}.card{padding:15px}}
+</style>
+</head>
+<body><main class="wrap"><section class="hero"><span class="badge">Phoenix Gold Standard · Batch 1</span><h1>故宫 × 天坛</h1><div class="subtitle">独立故事设计，相同品质规范。固定六阶段：故事 → 单词 → 发现 → 挑战（三种）→ 回忆 → 完成。</div></section><div class="journeys" id="journeys"></div><div class="stages" id="stages"></div><section class="card" id="content"></section></main>
+<script>
+const data={
+forbidden:{title:'北京 · 故宫：午门前消失的工牌',protagonist:'梁砚，十九岁的故宫古建测绘实习生',goal:'在闭馆前把一份标注太和殿屋脊构件异常的测绘记录交给修缮组',conflict:'新旧测绘记录互相矛盾。他必须在准时交件与返回复核之间作出选择。',levels:[
+'午门开门前，梁砚领到第一张独立工牌。他必须在闭馆前复核太和殿屋脊东侧的一处异常。师父提醒他：测绘数字必须放回建筑关系里理解。梁砚却只想尽快交出漂亮结果。',
+'他穿过午门与太和门。宫殿用门、院、殿组成礼仪秩序。梁砚发现东侧脊兽间距与旧图不一致，却把差异归因于旧图不准。',
+'修缮技师苏禾指出，故宫经历营建、火灾、重建与持续维修，同一位置可能留下不同年代做法。梁砚仍坚持新仪器不会错。',
+'异常构件旁有近期保护标记，但任务单没有记录。他必须选择直接上报，或返回档案室核对维修编号。',
+'他选择返回档案室，却在途中弄丢工牌。没有工牌，他无法再次进入作业区，闭馆时间也越来越近。',
+'师父让他按行动路线重建时间线。他利用安检记录、测量照片和时间戳，判断工牌可能落在太和殿东庑。',
+'苏禾找到工牌，但要求他先解释数据冲突。梁砚发现旧图记录投影长度，新仪器记录真实斜长，两组数据都没有错。',
+'闭馆广播响起。他放弃看起来完美的结论，提交标明测量口径差异与不确定性的复核单，避免了不必要的拆检。',
+'第二天，他主动请苏禾复核基准点。复核证明构件没有新位移，只是旧图表达方式不同。',
+'修缮组采用他的新版记录模板。他没有成为“最快实习生”，却获得独立进入下一次测绘任务的资格。真正的独立，是为判断留下证据。'],
+words:['午门','中轴线','外朝','太和殿','丹陛','屋脊','脊兽','木构','修缮','测绘','基准点','复核'],
+discovery:['故宫以中轴线组织门、院与主要宫殿，体现明清宫廷礼制。','太和殿经历多次重建与修缮，保护判断必须结合年代记录。','传统木构由柱、梁、枋等构件共同受力。','遗产保护记录强调位置、时间、测量口径与证据可追溯。'],
+challenge:{paragraphRebuild:['发现数据冲突','返回档案核对','重建行动时间线','识别测量口径差异','提交带不确定性的复核单'],grammarRepair:['如果只比较一个数字，就可能把历史变化误判为损坏。','两组数据都没有错，错的是把不同口径当成同一件事。','与其交一份漂亮却武断的结论，不如留下可复核证据。'],missingSentence:['他返回档案室，因为维修编号可能改变异常的含义。','工牌丢失后，他依据空间路线与时间戳缩小范围。','最终，复核证明构件没有新位移。']},memory:['梁砚的任务是什么？','新旧数据为什么看似冲突？','他第一次选择付出了什么代价？','新版记录模板解决了什么问题？'],complete:'梁砚从“用速度证明独立”成长为“用证据承担判断”，把空间秩序、修缮历史与现代测绘责任连成一条行动线。'},
+temple:{title:'北京 · 天坛：回音壁前的空白刻度',protagonist:'周沐，十八岁的声学社学生',goal:'在学校公开演示前完成一份不夸大神奇效果的天坛声学路线说明',conflict:'同伴想用“任何位置都能听见耳语”的说法吸引观众，但现场结果并不稳定。她必须在传播效果与真实证据间选择。',levels:[
+'周沐带着录音笔来到天坛。她想用回音壁的神奇效果赢得社团主讲资格，老师却要求所有结论说明测试位置和环境。',
+'他们从圜丘进入。三层圆形石坛以天心石为中心，数字、方位和层级共同形成祭天空间。站位稍变，声音反射也不同。',
+'沿丹陛桥向北，路线连接圜丘、皇穹宇与祈年殿，体现明清祭天礼仪的空间次序。同伴催她跳过历史说明。',
+'来到回音壁，前两轮测试被游客谈话和风声干扰。同伴提议剪掉失败录音，只留下清晰结果。',
+'她选择重测，记录距离、朝向、音量与背景噪声，并设置普通说话位置作对照。管理员提醒她不能触碰古建表面。',
+'第三轮仍不稳定。她意识到圆形墙面能引导声波，但听感也受站位、噪声和墙面条件影响。',
+'一阵风吹走了记录距离的透明页。她可以凭记忆补写数字，也可以承认数据缺失并缩小结论范围。',
+'重测显示，贴近墙面且环境安静时，部分低声内容更容易被听见。她把演示改成比较不同站位。',
+'演示时第一位观众没有听清。她公开观察风向、人流与站位后再测，第二次结果更清楚，观众也理解了实验条件。',
+'周沐被选为社团主讲。她在空白刻度旁写下：没有记录的数据不能被故事补上。文化传播要把条件、限制与建筑智慧一起讲清。'],
+words:['天坛','祭天','圜丘','天心石','丹陛桥','祈年殿','皇穹宇','回音壁','声波','反射','对照','噪声'],
+discovery:['天坛是明清皇帝举行祭天礼仪的重要坛庙建筑群。','圜丘坛、皇穹宇与祈年殿沿主要轴线组织。','回音壁的圆形墙面影响声音传播，但实际听感取决于站位与环境。','在遗产地实验必须避免接触、粘贴或损伤建筑表面。'],
+challenge:{paragraphRebuild:['首次测试失败','拒绝剪掉失败记录','建立位置与噪声对照','记录页被风吹走','缩小结论并完成公开演示'],grammarRepair:['只有说明测试条件，声音结果才具有可比较性。','即使一次听得清楚，也不能证明任何位置都有效。','与其用故事补上空白，不如重新测量关键数据。'],missingSentence:['她撤下靠墙标记，改用不接触建筑的手持刻度绳。','记录页丢失后，她拒绝凭记忆填写距离。','观众第一次没有听清，她便公开调整条件再测试。']},memory:['周沐最初想证明什么？','第一次重测为什么改变方案？','空白刻度迫使她作出什么选择？','同伴最后为什么修改标题？'],complete:'周沐从“追求神奇效果”成长为“诚实说明条件”，把礼仪空间、建筑声学、遗产保护与科学表达连成连续十级叙事。'}};
+const stageNames=['故事','单词','发现','挑战','回忆','完成'];let journey='forbidden',stage=0,level=0;
+const q=s=>document.querySelector(s);function buttons(){q('#journeys').innerHTML=Object.entries(data).map(([k,v])=>`<button data-j="${k}" class="${k===journey?'active':''}">${v.title.split('：')[0]}</button>`).join('');q('#stages').innerHTML=stageNames.map((x,i)=>`<button data-s="${i}" class="${i===stage?'active':''}">${i} ${x}</button>`).join('');document.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>{journey=b.dataset.j;stage=0;level=0;render()});document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{stage=+b.dataset.s;render()})}
+const list=a=>`<div class="list">${a.map((x,i)=>`<div class="item">${i+1}. ${x}</div>`).join('')}</div>`;function render(){buttons();const d=data[journey];let html=`<h2>${d.title}</h2>`;if(stage===0){html+=`<div class="meta"><div><b>主角</b>${d.protagonist}</div><div><b>目标</b>${d.goal}</div><div><b>冲突</b>${d.conflict}</div></div><div class="level-nav"><button id="prev">‹</button><span>Lv.${level+1} / 10</span><button id="next">›</button></div><div class="body">${d.levels[level]}</div>`}if(stage===1)html+=list(d.words);if(stage===2)html+=list(d.discovery);if(stage===3)html+=`<h3 class="challenge-title">paragraphRebuild</h3>${list(d.challenge.paragraphRebuild)}<h3 class="challenge-title">grammarRepair</h3>${list(d.challenge.grammarRepair)}<h3 class="challenge-title">missingSentence</h3>${list(d.challenge.missingSentence)}`;if(stage===4)html+=list(d.memory);if(stage===5)html+=`<div class="footer">${d.complete}</div>`;html+=`<div class="small">独立体验页 · 内容来自 Phoenix Batch 1 exact-Head 数据 · 不替代 Flutter 自动化测试</div>`;q('#content').innerHTML=html;if(stage===0){q('#prev').onclick=()=>{level=(level+9)%10;render()};q('#next').onclick=()=>{level=(level+1)%10;render()}}}render();
+</script></body></html>
