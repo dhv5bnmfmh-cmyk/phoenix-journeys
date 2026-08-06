@@ -219,20 +219,23 @@ test('GitHub workflow preserves read-only permissions and required triggers', ()
   );
   assert.match(
     bootstrap,
-    /EXPECTED_SHA="\$\{\{\s*github\.event\.pull_request\.head\.sha\s*\}\}"/u,
+    /\[\[\s*"\$TESTED_SHA"\s*==\s*"\$\{\{\s*github\.event\.pull_request\.head\.sha\s*\}\}"\s*\]\]/u,
+  );
+  assert.doesNotMatch(bootstrap, /\bgithub\.sha\b/u);
+  assert.match(
+    bootstrap,
+    /exact_candidate_sha=\$\{\{\s*steps\.identity\.outputs\.tested_sha\s*\}\}[\s\S]*?\}\s*>\s*bootstrap-source-test\/result\.txt/u,
   );
   assert.match(
     bootstrap,
-    /\[\[ "\$TESTED_SHA" != "\$EXPECTED_SHA" \]\]/u,
+    /path:\s*tools\/phoenix_agent_runner\/bootstrap-source-test\//u,
   );
   assert.match(
     bootstrap,
-    /exact_candidate_sha=\$TESTED_SHA/u,
+    /Exact Candidate SHA:.*\$\{\{\s*steps\.identity\.outputs\.tested_sha\s*\}\}/u,
   );
-  assert.match(
-    bootstrap,
-    /Exact Candidate SHA:/u,
-  );
+  assert.match(bootstrap, /persist-credentials:\s*false/u);
+  assert.match(bootstrap, /permissions:\s*\n\s+contents:\s*read/u);
   assert.match(
     bootstrap,
     /authority=NON_AUTHORITATIVE_BOOTSTRAP_SOURCE_TEST/u,
