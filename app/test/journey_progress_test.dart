@@ -80,7 +80,7 @@ void main() {
 
     expect(restored.beijingJourneyStep, 3);
     expect(restored.beijingJourneyFurthestStep, 3);
-    expect(restored.beijingJourneyStepLabel, '挑战');
+    expect(restored.beijingJourneyStepLabel, '思考');
     expect(restored.beijingJourneyProgressPercent, 67);
     expect(restored.wonderDraft, '我想观察红墙和屋顶。');
     expect(restored.expressDraft, '故宫保存了很多历史记忆。');
