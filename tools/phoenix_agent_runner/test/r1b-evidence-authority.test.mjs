@@ -61,7 +61,6 @@ const policy = {
     ci: {
       workflow_id: 327680704,
       workflow_path: '.github/workflows/phoenix-agent-audit.yml',
-      allowed_workflow_names: ['Phoenix Agent Audit'],
       allowed_check_names: ['Phoenix Agent Bootstrap Source Tests'],
       check_app_id: 15368,
       check_app_slug: 'github-actions',
@@ -312,6 +311,14 @@ test('19 nonexistent Run ID fails closed', async () => assert.rejects(
   }),
   /404/u,
 ));
+test('20 same name wrong Workflow ID blocks', async () => assert.rejects(
+  fetchAuthoritativeCiEvidence(ciArgs(run({ workflow_id: 1 }))),
+  /WORKFLOW_ID_MISMATCH/u,
+));
+test('21 same name wrong Workflow path blocks', async () => assert.rejects(
+  fetchAuthoritativeCiEvidence(ciArgs(run({ path: '.github/workflows/spoof.yml' }))),
+  /WORKFLOW_PATH_MISMATCH/u,
+));
 test('22 correct ID path exact Head terminal success passes', async () => assert.equal(
   (await fetchAuthoritativeCiEvidence(ciArgs(run()))).authority,
   'GITHUB_API_VERIFIED',
@@ -376,6 +383,24 @@ const checkArgs = ({ check = checkRecord(), suite = suiteRecord(), runs = { work
     throw new Error(`unexpected ${path}`);
   },
 });
+test('28 wrong Check App blocks', async () => assert.rejects(
+  fetchAuthoritativeCiEvidence(checkArgs({ check: checkRecord({ app: { id: 1, slug: 'spoof' } }) })),
+  /CHECK_APP/u,
+));
+test('29 wrong Check Suite blocks', async () => assert.rejects(
+  fetchAuthoritativeCiEvidence(checkArgs({ suite: suiteRecord({ head_sha: sha('f') }) })),
+  /CHECK_SUITE_HEAD_MISMATCH/u,
+));
+test('30 spoofed details_url blocks', async () => assert.rejects(
+  fetchAuthoritativeCiEvidence(checkArgs({ check: checkRecord({ details_url: 'https://example.com/spoof' }) })),
+  /CHECK_DETAILS_URL_MISMATCH/u,
+));
+test('31 reversed Check timestamps block', async () => assert.rejects(
+  fetchAuthoritativeCiEvidence(checkArgs({ check: checkRecord({
+    started_at: '2026-08-05T23:02:00Z', completed_at: '2026-08-05T23:01:00Z',
+  }) })),
+  /CHECK_TIMESTAMP_ORDER_INVALID/u,
+));
 test('32 candidate trust_class cannot create CI PASS', () => assert.throws(() => produceTrustedEvidenceEntries({
   identity,
   requiredTypes: ['ci'],
@@ -400,9 +425,24 @@ test('35 Review commit_id equals current Head passes', async () => assert.equal(
   (await fetchAuthoritativeFounderEvidence(founderArgs(review()))).authority,
   'GITHUB_API_VERIFIED',
 ));
+test('36 Review old commit_id blocks', async () => assert.rejects(
+  fetchAuthoritativeFounderEvidence(founderArgs(review(auth(), { commit_id: sha('f') }))),
+  /REVIEW_COMMIT_MISMATCH/u,
+));
 test('37 dismissed Review blocks', async () => assert.rejects(
   fetchAuthoritativeFounderEvidence(founderArgs(review(auth(), { state: 'DISMISSED' }))),
   /REVIEW_NOT_APPROVED/u,
+));
+test('38 edited comment matching updated_at semantics passes', async () => assert.equal(
+  (await fetchAuthoritativeFounderEvidence(founderArgs(comment(), { comment_id: '10' }))).record_type,
+  'issue_comment',
+));
+test('39 edited comment stale issued_at blocks', async () => assert.rejects(
+  fetchAuthoritativeFounderEvidence(founderArgs(
+    comment(commentAuth({ issued_at: '2026-08-05T23:00:00Z' })),
+    { comment_id: '10' },
+  )),
+  /ISSUED_AT_MISMATCH/u,
 ));
 test('40 deleted Founder record fails closed', async () => assert.rejects(
   fetchAuthoritativeFounderEvidence({
@@ -411,12 +451,19 @@ test('40 deleted Founder record fails closed', async () => assert.rejects(
   }),
   /404/u,
 ));
-test('41 wrong Founder identity blocks', async () => assert.rejects(
+test('41 wrong Founder identity blocks even with OWNER association', async () => assert.rejects(
   fetchAuthoritativeFounderEvidence(founderArgs(review(
     auth({ founder_github_identity: 'attacker' }),
-    { user: { login: 'attacker' }, author_association: 'NONE' },
+    { user: { login: 'attacker' }, author_association: 'OWNER' },
   ))),
   /IDENTITY_NOT_ALLOWED/u,
+));
+test('Founder record with unapproved association blocks', async () => assert.rejects(
+  fetchAuthoritativeFounderEvidence(founderArgs(review(
+    auth(),
+    { author_association: 'NONE' },
+  ))),
+  /AUTHOR_ASSOCIATION_NOT_ALLOWED/u,
 ));
 test('42 wrong PR blocks', async () => assert.rejects(
   fetchAuthoritativeFounderEvidence(founderArgs(review(auth({ pr_number: 149 })))),

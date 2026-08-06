@@ -1,4 +1,7 @@
-import { canonicalJson, sha256Text } from './identity-freshness.mjs';
+import {
+  canonicalJson,
+  sha256Text,
+} from './identity-freshness.mjs';
 
 export const TRUSTED_EVIDENCE_TYPES = Object.freeze([
   'repository',
@@ -52,13 +55,27 @@ function parseTime(value, code) {
   return time;
 }
 
+function assertTimestampOrder(startValue, endValue, code) {
+  const start = parseTime(startValue, `${code}_START_INVALID`);
+  const end = parseTime(endValue, `${code}_END_INVALID`);
+  if (end < start) fail(`${code}_ORDER_INVALID`);
+  return { start, end };
+}
+
 function assertRecordUrl(url, repository, fragment, code) {
-  const encodedRepository = repository.split('/').map(encodeURIComponent).join('/');
   const value = nonEmpty(url, code);
-  if (!value.includes(`/repos/${encodedRepository}/`) && !value.includes(`/${repository}/`)) {
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
     fail(code);
   }
-  if (!value.includes(fragment)) fail(code);
+  const allowedHosts = new Set(['api.github.com', 'github.com']);
+  if (!allowedHosts.has(parsed.hostname)) fail(code);
+  if (!parsed.pathname.includes(`/${repository}/`) && !parsed.pathname.includes(`/repos/${repository}/`)) {
+    fail(code);
+  }
+  if (!parsed.pathname.includes(fragment)) fail(code);
   return value;
 }
 
@@ -170,7 +187,6 @@ const TYPE_PRODUCERS = Object.freeze({
       limitations: proof.limitations ?? [],
     });
   },
-
   commit({ identity, proof, producedAt, index }) {
     requireObject(proof, 'commit');
     requireTerminalPass(proof, 'commit');
@@ -184,7 +200,6 @@ const TYPE_PRODUCERS = Object.freeze({
       limitations: proof.limitations ?? [],
     });
   },
-
   diff({ identity, proof, producedAt, index }) {
     requireObject(proof, 'diff');
     requireTerminalPass(proof, 'diff');
@@ -197,7 +212,6 @@ const TYPE_PRODUCERS = Object.freeze({
       limitations: proof.limitations ?? [],
     });
   },
-
   changed_paths({ identity, proof, producedAt, index }) {
     requireObject(proof, 'changed_paths');
     requireTerminalPass(proof, 'changed_paths');
@@ -210,7 +224,6 @@ const TYPE_PRODUCERS = Object.freeze({
       limitations: proof.limitations ?? [],
     });
   },
-
   test({ identity, proof, producedAt, index }) {
     requireObject(proof, 'test');
     requireTerminalPass(proof, 'test');
@@ -229,7 +242,6 @@ const TYPE_PRODUCERS = Object.freeze({
       limitations: proof.limitations ?? [],
     });
   },
-
   ci({ identity, proof, producedAt, index }) {
     requireObject(proof, 'ci');
     requireGithubAuthority(proof, 'ci');
@@ -237,7 +249,7 @@ const TYPE_PRODUCERS = Object.freeze({
     if (String(proof.conclusion).toLowerCase() !== 'success') fail('EVIDENCE_PROOF_BLOCKED:ci');
     requireHead(proof, identity, 'ci', 'head_sha');
     if (proof.repository !== identity.repository) fail('EVIDENCE_REPOSITORY_MISMATCH:ci');
-    if (Number(proof.run_attempt) !== identity.run_attempt) fail('EVIDENCE_STALE_RUN_ATTEMPT:ci');
+    positiveId(proof.run_attempt, 'EVIDENCE_RUN_ATTEMPT_INVALID:ci');
     return verifiedEntry({
       type: 'ci', identity, proof, producedAt, index,
       source: String(proof.source),
@@ -245,7 +257,6 @@ const TYPE_PRODUCERS = Object.freeze({
       limitations: proof.limitations ?? [],
     });
   },
-
   workflow({ identity, proof, producedAt, index }) {
     requireObject(proof, 'workflow');
     requireTerminalPass(proof, 'workflow');
@@ -263,7 +274,6 @@ const TYPE_PRODUCERS = Object.freeze({
       limitations: proof.limitations ?? [],
     });
   },
-
   founder({ identity, proof, producedAt, index }) {
     requireObject(proof, 'founder');
     requireGithubAuthority(proof, 'founder');
@@ -411,6 +421,16 @@ function founderPolicy(policy) {
   return policy?.github_record_authority?.founder ?? {};
 }
 
+function verifyApprovedWorkflowIdentity(record, policy, prefix) {
+  const approvedId = positiveId(policy?.workflow_id, `${prefix}_WORKFLOW_POLICY_ID_INVALID`);
+  if (positiveId(record?.workflow_id, `${prefix}_WORKFLOW_ID_INVALID`) !== approvedId) {
+    fail(`${prefix}_WORKFLOW_ID_MISMATCH`);
+  }
+  const approvedPath = nonEmpty(policy?.workflow_path, `${prefix}_WORKFLOW_POLICY_PATH_INVALID`);
+  if (record?.path !== approvedPath) fail(`${prefix}_WORKFLOW_PATH_MISMATCH`);
+  return { workflowId: approvedId, workflowPath: approvedPath };
+}
+
 function verifyWorkflowRun(record, { repository, identity, policy, recordId }) {
   if (!record || typeof record !== 'object' || Array.isArray(record)) fail('CI_GITHUB_RECORD_MALFORMED');
   if (positiveId(record.id, 'CI_GITHUB_RECORD_ID_MISMATCH') !== recordId) {
@@ -420,25 +440,36 @@ function verifyWorkflowRun(record, { repository, identity, policy, recordId }) {
   if (record.head_sha !== identity.candidate_sha) fail('CI_GITHUB_RECORD_HEAD_MISMATCH');
   if (String(record.status).toLowerCase() !== 'completed') fail('CI_GITHUB_RECORD_NOT_TERMINAL');
   if (String(record.conclusion).toLowerCase() !== 'success') fail('CI_GITHUB_RECORD_NOT_SUCCESS');
-  if (Number(record.run_attempt) !== identity.run_attempt) fail('CI_GITHUB_RECORD_ATTEMPT_MISMATCH');
-  const allowedNames = new Set(ciPolicy(policy).allowed_workflow_names ?? []);
-  if (!allowedNames.has(record.name)) fail('CI_GITHUB_RECORD_IDENTITY_NOT_ALLOWED');
+  const runAttempt = positiveId(record.run_attempt, 'CI_GITHUB_RECORD_ATTEMPT_INVALID');
+  const immutable = verifyApprovedWorkflowIdentity(record, ciPolicy(policy), 'CI_GITHUB_RECORD');
   const allowedEvents = new Set(ciPolicy(policy).allowed_events ?? []);
   if (!allowedEvents.has(record.event)) fail('CI_GITHUB_RECORD_EVENT_NOT_ALLOWED');
-  const created = parseTime(record.created_at, 'CI_GITHUB_RECORD_CREATED_AT_INVALID');
-  const completed = parseTime(record.updated_at, 'CI_GITHUB_RECORD_COMPLETED_AT_INVALID');
-  if (completed < created) fail('CI_GITHUB_RECORD_TIMESTAMP_ORDER_INVALID');
+  const times = assertTimestampOrder(
+    record.created_at,
+    record.updated_at,
+    'CI_GITHUB_RECORD_TIMESTAMP',
+  );
   const recordUrl = assertRecordUrl(
-    record.url ?? record.html_url,
+    record.url,
     repository,
     `/actions/runs/${recordId}`,
     'CI_GITHUB_RECORD_URL_MISMATCH',
   );
+  const htmlUrl = assertRecordUrl(
+    record.html_url,
+    repository,
+    `/actions/runs/${recordId}`,
+    'CI_GITHUB_RECORD_HTML_URL_MISMATCH',
+  );
   return {
     record,
     recordUrl,
+    htmlUrl,
     createdAt: record.created_at,
     completedAt: record.updated_at,
+    runAttempt,
+    ...immutable,
+    times,
   };
 }
 
@@ -473,14 +504,15 @@ export async function fetchAuthoritativeCiEvidence({
       record_type: 'workflow_run',
       record_url: verified.recordUrl,
       repository,
-      workflow_or_check_name: verified.record.name,
+      workflow_id: verified.workflowId,
+      workflow_path: verified.workflowPath,
       status: 'completed',
       conclusion: 'success',
       result: 'PASS',
       head_sha: identity.candidate_sha,
       candidate_sha: identity.candidate_sha,
       workflow_run_id: String(workflowId),
-      run_attempt: Number(verified.record.run_attempt),
+      run_attempt: verified.runAttempt,
       event: verified.record.event,
       created_at: verified.createdAt,
       completed_at: verified.completedAt,
@@ -499,43 +531,80 @@ export async function fetchAuthoritativeCiEvidence({
   if (check.head_sha !== identity.candidate_sha) fail('CI_GITHUB_RECORD_HEAD_MISMATCH');
   if (String(check.status).toLowerCase() !== 'completed') fail('CI_GITHUB_RECORD_NOT_TERMINAL');
   if (String(check.conclusion).toLowerCase() !== 'success') fail('CI_GITHUB_RECORD_NOT_SUCCESS');
-  const allowedChecks = new Set(ciPolicy(policy).allowed_check_names ?? []);
-  if (!allowedChecks.has(check.name)) fail('CI_GITHUB_RECORD_IDENTITY_NOT_ALLOWED');
-  parseTime(check.started_at, 'CI_GITHUB_RECORD_CREATED_AT_INVALID');
-  parseTime(check.completed_at, 'CI_GITHUB_RECORD_COMPLETED_AT_INVALID');
+  const checkPolicy = ciPolicy(policy);
+  if (positiveId(check?.app?.id, 'CI_CHECK_APP_ID_INVALID')
+      !== positiveId(checkPolicy.check_app_id, 'CI_CHECK_APP_POLICY_ID_INVALID')) {
+    fail('CI_CHECK_APP_ID_MISMATCH');
+  }
+  if (check?.app?.slug !== checkPolicy.check_app_slug) fail('CI_CHECK_APP_SLUG_MISMATCH');
+  const allowedChecks = new Set(checkPolicy.allowed_check_names ?? []);
+  if (!allowedChecks.has(check.name)) fail('CI_CHECK_IDENTITY_NOT_ALLOWED');
+  assertTimestampOrder(check.started_at, check.completed_at, 'CI_CHECK_TIMESTAMP');
   const checkUrl = assertRecordUrl(
-    check.url ?? check.html_url,
+    check.url,
     repository,
     `/check-runs/${checkId}`,
     'CI_GITHUB_RECORD_URL_MISMATCH',
   );
-  const details = String(check.details_url ?? check.html_url ?? '');
-  const runMatch = details.match(/\/actions\/runs\/(\d+)/u);
-  if (!runMatch) fail('CI_CHECK_RUN_WORKFLOW_IDENTITY_MISSING');
-  const associatedRunId = positiveId(runMatch[1], 'CI_CHECK_RUN_WORKFLOW_IDENTITY_INVALID');
-  const runPath = `/repos/${repository}/actions/runs/${associatedRunId}`;
+  const suiteId = positiveId(check?.check_suite?.id, 'CI_CHECK_SUITE_ID_MISSING');
+  const suitePath = `/repos/${repository}/check-suites/${suiteId}`;
+  const suite = await request(suitePath);
+  if (positiveId(suite?.id, 'CI_CHECK_SUITE_ID_MISMATCH') !== suiteId) {
+    fail('CI_CHECK_SUITE_ID_MISMATCH');
+  }
+  if (suite?.repository?.full_name !== repository) fail('CI_CHECK_SUITE_REPOSITORY_MISMATCH');
+  if (suite.head_sha !== identity.candidate_sha) fail('CI_CHECK_SUITE_HEAD_MISMATCH');
+  if (positiveId(suite?.app?.id, 'CI_CHECK_SUITE_APP_ID_INVALID') !== Number(check.app.id)
+      || suite?.app?.slug !== check.app.slug) {
+    fail('CI_CHECK_SUITE_APP_MISMATCH');
+  }
+  if (String(suite.status).toLowerCase() !== 'completed'
+      || String(suite.conclusion).toLowerCase() !== 'success') {
+    fail('CI_CHECK_SUITE_NOT_SUCCESS');
+  }
+
+  const runsPath = `/repos/${repository}/actions/runs?check_suite_id=${suiteId}&per_page=2`;
+  const runs = await request(runsPath);
+  const candidates = Array.isArray(runs?.workflow_runs)
+    ? runs.workflow_runs.filter((run) => Number(run?.check_suite_id) === suiteId)
+    : [];
+  if (candidates.length !== 1) fail('CI_CHECK_SUITE_WORKFLOW_ASSOCIATION_INVALID');
+  const associated = candidates[0];
+  const associatedId = positiveId(associated.id, 'CI_CHECK_RUN_WORKFLOW_IDENTITY_INVALID');
+  const runPath = `/repos/${repository}/actions/runs/${associatedId}`;
   const verifiedRun = verifyWorkflowRun(await request(runPath), {
-    repository, identity, policy, recordId: associatedRunId,
+    repository, identity, policy, recordId: associatedId,
   });
+  if (Number(verifiedRun.record.check_suite_id) !== suiteId) {
+    fail('CI_CHECK_SUITE_WORKFLOW_ASSOCIATION_MISMATCH');
+  }
+  if (String(check.details_url ?? '') !== verifiedRun.htmlUrl) {
+    fail('CI_CHECK_DETAILS_URL_MISMATCH');
+  }
+
   return {
     authority: 'GITHUB_API_VERIFIED',
     record_id: checkId,
     record_type: 'check_run',
     record_url: checkUrl,
     repository,
-    workflow_or_check_name: check.name,
+    workflow_id: verifiedRun.workflowId,
+    workflow_path: verifiedRun.workflowPath,
+    check_app_id: Number(check.app.id),
+    check_app_slug: check.app.slug,
+    check_suite_id: suiteId,
     status: 'completed',
     conclusion: 'success',
     result: 'PASS',
     head_sha: identity.candidate_sha,
     candidate_sha: identity.candidate_sha,
-    workflow_run_id: String(associatedRunId),
-    run_attempt: Number(verifiedRun.record.run_attempt),
+    workflow_run_id: String(associatedId),
+    run_attempt: verifiedRun.runAttempt,
     event: verifiedRun.record.event,
     created_at: check.started_at,
     completed_at: check.completed_at,
-    source: 'trusted-github-api-check-run',
-    command_or_path: `GET ${checkPath}; GET ${runPath}`,
+    source: 'trusted-github-api-check-run-suite-and-workflow-run',
+    command_or_path: `GET ${checkPath}; GET ${suitePath}; GET ${runsPath}; GET ${runPath}`,
     limitations: [],
   };
 }
@@ -593,18 +662,23 @@ export async function fetchAuthoritativeFounderEvidence({
   if (positiveId(record.id, 'FOUNDER_GITHUB_RECORD_ID_MISMATCH') !== id) {
     fail('FOUNDER_GITHUB_RECORD_ID_MISMATCH');
   }
-  if (!isReview) {
+  if (isReview) {
+    if (String(record.state).toUpperCase() !== 'APPROVED') {
+      fail('FOUNDER_GITHUB_REVIEW_NOT_APPROVED');
+    }
+    if (record.commit_id !== identity.candidate_sha) {
+      fail('FOUNDER_GITHUB_REVIEW_COMMIT_MISMATCH');
+    }
+  } else {
     assertRecordUrl(
       record.issue_url,
       repository,
       `/issues/${Number(prNumber)}`,
       'FOUNDER_GITHUB_RECORD_PR_MISMATCH',
     );
-  } else if (String(record.state).toUpperCase() !== 'APPROVED') {
-    fail('FOUNDER_GITHUB_REVIEW_NOT_APPROVED');
   }
   const recordUrl = assertRecordUrl(
-    record.url ?? record.html_url,
+    record.url,
     repository,
     isReview ? `/reviews/${id}` : `/comments/${id}`,
     'FOUNDER_GITHUB_RECORD_URL_MISMATCH',
@@ -622,17 +696,24 @@ export async function fetchAuthoritativeFounderEvidence({
   if (authorization.founder_github_identity !== author) fail('FOUNDER_GITHUB_IDENTITY_MISMATCH');
   const allowedIdentities = new Set(founderPolicy(policy).allowed_github_identities ?? []);
   const allowedAssociations = new Set(founderPolicy(policy).allowed_author_associations ?? []);
-  if (!allowedIdentities.has(author) && !allowedAssociations.has(record.author_association)) {
+  if (!allowedIdentities.has(author)) {
     fail('FOUNDER_GITHUB_IDENTITY_NOT_ALLOWED');
   }
+  if (allowedAssociations.size > 0 && !allowedAssociations.has(record.author_association)) {
+    fail('FOUNDER_GITHUB_AUTHOR_ASSOCIATION_NOT_ALLOWED');
+  }
 
-  const recordIssuedAt = isReview ? record.submitted_at : record.created_at;
-  const recordIssued = parseTime(recordIssuedAt, 'FOUNDER_GITHUB_RECORD_ISSUED_AT_INVALID');
+  const createdAt = isReview ? record.submitted_at : record.created_at;
+  const updatedAt = isReview ? record.submitted_at : record.updated_at;
+  const created = parseTime(createdAt, 'FOUNDER_GITHUB_RECORD_CREATED_AT_INVALID');
+  const updated = parseTime(updatedAt, 'FOUNDER_GITHUB_RECORD_UPDATED_AT_INVALID');
+  if (updated < created) fail('FOUNDER_GITHUB_RECORD_TIMESTAMP_ORDER_INVALID');
+  const authoritativeIssuedAt = updatedAt;
   const authorizationIssued = parseTime(
     authorization.issued_at,
     'FOUNDER_AUTHORIZATION_ISSUED_AT_INVALID',
   );
-  if (recordIssued !== authorizationIssued) fail('FOUNDER_AUTHORIZATION_ISSUED_AT_MISMATCH');
+  if (authorizationIssued !== updated) fail('FOUNDER_AUTHORIZATION_ISSUED_AT_MISMATCH');
   if (authorizationIssued > now.getTime() + 60_000) fail('FOUNDER_AUTHORIZATION_ISSUED_AT_FUTURE');
   if (authorization.expires_at !== undefined && authorization.expires_at !== null) {
     const expires = parseTime(authorization.expires_at, 'FOUNDER_AUTHORIZATION_EXPIRES_AT_INVALID');
@@ -650,10 +731,13 @@ export async function fetchAuthoritativeFounderEvidence({
     repository,
     pr_number: Number(prNumber),
     exact_head: identity.candidate_sha,
+    record_commit_id: isReview ? record.commit_id : null,
+    record_created_at: createdAt,
+    record_updated_at: updatedAt,
     founder_github_identity: author,
     author_association: record.author_association,
     action_type: expectedAction,
-    issued_at: authorization.issued_at,
+    issued_at: authoritativeIssuedAt,
     expires_at: authorization.expires_at ?? null,
     revoked: false,
     result: 'PASS',
