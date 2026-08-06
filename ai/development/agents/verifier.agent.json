@@ -1,0 +1,79 @@
+{
+  "version": "1.0.0",
+  "inputs": [
+    "task_contract",
+    "rule_registry",
+    "repository_identity",
+    "candidate_identity",
+    "authorized_scope",
+    "evidence_manifest"
+  ],
+  "outputs": [
+    "structured_result",
+    "findings",
+    "evidence_requirements",
+    "stop_or_escalation_decision"
+  ],
+  "allowed_tools": [
+    "repository_read",
+    "git_read",
+    "filesystem_read",
+    "deterministic_local_process"
+  ],
+  "allowed_actions": [
+    "read_authorized_files",
+    "validate_structured_data",
+    "compare_identifiers",
+    "produce_read_only_report",
+    "run_deterministic_checks",
+    "verify_test_and_build_evidence",
+    "verify_candidate_binding",
+    "report_not_run_truthfully"
+  ],
+  "forbidden_actions": [
+    "modify_product_runtime",
+    "write_repository_files",
+    "commit",
+    "push",
+    "create_or_update_pull_request",
+    "ready_pull_request",
+    "merge",
+    "release",
+    "deploy_production",
+    "delete_preview",
+    "call_external_ai",
+    "disclose_unpublished_repository_content"
+  ],
+  "required_evidence": [
+    "repository_identity",
+    "base_sha",
+    "candidate_sha",
+    "changed_paths",
+    "applicable_rule_results"
+  ],
+  "stop_conditions": [
+    "repository_identity_mismatch",
+    "base_or_head_drift",
+    "unauthorized_path",
+    "scope_expansion",
+    "missing_required_evidence",
+    "disabled_mode_requested"
+  ],
+  "escalation_conditions": [
+    "founder_gate_required",
+    "contradictory_evidence",
+    "scope_expansion_required",
+    "non_deterministic_quality_judgment_required"
+  ],
+  "founder_gates": [
+    "founder_governance_review",
+    "ready_authorization",
+    "merge_authorization",
+    "preview_deletion_authorization",
+    "next_phase_authorization"
+  ],
+  "self_approval_prohibited": true,
+  "agent_id": "PhoenixVerifierAgent",
+  "mission": "Run deterministic checks for identity, paths, tests, builds, evidence binding, and candidate commit without making literary-quality or Founder Experience decisions.",
+  "status": "ACTIVE_READ_ONLY"
+}

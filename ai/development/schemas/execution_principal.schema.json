@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phoenix.local/schemas/execution_principal.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["execution_principal_id","actor","triggering_actor","workflow_identity","role","run_id","run_attempt","candidate_sha","authorized_actions"],
+  "properties": {
+    "execution_principal_id": {"type":"string","minLength":1},
+    "actor": {"type":"string","minLength":1},
+    "triggering_actor": {"type":"string","minLength":1},
+    "workflow_identity": {"type":"string","minLength":1},
+    "role": {"enum":["BUILDER","FINAL_AUDITOR","FOUNDER_APPROVAL_AUTHORITY","VERIFIER","GOVERNOR"]},
+    "run_id": {"type":"string","minLength":1},
+    "run_attempt": {"type":"integer","minimum":1},
+    "candidate_sha": {"type":"string","pattern":"^[0-9a-f]{40}$"},
+    "authorized_actions": {"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true}
+  }
+}

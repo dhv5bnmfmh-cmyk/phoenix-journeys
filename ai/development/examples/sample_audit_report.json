@@ -1,0 +1,31 @@
+{
+  "report_id": "PDA-AUDIT-EXAMPLE-001",
+  "repository": "dhv5bnmfmh-cmyk/phoenix-journeys",
+  "pr_number": 148,
+  "base_sha": "d13129dfe2a7a25ea27d2a8f6d9b4da99f4b59f5",
+  "candidate_sha": "0000000000000000000000000000000000000000",
+  "candidate_tree": "1111111111111111111111111111111111111111",
+  "trusted_runner_sha": "2222222222222222222222222222222222222222",
+  "workflow_run_id": "example-run-1",
+  "run_attempt": 1,
+  "deterministic_result": "BLOCKED",
+  "ai_review_result": "NOT_RUN",
+  "founder_gate_result": "NOT_APPROVED",
+  "final_agent_decision": "BOOTSTRAP_SOURCE_EXAMPLE_REQUIRES_INDEPENDENT_GOVERNANCE_REVIEW",
+  "identity": {
+    "authority": "NON_AUTHORITATIVE_BOOTSTRAP_SOURCE_TEST",
+    "founder_governance": "NOT_APPROVED",
+    "ready_authorization": "NOT_PRESENT",
+    "merge_authorization": "NOT_PRESENT",
+    "phase_b_authorization": "NOT_PRESENT"
+  },
+  "evidence_manifest": {
+    "status": "EXAMPLE_ONLY",
+    "limitations": [
+      "No Trusted Governance Audit was executed.",
+      "No Founder approval is represented by this example."
+    ]
+  },
+  "findings": [],
+  "produced_at": "2026-08-05T00:00:00Z"
+}

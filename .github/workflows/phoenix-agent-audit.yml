@@ -1,0 +1,359 @@
+name: Phoenix Agent Audit
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to audit using exact live PR identity
+        required: true
+        type: number
+      audit_mode:
+        description: Fresh audit or explicit evidence re-audit
+        required: true
+        default: FRESH_AUDIT
+        type: choice
+        options: [FRESH_AUDIT, REAUDIT]
+      previous_evidence_artifact_id:
+        description: Prior trusted audit artifact ID; mandatory for REAUDIT
+        required: false
+        type: string
+      ci_workflow_run_id:
+        description: Authoritative GitHub Workflow Run ID for CI Evidence
+        required: false
+        type: string
+      ci_check_run_id:
+        description: Authoritative GitHub Check Run ID for CI Evidence
+        required: false
+        type: string
+      founder_review_id:
+        description: Authoritative Founder PR Review ID
+        required: false
+        type: string
+      founder_comment_id:
+        description: Authoritative Founder PR Comment ID
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+
+jobs:
+  bootstrap-source-tests:
+    name: Phoenix Agent Bootstrap Source Tests
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          submodules: false
+          lfs: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tools/phoenix_agent_runner/package-lock.json
+      - name: Record exact Bootstrap identity
+        id: identity
+        working-directory: tools/phoenix_agent_runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p bootstrap-source-test
+          TESTED_SHA="$(git rev-parse HEAD)"
+          [[ "$TESTED_SHA" == "${{ github.event.pull_request.head.sha }}" ]]
+          {
+            echo "tested_sha=$TESTED_SHA"
+            echo "node_version=$(node --version)"
+            echo "npm_version=$(npm --version)"
+            echo "lock_digest=$(sha256sum package-lock.json | awk '{print $1}')"
+          } >> "$GITHUB_OUTPUT"
+      - name: Install Candidate locked dependencies
+        working-directory: tools/phoenix_agent_runner
+        run: npm ci --ignore-scripts
+      - name: Run complete Candidate Node test suite
+        id: tests
+        working-directory: tools/phoenix_agent_runner
+        shell: bash
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee bootstrap-source-test/test-output.tap
+          TEST_EXIT="${PIPESTATUS[0]}"
+          count() { grep -E "^# $1 [0-9]+$" bootstrap-source-test/test-output.tap | tail -1 | awk '{print $3}'; }
+          TOTAL="$(count tests)"
+          PASSED="$(count pass)"
+          FAILED="$(count fail)"
+          SKIPPED="$(count skipped)"
+          {
+            echo "exact_candidate_sha=${{ steps.identity.outputs.tested_sha }}"
+            echo "node_version=${{ steps.identity.outputs.node_version }}"
+            echo "npm_version=${{ steps.identity.outputs.npm_version }}"
+            echo "package_lock_sha256=${{ steps.identity.outputs.lock_digest }}"
+            echo "ajv_version=$(node -p "require('./node_modules/ajv/package.json').version")"
+            echo "total_tests=$TOTAL"
+            echo "passed=$PASSED"
+            echo "failed=$FAILED"
+            echo "skipped=$SKIPPED"
+            echo "exit_code=$TEST_EXIT"
+            echo "authority=NON_AUTHORITATIVE_BOOTSTRAP_SOURCE_TEST"
+            echo "trusted_governance_result=NOT_EVALUATED"
+            echo "founder_governance=NOT_APPROVED"
+          } > bootstrap-source-test/result.txt
+          exit "$TEST_EXIT"
+      - name: Scan Bootstrap outputs for obvious secrets
+        if: always()
+        working-directory: tools/phoenix_agent_runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RIE '(gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' bootstrap-source-test
+      - name: Publish non-authoritative Bootstrap summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## Phoenix Agent Bootstrap Source Tests'
+            echo '- Authority: `NON_AUTHORITATIVE_BOOTSTRAP_SOURCE_TEST`'
+            echo '- Trusted Governance Result: `NOT_EVALUATED`'
+            echo '- Founder Governance: `NOT_APPROVED`'
+            echo '- Exact Candidate SHA: `${{ steps.identity.outputs.tested_sha }}`'
+            echo '- Tests: `${{ steps.tests.outputs.total }}`'
+            echo 'This job does not establish Governance, Founder, Ready, or Merge PASS.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: phoenix-agent-bootstrap-source-tests-${{ github.run_id }}-${{ github.run_attempt }}
+          path: tools/phoenix_agent_runner/bootstrap-source-test/
+          if-no-files-found: error
+          retention-days: 30
+
+  trusted-audit:
+    name: Trusted read-only governance audit
+    if: github.event_name == 'pull_request_target' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+    steps:
+      - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a
+        with:
+          egress-policy: audit
+      - name: Resolve PR number
+        id: pr
+        shell: bash
+        run: |
+          set -euo pipefail
+          PR_NUMBER="${{ github.event.pull_request.number || inputs.pr_number }}"
+          [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]
+          echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+      - name: Resolve exact live PR identity before checkout
+        id: live
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" > live-pr.json
+          HEAD_SHA="$(node -e "const x=require('./live-pr.json');process.stdout.write(x.head.sha)")"
+          gh api "repos/$GITHUB_REPOSITORY/git/commits/$HEAD_SHA" > live-head.json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const pr = JSON.parse(fs.readFileSync('live-pr.json', 'utf8'));
+          const commit = JSON.parse(fs.readFileSync('live-head.json', 'utf8'));
+          const sha = /^[0-9a-f]{40}$/;
+          if (!pr?.base?.ref || !sha.test(pr?.base?.sha || '') || !pr?.head?.ref || !sha.test(pr?.head?.sha || '') || !sha.test(commit?.tree?.sha || '')) process.exit(2);
+          const lines = [
+            `base_branch=${pr.base.ref}`,
+            `base_sha=${pr.base.sha}`,
+            `head_branch=${pr.head.ref}`,
+            `head_sha=${pr.head.sha}`,
+            `head_tree=${commit.tree.sha}`,
+          ];
+          const lf = String.fromCharCode(10);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, lines.join(lf) + lf);
+          NODE
+      - name: Check out exact live Base SHA as trusted source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ steps.live.outputs.base_sha }}
+          path: trusted
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+          lfs: false
+      - name: Check out exact live Candidate SHA as untrusted data
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ steps.live.outputs.head_sha }}
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+          lfs: false
+      - name: Verify exact trusted and Candidate checkouts
+        id: checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          TRUSTED_SHA="$(git -C trusted rev-parse HEAD)"
+          CANDIDATE_SHA="$(git -C candidate rev-parse HEAD)"
+          CANDIDATE_TREE="$(git -C candidate rev-parse HEAD^{tree})"
+          [[ "$TRUSTED_SHA" == "${{ steps.live.outputs.base_sha }}" ]]
+          [[ "$CANDIDATE_SHA" == "${{ steps.live.outputs.head_sha }}" ]]
+          [[ "$CANDIDATE_TREE" == "${{ steps.live.outputs.head_tree }}" ]]
+          echo "trusted_sha=$TRUSTED_SHA" >> "$GITHUB_OUTPUT"
+      - name: Detect trusted source availability
+        id: bootstrap
+        shell: bash
+        run: |
+          if [[ -f trusted/tools/phoenix_agent_runner/src/trusted-cli.mjs ]]; then
+            echo 'active=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'active=false' >> "$GITHUB_OUTPUT"
+            echo 'Trusted Audit: BOOTSTRAP_NOT_ACTIVE_UNTIL_MERGE' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Prepare explicit audit mode and previous Evidence
+        id: previous
+        if: steps.bootstrap.outputs.active == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUDIT_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.audit_mode || 'FRESH_AUDIT' }}
+          ARTIFACT_ID: ${{ inputs.previous_evidence_artifact_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$AUDIT_MODE" in
+            FRESH_AUDIT)
+              [[ -z "${ARTIFACT_ID:-}" ]]
+              ;;
+            REAUDIT)
+              [[ "${ARTIFACT_ID:-}" =~ ^[1-9][0-9]*$ ]]
+              ARTIFACT_ID="$ARTIFACT_ID" \
+              CURRENT_BASE_BRANCH="${{ steps.live.outputs.base_branch }}" \
+              CURRENT_BASE_SHA="${{ steps.live.outputs.base_sha }}" \
+              CURRENT_HEAD_BRANCH="${{ steps.live.outputs.head_branch }}" \
+              CURRENT_HEAD_SHA="${{ steps.live.outputs.head_sha }}" \
+              PR_NUMBER="${{ steps.pr.outputs.number }}" \
+              node --input-type=module <<'NODE'
+              import { writeFileSync, appendFileSync } from 'node:fs';
+              import { fetchAuthoritativePreviousEvidenceProvenance } from './trusted/tools/phoenix_agent_runner/src/identity-freshness.mjs';
+              import { createTrustedGithubRequest } from './trusted/tools/phoenix_agent_runner/src/trusted-cli.mjs';
+              const policy = JSON.parse(await (await import('node:fs/promises')).readFile(
+                './trusted/ai/development/policies/evidence_policy.json', 'utf8'));
+              const repository = process.env.GITHUB_REPOSITORY;
+              const request = createTrustedGithubRequest({
+                repository,
+                token: process.env.GH_TOKEN,
+                apiUrl: process.env.GITHUB_API_URL,
+              });
+              const provenance = await fetchAuthoritativePreviousEvidenceProvenance({
+                repository,
+                prNumber: Number(process.env.PR_NUMBER),
+                currentIdentity: {
+                  base_branch: process.env.CURRENT_BASE_BRANCH,
+                  base_sha: process.env.CURRENT_BASE_SHA,
+                  head_branch: process.env.CURRENT_HEAD_BRANCH,
+                  candidate_sha: process.env.CURRENT_HEAD_SHA,
+                },
+                artifactId: process.env.ARTIFACT_ID,
+                policy,
+                request,
+              });
+              writeFileSync('previous-provenance.json', JSON.stringify(provenance, null, 2));
+              appendFileSync(process.env.GITHUB_OUTPUT, 'artifact_id=' + provenance.artifact_id + '\n');
+              appendFileSync(process.env.GITHUB_OUTPUT, 'artifact_digest=' + provenance.artifact_digest + '\n');
+              NODE
+              ARTIFACT_DIGEST="$(node -e "const x=require('./previous-provenance.json');process.stdout.write(x.artifact_digest)")"
+              curl --fail-with-body --silent --show-error --location \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H 'Accept: application/vnd.github+json' \
+                -H 'X-GitHub-Api-Version: 2022-11-28' \
+                "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID/zip" \
+                -o previous.zip
+              DOWNLOADED_DIGEST="sha256:$(sha256sum previous.zip | awk '{print $1}')"
+              [[ "$DOWNLOADED_DIGEST" == "$ARTIFACT_DIGEST" ]]
+              mkdir previous
+              unzip -q previous.zip -d previous
+              mapfile -t REPORTS < <(find previous -type f -name audit-report.json -print)
+              [[ "${#REPORTS[@]}" -eq 1 ]]
+              DOWNLOADED_DIGEST="$DOWNLOADED_DIGEST" node - "${REPORTS[0]}" <<'NODE'
+              const fs = require('node:fs');
+              const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+              const provenance = JSON.parse(fs.readFileSync('previous-provenance.json', 'utf8'));
+              provenance.downloaded_artifact_digest = process.env.DOWNLOADED_DIGEST;
+              fs.writeFileSync('previous-evidence.json', JSON.stringify({
+                evidence_manifest: report.evidence_manifest || report,
+                provenance,
+              }, null, 2));
+              NODE
+              ;;
+            *) exit 2 ;;
+          esac
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        if: steps.bootstrap.outputs.active == 'true'
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: trusted/tools/phoenix_agent_runner/package-lock.json
+      - name: Install trusted locked validator
+        if: steps.bootstrap.outputs.active == 'true'
+        working-directory: trusted/tools/phoenix_agent_runner
+        run: npm ci --ignore-scripts
+      - name: Run trusted R1-B tests
+        if: steps.bootstrap.outputs.active == 'true'
+        working-directory: trusted/tools/phoenix_agent_runner
+        run: npm run test:r1b
+      - name: Run trusted audit against live PR identity
+        if: steps.bootstrap.outputs.active == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+          PHOENIX_CI_WORKFLOW_RUN_ID: ${{ inputs.ci_workflow_run_id }}
+          PHOENIX_CI_CHECK_RUN_ID: ${{ inputs.ci_check_run_id }}
+          PHOENIX_FOUNDER_REVIEW_ID: ${{ inputs.founder_review_id }}
+          PHOENIX_FOUNDER_COMMENT_ID: ${{ inputs.founder_comment_id }}
+          AUDIT_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.audit_mode || 'FRESH_AUDIT' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PREVIOUS_ARGS=()
+          if [[ "$AUDIT_MODE" == 'REAUDIT' ]]; then
+            PREVIOUS_ARGS=(--previous-evidence previous-evidence.json)
+          fi
+          node trusted/tools/phoenix_agent_runner/src/trusted-cli.mjs \
+            --trusted trusted \
+            --candidate candidate \
+            --event "$GITHUB_EVENT_PATH" \
+            --pr-number "${{ steps.pr.outputs.number }}" \
+            --trusted-checkout-sha "${{ steps.checkout.outputs.trusted_sha }}" \
+            --trusted-source-sha "${{ steps.live.outputs.base_sha }}" \
+            --audit-mode "$AUDIT_MODE" \
+            "${PREVIOUS_ARGS[@]}" \
+            --output phoenix-agent-audit
+      - name: Publish trusted summary
+        if: always() && steps.bootstrap.outputs.active == 'true'
+        run: cat phoenix-agent-audit/audit-summary.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always() && steps.bootstrap.outputs.active == 'true'
+        with:
+          name: phoenix-trusted-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: phoenix-agent-audit/
+          if-no-files-found: error
+          retention-days: 30

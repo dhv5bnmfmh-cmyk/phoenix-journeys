@@ -1,0 +1,35 @@
+{
+  "policy_id": "phoenix-development-agent-scope-policy",
+  "version": "1.0.0",
+  "phase": "PHASE_A_READ_ONLY_FOUNDATION",
+  "allowed_paths": [
+    "docs/PHOENIX_DEVELOPMENT_AGENT_SYSTEM.md",
+    "ai/development/README.md",
+    "ai/development/agents/**",
+    "ai/development/policies/**",
+    "ai/development/schemas/**",
+    "ai/development/examples/**",
+    "tools/phoenix_agent_runner/**",
+    ".github/workflows/phoenix-agent-audit.yml",
+    ".github/pull_request_template.md"
+  ],
+  "forbidden_paths": [
+    "app/lib/**",
+    "app/test/**",
+    "worker/**",
+    "assets/**",
+    "audio/**",
+    "images/**",
+    ".github/workflows/deploy-cloudflare.yml",
+    ".github/workflows/preview-cloudflare.yml"
+  ],
+  "path_matching": {
+    "separator": "/",
+    "double_star": "matches zero or more path segments",
+    "single_star": "matches characters inside one path segment",
+    "case_sensitive": true
+  },
+  "unexpected_path_result": "SCOPE_EXPANSION_REQUIRED",
+  "automatic_scope_expansion": false,
+  "stop_on_first_unexpected_path": true
+}

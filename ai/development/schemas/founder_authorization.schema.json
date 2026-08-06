@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phoenix.local/schemas/founder_authorization.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["trust_class","repository","pr_number","exact_head","action_type","founder_github_identity","trusted_evidence_source","issued_at","revoked"],
+  "properties": {
+    "trust_class": {"const":"TRUSTED_GITHUB_RECORD"},
+    "repository": {"type":"string","pattern":"^[^/]+/[^/]+$"},
+    "pr_number": {"type":"integer","minimum":1},
+    "exact_head": {"type":"string","pattern":"^[0-9a-f]{40}$"},
+    "action_type": {"enum":["GOVERNANCE_PASS","READY_AUTHORIZATION","MERGE_AUTHORIZATION","PREVIEW_DELETION_AUTHORIZATION","NEXT_PHASE_AUTHORIZATION"]},
+    "founder_github_identity": {"type":"string","minLength":1},
+    "trusted_evidence_source": {"type":"string","minLength":1},
+    "issued_at": {"type":"string","format":"date-time"},
+    "expires_at": {"type":["string","null"],"format":"date-time"},
+    "revoked": {"type":"boolean"}
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "finding_id": "PDA-F-EXAMPLE-001",
+  "rule_id": "PDA-R005",
+  "title": "Unexpected runtime path appears in a governance-only task",
+  "area": "scope",
+  "severity": "P1",
+  "result": "BLOCKED",
+  "evidence_level": "VERIFIED",
+  "expected": "All changed paths remain inside the Phase A allowlist.",
+  "actual": "app/lib/main.dart appears in the changed-path inventory.",
+  "exact_paths": [
+    "app/lib/main.dart"
+  ],
+  "candidate_sha": "d13129dfe2a7a25ea27d2a8f6d9b4da99f4b59f5",
+  "stable_sha": "5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977",
+  "evidence": [
+    "git diff --name-only"
+  ],
+  "root_cause": "The proposed change exceeded the authorized governance scope.",
+  "required_action": "Stop and obtain explicit Founder scope-expansion authorization.",
+  "proposed_scope": [
+    "app/lib/main.dart"
+  ],
+  "auto_fix_permitted": false,
+  "founder_authorization_required": true,
+  "status": "AUTHORIZATION_REQUIRED"
+}

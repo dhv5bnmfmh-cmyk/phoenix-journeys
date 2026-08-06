@@ -416,3 +416,88 @@ Pilot approval: APPROVED / REJECTED / PENDING / NOT_APPLICABLE
 - [ ] One normal pilot and one special pilot follow the binding order.
 - [ ] Default controlled batch size is two to three Journeys after pilot approval.
 - [ ] No second pilot or batch rewrite begins before the required prior Founder decision.
+
+## 17. PHOENIX DEVELOPMENT AGENT TASK CONTRACT
+
+This section extends the existing Phoenix Evidence Record. It does not replace Stable Baseline, Visual, Narration, Access, AI, Privacy, Secret, Evidence, or Founder gates.
+
+- Task ID: `<required>`
+- Task Mode: `READ_ONLY_AUDIT / AUTHORIZED_REMEDIATION / GOVERNANCE_DOCUMENTATION / RUNTIME_DEVELOPMENT / VISUAL_REMEDIATION`
+- Authorized Scope: `<exact scope>`
+- Allowed Paths: `<exact paths or glob patterns>`
+- Forbidden Paths: `<exact paths or glob patterns>`
+- Base SHA: `<full sha>`
+- Candidate SHA: `<full sha>`
+- Applicable Rule IDs: `<PDA-R...>`
+- Builder Agent: `<agent_id>`
+- Auditor Agent: `<different agent_id>`
+- Required Tests: `<exact checks>`
+- Required Evidence: `<exact evidence classes>`
+- Founder Experience Required: `YES / NO`
+- Ready Authorization: `PRESENT / NOT_PRESENT`
+- Merge Authorization: `PRESENT / NOT_PRESENT`
+- External Disclosure: `NOT_PERMITTED / <approved exact exception>`
+- Scope Expansion Status: `NONE / AUTHORIZATION_REQUIRED / AUTHORIZED`
+
+The machine-readable JSON block is required for Phoenix Agent Audit Workflow execution.
+
+<!-- PHOENIX_TASK_CONTRACT_JSON_START -->
+```json
+{
+  "task_id": "<required>",
+  "task_title": "<required>",
+  "task_mode": "READ_ONLY_AUDIT",
+  "repository": "dhv5bnmfmh-cmyk/phoenix-journeys",
+  "expected_main": "<full sha>",
+  "base_branch": "main",
+  "base_sha": "<full sha>",
+  "head_branch": "<branch>",
+  "initial_head_sha": "<full sha>",
+  "current_head_sha": "<full sha>",
+  "authorized_scope": "<exact authorized scope>",
+  "allowed_paths": [],
+  "forbidden_paths": [],
+  "authorized_findings": [],
+  "prohibited_actions": [],
+  "applicable_rules": [],
+  "required_tests": [],
+  "required_evidence": [],
+  "founder_gates": {
+    "founder_experience_required": false,
+    "founder_experience_result": "NOT_REQUIRED",
+    "founder_governance_review": "REQUIRED",
+    "ready_authorization": "NOT_PRESENT",
+    "merge_authorization": "NOT_PRESENT",
+    "preview_deletion_authorization": "NOT_PRESENT",
+    "next_phase_authorization": "NOT_PRESENT"
+  },
+  "external_disclosure": {
+    "permitted": false,
+    "services": [],
+    "content": []
+  },
+  "retry_limit": 0,
+  "stop_conditions": [],
+  "builder_agent": "PhoenixBuilderAgent",
+  "auditor_agent": "PhoenixAuditAgent",
+  "requested_agents": [
+    "PhoenixGovernorAgent",
+    "PhoenixPlannerAgent",
+    "PhoenixVerifierAgent",
+    "PhoenixAuditAgent"
+  ],
+  "requested_actions": [
+    "READ_REPOSITORY",
+    "VALIDATE_CONFIG",
+    "GENERATE_AUDIT_REPORT"
+  ]
+}
+```
+<!-- PHOENIX_TASK_CONTRACT_JSON_END -->
+
+- [ ] Builder and Auditor are different Agents.
+- [ ] Builder and Remediator capabilities match their current manifest status.
+- [ ] AI Review Result is `NOT_RUN` when no AI review actually executed.
+- [ ] Deterministic Result, AI Review Result, Founder Gate Result, and Final Agent Decision are reported separately.
+- [ ] Ready, Merge, Preview deletion, and next-phase authorization are independent gates.
+- [ ] Scope expansion stops and waits for separate Founder authorization.

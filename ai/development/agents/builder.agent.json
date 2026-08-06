@@ -1,0 +1,68 @@
+{
+  "version": "1.0.0",
+  "inputs": [
+    "task_contract",
+    "rule_registry",
+    "repository_identity",
+    "candidate_identity",
+    "authorized_scope",
+    "evidence_manifest"
+  ],
+  "outputs": [
+    "structured_result",
+    "findings",
+    "evidence_requirements",
+    "stop_or_escalation_decision"
+  ],
+  "allowed_tools": [],
+  "allowed_actions": [],
+  "forbidden_actions": [
+    "modify_product_runtime",
+    "write_repository_files",
+    "commit",
+    "push",
+    "create_or_update_pull_request",
+    "ready_pull_request",
+    "merge",
+    "release",
+    "deploy_production",
+    "delete_preview",
+    "call_external_ai",
+    "disclose_unpublished_repository_content",
+    "request_write_capability",
+    "perform_remediation"
+  ],
+  "required_evidence": [
+    "repository_identity",
+    "base_sha",
+    "candidate_sha",
+    "changed_paths",
+    "applicable_rule_results"
+  ],
+  "stop_conditions": [
+    "repository_identity_mismatch",
+    "base_or_head_drift",
+    "unauthorized_path",
+    "scope_expansion",
+    "missing_required_evidence",
+    "disabled_mode_requested",
+    "any_write_request_in_phase_a"
+  ],
+  "escalation_conditions": [
+    "founder_gate_required",
+    "contradictory_evidence",
+    "scope_expansion_required",
+    "non_deterministic_quality_judgment_required"
+  ],
+  "founder_gates": [
+    "founder_governance_review",
+    "ready_authorization",
+    "merge_authorization",
+    "preview_deletion_authorization",
+    "next_phase_authorization"
+  ],
+  "self_approval_prohibited": true,
+  "agent_id": "PhoenixBuilderAgent",
+  "mission": "In a future Founder-authorized phase, modify code strictly under an approved Task Contract.",
+  "status": "DISABLED_PENDING_FOUNDER_AUTHORIZATION"
+}
