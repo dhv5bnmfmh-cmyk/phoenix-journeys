@@ -1,51 +1,41 @@
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:phoenix_journeys/agents/phoenix_world_story_agent.dart';
+import 'package:phoenix_journeys/data/beijing_story_catalog.dart';
 import 'package:phoenix_journeys/data/world_geo_catalog.dart';
-import 'package:phoenix_journeys/data/world_story_runtime.dart';
+import 'package:phoenix_journeys/models/story_content.dart';
 
 void main() {
   PhoenixWorldStoryAgent buildAgent() {
     return PhoenixWorldStoryAgent(
-      nodes: worldGeoNodes,
-      journeys: worldJourneyRecords,
-      sources: worldStorySources,
+      nodes: worldGeoCatalog,
+      sources: beijingStorySources,
+      journeys: beijingJourneyCatalog,
     );
   }
 
   test('builds the full path to the Forbidden City', () {
     final agent = buildAgent();
 
+    final path = agent.pathTo('cn-beijing-dongcheng-forbidden-city');
+
     expect(
-      agent.pathForNode('cn-beijing-dongcheng-forbidden-city')
-          .map((node) => node.id),
-      ['world', 'asia', 'cn', 'cn-beijing', 'cn-beijing-dongcheng', 'cn-beijing-dongcheng-forbidden-city'],
+      path.map((node) => node.name),
+      ['世界', '中国', '北京市', '东城区', '故宫博物院'],
     );
   });
 
   test('searches local and international aliases', () {
     final agent = buildAgent();
 
-    expect(agent.searchGeo('Forbidden City').single.id,
-        'cn-beijing-dongcheng-forbidden-city');
-    expect(agent.searchGeo('北京').map((node) => node.id), contains('cn-beijing'));
+    expect(agent.search('Forbidden City').single.name, '故宫博物院');
+    expect(agent.search('北京').map((node) => node.id), contains('cn-beijing'));
   });
 
   test('rejects orphan geographic nodes', () {
+    final agent = PhoenixWorldStoryAgent();
+
     expect(
-      () => PhoenixWorldStoryAgent(
-        nodes: [
-          ...worldGeoNodes,
-          const GeoNode(
-            id: 'orphan',
-            type: GeoNodeType.place,
-            name: 'Orphan',
-            parentId: 'missing-parent',
-          ),
-        ],
-        journeys: worldJourneyRecords,
-        sources: worldStorySources,
-      ),
+      () => agent.register(worldGeoCatalog.last),
       throwsStateError,
     );
   });
@@ -61,15 +51,17 @@ void main() {
     expect(agent.evidenceForSection(journey.id, 'story-2'), hasLength(3));
   });
 
-  test('finds every place Journey from its country hierarchy', () {
+  test('finds all Beijing Journeys from the country hierarchy', () {
     final agent = buildAgent();
     final ids = agent
         .journeysForGeo('cn', includeDescendants: true)
         .map((journey) => journey.id)
         .toSet();
 
-    expect(ids, contains('beijing-forbidden-city'));
-    expect(ids, contains('beijing-temple-of-heaven'));
+    expect(ids, containsAll(<String>[
+      'beijing-forbidden-city',
+      'beijing-temple-of-heaven',
+    ]));
     expect(agent.journeysForGeo('cn'), isEmpty);
   });
 
@@ -81,25 +73,40 @@ void main() {
   });
 
   test('blocks publication when evidence is weak or unverified', () {
-    final source = worldStorySources.first;
-    final journey = worldJourneyRecords.first;
-    final weakAgent = PhoenixWorldStoryAgent(
-      nodes: worldGeoNodes,
-      journeys: [
-        journey.copyWith(
-          sections: [
-            JourneyStorySection(
-              id: 'story-0',
-              text: journey.sections.first.text,
-              sourceIds: [source.id],
-            ),
-          ],
+    const draftSource = StorySourceRecord(
+      id: 'draft-source',
+      title: 'Draft notes',
+      publisher: 'Unknown editor',
+      url: 'https://example.com/draft',
+      kind: StorySourceKind.editorial,
+      languageCode: 'en',
+      geoNodeIds: ['cn-beijing-dongcheng-forbidden-city'],
+      verificationStatus: StoryVerificationStatus.draft,
+    );
+    const draftJourney = JourneyContentRecord(
+      id: 'draft-journey',
+      title: 'Draft',
+      geoNodeId: 'cn-beijing-dongcheng-forbidden-city',
+      languageCode: 'zh-CN',
+      verificationStatus: StoryVerificationStatus.draft,
+      sections: [
+        JourneyStorySection(
+          id: 'draft-0',
+          text: '尚未验证的故事。',
+          sourceIds: ['draft-source'],
         ),
       ],
-      sources: [source],
+    );
+    final agent = PhoenixWorldStoryAgent(
+      nodes: worldGeoCatalog,
+      sources: const [draftSource],
+      journeys: const [draftJourney],
     );
 
-    expect(weakAgent.isJourneyPublishable(journey.id), isFalse);
-    expect(weakAgent.publicationIssues(journey.id), isNotEmpty);
+    final issues = agent.publicationIssues('draft-journey');
+    expect(issues, contains('故事尚未完成审核'));
+    expect(issues, contains('故事至少需要两个独立权威来源'));
+    expect(issues, contains('draft-source 尚未验证'));
+    expect(agent.isJourneyPublishable('draft-journey'), isFalse);
   });
 }
