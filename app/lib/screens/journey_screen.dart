@@ -155,8 +155,8 @@ class _JourneyScreenState extends State<JourneyScreen>
   Timer? _narrationCheckpointTimer;
   int _lastSavedNarrationOffset = 0;
 
-  bool get _isSummerPalacePilot =>
-      _experience.id == 'beijing-summer-palace';
+  // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
+  bool get _isSummerPalacePilot => false;
 
   @override
   void initState() {

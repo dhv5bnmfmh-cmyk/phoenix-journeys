@@ -73,33 +73,42 @@ test('difficulty and adaptive levels preserve narrative invariants', () => {
   assert.ok(levels.match(/许澄/g).length >= 6);
 });
 
-test('Reflection and Writing are Pilot-scoped composite pages', () => {
+test('Summer Palace uses the stable six-stage Journey flow', () => {
   requireAll(
     screen,
     [
-      'enum PilotN1CompositePage',
-      'resolvePilotN1CompositePage',
-      "_experience.id == 'beijing-summer-palace'",
-      '_wonderPage()',
+      'bool get _isSummerPalacePilot => false;',
+      '_storyPage()',
+      '_wordsPage()',
+      '_discoveryPage()',
       '_challengePage()',
-      '_expressPage()',
       '_memoryPage()',
-      '_pilotChallengeVisible',
-      '_pilotMemoryVisible',
+      '_completePage()',
     ],
     'Journey Screen',
   );
   requireAll(
     state,
     [
+      "static const int journeyLastStep = 5;",
+      "'故事',",
+      "'单词',",
+      "'发现',",
+      "'挑战',",
+      "'回忆',",
+      "'完成',",
+      'return journeyStepLabels[_safeJourneyStep(step)];',
       'enum JourneyCompositeSubstage',
       'summerPalaceJourneyFlowVersion = 2',
       'journeyChallengeAttemptId',
       'guideFeedbackInputIdentity',
       'writingFeedbackInputIdentity',
     ],
-    'Pilot N1 state identity',
+    'Stable Journey flow and compatibility state',
   );
+  assert.ok(!screen.includes("_experience.id == 'beijing-summer-palace'"));
+  assert.ok(!state.includes("return substage == JourneyCompositeSubstage.challenge ? '挑战' : '思考';"));
+  assert.ok(!state.includes("return substage == JourneyCompositeSubstage.memory ? '回忆' : '表达';"));
   assert.ok(!screen.includes('AppState.journeyLastStep ='));
 });
 
