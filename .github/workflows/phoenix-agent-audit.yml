@@ -229,6 +229,7 @@ jobs:
             echo 'Trusted Audit: BOOTSTRAP_NOT_ACTIVE_UNTIL_MERGE' >> "$GITHUB_STEP_SUMMARY"
           fi
       - name: Prepare explicit audit mode and previous Evidence
+        id: previous
         if: steps.bootstrap.outputs.active == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -243,19 +244,64 @@ jobs:
               ;;
             REAUDIT)
               [[ "${ARTIFACT_ID:-}" =~ ^[1-9][0-9]*$ ]]
-              gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID" > artifact.json
-              [[ "$(node -e "const x=require('./artifact.json');process.stdout.write(String(Boolean(x.expired)))")" == 'false' ]]
+              ARTIFACT_ID="$ARTIFACT_ID" \
+              CURRENT_BASE_BRANCH="${{ steps.live.outputs.base_branch }}" \
+              CURRENT_BASE_SHA="${{ steps.live.outputs.base_sha }}" \
+              CURRENT_HEAD_BRANCH="${{ steps.live.outputs.head_branch }}" \
+              CURRENT_HEAD_SHA="${{ steps.live.outputs.head_sha }}" \
+              PR_NUMBER="${{ steps.pr.outputs.number }}" \
+              node --input-type=module <<'NODE'
+              import { writeFileSync, appendFileSync } from 'node:fs';
+              import { fetchAuthoritativePreviousEvidenceProvenance } from './trusted/tools/phoenix_agent_runner/src/identity-freshness.mjs';
+              import { createTrustedGithubRequest } from './trusted/tools/phoenix_agent_runner/src/trusted-cli.mjs';
+              const policy = JSON.parse(await (await import('node:fs/promises')).readFile(
+                './trusted/ai/development/policies/evidence_policy.json', 'utf8'));
+              const repository = process.env.GITHUB_REPOSITORY;
+              const request = createTrustedGithubRequest({
+                repository,
+                token: process.env.GH_TOKEN,
+                apiUrl: process.env.GITHUB_API_URL,
+              });
+              const provenance = await fetchAuthoritativePreviousEvidenceProvenance({
+                repository,
+                prNumber: Number(process.env.PR_NUMBER),
+                currentIdentity: {
+                  base_branch: process.env.CURRENT_BASE_BRANCH,
+                  base_sha: process.env.CURRENT_BASE_SHA,
+                  head_branch: process.env.CURRENT_HEAD_BRANCH,
+                  candidate_sha: process.env.CURRENT_HEAD_SHA,
+                },
+                artifactId: process.env.ARTIFACT_ID,
+                policy,
+                request,
+              });
+              writeFileSync('previous-provenance.json', JSON.stringify(provenance, null, 2));
+              appendFileSync(process.env.GITHUB_OUTPUT, 'artifact_id=' + provenance.artifact_id + '\n');
+              appendFileSync(process.env.GITHUB_OUTPUT, 'artifact_digest=' + provenance.artifact_digest + '\n');
+              NODE
+              ARTIFACT_DIGEST="$(node -e "const x=require('./previous-provenance.json');process.stdout.write(x.artifact_digest)")"
               curl --fail-with-body --silent --show-error --location \
                 -H "Authorization: Bearer $GH_TOKEN" \
                 -H 'Accept: application/vnd.github+json' \
                 -H 'X-GitHub-Api-Version: 2022-11-28' \
                 "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID/zip" \
                 -o previous.zip
+              DOWNLOADED_DIGEST="sha256:$(sha256sum previous.zip | awk '{print $1}')"
+              [[ "$DOWNLOADED_DIGEST" == "$ARTIFACT_DIGEST" ]]
               mkdir previous
               unzip -q previous.zip -d previous
-              REPORT="$(find previous -type f -name audit-report.json -print -quit)"
-              [[ -n "$REPORT" ]]
-              node -e 'const fs=require("node:fs");const r=JSON.parse(fs.readFileSync(process.argv[1]));fs.writeFileSync("previous-evidence.json",JSON.stringify(r.evidence_manifest||r,null,2))' "$REPORT"
+              mapfile -t REPORTS < <(find previous -type f -name audit-report.json -print)
+              [[ "${#REPORTS[@]}" -eq 1 ]]
+              DOWNLOADED_DIGEST="$DOWNLOADED_DIGEST" node - "${REPORTS[0]}" <<'NODE'
+              const fs = require('node:fs');
+              const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+              const provenance = JSON.parse(fs.readFileSync('previous-provenance.json', 'utf8'));
+              provenance.downloaded_artifact_digest = process.env.DOWNLOADED_DIGEST;
+              fs.writeFileSync('previous-evidence.json', JSON.stringify({
+                evidence_manifest: report.evidence_manifest || report,
+                provenance,
+              }, null, 2));
+              NODE
               ;;
             *) exit 2 ;;
           esac
@@ -288,7 +334,9 @@ jobs:
         run: |
           set -euo pipefail
           PREVIOUS_ARGS=()
-          [[ "$AUDIT_MODE" != 'REAUDIT' ]] || PREVIOUS_ARGS=(--previous-evidence previous-evidence.json)
+          if [[ "$AUDIT_MODE" == 'REAUDIT' ]]; then
+            PREVIOUS_ARGS=(--previous-evidence previous-evidence.json)
+          fi
           node trusted/tools/phoenix_agent_runner/src/trusted-cli.mjs \
             --trusted trusted \
             --candidate candidate \

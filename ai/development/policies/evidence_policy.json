@@ -1,6 +1,6 @@
 {
   "policy_id": "phoenix-development-agent-evidence-policy",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "authority_class": "TRUSTED_BASE_EVIDENCE_TYPE_INVENTORY",
   "evidence_types": [
     "repository",
@@ -13,63 +13,23 @@
     "founder"
   ],
   "type_specific_authority": {
-    "repository": {
-      "producer": "live_github_pull_request_identity",
-      "terminal_proof_required": true
-    },
-    "commit": {
-      "producer": "live_github_commit_and_candidate_git_identity",
-      "terminal_proof_required": true
-    },
-    "diff": {
-      "producer": "trusted_git_diff",
-      "terminal_proof_required": true
-    },
-    "changed_paths": {
-      "producer": "trusted_git_diff_name_only",
-      "terminal_proof_required": true
-    },
-    "test": {
-      "producer": "trusted_terminal_node_test_result",
-      "terminal_proof_required": true
-    },
-    "ci": {
-      "producer": "trusted_github_api_workflow_or_check_record",
-      "terminal_proof_required": true
-    },
-    "workflow": {
-      "producer": "trusted_github_actions_run_identity",
-      "terminal_proof_required": true
-    },
-    "founder": {
-      "producer": "trusted_github_api_founder_authorization_record",
-      "terminal_proof_required": true
-    }
+    "repository": {"producer": "live_github_pull_request_identity", "terminal_proof_required": true},
+    "commit": {"producer": "live_github_commit_and_candidate_git_identity", "terminal_proof_required": true},
+    "diff": {"producer": "trusted_git_diff", "terminal_proof_required": true},
+    "changed_paths": {"producer": "trusted_git_diff_name_only", "terminal_proof_required": true},
+    "test": {"producer": "trusted_terminal_node_test_result", "terminal_proof_required": true},
+    "ci": {"producer": "trusted_github_api_workflow_or_check_record", "terminal_proof_required": true},
+    "workflow": {"producer": "trusted_github_actions_run_identity", "terminal_proof_required": true},
+    "founder": {"producer": "trusted_github_api_founder_authorization_record", "terminal_proof_required": true}
   },
   "required_fields": [
-    "evidence_id",
-    "evidence_type",
-    "source",
-    "command_or_path",
-    "candidate_sha",
-    "produced_at",
-    "result",
-    "evidence_level",
-    "limitations"
+    "evidence_id", "evidence_type", "source", "command_or_path", "candidate_sha",
+    "produced_at", "result", "evidence_level", "limitations"
   ],
   "binding_fields": [
-    "base_sha",
-    "task_contract_digest",
-    "governance_body_digest",
-    "workflow_run_id",
-    "run_attempt"
+    "base_sha", "task_contract_digest", "governance_body_digest", "workflow_run_id", "run_attempt"
   ],
-  "evidence_levels": [
-    "VERIFIED",
-    "PARTIALLY_VERIFIED",
-    "UNVERIFIED",
-    "CONTRADICTORY"
-  ],
+  "evidence_levels": ["VERIFIED", "PARTIALLY_VERIFIED", "UNVERIFIED", "CONTRADICTORY"],
   "binding_rules": {
     "candidate_sha_must_equal_current_head_for_pass": true,
     "old_candidate_evidence_may_be_historical_only": true,
@@ -81,6 +41,8 @@
     "unknown_evidence_type_is_blocked": true,
     "fresh_audit_must_not_accept_previous_evidence": true,
     "reaudit_requires_previous_evidence_identity": true,
+    "reaudit_previous_run_is_distinct_from_current_run": true,
+    "reaudit_artifact_digest_must_match_downloaded_archive": true,
     "self_asserted_ci_json_is_forbidden": true,
     "self_asserted_founder_json_is_forbidden": true
   },
@@ -89,39 +51,27 @@
     "candidate_token_permitted": false,
     "candidate_api_endpoint_permitted": false,
     "http_failure_behavior": "FAIL_CLOSED",
+    "reaudit_artifact": {
+      "name_pattern": "^phoenix-trusted-audit-[1-9][0-9]*-[1-9][0-9]*$",
+      "workflow_id": 327680704,
+      "workflow_path": ".github/workflows/phoenix-agent-audit.yml",
+      "allowed_events": ["pull_request_target", "workflow_dispatch"],
+      "allowed_conclusions": ["success", "failure"]
+    },
     "ci": {
-      "accepted_references": [
-        "WORKFLOW_RUN_ID",
-        "CHECK_RUN_ID"
-      ],
-      "allowed_workflow_names": [
-        "Phoenix Agent Audit"
-      ],
-      "allowed_check_names": [
-        "Phoenix Agent Bootstrap Source Tests",
-        "Trusted read-only governance audit"
-      ],
-      "allowed_events": [
-        "pull_request",
-        "pull_request_target",
-        "workflow_dispatch"
-      ],
+      "accepted_references": ["WORKFLOW_RUN_ID", "CHECK_RUN_ID"],
+      "allowed_workflow_names": ["Phoenix Agent Audit"],
+      "allowed_check_names": ["Phoenix Agent Bootstrap Source Tests", "Trusted read-only governance audit"],
+      "allowed_events": ["pull_request", "pull_request_target", "workflow_dispatch"],
       "terminal_status": "completed",
       "success_conclusion": "success",
       "exact_head_required": true,
       "exact_run_attempt_required": true
     },
     "founder": {
-      "accepted_references": [
-        "PULL_REQUEST_REVIEW_ID",
-        "ISSUE_OR_PR_COMMENT_ID"
-      ],
-      "allowed_github_identities": [
-        "dhv5bnmfmh-cmyk"
-      ],
-      "allowed_author_associations": [
-        "OWNER"
-      ],
+      "accepted_references": ["PULL_REQUEST_REVIEW_ID", "ISSUE_OR_PR_COMMENT_ID"],
+      "allowed_github_identities": ["dhv5bnmfmh-cmyk"],
+      "allowed_author_associations": ["OWNER"],
       "schema": "ai/development/schemas/founder_authorization.schema.json",
       "exact_repository_required": true,
       "exact_pr_required": true,
