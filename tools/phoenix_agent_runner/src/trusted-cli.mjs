@@ -10,6 +10,9 @@ import {
   metadataFromPullRequestEvent,
   assertCanonicalFreshness,
   assertTaskContractIdentity,
+  assertTrustedSourceIdentity,
+  assertAuditEvidenceMode,
+  normalizeAuditMode,
   sha256Text,
   canonicalJson,
 } from './identity-freshness.mjs';
@@ -19,6 +22,9 @@ import {
   produceTrustedEvidenceEntries,
   validateEvidenceManifest,
   normalizeRequiredEvidenceTypes,
+  assertNoSelfAssertedEvidence,
+  fetchAuthoritativeCiEvidence,
+  fetchAuthoritativeFounderEvidence,
 } from './evidence-authority.mjs';
 import {
   assertPhaseAActions,
@@ -30,14 +36,17 @@ import {
   assertTrustedSchemaInventory,
 } from './rule-authority.mjs';
 import { validateObject } from './schema-validator.mjs';
-import {
-  scanCandidateRepository,
-  assertSafeText,
-} from './secret-scanner.mjs';
+import { scanCandidateRepository, assertSafeText } from './secret-scanner.mjs';
 
 const ZERO_SHA = '0'.repeat(40);
 const ZERO_DIGEST = '0'.repeat(64);
 const STABLE_SHA = '5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977';
+
+function fail(code) {
+  const error = new Error(code);
+  error.code = code;
+  throw error;
+}
 
 function arg(argv, name, fallback = '') {
   const index = argv.indexOf(`--${name}`);
@@ -56,17 +65,6 @@ function git(repo, args) {
   }).trim();
 }
 
-function parseOptionalJson(value) {
-  if (!value) return null;
-  try {
-    return JSON.parse(value);
-  } catch {
-    const error = new Error('TRUSTED_PROOF_JSON_MALFORMED');
-    error.code = 'TRUSTED_PROOF_JSON_MALFORMED';
-    throw error;
-  }
-}
-
 function terminalTestProof({ trusted, candidateSha, runTests = execFileSync }) {
   let output = '';
   try {
@@ -76,10 +74,8 @@ function terminalTestProof({ trusted, candidateSha, runTests = execFileSync }) {
       stdio: ['ignore', 'pipe', 'pipe'],
       maxBuffer: 64 * 1024 * 1024,
     });
-  } catch (error) {
-    const failure = new Error('TRUSTED_TEST_EVIDENCE_FAILED');
-    failure.code = 'TRUSTED_TEST_EVIDENCE_FAILED';
-    throw failure;
+  } catch {
+    fail('TRUSTED_TEST_EVIDENCE_FAILED');
   }
   const count = (label) => {
     const matches = [...String(output).matchAll(new RegExp(`^# ${label} (\\d+)$`, 'gmu'))];
@@ -90,9 +86,7 @@ function terminalTestProof({ trusted, candidateSha, runTests = execFileSync }) {
   const failed = count('fail');
   const skipped = count('skipped');
   if (![total, passed, failed, skipped].every(Number.isInteger)) {
-    const error = new Error('TRUSTED_TEST_EVIDENCE_MALFORMED');
-    error.code = 'TRUSTED_TEST_EVIDENCE_MALFORMED';
-    throw error;
+    fail('TRUSTED_TEST_EVIDENCE_MALFORMED');
   }
   return {
     status: 'completed',
@@ -178,14 +172,14 @@ function errorFinding(identity, code) {
     severity: 'P1',
     result: 'BLOCKED',
     evidence_level: 'VERIFIED',
-    expected: 'Fresh, schema-valid trusted evidence bound to the live pull request identity.',
+    expected: 'Fresh, schema-valid trusted evidence bound to live GitHub identity.',
     actual: `Trusted audit stopped with ${code}.`,
     exact_paths: [],
     candidate_sha: identity.candidate_sha,
     stable_sha: STABLE_SHA,
     evidence: ['trusted audit error boundary'],
     root_cause: code,
-    required_action: 'Generate fresh trusted evidence and perform an independent source re-audit.',
+    required_action: 'Generate fresh authoritative evidence and perform an independent source re-audit.',
     proposed_scope: [],
     auto_fix_permitted: false,
     founder_authorization_required: false,
@@ -241,6 +235,7 @@ function writeOutput({ output, report }) {
     '- AI Review Result: NOT_RUN',
     '- Founder Governance: NOT_APPROVED',
     `- Candidate SHA: ${report.candidate_sha}`,
+    `- Trusted Source SHA: ${report.trusted_runner_sha}`,
     `- Workflow Run: ${report.workflow_run_id}`,
     `- Run Attempt: ${report.run_attempt}`,
     `- Final Agent Decision: ${report.final_agent_decision}`,
@@ -250,11 +245,83 @@ function writeOutput({ output, report }) {
   writeFileSync(join(output, 'audit-summary.md'), summary, 'utf8');
 }
 
+function trustedApiBase(env) {
+  const api = String(env.GITHUB_API_URL || 'https://api.github.com').replace(/\/$/u, '');
+  const server = String(env.GITHUB_SERVER_URL || 'https://github.com').replace(/\/$/u, '');
+  const allowed = new Set(['https://api.github.com', `${server}/api/v3`]);
+  if (!allowed.has(api)) fail('TRUSTED_GITHUB_API_ENDPOINT_INVALID');
+  return api;
+}
+
+export function createTrustedGithubRequest({
+  repository,
+  token,
+  apiUrl,
+  fetchImpl = fetch,
+}) {
+  if (!token) fail('TRUSTED_GITHUB_TOKEN_MISSING');
+  const prefix = `/repos/${repository}/`;
+  return async (path) => {
+    if (!String(path).startsWith(prefix)) fail('TRUSTED_GITHUB_API_PATH_INVALID');
+    let response;
+    try {
+      response = await fetchImpl(`${apiUrl}${path}`, {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${token}`,
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+      });
+    } catch {
+      fail('TRUSTED_GITHUB_API_REQUEST_FAILED');
+    }
+    if (!response?.ok) fail(`TRUSTED_GITHUB_API_REQUEST_FAILED:${response?.status ?? 'UNKNOWN'}`);
+    try {
+      return await response.json();
+    } catch {
+      fail('TRUSTED_GITHUB_API_RESPONSE_MALFORMED');
+    }
+  };
+}
+
+function referenceIds(env) {
+  return {
+    ci: {
+      workflow_run_id: String(env.PHOENIX_CI_WORKFLOW_RUN_ID ?? '').trim() || null,
+      check_run_id: String(env.PHOENIX_CI_CHECK_RUN_ID ?? '').trim() || null,
+    },
+    founder: {
+      review_id: String(env.PHOENIX_FOUNDER_REVIEW_ID ?? '').trim() || null,
+      comment_id: String(env.PHOENIX_FOUNDER_COMMENT_ID ?? '').trim() || null,
+    },
+  };
+}
+
+export function requiredFounderAction(taskContract) {
+  const actions = new Set(taskContract?.requested_actions ?? []);
+  const mappings = [
+    ['MERGE', 'MERGE_AUTHORIZATION'],
+    ['READY', 'READY_AUTHORIZATION'],
+    ['DELETE_PREVIEW', 'PREVIEW_DELETION_AUTHORIZATION'],
+    ['START_NEXT_PHASE', 'NEXT_PHASE_AUTHORIZATION'],
+  ];
+  const required = mappings.filter(([action]) => actions.has(action)).map(([, type]) => type);
+  if (required.length > 1) fail('FOUNDER_ACTION_AMBIGUOUS');
+  return required[0] ?? 'GOVERNANCE_PASS';
+}
+
+function finalDecisionForError(code) {
+  if (code === 'EVIDENCE_STALE_REAUDIT_REQUIRED'
+      || code === 'TRUSTED_SOURCE_IDENTITY_MISMATCH') return code;
+  return 'TRUSTED_EVIDENCE_BLOCKED_REAUDIT_REQUIRED';
+}
+
 export async function runTrustedAudit({
   argv = process.argv.slice(2),
   env = process.env,
   fetchLive = fetchLivePullRequest,
   runTests = execFileSync,
+  requestGithub = null,
 } = {}) {
   const trusted = resolve(arg(argv, 'trusted', 'trusted'));
   const candidate = resolve(arg(argv, 'candidate', 'candidate'));
@@ -267,7 +334,6 @@ export async function runTrustedAudit({
   const runAttempt = Number(env.GITHUB_RUN_ATTEMPT);
   const eventType = env.GITHUB_EVENT_NAME || '';
   let schemas = {};
-  let schemaInventory = null;
   let schemaDigest = ZERO_DIGEST;
   let ruleDigest = ZERO_DIGEST;
   let live = null;
@@ -275,7 +341,7 @@ export async function runTrustedAudit({
   let trustedRunnerSha = ZERO_SHA;
 
   try {
-    schemaInventory = load(join(
+    const schemaInventory = load(join(
       trusted,
       'ai/development/policies/trusted_schema_inventory.json',
     ));
@@ -288,11 +354,15 @@ export async function runTrustedAudit({
       'ai/development/policies/evidence_policy.json',
     ));
 
+    const auditMode = normalizeAuditMode(arg(argv, 'audit-mode'));
+    if (arg(argv, 'previous-identity')) fail('LEGACY_PREVIOUS_IDENTITY_FORBIDDEN');
+
+    const apiUrl = trustedApiBase(env);
     live = await fetchLive({
       repository,
       prNumber,
       token: env.GITHUB_TOKEN,
-      apiUrl: env.GITHUB_API_URL,
+      apiUrl,
     });
     contract = extractTaskContract(live.body);
     validateObject(
@@ -330,23 +400,31 @@ export async function runTrustedAudit({
 
     if (candidateSha !== currentIdentity.candidate_sha
         || candidateTree !== currentIdentity.candidate_tree) {
-      const error = new Error('EVIDENCE_STALE_REAUDIT_REQUIRED');
-      error.code = 'EVIDENCE_STALE_REAUDIT_REQUIRED';
-      error.stale_fields = [
+      const stale = [
         ...(candidateSha !== currentIdentity.candidate_sha ? ['candidate_sha'] : []),
         ...(candidateTree !== currentIdentity.candidate_tree ? ['candidate_tree'] : []),
       ];
+      const error = new Error('EVIDENCE_STALE_REAUDIT_REQUIRED');
+      error.code = 'EVIDENCE_STALE_REAUDIT_REQUIRED';
+      error.stale_fields = stale;
       throw error;
     }
 
-    // Canonical Task Contract and live branch assertion. This must remain
-    // before every type-specific PASS producer.
+    trustedRunnerSha = git(trusted, ['rev-parse', 'HEAD']);
+    assertTrustedSourceIdentity({
+      observedTrustedCheckoutSha: trustedRunnerSha,
+      declaredTrustedCheckoutSha: arg(argv, 'trusted-checkout-sha'),
+      authorizedTrustedSourceSha: arg(argv, 'trusted-source-sha'),
+      liveBaseSha: currentIdentity.base_sha,
+    });
+
     assertTaskContractIdentity(contract, currentIdentity, prNumber);
 
-    const previousIdentityPath = arg(argv, 'previous-identity');
-    if (previousIdentityPath) {
-      assertCanonicalFreshness(load(resolve(previousIdentityPath)), currentIdentity);
-    }
+    const previousEvidencePath = arg(argv, 'previous-evidence');
+    const previousEvidence = previousEvidencePath
+      ? load(resolve(previousEvidencePath))
+      : null;
+    assertAuditEvidenceMode({ auditMode, previousEvidence, currentIdentity });
 
     assertPhaseAActions(contract.requested_actions);
 
@@ -368,22 +446,16 @@ export async function runTrustedAudit({
       'execution_principal',
     );
 
-    const ruleRegistry = load(join(
-      trusted,
-      'ai/development/policies/rule_registry.json',
-    ));
+    const ruleRegistry = load(join(trusted, 'ai/development/policies/rule_registry.json'));
     const ruleInventory = load(join(
       trusted,
       'ai/development/policies/trusted_rule_inventory.json',
     ));
     ruleDigest = assertMandatoryRuleInventory(ruleRegistry, ruleInventory);
 
-    const changedPathsCommand = [
+    const changedPaths = git(candidate, [
       'diff', '--name-only', live.base_sha, live.head_sha,
-    ];
-    const changedPaths = git(candidate, changedPathsCommand)
-      .split(/\r?\n/u)
-      .filter(Boolean);
+    ]).split(/\r?\n/u).filter(Boolean);
     const scan = scanCandidateRepository({
       repo: candidate,
       baseSha: live.base_sha,
@@ -395,66 +467,73 @@ export async function runTrustedAudit({
     const requiredTypes = normalizeRequiredEvidenceTypes(contract.required_evidence);
     const proofs = {
       repository: {
-        status: 'completed',
-        result: 'PASS',
-        repository,
+        status: 'completed', result: 'PASS', repository,
         source: 'live-github-pr',
         command_or_path: `GET /repos/${repository}/pulls/${prNumber}`,
         limitations: [],
       },
       commit: {
-        status: 'completed',
-        result: 'PASS',
-        base_sha: live.base_sha,
-        candidate_sha: live.head_sha,
-        candidate_tree: live.head_tree,
+        status: 'completed', result: 'PASS', base_sha: live.base_sha,
+        candidate_sha: live.head_sha, candidate_tree: live.head_tree,
         source: 'live-github-commit-and-candidate-git',
-        command_or_path: `git rev-parse HEAD && git rev-parse HEAD^{tree}`,
+        command_or_path: 'git rev-parse HEAD && git rev-parse HEAD^{tree}',
         limitations: [],
       },
       diff: {
-        status: 'completed',
-        result: scan.result,
-        base_sha: live.base_sha,
-        candidate_sha: live.head_sha,
-        source: 'trusted-git-diff',
+        status: 'completed', result: scan.result, base_sha: live.base_sha,
+        candidate_sha: live.head_sha, source: 'trusted-git-diff',
         command_or_path: `git diff ${live.base_sha} ${live.head_sha}`,
         limitations: [],
       },
       changed_paths: {
-        status: 'completed',
-        result: 'PASS',
-        candidate_sha: live.head_sha,
-        paths: changedPaths,
-        source: 'trusted-git-diff-name-only',
+        status: 'completed', result: 'PASS', candidate_sha: live.head_sha,
+        paths: changedPaths, source: 'trusted-git-diff-name-only',
         command_or_path: `git diff --name-only ${live.base_sha} ${live.head_sha}`,
         limitations: [],
       },
       workflow: {
-        status: 'completed',
-        result: 'PASS',
-        candidate_sha: live.head_sha,
-        workflow_run_id: String(runId),
-        run_attempt: Number(runAttempt),
+        status: 'completed', result: 'PASS', candidate_sha: live.head_sha,
+        workflow_run_id: String(runId), run_attempt: Number(runAttempt),
         source: 'trusted-github-actions-run',
         command_or_path: '.github/workflows/phoenix-agent-audit.yml',
         limitations: [],
       },
     };
     if (requiredTypes.includes('test')) {
-      proofs.test = terminalTestProof({
-        trusted,
-        candidateSha: live.head_sha,
-        runTests,
+      proofs.test = terminalTestProof({ trusted, candidateSha: live.head_sha, runTests });
+    }
+
+    assertNoSelfAssertedEvidence(env);
+    const references = referenceIds(env);
+    const githubRequest = requestGithub ?? createTrustedGithubRequest({
+      repository,
+      token: env.GITHUB_TOKEN,
+      apiUrl,
+    });
+    if (requiredTypes.includes('ci')) {
+      proofs.ci = await fetchAuthoritativeCiEvidence({
+        repository,
+        identity: currentIdentity,
+        reference: references.ci,
+        policy: evidencePolicy,
+        request: githubRequest,
       });
     }
-    const ciProof = parseOptionalJson(env.PHOENIX_CI_EVIDENCE_JSON);
-    if (ciProof) proofs.ci = ciProof;
-    const founderProof = parseOptionalJson(env.PHOENIX_FOUNDER_EVIDENCE_JSON);
-    if (founderProof) proofs.founder = founderProof;
+    if (requiredTypes.includes('founder')) {
+      proofs.founder = await fetchAuthoritativeFounderEvidence({
+        repository,
+        prNumber,
+        identity: currentIdentity,
+        reference: references.founder,
+        expectedAction: requiredFounderAction(contract),
+        policy: evidencePolicy,
+        founderSchema: schemas['ai/development/schemas/founder_authorization.schema.json'],
+        validateAuthorization: validateObject,
+        request: githubRequest,
+        now: new Date(producedAt),
+      });
+    }
 
-    // No trusted PASS Evidence exists before the canonical freshness, Task
-    // Contract, principal, rule, schema, diff, scan, and terminal-proof gates.
     const entries = produceTrustedEvidenceEntries({
       identity: currentIdentity,
       requiredTypes,
@@ -474,7 +553,6 @@ export async function runTrustedAudit({
       now: new Date(producedAt),
     });
 
-    trustedRunnerSha = git(trusted, ['rev-parse', 'HEAD']);
     const reportIdentity = {
       ...currentIdentity,
       freshness_status: 'PASS',
@@ -485,11 +563,7 @@ export async function runTrustedAudit({
     };
     const findings = [];
     const report = {
-      report_id: reportId({
-        identity: reportIdentity,
-        trustedRunnerSha,
-        result: 'PASS',
-      }),
+      report_id: reportId({ identity: reportIdentity, trustedRunnerSha, result: 'PASS' }),
       repository,
       pr_number: prNumber,
       base_sha: live.base_sha,
@@ -524,16 +598,14 @@ export async function runTrustedAudit({
       ruleDigest,
       schemaDigest,
     });
-    try {
-      trustedRunnerSha = git(trusted, ['rev-parse', 'HEAD']);
-    } catch {
-      trustedRunnerSha = ZERO_SHA;
+    if (trustedRunnerSha === ZERO_SHA) {
+      try {
+        trustedRunnerSha = git(trusted, ['rev-parse', 'HEAD']);
+      } catch {
+        trustedRunnerSha = ZERO_SHA;
+      }
     }
-    const manifest = createBlockedEvidenceManifest({
-      identity,
-      producedAt,
-      code: safe.code,
-    });
+    const manifest = createBlockedEvidenceManifest({ identity, producedAt, code: safe.code });
     const findings = [errorFinding(identity, safe.code)];
     const report = {
       report_id: reportId({
@@ -553,19 +625,15 @@ export async function runTrustedAudit({
       deterministic_result: 'BLOCKED',
       ai_review_result: 'NOT_RUN',
       founder_gate_result: 'NOT_APPROVED',
-      final_agent_decision: safe.code === 'EVIDENCE_STALE_REAUDIT_REQUIRED'
-        ? 'EVIDENCE_STALE_REAUDIT_REQUIRED'
-        : 'TRUSTED_EVIDENCE_BLOCKED_REAUDIT_REQUIRED',
+      final_agent_decision: finalDecisionForError(safe.code),
       identity,
       evidence_manifest: manifest,
       findings,
       produced_at: producedAt,
       error_code: safe.code,
-      error_details: safe.stale_fields.length
-        ? { stale_fields: safe.stale_fields }
-        : {},
+      error_details: safe.stale_fields.length ? { stale_fields: safe.stale_fields } : undefined,
     };
-    if (Object.keys(report.error_details).length === 0) delete report.error_details;
+    if (report.error_details === undefined) delete report.error_details;
     validateCompleteOutput({ schemas, manifest, findings, report });
     writeOutput({ output, report });
     return { report, exitCode: 1 };
@@ -578,6 +646,4 @@ async function main() {
 }
 
 const invokedPath = process.argv[1] ? pathToFileURL(resolve(process.argv[1])).href : '';
-if (import.meta.url === invokedPath) {
-  await main();
-}
+if (import.meta.url === invokedPath) await main();
