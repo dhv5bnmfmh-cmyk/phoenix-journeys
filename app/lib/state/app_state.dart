@@ -203,14 +203,6 @@ class AppState extends ChangeNotifier {
   String get beijingJourneyFurthestStepLabel => journeyFurthestStepLabel;
 
   String _journeyLabelFor(int step, JourneyCompositeSubstage substage) {
-    if (activeJourneyId == 'beijing-summer-palace') {
-      if (step == 3) {
-        return substage == JourneyCompositeSubstage.challenge ? '挑战' : '思考';
-      }
-      if (step == 4) {
-        return substage == JourneyCompositeSubstage.memory ? '回忆' : '表达';
-      }
-    }
     return journeyStepLabels[_safeJourneyStep(step)];
   }
 
