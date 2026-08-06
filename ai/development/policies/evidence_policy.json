@@ -1,17 +1,51 @@
 {
   "policy_id": "phoenix-development-agent-evidence-policy",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "authority_class": "TRUSTED_BASE_EVIDENCE_TYPE_INVENTORY",
   "evidence_types": [
     "repository",
     "commit",
     "diff",
+    "changed_paths",
     "test",
     "ci",
-    "preview",
-    "mobile",
-    "ai_review",
+    "workflow",
     "founder"
   ],
+  "type_specific_authority": {
+    "repository": {
+      "producer": "live_github_pull_request_identity",
+      "terminal_proof_required": true
+    },
+    "commit": {
+      "producer": "live_github_commit_and_candidate_git_identity",
+      "terminal_proof_required": true
+    },
+    "diff": {
+      "producer": "trusted_git_diff",
+      "terminal_proof_required": true
+    },
+    "changed_paths": {
+      "producer": "trusted_git_diff_name_only",
+      "terminal_proof_required": true
+    },
+    "test": {
+      "producer": "trusted_terminal_node_test_result",
+      "terminal_proof_required": true
+    },
+    "ci": {
+      "producer": "trusted_github_terminal_check_result",
+      "terminal_proof_required": true
+    },
+    "workflow": {
+      "producer": "trusted_github_actions_run_identity",
+      "terminal_proof_required": true
+    },
+    "founder": {
+      "producer": "trusted_github_founder_record",
+      "terminal_proof_required": true
+    }
+  },
   "required_fields": [
     "evidence_id",
     "evidence_type",
@@ -22,6 +56,13 @@
     "result",
     "evidence_level",
     "limitations"
+  ],
+  "binding_fields": [
+    "base_sha",
+    "task_contract_digest",
+    "governance_body_digest",
+    "workflow_run_id",
+    "run_attempt"
   ],
   "evidence_levels": [
     "VERIFIED",
@@ -35,7 +76,9 @@
     "queued_or_in_progress_is_not_success": true,
     "not_run_must_remain_not_run": true,
     "checkbox_is_not_evidence": true,
-    "preview_deployment_is_not_product_pass": true
+    "preview_deployment_is_not_product_pass": true,
+    "candidate_requested_type_does_not_create_evidence": true,
+    "unknown_evidence_type_is_blocked": true
   },
   "external_disclosure": {
     "default": "NOT_PERMITTED",

@@ -1,10 +1,609 @@
 {
-  "$schema":"https://json-schema.org/draft/2020-12/schema",
-  "$id":"https://phoenix.local/schemas/audit_report.schema.json",
-  "type":"object","additionalProperties":false,
-  "required":["report_id","repository","pr_number","base_sha","candidate_sha","candidate_tree","trusted_runner_sha","workflow_run_id","run_attempt","deterministic_result","ai_review_result","founder_gate_result","final_agent_decision","identity","evidence_manifest","findings","produced_at"],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phoenix.local/schemas/audit_report.schema.json",
+  "title": "Phoenix Trusted Audit Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_id",
+    "repository",
+    "pr_number",
+    "base_sha",
+    "candidate_sha",
+    "candidate_tree",
+    "trusted_runner_sha",
+    "workflow_run_id",
+    "run_attempt",
+    "deterministic_result",
+    "ai_review_result",
+    "founder_gate_result",
+    "final_agent_decision",
+    "identity",
+    "evidence_manifest",
+    "findings",
+    "produced_at"
+  ],
   "properties": {
-    "report_id":{"type":"string","minLength":1},"repository":{"type":"string","pattern":"^[^/]+/[^/]+$"},"pr_number":{"type":"integer","minimum":1},"base_sha":{"type":"string","pattern":"^[0-9a-f]{40}$"},"candidate_sha":{"type":"string","pattern":"^[0-9a-f]{40}$"},"candidate_tree":{"type":"string","pattern":"^[0-9a-f]{40}$"},"trusted_runner_sha":{"type":"string","pattern":"^[0-9a-f]{40}$"},"workflow_run_id":{"type":"string","minLength":1},"run_attempt":{"type":"integer","minimum":1},
-    "deterministic_result":{"enum":["PASS","BLOCKED","FAILURE"]},"ai_review_result":{"enum":["NOT_RUN","PASS","REQUIRES_REVISION"]},"founder_gate_result":{"enum":["REQUIRED","NOT_REQUIRED","APPROVED","NOT_APPROVED"]},"final_agent_decision":{"type":"string","minLength":1},"identity":{"type":"object"},"evidence_manifest":{"type":"object"},"findings":{"type":"array"},"produced_at":{"type":"string","format":"date-time"}
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[^/]+/[^/]+$"
+    },
+    "pr_number": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "base_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "candidate_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "candidate_tree": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "trusted_runner_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "workflow_run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_attempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "deterministic_result": {
+      "enum": [
+        "PASS",
+        "BLOCKED",
+        "FAILURE"
+      ]
+    },
+    "ai_review_result": {
+      "enum": [
+        "NOT_RUN",
+        "PASS",
+        "REQUIRES_REVISION"
+      ]
+    },
+    "founder_gate_result": {
+      "enum": [
+        "REQUIRED",
+        "NOT_REQUIRED",
+        "APPROVED",
+        "NOT_APPROVED"
+      ]
+    },
+    "final_agent_decision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "identity": {
+      "$ref": "#/$defs/identity"
+    },
+    "evidence_manifest": {
+      "$ref": "#/$defs/evidenceManifest"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "produced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "error_code": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_:.-]+$"
+    },
+    "error_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stale_fields": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "repository",
+              "pr_number",
+              "base_branch",
+              "base_sha",
+              "head_branch",
+              "candidate_sha",
+              "candidate_tree",
+              "task_contract_digest",
+              "governance_body_digest",
+              "workflow_run_id",
+              "run_attempt"
+            ]
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "pr_number",
+        "base_branch",
+        "base_sha",
+        "head_branch",
+        "candidate_sha",
+        "candidate_tree",
+        "task_contract_digest",
+        "governance_body_digest",
+        "workflow_run_id",
+        "run_attempt",
+        "event_type",
+        "produced_at",
+        "state",
+        "draft",
+        "freshness_status",
+        "rule_inventory_digest",
+        "schema_inventory_digest",
+        "secret_scan",
+        "candidate_gate_claims"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[^/]+/[^/]+$"
+        },
+        "pr_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "base_branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "head_branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "candidate_tree": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "task_contract_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "governance_body_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "workflow_run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_attempt": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "event_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "produced_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "state": {
+          "enum": [
+            "open",
+            "closed",
+            "unknown"
+          ]
+        },
+        "draft": {
+          "type": "boolean"
+        },
+        "freshness_status": {
+          "enum": [
+            "PASS",
+            "BLOCKED"
+          ]
+        },
+        "rule_inventory_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "schema_inventory_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "secret_scan": {
+          "enum": [
+            "PASS",
+            "BLOCKED",
+            "NOT_RUN"
+          ]
+        },
+        "candidate_gate_claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "value",
+              "trust"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "type": "string",
+                "enum": [
+                  "PASS",
+                  "PRESENT",
+                  "APPROVED"
+                ]
+              },
+              "trust": {
+                "const": "UNTRUSTED_CANDIDATE_CLAIM"
+              }
+            }
+          }
+        }
+      }
+    },
+    "evidenceEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id",
+        "evidence_type",
+        "source",
+        "command_or_path",
+        "candidate_sha",
+        "produced_at",
+        "result",
+        "evidence_level",
+        "limitations",
+        "base_sha",
+        "task_contract_digest",
+        "governance_body_digest",
+        "workflow_run_id",
+        "run_attempt"
+      ],
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_type": {
+          "enum": [
+            "repository",
+            "commit",
+            "diff",
+            "changed_paths",
+            "test",
+            "ci",
+            "workflow",
+            "founder"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command_or_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "produced_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "result": {
+          "enum": [
+            "PASS",
+            "BLOCKED",
+            "FAILURE",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "evidence_level": {
+          "enum": [
+            "VERIFIED",
+            "PARTIALLY_VERIFIED",
+            "UNVERIFIED",
+            "CONTRADICTORY"
+          ]
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "base_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "task_contract_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "governance_body_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "workflow_run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_attempt": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "evidenceManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest_version",
+        "trust_class",
+        "repository",
+        "pr_number",
+        "base_branch",
+        "base_sha",
+        "head_branch",
+        "candidate_sha",
+        "candidate_tree",
+        "task_contract_digest",
+        "governance_body_digest",
+        "workflow_run_id",
+        "run_attempt",
+        "produced_at",
+        "required_evidence_types",
+        "evidence"
+      ],
+      "properties": {
+        "manifest_version": {
+          "const": "2.1.0"
+        },
+        "trust_class": {
+          "const": "TRUSTED_RUNNER_GENERATED"
+        },
+        "repository": {
+          "type": "string",
+          "pattern": "^[^/]+/[^/]+$"
+        },
+        "pr_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "base_branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "head_branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "candidate_tree": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "task_contract_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "governance_body_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "workflow_run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_attempt": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "produced_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "required_evidence_types": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "repository",
+              "commit",
+              "diff",
+              "changed_paths",
+              "test",
+              "ci",
+              "workflow",
+              "founder"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/evidenceEntry"
+          }
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "finding_id",
+        "rule_id",
+        "title",
+        "area",
+        "severity",
+        "result",
+        "evidence_level",
+        "expected",
+        "actual",
+        "exact_paths",
+        "candidate_sha",
+        "stable_sha",
+        "evidence",
+        "root_cause",
+        "required_action",
+        "proposed_scope",
+        "auto_fix_permitted",
+        "founder_authorization_required",
+        "status"
+      ],
+      "properties": {
+        "finding_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_id": {
+          "type": "string",
+          "pattern": "^PDA-R\\d{3}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "area": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": [
+            "P0",
+            "P1",
+            "P2",
+            "P3"
+          ]
+        },
+        "result": {
+          "enum": [
+            "PASS",
+            "REQUIRES_REVISION",
+            "REGRESSION",
+            "BLOCKED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "evidence_level": {
+          "enum": [
+            "VERIFIED",
+            "PARTIALLY_VERIFIED",
+            "UNVERIFIED",
+            "CONTRADICTORY"
+          ]
+        },
+        "expected": {
+          "type": "string",
+          "minLength": 1
+        },
+        "actual": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exact_paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "candidate_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "stable_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "root_cause": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "proposed_scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "auto_fix_permitted": {
+          "type": "boolean"
+        },
+        "founder_authorization_required": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "OPEN",
+            "AUTHORIZATION_REQUIRED",
+            "AUTHORIZED",
+            "REMEDIATION_IN_PROGRESS",
+            "READY_FOR_REAUDIT",
+            "CLOSED",
+            "BLOCKED"
+          ]
+        }
+      }
+    }
   }
 }
