@@ -113,12 +113,94 @@ class PhoenixVocabularyService {
     ),
   };
 
+  static const PhoenixVocabularyExample _legacyForbiddenOpening =
+      PhoenixVocabularyExample(
+        chinese: '清晨，北京的天空刚刚泛白。你站在一扇巨大的红色宫门前，微风从护城河上轻轻吹来。',
+        pinyin:
+            'Qīngchén, Běijīng de tiānkōng gānggāng fànbái. Nǐ zhàn zài yí shàn jùdà de hóngsè gōngmén qián, wēifēng cóng hùchénghé shàng qīngqīng chuī lái.',
+        native:
+            'Sáng sớm, bầu trời Bắc Kinh vừa hửng sáng. Bạn đứng trước một cánh cổng cung điện màu đỏ khổng lồ, làn gió nhẹ thổi từ hào nước bao quanh thành.',
+        english:
+            'At dawn, the sky over Beijing is just beginning to brighten. You stand before a massive red palace gate as a light breeze drifts across the moat.',
+        usageNote: '基础目录兼容例句，保留原词所在的完整语境。',
+        isOfflineFallback: true,
+        provider: 'phoenix-preloaded-pack',
+        model: 'legacy-bundled',
+        qualityReviewed: true,
+        qualityScore: 100,
+      );
+
+  static const PhoenixVocabularyExample _legacyForbiddenArchitecture =
+      PhoenixVocabularyExample(
+        chinese: '厚重的宫门慢慢打开。红墙、金色屋顶和宽阔的石路，一点一点出现在你的眼前。',
+        pinyin:
+            'Hòuzhòng de gōngmén mànmàn dǎkāi. Hóngqiáng, jīnsè wūdǐng hé kuānkuò de shílù, yìdiǎn yìdiǎn chūxiàn zài nǐ de yǎnqián.',
+        native:
+            'Cánh cổng nặng nề từ từ mở ra. Những bức tường đỏ, mái vàng và con đường đá rộng lớn dần hiện ra trước mắt bạn.',
+        english:
+            'The heavy palace gate slowly opens. Red walls, golden roofs, and broad stone paths gradually appear before you.',
+        usageNote: '基础目录兼容例句，保留原词所在的完整语境。',
+        isOfflineFallback: true,
+        provider: 'phoenix-preloaded-pack',
+        model: 'legacy-bundled',
+        qualityReviewed: true,
+        qualityScore: 100,
+      );
+
+  static const PhoenixVocabularyExample _legacyForbiddenCourt =
+      PhoenixVocabularyExample(
+        chinese: '这里曾经是皇帝生活和处理国家事务的地方。今天，它被称为故宫，也被世界认识为紫禁城。',
+        pinyin:
+            'Zhèlǐ céngjīng shì huángdì shēnghuó hé chǔlǐ guójiā shìwù de dìfang. Jīntiān, tā bèi chēngwéi Gùgōng, yě bèi shìjiè rènshi wéi Zǐjìnchéng.',
+        native:
+            'Nơi đây từng là chỗ hoàng đế sinh sống và xử lý việc quốc gia. Ngày nay, nơi này được gọi là Cố Cung và được thế giới biết đến với tên Tử Cấm Thành.',
+        english:
+            'This was once where emperors lived and handled affairs of state. Today it is called the Palace Museum and is known around the world as the Forbidden City.',
+        usageNote: '基础目录兼容例句，保留原词所在的完整语境。',
+        isOfflineFallback: true,
+        provider: 'phoenix-preloaded-pack',
+        model: 'legacy-bundled',
+        qualityReviewed: true,
+        qualityScore: 100,
+      );
+
+  static const PhoenixVocabularyExample _legacyForbiddenMemory =
+      PhoenixVocabularyExample(
+        chinese: '你不是来背诵年代的。你是来看看，一座宫殿怎样保存一个国家数百年的记忆。',
+        pinyin:
+            'Nǐ bú shì lái bèisòng niándài de. Nǐ shì lái kànkan, yí zuò gōngdiàn zěnyàng bǎocún yí gè guójiā shù bǎi nián de jìyì.',
+        native:
+            'Bạn không đến đây để học thuộc niên đại. Bạn đến để xem một cung điện đã lưu giữ ký ức của một đất nước suốt hàng trăm năm như thế nào.',
+        english:
+            'You are not here to memorize dates. You are here to see how a palace can preserve a nation’s memories across centuries.',
+        usageNote: '基础目录兼容例句，保留原词所在的完整语境。',
+        isOfflineFallback: true,
+        provider: 'phoenix-preloaded-pack',
+        model: 'legacy-bundled',
+        qualityReviewed: true,
+        qualityScore: 100,
+      );
+
   final http.Client _client;
   final Uri endpoint;
   final Duration timeout;
 
   static PhoenixVocabularyExample? bundledExampleForWord(String word) {
-    return _bundledExamples[word];
+    final bundled = _bundledExamples[word];
+    if (bundled != null) return bundled;
+    if (const <String>{'清晨', '泛白', '宫门', '微风', '护城河'}.contains(word)) {
+      return _legacyForbiddenOpening;
+    }
+    if (const <String>{'厚重', '屋顶', '宽阔'}.contains(word)) {
+      return _legacyForbiddenArchitecture;
+    }
+    if (const <String>{'皇帝', '国家事务'}.contains(word)) {
+      return _legacyForbiddenCourt;
+    }
+    if (const <String>{'背诵', '年代', '保存', '记忆'}.contains(word)) {
+      return _legacyForbiddenMemory;
+    }
+    return null;
   }
 
   Future<PhoenixVocabularyExample> generateExample({
