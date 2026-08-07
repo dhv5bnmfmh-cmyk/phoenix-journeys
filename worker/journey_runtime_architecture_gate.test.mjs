@@ -37,6 +37,9 @@ const stageRuntime = section(
   'Widget _page({',
 );
 
+const directJourneyIdentityBranch =
+  /(?:if\s*\([^)]*(?:(?:journeyId|_experience\.id)\s*(?:==|!=)|(?:==|!=)\s*(?:journeyId|_experience\.id))[^)]*\)|switch\s*\(\s*(?:journeyId|_experience\.id)\s*\))/;
+
 test('normal Journeys use one shared Phoenix Story component', () => {
   assert.match(journey, /Widget _storyPage\(\) => _defaultStoryPage\(\);/);
 
@@ -49,11 +52,20 @@ test('normal Journeys use one shared Phoenix Story component', () => {
     'Journey-specific Story page renderers require Founder-approved architecture review',
   );
 
-  assert.doesNotMatch(storyPresentation, /_isForbiddenCity|forbiddenCityJourneyId/);
   assert.doesNotMatch(
     storyPresentation,
-    /(?:if|switch)\s*\([^)]*(?:journeyId|_experience\.id)[^)]*\)/,
-    'Normal Story presentation must not branch by Journey identity',
+    /_is[A-Za-z0-9]*Journey\b|_isForbiddenCity|forbiddenCityJourneyId/,
+    'Journey-specific Story presentation flags require architecture review',
+  );
+  assert.doesNotMatch(
+    storyPresentation,
+    directJourneyIdentityBranch,
+    'Normal Story presentation must not route runtime by Journey identity',
+  );
+  assert.match(
+    storyPresentation,
+    /SpecialRealmStoryIntro\.supports\(_experience\.id\)/,
+    'Approved destination/special-realm visuals may remain data-driven inside the shared Story renderer',
   );
 });
 
@@ -103,8 +115,13 @@ test('normal Journeys keep the stable shared six-stage navigation', () => {
   assert.match(stageRuntime, /_completePage\(\)/);
   assert.doesNotMatch(
     stageRuntime,
-    /_isForbiddenCity|forbiddenCityJourneyId/,
+    /_is[A-Za-z0-9]*Journey\b|_isForbiddenCity|forbiddenCityJourneyId/,
     'Normal Journey stage navigation must not branch by Journey identity',
+  );
+  assert.doesNotMatch(
+    stageRuntime,
+    directJourneyIdentityBranch,
+    'Normal Journey stage navigation must not route by Journey identity',
   );
 });
 
