@@ -1323,7 +1323,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                                 transparentSurface: true,
                                 onSupport: () => unawaited(
                                   _showReadingSupport(
-                                      title: '故亊第 ${entry.key + 1} 殶',
+                                      title: '故事第 ${entry.key + 1} 段',
                                     pinyin: annotation.pinyin,
                                     nativeLabel: annotation.nativeLabel(language),
                                       nativeText: annotation.nativeText(language, entry.value),
