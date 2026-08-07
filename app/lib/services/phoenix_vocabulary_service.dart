@@ -150,6 +150,7 @@ class PhoenixVocabularyService {
     return SynchronousFuture<PhoenixVocabularyExample>(preloaded);
   }
 
+  /// Content-authoring path only.
   Future<PhoenixVocabularyExample> generateExampleForContentPipeline({
     required WordEntry entry,
     required String language,
