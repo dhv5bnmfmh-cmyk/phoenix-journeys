@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/batch_one_adaptive_story_levels.dart';
+import '../data/batch_one_journey_remediation.dart';
 import '../theme/phoenix_theme.dart';
 
 class BatchOneJourneySummary extends StatelessWidget {
@@ -21,29 +22,38 @@ class BatchOneJourneySummary extends StatelessWidget {
 
   String t(String value) => displayText(value);
 
+  IconData _reviewIcon(RemediatedMemoryReview review) => switch (review.category) {
+        'protagonist' => Icons.person_outline_rounded,
+        'events' => Icons.route_rounded,
+        'history' => Icons.history_edu_rounded,
+        'culture' => Icons.account_balance_outlined,
+        'architecture' => Icons.foundation_rounded,
+        'vocabulary' => Icons.menu_book_rounded,
+        _ => Icons.bookmark_border_rounded,
+      };
+
   @override
   Widget build(BuildContext context) {
-    final vocabulary = words.isEmpty ? '本级重点词已复习' : words.take(6).join(' · ');
+    final levelVocabulary =
+        words.isEmpty ? '本级重点词已复习' : words.take(6).join(' · ');
     final challenge = challengeCompleted
-        ? '段落重组 · 语法修复 · 补全句子：三种模式全部完成'
+        ? '短文复原 · 语病修复 · 补回句子：三种模式全部完成'
         : '三种 Challenge 的结果将在完成后自动记入本次旅程';
 
+    final reviewRows = spec.reviews
+        .map(
+          (review) => (
+            icon: _reviewIcon(review),
+            label: review.prompt,
+            value: review.category == 'vocabulary'
+                ? '${review.answer}\n本级复习：$levelVocabulary'
+                : review.answer,
+          ),
+        )
+        .toList(growable: false);
+
     final rows = <({IconData icon, String label, String value})>[
-      (
-        icon: Icons.route_rounded,
-        label: '故事结果',
-        value: spec.storyResult,
-      ),
-      (
-        icon: Icons.account_balance_outlined,
-        label: '核心文化点',
-        value: spec.culturalPoint,
-      ),
-      (
-        icon: Icons.menu_book_rounded,
-        label: '重点词汇',
-        value: vocabulary,
-      ),
+      ...reviewRows,
       (
         icon: Icons.task_alt_rounded,
         label: 'Challenge 表现',
@@ -57,6 +67,12 @@ class BatchOneJourneySummary extends StatelessWidget {
       if (completion)
         (
           icon: Icons.auto_awesome_rounded,
+          label: '旅程结果',
+          value: spec.storyResult,
+        ),
+      if (completion)
+        (
+          icon: Icons.verified_rounded,
           label: '旅程收束',
           value: spec.completionSummary,
         ),
