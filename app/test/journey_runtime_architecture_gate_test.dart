@@ -14,6 +14,9 @@ void main() {
   final journey = File('lib/screens/journey_screen.dart').readAsStringSync();
   final interactive =
       File('lib/widgets/interactive_story_text.dart').readAsStringSync();
+  final directJourneyIdentityBranch = RegExp(
+    r'(?:if\s*\([^)]*(?:(?:journeyId|_experience\.id)\s*(?:==|!=)|(?:==|!=)\s*(?:journeyId|_experience\.id))[^)]*\)|switch\s*\(\s*(?:journeyId|_experience\.id)\s*\))',
+  );
 
   test('Shared Story Component: PASS', () {
     final story = _section(journey, 'Widget _storyPage()', 'Widget _wordsPage()');
@@ -27,13 +30,21 @@ void main() {
       equals(<String>{'_defaultStoryPage'}),
       reason: 'Journey-specific Story renderer requires Founder-approved architecture review.',
     );
-    expect(story, isNot(contains('_isForbiddenCity')));
-    expect(story, isNot(contains('forbiddenCityJourneyId')));
     expect(
-      RegExp(r'(?:if|switch)\s*\([^)]*(?:journeyId|_experience\.id)[^)]*\)')
+      RegExp(r'_is[A-Za-z0-9]*Journey\b|_isForbiddenCity|forbiddenCityJourneyId')
           .hasMatch(story),
       isFalse,
-      reason: 'Standard Story presentation must not branch by Journey identity.',
+      reason: 'Journey-specific Story presentation flags require architecture review.',
+    );
+    expect(
+      directJourneyIdentityBranch.hasMatch(story),
+      isFalse,
+      reason: 'Standard Story presentation must not route runtime by Journey identity.',
+    );
+    expect(
+      story,
+      contains('SpecialRealmStoryIntro.supports(_experience.id)'),
+      reason: 'Approved destination/special-realm visuals may remain data-driven inside the shared Story renderer.',
     );
   });
 
@@ -99,7 +110,16 @@ void main() {
     expect(stages, contains('_challengePage()'));
     expect(stages, contains('_memoryPage()'));
     expect(stages, contains('_completePage(),'));
-    expect(stages, isNot(contains('_isForbiddenCity')));
-    expect(stages, isNot(contains('forbiddenCityJourneyId')));
+    expect(
+      RegExp(r'_is[A-Za-z0-9]*Journey\b|_isForbiddenCity|forbiddenCityJourneyId')
+          .hasMatch(stages),
+      isFalse,
+      reason: 'Normal Journey stage navigation must not use Journey-specific flags.',
+    );
+    expect(
+      directJourneyIdentityBranch.hasMatch(stages),
+      isFalse,
+      reason: 'Normal Journey stage navigation must not route by Journey identity.',
+    );
   });
 }
