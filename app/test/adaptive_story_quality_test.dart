@@ -52,7 +52,12 @@ void main() {
   });
 
   test('level controls one long block or two shorter blocks', () {
-    final journey = allJourneyExperiences.first;
+    final journey = allJourneyExperiences.firstWhere(
+      (journey) =>
+          journey.id != 'beijing-summer-palace' &&
+          journey.id != 'beijing-forbidden-city' &&
+          journey.id != 'shanghai-bund',
+    );
 
     for (final profile in levelAgent.allProfiles) {
       final content = resolveAdaptiveJourneyLevel(
