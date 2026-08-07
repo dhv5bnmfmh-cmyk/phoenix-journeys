@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
-import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
@@ -16,21 +15,6 @@ void main() {
           journey,
           profile: profile,
         );
-
-        if (journey.id == forbiddenCityJourneyId) {
-          final phoenixLevel = profile.phoenixLevel!;
-          final story = forbiddenCityLockedStories[phoenixLevel - 1];
-          expect(level.storyParagraphs, orderedEquals(<String>[story]));
-          expect(level.words, isNotEmpty);
-          expect(
-            level.words.every((word) => story.contains(word.word)),
-            isTrue,
-            reason: 'Forbidden City Lv.$phoenixLevel Words must be Story-grounded',
-          );
-          expect(level.discoveries.length, inInclusiveRange(1, 2));
-          continue;
-        }
-
         final storyTarget = phoenixStoryLengthTargetFor(profile);
         final expectedDiscoveryShape =
             profile.band == PhoenixReadingBand.beginner
@@ -47,6 +31,16 @@ void main() {
           level.storyAnnotations,
           hasLength(storyTarget.paragraphCount),
           reason: '${journey.id} annotations',
+        );
+        expect(
+          level.storyAnnotations.every(
+            (annotation) =>
+                annotation.pinyin.trim().isNotEmpty &&
+                annotation.vietnamese.trim().isNotEmpty &&
+                annotation.english.trim().isNotEmpty,
+          ),
+          isTrue,
+          reason: '${journey.id} multilingual Story support',
         );
         expect(
           storyCharacters,
