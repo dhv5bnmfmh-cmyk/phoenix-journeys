@@ -17,13 +17,13 @@ void main() {
     expect(batchOneMemorySpecFor(forbiddenCityJourneyId), isNull);
   });
 
-  test('Forbidden City review levels expose real paragraph segmentation', () {
+  test('Forbidden City review levels expose the normal Phoenix paragraph shape', () {
     for (final level in <int>[1, 5, 10]) {
       final content = forbiddenCityLevelContent(level);
       expect(
         content.storyParagraphs.length,
-        greaterThan(1),
-        reason: 'Lv$level must not render as a 1/1 text wall',
+        level <= 2 ? 1 : 2,
+        reason: 'Lv$level must use the normal Phoenix adaptive paragraph shape',
       );
       expect(content.storyAnnotations.length, content.storyParagraphs.length);
       expect(
@@ -33,7 +33,7 @@ void main() {
       expect(
         content.storyParagraphs.join('\n\n'),
         forbiddenCityLockedStories[level - 1],
-        reason: 'Lv$level reading segmentation must not rewrite locked Story text',
+        reason: 'Lv$level paragraph structure must preserve the locked adaptive Story text',
       );
     }
   });
