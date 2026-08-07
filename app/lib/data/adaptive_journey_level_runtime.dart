@@ -7,7 +7,6 @@ import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
 import 'batch_one_adaptive_story_levels.dart';
 import 'daily_journey_experience.dart';
-import 'forbidden_city_final_story.dart';
 import 'forbidden_city_journey_runtime.dart';
 import 'journey_level_catalog.dart';
 import 'summer_palace_adaptive_story_levels.dart';
@@ -57,7 +56,7 @@ JourneyLevelContent _resolveForbiddenCityAdaptiveLevel(
   required Set<String> knownWords,
 }) {
   final level = profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band);
-  final base = forbiddenCityFinalLevelContent(level);
+  final base = forbiddenCityLevelContent(level);
   final unseenWords = base.words
       .where((entry) => !knownWords.contains(entry.word))
       .toList(growable: false);
