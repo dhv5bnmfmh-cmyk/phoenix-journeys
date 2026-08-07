@@ -7,6 +7,7 @@ import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
 import 'batch_one_adaptive_story_levels.dart';
 import 'daily_journey_experience.dart';
+import 'forbidden_city_content_cache.dart';
 import 'forbidden_city_journey_runtime.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
@@ -58,7 +59,7 @@ JourneyLevelContent _resolveForbiddenCityAdaptiveLevel(
 }) {
   final level = profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band);
   final base = _normalizeForbiddenCityReadingSupport(
-    forbiddenCityLevelContent(level),
+    cachedForbiddenCityLevelContent(level),
     level,
   );
   final unseenWords = base.words
