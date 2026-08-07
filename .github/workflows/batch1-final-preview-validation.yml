@@ -128,4 +128,4 @@ jobs:
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
             --data "$payload"
 
-# Validation rerun marker: Journey Runtime Architecture Gate v2.
+# Validation rerun marker: Journey Runtime Architecture Gate v3.
