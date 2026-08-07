@@ -43,29 +43,35 @@ void main() {
     },
   );
 
-  testWidgets('Story stays visibly readable when narration begins at offset zero', (
+  testWidgets('Story follows narration reveal instead of dumping full text at offset zero', (
     tester,
   ) async {
+    const story = '紫禁城里的空间并不平等地向所有人展开。';
     final state = AppState();
-    await tester.pumpWidget(
-      ChangeNotifierProvider<AppState>.value(
-        value: state,
-        child: const MaterialApp(
-          home: Scaffold(
-            body: InteractiveStoryText(
-              text: '紫禁城里的空间并不平等地向所有人展开。',
-              entries: <WordEntry>[],
-              narrationContentId: 'story',
-              narrationItemId: 'story-0',
-              revealEnd: 0,
-              style: TextStyle(color: Colors.white),
+
+    Widget buildStory(int revealEnd) => ChangeNotifierProvider<AppState>.value(
+          value: state,
+          child: MaterialApp(
+            home: Scaffold(
+              body: InteractiveStoryText(
+                text: story,
+                entries: const <WordEntry>[],
+                narrationContentId: 'story',
+                narrationItemId: 'story-0',
+                revealEnd: revealEnd,
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        );
 
-    final richText = tester.widget<RichText>(find.byType(RichText).first);
+    await tester.pumpWidget(buildStory(0));
+    var richText = tester.widget<RichText>(find.byType(RichText).first);
+    expect(richText.text.toPlainText(), isNot(contains('紫禁城里的空间')));
+
+    await tester.pumpWidget(buildStory(story.length));
+    await tester.pumpAndSettle();
+    richText = tester.widget<RichText>(find.byType(RichText).first);
     expect(richText.text.toPlainText(), contains('紫禁城里的空间'));
     expect(
       _textSpans(richText.text).where(
