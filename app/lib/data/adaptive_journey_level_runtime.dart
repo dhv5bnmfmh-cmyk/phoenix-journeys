@@ -5,7 +5,7 @@ import '../services/narrative_quality_shaper.dart';
 import '../services/phoenix_story_length_policy.dart';
 import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
-import 'batch_one_journey_remediation.dart';
+import 'batch_one_adaptive_story_levels.dart';
 import 'daily_journey_experience.dart';
 import 'journey_level_catalog.dart';
 import 'summer_palace_adaptive_story_levels.dart';
@@ -24,12 +24,12 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   required ChineseProficiencyProfile profile,
   Set<String> knownWords = const <String>{},
 }) {
-  final batchOne = batchOneJourneyLevelContentFor(
-    experience.id,
-    profile.phoenixLevel ?? _legacyBatchOneLevel(profile.band),
-  );
-  if (batchOne != null) {
-    return _withBatchOneCompatibilityPrompts(experience.id, batchOne);
+  if (isBatchOneGoldJourney(experience.id)) {
+    return buildBatchOneGoldLevel(
+      experience,
+      profile: profile,
+      knownWords: knownWords,
+    );
   }
   if (experience.id == 'beijing-summer-palace') {
     return _resolveSummerPalaceN1Level(
@@ -44,36 +44,8 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   );
 }
 
-/// Reflection and Writing are no longer standalone stages, but these fields
-/// remain in JourneyLevelContent for legacy quality tooling and older callers.
-/// Keep them Journey-specific and non-empty without exposing removed stages.
-JourneyLevelContent _withBatchOneCompatibilityPrompts(
-  String journeyId,
-  JourneyLevelContent content,
-) {
-  final prompts = switch (journeyId) {
-    'beijing-forbidden-city' => (
-        understanding: '梁砚为什么宁可迟交，也不把冲突数据直接当成新的建筑位移？',
-        expression: '请按证据链说明测量口径、复核与最终修缮判断之间的关系。',
-      ),
-    'shanghai-bund' => (
-        understanding: '林乔为什么宁可让展览晚开，也不采用那句更吸引人的照片说明？',
-        expression: '请按证据链说明视点、档案编号与不确定性怎样改变照片说明。',
-      ),
-    _ => (understanding: '', expression: ''),
-  };
-  return JourneyLevelContent(
-    storyParagraphs: content.storyParagraphs,
-    storyAnnotations: content.storyAnnotations,
-    words: content.words,
-    discoveries: content.discoveries,
-    wonderQuestion: prompts.understanding,
-    expressQuestion: prompts.expression,
-  );
-}
-
 /// The unchanged shared pipeline used by every Journey except the isolated
-/// Beijing Summer Palace Pilot N1 and the two Batch 1 remediation Journeys.
+/// Beijing Summer Palace Pilot N1 and the two Batch 1 Gold Journeys.
 JourneyLevelContent resolveSharedAdaptiveJourneyLevel(
   DailyJourneyExperience experience, {
   required ChineseProficiencyProfile profile,
@@ -175,15 +147,6 @@ int _summerPalaceN1DiscoveryCount(PhoenixReadingBand band) => switch (band) {
     };
 
 int _legacySummerPalaceLevel(PhoenixReadingBand band) => switch (band) {
-      PhoenixReadingBand.beginner => 1,
-      PhoenixReadingBand.elementary => 3,
-      PhoenixReadingBand.intermediate => 5,
-      PhoenixReadingBand.upperIntermediate => 7,
-      PhoenixReadingBand.advanced => 8,
-      PhoenixReadingBand.mastery => 10,
-    };
-
-int _legacyBatchOneLevel(PhoenixReadingBand band) => switch (band) {
       PhoenixReadingBand.beginner => 1,
       PhoenixReadingBand.elementary => 3,
       PhoenixReadingBand.intermediate => 5,
