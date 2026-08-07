@@ -82,11 +82,9 @@ void main() {
       'Widget _defaultStoryPage()',
       'Widget _wordsPage()',
     );
-    final animation = _section(
-      story,
-      'return AnimatedBuilder(',
-      'Widget _wordsPage()',
-    );
+    final animationStart = story.indexOf('return AnimatedBuilder(');
+    expect(animationStart, greaterThanOrEqualTo(0));
+    final animation = story.substring(animationStart);
 
     expect(story, contains('final levelContent = _levelContent;'));
     expect(story, contains('final storyParagraphs = levelContent.storyParagraphs;'));
