@@ -222,6 +222,8 @@ class PhoenixVocabularyService {
     }
   }
 
+  void close() => _client.close();
+
   void _validate(PhoenixVocabularyExample example, String word) {
     final forbidden = [
       '故事里出现了',
