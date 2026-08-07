@@ -26,12 +26,12 @@ JourneyLevelContent buildBatchOneGoldLevel(
   final words = unseenWords.isEmpty ? base.words : unseenWords;
   final prompts = switch (experience.id) {
     'beijing-forbidden-city' => (
-        understanding: '梁砚为什么宁可迟交，也不把冲突数据直接当成新的建筑位移？',
-        expression: '请按证据链说明测量口径、复核与最终修缮判断之间的关系。',
+        understanding: '纪衡为什么在雷雨前没有直接疏通不出水的石雕龙头？',
+        expression: '请说明丹陛排水、旧修缮层、可逆临时导排与最终最小清理之间的关系。',
       ),
     'shanghai-bund' => (
-        understanding: '林乔为什么宁可让展览晚开，也不采用那句更吸引人的照片说明？',
-        expression: '请按证据链说明视点、档案编号与不确定性怎样改变照片说明。',
+        understanding: '陆潮为什么宁可错过九点半的同步画面，也不播放现成的赞助动画？',
+        expression: '请说明黄浦江、1843年开埠、外滩商业金融历史与现代浦东怎样进入同一场模拟。',
       ),
     _ => (understanding: '', expression: ''),
   };
