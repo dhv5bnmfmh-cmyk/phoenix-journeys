@@ -5,6 +5,7 @@ import '../services/narrative_quality_shaper.dart';
 import '../services/phoenix_story_length_policy.dart';
 import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
+import 'batch_one_adaptive_story_levels.dart';
 import 'daily_journey_experience.dart';
 import 'journey_level_catalog.dart';
 import 'summer_palace_adaptive_story_levels.dart';
@@ -29,6 +30,13 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
       knownWords: knownWords,
     );
   }
+  if (isBatchOneGoldJourney(experience.id)) {
+    return buildBatchOneGoldLevel(
+      experience,
+      profile: profile,
+      knownWords: knownWords,
+    );
+  }
   return resolveSharedAdaptiveJourneyLevel(
     experience,
     profile: profile,
@@ -36,9 +44,8 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   );
 }
 
-/// The unchanged shared pipeline used by every Journey except the isolated
-/// Beijing Summer Palace Pilot N1. Tests compare this helper with the public
-/// resolver for the other 35 Journeys to prove byte-for-byte output equality.
+/// Shared pipeline for Journeys that do not have an approved, isolated
+/// narrative-invariant implementation.
 JourneyLevelContent resolveSharedAdaptiveJourneyLevel(
   DailyJourneyExperience experience, {
   required ChineseProficiencyProfile profile,
