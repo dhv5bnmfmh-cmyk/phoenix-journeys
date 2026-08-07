@@ -128,4 +128,4 @@ jobs:
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
             --data "$payload"
 
-# Validation rerun marker: PR #155 final segmented Forbidden City Story UX with locked Story reconstruction gate.
+# Validation rerun marker: PR #155 Forbidden City normal Phoenix Gold Standard correction.
