@@ -50,7 +50,7 @@ void main() {
     expect(journey.storyParagraphs, hasLength(1));
     expect(journey.storyParagraphs.single, forbiddenCityLockedStories.last);
     expect(agent.sourcesForJourney(journey.id), hasLength(3));
-    expect(agent.evidenceForSection(journey.id, 'story-1'), hasLength(3));
+    expect(agent.evidenceForSection(journey.id, 'story-0'), hasLength(3));
   });
 
   test('finds all Beijing Journeys from the country hierarchy', () {
