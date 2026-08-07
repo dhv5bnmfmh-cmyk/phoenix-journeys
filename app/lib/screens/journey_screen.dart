@@ -2074,7 +2074,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
             const SizedBox(height: 8),
-            _ForbiddenCityCompleteCard(
+            const _ForbiddenCityCompleteCard(
               title: 'Journey Summary',
               body: forbiddenCityJourneySummary,
             ),
