@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
-import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
@@ -19,26 +18,8 @@ void main() {
           journey,
           profile: profile,
         );
-
-        if (journey.id == forbiddenCityJourneyId) {
-          final level = profile.phoenixLevel!;
-          final story = forbiddenCityLockedStories[level - 1];
-          expect(
-            content.storyParagraphs,
-            orderedEquals(<String>[story]),
-            reason: 'Forbidden City ${profile.displayLabel} must use its locked runtime Story',
-          );
-          expect(content.words, isNotEmpty);
-          expect(
-            content.words.every((word) => story.contains(word.word)),
-            isTrue,
-            reason: 'Forbidden City Words must exist in the selected Story',
-          );
-          expect(content.discoveries.length, inInclusiveRange(1, 2));
-          continue;
-        }
-
         final storyCharacters = content.storyParagraphs.join().runes.length;
+
         expect(
           content.storyParagraphs.length,
           storyTarget.paragraphCount,
@@ -82,6 +63,7 @@ void main() {
               : inInclusiveRange(1, 2),
           reason: '${journey.id} should use the approved discovery shape',
         );
+        expect(content.words, isNotEmpty, reason: journey.id);
         expect(
           content.words.length,
           lessThanOrEqualTo(plan.maximumVocabularyCount),
