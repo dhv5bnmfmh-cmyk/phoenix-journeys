@@ -227,10 +227,10 @@ WordEntry _word({
         english: storyEnglish,
       ),
       WordExample(
-        chinese: '梁砚或林乔在证据记录中再次确认“$word”。',
-        pinyin: 'Liáng Yàn huò Lín Qiáo zài zhèngjù jìlù zhōng zàicì quèrèn “$pinyin”.',
-        vietnamese: 'Lương Nghiên hoặc Lâm Kiều xác nhận lại “$word” trong hồ sơ bằng chứng.',
-        english: 'Liang Yan or Lin Qiao checks “$word” again in the evidence record.',
+        chinese: '学习者在证据记录中再次确认“$word”。',
+        pinyin: 'Xuéxízhě zài zhèngjù jìlù zhōng zàicì quèrèn “$pinyin”.',
+        vietnamese: 'Người học xác nhận lại “$word” trong hồ sơ bằng chứng.',
+        english: 'The learner checks “$word” again in the evidence record.',
       ),
       WordExample(
         chinese: '只有说明“$word”的位置和含义，别人才能复核。',
