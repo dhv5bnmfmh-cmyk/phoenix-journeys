@@ -1,16 +1,36 @@
 {
   "id": "CN-BJ-001",
+  "runtime_id": "beijing-forbidden-city",
   "country": "China",
   "city": "Beijing",
   "place": "Forbidden City",
-  "title_zh_hans": "第一次走进紫禁城",
-  "title_zh_hant": "第一次走進紫禁城",
+  "title_zh_hans": "北京 · 紫禁城",
+  "title_zh_hant": "北京 · 紫禁城",
   "mood": "awe",
   "estimated_minutes": 15,
-  "status": "draft",
+  "status": "ready_for_app_integration",
+  "architecture": [
+    "story",
+    "words",
+    "discovery",
+    "challenge",
+    "memory",
+    "complete"
+  ],
+  "story_levels": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "challenge_types": [
+    "paragraphRebuild",
+    "grammarRepair",
+    "missingSentence"
+  ],
+  "memory_anchor": "一道没有跨过的门槛",
+  "reflection": false,
+  "writing": false,
   "review": {
-    "factual": "pending",
-    "cultural": "pending",
-    "copyright": "pending"
+    "factual": "validated",
+    "cultural": "validated",
+    "copyright": "original_fiction_with_verified_historical_context",
+    "word_trace": "validated_at_runtime",
+    "level_binding": "locked"
   }
 }
