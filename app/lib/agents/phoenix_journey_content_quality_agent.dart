@@ -1,6 +1,8 @@
 import '../data/daily_journey_experience.dart';
+import '../data/forbidden_city_journey_runtime.dart';
 import '../data/journey_level_catalog.dart';
 import '../models/language_proficiency.dart';
+import '../services/forbidden_city_quality_gate.dart';
 import '../services/journey_content_quality_auditor.dart';
 
 typedef PhoenixJourneyContentResolver = JourneyLevelContent Function(
@@ -115,11 +117,16 @@ class PhoenixJourneyContentQualityAgent {
     required JourneyLevelContent content,
     required ChineseProficiencyProfile profile,
   }) {
-    final report = auditJourneyContentQuality(
-      experience,
-      content,
-      profile: profile,
-    );
+    final report = experience.id == forbiddenCityJourneyId
+        ? auditForbiddenCityLockedQuality(
+            content,
+            profile: profile,
+          )
+        : auditJourneyContentQuality(
+            experience,
+            content,
+            profile: profile,
+          );
     final recommendations = report.issues
         .map(_recommendationFor)
         .toList(growable: false);
