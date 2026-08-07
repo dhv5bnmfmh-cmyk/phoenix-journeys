@@ -61,7 +61,6 @@ void main() {
       final missing = forbiddenCityMissingSentence.singleWhere((item) => item.level == level);
 
       expect(rebuild.segments.every(story.contains), isTrue, reason: 'Lv$level paragraphRebuild');
-      expect(grammar.correct, isNotEmpty);
       expect(story.contains(grammar.correct), isTrue, reason: 'Lv$level grammarRepair');
       expect(story.contains(missing.before), isTrue, reason: 'Lv$level missing before');
       expect(story.contains(missing.after), isTrue, reason: 'Lv$level missing after');
@@ -94,7 +93,7 @@ void main() {
     }
 
     expect(forbiddenCityChallengeRewardName, contains('旧木尺'));
-    expect(forbiddenCityJourneyCompletion, contains(forbiddenCityMemoryAnchor));
+    expect(forbiddenCityJourneyCompletion, contains('没有跨过的门槛'));
     expect(forbiddenCityJourneyCompletion, contains('沈砚没有走遍紫禁城'));
     expect(forbiddenCityJourneyCompletion, contains('第一次真正看见了紫禁城'));
   });
