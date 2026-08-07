@@ -1,0 +1,30 @@
+name: Clean Performance Patch Output
+
+on:
+  push:
+    branches:
+      - preview/batch-1-final-founder-review
+    paths:
+      - '.github/workflows/performance-remediation-cleanup.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: preview/batch-1-final-founder-review
+          fetch-depth: 0
+      - name: Restore shared Story support label
+        run: python3 -c "from pathlib import Path; p=Path('app/lib/screens/journey_screen.dart'); s=p.read_text(); assert s.count('故亊第') == 1 and s.count(' 殶') == 1; p.write_text(s.replace('故亊第', '故事第').replace(' 殶', ' 段'))"
+      - name: Commit cleanup
+        run: |
+          git rm .github/workflows/performance-remediation-cleanup.yml
+          git add app/lib/screens/journey_screen.dart
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix: preserve shared Story support label'
+          git push origin HEAD:preview/batch-1-final-founder-review
