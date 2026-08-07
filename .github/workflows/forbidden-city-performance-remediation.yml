@@ -1,0 +1,369 @@
+name: Apply Journey Runtime Performance Remediation
+
+on:
+  push:
+    branches:
+      - preview/batch-1-final-founder-review
+    paths:
+      - '.github/workflows/forbidden-city-performance-remediation.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: preview/batch-1-final-founder-review
+          fetch-depth: 0
+
+      - name: Patch shared Journey hot path
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/screens/journey_screen.dart')
+          source = path.read_text()
+
+          def replace_once(old: str, new: str) -> None:
+              global source
+              count = source.count(old)
+              if count != 1:
+                  raise SystemExit(f'Expected one replacement, found {count}: {old[:80]!r}')
+              source = source.replace(old, new, 1)
+
+          replace_once(
+              "import '../data/forbidden_city_journey_runtime.dart';\nimport '../data/forbidden_city_trace_validation.dart';",
+              "import '../data/forbidden_city_content_cache.dart';\nimport '../data/forbidden_city_journey_runtime.dart';",
+          )
+
+          replace_once(
+              "  Timer? _narrationCheckpointTimer;\n  int _lastSavedNarrationOffset = 0;",
+              "  Timer? _narrationCheckpointTimer;\n  int _lastSavedNarrationOffset = 0;\n  JourneyLevelContent? _cachedLevelContent;\n  ChineseProficiencyProfile? _cachedLevelProfile;\n  JourneyDifficulty? _cachedLevelDifficulty;\n  int? _cachedKnownWordsHash;",
+          )
+
+          replace_once(
+              "    _experience = requireDailyJourneyExperience(journeyId);\n    _challengeSeed =",
+              "    _experience = requireDailyJourneyExperience(journeyId);\n    if (_experience.id == forbiddenCityJourneyId) {\n      warmForbiddenCityContentCache();\n    }\n    _challengeSeed =",
+          )
+
+          old_level = '''  JourneyLevelContent get _levelContent {
+    final profile = _languageProfile;
+    if (profile == null) {
+      if (_isForbiddenCity) {
+        final fallbackLevel = switch (_appState.journeyDifficulty) {
+          JourneyDifficulty.easy => 1,
+          JourneyDifficulty.standard => 5,
+          JourneyDifficulty.challenge => 10,
+        };
+        final base = forbiddenCityLevelContent(fallbackLevel);
+        return JourneyLevelContent(
+          storyParagraphs: base.storyParagraphs,
+          storyAnnotations: base.storyAnnotations,
+          words: forbiddenCityValidatedWordsForLevel(fallbackLevel),
+          discoveries: base.discoveries,
+          wonderQuestion: '',
+          expressQuestion: '',
+        );
+      }
+      return resolveJourneyLevel(_experience, _appState.journeyDifficulty);
+    }
+    return resolveAdaptiveJourneyLevel(
+      _experience,
+      profile: profile,
+      knownWords: _appState.savedWords,
+    );
+  }
+'''
+          new_level = '''  int get _knownWordsFingerprint =>
+      Object.hashAllUnordered(_appState.savedWords);
+
+  JourneyLevelContent get _levelContent {
+    final profile = _languageProfile;
+    final difficulty = _appState.journeyDifficulty;
+    final knownWordsHash = _knownWordsFingerprint;
+    final cached = _cachedLevelContent;
+    if (cached != null &&
+        identical(_cachedLevelProfile, profile) &&
+        _cachedLevelDifficulty == difficulty &&
+        _cachedKnownWordsHash == knownWordsHash) {
+      return cached;
+    }
+
+    late final JourneyLevelContent resolved;
+    if (profile == null) {
+      if (_isForbiddenCity) {
+        final fallbackLevel = switch (difficulty) {
+          JourneyDifficulty.easy => 1,
+          JourneyDifficulty.standard => 5,
+          JourneyDifficulty.challenge => 10,
+        };
+        final base = cachedForbiddenCityLevelContent(fallbackLevel);
+        resolved = JourneyLevelContent(
+          storyParagraphs: base.storyParagraphs,
+          storyAnnotations: base.storyAnnotations,
+          words: base.words,
+          discoveries: base.discoveries,
+          wonderQuestion: '',
+          expressQuestion: '',
+        );
+      } else {
+        resolved = resolveJourneyLevel(_experience, difficulty);
+      }
+    } else {
+      resolved = resolveAdaptiveJourneyLevel(
+        _experience,
+        profile: profile,
+        knownWords: _appState.savedWords,
+      );
+    }
+
+    _cachedLevelContent = resolved;
+    _cachedLevelProfile = profile;
+    _cachedLevelDifficulty = difficulty;
+    _cachedKnownWordsHash = knownWordsHash;
+    return resolved;
+  }
+'''
+          replace_once(old_level, new_level)
+
+          old_story = '''  Widget _defaultStoryPage() {
+    final state = context.watch<AppState>();
+    final language = state.translationLanguage;
+
+    return _page(
+      title: '故事',
+      onNext: () => unawaited(_enterVocabularyAtFirstWord()),
+      child: Column(
+        children: [
+          if (SpecialRealmStoryIntro.supports(_experience.id))
+            SpecialRealmStoryIntro(
+              journeyId: _experience.id,
+              displayText: _appState.displayText,
+            ),
+          NarrationPlayerCard(
+            controller: _narration,
+            contentId: 'story',
+            title: _appState.displayText(_experience.storyTitle),
+            subtitle:
+                '$_readingLevelLabel · ${_readingShapeLabel(_levelContent.storyParagraphs.length)} · ${_levelContent.storyParagraphs.length} 段',
+            compact: true,
+            onPlay: _playStory,
+          ),
+          const SizedBox(height: 2),
+          Expanded(
+            child: LayoutBuilder(
+              key: const ValueKey('adaptive-story-text-area'),
+              builder: (context, constraints) {
+                final fontSize = _fitJourneyTextSize(
+                  context,
+                  constraints,
+                  _levelContent.storyParagraphs,
+                  minSize: 10.8,
+                  maxSize: 16,
+                  lineHeight: 1.22,
+                );
+                return AnimatedBuilder(
+                  animation: _narration,
+                  builder: (context, _) {
+                    return SingleChildScrollView(
+                      key: const ValueKey('story-auto-visibility-scroll'),
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: _levelContent.storyParagraphs
+                            .asMap()
+                            .entries
+                            .map((entry) {
+                              final annotation =
+                                  _levelContent.storyAnnotations[entry.key];
+                              final snapshot = _narration.highlightSnapshot;
+                              final isActive =
+                                  snapshot?.contentId == 'story' &&
+                                  snapshot?.itemId == 'story-${entry.key}';
+                              return _CompactTextBlock(
+                                index: entry.key + 1,
+                                active: isActive,
+                                transparentSurface: true,
+                                onSupport: () => unawaited(
+                                  _showReadingSupport(
+                                    title: '故事第 ${entry.key + 1} 段',
+                                    pinyin: annotation.pinyin,
+                                    nativeLabel: annotation.nativeLabel(language),
+                                    nativeText: annotation.nativeText(language, entry.value),
+                                    english: annotation.english,
+                                  ),
+                                ),
+                                child: InteractiveStoryText(
+                                  text: entry.value,
+                                  entries: _levelContent.words,
+                                  narrationController: _narration,
+                                  highlightStart: isActive ? snapshot!.start : null,
+                                  highlightEnd: isActive ? snapshot!.end : null,
+                                  revealEnd: _narrationRevealEnd(
+                                    contentId: 'story',
+                                    itemIndex: entry.key,
+                                    itemLength: entry.value.length,
+                                  ),
+                                  narrationContentId: 'story',
+                                  narrationItemId: 'story-${entry.key}',
+                                  narrationSessionToken: _narration.speechSessionToken,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: fontSize,
+                                    height: 1.22,
+                                    fontFamily: PhoenixTheme.chineseFontFamily,
+                                    fontFamilyFallback: PhoenixTheme.chineseFontFallback,
+                                    fontWeight: FontWeight.w700,
+                                    shadows: const [
+                                      Shadow(color: Color(0xE6000000), blurRadius: 3, offset: Offset(0, 1)),
+                                      Shadow(color: Color(0x99000000), blurRadius: 8),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            })
+                            .toList(growable: false),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+'''
+          new_story = '''  Widget _defaultStoryPage() {
+    final state = context.watch<AppState>();
+    final language = state.translationLanguage;
+    final levelContent = _levelContent;
+    final storyParagraphs = levelContent.storyParagraphs;
+    final storyAnnotations = levelContent.storyAnnotations;
+    final words = levelContent.words;
+
+    return _page(
+      title: '故事',
+      onNext: () => unawaited(_enterVocabularyAtFirstWord()),
+      child: Column(
+        children: [
+          if (SpecialRealmStoryIntro.supports(_experience.id))
+            SpecialRealmStoryIntro(
+              journeyId: _experience.id,
+              displayText: _appState.displayText,
+            ),
+          NarrationPlayerCard(
+            controller: _narration,
+            contentId: 'story',
+            title: _appState.displayText(_experience.storyTitle),
+            subtitle:
+                '$_readingLevelLabel · ${_readingShapeLabel(storyParagraphs.length)} · ${storyParagraphs.length} 段',
+            compact: true,
+            onPlay: _playStory,
+          ),
+          const SizedBox(height: 2),
+          Expanded(
+            child: LayoutBuilder(
+              key: const ValueKey('adaptive-story-text-area'),
+              builder: (context, constraints) {
+                final fontSize = _fitJourneyTextSize(
+                  context,
+                  constraints,
+                  storyParagraphs,
+                  minSize: 10.8,
+                  maxSize: 16,
+                  lineHeight: 1.22,
+                );
+                return AnimatedBuilder(
+                  animation: _narration,
+                  builder: (context, _) {
+                    final snapshot = _narration.highlightSnapshot;
+                    return SingleChildScrollView(
+                      key: const ValueKey('story-auto-visibility-scroll'),
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: storyParagraphs
+                            .asMap()
+                            .entries
+                            .map((entry) {
+                              final annotation = storyAnnotations[entry.key];
+                              final isActive =
+                                  snapshot?.contentId == 'story' &&
+                                  snapshot?.itemId == 'story-${entry.key}';
+                              return _CompactTextBlock(
+                                index: entry.key + 1,
+                                active: isActive,
+                                transparentSurface: true,
+                                onSupport: () => unawaited(
+                                  _showReadingSupport(
+                                    title: '故事第 ${entry.key + 1} 段',
+                                    pinyin: annotation.pinyin,
+                                    nativeLabel: annotation.nativeLabel(language),
+                                    nativeText: annotation.nativeText(language, entry.value),
+                                    english: annotation.english,
+                                  ),
+                                ),
+                                child: InteractiveStoryText(
+                                  text: entry.value,
+                                  entries: words,
+                                  narrationController: _narration,
+                                  highlightStart: isActive ? snapshot!.start : null,
+                                  highlightEnd: isActive ? snapshot!.end : null,
+                                  revealEnd: _narrationRevealEnd(
+                                    contentId: 'story',
+                                    itemIndex: entry.key,
+                                    itemLength: entry.value.length,
+                                  ),
+                                  narrationContentId: 'story',
+                                  narrationItemId: 'story-${entry.key}',
+                                  narrationSessionToken: _narration.speechSessionToken,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: fontSize,
+                                    height: 1.22,
+                                    fontFamily: PhoenixTheme.chineseFontFamily,
+                                    fontFamilyFallback: PhoenixTheme.chineseFontFallback,
+                                    fontWeight: FontWeight.w700,
+                                    shadows: const [
+                                      Shadow(color: Color(0xE6000000), blurRadius: 3, offset: Offset(0, 1)),
+                                      Shadow(color: Color(0x99000000), blurRadius: 8),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            })
+                            .toList(growable: false),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+'''
+          replace_once(old_story, new_story)
+
+          path.write_text(source)
+          PY
+
+      - name: Remove transient patch workflow and commit
+        shell: bash
+        run: |
+          git rm .github/workflows/forbidden-city-performance-remediation.yml
+          git add app/lib/screens/journey_screen.dart
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'perf: cache Journey content outside narration rebuilds'
+          git push origin HEAD:preview/batch-1-final-founder-review
