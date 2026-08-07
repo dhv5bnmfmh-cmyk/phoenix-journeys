@@ -8,6 +8,7 @@ import 'all_journey_language_level_catalog.dart';
 import 'batch_one_adaptive_story_levels.dart';
 import 'daily_journey_experience.dart';
 import 'forbidden_city_journey_runtime.dart';
+import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 import 'summer_palace_adaptive_story_levels.dart';
 import 'summer_palace_language_level_catalog.dart';
@@ -56,7 +57,10 @@ JourneyLevelContent _resolveForbiddenCityAdaptiveLevel(
   required Set<String> knownWords,
 }) {
   final level = profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band);
-  final base = forbiddenCityLevelContent(level);
+  final base = _normalizeForbiddenCityReadingSupport(
+    forbiddenCityLevelContent(level),
+    level,
+  );
   final unseenWords = base.words
       .where((entry) => !knownWords.contains(entry.word))
       .toList(growable: false);
@@ -64,6 +68,31 @@ JourneyLevelContent _resolveForbiddenCityAdaptiveLevel(
     storyParagraphs: base.storyParagraphs,
     storyAnnotations: base.storyAnnotations,
     words: unseenWords.isEmpty ? base.words : unseenWords,
+    discoveries: base.discoveries,
+    wonderQuestion: base.wonderQuestion,
+    expressQuestion: base.expressQuestion,
+  );
+}
+
+JourneyLevelContent _normalizeForbiddenCityReadingSupport(
+  JourneyLevelContent base,
+  int level,
+) {
+  if (level != 8 && level != 10) return base;
+  final annotations = List<ReadingAnnotation>.of(base.storyAnnotations);
+  final index = annotations.length - 1;
+  final current = annotations[index];
+  annotations[index] = ReadingAnnotation(
+    pinyin: current.pinyin,
+    vietnamese: level == 8
+        ? 'Cậu nhận ra việc bước qua chỉ để lấp đầy bản đồ có thể biến “hiểu” thành “chiếm hữu”, nên giữ lại khoảng trống như một phần của hiểu biết lịch sử.'
+        : 'Khi cánh cổng mở, cậu từ chối biến khả năng thành quyền chiếm hữu, để “giới”, bản đồ thứ hai và chiếc thước gỗ cũ trở thành dấu mốc của cách nhìn mới.',
+    english: current.english,
+  );
+  return JourneyLevelContent(
+    storyParagraphs: base.storyParagraphs,
+    storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
+    words: base.words,
     discoveries: base.discoveries,
     wonderQuestion: base.wonderQuestion,
     expressQuestion: base.expressQuestion,
