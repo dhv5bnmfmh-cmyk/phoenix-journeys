@@ -10,11 +10,13 @@ const interactive = readFileSync(
 
 test('Story and Discovery show position with text-only highlights', () => {
   assert.doesNotMatch(journey, /_NowReadingStrip/);
+  const highlightBindings = journey.match(
+    /highlightStart:\s*isActive\s*\?\s*snapshot!\.start\s*:\s*null/g,
+  ) ?? [];
   assert.equal(
-    (journey.match(
-      /highlightStart:\s*isActive\s*\?\s*snapshot!\.start\s*:\s*null/g,
-    ) ?? []).length,
-    2,
+    highlightBindings.length,
+    3,
+    'Forbidden City segmented Story, default Story, and Discovery must preserve text-only narration position',
   );
   assert.match(interactive, /reading-highlight-/);
   assert.match(interactive, /class _InlineReadingMarker/);
