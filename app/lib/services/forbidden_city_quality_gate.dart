@@ -23,11 +23,12 @@ JourneyContentQualityReport auditForbiddenCityLockedQuality(
     );
   }
 
-  if (content.storyParagraphs.length != 1 ||
-      content.storyParagraphs.first != story) {
+  if (content.storyParagraphs.isEmpty ||
+      content.storyParagraphs.any((paragraph) => paragraph.trim().isEmpty) ||
+      content.storyParagraphs.join('\n\n') != story) {
     critical(
       'forbidden-city-runtime-binding',
-      'Forbidden City must bind the exact locked Story for Phoenix Lv.$level.',
+      'Forbidden City reading segments must reconstruct the exact locked Story for Phoenix Lv.$level.',
     );
   }
 
