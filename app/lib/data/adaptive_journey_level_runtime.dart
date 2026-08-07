@@ -5,7 +5,7 @@ import '../services/narrative_quality_shaper.dart';
 import '../services/phoenix_story_length_policy.dart';
 import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
-import 'batch_one_adaptive_story_levels.dart';
+import 'batch_one_journey_remediation.dart';
 import 'daily_journey_experience.dart';
 import 'journey_level_catalog.dart';
 import 'summer_palace_adaptive_story_levels.dart';
@@ -24,21 +24,16 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   required ChineseProficiencyProfile profile,
   Set<String> knownWords = const <String>{},
 }) {
+  final batchOne = batchOneJourneyLevelContentFor(
+    experience.id,
+    profile.phoenixLevel ?? _legacyBatchOneLevel(profile.band),
+  );
+  if (batchOne != null) return batchOne;
   if (experience.id == 'beijing-summer-palace') {
     return _resolveSummerPalaceN1Level(
       profile: profile,
       knownWords: knownWords,
     );
-  }
-  if (isBatchOneGoldJourney(experience.id)) {
-    final level = buildBatchOneGoldLevel(
-      experience,
-      profile: profile,
-      knownWords: knownWords,
-    );
-    return experience.id == 'shanghai-bund'
-        ? _normalizeShanghaiBundParagraphOpening(level)
-        : level;
   }
   return resolveSharedAdaptiveJourneyLevel(
     experience,
@@ -47,40 +42,8 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   );
 }
 
-JourneyLevelContent _normalizeShanghaiBundParagraphOpening(
-  JourneyLevelContent content,
-) {
-  if (content.storyParagraphs.length < 2) return content;
-  final paragraphs = content.storyParagraphs.toList(growable: false);
-  final annotations = content.storyAnnotations.toList(growable: false);
-  paragraphs[1] = paragraphs[1].replaceFirst('她必须在按时上传', '周玥必须在按时上传');
-  final second = annotations[1];
-  annotations[1] = ReadingAnnotation(
-    pinyin: second.pinyin.replaceFirst(
-      'Tā bìxū zài ànshí shàngchuán',
-      'Zhōu Yuè bìxū zài ànshí shàngchuán',
-    ),
-    vietnamese: second.vietnamese.replaceFirst(
-      'Cô phải chọn giữa tải lên',
-      'Chu Nguyệt phải chọn giữa tải lên',
-    ),
-    english: second.english.replaceFirst(
-      'She must choose between uploading',
-      'Zhou Yue must choose between uploading',
-    ),
-  );
-  return JourneyLevelContent(
-    storyParagraphs: paragraphs,
-    storyAnnotations: annotations,
-    words: content.words,
-    discoveries: content.discoveries,
-    wonderQuestion: content.wonderQuestion,
-    expressQuestion: content.expressQuestion,
-  );
-}
-
-/// Shared pipeline for Journeys that do not have an approved, isolated
-/// narrative-invariant implementation.
+/// The unchanged shared pipeline used by every Journey except the isolated
+/// Beijing Summer Palace Pilot N1 and the two Batch 1 remediation Journeys.
 JourneyLevelContent resolveSharedAdaptiveJourneyLevel(
   DailyJourneyExperience experience, {
   required ChineseProficiencyProfile profile,
@@ -182,6 +145,15 @@ int _summerPalaceN1DiscoveryCount(PhoenixReadingBand band) => switch (band) {
     };
 
 int _legacySummerPalaceLevel(PhoenixReadingBand band) => switch (band) {
+      PhoenixReadingBand.beginner => 1,
+      PhoenixReadingBand.elementary => 3,
+      PhoenixReadingBand.intermediate => 5,
+      PhoenixReadingBand.upperIntermediate => 7,
+      PhoenixReadingBand.advanced => 8,
+      PhoenixReadingBand.mastery => 10,
+    };
+
+int _legacyBatchOneLevel(PhoenixReadingBand band) => switch (band) {
       PhoenixReadingBand.beginner => 1,
       PhoenixReadingBand.elementary => 3,
       PhoenixReadingBand.intermediate => 5,
