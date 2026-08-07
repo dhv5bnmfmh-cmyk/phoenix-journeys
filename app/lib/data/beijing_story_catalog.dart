@@ -113,8 +113,8 @@ final beijingForbiddenCityJourney = _record(
 );
 
 final beijingTempleOfHeavenJourney = _record(
-  id: 'beijing-temple-of-heaven',
-  title: '北京 · 天坛：回音壁前的空白刻度',
+  id: templeOfHeavenRemediation.id,
+  title: templeOfHeavenRemediation.title,
   geoNodeId: 'cn-beijing-dongcheng',
   tags: const ['北京', '天坛', '祭天礼制', '声学', '证据', '世界文化遗产'],
   paragraphs: _templeOfHeavenCanonicalStory,
