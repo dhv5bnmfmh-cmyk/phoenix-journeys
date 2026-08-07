@@ -3,6 +3,7 @@ import 'package:phoenix_journeys/agents/phoenix_journey_content_quality_agent.da
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/journey_data.dart';
 import 'package:phoenix_journeys/data/journey_level_catalog.dart';
 
@@ -29,7 +30,9 @@ void main() {
   });
 
   test('quality agent blocks repeated discovery content and explains the fix', () {
-    final journey = dailyJourneyExperiences.first;
+    final journey = dailyJourneyExperiences.firstWhere(
+      (item) => item.id != forbiddenCityJourneyId,
+    );
     final profile = levelAgent.allProfiles.first;
     final content = resolveAdaptiveJourneyLevel(
       journey,
@@ -72,7 +75,9 @@ void main() {
   });
 
   test('quality agent converts warnings into revision decisions', () {
-    final journey = dailyJourneyExperiences.first;
+    final journey = dailyJourneyExperiences.firstWhere(
+      (item) => item.id != forbiddenCityJourneyId,
+    );
     final profile = levelAgent.allProfiles.first;
     final content = resolveAdaptiveJourneyLevel(
       journey,
