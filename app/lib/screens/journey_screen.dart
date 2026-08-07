@@ -9,6 +9,8 @@ import '../agents/phoenix_language_level_agent.dart';
 import '../data/adaptive_journey_level_runtime.dart';
 import '../data/batch_one_adaptive_story_levels.dart';
 import '../data/daily_journey_catalog.dart';
+import '../data/forbidden_city_journey_runtime.dart';
+import '../data/forbidden_city_trace_validation.dart';
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
 import '../models/journey_background.dart';
@@ -159,6 +161,7 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
   bool get _isSummerPalacePilot => false;
+  bool get _isForbiddenCity => _experience.id == forbiddenCityJourneyId;
 
   @override
   void initState() {
@@ -320,6 +323,22 @@ class _JourneyScreenState extends State<JourneyScreen>
   JourneyLevelContent get _levelContent {
     final profile = _languageProfile;
     if (profile == null) {
+      if (_isForbiddenCity) {
+        final fallbackLevel = switch (_appState.journeyDifficulty) {
+          JourneyDifficulty.easy => 1,
+          JourneyDifficulty.standard => 5,
+          JourneyDifficulty.challenge => 10,
+        };
+        final base = forbiddenCityLevelContent(fallbackLevel);
+        return JourneyLevelContent(
+          storyParagraphs: base.storyParagraphs,
+          storyAnnotations: base.storyAnnotations,
+          words: forbiddenCityValidatedWordsForLevel(fallbackLevel),
+          discoveries: base.discoveries,
+          wonderQuestion: '',
+          expressQuestion: '',
+        );
+      }
       return resolveJourneyLevel(_experience, _appState.journeyDifficulty);
     }
     return resolveAdaptiveJourneyLevel(
@@ -912,10 +931,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   String _batchOneStructuredMemory(BatchOneJourneyMemorySpec spec) {
-    final words = _levelContent.words
-        .map((entry) => entry.word)
-        .take(6)
-        .join('、');
+    final words = _levelContent.words.map((entry) => entry.word).take(6).join('、');
     return <String>[
       '故事结果：${spec.storyResult}',
       '核心文化点：${spec.culturalPoint}',
@@ -931,7 +947,9 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (batchSpec != null) {
       memoryController.text = _batchOneStructuredMemory(batchSpec);
     }
-    await _appState.completeJourney(memoryController.text);
+    await _appState.completeJourney(
+      _isForbiddenCity ? forbiddenCityMemoryAnchor : memoryController.text,
+    );
     if (!mounted) return;
     setState(() => step = AppState.journeyLastStep);
   }
@@ -1119,43 +1137,29 @@ class _JourneyScreenState extends State<JourneyScreen>
                                 () => unawaited(_goToStep(step - 1)),
                             style: OutlinedButton.styleFrom(
                               visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
                             ),
-                            icon: const Icon(
-                              Icons.arrow_back_rounded,
-                              size: 17,
-                            ),
-                            label: const Text(
-                              '上一步',
-                              style: TextStyle(fontSize: 11),
-                            ),
+                            icon: const Icon(Icons.arrow_back_rounded, size: 17),
+                            label: const Text('上一步', style: TextStyle(fontSize: 11)),
                           ),
                         ),
                         const SizedBox(width: 7),
                       ],
-                      if (secondaryButtonText != null &&
-                          onSecondary != null) ...[
+                      if (secondaryButtonText != null && onSecondary != null) ...[
                         Expanded(
                           child: OutlinedButton.icon(
                             key: ValueKey('journey-secondary-$title'),
                             onPressed: onSecondary,
                             style: OutlinedButton.styleFrom(
                               visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 5,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 5),
                             ),
                             icon: Icon(secondaryButtonIcon, size: 15),
                             label: Text(
                               secondaryButtonText,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                              ),
+                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800),
                             ),
                           ),
                         ),
@@ -1176,20 +1180,14 @@ class _JourneyScreenState extends State<JourneyScreen>
                               ? const SizedBox(
                                   width: 16,
                                   height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                 )
                               : Icon(buttonIcon, size: 17),
                           label: Text(
                             buttonText,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                            ),
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
                           ),
                         ),
                       ),
@@ -1291,13 +1289,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                                   _showReadingSupport(
                                     title: '故事第 ${entry.key + 1} 段',
                                     pinyin: annotation.pinyin,
-                                    nativeLabel: annotation.nativeLabel(
-                                      language,
-                                    ),
-                                    nativeText: annotation.nativeText(
-                                      language,
-                                      entry.value,
-                                    ),
+                                    nativeLabel: annotation.nativeLabel(language),
+                                    nativeText: annotation.nativeText(language, entry.value),
                                     english: annotation.english,
                                   ),
                                 ),
@@ -1305,9 +1298,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                                   text: entry.value,
                                   entries: _levelContent.words,
                                   narrationController: _narration,
-                                  highlightStart: isActive
-                                      ? snapshot!.start
-                                      : null,
+                                  highlightStart: isActive ? snapshot!.start : null,
                                   highlightEnd: isActive ? snapshot!.end : null,
                                   revealEnd: _narrationRevealEnd(
                                     contentId: 'story',
@@ -1316,26 +1307,17 @@ class _JourneyScreenState extends State<JourneyScreen>
                                   ),
                                   narrationContentId: 'story',
                                   narrationItemId: 'story-${entry.key}',
-                                  narrationSessionToken:
-                                      _narration.speechSessionToken,
+                                  narrationSessionToken: _narration.speechSessionToken,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: fontSize,
                                     height: 1.22,
                                     fontFamily: PhoenixTheme.chineseFontFamily,
-                                    fontFamilyFallback:
-                                        PhoenixTheme.chineseFontFallback,
+                                    fontFamilyFallback: PhoenixTheme.chineseFontFallback,
                                     fontWeight: FontWeight.w700,
                                     shadows: const [
-                                      Shadow(
-                                        color: Color(0xE6000000),
-                                        blurRadius: 3,
-                                        offset: Offset(0, 1),
-                                      ),
-                                      Shadow(
-                                        color: Color(0x99000000),
-                                        blurRadius: 8,
-                                      ),
+                                      Shadow(color: Color(0xE6000000), blurRadius: 3, offset: Offset(0, 1)),
+                                      Shadow(color: Color(0x99000000), blurRadius: 8),
                                     ],
                                   ),
                                 ),
@@ -1407,15 +1389,11 @@ class _JourneyScreenState extends State<JourneyScreen>
                       onTap: () => unawaited(_openWord(entry)),
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 3,
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                        decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
+                          color: Colors.black.withValues(alpha: .26),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        decoration: PhoenixTheme.journeyPanelDecoration
-                            .copyWith(
-                              color: Colors.black.withValues(alpha: .26),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -1431,27 +1409,16 @@ class _JourneyScreenState extends State<JourneyScreen>
                                       color: Colors.white,
                                       fontSize: 11,
                                       height: 1,
-                                      fontFamily:
-                                          PhoenixTheme.chineseFontFamily,
-                                      fontFamilyFallback:
-                                          PhoenixTheme.chineseFontFallback,
+                                      fontFamily: PhoenixTheme.chineseFontFamily,
+                                      fontFamilyFallback: PhoenixTheme.chineseFontFallback,
                                       fontWeight: FontWeight.w900,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black,
-                                          blurRadius: 4,
-                                        ),
-                                      ],
+                                      shadows: [Shadow(color: Colors.black, blurRadius: 4)],
                                     ),
                                   ),
                                 ),
                                 if (state.isWordSaved(entry.word)) ...[
                                   const SizedBox(width: 2),
-                                  const Icon(
-                                    Icons.bookmark_rounded,
-                                    size: 11,
-                                    color: PhoenixTheme.red,
-                                  ),
+                                  const Icon(Icons.bookmark_rounded, size: 11, color: PhoenixTheme.red),
                                 ],
                               ],
                             ),
@@ -1465,11 +1432,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                                 fontSize: cellHeight >= 120 ? 10 : 8,
                                 height: 1,
                                 fontFamily: PhoenixTheme.chineseFontFamily,
-                                fontFamilyFallback:
-                                    PhoenixTheme.chineseFontFallback,
-                                shadows: const [
-                                  Shadow(color: Colors.black, blurRadius: 4),
-                                ],
+                                fontFamilyFallback: PhoenixTheme.chineseFontFallback,
+                                shadows: const [Shadow(color: Colors.black, blurRadius: 4)],
                               ),
                             ),
                             if (showPartOfSpeech) ...[
@@ -1483,12 +1447,9 @@ class _JourneyScreenState extends State<JourneyScreen>
                                   color: Colors.white,
                                   fontSize: 9.5,
                                   fontFamily: PhoenixTheme.chineseFontFamily,
-                                  fontFamilyFallback:
-                                      PhoenixTheme.chineseFontFallback,
+                                  fontFamilyFallback: PhoenixTheme.chineseFontFallback,
                                   fontWeight: FontWeight.w800,
-                                  shadows: [
-                                    Shadow(color: Colors.black, blurRadius: 4),
-                                  ],
+                                  shadows: [Shadow(color: Colors.black, blurRadius: 4)],
                                 ),
                               ),
                             ],
@@ -1504,12 +1465,9 @@ class _JourneyScreenState extends State<JourneyScreen>
                                   fontSize: 8.6,
                                   height: 1.15,
                                   fontFamily: PhoenixTheme.chineseFontFamily,
-                                  fontFamilyFallback:
-                                      PhoenixTheme.chineseFontFallback,
+                                  fontFamilyFallback: PhoenixTheme.chineseFontFallback,
                                   fontWeight: FontWeight.w700,
-                                  shadows: [
-                                    Shadow(color: Colors.black, blurRadius: 4),
-                                  ],
+                                  shadows: [Shadow(color: Colors.black, blurRadius: 4)],
                                 ),
                               ),
                             ],
@@ -1525,11 +1483,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                                   fontSize: 8.4,
                                   height: 1.15,
                                   fontFamily: PhoenixTheme.chineseFontFamily,
-                                  fontFamilyFallback:
-                                      PhoenixTheme.chineseFontFallback,
-                                  shadows: [
-                                    Shadow(color: Colors.black, blurRadius: 4),
-                                  ],
+                                  fontFamilyFallback: PhoenixTheme.chineseFontFallback,
+                                  shadows: [Shadow(color: Colors.black, blurRadius: 4)],
                                 ),
                               ),
                             ],
@@ -1545,11 +1500,8 @@ class _JourneyScreenState extends State<JourneyScreen>
                                   fontSize: 8.4,
                                   height: 1.15,
                                   fontFamily: PhoenixTheme.chineseFontFamily,
-                                  fontFamilyFallback:
-                                      PhoenixTheme.chineseFontFallback,
-                                  shadows: [
-                                    Shadow(color: Colors.black, blurRadius: 4),
-                                  ],
+                                  fontFamilyFallback: PhoenixTheme.chineseFontFallback,
+                                  shadows: [Shadow(color: Colors.black, blurRadius: 4)],
                                 ),
                               ),
                             ],
@@ -1636,9 +1588,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                                 text: item.text,
                                 entries: _levelContent.words,
                                 narrationController: _narration,
-                                highlightStart: isActive
-                                    ? snapshot!.start
-                                    : null,
+                                highlightStart: isActive ? snapshot!.start : null,
                                 highlightEnd: isActive ? snapshot!.end : null,
                                 revealEnd: _narrationRevealEnd(
                                   contentId: 'discovery',
@@ -1647,8 +1597,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                                 ),
                                 narrationContentId: 'discovery',
                                 narrationItemId: 'discovery-${entry.key}',
-                                narrationSessionToken:
-                                    _narration.speechSessionToken,
+                                narrationSessionToken: _narration.speechSessionToken,
                                 style: PhoenixTheme.journeyBodyStyle.copyWith(
                                   fontSize: fontSize,
                                   fontWeight: FontWeight.w700,
@@ -1718,9 +1667,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 onChanged: _onWonderChanged,
                 style: PhoenixTheme.journeyWritingInputStyle,
                 cursorColor: PhoenixTheme.contentAccent,
-                decoration: PhoenixTheme.journeyWritingInputDecoration(
-                  '写下你的想法……',
-                ),
+                decoration: PhoenixTheme.journeyWritingInputDecoration('写下你的想法……'),
               ),
             ),
           ],
@@ -1817,9 +1764,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 onChanged: _onExpressChanged,
                 style: PhoenixTheme.journeyWritingInputStyle,
                 cursorColor: PhoenixTheme.contentAccent,
-                decoration: PhoenixTheme.journeyWritingInputDecoration(
-                  '用中文写下你的表达……',
-                ),
+                decoration: PhoenixTheme.journeyWritingInputDecoration('用中文写下你的表达……'),
               ),
             ),
           ],
@@ -1829,6 +1774,8 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _memoryPage() {
+    if (_isForbiddenCity) return _forbiddenCityMemoryPage();
+
     final batchSpec = batchOneMemorySpecFor(_experience.id);
     if (batchSpec != null) {
       return _page(
@@ -1838,9 +1785,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         onNext: () => unawaited(_finishJourney()),
         child: BatchOneJourneySummary(
           spec: batchSpec,
-          words: _levelContent.words
-              .map((entry) => entry.word)
-              .toList(growable: false),
+          words: _levelContent.words.map((entry) => entry.word).toList(growable: false),
           challengeCompleted: true,
           displayText: _appState.displayText,
         ),
@@ -1902,7 +1847,56 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
+  Widget _forbiddenCityMemoryPage() {
+    return _page(
+      title: '旅程回忆',
+      buttonText: '结束旅程',
+      buttonIcon: Icons.flag_rounded,
+      onNext: () => unawaited(_finishJourney()),
+      child: ListView.separated(
+        padding: const EdgeInsets.only(bottom: 6),
+        itemCount: forbiddenCityMemoryReviews.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 6),
+        itemBuilder: (context, index) {
+          final item = forbiddenCityMemoryReviews[index];
+          return Container(
+            padding: const EdgeInsets.all(10),
+            decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
+              color: Colors.black.withValues(alpha: .26),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _appState.displayText(item.prompt),
+                  style: const TextStyle(
+                    color: Color(0xFFFFD879),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _appState.displayText(item.answer),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    height: 1.35,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _completePage() {
+    if (_isForbiddenCity) return _forbiddenCityCompletePage();
+
     final batchSpec = batchOneMemorySpecFor(_experience.id);
     if (batchSpec != null) {
       return _page(
@@ -1916,14 +1910,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             const Positioned(
               top: 2,
               left: 2,
-              child: Text(
-                '盖章成功',
-                style: TextStyle(
-                  color: PhoenixTheme.red,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+              child: Text('盖章成功', style: TextStyle(color: PhoenixTheme.red, fontSize: 17, fontWeight: FontWeight.w900)),
             ),
             Align(
               key: const ValueKey('completion-background-stamp'),
@@ -1932,10 +1919,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 padding: const EdgeInsets.only(top: 1, right: 2),
                 child: FittedBox(
                   fit: BoxFit.contain,
-                  child: AnimatedCityJourneyStamp(
-                    journey: _experience,
-                    size: 70,
-                  ),
+                  child: AnimatedCityJourneyStamp(journey: _experience, size: 70),
                 ),
               ),
             ),
@@ -1946,9 +1930,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                   Expanded(
                     child: BatchOneJourneySummary(
                       spec: batchSpec,
-                      words: _levelContent.words
-                          .map((entry) => entry.word)
-                          .toList(growable: false),
+                      words: _levelContent.words.map((entry) => entry.word).toList(growable: false),
                       challengeCompleted: true,
                       displayText: _appState.displayText,
                       completion: true,
@@ -1972,17 +1954,9 @@ class _JourneyScreenState extends State<JourneyScreen>
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () => unawaited(_restartJourney()),
-                            style: OutlinedButton.styleFrom(
-                              visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                            ),
+                            style: OutlinedButton.styleFrom(visualDensity: VisualDensity.compact, padding: const EdgeInsets.symmetric(horizontal: 8)),
                             icon: const Icon(Icons.replay_rounded, size: 16),
-                            label: const Text(
-                              '重新体验',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 10.5),
-                            ),
+                            label: const Text('重新体验', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10.5)),
                           ),
                         ),
                       ],
@@ -2011,10 +1985,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               padding: const EdgeInsets.only(top: 2, right: 2),
               child: FittedBox(
                 fit: BoxFit.contain,
-                child: AnimatedCityJourneyStamp(
-                  journey: _experience,
-                  size: 104,
-                ),
+                child: AnimatedCityJourneyStamp(journey: _experience, size: 104),
               ),
             ),
           ),
@@ -2025,11 +1996,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               children: [
                 const Text(
                   '盖章成功',
-                  style: TextStyle(
-                    color: PhoenixTheme.red,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: TextStyle(color: PhoenixTheme.red, fontSize: 18, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 3),
                 const Text(
@@ -2073,6 +2040,124 @@ class _JourneyScreenState extends State<JourneyScreen>
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _forbiddenCityCompletePage() {
+    return _page(
+      title: '北京已点亮',
+      buttonText: '返回首页',
+      buttonIcon: Icons.home_outlined,
+      showBack: false,
+      onNext: () => Navigator.of(context).pop(),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(
+              alignment: Alignment.center,
+              child: AnimatedCityJourneyStamp(journey: _experience, size: 96),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              forbiddenCityAchievementName,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: PhoenixTheme.red,
+                fontSize: 17,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _ForbiddenCityCompleteCard(
+              title: 'Journey Summary',
+              body: forbiddenCityJourneySummary,
+            ),
+            const SizedBox(height: 6),
+            const _ForbiddenCityCompleteCard(
+              title: 'Memory Anchor',
+              body: forbiddenCityMemoryAnchor,
+            ),
+            const SizedBox(height: 6),
+            const _ForbiddenCityCompleteCard(
+              title: 'Challenge Reward',
+              body: '$forbiddenCityChallengeRewardName\n$forbiddenCityChallengeRewardMeaning',
+            ),
+            const SizedBox(height: 6),
+            const _ForbiddenCityCompleteCard(
+              title: 'Journey Completion',
+              body: forbiddenCityJourneyCompletion,
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 36,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: JourneyShareButton(
+                      isTraditional: _appState.isTraditional,
+                      city: _experience.city,
+                      place: _experience.place,
+                      compact: true,
+                      label: _appState.displayText('分享旅程'),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => unawaited(_restartJourney()),
+                      icon: const Icon(Icons.replay_rounded, size: 16),
+                      label: const Text('重新体验', style: TextStyle(fontSize: 10.5)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ForbiddenCityCompleteCard extends StatelessWidget {
+  const _ForbiddenCityCompleteCard({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
+        color: Colors.black.withValues(alpha: .26),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFFFFD879),
+              fontSize: 10.5,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            body,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              height: 1.35,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -2205,10 +2290,7 @@ class _ReadingSupportSheet extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w900,
-                ),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
               ),
             ),
             NarrationSpeedStepper(
@@ -2285,10 +2367,7 @@ class _SupportLine extends StatelessWidget {
                   onPressed: () => unawaited(onSpeak!()),
                   visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.all(4),
-                  constraints: const BoxConstraints.tightFor(
-                    width: 30,
-                    height: 30,
-                  ),
+                  constraints: const BoxConstraints.tightFor(width: 30, height: 30),
                   icon: Icon(Icons.volume_up_rounded, size: 18, color: color),
                 ),
             ],
@@ -2343,18 +2422,12 @@ class _InlineTipState extends State<_InlineTip> {
               decoration: BoxDecoration(
                 color: PhoenixTheme.red.withValues(alpha: .07),
                 borderRadius: BorderRadius.circular(99),
-                border: Border.all(
-                  color: PhoenixTheme.red.withValues(alpha: .18),
-                ),
+                border: Border.all(color: PhoenixTheme.red.withValues(alpha: .18)),
               ),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.tips_and_updates_outlined,
-                    size: 14,
-                    color: PhoenixTheme.red,
-                  ),
+                  Icon(Icons.tips_and_updates_outlined, size: 14, color: PhoenixTheme.red),
                   SizedBox(width: 4),
                   Text(
                     '提示',
@@ -2375,21 +2448,14 @@ class _InlineTipState extends State<_InlineTip> {
                 ? Container(
                     key: const ValueKey('press-hint-content'),
                     margin: const EdgeInsets.only(top: 6),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 7,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                     decoration: BoxDecoration(
                       color: PhoenixTheme.red.withValues(alpha: .06),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       widget.text,
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 11,
-                        height: 1.35,
-                      ),
+                      style: const TextStyle(color: Colors.black54, fontSize: 11, height: 1.35),
                     ),
                   )
                 : const SizedBox.shrink(),

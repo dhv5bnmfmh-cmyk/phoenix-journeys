@@ -5,7 +5,7 @@ import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 
 bool isBatchOneGoldJourney(String journeyId) =>
-    batchOneJourneyIds.contains(journeyId);
+    journeyId == 'shanghai-bund';
 
 /// Thin adaptive adapter over the canonical remediation records.
 /// It does not own Story, Words, Discovery, Challenge, Memory, or Completion
@@ -113,6 +113,7 @@ class BatchOneJourneyMemorySpec {
 }
 
 BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
+  if (journeyId != 'shanghai-bund') return null;
   final journey = batchOneRemediationFor(journeyId);
   if (journey == null) return null;
 

@@ -1,5 +1,6 @@
 import '../models/story_content.dart';
 import 'batch_one_journey_remediation.dart';
+import 'forbidden_city_journey_runtime.dart';
 
 const beijingStorySources = <StorySourceRecord>[
   StorySourceRecord(
@@ -59,11 +60,8 @@ const beijingStorySources = <StorySourceRecord>[
   ),
 ];
 
-const _forbiddenCityCanonicalStory = <String>[
-  '雷雨逼近，二十一岁的石质保护实习生纪衡在午门内接到任务：闭馆前确认太和殿丹陛一处排水异常。沿中轴进入外朝时，他第一次把三层汉白玉台基、国家礼仪空间和北部内廷的宫寝生活看成同一座宫城里彼此分工的秩序。',
-  '一个石雕龙头没有出水，附近石缝却开始返潮。大雨时，这些龙首承担真实排水功能，会出现“千龙吐水”的景象；偏偏异常点旁还保留着旧修缮灰缝。太和殿历经火灾、重建与持续维修，这道旧痕可能是需要保护的历史层。',
-  '纪衡必须在立刻疏通与停手复核之间选择。直接伸工具可能马上见水，也可能刮伤石材或破坏旧修缮层。他收起工具，记录位置、时间和编号，请保护师共同判断，并用不触碰文物本体的可逆临时导排先控制暴雨风险。代价是，他错过了原定汇报时间。',
-  '雷雨落下后，临时导排把水带离返潮石缝。次日受控检查确认，杂物堵在旧修缮层上方，不需要凿动石材；保护师只做最小范围清理，水流恢复，旧灰缝、编号和影像都被保留下来。纪衡终于明白，真正的独立不是抢先动手，而是让每次干预都能解释、复核并留下可追溯依据。',
+final _forbiddenCityCanonicalStory = <String>[
+  forbiddenCityLockedStories.last,
 ];
 
 const _templeOfHeavenCanonicalStory = <String>[
@@ -100,10 +98,18 @@ JourneyContentRecord _record({
 }
 
 final beijingForbiddenCityJourney = _record(
-  id: forbiddenCityRemediation.id,
-  title: forbiddenCityRemediation.title,
+  id: forbiddenCityJourneyId,
+  title: '北京 · 紫禁城',
   geoNodeId: 'cn-beijing-dongcheng-forbidden-city',
-  tags: const ['北京', '故宫', '紫禁城', '太和殿', '丹陛', '保护', '世界文化遗产'],
+  tags: const [
+    '北京',
+    '故宫',
+    '紫禁城',
+    '中轴',
+    '礼仪秩序',
+    '宫廷空间',
+    '世界文化遗产',
+  ],
   paragraphs: _forbiddenCityCanonicalStory,
   sourceIds: const [
     'dpm-forbidden-city-guide',
@@ -113,8 +119,8 @@ final beijingForbiddenCityJourney = _record(
 );
 
 final beijingTempleOfHeavenJourney = _record(
-  id: 'beijing-temple-of-heaven',
-  title: '北京 · 天坛：回音壁前的空白刻度',
+  id: templeOfHeavenRemediation.id,
+  title: templeOfHeavenRemediation.title,
   geoNodeId: 'cn-beijing-dongcheng',
   tags: const ['北京', '天坛', '祭天礼制', '声学', '证据', '世界文化遗产'],
   paragraphs: _templeOfHeavenCanonicalStory,
