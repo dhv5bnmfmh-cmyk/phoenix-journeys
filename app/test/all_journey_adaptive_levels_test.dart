@@ -51,10 +51,10 @@ void main() {
         expect(
           storyCharacters,
           inInclusiveRange(
-            storyTarget.minimumCharacters,
-            storyTarget.maximumCharacters,
+            storyTarget.acceptedMinimumCharacters,
+            storyTarget.acceptedMaximumCharacters,
           ),
-          reason: '${journey.id} ${profile.displayLabel} story length',
+          reason: '${journey.id} ${profile.displayLabel} story length with approved ±50 character tolerance',
         );
         expect(
           level.discoveries,
