@@ -41,4 +41,33 @@ void main() {
       );
     }
   });
+
+  test('Batch 1 vocabulary examples never leak the other protagonist', () {
+    final forbidden = batchOneRemediationFor('beijing-forbidden-city')!;
+    final bund = batchOneRemediationFor('shanghai-bund')!;
+
+    String examplesFor(RemediatedJourney journey) => journey.words
+        .expand((entry) => entry.examples)
+        .map(
+          (example) => <String>[
+            example.chinese,
+            example.pinyin,
+            example.vietnamese,
+            example.english,
+          ].join(' '),
+        )
+        .join('\n');
+
+    final forbiddenExamples = examplesFor(forbidden);
+    expect(forbiddenExamples, isNot(contains('林乔')));
+    expect(forbiddenExamples, isNot(contains('Lín Qiáo')));
+    expect(forbiddenExamples, isNot(contains('Lâm Kiều')));
+    expect(forbiddenExamples, isNot(contains('Lin Qiao')));
+
+    final bundExamples = examplesFor(bund);
+    expect(bundExamples, isNot(contains('梁砚')));
+    expect(bundExamples, isNot(contains('Liáng Yàn')));
+    expect(bundExamples, isNot(contains('Lương Nghiên')));
+    expect(bundExamples, isNot(contains('Liang Yan')));
+  });
 }
