@@ -15,8 +15,13 @@ test('Story and Discovery show position with text-only highlights', () => {
   ) ?? [];
   assert.equal(
     highlightBindings.length,
-    3,
-    'Forbidden City segmented Story, default Story, and Discovery must preserve text-only narration position',
+    2,
+    'shared Story and Discovery must each preserve text-only narration position exactly once',
+  );
+  assert.doesNotMatch(
+    journey,
+    /Widget _forbiddenCityStoryPage|forbidden-city-story-segment/,
+    'Forbidden City must use the same text-only narration position path as stable Journeys',
   );
   assert.match(interactive, /reading-highlight-/);
   assert.match(interactive, /class _InlineReadingMarker/);
