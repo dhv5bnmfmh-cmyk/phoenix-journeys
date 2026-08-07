@@ -31,16 +31,51 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     );
   }
   if (isBatchOneGoldJourney(experience.id)) {
-    return buildBatchOneGoldLevel(
+    final level = buildBatchOneGoldLevel(
       experience,
       profile: profile,
       knownWords: knownWords,
     );
+    return experience.id == 'shanghai-bund'
+        ? _normalizeShanghaiBundParagraphOpening(level)
+        : level;
   }
   return resolveSharedAdaptiveJourneyLevel(
     experience,
     profile: profile,
     knownWords: knownWords,
+  );
+}
+
+JourneyLevelContent _normalizeShanghaiBundParagraphOpening(
+  JourneyLevelContent content,
+) {
+  if (content.storyParagraphs.length < 2) return content;
+  final paragraphs = content.storyParagraphs.toList(growable: false);
+  final annotations = content.storyAnnotations.toList(growable: false);
+  paragraphs[1] = paragraphs[1].replaceFirst('她必须在按时上传', '周玥必须在按时上传');
+  final second = annotations[1];
+  annotations[1] = ReadingAnnotation(
+    pinyin: second.pinyin.replaceFirst(
+      'Tā bìxū zài ànshí shàngchuán',
+      'Zhōu Yuè bìxū zài ànshí shàngchuán',
+    ),
+    vietnamese: second.vietnamese.replaceFirst(
+      'Cô phải chọn giữa tải lên',
+      'Chu Nguyệt phải chọn giữa tải lên',
+    ),
+    english: second.english.replaceFirst(
+      'She must choose between uploading',
+      'Zhou Yue must choose between uploading',
+    ),
+  );
+  return JourneyLevelContent(
+    storyParagraphs: paragraphs,
+    storyAnnotations: annotations,
+    words: content.words,
+    discoveries: content.discoveries,
+    wonderQuestion: content.wonderQuestion,
+    expressQuestion: content.expressQuestion,
   );
 }
 
