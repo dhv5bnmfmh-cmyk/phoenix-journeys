@@ -47,16 +47,22 @@ JourneyLevelContent buildBatchOneGoldLevel(
 }
 
 /// UI compatibility view over the canonical Batch 1 remediation record.
+///
+/// [reviews] deliberately keeps the canonical six-part Memory review intact so
+/// the Memory and Completion surfaces do not collapse historically important
+/// protagonist, event, history, culture, architecture, or vocabulary recall.
 class BatchOneJourneyMemorySpec {
   const BatchOneJourneyMemorySpec({
     required this.storyResult,
     required this.culturalPoint,
+    required this.reviews,
     required this.longTermAnchor,
     required this.completionSummary,
   });
 
   final String storyResult;
   final String culturalPoint;
+  final List<RemediatedMemoryReview> reviews;
   final String longTermAnchor;
   final String completionSummary;
 }
@@ -73,6 +79,7 @@ BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
     storyResult: journey.completion.journeySummary,
     culturalPoint:
         '${memoryAnswer('culture')} ${memoryAnswer('architecture')}',
+    reviews: List<RemediatedMemoryReview>.unmodifiable(journey.memory),
     longTermAnchor: journey.completion.memoryAnchor,
     completionSummary:
         '${journey.completion.achievement} ${journey.completion.challengeReward}',
