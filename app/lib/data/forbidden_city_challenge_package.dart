@@ -54,7 +54,7 @@ const forbiddenCityParagraphRebuild = <ForbiddenCityParagraphRebuild>[
 const forbiddenCityGrammarRepair = <ForbiddenCityGrammarRepair>[
   ForbiddenCityGrammarRepair(level: 1, broken: '沈砚没有跨过去最后。', correct: '最后，沈砚没有跨过去。', focus: '时间副词“最后”的位置'),
   ForbiddenCityGrammarRepair(level: 2, broken: '可是自己知道，他并不应该进去。', correct: '可是他知道，自己并不应该进去。', focus: '主语与反身代词“自己”的指向'),
-  ForbiddenCityGrammarRepair(level: 3, broken: '因为没有人阻止他，所以让选择变得更难。', correct: '没有人阻止他。这反而让选择变得更难。', focus: '“反而”表达与预期相反的结果'),
+  ForbiddenCityGrammarRepair(level: 3, broken: '这让选择反而变得更难。', correct: '这反而让选择变得更难。', focus: '“反而”表达与预期相反的结果'),
   ForbiddenCityGrammarRepair(level: 4, broken: '如果现在进去，所以他就能亲眼补上那一块。', correct: '如果现在进去，他就能亲眼补上那一块。', focus: '如果……就……'),
   ForbiddenCityGrammarRepair(level: 5, broken: '此前，他一直把宫中的限制理解自己这个外来学徒的不便。', correct: '此前，他一直把宫中的限制理解为自己这个外来学徒的不便。', focus: '理解为'),
   ForbiddenCityGrammarRepair(level: 6, broken: '这一次，周师傅没有替决定他。', correct: '这一次，没有周师傅替他决定。', focus: '“替 + 人 + 动词”的结构与否定位置'),
