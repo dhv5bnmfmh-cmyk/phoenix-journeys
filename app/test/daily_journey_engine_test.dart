@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/world_story_runtime.dart';
 
 void main() {
@@ -29,7 +30,18 @@ void main() {
         isEmpty,
         reason: journey.id,
       );
-      expect(journey.storyAnnotations.length, journey.content.sections.length);
+
+      if (journey.id == forbiddenCityJourneyId) {
+        expect(journey.content.sections, hasLength(1));
+        expect(
+          journey.content.sections.single.text,
+          forbiddenCityLockedStories.last,
+          reason: 'Forbidden City catalog metadata must bind the locked canonical Story',
+        );
+      } else {
+        expect(journey.storyAnnotations.length, journey.content.sections.length);
+      }
+
       expect(journey.words.length, greaterThanOrEqualTo(9));
       expect(
         journey.discoveries.length,
