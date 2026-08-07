@@ -24,7 +24,7 @@ JourneyContentQualityReport auditForbiddenCityLockedQuality(
   }
 
   if (content.storyParagraphs.length != 1 ||
-      content.storyParagraphs.singleOrNull != story) {
+      content.storyParagraphs.first != story) {
     critical(
       'forbidden-city-runtime-binding',
       'Forbidden City must bind the exact locked Story for Phoenix Lv.$level.',
