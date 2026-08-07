@@ -1,0 +1,62 @@
+name: Batch 1 Flutter Test Machine Diagnostic
+
+on:
+  push:
+    branches:
+      - preview/batch-1-final-founder-review
+    paths:
+      - '.github/workflows/batch1-test-machine-diagnostic.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - working-directory: app
+        run: flutter pub get
+      - name: Capture failed test names
+        shell: bash
+        run: |
+          set +e
+          cd app
+          flutter test --machine > /tmp/tests.jsonl 2>/tmp/tests.stderr
+          code=$?
+          cd ..
+          python - <<'PY'
+          import json
+          tests = {}
+          failed = []
+          errors = []
+          for raw in open('/tmp/tests.jsonl', errors='replace'):
+              try:
+                  e = json.loads(raw)
+              except Exception:
+                  continue
+              t = e.get('type')
+              if t == 'testStart':
+                  test = e.get('test', {})
+                  tests[test.get('id')] = f"{test.get('url','')} :: {test.get('name','')}"
+              elif t == 'testDone' and e.get('result') not in ('success','skipped'):
+                  failed.append(tests.get(e.get('testID'), str(e.get('testID'))))
+              elif t == 'error':
+                  errors.append(f"TEST={tests.get(e.get('testID'), e.get('testID'))}\nERROR={e.get('error','')}\nSTACK={e.get('stackTrace','')}")
+          with open('.github/batch1-failed-tests.txt','w') as f:
+              f.write('FAILED TESTS\n' + '\n'.join(dict.fromkeys(failed)) + '\n\nERRORS\n' + '\n\n'.join(errors[-40:]))
+          PY
+          if [[ "$code" -ne 0 ]]; then
+            git config user.name 'Phoenix Preview Bot'
+            git config user.email 'actions@users.noreply.github.com'
+            git add .github/batch1-failed-tests.txt
+            git commit -m 'diagnostic: capture exact failed test names'
+            git push
+          fi
+          exit "$code"
