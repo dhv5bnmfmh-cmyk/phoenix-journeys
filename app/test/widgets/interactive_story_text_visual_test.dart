@@ -5,6 +5,15 @@ import 'package:phoenix_journeys/state/app_state.dart';
 import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
 import 'package:provider/provider.dart';
 
+Iterable<TextSpan> _textSpans(InlineSpan span) sync* {
+  if (span is TextSpan) {
+    yield span;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      yield* _textSpans(child);
+    }
+  }
+}
+
 void main() {
   testWidgets(
     'explicit narration range highlights active text without a triangle',
@@ -33,4 +42,36 @@ void main() {
       );
     },
   );
+
+  testWidgets('Story stays visibly readable when narration begins at offset zero', (
+    tester,
+  ) async {
+    final state = AppState();
+    await tester.pumpWidget(
+      ChangeNotifierProvider<AppState>.value(
+        value: state,
+        child: const MaterialApp(
+          home: Scaffold(
+            body: InteractiveStoryText(
+              text: '紫禁城里的空间并不平等地向所有人展开。',
+              entries: <WordEntry>[],
+              narrationContentId: 'story',
+              narrationItemId: 'story-0',
+              revealEnd: 0,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final richText = tester.widget<RichText>(find.byType(RichText).first);
+    expect(richText.text.toPlainText(), contains('紫禁城里的空间'));
+    expect(
+      _textSpans(richText.text).where(
+        (span) => span.text?.isNotEmpty == true && span.style?.color == Colors.transparent,
+      ),
+      isEmpty,
+    );
+  });
 }
