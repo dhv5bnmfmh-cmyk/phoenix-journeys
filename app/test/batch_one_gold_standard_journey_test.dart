@@ -11,6 +11,18 @@ void main() {
       expect(journey, isNotNull);
       expect(summary, isNotNull);
       expect(summary!.storyResult, journey!.completion.journeySummary);
+      expect(summary.reviews, journey.memory);
+      expect(
+        summary.reviews.map((item) => item.category).toList(),
+        <String>[
+          'protagonist',
+          'events',
+          'history',
+          'culture',
+          'architecture',
+          'vocabulary',
+        ],
+      );
       expect(summary.longTermAnchor, journey.completion.memoryAnchor);
       expect(summary.completionSummary, contains(journey.completion.achievement));
       expect(summary.completionSummary, contains(journey.completion.challengeReward));
