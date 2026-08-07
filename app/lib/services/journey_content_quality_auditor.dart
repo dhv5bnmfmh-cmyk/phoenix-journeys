@@ -41,6 +41,12 @@ class JourneyContentQualityReport {
   }
 }
 
+const _dedicatedNarrativeInvariantJourneyIds = <String>{
+  'beijing-summer-palace',
+  'beijing-forbidden-city',
+  'shanghai-bund',
+};
+
 JourneyContentQualityReport auditJourneyContentQuality(
   DailyJourneyExperience experience,
   JourneyLevelContent content, {
@@ -135,7 +141,7 @@ JourneyContentQualityReport auditJourneyContentQuality(
     }
   }
 
-  if (experience.id != 'beijing-summer-palace') {
+  if (!_dedicatedNarrativeInvariantJourneyIds.contains(experience.id)) {
     final sourceSentences = splitChineseQualitySentences(
       experience.content.storyParagraphs.join(),
     );
