@@ -20,9 +20,21 @@ void main() {
   test('Forbidden City review levels expose real paragraph segmentation', () {
     for (final level in <int>[1, 5, 10]) {
       final content = forbiddenCityLevelContent(level);
-      expect(content.storyParagraphs.length, greaterThan(1), reason: 'Lv$level must not render as a 1/1 text wall');
+      expect(
+        content.storyParagraphs.length,
+        greaterThan(1),
+        reason: 'Lv$level must not render as a 1/1 text wall',
+      );
       expect(content.storyAnnotations.length, content.storyParagraphs.length);
-      expect(content.storyParagraphs.every((paragraph) => paragraph.trim().isNotEmpty), isTrue);
+      expect(
+        content.storyParagraphs.every((paragraph) => paragraph.trim().isNotEmpty),
+        isTrue,
+      );
+      expect(
+        content.storyParagraphs.join('\n\n'),
+        forbiddenCityLockedStories[level - 1],
+        reason: 'Lv$level reading segmentation must not rewrite locked Story text',
+      );
     }
   });
 
