@@ -128,4 +128,4 @@ jobs:
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
             --data "$payload"
 
-# Validation rerun marker: PR #155 segmented Forbidden City Story UX remediation.
+# Validation rerun marker: PR #155 segmented Forbidden City Story UX remediation after narration contract update.
