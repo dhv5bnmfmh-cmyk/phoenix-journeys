@@ -59,15 +59,35 @@ void main() {
         .join('\n');
 
     final forbiddenExamples = examplesFor(forbidden);
-    expect(forbiddenExamples, isNot(contains('林乔')));
-    expect(forbiddenExamples, isNot(contains('Lín Qiáo')));
-    expect(forbiddenExamples, isNot(contains('Lâm Kiều')));
-    expect(forbiddenExamples, isNot(contains('Lin Qiao')));
+    expect(forbiddenExamples, isNot(contains('陆潮')));
+    expect(forbiddenExamples, isNot(contains('Lù Cháo')));
+    expect(forbiddenExamples, isNot(contains('Lục Triều')));
+    expect(forbiddenExamples, isNot(contains('Lu Chao')));
 
     final bundExamples = examplesFor(bund);
-    expect(bundExamples, isNot(contains('梁砚')));
-    expect(bundExamples, isNot(contains('Liáng Yàn')));
-    expect(bundExamples, isNot(contains('Lương Nghiên')));
-    expect(bundExamples, isNot(contains('Liang Yan')));
+    expect(bundExamples, isNot(contains('纪衡')));
+    expect(bundExamples, isNot(contains('Jì Héng')));
+    expect(bundExamples, isNot(contains('Kỷ Hành')));
+    expect(bundExamples, isNot(contains('Ji Heng')));
+  });
+
+  test('Batch 1 rejects the remediated Journeys previous plot engines', () {
+    final forbiddenStory = batchOneRemediationFor('beijing-forbidden-city')!
+        .levels
+        .last
+        .storyParagraphs
+        .join();
+    final bundStory = batchOneRemediationFor('shanghai-bund')!
+        .levels
+        .last
+        .storyParagraphs
+        .join();
+
+    for (final oldAnchor in <String>['工牌', '投影长度', '斜长', '最快实习生']) {
+      expect(forbiddenStory, isNot(contains(oldAnchor)));
+    }
+    for (final oldAnchor in <String>['旧照片', '底片编号', '说明牌', '档案志愿者']) {
+      expect(bundStory, isNot(contains(oldAnchor)));
+    }
   });
 }
