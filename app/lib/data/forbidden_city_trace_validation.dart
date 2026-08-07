@@ -24,6 +24,16 @@ List<ForbiddenCityWordRecord> get forbiddenCityValidatedWordRecords =>
             storySource: '“界”。',
             firstAppearsAt: 1,
           ),
+        '宫院' => _correctTrace(
+            record,
+            storySource: '后来，一道通往更深宫院的门打开了。',
+            firstAppearsAt: 1,
+          ),
+        '对照' => _correctTrace(
+            record,
+            storySource: '沈砚看着他的背影，突然发现了一个奇怪的对照。',
+            firstAppearsAt: 3,
+          ),
         '行动范围' => _correctTrace(
             record,
             storySource: '两个人都身在紫禁城，却并不拥有相同的行动范围。',
@@ -35,11 +45,28 @@ List<ForbiddenCityWordRecord> get forbiddenCityValidatedWordRecords =>
                 '此刻，他有机会偷偷跨过一条本来不属于自己的空间界线，却没有任何必须进入的理由。',
             firstAppearsAt: 5,
           ),
-        '接近' || '停留' => _correctTrace(
+        '接近' => _correctTrace(
+            record,
+            storySource:
+                '外朝和重要典礼、政务有关，内廷则更接近皇帝、后妃等人的宫廷生活。',
+            firstAppearsAt: 1,
+          ),
+        '停留' => _correctTrace(
             record,
             storySource:
                 '这些空间与国家重要典礼和政务活动密切相关。中轴、院落、宫门以及殿宇前后的关系，共同规定了进入、接近和停留的方式。',
             firstAppearsAt: 4,
+          ),
+        '空间组织' => _correctTrace(
+            record,
+            storySource:
+                '它不再只是“很多漂亮的大房子”，而逐渐成为一套通过空间组织人与活动的系统。',
+            firstAppearsAt: 5,
+          ),
+        '占有' => _correctTrace(
+            record,
+            storySource: '一张真正理解空间的地图，并不要求把所有未知都占有。',
+            firstAppearsAt: 7,
           ),
         '建筑语言' => _correctTrace(
             record,
