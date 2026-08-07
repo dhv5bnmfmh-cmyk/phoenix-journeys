@@ -24,7 +24,7 @@ void main() {
           .allMatches(journey)
           .map((match) => match.group(1))
           .toSet(),
-      equals(<String>{'_storyPage', '_defaultStoryPage'}),
+      equals(<String>{'_defaultStoryPage'}),
       reason: 'Journey-specific Story renderer requires Founder-approved architecture review.',
     );
     expect(story, isNot(contains('_isForbiddenCity')));
