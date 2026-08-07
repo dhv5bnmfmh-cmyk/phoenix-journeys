@@ -60,6 +60,12 @@ class BatchOneJourneySummary extends StatelessWidget {
           label: '旅程收束',
           value: spec.completionSummary,
         ),
+      if (completion)
+        (
+          icon: Icons.explore_rounded,
+          label: '继续探索',
+          value: '把这个记忆锚点带进下一段 Journey，继续用中文观察、判断和表达。',
+        ),
     ];
 
     return LayoutBuilder(
