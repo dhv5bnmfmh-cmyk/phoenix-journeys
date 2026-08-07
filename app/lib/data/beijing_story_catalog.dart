@@ -1,5 +1,4 @@
 import '../models/story_content.dart';
-import 'batch_one_journey_remediation.dart';
 import 'forbidden_city_journey_runtime.dart';
 
 const beijingStorySources = <StorySourceRecord>[
@@ -119,8 +118,8 @@ final beijingForbiddenCityJourney = _record(
 );
 
 final beijingTempleOfHeavenJourney = _record(
-  id: templeOfHeavenRemediation.id,
-  title: templeOfHeavenRemediation.title,
+  id: 'beijing-temple-of-heaven',
+  title: '北京 · 天坛：回音壁前的空白刻度',
   geoNodeId: 'cn-beijing-dongcheng',
   tags: const ['北京', '天坛', '祭天礼制', '声学', '证据', '世界文化遗产'],
   paragraphs: _templeOfHeavenCanonicalStory,
