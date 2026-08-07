@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 
 void main() {
   test('reviewed destinations rotate without repeating during one cycle',
@@ -17,6 +18,19 @@ void main() {
 
   test('every journey has complete story and learning content', () {
     for (final journey in dailyJourneyExperiences) {
+      if (journey.id == forbiddenCityJourneyId) {
+        expect(journey.content.storyParagraphs, hasLength(1), reason: journey.id);
+        expect(
+          journey.content.storyParagraphs.single,
+          forbiddenCityLockedStories.last,
+          reason: journey.id,
+        );
+        expect(forbiddenCityLockedStories, hasLength(10));
+        expect(journey.words.length, greaterThanOrEqualTo(9), reason: journey.id);
+        expect(journey.discoveries.length, greaterThanOrEqualTo(4), reason: journey.id);
+        continue;
+      }
+
       if (journey.id == 'beijing-summer-palace') {
         expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
         for (final paragraph in journey.content.storyParagraphs) {
