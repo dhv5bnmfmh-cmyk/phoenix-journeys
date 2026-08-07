@@ -6,6 +6,8 @@ import '../services/phoenix_story_length_policy.dart';
 import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
 import 'daily_journey_experience.dart';
+import 'forbidden_city_journey_runtime.dart';
+import 'forbidden_city_trace_validation.dart';
 import 'journey_level_catalog.dart';
 import 'summer_palace_adaptive_story_levels.dart';
 import 'summer_palace_language_level_catalog.dart';
@@ -23,6 +25,9 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   required ChineseProficiencyProfile profile,
   Set<String> knownWords = const <String>{},
 }) {
+  if (experience.id == forbiddenCityJourneyId) {
+    return _resolveForbiddenCityLockedLevel(profile);
+  }
   if (experience.id == 'beijing-summer-palace') {
     return _resolveSummerPalaceN1Level(
       profile: profile,
@@ -36,9 +41,33 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   );
 }
 
-/// The unchanged shared pipeline used by every Journey except the isolated
-/// Beijing Summer Palace Pilot N1. Tests compare this helper with the public
-/// resolver for the other 35 Journeys to prove byte-for-byte output equality.
+JourneyLevelContent _resolveForbiddenCityLockedLevel(
+  ChineseProficiencyProfile profile,
+) {
+  final level = profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band);
+  final base = forbiddenCityLevelContent(level);
+  return JourneyLevelContent(
+    storyParagraphs: base.storyParagraphs,
+    storyAnnotations: base.storyAnnotations,
+    words: forbiddenCityValidatedWordsForLevel(level),
+    discoveries: base.discoveries,
+    wonderQuestion: '',
+    expressQuestion: '',
+  );
+}
+
+int _legacyForbiddenCityLevel(PhoenixReadingBand band) => switch (band) {
+      PhoenixReadingBand.beginner => 1,
+      PhoenixReadingBand.elementary => 3,
+      PhoenixReadingBand.intermediate => 5,
+      PhoenixReadingBand.upperIntermediate => 7,
+      PhoenixReadingBand.advanced => 9,
+      PhoenixReadingBand.mastery => 10,
+    };
+
+/// The unchanged shared pipeline used by every Journey except isolated
+/// Journey-specific adaptive content such as Beijing Summer Palace and the
+/// locked Beijing Forbidden City remediation.
 JourneyLevelContent resolveSharedAdaptiveJourneyLevel(
   DailyJourneyExperience experience, {
   required ChineseProficiencyProfile profile,
