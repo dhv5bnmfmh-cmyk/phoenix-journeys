@@ -128,4 +128,4 @@ jobs:
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
             --data "$payload"
 
-# Validation rerun marker: PR #155 final two-failure remediation with report path fix.
+# Validation rerun marker: PR #155 Story text display fix.
