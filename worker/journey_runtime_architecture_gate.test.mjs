@@ -40,12 +40,12 @@ const stageRuntime = section(
 test('normal Journeys use one shared Phoenix Story component', () => {
   assert.match(journey, /Widget _storyPage\(\) => _defaultStoryPage\(\);/);
 
-  const storyPageMethods = [
+  const specializedStoryPages = [
     ...journey.matchAll(/Widget (_[A-Za-z0-9]+StoryPage)\s*\(/g),
   ].map((match) => match[1]);
   assert.deepEqual(
-    storyPageMethods.sort(),
-    ['_defaultStoryPage', '_storyPage'].sort(),
+    specializedStoryPages,
+    ['_defaultStoryPage'],
     'Journey-specific Story page renderers require Founder-approved architecture review',
   );
 
