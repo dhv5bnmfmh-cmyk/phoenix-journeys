@@ -56,7 +56,7 @@ jobs:
           flutter test test/journey_quality_report_ci_test.dart --reporter expanded
           node <<'NODE'
           const fs = require('node:fs');
-          const report = JSON.parse(fs.readFileSync('journey-quality-report.json', 'utf8'));
+          const report = JSON.parse(fs.readFileSync(process.env.PHOENIX_QUALITY_JSON, 'utf8'));
           console.log(`Phoenix quality gate: ${report.approvedCount}/${report.inspectionCount} approved; minimum ${report.minimumScore}; average ${report.averageScore}.`);
           if (!report.canPublish) {
             console.error(`Release blocked: ${report.needsRevisionCount} need revision and ${report.blockedCount} are blocked.`);
@@ -128,4 +128,4 @@ jobs:
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
             --data "$payload"
 
-# Validation rerun marker: PR #155 final two-failure remediation.
+# Validation rerun marker: PR #155 final two-failure remediation with report path fix.
