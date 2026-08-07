@@ -43,7 +43,6 @@ class JourneyContentQualityReport {
 
 const _dedicatedNarrativeInvariantJourneyIds = <String>{
   'beijing-summer-palace',
-  'beijing-forbidden-city',
   'shanghai-bund',
 };
 
