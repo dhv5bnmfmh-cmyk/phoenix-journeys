@@ -89,19 +89,21 @@ JourneyContentQualityReport auditJourneyContentQuality(
       .join()
       .runes
       .length;
-  if (storyCharacterCount < storyTarget.minimumCharacters) {
+  if (storyCharacterCount < storyTarget.acceptedMinimumCharacters) {
     add(
       'story-below-level-range',
       'Story has $storyCharacterCount characters, below the Phoenix '
-          '${profile.displayLabel} minimum of ${storyTarget.minimumCharacters}.',
+          '${profile.displayLabel} accepted minimum of ${storyTarget.acceptedMinimumCharacters} '
+          '(target ${storyTarget.minimumCharacters}, approved tolerance ±${PhoenixStoryLengthTarget.approvedToleranceCharacters}).',
       JourneyContentQualitySeverity.critical,
     );
   }
-  if (storyCharacterCount > storyTarget.maximumCharacters) {
+  if (storyCharacterCount > storyTarget.acceptedMaximumCharacters) {
     add(
       'story-above-level-range',
       'Story has $storyCharacterCount characters, above the Phoenix '
-          '${profile.displayLabel} maximum of ${storyTarget.maximumCharacters}.',
+          '${profile.displayLabel} accepted maximum of ${storyTarget.acceptedMaximumCharacters} '
+          '(target ${storyTarget.maximumCharacters}, approved tolerance ±${PhoenixStoryLengthTarget.approvedToleranceCharacters}).',
       JourneyContentQualitySeverity.critical,
     );
   }
