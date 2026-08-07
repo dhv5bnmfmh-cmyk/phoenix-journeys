@@ -28,7 +28,9 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     experience.id,
     profile.phoenixLevel ?? _legacyBatchOneLevel(profile.band),
   );
-  if (batchOne != null) return batchOne;
+  if (batchOne != null) {
+    return _withBatchOneCompatibilityPrompts(experience.id, batchOne);
+  }
   if (experience.id == 'beijing-summer-palace') {
     return _resolveSummerPalaceN1Level(
       profile: profile,
@@ -39,6 +41,34 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     experience,
     profile: profile,
     knownWords: knownWords,
+  );
+}
+
+/// Reflection and Writing are no longer standalone stages, but these fields
+/// remain in JourneyLevelContent for legacy quality tooling and older callers.
+/// Keep them Journey-specific and non-empty without exposing removed stages.
+JourneyLevelContent _withBatchOneCompatibilityPrompts(
+  String journeyId,
+  JourneyLevelContent content,
+) {
+  final prompts = switch (journeyId) {
+    'beijing-forbidden-city' => (
+        understanding: '梁砚为什么宁可迟交，也不把冲突数据直接当成新的建筑位移？',
+        expression: '请按证据链说明测量口径、复核与最终修缮判断之间的关系。',
+      ),
+    'shanghai-bund' => (
+        understanding: '林乔为什么宁可让展览晚开，也不采用那句更吸引人的照片说明？',
+        expression: '请按证据链说明视点、档案编号与不确定性怎样改变照片说明。',
+      ),
+    _ => (understanding: '', expression: ''),
+  };
+  return JourneyLevelContent(
+    storyParagraphs: content.storyParagraphs,
+    storyAnnotations: content.storyAnnotations,
+    words: content.words,
+    discoveries: content.discoveries,
+    wonderQuestion: prompts.understanding,
+    expressQuestion: prompts.expression,
   );
 }
 
