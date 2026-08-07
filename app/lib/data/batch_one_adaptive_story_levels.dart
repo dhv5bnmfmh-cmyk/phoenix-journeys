@@ -1,6 +1,7 @@
 import '../models/language_proficiency.dart';
 import 'batch_one_journey_remediation.dart';
 import 'daily_journey_experience.dart';
+import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 
 bool isBatchOneGoldJourney(String journeyId) =>
@@ -20,6 +21,50 @@ JourneyLevelContent buildBatchOneGoldLevel(
     throw ArgumentError.value(experience.id, 'experience.id');
   }
 
+  final storyParagraphs = List<String>.of(base.storyParagraphs);
+  final storyAnnotations = List<ReadingAnnotation>.of(base.storyAnnotations);
+  if (storyParagraphs.length > 1 && storyAnnotations.length > 1) {
+    final bridge = switch (experience.id) {
+      'beijing-forbidden-city' => (
+          chinese: '纪衡再次核对记录。',
+          pinyin: 'Jì Héng zàicì héduì jìlù.',
+          vietnamese: 'Kỷ Hành kiểm tra lại hồ sơ.',
+          english: 'Ji Heng checks the record again.',
+        ),
+      'shanghai-bund' => (
+          chinese: '陆潮看向断线屏幕。',
+          pinyin: 'Lù Cháo kàn xiàng duànxiàn píngmù.',
+          vietnamese: 'Lục Triều nhìn về màn hình đang mất kết nối.',
+          english: 'Lu Chao looks at the disconnected screen.',
+        ),
+      _ => (chinese: '', pinyin: '', vietnamese: '', english: ''),
+    };
+    if (bridge.chinese.isNotEmpty) {
+      storyParagraphs[1] = '${bridge.chinese}${storyParagraphs[1]}';
+      final annotation = storyAnnotations[1];
+      storyAnnotations[1] = ReadingAnnotation(
+        pinyin: '${bridge.pinyin} ${annotation.pinyin}',
+        vietnamese: '${bridge.vietnamese} ${annotation.vietnamese}',
+        english: '${bridge.english} ${annotation.english}',
+      );
+    }
+  }
+
+  if (experience.id == 'shanghai-bund' && level == 10) {
+    const epilogueChinese = '次日，新讲义入库。';
+    const epiloguePinyin = 'Cìrì, xīn jiǎngyì rùkù.';
+    const epilogueVietnamese = 'Ngày hôm sau, giáo án mới được lưu vào kho khóa học.';
+    const epilogueEnglish = 'The next day, the revised lesson enters the course library.';
+    final last = storyParagraphs.length - 1;
+    storyParagraphs[last] = '${storyParagraphs[last]}$epilogueChinese';
+    final annotation = storyAnnotations[last];
+    storyAnnotations[last] = ReadingAnnotation(
+      pinyin: '${annotation.pinyin} $epiloguePinyin',
+      vietnamese: '${annotation.vietnamese} $epilogueVietnamese',
+      english: '${annotation.english} $epilogueEnglish',
+    );
+  }
+
   final unseenWords = base.words
       .where((entry) => !knownWords.contains(entry.word))
       .toList(growable: false);
@@ -37,8 +82,8 @@ JourneyLevelContent buildBatchOneGoldLevel(
   };
 
   return JourneyLevelContent(
-    storyParagraphs: base.storyParagraphs,
-    storyAnnotations: base.storyAnnotations,
+    storyParagraphs: storyParagraphs,
+    storyAnnotations: storyAnnotations,
     words: words,
     discoveries: base.discoveries,
     wonderQuestion: prompts.understanding,
