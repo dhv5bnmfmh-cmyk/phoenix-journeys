@@ -23,7 +23,7 @@ jobs:
           cache: true
       - working-directory: app
         run: flutter pub get
-      - name: Capture failed test names
+      - name: Capture exact failed tests
         shell: bash
         run: |
           set +e
@@ -33,30 +33,45 @@ jobs:
           cd ..
           python - <<'PY'
           import json
+
           tests = {}
           failed = []
           errors = []
-          for raw in open('/tmp/tests.jsonl', errors='replace'):
-              try:
-                  e = json.loads(raw)
-              except Exception:
-                  continue
+
+          def visit(e):
+              if isinstance(e, list):
+                  for item in e:
+                      visit(item)
+                  return
+              if not isinstance(e, dict):
+                  return
               t = e.get('type')
               if t == 'testStart':
-                  test = e.get('test', {})
+                  test = e.get('test') or {}
                   tests[test.get('id')] = f"{test.get('url','')} :: {test.get('name','')}"
-              elif t == 'testDone' and e.get('result') not in ('success','skipped'):
+              elif t == 'testDone' and e.get('result') not in ('success', 'skipped'):
                   failed.append(tests.get(e.get('testID'), str(e.get('testID'))))
               elif t == 'error':
-                  errors.append(f"TEST={tests.get(e.get('testID'), e.get('testID'))}\nERROR={e.get('error','')}\nSTACK={e.get('stackTrace','')}")
-          with open('.github/batch1-failed-tests.txt','w') as f:
-              f.write('FAILED TESTS\n' + '\n'.join(dict.fromkeys(failed)) + '\n\nERRORS\n' + '\n\n'.join(errors[-40:]))
+                  errors.append(
+                      f"TEST={tests.get(e.get('testID'), e.get('testID'))}\n"
+                      f"ERROR={e.get('error','')}\nSTACK={e.get('stackTrace','')}"
+                  )
+
+          for raw in open('/tmp/tests.jsonl', errors='replace'):
+              try:
+                  visit(json.loads(raw))
+              except Exception:
+                  continue
+
+          with open('.github/batch1-failed-tests.txt', 'w') as f:
+              f.write(
+                  'FAILED TESTS\n' + '\n'.join(dict.fromkeys(failed)) +
+                  '\n\nERRORS\n' + '\n\n'.join(errors)
+              )
           PY
-          if [[ "$code" -ne 0 ]]; then
-            git config user.name 'Phoenix Preview Bot'
-            git config user.email 'actions@users.noreply.github.com'
-            git add .github/batch1-failed-tests.txt
-            git commit -m 'diagnostic: capture exact failed test names'
-            git push
-          fi
+          git config user.name 'Phoenix Preview Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add .github/batch1-failed-tests.txt
+          git commit -m 'diagnostic: capture exact 27 Flutter failures' || true
+          git push
           exit "$code"
