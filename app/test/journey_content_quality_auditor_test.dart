@@ -5,7 +5,6 @@ import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/journey_data.dart';
 import 'package:phoenix_journeys/data/journey_level_catalog.dart';
-import 'package:phoenix_journeys/services/forbidden_city_quality_gate.dart';
 import 'package:phoenix_journeys/services/journey_content_quality_auditor.dart';
 
 void main() {
@@ -18,16 +17,11 @@ void main() {
           journey,
           profile: profile,
         );
-        final report = journey.id == forbiddenCityJourneyId
-            ? auditForbiddenCityLockedQuality(
-                content,
-                profile: profile,
-              )
-            : auditJourneyContentQuality(
-                journey,
-                content,
-                profile: profile,
-              );
+        final report = auditJourneyContentQuality(
+          journey,
+          content,
+          profile: profile,
+        );
 
         expect(
           report.hasCriticalIssues,
