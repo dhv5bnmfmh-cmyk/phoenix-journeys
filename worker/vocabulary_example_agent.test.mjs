@@ -103,7 +103,7 @@ test('explorers read bundled examples and never wait for a model request', () =>
     'utf8',
   );
   const runtime = service.match(
-    /Future<PhoenixVocabularyExample> generateExample\([\s\S]*?\n  }\n\n  \/\/\/ Content-authoring path only\./,
+    /Future<PhoenixVocabularyExample> generateExample\([\s\S]*?\n  }\n\n  Future<PhoenixVocabularyExample> generateExampleForContentPipeline\(/,
   )?.[0] ?? '';
 
   assert.match(sheet, /PhoenixVocabularyService/);
