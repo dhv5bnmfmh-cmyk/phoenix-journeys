@@ -314,6 +314,9 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
   }
 
   double _targetRevealCursor(int? revealEnd) {
+    if (widget.narrationContentId == 'story') {
+      return (widget.text.length + cinematicRevealTailLength).toDouble();
+    }
     final resolved = (revealEnd ?? widget.text.length).clamp(
       0,
       widget.text.length,
