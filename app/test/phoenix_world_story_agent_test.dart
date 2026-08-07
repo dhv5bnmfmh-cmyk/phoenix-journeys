@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_world_story_agent.dart';
 import 'package:phoenix_journeys/data/beijing_story_catalog.dart';
+import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/world_geo_catalog.dart';
 import 'package:phoenix_journeys/models/story_content.dart';
 
@@ -42,13 +43,14 @@ void main() {
 
   test('binds the Beijing Journey to its precise place and evidence', () {
     final agent = buildAgent();
-    final journey = agent.findJourney('beijing-forbidden-city');
+    final journey = agent.findJourney(forbiddenCityJourneyId);
 
     expect(journey, isNotNull);
     expect(journey!.geoNodeId, 'cn-beijing-dongcheng-forbidden-city');
-    expect(journey.storyParagraphs, hasLength(4));
+    expect(journey.storyParagraphs, hasLength(1));
+    expect(journey.storyParagraphs.single, forbiddenCityLockedStories.last);
     expect(agent.sourcesForJourney(journey.id), hasLength(3));
-    expect(agent.evidenceForSection(journey.id, 'story-2'), hasLength(3));
+    expect(agent.evidenceForSection(journey.id, 'story-1'), hasLength(3));
   });
 
   test('finds all Beijing Journeys from the country hierarchy', () {
