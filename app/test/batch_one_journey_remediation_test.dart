@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/batch_one_adaptive_story_levels.dart';
+import 'package:phoenix_journeys/data/batch_one_journey_remediation.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 import 'package:phoenix_journeys/widgets/journey_challenge_panel.dart';
@@ -15,7 +16,7 @@ void main() {
 
   group('Phoenix Batch 1 Journey remediation', () {
     test('scope preserves exactly the requested Journey IDs', () {
-      expect(batchOneGoldJourneyIds, requestedIds);
+      expect(batchOneJourneyIds, requestedIds);
       for (final id in requestedIds) {
         expect(requireDailyJourneyExperience(id).id, id);
       }
@@ -30,17 +31,27 @@ void main() {
           JourneyChallengeType.missingSentence,
         ],
       );
+      for (final journey in batchOneRemediatedJourneys.values) {
+        expect(
+          journey.challenges.map((item) => item.type).toList(),
+          batchOneChallengeTypes,
+        );
+      }
     });
 
     test('quality gates are computed from implemented content', () {
       final results = <String, bool>{};
       for (final id in requestedIds) {
-        final journey = requireDailyJourneyExperience(id);
+        final experience = requireDailyJourneyExperience(id);
+        final remediation = batchOneRemediationFor(id)!;
         final memory = batchOneMemorySpecFor(id);
+        final protagonistName = remediation.protagonist.split('，').first;
+        final timelineMarker =
+            id == 'beijing-forbidden-city' ? '闭馆' : '开幕';
         final levels = levelAgent.allProfiles
             .map(
               (profile) => resolveAdaptiveJourneyLevel(
-                journey,
+                experience,
                 profile: profile,
               ),
             )
@@ -48,13 +59,10 @@ void main() {
 
         results['$id Story Continuity'] = levels.every((content) {
           final story = content.storyParagraphs.join();
-          return story.contains(id == 'beijing-forbidden-city' ? '选择' : '选择') &&
-              story.contains(id == 'beijing-forbidden-city' ? '梁砚' : '周玥');
+          return story.contains('选择') && story.contains(protagonistName);
         });
         results['$id Timeline Consistency'] = levels.every(
-          (content) => content.storyParagraphs.join().contains(
-                id == 'beijing-forbidden-city' ? '闭馆' : '上传',
-              ),
+          (content) => content.storyParagraphs.join().contains(timelineMarker),
         );
         results['$id Multilingual Consistency'] = levels.every(
           (content) =>
@@ -92,15 +100,33 @@ void main() {
               ),
         );
         results['$id Historical Source Binding'] =
-            journey.content.sourceIds.length >= 2;
+            remediation.discoveryTraces.every(
+          (trace) =>
+              trace.storyEventIds.isNotEmpty && trace.sourceIds.isNotEmpty,
+        );
         results['$id Memory Quality'] = memory != null &&
+            remediation.memory.map((item) => item.category).toSet().containsAll(
+              <String>{
+                'protagonist',
+                'events',
+                'history',
+                'culture',
+                'architecture',
+                'vocabulary',
+              },
+            ) &&
             memory.storyResult.trim().isNotEmpty &&
             memory.culturalPoint.trim().isNotEmpty &&
             memory.longTermAnchor.trim().isNotEmpty;
-        results['$id Complete Quality'] =
-            memory != null && memory.completionSummary.trim().isNotEmpty;
+        results['$id Complete Quality'] = memory != null &&
+            remediation.completion.journeySummary.trim().isNotEmpty &&
+            remediation.completion.achievement.trim().isNotEmpty &&
+            remediation.completion.memoryAnchor.trim().isNotEmpty &&
+            remediation.completion.challengeReward.trim().isNotEmpty &&
+            remediation.completion.journeyCompletion.trim().isNotEmpty;
         results['$id No Reflection or Writing'] = memory != null &&
             !<String>[
+              ...remediation.memory.map((item) => item.answer),
               memory.storyResult,
               memory.culturalPoint,
               memory.longTermAnchor,
@@ -124,12 +150,18 @@ void main() {
     });
 
     test('the two Journeys keep independent protagonists and memory anchors', () {
-      final forbidden = batchOneMemorySpecFor('beijing-forbidden-city')!;
-      final bund = batchOneMemorySpecFor('shanghai-bund')!;
-      expect(forbidden.storyResult, contains('梁砚'));
-      expect(bund.storyResult, contains('周玥'));
-      expect(forbidden.longTermAnchor, isNot(bund.longTermAnchor));
-      expect(forbidden.completionSummary, isNot(bund.completionSummary));
+      final forbidden = batchOneRemediationFor('beijing-forbidden-city')!;
+      final bund = batchOneRemediationFor('shanghai-bund')!;
+      expect(forbidden.protagonist, contains('梁砚'));
+      expect(bund.protagonist, contains('林乔'));
+      expect(
+        forbidden.completion.memoryAnchor,
+        isNot(bund.completion.memoryAnchor),
+      );
+      expect(
+        forbidden.completion.journeySummary,
+        isNot(bund.completion.journeySummary),
+      );
     });
   });
 }
