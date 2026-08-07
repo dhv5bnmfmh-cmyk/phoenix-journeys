@@ -1,4 +1,5 @@
 import 'forbidden_city_journey_runtime.dart';
+import 'forbidden_city_word_supplement.dart';
 import 'journey_data.dart';
 
 ForbiddenCityWordRecord _correctTrace(
@@ -17,7 +18,10 @@ ForbiddenCityWordRecord _correctTrace(
 /// Applies trace-only corrections discovered during the program-import audit.
 /// The locked Story is authoritative and is never changed to satisfy Words.
 List<ForbiddenCityWordRecord> get forbiddenCityValidatedWordRecords =>
-    forbiddenCityWordRecords.map((record) {
+    <ForbiddenCityWordRecord>[
+      ...forbiddenCityWordRecords,
+      ...forbiddenCitySupplementalWordRecords,
+    ].map((record) {
       return switch (record.entry.word) {
         '界' => _correctTrace(
             record,
@@ -28,6 +32,16 @@ List<ForbiddenCityWordRecord> get forbiddenCityValidatedWordRecords =>
             record,
             storySource: '后来，一道通往更深宫院的门打开了。',
             firstAppearsAt: 1,
+          ),
+        '开阔' => _correctTrace(
+            record,
+            storySource: '沈砚抬头看宫殿，又看看宽阔的院子，突然觉得自己很小。',
+            firstAppearsAt: 1,
+          ),
+        '性质' => _correctTrace(
+            record,
+            storySource: '到了乾清门附近，周师傅告诉他，空间的性质开始变化。',
+            firstAppearsAt: 2,
           ),
         '对照' => _correctTrace(
             record,
