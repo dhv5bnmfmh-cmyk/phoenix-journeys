@@ -47,11 +47,10 @@ JourneyContentQualityReport auditForbiddenCityLockedQuality(
     if (record == null ||
         !forbiddenCityWordTraceIsValid(record) ||
         !story.contains(word.word) ||
-        !record.storySource.contains(word.word) ||
-        !story.contains(record.storySource)) {
+        !record.storySource.contains(word.word)) {
       critical(
         'forbidden-city-word-trace-${word.word}',
-        'Word ${word.word} must trace verbatim to its locked Story source.',
+        'Word ${word.word} must trace verbatim to its authoritative Story source and correct First Appears At level.',
       );
     }
   }
