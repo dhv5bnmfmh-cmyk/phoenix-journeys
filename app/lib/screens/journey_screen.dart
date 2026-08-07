@@ -9,8 +9,8 @@ import '../agents/phoenix_language_level_agent.dart';
 import '../data/adaptive_journey_level_runtime.dart';
 import '../data/batch_one_adaptive_story_levels.dart';
 import '../data/daily_journey_catalog.dart';
+import '../data/forbidden_city_content_cache.dart';
 import '../data/forbidden_city_journey_runtime.dart';
-import '../data/forbidden_city_trace_validation.dart';
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
 import '../models/journey_background.dart';
@@ -158,6 +158,10 @@ class _JourneyScreenState extends State<JourneyScreen>
   int _levelChangeToken = 0;
   Timer? _narrationCheckpointTimer;
   int _lastSavedNarrationOffset = 0;
+  JourneyLevelContent? _cachedLevelContent;
+  ChineseProficiencyProfile? _cachedLevelProfile;
+  JourneyDifficulty? _cachedLevelDifficulty;
+  int? _cachedKnownWordsHash;
 
   // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
   bool get _isSummerPalacePilot => false;
@@ -173,6 +177,9 @@ class _JourneyScreenState extends State<JourneyScreen>
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
     _experience = requireDailyJourneyExperience(journeyId);
+    if (_experience.id == forbiddenCityJourneyId) {
+      warmForbiddenCityContentCache();
+    }
     _challengeSeed =
         (DateTime.now().millisecondsSinceEpoch + journeyId.hashCode).abs();
     _ai = PhoenixAiService();
@@ -320,32 +327,54 @@ class _JourneyScreenState extends State<JourneyScreen>
     });
   }
 
+  int get _knownWordsFingerprint =>
+      Object.hashAllUnordered(_appState.savedWords);
+
   JourneyLevelContent get _levelContent {
     final profile = _languageProfile;
+    final difficulty = _appState.journeyDifficulty;
+    final knownWordsHash = _knownWordsFingerprint;
+    final cached = _cachedLevelContent;
+    if (cached != null &&
+        identical(_cachedLevelProfile, profile) &&
+        _cachedLevelDifficulty == difficulty &&
+        _cachedKnownWordsHash == knownWordsHash) {
+      return cached;
+    }
+
+    late final JourneyLevelContent resolved;
     if (profile == null) {
       if (_isForbiddenCity) {
-        final fallbackLevel = switch (_appState.journeyDifficulty) {
+        final fallbackLevel = switch (difficulty) {
           JourneyDifficulty.easy => 1,
           JourneyDifficulty.standard => 5,
           JourneyDifficulty.challenge => 10,
         };
-        final base = forbiddenCityLevelContent(fallbackLevel);
-        return JourneyLevelContent(
+        final base = cachedForbiddenCityLevelContent(fallbackLevel);
+        resolved = JourneyLevelContent(
           storyParagraphs: base.storyParagraphs,
           storyAnnotations: base.storyAnnotations,
-          words: forbiddenCityValidatedWordsForLevel(fallbackLevel),
+          words: base.words,
           discoveries: base.discoveries,
           wonderQuestion: '',
           expressQuestion: '',
         );
+      } else {
+        resolved = resolveJourneyLevel(_experience, difficulty);
       }
-      return resolveJourneyLevel(_experience, _appState.journeyDifficulty);
+    } else {
+      resolved = resolveAdaptiveJourneyLevel(
+        _experience,
+        profile: profile,
+        knownWords: _appState.savedWords,
+      );
     }
-    return resolveAdaptiveJourneyLevel(
-      _experience,
-      profile: profile,
-      knownWords: _appState.savedWords,
-    );
+
+    _cachedLevelContent = resolved;
+    _cachedLevelProfile = profile;
+    _cachedLevelDifficulty = difficulty;
+    _cachedKnownWordsHash = knownWordsHash;
+    return resolved;
   }
 
   ReadingGenerationPlan? get _generationPlan {
@@ -1233,6 +1262,10 @@ class _JourneyScreenState extends State<JourneyScreen>
   Widget _defaultStoryPage() {
     final state = context.watch<AppState>();
     final language = state.translationLanguage;
+    final levelContent = _levelContent;
+    final storyParagraphs = levelContent.storyParagraphs;
+    final storyAnnotations = levelContent.storyAnnotations;
+    final words = levelContent.words;
 
     return _page(
       title: '故事',
@@ -1249,7 +1282,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             contentId: 'story',
             title: _appState.displayText(_experience.storyTitle),
             subtitle:
-                '$_readingLevelLabel · ${_readingShapeLabel(_levelContent.storyParagraphs.length)} · ${_levelContent.storyParagraphs.length} 段',
+                '$_readingLevelLabel · ${_readingShapeLabel(storyParagraphs.length)} · ${storyParagraphs.length} 段',
             compact: true,
             onPlay: _playStory,
           ),
@@ -1261,7 +1294,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 final fontSize = _fitJourneyTextSize(
                   context,
                   constraints,
-                  _levelContent.storyParagraphs,
+                  storyParagraphs,
                   minSize: 10.8,
                   maxSize: 16,
                   lineHeight: 1.22,
@@ -1269,64 +1302,63 @@ class _JourneyScreenState extends State<JourneyScreen>
                 return AnimatedBuilder(
                   animation: _narration,
                   builder: (context, _) {
+                    final snapshot = _narration.highlightSnapshot;
                     return SingleChildScrollView(
                       key: const ValueKey('story-auto-visibility-scroll'),
                       physics: const ClampingScrollPhysics(),
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: _levelContent.storyParagraphs
+                        children: storyParagraphs
                             .asMap()
                             .entries
                             .map((entry) {
-                              final annotation =
-                                  _levelContent.storyAnnotations[entry.key];
-                              final snapshot = _narration.highlightSnapshot;
+                              final annotation = storyAnnotations[entry.key];
                               final isActive =
                                   snapshot?.contentId == 'story' &&
                                   snapshot?.itemId == 'story-${entry.key}';
                               return _CompactTextBlock(
-                                index: entry.key + 1,
+                                  index: entry.key + 1,
                                 active: isActive,
                                 transparentSurface: true,
                                 onSupport: () => unawaited(
                                   _showReadingSupport(
-                                    title: '故事第 ${entry.key + 1} 段',
+                                      title: '故亊第 ${entry.key + 1} 殶',
                                     pinyin: annotation.pinyin,
                                     nativeLabel: annotation.nativeLabel(language),
-                                    nativeText: annotation.nativeText(language, entry.value),
-                                    english: annotation.english,
+                                      nativeText: annotation.nativeText(language, entry.value),
+                                      english: annotation.english,
                                   ),
                                 ),
                                 child: InteractiveStoryText(
                                   text: entry.value,
-                                  entries: _levelContent.words,
-                                  narrationController: _narration,
+                                entries: words,
+                                narrationController: _narration,
                                   highlightStart: isActive ? snapshot!.start : null,
-                                  highlightEnd: isActive ? snapshot!.end : null,
-                                  revealEnd: _narrationRevealEnd(
+                                highlightEnd: isActive ? snapshot!.end : null,
+                                revealEnd: _narrationRevealEnd(
                                     contentId: 'story',
                                     itemIndex: entry.key,
                                     itemLength: entry.value.length,
-                                  ),
-                                  narrationContentId: 'story',
-                                  narrationItemId: 'story-${entry.key}',
-                                  narrationSessionToken: _narration.speechSessionToken,
-                                  style: TextStyle(
-                                    color: Colors.white,
+                                ),
+                                narrationContentId: 'story',
+                                narrationItemId: 'story-${entry.key}',
+                              narrationSessionToken: _narration.speechSessionToken,
+                              style: TextStyle(
+                                color: Colors.white,
                                     fontSize: fontSize,
-                                    height: 1.22,
-                                    fontFamily: PhoenixTheme.chineseFontFamily,
-                                    fontFamilyFallback: PhoenixTheme.chineseFontFallback,
+                                  height: 1.22,
+                                  fontFamily: PhoenixTheme.chineseFontFamily,
+                                  fontFamilyFallback: PhoenixTheme.chineseFontFallback,
                                     fontWeight: FontWeight.w700,
-                                    shadows: const [
-                                      Shadow(color: Color(0xE6000000), blurRadius: 3, offset: Offset(0, 1)),
-                                      Shadow(color: Color(0x99000000), blurRadius: 8),
+                                  shadows: const [
+                                    Shadow(color: Color(0xE6000000), blurRadius: 3, offset: Offset(0, 1)),
+                                  Shadow(color: Color(0x99000000), blurRadius: 8),
                                     ],
                                   ),
-                                ),
-                              );
-                            })
+                              ),
+                            );
+                          })
                             .toList(growable: false),
                       ),
                     );
