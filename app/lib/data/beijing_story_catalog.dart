@@ -60,10 +60,10 @@ const beijingStorySources = <StorySourceRecord>[
 ];
 
 const _forbiddenCityCanonicalStory = <String>[
-  '清晨，修复实习生林砚站在午门前，发现自己的宫门通行工牌不见了。微风掠过护城河，天色刚刚泛白；他本想独自证明能力，却不得不向老师傅周岐说明失误。厚重的红墙和屋顶围住宽阔的石路，也把他追查线索的时间压得越来越紧。',
-  '林砚沿中轴线寻找，先后核对门禁记录、值守时间和工具交接。他曾把故宫理解成供人背诵年代的皇帝宫殿，如今才看见每一道宫门背后都有维护秩序的国家事务，也有普通工作人员需要共同承担的责任。',
-  '在保和殿后侧，他发现工牌被夹进一册临时检查记录。若隐瞒疏忽，他或许还能保存体面；若立即报告，团队就必须暂停路线复核。他选择报告，并主动整理当天所有交接记录，因此承担了延误，也避免错误记录继续流入修复流程。',
-  '复核结束后，周岐没有替林砚消除责任，而是让他把这次失误写进班组记忆。林砚终于明白，保护故宫不是让建筑看起来永远无错，而是让每一次选择、纠正和保存都有可追溯的依据。第二天，他把工牌交给同伴复核后才走进红墙。',
+  '雷雨逼近，二十一岁的石质保护实习生纪衡在午门内接到任务：闭馆前确认太和殿丹陛一处排水异常。沿中轴进入外朝时，他第一次把三层汉白玉台基、国家礼仪空间和北部内廷的宫寝生活看成同一座宫城里彼此分工的秩序。',
+  '一个石雕龙头没有出水，附近石缝却开始返潮。大雨时，这些龙首承担真实排水功能，会出现“千龙吐水”的景象；偏偏异常点旁还保留着旧修缮灰缝。太和殿历经火灾、重建与持续维修，这道旧痕可能是需要保护的历史层。',
+  '纪衡必须在立刻疏通与停手复核之间选择。直接伸工具可能马上见水，也可能刮伤石材或破坏旧修缮层。他收起工具，记录位置、时间和编号，请保护师共同判断，并用不触碰文物本体的可逆临时导排先控制暴雨风险。代价是，他错过了原定汇报时间。',
+  '雷雨落下后，临时导排把水带离返潮石缝。次日受控检查确认，杂物堵在旧修缮层上方，不需要凿动石材；保护师只做最小范围清理，水流恢复，旧灰缝、编号和影像都被保留下来。纪衡终于明白，真正的独立不是抢先动手，而是让每次干预都能解释、复核并留下可追溯依据。',
 ];
 
 const _templeOfHeavenCanonicalStory = <String>[
@@ -103,7 +103,7 @@ final beijingForbiddenCityJourney = _record(
   id: forbiddenCityRemediation.id,
   title: forbiddenCityRemediation.title,
   geoNodeId: 'cn-beijing-dongcheng-forbidden-city',
-  tags: const ['北京', '故宫', '紫禁城', '修复', '责任', '世界文化遗产'],
+  tags: const ['北京', '故宫', '紫禁城', '太和殿', '丹陛', '保护', '世界文化遗产'],
   paragraphs: _forbiddenCityCanonicalStory,
   sourceIds: const [
     'dpm-forbidden-city-guide',
@@ -113,8 +113,8 @@ final beijingForbiddenCityJourney = _record(
 );
 
 final beijingTempleOfHeavenJourney = _record(
-  id: templeOfHeavenRemediation.id,
-  title: templeOfHeavenRemediation.title,
+  id: 'beijing-temple-of-heaven',
+  title: '北京 · 天坛：回音壁前的空白刻度',
   geoNodeId: 'cn-beijing-dongcheng',
   tags: const ['北京', '天坛', '祭天礼制', '声学', '证据', '世界文化遗产'],
   paragraphs: _templeOfHeavenCanonicalStory,

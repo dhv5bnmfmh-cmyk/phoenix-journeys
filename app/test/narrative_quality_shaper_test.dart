@@ -7,6 +7,11 @@ import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 void main() {
   const agent = PhoenixLanguageLevelAgent();
+  const dedicatedAdaptiveJourneyIds = <String>{
+    'beijing-summer-palace',
+    'beijing-forbidden-city',
+    'shanghai-bund',
+  };
 
   test('narrative selector preserves opening, turning point, and ending', () {
     final indexes = selectNarrativeSentenceIndexesForTesting(
@@ -32,7 +37,7 @@ void main() {
       final storyTarget = phoenixStoryLengthTargetFor(profile);
 
       for (final journey in dailyJourneyExperiences) {
-        if (journey.id == 'beijing-summer-palace') continue;
+        if (dedicatedAdaptiveJourneyIds.contains(journey.id)) continue;
 
         final content = resolveAdaptiveJourneyLevel(
           journey,

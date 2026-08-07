@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../agents/phoenix_language_level_agent.dart';
 import '../data/adaptive_journey_level_runtime.dart';
+import '../data/batch_one_adaptive_story_levels.dart';
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
@@ -18,6 +19,7 @@ import '../services/narration_controller.dart';
 import '../services/phoenix_ai_service.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/batch_one_journey_summary.dart';
 import '../widgets/city_journey_stamp.dart';
 import '../widgets/destination_background.dart';
 import '../widgets/interactive_story_text.dart';
@@ -909,8 +911,26 @@ class _JourneyScreenState extends State<JourneyScreen>
     unawaited(_persistProgress());
   }
 
+  String _batchOneStructuredMemory(BatchOneJourneyMemorySpec spec) {
+    final words = _levelContent.words
+        .map((entry) => entry.word)
+        .take(6)
+        .join('、');
+    return <String>[
+      '故事结果：${spec.storyResult}',
+      '核心文化点：${spec.culturalPoint}',
+      '重点词汇：${words.isEmpty ? '本级重点词已复习' : words}',
+      'Challenge 表现：段落重组、语法修复、补全句子三种模式全部完成',
+      '长期记忆点：${spec.longTermAnchor}',
+    ].join('\n');
+  }
+
   Future<void> _finishJourney() async {
     await _narration.stop();
+    final batchSpec = batchOneMemorySpecFor(_experience.id);
+    if (batchSpec != null) {
+      memoryController.text = _batchOneStructuredMemory(batchSpec);
+    }
     await _appState.completeJourney(memoryController.text);
     if (!mounted) return;
     setState(() => step = AppState.journeyLastStep);
@@ -1809,6 +1829,24 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _memoryPage() {
+    final batchSpec = batchOneMemorySpecFor(_experience.id);
+    if (batchSpec != null) {
+      return _page(
+        title: '旅程回忆',
+        buttonText: '保存回忆并完成',
+        buttonIcon: Icons.flag_rounded,
+        onNext: () => unawaited(_finishJourney()),
+        child: BatchOneJourneySummary(
+          spec: batchSpec,
+          words: _levelContent.words
+              .map((entry) => entry.word)
+              .toList(growable: false),
+          challengeCompleted: true,
+          displayText: _appState.displayText,
+        ),
+      );
+    }
+
     final keyboardVisible = memoryFocusNode.hasFocus;
     return _page(
       title: '旅程回忆',
@@ -1865,6 +1903,99 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _completePage() {
+    final batchSpec = batchOneMemorySpecFor(_experience.id);
+    if (batchSpec != null) {
+      return _page(
+        title: '${_experience.city}已点亮',
+        buttonText: '返回首页',
+        buttonIcon: Icons.home_outlined,
+        showBack: false,
+        onNext: () => Navigator.of(context).pop(),
+        child: Stack(
+          children: [
+            const Positioned(
+              top: 2,
+              left: 2,
+              child: Text(
+                '盖章成功',
+                style: TextStyle(
+                  color: PhoenixTheme.red,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            Align(
+              key: const ValueKey('completion-background-stamp'),
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 1, right: 2),
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: AnimatedCityJourneyStamp(
+                    journey: _experience,
+                    size: 70,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 34),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: BatchOneJourneySummary(
+                      spec: batchSpec,
+                      words: _levelContent.words
+                          .map((entry) => entry.word)
+                          .toList(growable: false),
+                      challengeCompleted: true,
+                      displayText: _appState.displayText,
+                      completion: true,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  SizedBox(
+                    height: 36,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: JourneyShareButton(
+                            isTraditional: _appState.isTraditional,
+                            city: _experience.city,
+                            place: _experience.place,
+                            compact: true,
+                            label: _appState.displayText('分享旅程'),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => unawaited(_restartJourney()),
+                            style: OutlinedButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            icon: const Icon(Icons.replay_rounded, size: 16),
+                            label: const Text(
+                              '重新体验',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 10.5),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return _page(
       title: '${_experience.city}已点亮',
       buttonText: '返回首页',

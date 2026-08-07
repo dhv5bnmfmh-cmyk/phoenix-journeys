@@ -50,12 +50,17 @@ void main() {
     }
   });
 
-  test('the public resolver is exactly the unchanged shared pipeline for 35 Journeys',
+  test('the public resolver is exactly the unchanged shared pipeline for 33 Journeys',
       () {
     final otherJourneys = allJourneyExperiences
-        .where((journey) => journey.id != 'beijing-summer-palace')
+        .where(
+          (journey) =>
+              journey.id != 'beijing-summer-palace' &&
+              journey.id != 'beijing-forbidden-city' &&
+              journey.id != 'shanghai-bund',
+        )
         .toList(growable: false);
-    expect(otherJourneys, hasLength(35));
+    expect(otherJourneys, hasLength(33));
 
     for (final journey in otherJourneys) {
       for (final profile in agent.allProfiles) {
