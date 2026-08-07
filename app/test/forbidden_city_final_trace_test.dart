@@ -20,7 +20,7 @@ void main() {
   test('Forbidden City Lv9 is locked at the normal Phoenix shape', () {
     final story = forbiddenCityLockedStories[8];
     expect(forbiddenCityStoryParagraphsByLevel[8], hasLength(2));
-    expect(story.runes.length, 624);
+    expect(story.runes.length, 626);
     expect(story, contains('这种分辨也让沈砚明白，理解空间首先要承认自己所处的位置。'));
     expect(story, contains('于是他没有跨过去。'));
     expect(story, endsWith('那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。'));
