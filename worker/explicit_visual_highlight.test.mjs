@@ -19,11 +19,13 @@ const widgetTest = readFileSync(
 test('position derives from playback and is passed to Story and Discovery', () => {
   assert.match(controller, /NarrationHighlightSnapshot\? get highlightSnapshot \{/);
   assert.match(interactive, /final int\? highlightStart/);
+  const highlightBindings = journey.match(
+    /highlightStart:\s*isActive\s*\?\s*snapshot!\.start\s*:\s*null/g,
+  ) ?? [];
   assert.equal(
-    (journey.match(
-      /highlightStart:\s*isActive\s*\?\s*snapshot!\.start\s*:\s*null/g,
-    ) ?? []).length,
-    2,
+    highlightBindings.length,
+    3,
+    'Forbidden City segmented Story, default Story, and Discovery must all bind visible text to narration position',
   );
 });
 
