@@ -150,6 +150,7 @@ class PhoenixVocabularyService {
     return SynchronousFuture<PhoenixVocabularyExample>(preloaded);
   }
 
+  /// Content-authoring path only.
   Future<PhoenixVocabularyExample> generateExampleForContentPipeline({
     required WordEntry entry,
     required String language,
@@ -221,6 +222,8 @@ class PhoenixVocabularyService {
       return fallback;
     }
   }
+
+  void close() => _client.close();
 
   void _validate(PhoenixVocabularyExample example, String word) {
     final forbidden = [
