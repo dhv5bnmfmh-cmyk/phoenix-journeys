@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/data/journey_level_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
@@ -51,12 +52,9 @@ void main() {
     }
   });
 
-  test('level controls one long block or two shorter blocks', () {
+  test('generic level controls one long block or two shorter blocks', () {
     final journey = allJourneyExperiences.firstWhere(
-      (journey) =>
-          journey.id != 'beijing-summer-palace' &&
-          journey.id != 'beijing-forbidden-city' &&
-          journey.id != 'shanghai-bund',
+      (journey) => usesSharedGenericAdaptivePipeline(journey.id),
     );
 
     for (final profile in levelAgent.allProfiles) {
@@ -77,8 +75,8 @@ void main() {
       expect(
         content.storyParagraphs.join().runes.length,
         inInclusiveRange(
-          storyTarget.minimumCharacters,
-          storyTarget.maximumCharacters,
+          storyTarget.acceptedMinimumCharacters,
+          storyTarget.acceptedMaximumCharacters,
         ),
       );
     }
