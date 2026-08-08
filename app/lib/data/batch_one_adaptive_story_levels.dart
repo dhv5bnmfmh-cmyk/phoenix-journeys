@@ -4,11 +4,12 @@ import 'daily_journey_experience.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 import 'shanghai_bund_one_pass.dart';
+import 'xian_city_wall_one_pass.dart';
 
 bool isBatchOneGoldJourney(String journeyId) =>
-    journeyId == shanghaiBundJourneyId;
+    journeyId == shanghaiBundJourneyId || journeyId == xianCityWallJourneyId;
 
-/// Thin adaptive adapter over the canonical Shanghai one-pass package.
+/// Thin adaptive adapter over canonical one-pass content packages.
 /// Story, Words, Discovery, Challenge, Memory, and Completion remain immutable
 /// content definitions; narration/progress updates never rebuild them.
 JourneyLevelContent buildBatchOneGoldLevel(
@@ -16,11 +17,13 @@ JourneyLevelContent buildBatchOneGoldLevel(
   required ChineseProficiencyProfile profile,
   Set<String> knownWords = const <String>{},
 }) {
-  if (experience.id != shanghaiBundJourneyId) {
+  if (!isBatchOneGoldJourney(experience.id)) {
     throw ArgumentError.value(experience.id, 'experience.id');
   }
   final level = profile.phoenixLevel ?? _legacyLevel(profile.band);
-  final base = shanghaiBundOnePassRemediation.levelContent(level);
+  final base = experience.id == xianCityWallJourneyId
+      ? xianCityWallOnePassLevelContent(level)
+      : shanghaiBundOnePassRemediation.levelContent(level);
   final unseenWords = base.words
       .where((entry) => !knownWords.contains(entry.word))
       .toList(growable: false);
@@ -32,8 +35,8 @@ JourneyLevelContent buildBatchOneGoldLevel(
         ? base.words
         : List<WordEntry>.unmodifiable(unseenWords),
     discoveries: base.discoveries,
-    wonderQuestion: '林岸为什么在过江后不再把两岸理解成过去和未来？',
-    expressQuestion: '旧海运提单与陆家嘴结算系统在故事里共同组织了哪些流动？',
+    wonderQuestion: base.wonderQuestion,
+    expressQuestion: base.expressQuestion,
   );
 }
 
@@ -54,17 +57,24 @@ class BatchOneJourneyMemorySpec {
 }
 
 BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
-  if (journeyId != shanghaiBundJourneyId) return null;
-  final journey = shanghaiBundOnePassRemediation;
+  final journey = switch (journeyId) {
+    shanghaiBundJourneyId => shanghaiBundOnePassRemediation,
+    xianCityWallJourneyId => xianCityWallOnePassRemediation,
+    _ => null,
+  };
+  if (journey == null) return null;
 
   String memoryAnswer(String category) => journey.memory
       .firstWhere((item) => item.category == category)
       .answer;
 
+  final culturalPoint = journeyId == xianCityWallJourneyId
+      ? '${memoryAnswer('history')} ${memoryAnswer('culture')}'
+      : '${memoryAnswer('culture')} ${memoryAnswer('architecture')}';
+
   return BatchOneJourneyMemorySpec(
     storyResult: journey.completion.journeySummary,
-    culturalPoint:
-        '${memoryAnswer('culture')} ${memoryAnswer('architecture')}',
+    culturalPoint: culturalPoint,
     reviews: List<RemediatedMemoryReview>.unmodifiable(journey.memory),
     longTermAnchor: journey.completion.memoryAnchor,
     completionSummary:
