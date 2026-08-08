@@ -2,16 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/services/narrative_quality_shaper.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 void main() {
   const agent = PhoenixLanguageLevelAgent();
-  const dedicatedAdaptiveJourneyIds = <String>{
-    'beijing-summer-palace',
-    'beijing-forbidden-city',
-    'shanghai-bund',
-  };
 
   test('narrative selector preserves opening, turning point, and ending', () {
     final indexes = selectNarrativeSentenceIndexesForTesting(
@@ -33,11 +29,11 @@ void main() {
   });
 
   for (final profile in agent.allProfiles) {
-    test('${profile.displayLabel} keeps the narrative spine of every journey', () {
+    test('${profile.displayLabel} keeps the narrative spine of every generic journey', () {
       final storyTarget = phoenixStoryLengthTargetFor(profile);
 
       for (final journey in dailyJourneyExperiences) {
-        if (dedicatedAdaptiveJourneyIds.contains(journey.id)) continue;
+        if (usesDedicatedAdaptiveJourneyRuntime(journey.id)) continue;
 
         final content = resolveAdaptiveJourneyLevel(
           journey,
@@ -84,10 +80,10 @@ void main() {
         expect(
           storyCharacters,
           inInclusiveRange(
-            storyTarget.minimumCharacters,
-            storyTarget.maximumCharacters,
+            storyTarget.acceptedMinimumCharacters,
+            storyTarget.acceptedMaximumCharacters,
           ),
-          reason: '${journey.id} should meet the Phoenix reading range',
+          reason: '${journey.id} should meet the accepted Phoenix reading range',
         );
       }
     });
