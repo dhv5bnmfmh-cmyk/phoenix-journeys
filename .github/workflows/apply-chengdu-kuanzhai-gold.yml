@@ -1,0 +1,26 @@
+name: Apply Chengdu Kuanzhai Gold Remediation
+
+on:
+  push:
+    branches:
+      - remediation/chengdu-kuanzhai-one-pass
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Apply scoped Chengdu integration
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          printf '%s' 'ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCmltcG9ydCBiYXNlNjQKaW1wb3J0IHJlCmltcG9ydCBzdWJwcm9jZXNzCgpkZWYgcmVwbGFjZV9vbmNlKHBhdGgsIG9sZCwgbmV3KToKICAgIHAgPSBQYXRoKHBhdGgpCiAgICB0ZXh0ID0gcC5yZWFkX3RleHQoKQogICAgY291bnQgPSB0ZXh0LmNvdW50KG9sZCkKICAgIGlmIGNvdW50ICE9IDE6CiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdChmIntwYXRofSBleHBlY3RlZCBvbmUgZXhhY3QgbWF0Y2gsIGZvdW5kIHtjb3VudH06IHtvbGRbOjEwMF0hcn0iKQogICAgcC53cml0ZV90ZXh0KHRleHQucmVwbGFjZShvbGQsIG5ldywgMSkpCgpyZXBsYWNlX29uY2UoCiAgICAnYXBwL2xpYi9kYXRhL2RlZGljYXRlZF9hZGFwdGl2ZV9qb3VybmV5X2NhdGFsb2cuZGFydCcsCiAgICAiICAnaGFuZ3pob3Utd2VzdC1sYWtlJyxcbn07IiwKICAgICIgICdoYW5nemhvdS13ZXN0LWxha2UnLFxuICAnY2hlbmdkdS1rdWFuemhhaS1hbGxleScsXG59OyIsCikKCnJlcGxhY2Vfb25jZSgKICAgICdhcHAvbGliL2RhdGEvYmF0Y2hfb25lX2FkYXB0aXZlX3N0b3J5X2xldmVscy5kYXJ0JywKICAgICJpbXBvcnQgJ2JhdGNoX29uZV9qb3VybmV5X3JlbWVkaWF0aW9uLmRhcnQnO1xuIiwKICAgICJpbXBvcnQgJ2JhdGNoX29uZV9qb3VybmV5X3JlbWVkaWF0aW9uLmRhcnQnO1xuaW1wb3J0ICdjaGVuZ2R1X2t1YW56aGFpX29uZV9wYXNzLmRhcnQnO1xuIiwKKQpyZXBsYWNlX29uY2UoCiAgICAnYXBwL2xpYi9kYXRhL2JhdGNoX29uZV9hZGFwdGl2ZV9zdG9yeV9sZXZlbHMuZGFydCcsCiAgICAiICAgIGpvdXJuZXlJZCA9PSBoYW5nemhvdVdlc3RMYWtlSm91cm5leUlkOyIsCiAgICAiICAgIGpvdXJuZXlJZCA9PSBoYW5nemhvdVdlc3RMYWtlSm91cm5leUlkIHx8XG4gICAgam91cm5leUlkID09IGNoZW5nZHVLdWFuemhhaUpvdXJuZXlJZDsiLAp9CnJlcGxhY2Vfb25jZSgKICAgICdhcHAvbGliL2RhdGEvYmF0Y2hfb25lX2FkYXB0aXZlX3N0b3J5X2xldmVscy5kYXJ0JywKICAgICIgICAgaGFuZ3pob3VXZ...TRUNCATED...
