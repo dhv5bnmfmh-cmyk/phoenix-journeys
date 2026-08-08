@@ -148,6 +148,8 @@ Production imagery MUST preserve or exceed the PR `#137` level of completion:
 
 Crop approval MUST use actual target viewports. Source image quality does not guarantee mobile crop quality.
 
+All new or replaced Phoenix Journey background production MUST additionally comply with [PHOENIX AI BACKGROUND PRODUCTION STANDARD](PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md). That standard strengthens source eligibility, Visual DNA, Shot Plan, Pilot, rights/IP, provenance, cultural/historical, mobile, anti-template, performance, versioning, and runtime-integration gates without weakening this standard or the PR `#137` stable baseline.
+
 ## 11. Visual differentiation
 
 Normal and special Journeys MAY share product components and stage structure. They MUST NOT share a uniform visual template that erases identity.
@@ -270,6 +272,8 @@ Every new or replaced runtime visual MUST pass all applicable gates:
 4. Stable Baseline Comparison Gate;
 5. Founder Mobile Preview Approval Gate.
 
+For Journey backgrounds, the Rights Gate includes the mandatory IP Similarity Review and provenance requirements defined by [PHOENIX AI BACKGROUND PRODUCTION STANDARD](PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md). A background may not enter runtime without Rights Gate `PASS`.
+
 Failure or missing evidence at any gate results in `BLOCKED`, `REQUIRES_REVISION`, or `REGRESSION`, never `PASS`.
 
 ## 20. Evidence
@@ -301,3 +305,15 @@ A UI or visual task MUST NOT be marked Completed, expanded, moved to Ready, or m
 - the mandatory stable comparison is missing.
 
 Completion reporting follows [Phoenix Development Completion Standard](PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md).
+
+## 22. Binding background-production relationship
+
+For all new or replaced Journey backgrounds:
+
+- this UI and Visual Standard defines the minimum visual and mobile baseline;
+- [PHOENIX AI BACKGROUND PRODUCTION STANDARD](PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md) defines the mandatory production, rights/IP, Pilot, provenance, anti-template, mobile-crop, performance, versioning, and runtime-integration workflow;
+- [destination background runtime policy](destination-background-policy.md) continues to define applicable final library-count, format, runtime-selection, metadata, and regression-test rules;
+- automated fields are necessary technical evidence where required but are never sufficient for visual `PASS`;
+- any applicable Founder visual or mobile approval remains authoritative.
+
+No background-production rule may be interpreted to lower the PR `#137` stable visual baseline.
