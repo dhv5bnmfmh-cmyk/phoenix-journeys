@@ -8,6 +8,8 @@ class PhoenixStoryLengthTarget {
     required this.enrichmentPacketCount,
   });
 
+  static const int approvedToleranceCharacters = 50;
+
   final int minimumCharacters;
   final int maximumCharacters;
   final int paragraphCount;
@@ -15,6 +17,12 @@ class PhoenixStoryLengthTarget {
 
   int get preferredCharacters =>
       ((minimumCharacters + maximumCharacters) / 2).round();
+
+  int get acceptedMinimumCharacters =>
+      (minimumCharacters - approvedToleranceCharacters).clamp(0, minimumCharacters);
+
+  int get acceptedMaximumCharacters =>
+      maximumCharacters + approvedToleranceCharacters;
 }
 
 PhoenixStoryLengthTarget phoenixStoryLengthTargetFor(

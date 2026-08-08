@@ -5,9 +5,11 @@ import '../services/narrative_quality_shaper.dart';
 import '../services/phoenix_story_length_policy.dart';
 import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
+import 'batch_one_adaptive_story_levels.dart';
 import 'daily_journey_experience.dart';
+import 'forbidden_city_content_cache.dart';
 import 'forbidden_city_journey_runtime.dart';
-import 'forbidden_city_trace_validation.dart';
+import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 import 'summer_palace_adaptive_story_levels.dart';
 import 'summer_palace_language_level_catalog.dart';
@@ -26,7 +28,17 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   Set<String> knownWords = const <String>{},
 }) {
   if (experience.id == forbiddenCityJourneyId) {
-    return _resolveForbiddenCityLockedLevel(profile);
+    return _resolveForbiddenCityAdaptiveLevel(
+      profile,
+      knownWords: knownWords,
+    );
+  }
+  if (isBatchOneGoldJourney(experience.id)) {
+    return buildBatchOneGoldLevel(
+      experience,
+      profile: profile,
+      knownWords: knownWords,
+    );
   }
   if (experience.id == 'beijing-summer-palace') {
     return _resolveSummerPalaceN1Level(
@@ -41,18 +53,50 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   );
 }
 
-JourneyLevelContent _resolveForbiddenCityLockedLevel(
-  ChineseProficiencyProfile profile,
-) {
+JourneyLevelContent _resolveForbiddenCityAdaptiveLevel(
+  ChineseProficiencyProfile profile, {
+  required Set<String> knownWords,
+}) {
   final level = profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band);
-  final base = forbiddenCityLevelContent(level);
+  final base = _normalizeForbiddenCityReadingSupport(
+    cachedForbiddenCityLevelContent(level),
+    level,
+  );
+  final unseenWords = base.words
+      .where((entry) => !knownWords.contains(entry.word))
+      .toList(growable: false);
   return JourneyLevelContent(
     storyParagraphs: base.storyParagraphs,
     storyAnnotations: base.storyAnnotations,
-    words: forbiddenCityValidatedWordsForLevel(level),
+    words: unseenWords.isEmpty ? base.words : unseenWords,
     discoveries: base.discoveries,
-    wonderQuestion: '',
-    expressQuestion: '',
+    wonderQuestion: base.wonderQuestion,
+    expressQuestion: base.expressQuestion,
+  );
+}
+
+JourneyLevelContent _normalizeForbiddenCityReadingSupport(
+  JourneyLevelContent base,
+  int level,
+) {
+  if (level != 8 && level != 10) return base;
+  final annotations = List<ReadingAnnotation>.of(base.storyAnnotations);
+  final index = annotations.length - 1;
+  final current = annotations[index];
+  annotations[index] = ReadingAnnotation(
+    pinyin: current.pinyin,
+    vietnamese: level == 8
+        ? 'Cậu nhận ra việc bước qua chỉ để lấp đầy bản đồ có thể biến “hiểu” thành “chiếm hữu”, nên giữ lại khoảng trống như một phần của hiểu biết lịch sử.'
+        : 'Khi cánh cổng mở, cậu từ chối biến khả năng thành quyền chiếm hữu, để “giới”, bản đồ thứ hai và chiếc thước gỗ cũ trở thành dấu mốc của cách nhìn mới.',
+    english: current.english,
+  );
+  return JourneyLevelContent(
+    storyParagraphs: base.storyParagraphs,
+    storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
+    words: base.words,
+    discoveries: base.discoveries,
+    wonderQuestion: base.wonderQuestion,
+    expressQuestion: base.expressQuestion,
   );
 }
 
@@ -65,9 +109,6 @@ int _legacyForbiddenCityLevel(PhoenixReadingBand band) => switch (band) {
       PhoenixReadingBand.mastery => 10,
     };
 
-/// The unchanged shared pipeline used by every Journey except isolated
-/// Journey-specific adaptive content such as Beijing Summer Palace and the
-/// locked Beijing Forbidden City remediation.
 JourneyLevelContent resolveSharedAdaptiveJourneyLevel(
   DailyJourneyExperience experience, {
   required ChineseProficiencyProfile profile,
@@ -98,9 +139,6 @@ JourneyLevelContent resolveSharedAdaptiveJourneyLevel(
   );
 }
 
-/// Reconstructs the pre-remediation generic path for regression evidence.
-/// Production never calls this helper. It proves why Pilot N1 must remain
-/// isolated from shared tourist enrichment.
 JourneyLevelContent resolveLegacySummerPalaceGenericExpansionForTesting(
   DailyJourneyExperience experience, {
   required ChineseProficiencyProfile profile,

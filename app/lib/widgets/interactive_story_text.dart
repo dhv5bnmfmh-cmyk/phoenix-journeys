@@ -287,10 +287,12 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       _detachNarrationFollowCoordinator();
       _attachNarrationFollowCoordinator();
     }
-    final entriesChanged = !vocabularyWordListsEquivalent(
-      oldWidget.entries.map((entry) => entry.word),
-      widget.entries.map((entry) => entry.word),
-    );
+    final entriesChanged =
+        !identical(oldWidget.entries, widget.entries) &&
+        !vocabularyWordListsEquivalent(
+          oldWidget.entries.map((entry) => entry.word),
+          widget.entries.map((entry) => entry.word),
+        );
     if (textChanged || entriesChanged) {
       _disposeRecognizers();
       _selectedEntry = null;

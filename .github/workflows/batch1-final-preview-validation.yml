@@ -1,0 +1,163 @@
+name: Batch 1 Final Founder Preview Validation
+
+on:
+  push:
+    branches:
+      - preview/batch-1-final-founder-review
+
+permissions:
+  contents: read
+  statuses: write
+
+env:
+  PREVIEW_WORKER: phoenix-journeys-pr-155
+  PREVIEW_URL: https://phoenix-journeys-pr-155.7hn5tyrjgh.workers.dev
+  PREVIEW_RELEASE: ${{ github.sha }}
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact preview candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Test Phoenix agents
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p test-results
+          node --test --test-reporter=spec worker/*.test.mjs \
+            2>&1 | tee test-results/phoenix-agent-tests.log
+
+      - name: Publish Phoenix agent diagnostics to Step Summary
+        if: always()
+        shell: bash
+        run: |
+          echo '## Phoenix Agent Tests' >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f test-results/phoenix-agent-tests.log ]]; then
+            echo '```text' >> "$GITHUB_STEP_SUMMARY"
+            cat test-results/phoenix-agent-tests.log >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Phoenix Agent test log was not produced.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload Phoenix agent diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-agent-tests-pr-155
+          path: test-results/phoenix-agent-tests.log
+          if-no-files-found: warn
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Flutter Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Full Flutter Tests
+        working-directory: app
+        run: flutter test
+
+      - name: Journey Quality Gates
+        working-directory: app
+        env:
+          PHOENIX_GENERATE_QUALITY_REPORT: '1'
+          PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
+          PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
+        run: |
+          flutter test test/journey_quality_report_ci_test.dart --reporter expanded
+          node <<'NODE'
+          const fs = require('node:fs');
+          const report = JSON.parse(fs.readFileSync(process.env.PHOENIX_QUALITY_JSON, 'utf8'));
+          console.log(`Phoenix quality gate: ${report.approvedCount}/${report.inspectionCount} approved; minimum ${report.minimumScore}; average ${report.averageScore}.`);
+          if (!report.canPublish) {
+            console.error(`Release blocked: ${report.needsRevisionCount} need revision and ${report.blockedCount} are blocked.`);
+            process.exit(1);
+          }
+          NODE
+
+      - name: Journey Runtime Architecture Gate
+        working-directory: app
+        run: flutter test test/journey_runtime_architecture_gate_test.dart --reporter expanded
+
+      - name: Technical Performance Checks
+        working-directory: app
+        run: flutter test test/journey_runtime_performance_gate_test.dart --reporter expanded
+
+      - name: Upload journey quality report
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-journey-content-quality-pr-155
+          path: |
+            journey-quality-report.md
+            journey-quality-report.json
+          if-no-files-found: error
+
+      - name: Web Build
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Preview Deployment
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npx --yes wrangler@4 deploy \
+            --name "$PREVIEW_WORKER" \
+            --var "PHOENIX_RELEASE:$PREVIEW_RELEASE"
+
+      - name: Release Health
+        shell: bash
+        run: |
+          health_url="${PREVIEW_URL}/api/health?commit=${PREVIEW_RELEASE}"
+          verified="false"
+          for attempt in {1..18}; do
+            response="$(curl --fail --silent --show-error "$health_url" || true)"
+            echo "Preview release check ${attempt}/18: ${response:-no response}"
+            if node -e '
+              let health;
+              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
+              const expectedRelease = process.argv[2];
+              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expectedRelease) process.exit(1);
+            ' "$response" "$PREVIEW_RELEASE"; then
+              verified="true"
+              break
+            fi
+            sleep 5
+          done
+          [[ "$verified" == "true" ]]
+
+      - name: Publish preview status
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          target="${PREVIEW_URL}/?unlock=all&prototype=journeys"
+          payload="$(node -e '
+            const [url] = process.argv.slice(1);
+            process.stdout.write(JSON.stringify({state:"success",description:"Isolated Phoenix preview is ready",context:"cloudflare/preview",target_url:url}));
+          ' "$target")"
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
+            --data "$payload"
+
+# Validation rerun marker: exact-SHA architecture and performance gates.

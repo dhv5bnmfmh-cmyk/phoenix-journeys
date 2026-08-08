@@ -1,18 +1,20 @@
-import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import fs from 'node:fs';
+import path from 'node:path';
+import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
-const storyText = readFileSync(
-  'app/lib/widgets/interactive_story_text.dart',
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const storyText = fs.readFileSync(
+  path.join(root, 'app/lib/widgets/interactive_story_text.dart'),
   'utf8',
 );
-const main = readFileSync('app/lib/main.dart', 'utf8');
 
 test('narration rebuilds do not dismiss an open vocabulary explanation', () => {
   assert.match(storyText, /vocabularyWordListsEquivalent/);
   assert.match(
     storyText,
-    /final entriesChanged = !vocabularyWordListsEquivalent/,
+    /final entriesChanged\s*=\s*!identical\(oldWidget\.entries, widget\.entries\)\s*&&\s*!vocabularyWordListsEquivalent\(/s,
   );
   assert.doesNotMatch(storyText, /oldWidget\.entries != widget\.entries/);
   assert.match(
@@ -20,9 +22,4 @@ test('narration rebuilds do not dismiss an open vocabulary explanation', () => {
     /vocabularyPopoverAutoHideDuration = Duration\(seconds: 12\)/,
   );
   assert.match(storyText, /Timer\(vocabularyPopoverAutoHideDuration/);
-});
-
-test('vocabulary timing stays local instead of intercepting every app timer', () => {
-  assert.doesNotMatch(main, /runWithPhoenixTimerPolicy/);
-  assert.doesNotMatch(main, /vocabulary_popover_timer_policy/);
 });

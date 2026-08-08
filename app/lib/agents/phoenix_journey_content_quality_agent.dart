@@ -98,7 +98,8 @@ class PhoenixJourneyContentQualityBatch {
       .where((decision) => decision.status == PhoenixJourneyReleaseStatus.blocked)
       .length;
 
-  bool get canPublish => decisions.isNotEmpty && blockedCount == 0 && needsRevisionCount == 0;
+  bool get canPublish =>
+      decisions.isNotEmpty && blockedCount == 0 && needsRevisionCount == 0;
 
   int get minimumScore => decisions.isEmpty
       ? 0

@@ -1,0 +1,14 @@
+00:00 +0: loading /home/runner/work/phoenix-journeys/phoenix-journeys/app/test/_batch1_trace_diagnostic_test.dart
+00:00 +0: diagnose forbidden city level traces
+LEVEL=7
+ISSUE=forbidden-city-paragraph-rebuild-trace :: Paragraph rebuild must use verbatim segments from the selected Story.
+ISSUE=forbidden-city-missing-sentence-trace :: Missing-sentence challenge must use an actual Story sentence and context.
+REBUILD[0]=false :: 门是打开的。
+REBUILD[1]=false :: 边界却没有消失。
+REBUILD[2]=false :: “能够过去”和“应该过去”，原来从来不是同一件事。
+REBUILD[3]=false :: 沈砚第一次被迫区分两件事：
+GRAMMAR=true :: 有时候，一个人在一座建筑中生活得越久，反而越清楚哪些空间并不属于自己的行动范围。
+MISSING_BEFORE=false :: 门是打开的。
+MISSING_ANSWER=false :: 边界却没有消失。
+MISSING_AFTER=false :: 沈砚第一次被迫区分两件事：
+00:00 +1: All tests passed!

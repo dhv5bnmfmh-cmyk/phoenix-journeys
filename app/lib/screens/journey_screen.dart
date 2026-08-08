@@ -7,9 +7,10 @@ import 'package:provider/provider.dart';
 
 import '../agents/phoenix_language_level_agent.dart';
 import '../data/adaptive_journey_level_runtime.dart';
+import '../data/batch_one_adaptive_story_levels.dart';
 import '../data/daily_journey_catalog.dart';
+import '../data/forbidden_city_content_cache.dart';
 import '../data/forbidden_city_journey_runtime.dart';
-import '../data/forbidden_city_trace_validation.dart';
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
 import '../models/journey_background.dart';
@@ -20,6 +21,7 @@ import '../services/narration_controller.dart';
 import '../services/phoenix_ai_service.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/batch_one_journey_summary.dart';
 import '../widgets/city_journey_stamp.dart';
 import '../widgets/destination_background.dart';
 import '../widgets/interactive_story_text.dart';
@@ -156,6 +158,14 @@ class _JourneyScreenState extends State<JourneyScreen>
   int _levelChangeToken = 0;
   Timer? _narrationCheckpointTimer;
   int _lastSavedNarrationOffset = 0;
+  JourneyLevelContent? _cachedLevelContent;
+  ChineseProficiencyProfile? _cachedLevelProfile;
+  JourneyDifficulty? _cachedLevelDifficulty;
+  int? _cachedKnownWordsHash;
+  JourneyLevelContent? _cachedStoryNarrationContent;
+  List<NarrationItem>? _cachedStoryNarrationItems;
+  JourneyLevelContent? _cachedDiscoveryNarrationContent;
+  List<NarrationItem>? _cachedDiscoveryNarrationItems;
 
   // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
   bool get _isSummerPalacePilot => false;
@@ -171,6 +181,9 @@ class _JourneyScreenState extends State<JourneyScreen>
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
     _experience = requireDailyJourneyExperience(journeyId);
+    if (_experience.id == forbiddenCityJourneyId) {
+      warmForbiddenCityContentCache();
+    }
     _challengeSeed =
         (DateTime.now().millisecondsSinceEpoch + journeyId.hashCode).abs();
     _ai = PhoenixAiService();
@@ -266,7 +279,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         offset < total) {
       _lastSavedNarrationOffset = offset;
       final items = contentId == 'story'
-          ? _storyNarrationItems
+          ? _storyPlaybackItems
           : _discoveryNarrationItems;
       return _appState.saveJourneyNarrationPosition(
         contentId: contentId!,
@@ -318,32 +331,54 @@ class _JourneyScreenState extends State<JourneyScreen>
     });
   }
 
+  int get _knownWordsFingerprint =>
+      Object.hashAllUnordered(_appState.savedWords);
+
   JourneyLevelContent get _levelContent {
     final profile = _languageProfile;
+    final difficulty = _appState.journeyDifficulty;
+    final knownWordsHash = _knownWordsFingerprint;
+    final cached = _cachedLevelContent;
+    if (cached != null &&
+        identical(_cachedLevelProfile, profile) &&
+        _cachedLevelDifficulty == difficulty &&
+        _cachedKnownWordsHash == knownWordsHash) {
+      return cached;
+    }
+
+    late final JourneyLevelContent resolved;
     if (profile == null) {
       if (_isForbiddenCity) {
-        final fallbackLevel = switch (_appState.journeyDifficulty) {
+        final fallbackLevel = switch (difficulty) {
           JourneyDifficulty.easy => 1,
           JourneyDifficulty.standard => 5,
           JourneyDifficulty.challenge => 10,
         };
-        final base = forbiddenCityLevelContent(fallbackLevel);
-        return JourneyLevelContent(
+        final base = cachedForbiddenCityLevelContent(fallbackLevel);
+        resolved = JourneyLevelContent(
           storyParagraphs: base.storyParagraphs,
           storyAnnotations: base.storyAnnotations,
-          words: forbiddenCityValidatedWordsForLevel(fallbackLevel),
+          words: base.words,
           discoveries: base.discoveries,
           wonderQuestion: '',
           expressQuestion: '',
         );
+      } else {
+        resolved = resolveJourneyLevel(_experience, difficulty);
       }
-      return resolveJourneyLevel(_experience, _appState.journeyDifficulty);
+    } else {
+      resolved = resolveAdaptiveJourneyLevel(
+        _experience,
+        profile: profile,
+        knownWords: _appState.savedWords,
+      );
     }
-    return resolveAdaptiveJourneyLevel(
-      _experience,
-      profile: profile,
-      knownWords: _appState.savedWords,
-    );
+
+    _cachedLevelContent = resolved;
+    _cachedLevelProfile = profile;
+    _cachedLevelDifficulty = difficulty;
+    _cachedKnownWordsHash = knownWordsHash;
+    return resolved;
   }
 
   ReadingGenerationPlan? get _generationPlan {
@@ -356,6 +391,8 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   String _readingShapeLabel(int count) =>
       count == 1 ? '深度长文' : '分段短文';
+
+  List<NarrationItem> get _storyPlaybackItems => _storyNarrationItems;
 
   Future<void> _loadLanguageProfile() async {
     final profile = await _languageLevelStore.load();
@@ -370,30 +407,51 @@ class _JourneyScreenState extends State<JourneyScreen>
     _restoreNarrationPosition();
   }
 
-  List<NarrationItem> get _storyNarrationItems => _levelContent.storyParagraphs
-      .asMap()
-      .entries
-      .map(
-        (entry) => NarrationItem(
-          id: 'story-${entry.key}',
-          text: entry.value,
-          label: '故事第 ${entry.key + 1} 段',
-        ),
-      )
-      .toList(growable: false);
+  List<NarrationItem> get _storyNarrationItems {
+    final content = _levelContent;
+    final cached = _cachedStoryNarrationItems;
+    if (cached != null && identical(_cachedStoryNarrationContent, content)) {
+      return cached;
+    }
 
-  List<NarrationItem> get _discoveryNarrationItems =>
-      _levelContent.discoveries
-          .asMap()
-          .entries
-          .map(
-            (entry) => NarrationItem(
-              id: 'discovery-${entry.key}',
-              text: entry.value.text,
-              label: '今日发现 ${entry.key + 1}',
-            ),
-          )
-          .toList(growable: false);
+    final resolved = content.storyParagraphs
+        .asMap()
+        .entries
+        .map(
+          (entry) => NarrationItem(
+            id: 'story-${entry.key}',
+            text: entry.value,
+            label: '故事第 ${entry.key + 1} 段',
+          ),
+        )
+        .toList(growable: false);
+    _cachedStoryNarrationContent = content;
+    _cachedStoryNarrationItems = resolved;
+    return resolved;
+  }
+
+  List<NarrationItem> get _discoveryNarrationItems {
+    final content = _levelContent;
+    final cached = _cachedDiscoveryNarrationItems;
+    if (cached != null && identical(_cachedDiscoveryNarrationContent, content)) {
+      return cached;
+    }
+
+    final resolved = content.discoveries
+        .asMap()
+        .entries
+        .map(
+          (entry) => NarrationItem(
+            id: 'discovery-${entry.key}',
+            text: entry.value.text,
+            label: '今日发现 ${entry.key + 1}',
+          ),
+        )
+        .toList(growable: false);
+    _cachedDiscoveryNarrationContent = content;
+    _cachedDiscoveryNarrationItems = resolved;
+    return resolved;
+  }
 
   void _restoreNarrationPosition([String? requestedContentId]) {
     final contentId = requestedContentId ??
@@ -408,7 +466,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (_narration.hasContent && _narration.contentId == contentId) return;
 
     final items = contentId == 'story'
-        ? _storyNarrationItems
+        ? _storyPlaybackItems
         : _discoveryNarrationItems;
     final matchesStep =
         (step == 0 && contentId == 'story') ||
@@ -536,7 +594,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     return _narration.play(
       contentId: 'story',
       languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
-      items: _storyNarrationItems,
+      items: _storyPlaybackItems,
     );
   }
 
@@ -928,8 +986,23 @@ class _JourneyScreenState extends State<JourneyScreen>
     unawaited(_persistProgress());
   }
 
+  String _batchOneStructuredMemory(BatchOneJourneyMemorySpec spec) {
+    final words = _levelContent.words.map((entry) => entry.word).take(6).join('、');
+    return <String>[
+      '故事结果：${spec.storyResult}',
+      '核心文化点：${spec.culturalPoint}',
+      '重点词汇：${words.isEmpty ? '本级重点词已复习' : words}',
+      'Challenge 表现：段落重组、语法修复、补全句子三种模式全部完成',
+      '长期记忆点：${spec.longTermAnchor}',
+    ].join('\n');
+  }
+
   Future<void> _finishJourney() async {
     await _narration.stop();
+    final batchSpec = batchOneMemorySpecFor(_experience.id);
+    if (batchSpec != null) {
+      memoryController.text = _batchOneStructuredMemory(batchSpec);
+    }
     await _appState.completeJourney(
       _isForbiddenCity ? forbiddenCityMemoryAnchor : memoryController.text,
     );
@@ -1209,9 +1282,15 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  Widget _storyPage() {
+  Widget _storyPage() => _defaultStoryPage();
+
+  Widget _defaultStoryPage() {
     final state = context.watch<AppState>();
     final language = state.translationLanguage;
+    final levelContent = _levelContent;
+    final storyParagraphs = levelContent.storyParagraphs;
+    final storyAnnotations = levelContent.storyAnnotations;
+    final words = levelContent.words;
 
     return _page(
       title: '故事',
@@ -1228,7 +1307,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             contentId: 'story',
             title: _appState.displayText(_experience.storyTitle),
             subtitle:
-                '$_readingLevelLabel · ${_readingShapeLabel(_levelContent.storyParagraphs.length)} · ${_levelContent.storyParagraphs.length} 段',
+                '$_readingLevelLabel · ${_readingShapeLabel(storyParagraphs.length)} · ${storyParagraphs.length} 段',
             compact: true,
             onPlay: _playStory,
           ),
@@ -1240,7 +1319,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 final fontSize = _fitJourneyTextSize(
                   context,
                   constraints,
-                  _levelContent.storyParagraphs,
+                  storyParagraphs,
                   minSize: 10.8,
                   maxSize: 16,
                   lineHeight: 1.22,
@@ -1248,64 +1327,63 @@ class _JourneyScreenState extends State<JourneyScreen>
                 return AnimatedBuilder(
                   animation: _narration,
                   builder: (context, _) {
+                    final snapshot = _narration.highlightSnapshot;
                     return SingleChildScrollView(
                       key: const ValueKey('story-auto-visibility-scroll'),
                       physics: const ClampingScrollPhysics(),
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: _levelContent.storyParagraphs
+                        children: storyParagraphs
                             .asMap()
                             .entries
                             .map((entry) {
-                              final annotation =
-                                  _levelContent.storyAnnotations[entry.key];
-                              final snapshot = _narration.highlightSnapshot;
+                              final annotation = storyAnnotations[entry.key];
                               final isActive =
                                   snapshot?.contentId == 'story' &&
                                   snapshot?.itemId == 'story-${entry.key}';
                               return _CompactTextBlock(
-                                index: entry.key + 1,
+                                  index: entry.key + 1,
                                 active: isActive,
                                 transparentSurface: true,
                                 onSupport: () => unawaited(
                                   _showReadingSupport(
-                                    title: '故事第 ${entry.key + 1} 段',
+                                      title: '故事第 ${entry.key + 1} 段',
                                     pinyin: annotation.pinyin,
                                     nativeLabel: annotation.nativeLabel(language),
-                                    nativeText: annotation.nativeText(language, entry.value),
-                                    english: annotation.english,
+                                      nativeText: annotation.nativeText(language, entry.value),
+                                      english: annotation.english,
                                   ),
                                 ),
                                 child: InteractiveStoryText(
                                   text: entry.value,
-                                  entries: _levelContent.words,
-                                  narrationController: _narration,
+                                entries: words,
+                                narrationController: _narration,
                                   highlightStart: isActive ? snapshot!.start : null,
-                                  highlightEnd: isActive ? snapshot!.end : null,
-                                  revealEnd: _narrationRevealEnd(
+                                highlightEnd: isActive ? snapshot!.end : null,
+                                revealEnd: _narrationRevealEnd(
                                     contentId: 'story',
                                     itemIndex: entry.key,
                                     itemLength: entry.value.length,
-                                  ),
-                                  narrationContentId: 'story',
-                                  narrationItemId: 'story-${entry.key}',
-                                  narrationSessionToken: _narration.speechSessionToken,
-                                  style: TextStyle(
-                                    color: Colors.white,
+                                ),
+                                narrationContentId: 'story',
+                                narrationItemId: 'story-${entry.key}',
+                              narrationSessionToken: _narration.speechSessionToken,
+                              style: TextStyle(
+                                color: Colors.white,
                                     fontSize: fontSize,
-                                    height: 1.22,
-                                    fontFamily: PhoenixTheme.chineseFontFamily,
-                                    fontFamilyFallback: PhoenixTheme.chineseFontFallback,
+                                  height: 1.22,
+                                  fontFamily: PhoenixTheme.chineseFontFamily,
+                                  fontFamilyFallback: PhoenixTheme.chineseFontFallback,
                                     fontWeight: FontWeight.w700,
-                                    shadows: const [
-                                      Shadow(color: Color(0xE6000000), blurRadius: 3, offset: Offset(0, 1)),
-                                      Shadow(color: Color(0x99000000), blurRadius: 8),
+                                  shadows: const [
+                                    Shadow(color: Color(0xE6000000), blurRadius: 3, offset: Offset(0, 1)),
+                                  Shadow(color: Color(0x99000000), blurRadius: 8),
                                     ],
                                   ),
-                                ),
-                              );
-                            })
+                              ),
+                            );
+                          })
                             .toList(growable: false),
                       ),
                     );
@@ -1759,6 +1837,22 @@ class _JourneyScreenState extends State<JourneyScreen>
   Widget _memoryPage() {
     if (_isForbiddenCity) return _forbiddenCityMemoryPage();
 
+    final batchSpec = batchOneMemorySpecFor(_experience.id);
+    if (batchSpec != null) {
+      return _page(
+        title: '旅程回忆',
+        buttonText: '保存回忆并完成',
+        buttonIcon: Icons.flag_rounded,
+        onNext: () => unawaited(_finishJourney()),
+        child: BatchOneJourneySummary(
+          spec: batchSpec,
+          words: _levelContent.words.map((entry) => entry.word).toList(growable: false),
+          challengeCompleted: true,
+          displayText: _appState.displayText,
+        ),
+      );
+    }
+
     final keyboardVisible = memoryFocusNode.hasFocus;
     return _page(
       title: '旅程回忆',
@@ -1864,6 +1958,79 @@ class _JourneyScreenState extends State<JourneyScreen>
   Widget _completePage() {
     if (_isForbiddenCity) return _forbiddenCityCompletePage();
 
+    final batchSpec = batchOneMemorySpecFor(_experience.id);
+    if (batchSpec != null) {
+      return _page(
+        title: '${_experience.city}已点亮',
+        buttonText: '返回首页',
+        buttonIcon: Icons.home_outlined,
+        showBack: false,
+        onNext: () => Navigator.of(context).pop(),
+        child: Stack(
+          children: [
+            const Positioned(
+              top: 2,
+              left: 2,
+              child: Text('盖章成功', style: TextStyle(color: PhoenixTheme.red, fontSize: 17, fontWeight: FontWeight.w900)),
+            ),
+            Align(
+              key: const ValueKey('completion-background-stamp'),
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 1, right: 2),
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: AnimatedCityJourneyStamp(journey: _experience, size: 70),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 34),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: BatchOneJourneySummary(
+                      spec: batchSpec,
+                      words: _levelContent.words.map((entry) => entry.word).toList(growable: false),
+                      challengeCompleted: true,
+                      displayText: _appState.displayText,
+                      completion: true,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  SizedBox(
+                    height: 36,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: JourneyShareButton(
+                            isTraditional: _appState.isTraditional,
+                            city: _experience.city,
+                            place: _experience.place,
+                            compact: true,
+                            label: _appState.displayText('分享旅程'),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => unawaited(_restartJourney()),
+                            style: OutlinedButton.styleFrom(visualDensity: VisualDensity.compact, padding: const EdgeInsets.symmetric(horizontal: 8)),
+                            icon: const Icon(Icons.replay_rounded, size: 16),
+                            label: const Text('重新体验', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10.5)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return _page(
       title: '${_experience.city}已点亮',
       buttonText: '返回首页',
@@ -1968,7 +2135,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
             const SizedBox(height: 8),
-            _ForbiddenCityCompleteCard(
+            const _ForbiddenCityCompleteCard(
               title: 'Journey Summary',
               body: forbiddenCityJourneySummary,
             ),

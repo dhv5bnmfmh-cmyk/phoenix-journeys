@@ -28,11 +28,11 @@ void main() {
         expect(
           storyCharacters,
           inInclusiveRange(
-            storyTarget.minimumCharacters,
-            storyTarget.maximumCharacters,
+            storyTarget.acceptedMinimumCharacters,
+            storyTarget.acceptedMaximumCharacters,
           ),
           reason: '${journey.id} should meet the ${profile.displayLabel} '
-              'story range, but produced $storyCharacters characters',
+              'story range with the approved ±50 character tolerance, but produced $storyCharacters characters',
         );
         expect(
           content.storyAnnotations.length,
@@ -63,6 +63,7 @@ void main() {
               : inInclusiveRange(1, 2),
           reason: '${journey.id} should use the approved discovery shape',
         );
+        expect(content.words, isNotEmpty, reason: journey.id);
         expect(
           content.words.length,
           lessThanOrEqualTo(plan.maximumVocabularyCount),

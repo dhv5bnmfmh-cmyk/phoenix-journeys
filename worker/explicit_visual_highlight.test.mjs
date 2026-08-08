@@ -16,14 +16,21 @@ const widgetTest = readFileSync(
   'utf8',
 );
 
-test('position derives from playback and is passed to Story and Discovery', () => {
+test('position derives from playback and is passed to shared Story and Discovery', () => {
   assert.match(controller, /NarrationHighlightSnapshot\? get highlightSnapshot \{/);
   assert.match(interactive, /final int\? highlightStart/);
+  const highlightBindings = journey.match(
+    /highlightStart:\s*isActive\s*\?\s*snapshot!\.start\s*:\s*null/g,
+  ) ?? [];
   assert.equal(
-    (journey.match(
-      /highlightStart:\s*isActive\s*\?\s*snapshot!\.start\s*:\s*null/g,
-    ) ?? []).length,
+    highlightBindings.length,
     2,
+    'shared Story and Discovery must each bind visible text to narration position exactly once',
+  );
+  assert.doesNotMatch(
+    journey,
+    /Widget _forbiddenCityStoryPage|forbidden-city-story-segment/,
+    'Forbidden City must not restore a parallel Story highlight renderer',
   );
 });
 

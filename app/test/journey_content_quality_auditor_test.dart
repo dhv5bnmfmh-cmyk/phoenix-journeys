@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/journey_data.dart';
 import 'package:phoenix_journeys/data/journey_level_catalog.dart';
 import 'package:phoenix_journeys/services/journey_content_quality_auditor.dart';
@@ -38,7 +39,9 @@ void main() {
   }
 
   test('detects a discovery that simply repeats the story', () {
-    final journey = dailyJourneyExperiences.first;
+    final journey = dailyJourneyExperiences.firstWhere(
+      (item) => item.id != forbiddenCityJourneyId,
+    );
     final profile = agent.allProfiles.first;
     final content = resolveAdaptiveJourneyLevel(
       journey,
@@ -74,7 +77,9 @@ void main() {
   });
 
   test('detects an unresolved reference at the start of paragraph two', () {
-    final journey = dailyJourneyExperiences.first;
+    final journey = dailyJourneyExperiences.firstWhere(
+      (item) => item.id != forbiddenCityJourneyId,
+    );
     final profile = agent.allProfiles.firstWhere(
       (item) => agent.planFor(item).paragraphCount == 2,
     );
