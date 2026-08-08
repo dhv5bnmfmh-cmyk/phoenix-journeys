@@ -1,0 +1,207 @@
+name: Hangzhou West Lake One-Pass Validation
+
+on:
+  push:
+    branches:
+      - remediation/hangzhou-west-lake-one-pass
+
+permissions:
+  contents: read
+  statuses: write
+
+env:
+  PREVIEW_WORKER: phoenix-journeys-pr-159
+  PREVIEW_URL: https://phoenix-journeys-pr-159.7hn5tyrjgh.workers.dev
+  PREVIEW_RELEASE: ${{ github.sha }}
+  STARTING_MAIN_SHA: bda4460a13c7fd314a0d96fd412fa7fae0bf6232
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository starting SHA and exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Working tree verification
+        shell: bash
+        run: |
+          test "$(git log -1 --format=%H)" = "$PREVIEW_RELEASE"
+          test -z "$(git status --porcelain)"
+          git merge-base --is-ancestor "$STARTING_MAIN_SHA" "$PREVIEW_RELEASE"
+          git log -1 --format=%H
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Targeted Hangzhou regression cluster
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter test test/hangzhou_west_lake_one_pass_gate_test.dart --reporter expanded
+          flutter test test/hangzhou_legacy_fallback_gate_test.dart --reporter expanded
+          flutter test test/summer_palace_pilot_n1_effective_levels_test.dart --reporter expanded
+          flutter test test/narrative_quality_shaper_test.dart --reporter expanded
+          flutter test test/adaptive_story_quality_test.dart --reporter expanded
+          flutter test test/journey_content_quality_auditor_test.dart --reporter expanded
+          flutter test test/phoenix_journey_content_quality_agent_test.dart --reporter expanded
+
+      - name: Hangzhou canonical narrative validation
+        working-directory: app
+        run: flutter test test/hangzhou_west_lake_one_pass_gate_test.dart --plain-name "all levels preserve one canonical Hangzhou soundscape narrative" --reporter expanded
+
+      - name: Narrative Difference Matrix
+        working-directory: app
+        run: flutter test test/hangzhou_west_lake_one_pass_gate_test.dart --plain-name "Narrative Difference Matrix covers all five approved Gold Journeys" --reporter expanded
+
+      - name: Narrative Uniqueness Gate
+        working-directory: app
+        run: |
+          flutter test test/hangzhou_west_lake_one_pass_gate_test.dart --plain-name "Hangzhou Narrative DNA differs materially from every approved Gold reference" --reporter expanded
+          flutter test test/hangzhou_west_lake_one_pass_gate_test.dart --plain-name "anti-template gate rejects a three-dimension Hangzhou copy" --reporter expanded
+
+      - name: Story length and paragraph policy
+        working-directory: app
+        run: flutter test test/hangzhou_west_lake_one_pass_gate_test.dart --plain-name "Hangzhou Story obeys Lv1-Lv10 requested length and paragraph policy" --reporter expanded
+
+      - name: Words exact trace validation
+        working-directory: app
+        run: flutter test test/hangzhou_west_lake_one_pass_gate_test.dart --plain-name "Words have exact Story trace and truthful first appearance" --reporter expanded
+
+      - name: Discovery source and Story binding
+        working-directory: app
+        run: flutter test test/hangzhou_west_lake_one_pass_gate_test.dart --plain-name "Discovery is exactly one level-bound card with sources and Story Link" --reporter expanded
+
+      - name: Challenge active-level binding
+        working-directory: app
+        run: flutter test test/hangzhou_west_lake_one_pass_gate_test.dart --plain-name "Challenge covers all ten levels with only approved active-story types" --reporter expanded
+
+      - name: Memory and Complete binding
+        working-directory: app
+        run: flutter test test/hangzhou_west_lake_one_pass_gate_test.dart --plain-name "Memory and Complete stay bound to the rain soundscape journey" --reporter expanded
+
+      - name: Phoenix Agent Tests
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p test-results
+          node --test --test-reporter=spec worker/*.test.mjs 2>&1 | tee test-results/phoenix-agent-tests.log
+
+      - name: Flutter Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Full Flutter Tests
+        working-directory: app
+        run: flutter test
+
+      - name: Journey Quality Gates
+        working-directory: app
+        env:
+          PHOENIX_GENERATE_QUALITY_REPORT: '1'
+          PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
+          PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
+        run: |
+          flutter test test/journey_quality_report_ci_test.dart --reporter expanded
+          node <<'NODE'
+          const fs = require('node:fs');
+          const report = JSON.parse(fs.readFileSync(process.env.PHOENIX_QUALITY_JSON, 'utf8'));
+          console.log(`Phoenix quality gate: ${report.approvedCount}/${report.inspectionCount} approved; minimum ${report.minimumScore}; average ${report.averageScore}.`);
+          if (!report.canPublish) process.exit(1);
+          NODE
+
+      - name: Journey Runtime Architecture Gate
+        working-directory: app
+        run: flutter test test/journey_runtime_architecture_gate_test.dart --reporter expanded
+
+      - name: Technical Performance Checks
+        working-directory: app
+        run: |
+          flutter test test/journey_runtime_performance_gate_test.dart --reporter expanded
+          flutter test test/hangzhou_west_lake_one_pass_gate_test.dart --reporter expanded
+
+      - name: Protected Gold content scope verification
+        shell: bash
+        run: |
+          git diff --exit-code "$STARTING_MAIN_SHA"..."$PREVIEW_RELEASE" -- \
+            app/lib/data/summer_palace_journey.dart \
+            app/lib/data/summer_palace_adaptive_story_levels.dart \
+            app/lib/data/forbidden_city_journey_runtime.dart \
+            app/lib/data/forbidden_city_challenge_package.dart \
+            app/lib/data/shanghai_bund_one_pass.dart \
+            app/lib/data/xian_city_wall_one_pass.dart
+
+      - name: Upload journey quality report
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-journey-content-quality-pr-159
+          path: |
+            journey-quality-report.md
+            journey-quality-report.json
+          if-no-files-found: error
+
+      - name: Web Build
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Preview Deployment
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test "$(git log -1 --format=%H)" = "$PREVIEW_RELEASE"
+          npx --yes wrangler@4 deploy \
+            --name "$PREVIEW_WORKER" \
+            --var "PHOENIX_RELEASE:$PREVIEW_RELEASE"
+
+      - name: Release Health
+        shell: bash
+        run: |
+          health_url="${PREVIEW_URL}/api/health?commit=${PREVIEW_RELEASE}"
+          verified="false"
+          for attempt in {1..18}; do
+            response="$(curl --fail --silent --show-error "$health_url" || true)"
+            echo "Preview release check ${attempt}/18: ${response:-no response}"
+            if node -e '
+              let health;
+              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
+              const expectedRelease = process.argv[2];
+              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expectedRelease) process.exit(1);
+            ' "$response" "$PREVIEW_RELEASE"; then
+              verified="true"
+              break
+            fi
+            sleep 5
+          done
+          [[ "$verified" == "true" ]]
+
+      - name: Publish preview status
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          target="${PREVIEW_URL}/?unlock=all&prototype=journeys"
+          payload="$(node -e '
+            const [url] = process.argv.slice(1);
+            process.stdout.write(JSON.stringify({state:"success",description:"Hangzhou West Lake Founder preview is ready",context:"cloudflare/hangzhou-west-lake-preview",target_url:url}));
+          ' "$target")"
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
+            --data "$payload"
