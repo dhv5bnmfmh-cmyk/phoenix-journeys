@@ -88,6 +88,14 @@ jobs:
           }
           NODE
 
+      - name: Journey Runtime Architecture Gate
+        working-directory: app
+        run: flutter test test/journey_runtime_architecture_gate_test.dart --reporter expanded
+
+      - name: Technical Performance Checks
+        working-directory: app
+        run: flutter test test/journey_runtime_performance_gate_test.dart --reporter expanded
+
       - name: Upload journey quality report
         uses: actions/upload-artifact@v4
         with:
@@ -152,4 +160,4 @@ jobs:
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
             --data "$payload"
 
-# Validation rerun marker: Forbidden City runtime performance remediation v1.
+# Validation rerun marker: exact-SHA architecture and performance gates.
