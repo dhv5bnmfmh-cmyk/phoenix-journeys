@@ -55,7 +55,10 @@ void main() {
     expect(trace, contains('forbiddenCityWordTraceIsValid'));
     expect(trace, contains('_earliestLevelContaining'));
     expect(runtime, contains('PinyinHelper.getPinyinE'));
-    expect(cache, contains('late final List<JourneyLevelContent>'));
+    expect(
+      cache,
+      contains('final List<JourneyLevelContent> _forbiddenCityLevelSnapshots'),
+    );
     expect(cache, contains('warmForbiddenCityContentCache'));
     expect(adaptive, contains('cachedForbiddenCityLevelContent(level)'));
   });
@@ -180,7 +183,7 @@ void main() {
     );
 
     expect(journey, contains('Widget _storyPage() => _defaultStoryPage();'));
-    expect(journey, isNot(contains('_forbiddenCityStoryPage')));
+    expect(journey, isNot(contains('_forbiddenCityStoryPage'));
     expect(story, contains('InteractiveStoryText('));
     expect(story, contains('narrationController: _narration'));
     expect(story, contains('revealEnd: _narrationRevealEnd('));
