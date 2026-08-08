@@ -13,6 +13,7 @@ env:
   PREVIEW_WORKER: phoenix-journeys-pr-157
   PREVIEW_URL: https://phoenix-journeys-pr-157.7hn5tyrjgh.workers.dev
   PREVIEW_RELEASE: ${{ github.sha }}
+  STARTING_MAIN_SHA: b63a8ba60edbb569200698b27a4fc05da9ef1e4e
 
 jobs:
   validate-and-deploy:
@@ -29,7 +30,7 @@ jobs:
         run: |
           test "$(git log -1 --format=%H)" = "$PREVIEW_RELEASE"
           test -z "$(git status --porcelain)"
-          git merge-base --is-ancestor b63a8ba60edbb569200698b27a4fc05da9ef1e4e "$PREVIEW_RELEASE"
+          git merge-base --is-ancestor "$STARTING_MAIN_SHA" "$PREVIEW_RELEASE"
           git log -1 --format=%H
 
       - name: Set up Flutter
@@ -42,13 +43,28 @@ jobs:
         working-directory: app
         run: flutter pub get
 
+      - name: Targeted Xi'an regression cluster
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter test test/summer_palace_pilot_n1_effective_levels_test.dart --reporter expanded
+          flutter test test/narrative_quality_shaper_test.dart --reporter expanded
+          flutter test test/adaptive_story_quality_test.dart --reporter expanded
+          flutter test test/journey_content_quality_auditor_test.dart --reporter expanded
+          flutter test test/phoenix_journey_content_quality_agent_test.dart --reporter expanded
+          flutter test test/xian_city_wall_one_pass_gate_test.dart --reporter expanded
+
       - name: Xi'an canonical content validation
         working-directory: app
         run: flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Xi'an Story obeys Lv1-Lv10 requested length and paragraph policy" --reporter expanded
 
-      - name: Narrative uniqueness matrix
+      - name: Narrative Difference Matrix
         working-directory: app
-        run: flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Narrative DNA differs materially from all approved Gold references" --reporter expanded
+        run: |
+          flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Narrative DNA metadata and difference matrix cover all Gold Journeys" --reporter expanded
+          flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Narrative DNA differs materially from all approved Gold references" --reporter expanded
+          flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "anti-template regression logic fails a three-dimension template copy" --reporter expanded
 
       - name: Words exact trace validation
         working-directory: app
@@ -107,13 +123,26 @@ jobs:
 
       - name: Narrative Uniqueness Gate
         working-directory: app
-        run: flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Narrative DNA differs materially from all approved Gold references" --reporter expanded
+        run: |
+          flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Narrative DNA differs materially from all approved Gold references" --reporter expanded
+          flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "anti-template regression logic fails a three-dimension template copy" --reporter expanded
 
       - name: Technical Performance Checks
         working-directory: app
         run: |
           flutter test test/journey_runtime_performance_gate_test.dart --reporter expanded
           flutter test test/xian_city_wall_one_pass_gate_test.dart --reporter expanded
+
+      - name: Protected Gold content scope verification
+        shell: bash
+        run: |
+          git diff --exit-code "$STARTING_MAIN_SHA"..."$PREVIEW_RELEASE" -- \
+            app/lib/data/summer_palace_journey.dart \
+            app/lib/data/summer_palace_adaptive_story_levels.dart \
+            app/lib/data/forbidden_city_journey_runtime.dart \
+            app/lib/data/forbidden_city_challenge_package.dart \
+            app/lib/data/shanghai_bund_one_pass.dart
+          test -z "$(git diff --name-only "$STARTING_MAIN_SHA"..."$PREVIEW_RELEASE" -- app/lib/data/shanghai_bund_one_pass.dart)"
 
       - name: Upload journey quality report
         uses: actions/upload-artifact@v4
@@ -136,6 +165,7 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test "$(git log -1 --format=%H)" = "$PREVIEW_RELEASE"
           npx --yes wrangler@4 deploy \
             --name "$PREVIEW_WORKER" \
             --var "PHOENIX_RELEASE:$PREVIEW_RELEASE"
