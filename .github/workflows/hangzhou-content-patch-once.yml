@@ -1,0 +1,43 @@
+name: Hangzhou Content Patch Once
+
+on:
+  push:
+    branches:
+      - remediation/hangzhou-west-lake-one-pass
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: remediation/hangzhou-west-lake-one-pass
+          fetch-depth: 0
+      - name: Repair Lv5 paragraph opening
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('app/lib/data/hangzhou_west_lake_one_pass.dart')
+          text = path.read_text()
+          old = "'她第二次走到桥边时，脚步在石面和桥洞下形成不同的回声，一艘游船经过，桨声与水波一起靠近。她再次准备删掉，却看见堤上不断有人来去。"
+          new = "'苏堤桥边，许澄第二次听见脚步在石面和桥洞下形成不同的回声，一艘游船经过，桨声与水波一起靠近。她再次准备删掉，却看见堤上不断有人来去。"
+          if old in text:
+              text = text.replace(old, new, 1)
+          path.write_text(text)
+          PY
+      - name: Commit content repair when needed
+        shell: bash
+        run: |
+          if git diff --quiet -- app/lib/data/hangzhou_west_lake_one_pass.dart; then
+            echo "Lv5 paragraph opening already repaired."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/data/hangzhou_west_lake_one_pass.dart
+          git commit -m "fix: anchor Hangzhou Lv5 second paragraph"
+          git push origin HEAD:remediation/hangzhou-west-lake-one-pass
