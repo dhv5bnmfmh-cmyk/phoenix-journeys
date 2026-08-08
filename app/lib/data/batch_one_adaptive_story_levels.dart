@@ -1,13 +1,16 @@
 import '../models/language_proficiency.dart';
 import 'batch_one_journey_remediation.dart';
 import 'daily_journey_experience.dart';
+import 'hangzhou_west_lake_one_pass.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 import 'shanghai_bund_one_pass.dart';
 import 'xian_city_wall_one_pass.dart';
 
 bool isBatchOneGoldJourney(String journeyId) =>
-    journeyId == shanghaiBundJourneyId || journeyId == xianCityWallJourneyId;
+    journeyId == shanghaiBundJourneyId ||
+    journeyId == xianCityWallJourneyId ||
+    journeyId == hangzhouWestLakeJourneyId;
 
 /// Thin adaptive adapter over canonical one-pass content packages.
 /// Story, Words, Discovery, Challenge, Memory, and Completion remain immutable
@@ -21,9 +24,11 @@ JourneyLevelContent buildBatchOneGoldLevel(
     throw ArgumentError.value(experience.id, 'experience.id');
   }
   final level = profile.phoenixLevel ?? _legacyLevel(profile.band);
-  final base = experience.id == xianCityWallJourneyId
-      ? xianCityWallOnePassLevelContent(level)
-      : shanghaiBundOnePassRemediation.levelContent(level);
+  final base = switch (experience.id) {
+    xianCityWallJourneyId => xianCityWallOnePassLevelContent(level),
+    hangzhouWestLakeJourneyId => hangzhouWestLakeOnePassLevelContent(level),
+    _ => shanghaiBundOnePassRemediation.levelContent(level),
+  };
   final unseenWords = base.words
       .where((entry) => !knownWords.contains(entry.word))
       .toList(growable: false);
@@ -66,6 +71,7 @@ BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
   final journey = switch (journeyId) {
     shanghaiBundJourneyId => shanghaiBundOnePassRemediation,
     xianCityWallJourneyId => xianCityWallOnePassRemediation,
+    hangzhouWestLakeJourneyId => hangzhouWestLakeOnePassRemediation,
     _ => null,
   };
   if (journey == null) return null;
@@ -74,7 +80,8 @@ BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
       .firstWhere((item) => item.category == category)
       .answer;
 
-  final culturalPoint = journeyId == xianCityWallJourneyId
+  final culturalPoint = journeyId == xianCityWallJourneyId ||
+          journeyId == hangzhouWestLakeJourneyId
       ? '${memoryAnswer('history')} ${memoryAnswer('culture')}'
       : '${memoryAnswer('culture')} ${memoryAnswer('architecture')}';
 
