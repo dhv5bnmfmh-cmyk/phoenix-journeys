@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - preview/batch-1-final-founder-review
-    paths:
-      - '.github/workflows/batch1-final-preview-validation.yml'
 
 permissions:
   contents: read
@@ -26,7 +24,33 @@ jobs:
           ref: ${{ github.sha }}
 
       - name: Test Phoenix agents
-        run: node --test worker/*.test.mjs
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p test-results
+          node --test --test-reporter=spec worker/*.test.mjs \
+            2>&1 | tee test-results/phoenix-agent-tests.log
+
+      - name: Publish Phoenix agent diagnostics to Step Summary
+        if: always()
+        shell: bash
+        run: |
+          echo '## Phoenix Agent Tests' >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f test-results/phoenix-agent-tests.log ]]; then
+            echo '```text' >> "$GITHUB_STEP_SUMMARY"
+            cat test-results/phoenix-agent-tests.log >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Phoenix Agent test log was not produced.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload Phoenix agent diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-agent-tests-pr-155
+          path: test-results/phoenix-agent-tests.log
+          if-no-files-found: warn
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
