@@ -1,3 +1,4 @@
+import 'hangzhou_west_lake_one_pass.dart';
 import 'xian_city_wall_one_pass.dart';
 
 class JourneyNarrativeDnaRecord {
@@ -191,6 +192,33 @@ final approvedNarrativeDnaCatalog =
     centralMetaphor: xianCityWallNarrativeDna.centralMetaphor,
     narrativeVoice: 'third-person-local-runner',
     storyRhythm: 'lap-accumulation-finish-alert-continuation',
+  ),
+  JourneyNarrativeDnaRecord(
+    journeyId: hangzhouWestLakeJourneyId,
+    narrativeIdentity: hangzhouWestLakeNarrativeDna.narrativeIdentity,
+    protagonistIdentity: 'Xu-Cheng-Hangzhou-local-university-urban-sound-archivist',
+    protagonistAgeIdentity: 'twenty-one-year-old-local-university-student',
+    protagonistArchetype: hangzhouWestLakeNarrativeDna.protagonistArchetype,
+    openingSituation: 'summer-rain-forecast-and-continuous-West-Lake-field-recording-assignment',
+    storyGoal: hangzhouWestLakeNarrativeDna.storyGoal,
+    locationMechanism: 'Su-Causeway-bridges-water-surface-and-living-cultural-landscape-acoustics',
+    movementPattern: hangzhouWestLakeNarrativeDna.movementPattern,
+    conflictType: hangzhouWestLakeNarrativeDna.conflictType,
+    choiceType: 'reclassify-human-sound-as-evidence-and-reorient-microphone-into-rain-changed-public-space',
+    climaxType: hangzhouWestLakeNarrativeDna.climaxType,
+    consequenceType: 'archive-preserves-weather-human-movement-and-lake-as-one-layered-field-recording',
+    emotionalArc: 'curatorial-control-to-listening-attention-to-layered-presence',
+    historicalLearningMechanism: 'causeway-dredging-bridges-and-lived-use-are-heard-as-structural-parts-of-a-cultural-landscape',
+    resolutionType: hangzhouWestLakeNarrativeDna.resolutionType,
+    endingMechanism: hangzhouWestLakeNarrativeDna.endingMechanism,
+    memoryAnchorType: hangzhouWestLakeNarrativeDna.memoryAnchorType,
+    achievementType: 'West-Lake-rain-soundscape-listener',
+    rewardSymbolism: 'lake-rain-soundwave-mark-representing-layered-presence',
+    temporalPattern: hangzhouWestLakeNarrativeDna.temporalPattern,
+    supportingStructure: hangzhouWestLakeNarrativeDna.supportingStructure,
+    centralMetaphor: hangzhouWestLakeNarrativeDna.centralMetaphor,
+    narrativeVoice: 'third-person-auditory-close-observation',
+    storyRhythm: 'clean-take-deletion-bridge-listening-cloud-pressure-rain-recomposition-archive',
   ),
 ]);
 
