@@ -7,7 +7,7 @@ import 'journey_level_catalog.dart';
 /// normal Journey UI code must consume these snapshots so annotation Pinyin,
 /// vocabulary filtering, discovery selection, and level assembly never run on
 /// narration progress rebuilds.
-late final List<JourneyLevelContent> _forbiddenCityLevelSnapshots =
+final List<JourneyLevelContent> _forbiddenCityLevelSnapshots =
     List<JourneyLevelContent>.generate(10, (index) {
   final base = forbiddenCityLevelContent(index + 1);
   return JourneyLevelContent(
