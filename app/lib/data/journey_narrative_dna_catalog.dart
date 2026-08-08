@@ -1,3 +1,4 @@
+import 'chengdu_kuanzhai_one_pass.dart';
 import 'hangzhou_west_lake_one_pass.dart';
 import 'xian_city_wall_one_pass.dart';
 
@@ -219,6 +220,33 @@ final approvedNarrativeDnaCatalog =
     centralMetaphor: hangzhouWestLakeNarrativeDna.centralMetaphor,
     narrativeVoice: 'third-person-auditory-close-observation',
     storyRhythm: 'clean-take-deletion-bridge-listening-cloud-pressure-rain-recomposition-archive',
+  ),
+  JourneyNarrativeDnaRecord(
+    journeyId: chengduKuanzhaiJourneyId,
+    narrativeIdentity: chengduKuanzhaiNarrativeDna.narrativeIdentity,
+    protagonistIdentity: 'Lin-Xia-Chengdu-local-architecture-graduate-researcher',
+    protagonistAgeIdentity: 'twenty-four-year-old-local-graduate-student',
+    protagonistArchetype: chengduKuanzhaiNarrativeDna.protagonistArchetype,
+    openingSituation: 'use-trace-field-survey-with-commerce-preclassified-as-authenticity-interference',
+    storyGoal: chengduKuanzhaiNarrativeDna.storyGoal,
+    locationMechanism: 'three-alley-courtyard-system-read-through-doors-thresholds-tea-tables-and-use-traces',
+    movementPattern: chengduKuanzhaiNarrativeDna.movementPattern,
+    conflictType: chengduKuanzhaiNarrativeDna.conflictType,
+    choiceType: 'cross-out-commerce-as-automatic-negative-category-and-write-still-in-use',
+    climaxType: chengduKuanzhaiNarrativeDna.climaxType,
+    consequenceType: 'marked-survey-page-preserves-original-judgment-and-evidence-driven-reclassification',
+    emotionalArc: 'rigid-analytic-framework-to-more-precise-evidence-based-preservation-judgment',
+    historicalLearningMechanism: 'lane-courtyard-fabric-and-renewal-are-understood-through-observed-use-rather-than-lecture',
+    resolutionType: chengduKuanzhaiNarrativeDna.resolutionType,
+    endingMechanism: chengduKuanzhaiNarrativeDna.endingMechanism,
+    memoryAnchorType: chengduKuanzhaiNarrativeDna.memoryAnchorType,
+    achievementType: 'courtyard-use-trace-observer',
+    rewardSymbolism: 'survey-mark-and-courtyard-use-trace-imprint',
+    temporalPattern: chengduKuanzhaiNarrativeDna.temporalPattern,
+    supportingStructure: chengduKuanzhaiNarrativeDna.supportingStructure,
+    centralMetaphor: chengduKuanzhaiNarrativeDna.centralMetaphor,
+    narrativeVoice: 'third-person-architectural-field-observation',
+    storyRhythm: 'preclassification-measurement-comparison-tea-table-reclassification-submission',
   ),
 ]);
 
