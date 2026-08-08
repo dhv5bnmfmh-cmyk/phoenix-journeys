@@ -2,25 +2,35 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
 import 'package:phoenix_journeys/data/xian_city_wall_one_pass.dart';
+import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 void main() {
-  const acceptedRanges = <int, (int, int)>{
-    1: (200, 280), 2: (250, 340), 3: (300, 390), 4: (350, 460),
-    5: (400, 540), 6: (450, 620), 7: (500, 700), 8: (560, 780),
-    9: (620, 860), 10: (700, 980),
-  };
   const levelAgent = PhoenixLanguageLevelAgent();
 
   test('Xi\'an Story obeys Lv1-Lv10 requested length and paragraph policy', () {
     expect(xianCityWallOnePassLevels, hasLength(10));
     for (var level = 1; level <= 10; level++) {
       final content = xianCityWallOnePassLevels[level - 1];
-      final characters = content.storyParagraphs.join().length;
-      final range = acceptedRanges[level]!;
-      expect(characters, inInclusiveRange(range.$1, range.$2), reason: 'Lv$level length');
-      expect(content.storyParagraphs.length, level <= 2 ? 1 : 2, reason: 'Lv$level paragraphs');
+      final characters = content.storyParagraphs.join().runes.length;
+      final target = phoenixStoryLengthTargetForLevel(level);
+      // ignore: avoid_print
+      print('XI_AN_STORY_METRIC Lv$level characters=$characters paragraphs=${content.storyParagraphs.length}');
+      expect(
+        characters,
+        inInclusiveRange(
+          target.acceptedMinimumCharacters,
+          target.acceptedMaximumCharacters,
+        ),
+        reason: 'Lv$level Story-only accepted range',
+      );
+      expect(
+        content.storyParagraphs.length,
+        target.paragraphCount,
+        reason: 'Lv$level strict paragraph shape',
+      );
       expect(content.storyAnnotations.length, content.storyParagraphs.length);
     }
   });
@@ -54,15 +64,30 @@ void main() {
   });
 
   test('Words have exact Story trace and truthful first appearance', () {
-    final stories = <String>[for (final level in xianCityWallOnePassLevels) level.storyParagraphs.join()];
+    final stories = <String>[
+      for (final level in xianCityWallOnePassLevels)
+        level.storyParagraphs.join(),
+    ];
     expect(xianCityWallOnePassWords, hasLength(xianCityWallWordTraces.length));
-    expect(xianCityWallOnePassWords, hasLength(xianCityWallWordFirstAppears.length));
+    expect(
+      xianCityWallOnePassWords,
+      hasLength(xianCityWallWordFirstAppears.length),
+    );
     for (final word in xianCityWallOnePassWords) {
-      final trace = xianCityWallWordTraces.firstWhere((item) => item.word == word.word);
+      final trace = xianCityWallWordTraces
+          .firstWhere((item) => item.word == word.word);
       expect(trace.sourceText, contains(word.word), reason: word.word);
-      expect(stories.any((story) => story.contains(trace.sourceText)), isTrue, reason: '${word.word} exact source');
+      expect(
+        stories.any((story) => story.contains(trace.sourceText)),
+        isTrue,
+        reason: '${word.word} exact source',
+      );
       final first = stories.indexWhere((story) => story.contains(word.word)) + 1;
-      expect(first, xianCityWallWordFirstAppears[word.word], reason: '${word.word} first appears');
+      expect(
+        first,
+        xianCityWallWordFirstAppears[word.word],
+        reason: '${word.word} first appears',
+      );
       expect(word.pinyin.trim(), isNotEmpty);
       expect(word.partOfSpeech.trim(), isNotEmpty);
       expect(word.simpleChinese.trim(), isNotEmpty);
@@ -92,17 +117,35 @@ void main() {
   });
 
   test('Challenge covers all ten levels with only approved active-story types', () {
-    const approved = <String>{'paragraphRebuild', 'grammarRepair', 'missingSentence'};
+    const approved = <String>{
+      'paragraphRebuild',
+      'grammarRepair',
+      'missingSentence',
+    };
     expect(xianCityWallChallenges, hasLength(30));
     for (var level = 1; level <= 10; level++) {
       final story = xianCityWallOnePassLevels[level - 1].storyParagraphs.join();
-      final challenges = xianCityWallChallenges.where((item) => item.level == level).toList();
+      final challenges = xianCityWallChallenges
+          .where((item) => item.level == level)
+          .toList();
       expect(challenges.map((item) => item.type).toSet(), approved);
       for (final challenge in challenges) {
-        expect(story.contains(challenge.anchor), isTrue, reason: 'Lv$level ${challenge.type}');
+        expect(
+          story.contains(challenge.anchor),
+          isTrue,
+          reason: 'Lv$level ${challenge.type}',
+        );
         if (challenge.type == 'missingSentence') {
           expect(challenge.answer, challenge.anchor);
           expect(story.contains(challenge.answer), isTrue);
+          expect(
+            RegExp(r'[^。！？!?]+[。！？!?]')
+                .allMatches(story)
+                .map((match) => match.group(0)!)
+                .contains(challenge.answer),
+            isTrue,
+            reason: 'Lv$level missingSentence must be one exact Story sentence',
+          );
         }
       }
     }
@@ -110,7 +153,16 @@ void main() {
 
   test('Memory and Complete remain bound to Zhou Yao route and original anchor', () {
     final memory = xianCityWallMemory.map((item) => item.answer).join();
-    for (final anchor in <String>['周遥', '永宁门', '母亲', '城墙', '跑表', '新家', '明洪武', '全国重点文物保护单位']) {
+    for (final anchor in <String>[
+      '周遥',
+      '永宁门',
+      '母亲',
+      '城墙',
+      '跑表',
+      '新家',
+      '明洪武',
+      '全国重点文物保护单位',
+    ]) {
       expect(memory, contains(anchor), reason: anchor);
     }
     expect(xianCityWallCompletion.journeySummary, contains('周遥'));
@@ -120,24 +172,116 @@ void main() {
     expect(xianCityWallCompletion.journeyCompletion, contains('“回家”'));
   });
 
+  test('Narrative DNA metadata and difference matrix cover all Gold Journeys', () {
+    expect(
+      approvedNarrativeDnaCatalog.map((item) => item.journeyId).toSet(),
+      containsAll(<String>{
+        'beijing-summer-palace',
+        'beijing-forbidden-city',
+        'shanghai-bund',
+        xianCityWallJourneyId,
+      }),
+    );
+    expect(
+      approvedNarrativeDnaCatalog.every(
+        (item) =>
+            item.narrativeIdentity.trim().isNotEmpty &&
+            item.majorDimensions.every((dimension) => dimension.trim().isNotEmpty),
+      ),
+      isTrue,
+    );
+  });
+
   test('Narrative DNA differs materially from all approved Gold references', () {
-    final xian = approvedNarrativeDnaCatalog.singleWhere((item) => item.journeyId == xianCityWallJourneyId);
-    final references = approvedNarrativeDnaCatalog.where((item) => item.journeyId != xianCityWallJourneyId);
+    final xian = approvedNarrativeDnaCatalog
+        .singleWhere((item) => item.journeyId == xianCityWallJourneyId);
+    final references = approvedNarrativeDnaCatalog
+        .where((item) => item.journeyId != xianCityWallJourneyId);
     expect(narrativeDnaIsUnique(xian, references), isTrue);
     for (final reference in references) {
-      expect(duplicatedMajorDimensions(xian, reference), lessThan(3), reason: reference.journeyId);
+      expect(
+        duplicatedMajorDimensions(xian, reference),
+        lessThan(3),
+        reason: reference.journeyId,
+      );
     }
   });
 
-  test('runtime resolves Xi\'an only through immutable canonical gold snapshots', () {
+  test('anti-template regression logic fails a three-dimension template copy', () {
+    final xian = approvedNarrativeDnaCatalog
+        .singleWhere((item) => item.journeyId == xianCityWallJourneyId);
+    final shanghai = approvedNarrativeDnaCatalog
+        .singleWhere((item) => item.journeyId == 'shanghai-bund');
+    final disguisedCopy = JourneyNarrativeDnaRecord(
+      journeyId: 'template-copy-probe',
+      narrativeIdentity: 'probe',
+      protagonistIdentity: shanghai.protagonistIdentity,
+      protagonistAgeIdentity: shanghai.protagonistAgeIdentity,
+      protagonistArchetype: shanghai.protagonistArchetype,
+      openingSituation: xian.openingSituation,
+      storyGoal: xian.storyGoal,
+      locationMechanism: xian.locationMechanism,
+      movementPattern: xian.movementPattern,
+      conflictType: xian.conflictType,
+      choiceType: xian.choiceType,
+      climaxType: xian.climaxType,
+      consequenceType: xian.consequenceType,
+      emotionalArc: xian.emotionalArc,
+      historicalLearningMechanism: xian.historicalLearningMechanism,
+      resolutionType: xian.resolutionType,
+      endingMechanism: xian.endingMechanism,
+      memoryAnchorType: xian.memoryAnchorType,
+      achievementType: xian.achievementType,
+      rewardSymbolism: xian.rewardSymbolism,
+      temporalPattern: xian.temporalPattern,
+      supportingStructure: xian.supportingStructure,
+      centralMetaphor: xian.centralMetaphor,
+      narrativeVoice: xian.narrativeVoice,
+      storyRhythm: xian.storyRhythm,
+    );
+    expect(
+      duplicatedMajorDimensions(disguisedCopy, shanghai),
+      greaterThanOrEqualTo(3),
+    );
+    expect(narrativeDnaIsUnique(disguisedCopy, <JourneyNarrativeDnaRecord>[shanghai]), isFalse);
+  });
+
+  test('runtime classifies Xi\'an as dedicated Gold and resolves immutable snapshots', () {
+    expect(usesDedicatedAdaptiveJourneyRuntime(xianCityWallJourneyId), isTrue);
+    expect(usesSharedGenericAdaptivePipeline(xianCityWallJourneyId), isFalse);
     final experience = requireDailyJourneyExperience(xianCityWallJourneyId);
     for (var level = 1; level <= 10; level++) {
-      final profile = levelAgent.allProfiles.singleWhere((item) => item.phoenixLevel == level);
+      final profile = levelAgent.profileForPhoenixLevel(level);
       final resolved = resolveAdaptiveJourneyLevel(experience, profile: profile);
-      expect(identical(resolved.storyParagraphs, xianCityWallOnePassLevels[level - 1].storyParagraphs), isTrue);
-      expect(resolved.storyParagraphs.join(), isNot(contains('傍晚，你从永宁门走上西安城墙')));
+      expect(
+        identical(
+          resolved.storyParagraphs,
+          xianCityWallOnePassLevels[level - 1].storyParagraphs,
+        ),
+        isTrue,
+      );
+      expect(
+        resolved.storyParagraphs.join(),
+        isNot(contains('傍晚，你从永宁门走上西安城墙')),
+      );
       expect(resolved.storyAnnotations.length, resolved.storyParagraphs.length);
       expect(resolved.discoveries, hasLength(1));
     }
+  });
+
+  test('Xi\'an adapter integration preserves approved Shanghai runtime prompts', () {
+    final shanghai = requireDailyJourneyExperience('shanghai-bund');
+    final resolved = resolveAdaptiveJourneyLevel(
+      shanghai,
+      profile: levelAgent.profileForPhoenixLevel(5),
+    );
+    expect(
+      resolved.wonderQuestion,
+      '林岸为什么在过江后不再把两岸理解成过去和未来？',
+    );
+    expect(
+      resolved.expressQuestion,
+      '旧海运提单与陆家嘴结算系统在故事里共同组织了哪些流动？',
+    );
   });
 }
