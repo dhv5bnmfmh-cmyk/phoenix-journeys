@@ -1,5 +1,6 @@
 import 'batch_one_journey_remediation.dart';
 import 'journey_data.dart';
+import 'journey_level_catalog.dart';
 
 const shanghaiBundJourneyId = 'shanghai-bund';
 
