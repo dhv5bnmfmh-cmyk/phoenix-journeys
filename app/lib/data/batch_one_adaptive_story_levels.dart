@@ -28,10 +28,12 @@ JourneyLevelContent buildBatchOneGoldLevel(
   return JourneyLevelContent(
     storyParagraphs: base.storyParagraphs,
     storyAnnotations: base.storyAnnotations,
-    words: unseenWords.isEmpty ? base.words : List<WordEntry>.unmodifiable(unseenWords),
+    words: unseenWords.isEmpty
+        ? base.words
+        : List<WordEntry>.unmodifiable(unseenWords),
     discoveries: base.discoveries,
-    wonderQuestion: '',
-    expressQuestion: '',
+    wonderQuestion: '林岸为什么在过江后不再把两岸理解成过去和未来？',
+    expressQuestion: '旧海运提单与陆家嘴结算系统在故事里共同组织了哪些流动？',
   );
 }
 
