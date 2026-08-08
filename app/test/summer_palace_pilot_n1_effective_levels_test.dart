@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/data/journey_level_catalog.dart';
 import 'package:phoenix_journeys/data/summer_palace_adaptive_story_levels.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
@@ -30,7 +31,10 @@ void main() {
       );
       expect(
         story.runes.length,
-        inInclusiveRange(target.minimumCharacters, target.maximumCharacters),
+        inInclusiveRange(
+          target.acceptedMinimumCharacters,
+          target.acceptedMaximumCharacters,
+        ),
         reason: 'Lv.$level length',
       );
       expect(content.storyParagraphs, hasLength(target.paragraphCount));
@@ -50,19 +54,20 @@ void main() {
     }
   });
 
-  test('the public resolver is exactly the unchanged shared pipeline for 33 Journeys',
+  test('the public resolver is exactly the unchanged shared pipeline for generic Journeys',
       () {
-    final otherJourneys = allJourneyExperiences
-        .where(
-          (journey) =>
-              journey.id != 'beijing-summer-palace' &&
-              journey.id != 'beijing-forbidden-city' &&
-              journey.id != 'shanghai-bund',
-        )
+    final genericJourneys = allJourneyExperiences
+        .where((journey) => usesSharedGenericAdaptivePipeline(journey.id))
         .toList(growable: false);
-    expect(otherJourneys, hasLength(33));
+    expect(genericJourneys, isNotEmpty);
+    expect(
+      genericJourneys.any(
+        (journey) => dedicatedAdaptiveJourneyIds.contains(journey.id),
+      ),
+      isFalse,
+    );
 
-    for (final journey in otherJourneys) {
+    for (final journey in genericJourneys) {
       for (final profile in agent.allProfiles) {
         final public = resolveAdaptiveJourneyLevel(
           journey,

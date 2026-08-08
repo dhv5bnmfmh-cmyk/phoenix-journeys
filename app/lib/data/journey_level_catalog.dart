@@ -1,6 +1,7 @@
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
 import 'summer_palace_journey.dart';
+import 'xian_city_wall_one_pass.dart';
 
 enum JourneyDifficulty { easy, standard, challenge }
 
@@ -175,6 +176,14 @@ JourneyLevelContent resolveJourneyLevel(
   DailyJourneyExperience experience,
   JourneyDifficulty difficulty,
 ) {
+  if (experience.id == xianCityWallJourneyId) {
+    final level = switch (difficulty) {
+      JourneyDifficulty.easy => 1,
+      JourneyDifficulty.standard => 5,
+      JourneyDifficulty.challenge => 10,
+    };
+    return xianCityWallOnePassLevelContent(level);
+  }
   if (experience.id != 'beijing-summer-palace') {
     return JourneyLevelContent.fromExperience(experience);
   }
