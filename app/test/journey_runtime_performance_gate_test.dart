@@ -183,7 +183,7 @@ void main() {
     );
 
     expect(journey, contains('Widget _storyPage() => _defaultStoryPage();'));
-    expect(journey, isNot(contains('_forbiddenCityStoryPage'));
+    expect(journey, isNot(contains('_forbiddenCityStoryPage')));
     expect(story, contains('InteractiveStoryText('));
     expect(story, contains('narrationController: _narration'));
     expect(story, contains('revealEnd: _narrationRevealEnd('));
