@@ -6,10 +6,11 @@ import 'forbidden_city_story_scenes.dart';
 StorySceneVariant? storySceneVariantFor(
   String locationId, {
   String variantId = 'canonical-001',
+  int level = 5,
 }) {
   return switch ((locationId, variantId)) {
     ('beijing-forbidden-city', 'canonical-001') =>
-      forbiddenCityCanonicalStoryVariant,
+      forbiddenCityStoryVariantForLevel(level),
     _ => null,
   };
 }
