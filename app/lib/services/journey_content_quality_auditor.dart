@@ -1,4 +1,5 @@
 import '../data/daily_journey_experience.dart';
+import '../data/dedicated_adaptive_journey_catalog.dart';
 import '../data/journey_level_catalog.dart';
 import '../models/language_proficiency.dart';
 import 'phoenix_story_length_policy.dart';
@@ -41,11 +42,6 @@ class JourneyContentQualityReport {
   }
 }
 
-const _dedicatedNarrativeInvariantJourneyIds = <String>{
-  'beijing-summer-palace',
-  'shanghai-bund',
-};
-
 JourneyContentQualityReport auditJourneyContentQuality(
   DailyJourneyExperience experience,
   JourneyLevelContent content, {
@@ -84,10 +80,7 @@ JourneyContentQualityReport auditJourneyContentQuality(
     );
   }
 
-  final storyCharacterCount = content.storyParagraphs
-      .join()
-      .runes
-      .length;
+  final storyCharacterCount = content.storyParagraphs.join().runes.length;
   if (storyCharacterCount < storyTarget.acceptedMinimumCharacters) {
     add(
       'story-below-level-range',
@@ -115,9 +108,7 @@ JourneyContentQualityReport auditJourneyContentQuality(
     );
   }
 
-  for (var index = 0;
-      index < content.storyAnnotations.length;
-      index += 1) {
+  for (var index = 0; index < content.storyAnnotations.length; index += 1) {
     final annotation = content.storyAnnotations[index];
     if (annotation.pinyin.trim().isEmpty ||
         annotation.vietnamese.trim().isEmpty ||
@@ -131,9 +122,7 @@ JourneyContentQualityReport auditJourneyContentQuality(
   }
 
   for (var index = 1; index < content.storyParagraphs.length; index += 1) {
-    if (startsWithDependentNarrativeReference(
-      content.storyParagraphs[index],
-    )) {
+    if (startsWithDependentNarrativeReference(content.storyParagraphs[index])) {
       add(
         'dependent-paragraph-opening-$index',
         'Story paragraph ${index + 1} begins with an unresolved reference.',
@@ -142,7 +131,7 @@ JourneyContentQualityReport auditJourneyContentQuality(
     }
   }
 
-  if (!_dedicatedNarrativeInvariantJourneyIds.contains(experience.id)) {
+  if (usesSharedGenericAdaptivePipeline(experience.id)) {
     final sourceSentences = splitChineseQualitySentences(
       experience.content.storyParagraphs.join(),
     );
