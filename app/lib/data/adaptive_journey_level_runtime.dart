@@ -7,6 +7,7 @@ import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
 import 'batch_one_adaptive_story_levels.dart';
 import 'daily_journey_experience.dart';
+import 'dedicated_adaptive_journey_catalog.dart';
 import 'forbidden_city_content_cache.dart';
 import 'forbidden_city_journey_runtime.dart';
 import 'journey_data.dart';
@@ -27,6 +28,13 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   required ChineseProficiencyProfile profile,
   Set<String> knownWords = const <String>{},
 }) {
+  if (!usesDedicatedAdaptiveJourneyRuntime(experience.id)) {
+    return resolveSharedAdaptiveJourneyLevel(
+      experience,
+      profile: profile,
+      knownWords: knownWords,
+    );
+  }
   if (experience.id == forbiddenCityJourneyId) {
     return _resolveForbiddenCityAdaptiveLevel(
       profile,
@@ -46,10 +54,8 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
       knownWords: knownWords,
     );
   }
-  return resolveSharedAdaptiveJourneyLevel(
-    experience,
-    profile: profile,
-    knownWords: knownWords,
+  throw StateError(
+    'Dedicated adaptive Journey has no registered resolver: ${experience.id}',
   );
 }
 
