@@ -27,6 +27,12 @@ JourneyLevelContent buildBatchOneGoldLevel(
   final unseenWords = base.words
       .where((entry) => !knownWords.contains(entry.word))
       .toList(growable: false);
+  final wonderQuestion = experience.id == shanghaiBundJourneyId
+      ? '林岸为什么在过江后不再把两岸理解成过去和未来？'
+      : base.wonderQuestion;
+  final expressQuestion = experience.id == shanghaiBundJourneyId
+      ? '旧海运提单与陆家嘴结算系统在故事里共同组织了哪些流动？'
+      : base.expressQuestion;
 
   return JourneyLevelContent(
     storyParagraphs: base.storyParagraphs,
@@ -35,8 +41,8 @@ JourneyLevelContent buildBatchOneGoldLevel(
         ? base.words
         : List<WordEntry>.unmodifiable(unseenWords),
     discoveries: base.discoveries,
-    wonderQuestion: base.wonderQuestion,
-    expressQuestion: base.expressQuestion,
+    wonderQuestion: wonderQuestion,
+    expressQuestion: expressQuestion,
   );
 }
 
