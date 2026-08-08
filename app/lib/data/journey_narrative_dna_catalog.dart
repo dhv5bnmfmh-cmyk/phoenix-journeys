@@ -52,8 +52,8 @@ class JourneyNarrativeDnaRecord {
       ];
 }
 
-const approvedNarrativeDnaCatalog = <JourneyNarrativeDnaRecord>[
-  JourneyNarrativeDnaRecord(
+final approvedNarrativeDnaCatalog = List<JourneyNarrativeDnaRecord>.unmodifiable(<JourneyNarrativeDnaRecord>[
+  const JourneyNarrativeDnaRecord(
     journeyId: 'beijing-summer-palace',
     narrativeIdentity: 'lake-garden-causal-pilot',
     protagonistArchetype: 'place-bound-young-observer-with-relational-duty',
@@ -70,7 +70,7 @@ const approvedNarrativeDnaCatalog = <JourneyNarrativeDnaRecord>[
     narrativeVoice: 'third-person-causal',
     storyRhythm: 'scene-choice-consequence',
   ),
-  JourneyNarrativeDnaRecord(
+  const JourneyNarrativeDnaRecord(
     journeyId: 'beijing-forbidden-city',
     narrativeIdentity: 'maintenance-risk-and-palace-boundary',
     protagonistArchetype: 'young-palace-maintenance-worker',
@@ -87,7 +87,7 @@ const approvedNarrativeDnaCatalog = <JourneyNarrativeDnaRecord>[
     narrativeVoice: 'third-person-professional',
     storyRhythm: 'warning-task-risk-decision',
   ),
-  JourneyNarrativeDnaRecord(
+  const JourneyNarrativeDnaRecord(
     journeyId: 'shanghai-bund',
     narrativeIdentity: 'family-trade-document-crosses-river-into-new-job',
     protagonistArchetype: 'young-fintech-worker-from-port-trade-family',
@@ -121,7 +121,7 @@ const approvedNarrativeDnaCatalog = <JourneyNarrativeDnaRecord>[
     narrativeVoice: 'third-person-local-runner',
     storyRhythm: 'lap-accumulation-finish-alert-continuation',
   ),
-];
+]);
 
 int duplicatedMajorDimensions(
   JourneyNarrativeDnaRecord left,
