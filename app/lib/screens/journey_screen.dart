@@ -162,6 +162,10 @@ class _JourneyScreenState extends State<JourneyScreen>
   ChineseProficiencyProfile? _cachedLevelProfile;
   JourneyDifficulty? _cachedLevelDifficulty;
   int? _cachedKnownWordsHash;
+  JourneyLevelContent? _cachedStoryNarrationContent;
+  List<NarrationItem>? _cachedStoryNarrationItems;
+  JourneyLevelContent? _cachedDiscoveryNarrationContent;
+  List<NarrationItem>? _cachedDiscoveryNarrationItems;
 
   // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
   bool get _isSummerPalacePilot => false;
@@ -403,30 +407,51 @@ class _JourneyScreenState extends State<JourneyScreen>
     _restoreNarrationPosition();
   }
 
-  List<NarrationItem> get _storyNarrationItems => _levelContent.storyParagraphs
-      .asMap()
-      .entries
-      .map(
-        (entry) => NarrationItem(
-          id: 'story-${entry.key}',
-          text: entry.value,
-          label: '故事第 ${entry.key + 1} 段',
-        ),
-      )
-      .toList(growable: false);
+  List<NarrationItem> get _storyNarrationItems {
+    final content = _levelContent;
+    final cached = _cachedStoryNarrationItems;
+    if (cached != null && identical(_cachedStoryNarrationContent, content)) {
+      return cached;
+    }
 
-  List<NarrationItem> get _discoveryNarrationItems =>
-      _levelContent.discoveries
-          .asMap()
-          .entries
-          .map(
-            (entry) => NarrationItem(
-              id: 'discovery-${entry.key}',
-              text: entry.value.text,
-              label: '今日发现 ${entry.key + 1}',
-            ),
-          )
-          .toList(growable: false);
+    final resolved = content.storyParagraphs
+        .asMap()
+        .entries
+        .map(
+          (entry) => NarrationItem(
+            id: 'story-${entry.key}',
+            text: entry.value,
+            label: '故事第 ${entry.key + 1} 段',
+          ),
+        )
+        .toList(growable: false);
+    _cachedStoryNarrationContent = content;
+    _cachedStoryNarrationItems = resolved;
+    return resolved;
+  }
+
+  List<NarrationItem> get _discoveryNarrationItems {
+    final content = _levelContent;
+    final cached = _cachedDiscoveryNarrationItems;
+    if (cached != null && identical(_cachedDiscoveryNarrationContent, content)) {
+      return cached;
+    }
+
+    final resolved = content.discoveries
+        .asMap()
+        .entries
+        .map(
+          (entry) => NarrationItem(
+            id: 'discovery-${entry.key}',
+            text: entry.value.text,
+            label: '今日发现 ${entry.key + 1}',
+          ),
+        )
+        .toList(growable: false);
+    _cachedDiscoveryNarrationContent = content;
+    _cachedDiscoveryNarrationItems = resolved;
+    return resolved;
+  }
 
   void _restoreNarrationPosition([String? requestedContentId]) {
     final contentId = requestedContentId ??
