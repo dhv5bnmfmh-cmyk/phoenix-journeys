@@ -23,20 +23,20 @@ const appState = fs.readFileSync(
 );
 
 test('daily catalog keeps a real multi-destination Journey registry', () => {
-  assert.match(catalog, /List<DailyJourneyExperience> get dailyJourneyCatalog/);
+  assert.match(catalog, /final dailyJourneyExperiences = <DailyJourneyExperience>\[/);
   assert.match(catalog, /summer_palace/);
   assert.match(catalog, /forbidden_city/);
   assert.match(catalog, /shanghai_bund/);
+  assert.match(catalog, /final allJourneyExperiences = <DailyJourneyExperience>\[/);
   assert.match(catalog, /requireDailyJourneyExperience/);
 });
 
 test('adaptive resolver accepts every Journey instead of one hard-coded lesson', () => {
-  assert.match(adaptive, /resolveAdaptiveJourneyLevel/);
-  assert.match(adaptive, /DailyJourneyExperience journey/);
-  assert.match(adaptive, /resolveJourneyLevel\(journey, difficulty\)/);
-  assert.match(adaptive, /journey\.storyParagraphs/);
-  assert.match(adaptive, /journey\.words/);
-  assert.match(adaptive, /journey\.discoveries/);
+  assert.match(adaptive, /JourneyLevelContent resolveAdaptiveJourneyLevel\(/);
+  assert.match(adaptive, /DailyJourneyExperience experience/);
+  assert.match(adaptive, /return resolveSharedAdaptiveJourneyLevel\(/);
+  assert.match(adaptive, /buildAdaptiveLevelForJourney\(\s*experience,/s);
+  assert.match(adaptive, /refineAdaptiveNarrativeQuality\(\s*experience,/s);
 });
 
 test('one stable Journey screen renders every city and supported level', () => {
