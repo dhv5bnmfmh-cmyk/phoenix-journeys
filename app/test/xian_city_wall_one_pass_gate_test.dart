@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
 import 'package:phoenix_journeys/data/xian_city_wall_one_pass.dart';
-import 'package:phoenix_journeys/models/language_proficiency.dart';
 
 void main() {
   const acceptedRanges = <int, (int, int)>{
@@ -11,6 +11,7 @@ void main() {
     5: (400, 540), 6: (450, 620), 7: (500, 700), 8: (560, 780),
     9: (620, 860), 10: (700, 980),
   };
+  const levelAgent = PhoenixLanguageLevelAgent();
 
   test('Xi\'an Story obeys Lv1-Lv10 requested length and paragraph policy', () {
     expect(xianCityWallOnePassLevels, hasLength(10));
@@ -131,7 +132,7 @@ void main() {
   test('runtime resolves Xi\'an only through immutable canonical gold snapshots', () {
     final experience = requireDailyJourneyExperience(xianCityWallJourneyId);
     for (var level = 1; level <= 10; level++) {
-      final profile = ChineseProficiencyProfile.phoenix(level);
+      final profile = levelAgent.allProfiles.singleWhere((item) => item.phoenixLevel == level);
       final resolved = resolveAdaptiveJourneyLevel(experience, profile: profile);
       expect(identical(resolved.storyParagraphs, xianCityWallOnePassLevels[level - 1].storyParagraphs), isTrue);
       expect(resolved.storyParagraphs.join(), isNot(contains('傍晚，你从永宁门走上西安城墙')));
