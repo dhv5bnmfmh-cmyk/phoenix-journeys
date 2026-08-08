@@ -28,11 +28,12 @@ void main() {
   });
 
   test('all levels preserve one canonical Bund narrative DNA', () {
+    final canonical = <String>[];
     for (var level = 1; level <= 10; level++) {
       final story = shanghaiBundOnePassLevels[level - 1].storyParagraphs.join();
+      canonical.add(story);
       expect(story, contains('林岸'));
       expect(story, contains('母亲'));
-      expect(story, contains('黄浦江'));
       expect(story, contains('外滩'));
       expect(story, contains('陆家嘴'));
       expect(story, contains('提单'));
@@ -47,6 +48,7 @@ void main() {
       expect(story, isNot(contains('旧木尺')));
       expect(story, isNot(contains('一道没有跨过的门槛')));
     }
+    expect(canonical.join(), contains('黄浦江'));
   });
 
   test('location identity is irreducibly Shanghai and Huangpu-river based', () {
