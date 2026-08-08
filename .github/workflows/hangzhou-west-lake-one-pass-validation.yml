@@ -13,7 +13,7 @@ env:
   PREVIEW_WORKER: phoenix-journeys-pr-159
   PREVIEW_URL: https://phoenix-journeys-pr-159.7hn5tyrjgh.workers.dev
   PREVIEW_RELEASE: ${{ github.sha }}
-  STARTING_MAIN_SHA: e529d45341deed6a09f102a806b312ac507f0a19
+  STARTING_MAIN_SHA: bda4460a13c7fd314a0d96fd412fa7fae0bf6232
 
 jobs:
   validate-and-deploy:
