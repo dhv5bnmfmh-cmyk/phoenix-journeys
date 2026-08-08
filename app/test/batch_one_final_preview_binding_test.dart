@@ -31,17 +31,21 @@ void main() {
     expect(shanghaiBundOnePassRemediation.levels, hasLength(10));
     expect(shanghaiBundOnePassRemediation.protagonist, contains('林岸'));
     expect(shanghaiBundOnePassRemediation.title, contains('过江之前'));
+    final canonical = <String>[];
     for (var level = 1; level <= 10; level++) {
       final content = shanghaiBundOnePassRemediation.levelContent(level);
       final story = content.storyParagraphs.join();
+      canonical.add(story);
       expect(content.storyParagraphs.length, level <= 2 ? 1 : 2);
       expect(story, contains('林岸'));
-      expect(story, contains('黄浦江'));
+      expect(story, contains('外滩'));
+      expect(story, contains('陆家嘴'));
       expect(story, isNot(contains('陆潮')));
       expect(story, isNot(contains('九点半')));
       expect(story, isNot(contains('赞助动画')));
       expect(story, isNot(contains('直播断线')));
     }
+    expect(canonical.join(), contains('黄浦江'));
     expect(batchOneMemorySpecFor(shanghaiBundJourneyId), isNotNull);
   });
 }
