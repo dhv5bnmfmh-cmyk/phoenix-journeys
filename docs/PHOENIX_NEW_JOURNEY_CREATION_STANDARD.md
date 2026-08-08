@@ -10,6 +10,8 @@ This standard defines the only permitted lifecycle for creating a new Phoenix Jo
 
 The first new-Journey cycle permits exactly **one Journey pilot**. No second Journey may enter implementation before the first pilot receives controlled approval.
 
+For all new or replaced Journey backgrounds, [PHOENIX AI BACKGROUND PRODUCTION STANDARD](PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md) is binding and MUST be read before background production begins.
+
 ## 2. Global gates and requirement classes
 
 Every phase MUST record:
@@ -168,10 +170,29 @@ Story/Learning owner with cultural, language, and Quality review.
 
 ### Input
 
-- approved Story and Learning Design;
+- approved Story and Learning Design at Story Gold quality;
 - PR `#137` visual baseline;
 - UI and Visual Standard;
-- approved rights plan.
+- [PHOENIX AI BACKGROUND PRODUCTION STANDARD](PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md);
+- approved rights and IP safety plan.
+
+### Binding background-production sequence
+
+For Journey backgrounds, Phase C and the subsequent visual production path MUST execute in this order:
+
+> **Story Gold**  
+> → **Visual DNA**  
+> → **Cross-Journey Differentiation**  
+> → **Shot Plan**  
+> → **1–3 Pilot**  
+> → **Rights / IP QA**  
+> → **Historical / Cultural QA**  
+> → **Mobile QA**  
+> → **Founder Review where required**  
+> → **Full Production Library**  
+> → **Runtime Integration**
+
+A new Journey MUST NOT skip directly from Story Gold to 10-image generation. The 10-image minimum, where required by runtime policy, applies only after Pilot approval.
 
 ### Required deliverables
 
@@ -181,41 +202,62 @@ The visual pilot is limited to:
 - one to three sample images;
 - one isolated Preview.
 
-It MUST also provide:
+Before any image generation it MUST provide the pre-generation record required by the AI Background Production Standard, including:
+
+- Journey Visual DNA;
+- cross-Journey visual-difference review;
+- Shot Plan;
+- Pilot image request count of 1–3;
+- IP safety plan;
+- historical and cultural verification plan;
+- mobile crop plan;
+- UI readable-region plan;
+- runtime performance plan.
+
+The Pilot MUST also provide:
 
 - visual concept statement;
 - independent composition, environment, focal point, color relationships, lighting, material, weather, and cultural details;
 - target mobile crop and readable text region;
 - stage-to-image intent;
-- source, rights, and modification evidence;
-- explicit statement that unapproved pilot assets are excluded from release runtime.
+- AI Original status and audit provenance;
+- Rights Gate and IP Similarity Review evidence;
+- explicit statement that unapproved Pilot assets are excluded from release runtime.
 
 ### Validation evidence
 
 - stable/candidate visual comparison;
 - target-phone screenshots;
 - crop and focal-point review;
-- visual differentiation review;
-- Rights, Technical, Visual Quality, and Stable Comparison gate evidence;
-- Founder mobile decision.
+- Visual DNA and Shot Plan review;
+- visual differentiation and Anti-Template review;
+- Visual, Historical, Cultural, Architecture, Geography, IP/Rights, IP Similarity, Mobile Crop, UI Readability, Anti-Template, and performance-feasibility evidence;
+- Founder mobile decision where required.
 
 ### Blocking conditions
 
+- missing Visual DNA;
+- missing Cross-Journey Differentiation review;
+- missing Shot Plan;
+- missing IP safety or verification plan;
 - low-detail programmatic principal visual;
 - flat background;
 - recolored or repeated composition;
 - source-only approval without product review;
-- more than three sample images;
-- batch generation or runtime integration before approval;
-- Founder decision missing, pending, or rejected.
+- more than three Pilot images before Pilot approval;
+- generation of the full production library before Pilot approval;
+- runtime integration before Rights Gate `PASS`;
+- IP Similarity Review not `PASS`;
+- mobile crop or UI readable region unverified;
+- Founder decision missing, pending, or rejected where Founder review is required.
 
 ### Responsible owner
 
-Visual owner with Product, Rights, Quality, and Founder review.
+Visual owner with Product, Rights, Quality, Cultural/Historical, and Founder review where required.
 
 ### Completion state
 
-`PASS` only after Founder mobile approval of the concept. Rejection returns the work to revision; it does not authorize a new batch.
+`PASS` only after every applicable Pilot gate passes and required Founder mobile approval is explicit. Rejection returns the work to revision; it does not authorize a new batch.
 
 ## 6. Phase D: Implementation
 
@@ -233,6 +275,8 @@ Visual owner with Product, Rights, Quality, and Founder review.
 - no unrelated changes;
 - no use of closed PRs `#138`–`#141` as a baseline.
 
+For background assets, runtime integration is permitted only after the approved Pilot has authorized full production, the final library satisfies applicable minimum-count/runtime metadata rules, Rights Gate is `PASS`, IP Similarity Review is `PASS`, mobile and visual QA are `PASS`, provenance/versioning are complete, and Founder approval is `APPROVED` where required.
+
 ### Validation evidence
 
 - exact diff, Commit, Tree, paths, and mappings;
@@ -249,7 +293,8 @@ Visual owner with Product, Rights, Quality, and Founder review.
 - runtime placeholder;
 - unrelated refactor;
 - closed-PR implementation inherited without independent stable-baseline proof;
-- batch implementation of additional Journeys.
+- batch implementation of additional Journeys;
+- background runtime integration without all binding background-production gates.
 
 ### Responsible owner
 
@@ -294,7 +339,7 @@ Implementation owner with Quality verification.
 
 ### Completion state
 
-When no local environment exists, local status MUST be `NOT_RUN_NO_LOCAL_EXECUTION_ENVIRONMENT`. Automated validation success does not replace Preview or Founder approval.
+When no local environment exists, local status MUST be `NOT_RUN_NO_LOCAL_EXECUTION_ENVIRONMENT`. Automated validation success does not replace Preview, Rights/IP review, human visual judgment, or Founder approval where required.
 
 ## 8. Phase F: Stable Baseline Comparison
 
@@ -428,6 +473,8 @@ Until the first new Journey completes Phase H:
 
 Every phase MUST update [Phoenix New Journey Acceptance Matrix](templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md). Any missing `REQUIRED` item or applicable `CONDITIONALLY_REQUIRED` item blocks Completed, Ready, merge, expansion, and the next phase.
 
+For Journey backgrounds, every background-production row in the Acceptance Matrix is binding. `PASS` may not be inferred from image count, dimensions, `complianceScore`, `varietyScore`, AI-generated metadata, or file presence alone.
+
 ## 13. Final rule
 
 A new Journey is not complete when its files, content, images, tests, or Preview merely exist. It is complete only after all phases pass, the stable baseline is preserved or exceeded, and Founder mobile approval authorizes controlled release.
@@ -468,3 +515,13 @@ Phase E rule:
 Phase G Founder mobile review MUST include Story identity, Discovery distinction, emotional continuity, level adaptation, and Journey memorability.
 
 Existing-library repair follows Pilot N1 (`beijing-summer-palace`), Founder decision, Pilot S1 (`tide-letter`), Founder decision, then controlled batches of two to three Journeys. There is no batch rewrite, no 27-Journey rewrite, no nine-special-Journey rewrite, and no Story / Discovery functional duplication before pilot approval. A rejected pilot returns to revision and does not authorize another pilot or mass production.
+
+## 15. Binding AI background production extension
+
+The [PHOENIX AI BACKGROUND PRODUCTION STANDARD](PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md) is the canonical background-production standard for new and replacement Journey backgrounds.
+
+Its Visual DNA, Cross-Journey Differentiation, Shot Plan, 1–3 Pilot, AI Original, Rights Gate, IP Similarity Review, provenance, cultural/historical accuracy, mobile crop, UI readable region, anti-template, performance, versioning, rollback, and runtime-integration rules are `REQUIRED` wherever Journey backgrounds are in scope.
+
+Canonical Journey content remains read-only during visual production. Story, Words, Discovery, Challenge, Memory, and Complete MUST NOT be rewritten to make background production easier.
+
+No Agent or implementation may create a Journey-specific exception, hard-code `PASS`, skip rights review, skip required Founder review, skip Pilot gating, lower the stable visual baseline, alter canonical Story, or remove tests merely to obtain background acceptance. Any exception must be explicit, documented, scoped, and Founder-approved where applicable.

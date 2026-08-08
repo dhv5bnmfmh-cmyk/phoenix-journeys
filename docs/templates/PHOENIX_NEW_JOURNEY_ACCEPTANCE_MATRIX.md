@@ -1,6 +1,6 @@
 # Phoenix New Journey Acceptance Matrix
 
-Use with [Phoenix New Journey Creation Standard](../PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md) and [Phoenix Journey System Standard](../PHOENIX_JOURNEY_SYSTEM_STANDARD.md).
+Use with [Phoenix New Journey Creation Standard](../PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), [Phoenix Journey System Standard](../PHOENIX_JOURNEY_SYSTEM_STANDARD.md), and [PHOENIX AI BACKGROUND PRODUCTION STANDARD](../PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md).
 
 **Stable PR:** `#137`  
 **Stable Commit:** `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
@@ -29,10 +29,13 @@ Reviewer:
 - Result: `PASS` / `REQUIRES_REVISION` / `REGRESSION` / `BLOCKED` / `NOT_APPLICABLE`
 - Evidence Level: `VERIFIED` / `PARTIALLY_VERIFIED` / `UNVERIFIED` / `CONTRADICTORY`
 - Founder Approval: `APPROVED` / `REJECTED` / `PENDING` / `NOT_REQUIRED`
+- Background Gate State: `PASS` / `FAIL` / `PENDING` / `BLOCKED`
 
 Legacy records map `MANDATORY` to `REQUIRED` and `CONDITIONAL` to `CONDITIONALLY_REQUIRED`. New records MUST use the canonical terms above.
 
 Every `REQUIRED` item and every applicable `CONDITIONALLY_REQUIRED` item MUST be `PASS` with `VERIFIED` evidence before Completed. `NOT_APPLICABLE` requires an applicability reason and evidence. Any regression blocks Ready, merge, expansion, and the next phase.
+
+For background-production rows, `Background Gate State` is a subordinate visual-production gate. `PASS` means the item is verified and eligible to support the canonical acceptance Result. `FAIL` means the candidate must be regenerated, corrected, or rejected. `PENDING` means required evidence or human/Founder review is incomplete. `BLOCKED` means no further production or runtime integration is allowed until the blocking condition is resolved. A background row cannot produce canonical `PASS` unless its Background Gate State is `PASS` and Evidence Level is `VERIFIED`.
 
 ## Acceptance table
 
@@ -91,6 +94,56 @@ Every `REQUIRED` item and every applicable `CONDITIONALLY_REQUIRED` item MUST be
 | NJ-051 | Automated Literary Approval Limitation | REQUIRED | Exact automated scope, excluded literary judgments, separate human review, declaration `Automated score used as literary approval: NO`, Result/Evidence Level |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 | NJ-052 | Repair / Creation Pilot Batch Gate | REQUIRED | Work type, batch size, prior pilot Commit and Founder decision, next-phase authorization, Result, Evidence Level, issue/action, owner, Founder state |  | BLOCKED | UNVERIFIED |  |  | PENDING |
 
+## Background production acceptance extension
+
+This section is REQUIRED whenever a new or replacement Journey background is in scope. It implements the binding gates from [PHOENIX AI BACKGROUND PRODUCTION STANDARD](../PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md). The original Journey rows above remain binding and are not replaced by this extension.
+
+`FAIL`, `PENDING`, or `BLOCKED` in any applicable REQUIRED background row blocks runtime integration. `PENDING` is not approval. A Rights Gate other than `PASS` always blocks runtime integration.
+
+| ID | Background acceptance item | Requirement | Expected evidence | Actual evidence | Background Gate State | Canonical Result | Evidence Level | Issue / Required action | Owner | Founder Approval |
+|---|---|---|---|---|---|---|---|---|---|---|
+| BG-001 | Visual DNA | REQUIRED | Versioned Visual DNA covering place, Story identity, period, mood, geography, architecture, materials, season/weather/time/light, Color DNA, people/clothing/transport/objects, FG/MG/BG, camera/depth/atmosphere, mobile region, Memory Anchor, forbidden motifs, cross-Journey differences |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-002 | Cross-Journey Differentiation | REQUIRED | Comparison against approved Journeys for composition, camera height/distance, geometry, foreground, density, materials, weather/light/time, color, Story relation, rhythm, Memory Anchor |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-003 | Shot Plan | REQUIRED | Versioned per-shot plan with Shot ID, purpose, Story relation, place/time/weather, camera position/height/distance/direction, FG/MG/BG, focal hierarchy, human density, lighting, mobile region, history/culture verification, IP notes, anti-template note |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-004 | Pilot Count | REQUIRED | Exactly 1–3 Pilot candidates for each new visual direction before full-library production |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-005 | Pilot Approval Before Full Production | REQUIRED | Evidence that full production remained blocked until all applicable Pilot QA and Founder review passed |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-006 | AI Original | REQUIRED | `AI Original: YES`, or explicit separately documented commercial-rights exception |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-007 | Third-party Production Asset Absence | REQUIRED | `Third-party production asset used: NO`, or exact approved rights exception and commercial-use evidence |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-008 | IP Safety | REQUIRED | Prompt/source review shows no direct living-artist, specific-photographer, movie/game, protected-character, key-art, or protected-composition imitation |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-009 | IP Similarity Review | REQUIRED | Similarity review result `PASS`; `REGENERATE` or `BLOCKED` cannot advance |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-010 | Rights Gate | REQUIRED | Rights Gate `PASS`; rights uncertainty produces `BLOCKED`, never inferred approval |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-011 | Provenance | REQUIRED | Journey ID, Asset ID, Shot ID, Visual DNA/Shot Plan/Prompt versions, generation method/tool/date, AI-original status, third-party use, Rights/IP/Cultural/Historical/Mobile/Founder/runtime states, asset version |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-012 | Location Accuracy | REQUIRED | Verified geographic/place identity and no wrong-city substitution |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-013 | Cultural Accuracy | REQUIRED | Architecture, roads/bridges/boats/walls, clothes/plants/objects/transport/behavior/religious details/decor/signage/morphology/technology reviewed as applicable |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-014 | Historical Accuracy | CONDITIONALLY_REQUIRED | For historical Story: era, building existence/restoration, clothes, transport, lighting tech, road materials, landscape, architectural state; otherwise evidence-backed `NOT_APPLICABLE` |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-015 | Architecture / Geography QA | CONDITIONALLY_REQUIRED | Applicable architecture and geography verification tied to research evidence |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-016 | Visual Quality | REQUIRED | High-DPI/4K-class source detail or equivalent, sharp focal subject, stable geometry, realistic materials/depth/reflections/shadows/atmosphere; no AI defects, pseudo-text, watermark, logo, or caption |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-017 | Foreground / Midground / Background | REQUIRED | Meaningful spatial depth where appropriate; flat repeated imagery rejected |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-018 | Focal Point | REQUIRED | Intentional primary and secondary focal hierarchy appropriate to the Shot Plan |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-019 | Mobile Crop | REQUIRED | Target portrait viewport evidence for subject, architecture, human scale, top/bottom safe zones, Story text and button areas, no critical clipping |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-020 | UI Readable Region | REQUIRED | Intentional quiet region for runtime UI; heavy blur not used as a composition rescue |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-021 | Anti-Template | REQUIRED | No simple landmark substitution or repeated framing/central landmark/foreground tree/golden hour/water reflection/camera height/visual rhythm pattern |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-022 | Performance / Asset Weight | REQUIRED | Optimized runtime format/size, decode and memory review, mobile loading check, visual-fidelity check; raw giant generation masters excluded from runtime |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-023 | Final Library Minimum | CONDITIONALLY_REQUIRED | `>=10` approved images where current destination/background runtime policy requires it, only after Pilot approval |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-024 | Library Internal Diversity | CONDITIONALLY_REQUIRED | Full-library QA for camera, distance, focal relation, weather/light, density, depth, tension, Story purpose, negative space, movement implication where a library is produced |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-025 | Story World Coverage | REQUIRED | Images collectively support Story World and applicable opening/movement/turning point/conflict/weather/resolution/ending/Memory Anchor relationships |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-026 | Content / Visual Separation | REQUIRED | Evidence canonical Story, Words, Discovery, Challenge, Memory, and Complete were not modified to accommodate visuals |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| BG-027 | Versioning | REQUIRED | Asset ID, Version, Previous Version, Replacement Reason, Review Status |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-028 | Rollback Path | REQUIRED | Recoverable previous approved imagery or documented restoration path |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-029 | Safe Fallback | REQUIRED | No silent wrong-city, wrong-Journey, or wrong-era fallback; safe Phoenix fallback verified |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-030 | Automated-score Limitation | REQUIRED | Declaration that complianceScore, varietyScore, resolution, AI metadata, hash, dimensions, or asset count were not used as sole visual approval |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| BG-031 | Founder Visual Approval | CONDITIONALLY_REQUIRED | Explicit `APPROVED` tied to the candidate/Preview wherever UI/visual/Journey standards require Founder review; otherwise justified `NOT_REQUIRED` |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-032 | Runtime Integration Eligibility | REQUIRED | All mandatory background gates `PASS`, applicable Founder approval complete, final runtime metadata/count rules satisfied, relevant tests pass |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | PENDING |
+| BG-033 | No-Bypass Governance | REQUIRED | No hard-coded PASS, no skipped Rights/Founder/Pilot gate, no lowered baseline, no Story rewrite, no removed/weakened tests, exceptions explicitly documented and approved |  | BLOCKED | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+
+### Background phase rule
+
+Background production MUST follow:
+
+> Story Gold → Visual DNA → Cross-Journey Differentiation → Shot Plan → 1–3 Pilot → Rights/IP QA → Historical/Cultural QA → Mobile QA → Founder Review where required → Full Production Library → Runtime Integration
+
+A new Journey may not jump from Story Gold directly to 10-image generation.
+
 ## Conditional applicability record
 
 Every `CONDITIONALLY_REQUIRED` item MUST include:
@@ -113,7 +166,7 @@ A blank conditional decision is `BLOCKED`.
 |---|---|---|---|---|---|---|---|---|
 | A: Journey Proposal |  |  |  |  |  | BLOCKED | UNVERIFIED | NO |
 | B: Story and Learning Design |  | Relationship, Goal, ReadingAnnotation applicability, Stamp applicability, and all other classified design elements |  |  |  | BLOCKED | UNVERIFIED | NO |
-| C: Visual Concept Pilot |  |  |  |  |  | BLOCKED | UNVERIFIED | NO |
+| C: Visual Concept Pilot | Story Gold, visual baseline, AI Background Production Standard | Visual DNA, Cross-Journey Differentiation, Shot Plan, 1–3 Pilot plan, rights/IP plan, historical/cultural plan, mobile/readable-region plan |  | Missing mandatory background gate |  | BLOCKED | UNVERIFIED | NO |
 | D: Implementation |  |  |  |  |  | BLOCKED | UNVERIFIED | NO |
 | E: Automated Validation |  |  |  |  |  | BLOCKED | UNVERIFIED | NO |
 | F: Stable Baseline Comparison |  |  |  |  |  | BLOCKED | UNVERIFIED | NO |
@@ -124,8 +177,8 @@ Narrative extension for phase records:
 
 - Phase A additionally requires narrative engine, Story Function, Discovery Function, opening type, climax type, ending type, catalog differentiation matrix, and level-invariant plan.
 - Phase B additionally requires the complete Story / Discovery Design Matrix, causal Relationship evidence, enacted Choice evidence, caused Consequence evidence, functional separation, opening and ending independence, library review, and automated-score limitation acknowledgment.
-- Phase E records that automated validation success does not establish literary PASS.
-- Phase G reviews Story identity, Discovery distinction, emotional continuity, level adaptation, and Journey memorability.
+- Phase E records that automated validation success does not establish literary PASS or visual background PASS.
+- Phase G reviews Story identity, Discovery distinction, emotional continuity, level adaptation, Journey memorability, and applicable background mobile/visual approval.
 
 ## Final decision
 
@@ -139,11 +192,19 @@ Conditionally Required NOT_APPLICABLE with Reason + Evidence:
 Conditionally Required Missing or Failed:
 Regression Items:
 Blocked Items:
+Background Required Rows Total:
+Background Gate PASS + VERIFIED:
+Background Gate FAIL:
+Background Gate PENDING:
+Background Gate BLOCKED:
+Rights Gate:
+IP Similarity Review:
 Founder Mobile Approval:
 Second Journey Implementation Detected: YES / NO
 Stable Baseline Comparison Decision:
+Runtime Background Integration Eligible: YES / NO
 Final Journey Decision:
 Controlled Release Authorized: YES / NO
 ```
 
-Any missing `REQUIRED` item or applicable `CONDITIONALLY_REQUIRED` item blocks Completed.
+Any missing `REQUIRED` item or applicable `CONDITIONALLY_REQUIRED` item blocks Completed. Any required background gate that is `FAIL`, `PENDING`, or `BLOCKED` blocks background runtime integration.
