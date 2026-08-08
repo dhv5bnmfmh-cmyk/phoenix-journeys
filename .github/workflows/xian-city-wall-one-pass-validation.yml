@@ -199,7 +199,7 @@ jobs:
           target="${PREVIEW_URL}/?unlock=all&prototype=journeys"
           payload="$(node -e '
             const [url] = process.argv.slice(1);
-            process.stdout.write(JSON.stringify({state:"success",description:"Xi'an City Wall Founder preview is ready",context:"cloudflare/xian-city-wall-preview",target_url:url}));
+            process.stdout.write(JSON.stringify({state:"success",description:"Xian City Wall Founder preview is ready",context:"cloudflare/xian-city-wall-preview",target_url:url}));
           ' "$target")"
           curl --fail --silent --show-error \
             --request POST \
