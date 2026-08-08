@@ -13,6 +13,7 @@ import '../data/forbidden_city_content_cache.dart';
 import '../data/forbidden_city_journey_runtime.dart';
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
+import '../data/story_scene_catalog.dart';
 import '../models/journey_background.dart';
 import '../models/language_proficiency.dart';
 import '../services/language_level_preference_store.dart';
@@ -25,6 +26,7 @@ import '../widgets/batch_one_journey_summary.dart';
 import '../widgets/city_journey_stamp.dart';
 import '../widgets/destination_background.dart';
 import '../widgets/interactive_story_text.dart';
+import '../widgets/living_story_scene.dart';
 import '../widgets/journey_challenge_panel.dart';
 import '../widgets/journey_level_selector_button.dart';
 import '../widgets/journey_share_button.dart';
@@ -1041,6 +1043,7 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   @override
   Widget build(BuildContext context) {
+    final storySceneVariant = storySceneVariantFor(_experience.id);
     final stepThreePage = _isSummerPalacePilot
         ? resolvePilotN1CompositePage(
             step: 3,
@@ -1071,6 +1074,15 @@ class _JourneyScreenState extends State<JourneyScreen>
     return DestinationBackground(
       journeyId: _experience.id,
       pageType: _backgroundPageType,
+      sceneLayer: step == 0 && storySceneVariant != null
+          ? LivingStoryScene(
+              variant: storySceneVariant,
+              progressListenable: _narration,
+              readProgress: () => _narration.contentId == 'story'
+                  ? _narration.progress
+                  : 0,
+            )
+          : null,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         resizeToAvoidBottomInset: true,

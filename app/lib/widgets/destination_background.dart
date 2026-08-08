@@ -173,6 +173,7 @@ class DestinationBackground extends StatelessWidget {
     required this.child,
     this.localDate,
     this.scrimStrength = .24,
+    this.sceneLayer,
     super.key,
   });
 
@@ -181,6 +182,7 @@ class DestinationBackground extends StatelessWidget {
   final Widget child;
   final DateTime? localDate;
   final double scrimStrength;
+  final Widget? sceneLayer;
 
   @override
   Widget build(BuildContext context) {
@@ -193,6 +195,26 @@ class DestinationBackground extends StatelessWidget {
       catalog: journeyBackgroundCatalog,
     );
     final visibleScrimStrength = (scrimStrength * .55).clamp(0.0, 1.0);
+
+    if (sceneLayer != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          if (asset != null)
+            Image.asset(
+              asset.assetPath,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.medium,
+              errorBuilder: (_, __, ___) => const _BackgroundFallback(),
+            )
+          else
+            const _BackgroundFallback(),
+          sceneLayer!,
+          _JourneyBackgroundScrim(strength: visibleScrimStrength),
+          child,
+        ],
+      );
+    }
 
     if (SpecialRealmBackground.supports(journeyId)) {
       return SpecialRealmBackground(
