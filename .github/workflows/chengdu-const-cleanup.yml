@@ -1,0 +1,45 @@
+name: Chengdu Const Cleanup
+
+on:
+  push:
+    branches:
+      - remediation/chengdu-kuanzhai-one-pass
+    paths:
+      - .github/workflows/chengdu-const-cleanup.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: remediation/chengdu-kuanzhai-one-pass
+          fetch-depth: 0
+      - name: Apply analyzer repair
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('app/lib/data/chengdu_kuanzhai_one_pass.dart')
+          text = path.read_text()
+          start_marker = 'final chengduKuanzhaiWordTraces = List<RemediatedWordTrace>.unmodifiable(['
+          start = text.index(start_marker)
+          end = text.index('\n]);', start) + len('\n]);')
+          block = text[start:end]
+          old = '\n  RemediatedWordTrace('
+          count = block.count(old)
+          if count != 15:
+              raise SystemExit(f'Expected 15 non-const word traces, found {count}')
+          block = block.replace(old, '\n  const RemediatedWordTrace(')
+          path.write_text(text[:start] + block + text[end:])
+          PY
+          rm .github/workflows/chengdu-const-cleanup.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add app/lib/data/chengdu_kuanzhai_one_pass.dart .github/workflows/chengdu-const-cleanup.yml
+          git diff --cached --check
+          git commit -m "fix: const Chengdu word traces"
+          git push origin HEAD:remediation/chengdu-kuanzhai-one-pass
