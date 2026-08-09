@@ -346,7 +346,10 @@ Automated validation MAY verify:
 - IDs;
 - structural integrity;
 - normalized semantic fingerprint completeness;
-- exact Story-evidence binding;
+- active Story source identity;
+- exact Story-evidence span presence;
+- evidence dimension/mechanism alignment;
+- semantic-rationale field completeness;
 - deterministic CORE semantic collision thresholds.
 
 Automated validation cannot by itself approve:
@@ -359,15 +362,16 @@ Automated validation cannot by itself approve:
 - Consequence strength;
 - emotional arc;
 - cultural integration;
+- semantic sufficiency of a Narrative Mechanism classification;
 - Story/Discovery functional separation;
 - literary quality;
 - Founder experience.
 
-Semantic taxonomy assignment still requires truthful human/Agent classification against the active Story. Once assigned and evidence-bound, CI comparison is deterministic and MUST NOT be replaced by free-form prose judgment.
+Semantic taxonomy assignment still requires truthful human/Agent classification against the active Story. CI may prove that cited spans are active Story text and that a rationale exists; it MUST NOT claim that string-presence tests independently understand or prove natural-language semantic entailment. Founder/Agent review determines whether the evidence plus rationale actually supports the normalized mechanism family. Once a truthful classification is assigned, the normalized fingerprint comparison and Rule A / Rule B arithmetic are deterministic.
 
 Statements such as `360 / 360 PASS`, `score 100`, `average 100`, and `all fields present` MUST be reported only as evidence for the checks actually implemented. They MUST NOT produce overall Story Quality `PASS`.
 
-Automated structural Result and human literary Result MUST be recorded separately.
+Automated structural Result and human literary/semantic Result MUST be recorded separately.
 
 ## 14. Blocking codes
 
@@ -389,6 +393,9 @@ The following codes are binding minimum codes:
 - `SEMANTIC_TEMPLATE_COLLISION`
 - `NARRATIVE_DNA_ACTIVE_STORY_EVIDENCE_MISSING`
 - `NARRATIVE_DNA_LEGACY_STORY_DRIFT`
+- `NARRATIVE_MECHANISM_RATIONALE_MISSING`
+- `NARRATIVE_MECHANISM_SEMANTIC_SUFFICIENCY_UNVERIFIED`
+- `NARRATIVE_MECHANISM_TAXONOMY_LAUNDERING`
 - `LIBRARY_DIFFERENTIATION_UNVERIFIED`
 - `LEVEL_ADAPTATION_IDENTITY_LOSS`
 - `SPECIAL_MECHANISM_FLATTENED`
@@ -526,22 +533,46 @@ The normalized fingerprint MUST represent at least:
 
 Semantic identifiers MUST be reusable mechanism families. Journey-, city-, character-, landmark-, or candidate-specific identifiers are prohibited because they defeat comparison.
 
-### 17.3 Active Story evidence binding
+### 17.3 Active Story evidence binding: provenance vs semantic sufficiency
 
 Narrative DNA and every CORE normalized mechanism MUST be traceable to the **ACTIVE canonical production Story**.
+
+Phoenix formally distinguishes two evidence requirements.
+
+**Evidence Provenance — deterministically enforced**
+
+CI MAY and MUST verify, where implemented:
+
+- the evidence record belongs to the registered Journey;
+- the active Story source identifier is the approved active source;
+- every cited Story span is non-empty;
+- every cited Story span literally occurs in the active canonical Story;
+- the evidence record names the same semantic dimension as the fingerprint registration;
+- the evidence record names the same normalized mechanism family as the fingerprint registration;
+- a required semantic rationale field is present and non-empty.
+
+**Evidence Semantic Sufficiency — evidence-supported and human-auditable**
+
+Exact Story provenance alone does **not** establish semantic correctness. Each CORE Narrative Mechanism classification MUST include sufficient active-Story evidence and a concise causal `semanticRationale` explaining why those cited events, choices, consequences, relationships, spatial functions, or transformations support the normalized mechanism family.
+
+Founder/Agent review MUST judge whether the cited evidence plus rationale makes the classification understandable and defensible. Phoenix CI MUST NOT represent deterministic string-presence, enum-alignment, or non-empty-rationale checks as natural-language semantic proof.
 
 Each CORE mechanism evidence record MUST identify:
 
 - Journey ID;
 - semantic dimension;
 - normalized semantic family;
-- active Story package or level source;
-- exact Story source text;
-- optional explanatory note.
+- active Story package or source ID;
+- one or more exact active-Story source spans;
+- required semantic rationale.
 
-The exact evidence text MUST literally occur in the active production Story package. Legacy, abandoned, superseded, migration-only, or test-only Story prose MUST NOT satisfy active Narrative DNA evidence.
+A single source span MAY be used where it sufficiently exposes the causal mechanism. Multiple exact source spans SHOULD be used where conflict, transformation, dramatic engine, relationship geometry, or another mechanism depends on a sequence that cannot be audited from one short sentence. Every cited span MUST independently occur in the active Story. Invented bridging prose MUST NOT be inserted into `sourceTexts` and represented as Story evidence.
 
-Metadata MUST conform to the active Story. The Story MUST NOT be rewritten merely to preserve stale metadata.
+Evidence MUST remain focused. Copying entire Story levels into each record merely to guarantee a string match is prohibited evidence padding.
+
+Bare location names, protagonist biographies, incidental scenery, or isolated object mentions are not sufficient evidence for a causal Narrative Mechanism unless the dimension being evidenced is specifically that surface fact. Relationship evidence must expose the relevant relationship function or meaningful absence of a decisive actor. Cultural-anchor evidence must show how the place-specific anchor participates in conflict, interpretation, choice, consequence, or transformation. Transformation evidence must show changed understanding, behavior, responsibility, or model. Dramatic-engine evidence must show enough of the causal sequence to make the engine assignment auditable.
+
+Legacy, abandoned, superseded, migration-only, or test-only Story prose MUST NOT satisfy active Narrative DNA evidence, even when a rationale is present. Metadata MUST conform to the active Story. The Story MUST NOT be rewritten merely to preserve stale metadata.
 
 ### 17.4 CORE collision dimensions
 
@@ -628,17 +659,44 @@ There is no per-Journey bypass, city bypass, candidate allowlist, Founder-name b
 
 Semantic tests, pairwise catalog audit, normalized Difference Matrix reporting, and future Gold acceptance MUST resolve from the same canonical semantic fingerprint registry. Manually synchronized parallel semantic maps are prohibited where the canonical registry can be consumed directly.
 
-### 17.10 Agent execution order
+### 17.10 New mechanism-family governance
+
+A new `NarrativeMechanismFamily` MUST NOT be introduced merely to make a candidate appear different from an existing Gold Journey.
+
+Before extending the controlled taxonomy, the design/review record MUST state:
+
+```text
+Proposed mechanism family:
+Causal function:
+Why no existing mechanism family is semantically equivalent:
+Nearest existing mechanism families considered:
+Causal distinction from each nearest family:
+Why the distinction affects collision analysis rather than surface wording:
+Journey-specific naming check: PASS / FAIL
+Taxonomy-laundering check: PASS / FAIL
+Reviewer:
+Result:
+```
+
+If an existing reusable family is materially equivalent in causal function, that existing family MUST be used. Near-synonym splitting such as renaming one responsible-refusal family into a candidate-specific or operationally reworded variant solely to evade collision is prohibited. New families MUST remain general enough to compare across cities, characters, professions, objects, and future Journeys.
+
+This governance artifact is reviewed by Founder/Agent judgment. It does not require an LLM, embedding model, probabilistic semantic score, or network dependency in CI.
+
+### 17.11 Agent execution order
 
 Before final Story approval for a new Journey, the responsible Agent MUST:
 
 1. read the current approved-Gold semantic fingerprint catalog;
-2. define the candidate semantic fingerprint;
+2. define the candidate semantic fingerprint using the existing taxonomy where causally equivalent;
 3. compare it against every approved Gold Journey;
-4. bind every CORE mechanism to exact active Story evidence;
-5. reject collisions rather than disguise them through Layer 1 changes;
-6. redesign the dramatic engine or causal structure when required;
-7. update Narrative DNA only after the canonical Story is locked;
-8. rerun the semantic anti-template gate after Story changes.
+4. bind every CORE mechanism to one or more exact active Story spans;
+5. provide a concise semantic rationale for every CORE mechanism;
+6. use enough focused evidence to demonstrate causal function without evidence padding;
+7. reject bare landmark/name/biography evidence for causal classifications;
+8. justify any genuinely new semantic family against the nearest existing families before adding it;
+9. reject collisions rather than disguise them through Layer 1 changes or taxonomy laundering;
+10. redesign the dramatic engine or causal structure when required;
+11. update Narrative DNA only after the canonical Story is locked;
+12. rerun the semantic anti-template gate after Story or fingerprint changes.
 
-This semantic standard is deterministic and local. CI MUST NOT depend on an external LLM, embeddings API, network semantic service, or external vector database to decide the collision result.
+This semantic standard is deterministic and local where machine enforcement is claimed. CI MUST NOT depend on an external LLM, embeddings API, network semantic service, or external vector database to decide collision arithmetic or evidence provenance. Human/Agent review remains authoritative for semantic sufficiency.
