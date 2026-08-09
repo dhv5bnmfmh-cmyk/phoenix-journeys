@@ -6,6 +6,8 @@ import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/forbidden_city_challenge_package.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/forbidden_city_trace_validation.dart';
+import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
+import 'package:phoenix_journeys/data/journey_semantic_fingerprint_catalog.dart';
 
 List<String> _sentences(String story) => RegExp(r'[^。！？!?]+[。！？!?]')
     .allMatches(story)
@@ -13,25 +15,80 @@ List<String> _sentences(String story) => RegExp(r'[^。！？!?]+[。！？!?]')
     .where((sentence) => sentence.isNotEmpty)
     .toList(growable: false);
 
+bool _enactsRouteSynthesis(String story) {
+  return <String>[
+    '同一张',
+    '叠',
+    '保留',
+    '同时进入一张图',
+    '复合表示',
+    '同处一页',
+  ].any(story.contains);
+}
+
+bool _preservesPurposefulRouteDivergence(String story) {
+  return <String>[
+    '分开',
+    '分向',
+    '分岔',
+    '转向别处',
+    '转向各自的方向',
+  ].any(story.contains);
+}
+
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
   const qualityAgent = PhoenixJourneyContentQualityAgent();
+  const ceilings = <int>[5, 6, 7, 8, 9, 10, 11, 13, 14, 15];
 
-  test('Forbidden City Lv9 is locked at the normal Phoenix shape', () {
-    final story = forbiddenCityLockedStories[8];
-    expect(forbiddenCityStoryParagraphsByLevel[8], hasLength(2));
-    expect(story.runes.length, 626);
-    expect(story, contains('这种分辨也让沈砚明白，理解空间首先要承认自己所处的位置。'));
-    expect(story, contains('于是他没有跨过去。'));
-    expect(story, endsWith('那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。'));
+  test('Forbidden City Lv1-Lv10 preserve the dual-route causal identity', () {
+    expect(forbiddenCityLockedStories, hasLength(10));
+    for (var index = 0; index < forbiddenCityLockedStories.length; index++) {
+      final story = forbiddenCityLockedStories[index];
+      expect(story, contains('十七岁的营造学徒沈砚'), reason: 'Lv${index + 1}');
+      expect(story, contains('阿宁'), reason: 'Lv${index + 1}');
+      expect(story, contains('两条'), reason: 'Lv${index + 1}');
+      expect(story, contains('乾清门'), reason: 'Lv${index + 1}');
+      expect(_enactsRouteSynthesis(story), isTrue,
+          reason: 'Lv${index + 1} must enact synthesis');
+      expect(_preservesPurposefulRouteDivergence(story), isTrue,
+          reason: 'Lv${index + 1} must preserve purposeful divergence after the shared node');
+    }
+    expect(forbiddenCityStoryParagraphsByLevel[0], hasLength(1));
+    expect(forbiddenCityStoryParagraphsByLevel[1], hasLength(1));
+    for (var index = 2; index < 10; index++) {
+      expect(forbiddenCityStoryParagraphsByLevel[index], hasLength(2));
+    }
   });
 
-  test('every Forbidden City Word has exact final Story trace metadata', () {
-    expect(validateForbiddenCityImportedWords(), isEmpty);
+  test('obsolete refusal blank and ruler machinery is absent from active Story', () {
+    final corpus = forbiddenCityLockedStories.join('\n');
+    for (final obsolete in <String>[
+      '没有跨过门槛',
+      '没有跨过去',
+      '地图仍留下空白',
+      '地图仍不完整',
+      '写下“界”',
+      '旧木尺',
+      '那道没有跨过的门槛',
+    ]) {
+      expect(corpus, isNot(contains(obsolete)), reason: obsolete);
+    }
+  });
 
-    final sentenceSets = <Set<String>>[
-      for (final story in forbiddenCityLockedStories) _sentences(story).toSet(),
-    ];
+  test('new secondary participant and synthesis climax are explicit', () {
+    final high = forbiddenCityLockedStories[9];
+    expect(high, contains('年幼侍役阿宁'));
+    expect(high, contains('不是官方历史路线'));
+    expect(high, contains('沈砚没有把问题解决成谁对谁错'));
+    expect(high, contains('沈砚于是选择合成，而不是裁决'));
+    expect(high, contains('路线在乾清门前短暂重合'));
+    expect(high, contains('又因角色和目的不同向不同方向延伸'));
+    expect(high, contains('一张叠着两条路线的图留在纸上'));
+  });
+
+  test('every Forbidden City Word has exact remediated Story trace metadata', () {
+    expect(validateForbiddenCityImportedWords(), isEmpty);
     for (final record in forbiddenCityValidatedWordRecords) {
       expect(record.entry.word.trim(), isNotEmpty);
       expect(record.entry.pinyin.trim(), isNotEmpty, reason: record.entry.word);
@@ -40,9 +97,9 @@ void main() {
       expect(record.entry.englishDefinition.trim(), isNotEmpty, reason: record.entry.word);
       expect(record.storySource, contains(record.entry.word), reason: record.entry.word);
       expect(
-        sentenceSets.any((sentences) => sentences.contains(record.storySource)),
+        forbiddenCityLockedStories.any((story) => story.contains(record.storySource)),
         isTrue,
-        reason: '${record.entry.word} must cite a complete verbatim Story sentence',
+        reason: '${record.entry.word} must cite an exact verbatim span from active Story',
       );
       final earliest = forbiddenCityLockedStories.indexWhere(
             (story) => story.contains(record.entry.word),
@@ -52,53 +109,92 @@ void main() {
     }
   });
 
-  test('all three Challenge types trace to the matching final Story level', () {
-    for (var level = 1; level <= 10; level += 1) {
+  test('Forbidden City vocabulary remains inside global Lv1-Lv10 ceilings', () {
+    for (var level = 1; level <= 10; level++) {
+      final words = forbiddenCityWordsForLevel(level);
+      expect(words.length, lessThanOrEqualTo(ceilings[level - 1]), reason: 'Lv$level');
+      final story = forbiddenCityLockedStories[level - 1];
+      expect(words.every((entry) => story.contains(entry.word)), isTrue,
+          reason: 'Lv$level words must come from active Story');
+    }
+  });
+
+  test('all three Challenge types trace to matching remediated Story levels', () {
+    for (var level = 1; level <= 10; level++) {
       final story = forbiddenCityLockedStories[level - 1];
       final sentences = _sentences(story).toSet();
       final rebuild = forbiddenCityParagraphRebuild.singleWhere((item) => item.level == level);
       final grammar = forbiddenCityGrammarRepair.singleWhere((item) => item.level == level);
       final missing = forbiddenCityMissingSentence.singleWhere((item) => item.level == level);
-
-      expect(rebuild.segments.every(story.contains), isTrue, reason: 'Lv$level paragraphRebuild');
-      expect(story.contains(grammar.correct), isTrue, reason: 'Lv$level grammarRepair');
-      expect(story.contains(missing.before), isTrue, reason: 'Lv$level missing before');
-      expect(story.contains(missing.after), isTrue, reason: 'Lv$level missing after');
-      expect(sentences.contains(missing.answer), isTrue, reason: 'Lv$level missing answer must be a literal Story sentence');
+      expect(rebuild.segments.every(story.contains), isTrue,
+          reason: 'Lv$level paragraphRebuild');
+      expect(story.contains(grammar.correct), isTrue,
+          reason: 'Lv$level grammarRepair');
+      expect(story.contains(missing.before), isTrue,
+          reason: 'Lv$level missing before');
+      expect(story.contains(missing.after), isTrue,
+          reason: 'Lv$level missing after');
+      expect(sentences.contains(missing.answer), isTrue,
+          reason: 'Lv$level missing answer must be literal Story sentence');
+      final challengeCorpus =
+          '${rebuild.segments.join()}${grammar.correct}${missing.before}${missing.answer}${missing.after}';
+      expect(challengeCorpus, isNot(contains('旧木尺')));
+      expect(challengeCorpus, isNot(contains('没有跨过')));
     }
   });
 
-  test('Discovery, Memory and Complete remain bound to Forbidden City identity', () {
-    final storyCorpus = forbiddenCityLockedStories.join();
-    const anchors = <String>['中轴', '外朝', '内廷', '宫门', '身份', '空白', '第二张地图'];
-    for (final discovery in forbiddenCityDiscoveries) {
-      expect(discovery.pinyin.trim(), isNotEmpty);
-      expect(discovery.vietnamese.trim(), isNotEmpty);
-      expect(discovery.english.trim(), isNotEmpty);
-      expect(
-        anchors.any((anchor) => discovery.text.contains(anchor) && storyCorpus.contains(anchor)),
-        isTrue,
-        reason: discovery.text,
-      );
-    }
+  test('Discovery teaches architecture without replaying obsolete plot machinery', () {
+    final discoveryCorpus = forbiddenCityDiscoveries.map((item) => item.text).join('\n');
+    expect(discoveryCorpus, contains('午门是紫禁城的正门'));
+    expect(discoveryCorpus, contains('南北轴线'));
+    expect(discoveryCorpus, contains('外朝'));
+    expect(discoveryCorpus, contains('内廷'));
+    expect(discoveryCorpus, contains('乾清门'));
+    expect(discoveryCorpus, contains('多种推荐参观路线'));
+    expect(discoveryCorpus, contains('不是历史官方'));
+    expect(discoveryCorpus, isNot(contains('旧木尺')));
+    expect(discoveryCorpus, isNot(contains('地图空白')));
+    expect(discoveryCorpus, isNot(contains('没有跨过')));
+  });
 
+  test('Memory Completion and reward identity point to dual-route synthesis', () {
     final memory = forbiddenCityMemoryReviews
         .map((item) => '${item.prompt}${item.answer}')
-        .join();
+        .join('\n');
     for (final anchor in <String>[
-      '沈砚', '周师傅', '顾文澜', '年幼侍役', '午门', '外朝', '内廷', '乾清门',
-      '门槛', '界', '第二张地图', '旧木尺', forbiddenCityMemoryAnchor,
+      '沈砚',
+      '阿宁',
+      '两条路线',
+      '乾清门',
+      '共同',
+      '分岔',
+      forbiddenCityMemoryAnchor,
     ]) {
-      expect(memory, contains(anchor), reason: 'Memory must preserve $anchor');
+      expect(memory, contains(anchor), reason: anchor);
     }
-
-    expect(forbiddenCityChallengeRewardName, contains('旧木尺'));
-    expect(forbiddenCityJourneyCompletion, contains('没有跨过的门槛'));
-    expect(forbiddenCityJourneyCompletion, contains('沈砚没有走遍紫禁城'));
-    expect(forbiddenCityJourneyCompletion, contains('第一次真正看见了紫禁城'));
+    expect(forbiddenCityMemoryAnchor, '一张叠着两条路线的图');
+    expect(forbiddenCityChallengeRewardName, contains('双线节点'));
+    expect(forbiddenCityJourneyCompletion, contains('两条路线'));
+    expect(forbiddenCityJourneyCompletion, contains('共享节点'));
+    expect(forbiddenCityJourneyCompletion, isNot(contains('旧木尺')));
+    expect(forbiddenCityJourneyCompletion, isNot(contains('没有跨过')));
   });
 
-  test('Forbidden City uses the same unified quality agent as published journeys', () {
+  test('Narrative DNA and semantic fingerprint are derived from active Story', () {
+    final dna = approvedNarrativeDnaCatalog.singleWhere(
+      (item) => item.journeyId == forbiddenCityJourneyId,
+    );
+    final fingerprint = approvedGoldSemanticFingerprints[forbiddenCityJourneyId]!;
+    expect(dna.narrativeIdentity, contains('dual-valid-route-overlay'));
+    expect(dna.memoryAnchorType, contains('two-overlaid-routes'));
+    expect(
+      fingerprint.mechanism(NarrativeSemanticDimension.dramaticEngineFamily),
+      NarrativeMechanismFamily.coexistingValidPerspectivesSynthesizeRelationalModel,
+    );
+    expect(semanticEvidenceContractErrors(fingerprint), isEmpty);
+  });
+
+  test('Forbidden City uses the unified quality agent at every level', () {
     final journey = requireDailyJourneyExperience(forbiddenCityJourneyId);
     for (final profile in levelAgent.allProfiles) {
       final content = resolveAdaptiveJourneyLevel(journey, profile: profile);

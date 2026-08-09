@@ -9,10 +9,13 @@ void main() {
     for (var level = 1; level <= 10; level++) {
       final story = forbiddenCityLockedStories[level - 1];
       expect(story, contains('沈砚'));
+      expect(story, contains('阿宁'));
       expect(story, isNot(contains('纪衡')));
       expect(story, isNot(contains('梁砚')));
+      expect(story, isNot(contains('旧木尺')));
+      expect(story, isNot(contains('没有跨过门槛')));
     }
-    expect(forbiddenCityMemoryAnchor, '一道没有跨过的门槛');
+    expect(forbiddenCityMemoryAnchor, '一张叠着两条路线的图');
     expect(isBatchOneGoldJourney(forbiddenCityJourneyId), isFalse);
     expect(batchOneMemorySpecFor(forbiddenCityJourneyId), isNull);
   });

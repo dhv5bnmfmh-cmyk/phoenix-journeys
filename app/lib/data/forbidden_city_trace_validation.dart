@@ -1,37 +1,27 @@
 import 'forbidden_city_journey_runtime.dart';
 import 'journey_data.dart';
 
-ForbiddenCityWordRecord _withExactSource(
-  ForbiddenCityWordRecord record,
-  String storySource,
-) {
-  return ForbiddenCityWordRecord(
-    entry: record.entry,
-    usageNote: record.usageNote,
-    storySource: storySource,
-    firstAppearsAt: record.firstAppearsAt,
-  );
-}
-
-List<ForbiddenCityWordRecord> get forbiddenCityValidatedWordRecords =>
-    List<ForbiddenCityWordRecord>.unmodifiable(
-      forbiddenCityWordRecords.map((record) {
-        if (record.entry.word == '空间系统') {
-          return _withExactSource(
-            record,
-            '宫门既连接也区分，行动既受建筑引导，也受身份与职责限定；历史中的宏伟秩序与个人限制，往往属于同一个空间系统。',
-          );
-        }
-        return record;
-      }),
-    );
-
 int? _earliestLevelContaining(String value) {
   for (var index = 0; index < forbiddenCityLockedStories.length; index += 1) {
     if (forbiddenCityLockedStories[index].contains(value)) return index + 1;
   }
   return null;
 }
+
+ForbiddenCityWordRecord _normalizedRecord(ForbiddenCityWordRecord record) {
+  final earliest = _earliestLevelContaining(record.entry.word);
+  return ForbiddenCityWordRecord(
+    entry: record.entry,
+    usageNote: record.usageNote,
+    storySource: record.storySource,
+    firstAppearsAt: earliest ?? record.firstAppearsAt,
+  );
+}
+
+List<ForbiddenCityWordRecord> get forbiddenCityValidatedWordRecords =>
+    List<ForbiddenCityWordRecord>.unmodifiable(
+      forbiddenCityWordRecords.map(_normalizedRecord),
+    );
 
 bool forbiddenCityWordTraceIsValid(ForbiddenCityWordRecord record) {
   final earliest = _earliestLevelContaining(record.entry.word);

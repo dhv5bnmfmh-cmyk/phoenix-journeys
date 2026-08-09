@@ -4,7 +4,7 @@ import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 
 const forbiddenCityJourneyId = 'beijing-forbidden-city';
-const forbiddenCityMemoryAnchor = '一道没有跨过的门槛';
+const forbiddenCityMemoryAnchor = '一张叠着两条路线的图';
 
 class ForbiddenCityWordRecord {
   const ForbiddenCityWordRecord({
@@ -29,42 +29,42 @@ class ForbiddenCityMemoryReview {
 
 final forbiddenCityStoryParagraphsByLevel = <List<String>>[
   <String>[
-    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他想看太和殿，也想把路线画满。走到一处宫门时，顾文澜和周师傅正在看记录，一道本来不该进的门忽然开了。门后正是地图上的空白，沈砚很想进去。一个年幼侍役从规定的路匆匆走过。沈砚走到门槛前，却停下了。他明白门开着，不等于自己应该进去。门关上后，他在第二张地图上写下“界”，留下那块空白。周师傅把旧木尺交给他。那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。',
+    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他在纸上画自己从午门沿中轴走到乾清门的学习路线，觉得一张路线图应该只有一条最清楚的路。一个年幼侍役阿宁看见后说：“我的路不这样走。”阿宁在纸角画出自己从东侧过来、也到乾清门前的一条线。沈砚问：“怎么会有两条都对的路？”两人把两条线放到同一张纸上，对准乾清门。两条线在这里相遇，又向不同方向分开。沈砚没有擦掉任何一条，而是把两条都描清楚。最后，他们从同一个门前继续走向各自要去的方向。纸上留下两条路线。',
   ],
   <String>[
-    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他一心想看太和殿，把自己的路线图画得完整。周师傅却总提醒他哪些路能走、哪些门不能过，沈砚觉得这些规矩妨碍了学习。后来，顾文澜和周师傅在一旁核对记录，一道通往更深宫院的门暂时打开。门后正好是地图上的空白。沈砚走到门槛前，一个年幼侍役从规定路线匆匆经过。他忽然想到：侍役天天在宫里，也不能想去哪里就去哪里。于是沈砚没有跨过去。门关上后，他有些遗憾，却在第二张地图上写下“界”，保留那块空白。周师傅把旧木尺交给他。沈砚明白，知道为什么停下，也是在理解建筑。那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。',
+    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他画下自己从午门沿中轴到乾清门的学习路线，认为正确的路线图应该选出一条最清楚的路。年幼侍役阿宁看见后摇头：“我到这里不是这样走。”他在纸上画出自己从东侧过来的一条路线，也到乾清门前。沈砚先觉得两张图互相矛盾：同一座宫城，怎么会有两条都正确的路？阿宁说，他们来这里的事情不同，所以经过的地方也不同。两人把两条线叠到同一张图上，用乾清门作共同位置。两条线短暂重合，又向不同方向分开。沈砚决定不删掉任何一条，而是用两种线把它们都保留下来。图不再只回答“哪条路才对”，而开始说明“谁为什么这样走”。最后，两人从同一个位置继续走向各自的方向，那张图上仍清楚留着两条路线。',
   ],
   <String>[
-    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他原以为学习建筑，就是看清太和殿、宫门和院落，再把路线图画满。到了外朝，周师傅告诉他，这里的中轴和开阔庭院与重要礼仪、政务有关；走近乾清门后，空间转入更接近日常宫廷生活的内廷。沈砚第一次发现，外朝与内廷不只是建筑不同，人的行动方式也不同。',
-    '顾文澜和周师傅核对记录时，一道通往更深宫院的门暂时打开。门后正是沈砚地图上的空白。他走到门槛前，看见一个年幼侍役沿规定路线匆匆经过，突然明白同在宫中，不同身份的人也有不同的路。沈砚最终没有跨过去。门关上后，他在第二张地图上写下“界”，有意留下空白。周师傅把旧木尺交给他。那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。',
+    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他把当天的学习路线画在纸上：从午门进入，沿中轴经过外朝的层层空间，再到乾清门附近。他习惯把图画成一条主线，觉得这样最清楚。年幼侍役阿宁看见图后却说，自己的走法不同。他从东侧过来，也会到乾清门前，但不是沿着沈砚的线走。沈砚起初把这看成错误：同一个地方，为什么会出现两条不同路线？',
+    '阿宁没有改沈砚的图，只在另一张纸上画出自己记得的走法。两人把纸对在一起，以乾清门前这个共同位置为参照。两条路线在那里相遇，随后因为两人的事情不同而分开。沈砚这才发现，两张图各自只说明了一种移动关系，任何一张单独留下都会少掉另一种信息。他选择把两条线叠在同一张图上，并用不同线型保留它们。新的图没有判定谁错，而让“同一空间、不同角色、不同走法”同时变得可见。分别时，两人从共同的门前向不同方向走去。',
   ],
   <String>[
-    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他带着纸和尺，想把太和殿、宫门与院落一一画进地图。外朝的中轴、宽阔庭院和高大殿宇让他感到庄严；靠近乾清门以后，进入内廷的空间更细密，也更接近宫廷生活。周师傅提醒他，建筑不仅有形状，还安排礼仪、位置与行动。沈砚却仍觉得，看得越多，自己的图才越完整。',
-    '顾文澜和周师傅核对记录时，一道平日不该进入的宫门暂时打开。门后的院落正是地图上的空白。沈砚走到门槛前，心里既兴奋又不安。一个年幼侍役从规定路线匆匆经过，他忽然看见身份与空间之间的边界：有人必须经过某些地方，也有人即使门开着也不应进入。沈砚没有跨过去。门关上后，他虽然遗憾，却在第二张地图上写下“界”，保留空白。周师傅把旧木尺交给他。沈砚明白，真正的测量也包括知道自己该在哪里停下。那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。',
+    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他想练习把宫城的空间关系画清楚，便从午门开始，沿中轴记录外朝的庭院、宫门和方向，最后把自己的路线连到乾清门附近。他认为一张好图应该有一条明确主线，否则看起来会乱。年幼侍役阿宁看到后却说：“如果按我今天要做的事，我不会沿你这条线来。”阿宁在纸上画出从东侧空间接近乾清门前的另一条线。两张路线都能指到同一个地方，却没有相同的过程，沈砚一时不知道该相信哪一张。',
+    '两人没有争着证明对方错误，而是逐点比较方向和共同参照。沈砚发现，午门和中轴让自己的学习路线容易组织；阿宁的路线则由他要去的地方和所做的事情决定。到了乾清门前，两条线终于对齐，随后又分向不同方向。沈砚作出决定：不选一条覆盖另一条，而在同一张纸上用实线和点线保留两种走法。重叠后的图比任何一张原图都多出一种关系：建筑相同，角色与目的不同，路线也可以不同。最后，他们在同一个空间节点分开，各走各的路。',
   ],
   <String>[
-    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他带着纸、墨和尺，暗暗想证明自己能看懂这座宫城。外朝沿中轴展开，太和殿前的尺度与秩序让他震动；到了乾清门附近，空间渐渐转入内廷，宫院和门道更密，人的位置也更具体。周师傅告诉他，建筑不只是梁柱与屋顶，还会规定谁从哪里接近、在哪里等待。沈砚听懂了，却仍执着于把路线图上的每一块空白填满。',
-    '顾文澜与周师傅核对记录时，一道通往更深宫院的门意外敞开。沈砚知道自己不该进去，可门后恰好是那块最刺眼的空白。他向前走到门槛，甚至为自己找好理由：只是学习，只看一眼。就在这时，年幼侍役沿规定路线匆匆经过。沈砚突然意识到，别人每天生活在这里，也被身份和职责限定，而自己没有职责，却想把好奇解释成资格。他最终没有跨过去。门关上后，遗憾真实存在，但第二张地图也因此改变。他写下“界”，留下空白。周师傅把旧木尺交给他。那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。',
+    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他想练习一种能解释宫城空间关系的图，于是从午门进入后，沿南北中轴观察外朝的院落和宫门，再把自己的学习路线画到乾清门附近。外朝的开阔庭院和层层门序让他的线条很自然地顺着中轴向前。沈砚因此相信，一张真正清楚的路线图应该找出唯一的主路线。年幼侍役阿宁看见后却说，他今天经过的空间不是这样组织的。阿宁在另一张纸上画出自己从东侧接近乾清门前的走法。他没有说沈砚画错，只问：“如果我们做的事不同，为什么一定要走成一条线？”',
+    '这个问题让两张图的矛盾变得更难处理，因为两条路线都来自真实的行动。沈砚和阿宁把图放在一起，对齐几个共同位置。到乾清门前，两条线短暂重合；再往后，一条继续服务沈砚的学习观察，另一条随阿宁的事情转向别处。沈砚没有删掉阿宁的线，也没有让自己的线变成标准答案。他把两种线型叠在一张图上，并在交会处标出共同节点。新的图显示的不是“谁走对了”，而是同一组宫门、庭院和连接关系怎样因角色与目的产生不同路径。分别时，两人从共同节点转向各自的方向，图上的两条线也一起留下。',
   ],
   <String>[
-    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他原想用纸、墨和旧习惯记录梁柱、屋顶与尺度，证明自己能把宫城看懂。沿中轴进入外朝时，太和殿前的巨大庭院让人自然放慢脚步；走到乾清门附近，空间逐渐转向内廷，宫院、门与廊道更细密。周师傅说，礼仪并不只发生在典礼那一刻，轴线、门序和距离本身就在组织人的接近、等待与转向。沈砚开始理解这种空间秩序，却仍把“完整”想成地图上没有空白。',
-    '顾文澜与周师傅核对记录时，一道通往更深宫院的门暂时敞开。门后正是沈砚没有画到的区域。他走到门槛前，没有人阻止，于是选择第一次真正落到自己手里。他想进去，却看见年幼侍役沿规定路线匆匆经过。两个人都在紫禁城中，但身份、职责和行动范围并不相同。沈砚忽然明白，门既连接空间，也界定谁能够进入。于是他没有跨过门槛。门后来关上，地图仍不完整。傍晚，他画第二张地图，把中轴、外朝、内廷、几道门和那片空白都留下，并写下“界”。周师傅把旧木尺交给他。沈砚终于知道，理解空间不只靠进入，也靠承认边界。那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。',
+    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他准备做一张学习用的空间图，希望别人能看懂宫门、庭院怎样连接。进入午门后，他沿中轴观察外朝，开阔庭院、层层门序与轴线让他的记录形成一条强烈的纵向路线；到乾清门附近，外朝与内廷的空间关系又让这个位置成为重要的连接点。沈砚把自己的路线画得很确定，甚至觉得图上只应保留一条“正确路线”。年幼侍役阿宁看完却提出异议。他说自己今天从东侧空间过来，经过的方向不同，却同样会到乾清门前。随后，他在另一张纸上画出自己的走法。两条线看起来互相冲突，但谁也没有编造自己没走过的地方。',
+    '沈砚没有急着把其中一张改成另一张。他和阿宁先找共同参照，再比较每一段线为什么出现。沈砚的路线跟着学习观察的顺序展开，阿宁的路线跟着自己的事情和目的展开。两人在乾清门前把两张图对齐时，路线短暂合在一起，随后再次分开。这个交会点让沈砚看清：矛盾并不一定意味着一真一假，有时是两种局部视角同时成立。他选择把两条路线叠进同一张图，用不同线型保存各自的完整路径，而不是删掉一条。复合图因此多出任何单张图都没有的信息：同一建筑系统能组织不同角色的移动关系。最后，两人在共同节点分别，继续各自的事情；纸上的两条线也从同一点伸向不同方向。',
   ],
   <String>[
-    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他熟悉梁柱、屋面和尺度，因此早晨的他相信：只要看见更多建筑，就能得到更完整的理解。沿中轴进入外朝，太和殿前的开阔庭院与层层门序让人的身体自然进入一种庄重节奏；到乾清门附近，空间转向内廷，宫院与廊道更密，日常生活的尺度也更明显。周师傅提醒他，宫城的秩序不仅写在建筑形制里，也写在人如何接近、等待、转向和停留。沈砚开始重画自己的空间认知，却仍舍不得地图上的空白。',
-    '顾文澜与周师傅核对记录时，一道通往更深宫院的门暂时打开。那片未画区域近在眼前，沈砚甚至能把越界解释成求知。他走到门槛前，没有人命令他停。恰在此时，年幼侍役沿规定路线匆匆经过。沈砚忽然看见，同一座宫城并不会以同一种方式向所有身份开放：侍役有必须履行的职责，也有不能任意跨越的行动边界；自己有机会，却没有进入的理由。于是他没有跨过去。门关上后，他承受了错失，也得到另一种完整。第二张地图不再追求占满，而标出中轴、礼仪空间、生活空间、门与空白，并在门旁写下“界”。周师傅把旧木尺郑重交给他。那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。',
+    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他想做一张能解释宫城空间的学习图，于是从午门进入，沿南北中轴观察外朝。午门位于紫禁城南北轴线上，外朝的庭院与门序使他的观察自然形成一条连续路线；到乾清门附近，空间进入外朝与内廷相接的重要位置。沈砚把这条线画得很清楚，于是产生了一个简单判断：既然建筑关系明确，一张好图就应该把移动也归成一条主线。年幼侍役阿宁看到图后说，自己的路线并不沿着沈砚的线展开。他从东侧空间接近同一个节点，随后又因为自己的事情转向别处。阿宁把这条路线画在自己的纸上。两张图都来自各自实际走过的路，却无法在沈砚的“一条主线”规则里同时成立。',
+    '沈砚没有把阿宁当成反例，也没有把自己的路线改成错误答案。他们把两张纸叠看，从共同的宫门和方向关系开始校准。乾清门前成为关键：两条路线在这里接近、重合，再向不同方向展开。沈砚终于看到，建筑提供共同的空间骨架，却不会让每个角色拥有相同的目的和移动关系。他作出决定，在同一张图上用实线与点线完整保留两条路线，并把交会处标为共享节点。图的意义因此改变，不是旧图被新证据推翻，而是两个都有效的局部视角经过合成后，显出彼此之间的关系。傍晚，两人在那个共同节点分开。阿宁去做自己的事，沈砚继续学习观察；一张叠着两条路线的图留在沈砚手里，两条线都没有被擦掉。',
   ],
   <String>[
-    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他想看清太和殿，把所有经过的宫门和院落填进路线图。外朝却先让他意识到另一层结构：中轴、庭院尺度与门序共同制造庄严的礼仪距离；到乾清门附近进入内廷后，空间变得更细密，宫廷生活、身份和行动范围也更直接地交织在一起。周师傅说，空间不只是容纳人，它还安排人。沈砚开始明白，建筑的意义不仅存在于形制，也存在于谁能接近、谁须等待、谁在何处转向。顾文澜还提醒他，今天看到的安静院落，曾经承担具体的宫廷功能，不能只当作风景。他也开始注意，今日参观者看到的是作为博物院与世界遗产开放的宫殿，而故事所讨论的历史边界来自过去的宫廷制度，两者不能混为一谈。',
-    '顾文澜与周师傅核对记录时，一道平日不属于沈砚行动范围的门暂时打开。门后正是地图上最诱人的空白。他走到门槛前，发现最危险的理由并不是“我想违规”，而是“我是来学习，所以多看一点也合理”。年幼侍役恰好沿规定路线匆匆经过，让沈砚看见空间与身份的双向关系：同一扇门对不同的人意味着不同的许可、职责与限制。若他跨过去，地图会更满，却可能把“理解”变成对空间的占有。于是沈砚没有跨过门槛。门关上后，他重新画第二张地图，保留那片空白，并在旁边写下“界”。周师傅把旧木尺交给他。那道没有跨过的门槛没有削弱他的理解，反而使他第一次承认历史空间有自己的边界。那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。',
+    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他要练习把“建筑怎样组织人的移动”画成一张可读的图。进入午门后，他沿南北中轴观察外朝，庭院尺度、门序和方向关系让自己的学习路径呈现出清晰的纵向逻辑；接近乾清门时，他又注意到这里是连接外朝与内廷往来的重要通道。沈砚因此把自己的路线当作整张图的骨架，认为其他路线只要足够准确，最后都应当被整理进这条主线。年幼侍役阿宁看见图后却指出，他今天从东侧空间接近乾清门前，随后仍要向另一方向去。阿宁在纸上画出自己的实际走法，没有把它称作制度规定或官方路线，只说这是自己今天怎样走。两张图都对应真实行动，却在沈砚的单一路线模型里互相排斥。',
+    '沈砚和阿宁开始逐段比较。他们先对准共同的门、院落方向和乾清门前的位置，再追问每一段线服务什么目的。沈砚的线记录学习建筑的观察次序，阿宁的线记录一次具体行动。两条路线在共享节点短暂叠合，随后因目的不同而分开。这不是谁被纠正的时刻，而是两张局部图第一次能够彼此说明。沈砚选择保留差异：他用两种线型叠画路线，让共同节点、重合段和分岔同时可见。复合图因此显示出一层新的空间关系：宫门和庭院构成共同结构，而角色、目的与行动使同一结构产生不同但可同时成立的路径。两人最后从共享节点分别。沈砚没有得到一条更“唯一”的路线，却得到一张信息更多的图，一张叠着两条路线、能解释它们为何相遇又分开的图。',
   ],
   <String>[
-    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。沿中轴进入外朝后，他发现太和殿前的宏阔并非单纯追求壮观。轴线、庭院、宫门次序和距离共同构成礼制的空间表达，使人的接近、停留和视线都被组织起来。到乾清门附近转入内廷，空间尺度更细密，宫廷生活也使身份与行动边界变得具体。周师傅提醒他，建筑既塑造秩序，也让秩序通过人的身体被体验。沈砚开始理解这句话，却仍把地图的空白视为知识的缺口。顾文澜提醒他，今天作为博物院开放的路线，与明清宫廷真实使用空间并不相同。学习者既要读懂建筑保存的制度痕迹，也要避免把历史秩序简单复制到当代价值判断中。这种分辨也让沈砚明白，理解空间首先要承认自己所处的位置。',
-    '顾文澜与周师傅核对记录时，一道通往更深宫院的门暂时敞开。门后就是那块缺口。没有人看着他，沈砚甚至可以把越界包装成勤学。他走到门槛前，看见年幼侍役沿规定路线匆匆经过，忽然意识到所谓空间等级并非图纸上的抽象概念，而是不同身份的人每天以行走、等待、转向和禁止进入不断实现的历史现实。对侍役而言，某些路线是职责；对沈砚而言，这扇开着的门却只是机会。若把机会误认成资格，他得到的只会是更多景象，而不是更准确的理解。于是他没有跨过去。门关上后，遗憾与领悟同时留下。第二张地图舍弃了“占满”和占有的冲动，只标出中轴、礼仪与生活空间、关键门序和那片空白，并写下“界”。周师傅把旧木尺交给他。那道没有跨过的门槛成为地图最有意义的一处。那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。',
+    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他给自己定下一个具体任务：做一张让别人既能看懂建筑连接，也能看懂不同人为何走出不同路线的学习图。进入午门后，他沿中轴观察外朝。午门位于紫禁城南北轴线上，外朝以大尺度庭院、宫门与核心殿宇形成强烈的空间次序；接近乾清门后，外朝与内廷之间的连接关系更加明显。沈砚先把自己的观察路线画成一条连续主线，并把“清楚”理解成“只有一个正确顺序”。年幼侍役阿宁看图时却说，他今天从东侧空间接近乾清门前，路线与沈砚不同，随后还要转向另一处。阿宁把自己的走法画出来。两条路线都能准确对应各自的行动，却无法同时服从沈砚原先的单线规则。',
+    '真正困难的不是判断谁错，而是如何让两个有效视角同时进入一张图。沈砚和阿宁把纸并在一起，以共同宫门、院落方向和乾清门前的位置校准。比较后，他们发现两条路线在这个重要连接节点短暂重合，随后因为角色和目的不同而分岔。沈砚没有用阿宁的图替换自己的图，也没有把阿宁的线降成旁注；他主动选择用不同线型完整保存两条路径，再画出共同节点与分岔关系。新的复合表示出现了任何单张路线图都不能单独给出的信息：同一建筑系统提供共同结构，而不同角色的行动目的决定他们怎样使用这些连接。这个变化不是“旧分类被证据推翻”，而是两个同时有效的局部视角经过比较后形成更高一层的关系表示。傍晚，两人在乾清门前的共同节点各自转向。图上两条线同处一页、互不抹去，也清楚解释了它们为何相遇、为何分开。',
   ],
   <String>[
-    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他想亲眼确认太和殿的形制，也想把宫城尽可能填进自己的图。进入外朝后，宏阔的庭院、中轴与层层门序却让他意识到，建筑从来不是静止的物件集合。礼制借由尺度、方向、接近次序和停留位置成为空间经验；到了乾清门附近，内廷更密集的宫院、廊道与生活空间又把身份、职责和行动范围写进日常。周师傅告诉他，真正的营造不仅处理结构，也要读懂人与空间之间的关系。沈砚开始动摇，却仍本能地厌恶地图上的空白，因为空白像在提醒他还有一部分宫城没有被自己的目光掌握。顾文澜进一步提醒他，今天的故宫是博物院，也是世界文化遗产；参观者所能进入的路线，与明清宫廷中真实的功能分区和身份边界并不相同。理解历史空间，既需要承认过去制度留下的结构，也不能把那套等级秩序当成今天应当延续的规则。',
-    '顾文澜与周师傅核对记录时，一道通往更深宫院的门临时敞开。没有守卫催促，也没有师父提醒，门后恰是那片未完成的区域。沈砚走到门槛前，发现诱惑最强的地方恰恰在于它可以被包装成求知：我是学徒，多看一点有什么错？就在这时，年幼侍役沿规定路线匆匆经过。那道身影让沈砚突然看清，紫禁城的空间并非同质地向所有人开放。宫门既连接也区分，行动既受建筑引导，也受身份与职责限定；历史中的宏伟秩序与个人限制，往往属于同一个空间系统。若他只因为门开着就跨过去，便会把“可以进入”误成“有理由进入”，也把理解偷偷变成占有。于是沈砚停下，没有跨过门槛。门后来关上，地图仍留下空白。傍晚，他画出第二张图，不再追求填满，而用中轴、礼仪空间、生活空间、门序和留白记录关系，并在那扇门旁写下“界”。周师傅把用了多年的旧木尺交给他。沈砚终于懂得，一把尺能量出距离，却量不出一个人为何应该停下。那道没有跨过的门槛因此成为整张地图最清楚的一笔。那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。',
+    '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。他想把“宫城空间怎样连接、不同角色又怎样使用这些连接”做成一张能被别人读懂的学习图。进入午门后，他沿紫禁城南北中轴观察外朝。午门是紫禁城正门，位于南北轴线上；外朝的核心殿宇、开阔庭院和层层门序共同形成强烈的轴线秩序。接近乾清门时，他又看到另一种关键关系：乾清门既是内廷正宫门，也是连接内廷与外朝往来的重要通道。沈砚把自己的观察顺序连成一条清楚的线，直觉上认为“正确的空间图”应当收束为一个最权威的路线。年幼侍役阿宁看后却说，自己今天从东侧空间接近乾清门前，随后还要转向另一处，因此不会沿沈砚的整条线移动。阿宁在纸上画下这次具体行动的路线，明确只是自己的走法，不是官方历史路线。两张图都忠实于各自行动，却在“只有一条正确路径”的假设下彼此冲突。',
+    '沈砚没有把问题解决成谁对谁错。他与阿宁把两张纸按共同宫门、庭院方向和乾清门前的位置逐点对齐，并追问每段路线在做什么。沈砚的线服务于营造学习和建筑观察，阿宁的线服务于他当下的行动。路线在乾清门前短暂重合，又因角色和目的不同向不同方向延伸。这个重合与分岔同时出现的瞬间成为关键：如果擦掉任何一条，图都会失去真实关系。沈砚于是选择合成，而不是裁决。他用实线与点线在同一张纸上保留两条完整路线，标出共享节点、重合段与分岔，使建筑结构和人的目的同时可读。复合图揭示了两张原图单独都没有表达出的关系：同一宫城并不是一张“人人同路”的平面，建筑的轴线、宫门、庭院与功能分区提供共同空间骨架，不同角色则因行动目的而形成不同的合法叙事视角。傍晚，沈砚与阿宁从共同节点分别，继续各自要做的事。一张叠着两条路线的图留在纸上，两条线都清楚、都完整，也彼此说明。',
   ],
 ];
 
@@ -79,16 +79,17 @@ String _pinyin(String text) => PinyinHelper.getPinyinE(
     );
 
 const _support = <List<(String, String)>>[
-  [('Thẩm Nghiên muốn vẽ kín lộ trình, nhưng dừng trước một cánh cổng mở và giữ lại khoảng trống trên bản đồ thứ hai.', 'Shen Yan wants to fill his route map, but stops at an open gate and preserves the blank on his second map.')],
-  [('Thẩm Nghiên thấy các quy tắc cản trở việc học, rồi hiểu rằng ngay cả người sống trong cung cũng có những tuyến đường không thể tùy ý vượt qua.', 'Shen Yan first sees rules as obstacles to learning, then realizes that even people living in the palace cannot move wherever they wish.')],
-  [('Ở Ngoại triều và Nội đình, Thẩm Nghiên bắt đầu thấy kiến trúc gắn với nghi lễ, đời sống và cách con người di chuyển.', 'Across the Outer and Inner Courts, Shen Yan begins to see architecture as connected to ritual, daily life, and movement.'), ('Một cánh cổng mở đặt cậu trước lựa chọn; nhìn thấy tiểu thị dịch, cậu nhận ra những thân phận khác nhau có những con đường khác nhau và không bước qua.', 'An open gate gives him a choice; seeing the young attendant, he realizes different identities have different routes and does not cross.')],
-  [('Thẩm Nghiên quan sát sự khác biệt về quy mô giữa Ngoại triều và Nội đình, nhưng vẫn nghĩ bản đồ càng đầy thì càng hoàn chỉnh.', 'Shen Yan notices the spatial contrast between the Outer and Inner Courts, yet still thinks a fuller map means fuller understanding.'), ('Trước cánh cổng mở, cậu thấy ranh giới giữa thân phận và không gian, giữ lại khoảng trống và hiểu rằng đo đạc cũng bao gồm biết nơi nên dừng.', 'At the open gate he sees the boundary between identity and space, keeps the blank, and learns that measurement also includes knowing where to stop.')],
-  [('Thẩm Nghiên muốn chứng minh mình hiểu cung thành, nhưng dần thấy kiến trúc còn tổ chức việc tiếp cận và chờ đợi của con người.', 'Shen Yan wants to prove he understands the palace, but gradually sees that architecture also organizes approach and waiting.'), ('Cậu nhận ra mình đang biến tò mò thành một thứ quyền tự cho phép, nên không bước qua và để chữ “giới” thay đổi ý nghĩa của bản đồ thứ hai.', 'He realizes he is turning curiosity into self-granted permission, so he does not cross and lets “boundary” reshape the meaning of the second map.')],
-  [('Trục, cửa và khoảng cách của Ngoại triều và Nội đình khiến Thẩm Nghiên hiểu nghi lễ có thể được tổ chức thành trải nghiệm không gian.', 'Axis, gates, and distance across the Outer and Inner Courts show Shen Yan how ritual can be organized as spatial experience.'), ('Không ai ngăn cậu, nên lựa chọn trở thành phán đoán của chính mình. Cậu hiểu cửa vừa kết nối vừa giới hạn và vẽ lại bản đồ quanh các quan hệ ấy.', 'With no one stopping him, the choice becomes his own judgment. He learns that gates both connect and delimit, and redraws the map around those relations.')],
-  [('Thẩm Nghiên bắt đầu đọc kiến trúc qua nhịp đi, chờ, đổi hướng và dừng lại, thay vì chỉ qua hình thức và kích thước.', 'Shen Yan begins reading architecture through patterns of walking, waiting, turning, and stopping rather than only form and scale.'), ('Cậu thấy cơ hội không đồng nghĩa với lý do chính đáng để vào. Bản đồ thứ hai vì thế ghi lại cả không gian lẫn giới hạn của hành động.', 'He sees that opportunity is not the same as justification to enter. The second map therefore records both space and limits on action.')],
-  [('Thẩm Nghiên liên hệ trục, nghi lễ, đời sống cung đình, thân phận và phạm vi hành động, đồng thời phân biệt di sản mở cửa hôm nay với ranh giới lịch sử.', 'Shen Yan connects axis, ritual, court life, identity, and movement while distinguishing today’s open heritage site from historical boundaries.'), ('Cậu nhận ra việc bước qua chỉ để lấp đầy bản đồ có thể biến“hiểu”成“占有”，所以保留空白作为历史理解的一部分。', 'He realizes crossing merely to fill the map could turn understanding into possession, so he preserves the blank as part of historical understanding.')],
-  [('Ở cấp độ sâu hơn, Thẩm Nghiên đọc lễ chế qua trục, quy mô, thứ tự cổng và chuyển động của cơ thể; cậu cũng hiểu rằng đọc không gian phải bắt đầu từ việc nhận rõ vị trí của chính mình.', 'At a deeper level, Shen Yan reads ritual order through axis, scale, gate sequence, and embodied movement; he also understands that reading space begins by recognizing his own position within it.'), ('Cậu phân biệt cơ hội với tư cách, từ chối vượt ranh giới và biến khoảng trống trên bản đồ thành bằng chứng trung thực thay vì một thất bại.', 'He distinguishes opportunity from entitlement, refuses to cross, and turns the map’s blank into honest evidence rather than failure.')],
-  [('Thẩm Nghiên hiểu Tử Cấm Thành như một hệ thống nơi kiến trúc, nghi lễ, chức năng, thân phận và hành động cùng tạo nên lịch sử không gian.', 'Shen Yan comes to understand the Forbidden City as a system where architecture, ritual, function, identity, and action jointly form spatial history.'), ('Khi cánh cổng mở, cậu từ chối biến khả năng thành quyền chiếm hữu, để“界”、第二张地图和旧木尺成为他新观看方式的标记。', 'When the gate opens, he refuses to turn possibility into possession, allowing “boundary,” the second map, and the old wooden ruler to mark his new way of seeing.')],
+  [('Thẩm Nghiên và A Ninh vẽ hai tuyến khác nhau qua cùng cung thành rồi chồng chúng lên nhau tại Càn Thanh Môn.', 'Shen Yan and A Ning draw two different routes through the same palace and overlay them at the Gate of Heavenly Purity.')],
+  [('Hai tuyến đều đúng với việc mỗi người đang làm; Thẩm Nghiên giữ cả hai thay vì chọn một tuyến duy nhất.', 'Both routes are valid for what each person is doing; Shen Yan preserves both instead of choosing a single route.')],
+  [('Thẩm Nghiên xem tuyến của mình là đường chính, còn A Ninh đưa ra một lộ trình khác đến cùng điểm.', 'Shen Yan treats his route as the main line, while A Ning contributes another route to the same point.'), ('Hai người căn chỉnh hai bản vẽ tại một vị trí chung và giữ cả hai góc nhìn.', 'They align the drawings at a shared location and preserve both perspectives.')],
+  [('Hai tuyến cùng dẫn tới Càn Thanh Môn nhưng có logic di chuyển khác nhau.', 'Both routes reach the Gate of Heavenly Purity but follow different movement logics.'), ('Sự chồng tuyến cho thấy kiến trúc giống nhau có thể hỗ trợ những đường đi khác nhau theo vai trò và mục đích.', 'The overlay shows that the same architecture can support different paths according to role and purpose.')],
+  [('Trục giữa tổ chức đường học của Thẩm Nghiên, còn A Ninh mô tả một đường khác từ phía đông.', 'The central axis organizes Shen Yan’s learning route while A Ning describes another approach from the east.'), ('Thẩm Nghiên giữ hai kiểu nét và điểm giao chung thay vì biến một tuyến thành đáp án chuẩn.', 'Shen Yan keeps two line styles and a shared junction rather than turning one route into the standard answer.')],
+  [('Ngoại triều, trục giữa và Càn Thanh Môn tạo bộ khung không gian chung cho hai tuyến.', 'The Outer Court, central axis, and Gate of Heavenly Purity provide a shared spatial frame for both routes.'), ('Hai góc nhìn cục bộ hợp lại thành một bản đồ có nhiều thông tin quan hệ hơn.', 'Two valid local perspectives combine into a map with more relational information.')],
+  [('Thẩm Nghiên muốn giải thích các kết nối của cung thành chứ không chỉ vẽ một đường đi.', 'Shen Yan wants to explain palace connections rather than merely draw one path.'), ('Hai tuyến gặp nhau, tách ra và cùng được giữ lại trong một sơ đồ tổng hợp.', 'The routes meet, diverge, and are both preserved in one composite representation.')],
+  [('Thông tin chính thức về trục và sự chuyển tiếp Ngoại triều–Nội đình tạo nền kiến trúc cho hành động hư cấu.', 'Verified axis and Outer/Inner Court transition facts provide the architectural scaffold for the fictional actions.'), ('Bản đồ tổng hợp không sửa một tuyến thành sai; nó làm quan hệ giữa hai tuyến trở nên có thể đọc được.', 'The composite map does not correct one route into error; it makes the relation between two routes legible.')],
+  [('A Ninh chỉ mô tả đường mình đi hôm đó, không tuyên bố đó là tuyến lịch sử chính thức.', 'A Ning describes only the path he takes that day and does not claim it is an official historical route.'), ('Thẩm Nghiên dùng điểm chung, đoạn trùng và chỗ rẽ để biểu diễn nhiều quan hệ không gian cùng lúc.', 'Shen Yan uses shared points, overlap, and divergence to represent multiple spatial relations at once.')],
+  [('Nhiệm vụ trở thành làm cho cả kết nối kiến trúc lẫn mục đích của con người đều có thể đọc được.', 'The task becomes making both architectural connections and human purposes legible.'), ('Hai góc nhìn hợp lệ tạo thành một biểu diễn quan hệ cao hơn mà không xóa góc nhìn nào.', 'Two valid perspectives form a higher-order relational representation without erasing either one.')],
+  [('Các sự kiện về Ngọ Môn, trục giữa, Ngoại triều, Nội đình và Càn Thanh Môn được tách khỏi các tuyến nhân vật hư cấu.', 'Facts about the Meridian Gate, central axis, Outer Court, Inner Court, and Gate of Heavenly Purity are kept distinct from fictional character routes.'), ('Tại điểm chung, hai tuyến cùng hiện diện rồi phân nhánh; bản đồ cuối cùng giữ cả hai logic di chuyển.', 'At the shared node the routes coexist and then diverge; the final map preserves both movement logics.')],
 ];
 
 List<ReadingAnnotation> _storyAnnotationsForLevel(int level) {
@@ -107,59 +108,111 @@ List<ReadingAnnotation> _storyAnnotationsForLevel(int level) {
 
 const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
   ForbiddenCityWordRecord(entry: WordEntry(word: '营造学徒', pinyin: 'yíngzào xuétú', partOfSpeech: '名词', simpleChinese: '学习传统建筑营造工作的年轻学徒。', translation: 'học việc xây dựng truyền thống', englishDefinition: 'construction apprentice', symbol: '🪚'), usageNote: '主人公的职业身份。', storySource: '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。', firstAppearsAt: 1),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '宫门', pinyin: 'gōngmén', partOfSpeech: '名词', simpleChinese: '宫城或宫殿中的门。', translation: 'cổng cung điện', englishDefinition: 'palace gate', symbol: '🚪'), usageNote: '连接空间，也形成边界。', storySource: '走到一处宫门时，顾文澜和周师傅正在看记录，一道本来不该进的门忽然开了。', firstAppearsAt: 1),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '侍役', pinyin: 'shìyì', partOfSpeech: '名词', simpleChinese: '在宫廷中从事服务或杂务的人。', translation: 'người phục dịch', englishDefinition: 'attendant', symbol: '👤'), usageNote: '虚构角色，用来表现身份与路线。', storySource: '一个年幼侍役从规定的路匆匆走过。', firstAppearsAt: 1),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '门槛', pinyin: 'ménkǎn', partOfSpeech: '名词', simpleChinese: '门下方需要跨过的部分，也可表示界线。', translation: 'ngưỡng cửa', englishDefinition: 'threshold', symbol: '🚧'), usageNote: '核心选择发生的位置。', storySource: '沈砚走到门槛前，却停下了。', firstAppearsAt: 1),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '空白', pinyin: 'kòngbái', partOfSpeech: '名词', simpleChinese: '没有写、画或填入内容的地方。', translation: 'khoảng trống', englishDefinition: 'blank space', symbol: '⬜'), usageNote: '从地图缺口变成有意义的留白。', storySource: '门后正是地图上的空白，沈砚很想进去。', firstAppearsAt: 1),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '旧木尺', pinyin: 'jiù mùchǐ', partOfSpeech: '名词', simpleChinese: '周师傅使用多年的木制尺。', translation: 'thước gỗ cũ', englishDefinition: 'old wooden ruler', symbol: '📏'), usageNote: '师徒传承的奖励意象。', storySource: '周师傅把旧木尺交给他。', firstAppearsAt: 1),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '界', pinyin: 'jiè', partOfSpeech: '名词', simpleChinese: '分开不同范围的边界。', translation: 'ranh giới', englishDefinition: 'boundary', symbol: '〰️'), usageNote: '第二张地图的核心字。', storySource: '门关上后，他在第二张地图上写下“界”，留下那块空白。', firstAppearsAt: 1),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '外朝', pinyin: 'wàicháo', partOfSpeech: '名词', simpleChinese: '与重大典礼和政务活动关系密切的宫廷区域。', translation: 'Ngoại triều', englishDefinition: 'Outer Court', symbol: '🏛️'), usageNote: '与内廷形成空间功能对照。', storySource: '到了外朝，周师傅告诉他，这里的中轴和开阔庭院与重要礼仪、政务有关；走近乾清门后，空间转入更接近日常宫廷生活的内廷。', firstAppearsAt: 3),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '内廷', pinyin: 'nèitíng', partOfSpeech: '名词', simpleChinese: '与皇帝、后妃等宫廷成员生活联系更密切的区域。', translation: 'Nội đình', englishDefinition: 'Inner Court', symbol: '🏯'), usageNote: '表现宫廷生活空间。', storySource: '到了外朝，周师傅告诉他，这里的中轴和开阔庭院与重要礼仪、政务有关；走近乾清门后，空间转入更接近日常宫廷生活的内廷。', firstAppearsAt: 3),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '中轴', pinyin: 'zhōngzhóu', partOfSpeech: '名词', simpleChinese: '组织建筑群的重要中心轴线。', translation: 'trục trung tâm', englishDefinition: 'central axis', symbol: '↕️'), usageNote: '组织空间与路线。', storySource: '到了外朝，周师傅告诉他，这里的中轴和开阔庭院与重要礼仪、政务有关；走近乾清门后，空间转入更接近日常宫廷生活的内廷。', firstAppearsAt: 3),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '礼仪', pinyin: 'lǐyí', partOfSpeech: '名词', simpleChinese: '正式活动中的仪式与行为规范。', translation: 'nghi lễ', englishDefinition: 'ritual; ceremony', symbol: '📜'), usageNote: '连接外朝空间与典礼。', storySource: '到了外朝，周师傅告诉他，这里的中轴和开阔庭院与重要礼仪、政务有关；走近乾清门后，空间转入更接近日常宫廷生活的内廷。', firstAppearsAt: 3),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '身份', pinyin: 'shēnfèn', partOfSpeech: '名词', simpleChinese: '一个人在制度或社会关系中的位置。', translation: 'thân phận; địa vị', englishDefinition: 'identity; status', symbol: '🪪'), usageNote: '解释不同人物的行动范围。', storySource: '他走到门槛前，看见一个年幼侍役沿规定路线匆匆经过，突然明白同在宫中，不同身份的人也有不同的路。', firstAppearsAt: 3),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '占有', pinyin: 'zhànyǒu', partOfSpeech: '动词', simpleChinese: '把某物或某范围看成自己拥有。', translation: 'chiếm hữu', englishDefinition: 'possess; appropriate', symbol: '✋'), usageNote: '反省把求知变成占有的冲动。', storySource: '若他跨过去，地图会更满，却可能把“理解”变成对空间的占有。', firstAppearsAt: 8),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '礼制', pinyin: 'lǐzhì', partOfSpeech: '名词', simpleChinese: '由礼仪、等级和制度规范形成的体系。', translation: 'lễ chế', englishDefinition: 'ritual system', symbol: '📚'), usageNote: '说明建筑如何表达历史制度。', storySource: '轴线、庭院、宫门次序和距离共同构成礼制的空间表达，使人的接近、停留和视线都被组织起来。', firstAppearsAt: 9),
-  ForbiddenCityWordRecord(entry: WordEntry(word: '空间系统', pinyin: 'kōngjiān xìtǒng', partOfSpeech: '名词短语', simpleChinese: '由建筑、功能、边界与人的行动共同组成的空间关系整体。', translation: 'hệ thống không gian', englishDefinition: 'spatial system', symbol: '🧩'), usageNote: '最高阶的整体空间理解。', storySource: '历史中的宏伟秩序与个人限制，往往属于同一个空间系统。', firstAppearsAt: 10),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '路线图', pinyin: 'lùxiàntú', partOfSpeech: '名词', simpleChinese: '表示行走路线与连接关系的图。', translation: 'sơ đồ tuyến đường', englishDefinition: 'route map', symbol: '🗺️'), usageNote: '新故事的核心学习表示。', storySource: '他在纸上画自己从午门沿中轴走到乾清门的学习路线，觉得一张路线图应该只有一条最清楚的路。', firstAppearsAt: 1),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '侍役', pinyin: 'shìyì', partOfSpeech: '名词', simpleChinese: '故事中在宫廷空间行动的虚构服务角色。', translation: 'người phục dịch', englishDefinition: 'attendant', symbol: '👤'), usageNote: '阿宁是虚构角色，不代表官方历史路线。', storySource: '一个年幼侍役阿宁看见后说：“我的路不这样走。”', firstAppearsAt: 1),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '叠', pinyin: 'dié', partOfSpeech: '动词', simpleChinese: '把两个东西放在一起重合比较。', translation: 'chồng lên', englishDefinition: 'overlay; stack', symbol: '🗂️'), usageNote: '核心行动是把两条路线叠在一起。', storySource: '两人把两条线叠到同一张图上，用乾清门作共同位置。', firstAppearsAt: 2),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '矛盾', pinyin: 'máodùn', partOfSpeech: '名词/形容词', simpleChinese: '两个说法或现象看起来不能同时成立。', translation: 'mâu thuẫn', englishDefinition: 'contradiction', symbol: '↔️'), usageNote: '两条有效路线最初看似互相排斥。', storySource: '沈砚先觉得两张图互相矛盾：同一座宫城，怎么会有两条都正确的路？', firstAppearsAt: 2),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '外朝', pinyin: 'wàicháo', partOfSpeech: '名词', simpleChinese: '与重大典礼和政务关系密切的宫廷区域。', translation: 'Ngoại triều', englishDefinition: 'Outer Court', symbol: '🏛️'), usageNote: '官方建筑资料支持的空间功能框架。', storySource: '他把当天的学习路线画在纸上：从午门进入，沿中轴经过外朝的层层空间，再到乾清门附近。', firstAppearsAt: 3),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '参照', pinyin: 'cānzhào', partOfSpeech: '名词/动词', simpleChinese: '用来对比、定位或判断的共同依据。', translation: 'mốc tham chiếu', englishDefinition: 'reference point', symbol: '📍'), usageNote: '两张路线图通过共同位置进行比较。', storySource: '两人把纸对在一起，以乾清门前这个共同位置为参照。', firstAppearsAt: 3),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '线型', pinyin: 'xiànxíng', partOfSpeech: '名词', simpleChinese: '线条的不同样式。', translation: 'kiểu đường nét', englishDefinition: 'line style', symbol: '➖'), usageNote: '用于同时保留两条路线。', storySource: '他选择把两条线叠在同一张图上，并用不同线型保留它们。', firstAppearsAt: 3),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '节点', pinyin: 'jiédiǎn', partOfSpeech: '名词', simpleChinese: '连接多条关系或路线的重要位置。', translation: 'nút giao', englishDefinition: 'node; junction', symbol: '🔘'), usageNote: '共享节点使两条路线的关系可见。', storySource: '最后，他们在同一个空间节点分开，各走各的路。', firstAppearsAt: 4),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '中轴', pinyin: 'zhōngzhóu', partOfSpeech: '名词', simpleChinese: '组织建筑群的重要中心轴线。', translation: 'trục trung tâm', englishDefinition: 'central axis', symbol: '↕️'), usageNote: '紫禁城空间组织的重要事实。', storySource: '进入午门后，他沿中轴观察外朝，开阔庭院、层层门序与轴线让他的记录形成一条强烈的纵向路线；到乾清门附近，外朝与内廷的空间关系又让这个位置成为重要的连接点。', firstAppearsAt: 6),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '内廷', pinyin: 'nèitíng', partOfSpeech: '名词', simpleChinese: '与帝后生活联系更紧密的宫廷后部区域。', translation: 'Nội đình', englishDefinition: 'Inner Court', symbol: '🏯'), usageNote: '与外朝共同构成重要空间功能框架。', storySource: '进入午门后，他沿中轴观察外朝，开阔庭院、层层门序与轴线让他的记录形成一条强烈的纵向路线；到乾清门附近，外朝与内廷的空间关系又让这个位置成为重要的连接点。', firstAppearsAt: 6),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '局部视角', pinyin: 'júbù shìjiǎo', partOfSpeech: '名词短语', simpleChinese: '只能说明整体其中一部分的观察位置或理解方式。', translation: 'góc nhìn cục bộ', englishDefinition: 'partial perspective', symbol: '🔎'), usageNote: '两种视角都有效但都不等于全部。', storySource: '这个交会点让沈砚看清：矛盾并不一定意味着一真一假，有时是两种局部视角同时成立。', firstAppearsAt: 6),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '复合图', pinyin: 'fùhétú', partOfSpeech: '名词', simpleChinese: '把多个相关表示合在一起的图。', translation: 'sơ đồ tổng hợp', englishDefinition: 'composite map', symbol: '🧩'), usageNote: '复合图保存两种路线逻辑。', storySource: '复合图因此多出任何单张图都没有的信息：同一建筑系统能组织不同角色的移动关系。', firstAppearsAt: 6),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '校准', pinyin: 'jiàozhǔn', partOfSpeech: '动词', simpleChinese: '依据共同标准对齐位置或数值。', translation: 'căn chỉnh', englishDefinition: 'align; calibrate', symbol: '🎯'), usageNote: '两张图先对齐共同空间参照。', storySource: '他们把两张纸叠看，从共同的宫门和方向关系开始校准。', firstAppearsAt: 7),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '分岔', pinyin: 'fēnchà', partOfSpeech: '动词/名词', simpleChinese: '从共同方向分成不同方向。', translation: 'phân nhánh', englishDefinition: 'diverge; fork', symbol: '⑂'), usageNote: '共享节点后的分开是高潮信息。', storySource: '比较后，他们发现两条路线在这个重要连接节点短暂重合，随后因为角色和目的不同而分岔。', firstAppearsAt: 9),
+  ForbiddenCityWordRecord(entry: WordEntry(word: '空间骨架', pinyin: 'kōngjiān gǔjià', partOfSpeech: '名词短语', simpleChinese: '组织多个空间关系的共同基础结构。', translation: 'khung không gian', englishDefinition: 'spatial framework', symbol: '🏗️'), usageNote: '共同建筑结构与不同路径并存。', storySource: '建筑的轴线、宫门、庭院与功能分区提供共同空间骨架，不同角色则因行动目的而形成不同的合法叙事视角。', firstAppearsAt: 10),
 ];
 
-DiscoveryEntry _discovery(String text, String simpleChinese, String vietnamese, String english) => DiscoveryEntry(text: text, pinyin: _pinyin(text), simpleChinese: simpleChinese, vietnamese: vietnamese, english: english);
+DiscoveryEntry _discovery(
+  String text,
+  String simpleChinese,
+  String vietnamese,
+  String english,
+) =>
+    DiscoveryEntry(
+      text: text,
+      pinyin: _pinyin(text),
+      simpleChinese: simpleChinese,
+      vietnamese: vietnamese,
+      english: english,
+    );
 
 final forbiddenCityDiscoveries = <DiscoveryEntry>[
-  _discovery('午门是紫禁城的正门，也是南北中轴上的重要起点。进入午门后，宫门、庭院和殿宇通过连续的空间次序形成强烈方向感。今天这里是故宫博物院，也是世界文化遗产；学习历史空间时，需要把今天的参观体验与过去的宫廷使用方式区分开。', '午门是紫禁城的重要正门和中轴起点。今天它是博物院和世界文化遗产，历史上的使用方式与今天参观路线不同。', 'Ngọ Môn là chính môn quan trọng và là điểm mở đầu trên trục bắc-nam của Tử Cấm Thành. Ngày nay đây là Bảo tàng Cố Cung và Di sản Thế giới, vì vậy cần phân biệt tuyến tham quan hiện đại với cách sử dụng cung đình trong lịch sử.', 'The Meridian Gate is the principal gate and an important starting point on the Forbidden City’s north-south axis. Today the site is the Palace Museum and a World Heritage property, so modern visitor routes should be distinguished from historical court use.'),
-  _discovery('外朝与内廷是理解紫禁城空间功能的重要框架。外朝核心区域与重大典礼、政务关系密切；内廷则与皇帝、后妃等宫廷成员的生活联系更紧。乾清门附近是前后空间转换的重要节点，但历史使用并不能被理解成一条绝对、机械的分界线。', '外朝更接近重要典礼和政务，内廷更接近宫廷生活；乾清门附近是重要转换节点。', 'Ngoại triều gắn chặt với nghi lễ lớn và chính vụ, còn Nội đình gần hơn với đời sống cung đình. Khu vực gần Càn Thanh Môn là một nút chuyển tiếp quan trọng.', 'The Outer Court was closely tied to major ceremonies and state affairs, while the Inner Court was more closely connected to imperial household life. The Gate of Heavenly Purity area is an important transition.'),
-  _discovery('紫禁城的礼仪秩序不只存在于典礼举行的瞬间。中轴、院落尺度、宫门位置和接近次序会持续影响人的视线、等待与行走，因此建筑本身能够保存制度曾经如何被体验的线索。理解这种关系，不等于赞美过去的等级制度。', '中轴、院落、宫门和距离会影响人怎样走和看。理解历史不等于赞美旧等级。', 'Trật tự nghi lễ còn được lưu trong trục, quy mô sân, vị trí cổng và thứ tự tiếp cận. Hiểu mối quan hệ này không có nghĩa là ca ngợi hệ thống thứ bậc cũ.', 'Ritual order is also preserved in axis, courtyard scale, gate positions, and sequences of approach. Understanding that relationship does not mean praising historical hierarchy.'),
-  _discovery('故事中的年幼侍役是虚构人物，用来帮助学习者理解一个真实的历史问题：宫廷空间并不会以同一种方式向所有身份开放。不同职责、等级与制度位置会影响人的活动范围。今天讨论这种边界时，应把它视为理解历史社会结构的线索，而不是现代行为规范。', '侍役是虚构角色，但不同身份在历史宫廷中拥有不同活动范围这一点有真实制度背景。', 'Tiểu thị dịch là nhân vật hư cấu, nhưng sự khác biệt về phạm vi hoạt động theo thân phận có nền tảng lịch sử có thật. Đây là manh mối lịch sử, không phải chuẩn mực hiện đại.', 'The young attendant is fictional, but historically different statuses did have different ranges of movement. This is evidence for understanding historical society, not a modern behavioral rule.'),
-  _discovery('沈砚的第二张地图把“没有进入”也记录下来，这接近历史研究中的一个重要态度：证据不足时，不应为了制造完整感而随意补齐未知。建筑史、考古与文物研究都需要区分已经确认的材料、合理推测和仍然未知的部分。', '研究历史时，未知就是未知。不能为了让答案看起来完整，就把没有证据的部分补出来。', 'Bản đồ thứ hai ghi cả phần không đi vào. Trong nghiên cứu lịch sử, khi bằng chứng chưa đủ, không nên lấp phần chưa biết chỉ để tạo cảm giác hoàn chỉnh.', 'The second map records what was not entered. In historical research, insufficient evidence should not be filled merely to create a sense of completeness.'),
+  _discovery(
+    '午门是紫禁城的正门，位于紫禁城南北轴线上。门、廊庑和广场层层递进，使中轴上的接近次序成为宫城空间组织的重要部分。',
+    '午门是紫禁城正门，也在南北中轴线上。',
+    'Ngọ Môn là chính môn của Tử Cấm Thành và nằm trên trục bắc-nam.',
+    'The Meridian Gate is the principal gate of the Forbidden City and stands on its north-south axis.',
+  ),
+  _discovery(
+    '紫禁城建筑通常以外朝与内廷作为重要功能框架。外朝核心区域与重大典礼、政务关系密切；内廷后部与帝后生活联系更紧。乾清门是内廷正宫门，也是连接内廷与外朝往来的重要通道。',
+    '外朝更接近重大典礼和政务，内廷更接近宫廷生活；乾清门是重要连接通道。',
+    'Ngoại triều gắn với đại lễ và chính vụ; Nội đình gắn hơn với đời sống cung đình. Càn Thanh Môn là một lối kết nối quan trọng.',
+    'The Outer Court was closely tied to major ceremonies and state affairs, while the Inner Court was more closely tied to court life; the Gate of Heavenly Purity was an important connection between them.',
+  ),
+  _discovery(
+    '轴线、庭院尺度、宫门位置和功能分区共同组织紫禁城的空间关系。建筑因此不仅是孤立的殿宇，也是一套让方向、接近和不同用途彼此发生关系的空间结构。',
+    '轴线、庭院、宫门和功能分区一起组织空间。',
+    'Trục, sân, cổng và phân khu chức năng cùng tổ chức quan hệ không gian.',
+    'Axes, courtyards, gates, and functional zones work together to organize spatial relationships.',
+  ),
+  _discovery(
+    '今天的故宫博物院导览提供多种推荐参观路线，也按宫廷建筑功能展示不同区域。这些现代路线属于博物院参观组织，不能被直接当成明清宫廷中的官方行动路线。',
+    '今天有多种参观路线，但现代导览不能直接代表历史宫廷路线。',
+    'Ngày nay bảo tàng có nhiều tuyến tham quan, nhưng chúng không phải là tuyến chính thức của cung đình lịch sử.',
+    'The Palace Museum offers multiple visitor routes today, but modern visitor routes must not be treated as official historical court routes.',
+  ),
+  _discovery(
+    '本 Journey 中沈砚与阿宁画出的路线都是虚构的学习表示，不是历史官方地图、许可记录或制度路线。故事只借用已经核实的建筑节点与空间关系，让学习者思考：同一建筑结构怎样因角色与目的不同而产生不同的移动视角。',
+    '故事里的两条路线是虚构学习表示，不是官方历史路线。',
+    'Hai tuyến trong câu chuyện là biểu diễn học tập hư cấu, không phải tuyến lịch sử chính thức.',
+    'The two routes in the Story are fictional learning representations, not official historical routes.',
+  ),
 ];
 
 List<DiscoveryEntry> _discoveriesForLevel(int level) {
   if (level <= 2) return <DiscoveryEntry>[forbiddenCityDiscoveries[0]];
-  if (level <= 4) return <DiscoveryEntry>[forbiddenCityDiscoveries[1], forbiddenCityDiscoveries[0]];
-  if (level <= 7) return <DiscoveryEntry>[forbiddenCityDiscoveries[1], forbiddenCityDiscoveries[2]];
-  return <DiscoveryEntry>[forbiddenCityDiscoveries[3], forbiddenCityDiscoveries[4]];
+  if (level <= 4) {
+    return <DiscoveryEntry>[
+      forbiddenCityDiscoveries[0],
+      forbiddenCityDiscoveries[1],
+    ];
+  }
+  if (level <= 7) {
+    return <DiscoveryEntry>[
+      forbiddenCityDiscoveries[1],
+      forbiddenCityDiscoveries[2],
+    ];
+  }
+  return <DiscoveryEntry>[
+    forbiddenCityDiscoveries[3],
+    forbiddenCityDiscoveries[4],
+  ];
 }
 
 const forbiddenCityMemoryReviews = <ForbiddenCityMemoryReview>[
   ForbiddenCityMemoryReview(prompt: '故事的主人公是谁？', answer: '沈砚，十七岁的营造学徒。'),
-  ForbiddenCityMemoryReview(prompt: '周师傅怎样改变沈砚看建筑的方法？', answer: '他让沈砚不只看建筑形状，也观察人怎样接近、等待、转向和停下。'),
-  ForbiddenCityMemoryReview(prompt: '顾文澜在故事里承担什么作用？', answer: '她和周师傅核对记录，并在高等级版本中提醒沈砚区分历史使用方式与今天的参观视角。'),
-  ForbiddenCityMemoryReview(prompt: '年幼侍役让沈砚看见什么？', answer: '同在宫城中，不同身份和职责的人也可能拥有不同的行动范围。'),
-  ForbiddenCityMemoryReview(prompt: '一天的空间路线怎样展开？', answer: '从午门进入，沿中轴进入外朝，经乾清门附近转向内廷，再在层层宫门与院落中理解行动边界。'),
-  ForbiddenCityMemoryReview(prompt: '真正的冲突是什么？', answer: '一道通往更深宫院的门暂时打开，沈砚有机会进入一个本来不该进入的空间。'),
-  ForbiddenCityMemoryReview(prompt: '沈砚做了什么选择？', answer: '他主动停在门槛前，没有跨过去。'),
-  ForbiddenCityMemoryReview(prompt: '这个选择带来什么后果？', answer: '门后来关闭，地图仍有空白，但那块空白变得更有意义。'),
-  ForbiddenCityMemoryReview(prompt: '“界”为什么重要？', answer: '它把宫门从建筑构件变成空间、身份、职责与自我判断之间的边界。'),
-  ForbiddenCityMemoryReview(prompt: '第二张地图与第一张有什么不同？', answer: '第二张地图不再追求填满，而用中轴、空间关系、宫门和留白记录理解。'),
-  ForbiddenCityMemoryReview(prompt: '周师傅最后给沈砚什么？', answer: '一把使用多年的旧木尺。'),
+  ForbiddenCityMemoryReview(prompt: '第二个关键角色是谁？', answer: '年幼侍役阿宁；他带来一条与沈砚不同但同样有效的行动路线。'),
+  ForbiddenCityMemoryReview(prompt: '开头的矛盾是什么？', answer: '沈砚认为一张清楚的图应只有一条主路线，但阿宁从不同方向到达同一个空间节点。'),
+  ForbiddenCityMemoryReview(prompt: '为什么不能简单判定其中一条路线错误？', answer: '两条路线都来自各自真实行动，只服务于不同角色与目的。'),
+  ForbiddenCityMemoryReview(prompt: '两人怎样比较路线？', answer: '他们用共同宫门、方向和乾清门前的位置作参照，把两张图对齐。'),
+  ForbiddenCityMemoryReview(prompt: '沈砚做了什么决定？', answer: '他不用一条路线覆盖另一条，而用不同线型把两条都保留在同一张图上。'),
+  ForbiddenCityMemoryReview(prompt: '高潮怎样发生？', answer: '两条路线在共享节点短暂重合，随后因角色与目的不同而分岔。'),
+  ForbiddenCityMemoryReview(prompt: '这个选择带来什么结果？', answer: '复合图增加了共同节点、重合与分岔的关系信息，而不是留下缺口。'),
+  ForbiddenCityMemoryReview(prompt: '沈砚的空间理解怎样改变？', answer: '他从“一张图只有一条正确路线”转向理解同一建筑系统可以支持多个同时有效的角色视角。'),
   ForbiddenCityMemoryReview(prompt: 'Journey 的 Memory Anchor 是什么？', answer: forbiddenCityMemoryAnchor),
 ];
 
-const forbiddenCityJourneySummary = '沈砚第一次随周师傅进入紫禁城，从只想看更多、把地图填满，逐渐学会观察中轴、外朝与内廷、礼仪、身份和行动边界。当一道不该进入的宫门暂时打开时，他选择停在门槛前。第二张地图因此留下空白，并写下“界”。';
-const forbiddenCityAchievementName = '识界 · Read the Boundary';
-const forbiddenCityChallengeRewardName = '旧木尺 · The Old Wooden Ruler';
-const forbiddenCityChallengeRewardMeaning = '旧木尺提醒学习者：测量建筑之前，还要理解自己站在哪里，以及人与空间之间有哪些关系和边界。';
-const forbiddenCityJourneyCompletion = '那道没有跨过的门槛没有让地图残缺，反而让第二张地图第一次拥有真正的意义。那天，沈砚没有走遍紫禁城。他却第一次真正看见了紫禁城。';
+const forbiddenCityJourneySummary =
+    '沈砚想把紫禁城画成一条唯一清楚的学习路线，年幼侍役阿宁却带来另一条同样有效的走法。两人以乾清门前等共同空间参照对齐路线，发现两条线会相遇、重合并因角色与目的不同而分开。沈砚选择把两种路线都保留在复合图上，让同一宫城中的多种空间关系同时可读。';
+const forbiddenCityAchievementName = '合路 · Read the Routes';
+const forbiddenCityChallengeRewardName = '双线节点 · Shared Junction';
+const forbiddenCityChallengeRewardMeaning =
+    '双线节点提醒学习者：同一建筑结构可以成为多种行动路线的共同参照，理解空间有时需要保存并比较多个有效视角。';
+const forbiddenCityJourneyCompletion =
+    '两条路线在同一张图上相遇、重合，又从共享节点分开。沈砚与阿宁继续各自的方向，纸上没有谁覆盖谁：一张叠着两条路线的图把同一宫城中的两种移动逻辑同时留下。';
 
 List<String> validateForbiddenCityWordTrace() {
   final invalid = <String>[];
@@ -173,7 +226,9 @@ List<String> validateForbiddenCityWordTrace() {
     if (levels.isEmpty ||
         levels.first != record.firstAppearsAt ||
         !record.storySource.contains(record.entry.word) ||
-        !forbiddenCityLockedStories.any((story) => story.contains(record.storySource))) {
+        !forbiddenCityLockedStories.any(
+          (story) => story.contains(record.storySource),
+        )) {
       invalid.add(record.entry.word);
     }
   }
@@ -185,7 +240,11 @@ List<WordEntry> forbiddenCityWordsForLevel(int level) {
   final story = forbiddenCityLockedStories[safeLevel - 1];
   final maximum = <int>[5, 6, 7, 8, 9, 10, 11, 13, 14, 15][safeLevel - 1];
   return forbiddenCityWordRecords
-      .where((record) => record.firstAppearsAt <= safeLevel && story.contains(record.entry.word))
+      .where(
+        (record) =>
+            record.firstAppearsAt <= safeLevel &&
+            story.contains(record.entry.word),
+      )
       .take(maximum)
       .map((record) => record.entry)
       .toList(growable: false);
@@ -193,23 +252,33 @@ List<WordEntry> forbiddenCityWordsForLevel(int level) {
 
 List<String> forbiddenCityStoryReadingSegments(String story, int level) {
   final safeLevel = level.clamp(1, 10).toInt();
-  final paragraphs = story.split('\n\n').map((item) => item.trim()).where((item) => item.isNotEmpty).toList(growable: false);
+  final paragraphs = story
+      .split('\n\n')
+      .map((item) => item.trim())
+      .where((item) => item.isNotEmpty)
+      .toList(growable: false);
   final expected = safeLevel <= 2 ? 1 : 2;
   if (paragraphs.length != expected) {
-    throw StateError('Forbidden City Lv.$safeLevel must contain exactly $expected Story paragraph(s).');
+    throw StateError(
+      'Forbidden City Lv.$safeLevel must contain exactly $expected Story paragraph(s).',
+    );
   }
   return paragraphs;
 }
 
 JourneyLevelContent forbiddenCityLevelContent(int level) {
   final safeLevel = level.clamp(1, 10).toInt();
-  final paragraphs = List<String>.unmodifiable(forbiddenCityStoryParagraphsByLevel[safeLevel - 1]);
+  final paragraphs = List<String>.unmodifiable(
+    forbiddenCityStoryParagraphsByLevel[safeLevel - 1],
+  );
   return JourneyLevelContent(
     storyParagraphs: paragraphs,
     storyAnnotations: _storyAnnotationsForLevel(safeLevel),
     words: forbiddenCityWordsForLevel(safeLevel),
     discoveries: _discoveriesForLevel(safeLevel),
-    wonderQuestion: '沈砚在 Lv.$safeLevel 为什么没有跨过那道门槛？',
-    expressQuestion: '请用 Lv.$safeLevel 的语言说明“界”怎样改变了第二张地图的意义。',
+    wonderQuestion:
+        '沈砚和阿宁在 Lv.$safeLevel 为什么能拥有两条不同却同时有效的路线？',
+    expressQuestion:
+        '请用 Lv.$safeLevel 的语言说明两条路线叠在一起后，多出了什么空间关系信息。',
   );
 }
