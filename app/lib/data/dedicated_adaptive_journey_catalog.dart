@@ -5,6 +5,7 @@ const dedicatedAdaptiveJourneyIds = <String>{
   'xian-city-wall',
   'hangzhou-west-lake',
   'chengdu-kuanzhai-alley',
+  'nanjing-qinhuai-river',
 };
 
 bool usesDedicatedAdaptiveJourneyRuntime(String journeyId) =>
