@@ -117,10 +117,34 @@ class _PassportMapState extends State<_PassportMap> {
   _PassportMapLevel _level = _PassportMapLevel.continent;
   String? _selectedProvinceId;
   String? _selectedCityId;
+  late final TransformationController _mapTransformationController;
 
   AppState get state => widget.state;
 
+  @override
+  void initState() {
+    super.initState();
+    _mapTransformationController = TransformationController();
+  }
+
+  @override
+  void dispose() {
+    _mapTransformationController.dispose();
+    super.dispose();
+  }
+
+  void _resetMapTransform() {
+    _mapTransformationController.value = Matrix4.identity();
+  }
+
+  void _restoreCanonicalTransformAtBaseScale(ScaleEndDetails details) {
+    if (_mapTransformationController.value.getMaxScaleOnAxis() <= 1.0001) {
+      _resetMapTransform();
+    }
+  }
+
   void _selectContinent(String continentId) {
+    _resetMapTransform();
     setState(() {
       _continentId = continentId;
       _level = _PassportMapLevel.continent;
@@ -130,6 +154,7 @@ class _PassportMapState extends State<_PassportMap> {
   }
 
   void _selectChina() {
+    _resetMapTransform();
     setState(() {
       _level = _PassportMapLevel.country;
       _selectedProvinceId = null;
@@ -139,6 +164,7 @@ class _PassportMapState extends State<_PassportMap> {
 
   void _selectProvince(String provinceId) {
     final province = requireJourneyProvince(provinceId);
+    _resetMapTransform();
     setState(() {
       _selectedProvinceId = provinceId;
       if (province.isMunicipality) {
@@ -152,6 +178,7 @@ class _PassportMapState extends State<_PassportMap> {
   }
 
   void _selectCity(String cityId) {
+    _resetMapTransform();
     setState(() {
       _level = _PassportMapLevel.city;
       _selectedCityId = cityId;
@@ -159,6 +186,7 @@ class _PassportMapState extends State<_PassportMap> {
   }
 
   void _goBack() {
+    _resetMapTransform();
     setState(() {
       if (_level == _PassportMapLevel.city) {
         final province = requireJourneyProvince(_selectedProvinceId!);
@@ -268,123 +296,140 @@ class _PassportMapState extends State<_PassportMap> {
             : _continentId == 'asia'
                 ? 'assets/images/maps/east-asia-flight-relief-v2.webp'
                 : 'assets/images/maps/world-flight-atlas-v1.webp';
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: InteractiveViewer(
-            key: const ValueKey('passport-pinch-zoom-map'),
-            minScale: .85,
-            maxScale: 4,
-            boundaryMargin: const EdgeInsets.all(90),
-            panEnabled: true,
-            scaleEnabled: true,
+        final mapFit = showChinaMap ? BoxFit.contain : BoxFit.cover;
+        return SizedBox.fromSize(
+          key: const ValueKey('passport-map-viewport'),
+          size: mapSize,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
             clipBehavior: Clip.hardEdge,
-            child: SizedBox.fromSize(
-              size: mapSize,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned.fill(
-                    child: ColoredBox(
-                      color: const Color(0xFFE8D7AF),
-                      child: ColorFiltered(
-                        colorFilter: const ColorFilter.matrix(<double>[
-                          1.28, -.08, -.08, 0, -4,
-                          -.08, 1.28, -.08, 0, -4,
-                          -.08, -.08, 1.28, 0, -4,
-                          0, 0, 0, 1, 0,
-                        ]),
-                        child: Image.asset(
-                          mapAsset,
-                          key: const ValueKey('passport-hd-atlas-image'),
-                          fit: BoxFit.contain,
-                          alignment: Alignment.center,
-                          filterQuality: FilterQuality.high,
-                          gaplessPlayback: true,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                          center: Alignment(.18, -.20),
-                          radius: 1.12,
-                          colors: [
-                            Color(0x00FFF8E8),
-                            Color(0x120D4A45),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (selectedCity != null) ...[
-                    _CityMarkerLeader(
-                      placement: markerPlacements[selectedCity.id]!,
-                      earned: selectedCity.destinations.any(
-                        (journey) => state.isJourneyStampEarned(journey.id),
-                      ),
-                    ),
-                    _CityMapMarker(
-                      state: state,
-                      city: selectedCity,
-                      placement: markerPlacements[selectedCity.id]!,
-                    ),
-                  ],
-                  if (_level == _PassportMapLevel.continent)
-                    Center(
-                      child: _MapLevelCaption(
-                        title: _continentId == 'asia'
-                            ? state.displayText('亚洲')
-                            : state.displayText('目的地即将开放'),
-                        subtitle: _continentId == 'asia'
-                            ? state.displayText('请从左侧选择国家')
-                            : state.displayText('请选择其他洲继续探索'),
-                      ),
-                    )
-                  else if (_level == _PassportMapLevel.country)
-                    Center(
-                      child: _MapLevelCaption(
-                        title: state.displayText('中国'),
-                        subtitle: state.displayText('请从左侧选择省份'),
-                      ),
-                    )
-                  else if (_level == _PassportMapLevel.province)
-                    Center(
-                      child: _MapLevelCaption(
-                        title: state.displayText(
-                          requireJourneyProvince(_selectedProvinceId!).name,
-                        ),
-                        subtitle: state.displayText('请从左侧选择城市'),
-                      ),
-                    ),
-                  Positioned(
-                    left: 9,
-                    bottom: 9,
-                    child: IgnorePointer(
-                      child: Container(
-                        key: const ValueKey('passport-pinch-hint'),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xD92A2019),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          state.displayText('双指缩放 · 拖动地图'),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 8.5,
-                            fontWeight: FontWeight.w800,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                InteractiveViewer(
+                  key: const ValueKey('passport-pinch-zoom-map'),
+                  transformationController: _mapTransformationController,
+                  minScale: 1,
+                  maxScale: 4,
+                  boundaryMargin: EdgeInsets.zero,
+                  panEnabled: true,
+                  scaleEnabled: true,
+                  onInteractionEnd: _restoreCanonicalTransformAtBaseScale,
+                  clipBehavior: Clip.hardEdge,
+                  child: SizedBox.fromSize(
+                    key: const ValueKey('passport-map-content'),
+                    size: mapSize,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned.fill(
+                          child: ColoredBox(
+                            color: const Color(0xFFE8D7AF),
+                            child: ColorFiltered(
+                              colorFilter: const ColorFilter.matrix(<double>[
+                                1.28, -.08, -.08, 0, -4,
+                                -.08, 1.28, -.08, 0, -4,
+                                -.08, -.08, 1.28, 0, -4,
+                                0, 0, 0, 1, 0,
+                              ]),
+                              child: Image.asset(
+                                mapAsset,
+                                key: const ValueKey(
+                                  'passport-hd-atlas-image',
+                                ),
+                                fit: mapFit,
+                                alignment: Alignment.center,
+                                filterQuality: FilterQuality.high,
+                                gaplessPlayback: true,
+                              ),
+                            ),
                           ),
                         ),
+                        const Positioned.fill(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: RadialGradient(
+                                center: Alignment(.18, -.20),
+                                radius: 1.12,
+                                colors: [
+                                  Color(0x00FFF8E8),
+                                  Color(0x120D4A45),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (selectedCity != null) ...[
+                          _CityMarkerLeader(
+                            placement: markerPlacements[selectedCity.id]!,
+                            earned: selectedCity.destinations.any(
+                              (journey) =>
+                                  state.isJourneyStampEarned(journey.id),
+                            ),
+                          ),
+                          _CityMapMarker(
+                            state: state,
+                            city: selectedCity,
+                            placement: markerPlacements[selectedCity.id]!,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                if (_level == _PassportMapLevel.continent)
+                  Center(
+                    child: _MapLevelCaption(
+                      title: _continentId == 'asia'
+                          ? state.displayText('亚洲')
+                          : state.displayText('目的地即将开放'),
+                      subtitle: _continentId == 'asia'
+                          ? state.displayText('请从左侧选择国家')
+                          : state.displayText('请选择其他洲继续探索'),
+                    ),
+                  )
+                else if (_level == _PassportMapLevel.country)
+                  Center(
+                    child: _MapLevelCaption(
+                      title: state.displayText('中国'),
+                      subtitle: state.displayText('请从左侧选择省份'),
+                    ),
+                  )
+                else if (_level == _PassportMapLevel.province)
+                  Center(
+                    child: _MapLevelCaption(
+                      title: state.displayText(
+                        requireJourneyProvince(_selectedProvinceId!).name,
+                      ),
+                      subtitle: state.displayText('请从左侧选择城市'),
+                    ),
+                  ),
+                Positioned(
+                  left: 9,
+                  bottom: 9,
+                  child: IgnorePointer(
+                    child: Container(
+                      key: const ValueKey('passport-pinch-hint'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xD92A2019),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        state.displayText('双指缩放查看地图'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 8.5,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
