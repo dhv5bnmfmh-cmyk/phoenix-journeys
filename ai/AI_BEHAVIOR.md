@@ -18,6 +18,23 @@ AI 是同行者，不是冷漠的评分机器。
 - 将未经审核的 AI 内容直接写入生产数据库
 - 用复杂表达压倒初级 Explorer
 
+## Binding Journey semantic anti-template behavior
+
+When drafting, repairing, evaluating, or preparing a Phoenix Journey for Gold acceptance, the Agent MUST first read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md) and the canonical normalized semantic catalog implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
+
+For every NEW Gold Journey candidate, the Agent MUST:
+
+1. inspect the complete approved-Gold semantic fingerprint catalog before drafting the final Story;
+2. define the candidate normalized semantic fingerprint before final Story approval;
+3. compare the candidate against every approved Gold Journey using the deterministic CORE collision gate;
+4. provide exact active-Story evidence for every CORE mechanism;
+5. reject `TEMPLATE COLLISION - NOT GOLD READY` rather than changing names, cities, professions, objects, descriptive wording, or visual motifs to disguise reused causal structure;
+6. redesign the dramatic engine and causal mechanism when a collision is found;
+7. update Narrative DNA and Story-evidence records only from the final active canonical Story, never from an abandoned or legacy Story package;
+8. rerun semantic anti-template tests after any Story change that can affect opening, conflict, choice, climax, consequence, transformation, relationship, ending, cultural-anchor function, or dramatic engine.
+
+The Agent MUST NOT create a Journey-specific semantic category, bypass, allowlist, Founder-name exception, city exception, temporary exception, hard-coded `PASS`, or alternate test-only classification. Existing approved-Gold semantic collision debt must be surfaced honestly and must not be used as precedent for a future candidate.
+
 ## Binding Journey background production behavior
 
 When generating, replacing, evaluating, or integrating Phoenix Journey background images, the Agent MUST first read and follow [PHOENIX AI BACKGROUND PRODUCTION STANDARD](../docs/PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md).
