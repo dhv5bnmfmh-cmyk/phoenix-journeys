@@ -203,21 +203,21 @@ final chengduKuanzhaiOnePassWords = List<WordEntry>.unmodifiable([
 ]);
 
 final chengduKuanzhaiWordTraces = List<RemediatedWordTrace>.unmodifiable([
-  RemediatedWordTrace(word: '使用痕迹', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
-  RemediatedWordTrace(word: '宽窄巷子', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
-  RemediatedWordTrace(word: '调查表', eventId: 'CD-E1-survey', usage: 'Lv2 首次出现。', sourceText: '她原本相信，商业活动越多，历史真实性就越弱，所以刚到宽巷子，便在调查表的“影响历史真实性”一栏写下“商业活动”。'),
-  RemediatedWordTrace(word: '历史真实性', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
-  RemediatedWordTrace(word: '商业活动', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
-  RemediatedWordTrace(word: '青砖', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
-  RemediatedWordTrace(word: '门槛', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
-  RemediatedWordTrace(word: '院落', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
-  RemediatedWordTrace(word: '茶桌', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
-  RemediatedWordTrace(word: '仍在使用', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '林夏把“商业活动”四个字轻轻划掉，在旁边写：“仍在使用。”'),
-  RemediatedWordTrace(word: '井巷子', eventId: 'CD-E1-survey', usage: 'Lv2 首次出现。', sourceText: '她仔细看青砖、木门、院落和被踩亮的门槛，又走过窄巷子和井巷子，记录茶馆、餐厅、小店、椅子与不断变化的人流。'),
-  RemediatedWordTrace(word: '茶馆', eventId: 'CD-E1-survey', usage: 'Lv2 首次出现。', sourceText: '她仔细看青砖、木门、院落和被踩亮的门槛，又走过窄巷子和井巷子，记录茶馆、餐厅、小店、椅子与不断变化的人流。'),
-  RemediatedWordTrace(word: '街巷肌理', eventId: 'CD-E3-observe', usage: 'Lv7 首次出现。', sourceText: '宽巷子、窄巷子和井巷子组成街区核心，院落与街巷肌理保存下来，同时又有茶馆、餐饮、零售和不断流动的访客。'),
-  RemediatedWordTrace(word: '砖木建筑', eventId: 'CD-E3-observe', usage: 'Lv9 首次出现。', sourceText: '宽巷子、窄巷子和井巷子构成街区核心的三条街巷，院落与砖木建筑保留了历史空间特征；保护更新后又长期容纳餐饮、茶文化、零售、休闲与访客。'),
-  RemediatedWordTrace(word: '保护更新', eventId: 'CD-E3-observe', usage: 'Lv8 首次出现。', sourceText: '宽巷子、窄巷子、井巷子三条核心街巷与院落保留着历史空间特征，保护更新后又持续承载餐饮、茶文化、零售和公共游逛。')
+  const RemediatedWordTrace(word: '使用痕迹', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
+  const RemediatedWordTrace(word: '宽窄巷子', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
+  const RemediatedWordTrace(word: '调查表', eventId: 'CD-E1-survey', usage: 'Lv2 首次出现。', sourceText: '她原本相信，商业活动越多，历史真实性就越弱，所以刚到宽巷子，便在调查表的“影响历史真实性”一栏写下“商业活动”。'),
+  const RemediatedWordTrace(word: '历史真实性', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
+  const RemediatedWordTrace(word: '商业活动', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
+  const RemediatedWordTrace(word: '青砖', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
+  const RemediatedWordTrace(word: '门槛', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
+  const RemediatedWordTrace(word: '院落', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
+  const RemediatedWordTrace(word: '茶桌', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
+  const RemediatedWordTrace(word: '仍在使用', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '林夏把“商业活动”四个字轻轻划掉，在旁边写：“仍在使用。”'),
+  const RemediatedWordTrace(word: '井巷子', eventId: 'CD-E1-survey', usage: 'Lv2 首次出现。', sourceText: '她仔细看青砖、木门、院落和被踩亮的门槛，又走过窄巷子和井巷子，记录茶馆、餐厅、小店、椅子与不断变化的人流。'),
+  const RemediatedWordTrace(word: '茶馆', eventId: 'CD-E1-survey', usage: 'Lv2 首次出现。', sourceText: '她仔细看青砖、木门、院落和被踩亮的门槛，又走过窄巷子和井巷子，记录茶馆、餐厅、小店、椅子与不断变化的人流。'),
+  const RemediatedWordTrace(word: '街巷肌理', eventId: 'CD-E3-observe', usage: 'Lv7 首次出现。', sourceText: '宽巷子、窄巷子和井巷子组成街区核心，院落与街巷肌理保存下来，同时又有茶馆、餐饮、零售和不断流动的访客。'),
+  const RemediatedWordTrace(word: '砖木建筑', eventId: 'CD-E3-observe', usage: 'Lv9 首次出现。', sourceText: '宽巷子、窄巷子和井巷子构成街区核心的三条街巷，院落与砖木建筑保留了历史空间特征；保护更新后又长期容纳餐饮、茶文化、零售、休闲与访客。'),
+  const RemediatedWordTrace(word: '保护更新', eventId: 'CD-E3-observe', usage: 'Lv8 首次出现。', sourceText: '宽巷子、窄巷子、井巷子三条核心街巷与院落保留着历史空间特征，保护更新后又持续承载餐饮、茶文化、零售和公共游逛。')
 ]);
 
 const chengduKuanzhaiWordFirstAppears = <String, int>{'使用痕迹': 1, '宽窄巷子': 1, '调查表': 2, '历史真实性': 1, '商业活动': 1, '青砖': 1, '门槛': 1, '院落': 1, '茶桌': 1, '仍在使用': 1, '井巷子': 2, '茶馆': 2, '街巷肌理': 7, '砖木建筑': 9, '保护更新': 8};
