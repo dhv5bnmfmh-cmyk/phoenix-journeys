@@ -133,7 +133,18 @@ class _PassportMapState extends State<_PassportMap> {
     super.dispose();
   }
 
+  void _resetMapTransform() {
+    _mapTransformationController.value = Matrix4.identity();
+  }
+
+  void _restoreCanonicalTransformAtBaseScale(ScaleEndDetails details) {
+    if (_mapTransformationController.value.getMaxScaleOnAxis() <= 1.0001) {
+      _resetMapTransform();
+    }
+  }
+
   void _selectContinent(String continentId) {
+    _resetMapTransform();
     setState(() {
       _continentId = continentId;
       _level = _PassportMapLevel.continent;
@@ -143,6 +154,7 @@ class _PassportMapState extends State<_PassportMap> {
   }
 
   void _selectChina() {
+    _resetMapTransform();
     setState(() {
       _level = _PassportMapLevel.country;
       _selectedProvinceId = null;
@@ -152,6 +164,7 @@ class _PassportMapState extends State<_PassportMap> {
 
   void _selectProvince(String provinceId) {
     final province = requireJourneyProvince(provinceId);
+    _resetMapTransform();
     setState(() {
       _selectedProvinceId = provinceId;
       if (province.isMunicipality) {
@@ -165,6 +178,7 @@ class _PassportMapState extends State<_PassportMap> {
   }
 
   void _selectCity(String cityId) {
+    _resetMapTransform();
     setState(() {
       _level = _PassportMapLevel.city;
       _selectedCityId = cityId;
@@ -172,6 +186,7 @@ class _PassportMapState extends State<_PassportMap> {
   }
 
   void _goBack() {
+    _resetMapTransform();
     setState(() {
       if (_level == _PassportMapLevel.city) {
         final province = requireJourneyProvince(_selectedProvinceId!);
@@ -281,6 +296,7 @@ class _PassportMapState extends State<_PassportMap> {
             : _continentId == 'asia'
                 ? 'assets/images/maps/east-asia-flight-relief-v2.webp'
                 : 'assets/images/maps/world-flight-atlas-v1.webp';
+        final mapFit = showChinaMap ? BoxFit.contain : BoxFit.cover;
         return SizedBox.fromSize(
           key: const ValueKey('passport-map-viewport'),
           size: mapSize,
@@ -293,11 +309,12 @@ class _PassportMapState extends State<_PassportMap> {
                 InteractiveViewer(
                   key: const ValueKey('passport-pinch-zoom-map'),
                   transformationController: _mapTransformationController,
-                  minScale: .85,
+                  minScale: 1,
                   maxScale: 4,
-                  boundaryMargin: const EdgeInsets.all(90),
+                  boundaryMargin: EdgeInsets.zero,
                   panEnabled: true,
                   scaleEnabled: true,
+                  onInteractionEnd: _restoreCanonicalTransformAtBaseScale,
                   clipBehavior: Clip.hardEdge,
                   child: SizedBox.fromSize(
                     key: const ValueKey('passport-map-content'),
@@ -320,7 +337,7 @@ class _PassportMapState extends State<_PassportMap> {
                                 key: const ValueKey(
                                   'passport-hd-atlas-image',
                                 ),
-                                fit: BoxFit.contain,
+                                fit: mapFit,
                                 alignment: Alignment.center,
                                 filterQuality: FilterQuality.high,
                                 gaplessPlayback: true,
@@ -402,7 +419,7 @@ class _PassportMapState extends State<_PassportMap> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        state.displayText('双指缩放 · 拖动地图'),
+                        state.displayText('双指缩放查看地图'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 8.5,
