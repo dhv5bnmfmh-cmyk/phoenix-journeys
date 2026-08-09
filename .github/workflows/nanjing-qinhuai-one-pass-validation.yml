@@ -52,6 +52,7 @@ jobs:
           flutter test test/nanjing_qinhuai_one_pass_gate_test.dart --reporter expanded
           flutter test test/nanjing_qinhuai_source_claim_guard_test.dart --reporter expanded
           flutter test test/nanjing_legacy_fallback_gate_test.dart --reporter expanded
+          flutter test test/nanjing_narrative_dna_registry_test.dart --reporter expanded
           flutter test test/adaptive_story_quality_test.dart --reporter expanded
           flutter test test/narrative_quality_shaper_test.dart --reporter expanded
           flutter test test/journey_content_quality_auditor_test.dart --reporter expanded
