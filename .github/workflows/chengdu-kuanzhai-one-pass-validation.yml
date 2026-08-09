@@ -56,6 +56,14 @@ jobs:
           flutter test test/journey_content_quality_auditor_test.dart --reporter expanded
           flutter test test/phoenix_journey_content_quality_agent_test.dart --reporter expanded
 
+      - name: Words exact trace validation
+        working-directory: app
+        run: flutter test test/chengdu_kuanzhai_one_pass_gate_test.dart --plain-name "Words have exact Story trace and truthful first appearance" --reporter expanded
+
+      - name: Legacy Chengdu fallback absence
+        working-directory: app
+        run: flutter test test/chengdu_legacy_fallback_gate_test.dart --reporter expanded
+
       - name: Narrative Uniqueness Gate
         working-directory: app
         run: flutter test test/chengdu_kuanzhai_one_pass_gate_test.dart --plain-name "Narrative Difference Matrix covers six Gold Journeys and Chengdu is unique" --reporter expanded
