@@ -1,13 +1,13 @@
 # Phoenix Approved Gold Semantic Audit
 
 **Status:** DETERMINISTIC AUDIT RECORD  
-**Catalog scope:** the seven approved Gold Journeys present when the semantic anti-template gate was introduced  
+**Catalog scope:** seven approved Gold Journeys  
 **Source of truth:** `app/lib/data/journey_semantic_fingerprint_catalog.dart`  
 **Pair count:** 21 unique pairs
 
 This document records the deterministic output of the normalized semantic fingerprint catalog. It does not override the catalog. If a fingerprint changes, regenerate/review this audit from the canonical registry and active Story evidence.
 
-Collision thresholds are binding in [Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md):
+Collision thresholds remain binding and unchanged:
 
 - **Rule A:** same dramatic engine + at least 3 additional CORE matches.
 - **Rule B:** at least 4 CORE matches, even when dramatic-engine labels differ.
@@ -16,25 +16,23 @@ Collision thresholds are binding in [Phoenix Narrative and Discovery Standard](P
 
 ## Evidence status meaning
 
-`VERIFIED` in the Story evidence column means the registered CORE evidence contract has valid active-Story provenance, aligned dimension/mechanism metadata, and a non-empty semantic rationale. It does **not** mean CI independently understands or proves the natural-language semantic classification. Semantic sufficiency is reviewed by auditing the cited active-Story spans together with the causal rationale under the binding standard.
-
-The evidence re-audit for this catalog strengthened weak single-span records, including relationship geometry, cultural-anchor function, transformation, and dramatic-engine evidence. It did not change any semantic family, Rule A, Rule B, or pair classification.
+`VERIFIED` means the registered CORE evidence contract has valid active-Story provenance, aligned dimension/mechanism metadata, and a non-empty semantic rationale. It does **not** mean CI independently understands or proves natural-language semantic classification. Semantic sufficiency remains a Founder/Agent review of cited active-Story spans plus causal rationale.
 
 ## Pairwise audit
 
 | # | Journey A | Journey B | Same engine | Matching CORE dimensions | CORE count | Matching secondary dimensions | Story evidence | Classification | Notes |
 |---:|---|---|---|---|---:|---|---|---|---|
-| 1 | beijing-summer-palace | beijing-forbidden-city | NO | none | 0 | none | VERIFIED | DISTINCT | Both concern judgment and heritage traces, but Summer uses a forced creative tradeoff; Forbidden uses responsible refusal of available access. |
+| 1 | beijing-summer-palace | beijing-forbidden-city | NO | none | 0 | none | VERIFIED | DISTINCT | Forced creative/relational tradeoff vs synthesis of two simultaneously valid route perspectives. |
 | 2 | beijing-summer-palace | shanghai-bund | NO | none | 0 | none | VERIFIED | DISTINCT | Creative authorship/recovered photograph vs intergenerational continuity through a river crossing. |
 | 3 | beijing-summer-palace | xian-city-wall | NO | none | 0 | none | VERIFIED | DISTINCT | Forced photographic tradeoff vs completed closed circuit becoming open continuation. |
-| 4 | beijing-summer-palace | hangzhou-west-lake | NO | none | 0 | none | VERIFIED | DISTINCT | Both create records, but Summer's causal pivot is a forced relational tradeoff; Hangzhou is evidence-driven reclassification. |
-| 5 | beijing-summer-palace | chengdu-kuanzhai-alley | NO | none | 0 | none | VERIFIED | DISTINCT | Creative tradeoff and inherited photograph vs field-survey reclassification. |
-| 6 | beijing-summer-palace | nanjing-qinhuai-river | NO | none | 0 | none | VERIFIED | DISTINCT | Both sacrifice an ideal result and alter a senior relationship, but the CORE causal mechanisms differ: rescue/recomposition vs refusal of an unsafe/unapproved shortcut. |
-| 7 | beijing-forbidden-city | shanghai-bund | NO | none | 0 | none | VERIFIED | DISTINCT | Boundary restraint vs carried-document continuity through crossing. |
-| 8 | beijing-forbidden-city | xian-city-wall | NO | none | 0 | none | VERIFIED | DISTINCT | Deliberate non-crossing/blank vs deliberate continuation beyond a completed circuit. |
-| 9 | beijing-forbidden-city | hangzhou-west-lake | NO | none | 0 | none | VERIFIED | DISTINCT | Responsible refusal vs evidence-driven authenticity reclassification. |
-| 10 | beijing-forbidden-city | chengdu-kuanzhai-alley | NO | none | 0 | none | VERIFIED | DISTINCT | Responsible refusal vs evidence-driven authenticity reclassification. |
-| 11 | beijing-forbidden-city | nanjing-qinhuai-river | YES | conflict, choice, consequence, transformation, ending, dramatic engine | 6 | none | VERIFIED | EXISTING_SEMANTIC_COLLISION_DEBT | Both pursue completion, encounter an available but irresponsible shortcut/boundary crossing, refuse it, retain visible incompletion, move from completion-drive to restraint, and end with senior trust/responsibility transfer. Opening, climax form, relationship subtype, and cultural-anchor subtype remain different but do not erase the CORE collision. |
+| 4 | beijing-summer-palace | hangzhou-west-lake | NO | none | 0 | none | VERIFIED | DISTINCT | Forced relational tradeoff vs evidence-driven reclassification. |
+| 5 | beijing-summer-palace | chengdu-kuanzhai-alley | NO | none | 0 | none | VERIFIED | DISTINCT | Creative tradeoff/inherited photograph vs field-survey reclassification. |
+| 6 | beijing-summer-palace | nanjing-qinhuai-river | NO | none | 0 | none | VERIFIED | DISTINCT | Rescue/recomposition vs refusal of an unsafe/unapproved shortcut. |
+| 7 | beijing-forbidden-city | shanghai-bund | NO | none | 0 | none | VERIFIED | DISTINCT | Comparative route synthesis vs carried-document continuity through one-way crossing. |
+| 8 | beijing-forbidden-city | xian-city-wall | NO | none | 0 | none | VERIFIED | DISTINCT | Shared-node overlay/divergence vs completion of a closed circuit followed by onward continuation. |
+| 9 | beijing-forbidden-city | hangzhou-west-lake | NO | none | 0 | none | VERIFIED | DISTINCT | Two valid perspectives are retained; Hangzhou replaces a purity model after contradictory field evidence. |
+| 10 | beijing-forbidden-city | chengdu-kuanzhai-alley | NO | none | 0 | none | VERIFIED | DISTINCT | Composite preservation of two valid routes vs evidence-driven authenticity reclassification. |
+| 11 | beijing-forbidden-city | nanjing-qinhuai-river | NO | none | 0 | none | VERIFIED | DISTINCT | Forbidden now aligns and preserves two valid routes to reveal relational spatial information; Nanjing remains responsible refusal of an unsafe/unapproved shortcut with visible incompletion and responsibility transfer. |
 | 12 | shanghai-bund | xian-city-wall | NO | none | 0 | none | VERIFIED | DISTINCT | One-way river crossing reframes historical continuity; closed wall circuit becomes an onward home route. |
 | 13 | shanghai-bund | hangzhou-west-lake | NO | none | 0 | none | VERIFIED | DISTINCT | Intergenerational carried-object continuity vs evidence-driven field-recording reclassification. |
 | 14 | shanghai-bund | chengdu-kuanzhai-alley | NO | none | 0 | none | VERIFIED | DISTINCT | Intergenerational carried-object continuity vs evidence-driven survey reclassification. |
@@ -42,7 +40,7 @@ The evidence re-audit for this catalog strengthened weak single-span records, in
 | 16 | xian-city-wall | hangzhou-west-lake | NO | none | 0 | none | VERIFIED | DISTINCT | Open continuation after a completed circuit vs evidence-driven reclassification. |
 | 17 | xian-city-wall | chengdu-kuanzhai-alley | NO | none | 0 | none | VERIFIED | DISTINCT | Belonging through continuation vs evidence-driven preservation-model revision. |
 | 18 | xian-city-wall | nanjing-qinhuai-river | NO | none | 0 | none | VERIFIED | DISTINCT | Self-declared farewell completion becomes continuation vs deadline refusal with visible operational incompletion. |
-| 19 | hangzhou-west-lake | chengdu-kuanzhai-alley | YES | relationship geometry, conflict, choice, climax, consequence, transformation, ending, dramatic engine | 8 | supporting-character function | VERIFIED | EXISTING_SEMANTIC_COLLISION_DEBT | Both begin fieldwork with a purity/authenticity model, lived evidence contradicts that model, the protagonist stops filtering evidence, enacts reclassification in a record/artifact, retains the changed evidence, and ends with a revised record preserving changed understanding. |
+| 19 | hangzhou-west-lake | chengdu-kuanzhai-alley | YES | relationship geometry, conflict, choice, climax, consequence, transformation, ending, dramatic engine | 8 | supporting-character function | VERIFIED | EXISTING_SEMANTIC_COLLISION_DEBT | Both begin fieldwork with a purity/authenticity model, lived evidence contradicts it, the protagonist stops filtering evidence, enacts reclassification in a record/artifact, retains the changed evidence, and ends with a revised record preserving changed understanding. |
 | 20 | hangzhou-west-lake | nanjing-qinhuai-river | NO | none | 0 | none | VERIFIED | DISTINCT | Evidence-driven soundscape reclassification vs operational shortcut refusal. |
 | 21 | chengdu-kuanzhai-alley | nanjing-qinhuai-river | NO | none | 0 | none | VERIFIED | DISTINCT | Evidence-driven survey reclassification vs operational shortcut refusal. |
 
@@ -50,13 +48,13 @@ The evidence re-audit for this catalog strengthened weak single-span records, in
 
 ### Forbidden City vs Nanjing Qinhuai
 
-**Result:** `EXISTING_SEMANTIC_COLLISION_DEBT`  
-**CORE matches:** conflict, choice, consequence, transformation, ending, dramatic engine (6).  
-**Same dramatic engine:** YES.  
-**Rule A:** COLLISION.  
-**Rule B:** COLLISION.
+**Result:** `DISTINCT`  
+**CORE matches:** none (0).  
+**Same dramatic engine:** NO.  
+**Rule A:** NOT TRIGGERED.  
+**Rule B:** NOT TRIGGERED.
 
-The normalized classification is supported by active Story evidence plus causal rationales. Different professional settings, objects, timing, landmarks, and descriptive strings do not remove the shared causal mechanism.
+The previous six-CORE debt is removed by active Story remediation, not taxonomy renaming. Forbidden City no longer uses completion-vs-boundary conflict, shortcut refusal, intentional visible incompletion, completion-drive-to-restraint transformation, or mentor responsibility transfer. Its causal engine now requires two simultaneously valid partial route perspectives, comparison/alignment, enacted preservation through overlay, a shared-node overlap/divergence discovery, and a composite representation containing more relational information than either input alone.
 
 ### Hangzhou West Lake vs Chengdu Kuanzhai Alley
 
@@ -67,26 +65,36 @@ The normalized classification is supported by active Story evidence plus causal 
 **Rule A:** COLLISION.  
 **Rule B:** COLLISION.
 
-The sound recording and survey sheet are different surface artifacts, but both perform the same deeper function: evidence forces an authenticity model to be revised and the revised record becomes ending evidence. The strengthened evidence metadata makes that causal sequence auditable without changing the classification.
+This debt is untouched by Forbidden City remediation. The sound recording and survey sheet remain different surface artifacts that perform the same deeper function: evidence forces an authenticity model to be revised and the revised record becomes ending evidence.
+
+### Forbidden City all-Gold result
+
+**Result:** `DISTINCT` from all six other approved Gold Journeys.
+
+Its new engine is `coexistingValidPerspectivesSynthesizeRelationalModel`. Two valid perspectives remain simultaneously true and become more informative through composite representation. No other current Gold Journey uses that causal mechanism.
 
 ### Summer Palace family result
 
-**Result:** `DISTINCT` from Forbidden City and Nanjing under the normalized gate.
+**Result:** `DISTINCT` from all six other current Gold Journeys.
 
-Summer Palace shares broad themes of accepting imperfection and changed senior trust, but its causal engine is a forced choice between preserving the ideal photographic opportunity and recovering a relational memory object. The lost light causes a new composition; the ending entrusts an inherited photograph. Those functions are not normalized as responsible refusal of an available shortcut or intentional visible incompletion.
+Its engine remains a forced choice between preserving an ideal photographic opportunity and recovering a relational memory object, producing a recomposed artifact and intergenerational entrustment.
 
 ### Shanghai Bund distinctness
 
 **Result:** `DISTINCT` from all six other current Gold Journeys.
 
-Its engine is a one-way spatial crossing that reframes a false past/future split through an intergenerational trade document carried into a chosen new career.
+Its engine remains a one-way spatial crossing that reframes a false past/future split through an intergenerational trade document carried into a chosen new career.
 
 ### Xi'an City Wall distinctness
 
 **Result:** `DISTINCT` from all six other current Gold Journeys.
 
-Its engine is a deliberately completed closed circuit that becomes the departure point for an open continuation, with the running record extending past the declared finish toward the new home.
+Its engine remains a deliberately completed closed circuit that becomes the departure point for an open continuation, with the running record extending past the declared finish toward the new home.
 
 ## Debt policy
 
-The two existing debt findings are reported rather than suppressed. This audit does **not** authorize literary remediation in the affected Stories. A future Gold candidate cannot rely on this debt as precedent: any candidate collision is `TEMPLATE COLLISION - NOT GOLD READY` until its dramatic mechanism is redesigned.
+The current catalog contains **one** historical semantic collision debt:
+
+1. `hangzhou-west-lake` ↔ `chengdu-kuanzhai-alley`
+
+Forbidden City ↔ Nanjing debt is remediated and no longer classified as collision debt. No allowlist or exception was created. This audit does **not** authorize remediation of Hangzhou or Chengdu, and a future Gold candidate cannot use historical debt as precedent: any candidate collision remains `TEMPLATE COLLISION - NOT GOLD READY` until its causal dramatic mechanism is redesigned.
