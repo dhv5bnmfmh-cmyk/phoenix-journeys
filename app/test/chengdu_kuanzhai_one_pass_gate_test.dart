@@ -26,12 +26,21 @@ void main() {
   });
 
   test('all levels preserve canonical shared-space handoff engine', () {
+    final chairYieldPatterns = <RegExp>[
+      RegExp(r'(?:把|将)?竹椅(?:挪开|移开|挪到|移到)'),
+      RegExp(r'(?:挪开|移开|挪到|移到)竹椅'),
+      RegExp(r'(?:把|将)?竹椅(?:挪到|移到)(?:院墙边|墙边|一旁)'),
+    ];
     for (var level = 1; level <= 10; level++) {
       final story = chengduKuanzhaiOnePassLevels[level - 1].storyParagraphs.join();
       for (final anchor in <String>['林夏', '周叔', '院落', '竹椅', '茶桌', '通行']) {
         expect(story, contains(anchor), reason: 'Lv$level $anchor');
       }
-      expect(story, anyOf(contains('挪开'), contains('移开')), reason: 'Lv$level first/ongoing handoff');
+      expect(
+        chairYieldPatterns.any((pattern) => pattern.hasMatch(story)),
+        isTrue,
+        reason: 'Lv$level bamboo chair physically yields from passage',
+      );
       expect(story, contains('放回'), reason: 'Lv$level return handoff');
       expect(story, contains('没有'), reason: 'Lv$level release of direct control');
       expect(story, isNot(contains('调查表')));
