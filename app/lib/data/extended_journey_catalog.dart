@@ -139,10 +139,40 @@ const hangzhouDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '西湖在二〇一一年被列入世界遗产名录。', pinyin: 'Xīhú zài èr líng yī yī nián bèi lièrù Shìjiè Yíchǎn Mínglù.', simpleChinese: '西湖文化景观是世界文化遗产。', vietnamese: 'Cảnh quan văn hóa Tây Hồ được ghi danh Di sản Thế giới năm 2011.', english: 'The West Lake Cultural Landscape was inscribed on the World Heritage List in 2011.'),
 ];
 
-final chengduStoryParagraphs = chengduKuanzhaiOnePassLevels[4].storyParagraphs;
-final chengduStoryAnnotations = chengduKuanzhaiOnePassLevels[4].storyAnnotations;
+final chengduStoryParagraphs = <String>[
+  '林夏二十四岁，是成都本地建筑系研究生。她带着“使用痕迹调查”表进入宽窄巷子，原先认为商业越明显，历史真实性越容易被削弱，于是在调查表“影响历史真实性的因素”下先写了“商业活动”。',
+  '在宽巷子，她记录青砖、木门、门槛和院落的磨损，也观察街巷肌理怎样组织进出。部分砖木建筑经过保护更新后继续承担现实功能，她开始把“看起来新”与“空间是否仍可读”分开。',
+  '走到窄巷子和井巷子，她把茶馆里的茶桌、椅子、添水、交谈和让路都当作现场证据。人仍沿门、廊、院移动，今天的经营没有让旧空间自动停止作用，反而继续留下新的使用痕迹。',
+  '傍晚在院中茶桌旁，林夏重新看调查表，把“商业活动”四个字划掉，在旁边写：“仍在使用。”第二天提交报告时，她没有誊清这一页，让原来的判断、删除线和新的手写结论一起留在纸上。',
+];
+
+const chengduStoryAnnotations = <ReadingAnnotation>[
+  ReadingAnnotation(
+    pinyin: 'Lín Xià èrshísì suì, shì Chéngdū běndì jiànzhù xì yánjiūshēng. Tā dài zhe shǐyòng hénjì diàochá biǎo jìnrù Kuānzhǎi Xiàngzi, yuánxiān rènwéi shāngyè yuè míngxiǎn, lìshǐ zhēnshíxìng yuè róngyì bèi xuēruò, yúshì xiān xiěxià shāngyè huódòng.',
+    vietnamese: 'Lâm Hạ, 24 tuổi, là nghiên cứu sinh kiến trúc người Thành Đô. Cô vào Kuanzhai với phiếu khảo sát dấu vết sử dụng và ban đầu ghi hoạt động thương mại là yếu tố có thể làm suy giảm tính xác thực lịch sử.',
+    english: 'Lin Xia, 24, is a Chengdu architecture graduate student. She enters Kuanzhai Alley with a use-trace survey and initially records commercial activity as a possible threat to historical authenticity.',
+  ),
+  ReadingAnnotation(
+    pinyin: 'Zài Kuān Xiàngzi, tā jìlù qīngzhuān, mùmén, ménkǎn hé yuànluò de mósǔn, yě guānchá jiēxiàng jīlǐ zěnyàng zǔzhī jìnchū. Bùfen zhuānmù jiànzhù jīngguò bǎohù gēngxīn hòu jìxù chéngdān xiànshí gōngnéng.',
+    vietnamese: 'Ở ngõ Rộng, cô ghi lại gạch xanh, cửa gỗ, ngưỡng cửa và sân nhà, đồng thời quan sát cấu trúc phố-ngõ tổ chức việc ra vào ra sao. Một số kiến trúc gạch-gỗ tiếp tục có chức năng sau bảo tồn và cải tạo.',
+    english: 'In Kuan Alley she records brick, doors, thresholds, courtyards, and the street-and-alley fabric, noting that brick-and-timber buildings can retain legible space through conservation-led renewal.',
+  ),
+  ReadingAnnotation(
+    pinyin: 'Zǒudào Zhǎi Xiàngzi hé Jǐng Xiàngzi, tā bǎ cháguǎn lǐ de cházhuō, yǐzi, tiānshuǐ, jiāotán hé rànglù dōu dàngzuò xiànchǎng zhèngjù. Jīntiān de jīngyíng jìxù liúxià xīn de shǐyòng hénjì.',
+    vietnamese: 'Tại ngõ Hẹp và ngõ Giếng, cô xem bàn trà, ghế, châm nước, trò chuyện và nhường đường trong quán trà như bằng chứng tại chỗ về cách không gian vẫn được sử dụng.',
+    english: 'In Zhai and Jing Alleys she treats the teahouse, tea table, seating, service, conversation, and circulation as evidence that historic space remains in use.',
+  ),
+  ReadingAnnotation(
+    pinyin: 'Bàngwǎn zài yuànzhōng cházhuō páng, Lín Xià chóngxīn kàn diàochá biǎo, bǎ shāngyè huódòng huàdiào, zài pángbiān xiě réng zài shǐyòng. Dì èr tiān tā méiyǒu téngqīng zhè yí yè.',
+    vietnamese: 'Buổi chiều bên bàn trà trong sân, Lâm Hạ gạch bỏ “hoạt động thương mại”, viết bên cạnh “vẫn đang được sử dụng”, rồi hôm sau nộp nguyên trang có sửa chữa.',
+    english: 'At the courtyard tea table Lin Xia crosses out “commercial activity,” writes “still in use,” and submits the original marked page the next day.',
+  ),
+];
+
 final chengduWords = chengduKuanzhaiOnePassWords;
-final chengduDiscoveries = chengduKuanzhaiOnePassDiscoveries;
+final chengduDiscoveries = List<DiscoveryEntry>.unmodifiable(
+  chengduKuanzhaiDiscoverySpecs.take(4).map((spec) => spec.entry),
+);
 
 const nanjingStoryParagraphs = <String>[
   '夜色降临，你沿着秦淮河走向夫子庙。水面映着灯光，石桥、牌坊和街巷把河岸连接成一条缓慢展开的历史线。',
