@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/data/chengdu_kuanzhai_one_pass.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/world_story_runtime.dart';
@@ -43,11 +44,24 @@ void main() {
       }
 
       expect(journey.words.length, greaterThanOrEqualTo(9));
-      expect(
-        journey.discoveries.length,
-        journey.id == 'beijing-summer-palace' ? 2 : 4,
-        reason: journey.id,
-      );
+      if (journey.id == chengduKuanzhaiJourneyId) {
+        expect(
+          journey.content.storyParagraphs,
+          chengduKuanzhaiOnePassLevels[4].storyParagraphs,
+          reason: 'Chengdu catalog metadata must bind canonical Gold Lv5 Story',
+        );
+        expect(
+          journey.discoveries.length,
+          chengduKuanzhaiOnePassDiscoveries.length,
+          reason: journey.id,
+        );
+      } else {
+        expect(
+          journey.discoveries.length,
+          journey.id == 'beijing-summer-palace' ? 2 : 4,
+          reason: journey.id,
+        );
+      }
     }
   });
 }
