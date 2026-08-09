@@ -18,6 +18,25 @@ void main() {
     expect(story, isNot(contains('慢生活')));
   });
 
+  test('published Chengdu adapter preserves shared catalog contracts', () {
+    final experience = requireDailyJourneyExperience(chengduKuanzhaiJourneyId);
+    expect(experience.content.storyParagraphs, hasLength(4));
+    expect(experience.storyAnnotations, hasLength(4));
+    expect(experience.discoveries.length, greaterThanOrEqualTo(4));
+
+    final publishedContext = <String>[
+      ...experience.content.storyParagraphs,
+      ...experience.discoveries.map((entry) => entry.text),
+    ].join();
+    for (final word in experience.words) {
+      expect(
+        publishedContext,
+        contains(word.word),
+        reason: 'Published Chengdu Word lacks a static Story/Discovery context: ${word.word}',
+      );
+    }
+  });
+
   test('legacy difficulty resolver maps Chengdu to canonical Gold levels', () {
     final experience = requireDailyJourneyExperience(chengduKuanzhaiJourneyId);
     final easy = resolveJourneyLevel(experience, JourneyDifficulty.easy);
