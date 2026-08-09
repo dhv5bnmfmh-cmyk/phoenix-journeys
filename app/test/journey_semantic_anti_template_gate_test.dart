@@ -329,13 +329,12 @@ void main() {
     );
   });
 
-  test('only Hangzhou Chengdu historical semantic debt remains', () {
-    final debtKeys = auditApprovedGoldSemanticPairs()
-        .where((item) =>
-            item.classification == SemanticCollisionClassification.existingSemanticCollisionDebt)
-        .map((item) => _pairKey(item.journeyA, item.journeyB))
-        .toSet();
-    expect(debtKeys, <String>{'chengdu-kuanzhai-alley|hangzhou-west-lake'});
+  test('no historical semantic collision debt remains', () {
+    final debts = auditApprovedGoldSemanticPairs().where(
+      (item) => item.classification == SemanticCollisionClassification.existingSemanticCollisionDebt,
+    );
+    expect(debts, isEmpty);
+    expect(auditApprovedGoldSemanticPairs().where((item) => item.isCollision), isEmpty);
   });
 
   test('Forbidden City vs Nanjing no longer triggers Rule A or Rule B', () {
@@ -374,13 +373,34 @@ void main() {
     );
   });
 
-  test('Hangzhou vs Chengdu debt remains untouched', () {
+  test('Chengdu engine is repeated spatial handoff, not evidence reclassification', () {
+    final fingerprint = approvedGoldSemanticFingerprints['chengdu-kuanzhai-alley']!;
+    expect(
+      fingerprint.mechanism(NarrativeSemanticDimension.dramaticEngineFamily),
+      NarrativeMechanismFamily.repeatedSpatialHandoffsCreateSharedUseProtocol,
+    );
+    expect(
+      fingerprint.mechanism(NarrativeSemanticDimension.dramaticEngineFamily),
+      isNot(NarrativeMechanismFamily.evidenceForcesReclassification),
+    );
+  });
+
+  test('Hangzhou vs Chengdu is structurally distinct after Chengdu remediation', () {
     final comparison = _pair('hangzhou-west-lake', 'chengdu-kuanzhai-alley');
-    expect(comparison.sameDramaticEngine, isTrue);
-    expect(comparison.ruleA, isTrue);
-    expect(comparison.ruleB, isTrue);
-    expect(comparison.classification,
-        SemanticCollisionClassification.existingSemanticCollisionDebt);
+    expect(comparison.sameDramaticEngine, isFalse);
+    expect(comparison.coreMatchCount, 0);
+    expect(comparison.ruleA, isFalse);
+    expect(comparison.ruleB, isFalse);
+    expect(comparison.isCollision, isFalse);
+    expect(comparison.classification, SemanticCollisionClassification.distinct);
+  });
+
+  test('Chengdu collides with no other approved Gold Journey', () {
+    final comparisons = auditApprovedGoldSemanticPairs().where(
+      (item) => item.journeyA == 'chengdu-kuanzhai-alley' || item.journeyB == 'chengdu-kuanzhai-alley',
+    );
+    expect(comparisons, hasLength(6));
+    expect(comparisons.every((item) => !item.isCollision), isTrue);
   });
 
   test('future colliding candidate still hard-blocks with exact status', () {
