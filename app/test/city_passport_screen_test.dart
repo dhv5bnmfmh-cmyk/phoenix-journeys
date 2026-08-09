@@ -126,4 +126,99 @@ void main() {
     expect(find.text('紫禁城'), findsNWidgets(2));
     expect(find.text('颐和园'), findsNWidgets(2));
   });
+
+  testWidgets('map transform and country selection keep viewport fixed', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final state = AppState(clock: () => DateTime(2026, 7, 22));
+    await state.load();
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: const MaterialApp(
+          home: Scaffold(body: CityPassportScreen()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final viewport = find.byKey(const ValueKey('passport-map-viewport'));
+    final viewerFinder = find.byKey(
+      const ValueKey('passport-pinch-zoom-map'),
+    );
+    final initialViewport = tester.getRect(viewport);
+    final initialContent = tester.getSize(
+      find.byKey(const ValueKey('passport-map-content')),
+    );
+    final viewer = tester.widget<InteractiveViewer>(viewerFinder);
+
+    expect(viewer.panEnabled, isTrue);
+    expect(viewer.scaleEnabled, isTrue);
+    expect(viewer.transformationController, isNotNull);
+    viewer.transformationController!.value = Matrix4.identity()
+      ..translateByDouble(24, 18, 0, 1)
+      ..scaleByDouble(1.6, 1.6, 1, 1);
+    await tester.pump();
+
+    expect(tester.getRect(viewport), initialViewport);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('passport-map-content'))),
+      initialContent,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('passport-country-china')));
+    await tester.pumpAndSettle();
+
+    expect(tester.getRect(viewport), initialViewport);
+    expect(viewer.transformationController!.value, isNot(Matrix4.identity()));
+    final clip = tester.widget<ClipRRect>(
+      find.descendant(of: viewport, matching: find.byType(ClipRRect)).first,
+    );
+    expect(clip.clipBehavior, Clip.hardEdge);
+    expect(clip.borderRadius, BorderRadius.circular(18));
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final size in const <Size>[
+    Size(320, 667),
+    Size(390, 844),
+    Size(430, 932),
+    Size(412, 915),
+  ]) {
+    testWidgets('Passport viewport fits mobile ${size.width}x${size.height}', (
+      tester,
+    ) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final state = AppState(clock: () => DateTime(2026, 7, 22));
+      await state.load();
+      await tester.pumpWidget(
+        ChangeNotifierProvider.value(
+          value: state,
+          child: const MaterialApp(
+            home: Scaffold(body: CityPassportScreen()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final viewportRect = tester.getRect(
+        find.byKey(const ValueKey('passport-map-viewport')),
+      );
+      expect(viewportRect.width, greaterThanOrEqualTo(198));
+      expect(viewportRect.height, greaterThan(0));
+      expect(viewportRect.left, greaterThanOrEqualTo(0));
+      expect(viewportRect.right, lessThanOrEqualTo(size.width));
+      expect(viewportRect.bottom, lessThanOrEqualTo(size.height));
+      expect(tester.takeException(), isNull);
+    });
+  }
 }
