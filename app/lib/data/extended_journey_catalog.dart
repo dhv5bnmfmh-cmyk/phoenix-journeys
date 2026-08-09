@@ -1,4 +1,5 @@
 import '../models/story_content.dart';
+import 'chengdu_kuanzhai_one_pass.dart';
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
 
@@ -138,38 +139,18 @@ const hangzhouDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '西湖在二〇一一年被列入世界遗产名录。', pinyin: 'Xīhú zài èr líng yī yī nián bèi lièrù Shìjiè Yíchǎn Mínglù.', simpleChinese: '西湖文化景观是世界文化遗产。', vietnamese: 'Cảnh quan văn hóa Tây Hồ được ghi danh Di sản Thế giới năm 2011.', english: 'The West Lake Cultural Landscape was inscribed on the World Heritage List in 2011.'),
 ];
 
-const chengduStoryParagraphs = <String>[
-  '午后，你走进成都宽窄巷子。青砖墙、木门和一座座院落，把城市的声音慢慢放低。',
-  '这里由宽巷子、窄巷子和井巷子组成。三条平行街巷保留了清代街区的空间，也装进了今天的茶馆、餐厅和小店。',
-  '你在院门前停下，听见盖碗茶的杯盖轻轻碰响。老建筑没有停止使用，而是在新的生活方式里继续存在。',
-  '宽窄巷子的意义，也许不只是“看古街”，而是观察一座城市怎样把慢生活、商业与历史放在同一个院子里。',
-];
-
-const chengduStoryAnnotations = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Wǔhòu, nǐ zǒujìn Chéngdū Kuānzhǎi Xiàngzi. Qīngzhuān qiáng, mùmén hé yí zuò zuò yuànluò, bǎ chéngshì de shēngyīn mànmàn fàng dī.', vietnamese: 'Buổi chiều, bạn bước vào ngõ Rộng Hẹp ở Thành Đô. Tường gạch xanh, cửa gỗ và những sân nhà khiến âm thanh thành phố dần dịu xuống.', english: 'In the afternoon, you enter Chengdu’s Kuanzhai Alley, where grey-brick walls, wooden doors, and courtyards soften the city’s noise.'),
-  ReadingAnnotation(pinyin: 'Zhèlǐ yóu Kuān Xiàngzi, Zhǎi Xiàngzi hé Jǐng Xiàngzi zǔchéng. Sān tiáo píngxíng jiēxiàng bǎoliú le Qīngdài jiēqū de kōngjiān, yě zhuāngjìn le jīntiān de cháguǎn, cāntīng hé xiǎodiàn.', vietnamese: 'Nơi đây gồm ngõ Rộng, ngõ Hẹp và ngõ Giếng. Ba con ngõ song song giữ cấu trúc khu phố thời Thanh và chứa những quán trà, nhà hàng, cửa tiệm hôm nay.', english: 'Three parallel lanes preserve a Qing-era urban pattern while hosting today’s teahouses, restaurants, and shops.'),
-  ReadingAnnotation(pinyin: 'Nǐ zài yuànmén qián tíngxià, tīngjiàn gàiwǎnchá de bēigài qīngqīng pèngxiǎng. Lǎo jiànzhù méiyǒu tíngzhǐ shǐyòng, ér shì zài xīn de shēnghuó fāngshì lǐ jìxù cúnzài.', vietnamese: 'Bạn dừng trước cổng sân và nghe nắp chén trà khẽ chạm. Các công trình cũ không ngừng được sử dụng mà tiếp tục sống trong lối sống mới.', english: 'The old buildings remain in use, continuing their lives through contemporary ways of living.'),
-  ReadingAnnotation(pinyin: 'Kuānzhǎi Xiàngzi de yìyì, yěxǔ bù zhǐ shì “kàn gǔjiē”, ér shì guānchá yí zuò chéngshì zěnyàng bǎ màn shēnghuó, shāngyè yǔ lìshǐ fàng zài tóng yí gè yuànzi lǐ.', vietnamese: 'Ý nghĩa của ngõ Rộng Hẹp không chỉ là ngắm phố cổ, mà còn là quan sát cách một thành phố đặt nhịp sống chậm, thương mại và lịch sử trong cùng một khoảng sân.', english: 'Kuanzhai Alley shows how slow living, commerce, and history can occupy the same courtyard.'),
-];
-
-const chengduWords = <WordEntry>[
-  WordEntry(word: '巷子', pinyin: 'xiàngzi', partOfSpeech: '名词', simpleChinese: '城市里比较窄的小路。', translation: 'Ngõ hoặc hẻm nhỏ trong thành phố.', englishDefinition: 'alley or lane', symbol: '🛤️'),
-  WordEntry(word: '青砖', pinyin: 'qīngzhuān', partOfSpeech: '名词', simpleChinese: '颜色偏灰青的传统砖。', translation: 'Gạch xanh xám truyền thống.', englishDefinition: 'grey-blue brick', symbol: '🧱'),
-  WordEntry(word: '院落', pinyin: 'yuànluò', partOfSpeech: '名词', simpleChinese: '由房屋围成的院子和建筑。', translation: 'Khu nhà và sân được bao quanh.', englishDefinition: 'courtyard compound', symbol: '🏡'),
-  WordEntry(word: '平行', pinyin: 'píngxíng', partOfSpeech: '形容词', simpleChinese: '方向相同而不相交。', translation: 'Song song, cùng hướng không giao nhau.', englishDefinition: 'parallel', symbol: '〰️'),
-  WordEntry(word: '茶馆', pinyin: 'cháguǎn', partOfSpeech: '名词', simpleChinese: '喝茶、休息和聊天的地方。', translation: 'Quán trà để uống trà và trò chuyện.', englishDefinition: 'teahouse', symbol: '🍵'),
-  WordEntry(word: '盖碗茶', pinyin: 'gàiwǎnchá', partOfSpeech: '名词', simpleChinese: '用带盖茶碗冲泡和饮用的茶。', translation: 'Trà pha trong chén có nắp.', englishDefinition: 'tea served in a lidded bowl', symbol: '🫖'),
-  WordEntry(word: '保留', pinyin: 'bǎoliú', partOfSpeech: '动词', simpleChinese: '留下来，不让它消失。', translation: 'Giữ lại, bảo tồn.', englishDefinition: 'to preserve or retain', symbol: '📦'),
-  WordEntry(word: '慢生活', pinyin: 'màn shēnghuó', partOfSpeech: '名词', simpleChinese: '节奏比较放松的生活方式。', translation: 'Lối sống chậm và thư thái.', englishDefinition: 'slow-paced lifestyle', symbol: '🐢'),
-  WordEntry(word: '商业', pinyin: 'shāngyè', partOfSpeech: '名词', simpleChinese: '买卖商品和服务的活动。', translation: 'Hoạt động kinh doanh và thương mại.', englishDefinition: 'commerce', symbol: '🏪'),
-];
-
-const chengduDiscoveries = <DiscoveryEntry>[
-  DiscoveryEntry(text: '宽窄巷子由宽巷子、窄巷子和井巷子三条平行街巷组成。', pinyin: 'Kuānzhǎi Xiàngzi yóu Kuān Xiàngzi, Zhǎi Xiàngzi hé Jǐng Xiàngzi sān tiáo píngxíng jiēxiàng zǔchéng.', simpleChinese: '这个街区有三条主要巷子。', vietnamese: 'Khu phố gồm ba con ngõ song song: ngõ Rộng, ngõ Hẹp và ngõ Giếng.', english: 'The district consists of three parallel lanes: Wide, Narrow, and Well Alley.'),
-  DiscoveryEntry(text: '街区保存了较多清代院落和老成都的城市空间。', pinyin: 'Jiēqū bǎocún le jiàoduō Qīngdài yuànluò hé lǎo Chéngdū de chéngshì kōngjiān.', simpleChinese: '这里还能看到清代院落和旧城市格局。', vietnamese: 'Khu phố còn giữ nhiều sân nhà thời Thanh và cấu trúc đô thị Thành Đô xưa.', english: 'The area preserves Qing-era courtyards and traces of old Chengdu’s urban form.'),
-  DiscoveryEntry(text: '今天的宽窄巷子把历史建筑与餐饮、茶文化和休闲活动结合起来。', pinyin: 'Jīntiān de Kuānzhǎi Xiàngzi bǎ lìshǐ jiànzhù yǔ cānyǐn, chá wénhuà hé xiūxián huódòng jiéhé qǐlái.', simpleChinese: '老建筑里也有今天的茶馆、餐厅和休闲空间。', vietnamese: 'Ngày nay, công trình lịch sử kết hợp với ẩm thực, văn hóa trà và hoạt động thư giãn.', english: 'Historic buildings now accommodate food, tea culture, and leisure activities.'),
-  DiscoveryEntry(text: '街巷的更新说明历史保护也需要考虑居民生活和现代使用。', pinyin: 'Jiēxiàng de gēngxīn shuōmíng lìshǐ bǎohù yě xūyào kǎolǜ jūmín shēnghuó hé xiàndài shǐyòng.', simpleChinese: '保护老街时，也要考虑今天怎样使用它。', vietnamese: 'Việc cải tạo cho thấy bảo tồn lịch sử cũng phải tính đến đời sống và cách sử dụng hiện đại.', english: 'The renewal shows that heritage protection must also consider contemporary use.'),
-];
+final chengduStoryParagraphs = chengduKuanzhaiOnePassLevels[4].storyParagraphs;
+final chengduStoryAnnotations = chengduKuanzhaiOnePassLevels[4].storyAnnotations;
+final chengduDiscoveries = chengduKuanzhaiOnePassDiscoveries;
+final chengduWords = List<WordEntry>.unmodifiable(
+  chengduKuanzhaiOnePassWords.where((entry) {
+    final context = <String>[
+      ...chengduStoryParagraphs,
+      ...chengduDiscoveries.map((discovery) => discovery.text),
+    ].join();
+    return context.contains(entry.word);
+  }),
+);
 
 const nanjingStoryParagraphs = <String>[
   '夜色降临，你沿着秦淮河走向夫子庙。水面映着灯光，石桥、牌坊和街巷把河岸连接成一条缓慢展开的历史线。',
@@ -248,9 +229,9 @@ final hangzhouWestLakeJourney = _buildJourney(
 
 final chengduKuanzhaiJourney = _buildJourney(
   id: 'chengdu-kuanzhai-alley',
-  title: '成都 · 宽窄巷子：在院落里读懂慢生活',
+  title: '成都 · 宽窄巷子：仍在使用',
   geoNodeId: 'cn-sichuan-chengdu-kuanzhai',
-  tags: const ['成都', '宽窄巷子', '院落', '茶文化', '城市更新'],
+  tags: const ['成都', '宽窄巷子', '使用痕迹', '院落', '保护更新'],
   paragraphs: chengduStoryParagraphs,
   sourceIds: const ['chengdu-gov-kuanzhai-alley'],
 );
