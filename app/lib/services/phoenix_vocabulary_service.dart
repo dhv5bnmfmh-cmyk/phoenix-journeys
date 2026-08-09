@@ -111,6 +111,36 @@ class PhoenixVocabularyService {
       qualityReviewed: true,
       qualityScore: 100,
     ),
+    '茶馆': PhoenixVocabularyExample(
+      chinese: '窄巷子的茶馆把院落继续变成喝茶、交谈和停留的日常空间。',
+      pinyin:
+          'Zhǎi Xiàngzi de cháguǎn bǎ yuànluò jìxù biàn chéng hēchá, jiāotán hé tíngliú de rìcháng kōngjiān.',
+      native:
+          'Quán trà trong Ngõ Hẹp tiếp tục biến sân nhà thành không gian thường nhật để uống trà, trò chuyện và dừng chân.',
+      english:
+          'A teahouse in Zhai Alley keeps the courtyard in everyday use for tea, conversation, and lingering.',
+      usageNote: '“茶馆”在成都历史街区语境中指提供饮茶、停留和社交的经营空间。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
+    '砖木建筑': PhoenixVocabularyExample(
+      chinese: '宽窄巷子的砖木建筑与院落仍保留可辨认的历史空间特征。',
+      pinyin:
+          'Kuānzhǎi Xiàngzi de zhuānmù jiànzhù yǔ yuànluò réng bǎoliú kě biànrèn de lìshǐ kōngjiān tèzhēng.',
+      native:
+          'Các công trình gạch và gỗ cùng sân nhà ở Kuanzhai vẫn giữ những đặc trưng không gian lịch sử có thể nhận biết.',
+      english:
+          'The brick-and-timber buildings and courtyards of Kuanzhai Alley retain legible historic spatial features.',
+      usageNote: '“砖木建筑”用于描述以砖和木为主要材料并保留历史空间特征的建筑。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
   };
 
   static const PhoenixVocabularyExample _legacyForbiddenOpening =
