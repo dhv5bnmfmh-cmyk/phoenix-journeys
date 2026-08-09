@@ -134,6 +134,22 @@ Create one row for every materially similar existing Journey. A blank comparison
 | Visual motif |  |  |  | `BLOCKED` | `UNVERIFIED` |
 | Special mechanism |  |  |  | `NOT_APPLICABLE` | `UNVERIFIED` |
 
+### 5.1 Normalized semantic Difference Matrix — REQUIRED for Gold candidates
+
+Free-form difference prose cannot establish semantic independence. Populate this row for **every approved Gold reference** using the canonical normalized fingerprint registry in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
+
+| Reference Journey | Dramatic engine match | Opening match | Conflict match | Choice match | Climax match | Consequence match | Transformation match | Ending match | Relationship geometry match | Cultural-anchor-function match | CORE match count | Secondary matches | Rule A | Rule B | Collision result |
+|---|---|---|---|---|---|---|---|---|---|---|---:|---|---|---|---|
+|  | YES / NO | YES / NO | YES / NO | YES / NO | YES / NO | YES / NO | YES / NO | YES / NO | YES / NO | YES / NO |  |  | PASS / COLLISION | PASS / COLLISION | `BLOCKED` |
+
+Binding thresholds:
+
+- Rule A: same `dramaticEngineFamily` + at least **3 additional CORE matches** = semantic collision.
+- Rule B: at least **4 CORE matches** = semantic collision, even when dramatic-engine labels differ.
+- A NEW Gold candidate with any semantic collision MUST record `TEMPLATE COLLISION - NOT GOLD READY` and `Next phase authorized: NO`.
+- Existing approved Gold-to-Gold collisions are recorded as `EXISTING_SEMANTIC_COLLISION_DEBT`; they MUST NOT be silently allowlisted or used as precedent for a new Gold candidate.
+- Exact active Story evidence is required for every CORE semantic classification.
+
 ## 6. Level-invariant matrix
 
 Complete all ten rows. Simplification is not approval to remove causal identity.
@@ -189,6 +205,8 @@ Before Pilot N1 Founder approval, `Second pilot or expansion authorized` MUST be
 
 ```text
 Blocking codes:
+Semantic template collision: YES / NO
+Semantic collision result:
 Required action:
 Stable comparison result:
 Stable comparison evidence level:
@@ -204,4 +222,4 @@ Reviewer:
 Decision date:
 ```
 
-`Next phase authorized` MUST be `NO` whenever any blocking code, missing evidence, regression, rejected pilot, or pending Founder approval remains.
+`Next phase authorized` MUST be `NO` whenever any blocking code, semantic template collision, missing evidence, regression, rejected pilot, or pending Founder approval remains.
