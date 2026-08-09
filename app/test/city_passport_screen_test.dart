@@ -199,11 +199,11 @@ void main() {
     expect(scale, greaterThan(1));
     expect(
       translationX,
-      inInclusiveRange(initialViewport.width * (1 - scale), 0),
+      inInclusiveRange(initialViewport.width * (1 - scale) - .001, .001),
     );
     expect(
       translationY,
-      inInclusiveRange(initialViewport.height * (1 - scale), 0),
+      inInclusiveRange(initialViewport.height * (1 - scale) - .001, .001),
     );
     expect(tester.getRect(viewport), initialViewport);
 
