@@ -141,8 +141,16 @@ const hangzhouDiscoveries = <DiscoveryEntry>[
 
 final chengduStoryParagraphs = chengduKuanzhaiOnePassLevels[4].storyParagraphs;
 final chengduStoryAnnotations = chengduKuanzhaiOnePassLevels[4].storyAnnotations;
-final chengduWords = chengduKuanzhaiOnePassWords;
 final chengduDiscoveries = chengduKuanzhaiOnePassDiscoveries;
+final chengduWords = List<WordEntry>.unmodifiable(
+  chengduKuanzhaiOnePassWords.where((entry) {
+    final context = <String>[
+      ...chengduStoryParagraphs,
+      ...chengduDiscoveries.map((discovery) => discovery.text),
+    ].join();
+    return context.contains(entry.word);
+  }),
+);
 
 const nanjingStoryParagraphs = <String>[
   '夜色降临，你沿着秦淮河走向夫子庙。水面映着灯光，石桥、牌坊和街巷把河岸连接成一条缓慢展开的历史线。',
