@@ -50,11 +50,57 @@ const forbiddenCityRemediatedNarrativeDna = JourneyNarrativeDnaRecord(
       'route-assertion-peer-contradiction-comparison-alignment-overlay-shared-node-divergence',
 );
 
+const chengduRemediatedNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'chengdu-kuanzhai-alley',
+  narrativeIdentity: 'courtyard-chair-handoffs-create-shared-use-rhythm',
+  protagonistIdentity:
+      'Lin-Xia-twenty-four-year-old-fictional-teahouse-courtyard-host',
+  protagonistAgeIdentity: 'twenty-four-year-old-young-service-worker',
+  protagonistArchetype:
+      'young-courtyard-host-facilitating-changing-shared-use',
+  openingSituation:
+      'one-bamboo-chair-immediately-contested-by-legitimate-tea-seating-and-courtyard-passage',
+  storyGoal:
+      'keep-courtyard-usable-for-tea-staying-service-and-passage-without-permanent-exclusion',
+  locationMechanism:
+      'Kuanzhai-street-lane-courtyard-threshold-compresses-stopping-and-circulation-into-one-shared-entry-zone',
+  movementPattern:
+      'bamboo-chair-repeatedly-yields-from-threshold-to-wall-and-returns-to-tea-table',
+  conflictType: 'fixed-space-assignment-vs-time-dependent-shared-use',
+  choiceType:
+      'facilitate-temporary-handoff-instead-of-permanent-seat-allocation',
+  climaxType:
+      'older-regular-independently-clears-passage-and-restores-tea-seat-without-host-instruction',
+  consequenceType:
+      'courtyard-remains-usable-through-repeated-sequential-handoffs-among-participants',
+  emotionalArc:
+      'arranging-confidence-to-irritation-to-negotiation-to-hesitation-to-relief-and-trust',
+  historicalLearningMechanism:
+      'verified-street-lane-courtyard-morphology-and-current-tea-use-create-the-spatial-constraint-while-factual-conservation-learning-stays-in-Discovery',
+  resolutionType: 'repeated-spatial-handoffs-create-a-shared-use-protocol',
+  endingMechanism:
+      'another-user-moves-the-same-chair-for-passage-while-Lin-Xia-does-not-intervene',
+  memoryAnchorType: 'one-bamboo-chair-without-a-fixed-position',
+  achievementType: 'shared-courtyard-rhythm-facilitator',
+  rewardSymbolism:
+      'yield-and-return-motion-symbolizes-temporary-use-handoff-not-ownership-or-mentor-reward',
+  temporalPattern: 'single-afternoon-use-cycle-without-external-countdown',
+  supportingStructure:
+      'practical-courtyard-host-and-older-regular-negotiate-and-reproduce-handoffs-without-mentor-authority',
+  centralMetaphor:
+      'shared-space-stays-usable-by-being-handed-on-rather-than-permanently-owned',
+  narrativeVoice: 'third-person-action-led-courtyard-coordination',
+  storyRhythm:
+      'place-chair-first-handoff-fixed-layout-fails-again-negotiate-repeat-independent-reproduction-release-control',
+);
+
 final approvedNarrativeDnaCatalog =
     List<JourneyNarrativeDnaRecord>.unmodifiable(<JourneyNarrativeDnaRecord>[
   for (final record in baseline.approvedNarrativeDnaCatalog)
     if (record.journeyId == 'beijing-forbidden-city')
       forbiddenCityRemediatedNarrativeDna
+    else if (record.journeyId == 'chengdu-kuanzhai-alley')
+      chengduRemediatedNarrativeDna
     else
       record,
 ]);

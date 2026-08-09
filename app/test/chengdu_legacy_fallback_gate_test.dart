@@ -8,26 +8,25 @@ import 'package:phoenix_journeys/data/journey_level_catalog.dart';
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
 
-  test('legacy static Chengdu catalog no longer exposes tourist Story', () {
+  test('legacy static Chengdu catalog exposes canonical handoff Story, not tourist or survey prose', () {
     final experience = requireDailyJourneyExperience(chengduKuanzhaiJourneyId);
     final story = experience.content.storyParagraphs.join();
     expect(story, contains('林夏'));
-    expect(story, contains('商业活动'));
-    expect(story, contains('仍在使用'));
+    expect(story, contains('周叔'));
+    expect(story, contains('竹椅'));
+    expect(story, contains('院落'));
+    expect(story, contains('通行'));
     expect(story, isNot(contains('午后，你走进成都宽窄巷子')));
     expect(story, isNot(contains('慢生活')));
+    expect(story, isNot(contains('调查表')));
+    expect(story, isNot(contains('商业活动')));
+    expect(story, isNot(contains('仍在使用')));
   });
 
   test('published Chengdu adapter binds exact Gold Lv5 and complete Discovery', () {
     final experience = requireDailyJourneyExperience(chengduKuanzhaiJourneyId);
-    expect(
-      experience.content.storyParagraphs,
-      chengduKuanzhaiOnePassLevels[4].storyParagraphs,
-    );
-    expect(
-      experience.storyAnnotations,
-      chengduKuanzhaiOnePassLevels[4].storyAnnotations,
-    );
+    expect(experience.content.storyParagraphs, chengduKuanzhaiOnePassLevels[4].storyParagraphs);
+    expect(experience.storyAnnotations, chengduKuanzhaiOnePassLevels[4].storyAnnotations);
     expect(experience.discoveries, chengduKuanzhaiOnePassDiscoveries);
     expect(experience.words.length, greaterThanOrEqualTo(9));
 
@@ -44,7 +43,7 @@ void main() {
     }
   });
 
-  test('legacy difficulty resolver maps Chengdu to canonical Gold levels', () {
+  test('legacy difficulty resolver maps Chengdu to canonical handoff Gold levels', () {
     final experience = requireDailyJourneyExperience(chengduKuanzhaiJourneyId);
     final easy = resolveJourneyLevel(experience, JourneyDifficulty.easy);
     final standard = resolveJourneyLevel(experience, JourneyDifficulty.standard);
@@ -54,7 +53,7 @@ void main() {
     expect(identical(challenge.storyParagraphs, chengduKuanzhaiOnePassLevels[9].storyParagraphs), isTrue);
   });
 
-  test('adaptive resolver cannot resurrect old Chengdu tourist prose', () {
+  test('adaptive resolver cannot resurrect old Chengdu tourist or survey prose', () {
     final experience = requireDailyJourneyExperience(chengduKuanzhaiJourneyId);
     for (final level in <int>[1, 5, 10]) {
       final resolved = resolveAdaptiveJourneyLevel(
@@ -63,8 +62,11 @@ void main() {
       );
       final story = resolved.storyParagraphs.join();
       expect(story, contains('林夏'));
+      expect(story, contains('竹椅'));
       expect(story, isNot(contains('午后，你走进成都宽窄巷子')));
       expect(story, isNot(contains('慢生活')));
+      expect(story, isNot(contains('调查表')));
+      expect(story, isNot(contains('仍在使用')));
     }
   });
 }

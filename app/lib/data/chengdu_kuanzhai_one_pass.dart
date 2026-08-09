@@ -35,18 +35,18 @@ class ChengduNarrativeDna {
 }
 
 const chengduKuanzhaiNarrativeDna = ChengduNarrativeDna(
-  narrativeIdentity: 'courtyard-use-trace-survey-revises-preservation-authenticity-judgment',
-  protagonistArchetype: 'architecture-researcher-testing-a-preservation-framework-through-field-observation',
-  storyGoal: 'document-how-historic-courtyard-space-is-used-today-and-evaluate-authenticity',
-  conflictType: 'frozen-preservation-model-vs-lived-commercial-social-use-of-historic-space',
-  climaxType: 'survey-form-cross-out-at-tea-table-and-handwritten-still-in-use-reclassification',
-  resolutionType: 'retain-modern-use-as-an-evidence-category-rather-than-automatic-authenticity-loss',
-  memoryAnchorType: 'crossed-out-commerce-on-field-survey-beside-handwritten-still-in-use',
-  movementPattern: 'comparative-field-observation-across-Kuan-Zhai-and-Jing-alleys-with-courtyard-return',
-  temporalPattern: 'single-field-study-day-followed-by-next-day-report-submission',
-  supportingStructure: 'solo-academic-fieldwork-with-public-courtyard-behavior-no-mentor-lecture',
-  endingMechanism: 'next-day-submission-of-uncleaned-survey-page-with-cross-out-and-handwritten-revision-visible',
-  centralMetaphor: 'preservation-can-hold-time-through-continuing-use-rather-than-freezing-space',
+  narrativeIdentity: 'courtyard-chair-handoffs-create-shared-use-rhythm',
+  protagonistArchetype: 'young-teahouse-courtyard-host-facilitating-changing-use',
+  storyGoal: 'keep-courtyard-usable-for-tea-staying-and-passage-across-changing-moments',
+  conflictType: 'fixed-space-assignment-vs-time-dependent-shared-use',
+  climaxType: 'regular-participant-independently-reproduces-chair-handoff-before-host-intervenes',
+  resolutionType: 'repeated-temporary-handoffs-create-a-shared-use-protocol',
+  memoryAnchorType: 'bamboo-chair-without-a-fixed-position',
+  movementPattern: 'chair-repeatedly-yields-to-passage-and-returns-to-tea-use-at-courtyard-threshold',
+  temporalPattern: 'single-afternoon-use-cycle-without-external-countdown',
+  supportingStructure: 'courtyard-host-and-older-regular-negotiate-and-share-the-handoff',
+  endingMechanism: 'another-user-moves-the-chair-without-instruction-and-the-host-does-not-intervene',
+  centralMetaphor: 'shared-space-can-be-kept-usable-through-handoff-rather-than-permanent-ownership',
 );
 
 class ChengduDiscoverySpec {
@@ -109,21 +109,22 @@ class ChengduCompleteSpec {
   final String journeyCompletion;
 }
 
-JourneyLevelContent _chengduLevel(List<String> paragraphs) => JourneyLevelContent(
+ReadingAnnotation _chengduAnnotation(int level, int paragraph) => ReadingAnnotation(
+      pinyin: paragraph == 0
+          ? 'Lín Xià zài Kuānzhǎi Xiàngzi de yuànluò cháguǎn zhàokàn zuòwèi hé chūrù, yì bǎ zhúyǐ zài cházhuō hé tōngxíng zhījiān fǎnfù jiāojiē.'
+          : 'Zhōu Shū bù zài děng Lín Xià tíxǐng, zìjǐ yíkāi zhúyǐ ràng rén tōngguò, ránhòu bǎ yǐzi fàng huí cházhuō páng.',
+      vietnamese: paragraph == 0
+          ? 'Lâm Hạ, 24 tuổi, là nhân viên trẻ phụ trách sân của một quán trà trong khu Kuanzhai. Một chiếc ghế tre phải liên tục nhường chỗ giữa việc ngồi uống trà và lối đi qua cửa sân.'
+          : 'Chú Chu, một khách quen lớn tuổi, dần cùng tham gia việc bàn giao chỗ. Ở cao trào, ông tự dời ghế cho người đi qua rồi đặt lại cạnh bàn trà mà không cần Lâm Hạ nhắc.',
+      english: paragraph == 0
+          ? 'Lin Xia, 24, is a young courtyard host at a teahouse in Kuanzhai Alley. One bamboo chair repeatedly yields between tea seating and passage through the courtyard entrance.'
+          : 'Zhou Shu, an older regular, becomes a causal participant in the handoff. At the climax he independently moves the chair for passage and returns it to tea use without waiting for Lin Xia.',
+    );
+
+JourneyLevelContent _chengduLevel(int level, List<String> paragraphs) => JourneyLevelContent(
       storyParagraphs: List<String>.unmodifiable(paragraphs),
       storyAnnotations: List<ReadingAnnotation>.unmodifiable([
-        for (var i = 0; i < paragraphs.length; i++)
-          ReadingAnnotation(
-            pinyin: i == 0
-                ? 'Lín Xià èrshísì suì, shì Chéngdū běndì jiànzhù xì yánjiūshēng. Tā dài zhe shǐyòng hénjì diàochá biǎo zǒujìn Kuānzhǎi Xiàngzi.'
-                : 'Tā zài chá zhuō páng chóngxīn héduì diàochá biǎo, huàdiào shāngyè huódòng, zài pángbiān xiěxià réng zài shǐyòng.',
-            vietnamese: i == 0
-                ? 'Lâm Hạ, 24 tuổi, là nghiên cứu sinh kiến trúc người Thành Đô. Cô mang phiếu khảo sát dấu vết sử dụng vào khu Kuanzhai, ban đầu xem hoạt động thương mại là yếu tố làm giảm tính xác thực lịch sử.'
-                : 'Qua việc quan sát cách cửa, sân, bàn trà, ghế và dòng người tiếp tục vận hành trong không gian cũ, cô sửa phân loại của mình. Hôm sau cô nộp nguyên phiếu có dòng gạch bỏ “hoạt động thương mại” và ghi tay “vẫn đang được sử dụng”.',
-            english: i == 0
-                ? 'Lin Xia, 24, is a Chengdu architecture graduate student. She enters Kuanzhai Alley with a use-trace survey and initially classifies commercial activity as a threat to historical authenticity.'
-                : 'Observing doors, courtyards, tea tables, chairs, and circulation still working inside the historic fabric forces her to revise that category. The next day she submits the original sheet with “commercial activity” crossed out and “still in use” handwritten beside it.',
-          ),
+        for (var i = 0; i < paragraphs.length; i++) _chengduAnnotation(level, i),
       ]),
       words: const <WordEntry>[],
       discoveries: const <DiscoveryEntry>[],
@@ -132,49 +133,55 @@ JourneyLevelContent _chengduLevel(List<String> paragraphs) => JourneyLevelConten
     );
 
 final chengduKuanzhaiOnePassLevels = List<JourneyLevelContent>.unmodifiable([
-  _chengduLevel([
-      '林夏二十四岁，是成都本地建筑系研究生。她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。到一张院中茶桌旁，她发现椅脚磨出的痕迹和旧门槛一样真实。林夏把“商业活动”四个字轻轻划掉，在旁边写：“仍在使用。”第二天交表时，她没有誊清那一页。'
-    ]),
-  _chengduLevel([
-      '林夏二十四岁，是成都本地建筑系研究生。老师让她在宽窄巷子做一次“使用痕迹调查”，记录历史街区今天怎样被使用。她原本相信，商业活动越多，历史真实性就越弱，所以刚到宽巷子，便在调查表的“影响历史真实性”一栏写下“商业活动”。她仔细看青砖、木门、院落和被踩亮的门槛，又走过窄巷子和井巷子，记录茶馆、餐厅、小店、椅子与不断变化的人流。院里一张茶桌旁，杯子移开后留下水圈，椅脚附近的地面也有长期使用的磨痕。她低头看表，没有写结论，只把“商业活动”四个字划掉，在旁边补上：“仍在使用。”第二天提交调查时，她保留了这处修改。'
-    ]),
-  _chengduLevel([
-      '林夏二十四岁，是成都本地建筑系研究生。课程要求她在宽窄巷子完成一份“使用痕迹调查”，观察历史街区的空间今天怎样运转。她的判断框架很清楚：保存应尽量减少现代干扰，商业越密集，历史真实性越容易被削弱。因此走进宽巷子不久，她就在调查表“影响历史真实性的因素”下面写了“商业活动”。她量门洞、看青砖墙，记下木门边缘和门槛被反复摩擦后的亮痕，也把茶馆、餐厅和游客流线标进草图。',
-      '走到窄巷子，她发现院落并没有因为有茶桌和店铺就停止发挥空间作用：门仍组织进出，院子仍让人坐下、交谈、绕行。井巷子更紧凑的街面上，旧墙与今天的经营并置。傍晚，她在一张院中茶桌旁重新核对调查表，看到椅脚磨痕、茶水留下的浅圈和门槛上的旧痕连在同一条使用线上。林夏没有写“我明白了”。她只是把“商业活动”四个字轻轻划掉，在旁边写：“仍在使用。”第二天交表，她没有誊写干净版本，那道删除线仍留在纸上。'
-    ]),
-  _chengduLevel([
-      '林夏二十四岁，是成都本地建筑系研究生。一次城市空间课程把她带到宽窄巷子，任务不是画立面，而是做“使用痕迹调查”：记录历史街区里哪些空间被保留、哪些被改变、今天的人怎样使用它们。林夏一直认为，保存越接近“少干预”，历史真实性越可靠。刚进宽巷子，她看见餐饮招牌和排队的人，便在调查表“影响历史真实性的因素”下先写“商业活动”。随后她把注意力移到建筑本身：青砖墙上有修补差异，木门边缘被手掌磨亮，门槛中央比两侧光滑，院落中的桌椅改变了停留方式，却没有改变门、院、廊之间的基本关系。',
-      '窄巷子和井巷子的观察让她的表格越来越难填。店铺确实改变了使用内容，但人仍沿街进入院落，在门内外停顿、交谈、让路；茶桌不是背景装饰，而是让院子继续发生社交的家具。傍晚，她坐在一张茶桌旁核对记录，发现椅脚附近的磨痕、杯底水圈与旧门槛上的凹痕都来自反复使用。她再次看见早先写下的“商业活动”。林夏停了一会儿，把这四个字划掉，在旁边写：“仍在使用。”第二天提交调查，她没有做一份整洁的新表，那道删除线和补写被原样保留。'
-    ]),
-  _chengduLevel([
-      '林夏二十四岁，是成都本地建筑系研究生。导师布置“使用痕迹调查”时，要求学生不要只拍建筑，而要记录历史街区如何被今天的人真正使用。林夏选择宽窄巷子，因为它由宽巷子、窄巷子和井巷子构成，旧街巷、院落与现代经营挤在一起，正适合检验她熟悉的保护观念。她一直倾向于把“原真”理解成减少后来加入的东西：商业越少，历史空间越纯。进入宽巷子后，餐厅门口的人流和店铺陈设首先进入视线，她很快在调查表“影响历史真实性的因素”下面写了“商业活动”。接着她开始按建筑训练观察：青砖墙的旧新差别、木门被触摸后的颜色变化、门槛中央的磨损、院落里桌椅留下的移动范围，全被标在草图上。',
-      '沿窄巷子继续走，她发现经营内容虽然是今天的，空间关系却仍被使用不断解释：门控制进出，院子容纳停留，窄处迫使陌生人侧身让路，茶桌把几个人的谈话固定在院落一角。到井巷子，她又记下旧墙边短暂停留的人和店铺前反复形成的流线。傍晚回到一处院落，她在茶桌旁整理记录。杯底留下的水圈很快会干，椅脚和门槛的磨痕却是日复一日积出的；新活动没有把旧空间变成静止展品，反而持续留下可读的使用证据。林夏翻到第一页，看着自己写的“商业活动”，没有加一句辩解，只把四个字划掉，在旁边写：“仍在使用。”第二天她交上原表，删除线没有被擦掉。'
-    ]),
-  _chengduLevel([
-      '林夏二十四岁，是成都本地建筑系研究生。城市更新课程要求她完成一份“使用痕迹调查”，目标不是只判断建筑保存了多少旧材料，而是记录历史空间今天怎样被进入、停留和使用。她选择宽窄巷子，因为宽巷子、窄巷子和井巷子既保留街巷与院落格局，也容纳茶馆、餐饮和商店。林夏并不反对经营，但她一直觉得现代商业越明显，历史真实性越容易被遮住。上午进入宽巷子，看见排队的人、菜单和店铺陈设后，她在调查表“影响历史真实性的因素”下面写了“商业活动”。随后她按建筑训练重新观察：青砖墙上旧砖与修补砖的色差、木门被反复触摸后变亮的位置、门槛中央的磨损、桌椅摆放后留下的通行缝隙，都被她画进草图。',
-      '窄巷子里，一处院落让她把“商业”拆成具体动作。茶桌旁有人添水、交谈、挪椅让路，服务人员绕过桌角，后来的人在门口等前一组通过；门、廊、院仍在组织这些动作。井巷子更紧凑，穿行、购买和短暂停留形成另一种使用密度。傍晚，她回到院中茶桌旁汇总记录。杯底水圈会很快变淡，椅脚附近和门槛上的磨痕却来自长期接触。她发现今天的活动并没有让旧空间停止发挥作用，反而继续留下能被读出的痕迹。林夏翻到第一页，看着自己先写下的“商业活动”，没有补理论，只把四个字划掉，在旁边写：“仍在使用。”第二天提交报告时，她没有誊清这一页，删除线和补写都留在原表上。'
-    ]),
-  _chengduLevel([
-      '林夏二十四岁，是成都本地建筑系研究生，研究历史街区更新。课程布置“使用痕迹调查”时，要求学生把建筑当成仍在运转的空间，而不是只看立面是否古旧。她选择宽窄巷子。宽巷子、窄巷子和井巷子组成街区核心，院落与街巷肌理保存下来，同时又有茶馆、餐饮、零售和不断流动的访客。林夏的担心并非没有道理：商业如果过强，确实可能遮住历史信息。只是她习惯在观察之前就把商业列成负面项。上午进入宽巷子，她看见候位、人流和店铺陈设，很快在调查表“影响历史真实性的因素”下写了“商业活动”。写完后，她按研究方法逐项测记：青砖墙修补处的色差、木门手握处的亮面、门槛中部长期踩出的磨损、院内桌椅的移动范围，以及人从街到门、从门到院的转折。',
-      '到了窄巷子，她发现原来的分类开始变得粗糙。茶桌周围有人坐下、起身、添水、让路，服务人员沿门廊往返；经营改变了内容，却仍在调用院落原有的尺度和关系。井巷子更窄，购买、穿行和驻足叠在一起，旧街巷的尺度反过来限制着今天的人怎样移动。林夏把“现代用途”和“空间是否仍可读”分开记录。傍晚，她回到茶桌旁核对三条巷子的表格。杯底水圈正在消失，椅脚移动磨亮的砖面和旧门槛上的凹痕却更稳定。调查明明在寻找“使用痕迹”，她最早却把最明显的使用先判成干扰。林夏没有写心得，只把第一页的“商业活动”四个字划掉，在旁边补上：“仍在使用。”第二天，她把这张有删除线、有补写的原表直接交了上去。'
-    ]),
-  _chengduLevel([
-      '林夏二十四岁，是成都本地建筑系研究生，正在做历史街区更新方向的课程研究。她收到的任务叫“使用痕迹调查”：不是给建筑做年代鉴定，而是观察历史空间在今天怎样被进入、停留、使用和改变。她选择宽窄巷子。宽巷子、窄巷子、井巷子三条核心街巷与院落保留着历史空间特征，保护更新后又持续承载餐饮、茶文化、零售和公共游逛。林夏一直对此保持警惕。她知道商业并非天然错误，但当招牌、消费和游客变得太醒目，历史真实性很容易退到背景。于是上午进入宽巷子，她看到门前排队、菜单和店铺陈设后，仍按原来的分析框架，在调查表“影响历史真实性的因素”下面写了“商业活动”。她随后开始更细的记录：青砖墙上旧砖与修补砖的色差，木门开启时手掌反复接触的位置，门槛中央被脚步磨低的弧度，院落中桌椅摆放后形成的通行缝隙，以及人从街到门、从门到院的转折。',
-      '窄巷子的一处院落让她第一次把商业用途拆成具体动作来看。茶桌旁有人添水、交谈、起身，服务人员穿过桌椅之间，后来的人在门口等前一组离开；空间并不是被“商业”这个抽象词占据，而是在持续承受身体、物件和时间。井巷子里，更高密度的穿行与购买又显示另一种关系：旧街巷尺度限制人怎样移动，今天的活动也反过来不断磨出新的使用痕迹。她查阅现场资料时确认，宽窄巷子是成都历史文化街区，保护更新长期同时处理历史遗存与现代使用。傍晚回到茶桌旁，她整理三条巷子的草图。杯底水圈将干未干，椅脚下的砖面已经发亮，旧门槛上的凹痕更深。林夏看见第一页那个写得很肯定的“商业活动”，停了几秒，把四个字划掉，在旁边写：“仍在使用。”第二天交表，她没有把矛盾整理成漂亮结论，而是留下原来的判断、删除线和新的四个字。'
-    ]),
-  _chengduLevel([
-      '林夏二十四岁，是成都本地建筑系研究生，研究历史街区更新。课程要求完成一份“使用痕迹调查”，重点不是判断某栋房子“古不古”，而是追踪空间在当代如何被进入、停留、经营、维护和重新理解。她选择宽窄巷子作为样本。宽巷子、窄巷子和井巷子构成街区核心的三条街巷，院落与砖木建筑保留了历史空间特征；保护更新后又长期容纳餐饮、茶文化、零售、休闲与访客。林夏知道历史街区不可能没有现实功能，但她仍倾向于一个谨慎的判断：现代商业越强，旧空间越容易变成消费布景，历史真实性也越难辨认。上午进入宽巷子，她看到餐厅门口的候位、人流和商品陈设，便在调查表“影响历史真实性的因素”下面写下“商业活动”。写完后，她按老师要求暂时搁置结论，只记录能被看见的证据：青砖墙上旧砖和修补砖的色差，木门反复开启形成的触摸亮区，门槛中央被长期踩出的磨损，院内桌椅改变停留位置后留下的移动范围，以及人从街巷进入院落时反复出现的转身与让路。',
-      '窄巷子里，一处院落的茶桌把她原先的分类逐渐拆开。喝茶的人并没有把院子当摄影背景：有人挪椅子让出通道，有人添水，有人交谈后起身，服务人员沿门、廊和桌边不断往返。院落原来的尺度决定这些动作怎样发生，而这些动作又在砖地、门槛和家具周围留下新的痕迹。井巷子更紧凑，购买、穿行、短暂停留叠在较窄的街面上，却也让她看到“使用”不能只按新旧二分。她把笔记改成两栏：一栏记可能遮蔽历史信息的改变，一栏记仍能读出旧空间结构的当代使用。她随后核对资料：宽窄巷子是成都重要历史文化街区，三条核心巷道和院落肌理在保护更新中被保留，同时又引入现代消费和公共活动。傍晚，林夏回到院中的茶桌旁汇总。杯底水圈正在变淡，椅脚附近的砖面因反复移动发亮，旧门槛上的凹痕则更深；不同年代的接触并没有自动互相取消。她翻到第一页，看见“商业活动”四个字仍被放在单一负面项里。林夏没有写心得，也没有给自己辩护。她用笔把那四个字划掉，在旁边写：“仍在使用。”第二天交调查表时，她没有誊清这一页。被划掉的旧判断和手写的新判断一起留在报告里。'
-    ]),
-  _chengduLevel([
-      '林夏二十四岁，是成都本地建筑系研究生，研究方向是历史街区保护与城市更新。学期末的课程任务不是传统测绘，而是一份“使用痕迹调查”：学生要追踪历史空间今天如何被进入、停留、经营、维护和改变，再判断这些活动究竟遮蔽了什么，又延续了什么。林夏选择宽窄巷子，因为它把她一直没有完全解决的问题摆得很直接。宽巷子、窄巷子和井巷子构成核心街巷，院落及砖木建筑保留着历史空间特征；保护更新之后，餐饮、茶文化、零售、休闲与密集访客又持续进入这些院落。林夏并不主张把商业全部赶走，她的担心更专业也更克制：当消费标识、经营需求和游客流线成为最醒目的层次，旧空间是否会只剩外观？上午刚到宽巷子，她看见候位的人、菜单牌和店铺陈设，仍按原有分析框架，在调查表“影响历史真实性的因素”下面写了“商业活动”。随后她把价值判断放到一边，逐项画证据。青砖墙上旧砖和修补砖有色差，木门把手附近被反复触摸得发亮，门槛中央比两侧磨损更深；院落里桌椅形成新的停留点，人从街到门、从门到院时反复转身、避让，留下稳定的通行带。',
-      '窄巷子的一处茶桌让她的分类开始失效。坐下的人添水、挪椅、聊天、起身，服务人员沿门廊往返，后来者在狭窄入口等前一组人通过。林夏原本只想标出“商业占用”，却发现门、廊、院的旧尺度仍在决定今天的身体如何移动。井巷子更紧凑，购买、拍照、穿行与短暂停留重叠，确实产生拥挤和视觉压力，但她无法再把所有现代活动直接等同于历史信息的消失。她把记录重新分成“遮蔽”与“延续”两栏，并核对街区资料：宽窄巷子由三条核心巷道及院落群构成，是成都的重要历史文化街区；保护更新既保留街巷院落机理，也引入餐饮、茶文化、零售与公共活动，相关城市实践明确面对历史传承与现代商业如何融合的问题。傍晚，她回到院中茶桌旁整理草图。杯底的水圈正在蒸发，椅脚反复移动使砖面发亮，门槛上的凹痕则跨过更长时间；新的接触与旧的磨损都证明空间没有停止承担生活。林夏翻到第一页，那四个字“商业活动”仍被她写在单一负面项里。她没有补一段理论，也没有写“我明白了”。只把“商业活动”划掉，在旁边写：“仍在使用。”第二天，她没有把报告誊成没有修改痕迹的干净版本。调查表上被划掉的四个字和那句手写补充一起被提交，成为这次调查最清楚的一处证据。'
-    ])
+  _chengduLevel(1, [
+    '林夏把一把竹椅挪到宽窄巷子一间院落茶馆的门口，刚想请常来的周叔坐下，端茶的同事就要从这里进院。林夏二十四岁，负责照看院里的座位和进出。她把竹椅挪开，让人通过，再把椅子还到茶桌边。没多久，两位客人又到门口，椅子再次挡路。林夏本想给它找一个永远不动的位置，却发现坐茶和通行都要用这块地方。她和周叔约好：有人经过就挪开，门口空了再放回。后来客人再来，林夏还没起身，周叔已经把椅子移开；人过去后，他又把它放回茶桌边。林夏看着那把没有固定位置的竹椅，没有再伸手。'
+  ]),
+  _chengduLevel(2, [
+    '林夏把一把竹椅放到宽窄巷子一间院落茶馆的门口，常来的周叔刚坐下，端着茶盘的同事就需要从门槛进院。二十四岁的林夏负责照看院里的座位和通行，她马上把椅子挪开，等同事过去后又放回茶桌旁。她觉得这样来回太乱，想替竹椅定一个固定位置。可是下午又有两位客人进院，门口需要让路；周叔也正好要坐着喝茶。林夏试着把椅子靠墙，服务的人转身时仍然不方便。她不再找“唯一正确”的位置，而是和周叔商量：通行开始时先让开，门口空下来再把椅子交还给茶桌。下一拨客人来到院门，林夏还没开口，周叔先起身移开竹椅。客人通过后，他把椅子重新放回。林夏第一次没有替别人安排位置，只看着院落里的停留和进出继续轮流发生。'
+  ]),
+  _chengduLevel(3, [
+    '林夏把一把竹椅挪到宽窄巷子一间院落茶馆的入口，准备让常来的周叔坐在茶桌旁。周叔刚落座，端着茶盘的同事就从门口进来，椅背挡住了通行。二十四岁的林夏是这里的年轻院落接待员，平时负责座位、添茶和出入。她先把椅子挪到一旁，让茶盘过去，再把椅子放回周叔身边。几分钟后，两位新客人从巷子走进院落，同一块门口又需要空出来。林夏有点烦，觉得一把椅子不该整天来回移动，于是把它靠墙，想给它一个固定位置。',
+    '固定位置很快又失效：靠墙的竹椅让端茶的人转身不便，周叔坐得离茶桌太远。林夏没有把椅子收走，也没有宣布它只属于周叔。她和周叔商量：谁看见通行开始，谁就先把椅子移开；门口空下来，再把它交还给茶桌。下午又一组客人进来时，林夏正给另一桌添水。她还没走到门边，周叔已经起身把竹椅挪开。客人经过后，他顺手将椅子放回茶桌边。林夏没有接手。院门重新打开，茶也继续喝，那把没有固定位置的竹椅又等着下一次交接。'
+  ]),
+  _chengduLevel(4, [
+    '林夏把一把竹椅放到宽窄巷子一间院落茶馆的入口旁，常来的周叔刚坐下，端茶的同事便从门外进来。门槛和茶桌之间的通道不宽，椅背一横，茶盘就不好通过。林夏二十四岁，是负责院落座位、茶水和出入的年轻接待员。她熟练地把竹椅移到院墙边，让同事过去，再还给周叔。她原以为只要找好一个位置，下午就能一直保持整齐。可不久，两位客人从窄巷子方向进院，入口又要空出来；周叔同时还需要椅子喝茶。林夏把椅子再靠墙一点，服务的人转身时却仍被挡住，她第一次对这把总要移动的椅子感到不耐烦。',
+    '林夏没有把通行或喝茶中的任何一方当成麻烦。她试着换问题：不是“椅子应该永远放哪儿”，而是“现在这几分钟谁需要这块地方”。她和周叔约定，门口有人进出时就把竹椅让开，通道恢复后再交还给茶桌；谁先看见下一次需要，谁就先动手。第二轮交接后，周叔已经不再等她提醒。下午又有客人跨过门槛，林夏正端着水壶，周叔先起身把竹椅挪到一旁；客人通过后，他又把椅子放回茶桌边。林夏犹豫了一下，没有重新摆正它。院落在停留和通行之间继续转换，一把没有固定位置的竹椅把这种临时交接留在动作里。'
+  ]),
+  _chengduLevel(5, [
+    '林夏午后把一把竹椅放到宽窄巷子一间院落茶馆的入口旁。常来的周叔喜欢坐在靠门的茶桌边，看得到巷子，也方便和熟人打招呼。可他刚坐下，端着茶盘的同事就要跨过门槛，椅背挡住了从巷子进入院落的通道。二十四岁的林夏是茶馆的年轻院落接待员，负责座位、茶水和出入。她把竹椅移开，让茶盘通过，再把椅子交还给周叔。她熟悉这个院子，原以为只要把桌椅摆得足够准确，就能让茶客停留和服务通行同时顺畅。几分钟后，两位新客人从窄巷子方向进来，同一个入口又要让路。林夏把竹椅靠墙，想给它确定一个“正确位置”，但服务人员转身仍不方便，周叔也离茶桌太远。',
+    '第二次失败让林夏不再追求永久布局。她没有把周叔赶离门边，也没有把竹椅永久收走，而是和他商量一个临时交接的节奏：有人从巷子进院或服务人员经过时，先把椅子挪开；通道空下来，再把它还给茶桌。周叔点头，并开始留意门口。之后一名同事端水出去，竹椅让开一次；另一桌客人离院，它又让开一次，每次都在通行结束后回到茶桌旁。傍晚前，又一组客人走近门槛，林夏正在院里给客人添茶。她还没开口，周叔已经自己起身，把竹椅移出通道。客人通过后，他顺手把椅子放回原来的茶桌边。林夏看见了，却没有接管。茶继续喝，路继续开合，一把没有固定位置的竹椅开始由不止一双手完成交接。'
+  ]),
+  _chengduLevel(6, [
+    '午后的宽窄巷子人流不断。林夏把一把普通竹椅放到一间院落茶馆的入口旁，常来的周叔坐下喝茶。这个位置对茶客很方便，却也贴近从巷子跨过门槛、进入院落的通道。周叔刚端起茶碗，服务员便托着茶盘进门，椅背让本来就有限的转身空间更窄。林夏二十四岁，是负责院落座位、茶水和进出的年轻接待员。她先把竹椅挪到院墙边，让茶盘通过，再把它推回周叔的茶桌。她一直以为好的接待就是提前把每件东西安排到固定位置，于是趁门口空下，把竹椅重新摆得更靠里，想一次解决冲突。没过多久，两位访客从窄巷子方向进院，仍然需要同一段入口；而竹椅靠得太里，又妨碍服务人员绕过茶桌。',
+    '林夏的第二次固定安排也失败了。她开始把注意力放在使用发生的先后，而不是寻找永久位置：周叔坐着喝茶是真的需要，端茶、进院和离院也都是真的需要，只是它们不必在同一秒占住同一块地方。她和周叔商量，谁先看见通行开始，谁就把竹椅移开；门口清空以后，再把椅子交还给茶桌。接下来的一个小时里，竹椅随着服务和客流几次往返，周叔也从被安排的人变成参与交接的人。傍晚前，一对客人走近门槛，林夏正背对入口添水。周叔先看见他们，没等提醒便起身把竹椅挪开。客人通过后，他又把椅子放回茶桌边，继续喝茶。林夏转身时只看见已经恢复的通道，没有再调整。院落的停留与通行开始依靠共同动作轮流发生，那把没有固定位置的竹椅也不再只听从她一个人的安排。'
+  ]),
+  _chengduLevel(7, [
+    '午后，宽窄巷子的巷道里人流一阵紧、一阵松。林夏把一把普通竹椅放在一间院落茶馆入口旁，常来的周叔习惯坐在这里喝茶，既能看见巷子，又离茶桌近。可是院门、门槛和茶桌之间只有一段有限的转身空间。周叔刚坐下，服务员托着茶盘从巷子进入院落，椅背就把通道压窄。二十四岁的林夏是茶馆的年轻院落接待员，负责座位、添茶和出入。她先把竹椅移到墙边，让茶盘过去，再把椅子推回茶桌。她对自己的安排很有把握，觉得只要找到一个最合适的位置，就能让整个下午不再反复搬动。于是她把竹椅重新定在门边一个看似折中的点。几分钟后，两位客人从窄巷子方向进院，这个点仍挡住转身；她又把椅子靠里，下一次服务员端水出去时，茶桌旁的空间又被挤窄。她的固定布局连续两次失效，烦躁也跟着上来。',
+    '林夏没有把周叔、访客或服务人员变成“错误的一方”。她终于把问题从永久归位改成时间顺序：同一个入口可以先服务通行，再恢复停留；同一把竹椅可以暂时让开，也可以在通道空下后回到茶桌。她和周叔约定，谁先看见下一次进出，谁就先移动椅子，不必等她批准。周叔第一次照做时还有点犹豫，第二次已经会在客人到门前前先起身。接下来的茶水往返、客人进院和离院，让竹椅反复完成几次短暂交接。傍晚前，一名新客人从宽巷子一侧转进门口，林夏正背对入口给另一桌添水。周叔先看见，自己把竹椅移开，让出门槛；客人通过后，他又把椅子放回茶桌旁。林夏转身时没有重新摆正，也没有表扬谁。院里的人继续喝茶，通道继续开合。她第一次相信，这个小院不必由她把每个位置永远控制住；一把没有固定位置的竹椅，已经把临时使用交给了不止一双手。'
+  ]),
+  _chengduLevel(8, [
+    '午后，宽窄巷子的街巷与院落不断在“走过”和“停下”之间切换。林夏把一把普通竹椅放在一间院落茶馆的入口旁，常来的周叔喜欢坐在靠门的茶桌边，看巷子里的人来人往。院门从巷道收进小院，门槛后的转身空间不大，桌椅一靠近入口，就会直接影响服务和客流。周叔刚坐下，服务员托着茶盘进院，椅背已经挡住路线。二十四岁的林夏是茶馆的年轻院落接待员，负责座位、茶水与出入秩序。她熟练地把竹椅挪到墙边，让茶盘通过，再把它交还给周叔。她一直把“摆好以后不要再动”当成整齐和负责，于是趁门口空下，重新测着距离，把椅子放到一个自认为永久合适的位置。几分钟后，两位客人从窄巷子方向进入院落，同一处门口又需要更宽的转身；她把椅子往里挪，下一轮端水出去时，服务员又被桌角和椅背夹住。固定位置第二次失败，林夏忍不住叹气，周叔也看出她一直在和这把椅子较劲。',
+    '林夏没有把冲突解释成谁更有资格占这个位置。喝茶的停留、服务员的往返、访客的进出都合理，真正变化的是发生的时刻。她不再寻找一张永久布局，而是和周叔商量一个简单的临时交接：入口开始通行时，竹椅先退出通道；门槛空下来，再把它放回茶桌；下一次谁先看到需要，谁就先动手。最初林夏仍会下意识伸手，随后她故意慢半拍，让周叔参与。服务员端水出去时，周叔移椅；一桌客人离院后，他又把椅子放回。这个动作不是写在纸上的规定，而是在院门、门槛、茶桌与人的身体之间一次次被练出来。傍晚前，一名第一次来的客人从宽巷子一侧走近院门，林夏正给另一桌添茶，完全没有发出指令。周叔看见来人，自己起身把竹椅移到墙边；客人跨过门槛后，他顺手把椅子还给茶桌。林夏转过身，只看见通道已经重新打开。她没有接管，也没有把椅子搬回所谓标准位置。茶继续喝，服务继续穿行，一把没有固定位置的竹椅让院落形成了可以被别人接续的共享节奏。'
+  ]),
+  _chengduLevel(9, [
+    '午后，宽窄巷子的人流从宽巷子、窄巷子的街面不断进入沿巷院落，停留与通行在入口处交替发生。林夏把一把普通竹椅放在一间院落茶馆门边，常来的周叔习惯坐在靠入口的茶桌旁。这个位置既能看见巷子，也正贴着门槛后的转身区域。周叔刚坐下，服务员托着茶盘从街巷进入院落，椅背让本就有限的通道变得更窄。林夏二十四岁，是负责院落座位、茶水和出入的年轻茶馆接待员。她先把竹椅移到墙边，让茶盘通过，再把它交还给周叔。她对自己的空间安排一向有信心，认为负责就是提前决定每张桌椅该在哪里。于是她趁入口空下，给竹椅找了一个看似兼顾喝茶与通行的固定位置。几分钟后，两位客人从窄巷子方向来到院门，仍需要更大的转身空间；林夏把椅子往内收，下一次服务员端水离院，桌角和椅背又挤住路线。第二种固定位置也失败了。她越想把院子一次摆定，竹椅越随着实际使用被迫移动。',
+    '林夏压下不耐烦，没有把周叔赶离茶桌，也没有要求所有进院的人绕路。她开始承认同一个小空间存在几种正当而不同步的需要：坐下喝茶需要停留，茶水服务需要往返，巷道与院落之间的入口需要保持可以打开的通路。宽窄巷子的街—巷—院关系让这些动作在同一个门口相遇，也让“固定分配”很快露出限制。林夏于是做了一个身体上的选择，而不是写规则：她和周叔约定，谁先看见通行开始，谁就先把竹椅退出入口；通行结束，再把它交还给茶桌。第一次周叔等她点头，第二次他主动起身；服务员进出、客人离院、另一组访客到来，让竹椅在下午反复完成短暂的让位和归还。傍晚前，一名第一次来的客人走近门槛，林夏正背对入口添水。周叔没有叫她，直接把竹椅挪到院墙边。客人顺利通过后，他又把椅子放回茶桌旁，继续端起茶碗。林夏转身时停了一瞬，没有重新摆椅。院落的共享使用已经不再只是她个人的安排：停留结束时可以交给通行，通行结束又可以回到停留。一把没有固定位置的竹椅，在不同人的手里维持着这段节奏。'
+  ]),
+  _chengduLevel(10, [
+    '午后，宽窄巷子的街巷人流不断变化。宽巷子、窄巷子与井巷子构成历史街区的核心街巷，沿巷院落把街面的流动收进更小的入口、门槛和内部停留空间。林夏工作的茶馆就在这样一处院落里。她把一把普通竹椅放到门边，常来的周叔习惯坐在靠入口的茶桌旁，既能喝茶，也能看见巷子。这个位置对停留很合适，却紧贴从巷子跨过门槛进入院落的通路。周叔刚落座，服务员托着茶盘进门，椅背便压缩了转身空间。二十四岁的林夏是年轻的院落接待员，负责座位、茶水和进出。她先把竹椅挪到墙边，让茶盘通过，再将椅子交还给周叔。她一向相信，把桌椅一次摆到“正确位置”才算把空间管好，于是趁入口暂时空下，重新调整竹椅，想给它一个整日下午都不用改变的固定位置。几分钟后，两位客人从窄巷子方向来到门口，固定位置仍挡住进院的转身；她又把椅子往内收，下一次服务员端水离院时，桌角与椅背又挤住路线。第二个方案也失败了。林夏开始烦躁，因为每一种永久安排都只适合刚才那一刻。',
+    '院落里，林夏没有把周叔的喝茶、服务员的往返或访客的通行判成不合理。真正冲突的是院落入口的有限空间与不断变化的使用时序：同一小块地方不能永久交给一种用途，却可以在不同时间服务不同的人。林夏放弃给竹椅指定永久归属，改成亲手建立交接节奏。她先示范：有人从巷子进院，竹椅就退出门槛；通道清空，椅子再放回茶桌。她邀请周叔一起留意下一次需要，谁先看见，谁先移动，不必等她发令。起初周叔仍看她一眼才动，后来服务员端茶、客人离院、另一桌有人经过，竹椅反复几次让位又归还，动作越来越自然。傍晚前，一名第一次来的客人从街巷转入院门，林夏正在另一桌添水，背对入口。周叔先看见来人，没有喊她，也没有等提示，自己起身把竹椅挪到院墙边；客人跨过门槛进入院落后，他又把椅子推回茶桌旁，继续喝茶。林夏转身时只看见已经打开又恢复的通路。她没有再伸手，也没有把椅子校正到某个标准点。茶客继续停留，服务人员继续穿行，院落在一轮轮临时交接中保持可用。最后，一位离桌的客人顺手又为经过的人移开同一把竹椅。林夏看着那只手完成动作，没有出声。一把没有固定位置的竹椅，已经把共享空间的节奏交给了下一位使用者。'
+  ]),
 ]);
 
-WordEntry _word(String word, String pinyin, String partOfSpeech,
-        String simpleChinese, String vietnamese, String english, String symbol) =>
-    WordEntry(
+WordEntry _word(
+  String word,
+  String pinyin,
+  String partOfSpeech,
+  String simpleChinese,
+  String vietnamese,
+  String english,
+  String symbol,
+) => WordEntry(
       word: word,
       pinyin: pinyin,
       partOfSpeech: partOfSpeech,
@@ -185,233 +192,235 @@ WordEntry _word(String word, String pinyin, String partOfSpeech,
     );
 
 final chengduKuanzhaiOnePassWords = List<WordEntry>.unmodifiable([
-  _word('使用痕迹', 'shǐyòng hénjì', '名词', '空间或物件因反复使用留下的可观察变化。', 'dấu vết sử dụng', 'visible traces left by repeated use', '🔎'),
-  _word('宽窄巷子', 'Kuānzhǎi Xiàngzi', '名词（专名）', '成都由宽巷子、窄巷子和井巷子组成的重要历史街区。', 'Khu ngõ Kuanzhai ở Thành Đô', 'Kuanzhai Alley historic district in Chengdu', '🏘️'),
-  _word('调查表', 'diàochá biǎo', '名词', '按项目记录现场观察和判断的表格。', 'phiếu khảo sát', 'survey form', '📋'),
-  _word('历史真实性', 'lìshǐ zhēnshíxìng', '名词', '对历史空间真实信息与连续性的判断。', 'tính xác thực lịch sử', 'historical authenticity', '🧭'),
-  _word('商业活动', 'shāngyè huódòng', '名词', '餐饮、零售、服务等经营活动。', 'hoạt động thương mại', 'commercial activity', '🏪'),
-  _word('青砖', 'qīngzhuān', '名词', '传统建筑中常见的灰青色砖材。', 'gạch xanh xám', 'grey-blue brick', '🧱'),
-  _word('门槛', 'ménkǎn', '名词', '门口下方横置、常被脚步经过的构件。', 'ngưỡng cửa', 'door threshold', '🚪'),
-  _word('院落', 'yuànluò', '名词', '由建筑围合并组织出入、停留和活动的院子空间。', 'sân nhà khép kín', 'courtyard compound', '🏡'),
-  _word('茶桌', 'cházhuō', '名词', '喝茶时使用的桌子，在故事中也是观察院落使用的现场。', 'bàn trà', 'tea table', '🍵'),
-  _word('仍在使用', 'réng zài shǐyòng', '短语', '没有被冻成静态展品，而是继续承担现实活动。', 'vẫn đang được sử dụng', 'still in use', '✍️'),
-  _word('井巷子', 'Jǐng Xiàngzi', '名词（专名）', '宽窄巷子街区三条核心巷道之一。', 'Ngõ Giếng', 'Jing Alley', '↕️'),
-  _word('茶馆', 'cháguǎn', '名词', '提供饮茶、停留和社交的经营空间。', 'quán trà', 'teahouse', '🫖'),
-  _word('街巷肌理', 'jiēxiàng jīlǐ', '名词', '街道、巷道、院落等共同形成的空间组织关系。', 'cấu trúc mô hình phố-ngõ', 'street-and-alley urban fabric', '🗺️'),
-  _word('砖木建筑', 'zhuānmù jiànzhù', '名词', '以砖和木为主要材料的建筑。', 'kiến trúc gạch và gỗ', 'brick-and-timber architecture', '🏠'),
-  _word('保护更新', 'bǎohù gēngxīn', '名词/动词', '在保护历史信息的同时改善和延续现实使用。', 'bảo tồn và cải tạo', 'conservation-led renewal', '♻️')
+  _word('宽窄巷子', 'Kuānzhǎi Xiàngzi', '名词（专名）', '成都重要历史文化街区。', 'Khu Kuanzhai ở Thành Đô', 'Kuanzhai Alley historic district', '🏘️'),
+  _word('竹椅', 'zhúyǐ', '名词', '竹制的椅子；故事中是普通的日常座椅。', 'ghế tre', 'bamboo chair', '🪑'),
+  _word('院落', 'yuànluò', '名词', '由建筑围合、连接入口与内部活动的院子空间。', 'sân nhà', 'courtyard', '🏡'),
+  _word('茶馆', 'cháguǎn', '名词', '提供饮茶和停留的经营空间。', 'quán trà', 'teahouse', '🫖'),
+  _word('茶桌', 'cházhuō', '名词', '喝茶时使用的桌子。', 'bàn trà', 'tea table', '🍵'),
+  _word('通行', 'tōngxíng', '动词/名词', '从一个地方顺利经过。', 'đi qua, lưu thông', 'passage; to pass through', '🚶'),
+  _word('挪开', 'nuókāi', '动词', '把东西移动到旁边，让出位置。', 'dời sang một bên', 'move aside', '↔️'),
+  _word('门口', 'ménkǒu', '名词', '门的内外连接位置。', 'cửa ra vào', 'doorway; entrance', '🚪'),
+  _word('门槛', 'ménkǎn', '名词', '门口下方横置、进出时跨过的构件。', 'ngưỡng cửa', 'threshold', '🧱'),
+  _word('让路', 'rànglù', '动词', '把通道让出来给别人经过。', 'nhường đường', 'make way', '➡️'),
+  _word('轮流', 'lúnliú', '副词/动词', '按先后次序交替进行。', 'luân phiên', 'take turns', '🔁'),
+  _word('交接', 'jiāojiē', '动词/名词', '把正在使用或负责的东西交给下一方继续。', 'bàn giao', 'handoff; transfer', '🤝'),
 ]);
 
 final chengduKuanzhaiWordTraces = List<RemediatedWordTrace>.unmodifiable([
-  const RemediatedWordTrace(word: '使用痕迹', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
-  const RemediatedWordTrace(word: '宽窄巷子', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
-  const RemediatedWordTrace(word: '调查表', eventId: 'CD-E1-survey', usage: 'Lv2 首次出现。', sourceText: '她原本相信，商业活动越多，历史真实性就越弱，所以刚到宽巷子，便在调查表的“影响历史真实性”一栏写下“商业活动”。'),
-  const RemediatedWordTrace(word: '历史真实性', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
-  const RemediatedWordTrace(word: '商业活动', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她带着“使用痕迹调查”表走进宽窄巷子，认定商业越多，历史越不真实，便在“影响历史真实性”一栏写下“商业活动”。'),
-  const RemediatedWordTrace(word: '青砖', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
-  const RemediatedWordTrace(word: '门槛', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
-  const RemediatedWordTrace(word: '院落', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
-  const RemediatedWordTrace(word: '茶桌', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '她沿宽巷子看青砖墙、木门、磨亮的门槛和院落，又在窄巷子看见茶桌、椅子、店员和来往的人共享旧空间。'),
-  const RemediatedWordTrace(word: '仍在使用', eventId: 'CD-E1-survey', usage: 'Lv1 首次出现。', sourceText: '林夏把“商业活动”四个字轻轻划掉，在旁边写：“仍在使用。”'),
-  const RemediatedWordTrace(word: '井巷子', eventId: 'CD-E1-survey', usage: 'Lv2 首次出现。', sourceText: '她仔细看青砖、木门、院落和被踩亮的门槛，又走过窄巷子和井巷子，记录茶馆、餐厅、小店、椅子与不断变化的人流。'),
-  const RemediatedWordTrace(word: '茶馆', eventId: 'CD-E1-survey', usage: 'Lv2 首次出现。', sourceText: '她仔细看青砖、木门、院落和被踩亮的门槛，又走过窄巷子和井巷子，记录茶馆、餐厅、小店、椅子与不断变化的人流。'),
-  const RemediatedWordTrace(word: '街巷肌理', eventId: 'CD-E3-observe', usage: 'Lv7 首次出现。', sourceText: '宽巷子、窄巷子和井巷子组成街区核心，院落与街巷肌理保存下来，同时又有茶馆、餐饮、零售和不断流动的访客。'),
-  const RemediatedWordTrace(word: '砖木建筑', eventId: 'CD-E3-observe', usage: 'Lv9 首次出现。', sourceText: '宽巷子、窄巷子和井巷子构成街区核心的三条街巷，院落与砖木建筑保留了历史空间特征；保护更新后又长期容纳餐饮、茶文化、零售、休闲与访客。'),
-  const RemediatedWordTrace(word: '保护更新', eventId: 'CD-E3-observe', usage: 'Lv8 首次出现。', sourceText: '宽巷子、窄巷子、井巷子三条核心街巷与院落保留着历史空间特征，保护更新后又持续承载餐饮、茶文化、零售和公共游逛。')
+  const RemediatedWordTrace(word: '宽窄巷子', eventId: 'CD-E1-opening', usage: 'Lv1 首次出现。', sourceText: '林夏把一把竹椅挪到宽窄巷子一间院落茶馆的门口，刚想请常来的周叔坐下，端茶的同事就要从这里进院。'),
+  const RemediatedWordTrace(word: '竹椅', eventId: 'CD-E1-opening', usage: 'Lv1 首次出现。', sourceText: '林夏把一把竹椅挪到宽窄巷子一间院落茶馆的门口，刚想请常来的周叔坐下，端茶的同事就要从这里进院。'),
+  const RemediatedWordTrace(word: '院落', eventId: 'CD-E1-opening', usage: 'Lv1 首次出现。', sourceText: '林夏把一把竹椅挪到宽窄巷子一间院落茶馆的门口，刚想请常来的周叔坐下，端茶的同事就要从这里进院。'),
+  const RemediatedWordTrace(word: '茶馆', eventId: 'CD-E1-opening', usage: 'Lv1 首次出现。', sourceText: '林夏把一把竹椅挪到宽窄巷子一间院落茶馆的门口，刚想请常来的周叔坐下，端茶的同事就要从这里进院。'),
+  const RemediatedWordTrace(word: '茶桌', eventId: 'CD-E2-first-handoff', usage: 'Lv1 首次出现。', sourceText: '她把竹椅挪开，让人通过，再把椅子还到茶桌边。'),
+  const RemediatedWordTrace(word: '通行', eventId: 'CD-E3-fixed-fails', usage: 'Lv1 首次出现。', sourceText: '林夏本想给它找一个永远不动的位置，却发现坐茶和通行都要用这块地方。'),
+  const RemediatedWordTrace(word: '挪开', eventId: 'CD-E2-first-handoff', usage: 'Lv1 首次出现。', sourceText: '她把竹椅挪开，让人通过，再把椅子还到茶桌边。'),
+  const RemediatedWordTrace(word: '门口', eventId: 'CD-E1-opening', usage: 'Lv1 首次出现。', sourceText: '林夏把一把竹椅挪到宽窄巷子一间院落茶馆的门口，刚想请常来的周叔坐下，端茶的同事就要从这里进院。'),
+  const RemediatedWordTrace(word: '门槛', eventId: 'CD-E2-first-handoff', usage: 'Lv2 首次出现。', sourceText: '林夏把一把竹椅放到宽窄巷子一间院落茶馆的门口，常来的周叔刚坐下，端着茶盘的同事就需要从门槛进院。'),
+  const RemediatedWordTrace(word: '让路', eventId: 'CD-E3-fixed-fails', usage: 'Lv2 首次出现。', sourceText: '可是下午又有两位客人进院，门口需要让路；周叔也正好要坐着喝茶。'),
+  const RemediatedWordTrace(word: '轮流', eventId: 'CD-E7-consequence', usage: 'Lv2 首次出现。', sourceText: '林夏第一次没有替别人安排位置，只看着院落里的停留和进出继续轮流发生。'),
+  const RemediatedWordTrace(word: '交接', eventId: 'CD-E4-choice', usage: 'Lv3 首次出现。', sourceText: '院门重新打开，茶也继续喝，那把没有固定位置的竹椅又等着下一次交接。'),
 ]);
 
-const chengduKuanzhaiWordFirstAppears = <String, int>{'使用痕迹': 1, '宽窄巷子': 1, '调查表': 2, '历史真实性': 1, '商业活动': 1, '青砖': 1, '门槛': 1, '院落': 1, '茶桌': 1, '仍在使用': 1, '井巷子': 2, '茶馆': 2, '街巷肌理': 7, '砖木建筑': 9, '保护更新': 8};
+const chengduKuanzhaiWordFirstAppears = <String, int>{
+  '宽窄巷子': 1,
+  '竹椅': 1,
+  '院落': 1,
+  '茶馆': 1,
+  '茶桌': 1,
+  '通行': 1,
+  '挪开': 1,
+  '门口': 1,
+  '门槛': 2,
+  '让路': 2,
+  '轮流': 2,
+  '交接': 3,
+};
 
 DiscoveryEntry _discovery(
   String text, {
   required String simpleChinese,
   required String vietnamese,
   required String english,
-}) =>
-    DiscoveryEntry(
+}) => DiscoveryEntry(
       text: text,
-      pinyin:
-          'Kuānzhǎi Xiàngzi de lìshǐ kōngjiān yǔ dāngdài shǐyòng xūyào fàng zài tóng yí gè bǎohù hé gēngxīn guānxì zhōng lǐjiě.',
+      pinyin: 'Kuānzhǎi Xiàngzi de jiē, xiàng, yuàn yǔ dāngdài shǐyòng yīrán xiānghù liánjiē.',
       simpleChinese: simpleChinese,
       vietnamese: vietnamese,
       english: english,
     );
 
-final chengduKuanzhaiDiscoverySpecs =
-    List<ChengduDiscoverySpec>.unmodifiable([
+final chengduKuanzhaiDiscoverySpecs = List<ChengduDiscoverySpec>.unmodifiable([
   ChengduDiscoverySpec(
     level: 1,
-    title: '三条巷子构成什么',
-    storyLink: '林夏从宽巷子开始，又把窄巷子和井巷子纳入同一份调查。',
+    title: '三条核心街巷',
+    storyLink: '故事发生在宽窄巷子的沿巷院落，入口直接连接街巷流动与院内停留。',
     entry: _discovery(
-      '宽窄巷子街区由宽巷子、窄巷子和井巷子三条核心街巷组成，三条巷道与院落共同构成可连续步行和观察的历史空间。',
-      simpleChinese: '宽巷子、窄巷子、井巷子不是三个孤立景点，而是同一历史街区的核心部分。',
-      vietnamese: 'Khu Kuanzhai gồm ba tuyến ngõ cốt lõi: ngõ Rộng, ngõ Hẹp và ngõ Giếng, cùng các sân nhà tạo thành một không gian lịch sử liên tục.',
-      english: 'Kuanzhai Alley is organized around the three core lanes of Kuan, Zhai, and Jing, together with their courtyards.',
+      '宽窄巷子街区由宽巷子、窄巷子和井巷子三条核心街巷及沿线院落共同构成。',
+      simpleChinese: '宽巷子、窄巷子和井巷子共同组成街区核心。',
+      vietnamese: 'Khu Kuanzhai gồm ba ngõ cốt lõi Kuan, Zhai và Jing cùng các sân nhà dọc tuyến.',
+      english: 'Kuanzhai is organized around the three core lanes of Kuan, Zhai, and Jing together with courtyards along them.',
     ),
     keyTerms: const ['宽巷子', '窄巷子', '井巷子'],
-    learnerInsight: '故事让林夏比较三条巷子的使用方式，而不是把宽窄巷子理解成一个单点地标。',
-    check: '宽窄巷子的三条核心街巷叫什么？',
+    learnerInsight: '街巷与院落不是两个无关背景，而是连续的空间系统。',
+    check: '宽窄巷子的三条核心街巷是什么？',
     answer: '宽巷子、窄巷子和井巷子。',
     sourceIds: const ['chengdu-gov-kuanzhai-alley'],
   ),
   ChengduDiscoverySpec(
     level: 2,
-    title: '为什么能读到清代以来的空间',
-    storyLink: '林夏先看青砖、木门和院落，再记录今天的人流。',
+    title: '历史街区与院落',
+    storyLink: '院门和门槛把巷道通行压缩到一个具体入口。',
     entry: _discovery(
-      '官方资料把宽窄巷子的历史追溯到清代，并指出街区仍保存具有历史特征的街巷、院落和传统建筑空间。',
-      simpleChinese: '这里的价值不只来自“老外观”，还来自被保留下来的街巷和院落关系。',
-      vietnamese: 'Tư liệu chính thức truy nguồn lịch sử khu phố về thời Thanh và nhấn mạnh việc bảo tồn ngõ, sân nhà và không gian kiến trúc lịch sử.',
-      english: 'Official material traces the district\'s history to the Qing period and emphasizes the survival of historic lanes, courtyards, and building fabric.',
+      '官方资料把宽窄巷子的历史追溯到清代，并持续强调街巷、院落和传统建筑空间的保存。',
+      simpleChinese: '历史价值来自街巷、院落和建筑关系，不只来自外观。',
+      vietnamese: 'Tư liệu chính thức truy lịch sử khu phố về thời Thanh và nhấn mạnh việc bảo tồn ngõ, sân và cấu trúc kiến trúc.',
+      english: 'Official material traces the district to the Qing period and emphasizes preservation of lanes, courtyards, and historic building fabric.',
     ),
     keyTerms: const ['清代', '院落', '历史空间'],
-    learnerInsight: '林夏观察门槛和院落，是在读空间连续性，而不是只给建筑贴年代标签。',
-    check: '故事为什么反复写门、院和巷，而不只写立面？',
-    answer: '因为街巷与院落的空间关系本身就是历史信息。',
+    learnerInsight: '入口、门槛和院落关系让今天的通行受到历史空间尺度影响。',
+    check: '为什么Discovery不只看一面“老墙”？',
+    answer: '因为街巷和院落的空间关系本身也是历史信息。',
     sourceIds: const ['chengdu-gov-kuanzhai-alley'],
   ),
   ChengduDiscoverySpec(
     level: 3,
-    title: '院落为什么是使用系统',
-    storyLink: '林夏发现门仍组织进出，院子仍容纳坐下、交谈和绕行。',
+    title: '街—巷—院的连续关系',
+    storyLink: '停留与通行在同一个院落入口相遇。',
     entry: _discovery(
-      '宽窄巷子的保护更新强调街、巷、院之间的空间组织；院落不是独立摆设，而是与街巷、入口和内部活动相连的使用单元。',
-      simpleChinese: '院落要放回街—巷—院的关系里理解。',
-      vietnamese: 'Việc bảo tồn nhấn mạnh quan hệ không gian phố-ngõ-sân; sân nhà là một đơn vị sử dụng liên kết với lối vào và hoạt động bên trong.',
-      english: 'Conservation work emphasizes the street-lane-courtyard relationship, treating courtyards as connected spatial units rather than isolated exhibits.',
+      '宽窄巷子的保护利用强调历史街巷和院落关系，院落与入口、街巷和内部活动共同形成连续使用空间。',
+      simpleChinese: '院落不是孤立展品，而是街—巷—院关系中的一部分。',
+      vietnamese: 'Sân nhà là một phần của quan hệ liên tục phố-ngõ-sân, nối lối vào với hoạt động bên trong.',
+      english: 'Courtyards are part of a continuous street-lane-courtyard relationship linking entrances and internal activity.',
     ),
     keyTerms: const ['街', '巷', '院'],
-    learnerInsight: '茶桌是否“现代”不是唯一问题，更关键的是这些活动怎样进入并使用原有空间。',
-    check: '院落为什么不能只当作一张静态照片看？',
-    answer: '因为它仍与入口、街巷和人的活动相连。',
+    learnerInsight: '院落尺度会实际影响人怎样进入、停留和让路。',
+    check: '院落为什么不能只当静态背景？',
+    answer: '因为它仍与入口、街巷和现实活动相连。',
     sourceIds: const ['mofcom-kuanzhai-pedestrian-renewal'],
   ),
   ChengduDiscoverySpec(
     level: 4,
-    title: '保护为什么不等于只保立面',
-    storyLink: '林夏记录修补差异、门槛磨损和桌椅移动，而不是只判断墙面是否古旧。',
+    title: '现实使用与保护',
+    storyLink: '故事把空间是否可用表现为停留和通行的实际关系。',
     entry: _discovery(
-      '历史街区保护既要保存可识别的历史空间和建筑特征，也要处理现实使用、维护与更新；只保留一个“像旧的”外表，不能代表完整的保护。',
-      simpleChinese: '保护要同时看历史信息、空间关系和现实使用。',
-      vietnamese: 'Bảo tồn khu lịch sử cần giữ thông tin và quan hệ không gian, đồng thời xử lý việc sử dụng, bảo dưỡng và cải tạo hiện tại.',
-      english: 'Historic-district conservation must preserve legible historic fabric and spatial relationships while addressing present use, maintenance, and renewal.',
+      '历史街区保护既要保存可识别的历史空间与建筑特征，也需要处理现实使用、维护和更新。',
+      simpleChinese: '保护历史空间并不等于让现实使用停止。',
+      vietnamese: 'Bảo tồn khu lịch sử vừa giữ thông tin không gian, vừa phải xử lý việc sử dụng, bảo dưỡng và cải tạo hiện tại.',
+      english: 'Historic-district conservation preserves legible historic fabric while also addressing present use, maintenance, and renewal.',
     ),
-    keyTerms: const ['保护', '历史信息', '现实使用'],
-    learnerInsight: '林夏的调查方法从“看起来旧不旧”转向“空间怎样继续工作”。',
-    check: '只保留古旧外观是否足以证明历史空间被完整保护？',
-    answer: '不足，还要看历史信息、空间关系和现实使用。',
-    sourceIds: const ['sichuan-gov-historic-building-use', 'chengdu-gov-kuanzhai-embedded-renewal'],
+    keyTerms: const ['保护', '现实使用', '更新'],
+    learnerInsight: 'Discovery解释保护背景，不替林夏解释“正确答案”。',
+    check: '保护是否等于停止所有现实使用？',
+    answer: '不是，还需要处理合适的现实使用与维护。',
+    sourceIds: const ['sichuan-gov-historic-building-use'],
   ),
   ChengduDiscoverySpec(
     level: 5,
-    title: '茶桌为什么不是成都装饰',
-    storyLink: '茶桌旁的挪椅、添水、让路和交谈成为林夏最关键的使用证据。',
+    title: '茶饮为什么是实际使用',
+    storyLink: '茶桌在故事中直接占用停留空间，并与服务通行发生关系。',
     entry: _discovery(
-      '宽窄巷子的现实经营包含茶饮、餐饮等活动；在历史院落里，桌椅与服务流线会直接改变人怎样停留和通行，因此可以被当作空间使用证据来观察。',
-      simpleChinese: '故事里的茶桌不是“慢生活”符号，而是具体的人与空间发生关系的地方。',
-      vietnamese: 'Bàn trà không chỉ là biểu tượng địa phương; trong sân lịch sử, ghế, bàn và lối phục vụ cho thấy con người thực sự sử dụng không gian ra sao.',
-      english: 'The tea table is not decorative branding: seating, service, and circulation make contemporary courtyard use observable.',
+      '宽窄巷子的现实经营包含茶饮、餐饮等功能；在院落中，桌椅、服务与通行会共同影响空间怎样被使用。',
+      simpleChinese: '茶不是装饰词，它会带来座位、服务和停留。',
+      vietnamese: 'Trà không chỉ là hình ảnh trang trí; bàn ghế, phục vụ và việc dừng lại đều trực tiếp sử dụng không gian sân.',
+      english: 'Tea use is not decorative branding: seating, service, and stopping directly occupy and organize courtyard space.',
     ),
-    keyTerms: const ['茶桌', '通行', '停留'],
-    learnerInsight: '文化学习来自行为和空间关系，而不是一句“成都很悠闲”。',
-    check: '茶桌在故事中的主要作用是什么？',
-    answer: '让林夏观察院落正在发生的真实使用。',
+    keyTerms: const ['茶饮', '座位', '通行'],
+    learnerInsight: '茶桌只有进入Goal、Conflict和Choice，才成为故事机制。',
+    check: '故事中的茶桌为什么不是成都风格装饰？',
+    answer: '因为茶桌产生真实停留需求，并直接参与入口空间冲突。',
     sourceIds: const ['chengdu-gov-kuanzhai-alley', 'mofcom-kuanzhai-pedestrian-renewal'],
   ),
   ChengduDiscoverySpec(
     level: 6,
-    title: '商业一定等于破坏吗',
-    storyLink: '林夏把“商业”拆成添水、挪椅、穿行、购买等具体动作。',
+    title: '商业与历史空间可以怎样相处',
+    storyLink: '故事不判断商业“真不真实”，只处理茶馆日常使用怎样在历史空间中发生。',
     entry: _discovery(
-      '官方更新实践把历史文化传承与现代商业的融合视为需要设计和管理的问题，这并不表示所有商业都自动正确，也不表示商业一出现就等于历史真实性消失。',
-      simpleChinese: '关键是判断经营怎样影响历史信息和空间，而不是先把“商业”判成同一种结果。',
-      vietnamese: 'Thực tiễn cải tạo xem sự kết hợp giữa di sản và thương mại hiện đại là vấn đề cần thiết kế và quản lý, không phải một kết luận tự động tốt hay xấu.',
-      english: 'Official renewal practice treats the relationship between heritage and modern commerce as something to design and manage, not as an automatic good-or-bad verdict.',
+      '商务部门对宽窄巷子的改造提升材料强调历史文化传承与现代商业融合，同时要求保护利用历史文化遗产。',
+      simpleChinese: '现代功能进入历史街区，需要受历史空间和保护目标约束。',
+      vietnamese: 'Tài liệu cải tạo nhấn mạnh sự kết hợp giữa di sản và thương mại hiện đại trong điều kiện bảo vệ giá trị lịch sử.',
+      english: 'Official renewal material describes integrating modern commerce with heritage while retaining the duty to protect historic cultural assets.',
     ),
-    keyTerms: const ['商业', '融合', '管理'],
-    learnerInsight: '这正是林夏为什么需要修改分类，而不是把原来的负面词换成赞美词。',
-    check: '林夏划掉“商业活动”是否表示所有商业都不会损害历史街区？',
-    answer: '不是，她只是拒绝把商业自动等同于真实性下降。',
+    keyTerms: const ['商业', '保护利用', '融合'],
+    learnerInsight: '这项事实学习与林夏的椅子交接故事分层存在，不构成她的戏剧性“改判”。',
+    check: 'Discovery是否证明所有商业都自动合适？',
+    answer: '不是，现实利用仍需受保护目标和空间条件约束。',
     sourceIds: const ['mofcom-kuanzhai-pedestrian-renewal'],
   ),
   ChengduDiscoverySpec(
     level: 7,
-    title: '街巷肌理怎样限制今天的动作',
-    storyLink: '井巷子更窄，购买、穿行和驻足叠在一起，旧尺度反过来限制人的移动。',
+    title: '街巷肌理怎样影响移动',
+    storyLink: '有限入口使不同使用不能永久同时占据同一位置。',
     entry: _discovery(
-      '保护街巷肌理意味着保留道路宽度、院落关系、入口节奏等空间特征；这些特征今天仍会影响人流、停留、经营布置和进入院落的方式。',
-      simpleChinese: '历史空间不是背景，它会实际约束今天的人怎样移动。',
-      vietnamese: 'Cấu trúc phố-ngõ lịch sử vẫn ảnh hưởng đến dòng người, điểm dừng, cách bố trí kinh doanh và lối vào sân ngày nay.',
-      english: 'Historic street-and-alley morphology still shapes circulation, stopping, commercial layout, and courtyard access today.',
+      '保护街巷肌理与空间尺度意味着保留道路、入口和院落之间的关系，这些关系今天仍会影响人流、停留和进入院落的方式。',
+      simpleChinese: '历史空间的尺度会继续影响今天的人怎样移动。',
+      vietnamese: 'Quy mô và cấu trúc phố-ngõ lịch sử vẫn ảnh hưởng tới dòng người, điểm dừng và cách vào sân.',
+      english: 'Historic street-and-lane morphology still shapes circulation, stopping, and courtyard access today.',
     ),
-    keyTerms: const ['街巷肌理', '人流', '空间尺度'],
-    learnerInsight: '“仍在使用”不是抽象口号，而是空间继续对身体和行为产生作用。',
-    check: '旧街巷尺度今天还会影响什么？',
-    answer: '会影响人流、停留、经营布置和进入院落的方式。',
+    keyTerms: const ['街巷肌理', '空间尺度', '人流'],
+    learnerInsight: '文化锚点的作用是制造具体空间约束，而不是提供地方气氛。',
+    check: '街巷肌理今天还能影响什么？',
+    answer: '会影响通行、停留和进入院落的方式。',
     sourceIds: const ['mofcom-kuanzhai-pedestrian-renewal'],
   ),
   ChengduDiscoverySpec(
     level: 8,
-    title: '什么叫嵌入式更新',
-    storyLink: '林夏确认保护更新既处理历史遗存，也处理现代使用。',
+    title: '嵌入式更新',
+    storyLink: '故事中的现实功能发生在既有院落关系内，而不是把院落替换成新空间。',
     entry: _discovery(
-      '成都的城市更新实践提出在既有建筑和街区条件中进行“嵌入式”改善，让新功能进入旧空间时尽量延续原有尺度、院落语言和城市关系，而不是简单拆除重建。',
-      simpleChinese: '新用途可以进入旧空间，但应受原有空间关系约束。',
-      vietnamese: 'Cải tạo kiểu “nhúng” đưa chức năng mới vào kết cấu hiện hữu, cố gắng duy trì tỷ lệ, ngôn ngữ sân nhà và quan hệ đô thị thay vì phá bỏ xây mới đơn giản.',
-      english: 'Embedded renewal introduces new functions into existing fabric while retaining the scale, courtyard language, and urban relationships of the old space.',
+      '成都的更新实践提出在既有建筑和街区条件中进行嵌入式改善，使新功能进入旧空间时尽量延续原有尺度与空间关系。',
+      simpleChinese: '新功能可以进入旧空间，但应尊重原有空间关系。',
+      vietnamese: 'Cải tạo kiểu nhúng đưa chức năng mới vào kết cấu hiện hữu và cố gắng duy trì quy mô cùng quan hệ không gian cũ.',
+      english: 'Embedded renewal introduces new functions into existing fabric while seeking to retain established scale and spatial relationships.',
     ),
-    keyTerms: const ['嵌入式更新', '既有建筑', '院落'],
-    learnerInsight: '林夏开始区分“用途是新的”和“空间关系被消失”这两件事。',
-    check: '嵌入式更新的方向更接近拆除重建，还是在既有空间中改善使用？',
-    answer: '在既有空间中改善并延续使用。',
+    keyTerms: const ['嵌入式更新', '既有建筑', '空间关系'],
+    learnerInsight: '新的使用节奏受旧院落尺度约束，而不是把旧空间当空白容器。',
+    check: '嵌入式更新更接近拆除重建还是在既有条件中改善？',
+    answer: '在既有条件中改善并延续使用。',
     sourceIds: const ['chengdu-gov-kuanzhai-embedded-renewal'],
   ),
   ChengduDiscoverySpec(
     level: 9,
-    title: '使用痕迹能证明什么',
-    storyLink: '杯底水圈、椅脚亮痕和门槛凹痕让林夏把不同年代的接触放在一起读。',
+    title: '活化利用不是只保立面',
+    storyLink: '故事关注院落怎样继续容纳停留、服务和通行。',
     entry: _discovery(
-      '历史建筑保护中的“活化利用”关注建筑在保存历史信息的同时继续承担合适功能；反复开启、行走、停留和维护形成的痕迹，可以帮助观察者理解空间是否仍参与现实生活。',
-      simpleChinese: '使用痕迹不是年代证书，却能帮助判断空间今天怎样继续发挥作用。',
-      vietnamese: 'Dấu vết sử dụng không tự chứng minh niên đại, nhưng giúp quan sát cách không gian lịch sử tiếp tục tham gia đời sống hiện tại.',
-      english: 'Use traces do not prove age by themselves, but they can reveal how historic space continues to participate in present-day life.',
+      '四川与成都的历史建筑保护材料把活化利用和城市有机更新作为现实保护工作的一部分。',
+      simpleChinese: '历史建筑可以在保护历史信息的同时承担合适的现实功能。',
+      vietnamese: 'Bảo tồn công trình lịch sử có thể đi cùng việc sử dụng phù hợp trong đời sống hiện tại.',
+      english: 'Historic-building conservation can include appropriate contemporary use as part of ongoing urban renewal.',
     ),
-    keyTerms: const ['使用痕迹', '活化利用', '现实生活'],
-    learnerInsight: '调查表最终记录的不只是旧材料，还记录“空间仍承担什么”。',
-    check: '椅脚磨痕能否单独证明建筑年代？',
-    answer: '不能，但能帮助观察现实使用方式。',
+    keyTerms: const ['活化利用', '历史建筑', '现实功能'],
+    learnerInsight: '事实层说明“继续使用”存在政策与实践背景，故事层仍只讲一次下午的空间协作。',
+    check: '活化利用是否只关心外立面？',
+    answer: '不是，也关心历史建筑怎样继续承担合适功能。',
     sourceIds: const ['sichuan-gov-historic-building-use'],
   ),
   ChengduDiscoverySpec(
     level: 10,
-    title: '保存是否必须让时间停住',
-    storyLink: '林夏提交有删除线的原表，让旧判断和新判断同时可见。',
+    title: '保护与利用的持续协调',
+    storyLink: '院落的通行与停留让“现实使用”成为可以具体讨论的空间问题。',
     entry: _discovery(
-      '宽窄巷子的保护与利用实践表明，历史街区可以在保留街巷院落和建筑特征的同时继续承担现实功能；真正需要持续判断的是哪些新活动延续空间、哪些活动会遮蔽或损害历史信息。',
-      simpleChinese: '保护不是把街区冻结，也不是放任所有变化，而是持续判断新使用与历史空间的关系。',
-      vietnamese: 'Bảo tồn không phải đóng băng khu phố cũng không phải chấp nhận mọi thay đổi; cần liên tục đánh giá cách sử dụng mới tác động đến thông tin và cấu trúc lịch sử.',
-      english: 'Conservation is neither freezing a district nor accepting every change; it requires continuing judgment about how new use affects historic information and spatial structure.',
+      '宽窄巷子的保护利用实践说明，历史街区可以在保留街巷、院落和建筑特征的同时承担现实功能；保护与利用需要持续协调。',
+      simpleChinese: '保护不是冻结空间，也不是放任变化，而是在历史条件中协调现实使用。',
+      vietnamese: 'Bảo tồn không đóng băng không gian cũng không thả nổi thay đổi; việc sử dụng hiện tại cần được điều phối trong điều kiện lịch sử.',
+      english: 'Conservation neither freezes space nor accepts every change; contemporary use is coordinated within historic spatial conditions.',
     ),
-    keyTerms: const ['保护', '利用', '历史信息'],
-    learnerInsight: '调查表上的删除线保留了这种判断过程本身。',
-    check: '故事最后为什么不把“商业活动”改成一个完全正面的标签？',
-    answer: '因为重点是重新分类和持续判断，而不是把所有商业一律肯定。',
+    keyTerms: const ['保护', '利用', '协调'],
+    learnerInsight: '这项学习解释地点背景，但不把椅子故事改写成保护理论结论。',
+    check: '保护与利用是否只能二选一？',
+    answer: '不是，历史街区需要在保护条件中持续协调现实使用。',
     sourceIds: const ['mofcom-kuanzhai-pedestrian-renewal', 'chengdu-gov-kuanzhai-embedded-renewal'],
-  )
+  ),
 ]);
 
-final chengduKuanzhaiOnePassDiscoveries =
-    List<DiscoveryEntry>.unmodifiable([
+final chengduKuanzhaiOnePassDiscoveries = List<DiscoveryEntry>.unmodifiable([
   for (final spec in chengduKuanzhaiDiscoverySpecs) spec.entry,
 ]);
 
-final chengduKuanzhaiDiscoveryTraces =
-    List<RemediatedDiscoveryTrace>.unmodifiable([
+final chengduKuanzhaiDiscoveryTraces = List<RemediatedDiscoveryTrace>.unmodifiable([
   for (final spec in chengduKuanzhaiDiscoverySpecs)
     RemediatedDiscoveryTrace(
       discoveryIndex: spec.level - 1,
-      storyEventIds: const ['CD-E3-observe', 'CD-E4-tea-table'],
+      storyEventIds: const ['CD-E1-opening', 'CD-E2-first-handoff', 'CD-E7-consequence'],
       sourceIds: spec.sourceIds,
     ),
 ]);
@@ -425,51 +434,36 @@ String _storySentence(int level, {required bool last}) {
 
 final chengduKuanzhaiChallenges = List<ChengduChallengeSpec>.unmodifiable([
   for (var level = 1; level <= 10; level++) ...[
-    ChengduChallengeSpec(
-      level: level,
-      type: 'paragraphRebuild',
-      anchor: _storySentence(level, last: false),
-      answer: _storySentence(level, last: false),
-    ),
-    ChengduChallengeSpec(
-      level: level,
-      type: 'grammarRepair',
-      anchor: _storySentence(level, last: false),
-      answer: _storySentence(level, last: false),
-    ),
-    ChengduChallengeSpec(
-      level: level,
-      type: 'missingSentence',
-      anchor: _storySentence(level, last: true),
-      answer: _storySentence(level, last: true),
-    ),
+    ChengduChallengeSpec(level: level, type: 'paragraphRebuild', anchor: _storySentence(level, last: false), answer: _storySentence(level, last: false)),
+    ChengduChallengeSpec(level: level, type: 'grammarRepair', anchor: _storySentence(level, last: false), answer: _storySentence(level, last: false)),
+    ChengduChallengeSpec(level: level, type: 'missingSentence', anchor: _storySentence(level, last: true), answer: _storySentence(level, last: true)),
   ],
 ]);
 
 final chengduKuanzhaiMemory = List<RemediatedMemoryReview>.unmodifiable([
-  const RemediatedMemoryReview(category: 'protagonist', prompt: '谁完成这次宽窄巷子使用痕迹调查？', answer: '林夏，二十四岁的成都本地建筑系研究生。', storyEventIds: ['CD-E1-survey']),
-  const RemediatedMemoryReview(category: 'assignment', prompt: '她的课程任务是什么？', answer: '用调查表记录历史街区今天怎样被进入、停留、经营、维护和使用。', storyEventIds: ['CD-E1-survey']),
-  const RemediatedMemoryReview(category: 'initialBelief', prompt: '林夏最初怎样判断商业活动？', answer: '她认为商业越明显，历史真实性越容易被削弱，因此先把“商业活动”写进负面干扰项。', storyEventIds: ['CD-E2-preclassify']),
-  const RemediatedMemoryReview(category: 'route', prompt: '她比较了哪些核心街巷？', answer: '宽巷子、窄巷子和井巷子，并把院落、门、门槛和人流放在同一份观察中。', storyEventIds: ['CD-E3-observe']),
-  const RemediatedMemoryReview(category: 'space', prompt: '院落为什么不是静止背景？', answer: '门、廊、院仍在组织进出、停留、让路、添水和交谈，旧空间继续影响今天的行为。', storyEventIds: ['CD-E3-observe', 'CD-E4-tea-table']),
-  const RemediatedMemoryReview(category: 'history', prompt: '宽窄巷子的历史空间从哪里读出来？', answer: '从三条核心巷道、院落、青砖与砖木建筑等历史空间特征，以及保护更新后仍可读的街巷肌理。', storyEventIds: ['CD-E3-observe']),
-  const RemediatedMemoryReview(category: 'preservation', prompt: '故事是否把所有商业都改判为“好”？', answer: '没有。林夏只是停止把商业自动等同于真实性下降，转而判断哪些使用延续空间、哪些变化会遮蔽历史信息。', storyEventIds: ['CD-E5-reclassify']),
-  const RemediatedMemoryReview(category: 'turningPoint', prompt: '茶桌旁的什么证据改变了她的分类？', answer: '茶桌旁椅脚磨亮的砖面、杯底水圈、门槛凹痕与持续发生的坐下、起身、让路和服务流线。', storyEventIds: ['CD-E4-tea-table']),
-  const RemediatedMemoryReview(category: 'climax', prompt: '林夏在调查表上做了什么？', answer: '她把“商业活动”四个字划掉，在旁边写：“仍在使用。”', storyEventIds: ['CD-E5-reclassify']),
-  const RemediatedMemoryReview(category: 'anchor', prompt: 'Memory Anchor是什么？', answer: '调查表上被划掉的“商业活动”四个字，旁边保留手写的“仍在使用。”', storyEventIds: ['CD-E5-reclassify', 'CD-E6-submit']),
-  const RemediatedMemoryReview(category: 'ending', prompt: '第二天她为什么不誊清报告？', answer: '她提交原来的调查页，让旧判断、删除线和新判断同时可见。', storyEventIds: ['CD-E6-submit']),
-  const RemediatedMemoryReview(category: 'vocabulary', prompt: '“使用痕迹”和“街巷肌理”怎样连接？', answer: '使用痕迹记录身体与物件留下的变化；街巷肌理说明这些变化发生在怎样的门、巷、院空间关系中。', storyEventIds: ['CD-E3-observe', 'CD-E4-tea-table']),
+  const RemediatedMemoryReview(category: 'protagonist', prompt: '林夏是谁？', answer: '林夏，二十四岁，是宽窄巷子一间院落茶馆负责座位、茶水和出入的年轻接待员。', storyEventIds: ['CD-E1-opening']),
+  const RemediatedMemoryReview(category: 'participant', prompt: '周叔怎样参与故事？', answer: '周叔是常来的年长茶客，先需要竹椅，后来与林夏一起完成临时让位和归还。', storyEventIds: ['CD-E1-opening', 'CD-E6-climax']),
+  const RemediatedMemoryReview(category: 'goal', prompt: '林夏要保持什么？', answer: '让院落既能让茶客停留，也能让服务人员和访客顺利通行。', storyEventIds: ['CD-E2-first-handoff']),
+  const RemediatedMemoryReview(category: 'conflict', prompt: '固定位置为什么失败？', answer: '同一块入口空间在不同时间分别需要服务喝茶停留和通行，永久分给一种用途会妨碍另一种用途。', storyEventIds: ['CD-E3-fixed-fails']),
+  const RemediatedMemoryReview(category: 'firstHandoff', prompt: '第一次交接发生什么？', answer: '林夏把竹椅挪开让茶盘通过，再把椅子交还给周叔和茶桌。', storyEventIds: ['CD-E2-first-handoff']),
+  const RemediatedMemoryReview(category: 'secondHandoff', prompt: '第二次为什么证明固定方案不够？', answer: '新客人和服务人员再次需要入口，竹椅无论固定在门边还是靠里都会在另一个时刻妨碍使用。', storyEventIds: ['CD-E3-fixed-fails']),
+  const RemediatedMemoryReview(category: 'choice', prompt: '林夏最后选择怎样管理竹椅？', answer: '她不再决定永久位置，而是让通行时先让位、通道空下后再归还，并让参与者一起完成交接。', storyEventIds: ['CD-E4-choice']),
+  const RemediatedMemoryReview(category: 'climax', prompt: '高潮为什么不是林夏自己搬椅子？', answer: '周叔在林夏没有发令时独立把竹椅移开让客人通过，再放回茶桌，说明节奏已经成为共同动作。', storyEventIds: ['CD-E6-climax']),
+  const RemediatedMemoryReview(category: 'consequence', prompt: '交接带来什么结果？', answer: '茶客能继续停留，服务和访客也能继续通过，院落在不同用途之间保持可用。', storyEventIds: ['CD-E7-consequence']),
+  const RemediatedMemoryReview(category: 'transformation', prompt: '林夏的参与方式怎样改变？', answer: '她从想永久控制每个位置，变成帮助不同使用者把空间临时交给下一种需要。', storyEventIds: ['CD-E4-choice', 'CD-E7-consequence']),
+  const RemediatedMemoryReview(category: 'anchor', prompt: 'Memory Anchor是什么？', answer: '一把没有固定位置的竹椅。', storyEventIds: ['CD-E8-ending']),
+  const RemediatedMemoryReview(category: 'ending', prompt: '故事最后是谁移动竹椅？', answer: '一位离桌的客人顺手为经过的人移开同一把竹椅，林夏没有出声或接管。', storyEventIds: ['CD-E8-ending']),
 ]);
 
 const chengduKuanzhaiCompletion = ChengduCompleteSpec(
-  journeySummary: '林夏带着“商业越多、历史越不真实”的判断进入宽窄巷子，通过三条巷道、院落、门槛、茶桌和人流的使用痕迹重新分类现代活动，并把修改保留在原调查表上。',
-  achievement: '巷院痕迹观察者',
-  memoryAnchor: '调查表上被划掉的“商业活动”四个字',
-  anchorMeaning: '删除线保留了林夏原来的学术判断，也让她依据现场证据做出的修正保持可见。',
-  challengeReward: '巷院使用印记',
-  rewardMeaning: '以调查笔迹与院落使用痕迹为意象，代表能从门、巷、院和现实活动中读出空间连续性。',
-  rewardUnlockText: '你已完成成都宽窄巷子三种故事挑战，解锁「巷院使用印记」。',
-  journeyCompletion: '第二天，林夏提交原调查表：被划掉的“商业活动”仍在纸上，旁边写着“仍在使用。”',
+  journeySummary: '林夏在宽窄巷子院落茶馆里放弃为竹椅寻找永久位置，与周叔通过反复让位和归还建立共享空间的临时交接节奏。',
+  achievement: '院落节奏协调者',
+  memoryAnchor: '一把没有固定位置的竹椅',
+  anchorMeaning: '竹椅不断在茶桌与通道之间移动，记录的是临时使用权被交给下一种需要，而不是一个人的永久控制。',
+  challengeReward: '共享交接印记',
+  rewardMeaning: '以竹椅让位和归还的动作代表不同使用者可以共同维持历史院落的现实节奏。',
+  rewardUnlockText: '你已完成成都宽窄巷子三种故事挑战，解锁「共享交接印记」。',
+  journeyCompletion: '另一位使用者再次移动竹椅让出通道，随后茶桌恢复使用；林夏没有介入。',
 );
 
 const chengduKuanzhaiSources = <RemediatedSourceBinding>[
@@ -481,7 +475,7 @@ const chengduKuanzhaiSources = <RemediatedSourceBinding>[
   RemediatedSourceBinding(
     id: 'mofcom-kuanzhai-pedestrian-renewal',
     publisher: '中华人民共和国商务部',
-    scope: '成都历史文化街区保护利用、街巷院机理，以及历史文化传承与现代商业融合的更新实践',
+    scope: '成都历史文化街区保护利用、街巷院肌理，以及历史文化传承与现代商业融合的更新实践',
   ),
   RemediatedSourceBinding(
     id: 'chengdu-gov-kuanzhai-embedded-renewal',
@@ -495,24 +489,33 @@ const chengduKuanzhaiSources = <RemediatedSourceBinding>[
   ),
 ];
 
+const chengduKuanzhaiSourceDiscipline = <String, String>{
+  'historic-lanes-courtyards-current-use': 'VERIFIED FACT',
+  'street-lane-courtyard-circulation-link': 'SAFE NARRATIVE INFERENCE',
+  'Lin-Xia-teahouse-role': 'FICTIONAL CHARACTER ACTION',
+  'Zhou-Shu-regular-guest-role': 'FICTIONAL CHARACTER ACTION',
+  'bamboo-chair-movement': 'FICTIONAL CHARACTER ACTION',
+  'tea-service-and-dialogue': 'FICTIONAL CHARACTER ACTION',
+};
+
 const chengduKuanzhaiSemanticEvents = <RemediatedSemanticEvent>[
-  RemediatedSemanticEvent(id: 'CD-E1-survey', coreChinese: '林夏带着使用痕迹调查表进入宽窄巷子。', corePinyin: 'Lín Xià dài zhe shǐyòng hénjì diàochá biǎo jìnrù Kuānzhǎi Xiàngzi.', coreVietnamese: 'Lâm Hạ mang phiếu khảo sát dấu vết sử dụng vào khu Kuanzhai.', coreEnglish: 'Lin Xia enters Kuanzhai Alley with a use-trace survey.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
-  RemediatedSemanticEvent(id: 'CD-E2-preclassify', coreChinese: '她先把“商业活动”写成影响历史真实性的负面因素。', corePinyin: 'Tā xiān bǎ shāngyè huódòng xiěchéng lìshǐ zhēnshíxìng de fùmiàn yīnsù.', coreVietnamese: 'Ban đầu cô ghi hoạt động thương mại như một yếu tố tiêu cực đối với tính xác thực lịch sử.', coreEnglish: 'She initially records commercial activity as a negative factor for historical authenticity.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
-  RemediatedSemanticEvent(id: 'CD-E3-observe', coreChinese: '她比较三条巷子里的门、院、门槛、街巷肌理和现实人流。', corePinyin: 'Tā bǐjiào sān tiáo xiàngzi lǐ de mén, yuàn, ménkǎn, jiēxiàng jīlǐ hé rénliú.', coreVietnamese: 'Cô so sánh cửa, sân, ngưỡng cửa, cấu trúc phố-ngõ và dòng người ở ba ngõ.', coreEnglish: 'She compares doors, courtyards, thresholds, urban fabric, and circulation across the three alleys.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
-  RemediatedSemanticEvent(id: 'CD-E4-tea-table', coreChinese: '茶桌旁的挪椅、添水、让路和磨痕让她看见院落仍在组织生活。', corePinyin: 'Chá zhuō páng de nuóyǐ, tiānshuǐ, rànglù hé móhén ràng tā kànjiàn yuànluò réng zài zǔzhī shēnghuó.', coreVietnamese: 'Việc kéo ghế, châm nước, nhường đường và dấu mòn quanh bàn trà cho cô thấy sân nhà vẫn đang tổ chức đời sống.', coreEnglish: 'Movement around a tea table shows the courtyard still organizing lived activity.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
-  RemediatedSemanticEvent(id: 'CD-E5-reclassify', coreChinese: '林夏把“商业活动”划掉，在旁边写“仍在使用。”', corePinyin: 'Lín Xià huàdiào shāngyè huódòng, zài pángbiān xiě réng zài shǐyòng.', coreVietnamese: 'Lâm Hạ gạch bỏ “hoạt động thương mại” và viết bên cạnh “vẫn đang được sử dụng”.', coreEnglish: 'Lin Xia crosses out “commercial activity” and writes “still in use” beside it.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
-  RemediatedSemanticEvent(id: 'CD-E6-submit', coreChinese: '第二天她提交没有誊清的原调查页，保留删除线和补写。', corePinyin: 'Dì èr tiān tā tíjiāo méiyǒu téngqīng de yuán diàochá yè.', coreVietnamese: 'Hôm sau cô nộp trang khảo sát gốc, giữ nguyên dòng gạch bỏ và phần viết bổ sung.', coreEnglish: 'The next day she submits the original survey page with both the cross-out and handwritten revision visible.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
+  RemediatedSemanticEvent(id: 'CD-E1-opening', coreChinese: '林夏把一把竹椅放在宽窄巷子院落茶馆入口，周叔的茶座与进院通路立刻争用同一小块空间。', corePinyin: 'Lín Xià bǎ yì bǎ zhúyǐ fàng zài Kuānzhǎi Xiàngzi yuànluò cháguǎn rùkǒu.', coreVietnamese: 'Lâm Hạ đặt một ghế tre cạnh cửa sân; chỗ ngồi của chú Chu và lối vào lập tức cần cùng một khoảng nhỏ.', coreEnglish: 'Lin Xia places a bamboo chair at the courtyard entrance, where Zhou Shu’s tea seat and passage immediately need the same small area.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
+  RemediatedSemanticEvent(id: 'CD-E2-first-handoff', coreChinese: '她先把竹椅挪开让茶盘通过，再把椅子交还给周叔和茶桌。', corePinyin: 'Tā xiān bǎ zhúyǐ nuókāi ràng chápán tōngguò, zài bǎ yǐzi jiāohuán gěi Zhōu Shū.', coreVietnamese: 'Cô dời ghế cho khay trà đi qua rồi trả ghế lại cho chú Chu.', coreEnglish: 'She first moves the chair aside for passage and returns it to Zhou Shu and the tea table.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
+  RemediatedSemanticEvent(id: 'CD-E3-fixed-fails', coreChinese: '林夏两次尝试固定竹椅位置，都被下一轮合理的通行或停留需要打破。', corePinyin: 'Lín Xià liǎng cì chángshì gùdìng zhúyǐ wèizhi, dōu bèi xià yì lún shǐyòng dǎpò.', coreVietnamese: 'Hai lần Lâm Hạ cố định vị trí ghế đều thất bại trước nhu cầu sử dụng hợp lý tiếp theo.', coreEnglish: 'Two attempts to fix the chair permanently fail when the next legitimate use arrives.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
+  RemediatedSemanticEvent(id: 'CD-E4-choice', coreChinese: '林夏放弃永久分配，改为通行时让位、通道清空后归还，并邀请周叔一起完成交接。', corePinyin: 'Lín Xià fàngqì yǒngjiǔ fēnpèi, gǎiwéi tōngxíng shí ràngwèi, qīngkōng hòu guīhuán.', coreVietnamese: 'Lâm Hạ bỏ phân bổ cố định, chuyển sang nhường chỗ khi có người qua và trả ghế sau đó, cùng chú Chu thực hiện bàn giao.', coreEnglish: 'Lin Xia abandons permanent allocation and establishes a yield-and-return handoff with Zhou Shu.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
+  RemediatedSemanticEvent(id: 'CD-E5-repetition', coreChinese: '服务、进院和离院让竹椅反复在通道与茶桌之间交接。', corePinyin: 'Fúwù, jìnyuàn hé líyuàn ràng zhúyǐ fǎnfù zài tōngdào yǔ cházhuō zhījiān jiāojiē.', coreVietnamese: 'Phục vụ, vào sân và rời sân khiến ghế tre liên tục được bàn giao giữa lối đi và bàn trà.', coreEnglish: 'Service and arrivals repeatedly hand the bamboo chair between passage and tea use.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
+  RemediatedSemanticEvent(id: 'CD-E6-climax', coreChinese: '林夏没有发令时，周叔独立移开竹椅让新客人通过，随后又把它放回茶桌。', corePinyin: 'Lín Xià méiyǒu fālìng shí, Zhōu Shū dúlì yíkāi zhúyǐ ràng xīn kèrén tōngguò.', coreVietnamese: 'Không cần Lâm Hạ ra hiệu, chú Chu tự dời ghế cho khách mới đi qua rồi đặt lại cạnh bàn trà.', coreEnglish: 'Without Lin Xia directing him, Zhou Shu independently moves the chair for a new arrival and returns it to tea use.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
+  RemediatedSemanticEvent(id: 'CD-E7-consequence', coreChinese: '院落在茶客停留、服务往返与访客通行之间保持可用，共享节奏不再依赖林夏一个人。', corePinyin: 'Yuànluò zài tíngliú, fúwù yǔ tōngxíng zhījiān bǎochí kěyòng.', coreVietnamese: 'Sân vẫn dùng được giữa việc ngồi trà, phục vụ và đi qua; nhịp dùng chung không còn phụ thuộc riêng Lâm Hạ.', coreEnglish: 'The courtyard remains usable across tea, service, and passage, and the shared rhythm no longer depends on Lin Xia alone.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
+  RemediatedSemanticEvent(id: 'CD-E8-ending', coreChinese: '最后，另一位使用者也顺手移动同一把没有固定位置的竹椅，林夏没有介入。', corePinyin: 'Zuìhòu, lìng yí wèi shǐyòngzhě yě shùnshǒu yídòng tóng yì bǎ méiyǒu gùdìng wèizhi de zhúyǐ.', coreVietnamese: 'Cuối cùng, một người dùng khác cũng tự dời chính chiếc ghế không có vị trí cố định, còn Lâm Hạ không can thiệp.', coreEnglish: 'Finally, another user moves the same chair without a fixed position while Lin Xia does not intervene.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
 ];
 
 final chengduKuanzhaiOnePassRemediation = RemediatedJourney(
   id: chengduKuanzhaiJourneyId,
-  title: '成都 · 宽窄巷子：仍在使用',
+  title: '成都 · 宽窄巷子：没有固定位置的竹椅',
   protagonist: '林夏',
-  goal: '完成宽窄巷子使用痕迹调查，判断历史院落在现代经营与公共活动中如何继续发挥空间作用。',
-  conflict: '林夏必须检验自己的预设：商业活动是否一出现就必然削弱历史真实性，还是某些现实使用本身也构成历史空间继续存在的证据。',
-  eventIds: List<String>.unmodifiable([
-    for (final event in chengduKuanzhaiSemanticEvents) event.id,
-  ]),
+  goal: '让宽窄巷子院落茶馆同时保持茶客停留与入口通行，而不永久排除任何一种合理使用。',
+  conflict: '有限院落入口无法靠一个固定座位布局持续满足随时间变化的茶座、服务与通行需求。',
+  eventIds: List<String>.unmodifiable([for (final event in chengduKuanzhaiSemanticEvents) event.id]),
   events: chengduKuanzhaiSemanticEvents,
   levels: chengduKuanzhaiOnePassLevels,
   words: chengduKuanzhaiOnePassWords,
@@ -523,17 +526,17 @@ final chengduKuanzhaiOnePassRemediation = RemediatedJourney(
     for (final challenge in chengduKuanzhaiChallenges)
       RemediatedChallengeTrace(
         type: challenge.type,
-        storyEventIds: const ['CD-E2-preclassify', 'CD-E4-tea-table', 'CD-E5-reclassify'],
+        storyEventIds: const ['CD-E2-first-handoff', 'CD-E4-choice', 'CD-E6-climax'],
         anchor: challenge.anchor,
       ),
   ]),
   memory: chengduKuanzhaiMemory,
   completion: const RemediatedCompletion(
-    journeySummary: '林夏从预先把商业活动判为真实性干扰，转向依据院落使用痕迹区分遮蔽与延续，并把这次修正留在原调查表上。',
-    achievement: '巷院痕迹观察者',
-    memoryAnchor: '调查表上被划掉的“商业活动”四个字',
-    challengeReward: '巷院使用印记：由调查笔迹、门槛与院落使用痕迹组成的观察徽记。',
-    journeyCompletion: '第二天，林夏提交原调查表；删除线旁仍写着“仍在使用。”',
+    journeySummary: '林夏从永久安排院落位置，转向帮助周叔与其他使用者通过反复让位和归还共同维持空间节奏。',
+    achievement: '院落节奏协调者',
+    memoryAnchor: '一把没有固定位置的竹椅',
+    challengeReward: '共享交接印记：竹椅在通道与茶桌之间反复让位和归还。',
+    journeyCompletion: '另一位使用者再次移动竹椅让出通道；林夏没有介入。',
   ),
   sources: chengduKuanzhaiSources,
 );
@@ -550,10 +553,8 @@ JourneyLevelContent chengduKuanzhaiOnePassLevelContent(int requestedLevel) {
     storyParagraphs: base.storyParagraphs,
     storyAnnotations: base.storyAnnotations,
     words: List<WordEntry>.unmodifiable(visibleWords),
-    discoveries: List<DiscoveryEntry>.unmodifiable(
-      <DiscoveryEntry>[chengduKuanzhaiDiscoverySpecs[level - 1].entry],
-    ),
-    wonderQuestion: '为什么茶桌旁的使用痕迹让林夏不能继续把“商业活动”当成单一负面因素？',
-    expressQuestion: '调查表上的删除线与“仍在使用。”怎样改变你对历史空间保护的理解？',
+    discoveries: List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[chengduKuanzhaiDiscoverySpecs[level - 1].entry]),
+    wonderQuestion: '为什么这把竹椅没有固定位置，反而让院落更容易同时服务停留与通行？',
+    expressQuestion: '周叔在没有提醒时主动移椅，怎样证明共享节奏已经不只属于林夏？',
   );
 }

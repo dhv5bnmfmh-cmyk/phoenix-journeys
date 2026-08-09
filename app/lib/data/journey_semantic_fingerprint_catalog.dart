@@ -136,6 +136,24 @@ enum NarrativeMechanismFamily {
   singleStudyDayWithoutExternalCountdown,
   peerContributesIndependentRoutePerspective,
   coexistingValidPerspectivesSynthesizeRelationalModel,
+
+  // Reusable families introduced by Chengdu shared-space debt remediation.
+  immediateSharedUseContentionAtThreshold,
+  serviceHostManagingChangingSharedSpace,
+  serviceParticipantNegotiatedHandoff,
+  maintainUsabilityAcrossSequentialUses,
+  fixedAssignmentVsTimeDependentSharedUse,
+  facilitateHandoffInsteadOfPermanentAllocation,
+  participantIndependentlyReproducesHandoff,
+  repeatedHandoffsSustainSharedUsability,
+  controllerToSharedRhythmFacilitator,
+  sharedProtocolContinuesBeyondFacilitator,
+  historicCourtyardMorphologyConstrainsSharedUse,
+  movableObjectEmbodiesTemporaryClaim,
+  thresholdRepositioningAcrossSequentialUses,
+  singleAfternoonUseCycleWithoutDeadline,
+  regularParticipantLearnsAndReproducesProtocol,
+  repeatedSpatialHandoffsCreateSharedUseProtocol,
 }
 
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
@@ -272,6 +290,7 @@ JourneySemanticFingerprint _convertBaselineFingerprint(
     );
 
 const _forbidden = 'beijing-forbidden-city';
+const _chengdu = 'chengdu-kuanzhai-alley';
 
 final _forbiddenFingerprint = JourneySemanticFingerprint(
   journeyId: _forbidden,
@@ -438,12 +457,177 @@ final _forbiddenFingerprint = JourneySemanticFingerprint(
   ]),
 );
 
+final _chengduFingerprint = JourneySemanticFingerprint(
+  journeyId: _chengdu,
+  surfaceIdentity:
+      'Lin Xia / twenty-four-year-old fictional courtyard teahouse host / Zhou Shu / movable bamboo chair',
+  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
+    NarrativeSemanticDimension.openingMechanism:
+        NarrativeMechanismFamily.immediateSharedUseContentionAtThreshold,
+    NarrativeSemanticDimension.protagonistRolePattern:
+        NarrativeMechanismFamily.serviceHostManagingChangingSharedSpace,
+    NarrativeSemanticDimension.relationshipGeometry:
+        NarrativeMechanismFamily.serviceParticipantNegotiatedHandoff,
+    NarrativeSemanticDimension.goalMechanism:
+        NarrativeMechanismFamily.maintainUsabilityAcrossSequentialUses,
+    NarrativeSemanticDimension.conflictMechanism:
+        NarrativeMechanismFamily.fixedAssignmentVsTimeDependentSharedUse,
+    NarrativeSemanticDimension.choiceMechanism:
+        NarrativeMechanismFamily.facilitateHandoffInsteadOfPermanentAllocation,
+    NarrativeSemanticDimension.climaxMechanism:
+        NarrativeMechanismFamily.participantIndependentlyReproducesHandoff,
+    NarrativeSemanticDimension.consequenceMechanism:
+        NarrativeMechanismFamily.repeatedHandoffsSustainSharedUsability,
+    NarrativeSemanticDimension.transformationMechanism:
+        NarrativeMechanismFamily.controllerToSharedRhythmFacilitator,
+    NarrativeSemanticDimension.endingMechanism:
+        NarrativeMechanismFamily.sharedProtocolContinuesBeyondFacilitator,
+    NarrativeSemanticDimension.culturalAnchorFunction:
+        NarrativeMechanismFamily.historicCourtyardMorphologyConstrainsSharedUse,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction:
+        NarrativeMechanismFamily.movableObjectEmbodiesTemporaryClaim,
+    NarrativeSemanticDimension.movementSpatialMechanism:
+        NarrativeMechanismFamily.thresholdRepositioningAcrossSequentialUses,
+    NarrativeSemanticDimension.temporalPressureMechanism:
+        NarrativeMechanismFamily.singleAfternoonUseCycleWithoutDeadline,
+    NarrativeSemanticDimension.supportingCharacterFunction:
+        NarrativeMechanismFamily.regularParticipantLearnsAndReproducesProtocol,
+    NarrativeSemanticDimension.dramaticEngineFamily:
+        NarrativeMechanismFamily.repeatedSpatialHandoffsCreateSharedUseProtocol,
+  }),
+  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.openingMechanism,
+      mechanism: NarrativeMechanismFamily.immediateSharedUseContentionAtThreshold,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她把一把普通竹椅放到门边，常来的周叔习惯坐在靠入口的茶桌旁，既能喝茶，也能看见巷子。',
+        '周叔刚落座，服务员托着茶盘进门，椅背便压缩了转身空间。',
+      ],
+      semanticRationale:
+          'The Story opens on one threshold immediately needed by two legitimate uses, making physical contention visible before exposition.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.conflictMechanism,
+      mechanism: NarrativeMechanismFamily.fixedAssignmentVsTimeDependentSharedUse,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '第二个方案也失败了。林夏开始烦躁，因为每一种永久安排都只适合刚才那一刻。',
+        '真正冲突的是院落入口的有限空间与不断变化的使用时序：同一小块地方不能永久交给一种用途，却可以在不同时间服务不同的人。',
+      ],
+      semanticRationale:
+          'The conflict is spatial and temporal: permanent allocation cannot serve legitimate uses that recur at different moments.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.choiceMechanism,
+      mechanism: NarrativeMechanismFamily.facilitateHandoffInsteadOfPermanentAllocation,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '林夏放弃给竹椅指定永久归属，改成亲手建立交接节奏。',
+        '她邀请周叔一起留意下一次需要，谁先看见，谁先移动，不必等她发令。',
+      ],
+      semanticRationale:
+          'Lin Xia enacts the choice by replacing permanent allocation with a temporary yield-and-return handoff shared with another participant.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.climaxMechanism,
+      mechanism: NarrativeMechanismFamily.participantIndependentlyReproducesHandoff,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '周叔先看见来人，没有喊她，也没有等提示，自己起身把竹椅挪到院墙边；客人跨过门槛进入院落后，他又把椅子推回茶桌旁，继续喝茶。',
+      ],
+      semanticRationale:
+          'The climax is behavioral replication by Zhou Shu without instruction, proving the protocol has become shared social choreography.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.consequenceMechanism,
+      mechanism: NarrativeMechanismFamily.repeatedHandoffsSustainSharedUsability,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '茶客继续停留，服务人员继续穿行，院落在一轮轮临时交接中保持可用。',
+      ],
+      semanticRationale:
+          'The consequence is continued usability across sequential tea, service, and passage rather than a revised record or sacrificed result.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.transformationMechanism,
+      mechanism: NarrativeMechanismFamily.controllerToSharedRhythmFacilitator,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她一向相信，把桌椅一次摆到“正确位置”才算把空间管好，于是趁入口暂时空下，重新调整竹椅，想给它一个整日下午都不用改变的固定位置。',
+        '她没有再伸手，也没有把椅子校正到某个标准点。',
+      ],
+      semanticRationale:
+          'Lin Xia changes from personally controlling permanent placement to allowing participants to carry a shared use rhythm themselves.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.endingMechanism,
+      mechanism: NarrativeMechanismFamily.sharedProtocolContinuesBeyondFacilitator,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '最后，一位离桌的客人顺手又为经过的人移开同一把竹椅。',
+        '林夏看着那只手完成动作，没有出声。',
+        '一把没有固定位置的竹椅，已经把共享空间的节奏交给了下一位使用者。',
+      ],
+      semanticRationale:
+          'The ending proves continuation beyond Lin Xia because a further participant performs the handoff while she deliberately does not intervene.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.relationshipGeometry,
+      mechanism: NarrativeMechanismFamily.serviceParticipantNegotiatedHandoff,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她邀请周叔一起留意下一次需要，谁先看见，谁先移动，不必等她发令。',
+        '周叔先看见来人，没有喊她，也没有等提示，自己起身把竹椅挪到院墙边；客人跨过门槛进入院落后，他又把椅子推回茶桌旁，继续喝茶。',
+      ],
+      semanticRationale:
+          'Host and regular negotiate and then jointly perform the practical handoff; Zhou Shu is causal rather than a mentor delivering interpretation.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.culturalAnchorFunction,
+      mechanism: NarrativeMechanismFamily.historicCourtyardMorphologyConstrainsSharedUse,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '宽巷子、窄巷子与井巷子构成历史街区的核心街巷，沿巷院落把街面的流动收进更小的入口、门槛和内部停留空间。',
+        '真正冲突的是院落入口的有限空间与不断变化的使用时序：同一小块地方不能永久交给一种用途，却可以在不同时间服务不同的人。',
+      ],
+      semanticRationale:
+          'Kuanzhai street-lane-courtyard morphology is causal because its threshold compresses tea stopping and circulation into the shared zone that requires handoff.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.dramaticEngineFamily,
+      mechanism: NarrativeMechanismFamily.repeatedSpatialHandoffsCreateSharedUseProtocol,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '林夏放弃给竹椅指定永久归属，改成亲手建立交接节奏。',
+        '起初周叔仍看她一眼才动，后来服务员端茶、客人离院、另一桌有人经过，竹椅反复几次让位又归还，动作越来越自然。',
+        '周叔先看见来人，没有喊她，也没有等提示，自己起身把竹椅挪到院墙边；客人跨过门槛进入院落后，他又把椅子推回茶桌旁，继续喝茶。',
+        '最后，一位离桌的客人顺手又为经过的人移开同一把竹椅。',
+      ],
+      semanticRationale:
+          'The engine requires repeated physical yield-and-return handoffs until participants reproduce the behavior independently; no evidence classification, representational synthesis, refusal, or artifact correction drives the change.',
+    ),
+  ]),
+);
+
 final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     Map<String, JourneySemanticFingerprint>.unmodifiable({
   for (final entry in baseline.approvedGoldSemanticFingerprints.entries)
     entry.key: entry.key == _forbidden
         ? _forbiddenFingerprint
-        : _convertBaselineFingerprint(entry.value),
+        : entry.key == _chengdu
+            ? _chengduFingerprint
+            : _convertBaselineFingerprint(entry.value),
 });
 
 String activeCanonicalGoldStoryText(String journeyId) =>
