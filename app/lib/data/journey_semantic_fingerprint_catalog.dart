@@ -30,7 +30,6 @@ enum NarrativeSemanticDimension {
 /// Reusable causal families. These identifiers describe mechanisms, never a
 /// city, character, landmark, or Journey-specific event name.
 enum NarrativeMechanismFamily {
-  // Openings.
   deadlineWithIdealizedTarget,
   incompleteKnowledgeOpportunity,
   lifeTransitionWithCarriedPast,
@@ -38,8 +37,6 @@ enum NarrativeMechanismFamily {
   fieldAssignmentWithPurityModel,
   fieldSurveyWithPriorClassification,
   operationalFailureCountdown,
-
-  // Protagonist roles.
   creatorProvingIndependentJudgment,
   apprenticeSeekingCompleteUnderstanding,
   youngProfessionalAtTransition,
@@ -47,16 +44,12 @@ enum NarrativeMechanismFamily {
   fieldRecorderTestingAuthenticityModel,
   researcherTestingAuthenticityModel,
   technicianSeekingIndependentTrust,
-
-  // Relationship geometries.
   intergenerationalMentorToRecognizedAgency,
   mentorToEntrustedAgency,
   parentChildContinuityWithoutCareerControl,
   familyAsBelongingAnchor,
   soloFieldworkAgainstInternalModel,
   supervisorToEntrustedResponsibility,
-
-  // Goals.
   produceIdealArtifact,
   completeKnowledgeRecord,
   crossIntoNewRoleWithoutPast,
@@ -64,51 +57,37 @@ enum NarrativeMechanismFamily {
   capturePurifiedRecord,
   validatePriorAuthenticityModel,
   restoreCompleteOperationalResult,
-
-  // Conflicts.
   aestheticPerfectionVsRelationalTrace,
   completeResultVsResponsibleBoundary,
   ruptureVsContinuity,
   addressChangeVsBelongingContinuity,
   purityModelVsLivedEvidence,
-
-  // Choices. A family may legitimately also be the high-level engine family.
   sacrificeIdealResultToPreserveRelationalEvidence,
   responsibleRefusalOfAvailableShortcut,
   carryPastObjectIntoChosenFuture,
   continueBeyondDeclaredFinish,
   reviseClassificationInsteadOfFilteringEvidence,
-
-  // Climaxes.
   forcedTradeoffCreatesNewFrame,
   refusalAtAvailableThreshold,
   spatialCrossingTriggersContinuityRecognition,
   completedCircuitBecomesDeparturePoint,
   evidenceReclassificationEnactedInArtifact,
   operationalRefusalLeavesVisibleIncompletion,
-
-  // Consequences.
   sacrificedIdealCreatesAlternativeArtifact,
   intentionalVisibleIncompletion,
   carriedObjectCrossesIdentityBoundary,
   completedRecordExtendsBeyondOriginalBoundary,
   retainedEvidencePreservesReclassification,
-
-  // Transformations.
   independenceReframedAsTraceableResponsibility,
   completionDriveToResponsibleRestraint,
   cleanBreakModelToContinuityModel,
   boundedBelongingToContinuingBelonging,
   purityModelToLayeredAuthenticity,
-
-  // Endings.
   intergenerationalObjectEntrustment,
   responsibilityTransferAfterRestraint,
   arrivalWithCarriedContinuityObject,
   artifactRecordsOpenContinuation,
   revisedArtifactRecordsChangedUnderstanding,
-
-  // Cultural-anchor functions.
   restorationTraceMakesTimeReadable,
   heritageBoundaryMakesRestraintMeaningful,
   riverFlowConnectsCommercialEras,
@@ -116,8 +95,6 @@ enum NarrativeMechanismFamily {
   livedCulturalLandscapeDisprovesPurity,
   livedUseDisprovesFrozenAuthenticity,
   heritageOperationsConstrainSpectacle,
-
-  // Artifact/object functions.
   inheritedPhotographForcesRelationalChoice,
   mapBlankRecordsChosenBoundary,
   carriedTradeDocumentConnectsEras,
@@ -125,8 +102,6 @@ enum NarrativeMechanismFamily {
   fieldRecordingStoresReclassifiedEvidence,
   markedSurveyStoresReclassifiedEvidence,
   statusRecordTransfersOperationalOwnership,
-
-  // Movement/spatial families.
   vantageSearchThenRecomposition,
   approachToUncrossedThreshold,
   oneWayCrossingBetweenContrastedBanks,
@@ -134,8 +109,6 @@ enum NarrativeMechanismFamily {
   linearFieldTransectWithReorientation,
   comparativeFieldSurveyWithReturn,
   fixedFailureZoneDecision,
-
-  // Temporal pressure families.
   expiringCreativeOpportunity,
   openAccessWithoutExternalDeadline,
   nextDayLifeTransition,
@@ -143,25 +116,18 @@ enum NarrativeMechanismFamily {
   approachingWeatherWindow,
   fieldDayThenSubmission,
   explicitOperationalCountdown,
-
-  // Supporting-character functions.
   elderEmbodiesPriorKnowledgeThenEntrusts,
   mentorDefinesBoundaryThenWithholdsIntervention,
   parentOffersObjectWithoutBlockingDeparture,
   familyMessageReorientsMeaningOfDestination,
   noDecisiveSupportingCharacter,
   supervisorAbsentForChoiceThenTransfersOwnership,
-
-  // Dramatic engines that are not already represented by a reusable family
-  // above. responsibleRefusalOfAvailableShortcut intentionally reuses the
-  // existing controlled family rather than declaring a synonym.
   forcedTradeoffReframesCreativeAuthorship,
   spatialCrossingReframesTemporalContinuity,
   completedClosureBecomesOpenContinuation,
   evidenceForcesReclassification,
 }
 
-/// The deterministic CORE set. Incidental surface similarities do not count.
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
   NarrativeSemanticDimension.openingMechanism,
   NarrativeSemanticDimension.conflictMechanism,
@@ -175,31 +141,33 @@ const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
   NarrativeSemanticDimension.dramaticEngineFamily,
 };
 
-/// Rule A: same dramatic engine plus this many ADDITIONAL CORE matches blocks.
 const int semanticCollisionSameEngineAdditionalCoreThreshold = 3;
-
-/// Rule B: this many CORE matches blocks even when engine labels differ.
 const int semanticCollisionIndependentCoreThreshold = 4;
-
 const String semanticTemplateCollisionNotGoldReady =
     'TEMPLATE COLLISION - NOT GOLD READY';
+const String activeGoldStorySourceId = 'active-lv1-lv10-story-package';
 
+/// CI can verify provenance and contract completeness. It cannot independently
+/// prove natural-language semantic entailment. [semanticRationale] is mandatory
+/// human-auditable metadata explaining the causal mapping.
 class NarrativeMechanismEvidence {
   const NarrativeMechanismEvidence({
     required this.journeyId,
     required this.dimension,
     required this.mechanism,
     required this.activeSourceId,
-    required this.sourceText,
-    this.note = '',
+    required this.sourceTexts,
+    required this.semanticRationale,
   });
 
   final String journeyId;
   final NarrativeSemanticDimension dimension;
   final NarrativeMechanismFamily mechanism;
   final String activeSourceId;
-  final String sourceText;
-  final String note;
+  final List<String> sourceTexts;
+  final String semanticRationale;
+
+  String get sourceText => sourceTexts.isEmpty ? '' : sourceTexts.first;
 }
 
 class JourneySemanticFingerprint {
@@ -211,8 +179,6 @@ class JourneySemanticFingerprint {
   });
 
   final String journeyId;
-
-  /// Human-readable review aid only. Never used in collision arithmetic.
   final String surfaceIdentity;
   final Map<NarrativeSemanticDimension, NarrativeMechanismFamily> mechanisms;
   final List<NarrativeMechanismEvidence> coreEvidence;
@@ -265,29 +231,32 @@ class FutureGoldSemanticGateResult {
   final List<NarrativeSemanticComparison> comparisons;
 }
 
-typedef _MechanismEntry =
-    (NarrativeSemanticDimension, NarrativeMechanismFamily, String);
+typedef _MechanismEvidenceEntry = (
+  NarrativeSemanticDimension,
+  NarrativeMechanismFamily,
+  List<String>,
+  String,
+);
 
 NarrativeMechanismEvidence _e(
   String journeyId,
-  NarrativeSemanticDimension dimension,
-  NarrativeMechanismFamily mechanism,
-  String sourceText,
+  _MechanismEvidenceEntry entry,
 ) =>
     NarrativeMechanismEvidence(
       journeyId: journeyId,
-      dimension: dimension,
-      mechanism: mechanism,
-      activeSourceId: 'active-lv1-lv10-story-package',
-      sourceText: sourceText,
+      dimension: entry.$1,
+      mechanism: entry.$2,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: List<String>.unmodifiable(entry.$3),
+      semanticRationale: entry.$4,
     );
 
 List<NarrativeMechanismEvidence> _evidence(
   String journeyId,
-  List<_MechanismEntry> entries,
+  List<_MechanismEvidenceEntry> entries,
 ) =>
     List<NarrativeMechanismEvidence>.unmodifiable([
-      for (final entry in entries) _e(journeyId, entry.$1, entry.$2, entry.$3),
+      for (final entry in entries) _e(journeyId, entry),
     ]);
 
 Map<NarrativeSemanticDimension, NarrativeMechanismFamily> _mechanisms({
@@ -370,34 +339,44 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     coreEvidence: _evidence(_summer, [
       (NarrativeSemanticDimension.openingMechanism,
         NarrativeMechanismFamily.deadlineWithIdealizedTarget,
-        '她要为校展拍照。'),
+        ['她要为校展拍照。'],
+        'The exhibition assignment establishes an externally bounded production goal with an ideal-result target.'),
       (NarrativeSemanticDimension.conflictMechanism,
         NarrativeMechanismFamily.aestheticPerfectionVsRelationalTrace,
-        '许澄要无瑕画面，周岚要她看修复痕迹。'),
+        ['许澄要无瑕画面，周岚要她看修复痕迹。'],
+        'Xu Cheng seeks flawlessness while Zhou Lan asks her to preserve and read restoration traces, creating the central perfection-versus-trace conflict.'),
       (NarrativeSemanticDimension.choiceMechanism,
         NarrativeMechanismFamily.sacrificeIdealResultToPreserveRelationalEvidence,
-        '许澄放弃原构图，先捡回照片。'),
+        ['许澄放弃原构图，先捡回照片。'],
+        'She gives up the planned composition to recover the relational photograph, explicitly sacrificing the ideal result for inherited evidence.'),
       (NarrativeSemanticDimension.climaxMechanism,
         NarrativeMechanismFamily.forcedTradeoffCreatesNewFrame,
-        '她必须在追光和捡照片之间选择。'),
+        ['她必须在追光和捡照片之间选择。'],
+        'The two actions become mutually exclusive at the decisive moment, forcing the tradeoff that changes what image can be made.'),
       (NarrativeSemanticDimension.consequenceMechanism,
         NarrativeMechanismFamily.sacrificedIdealCreatesAlternativeArtifact,
-        '因此，她错失最佳光线。'),
+        ['因此，她错失最佳光线。'],
+        'The Story explicitly makes the lost ideal light a direct consequence of the enacted choice, requiring a different resulting image.'),
       (NarrativeSemanticDimension.transformationMechanism,
         NarrativeMechanismFamily.independenceReframedAsTraceableResponsibility,
-        '许澄不再只想证明独立。'),
+        ['许澄不再只想证明独立。','她理解修复不是抹去痕迹，而是让失去、选择、守护与关系继续被后来的人读见。'],
+        'Her model shifts from proving independence through flawlessness to accepting accountable choices whose losses and inherited traces remain legible.'),
       (NarrativeSemanticDimension.endingMechanism,
         NarrativeMechanismFamily.intergenerationalObjectEntrustment,
-        '她把旧照片交给许澄保存。'),
+        ['她把旧照片交给许澄保存。'],
+        'The senior generation entrusts the inherited photograph to Xu Cheng, making transferred stewardship the ending state.'),
       (NarrativeSemanticDimension.relationshipGeometry,
         NarrativeMechanismFamily.intergenerationalMentorToRecognizedAgency,
-        '周岚不再替她调整构图。'),
+        ['周岚不再替她调整构图。','她把旧照片交给许澄保存。'],
+        'Zhou Lan stops directing the younger photographer and then entrusts the family artifact, moving the relationship toward recognized agency.'),
       (NarrativeSemanticDimension.culturalAnchorFunction,
         NarrativeMechanismFamily.restorationTraceMakesTimeReadable,
-        '周岚曾保护长廊彩画。'),
+        ['周岚曾保护长廊彩画。','她年轻时参与修复，如今视力衰退，仍记得褪色、裂纹和补绘的位置。'],
+        'The Long Corridor restoration history gives visible traces a place-specific temporal function: damage, retouching, and conservation make time readable and drive the value conflict.'),
       (NarrativeSemanticDimension.dramaticEngineFamily,
         NarrativeMechanismFamily.forcedTradeoffReframesCreativeAuthorship,
-        '许澄放弃原构图，先捡回照片。'),
+        ['她必须在追光和捡照片之间选择。','许澄放弃原构图，先捡回照片。','因此，她错失最佳光线。'],
+        'A forced either-or choice sacrifices the ideal shot, and that loss compels a new understanding of responsible authorship.'),
     ]),
   ),
   _forbidden: JourneySemanticFingerprint(
@@ -431,34 +410,44 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     coreEvidence: _evidence(_forbidden, [
       (NarrativeSemanticDimension.openingMechanism,
         NarrativeMechanismFamily.incompleteKnowledgeOpportunity,
-        '十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。'),
+        ['十七岁的营造学徒沈砚第一次随周师傅进入紫禁城。'],
+        'An apprentice enters the palace for the first time with a knowledge gap, establishing an opportunity to complete understanding rather than a deadline or crisis.'),
       (NarrativeSemanticDimension.conflictMechanism,
         NarrativeMechanismFamily.completeResultVsResponsibleBoundary,
-        '沈砚开始动摇，却仍本能地厌恶地图上的空白'),
+        ['沈砚知道自己不该进去，可门后恰好是那块最刺眼的空白。','沈砚开始动摇，却仍本能地厌恶地图上的空白'],
+        'The open doorway simultaneously offers map completion and violates a known boundary, opposing his completion drive to responsible spatial restraint.'),
       (NarrativeSemanticDimension.choiceMechanism,
         NarrativeMechanismFamily.responsibleRefusalOfAvailableShortcut,
-        '于是沈砚停下，没有跨过门槛。'),
+        ['于是沈砚停下，没有跨过门槛。'],
+        'Physical access is immediately available, but Shen Yan deliberately refuses to use availability as permission to advance his completion goal.'),
       (NarrativeSemanticDimension.climaxMechanism,
         NarrativeMechanismFamily.refusalAtAvailableThreshold,
-        '就在这时，年幼侍役沿规定路线匆匆经过。'),
+        ['就在这时，年幼侍役沿规定路线匆匆经过。','沈砚最终没有跨过去。'],
+        'The servant makes identity-bound movement visible at the threshold, and Shen Yan resolves the decisive moment by refusing to cross.'),
       (NarrativeSemanticDimension.consequenceMechanism,
         NarrativeMechanismFamily.intentionalVisibleIncompletion,
-        '门后来关上，地图仍留下空白。'),
+        ['门后来关上，地图仍留下空白。'],
+        'Because he does not cross, the missing area remains visibly unfilled rather than hidden or retrospectively completed.'),
       (NarrativeSemanticDimension.transformationMechanism,
         NarrativeMechanismFamily.completionDriveToResponsibleRestraint,
-        '不再追求填满'),
+        ['不再追求填满','沈砚终于知道，理解空间不只靠进入，也靠承认边界。'],
+        'His model changes from filling every blank through access to recognizing restraint and boundary acknowledgment as part of architectural understanding.'),
       (NarrativeSemanticDimension.endingMechanism,
         NarrativeMechanismFamily.responsibilityTransferAfterRestraint,
-        '周师傅把用了多年的旧木尺交给他。'),
+        ['周师傅把用了多年的旧木尺交给他。'],
+        'The mentor entrusts a working tool after Shen Yan demonstrates restraint, converting the ending into transferred responsibility and trust.'),
       (NarrativeSemanticDimension.relationshipGeometry,
         NarrativeMechanismFamily.mentorToEntrustedAgency,
-        '周师傅告诉他，真正的营造不仅处理结构，也要读懂人与空间之间的关系。'),
+        ['周师傅告诉他，真正的营造不仅处理结构，也要读懂人与空间之间的关系。','周师傅把用了多年的旧木尺交给他。'],
+        'The mentor first frames the spatial ethic and later entrusts his own tool, showing a mentor-to-apprentice relationship culminating in recognized agency.'),
       (NarrativeSemanticDimension.culturalAnchorFunction,
         NarrativeMechanismFamily.heritageBoundaryMakesRestraintMeaningful,
-        '宫门既连接也区分'),
+        ['宫门既连接也区分','沈砚忽然明白，门既连接空间，也界定谁能够进入。'],
+        'The palace gate is not decorative scenery: its architectural and historical function organizes access by identity, making restraint causally meaningful.'),
       (NarrativeSemanticDimension.dramaticEngineFamily,
         NarrativeMechanismFamily.responsibleRefusalOfAvailableShortcut,
-        '若他只因为门开着就跨过去'),
+        ['若他只因为门开着就跨过去','于是他没有跨过门槛。','门后来关上，地图仍不完整。'],
+        'A completion-serving opportunity becomes physically available, is refused for responsibility rather than inability, and leaves the desired result intentionally incomplete.'),
     ]),
   ),
   _shanghai: JourneySemanticFingerprint(
@@ -490,34 +479,44 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     coreEvidence: _evidence(_shanghai, [
       (NarrativeSemanticDimension.openingMechanism,
         NarrativeMechanismFamily.lifeTransitionWithCarriedPast,
-        '这个晚上，他要去浦东陆家嘴，为第二天的新工作做准备。'),
+        ['这个晚上，他要去浦东陆家嘴，为第二天的新工作做准备。'],
+        'The Story opens immediately before a new career role, with the family past still present in the transition.'),
       (NarrativeSemanticDimension.conflictMechanism,
         NarrativeMechanismFamily.ruptureVsContinuity,
-        '过了黄浦江，就是离开旧上海，进入新上海。'),
+        ['过了黄浦江，就是离开旧上海，进入新上海。'],
+        'Lin An frames the crossing as a clean rupture between old and new Shanghai, establishing the binary the Story later overturns.'),
       (NarrativeSemanticDimension.choiceMechanism,
         NarrativeMechanismFamily.carryPastObjectIntoChosenFuture,
-        '最后还是把它放进包里。'),
+        ['最后还是把它放进包里。'],
+        'He chooses to carry the inherited trade document rather than return or discard it before entering the new professional future.'),
       (NarrativeSemanticDimension.climaxMechanism,
         NarrativeMechanismFamily.spatialCrossingTriggersContinuityRecognition,
-        '轮渡离开西岸'),
+        ['轮渡离开西岸','江没有把上海分成过去和未来。'],
+        'Recognition occurs during the literal crossing as the banks shift in view, so spatial movement itself overturns his old-versus-new model.'),
       (NarrativeSemanticDimension.consequenceMechanism,
         NarrativeMechanismFamily.carriedObjectCrossesIdentityBoundary,
-        '也把那张旧单据带过了江。'),
+        ['也把那张旧单据带过了江。'],
+        'The chosen object physically crosses with him into the new-role side of the river, making continuity a visible consequence.'),
       (NarrativeSemanticDimension.transformationMechanism,
         NarrativeMechanismFamily.cleanBreakModelToContinuityModel,
-        '江没有把上海分成过去和未来。'),
+        ['江没有把上海分成过去和未来。'],
+        'His interpretive model explicitly changes from clean temporal rupture to continuity across the river.'),
       (NarrativeSemanticDimension.endingMechanism,
         NarrativeMechanismFamily.arrivalWithCarriedContinuityObject,
-        '船靠东岸后，他继续走向新的工作'),
+        ['船靠东岸后，他继续走向新的工作'],
+        'He reaches the new-role side without reversing his career choice while retaining the inherited object, ending on continuity rather than return.'),
       (NarrativeSemanticDimension.relationshipGeometry,
         NarrativeMechanismFamily.parentChildContinuityWithoutCareerControl,
-        '母亲没有劝他留下，只把提单递过去。'),
+        ['母亲没有劝他留下，只把提单递过去。'],
+        'The mother transmits an object and history without blocking the son’s departure, carrying continuity without controlling his career choice.'),
       (NarrativeSemanticDimension.culturalAnchorFunction,
         NarrativeMechanismFamily.riverFlowConnectsCommercialEras,
-        '黄浦江'),
+        ['两人沿黄浦江西岸向南走，身后是外滩历史建筑，江上船只拖着灯影，东岸的陆家嘴已经亮起来。','他忽然明白，江没有把上海分成过去和未来；人、货物、信息和钱一直在两岸之间换着方式流动。'],
+        'The Huangpu holds historic Bund commerce and modern Lujiazui in one spatial field, while continuing flows provide the evidence that breaks the rupture model.'),
       (NarrativeSemanticDimension.dramaticEngineFamily,
         NarrativeMechanismFamily.spatialCrossingReframesTemporalContinuity,
-        '轮渡离开西岸'),
+        ['最后还是把它放进包里。','轮渡离开西岸','江没有把上海分成过去和未来。','也把那张旧单据带过了江。'],
+        'The carried document and one-way river crossing jointly transform a past-versus-future split into intergenerational continuity without cancelling forward choice.'),
     ]),
   ),
   _xian: JourneySemanticFingerprint(
@@ -551,34 +550,44 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     coreEvidence: _evidence(_xian, [
       (NarrativeSemanticDimension.openingMechanism,
         NarrativeMechanismFamily.farewellCompletionRitual,
-        '想跑完一圈，把这条熟悉的路当成最后一次告别。'),
+        ['想跑完一圈，把这条熟悉的路当成最后一次告别。'],
+        'He deliberately defines a complete wall circuit as a final farewell ritual before relocation.'),
       (NarrativeSemanticDimension.conflictMechanism,
         NarrativeMechanismFamily.addressChangeVsBelongingContinuity,
-        '搬出去以后，自己还算不算“城里人”'),
+        ['搬出去以后，自己还算不算“城里人”'],
+        'The explicit question makes address change threaten his sense of continuing belonging to the old city.'),
       (NarrativeSemanticDimension.choiceMechanism,
         NarrativeMechanismFamily.continueBeyondDeclaredFinish,
-        '他没有按停，而是下城继续往南跑。'),
+        ['他没有按停，而是下城继续往南跑。'],
+        'At the self-declared finish, he deliberately refuses closure and continues the same run toward the new home.'),
       (NarrativeSemanticDimension.climaxMechanism,
         NarrativeMechanismFamily.completedCircuitBecomesDeparturePoint,
-        '跑表刚好记下一整圈。'),
+        ['跑表刚好记下一整圈。'],
+        'The watch verifies that the promised closed circuit is complete, turning the finish point into the decision point for onward movement.'),
       (NarrativeSemanticDimension.consequenceMechanism,
         NarrativeMechanismFamily.completedRecordExtendsBeyondOriginalBoundary,
-        '他的距离还在增加。'),
+        ['他的距离还在增加。'],
+        'Because he keeps running after completion, the same record extends beyond the boundary it was originally meant to close.'),
       (NarrativeSemanticDimension.transformationMechanism,
         NarrativeMechanismFamily.boundedBelongingToContinuingBelonging,
-        '身后的城墙亮起灯'),
+        ['周遥小时候在墙下骑车，上学后又常来跑步，这些记忆并不只在墙内。','周遥没有按停计时。他下城后继续向南跑，穿过晚高峰的路口。'],
+        'His memories and enacted continuation show that belonging is no longer contained by the wall or address; it continues toward the new home.'),
       (NarrativeSemanticDimension.endingMechanism,
         NarrativeMechanismFamily.artifactRecordsOpenContinuation,
-        '跑表上的距离越过那一圈。'),
+        ['跑表上的距离越过那一圈。'],
+        'The ending artifact records distance beyond the completed circuit, preserving open continuation instead of a sealed farewell.'),
       (NarrativeSemanticDimension.relationshipGeometry,
         NarrativeMechanismFamily.familyAsBelongingAnchor,
-        '母亲发来消息，说搬家车已经到了，让他跑完就去新家吃饭。'),
+        ['母亲发来消息，说搬家车已经到了，让他跑完就去新家吃饭。'],
+        'The family does not oppose his run; the message makes the new home an awaiting relational destination and anchors belonging beyond the wall.'),
       (NarrativeSemanticDimension.culturalAnchorFunction,
         NarrativeMechanismFamily.fortificationBoundaryReframesBelonging,
-        '西安城墙'),
+        ['现存西安城墙主要形成于明代，后来持续修缮；过去的防御设施今天仍被保护，也进入城市公共生活。','这些记忆并不只在墙内。'],
+        'The protected fortification supplies the literal inside/outside boundary he initially equates with belonging, then reinterprets through lived use and memory.'),
       (NarrativeSemanticDimension.dramaticEngineFamily,
         NarrativeMechanismFamily.completedClosureBecomesOpenContinuation,
-        '他没有按停，而是下城继续往南跑。'),
+        ['跑表刚好记下一整圈。','他没有按停，而是下城继续往南跑。','跑表上的距离越过那一圈。'],
+        'A deliberately completed closed circuit becomes the departure point for continuing motion, and the same artifact records the shift from closure to continuation.'),
     ]),
   ),
   _hangzhou: JourneySemanticFingerprint(
@@ -612,34 +621,44 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     coreEvidence: _evidence(_hangzhou, [
       (NarrativeSemanticDimension.openingMechanism,
         NarrativeMechanismFamily.fieldAssignmentWithPurityModel,
-        '想收下一段“干净”的声音'),
+        ['想收下一段“干净”的声音'],
+        'The field-recording task begins with a self-imposed purity criterion defining what evidence she intends to admit or reject.'),
       (NarrativeSemanticDimension.conflictMechanism,
         NarrativeMechanismFamily.purityModelVsLivedEvidence,
-        '一声自行车铃闯进录音，她皱眉删掉重来。'),
+        ['一声自行车铃闯进录音，她皱眉删掉重来。'],
+        'Ordinary lived sound contradicts her clean-West-Lake model and she initially treats the contradiction as contamination to remove.'),
       (NarrativeSemanticDimension.choiceMechanism,
         NarrativeMechanismFamily.reviseClassificationInsteadOfFilteringEvidence,
-        '她忽然没有再删。'),
+        ['她忽然没有再删。'],
+        'At the repeated contamination point, she changes behavior from deleting contrary evidence to retaining it.'),
       (NarrativeSemanticDimension.climaxMechanism,
         NarrativeMechanismFamily.evidenceReclassificationEnactedInArtifact,
-        '许澄把麦克风转向堤上和水面'),
+        ['许澄把麦克风转向堤上和水面'],
+        'She actively re-aims the recorder to include previously rejected human and environmental layers, enacting the new classification in the artifact.'),
       (NarrativeSemanticDimension.consequenceMechanism,
         NarrativeMechanismFamily.retainedEvidencePreservesReclassification,
-        '让雨声、脚步和人声一起进入录音。'),
+        ['让雨声、脚步和人声一起进入录音。'],
+        'The revised decision leaves the contrary layers inside the recording rather than deleting them.'),
       (NarrativeSemanticDimension.transformationMechanism,
         NarrativeMechanismFamily.purityModelToLayeredAuthenticity,
-        '最好没有人声。'),
+        ['她不再追赶“干净”，而是把麦克风转向堤上与水面，让变化同时进入一条录音。','第二天，她把文件名写成日期、苏堤路线和“在场”。'],
+        'Her behavior and final naming show a changed authenticity model: value moves from purified absence to layered presence recorded as part of the place.'),
       (NarrativeSemanticDimension.endingMechanism,
         NarrativeMechanismFamily.revisedArtifactRecordsChangedUnderstanding,
-        '第二天，她把文件写成日期、苏堤路线和两个字：“在场”。'),
+        ['第二天，她把文件写成日期、苏堤路线和两个字：“在场”。'],
+        'The final archive record names and stores the revised understanding rather than a cleaned replacement take.'),
       (NarrativeSemanticDimension.relationshipGeometry,
         NarrativeMechanismFamily.soloFieldworkAgainstInternalModel,
-        '许澄二十一岁，是杭州本地大学生。'),
+        ['许澄私下又加了一条标准：她想录到“最像西湖”的声音。','她没有删除，而在记录表上写下“桥上人流”。'],
+        'The decisive standard and its reversal are both generated and enacted by Xu Cheng during fieldwork; no mentor or supporting character supplies the causal reinterpretation.'),
       (NarrativeSemanticDimension.culturalAnchorFunction,
         NarrativeMechanismFamily.livedCulturalLandscapeDisprovesPurity,
-        '苏堤'),
+        ['苏堤本身就来自长期的湖水治理和人工营造，西湖的堤、岛、桥、园林与山水共同组成文化景观；把所有人的声音清掉，反而像把其中一层历史关系擦掉。'],
+        'Su Causeway and West Lake function as a historically made, continuously inhabited cultural landscape; that place-specific fact directly disproves human-free purity.'),
       (NarrativeSemanticDimension.dramaticEngineFamily,
         NarrativeMechanismFamily.evidenceForcesReclassification,
-        '她忽然没有再删。'),
+        ['她觉得这一段被“污染”了，停下录音，删掉文件，从头再来。','苏堤本身就来自长期的湖水治理和人工营造，西湖的堤、岛、桥、园林与山水共同组成文化景观；把所有人的声音清掉，反而像把其中一层历史关系擦掉。','她不再追赶“干净”，而是把麦克风转向堤上与水面，让变化同时进入一条录音。'],
+        'The engine moves from filtering contradictory evidence, through place-specific evidence that invalidates the purity model, to an artifact practice that adopts the revised classification.'),
     ]),
   ),
   _chengdu: JourneySemanticFingerprint(
@@ -673,34 +692,44 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     coreEvidence: _evidence(_chengdu, [
       (NarrativeSemanticDimension.openingMechanism,
         NarrativeMechanismFamily.fieldSurveyWithPriorClassification,
-        '她带着“使用痕迹调查”表走进宽窄巷子'),
+        ['她带着“使用痕迹调查”表走进宽窄巷子'],
+        'She enters fieldwork with a formal survey instrument and an already defined authenticity classification to test against the site.'),
       (NarrativeSemanticDimension.conflictMechanism,
         NarrativeMechanismFamily.purityModelVsLivedEvidence,
-        '认定商业越多，历史越不真实'),
+        ['认定商业越多，历史越不真实'],
+        'Her prior purity model treats visible commerce as loss of authenticity while observed continuing use contradicts that classification.'),
       (NarrativeSemanticDimension.choiceMechanism,
         NarrativeMechanismFamily.reviseClassificationInsteadOfFilteringEvidence,
-        '林夏把“商业活动”四个字轻轻划掉'),
+        ['林夏把“商业活动”四个字轻轻划掉'],
+        'She explicitly removes the original negative category instead of discarding the contrary observations that challenged it.'),
       (NarrativeSemanticDimension.climaxMechanism,
         NarrativeMechanismFamily.evidenceReclassificationEnactedInArtifact,
-        '在旁边写：“仍在使用。”'),
+        ['在旁边写：“仍在使用。”'],
+        'The revised classification is enacted directly on the survey artifact at the decisive moment.'),
       (NarrativeSemanticDimension.consequenceMechanism,
         NarrativeMechanismFamily.retainedEvidencePreservesReclassification,
-        '第二天交表时，她没有誊清那一页。'),
+        ['第二天交表时，她没有誊清那一页。'],
+        'She preserves the crossed-out classification and revision in the submitted record rather than cleaning away evidence of changed judgment.'),
       (NarrativeSemanticDimension.transformationMechanism,
         NarrativeMechanismFamily.purityModelToLayeredAuthenticity,
-        '椅脚磨出的痕迹和旧门槛一样真实。'),
+        ['椅脚磨出的痕迹和旧门槛一样真实。','林夏把“商业活动”四个字轻轻划掉'],
+        'She recognizes contemporary use traces as authentically legible alongside older fabric, then changes her classification to a layered authenticity model.'),
       (NarrativeSemanticDimension.endingMechanism,
         NarrativeMechanismFamily.revisedArtifactRecordsChangedUnderstanding,
-        '第二天交表时，她没有誊清那一页。'),
+        ['第二天交表时，她没有誊清那一页。'],
+        'The Story ends with the visibly revised original survey surviving into submission, making changed understanding durable in the artifact.'),
       (NarrativeSemanticDimension.relationshipGeometry,
         NarrativeMechanismFamily.soloFieldworkAgainstInternalModel,
-        '林夏二十四岁，是成都本地建筑系研究生。'),
+        ['导师布置“使用痕迹调查”时，要求学生不要只拍建筑，而要记录历史街区如何被今天的人真正使用。','林夏翻到第一页，看着自己写的“商业活动”，没有加一句辩解，只把四个字划掉，在旁边写：“仍在使用。”'],
+        'The instructor defines the assignment but not the conclusion; Lin Xia’s own observations confront her internal model and she independently revises the record.'),
       (NarrativeSemanticDimension.culturalAnchorFunction,
         NarrativeMechanismFamily.livedUseDisprovesFrozenAuthenticity,
-        '宽窄巷子'),
+        ['林夏选择宽窄巷子，因为它由宽巷子、窄巷子和井巷子构成，旧街巷、院落与现代经营挤在一起，正适合检验她熟悉的保护观念。','杯底留下的水圈很快会干，椅脚和门槛的磨痕却是日复一日积出的；新活动没有把旧空间变成静止展品，反而持续留下可读的使用证据。'],
+        'Kuanzhai Alley’s coexistence of historic spatial fabric and ongoing social/commercial use supplies the evidence that frozen authenticity is inadequate.'),
       (NarrativeSemanticDimension.dramaticEngineFamily,
         NarrativeMechanismFamily.evidenceForcesReclassification,
-        '林夏把“商业活动”四个字轻轻划掉'),
+        ['她一直倾向于把“原真”理解成减少后来加入的东西：商业越少，历史空间越纯。','新活动没有把旧空间变成静止展品，反而持续留下可读的使用证据。','林夏翻到第一页，看着自己写的“商业活动”，没有加一句辩解，只把四个字划掉，在旁边写：“仍在使用。”'],
+        'The engine begins with a prior authenticity category, accumulates site evidence that falsifies it, and ends with the protagonist revising the category in the survey.'),
     ]),
   ),
   _nanjing: JourneySemanticFingerprint(
@@ -735,40 +764,48 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     coreEvidence: _evidence(_nanjing, [
       (NarrativeSemanticDimension.openingMechanism,
         NarrativeMechanismFamily.operationalFailureCountdown,
-        '离秦淮灯会亮灯还有七分钟'),
+        ['离秦淮灯会亮灯还有七分钟'],
+        'A public-opening lighting failure arrives with a seven-minute operational deadline, creating an immediate countdown mechanism.'),
       (NarrativeSemanticDimension.conflictMechanism,
         NarrativeMechanismFamily.completeResultVsResponsibleBoundary,
-        '最快的办法是临时改动原来的照明线路，但这项改动没有经过确认'),
+        ['最快的办法是临时改动原来的照明线路，但这项改动没有经过确认'],
+        'The fastest route to full visual completion requires an unconfirmed change, opposing spectacle completion to responsible operating boundaries.'),
       (NarrativeSemanticDimension.choiceMechanism,
         NarrativeMechanismFamily.responsibleRefusalOfAvailableShortcut,
-        '最后还是停下了手。'),
+        ['最后还是停下了手。'],
+        'Wei Zhou deliberately stops himself from using the available shortcut even though it could restore the missing decorative effect.'),
       (NarrativeSemanticDimension.climaxMechanism,
         NarrativeMechanismFamily.operationalRefusalLeavesVisibleIncompletion,
-        '放弃一段装饰灯。'),
+        ['放弃一段装饰灯。'],
+        'The decisive operational action accepts a visibly reduced decorative result to preserve the approved safe configuration.'),
       (NarrativeSemanticDimension.consequenceMechanism,
         NarrativeMechanismFamily.intentionalVisibleIncompletion,
-        '那一段装饰灯仍然黑着。'),
+        ['那一段装饰灯仍然黑着。'],
+        'The refused shortcut leaves a clearly visible dark section when the route opens, making incompletion an intentional consequence.'),
       (NarrativeSemanticDimension.transformationMechanism,
         NarrativeMechanismFamily.completionDriveToResponsibleRestraint,
-        '他保留原有安全方案'),
+        ['他很想把所有灯都亮起来，最后还是停下了手。','他保留原有安全方案，把能用的电力留给通行照明，放弃一段装饰灯。'],
+        'His goal shifts from proving competence through total illumination to accepting a reduced result that prioritizes confirmed safety and responsibility.'),
       (NarrativeSemanticDimension.endingMechanism,
         NarrativeMechanismFamily.responsibilityTransferAfterRestraint,
-        '只把最终灯光状态记录交给魏舟填写。'),
+        ['只把最终灯光状态记录交给魏舟填写。'],
+        'After the restrained decision stands, the supervisor transfers final-state documentation to Wei Zhou, ending on entrusted operational ownership.'),
       (NarrativeSemanticDimension.relationshipGeometry,
         NarrativeMechanismFamily.supervisorToEntrustedResponsibility,
-        '周工正在另一段处理问题，不能马上回来。'),
+        ['周工正在另一段处理问题，不能马上回来。','只把最终灯光状态记录交给魏舟填写。'],
+        'The supervisor is absent for the decisive judgment and later hands the final record to Wei Zhou, shifting toward entrusted responsibility.'),
       (NarrativeSemanticDimension.culturalAnchorFunction,
         NarrativeMechanismFamily.heritageOperationsConstrainSpectacle,
-        '秦淮河古桥'),
+        ['这里属于历史风貌敏感的河岸段，临时改动公用照明安排需要确认，剩下的时间也不够重新完成安全检查。'],
+        'The Qinhuai heritage-sensitive riverbank makes the operating constraint place-specific: decorative spectacle cannot override confirmed infrastructure and safety procedures.'),
       (NarrativeSemanticDimension.dramaticEngineFamily,
         NarrativeMechanismFamily.responsibleRefusalOfAvailableShortcut,
-        '最快的办法是临时改动原来的照明线路'),
+        ['最快的办法是临时改动原来的照明线路，但这项改动没有经过确认，也来不及重新检查安全。','最后还是停下了手。','那一段装饰灯仍然黑着。'],
+        'A completion-restoring shortcut is technically available but unconfirmed, the protagonist refuses it on responsibility grounds, and visible incompletion remains.'),
     ]),
   ),
 });
 
-/// Active production Story packages only. Legacy migration/remediation prose is
-/// deliberately excluded, so it cannot satisfy semantic evidence.
 String activeCanonicalGoldStoryText(String journeyId) {
   switch (journeyId) {
     case _summer:
@@ -811,15 +848,79 @@ List<String> semanticFingerprintCompletenessErrors(
       errors.add('${fingerprint.journeyId}: missing ${dimension.name}');
     }
   }
-  final evidenceByDimension = {
-    for (final evidence in fingerprint.coreEvidence) evidence.dimension: evidence,
-  };
+  final evidenceByDimension = <NarrativeSemanticDimension,
+      List<NarrativeMechanismEvidence>>{};
+  for (final evidence in fingerprint.coreEvidence) {
+    evidenceByDimension.putIfAbsent(evidence.dimension, () => []).add(evidence);
+  }
   for (final dimension in narrativeSemanticCoreDimensions) {
-    final evidence = evidenceByDimension[dimension];
-    if (evidence == null) {
+    final records = evidenceByDimension[dimension] ?? const [];
+    if (records.isEmpty) {
       errors.add('${fingerprint.journeyId}: missing evidence ${dimension.name}');
-    } else if (evidence.mechanism != fingerprint.mechanism(dimension)) {
+      continue;
+    }
+    if (records.length != 1) {
+      errors.add('${fingerprint.journeyId}: duplicate evidence ${dimension.name}');
+      continue;
+    }
+    if (records.single.mechanism != fingerprint.mechanism(dimension)) {
       errors.add('${fingerprint.journeyId}: evidence mismatch ${dimension.name}');
+    }
+  }
+  return errors;
+}
+
+/// Deterministic provenance only. This proves source identity and exact spans,
+/// not semantic entailment.
+List<String> semanticEvidenceProvenanceErrors(
+  JourneySemanticFingerprint fingerprint,
+) {
+  final story = activeCanonicalGoldStoryText(fingerprint.journeyId);
+  final errors = <String>[];
+  for (final evidence in fingerprint.coreEvidence) {
+    final prefix = '${fingerprint.journeyId}:${evidence.dimension.name}';
+    if (evidence.journeyId != fingerprint.journeyId) {
+      errors.add('$prefix:journey');
+    }
+    if (evidence.activeSourceId != activeGoldStorySourceId) {
+      errors.add('$prefix:activeSourceId');
+    }
+    if (evidence.sourceTexts.isEmpty) {
+      errors.add('$prefix:missing-source-text');
+      continue;
+    }
+    for (var index = 0; index < evidence.sourceTexts.length; index++) {
+      final sourceText = evidence.sourceTexts[index];
+      if (sourceText.trim().isEmpty) {
+        errors.add('$prefix:empty-source-text-$index');
+      } else if (!story.contains(sourceText)) {
+        errors.add('$prefix:source-not-in-active-story-$index');
+      }
+    }
+  }
+  return errors;
+}
+
+/// CI verifies provenance, completeness, and registry alignment. Founder/Agent
+/// review verifies semantic sufficiency by auditing the rationale against the
+/// cited active-Story spans.
+List<String> semanticEvidenceContractErrors(
+  JourneySemanticFingerprint fingerprint,
+) {
+  final errors = <String>[
+    ...semanticFingerprintCompletenessErrors(fingerprint),
+    ...semanticEvidenceProvenanceErrors(fingerprint),
+  ];
+  for (final evidence in fingerprint.coreEvidence) {
+    final prefix = '${fingerprint.journeyId}:${evidence.dimension.name}';
+    if (!narrativeSemanticCoreDimensions.contains(evidence.dimension)) {
+      errors.add('$prefix:not-core');
+    }
+    if (fingerprint.mechanisms[evidence.dimension] != evidence.mechanism) {
+      errors.add('$prefix:mechanism-mismatch');
+    }
+    if (evidence.semanticRationale.trim().isEmpty) {
+      errors.add('$prefix:missing-semantic-rationale');
     }
   }
   return errors;
@@ -827,14 +928,7 @@ List<String> semanticFingerprintCompletenessErrors(
 
 List<String> semanticEvidenceFidelityErrors(
   JourneySemanticFingerprint fingerprint,
-) {
-  final story = activeCanonicalGoldStoryText(fingerprint.journeyId);
-  return <String>[
-    for (final evidence in fingerprint.coreEvidence)
-      if (evidence.sourceText.trim().isEmpty || !story.contains(evidence.sourceText))
-        '${fingerprint.journeyId}:${evidence.dimension.name}:${evidence.sourceText}',
-  ];
-}
+) => semanticEvidenceProvenanceErrors(fingerprint);
 
 NarrativeSemanticComparison compareSemanticFingerprints(
   JourneySemanticFingerprint left,
@@ -885,8 +979,6 @@ NarrativeSemanticComparison compareSemanticFingerprints(
   );
 }
 
-/// Normalized structural Difference Matrix. Free-form difference prose may be
-/// displayed alongside this output but cannot override it.
 List<NarrativeSemanticComparison> semanticDifferenceMatrixAgainstApprovedGold(
   JourneySemanticFingerprint candidate,
 ) =>
