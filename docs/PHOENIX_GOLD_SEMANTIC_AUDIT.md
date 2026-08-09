@@ -14,6 +14,12 @@ Collision thresholds are binding in [Phoenix Narrative and Discovery Standard](P
 
 `EXISTING_SEMANTIC_COLLISION_DEBT` records a collision between already-approved Gold Journeys. It is not an allowlist and is not precedent for a future Gold candidate.
 
+## Evidence status meaning
+
+`VERIFIED` in the Story evidence column means the registered CORE evidence contract has valid active-Story provenance, aligned dimension/mechanism metadata, and a non-empty semantic rationale. It does **not** mean CI independently understands or proves the natural-language semantic classification. Semantic sufficiency is reviewed by auditing the cited active-Story spans together with the causal rationale under the binding standard.
+
+The evidence re-audit for this catalog strengthened weak single-span records, including relationship geometry, cultural-anchor function, transformation, and dramatic-engine evidence. It did not change any semantic family, Rule A, Rule B, or pair classification.
+
 ## Pairwise audit
 
 | # | Journey A | Journey B | Same engine | Matching CORE dimensions | CORE count | Matching secondary dimensions | Story evidence | Classification | Notes |
@@ -50,7 +56,7 @@ Collision thresholds are binding in [Phoenix Narrative and Discovery Standard](P
 **Rule A:** COLLISION.  
 **Rule B:** COLLISION.
 
-The normalized classification is supported by active Story evidence. Different professional settings, objects, timing, landmarks, and descriptive strings do not remove the shared causal mechanism.
+The normalized classification is supported by active Story evidence plus causal rationales. Different professional settings, objects, timing, landmarks, and descriptive strings do not remove the shared causal mechanism.
 
 ### Hangzhou West Lake vs Chengdu Kuanzhai Alley
 
@@ -61,7 +67,7 @@ The normalized classification is supported by active Story evidence. Different p
 **Rule A:** COLLISION.  
 **Rule B:** COLLISION.
 
-The sound recording and survey sheet are different surface artifacts, but both perform the same deeper function: evidence forces an authenticity model to be revised and the revised record becomes ending evidence.
+The sound recording and survey sheet are different surface artifacts, but both perform the same deeper function: evidence forces an authenticity model to be revised and the revised record becomes ending evidence. The strengthened evidence metadata makes that causal sequence auditable without changing the classification.
 
 ### Summer Palace family result
 
