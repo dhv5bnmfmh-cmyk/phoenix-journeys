@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/data/chengdu_kuanzhai_one_pass.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 
@@ -31,7 +32,13 @@ void main() {
         continue;
       }
 
-      if (journey.id == 'beijing-summer-palace') {
+      if (journey.id == chengduKuanzhaiJourneyId) {
+        expect(
+          journey.content.storyParagraphs,
+          chengduKuanzhaiOnePassLevels[4].storyParagraphs,
+          reason: journey.id,
+        );
+      } else if (journey.id == 'beijing-summer-palace') {
         expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
         for (final paragraph in journey.content.storyParagraphs) {
           expect(
@@ -49,7 +56,13 @@ void main() {
         reason: journey.id,
       );
       expect(journey.words.length, greaterThanOrEqualTo(9), reason: journey.id);
-      if (journey.id == 'beijing-summer-palace') {
+      if (journey.id == chengduKuanzhaiJourneyId) {
+        expect(
+          journey.discoveries,
+          hasLength(chengduKuanzhaiOnePassDiscoveries.length),
+          reason: journey.id,
+        );
+      } else if (journey.id == 'beijing-summer-palace') {
         expect(journey.discoveries, hasLength(2), reason: journey.id);
       } else {
         expect(
