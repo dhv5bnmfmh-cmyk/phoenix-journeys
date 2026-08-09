@@ -454,7 +454,7 @@ final chengduKuanzhaiMemory = List<RemediatedMemoryReview>.unmodifiable([
   const RemediatedMemoryReview(category: 'space', prompt: '院落为什么不是静止背景？', answer: '门、廊、院仍在组织进出、停留、让路、添水和交谈，旧空间继续影响今天的行为。', storyEventIds: ['CD-E3-observe', 'CD-E4-tea-table']),
   const RemediatedMemoryReview(category: 'history', prompt: '宽窄巷子的历史空间从哪里读出来？', answer: '从三条核心巷道、院落、青砖与砖木建筑等历史空间特征，以及保护更新后仍可读的街巷肌理。', storyEventIds: ['CD-E3-observe']),
   const RemediatedMemoryReview(category: 'preservation', prompt: '故事是否把所有商业都改判为“好”？', answer: '没有。林夏只是停止把商业自动等同于真实性下降，转而判断哪些使用延续空间、哪些变化会遮蔽历史信息。', storyEventIds: ['CD-E5-reclassify']),
-  const RemediatedMemoryReview(category: 'turningPoint', prompt: '茶桌旁的什么证据改变了她的分类？', answer: '椅脚磨亮的砖面、杯底水圈、门槛凹痕与持续发生的坐下、起身、让路和服务流线。', storyEventIds: ['CD-E4-tea-table']),
+  const RemediatedMemoryReview(category: 'turningPoint', prompt: '茶桌旁的什么证据改变了她的分类？', answer: '茶桌旁椅脚磨亮的砖面、杯底水圈、门槛凹痕与持续发生的坐下、起身、让路和服务流线。', storyEventIds: ['CD-E4-tea-table']),
   const RemediatedMemoryReview(category: 'climax', prompt: '林夏在调查表上做了什么？', answer: '她把“商业活动”四个字划掉，在旁边写：“仍在使用。”', storyEventIds: ['CD-E5-reclassify']),
   const RemediatedMemoryReview(category: 'anchor', prompt: 'Memory Anchor是什么？', answer: '调查表上被划掉的“商业活动”四个字，旁边保留手写的“仍在使用。”', storyEventIds: ['CD-E5-reclassify', 'CD-E6-submit']),
   const RemediatedMemoryReview(category: 'ending', prompt: '第二天她为什么不誊清报告？', answer: '她提交原来的调查页，让旧判断、删除线和新判断同时可见。', storyEventIds: ['CD-E6-submit']),
