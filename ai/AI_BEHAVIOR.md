@@ -18,6 +18,30 @@ AI 是同行者，不是冷漠的评分机器。
 - 将未经审核的 AI 内容直接写入生产数据库
 - 用复杂表达压倒初级 Explorer
 
+## Binding Journey semantic anti-template behavior
+
+When drafting, repairing, evaluating, or preparing a Phoenix Journey for Gold acceptance, the Agent MUST first read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md) and the canonical normalized semantic catalog implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
+
+For every NEW Gold Journey candidate, the Agent MUST:
+
+1. inspect the complete approved-Gold semantic fingerprint catalog before drafting the final Story;
+2. define the candidate normalized semantic fingerprint before final Story approval;
+3. compare the candidate against every approved Gold Journey using the deterministic CORE collision gate;
+4. cite exact active-Story evidence for every CORE mechanism;
+5. provide a concise semantic rationale for every CORE mechanism that explains the causal mapping from the cited Story evidence to the normalized mechanism family;
+6. cite enough focused active-Story spans to demonstrate the causal function when one sentence is insufficient, without copying whole Story levels as evidence padding;
+7. avoid bare landmark names, protagonist biographies, incidental scenery, or other surface facts as evidence for a causal mechanism unless that surface fact is itself the dimension being evidenced;
+8. reject `TEMPLATE COLLISION - NOT GOLD READY` rather than changing names, cities, professions, objects, descriptive wording, visual motifs, or enum labels to disguise reused causal structure;
+9. prefer an existing reusable `NarrativeMechanismFamily` whenever its causal function is materially equivalent;
+10. if a genuinely new mechanism family is proposed, record why no existing family is semantically equivalent, which nearest existing families were considered, and what causal distinction makes the new family necessary before the taxonomy is extended;
+11. redesign the dramatic engine and causal mechanism when a collision is found, rather than laundering the same mechanism through a near-synonym enum;
+12. update Narrative DNA, semantic fingerprints, Story-evidence spans, and semantic rationales only from the final active canonical Story, never from an abandoned or legacy Story package;
+13. rerun semantic anti-template tests after any Story or fingerprint change that can affect opening, conflict, choice, climax, consequence, transformation, relationship, ending, cultural-anchor function, or dramatic engine.
+
+The Agent MUST distinguish **Evidence Provenance** from **Semantic Sufficiency**. Deterministic CI can verify active-source identity, exact Story-span presence, dimension/mechanism alignment, and non-empty rationale fields. CI MUST NOT be represented as independently understanding whether arbitrary natural-language Story prose semantically entails an enum. Founder/Agent review remains responsible for judging whether the cited evidence plus rationale actually supports the claimed mechanism.
+
+The Agent MUST NOT create a Journey-specific semantic category, bypass, allowlist, Founder-name exception, city exception, temporary exception, hard-coded `PASS`, alternate test-only classification, or near-synonym mechanism family solely to evade a collision. Existing approved-Gold semantic collision debt must be surfaced honestly and must not be used as precedent for a future candidate.
+
 ## Binding Journey background production behavior
 
 When generating, replacing, evaluating, or integrating Phoenix Journey background images, the Agent MUST first read and follow [PHOENIX AI BACKGROUND PRODUCTION STANDARD](../docs/PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md).

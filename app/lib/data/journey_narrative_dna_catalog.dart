@@ -85,6 +85,10 @@ class JourneyNarrativeDnaRecord {
       ];
 }
 
+/// Human-readable Gold Narrative DNA.
+///
+/// This descriptive registry remains for review/report compatibility. Machine
+/// anti-template decisions are made by journey_semantic_fingerprint_catalog.dart.
 final approvedNarrativeDnaCatalog =
     List<JourneyNarrativeDnaRecord>.unmodifiable(<JourneyNarrativeDnaRecord>[
   const JourneyNarrativeDnaRecord(
@@ -116,30 +120,30 @@ final approvedNarrativeDnaCatalog =
   ),
   const JourneyNarrativeDnaRecord(
     journeyId: 'beijing-forbidden-city',
-    narrativeIdentity: 'maintenance-risk-and-palace-boundary',
-    protagonistIdentity: 'Shen-Yan-young-palace-maintenance-worker',
-    protagonistAgeIdentity: 'young-working-adult',
-    protagonistArchetype: 'young-palace-maintenance-worker',
-    openingSituation: 'professional-maintenance-duty-inside-controlled-palace-space',
-    storyGoal: 'verify-and-handle-a-palace-maintenance-risk',
-    locationMechanism: 'controlled-palace-axis-rooms-and-access-rules',
-    movementPattern: 'palace-axis-and-controlled-space',
-    conflictType: 'access-boundary-and-professional-responsibility',
-    choiceType: 'decline-to-treat-available-access-as-permission-to-possess',
-    climaxType: 'permission-boundary-decision',
-    consequenceType: 'unentered-space-and-uncompleted-map-retain-meaning',
-    emotionalArc: 'task-completion-drive-to-professional-restraint',
-    historicalLearningMechanism: 'institutional-space-and-maintenance-duty-reveal-palace-order',
-    resolutionType: 'professional-restraint-inside-palace-system',
-    endingMechanism: 'boundary-remains-meaningful',
-    memoryAnchorType: 'uncrossed-threshold-object',
-    achievementType: 'restraint-and-historical-responsibility',
-    rewardSymbolism: 'old-wooden-ruler-linked-to-measured-restraint',
-    temporalPattern: 'weather-window-before-closing',
-    supportingStructure: 'work-team-and-institutional-rules',
-    centralMetaphor: 'access-does-not-equal-possession',
-    narrativeVoice: 'third-person-professional',
-    storyRhythm: 'warning-task-risk-decision',
+    narrativeIdentity: 'apprentice-map-blank-boundary-restraint',
+    protagonistIdentity: 'Shen-Yan-seventeen-year-old-palace-construction-apprentice',
+    protagonistAgeIdentity: 'seventeen-year-old-apprentice',
+    protagonistArchetype: 'young-construction-apprentice-seeking-complete-spatial-understanding',
+    openingSituation: 'first-palace-study-route-with-map-completion-drive',
+    storyGoal: 'understand-palace-space-and-fill-his-route-map-as-completely-as-possible',
+    locationMechanism: 'palace-axis-courtyards-gates-thresholds-and-access-boundaries',
+    movementPattern: 'guided-palace-route-ending-at-an-available-but-unpermitted-threshold',
+    conflictType: 'complete-map-and-knowledge-vs-responsible-spatial-boundary',
+    choiceType: 'decline-to-cross-an-open-threshold-merely-because-access-is-available',
+    climaxType: 'stop-at-open-threshold-and-leave-the-unvisited-area-unclaimed',
+    consequenceType: 'door-closes-and-map-retains-a-meaningful-blank',
+    emotionalArc: 'completion-drive-to-restraint-and-relational-spatial-understanding',
+    historicalLearningMechanism: 'palace-order-is-read-through-axis-gate-sequence-identity-and-action-boundaries',
+    resolutionType: 'second-map-records-relations-and-deliberate-blank-rather-than-total-coverage',
+    endingMechanism: 'Zhou-Shifu-entrusts-old-wooden-ruler-after-Shen-Yan-chooses-restraint',
+    memoryAnchorType: 'uncrossed-threshold-map-blank-and-old-wooden-ruler',
+    achievementType: 'spatial-boundary-reader-through-restraint',
+    rewardSymbolism: 'old-wooden-ruler-links-measurement-to-ethical-spatial-judgment',
+    temporalPattern: 'single-guided-study-day-with-temporary-open-door-opportunity',
+    supportingStructure: 'apprentice-Zhou-Shifu-and-palace-historian-Gu-Wenlan',
+    centralMetaphor: 'a-map-can-be-more-truthful-when-it-keeps-a-chosen-blank',
+    narrativeVoice: 'third-person-apprentice-spatial-observation',
+    storyRhythm: 'guided-observation-completion-drive-open-threshold-refusal-map-revision-entrustment',
   ),
   const JourneyNarrativeDnaRecord(
     journeyId: 'shanghai-bund',
@@ -278,6 +282,9 @@ final approvedNarrativeDnaCatalog =
   ),
 ]);
 
+/// Legacy string-equality coverage retained as a regression layer.
+///
+/// This is intentionally not the authoritative semantic anti-template gate.
 int duplicatedMajorDimensions(
   JourneyNarrativeDnaRecord left,
   JourneyNarrativeDnaRecord right,
@@ -291,6 +298,7 @@ int duplicatedMajorDimensions(
   return duplicates;
 }
 
+/// Legacy descriptive uniqueness helper retained for existing tests.
 bool narrativeDnaIsUnique(
   JourneyNarrativeDnaRecord candidate,
   Iterable<JourneyNarrativeDnaRecord> references,
