@@ -24,6 +24,23 @@ JourneySemanticFingerprint _synthetic(
       coreEvidence: const [],
     );
 
+JourneySemanticFingerprint _replaceEvidence(
+  JourneySemanticFingerprint source,
+  NarrativeMechanismEvidence replacement,
+) =>
+    JourneySemanticFingerprint(
+      journeyId: source.journeyId,
+      surfaceIdentity: source.surfaceIdentity,
+      mechanisms: source.mechanisms,
+      coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
+        for (final evidence in source.coreEvidence)
+          if (evidence.dimension == replacement.dimension)
+            replacement
+          else
+            evidence,
+      ]),
+    );
+
 NarrativeSemanticComparison _pair(String a, String b) =>
     auditApprovedGoldSemanticPairs().singleWhere(
       (item) =>
@@ -65,7 +82,7 @@ void main() {
     }
   });
 
-  test('every CORE evidence record is exact text from the active production Story', () {
+  test('every CORE evidence record satisfies provenance and rationale contract', () {
     for (final fingerprint in approvedGoldSemanticFingerprints.values) {
       expect(
         fingerprint.coreEvidence.length,
@@ -73,27 +90,153 @@ void main() {
         reason: fingerprint.journeyId,
       );
       expect(
-        semanticEvidenceFidelityErrors(fingerprint),
+        semanticEvidenceContractErrors(fingerprint),
         isEmpty,
         reason: fingerprint.journeyId,
       );
       final activeStory = activeCanonicalGoldStoryText(fingerprint.journeyId);
       for (final evidence in fingerprint.coreEvidence) {
         expect(evidence.journeyId, fingerprint.journeyId);
-        expect(activeStory, contains(evidence.sourceText));
+        expect(evidence.activeSourceId, activeGoldStorySourceId);
+        expect(evidence.sourceTexts, isNotEmpty);
+        expect(evidence.semanticRationale.trim(), isNotEmpty);
         expect(evidence.mechanism, fingerprint.mechanism(evidence.dimension));
+        for (final sourceText in evidence.sourceTexts) {
+          expect(sourceText.trim(), isNotEmpty);
+          expect(
+            activeStory,
+            contains(sourceText),
+            reason:
+                '${fingerprint.journeyId}:${evidence.dimension.name}:$sourceText',
+          );
+        }
       }
     }
   });
 
-  test('legacy Forbidden City Story prose cannot satisfy active DNA evidence', () {
-    final active = activeCanonicalGoldStoryText('beijing-forbidden-city');
-    const abandonedMaintenanceStory = '纪衡在午门内收到雷雨预警。';
-    expect(active, isNot(contains(abandonedMaintenanceStory)));
+  test('multi-span evidence resolves every cited span to the active Story', () {
+    var multiSpanRecords = 0;
+    for (final fingerprint in approvedGoldSemanticFingerprints.values) {
+      final activeStory = activeCanonicalGoldStoryText(fingerprint.journeyId);
+      for (final evidence in fingerprint.coreEvidence) {
+        if (evidence.sourceTexts.length > 1) multiSpanRecords++;
+        for (final sourceText in evidence.sourceTexts) {
+          expect(activeStory, contains(sourceText));
+        }
+      }
+    }
+    expect(multiSpanRecords, greaterThan(0));
+  });
+
+  test('empty semantic rationale fails evidence-contract completeness', () {
+    final source = approvedGoldSemanticFingerprints['beijing-forbidden-city']!;
+    final original = source.coreEvidence.firstWhere(
+      (evidence) =>
+          evidence.dimension == NarrativeSemanticDimension.choiceMechanism,
+    );
+    final invalid = _replaceEvidence(
+      source,
+      NarrativeMechanismEvidence(
+        journeyId: original.journeyId,
+        dimension: original.dimension,
+        mechanism: original.mechanism,
+        activeSourceId: original.activeSourceId,
+        sourceTexts: original.sourceTexts,
+        semanticRationale: '',
+      ),
+    );
+
     expect(
-      approvedGoldSemanticFingerprints['beijing-forbidden-city']!.coreEvidence
-          .any((evidence) => evidence.sourceText == abandonedMaintenanceStory),
+      semanticEvidenceContractErrors(invalid),
+      contains(
+        'beijing-forbidden-city:choiceMechanism:missing-semantic-rationale',
+      ),
+    );
+  });
+
+  test('missing Story evidence fails evidence-contract completeness', () {
+    final source = approvedGoldSemanticFingerprints['beijing-forbidden-city']!;
+    final original = source.coreEvidence.firstWhere(
+      (evidence) =>
+          evidence.dimension == NarrativeSemanticDimension.choiceMechanism,
+    );
+    final invalid = _replaceEvidence(
+      source,
+      NarrativeMechanismEvidence(
+        journeyId: original.journeyId,
+        dimension: original.dimension,
+        mechanism: original.mechanism,
+        activeSourceId: original.activeSourceId,
+        sourceTexts: const [],
+        semanticRationale:
+            'The rationale is present, but there is no active Story evidence.',
+      ),
+    );
+
+    expect(
+      semanticEvidenceContractErrors(invalid),
+      contains('beijing-forbidden-city:choiceMechanism:missing-source-text'),
+    );
+  });
+
+  test('legacy Forbidden City Story evidence fails active provenance', () {
+    const abandonedMaintenanceStory = '纪衡在午门内收到雷雨预警。';
+    final source = approvedGoldSemanticFingerprints['beijing-forbidden-city']!;
+    final original = source.coreEvidence.firstWhere(
+      (evidence) =>
+          evidence.dimension == NarrativeSemanticDimension.choiceMechanism,
+    );
+    final active = activeCanonicalGoldStoryText(source.journeyId);
+    expect(active, isNot(contains(abandonedMaintenanceStory)));
+
+    final invalid = _replaceEvidence(
+      source,
+      NarrativeMechanismEvidence(
+        journeyId: original.journeyId,
+        dimension: original.dimension,
+        mechanism: original.mechanism,
+        activeSourceId: original.activeSourceId,
+        sourceTexts: const [abandonedMaintenanceStory],
+        semanticRationale:
+            'A non-empty rationale cannot make abandoned Story prose active evidence.',
+      ),
+    );
+
+    expect(
+      semanticEvidenceContractErrors(invalid),
+      contains(
+        'beijing-forbidden-city:choiceMechanism:source-not-in-active-story-0',
+      ),
+    );
+    expect(
+      source.coreEvidence.any(
+        (evidence) => evidence.sourceTexts.contains(abandonedMaintenanceStory),
+      ),
       isFalse,
+    );
+  });
+
+  test('evidence mechanism metadata must stay aligned with fingerprint mechanism', () {
+    final source = approvedGoldSemanticFingerprints['beijing-forbidden-city']!;
+    final original = source.coreEvidence.firstWhere(
+      (evidence) =>
+          evidence.dimension == NarrativeSemanticDimension.choiceMechanism,
+    );
+    final invalid = _replaceEvidence(
+      source,
+      NarrativeMechanismEvidence(
+        journeyId: original.journeyId,
+        dimension: original.dimension,
+        mechanism: NarrativeMechanismFamily.carryPastObjectIntoChosenFuture,
+        activeSourceId: original.activeSourceId,
+        sourceTexts: original.sourceTexts,
+        semanticRationale: original.semanticRationale,
+      ),
+    );
+
+    expect(
+      semanticEvidenceContractErrors(invalid),
+      contains('beijing-forbidden-city:choiceMechanism:mechanism-mismatch'),
     );
   });
 
@@ -127,11 +270,35 @@ void main() {
       expect(fingerprint, isNotNull, reason: record.journeyId);
       expect(fingerprint!.coreEvidence, isNotEmpty, reason: record.journeyId);
       expect(
-        semanticEvidenceFidelityErrors(fingerprint),
+        semanticEvidenceContractErrors(fingerprint),
         isEmpty,
         reason: record.journeyId,
       );
     }
+  });
+
+  test('Hangzhou relationship evidence shows internal-model solo fieldwork', () {
+    final fingerprint = approvedGoldSemanticFingerprints['hangzhou-west-lake']!;
+    final evidence = fingerprint.coreEvidence.singleWhere(
+      (item) =>
+          item.dimension == NarrativeSemanticDimension.relationshipGeometry,
+    );
+    expect(evidence.sourceTexts.length, greaterThanOrEqualTo(2));
+    expect(evidence.sourceTexts.join('\n'), contains('私下又加了一条标准'));
+    expect(evidence.sourceTexts.join('\n'), contains('桥上人流'));
+    expect(evidence.semanticRationale, contains('no mentor'));
+  });
+
+  test('Hangzhou cultural anchor evidence is causal rather than a bare landmark', () {
+    final fingerprint = approvedGoldSemanticFingerprints['hangzhou-west-lake']!;
+    final evidence = fingerprint.coreEvidence.singleWhere(
+      (item) =>
+          item.dimension == NarrativeSemanticDimension.culturalAnchorFunction,
+    );
+    expect(evidence.sourceTexts.join('\n'), contains('湖水治理和人工营造'));
+    expect(evidence.sourceTexts.join('\n'), contains('文化景观'));
+    expect(evidence.sourceTexts, isNot(equals(const ['苏堤'])));
+    expect(evidence.semanticRationale, contains('disproves'));
   });
 
   test('wording disguise cannot evade normalized semantic collision', () {
@@ -173,6 +340,11 @@ void main() {
     expect(a.surfaceIdentity, b.surfaceIdentity);
     expect(comparison.coreMatchCount, 0);
     expect(comparison.isCollision, isFalse);
+  });
+
+  test('Rule A and Rule B named thresholds remain unchanged', () {
+    expect(semanticCollisionSameEngineAdditionalCoreThreshold, 3);
+    expect(semanticCollisionIndependentCoreThreshold, 4);
   });
 
   test('Rule A blocks same dramatic engine plus exactly three additional CORE matches', () {
