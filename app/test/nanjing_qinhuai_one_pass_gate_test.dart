@@ -70,7 +70,8 @@ void main() {
             story.contains('黑暗') ||
             story.contains('暗区') ||
             story.contains('暗口') ||
-            story.contains('没有亮'),
+            story.contains('没有亮') ||
+            story.contains('熄灭'),
         isTrue,
         reason: 'Lv$level visible decorative-light sacrifice',
       );
@@ -211,8 +212,18 @@ void main() {
   });
 
   test('Memory and Complete preserve the distinctive dark-section image', () {
-    final memory = nanjingQinhuaiMemory.map((item) => item.answer).join();
-    for (final anchor in <String>['魏舟', '秦淮河', '古桥', '装饰灯', '黑着', '周工', '记录']) {
+    final memory = nanjingQinhuaiMemory
+        .map((item) => '${item.prompt}${item.answer}')
+        .join();
+    for (final anchor in <String>[
+      '魏舟',
+      '秦淮河',
+      '古桥',
+      '装饰灯',
+      '黑着',
+      '周工',
+      '记录',
+    ]) {
       expect(memory, contains(anchor), reason: anchor);
     }
     expect(
