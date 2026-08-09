@@ -60,16 +60,14 @@ const nanjingQinhuaiNarrativeDna = NanjingNarrativeDna(
       'safe-reduced-opening-with-visible-imperfection-and-earned-responsibility',
   memoryAnchorType:
       'dark-decorative-section-after-essential-route-lights-come-on',
-  movementPattern:
-      'fixed-Qinhuai-riverside-failure-zone-not-tourism-walk',
+  movementPattern: 'fixed-Qinhuai-riverside-failure-zone-not-tourism-walk',
   temporalPattern:
       'seven-minute-countdown-to-one-lantern-festival-opening-sequence',
   supportingStructure:
       'mentor-away-during-decision-then-returns-for-responsibility-transfer',
   endingMechanism:
       'mentor-hands-final-lighting-status-record-to-Wei-Zhou-to-own-and-report',
-  centralMetaphor:
-      'successful-operation-can-leave-a-visible-absence',
+  centralMetaphor: 'successful-operation-can-leave-a-visible-absence',
 );
 
 const nanjingQinhuaiSupportedNarrativeFacts = <String>[
@@ -269,7 +267,7 @@ final nanjingQinhuaiOnePassLevels =
   ]),
   _nanjingLevel([
     '秦淮灯会亮灯序列启动前只剩七分钟，魏舟负责的秦淮河沿岸段突然出现故障告警：古桥附近一组装饰灯失去响应。外围等待区已经进入开放准备，河岸的连续通行照明必须按计划具备使用条件。周工正被上游另一处异常占住，只能通过对讲机要求魏舟先作现场判断。魏舟跟着周工完成过许多安装和试亮，熟悉设备，却很少承担“哪些效果可以放弃”的决定；他原本希望今晚交出一条完整、漂亮的灯带，让周工看到自己已经能独立负责。故障点恰好有一个速度很快的临时方案：改变既定照明与供电走向，把仍可使用的部分重新引到装饰段。视觉上它最接近“全部恢复”，但这意味着在秦淮历史风貌敏感的河岸和古桥附近临时改变已经确认的设施安排。没有授权，也没有足够时间重新核对安全，魏舟知道这不是一个可以只凭“来得及”就执行的选择。',
-    '他把临时方案划掉，转而在现有配置内重排优先级：先保持整段通行照明连续，再降低靠桥区域的装饰负荷，并把故障旁的一小段装饰灯明确留在关闭状态。倒计时归零，主要路线从远处依次亮起。光落进秦淮河，水面能映出移动的人影和灯色；古桥旁却没有出现完整的灯带，那一段黑暗像一道缺口，清楚地留在夜景里。开放按缩减后的状态继续，魏舟没有再去碰未经确认的改线。周工回来后先看通行区域，再看那段暗处，随后让魏舟说明自己的判断。听完后，他没有接过控制权，而是把最终灯光状态记录交给魏舟，让他写明故障、保留的安全照明和主动放弃的装饰范围，并由他完成现场汇报。',
+    '古桥旁，魏舟把临时方案划掉，转而在现有配置内重排优先级：先保持整段通行照明连续，再降低靠桥区域的装饰负荷，并把故障旁的一小段装饰灯明确留在关闭状态。倒计时归零，主要路线从远处依次亮起。光落进秦淮河，水面能映出移动的人影和灯色；古桥旁却没有出现完整的灯带，那一段黑暗像一道缺口，清楚地留在夜景里。开放按缩减后的状态继续，魏舟没有再去碰未经确认的改线。周工回来后先看通行区域，再看那段暗处，随后让魏舟说明自己的判断。听完后，他没有接过控制权，而是把最终灯光状态记录交给魏舟，让他写明故障、保留的安全照明和主动放弃的装饰范围，并由他完成现场汇报。',
   ]),
   _nanjingLevel([
     '秦淮灯会正式亮灯前七分钟，魏舟负责的秦淮河沿岸控制段突然报出故障：古桥附近的一组装饰灯完全失去响应。外围已经进入开场准备，人群很快就会沿河移动，因此真正不能中断的是连续、可识别的通行照明。周工此时正在上游处理另一处异常，无法赶回，只在对讲机里说了一句：“这段你先判断。”魏舟握着工具时意识到，这正是他一直想等到的机会。他跟随周工完成过安装、试亮和排障，却很少在时间压力下决定“什么可以不恢复”。眼前最快的办法，是临时改变已经确认的照明与供电走向，把仍能使用的部分重新引向故障装饰段。若只看视觉效果，这条路最漂亮；但它会在秦淮历史风貌敏感的河岸和古桥附近改变既定设施安排，而且剩余时间不足以取得必要确认并重新完成安全复核。一个未经确认的变化，即使能让灯带看起来完整，也会把新的未知状态带进马上开放的路线。',
