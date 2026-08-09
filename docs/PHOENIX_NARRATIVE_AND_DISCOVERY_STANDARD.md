@@ -344,7 +344,10 @@ Automated validation MAY verify:
 - annotations;
 - exact duplication;
 - IDs;
-- structural integrity.
+- structural integrity;
+- normalized semantic fingerprint completeness;
+- exact Story-evidence binding;
+- deterministic CORE semantic collision thresholds.
 
 Automated validation cannot by itself approve:
 
@@ -357,9 +360,10 @@ Automated validation cannot by itself approve:
 - emotional arc;
 - cultural integration;
 - Story/Discovery functional separation;
-- library differentiation;
 - literary quality;
 - Founder experience.
+
+Semantic taxonomy assignment still requires truthful human/Agent classification against the active Story. Once assigned and evidence-bound, CI comparison is deterministic and MUST NOT be replaced by free-form prose judgment.
 
 Statements such as `360 / 360 PASS`, `score 100`, `average 100`, and `all fields present` MUST be reported only as evidence for the checks actually implemented. They MUST NOT produce overall Story Quality `PASS`.
 
@@ -382,6 +386,9 @@ The following codes are binding minimum codes:
 - `OPENING_TEMPLATE_REUSE`
 - `ENDING_TEMPLATE_REUSE`
 - `NARRATIVE_ENGINE_DUPLICATION`
+- `SEMANTIC_TEMPLATE_COLLISION`
+- `NARRATIVE_DNA_ACTIVE_STORY_EVIDENCE_MISSING`
+- `NARRATIVE_DNA_LEGACY_STORY_DRIFT`
 - `LIBRARY_DIFFERENTIATION_UNVERIFIED`
 - `LEVEL_ADAPTATION_IDENTITY_LOSS`
 - `SPECIAL_MECHANISM_FLATTENED`
@@ -453,3 +460,185 @@ A Story, Discovery, pilot, batch, or new Journey is not approved unless:
 - required Founder approval is explicitly tied to the candidate Commit and Preview.
 
 This standard establishes governance only. It does not authorize content repair, pilot implementation, batch rewriting, or a new Journey.
+
+## 17. Semantic Anti-Template Standard
+
+### 17.1 Two-layer originality model
+
+Phoenix evaluates Journey originality at two separate layers.
+
+**Layer 1 — Surface Identity** includes, but is not limited to:
+
+- character name;
+- city or realm;
+- profession;
+- physical object;
+- visual motif;
+- cultural or historical subject;
+- narration voice, age, time of day, and other incidental presentation choices.
+
+**Layer 2 — Dramatic Mechanism** includes:
+
+- opening mechanism;
+- goal mechanism;
+- conflict mechanism;
+- choice mechanism;
+- climax mechanism;
+- consequence mechanism;
+- protagonist transformation mechanism;
+- relationship geometry;
+- ending mechanism;
+- cultural-anchor function;
+- dramatic engine family;
+- supporting structural mechanisms used by the canonical semantic fingerprint.
+
+**Binding rule:** Different names, professions, cities, objects, wording, historical subjects, or visual motifs do NOT establish narrative originality when the underlying causal dramatic mechanism remains materially duplicated.
+
+A Story MUST NOT be classified as distinct merely because its descriptive Narrative DNA uses different prose strings.
+
+### 17.2 Descriptive Narrative DNA and normalized semantic fingerprint
+
+Phoenix maintains two complementary representations:
+
+1. **Descriptive Narrative DNA** for rich Journey-specific human review.
+2. **Normalized Semantic Narrative Fingerprint** for deterministic machine gating.
+
+The normalized fingerprint is the authoritative machine comparison source and MUST use controlled semantic identifiers rather than arbitrary prose equality. The canonical implementation is `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
+
+The normalized fingerprint MUST represent at least:
+
+1. opening mechanism;
+2. protagonist role pattern;
+3. relationship geometry;
+4. goal mechanism;
+5. conflict mechanism;
+6. choice mechanism;
+7. climax mechanism;
+8. consequence mechanism;
+9. transformation mechanism;
+10. ending mechanism;
+11. cultural-anchor function;
+12. artifact/object narrative function;
+13. movement/spatial mechanism;
+14. temporal pressure mechanism;
+15. supporting-character function;
+16. dramatic engine family.
+
+Semantic identifiers MUST be reusable mechanism families. Journey-, city-, character-, landmark-, or candidate-specific identifiers are prohibited because they defeat comparison.
+
+### 17.3 Active Story evidence binding
+
+Narrative DNA and every CORE normalized mechanism MUST be traceable to the **ACTIVE canonical production Story**.
+
+Each CORE mechanism evidence record MUST identify:
+
+- Journey ID;
+- semantic dimension;
+- normalized semantic family;
+- active Story package or level source;
+- exact Story source text;
+- optional explanatory note.
+
+The exact evidence text MUST literally occur in the active production Story package. Legacy, abandoned, superseded, migration-only, or test-only Story prose MUST NOT satisfy active Narrative DNA evidence.
+
+Metadata MUST conform to the active Story. The Story MUST NOT be rewritten merely to preserve stale metadata.
+
+### 17.4 CORE collision dimensions
+
+The deterministic CORE set is:
+
+- opening mechanism;
+- conflict mechanism;
+- choice mechanism;
+- climax mechanism;
+- consequence mechanism;
+- transformation mechanism;
+- ending mechanism;
+- relationship geometry;
+- cultural-anchor function;
+- dramatic engine family.
+
+Incidental similarities such as young protagonists, third-person narration, one-day duration, mentor presence, heritage setting, physical-object presence, student status, or nighttime ending do not independently establish a template collision.
+
+### 17.5 Deterministic blocking threshold
+
+The implementation MUST use named thresholds and the following minimum-strength rules:
+
+**Rule A — same dramatic engine:**
+
+A candidate is a semantic template collision when it has the same `dramaticEngineFamily` as a reference approved Gold Journey **AND at least 3 additional matching CORE mechanism families**.
+
+Implementation constant:
+
+`semanticCollisionSameEngineAdditionalCoreThreshold = 3`
+
+**Rule B — CORE structural reuse:**
+
+A candidate is a semantic template collision when it has **at least 4 matching CORE mechanism families**, even when the top-level dramatic-engine labels differ.
+
+Implementation constant:
+
+`semanticCollisionIndependentCoreThreshold = 4`
+
+A weighted or descriptive similarity score MAY supplement reporting but MUST NOT weaken or replace these deterministic rules without a separately approved, demonstrably stricter regression-tested standard change.
+
+### 17.6 Difference Matrix structural output
+
+Free-form Difference Matrix prose is not sufficient. Every candidate-vs-reference comparison MUST resolve from the canonical semantic fingerprint and report at least:
+
+- dramatic-engine match;
+- opening-mechanism match;
+- conflict-mechanism match;
+- choice-mechanism match;
+- climax-mechanism match;
+- consequence-mechanism match;
+- transformation-mechanism match;
+- ending-mechanism match;
+- relationship-geometry match;
+- cultural-anchor-function match;
+- total CORE matches;
+- matching secondary dimensions;
+- deterministic collision result.
+
+Different descriptive wording MUST NOT override a normalized structural match.
+
+### 17.7 Existing approved collision debt
+
+The semantic engine MUST audit all approved Gold-to-Gold pairs.
+
+If an already approved Gold pair now exceeds the deterministic threshold, it MUST be reported as:
+
+`EXISTING_SEMANTIC_COLLISION_DEBT`
+
+Existing debt MUST NOT be hidden by category splitting, Journey-specific identifiers, allowlists, exclusions, threshold reduction, or dishonest reclassification. Infrastructure tests MAY remain green by asserting the truthful debt result. Existing debt does not authorize Story rewriting without separate Founder instruction and does not create precedent for future Gold acceptance.
+
+### 17.8 Future Gold hard gate
+
+For every NEW Gold Journey candidate, semantic comparison against **every approved Gold Journey** is mandatory before Gold acceptance.
+
+If any comparison is a semantic collision, the required result is:
+
+`TEMPLATE COLLISION - NOT GOLD READY`
+
+The Gold acceptance gate MUST fail until the dramatic mechanism is redesigned and the collision is removed.
+
+There is no per-Journey bypass, city bypass, candidate allowlist, Founder-name bypass, temporary semantic exception, alternate test-only registry, or prose-only override.
+
+### 17.9 One semantic source of truth
+
+Semantic tests, pairwise catalog audit, normalized Difference Matrix reporting, and future Gold acceptance MUST resolve from the same canonical semantic fingerprint registry. Manually synchronized parallel semantic maps are prohibited where the canonical registry can be consumed directly.
+
+### 17.10 Agent execution order
+
+Before final Story approval for a new Journey, the responsible Agent MUST:
+
+1. read the current approved-Gold semantic fingerprint catalog;
+2. define the candidate semantic fingerprint;
+3. compare it against every approved Gold Journey;
+4. bind every CORE mechanism to exact active Story evidence;
+5. reject collisions rather than disguise them through Layer 1 changes;
+6. redesign the dramatic engine or causal structure when required;
+7. update Narrative DNA only after the canonical Story is locked;
+8. rerun the semantic anti-template gate after Story changes.
+
+This semantic standard is deterministic and local. CI MUST NOT depend on an external LLM, embeddings API, network semantic service, or external vector database to decide the collision result.
