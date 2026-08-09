@@ -18,6 +18,32 @@ void main() {
     expect(story, isNot(contains('慢生活')));
   });
 
+  test('published Chengdu adapter binds exact Gold Lv5 and complete Discovery', () {
+    final experience = requireDailyJourneyExperience(chengduKuanzhaiJourneyId);
+    expect(
+      experience.content.storyParagraphs,
+      chengduKuanzhaiOnePassLevels[4].storyParagraphs,
+    );
+    expect(
+      experience.storyAnnotations,
+      chengduKuanzhaiOnePassLevels[4].storyAnnotations,
+    );
+    expect(experience.discoveries, chengduKuanzhaiOnePassDiscoveries);
+    expect(experience.words.length, greaterThanOrEqualTo(9));
+
+    final publishedContext = <String>[
+      ...experience.content.storyParagraphs,
+      ...experience.discoveries.map((entry) => entry.text),
+    ].join();
+    for (final word in experience.words) {
+      expect(
+        publishedContext,
+        contains(word.word),
+        reason: 'Published Chengdu Word lacks Story/Discovery context: ${word.word}',
+      );
+    }
+  });
+
   test('legacy difficulty resolver maps Chengdu to canonical Gold levels', () {
     final experience = requireDailyJourneyExperience(chengduKuanzhaiJourneyId);
     final easy = resolveJourneyLevel(experience, JourneyDifficulty.easy);
