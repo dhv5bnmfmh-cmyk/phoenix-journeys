@@ -49,6 +49,9 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
+          flutter test test/all_journey_adaptive_level_test.dart --reporter expanded
+          flutter test test/all_journey_adaptive_levels_test.dart --reporter expanded
+          flutter test test/nanjing_qinhuai_vocabulary_ceiling_test.dart --reporter expanded
           flutter test test/nanjing_qinhuai_one_pass_gate_test.dart --reporter expanded
           flutter test test/nanjing_qinhuai_source_claim_guard_test.dart --reporter expanded
           flutter test test/nanjing_legacy_fallback_gate_test.dart --reporter expanded
