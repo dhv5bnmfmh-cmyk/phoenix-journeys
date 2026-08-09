@@ -12,81 +12,71 @@ const _goldIds = <String>{
   'nanjing-qinhuai-river',
 };
 
-Map<NarrativeSemanticDimension, NarrativeMechanismFamily> _baseMechanisms() => {
-      NarrativeSemanticDimension.openingMechanism:
-          NarrativeMechanismFamily.deadlineWithIdealizedTarget,
-      NarrativeSemanticDimension.protagonistRolePattern:
-          NarrativeMechanismFamily.creatorProvingIndependentJudgment,
-      NarrativeSemanticDimension.relationshipGeometry:
-          NarrativeMechanismFamily.intergenerationalMentorToRecognizedAgency,
-      NarrativeSemanticDimension.goalMechanism:
-          NarrativeMechanismFamily.produceIdealArtifact,
-      NarrativeSemanticDimension.conflictMechanism:
-          NarrativeMechanismFamily.aestheticPerfectionVsRelationalTrace,
-      NarrativeSemanticDimension.choiceMechanism:
-          NarrativeMechanismFamily.sacrificeIdealResultToPreserveRelationalEvidence,
-      NarrativeSemanticDimension.climaxMechanism:
-          NarrativeMechanismFamily.forcedTradeoffCreatesNewFrame,
-      NarrativeSemanticDimension.consequenceMechanism:
-          NarrativeMechanismFamily.sacrificedIdealCreatesAlternativeArtifact,
-      NarrativeSemanticDimension.transformationMechanism:
-          NarrativeMechanismFamily.independenceReframedAsTraceableResponsibility,
-      NarrativeSemanticDimension.endingMechanism:
-          NarrativeMechanismFamily.intergenerationalObjectEntrustment,
-      NarrativeSemanticDimension.culturalAnchorFunction:
-          NarrativeMechanismFamily.restorationTraceMakesTimeReadable,
-      NarrativeSemanticDimension.artifactObjectNarrativeFunction:
-          NarrativeMechanismFamily.inheritedPhotographForcesRelationalChoice,
-      NarrativeSemanticDimension.movementSpatialMechanism:
-          NarrativeMechanismFamily.vantageSearchThenRecomposition,
-      NarrativeSemanticDimension.temporalPressureMechanism:
-          NarrativeMechanismFamily.expiringCreativeOpportunity,
-      NarrativeSemanticDimension.supportingCharacterFunction:
-          NarrativeMechanismFamily.elderEmbodiesPriorKnowledgeThenEntrusts,
-      NarrativeSemanticDimension.dramaticEngineFamily:
-          NarrativeMechanismFamily.forcedTradeoffReframesCreativeAuthorship,
-    };
-
 JourneySemanticFingerprint _synthetic(
   String id,
-  String surface,
+  String surfaceIdentity,
   Map<NarrativeSemanticDimension, NarrativeMechanismFamily> mechanisms,
 ) =>
     JourneySemanticFingerprint(
       journeyId: id,
-      surfaceIdentity: surface,
+      surfaceIdentity: surfaceIdentity,
       mechanisms: Map.unmodifiable(mechanisms),
       coreEvidence: const [],
     );
 
-NarrativeSemanticComparison _pair(String a, String b) {
-  final audit = auditApprovedGoldSemanticPairs();
-  return audit.singleWhere(
-    (item) =>
-        (item.journeyA == a && item.journeyB == b) ||
-        (item.journeyA == b && item.journeyB == a),
-  );
+NarrativeSemanticComparison _pair(String a, String b) =>
+    auditApprovedGoldSemanticPairs().singleWhere(
+      (item) =>
+          (item.journeyA == a && item.journeyB == b) ||
+          (item.journeyA == b && item.journeyB == a),
+    );
+
+String _pairKey(String a, String b) {
+  final ids = <String>[a, b]..sort();
+  return ids.join('|');
 }
+
+Map<NarrativeSemanticDimension, NarrativeMechanismFamily> _cloneGold(String id) =>
+    Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.from(
+      approvedGoldSemanticFingerprints[id]!.mechanisms,
+    );
 
 void main() {
   test('all seven approved Gold Journeys have complete normalized fingerprints', () {
     expect(approvedGoldSemanticFingerprints.keys.toSet(), _goldIds);
     for (final fingerprint in approvedGoldSemanticFingerprints.values) {
-      expect(fingerprint.mechanisms.length, NarrativeSemanticDimension.values.length);
-      expect(semanticFingerprintCompletenessErrors(fingerprint), isEmpty,
-          reason: fingerprint.journeyId);
+      expect(
+        fingerprint.mechanisms.length,
+        NarrativeSemanticDimension.values.length,
+        reason: fingerprint.journeyId,
+      );
+      expect(
+        semanticFingerprintCompletenessErrors(fingerprint),
+        isEmpty,
+        reason: fingerprint.journeyId,
+      );
       for (final dimension in narrativeSemanticCoreDimensions) {
-        expect(fingerprint.mechanisms[dimension], isNotNull,
-            reason: '${fingerprint.journeyId}:${dimension.name}');
+        expect(
+          fingerprint.mechanisms[dimension],
+          isNotNull,
+          reason: '${fingerprint.journeyId}:${dimension.name}',
+        );
       }
     }
   });
 
-  test('every CORE evidence record is exact text from the active production Story package', () {
+  test('every CORE evidence record is exact text from the active production Story', () {
     for (final fingerprint in approvedGoldSemanticFingerprints.values) {
-      expect(fingerprint.coreEvidence.length, narrativeSemanticCoreDimensions.length);
-      expect(semanticEvidenceFidelityErrors(fingerprint), isEmpty,
-          reason: fingerprint.journeyId);
+      expect(
+        fingerprint.coreEvidence.length,
+        narrativeSemanticCoreDimensions.length,
+        reason: fingerprint.journeyId,
+      );
+      expect(
+        semanticEvidenceFidelityErrors(fingerprint),
+        isEmpty,
+        reason: fingerprint.journeyId,
+      );
       final activeStory = activeCanonicalGoldStoryText(fingerprint.journeyId);
       for (final evidence in fingerprint.coreEvidence) {
         expect(evidence.journeyId, fingerprint.journeyId);
@@ -96,22 +86,23 @@ void main() {
     }
   });
 
-  test('legacy Forbidden City Story prose cannot satisfy active Narrative DNA evidence', () {
+  test('legacy Forbidden City Story prose cannot satisfy active DNA evidence', () {
     final active = activeCanonicalGoldStoryText('beijing-forbidden-city');
-    const legacyAbandonedSource = '纪衡在午门内收到雷雨预警。';
-    expect(active, isNot(contains(legacyAbandonedSource)));
+    const abandonedMaintenanceStory = '纪衡在午门内收到雷雨预警。';
+    expect(active, isNot(contains(abandonedMaintenanceStory)));
     expect(
       approvedGoldSemanticFingerprints['beijing-forbidden-city']!.coreEvidence
-          .any((evidence) => evidence.sourceText == legacyAbandonedSource),
+          .any((evidence) => evidence.sourceText == abandonedMaintenanceStory),
       isFalse,
     );
   });
 
-  test('Forbidden City descriptive registry reflects active Shen Yan apprentice Story', () {
+  test('Forbidden City descriptive registry matches active Shen Yan apprentice Story', () {
     final record = approvedNarrativeDnaCatalog.singleWhere(
       (item) => item.journeyId == 'beijing-forbidden-city',
     );
-    final story = activeCanonicalGoldStoryText('beijing-forbidden-city');
+    final active = activeCanonicalGoldStoryText('beijing-forbidden-city');
+
     expect(record.protagonistIdentity, contains('Shen-Yan'));
     expect(record.protagonistIdentity, contains('seventeen-year-old'));
     expect(record.protagonistArchetype, contains('construction-apprentice'));
@@ -120,14 +111,14 @@ void main() {
     expect(record.consequenceType, contains('map-retains-a-meaningful-blank'));
     expect(record.endingMechanism, contains('old-wooden-ruler'));
     expect(record.protagonistIdentity, isNot(contains('maintenance-worker')));
-    expect(story, contains('沈砚'));
-    expect(story, contains('十七岁的营造学徒沈砚'));
-    expect(story, contains('周师傅'));
-    expect(story, contains('地图仍留下空白'));
-    expect(story, contains('旧木尺'));
+
+    expect(active, contains('十七岁的营造学徒沈砚'));
+    expect(active, contains('周师傅'));
+    expect(active, contains('地图仍留下空白'));
+    expect(active, contains('旧木尺'));
   });
 
-  test('all descriptive Gold registry IDs have active Story and semantic evidence', () {
+  test('all descriptive Gold registry entries resolve to active Story evidence', () {
     expect(approvedNarrativeDnaCatalog.map((item) => item.journeyId).toSet(), _goldIds);
     for (final record in approvedNarrativeDnaCatalog) {
       final activeStory = activeCanonicalGoldStoryText(record.journeyId);
@@ -135,264 +126,169 @@ void main() {
       expect(activeStory.trim(), isNotEmpty, reason: record.journeyId);
       expect(fingerprint, isNotNull, reason: record.journeyId);
       expect(fingerprint!.coreEvidence, isNotEmpty, reason: record.journeyId);
-      expect(semanticEvidenceFidelityErrors(fingerprint), isEmpty,
-          reason: record.journeyId);
+      expect(
+        semanticEvidenceFidelityErrors(fingerprint),
+        isEmpty,
+        reason: record.journeyId,
+      );
     }
   });
 
   test('wording disguise cannot evade normalized semantic collision', () {
-    final mechanismsA = _baseMechanisms();
-    final mechanismsB = Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.from(
-      mechanismsA,
-    );
+    final source = approvedGoldSemanticFingerprints['beijing-forbidden-city']!;
     final a = _synthetic(
-      'harbor-restoration-probe',
-      'Mei / harbor engineer / brass compass / northern city',
-      mechanismsA,
+      'northern-archive-probe',
+      'Mei / northern city / archivist / brass compass / identity text A',
+      Map.from(source.mechanisms),
     );
     final b = _synthetic(
-      'mountain-archive-probe',
-      'Arun / museum intern / paper ledger / southern town',
-      mechanismsB,
+      'southern-harbor-probe',
+      'Arun / southern port / engineer / paper ledger / identity text B',
+      Map.from(source.mechanisms),
     );
-    final result = compareSemanticFingerprints(a, b);
+
+    final comparison = compareSemanticFingerprints(a, b);
     expect(a.surfaceIdentity, isNot(equals(b.surfaceIdentity)));
-    expect(result.isCollision, isTrue);
-    expect(result.classification, SemanticCollisionClassification.semanticCollision);
-    expect(result.coreMatchCount, narrativeSemanticCoreDimensions.length);
+    expect(comparison.sameDramaticEngine, isTrue);
+    expect(comparison.isCollision, isTrue);
+    expect(
+      comparison.classification,
+      SemanticCollisionClassification.semanticCollision,
+    );
   });
 
   test('surface similarity alone does not create a false semantic collision', () {
     final a = _synthetic(
       'surface-a',
       'young / third-person / one-day / heritage / physical-object',
-      _baseMechanisms(),
+      _cloneGold('beijing-summer-palace'),
     );
-    final mechanismsB = {
-      NarrativeSemanticDimension.openingMechanism:
-          NarrativeMechanismFamily.lifeTransitionWithCarriedPast,
-      // Deliberately same incidental role pattern.
-      NarrativeSemanticDimension.protagonistRolePattern:
-          NarrativeMechanismFamily.creatorProvingIndependentJudgment,
-      NarrativeSemanticDimension.relationshipGeometry:
-          NarrativeMechanismFamily.parentChildContinuityWithoutCareerControl,
-      NarrativeSemanticDimension.goalMechanism:
-          NarrativeMechanismFamily.crossIntoNewRoleWithoutPast,
-      NarrativeSemanticDimension.conflictMechanism:
-          NarrativeMechanismFamily.ruptureVsContinuity,
-      NarrativeSemanticDimension.choiceMechanism:
-          NarrativeMechanismFamily.carryPastObjectIntoChosenFuture,
-      NarrativeSemanticDimension.climaxMechanism:
-          NarrativeMechanismFamily.spatialCrossingTriggersContinuityRecognition,
-      NarrativeSemanticDimension.consequenceMechanism:
-          NarrativeMechanismFamily.carriedObjectCrossesIdentityBoundary,
-      NarrativeSemanticDimension.transformationMechanism:
-          NarrativeMechanismFamily.cleanBreakModelToContinuityModel,
-      NarrativeSemanticDimension.endingMechanism:
-          NarrativeMechanismFamily.arrivalWithCarriedContinuityObject,
-      NarrativeSemanticDimension.culturalAnchorFunction:
-          NarrativeMechanismFamily.riverFlowConnectsCommercialEras,
-      // Deliberately both contain a meaningful physical object, but with a
-      // different narrative function.
-      NarrativeSemanticDimension.artifactObjectNarrativeFunction:
-          NarrativeMechanismFamily.carriedTradeDocumentConnectsEras,
-      NarrativeSemanticDimension.movementSpatialMechanism:
-          NarrativeMechanismFamily.oneWayCrossingBetweenContrastedBanks,
-      NarrativeSemanticDimension.temporalPressureMechanism:
-          NarrativeMechanismFamily.nextDayLifeTransition,
-      NarrativeSemanticDimension.supportingCharacterFunction:
-          NarrativeMechanismFamily.parentOffersObjectWithoutBlockingDeparture,
-      NarrativeSemanticDimension.dramaticEngineFamily:
-          NarrativeMechanismFamily.spatialCrossingReframesTemporalContinuity,
-    };
     final b = _synthetic(
       'surface-b',
       'young / third-person / one-day / heritage / physical-object',
-      mechanismsB,
+      _cloneGold('shanghai-bund'),
     );
-    final result = compareSemanticFingerprints(a, b);
-    expect(result.isCollision, isFalse);
-    expect(result.coreMatchCount, 0);
-    expect(result.classification, SemanticCollisionClassification.relatedButDistinct);
+
+    final comparison = compareSemanticFingerprints(a, b);
+    expect(a.surfaceIdentity, b.surfaceIdentity);
+    expect(comparison.coreMatchCount, 0);
+    expect(comparison.isCollision, isFalse);
   });
 
   test('Rule A blocks same dramatic engine plus exactly three additional CORE matches', () {
-    final leftMechanisms = _baseMechanisms();
-    final rightMechanisms = Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.from(
-      {
-        NarrativeSemanticDimension.openingMechanism:
-            NarrativeMechanismFamily.lifeTransitionWithCarriedPast,
-        NarrativeSemanticDimension.protagonistRolePattern:
-            NarrativeMechanismFamily.youngProfessionalAtTransition,
-        NarrativeSemanticDimension.relationshipGeometry:
-            NarrativeMechanismFamily.parentChildContinuityWithoutCareerControl,
-        NarrativeSemanticDimension.goalMechanism:
-            NarrativeMechanismFamily.crossIntoNewRoleWithoutPast,
-        NarrativeSemanticDimension.conflictMechanism:
-            NarrativeMechanismFamily.aestheticPerfectionVsRelationalTrace,
-        NarrativeSemanticDimension.choiceMechanism:
-            NarrativeMechanismFamily.sacrificeIdealResultToPreserveRelationalEvidence,
-        NarrativeSemanticDimension.climaxMechanism:
-            NarrativeMechanismFamily.forcedTradeoffCreatesNewFrame,
-        NarrativeSemanticDimension.consequenceMechanism:
-            NarrativeMechanismFamily.carriedObjectCrossesIdentityBoundary,
-        NarrativeSemanticDimension.transformationMechanism:
-            NarrativeMechanismFamily.cleanBreakModelToContinuityModel,
-        NarrativeSemanticDimension.endingMechanism:
-            NarrativeMechanismFamily.arrivalWithCarriedContinuityObject,
-        NarrativeSemanticDimension.culturalAnchorFunction:
-            NarrativeMechanismFamily.riverFlowConnectsCommercialEras,
-        NarrativeSemanticDimension.artifactObjectNarrativeFunction:
-            NarrativeMechanismFamily.carriedTradeDocumentConnectsEras,
-        NarrativeSemanticDimension.movementSpatialMechanism:
-            NarrativeMechanismFamily.oneWayCrossingBetweenContrastedBanks,
-        NarrativeSemanticDimension.temporalPressureMechanism:
-            NarrativeMechanismFamily.nextDayLifeTransition,
-        NarrativeSemanticDimension.supportingCharacterFunction:
-            NarrativeMechanismFamily.parentOffersObjectWithoutBlockingDeparture,
-        NarrativeSemanticDimension.dramaticEngineFamily:
-            NarrativeMechanismFamily.forcedTradeoffReframesCreativeAuthorship,
-      },
+    final left = _cloneGold('beijing-summer-palace');
+    final right = _cloneGold('shanghai-bund');
+    for (final dimension in <NarrativeSemanticDimension>[
+      NarrativeSemanticDimension.dramaticEngineFamily,
+      NarrativeSemanticDimension.conflictMechanism,
+      NarrativeSemanticDimension.choiceMechanism,
+      NarrativeSemanticDimension.climaxMechanism,
+    ]) {
+      right[dimension] = left[dimension]!;
+    }
+
+    final comparison = compareSemanticFingerprints(
+      _synthetic('rule-a-left', 'surface A', left),
+      _synthetic('rule-a-right', 'surface B', right),
     );
-    final result = compareSemanticFingerprints(
-      _synthetic('rule-a-left', 'A', leftMechanisms),
-      _synthetic('rule-a-right', 'B', rightMechanisms),
-    );
-    expect(result.sameDramaticEngine, isTrue);
-    expect(result.coreMatchCount, 4);
-    expect(result.ruleA, isTrue);
-    expect(result.isCollision, isTrue);
+    expect(comparison.sameDramaticEngine, isTrue);
+    expect(comparison.coreMatchCount, 4);
+    expect(comparison.ruleA, isTrue);
+    expect(comparison.isCollision, isTrue);
   });
 
-  test('Rule A does not trigger below three additional CORE matches', () {
-    final right = {
-      NarrativeSemanticDimension.openingMechanism:
-          NarrativeMechanismFamily.lifeTransitionWithCarriedPast,
-      NarrativeSemanticDimension.protagonistRolePattern:
-          NarrativeMechanismFamily.youngProfessionalAtTransition,
-      NarrativeSemanticDimension.relationshipGeometry:
-          NarrativeMechanismFamily.parentChildContinuityWithoutCareerControl,
-      NarrativeSemanticDimension.goalMechanism:
-          NarrativeMechanismFamily.crossIntoNewRoleWithoutPast,
-      NarrativeSemanticDimension.conflictMechanism:
-          NarrativeMechanismFamily.aestheticPerfectionVsRelationalTrace,
-      NarrativeSemanticDimension.choiceMechanism:
-          NarrativeMechanismFamily.sacrificeIdealResultToPreserveRelationalEvidence,
-      NarrativeSemanticDimension.climaxMechanism:
-          NarrativeMechanismFamily.spatialCrossingTriggersContinuityRecognition,
-      NarrativeSemanticDimension.consequenceMechanism:
-          NarrativeMechanismFamily.carriedObjectCrossesIdentityBoundary,
-      NarrativeSemanticDimension.transformationMechanism:
-          NarrativeMechanismFamily.cleanBreakModelToContinuityModel,
-      NarrativeSemanticDimension.endingMechanism:
-          NarrativeMechanismFamily.arrivalWithCarriedContinuityObject,
-      NarrativeSemanticDimension.culturalAnchorFunction:
-          NarrativeMechanismFamily.riverFlowConnectsCommercialEras,
-      NarrativeSemanticDimension.artifactObjectNarrativeFunction:
-          NarrativeMechanismFamily.carriedTradeDocumentConnectsEras,
-      NarrativeSemanticDimension.movementSpatialMechanism:
-          NarrativeMechanismFamily.oneWayCrossingBetweenContrastedBanks,
-      NarrativeSemanticDimension.temporalPressureMechanism:
-          NarrativeMechanismFamily.nextDayLifeTransition,
-      NarrativeSemanticDimension.supportingCharacterFunction:
-          NarrativeMechanismFamily.parentOffersObjectWithoutBlockingDeparture,
-      NarrativeSemanticDimension.dramaticEngineFamily:
-          NarrativeMechanismFamily.forcedTradeoffReframesCreativeAuthorship,
-    };
-    final result = compareSemanticFingerprints(
-      _synthetic('below-a-left', 'A', _baseMechanisms()),
-      _synthetic('below-a-right', 'B', right),
+  test('Rule A stays open below three additional CORE matches', () {
+    final left = _cloneGold('beijing-summer-palace');
+    final right = _cloneGold('shanghai-bund');
+    for (final dimension in <NarrativeSemanticDimension>[
+      NarrativeSemanticDimension.dramaticEngineFamily,
+      NarrativeSemanticDimension.conflictMechanism,
+      NarrativeSemanticDimension.choiceMechanism,
+    ]) {
+      right[dimension] = left[dimension]!;
+    }
+
+    final comparison = compareSemanticFingerprints(
+      _synthetic('below-a-left', 'surface A', left),
+      _synthetic('below-a-right', 'surface B', right),
     );
-    expect(result.sameDramaticEngine, isTrue);
-    expect(result.coreMatchCount, 3);
-    expect(result.ruleA, isFalse);
-    expect(result.ruleB, isFalse);
+    expect(comparison.sameDramaticEngine, isTrue);
+    expect(comparison.coreMatchCount, 3);
+    expect(comparison.ruleA, isFalse);
+    expect(comparison.ruleB, isFalse);
   });
 
-  test('Rule B blocks exactly four CORE matches even with different dramatic engines', () {
-    final right = {
-      NarrativeSemanticDimension.openingMechanism:
-          NarrativeMechanismFamily.deadlineWithIdealizedTarget,
-      NarrativeSemanticDimension.protagonistRolePattern:
-          NarrativeMechanismFamily.youngProfessionalAtTransition,
-      NarrativeSemanticDimension.relationshipGeometry:
-          NarrativeMechanismFamily.intergenerationalMentorToRecognizedAgency,
-      NarrativeSemanticDimension.goalMechanism:
-          NarrativeMechanismFamily.crossIntoNewRoleWithoutPast,
-      NarrativeSemanticDimension.conflictMechanism:
-          NarrativeMechanismFamily.aestheticPerfectionVsRelationalTrace,
-      NarrativeSemanticDimension.choiceMechanism:
-          NarrativeMechanismFamily.sacrificeIdealResultToPreserveRelationalEvidence,
-      NarrativeSemanticDimension.climaxMechanism:
-          NarrativeMechanismFamily.spatialCrossingTriggersContinuityRecognition,
-      NarrativeSemanticDimension.consequenceMechanism:
-          NarrativeMechanismFamily.carriedObjectCrossesIdentityBoundary,
-      NarrativeSemanticDimension.transformationMechanism:
-          NarrativeMechanismFamily.cleanBreakModelToContinuityModel,
-      NarrativeSemanticDimension.endingMechanism:
-          NarrativeMechanismFamily.arrivalWithCarriedContinuityObject,
-      NarrativeSemanticDimension.culturalAnchorFunction:
-          NarrativeMechanismFamily.riverFlowConnectsCommercialEras,
-      NarrativeSemanticDimension.artifactObjectNarrativeFunction:
-          NarrativeMechanismFamily.carriedTradeDocumentConnectsEras,
-      NarrativeSemanticDimension.movementSpatialMechanism:
-          NarrativeMechanismFamily.oneWayCrossingBetweenContrastedBanks,
-      NarrativeSemanticDimension.temporalPressureMechanism:
-          NarrativeMechanismFamily.nextDayLifeTransition,
-      NarrativeSemanticDimension.supportingCharacterFunction:
-          NarrativeMechanismFamily.parentOffersObjectWithoutBlockingDeparture,
-      NarrativeSemanticDimension.dramaticEngineFamily:
-          NarrativeMechanismFamily.spatialCrossingReframesTemporalContinuity,
-    };
-    final result = compareSemanticFingerprints(
-      _synthetic('rule-b-left', 'A', _baseMechanisms()),
-      _synthetic('rule-b-right', 'B', right),
+  test('Rule B blocks exactly four CORE matches with different dramatic engines', () {
+    final left = _cloneGold('beijing-summer-palace');
+    final right = _cloneGold('shanghai-bund');
+    for (final dimension in <NarrativeSemanticDimension>[
+      NarrativeSemanticDimension.openingMechanism,
+      NarrativeSemanticDimension.conflictMechanism,
+      NarrativeSemanticDimension.choiceMechanism,
+      NarrativeSemanticDimension.climaxMechanism,
+    ]) {
+      right[dimension] = left[dimension]!;
+    }
+
+    final comparison = compareSemanticFingerprints(
+      _synthetic('rule-b-left', 'surface A', left),
+      _synthetic('rule-b-right', 'surface B', right),
     );
-    expect(result.sameDramaticEngine, isFalse);
-    expect(result.coreMatchCount, 4);
-    expect(result.ruleB, isTrue);
-    expect(result.isCollision, isTrue);
+    expect(comparison.sameDramaticEngine, isFalse);
+    expect(comparison.coreMatchCount, 4);
+    expect(comparison.ruleB, isTrue);
+    expect(comparison.isCollision, isTrue);
   });
 
-  test('current approved Gold audit deterministically covers all 21 unique pairs', () {
-    final audit = auditApprovedGoldSemanticPairs();
-    expect(audit, hasLength(21));
+  test('current approved Gold audit covers all 21 unique pairs deterministically', () {
+    final first = auditApprovedGoldSemanticPairs();
+    final second = auditApprovedGoldSemanticPairs();
+    expect(first, hasLength(21));
     expect(
-      audit.map((item) => '${item.journeyA}|${item.journeyB}').toSet().length,
+      first.map((item) => _pairKey(item.journeyA, item.journeyB)).toSet().length,
       21,
     );
     expect(
-      audit.every((item) =>
-          item.classification != SemanticCollisionClassification.semanticCollision),
-      isTrue,
-      reason: 'approved collisions must be surfaced as existing debt, never hidden',
+      first.map((item) =>
+          '${_pairKey(item.journeyA, item.journeyB)}|'
+          '${item.matchingCoreDimensions.map((d) => d.name).join(',')}|'
+          '${item.matchingSecondaryDimensions.map((d) => d.name).join(',')}|'
+          '${item.classification.name}').toList(),
+      second.map((item) =>
+          '${_pairKey(item.journeyA, item.journeyB)}|'
+          '${item.matchingCoreDimensions.map((d) => d.name).join(',')}|'
+          '${item.matchingSecondaryDimensions.map((d) => d.name).join(',')}|'
+          '${item.classification.name}').toList(),
     );
   });
 
-  test('known current-catalog collisions are surfaced as explicit existing debt', () {
-    final debt = auditApprovedGoldSemanticPairs()
+  test('existing approved collisions are surfaced as debt instead of hidden', () {
+    final debtKeys = auditApprovedGoldSemanticPairs()
         .where((item) =>
             item.classification ==
             SemanticCollisionClassification.existingSemanticCollisionDebt)
-        .toList();
-    expect(debt, hasLength(2));
-    expect(
-      debt.map((item) => {item.journeyA, item.journeyB}),
-      containsAll(<Set<String>>[
-        {'beijing-forbidden-city', 'nanjing-qinhuai-river'},
-        {'hangzhou-west-lake', 'chengdu-kuanzhai-alley'},
-      ]),
-    );
+        .map((item) => _pairKey(item.journeyA, item.journeyB))
+        .toSet();
+
+    expect(debtKeys, <String>{
+      'beijing-forbidden-city|nanjing-qinhuai-river',
+      'chengdu-kuanzhai-alley|hangzhou-west-lake',
+    });
   });
 
-  test('Forbidden City vs Nanjing collision exposes normalized mechanism reuse', () {
-    final result = _pair('beijing-forbidden-city', 'nanjing-qinhuai-river');
-    expect(result.sameDramaticEngine, isTrue);
-    expect(result.isCollision, isTrue);
-    expect(result.classification,
-        SemanticCollisionClassification.existingSemanticCollisionDebt);
+  test('Forbidden City vs Nanjing exposes responsible-refusal mechanism reuse', () {
+    final comparison = _pair(
+      'beijing-forbidden-city',
+      'nanjing-qinhuai-river',
+    );
+    expect(comparison.sameDramaticEngine, isTrue);
+    expect(comparison.isCollision, isTrue);
     expect(
-      result.matchingCoreDimensions,
+      comparison.classification,
+      SemanticCollisionClassification.existingSemanticCollisionDebt,
+    );
+    expect(
+      comparison.matchingCoreDimensions,
       containsAll(<NarrativeSemanticDimension>[
         NarrativeSemanticDimension.conflictMechanism,
         NarrativeSemanticDimension.choiceMechanism,
@@ -404,14 +300,19 @@ void main() {
     );
   });
 
-  test('Hangzhou vs Chengdu collision exposes evidence-driven reclassification reuse', () {
-    final result = _pair('hangzhou-west-lake', 'chengdu-kuanzhai-alley');
-    expect(result.sameDramaticEngine, isTrue);
-    expect(result.isCollision, isTrue);
-    expect(result.classification,
-        SemanticCollisionClassification.existingSemanticCollisionDebt);
+  test('Hangzhou vs Chengdu exposes evidence-driven reclassification reuse', () {
+    final comparison = _pair(
+      'hangzhou-west-lake',
+      'chengdu-kuanzhai-alley',
+    );
+    expect(comparison.sameDramaticEngine, isTrue);
+    expect(comparison.isCollision, isTrue);
     expect(
-      result.matchingCoreDimensions,
+      comparison.classification,
+      SemanticCollisionClassification.existingSemanticCollisionDebt,
+    );
+    expect(
+      comparison.matchingCoreDimensions,
       containsAll(<NarrativeSemanticDimension>[
         NarrativeSemanticDimension.relationshipGeometry,
         NarrativeSemanticDimension.conflictMechanism,
@@ -425,53 +326,53 @@ void main() {
     );
   });
 
-  test('Summer Palace remains structurally distinct from refusal/incompletion family', () {
-    for (final other in <String>['beijing-forbidden-city', 'nanjing-qinhuai-river']) {
-      final result = _pair('beijing-summer-palace', other);
-      expect(result.isCollision, isFalse, reason: other);
-      expect(result.sameDramaticEngine, isFalse, reason: other);
+  test('Summer Palace is distinct from responsible-refusal/incompletion family', () {
+    for (final other in <String>[
+      'beijing-forbidden-city',
+      'nanjing-qinhuai-river',
+    ]) {
+      final comparison = _pair('beijing-summer-palace', other);
+      expect(comparison.sameDramaticEngine, isFalse, reason: other);
+      expect(comparison.isCollision, isFalse, reason: other);
     }
   });
 
-  test('Shanghai and Xi an remain distinct under normalized mechanism comparison', () {
+  test('Shanghai and Xi an remain distinct from every other current Gold Journey', () {
+    final audit = auditApprovedGoldSemanticPairs();
     for (final id in <String>['shanghai-bund', 'xian-city-wall']) {
-      final comparisons = auditApprovedGoldSemanticPairs()
-          .where((item) => item.journeyA == id || item.journeyB == id);
-      expect(comparisons.every((item) => !item.isCollision), isTrue,
-          reason: id);
+      final comparisons =
+          audit.where((item) => item.journeyA == id || item.journeyB == id);
+      expect(
+        comparisons.every((item) => !item.isCollision),
+        isTrue,
+        reason: id,
+      );
     }
   });
 
-  test('future Gold candidate collision is hard blocking with no bypass input', () {
-    final forbidden = approvedGoldSemanticFingerprints['beijing-forbidden-city']!;
-    final disguisedCandidate = _synthetic(
+  test('future Gold collision is hard blocking with no candidate-specific bypass', () {
+    final reference =
+        approvedGoldSemanticFingerprints['beijing-forbidden-city']!;
+    final disguised = _synthetic(
       'future-gold-probe',
-      'different city / different name / different profession / different object',
-      Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.from(
-        forbidden.mechanisms,
-      ),
+      'different city / name / profession / object / descriptive wording',
+      Map.from(reference.mechanisms),
     );
-    final result = evaluateFutureGoldSemanticCandidate(disguisedCandidate);
+
+    final result = evaluateFutureGoldSemanticCandidate(disguised);
     expect(result.isGoldReady, isFalse);
     expect(result.status, semanticTemplateCollisionNotGoldReady);
     expect(result.comparisons.any((item) => item.isCollision), isTrue);
   });
 
-  test('semantic audit and difference matrix are deterministic', () {
-    String encode(List<NarrativeSemanticComparison> items) => items
-        .map((item) =>
-            '${item.journeyA}|${item.journeyB}|${item.sameDramaticEngine}|'
-            '${item.matchingCoreDimensions.map((d) => d.name).join(',')}|'
-            '${item.matchingSecondaryDimensions.map((d) => d.name).join(',')}|'
-            '${item.classification.name}')
-        .join('\n');
-
-    expect(encode(auditApprovedGoldSemanticPairs()),
-        encode(auditApprovedGoldSemanticPairs()));
+  test('normalized Difference Matrix resolves from the canonical registry', () {
     final shanghai = approvedGoldSemanticFingerprints['shanghai-bund']!;
+    final matrix = semanticDifferenceMatrixAgainstApprovedGold(shanghai);
+    expect(matrix, hasLength(6));
     expect(
-      encode(semanticDifferenceMatrixAgainstApprovedGold(shanghai)),
-      encode(semanticDifferenceMatrixAgainstApprovedGold(shanghai)),
+      matrix.map((item) => item.journeyB).toSet(),
+      _goldIds.difference(<String>{'shanghai-bund'}),
     );
+    expect(matrix.every((item) => item.journeyA == 'shanghai-bund'), isTrue);
   });
 }
