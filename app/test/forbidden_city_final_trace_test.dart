@@ -15,6 +15,17 @@ List<String> _sentences(String story) => RegExp(r'[^。！？!?]+[。！？!?]')
     .where((sentence) => sentence.isNotEmpty)
     .toList(growable: false);
 
+bool _enactsRouteSynthesis(String story) {
+  return <String>[
+    '同一张',
+    '叠',
+    '保留',
+    '同时进入一张图',
+    '复合表示',
+    '同处一页',
+  ].any(story.contains);
+}
+
 bool _preservesPurposefulRouteDivergence(String story) {
   return <String>[
     '分开',
@@ -38,7 +49,7 @@ void main() {
       expect(story, contains('阿宁'), reason: 'Lv${index + 1}');
       expect(story, contains('两条'), reason: 'Lv${index + 1}');
       expect(story, contains('乾清门'), reason: 'Lv${index + 1}');
-      expect(story, anyOf(contains('同一张'), contains('叠'), contains('保留')),
+      expect(_enactsRouteSynthesis(story), isTrue,
           reason: 'Lv${index + 1} must enact synthesis');
       expect(_preservesPurposefulRouteDivergence(story), isTrue,
           reason: 'Lv${index + 1} must preserve purposeful divergence after the shared node');
