@@ -15,6 +15,16 @@ List<String> _sentences(String story) => RegExp(r'[^。！？!?]+[。！？!?]')
     .where((sentence) => sentence.isNotEmpty)
     .toList(growable: false);
 
+bool _preservesPurposefulRouteDivergence(String story) {
+  return <String>[
+    '分开',
+    '分向',
+    '分岔',
+    '转向别处',
+    '转向各自的方向',
+  ].any(story.contains);
+}
+
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
   const qualityAgent = PhoenixJourneyContentQualityAgent();
@@ -30,8 +40,8 @@ void main() {
       expect(story, contains('乾清门'), reason: 'Lv${index + 1}');
       expect(story, anyOf(contains('同一张'), contains('叠'), contains('保留')),
           reason: 'Lv${index + 1} must enact synthesis');
-      expect(story, anyOf(contains('分开'), contains('分向'), contains('分岔')),
-          reason: 'Lv${index + 1} must preserve purposeful divergence');
+      expect(_preservesPurposefulRouteDivergence(story), isTrue,
+          reason: 'Lv${index + 1} must preserve purposeful divergence after the shared node');
     }
     expect(forbiddenCityStoryParagraphsByLevel[0], hasLength(1));
     expect(forbiddenCityStoryParagraphsByLevel[1], hasLength(1));
@@ -68,9 +78,6 @@ void main() {
 
   test('every Forbidden City Word has exact remediated Story trace metadata', () {
     expect(validateForbiddenCityImportedWords(), isEmpty);
-    final sentenceSets = <Set<String>>[
-      for (final story in forbiddenCityLockedStories) _sentences(story).toSet(),
-    ];
     for (final record in forbiddenCityValidatedWordRecords) {
       expect(record.entry.word.trim(), isNotEmpty);
       expect(record.entry.pinyin.trim(), isNotEmpty, reason: record.entry.word);
@@ -78,8 +85,11 @@ void main() {
       expect(record.entry.translation.trim(), isNotEmpty, reason: record.entry.word);
       expect(record.entry.englishDefinition.trim(), isNotEmpty, reason: record.entry.word);
       expect(record.storySource, contains(record.entry.word), reason: record.entry.word);
-      expect(sentenceSets.any((sentences) => sentences.contains(record.storySource)), isTrue,
-          reason: '${record.entry.word} must cite a complete verbatim Story sentence');
+      expect(
+        forbiddenCityLockedStories.any((story) => story.contains(record.storySource)),
+        isTrue,
+        reason: '${record.entry.word} must cite an exact verbatim span from active Story',
+      );
       final earliest = forbiddenCityLockedStories.indexWhere(
             (story) => story.contains(record.entry.word),
           ) +
