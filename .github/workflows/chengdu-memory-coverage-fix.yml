@@ -1,0 +1,40 @@
+name: Chengdu Memory Coverage Fix
+
+on:
+  push:
+    branches:
+      - remediation/chengdu-kuanzhai-one-pass
+    paths:
+      - .github/workflows/chengdu-memory-coverage-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: remediation/chengdu-kuanzhai-one-pass
+          fetch-depth: 0
+      - name: Apply exact Memory coverage repair
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('app/lib/data/chengdu_kuanzhai_one_pass.dart')
+          text = path.read_text()
+          old = "const RemediatedMemoryReview(category: 'turningPoint', prompt: '茶桌旁的什么证据改变了她的分类？', answer: '椅脚磨亮的砖面、杯底水圈、门槛凹痕与持续发生的坐下、起身、让路和服务流线。', storyEventIds: ['CD-E4-tea-table']),"
+          new = "const RemediatedMemoryReview(category: 'turningPoint', prompt: '茶桌旁的什么证据改变了她的分类？', answer: '茶桌旁椅脚磨亮的砖面、杯底水圈、门槛凹痕与持续发生的坐下、起身、让路和服务流线。', storyEventIds: ['CD-E4-tea-table']),"
+          if old not in text:
+              raise SystemExit('Exact Chengdu Memory anchor not found')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          rm .github/workflows/chengdu-memory-coverage-fix.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add app/lib/data/chengdu_kuanzhai_one_pass.dart .github/workflows/chengdu-memory-coverage-fix.yml
+          git diff --cached --check
+          git commit -m "fix: cover Chengdu tea-table Memory anchor"
+          git push origin HEAD:remediation/chengdu-kuanzhai-one-pass
