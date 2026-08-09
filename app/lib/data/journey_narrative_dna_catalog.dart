@@ -1,5 +1,6 @@
 import 'chengdu_kuanzhai_one_pass.dart';
 import 'hangzhou_west_lake_one_pass.dart';
+import 'nanjing_qinhuai_one_pass.dart';
 import 'xian_city_wall_one_pass.dart';
 
 class JourneyNarrativeDnaRecord {
@@ -247,6 +248,33 @@ final approvedNarrativeDnaCatalog =
     centralMetaphor: chengduKuanzhaiNarrativeDna.centralMetaphor,
     narrativeVoice: 'third-person-architectural-field-observation',
     storyRhythm: 'preclassification-measurement-comparison-tea-table-reclassification-submission',
+  ),
+  JourneyNarrativeDnaRecord(
+    journeyId: nanjingQinhuaiJourneyId,
+    narrativeIdentity: nanjingQinhuaiNarrativeDna.narrativeIdentity,
+    protagonistIdentity: 'Wei-Zhou-Qinhuai-Lantern-Festival-lighting-technician',
+    protagonistAgeIdentity: 'young-working-adult-lighting-technician',
+    protagonistArchetype: nanjingQinhuaiNarrativeDna.protagonistArchetype,
+    openingSituation: 'seven-minute-countdown-after-decorative-light-failure-near-Qinhuai-old-bridge',
+    storyGoal: nanjingQinhuaiNarrativeDna.storyGoal,
+    locationMechanism: 'Qinhuai-river-night-route-old-bridge-heritage-context-and-managed-lighting-infrastructure',
+    movementPattern: nanjingQinhuaiNarrativeDna.movementPattern,
+    conflictType: nanjingQinhuaiNarrativeDna.conflictType,
+    choiceType: nanjingQinhuaiNarrativeDna.choiceType,
+    climaxType: nanjingQinhuaiNarrativeDna.climaxType,
+    consequenceType: 'safe-route-opens-with-decorative-dark-section-left-visible',
+    emotionalArc: 'prove-competence-to-pressure-to-shortcut-temptation-to-responsible-visible-sacrifice-to-earned-trust',
+    historicalLearningMechanism: 'official-Qinhuai-protection-and-night-lighting-management-enter-through-operational-constraints-not-lecture',
+    resolutionType: nanjingQinhuaiNarrativeDna.resolutionType,
+    endingMechanism: nanjingQinhuaiNarrativeDna.endingMechanism,
+    memoryAnchorType: nanjingQinhuaiNarrativeDna.memoryAnchorType,
+    achievementType: 'heritage-sensitive-lighting-status-owner',
+    rewardSymbolism: 'dark-section-status-mark-as-evidence-of-professional-choice',
+    temporalPattern: nanjingQinhuaiNarrativeDna.temporalPattern,
+    supportingStructure: nanjingQinhuaiNarrativeDna.supportingStructure,
+    centralMetaphor: nanjingQinhuaiNarrativeDna.centralMetaphor,
+    narrativeVoice: 'third-person-operational-close-judgment',
+    storyRhythm: 'countdown-failure-shortcut-temptation-refusal-reduced-lighting-opening-responsibility-transfer',
   ),
 ]);
 
