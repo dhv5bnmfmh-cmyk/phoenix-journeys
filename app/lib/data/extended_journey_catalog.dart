@@ -167,7 +167,7 @@ const nanjingWords = <WordEntry>[
   WordEntry(word: '灯会', pinyin: 'dēnghuì', partOfSpeech: '名词', simpleChinese: '集中展示花灯的节庆活动。', translation: 'Lễ hội đèn lồng.', englishDefinition: 'lantern festival', symbol: '🏮'),
   WordEntry(word: '曲艺', pinyin: 'qǔyì', partOfSpeech: '名词', simpleChinese: '说唱、评书等传统表演艺术。', translation: 'Nghệ thuật kể chuyện và hát nói truyền thống.', englishDefinition: 'Chinese folk performance arts', symbol: '🎭'),
   WordEntry(word: '游船', pinyin: 'yóuchuán', partOfSpeech: '名词', simpleChinese: '供游客乘坐游览的船。', translation: 'Thuyền du lịch.', englishDefinition: 'sightseeing boat', symbol: '⛵'),
-  WordEntry(word: '静止', pinyin: 'jìngzhǐ', partOfSpeech: '形容词', simpleChinese: '停止不动。', translation: 'Đứng yên, không chuyển động。', englishDefinition: 'still or motionless', symbol: '⏸️'),
+  WordEntry(word: '静止', pinyin: 'jìngzhǐ', partOfSpeech: '形容词', simpleChinese: '停止不动。', translation: 'Đứng yên, không chuyển động.', englishDefinition: 'still or motionless', symbol: '⏸️'),
 ];
 
 const nanjingDiscoveries = <DiscoveryEntry>[
