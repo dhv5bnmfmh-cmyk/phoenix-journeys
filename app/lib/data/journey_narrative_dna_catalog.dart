@@ -42,7 +42,7 @@ const forbiddenCityRemediatedNarrativeDna = JourneyNarrativeDnaRecord(
       'shared-junction-mark-represents-relational-information-not-mentor-approval',
   temporalPattern: 'single-study-day-with-comparison-at-a-shared-palace-node',
   supportingStructure:
-      'cross-role-peer-perspective-exchange-between-Shen-Yan-and-fictional-young-attendant-A-Ning-with-mentor-nondeci­sive',
+      'cross-role-peer-perspective-exchange-between-Shen-Yan-and-fictional-young-attendant-A-Ning-with-mentor-nondecisive',
   centralMetaphor:
       'one-architectural-frame-can-hold-multiple-valid-movement-logics-at-once',
   narrativeVoice: 'third-person-apprentice-spatial-comparison',
