@@ -26,11 +26,11 @@ StoryDevelopmentGateInput _validInput({
   Lv1CausalProofRecord? lv1,
   bool draftedEarly = false,
 }) {
-  final verifiedClaim = StoryClaimRecord(
+  const verifiedClaim = StoryClaimRecord(
     claimId: 'place-geometry',
     claim: 'The verified place property constrains movement through a specific spatial relation.',
     classification: StoryClaimClassification.verifiedFact,
-    sourceIds: const <String>['official-1'],
+    sourceIds: <String>['official-1'],
     materiallySupportsStoryMechanism: true,
   );
   return StoryDevelopmentGateInput(
