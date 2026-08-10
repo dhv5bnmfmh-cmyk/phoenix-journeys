@@ -1,11 +1,14 @@
 # Phoenix Approved Gold Semantic Audit
 
 **Status:** DETERMINISTIC AUDIT RECORD  
-**Catalog scope:** seven approved Gold Journeys  
+**Catalog scope:** eight approved Gold Journeys  
+**Protected baseline:** seven approved Gold Journeys / 21 unique pairs  
 **Source of truth:** `app/lib/data/journey_semantic_fingerprint_catalog.dart`  
-**Pair count:** 21 unique pairs
+**Pair count:** 28 unique pairs
 
 This document records the deterministic output of the normalized semantic fingerprint catalog. It does not override the catalog. If a fingerprint changes, regenerate/review this audit from the canonical registry and active Story evidence.
+
+The original seven-Gold baseline and its 21 pair explanations remain protected. Guangzhou promotion extends that state with seven new comparisons; it does not rewrite the prior pair conclusions.
 
 Collision thresholds remain binding and unchanged:
 
@@ -43,6 +46,13 @@ Collision thresholds remain binding and unchanged:
 | 19 | hangzhou-west-lake | chengdu-kuanzhai-alley | NO | none | 0 | none | VERIFIED | DISTINCT | Hangzhou remains evidence-driven sound-recording reclassification; Chengdu now uses repeated physical chair handoffs until other participants reproduce a shared-use protocol. |
 | 20 | hangzhou-west-lake | nanjing-qinhuai-river | NO | none | 0 | none | VERIFIED | DISTINCT | Evidence-driven soundscape reclassification vs operational shortcut refusal. |
 | 21 | chengdu-kuanzhai-alley | nanjing-qinhuai-river | NO | none | 0 | none | VERIFIED | DISTINCT | Sequential shared-space handoff without countdown vs operational failure/countdown and responsible shortcut refusal. |
+| 22 | beijing-summer-palace | guangzhou-chen-clan-academy | NO | none | 0 | none | VERIFIED | DISTINCT | Forced creative/relational sacrifice under an expiring opportunity vs physical paper-prototype failure followed by successful medium-specific reencoding. |
+| 23 | beijing-forbidden-city | guangzhou-chen-clan-academy | NO | none | 0 | temporalPressureMechanism | VERIFIED | RELATED_BUT_DISTINCT | Both unfold within a study session without an external countdown, but Forbidden synthesizes two simultaneously valid spatial routes while Guangzhou changes a paper prototype's structural encoding after material failure. |
+| 24 | shanghai-bund | guangzhou-chen-clan-academy | NO | none | 0 | none | VERIFIED | DISTINCT | One-way spatial crossing reveals intergenerational continuity; Guangzhou instead tests, rebuilds, and physically validates a cross-medium paper translation. |
+| 25 | xian-city-wall | guangzhou-chen-clan-academy | NO | none | 0 | none | VERIFIED | DISTINCT | A deliberately completed circuit becomes onward continuation; Guangzhou's second prototype succeeds because connection geometry is reencoded for paper. |
+| 26 | hangzhou-west-lake | guangzhou-chen-clan-academy | NO | none | 0 | none | VERIFIED | DISTINCT | Hangzhou changes an authenticity classification after contradictory evidence; Guangzhou does not classify evidence and instead changes how a source relation is structurally encoded in a new medium. |
+| 27 | chengdu-kuanzhai-alley | guangzhou-chen-clan-academy | NO | none | 0 | none | VERIFIED | DISTINCT | Chengdu builds a shared-use protocol through repeated social handoffs; Guangzhou solves a maker's structural translation problem through a revised physical prototype. |
+| 28 | nanjing-qinhuai-river | guangzhou-chen-clan-academy | NO | none | 0 | none | VERIFIED | DISTINCT | Nanjing refuses an unsafe/unapproved shortcut under countdown and accepts visible operational incompletion; Guangzhou refuses no opportunity and reaches a complete, legible paper result through reencoding. |
 
 ## Required explicit pair conclusions
 
@@ -69,41 +79,57 @@ Hangzhou is protected and remains `evidenceForcesReclassification`: a prior puri
 
 Chengdu has moved entirely away from that causal architecture. Its active Story now starts with one courtyard threshold being needed by tea seating and passage, rejects permanent spatial allocation after repeated practical failure, establishes a physical yield-and-return handoff, and reaches climax when a recurring participant independently reproduces that handoff. The ending extends the behavior to another user while Lin Xia does not intervene. No survey form, authenticity-category revision, crossed-out record, or revised artifact carries the resolution.
 
+### Guangzhou Chen Clan Academy future-candidate proof
+
+**Pre-promotion result:** `SEMANTIC ANTI-TEMPLATE PASS` against the protected seven-Gold registry.  
+**Comparisons:** 7.  
+**Rule A triggers:** 0.  
+**Rule B triggers:** 0.  
+**Semantic collisions:** 0.
+
+The pre-promotion Stage A head kept `approvedGoldSemanticFingerprints.length == 7` while the existing `evaluateFutureGoldSemanticCandidate(...)` evaluated the Guangzhou fingerprint against all seven approved references. Promotion occurred only after that gate was green.
+
+### Guangzhou all-Gold result
+
+**Result:** `DISTINCT` or `RELATED_BUT_DISTINCT` from all seven other approved Gold Journeys, with zero collisions.
+
+Its engine is `materialConstraintForcesCrossMediumReencoding`. A literal-contour paper prototype physically fails; Liang Yao then changes the target medium's connection encoding by leaving paper bridges; the revised single sheet survives handling and a peer still recognizes the important visual relation. The causal result is a successful cross-medium translation, not sacrifice, synthesis of rival perspectives, historical continuity through crossing, completed-circuit continuation, evidence reclassification, repeated social handoff, or operational refusal.
+
 ### Chengdu all-Gold result
 
-**Result:** `DISTINCT` from all six other approved Gold Journeys.
+**Result:** `DISTINCT` from all seven other approved Gold Journeys.
 
 Its engine is `repeatedSpatialHandoffsCreateSharedUseProtocol`. The causal mechanism depends on sequential physical use of constrained shared space, repeated temporary relinquishment and return, and independent participant reproduction. No other current Gold Journey uses that engine.
 
 ### Forbidden City all-Gold result
 
-**Result:** `DISTINCT` from all six other approved Gold Journeys.
+**Result:** `DISTINCT` or `RELATED_BUT_DISTINCT` from all seven other approved Gold Journeys, with zero collisions.
 
 Its engine remains `coexistingValidPerspectivesSynthesizeRelationalModel`.
 
 ### Summer Palace family result
 
-**Result:** `DISTINCT` from all six other current Gold Journeys.
+**Result:** `DISTINCT` from all seven other current Gold Journeys.
 
 Its engine remains a forced choice between preserving an ideal photographic opportunity and recovering a relational memory object.
 
 ### Shanghai Bund distinctness
 
-**Result:** `DISTINCT` from all six other current Gold Journeys.
+**Result:** `DISTINCT` from all seven other current Gold Journeys.
 
 Its engine remains a one-way spatial crossing that reframes a false past/future split through an intergenerational trade document carried into a chosen new career.
 
 ### Xi'an City Wall distinctness
 
-**Result:** `DISTINCT` from all six other current Gold Journeys.
+**Result:** `DISTINCT` from all seven other current Gold Journeys.
 
 Its engine remains a deliberately completed closed circuit that becomes the departure point for an open continuation.
 
 ## Debt policy
 
-The current approved seven-Gold catalog contains **zero** historical semantic collision debt.
+The original protected seven-Gold baseline contains **zero** historical semantic collision debt across 21 pairs. The promoted eight-Gold catalog also contains **zero** historical semantic collision debt across 28 pairs.
 
 - `EXISTING_SEMANTIC_COLLISION_DEBT`: **NONE**
-- Gold-to-Gold semantic collisions: **0 / 21 pairs**
+- Gold-to-Gold semantic collisions: **0 / 28 pairs**
 
 No allowlist or exception was created. Rule A and Rule B remain unchanged. A future Gold candidate that collides with an approved Journey still returns `TEMPLATE COLLISION - NOT GOLD READY` until its causal dramatic mechanism is redesigned.

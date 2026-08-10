@@ -1,0 +1,235 @@
+name: Guangzhou Chen Clan Gold Validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+env:
+  PREVIEW_WORKER: phoenix-journeys-pr-168
+  PREVIEW_URL: https://phoenix-journeys-pr-168.7hn5tyrjgh.workers.dev
+  STARTING_MAIN_SHA: 11a14a866774e58533f3446ba7f643c839595b41
+
+jobs:
+  validate-and-deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.ref == 'gold/guangzhou-chen-clan-story'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Resolve exact candidate
+        id: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            candidate="${{ github.event.pull_request.head.sha }}"
+          else
+            candidate="${{ github.sha }}"
+          fi
+          echo "sha=$candidate" >> "$GITHUB_OUTPUT"
+          echo "CANDIDATE_SHA=$candidate"
+
+      - name: Repository exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.candidate.outputs.sha }}
+          fetch-depth: 0
+
+      - name: Exact SHA clean tree and locked ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git log -1 --format=%H)" = "${{ steps.candidate.outputs.sha }}"
+          test -z "$(git status --porcelain)"
+          git merge-base --is-ancestor "$STARTING_MAIN_SHA" "${{ steps.candidate.outputs.sha }}"
+
+      - name: Frozen baseline snapshots unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code "$STARTING_MAIN_SHA"..."${{ steps.candidate.outputs.sha }}" -- \
+            app/lib/data/journey_semantic_fingerprint_baseline_snapshot.dart \
+            app/lib/data/journey_narrative_dna_baseline_snapshot.dart
+
+      - name: Protected Gold visual and hierarchy scope unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code "$STARTING_MAIN_SHA"..."${{ steps.candidate.outputs.sha }}" -- \
+            app/lib/data/summer_palace_journey.dart \
+            app/lib/data/summer_palace_adaptive_story_levels.dart \
+            app/lib/data/forbidden_city_journey_runtime.dart \
+            app/lib/data/forbidden_city_challenge_package.dart \
+            app/lib/data/shanghai_bund_one_pass.dart \
+            app/lib/data/xian_city_wall_one_pass.dart \
+            app/lib/data/hangzhou_west_lake_one_pass.dart \
+            app/lib/data/chengdu_kuanzhai_one_pass.dart \
+            app/lib/data/nanjing_qinhuai_one_pass.dart \
+            docs/PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md
+          changed="$(git diff --name-only "$STARTING_MAIN_SHA"..."${{ steps.candidate.outputs.sha }}")"
+          if printf '%s\n' "$changed" | grep -E '(^|/)(assets/.*/background|backgrounds?/|dynamic_.*background|.*_dynamic_background)'; then
+            echo 'Background scope changed unexpectedly.' >&2
+            exit 1
+          fi
+          if printf '%s\n' "$changed" | grep -E '(city_passport_screen\.dart|passport.*map|location_hierarchy|geo_.*hierarchy|map_.*\.dart)'; then
+            echo 'Passport / map / location hierarchy scope changed unexpectedly.' >&2
+            exit 1
+          fi
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Flutter dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Guangzhou targeted Gold gates
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter test test/guangzhou_chen_clan_one_pass_gate_test.dart --reporter expanded
+          flutter test test/guangzhou_future_gold_candidate_test.dart --reporter expanded
+          flutter test test/journey_semantic_anti_template_gate_test.dart --reporter expanded
+          flutter test test/daily_journey_engine_test.dart --reporter expanded
+          flutter test test/seven_day_journey_catalog_test.dart --reporter expanded
+          flutter test test/chengdu_kuanzhai_one_pass_gate_test.dart --reporter expanded
+
+      - name: Location hierarchy and Passport regressions
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter test test/journey_location_hierarchy_test.dart --reporter expanded
+          flutter test test/city_passport_screen_test.dart --reporter expanded
+
+      - name: Global adaptive and quality blocker cluster
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter test test/all_journey_adaptive_level_test.dart --reporter expanded
+          flutter test test/all_journey_adaptive_levels_test.dart --reporter expanded
+          flutter test test/adaptive_story_quality_test.dart --reporter expanded
+          flutter test test/narrative_quality_shaper_test.dart --reporter expanded
+          flutter test test/journey_content_quality_auditor_test.dart --reporter expanded
+          flutter test test/phoenix_journey_content_quality_agent_test.dart --reporter expanded
+
+      - name: Phoenix Agent Tests
+        shell: bash
+        run: |
+          mkdir -p test-results
+          node --test --test-reporter=spec worker/*.test.mjs 2>&1 | tee test-results/phoenix-agent-tests.log
+
+      - name: Flutter Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Full Flutter Tests
+        working-directory: app
+        run: flutter test
+
+      - name: Journey Quality Report
+        working-directory: app
+        env:
+          PHOENIX_GENERATE_QUALITY_REPORT: '1'
+          PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
+          PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
+        shell: bash
+        run: |
+          flutter test test/journey_quality_report_ci_test.dart --reporter expanded
+          node <<'NODE'
+          const fs = require('node:fs');
+          const report = JSON.parse(fs.readFileSync(process.env.PHOENIX_QUALITY_JSON, 'utf8'));
+          console.log(`Phoenix quality gate: ${report.approvedCount}/${report.inspectionCount} approved; minimum ${report.minimumScore}; average ${report.averageScore}.`);
+          if (!report.canPublish) process.exit(1);
+          NODE
+
+      - name: Journey Runtime Architecture Gate
+        working-directory: app
+        run: flutter test test/journey_runtime_architecture_gate_test.dart --reporter expanded
+
+      - name: Journey Runtime Performance Gate
+        working-directory: app
+        run: flutter test test/journey_runtime_performance_gate_test.dart --reporter expanded
+
+      - name: Web Build
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Preview Deployment
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test "$(git log -1 --format=%H)" = "${{ steps.candidate.outputs.sha }}"
+          npx --yes wrangler@4 deploy --name "$PREVIEW_WORKER" --var "PHOENIX_RELEASE:${{ steps.candidate.outputs.sha }}"
+
+      - name: Release Health
+        id: health
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="${{ steps.candidate.outputs.sha }}"
+          health_url="${PREVIEW_URL}/api/health?commit=${expected}"
+          verified="false"
+          response=''
+          for attempt in {1..18}; do
+            response="$(curl --fail --silent --show-error "$health_url" || true)"
+            echo "Preview release check ${attempt}/18: ${response:-no response}"
+            if node -e '
+              let health;
+              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
+              const expectedRelease = process.argv[2];
+              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expectedRelease) process.exit(1);
+            ' "$response" "$expected"; then
+              verified="true"
+              break
+            fi
+            sleep 5
+          done
+          [[ "$verified" == "true" ]]
+          echo "release_sha=$expected" >> "$GITHUB_OUTPUT"
+
+      - name: Publish preview status
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="${PREVIEW_URL}/?unlock=all&prototype=journeys"
+          payload="$(node -e '
+            const [url] = process.argv.slice(1);
+            process.stdout.write(JSON.stringify({state:"success",description:"Guangzhou Chen Clan Founder preview is ready",context:"cloudflare/guangzhou-chen-clan-preview",target_url:url}));
+          ' "$target")"
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${{ steps.candidate.outputs.sha }}" \
+            --data "$payload"
+
+      - name: Exact Head Evidence
+        shell: bash
+        run: |
+          echo "STARTING_MAIN_SHA=$STARTING_MAIN_SHA"
+          echo "CANDIDATE_SHA=${{ steps.candidate.outputs.sha }}"
+          echo "PREVIEW_URL=${PREVIEW_URL}/?unlock=all&prototype=journeys"
+          echo "PREVIEW_RELEASE_SHA=${{ steps.health.outputs.release_sha }}"
+          echo 'APPROVED_GOLD_COUNT=8'
+          echo 'GOLD_PAIR_AUDIT_COUNT=28'
+          echo 'DO_NOT_MERGE'

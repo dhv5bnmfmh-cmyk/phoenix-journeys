@@ -1,3 +1,4 @@
+import 'guangzhou_chen_clan_one_pass.dart';
 import 'journey_semantic_fingerprint_baseline_snapshot.dart' as baseline;
 
 /// Machine-controlled dimensions used by the Phoenix semantic anti-template gate.
@@ -154,6 +155,23 @@ enum NarrativeMechanismFamily {
   singleAfternoonUseCycleWithoutDeadline,
   regularParticipantLearnsAndReproducesProtocol,
   repeatedSpatialHandoffsCreateSharedUseProtocol,
+
+  // Reusable families introduced by Guangzhou cross-medium making.
+  prototypeFailureExposesMediumConstraint,
+  youngMakerTranslatingHistoricCraft,
+  peerMakersTestFidelityThroughPrototype,
+  preserveSourceRelationInNewMedium,
+  literalCopyVsMaterialSpecificStructure,
+  reencodeConnectionsForNewMedium,
+  translatedPrototypeSurvivesAndRemainsLegible,
+  changedFormFunctionsInNewMedium,
+  surfaceCopyistToMaterialTranslator,
+  translationMethodCarriesIntoNextMaterial,
+  multiCraftArchitectureMakesMaterialDifferenceCausal,
+  prototypeEmbodiesMediumSpecificTranslation,
+  observePrototypeReviseMaterialTranslation,
+  peerTestsLegibilityWithoutMentorAuthority,
+  materialConstraintForcesCrossMediumReencoding,
 }
 
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
@@ -291,6 +309,7 @@ JourneySemanticFingerprint _convertBaselineFingerprint(
 
 const _forbidden = 'beijing-forbidden-city';
 const _chengdu = 'chengdu-kuanzhai-alley';
+const _guangzhou = guangzhouChenClanJourneyId;
 
 final _forbiddenFingerprint = JourneySemanticFingerprint(
   journeyId: _forbidden,
@@ -620,6 +639,164 @@ final _chengduFingerprint = JourneySemanticFingerprint(
   ]),
 );
 
+final guangzhouChenClanGoldSemanticFingerprint = JourneySemanticFingerprint(
+  journeyId: _guangzhou,
+  surfaceIdentity:
+      'Liang Yao / twenty-two-year-old fictional printmaking student / He Zhen ceramics peer / connected single-sheet paper prototype',
+  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
+    NarrativeSemanticDimension.openingMechanism:
+        NarrativeMechanismFamily.prototypeFailureExposesMediumConstraint,
+    NarrativeSemanticDimension.protagonistRolePattern:
+        NarrativeMechanismFamily.youngMakerTranslatingHistoricCraft,
+    NarrativeSemanticDimension.relationshipGeometry:
+        NarrativeMechanismFamily.peerMakersTestFidelityThroughPrototype,
+    NarrativeSemanticDimension.goalMechanism:
+        NarrativeMechanismFamily.preserveSourceRelationInNewMedium,
+    NarrativeSemanticDimension.conflictMechanism:
+        NarrativeMechanismFamily.literalCopyVsMaterialSpecificStructure,
+    NarrativeSemanticDimension.choiceMechanism:
+        NarrativeMechanismFamily.reencodeConnectionsForNewMedium,
+    NarrativeSemanticDimension.climaxMechanism:
+        NarrativeMechanismFamily.translatedPrototypeSurvivesAndRemainsLegible,
+    NarrativeSemanticDimension.consequenceMechanism:
+        NarrativeMechanismFamily.changedFormFunctionsInNewMedium,
+    NarrativeSemanticDimension.transformationMechanism:
+        NarrativeMechanismFamily.surfaceCopyistToMaterialTranslator,
+    NarrativeSemanticDimension.endingMechanism:
+        NarrativeMechanismFamily.translationMethodCarriesIntoNextMaterial,
+    NarrativeSemanticDimension.culturalAnchorFunction:
+        NarrativeMechanismFamily.multiCraftArchitectureMakesMaterialDifferenceCausal,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction:
+        NarrativeMechanismFamily.prototypeEmbodiesMediumSpecificTranslation,
+    NarrativeSemanticDimension.movementSpatialMechanism:
+        NarrativeMechanismFamily.observePrototypeReviseMaterialTranslation,
+    NarrativeSemanticDimension.temporalPressureMechanism:
+        NarrativeMechanismFamily.singleStudyDayWithoutExternalCountdown,
+    NarrativeSemanticDimension.supportingCharacterFunction:
+        NarrativeMechanismFamily.peerTestsLegibilityWithoutMentorAuthority,
+    NarrativeSemanticDimension.dramaticEngineFamily:
+        NarrativeMechanismFamily.materialConstraintForcesCrossMediumReencoding,
+  }),
+  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.openingMechanism,
+      mechanism: NarrativeMechanismFamily.prototypeFailureExposesMediumConstraint,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她的第一件原型却在桌面上散开：她把每一道看见的轮廓都当成必须照搬的边界，剪到两组形体之间时，纸上原本承担连接的部分也被一起去掉，几个部分随即断开。',
+      ],
+      semanticRationale:
+          'The causal problem enters as a physical prototype failure produced by the new medium, not as exposition, missing evidence, a route conflict, or an operational shortcut.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.conflictMechanism,
+      mechanism: NarrativeMechanismFamily.literalCopyVsMaterialSpecificStructure,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她把散开的几片重新并在桌上，发现最后被剪掉的正是让整张纸保持相连的部分。原来的形体可以依靠材料和基底保持关系，单张薄纸却需要自己的连接。',
+        '字面复制越彻底，单张纸反而越无法成为一件东西。',
+      ],
+      semanticRationale:
+          'Literal surface fidelity directly destroys the structural connectedness required by paper, so the conflict belongs to medium-specific making rather than authenticity classification or responsible refusal.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.choiceMechanism,
+      mechanism: NarrativeMechanismFamily.reencodeConnectionsForNewMedium,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她停下逐线描摹，在第二张自己的纸上重新编码连接：保留主要形体的相对位置，却在原本会断开的地方留下窄窄的纸桥。',
+      ],
+      semanticRationale:
+          'Liang Yao enacts the choice on her own second sheet by deliberately changing the connection encoding instead of sacrificing the goal, rejecting a shortcut, or revising a classification.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.climaxMechanism,
+      mechanism: NarrativeMechanismFamily.translatedPrototypeSurvivesAndRemainsLegible,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她剪完第二件原型，从一角把它提起；整张纸没有散开。',
+        '贺真把草图扣在桌面，只看成品。几秒后，他准确指出两组主要形体之间原先最重要的相接关系。',
+      ],
+      semanticRationale:
+          'The climax is a two-part physical test: the translated object survives handling as one piece and a peer independently confirms the important visual relation remains legible.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.consequenceMechanism,
+      mechanism: NarrativeMechanismFamily.changedFormFunctionsInNewMedium,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '梁遥改变连接后，纸桥改变了局部轮廓，却让整张纸既能被拿起，也没有丢掉那组相接关系。',
+      ],
+      semanticRationale:
+          'The revised form succeeds according to the new medium’s logic; its changed geometry creates both structural function and legibility rather than leaving a responsible defect.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.transformationMechanism,
+      mechanism: NarrativeMechanismFamily.surfaceCopyistToMaterialTranslator,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她在笔记本上把“照着表面复制”划掉，写下“先问材料怎样连接”。',
+      ],
+      semanticRationale:
+          'Her working rule changes from copying source contours to interrogating how a target material must carry relations, marking a maker-level transformation rather than a theory-only conclusion.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.endingMechanism,
+      mechanism: NarrativeMechanismFamily.translationMethodCarriesIntoNextMaterial,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '回到工作室，她拿起一块新的版材，先标出这种材料必须保留的连接，再开始下一次材料研究。',
+      ],
+      semanticRationale:
+          'The ending is enacted continuation of the new translation method on a fresh material problem, not a mentor judgment, philosophical summary, record correction, or farewell continuation engine.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.relationshipGeometry,
+      mechanism: NarrativeMechanismFamily.peerMakersTestFidelityThroughPrototype,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '二十二岁的版画学生梁遥和陶艺同学贺真在广州陈家祠观察建筑装饰。',
+        '贺真把草图扣在桌面，只看成品。几秒后，他准确指出两组主要形体之间原先最重要的相接关系。',
+      ],
+      semanticRationale:
+          'He Zhen is a maker peer whose independent recognition tests the translated prototype; he neither mentors Liang Yao nor transfers authority to her.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.culturalAnchorFunction,
+      mechanism: NarrativeMechanismFamily.multiCraftArchitectureMakesMaterialDifferenceCausal,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '陈家祠集中展示多种岭南装饰工艺，正因为材料并不相同，梁遥把“材料怎样让形体相接”当成观察重点。',
+      ],
+      semanticRationale:
+          'The verified multi-craft character of the Chen Clan Academy makes material difference causal to Liang Yao’s making question, while factual craft enumeration remains in Discovery.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.dramaticEngineFamily,
+      mechanism: NarrativeMechanismFamily.materialConstraintForcesCrossMediumReencoding,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她的第一件原型却在桌面上散开：她把每一道看见的轮廓都当成必须照搬的边界，剪到两组形体之间时，纸上原本承担连接的部分也被一起去掉，几个部分随即断开。',
+        '她停下逐线描摹，在第二张自己的纸上重新编码连接：保留主要形体的相对位置，却在原本会断开的地方留下窄窄的纸桥。',
+        '她剪完第二件原型，从一角把它提起；整张纸没有散开。',
+        '贺真把草图扣在桌面，只看成品。几秒后，他准确指出两组主要形体之间原先最重要的相接关系。',
+      ],
+      semanticRationale:
+          'The engine requires a material-caused physical failure, deliberate cross-medium re-encoding, and a successful structural-plus-legibility test. It is not tradeoff, synthesis, crossing, closure, reclassification, handoff, or refusal.',
+    ),
+  ]),
+);
+
 final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     Map<String, JourneySemanticFingerprint>.unmodifiable({
   for (final entry in baseline.approvedGoldSemanticFingerprints.entries)
@@ -628,10 +805,17 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
         : entry.key == _chengdu
             ? _chengduFingerprint
             : _convertBaselineFingerprint(entry.value),
+  _guangzhou: guangzhouChenClanGoldSemanticFingerprint,
 });
 
-String activeCanonicalGoldStoryText(String journeyId) =>
-    baseline.activeCanonicalGoldStoryText(journeyId);
+String activeCanonicalGoldStoryText(String journeyId) {
+  if (journeyId == _guangzhou) {
+    return guangzhouChenClanOnePassLevels
+        .expand((level) => level.storyParagraphs)
+        .join('\n');
+  }
+  return baseline.activeCanonicalGoldStoryText(journeyId);
+}
 
 List<String> semanticFingerprintCompletenessErrors(
   JourneySemanticFingerprint fingerprint,
