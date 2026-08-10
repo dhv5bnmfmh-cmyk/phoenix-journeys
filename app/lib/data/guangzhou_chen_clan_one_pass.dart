@@ -57,9 +57,9 @@ JourneyLevelContent _guangzhouLevel(List<String> paragraphs) {
       for (var i = 0; i < paragraphs.length; i++)
         ReadingAnnotation(
           pinyin: single
-              ? 'Èrshí'èr suì de Liáng Yáo hé táoyì tóngxué Hè Zhēn zài Guǎngzhōu Chénjiācí guānchá zhuāngshì. Tā zài zìjǐ de zhǐ shàng zuò yuánxíng; zhàobān biǎomiàn xiàn tiáo de dì yī jiàn duànkāi. Tā gǎixiě liánjiē, liúxià zhǐqiáo. Dì èr jiàn tíqǐ hòu réng shì yí gè zhěngtǐ, Hè Zhēn yě rènchū zhǔyào guānxì. Huídào gōngzuòshì, tā yòng tóngyàng de wèntí kāishǐ xīn cáiliào yánjiū.'
+              ? 'Èrshí’èr suì de Liáng Yáo hé táoyì tóngxué Hè Zhēn zài Guǎngzhōu Chénjiācí guānchá zhuāngshì. Tā zài zìjǐ de zhǐ shàng zuò yuánxíng; zhàobān biǎomiàn xiàn tiáo de dì yī jiàn duànkāi. Tā gǎixiě liánjiē, liúxià zhǐqiáo. Dì èr jiàn tíqǐ hòu réng shì yí gè zhěngtǐ, Hè Zhēn yě rènchū zhǔyào guānxì. Huídào gōngzuòshì, tā yòng tóngyàng de wèntí kāishǐ xīn cáiliào yánjiū.'
               : i == 0
-                  ? 'Èrshí'èr suì de Liáng Yáo hé táoyì tóngxué Hè Zhēn zài Guǎngzhōu Chénjiācí guānchá zhuāngshì, zhǐ zài zìjǐ de cáiliào shàng shìzuò. Dì yī jiàn zhǐ yuánxíng yīnwèi zhàobān kànjiàn de xiàn tiáo ér duànkāi; zhǐ de cáiliào yuēshù bǎ zìmiàn fùzhì biànchéng jiégòu wèntí.'
+                  ? 'Èrshí’èr suì de Liáng Yáo hé táoyì tóngxué Hè Zhēn zài Guǎngzhōu Chénjiācí guānchá zhuāngshì, zhǐ zài zìjǐ de cáiliào shàng shìzuò. Dì yī jiàn zhǐ yuánxíng yīnwèi zhàobān kànjiàn de xiàn tiáo ér duànkāi; zhǐ de cáiliào yuēshù bǎ zìmiàn fùzhì biànchéng jiégòu wèntí.'
                   : 'Liáng Yáo tíngzhǐ zhúxiàn zhàomiáo, zài dì èr zhāng zhǐ shàng chóngxīn ānpái liánjiē, liúxià zhǐqiáo. Tā tíqǐ xīn yuánxíng, zhěng zhāng zhǐ méiyǒu sànkāi; Hè Zhēn réng néng rènchū zhǔyào xíngtǐ de xiāngjiē guānxì. Tā bǎ fāngfǎ dài huí gōngzuòshì, kāishǐ xià yí gè cáiliào yánjiū.',
           vietnamese: single
               ? 'Lương Dao, 22 tuổi, cùng bạn học gốm Hạ Chân quan sát trang trí tại Trần Gia Từ. Cô làm mẫu trên giấy của mình; mẫu đầu tiên bị rời thành nhiều phần vì sao chép đường nét bề mặt quá sát. Cô đổi cách mã hóa, để lại các “cầu giấy”. Mẫu thứ hai được nhấc lên vẫn là một mảnh liền và Hạ Chân vẫn nhận ra quan hệ thị giác chính. Về xưởng, cô áp dụng cách hỏi mới vào một nghiên cứu vật liệu khác.'
@@ -205,7 +205,7 @@ final guangzhouChenClanWordTraces = List<RemediatedWordTrace>.unmodifiable([
   const RemediatedWordTrace(word: '单张', eventId: 'GZ-E1-observation', usage: 'Lv5 首次出现。', sourceText: '目标很明确：把观察到的主要形体做成单张纸解释，成品必须能够拿起、保持一个整体，同时让贺真仍能识别原先重要的相接方式。'),
   const RemediatedWordTrace(word: '识别', eventId: 'GZ-E6-legibility', usage: 'Lv5 首次出现。', sourceText: '贺真没有看她的底稿，仍能识别两组主要形体之间原先的相接关系。'),
   const RemediatedWordTrace(word: '关系', eventId: 'GZ-E5-second-prototype', usage: 'Lv1 首次出现。', sourceText: '贺真也认出主要形体怎样相接。'),
-  const RemediatedWordTrace(word: '结构', eventId: 'GZ-E3-medium-conflict', usage: 'Lv3 首次出现。', sourceText: '纸桥不是她假装在原装饰上看到的新线，而是这张纸为了保持在一起所需要的连接。'),
+  const RemediatedWordTrace(word: '结构', eventId: 'GZ-E3-medium-conflict', usage: 'Lv3 首次出现。', sourceText: '冲突变得很具体：轮廓越像表面，纸作为一种材料反而越难保持为一个整体。'),
   const RemediatedWordTrace(word: '翻译', eventId: 'GZ-E7-transformation', usage: 'Lv4 首次出现。', sourceText: '梁遥不再把“像”理解成复制所有线，而开始按材料条件翻译关系。'),
   const RemediatedWordTrace(word: '完整', eventId: 'GZ-E5-second-prototype', usage: 'Lv4 首次出现。', sourceText: '剪完后，她从一角把新原型提起来，整张纸仍连在一起。'),
   const RemediatedWordTrace(word: '观察', eventId: 'GZ-E1-observation', usage: 'Lv1 首次出现。', sourceText: '她只观察，在自己的纸上做原型。'),
@@ -228,76 +228,16 @@ DiscoveryEntry _discovery(
     );
 
 final guangzhouChenClanDiscoverySpecs = List<GuangzhouDiscoverySpec>.unmodifiable([
-  GuangzhouDiscoverySpec(
-    level: 1,
-    title: '陈家祠与陈氏书院',
-    storyLink: '故事把陈家祠作为观察地点，Discovery 说明名称与时代背景。',
-    entry: _discovery('陈家祠是清代晚期建筑，也称陈氏书院。', pinyin: 'Chénjiācí shì Qīngdài wǎnqī jiànzhù, yě chēng Chénshì Shūyuàn.', simpleChinese: '陈家祠也叫陈氏书院，是晚清建筑。', vietnamese: 'Trần Gia Từ còn được gọi là Trần Thị Thư Viện và là công trình cuối thời Thanh.', english: 'Chen Clan Academy, also known as Chen Clan Ancestral Hall, is a late-Qing complex.'),
-    keyTerms: const ['陈家祠', '陈氏书院', '晚清'], learnerInsight: '一个地点可以同时保留常用名与历史名称。', check: '陈家祠还有什么名称？', answer: '陈氏书院。', sourceIds: const [guangzhouChenClanSourceRecordId],
-  ),
-  GuangzhouDiscoverySpec(
-    level: 2,
-    title: '多种岭南装饰工艺',
-    storyLink: 'Story 只需要材料差异，Discovery 展开具体工艺类别。',
-    entry: _discovery('陈家祠集中展示木雕、砖雕、石雕、陶塑和灰塑等岭南装饰工艺。', pinyin: 'Chénjiācí jízhōng zhǎnshì mùdiāo, zhuāndiāo, shídiāo, táosù hé huīsù děng Lǐngnán zhuāngshì gōngyì.', simpleChinese: '这里能看到多种不同材料的岭南装饰。', vietnamese: 'Trần Gia Từ tập trung nhiều nghệ thuật trang trí Lĩnh Nam như chạm gỗ, gạch, đá, tượng gốm và phù điêu vữa.', english: 'The complex brings together Lingnan decorative arts including wood, brick, and stone carving, ceramic sculpture, and lime sculpture.'),
-    keyTerms: const ['木雕', '砖雕', '石雕', '陶塑', '灰塑'], learnerInsight: '岭南装饰并不依赖单一材料。', check: '陈家祠的装饰是否只使用一种材料？', answer: '不是，官方介绍列出多种装饰工艺。', sourceIds: const [guangzhouChenClanSourceRecordId],
-  ),
-  GuangzhouDiscoverySpec(
-    level: 3,
-    title: '铸造与彩绘也在其中',
-    storyLink: 'Story 不罗列七类工艺，Discovery 补足官方列出的范围。',
-    entry: _discovery('官方介绍还把铸造和彩绘与多种雕塑、雕刻工艺一起列入陈家祠的装饰特色。', pinyin: 'Guānfāng jièshào hái bǎ zhùzào hé cǎihuì yǔ duō zhǒng diāosù, diāokè gōngyì yìqǐ lièrù Chénjiācí de zhuāngshì tèsè.', simpleChinese: '除了雕刻和塑造，这里还有铸造和彩绘。', vietnamese: 'Giới thiệu chính thức còn liệt kê đúc và vẽ màu cùng với nhiều loại chạm khắc và tạo hình.', english: 'The official description also includes casting and painting among the complex’s decorative crafts.'),
-    keyTerms: const ['铸造', '彩绘'], learnerInsight: '工艺差异不仅是图案差异，也包括材料和制作媒介的差异。', check: '除了雕刻与塑造，官方介绍还提到哪两类？', answer: '铸造和彩绘。', sourceIds: const [guangzhouChenClanSourceRecordId],
-  ),
-  GuangzhouDiscoverySpec(
-    level: 4,
-    title: '材料差异为什么值得观察',
-    storyLink: 'Story 让材料差异推动制作，Discovery 只陈述多工艺并置事实。',
-    entry: _discovery('木、砖、石、陶、灰泥以及用于铸造和彩绘的媒介在同一建筑装饰体系中并置，形成陈家祠鲜明的多工艺特征。', pinyin: 'Mù, zhuān, shí, táo, huīní yǐjí yòngyú zhùzào hé cǎihuì de méijiè zài tóng yī jiànzhù zhuāngshì tǐxì zhōng bìngzhì.', simpleChinese: '同一建筑里可以同时看到不同材料形成的装饰。', vietnamese: 'Trong cùng một hệ trang trí kiến trúc có nhiều vật liệu và hình thức thủ công khác nhau.', english: 'Different material-based decorative crafts are presented together within the same architectural complex.'),
-    keyTerms: const ['材料', '多工艺', '建筑装饰'], learnerInsight: '多材料并置使比较不同媒介成为可能。', check: '陈家祠的工艺特色为什么适合做材料比较？', answer: '因为同一建筑中集中呈现多种材料和工艺。', sourceIds: const [guangzhouChenClanSourceRecordId],
-  ),
-  GuangzhouDiscoverySpec(
-    level: 5,
-    title: '今天的博物馆功能',
-    storyLink: 'Story 聚焦制作，Discovery 说明场所今天的机构身份。',
-    entry: _discovery('今天，陈家祠是广东民间工艺博物馆所在地，收藏和展示多种广东传统工艺。', pinyin: 'Jīntiān, Chénjiācí shì Guǎngdōng Mínjiān Gōngyì Bówùguǎn suǒzàidì, shōucáng hé zhǎnshì duō zhǒng Guǎngdōng chuántǒng gōngyì.', simpleChinese: '现在这里也是广东民间工艺博物馆。', vietnamese: 'Ngày nay đây là nơi đặt Bảo tàng Mỹ thuật Dân gian Quảng Đông, nơi sưu tầm và trưng bày nhiều nghề thủ công truyền thống.', english: 'Today the complex houses the Guangdong Folk Arts Museum, which collects and displays traditional Guangdong crafts.'),
-    keyTerms: const ['广东民间工艺博物馆', '收藏', '展示'], learnerInsight: '历史建筑今天也承担民间工艺博物馆功能。', check: '今天这里是什么博物馆所在地？', answer: '广东民间工艺博物馆。', sourceIds: const [guangzhouChenClanSourceRecordId],
-  ),
-  GuangzhouDiscoverySpec(
-    level: 6,
-    title: '文物保护身份',
-    storyLink: 'Story 主动保持非接触，Discovery 给出已核实的保护身份。',
-    entry: _discovery('陈家祠在一九八八年被公布为全国重点文物保护单位。', pinyin: 'Chénjiācí zài yī jiǔ bā bā nián bèi gōngbù wéi Quánguó Zhòngdiǎn Wénwù Bǎohù Dānwèi.', simpleChinese: '陈家祠是全国重点文物保护单位。', vietnamese: 'Năm 1988, Trần Gia Từ được công bố là đơn vị di tích văn hóa trọng điểm cấp quốc gia.', english: 'In 1988, the complex was designated a Major Historical and Cultural Site Protected at the National Level.'),
-    keyTerms: const ['全国重点文物保护单位', '保护'], learnerInsight: '观察历史建筑与在自己材料上试做可以清楚分开。', check: '陈家祠具有什么国家级保护身份？', answer: '全国重点文物保护单位。', sourceIds: const [guangzhouChenClanSourceRecordId],
-  ),
-  GuangzhouDiscoverySpec(
-    level: 7,
-    title: '工艺展示的范围',
-    storyLink: 'Story 只用“多材料”作为因果背景，Discovery 保留具体事实。',
-    entry: _discovery('广东民间工艺博物馆以广东传统工艺的收藏和展示为重要内容，陈家祠本身的建筑装饰也是认识这些工艺的重要对象。', pinyin: 'Guǎngdōng Mínjiān Gōngyì Bówùguǎn yǐ Guǎngdōng chuántǒng gōngyì de shōucáng hé zhǎnshì wéi zhòngyào nèiróng.', simpleChinese: '博物馆通过收藏、展示和建筑装饰帮助人们认识广东传统工艺。', vietnamese: 'Bảo tàng tập trung vào việc sưu tầm và trưng bày các nghề thủ công truyền thống Quảng Đông.', english: 'The museum’s role includes collecting and displaying Guangdong traditional crafts, while the historic complex itself presents rich decorative craftsmanship.'),
-    keyTerms: const ['广东传统工艺', '博物馆'], learnerInsight: '建筑与博物馆展示共同支持工艺学习。', check: '博物馆的重要内容是什么？', answer: '收藏和展示广东传统工艺。', sourceIds: const [guangzhouChenClanSourceRecordId],
-  ),
-  GuangzhouDiscoverySpec(
-    level: 8,
-    title: '雕刻与塑造不是同一种媒介',
-    storyLink: 'Story 的翻译问题来自媒介不同，Discovery 用官方类别说明差异存在。',
-    entry: _discovery('官方介绍把木雕、砖雕、石雕与陶塑、灰塑分别列出，说明陈家祠的装饰由不同材料类别共同构成。', pinyin: 'Guānfāng jièshào bǎ mùdiāo, zhuāndiāo, shídiāo yǔ táosù, huīsù fēnbié lièchū.', simpleChinese: '雕刻和塑造使用的材料类别不同，却一起构成建筑装饰。', vietnamese: 'Giới thiệu chính thức liệt kê riêng các loại chạm khắc và tạo hình, cho thấy nhiều nhóm vật liệu cùng tạo nên trang trí.', english: 'The official description lists carving and sculptural crafts separately, showing that multiple material categories contribute to the decoration.'),
-    keyTerms: const ['雕刻', '塑造', '材料类别'], learnerInsight: '同一视觉环境可以由不同媒介共同形成。', check: '官方介绍是否把所有装饰都归成同一种工艺？', answer: '不是，它分别列出多种雕刻、塑造、铸造和彩绘工艺。', sourceIds: const [guangzhouChenClanSourceRecordId],
-  ),
-  GuangzhouDiscoverySpec(
-    level: 9,
-    title: '历史建筑与活态展示',
-    storyLink: 'Story 不把地点写成抽象工作室，Discovery 说明它同时是受保护建筑和博物馆。',
-    entry: _discovery('陈家祠既具有全国重点文物保护单位身份，今天又作为广东民间工艺博物馆使用。', pinyin: 'Chénjiācí jì jùyǒu Quánguó Zhòngdiǎn Wénwù Bǎohù Dānwèi shēnfèn, jīntiān yòu zuòwéi Guǎngdōng Mínjiān Gōngyì Bówùguǎn shǐyòng.', simpleChinese: '这里既是受保护的历史建筑，也是今天的工艺博物馆。', vietnamese: 'Nơi đây vừa là di tích được bảo vệ cấp quốc gia, vừa là Bảo tàng Mỹ thuật Dân gian Quảng Đông ngày nay.', english: 'The complex is both a nationally protected historic site and the present home of the Guangdong Folk Arts Museum.'),
-    keyTerms: const ['文物保护', '博物馆'], learnerInsight: '保护与当代公共文化功能可以同时存在。', check: '陈家祠今天同时具有哪两种身份？', answer: '受保护的历史建筑与广东民间工艺博物馆所在地。', sourceIds: const [guangzhouChenClanSourceRecordId],
-  ),
-  GuangzhouDiscoverySpec(
-    level: 10,
-    title: '陈家祠为什么是多材料学习场',
-    storyLink: 'Story 的因果只需要“多种材料并置”，完整事实留在 Discovery。',
-    entry: _discovery('从晚清陈氏书院到今天的广东民间工艺博物馆，陈家祠以受保护的历史建筑保存并展示木雕、砖雕、石雕、陶塑、灰塑、铸造和彩绘等多种岭南工艺。', pinyin: 'Cóng Wǎnqīng Chénshì Shūyuàn dào jīntiān de Guǎngdōng Mínjiān Gōngyì Bówùguǎn, Chénjiācí bǎocún bìng zhǎnshì duō zhǒng Lǐngnán gōngyì.', simpleChinese: '陈家祠把历史建筑、文物保护和多种岭南工艺展示连在一起。', vietnamese: 'Từ Trần Thị Thư Viện cuối Thanh đến Bảo tàng Mỹ thuật Dân gian Quảng Đông ngày nay, công trình được bảo vệ này lưu giữ và trưng bày nhiều nghệ thuật Lĩnh Nam.', english: 'From its late-Qing identity as the Chen Clan Academy to its present museum role, the protected complex preserves and presents multiple Lingnan crafts including carving, sculpture, casting, and painting.'),
-    keyTerms: const ['陈氏书院', '岭南工艺', '广东民间工艺博物馆'], learnerInsight: '地点的文化价值来自多种工艺、历史建筑与当代展示共同存在。', check: '为什么陈家祠不能被任意替换成普通工作室？', answer: '因为这里的受保护建筑与多种岭南工艺并置，正是材料比较的文化背景。', sourceIds: const [guangzhouChenClanSourceRecordId],
-  ),
+  GuangzhouDiscoverySpec(level: 1, title: '陈家祠与陈氏书院', storyLink: '故事把陈家祠作为观察地点，Discovery 说明名称与时代背景。', entry: _discovery('陈家祠是清代晚期建筑，也称陈氏书院。', pinyin: 'Chénjiācí shì Qīngdài wǎnqī jiànzhù, yě chēng Chénshì Shūyuàn.', simpleChinese: '陈家祠也叫陈氏书院，是晚清建筑。', vietnamese: 'Trần Gia Từ còn được gọi là Trần Thị Thư Viện và là công trình cuối thời Thanh.', english: 'Chen Clan Academy, also known as Chen Clan Ancestral Hall, is a late-Qing complex.'), keyTerms: const ['陈家祠', '陈氏书院', '晚清'], learnerInsight: '一个地点可以同时保留常用名与历史名称。', check: '陈家祠还有什么名称？', answer: '陈氏书院。', sourceIds: const [guangzhouChenClanSourceRecordId]),
+  GuangzhouDiscoverySpec(level: 2, title: '多种岭南装饰工艺', storyLink: 'Story 只需要材料差异，Discovery 展开具体工艺类别。', entry: _discovery('陈家祠集中展示木雕、砖雕、石雕、陶塑和灰塑等岭南装饰工艺。', pinyin: 'Chénjiācí jízhōng zhǎnshì mùdiāo, zhuāndiāo, shídiāo, táosù hé huīsù děng Lǐngnán zhuāngshì gōngyì.', simpleChinese: '这里能看到多种不同材料的岭南装饰。', vietnamese: 'Trần Gia Từ tập trung nhiều nghệ thuật trang trí Lĩnh Nam như chạm gỗ, gạch, đá, tượng gốm và phù điêu vữa.', english: 'The complex brings together Lingnan decorative arts including wood, brick, and stone carving, ceramic sculpture, and lime sculpture.'), keyTerms: const ['木雕', '砖雕', '石雕', '陶塑', '灰塑'], learnerInsight: '岭南装饰并不依赖单一材料。', check: '陈家祠的装饰是否只使用一种材料？', answer: '不是，官方介绍列出多种装饰工艺。', sourceIds: const [guangzhouChenClanSourceRecordId]),
+  GuangzhouDiscoverySpec(level: 3, title: '铸造与彩绘也在其中', storyLink: 'Story 不罗列七类工艺，Discovery 补足官方列出的范围。', entry: _discovery('官方介绍还把铸造和彩绘与多种雕塑、雕刻工艺一起列入陈家祠的装饰特色。', pinyin: 'Guānfāng jièshào hái bǎ zhùzào hé cǎihuì yǔ duō zhǒng diāosù, diāokè gōngyì yìqǐ lièrù Chénjiācí de zhuāngshì tèsè.', simpleChinese: '除了雕刻和塑造，这里还有铸造和彩绘。', vietnamese: 'Giới thiệu chính thức còn liệt kê đúc và vẽ màu cùng với nhiều loại chạm khắc và tạo hình.', english: 'The official description also includes casting and painting among the complex’s decorative crafts.'), keyTerms: const ['铸造', '彩绘'], learnerInsight: '工艺差异不仅是图案差异，也包括材料和制作媒介的差异。', check: '除了雕刻与塑造，官方介绍还提到哪两类？', answer: '铸造和彩绘。', sourceIds: const [guangzhouChenClanSourceRecordId]),
+  GuangzhouDiscoverySpec(level: 4, title: '材料差异为什么值得观察', storyLink: 'Story 让材料差异推动制作，Discovery 只陈述多工艺并置事实。', entry: _discovery('木、砖、石、陶、灰泥以及用于铸造和彩绘的媒介在同一建筑装饰体系中并置，形成陈家祠鲜明的多工艺特征。', pinyin: 'Mù, zhuān, shí, táo, huīní yǐjí yòngyú zhùzào hé cǎihuì de méijiè zài tóng yī jiànzhù zhuāngshì tǐxì zhōng bìngzhì.', simpleChinese: '同一建筑里可以同时看到不同材料形成的装饰。', vietnamese: 'Trong cùng một hệ trang trí kiến trúc có nhiều vật liệu và hình thức thủ công khác nhau.', english: 'Different material-based decorative crafts are presented together within the same architectural complex.'), keyTerms: const ['材料', '多工艺', '建筑装饰'], learnerInsight: '多材料并置使比较不同媒介成为可能。', check: '陈家祠的工艺特色为什么适合做材料比较？', answer: '因为同一建筑中集中呈现多种材料和工艺。', sourceIds: const [guangzhouChenClanSourceRecordId]),
+  GuangzhouDiscoverySpec(level: 5, title: '今天的博物馆功能', storyLink: 'Story 聚焦制作，Discovery 说明场所今天的机构身份。', entry: _discovery('今天，陈家祠是广东民间工艺博物馆所在地，收藏和展示多种广东传统工艺。', pinyin: 'Jīntiān, Chénjiācí shì Guǎngdōng Mínjiān Gōngyì Bówùguǎn suǒzàidì, shōucáng hé zhǎnshì duō zhǒng Guǎngdōng chuántǒng gōngyì.', simpleChinese: '现在这里也是广东民间工艺博物馆。', vietnamese: 'Ngày nay đây là nơi đặt Bảo tàng Mỹ thuật Dân gian Quảng Đông, nơi sưu tầm và trưng bày nhiều nghề thủ công truyền thống.', english: 'Today the complex houses the Guangdong Folk Arts Museum, which collects and displays traditional Guangdong crafts.'), keyTerms: const ['广东民间工艺博物馆', '收藏', '展示'], learnerInsight: '历史建筑今天也承担民间工艺博物馆功能。', check: '今天这里是什么博物馆所在地？', answer: '广东民间工艺博物馆。', sourceIds: const [guangzhouChenClanSourceRecordId]),
+  GuangzhouDiscoverySpec(level: 6, title: '文物保护身份', storyLink: 'Story 主动保持非接触，Discovery 给出已核实的保护身份。', entry: _discovery('陈家祠在一九八八年被公布为全国重点文物保护单位。', pinyin: 'Chénjiācí zài yī jiǔ bā bā nián bèi gōngbù wéi Quánguó Zhòngdiǎn Wénwù Bǎohù Dānwèi.', simpleChinese: '陈家祠是全国重点文物保护单位。', vietnamese: 'Năm 1988, Trần Gia Từ được công bố là đơn vị di tích văn hóa trọng điểm cấp quốc gia.', english: 'In 1988, the complex was designated a Major Historical and Cultural Site Protected at the National Level.'), keyTerms: const ['全国重点文物保护单位', '保护'], learnerInsight: '观察历史建筑与在自己材料上试做可以清楚分开。', check: '陈家祠具有什么国家级保护身份？', answer: '全国重点文物保护单位。', sourceIds: const [guangzhouChenClanSourceRecordId]),
+  GuangzhouDiscoverySpec(level: 7, title: '工艺展示的范围', storyLink: 'Story 只用“多材料”作为因果背景，Discovery 保留具体事实。', entry: _discovery('广东民间工艺博物馆以广东传统工艺的收藏和展示为重要内容，陈家祠本身的建筑装饰也是认识这些工艺的重要对象。', pinyin: 'Guǎngdōng Mínjiān Gōngyì Bówùguǎn yǐ Guǎngdōng chuántǒng gōngyì de shōucáng hé zhǎnshì wéi zhòngyào nèiróng.', simpleChinese: '博物馆通过收藏、展示和建筑装饰帮助人们认识广东传统工艺。', vietnamese: 'Bảo tàng tập trung vào việc sưu tầm và trưng bày các nghề thủ công truyền thống Quảng Đông.', english: 'The museum’s role includes collecting and displaying Guangdong traditional crafts, while the historic complex itself presents rich decorative craftsmanship.'), keyTerms: const ['广东传统工艺', '博物馆'], learnerInsight: '建筑与博物馆展示共同支持工艺学习。', check: '博物馆的重要内容是什么？', answer: '收藏和展示广东传统工艺。', sourceIds: const [guangzhouChenClanSourceRecordId]),
+  GuangzhouDiscoverySpec(level: 8, title: '雕刻与塑造不是同一种媒介', storyLink: 'Story 的翻译问题来自媒介不同，Discovery 用官方类别说明差异存在。', entry: _discovery('官方介绍把木雕、砖雕、石雕与陶塑、灰塑分别列出，说明陈家祠的装饰由不同材料类别共同构成。', pinyin: 'Guānfāng jièshào bǎ mùdiāo, zhuāndiāo, shídiāo yǔ táosù, huīsù fēnbié lièchū.', simpleChinese: '雕刻和塑造使用的材料类别不同，却一起构成建筑装饰。', vietnamese: 'Giới thiệu chính thức liệt kê riêng các loại chạm khắc và tạo hình, cho thấy nhiều nhóm vật liệu cùng tạo nên trang trí.', english: 'The official description lists carving and sculptural crafts separately, showing that multiple material categories contribute to the decoration.'), keyTerms: const ['雕刻', '塑造', '材料类别'], learnerInsight: '同一视觉环境可以由不同媒介共同形成。', check: '官方介绍是否把所有装饰都归成同一种工艺？', answer: '不是，它分别列出多种雕刻、塑造、铸造和彩绘工艺。', sourceIds: const [guangzhouChenClanSourceRecordId]),
+  GuangzhouDiscoverySpec(level: 9, title: '历史建筑与活态展示', storyLink: 'Story 不把地点写成抽象工作室，Discovery 说明它同时是受保护建筑和博物馆。', entry: _discovery('陈家祠既具有全国重点文物保护单位身份，今天又作为广东民间工艺博物馆使用。', pinyin: 'Chénjiācí jì jùyǒu Quánguó Zhòngdiǎn Wénwù Bǎohù Dānwèi shēnfèn, jīntiān yòu zuòwéi Guǎngdōng Mínjiān Gōngyì Bówùguǎn shǐyòng.', simpleChinese: '这里既是受保护的历史建筑，也是今天的工艺博物馆。', vietnamese: 'Nơi đây vừa là di tích được bảo vệ cấp quốc gia, vừa là Bảo tàng Mỹ thuật Dân gian Quảng Đông ngày nay.', english: 'The complex is both a nationally protected historic site and the present home of the Guangdong Folk Arts Museum.'), keyTerms: const ['文物保护', '博物馆'], learnerInsight: '保护与当代公共文化功能可以同时存在。', check: '陈家祠今天同时具有哪两种身份？', answer: '受保护的历史建筑与广东民间工艺博物馆所在地。', sourceIds: const [guangzhouChenClanSourceRecordId]),
+  GuangzhouDiscoverySpec(level: 10, title: '陈家祠为什么是多材料学习场', storyLink: 'Story 的因果只需要“多种材料并置”，完整事实留在 Discovery。', entry: _discovery('从晚清陈氏书院到今天的广东民间工艺博物馆，陈家祠以受保护的历史建筑保存并展示木雕、砖雕、石雕、陶塑、灰塑、铸造和彩绘等多种岭南工艺。', pinyin: 'Cóng Wǎnqīng Chénshì Shūyuàn dào jīntiān de Guǎngdōng Mínjiān Gōngyì Bówùguǎn, Chénjiācí bǎocún bìng zhǎnshì duō zhǒng Lǐngnán gōngyì.', simpleChinese: '陈家祠把历史建筑、文物保护和多种岭南工艺展示连在一起。', vietnamese: 'Từ Trần Thị Thư Viện cuối Thanh đến Bảo tàng Mỹ thuật Dân gian Quảng Đông ngày nay, công trình được bảo vệ này lưu giữ và trưng bày nhiều nghệ thuật Lĩnh Nam.', english: 'From its late-Qing identity as the Chen Clan Academy to its present museum role, the protected complex preserves and presents multiple Lingnan crafts including carving, sculpture, casting, and painting.'), keyTerms: const ['陈氏书院', '岭南工艺', '广东民间工艺博物馆'], learnerInsight: '地点的文化价值来自多种工艺、历史建筑与当代展示共同存在。', check: '为什么陈家祠不能被任意替换成普通工作室？', answer: '因为这里的受保护建筑与多种岭南工艺并置，正是材料比较的文化背景。', sourceIds: const [guangzhouChenClanSourceRecordId]),
 ]);
 
 final guangzhouChenClanOnePassDiscoveries = List<DiscoveryEntry>.unmodifiable(
@@ -306,27 +246,9 @@ final guangzhouChenClanOnePassDiscoveries = List<DiscoveryEntry>.unmodifiable(
 
 final guangzhouChenClanChallengeSpecs = List<GuangzhouChallengeSpec>.unmodifiable([
   for (var level = 1; level <= 10; level++) ...[
-    GuangzhouChallengeSpec(
-      level: level,
-      type: 'paragraphRebuild',
-      prompt: '第一件纸原型为什么会物理失败？',
-      anchor: guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.first,
-      answer: '梁遥逐线照搬表面轮廓，把纸上承担连接的部分也切掉，因此几个部分断开。',
-    ),
-    GuangzhouChallengeSpec(
-      level: level,
-      type: 'grammarRepair',
-      prompt: '梁遥在第二张纸上具体改变了什么？',
-      anchor: guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.last,
-      answer: '她停止逐线照搬，在会断开的地方保留纸桥，用纸的结构需要重新编码连接。',
-    ),
-    GuangzhouChallengeSpec(
-      level: level,
-      type: 'missingSentence',
-      prompt: '第二件原型怎样证明跨材料翻译成功？',
-      anchor: guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.last,
-      answer: '梁遥提起原型时整张纸保持连接，贺真又能识别原先重要的形体关系。',
-    ),
+    GuangzhouChallengeSpec(level: level, type: 'paragraphRebuild', prompt: '第一件纸原型为什么会物理失败？', anchor: guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.first, answer: '梁遥逐线照搬表面轮廓，把纸上承担连接的部分也切掉，因此几个部分断开。'),
+    GuangzhouChallengeSpec(level: level, type: 'grammarRepair', prompt: '梁遥在第二张纸上具体改变了什么？', anchor: guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.last, answer: '她停止逐线照搬，在会断开的地方保留纸桥，用纸的结构需要重新编码连接。'),
+    GuangzhouChallengeSpec(level: level, type: 'missingSentence', prompt: '第二件原型怎样证明跨材料翻译成功？', anchor: guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.last, answer: '梁遥提起原型时整张纸保持连接，贺真又能识别原先重要的形体关系。'),
   ],
 ]);
 
@@ -341,48 +263,18 @@ final guangzhouChenClanWritingPrompts = List<String>.unmodifiable([
 ]);
 
 final guangzhouChenClanDiscoveryTraces = List<RemediatedDiscoveryTrace>.unmodifiable([
-  for (var level = 1; level <= 10; level++)
-    RemediatedDiscoveryTrace(
-      discoveryIndex: level - 1,
-      storyEventIds: const ['GZ-E1-observation', 'GZ-E3-medium-conflict'],
-      sourceIds: const [guangzhouChenClanSourceRecordId],
-    ),
+  for (var level = 1; level <= 10; level++) RemediatedDiscoveryTrace(discoveryIndex: level - 1, storyEventIds: const ['GZ-E1-observation', 'GZ-E3-medium-conflict'], sourceIds: const [guangzhouChenClanSourceRecordId]),
 ]);
 
 final guangzhouChenClanChallengeTraces = List<RemediatedChallengeTrace>.unmodifiable([
   for (final spec in guangzhouChenClanChallengeSpecs)
-    RemediatedChallengeTrace(
-      type: spec.type,
-      storyEventIds: const [
-        'GZ-E2-first-failure',
-        'GZ-E3-medium-conflict',
-        'GZ-E4-reencode',
-        'GZ-E5-second-prototype',
-        'GZ-E6-legibility',
-      ],
-      anchor: spec.anchor,
-    ),
+    RemediatedChallengeTrace(type: spec.type, storyEventIds: const ['GZ-E2-first-failure', 'GZ-E3-medium-conflict', 'GZ-E4-reencode', 'GZ-E5-second-prototype', 'GZ-E6-legibility'], anchor: spec.anchor),
 ]);
 
 const guangzhouChenClanMemory = <RemediatedMemoryReview>[
-  RemediatedMemoryReview(
-    category: '失败',
-    prompt: '第一件原型为什么散开？',
-    answer: '梁遥逐线复制轮廓，把纸上必须承担连接的部分切掉了。',
-    storyEventIds: ['GZ-E2-first-failure', 'GZ-E3-medium-conflict'],
-  ),
-  RemediatedMemoryReview(
-    category: '选择',
-    prompt: '纸桥代表梁遥做了什么改变？',
-    answer: '她不再复制每条表面线，而按纸的结构要求重新编码连接。',
-    storyEventIds: ['GZ-E4-reencode'],
-  ),
-  RemediatedMemoryReview(
-    category: '证明',
-    prompt: '第二件原型怎样证明方法有效？',
-    answer: '它被提起后仍是一整张，贺真又能识别关键形体关系。',
-    storyEventIds: ['GZ-E5-second-prototype', 'GZ-E6-legibility'],
-  ),
+  RemediatedMemoryReview(category: '失败', prompt: '第一件原型为什么散开？', answer: '梁遥逐线复制轮廓，把纸上必须承担连接的部分切掉了。', storyEventIds: ['GZ-E2-first-failure', 'GZ-E3-medium-conflict']),
+  RemediatedMemoryReview(category: '选择', prompt: '纸桥代表梁遥做了什么改变？', answer: '她不再复制每条表面线，而按纸的结构要求重新编码连接。', storyEventIds: ['GZ-E4-reencode']),
+  RemediatedMemoryReview(category: '证明', prompt: '第二件原型怎样证明方法有效？', answer: '它被提起后仍是一整张，贺真又能识别关键形体关系。', storyEventIds: ['GZ-E5-second-prototype', 'GZ-E6-legibility']),
 ];
 
 const guangzhouChenClanCompletion = RemediatedCompletion(
@@ -394,33 +286,22 @@ const guangzhouChenClanCompletion = RemediatedCompletion(
 );
 
 const guangzhouChenClanEventIds = <String>[
-  'GZ-E1-observation',
-  'GZ-E2-first-failure',
-  'GZ-E3-medium-conflict',
-  'GZ-E4-reencode',
-  'GZ-E5-second-prototype',
-  'GZ-E6-legibility',
-  'GZ-E7-transformation',
-  'GZ-E8-next-material',
+  'GZ-E1-observation', 'GZ-E2-first-failure', 'GZ-E3-medium-conflict', 'GZ-E4-reencode', 'GZ-E5-second-prototype', 'GZ-E6-legibility', 'GZ-E7-transformation', 'GZ-E8-next-material',
 ];
 
 const guangzhouChenClanEvents = <RemediatedSemanticEvent>[
-  RemediatedSemanticEvent(id: 'GZ-E1-observation', coreChinese: '二十二岁的版画学生梁遥和陶艺同学贺真在广州陈家祠观察建筑装饰，只在自己的材料上试做。', corePinyin: 'Èrshí'èr suì de bǎnhuà xuéshēng Liáng Yáo hé táoyì tóngxué Hè Zhēn zài Guǎngzhōu Chénjiācí guānchá.', coreVietnamese: 'Lương Dao, sinh viên in 22 tuổi, và bạn học gốm Hạ Chân quan sát trang trí tại Trần Gia Từ và chỉ thử nghiệm trên vật liệu của mình.', coreEnglish: 'Twenty-two-year-old printmaking student Liang Yao and ceramics-student peer He Zhen observe decoration at the Chen Clan Academy and work only on their own materials.', detailChinese: '多种岭南装饰工艺的材料差异使跨媒介连接成为观察重点。', detailPinyin: 'Duō zhǒng Lǐngnán zhuāngshì gōngyì de cáiliào chāyì shǐ kuà méijiè liánjiē chéngwéi guānchá zhòngdiǎn.', detailVietnamese: 'Sự khác biệt vật liệu giữa nhiều nghệ thuật trang trí Lĩnh Nam khiến vấn đề kết nối xuyên môi trường trở thành trọng tâm.', detailEnglish: 'Material differences among multiple Lingnan decorative crafts make cross-medium connection the focus.', detailFromLevel: 4),
+  RemediatedSemanticEvent(id: 'GZ-E1-observation', coreChinese: '二十二岁的版画学生梁遥和陶艺同学贺真在广州陈家祠观察建筑装饰，只在自己的材料上试做。', corePinyin: 'Èrshí’èr suì de bǎnhuà xuéshēng Liáng Yáo hé táoyì tóngxué Hè Zhēn zài Guǎngzhōu Chénjiācí guānchá.', coreVietnamese: 'Lương Dao, sinh viên in 22 tuổi, và bạn học gốm Hạ Chân quan sát trang trí tại Trần Gia Từ và chỉ thử nghiệm trên vật liệu của mình.', coreEnglish: 'Twenty-two-year-old printmaking student Liang Yao and ceramics-student peer He Zhen observe decoration at the Chen Clan Academy and work only on their own materials.', detailChinese: '多种岭南装饰工艺的材料差异使跨媒介连接成为观察重点。', detailPinyin: 'Duō zhǒng Lǐngnán zhuāngshì gōngyì de cáiliào chāyì shǐ kuà méijiè liánjiē chéngwéi guānchá zhòngdiǎn.', detailVietnamese: 'Sự khác biệt vật liệu giữa nhiều nghệ thuật trang trí Lĩnh Nam khiến vấn đề kết nối xuyên môi trường trở thành trọng tâm.', detailEnglish: 'Material differences among multiple Lingnan decorative crafts make cross-medium connection the focus.', detailFromLevel: 4),
   RemediatedSemanticEvent(id: 'GZ-E2-first-failure', coreChinese: '第一件逐线复制的纸原型在剪完后断成几个部分。', corePinyin: 'Dì yī jiàn zhúxiàn fùzhì de zhǐ yuánxíng zài jiǎnwán hòu duàn chéng jǐ gè bùfen.', coreVietnamese: 'Mẫu giấy đầu tiên sao chép từng đường bị đứt thành nhiều phần sau khi cắt.', coreEnglish: 'The first literal-contour paper prototype breaks into disconnected pieces after cutting.', detailChinese: '梁遥把承担连接的纸也当成轮廓空隙切掉。', detailPinyin: 'Liáng Yáo bǎ chéngdān liánjiē de zhǐ yě dàngchéng lúnkuò kòngxì qiēdiào.', detailVietnamese: 'Lương Dao cắt mất cả phần giấy cần để kết nối.', detailEnglish: 'Liang Yao cuts away paper that the new medium needs for connection.', detailFromLevel: 3),
   RemediatedSemanticEvent(id: 'GZ-E3-medium-conflict', coreChinese: '字面复制与纸的结构要求发生冲突。', corePinyin: 'Zìmiàn fùzhì yǔ zhǐ de jiégòu yāoqiú fāshēng chōngtū.', coreVietnamese: 'Sao chép theo bề mặt xung đột với yêu cầu cấu trúc của giấy.', coreEnglish: 'Literal copying conflicts with paper-specific structural requirements.', detailChinese: '问题不是历史证据分类，而是新材料不能用原媒介的连接逻辑自动保持整体。', detailPinyin: 'Wèntí bú shì lìshǐ zhèngjù fēnlèi, ér shì xīn cáiliào bùnéng zìdòng yòng yuán méijiè de liánjiē luójí bǎochí zhěngtǐ.', detailVietnamese: 'Vấn đề không phải phân loại bằng chứng lịch sử mà là vật liệu mới không tự giữ được logic kết nối của môi trường cũ.', detailEnglish: 'The issue is not historical evidence classification; the new material cannot automatically inherit the source medium’s connection logic.', detailFromLevel: 5),
   RemediatedSemanticEvent(id: 'GZ-E4-reencode', coreChinese: '梁遥在第二张纸上留下纸桥，重新编码会断开的连接。', corePinyin: 'Liáng Yáo zài dì èr zhāng zhǐ shàng liúxià zhǐqiáo, chóngxīn biānmǎ huì duànkāi de liánjiē.', coreVietnamese: 'Lương Dao để lại các cầu giấy trên tờ thứ hai và mã hóa lại các điểm kết nối sẽ bị đứt.', coreEnglish: 'On the second sheet, Liang Yao leaves paper bridges and re-encodes the connections that would otherwise break.', detailChinese: '她保留主要形体关系，但不再把每条表面线都当成切割边界。', detailPinyin: 'Tā bǎoliú zhǔyào xíngtǐ guānxì, dàn bù zài bǎ měi tiáo biǎomiàn xiàn dōu dàngchéng qiēgē biānjiè.', detailVietnamese: 'Cô giữ quan hệ hình thể chính nhưng không còn coi mọi đường bề mặt là biên cắt.', detailEnglish: 'She preserves the important form relation without treating every surface line as a cutting boundary.', detailFromLevel: 3),
   RemediatedSemanticEvent(id: 'GZ-E5-second-prototype', coreChinese: '第二件原型从一角提起后仍是一张完整相连的纸。', corePinyin: 'Dì èr jiàn yuánxíng cóng yì jiǎo tíqǐ hòu réng shì yì zhāng wánzhěng xiānglián de zhǐ.', coreVietnamese: 'Mẫu thứ hai khi nhấc từ một góc vẫn là một tờ giấy liền và hoàn chỉnh.', coreEnglish: 'The second prototype lifts from one corner as one intact connected sheet.', detailChinese: '纸桥让新媒介获得实际结构连续性。', detailPinyin: 'Zhǐqiáo ràng xīn méijiè huòdé shíjì jiégòu liánxùxìng.', detailVietnamese: 'Cầu giấy tạo tính liên tục cấu trúc thực sự cho môi trường mới.', detailEnglish: 'The paper bridges give the new medium real structural continuity.', detailFromLevel: 4),
-  RemediatedSemanticEvent(id: 'GZ-E6-legibility', coreChinese: '贺真不看草图，仍能识别原先重要的相接关系。', corePinyin: 'Hè Zhēn bù kàn cǎotú, réng néng shíbié yuánxiān zhòngyào de xiāngjiē guānxì.', coreVietnamese: 'Không nhìn bản phác, Hạ Chân vẫn nhận ra quan hệ nối quan trọng ban đầu.', coreEnglish: 'Without seeing the sketch, He Zhen can still identify the important original relation.', detailChinese: '同伴用可识别性检验翻译结果，而不是以导师身份授予答案。', detailPinyin: 'Tóngbàn yòng kě shíbié xìng jiǎnyàn fānyì jiéguǒ, ér bú shì yǐ dǎoshī shēnfèn shòuyǔ dá'àn.', detailVietnamese: 'Người bạn kiểm tra tính nhận diện của bản dịch chứ không ban đáp án như một người thầy.', detailEnglish: 'The peer tests legibility rather than granting an answer with mentor authority.', detailFromLevel: 5),
+  RemediatedSemanticEvent(id: 'GZ-E6-legibility', coreChinese: '贺真不看草图，仍能识别原先重要的相接关系。', corePinyin: 'Hè Zhēn bù kàn cǎotú, réng néng shíbié yuánxiān zhòngyào de xiāngjiē guānxì.', coreVietnamese: 'Không nhìn bản phác, Hạ Chân vẫn nhận ra quan hệ nối quan trọng ban đầu.', coreEnglish: 'Without seeing the sketch, He Zhen can still identify the important original relation.', detailChinese: '同伴用可识别性检验翻译结果，而不是以导师身份授予答案。', detailPinyin: 'Tóngbàn yòng kě shíbié xìng jiǎnyàn fānyì jiéguǒ, ér bú shì yǐ dǎoshī shēnfèn shòuyǔ dá’àn.', detailVietnamese: 'Người bạn kiểm tra tính nhận diện của bản dịch chứ không ban đáp án như một người thầy.', detailEnglish: 'The peer tests legibility rather than granting an answer with mentor authority.', detailFromLevel: 5),
   RemediatedSemanticEvent(id: 'GZ-E7-transformation', coreChinese: '梁遥从表面复制者转为材料翻译者。', corePinyin: 'Liáng Yáo cóng biǎomiàn fùzhì zhě zhuǎn wéi cáiliào fānyì zhě.', coreVietnamese: 'Lương Dao chuyển từ người sao chép bề mặt thành người dịch qua vật liệu.', coreEnglish: 'Liang Yao changes from a surface-copyist into a material translator.', detailChinese: '成功标准从逐线相似改为关系在新媒介中既可工作又可读。', detailPinyin: 'Chénggōng biāozhǔn cóng zhúxiàn xiāngsì gǎi wéi guānxì zài xīn méijiè zhōng jì kě gōngzuò yòu kě dú.', detailVietnamese: 'Tiêu chuẩn thành công chuyển từ giống từng đường sang việc quan hệ vừa hoạt động vừa đọc được trong môi trường mới.', detailEnglish: 'Success shifts from line-by-line likeness to a relation that works and remains legible in the new medium.', detailFromLevel: 6),
   RemediatedSemanticEvent(id: 'GZ-E8-next-material', coreChinese: '回到工作室，梁遥把新的连接方法用于下一种材料研究。', corePinyin: 'Huídào gōngzuòshì, Liáng Yáo bǎ xīn de liánjiē fāngfǎ yòngyú xià yì zhǒng cáiliào yánjiū.', coreVietnamese: 'Về xưởng, Lương Dao áp dụng cách kết nối mới vào nghiên cứu vật liệu tiếp theo.', coreEnglish: 'Back in the studio, Liang Yao applies the changed connection method to the next material study.', detailChinese: '她先标出新材料必须保留的连接，再开始画轮廓。', detailPinyin: 'Tā xiān biāochū xīn cáiliào bìxū bǎoliú de liánjiē, zài kāishǐ huà lúnkuò.', detailVietnamese: 'Cô đánh dấu trước những kết nối vật liệu mới phải giữ rồi mới bắt đầu vẽ đường nét.', detailEnglish: 'She marks the connections the new material must retain before drawing contours.', detailFromLevel: 7),
 ];
 
 const guangzhouChenClanSources = <RemediatedSourceBinding>[
-  RemediatedSourceBinding(
-    id: guangzhouChenClanSourceRecordId,
-    publisher: '广州市人民政府',
-    scope: '陈家祠／陈氏书院晚清背景、木雕砖雕石雕陶塑灰塑铸造彩绘等岭南装饰工艺、全国重点文物保护单位、广东民间工艺博物馆',
-  ),
+  RemediatedSourceBinding(id: guangzhouChenClanSourceRecordId, publisher: '广州市人民政府', scope: '陈家祠／陈氏书院晚清背景、木雕砖雕石雕陶塑灰塑铸造彩绘等岭南装饰工艺、全国重点文物保护单位、广东民间工艺博物馆'),
 ];
 
 final guangzhouChenClanRemediatedJourney = RemediatedJourney(
