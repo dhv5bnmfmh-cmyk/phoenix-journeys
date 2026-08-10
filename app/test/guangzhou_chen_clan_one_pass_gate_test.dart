@@ -80,6 +80,16 @@ void main() {
         expect(guangzhouChenClanWordFirstAppears[word.word], lessThanOrEqualTo(level));
       }
     }
+    for (final word in guangzhouChenClanOnePassWords) {
+      final observedFirstLevel = List<int>.generate(10, (index) => index + 1).firstWhere(
+        (level) => guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.join().contains(word.word),
+      );
+      expect(
+        guangzhouChenClanWordFirstAppears[word.word],
+        observedFirstLevel,
+        reason: '${word.word} exact Story first appearance',
+      );
+    }
     for (final trace in guangzhouChenClanWordTraces) {
       expect(trace.sourceText, contains(trace.word), reason: trace.word);
       expect(allStory, contains(trace.sourceText), reason: trace.word);
