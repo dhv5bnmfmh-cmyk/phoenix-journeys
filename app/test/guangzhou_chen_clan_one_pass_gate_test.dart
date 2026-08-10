@@ -31,7 +31,18 @@ void main() {
       expect(story, anyOf(contains('第二张'), contains('第二件'), contains('第二个')), reason: 'Lv$level revised prototype');
       expect(story, anyOf(contains('提起'), contains('拿起')), reason: 'Lv$level physical climax');
       expect(story, anyOf(contains('认出'), contains('识别'), contains('指出')), reason: 'Lv$level peer legibility test');
-      expect(story, anyOf(contains('翻译'), contains('改对'), contains('改变编码'), contains('编码改变'), contains('改变表达方式')), reason: 'Lv$level transformation/consequence');
+      expect(
+        story,
+        anyOf(
+          contains('翻译'),
+          contains('改对'),
+          contains('改变编码'),
+          contains('编码改变'),
+          contains('改变表达方式'),
+          contains('改变连接'),
+        ),
+        reason: 'Lv$level transformation/consequence',
+      );
       expect(story, contains('工作室'), reason: 'Lv$level action ending');
       expect(
         story,
