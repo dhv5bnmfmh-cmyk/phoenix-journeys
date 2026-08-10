@@ -150,6 +150,7 @@ final approvedNarrativeDnaCatalog =
       chengduRemediatedNarrativeDna
     else
       record,
+  guangzhouChenClanGoldNarrativeDna,
 ]);
 
 int duplicatedMajorDimensions(
