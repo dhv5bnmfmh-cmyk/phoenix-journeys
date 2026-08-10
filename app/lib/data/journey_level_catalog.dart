@@ -1,5 +1,6 @@
 import 'chengdu_kuanzhai_one_pass.dart';
 import 'daily_journey_experience.dart';
+import 'guangzhou_chen_clan_one_pass.dart';
 import 'hangzhou_west_lake_one_pass.dart';
 import 'journey_data.dart';
 import 'summer_palace_journey.dart';
@@ -185,6 +186,14 @@ JourneyLevelContent resolveJourneyLevel(
       JourneyDifficulty.challenge => 10,
     };
     return chengduKuanzhaiOnePassLevelContent(level);
+  }
+  if (experience.id == guangzhouChenClanJourneyId) {
+    final level = switch (difficulty) {
+      JourneyDifficulty.easy => 1,
+      JourneyDifficulty.standard => 5,
+      JourneyDifficulty.challenge => 10,
+    };
+    return guangzhouChenClanOnePassLevelContent(level);
   }
   if (experience.id == hangzhouWestLakeJourneyId) {
     final level = switch (difficulty) {
