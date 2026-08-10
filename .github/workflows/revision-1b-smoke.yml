@@ -19,6 +19,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p = Path('app/lib/data/guangzhou_chen_clan_one_pass.dart')
           s = p.read_text()
           pairs = [
@@ -33,30 +34,8 @@ jobs:
 
           p = Path('app/test/guangzhou_chen_clan_one_pass_gate_test.dart')
           s = p.read_text()
-          old = """  test('Lv9/Lv10 reader Story excludes semantic-governance meta language', () {
-            final advancedStory = <String>[
-              ...guangzhouChenClanOnePassLevels[8].storyParagraphs,
-              ...guangzhouChenClanOnePassLevels[9].storyParagraphs,
-            ].join();
-            const forbiddenMeta = <String>[
-              '历史证据',
-              '重新分类',
-              '历史解释',
-              '导师',
-              '妥协',
-              '改分类',
-              '故意残缺',
-            ];
-            for (final phrase in forbiddenMeta) {
-              expect(advancedStory, isNot(contains(phrase)), reason: phrase);
-            }
-            expect(advancedStory, contains('把断开的几片重新并在桌上'));
-            expect(advancedStory, contains('把草图扣在桌面，只看成品'));
-            expect(advancedStory, contains('纸桥改变了局部轮廓'));
-          });
-          """
-          old = '\n'.join(line[10:] if line.startswith('          ') else line for line in old.splitlines()) + '\n'
-          new = """  test('Lv6-Lv10 reader Story excludes semantic-governance meta language', () {
+          pattern = r"  test\('Lv9/Lv10 reader Story excludes semantic-governance meta language', \(\) \{.*?^  \}\);\n"
+          replacement = """  test('Lv6-Lv10 reader Story excludes semantic-governance meta language', () {
             final advancedStory = <String>[
               for (var index = 5; index <= 9; index++)
                 ...guangzhouChenClanOnePassLevels[index].storyParagraphs,
@@ -84,9 +63,10 @@ jobs:
             expect(guangzhouChenClanOnePassLevels[9].storyParagraphs.join(), contains('纸桥改变了局部轮廓'));
           });
           """
-          new = '\n'.join(line[10:] if line.startswith('          ') else line for line in new.splitlines()) + '\n'
-          assert s.count(old) == 1, s.count(old)
-          p.write_text(s.replace(old, new))
+          replacement = '\n'.join(line[10:] if line.startswith('          ') else line for line in replacement.splitlines()) + '\n'
+          s, count = re.subn(pattern, replacement, s, flags=re.S | re.M)
+          assert count == 1, count
+          p.write_text(s)
           PY
           git diff --check
           rm .github/workflows/founder-revision-1b-apply.yml .github/workflows/revision-1b-smoke.yml
