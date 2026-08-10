@@ -40,8 +40,26 @@ void main() {
     final shanghai = requireJourneyProvince('shanghai');
 
     expect(beijing.isMunicipality, isTrue);
+    expect(beijing.name, '北京市');
     expect(beijing.cityIds, ['beijing']);
+    expect(beijing.cityCount, 1);
+    expect(beijing.journeyCount, 2);
     expect(shanghai.isMunicipality, isTrue);
+    expect(shanghai.name, '上海市');
     expect(shanghai.cityIds, ['shanghai']);
+  });
+
+  test('province coverage is derived from registered city bindings', () {
+    final sichuan = requireJourneyProvince('sichuan');
+
+    expect(sichuan.name, '四川省');
+    expect(sichuan.cityIds, containsAll(['chengdu', 'leshan']));
+    expect(sichuan.cityCount, 2);
+    expect(
+      sichuan.journeyCount,
+      sichuan.cityIds
+          .map((cityId) => requireJourneyCity(cityId).destinationCount)
+          .reduce((left, right) => left + right),
+    );
   });
 }

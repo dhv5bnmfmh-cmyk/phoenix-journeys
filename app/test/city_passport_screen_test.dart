@@ -78,6 +78,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('北京市'), findsOneWidget);
+    expect(find.text('2 段旅程'), findsOneWidget);
+    expect(find.text('北京市 · 北京市'), findsNothing);
+    expect(find.text('东城区'), findsOneWidget);
+    expect(find.text('海淀区'), findsOneWidget);
     expect(
       find.byKey(const ValueKey('passport-city-option-beijing')),
       findsNothing,
@@ -110,7 +115,8 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('passport-city-beijing')));
     await tester.pumpAndSettle();
 
-    expect(find.text('北京 · 选择旅程'), findsOneWidget);
+    expect(find.text('北京市 · 2 段旅程'), findsOneWidget);
+    expect(find.text('北京市 · 北京市'), findsNothing);
     expect(
       find.byKey(
         const ValueKey('passport-destination-beijing-forbidden-city'),
@@ -125,6 +131,76 @@ void main() {
     );
     expect(find.text('紫禁城'), findsNWidgets(2));
     expect(find.text('颐和园'), findsNWidgets(2));
+  });
+
+  testWidgets('normal province city and place hierarchy stays findable', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final state = AppState(clock: () => DateTime(2026, 7, 22));
+    await state.load();
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: const MaterialApp(
+          home: Scaffold(body: CityPassportScreen()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('passport-country-china')));
+    await tester.pumpAndSettle();
+    expect(find.text('四川省'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('passport-province-sichuan')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('passport-city-option-chengdu')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('四川省'), findsOneWidget);
+    expect(find.text('成都市 · 1 段旅程'), findsOneWidget);
+    expect(find.text('宽窄巷子'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Passport hierarchy follows Traditional Chinese mode', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final state = AppState(clock: () => DateTime(2026, 7, 22));
+    await state.load();
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: const MaterialApp(
+          home: Scaffold(body: CityPassportScreen()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('passport-country-china')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('passport-province-beijing')));
+    await tester.pumpAndSettle();
+
+    await state.toggleScript();
+    await tester.pumpAndSettle();
+
+    expect(find.text('東城區'), findsOneWidget);
+    expect(find.text('故宮博物院'), findsOneWidget);
+    expect(find.text('海淀區'), findsOneWidget);
+    expect(find.text('頤和園'), findsOneWidget);
+    expect(find.text('北京市 · 北京市'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('map locks base position and bounds zoomed panning', (
