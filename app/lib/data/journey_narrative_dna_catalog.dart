@@ -94,6 +94,53 @@ const chengduRemediatedNarrativeDna = JourneyNarrativeDnaRecord(
       'place-chair-first-handoff-fixed-layout-fails-again-negotiate-repeat-independent-reproduction-release-control',
 );
 
+const guangzhouChenClanGoldNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'guangzhou-chen-clan-academy',
+  narrativeIdentity: 'paper-bridges-translate-relief-across-material-constraints',
+  protagonistIdentity:
+      'Liang-Yao-twenty-two-year-old-fictional-Guangzhou-printmaking-student',
+  protagonistAgeIdentity: 'twenty-two-year-old-young-maker',
+  protagonistArchetype:
+      'young-maker-translating-form-across-material-constraints',
+  openingSituation:
+      'first-literal-contour-single-sheet-paper-prototype-separates-into-disconnected-pieces',
+  storyGoal:
+      'make-one-connected-single-sheet-interpretation-while-preserving-a-recognisable-source-relation',
+  locationMechanism:
+      'Chen-Clan-Academy-multi-craft-architecture-makes-material-difference-causal-to-the-making-problem',
+  movementPattern:
+      'observe-own-paper-prototype-fail-redraw-connections-cut-again-lift-and-test-legibility',
+  conflictType:
+      'literal-surface-fidelity-vs-paper-specific-structural-integrity',
+  choiceType:
+      'introduce-deliberate-paper-bridges-and-reencode-connections-for-the-new-medium',
+  climaxType:
+      'revised-paper-object-lifts-intact-while-peer-still-recognises-the-important-relation',
+  consequenceType:
+      'translated-object-functions-as-one-paper-piece-because-its-encoding-changed',
+  emotionalArc:
+      'copying-confidence-to-physical-failure-to-material-questioning-to-deliberate-reencoding-to-functional-proof',
+  historicalLearningMechanism:
+      'verified-multi-craft-Lingnan-decoration-provides-the-material-comparison-context-while-factual-expansion-remains-in-Discovery',
+  resolutionType:
+      'cross-medium-translation-preserves-relation-through-medium-specific-structure',
+  endingMechanism:
+      'changed-translation-method-is-applied-immediately-to-the-next-material-study',
+  memoryAnchorType:
+      'paper-bridges-absent-from-the-source-surface-but-necessary-for-the-translated-medium',
+  achievementType: 'material-relation-translator',
+  rewardSymbolism:
+      'connected-paper-bridge-symbolises-successful-reencoding-not-sacrifice-or-incompletion',
+  temporalPattern: 'single-material-study-session-without-external-countdown',
+  supportingStructure:
+      'peer-makers-Liang-Yao-and-ceramics-student-He-Zhen-test-legibility-without-mentor-authority',
+  centralMetaphor:
+      'fidelity-can-live-in-a-relation-even-when-a-new-material-needs-new-connections',
+  narrativeVoice: 'third-person-action-led-maker-prototype-testing',
+  storyRhythm:
+      'observe-literal-prototype-fails-material-conflict-reencode-paper-bridges-lift-peer-recognition-next-material',
+);
+
 final approvedNarrativeDnaCatalog =
     List<JourneyNarrativeDnaRecord>.unmodifiable(<JourneyNarrativeDnaRecord>[
   for (final record in baseline.approvedNarrativeDnaCatalog)
