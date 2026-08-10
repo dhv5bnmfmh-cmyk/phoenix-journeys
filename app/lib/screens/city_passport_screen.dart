@@ -476,6 +476,9 @@ class _PassportPlaceRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final canGoBack = level != _PassportMapLevel.continent;
+    final selectedCity = selectedCityId == null
+        ? null
+        : requireJourneyCity(selectedCityId!);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: const Color(0xDFFFF8E8),
@@ -493,6 +496,8 @@ class _PassportPlaceRail extends StatelessWidget {
               color: PhoenixTheme.red,
               visualDensity: VisualDensity.compact,
             ),
+          if (level == _PassportMapLevel.city && selectedCity != null)
+            _PassportCityContext(state: state, city: selectedCity),
           Expanded(
             child: continentId != 'asia'
                 ? Center(
@@ -554,11 +559,15 @@ class _PassportPlaceRail extends StatelessWidget {
                                 selectedCityId!,
                               ).destinations[index];
                               final canOpen = state.canOpenJourney(journey.id);
-                              return _PlaceRailButton(
+                              final location = requireJourneyLocation(
+                                journey.id,
+                              );
+                              return _PlaceRailJourneyButton(
                                 key: ValueKey(
                                   'passport-place-option-${journey.id}',
                                 ),
-                                label: state.displayText(journey.place),
+                                state: state,
+                                location: location,
                                 selected: canOpen &&
                                     state.activeJourneyId == journey.id,
                                 onTap: canOpen
@@ -594,6 +603,132 @@ class _PassportPlaceRail extends StatelessWidget {
                       ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PassportCityContext extends StatelessWidget {
+  const _PassportCityContext({required this.state, required this.city});
+
+  final AppState state;
+  final JourneyCityCatalogEntry city;
+
+  @override
+  Widget build(BuildContext context) {
+    final location = requireJourneyLocation(city.primaryDestination.id);
+    final provinceName = location.provinceLevelName!;
+    final cityName = location.cityEquivalentName!;
+    final countLabel = '${city.destinationCount} 段旅程';
+    final administrativeLabel = location.isMunicipality
+        ? provinceName
+        : '$provinceName，$cityName';
+    return Semantics(
+      container: true,
+      label: state.displayText(
+        '$administrativeLabel，$countLabel',
+      ),
+      child: Padding(
+        key: ValueKey('passport-city-context-${city.id}'),
+        padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
+        child: Column(
+          children: [
+            Text(
+              state.displayText(provinceName),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: PhoenixTheme.red,
+                fontSize: 9.5,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            Text(
+              state.displayText(
+                location.isMunicipality ? countLabel : '$cityName · $countLabel',
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.black54,
+                fontSize: 8,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlaceRailJourneyButton extends StatelessWidget {
+  const _PlaceRailJourneyButton({
+    super.key,
+    required this.state,
+    required this.location,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final AppState state;
+  final JourneyLocationBinding location;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    final foreground = selected && enabled
+        ? Colors.white
+        : enabled
+            ? const Color(0xFF38231A)
+            : Colors.black38;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: state.displayText(
+        '${location.compactAdministrativeLabel}，${location.placeName}',
+      ),
+      child: Material(
+        color: selected && enabled ? PhoenixTheme.red : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
+            child: Column(
+              children: [
+                if (location.districtName != null)
+                  Text(
+                    state.displayText(location.districtName!),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: foreground.withValues(alpha: .72),
+                      fontSize: 8,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                Text(
+                  state.displayText(location.placeName),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -896,6 +1031,7 @@ class _CityMapMarker extends StatelessWidget {
   final _CityMarkerPlacement placement;
 
   Future<void> _showCityJourneys(BuildContext context) {
+    final cityLocation = requireJourneyLocation(city.primaryDestination.id);
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -912,14 +1048,22 @@ class _CityMapMarker extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                state.displayText('${city.name} · 选择旅程'),
+                state.displayText(
+                  '${cityLocation.cityEquivalentName} · '
+                  '${city.destinationCount} 段旅程',
+                ),
                 style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w900,
                 ),
               ),
               const SizedBox(height: 5),
               Text(
-                state.displayText('点击地点，打开它的故事与学习旅程。'),
+                state.displayText(
+                  cityLocation.isMunicipality
+                      ? '按行政区与地点寻找旅程。'
+                      : '${cityLocation.provinceLevelName} · '
+                          '按地点寻找旅程。',
+                ),
                 style: const TextStyle(color: Colors.black54, fontSize: 12),
               ),
               const SizedBox(height: 12),
@@ -1034,6 +1178,7 @@ class _DestinationStampTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = state.canOpenJourney(journey.id);
+    final location = requireJourneyLocation(journey.id);
 
     return Semantics(
       button: true,
@@ -1058,20 +1203,37 @@ class _DestinationStampTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    state.displayText(journey.place),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: enabled
-                          ? const Color(0xFF251A15)
-                          : Colors.black45,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                      shadows: const [
-                        Shadow(color: Color(0xCCFFF8E8), blurRadius: 7),
-                      ],
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (location.districtName != null)
+                        Text(
+                          state.displayText(location.districtName!),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      Text(
+                        state.displayText(location.placeName),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: enabled
+                              ? const Color(0xFF251A15)
+                              : Colors.black45,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          shadows: const [
+                            Shadow(color: Color(0xCCFFF8E8), blurRadius: 7),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

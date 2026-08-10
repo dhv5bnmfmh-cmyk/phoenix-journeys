@@ -22,13 +22,14 @@ test('Passport keeps every city journey reachable on the transparent atlas', () 
   assert.match(passport, /passport-destination-\$\{journey\.id\}/);
   assert.match(passport, /china-passport-atlas-v2\.webp/);
   assert.match(passport, /showModalBottomSheet<void>/);
-  assert.match(passport, /选择旅程/);
+  assert.match(passport, /city\.destinationCount.*段旅程/s);
 });
 
 test('Passport tiles render a compact layered journey symbol and name', () => {
   assert.match(passport, /JourneySymbolBadge\(/);
   assert.match(passport, /size: 50/);
-  assert.match(passport, /state\.displayText\(journey\.place\)/);
+  assert.match(passport, /state\.displayText\(location\.placeName\)/);
+  assert.match(passport, /state\.displayText\(location\.districtName!\)/);
   assert.match(passport, /JourneyScreen\(journeyId: journey\.id\)/);
   assert.match(passport, /state\.activateJourney\(journey\.id\)/);
   assert.doesNotMatch(passport, /journey\.description/);
