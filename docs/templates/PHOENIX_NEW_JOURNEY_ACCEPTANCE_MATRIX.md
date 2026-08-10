@@ -1,6 +1,6 @@
 # Phoenix New Journey Acceptance Matrix
 
-Use with [Phoenix New Journey Creation Standard](../PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), [Phoenix Journey System Standard](../PHOENIX_JOURNEY_SYSTEM_STANDARD.md), and [PHOENIX AI BACKGROUND PRODUCTION STANDARD](../PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md).
+Use with [Phoenix New Journey Creation Standard](../PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), [Phoenix Journey System Standard](../PHOENIX_JOURNEY_SYSTEM_STANDARD.md), [Phoenix Narrative and Discovery Standard](../PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), and [PHOENIX AI BACKGROUND PRODUCTION STANDARD](../PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md).
 
 **Stable PR:** `#137`  
 **Stable Commit:** `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
@@ -53,7 +53,7 @@ For background-production rows, `Background Gate State` is a subordinate visual-
 | NJ-010 | Emotional arc | REQUIRED | Emotional movement from opening to ending |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 | NJ-011 | Learning value | REQUIRED | Defined outcomes served by each stage |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 | NJ-012 | Vocabulary | REQUIRED | Contextual words and language support |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
-| NJ-013 | ReadingAnnotation | CONDITIONALLY_REQUIRED | When Story, Discovery, or other explorer-readable text exists: text, pronunciation, segmentation, and translation alignment. Otherwise: `NOT_APPLICABLE` reason and evidence that no applicable reading text exists. |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-013 | ReadingAnnotation | CONDITIONALLY_REQUIRED | When Story, Discovery, or other explorer-readable learning text exists: text, pronunciation, segmentation, and translation alignment. Otherwise: `NOT_APPLICABLE` reason and evidence that no applicable reading text exists. |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 | NJ-014 | Discovery | REQUIRED | Cultural/context learning distinct from Story |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 | NJ-015 | Challenge | REQUIRED | Valid task, answer, and feedback |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 | NJ-016 | Reflection | REQUIRED | Interpretation or emotional prompt |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
@@ -93,6 +93,17 @@ For background-production rows, `Background Gate State` is a subordinate visual-
 | NJ-050 | Level-Adaptation Narrative Invariants | REQUIRED | Phoenix Lv.1–Lv.10 matrix preserving identity, causality, event order, anchor, ending, memory, and special mechanism with Result/Evidence Level |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 | NJ-051 | Automated Literary Approval Limitation | REQUIRED | Exact automated scope, excluded literary judgments, separate human review, declaration `Automated score used as literary approval: NO`, Result/Evidence Level |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 | NJ-052 | Repair / Creation Pilot Batch Gate | REQUIRED | Work type, batch size, prior pilot Commit and Founder decision, next-phase authorization, Result, Evidence Level, issue/action, owner, Founder state |  | BLOCKED | UNVERIFIED |  |  | PENDING |
+| NJ-053 | Source Truth Gate | REQUIRED | Authoritative source inventory plus verified factual premises; material Story facts trace to approved source IDs |  | BLOCKED | UNVERIFIED | `SOURCE EVIDENCE INSUFFICIENT — STORY DEVELOPMENT STOPPED` when evidence is insufficient |  | NOT_REQUIRED |
+| NJ-054 | Fact / Fiction Classification | REQUIRED | Every material premise classified as VERIFIED FACT / FICTIONAL CHARACTER ACTION / FICTIONAL DIALOGUE / FICTIONAL PERSONAL MOTIVATION / INTERPRETIVE STORY DEVICE / UNSUPPORTED FACTUAL CLAIM |  | BLOCKED | UNVERIFIED | `UNVERIFIED FACTUAL CLAIM — BLOCKED` for unsupported factual claims |  | NOT_REQUIRED |
+| NJ-055 | Real Historical Person Protection | CONDITIONALLY_REQUIRED | Where a real historical person appears: exact source support for factual actions/intentions/dialogue; explicit separation from fictional/interpretive material |  | BLOCKED | UNVERIFIED | No invented private thought, intention, consequential action, or dialogue presented as fact |  | NOT_REQUIRED |
+| NJ-056 | Place Causal Mechanism | REQUIRED | Verified place property, approved source IDs, causal mechanism rationale, affected Story dimensions |  | BLOCKED | UNVERIFIED | Place name/decorative motif alone does not pass |  | NOT_REQUIRED |
+| NJ-057 | Generic Place Substitution Test | REQUIRED | Human-auditable answer to whether Goal→Conflict→Choice→Climax→Consequence survives generic-place replacement |  | BLOCKED | UNVERIFIED | `GENERIC-PLACE STORY — NOT GOLD READY` when substantially interchangeable |  | NOT_REQUIRED |
+| NJ-058 | Pre-Prose Story Mechanism | REQUIRED | Protagonist, relationship geometry, Goal, Conflict, Choice, Climax, Consequence, Transformation, Ending, cultural-anchor function, dramatic engine |  | BLOCKED | UNVERIFIED | Full Lv1-Lv10 prose cannot precede this record |  | NOT_REQUIRED |
+| NJ-059 | All-Gold Semantic Comparison | REQUIRED | Candidate fingerprint compared against every approved Gold Journey using canonical registry and unchanged Rule A / Rule B |  | BLOCKED | UNVERIFIED | `TEMPLATE COLLISION - NOT GOLD READY` on any collision |  | NOT_REQUIRED |
+| NJ-060 | Mechanism Family Governance | CONDITIONALLY_REQUIRED | For a new family: nearest existing families, why none is equivalent, causal structural distinction, reusable naming, anti-laundering review |  | BLOCKED | UNVERIFIED | Journey-specific or collision-escape near-synonym family is BLOCKED |  | NOT_REQUIRED |
+| NJ-061 | Lv1 Causal Proof | REQUIRED | Lv1 already contains protagonist, concrete Goal, Conflict, enacted Choice, decisive event/climax, and caused Consequence |  | BLOCKED | UNVERIFIED | `LV1 CAUSAL PROOF FAILED — DO NOT EXPAND` |  | NOT_REQUIRED |
+| NJ-062 | Story Lock Pipeline Order | REQUIRED | FACT FIRST → PLACE CAUSALITY → STORY MECHANISM → ANTI-TEMPLATE → LV1 CAUSAL PROOF all PASS before STORY LOCK and Lv2-Lv10 expansion |  | BLOCKED | UNVERIFIED | Early full-Story drafting or expansion is blocked |  | NOT_REQUIRED |
+| NJ-063 | Machine / Human Authority Boundary | REQUIRED | Machine-verifiable contract and human semantic/literary sufficiency recorded separately; no claim that CI proves historical interpretation or literary truth |  | BLOCKED | UNVERIFIED | Automated contract PASS cannot replace Founder/Agent review |  | NOT_REQUIRED |
 
 ## Background production acceptance extension
 
@@ -164,8 +175,8 @@ A blank conditional decision is `BLOCKED`.
 
 | Phase | Inputs | Required deliverables | Evidence | Blockers | Owner | Result | Evidence Level | Next phase authorized |
 |---|---|---|---|---|---|---|---|---|
-| A: Journey Proposal |  |  |  |  |  | BLOCKED | UNVERIFIED | NO |
-| B: Story and Learning Design |  | Relationship, Goal, ReadingAnnotation applicability, Stamp applicability, and all other classified design elements |  |  |  | BLOCKED | UNVERIFIED | NO |
+| A: Journey Proposal |  | Story source inventory, fact/fiction record, Place Causal Mechanism, Story Mechanism, all-Gold semantic comparison |  | Source/place/semantic blocker |  | BLOCKED | UNVERIFIED | NO |
+| B: Story and Learning Design |  | Lv1 causal proof before Lv2-Lv10; Relationship, Goal, ReadingAnnotation applicability, Stamp applicability, and all other classified design elements |  | Lv1 or Story Lock blocker |  | BLOCKED | UNVERIFIED | NO |
 | C: Visual Concept Pilot | Story Gold, visual baseline, AI Background Production Standard | Visual DNA, Cross-Journey Differentiation, Shot Plan, 1–3 Pilot plan, rights/IP plan, historical/cultural plan, mobile/readable-region plan |  | Missing mandatory background gate |  | BLOCKED | UNVERIFIED | NO |
 | D: Implementation |  |  |  |  |  | BLOCKED | UNVERIFIED | NO |
 | E: Automated Validation |  |  |  |  |  | BLOCKED | UNVERIFIED | NO |
@@ -175,10 +186,12 @@ A blank conditional decision is `BLOCKED`.
 
 Narrative extension for phase records:
 
+- Phase A requires FACT FIRST source truth, explicit fact/fiction classification, real-person protection where applicable, Place Causal Mechanism, Generic Place Substitution Test, Story Mechanism architecture, and canonical all-Gold semantic comparison before full Story prose.
+- Phase B begins with Lv1 Causal Proof; Lv2-Lv10 expansion is blocked until Lv1 and all pre-lock gates pass and Story is `STORY LOCKED`.
 - Phase A additionally requires narrative engine, Story Function, Discovery Function, opening type, climax type, ending type, catalog differentiation matrix, and level-invariant plan.
 - Phase B additionally requires the complete Story / Discovery Design Matrix, causal Relationship evidence, enacted Choice evidence, caused Consequence evidence, functional separation, opening and ending independence, library review, and automated-score limitation acknowledgment.
-- Phase E records that automated validation success does not establish literary PASS or visual background PASS.
-- Phase G reviews Story identity, Discovery distinction, emotional continuity, level adaptation, Journey memorability, and applicable background mobile/visual approval.
+- Phase E records that automated validation success does not establish literary PASS, factual-interpretation sufficiency, place-native Story quality, or visual background PASS.
+- Phase G reviews Story identity, Discovery distinction, emotional continuity, place causality, semantic distinctness beyond mechanical thresholds, level adaptation, Journey memorability, and applicable background mobile/visual approval.
 
 ## Final decision
 
@@ -192,6 +205,18 @@ Conditionally Required NOT_APPLICABLE with Reason + Evidence:
 Conditionally Required Missing or Failed:
 Regression Items:
 Blocked Items:
+Source Truth Gate:
+Unsupported Factual Claims:
+Fact / Fiction Boundary:
+Real Historical Person Protection:
+Place Causal Mechanism:
+Generic Place Substitution Test:
+Story Mechanism Gate:
+All-Gold Semantic Comparison:
+Taxonomy Governance:
+Lv1 Causal Proof:
+Story Lock State:
+Machine / Human Authority Separation:
 Background Required Rows Total:
 Background Gate PASS + VERIFIED:
 Background Gate FAIL:
