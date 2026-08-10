@@ -62,7 +62,11 @@ void main() {
           guangzhouChenClanOnePassLevels[4].storyParagraphs,
           reason: 'Guangzhou catalog metadata must bind canonical Gold Lv5 Story',
         );
-        expect(journey.discoveries, hasLength(2), reason: journey.id);
+        expect(
+          journey.discoveries.length,
+          guangzhouChenClanOnePassDiscoveries.length,
+          reason: journey.id,
+        );
       } else {
         expect(
           journey.discoveries.length,
