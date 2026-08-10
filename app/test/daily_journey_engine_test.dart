@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/chengdu_kuanzhai_one_pass.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
+import 'package:phoenix_journeys/data/guangzhou_chen_clan_one_pass.dart';
 import 'package:phoenix_journeys/data/world_story_runtime.dart';
 
 void main() {
@@ -55,6 +56,13 @@ void main() {
           chengduKuanzhaiOnePassDiscoveries.length,
           reason: journey.id,
         );
+      } else if (journey.id == guangzhouChenClanJourneyId) {
+        expect(
+          journey.content.storyParagraphs,
+          guangzhouChenClanOnePassLevels[4].storyParagraphs,
+          reason: 'Guangzhou catalog metadata must bind canonical Gold Lv5 Story',
+        );
+        expect(journey.discoveries, hasLength(2), reason: journey.id);
       } else {
         expect(
           journey.discoveries.length,
