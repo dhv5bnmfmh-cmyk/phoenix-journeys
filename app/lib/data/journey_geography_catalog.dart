@@ -67,7 +67,7 @@ List<JourneyProvinceCatalogEntry> _buildChinaProvinceCatalog() {
 
     for (final journey in city.destinations) {
       final binding = requireJourneyLocation(journey.id);
-      if (binding.countryNode?.id != country.id ||
+      if (binding.countryNode?.id != country!.id ||
           binding.provinceLevelNode?.id != provinceLevel.id ||
           binding.cityEquivalentNode?.id != cityEquivalent.id) {
         throw StateError(
