@@ -155,6 +155,10 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('passport-country-china')));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('passport-province-sichuan')),
+    );
+    await tester.pumpAndSettle();
     expect(find.text('四川省'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('passport-province-sichuan')));
