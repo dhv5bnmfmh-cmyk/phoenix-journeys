@@ -276,15 +276,18 @@ class FutureGoldSemanticGateResult {
 
 NarrativeSemanticDimension _dimensionFromBaseline(
   baseline.NarrativeSemanticDimension value,
-) => NarrativeSemanticDimension.values.byName(value.name);
+) =>
+    NarrativeSemanticDimension.values.byName(value.name);
 
 NarrativeMechanismFamily _mechanismFromBaseline(
   baseline.NarrativeMechanismFamily value,
-) => NarrativeMechanismFamily.values.byName(value.name);
+) =>
+    NarrativeMechanismFamily.values.byName(value.name);
 
 JourneySemanticFingerprint _convertBaselineFingerprint(
   baseline.JourneySemanticFingerprint source,
-) => JourneySemanticFingerprint(
+) =>
+    JourneySemanticFingerprint(
       journeyId: source.journeyId,
       surfaceIdentity: source.surfaceIdentity,
       mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
@@ -313,104 +316,484 @@ final _forbiddenFingerprint = JourneySemanticFingerprint(
   surfaceIdentity:
       'Shen Yan / seventeen-year-old construction apprentice / A Ning / overlaid dual-route learning map',
   mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
-    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.dualValidRoutesCreateOpeningContradiction,
-    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.apprenticeSeekingCompleteUnderstanding,
-    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.crossRolePeerPerspectiveExchange,
-    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.makePluralRouteRelationsLegible,
-    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.singleAuthoritativeRouteVsCoexistingValidRoutes,
-    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.preserveBothRoutesThroughOverlay,
-    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.sharedNodeRevealsOverlapAndDivergence,
-    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.compositeRepresentationAddsRelationalInformation,
-    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.singleRouteTruthToRoleDependentSpatialSystem,
-    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.sharedNodeThenPurposefulDivergence,
-    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.roleDifferentiatedArchitectureMakesPluralRoutesLegible,
-    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.overlaidRoutesPreserveCoexistingPerspectives,
-    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.compareAlignOverlayThenDiverge,
-    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.singleStudyDayWithoutExternalCountdown,
-    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.peerContributesIndependentRoutePerspective,
-    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.coexistingValidPerspectivesSynthesizeRelationalModel,
+    NarrativeSemanticDimension.openingMechanism:
+        NarrativeMechanismFamily.dualValidRoutesCreateOpeningContradiction,
+    NarrativeSemanticDimension.protagonistRolePattern:
+        NarrativeMechanismFamily.apprenticeSeekingCompleteUnderstanding,
+    NarrativeSemanticDimension.relationshipGeometry:
+        NarrativeMechanismFamily.crossRolePeerPerspectiveExchange,
+    NarrativeSemanticDimension.goalMechanism:
+        NarrativeMechanismFamily.makePluralRouteRelationsLegible,
+    NarrativeSemanticDimension.conflictMechanism:
+        NarrativeMechanismFamily.singleAuthoritativeRouteVsCoexistingValidRoutes,
+    NarrativeSemanticDimension.choiceMechanism:
+        NarrativeMechanismFamily.preserveBothRoutesThroughOverlay,
+    NarrativeSemanticDimension.climaxMechanism:
+        NarrativeMechanismFamily.sharedNodeRevealsOverlapAndDivergence,
+    NarrativeSemanticDimension.consequenceMechanism:
+        NarrativeMechanismFamily.compositeRepresentationAddsRelationalInformation,
+    NarrativeSemanticDimension.transformationMechanism:
+        NarrativeMechanismFamily.singleRouteTruthToRoleDependentSpatialSystem,
+    NarrativeSemanticDimension.endingMechanism:
+        NarrativeMechanismFamily.sharedNodeThenPurposefulDivergence,
+    NarrativeSemanticDimension.culturalAnchorFunction:
+        NarrativeMechanismFamily.roleDifferentiatedArchitectureMakesPluralRoutesLegible,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction:
+        NarrativeMechanismFamily.overlaidRoutesPreserveCoexistingPerspectives,
+    NarrativeSemanticDimension.movementSpatialMechanism:
+        NarrativeMechanismFamily.compareAlignOverlayThenDiverge,
+    NarrativeSemanticDimension.temporalPressureMechanism:
+        NarrativeMechanismFamily.singleStudyDayWithoutExternalCountdown,
+    NarrativeSemanticDimension.supportingCharacterFunction:
+        NarrativeMechanismFamily.peerContributesIndependentRoutePerspective,
+    NarrativeSemanticDimension.dramaticEngineFamily:
+        NarrativeMechanismFamily.coexistingValidPerspectivesSynthesizeRelationalModel,
   }),
   coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
-    const NarrativeMechanismEvidence(journeyId: _forbidden, dimension: NarrativeSemanticDimension.openingMechanism, mechanism: NarrativeMechanismFamily.dualValidRoutesCreateOpeningContradiction, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['沈砚把自己的观察顺序连成一条清楚的线，直觉上认为“正确的空间图”应当收束为一个最权威的路线。', '阿宁在纸上画下这次具体行动的路线，明确只是自己的走法，不是官方历史路线。'], semanticRationale: 'The opening problem is generated by two action-grounded route representations that cannot both fit Shen Yan’s single-authoritative-route assumption; neither route is introduced as a shortcut or failure.'),
-    const NarrativeMechanismEvidence(journeyId: _forbidden, dimension: NarrativeSemanticDimension.conflictMechanism, mechanism: NarrativeMechanismFamily.singleAuthoritativeRouteVsCoexistingValidRoutes, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['两张图都忠实于各自行动，却在“只有一条正确路径”的假设下彼此冲突。', '沈砚没有把问题解决成谁对谁错。'], semanticRationale: 'Both routes remain valid descriptions of different actors’ movement, so the conflict is between a single-route authority model and simultaneous route validity, not bad model versus disproving evidence.'),
-    const NarrativeMechanismEvidence(journeyId: _forbidden, dimension: NarrativeSemanticDimension.choiceMechanism, mechanism: NarrativeMechanismFamily.preserveBothRoutesThroughOverlay, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['沈砚于是选择合成，而不是裁决。', '他用实线与点线在同一张纸上保留两条完整路线，标出共享节点、重合段与分岔，使建筑结构和人的目的同时可读。'], semanticRationale: 'Shen Yan enacts synthesis by preserving both complete paths in distinguishable line styles instead of refusing an opportunity, deleting one route, or correcting one into the other.'),
-    const NarrativeMechanismEvidence(journeyId: _forbidden, dimension: NarrativeSemanticDimension.climaxMechanism, mechanism: NarrativeMechanismFamily.sharedNodeRevealsOverlapAndDivergence, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['路线在乾清门前短暂重合，又因角色和目的不同向不同方向延伸。', '这个重合与分岔同时出现的瞬间成为关键：如果擦掉任何一条，图都会失去真实关系。'], semanticRationale: 'The decisive discovery is produced by spatial alignment itself: the lines share a node and then diverge for different purposes, revealing a relation that cannot exist if either perspective is erased.'),
-    const NarrativeMechanismEvidence(journeyId: _forbidden, dimension: NarrativeSemanticDimension.consequenceMechanism, mechanism: NarrativeMechanismFamily.compositeRepresentationAddsRelationalInformation, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['复合图揭示了两张原图单独都没有表达出的关系：同一宫城并不是一张“人人同路”的平面，建筑的轴线、宫门、庭院与功能分区提供共同空间骨架，不同角色则因行动目的而形成不同的合法叙事视角。'], semanticRationale: 'The enacted overlay produces additional relational information about shared structure and differentiated movement; the consequence is informational plurality rather than visible incompletion.'),
-    const NarrativeMechanismEvidence(journeyId: _forbidden, dimension: NarrativeSemanticDimension.transformationMechanism, mechanism: NarrativeMechanismFamily.singleRouteTruthToRoleDependentSpatialSystem, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['沈砚把自己的观察顺序连成一条清楚的线，直觉上认为“正确的空间图”应当收束为一个最权威的路线。', '复合图揭示了两张原图单独都没有表达出的关系：同一宫城并不是一张“人人同路”的平面，建筑的轴线、宫门、庭院与功能分区提供共同空间骨架，不同角色则因行动目的而形成不同的合法叙事视角。'], semanticRationale: 'His spatial model changes from one definitive route to a role- and purpose-dependent system in which common architecture supports several simultaneously valid movement logics.'),
-    const NarrativeMechanismEvidence(journeyId: _forbidden, dimension: NarrativeSemanticDimension.endingMechanism, mechanism: NarrativeMechanismFamily.sharedNodeThenPurposefulDivergence, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['傍晚，沈砚与阿宁从共同节点分别，继续各自要做的事。', '一张叠着两条路线的图留在纸上，两条线都清楚、都完整，也彼此说明。'], semanticRationale: 'The two participants continue along different purpose-appropriate paths while the final artifact preserves both; no mentor reward or transfer of authority closes the Story.'),
-    const NarrativeMechanismEvidence(journeyId: _forbidden, dimension: NarrativeSemanticDimension.relationshipGeometry, mechanism: NarrativeMechanismFamily.crossRolePeerPerspectiveExchange, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['年幼侍役阿宁看后却说，自己今天从东侧空间接近乾清门前，随后还要转向另一处，因此不会沿沈砚的整条线移动。', '他与阿宁把两张纸按共同宫门、庭院方向和乾清门前的位置逐点对齐，并追问每段路线在做什么。'], semanticRationale: 'A Ning contributes information Shen Yan cannot generate from his own movement, and the two young characters jointly compare their representations; the mentor does not own the decisive synthesis.'),
-    const NarrativeMechanismEvidence(journeyId: _forbidden, dimension: NarrativeSemanticDimension.culturalAnchorFunction, mechanism: NarrativeMechanismFamily.roleDifferentiatedArchitectureMakesPluralRoutesLegible, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['午门是紫禁城正门，位于南北轴线上；外朝的核心殿宇、开阔庭院和层层门序共同形成强烈的轴线秩序。', '乾清门既是内廷正宫门，也是连接内廷与外朝往来的重要通道。', '建筑的轴线、宫门、庭院与功能分区提供共同空间骨架，不同角色则因行动目的而形成不同的合法叙事视角。'], semanticRationale: 'Verified Forbidden City axis, gate, courtyard, and Outer/Inner Court relationships supply the shared architectural framework that makes route overlap and role-dependent divergence meaningful and non-interchangeable with a generic setting.'),
-    const NarrativeMechanismEvidence(journeyId: _forbidden, dimension: NarrativeSemanticDimension.dramaticEngineFamily, mechanism: NarrativeMechanismFamily.coexistingValidPerspectivesSynthesizeRelationalModel, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['两张图都忠实于各自行动，却在“只有一条正确路径”的假设下彼此冲突。', '沈砚没有把问题解决成谁对谁错。', '沈砚于是选择合成，而不是裁决。', '路线在乾清门前短暂重合，又因角色和目的不同向不同方向延伸。', '一张叠着两条路线的图留在纸上，两条线都清楚、都完整，也彼此说明。'], semanticRationale: 'The causal engine requires two valid partial perspectives, comparison without falsification, enacted composite synthesis, and a relation visible only after overlay; it is neither refusal/incompletion nor evidence-driven category replacement.'),
+    const NarrativeMechanismEvidence(
+      journeyId: _forbidden,
+      dimension: NarrativeSemanticDimension.openingMechanism,
+      mechanism: NarrativeMechanismFamily.dualValidRoutesCreateOpeningContradiction,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '沈砚把自己的观察顺序连成一条清楚的线，直觉上认为“正确的空间图”应当收束为一个最权威的路线。',
+        '阿宁在纸上画下这次具体行动的路线，明确只是自己的走法，不是官方历史路线。',
+      ],
+      semanticRationale:
+          'The opening problem is generated by two action-grounded route representations that cannot both fit Shen Yan’s single-authoritative-route assumption; neither route is introduced as a shortcut or failure.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _forbidden,
+      dimension: NarrativeSemanticDimension.conflictMechanism,
+      mechanism: NarrativeMechanismFamily.singleAuthoritativeRouteVsCoexistingValidRoutes,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '两张图都忠实于各自行动，却在“只有一条正确路径”的假设下彼此冲突。',
+        '沈砚没有把问题解决成谁对谁错。',
+      ],
+      semanticRationale:
+          'Both routes remain valid descriptions of different actors’ movement, so the conflict is between a single-route authority model and simultaneous route validity, not bad model versus disproving evidence.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _forbidden,
+      dimension: NarrativeSemanticDimension.choiceMechanism,
+      mechanism: NarrativeMechanismFamily.preserveBothRoutesThroughOverlay,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '沈砚于是选择合成，而不是裁决。',
+        '他用实线与点线在同一张纸上保留两条完整路线，标出共享节点、重合段与分岔，使建筑结构和人的目的同时可读。',
+      ],
+      semanticRationale:
+          'Shen Yan enacts synthesis by preserving both complete paths in distinguishable line styles instead of refusing an opportunity, deleting one route, or correcting one into the other.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _forbidden,
+      dimension: NarrativeSemanticDimension.climaxMechanism,
+      mechanism: NarrativeMechanismFamily.sharedNodeRevealsOverlapAndDivergence,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '路线在乾清门前短暂重合，又因角色和目的不同向不同方向延伸。',
+        '这个重合与分岔同时出现的瞬间成为关键：如果擦掉任何一条，图都会失去真实关系。',
+      ],
+      semanticRationale:
+          'The decisive discovery is produced by spatial alignment itself: the lines share a node and then diverge for different purposes, revealing a relation that cannot exist if either perspective is erased.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _forbidden,
+      dimension: NarrativeSemanticDimension.consequenceMechanism,
+      mechanism: NarrativeMechanismFamily.compositeRepresentationAddsRelationalInformation,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '复合图揭示了两张原图单独都没有表达出的关系：同一宫城并不是一张“人人同路”的平面，建筑的轴线、宫门、庭院与功能分区提供共同空间骨架，不同角色则因行动目的而形成不同的合法叙事视角。',
+      ],
+      semanticRationale:
+          'The enacted overlay produces additional relational information about shared structure and differentiated movement; the consequence is informational plurality rather than visible incompletion.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _forbidden,
+      dimension: NarrativeSemanticDimension.transformationMechanism,
+      mechanism: NarrativeMechanismFamily.singleRouteTruthToRoleDependentSpatialSystem,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '沈砚把自己的观察顺序连成一条清楚的线，直觉上认为“正确的空间图”应当收束为一个最权威的路线。',
+        '复合图揭示了两张原图单独都没有表达出的关系：同一宫城并不是一张“人人同路”的平面，建筑的轴线、宫门、庭院与功能分区提供共同空间骨架，不同角色则因行动目的而形成不同的合法叙事视角。',
+      ],
+      semanticRationale:
+          'His spatial model changes from one definitive route to a role- and purpose-dependent system in which common architecture supports several simultaneously valid movement logics.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _forbidden,
+      dimension: NarrativeSemanticDimension.endingMechanism,
+      mechanism: NarrativeMechanismFamily.sharedNodeThenPurposefulDivergence,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '傍晚，沈砚与阿宁从共同节点分别，继续各自要做的事。',
+        '一张叠着两条路线的图留在纸上，两条线都清楚、都完整，也彼此说明。',
+      ],
+      semanticRationale:
+          'The two participants continue along different purpose-appropriate paths while the final artifact preserves both; no mentor reward or transfer of authority closes the Story.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _forbidden,
+      dimension: NarrativeSemanticDimension.relationshipGeometry,
+      mechanism: NarrativeMechanismFamily.crossRolePeerPerspectiveExchange,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '年幼侍役阿宁看后却说，自己今天从东侧空间接近乾清门前，随后还要转向另一处，因此不会沿沈砚的整条线移动。',
+        '他与阿宁把两张纸按共同宫门、庭院方向和乾清门前的位置逐点对齐，并追问每段路线在做什么。',
+      ],
+      semanticRationale:
+          'A Ning contributes information Shen Yan cannot generate from his own movement, and the two young characters jointly compare their representations; the mentor does not own the decisive synthesis.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _forbidden,
+      dimension: NarrativeSemanticDimension.culturalAnchorFunction,
+      mechanism: NarrativeMechanismFamily.roleDifferentiatedArchitectureMakesPluralRoutesLegible,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '午门是紫禁城正门，位于南北轴线上；外朝的核心殿宇、开阔庭院和层层门序共同形成强烈的轴线秩序。',
+        '乾清门既是内廷正宫门，也是连接内廷与外朝往来的重要通道。',
+        '建筑的轴线、宫门、庭院与功能分区提供共同空间骨架，不同角色则因行动目的而形成不同的合法叙事视角。',
+      ],
+      semanticRationale:
+          'Verified Forbidden City axis, gate, courtyard, and Outer/Inner Court relationships supply the shared architectural framework that makes route overlap and role-dependent divergence meaningful and non-interchangeable with a generic setting.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _forbidden,
+      dimension: NarrativeSemanticDimension.dramaticEngineFamily,
+      mechanism: NarrativeMechanismFamily.coexistingValidPerspectivesSynthesizeRelationalModel,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '两张图都忠实于各自行动，却在“只有一条正确路径”的假设下彼此冲突。',
+        '沈砚没有把问题解决成谁对谁错。',
+        '沈砚于是选择合成，而不是裁决。',
+        '路线在乾清门前短暂重合，又因角色和目的不同向不同方向延伸。',
+        '一张叠着两条路线的图留在纸上，两条线都清楚、都完整，也彼此说明。',
+      ],
+      semanticRationale:
+          'The causal engine requires two valid partial perspectives, comparison without falsification, enacted composite synthesis, and a relation visible only after overlay; it is neither refusal/incompletion nor evidence-driven category replacement.',
+    ),
   ]),
 );
 
 final _chengduFingerprint = JourneySemanticFingerprint(
   journeyId: _chengdu,
-  surfaceIdentity: 'Lin Xia / twenty-four-year-old fictional courtyard teahouse host / Zhou Shu / movable bamboo chair',
+  surfaceIdentity:
+      'Lin Xia / twenty-four-year-old fictional courtyard teahouse host / Zhou Shu / movable bamboo chair',
   mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
-    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.immediateSharedUseContentionAtThreshold,
-    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.serviceHostManagingChangingSharedSpace,
-    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.serviceParticipantNegotiatedHandoff,
-    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.maintainUsabilityAcrossSequentialUses,
-    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.fixedAssignmentVsTimeDependentSharedUse,
-    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.facilitateHandoffInsteadOfPermanentAllocation,
-    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.participantIndependentlyReproducesHandoff,
-    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.repeatedHandoffsSustainSharedUsability,
-    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.controllerToSharedRhythmFacilitator,
-    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.sharedProtocolContinuesBeyondFacilitator,
-    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.historicCourtyardMorphologyConstrainsSharedUse,
-    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.movableObjectEmbodiesTemporaryClaim,
-    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.thresholdRepositioningAcrossSequentialUses,
-    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.singleAfternoonUseCycleWithoutDeadline,
-    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.regularParticipantLearnsAndReproducesProtocol,
-    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.repeatedSpatialHandoffsCreateSharedUseProtocol,
+    NarrativeSemanticDimension.openingMechanism:
+        NarrativeMechanismFamily.immediateSharedUseContentionAtThreshold,
+    NarrativeSemanticDimension.protagonistRolePattern:
+        NarrativeMechanismFamily.serviceHostManagingChangingSharedSpace,
+    NarrativeSemanticDimension.relationshipGeometry:
+        NarrativeMechanismFamily.serviceParticipantNegotiatedHandoff,
+    NarrativeSemanticDimension.goalMechanism:
+        NarrativeMechanismFamily.maintainUsabilityAcrossSequentialUses,
+    NarrativeSemanticDimension.conflictMechanism:
+        NarrativeMechanismFamily.fixedAssignmentVsTimeDependentSharedUse,
+    NarrativeSemanticDimension.choiceMechanism:
+        NarrativeMechanismFamily.facilitateHandoffInsteadOfPermanentAllocation,
+    NarrativeSemanticDimension.climaxMechanism:
+        NarrativeMechanismFamily.participantIndependentlyReproducesHandoff,
+    NarrativeSemanticDimension.consequenceMechanism:
+        NarrativeMechanismFamily.repeatedHandoffsSustainSharedUsability,
+    NarrativeSemanticDimension.transformationMechanism:
+        NarrativeMechanismFamily.controllerToSharedRhythmFacilitator,
+    NarrativeSemanticDimension.endingMechanism:
+        NarrativeMechanismFamily.sharedProtocolContinuesBeyondFacilitator,
+    NarrativeSemanticDimension.culturalAnchorFunction:
+        NarrativeMechanismFamily.historicCourtyardMorphologyConstrainsSharedUse,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction:
+        NarrativeMechanismFamily.movableObjectEmbodiesTemporaryClaim,
+    NarrativeSemanticDimension.movementSpatialMechanism:
+        NarrativeMechanismFamily.thresholdRepositioningAcrossSequentialUses,
+    NarrativeSemanticDimension.temporalPressureMechanism:
+        NarrativeMechanismFamily.singleAfternoonUseCycleWithoutDeadline,
+    NarrativeSemanticDimension.supportingCharacterFunction:
+        NarrativeMechanismFamily.regularParticipantLearnsAndReproducesProtocol,
+    NarrativeSemanticDimension.dramaticEngineFamily:
+        NarrativeMechanismFamily.repeatedSpatialHandoffsCreateSharedUseProtocol,
   }),
   coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
-    const NarrativeMechanismEvidence(journeyId: _chengdu, dimension: NarrativeSemanticDimension.openingMechanism, mechanism: NarrativeMechanismFamily.immediateSharedUseContentionAtThreshold, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['她把一把普通竹椅放到门边，常来的周叔习惯坐在靠入口的茶桌旁，既能喝茶，也能看见巷子。', '周叔刚落座，服务员托着茶盘进门，椅背便压缩了转身空间。'], semanticRationale: 'The Story opens on one threshold immediately needed by two legitimate uses, making physical contention visible before exposition.'),
-    const NarrativeMechanismEvidence(journeyId: _chengdu, dimension: NarrativeSemanticDimension.conflictMechanism, mechanism: NarrativeMechanismFamily.fixedAssignmentVsTimeDependentSharedUse, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['第二个方案也失败了。林夏开始烦躁，因为每一种永久安排都只适合刚才那一刻。', '真正冲突的是院落入口的有限空间与不断变化的使用时序：同一小块地方不能永久交给一种用途，却可以在不同时间服务不同的人。'], semanticRationale: 'The conflict is spatial and temporal: permanent allocation cannot serve legitimate uses that recur at different moments.'),
-    const NarrativeMechanismEvidence(journeyId: _chengdu, dimension: NarrativeSemanticDimension.choiceMechanism, mechanism: NarrativeMechanismFamily.facilitateHandoffInsteadOfPermanentAllocation, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['林夏放弃给竹椅指定永久归属，改成亲手建立交接节奏。', '她邀请周叔一起留意下一次需要，谁先看见，谁先移动，不必等她发令。'], semanticRationale: 'Lin Xia enacts the choice by replacing permanent allocation with a temporary yield-and-return handoff shared with another participant.'),
-    const NarrativeMechanismEvidence(journeyId: _chengdu, dimension: NarrativeSemanticDimension.climaxMechanism, mechanism: NarrativeMechanismFamily.participantIndependentlyReproducesHandoff, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['周叔先看见来人，没有喊她，也没有等提示，自己起身把竹椅挪到院墙边；客人跨过门槛进入院落后，他又把椅子推回茶桌旁，继续喝茶。'], semanticRationale: 'The climax is behavioral replication by Zhou Shu without instruction, proving the protocol has become shared social choreography.'),
-    const NarrativeMechanismEvidence(journeyId: _chengdu, dimension: NarrativeSemanticDimension.consequenceMechanism, mechanism: NarrativeMechanismFamily.repeatedHandoffsSustainSharedUsability, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['茶客继续停留，服务人员继续穿行，院落在一轮轮临时交接中保持可用。'], semanticRationale: 'The consequence is continued usability across sequential tea, service, and passage rather than a revised record or sacrificed result.'),
-    const NarrativeMechanismEvidence(journeyId: _chengdu, dimension: NarrativeSemanticDimension.transformationMechanism, mechanism: NarrativeMechanismFamily.controllerToSharedRhythmFacilitator, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['她一向相信，把桌椅一次摆到“正确位置”才算把空间管好，于是趁入口暂时空下，重新调整竹椅，想给它一个整日下午都不用改变的固定位置。', '她没有再伸手，也没有把椅子校正到某个标准点。'], semanticRationale: 'Lin Xia changes from personally controlling permanent placement to allowing participants to carry a shared use rhythm themselves.'),
-    const NarrativeMechanismEvidence(journeyId: _chengdu, dimension: NarrativeSemanticDimension.endingMechanism, mechanism: NarrativeMechanismFamily.sharedProtocolContinuesBeyondFacilitator, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['最后，一位离桌的客人顺手又为经过的人移开同一把竹椅。', '林夏看着那只手完成动作，没有出声。', '一把没有固定位置的竹椅，已经把共享空间的节奏交给了下一位使用者。'], semanticRationale: 'The ending proves continuation beyond Lin Xia because a further participant performs the handoff while she deliberately does not intervene.'),
-    const NarrativeMechanismEvidence(journeyId: _chengdu, dimension: NarrativeSemanticDimension.relationshipGeometry, mechanism: NarrativeMechanismFamily.serviceParticipantNegotiatedHandoff, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['她邀请周叔一起留意下一次需要，谁先看见，谁先移动，不必等她发令。', '周叔先看见来人，没有喊她，也没有等提示，自己起身把竹椅挪到院墙边；客人跨过门槛进入院落后，他又把椅子推回茶桌旁，继续喝茶。'], semanticRationale: 'Host and regular negotiate and then jointly perform the practical handoff; Zhou Shu is causal rather than a mentor delivering interpretation.'),
-    const NarrativeMechanismEvidence(journeyId: _chengdu, dimension: NarrativeSemanticDimension.culturalAnchorFunction, mechanism: NarrativeMechanismFamily.historicCourtyardMorphologyConstrainsSharedUse, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['宽巷子、窄巷子与井巷子构成历史街区的核心街巷，沿巷院落把街面的流动收进更小的入口、门槛和内部停留空间。', '真正冲突的是院落入口的有限空间与不断变化的使用时序：同一小块地方不能永久交给一种用途，却可以在不同时间服务不同的人。'], semanticRationale: 'Kuanzhai street-lane-courtyard morphology is causal because its threshold compresses tea stopping and circulation into the shared zone that requires handoff.'),
-    const NarrativeMechanismEvidence(journeyId: _chengdu, dimension: NarrativeSemanticDimension.dramaticEngineFamily, mechanism: NarrativeMechanismFamily.repeatedSpatialHandoffsCreateSharedUseProtocol, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['林夏放弃给竹椅指定永久归属，改成亲手建立交接节奏。', '起初周叔仍看她一眼才动，后来服务员端茶、客人离院、另一桌有人经过，竹椅反复几次让位又归还，动作越来越自然。', '周叔先看见来人，没有喊她，也没有等提示，自己起身把竹椅挪到院墙边；客人跨过门槛进入院落后，他又把椅子推回茶桌旁，继续喝茶。', '最后，一位离桌的客人顺手又为经过的人移开同一把竹椅。'], semanticRationale: 'The engine requires repeated physical yield-and-return handoffs until participants reproduce the behavior independently; no evidence classification, representational synthesis, refusal, or artifact correction drives the change.'),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.openingMechanism,
+      mechanism: NarrativeMechanismFamily.immediateSharedUseContentionAtThreshold,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她把一把普通竹椅放到门边，常来的周叔习惯坐在靠入口的茶桌旁，既能喝茶，也能看见巷子。',
+        '周叔刚落座，服务员托着茶盘进门，椅背便压缩了转身空间。',
+      ],
+      semanticRationale:
+          'The Story opens on one threshold immediately needed by two legitimate uses, making physical contention visible before exposition.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.conflictMechanism,
+      mechanism: NarrativeMechanismFamily.fixedAssignmentVsTimeDependentSharedUse,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '第二个方案也失败了。林夏开始烦躁，因为每一种永久安排都只适合刚才那一刻。',
+        '真正冲突的是院落入口的有限空间与不断变化的使用时序：同一小块地方不能永久交给一种用途，却可以在不同时间服务不同的人。',
+      ],
+      semanticRationale:
+          'The conflict is spatial and temporal: permanent allocation cannot serve legitimate uses that recur at different moments.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.choiceMechanism,
+      mechanism: NarrativeMechanismFamily.facilitateHandoffInsteadOfPermanentAllocation,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '林夏放弃给竹椅指定永久归属，改成亲手建立交接节奏。',
+        '她邀请周叔一起留意下一次需要，谁先看见，谁先移动，不必等她发令。',
+      ],
+      semanticRationale:
+          'Lin Xia enacts the choice by replacing permanent allocation with a temporary yield-and-return handoff shared with another participant.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.climaxMechanism,
+      mechanism: NarrativeMechanismFamily.participantIndependentlyReproducesHandoff,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '周叔先看见来人，没有喊她，也没有等提示，自己起身把竹椅挪到院墙边；客人跨过门槛进入院落后，他又把椅子推回茶桌旁，继续喝茶。',
+      ],
+      semanticRationale:
+          'The climax is behavioral replication by Zhou Shu without instruction, proving the protocol has become shared social choreography.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.consequenceMechanism,
+      mechanism: NarrativeMechanismFamily.repeatedHandoffsSustainSharedUsability,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '茶客继续停留，服务人员继续穿行，院落在一轮轮临时交接中保持可用。',
+      ],
+      semanticRationale:
+          'The consequence is continued usability across sequential tea, service, and passage rather than a revised record or sacrificed result.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.transformationMechanism,
+      mechanism: NarrativeMechanismFamily.controllerToSharedRhythmFacilitator,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她一向相信，把桌椅一次摆到“正确位置”才算把空间管好，于是趁入口暂时空下，重新调整竹椅，想给它一个整日下午都不用改变的固定位置。',
+        '她没有再伸手，也没有把椅子校正到某个标准点。',
+      ],
+      semanticRationale:
+          'Lin Xia changes from personally controlling permanent placement to allowing participants to carry a shared use rhythm themselves.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.endingMechanism,
+      mechanism: NarrativeMechanismFamily.sharedProtocolContinuesBeyondFacilitator,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '最后，一位离桌的客人顺手又为经过的人移开同一把竹椅。',
+        '林夏看着那只手完成动作，没有出声。',
+        '一把没有固定位置的竹椅，已经把共享空间的节奏交给了下一位使用者。',
+      ],
+      semanticRationale:
+          'The ending proves continuation beyond Lin Xia because a further participant performs the handoff while she deliberately does not intervene.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.relationshipGeometry,
+      mechanism: NarrativeMechanismFamily.serviceParticipantNegotiatedHandoff,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她邀请周叔一起留意下一次需要，谁先看见，谁先移动，不必等她发令。',
+        '周叔先看见来人，没有喊她，也没有等提示，自己起身把竹椅挪到院墙边；客人跨过门槛进入院落后，他又把椅子推回茶桌旁，继续喝茶。',
+      ],
+      semanticRationale:
+          'Host and regular negotiate and then jointly perform the practical handoff; Zhou Shu is causal rather than a mentor delivering interpretation.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.culturalAnchorFunction,
+      mechanism: NarrativeMechanismFamily.historicCourtyardMorphologyConstrainsSharedUse,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '宽巷子、窄巷子与井巷子构成历史街区的核心街巷，沿巷院落把街面的流动收进更小的入口、门槛和内部停留空间。',
+        '真正冲突的是院落入口的有限空间与不断变化的使用时序：同一小块地方不能永久交给一种用途，却可以在不同时间服务不同的人。',
+      ],
+      semanticRationale:
+          'Kuanzhai street-lane-courtyard morphology is causal because its threshold compresses tea stopping and circulation into the shared zone that requires handoff.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _chengdu,
+      dimension: NarrativeSemanticDimension.dramaticEngineFamily,
+      mechanism: NarrativeMechanismFamily.repeatedSpatialHandoffsCreateSharedUseProtocol,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '林夏放弃给竹椅指定永久归属，改成亲手建立交接节奏。',
+        '起初周叔仍看她一眼才动，后来服务员端茶、客人离院、另一桌有人经过，竹椅反复几次让位又归还，动作越来越自然。',
+        '周叔先看见来人，没有喊她，也没有等提示，自己起身把竹椅挪到院墙边；客人跨过门槛进入院落后，他又把椅子推回茶桌旁，继续喝茶。',
+        '最后，一位离桌的客人顺手又为经过的人移开同一把竹椅。',
+      ],
+      semanticRationale:
+          'The engine requires repeated physical yield-and-return handoffs until participants reproduce the behavior independently; no evidence classification, representational synthesis, refusal, or artifact correction drives the change.',
+    ),
   ]),
 );
 
 final guangzhouChenClanGoldSemanticFingerprint = JourneySemanticFingerprint(
   journeyId: _guangzhou,
-  surfaceIdentity: 'Liang Yao / twenty-two-year-old fictional printmaking student / He Zhen ceramics peer / connected single-sheet paper prototype',
+  surfaceIdentity:
+      'Liang Yao / twenty-two-year-old fictional printmaking student / He Zhen ceramics peer / connected single-sheet paper prototype',
   mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
-    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.prototypeFailureExposesMediumConstraint,
-    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.youngMakerTranslatingHistoricCraft,
-    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.peerMakersTestFidelityThroughPrototype,
-    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.preserveSourceRelationInNewMedium,
-    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.literalCopyVsMaterialSpecificStructure,
-    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.reencodeConnectionsForNewMedium,
-    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.translatedPrototypeSurvivesAndRemainsLegible,
-    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.changedFormFunctionsInNewMedium,
-    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.surfaceCopyistToMaterialTranslator,
-    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.translationMethodCarriesIntoNextMaterial,
-    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.multiCraftArchitectureMakesMaterialDifferenceCausal,
-    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.prototypeEmbodiesMediumSpecificTranslation,
-    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.observePrototypeReviseMaterialTranslation,
-    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.singleStudyDayWithoutExternalCountdown,
-    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.peerTestsLegibilityWithoutMentorAuthority,
-    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.materialConstraintForcesCrossMediumReencoding,
+    NarrativeSemanticDimension.openingMechanism:
+        NarrativeMechanismFamily.prototypeFailureExposesMediumConstraint,
+    NarrativeSemanticDimension.protagonistRolePattern:
+        NarrativeMechanismFamily.youngMakerTranslatingHistoricCraft,
+    NarrativeSemanticDimension.relationshipGeometry:
+        NarrativeMechanismFamily.peerMakersTestFidelityThroughPrototype,
+    NarrativeSemanticDimension.goalMechanism:
+        NarrativeMechanismFamily.preserveSourceRelationInNewMedium,
+    NarrativeSemanticDimension.conflictMechanism:
+        NarrativeMechanismFamily.literalCopyVsMaterialSpecificStructure,
+    NarrativeSemanticDimension.choiceMechanism:
+        NarrativeMechanismFamily.reencodeConnectionsForNewMedium,
+    NarrativeSemanticDimension.climaxMechanism:
+        NarrativeMechanismFamily.translatedPrototypeSurvivesAndRemainsLegible,
+    NarrativeSemanticDimension.consequenceMechanism:
+        NarrativeMechanismFamily.changedFormFunctionsInNewMedium,
+    NarrativeSemanticDimension.transformationMechanism:
+        NarrativeMechanismFamily.surfaceCopyistToMaterialTranslator,
+    NarrativeSemanticDimension.endingMechanism:
+        NarrativeMechanismFamily.translationMethodCarriesIntoNextMaterial,
+    NarrativeSemanticDimension.culturalAnchorFunction:
+        NarrativeMechanismFamily.multiCraftArchitectureMakesMaterialDifferenceCausal,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction:
+        NarrativeMechanismFamily.prototypeEmbodiesMediumSpecificTranslation,
+    NarrativeSemanticDimension.movementSpatialMechanism:
+        NarrativeMechanismFamily.observePrototypeReviseMaterialTranslation,
+    NarrativeSemanticDimension.temporalPressureMechanism:
+        NarrativeMechanismFamily.singleStudyDayWithoutExternalCountdown,
+    NarrativeSemanticDimension.supportingCharacterFunction:
+        NarrativeMechanismFamily.peerTestsLegibilityWithoutMentorAuthority,
+    NarrativeSemanticDimension.dramaticEngineFamily:
+        NarrativeMechanismFamily.materialConstraintForcesCrossMediumReencoding,
   }),
   coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
-    const NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: NarrativeSemanticDimension.openingMechanism, mechanism: NarrativeMechanismFamily.prototypeFailureExposesMediumConstraint, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['她的第一件原型却在桌面上散开：她把每一道看见的轮廓都当成必须照搬的边界，剪到两组形体之间时，纸上原本承担连接的部分也被一起去掉，几个部分随即断开。'], semanticRationale: 'The causal problem enters as a physical prototype failure produced by the new medium, not as exposition, missing evidence, a route conflict, or an operational shortcut.'),
-    const NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: NarrativeSemanticDimension.conflictMechanism, mechanism: NarrativeMechanismFamily.literalCopyVsMaterialSpecificStructure, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['问题不是她少看了证据，也不是要判断哪一种历史解释更真实；是纸这种材料不能替孤立形体保持原先的连接。', '字面复制越彻底，单张纸反而越无法成为一件东西。'], semanticRationale: 'Literal surface fidelity directly destroys the structural connectedness required by paper, so the conflict belongs to medium-specific making rather than authenticity classification or responsible refusal.'),
-    const NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: NarrativeSemanticDimension.choiceMechanism, mechanism: NarrativeMechanismFamily.reencodeConnectionsForNewMedium, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['她停下逐线描摹，在第二张自己的纸上重新编码连接：保留主要形体的相对位置，却在原本会断开的地方留下窄窄的纸桥。'], semanticRationale: 'Liang Yao enacts the choice on her own second sheet by deliberately changing the connection encoding instead of sacrificing the goal, rejecting a shortcut, or revising a classification.'),
-    const NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: NarrativeSemanticDimension.climaxMechanism, mechanism: NarrativeMechanismFamily.translatedPrototypeSurvivesAndRemainsLegible, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['她剪完第二件原型，从一角把它提起；整张纸没有散开。', '贺真没有看她的草图，仍指出两组主要形体之间原先最重要的相接关系。'], semanticRationale: 'The climax is a two-part physical test: the translated object survives handling as one piece and a peer independently confirms the important visual relation remains legible.'),
-    const NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: NarrativeSemanticDimension.consequenceMechanism, mechanism: NarrativeMechanismFamily.changedFormFunctionsInNewMedium, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['新的纸片不是“少复制一点”的妥协，而是因为编码改变，所以同时获得连接性和可识别性。'], semanticRationale: 'The revised form succeeds according to the new medium’s logic; its changed geometry creates both structural function and legibility rather than leaving a responsible defect.'),
-    const NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: NarrativeSemanticDimension.transformationMechanism, mechanism: NarrativeMechanismFamily.surfaceCopyistToMaterialTranslator, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['她在笔记本上把“照着表面复制”划掉，写下“先问材料怎样连接”。'], semanticRationale: 'Her working rule changes from copying source contours to interrogating how a target material must carry relations, marking a maker-level transformation rather than a theory-only conclusion.'),
-    const NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: NarrativeSemanticDimension.endingMechanism, mechanism: NarrativeMechanismFamily.translationMethodCarriesIntoNextMaterial, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['回到工作室，她拿起一块新的版材，先标出这种材料必须保留的连接，再开始下一次材料研究。'], semanticRationale: 'The ending is enacted continuation of the new translation method on a fresh material problem, not a mentor judgment, philosophical summary, record correction, or farewell continuation engine.'),
-    const NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: NarrativeSemanticDimension.relationshipGeometry, mechanism: NarrativeMechanismFamily.peerMakersTestFidelityThroughPrototype, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['二十二岁的版画学生梁遥和陶艺同学贺真在广州陈家祠观察建筑装饰。', '贺真没有看她的草图，仍指出两组主要形体之间原先最重要的相接关系。'], semanticRationale: 'He Zhen is a maker peer whose independent recognition tests the translated prototype; he neither mentors Liang Yao nor transfers authority to her.'),
-    const NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: NarrativeSemanticDimension.culturalAnchorFunction, mechanism: NarrativeMechanismFamily.multiCraftArchitectureMakesMaterialDifferenceCausal, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['陈家祠集中展示多种岭南装饰工艺，正因为材料并不相同，梁遥把“材料怎样让形体相接”当成观察重点。'], semanticRationale: 'The verified multi-craft character of the Chen Clan Academy makes material difference causal to Liang Yao’s making question, while factual craft enumeration remains in Discovery.'),
-    const NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: NarrativeSemanticDimension.dramaticEngineFamily, mechanism: NarrativeMechanismFamily.materialConstraintForcesCrossMediumReencoding, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['她的第一件原型却在桌面上散开：她把每一道看见的轮廓都当成必须照搬的边界，剪到两组形体之间时，纸上原本承担连接的部分也被一起去掉，几个部分随即断开。', '她停下逐线描摹，在第二张自己的纸上重新编码连接：保留主要形体的相对位置，却在原本会断开的地方留下窄窄的纸桥。', '她剪完第二件原型，从一角把它提起；整张纸没有散开。', '贺真没有看她的草图，仍指出两组主要形体之间原先最重要的相接关系。'], semanticRationale: 'The engine requires a material-caused physical failure, deliberate cross-medium re-encoding, and a successful structural-plus-legibility test. It is not tradeoff, synthesis, crossing, closure, reclassification, handoff, or refusal.'),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.openingMechanism,
+      mechanism: NarrativeMechanismFamily.prototypeFailureExposesMediumConstraint,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她的第一件原型却在桌面上散开：她把每一道看见的轮廓都当成必须照搬的边界，剪到两组形体之间时，纸上原本承担连接的部分也被一起去掉，几个部分随即断开。',
+      ],
+      semanticRationale:
+          'The causal problem enters as a physical prototype failure produced by the new medium, not as exposition, missing evidence, a route conflict, or an operational shortcut.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.conflictMechanism,
+      mechanism: NarrativeMechanismFamily.literalCopyVsMaterialSpecificStructure,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '问题不是她少看了证据，也不是要判断哪一种历史解释更真实；是纸这种材料不能替孤立形体保持原先的连接。',
+        '字面复制越彻底，单张纸反而越无法成为一件东西。',
+      ],
+      semanticRationale:
+          'Literal surface fidelity directly destroys the structural connectedness required by paper, so the conflict belongs to medium-specific making rather than authenticity classification or responsible refusal.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.choiceMechanism,
+      mechanism: NarrativeMechanismFamily.reencodeConnectionsForNewMedium,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她停下逐线描摹，在第二张自己的纸上重新编码连接：保留主要形体的相对位置，却在原本会断开的地方留下窄窄的纸桥。',
+      ],
+      semanticRationale:
+          'Liang Yao enacts the choice on her own second sheet by deliberately changing the connection encoding instead of sacrificing the goal, rejecting a shortcut, or revising a classification.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.climaxMechanism,
+      mechanism: NarrativeMechanismFamily.translatedPrototypeSurvivesAndRemainsLegible,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她剪完第二件原型，从一角把它提起；整张纸没有散开。',
+        '贺真没有看她的草图，仍指出两组主要形体之间原先最重要的相接关系。',
+      ],
+      semanticRationale:
+          'The climax is a two-part physical test: the translated object survives handling as one piece and a peer independently confirms the important visual relation remains legible.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.consequenceMechanism,
+      mechanism: NarrativeMechanismFamily.changedFormFunctionsInNewMedium,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '新的纸片不是“少复制一点”的妥协，而是因为编码改变，所以同时获得连接性和可识别性。',
+      ],
+      semanticRationale:
+          'The revised form succeeds according to the new medium’s logic; its changed geometry creates both structural function and legibility rather than leaving a responsible defect.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.transformationMechanism,
+      mechanism: NarrativeMechanismFamily.surfaceCopyistToMaterialTranslator,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她在笔记本上把“照着表面复制”划掉，写下“先问材料怎样连接”。',
+      ],
+      semanticRationale:
+          'Her working rule changes from copying source contours to interrogating how a target material must carry relations, marking a maker-level transformation rather than a theory-only conclusion.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.endingMechanism,
+      mechanism: NarrativeMechanismFamily.translationMethodCarriesIntoNextMaterial,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '回到工作室，她拿起一块新的版材，先标出这种材料必须保留的连接，再开始下一次材料研究。',
+      ],
+      semanticRationale:
+          'The ending is enacted continuation of the new translation method on a fresh material problem, not a mentor judgment, philosophical summary, record correction, or farewell continuation engine.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.relationshipGeometry,
+      mechanism: NarrativeMechanismFamily.peerMakersTestFidelityThroughPrototype,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '二十二岁的版画学生梁遥和陶艺同学贺真在广州陈家祠观察建筑装饰。',
+        '贺真没有看她的草图，仍指出两组主要形体之间原先最重要的相接关系。',
+      ],
+      semanticRationale:
+          'He Zhen is a maker peer whose independent recognition tests the translated prototype; he neither mentors Liang Yao nor transfers authority to her.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.culturalAnchorFunction,
+      mechanism: NarrativeMechanismFamily.multiCraftArchitectureMakesMaterialDifferenceCausal,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '陈家祠集中展示多种岭南装饰工艺，正因为材料并不相同，梁遥把“材料怎样让形体相接”当成观察重点。',
+      ],
+      semanticRationale:
+          'The verified multi-craft character of the Chen Clan Academy makes material difference causal to Liang Yao’s making question, while factual craft enumeration remains in Discovery.',
+    ),
+    const NarrativeMechanismEvidence(
+      journeyId: _guangzhou,
+      dimension: NarrativeSemanticDimension.dramaticEngineFamily,
+      mechanism: NarrativeMechanismFamily.materialConstraintForcesCrossMediumReencoding,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[
+        '她的第一件原型却在桌面上散开：她把每一道看见的轮廓都当成必须照搬的边界，剪到两组形体之间时，纸上原本承担连接的部分也被一起去掉，几个部分随即断开。',
+        '她停下逐线描摹，在第二张自己的纸上重新编码连接：保留主要形体的相对位置，却在原本会断开的地方留下窄窄的纸桥。',
+        '她剪完第二件原型，从一角把它提起；整张纸没有散开。',
+        '贺真没有看她的草图，仍指出两组主要形体之间原先最重要的相接关系。',
+      ],
+      semanticRationale:
+          'The engine requires a material-caused physical failure, deliberate cross-medium re-encoding, and a successful structural-plus-legibility test. It is not tradeoff, synthesis, crossing, closure, reclassification, handoff, or refusal.',
+    ),
   ]),
 );
 
@@ -427,17 +810,24 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
 
 String activeCanonicalGoldStoryText(String journeyId) {
   if (journeyId == _guangzhou) {
-    return guangzhouChenClanOnePassLevels.expand((level) => level.storyParagraphs).join('\n');
+    return guangzhouChenClanOnePassLevels
+        .expand((level) => level.storyParagraphs)
+        .join('\n');
   }
   return baseline.activeCanonicalGoldStoryText(journeyId);
 }
 
-List<String> semanticFingerprintCompletenessErrors(JourneySemanticFingerprint fingerprint) {
+List<String> semanticFingerprintCompletenessErrors(
+  JourneySemanticFingerprint fingerprint,
+) {
   final errors = <String>[];
   for (final dimension in NarrativeSemanticDimension.values) {
-    if (!fingerprint.mechanisms.containsKey(dimension)) errors.add('${fingerprint.journeyId}: missing ${dimension.name}');
+    if (!fingerprint.mechanisms.containsKey(dimension)) {
+      errors.add('${fingerprint.journeyId}: missing ${dimension.name}');
+    }
   }
-  final evidenceByDimension = <NarrativeSemanticDimension, List<NarrativeMechanismEvidence>>{};
+  final evidenceByDimension =
+      <NarrativeSemanticDimension, List<NarrativeMechanismEvidence>>{};
   for (final evidence in fingerprint.coreEvidence) {
     evidenceByDimension.putIfAbsent(evidence.dimension, () => []).add(evidence);
   }
@@ -451,18 +841,26 @@ List<String> semanticFingerprintCompletenessErrors(JourneySemanticFingerprint fi
       errors.add('${fingerprint.journeyId}: duplicate evidence ${dimension.name}');
       continue;
     }
-    if (records.single.mechanism != fingerprint.mechanism(dimension)) errors.add('${fingerprint.journeyId}: evidence mismatch ${dimension.name}');
+    if (records.single.mechanism != fingerprint.mechanism(dimension)) {
+      errors.add('${fingerprint.journeyId}: evidence mismatch ${dimension.name}');
+    }
   }
   return errors;
 }
 
-List<String> semanticEvidenceProvenanceErrors(JourneySemanticFingerprint fingerprint) {
+List<String> semanticEvidenceProvenanceErrors(
+  JourneySemanticFingerprint fingerprint,
+) {
   final story = activeCanonicalGoldStoryText(fingerprint.journeyId);
   final errors = <String>[];
   for (final evidence in fingerprint.coreEvidence) {
     final prefix = '${fingerprint.journeyId}:${evidence.dimension.name}';
-    if (evidence.journeyId != fingerprint.journeyId) errors.add('$prefix:journey');
-    if (evidence.activeSourceId != activeGoldStorySourceId) errors.add('$prefix:activeSourceId');
+    if (evidence.journeyId != fingerprint.journeyId) {
+      errors.add('$prefix:journey');
+    }
+    if (evidence.activeSourceId != activeGoldStorySourceId) {
+      errors.add('$prefix:activeSourceId');
+    }
     if (evidence.sourceTexts.isEmpty) {
       errors.add('$prefix:missing-source-text');
       continue;
@@ -479,21 +877,32 @@ List<String> semanticEvidenceProvenanceErrors(JourneySemanticFingerprint fingerp
   return errors;
 }
 
-List<String> semanticEvidenceContractErrors(JourneySemanticFingerprint fingerprint) {
+List<String> semanticEvidenceContractErrors(
+  JourneySemanticFingerprint fingerprint,
+) {
   final errors = <String>[
     ...semanticFingerprintCompletenessErrors(fingerprint),
     ...semanticEvidenceProvenanceErrors(fingerprint),
   ];
   for (final evidence in fingerprint.coreEvidence) {
     final prefix = '${fingerprint.journeyId}:${evidence.dimension.name}';
-    if (!narrativeSemanticCoreDimensions.contains(evidence.dimension)) errors.add('$prefix:not-core');
-    if (fingerprint.mechanisms[evidence.dimension] != evidence.mechanism) errors.add('$prefix:mechanism-mismatch');
-    if (evidence.semanticRationale.trim().isEmpty) errors.add('$prefix:missing-semantic-rationale');
+    if (!narrativeSemanticCoreDimensions.contains(evidence.dimension)) {
+      errors.add('$prefix:not-core');
+    }
+    if (fingerprint.mechanisms[evidence.dimension] != evidence.mechanism) {
+      errors.add('$prefix:mechanism-mismatch');
+    }
+    if (evidence.semanticRationale.trim().isEmpty) {
+      errors.add('$prefix:missing-semantic-rationale');
+    }
   }
   return errors;
 }
 
-List<String> semanticEvidenceFidelityErrors(JourneySemanticFingerprint fingerprint) => semanticEvidenceProvenanceErrors(fingerprint);
+List<String> semanticEvidenceFidelityErrors(
+  JourneySemanticFingerprint fingerprint,
+) =>
+    semanticEvidenceProvenanceErrors(fingerprint);
 
 NarrativeSemanticComparison compareSemanticFingerprints(
   JourneySemanticFingerprint left,
@@ -511,15 +920,29 @@ NarrativeSemanticComparison compareSemanticFingerprints(
     }
   }
 
-  final sameEngine = left.mechanism(NarrativeSemanticDimension.dramaticEngineFamily) == right.mechanism(NarrativeSemanticDimension.dramaticEngineFamily);
-  final additionalCoreMatches = matchingCore.where((dimension) => dimension != NarrativeSemanticDimension.dramaticEngineFamily).length;
-  final ruleA = sameEngine && additionalCoreMatches >= semanticCollisionSameEngineAdditionalCoreThreshold;
-  final ruleB = matchingCore.length >= semanticCollisionIndependentCoreThreshold;
+  final sameEngine =
+      left.mechanism(NarrativeSemanticDimension.dramaticEngineFamily) ==
+          right.mechanism(NarrativeSemanticDimension.dramaticEngineFamily);
+  final additionalCoreMatches = matchingCore
+      .where(
+        (dimension) =>
+            dimension != NarrativeSemanticDimension.dramaticEngineFamily,
+      )
+      .length;
+  final ruleA = sameEngine &&
+      additionalCoreMatches >=
+          semanticCollisionSameEngineAdditionalCoreThreshold;
+  final ruleB =
+      matchingCore.length >= semanticCollisionIndependentCoreThreshold;
   final collision = ruleA || ruleB;
 
   final classification = collision
-      ? (approvedCatalogAudit ? SemanticCollisionClassification.existingSemanticCollisionDebt : SemanticCollisionClassification.semanticCollision)
-      : (matchingCore.isNotEmpty || matchingSecondary.isNotEmpty ? SemanticCollisionClassification.relatedButDistinct : SemanticCollisionClassification.distinct);
+      ? (approvedCatalogAudit
+          ? SemanticCollisionClassification.existingSemanticCollisionDebt
+          : SemanticCollisionClassification.semanticCollision)
+      : (matchingCore.isNotEmpty || matchingSecondary.isNotEmpty
+          ? SemanticCollisionClassification.relatedButDistinct
+          : SemanticCollisionClassification.distinct);
 
   return NarrativeSemanticComparison(
     journeyA: left.journeyId,
@@ -533,10 +956,13 @@ NarrativeSemanticComparison compareSemanticFingerprints(
   );
 }
 
-List<NarrativeSemanticComparison> semanticDifferenceMatrixAgainstApprovedGold(JourneySemanticFingerprint candidate) =>
+List<NarrativeSemanticComparison> semanticDifferenceMatrixAgainstApprovedGold(
+  JourneySemanticFingerprint candidate,
+) =>
     List<NarrativeSemanticComparison>.unmodifiable([
       for (final reference in approvedGoldSemanticFingerprints.values)
-        if (reference.journeyId != candidate.journeyId) compareSemanticFingerprints(candidate, reference),
+        if (reference.journeyId != candidate.journeyId)
+          compareSemanticFingerprints(candidate, reference),
     ]);
 
 List<NarrativeSemanticComparison> auditApprovedGoldSemanticPairs() {
@@ -544,18 +970,29 @@ List<NarrativeSemanticComparison> auditApprovedGoldSemanticPairs() {
   final results = <NarrativeSemanticComparison>[];
   for (var i = 0; i < catalog.length; i++) {
     for (var j = i + 1; j < catalog.length; j++) {
-      results.add(compareSemanticFingerprints(catalog[i], catalog[j], approvedCatalogAudit: true));
+      results.add(
+        compareSemanticFingerprints(
+          catalog[i],
+          catalog[j],
+          approvedCatalogAudit: true,
+        ),
+      );
     }
   }
   return List<NarrativeSemanticComparison>.unmodifiable(results);
 }
 
-FutureGoldSemanticGateResult evaluateFutureGoldSemanticCandidate(JourneySemanticFingerprint candidate) {
+FutureGoldSemanticGateResult evaluateFutureGoldSemanticCandidate(
+  JourneySemanticFingerprint candidate,
+) {
   final comparisons = semanticDifferenceMatrixAgainstApprovedGold(candidate);
-  final collisions = comparisons.where((comparison) => comparison.isCollision).toList();
+  final collisions =
+      comparisons.where((comparison) => comparison.isCollision).toList();
   return FutureGoldSemanticGateResult(
     isGoldReady: collisions.isEmpty,
-    status: collisions.isEmpty ? 'SEMANTIC ANTI-TEMPLATE PASS' : semanticTemplateCollisionNotGoldReady,
+    status: collisions.isEmpty
+        ? 'SEMANTIC ANTI-TEMPLATE PASS'
+        : semanticTemplateCollisionNotGoldReady,
     comparisons: comparisons,
   );
 }
