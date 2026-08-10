@@ -54,6 +54,31 @@ void main() {
     }
   });
 
+  test('China prefecture and county levels project without rewriting GeoNodes',
+      () {
+    final honghe = requireJourneyLocation('honghe-hani-rice-terraces');
+
+    expect(honghe.provinceLevelName, '云南省');
+    expect(honghe.cityEquivalentName, '红河哈尼族彝族自治州');
+    expect(honghe.districtName, '元阳县');
+    expect(honghe.placeName, '哈尼梯田');
+    expect(
+      honghe.compactAdministrativeLabel,
+      '云南省 · 红河哈尼族彝族自治州',
+    );
+  });
+
+  test('every registered production Journey has display-ready geography', () {
+    for (final location in journeyLocationBindings.values) {
+      expect(location.countryNode, isNotNull, reason: location.journeyId);
+      expect(location.provinceLevelNode, isNotNull,
+          reason: location.journeyId);
+      expect(location.cityEquivalentNode, isNotNull,
+          reason: location.journeyId);
+      expect(location.placeName, isNotEmpty, reason: location.journeyId);
+    }
+  });
+
   test('Guangzhou geography is ready without Journey authoring', () {
     final agent = PhoenixWorldStoryAgent(nodes: worldGeoCatalog);
     final path = agent.pathTo('cn-guangdong-guangzhou-chen-clan');
