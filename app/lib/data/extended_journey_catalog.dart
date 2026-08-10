@@ -1,6 +1,7 @@
 import '../models/story_content.dart';
 import 'chengdu_kuanzhai_one_pass.dart';
 import 'daily_journey_experience.dart';
+import 'guangzhou_chen_clan_one_pass.dart';
 import 'journey_data.dart';
 
 const extendedJourneySources = <StorySourceRecord>[
@@ -39,7 +40,7 @@ const extendedJourneySources = <StorySourceRecord>[
     accessedOn: '2026-07-20',
   ),
   StorySourceRecord(
-    id: 'guangzhou-gov-chen-clan-academy',
+    id: guangzhouChenClanSourceRecordId,
     title: '广东民间工艺博物馆',
     publisher: '广州市人民政府',
     url:
@@ -185,38 +186,10 @@ const nanjingDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '秦淮灯会、南京剪纸和传统小吃等非物质文化遗产仍在景区中传承。', pinyin: 'Qínhuái Dēnghuì, Nánjīng jiǎnzhǐ hé chuántǒng xiǎochī děng fēiwùzhì wénhuà yíchǎn réng zài jǐngqū zhōng chuánchéng.', simpleChinese: '灯会、剪纸和小吃等传统文化继续被传承。', vietnamese: 'Hội đèn Tần Hoài, cắt giấy Nam Kinh và ẩm thực truyền thống vẫn được lưu truyền.', english: 'Lantern traditions, paper-cutting, and local food crafts continue as living heritage.'),
 ];
 
-const guangzhouStoryParagraphs = <String>[
-  '走进广州陈家祠，你最先注意到的也许不是大厅，而是屋脊、门窗和墙面上密密层层的装饰。',
-  '木雕、砖雕、石雕、陶塑和灰塑同时出现在建筑上。人物、花鸟和故事被工匠放进梁架、屋顶与墙壁。',
-  '这座晚清建筑曾与广东各地陈姓宗族和读书人有关，后来成为广东民间工艺博物馆。',
-  '陈家祠像一本不能快速翻完的立体图书。你越靠近细节，越能看见岭南工艺怎样把建筑变成文化记忆。',
-];
-
-const guangzhouStoryAnnotations = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Zǒujìn Guǎngzhōu Chénjiācí, nǐ zuìxiān zhùyì dào de yěxǔ bú shì dàtīng, ér shì wūjǐ, ménchuāng hé qiángmiàn shàng mìmì céngcéng de zhuāngshì.', vietnamese: 'Bước vào Trần Gia Từ ở Quảng Châu, điều bạn chú ý đầu tiên có lẽ không phải đại sảnh mà là lớp trang trí dày đặc trên nóc, cửa và tường.', english: 'At Chen Clan Ancestral Hall, the first thing you notice may be the dense decoration on roof ridges, doors, windows, and walls.'),
-  ReadingAnnotation(pinyin: 'Mùdiāo, zhuāndiāo, shídiāo, táosù hé huīsù tóngshí chūxiàn zài jiànzhù shàng. Rénwù, huāniǎo hé gùshì bèi gōngjiàng fàngjìn liángjià, wūdǐng yǔ qiángbì.', vietnamese: 'Chạm gỗ, chạm gạch, chạm đá, tượng gốm và phù điêu vữa cùng xuất hiện trên kiến trúc; nhân vật, hoa chim và câu chuyện được đặt lên khung, mái và tường.', english: 'Wood, brick, and stone carving, ceramic sculpture, and lime sculpture fill the structure with figures, flowers, birds, and stories.'),
-  ReadingAnnotation(pinyin: 'Zhè zuò Wǎnqīng jiànzhù céng yǔ Guǎngdōng gèdì Chén xìng zōngzú hé dúshūrén yǒuguān, hòulái chéngwéi Guǎngdōng Mínjiān Gōngyì Bówùguǎn.', vietnamese: 'Công trình cuối thời Thanh này từng gắn với các dòng họ Trần và người đi học từ nhiều nơi ở Quảng Đông, sau trở thành Bảo tàng Mỹ thuật Dân gian Quảng Đông.', english: 'The late-Qing complex served Chen clans and students from across Guangdong and later became the Guangdong Folk Arts Museum.'),
-  ReadingAnnotation(pinyin: 'Chénjiācí xiàng yì běn bùnéng kuàisù fānwán de lìtǐ túshū. Nǐ yuè kàojìn xìjié, yuè néng kànjiàn Lǐngnán gōngyì zěnyàng bǎ jiànzhù biàn chéng wénhuà jìyì.', vietnamese: 'Trần Gia Từ giống một cuốn sách ba chiều không thể lật nhanh. Càng đến gần chi tiết, bạn càng thấy nghệ thuật Lĩnh Nam biến kiến trúc thành ký ức văn hóa.', english: 'The hall is a three-dimensional book: the closer you look, the more clearly Lingnan craft turns architecture into cultural memory.'),
-];
-
-const guangzhouWords = <WordEntry>[
-  WordEntry(word: '陈家祠', pinyin: 'Chénjiācí', partOfSpeech: '名词（专名）', simpleChinese: '广州著名的祠堂式历史建筑。', translation: 'Trần Gia Từ, công trình từ đường nổi tiếng ở Quảng Châu.', englishDefinition: 'Chen Clan Ancestral Hall', symbol: '🏯'),
-  WordEntry(word: '屋脊', pinyin: 'wūjǐ', partOfSpeech: '名词', simpleChinese: '屋顶最高的连接部分。', translation: 'Nóc mái, phần cao nhất của mái nhà.', englishDefinition: 'roof ridge', symbol: '🏠'),
-  WordEntry(word: '木雕', pinyin: 'mùdiāo', partOfSpeech: '名词', simpleChinese: '在木头上雕刻图案的工艺。', translation: 'Nghệ thuật chạm khắc gỗ.', englishDefinition: 'wood carving', symbol: '🪵'),
-  WordEntry(word: '砖雕', pinyin: 'zhuāndiāo', partOfSpeech: '名词', simpleChinese: '在砖上雕刻图案的工艺。', translation: 'Nghệ thuật chạm khắc gạch.', englishDefinition: 'brick carving', symbol: '🧱'),
-  WordEntry(word: '陶塑', pinyin: 'táosù', partOfSpeech: '名词', simpleChinese: '用陶土制作立体装饰。', translation: 'Tượng trang trí bằng gốm.', englishDefinition: 'ceramic sculpture', symbol: '🏺'),
-  WordEntry(word: '灰塑', pinyin: 'huīsù', partOfSpeech: '名词', simpleChinese: '用灰泥制作的传统建筑装饰。', translation: 'Phù điêu trang trí bằng vữa.', englishDefinition: 'lime or plaster sculpture', symbol: '🎨'),
-  WordEntry(word: '工匠', pinyin: 'gōngjiàng', partOfSpeech: '名词', simpleChinese: '掌握手工技艺的专业劳动者。', translation: 'Thợ thủ công có kỹ năng chuyên môn.', englishDefinition: 'craftsperson or artisan', symbol: '🛠️'),
-  WordEntry(word: '宗族', pinyin: 'zōngzú', partOfSpeech: '名词', simpleChinese: '有共同祖先的家族群体。', translation: 'Dòng họ có cùng tổ tiên.', englishDefinition: 'clan or lineage', symbol: '👨‍👩‍👧‍👦'),
-  WordEntry(word: '岭南', pinyin: 'Lǐngnán', partOfSpeech: '名词（专名）', simpleChinese: '中国南岭以南的文化地理区域。', translation: 'Vùng văn hóa địa lý phía nam dãy Nam Lĩnh.', englishDefinition: 'Lingnan, the region south of the Nanling Mountains', symbol: '🌺'),
-];
-
-const guangzhouDiscoveries = <DiscoveryEntry>[
-  DiscoveryEntry(text: '陈家祠落成于清代晚期，原名陈氏书院。', pinyin: 'Chénjiācí luòchéng yú Qīngdài wǎnqī, yuánmíng Chénshì Shūyuàn.', simpleChinese: '陈家祠是晚清建筑，也叫陈氏书院。', vietnamese: 'Trần Gia Từ hoàn thành vào cuối thời Thanh và còn gọi là Trần Thị Thư Viện.', english: 'The complex was completed in the late Qing period and is also known as the Chen Clan Academy.'),
-  DiscoveryEntry(text: '建筑集中展示木雕、砖雕、石雕、陶塑、灰塑、铸造和彩绘等岭南装饰工艺。', pinyin: 'Jiànzhù jízhōng zhǎnshì mùdiāo, zhuāndiāo, shídiāo, táosù, huīsù, zhùzào hé cǎihuì děng Lǐngnán zhuāngshì gōngyì.', simpleChinese: '这里能看到很多种岭南传统装饰工艺。', vietnamese: 'Kiến trúc tập trung nhiều kỹ thuật trang trí Lĩnh Nam như chạm gỗ, gạch, đá, gốm, vữa, đúc và vẽ màu.', english: 'The building brings together many Lingnan decorative crafts, including carving, ceramic and lime sculpture, casting, and painting.'),
-  DiscoveryEntry(text: '陈家祠在一九八八年被公布为全国重点文物保护单位。', pinyin: 'Chénjiācí zài yī jiǔ bā bā nián bèi gōngbù wéi Quánguó Zhòngdiǎn Wénwù Bǎohù Dānwèi.', simpleChinese: '陈家祠是国家重点保护的文物建筑。', vietnamese: 'Năm 1988, Trần Gia Từ được công nhận là đơn vị bảo tồn di tích trọng điểm toàn quốc.', english: 'In 1988, the hall was designated a Major Historical and Cultural Site Protected at the National Level.'),
-  DiscoveryEntry(text: '今天这里是广东民间工艺博物馆，收藏和展示多种广东传统工艺。', pinyin: 'Jīntiān zhèlǐ shì Guǎngdōng Mínjiān Gōngyì Bówùguǎn, shōucáng hé zhǎnshì duō zhǒng Guǎngdōng chuántǒng gōngyì.', simpleChinese: '现在这里是一座展示广东民间工艺的博物馆。', vietnamese: 'Ngày nay đây là Bảo tàng Mỹ thuật Dân gian Quảng Đông, sưu tầm và trưng bày nhiều nghề thủ công truyền thống.', english: 'Today it houses the Guangdong Folk Arts Museum and displays a wide range of traditional crafts.'),
-];
+final guangzhouStoryParagraphs = guangzhouChenClanOnePassLevels[4].storyParagraphs;
+final guangzhouStoryAnnotations = guangzhouChenClanOnePassLevels[4].storyAnnotations;
+final guangzhouWords = guangzhouChenClanOnePassLevelContent(5).words;
+final guangzhouDiscoveries = guangzhouChenClanOnePassDiscoveries;
 
 final hangzhouWestLakeJourney = _buildJourney(
   id: 'hangzhou-west-lake',
@@ -246,12 +219,12 @@ final nanjingQinhuaiJourney = _buildJourney(
 );
 
 final guangzhouChenClanJourney = _buildJourney(
-  id: 'guangzhou-chen-clan-academy',
-  title: '广州 · 陈家祠：把建筑读成一本工艺书',
+  id: guangzhouChenClanJourneyId,
+  title: '广州 · 陈家祠：纸桥',
   geoNodeId: 'cn-guangdong-guangzhou-chen-clan',
-  tags: const ['广州', '陈家祠', '岭南', '民间工艺', '建筑装饰'],
+  tags: const ['广州', '陈家祠', '岭南', '版画', '纸桥', '材料翻译'],
   paragraphs: guangzhouStoryParagraphs,
-  sourceIds: const ['guangzhou-gov-chen-clan-academy'],
+  sourceIds: const [guangzhouChenClanSourceRecordId],
 );
 
 final extendedJourneyRecords = <JourneyContentRecord>[
@@ -325,17 +298,17 @@ final extendedJourneyExperiences = <DailyJourneyExperience>[
     cityCode: 'CAN',
     place: '陈家祠',
     appBarTitle: '广州 · 陈家祠',
-    storyTitle: '岭南工艺故事',
-    headline: '把建筑读成一本立体工艺书',
-    description: '靠近屋脊与墙面，从细节认识岭南传统工艺。',
-    discoveryTeaser: '为什么陈家祠的装饰比建筑本身更抢眼？',
+    storyTitle: '纸桥',
+    headline: '让一张纸学会新的连接方式',
+    description: '跟着梁遥把观察到的形体关系翻译成一张不断开的纸。',
+    discoveryTeaser: '为什么陈家祠适合观察不同材料怎样形成装饰？',
     distanceLabel: '820 km',
     stampSymbol: '艺',
     content: guangzhouChenClanJourney,
     storyAnnotations: guangzhouStoryAnnotations,
     words: guangzhouWords,
     discoveries: guangzhouDiscoveries,
-    wonderQuestion: '木雕、砖雕、陶塑和灰塑中，你最想近距离观察哪一种？为什么？',
-    expressQuestion: '请用两到三句话介绍陈家祠最吸引你的工艺细节。',
+    wonderQuestion: guangzhouChenClanReflectionPrompts[4],
+    expressQuestion: guangzhouChenClanWritingPrompts[4],
   ),
 ];
