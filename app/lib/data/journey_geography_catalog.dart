@@ -44,13 +44,6 @@ List<JourneyProvinceCatalogEntry> _buildChinaProvinceCatalog() {
         'province-level region, and city-equivalent region.',
       );
     }
-    if (!_nodeMatchesProductCity(cityEquivalent, city.name)) {
-      throw StateError(
-        'Journey city key ${city.id} does not match its canonical '
-        'city-equivalent GeoNode ${cityEquivalent.id}.',
-      );
-    }
-
     final group = groups.putIfAbsent(provinceLevel.id, () {
       provinceOrder.add(provinceLevel.id);
       return _MutableProvinceGroup(
@@ -105,14 +98,6 @@ String _chinaRegionId(GeoNode node) {
     throw StateError('Invalid China province-level GeoNode ID: ${node.id}.');
   }
   return node.id.substring(prefix.length);
-}
-
-bool _nodeMatchesProductCity(GeoNode node, String cityName) {
-  final names = <String>{
-    node.name.replaceFirst(RegExp('市\$'), ''),
-    ...node.aliases,
-  };
-  return names.contains(cityName);
 }
 
 class _MutableProvinceGroup {
