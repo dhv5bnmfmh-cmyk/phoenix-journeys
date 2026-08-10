@@ -70,7 +70,11 @@ void main() {
           reason: journey.id,
         );
       } else if (journey.id == guangzhouChenClanJourneyId) {
-        expect(journey.discoveries, hasLength(2), reason: journey.id);
+        expect(
+          journey.discoveries,
+          hasLength(guangzhouChenClanOnePassDiscoveries.length),
+          reason: journey.id,
+        );
       } else if (journey.id == 'beijing-summer-palace') {
         expect(journey.discoveries, hasLength(2), reason: journey.id);
       } else {
