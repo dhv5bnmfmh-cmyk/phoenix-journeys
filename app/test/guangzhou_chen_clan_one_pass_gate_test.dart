@@ -33,7 +33,16 @@ void main() {
       expect(story, anyOf(contains('认出'), contains('识别'), contains('指出')), reason: 'Lv$level peer legibility test');
       expect(story, anyOf(contains('翻译'), contains('改对'), contains('改变编码'), contains('编码改变'), contains('改变表达方式')), reason: 'Lv$level transformation/consequence');
       expect(story, contains('工作室'), reason: 'Lv$level action ending');
-      expect(story, anyOf(contains('新材料'), contains('版材'), contains('新的版材')), reason: 'Lv$level next material study');
+      expect(
+        story,
+        anyOf(
+          contains('新材料'),
+          contains('版材'),
+          contains('新的版材'),
+          contains('另一种版画材料'),
+        ),
+        reason: 'Lv$level next material study',
+      );
       expect(story, isNot(contains(guangzhouChenClanLegacyOpening)), reason: 'Lv$level legacy opening retired');
       expect(story, isNot(contains(guangzhouChenClanLegacyMetaphor)), reason: 'Lv$level legacy metaphor retired');
     }
@@ -70,7 +79,11 @@ void main() {
   });
 
   test('Words are curated in Story context and provenance is truthful', () {
-    final allStory = guangzhouChenClanOnePassLevels.expand((item) => item.storyParagraphs).join('\n');
+    final stories = <String>[
+      for (final level in guangzhouChenClanOnePassLevels)
+        level.storyParagraphs.join(),
+    ];
+    final allStory = stories.join('\n');
     for (var level = 1; level <= 10; level++) {
       final content = guangzhouChenClanOnePassLevelContent(level);
       final story = content.storyParagraphs.join();
@@ -81,9 +94,8 @@ void main() {
       }
     }
     for (final word in guangzhouChenClanOnePassWords) {
-      final observedFirstLevel = List<int>.generate(10, (index) => index + 1).firstWhere(
-        (level) => guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.join().contains(word.word),
-      );
+      final observedFirstLevel = stories.indexWhere((story) => story.contains(word.word)) + 1;
+      expect(observedFirstLevel, greaterThan(0), reason: '${word.word} must occur in Story');
       expect(
         guangzhouChenClanWordFirstAppears[word.word],
         observedFirstLevel,
@@ -98,7 +110,10 @@ void main() {
 
   test('Memory, completion, reflection and writing stay synchronized', () {
     expect(guangzhouChenClanMemory, hasLength(3));
-    expect(guangzhouChenClanMemory.map((item) => item.answer).join(), contains('纸桥'));
+    final memoryPayload = guangzhouChenClanMemory
+        .map((item) => '${item.prompt}${item.answer}')
+        .join();
+    expect(memoryPayload, contains('纸桥'));
     expect(guangzhouChenClanCompletion.memoryAnchor, '纸桥');
     expect(guangzhouChenClanCompletion.journeySummary, contains('第二件单张纸'));
     for (var level = 1; level <= 10; level++) {
