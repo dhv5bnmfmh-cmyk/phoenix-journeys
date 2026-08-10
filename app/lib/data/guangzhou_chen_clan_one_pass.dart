@@ -167,7 +167,7 @@ final guangzhouChenClanOnePassWords = List<WordEntry>.unmodifiable([
   _word('翻译', 'fānyì', '动词', '把一种表达转换到另一种表达中，同时保留重要意义。', 'chuyển dịch', 'to translate across forms', '🔄'),
   _word('完整', 'wánzhěng', '形容词', '没有散开或缺失关键部分。', 'hoàn chỉnh', 'complete or intact', '✅'),
   _word('观察', 'guānchá', '动词', '有目的地仔细看并比较。', 'quan sát', 'to observe', '🔎'),
-  _word('重编码', 'chóng biānmǎ', '动词', '为了新的媒介重新安排信息与连接方式。', 'mã hóa lại', 'to re-encode', '🧠'),
+  _word('重新编码', 'chóngxīn biānmǎ', '动词', '为了新的媒介重新安排信息与连接方式。', 'mã hóa lại', 'to re-encode', '🧠'),
 ]);
 
 const guangzhouChenClanWordFirstAppears = <String, int>{
@@ -186,7 +186,7 @@ const guangzhouChenClanWordFirstAppears = <String, int>{
   '翻译': 4,
   '完整': 6,
   '观察': 1,
-  '重编码': 9,
+  '重新编码': 8,
 };
 
 const guangzhouChenClanCuratedWordNamesByLevel = <int, Set<String>>{
@@ -198,8 +198,8 @@ const guangzhouChenClanCuratedWordNamesByLevel = <int, Set<String>>{
   6: {'陈家祠', '原型', '断开', '纸桥', '连接', '材料', '轮廓', '版画', '单张', '识别', '关系'},
   7: {'陈家祠', '原型', '断开', '纸桥', '连接', '材料', '轮廓', '版画', '单张', '识别', '关系', '结构'},
   8: {'陈家祠', '原型', '断开', '纸桥', '连接', '材料', '轮廓', '版画', '单张', '识别', '关系', '结构', '翻译', '完整', '观察'},
-  9: {'陈家祠', '原型', '断开', '纸桥', '连接', '材料', '轮廓', '版画', '单张', '识别', '关系', '结构', '翻译', '完整', '观察', '重编码'},
-  10: {'陈家祠', '原型', '断开', '纸桥', '连接', '材料', '轮廓', '版画', '单张', '识别', '关系', '结构', '翻译', '完整', '观察', '重编码'},
+  9: {'陈家祠', '原型', '断开', '纸桥', '连接', '材料', '轮廓', '版画', '单张', '识别', '关系', '结构', '翻译', '完整', '观察', '重新编码'},
+  10: {'陈家祠', '原型', '断开', '纸桥', '连接', '材料', '轮廓', '版画', '单张', '识别', '关系', '结构', '翻译', '完整', '观察', '重新编码'},
 };
 
 final guangzhouChenClanWordTraces = List<RemediatedWordTrace>.unmodifiable([
@@ -218,7 +218,7 @@ final guangzhouChenClanWordTraces = List<RemediatedWordTrace>.unmodifiable([
   const RemediatedWordTrace(word: '翻译', eventId: 'GZ-E7-transformation', usage: 'Lv4 首次出现。', sourceText: '梁遥不再把“像”理解成复制所有线，而开始按材料条件翻译关系。'),
   const RemediatedWordTrace(word: '完整', eventId: 'GZ-E5-second-prototype', usage: 'Lv6 首次出现。', sourceText: '梁遥想把观察到的一组主要形体做成单张纸作品：拿起来必须仍是一件完整对象，同时让一个没有看她草图的人识别重要关系。'),
   const RemediatedWordTrace(word: '观察', eventId: 'GZ-E1-observation', usage: 'Lv1 首次出现。', sourceText: '她只观察，在自己的纸上做原型。'),
-  const RemediatedWordTrace(word: '重编码', eventId: 'GZ-E4-reencode', usage: 'Lv9 首次出现。', sourceText: '她换第二张自己的纸，重新编码连接：主要形体的位置、方向和相互靠近方式继续保留，但原本会完全分离的节点留下窄纸桥。'),
+  const RemediatedWordTrace(word: '重新编码', eventId: 'GZ-E4-reencode', usage: 'Lv8 首次出现。', sourceText: '她把第二张纸当成一种需要被翻译的媒介：主要形体的相对关系保留，但连接方式重新编码，在会断开的关键位置留下纸桥。'),
 ]);
 
 DiscoveryEntry _discovery(
