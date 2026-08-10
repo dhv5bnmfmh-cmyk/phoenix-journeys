@@ -525,3 +525,63 @@ Its Visual DNA, Cross-Journey Differentiation, Shot Plan, 1–3 Pilot, AI Origin
 Canonical Journey content remains read-only during visual production. Story, Words, Discovery, Challenge, Memory, and Complete MUST NOT be rewritten to make background production easier.
 
 No Agent or implementation may create a Journey-specific exception, hard-code `PASS`, skip rights review, skip required Founder review, skip Pilot gating, lower the stable visual baseline, alter canonical Story, or remove tests merely to obtain background acceptance. Any exception must be explicit, documented, scoped, and Founder-approved where applicable.
+
+## 16. Binding Story Truth + Place-Causality lifecycle extension
+
+Before Phase B may produce a full Story, every new Journey MUST execute the Story-development pre-lock sequence from [Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md):
+
+> **FACT FIRST**  
+> → **PLACE CAUSALITY**  
+> → **STORY MECHANISM**  
+> → **ANTI-TEMPLATE COMPARISON**  
+> → **LV1 CAUSAL PROOF**  
+> → **STORY LOCK**  
+> → **LV1-LV10 EXPANSION**  
+> → **STORY / DISCOVERY SEPARATION**  
+> → **LEARNING PACKAGE**  
+> → **GOLD PROMOTION**
+
+### Phase A preconditions added
+
+Before Story architecture is accepted, Phase A MUST contain:
+
+- authoritative place-source inventory using the approved source hierarchy;
+- source-governance claim record separating verified facts from fictional actions/dialogue/motivation and interpretive devices;
+- explicit absence of unsupported factual premises;
+- real-historical-person protection review where applicable;
+- `PLACE_CAUSAL_MECHANISM` record;
+- Generic Place Substitution Test;
+- candidate Story Mechanism architecture;
+- candidate normalized semantic fingerprint and all-approved-Gold comparison;
+- taxonomy-family governance record when a new family is proposed;
+- human semantic-sufficiency review separate from CI contract validation.
+
+Phase A MUST NOT pass when the site is merely decorative, a material factual premise lacks approved evidence, a real-person action/intention is fabricated, or semantic collision is unresolved.
+
+### Phase B ordering added
+
+Phase B MUST begin with a causal Lv1 proof, not a ten-level prose batch. Lv1 MUST contain protagonist, concrete Goal, Conflict, enacted Choice, decisive event/climax, and caused Consequence.
+
+If Lv1 fails, the required result is:
+
+`LV1 CAUSAL PROOF FAILED — DO NOT EXPAND`
+
+Lv2-Lv10 expansion is prohibited until Lv1 causal proof passes and the architecture is `STORY LOCKED`.
+
+### Required stop outcomes
+
+The following are binding lifecycle stops and block the next phase, Gold promotion, Ready, and merge:
+
+- `SOURCE EVIDENCE INSUFFICIENT — STORY DEVELOPMENT STOPPED`
+- `UNVERIFIED FACTUAL CLAIM — BLOCKED`
+- `GENERIC-PLACE STORY — NOT GOLD READY`
+- `TEMPLATE COLLISION - NOT GOLD READY`
+- `LV1 CAUSAL PROOF FAILED — DO NOT EXPAND`
+
+Changing source facts does not establish Story uniqueness, and Story uniqueness does not authorize unsupported facts. `SOURCE TRUTH` and `SEMANTIC DISTINCTNESS` MUST independently pass.
+
+### Machine / human boundary
+
+Automated validation may prove source-record presence, approved authority classification, fact/fiction contract completeness, declared substitution result, mechanism fields, fingerprint completeness, Rule A / Rule B results, taxonomy-governance fields, and Lv1 causal-contract fields. It MUST NOT be described as proving historical interpretation, place-native literary sufficiency, cultural nuance, creative distinctness beyond the deterministic threshold, or literary quality. Those remain Founder/Agent review responsibilities.
+
+This extension governs future new Journeys and separately authorized future remediations. It does not reopen the eight approved Gold Stories, does not authorize Suzhou continuation, and does not authorize background, Passport, map, or location-hierarchy work.
