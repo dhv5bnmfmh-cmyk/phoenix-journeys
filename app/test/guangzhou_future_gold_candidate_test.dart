@@ -4,11 +4,11 @@ import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
 import 'package:phoenix_journeys/data/journey_semantic_fingerprint_catalog.dart';
 
 void main() {
-  test('Guangzhou remains a seven-Gold future candidate before promotion', () {
-    expect(approvedGoldSemanticFingerprints, hasLength(7));
+  test('promoted Guangzhou still compares against seven other Gold Journeys', () {
+    expect(approvedGoldSemanticFingerprints, hasLength(8));
     expect(
-      approvedGoldSemanticFingerprints,
-      isNot(contains(guangzhouChenClanJourneyId)),
+      approvedGoldSemanticFingerprints[guangzhouChenClanJourneyId],
+      same(guangzhouChenClanGoldSemanticFingerprint),
     );
 
     final gate = evaluateFutureGoldSemanticCandidate(
@@ -38,8 +38,14 @@ void main() {
     expect(active, isNot(contains(guangzhouChenClanLegacyMetaphor)));
   });
 
-  test('Guangzhou candidate DNA is distinct from seven approved Gold records', () {
-    expect(approvedNarrativeDnaCatalog, hasLength(7));
+  test('Guangzhou descriptive DNA is the eighth approved Gold record', () {
+    expect(approvedNarrativeDnaCatalog, hasLength(8));
+    expect(
+      approvedNarrativeDnaCatalog.where(
+        (record) => record.journeyId == guangzhouChenClanJourneyId,
+      ),
+      hasLength(1),
+    );
     expect(
       narrativeDnaIsUnique(
         guangzhouChenClanGoldNarrativeDna,
@@ -50,6 +56,25 @@ void main() {
     expect(
       guangzhouChenClanGoldNarrativeDna.narrativeIdentity,
       'paper-bridges-translate-relief-across-material-constraints',
+    );
+  });
+
+  test('eight-Gold audit has 28 unique pairs and zero collision debt', () {
+    final audit = auditApprovedGoldSemanticPairs();
+    expect(audit, hasLength(28));
+    final pairKeys = audit
+        .map((item) => <String>[item.journeyA, item.journeyB]..sort())
+        .map((pair) => pair.join('|'))
+        .toSet();
+    expect(pairKeys, hasLength(28));
+    expect(audit.where((item) => item.isCollision), isEmpty);
+    expect(
+      audit.where(
+        (item) =>
+            item.classification ==
+            SemanticCollisionClassification.existingSemanticCollisionDebt,
+      ),
+      isEmpty,
     );
   });
 
