@@ -1,0 +1,12 @@
+name: Revision 1B Smoke
+on:
+  push:
+    branches:
+      - gold/guangzhou-chen-clan-story
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ready
