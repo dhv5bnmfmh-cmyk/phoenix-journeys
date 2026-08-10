@@ -59,6 +59,28 @@ void main() {
     }
   });
 
+  test('Lv9/Lv10 reader Story excludes semantic-governance meta language', () {
+    final advancedStory = <String>[
+      ...guangzhouChenClanOnePassLevels[8].storyParagraphs,
+      ...guangzhouChenClanOnePassLevels[9].storyParagraphs,
+    ].join();
+    const forbiddenMeta = <String>[
+      '历史证据',
+      '重新分类',
+      '历史解释',
+      '导师',
+      '妥协',
+      '改分类',
+      '故意残缺',
+    ];
+    for (final phrase in forbiddenMeta) {
+      expect(advancedStory, isNot(contains(phrase)), reason: phrase);
+    }
+    expect(advancedStory, contains('把断开的几片重新并在桌上'));
+    expect(advancedStory, contains('把草图扣在桌面，只看成品'));
+    expect(advancedStory, contains('纸桥改变了局部轮廓'));
+  });
+
   test('Story explicitly avoids heritage-surface contact', () {
     final story = guangzhouChenClanOnePassLevels.expand((item) => item.storyParagraphs).join();
     const forbiddenContact = <String>[

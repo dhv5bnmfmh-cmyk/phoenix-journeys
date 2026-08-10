@@ -695,7 +695,7 @@ final guangzhouChenClanGoldSemanticFingerprint = JourneySemanticFingerprint(
       mechanism: NarrativeMechanismFamily.literalCopyVsMaterialSpecificStructure,
       activeSourceId: activeGoldStorySourceId,
       sourceTexts: <String>[
-        '问题不是她少看了证据，也不是要判断哪一种历史解释更真实；是纸这种材料不能替孤立形体保持原先的连接。',
+        '她把散开的几片重新并在桌上，发现最后被剪掉的正是让整张纸保持相连的部分。原来的形体可以依靠材料和基底保持关系，单张薄纸却需要自己的连接。',
         '字面复制越彻底，单张纸反而越无法成为一件东西。',
       ],
       semanticRationale:
@@ -719,7 +719,7 @@ final guangzhouChenClanGoldSemanticFingerprint = JourneySemanticFingerprint(
       activeSourceId: activeGoldStorySourceId,
       sourceTexts: <String>[
         '她剪完第二件原型，从一角把它提起；整张纸没有散开。',
-        '贺真没有看她的草图，仍指出两组主要形体之间原先最重要的相接关系。',
+        '贺真把草图扣在桌面，只看成品。几秒后，他准确指出两组主要形体之间原先最重要的相接关系。',
       ],
       semanticRationale:
           'The climax is a two-part physical test: the translated object survives handling as one piece and a peer independently confirms the important visual relation remains legible.',
@@ -730,7 +730,7 @@ final guangzhouChenClanGoldSemanticFingerprint = JourneySemanticFingerprint(
       mechanism: NarrativeMechanismFamily.changedFormFunctionsInNewMedium,
       activeSourceId: activeGoldStorySourceId,
       sourceTexts: <String>[
-        '新的纸片不是“少复制一点”的妥协，而是因为编码改变，所以同时获得连接性和可识别性。',
+        '梁遥改变连接后，纸桥改变了局部轮廓，却让整张纸既能被拿起，也没有丢掉那组相接关系。',
       ],
       semanticRationale:
           'The revised form succeeds according to the new medium’s logic; its changed geometry creates both structural function and legibility rather than leaving a responsible defect.',
@@ -764,7 +764,7 @@ final guangzhouChenClanGoldSemanticFingerprint = JourneySemanticFingerprint(
       activeSourceId: activeGoldStorySourceId,
       sourceTexts: <String>[
         '二十二岁的版画学生梁遥和陶艺同学贺真在广州陈家祠观察建筑装饰。',
-        '贺真没有看她的草图，仍指出两组主要形体之间原先最重要的相接关系。',
+        '贺真把草图扣在桌面，只看成品。几秒后，他准确指出两组主要形体之间原先最重要的相接关系。',
       ],
       semanticRationale:
           'He Zhen is a maker peer whose independent recognition tests the translated prototype; he neither mentors Liang Yao nor transfers authority to her.',
@@ -789,7 +789,7 @@ final guangzhouChenClanGoldSemanticFingerprint = JourneySemanticFingerprint(
         '她的第一件原型却在桌面上散开：她把每一道看见的轮廓都当成必须照搬的边界，剪到两组形体之间时，纸上原本承担连接的部分也被一起去掉，几个部分随即断开。',
         '她停下逐线描摹，在第二张自己的纸上重新编码连接：保留主要形体的相对位置，却在原本会断开的地方留下窄窄的纸桥。',
         '她剪完第二件原型，从一角把它提起；整张纸没有散开。',
-        '贺真没有看她的草图，仍指出两组主要形体之间原先最重要的相接关系。',
+        '贺真把草图扣在桌面，只看成品。几秒后，他准确指出两组主要形体之间原先最重要的相接关系。',
       ],
       semanticRationale:
           'The engine requires a material-caused physical failure, deliberate cross-medium re-encoding, and a successful structural-plus-legibility test. It is not tradeoff, synthesis, crossing, closure, reclassification, handoff, or refusal.',
