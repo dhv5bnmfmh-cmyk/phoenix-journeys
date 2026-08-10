@@ -34,6 +34,10 @@ class JourneyLocationBinding {
   GeoNode? get cityEquivalentNode {
     final cityNode = _singleNodeOfKind(GeoNodeKind.city);
     if (cityNode != null) return cityNode;
+    if (countryNode?.countryCode == 'CN') {
+      final prefectureLevel = _singleNodeOfKind(GeoNodeKind.adminLevel2);
+      if (prefectureLevel != null) return prefectureLevel;
+    }
     final provinceLevel = provinceLevelNode;
     if (provinceLevel != null && _isChinaMunicipality(provinceLevel)) {
       return provinceLevel;
@@ -41,7 +45,14 @@ class JourneyLocationBinding {
     return null;
   }
 
-  GeoNode? get districtNode => _singleNodeOfKind(GeoNodeKind.district);
+  GeoNode? get districtNode {
+    final district = _singleNodeOfKind(GeoNodeKind.district);
+    if (district != null) return district;
+    if (countryNode?.countryCode == 'CN') {
+      return _singleNodeOfKind(GeoNodeKind.adminLevel3);
+    }
+    return null;
+  }
 
   String? get provinceLevelName => provinceLevelNode?.name;
   String? get cityEquivalentName => cityEquivalentNode?.name;
