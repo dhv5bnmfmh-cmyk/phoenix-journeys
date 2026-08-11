@@ -31,6 +31,7 @@ MACHINE_SEMANTIC_GATE: PASS / FAIL
 AGENT_SEMANTIC_SUFFICIENCY: PASS / REQUIRES_REVISION / BLOCKED / PENDING
 AGENT_LITERARY_REVIEW: PASS / REQUIRES_REVISION / BLOCKED / PENDING
 HUMAN_NARRATIVE_ANTI_TEMPLATE: PASS / REQUIRES_REVISION / BLOCKED / PENDING
+PREVIOUS_VERSION_UI_FUNCTION_PARITY: PASS / FAIL / PENDING
 FOUNDER_STORY_APPROVAL: APPROVED / REJECTED / PENDING
 OVERALL_STORY_QUALITY: PASS / REQUIRES_REVISION / BLOCKED / PENDING
 AUTOMATED_SCORE_USED_AS_LITERARY_APPROVAL: NO
@@ -102,7 +103,7 @@ A human Story collision blocks Gold readiness even when deterministic semantic c
 
 Every AI Story development or remediation cycle MUST follow this loop on the **current exact candidate head**:
 
-> **MODIFY OR CREATE STORY → CHANGE / COMPLIANCE PROOF → MACHINE CONTRACT CHECK → MACHINE SEMANTIC CHECK → AGENT LITERARY REVIEW → HUMAN DE-SKINNED CATALOG COMPARISON → RUNTIME STORY PARITY → EXACT-HEAD PREVIEW → FOUNDER REVIEW → APPROVE OR REVISE**
+> **MODIFY OR CREATE STORY → CHANGE / COMPLIANCE PROOF → PREVIOUS-VERSION UI + FUNCTION PARITY → MACHINE CONTRACT CHECK → MACHINE SEMANTIC CHECK → AGENT LITERARY REVIEW → HUMAN DE-SKINNED CATALOG COMPARISON → RUNTIME STORY PARITY → EXACT-HEAD PREVIEW → FOUNDER REVIEW → APPROVE OR REVISE**
 
 The loop has two different entry proofs:
 
@@ -115,6 +116,35 @@ The loop has two different entry proofs:
 2. **New Story development — NEW STORY COMPLIANCE PROOF**
    - verify the candidate against all binding Narrative, New Journey, acceptance, Story Truth, place-causality, Lv1/Lv5/Lv10, Chinese narrative quality, and human Story requirements before Preview;
    - no new Story may reach Preview merely because fields are complete or CI is green.
+
+## Previous-version UI + Function Parity Gate
+
+For every Story-only modification or new Story implementation, the Agent MUST record the exact pre-change baseline SHA and prove that Phoenix remains the same product outside the explicitly authorized Story/content delta.
+
+Before editing, the Agent MUST establish a **changed-file and changed-field allowlist**. For a Story-only task, production changes are restricted to the target Story and the minimum Story-grounded bindings required because the Story itself changed. UI, navigation, Passport, Map, backgrounds, rewards, coins, challenge architecture, progress, location hierarchy, shared runtime architecture, unrelated catalogs, unrelated Journeys, and other product behavior are outside the allowlist unless the Founder explicitly authorizes them.
+
+Before any Preview is generated, the Agent MUST compare the candidate against the recorded baseline and set:
+
+`PREVIOUS_VERSION_UI_FUNCTION_PARITY = PASS / FAIL`
+
+A PASS requires all of the following:
+
+- the changed-file diff contains no unauthorized product or UI files;
+- the changed-field diff contains no unauthorized product configuration changes;
+- layout, navigation, screen order, controls, product modes, rewards/coins, Passport, Map, progress, challenge behavior, completion behavior, and unrelated runtime behavior remain unchanged from the baseline;
+- Journey ID, GeoNode, route/catalog membership, and unrelated Journey records remain unchanged unless the Story task explicitly requires a documented content-binding correction;
+- all non-target Journeys retain their previous behavior and data;
+- the target Journey continues through the pre-existing product architecture unless the Founder explicitly authorizes an architecture change;
+- the only Founder-visible differences are the authorized Story/content changes and their minimum necessary Story-grounded text bindings;
+- available regression, widget, golden, route, runtime, and catalog tests remain green; absence of a particular automated UI test does not waive the diff and behavior comparison requirement.
+
+Any unauthorized visible or behavioral delta is a **SCOPE VIOLATION** and forces:
+
+`PREVIOUS_VERSION_UI_FUNCTION_PARITY = FAIL`
+
+When this happens, the candidate MUST NOT be patched forward by preserving the unauthorized redesign. The Agent MUST discard or revert the violating product changes, restore the previous Phoenix product behavior, return to the clean baseline, re-apply only the authorized Story delta, and restart the complete closed loop on a new exact head.
+
+A correct Story is never permission to redesign Phoenix. Passing Story tests is never permission to alter unrelated software behavior. No AI agent may infer product-change authorization from failing tests, implementation convenience, refactoring preference, or a desire to make the Story easier to wire.
 
 For **both** modified and new Stories, the Agent MUST then:
 
@@ -139,7 +169,7 @@ Founder review closes the loop:
 - if Founder approves the Story but has not explicitly authorized merge: keep the PR open and unmerged;
 - Merge is permitted only after the explicit instruction `FOUNDER APPROVED FOR MERGE` and only for the exact candidate that completed the loop.
 
-No AI agent may skip directly from code change or green CI to Founder handoff. No prior Preview, prior machine score, prior literary review, or prior Founder review may be reused after a Story-affecting change without rerunning the applicable gates.
+No AI agent may skip directly from code change or green CI to Founder handoff. No prior Preview, prior machine score, prior literary review, prior parity result, or prior Founder review may be reused after a Story-affecting change without rerunning the applicable gates.
 
 ## Visible PR report
 
