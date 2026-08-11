@@ -401,6 +401,14 @@ The following codes are binding minimum codes:
 - `SPECIAL_MECHANISM_FLATTENED`
 - `AUTOMATED_SCORE_NOT_LITERARY_APPROVAL`
 - `BATCH_EXPANSION_BEFORE_PILOT_APPROVAL`
+- `SOURCE_EVIDENCE_INSUFFICIENT`
+- `UNVERIFIED_FACTUAL_CLAIM`
+- `REAL_HISTORICAL_PERSON_FABRICATION`
+- `GENERIC_PLACE_STORY`
+- `PLACE_CAUSAL_MECHANISM_UNVERIFIED`
+- `STORY_MECHANISM_INCOMPLETE`
+- `LV1_CAUSAL_PROOF_FAILED`
+- `FACT_FIRST_PIPELINE_VIOLATION`
 
 Every blocking-code record MUST include:
 
@@ -700,3 +708,229 @@ Before final Story approval for a new Journey, the responsible Agent MUST:
 12. rerun the semantic anti-template gate after Story or fingerprint changes.
 
 This semantic standard is deterministic and local where machine enforcement is claimed. CI MUST NOT depend on an external LLM, embeddings API, network semantic service, or external vector database to decide collision arithmetic or evidence provenance. Human/Agent review remains authoritative for semantic sufficiency.
+
+## 18. Story Truth + Place-Causality Blocking Standard
+
+### 18.1 Binding development sequence
+
+For every future new Journey, every future Story remediation explicitly authorized by Founder, and every future Gold promotion, Story development MUST proceed in this order:
+
+> **FACT FIRST**  
+> → **PLACE CAUSALITY**  
+> → **STORY MECHANISM**  
+> → **ANTI-TEMPLATE COMPARISON**  
+> → **LV1 CAUSAL PROOF**  
+> → **STORY LOCK**  
+> → **LV1-LV10 EXPANSION**  
+> → **STORY / DISCOVERY SEPARATION**  
+> → **LEARNING PACKAGE**  
+> → **GOLD PROMOTION**
+
+An Agent MUST NOT jump directly from a Journey location to drafting a complete Lv1-Lv10 Story. Full Story drafting before the pre-lock gates pass is `FACT_FIRST_PIPELINE_VIOLATION`.
+
+This governance extension does not reopen any already approved Gold Story. Existing approved Gold Story prose, Narrative DNA, and fingerprints remain the comparison baseline unless a separate Founder task explicitly authorizes remediation.
+
+### 18.2 Blocking Gate A — Source Truth
+
+Authoritative place research is REQUIRED before Story architecture is locked.
+
+Preferred source hierarchy, in order:
+
+1. UNESCO or equivalent international heritage authority;
+2. national, provincial, or municipal government;
+3. official museum, heritage, monument, or site authority;
+4. official cultural institution;
+5. reputable academic or institutional source when required.
+
+Tourism blogs, social-media posts, unsourced travel articles, search-result snippets, AI-generated summaries, and unreviewed secondary summaries MUST NOT become binding factual evidence.
+
+At minimum, factual claims involving history, dates, historical development, real historical people, architecture, construction, restoration, conservation, heritage status, cultural practices, traditional crafts, spatial organization, building functions, landscape design, water systems, paths, bridges, gates, pavilions, windows, materials, inscriptions, rituals, regulations, prohibitions, named historical events, current heritage management, and factual site-specific cause/effect claims require approved source provenance when asserted as fact.
+
+If a factual statement materially supports Goal, Conflict, Choice, Climax, Consequence, Transformation, Ending, Cultural Anchor, or the dramatic engine, its approved source provenance is mandatory.
+
+Binding stop condition:
+
+`SOURCE EVIDENCE INSUFFICIENT — STORY DEVELOPMENT STOPPED`
+
+When evidence is insufficient the Agent may only:
+
+A. remove the unsupported claim;
+B. replace it with a verified factual mechanism;
+C. convert the relevant action into clearly fictional contemporary character behavior when that conversion does not falsely imply historical truth; or
+D. stop and report insufficient evidence.
+
+Inventing a plausible fact is never an allowed option.
+
+An untraceable factual premise produces:
+
+`UNVERIFIED FACTUAL CLAIM — BLOCKED`
+
+### 18.3 Blocking Gate B — Fact / Fiction Boundary
+
+Phoenix may use fictional narrative. The following are permitted when compatible with the verified setting and clearly treated as fiction:
+
+- fictional protagonist;
+- fictional supporting characters;
+- fictional contemporary assignment;
+- fictional dialogue;
+- fictional personal motivation;
+- fictional interpersonal conflict;
+- fictional present-day action;
+- fictional object created or used by the protagonist.
+
+Before Story lock the source-governance record MUST classify material premises as one of:
+
+- `VERIFIED FACT`
+- `FICTIONAL CHARACTER ACTION`
+- `FICTIONAL DIALOGUE`
+- `FICTIONAL PERSONAL MOTIVATION`
+- `INTERPRETIVE STORY DEVICE`
+- `UNSUPPORTED FACTUAL CLAIM`
+
+`UNSUPPORTED FACTUAL CLAIM` is always `BLOCKED`.
+
+Fictional actions MUST NOT be represented as documented historical events or practices. An interpretive Story device is allowed only when it does not falsely assert unsupported historical fact.
+
+### 18.4 Real historical person protection
+
+Phoenix MUST NOT invent consequential actions, dialogue, private thoughts, intentions, motives, or design purposes for a real historical person and present them as fact.
+
+A sentence equivalent to `乾隆在这里决定……` requires approved evidence that supports that specific action. A statement equivalent to `the architect intentionally built this feature specifically so that…` requires approved evidence of that intention.
+
+Observed spatial effect, present-day interpretation, and documented historical intention are three different claim types. One MUST NOT be silently converted into another.
+
+Unsupported real-person action, intention, or dialogue is `REAL_HISTORICAL_PERSON_FABRICATION` and `UNVERIFIED FACTUAL CLAIM — BLOCKED`.
+
+### 18.5 Blocking Gate C — Place Causality
+
+A Phoenix Gold Story MUST NOT be `GENERIC STORY + FAMOUS PLACE SKIN`.
+
+Before Story drafting, submit a `PLACE_CAUSAL_MECHANISM` record:
+
+```text
+Verified place property:
+Authoritative source IDs:
+Why this property creates the dramatic possibility:
+Why the same Story would not work unchanged in a generic place:
+Affected Goal / Conflict / Choice / Climax / Consequence / Transformation / Ending dimensions:
+Generic Place Substitution Test: PASS / FAIL
+Human semantic-sufficiency review:
+Result:
+```
+
+**Generic Place Substitution Test:** ask whether the exact Goal → Conflict → Choice → Climax → Consequence chain would work substantially unchanged if the named location were replaced by a generic city park, café, museum, old street, school, or unrelated attraction.
+
+If YES, the required stop result is:
+
+`GENERIC-PLACE STORY — NOT GOLD READY`
+
+The location's verified properties MUST affect at least one major causal dimension and SHOULD affect more than one. A place name or decorative reference to a pavilion, bridge, lotus, old wall, tea, river, palace, garden, carving, or other motif does not satisfy place causality by itself.
+
+The design record MUST identify what causal element breaks when the place property is removed. CI may verify that the record and source links exist and that a declared substitution result is present; Founder/Agent review determines whether that causal claim is intellectually and creatively sufficient.
+
+### 18.6 Blocking Gate D — Story Mechanism
+
+Before Lv1-Lv10 drafting, define the candidate architecture separately from prose:
+
+```text
+PROTAGONIST:
+RELATIONSHIP_GEOMETRY:
+GOAL:
+CONFLICT:
+CHOICE:
+CLIMAX:
+CONSEQUENCE:
+TRANSFORMATION:
+ENDING:
+CULTURAL_ANCHOR_FUNCTION:
+DRAMATIC_ENGINE:
+```
+
+Missing required architecture is `STORY_MECHANISM_INCOMPLETE` and blocks Story lock.
+
+Every Gold Story MUST have a genuinely distinct causal/dramatic structure. Changing city, name, gender, age, profession, historical period, supporting character, object, Memory anchor, scenery, dialogue, vocabulary, or descriptive wording does not establish originality when the causal machine remains materially duplicated.
+
+### 18.7 Blocking Gate E — Semantic Anti-Template
+
+The existing normalized semantic fingerprint architecture and Rule A / Rule B are the only machine collision system. This section creates no parallel semantic registry.
+
+Before Story lock, compare the candidate against **every approved Gold Journey**. Source uniqueness and narrative uniqueness are independent requirements. Different historical facts do not make a repeated causal template acceptable.
+
+Any collision returns the existing binding result:
+
+`TEMPLATE COLLISION - NOT GOLD READY`
+
+The response to collision is to redesign Story causality, not wording, profession, object, city, protagonist, enum name, or NarrativeMechanismFamily label.
+
+Taxonomy laundering remains prohibited. A new mechanism family requires the review record in §17.10 and MUST be reusable beyond one Journey. A Journey-specific or near-synonym family introduced solely to evade collision is `NARRATIVE_MECHANISM_TAXONOMY_LAUNDERING` and `BLOCKED`.
+
+**Distinctness never overrides truth.** If a distinct mechanism requires fabricated history, heritage behavior, architecture, cultural practice, rule, or real-person action, Story development MUST stop and another verified place mechanism must be found.
+
+### 18.8 Blocking Gate F — Lv1 Causal Proof
+
+Before Lv2-Lv10 expansion, Lv1 MUST already contain the essential causal skeleton:
+
+- protagonist;
+- concrete goal;
+- conflict;
+- enacted choice;
+- climax or decisive event;
+- caused consequence.
+
+A Lv1 that provides only person + place + atmosphere fails even if the planned Lv10 is structurally complete.
+
+Failure result:
+
+`LV1 CAUSAL PROOF FAILED — DO NOT EXPAND`
+
+Only after Source Truth, Fact/Fiction Boundary, Place Causality, Story Mechanism, Anti-Template, and Lv1 Causal Proof all pass may the architecture be recorded as `STORY LOCKED` and expanded across Lv1-Lv10.
+
+### 18.9 Story lock and Lv1-Lv10 expansion
+
+After `STORY LOCKED`, Lv2-Lv10 deepen the same causal Story. They may deepen action, relationship, environment, emotion, material detail, causal context, and language complexity. They MUST NOT silently replace the dramatic engine.
+
+Lv10 MUST remain Story. It MUST NOT become an academic essay, semantic audit, validation explanation, anti-template defense, architecture lecture, or historical textbook. Structural distinction should be experienced through action.
+
+Story / Discovery separation in §6 remains binding: Story owns lived causality; Discovery owns verified knowledge that adds understanding without retelling Story.
+
+### 18.10 Machine-verifiable contract vs human authority
+
+Phoenix explicitly separates **MACHINE-VERIFIABLE CONTRACT** from **HUMAN SEMANTIC SUFFICIENCY REVIEW**.
+
+CI can deterministically verify, where implemented:
+
+- source records exist;
+- source authority classification is present;
+- required fact/fiction claim classification is present;
+- a verified factual claim references approved evidence;
+- unsupported factual claims are blocked;
+- place-causality record fields exist;
+- declared generic-place substitution outcome exists;
+- Story mechanism fields exist;
+- normalized fingerprint completeness;
+- Rule A / Rule B arithmetic against the canonical Gold catalog;
+- mechanism-family governance record completeness;
+- Lv1 causal-proof fields exist;
+- pipeline ordering flags and stop states.
+
+CI cannot independently prove:
+
+- that a factual interpretation is intellectually honest beyond its recorded evidence;
+- that a Story truly feels native to the place;
+- that two Stories are creatively too similar despite passing deterministic thresholds;
+- that a cultural interpretation is nuanced enough;
+- literary quality;
+- emotional effectiveness;
+- whether prose feels artificial.
+
+Founder / human review remains authoritative for those judgments. Phoenix MUST NOT describe deterministic record checks as machine proof of historical truth, cultural truth, place-native literary quality, or natural-language semantic entailment.
+
+### 18.11 Governance scope
+
+This Story Truth + Place-Causality gate applies to:
+
+1. future new Journeys;
+2. future Story remediations only when separately authorized;
+3. future Gold promotions.
+
+It does **not** retroactively reopen or rewrite the eight approved Gold Stories on the current baseline. It does not authorize Suzhou continuation, background generation, visual changes, Passport/map/location-hierarchy changes, or any unrelated runtime work.
