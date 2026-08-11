@@ -98,6 +98,49 @@ After the automated content gate and machine semantic gate pass, the Story must 
 
 A human Story collision blocks Gold readiness even when deterministic semantic collision arithmetic is green.
 
+## Mandatory Story development closed loop
+
+Every AI Story development or remediation cycle MUST follow this loop on the **current exact candidate head**:
+
+> **MODIFY OR CREATE STORY → CHANGE / COMPLIANCE PROOF → MACHINE CONTRACT CHECK → MACHINE SEMANTIC CHECK → AGENT LITERARY REVIEW → HUMAN DE-SKINNED CATALOG COMPARISON → RUNTIME STORY PARITY → EXACT-HEAD PREVIEW → FOUNDER REVIEW → APPROVE OR REVISE**
+
+The loop has two different entry proofs:
+
+1. **Existing Story modification / remediation — ACTIVE STORY CHANGE PROOF**
+   - compare the pre-change Story with the current runtime-active Story;
+   - verify the intended protagonist, relationship, Story Shape, decisive action, Memory Moment, and ending actually changed where the remediation requires them to change;
+   - verify rejected names, plot references, artifacts, and Story skeletons are absent from every active runtime route, including adaptive language-level rendering;
+   - old Story material may remain only as explicitly non-runtime historical evidence when useful for audit.
+
+2. **New Story development — NEW STORY COMPLIANCE PROOF**
+   - verify the candidate against all binding Narrative, New Journey, acceptance, Story Truth, place-causality, Lv1/Lv5/Lv10, Chinese narrative quality, and human Story requirements before Preview;
+   - no new Story may reach Preview merely because fields are complete or CI is green.
+
+For **both** modified and new Stories, the Agent MUST then:
+
+- run Rule A / Rule B against the complete current approved-Gold semantic catalog;
+- compare `DE-SKINNED STORY SPINE`, `STORY SHAPE`, protagonist/life-stage pattern, relationship geometry, opening pattern, climax pattern, ending pattern, Story Memory Moment, and emotional texture against **every** current Founder-approved Gold Story;
+- record `AGENT_LITERARY_REVIEW` separately from machine results;
+- fail the cycle if the Story is materially the same template with only city, profession, names, culture nouns, props, or wording changed;
+- prove **RUNTIME STORY PARITY** through the same resolver/rendering path used by the product for Founder-visible Lv1/Lv5/Lv10. A release SHA health check, successful deploy, catalog-unit test, or source-file assertion alone is insufficient if the rendered Story can still come from an old/generic path;
+- generate and hand off an exact-head Preview only after all pre-Preview Story gates pass.
+
+`RUNTIME STORY PARITY` MUST verify at minimum:
+
+- Founder-visible Lv1, Lv5, and Lv10 resolve from the intended active Story package;
+- expected current protagonist / relationship / decisive Story markers are present;
+- rejected prior-Story markers and generic fallback Story text are absent;
+- the Preview release SHA equals the reviewed candidate SHA.
+
+Founder review closes the loop:
+
+- before Founder decision: `FOUNDER_STORY_APPROVAL = PENDING`;
+- if Founder rejects, requests changes, or reports runtime/content mismatch: the previous Preview/review result is invalidated, Story work returns to `MODIFY OR CREATE STORY`, and **the entire gate sequence must rerun on a new exact head**;
+- if Founder approves the Story but has not explicitly authorized merge: keep the PR open and unmerged;
+- Merge is permitted only after the explicit instruction `FOUNDER APPROVED FOR MERGE` and only for the exact candidate that completed the loop.
+
+No AI agent may skip directly from code change or green CI to Founder handoff. No prior Preview, prior machine score, prior literary review, or prior Founder review may be reused after a Story-affecting change without rerunning the applicable gates.
+
 ## Visible PR report
 
 `app/tool/generate_journey_quality_report.dart` must expose the automated gate separately from pending human/Founder states. A clean automated report should use language equivalent to:
