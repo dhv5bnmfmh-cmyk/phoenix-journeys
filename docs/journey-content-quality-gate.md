@@ -1,70 +1,113 @@
 # Phoenix Journey Content Quality Agent
 
-`PhoenixJourneyContentQualityAgent` is the release authority for journey content. The deterministic auditor detects structural and content problems; the agent converts those findings into scores, release decisions, and repair instructions.
+`PhoenixJourneyContentQualityAgent` is a deterministic **automated content-contract gate**. It is not the release authority for literary quality, human Story differentiation, Founder approval, or Gold promotion.
 
-## Release decisions
+The binding Story-quality authority remains the combination of:
 
-- `approved`: no detected issues; content may be published.
-- `needsRevision`: improvement-level findings remain; content stays out of release until refined.
-- `blocked`: one or more critical findings exist; publishing is prohibited.
+- `docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md`;
+- `docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md` where applicable;
+- `docs/templates/PHOENIX_STORY_DISCOVERY_DESIGN_MATRIX.md` and the current acceptance matrices;
+- `ai/AI_BEHAVIOR.md`;
+- the canonical semantic fingerprint registry for Rule A / Rule B;
+- explicit Founder approval where required.
 
-## Complete release surface
+## Automated decisions
 
-The release catalog contains:
+The deterministic agent may return:
 
-- 8 regular city journeys;
-- 4 special journeys covering literary fantasy, mythology, zhiguai, and folk-inspired fiction;
-- 10 public Phoenix levels for each journey;
-- 120 mandatory journey-level inspections in every preview release.
+- `approved`: automated content-contract checks pass; the content is **eligible to enter human/Founder review**;
+- `needsRevision`: one or more automated improvement findings remain;
+- `blocked`: one or more automated blocking findings remain.
 
-The report must use `allJourneyExperiences`. Using only `dailyJourneyExperiences` is incomplete and must fail product-rule validation.
+`approved`, `isPublishable`, and `canPublish` are legacy/runtime names whose scope is strictly the automated content gate. They MUST NOT be read or reported as `STORY QUALITY PASS`, `NARRATIVE QUALITY PASS`, `GOLD READY`, or Founder approval.
 
-## What the agent reviews
+## Separate authority states
 
-The agent runs against every regular and special journey at Phoenix Lv.1–10. It reviews:
+Every Story-quality report must keep these states distinct:
 
-- the approved character range and one- or two-paragraph shape for the active Phoenix level;
-- opening scene, narrative movement, paragraph boundaries, and closing meaning;
-- pinyin, Vietnamese, and English alignment;
-- discovery novelty, depth, and one- or two-entry structure;
+```text
+MACHINE_CONTENT_GATE: PASS / FAIL
+MACHINE_SEMANTIC_GATE: PASS / FAIL
+AGENT_SEMANTIC_SUFFICIENCY: PASS / REQUIRES_REVISION / BLOCKED / PENDING
+AGENT_LITERARY_REVIEW: PASS / REQUIRES_REVISION / BLOCKED / PENDING
+HUMAN_NARRATIVE_ANTI_TEMPLATE: PASS / REQUIRES_REVISION / BLOCKED / PENDING
+FOUNDER_STORY_APPROVAL: APPROVED / REJECTED / PENDING
+OVERALL_STORY_QUALITY: PASS / REQUIRES_REVISION / BLOCKED / PENDING
+AUTOMATED_SCORE_USED_AS_LITERARY_APPROVAL: NO
+```
+
+Rule A = 0 and Rule B = 0 establish only the machine semantic-collision result. They do not establish human-reader differentiation.
+
+## What the deterministic agent reviews
+
+The agent runs across the configured Phoenix Journey catalog and language levels. Depending on current implementation it may review:
+
+- approved character ranges and paragraph shape;
+- required structural fields and content presence;
+- opening/closing contract signals implemented by code;
+- pinyin, Vietnamese, and English alignment checks implemented by code;
+- Discovery novelty/depth checks implemented by code;
 - vocabulary validity and duplication;
 - separation between comprehension and expression prompts;
-- genre integrity for special journeys, preventing urban-heritage filler from entering dream, myth, zhiguai, or folk-fantasy stories;
-- retention of HSK and TOCFL only as internal calibration and migration evidence.
+- special-Journey genre signals;
+- exact duplication and other deterministic content rules.
 
-## Special-journey narrative integrity
+The report must state the exact implemented scope rather than imply natural-language understanding that the code does not possess.
 
-Special journeys use their own enrichment arcs:
+## What the deterministic agent cannot prove
 
-- `literary-roaming`: butterfly, bamboo forest, dream, awakening, and identity;
-- `myth-tracing`: moonlight, osmanthus, bamboo slip, white rabbit, return, and myth variation;
-- `strange-night-talks`: storm, inn, shadowless guest, coin, promise, watches of the night, and rooster call;
-- `folk-secret-land`: river lantern, upstream movement, future reflection, local specificity, and choice.
+Automated green status cannot prove:
 
-Their adaptive stories must not fall back to generic architecture, restoration, street, or heritage-preservation passages.
+- that a protagonist feels alive;
+- that a Goal matters for a human reason;
+- that a Relationship is emotionally or causally meaningful;
+- that a Choice carries a real cost;
+- that a climax is more than a revised method succeeding;
+- that Chinese prose feels natural rather than engineered;
+- that exposition is artistically restrained;
+- that a Story contains a memorable human moment;
+- that Story Shape is genuinely different to a reader;
+- that a de-skinned Story spine does not collide with an approved Gold Story;
+- that Lv5 works as literature;
+- that Lv10 deepens rather than inflates;
+- that removing the final explanation improves the ending;
+- that Founder approved the exact candidate.
 
-## Agent output
+Those are Agent/human/Founder review responsibilities defined by the canonical Story standards and design matrix.
 
-Every journey-level combination receives:
+## Human literary and anti-template handoff
 
-- a score from 0 to 100 and a quality grade;
-- an `approved`, `needsRevision`, or `blocked` release status;
-- issue dimensions and priorities;
-- concrete repair actions, such as rebuilding paragraph two, restoring multilingual support, correcting the Phoenix length range, or replacing repeated discoveries.
+After the automated content gate and machine semantic gate pass, the Story must still complete the human gates in `PHOENIX_STORY_DISCOVERY_DESIGN_MATRIX.md`, including:
+
+- protagonist humanity;
+- relationship deletion test;
+- human stakes;
+- Cost of Choice Review;
+- climax-quality review;
+- behavioral transformation;
+- Story Memory Moment;
+- Story Shape;
+- de-skinned Story Spine against every current Founder-approved Gold Story;
+- nearest Story collision;
+- Chinese narrative quality;
+- exposition / AI case-study tone risk;
+- Lv1 Human Story Proof;
+- Lv5 primary literary review;
+- Lv10 deepen-not-inflate review;
+- LAST_EXPLANATION_REMOVAL_TEST.
+
+A human Story collision blocks Gold readiness even when deterministic semantic collision arithmetic is green.
 
 ## Visible PR report
 
-Every pull-request update runs `app/tool/generate_journey_quality_report.dart` before the preview build. The workflow:
+`app/tool/generate_journey_quality_report.dart` must expose the automated gate separately from pending human/Founder states. A clean automated report should use language equivalent to:
 
-1. inspects all 12 journeys across Phoenix Lv.1–10;
-2. writes both Markdown and JSON evidence;
-3. records regular, special, total-journey, profile, and inspection counts;
-4. uploads the evidence as a workflow artifact;
-5. creates or updates one dedicated quality-agent comment on the pull request;
-6. blocks the preview build when any combination is `needsRevision` or `blocked`.
+`AUTOMATED CONTENT GATE: PASS — ELIGIBLE FOR HUMAN REVIEW`
 
-A valid clean report must show 12 journeys, 10 profiles, 120 inspections, zero revisions, and zero blocked combinations.
+It must not say that machine green alone authorizes release or Gold Story acceptance.
 
 ## CI enforcement
 
-Flutter tests call `inspectPublishedCatalog` across `allJourneyExperiences` and every Phoenix profile. Additional tests verify special-journey length ranges, paragraph structure, multilingual support, genre signals, and separation between the four expanded stories. CI and the Cloudflare preview require the entire batch to be publishable.
+CI may enforce deterministic contract failures and may verify that required human-review records/states exist. CI must not hard-code literary approval or claim that string presence, scores, test counts, or enum arithmetic independently prove literary quality.
+
+A valid build may be machine-green while `OVERALL_STORY_QUALITY = PENDING` because human literary review or Founder review is still pending. That is a truthful state, not a CI failure by itself unless the current workflow phase explicitly requires those approvals.
