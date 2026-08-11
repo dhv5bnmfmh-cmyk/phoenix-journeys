@@ -20,11 +20,11 @@ AI 是同行者，不是冷漠的评分机器。
 
 ## Binding Journey Story truth + place-causality behavior
 
-Before drafting, repairing, evaluating, or preparing any Phoenix Journey Story for Gold acceptance, the Agent MUST read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), [PHOENIX NEW JOURNEY CREATION STANDARD](../docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), and the canonical semantic gate implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
+Before drafting, repairing, evaluating, or preparing any Phoenix Journey Story for Gold acceptance, the Agent MUST read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), [PHOENIX NEW JOURNEY CREATION STANDARD](../docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), [PHOENIX HUMAN NARRATIVE QUALITY GATE](../docs/PHOENIX_HUMAN_NARRATIVE_QUALITY_GATE.md), and the canonical semantic gate implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
 
 The mandatory development order is:
 
-> **FACT FIRST** → **PLACE CAUSALITY** → **STORY MECHANISM** → **ANTI-TEMPLATE COMPARISON** → **LV1 CAUSAL PROOF** → **STORY LOCK** → **LV1-LV10 EXPANSION** → **STORY / DISCOVERY SEPARATION** → **LEARNING PACKAGE** → **GOLD PROMOTION**
+> **FACT FIRST** → **PLACE CAUSALITY** → **STORY MECHANISM** → **ANTI-TEMPLATE COMPARISON** → **HUMAN NARRATIVE QUALITY REVIEW** → **LV1 CAUSAL PROOF** → **STORY LOCK** → **LV1-LV10 EXPANSION** → **STORY / DISCOVERY SEPARATION** → **LEARNING PACKAGE** → **GOLD PROMOTION**
 
 The Agent MUST NOT jump from a location name directly to a full Lv1-Lv10 Story.
 
@@ -40,8 +40,9 @@ Before Story lock the Agent MUST:
 8. reject a Story whose Goal → Conflict → Choice → Climax → Consequence remains substantially unchanged when the named place is replaced with a generic park, café, museum, old street, school, or unrelated attraction;
 9. define the Story architecture before full prose: protagonist, relationship geometry, goal, conflict, choice, climax, consequence, transformation, ending, cultural-anchor function, and dramatic engine;
 10. compare the candidate against every approved Gold semantic fingerprint using the existing Rule A / Rule B gate;
-11. require Lv1 to contain the causal skeleton before any Lv2-Lv10 expansion;
-12. record machine-verifiable contract evidence separately from human/Founder semantic-sufficiency and literary review.
+11. complete the binding human narrative quality review, including de-skinned causal-spine comparison against every approved Gold Journey, before Story Lock;
+12. require Lv1 to contain the causal skeleton before any Lv2-Lv10 expansion;
+13. record machine-verifiable contract evidence separately from Agent semantic sufficiency, Agent literary review, human anti-template review, and Founder approval.
 
 The Agent MUST use these exact stop outcomes where applicable:
 
@@ -49,6 +50,7 @@ The Agent MUST use these exact stop outcomes where applicable:
 - `UNVERIFIED FACTUAL CLAIM — BLOCKED`
 - `GENERIC-PLACE STORY — NOT GOLD READY`
 - `TEMPLATE COLLISION - NOT GOLD READY`
+- `HUMAN NARRATIVE TEMPLATE REUSE — NOT GOLD READY`
 - `LV1 CAUSAL PROOF FAILED — DO NOT EXPAND`
 
 The Agent MUST NOT continue after a binding STOP condition, fabricate a workaround, use tourism blogs/social posts/unsourced travel articles/AI summaries as binding factual evidence, weaken tests to admit a candidate, or add filler facts merely to create drama.
@@ -57,7 +59,7 @@ Distinctness never overrides truth. If a unique dramatic engine depends on an un
 
 ## Binding Journey semantic anti-template behavior
 
-When drafting, repairing, evaluating, or preparing a Phoenix Journey for Gold acceptance, the Agent MUST first read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md) and the canonical normalized semantic catalog implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
+When drafting, repairing, evaluating, or preparing a Phoenix Journey for Gold acceptance, the Agent MUST first read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), [PHOENIX HUMAN NARRATIVE QUALITY GATE](../docs/PHOENIX_HUMAN_NARRATIVE_QUALITY_GATE.md), and the canonical normalized semantic catalog implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
 
 For every NEW Gold Journey candidate, the Agent MUST:
 
@@ -78,6 +80,27 @@ For every NEW Gold Journey candidate, the Agent MUST:
 The Agent MUST distinguish **Evidence Provenance** from **Semantic Sufficiency**. Deterministic CI can verify active-source identity, exact Story-span presence, dimension/mechanism alignment, non-empty rationale fields, approved source-record presence, fact/fiction classification fields, declared generic-substitution outcome, and Lv1 causal-contract completeness. CI MUST NOT be represented as independently understanding whether arbitrary natural-language Story prose semantically entails an enum, whether a factual interpretation is intellectually honest, whether a Story truly feels native to the place, or whether prose works emotionally. Founder/Agent review remains responsible for those judgments.
 
 The Agent MUST NOT create a Journey-specific semantic category, bypass, allowlist, Founder-name exception, city exception, temporary exception, hard-coded `PASS`, alternate test-only classification, or near-synonym mechanism family solely to evade a collision. Existing approved-Gold semantic collision debt must be surfaced honestly and must not be used as precedent for a future candidate.
+
+## Binding human narrative quality behavior
+
+Machine validation is a floor. It MUST NOT be reported as literary approval.
+
+For every new Story, Founder-authorized Story remediation, and Gold candidate, the Agent MUST read and complete [PHOENIX HUMAN NARRATIVE QUALITY GATE](../docs/PHOENIX_HUMAN_NARRATIVE_QUALITY_GATE.md) using [PHOENIX HUMAN NARRATIVE QUALITY GATE RECORD](../docs/templates/PHOENIX_HUMAN_NARRATIVE_QUALITY_GATE_RECORD.md).
+
+The Agent MUST:
+
+1. separate `MACHINE_CONTENT_GATE`, `MACHINE_SEMANTIC_GATE`, `AGENT_SEMANTIC_SUFFICIENCY`, `AGENT_LITERARY_REVIEW`, `HUMAN_NARRATIVE_ANTI_TEMPLATE`, `FOUNDER_STORY_APPROVAL`, and `OVERALL_STORY_QUALITY`;
+2. never infer Agent literary `PASS`, human anti-template `PASS`, Founder approval, or overall Story Quality `PASS` from automated scores, green CI, complete fields, or Rule A / Rule B alone;
+3. perform a de-skinned causal-spine comparison against every current approved Gold Story by ignoring city, character names, incidental profession, named object, cosmetic motif, and taxonomy labels;
+4. block reader-perceived reuse of the same opening trigger → desire → stakes → relationship pressure → conflict → failure → choice → cost → climax → consequence → transformation → ending behavior chain, even when deterministic semantic collision thresholds are not reached;
+5. explain the nearest-Gold difference using actual Story events and reader-perceived causality without relying on enum names or governance terminology;
+6. require believable human stakes and relationship pressure appropriate to the Story rather than treating task completion or a defective prototype as sufficient dramatic conflict;
+7. verify that the key choice carries a cost, risk, commitment, or meaningful rejected alternative and that the climax does more than prove a revised method works;
+8. verify behavioral transformation and a Journey-specific memory anchor that is not an interchangeable Phoenix default object;
+9. consider at least three structurally distinct Story architectures before Story Lock for a new Story or substantial Founder-authorized remediation, and record why the selected architecture is strongest;
+10. keep `OVERALL_STORY_QUALITY = PENDING` while any required Agent, human, or Founder review remains pending.
+
+If a Story-quality remediation finishes with `STORY_CONTENT_CHANGED = NO`, the Agent MUST supply the complete human narrative quality record proving that the unchanged architecture remains the strongest compliant candidate. Machine green alone is invalid evidence.
 
 ## Binding Journey background production behavior
 
