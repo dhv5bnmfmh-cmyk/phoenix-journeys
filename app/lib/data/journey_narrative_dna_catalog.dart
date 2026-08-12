@@ -178,6 +178,55 @@ const suzhouGardenGoldNarrativeDna = JourneyNarrativeDnaRecord(
   storyRhythm: 'request-first-disappearance-call-return-second-disappearance-restraint-reappearance-reciprocal-waiting',
 );
 
+const luoyangLongmenGoldNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'luoyang-longmen-grottoes',
+  narrativeIdentity:
+      'adult-siblings-house-sale-signature-is-torn-to-refuse-relational-exit-price',
+  protagonistIdentity:
+      'Zhou-Lan-forty-two-year-old-local-sister-and-Zhou-Yu-thirty-seven-year-old-away-working-brother',
+  protagonistAgeIdentity: 'forty-two-year-old-sister-and-thirty-seven-year-old-brother',
+  protagonistArchetype:
+      'responsibility-heavy-older-sister-who-confuses-carrying-work-with-owning-the-decision',
+  openingSituation:
+      'same-day-house-sale-signature-after-sister-has-already-risked-a-nonrefundable-new-home-deposit',
+  storyGoal:
+      'obtain-brothers-signature-and-close-sale-before-the-agreed-signing-time',
+  locationMechanism:
+      'dense-cliff-caves-and-niches-require-repeated-close-pauses-while-Fengxian-monumental-group-requires-pulling-back-to-read-the-whole',
+  movementPattern:
+      'Yi-River-cliff-walk-with-repeated-close-pauses-distance-shifts-and-return-to-brother-at-Fengxian',
+  conflictType:
+      'sisters-efficiency-and-unilateral-decisions-vs-brothers-demand-to-remain-a-real-participant-in-family-decisions',
+  choiceType:
+      'tear-the-signature-page-and-accept-deposit-loss-instead-of-buying-the-signature-with-brothers-future-withdrawal',
+  climaxType:
+      'brother-holds-pen-over-signature-box-and-offers-signature-only-if-he-is-never-called-back-into-family-decisions',
+  consequenceType:
+      'signing-window-passes-deposit-is-lost-house-remains-jointly-owned-and-relationship-remains-unresolved-but-not-abandoned',
+  emotionalArc:
+      'administrative-certainty-to-irritation-to-recognition-of-relational-price-to-costly-stop-with-residue',
+  historicalLearningMechanism:
+      'Longmen-cliff-density-and-Fengxian-scale-create-the-changing-viewing-distance-while-factual-period-style-and-conservation-learning-remain-in-Discovery',
+  resolutionType:
+      'transaction-is-stopped-without-solving-the-house-or-erasing-the-sibling-conflict',
+  endingMechanism:
+      'brother-asks-for-all-options-before-the-next-house-discussion-and-sister-touches-the-two-torn-halves-without-taking-them-out',
+  memoryAnchorType:
+      'signature-page-torn-along-old-fold-before-Fengxian-and-kept-in-the-bag',
+  achievementType: 'shared-decision-space-protected-at-a-real-financial-cost',
+  rewardSymbolism:
+      'two-kept-paper-halves-mark-a-stopped-transaction-not-a-restored-agreement',
+  temporalPattern: 'single-afternoon-under-a-same-day-signing-deadline',
+  supportingStructure:
+      'adult-sister-and-brother-whose-future-family-participation-is-the-price-of-the-offered-signature',
+  centralMetaphor:
+      'not-used-as-place-substitute-location-mechanics-drive-time-and-distance-pressure-directly',
+  narrativeVoice:
+      'third-person-close-to-older-sister-action-led-without-guide-lecture',
+  storyRhythm:
+      'unilateral-plan-cliff-pauses-escalating-hurry-condition-offered-pen-torn-page-deadline-passes-unresolved-request',
+);
+
 final approvedNarrativeDnaCatalog =
     List<JourneyNarrativeDnaRecord>.unmodifiable(<JourneyNarrativeDnaRecord>[
   for (final record in baseline.approvedNarrativeDnaCatalog)
@@ -191,6 +240,7 @@ final approvedNarrativeDnaCatalog =
       record,
   guangzhouChenClanGoldNarrativeDna,
   suzhouGardenGoldNarrativeDna,
+  luoyangLongmenGoldNarrativeDna,
 ]);
 
 int duplicatedMajorDimensions(

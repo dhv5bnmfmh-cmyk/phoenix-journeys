@@ -14,6 +14,7 @@ import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 import 'guangzhou_chen_clan_one_pass.dart';
 import 'journey_expansion_catalog.dart';
+import 'luoyang_longmen_gold.dart';
 import 'summer_palace_adaptive_story_levels.dart';
 import 'summer_palace_language_level_catalog.dart';
 
@@ -68,6 +69,22 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
       profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band),
       profile: profile,
       knownWords: knownWords,
+    );
+  }
+  if (experience.id == luoyangLongmenGoldJourneyId) {
+    final level =
+        profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band);
+    final story = longmenGoldStoryForLevel(level);
+    return JourneyLevelContent(
+      storyParagraphs: List<String>.unmodifiable(story.chinese),
+      storyAnnotations: longmenGoldStoryAnnotations(level),
+      words: longmenGoldVocabularyForLevel(
+        level,
+        knownWords: knownWords,
+      ),
+      discoveries: <DiscoveryEntry>[longmenGoldDiscoveries[level - 1]],
+      wonderQuestion: luoyangLongmenGoldWonderQuestion,
+      expressQuestion: luoyangLongmenGoldExpressQuestion,
     );
   }
   throw StateError(

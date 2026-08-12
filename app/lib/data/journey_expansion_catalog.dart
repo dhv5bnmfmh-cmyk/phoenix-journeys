@@ -5,6 +5,7 @@ import 'package:pinyin/pinyin.dart';
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
+import 'luoyang_longmen_gold.dart';
 
 const journeyExpansionSources = <StorySourceRecord>[
   StorySourceRecord(
@@ -313,38 +314,11 @@ const suzhouGardenCulturalPoint =
 const suzhouGardenMemoryAnchor = '抬起又放下的手，与下一处回望的程朗';
 const suzhouGardenCompletionSummary = '下一处等我：两个人都学会在短暂看不见时等对方。';
 
-const _luoyangParagraphs = <String>[
-  '傍晚，你沿伊河走到龙门石窟。两岸山崖像一道石门，密集的洞窟和佛龛分布在灰色岩壁上。',
-  '从北魏到唐代，工匠在这里持续开凿。不同年代的造像留下服饰、面容和雕刻风格的变化。',
-  '走近奉先寺，巨大的主像与两侧造像共同形成庄严空间。石头上的细节，让遥远历史突然有了人的尺度。',
-  '龙门石窟不仅是一组宏伟雕像，也是一部刻在山崖上的艺术史。河水向前流，石刻则保存着时代留下的表情。',
-];
-
-const _luoyangAnnotations = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Bàngwǎn, nǐ yán Yī Hé zǒudào Lóngmén Shíkū. Liǎng àn shānyá xiàng yí dào shímén, mìjí de dòngkū hé Fókān fēnbù zài huīsè yánbì shàng.', vietnamese: 'Chiều tối, bạn đi dọc sông Y đến hang đá Long Môn. Vách núi hai bờ như một cánh cổng đá, đầy hang và hốc tượng.', english: 'At dusk, you follow the Yi River to Longmen, where cliffs form a stone gate covered with caves and niches.'),
-  ReadingAnnotation(pinyin: 'Cóng Běiwèi dào Tángdài, gōngjiàng zài zhèlǐ chíxù kāizáo. Bùtóng niándài de zàoxiàng liúxià fúshì, miànróng hé diāokè fēnggé de biànhuà.', vietnamese: 'Từ Bắc Ngụy đến thời Đường, nghệ nhân liên tục tạc đá, để lại thay đổi về trang phục, gương mặt và phong cách điêu khắc.', english: 'From the Northern Wei through the Tang, artisans recorded changing dress, faces, and carving styles.'),
-  ReadingAnnotation(pinyin: 'Zǒujìn Fèngxiān Sì, jùdà de zhǔxiàng yǔ liǎngcè zàoxiàng gòngtóng xíngchéng zhuāngyán kōngjiān. Shítou shàng de xìjié, ràng yáoyuǎn lìshǐ tūrán yǒule rén de chǐdù.', vietnamese: 'Đến gần Phụng Tiên Tự, tượng chính lớn cùng các tượng hai bên tạo nên không gian trang nghiêm. Chi tiết trên đá khiến lịch sử xa xôi trở nên gần với con người.', english: 'At Fengxian Temple, monumental figures create a solemn space whose details bring distant history to human scale.'),
-  ReadingAnnotation(pinyin: 'Lóngmén Shíkū bùjǐn shì yì zǔ hóngwěi diāoxiàng, yě shì yí bù kè zài shānyá shàng de yìshùshǐ. Héshuǐ xiàng qián liú, shíkè zé bǎocúnzhe shídài liúxià de biǎoqíng.', vietnamese: 'Long Môn không chỉ là nhóm tượng hùng vĩ mà còn là lịch sử nghệ thuật khắc trên vách núi. Dòng sông trôi đi, còn đá giữ lại nét mặt của thời đại.', english: 'Longmen is art history carved into a cliff: the river moves on while stone preserves the faces of an era.'),
-];
-
-const _luoyangWords = <WordEntry>[
-  WordEntry(word: '石窟', pinyin: 'shíkū', partOfSpeech: '名词', simpleChinese: '在岩石山体中开凿的洞窟。', translation: 'Hang được đục trong vách đá.', englishDefinition: 'rock-cut grotto', symbol: '🪨'),
-  WordEntry(word: '佛龛', pinyin: 'Fókān', partOfSpeech: '名词', simpleChinese: '安放佛像的小空间。', translation: 'Hốc nhỏ đặt tượng Phật.', englishDefinition: 'Buddhist niche', symbol: '🕯️'),
-  WordEntry(word: '开凿', pinyin: 'kāizáo', partOfSpeech: '动词', simpleChinese: '在石头上挖掘和雕刻。', translation: 'Đào và tạc vào đá.', englishDefinition: 'to excavate and carve', symbol: '⛏️'),
-  WordEntry(word: '造像', pinyin: 'zàoxiàng', partOfSpeech: '名词', simpleChinese: '宗教或纪念用途的雕像。', translation: 'Tượng dùng cho tôn giáo hoặc tưởng niệm.', englishDefinition: 'religious sculpted image', symbol: '🗿'),
-  WordEntry(word: '庄严', pinyin: 'zhuāngyán', partOfSpeech: '形容词', simpleChinese: '严肃而令人尊敬。', translation: 'Trang nghiêm và đáng kính.', englishDefinition: 'solemn and dignified', symbol: '✨'),
-  WordEntry(word: '山崖', pinyin: 'shānyá', partOfSpeech: '名词', simpleChinese: '陡峭的山壁。', translation: 'Vách núi dựng đứng.', englishDefinition: 'cliff face', symbol: '⛰️'),
-  WordEntry(word: '岩壁', pinyin: 'yánbì', partOfSpeech: '名词', simpleChinese: '由岩石形成的陡壁。', translation: 'Vách đá.', englishDefinition: 'rock wall', symbol: '🪨'),
-  WordEntry(word: '细节', pinyin: 'xìjié', partOfSpeech: '名词', simpleChinese: '事物中细小而重要的部分。', translation: 'Chi tiết nhỏ nhưng quan trọng.', englishDefinition: 'detail', symbol: '🔍'),
-  WordEntry(word: '雕刻', pinyin: 'diāokè', partOfSpeech: '动词', simpleChinese: '在材料上刻出形象或图案。', translation: 'Điêu khắc hình hoặc hoa văn.', englishDefinition: 'to carve or sculpt', symbol: '🔨'),
-];
-
-const _luoyangDiscoveries = <DiscoveryEntry>[
-  DiscoveryEntry(text: '龙门石窟集中保存北魏晚期至唐代的重要佛教石刻艺术。', pinyin: 'Lóngmén Shíkū jízhōng bǎocún Běiwèi wǎnqī zhì Tángdài de zhòngyào Fójiào shíkè yìshù.', simpleChinese: '这里保存了北魏到唐代的重要石刻。', vietnamese: 'Long Môn bảo tồn nghệ thuật khắc đá Phật giáo quan trọng từ cuối Bắc Ngụy đến thời Đường.', english: 'Longmen preserves major Buddhist stone art from the late Northern Wei through the Tang.'),
-  DiscoveryEntry(text: '洞窟与佛龛沿伊河两岸的石灰岩山崖分布。', pinyin: 'Dòngkū yǔ Fókān yán Yī Hé liǎng àn de shíhuīyán shānyá fēnbù.', simpleChinese: '许多洞窟分布在伊河边的山崖上。', vietnamese: 'Các hang và hốc tượng phân bố trên vách đá vôi dọc hai bờ sông Y.', english: 'Caves and niches line limestone cliffs beside the Yi River.'),
-  DiscoveryEntry(text: '奉先寺的大型造像群以规模、布局和细节形成完整的视觉中心。', pinyin: 'Fèngxiān Sì de dàxíng zàoxiàng qún yǐ guīmó, bùjú hé xìjié xíngchéng wánzhěng de shìjué zhōngxīn.', simpleChinese: '奉先寺的大型造像构成视觉中心。', vietnamese: 'Quần thể tượng lớn ở Phụng Tiên Tự tạo thành một trung tâm thị giác hoàn chỉnh nhờ quy mô, bố cục và chi tiết.', english: 'The monumental figures at Fengxian Temple form a coherent visual focus through scale, arrangement, and detail.'),
-  DiscoveryEntry(text: '龙门造像体现了中国石刻艺术在不同历史阶段的发展。', pinyin: 'Lóngmén zàoxiàng tǐxiàn le Zhōngguó shíkè yìshù zài bùtóng lìshǐ jiēduàn de fāzhǎn.', simpleChinese: '不同造像展示了艺术风格的变化。', vietnamese: 'Các tượng Long Môn cho thấy sự phát triển của nghệ thuật điêu khắc đá Trung Hoa.', english: 'The sculptures show the development of Chinese stone carving across periods.'),
-];
+final _luoyangParagraphs =
+    List<String>.unmodifiable(longmenGoldStoryForLevel(5).chinese);
+final _luoyangAnnotations = longmenGoldStoryAnnotations(5);
+const _luoyangWords = longmenGoldWords;
+final _luoyangDiscoveries = longmenGoldDiscoveries;
 
 const _quanzhouParagraphs = <String>[
   '上午，你走进泉州开元寺。东西两座石塔越过树梢，安静地标记着这座古代港口城市的天际线。',
@@ -390,7 +364,7 @@ final suzhouGardenJourney = _journeyRecord(
 
 final luoyangLongmenJourney = _journeyRecord(
   id: 'luoyang-longmen-grottoes',
-  title: '洛阳 · 龙门石窟：读一部刻在山崖上的艺术史',
+  title: '洛阳 · 龙门石窟：签字页',
   geoNodeId: 'cn-henan-luoyang-luolong-longmen-grottoes',
   tags: const ['洛阳', '龙门石窟', '北魏', '唐代', '石刻艺术'],
   paragraphs: _luoyangParagraphs,
@@ -438,18 +412,18 @@ final journeyExpansionExperiences = <DailyJourneyExperience>[
     cityCode: 'LYA',
     place: '龙门石窟',
     appBarTitle: '洛阳 · 龙门石窟',
-    storyTitle: '山崖石刻故事',
-    headline: '读一部刻在山崖上的艺术史',
-    description: '沿伊河观察洞窟、造像与跨越多个时代的雕刻风格。',
-    discoveryTeaser: '为什么同一面山崖能看见不同朝代的艺术？',
+    storyTitle: luoyangLongmenGoldStoryTitle,
+    headline: luoyangLongmenGoldHeadline,
+    description: luoyangLongmenGoldDescription,
+    discoveryTeaser: luoyangLongmenGoldDiscoveryTeaser,
     distanceLabel: '1,470 km',
     stampSymbol: '石',
     content: luoyangLongmenJourney,
     storyAnnotations: _luoyangAnnotations,
     words: _luoyangWords,
     discoveries: _luoyangDiscoveries,
-    wonderQuestion: '面对龙门石窟，你最想先观察整体规模还是一尊造像的细节？为什么？',
-    expressQuestion: '请用两到三句话描写石窟、山崖与伊河形成的景象。',
+    wonderQuestion: luoyangLongmenGoldWonderQuestion,
+    expressQuestion: luoyangLongmenGoldExpressQuestion,
   ),
   DailyJourneyExperience(
     id: quanzhouKaiyuanJourney.id,

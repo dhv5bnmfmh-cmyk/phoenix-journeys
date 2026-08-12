@@ -2094,7 +2094,8 @@ class _ChallengeSession {
       'chengdu-kuanzhai-alley' ||
       'nanjing-qinhuai-river' ||
       'guangzhou-chen-clan-academy' ||
-      'suzhou-humble-administrators-garden' =>
+      'suzhou-humble-administrators-garden' ||
+      'luoyang-longmen-grottoes' =>
         _adaptiveGrammarForJourney(journeyId, difficulty),
       'literary-roaming' ||
       'myth-tracing' ||
@@ -2245,6 +2246,16 @@ class _ChallengeSession {
           cause: '廊、墙和植物形成前后遮挡',
           resultSubject: '园林视野',
           resultAction: '随着行走连续变化',
+        ),
+      'luoyang-longmen-grottoes' => (
+          focus: '伊河两岸的洞窟、佛龛与山崖',
+          insight: '比较龙门石窟的整体尺度与细节',
+          subject: '奉先寺大型造像群',
+          action: '用尺度和位置组织观看',
+          result: '比较中央大像与周围造像的整体安排',
+          cause: '不同大小的洞窟与造像沿山崖连续分布',
+          resultSubject: '观看距离',
+          resultAction: '在近处细节与远处整体之间不断变化',
         ),
       'literary-roaming' => (
           focus: '蓝色蝴蝶和竹林梦境',
@@ -2437,6 +2448,12 @@ class _ChallengeSession {
         '程朗在下一处没有回头，也没有等待外婆。',
         '陈玉兰说完“下一处等我”，最后还是追了上去。',
       ],
+      'luoyang-longmen-grottoes' => [
+        '周岚把签字页递回周屿，两人当场完成了卖房签约。',
+        '周屿没有提出任何条件，签完字后立刻替姐姐承担全部定金。',
+        '到奉先寺前，周岚决定跳过所有停留，故事因此没有发生选择。',
+        '周岚撕开签字页后又把两半拼回去，当场补上了双方签名。',
+      ],
       _ => [
         '故事中的地点突然改变，却没有任何前文线索。',
         '人物作出决定以后，后面的结果与决定完全无关。',
@@ -2451,6 +2468,16 @@ class _ChallengeSession {
     List<String> discoveries,
     JourneyChallengeDifficulty difficulty,
   ) {
+    if (journeyId == 'luoyang-longmen-grottoes') {
+      final discoverySentences = _extractSentences(discoveries);
+      return <String>[
+        '周岚把合同收回包里，决定按原计划独自完成房屋交易。',
+        '周屿在奉先寺前签完名字，并要求姐姐以后继续替他决定所有家事。',
+        '两人为了赶时间没有再停下，签字页也始终保持完整。',
+        '周岚撕掉签字页后立即反悔，又让周屿在两半纸上补签名字。',
+        if (discoverySentences.isNotEmpty) discoverySentences.last,
+      ];
+    }
     final specific = switch (journeyId) {
       'literary-roaming' => [
         '他决定统计竹子的数量，不再观察蝴蝶。',
