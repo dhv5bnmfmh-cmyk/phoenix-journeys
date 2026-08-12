@@ -24,3 +24,22 @@ test('Suzhou, Guangzhou, and Hangzhou grammar mappings use current Journey conte
     assert.doesNotMatch(activeMappings, new RegExp(stale));
   }
 });
+
+test('three corrected Journeys use current Story facts in missing-sentence options', () => {
+  for (const anchor of [
+    '方毓把预约卡收回包里',
+    '周绍庭答对全部景名',
+    '陈秀仪把镜头转向刘嘉禾',
+    '刘嘉禾戴上红围巾',
+    '程朗第一次消失后',
+    '陈玉兰说完“下一处等我”',
+  ]) {
+    assert.match(challengeSource, new RegExp(anchor));
+  }
+  for (const stale of [
+    '苏堤和白堤远离湖面',
+    '屋脊装饰全部来自现代印刷',
+  ]) {
+    assert.doesNotMatch(challengeSource, new RegExp(stale));
+  }
+});
