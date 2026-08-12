@@ -70,7 +70,7 @@ void main() {
     ['ba trục ngang', 'ba lớp dọc', 'cửa', 'sảnh', 'sân'],
     ['sân', 'ánh sáng', 'không khí', 'hành lang', 'nối', 'đơn vị kiến trúc'],
     ['ba trục ba lớp', 'chính-phụ', 'trước-sau'],
-    ['chạm gỗ', 'chạm khắc gạch', 'tượng gốm', 'đúc', 'vẽ màu', 'vị trí'],
+    ['chạm gỗ', 'gạch', 'đá', 'tượng gốm', 'đúc', 'vẽ màu', 'vị trí', 'biểu đạt'],
     ['bảo tàng', 'công trình lịch sử', 'bộ sưu tập', 'trưng bày', 'công chúng'],
     ['trọng điểm cấp quốc gia', 'bố cục tổng thể', 'ba trục ba lớp', 'thủ công lĩnh nam', 'văn hóa công cộng'],
   ];
