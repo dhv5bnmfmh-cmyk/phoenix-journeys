@@ -80,8 +80,10 @@ JourneyContentRecord _buildJourney({
 }
 
 const hangzhouStoryParagraphs = <String>[
-  '方毓六十九岁，和周绍庭结婚四十三年。最近半年，周绍庭开始把日期、人名和刚说过的话弄混，有时出门后还会忘记原来的方向。女儿替他约了周一的记忆门诊，方毓把预约卡放在包内层，几次想拿出来，又怕他觉得自己被当成病人。星期六，她说很久没走西湖，拉他从断桥出发。一路上，她不断问“断桥残雪是什么季节”“远处是哪座塔”“他们第一次来时下没下雨”。周绍庭把冬景说成夏天，又说错塔名；第三个问题没有回答。散步渐渐只剩方毓在出题。',
-  '雨点落下来，桥边石阶很快湿了。方毓回头看他，脚下一偏，周绍庭下意识扶住她的手肘：“这里一直滑。”四十三年前第一次走这段路时，他也曾在湿石阶上这样扶她。景名和日期都乱了，这个动作却先于回答发生。方毓把下一道题停住，从包里拿出预约卡，承认今天不是来赏景，而是想证明他还记得两个人的日子。周绍庭没有把卡推回去：“我知道你在怕什么。我也怕。”他看清日期，把卡放进自己的钱包。公交车到站后，他没有让方毓替自己开口，先问司机：“去医院，哪一站下？”',
+  '方毓六十九岁，和周绍庭结婚四十三年。最近半年，周绍庭开始把日期、人名和刚说过的话弄混，有时出门后还会忘记原来的方向。女儿替他约了周一的记忆门诊，方毓把预约卡放在包内层，几次想拿出来，又怕他觉得自己被当成病人。',
+  '星期六，她说很久没走西湖，拉他从断桥出发。一路上，她不断问“断桥残雪是什么季节”“远处是哪座塔”“他们第一次来时下没下雨”。周绍庭把冬景说成夏天，又说错塔名；第三个问题没有回答。散步渐渐只剩方毓在出题。',
+  '雨点落下来，桥边石阶很快湿了。方毓回头看他，脚下一偏，周绍庭下意识扶住她的手肘：“这里一直滑。”四十三年前第一次走这段路时，他也曾在湿石阶上这样扶她。景名和日期都乱了，这个动作却先于回答发生。',
+  '方毓把下一道题停住，从包里拿出预约卡，承认今天不是来赏景，而是想证明他还记得两个人的日子。周绍庭没有把卡推回去：“我知道你在怕什么。我也怕。”他看清日期，把卡放进自己的钱包。公交车到站后，他没有让方毓替自己开口，先问司机：“去医院，哪一站下？”',
 ];
 
 const hangzhouStoryAnnotations = <ReadingAnnotation>[
@@ -91,9 +93,19 @@ const hangzhouStoryAnnotations = <ReadingAnnotation>[
     english: 'Fang Yu and Zhou Shaoting have been married for forty-three years. She hides a clinic appointment card during their West Lake walk from Broken Bridge.',
   ),
   ReadingAnnotation(
+    pinyin: 'Tāmen cóng Duànqiáo chūfā. Fāng Yù bùduàn wèn Xīhú jǐngmíng, Zhōu Shàotíng dá cuò le liǎng cì.',
+    vietnamese: 'Họ xuất phát từ Đoạn Kiều. Phương Dục liên tục hỏi tên cảnh Tây Hồ, còn Chu Thiệu Đình trả lời sai hai lần.',
+    english: 'They set out from Broken Bridge. Fang Yu keeps asking West Lake view-name questions, and Zhou Shaoting answers two incorrectly.',
+  ),
+  ReadingAnnotation(
     pinyin: 'Shíjiē shàng, Zhōu Shàotíng fú zhù tā de shǒuzhǒu. Fāng Yù bù zài chūtí, bǎ yùyuē kǎ jiāo gěi tā.',
-    vietnamese: 'Trên bậc đá ướt, ông đỡ khuỷu tay bà. Bà thôi kiểm tra và trao thẳng thẻ hẹn; ông cất nó vào ví.',
-    english: 'On a wet stone step he catches her elbow. She stops testing him, hands over the appointment card, and he puts it in his own wallet.',
+    vietnamese: 'Trên bậc đá ướt, ông đỡ khuỷu tay bà theo phản xạ, như nhiều năm trước.',
+    english: 'On a wet stone step he instinctively catches her elbow, as he did many years earlier.',
+  ),
+  ReadingAnnotation(
+    pinyin: 'Fāng Yù bù zài chūtí, bǎ yùyuē kǎ jiāo gěi tā. Tā bǎ kǎ fàng jìn zìjǐ de qiánbāo.',
+    vietnamese: 'Bà thôi kiểm tra và trao thẳng thẻ hẹn; ông cất nó vào ví rồi chủ động hỏi trạm bệnh viện.',
+    english: 'She stops testing and hands over the appointment card; he puts it in his own wallet and asks for the hospital stop.',
   ),
 ];
 
