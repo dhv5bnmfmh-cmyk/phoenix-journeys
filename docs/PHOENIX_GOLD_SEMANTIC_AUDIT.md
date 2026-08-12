@@ -1,14 +1,17 @@
 # Phoenix Approved Gold Semantic Audit
 
 **Status:** DETERMINISTIC AUDIT RECORD  
-**Catalog scope:** eight approved Gold Journeys  
+**Catalog scope:** nine approved Gold Journeys
 **Protected baseline:** seven approved Gold Journeys / 21 unique pairs  
 **Source of truth:** `app/lib/data/journey_semantic_fingerprint_catalog.dart`  
-**Pair count:** 28 unique pairs
+**Pair count:** 36 unique pairs
 
 This document records the deterministic output of the normalized semantic fingerprint catalog. It does not override the catalog. If a fingerprint changes, regenerate/review this audit from the canonical registry and active Story evidence.
 
-The original seven-Gold baseline and its 21 pair explanations remain protected. Guangzhou promotion extends that state with seven new comparisons; it does not rewrite the prior pair conclusions.
+The original seven-Gold baseline and its 21 pair explanations remain protected.
+Guangzhou and Suzhou extend that state to nine Gold Stories and 36 current
+comparisons. The executable catalog and pair audit are authoritative for the
+current result.
 
 Collision thresholds remain binding and unchanged:
 
@@ -21,7 +24,12 @@ Collision thresholds remain binding and unchanged:
 
 `VERIFIED` means the registered CORE evidence contract has valid active-Story provenance, aligned dimension/mechanism metadata, and a non-empty semantic rationale. It does **not** mean CI independently understands or proves natural-language semantic classification. Semantic sufficiency remains a Founder/Agent review of cited active-Story spans plus causal rationale.
 
-## Pairwise audit
+## Historical eight-Gold pairwise audit
+
+The 28 rows below preserve the earlier audit record. They are superseded where
+the row describes Hangzhou's former sound-recording Story or Guangzhou's former
+《纸桥》 Story. Current Hangzhou, Guangzhou and Suzhou conclusions are recorded
+below and enforced by the executable 36-pair audit.
 
 | # | Journey A | Journey B | Same engine | Matching CORE dimensions | CORE count | Matching secondary dimensions | Story evidence | Classification | Notes |
 |---:|---|---|---|---|---:|---|---|---|---|
@@ -75,7 +83,11 @@ Forbidden City uses `coexistingValidPerspectivesSynthesizeRelationalModel`; Nanj
 **Rule A:** NOT TRIGGERED.  
 **Rule B:** NOT TRIGGERED.
 
-Hangzhou is protected and remains `evidenceForcesReclassification`: a prior purity model is contradicted by lived sound, the protagonist stops filtering that evidence, and the changed recording/archive preserves revised understanding.
+Hangzhou now uses `embodiedRecognitionEndsHiddenMemoryExam`: a wife conceals a
+memory-clinic appointment behind a familiar walk, tests her husband with named
+views, and stops when his instinctive care on a wet stone step interrupts the
+verbal exam. The appointment is faced through mutual disclosure, not a corrected
+answer, revised artifact, archive, separation, or public-boundary refusal.
 
 Chengdu has moved entirely away from that causal architecture. Its active Story now starts with one courtyard threshold being needed by tea seating and passage, rejects permanent spatial allocation after repeated practical failure, establishes a physical yield-and-return handoff, and reaches climax when a recurring participant independently reproduces that handoff. The ending extends the behavior to another user while Lin Xia does not intervene. No survey form, authenticity-category revision, crossed-out record, or revised artifact carries the resolution.
 
