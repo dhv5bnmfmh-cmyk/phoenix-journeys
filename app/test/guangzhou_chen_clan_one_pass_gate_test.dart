@@ -48,17 +48,48 @@ void main() {
     expect(batchOneMemorySpecFor(guangzhouChenClanJourneyId), isNull);
   });
 
-  test('knownWords filtering stays active on canonical Story vocabulary', () {
+  test('knownWords keep baseline review semantics on canonical vocabulary', () {
     final baseline = resolveAdaptiveJourneyLevel(experience, profile: profile(10));
-    final known = baseline.words.first.word;
-    final filtered = resolveAdaptiveJourneyLevel(
+    final known = baseline.words
+        .where((entry) => !guangzhouChenClanVocabularyLevelCatalog[entry.word]!.isCulture)
+        .map((entry) => entry.word)
+        .take(1)
+        .toSet();
+    final reviewed = resolveAdaptiveJourneyLevel(
       experience,
       profile: profile(10),
-      knownWords: <String>{known},
+      knownWords: known,
     );
-    expect(filtered.words.map((entry) => entry.word), isNot(contains(known)));
-    expect(filtered.storyParagraphs, baseline.storyParagraphs);
-    expect(filtered.words.map((entry) => entry.word), isNot(contains('纸桥')));
+    expect(reviewed.words.map((entry) => entry.word).toSet().intersection(known), isNotEmpty);
+    expect(
+      reviewed.words.map((entry) => entry.word).toList(),
+      isNot(equals(baseline.words.map((entry) => entry.word).toList())),
+    );
+    expect(reviewed.words.length, lessThanOrEqualTo(20));
+    expect(reviewed.storyParagraphs, baseline.storyParagraphs);
+    for (final stale in <String>['梁遥', '原型', '纸桥', '版画', '材料翻译']) {
+      expect(reviewed.words.map((entry) => entry.word), isNot(contains(stale)));
+    }
+  });
+
+  test('Lv1 Lv5 Lv10 Reading Support follows every Not in Frame paragraph', () {
+    for (final level in <int>[1, 5, 10]) {
+      final content = guangzhouChenClanOnePassLevelContent(level);
+      expect(content.storyAnnotations, hasLength(content.storyParagraphs.length));
+      final support = content.storyAnnotations
+          .map((item) => '${item.pinyin} ${item.vietnamese} ${item.english}')
+          .join(' ');
+      expect(support, contains('Xiuyi'));
+      expect(support, contains('Jiahe'));
+      expect(support, contains('picture'));
+      expect(support, isNot(contains('Liang Yao')));
+      expect(support, isNot(contains('paper bridge')));
+      for (final annotation in content.storyAnnotations) {
+        expect(annotation.pinyin.trim(), isNotEmpty);
+        expect(annotation.vietnamese.trim(), isNotEmpty);
+        expect(annotation.english.trim(), isNotEmpty);
+      }
+    }
   });
 
   test('Discovery remains factual and separate from plot', () {

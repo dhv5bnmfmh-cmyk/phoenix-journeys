@@ -35,16 +35,43 @@ void main() {
     expect(experience.discoveryTeaser, isNot(contains('喊他回来')));
   });
 
-  test('knownWords filtering stays active on locked Story vocabulary', () {
+  test('knownWords keep baseline review semantics on locked vocabulary', () {
     final baseline = resolveAdaptiveJourneyLevel(experience, profile: profile(10));
-    final known = baseline.words.first.word;
-    final filtered = resolveAdaptiveJourneyLevel(
+    final known = <String>{'园林'};
+    final reviewed = resolveAdaptiveJourneyLevel(
       experience,
       profile: profile(10),
-      knownWords: <String>{known},
+      knownWords: known,
     );
-    expect(filtered.words.map((entry) => entry.word), isNot(contains(known)));
-    expect(filtered.storyParagraphs, baseline.storyParagraphs);
+    expect(reviewed.words.map((entry) => entry.word).toSet().intersection(known), isNotEmpty);
+    expect(
+      reviewed.words.map((entry) => entry.word).toList(),
+      isNot(equals(baseline.words.map((entry) => entry.word).toList())),
+    );
+    expect(reviewed.words.length, lessThanOrEqualTo(20));
+    expect(reviewed.storyParagraphs, baseline.storyParagraphs);
+  });
+
+  test('Lv1 Lv5 Lv10 Reading Support matches the locked Story facts', () {
+    for (final level in <int>[1, 5, 10]) {
+      final content = suzhouGardenCanonicalLevelContent(level);
+      expect(content.storyAnnotations, hasLength(content.storyParagraphs.length));
+      final support = content.storyAnnotations
+          .map((item) => '${item.pinyin} ${item.vietnamese} ${item.english}')
+          .join(' ');
+      for (final anchor in <String>[
+        'Chen Yulan',
+        'Cheng Lang',
+        'calls',
+        'does not call',
+        'next place',
+        'does not chase',
+      ]) {
+        expect(support, contains(anchor), reason: 'Lv$level $anchor');
+      }
+      expect(support, isNot(contains('does not look back')));
+      expect(support, isNot(contains('never chase')));
+    }
   });
 
   test('Lv10 ends at the Founder-approved final action', () {

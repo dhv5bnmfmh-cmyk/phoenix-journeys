@@ -1,3 +1,5 @@
+import 'package:pinyin/pinyin.dart';
+
 import 'batch_one_journey_remediation.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
@@ -305,20 +307,21 @@ final hangzhouWestLakeReopenedWordTraces = <RemediatedWordTrace>[
   const RemediatedWordTrace(word: '断桥残雪', eventId: 'HZ2-E2-views', usage: '连接地点、季节和记忆答案的题名景观。', sourceText: '周绍庭把“断桥残雪”说成夏天。'),
 ];
 
-JourneyLevelContent _hangzhouMarriageLevel(List<String> paragraphs) => JourneyLevelContent(
+JourneyLevelContent _hangzhouMarriageLevel(
+  int level,
+  List<String> paragraphs,
+) => JourneyLevelContent(
       storyParagraphs: List<String>.unmodifiable(paragraphs),
       storyAnnotations: List<ReadingAnnotation>.unmodifiable([
         for (var i = 0; i < paragraphs.length; i++)
           ReadingAnnotation(
-            pinyin: i == 0
-                ? 'Fāng Yù hé Zhōu Shàotíng jiéhūn sìshísān nián. Tā dài zhe yīyuàn yùyuē kǎ, péi tā cóng Duànqiáo zǒu Xīhú.'
-                : 'Shíjiē shàng, Zhōu Shàotíng fú zhù tā de shǒuzhǒu. Fāng Yù bù zài chūtí, bǎ yùyuē kǎ jiāo gěi tā.' ,
-            vietnamese: i == 0
-                ? 'Phương Dục và Chu Thiệu Đình đã kết hôn bốn mươi ba năm. Bà mang theo thẻ hẹn khám và cùng ông đi từ Đoạn Kiều quanh Tây Hồ.'
-                : 'Trên bậc đá ướt, ông đỡ khuỷu tay bà. Bà thôi kiểm tra trí nhớ và trao thẳng thẻ hẹn; ông nhận lấy.' ,
-            english: i == 0
-                ? 'Fang Yu and Zhou Shaoting have been married for forty-three years. She carries a clinic appointment card on their West Lake walk from Broken Bridge.'
-                : 'On a wet stone step he catches her elbow. She stops testing him and openly hands him the appointment card; he accepts it.',
+            pinyin: PinyinHelper.getPinyinE(
+              paragraphs[i],
+              separator: ' ',
+              format: PinyinFormat.WITH_TONE_MARK,
+            ),
+            vietnamese: _hangzhouReadingSupport(level)[i].$1,
+            english: _hangzhouReadingSupport(level)[i].$2,
           ),
       ]),
       words: const <WordEntry>[],
@@ -328,26 +331,71 @@ JourneyLevelContent _hangzhouMarriageLevel(List<String> paragraphs) => JourneyLe
     );
 
 final hangzhouWestLakeReopenedLevels = List<JourneyLevelContent>.unmodifiable([
-  _hangzhouMarriageLevel(['方毓六十九岁，和周绍庭结婚四十三年。周一他要去医院做记忆检查，她却一直没把预约卡拿出来。两人从断桥往前走，方毓不停问他西湖景名。周绍庭把“断桥残雪”说成夏天。石阶被雨打湿，方毓脚下一滑，他立刻扶住她的手肘，说：“这里一直滑。”方毓不再出题，把预约卡交给他。周绍庭看了日期，说：“我知道你在怕什么。我也怕。”他把卡放进自己的钱包。公交车来时，他问司机：“去医院，哪一站下？”']),
-  _hangzhouMarriageLevel(['方毓六十九岁，和周绍庭结婚四十三年。周一，周绍庭要去医院做记忆检查；方毓把预约卡藏在包里，只说今天去西湖走走。他们从断桥出发，她一路问他“断桥残雪”是什么季节、远处是哪座塔。周绍庭答错了两次，后来沉默。小雨落下，石阶发滑，方毓脚下一偏，他立刻扶住她的手肘：“这里一直滑。”这是他们常走的旧路。方毓不再问景名，拿出预约卡，说自己不是来散步，是怕他连两个人的日子也忘掉。周绍庭接过卡：“我知道你在怕什么。我也怕。”他把卡放进自己的钱包。公交车到站，他上车后先问司机：“去医院，哪一站下？”']),
-  _hangzhouMarriageLevel([
+  _hangzhouMarriageLevel(1, ['方毓六十九岁，和周绍庭结婚四十三年。周一他要去医院做记忆检查，她却一直没把预约卡拿出来。两人从断桥往前走，方毓不停问他西湖景名。周绍庭把“断桥残雪”说成夏天。石阶被雨打湿，方毓脚下一滑，他立刻扶住她的手肘，说：“这里一直滑。”方毓不再出题，把预约卡交给他。周绍庭看了日期，说：“我知道你在怕什么。我也怕。”他把卡放进自己的钱包。公交车来时，他问司机：“去医院，哪一站下？”']),
+  _hangzhouMarriageLevel(2, ['方毓六十九岁，和周绍庭结婚四十三年。周一，周绍庭要去医院做记忆检查；方毓把预约卡藏在包里，只说今天去西湖走走。他们从断桥出发，她一路问他“断桥残雪”是什么季节、远处是哪座塔。周绍庭答错了两次，后来沉默。小雨落下，石阶发滑，方毓脚下一偏，他立刻扶住她的手肘：“这里一直滑。”这是他们常走的旧路。方毓不再问景名，拿出预约卡，说自己不是来散步，是怕他连两个人的日子也忘掉。周绍庭接过卡：“我知道你在怕什么。我也怕。”他把卡放进自己的钱包。公交车到站，他上车后先问司机：“去医院，哪一站下？”']),
+  _hangzhouMarriageLevel(3, [
     '方毓六十九岁，和周绍庭结婚四十三年。最近周绍庭常把日期和人名说错，女儿替他约了周一的记忆门诊。方毓把预约卡藏在包里，只说陪她去西湖走走。他们从断桥出发，她一会儿问“断桥残雪”该在什么季节，一会儿问远处是哪座塔。周绍庭把冬景说成夏天，又把塔名说错，最后不再回答。',
     '小雨落到桥面，石阶渐渐发滑。方毓脚下一偏，周绍庭立刻扶住她的手肘，说：“这里一直滑。”很多年前，她在同一段路上也险些摔倒。方毓把准备好的下一个问题咽回去，拿出预约卡，承认自己不是来赏景，而是想证明他还记得两个人的日子。周绍庭接过卡：“我知道你在怕什么。我也怕。”他把卡放进自己的钱包，没有还给她。公交车到站，他上车后先问司机：“去医院，哪一站下？”',
   ]),
-  _hangzhouMarriageLevel([
+  _hangzhouMarriageLevel(4, [
     '方毓六十九岁，和周绍庭结婚四十三年。最近半年，周绍庭开始把日期、人名和刚说过的话弄混。女儿替他约了周一的记忆门诊，方毓却一直没有把预约卡交给他。星期六，她只说很久没走西湖，拉他从断桥出发。她一路把散步变成考试：“断桥残雪是什么季节？”“远处是哪座塔？”周绍庭把冬景说成夏天，又说错塔名，后来只看着湖面，不再回答。',
     '雨点落下来，桥边石阶很快湿了。方毓脚下一偏，周绍庭下意识扶住她的手肘：“这里一直滑。”四十三年前第一次走这段路时，他也这样扶过她。方毓忽然把准备好的下一道题停住。她从包里拿出预约卡，说今天不是来赏景，是怕他有一天连两个人怎样过来的也忘了。周绍庭没有辩解，接过卡：“我知道你在怕什么。我也怕。”他把卡放进自己的钱包。公交车到站后，他没有让方毓替自己问，先对司机说：“去医院，哪一站下？”',
   ]),
-  _hangzhouMarriageLevel([
+  _hangzhouMarriageLevel(5, [
     '方毓六十九岁，和周绍庭结婚四十三年。最近半年，周绍庭开始把日期、人名和刚说过的话弄混，有时出门后还会忘记原来的方向。女儿替他约了周一的记忆门诊，方毓把预约卡放在包内层，几次想拿出来，又怕他觉得自己被当成病人。星期六，她说很久没走西湖，拉他从断桥出发。一路上，她不断问“断桥残雪是什么季节”“远处是哪座塔”“他们第一次来时下没下雨”。周绍庭把冬景说成夏天，又说错塔名；第三个问题没有回答。散步渐渐只剩方毓在出题。',
     '雨点落下来，桥边石阶很快湿了。方毓回头看他，脚下一偏，周绍庭下意识扶住她的手肘：“这里一直滑。”四十三年前第一次走这段路时，他也曾在湿石阶上这样扶她。景名和日期都乱了，这个动作却先于回答发生。方毓把下一道题停住，从包里拿出预约卡，承认今天不是来赏景，而是想证明他还记得两个人的日子。周绍庭没有把卡推回去：“我知道你在怕什么。我也怕。”他看清日期，把卡放进自己的钱包。公交车到站后，他没有让方毓替自己开口，先问司机：“去医院，哪一站下？”',
   ]),
   for (var level = 6; level <= 10; level++)
-    _hangzhouMarriageLevel([
+    _hangzhouMarriageLevel(level, [
       '方毓六十九岁，和周绍庭结婚四十三年。最近半年，周绍庭开始把日期、人名和刚说过的话弄混，有时下楼后会忘记原来要去哪里。女儿替他约了周一的记忆门诊，方毓把预约卡放在包内层，几次想拿出来，又怕他觉得自己被当成病人。星期六，她说很久没走西湖，拉他从断桥出发。断桥是他们年轻时常走的路，湖面一边接着城市，一边朝山影展开。方毓一路问“断桥残雪是什么季节”“远处是哪座塔”“他们第一次来时下没下雨”。周绍庭把冬景说成夏天，又说错塔名；第三个问题没有回答。方毓仍往前走，散步渐渐只剩她在出题，他在猜。${level >= 8 ? '经过桥边时，他反问她为什么每一个景都要有标准答案。方毓没有回答，只摸了摸包里预约卡的硬边。' : ''}',
       '雨点落下来，桥边石阶很快湿了。方毓回头等他，脚下一偏，周绍庭下意识扶住她的手肘：“这里一直滑。”四十三年前第一次走这段路时，他也曾在湿石阶上这样扶她；那次的月份他们后来争过很多回，扶住手肘的动作却没有变。方毓把准备好的下一道题停住，从包里拿出预约卡，承认今天不是来赏景，而是想证明他还记得两个人共同过过的日子。周绍庭没有把卡推回去：“我知道你在怕什么。我也怕。”${level >= 7 ? '他说自己早已看见女儿发来的医院短信，只是不愿先开口，仿佛不说，记忆混乱就还只是家里的小差错。' : ''}${level >= 9 ? '方毓承认自己也一直装作只是散步，因为她宁可听见几个错误答案，也不愿听见医生把担心说成一个名字。' : ''}他低头看清日期，把预约卡放进自己的钱包，没有交还给方毓。${level >= 10 ? '雨还落在湖面和桥栏上，远处景物被水汽遮去一层；方毓没有再问任何景名，周绍庭也没有重新猜答案。' : ''}公交车到站后，他没有让方毓替自己开口，先问司机：“去医院，哪一站下？”',
     ]),
 ]);
+
+List<(String, String)> _hangzhouReadingSupport(int level) => switch (level) {
+  1 => const [(
+      'Phương Dục, 69 tuổi, đã kết hôn với Chu Thiệu Đình bốn mươi ba năm. Thứ Hai ông phải đến bệnh viện kiểm tra trí nhớ, nhưng bà vẫn chưa lấy thẻ hẹn ra. Từ Đoạn Kiều, bà liên tục hỏi tên các cảnh Tây Hồ; ông nói “Đoạn Kiều Tàn Tuyết” thuộc mùa hè. Bậc đá ướt mưa, bà trượt chân và ông lập tức đỡ khuỷu tay: “Chỗ này vẫn luôn trơn.” Bà thôi ra câu hỏi và đưa thẻ hẹn. Ông nhìn ngày, nói: “Tôi biết bà sợ gì. Tôi cũng sợ,” rồi cất thẻ vào ví. Khi xe buýt đến, ông hỏi tài xế: “Đi bệnh viện xuống trạm nào?”',
+      'Fang Yu is sixty-nine and has been married to Zhou Shaoting for forty-three years. On Monday he must go to the hospital for a memory examination, but she still has not produced the appointment card. Walking from Broken Bridge, she repeatedly quizzes him on West Lake sights; he says “Lingering Snow on Broken Bridge” belongs to summer. Rain wets the stone steps, Fang Yu slips, and he immediately catches her elbow: “It has always been slippery here.” She stops asking questions and gives him the card. He checks the date, says, “I know what you’re afraid of. I’m afraid too,” and puts it in his wallet. When the bus arrives, he asks the driver, “Which stop for the hospital?”'
+    )],
+  2 => const [(
+      'Phương Dục, 69 tuổi, và Chu Thiệu Đình đã kết hôn bốn mươi ba năm. Thứ Hai ông phải đến bệnh viện kiểm tra trí nhớ; bà giấu thẻ hẹn trong túi và chỉ nói đi dạo Tây Hồ. Từ Đoạn Kiều, bà hỏi “Đoạn Kiều Tàn Tuyết” thuộc mùa nào và ngọn tháp xa kia là gì. Ông trả lời sai hai lần rồi im lặng. Mưa nhỏ làm bậc đá trơn; bà lệch chân và ông lập tức đỡ khuỷu tay: “Chỗ này vẫn luôn trơn.” Đó là con đường cũ họ thường đi. Bà thôi hỏi, lấy thẻ hẹn ra và thú nhận mình sợ ông quên cả những ngày tháng của hai người. Ông nhận thẻ: “Tôi biết bà sợ gì. Tôi cũng sợ,” rồi cất vào ví. Lên xe buýt, ông hỏi trước: “Đi bệnh viện xuống trạm nào?”',
+      'Fang Yu is sixty-nine and has been married to Zhou Shaoting for forty-three years. On Monday he must go to the hospital for a memory examination; she hides the appointment card in her bag and says only that they are walking at West Lake. From Broken Bridge she asks what season “Lingering Snow on Broken Bridge” belongs to and which pagoda stands in the distance. He answers wrongly twice and then falls silent. Light rain makes the stone steps slippery; she loses her footing and he immediately catches her elbow: “It has always been slippery here.” This is an old route they often walk. She stops quizzing him, produces the card, and admits she fears he may forget even their shared days. He takes it: “I know what you’re afraid of. I’m afraid too,” then puts it in his wallet. On the bus he asks first, “Which stop for the hospital?”'
+    )],
+  3 => const [
+      ('Phương Dục, 69 tuổi, đã kết hôn với Chu Thiệu Đình bốn mươi ba năm. Gần đây ông thường nhầm ngày và tên, nên con gái đặt lịch khám trí nhớ vào thứ Hai. Phương Dục giấu thẻ hẹn, chỉ nói đi Tây Hồ. Từ Đoạn Kiều, bà hỏi mùa của “Đoạn Kiều Tàn Tuyết” và tên ngọn tháp xa. Ông nói cảnh mùa đông là mùa hè, gọi sai tên tháp rồi không trả lời nữa.', 'Fang Yu is sixty-nine and has been married to Zhou Shaoting for forty-three years. Recently he has often confused dates and names, so their daughter books a Monday memory-clinic appointment. Fang Yu hides the card and says only that they are walking at West Lake. From Broken Bridge she asks the season of “Lingering Snow on Broken Bridge” and the name of the distant pagoda. He calls the winter scene summer, misnames the pagoda, and then stops answering.'),
+      ('Mưa nhỏ làm bậc đá trơn. Phương Dục lệch chân; Chu Thiệu Đình lập tức đỡ khuỷu tay và nói: “Chỗ này vẫn luôn trơn.” Nhiều năm trước bà cũng suýt ngã ở đây. Bà nuốt câu hỏi tiếp theo, lấy thẻ hẹn và thú nhận mình muốn chứng minh ông còn nhớ cuộc sống chung. Ông nhận thẻ: “Tôi biết bà sợ gì. Tôi cũng sợ,” cất nó vào ví và không trả lại. Lên xe buýt, ông hỏi trước: “Đi bệnh viện xuống trạm nào?”', 'Light rain makes the stone steps slippery. Fang Yu loses her footing; Zhou Shaoting immediately catches her elbow and says, “It has always been slippery here.” Years earlier she almost fell on the same stretch. She swallows her next question, produces the appointment card, and admits she wanted proof that he still remembers their life together. He takes it: “I know what you’re afraid of. I’m afraid too,” places it in his wallet without returning it, and asks first on the bus, “Which stop for the hospital?”'),
+    ],
+  4 => const [
+      ('Phương Dục, 69 tuổi, và Chu Thiệu Đình đã kết hôn bốn mươi ba năm. Nửa năm gần đây ông bắt đầu lẫn ngày, tên và lời vừa nói. Con gái đặt lịch khám trí nhớ vào thứ Hai nhưng bà chưa đưa thẻ. Thứ Bảy, bà kéo ông từ Đoạn Kiều đi Tây Hồ và biến cuộc dạo thành bài kiểm tra: mùa của “Đoạn Kiều Tàn Tuyết” và tên ngọn tháp xa. Ông nói cảnh đông là mùa hè, gọi sai tên tháp, rồi chỉ nhìn mặt hồ và không đáp.', 'Fang Yu is sixty-nine and has been married to Zhou Shaoting for forty-three years. For half a year he has confused dates, names, and things just said. Their daughter books a Monday memory-clinic visit, but Fang Yu does not hand him the card. On Saturday she leads him from Broken Bridge and turns the walk into a test: the season of “Lingering Snow on Broken Bridge” and the distant pagoda’s name. He calls winter summer, misnames the pagoda, then only looks at the lake and stops answering.'),
+      ('Mưa làm bậc đá nhanh chóng ướt. Phương Dục lệch chân; Chu Thiệu Đình theo bản năng đỡ khuỷu tay: “Chỗ này vẫn luôn trơn.” Bốn mươi ba năm trước, ông cũng từng đỡ bà như vậy. Bà dừng câu hỏi tiếp theo, lấy thẻ hẹn và nói mình sợ một ngày ông quên cách hai người đã đi qua đời sống. Ông không biện hộ, nhận thẻ: “Tôi biết bà sợ gì. Tôi cũng sợ,” rồi cất vào ví. Khi xe tới, ông không để bà hỏi thay mà tự hỏi tài xế trạm xuống bệnh viện.', 'Rain quickly wets the stone steps. Fang Yu loses her footing; Zhou Shaoting instinctively catches her elbow: “It has always been slippery here.” Forty-three years earlier he caught her the same way. She stops the next question, produces the appointment card, and says she fears he may one day forget how they came through their life together. He does not argue, takes the card—“I know what you’re afraid of. I’m afraid too”—and puts it in his wallet. When the bus comes, he does not let her speak for him but asks the driver which stop serves the hospital.'),
+    ],
+  5 => const [
+      ('Phương Dục, 69 tuổi, và Chu Thiệu Đình đã kết hôn bốn mươi ba năm. Nửa năm gần đây ông lẫn ngày, tên, lời vừa nói và đôi khi quên hướng đi. Con gái đặt lịch khám trí nhớ thứ Hai; bà giấu thẻ trong ngăn trong của túi, sợ ông thấy mình bị coi là bệnh nhân. Thứ Bảy, bà kéo ông từ Đoạn Kiều đi Tây Hồ và liên tục hỏi mùa của “Đoạn Kiều Tàn Tuyết”, tên ngọn tháp, và lần đầu họ đến có mưa không. Ông nói cảnh đông là mùa hè, gọi sai tháp và không đáp câu thứ ba. Cuộc dạo chỉ còn bà ra đề.', 'Fang Yu is sixty-nine and has been married to Zhou Shaoting for forty-three years. For half a year he has confused dates, names, and recent words, and sometimes forgets his direction. Their daughter books a Monday memory-clinic visit; Fang Yu hides the card deep in her bag, afraid he will feel treated as a patient. On Saturday she leads him from Broken Bridge and repeatedly asks the season of “Lingering Snow on Broken Bridge,” the pagoda’s name, and whether it rained on their first visit. He calls winter summer, misnames the pagoda, and does not answer the third question. The walk becomes only Fang Yu setting tests.'),
+      ('Mưa nhanh chóng làm ướt bậc đá. Phương Dục quay lại, lệch chân; Chu Thiệu Đình theo bản năng đỡ khuỷu tay: “Chỗ này vẫn luôn trơn.” Bốn mươi ba năm trước ông cũng đỡ bà ở đây. Tên cảnh và ngày tháng lẫn lộn, nhưng động tác xảy ra trước câu trả lời. Bà dừng câu hỏi, lấy thẻ hẹn và thú nhận muốn chứng minh ông còn nhớ đời sống chung. Ông không đẩy thẻ lại: “Tôi biết bà sợ gì. Tôi cũng sợ.” Ông xem ngày, cất thẻ vào ví. Khi xe tới, ông tự hỏi tài xế: “Đi bệnh viện xuống trạm nào?”', 'Rain quickly wets the stone steps. Fang Yu turns, loses her footing, and Zhou Shaoting instinctively catches her elbow: “It has always been slippery here.” Forty-three years earlier he caught her here in the same way. Scenic names and dates are confused, but the action comes before any answer. She stops the quiz, produces the card, and admits she wanted proof that he still remembers their life together. He does not push it back: “I know what you’re afraid of. I’m afraid too.” He checks the date, puts the card in his wallet, and when the bus arrives asks the driver himself, “Which stop for the hospital?”'),
+    ],
+  _ => _hangzhouAdvancedReadingSupport(level),
+};
+
+List<(String, String)> _hangzhouAdvancedReadingSupport(int level) {
+  final questionVi = level >= 8 ? ' Bên cầu, ông hỏi lại vì sao mỗi cảnh đều phải có một đáp án chuẩn. Bà không trả lời, chỉ sờ mép cứng của thẻ trong túi.' : '';
+  final questionEn = level >= 8 ? ' Beside the bridge, he asks why every sight must have one standard answer. She does not reply and only touches the hard edge of the card in her bag.' : '';
+  final smsVi = level >= 7 ? ' Ông nói đã thấy tin nhắn bệnh viện con gái gửi nhưng không muốn lên tiếng trước, như thể im lặng sẽ giữ những lẫn lộn ở mức lỗi nhỏ trong nhà.' : '';
+  final smsEn = level >= 7 ? ' He says he already saw their daughter’s hospital message but did not want to speak first, as though silence could keep the confusion a small household mistake.' : '';
+  final fearVi = level >= 9 ? ' Phương Dục thú nhận mình cũng giả vờ chỉ đi dạo, vì bà thà nghe vài đáp án sai còn hơn nghe bác sĩ đặt tên cho nỗi lo.' : '';
+  final fearEn = level >= 9 ? ' Fang Yu admits she too pretended this was only a walk, preferring a few wrong answers to hearing a doctor give their fear a name.' : '';
+  final rainVi = level >= 10 ? ' Mưa vẫn rơi trên hồ và lan can; cảnh xa mờ trong hơi nước. Bà không hỏi thêm tên cảnh, ông cũng không đoán lại.' : '';
+  final rainEn = level >= 10 ? ' Rain continues over the lake and railings; distant sights fade behind mist. She asks no more scenic names, and he makes no more guesses.' : '';
+  return [
+    (
+      'Phương Dục, 69 tuổi, và Chu Thiệu Đình đã kết hôn bốn mươi ba năm. Nửa năm gần đây ông lẫn ngày, tên, lời vừa nói và đôi khi quên mình định đi đâu. Con gái đặt lịch khám trí nhớ thứ Hai; bà giấu thẻ trong túi, sợ ông thấy bị coi là bệnh nhân. Thứ Bảy, bà kéo ông từ Đoạn Kiều đi Tây Hồ, con đường họ thường đi khi còn trẻ, giữa thành phố và bóng núi. Bà hỏi mùa của “Đoạn Kiều Tàn Tuyết”, tên ngọn tháp và lần đầu họ đến có mưa không. Ông nói cảnh đông là mùa hè, gọi sai tháp và không đáp câu thứ ba. Cuộc dạo thành bà ra đề, ông đoán.$questionVi',
+      'Fang Yu is sixty-nine and has been married to Zhou Shaoting for forty-three years. For half a year he has confused dates, names, and recent words, and sometimes forgets where he meant to go. Their daughter books a Monday memory-clinic visit; Fang Yu hides the card in her bag, afraid he will feel treated as a patient. On Saturday she leads him from Broken Bridge along a route they often walked when young, between city and mountain shadows. She asks the season of “Lingering Snow on Broken Bridge,” the pagoda’s name, and whether it rained on their first visit. He calls winter summer, misnames the pagoda, and leaves the third question unanswered. The walk becomes her testing and his guessing.$questionEn',
+    ),
+    (
+      'Mưa làm bậc đá ướt. Phương Dục quay lại chờ, lệch chân; Chu Thiệu Đình theo bản năng đỡ khuỷu tay: “Chỗ này vẫn luôn trơn.” Bốn mươi ba năm trước ông cũng đỡ bà ở đây; họ từng tranh luận về tháng của lần ấy, nhưng động tác không đổi. Bà dừng câu hỏi tiếp theo, lấy thẻ hẹn và thú nhận muốn chứng minh ông còn nhớ những ngày chung sống. Ông không đẩy thẻ lại: “Tôi biết bà sợ gì. Tôi cũng sợ.”$smsVi$fearVi Ông xem ngày rồi cất thẻ vào ví, không trả lại.$rainVi Khi xe tới, ông tự hỏi tài xế: “Đi bệnh viện xuống trạm nào?”',
+      'Rain wets the stone steps. Fang Yu turns to wait, loses her footing, and Zhou Shaoting instinctively catches her elbow: “It has always been slippery here.” Forty-three years earlier he caught her here too; they later disputed the month, but the action did not change. She stops her next question, produces the appointment card, and admits she wanted proof that he still remembers the days they shared. He does not push it back: “I know what you’re afraid of. I’m afraid too.”$smsEn$fearEn He checks the date and puts the card in his wallet without returning it.$rainEn When the bus arrives, he asks the driver himself, “Which stop for the hospital?”',
+    ),
+  ];
+}
 
 final hangzhouWestLakeReopenedMemory = <RemediatedMemoryReview>[
   const RemediatedMemoryReview(category: '人物', prompt: '方毓为什么把西湖散步变成一连串问题？', answer: '她害怕周绍庭忘掉两个人共同生活的记忆，又不敢直接交出记忆门诊预约卡。', storyEventIds: ['HZ2-E1-test']),

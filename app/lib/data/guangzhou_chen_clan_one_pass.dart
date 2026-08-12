@@ -1,3 +1,6 @@
+import '../agents/phoenix_language_level_agent.dart';
+import '../models/language_proficiency.dart';
+import 'package:pinyin/pinyin.dart';
 import 'batch_one_journey_remediation.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
@@ -140,10 +143,17 @@ const _guangzhouLockedParagraphs = <String>[
   '她把手机翻过来，扣在身旁的青砖台上，说：“她叫刘嘉禾。今天不入镜。”群里还在说话，她按掉了声音。那张她等了三十四年的合照没有拍成。过了一会儿，嘉禾先往下一座院子走。秀仪没有去拉她，只把红围巾留在包里，跟到她身边。经过门槛时，嘉禾放慢了一步。两个人并排走了进去。',
 ];
 
-ReadingAnnotation _guangzhouLockedAnnotation(String english) => ReadingAnnotation(
-  pinyin: 'Chén Xiùyí hé Liú Jiāhé zài Chénjiācí jiànmiàn. Xiùyí jùjué le qīnshǔ yāoqiú de gōngkāi zhàopiàn, shuō: “Tā jiào Liú Jiāhé. Jīntiān bù rù jìng.”',
-  vietnamese: 'Trần Tú Nghi gặp Lưu Gia Hòa tại Trần Gia Từ. Bà từ chối bức ảnh công khai mà họ hàng yêu cầu, tôn trọng tên và ranh giới hiện tại của con gái.',
-  english: english,
+ReadingAnnotation _guangzhouLockedAnnotation(
+  String paragraph,
+  (String, String) support,
+) => ReadingAnnotation(
+  pinyin: PinyinHelper.getPinyinE(
+    paragraph,
+    separator: ' ',
+    format: PinyinFormat.WITH_TONE_MARK,
+  ),
+  vietnamese: support.$1,
+  english: support.$2,
 );
 
 JourneyLevelContent _guangzhouLockedLevel(int level) {
@@ -167,16 +177,63 @@ JourneyLevelContent _guangzhouLockedLevel(int level) {
         '${_guangzhouLockedParagraphs[2]}${_guangzhouLockedParagraphs[3]}${_guangzhouLevelEnrichment(level)}',
       ],
   };
+  final support = _guangzhouLockedReadingSupport(level);
   return JourneyLevelContent(
     storyParagraphs: List<String>.unmodifiable(story),
     storyAnnotations: List<ReadingAnnotation>.unmodifiable([
       for (var index = 0; index < story.length; index++)
-        _guangzhouLockedAnnotation('Chen Xiuyi meets her adult daughter Liu Jiahe at the Chen Clan Academy. Under pressure from relatives to make the reunion public, she turns the phone face-down and protects Jiahe’s present name and boundary.'),
+        _guangzhouLockedAnnotation(story[index], support[index]),
     ]),
     words: const <WordEntry>[],
     discoveries: const <DiscoveryEntry>[],
     wonderQuestion: '',
     expressQuestion: '',
+  );
+}
+
+List<(String, String)> _guangzhouLockedReadingSupport(int level) => switch (level) {
+  1 => const [(
+      'Trần Tú Nghi, 61 tuổi, gặp Lưu Gia Hòa tại Trần Gia Từ. Gia Hòa là con gái bà đã giao cho họ hàng nuôi ba mươi bốn năm trước và nay mang họ Lưu. Khi họ hàng gọi video đòi một bức ảnh nhận thân dưới biển “Trần Thị Thư Viện”, Tú Nghi giơ điện thoại lên và thấy Gia Hòa lùi về phía cột hành lang. Bà úp điện thoại xuống bệ gạch xanh và nói: “Con bé tên Lưu Gia Hòa. Hôm nay không vào hình.” Gia Hòa đi về sân kế tiếp, chậm lại ở ngưỡng cửa; Tú Nghi theo kịp và hai người bước vào song song.',
+      'Sixty-one-year-old Chen Xiuyi meets Liu Jiahe at the Chen Clan Academy. Jiahe is the daughter she gave to relatives to raise thirty-four years ago and now bears the surname Liu. When relatives call by video demanding a reunion photo beneath the “Chen Clan Academy” plaque, Xiuyi raises the phone and sees Jiahe step back beside a corridor pillar. She turns the phone face-down on a blue-brick ledge and says, “Her name is Liu Jiahe. Today she will not be in the picture.” Jiahe heads toward the next courtyard and slows at the threshold; Xiuyi catches up and they enter side by side.'
+    )],
+  2 => const [(
+      'Trần Tú Nghi, 61 tuổi, đã giao đứa con gái mới sinh cho họ hàng nuôi ba mươi bốn năm trước; cô nay tên Lưu Gia Hòa. Sau nửa năm liên lạc lại, họ lần đầu gặp riêng tại Trần Gia Từ. Một cuộc gọi video từ nhóm họ hàng giục họ chụp ảnh nhận thân dưới biển “Trần Thị Thư Viện”. Tú Nghi giơ điện thoại, Gia Hòa lùi về phía cột hành lang. Bà nhìn màn hình rồi úp máy xuống bệ gạch: “Con bé tên Lưu Gia Hòa. Hôm nay không vào hình.” Bức ảnh bà chờ ba mươi bốn năm đã không được chụp. Gia Hòa đi trước về sân kế tiếp và chậm lại ở ngưỡng cửa; Tú Nghi không kéo cô lại mà bước đến bên cạnh, cùng đi vào.',
+      'Chen Xiuyi is sixty-one. Thirty-four years ago she gave her newborn daughter to relatives to raise; her daughter is now Liu Jiahe. After reconnecting for six months, they meet alone for the first time at the Chen Clan Academy. A video call from the family group urges them to take a reunion photo beneath the “Chen Clan Academy” plaque. Xiuyi raises the phone and Jiahe steps back beside a pillar. Xiuyi looks at the screen, turns the phone face-down on a blue-brick ledge, and says, “Her name is Liu Jiahe. Today she will not be in the picture.” The photograph Xiuyi waited thirty-four years for is not taken. Jiahe walks toward the next courtyard and slows at the threshold; Xiuyi does not pull her back, but joins her and they enter side by side.'
+    )],
+  3 => const [
+      ('Trần Tú Nghi, 61 tuổi, đã giao con gái mới sinh cho họ hàng nuôi ba mươi bốn năm trước. Cô nay tên Lưu Gia Hòa. Sau nửa năm liên lạc lại, họ lần đầu hẹn gặp riêng tại Trần Gia Từ. Gia Hòa nói trước rằng cô chỉ gặp bà, không gặp họ hàng nhà họ Trần và không chụp ảnh “nhận về”. Tú Nghi đồng ý, nhưng trong túi vẫn có chiếc khăn đỏ nhóm họ hàng gửi đến.', 'Chen Xiuyi is sixty-one. Thirty-four years ago she gave her newborn daughter to relatives to raise. Her daughter is now Liu Jiahe. After six months back in contact, they arrange their first private meeting at the Chen Clan Academy. Jiahe has stated that she will meet Xiuyi only, not the Chen relatives, and will not pose for a photo of being “taken back.” Xiuyi agrees, though a red scarf sent by the family group remains in her bag.'),
+      ('Dưới biển “Trần Thị Thư Viện”, nhóm họ hàng gọi video và giục Tú Nghi quay máy sang Gia Hòa. Tú Nghi giơ điện thoại; Gia Hòa lùi về phía cột hành lang. Cuối cùng bà úp máy xuống bệ gạch: “Con bé tên Lưu Gia Hòa. Hôm nay không vào hình.” Bức ảnh không được chụp. Gia Hòa đi về sân kế tiếp và chậm lại ở ngưỡng cửa. Tú Nghi theo kịp, hai người cùng bước vào.', 'Under the “Chen Clan Academy” plaque, a video call from the family group urges Xiuyi to turn the camera toward Jiahe. Xiuyi raises the phone and Jiahe steps back beside a corridor pillar. Xiuyi finally turns the phone face-down on the blue-brick ledge: “Her name is Liu Jiahe. Today she will not be in the picture.” No reunion photo is taken. Jiahe walks toward the next courtyard and slows at the threshold. Xiuyi catches up, and they enter side by side.'),
+    ],
+  4 => const [
+      ('Trần Tú Nghi, 61 tuổi, đã giao con gái mới sinh cho họ hàng nuôi ba mươi bốn năm trước; cô nay tên Lưu Gia Hòa. Sau nửa năm liên lạc lại, họ lần đầu gặp riêng tại Trần Gia Từ. Gia Hòa chỉ đồng ý gặp bà, không gặp họ hàng nhà Trần và không chụp ảnh “nhận về”. Tú Nghi đồng ý nhưng vẫn mang chiếc khăn đỏ họ hàng gửi. Trong sân đầu tiên, biển “Trần Thị Thư Viện” đặt hai họ của họ dưới cùng một mái nhìn. Tú Nghi lấy khăn ra; Gia Hòa không nhận và chỉ nói: “Con họ Lưu.”', 'Chen Xiuyi is sixty-one. Thirty-four years ago she gave her newborn daughter to relatives to raise; her daughter is now Liu Jiahe. After six months back in contact, they meet alone at the Chen Clan Academy. Jiahe has agreed to meet Xiuyi only, not the Chen relatives, and not to pose for a photo of being “taken back.” Xiuyi agrees but carries the family group’s red scarf. In the first courtyard, the “Chen Clan Academy” plaque places their different surnames beneath the same upward glance. Xiuyi offers the scarf; Jiahe does not take it and only says, “My surname is Liu.”'),
+      ('Trong sân kế tiếp, nhóm họ hàng bất ngờ gọi video. Những gương mặt chờ đợi giục Tú Nghi quay máy sang Gia Hòa, nói rằng chỉ cần một bức ảnh là mọi việc sẽ trọn vẹn. Tú Nghi giơ điện thoại; Gia Hòa lùi một bước về cột hành lang. Tú Nghi thấy mình trên màn hình rồi úp máy xuống bệ gạch: “Con bé tên Lưu Gia Hòa. Hôm nay không vào hình.” Bức ảnh không được chụp. Gia Hòa đi trước về sân kế; ở ngưỡng cửa cô chậm lại. Tú Nghi để khăn trong túi, đi đến bên cô và cùng bước vào.', 'In the next courtyard, the family group suddenly calls by video. Waiting faces urge Xiuyi to turn the camera toward Jiahe, saying one photograph will make everything complete. Xiuyi raises the phone; Jiahe steps back toward a pillar. Xiuyi sees herself on the screen, then turns the phone face-down on the blue-brick ledge: “Her name is Liu Jiahe. Today she will not be in the picture.” The photograph is not taken. Jiahe walks toward the next courtyard and slows at its threshold; Xiuyi leaves the scarf in her bag, joins her, and they enter side by side.'),
+    ],
+  _ => <(String, String)>[
+      const ('Trần Tú Nghi, 61 tuổi, đã giao con gái mới sinh cho họ hàng nuôi ba mươi bốn năm trước. Cô nay tên Lưu Gia Hòa. Sau nửa năm liên lạc lại, họ lần đầu gặp riêng tại Trần Gia Từ. Gia Hòa nói rõ: chỉ gặp bà, không gặp họ hàng nhà Trần và không chụp ảnh “nhận về”. Tú Nghi đồng ý nhưng vẫn mang chiếc khăn đỏ họ hàng gửi. Qua tiền sảnh và các lớp sân dưới biển “Trần Thị Thư Viện”, Tú Nghi kể nơi này do các dòng họ Trần ở Quảng Đông góp vốn xây dựng rồi đưa khăn ra. Gia Hòa không nhận: “Con họ Lưu.” Tú Nghi gấp khăn lại, ngón tay dừng lâu trên mép vải.', 'Chen Xiuyi is sixty-one. Thirty-four years ago she gave her newborn daughter to relatives to raise. Her daughter is now Liu Jiahe. After six months back in contact, they meet alone for the first time at the Chen Clan Academy. Jiahe has made her terms clear: she will meet Xiuyi only, not the Chen relatives, and will not pose for a photo of being “taken back.” Xiuyi agrees but keeps a red scarf sent by the family group in her bag. As they pass through the entrance hall and layered courtyards beneath the “Chen Clan Academy” plaque, Xiuyi explains that Chen lineages across Guangdong pooled funds to build it and takes out the scarf. Jiahe does not accept it: “My surname is Liu.” Xiuyi folds it away, her fingers lingering on its edge.'),
+      _guangzhouLockedSecondSupport(level),
+    ],
+};
+
+(String, String) _guangzhouLockedSecondSupport(int level) {
+  final extraVi = switch (level) {
+    6 => ' Qua ngưỡng cửa, Tú Nghi không nhìn điện thoại nữa; tấm biển ở lại phía sau, còn tên Gia Hòa ở lại trong chính câu nói của bà.',
+    7 => ' Qua ngưỡng cửa, Tú Nghi không nhìn điện thoại nữa. Bà từng nghĩ một bức ảnh có thể bù lại khởi đầu của ba mươi bốn năm, nhưng khoảng trống vẫn còn. Tấm biển ở lại phía sau, tên Gia Hòa ở lại trong lời bà.',
+    8 => ' Qua ngưỡng cửa, Tú Nghi không nhìn điện thoại nữa. Bức ảnh không thể bù khởi đầu đã mất; họ hàng có thể tiếp tục chờ, còn Gia Hòa không phải đổi họ hay vào hình để chứng minh cuộc gặp. Tấm biển ở lại phía sau, tên cô ở lại trong lời Tú Nghi.',
+    9 => ' Qua ngưỡng cửa, Tú Nghi không nhìn điện thoại nữa. Bức ảnh không thể bù khởi đầu đã mất; họ hàng có thể chờ, còn Gia Hòa không phải đổi họ hay vào hình. Những lớp sân không dẫn thẳng tới một kết thúc trọn vẹn, mà buộc họ quyết định lại khoảng cách ở mỗi ngưỡng cửa. Tấm biển ở lại phía sau, tên Gia Hòa ở lại trong lời Tú Nghi.',
+    10 => ' Qua ngưỡng cửa, Tú Nghi không nhìn điện thoại nữa. Bà từ bỏ thể diện của việc chứng minh với họ hàng rằng “con gái đã trở về”; Gia Hòa không cần đổi họ, quàng khăn đỏ hay đứng trước ống kính. Những lớp sân không dẫn thẳng tới một kết thúc trọn vẹn, mà buộc họ quyết định lại khoảng cách ở mỗi ngưỡng cửa. Điện thoại im trong tay, khăn vẫn trong túi. Tấm biển ở lại phía sau; phía trước, họ chỉ tiếp tục đi song song, không ai nói “về nhà”.',
+    _ => '',
+  };
+  final extraEn = switch (level) {
+    6 => ' Crossing the threshold, Xiuyi does not look at the phone again; the plaque remains behind them, while Jiahe’s name remains in Xiuyi’s own sentence.',
+    7 => ' Crossing the threshold, Xiuyi does not look at the phone again. She once thought a photograph could supply a beginning missing for thirty-four years, but the blank remains. The plaque stays behind them, and Jiahe’s name remains in her own sentence.',
+    8 => ' Crossing the threshold, Xiuyi does not look at the phone again. A photograph cannot restore the missing beginning; the relatives may keep waiting, but Jiahe need not change her surname or enter a picture to prove recognition. The plaque stays behind, and Jiahe’s name remains in Xiuyi’s sentence.',
+    9 => ' Crossing the threshold, Xiuyi does not look at the phone again. A photograph cannot restore the missing beginning; the relatives may wait, but Jiahe need not change her surname or enter the frame. The sequence of courtyards offers no direct route to completion, only a new decision about distance at each threshold. The plaque stays behind, and Jiahe’s name remains in Xiuyi’s sentence.',
+    10 => ' Crossing the threshold, Xiuyi does not look at the phone again. She gives up the dignity of proving to the family that “her daughter has returned”; Jiahe need not change her surname, wear the red scarf, or enter the frame. The layered courtyards offer no direct route to completion, only renewed choices about distance at each threshold. The phone is quiet in Xiuyi’s hand and the scarf remains packed away. The plaque stays behind; ahead, they simply continue side by side, and neither says “home.”',
+    _ => '',
+  };
+  return (
+    'Trong sân kế tiếp, nhóm họ hàng gọi video, những gương mặt chờ đợi đòi một bức ảnh dưới biển để mọi chuyện “trọn vẹn”. Tú Nghi giơ máy; Gia Hòa lùi về phía cột, không bỏ đi cũng không bước gần. Du khách đi qua khoảng giữa họ. Tú Nghi nhìn thấy mình trên màn hình và khoảng trống dưới biển. Bà úp điện thoại xuống bệ gạch: “Con bé tên Lưu Gia Hòa. Hôm nay không vào hình,” rồi tắt tiếng. Bức ảnh bà chờ ba mươi bốn năm không được chụp. Gia Hòa đi trước; Tú Nghi không kéo cô lại, để khăn trong túi và theo đến bên cạnh. Ở ngưỡng cửa, Gia Hòa chậm một bước và hai người cùng bước vào.$extraVi',
+    'In the next courtyard, the family group calls by video and waiting faces demand a photograph beneath the plaque so everything can be “complete.” Xiuyi raises the phone; Jiahe steps toward a pillar, neither leaving nor coming closer. Visitors pass through the space between them. Xiuyi sees herself on the screen and the empty place beneath the plaque. She turns the phone face-down on the blue-brick ledge: “Her name is Liu Jiahe. Today she will not be in the picture,” and mutes the call. The photograph she waited thirty-four years for is not taken. Jiahe walks ahead; Xiuyi does not pull her back, leaves the scarf in her bag, and joins her. At the threshold Jiahe slows by one step, and they enter together.$extraEn',
   );
 }
 
@@ -716,18 +773,26 @@ final guangzhouChenClanRemediatedJourney = RemediatedJourney(
 
 JourneyLevelContent guangzhouChenClanOnePassLevelContent(
   int requestedLevel, {
+  ChineseProficiencyProfile? profile,
   Set<String> knownWords = const <String>{},
 }) {
   final level = requestedLevel.clamp(1, 10).toInt();
   final base = guangzhouChenClanOnePassLevels[level - 1];
   final story = base.storyParagraphs.join();
   final selected = guangzhouChenClanCuratedWordNamesByLevel[level] ?? const <String>{};
-  final visibleWords = guangzhouChenClanOnePassWords
+  final candidates = guangzhouChenClanOnePassWords
       .where((entry) =>
           selected.contains(entry.word) &&
-          story.contains(entry.word) &&
-          !knownWords.contains(entry.word))
+          story.contains(entry.word))
       .toList(growable: false);
+  final effectiveProfile = profile ??
+      const PhoenixLanguageLevelAgent().profileForPhoenixLevel(level);
+  final visibleWords = const PhoenixLanguageLevelAgent().selectVocabulary(
+    words: candidates,
+    levelCatalog: guangzhouChenClanVocabularyLevelCatalog,
+    profile: effectiveProfile,
+    knownWords: knownWords,
+  );
   return JourneyLevelContent(
     storyParagraphs: base.storyParagraphs,
     storyAnnotations: base.storyAnnotations,
@@ -737,3 +802,16 @@ JourneyLevelContent guangzhouChenClanOnePassLevelContent(
     expressQuestion: guangzhouChenClanWritingPrompts[level - 1],
   );
 }
+
+final guangzhouChenClanVocabularyLevelCatalog = <String, VocabularyLevelTag>{
+  for (final entry in guangzhouChenClanWordFirstAppears.entries)
+    entry.key: VocabularyLevelTag(
+      hskLevel: entry.value.clamp(1, 6).toInt(),
+      tocflLevel: entry.value.clamp(1, 6).toInt(),
+      kind: switch (entry.key) {
+        '陈家祠' || '陈氏书院' => VocabularyKind.properNoun,
+        '匾额' || '院落' || '门槛' || '宗族' => VocabularyKind.cultural,
+        _ => VocabularyKind.general,
+      },
+    ),
+};

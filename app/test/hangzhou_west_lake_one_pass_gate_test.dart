@@ -153,4 +153,27 @@ void main() {
       expect(resolved.discoveries.single, same(hangzhouWestLakeReopenedDiscoverySpecs[level - 1].entry));
     }
   });
+
+  test('Lv1 Lv5 Lv10 Reading Support matches every current paragraph', () {
+    for (final level in <int>[1, 5, 10]) {
+      final content = hangzhouWestLakeReopenedLevels[level - 1];
+      expect(content.storyAnnotations, hasLength(content.storyParagraphs.length));
+      final support = content.storyAnnotations
+          .map((item) => '${item.pinyin} ${item.vietnamese} ${item.english}')
+          .join(' ');
+      for (final anchor in <String>[
+        'Fang Yu',
+        'Zhou Shaoting',
+        'appointment card',
+        'stone steps',
+        'elbow',
+        'hospital',
+      ]) {
+        expect(support, contains(anchor), reason: 'Lv$level $anchor');
+      }
+      for (final stale in <String>['Xu Cheng', 'recording', 'soundscape project', 'archive']) {
+        expect(support, isNot(contains(stale)), reason: 'Lv$level stale $stale');
+      }
+    }
+  });
 }
