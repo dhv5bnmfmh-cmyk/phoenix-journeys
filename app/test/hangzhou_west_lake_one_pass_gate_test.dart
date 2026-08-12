@@ -4,10 +4,32 @@ import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/data/hangzhou_west_lake_one_pass.dart';
+import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 void main() {
+  ChineseProficiencyProfile profile(int level) => ChineseProficiencyProfile(
+    track: ChineseExamTrack.hsk,
+    levelCode: '$level',
+    levelLabel: '$level',
+    band: PhoenixReadingBand.intermediate,
+    phoenixLevel: level,
+  );
+
+  test('Lv1-Lv10 vocabulary meets Phoenix targets with visible provenance', () {
+    const agent = PhoenixLanguageLevelAgent();
+    for (var level = 1; level <= 10; level++) {
+      final actual = hangzhouWestLakeOnePassLevelContent(level, profile: profile(level));
+      final plan = agent.planFor(profile(level));
+      expect(actual.words.length, greaterThanOrEqualTo(plan.targetVocabularyCount), reason: 'Lv$level target');
+      expect(actual.words.length, lessThanOrEqualTo(plan.maximumVocabularyCount), reason: 'Lv$level maximum');
+      final visible = '${actual.storyParagraphs.join()}${actual.discoveries.single.text}';
+      for (final word in actual.words) {
+        expect(visible, contains(word.word), reason: 'Lv$level ${word.word}');
+      }
+    }
+  });
   const levelAgent = PhoenixLanguageLevelAgent();
 
   test('Hangzhou Story obeys Lv1-Lv10 requested length and paragraph policy', () {

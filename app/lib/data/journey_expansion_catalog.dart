@@ -141,6 +141,16 @@ const _suzhouWords = <WordEntry>[
   WordEntry(word: '曲桥', pinyin: 'qūqiáo', partOfSpeech: '名词', simpleChinese: '弯曲转折的小桥。', translation: 'Cầu nhỏ uốn cong.', englishDefinition: 'curved bridge', symbol: '🌉'),
   WordEntry(word: '山水画', pinyin: 'shānshuǐhuà', partOfSpeech: '名词', simpleChinese: '表现山川自然的中国画。', translation: 'Tranh sơn thủy Trung Hoa.', englishDefinition: 'Chinese landscape painting', symbol: '🖌️'),
   WordEntry(word: '层次', pinyin: 'céngcì', partOfSpeech: '名词', simpleChinese: '空间前后形成的不同层面。', translation: 'Các lớp không gian trước sau.', englishDefinition: 'visual layers and depth', symbol: '🌫️'),
+  WordEntry(word: '外婆', pinyin: 'wàipó', partOfSpeech: '名词', simpleChinese: '母亲的母亲。', translation: 'Bà ngoại.', englishDefinition: 'maternal grandmother', symbol: '👵'),
+  WordEntry(word: '自己', pinyin: 'zìjǐ', partOfSpeech: '代词', simpleChinese: '本人，不依靠别人。', translation: 'Tự mình.', englishDefinition: 'oneself; independently', symbol: '🚶'),
+  WordEntry(word: '转弯', pinyin: 'zhuǎnwān', partOfSpeech: '动词', simpleChinese: '改变行走方向。', translation: 'Rẽ.', englishDefinition: 'to turn a corner', symbol: '↪️'),
+  WordEntry(word: '消失', pinyin: 'xiāoshī', partOfSpeech: '动词', simpleChinese: '从视线里看不见了。', translation: 'Biến mất.', englishDefinition: 'to disappear from view', symbol: '👀'),
+  WordEntry(word: '视线', pinyin: 'shìxiàn', partOfSpeech: '名词', simpleChinese: '眼睛看出去的方向和范围。', translation: 'Tầm nhìn.', englishDefinition: 'line of sight', symbol: '👁️'),
+  WordEntry(word: '抬起', pinyin: 'táiqǐ', partOfSpeech: '动词', simpleChinese: '把手或物体向上举。', translation: 'Giơ lên.', englishDefinition: 'to raise', symbol: '✋'),
+  WordEntry(word: '水面', pinyin: 'shuǐmiàn', partOfSpeech: '名词', simpleChinese: '水最上面的表面。', translation: 'Mặt nước.', englishDefinition: 'water surface', symbol: '🌊'),
+  WordEntry(word: '回头', pinyin: 'huítóu', partOfSpeech: '动词', simpleChinese: '转头向后看。', translation: 'Ngoảnh lại.', englishDefinition: 'to look back', symbol: '↩️'),
+  WordEntry(word: '追上', pinyin: 'zhuīshàng', partOfSpeech: '动词', simpleChinese: '加快脚步赶到前面的人身边。', translation: 'Đuổi kịp.', englishDefinition: 'to catch up', symbol: '🏃'),
+  WordEntry(word: '遮挡', pinyin: 'zhēdǎng', partOfSpeech: '动词', simpleChinese: '挡住，使人暂时看不见。', translation: 'Che khuất.', englishDefinition: 'to block from view', symbol: '🧱'),
 ];
 
 const _suzhouDiscoveries = <DiscoveryEntry>[
@@ -186,8 +196,7 @@ JourneyLevelContent suzhouGardenCanonicalLevelContent(
     words: List<WordEntry>.unmodifiable(
       const PhoenixLanguageLevelAgent().selectVocabulary(
         words: _suzhouWords
-            .where((entry) => searchable.contains(entry.word))
-            .take(switch (level) { 1 => 5, 2 => 6, 3 => 7, 4 => 8, _ => 9 }),
+            .where((entry) => searchable.contains(entry.word)),
         levelCatalog: _suzhouVocabularyLevelCatalog,
         profile: profile ??
             const PhoenixLanguageLevelAgent().profileForPhoenixLevel(level),
@@ -210,6 +219,16 @@ const _suzhouVocabularyLevelCatalog = <String, VocabularyLevelTag>{
   '曲桥': VocabularyLevelTag(hskLevel: 5, tocflLevel: 4, kind: VocabularyKind.cultural),
   '山水画': VocabularyLevelTag(hskLevel: 4, tocflLevel: 3, kind: VocabularyKind.cultural),
   '层次': VocabularyLevelTag(hskLevel: 5, tocflLevel: 4),
+  '外婆': VocabularyLevelTag(hskLevel: 2, tocflLevel: 1),
+  '自己': VocabularyLevelTag(hskLevel: 1, tocflLevel: 1),
+  '转弯': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '消失': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '视线': VocabularyLevelTag(hskLevel: 4, tocflLevel: 3),
+  '抬起': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '水面': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '回头': VocabularyLevelTag(hskLevel: 2, tocflLevel: 2),
+  '追上': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '遮挡': VocabularyLevelTag(hskLevel: 5, tocflLevel: 4),
 };
 
 List<(String, String)> _suzhouReadingSupport(int level) => switch (level) {

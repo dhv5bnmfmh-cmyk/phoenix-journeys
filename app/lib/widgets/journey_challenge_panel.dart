@@ -2093,7 +2093,8 @@ class _ChallengeSession {
       'hangzhou-west-lake' ||
       'chengdu-kuanzhai-alley' ||
       'nanjing-qinhuai-river' ||
-      'guangzhou-chen-clan-academy' =>
+      'guangzhou-chen-clan-academy' ||
+      'suzhou-humble-administrators-garden' =>
         _adaptiveGrammarForJourney(journeyId, difficulty),
       'literary-roaming' ||
       'myth-tracing' ||
@@ -2196,14 +2197,14 @@ class _ChallengeSession {
           resultAction: '变得清楚可辨',
         ),
       'hangzhou-west-lake' => (
-          focus: '苏堤、桥与远山',
-          insight: '发现西湖景色的变化',
-          subject: '苏堤',
-          action: '组织沿湖路线',
-          result: '逐步看见不同景层',
-          cause: '天气和季节不断变化',
-          resultSubject: '西湖十景',
-          resultAction: '呈现不同的观看感受',
+          focus: '断桥残雪、湿石阶和预约卡',
+          insight: '理解地点记忆与人物行动的差别',
+          subject: '题名景观',
+          action: '连接地点、季节与观看条件',
+          result: '理解景名不是一次记忆考试',
+          cause: '湿石阶触发了下意识的扶持',
+          resultSubject: '方毓的连续提问',
+          resultAction: '停在交出预约卡之前',
         ),
       'chengdu-kuanzhai-alley' => (
           focus: '宽、窄、井三条巷子',
@@ -2226,14 +2227,24 @@ class _ChallengeSession {
           resultAction: '承载更多历史记忆',
         ),
       'guangzhou-chen-clan-academy' => (
-          focus: '屋脊陶塑和木石雕刻',
-          insight: '读懂其中的岭南故事',
-          subject: '陈家祠装饰',
-          action: '保存岭南工艺',
-          result: '理解宗族文化记忆',
-          cause: '多种雕塑共同讲述地方故事',
-          resultSubject: '建筑细节',
-          resultAction: '成为可阅读的文化线索',
+          focus: '共同兴建与陈氏书院匾额',
+          insight: '理解共同兴建与空间组织',
+          subject: '三路三进格局',
+          action: '组织厅堂、院落和廊道',
+          result: '理解建筑的前后层次',
+          cause: '多地陈姓宗族共同兴建陈氏书院',
+          resultSubject: '合族祠与书院身份',
+          resultAction: '在同一建筑中相互联系',
+        ),
+      'suzhou-humble-administrators-garden' => (
+          focus: '长廊转弯、曲桥和池水',
+          insight: '理解视线怎样遮挡又重新打开',
+          subject: '长廊与建筑转折',
+          action: '暂时收紧视线',
+          result: '看见池水重新打开空间',
+          cause: '廊、墙和植物形成前后遮挡',
+          resultSubject: '园林视野',
+          resultAction: '随着行走连续变化',
         ),
       'literary-roaming' => (
           focus: '蓝色蝴蝶和竹林梦境',

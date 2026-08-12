@@ -1,5 +1,7 @@
 import 'package:pinyin/pinyin.dart';
 
+import '../agents/phoenix_language_level_agent.dart';
+import '../models/language_proficiency.dart';
 import 'batch_one_journey_remediation.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
@@ -290,7 +292,27 @@ final hangzhouWestLakeReopenedWords = <WordEntry>[
   _word('怕', 'pà', '动词', '心里感到不安或恐惧。', 'Sợ hãi.', 'to be afraid', '🤐'),
   _word('公交车', 'gōngjiāochē', '名词', '按固定路线载客的公共汽车。', 'Xe buýt.', 'public bus', '🚌'),
   _word('断桥残雪', 'Duànqiáo Cánxuě', '名词（题名景观）', '与冬雪及特定观看条件有关的西湖十景之一。', 'Tuyết còn trên Đoạn Kiều.', 'Lingering Snow on Broken Bridge', '❄️'),
+  _word('结婚', 'jiéhūn', '动词', '两个人建立婚姻关系。', 'Kết hôn.', 'to marry', '💍'),
+  _word('医院', 'yīyuàn', '名词', '检查和治疗疾病的机构。', 'Bệnh viện.', 'hospital', '🏥'),
+  _word('检查', 'jiǎnchá', '动词/名词', '查看身体或情况是否有变化。', 'Kiểm tra.', 'examination; to examine', '🩺'),
+  _word('景名', 'jǐngmíng', '名词', '景观使用的名称。', 'Tên cảnh.', 'name of a scenic view', '🏞️'),
+  _word('夏天', 'xiàtiān', '名词', '一年中炎热的季节。', 'Mùa hè.', 'summer', '☀️'),
+  _word('钱包', 'qiánbāo', '名词', '随身放钱和卡片的小包。', 'Ví tiền.', 'wallet', '👛'),
+  _word('司机', 'sījī', '名词', '驾驶车辆的人。', 'Tài xế.', 'driver', '🧑‍✈️'),
+  _word('害怕', 'hàipà', '动词', '因担心而感到不安。', 'Sợ hãi.', 'to be afraid', '😟'),
 ];
+
+final hangzhouWestLakeVocabularyLevelCatalog = <String, VocabularyLevelTag>{
+  for (var index = 0; index < hangzhouWestLakeReopenedWords.length; index++)
+    hangzhouWestLakeReopenedWords[index].word: VocabularyLevelTag(
+      hskLevel: (1 + index ~/ 4).clamp(1, 6).toInt(),
+      tocflLevel: (1 + index ~/ 4).clamp(1, 6).toInt(),
+      kind: switch (hangzhouWestLakeReopenedWords[index].word) {
+        '西湖' || '断桥' || '断桥残雪' => VocabularyKind.cultural,
+        _ => VocabularyKind.general,
+      },
+    ),
+};
 
 final hangzhouWestLakeReopenedWordTraces = <RemediatedWordTrace>[
   const RemediatedWordTrace(word: '西湖', eventId: 'HZ2-E2-views', usage: '故事行走和景名提问的地点。', sourceText: '两人从断桥往前走，方毓不停问他西湖景名。'),
@@ -475,10 +497,24 @@ final hangzhouWestLakeReopenedRemediation = RemediatedJourney(
 
 final hangzhouWestLakeOnePassRemediation = RemediatedJourney(id: hangzhouWestLakeJourneyId, title: '杭州 · 西湖：雨落进录音以后', protagonist: '许澄', goal: '在阵雨到来前沿苏堤完成一段连续环境录音，最初试图得到没有现代人声的“完美西湖”。', conflict: '许澄必须判断：把所有人的声音都当成污染，是否也会删除西湖作为活着的文化景观的一部分。', eventIds: List<String>.unmodifiable([for (final event in hangzhouWestLakeSemanticEvents) event.id]), events: hangzhouWestLakeSemanticEvents, levels: hangzhouWestLakeOnePassLevels, words: hangzhouWestLakeOnePassWords, wordTraces: hangzhouWestLakeWordTraces, discoveries: hangzhouWestLakeOnePassDiscoveries, discoveryTraces: hangzhouWestLakeDiscoveryTraces, challenges: List<RemediatedChallengeTrace>.unmodifiable([for (final challenge in hangzhouWestLakeChallenges) RemediatedChallengeTrace(type: challenge.type, storyEventIds: const ['HZ-E2-delete', 'HZ-E3-bridge', 'HZ-E6-rain'], anchor: challenge.anchor)]), memory: hangzhouWestLakeMemory, completion: const RemediatedCompletion(journeySummary: '许澄从苏堤出发寻找“纯净”的西湖声景，最终在阵雨中主动记录人与湖面共同改变的声场。', achievement: '湖雨采声者', memoryAnchor: '第一滴雨落进西湖录音里的声音', challengeReward: '西湖声纹章：记录雨、水与城市在场关系的声音徽记。', journeyCompletion: '第二天，许澄按日期和苏堤路线归档录音，并把标题写成“在场”。'), sources: hangzhouWestLakeSources);
 
-JourneyLevelContent hangzhouWestLakeOnePassLevelContent(int requestedLevel) {
+JourneyLevelContent hangzhouWestLakeOnePassLevelContent(
+  int requestedLevel, {
+  ChineseProficiencyProfile? profile,
+  Set<String> knownWords = const <String>{},
+}) {
   final level = requestedLevel.clamp(1, 10).toInt();
   final base = hangzhouWestLakeReopenedLevels[level - 1];
   final story = base.storyParagraphs.join();
-  final visibleWords = hangzhouWestLakeReopenedWords.where((entry) => story.contains(entry.word)).take((4 + level).clamp(5, 12)).toList(growable: false);
-  return JourneyLevelContent(storyParagraphs: base.storyParagraphs, storyAnnotations: base.storyAnnotations, words: List<WordEntry>.unmodifiable(visibleWords), discoveries: List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[hangzhouWestLakeReopenedDiscoverySpecs[level - 1].entry]), wonderQuestion: '方毓为什么在周绍庭扶住她以后停止用西湖景名测试他？', expressQuestion: '请按顺序写出方毓隐瞒预约卡、不断出题、湿石阶被扶住和公开交卡四件事。');
+  final discovery = hangzhouWestLakeReopenedDiscoverySpecs[level - 1].entry;
+  final searchable = '$story${discovery.text}';
+  final visibleWords = const PhoenixLanguageLevelAgent().selectVocabulary(
+    words: hangzhouWestLakeReopenedWords.where(
+      (entry) => searchable.contains(entry.word),
+    ),
+    levelCatalog: hangzhouWestLakeVocabularyLevelCatalog,
+    profile: profile ??
+        const PhoenixLanguageLevelAgent().profileForPhoenixLevel(level),
+    knownWords: knownWords,
+  );
+  return JourneyLevelContent(storyParagraphs: base.storyParagraphs, storyAnnotations: base.storyAnnotations, words: List<WordEntry>.unmodifiable(visibleWords), discoveries: List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[discovery]), wonderQuestion: '方毓为什么在周绍庭扶住她以后停止用西湖景名测试他？', expressQuestion: '请按顺序写出方毓隐瞒预约卡、不断出题、湿石阶被扶住和公开交卡四件事。');
 }

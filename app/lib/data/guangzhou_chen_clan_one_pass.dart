@@ -300,6 +300,14 @@ final guangzhouChenClanOnePassWords = List<WordEntry>.unmodifiable([
   _word('院落', 'yuànluò', '名词', '由房屋和围合空间组成的院子。', 'sân trong', 'courtyard', '🏛️'),
   _word('门槛', 'ménkǎn', '名词', '门框下方横着的构件。', 'ngưỡng cửa', 'threshold', '🚪'),
   _word('体面', 'tǐmiàn', '名词/形容词', '在别人眼中显得完整、合宜的样子。', 'thể diện', 'social dignity or appearances', '🎭'),
+  _word('共同', 'gòngtóng', '副词/形容词', '由多方一起完成或拥有。', 'cùng nhau', 'joint; shared', '🤝'),
+  _word('兴建', 'xīngjiàn', '动词', '组织力量建造。', 'xây dựng', 'to construct', '🏗️'),
+  _word('合族祠', 'hézúcí', '名词', '由同姓不同支系共同建立的祠堂。', 'từ đường chung của tông tộc', 'joint lineage hall', '🏛️'),
+  _word('三路三进', 'sānlù sānjìn', '名词', '横向三路、纵向三进的建筑组织。', 'bố cục ba trục ba lớp', 'three-route, three-depth layout', '🧭'),
+  _word('廊道', 'lángdào', '名词', '连接厅堂和院落的有顶通道。', 'hành lang', 'corridor', '🚶'),
+  _word('岭南工艺', 'Lǐngnán gōngyì', '名词', '岭南地区形成的传统装饰与制作技艺。', 'thủ công Lĩnh Nam', 'Lingnan craftsmanship', '🎨'),
+  _word('博物馆', 'bówùguǎn', '名词', '收藏、研究和展示文化对象的机构。', 'bảo tàng', 'museum', '🏛️'),
+  _word('文物保护', 'wénwù bǎohù', '名词', '维护历史文化遗产的工作。', 'bảo tồn di tích', 'heritage conservation', '🛡️'),
 ]);
 
 const guangzhouChenClanLegacyPaperBridgeWordFirstAppears = <String, int>{
@@ -356,7 +364,9 @@ final guangzhouChenClanLegacyPaperBridgeWordTraces = List<RemediatedWordTrace>.u
 const guangzhouChenClanWordFirstAppears = <String, int>{
   '陈家祠': 1, '陈氏书院': 2, '收养': 2, '亲生': 2, '入镜': 1,
   '匾额': 3, '院落': 3, '门槛': 4, '宗族': 5, '合资': 5,
-  '边界': 6, '体面': 8,
+  '边界': 6, '体面': 8, '共同': 1, '兴建': 1, '合族祠': 4,
+  '三路三进': 7, '廊道': 7, '岭南工艺': 8, '博物馆': 9,
+  '文物保护': 10,
 };
 
 final guangzhouChenClanCuratedWordNamesByLevel = <int, Set<String>>{
@@ -502,17 +512,26 @@ final guangzhouChenClanLegacyPaperBridgeDiscoverySpecs = List<GuangzhouDiscovery
   ),
 ]);
 
+DiscoveryEntry _guangzhouActiveDiscovery(int level) => switch (level) {
+  1 => _discovery('陈家祠匾额题“陈氏书院”，由广东各地陈姓宗族共同出资兴建。', pinyin: 'Chénjiācí biǎné tí Chénshì Shūyuàn, yóu Guǎngdōng gèdì Chén xìng zōngzú gòngtóng chūzī xīngjiàn.', simpleChinese: '广东各地陈姓宗族共同兴建陈氏书院。', vietnamese: 'Các dòng họ Trần ở nhiều nơi thuộc Quảng Đông cùng góp tiền xây Trần Thị Thư Viện.', english: 'Chen lineages across Guangdong jointly funded and built the Chen Clan Academy.'),
+  2 => _discovery('“陈家祠”是常用名称，“陈氏书院”是匾额所题名称；两个名称保留了祠堂与书院相连的历史身份。', pinyin: 'Chénjiācí shì chángyòng míngchēng, Chénshì Shūyuàn shì biǎné suǒ tí míngchēng.', simpleChinese: '陈家祠也叫陈氏书院，名称反映它的复合身份。', vietnamese: 'Tên Trần Gia Từ và Trần Thị Thư Viện lưu giữ hai lớp căn tính lịch sử.', english: 'The names Chen Clan Ancestral Hall and Chen Clan Academy preserve its linked hall-and-academy identity.'),
+  3 => _discovery('它不是一户人家的私祠，而是广东不同地方陈姓宗族合资建立的公共宗族空间。', pinyin: 'Tā bú shì yí hù rénjiā de sīcí, ér shì bùtóng dìfāng Chén xìng zōngzú hézī jiànlì de kōngjiān.', simpleChinese: '这里由不同地方的陈姓宗族合资建立。', vietnamese: 'Đây không phải từ đường của một gia đình mà là không gian chung do nhiều dòng họ Trần góp vốn.', english: 'It was not one household’s private hall but a shared lineage space funded by Chen groups from different places.'),
+  4 => _discovery('陈家祠又称陈氏书院，是多地陈姓宗族共同兴建的合族祠，兼有祭祀、联络与书院身份。', pinyin: 'Chénjiācí yòu chēng Chénshì Shūyuàn, shì duōdì Chén xìng zōngzú gòngtóng xīngjiàn de hézúcí.', simpleChinese: '合族祠把多个陈姓支系联系在同一空间。', vietnamese: 'Đây là từ đường chung nối nhiều nhánh họ Trần và đồng thời mang căn tính thư viện.', english: 'As a joint lineage hall, it linked multiple Chen branches while also retaining an academy identity.'),
+  5 => _discovery('主体建筑以横向三路、纵向三进组织厅堂与院落，人们经过门、堂、院逐层深入。', pinyin: 'Zhǔtǐ jiànzhù yǐ héngxiàng sānlù, zòngxiàng sānjìn zǔzhī tīngtáng yǔ yuànluò.', simpleChinese: '三路三进让厅堂和院落有清楚层次。', vietnamese: 'Bố cục ba trục ngang và ba lớp dọc tổ chức sảnh cùng sân theo chiều sâu.', english: 'Three transverse routes and three successive depths organize halls and courtyards in layers.'),
+  6 => _discovery('厅堂、院落和廊道相互连接：院落引入光线和空气，廊道把不同建筑单元连成连续路线。', pinyin: 'Tīngtáng, yuànluò hé lángdào xiānghù liánjiē.', simpleChinese: '院落提供开敞空间，廊道连接建筑。', vietnamese: 'Sân đưa ánh sáng và không khí vào, còn hành lang nối các đơn vị kiến trúc.', english: 'Courtyards admit light and air, while corridors connect the building units into continuous routes.'),
+  7 => _discovery('三路三进并不是数字标签：它把厅堂、院落、廊道和出入口组织成有主次、有前后的建筑群。', pinyin: 'Sānlù sānjìn bǎ tīngtáng, yuànluò, lángdào hé chūrùkǒu zǔzhī chéng jiànzhùqún.', simpleChinese: '三路三进组织建筑的主次和前后关系。', vietnamese: 'Bố cục ba trục ba lớp tạo quan hệ chính-phụ và trước-sau trong quần thể.', english: 'The three-route, three-depth plan establishes hierarchy and front-to-back relationships across the complex.'),
+  8 => _discovery('木雕、砖雕、石雕、陶塑、灰塑、铸造和彩绘等岭南工艺集中在建筑不同部位，材料与位置共同参与表达。', pinyin: 'Mùdiāo, zhuāndiāo, shídiāo, táosù, huīsù, zhùzào hé cǎihuì děng Lǐngnán gōngyì jízhōng zài jiànzhù bùtóng bùwèi.', simpleChinese: '多种岭南工艺分布在建筑不同位置。', vietnamese: 'Nhiều nghề thủ công Lĩnh Nam bằng gỗ, gạch, đá, gốm, vữa, đúc và vẽ màu xuất hiện ở các vị trí kiến trúc khác nhau.', english: 'Wood, brick, and stone carving, ceramic and lime sculpture, casting, and painting occupy different architectural positions.'),
+  9 => _discovery('今天陈家祠也是广东民间工艺博物馆所在地；历史建筑本身与馆内收藏展示共同帮助公众认识广东传统工艺。', pinyin: 'Jīntiān Chénjiācí yě shì Guǎngdōng Mínjiān Gōngyì Bówùguǎn suǒzàidì.', simpleChinese: '陈家祠既是历史建筑，也是今天的民间工艺博物馆。', vietnamese: 'Ngày nay công trình lịch sử này đồng thời là Bảo tàng Mỹ thuật Dân gian Quảng Đông.', english: 'Today the historic complex also houses the Guangdong Folk Arts Museum.'),
+  _ => _discovery('陈家祠是全国重点文物保护单位。文物保护既要维护三路三进、厅堂、院落和廊道组成的整体格局，也要保存建筑上的岭南工艺及其博物馆公共文化功能。', pinyin: 'Chénjiācí shì Quánguó Zhòngdiǎn Wénwù Bǎohù Dānwèi.', simpleChinese: '保护陈家祠要同时保护整体建筑格局、岭南工艺和公共文化功能。', vietnamese: 'Bảo tồn cần gìn giữ tổng thể bố cục, thủ công Lĩnh Nam và chức năng văn hóa công cộng.', english: 'Conservation must sustain the complete layout, its Lingnan craftsmanship, and its public cultural role.'),
+};
+
 final guangzhouChenClanDiscoverySpecs = List<GuangzhouDiscoverySpec>.unmodifiable([
   for (var level = 1; level <= 10; level++)
     GuangzhouDiscoverySpec(
       level: level,
-      title: level <= 3 ? '共同兴建的陈氏书院' : level <= 6 ? '合族祠与书院' : '三路三进的院落',
+      title: const ['共同兴建', '两个名称', '不是一户私祠', '合族祠与书院', '三路三进', '院落与廊道', '空间主次', '岭南工艺', '博物馆功能', '整体保护'][level - 1],
       storyLink: '说明共同兴建、复合功能与院落组织，不复述虚构母女剧情。',
-      entry: level <= 3
-          ? _discovery('陈家祠匾额题“陈氏书院”，落成于清光绪十九年，由广东各地陈姓宗族合资兴建。', pinyin: 'Chénjiācí biǎné tí “Chénshì Shūyuàn”, yóu Guǎngdōng gèdì Chén xìng zōngzú hézī xīngjiàn.', simpleChinese: '广东不同地方的陈姓宗族共同出资建成陈氏书院。', vietnamese: 'Các dòng họ Trần ở nhiều nơi thuộc Quảng Đông cùng góp tiền xây dựng Trần Thị Thư Viện.', english: 'Chen lineages from different parts of Guangdong jointly funded the Chen Clan Academy.')
-          : level <= 6
-              ? _discovery('陈家祠又称陈氏书院，是广东各地陈姓宗族共同兴建的合族祠，名称同时保留祠堂与书院两层历史身份。', pinyin: 'Chénjiācí yòu chēng Chénshì Shūyuàn, shì Chén xìng zōngzú gòngtóng xīngjiàn de hézúcí.', simpleChinese: '陈家祠也是陈氏书院，由不同地方的陈姓宗族共同兴建。', vietnamese: 'Trần Gia Từ cũng gọi là Trần Thị Thư Viện, do các dòng họ Trần ở nhiều nơi cùng xây dựng.', english: 'Also called the Chen Clan Academy, the joint ancestral hall was built by Chen lineages from different parts of Guangdong.')
-              : _discovery('主体建筑以三路三进组织九堂、六院与相连廊道，并集中多种岭南建筑装饰工艺。', pinyin: 'Zhǔtǐ jiànzhù yǐ sānlù sānjìn zǔzhī jiǔ táng, liù yuàn yǔ lángdào.', simpleChinese: '厅堂、院落和走廊组成有层次的建筑群。', vietnamese: 'Các sảnh, sân và hành lang tạo thành một quần thể nhiều lớp.', english: 'Three routes and three depths organize halls, courtyards, and connected corridors.'),
+      entry: _guangzhouActiveDiscovery(level),
       keyTerms: level <= 3 ? const ['陈氏书院', '合资', '宗族'] : level <= 6 ? const ['合族祠', '书院', '共同兴建'] : const ['三路三进', '院落', '廊道'],
       learnerInsight: '一个共同姓氏空间由多地群体、复合功能与层层院落共同形成。',
       check: '为什么这里不能只理解成一户人家的祠堂？',
@@ -779,11 +798,13 @@ JourneyLevelContent guangzhouChenClanOnePassLevelContent(
   final level = requestedLevel.clamp(1, 10).toInt();
   final base = guangzhouChenClanOnePassLevels[level - 1];
   final story = base.storyParagraphs.join();
+  final discovery = guangzhouChenClanDiscoverySpecs[level - 1].entry;
+  final searchable = '$story${discovery.text}';
   final selected = guangzhouChenClanCuratedWordNamesByLevel[level] ?? const <String>{};
   final candidates = guangzhouChenClanOnePassWords
       .where((entry) =>
           selected.contains(entry.word) &&
-          story.contains(entry.word))
+          searchable.contains(entry.word))
       .toList(growable: false);
   final effectiveProfile = profile ??
       const PhoenixLanguageLevelAgent().profileForPhoenixLevel(level);
@@ -797,7 +818,7 @@ JourneyLevelContent guangzhouChenClanOnePassLevelContent(
     storyParagraphs: base.storyParagraphs,
     storyAnnotations: base.storyAnnotations,
     words: visibleWords,
-    discoveries: <DiscoveryEntry>[guangzhouChenClanDiscoverySpecs[level - 1].entry],
+    discoveries: <DiscoveryEntry>[discovery],
     wonderQuestion: guangzhouChenClanReflectionPrompts[level - 1],
     expressQuestion: guangzhouChenClanWritingPrompts[level - 1],
   );
@@ -810,7 +831,8 @@ final guangzhouChenClanVocabularyLevelCatalog = <String, VocabularyLevelTag>{
       tocflLevel: entry.value.clamp(1, 6).toInt(),
       kind: switch (entry.key) {
         '陈家祠' || '陈氏书院' => VocabularyKind.properNoun,
-        '匾额' || '院落' || '门槛' || '宗族' => VocabularyKind.cultural,
+        '匾额' || '院落' || '门槛' || '宗族' || '合族祠' ||
+        '三路三进' || '廊道' || '岭南工艺' || '文物保护' => VocabularyKind.cultural,
         _ => VocabularyKind.general,
       },
     ),

@@ -4,6 +4,7 @@ import 'package:phoenix_journeys/data/batch_one_adaptive_story_levels.dart';
 import 'package:phoenix_journeys/data/extended_journey_catalog.dart';
 import 'package:phoenix_journeys/data/guangzhou_chen_clan_one_pass.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
+import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 
 ChineseProficiencyProfile profile(int level) => ChineseProficiencyProfile(
   track: ChineseExamTrack.hsk, levelCode: '$level', levelLabel: '$level',
@@ -99,5 +100,24 @@ void main() {
     expect(discovery, isNot(contains('陈秀仪')));
     expect(discovery, isNot(contains('刘嘉禾')));
     expect(discovery, isNot(contains('纸桥')));
+  });
+
+  test('Lv1-Lv10 Discovery and vocabulary are distinct, visible, and on target', () {
+    const agent = PhoenixLanguageLevelAgent();
+    final discoveries = <String>{};
+    for (var level = 1; level <= 10; level++) {
+      final actual = resolveAdaptiveJourneyLevel(experience, profile: profile(level));
+      final canonical = guangzhouChenClanOnePassLevelContent(level);
+      final plan = agent.planFor(profile(level));
+      expect(actual.storyParagraphs, canonical.storyParagraphs, reason: 'Lv$level Story');
+      expect(actual.discoveries, canonical.discoveries, reason: 'Lv$level Discovery');
+      expect(discoveries.add(actual.discoveries.single.text), isTrue, reason: 'Lv$level learner value');
+      expect(actual.words.length, greaterThanOrEqualTo(plan.targetVocabularyCount), reason: 'Lv$level target');
+      expect(actual.words.length, lessThanOrEqualTo(plan.maximumVocabularyCount), reason: 'Lv$level maximum');
+      final visible = '${actual.storyParagraphs.join()}${actual.discoveries.single.text}';
+      for (final word in actual.words) {
+        expect(visible, contains(word.word), reason: 'Lv$level ${word.word}');
+      }
+    }
   });
 }

@@ -4,6 +4,7 @@ import 'package:phoenix_journeys/data/batch_one_adaptive_story_levels.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/journey_expansion_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
+import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 
 ChineseProficiencyProfile profile(int level) => ChineseProficiencyProfile(
   track: ChineseExamTrack.hsk, levelCode: '$level', levelLabel: '$level',
@@ -65,6 +66,20 @@ void main() {
     expect(suzhouGardenCanonicalLevelContent(9).discoveries.single.text, contains('有限'));
     expect(suzhouGardenCanonicalLevelContent(10).discoveries.single.text, contains('世界遗产'));
     expect(suzhouGardenCanonicalLevelContent(10).discoveries.single.text, contains('保护'));
+  });
+
+  test('Lv1-Lv10 vocabulary meets Phoenix targets with visible provenance', () {
+    const agent = PhoenixLanguageLevelAgent();
+    for (var level = 1; level <= 10; level++) {
+      final actual = resolveAdaptiveJourneyLevel(experience, profile: profile(level));
+      final plan = agent.planFor(profile(level));
+      expect(actual.words.length, greaterThanOrEqualTo(plan.targetVocabularyCount), reason: 'Lv$level target');
+      expect(actual.words.length, lessThanOrEqualTo(plan.maximumVocabularyCount), reason: 'Lv$level maximum');
+      final visible = '${actual.storyParagraphs.join()}${actual.discoveries.map((item) => item.text).join()}';
+      for (final word in actual.words) {
+        expect(visible, contains(word.word), reason: 'Lv$level ${word.word}');
+      }
+    }
   });
 
   test('Memory and Completion preserve the baseline generic product branch', () {
