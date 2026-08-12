@@ -98,32 +98,32 @@ JourneyContentRecord _journeyRecord({
 }
 
 const _suzhouParagraphs = <String>[
-  '清晨，你走进苏州拙政园。池水占据庭园中央，亭子、曲桥和白墙并不排成直线，而是随着脚步一层一层出现。',
-  '古典园林把水、石头、植物和建筑安排在有限空间里，让人感觉正在穿过一幅不断变化的山水画。',
-  '一扇漏窗框住竹影，一条长廊又把视线引向远处。借景让园内与园外彼此连接，小空间因此显得更深。',
-  '拙政园的故事不只关于美景，也关于人怎样观察自然。每一次转身，都可能重新理解同一片水和同一座亭。',
+  '下周一，十二岁的程朗要开始自己坐车去初中。六年来，外婆陈玉兰几乎每天都去接他放学；这个星期天，她带他来到拙政园，程朗第一次认真提出：“今天让我走前面吧，我在下一处等你。”陈玉兰看了他一眼，只说：“别走太快。”',
+  '沿着池水转过长廊，亭子、白墙和树影叠得像一幅被墙角切开的山水画。程朗的背影第一次从她眼前消失时，陈玉兰立刻喊了他的名字。程朗从转角退回来，没有争辩，只把脚步放慢了一点。',
+  '再往前走，曲桥和屋角又一次截断视线，廊下的人声盖住了程朗的脚步声。陈玉兰抬起手，他的名字已经到了嘴边，却没有喊；她把手放下来，自己走完那几步看不见他的路。',
+  '下一处水面重新打开时，程朗已经停在前面，正回头找她。他问：“外婆，我还能走前面吗？”陈玉兰把肩上的水壶带往上提了提，说：“下一处等我。”程朗转过去，背影很快又被房屋挡住。陈玉兰没有追上去。',
 ];
 
 const _suzhouAnnotations = <ReadingAnnotation>[
   ReadingAnnotation(
-    pinyin: 'Qīngchén, nǐ zǒujìn Sūzhōu Zhuōzhèng Yuán. Chíshuǐ zhànjù tíngyuán zhōngyāng, tíngzi, qūqiáo hé báiqiáng bìng bù páichéng zhíxiàn, ér shì suízhe jiǎobù yì céng yì céng chūxiàn.',
-    vietnamese: 'Sáng sớm, bạn bước vào Chuyết Chính Viên ở Tô Châu. Ao nước nằm giữa vườn; đình, cầu cong và tường trắng lần lượt hiện ra theo bước chân.',
-    english: 'At dawn, you enter Suzhou’s Humble Administrator’s Garden. Pond, pavilions, curved bridges, and white walls reveal themselves layer by layer.',
+    pinyin: 'Xià zhōuyī, shí’èr suì de Chéng Lǎng yào kāishǐ zìjǐ zuò chē qù chūzhōng. Liù nián lái, wàipó Chén Yùlán jīhū měitiān dōu qù jiē tā fàngxué; zhège xīngqītiān, tā dài tā láidào Zhuōzhèng Yuán, Chéng Lǎng dì yī cì rènzhēn tíchū: “Jīntiān ràng wǒ zǒu qiánmiàn ba, wǒ zài xià yí chù děng nǐ.” Chén Yùlán kàn le tā yì yǎn, zhǐ shuō: “Bié zǒu tài kuài.”',
+    vietnamese: 'Thứ Hai tuần sau, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường trung học cơ sở. Suốt sáu năm, bà ngoại Trần Ngọc Lan gần như ngày nào cũng đón cậu tan học; Chủ nhật này, bà đưa cậu đến Chuyết Chính Viên, và lần đầu cậu nghiêm túc nói: “Hôm nay để cháu đi phía trước nhé, cháu sẽ đợi bà ở chỗ tiếp theo.” Bà nhìn cậu rồi chỉ nói: “Đừng đi nhanh quá.”',
+    english: 'Next Monday, twelve-year-old Cheng Lang will begin travelling to middle school on his own. For six years, his grandmother Chen Yulan has picked him up after school almost every day; this Sunday at the Humble Administrator’s Garden, he asks seriously for the first time, “Let me walk ahead today. I’ll wait for you at the next place.” She looks at him and says only, “Don’t go too fast.”',
   ),
   ReadingAnnotation(
-    pinyin: 'Gǔdiǎn yuánlín bǎ shuǐ, shítou, zhíwù hé jiànzhù ānpái zài yǒuxiàn kōngjiān lǐ, ràng rén gǎnjué zhèngzài chuānguò yì fú bùduàn biànhuà de shānshuǐhuà.',
-    vietnamese: 'Vườn cổ điển sắp xếp nước, đá, cây và kiến trúc trong không gian hữu hạn, tạo cảm giác đang đi qua một bức tranh sơn thủy luôn thay đổi.',
-    english: 'Classical gardens arrange water, rocks, plants, and buildings in limited space like a changing landscape painting.',
+    pinyin: 'Yánzhe chíshuǐ zhuǎnguò chángláng, tíngzi, báiqiáng hé shùyǐng dié de xiàng yì fú bèi qiángjiǎo qiēkāi de shānshuǐhuà. Chéng Lǎng de bèiyǐng dì yī cì cóng tā yǎnqián xiāoshī shí, Chén Yùlán lìkè hǎn le tā de míngzi. Chéng Lǎng cóng zhuǎnjiǎo tuì huílái, méiyǒu zhēngbiàn, zhǐ bǎ jiǎobù fàngmàn le yìdiǎn.',
+    vietnamese: 'Đi dọc mặt nước rồi rẽ qua hành lang dài, đình, tường trắng và bóng cây xếp lớp như một bức tranh sơn thủy bị góc tường cắt ngang. Lần đầu bóng lưng Trình Lãng biến khỏi tầm mắt, Trần Ngọc Lan lập tức gọi tên cậu. Cậu quay lại từ góc rẽ, không tranh cãi, chỉ đi chậm hơn một chút.',
+    english: 'Along the pond and around a long corridor, pavilions, white walls, and tree shadows overlap like a landscape painting cut by the corner of a wall. The first time Cheng Lang disappears from sight, Chen Yulan immediately calls his name. He comes back around the corner without arguing and simply slows his pace a little.',
   ),
   ReadingAnnotation(
-    pinyin: 'Yí shàn lòuchuāng kuàngzhù zhúyǐng, yì tiáo chángláng yòu bǎ shìxiàn yǐnxiàng yuǎnchù. Jièjǐng ràng yuánnèi yǔ yuánwài bǐcǐ liánjiē, xiǎo kōngjiān yīncǐ xiǎnde gèng shēn.',
-    vietnamese: 'Một ô cửa trang trí đóng khung bóng tre, còn hành lang dẫn tầm mắt ra xa. Kỹ thuật mượn cảnh nối trong và ngoài vườn, làm không gian nhỏ trở nên sâu hơn.',
-    english: 'A patterned window frames bamboo while a corridor leads the eye outward. Borrowed scenery gives a small garden greater depth.',
+    pinyin: 'Zài wǎng qián zǒu, qūqiáo hé wūjiǎo yòu yí cì jiéduàn shìxiàn, lángxià de rénshēng gàizhù le Chéng Lǎng de jiǎobùshēng. Chén Yùlán táiqǐ shǒu, tā de míngzi yǐjīng dào le zuǐbiān, què méiyǒu hǎn; tā bǎ shǒu fàng xiàlái, zìjǐ zǒuwán nà jǐ bù kànbujiàn tā de lù.',
+    vietnamese: 'Đi tiếp, cầu cong và góc mái lại cắt đứt tầm nhìn, tiếng người dưới hành lang át cả tiếng bước chân của Trình Lãng. Trần Ngọc Lan giơ tay, tên cậu đã ở ngay đầu môi nhưng bà không gọi; bà hạ tay xuống và tự đi hết mấy bước không nhìn thấy cậu.',
+    english: 'Farther on, a curved bridge and the corner of a building cut the sightline again, while voices under the corridor cover Cheng Lang’s footsteps. Chen Yulan raises her hand, his name already at her lips, but does not call. She lowers her hand and walks those few unseen steps herself.',
   ),
   ReadingAnnotation(
-    pinyin: 'Zhuōzhèng Yuán de gùshì bù zhǐ guānyú měijǐng, yě guānyú rén zěnyàng guānchá zìrán. Měi yí cì zhuǎnshēn, dōu kěnéng chóngxīn lǐjiě tóng yí piàn shuǐ hé tóng yí zuò tíng.',
-    vietnamese: 'Câu chuyện của Chuyết Chính Viên không chỉ là cảnh đẹp mà còn là cách con người quan sát thiên nhiên. Mỗi lần quay lại có thể đem đến một cách hiểu mới.',
-    english: 'The garden is about how people observe nature: every turn can renew the same pond and pavilion.',
+    pinyin: 'Xià yí chù shuǐmiàn chóngxīn dǎkāi shí, Chéng Lǎng yǐjīng tíng zài qiánmiàn, zhèng huítóu zhǎo tā. Tā wèn: “Wàipó, wǒ hái néng zǒu qiánmiàn ma?” Chén Yùlán bǎ jiānshàng de shuǐhúdài wǎng shàng tí le tí, shuō: “Xià yí chù děng wǒ.” Chéng Lǎng zhuǎn guòqù, bèiyǐng hěn kuài yòu bèi fángwū dǎngzhù. Chén Yùlán méiyǒu zhuī shàngqù.',
+    vietnamese: 'Khi mặt nước ở khoảng tiếp theo lại mở ra, Trình Lãng đã dừng phía trước và đang quay đầu tìm bà. Cậu hỏi: “Bà ơi, cháu vẫn được đi phía trước chứ?” Trần Ngọc Lan kéo quai bình nước trên vai lên rồi nói: “Đợi bà ở chỗ tiếp theo.” Trình Lãng quay đi, bóng lưng nhanh chóng lại bị căn nhà che khuất. Trần Ngọc Lan không đuổi theo.',
+    english: 'When the water opens into view again, Cheng Lang has already stopped ahead and is looking back for her. “Grandma, can I still walk in front?” he asks. Chen Yulan adjusts the water-bottle strap on her shoulder and says, “Wait for me at the next place.” He turns away and soon disappears behind a building again. She does not hurry after him.',
   ),
 ];
 
@@ -214,7 +214,7 @@ const _quanzhouDiscoveries = <DiscoveryEntry>[
 
 final suzhouGardenJourney = _journeyRecord(
   id: 'suzhou-humble-administrators-garden',
-  title: '苏州 · 拙政园：在转身之间重新看见山水',
+  title: '苏州 · 拙政园：下一处等我',
   geoNodeId: 'cn-jiangsu-suzhou-gusu-humble-administrators-garden',
   tags: const ['苏州', '拙政园', '古典园林', '借景', '世界遗产'],
   paragraphs: _suzhouParagraphs,
@@ -252,18 +252,18 @@ final journeyExpansionExperiences = <DailyJourneyExperience>[
     cityCode: 'SZV',
     place: '拙政园',
     appBarTitle: '苏州 · 拙政园',
-    storyTitle: '江南园林故事',
-    headline: '在转身之间重新看见山水',
-    description: '沿池水、长廊与漏窗，读懂苏州园林怎样创造空间层次。',
-    discoveryTeaser: '小小园林为什么让人感觉走进大片山水？',
+    storyTitle: '下一处等我',
+    headline: '下一处等我',
+    description: '外婆第一次让十二岁的外孙走在前面，在拙政园一次次消失又重现的视线里学着不再把他喊回来。',
+    discoveryTeaser: '当熟悉的人第一次走出你的视线，你会不会把他叫回来？',
     distanceLabel: '1,820 km',
     stampSymbol: '园',
     content: suzhouGardenJourney,
     storyAnnotations: _suzhouAnnotations,
     words: _suzhouWords,
     discoveries: _suzhouDiscoveries,
-    wonderQuestion: '如果你能用一扇漏窗框住园中的景色，你会选择水面、竹影还是亭子？为什么？',
-    expressQuestion: '请用两到三句话描写你走进拙政园时最先注意到的景色。',
+    wonderQuestion: '如果你是陈玉兰，第二次看不见程朗时，你会喊他回来吗？为什么？',
+    expressQuestion: '请用两到三句话写出陈玉兰抬起手却没有喊名字的那个瞬间。',
   ),
   DailyJourneyExperience(
     id: luoyangLongmenJourney.id,
