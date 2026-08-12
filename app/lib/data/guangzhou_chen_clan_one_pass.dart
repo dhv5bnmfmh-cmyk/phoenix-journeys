@@ -309,6 +309,7 @@ final guangzhouChenClanOnePassWords = List<WordEntry>.unmodifiable([
   _word('博物馆', 'bówùguǎn', '名词', '收藏、研究和展示文化对象的机构。', 'bảo tàng', 'museum', '🏛️'),
   _word('文物保护', 'wénwù bǎohù', '名词', '维护历史文化遗产的工作。', 'bảo tồn di tích', 'heritage conservation', '🛡️'),
   _word('名称', 'míngchēng', '名词', '一个地点或事物使用的名字。', 'tên gọi', 'name; designation', '🏷️'),
+  _word('私祠', 'sīcí', '名词', '由一户或单一支系使用的私人祠堂。', 'từ đường riêng', 'private ancestral hall', '🏠'),
 ]);
 
 const guangzhouChenClanLegacyPaperBridgeWordFirstAppears = <String, int>{
@@ -369,6 +370,7 @@ const guangzhouChenClanWordFirstAppears = <String, int>{
   '三路三进': 7, '廊道': 7, '岭南工艺': 8, '博物馆': 9,
   '文物保护': 10,
   '名称': 2,
+  '私祠': 3,
 };
 
 final guangzhouChenClanCuratedWordNamesByLevel = <int, Set<String>>{

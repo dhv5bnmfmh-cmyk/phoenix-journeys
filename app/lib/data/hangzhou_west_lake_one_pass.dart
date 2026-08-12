@@ -299,7 +299,6 @@ final hangzhouWestLakeReopenedWords = <WordEntry>[
   _word('夏天', 'xiàtiān', '名词', '一年中炎热的季节。', 'Mùa hè.', 'summer', '☀️'),
   _word('钱包', 'qiánbāo', '名词', '随身放钱和卡片的小包。', 'Ví tiền.', 'wallet', '👛'),
   _word('司机', 'sījī', '名词', '驾驶车辆的人。', 'Tài xế.', 'driver', '🧑‍✈️'),
-  _word('害怕', 'hàipà', '动词', '因担心而感到不安。', 'Sợ hãi.', 'to be afraid', '😟'),
 ];
 
 final hangzhouWestLakeVocabularyLevelCatalog = <String, VocabularyLevelTag>{
@@ -334,7 +333,6 @@ final hangzhouWestLakeReopenedWordTraces = <RemediatedWordTrace>[
   const RemediatedWordTrace(word: '夏天', eventId: 'HZ2-E2-views', usage: '周绍庭说错的季节。', sourceText: '说成夏天'),
   const RemediatedWordTrace(word: '钱包', eventId: 'HZ2-E5-bus', usage: '周绍庭主动收下预约卡的位置。', sourceText: '放进自己的钱包'),
   const RemediatedWordTrace(word: '司机', eventId: 'HZ2-E5-bus', usage: '周绍庭主动询问站点的人。', sourceText: '问司机'),
-  const RemediatedWordTrace(word: '害怕', eventId: 'HZ2-E4-card', usage: '夫妻终于共同承认的感受。', sourceText: '害怕'),
 ];
 
 JourneyLevelContent _hangzhouMarriageLevel(
