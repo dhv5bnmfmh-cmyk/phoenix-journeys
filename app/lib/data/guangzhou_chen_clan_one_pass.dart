@@ -309,7 +309,12 @@ final guangzhouChenClanOnePassWords = List<WordEntry>.unmodifiable([
   _word('木雕', 'mùdiāo', '名词', '在木材上雕刻形成的装饰工艺。', 'chạm khắc gỗ', 'wood carving', '🪵'),
   _word('砖雕', 'zhuāndiāo', '名词', '在砖材上雕刻形成的建筑装饰工艺。', 'chạm khắc gạch', 'brick carving', '🧱'),
   _word('博物馆', 'bówùguǎn', '名词', '收藏、研究和展示文化对象的机构。', 'bảo tàng', 'museum', '🏛️'),
+  _word('民间工艺', 'mínjiān gōngyì', '名词', '在地方社会中传承和发展的制作与装饰技艺。', 'nghề thủ công dân gian', 'folk craftsmanship', '🧵'),
+  _word('收藏', 'shōucáng', '动词', '保存具有历史或文化价值的物件。', 'sưu tầm và lưu giữ', 'to collect and preserve', '🗃️'),
+  _word('公众', 'gōngzhòng', '名词', '社会中的普通人群。', 'công chúng', 'the public', '👥'),
   _word('文物保护', 'wénwù bǎohù', '名词', '维护历史文化遗产的工作。', 'bảo tồn di tích', 'heritage conservation', '🛡️'),
+  _word('整体格局', 'zhěngtǐ géjú', '名词', '建筑各部分共同形成的完整空间组织。', 'bố cục tổng thể', 'overall spatial layout', '🧭'),
+  _word('公共文化', 'gōnggòng wénhuà', '名词', '面向社会公众提供的文化服务与活动。', 'văn hóa công cộng', 'public culture', '🏛️'),
   _word('名称', 'míngchēng', '名词', '一个地点或事物使用的名字。', 'tên gọi', 'name; designation', '🏷️'),
   _word('私祠', 'sīcí', '名词', '由一户或单一支系使用的私人祠堂。', 'từ đường riêng', 'private ancestral hall', '🏠'),
 ]);
@@ -370,8 +375,8 @@ const guangzhouChenClanWordFirstAppears = <String, int>{
   '匾额': 3, '院落': 3, '门槛': 4, '宗族': 5, '合资': 5,
   '边界': 6, '体面': 8, '共同': 1, '兴建': 1, '合族祠': 4,
   '三路三进': 7, '廊道': 7, '岭南工艺': 8, '木雕': 8,
-  '砖雕': 8, '博物馆': 9,
-  '文物保护': 10,
+  '砖雕': 8, '博物馆': 9, '民间工艺': 9, '收藏': 9, '公众': 9,
+  '文物保护': 10, '整体格局': 10, '公共文化': 10,
   '名称': 2,
   '私祠': 3,
 };
@@ -840,7 +845,7 @@ final guangzhouChenClanVocabularyLevelCatalog = <String, VocabularyLevelTag>{
         '陈家祠' || '陈氏书院' => VocabularyKind.properNoun,
         '匾额' || '院落' || '门槛' || '宗族' || '合族祠' ||
         '三路三进' || '廊道' || '岭南工艺' || '木雕' || '砖雕' ||
-        '文物保护' => VocabularyKind.cultural,
+        '民间工艺' || '文物保护' || '整体格局' || '公共文化' => VocabularyKind.cultural,
         _ => VocabularyKind.general,
       },
     ),
