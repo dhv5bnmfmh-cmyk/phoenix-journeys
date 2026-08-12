@@ -6,6 +6,7 @@ import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/batch_one_adaptive_story_levels.dart';
 import 'package:phoenix_journeys/data/journey_expansion_catalog.dart';
 import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
+import 'package:phoenix_journeys/data/journey_semantic_fingerprint_catalog.dart';
 import 'package:phoenix_journeys/data/luoyang_longmen_gold.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/widgets/journey_challenge_panel.dart';
@@ -165,6 +166,19 @@ void main() {
     expect(batchOneMemorySpecFor(longmen.id), isNull);
   });
 
+
+  test('Longmen static publication shell remains four-section compatible', () {
+    expect(longmen.storyParagraphs, hasLength(4));
+    expect(longmen.storyAnnotations, hasLength(4));
+    expect(longmen.discoveries, hasLength(4));
+    expect(longmen.storyParagraphs.join(), contains('周岚'));
+    expect(longmen.storyParagraphs.join(), contains('撕开签字页'));
+    expect(longmen.storyParagraphs.join(), isNot(contains('傍晚，你沿伊河')));
+    for (var index = 0; index < longmen.storyParagraphs.length; index++) {
+      expect(longmen.storyAnnotations[index].pinyin, _pinyin(longmen.storyParagraphs[index]));
+    }
+  });
+
   test('Gold DNA catalog is 10 Journeys / 45 pairs and Longmen is unique', () {
     expect(approvedNarrativeDnaCatalog, hasLength(10));
     final ids = approvedNarrativeDnaCatalog.map((item) => item.journeyId).toSet();
@@ -186,6 +200,30 @@ void main() {
       }
     }
     expect(pairCount, 45);
+  });
+
+
+  test('Longmen Story metrics obey active paragraph policy', () {
+    for (var level = 1; level <= 10; level++) {
+      final story = longmenGoldStoryForLevel(level);
+      final characters = story.chinese.join().runes.length;
+      // ignore: avoid_print
+      print('LONGMEN_STORY_METRIC Lv$level characters=$characters paragraphs=${story.chinese.length}');
+      expect(story.chinese.length, story.vietnamese.length, reason: 'Lv$level Vietnamese paragraph alignment');
+      expect(story.chinese.length, story.english.length, reason: 'Lv$level English paragraph alignment');
+      if (level == 4) expect(characters, inInclusiveRange(270, 470));
+      if (level >= 8) expect(story.chinese, hasLength(2), reason: 'Lv$level literary paragraph shape');
+    }
+  });
+
+  test('Longmen is fully registered in semantic Gold with active Story evidence', () {
+    expect(approvedGoldSemanticFingerprints, hasLength(10));
+    final fingerprint = approvedGoldSemanticFingerprints[luoyangLongmenGoldJourneyId];
+    expect(fingerprint, isNotNull);
+    expect(semanticEvidenceContractErrors(fingerprint!), isEmpty);
+    final pairs = auditApprovedGoldSemanticPairs();
+    expect(pairs, hasLength(45));
+    expect(pairs.where((item) => item.ruleA || item.ruleB), isEmpty);
   });
 
   testWidgets('Longmen Challenge keeps all modes and uses Longmen-specific grammar',
@@ -239,9 +277,12 @@ void main() {
     expect(find.textContaining('长廊不但可以避雨'), findsNothing);
     expect(find.textContaining('园林采用了借景手法'), findsNothing);
 
-    await tester.tap(find.text('而且游客还'));
+    expect(find.byKey(const ValueKey('challenge-grammar-segment-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('challenge-option-correct')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('challenge-grammar-segment-1')));
     await tester.pump();
-    await tester.tap(find.text('而且让游客'));
+    expect(find.byKey(const ValueKey('challenge-option-correct')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('challenge-option-correct')));
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('challenge-submit')));
     await tester.pumpAndSettle();

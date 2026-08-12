@@ -314,11 +314,10 @@ const suzhouGardenCulturalPoint =
 const suzhouGardenMemoryAnchor = '抬起又放下的手，与下一处回望的程朗';
 const suzhouGardenCompletionSummary = '下一处等我：两个人都学会在短暂看不见时等对方。';
 
-final _luoyangParagraphs =
-    List<String>.unmodifiable(longmenGoldStoryForLevel(5).chinese);
-final _luoyangAnnotations = longmenGoldStoryAnnotations(5);
+const _luoyangParagraphs = longmenGoldPublicationParagraphs;
+final _luoyangAnnotations = longmenGoldPublicationAnnotations;
 const _luoyangWords = longmenGoldWords;
-final _luoyangDiscoveries = longmenGoldDiscoveries;
+final _luoyangDiscoveries = longmenGoldPublicationDiscoveries;
 
 const _quanzhouParagraphs = <String>[
   '上午，你走进泉州开元寺。东西两座石塔越过树梢，安静地标记着这座古代港口城市的天际线。',

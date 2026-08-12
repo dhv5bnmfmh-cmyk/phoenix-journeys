@@ -1,5 +1,6 @@
 import 'guangzhou_chen_clan_one_pass.dart';
 import 'hangzhou_west_lake_one_pass.dart';
+import 'luoyang_longmen_gold.dart';
 import 'journey_expansion_catalog.dart';
 import 'journey_semantic_fingerprint_baseline_snapshot.dart' as baseline;
 
@@ -228,6 +229,24 @@ enum NarrativeMechanismFamily {
   weekendBeforeMemoryClinic,
   spouseAcknowledgesFearAndKeepsCard,
   embodiedRecognitionEndsHiddenMemoryExam,
+
+  // Reusable families introduced by Longmen adult-sibling shared-agency remediation.
+  jointAssetDeadlineCreatedBeforeSharedConsent,
+  responsibleSiblingEquatingBurdenWithAuthority,
+  adultSiblingsNegotiatingFutureSharedAgency,
+  completeJointTransactionWithoutLosingSharedAgency,
+  administrativeBurdenVsEqualDecisionParticipation,
+  acceptFinancialLossToPreserveFutureParticipation,
+  withdrawExecutableConsentAtLastMoment,
+  deadlinePassesWhileJointOwnershipRemains,
+  unilateralControlTowardPriorConsultation,
+  futureProcessRequestAcceptedWithoutFullRepair,
+  nearFarViewingRequirementDisruptsDeadlinePace,
+  destroyedConsentPageEmbodiesRefusedExchange,
+  alternatingCloseAndDistantViewingAlongLinearRoute,
+  sameDayTransactionDeadlineBackedBySunkDeposit,
+  siblingSetsExitPriceThenRequestsFutureInclusion,
+  sunkFinancialCostPreservesRelationalDecisionRights,
 }
 
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
@@ -985,6 +1004,44 @@ final hangzhouWestLakeReopenedSemanticFingerprint = JourneySemanticFingerprint(
   ],
 );
 
+
+const _longmen = luoyangLongmenGoldJourneyId;
+
+final luoyangLongmenGoldSemanticFingerprint = JourneySemanticFingerprint(
+  journeyId: _longmen,
+  surfaceIdentity: 'adult-sister-tears-joint-property-signature-page-to-preserve-younger-brother-future-shared-agency',
+  mechanisms: const <NarrativeSemanticDimension, NarrativeMechanismFamily>{
+    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.jointAssetDeadlineCreatedBeforeSharedConsent,
+    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.responsibleSiblingEquatingBurdenWithAuthority,
+    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.adultSiblingsNegotiatingFutureSharedAgency,
+    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.completeJointTransactionWithoutLosingSharedAgency,
+    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.administrativeBurdenVsEqualDecisionParticipation,
+    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.acceptFinancialLossToPreserveFutureParticipation,
+    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.withdrawExecutableConsentAtLastMoment,
+    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.deadlinePassesWhileJointOwnershipRemains,
+    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.unilateralControlTowardPriorConsultation,
+    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.futureProcessRequestAcceptedWithoutFullRepair,
+    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.nearFarViewingRequirementDisruptsDeadlinePace,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.destroyedConsentPageEmbodiesRefusedExchange,
+    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.alternatingCloseAndDistantViewingAlongLinearRoute,
+    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.sameDayTransactionDeadlineBackedBySunkDeposit,
+    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.siblingSetsExitPriceThenRequestsFutureInclusion,
+    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.sunkFinancialCostPreservesRelationalDecisionRights,
+  },
+  coreEvidence: <NarrativeMechanismEvidence>[
+    NarrativeMechanismEvidence(journeyId: _longmen, dimension: NarrativeSemanticDimension.openingMechanism, mechanism: NarrativeMechanismFamily.jointAssetDeadlineCreatedBeforeSharedConsent, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['为了锁定新房，她先交了不能退的定金，然后才把合同发给周屿：“回来签字就行。”'], semanticRationale: 'The deadline exists because Zhou Lan commits money before obtaining her co-owner sibling’s consent.'),
+    NarrativeMechanismEvidence(journeyId: _longmen, dimension: NarrativeSemanticDimension.relationshipGeometry, mechanism: NarrativeMechanismFamily.adultSiblingsNegotiatingFutureSharedAgency, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['父母搬离洛阳后，姐弟共同拥有的旧房空了两年。'], semanticRationale: 'Adult sibling co-owners remain structurally tied through future family decisions.'),
+    NarrativeMechanismEvidence(journeyId: _longmen, dimension: NarrativeSemanticDimension.conflictMechanism, mechanism: NarrativeMechanismFamily.administrativeBurdenVsEqualDecisionParticipation, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['责任积得越久，周岚越习惯把责任和决定权当成同一件事。'], semanticRationale: 'Accumulated administrative burden has been converted into unilateral authority.'),
+    NarrativeMechanismEvidence(journeyId: _longmen, dimension: NarrativeSemanticDimension.choiceMechanism, mechanism: NarrativeMechanismFamily.acceptFinancialLossToPreserveFutureParticipation, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['她把合同抽回来，沿中间那道旧折痕把签字页撕成两半。'], semanticRationale: 'The sister physically removes the immediate transaction path and accepts its financial cost.'),
+    NarrativeMechanismEvidence(journeyId: _longmen, dimension: NarrativeSemanticDimension.climaxMechanism, mechanism: NarrativeMechanismFamily.withdrawExecutableConsentAtLastMoment, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['“我可以签。你拿到房款，不丢定金。可是签完以后，家里的事你自己决定，别再叫我回来。”', '她把合同抽回来，沿中间那道旧折痕把签字页撕成两半。'], semanticRationale: 'The two-span climax binds the brother’s permanent-exit condition to the sister’s destruction of the executable signature page.'),
+    NarrativeMechanismEvidence(journeyId: _longmen, dimension: NarrativeSemanticDimension.consequenceMechanism, mechanism: NarrativeMechanismFamily.deadlinePassesWhileJointOwnershipRemains, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['两人离开时，原定签约时间已经过去，旧房仍属于两个人，责任怎么分、房子卖不卖，都没有答案。'], semanticRationale: 'The transaction deadline genuinely passes while ownership remains joint and unresolved.'),
+    NarrativeMechanismEvidence(journeyId: _longmen, dimension: NarrativeSemanticDimension.transformationMechanism, mechanism: NarrativeMechanismFamily.unilateralControlTowardPriorConsultation, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['回到伊河边，周屿问：“下次谈房子，你能不能先把所有方案都发给我？”周岚没有保证自己从此会变成另一个人。她只说：“能。”'], semanticRationale: 'Change is narrow and procedural: future consultation is accepted without claiming total repair.'),
+    NarrativeMechanismEvidence(journeyId: _longmen, dimension: NarrativeSemanticDimension.endingMechanism, mechanism: NarrativeMechanismFamily.futureProcessRequestAcceptedWithoutFullRepair, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['然后摸到包里的两半签字页，没有再拿出来。'], semanticRationale: 'The torn consent artifact remains present but unshown, preserving residue.'),
+    NarrativeMechanismEvidence(journeyId: _longmen, dimension: NarrativeSemanticDimension.culturalAnchorFunction, mechanism: NarrativeMechanismFamily.nearFarViewingRequirementDisruptsDeadlinePace, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['到了奉先寺大型造像群前，尺度改变，中央大像与周围造像需要拉开距离才能看出安排。'], semanticRationale: 'Longmen’s near/far viewing structure materially controls pace and therefore signing pressure.'),
+    NarrativeMechanismEvidence(journeyId: _longmen, dimension: NarrativeSemanticDimension.dramaticEngineFamily, mechanism: NarrativeMechanismFamily.sunkFinancialCostPreservesRelationalDecisionRights, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>['“我可以签。你拿到房款，不丢定金。可是签完以后，家里的事你自己决定，别再叫我回来。”', '“定金我自己赔。房子今天不卖。”'], semanticRationale: 'A real sunk financial loss and failed sale preserve future shared relational agency.'),
+  ],
+);
+
 final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     Map<String, JourneySemanticFingerprint>.unmodifiable({
   for (final entry in baseline.approvedGoldSemanticFingerprints.entries)
@@ -997,6 +1054,7 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
             : _convertBaselineFingerprint(entry.value),
   _guangzhou: guangzhouChenClanGoldSemanticFingerprint,
   _suzhou: suzhouGardenGoldSemanticFingerprint,
+  _longmen: luoyangLongmenGoldSemanticFingerprint,
 });
 
 String activeCanonicalGoldStoryText(String journeyId) {
@@ -1012,6 +1070,9 @@ String activeCanonicalGoldStoryText(String journeyId) {
   }
   if (journeyId == _suzhou) {
     return suzhouGardenCanonicalLevelContent(10).storyParagraphs.join('\n');
+  }
+  if (journeyId == _longmen) {
+    return longmenGoldStoryLevels.expand((level) => level.chinese).join('\n');
   }
   return baseline.activeCanonicalGoldStoryText(journeyId);
 }
