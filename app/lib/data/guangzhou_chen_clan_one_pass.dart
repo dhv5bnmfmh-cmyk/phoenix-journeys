@@ -714,13 +714,19 @@ final guangzhouChenClanRemediatedJourney = RemediatedJourney(
   sources: guangzhouChenClanSources,
 );
 
-JourneyLevelContent guangzhouChenClanOnePassLevelContent(int requestedLevel) {
+JourneyLevelContent guangzhouChenClanOnePassLevelContent(
+  int requestedLevel, {
+  Set<String> knownWords = const <String>{},
+}) {
   final level = requestedLevel.clamp(1, 10).toInt();
   final base = guangzhouChenClanOnePassLevels[level - 1];
   final story = base.storyParagraphs.join();
   final selected = guangzhouChenClanCuratedWordNamesByLevel[level] ?? const <String>{};
   final visibleWords = guangzhouChenClanOnePassWords
-      .where((entry) => selected.contains(entry.word) && story.contains(entry.word))
+      .where((entry) =>
+          selected.contains(entry.word) &&
+          story.contains(entry.word) &&
+          !knownWords.contains(entry.word))
       .toList(growable: false);
   return JourneyLevelContent(
     storyParagraphs: base.storyParagraphs,

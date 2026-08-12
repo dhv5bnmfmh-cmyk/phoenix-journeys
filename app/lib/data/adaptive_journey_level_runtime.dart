@@ -59,11 +59,13 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   if (experience.id == guangzhouChenClanJourneyId) {
     return guangzhouChenClanOnePassLevelContent(
       profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band),
+      knownWords: knownWords,
     );
   }
   if (experience.id == 'suzhou-humble-administrators-garden') {
     return suzhouGardenCanonicalLevelContent(
       profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band),
+      knownWords: knownWords,
     );
   }
   throw StateError(

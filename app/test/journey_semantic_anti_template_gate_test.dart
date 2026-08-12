@@ -222,7 +222,7 @@ void main() {
     }
   });
 
-  test('Hangzhou evidence sufficiency regressions remain intact', () {
+  test('Hangzhou reopened evidence stays grounded in the active married-couple Story', () {
     final fingerprint = approvedGoldSemanticFingerprints['hangzhou-west-lake']!;
     final relationship = fingerprint.coreEvidence.singleWhere(
       (item) => item.dimension == NarrativeSemanticDimension.relationshipGeometry,
@@ -230,10 +230,10 @@ void main() {
     final cultural = fingerprint.coreEvidence.singleWhere(
       (item) => item.dimension == NarrativeSemanticDimension.culturalAnchorFunction,
     );
-    expect(relationship.sourceTexts.join('\n'), contains('私下又加了一条标准'));
-    expect(relationship.semanticRationale, contains('no mentor'));
-    expect(cultural.sourceTexts.join('\n'), contains('文化景观'));
-    expect(cultural.semanticRationale, contains('disproves'));
+    expect(relationship.sourceTexts.join('\n'), contains('结婚四十三年'));
+    expect(relationship.semanticRationale, contains('marriage'));
+    expect(cultural.sourceTexts.join('\n'), contains('断桥残雪'));
+    expect(cultural.semanticRationale, contains('place, season'));
   });
 
   test('wording disguise cannot evade normalized semantic collision', () {

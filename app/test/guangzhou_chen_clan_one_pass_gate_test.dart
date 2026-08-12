@@ -44,11 +44,21 @@ void main() {
     }
   });
 
-  test('Memory and Completion resolve from canonical Story', () {
-    final spec = batchOneMemorySpecFor(guangzhouChenClanJourneyId)!;
-    expect(spec.longTermAnchor, guangzhouChenClanMemoryAnchor);
-    expect(spec.storyResult, contains('刘嘉禾'));
-    expect(spec.completionSummary, isNot(contains('纸桥')));
+  test('Memory and Completion preserve the baseline generic product branch', () {
+    expect(batchOneMemorySpecFor(guangzhouChenClanJourneyId), isNull);
+  });
+
+  test('knownWords filtering stays active on canonical Story vocabulary', () {
+    final baseline = resolveAdaptiveJourneyLevel(experience, profile: profile(10));
+    final known = baseline.words.first.word;
+    final filtered = resolveAdaptiveJourneyLevel(
+      experience,
+      profile: profile(10),
+      knownWords: <String>{known},
+    );
+    expect(filtered.words.map((entry) => entry.word), isNot(contains(known)));
+    expect(filtered.storyParagraphs, baseline.storyParagraphs);
+    expect(filtered.words.map((entry) => entry.word), isNot(contains('纸桥')));
   });
 
   test('Discovery remains factual and separate from plot', () {

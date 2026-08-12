@@ -94,6 +94,34 @@ const chengduRemediatedNarrativeDna = JourneyNarrativeDnaRecord(
       'place-chair-first-handoff-fixed-layout-fails-again-negotiate-repeat-independent-reproduction-release-control',
 );
 
+const hangzhouReopenedNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'hangzhou-west-lake',
+  narrativeIdentity: 'long-married-couple-end-hidden-memory-test-and-name-shared-fear',
+  protagonistIdentity: 'Fang-Yu-sixty-nine-year-old-wife-facing-husbands-memory-decline',
+  protagonistAgeIdentity: 'sixty-nine-year-old-older-spouse',
+  protagonistArchetype: 'older-spouse-concealing-clinic-appointment-behind-familiar-walk',
+  openingSituation: 'familiar-West-Lake-walk-is-secretly-used-as-memory-test-before-clinic-visit',
+  storyGoal: 'learn-what-husband-remembers-without-directly-naming-medical-fear',
+  locationMechanism: 'named-seasonal-views-and-wet-Broken-Bridge-route-cue-conflicting-verbal-and-embodied-memory',
+  movementPattern: 'questioning-walk-from-named-view-to-wet-step-then-bus',
+  conflictType: 'proof-seeking-memory-quiz-vs-honest-mutual-recognition-of-decline',
+  choiceType: 'stop-testing-and-openly-hand-over-clinic-appointment',
+  climaxType: 'instinctive-elbow-catch-breaks-quiz-and-both-spouses-name-their-fear',
+  consequenceType: 'husband-keeps-appointment-card-and-asks-for-hospital-stop-himself',
+  emotionalArc: 'concealment-to-testing-to-humiliation-to-embodied-recognition-to-mutual-admission',
+  historicalLearningMechanism: 'named-West-Lake-views-link-place-season-and-viewing-conditions-while-factual-cultural-landscape-learning-remains-in-Discovery',
+  resolutionType: 'medical-uncertainty-is-faced-through-disclosure-not-a-correct-memory-score',
+  endingMechanism: 'husband-asks-bus-driver-for-hospital-stop-with-card-in-own-wallet',
+  memoryAnchorType: 'hand-catching-wifes-elbow-on-familiar-wet-stone-step',
+  achievementType: 'shared-fear-spoken-without-memory-exam',
+  rewardSymbolism: 'wet-step-and-held-elbow-mark-embodied-care-not-project-success-or-separation',
+  temporalPattern: 'single-weekend-walk-before-Monday-memory-clinic',
+  supportingStructure: 'long-married-spouses-each-conceal-fear-until-direct-mutual-admission',
+  centralMetaphor: 'a-shared-life-is-not-reducible-to-correct-place-name-answers',
+  narrativeVoice: 'third-person-older-wife-close-action-led',
+  storyRhythm: 'hidden-card-serial-questions-wrong-answers-silence-slip-catch-disclosure-card-accepted-bus-question',
+);
+
 const guangzhouChenClanGoldNarrativeDna = JourneyNarrativeDnaRecord(
   journeyId: 'guangzhou-chen-clan-academy',
   narrativeIdentity: 'birth-mother-refuses-public-kinship-proof-to-protect-daughters-present-name',
@@ -157,6 +185,8 @@ final approvedNarrativeDnaCatalog =
       forbiddenCityRemediatedNarrativeDna
     else if (record.journeyId == 'chengdu-kuanzhai-alley')
       chengduRemediatedNarrativeDna
+    else if (record.journeyId == 'hangzhou-west-lake')
+      hangzhouReopenedNarrativeDna
     else
       record,
   guangzhouChenClanGoldNarrativeDna,

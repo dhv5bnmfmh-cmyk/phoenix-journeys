@@ -273,12 +273,164 @@ const hangzhouWestLakeSemanticEvents = <RemediatedSemanticEvent>[
   RemediatedSemanticEvent(id: 'HZ-E7-ending', coreChinese: '第二天她按日期和苏堤路线归档声轨，并把标题写成“在场”。', corePinyin: 'Dì èr tiān tā àn rìqī hé Sūdī lùxiàn guīdàng, biāotí shì Zàichǎng.', coreVietnamese: 'Hôm sau cô lưu trữ theo ngày và tuyến đê Tô, đặt tên “Hiện diện”.', coreEnglish: 'The next day she archives the track by date and Su Causeway route and titles it “Presence”.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 10),
 ];
 
+const hangzhouWestLakeReopenedTitle = '还认得这条路';
+
+final hangzhouWestLakeReopenedWords = <WordEntry>[
+  _word('西湖', 'Xīhú', '名词（专名）', '杭州的湖泊文化景观。', 'Tây Hồ.', 'West Lake', '🌊'),
+  _word('断桥', 'Duànqiáo', '名词（专名）', '西湖白堤东端附近的著名桥梁。', 'Đoạn Kiều.', 'Broken Bridge', '🌉'),
+  _word('预约卡', 'yùyuē kǎ', '名词', '写有预约时间和地点的卡片。', 'Thẻ hẹn.', 'appointment card', '🗓️'),
+  _word('记忆', 'jìyì', '名词', '保存和想起经历的能力。', 'Trí nhớ.', 'memory', '🧠'),
+  _word('门诊', 'ménzhěn', '名词', '不住院的诊察服务。', 'Khám ngoại trú.', 'outpatient clinic', '🏥'),
+  _word('季节', 'jìjié', '名词', '一年中气候不同的时期。', 'Mùa.', 'season', '🍂'),
+  _word('石阶', 'shíjiē', '名词', '石头做成的台阶。', 'Bậc đá.', 'stone steps', '🪨'),
+  _word('手肘', 'shǒuzhǒu', '名词', '手臂中间弯曲的关节。', 'Khuỷu tay.', 'elbow', '💪'),
+  _word('下意识', 'xiàyìshí', '副词', '没有先思考就自然做出。', 'Theo phản xạ.', 'instinctively', '⚡'),
+  _word('怕', 'pà', '动词', '心里感到不安或恐惧。', 'Sợ hãi.', 'to be afraid', '🤐'),
+  _word('公交车', 'gōngjiāochē', '名词', '按固定路线载客的公共汽车。', 'Xe buýt.', 'public bus', '🚌'),
+  _word('断桥残雪', 'Duànqiáo Cánxuě', '名词（题名景观）', '与冬雪及特定观看条件有关的西湖十景之一。', 'Tuyết còn trên Đoạn Kiều.', 'Lingering Snow on Broken Bridge', '❄️'),
+];
+
+final hangzhouWestLakeReopenedWordTraces = <RemediatedWordTrace>[
+  const RemediatedWordTrace(word: '西湖', eventId: 'HZ2-E2-views', usage: '故事行走和景名提问的地点。', sourceText: '两人从断桥往前走，方毓不停问他西湖景名。'),
+  const RemediatedWordTrace(word: '断桥', eventId: 'HZ2-E2-views', usage: '两人开始散步的地点。', sourceText: '两人从断桥往前走，方毓不停问他西湖景名。'),
+  const RemediatedWordTrace(word: '预约卡', eventId: 'HZ2-E1-test', usage: '方毓一直没有拿出的就诊凭据。', sourceText: '周一他要去医院做记忆检查，她却一直没把预约卡拿出来。'),
+  const RemediatedWordTrace(word: '记忆', eventId: 'HZ2-E1-test', usage: '夫妻不敢直接面对的变化。', sourceText: '周一他要去医院做记忆检查，她却一直没把预约卡拿出来。'),
+  const RemediatedWordTrace(word: '门诊', eventId: 'HZ2-E1-test', usage: '周绍庭周一要去的诊疗安排。', sourceText: '女儿替他约了周一的记忆门诊。'),
+  const RemediatedWordTrace(word: '季节', eventId: 'HZ2-E2-views', usage: '方毓用来测试西湖题名景观的问题。', sourceText: '方毓一路问“断桥残雪是什么季节”'),
+  const RemediatedWordTrace(word: '石阶', eventId: 'HZ2-E3-elbow', usage: '雨后变滑并触发转折的具体地面。', sourceText: '石阶被雨打湿，方毓脚下一滑，他立刻扶住她的手肘'),
+  const RemediatedWordTrace(word: '手肘', eventId: 'HZ2-E3-elbow', usage: '周绍庭下意识扶住的部位。', sourceText: '石阶被雨打湿，方毓脚下一滑，他立刻扶住她的手肘'),
+  const RemediatedWordTrace(word: '下意识', eventId: 'HZ2-E3-elbow', usage: '未经回答或思考先发生的扶持动作。', sourceText: '周绍庭下意识扶住她的手肘'),
+  const RemediatedWordTrace(word: '怕', eventId: 'HZ2-E4-card', usage: '夫妻终于对彼此说出的感受。', sourceText: '我知道你在怕什么。我也怕。'),
+  const RemediatedWordTrace(word: '公交车', eventId: 'HZ2-E5-bus', usage: '周绍庭主动询问医院站点的空间。', sourceText: '公交车来时，他问司机：“去医院，哪一站下？”'),
+  const RemediatedWordTrace(word: '断桥残雪', eventId: 'HZ2-E2-views', usage: '连接地点、季节和记忆答案的题名景观。', sourceText: '周绍庭把“断桥残雪”说成夏天。'),
+];
+
+JourneyLevelContent _hangzhouMarriageLevel(List<String> paragraphs) => JourneyLevelContent(
+      storyParagraphs: List<String>.unmodifiable(paragraphs),
+      storyAnnotations: List<ReadingAnnotation>.unmodifiable([
+        for (var i = 0; i < paragraphs.length; i++)
+          ReadingAnnotation(
+            pinyin: i == 0
+                ? 'Fāng Yù hé Zhōu Shàotíng jiéhūn sìshísān nián. Tā dài zhe yīyuàn yùyuē kǎ, péi tā cóng Duànqiáo zǒu Xīhú.'
+                : 'Shíjiē shàng, Zhōu Shàotíng fú zhù tā de shǒuzhǒu. Fāng Yù bù zài chūtí, bǎ yùyuē kǎ jiāo gěi tā.' ,
+            vietnamese: i == 0
+                ? 'Phương Dục và Chu Thiệu Đình đã kết hôn bốn mươi ba năm. Bà mang theo thẻ hẹn khám và cùng ông đi từ Đoạn Kiều quanh Tây Hồ.'
+                : 'Trên bậc đá ướt, ông đỡ khuỷu tay bà. Bà thôi kiểm tra trí nhớ và trao thẳng thẻ hẹn; ông nhận lấy.' ,
+            english: i == 0
+                ? 'Fang Yu and Zhou Shaoting have been married for forty-three years. She carries a clinic appointment card on their West Lake walk from Broken Bridge.'
+                : 'On a wet stone step he catches her elbow. She stops testing him and openly hands him the appointment card; he accepts it.',
+          ),
+      ]),
+      words: const <WordEntry>[],
+      discoveries: const <DiscoveryEntry>[],
+      wonderQuestion: '',
+      expressQuestion: '',
+    );
+
+final hangzhouWestLakeReopenedLevels = List<JourneyLevelContent>.unmodifiable([
+  _hangzhouMarriageLevel(['方毓六十九岁，和周绍庭结婚四十三年。周一他要去医院做记忆检查，她却一直没把预约卡拿出来。两人从断桥往前走，方毓不停问他西湖景名。周绍庭把“断桥残雪”说成夏天。石阶被雨打湿，方毓脚下一滑，他立刻扶住她的手肘，说：“这里一直滑。”方毓不再出题，把预约卡交给他。周绍庭看了日期，说：“我知道你在怕什么。我也怕。”他把卡放进自己的钱包。公交车来时，他问司机：“去医院，哪一站下？”']),
+  _hangzhouMarriageLevel(['方毓六十九岁，和周绍庭结婚四十三年。周一，周绍庭要去医院做记忆检查；方毓把预约卡藏在包里，只说今天去西湖走走。他们从断桥出发，她一路问他“断桥残雪”是什么季节、远处是哪座塔。周绍庭答错了两次，后来沉默。小雨落下，石阶发滑，方毓脚下一偏，他立刻扶住她的手肘：“这里一直滑。”这是他们常走的旧路。方毓不再问景名，拿出预约卡，说自己不是来散步，是怕他连两个人的日子也忘掉。周绍庭接过卡：“我知道你在怕什么。我也怕。”他把卡放进自己的钱包。公交车到站，他上车后先问司机：“去医院，哪一站下？”']),
+  _hangzhouMarriageLevel([
+    '方毓六十九岁，和周绍庭结婚四十三年。最近周绍庭常把日期和人名说错，女儿替他约了周一的记忆门诊。方毓把预约卡藏在包里，只说陪她去西湖走走。他们从断桥出发，她一会儿问“断桥残雪”该在什么季节，一会儿问远处是哪座塔。周绍庭把冬景说成夏天，又把塔名说错，最后不再回答。',
+    '小雨落到桥面，石阶渐渐发滑。方毓脚下一偏，周绍庭立刻扶住她的手肘，说：“这里一直滑。”很多年前，她在同一段路上也险些摔倒。方毓把准备好的下一个问题咽回去，拿出预约卡，承认自己不是来赏景，而是想证明他还记得两个人的日子。周绍庭接过卡：“我知道你在怕什么。我也怕。”他把卡放进自己的钱包，没有还给她。公交车到站，他上车后先问司机：“去医院，哪一站下？”',
+  ]),
+  _hangzhouMarriageLevel([
+    '方毓六十九岁，和周绍庭结婚四十三年。最近半年，周绍庭开始把日期、人名和刚说过的话弄混。女儿替他约了周一的记忆门诊，方毓却一直没有把预约卡交给他。星期六，她只说很久没走西湖，拉他从断桥出发。她一路把散步变成考试：“断桥残雪是什么季节？”“远处是哪座塔？”周绍庭把冬景说成夏天，又说错塔名，后来只看着湖面，不再回答。',
+    '雨点落下来，桥边石阶很快湿了。方毓脚下一偏，周绍庭下意识扶住她的手肘：“这里一直滑。”四十三年前第一次走这段路时，他也这样扶过她。方毓忽然把准备好的下一道题停住。她从包里拿出预约卡，说今天不是来赏景，是怕他有一天连两个人怎样过来的也忘了。周绍庭没有辩解，接过卡：“我知道你在怕什么。我也怕。”他把卡放进自己的钱包。公交车到站后，他没有让方毓替自己问，先对司机说：“去医院，哪一站下？”',
+  ]),
+  _hangzhouMarriageLevel([
+    '方毓六十九岁，和周绍庭结婚四十三年。最近半年，周绍庭开始把日期、人名和刚说过的话弄混，有时出门后还会忘记原来的方向。女儿替他约了周一的记忆门诊，方毓把预约卡放在包内层，几次想拿出来，又怕他觉得自己被当成病人。星期六，她说很久没走西湖，拉他从断桥出发。一路上，她不断问“断桥残雪是什么季节”“远处是哪座塔”“他们第一次来时下没下雨”。周绍庭把冬景说成夏天，又说错塔名；第三个问题没有回答。散步渐渐只剩方毓在出题。',
+    '雨点落下来，桥边石阶很快湿了。方毓回头看他，脚下一偏，周绍庭下意识扶住她的手肘：“这里一直滑。”四十三年前第一次走这段路时，他也曾在湿石阶上这样扶她。景名和日期都乱了，这个动作却先于回答发生。方毓把下一道题停住，从包里拿出预约卡，承认今天不是来赏景，而是想证明他还记得两个人的日子。周绍庭没有把卡推回去：“我知道你在怕什么。我也怕。”他看清日期，把卡放进自己的钱包。公交车到站后，他没有让方毓替自己开口，先问司机：“去医院，哪一站下？”',
+  ]),
+  for (var level = 6; level <= 10; level++)
+    _hangzhouMarriageLevel([
+      '方毓六十九岁，和周绍庭结婚四十三年。最近半年，周绍庭开始把日期、人名和刚说过的话弄混，有时下楼后会忘记原来要去哪里。女儿替他约了周一的记忆门诊，方毓把预约卡放在包内层，几次想拿出来，又怕他觉得自己被当成病人。星期六，她说很久没走西湖，拉他从断桥出发。断桥是他们年轻时常走的路，湖面一边接着城市，一边朝山影展开。方毓一路问“断桥残雪是什么季节”“远处是哪座塔”“他们第一次来时下没下雨”。周绍庭把冬景说成夏天，又说错塔名；第三个问题没有回答。方毓仍往前走，散步渐渐只剩她在出题，他在猜。${level >= 8 ? '经过桥边时，他反问她为什么每一个景都要有标准答案。方毓没有回答，只摸了摸包里预约卡的硬边。' : ''}',
+      '雨点落下来，桥边石阶很快湿了。方毓回头等他，脚下一偏，周绍庭下意识扶住她的手肘：“这里一直滑。”四十三年前第一次走这段路时，他也曾在湿石阶上这样扶她；那次的月份他们后来争过很多回，扶住手肘的动作却没有变。方毓把准备好的下一道题停住，从包里拿出预约卡，承认今天不是来赏景，而是想证明他还记得两个人共同过过的日子。周绍庭没有把卡推回去：“我知道你在怕什么。我也怕。”${level >= 7 ? '他说自己早已看见女儿发来的医院短信，只是不愿先开口，仿佛不说，记忆混乱就还只是家里的小差错。' : ''}${level >= 9 ? '方毓承认自己也一直装作只是散步，因为她宁可听见几个错误答案，也不愿听见医生把担心说成一个名字。' : ''}他低头看清日期，把预约卡放进自己的钱包，没有交还给方毓。${level >= 10 ? '雨还落在湖面和桥栏上，远处景物被水汽遮去一层；方毓没有再问任何景名，周绍庭也没有重新猜答案。' : ''}公交车到站后，他没有让方毓替自己开口，先问司机：“去医院，哪一站下？”',
+    ]),
+]);
+
+final hangzhouWestLakeReopenedMemory = <RemediatedMemoryReview>[
+  const RemediatedMemoryReview(category: '人物', prompt: '方毓为什么把西湖散步变成一连串问题？', answer: '她害怕周绍庭忘掉两个人共同生活的记忆，又不敢直接交出记忆门诊预约卡。', storyEventIds: ['HZ2-E1-test']),
+  const RemediatedMemoryReview(category: '关系', prompt: '周绍庭在湿石阶上的什么动作让方毓停下出题？', answer: '他下意识扶住方毓的手肘，并说“这里一直滑”。', storyEventIds: ['HZ2-E3-elbow']),
+  const RemediatedMemoryReview(category: '选择', prompt: '方毓最后怎样结束这场隐瞒的测试？', answer: '她公开拿出预约卡，承认自己的害怕，不再用景名答案证明他们的过去。', storyEventIds: ['HZ2-E4-card']),
+  const RemediatedMemoryReview(category: '结尾', prompt: '周绍庭怎样回应周一的检查？', answer: '他把预约卡放进自己的钱包，并在公交车上主动询问去医院哪站下。', storyEventIds: ['HZ2-E5-bus']),
+  const RemediatedMemoryReview(category: 'history', prompt: '断桥残雪为什么与季节和观看条件有关？', answer: '它是西湖题名景观之一，把特定地点、季节、天气和观看方式组织在一起。', storyEventIds: ['HZ2-E2-views']),
+  const RemediatedMemoryReview(category: 'culture', prompt: '西湖为何被称为文化景观？', answer: '湖、山与堤、岛、桥、亭塔及长期文化传统共同形成整体。', storyEventIds: ['HZ2-E2-views']),
+];
+
+final hangzhouWestLakeReopenedDiscoverySpecs = List<HangzhouDiscoverySpec>.unmodifiable([
+  for (var i = 0; i < hangzhouWestLakeDiscoverySpecs.length; i++)
+    HangzhouDiscoverySpec(
+      level: i + 1,
+      title: hangzhouWestLakeDiscoverySpecs[i].title,
+      storyLink: i < 5
+          ? '方毓用西湖题名景观测试周绍庭；Discovery 解释这些名称怎样连接地点、季节与观看条件。'
+          : '故事沿断桥与湖岸展开；Discovery 解释西湖的湖、山、堤、岛、桥与城市怎样形成文化景观。',
+      entry: hangzhouWestLakeDiscoverySpecs[i].entry,
+      keyTerms: hangzhouWestLakeDiscoverySpecs[i].keyTerms,
+      learnerInsight: hangzhouWestLakeDiscoverySpecs[i].entry.simpleChinese,
+      check: i == 9
+          ? '保护西湖文化景观，是否等于把它冻结成没有人的历史舞台？'
+          : hangzhouWestLakeDiscoverySpecs[i].check,
+      answer: i == 9
+          ? '不是。保护整体格局的同时，文化景观仍与现实城市生活发生关系。'
+          : hangzhouWestLakeDiscoverySpecs[i].answer,
+      sourceIds: hangzhouWestLakeDiscoverySpecs[i].sourceIds,
+    ),
+]);
+
+const hangzhouWestLakeReopenedCompletion = RemediatedCompletion(
+  journeySummary: '方毓把西湖散步变成记忆测试；湿石阶上，周绍庭下意识扶住她。她终于交出预约卡，两个人第一次把共同的害怕说出口。',
+  achievement: '把问题说出来的人',
+  memoryAnchor: '湿石阶上扶住手肘的那只手',
+  challengeReward: '西湖同行章：记住一次不再互相隐瞒的同行。',
+  journeyCompletion: '周绍庭把预约卡放进自己的钱包，上车后主动问去医院哪一站下。',
+);
+
+final hangzhouWestLakeReopenedEvents = <RemediatedSemanticEvent>[
+  const RemediatedSemanticEvent(id: 'HZ2-E1-test', coreChinese: '方毓把断桥散步变成对丈夫的记忆测试。', corePinyin: 'Fāng Yù bǎ sànbù biànchéng jìyì cèshì.', coreVietnamese: 'Phương Dục biến cuộc đi dạo thành bài kiểm tra trí nhớ.', coreEnglish: 'Fang Yu turns the walk into a memory test.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 1),
+  const RemediatedSemanticEvent(id: 'HZ2-E2-views', coreChinese: '周绍庭说错断桥残雪的季节和远处塔名。', corePinyin: 'Zhōu Shàotíng shuō cuò jǐngmíng.', coreVietnamese: 'Chu Thiệu Đình trả lời sai tên cảnh.', coreEnglish: 'Zhou Shaoting misstates the season and view names.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 1),
+  const RemediatedSemanticEvent(id: 'HZ2-E3-elbow', coreChinese: '湿石阶上，周绍庭下意识扶住方毓的手肘。', corePinyin: 'Tā fú zhù Fāng Yù de shǒuzhǒu.', coreVietnamese: 'Ông đỡ khuỷu tay Phương Dục.', coreEnglish: 'He instinctively catches Fang Yu by the elbow.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 1),
+  const RemediatedSemanticEvent(id: 'HZ2-E4-card', coreChinese: '方毓停止出题，公开交出记忆门诊预约卡。', corePinyin: 'Fāng Yù jiāochū yùyuē kǎ.', coreVietnamese: 'Phương Dục trao thẻ hẹn khám.', coreEnglish: 'Fang Yu stops testing and openly hands over the clinic card.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 1),
+  const RemediatedSemanticEvent(id: 'HZ2-E5-bus', coreChinese: '周绍庭收下卡，在公交车上主动询问医院站点。', corePinyin: 'Zhōu Shàotíng zhǔdòng wèn yīyuàn zhàndiǎn.', coreVietnamese: 'Ông chủ động hỏi trạm bệnh viện.', coreEnglish: 'Zhou accepts the card and asks for the hospital stop.', detailChinese: '', detailPinyin: '', detailVietnamese: '', detailEnglish: '', detailFromLevel: 1),
+];
+
+String _hangzhouFinalSentence(JourneyLevelContent content) {
+  final matches = RegExp(r'[^\u3002！？!?]+[\u3002！？!?]').allMatches(content.storyParagraphs.last);
+  return matches.last.group(0)!;
+}
+
+final hangzhouWestLakeReopenedRemediation = RemediatedJourney(
+  id: hangzhouWestLakeJourneyId,
+  title: '杭州 · 西湖：$hangzhouWestLakeReopenedTitle',
+  protagonist: '方毓，六十九岁',
+  goal: '确认结婚四十三年的丈夫还记得多少，同时回避直接谈论记忆门诊。',
+  conflict: '她越用西湖景名测试丈夫，两个人越无法说出共同面对的害怕。',
+  eventIds: List<String>.unmodifiable([for (final event in hangzhouWestLakeReopenedEvents) event.id]),
+  events: hangzhouWestLakeReopenedEvents,
+  levels: hangzhouWestLakeReopenedLevels,
+  words: hangzhouWestLakeReopenedWords,
+  wordTraces: hangzhouWestLakeReopenedWordTraces,
+  discoveries: List<DiscoveryEntry>.unmodifiable([for (final spec in hangzhouWestLakeReopenedDiscoverySpecs) spec.entry]),
+  discoveryTraces: hangzhouWestLakeDiscoveryTraces,
+  challenges: List<RemediatedChallengeTrace>.unmodifiable([
+    for (var level = 1; level <= 10; level++) ...<RemediatedChallengeTrace>[
+      RemediatedChallengeTrace(type: 'paragraphRebuild', storyEventIds: const ['HZ2-E1-test', 'HZ2-E2-views'], anchor: hangzhouWestLakeReopenedLevels[level - 1].storyParagraphs.first),
+      RemediatedChallengeTrace(type: 'grammarRepair', storyEventIds: const ['HZ2-E3-elbow', 'HZ2-E4-card'], anchor: hangzhouWestLakeReopenedLevels[level - 1].storyParagraphs.last),
+      RemediatedChallengeTrace(type: 'missingSentence', storyEventIds: const ['HZ2-E5-bus'], anchor: _hangzhouFinalSentence(hangzhouWestLakeReopenedLevels[level - 1])),
+    ],
+  ]),
+  memory: hangzhouWestLakeReopenedMemory,
+  completion: hangzhouWestLakeReopenedCompletion,
+  sources: hangzhouWestLakeSources,
+);
+
 final hangzhouWestLakeOnePassRemediation = RemediatedJourney(id: hangzhouWestLakeJourneyId, title: '杭州 · 西湖：雨落进录音以后', protagonist: '许澄', goal: '在阵雨到来前沿苏堤完成一段连续环境录音，最初试图得到没有现代人声的“完美西湖”。', conflict: '许澄必须判断：把所有人的声音都当成污染，是否也会删除西湖作为活着的文化景观的一部分。', eventIds: List<String>.unmodifiable([for (final event in hangzhouWestLakeSemanticEvents) event.id]), events: hangzhouWestLakeSemanticEvents, levels: hangzhouWestLakeOnePassLevels, words: hangzhouWestLakeOnePassWords, wordTraces: hangzhouWestLakeWordTraces, discoveries: hangzhouWestLakeOnePassDiscoveries, discoveryTraces: hangzhouWestLakeDiscoveryTraces, challenges: List<RemediatedChallengeTrace>.unmodifiable([for (final challenge in hangzhouWestLakeChallenges) RemediatedChallengeTrace(type: challenge.type, storyEventIds: const ['HZ-E2-delete', 'HZ-E3-bridge', 'HZ-E6-rain'], anchor: challenge.anchor)]), memory: hangzhouWestLakeMemory, completion: const RemediatedCompletion(journeySummary: '许澄从苏堤出发寻找“纯净”的西湖声景，最终在阵雨中主动记录人与湖面共同改变的声场。', achievement: '湖雨采声者', memoryAnchor: '第一滴雨落进西湖录音里的声音', challengeReward: '西湖声纹章：记录雨、水与城市在场关系的声音徽记。', journeyCompletion: '第二天，许澄按日期和苏堤路线归档录音，并把标题写成“在场”。'), sources: hangzhouWestLakeSources);
 
 JourneyLevelContent hangzhouWestLakeOnePassLevelContent(int requestedLevel) {
   final level = requestedLevel.clamp(1, 10).toInt();
-  final base = hangzhouWestLakeOnePassLevels[level - 1];
+  final base = hangzhouWestLakeReopenedLevels[level - 1];
   final story = base.storyParagraphs.join();
-  final visibleWords = hangzhouWestLakeOnePassWords.where((entry) => story.contains(entry.word)).take((4 + level).clamp(5, 12)).toList(growable: false);
-  return JourneyLevelContent(storyParagraphs: base.storyParagraphs, storyAnnotations: base.storyAnnotations, words: List<WordEntry>.unmodifiable(visibleWords), discoveries: List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[hangzhouWestLakeDiscoverySpecs[level - 1].entry]), wonderQuestion: '许澄为什么在桥边开始怀疑“越安静越真实”的录音标准？', expressQuestion: '第一滴雨到来后，堤上、桥下和水面的声音怎样共同改变了许澄记录西湖的方式？');
+  final visibleWords = hangzhouWestLakeReopenedWords.where((entry) => story.contains(entry.word)).take((4 + level).clamp(5, 12)).toList(growable: false);
+  return JourneyLevelContent(storyParagraphs: base.storyParagraphs, storyAnnotations: base.storyAnnotations, words: List<WordEntry>.unmodifiable(visibleWords), discoveries: List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[hangzhouWestLakeReopenedDiscoverySpecs[level - 1].entry]), wonderQuestion: '方毓为什么在周绍庭扶住她以后停止用西湖景名测试他？', expressQuestion: '请按顺序写出方毓隐瞒预约卡、不断出题、湿石阶被扶住和公开交卡四件事。');
 }

@@ -1,4 +1,5 @@
 import 'guangzhou_chen_clan_one_pass.dart';
+import 'hangzhou_west_lake_one_pass.dart';
 import 'journey_expansion_catalog.dart';
 import 'journey_semantic_fingerprint_baseline_snapshot.dart' as baseline;
 
@@ -209,6 +210,24 @@ enum NarrativeMechanismFamily {
   unplannedLiveFamilyCall,
   daughterSetsBoundaryAndOffersSmallContinuation,
   publicKinshipProofSacrificedForPresentIdentity,
+
+  // Reusable families introduced by the reopened older-spouse memory Story.
+  concealedClinicVisitBehindFamiliarWalk,
+  olderSpouseTestingPartnersMemory,
+  longMarriedSpousesConcealSharedFear,
+  verifySharedPastThroughPlaceNameAnswers,
+  memoryQuizVsHonestMedicalDisclosure,
+  stopTestingAndHandOverAppointment,
+  embodiedCareInterruptsVerbalMemoryTest,
+  appointmentAcceptedAndHospitalRouteRequested,
+  proofSeekingToMutualAdmission,
+  hospitalQuestionEndsConcealment,
+  namedSeasonalViewsCueConflictingMemory,
+  appointmentCardEmbodiesNamedFear,
+  questioningWalkToWetStepAndBus,
+  weekendBeforeMemoryClinic,
+  spouseAcknowledgesFearAndKeepsCard,
+  embodiedRecognitionEndsHiddenMemoryExam,
 }
 
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
@@ -919,10 +938,59 @@ final suzhouGardenGoldSemanticFingerprint = JourneySemanticFingerprint(
   ],
 );
 
+const _hangzhouReopened = 'hangzhou-west-lake';
+
+final hangzhouWestLakeReopenedSemanticFingerprint = JourneySemanticFingerprint(
+  journeyId: _hangzhouReopened,
+  surfaceIdentity: 'Fang Yu / sixty-nine-year-old wife / Zhou Shaoting / hidden memory-clinic card / Broken Bridge walk',
+  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
+    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.concealedClinicVisitBehindFamiliarWalk,
+    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.olderSpouseTestingPartnersMemory,
+    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.longMarriedSpousesConcealSharedFear,
+    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.verifySharedPastThroughPlaceNameAnswers,
+    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.memoryQuizVsHonestMedicalDisclosure,
+    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.stopTestingAndHandOverAppointment,
+    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.embodiedCareInterruptsVerbalMemoryTest,
+    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.appointmentAcceptedAndHospitalRouteRequested,
+    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.proofSeekingToMutualAdmission,
+    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.hospitalQuestionEndsConcealment,
+    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.namedSeasonalViewsCueConflictingMemory,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.appointmentCardEmbodiesNamedFear,
+    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.questioningWalkToWetStepAndBus,
+    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.weekendBeforeMemoryClinic,
+    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.spouseAcknowledgesFearAndKeepsCard,
+    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.embodiedRecognitionEndsHiddenMemoryExam,
+  }),
+  coreEvidence: <NarrativeMechanismEvidence>[
+    for (final item in <(NarrativeSemanticDimension, NarrativeMechanismFamily, String, String)>[
+      (NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.concealedClinicVisitBehindFamiliarWalk, '周一他要去医院做记忆检查，她却一直没把预约卡拿出来。', 'A familiar walk conceals an already scheduled clinic visit.'),
+      (NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.longMarriedSpousesConcealSharedFear, '方毓六十九岁，和周绍庭结婚四十三年。', 'The causal relationship is a forty-three-year marriage facing memory decline, not a project team or mentor pair.'),
+      (NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.memoryQuizVsHonestMedicalDisclosure, '两人从断桥往前走，方毓不停问他西湖景名。', 'Serial place-name questions substitute for direct disclosure and humiliate rather than clarify.'),
+      (NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.stopTestingAndHandOverAppointment, '方毓不再出题，把预约卡交给他。', 'The choice is to end concealment and hand over the medical appointment openly.'),
+      (NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.embodiedCareInterruptsVerbalMemoryTest, '方毓脚下一滑，他立刻扶住她的手肘，说：“这里一直滑。”', 'Embodied relational memory interrupts the verbal test without proving cognitive recovery.'),
+      (NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.appointmentAcceptedAndHospitalRouteRequested, '他把卡放进自己的钱包。公交车来时，他问司机：“去医院，哪一站下？”', 'He accepts the appointment and takes practical ownership of the hospital route.'),
+      (NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.proofSeekingToMutualAdmission, '我知道你在怕什么。我也怕。', 'Both spouses move from private proof-seeking to naming shared fear.'),
+      (NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.hospitalQuestionEndsConcealment, '去医院，哪一站下？', 'The ending is a practical question toward care, not an artifact, archive, separation, or restored result.'),
+      (NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.namedSeasonalViewsCueConflictingMemory, '周绍庭把“断桥残雪”说成夏天。', 'A named seasonal West Lake view makes place, season, and memory answer causally inseparable.'),
+      (NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.embodiedRecognitionEndsHiddenMemoryExam, '石阶被雨打湿，方毓脚下一滑，他立刻扶住她的手肘', 'The engine turns on embodied recognition ending a concealed spousal exam, materially unlike project revision, boundary refusal, or visual separation.'),
+    ])
+      NarrativeMechanismEvidence(
+        journeyId: _hangzhouReopened,
+        dimension: item.$1,
+        mechanism: item.$2,
+        activeSourceId: activeGoldStorySourceId,
+        sourceTexts: <String>[item.$3],
+        semanticRationale: item.$4,
+      ),
+  ],
+);
+
 final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     Map<String, JourneySemanticFingerprint>.unmodifiable({
   for (final entry in baseline.approvedGoldSemanticFingerprints.entries)
-    entry.key: entry.key == _forbidden
+    entry.key: entry.key == _hangzhouReopened
+        ? hangzhouWestLakeReopenedSemanticFingerprint
+        : entry.key == _forbidden
         ? _forbiddenFingerprint
         : entry.key == _chengdu
             ? _chengduFingerprint
@@ -932,6 +1000,11 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
 });
 
 String activeCanonicalGoldStoryText(String journeyId) {
+  if (journeyId == _hangzhouReopened) {
+    return hangzhouWestLakeReopenedLevels
+        .expand((level) => level.storyParagraphs)
+        .join('\n');
+  }
   if (journeyId == _guangzhou) {
     return guangzhouChenClanOnePassLevels
         .expand((level) => level.storyParagraphs)

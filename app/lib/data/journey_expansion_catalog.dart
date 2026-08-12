@@ -149,7 +149,10 @@ const _suzhouDiscoveries = <DiscoveryEntry>[
 
 /// Founder-locked adaptive package for 《下一处等我》. Every level preserves the
 /// four approved causal beats; higher levels add detail without changing them.
-JourneyLevelContent suzhouGardenCanonicalLevelContent(int requestedLevel) {
+JourneyLevelContent suzhouGardenCanonicalLevelContent(
+  int requestedLevel, {
+  Set<String> knownWords = const <String>{},
+}) {
   final level = requestedLevel.clamp(1, 10).toInt();
   final story = _suzhouAdaptiveStory(level);
   final annotations = story.length == 1
@@ -179,6 +182,7 @@ JourneyLevelContent suzhouGardenCanonicalLevelContent(int requestedLevel) {
     words: List<WordEntry>.unmodifiable(
       _suzhouWords
           .where((entry) => searchable.contains(entry.word))
+          .where((entry) => !knownWords.contains(entry.word))
           .take(switch (level) { 1 => 5, 2 => 6, 3 => 7, 4 => 8, _ => 9 }),
     ),
     discoveries: List<DiscoveryEntry>.unmodifiable(
@@ -201,18 +205,20 @@ List<String> _suzhouAdaptiveStory(int level) => switch (level) {
       '${_suzhouParagraphs[2]}${_suzhouParagraphs[3]}',
     ],
   _ => <String>[
-      '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}',
-      '${_suzhouParagraphs[2]}${_suzhouParagraphs[3]}${_suzhouLevelEnrichment(level)}',
+      '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}${_suzhouLockedRestatement(level).$1}${level >= 8 ? '下周一，程朗要自己坐车。' : ''}',
+      '${_suzhouParagraphs[2]}${_suzhouLockedRestatement(level).$2}${_suzhouParagraphs[3]}',
     ],
 };
 
-String _suzhouLevelEnrichment(int level) => switch (level) {
-  6 => '陈玉兰走得不快。她知道程朗没有真的离开，只是第一次把两个人之间的几步路交给了等待。',
-  7 => '陈玉兰走得不快。六年来，她习惯用追上去确认程朗平安；这一次，她把担心留在自己这边，也把下一处停下回望的责任交给他。风从廊下过去，她听不见他的脚步，却仍按自己的速度一步一步往前走。两个人之间多出的不是距离，而是一小段各自走完的路。',
-  8 => '陈玉兰走得不快。六年来，她习惯用追上去确认程朗平安；这一次，她把担心留在自己这边，也把下一处停下回望的责任交给他。拙政园的墙、树与屋角不断收紧视线，池水又在转折后把空间打开。风从廊下过去，她听不见他的脚步，却仍按自己的速度一步一步往前走；程朗也没有借着转弯越走越快，而是守着说好的下一处。两个人之间多出的不是失散，而是一小段各自走完、又重新看见对方的路。',
-  9 => '陈玉兰走得不快。六年来，她习惯用追上去确认程朗平安；这一次，她把担心留在自己这边，也把下一处停下回望的责任交给他。拙政园的墙、树与屋角不断收紧视线，池水又在转折后把空间打开。第一次消失时，她用一声呼喊把旧日的关系拉回原位；第二次，她放下手，让看不见成为两个人都要承担的几步。程朗没有把走在前面当成甩开外婆，而是在下一处停住。风从廊下过去，她听不见他的脚步，却仍按自己的速度往前走；程朗也没有借着转弯越走越快，没有催促。两个人之间多出的不是失散，而是一小段各自走完、又重新看见对方的路。',
-  10 => '陈玉兰走得不快。六年来，她习惯用追上去确认程朗平安；这一次，她把担心留在自己这边，也把下一处停下回望的责任交给他。拙政园的墙、树、曲桥与屋角不断收紧视线，池水又在转折后把空间打开。第一次消失时，她用一声呼喊把旧日的关系拉回原位；第二次，她抬起手又放下，让看不见成为两个人都要承担的几步。程朗没有把走在前面当成甩开外婆，而是在下一处停住，回头确认她仍沿着同一条路来。“下一处等我”不再只是孩子请求放手，也成了外婆提出的新约定：你可以先走，但要学会等；我会担心，却不再每次都追上去。两个人之间多出的不是失散，而是一小段各自走完、又重新看见对方的路。风从廊下过去，两个人都没有催对方。园路还会继续转弯，陈玉兰没有加快脚步，也没有回头。',
-  _ => '',
+/// Higher levels may restate only facts already present in the four Founder-
+/// approved paragraphs. They never append an event after the locked ending.
+(String, String) _suzhouLockedRestatement(int level) => switch (level) {
+  6 => ('第一次转角前，程朗走在前面；转角后，他按外婆的喊声退回来。陈玉兰看了他一眼，只说：“别走太快。”', ''),
+  7 => ('第一次转角前，程朗走在前面；转角后，他按外婆的喊声退回来，只把速度放慢。陈玉兰看了他一眼，只说：“别走太快。”', '第二次，陈玉兰仍站在被曲桥和屋角挡住视线的路上；她抬起手，名字到了嘴边，最后没有喊。她把手放下来。程朗正回头找她。'),
+  8 => ('第一次转角前，程朗走在前面；转角后，他按外婆的喊声退回来，没有争辩，只把速度放慢。陈玉兰看了他一眼，只说：“别走太快。”长廊、亭子、白墙和树影把同一条路分成看得见与暂时看不见的几段。', '第二次，曲桥和屋角再次挡住程朗，廊下人声又盖住脚步声。陈玉兰抬起手，名字到了嘴边，最后没有喊；她独自走完那几步。她把手放下来。程朗正回头找她。'),
+  9 => ('第一次转角前，程朗走在前面；转角后，他按外婆的喊声退回来，没有争辩，只把速度放慢。陈玉兰看了他一眼，只说：“别走太快。”长廊、亭子、白墙和树影把同一条路分成看得见与暂时看不见的几段。下周一自己坐车、六年来外婆接他放学，以及今天第一次要求走在前面，都是两人此时已经说出的事实。', '第二次，曲桥和屋角再次挡住程朗，廊下人声又盖住脚步声。陈玉兰抬起手，名字到了嘴边，最后没有喊；她放下手，独自走完那几步。水面重新打开后，程朗已经停下并回头找她。她把手放下来。程朗正回头找她。'),
+  10 => ('第一次转角前，程朗走在前面；转角后，他按外婆的喊声退回来，没有争辩，只把速度放慢。陈玉兰看了他一眼，只说：“别走太快。”长廊、亭子、白墙和树影把同一条路分成看得见与暂时看不见的几段。下周一自己坐车、六年来外婆接他放学，以及今天第一次要求走在前面，都是两人此时已经说出的事实。程朗说的是“我在下一处等你”，陈玉兰第一次回应的是喊他的名字；程朗因此从转角退回。', '第二次，曲桥和屋角再次挡住程朗，廊下人声又盖住脚步声。陈玉兰抬起手，名字到了嘴边，最后没有喊；她放下手，独自走完那几步。水面重新打开后，程朗已经停下并回头找她。他问自己还能不能走在前面，陈玉兰提了提肩上的水壶带，回答“下一处等我”。她把手放下来。程朗正回头找她。'),
+  _ => ('', ''),
 };
 
 const suzhouGardenMemoryResult =

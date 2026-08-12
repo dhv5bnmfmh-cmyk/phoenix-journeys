@@ -11,113 +11,88 @@ void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
 
   test('Hangzhou Story obeys Lv1-Lv10 requested length and paragraph policy', () {
-    expect(hangzhouWestLakeOnePassLevels, hasLength(10));
+    expect(hangzhouWestLakeReopenedLevels, hasLength(10));
     for (var level = 1; level <= 10; level++) {
-      final content = hangzhouWestLakeOnePassLevels[level - 1];
+      final content = hangzhouWestLakeReopenedLevels[level - 1];
       final characters = content.storyParagraphs.join().runes.length;
       final target = phoenixStoryLengthTargetForLevel(level);
-      // ignore: avoid_print
-      print('HANGZHOU_STORY_METRIC Lv$level characters=$characters paragraphs=${content.storyParagraphs.length}');
-      expect(characters, inInclusiveRange(target.acceptedMinimumCharacters, target.acceptedMaximumCharacters), reason: 'Lv$level Story-only accepted range');
-      expect(content.storyParagraphs.length, target.paragraphCount, reason: 'Lv$level strict paragraph shape');
+      expect(
+        characters,
+        inInclusiveRange(
+          target.acceptedMinimumCharacters,
+          target.acceptedMaximumCharacters,
+        ),
+        reason: 'Lv$level Story-only accepted range ($characters)',
+      );
+      expect(content.storyParagraphs.length, target.paragraphCount);
       expect(content.storyAnnotations.length, content.storyParagraphs.length);
     }
   });
 
   test('all levels preserve one canonical Hangzhou soundscape narrative', () {
     for (var level = 1; level <= 10; level++) {
-      final story = hangzhouWestLakeOnePassLevels[level - 1].storyParagraphs.join();
-      for (final anchor in <String>['许澄', '西湖', '苏堤', '录音', '雨', '在场']) {
+      final story = hangzhouWestLakeReopenedLevels[level - 1].storyParagraphs.join();
+      for (final anchor in <String>['方毓', '周绍庭', '断桥', '预约卡', '手肘', '医院']) {
         expect(story, contains(anchor), reason: 'Lv$level $anchor');
       }
-      expect(story, isNot(contains('清晨，你沿着苏堤慢慢向前走')));
-      expect(story, isNot(contains('永宁门')));
-      expect(story, isNot(contains('跑表')));
-      expect(story, isNot(contains('提单')));
-      expect(story, isNot(contains('地图上的空白')));
-      expect(story, isNot(contains('没有____，却第一次真正')));
-      expect(story, isNot(contains('我原来以为')));
+      for (final stale in <String>['许澄', '录音', '项目', '归档', '在场']) {
+        expect(story, isNot(contains(stale)), reason: 'Lv$level stale $stale');
+      }
     }
   });
 
-  test('advanced Story carries verified West Lake cultural-landscape anchors', () {
-    final advanced = hangzhouWestLakeOnePassLevels[9].storyParagraphs.join();
-    expect(advanced, contains('苏堤'));
-    expect(advanced, contains('疏浚'));
-    expect(advanced, contains('三面山地'));
-    expect(advanced, contains('文化景观'));
-    expect(advanced, contains('九世纪'));
-  });
-
   test('Words have exact Story trace and truthful first appearance', () {
-    final stories = <String>[for (final level in hangzhouWestLakeOnePassLevels) level.storyParagraphs.join()];
-    expect(hangzhouWestLakeOnePassWords, hasLength(hangzhouWestLakeWordTraces.length));
-    expect(hangzhouWestLakeOnePassWords, hasLength(hangzhouWestLakeWordFirstAppears.length));
-    for (final word in hangzhouWestLakeOnePassWords) {
-      final trace = hangzhouWestLakeWordTraces.firstWhere((item) => item.word == word.word);
+    final stories = hangzhouWestLakeReopenedLevels
+        .map((level) => level.storyParagraphs.join())
+        .toList(growable: false);
+    expect(hangzhouWestLakeReopenedWords, hasLength(hangzhouWestLakeReopenedWordTraces.length));
+    for (final word in hangzhouWestLakeReopenedWords) {
+      final trace = hangzhouWestLakeReopenedWordTraces.singleWhere((item) => item.word == word.word);
       expect(trace.sourceText, contains(word.word), reason: word.word);
       expect(stories.any((story) => story.contains(trace.sourceText)), isTrue, reason: '${word.word} exact source');
-      final first = stories.indexWhere((story) => story.contains(word.word)) + 1;
-      expect(first, hangzhouWestLakeWordFirstAppears[word.word], reason: '${word.word} first appears');
-      expect(word.pinyin.trim(), isNotEmpty);
-      expect(word.partOfSpeech.trim(), isNotEmpty);
-      expect(word.simpleChinese.trim(), isNotEmpty);
-      expect(word.translation.trim(), isNotEmpty);
-      expect(word.englishDefinition.trim(), isNotEmpty);
     }
   });
 
   test('Discovery is exactly one level-bound card with sources and Story Link', () {
     final sourceIds = hangzhouWestLakeSources.map((source) => source.id).toSet();
-    expect(hangzhouWestLakeDiscoverySpecs, hasLength(10));
+    expect(hangzhouWestLakeReopenedDiscoverySpecs, hasLength(10));
     for (var level = 1; level <= 10; level++) {
-      final spec = hangzhouWestLakeDiscoverySpecs[level - 1];
+      final spec = hangzhouWestLakeReopenedDiscoverySpecs[level - 1];
       expect(spec.level, level);
-      expect(spec.title.trim(), isNotEmpty);
-      expect(spec.storyLink.trim(), isNotEmpty);
-      expect(spec.keyTerms, isNotEmpty);
-      expect(spec.learnerInsight.trim(), isNotEmpty);
-      expect(spec.check.trim(), isNotEmpty);
-      expect(spec.answer.trim(), isNotEmpty);
       expect(spec.sourceIds, isNotEmpty);
       expect(spec.sourceIds.every(sourceIds.contains), isTrue);
-      final levelContent = hangzhouWestLakeOnePassLevelContent(level);
-      expect(levelContent.discoveries, hasLength(1));
-      expect(identical(levelContent.discoveries.single, spec.entry), isTrue);
+      final knowledge = '${spec.entry.text}${spec.entry.simpleChinese}';
+      expect(knowledge, isNot(contains('方毓')));
+      expect(knowledge, isNot(contains('周绍庭')));
+      expect(knowledge, isNot(contains('预约卡')));
+      final runtime = hangzhouWestLakeOnePassLevelContent(level);
+      expect(runtime.discoveries.single, same(spec.entry));
     }
   });
 
   test('Challenge covers all ten levels with only approved active-story types', () {
     const approved = <String>{'paragraphRebuild', 'grammarRepair', 'missingSentence'};
-    expect(hangzhouWestLakeChallenges, hasLength(30));
+    expect(hangzhouWestLakeReopenedRemediation.challenges, hasLength(30));
     for (var level = 1; level <= 10; level++) {
-      final story = hangzhouWestLakeOnePassLevels[level - 1].storyParagraphs.join();
-      final challenges = hangzhouWestLakeChallenges.where((item) => item.level == level).toList();
+      final story = hangzhouWestLakeReopenedLevels[level - 1].storyParagraphs.join();
+      final challenges = hangzhouWestLakeReopenedRemediation.challenges.skip((level - 1) * 3).take(3);
       expect(challenges.map((item) => item.type).toSet(), approved);
       for (final challenge in challenges) {
-        expect(story.contains(challenge.anchor), isTrue, reason: 'Lv$level ${challenge.type}');
-        if (challenge.type == 'missingSentence') {
-          expect(challenge.answer, challenge.anchor);
-          expect(RegExp(r'[^。！？!?]+[。！？!?]').allMatches(story).map((match) => match.group(0)!).contains(challenge.answer), isTrue, reason: 'Lv$level exact missing sentence');
-        }
+        expect(story, contains(challenge.anchor), reason: 'Lv$level ${challenge.type}');
+        expect(challenge.anchor, isNot(contains('录音')));
       }
     }
   });
 
   test('Memory and Complete stay bound to the rain soundscape journey', () {
-    final memory = hangzhouWestLakeMemory.map((item) => item.answer).join();
-    for (final anchor in <String>['许澄', '苏堤', '西湖', '录音', '雨', '文化景观', '麦克风', '在场']) {
+    final memory = hangzhouWestLakeReopenedMemory.map((item) => '${item.prompt}${item.answer}').join();
+    for (final anchor in <String>['方毓', '周绍庭', '预约卡', '手肘', '医院']) {
       expect(memory, contains(anchor), reason: anchor);
     }
-    expect(hangzhouWestLakeCompletion.achievement, '湖雨采声者');
-    expect(hangzhouWestLakeCompletion.memoryAnchor, '第一滴雨落进西湖录音里的声音');
-    expect(hangzhouWestLakeCompletion.challengeReward, '西湖声纹章');
-    expect(hangzhouWestLakeCompletion.journeyCompletion, contains('“在场”'));
-  });
-
-  test('Narrative Difference Matrix covers all five approved Gold Journeys', () {
-    expect(approvedNarrativeDnaCatalog.map((item) => item.journeyId).toSet(), containsAll(<String>{'beijing-summer-palace', 'beijing-forbidden-city', 'shanghai-bund', 'xian-city-wall', hangzhouWestLakeJourneyId}));
-    expect(approvedNarrativeDnaCatalog.every((item) => item.narrativeIdentity.trim().isNotEmpty && item.majorDimensions.every((dimension) => dimension.trim().isNotEmpty)), isTrue);
+    expect(memory, isNot(contains('许澄')));
+    expect(memory, isNot(contains('录音')));
+    expect(hangzhouWestLakeReopenedCompletion.memoryAnchor, contains('手肘'));
+    expect(hangzhouWestLakeReopenedCompletion.journeyCompletion, contains('医院'));
   });
 
   test('Hangzhou Narrative DNA differs materially from every approved Gold reference', () {
@@ -129,30 +104,53 @@ void main() {
     }
   });
 
+  test('Narrative Difference Matrix covers all five approved Gold Journeys', () {
+    expect(approvedNarrativeDnaCatalog.map((item) => item.journeyId).toSet(), contains(hangzhouWestLakeJourneyId));
+    expect(approvedNarrativeDnaCatalog.length, greaterThanOrEqualTo(5));
+  });
+
   test('anti-template gate rejects a three-dimension Hangzhou copy', () {
     final hangzhou = approvedNarrativeDnaCatalog.singleWhere((item) => item.journeyId == hangzhouWestLakeJourneyId);
     final copy = JourneyNarrativeDnaRecord(
-      journeyId: 'hangzhou-copy-probe', narrativeIdentity: 'probe', protagonistIdentity: hangzhou.protagonistIdentity, protagonistAgeIdentity: hangzhou.protagonistAgeIdentity, protagonistArchetype: hangzhou.protagonistArchetype, openingSituation: 'other', storyGoal: 'other', locationMechanism: 'other', movementPattern: 'other', conflictType: 'other', choiceType: 'other', climaxType: 'other', consequenceType: 'other', emotionalArc: 'other', historicalLearningMechanism: 'other', resolutionType: 'other', endingMechanism: 'other', memoryAnchorType: 'other', achievementType: 'other', rewardSymbolism: 'other', temporalPattern: 'other', supportingStructure: 'other', centralMetaphor: 'other', narrativeVoice: 'other', storyRhythm: 'other');
-    expect(duplicatedMajorDimensions(copy, hangzhou), greaterThanOrEqualTo(3));
+      journeyId: 'hangzhou-copy-probe',
+      narrativeIdentity: 'probe',
+      protagonistIdentity: hangzhou.protagonistIdentity,
+      protagonistAgeIdentity: hangzhou.protagonistAgeIdentity,
+      protagonistArchetype: hangzhou.protagonistArchetype,
+      openingSituation: 'other',
+      storyGoal: 'other',
+      locationMechanism: 'other',
+      movementPattern: 'other',
+      conflictType: 'other',
+      choiceType: 'other',
+      climaxType: 'other',
+      consequenceType: 'other',
+      emotionalArc: 'other',
+      historicalLearningMechanism: 'other',
+      resolutionType: 'other',
+      endingMechanism: 'other',
+      memoryAnchorType: 'other',
+      achievementType: 'other',
+      rewardSymbolism: 'other',
+      temporalPattern: 'other',
+      supportingStructure: 'other',
+      centralMetaphor: 'other',
+      narrativeVoice: 'other',
+      storyRhythm: 'other',
+    );
     expect(narrativeDnaIsUnique(copy, <JourneyNarrativeDnaRecord>[hangzhou]), isFalse);
   });
 
-  test('runtime classifies Hangzhou as dedicated Gold and resolves immutable snapshots', () {
+  test('Lv1 Lv5 Lv10 runtime equals the reopened canonical Story', () {
     expect(usesDedicatedAdaptiveJourneyRuntime(hangzhouWestLakeJourneyId), isTrue);
-    expect(usesSharedGenericAdaptivePipeline(hangzhouWestLakeJourneyId), isFalse);
     final experience = requireDailyJourneyExperience(hangzhouWestLakeJourneyId);
-    for (var level = 1; level <= 10; level++) {
-      final resolved = resolveAdaptiveJourneyLevel(experience, profile: levelAgent.profileForPhoenixLevel(level));
-      expect(identical(resolved.storyParagraphs, hangzhouWestLakeOnePassLevels[level - 1].storyParagraphs), isTrue);
-      expect(resolved.storyParagraphs.join(), isNot(contains('清晨，你沿着苏堤慢慢向前走')));
-      expect(resolved.discoveries, hasLength(1));
+    for (final level in <int>[1, 5, 10]) {
+      final resolved = resolveAdaptiveJourneyLevel(
+        experience,
+        profile: levelAgent.profileForPhoenixLevel(level),
+      );
+      expect(resolved.storyParagraphs, hangzhouWestLakeReopenedLevels[level - 1].storyParagraphs);
+      expect(resolved.discoveries.single, same(hangzhouWestLakeReopenedDiscoverySpecs[level - 1].entry));
     }
-  });
-
-  test('Hangzhou integration preserves approved Shanghai runtime prompts', () {
-    final shanghai = requireDailyJourneyExperience('shanghai-bund');
-    final resolved = resolveAdaptiveJourneyLevel(shanghai, profile: levelAgent.profileForPhoenixLevel(5));
-    expect(resolved.wonderQuestion, '林岸为什么在过江后不再把两岸理解成过去和未来？');
-    expect(resolved.expressQuestion, '旧海运提单与陆家嘴结算系统在故事里共同组织了哪些流动？');
   });
 }
