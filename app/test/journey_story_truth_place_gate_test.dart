@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
 import 'package:phoenix_journeys/data/journey_semantic_fingerprint_catalog.dart';
 import 'package:phoenix_journeys/data/journey_story_development_gate.dart';
 
