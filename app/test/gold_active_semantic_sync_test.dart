@@ -46,7 +46,7 @@ void main() {
     ['thế kỷ 9', 'thi nhân', 'học giả', 'nghệ sĩ', 'nhật bản', 'triều tiên'],
     ['nam tống', 'địa điểm', 'mùa', 'thời tiết', 'cách nhìn', 'ký ức văn hóa'],
     ['cầu', 'đình', 'tháp', 'chùa', 'cây cối', 'tầm nhìn', 'tuyến đi', 'không gian'],
-    ['2011', 'di sản thế giới', 'tự nhiên', 'con người', 'truyền thống văn hóa'],
+    ['2011', 'di sản thế giới', 'tự nhiên', 'kiến tạo', 'nhiều thời đại', 'truyền thống văn hóa'],
     ['hơn một nghìn năm', 'tự nhiên', 'nhân tạo', 'không có con người'],
   ];
   final hangzhouEnglish = <List<String>>[
