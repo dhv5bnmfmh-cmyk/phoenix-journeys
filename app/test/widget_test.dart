@@ -68,7 +68,7 @@ void main() {
     );
 
     expect(find.text('PHOENIX JOURNEYS'), findsOneWidget);
-    expect(find.text('两条路，一张图'), findsOneWidget);
+    expect(find.text('沈砚要让两条都走得通的路留在同一张图上'), findsOneWidget);
     expect(find.text('开始北京 Journey'), findsOneWidget);
   });
 

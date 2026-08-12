@@ -323,7 +323,10 @@ void main() {
     final second = auditApprovedGoldSemanticPairs();
     final count = approvedGoldSemanticFingerprints.length;
     expect(first, hasLength(count * (count - 1) ~/ 2));
-    expect(first.map((item) => _pairKey(item.journeyA, item.journeyB)).toSet().length, 28);
+    expect(
+      first.map((item) => _pairKey(item.journeyA, item.journeyB)).toSet().length,
+      count * (count - 1) ~/ 2,
+    );
     expect(
       first.map((item) =>
           '${_pairKey(item.journeyA, item.journeyB)}|${item.matchingCoreDimensions.map((d) => d.name).join(',')}|${item.classification.name}').toList(),

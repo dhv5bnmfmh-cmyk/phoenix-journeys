@@ -177,10 +177,12 @@ JourneyLevelContent suzhouGardenCanonicalLevelContent(int requestedLevel) {
     storyParagraphs: List<String>.unmodifiable(story),
     storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
     words: List<WordEntry>.unmodifiable(
-      _suzhouWords.where((entry) => searchable.contains(entry.word)),
+      _suzhouWords
+          .where((entry) => searchable.contains(entry.word))
+          .take(switch (level) { 1 => 5, 2 => 6, 3 => 7, 4 => 8, _ => 9 }),
     ),
     discoveries: List<DiscoveryEntry>.unmodifiable(
-      _suzhouDiscoveries.take(level <= 3 ? 1 : level <= 7 ? 2 : 4),
+      _suzhouDiscoveries.take(level <= 3 ? 1 : 2),
     ),
     wonderQuestion: '陈玉兰第二次看不见程朗时，为什么抬起手却没有喊他的名字？',
     expressQuestion: '请写出“下一处等我”在故事开头和结尾分别是谁对谁说，以及这句话的意思怎样改变。',
