@@ -76,7 +76,7 @@ void main() {
   ];
   final guangzhouEnglish = <List<String>>[
     ['plaque', 'chen clan academy', 'across guangdong', 'jointly funded'],
-    ['two names', 'ancestral hall', 'academy', 'identity'],
+    ['chen clan ancestral hall', 'chen clan academy', 'identity'],
     ['not one household', 'private hall', 'shared lineage', 'funded'],
     ['jointly built', 'shared lineage hall', 'ritual', 'networking', 'academy'],
     ['three transverse routes', 'three successive depths', 'gates', 'halls', 'courts'],
