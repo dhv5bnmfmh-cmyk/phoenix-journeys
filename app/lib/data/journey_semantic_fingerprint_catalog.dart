@@ -1007,10 +1007,10 @@ final hangzhouWestLakeReopenedSemanticFingerprint = JourneySemanticFingerprint(
 
 const _longmen = luoyangLongmenGoldJourneyId;
 
-final luoyangLongmenGoldSemanticFingerprint = JourneySemanticFingerprint(
+const luoyangLongmenGoldSemanticFingerprint = JourneySemanticFingerprint(
   journeyId: _longmen,
   surfaceIdentity: 'adult-sister-tears-joint-property-signature-page-to-preserve-younger-brother-future-shared-agency',
-  mechanisms: const <NarrativeSemanticDimension, NarrativeMechanismFamily>{
+  mechanisms: <NarrativeSemanticDimension, NarrativeMechanismFamily>{
     NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.jointAssetDeadlineCreatedBeforeSharedConsent,
     NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.responsibleSiblingEquatingBurdenWithAuthority,
     NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.adultSiblingsNegotiatingFutureSharedAgency,

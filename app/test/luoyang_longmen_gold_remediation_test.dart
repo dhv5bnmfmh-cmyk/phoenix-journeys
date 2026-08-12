@@ -168,14 +168,21 @@ void main() {
 
 
   test('Longmen static publication shell remains four-section compatible', () {
-    expect(longmen.storyParagraphs, hasLength(4));
+    final publishedSections = longmen.content.sections;
+    final publishedParagraphs = publishedSections
+        .map((section) => section.text)
+        .toList(growable: false);
+    expect(publishedSections, hasLength(4));
     expect(longmen.storyAnnotations, hasLength(4));
     expect(longmen.discoveries, hasLength(4));
-    expect(longmen.storyParagraphs.join(), contains('周岚'));
-    expect(longmen.storyParagraphs.join(), contains('撕开签字页'));
-    expect(longmen.storyParagraphs.join(), isNot(contains('傍晚，你沿伊河')));
-    for (var index = 0; index < longmen.storyParagraphs.length; index++) {
-      expect(longmen.storyAnnotations[index].pinyin, _pinyin(longmen.storyParagraphs[index]));
+    expect(publishedParagraphs.join(), contains('周岚'));
+    expect(publishedParagraphs.join(), contains('撕开签字页'));
+    expect(publishedParagraphs.join(), isNot(contains('傍晚，你沿伊河')));
+    for (var index = 0; index < publishedSections.length; index++) {
+      expect(
+        longmen.storyAnnotations[index].pinyin,
+        _pinyin(publishedParagraphs[index]),
+      );
     }
   });
 
@@ -277,12 +284,56 @@ void main() {
     expect(find.textContaining('长廊不但可以避雨'), findsNothing);
     expect(find.textContaining('园林采用了借景手法'), findsNothing);
 
-    expect(find.byKey(const ValueKey('challenge-grammar-segment-1')), findsOneWidget);
-    expect(find.byKey(const ValueKey('challenge-option-correct')), findsNothing);
-    await tester.tap(find.byKey(const ValueKey('challenge-grammar-segment-1')));
+    final grammarSegment =
+        find.byKey(const ValueKey('challenge-grammar-segment-1'));
+    final grammarOptions =
+        find.byKey(const ValueKey('challenge-four-options'));
+    final correctGrammarOption =
+        find.byKey(const ValueKey('challenge-option-correct'));
+    expect(grammarSegment, findsOneWidget);
+    expect(
+      find.descendant(of: grammarSegment, matching: find.text('而且游客还')),
+      findsOneWidget,
+    );
+    expect(tester.widget<ChoiceChip>(grammarSegment).selected, isFalse);
+    expect(grammarOptions, findsOneWidget);
+    final keyedGrammarOptions = find.descendant(
+      of: grammarOptions,
+      matching: find.byWidgetPredicate((widget) {
+        final key = widget.key;
+        return widget is Material &&
+            key is ValueKey<String> &&
+            key.value.startsWith('challenge-option-');
+      }),
+    );
+    expect(keyedGrammarOptions, findsNWidgets(journeyChallengeOptionCount));
+    for (final optionId in <String>[
+      'correct',
+      'distractor-1',
+      'distractor-2',
+      'distractor-3',
+    ]) {
+      expect(
+        find.descendant(
+          of: grammarOptions,
+          matching: find.byKey(ValueKey('challenge-option-$optionId')),
+        ),
+        findsOneWidget,
+      );
+    }
+    expect(correctGrammarOption, findsOneWidget);
+    expect(
+      find.descendant(
+        of: correctGrammarOption,
+        matching: find.text('而且让游客'),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(grammarSegment);
     await tester.pump();
-    expect(find.byKey(const ValueKey('challenge-option-correct')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('challenge-option-correct')));
+    expect(tester.widget<ChoiceChip>(grammarSegment).selected, isTrue);
+    expect(correctGrammarOption, findsOneWidget);
+    await tester.tap(correctGrammarOption);
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('challenge-submit')));
     await tester.pumpAndSettle();

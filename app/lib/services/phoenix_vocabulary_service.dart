@@ -141,6 +141,37 @@ class PhoenixVocabularyService {
       qualityReviewed: true,
       qualityScore: 100,
     ),
+    '世界遗产': PhoenixVocabularyExample(
+      chinese: '龙门石窟是世界遗产，完整的洞窟、造像与河谷环境共同构成它的遗产价值。',
+      pinyin:
+          'Lóngmén Shíkū shì shìjiè yíchǎn, wánzhěng de dòngkū, zàoxiàng yǔ hégǔ huánjìng gòngtóng gòuchéng tā de yíchǎn jiàzhí.',
+      native:
+          'Long Môn Thạch Quật là Di sản Thế giới; các hang động, tượng và môi trường thung lũng sông còn nguyên vẹn cùng tạo nên giá trị di sản của địa điểm này.',
+      english:
+          'The Longmen Grottoes are a World Heritage property; their intact caves, sculptures, and river-valley setting together form its heritage value.',
+      usageNote: '“世界遗产”指列入世界遗产名录、具有突出普遍价值的遗产地。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
+    '保护': PhoenixVocabularyExample(
+      chinese: '保护龙门石窟不能只关注著名大像，也要维护洞窟、山崖与河谷环境。',
+      pinyin:
+          'Bǎohù Lóngmén Shíkū bù néng zhǐ guānzhù zhùmíng dàxiàng, yě yào wéihù dòngkū, shānyá yǔ hégǔ huánjìng.',
+      native:
+          'Bảo vệ Long Môn Thạch Quật không thể chỉ tập trung vào những tượng lớn nổi tiếng; còn phải gìn giữ các hang động, vách núi và môi trường thung lũng sông.',
+      english:
+          'Protecting the Longmen Grottoes cannot focus only on famous monumental statues; it must also preserve the caves, cliffs, and river-valley setting.',
+      usageNote: '“保护”在遗产语境中表示通过管理和维护减少损害并保存遗产价值。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
+
   };
 
   static const PhoenixVocabularyExample _legacyForbiddenOpening =
