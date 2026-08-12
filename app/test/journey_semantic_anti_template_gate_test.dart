@@ -318,10 +318,11 @@ void main() {
     expect(comparison.ruleB, isTrue);
   });
 
-  test('current approved Gold audit remains 28-pair deterministic', () {
+  test('current approved Gold audit remains pair-complete and deterministic', () {
     final first = auditApprovedGoldSemanticPairs();
     final second = auditApprovedGoldSemanticPairs();
-    expect(first, hasLength(28));
+    final count = approvedGoldSemanticFingerprints.length;
+    expect(first, hasLength(count * (count - 1) ~/ 2));
     expect(first.map((item) => _pairKey(item.journeyA, item.journeyB)).toSet().length, 28);
     expect(
       first.map((item) =>
@@ -355,7 +356,7 @@ void main() {
     final comparisons = auditApprovedGoldSemanticPairs().where(
       (item) => item.journeyA == 'beijing-forbidden-city' || item.journeyB == 'beijing-forbidden-city',
     );
-    expect(comparisons, hasLength(7));
+    expect(comparisons, hasLength(approvedGoldSemanticFingerprints.length - 1));
     expect(comparisons.every((item) => !item.isCollision), isTrue);
   });
 
@@ -401,7 +402,7 @@ void main() {
     final comparisons = auditApprovedGoldSemanticPairs().where(
       (item) => item.journeyA == 'chengdu-kuanzhai-alley' || item.journeyB == 'chengdu-kuanzhai-alley',
     );
-    expect(comparisons, hasLength(7));
+    expect(comparisons, hasLength(approvedGoldSemanticFingerprints.length - 1));
     expect(comparisons.every((item) => !item.isCollision), isTrue);
   });
 
@@ -409,7 +410,7 @@ void main() {
     final comparisons = auditApprovedGoldSemanticPairs().where(
       (item) => item.journeyA == 'guangzhou-chen-clan-academy' || item.journeyB == 'guangzhou-chen-clan-academy',
     );
-    expect(comparisons, hasLength(7));
+    expect(comparisons, hasLength(approvedGoldSemanticFingerprints.length - 1));
     expect(comparisons.every((item) => !item.ruleA), isTrue);
     expect(comparisons.every((item) => !item.ruleB), isTrue);
     expect(comparisons.every((item) => !item.isCollision), isTrue);

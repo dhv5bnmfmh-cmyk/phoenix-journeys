@@ -151,16 +151,8 @@ const _suzhouDiscoveries = <DiscoveryEntry>[
 /// four approved causal beats; higher levels add detail without changing them.
 JourneyLevelContent suzhouGardenCanonicalLevelContent(int requestedLevel) {
   final level = requestedLevel.clamp(1, 10).toInt();
-  final paragraphCount = level <= 2 ? 1 : level <= 6 ? 2 : 4;
-  final story = paragraphCount == 1
-      ? <String>[_suzhouParagraphs.join()]
-      : paragraphCount == 2
-          ? <String>[
-              '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}',
-              '${_suzhouParagraphs[2]}${_suzhouParagraphs[3]}',
-            ]
-          : _suzhouParagraphs;
-  final annotations = paragraphCount == 1
+  final story = _suzhouAdaptiveStory(level);
+  final annotations = story.length == 1
       ? <ReadingAnnotation>[
           ReadingAnnotation(
             pinyin: _suzhouAnnotations.map((item) => item.pinyin).join(' '),
@@ -168,20 +160,18 @@ JourneyLevelContent suzhouGardenCanonicalLevelContent(int requestedLevel) {
             english: _suzhouAnnotations.map((item) => item.english).join(' '),
           ),
         ]
-      : paragraphCount == 2
-          ? <ReadingAnnotation>[
-              ReadingAnnotation(
-                pinyin: '${_suzhouAnnotations[0].pinyin} ${_suzhouAnnotations[1].pinyin}',
-                vietnamese: '${_suzhouAnnotations[0].vietnamese} ${_suzhouAnnotations[1].vietnamese}',
-                english: '${_suzhouAnnotations[0].english} ${_suzhouAnnotations[1].english}',
-              ),
-              ReadingAnnotation(
-                pinyin: '${_suzhouAnnotations[2].pinyin} ${_suzhouAnnotations[3].pinyin}',
-                vietnamese: '${_suzhouAnnotations[2].vietnamese} ${_suzhouAnnotations[3].vietnamese}',
-                english: '${_suzhouAnnotations[2].english} ${_suzhouAnnotations[3].english}',
-              ),
-            ]
-          : _suzhouAnnotations;
+      : <ReadingAnnotation>[
+          ReadingAnnotation(
+            pinyin: '${_suzhouAnnotations[0].pinyin} ${_suzhouAnnotations[1].pinyin}',
+            vietnamese: '${_suzhouAnnotations[0].vietnamese} ${_suzhouAnnotations[1].vietnamese}',
+            english: '${_suzhouAnnotations[0].english} ${_suzhouAnnotations[1].english}',
+          ),
+          ReadingAnnotation(
+            pinyin: '${_suzhouAnnotations[2].pinyin} ${_suzhouAnnotations[3].pinyin}',
+            vietnamese: '${_suzhouAnnotations[2].vietnamese} ${_suzhouAnnotations[3].vietnamese}',
+            english: '${_suzhouAnnotations[2].english} ${_suzhouAnnotations[3].english}',
+          ),
+        ];
   final searchable = '${story.join()}${_suzhouDiscoveries.map((item) => item.text).join()}';
   return JourneyLevelContent(
     storyParagraphs: List<String>.unmodifiable(story),
@@ -196,6 +186,32 @@ JourneyLevelContent suzhouGardenCanonicalLevelContent(int requestedLevel) {
     expressQuestion: '请写出“下一处等我”在故事开头和结尾分别是谁对谁说，以及这句话的意思怎样改变。',
   );
 }
+
+List<String> _suzhouAdaptiveStory(int level) => switch (level) {
+  1 => <String>[
+      '下周一，十二岁的程朗要开始自己坐车上学。星期天，外婆陈玉兰带他到拙政园。程朗说：“今天让我走前面吧，我在下一处等你。”长廊转弯后，他第一次消失，外婆立刻把他喊回来。第二次，曲桥和屋角又挡住视线。陈玉兰抬起手，却没有喊，自己走完那几步。水面重新打开时，程朗正在前面等她。她只说：“下一处等我。”程朗继续往前，陈玉兰没有追上去。',
+    ],
+  2 => <String>[
+      '下周一，十二岁的程朗要开始自己坐车去初中。六年来，外婆陈玉兰几乎每天都接他放学。这个星期天，她带他到拙政园，程朗第一次认真说：“今天让我走前面吧，我在下一处等你。”转过长廊，他的背影第一次消失，陈玉兰立刻喊了他的名字。程朗退回来，没有争辩，只把脚步放慢。再往前，曲桥和屋角又截断视线。陈玉兰抬起手，名字已经到了嘴边，却没有喊；她自己走完那几步。水面重新打开时，程朗正在前面回头找她。陈玉兰提了提水壶带：“下一处等我。”程朗转身继续走，她没有追上去。',
+    ],
+  3 || 4 || 5 => <String>[
+      '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}',
+      '${_suzhouParagraphs[2]}${_suzhouParagraphs[3]}',
+    ],
+  _ => <String>[
+      '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}',
+      '${_suzhouParagraphs[2]}${_suzhouParagraphs[3]}${_suzhouLevelEnrichment(level)}',
+    ],
+};
+
+String _suzhouLevelEnrichment(int level) => switch (level) {
+  6 => '陈玉兰走得不快。她知道程朗没有真的离开，只是第一次把两个人之间的几步路交给了等待。',
+  7 => '陈玉兰走得不快。六年来，她习惯用追上去确认程朗平安；这一次，她把担心留在自己这边，也把下一处停下回望的责任交给他。风从廊下过去，她听不见他的脚步，却仍按自己的速度一步一步往前走。两个人之间多出的不是距离，而是一小段各自走完的路。',
+  8 => '陈玉兰走得不快。六年来，她习惯用追上去确认程朗平安；这一次，她把担心留在自己这边，也把下一处停下回望的责任交给他。拙政园的墙、树与屋角不断收紧视线，池水又在转折后把空间打开。风从廊下过去，她听不见他的脚步，却仍按自己的速度一步一步往前走；程朗也没有借着转弯越走越快，而是守着说好的下一处。两个人之间多出的不是失散，而是一小段各自走完、又重新看见对方的路。',
+  9 => '陈玉兰走得不快。六年来，她习惯用追上去确认程朗平安；这一次，她把担心留在自己这边，也把下一处停下回望的责任交给他。拙政园的墙、树与屋角不断收紧视线，池水又在转折后把空间打开。第一次消失时，她用一声呼喊把旧日的关系拉回原位；第二次，她放下手，让看不见成为两个人都要承担的几步。程朗没有把走在前面当成甩开外婆，而是在下一处停住。风从廊下过去，她听不见他的脚步，却仍按自己的速度往前走；程朗也没有借着转弯越走越快，没有催促。两个人之间多出的不是失散，而是一小段各自走完、又重新看见对方的路。',
+  10 => '陈玉兰走得不快。六年来，她习惯用追上去确认程朗平安；这一次，她把担心留在自己这边，也把下一处停下回望的责任交给他。拙政园的墙、树、曲桥与屋角不断收紧视线，池水又在转折后把空间打开。第一次消失时，她用一声呼喊把旧日的关系拉回原位；第二次，她抬起手又放下，让看不见成为两个人都要承担的几步。程朗没有把走在前面当成甩开外婆，而是在下一处停住，回头确认她仍沿着同一条路来。“下一处等我”不再只是孩子请求放手，也成了外婆提出的新约定：你可以先走，但要学会等；我会担心，却不再每次都追上去。两个人之间多出的不是失散，而是一小段各自走完、又重新看见对方的路。风从廊下过去，两个人都没有催对方。园路还会继续转弯，陈玉兰没有加快脚步，也没有回头。',
+  _ => '',
+};
 
 const suzhouGardenMemoryResult =
     '陈玉兰第二次没有喊回程朗，自己走完看不见他的几步；程朗在下一处停下回望。';

@@ -190,7 +190,7 @@ void main() {
     expect(fingerprint.mechanism(NarrativeSemanticDimension.climaxMechanism), NarrativeMechanismFamily.participantIndependentlyReproducesHandoff);
     expect(semanticEvidenceContractErrors(fingerprint), isEmpty);
     final comparisons = semanticDifferenceMatrixAgainstApprovedGold(fingerprint);
-    expect(comparisons, hasLength(7));
+    expect(comparisons, hasLength(approvedGoldSemanticFingerprints.length - 1));
     expect(comparisons.every((comparison) => !comparison.isCollision), isTrue);
     final hangzhou = comparisons.singleWhere((comparison) => comparison.journeyA == 'hangzhou-west-lake' || comparison.journeyB == 'hangzhou-west-lake');
     expect(hangzhou.coreMatchCount, 0);
@@ -198,9 +198,10 @@ void main() {
     expect(hangzhou.ruleB, isFalse);
   });
 
-  test('28 Gold pairs contain zero historical semantic collision debt', () {
+  test('all Gold pairs contain zero historical semantic collision debt', () {
     final audit = auditApprovedGoldSemanticPairs();
-    expect(audit, hasLength(28));
+    final count = approvedGoldSemanticFingerprints.length;
+    expect(audit, hasLength(count * (count - 1) ~/ 2));
     expect(audit.where((item) => item.isCollision), isEmpty);
     expect(audit.where((item) => item.classification == SemanticCollisionClassification.existingSemanticCollisionDebt), isEmpty);
   });

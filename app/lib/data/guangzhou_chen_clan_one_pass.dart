@@ -147,14 +147,26 @@ ReadingAnnotation _guangzhouLockedAnnotation(String english) => ReadingAnnotatio
 );
 
 JourneyLevelContent _guangzhouLockedLevel(int level) {
-  final story = level <= 2
-      ? <String>['陈秀仪六十一岁，在陈家祠见三十四岁的刘嘉禾。嘉禾是她的亲生女儿，却由亲戚养大，姓刘。亲戚打来视频，要她们在“陈氏书院”匾额下拍认亲照。秀仪举起手机，看见嘉禾退到廊柱旁。她最后把手机扣在青砖台上，说：“她叫刘嘉禾。今天不入镜。”她失去了等了三十四年的合照。嘉禾往下一座院子走，经过门槛时放慢一步。秀仪跟上去，两个人并排走进院里。']
-      : level <= 5
-          ? <String>[
-              '${_guangzhouLockedParagraphs[0]}${_guangzhouLockedParagraphs[1]}',
-              '${_guangzhouLockedParagraphs[2]}${_guangzhouLockedParagraphs[3]}',
-            ]
-          : _guangzhouLockedParagraphs;
+  final story = switch (level) {
+    1 => <String>[
+        '陈秀仪六十一岁，在陈家祠见刘嘉禾。嘉禾是她三十四年前交给亲戚收养的女儿，如今姓刘。亲戚打来视频，要她们在“陈氏书院”匾额下拍认亲照。秀仪举起手机，看见嘉禾退到廊柱旁。她把手机扣在青砖台上，说：“她叫刘嘉禾。今天不入镜。”嘉禾往下一座院子走，过门槛时放慢一步。秀仪跟上去，两个人并排走进院里。',
+      ],
+    2 => <String>[
+        '陈秀仪六十一岁。三十四年前，她把刚出生的女儿交给亲戚收养；女儿如今叫刘嘉禾。两人重新联系半年后，第一次单独约在陈家祠见面。亲族群忽然打来视频，催她们在“陈氏书院”匾额下拍一张认亲照。秀仪举起手机，嘉禾退到廊柱旁。秀仪看了看屏幕，把手机扣在青砖台上：“她叫刘嘉禾。今天不入镜。”她等了三十四年的合照没有拍成。嘉禾先往下一座院子走，经过门槛时放慢一步；秀仪没有拉她，只跟到她身边。',
+      ],
+    3 => <String>[
+        '陈秀仪六十一岁。三十四年前，她把刚出生的女儿交给亲戚收养。女儿如今叫刘嘉禾。两人重新联系半年后，第一次单独约在陈家祠见面。嘉禾事先说好：只见她，不见陈家亲戚，也不拍“认回来”的照片。秀仪答应了，包里却放着亲族群寄来的红围巾。',
+        '走到“陈氏书院”匾额下，亲族群的视频打来，催秀仪把镜头转向嘉禾。秀仪举起手机，嘉禾向廊柱后退了一步。秀仪最后把手机扣在青砖台上：“她叫刘嘉禾。今天不入镜。”合照没有拍成。嘉禾往下一座院子走，过门槛时放慢一步。秀仪跟上去，与她并排走进院里。',
+      ],
+    4 => <String>[
+        '${_guangzhouLockedParagraphs[0]}她们走进第一进院落，匾额上的“陈氏书院”把两个人的姓隔在同一个抬头里。秀仪取出红围巾，说亲戚们只想看一眼。嘉禾没有接，只说：“我姓刘。”',
+        '下一进院子里，亲族群的视频忽然打来。几张等候的脸催秀仪把镜头转过去，说拍一张事情就算圆满。秀仪举起手机，嘉禾向廊柱后退一步。秀仪看见屏幕里的自己，随即把手机扣在青砖台上：“她叫刘嘉禾。今天不入镜。”合照没有拍成。嘉禾先走向下一座院子，过门槛时放慢一步；秀仪把红围巾留在包里，跟到她身边。',
+      ],
+    _ => <String>[
+        '${_guangzhouLockedParagraphs[0]}${_guangzhouLockedParagraphs[1]}',
+        '${_guangzhouLockedParagraphs[2]}${_guangzhouLockedParagraphs[3]}${_guangzhouLevelEnrichment(level)}',
+      ],
+  };
   return JourneyLevelContent(
     storyParagraphs: List<String>.unmodifiable(story),
     storyAnnotations: List<ReadingAnnotation>.unmodifiable([
@@ -167,6 +179,15 @@ JourneyLevelContent _guangzhouLockedLevel(int level) {
     expressQuestion: '',
   );
 }
+
+String _guangzhouLevelEnrichment(int level) => switch (level) {
+  6 => '陈秀仪走过门槛时没有再看手机。匾额仍在身后，嘉禾的名字留在她自己的那句话里。',
+  7 => '陈秀仪走过门槛时没有再看手机。她曾以为一张合照能替三十四年补上一个开头，如今那块空白仍在。匾额留在身后，嘉禾的名字留在她自己的那句话里。',
+  8 => '陈秀仪走过门槛时没有再看手机。她曾以为一张合照能替三十四年补上一个开头，如今那块空白仍在。亲族群可以继续等，嘉禾却不必用改姓或入镜来证明相认。匾额留在身后，嘉禾的名字留在她自己的那句话里。',
+  9 => '陈秀仪走过门槛时没有再看手机。她曾以为一张合照能替三十四年补上一个开头，如今那块空白仍在。亲族群可以继续等，嘉禾却不必用改姓或入镜来证明相认。陈家祠一进又一进的院落没有给她们一条直达圆满的路，只让两个人在每一道门槛前重新决定彼此能靠多近。匾额留在身后，嘉禾的名字留在秀仪自己的那句话里。',
+  10 => '陈秀仪走过门槛时没有再看手机。她曾以为一张合照能替三十四年补上一个开头，如今那块空白仍在；她付出的不是一时的难堪，而是放弃向亲族证明“女儿已经回来”的体面。亲族群可以继续等，嘉禾却不必用改姓、围红围巾或站进镜头来证明相认。陈家祠一进又一进的院落没有给她们一条直达圆满的路，只让两个人在每一道门槛前重新决定彼此能靠多近。手机安静地留在掌心，红围巾也没有拿出来。匾额留在身后，嘉禾的名字留在秀仪自己的那句话里；前面的院子里，两个人仍只并排走着，没有谁先说“回家”。',
+  _ => '',
+};
 
 final guangzhouChenClanOnePassLevels = List<JourneyLevelContent>.unmodifiable([
   for (var level = 1; level <= 10; level++) _guangzhouLockedLevel(level),
