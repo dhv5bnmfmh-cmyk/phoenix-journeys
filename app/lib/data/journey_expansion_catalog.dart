@@ -143,7 +143,7 @@ const _suzhouWords = <WordEntry>[
   WordEntry(word: '层次', pinyin: 'céngcì', partOfSpeech: '名词', simpleChinese: '空间前后形成的不同层面。', translation: 'Các lớp không gian trước sau.', englishDefinition: 'visual layers and depth', symbol: '🌫️'),
   WordEntry(word: '外婆', pinyin: 'wàipó', partOfSpeech: '名词', simpleChinese: '母亲的母亲。', translation: 'Bà ngoại.', englishDefinition: 'maternal grandmother', symbol: '👵'),
   WordEntry(word: '自己', pinyin: 'zìjǐ', partOfSpeech: '代词', simpleChinese: '本人，不依靠别人。', translation: 'Tự mình.', englishDefinition: 'oneself; independently', symbol: '🚶'),
-  WordEntry(word: '转弯', pinyin: 'zhuǎnwān', partOfSpeech: '动词', simpleChinese: '改变行走方向。', translation: 'Rẽ.', englishDefinition: 'to turn a corner', symbol: '↪️'),
+  WordEntry(word: '转弯', pinyin: 'zhuǎnwān', partOfSpeech: '动词', simpleChinese: '改变行走方向。', translation: 'Rẽ.', englishDefinition: 'to turn a corner', symbol: '↪️', examples: [WordExample(chinese: '长廊转弯后，程朗暂时从外婆的视线里消失。', pinyin: 'Chángláng zhuǎnwān hòu, Chéng Lǎng zànshí cóng wàipó de shìxiàn lǐ xiāoshī.', vietnamese: 'Sau khúc quanh hành lang, Trình Lãng tạm khuất khỏi tầm mắt bà ngoại.', english: 'After the corridor turns, Cheng Lang temporarily disappears from his grandmother’s sight.')]),
   WordEntry(word: '消失', pinyin: 'xiāoshī', partOfSpeech: '动词', simpleChinese: '从视线里看不见了。', translation: 'Biến mất.', englishDefinition: 'to disappear from view', symbol: '👀'),
   WordEntry(word: '视线', pinyin: 'shìxiàn', partOfSpeech: '名词', simpleChinese: '眼睛看出去的方向和范围。', translation: 'Tầm nhìn.', englishDefinition: 'line of sight', symbol: '👁️'),
   WordEntry(word: '抬起', pinyin: 'táiqǐ', partOfSpeech: '动词', simpleChinese: '把手或物体向上举。', translation: 'Giơ lên.', englishDefinition: 'to raise', symbol: '✋'),
@@ -151,6 +151,8 @@ const _suzhouWords = <WordEntry>[
   WordEntry(word: '回头', pinyin: 'huítóu', partOfSpeech: '动词', simpleChinese: '转头向后看。', translation: 'Ngoảnh lại.', englishDefinition: 'to look back', symbol: '↩️'),
   WordEntry(word: '追上', pinyin: 'zhuīshàng', partOfSpeech: '动词', simpleChinese: '加快脚步赶到前面的人身边。', translation: 'Đuổi kịp.', englishDefinition: 'to catch up', symbol: '🏃'),
   WordEntry(word: '遮挡', pinyin: 'zhēdǎng', partOfSpeech: '动词', simpleChinese: '挡住，使人暂时看不见。', translation: 'Che khuất.', englishDefinition: 'to block from view', symbol: '🧱'),
+  WordEntry(word: '世界遗产', pinyin: 'shìjiè yíchǎn', partOfSpeech: '名词', simpleChinese: '被国际认定具有突出价值的文化或自然遗产。', translation: 'Di sản thế giới.', englishDefinition: 'World Heritage', symbol: '🌏'),
+  WordEntry(word: '保护', pinyin: 'bǎohù', partOfSpeech: '动词', simpleChinese: '防止重要事物受到损害。', translation: 'Bảo vệ.', englishDefinition: 'to protect; conservation', symbol: '🛡️'),
 ];
 
 const _suzhouDiscoveries = <DiscoveryEntry>[
@@ -229,6 +231,8 @@ const _suzhouVocabularyLevelCatalog = <String, VocabularyLevelTag>{
   '回头': VocabularyLevelTag(hskLevel: 2, tocflLevel: 2),
   '追上': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
   '遮挡': VocabularyLevelTag(hskLevel: 5, tocflLevel: 4),
+  '世界遗产': VocabularyLevelTag(hskLevel: 6, tocflLevel: 5, kind: VocabularyKind.cultural),
+  '保护': VocabularyLevelTag(hskLevel: 4, tocflLevel: 3),
 };
 
 List<(String, String)> _suzhouReadingSupport(int level) => switch (level) {

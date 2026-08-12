@@ -327,6 +327,14 @@ final hangzhouWestLakeReopenedWordTraces = <RemediatedWordTrace>[
   const RemediatedWordTrace(word: '怕', eventId: 'HZ2-E4-card', usage: '夫妻终于对彼此说出的感受。', sourceText: '我知道你在怕什么。我也怕。'),
   const RemediatedWordTrace(word: '公交车', eventId: 'HZ2-E5-bus', usage: '周绍庭主动询问医院站点的空间。', sourceText: '公交车来时，他问司机：“去医院，哪一站下？”'),
   const RemediatedWordTrace(word: '断桥残雪', eventId: 'HZ2-E2-views', usage: '连接地点、季节和记忆答案的题名景观。', sourceText: '周绍庭把“断桥残雪”说成夏天。'),
+  const RemediatedWordTrace(word: '结婚', eventId: 'HZ2-E1-test', usage: '说明两人的长期夫妻关系。', sourceText: '和周绍庭结婚四十三年'),
+  const RemediatedWordTrace(word: '医院', eventId: 'HZ2-E5-bus', usage: '记忆检查和公交目的地。', sourceText: '去医院，哪一站下'),
+  const RemediatedWordTrace(word: '检查', eventId: 'HZ2-E1-test', usage: '周一安排的记忆检查。', sourceText: '去医院做记忆检查'),
+  const RemediatedWordTrace(word: '景名', eventId: 'HZ2-E2-views', usage: '方毓连续提出的问题。', sourceText: '方毓不停问他西湖景名'),
+  const RemediatedWordTrace(word: '夏天', eventId: 'HZ2-E2-views', usage: '周绍庭说错的季节。', sourceText: '说成夏天'),
+  const RemediatedWordTrace(word: '钱包', eventId: 'HZ2-E5-bus', usage: '周绍庭主动收下预约卡的位置。', sourceText: '放进自己的钱包'),
+  const RemediatedWordTrace(word: '司机', eventId: 'HZ2-E5-bus', usage: '周绍庭主动询问站点的人。', sourceText: '问司机'),
+  const RemediatedWordTrace(word: '害怕', eventId: 'HZ2-E4-card', usage: '夫妻终于共同承认的感受。', sourceText: '害怕'),
 ];
 
 JourneyLevelContent _hangzhouMarriageLevel(
