@@ -3,6 +3,7 @@ import 'package:pinyin/pinyin.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/extended_journey_catalog.dart';
+import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 
 ChineseProficiencyProfile _profile(int level) => ChineseProficiencyProfile(
@@ -197,6 +198,30 @@ void main() {
           );
         }
       }
+    }
+  });
+
+  test('active Gold vocabulary publishes auditable Lv1-Lv10 counts', () {
+    const agent = PhoenixLanguageLevelAgent();
+    for (final journey in [hangzhou, guangzhou, suzhou]) {
+      final evidence = <String>[];
+      for (var level = 1; level <= 10; level++) {
+        final profile = _profile(level);
+        final plan = agent.planFor(profile);
+        final active = resolveAdaptiveJourneyLevel(journey, profile: profile);
+        final visible = '${active.storyParagraphs.join()}${active.discoveries.single.text}';
+        expect(active.words.length, greaterThanOrEqualTo(plan.targetVocabularyCount));
+        expect(active.words.length, lessThanOrEqualTo(plan.maximumVocabularyCount));
+        for (final word in active.words) {
+          expect(visible, contains(word.word), reason: '${journey.id} Lv$level ${word.word}');
+        }
+        evidence.add(
+          'Lv$level=${active.words.length}/${plan.targetVocabularyCount}/${plan.maximumVocabularyCount}',
+        );
+      }
+      // Kept in CI output as exact Founder evidence: actual/target/maximum.
+      // ignore: avoid_print
+      print('GOLD_VOCAB ${journey.id} ${evidence.join(' ')}');
     }
   });
 }
