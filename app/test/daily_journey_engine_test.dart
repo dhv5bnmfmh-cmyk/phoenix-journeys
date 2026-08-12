@@ -3,6 +3,7 @@ import 'package:phoenix_journeys/data/chengdu_kuanzhai_one_pass.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/guangzhou_chen_clan_one_pass.dart';
+import 'package:phoenix_journeys/data/journey_expansion_catalog.dart';
 import 'package:phoenix_journeys/data/world_story_runtime.dart';
 
 void main() {
@@ -66,6 +67,12 @@ void main() {
           journey.discoveries.length,
           guangzhouChenClanOnePassDiscoveries.length,
           reason: journey.id,
+        );
+      } else if (journey.id == suzhouGardenJourney.id) {
+        expect(
+          journey.discoveries.length,
+          10,
+          reason: 'Suzhou publishes one progressive Discovery for each level',
         );
       } else {
         expect(

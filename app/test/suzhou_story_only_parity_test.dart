@@ -36,8 +36,20 @@ void main() {
       '曲桥',
       '山水画',
       '层次',
+      '外婆',
+      '自己',
+      '转弯',
+      '消失',
+      '视线',
+      '抬起',
+      '水面',
+      '回头',
+      '追上',
+      '遮挡',
+      '世界遗产',
+      '保护',
     ]));
-    expect(suzhou.discoveries, hasLength(4));
+    expect(suzhou.discoveries, hasLength(10));
   });
 
   test('Founder-visible Lv1 Lv5 Lv10 use the new Story through the original runtime', () {

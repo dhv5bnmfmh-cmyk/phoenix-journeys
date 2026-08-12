@@ -4,8 +4,8 @@ import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
 import 'package:phoenix_journeys/data/journey_semantic_fingerprint_catalog.dart';
 
 void main() {
-  test('promoted Guangzhou still compares against seven other Gold Journeys', () {
-    expect(approvedGoldSemanticFingerprints, hasLength(8));
+  test('promoted Guangzhou compares against every other Gold Journey', () {
+    expect(approvedGoldSemanticFingerprints, hasLength(9));
     expect(
       approvedGoldSemanticFingerprints[guangzhouChenClanJourneyId],
       same(guangzhouChenClanGoldSemanticFingerprint),
@@ -14,7 +14,7 @@ void main() {
     final gate = evaluateFutureGoldSemanticCandidate(
       guangzhouChenClanGoldSemanticFingerprint,
     );
-    expect(gate.comparisons, hasLength(7));
+    expect(gate.comparisons, hasLength(approvedGoldSemanticFingerprints.length - 1));
     expect(gate.isGoldReady, isTrue);
     expect(gate.status, 'SEMANTIC ANTI-TEMPLATE PASS');
     expect(gate.comparisons.where((item) => item.ruleA), isEmpty);
@@ -30,16 +30,16 @@ void main() {
       isEmpty,
     );
     final active = activeCanonicalGoldStoryText(guangzhouChenClanJourneyId);
-    expect(active, contains('她的第一件原型却在桌面上散开'));
-    expect(active, contains('留下窄窄的纸桥'));
-    expect(active, contains('整张纸没有散开'));
-    expect(active, contains('先问材料怎样连接'));
+    expect(active, contains('她叫刘嘉禾。今天不入镜。'));
+    expect(active, contains('那张她等了三十四年的合照没有拍成'));
+    expect(active, contains('两个人并排走了进去'));
+    expect(active, isNot(contains('纸桥')));
     expect(active, isNot(contains(guangzhouChenClanLegacyOpening)));
     expect(active, isNot(contains(guangzhouChenClanLegacyMetaphor)));
   });
 
-  test('Guangzhou descriptive DNA is the eighth approved Gold record', () {
-    expect(approvedNarrativeDnaCatalog, hasLength(8));
+  test('Guangzhou descriptive DNA is synchronized to current Story', () {
+    expect(approvedNarrativeDnaCatalog, hasLength(9));
     expect(
       approvedNarrativeDnaCatalog.where(
         (record) => record.journeyId == guangzhouChenClanJourneyId,
@@ -55,18 +55,20 @@ void main() {
     );
     expect(
       guangzhouChenClanGoldNarrativeDna.narrativeIdentity,
-      'paper-bridges-translate-relief-across-material-constraints',
+      'birth-mother-refuses-public-kinship-proof-to-protect-daughters-present-name',
     );
   });
 
-  test('eight-Gold audit has 28 unique pairs and zero collision debt', () {
+  test('Gold audit has complete unique pairs and zero collision debt', () {
     final audit = auditApprovedGoldSemanticPairs();
-    expect(audit, hasLength(28));
+    final expectedPairs = approvedGoldSemanticFingerprints.length *
+        (approvedGoldSemanticFingerprints.length - 1) ~/ 2;
+    expect(audit, hasLength(expectedPairs));
     final pairKeys = audit
         .map((item) => <String>[item.journeyA, item.journeyB]..sort())
         .map((pair) => pair.join('|'))
         .toSet();
-    expect(pairKeys, hasLength(28));
+    expect(pairKeys, hasLength(expectedPairs));
     expect(audit.where((item) => item.isCollision), isEmpty);
     expect(
       audit.where(
@@ -93,7 +95,7 @@ void main() {
     );
     expect(
       engine,
-      NarrativeMechanismFamily.materialConstraintForcesCrossMediumReencoding,
+      NarrativeMechanismFamily.publicKinshipProofSacrificedForPresentIdentity,
     );
     expect(protectedEngines, isNot(contains(engine)));
   });

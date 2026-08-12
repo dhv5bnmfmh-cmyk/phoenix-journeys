@@ -3,6 +3,7 @@ import 'daily_journey_experience.dart';
 import 'guangzhou_chen_clan_one_pass.dart';
 import 'hangzhou_west_lake_one_pass.dart';
 import 'journey_data.dart';
+import 'journey_expansion_catalog.dart';
 import 'summer_palace_journey.dart';
 import 'xian_city_wall_one_pass.dart';
 
@@ -194,6 +195,14 @@ JourneyLevelContent resolveJourneyLevel(
       JourneyDifficulty.challenge => 10,
     };
     return guangzhouChenClanOnePassLevelContent(level);
+  }
+  if (experience.id == 'suzhou-humble-administrators-garden') {
+    final level = switch (difficulty) {
+      JourneyDifficulty.easy => 1,
+      JourneyDifficulty.standard => 5,
+      JourneyDifficulty.challenge => 10,
+    };
+    return suzhouGardenCanonicalLevelContent(level);
   }
   if (experience.id == hangzhouWestLakeJourneyId) {
     final level = switch (difficulty) {

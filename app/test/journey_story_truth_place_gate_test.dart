@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
 import 'package:phoenix_journeys/data/journey_semantic_fingerprint_catalog.dart';
 import 'package:phoenix_journeys/data/journey_story_development_gate.dart';
 
@@ -270,10 +271,11 @@ void main() {
     );
   });
 
-  test('existing eight-Gold semantic baseline remains 28 pairs with zero debt', () {
-    expect(approvedGoldSemanticFingerprints.length, 8);
+  test('approved Gold semantic catalog has complete zero-debt pair coverage', () {
+    expect(approvedGoldSemanticFingerprints.length, approvedNarrativeDnaCatalog.length);
     final audit = auditApprovedGoldSemanticPairs();
-    expect(audit.length, 28);
+    final count = approvedGoldSemanticFingerprints.length;
+    expect(audit.length, count * (count - 1) ~/ 2);
     expect(audit.where((comparison) => comparison.isCollision), isEmpty);
   });
 }

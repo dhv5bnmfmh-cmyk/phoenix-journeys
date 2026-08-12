@@ -1,11 +1,14 @@
+import '../agents/phoenix_language_level_agent.dart';
+import '../models/language_proficiency.dart';
+import 'package:pinyin/pinyin.dart';
 import 'batch_one_journey_remediation.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 
 const guangzhouChenClanJourneyId = 'guangzhou-chen-clan-academy';
 const guangzhouChenClanSourceRecordId = 'guangzhou-gov-chen-clan-academy';
-const guangzhouChenClanCanonicalTitle = '纸桥';
-const guangzhouChenClanMemoryAnchor = '纸桥';
+const guangzhouChenClanCanonicalTitle = '不入镜';
+const guangzhouChenClanMemoryAnchor = '匾额下被扣在青砖上的手机';
 const guangzhouChenClanLegacyOpening = '走进广州陈家祠';
 const guangzhouChenClanLegacyMetaphor = '立体图书';
 
@@ -91,7 +94,7 @@ JourneyLevelContent _guangzhouLevel(List<String> paragraphs) => JourneyLevelCont
       expressQuestion: '',
     );
 
-final guangzhouChenClanOnePassLevels = List<JourneyLevelContent>.unmodifiable([
+final guangzhouChenClanLegacyPaperBridgeLevels = List<JourneyLevelContent>.unmodifiable([
   _guangzhouLevel([
     '二十二岁的梁遥和陶艺同学贺真在广州陈家祠看建筑装饰。她只观察，在自己的纸上做原型。第一张纸照着看见的线剪，几个部分马上断开；她想做成一张能拿起来、又看得出原来形体相接方式的作品。梁遥没有接受散开的结果，也没有继续照搬。她在第二张纸上改掉连接，在会断开的地方留下窄窄的纸桥。她提起新原型，整张纸没有散；贺真也认出主要形体怎样相接。新作品成功，不是因为少做一点，而是纸的连接方式被改对了。梁遥把“照着表面复制”划掉，回到工作室拿起新材料，先问它靠什么连接，再开始下一次试验。',
   ]),
@@ -133,6 +136,120 @@ final guangzhouChenClanOnePassLevels = List<JourneyLevelContent>.unmodifiable([
   ]),
 ]);
 
+const _guangzhouLockedParagraphs = <String>[
+  '陈秀仪六十一岁。三十四年前，她把刚出生的女儿交给亲戚收养。女儿如今叫刘嘉禾。两人重新联系半年后，第一次单独约在陈家祠见面。嘉禾事先说好：只见她，不见陈家亲戚，也不拍“认回来”的照片。秀仪答应了，包里却一直放着亲族群寄来的红围巾。',
+  '她们从门厅走进院落。匾额上写着“陈氏书院”，廊与院一层层向里展开。秀仪说起这里由广东各地陈姓宗族合资兴建，又把红围巾取出来，说亲戚们只想在匾额下看一眼。嘉禾没有接，只说：“我姓刘。”秀仪把围巾叠回去，手指在布边停了很久。',
+  '走到下一进院子，亲族群的视频忽然打来。屏幕里挤着几张等候的脸，有人催秀仪把镜头转过去，说在陈氏书院前拍一张，事情就算圆满。秀仪举起手机。嘉禾向廊柱后退了一步，没有躲远，也没有走近。院里游客从两人之间经过。秀仪看见屏幕里的自己，也看见匾额下空着的那一块位置。',
+  '她把手机翻过来，扣在身旁的青砖台上，说：“她叫刘嘉禾。今天不入镜。”群里还在说话，她按掉了声音。那张她等了三十四年的合照没有拍成。过了一会儿，嘉禾先往下一座院子走。秀仪没有去拉她，只把红围巾留在包里，跟到她身边。经过门槛时，嘉禾放慢了一步。两个人并排走了进去。',
+];
+
+ReadingAnnotation _guangzhouLockedAnnotation(
+  String paragraph,
+  (String, String) support,
+) => ReadingAnnotation(
+  pinyin: PinyinHelper.getPinyinE(
+    paragraph,
+    separator: ' ',
+    format: PinyinFormat.WITH_TONE_MARK,
+  ),
+  vietnamese: support.$1,
+  english: support.$2,
+);
+
+JourneyLevelContent _guangzhouLockedLevel(int level) {
+  final story = switch (level) {
+    1 => <String>[
+        '陈秀仪六十一岁，在陈家祠见刘嘉禾。嘉禾是她三十四年前交给亲戚收养的女儿，如今姓刘。亲戚打来视频，要她们在“陈氏书院”匾额下拍认亲照。秀仪举起手机，看见嘉禾退到廊柱旁。她把手机扣在青砖台上，说：“她叫刘嘉禾。今天不入镜。”嘉禾往下一座院子走，过门槛时放慢一步。秀仪跟上去，两个人并排走进院里。',
+      ],
+    2 => <String>[
+        '陈秀仪六十一岁。三十四年前，她把刚出生的女儿交给亲戚收养；女儿如今叫刘嘉禾。两人重新联系半年后，第一次单独约在陈家祠见面。亲族群忽然打来视频，催她们在“陈氏书院”匾额下拍一张认亲照。秀仪举起手机，嘉禾退到廊柱旁。秀仪看了看屏幕，把手机扣在青砖台上：“她叫刘嘉禾。今天不入镜。”她等了三十四年的合照没有拍成。嘉禾先往下一座院子走，经过门槛时放慢一步；秀仪没有拉她，只跟到她身边，并排走进院里。',
+      ],
+    3 => <String>[
+        '陈秀仪六十一岁。三十四年前，她把刚出生的女儿交给亲戚收养。女儿如今叫刘嘉禾。两人重新联系半年后，第一次单独约在陈家祠见面。嘉禾事先说好：只见她，不见陈家亲戚，也不拍“认回来”的照片。秀仪答应了，包里却放着亲族群寄来的红围巾。',
+        '走到“陈氏书院”匾额下，亲族群的视频打来，催秀仪把镜头转向嘉禾。秀仪举起手机，嘉禾向廊柱后退了一步。秀仪最后把手机扣在青砖台上：“她叫刘嘉禾。今天不入镜。”合照没有拍成。嘉禾往下一座院子走，过门槛时放慢一步。秀仪跟上去，与她并排走进院里。',
+      ],
+    4 => <String>[
+        '${_guangzhouLockedParagraphs[0]}她们走进第一进院落，匾额上的“陈氏书院”把两个人的姓隔在同一个抬头里。秀仪取出红围巾，说亲戚们只想看一眼。嘉禾没有接，只说：“我姓刘。”',
+        '下一进院子里，亲族群的视频忽然打来。几张等候的脸催秀仪把镜头转过去，说拍一张事情就算圆满。秀仪举起手机，嘉禾向廊柱后退一步。秀仪看见屏幕里的自己，随即把手机扣在青砖台上：“她叫刘嘉禾。今天不入镜。”合照没有拍成。嘉禾先走向下一座院子，过门槛时放慢一步；秀仪把红围巾留在包里，跟到她身边，并排走进院里。',
+      ],
+    _ => <String>[
+        '${_guangzhouLockedParagraphs[0]}${_guangzhouLockedParagraphs[1]}',
+        '${_guangzhouLockedParagraphs[2]}${_guangzhouLockedParagraphs[3]}${_guangzhouLevelEnrichment(level)}',
+      ],
+  };
+  final support = _guangzhouLockedReadingSupport(level);
+  return JourneyLevelContent(
+    storyParagraphs: List<String>.unmodifiable(story),
+    storyAnnotations: List<ReadingAnnotation>.unmodifiable([
+      for (var index = 0; index < story.length; index++)
+        _guangzhouLockedAnnotation(story[index], support[index]),
+    ]),
+    words: const <WordEntry>[],
+    discoveries: const <DiscoveryEntry>[],
+    wonderQuestion: '',
+    expressQuestion: '',
+  );
+}
+
+List<(String, String)> _guangzhouLockedReadingSupport(int level) => switch (level) {
+  1 => const [(
+      'Trần Tú Nghi, 61 tuổi, gặp Lưu Gia Hòa tại Trần Gia Từ. Gia Hòa là con gái bà đã giao cho họ hàng nuôi ba mươi bốn năm trước và nay mang họ Lưu. Khi họ hàng gọi video đòi một bức ảnh nhận thân dưới biển “Trần Thị Thư Viện”, Tú Nghi giơ điện thoại lên và thấy Gia Hòa lùi về phía cột hành lang. Bà úp điện thoại xuống bệ gạch xanh và nói: “Con bé tên Lưu Gia Hòa. Hôm nay không vào hình.” Gia Hòa đi về sân kế tiếp, chậm lại ở ngưỡng cửa; Tú Nghi theo kịp và hai người bước vào song song.',
+      'Sixty-one-year-old Chen Xiuyi meets Liu Jiahe at the Chen Clan Academy. Jiahe is the daughter she gave to relatives to raise thirty-four years ago and now bears the surname Liu. When relatives call by video demanding a reunion photo beneath the “Chen Clan Academy” plaque, Xiuyi raises the phone and sees Jiahe step back beside a corridor pillar. She turns the phone face-down on a blue-brick ledge and says, “Her name is Liu Jiahe. Today she will not be in the picture.” Jiahe heads toward the next courtyard and slows at the threshold; Xiuyi catches up and they enter side by side.'
+    )],
+  2 => const [(
+      'Trần Tú Nghi, 61 tuổi, đã giao đứa con gái mới sinh cho họ hàng nuôi ba mươi bốn năm trước; cô nay tên Lưu Gia Hòa. Sau nửa năm liên lạc lại, họ lần đầu gặp riêng tại Trần Gia Từ. Một cuộc gọi video từ nhóm họ hàng giục họ chụp ảnh nhận thân dưới biển “Trần Thị Thư Viện”. Tú Nghi giơ điện thoại, Gia Hòa lùi về phía cột hành lang. Bà nhìn màn hình rồi úp máy xuống bệ gạch: “Con bé tên Lưu Gia Hòa. Hôm nay không vào hình.” Bức ảnh bà chờ ba mươi bốn năm đã không được chụp. Gia Hòa đi trước về sân kế tiếp và chậm lại ở ngưỡng cửa; Tú Nghi không kéo cô lại mà bước đến bên cạnh, cùng đi vào.',
+      'Chen Xiuyi is sixty-one. Thirty-four years ago she gave her newborn daughter to relatives to raise; her daughter is now Liu Jiahe. After reconnecting for six months, they meet alone for the first time at the Chen Clan Academy. A video call from the family group urges them to take a reunion photo beneath the “Chen Clan Academy” plaque. Xiuyi raises the phone and Jiahe steps back beside a pillar. Xiuyi looks at the screen, turns the phone face-down on a blue-brick ledge, and says, “Her name is Liu Jiahe. Today she will not be in the picture.” The photograph Xiuyi waited thirty-four years for is not taken. Jiahe walks toward the next courtyard and slows at the threshold; Xiuyi does not pull her back, but joins her and they enter side by side.'
+    )],
+  3 => const [
+      ('Trần Tú Nghi, 61 tuổi, đã giao con gái mới sinh cho họ hàng nuôi ba mươi bốn năm trước. Cô nay tên Lưu Gia Hòa. Sau nửa năm liên lạc lại, họ lần đầu hẹn gặp riêng tại Trần Gia Từ. Gia Hòa nói trước rằng cô chỉ gặp bà, không gặp họ hàng nhà họ Trần và không chụp ảnh “nhận về”. Tú Nghi đồng ý, nhưng trong túi vẫn có chiếc khăn đỏ nhóm họ hàng gửi đến.', 'Chen Xiuyi is sixty-one. Thirty-four years ago she gave her newborn daughter to relatives to raise. Her daughter is now Liu Jiahe. After six months back in contact, they arrange their first private meeting at the Chen Clan Academy. Jiahe has stated that she will meet Xiuyi only, not the Chen relatives, and will not pose for a photo of being “taken back.” Xiuyi agrees, though a red scarf sent by the family group remains in her bag.'),
+      ('Dưới biển “Trần Thị Thư Viện”, nhóm họ hàng gọi video và giục Tú Nghi quay máy sang Gia Hòa. Tú Nghi giơ điện thoại; Gia Hòa lùi về phía cột hành lang. Cuối cùng bà úp máy xuống bệ gạch: “Con bé tên Lưu Gia Hòa. Hôm nay không vào hình.” Bức ảnh không được chụp. Gia Hòa đi về sân kế tiếp và chậm lại ở ngưỡng cửa. Tú Nghi theo kịp, hai người cùng bước vào.', 'Under the “Chen Clan Academy” plaque, a video call from the family group urges Xiuyi to turn the camera toward Jiahe. Xiuyi raises the phone and Jiahe steps back beside a corridor pillar. Xiuyi finally turns the phone face-down on the blue-brick ledge: “Her name is Liu Jiahe. Today she will not be in the picture.” No reunion photo is taken. Jiahe walks toward the next courtyard and slows at the threshold. Xiuyi catches up, and they enter side by side.'),
+    ],
+  4 => const [
+      ('Trần Tú Nghi, 61 tuổi, đã giao con gái mới sinh cho họ hàng nuôi ba mươi bốn năm trước; cô nay tên Lưu Gia Hòa. Sau nửa năm liên lạc lại, họ lần đầu gặp riêng tại Trần Gia Từ. Gia Hòa chỉ đồng ý gặp bà, không gặp họ hàng nhà Trần và không chụp ảnh “nhận về”. Tú Nghi đồng ý nhưng vẫn mang chiếc khăn đỏ họ hàng gửi. Trong sân đầu tiên, biển “Trần Thị Thư Viện” đặt hai họ của họ dưới cùng một mái nhìn. Tú Nghi lấy khăn ra; Gia Hòa không nhận và chỉ nói: “Con họ Lưu.”', 'Chen Xiuyi is sixty-one. Thirty-four years ago she gave her newborn daughter to relatives to raise; her daughter is now Liu Jiahe. After six months back in contact, they meet alone at the Chen Clan Academy. Jiahe has agreed to meet Xiuyi only, not the Chen relatives, and not to pose for a photo of being “taken back.” Xiuyi agrees but carries the family group’s red scarf. In the first courtyard, the “Chen Clan Academy” plaque places their different surnames beneath the same upward glance. Xiuyi offers the scarf; Jiahe does not take it and only says, “My surname is Liu.”'),
+      ('Trong sân kế tiếp, nhóm họ hàng bất ngờ gọi video. Những gương mặt chờ đợi giục Tú Nghi quay máy sang Gia Hòa, nói rằng chỉ cần một bức ảnh là mọi việc sẽ trọn vẹn. Tú Nghi giơ điện thoại; Gia Hòa lùi một bước về cột hành lang. Tú Nghi thấy mình trên màn hình rồi úp máy xuống bệ gạch: “Con bé tên Lưu Gia Hòa. Hôm nay không vào hình.” Bức ảnh không được chụp. Gia Hòa đi trước về sân kế; ở ngưỡng cửa cô chậm lại. Tú Nghi để khăn trong túi, đi đến bên cô và cùng bước vào.', 'In the next courtyard, the family group suddenly calls by video. Waiting faces urge Xiuyi to turn the camera toward Jiahe, saying one photograph will make everything complete. Xiuyi raises the phone; Jiahe steps back toward a pillar. Xiuyi sees herself on the screen, then turns the phone face-down on the blue-brick ledge: “Her name is Liu Jiahe. Today she will not be in the picture.” The photograph is not taken. Jiahe walks toward the next courtyard and slows at its threshold; Xiuyi leaves the scarf in her bag, joins her, and they enter side by side.'),
+    ],
+  _ => <(String, String)>[
+      const ('Trần Tú Nghi, 61 tuổi, đã giao con gái mới sinh cho họ hàng nuôi ba mươi bốn năm trước. Cô nay tên Lưu Gia Hòa. Sau nửa năm liên lạc lại, họ lần đầu gặp riêng tại Trần Gia Từ. Gia Hòa nói rõ: chỉ gặp bà, không gặp họ hàng nhà Trần và không chụp ảnh “nhận về”. Tú Nghi đồng ý nhưng vẫn mang chiếc khăn đỏ họ hàng gửi. Qua tiền sảnh và các lớp sân dưới biển “Trần Thị Thư Viện”, Tú Nghi kể nơi này do các dòng họ Trần ở Quảng Đông góp vốn xây dựng rồi đưa khăn ra. Gia Hòa không nhận: “Con họ Lưu.” Tú Nghi gấp khăn lại, ngón tay dừng lâu trên mép vải.', 'Chen Xiuyi is sixty-one. Thirty-four years ago she gave her newborn daughter to relatives to raise. Her daughter is now Liu Jiahe. After six months back in contact, they meet alone for the first time at the Chen Clan Academy. Jiahe has made her terms clear: she will meet Xiuyi only, not the Chen relatives, and will not pose for a photo of being “taken back.” Xiuyi agrees but keeps a red scarf sent by the family group in her bag. As they pass through the entrance hall and layered courtyards beneath the “Chen Clan Academy” plaque, Xiuyi explains that Chen lineages across Guangdong pooled funds to build it and takes out the scarf. Jiahe does not accept it: “My surname is Liu.” Xiuyi folds it away, her fingers lingering on its edge.'),
+      _guangzhouLockedSecondSupport(level),
+    ],
+};
+
+(String, String) _guangzhouLockedSecondSupport(int level) {
+  final extraVi = switch (level) {
+    6 => ' Qua ngưỡng cửa, Tú Nghi không nhìn điện thoại nữa; tấm biển ở lại phía sau, còn tên Gia Hòa ở lại trong chính câu nói của bà.',
+    7 => ' Qua ngưỡng cửa, Tú Nghi không nhìn điện thoại nữa. Bà từng nghĩ một bức ảnh có thể bù lại khởi đầu của ba mươi bốn năm, nhưng khoảng trống vẫn còn. Tấm biển ở lại phía sau, tên Gia Hòa ở lại trong lời bà.',
+    8 => ' Qua ngưỡng cửa, Tú Nghi không nhìn điện thoại nữa. Bức ảnh không thể bù khởi đầu đã mất; họ hàng có thể tiếp tục chờ, còn Gia Hòa không phải đổi họ hay vào hình để chứng minh cuộc gặp. Tấm biển ở lại phía sau, tên cô ở lại trong lời Tú Nghi.',
+    9 => ' Qua ngưỡng cửa, Tú Nghi không nhìn điện thoại nữa. Bức ảnh không thể bù khởi đầu đã mất; họ hàng có thể chờ, còn Gia Hòa không phải đổi họ hay vào hình. Những lớp sân không dẫn thẳng tới một kết thúc trọn vẹn, mà buộc họ quyết định lại khoảng cách ở mỗi ngưỡng cửa. Tấm biển ở lại phía sau, tên Gia Hòa ở lại trong lời Tú Nghi.',
+    10 => ' Qua ngưỡng cửa, Tú Nghi không nhìn điện thoại nữa. Bà từ bỏ thể diện của việc chứng minh với họ hàng rằng “con gái đã trở về”; Gia Hòa không cần đổi họ, quàng khăn đỏ hay đứng trước ống kính. Những lớp sân không dẫn thẳng tới một kết thúc trọn vẹn, mà buộc họ quyết định lại khoảng cách ở mỗi ngưỡng cửa. Điện thoại im trong tay, khăn vẫn trong túi. Tấm biển ở lại phía sau; phía trước, họ chỉ tiếp tục đi song song, không ai nói “về nhà”.',
+    _ => '',
+  };
+  final extraEn = switch (level) {
+    6 => ' Crossing the threshold, Xiuyi does not look at the phone again; the plaque remains behind them, while Jiahe’s name remains in Xiuyi’s own sentence.',
+    7 => ' Crossing the threshold, Xiuyi does not look at the phone again. She once thought a photograph could supply a beginning missing for thirty-four years, but the blank remains. The plaque stays behind them, and Jiahe’s name remains in her own sentence.',
+    8 => ' Crossing the threshold, Xiuyi does not look at the phone again. A photograph cannot restore the missing beginning; the relatives may keep waiting, but Jiahe need not change her surname or enter a picture to prove recognition. The plaque stays behind, and Jiahe’s name remains in Xiuyi’s sentence.',
+    9 => ' Crossing the threshold, Xiuyi does not look at the phone again. A photograph cannot restore the missing beginning; the relatives may wait, but Jiahe need not change her surname or enter the frame. The sequence of courtyards offers no direct route to completion, only a new decision about distance at each threshold. The plaque stays behind, and Jiahe’s name remains in Xiuyi’s sentence.',
+    10 => ' Crossing the threshold, Xiuyi does not look at the phone again. She gives up the dignity of proving to the family that “her daughter has returned”; Jiahe need not change her surname, wear the red scarf, or enter the frame. The layered courtyards offer no direct route to completion, only renewed choices about distance at each threshold. The phone is quiet in Xiuyi’s hand and the scarf remains packed away. The plaque stays behind; ahead, they simply continue side by side, and neither says “home.”',
+    _ => '',
+  };
+  return (
+    'Trong sân kế tiếp, nhóm họ hàng gọi video, những gương mặt chờ đợi đòi một bức ảnh dưới biển để mọi chuyện “trọn vẹn”. Tú Nghi giơ máy; Gia Hòa lùi về phía cột, không bỏ đi cũng không bước gần. Du khách đi qua khoảng giữa họ. Tú Nghi nhìn thấy mình trên màn hình và khoảng trống dưới biển. Bà úp điện thoại xuống bệ gạch: “Con bé tên Lưu Gia Hòa. Hôm nay không vào hình,” rồi tắt tiếng. Bức ảnh bà chờ ba mươi bốn năm không được chụp. Gia Hòa đi trước; Tú Nghi không kéo cô lại, để khăn trong túi và theo đến bên cạnh. Ở ngưỡng cửa, Gia Hòa chậm một bước và hai người cùng bước vào.$extraVi',
+    'In the next courtyard, the family group calls by video and waiting faces demand a photograph beneath the plaque so everything can be “complete.” Xiuyi raises the phone; Jiahe steps toward a pillar, neither leaving nor coming closer. Visitors pass through the space between them. Xiuyi sees herself on the screen and the empty place beneath the plaque. She turns the phone face-down on the blue-brick ledge: “Her name is Liu Jiahe. Today she will not be in the picture,” and mutes the call. The photograph she waited thirty-four years for is not taken. Jiahe walks ahead; Xiuyi does not pull her back, leaves the scarf in her bag, and joins her. At the threshold Jiahe slows by one step, and they enter together.$extraEn',
+  );
+}
+
+String _guangzhouLevelEnrichment(int level) => switch (level) {
+  6 => '陈秀仪走过门槛时没有再看手机。匾额仍在身后，嘉禾的名字留在她自己的那句话里。',
+  7 => '陈秀仪走过门槛时没有再看手机。她曾以为一张合照能替三十四年补上一个开头，如今那块空白仍在。匾额留在身后，嘉禾的名字留在她自己的那句话里。',
+  8 => '陈秀仪走过门槛时没有再看手机。她曾以为一张合照能替三十四年补上一个开头，如今那块空白仍在。亲族群可以继续等，嘉禾却不必用改姓或入镜来证明相认。匾额留在身后，嘉禾的名字留在她自己的那句话里。',
+  9 => '陈秀仪走过门槛时没有再看手机。她曾以为一张合照能替三十四年补上一个开头，如今那块空白仍在。亲族群可以继续等，嘉禾却不必用改姓或入镜来证明相认。陈家祠一进又一进的院落没有给她们一条直达圆满的路，只让两个人在每一道门槛前重新决定彼此能靠多近。匾额留在身后，嘉禾的名字留在秀仪自己的那句话里。',
+  10 => '陈秀仪走过门槛时没有再看手机。她曾以为一张合照能替三十四年补上一个开头，如今那块空白仍在；她付出的不是一时的难堪，而是放弃向亲族证明“女儿已经回来”的体面。亲族群可以继续等，嘉禾却不必用改姓、围红围巾或站进镜头来证明相认。陈家祠一进又一进的院落没有给她们一条直达圆满的路，只让两个人在每一道门槛前重新决定彼此能靠多近。手机安静地留在掌心，红围巾也没有拿出来。匾额留在身后，嘉禾的名字留在秀仪自己的那句话里；前面的院子里，两个人仍只并排走着，没有谁先说“回家”。',
+  _ => '',
+};
+
+final guangzhouChenClanOnePassLevels = List<JourneyLevelContent>.unmodifiable([
+  for (var level = 1; level <= 10; level++) _guangzhouLockedLevel(level),
+]);
+
 WordEntry _word(
   String word,
   String pinyin,
@@ -151,7 +268,7 @@ WordEntry _word(
       symbol: symbol,
     );
 
-final guangzhouChenClanOnePassWords = List<WordEntry>.unmodifiable([
+final guangzhouChenClanLegacyPaperBridgeWords = List<WordEntry>.unmodifiable([
   _word('陈家祠', 'Chénjiācí', '名词（专名）', '广州的历史建筑与广东民间工艺博物馆所在地。', 'Trần Gia Từ', 'Chen Clan Academy / Chen Clan Ancestral Hall', '🏯'),
   _word('原型', 'yuánxíng', '名词', '为了测试想法先做出的试验版本。', 'nguyên mẫu', 'prototype', '🧪'),
   _word('断开', 'duànkāi', '动词', '原来连着的部分分开了。', 'bị đứt; tách rời', 'to disconnect or break apart', '✂️'),
@@ -170,7 +287,39 @@ final guangzhouChenClanOnePassWords = List<WordEntry>.unmodifiable([
   _word('重新编码', 'chóngxīn biānmǎ', '动词', '为了新的媒介重新安排信息与连接方式。', 'mã hóa lại', 'to re-encode', '🧠'),
 ]);
 
-const guangzhouChenClanWordFirstAppears = <String, int>{
+final guangzhouChenClanOnePassWords = List<WordEntry>.unmodifiable([
+  _word('陈家祠', 'Chénjiācí', '名词（专名）', '广州的历史建筑与广东民间工艺博物馆所在地。', 'Trần Gia Từ', 'Chen Clan Academy / Chen Clan Ancestral Hall', '🏯'),
+  _word('陈氏书院', 'Chénshì Shūyuàn', '名词（专名）', '陈家祠匾额所题的历史名称。', 'Trần Thị Thư Viện', 'historic name inscribed at the complex', '📜'),
+  _word('合资', 'hézī', '动词', '不同群体共同出资。', 'cùng góp vốn', 'to pool funds', '🤝'),
+  _word('宗族', 'zōngzú', '名词', '以共同姓氏和亲缘联系形成的群体。', 'tông tộc', 'lineage group', '👥'),
+  _word('收养', 'shōuyǎng', '动词', '依法或长期承担非亲生孩子的养育责任。', 'nhận nuôi', 'to adopt', '🏠'),
+  _word('亲生', 'qīnshēng', '形容词', '有出生血缘关系的。', 'ruột thịt', 'biological', '🫶'),
+  _word('边界', 'biānjiè', '名词', '一个人明确表示不愿被越过的范围。', 'ranh giới', 'boundary', '〰️'),
+  _word('入镜', 'rùjìng', '动词', '进入照片或视频画面。', 'vào khuôn hình', 'to appear on camera', '📷'),
+  _word('匾额', 'biǎné', '名词', '悬挂在建筑上的题字牌。', 'hoành phi', 'inscribed plaque', '🪧'),
+  _word('院落', 'yuànluò', '名词', '由房屋和围合空间组成的院子。', 'sân trong', 'courtyard', '🏛️'),
+  _word('门槛', 'ménkǎn', '名词', '门框下方横着的构件。', 'ngưỡng cửa', 'threshold', '🚪'),
+  _word('体面', 'tǐmiàn', '名词/形容词', '在别人眼中显得完整、合宜的样子。', 'thể diện', 'social dignity or appearances', '🎭'),
+  _word('共同', 'gòngtóng', '副词/形容词', '由多方一起完成或拥有。', 'cùng nhau', 'joint; shared', '🤝'),
+  _word('兴建', 'xīngjiàn', '动词', '组织力量建造。', 'xây dựng', 'to construct', '🏗️'),
+  _word('合族祠', 'hézúcí', '名词', '由同姓不同支系共同建立的祠堂。', 'từ đường chung của tông tộc', 'joint lineage hall', '🏛️'),
+  _word('三路三进', 'sānlù sānjìn', '名词', '横向三路、纵向三进的建筑组织。', 'bố cục ba trục ba lớp', 'three-route, three-depth layout', '🧭'),
+  _word('廊道', 'lángdào', '名词', '连接厅堂和院落的有顶通道。', 'hành lang', 'corridor', '🚶'),
+  _word('岭南工艺', 'Lǐngnán gōngyì', '名词', '岭南地区形成的传统装饰与制作技艺。', 'thủ công Lĩnh Nam', 'Lingnan craftsmanship', '🎨'),
+  _word('木雕', 'mùdiāo', '名词', '在木材上雕刻形成的装饰工艺。', 'chạm khắc gỗ', 'wood carving', '🪵'),
+  _word('砖雕', 'zhuāndiāo', '名词', '在砖材上雕刻形成的建筑装饰工艺。', 'chạm khắc gạch', 'brick carving', '🧱'),
+  _word('博物馆', 'bówùguǎn', '名词', '收藏、研究和展示文化对象的机构。', 'bảo tàng', 'museum', '🏛️'),
+  _word('民间工艺', 'mínjiān gōngyì', '名词', '在地方社会中传承和发展的制作与装饰技艺。', 'nghề thủ công dân gian', 'folk craftsmanship', '🧵'),
+  _word('收藏', 'shōucáng', '动词', '保存具有历史或文化价值的物件。', 'sưu tầm và lưu giữ', 'to collect and preserve', '🗃️'),
+  _word('公众', 'gōngzhòng', '名词', '社会中的普通人群。', 'công chúng', 'the public', '👥'),
+  _word('文物保护', 'wénwù bǎohù', '名词', '维护历史文化遗产的工作。', 'bảo tồn di tích', 'heritage conservation', '🛡️'),
+  _word('整体格局', 'zhěngtǐ géjú', '名词', '建筑各部分共同形成的完整空间组织。', 'bố cục tổng thể', 'overall spatial layout', '🧭'),
+  _word('公共文化', 'gōnggòng wénhuà', '名词', '面向社会公众提供的文化服务与活动。', 'văn hóa công cộng', 'public culture', '🏛️'),
+  _word('名称', 'míngchēng', '名词', '一个地点或事物使用的名字。', 'tên gọi', 'name; designation', '🏷️'),
+  _word('私祠', 'sīcí', '名词', '由一户或单一支系使用的私人祠堂。', 'từ đường riêng', 'private ancestral hall', '🏠'),
+]);
+
+const guangzhouChenClanLegacyPaperBridgeWordFirstAppears = <String, int>{
   '陈家祠': 1,
   '原型': 1,
   '断开': 1,
@@ -189,7 +338,7 @@ const guangzhouChenClanWordFirstAppears = <String, int>{
   '重新编码': 8,
 };
 
-const guangzhouChenClanCuratedWordNamesByLevel = <int, Set<String>>{
+const guangzhouChenClanLegacyPaperBridgeCuratedWordNamesByLevel = <int, Set<String>>{
   1: {'陈家祠', '原型', '断开', '纸桥', '连接'},
   2: {'陈家祠', '原型', '断开', '纸桥', '连接', '材料'},
   3: {'陈家祠', '原型', '断开', '纸桥', '连接', '材料', '轮廓'},
@@ -202,7 +351,7 @@ const guangzhouChenClanCuratedWordNamesByLevel = <int, Set<String>>{
   10: {'陈家祠', '原型', '断开', '纸桥', '连接', '材料', '轮廓', '版画', '单张', '识别', '关系', '结构', '翻译', '完整', '观察', '重新编码'},
 };
 
-final guangzhouChenClanWordTraces = List<RemediatedWordTrace>.unmodifiable([
+final guangzhouChenClanLegacyPaperBridgeWordTraces = List<RemediatedWordTrace>.unmodifiable([
   const RemediatedWordTrace(word: '陈家祠', eventId: 'GZ-E1-observation', usage: 'Lv1 首次出现。', sourceText: '二十二岁的梁遥和陶艺同学贺真在广州陈家祠看建筑装饰。'),
   const RemediatedWordTrace(word: '原型', eventId: 'GZ-E2-first-failure', usage: 'Lv1 首次出现。', sourceText: '她只观察，在自己的纸上做原型。'),
   const RemediatedWordTrace(word: '断开', eventId: 'GZ-E2-first-failure', usage: 'Lv1 首次出现。', sourceText: '第一张纸照着看见的线剪，几个部分马上断开；她想做成一张能拿起来、又看得出原来形体相接方式的作品。'),
@@ -221,6 +370,33 @@ final guangzhouChenClanWordTraces = List<RemediatedWordTrace>.unmodifiable([
   const RemediatedWordTrace(word: '重新编码', eventId: 'GZ-E4-reencode', usage: 'Lv8 首次出现。', sourceText: '她把第二张纸当成一种需要被翻译的媒介：主要形体的相对关系保留，但连接方式重新编码，在会断开的关键位置留下纸桥。'),
 ]);
 
+const guangzhouChenClanWordFirstAppears = <String, int>{
+  '陈家祠': 1, '陈氏书院': 2, '收养': 2, '亲生': 2, '入镜': 1,
+  '匾额': 3, '院落': 3, '门槛': 4, '宗族': 5, '合资': 5,
+  '边界': 6, '体面': 8, '共同': 1, '兴建': 1, '合族祠': 4,
+  '三路三进': 7, '廊道': 7, '岭南工艺': 8, '木雕': 8,
+  '砖雕': 8, '博物馆': 9, '民间工艺': 9, '收藏': 9, '公众': 9,
+  '文物保护': 10, '整体格局': 10, '公共文化': 10,
+  '名称': 2,
+  '私祠': 3,
+};
+
+final guangzhouChenClanCuratedWordNamesByLevel = <int, Set<String>>{
+  for (var level = 1; level <= 10; level++)
+    level: <String>{
+      for (final entry in guangzhouChenClanWordFirstAppears.entries)
+        if (entry.value <= level) entry.key,
+    },
+};
+
+final guangzhouChenClanWordTraces = List<RemediatedWordTrace>.unmodifiable([
+  const RemediatedWordTrace(word: '陈家祠', eventId: 'GZ-E1-private-meeting', usage: 'Lv1 首次出现。', sourceText: '陈秀仪六十一岁，在陈家祠见三十四岁的刘嘉禾。'),
+  const RemediatedWordTrace(word: '入镜', eventId: 'GZ-E4-phone-down', usage: 'Lv1 首次出现。', sourceText: '她叫刘嘉禾。今天不入镜。'),
+  const RemediatedWordTrace(word: '陈氏书院', eventId: 'GZ-E2-lineage-pressure', usage: 'Lv2 首次出现。', sourceText: '亲戚打来视频，要她们在“陈氏书院”匾额下拍认亲照。'),
+  const RemediatedWordTrace(word: '匾额', eventId: 'GZ-E2-lineage-pressure', usage: 'Lv3 首次出现。', sourceText: '匾额上写着“陈氏书院”。'),
+  const RemediatedWordTrace(word: '门槛', eventId: 'GZ-E6-side-by-side', usage: 'Lv4 首次出现。', sourceText: '经过门槛时，嘉禾放慢了一步。'),
+]);
+
 DiscoveryEntry _discovery(
   String text, {
   required String pinyin,
@@ -229,13 +405,17 @@ DiscoveryEntry _discovery(
   required String english,
 }) => DiscoveryEntry(
       text: text,
-      pinyin: pinyin,
+      pinyin: PinyinHelper.getPinyinE(
+        text,
+        separator: ' ',
+        format: PinyinFormat.WITH_TONE_MARK,
+      ),
       simpleChinese: simpleChinese,
       vietnamese: vietnamese,
       english: english,
     );
 
-final guangzhouChenClanDiscoverySpecs = List<GuangzhouDiscoverySpec>.unmodifiable([
+final guangzhouChenClanLegacyPaperBridgeDiscoverySpecs = List<GuangzhouDiscoverySpec>.unmodifiable([
   GuangzhouDiscoverySpec(
     level: 1,
     title: '陈家祠与陈氏书院',
@@ -348,6 +528,34 @@ final guangzhouChenClanDiscoverySpecs = List<GuangzhouDiscoverySpec>.unmodifiabl
   ),
 ]);
 
+DiscoveryEntry _guangzhouActiveDiscovery(int level) => switch (level) {
+  1 => _discovery('陈家祠匾额题“陈氏书院”，由广东各地陈姓宗族共同出资兴建。', pinyin: 'Chénjiācí biǎné tí Chénshì Shūyuàn, yóu Guǎngdōng gèdì Chén xìng zōngzú gòngtóng chūzī xīngjiàn.', simpleChinese: '广东各地陈姓宗族共同兴建陈氏书院。', vietnamese: 'Tấm biển ở Trần Gia Từ đề “Trần Thị Thư Viện”; các dòng họ Trần từ nhiều nơi thuộc Quảng Đông đã cùng góp tiền xây dựng.', english: 'The plaque at the Chen Clan Ancestral Hall reads “Chen Clan Academy”; Chen lineages from across Guangdong jointly funded and built it.'),
+  2 => _discovery('“陈家祠”是常用名称，“陈氏书院”是匾额所题名称；两个名称保留了祠堂与书院相连的历史身份。', pinyin: 'Chénjiācí shì chángyòng míngchēng, Chénshì Shūyuàn shì biǎné suǒ tí míngchēng.', simpleChinese: '陈家祠也叫陈氏书院，名称反映它的复合身份。', vietnamese: 'Tên Trần Gia Từ và Trần Thị Thư Viện lưu giữ hai lớp căn tính lịch sử.', english: 'The names Chen Clan Ancestral Hall and Chen Clan Academy preserve its linked hall-and-academy identity.'),
+  3 => _discovery('它不是一户人家的私祠，而是广东不同地方陈姓宗族合资建立的公共宗族空间。', pinyin: 'Tā bú shì yí hù rénjiā de sīcí, ér shì bùtóng dìfāng Chén xìng zōngzú hézī jiànlì de kōngjiān.', simpleChinese: '这里由不同地方的陈姓宗族合资建立。', vietnamese: 'Đây không phải từ đường của một gia đình mà là không gian chung do nhiều dòng họ Trần góp vốn.', english: 'It was not one household’s private hall but a shared lineage space funded by Chen groups from different places.'),
+  4 => _discovery('陈家祠又称陈氏书院，是多地陈姓宗族共同兴建的合族祠，兼有祭祀、联络与书院身份。', pinyin: 'Chénjiācí yòu chēng Chénshì Shūyuàn, shì duōdì Chén xìng zōngzú gòngtóng xīngjiàn de hézúcí.', simpleChinese: '合族祠把多个陈姓支系联系在同一空间。', vietnamese: 'Trần Gia Từ, còn gọi là Trần Thị Thư Viện, là từ đường chung do nhiều dòng họ Trần cùng xây dựng, đồng thời phục vụ tế tự, liên lạc dòng họ và chức năng thư viện.', english: 'The Chen Clan Ancestral Hall, also called the Chen Clan Academy, was jointly built by Chen lineages as a shared lineage hall with ritual, networking, and academy functions.'),
+  5 => _discovery('主体建筑以横向三路、纵向三进组织厅堂与院落，人们经过门、堂、院逐层深入。', pinyin: 'Zhǔtǐ jiànzhù yǐ héngxiàng sānlù, zòngxiàng sānjìn zǔzhī tīngtáng yǔ yuànluò.', simpleChinese: '三路三进让厅堂和院落有清楚层次。', vietnamese: 'Kiến trúc chính dùng ba trục ngang và ba lớp dọc để tổ chức sảnh cùng sân; người đi qua cửa, sảnh và sân để tiến dần vào từng lớp.', english: 'The principal buildings use three transverse routes and three successive depths to organize halls and courtyards, leading people inward layer by layer through gates, halls, and courts.'),
+  6 => _discovery('厅堂、院落和廊道相互连接：院落引入光线和空气，廊道把不同建筑单元连成连续路线。', pinyin: 'Tīngtáng, yuànluò hé lángdào xiānghù liánjiē.', simpleChinese: '院落提供开敞空间，廊道连接建筑。', vietnamese: 'Sân đưa ánh sáng và không khí vào, còn hành lang nối các đơn vị kiến trúc.', english: 'Courtyards admit light and air, while corridors connect the building units into continuous routes.'),
+  7 => _discovery('三路三进并不是数字标签：它把厅堂、院落、廊道和出入口组织成有主次、有前后的建筑群。', pinyin: 'Sānlù sānjìn bǎ tīngtáng, yuànluò, lángdào hé chūrùkǒu zǔzhī chéng jiànzhùqún.', simpleChinese: '三路三进组织建筑的主次和前后关系。', vietnamese: 'Bố cục ba trục ba lớp tạo quan hệ chính-phụ và trước-sau trong quần thể.', english: 'The three-route, three-depth plan establishes hierarchy and front-to-back relationships across the complex.'),
+  8 => _discovery('木雕、砖雕、石雕、陶塑、灰塑、铸造和彩绘等岭南工艺集中在建筑不同部位，材料与位置共同参与表达。', pinyin: 'Mùdiāo, zhuāndiāo, shídiāo, táosù, huīsù, zhùzào hé cǎihuì děng Lǐngnán gōngyì jízhōng zài jiànzhù bùtóng bùwèi.', simpleChinese: '多种岭南工艺分布在建筑不同位置。', vietnamese: 'Các nghề thủ công Lĩnh Nam như chạm gỗ, gạch, đá, tượng gốm, phù điêu vữa, đúc và vẽ màu tập trung ở những bộ phận kiến trúc khác nhau; vật liệu và vị trí cùng tham gia biểu đạt.', english: 'Lingnan crafts including wood, brick, and stone carving, ceramic and lime sculpture, casting, and painting occupy different architectural parts; material and position work together in the expression.'),
+  9 => _discovery('今天陈家祠也是广东民间工艺博物馆所在地；历史建筑本身与馆内收藏展示共同帮助公众认识广东传统工艺。', pinyin: 'Jīntiān Chénjiācí yě shì Guǎngdōng Mínjiān Gōngyì Bówùguǎn suǒzàidì.', simpleChinese: '陈家祠既是历史建筑，也是今天的民间工艺博物馆。', vietnamese: 'Ngày nay Trần Gia Từ cũng là nơi đặt Bảo tàng Mỹ thuật Dân gian Quảng Đông; bản thân công trình lịch sử cùng các bộ sưu tập và trưng bày trong bảo tàng giúp công chúng tìm hiểu nghề thủ công truyền thống Quảng Đông.', english: 'Today the Chen Clan Ancestral Hall also houses the Guangdong Folk Arts Museum; the historic building itself and the museum’s collections and displays jointly help the public understand Guangdong’s traditional crafts.'),
+  _ => _discovery('陈家祠是全国重点文物保护单位。文物保护既要维护三路三进、厅堂、院落和廊道组成的整体格局，也要保存建筑上的岭南工艺及其博物馆公共文化功能。', pinyin: 'Chénjiācí shì Quánguó Zhòngdiǎn Wénwù Bǎohù Dānwèi.', simpleChinese: '保护陈家祠要同时保护整体建筑格局、岭南工艺和公共文化功能。', vietnamese: 'Trần Gia Từ là đơn vị bảo vệ di tích trọng điểm cấp quốc gia. Công tác bảo tồn phải duy trì cả bố cục tổng thể gồm ba trục ba lớp, sảnh, sân và hành lang, đồng thời gìn giữ thủ công Lĩnh Nam trên kiến trúc và chức năng văn hóa công cộng của bảo tàng.', english: 'The Chen Clan Ancestral Hall is a Major Historical and Cultural Site Protected at the National Level. Conservation must maintain the complete three-route, three-depth layout of halls, courtyards, and corridors while also preserving its architectural Lingnan craftsmanship and the museum’s public cultural function.'),
+};
+
+final guangzhouChenClanDiscoverySpecs = List<GuangzhouDiscoverySpec>.unmodifiable([
+  for (var level = 1; level <= 10; level++)
+    GuangzhouDiscoverySpec(
+      level: level,
+      title: const ['共同兴建', '两个名称', '不是一户私祠', '合族祠与书院', '三路三进', '院落与廊道', '空间主次', '岭南工艺', '博物馆功能', '整体保护'][level - 1],
+      storyLink: '说明共同兴建、复合功能与院落组织，不复述虚构母女剧情。',
+      entry: _guangzhouActiveDiscovery(level),
+      keyTerms: level <= 3 ? const ['陈氏书院', '合资', '宗族'] : level <= 6 ? const ['合族祠', '书院', '共同兴建'] : const ['三路三进', '院落', '廊道'],
+      learnerInsight: '一个共同姓氏空间由多地群体、复合功能与层层院落共同形成。',
+      check: '为什么这里不能只理解成一户人家的祠堂？',
+      answer: '它由广东各地陈姓宗族共同兴建，匾额又题“陈氏书院”。',
+      sourceIds: const [guangzhouChenClanSourceRecordId],
+    ),
+]);
+
 final guangzhouChenClanOnePassDiscoveries = List<DiscoveryEntry>.unmodifiable(
   guangzhouChenClanDiscoverySpecs.map((spec) => spec.entry),
 );
@@ -357,42 +565,42 @@ final guangzhouChenClanChallengeSpecs = List<GuangzhouChallengeSpec>.unmodifiabl
     GuangzhouChallengeSpec(
       level: level,
       type: 'paragraphRebuild',
-      prompt: '第一件纸原型为什么会物理失败？',
+      prompt: '刘嘉禾在见面前提出了什么边界？',
       anchor: guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.first,
-      answer: '梁遥逐线照搬表面轮廓，把纸上承担连接的部分也切掉，因此几个部分断开。',
+      answer: '她只见陈秀仪，不见亲戚，也不拍公开认亲照片。',
     ),
     GuangzhouChallengeSpec(
       level: level,
       type: 'grammarRepair',
-      prompt: '梁遥在第二张纸上具体改变了什么？',
+      prompt: '亲戚要求公开合照时，陈秀仪做了什么？',
       anchor: guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.last,
-      answer: '她停止逐线照搬，在会断开的地方保留纸桥，用纸的结构需要重新编码连接。',
+      answer: '她把手机扣下，叫出刘嘉禾现在的名字，并拒绝让她入镜。',
     ),
     GuangzhouChallengeSpec(
       level: level,
       type: 'missingSentence',
-      prompt: '第二件原型怎样证明跨材料翻译成功？',
+      prompt: '故事结尾怎样表明关系仍愿意继续？',
       anchor: guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.last,
-      answer: '梁遥提起原型时整张纸保持连接，贺真又能识别原先重要的形体关系。',
+      answer: '刘嘉禾在门槛前放慢一步，两个人并排走进下一座院子。',
     ),
   ],
 ]);
 
 final guangzhouChenClanReflectionPrompts = List<String>.unmodifiable([
   for (var level = 1; level <= 10; level++)
-    '为什么纸桥不是对原装饰的错误添加，而是梁遥把关系翻译到纸这种材料中的必要连接？',
+    '陈秀仪为什么把手机扣下，并坚持说“她叫刘嘉禾”？',
 ]);
 
 final guangzhouChenClanWritingPrompts = List<String>.unmodifiable([
   for (var level = 1; level <= 10; level++)
-    '请用两到三句话写出“第一件断开 → 改变连接 → 第二件完整且可识别”的因果过程。',
+    '请用两到三句话说明陈秀仪失去了什么，又保住了刘嘉禾的什么。',
 ]);
 
 final guangzhouChenClanDiscoveryTraces = List<RemediatedDiscoveryTrace>.unmodifiable([
   for (var level = 1; level <= 10; level++)
     RemediatedDiscoveryTrace(
       discoveryIndex: level - 1,
-      storyEventIds: const ['GZ-E1-observation', 'GZ-E3-medium-conflict'],
+      storyEventIds: const ['GZ-E2-lineage-pressure', 'GZ-E3-public-demand'],
       sourceIds: const [guangzhouChenClanSourceRecordId],
     ),
 ]);
@@ -402,11 +610,11 @@ final guangzhouChenClanChallengeTraces = List<RemediatedChallengeTrace>.unmodifi
     RemediatedChallengeTrace(
       type: spec.type,
       storyEventIds: const [
-        'GZ-E2-first-failure',
-        'GZ-E3-medium-conflict',
-        'GZ-E4-reencode',
-        'GZ-E5-second-prototype',
-        'GZ-E6-legibility',
+        'GZ-E1-private-meeting',
+        'GZ-E2-lineage-pressure',
+        'GZ-E3-public-demand',
+        'GZ-E4-phone-down',
+        'GZ-E6-side-by-side',
       ],
       anchor: spec.anchor,
     ),
@@ -414,35 +622,35 @@ final guangzhouChenClanChallengeTraces = List<RemediatedChallengeTrace>.unmodifi
 
 const guangzhouChenClanMemory = <RemediatedMemoryReview>[
   RemediatedMemoryReview(
-    category: '失败',
-    prompt: '第一件原型为什么散开？',
-    answer: '梁遥逐线复制轮廓，把纸上必须承担连接的部分切掉了。',
-    storyEventIds: ['GZ-E2-first-failure', 'GZ-E3-medium-conflict'],
+    category: '边界',
+    prompt: '刘嘉禾在见面前说清了什么？',
+    answer: '她只愿意见陈秀仪，不见陈家亲戚，也不拍“认回来”的照片。',
+    storyEventIds: ['GZ-E1-private-meeting'],
   ),
   RemediatedMemoryReview(
     category: '选择',
-    prompt: '纸桥代表梁遥做了什么改变？',
-    answer: '她不再复制每条表面线，而按纸的结构要求重新编码连接。',
-    storyEventIds: ['GZ-E4-reencode'],
+    prompt: '亲戚催拍照时，陈秀仪做了什么？',
+    answer: '她把手机扣在青砖台上，说“她叫刘嘉禾。今天不入镜”。',
+    storyEventIds: ['GZ-E4-phone-down'],
   ),
   RemediatedMemoryReview(
-    category: '证明',
-    prompt: '第二件原型怎样证明方法有效？',
-    answer: '它被提起后仍是一整张，贺真又能识别关键形体关系。',
-    storyEventIds: ['GZ-E5-second-prototype', 'GZ-E6-legibility'],
+    category: '结尾',
+    prompt: '没有合照以后，两个人怎样离开那座院子？',
+    answer: '刘嘉禾在门槛前放慢一步，陈秀仪跟到身边，两个人并排走进去。',
+    storyEventIds: ['GZ-E6-side-by-side'],
   ),
 ];
 
 const guangzhouChenClanCompletion = RemediatedCompletion(
-  journeySummary: '梁遥让第一件逐线复制的纸原型失败，再用纸桥重新编码连接，使第二件单张纸既完整又保持关键关系可识别。',
-  achievement: '跨材料关系翻译者',
+  journeySummary: '陈秀仪拒绝亲戚要求的认亲合照，承认女儿现在叫刘嘉禾，也接受关系不能靠一张公开照片补回。',
+  achievement: '名字边界守护者',
   memoryAnchor: guangzhouChenClanMemoryAnchor,
-  challengeReward: '纸桥结构标记',
+  challengeReward: '青砖静屏标记',
   journeyCompletion:
-      '《纸桥》完成：梁遥不再把忠实等同于表面复制，而把新的连接方法带进下一次材料研究。陈家祠仍有更多工艺可以观察。',
+      '《不入镜》完成：合照没有拍成，陈秀仪与刘嘉禾却并排走进下一座院子。',
 );
 
-const guangzhouChenClanEventIds = <String>[
+const guangzhouChenClanLegacyPaperBridgeEventIds = <String>[
   'GZ-E1-observation',
   'GZ-E2-first-failure',
   'GZ-E3-medium-conflict',
@@ -453,7 +661,7 @@ const guangzhouChenClanEventIds = <String>[
   'GZ-E8-next-material',
 ];
 
-const guangzhouChenClanEvents = <RemediatedSemanticEvent>[
+const guangzhouChenClanLegacyPaperBridgeEvents = <RemediatedSemanticEvent>[
   RemediatedSemanticEvent(
     id: 'GZ-E1-observation',
     coreChinese: '二十二岁的版画学生梁遥和陶艺同学贺真在广州陈家祠观察建筑装饰，只在自己的材料上试做。',
@@ -557,16 +765,34 @@ const guangzhouChenClanSources = <RemediatedSourceBinding>[
     id: guangzhouChenClanSourceRecordId,
     publisher: '广州市人民政府',
     scope:
-        '陈家祠／陈氏书院晚清背景、木雕砖雕石雕陶塑灰塑铸造彩绘等岭南装饰工艺、全国重点文物保护单位、广东民间工艺博物馆',
+        '陈家祠／陈氏书院1893年落成、广东各地陈姓宗族合资兴建、合族祠与书院身份、三路三进九堂六院廊道、多种岭南装饰工艺、全国重点文物保护单位、广东民间工艺博物馆',
   ),
+];
+
+const guangzhouChenClanEventIds = <String>[
+  'GZ-E1-private-meeting',
+  'GZ-E2-lineage-pressure',
+  'GZ-E3-public-demand',
+  'GZ-E4-phone-down',
+  'GZ-E5-visible-cost',
+  'GZ-E6-side-by-side',
+];
+
+const guangzhouChenClanEvents = <RemediatedSemanticEvent>[
+  RemediatedSemanticEvent(id: 'GZ-E1-private-meeting', coreChinese: '陈秀仪与由亲戚收养、如今姓刘的亲生女儿第一次单独见面。', corePinyin: 'Chén Xiùyí yǔ Liú Jiāhé dì yī cì dāndú jiànmiàn.', coreVietnamese: 'Trần Tú Nghi lần đầu gặp riêng người con gái ruột nay mang họ Lưu.', coreEnglish: 'Chen Xiuyi privately meets her biological daughter, now Liu Jiahe.', detailChinese: '刘嘉禾只同意见陈秀仪，不见陈家亲戚，也不拍公开认亲照。', detailPinyin: 'Liú Jiāhé shuōmíng le biānjiè.', detailVietnamese: 'Lưu Gia Hòa nêu rõ ranh giới.', detailEnglish: 'Liu Jiahe has set a clear boundary against relatives and a public reunion photo.', detailFromLevel: 1),
+  RemediatedSemanticEvent(id: 'GZ-E2-lineage-pressure', coreChinese: '陈氏书院的匾额与共同兴建历史让亲戚把同姓当成公开认回的证明。', corePinyin: 'Chénshì Shūyuàn de biǎné zēngjiā le tóngxìng yālì.', coreVietnamese: 'Tấm biển Trần Thị Thư Viện làm tăng áp lực công khai nhận họ.', coreEnglish: 'The academy plaque and pooled-lineage history intensify surname pressure.', detailChinese: '这是当代亲戚的解释，不是历史建筑规定的仪式。', detailPinyin: 'Zhè shì dāngdài qīnshǔ de jiěshì.', detailVietnamese: 'Đây là cách hiểu của người thân hiện nay.', detailEnglish: 'This pressure is a fictional contemporary family interpretation, not a historical rule.', detailFromLevel: 3),
+  RemediatedSemanticEvent(id: 'GZ-E3-public-demand', coreChinese: '亲族视频要求两人在匾额下拍一张“圆满”的认亲合照。', corePinyin: 'Qīnzú yāoqiú pāi rènqīn hézhào.', coreVietnamese: 'Họ hàng yêu cầu chụp ảnh công khai nhận thân.', coreEnglish: 'Relatives demand a public reunion photograph beneath the plaque.', detailChinese: '刘嘉禾退到廊柱旁，没有替陈秀仪做决定。', detailPinyin: 'Liú Jiāhé tuì dào lángzhù páng.', detailVietnamese: 'Lưu Gia Hòa lùi về phía cột hành lang.', detailEnglish: 'Liu Jiahe steps toward a corridor pillar and leaves the choice to Xiuyi.', detailFromLevel: 1),
+  RemediatedSemanticEvent(id: 'GZ-E4-phone-down', coreChinese: '陈秀仪把手机扣下，说“她叫刘嘉禾。今天不入镜”。', corePinyin: 'Chén Xiùyí bǎ shǒujī kòuxià.', coreVietnamese: 'Trần Tú Nghi úp điện thoại xuống.', coreEnglish: 'Chen Xiuyi turns the phone face-down and names Liu Jiahe.', detailChinese: '她主动拒绝用公开影像覆盖女儿现在的姓名和边界。', detailPinyin: 'Tā jùjué gōngkāi zhèngmíng.', detailVietnamese: 'Bà từ chối bằng chứng công khai.', detailEnglish: 'She refuses public proof that would override her daughter’s present identity.', detailFromLevel: 1),
+  RemediatedSemanticEvent(id: 'GZ-E5-visible-cost', coreChinese: '陈秀仪等了三十四年的合照没有拍成。', corePinyin: 'Děng le sānshísì nián de hézhào méiyǒu pāichéng.', coreVietnamese: 'Bức ảnh bà chờ ba mươi bốn năm không được chụp.', coreEnglish: 'The reunion photograph Xiuyi wanted for thirty-four years is not taken.', detailChinese: '代价没有被替代成另一件公开纪念物。', detailPinyin: 'Dàijià méiyǒu bèi tìdài.', detailVietnamese: 'Không có vật công khai nào thay thế cái giá ấy.', detailEnglish: 'No substitute public keepsake erases the cost.', detailFromLevel: 1),
+  RemediatedSemanticEvent(id: 'GZ-E6-side-by-side', coreChinese: '刘嘉禾在门槛前放慢一步，两个人并排走进下一座院子。', corePinyin: 'Liú Jiāhé zài ménkǎn qián fàngmàn yí bù.', coreVietnamese: 'Lưu Gia Hòa chậm lại trước ngưỡng cửa.', coreEnglish: 'Liu Jiahe slows at the threshold and they enter the next courtyard side by side.', detailChinese: '关系以一个小动作继续，没有宣布已经圆满。', detailPinyin: 'Guānxì yǐ xiǎo dòngzuò jìxù.', detailVietnamese: 'Mối quan hệ tiếp tục bằng một cử chỉ nhỏ.', detailEnglish: 'The relationship continues through a small action without declaring itself repaired.', detailFromLevel: 1),
 ];
 
 final guangzhouChenClanRemediatedJourney = RemediatedJourney(
   id: guangzhouChenClanJourneyId,
   title: '广州 · 陈家祠：$guangzhouChenClanCanonicalTitle',
-  protagonist: '梁遥，22岁，虚构版画学生',
-  goal: '把观察到的主要形体关系翻译成一件保持单张连接且仍可识别的纸作品。',
-  conflict: '逐线复制表面轮廓会切断纸的结构连接；纸这种新媒介要求重新编码连接方式。',
+  protagonist: '陈秀仪，61岁，虚构人物',
+  goal: '与成年亲生女儿刘嘉禾继续来往，同时面对亲戚要求公开认回的压力。',
+  conflict: '陈秀仪渴望一张迟到三十四年的合照，但刘嘉禾明确拒绝被陈家亲戚公开“认回来”。',
   eventIds: guangzhouChenClanEventIds,
   events: guangzhouChenClanEvents,
   levels: guangzhouChenClanOnePassLevels,
@@ -580,20 +806,51 @@ final guangzhouChenClanRemediatedJourney = RemediatedJourney(
   sources: guangzhouChenClanSources,
 );
 
-JourneyLevelContent guangzhouChenClanOnePassLevelContent(int requestedLevel) {
+JourneyLevelContent guangzhouChenClanOnePassLevelContent(
+  int requestedLevel, {
+  ChineseProficiencyProfile? profile,
+  Set<String> knownWords = const <String>{},
+}) {
   final level = requestedLevel.clamp(1, 10).toInt();
   final base = guangzhouChenClanOnePassLevels[level - 1];
   final story = base.storyParagraphs.join();
+  final discovery = guangzhouChenClanDiscoverySpecs[level - 1].entry;
+  final searchable = '$story${discovery.text}';
   final selected = guangzhouChenClanCuratedWordNamesByLevel[level] ?? const <String>{};
-  final visibleWords = guangzhouChenClanOnePassWords
-      .where((entry) => selected.contains(entry.word) && story.contains(entry.word))
+  final candidates = guangzhouChenClanOnePassWords
+      .where((entry) =>
+          selected.contains(entry.word) &&
+          searchable.contains(entry.word))
       .toList(growable: false);
+  final effectiveProfile = profile ??
+      const PhoenixLanguageLevelAgent().profileForPhoenixLevel(level);
+  final visibleWords = const PhoenixLanguageLevelAgent().selectVocabulary(
+    words: candidates,
+    levelCatalog: guangzhouChenClanVocabularyLevelCatalog,
+    profile: effectiveProfile,
+    knownWords: knownWords,
+  );
   return JourneyLevelContent(
     storyParagraphs: base.storyParagraphs,
     storyAnnotations: base.storyAnnotations,
     words: visibleWords,
-    discoveries: <DiscoveryEntry>[guangzhouChenClanDiscoverySpecs[level - 1].entry],
+    discoveries: <DiscoveryEntry>[discovery],
     wonderQuestion: guangzhouChenClanReflectionPrompts[level - 1],
     expressQuestion: guangzhouChenClanWritingPrompts[level - 1],
   );
 }
+
+final guangzhouChenClanVocabularyLevelCatalog = <String, VocabularyLevelTag>{
+  for (final entry in guangzhouChenClanWordFirstAppears.entries)
+    entry.key: VocabularyLevelTag(
+      hskLevel: entry.value.clamp(1, 6).toInt(),
+      tocflLevel: entry.value.clamp(1, 6).toInt(),
+      kind: switch (entry.key) {
+        '陈家祠' || '陈氏书院' => VocabularyKind.properNoun,
+        '匾额' || '院落' || '门槛' || '宗族' || '合族祠' ||
+        '三路三进' || '廊道' || '岭南工艺' || '木雕' || '砖雕' ||
+        '民间工艺' || '文物保护' || '整体格局' || '公共文化' => VocabularyKind.cultural,
+        _ => VocabularyKind.general,
+      },
+    ),
+};

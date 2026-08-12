@@ -16,9 +16,11 @@ void main() {
       final canonical = hangzhouWestLakeOnePassLevelContent(entry.value);
       expect(resolved.storyParagraphs, canonical.storyParagraphs, reason: entry.key.name);
       final story = resolved.storyParagraphs.join();
-      expect(story, contains('许澄'));
-      expect(story, contains('苏堤'));
-      expect(story, contains('录音'));
+      expect(story, contains('方毓'));
+      expect(story, contains('周绍庭'));
+      expect(story, contains('预约卡'));
+      expect(story, isNot(contains('许澄')));
+      expect(story, isNot(contains('录音')));
       expect(story, isNot(contains('清晨，你沿着苏堤慢慢向前走')));
     }
   });
