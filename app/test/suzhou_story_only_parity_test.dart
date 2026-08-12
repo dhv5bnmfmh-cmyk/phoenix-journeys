@@ -37,7 +37,7 @@ void main() {
       '山水画',
       '层次',
     ]));
-    expect(suzhou.discoveries, hasLength(4));
+    expect(suzhou.discoveries, hasLength(10));
   });
 
   test('Founder-visible Lv1 Lv5 Lv10 use the new Story through the original runtime', () {

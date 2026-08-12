@@ -29,6 +29,44 @@ void main() {
     }
   });
 
+  test('Lv1-Lv10 Discovery is level-bound, progressive, and place-only', () {
+    expect(
+      experience.content.sourceIds,
+      orderedEquals(const <String>[
+        'unesco-suzhou-classical-gardens',
+        'suzhou-garden-bureau-humble-administrators-garden',
+      ]),
+    );
+    final seen = <String>{};
+    for (var level = 1; level <= 10; level++) {
+      final canonical = suzhouGardenCanonicalLevelContent(level);
+      final runtime = resolveAdaptiveJourneyLevel(
+        experience,
+        profile: profile(level),
+      );
+      expect(canonical.discoveries, hasLength(1), reason: 'Lv$level');
+      expect(runtime.discoveries, canonical.discoveries, reason: 'Lv$level runtime');
+      final discovery = canonical.discoveries.single;
+      expect(seen.add(discovery.text), isTrue, reason: 'Lv$level must add learner value');
+      expect(discovery.pinyin.trim(), isNotEmpty);
+      expect(discovery.vietnamese.trim(), isNotEmpty);
+      expect(discovery.english.trim(), isNotEmpty);
+      for (final plot in <String>['陈玉兰', '程朗', '外婆', '外孙', '下一处等我']) {
+        expect(discovery.text, isNot(contains(plot)), reason: 'Lv$level plot $plot');
+      }
+    }
+
+    expect(suzhouGardenCanonicalLevelContent(1).discoveries.single.text, contains('水面'));
+    expect(suzhouGardenCanonicalLevelContent(3).discoveries.single.text, contains('遮挡'));
+    expect(suzhouGardenCanonicalLevelContent(4).discoveries.single.text, contains('重新打开'));
+    expect(suzhouGardenCanonicalLevelContent(6).discoveries.single.text, contains('漏窗'));
+    expect(suzhouGardenCanonicalLevelContent(7).discoveries.single.text, contains('借景'));
+    expect(suzhouGardenCanonicalLevelContent(8).discoveries.single.text, contains('山石'));
+    expect(suzhouGardenCanonicalLevelContent(9).discoveries.single.text, contains('有限'));
+    expect(suzhouGardenCanonicalLevelContent(10).discoveries.single.text, contains('世界遗产'));
+    expect(suzhouGardenCanonicalLevelContent(10).discoveries.single.text, contains('保护'));
+  });
+
   test('Memory and Completion preserve the baseline generic product branch', () {
     expect(batchOneMemorySpecFor(experience.id), isNull);
     expect(experience.discoveryTeaser, contains('视线'));

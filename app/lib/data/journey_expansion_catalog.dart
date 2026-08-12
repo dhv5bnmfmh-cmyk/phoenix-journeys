@@ -144,10 +144,16 @@ const _suzhouWords = <WordEntry>[
 ];
 
 const _suzhouDiscoveries = <DiscoveryEntry>[
-  DiscoveryEntry(text: '苏州古典园林以精细设计在有限空间中重现自然山水。', pinyin: 'Sūzhōu Gǔdiǎn Yuánlín yǐ jīngxì shèjì zài yǒuxiàn kōngjiān zhōng chóngxiàn zìrán shānshuǐ.', simpleChinese: '苏州园林用小空间表现大自然。', vietnamese: 'Vườn cổ điển Tô Châu tái hiện thiên nhiên trong không gian nhỏ bằng thiết kế tinh tế.', english: 'Suzhou gardens recreate natural landscapes within limited space.'),
-  DiscoveryEntry(text: '世界遗产项目包括苏州历史城区内九座具有代表性的园林。', pinyin: 'Shìjiè Yíchǎn xiàngmù bāokuò Sūzhōu lìshǐ chéngqū nèi jiǔ zuò jùyǒu dàibiǎoxìng de yuánlín.', simpleChinese: '九座代表性园林共同组成世界遗产。', vietnamese: 'Chín khu vườn tiêu biểu tạo thành quần thể Di sản Thế giới.', english: 'Nine representative gardens form the World Heritage property.'),
-  DiscoveryEntry(text: '拙政园以池水为中心，通过回廊、漏窗与借景组织出丰富层次。', pinyin: 'Zhuōzhèng Yuán yǐ chíshuǐ wéi zhōngxīn, tōngguò huíláng, lòuchuāng yǔ jièjǐng zǔzhī chū fēngfù céngcì.', simpleChinese: '池水、回廊和漏窗让园林更有层次。', vietnamese: 'Chuyết Chính Viên lấy ao nước làm trung tâm, dùng hành lang, cửa hoa và mượn cảnh để tạo nhiều lớp không gian.', english: 'Ponds, corridors, openwork windows, and borrowed scenery create layered depth.'),
-  DiscoveryEntry(text: '这些园林集中体现水、山石、植物与建筑之间的关系。', pinyin: 'Zhèxiē yuánlín jízhōng tǐxiàn shuǐ, shānshí, zhíwù yǔ jiànzhù zhījiān de guānxì.', simpleChinese: '园林把水、石、植物和建筑组合在一起。', vietnamese: 'Các khu vườn thể hiện mối quan hệ giữa nước, đá, cây và kiến trúc.', english: 'The gardens unite water, rocks, planting, and architecture.'),
+  DiscoveryEntry(text: '拙政园以水面为园林空间的重要中心，建筑、植物和道路沿水展开，让游人边走边看见不同景色。', pinyin: 'Zhuōzhèng Yuán yǐ shuǐmiàn wéi yuánlín kōngjiān de zhòngyào zhōngxīn, jiànzhù, zhíwù hé dàolù yán shuǐ zhǎnkāi, ràng yóurén biān zǒu biān kànjiàn bùtóng jǐngsè.', simpleChinese: '拙政园围绕水面安排建筑、植物和道路。', vietnamese: 'Chuyết Chính Viên tổ chức kiến trúc, cây cối và lối đi quanh mặt nước, để cảnh vật thay đổi theo bước chân.', english: 'The Humble Administrator’s Garden organizes buildings, planting, and paths around water so views change as visitors walk.'),
+  DiscoveryEntry(text: '亭子提供停留和观景的位置，长廊连接不同建筑与院落；它们与池水一起组织游园路线，而不只是在园中摆放装饰。', pinyin: 'Tíngzi tígōng tíngliú hé guānjǐng de wèizhi, chángláng liánjiē bùtóng jiànzhù yǔ yuànluò; tāmen yǔ chíshuǐ yìqǐ zǔzhī yóuyuán lùxiàn, ér bù zhǐshì zài yuán zhōng bǎifàng zhuāngshì.', simpleChinese: '亭子让人停下看景，长廊把建筑和院落连起来。', vietnamese: 'Đình là nơi dừng lại ngắm cảnh, còn hành lang dài nối các công trình và sân; cùng với mặt nước, chúng tổ chức tuyến tham quan.', english: 'Pavilions provide places to pause and look, while corridors connect buildings and courtyards; together with the water, they organize movement through the garden.'),
+  DiscoveryEntry(text: '长廊的转折、建筑的墙面和植物的遮挡会暂时收紧视线，使同一条路被分成看得见与暂时看不见的几段。', pinyin: 'Chángláng de zhuǎnzhé, jiànzhù de qiángmiàn hé zhíwù de zhēdǎng huì zànshí shōujǐn shìxiàn, shǐ tóng yì tiáo lù bèi fēnchéng kàndéjiàn yǔ zànshí kànbujiàn de jǐ duàn.', simpleChinese: '廊、墙和植物会让前面的景物暂时看不见。', vietnamese: 'Các khúc ngoặt của hành lang, tường nhà và cây cối tạm thời thu hẹp tầm nhìn, chia một lối đi thành những đoạn thấy và khuất.', english: 'Turns in corridors, building walls, and planting temporarily narrow sightlines, dividing one path into visible and hidden stretches.'),
+  DiscoveryEntry(text: '从较窄的廊道或建筑边转向开阔池面时，视野会重新打开；水面把天空、建筑和植物的倒影带进画面，扩大空间感。', pinyin: 'Cóng jiào zhǎi de lángdào huò jiànzhù biān zhuǎnxiàng kāikuò chímiàn shí, shìyě huì chóngxīn dǎkāi; shuǐmiàn bǎ tiānkōng, jiànzhù hé zhíwù de dàoyǐng dài jìn huàmiàn, kuòdà kōngjiāngǎn.', simpleChinese: '从窄处走到池边，视野会重新变开阔。', vietnamese: 'Khi rời hành lang hẹp hoặc mép công trình để hướng ra mặt ao rộng, tầm nhìn mở lại; phản chiếu của trời, nhà và cây làm không gian có vẻ rộng hơn.', english: 'Moving from a narrow corridor or building edge toward open water releases the view; reflections of sky, buildings, and planting enlarge the sense of space.'),
+  DiscoveryEntry(text: '回廊、建筑、植物和水面不是各自孤立的景物。它们通过前后遮挡、远近对照和水中倒影形成层次，让有限空间显得更深。', pinyin: 'Huíláng, jiànzhù, zhíwù hé shuǐmiàn bú shì gèzì gūlì de jǐngwù. Tāmen tōngguò qiánhòu zhēdǎng, yuǎnjìn duìzhào hé shuǐzhōng dàoyǐng xíngchéng céngcì, ràng yǒuxiàn kōngjiān xiǎnde gèng shēn.', simpleChinese: '廊、房屋、植物和水面一起形成前后层次。', vietnamese: 'Hành lang, kiến trúc, cây cối và mặt nước không tách rời; che khuất trước sau, đối chiếu gần xa và phản chiếu tạo chiều sâu trong không gian hữu hạn.', english: 'Corridors, buildings, planting, and water work together: overlap, near–far contrast, and reflection create depth within limited space.'),
+  DiscoveryEntry(text: '漏窗既让墙保持分隔，也让人透过镂空图案看见另一侧的局部景物。被窗框选中的景色像一幅画，人的位置改变时，画面也会改变。', pinyin: 'Lòuchuāng jì ràng qiáng bǎochí fēngé, yě ràng rén tòuguò lòukōng tú’àn kànjiàn lìng yí cè de júbù jǐngwù. Bèi chuāngkuàng xuǎnzhòng de jǐngsè xiàng yì fú huà, rén de wèizhi gǎibiàn shí, huàmiàn yě huì gǎibiàn.', simpleChinese: '漏窗把另一边的一部分景色框成一幅会变化的画。', vietnamese: 'Cửa sổ hoa vừa giữ sự phân cách của tường vừa cho thấy một phần cảnh phía bên kia; khung cảnh thay đổi khi người xem đổi vị trí.', english: 'Openwork windows preserve a wall’s separation while framing partial views beyond it; the framed scene changes as the viewer moves.'),
+  DiscoveryEntry(text: '借景把园外或较远处的景物纳入眼前构图，使视线越过园墙和近处建筑。它不把远景搬进园内，而是通过观看位置让远近景物发生联系。', pinyin: 'Jièjǐng bǎ yuánwài huò jiào yuǎnchù de jǐngwù nàrù yǎnqián gòutú, shǐ shìxiàn yuèguò yuánqiáng hé jìnchù jiànzhù. Tā bù bǎ yuǎnjǐng bānjìn yuánnèi, ér shì tōngguò guānkàn wèizhi ràng yuǎnjìn jǐngwù fāshēng liánxì.', simpleChinese: '借景利用观看位置，把远处景物放进眼前画面。', vietnamese: 'Mượn cảnh đưa cảnh vật ngoài vườn hoặc ở xa vào bố cục trước mắt; không di chuyển cảnh vật mà dùng vị trí nhìn để nối gần với xa.', english: 'Borrowed scenery brings distant or outside features into the present composition, using viewpoint rather than physically moving the distant scene.'),
+  DiscoveryEntry(text: '苏州古典园林把水、山石、植物和建筑作为一个整体来设计：水组织开合，山石形成起伏，植物随季节变化，建筑提供行走、停留和观看的位置。', pinyin: 'Sūzhōu Gǔdiǎn Yuánlín bǎ shuǐ, shānshí, zhíwù hé jiànzhù zuòwéi yí gè zhěngtǐ lái shèjì: shuǐ zǔzhī kāihé, shānshí xíngchéng qǐfú, zhíwù suí jìjié biànhuà, jiànzhù tígōng xíngzǒu, tíngliú hé guānkàn de wèizhi.', simpleChinese: '水、石、植物和建筑各有作用，又共同组成园林。', vietnamese: 'Vườn cổ Tô Châu thiết kế nước, đá, cây và kiến trúc như một chỉnh thể: nước tạo đóng mở, đá tạo cao thấp, cây đổi theo mùa, công trình định vị việc đi, dừng và nhìn.', english: 'Suzhou gardens design water, rocks, planting, and architecture as one system: water shapes opening and enclosure, rocks create relief, plants mark seasons, and buildings position movement, pause, and viewing.'),
+  DiscoveryEntry(text: '苏州园林在有限城市用地中，通过曲折路线、遮挡与显现、框景和借景连续改变观看关系，使游园过程像逐步展开的山水画，而不是一次看完的全景。', pinyin: 'Sūzhōu Yuánlín zài yǒuxiàn chéngshì yòngdì zhōng, tōngguò qūzhé lùxiàn, zhēdǎng yǔ xiǎnxiàn, kuàngjǐng hé jièjǐng liánxù gǎibiàn guānkàn guānxì, shǐ yóuyuán guòchéng xiàng zhúbù zhǎnkāi de shānshuǐhuà, ér bú shì yí cì kànwán de quánjǐng.', simpleChinese: '园林用转折、遮挡和借景，让景色边走边展开。', vietnamese: 'Trong khu đất đô thị hữu hạn, tuyến đi quanh co, che–hiện, đóng khung và mượn cảnh liên tục thay đổi cách nhìn, khiến khu vườn mở ra từng bước như tranh sơn thủy.', english: 'Within limited urban land, winding routes, concealment and reveal, framed views, and borrowed scenery continually change what can be seen, unfolding the garden like a landscape painting rather than a single panorama.'),
+  DiscoveryEntry(text: '拙政园属于“苏州古典园林”世界遗产。世界遗产价值不仅在单座亭子或一片池水，也在整体空间设计和延续至今的造园传统；保护需要维护水体、山石、植物、建筑及其观看关系。', pinyin: 'Zhuōzhèng Yuán shǔyú “Sūzhōu Gǔdiǎn Yuánlín” Shìjiè Yíchǎn. Shìjiè Yíchǎn jiàzhí bùjǐn zài dān zuò tíngzi huò yí piàn chíshuǐ, yě zài zhěngtǐ kōngjiān shèjì hé yánxù zhìjīn de zàoyuán chuántǒng; bǎohù xūyào wéihù shuǐtǐ, shānshí, zhíwù, jiànzhù jí qí guānkàn guānxì.', simpleChinese: '保护拙政园，要保护水、石、植物、建筑和它们组成的整体空间。', vietnamese: 'Chuyết Chính Viên thuộc Di sản Thế giới “Vườn cổ điển Tô Châu”. Giá trị nằm ở thiết kế tổng thể và truyền thống tạo vườn, nên bảo tồn phải giữ cả nước, đá, cây, kiến trúc và quan hệ nhìn giữa chúng.', english: 'The Humble Administrator’s Garden is part of the Classical Gardens of Suzhou World Heritage property. Its value lies in the complete spatial design and continuing garden tradition, so conservation must sustain water, rocks, planting, buildings, and their viewing relationships.'),
 ];
 
 /// Founder-locked adaptive package for 《下一处等我》. Every level preserves the
@@ -159,6 +165,7 @@ JourneyLevelContent suzhouGardenCanonicalLevelContent(
 }) {
   final level = requestedLevel.clamp(1, 10).toInt();
   final story = _suzhouAdaptiveStory(level);
+  final discovery = _suzhouDiscoveries[level - 1];
   final support = _suzhouReadingSupport(level);
   final annotations = <ReadingAnnotation>[
     for (var index = 0; index < story.length; index++)
@@ -172,7 +179,7 @@ JourneyLevelContent suzhouGardenCanonicalLevelContent(
         english: support[index].$2,
       ),
   ];
-  final searchable = '${story.join()}${_suzhouDiscoveries.map((item) => item.text).join()}';
+  final searchable = '${story.join()}${discovery.text}';
   return JourneyLevelContent(
     storyParagraphs: List<String>.unmodifiable(story),
     storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
@@ -187,9 +194,7 @@ JourneyLevelContent suzhouGardenCanonicalLevelContent(
         knownWords: knownWords,
       ),
     ),
-    discoveries: List<DiscoveryEntry>.unmodifiable(
-      _suzhouDiscoveries.take(level <= 3 ? 1 : 2),
-    ),
+    discoveries: <DiscoveryEntry>[discovery],
     wonderQuestion: '陈玉兰第二次看不见程朗时，为什么抬起手却没有喊他的名字？',
     expressQuestion: '请写出“下一处等我”在故事开头和结尾分别是谁对谁说，以及这句话的意思怎样改变。',
   );
