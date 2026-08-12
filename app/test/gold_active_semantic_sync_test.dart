@@ -68,7 +68,7 @@ void main() {
     ['không phải', 'một gia đình', 'nhiều dòng họ', 'góp vốn'],
     ['cùng xây dựng', 'tế tự', 'liên lạc', 'thư viện'],
     ['ba trục ngang', 'ba lớp dọc', 'cửa', 'sảnh', 'sân'],
-    ['sân', 'ánh sáng', 'không khí', 'hành lang', 'kết nối'],
+    ['sân', 'ánh sáng', 'không khí', 'hành lang', 'nối', 'đơn vị kiến trúc'],
     ['ba trục ba lớp', 'chính-phụ', 'trước-sau'],
     ['chạm gỗ', 'chạm khắc gạch', 'tượng gốm', 'đúc', 'vẽ màu', 'vị trí'],
     ['bảo tàng', 'công trình lịch sử', 'bộ sưu tập', 'trưng bày', 'công chúng'],
