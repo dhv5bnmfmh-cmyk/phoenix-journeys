@@ -1,4 +1,5 @@
 import 'guangzhou_chen_clan_one_pass.dart';
+import 'journey_expansion_catalog.dart';
 import 'journey_semantic_fingerprint_baseline_snapshot.dart' as baseline;
 
 /// Machine-controlled dimensions used by the Phoenix semantic anti-template gate.
@@ -172,6 +173,42 @@ enum NarrativeMechanismFamily {
   observePrototypeReviseMaterialTranslation,
   peerTestsLegibilityWithoutMentorAuthority,
   materialConstraintForcesCrossMediumReencoding,
+
+  // Reusable families introduced by caregiver/child visibility release.
+  impendingIndependentTravelRehearsal,
+  dailyCaregiverReleasingVisualControl,
+  caregiverChildReciprocalAdjustment,
+  practiceIndependentMovementWithoutBreakingCare,
+  continuousVisibilityVsAgeAppropriateSeparation,
+  withholdProtectiveRecall,
+  completeIntervalWithoutVisualContact,
+  childWaitsAndLooksBackWithoutRecall,
+  vigilanceToReciprocalTrust,
+  separationAndWaitingContinueWithoutPursuit,
+  layeredSightlinesCreateLossAndRecoveryOfView,
+  raisedThenLoweredHandEmbodiesRestraint,
+  repeatedOcclusionAndReappearance,
+  lastWalkBeforeIndependentRoutine,
+  childAcceptsResponsibilityToWaitAndLookBack,
+  releasedVisualControlCreatesReciprocalWaiting,
+
+  // Reusable families introduced by private kinship boundary protection.
+  privateReunionWithNoPublicProofAgreement,
+  estrangedBirthMotherSeekingContinuedContact,
+  birthMotherAdultDaughterWithRemoteKinPressure,
+  continueContactWithoutErasingPresentIdentity,
+  publicKinshipProofVsAdultChildBoundary,
+  refusePublicImageAndNamePresentIdentity,
+  faceDownPhoneRejectsCollectiveRecognition,
+  noReunionPhotoButPrivateWalkContinues,
+  hopedForRestorationToConsentBasedContinuation,
+  thresholdSlowdownContinuesUnrepairedRelationship,
+  pooledLineageInstitutionIntensifiesSurnameClaim,
+  phoneAsRefusedPublicProof,
+  courtyardProgressionUnderRemoteFamilyGaze,
+  unplannedLiveFamilyCall,
+  daughterSetsBoundaryAndOffersSmallContinuation,
+  publicKinshipProofSacrificedForPresentIdentity,
 }
 
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
@@ -639,7 +676,7 @@ final _chengduFingerprint = JourneySemanticFingerprint(
   ]),
 );
 
-final guangzhouChenClanGoldSemanticFingerprint = JourneySemanticFingerprint(
+final guangzhouChenClanLegacyPaperBridgeSemanticFingerprint = JourneySemanticFingerprint(
   journeyId: _guangzhou,
   surfaceIdentity:
       'Liang Yao / twenty-two-year-old fictional printmaking student / He Zhen ceramics peer / connected single-sheet paper prototype',
@@ -797,6 +834,91 @@ final guangzhouChenClanGoldSemanticFingerprint = JourneySemanticFingerprint(
   ]),
 );
 
+final guangzhouChenClanGoldSemanticFingerprint = JourneySemanticFingerprint(
+  journeyId: _guangzhou,
+  surfaceIdentity: 'birth-mother-turns-family-video-face-down-and-names-adult-daughter-Liu-Jiahe',
+  mechanisms: const <NarrativeSemanticDimension, NarrativeMechanismFamily>{
+    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.privateReunionWithNoPublicProofAgreement,
+    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.estrangedBirthMotherSeekingContinuedContact,
+    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.birthMotherAdultDaughterWithRemoteKinPressure,
+    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.continueContactWithoutErasingPresentIdentity,
+    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.publicKinshipProofVsAdultChildBoundary,
+    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.refusePublicImageAndNamePresentIdentity,
+    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.faceDownPhoneRejectsCollectiveRecognition,
+    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.noReunionPhotoButPrivateWalkContinues,
+    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.hopedForRestorationToConsentBasedContinuation,
+    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.thresholdSlowdownContinuesUnrepairedRelationship,
+    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.pooledLineageInstitutionIntensifiesSurnameClaim,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.phoneAsRefusedPublicProof,
+    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.courtyardProgressionUnderRemoteFamilyGaze,
+    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.unplannedLiveFamilyCall,
+    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.daughterSetsBoundaryAndOffersSmallContinuation,
+    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.publicKinshipProofSacrificedForPresentIdentity,
+  },
+  coreEvidence: <NarrativeMechanismEvidence>[
+    for (final item in <(NarrativeSemanticDimension, NarrativeMechanismFamily, String, String)>[
+      (NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.privateReunionWithNoPublicProofAgreement, '嘉禾事先说好：只见她，不见陈家亲戚，也不拍“认回来”的照片。', 'The first meeting begins with an explicit privacy and image boundary.'),
+      (NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.birthMotherAdultDaughterWithRemoteKinPressure, '三十四年前，她把刚出生的女儿交给亲戚收养。女儿如今叫刘嘉禾。', 'An estranged birth mother and adopted adult daughter face pressure from remote birth relatives.'),
+      (NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.publicKinshipProofVsAdultChildBoundary, '有人催秀仪把镜头转过去，说在陈氏书院前拍一张，事情就算圆满。', 'Relatives demand visible completion that conflicts with the daughter’s boundary.'),
+      (NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.refusePublicImageAndNamePresentIdentity, '她把手机翻过来，扣在身旁的青砖台上，说：“她叫刘嘉禾。今天不入镜。”', 'Xiuyi enacts refusal and affirms the daughter’s present name.'),
+      (NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.faceDownPhoneRejectsCollectiveRecognition, '她把手机翻过来，扣在身旁的青砖台上', 'The face-down phone visibly denies collective access to the reunion.'),
+      (NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.noReunionPhotoButPrivateWalkContinues, '那张她等了三十四年的合照没有拍成。', 'The desired public image is genuinely lost rather than replaced.'),
+      (NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.hopedForRestorationToConsentBasedContinuation, '秀仪没有去拉她，只把红围巾留在包里，跟到她身边。', 'Xiuyi stops staging restoration and follows without claiming or dressing the daughter.'),
+      (NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.thresholdSlowdownContinuesUnrepairedRelationship, '经过门槛时，嘉禾放慢了一步。两个人并排走了进去。', 'A small reciprocal action continues the unrepaired relationship without declaring completion.'),
+      (NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.pooledLineageInstitutionIntensifiesSurnameClaim, '秀仪说起这里由广东各地陈姓宗族合资兴建', 'The verified pooled-lineage identity makes surname-based public pressure causal.'),
+      (NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.publicKinshipProofSacrificedForPresentIdentity, '她叫刘嘉禾。今天不入镜。', 'The engine sacrifices public kinship proof to preserve an adult daughter’s present identity and consent.'),
+    ])
+      NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: item.$1, mechanism: item.$2, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>[item.$3], semanticRationale: item.$4),
+  ],
+);
+
+const _suzhou = 'suzhou-humble-administrators-garden';
+
+final suzhouGardenGoldSemanticFingerprint = JourneySemanticFingerprint(
+  journeyId: _suzhou,
+  surfaceIdentity: 'grandmother-grandson-disappear-wait-and-reappear-in-layered-garden-space',
+  mechanisms: const <NarrativeSemanticDimension, NarrativeMechanismFamily>{
+    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.impendingIndependentTravelRehearsal,
+    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.dailyCaregiverReleasingVisualControl,
+    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.caregiverChildReciprocalAdjustment,
+    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.practiceIndependentMovementWithoutBreakingCare,
+    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.continuousVisibilityVsAgeAppropriateSeparation,
+    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.withholdProtectiveRecall,
+    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.completeIntervalWithoutVisualContact,
+    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.childWaitsAndLooksBackWithoutRecall,
+    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.vigilanceToReciprocalTrust,
+    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.separationAndWaitingContinueWithoutPursuit,
+    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.layeredSightlinesCreateLossAndRecoveryOfView,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.raisedThenLoweredHandEmbodiesRestraint,
+    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.repeatedOcclusionAndReappearance,
+    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.lastWalkBeforeIndependentRoutine,
+    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.childAcceptsResponsibilityToWaitAndLookBack,
+    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.releasedVisualControlCreatesReciprocalWaiting,
+  },
+  coreEvidence: <NarrativeMechanismEvidence>[
+    for (final item in <(NarrativeSemanticDimension, NarrativeMechanismFamily, String, String)>[
+      (NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.impendingIndependentTravelRehearsal, '下周一，十二岁的程朗要开始自己坐车去初中。', 'The coming Monday makes this walk the last rehearsal before independent travel.'),
+      (NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.caregiverChildReciprocalAdjustment, '六年来，外婆陈玉兰几乎每天都去接他放学', 'A long daily-care relationship, not a mentor or peer project, creates the emotional pressure.'),
+      (NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.continuousVisibilityVsAgeAppropriateSeparation, '程朗的背影第一次从她眼前消失时，陈玉兰立刻喊了他的名字。', 'The conflict is continuous protective visibility against a child beginning independent movement.'),
+      (NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.withholdProtectiveRecall, '陈玉兰抬起手，他的名字已经到了嘴边，却没有喊；她把手放下来', 'The enacted choice is the visible withholding of an immediately available call.'),
+      (NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.completeIntervalWithoutVisualContact, '她把手放下来，自己走完那几步看不见他的路。', 'She physically completes the unseen interval instead of restoring control by calling.'),
+      (NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.childWaitsAndLooksBackWithoutRecall, '下一处水面重新打开时，程朗已经停在前面，正回头找她。', 'The child answers released control with reciprocal waiting and looking back.'),
+      (NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.vigilanceToReciprocalTrust, '外婆，我还能走前面吗？', 'Care changes from one-sided visual vigilance to mutual adjustment.'),
+      (NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.separationAndWaitingContinueWithoutPursuit, '程朗转过去，背影很快又被房屋挡住。陈玉兰没有追上去。', 'The new wait-and-look-back relation continues without the caregiver catching up.'),
+      (NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.layeredSightlinesCreateLossAndRecoveryOfView, '曲桥和屋角又一次截断视线', 'Garden turns and built layers causally alternate concealment with reappearance.'),
+      (NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.releasedVisualControlCreatesReciprocalWaiting, '下一处等我。', 'Repeated loss and recovery of sight transforms continuous control into reciprocal waiting.'),
+    ])
+      NarrativeMechanismEvidence(
+        journeyId: _suzhou,
+        dimension: item.$1,
+        mechanism: item.$2,
+        activeSourceId: activeGoldStorySourceId,
+        sourceTexts: <String>[item.$3],
+        semanticRationale: item.$4,
+      ),
+  ],
+);
+
 final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     Map<String, JourneySemanticFingerprint>.unmodifiable({
   for (final entry in baseline.approvedGoldSemanticFingerprints.entries)
@@ -806,6 +928,7 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
             ? _chengduFingerprint
             : _convertBaselineFingerprint(entry.value),
   _guangzhou: guangzhouChenClanGoldSemanticFingerprint,
+  _suzhou: suzhouGardenGoldSemanticFingerprint,
 });
 
 String activeCanonicalGoldStoryText(String journeyId) {
@@ -813,6 +936,9 @@ String activeCanonicalGoldStoryText(String journeyId) {
     return guangzhouChenClanOnePassLevels
         .expand((level) => level.storyParagraphs)
         .join('\n');
+  }
+  if (journeyId == _suzhou) {
+    return suzhouGardenCanonicalLevelContent(10).storyParagraphs.join('\n');
   }
   return baseline.activeCanonicalGoldStoryText(journeyId);
 }

@@ -12,6 +12,8 @@ import 'forbidden_city_content_cache.dart';
 import 'forbidden_city_journey_runtime.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
+import 'guangzhou_chen_clan_one_pass.dart';
+import 'journey_expansion_catalog.dart';
 import 'summer_palace_adaptive_story_levels.dart';
 import 'summer_palace_language_level_catalog.dart';
 
@@ -52,6 +54,16 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     return _resolveSummerPalaceN1Level(
       profile: profile,
       knownWords: knownWords,
+    );
+  }
+  if (experience.id == guangzhouChenClanJourneyId) {
+    return guangzhouChenClanOnePassLevelContent(
+      profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band),
+    );
+  }
+  if (experience.id == 'suzhou-humble-administrators-garden') {
+    return suzhouGardenCanonicalLevelContent(
+      profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band),
     );
   }
   throw StateError(

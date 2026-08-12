@@ -11,6 +11,7 @@ const _goldIds = <String>{
   'chengdu-kuanzhai-alley',
   'nanjing-qinhuai-river',
   'guangzhou-chen-clan-academy',
+  'suzhou-humble-administrators-garden',
 };
 
 JourneySemanticFingerprint _synthetic(
@@ -60,7 +61,7 @@ Map<NarrativeSemanticDimension, NarrativeMechanismFamily> _cloneGold(String id) 
     );
 
 void main() {
-  test('all eight approved Gold Journeys keep complete normalized fingerprints', () {
+  test('all approved Gold Journeys keep complete normalized fingerprints', () {
     expect(approvedGoldSemanticFingerprints.keys.toSet(), _goldIds);
     for (final fingerprint in approvedGoldSemanticFingerprints.values) {
       expect(fingerprint.mechanisms.length, NarrativeSemanticDimension.values.length,
@@ -414,10 +415,10 @@ void main() {
     expect(comparisons.every((item) => !item.isCollision), isTrue);
   });
 
-  test('Guangzhou engine remains material translation, not any protected engine', () {
+  test('Guangzhou engine protects present identity over public kinship proof', () {
     final fingerprint = approvedGoldSemanticFingerprints['guangzhou-chen-clan-academy']!;
     final engine = fingerprint.mechanism(NarrativeSemanticDimension.dramaticEngineFamily);
-    expect(engine, NarrativeMechanismFamily.materialConstraintForcesCrossMediumReencoding);
+    expect(engine, NarrativeMechanismFamily.publicKinshipProofSacrificedForPresentIdentity);
     expect(engine, isNot(NarrativeMechanismFamily.forcedTradeoffReframesCreativeAuthorship));
     expect(engine, isNot(NarrativeMechanismFamily.coexistingValidPerspectivesSynthesizeRelationalModel));
     expect(engine, isNot(NarrativeMechanismFamily.spatialCrossingReframesTemporalContinuity));

@@ -9,6 +9,8 @@ import 'nanjing_qinhuai_one_pass.dart';
 import 'nanjing_qinhuai_vocabulary_curation.dart';
 import 'shanghai_bund_one_pass.dart';
 import 'xian_city_wall_one_pass.dart';
+import 'guangzhou_chen_clan_one_pass.dart';
+import 'journey_expansion_catalog.dart';
 
 bool isBatchOneGoldJourney(String journeyId) =>
     journeyId == shanghaiBundJourneyId ||
@@ -81,8 +83,25 @@ BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
     hangzhouWestLakeJourneyId => hangzhouWestLakeOnePassRemediation,
     chengduKuanzhaiJourneyId => chengduKuanzhaiOnePassRemediation,
     nanjingQinhuaiJourneyId => nanjingQinhuaiRemediatedJourney,
+    guangzhouChenClanJourneyId => guangzhouChenClanRemediatedJourney,
     _ => null,
   };
+  if (journeyId == 'suzhou-humble-administrators-garden') {
+    return const BatchOneJourneyMemorySpec(
+      storyResult: suzhouGardenMemoryResult,
+      culturalPoint: suzhouGardenCulturalPoint,
+      reviews: <RemediatedMemoryReview>[
+        RemediatedMemoryReview(
+          category: '关系',
+          prompt: '陈玉兰第二次为什么没有喊程朗？',
+          answer: '她把抬起的手放下，自己走完看不见他的几步，也让程朗在下一处用回望承担约定。',
+          storyEventIds: <String>['SZ-E3-no-call', 'SZ-E4-look-back'],
+        ),
+      ],
+      longTermAnchor: suzhouGardenMemoryAnchor,
+      completionSummary: suzhouGardenCompletionSummary,
+    );
+  }
   if (journey == null) return null;
 
   String memoryAnswer(String category) => journey.memory
@@ -94,6 +113,8 @@ BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
       '${memoryAnswer('history')} ${memoryAnswer('preservation')}',
     nanjingQinhuaiJourneyId =>
       '${memoryAnswer('选择')} ${memoryAnswer('画面')}',
+    guangzhouChenClanJourneyId =>
+      '${memoryAnswer('边界')} ${memoryAnswer('选择')}',
     xianCityWallJourneyId || hangzhouWestLakeJourneyId =>
       '${memoryAnswer('history')} ${memoryAnswer('culture')}',
     _ => '${memoryAnswer('culture')} ${memoryAnswer('architecture')}',

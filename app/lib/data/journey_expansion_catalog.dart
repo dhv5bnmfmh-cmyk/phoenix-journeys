@@ -1,6 +1,7 @@
 import '../models/story_content.dart';
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
+import 'journey_level_catalog.dart';
 
 const journeyExpansionSources = <StorySourceRecord>[
   StorySourceRecord(
@@ -146,6 +147,63 @@ const _suzhouDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '这些园林集中体现水、山石、植物与建筑之间的关系。', pinyin: 'Zhèxiē yuánlín jízhōng tǐxiàn shuǐ, shānshí, zhíwù yǔ jiànzhù zhījiān de guānxì.', simpleChinese: '园林把水、石、植物和建筑组合在一起。', vietnamese: 'Các khu vườn thể hiện mối quan hệ giữa nước, đá, cây và kiến trúc.', english: 'The gardens unite water, rocks, planting, and architecture.'),
 ];
 
+/// Founder-locked adaptive package for 《下一处等我》. Every level preserves the
+/// four approved causal beats; higher levels add detail without changing them.
+JourneyLevelContent suzhouGardenCanonicalLevelContent(int requestedLevel) {
+  final level = requestedLevel.clamp(1, 10).toInt();
+  final paragraphCount = level <= 2 ? 1 : level <= 6 ? 2 : 4;
+  final story = paragraphCount == 1
+      ? <String>[_suzhouParagraphs.join()]
+      : paragraphCount == 2
+          ? <String>[
+              '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}',
+              '${_suzhouParagraphs[2]}${_suzhouParagraphs[3]}',
+            ]
+          : _suzhouParagraphs;
+  final annotations = paragraphCount == 1
+      ? <ReadingAnnotation>[
+          ReadingAnnotation(
+            pinyin: _suzhouAnnotations.map((item) => item.pinyin).join(' '),
+            vietnamese: _suzhouAnnotations.map((item) => item.vietnamese).join(' '),
+            english: _suzhouAnnotations.map((item) => item.english).join(' '),
+          ),
+        ]
+      : paragraphCount == 2
+          ? <ReadingAnnotation>[
+              ReadingAnnotation(
+                pinyin: '${_suzhouAnnotations[0].pinyin} ${_suzhouAnnotations[1].pinyin}',
+                vietnamese: '${_suzhouAnnotations[0].vietnamese} ${_suzhouAnnotations[1].vietnamese}',
+                english: '${_suzhouAnnotations[0].english} ${_suzhouAnnotations[1].english}',
+              ),
+              ReadingAnnotation(
+                pinyin: '${_suzhouAnnotations[2].pinyin} ${_suzhouAnnotations[3].pinyin}',
+                vietnamese: '${_suzhouAnnotations[2].vietnamese} ${_suzhouAnnotations[3].vietnamese}',
+                english: '${_suzhouAnnotations[2].english} ${_suzhouAnnotations[3].english}',
+              ),
+            ]
+          : _suzhouAnnotations;
+  final searchable = '${story.join()}${_suzhouDiscoveries.map((item) => item.text).join()}';
+  return JourneyLevelContent(
+    storyParagraphs: List<String>.unmodifiable(story),
+    storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
+    words: List<WordEntry>.unmodifiable(
+      _suzhouWords.where((entry) => searchable.contains(entry.word)),
+    ),
+    discoveries: List<DiscoveryEntry>.unmodifiable(
+      _suzhouDiscoveries.take(level <= 3 ? 1 : level <= 7 ? 2 : 4),
+    ),
+    wonderQuestion: '陈玉兰第二次看不见程朗时，为什么抬起手却没有喊他的名字？',
+    expressQuestion: '请写出“下一处等我”在故事开头和结尾分别是谁对谁说，以及这句话的意思怎样改变。',
+  );
+}
+
+const suzhouGardenMemoryResult =
+    '陈玉兰第二次没有喊回程朗，自己走完看不见他的几步；程朗在下一处停下回望。';
+const suzhouGardenCulturalPoint =
+    '拙政园以池水为中心，长廊、建筑、植物与转折让视线收紧后重新打开，形成层层展开的空间。';
+const suzhouGardenMemoryAnchor = '抬起又放下的手，与下一处回望的程朗';
+const suzhouGardenCompletionSummary = '下一处等我：两个人都学会在短暂看不见时等对方。';
+
 const _luoyangParagraphs = <String>[
   '傍晚，你沿伊河走到龙门石窟。两岸山崖像一道石门，密集的洞窟和佛龛分布在灰色岩壁上。',
   '从北魏到唐代，工匠在这里持续开凿。不同年代的造像留下服饰、面容和雕刻风格的变化。',
@@ -255,7 +313,7 @@ final journeyExpansionExperiences = <DailyJourneyExperience>[
     storyTitle: '下一处等我',
     headline: '下一处等我',
     description: '外婆第一次让十二岁的外孙走在前面，在拙政园一次次消失又重现的视线里学着不再把他喊回来。',
-    discoveryTeaser: '当熟悉的人第一次走出你的视线，你会不会把他叫回来？',
+    discoveryTeaser: '长廊、建筑转折与池水开合怎样让园中视线时而隐藏、时而重新出现？',
     distanceLabel: '1,820 km',
     stampSymbol: '园',
     content: suzhouGardenJourney,

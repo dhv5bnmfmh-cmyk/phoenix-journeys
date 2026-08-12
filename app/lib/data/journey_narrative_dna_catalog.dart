@@ -96,49 +96,58 @@ const chengduRemediatedNarrativeDna = JourneyNarrativeDnaRecord(
 
 const guangzhouChenClanGoldNarrativeDna = JourneyNarrativeDnaRecord(
   journeyId: 'guangzhou-chen-clan-academy',
-  narrativeIdentity: 'paper-bridges-translate-relief-across-material-constraints',
-  protagonistIdentity:
-      'Liang-Yao-twenty-two-year-old-fictional-Guangzhou-printmaking-student',
-  protagonistAgeIdentity: 'twenty-two-year-old-young-maker',
-  protagonistArchetype:
-      'young-maker-translating-form-across-material-constraints',
-  openingSituation:
-      'first-literal-contour-single-sheet-paper-prototype-separates-into-disconnected-pieces',
-  storyGoal:
-      'make-one-connected-single-sheet-interpretation-while-preserving-a-recognisable-source-relation',
-  locationMechanism:
-      'Chen-Clan-Academy-multi-craft-architecture-makes-material-difference-causal-to-the-making-problem',
-  movementPattern:
-      'observe-own-paper-prototype-fail-redraw-connections-cut-again-lift-and-test-legibility',
-  conflictType:
-      'literal-surface-fidelity-vs-paper-specific-structural-integrity',
-  choiceType:
-      'introduce-deliberate-paper-bridges-and-reencode-connections-for-the-new-medium',
-  climaxType:
-      'revised-paper-object-lifts-intact-while-peer-still-recognises-the-important-relation',
-  consequenceType:
-      'translated-object-functions-as-one-paper-piece-because-its-encoding-changed',
-  emotionalArc:
-      'copying-confidence-to-physical-failure-to-material-questioning-to-deliberate-reencoding-to-functional-proof',
-  historicalLearningMechanism:
-      'verified-multi-craft-Lingnan-decoration-provides-the-material-comparison-context-while-factual-expansion-remains-in-Discovery',
-  resolutionType:
-      'cross-medium-translation-preserves-relation-through-medium-specific-structure',
-  endingMechanism:
-      'changed-translation-method-is-applied-immediately-to-the-next-material-study',
-  memoryAnchorType:
-      'paper-bridges-absent-from-the-source-surface-but-necessary-for-the-translated-medium',
-  achievementType: 'material-relation-translator',
-  rewardSymbolism:
-      'connected-paper-bridge-symbolises-successful-reencoding-not-sacrifice-or-incompletion',
-  temporalPattern: 'single-material-study-session-without-external-countdown',
-  supportingStructure:
-      'peer-makers-Liang-Yao-and-ceramics-student-He-Zhen-test-legibility-without-mentor-authority',
-  centralMetaphor:
-      'fidelity-can-live-in-a-relation-even-when-a-new-material-needs-new-connections',
-  narrativeVoice: 'third-person-action-led-maker-prototype-testing',
-  storyRhythm:
-      'observe-literal-prototype-fails-material-conflict-reencode-paper-bridges-lift-peer-recognition-next-material',
+  narrativeIdentity: 'birth-mother-refuses-public-kinship-proof-to-protect-daughters-present-name',
+  protagonistIdentity: 'Chen-Xiuyi-sixty-one-year-old-birth-mother-meeting-adult-daughter-Liu-Jiahe',
+  protagonistAgeIdentity: 'sixty-one-year-old-mother-and-thirty-four-year-old-daughter',
+  protagonistArchetype: 'estranged-birth-mother-facing-cost-of-respecting-an-adult-childs-boundary',
+  openingSituation: 'first-private-meeting-after-thirty-four-years-with-no-relatives-and-no-reunion-photo-agreed',
+  storyGoal: 'continue-a-private-relationship-without-erasing-the-daughters-adoptive-name-and-life',
+  locationMechanism: 'jointly-funded-Chen-lineage-academy-plaque-and-layered-courtyards-intensify-public-surname-pressure',
+  movementPattern: 'private-entry-lineage-plaque-video-demand-phone-down-next-courtyard-side-by-side',
+  conflictType: 'public-kinship-recognition-and-family-face-vs-daughters-stated-name-and-boundary',
+  choiceType: 'turn-phone-face-down-name-Liu-Jiahe-and-refuse-public-image',
+  climaxType: 'mother-denies-relatives-the-proof-she-has-wanted-for-thirty-four-years',
+  consequenceType: 'no-reunion-photo-exists-but-daughter-continues-the-walk',
+  emotionalArc: 'contained-hope-to-surname-pressure-to-exposure-to-costly-restraint-to-tentative-continuation',
+  historicalLearningMechanism: 'verified-multi-lineage-funding-and-academy-identity-create-causal-surname-pressure-while-family-actions-remain-fiction',
+  resolutionType: 'private-continuation-without-public-restoration-claim',
+  endingMechanism: 'daughter-slows-at-threshold-and-the-two-enter-next-courtyard-side-by-side',
+  memoryAnchorType: 'phone-face-down-on-brick-beneath-academy-plaque',
+  achievementType: 'present-name-boundary-keeper',
+  rewardSymbolism: 'silent-screen-on-brick-symbolises-refused-public-proof',
+  temporalPattern: 'single-first-meeting-with-unplanned-live-family-call',
+  supportingStructure: 'estranged-birth-mother-and-adult-daughter-under-remote-kin-pressure',
+  centralMetaphor: 'a-shared-surname-cannot-replace-consent-to-a-shared-image',
+  narrativeVoice: 'third-person-close-to-mother-with-action-and-silence',
+  storyRhythm: 'agreement-entry-name-pressure-call-raised-phone-step-back-phone-down-cost-threshold-slowing',
+);
+
+const suzhouGardenGoldNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'suzhou-humble-administrators-garden',
+  narrativeIdentity: 'grandmother-releases-visual-control-through-repeated-disappearance-and-return',
+  protagonistIdentity: 'Chen-Yulan-grandmother-preparing-Cheng-Lang-for-independent-travel',
+  protagonistAgeIdentity: 'older-grandmother-and-twelve-year-old-grandson',
+  protagonistArchetype: 'daily-caregiver-learning-to-release-immediate-visual-control',
+  openingSituation: 'last-Sunday-before-grandson-begins-travelling-to-school-alone',
+  storyGoal: 'let-grandson-walk-ahead-without-breaking-their-practical-care-bond',
+  locationMechanism: 'garden-corridors-buildings-bridges-and-water-alternate-occlusion-with-reappearance',
+  movementPattern: 'grandson-walks-ahead-disappears-at-turns-and-waits-where-water-opens',
+  conflictType: 'protective-visual-control-vs-age-appropriate-independent-movement',
+  choiceType: 'lower-raised-hand-and-withhold-second-call',
+  climaxType: 'grandmother-completes-unseen-steps-before-grandson-reappears-looking-back',
+  consequenceType: 'grandson-keeps-leading-while-taking-responsibility-to-wait-and-look-back',
+  emotionalArc: 'habitual-vigilance-to-alarm-to-contained-fear-to-mutual-trust',
+  historicalLearningMechanism: 'layered-garden-space-makes-short-loss-and-recovery-of-sight-causal-without-turning-Discovery-into-plot',
+  resolutionType: 'care-shifts-from-continuous-visibility-to-reciprocal-waiting',
+  endingMechanism: 'grandmother-says-next-place-wait-for-me-and-does-not-catch-up',
+  memoryAnchorType: 'raised-then-lowered-hand-and-grandson-looking-back-at-next-opening',
+  achievementType: 'reciprocal-waiting-between-caregiver-and-growing-child',
+  rewardSymbolism: 'opening-sightline-marks-trust-without-erasing-separation',
+  temporalPattern: 'single-Sunday-walk-before-Monday-independent-travel',
+  supportingStructure: 'grandmother-grandson-care-relationship-without-mentor-approval',
+  centralMetaphor: 'care-can-survive-a-few-steps-out-of-sight',
+  narrativeVoice: 'third-person-grandmother-close-action-led',
+  storyRhythm: 'request-first-disappearance-call-return-second-disappearance-restraint-reappearance-reciprocal-waiting',
 );
 
 final approvedNarrativeDnaCatalog =
@@ -151,6 +160,7 @@ final approvedNarrativeDnaCatalog =
     else
       record,
   guangzhouChenClanGoldNarrativeDna,
+  suzhouGardenGoldNarrativeDna,
 ]);
 
 int duplicatedMajorDimensions(
