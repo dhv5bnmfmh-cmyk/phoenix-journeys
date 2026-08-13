@@ -17,6 +17,9 @@ const dailyCatalog = read('app/lib/data/daily_journey_catalog.dart');
 const extendedCatalog = read('app/lib/data/extended_journey_catalog.dart');
 const expansionCatalog = read('app/lib/data/journey_expansion_catalog.dart');
 const summerPalace = read('app/lib/data/summer_palace_journey.dart');
+const forbiddenCity = read('app/lib/data/forbidden_city_journey_runtime.dart');
+const shanghai = read('app/lib/data/shanghai_bund_one_pass.dart');
+const chengdu = read('app/lib/data/chengdu_kuanzhai_one_pass.dart');
 const hangzhou = read('app/lib/data/hangzhou_west_lake_one_pass.dart');
 const guangzhou = read('app/lib/data/guangzhou_chen_clan_one_pass.dart');
 const nanjing = read('app/lib/data/nanjing_qinhuai_one_pass.dart');
@@ -47,6 +50,23 @@ function identityRow(journeyId) {
   const row = proof.split('\n').find((line) => line.startsWith(`| \`${journeyId}\` |`));
   assert.ok(row, `Active identity proof must include ${journeyId}`);
   return row;
+}
+
+function identityFields(journeyId) {
+  const fields = identityRow(journeyId).split('|').slice(1, -1).map((value) => value.trim());
+  assert.equal(fields.length, 11, `${journeyId} identity proof must preserve all eleven fields`);
+  return {
+    story: fields[1],
+    source: fields[2],
+    protagonistRelationship: fields[3],
+    goal: fields[4],
+    conflict: fields[5],
+    choice: fields[6],
+    cost: fields[7],
+    memory: fields[8],
+    ending: fields[9],
+    verified: fields[10],
+  };
 }
 
 test('canonical standards bind Story culture and level learning without a parallel V2', () => {
@@ -213,6 +233,105 @@ test('Hangzhou, Guangzhou, and Nanjing identity fields match canonical package m
     '`DESCRIPTION`',
     '`MEMORY ANCHOR`',
   ], 'Identity field separation rule');
+});
+
+test('Forbidden City and Shanghai keep initial Goal separate from enacted Choice', () => {
+  requiresEvery(forbiddenCity, [
+    '想做一张能解释宫城空间的学习图',
+    '一张好图应该有一条明确主线',
+    '两条路线都来自真实的行动',
+    '不选一条覆盖另一条',
+    forbiddenCity.match(/const forbiddenCityMemoryAnchor = '([^']+)'/)[1],
+  ], 'Forbidden City active runtime');
+  const forbiddenFields = identityFields('beijing-forbidden-city');
+  requiresEvery(forbiddenFields.goal, [
+    '建筑怎样组织人的移动',
+    '可读的宫城学习图',
+    '一条明确主线',
+  ], 'Forbidden City Goal');
+  assert.notEqual(forbiddenFields.goal, forbiddenFields.choice);
+  assert.doesNotMatch(forbiddenFields.goal, /^保留两条都成立的路线$/);
+  requiresEvery(forbiddenFields.choice, ['不选一条覆盖另一条', '不同线型保留'], 'Forbidden City Choice');
+
+  const shanghaiGoal = capture(
+    shanghai,
+    /final shanghaiBundOnePassRemediation[\s\S]*?goal: '([^']+)'/,
+    'Shanghai goal',
+  );
+  const shanghaiConflict = capture(
+    shanghai,
+    /final shanghaiBundOnePassRemediation[\s\S]*?conflict: '([^']+)'/,
+    'Shanghai conflict',
+  );
+  const shanghaiFields = identityFields('shanghai-bund');
+  assert.equal(shanghaiFields.goal, shanghaiGoal);
+  assert.equal(shanghaiFields.conflict, shanghaiConflict);
+  assert.doesNotMatch(shanghaiFields.goal, /^把旧提单带过江$/);
+  requiresEvery(shanghaiFields.choice, ['旧提单', '电脑包', '上船', '新职业'], 'Shanghai Choice');
+  assert.match(shanghaiFields.cost, /identity \/ certainty cost/);
+  assert.doesNotMatch(shanghaiFields.cost, /承担文件与记忆的重量/);
+});
+
+test('Chengdu and Suzhou identity proof follows active action evidence without invented motives', () => {
+  const chengduGoal = capture(
+    chengdu,
+    /final chengduKuanzhaiOnePassRemediation[\s\S]*?goal: '([^']+)'/,
+    'Chengdu goal',
+  );
+  const chengduConflict = capture(
+    chengdu,
+    /final chengduKuanzhaiOnePassRemediation[\s\S]*?conflict: '([^']+)'/,
+    'Chengdu conflict',
+  );
+  requiresEvery(chengdu, [
+    '林夏还没起身，周叔已经把椅子移开',
+    '人过去后，他又把它放回茶桌边',
+    '谁先看见下一次需要，谁就先动手',
+    '没有再伸手',
+  ], 'Chengdu active Story');
+  const chengduFields = identityFields('chengdu-kuanzhai-alley');
+  assert.equal(chengduFields.goal, chengduGoal);
+  assert.equal(chengduFields.conflict, chengduConflict);
+  requiresEvery(chengduFields.choice, ['通行', '移椅', '通道清空', '茶桌'], 'Chengdu Choice');
+  requiresEvery(chengduFields.memory, ['林夏还没起身', '周叔', '放回茶桌旁'], 'Chengdu Memory Moment');
+  assert.doesNotMatch(chengduFields.goal + chengduFields.conflict + chengduFields.cost, /私人记忆|独占纪念物|该留下给谁/);
+
+  requiresEvery(expansionCatalog, [
+    '下周一，十二岁的程朗要开始自己坐车去初中',
+    '今天让我走前面吧，我在下一处等你',
+    '陈玉兰抬起手',
+    '却没有喊',
+    '陈玉兰没有追上去',
+  ], 'Suzhou active Story');
+  const suzhouFields = identityFields('suzhou-humble-administrators-garden');
+  requiresEvery(suzhouFields.goal, ['独立通勤', '让他走在前面', '不再因暂时看不见他就把他叫回来'], 'Suzhou Goal');
+  requiresEvery(suzhouFields.choice, ['第二次', '抬起手', '没有喊'], 'Suzhou Choice');
+  requiresEvery(suzhouFields.ending, ['背影很快又被房屋挡住', '陈玉兰没有追上去'], 'Suzhou Ending');
+  assert.doesNotMatch(suzhouFields.goal, /确认孩子仍会回望与等待/);
+});
+
+test('all nine proofs keep Goal, Choice, Memory, and Ending as distinct complete fields', () => {
+  const journeyIds = [
+    'beijing-summer-palace',
+    'beijing-forbidden-city',
+    'shanghai-bund',
+    'xian-city-wall',
+    'hangzhou-west-lake',
+    'chengdu-kuanzhai-alley',
+    'nanjing-qinhuai-river',
+    'guangzhou-chen-clan-academy',
+    'suzhou-humble-administrators-garden',
+  ];
+  for (const journeyId of journeyIds) {
+    const fields = identityFields(journeyId);
+    for (const key of ['goal', 'conflict', 'choice', 'cost', 'memory', 'ending']) {
+      assert.ok(fields[key].length > 0, `${journeyId} ${key} must be explicit`);
+    }
+    assert.notEqual(fields.goal, fields.choice, `${journeyId} Goal must not equal Choice`);
+    assert.notEqual(fields.story, fields.memory, `${journeyId} Story title must not equal Memory Moment`);
+    assert.notEqual(fields.choice, fields.ending, `${journeyId} Choice must not equal Ending`);
+    assert.equal(fields.verified, 'PASS');
+  }
 });
 
 test('canonical governance enforces a single current-main development line', () => {
