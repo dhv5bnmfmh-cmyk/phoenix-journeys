@@ -90,7 +90,7 @@ test('all journey grammar repairs stay theme-specific at every level', () => {
 
   for (const destinationMarker of [
     '午门和中轴线',
-    '昆明湖的倒影',
+    '冬至前后十七孔桥的金光',
     '外滩与浦东两岸',
     '城墙和护城河',
     '断桥残雪、湿石阶和预约卡',

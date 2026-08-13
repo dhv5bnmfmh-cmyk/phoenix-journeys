@@ -58,9 +58,11 @@ void main() {
         );
         expect(
           content.discoveries.length,
-          profile.band == PhoenixReadingBand.beginner
-              ? 1
-              : inInclusiveRange(1, 2),
+          journey.id == 'beijing-summer-palace'
+              ? (profile.phoenixLevel! <= 4 ? 2 : 3)
+              : profile.band == PhoenixReadingBand.beginner
+                  ? 1
+                  : inInclusiveRange(1, 2),
           reason: '${journey.id} should use the approved discovery shape',
         );
         expect(content.words, isNotEmpty, reason: journey.id);

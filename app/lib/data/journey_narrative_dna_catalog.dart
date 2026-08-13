@@ -178,10 +178,40 @@ const suzhouGardenGoldNarrativeDna = JourneyNarrativeDnaRecord(
   storyRhythm: 'request-first-disappearance-call-return-second-disappearance-restraint-reappearance-reciprocal-waiting',
 );
 
+const summerPalaceCulturalIntegrationNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'beijing-summer-palace',
+  narrativeIdentity: 'winter-solstice-bridge-light-forces-old-photo-recovery',
+  protagonistIdentity: 'Xu-Cheng-seventeen-year-old-student-photographer-with-grandmother-Zhou-Lan',
+  protagonistAgeIdentity: 'seventeen-year-old-student-photographer',
+  protagonistArchetype: 'young-photographer-proving-independent-judgment',
+  openingSituation: 'winter-solstice-season-photo-window-for-school-exhibition',
+  storyGoal: 'make-a-flawless-Summer-Palace-photograph-without-grandmother-composition-control',
+  locationMechanism: 'Long-Corridor-lake-route-and-winter-solstice-Seventeen-Arch-Bridge-light-window',
+  movementPattern: 'corridor-pace-conflict-to-northwest-bridge-vantage-and-bend-to-retrieve-photo',
+  conflictType: 'flawless-image-vs-restoration-trace-and-grandmother-trust',
+  choiceType: 'lower-camera-during-moving-bridge-light-to-retrieve-grandmothers-old-photograph',
+  climaxType: 'seasonal-Seventeen-Arch-Bridge-light-shifts-during-photograph-retrieval',
+  consequenceType: 'desired-seasonal-shot-is-lost-and-cannot-be-recreated-that-moment',
+  emotionalArc: 'control-to-irritation-to-time-pressure-to-costly-choice-to-trust-with-residue',
+  historicalLearningMechanism: '1860-damage-1886-restoration-and-seasonal-bridge-light-enter-through-object-position-and-timing',
+  resolutionType: 'independent-authorship-is-recognized-after-preserving-relational-evidence-at-real-cost',
+  endingMechanism: 'grandmother-entrusts-old-photo-and-old-new-images-share-one-camera-bag-layer',
+  memoryAnchorType: 'camera-lowered-as-old-photo-falls-during-moving-bridge-light',
+  achievementType: 'place-grounded-relational-photographer',
+  rewardSymbolism: 'old-and-new-photographs-together-mark-trust-without-erasing-history',
+  temporalPattern: 'single-clear-winter-afternoon-with-expiring-seasonal-bridge-light',
+  supportingStructure: 'grandmother-with-restoration-history-shifts-from-composition-control-to-entrustment',
+  centralMetaphor: 'a-photograph-cannot-freeze-light-or-history-without-choosing-what-to-preserve',
+  narrativeVoice: 'third-person-close-to-Xu-Cheng-action-led',
+  storyRhythm: 'season-arrival-corridor-pace-history-object-vantage-light-photo-fall-choice-loss-reframe-trust',
+);
+
 final approvedNarrativeDnaCatalog =
     List<JourneyNarrativeDnaRecord>.unmodifiable(<JourneyNarrativeDnaRecord>[
   for (final record in baseline.approvedNarrativeDnaCatalog)
-    if (record.journeyId == 'beijing-forbidden-city')
+    if (record.journeyId == 'beijing-summer-palace')
+      summerPalaceCulturalIntegrationNarrativeDna
+    else if (record.journeyId == 'beijing-forbidden-city')
       forbiddenCityRemediatedNarrativeDna
     else if (record.journeyId == 'chengdu-kuanzhai-alley')
       chengduRemediatedNarrativeDna

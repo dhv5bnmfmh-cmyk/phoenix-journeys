@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
-import 'package:phoenix_journeys/data/summer_palace_language_level_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
@@ -40,7 +39,7 @@ void main() {
     );
   });
 
-  test('TOCFL Level 5 receives two focused advanced discoveries', () {
+  test('TOCFL Level 5 receives three focused Pilot discoveries', () {
     final profile = agent.profilesFor(ChineseExamTrack.tocfl).firstWhere(
           (item) => item.levelCode == '5',
         );
@@ -52,7 +51,7 @@ void main() {
 
     expect(content.storyParagraphs, hasLength(legacyPlan.paragraphCount));
     expect(content.storyAnnotations, hasLength(legacyPlan.paragraphCount));
-    expect(content.discoveries, hasLength(2));
+    expect(content.discoveries, hasLength(3));
     expect(content.words, hasLength(14));
 
     final issues = agent.validateJourney(
@@ -74,7 +73,24 @@ void main() {
     expect(content.words, hasLength(16));
     expect(
       content.words.map((entry) => entry.word).toSet(),
-      summerPalaceAdaptiveWords.map((entry) => entry.word).toSet(),
+      const <String>{
+        '快门',
+        '构图',
+        '修复',
+        '旧照片',
+        '金光',
+        '保存',
+        '痕迹',
+        '规划',
+        '颐和园',
+        '昆明湖',
+        '长廊',
+        '十七孔桥',
+        '冬至',
+        '桥洞',
+        '东堤',
+        '南湖岛',
+      },
     );
   });
 
@@ -86,7 +102,7 @@ void main() {
       );
       final storyTarget = phoenixStoryLengthTargetFor(profile);
       final expectedDiscoveryCount =
-          profile.band == PhoenixReadingBand.beginner ? 1 : 2;
+          profile.phoenixLevel! <= 4 ? 2 : 3;
 
       expect(
         content.storyParagraphs,

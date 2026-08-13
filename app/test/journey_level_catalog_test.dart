@@ -29,7 +29,7 @@ void main() {
       final standard = resolveJourneyLevel(journey, JourneyDifficulty.standard);
       expect(standard.storyParagraphs, hasLength(2));
       expect(standard.storyAnnotations, hasLength(2));
-      expect(standard.discoveries, hasLength(2));
+      expect(standard.discoveries, hasLength(3));
     });
 
     test('challenge journey adds analytical depth without changing destination',

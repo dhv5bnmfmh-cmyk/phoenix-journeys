@@ -18,7 +18,7 @@ const controller = readFileSync(
 test('Summer Palace keeps persistent fallback journey levels', () => {
   assert.match(catalog, /enum JourneyDifficulty \{ easy, standard, challenge \}/);
   assert.match(catalog, /summerPalaceEasyLevel/);
-  assert.match(catalog, /const summerPalaceChallengeLevel = JourneyLevelContent/);
+  assert.match(catalog, /final summerPalaceChallengeLevel = JourneyLevelContent/);
   assert.match(state, /JourneyDifficulty journeyDifficulty/);
   assert.match(state, /Future<void> setJourneyDifficulty/);
   assert.match(state, /_key\('difficulty'\)/);

@@ -27,13 +27,13 @@ test('Pilot N1 declares its exact governance identity and causal story', () => {
     story,
     [
       "summerPalacePilotPhaseId = 'PILOT_N1'",
-      "summerPalacePilotPrimaryFinding = 'PROTAGONIST_IDENTITY_MISSING'",
+      "summerPalacePilotPrimaryFinding = 'CULTURAL_PLACE_CAUSALITY_MISSING'",
       "summerPalacePilotProtagonist = '许澄'",
       '外婆周岚',
-      '必须选择',
-      '先捡回照片',
-      '《留下痕迹的风景》',
-      '只把旧照片交给她保存',
+      '迫使许澄在作品和外婆的记忆之间选择',
+      '先捡回旧照片',
+      '等了一下午的十七孔桥桥洞金光真实消失',
+      '周岚停止替她调整构图并把旧照片交给她保存',
     ],
     'Summer Palace Story',
   );
@@ -46,10 +46,10 @@ test('Story and Discovery have separate functions', () => {
     [
       'summerPalaceStoryFunctionContract',
       'summerPalaceDiscoveryFunctionContract',
-      '不复述许澄的事件链',
+      '不复述许澄事件链',
       '借景',
-      '对景',
-      '修复记录',
+      '十七孔桥空间与季节光线',
+      'World Heritage保护',
     ],
     'Summer Palace function contracts',
   );

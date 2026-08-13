@@ -190,10 +190,18 @@ JourneyLevelContent _resolveSummerPalaceN1Level({
   final level = profile.phoenixLevel ?? _legacySummerPalaceLevel(profile.band);
   final target = phoenixStoryLengthTargetFor(profile);
   final plan = _languageLevelAgent.planFor(profile);
-  final base = summerPalaceN1LevelForPhoenixLevel(level).withReadingLimit(
+  final source = summerPalaceN1LevelForPhoenixLevel(level);
+  final limited = source.withReadingLimit(
     paragraphCount:
         profile.isPhoenix ? target.paragraphCount : plan.paragraphCount,
-    discoveryCount: _summerPalaceN1DiscoveryCount(profile.band),
+  );
+  final base = JourneyLevelContent(
+    storyParagraphs: limited.storyParagraphs,
+    storyAnnotations: limited.storyAnnotations,
+    words: source.words,
+    discoveries: source.discoveries,
+    wonderQuestion: source.wonderQuestion,
+    expressQuestion: source.expressQuestion,
   );
   final context = <String>[
     ...base.storyParagraphs,
@@ -218,15 +226,6 @@ JourneyLevelContent _resolveSummerPalaceN1Level({
     expressQuestion: base.expressQuestion,
   );
 }
-
-int _summerPalaceN1DiscoveryCount(PhoenixReadingBand band) => switch (band) {
-      PhoenixReadingBand.beginner => 1,
-      PhoenixReadingBand.elementary ||
-      PhoenixReadingBand.intermediate => 2,
-      PhoenixReadingBand.upperIntermediate ||
-      PhoenixReadingBand.advanced ||
-      PhoenixReadingBand.mastery => 2,
-    };
 
 int _legacySummerPalaceLevel(PhoenixReadingBand band) => switch (band) {
       PhoenixReadingBand.beginner => 1,

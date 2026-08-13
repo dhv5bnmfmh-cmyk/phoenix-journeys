@@ -40,10 +40,8 @@ test('advanced and mastery discoveries stay in two focused sections', () => {
     catalog,
     /PhoenixReadingBand\.upperIntermediate \|\|\s*PhoenixReadingBand\.advanced \|\|\s*PhoenixReadingBand\.mastery => 2/,
   );
-  assert.match(
-    runtime,
-    /PhoenixReadingBand\.upperIntermediate \|\|\s*PhoenixReadingBand\.advanced \|\|\s*PhoenixReadingBand\.mastery => 2/,
-  );
+  assert.match(runtime, /discoveries: source\.discoveries/);
+  assert.doesNotMatch(runtime, /_summerPalaceN1DiscoveryCount/);
 });
 
 test('advanced prompts use journey-specific analysis lenses', () => {
