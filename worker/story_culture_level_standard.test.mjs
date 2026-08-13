@@ -10,6 +10,8 @@ const design = read('docs/templates/PHOENIX_STORY_DISCOVERY_DESIGN_MATRIX.md');
 const acceptance = read('docs/templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md');
 const sixStage = read('docs/templates/PHOENIX_SIX_STAGE_JOURNEY_ACCEPTANCE_MATRIX.md');
 const behavior = read('ai/AI_BEHAVIOR.md');
+const qualityGate = read('docs/journey-content-quality-gate.md');
+const baseline = read('docs/PHOENIX_STABLE_BASELINE_STANDARD.md');
 const roadmap = read('docs/PHOENIX_STORY_REMEDIATION_ROADMAP.md');
 
 function requiresEvery(text, values, label) {
@@ -89,8 +91,49 @@ test('horizontal audit is current and does not authorize multi-Journey rewrites'
     '`guangzhou-chen-clan-academy`',
     '`suzhou-humble-administrators-garden`',
     'Never modify Journeys in this standards PR',
-    'recommended next isolated audit',
+    'FURTHER ISOLATED AUDIT REQUIRED',
+    '《不入镜》',
+    'guangzhouChenClanOnePassLevels → _guangzhouLockedLevel(...)',
+    '陈秀仪',
+    '刘嘉禾',
+    '匾额下被扣在青砖上的手机',
   ], 'Horizontal audit');
   assert.doesNotMatch(roadmap, /approved catalog remains eight/i);
   assert.doesNotMatch(roadmap, /Suzhou is not counted as Gold/i);
+  const currentGuangzhouRow = roadmap
+    .split('\n')
+    .find((line) => line.startsWith('| `guangzhou-chen-clan-academy` | 《不入镜》 | PASS |'));
+  assert.ok(currentGuangzhouRow, 'Current Guangzhou audit row must bind 《不入镜》');
+  assert.doesNotMatch(
+    currentGuangzhouRow,
+    /梁遥|贺真|纸桥|prototype|maker|material reencoding/i,
+    'Current Guangzhou rationale must not use legacy Paper Bridge evidence',
+  );
+});
+
+test('canonical governance enforces a single current-main development line', () => {
+  const governance = `${behavior}\n${qualityGate}\n${baseline}`;
+  requiresEvery(governance, [
+    'PHOENIX SINGLE-TRACK DEVELOPMENT',
+    'STARTING_MAIN_SHA',
+    'ACTIVE_DEVELOPMENT_BRANCH',
+    'ACTIVE_DEVELOPMENT_PR',
+    'REMOTE_ACTIVE_DEVELOPMENT_LINE_COUNT',
+    'MULTIPLE ACTIVE DEVELOPMENT LINES — BLOCKED',
+    'fetch current remote main',
+    'RELATED HISTORY != CURRENT SOURCE OF TRUTH',
+    'ONE JOURNEY AT A TIME',
+    'ONE ACTIVE DEVELOPMENT PR AT A TIME',
+    'ONE ACTIVE DEVELOPMENT BRANCH AT A TIME',
+    'ONE ACTIVE DEVELOPMENT LINE',
+    'NO SILENT PRODUCT REPLACEMENT',
+    'ABSENCE OF AUTHORIZATION = PRESERVE CURRENT MAIN',
+    'PROTECTED BASELINE MANIFEST',
+    'FILE EXISTS != ACTIVE PRODUCT',
+    'ACTIVE RUNTIME',
+    'ACTIVE RESOLVER',
+    'ACTIVE BINDING',
+    'CURRENT MAIN',
+    'Founder approval remains SHA-bound',
+  ], 'Single-track governance');
 });
