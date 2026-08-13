@@ -32,7 +32,20 @@ Before proposing a new Journey candidate the Agent MUST:
 - Declare Truth Mode, Incremental Cultural Value, and Incremental Human Value for the candidate.
 - Run Same-Place collision and Whole-library differentiation (machine + human gates) prior to STORY LOCK.
 
-One City != One Story; One Place != One Story. Continue to follow existing Gold / Truth / Place Causality rules and do not treat any Pilot method as a content template. 
+One City != One Story; One Place != One Story. Continue to follow existing Gold / Truth / Place Causality rules. Do not treat any Pilot method as a content template.
+
+Summer Palace Founder-approved Method Pilot is NOT a Story template, Level template, Cultural template, or Place Story Universe template.
+
+Before developing a new Journey candidate that targets the same Place the Agent MUST:
+
+- Read the same-Place active Story inventory.
+- Read the City inventory.
+- Read the whole Founder-approved Gold catalog.
+- Declare the candidate's Truth Mode and record evidence classification.
+- Demonstrate Incremental Cultural Value and Incremental Human Value in writing with supporting evidence paths.
+- Execute a human Same-Place differentiation (compare opening, protagonist, relationship, Goal, Conflict, Choice, Cost, Climax, Consequence, Memory Moment, Story Shape, and cultural mechanism) and record the differentiation result.
+
+Only after these items pass may the Agent proceed with pre-lock architecture and the normal Story development gates. 
 
 The mandatory development order is:
 

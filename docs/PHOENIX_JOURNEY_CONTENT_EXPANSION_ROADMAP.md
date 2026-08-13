@@ -2,28 +2,40 @@
 
 Status: FOUNDER STRATEGIC ROADMAP — NON-BINDING QUALITY AUTHORITY
 
-This roadmap is a Founder-declared sequencing guide for long-term content expansion. It is not a replacement for canonical standards and does not change quality gates.
+CURRENT FOUNDER STRATEGIC ROADMAP
 
-Phases (example Founder strategy):
+This roadmap records the current Founder-declared sequencing for content expansion. It is a non-binding strategic ordering and does not alter canonical quality standards or acceptance gates.
 
-- PHASE A: NATIONAL SEED COVERAGE
-  - Establish baseline Gold coverage across province-level regions and major cities. Emphasize cultural and human depth rather than count.
-  - Objective: create seed Journeys allowing future Place Story Universe expansion.
+PHASE A
+NATIONAL SEED COVERAGE
 
-- PHASE B: BEIJING DEPTH PROGRAM
-  - City Place Network expansion and Place Story Universe growth focused on Beijing.
-  - Allow multiple independent Journeys per Place when Same-Place differentiation and Incremental Value are proven.
+- Establish baseline Gold coverage across province-level regions and major cities.
+- Prioritize cultural and human depth over raw story counts.
+- Objective: create seed Journeys that enable future Place Story Universe expansion.
 
-- PHASE C: SHANGHAI DEPTH PROGRAM
-  - Start only after Founder declares BEIJING DEPTH SUFFICIENT.
+PHASE B
+BEIJING DEPTH PROGRAM
 
-- PHASE D: OTHER PROVINCES / CITIES
-  - Sequential Founder authorization per strategic priority.
+- Focused City Place Network expansion for Beijing.
+- Support multiple independent Journeys per Place only when Same-Place differentiation and Incremental Value are demonstrated.
+
+PHASE C
+SHANGHAI DEPTH PROGRAM
+
+- Execute only after Founder declares BEIJING DEPTH SUFFICIENT.
+
+PHASE D
+OTHER FOUNDER-AUTHORIZED PROVINCES / CITIES
+
+- Sequential Founder authorization for subsequent provinces and cities.
+
+Additional principles
+
+- It is permissible in future phases to return to Beijing, Shanghai, or any existing Place to add genuinely new independent Journeys when justified by Incremental Cultural Value and Incremental Human Value.
+- The Founder-declared pilot or method for a Story (for example, Summer Palace method evidence) IS NOT a Story template, Level template, Cultural template, or Place Story Universe template.
+- "《留下痕迹的风景》" is a Founder-approved Gold Story and Pilot evidence set, and must not be treated as a future template for Yiheyuan or other Place Stories.
+- Roadmap status = NON-BINDING FOUNDER STRATEGY. FOUNDER APPROVAL = PENDING
 
 Notes:
 
-- Roadmap status is non-binding to the content quality standard. It signals sequencing and prioritization only.
-- Founder decisions (City depth sufficient, Place freeze, reopen) remain authoritative.
 - Roadmap must not be used to justify coverage quotas that reduce Gold quality.
-
-Approved scope: creator: Founder-authorized standards-only task. FOUNDER APPROVAL for merge: PENDING.
