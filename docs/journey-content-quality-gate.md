@@ -187,3 +187,13 @@ A valid build may be machine-green while `OVERALL_STORY_QUALITY = PENDING` becau
 A deterministic PASS remains only a machine gate. For Story/Culture/Level work, the release record MUST additionally preserve: Cultural Fact Action evidence, human Place Causality, Cultural Knowledge Residue, Story/Discovery bridge, Discovery depth, three gradients, five cognitive bands, adjacent semantic deltas, backward completeness, Lv10 mastery, exact four-language alignment, vocabulary provenance, and learner-visible QA-language sweep.
 
 Founder authority is exact-head and SHA-bound. `PR HEAD = Founder-reviewed Candidate = Preview release`. A later source commit invalidates the prior approval even when every automated check stays green.
+
+## Single-track development gate
+
+Phoenix uses `PHOENIX SINGLE-TRACK DEVELOPMENT`: permanent branch `main`; maximum active development branches = 1; maximum active development PRs = 1; maximum active development lines = 1. Before any repository write, verify `STARTING_MAIN_SHA`, `ACTIVE_DEVELOPMENT_BRANCH`, `ACTIVE_DEVELOPMENT_PR`, and `REMOTE_ACTIVE_DEVELOPMENT_LINE_COUNT`. More than one line is `MULTIPLE ACTIVE DEVELOPMENT LINES — BLOCKED`.
+
+New work must fetch current remote main and branch from that exact SHA. `RELATED HISTORY != CURRENT SOURCE OF TRUTH`. Journey work is one Journey, one PR, one branch, and one line; unrelated product, standards, UI, or remediation work may not run beside it without explicit Founder scope.
+
+The gate includes `NO SILENT PRODUCT REPLACEMENT`: `ABSENCE OF AUTHORIZATION = PRESERVE CURRENT MAIN`. Record a `PROTECTED BASELINE MANIFEST` before writing and prove `AUTHORIZED DELTA + PROTECTED BASELINE PARITY` at closeout.
+
+`FILE EXISTS != ACTIVE PRODUCT`. Current judgments must establish active runtime identity from `ACTIVE RUNTIME`, `ACTIVE RESOLVER`, `ACTIVE BINDING`, and `CURRENT MAIN` before using content as defect evidence. Legacy constants and inactive packages cannot define current product behavior. Founder approval remains SHA-bound.
