@@ -167,6 +167,20 @@ The Agent MUST keep these separate:
 
 Machine scores, green CI, field completeness, Rule A = 0, or Rule B = 0 MUST NOT infer literary `PASS`. Before explicit Founder approval, `FOUNDER_STORY_APPROVAL = PENDING`.
 
+## Phoenix single-track development
+
+Phoenix has one permanent branch: `main`. At any time the maximum is one active development branch, one active development PR, and one active development line. The source of truth is current remote `main` plus the one explicitly Founder-authorized active development branch.
+
+Before any write, report and verify `STARTING_MAIN_SHA`, `ACTIVE_DEVELOPMENT_BRANCH`, `ACTIVE_DEVELOPMENT_PR`, and `REMOTE_ACTIVE_DEVELOPMENT_LINE_COUNT`. If the count is greater than one, report `MULTIPLE ACTIVE DEVELOPMENT LINES — BLOCKED` and do not write. Every new task must fetch current remote main and create its sole branch from that exact SHA. `RELATED HISTORY != CURRENT SOURCE OF TRUTH`.
+
+Follow `ONE JOURNEY AT A TIME`, `ONE ACTIVE DEVELOPMENT PR AT A TIME`, `ONE ACTIVE DEVELOPMENT BRANCH AT A TIME`, and `ONE ACTIVE DEVELOPMENT LINE`. Old PRs, Preview branches, temporary validation branches, prototypes, and remediation branches are historical evidence, never a starting baseline.
+
+### No silent product replacement
+
+`ABSENCE OF AUTHORIZATION = PRESERVE CURRENT MAIN`. A historical checkout must never restore or overwrite current UI, navigation, runtime, six-stage behavior, active Story, or any other unauthorized product surface. Before writing, create a `PROTECTED BASELINE MANIFEST` covering the current main SHA, scoped screen/runtime path, active Story source, Journey IDs, six-stage behavior, and UI/navigation behavior. Closeout must prove the authorized delta plus protected baseline parity.
+
+`FILE EXISTS != ACTIVE PRODUCT`. Audit and implementation authority follow `ACTIVE RUNTIME`, `ACTIVE RESOLVER`, `ACTIVE BINDING`, and `CURRENT MAIN`; inactive file residue is archive evidence only. Founder approval remains SHA-bound: PR head, Founder-reviewed Candidate, and Preview release must be identical, and any source commit invalidates prior approval.
+
 Founder-approved Stories are reviewable for quality debt but MUST NOT be modified merely because the Agent recommends reopening them. Record `REOPEN RECOMMENDED` and wait for Founder authorization. An unapproved active Candidate may be remediated directly within its authorized Story scope.
 
 ### Story × Culture × Level behavior
