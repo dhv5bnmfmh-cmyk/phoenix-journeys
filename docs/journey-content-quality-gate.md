@@ -57,12 +57,31 @@ The report must state the exact implemented scope rather than imply natural-lang
 
 ## What the deterministic agent cannot prove
 
-Additionally, the Quality Gate enforces the minimal expansion principles for new Journey proposals when applicable:
+Automated green status cannot prove:
 
-- ONE PLACE != ONE STORY — allow multiple independent Journeys per Place, but require Same-Place Differentiation proof.
-- SAME PLACE STORY DIFFERENTIATION — candidates must pass Same-Place collision and Whole-library differentiation checks.
-- TRUTH MODE — candidates must declare and verify Truth Mode (VERIFIED HISTORY / VERIFIED CULTURAL FACT / CONTEMPORARY FICTION / FICTIONAL CHARACTER IN VERIFIED HISTORICAL SETTING / FOLKLORE / LITERARY TRADITION).
-- INCREMENTAL VALUE — candidates must declare Incremental Cultural Value and Incremental Human Value; coverage quotas must not override Gold requirements.
+- that a protagonist feels alive;
+- that a Goal matters for a human reason;
+- that a Relationship is emotionally or causally meaningful;
+- that a Choice carries a real cost;
+- that a climax is more than a revised method succeeding;
+- that Chinese prose feels natural rather than engineered;
+- that exposition is artistically restrained;
+- that a Story contains a memorable human moment;
+- that Story Shape is genuinely different to a reader;
+- that a de-skinned Story spine does not collide with an approved Gold Story;
+- that Lv5 works as literature;
+- that Lv10 deepens rather than inflates;
+- that removing the final explanation improves the ending;
+- that Founder approved the exact candidate.
+
+## Expansion Gate
+
+When a new Journey proposal is in scope, the Quality Gate enforces the Expansion Gate minimal checks (machine or human where applicable):
+
+- ONE PLACE != ONE STORY — multiple independent Journeys per Place are permitted but require Same-Place Differentiation proof.
+- SAME-PLACE STORY DIFFERENTIATION — human same-place comparison of opening, protagonist, relationship, Goal, Conflict, Choice, Cost, Climax, Consequence, Memory Moment, Story Shape, and cultural mechanism.
+- TRUTH MODE — candidate must declare Truth Mode and provide evidence classification (VERIFIED HISTORY / VERIFIED CULTURAL FACT / CONTEMPORARY FICTION / FICTIONAL CHARACTER IN VERIFIED HISTORICAL SETTING / FOLKLORE / LITERARY TRADITION).
+- INCREMENTAL VALUE — candidate must demonstrate Incremental Cultural Value and Incremental Human Value; coverage quotas must not override Gold acceptance.
 
 ## What the deterministic agent cannot prove
 
