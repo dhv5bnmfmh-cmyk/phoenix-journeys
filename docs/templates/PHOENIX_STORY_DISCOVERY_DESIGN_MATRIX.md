@@ -31,20 +31,29 @@ Level Scope:
 Owner:
 Reviewer:
 Expansion Layer: LAYER 1 / LAYER 2 / LAYER 3
+Parent Geographic Hierarchy:
 Parent Province-Level Region:
 Parent City:
 Parent Place:
+Place Story Universe Inventory:
+Existing Same-Place Stories:
 Existing Place Story Inventory:
 Candidate Story Universe Slot:
+Candidate Cultural Slice: DESCRIPTIVE / NON-QUOTA
+Time Layer:
+Social Perspective: DESCRIPTIVE / NON-QUOTA
+Narrative Scale: DESCRIPTIVE / NON-QUOTA
 Truth Mode:
+Primary Place Mechanism:
 Incremental Cultural Value:
 Incremental Human Value:
 Same-Place Differentiation Result:
-Whole-Library Differentiation Result:
-Narrative Scale = DESCRIPTIVE / NON-QUOTA
-Social Perspective = DESCRIPTIVE / NON-QUOTA
-Candidate Cultural Slice = DESCRIPTIVE / NON-QUOTA
+Whole-Catalog Differentiation Result:
+Story Universe Result:
+Founder Strategic Authorization:
 ```
+
+`Candidate Cultural Slice`, `Social Perspective`, and `Narrative Scale` are descriptive planning fields only. They MUST NOT become quotas, required category counts, or template slots.
 
 ## 2. Stage Function Contracts
 
