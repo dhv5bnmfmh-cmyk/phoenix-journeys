@@ -13,11 +13,40 @@ const behavior = read('ai/AI_BEHAVIOR.md');
 const qualityGate = read('docs/journey-content-quality-gate.md');
 const baseline = read('docs/PHOENIX_STABLE_BASELINE_STANDARD.md');
 const roadmap = read('docs/PHOENIX_STORY_REMEDIATION_ROADMAP.md');
+const dailyCatalog = read('app/lib/data/daily_journey_catalog.dart');
+const extendedCatalog = read('app/lib/data/extended_journey_catalog.dart');
+const expansionCatalog = read('app/lib/data/journey_expansion_catalog.dart');
+const summerPalace = read('app/lib/data/summer_palace_journey.dart');
+const hangzhou = read('app/lib/data/hangzhou_west_lake_one_pass.dart');
+const guangzhou = read('app/lib/data/guangzhou_chen_clan_one_pass.dart');
+const nanjing = read('app/lib/data/nanjing_qinhuai_one_pass.dart');
 
 function requiresEvery(text, values, label) {
   for (const value of values) {
     assert.ok(text.includes(value), `${label} must include ${value}`);
   }
+}
+
+function capture(text, pattern, label) {
+  const match = text.match(pattern);
+  assert.ok(match, `Unable to resolve current runtime ${label}`);
+  return match[1];
+}
+
+function experienceTitle(text, idExpression) {
+  const escaped = idExpression.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return capture(
+    text,
+    new RegExp(`id: ${escaped},[\\s\\S]*?storyTitle: '([^']+)'`),
+    `${idExpression} Story title`,
+  );
+}
+
+function identityRow(journeyId) {
+  const proof = roadmap.split('## Horizontal Gold audit matrix')[0];
+  const row = proof.split('\n').find((line) => line.startsWith(`| \`${journeyId}\` |`));
+  assert.ok(row, `Active identity proof must include ${journeyId}`);
+  return row;
 }
 
 test('canonical standards bind Story culture and level learning without a parallel V2', () => {
@@ -109,6 +138,81 @@ test('horizontal audit is current and does not authorize multi-Journey rewrites'
     /梁遥|贺真|纸桥|prototype|maker|material reencoding/i,
     'Current Guangzhou rationale must not use legacy Paper Bridge evidence',
   );
+});
+
+test('all nine active identity proofs use current runtime titles and remain field-complete', () => {
+  const currentTitles = new Map([
+    ['beijing-summer-palace', experienceTitle(summerPalace, 'summerPalaceJourneyContent.id')],
+    ['beijing-forbidden-city', experienceTitle(dailyCatalog, 'beijingForbiddenCityJourney.id')],
+    ['shanghai-bund', experienceTitle(dailyCatalog, 'shanghaiBundJourney.id')],
+    ['xian-city-wall', experienceTitle(dailyCatalog, 'xianCityWallJourney.id')],
+    ['hangzhou-west-lake', experienceTitle(extendedCatalog, 'hangzhouWestLakeJourney.id')],
+    ['chengdu-kuanzhai-alley', experienceTitle(extendedCatalog, 'chengduKuanzhaiJourney.id')],
+    [
+      'nanjing-qinhuai-river',
+      capture(nanjing, /const nanjingQinhuaiCanonicalTitle = '([^']+)'/, 'Nanjing canonical title'),
+    ],
+    ['guangzhou-chen-clan-academy', experienceTitle(extendedCatalog, 'guangzhouChenClanJourney.id')],
+    ['suzhou-humble-administrators-garden', experienceTitle(expansionCatalog, 'suzhouGardenJourney.id')],
+  ]);
+
+  for (const [journeyId, title] of currentTitles) {
+    const row = identityRow(journeyId);
+    assert.ok(row.includes(`| 《${title}》 |`), `${journeyId} must use current Story title 《${title}》`);
+    assert.match(row, /\| PASS \|$/, `${journeyId} identity proof must be complete before PASS`);
+  }
+});
+
+test('Hangzhou, Guangzhou, and Nanjing identity fields match canonical package metadata', () => {
+  const hangzhouGoal = capture(
+    hangzhou,
+    /final hangzhouWestLakeReopenedRemediation[\s\S]*?goal: '([^']+)'/,
+    'Hangzhou goal',
+  );
+  const hangzhouRow = identityRow('hangzhou-west-lake');
+  requiresEvery(hangzhouRow, [
+    '方毓 ↔ 结婚四十三年的丈夫周绍庭（夫妻）',
+    hangzhouGoal,
+    'hangzhouWestLakeReopenedLevels',
+    'hangzhouWestLakeReopenedRemediation',
+  ], 'Hangzhou active identity');
+  assert.doesNotMatch(hangzhouRow, /父亲/, 'Hangzhou current identity must not invent a father relationship');
+
+  const guangzhouGoal = capture(
+    guangzhou,
+    /final guangzhouChenClanRemediatedJourney[\s\S]*?goal: '([^']+)'/,
+    'Guangzhou goal',
+  );
+  const guangzhouRow = identityRow('guangzhou-chen-clan-academy');
+  requiresEvery(guangzhouRow, [
+    '陈秀仪 ↔ 成年亲生女儿刘嘉禾',
+    '亲生母女',
+    guangzhouGoal,
+    'guangzhouChenClanOnePassLevels → _guangzhouLockedLevel(...)',
+    'guangzhouChenClanRemediatedJourney',
+  ], 'Guangzhou active identity');
+  assert.doesNotMatch(guangzhouRow, /同伴/, 'Guangzhou biological mother-daughter relationship must not be weakened');
+
+  const nanjingTitle = capture(
+    nanjing,
+    /const nanjingQinhuaiCanonicalTitle = '([^']+)'/,
+    'Nanjing canonical title',
+  );
+  const nanjingMemory = capture(
+    nanjing,
+    /const nanjingQinhuaiMemoryAnchor = '([^']+)'/,
+    'Nanjing memory anchor',
+  );
+  const nanjingRow = identityRow('nanjing-qinhuai-river');
+  assert.ok(nanjingRow.includes(`| 《${nanjingTitle}》 |`));
+  assert.ok(nanjingRow.includes(`| ${nanjingMemory} |`));
+  assert.notEqual(nanjingTitle, nanjingMemory, 'Nanjing Story title and Memory Anchor must stay distinct');
+  requiresEvery(roadmap, [
+    '`STORY TITLE`',
+    '`HEADLINE`',
+    '`DESCRIPTION`',
+    '`MEMORY ANCHOR`',
+  ], 'Identity field separation rule');
 });
 
 test('canonical governance enforces a single current-main development line', () => {
