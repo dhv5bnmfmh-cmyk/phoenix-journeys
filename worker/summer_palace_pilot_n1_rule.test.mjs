@@ -32,7 +32,7 @@ test('Pilot N1 declares its exact governance identity and causal story', () => {
       '外婆周岚',
       '迫使许澄在作品和外婆的记忆之间选择',
       '先捡回旧照片',
-      '等了一下午的十七孔桥季节性画面真实消失',
+      '等了一下午的十七孔桥桥洞金光真实消失',
       '周岚停止替她调整构图并把旧照片交给她保存',
     ],
     'Summer Palace Story',
