@@ -933,4 +933,115 @@ This Story Truth + Place-Causality gate applies to:
 2. future Story remediations only when separately authorized;
 3. future Gold promotions.
 
-It does **not** retroactively reopen or rewrite the eight approved Gold Stories on the current baseline. It does not authorize Suzhou continuation, background generation, visual changes, Passport/map/location-hierarchy changes, or any unrelated runtime work.
+It does **not** retroactively reopen or rewrite Founder-approved Gold Stories on the current baseline. Audit findings require separate Journey-specific authorization. It does not authorize background generation, visual changes, Passport/map/location-hierarchy changes, or unrelated runtime work.
+
+## 19. Canonical Story × Culture × Level Standard
+
+This section formalizes the Founder-approved Beijing Summer Palace Pilot inside this existing canonical standard. It creates no parallel Story, Culture, Discovery, or Level standard.
+
+### 19.1 Story × Culture principle
+
+> 文化知识不是背景资料，而是剧情压力。
+> Cultural knowledge is not background material; it is Story pressure.
+
+The required causal chain is:
+
+`cultural fact / place mechanism → character encounters it → character acts because of it → the action is constrained or pressured → Choice / Cost / Consequence changes`.
+
+An important cultural fact MUST pass the `CULTURAL FACT ACTION TEST`:
+
+1. `FACT / MECHANISM` — the concrete fact or mechanism;
+2. `SOURCE` — its authoritative source;
+3. `STORY LOCATION` — where it enters active Story;
+4. `CHARACTER ACTION` — what a character does because of it;
+5. `PRESSURE` — what limit, pressure, or opportunity window it creates;
+6. `NON-EXPOSITION` — why this is lived causality rather than encyclopedia prose;
+7. `REMOVAL EFFECT` — which key action or consequence fails when removed.
+
+If no character acts because of it, classify it `DECORATIVE CULTURAL FACT`; it cannot be core Gold cultural-integration evidence.
+
+### 19.2 Place causality and cultural residue
+
+The Generic Place Substitution Test remains binding and receives this human criterion: remove the place and ask whether the key Choice could still happen in a materially identical way. Renaming a landmark, building, or attraction is not causality. Gold requires a **place mechanism**, not merely a place name.
+
+Story-only reading SHOULD leave natural `CULTURAL KNOWLEDGE RESIDUE` without becoming an essay:
+
+- Lv1–Lv2: normally 1–2 clear place/culture anchors;
+- Lv3–Lv4: normally at least two spatial, route, or historical relationships;
+- Lv5–Lv10: normally at least three cultural, historical, spatial, or material mechanisms that participate in Story.
+
+These are human comprehension targets, not mechanical stuffing quotas. Facts inserted only to reach a count are a failure.
+
+### 19.3 Story / Discovery bridge and depth
+
+Story owns people, relationship, action, Choice, Cost, Consequence, and Memory Moment. Cultural facts enter it through lived action. Discovery names, explains, and deepens dates, context, spatial relationships, mechanisms, and conservation concepts without replaying the character event chain.
+
+The intended bridge is `Story encounter → Discovery explanation`, never `Story lecture → Discovery repeat`.
+
+Default Gold `DISCOVERY PAGE DEPTH` is `2 / 2 / 2 / 2 / 3 / 3 / 3 / 3 / 3 / 3` for Lv1–Lv10. Each level has one clear learner theme; each unit has one independent fact or concept, an authoritative source, distinct value, a Story bridge, and aligned Chinese / Pinyin / Vietnamese / English. Sentence splitting, repetition, Story retelling, and automatic expansion to four or more units are prohibited. A deviation requires a documented content/mobile reason and Founder or canonical review.
+
+### 19.4 Three gradients and five cognitive bands
+
+`PHOENIX LEVEL = LANGUAGE GRADIENT + STORY UNDERSTANDING GRADIENT + CULTURAL UNDERSTANDING GRADIENT`.
+
+The five canonical cognitive bands are:
+
+| Levels | Band | Learner focus |
+|---|---|---|
+| Lv1–Lv2 | `EVENT COMPREHENSION` | who, what happened, action, Choice, result |
+| Lv3–Lv4 | `PLACE COMPREHENSION` | place, space, route, basic history, constraints on action |
+| Lv5–Lv6 | `RELATIONSHIP × PLACE` | value difference and place-amplified relationship pressure |
+| Lv7–Lv8 | `CULTURAL MECHANISM` | why time, direction, material, architecture, space, or history makes the phenomenon work |
+| Lv9–Lv10 | `MASTERY / CULTURAL JUDGMENT` | authenticity, integrity, traces, conservation, responsibility, record, and transmission through lived Story |
+
+Wonder / Express or equivalent existing content intents SHOULD follow these bands. This is content semantics only: it MUST NOT create Reflection/Writing stages or alter the canonical six-stage architecture.
+
+### 19.5 Level semantic delta and backward completeness
+
+From Lv2 through Lv10, `LEVEL SEMANTIC DELTA` requires at least one perceivable new understanding relative to the previous level: a new place relationship, historical cause, relationship insight, cultural mechanism, irreversible pressure, or cultural judgment. More characters, one more word, longer syntax, synonym replacement, punctuation, and a new phrase alone do not pass.
+
+`NEW PHRASE != NEW UNDERSTANDING`. Evidence SHOULD prove a causal, relational, or cultural chain—for example `corridor → lake re-enters view → one person stops / another accelerates → relationship rhythm changes`—rather than only the word `corridor`.
+
+`LEVEL BACKWARD COMPLETENESS` is mandatory because Level is an ability choice, not a chapter sequence. Every level independently preserves Protagonist, Relationship, Goal, Conflict, Choice, Cost, Climax, Consequence, Ending/Transformation, and Memory Moment.
+
+The `STORY SPINE INVARIANT` requires one Story across Lv1–Lv10. Expansion may add language complexity, detail, relationship understanding, and cultural mechanism; it MUST NOT replace the core people, relationship, conflict, Choice, Cost, Climax, Ending, or Memory Moment.
+
+### 19.6 Lv10 mastery and minimum sufficient Story
+
+`LV10 MASTERY DELTA` requires a real increment beyond Lv9, preferably mature behavior, evidence/record awareness, cultural judgment, relationship understanding, or conservation judgment shown through action. Direct essay declarations such as “I understand authenticity” are weak evidence.
+
+If Lv9 and Lv10 share a band but remain hard to distinguish, Lv10 MAY have one `MASTERY CAPSTONE`: a more advanced existing Express prompt, interpretive record, comparison, exhibition note, conservation view, or cultural judgment. It MUST NOT add a Story event, second climax, new ending, or product stage.
+
+Story length maximum is a ceiling, not a target. Apply `MINIMUM SUFFICIENT STORY`: use the least natural length that preserves the complete spine, required cultural residue, and semantic delta. Do not fill a level to its maximum merely because space remains.
+
+Apply `ACTION FIRST; TERMINOLOGY SECOND`: Story shows recording a date/source/location, keeping a trace, changing a route, or waiting for specific light; Discovery may then name authenticity, integrity, or traceability.
+
+### 19.7 Exact alignment, vocabulary, and learner-language safety
+
+Chinese, Pinyin, Vietnamese, and English MUST bind to the same active semantic event or Discovery unit. Moving/removing a detail in Chinese moves/removes it in every support language. Reading Support supports current Chinese; it is not an old summary or extra lecture.
+
+Every active vocabulary item MUST have provenance in `CURRENT STORY + ALL CURRENT ACTIVE DISCOVERY UNITS`. `knownWords` filtering/review MUST preserve target count and provenance semantics. Unseen advanced filler is prohibited.
+
+`INTERNAL QA LANGUAGE MUST NEVER LEAK TO LEARNER CONTENT`. Story, Discovery, Challenge, Wonder, Express, Memory, Completion, and Entry copy MUST NOT expose internal terms such as `Story`, `Choice`, `Cost`, `Place Substitution Test`, `Semantic Gate`, `PASS`, `FAIL`, `工程验证`, `因果测试`, `模板碰撞`, or `机器 Gate`. Code, tests, metadata, audits, and developer reports may use them.
+
+### 19.8 Pilot-to-standard governance and authority
+
+Methods affecting Story model, cultural integration, Discovery depth, or Level philosophy follow:
+
+`one Pilot → full machine validation → independent exact-head audit → Founder Experience → revise the same Pilot/PR if needed → final Founder audit → classify MUST FIX / SHOULD FIX / LATER → Founder Experience PASS → canonical formalization → horizontal Gold audit → one Journey at a time remediation`.
+
+Do not standardize before Founder Experience, auto-roll out after machine PASS, or remediate multiple Journeys inside a standards PR.
+
+Before freezing a major Pilot, `FINAL FOUNDER AUDIT` reviews Story, humanity, relationship causality, Choice/Cost, place causality, cultural integration/residue, Level gradient, Lv10 mastery, Discovery, vocabulary, Challenge, multilingual alignment, learner-visible language, and end-to-end experience. Remaining findings are:
+
+- `MUST FIX`: Gold, correctness, or user-experience blocker;
+- `SHOULD FIX`: meaningful improvement that must not create endless delay;
+- `LATER`: valuable future optimization.
+
+`NO ENDLESS POLISH LOOP`: a Gold Pilot can be frozen.
+
+Recommended Founder Level sampling is Lv1, Lv3, Lv5, Lv7, Lv10 plus adjacent Lv9→Lv10.
+
+Founder approval is SHA-bound: `PR HEAD SHA = Founder review Candidate SHA = Preview release SHA`. Any later source commit invalidates approval and requires complete exact-head validation, Preview, independent audit, and Founder review again.
+
+Machine gates are necessary, not literary authority. Green CI, 360/360, score 100, and semantic arithmetic never independently establish Story Gold, humanity, place causality, or Founder approval.

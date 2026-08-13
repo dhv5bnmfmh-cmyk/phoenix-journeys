@@ -169,6 +169,12 @@ Machine scores, green CI, field completeness, Rule A = 0, or Rule B = 0 MUST NOT
 
 Founder-approved Stories are reviewable for quality debt but MUST NOT be modified merely because the Agent recommends reopening them. Record `REOPEN RECOMMENDED` and wait for Founder authorization. An unapproved active Candidate may be remediated directly within its authorized Story scope.
 
+### Story × Culture × Level behavior
+
+The Agent MUST apply [Canonical Story × Culture × Level Standard](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md#19-canonical-story--culture--level-standard): cultural knowledge creates Story pressure through character action; every important fact passes the Cultural Fact Action Test; place mechanisms survive human causality review; Story encounter precedes Discovery explanation; Discovery defaults to `2/2/2/2/3/3/3/3/3/3`; every adjacent level adds new understanding while remaining independently complete; Lv10 has a mastery delta; Story length uses minimum sufficient natural prose; action precedes terminology; four languages share one active semantic event; vocabulary has current provenance; and internal QA language never appears in learner-visible content.
+
+The Agent MUST preserve the six-stage product architecture. Cognitive bands govern content semantics only. New methods proceed through one Pilot, exact-head audit/Preview, Founder Experience, final audit, canonical formalization, horizontal audit, then one-Journey-at-a-time remediation. Green automation is never literary or Founder authority.
+
 ## Binding Journey background production behavior
 
 When generating, replacing, evaluating, or integrating Phoenix Journey background images, the Agent MUST first read and follow [PHOENIX AI BACKGROUND PRODUCTION STANDARD](../docs/PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md).

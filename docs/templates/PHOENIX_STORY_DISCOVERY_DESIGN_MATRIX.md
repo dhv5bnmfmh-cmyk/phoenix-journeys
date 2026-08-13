@@ -311,6 +311,46 @@ Knowledge/terminology/history/theme explanation inflated: YES / NO
 Result:
 ```
 
+### Adjacent Level Semantic Delta — REQUIRED
+
+`NEW PHRASE != NEW UNDERSTANDING`. Record human-readable causal, relational, or cultural meaning, not character-count or vocabulary-count changes.
+
+| Level | New Story understanding vs previous level | New cultural understanding vs previous level | Causal/relational evidence chain | Previous level lacks this meaning | Result |
+|---:|---|---|---|---|---|
+| 2 |  |  |  |  | BLOCKED |
+| 3 |  |  |  |  | BLOCKED |
+| 4 |  |  |  |  | BLOCKED |
+| 5 |  |  |  |  | BLOCKED |
+| 6 |  |  |  |  | BLOCKED |
+| 7 |  |  |  |  | BLOCKED |
+| 8 |  |  |  |  | BLOCKED |
+| 9 |  |  |  |  | BLOCKED |
+| 10 |  |  |  |  | BLOCKED |
+
+### Story × Culture evidence — REQUIRED
+
+| Cultural fact/mechanism | Authoritative source | Story location | Character action | Pressure/opportunity window | Why not exposition | Removal effect | Result |
+|---|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  | BLOCKED |
+
+```text
+Generic-place substitution changes key Choice materially: YES / NO
+Cultural Knowledge Residue by cognitive band:
+Story encounter → Discovery explanation evidence:
+Discovery count Lv1–Lv10 (default 2/2/2/2/3/3/3/3/3/3):
+Discovery deviation rationale and approval, if any:
+Every level backward-complete: YES / NO
+Story Spine invariant across Lv1–Lv10: YES / NO
+Lv10 unique Mastery action/judgment:
+Optional Mastery Capstone, if needed:
+Story maximum treated as ceiling: YES / NO
+Minimum Sufficient Story review:
+Action First / Terminology Second evidence:
+CN/Pinyin/VI/EN exact event alignment:
+Vocabulary provenance in current Story + all current Discovery:
+Founder-visible QA language sweep:
+```
+
 ## 7. Automated validation boundary + authority states
 
 ```text

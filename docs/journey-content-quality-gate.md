@@ -184,3 +184,6 @@ It must not say that machine green alone authorizes release or Gold Story accept
 CI may enforce deterministic contract failures and may verify that required human-review records/states exist. CI must not hard-code literary approval or claim that string presence, scores, test counts, or enum arithmetic independently prove literary quality.
 
 A valid build may be machine-green while `OVERALL_STORY_QUALITY = PENDING` because human literary review or Founder review is still pending. That is a truthful state, not a CI failure by itself unless the current workflow phase explicitly requires those approvals.
+A deterministic PASS remains only a machine gate. For Story/Culture/Level work, the release record MUST additionally preserve: Cultural Fact Action evidence, human Place Causality, Cultural Knowledge Residue, Story/Discovery bridge, Discovery depth, three gradients, five cognitive bands, adjacent semantic deltas, backward completeness, Lv10 mastery, exact four-language alignment, vocabulary provenance, and learner-visible QA-language sweep.
+
+Founder authority is exact-head and SHA-bound. `PR HEAD = Founder-reviewed Candidate = Preview release`. A later source commit invalidates the prior approval even when every automated check stays green.
