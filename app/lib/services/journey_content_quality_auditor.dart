@@ -1,6 +1,7 @@
 import '../data/daily_journey_experience.dart';
 import '../data/dedicated_adaptive_journey_catalog.dart';
 import '../data/journey_level_catalog.dart';
+import '../data/luoyang_longmen_gold.dart';
 import '../models/language_proficiency.dart';
 import 'phoenix_story_length_policy.dart';
 
@@ -158,10 +159,28 @@ JourneyContentQualityReport auditJourneyContentQuality(
     }
   }
 
-  if (content.discoveries.isEmpty || content.discoveries.length > 2) {
+  final longmenLevel = profile.phoenixLevel ??
+      switch (profile.band) {
+        PhoenixReadingBand.beginner => 1,
+        PhoenixReadingBand.elementary => 3,
+        PhoenixReadingBand.intermediate => 5,
+        PhoenixReadingBand.upperIntermediate => 7,
+        PhoenixReadingBand.advanced => 9,
+        PhoenixReadingBand.mastery => 10,
+      };
+  final expectedLongmenDiscoveryCount =
+      experience.id == luoyangLongmenGoldJourneyId
+          ? (longmenLevel <= 4 ? 2 : 3)
+          : null;
+  final hasInvalidDiscoveryShape = expectedLongmenDiscoveryCount == null
+      ? content.discoveries.isEmpty || content.discoveries.length > 2
+      : content.discoveries.length != expectedLongmenDiscoveryCount;
+  if (hasInvalidDiscoveryShape) {
     add(
       'discovery-shape',
-      'Discoveries must use the approved one- or two-entry shape.',
+      expectedLongmenDiscoveryCount == null
+          ? 'Discoveries must use the approved one- or two-entry shape.'
+          : 'Longmen Discovery must match the approved Founder depth pilot for this level.',
       JourneyContentQualitySeverity.critical,
     );
   }

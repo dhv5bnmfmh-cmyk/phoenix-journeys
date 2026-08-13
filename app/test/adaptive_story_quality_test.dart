@@ -5,6 +5,7 @@ import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/data/journey_level_catalog.dart';
+import 'package:phoenix_journeys/data/luoyang_longmen_gold.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
@@ -38,11 +39,19 @@ void main() {
           inInclusiveRange(1, 2),
           reason: '${journey.id} ${profile.displayLabel} story',
         );
-        expect(
-          content.discoveries.length,
-          inInclusiveRange(1, 2),
-          reason: '${journey.id} ${profile.displayLabel} discoveries',
-        );
+        if (journey.id == luoyangLongmenGoldJourneyId) {
+          expect(
+            content.discoveries,
+            hasLength(profile.phoenixLevel! <= 4 ? 2 : 3),
+            reason: '${journey.id} ${profile.displayLabel} discoveries',
+          );
+        } else {
+          expect(
+            content.discoveries.length,
+            inInclusiveRange(1, 2),
+            reason: '${journey.id} ${profile.displayLabel} discoveries',
+          );
+        }
         expect(
           content.storyAnnotations.length,
           content.storyParagraphs.length,

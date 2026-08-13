@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/luoyang_longmen_gold.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
@@ -56,13 +57,21 @@ void main() {
           isTrue,
           reason: '${journey.id} should preserve multilingual reading support',
         );
-        expect(
-          content.discoveries.length,
-          profile.band == PhoenixReadingBand.beginner
-              ? 1
-              : inInclusiveRange(1, 2),
-          reason: '${journey.id} should use the approved discovery shape',
-        );
+        if (journey.id == luoyangLongmenGoldJourneyId) {
+          expect(
+            content.discoveries,
+            hasLength(profile.phoenixLevel! <= 4 ? 2 : 3),
+            reason: '${journey.id} should use the approved Founder depth pilot',
+          );
+        } else {
+          expect(
+            content.discoveries.length,
+            profile.band == PhoenixReadingBand.beginner
+                ? 1
+                : inInclusiveRange(1, 2),
+            reason: '${journey.id} should use the approved discovery shape',
+          );
+        }
         expect(content.words, isNotEmpty, reason: journey.id);
         expect(
           content.words.length,

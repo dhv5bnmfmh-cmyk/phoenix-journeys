@@ -253,6 +253,165 @@ final longmenGoldDiscoveries = List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry
   _longmenDiscovery('龙门石窟的世界遗产价值依赖完整的洞窟、佛龛、造像及其山崖与河谷环境；真实性和保护因此不能只针对少数著名大像，而要维护整个遗产地。', 'Giá trị Di sản Thế giới của Long Môn phụ thuộc vào tính toàn vẹn của hang động, hốc thờ, tượng cùng môi trường vách núi và thung lũng sông; vì vậy tính xác thực và bảo tồn không thể chỉ tập trung vào vài tượng lớn nổi tiếng mà phải gìn giữ toàn bộ di sản.', 'Longmen’s World Heritage value depends on the integrity of its caves, niches, sculptures, cliffs, and river-valley setting; authenticity and conservation therefore cannot focus only on a few famous monumental figures but must protect the heritage property as a whole.'),
 ]);
 
+
+final longmenGoldDiscoveryLevels =
+    List<List<DiscoveryEntry>>.unmodifiable(<List<DiscoveryEntry>>[
+  List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
+    _longmenDiscovery(
+      '龙门石窟分布在伊河两岸的石灰岩山崖上，洞窟和佛龛沿崖展开。',
+      'Long Môn phân bố trên các vách đá vôi ở hai bờ sông Y, với các hang động và hốc thờ trải dọc vách núi.',
+      'The Longmen Grottoes occupy limestone cliffs on both sides of the Yi River, with caves and niches extending along the rock faces.',
+    ),
+    _longmenDiscovery(
+      '伊河从两侧山崖之间穿过，洞窟和佛龛直接开凿在石灰岩崖壁中，因此河流、山崖和石窟属于同一遗址空间。',
+      'Sông Y chảy giữa các vách núi hai bên; hang động và hốc thờ được đục trực tiếp vào vách đá vôi, nên sông, vách núi và hang động cùng thuộc một không gian di sản.',
+      'The Yi River runs between the cliffs on both sides; caves and niches are cut directly into the limestone faces, so the river, cliffs, and grottoes belong to one heritage setting.',
+    ),
+  ]),
+  List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
+    _longmenDiscovery(
+      '龙门石窟遗产地在伊河两岸约一公里范围内保存两千三百多个洞窟和佛龛，形成连续的崖壁遗产。',
+      'Trong phạm vi khoảng một kilômét dọc hai bờ sông Y, di sản Long Môn bảo tồn hơn 2.300 hang động và hốc thờ, tạo thành một dải di sản vách đá liên tục.',
+      'Across roughly one kilometre on both sides of the Yi River, Longmen preserves more than 2,300 caves and niches, forming a continuous cliff-side heritage landscape.',
+    ),
+    _longmenDiscovery(
+      '这两千三百多个洞窟和佛龛并非集中在一个点，而是沿约一公里的崖壁连续分布；数量与整段崖壁的范围要一起理解。',
+      'Hơn 2.300 hang động và hốc thờ này không tập trung tại một điểm mà phân bố liên tục dọc khoảng một kilômét vách núi; số lượng cần được hiểu cùng với quy mô của cả dải vách đá.',
+      'These more than 2,300 caves and niches are not concentrated at one point but extend continuously along roughly one kilometre of cliff; the count belongs to the scale of the whole stretch.',
+    ),
+  ]),
+  List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
+    _longmenDiscovery(
+      '龙门石窟的重要营造期从北魏晚期延续到唐代，最密集的雕刻集中在五世纪末至八世纪中叶。',
+      'Giai đoạn tạo tác quan trọng của Long Môn kéo dài từ cuối Bắc Ngụy đến đời Đường, với hoạt động chạm khắc tập trung nhất từ cuối thế kỷ 5 đến giữa thế kỷ 8.',
+      'Longmen’s major period of creation extends from the late Northern Wei through the Tang dynasty, with carving most concentrated from the late fifth to the mid-eighth century.',
+    ),
+    _longmenDiscovery(
+      '北魏晚期和初唐时期，洛阳都曾具有都城地位；龙门最密集的营造时间也落在这一长时段内。',
+      'Vào cuối Bắc Ngụy và đầu đời Đường, Lạc Dương đều từng giữ vị thế kinh đô; giai đoạn tạo tác dày đặc nhất ở Long Môn cũng nằm trong khoảng thời gian dài này.',
+      'Luoyang held capital status in the late Northern Wei and early Tang periods, and the most intensive phase of carving at Longmen also falls within this long span.',
+    ),
+  ]),
+  List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
+    _longmenDiscovery(
+      '不同时期的造像在面容、衣纹、比例和雕刻处理上出现变化，因此龙门保存了佛教石刻艺术风格长期演变的证据。',
+      'Tượng ở các thời kỳ khác nhau thay đổi về khuôn mặt, nếp áo, tỷ lệ và cách chạm khắc, vì vậy Long Môn lưu giữ bằng chứng về sự phát triển lâu dài của phong cách điêu khắc Phật giáo trên đá.',
+      'Sculptures from different periods change in facial treatment, drapery, proportion, and carving, so Longmen preserves evidence of the long development of Buddhist stone-carving styles.',
+    ),
+    _longmenDiscovery(
+      '龙门同时保存较早的“中原风格”和后来的“盛唐风格”，把不同时期的雕塑放在同一遗址中对照，可以看见石刻艺术并非固定不变。',
+      'Long Môn cùng bảo tồn phong cách Trung Nguyên sớm hơn và phong cách Thịnh Đường muộn hơn; đặt tác phẩm các thời kỳ cạnh nhau trong cùng di sản cho thấy nghệ thuật chạm khắc đá không hề bất biến.',
+      'Longmen preserves both the earlier Central China Style and the later Great Tang Style; comparing works from different periods at one site shows that stone-carving style was not fixed.',
+    ),
+  ]),
+  List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
+    _longmenDiscovery(
+      '奉先寺的巨型造像是唐代皇家石窟艺术最具代表性的实例之一，说明龙门不仅有小型佛龛，也有大型造像群。',
+      'Những tượng khổng lồ ở Phụng Tiên Tự là một trong những ví dụ tiêu biểu nhất của nghệ thuật hang động hoàng gia đời Đường, cho thấy Long Môn không chỉ có hốc thờ nhỏ mà còn có các quần thể tượng quy mô lớn.',
+      'The giant sculptures at Fengxian Temple are among the most representative examples of Tang royal cave-temple art, showing that Longmen contains not only small niches but also monumental sculpture groups.',
+    ),
+    _longmenDiscovery(
+      '奉先寺的大型造像群以中央大像和周围多尊造像共同组织空间；它的视觉力量来自整组的尺度与安排，而不只是一尊造像。',
+      'Quần thể tượng lớn Phụng Tiên Tự tổ chức không gian bằng tượng lớn trung tâm cùng nhiều tượng xung quanh; sức mạnh thị giác đến từ quy mô và bố cục của cả nhóm, không chỉ một pho tượng.',
+      'Fengxian Temple’s monumental group organizes space around a central giant figure and surrounding sculptures; its visual force comes from the scale and arrangement of the group, not from a single figure alone.',
+    ),
+    _longmenDiscovery(
+      '阅读奉先寺时，既要看单尊造像，也要把中央与周围造像放回同一布局；否则会失去大型造像群的整体安排。',
+      'Khi đọc Phụng Tiên Tự, cần nhìn từng tượng nhưng cũng phải đặt tượng trung tâm và các tượng xung quanh trở lại trong cùng một bố cục; nếu không sẽ mất cách tổ chức tổng thể của quần thể tượng lớn.',
+      'To read Fengxian, a viewer needs to study individual figures while also placing the central and surrounding sculptures within one layout; otherwise the organization of the monumental group is lost.',
+    ),
+  ]),
+  List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
+    _longmenDiscovery(
+      '龙门同时包含小型佛龛、洞窟和大型造像群，观看对象本身就存在明显的尺度差异。',
+      'Long Môn đồng thời có hốc thờ nhỏ, hang động và các quần thể tượng lớn, vì vậy bản thân đối tượng quan sát đã có khác biệt rõ rệt về quy mô.',
+      'Longmen contains small niches, caves, and monumental sculpture groups, so the objects themselves differ clearly in scale.',
+    ),
+    _longmenDiscovery(
+      '靠近小型佛龛或洞窟时，观看重点可以落在较小造像和局部雕刻细节；近距离帮助辨认这些小尺度信息。',
+      'Khi đến gần hốc thờ nhỏ hoặc hang động, trọng tâm có thể đặt vào các tượng nhỏ hơn và chi tiết chạm khắc cục bộ; khoảng cách gần giúp nhận ra thông tin ở quy mô nhỏ này.',
+      'Near a small niche or cave, attention can focus on smaller figures and local carving details; close viewing helps reveal information at that small scale.',
+    ),
+    _longmenDiscovery(
+      '面对奉先寺等大型造像群，拉开距离更容易把中央与周围造像纳入同一视野；对象尺度改变，合适的观看距离也随之改变。',
+      'Với quần thể tượng lớn như Phụng Tiên Tự, lùi xa giúp đưa tượng trung tâm và các tượng xung quanh vào cùng một tầm nhìn; khi quy mô đối tượng thay đổi, khoảng cách xem phù hợp cũng thay đổi.',
+      'For a monumental group such as Fengxian, stepping farther back makes it easier to hold the central and surrounding figures in one view; as the scale of the object changes, the useful viewing distance changes too.',
+    ),
+  ]),
+  List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
+    _longmenDiscovery(
+      '龙门石窟的造像都以佛教为题材，但这些作品是在中国石刻传统中持续发展的。',
+      'Các tượng ở Long Môn đều lấy Phật giáo làm đề tài, nhưng các tác phẩm này tiếp tục phát triển trong truyền thống chạm khắc đá của Trung Quốc.',
+      'The sculptures at Longmen are devoted to Buddhist subjects, but these works continued to develop within Chinese stone-carving traditions.',
+    ),
+    _longmenDiscovery(
+      '从北魏晚期到唐代，雕塑风格不断变化，说明佛教题材在中国并没有保持单一固定的表现方式。',
+      'Từ cuối Bắc Ngụy đến đời Đường, phong cách điêu khắc liên tục thay đổi, cho thấy đề tài Phật giáo ở Trung Quốc không giữ một cách thể hiện cố định duy nhất.',
+      'From the late Northern Wei through the Tang, sculptural styles kept changing, showing that Buddhist subjects in China did not remain in a single fixed form.',
+    ),
+    _longmenDiscovery(
+      '龙门把佛教宗教内容与中国本土雕塑风格的长期演变放在同一遗址中，因此能观察两者如何持续互动。',
+      'Long Môn đặt nội dung tôn giáo Phật giáo cùng với sự phát triển lâu dài của phong cách điêu khắc bản địa Trung Quốc trong một di sản, vì thế có thể quan sát cách hai yếu tố này tương tác liên tục.',
+      'Longmen places Buddhist religious content and the long development of local Chinese sculptural styles within one site, making their continued interaction visible.',
+    ),
+  ]),
+  List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
+    _longmenDiscovery(
+      '单个洞窟、佛龛以及奉先寺等大型造像群并不是孤立遗物；它们与伊河、两岸山崖共同组成一个整体遗产景观。',
+      'Các hang động, hốc thờ riêng lẻ và quần thể lớn như Phụng Tiên Tự không phải di tích cô lập; cùng sông Y và vách núi hai bờ, chúng tạo thành một cảnh quan di sản thống nhất.',
+      'Individual caves, niches, and monumental groups such as Fengxian Temple are not isolated remains; together with the Yi River and the cliffs on both banks, they form one integrated heritage landscape.',
+    ),
+    _longmenDiscovery(
+      '世界遗产的完整性不仅看洞窟和造像，也看东山、西山及河谷环境是否被整体保存；人工开凿与自然地貌共同构成遗产。',
+      'Tính toàn vẹn của Di sản Thế giới không chỉ xét các hang động và tượng mà còn xem Đông Sơn, Tây Sơn và môi trường thung lũng có được bảo tồn như một tổng thể hay không; công trình do con người tạo ra và địa hình tự nhiên cùng cấu thành di sản.',
+      'World Heritage integrity concerns not only caves and sculptures but also whether East Hill, West Hill, and the river-valley setting are preserved as a whole; human carving and natural landforms together form the heritage property.',
+    ),
+    _longmenDiscovery(
+      '因此理解龙门可以依次连接三个尺度：单个洞窟或佛龛、大型造像群、以及伊河与两岸山崖组成的整体环境。',
+      'Vì vậy, có thể hiểu Long Môn bằng cách nối ba quy mô: một hang động hoặc hốc thờ riêng lẻ, một quần thể tượng lớn, và toàn bộ môi trường do sông Y cùng các vách núi hai bờ tạo nên.',
+      'Longmen can therefore be read across three connected scales: an individual cave or niche, a monumental sculpture group, and the larger setting formed by the Yi River and cliffs on both banks.',
+    ),
+  ]),
+  List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
+    _longmenDiscovery(
+      '龙门数量众多、尺度多样、跨越多个时期的石刻作品，记录了中国佛教艺术和石雕发展的重要阶段。',
+      'Các tác phẩm chạm khắc đá ở Long Môn với số lượng lớn, quy mô đa dạng và trải qua nhiều thời kỳ ghi lại những giai đoạn quan trọng của nghệ thuật Phật giáo và điêu khắc đá Trung Quốc.',
+      'The many stone works at Longmen, varied in scale and spanning multiple periods, record important stages in the development of Chinese Buddhist art and stone carving.',
+    ),
+    _longmenDiscovery(
+      '龙门较早和较晚的代表性雕塑风格不仅影响中国其他地区，也对亚洲其他地区的雕塑艺术发展产生重要影响。',
+      'Các phong cách điêu khắc tiêu biểu sớm và muộn ở Long Môn không chỉ ảnh hưởng đến những vùng khác của Trung Quốc mà còn tác động quan trọng đến sự phát triển điêu khắc ở các khu vực khác của châu Á.',
+      'The representative earlier and later sculptural styles at Longmen influenced other parts of China and also made an important contribution to the development of sculpture in other parts of Asia.',
+    ),
+    _longmenDiscovery(
+      '因此龙门的意义不只在作品数量，还在于它把中国石刻风格的长期发展与更广泛的亚洲艺术传播联系起来。',
+      'Vì vậy, ý nghĩa của Long Môn không chỉ nằm ở số lượng tác phẩm mà còn ở việc kết nối sự phát triển lâu dài của phong cách chạm khắc đá Trung Quốc với sự lan truyền nghệ thuật rộng hơn ở châu Á.',
+      'Longmen matters not only for the number of works but also because it connects the long development of Chinese stone-carving styles with wider artistic transmission across Asia.',
+    ),
+  ]),
+  List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
+    _longmenDiscovery(
+      '龙门作为世界遗产，其价值依赖洞窟、佛龛、造像、山崖和河谷环境作为整体被理解和保存。',
+      'Là một Di sản Thế giới, giá trị của Long Môn phụ thuộc vào việc các hang động, hốc thờ, tượng, vách núi và môi trường thung lũng được hiểu và bảo tồn như một tổng thể.',
+      'As a World Heritage property, the value of Longmen depends on its caves, niches, sculptures, cliffs, and river-valley setting being understood and preserved as a whole.',
+    ),
+    _longmenDiscovery(
+      '完整性关注遗产要素与自然环境是否整体保存；真实性还包括布局、材料、传统技术、位置以及各要素之间的内在联系。',
+      'Tính toàn vẹn xem các yếu tố di sản và môi trường tự nhiên có được bảo tồn như một tổng thể hay không; tính xác thực còn bao gồm bố cục, vật liệu, kỹ thuật truyền thống, vị trí và mối liên hệ nội tại giữa các yếu tố.',
+      'Integrity concerns whether heritage elements and the natural setting are preserved as a whole; authenticity also includes layout, material, traditional technique, location, and the intrinsic links among those elements.',
+    ),
+    _longmenDiscovery(
+      '保护不能只围绕少数著名大像，而要覆盖整个遗产地及其环境，并通过长期管理减少损害。',
+      'Bảo tồn không thể chỉ xoay quanh một vài tượng lớn nổi tiếng mà phải bao phủ toàn bộ khu di sản và môi trường của nó, đồng thời giảm tổn hại bằng quản lý lâu dài.',
+      'Conservation cannot focus only on a few famous monumental figures; it must cover the whole heritage property and its setting and reduce harm through long-term management.',
+    ),
+  ]),
+]);
+
+List<DiscoveryEntry> longmenGoldDiscoveriesForLevel(int requestedLevel) =>
+    longmenGoldDiscoveryLevels[requestedLevel.clamp(1, 10).toInt() - 1];
+
+
 const longmenGoldWords = <WordEntry>[
   WordEntry(word: '签字', pinyin: 'qiānzì', simpleChinese: '在文件上写下名字表示同意。', translation: 'ký tên', englishDefinition: 'to sign a document', symbol: '✍️'),
   WordEntry(word: '定金', pinyin: 'dìngjīn', simpleChinese: '为了确认交易先支付的一笔钱。', translation: 'tiền đặt cọc', englishDefinition: 'a deposit paid to secure a transaction', symbol: '💰'),
@@ -284,7 +443,9 @@ List<WordEntry> longmenGoldVocabularyForLevel(
 }) {
   final level = requestedLevel.clamp(1, 10).toInt();
   final story = longmenGoldStoryForLevel(level).chinese.join();
-  final discovery = longmenGoldDiscoveries[level - 1].text;
+  final discovery = longmenGoldDiscoveriesForLevel(level)
+      .map((entry) => entry.text)
+      .join();
   final visible = longmenGoldWords
       .where((entry) => story.contains(entry.word) || discovery.contains(entry.word))
       .toList(growable: false);

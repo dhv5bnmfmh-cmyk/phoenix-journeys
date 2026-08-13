@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/luoyang_longmen_gold.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
@@ -17,9 +18,11 @@ void main() {
         );
         final storyTarget = phoenixStoryLengthTargetFor(profile);
         final expectedDiscoveryShape =
-            profile.band == PhoenixReadingBand.beginner
-                ? hasLength(1)
-                : hasLength(inInclusiveRange(1, 2));
+            journey.id == luoyangLongmenGoldJourneyId
+                ? hasLength(profile.phoenixLevel! <= 4 ? 2 : 3)
+                : profile.band == PhoenixReadingBand.beginner
+                    ? hasLength(1)
+                    : hasLength(inInclusiveRange(1, 2));
         final storyCharacters = level.storyParagraphs.join().runes.length;
 
         expect(

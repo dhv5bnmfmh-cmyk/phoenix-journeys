@@ -82,7 +82,7 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
         level,
         knownWords: knownWords,
       ),
-      discoveries: <DiscoveryEntry>[longmenGoldDiscoveries[level - 1]],
+      discoveries: longmenGoldDiscoveriesForLevel(level),
       wonderQuestion: luoyangLongmenGoldWonderQuestion,
       expressQuestion: luoyangLongmenGoldExpressQuestion,
     );
