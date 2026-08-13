@@ -20,7 +20,7 @@ AI 是同行者，不是冷漠的评分机器。
 
 ## Binding Journey Story truth + place-causality behavior
 
-Before drafting, repairing, evaluating, or preparing any Phoenix Journey Story for Gold acceptance, the Agent MUST read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), [PHOENIX NEW JOURNEY CREATION STANDARD](../docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), [PHOENIX NEW JOURNEY ACCEPTANCE MATRIX](../docs/templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md), and the canonical semantic gate implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
+Before drafting, repairing, evaluating, or preparing any Phoenix Journey Story for Gold acceptance, the Agent MUST read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), [PHOENIX NEW JOURNEY CREATION STANDARD](../docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), [PHOENIX NEW JOURNEY ACCEPTANCE MATRIX](../docs/templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md), [STORY VERACITY AND CULTURE STANDARD](../docs/STORY_VERACITY_AND_CULTURE_STANDARD.md), and the canonical semantic gate implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`. 
 
 The mandatory development order is:
 
