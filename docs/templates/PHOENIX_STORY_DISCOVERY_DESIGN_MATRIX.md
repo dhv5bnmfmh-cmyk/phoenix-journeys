@@ -41,6 +41,9 @@ Incremental Cultural Value:
 Incremental Human Value:
 Same-Place Differentiation Result:
 Whole-Library Differentiation Result:
+Narrative Scale = DESCRIPTIVE / NON-QUOTA
+Social Perspective = DESCRIPTIVE / NON-QUOTA
+Candidate Cultural Slice = DESCRIPTIVE / NON-QUOTA
 ```
 
 ## 2. Stage Function Contracts
