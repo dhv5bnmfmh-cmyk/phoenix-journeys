@@ -324,11 +324,11 @@ JourneyLevelContent summerPalaceN1LevelForPhoenixLevel(int requestedLevel) {
     words: const [],
     discoveries: summerPalaceDiscoveryEntriesForLevel(level),
     wonderQuestion: level <= 4
-        ? '为什么十七孔桥的光一移动，许澄的选择就不能重来？'
-        : '如果移走冬至前后的十七孔桥光线，Story的Choice和Cost为什么会变弱？',
+        ? '桥洞的金光正在移动，许澄为什么还是先去捡外婆的旧照片？'
+        : '颐和园经历过损毁和修复。许澄最后把旧照片和正在暗下来的桥洞一起拍进画面，你觉得她对“无瑕”的理解发生了什么变化？',
     expressQuestion: level <= 4
-        ? '请按“桥洞亮起→照片掉落→先捡照片→光线移开”复述。'
-        : '请用“站位→光线→旧照片→选择→代价→托付”说明颐和园怎样参与故事因果。',
+        ? '请用两到三句话写出桥洞金光、旧照片和许澄的选择之间发生了什么。'
+        : '请用三到五句话写一段许澄可能放在校展照片旁的说明。写出拍摄的时节、十七孔桥、旧照片，以及她最后决定留下什么。',
   );
 }
 

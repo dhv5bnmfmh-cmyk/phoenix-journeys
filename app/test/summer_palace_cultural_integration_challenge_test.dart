@@ -12,6 +12,23 @@ Future<void> _tap(WidgetTester tester, String key) async {
   await tester.pumpAndSettle();
 }
 
+void _expectNoQaLanguageInVisibleChallenge() {
+  for (final term in <String>[
+    'Story',
+    'Choice',
+    'Cost',
+    'Place Substitution Test',
+    '不能换成普通公园',
+    '因果测试',
+    '文化因果 Gate',
+    '工程验证',
+    'PASS',
+    'FAIL',
+  ]) {
+    expect(find.textContaining(term), findsNothing, reason: term);
+  }
+}
+
 void main() {
   const agent = PhoenixLanguageLevelAgent();
 
@@ -63,6 +80,7 @@ void main() {
       expect(find.textContaining('十七孔桥'), findsWidgets);
       expect(find.textContaining('冬至前后'), findsWidgets);
       expect(find.textContaining('昆明湖的倒影'), findsNothing);
+      _expectNoQaLanguageInVisibleChallenge();
 
       for (final key in <String>[
         'challenge-option-correct-0',
@@ -78,6 +96,7 @@ void main() {
 
       expect(find.textContaining('十七孔桥'), findsWidgets);
       expect(find.textContaining('昆明湖的倒影'), findsNothing);
+      _expectNoQaLanguageInVisibleChallenge();
 
       await _tap(tester, 'challenge-grammar-segment-1');
       await _tap(tester, 'challenge-option-correct');
@@ -87,6 +106,7 @@ void main() {
       expect(find.text('补回故事中消失的一句'), findsOneWidget);
       await _tap(tester, 'challenge-option-correct');
       await _tap(tester, 'challenge-submit');
+      _expectNoQaLanguageInVisibleChallenge();
       expect(rewards, hasLength(3));
     },
   );

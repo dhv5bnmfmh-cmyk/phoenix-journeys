@@ -105,6 +105,6 @@ final summerPalaceJourneyExperience = DailyJourneyExperience(
   storyAnnotations: summerPalaceStoryAnnotations,
   words: summerPalaceWords,
   discoveries: summerPalaceDiscoveries,
-  wonderQuestion: '十七孔桥的季节光线为什么让许澄的选择付出真实代价？',
-  expressQuestion: '请用“站位→光线→旧照片→选择→代价”说明这个故事为什么不能换成普通公园。',
+  wonderQuestion: '颐和园经历过损毁和修复。许澄最后把旧照片和正在暗下来的桥洞一起拍进画面，你觉得她对“无瑕”的理解发生了什么变化？',
+  expressQuestion: '请用三到五句话写一段许澄可能放在校展照片旁的说明。写出拍摄的时节、十七孔桥、旧照片，以及她最后决定留下什么。',
 );

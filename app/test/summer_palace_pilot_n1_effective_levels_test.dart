@@ -124,6 +124,95 @@ void main() {
     }
   });
 
+  test('Founder-visible reflection prompts stay human and contain no QA language', () {
+    final journey = requireDailyJourneyExperience('beijing-summer-palace');
+    const beginnerWonder =
+        '桥洞的金光正在移动，许澄为什么还是先去捡外婆的旧照片？';
+    const beginnerExpress =
+        '请用两到三句话写出桥洞金光、旧照片和许澄的选择之间发生了什么。';
+    const advancedWonder =
+        '颐和园经历过损毁和修复。许澄最后把旧照片和正在暗下来的桥洞一起拍进画面，你觉得她对“无瑕”的理解发生了什么变化？';
+    const advancedExpress =
+        '请用三到五句话写一段许澄可能放在校展照片旁的说明。写出拍摄的时节、十七孔桥、旧照片，以及她最后决定留下什么。';
+    const forbiddenQaTerms = <String>[
+      'Story',
+      'Choice',
+      'Cost',
+      'Place Substitution Test',
+      '不能换成普通公园',
+      '因果测试',
+      '文化因果 Gate',
+      '工程验证',
+      'PASS',
+      'FAIL',
+    ];
+
+    expect(journey.wonderQuestion, advancedWonder);
+    expect(journey.expressQuestion, advancedExpress);
+
+    final visibleContent = <String>[
+      journey.appBarTitle,
+      journey.storyTitle,
+      journey.headline,
+      journey.description,
+      journey.discoveryTeaser,
+      journey.wonderQuestion,
+      journey.expressQuestion,
+      ...journey.content.storyParagraphs,
+      ...journey.discoveries.expand(
+        (entry) => <String>[
+          entry.text,
+          entry.pinyin,
+          entry.simpleChinese,
+          entry.vietnamese,
+          entry.english,
+        ],
+      ),
+      ...journey.words.expand(
+        (entry) => <String>[
+          entry.word,
+          entry.pinyin,
+          entry.simpleChinese,
+          entry.translation,
+          entry.englishDefinition,
+          ...entry.examples.expand(
+            (example) => <String>[
+              example.chinese,
+              example.pinyin,
+              example.vietnamese,
+              example.english,
+            ],
+          ),
+        ],
+      ),
+    ].join('\n');
+
+    for (final term in forbiddenQaTerms) {
+      expect(visibleContent, isNot(contains(term)), reason: term);
+    }
+
+    for (var level = 1; level <= 10; level += 1) {
+      final content = resolveAdaptiveJourneyLevel(
+        journey,
+        profile: agent.profileForPhoenixLevel(level),
+      );
+      expect(
+        content.wonderQuestion,
+        level <= 4 ? beginnerWonder : advancedWonder,
+        reason: 'Lv.$level Wonder',
+      );
+      expect(
+        content.expressQuestion,
+        level <= 4 ? beginnerExpress : advancedExpress,
+        reason: 'Lv.$level Express',
+      );
+      final prompts = '${content.wonderQuestion}\n${content.expressQuestion}';
+      for (final term in forbiddenQaTerms) {
+        expect(prompts, isNot(contains(term)), reason: 'Lv.$level: $term');
+      }
+    }
+  });
+
   test('Place substitution damages the causal chain instead of merely renaming it', () {
     final story = summerPalaceN1LevelForPhoenixLevel(7).storyParagraphs.join();
     final generic = story
