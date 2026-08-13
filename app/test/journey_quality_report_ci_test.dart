@@ -36,13 +36,32 @@ void main() {
 
     expect(markdown, contains('Phoenix 全旅程内容品质报告'));
     expect(markdown, contains('特别旅程：`9`'));
+    expect(markdown, contains('自动内容门禁：`PASS`'));
+    expect(markdown, contains('Agent 文学品质审核：`PENDING`'));
+    expect(markdown, contains('Human Narrative Anti-Template：`PENDING`'));
+    expect(markdown, contains('Founder Story Approval：`PENDING`'));
+    expect(markdown, contains('Automated score used as literary approval：`NO`'));
+    expect(
+      markdown,
+      contains('不得据此宣称 `NARRATIVE_QUALITY = PASS`'),
+    );
+
     expect(report['agent'], 'PhoenixJourneyContentQualityAgent');
     expect(report['journeyCount'], 36);
     expect(report['regularJourneyCount'], 27);
     expect(report['specialJourneyCount'], 9);
     expect(report['profileCount'], 10);
     expect(report['inspectionCount'], 360);
+    expect(report['automatedGateStatus'], 'pass');
+    expect(report['canEnterHumanReview'], isTrue);
+    expect(report['agentSemanticSufficiencyStatus'], 'pending-human-review');
+    expect(report['agentLiteraryReviewStatus'], 'pending-human-review');
+    expect(report['humanNarrativeAntiTemplateStatus'], 'pending-human-review');
+    expect(report['founderStoryApprovalStatus'], 'pending-founder-review');
+    expect(report['overallStoryQualityStatus'], 'pending-human-review');
+    expect(report['automatedScoreUsedAsLiteraryApproval'], isFalse);
     expect(report['canPublish'], isTrue);
+    expect(report['canPublishScope'], 'automated-content-contract-only');
     expect(report['approvedCount'], 360);
     expect(report['needsRevisionCount'], 0);
     expect(report['blockedCount'], 0);

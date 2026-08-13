@@ -57,7 +57,15 @@ class PhoenixJourneyContentQualityDecision {
 
   int get score => report.score;
 
-  bool get isPublishable => status == PhoenixJourneyReleaseStatus.approved;
+  /// True only for the deterministic content-contract gate implemented by this
+  /// agent. It does not establish semantic sufficiency, literary quality,
+  /// human anti-template approval, Founder approval, or Gold readiness.
+  bool get passesAutomatedContentGate =>
+      status == PhoenixJourneyReleaseStatus.approved;
+
+  /// Legacy compatibility alias. Callers MUST NOT interpret this as literary
+  /// or Founder approval.
+  bool get isPublishable => passesAutomatedContentGate;
 
   String get grade => switch (score) {
         >= 98 => 'S',
@@ -70,11 +78,11 @@ class PhoenixJourneyContentQualityDecision {
 
   String get summary => switch (status) {
         PhoenixJourneyReleaseStatus.approved =>
-          '内容品质通过，可进入发布流程。',
+          '自动内容契约通过，可进入人工/Founder故事审核；不构成文学或Gold批准。',
         PhoenixJourneyReleaseStatus.needsRevision =>
-          '内容基本完整，但仍有可改善项目。',
+          '自动内容契约仍有可改善项目，修正后才能进入后续人工审核。',
         PhoenixJourneyReleaseStatus.blocked =>
-          '发现关键品质问题，必须修正后才能发布。',
+          '自动内容契约发现关键问题，必须修正后才能进入后续审核。',
       };
 }
 
@@ -98,8 +106,15 @@ class PhoenixJourneyContentQualityBatch {
       .where((decision) => decision.status == PhoenixJourneyReleaseStatus.blocked)
       .length;
 
-  bool get canPublish =>
+  /// Deterministic machine gate only. A true result means the catalog may
+  /// proceed to semantic/literary/Founder review, not that Story Quality or
+  /// Gold approval has been granted.
+  bool get automatedGatePass =>
       decisions.isNotEmpty && blockedCount == 0 && needsRevisionCount == 0;
+
+  /// Legacy compatibility alias retained for existing runtime/report callers.
+  /// Its scope is strictly the automated content-contract gate.
+  bool get canPublish => automatedGatePass;
 
   int get minimumScore => decisions.isEmpty
       ? 0

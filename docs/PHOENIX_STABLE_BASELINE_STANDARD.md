@@ -105,6 +105,14 @@ Production visuals MUST NOT be replaced by low-detail programmatic SVG/WebP, fla
 
 Rights completeness does not equal visual approval. Rights, technical validity, visual quality, stable comparison, and Founder approval are separate mandatory gates.
 
+## Protected baseline manifest and single-track authority
+
+The permanent repository branch is `main`; at most one Founder-authorized development branch and one active development PR may coexist. Every task must fetch current remote main, record `STARTING_MAIN_SHA`, and record the sole `ACTIVE_DEVELOPMENT_BRANCH`, `ACTIVE_DEVELOPMENT_PR`, and `REMOTE_ACTIVE_DEVELOPMENT_LINE_COUNT`. A count above one is `MULTIPLE ACTIVE DEVELOPMENT LINES — BLOCKED`.
+
+Before writing, preserve a `PROTECTED BASELINE MANIFEST` containing the current main SHA and the scoped active runtime/screen path, active Story source, Journey IDs, six-stage behavior, and UI/navigation behavior. Delivery requires `AUTHORIZED DELTA + PROTECTED BASELINE PARITY`. `ABSENCE OF AUTHORIZATION = PRESERVE CURRENT MAIN`.
+
+`FILE EXISTS != ACTIVE PRODUCT`: active runtime, resolver, binding, and current main outrank legacy or inactive file residue. Historical work may inform a new task, but `RELATED HISTORY != CURRENT SOURCE OF TRUTH` and may not be resumed directly.
+
 See [Phoenix UI and Visual Standard](PHOENIX_UI_VISUAL_STANDARD.md) and [Phoenix Product Quality Standard](PHOENIX_PRODUCT_QUALITY_STANDARD.md).
 
 ## 6. Mandatory stable baseline comparison

@@ -584,4 +584,16 @@ Changing source facts does not establish Story uniqueness, and Story uniqueness 
 
 Automated validation may prove source-record presence, approved authority classification, fact/fiction contract completeness, declared substitution result, mechanism fields, fingerprint completeness, Rule A / Rule B results, taxonomy-governance fields, and Lv1 causal-contract fields. It MUST NOT be described as proving historical interpretation, place-native literary sufficiency, cultural nuance, creative distinctness beyond the deterministic threshold, or literary quality. Those remain Founder/Agent review responsibilities.
 
-This extension governs future new Journeys and separately authorized future remediations. It does not reopen the eight approved Gold Stories, does not authorize Suzhou continuation, and does not authorize background, Passport, map, or location-hierarchy work.
+This extension governs future new Journeys and separately authorized future remediations. It does not reopen Founder-approved Gold Stories and does not authorize background, Passport, map, or location-hierarchy work.
+
+## 17. Binding Story × Culture × Level lifecycle extension
+
+The canonical requirements in [Phoenix Narrative and Discovery Standard §19](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md#19-canonical-story--culture--level-standard) are REQUIRED in this lifecycle.
+
+Before Story lock, Phase A/B evidence MUST include the Cultural Fact Action Test, human Place Causality review, Cultural Knowledge Residue plan, Story/Discovery bridge, three-gradient Level plan, five cognitive bands, adjacent Level Semantic Delta evidence, Level Backward Completeness, Story Spine Invariant, Lv10 Mastery Delta, four-language event alignment, vocabulary provenance, and learner-visible QA-language sweep.
+
+Default Discovery depth is `2 / 2 / 2 / 2 / 3 / 3 / 3 / 3 / 3 / 3`; deviations require documented content/mobile evidence and Founder or canonical review. Story length ceilings MUST be treated as ceilings under `MINIMUM SUFFICIENT STORY`.
+
+Pilot governance is binding: one Pilot, exact-head validation and Preview, independent audit, Founder Experience, final Founder audit, canonical formalization only after PASS, then horizontal audit and one-Journey-at-a-time remediation. Any source commit after Founder Experience invalidates that SHA-bound approval.
+
+The six-stage product architecture is unchanged. Wonder/Express cognitive bands are content semantics, not standalone stages.

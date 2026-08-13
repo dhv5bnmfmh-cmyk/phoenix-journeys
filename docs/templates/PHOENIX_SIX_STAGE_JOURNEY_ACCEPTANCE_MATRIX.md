@@ -99,6 +99,25 @@ Functional Separation Result:
 | Ending |  |  |  |  |  |
 | Memory Anchor |  |  |  |  |  |
 
+## Story × Culture × Level content semantics
+
+The six stages remain unchanged. These rows validate content inside existing stages and MUST NOT create standalone Reflection or Writing stages.
+
+| Gate | Required evidence | Result |
+|---|---|---|
+| Cultural Fact Action Test | Fact/source/Story location/action/pressure/non-exposition/removal effect |  |
+| Place Causality | Key Choice materially breaks under generic-place substitution |  |
+| Cultural Knowledge Residue | Natural Story-only place/culture understanding by level band |  |
+| Story / Discovery Bridge | Story encounter precedes Discovery explanation; no plot retelling |  |
+| Discovery depth | `2/2/2/2/3/3/3/3/3/3`, independent sourced aligned units |  |
+| Three gradients | Language + Story understanding + cultural understanding |  |
+| Five cognitive bands | Event / Place / Relationship×Place / Mechanism / Judgment |  |
+| Adjacent semantic delta | New causal/relational/cultural meaning at every Lv2–Lv10 |  |
+| Backward completeness | Every level independently contains full Story spine |  |
+| Lv10 mastery | Unique action/judgment/capstone beyond Lv9 |  |
+| Vocabulary provenance | Current Story + all current active Discovery units |  |
+| Learner-visible QA ban | Exact visible-copy sweep |  |
+
 ## Runtime and evidence gates
 
 | Gate | Required evidence | Result |

@@ -20,11 +20,11 @@ AI 是同行者，不是冷漠的评分机器。
 
 ## Binding Journey Story truth + place-causality behavior
 
-Before drafting, repairing, evaluating, or preparing any Phoenix Journey Story for Gold acceptance, the Agent MUST read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), [PHOENIX NEW JOURNEY CREATION STANDARD](../docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), and the canonical semantic gate implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
+Before drafting, repairing, evaluating, or preparing any Phoenix Journey Story for Gold acceptance, the Agent MUST read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), [PHOENIX NEW JOURNEY CREATION STANDARD](../docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), [PHOENIX NEW JOURNEY ACCEPTANCE MATRIX](../docs/templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md), and the canonical semantic gate implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
 
 The mandatory development order is:
 
-> **FACT FIRST** → **PLACE CAUSALITY** → **STORY MECHANISM** → **ANTI-TEMPLATE COMPARISON** → **LV1 CAUSAL PROOF** → **STORY LOCK** → **LV1-LV10 EXPANSION** → **STORY / DISCOVERY SEPARATION** → **LEARNING PACKAGE** → **GOLD PROMOTION**
+> **FACT FIRST** → **PLACE CAUSALITY** → **STORY MECHANISM** → **MACHINE ANTI-TEMPLATE** → **HUMAN STORY DIFFERENTIATION** → **LV1 CAUSAL + HUMAN PROOF** → **STORY LOCK** → **LV1-LV10 EXPANSION** → **STORY / DISCOVERY SEPARATION** → **LEARNING PACKAGE** → **GOLD PROMOTION**
 
 The Agent MUST NOT jump from a location name directly to a full Lv1-Lv10 Story.
 
@@ -38,10 +38,14 @@ Before Story lock the Agent MUST:
 6. distinguish observed spatial effect from documented historical intention; one does not prove the other;
 7. create a `PLACE_CAUSAL_MECHANISM` record identifying the verified place property, authoritative evidence, generic-place substitution result, and affected Story causal dimensions;
 8. reject a Story whose Goal → Conflict → Choice → Climax → Consequence remains substantially unchanged when the named place is replaced with a generic park, café, museum, old street, school, or unrelated attraction;
-9. define the Story architecture before full prose: protagonist, relationship geometry, goal, conflict, choice, climax, consequence, transformation, ending, cultural-anchor function, and dramatic engine;
-10. compare the candidate against every approved Gold semantic fingerprint using the existing Rule A / Rule B gate;
-11. require Lv1 to contain the causal skeleton before any Lv2-Lv10 expansion;
-12. record machine-verifiable contract evidence separately from human/Founder semantic-sufficiency and literary review.
+9. define Story architecture before full prose: protagonist, relationship geometry, goal, human stakes, conflict, choice, cost, climax, consequence, transformation, ending, Story Shape, Memory Moment, cultural-anchor function, and dramatic engine;
+10. compare the candidate against every approved Gold semantic fingerprint using the existing Rule A / Rule B machine gate;
+11. separately compare the de-skinned Story spine against every approved Gold Story at the human-reader level;
+12. for new Stories and Founder-authorized major remediation, consider at least three genuinely different architectures before Lv1 and choose the strongest one;
+13. require Lv1 to pass both `LV1 CAUSAL PROOF` and `LV1 HUMAN STORY PROOF` before any Lv2-Lv10 expansion;
+14. use Lv5 as the primary literary review level and verify Lv10 deepens character, relationship, environment, cultural context, and psychological texture rather than merely adding exposition;
+15. run `LAST_EXPLANATION_REMOVAL_TEST` after the Story is complete;
+16. record machine-verifiable contract evidence separately from Agent semantic sufficiency, Agent literary review, human anti-template review, and Founder approval.
 
 The Agent MUST use these exact stop outcomes where applicable:
 
@@ -49,35 +53,141 @@ The Agent MUST use these exact stop outcomes where applicable:
 - `UNVERIFIED FACTUAL CLAIM — BLOCKED`
 - `GENERIC-PLACE STORY — NOT GOLD READY`
 - `TEMPLATE COLLISION - NOT GOLD READY`
+- `HUMAN STORY COLLISION — NOT GOLD READY`
 - `LV1 CAUSAL PROOF FAILED — DO NOT EXPAND`
+- `LV1 HUMAN STORY PROOF FAILED — DO NOT EXPAND`
 
-The Agent MUST NOT continue after a binding STOP condition, fabricate a workaround, use tourism blogs/social posts/unsourced travel articles/AI summaries as binding factual evidence, weaken tests to admit a candidate, or add filler facts merely to create drama.
-
-Distinctness never overrides truth. If a unique dramatic engine depends on an unsupported factual premise, the Agent MUST remove the premise, replace it with a verified place mechanism, convert only the character action into clearly fictional contemporary behavior where truthful, or stop.
+The Agent MUST NOT continue after a binding STOP condition, fabricate a workaround, weaken tests to admit a candidate, or add filler facts merely to create drama. Distinctness never overrides truth.
 
 ## Binding Journey semantic anti-template behavior
-
-When drafting, repairing, evaluating, or preparing a Phoenix Journey for Gold acceptance, the Agent MUST first read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md) and the canonical normalized semantic catalog implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
 
 For every NEW Gold Journey candidate, the Agent MUST:
 
 1. inspect the complete approved-Gold semantic fingerprint catalog before drafting the final Story;
 2. define the candidate normalized semantic fingerprint before final Story approval;
-3. compare the candidate against every approved Gold Journey using the deterministic CORE collision gate;
-4. cite exact active-Story evidence for every CORE mechanism;
-5. provide a concise semantic rationale for every CORE mechanism that explains the causal mapping from the cited Story evidence to the normalized mechanism family;
-6. cite enough focused active-Story spans to demonstrate the causal function when one sentence is insufficient, without copying whole Story levels as evidence padding;
-7. avoid bare landmark names, protagonist biographies, incidental scenery, or other surface facts as evidence for a causal mechanism unless that surface fact is itself the dimension being evidenced;
-8. reject `TEMPLATE COLLISION - NOT GOLD READY` rather than changing names, cities, professions, objects, descriptive wording, visual motifs, or enum labels to disguise reused causal structure;
-9. prefer an existing reusable `NarrativeMechanismFamily` whenever its causal function is materially equivalent;
-10. if a genuinely new mechanism family is proposed, record why no existing family is semantically equivalent, which nearest existing families were considered, and what causal distinction makes the new family necessary before the taxonomy is extended;
-11. redesign the dramatic engine and causal mechanism when a collision is found, rather than laundering the same mechanism through a near-synonym enum;
-12. update Narrative DNA, semantic fingerprints, Story-evidence spans, and semantic rationales only from the final active canonical Story, never from an abandoned or legacy Story package;
-13. rerun semantic anti-template tests after any Story or fingerprint change that can affect opening, conflict, choice, climax, consequence, transformation, relationship, ending, cultural-anchor function, or dramatic engine.
+3. compare it against every approved Gold Journey using deterministic CORE collision Rule A / Rule B;
+4. cite exact active-Story evidence and a semantic rationale for every CORE mechanism;
+5. reject collisions rather than disguising reused causality through names, cities, professions, objects, wording, visual motifs, or enum labels;
+6. prefer an existing reusable `NarrativeMechanismFamily` whenever causally equivalent;
+7. prohibit taxonomy laundering and Journey-specific near-synonym families created to evade collision;
+8. update Narrative DNA, fingerprints, Story evidence, and rationales only from the final active Story;
+9. rerun the semantic anti-template gate after any Story or fingerprint change that can affect causal structure.
 
-The Agent MUST distinguish **Evidence Provenance** from **Semantic Sufficiency**. Deterministic CI can verify active-source identity, exact Story-span presence, dimension/mechanism alignment, non-empty rationale fields, approved source-record presence, fact/fiction classification fields, declared generic-substitution outcome, and Lv1 causal-contract completeness. CI MUST NOT be represented as independently understanding whether arbitrary natural-language Story prose semantically entails an enum, whether a factual interpretation is intellectually honest, whether a Story truly feels native to the place, or whether prose works emotionally. Founder/Agent review remains responsible for those judgments.
+Rule A = 0 and Rule B = 0 mean only `MACHINE SEMANTIC COLLISION = PASS`. They MUST NOT be represented as `HUMAN STORY DIFFERENTIATION = PASS`, literary approval, Founder approval, or Gold readiness.
 
-The Agent MUST NOT create a Journey-specific semantic category, bypass, allowlist, Founder-name exception, city exception, temporary exception, hard-coded `PASS`, alternate test-only classification, or near-synonym mechanism family solely to evade a collision. Existing approved-Gold semantic collision debt must be surfaced honestly and must not be used as precedent for a future candidate.
+## Binding human Story quality behavior
+
+Phoenix Gold Story must first work as an independent Chinese short story: a reader should want to finish it and be able to remember the person, the place, and one decisive moment. Cultural knowledge must enter lived action. Place must change what happens. Causality should live inside the Story instead of reading like a test case.
+
+### Chinese narrative quality
+
+`中国人的方式` MUST NOT be reduced to idioms, archaic diction, costumes, poetry, historical protagonists, or one prescribed traditional value. Human review SHOULD look for lived Chinese narrative texture such as family, friendship, apprenticeship, neighbors, colleagues, old customers, strangers helping one another, responsibility, promise, debt, trust, reluctance to part, dignity, silence, and tacit understanding when organically required by the Story.
+
+Small actions are allowed to carry large meaning. Prefer action over explanation, and leave room for silence. Environment such as rain, light, water, doors, bridges, alleys, sound, wind, shadow, crowd flow, and occlusion SHOULD participate in pacing and pressure instead of functioning as a fact container.
+
+### Protagonist humanity
+
+Every Story review MUST answer:
+
+- What does this person actually want?
+- Why today?
+- Why can it not simply wait until tomorrow?
+- Why can the protagonist not walk away?
+- What happens if it fails?
+- What do they refuse to admit?
+- What are they reluctant to lose?
+- What do they fear losing?
+- Why does another person matter, when another person is present?
+
+If the answers reduce to `because the assignment/task requires it`, `PROTAGONIST HUMANITY = FAIL`.
+
+### Relationship causality
+
+Delete the supporting character and reread the Story. If Goal, Conflict, Choice, Climax, and Ending remain substantially unchanged, `RELATIONSHIP NOT CAUSAL = FAIL`. A friend must not exist only to test a prototype, ask one convenient question, announce the answer, or validate the protagonist.
+
+### Goal, Choice, Cost, Climax, Transformation
+
+Completing an assignment, design, report, photograph, survey, or artifact is a weak default Goal unless personal need, relationship need, identity judgment, or real-world stakes make it matter.
+
+Every major Choice MUST receive `COST OF CHOICE REVIEW`: what is lost, missed, risked, exposed, assumed, or promised? A choice that is only a better method is not enough by itself.
+
+A climax MUST NOT default to `the friend understood`, `the prototype worked`, `the object did not break`, `the teacher approved`, or `the report passed`. Those are validation results. The climax should expose a decision under pressure, an irreversible relationship change, a relinquishment, an accepted consequence, an action the protagonist previously would not take, or a place-driven truth that can no longer be avoided.
+
+Transformation SHOULD be behavioral. `她意识到……`, `他明白……`, or `她终于懂得……` are not sufficient primary evidence when the Story can show the change through a final action, choice, or relationship response.
+
+### Memory Moment + Story Shape
+
+Every Story MUST declare one literary `STORY MEMORY MOMENT`: if the reader remembers one image a week later, what is it? If no distinct image/action remains, `STORY MEMORY MOMENT = WEAK`.
+
+Every Story MUST also declare its own `STORY SHAPE` in event-level language. Narrative-engine names do not prove shape difference. If two Journeys have substantially the same human-readable shape, prefer rewriting the newer Candidate.
+
+### De-skinned Story Spine
+
+For every Candidate, remove city, attraction, names, profession labels, academic/specialist labels, cultural nouns, and named props, then record only:
+
+`who wants what → why it matters → what blocks them → how relationship creates pressure → what fails → what must be chosen → what the choice costs → what the climax is → what irreversible result follows → how the person changes → final action`.
+
+Compare this spine against every current Founder-approved Gold Story. If two Stories remain highly similar after stripping the skin, `HUMAN STORY COLLISION — NOT GOLD READY` even when Rule A = 0 and Rule B = 0.
+
+The following high-frequency skeleton requires automatic scrutiny and MUST NOT become a Phoenix default engine:
+
+`student receives assignment → first version fails → friend raises question → protagonist re-observes place → redesigns artifact → friend tests again → second version succeeds → protagonist applies method to next project`.
+
+Photography assignments, research projects, design prototypes, maps, cards, worksheets, reports, presentations, peer testing, and teacher evaluation MUST NOT become bulk Story engines merely because their surface subjects differ.
+
+### Catalog diversity and anti-template restraint
+
+Phoenix MUST NOT become a `20-year-old university student universe`. Catalog comparison must consider age/life stage, lived situation, relationship geometry, opening pattern, climax pattern, ending pattern, Memory Moment, and emotional texture. Diversity MUST emerge from Story need, not mechanical occupation quotas.
+
+These quality dimensions are not a replacement Story template. A Story may have an explicit binary Choice or a long-form behavioral change; a countdown or no deadline; a large climax or a quiet irreversible action. Literary quality does not require disaster, death, family rupture, or cinematic escalation.
+
+### Level literary gates
+
+`LV1 HUMAN STORY PROOF` asks whether the protagonist is credible, wants something concrete, has meaningful stakes/relationship where applicable, experiences an event, performs a decisive action, and ends as a Story rather than a knowledge summary. If Lv1 reads like a product requirement, case study, course assignment, or museum explanation, FAIL.
+
+Lv5 is the primary literary review level. Review natural Chinese, character breath, dialogue, exposition, place-in-action, rhythm, AI-engineering tone, memorable scene, and aftertaste.
+
+Lv10 MUST deepen rather than inflate. Additional text should deepen character, relationship, environment, psychological detail, and cultural context, not merely add facts, terminology, history, or theme explanation.
+
+### Last Explanation Removal Test
+
+After the Story is complete, remove the last explanatory sentence. If the Story becomes stronger, more restrained, or more memorable, the sentence MUST stay removed. Ending meaning SHOULD be carried by the final action, relationship response, or image whenever possible.
+
+### Authority states
+
+The Agent MUST keep these separate:
+
+- `MACHINE_CONTENT_GATE`
+- `MACHINE_SEMANTIC_GATE`
+- `AGENT_SEMANTIC_SUFFICIENCY`
+- `AGENT_LITERARY_REVIEW`
+- `HUMAN_NARRATIVE_ANTI_TEMPLATE`
+- `FOUNDER_STORY_APPROVAL`
+- `OVERALL_STORY_QUALITY`
+
+Machine scores, green CI, field completeness, Rule A = 0, or Rule B = 0 MUST NOT infer literary `PASS`. Before explicit Founder approval, `FOUNDER_STORY_APPROVAL = PENDING`.
+
+## Phoenix single-track development
+
+Phoenix has one permanent branch: `main`. At any time the maximum is one active development branch, one active development PR, and one active development line. The source of truth is current remote `main` plus the one explicitly Founder-authorized active development branch.
+
+Before any write, report and verify `STARTING_MAIN_SHA`, `ACTIVE_DEVELOPMENT_BRANCH`, `ACTIVE_DEVELOPMENT_PR`, and `REMOTE_ACTIVE_DEVELOPMENT_LINE_COUNT`. If the count is greater than one, report `MULTIPLE ACTIVE DEVELOPMENT LINES — BLOCKED` and do not write. Every new task must fetch current remote main and create its sole branch from that exact SHA. `RELATED HISTORY != CURRENT SOURCE OF TRUTH`.
+
+Follow `ONE JOURNEY AT A TIME`, `ONE ACTIVE DEVELOPMENT PR AT A TIME`, `ONE ACTIVE DEVELOPMENT BRANCH AT A TIME`, and `ONE ACTIVE DEVELOPMENT LINE`. Old PRs, Preview branches, temporary validation branches, prototypes, and remediation branches are historical evidence, never a starting baseline.
+
+### No silent product replacement
+
+`ABSENCE OF AUTHORIZATION = PRESERVE CURRENT MAIN`. A historical checkout must never restore or overwrite current UI, navigation, runtime, six-stage behavior, active Story, or any other unauthorized product surface. Before writing, create a `PROTECTED BASELINE MANIFEST` covering the current main SHA, scoped screen/runtime path, active Story source, Journey IDs, six-stage behavior, and UI/navigation behavior. Closeout must prove the authorized delta plus protected baseline parity.
+
+`FILE EXISTS != ACTIVE PRODUCT`. Audit and implementation authority follow `ACTIVE RUNTIME`, `ACTIVE RESOLVER`, `ACTIVE BINDING`, and `CURRENT MAIN`; inactive file residue is archive evidence only. Founder approval remains SHA-bound: PR head, Founder-reviewed Candidate, and Preview release must be identical, and any source commit invalidates prior approval.
+
+Founder-approved Stories are reviewable for quality debt but MUST NOT be modified merely because the Agent recommends reopening them. Record `REOPEN RECOMMENDED` and wait for Founder authorization. An unapproved active Candidate may be remediated directly within its authorized Story scope.
+
+### Story × Culture × Level behavior
+
+The Agent MUST apply [Canonical Story × Culture × Level Standard](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md#19-canonical-story--culture--level-standard): cultural knowledge creates Story pressure through character action; every important fact passes the Cultural Fact Action Test; place mechanisms survive human causality review; Story encounter precedes Discovery explanation; Discovery defaults to `2/2/2/2/3/3/3/3/3/3`; every adjacent level adds new understanding while remaining independently complete; Lv10 has a mastery delta; Story length uses minimum sufficient natural prose; action precedes terminology; four languages share one active semantic event; vocabulary has current provenance; and internal QA language never appears in learner-visible content.
+
+The Agent MUST preserve the six-stage product architecture. Cognitive bands govern content semantics only. New methods proceed through one Pilot, exact-head audit/Preview, Founder Experience, final audit, canonical formalization, horizontal audit, then one-Journey-at-a-time remediation. Green automation is never literary or Founder authority.
 
 ## Binding Journey background production behavior
 
