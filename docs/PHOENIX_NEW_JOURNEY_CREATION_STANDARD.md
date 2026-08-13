@@ -8,6 +8,8 @@
 
 This standard defines the only permitted lifecycle for creating a new Phoenix Journey. It prevents batch expansion before product, story, learning, visual, technical, and mobile quality are proven.
 
+New Journey proposals MUST also follow [Phoenix Narrative and Discovery Standard §20](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md#20-canonical-journey-content-expansion-standard). Phase A proposals must declare Expansion Layer, Parent Province-Level Region, Parent City, Parent Place, Existing Place Story Inventory, Candidate Story Universe Slot, Truth Mode, Incremental Cultural Value, Incremental Human Value, Same-Place Differentiation results, Whole-library Differentiation results, and Founder Strategic Authorization when required.
+
 The first new-Journey cycle permits exactly **one Journey pilot**. No second Journey may enter implementation before the first pilot receives controlled approval.
 
 For all new or replaced Journey backgrounds, [PHOENIX AI BACKGROUND PRODUCTION STANDARD](PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md) is binding and MUST be read before background production begins.

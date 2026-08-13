@@ -21,6 +21,21 @@ Current Phase:
 Preview Link:
 Owner:
 Reviewer:
+Expansion Layer: LAYER 1 / LAYER 2 / LAYER 3
+Parent Province-Level Region:
+Parent City:
+Parent Place:
+Existing Place Story Inventory:
+Candidate Story Universe Slot:
+Truth Mode:
+Incremental Cultural Value:
+Incremental Human Value:
+Same-Place Differentiation Result:
+Whole-Library Differentiation Result:
+Narrative Scale = DESCRIPTIVE / NON-QUOTA
+Social Perspective = DESCRIPTIVE / NON-QUOTA
+Candidate Cultural Slice = DESCRIPTIVE / NON-QUOTA
+Founder Strategic Authorization:
 ```
 
 ## Allowed values
@@ -122,6 +137,21 @@ For background-production rows, `Background Gate State` is a subordinate visual-
 | NJ-079 | Founder-Visible QA Language Ban | REQUIRED | Exact sweep of Story, Discovery, Challenge, Wonder, Express, Memory, Completion, Entry |  | BLOCKED | UNVERIFIED | Internal QA/test/Gate/PASS/FAIL language prohibited |  | NOT_REQUIRED |
 | NJ-080 | Exact-Head Founder Authority | REQUIRED | PR head = reviewed Candidate = Preview release; later source commit invalidates approval |  | BLOCKED | UNVERIFIED | Full revalidation/review after any source change |  | PENDING |
 | NJ-081 | Final Founder Audit | REQUIRED | Full Story/Culture/Level/end-to-end review with MUST FIX / SHOULD FIX / LATER and no endless polish loop |  | BLOCKED | UNVERIFIED |  |  | PENDING |
+
+## Additional Expansion acceptance rows
+
+| ID | Acceptance item | Requirement | Expected evidence | Actual evidence | Result | Evidence Level | Issue / Required action | Owner | Founder Approval |
+|---|---|---|---|---|---|---|---|---|---|
+| NJ-100 | Expansion context declared | REQUIRED | Expansion Layer, Parent hierarchy, Candidate Story Universe Slot |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-101 | Parent hierarchy verified | REQUIRED | Parent Province-Level Region, Parent City, Parent Place evidence |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-102 | Same-Place inventory reviewed | REQUIRED | Existing Place Story Inventory and comparison table |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-103 | Truth Mode declared | REQUIRED | Declared Truth Mode and evidence classification |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-104 | Incremental cultural value verified | REQUIRED | Rationale and evidence showing cultural incremental value vs existing Stories |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-105 | Incremental human value verified | REQUIRED | Rationale and evidence showing human-value incremental difference |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-106 | Same-Place Story collision absent | REQUIRED | Human Same-Place differentiation result and de-skinned spine comparison |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-107 | Whole-library differentiation verified | REQUIRED | Normalized semantic fingerprint comparison and human gate result |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-108 | Coverage quota did not override Gold | REQUIRED | Evidence showing coverage not used to justify acceptance |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
+| NJ-109 | Founder strategic authorization verified | REQUIRED | Founder strategic authorization record or explicit note (if required) |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 
 ## Background production acceptance extension
 

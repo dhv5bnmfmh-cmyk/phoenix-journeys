@@ -22,6 +22,31 @@ AI 是同行者，不是冷漠的评分机器。
 
 Before drafting, repairing, evaluating, or preparing any Phoenix Journey Story for Gold acceptance, the Agent MUST read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), [PHOENIX NEW JOURNEY CREATION STANDARD](../docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), [PHOENIX NEW JOURNEY ACCEPTANCE MATRIX](../docs/templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md), and the canonical semantic gate implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
 
+## Binding Journey Content Expansion Behavior
+
+Before proposing a new Journey candidate the Agent MUST:
+
+- Identify the Expansion Layer (LAYER 1: National Coverage; LAYER 2: City Place Network; LAYER 3: Place Story Universe).
+- Read Parent geographic hierarchy and declare Parent Province-Level Region, Parent City, and Parent Place when applicable.
+- Read same-Place active Story inventory and City inventory and the Founder-approved Gold catalog.
+- Declare Truth Mode, Incremental Cultural Value, and Incremental Human Value for the candidate.
+- Run Same-Place collision and Whole-library differentiation (machine + human gates) prior to STORY LOCK.
+
+One City != One Story; One Place != One Story. Continue to follow existing Gold / Truth / Place Causality rules. Do not treat any Pilot method as a content template.
+
+Summer Palace Founder-approved Method Pilot is NOT a Story template, Level template, Cultural template, or Place Story Universe template.
+
+Before developing a new Journey candidate that targets the same Place the Agent MUST:
+
+- Read the same-Place active Story inventory.
+- Read the City inventory.
+- Read the whole Founder-approved Gold catalog.
+- Declare the candidate's Truth Mode and record evidence classification.
+- Demonstrate Incremental Cultural Value and Incremental Human Value in writing with supporting evidence paths.
+- Execute a human Same-Place differentiation (compare opening, protagonist, relationship, Goal, Conflict, Choice, Cost, Climax, Consequence, Memory Moment, Story Shape, and cultural mechanism) and record the differentiation result.
+
+Only after these items pass may the Agent proceed with pre-lock architecture and the normal Story development gates. 
+
 The mandatory development order is:
 
 > **FACT FIRST** → **PLACE CAUSALITY** → **STORY MECHANISM** → **MACHINE ANTI-TEMPLATE** → **HUMAN STORY DIFFERENTIATION** → **LV1 CAUSAL + HUMAN PROOF** → **STORY LOCK** → **LV1-LV10 EXPANSION** → **STORY / DISCOVERY SEPARATION** → **LEARNING PACKAGE** → **GOLD PROMOTION**

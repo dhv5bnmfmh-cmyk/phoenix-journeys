@@ -74,6 +74,16 @@ Automated green status cannot prove:
 - that removing the final explanation improves the ending;
 - that Founder approved the exact candidate.
 
+## Expansion Gate
+
+When a new Journey proposal is in scope, the Quality Gate enforces the Expansion Gate minimal checks (machine or human where applicable):
+
+- ONE PLACE != ONE STORY — multiple independent Journeys per Place are permitted but require Same-Place Differentiation proof.
+- SAME-PLACE STORY DIFFERENTIATION — human same-place comparison of opening, protagonist, relationship, Goal, Conflict, Choice, Cost, Climax, Consequence, Memory Moment, Story Shape, and cultural mechanism.
+- TRUTH MODE — candidate must declare Truth Mode and provide evidence classification (VERIFIED HISTORY / VERIFIED CULTURAL FACT / CONTEMPORARY FICTION / FICTIONAL CHARACTER IN VERIFIED HISTORICAL SETTING / FOLKLORE / LITERARY TRADITION).
+- INCREMENTAL VALUE — candidate must demonstrate Incremental Cultural Value and Incremental Human Value.
+- COVERAGE DOES NOT OVERRIDE GOLD — coverage goals or story-count targets must not reduce or bypass Gold acceptance requirements.
+
 Those are Agent/human/Founder review responsibilities defined by the canonical Story standards and design matrix.
 
 ## Human literary and anti-template handoff
