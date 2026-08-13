@@ -17,9 +17,11 @@ void main() {
         );
         final storyTarget = phoenixStoryLengthTargetFor(profile);
         final expectedDiscoveryShape =
-            profile.band == PhoenixReadingBand.beginner
-                ? hasLength(1)
-                : hasLength(inInclusiveRange(1, 2));
+            journey.id == 'beijing-summer-palace'
+                ? hasLength(profile.phoenixLevel! <= 4 ? 2 : 3)
+                : profile.band == PhoenixReadingBand.beginner
+                    ? hasLength(1)
+                    : hasLength(inInclusiveRange(1, 2));
         final storyCharacters = level.storyParagraphs.join().runes.length;
 
         expect(

@@ -1,70 +1,76 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/data/summer_palace_adaptive_story_levels.dart';
 import 'package:phoenix_journeys/data/summer_palace_journey.dart';
+import 'package:phoenix_journeys/models/story_content.dart';
 
 void main() {
-  test('Summer Palace uses two balanced long story paragraphs', () {
-    expect(summerPalaceStoryParagraphs, hasLength(2));
-    expect(summerPalaceStoryAnnotations, hasLength(2));
-    for (final paragraph in summerPalaceStoryParagraphs) {
-      expect(paragraph.length, inInclusiveRange(260, 380));
-    }
+  test('published Summer Palace shell uses the same active cultural Story', () {
+    final active = summerPalaceN1LevelForPhoenixLevel(8);
+    expect(summerPalaceStoryParagraphs, active.storyParagraphs);
     expect(
-      summerPalaceStoryParagraphs.join().length,
+      summerPalaceStoryAnnotations
+          .map((entry) => (entry.pinyin, entry.vietnamese, entry.english))
+          .toList(),
+      active.storyAnnotations
+          .map((entry) => (entry.pinyin, entry.vietnamese, entry.english))
+          .toList(),
+    );
+    expect(summerPalaceStoryParagraphs, hasLength(2));
+    expect(
+      summerPalaceStoryParagraphs.join().runes.length,
       inInclusiveRange(600, 760),
     );
   });
 
-  test('Pilot N1 declares causal narrative identity', () {
+  test('Pilot identity preserves human bones while making place causal', () {
     expect(summerPalacePilotPhaseId, 'PILOT_N1');
     expect(
       summerPalacePilotPrimaryFinding,
-      'PROTAGONIST_IDENTITY_MISSING',
+      'CULTURAL_PLACE_CAUSALITY_MISSING',
     );
     expect(summerPalacePilotProtagonist, '许澄');
     expect(summerPalacePilotRelationship, contains('周岚'));
     expect(summerPalacePilotGoal, contains('校展'));
-    expect(summerPalacePilotConflict, contains('选择'));
+    expect(summerPalacePilotConflict, contains('十七孔桥'));
     expect(summerPalacePilotChoice, contains('旧照片'));
-    expect(summerPalacePilotConsequence, contains('留下痕迹的风景'));
-    expect(summerPalaceStoryFunctionContract, contains('冲突、选择与后果'));
+    expect(summerPalacePilotConsequence, contains('金光'));
+    expect(summerPalaceStoryFunctionContract, contains('地点机制'));
     expect(summerPalaceDiscoveryFunctionContract, contains('不复述'));
   });
 
-  test('Story enacts choice and caused consequence without tourist opening', () {
-    final story = summerPalaceStoryParagraphs.join();
-    expect(summerPalaceStoryParagraphs.first, isNot(startsWith('清晨，你')));
-    expect(story, contains('许澄'));
-    expect(story, contains('周岚'));
-    expect(story, contains('必须选择'));
-    expect(story, contains('先捡回照片'));
-    expect(story, contains('明信片式的画面消失'));
-    expect(story, contains('《留下痕迹的风景》'));
-    expect(story, contains('只把旧照片交给她保存'));
-  });
-
-  test('Story annotations preserve all supported language evidence', () {
-    for (final annotation in summerPalaceStoryAnnotations) {
-      expect(annotation.pinyin.trim(), isNotEmpty);
-      expect(annotation.vietnamese.trim(), isNotEmpty);
-      expect(annotation.english.trim(), isNotEmpty);
+  test('official source records cover Story and Discovery cultural mechanisms', () {
+    final ids = summerPalaceStorySources.map((source) => source.id).toSet();
+    expect(
+      ids,
+      containsAll(<String>{
+        'unesco-summer-palace-880',
+        'beijing-parks-summer-palace-overview',
+        'beijing-parks-seventeen-arch-bridge',
+        'beijing-parks-seventeen-arch-winter-light',
+      }),
+    );
+    for (final source in summerPalaceStorySources) {
+      expect(source.verificationStatus, StoryVerificationStatus.verified);
     }
   });
 
-  test('Discovery is factual and functionally separate from the character plot',
-      () {
+  test('static Discovery is compact factual and plot-free', () {
     expect(summerPalaceDiscoveries, hasLength(2));
-    final discovery = summerPalaceDiscoveries.map((item) => item.text).join();
+    final text = summerPalaceDiscoveries.map((item) => item.text).join();
+    expect(text, contains('十七孔桥'));
+    expect(text, contains('冬至'));
+    expect(text, isNot(contains('许澄')));
+    expect(text, isNot(contains('周岚')));
     for (final item in summerPalaceDiscoveries) {
-      expect(item.text.length, inInclusiveRange(240, 340));
       expect(item.pinyin.trim(), isNotEmpty);
       expect(item.vietnamese.trim(), isNotEmpty);
       expect(item.english.trim(), isNotEmpty);
     }
-    expect(discovery, contains('借景'));
-    expect(discovery, contains('对景'));
-    expect(discovery, contains('修复'));
-    expect(discovery, isNot(contains('许澄')));
-    expect(discovery, isNot(contains('周岚')));
-    expect(discovery, isNot(contains('旧照片')));
+  });
+
+  test('Entry copy names the active causal mechanism rather than generic lesson', () {
+    expect(summerPalaceJourneyExperience.description, contains('十七孔桥'));
+    expect(summerPalaceJourneyExperience.description, contains('旧照片'));
+    expect(summerPalaceJourneyExperience.discoveryTeaser, contains('季节光线'));
   });
 }

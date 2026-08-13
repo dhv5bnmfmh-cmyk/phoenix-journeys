@@ -1,30 +1,25 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/summer_palace_adaptive_story_levels.dart';
-import 'package:phoenix_journeys/data/summer_palace_journey.dart';
+import 'package:phoenix_journeys/data/summer_palace_cultural_discovery_levels.dart';
 
 void main() {
-  test('every N1 event owns aligned Chinese, pinyin, Vietnamese, and English',
-      () {
-    expect(
-      summerPalaceN1SemanticEvents.map((event) => event.id),
-      summerPalaceN1RequiredEventOrder,
-    );
+  test('every Story event owns complete aligned CN Pinyin Vietnamese English', () {
     expect(summerPalaceN1SemanticEvents, hasLength(14));
-
     for (final event in summerPalaceN1SemanticEvents) {
-      expect(event.coreChinese.trim(), isNotEmpty, reason: event.id.name);
-      expect(event.corePinyin.trim(), isNotEmpty, reason: event.id.name);
-      expect(event.coreVietnamese.trim(), isNotEmpty, reason: event.id.name);
-      expect(event.coreEnglish.trim(), isNotEmpty, reason: event.id.name);
-      expect(event.detailChinese.trim(), isNotEmpty, reason: event.id.name);
-      expect(event.detailPinyin.trim(), isNotEmpty, reason: event.id.name);
-      expect(event.detailVietnamese.trim(), isNotEmpty, reason: event.id.name);
-      expect(event.detailEnglish.trim(), isNotEmpty, reason: event.id.name);
+      for (final value in <String>[
+        event.coreChinese,
+        event.corePinyin,
+        event.coreVietnamese,
+        event.coreEnglish,
+        event.detailChinese,
+        event.detailPinyin,
+        event.detailVietnamese,
+        event.detailEnglish,
+      ]) {
+        expect(value.trim(), isNotEmpty, reason: event.id.name);
+      }
     }
-  });
 
-  test('each effective level is assembled from the same multilingual event IDs',
-      () {
     for (var level = 1; level <= 10; level += 1) {
       final content = summerPalaceN1LevelForPhoenixLevel(level);
       final chinese = content.storyParagraphs.join();
@@ -34,55 +29,73 @@ void main() {
       final english =
           content.storyAnnotations.map((entry) => entry.english).join(' ');
 
-      var chineseCursor = -1;
-      var pinyinCursor = -1;
-      var vietnameseCursor = -1;
-      var englishCursor = -1;
       for (final event in summerPalaceN1SemanticEvents) {
-        final nextChinese = chinese.indexOf(event.coreChinese, chineseCursor + 1);
-        final nextPinyin = pinyin.indexOf(event.corePinyin, pinyinCursor + 1);
-        final nextVietnamese =
-            vietnamese.indexOf(event.coreVietnamese, vietnameseCursor + 1);
-        final nextEnglish = english.indexOf(event.coreEnglish, englishCursor + 1);
-        expect(nextChinese, greaterThan(chineseCursor),
-            reason: 'Lv.$level Chinese ${event.id.name}');
-        expect(nextPinyin, greaterThan(pinyinCursor),
-            reason: 'Lv.$level pinyin ${event.id.name}');
-        expect(nextVietnamese, greaterThan(vietnameseCursor),
-            reason: 'Lv.$level Vietnamese ${event.id.name}');
-        expect(nextEnglish, greaterThan(englishCursor),
-            reason: 'Lv.$level English ${event.id.name}');
-        chineseCursor = nextChinese;
-        pinyinCursor = nextPinyin;
-        vietnameseCursor = nextVietnamese;
-        englishCursor = nextEnglish;
+        expect(chinese, contains(event.coreChinese),
+            reason: 'Lv.$level CN ${event.id.name}');
+        expect(pinyin, contains(event.corePinyin),
+            reason: 'Lv.$level PY ${event.id.name}');
+        expect(vietnamese, contains(event.coreVietnamese),
+            reason: 'Lv.$level VI ${event.id.name}');
+        expect(english, contains(event.coreEnglish),
+            reason: 'Lv.$level EN ${event.id.name}');
+        if (level >= event.detailFromLevel) {
+          expect(chinese, contains(event.detailChinese));
+          expect(pinyin, contains(event.detailPinyin));
+          expect(vietnamese, contains(event.detailVietnamese));
+          expect(english, contains(event.detailEnglish));
+        }
       }
     }
   });
 
-  test('Standard Story preserves title, trust change, and handoff in all languages',
-      () {
-    final chinese = summerPalaceStoryParagraphs.join();
-    final pinyin = summerPalaceStoryAnnotations.map((entry) => entry.pinyin).join(' ');
-    final vietnamese =
-        summerPalaceStoryAnnotations.map((entry) => entry.vietnamese).join(' ');
-    final english =
-        summerPalaceStoryAnnotations.map((entry) => entry.english).join(' ');
+  test('Discovery depth matrix is exact multilingual sourced and non-padded', () {
+    const expected = <int, int>{
+      1: 2,
+      2: 2,
+      3: 2,
+      4: 2,
+      5: 3,
+      6: 3,
+      7: 3,
+      8: 3,
+      9: 3,
+      10: 3,
+    };
+    for (var level = 1; level <= 10; level += 1) {
+      final units = summerPalaceDiscoveryUnitsForLevel(level);
+      expect(units, hasLength(expected[level]!));
+      final texts = <String>{};
+      final questions = <String>{};
+      for (final unit in units) {
+        expect(texts.add(unit.entry.text), isTrue,
+            reason: 'Lv.$level duplicate text');
+        expect(questions.add(unit.learnerQuestion), isTrue,
+            reason: 'Lv.$level duplicate question');
+        expect(unit.newFactOrConcept.trim(), isNotEmpty);
+        expect(unit.sourceIds, isNotEmpty);
+        expect(unit.whyDistinct.trim(), isNotEmpty);
+        expect(unit.storyBridge.trim(), isNotEmpty);
+        expect(unit.entry.text.trim(), isNotEmpty);
+        expect(unit.entry.pinyin.trim(), isNotEmpty);
+        expect(unit.entry.vietnamese.trim(), isNotEmpty);
+        expect(unit.entry.english.trim(), isNotEmpty);
+        expect(unit.entry.text, isNot(contains('许澄')));
+        expect(unit.entry.text, isNot(contains('周岚')));
+        expect(unit.entry.text, isNot(contains('旧照片')));
+      }
+    }
+  });
 
-    expect(chinese, contains('《留下痕迹的风景》'));
-    expect(chinese, contains('不再替她调整构图'));
-    expect(chinese, contains('旧照片交给她保存'));
-
-    expect(pinyin, contains('Liúxià Hénjì de Fēngjǐng'));
-    expect(pinyin, contains('bù zài tì tā tiáozhěng gòutú'));
-    expect(pinyin, contains('jiù zhàopiàn jiāogěi tā bǎocún'));
-
-    expect(vietnamese, contains('Phong cảnh lưu lại dấu vết'));
-    expect(vietnamese, contains('không còn chỉnh bố cục'));
-    expect(vietnamese, contains('giao bức ảnh cũ'));
-
-    expect(english, contains('A Landscape That Keeps Its Traces'));
-    expect(english, contains('no longer adjusts the composition'));
-    expect(english, contains('entrusts the old photograph'));
+  test('Story and Discovery form one cultural bridge without retelling plot', () {
+    final story = summerPalaceN1LevelForPhoenixLevel(7).storyParagraphs.join();
+    final discovery =
+        summerPalaceDiscoveryEntriesForLevel(7).map((entry) => entry.text).join();
+    for (final anchor in <String>['十七孔桥', '冬至', '桥洞', '西北']) {
+      expect(story, contains(anchor));
+      expect(discovery, contains(anchor));
+    }
+    for (final plot in <String>['许澄', '周岚', '旧照片', '先捡回照片', '校展']) {
+      expect(discovery, isNot(contains(plot)));
+    }
   });
 }

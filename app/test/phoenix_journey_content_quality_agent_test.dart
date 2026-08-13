@@ -76,7 +76,9 @@ void main() {
 
   test('quality agent converts warnings into revision decisions', () {
     final journey = dailyJourneyExperiences.firstWhere(
-      (item) => item.id != forbiddenCityJourneyId,
+      (item) =>
+          item.id != forbiddenCityJourneyId &&
+          item.id != 'beijing-summer-palace',
     );
     final profile = levelAgent.allProfiles.first;
     final content = resolveAdaptiveJourneyLevel(

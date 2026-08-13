@@ -4,6 +4,8 @@ import 'guangzhou_chen_clan_one_pass.dart';
 import 'hangzhou_west_lake_one_pass.dart';
 import 'journey_data.dart';
 import 'journey_expansion_catalog.dart';
+import 'summer_palace_adaptive_story_levels.dart';
+import 'summer_palace_cultural_discovery_levels.dart';
 import 'summer_palace_journey.dart';
 import 'xian_city_wall_one_pass.dart';
 
@@ -224,14 +226,31 @@ JourneyLevelContent resolveJourneyLevel(
     return JourneyLevelContent.fromExperience(experience);
   }
 
-  final limited = (switch (difficulty) {
+  final source = switch (difficulty) {
     JourneyDifficulty.easy => summerPalaceEasyLevel,
-    JourneyDifficulty.standard => JourneyLevelContent.fromExperience(experience),
+    JourneyDifficulty.standard => (() {
+        final level = summerPalaceN1LevelForPhoenixLevel(5);
+        return JourneyLevelContent(
+          storyParagraphs: level.storyParagraphs,
+          storyAnnotations: level.storyAnnotations,
+          words: summerPalaceChallengeLevel.words,
+          discoveries: level.discoveries,
+          wonderQuestion: level.wonderQuestion,
+          expressQuestion: level.expressQuestion,
+        );
+      })(),
     JourneyDifficulty.challenge => summerPalaceChallengeLevel,
-  }).withReadingLimit();
-  return _withVocabularyInContext(
-    _normalizeSummerPalaceEventOrder(limited),
+  };
+  final readingLimited = source.withReadingLimit();
+  final limited = JourneyLevelContent(
+    storyParagraphs: readingLimited.storyParagraphs,
+    storyAnnotations: readingLimited.storyAnnotations,
+    words: source.words,
+    discoveries: source.discoveries,
+    wonderQuestion: source.wonderQuestion,
+    expressQuestion: source.expressQuestion,
   );
+  return _withVocabularyInContext(_normalizeSummerPalaceEventOrder(limited));
 }
 
 JourneyLevelContent _normalizeSummerPalaceEventOrder(
@@ -361,7 +380,6 @@ final summerPalaceEasyLevel = JourneyLevelContent(
   ],
   words: _selectSummerPalaceWords(const <String>[
     '颐和园',
-    '万寿山',
     '长廊',
     '修复',
     '十七孔桥',
@@ -371,13 +389,13 @@ final summerPalaceEasyLevel = JourneyLevelContent(
   expressQuestion: '请按顺序写出旧照片掉落、许澄选择、错失光线和外婆托付。',
 );
 
-const summerPalaceChallengeLevel = JourneyLevelContent(
+final summerPalaceChallengeLevel = JourneyLevelContent(
   storyParagraphs: <String>[
-    '校展截稿前夕，十七岁的学生摄影者许澄执意寻找一幅“无瑕”的皇家园林图景，以此证明自己的摄影不再依赖外婆周岚。周岚曾参与长廊彩画保护，她借廊柱的遮蔽与开敞说明：构图和修复一样，都必须决定何者显现、何者退后，却不能伪造未曾受损的过去。许澄仍坚持把褪色、裂纹和补绘排除在镜头外，两人的价值判断因此直接冲突。',
+    '校展截稿前夕，十七岁的学生摄影者许澄执意寻找一幅“无瑕”的颐和园图景，以此证明自己的摄影不再依赖外婆周岚。周岚曾参与长廊彩画保护，她借廊柱的遮蔽与开敞说明：构图和修复一样，都必须决定何者显现、何者退后，却不能伪造未曾受损的过去。许澄仍坚持把褪色、裂纹和补绘排除在镜头外，两人的价值判断因此直接冲突。',
     '十七孔桥前，理想光线出现的同时，记录修复前长廊、年轻周岚及其已故老师的旧照片被风吹落。许澄必须在标准风景与关系记忆之间作出不可兼得的选择。她放弃追光，先捡回照片，再以斑驳旧照、外婆扶栏的手和桥孔后的万寿山形成三层对景。这个行动使她错失最佳光线，却换来《留下痕迹的风景》：周岚不再替她调整构图，并把旧照片交给她保存。许澄的目标从证明独立转为承担保存关系与时间的责任，也理解修复不是抹去痕迹，而是让损失、选择和守护继续可读。',
   ],
   storyAnnotations: <ReadingAnnotation>[
-    ReadingAnnotation(
+    const ReadingAnnotation(
       pinyin:
           'Xiàozhǎn jiégǎo qiánxī, shíqī suì de xuéshēng shèyǐngzhě Xǔ Chéng zhíyì xúnzhǎo yì fú wúxiá de huángjiā yuánlín tújǐng, yǐcǐ zhèngmíng zìjǐ de shèyǐng bù zài yīlài wàipó Zhōu Lán. Zhōu Lán céng cānyù Chángláng cǎihuà bǎohù, tā jiè lángzhù de zhēbì yǔ kāichǎng shuōmíng: gòutú hé xiūfù yíyàng, dōu bìxū juédìng hézhě xiǎnxiàn, hézhě tuìhòu, què bùnéng wěizào wèicéng shòusǔn de guòqù. Xǔ Chéng réng jiānchí bǎ tuìsè, lièwén hé bǔhuì páichú zài jìngtóu wài, liǎng rén de jiàzhí pànduàn yīncǐ zhíjiē chōngtū.',
       vietnamese:
@@ -385,7 +403,7 @@ const summerPalaceChallengeLevel = JourneyLevelContent(
       english:
           'Before the exhibition deadline, seventeen-year-old student photographer Xu Cheng insists on a flawless imperial-garden image to prove she no longer depends on Zhou Lan. Zhou Lan once conserved Long Corridor paintings and uses the columns’ concealment and opening to explain that composition and restoration decide what appears and recedes without fabricating an undamaged past. Xu Cheng still excludes fading, cracks, and retouching, placing their values in direct conflict.',
     ),
-    ReadingAnnotation(
+    const ReadingAnnotation(
       pinyin:
           'Shíqīkǒng Qiáo qián, lǐxiǎng guāngxiàn chūxiàn de tóngshí, jìlù xiūfù qián Chángláng, niánqīng Zhōu Lán jí qí yǐgù lǎoshī de jiù zhàopiàn bèi fēng chuīluò. Xǔ Chéng bìxū zài biāozhǔn fēngjǐng yǔ guānxì jìyì zhījiān zuòchū bùkě jiāndé de xuǎnzé. Tā fàngqì zhuīguāng, xiān jiǎn huí zhàopiàn, zài yǐ bānbó jiùzhào, wàipó fúlán de shǒu hé qiáokǒng hòu de Wànshòu Shān xíngchéng sān céng duìjǐng. Zhège xíngdòng shǐ tā cuòshī zuìjiā guāngxiàn, què huànlái Liúxià Hénjì de Fēngjǐng: Zhōu Lán bù zài tì tā tiáozhěng gòutú, bìng bǎ jiù zhàopiàn jiāogěi tā bǎocún. Xǔ Chéng de mùbiāo cóng zhèngmíng dúlì zhuǎn wéi chéngdān bǎocún guānxì yǔ shíjiān de zérèn, yě lǐjiě xiūfù bú shì mǒqù hénjì, ér shì ràng sǔnshī, xuǎnzé hé shǒuhù jìxù kě dú.',
       vietnamese:
@@ -394,8 +412,14 @@ const summerPalaceChallengeLevel = JourneyLevelContent(
           'At the Seventeen-Arch Bridge, ideal light arrives as the old photograph of the unrestored corridor, young Zhou Lan, and her late teacher falls. Xu Cheng must choose between a standard view and relational memory. She abandons the light, retrieves the photograph, and composes three layers: worn image, Zhou Lan’s hand, and Longevity Hill beyond the arches. The action costs the best light but creates “A Landscape That Keeps Its Traces.” Zhou Lan stops adjusting the composition and entrusts the photograph to her. Xu Cheng’s goal changes from proving independence to carrying responsibility for relationship and time, and she understands restoration as keeping loss, choice, and care readable.',
     ),
   ],
-  words: summerPalaceWords,
-  discoveries: summerPalaceDiscoveries,
+  words: _selectSummerPalaceWords(const <String>[
+    '颐和园',
+    '万寿山',
+    '长廊',
+    '修复',
+    '十七孔桥',
+  ]),
+  discoveries: summerPalaceDiscoveryEntriesForLevel(10),
   wonderQuestion: '许澄的摄影选择如何把园林构图原则转化为对历史、关系与责任的判断？',
   expressQuestion: '请分析“无瑕”与“可阅读的修复痕迹”代表的两种遗产态度。',
 );

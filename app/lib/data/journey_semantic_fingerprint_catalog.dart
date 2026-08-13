@@ -2,6 +2,7 @@ import 'guangzhou_chen_clan_one_pass.dart';
 import 'hangzhou_west_lake_one_pass.dart';
 import 'journey_expansion_catalog.dart';
 import 'journey_semantic_fingerprint_baseline_snapshot.dart' as baseline;
+import 'summer_palace_adaptive_story_levels.dart';
 
 /// Machine-controlled dimensions used by the Phoenix semantic anti-template gate.
 enum NarrativeSemanticDimension {
@@ -985,10 +986,35 @@ final hangzhouWestLakeReopenedSemanticFingerprint = JourneySemanticFingerprint(
   ],
 );
 
+const _summerPalace = 'beijing-summer-palace';
+
+final _summerPalaceBaselineFingerprint =
+    _convertBaselineFingerprint(baseline.approvedGoldSemanticFingerprints[_summerPalace]!);
+
+final summerPalaceCulturalIntegrationSemanticFingerprint = JourneySemanticFingerprint(
+  journeyId: _summerPalace,
+  surfaceIdentity: 'Xu Cheng / student photographer / grandmother Zhou Lan / winter-solstice Seventeen-Arch Bridge light / old photograph',
+  mechanisms: _summerPalaceBaselineFingerprint.mechanisms,
+  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
+    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.openingMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.openingMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['冬至前，许澄带相机到颐和园。', '她要为校展拍一张“无瑕”照片。'], semanticRationale: 'A school-exhibition goal begins inside a verified seasonal Summer Palace time window.'),
+    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.relationshipGeometry, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.relationshipGeometry), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['她想证明不靠外婆周岚选构图。', '周岚看完，不再替她调构图。', '她把旧照片交给许澄保存。'], semanticRationale: 'Guidance changes into recognized agency and object entrustment after the costly choice.'),
+    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.conflictMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.conflictMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['许澄避开旧痕迹，周岚要她多看一眼。', '旧照片背面写着：“一八六〇年受损，一八八六年修复。”许澄想把这行字裁掉，周岚把照片翻回正面。'], semanticRationale: 'Aesthetic perfection collides physically with restoration history through the old photograph.'),
+    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.choiceMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.choiceMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['许澄放下相机，先捡回照片。'], semanticRationale: 'She gives up the available desired shot and acts first to preserve the relational object.'),
+    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.climaxMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.climaxMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['十七孔桥西北侧，桥洞亮起时，旧照片被风吹落。', '她必须在按快门和捡照片之间选择。'], semanticRationale: 'A Summer-Palace-specific bridge-light moment forces the tradeoff.'),
+    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.consequenceMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.consequenceMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['她再举机时，桥洞金光已移动，等了一下午的画面没了。'], semanticRationale: 'The seasonal light moves while she retrieves the photograph, making the cost irreversible.'),
+    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.transformationMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.transformationMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['她没有删掉“无瑕”这个词，只在旁边画了一道问号。', '许澄把新旧照片放进相机包。'], semanticRationale: 'Her perfection language changes through small physical actions rather than an essay conclusion.'),
+    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.endingMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.endingMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['她把旧照片交给许澄保存。', '许澄把新旧照片放进相机包。'], semanticRationale: 'The ending is intergenerational entrustment followed by old and new images kept together.'),
+    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.culturalAnchorFunction, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.culturalAnchorFunction), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['周岚做过园林修复，带着旧照片。', '旧照片背面写着：“一八六〇年受损，一八八六年修复。”许澄想把这行字裁掉，周岚把照片翻回正面。'], semanticRationale: 'Verified damage/restoration history is attached to the core object and causes framing conflict.'),
+    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.dramaticEngineFamily, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.dramaticEngineFamily), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['她必须在按快门和捡照片之间选择。', '许澄放下相机，先捡回照片。', '她再举机时，桥洞金光已移动，等了一下午的画面没了。'], semanticRationale: 'A place-timed forced tradeoff reframes authorship through a real lost image opportunity.'),
+  ]),
+);
+
 final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     Map<String, JourneySemanticFingerprint>.unmodifiable({
   for (final entry in baseline.approvedGoldSemanticFingerprints.entries)
-    entry.key: entry.key == _hangzhouReopened
+    entry.key: entry.key == _summerPalace
+        ? summerPalaceCulturalIntegrationSemanticFingerprint
+        : entry.key == _hangzhouReopened
         ? hangzhouWestLakeReopenedSemanticFingerprint
         : entry.key == _forbidden
         ? _forbiddenFingerprint
@@ -1000,6 +1026,9 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
 });
 
 String activeCanonicalGoldStoryText(String journeyId) {
+  if (journeyId == _summerPalace) {
+    return List<String>.generate(10, (index) => summerPalaceN1LevelForPhoenixLevel(index + 1).storyParagraphs.join('\n')).join('\n');
+  }
   if (journeyId == _hangzhouReopened) {
     return hangzhouWestLakeReopenedLevels
         .expand((level) => level.storyParagraphs)

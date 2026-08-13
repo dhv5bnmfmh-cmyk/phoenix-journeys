@@ -158,10 +158,22 @@ JourneyContentQualityReport auditJourneyContentQuality(
     }
   }
 
-  if (content.discoveries.isEmpty || content.discoveries.length > 2) {
+  final summerPalacePilotDiscoveryCount =
+      experience.id == 'beijing-summer-palace' && profile.phoenixLevel != null
+          ? (profile.phoenixLevel! <= 4 ? 2 : 3)
+          : null;
+  final tooManyGenericDiscoveries = content.discoveries.length > 2;
+  final invalidDiscoveryShape = summerPalacePilotDiscoveryCount == null
+      ? content.discoveries.isEmpty || tooManyGenericDiscoveries
+      : content.discoveries.length != summerPalacePilotDiscoveryCount;
+  if (invalidDiscoveryShape) {
     add(
       'discovery-shape',
-      'Discoveries must use the approved one- or two-entry shape.',
+      summerPalacePilotDiscoveryCount == null
+          ? 'Discoveries must use the approved one- or two-entry shape.'
+          : 'Summer Palace cultural integration pilot must use exactly '
+              '$summerPalacePilotDiscoveryCount Discovery entries at '
+              '${profile.displayLabel}.',
       JourneyContentQualitySeverity.critical,
     );
   }
