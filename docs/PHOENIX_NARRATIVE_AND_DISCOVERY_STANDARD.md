@@ -332,50 +332,6 @@ All special Journeys MUST use an explicitly approved special or Journey-specific
 
 Each level MUST receive a separate Result and Evidence Level in the design matrix.
 
-## 20. Canonical Journey Content Expansion Standard
-
-20.1 Purpose
-
-This section formalizes the canonical three-layer Journey Content Expansion model (Phoenix 旅程内容三层扩展模型) and binding expansion-related gates that apply to new Journey proposals and major remediation. It is part of the canonical Narrative and Discovery Standard and is binding for Journey creation and acceptance.
-
-20.2 Three layers
-
-- LAYER 1 — NATIONAL COVERAGE: province-level and national coverage planning; long-term objective to seed culturally representative Journeys across regions while preserving Gold quality.
-- LAYER 2 — CITY PLACE NETWORK: city-level place network planning; a city may contain many Places and many candidate Journeys; CITY_COMPLETE is not defined by a fixed quota.
-- LAYER 3 — PLACE STORY UNIVERSE: multiple independent Journey universes per Place; ONE PLACE != ONE STORY; same Place may host distinct Journeys that differ by protagonist, relationship geometry, time layer, social perspective, narrative scale, Truth Mode, or cultural mechanism.
-
-20.3 Binding principles
-
-- ONE PLACE != ONE STORY — permitted but not automatic. Multiple Journeys require documented differentiation and incremental value.
-- SAME-PLACE STORY DIFFERENTIATION — every new same-Place candidate must run a human Same-Place differentiation comparing opening, protagonist, relationship, Goal, Conflict, Choice, Cost, Climax, Consequence, Memory Moment, Story Shape, and cultural mechanism; if de-skinned spine remains materially the same, candidate fails.
-- TRUTH MODE — every candidate must declare Truth Mode and provide evidence classification (VERIFIED HISTORY / VERIFIED CULTURAL FACT / CONTEMPORARY FICTION / FICTIONAL CHARACTER IN VERIFIED HISTORICAL SETTING / FOLKLORE / LITERARY TRADITION).
-- INCREMENTAL VALUE — candidate must demonstrate Incremental Cultural Value and Incremental Human Value relative to existing Place and whole-catalog entries; coverage objectives must not override Gold acceptance.
-- COVERAGE DOES NOT OVERRIDE GOLD — strategic coverage or roadmap priorities do not lower Gold quality gates or permit quota-driven acceptance.
-
-20.4 Required records and tests
-
-- Same-Place inventory record: list of existing Stories at the Place and their primary cultural mechanisms.
-- Place Story Universe record: candidate slot, time layer, social perspective, primary cultural mechanism, and incremental value rationale.
-- Generic-Place Substitution Test: document whether replacing the Place with a generic site preserves the candidate's Goal→Conflict→Choice→Climax→Consequence; if preserved, candidate is `GENERIC-PLACE STORY — NOT GOLD READY`.
-- Cultural Fact Action Test: every cultural fact used causally must be documented through the chain: fact/mechanism → character encounter → character action → relationship/pressure change → choice/cost/consequence.
-
-20.5 Authority and Founder strategic roadmap
-
-- Founder strategic roadmap remains non-binding with respect to canonical quality gates. Founder decisions (City depth sufficient, Place freeze, reopening) are authoritative for sequencing but do not change Gold acceptance criteria.
-- Founder must explicitly authorize strategic coverage decisions; Founder approval for merge remains `PENDING`
-
-- vocabulary;
-- grammar;
-- sentence length;
-- paragraph density;
-- amount of dialogue;
-- explanatory detail.
-
-Simplification MUST NOT remove causality or turn Story back into tourism exposition.
-
-All special Journeys MUST use an explicitly approved special or Journey-specific adaptation policy. Generic adaptation is prohibited when it flattens the literary mechanism.
-
-Each level MUST receive a separate Result and Evidence Level in the design matrix.
 
 ## 13. Automated validation limitations
 
@@ -1070,6 +1026,52 @@ Every active vocabulary item MUST have provenance in `CURRENT STORY + ALL CURREN
 `INTERNAL QA LANGUAGE MUST NEVER LEAK TO LEARNER CONTENT`. Story, Discovery, Challenge, Wonder, Express, Memory, Completion, and Entry copy MUST NOT expose internal terms such as `Story`, `Choice`, `Cost`, `Place Substitution Test`, `Semantic Gate`, `PASS`, `FAIL`, `工程验证`, `因果测试`, `模板碰撞`, or `机器 Gate`. Code, tests, metadata, audits, and developer reports may use them.
 
 ### 19.8 Pilot-to-standard governance and authority
+
+## 20. Canonical Journey Content Expansion Standard
+
+20.1 Purpose
+
+This section formalizes the canonical three-layer Journey Content Expansion model (Phoenix 旅程内容三层扩展模型) and binding expansion-related gates that apply to new Journey proposals and major remediation. It is part of the canonical Narrative and Discovery Standard and is binding for Journey creation and acceptance.
+
+20.2 Three layers
+
+- LAYER 1 — NATIONAL COVERAGE: province-level and national coverage planning; long-term objective to seed culturally representative Journeys across regions while preserving Gold quality.
+- LAYER 2 — CITY PLACE NETWORK: city-level place network planning; a city may contain many Places and many candidate Journeys; CITY_COMPLETE is not defined by a fixed quota.
+- LAYER 3 — PLACE STORY UNIVERSE: multiple independent Journey universes per Place; ONE PLACE != ONE STORY; same Place may host distinct Journeys that differ by protagonist, relationship geometry, time layer, social perspective, narrative scale, Truth Mode, or cultural mechanism.
+
+20.3 Binding principles
+
+- ONE PLACE != ONE STORY — permitted but not automatic. Multiple Journeys require documented differentiation and incremental value.
+- SAME-PLACE STORY DIFFERENTIATION — every new same-Place candidate must run a human Same-Place differentiation comparing opening, protagonist, relationship, Goal, Conflict, Choice, Cost, Climax, Consequence, Memory Moment, Story Shape, and cultural mechanism; if de-skinned spine remains materially the same, candidate fails.
+- TRUTH MODE — every candidate must declare Truth Mode and provide evidence classification (VERIFIED HISTORY / VERIFIED CULTURAL FACT / CONTEMPORARY FICTION / FICTIONAL CHARACTER IN VERIFIED HISTORICAL SETTING / FOLKLORE / LITERARY TRADITION).
+- INCREMENTAL VALUE — candidate must demonstrate Incremental Cultural Value and Incremental Human Value relative to existing Place and whole-catalog entries; coverage objectives must not override Gold acceptance.
+- COVERAGE DOES NOT OVERRIDE GOLD — strategic coverage or roadmap priorities do not lower Gold quality gates or permit quota-driven acceptance.
+
+20.4 Required records and tests
+
+- Same-Place inventory record: list of existing Stories at the Place and their primary cultural mechanisms.
+- Place Story Universe record: candidate slot, time layer, social perspective, primary cultural mechanism, and incremental value rationale.
+- Generic-Place Substitution Test: document whether replacing the Place with a generic site preserves the candidate's Goal→Conflict→Choice→Climax→Consequence; if preserved, candidate is `GENERIC-PLACE STORY — NOT GOLD READY`.
+- Cultural Fact Action Test: every cultural fact used causally must be documented through the chain: fact/mechanism → character encounter → character action → relationship/pressure change → choice/cost/consequence.
+
+20.5 Authority and Founder strategic roadmap
+
+- Founder strategic roadmap remains non-binding with respect to canonical quality gates. Founder decisions (City depth sufficient, Place freeze, reopening) are authoritative for sequencing but do not change Gold acceptance criteria.
+- Founder must explicitly authorize strategic coverage decisions; Founder approval for merge remains `PENDING`
+
+- vocabulary;
+- grammar;
+- sentence length;
+- paragraph density;
+- amount of dialogue;
+- explanatory detail.
+
+Simplification MUST NOT remove causality or turn Story back into tourism exposition.
+
+All special Journeys MUST use an explicitly approved special or Journey-specific adaptation policy. Generic adaptation is prohibited when it flattens the literary mechanism.
+
+Each level MUST receive a separate Result and Evidence Level in the design matrix.
+
 
 Methods affecting Story model, cultural integration, Discovery depth, or Level philosophy follow:
 
