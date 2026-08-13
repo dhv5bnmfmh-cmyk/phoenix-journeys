@@ -77,11 +77,11 @@ void main() {
   test('published reflection and writing copy are natural learner prompts', () {
     expect(
       summerPalaceJourneyExperience.wonderQuestion,
-      '颐和园经历过损毁和修复。许澄最后把旧照片和正在暗下来的桥洞一起拍进画面，你觉得她对“无瑕”的理解发生了什么变化？',
+      summerPalaceWonderForLevel(8),
     );
     expect(
       summerPalaceJourneyExperience.expressQuestion,
-      '请用三到五句话写一段许澄可能放在校展照片旁的说明。写出拍摄的时节、十七孔桥、旧照片，以及她最后决定留下什么。',
+      summerPalaceExpressForLevel(8),
     );
   });
 }

@@ -18,6 +18,18 @@ void main() {
       ]) {
         expect(value.trim(), isNotEmpty, reason: event.id.name);
       }
+      final masteryValues = <String>[
+        event.masteryChinese,
+        event.masteryPinyin,
+        event.masteryVietnamese,
+        event.masteryEnglish,
+      ];
+      expect(
+        masteryValues.every((value) => value.isEmpty) ||
+            masteryValues.every((value) => value.isNotEmpty),
+        isTrue,
+        reason: '${event.id.name} mastery alignment',
+      );
     }
 
     for (var level = 1; level <= 10; level += 1) {
@@ -43,6 +55,24 @@ void main() {
           expect(pinyin, contains(event.detailPinyin));
           expect(vietnamese, contains(event.detailVietnamese));
           expect(english, contains(event.detailEnglish));
+        } else {
+          expect(chinese, isNot(contains(event.detailChinese)));
+          expect(pinyin, isNot(contains(event.detailPinyin)));
+          expect(vietnamese, isNot(contains(event.detailVietnamese)));
+          expect(english, isNot(contains(event.detailEnglish)));
+        }
+        if (event.masteryChinese.isNotEmpty) {
+          if (level >= event.masteryFromLevel) {
+            expect(chinese, contains(event.masteryChinese));
+            expect(pinyin, contains(event.masteryPinyin));
+            expect(vietnamese, contains(event.masteryVietnamese));
+            expect(english, contains(event.masteryEnglish));
+          } else {
+            expect(chinese, isNot(contains(event.masteryChinese)));
+            expect(pinyin, isNot(contains(event.masteryPinyin)));
+            expect(vietnamese, isNot(contains(event.masteryVietnamese)));
+            expect(english, isNot(contains(event.masteryEnglish)));
+          }
         }
       }
     }
@@ -165,6 +195,40 @@ void main() {
         expect(unit.entry.text, isNot(contains('周岚')));
         expect(unit.entry.text, isNot(contains('旧照片')));
       }
+    }
+  });
+
+  test('Discovery concepts progress from facts to cultural judgment without padding', () {
+    const levelConceptEvidence = <int, String>{
+      1: '基本山水框架',
+      2: '不同功能',
+      3: '1886年在原有基础上修复',
+      4: '按移动顺序进入视野',
+      5: '借景依赖既有视线与远景关系',
+      6: '桥把岛、堤和水面组织为可通行的空间关系',
+      7: '季节光影也受观看位置影响',
+      8: '山、水、建筑、寺庙、桥梁与移动路线共同工作',
+      9: '湖区由多重连接组成',
+      10: '保存历史信息',
+    };
+    final conceptsByLevel = <int, String>{};
+
+    for (var level = 1; level <= 10; level += 1) {
+      final concepts = summerPalaceDiscoveryUnitsForLevel(level)
+          .map((unit) => unit.newFactOrConcept)
+          .join('\n');
+      conceptsByLevel[level] = concepts;
+      expect(concepts, contains(levelConceptEvidence[level]),
+          reason: 'Lv.$level cognitive target');
+    }
+
+    expect(conceptsByLevel.values.toSet(), hasLength(10));
+    for (var level = 2; level <= 10; level += 1) {
+      expect(
+        conceptsByLevel[level - 1],
+        isNot(contains(levelConceptEvidence[level]!)),
+        reason: 'Lv.$level cultural delta must not be previous-level padding',
+      );
     }
   });
 

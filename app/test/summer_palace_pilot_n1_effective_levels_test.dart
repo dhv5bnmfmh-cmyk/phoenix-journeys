@@ -61,6 +61,8 @@ void main() {
         '《留下痕迹的风景》',
         '不再替她调构图',
         '交给许澄保存',
+        '她改拍旧照片',
+        '许澄把新旧照片放进相机包',
       ]) {
         expect(story, contains(anchor), reason: 'Lv.$level human spine: $anchor');
       }
@@ -126,14 +128,14 @@ void main() {
 
   test('Founder-visible reflection prompts stay human and contain no QA language', () {
     final journey = requireDailyJourneyExperience('beijing-summer-palace');
-    const beginnerWonder =
-        '桥洞的金光正在移动，许澄为什么还是先去捡外婆的旧照片？';
-    const beginnerExpress =
-        '请用两到三句话写出桥洞金光、旧照片和许澄的选择之间发生了什么。';
-    const advancedWonder =
-        '颐和园经历过损毁和修复。许澄最后把旧照片和正在暗下来的桥洞一起拍进画面，你觉得她对“无瑕”的理解发生了什么变化？';
-    const advancedExpress =
-        '请用三到五句话写一段许澄可能放在校展照片旁的说明。写出拍摄的时节、十七孔桥、旧照片，以及她最后决定留下什么。';
+    final expectedWonder = <int, String>{
+      for (var level = 1; level <= 10; level += 1)
+        level: summerPalaceWonderForLevel(level),
+    };
+    final expectedExpress = <int, String>{
+      for (var level = 1; level <= 10; level += 1)
+        level: summerPalaceExpressForLevel(level),
+    };
     const forbiddenQaTerms = <String>[
       'Story',
       'Choice',
@@ -147,8 +149,8 @@ void main() {
       'FAIL',
     ];
 
-    expect(journey.wonderQuestion, advancedWonder);
-    expect(journey.expressQuestion, advancedExpress);
+    expect(journey.wonderQuestion, expectedWonder[8]);
+    expect(journey.expressQuestion, expectedExpress[8]);
 
     final visibleContent = <String>[
       journey.appBarTitle,
@@ -198,18 +200,124 @@ void main() {
       );
       expect(
         content.wonderQuestion,
-        level <= 4 ? beginnerWonder : advancedWonder,
+        expectedWonder[level],
         reason: 'Lv.$level Wonder',
       );
       expect(
         content.expressQuestion,
-        level <= 4 ? beginnerExpress : advancedExpress,
+        expectedExpress[level],
         reason: 'Lv.$level Express',
       );
       final prompts = '${content.wonderQuestion}\n${content.expressQuestion}';
+      final adaptiveVisibleContent = <String>[
+        ...content.storyParagraphs,
+        ...content.discoveries.expand(
+          (entry) => <String>[
+            entry.text,
+            entry.pinyin,
+            entry.simpleChinese,
+            entry.vietnamese,
+            entry.english,
+          ],
+        ),
+        ...content.words.expand(
+          (entry) => <String>[
+            entry.word,
+            entry.pinyin,
+            entry.simpleChinese,
+            entry.translation,
+            entry.englishDefinition,
+            ...entry.examples.expand(
+              (example) => <String>[
+                example.chinese,
+                example.pinyin,
+                example.vietnamese,
+                example.english,
+              ],
+            ),
+          ],
+        ),
+        prompts,
+      ].join('\n');
       for (final term in forbiddenQaTerms) {
-        expect(prompts, isNot(contains(term)), reason: 'Lv.$level: $term');
+        expect(adaptiveVisibleContent, isNot(contains(term)),
+            reason: 'Lv.$level: $term');
       }
+    }
+
+    expect(expectedWonder.values.toSet(), hasLength(5));
+    expect(expectedExpress.values.toSet(), hasLength(5));
+    expect(expectedWonder[1], expectedWonder[2]);
+    expect(expectedWonder[3], expectedWonder[4]);
+    expect(expectedWonder[5], expectedWonder[6]);
+    expect(expectedWonder[7], expectedWonder[8]);
+    expect(expectedWonder[9], expectedWonder[10]);
+  });
+
+  test('adjacent levels add semantic understanding rather than length alone', () {
+    final journey = requireDailyJourneyExperience('beijing-summer-palace');
+    const storyDelta = <int, String>{
+      2: '冬至前后十七孔桥会出现“金光穿洞”',
+      3: '十七孔桥东接东堤、西连南湖岛',
+      4: '走过长廊时',
+      5: '一八六〇年受损，一八八六年修复',
+      6: '许澄把每个问题都听成干涉',
+      7: '这张也归你保管',
+      8: '她在校展说明里只写拍摄地点和时节',
+      9: '低角度夕阳不会为她停住',
+      10: '并注明旧照片来自外婆周岚',
+    };
+
+    for (var level = 2; level <= 10; level += 1) {
+      final current = resolveAdaptiveJourneyLevel(
+        journey,
+        profile: agent.profileForPhoenixLevel(level),
+      ).storyParagraphs.join();
+      final previous = resolveAdaptiveJourneyLevel(
+        journey,
+        profile: agent.profileForPhoenixLevel(level - 1),
+      ).storyParagraphs.join();
+      final evidence = storyDelta[level]!;
+      expect(current, contains(evidence), reason: 'Lv.$level semantic delta');
+      expect(previous, isNot(contains(evidence)),
+          reason: 'Lv.$level delta must be new');
+    }
+  });
+
+  test('Lv10 adds traceable cultural record action beyond Lv9', () {
+    final level9 = summerPalaceN1LevelForPhoenixLevel(9).storyParagraphs.join();
+    final level10 = summerPalaceN1LevelForPhoenixLevel(10).storyParagraphs.join();
+    const mastery = '冬至前后的拍摄时节、十七孔桥西北侧的站位，并注明旧照片来自外婆周岚';
+    expect(level9, isNot(contains(mastery)));
+    expect(level10, contains(mastery));
+    expect(level9, contains('只在旁边画了一道问号'));
+    expect(level10, contains('只在旁边画了一道问号'));
+  });
+
+  test('each selected level is a backward-complete independent Story', () {
+    for (var level = 1; level <= 10; level += 1) {
+      final content = summerPalaceN1LevelForPhoenixLevel(level);
+      final story = content.storyParagraphs.join();
+      for (final causalAnchor in <String>[
+        '她必须在按快门和捡照片之间选择',
+        '许澄放下相机，先捡回照片',
+        '等了一下午的画面没了',
+        '她改拍旧照片、外婆的手和暗下的桥洞',
+        '周岚看完，不再替她调构图',
+        '她把旧照片交给许澄保存',
+      ]) {
+        expect(story, contains(causalAnchor), reason: 'Lv.$level: $causalAnchor');
+      }
+      expect(
+        '${content.wonderQuestion}${content.expressQuestion}',
+        isNot(
+          anyOf(
+            contains('上一级'),
+            contains('前一级'),
+            contains('之前学过'),
+          ),
+        ),
+      );
     }
   });
 

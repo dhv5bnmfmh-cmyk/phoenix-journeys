@@ -48,6 +48,11 @@ class SummerPalaceN1SemanticEvent {
     required this.detailVietnamese,
     required this.detailEnglish,
     required this.detailFromLevel,
+    this.masteryChinese = '',
+    this.masteryPinyin = '',
+    this.masteryVietnamese = '',
+    this.masteryEnglish = '',
+    this.masteryFromLevel = 11,
   });
 
   final SummerPalaceN1EventId id;
@@ -60,6 +65,11 @@ class SummerPalaceN1SemanticEvent {
   final String detailVietnamese;
   final String detailEnglish;
   final int detailFromLevel;
+  final String masteryChinese;
+  final String masteryPinyin;
+  final String masteryVietnamese;
+  final String masteryEnglish;
+  final int masteryFromLevel;
 }
 
 const summerPalaceN1SemanticEvents = <SummerPalaceN1SemanticEvent>[
@@ -225,11 +235,16 @@ const summerPalaceN1SemanticEvents = <SummerPalaceN1SemanticEvent>[
     corePinyin: 'Xǔ Chéng bǎ xīn jiù zhàopiàn fàngjìn xiàngjī bāo.',
     coreVietnamese: 'Hứa Trừng đặt ảnh mới và ảnh cũ vào túi máy ảnh.',
     coreEnglish: 'Xu Cheng places the new and old photographs in her camera bag.',
-    detailChinese: '她没有删掉“无瑕”这个词，只在旁边画了一道问号。她还写下具体拍摄时节和站位。',
-    detailPinyin: 'Tā méiyǒu shāndiào “wúxiá” zhège cí, zhǐ zài pángbiān huà le yí dào wènhào. Tā hái xiěxià jùtǐ pāishè shíjié hé zhànwèi.',
-    detailVietnamese: 'Cô không xóa từ “không tì vết”, chỉ vẽ một dấu hỏi bên cạnh. Cô còn ghi lại thời điểm và vị trí chụp cụ thể.',
-    detailEnglish: 'She does not delete the word “flawless”; she only draws a question mark beside it. She also records the specific season and shooting position.',
+    detailChinese: '她没有删掉“无瑕”这个词，只在旁边画了一道问号。',
+    detailPinyin: 'Tā méiyǒu shāndiào “wúxiá” zhège cí, zhǐ zài pángbiān huà le yí dào wènhào.',
+    detailVietnamese: 'Cô không xóa từ “không tì vết”, chỉ vẽ một dấu hỏi bên cạnh.',
+    detailEnglish: 'She does not delete the word “flawless”; she only draws a question mark beside it.',
     detailFromLevel: 9,
+    masteryChinese: '她又在校展记录里写下冬至前后的拍摄时节、十七孔桥西北侧的站位，并注明旧照片来自外婆周岚。',
+    masteryPinyin: 'Tā yòu zài xiàozhǎn jìlù lǐ xiěxià dōngzhì qiánhòu de pāishè shíjié, Shíqīkǒng Qiáo xīběi cè de zhànwèi, bìng zhùmíng jiù zhàopiàn láizì wàipó Zhōu Lán.',
+    masteryVietnamese: 'Trong ghi chép cho triển lãm trường, cô còn ghi thời điểm chụp quanh Đông chí, vị trí ở phía tây bắc cầu Thập Thất Khổng, và chú thích rằng bức ảnh cũ đến từ bà ngoại Chu Lam.',
+    masteryEnglish: 'In her school-exhibition record, she also notes that the photograph was taken around the winter solstice from the northwest side of the Seventeen-Arch Bridge, and identifies the old photograph as coming from her grandmother Zhou Lan.',
+    masteryFromLevel: 10,
   ),
 ];
 
@@ -323,12 +338,8 @@ JourneyLevelContent summerPalaceN1LevelForPhoenixLevel(int requestedLevel) {
     ],
     words: const [],
     discoveries: summerPalaceDiscoveryEntriesForLevel(level),
-    wonderQuestion: level <= 4
-        ? '桥洞的金光正在移动，许澄为什么还是先去捡外婆的旧照片？'
-        : '颐和园经历过损毁和修复。许澄最后把旧照片和正在暗下来的桥洞一起拍进画面，你觉得她对“无瑕”的理解发生了什么变化？',
-    expressQuestion: level <= 4
-        ? '请用两到三句话写出桥洞金光、旧照片和许澄的选择之间发生了什么。'
-        : '请用三到五句话写一段许澄可能放在校展照片旁的说明。写出拍摄的时节、十七孔桥、旧照片，以及她最后决定留下什么。',
+    wonderQuestion: summerPalaceWonderForLevel(level),
+    expressQuestion: summerPalaceExpressForLevel(level),
   );
 }
 
@@ -341,16 +352,50 @@ List<(int, int)> _paragraphEventRanges(int level) =>
     level <= 2 ? const [(0, 14)] : const [(0, 7), (7, 14)];
 
 String _eventChinese(SummerPalaceN1SemanticEvent event, int level) =>
-    '${event.coreChinese}${level >= event.detailFromLevel ? event.detailChinese : ''}';
+    '${event.coreChinese}${level >= event.detailFromLevel ? event.detailChinese : ''}${level >= event.masteryFromLevel ? event.masteryChinese : ''}';
 
 String _eventPinyin(SummerPalaceN1SemanticEvent event, int level) =>
-    '${event.corePinyin}${level >= event.detailFromLevel ? ' ${event.detailPinyin}' : ''}';
+    '${event.corePinyin}${level >= event.detailFromLevel ? ' ${event.detailPinyin}' : ''}${level >= event.masteryFromLevel ? ' ${event.masteryPinyin}' : ''}';
 
 String _eventVietnamese(SummerPalaceN1SemanticEvent event, int level) =>
-    '${event.coreVietnamese}${level >= event.detailFromLevel ? ' ${event.detailVietnamese}' : ''}';
+    '${event.coreVietnamese}${level >= event.detailFromLevel ? ' ${event.detailVietnamese}' : ''}${level >= event.masteryFromLevel ? ' ${event.masteryVietnamese}' : ''}';
 
 String _eventEnglish(SummerPalaceN1SemanticEvent event, int level) =>
-    '${event.coreEnglish}${level >= event.detailFromLevel ? ' ${event.detailEnglish}' : ''}';
+    '${event.coreEnglish}${level >= event.detailFromLevel ? ' ${event.detailEnglish}' : ''}${level >= event.masteryFromLevel ? ' ${event.masteryEnglish}' : ''}';
+
+String summerPalaceWonderForLevel(int requestedLevel) {
+  final level = requestedLevel.clamp(1, 10).toInt();
+  if (level <= 2) {
+    return '桥洞的金光正在移动，许澄为什么还是先去捡外婆的旧照片？';
+  }
+  if (level <= 4) {
+    return '十七孔桥的位置、移动的光线和她们走过的路线，怎样改变了许澄当天的行动？';
+  }
+  if (level <= 6) {
+    return '许澄和外婆看到的是同一座颐和园，为什么她们一开始想留下的东西却不一样？';
+  }
+  if (level <= 8) {
+    return '为什么同一座十七孔桥，在不同季节、时间和站位下，会让许澄面对不同的拍摄机会？';
+  }
+  return '一处经历过损毁和修复的文化遗产，是否应该努力让人看起来它从未受损？为什么？';
+}
+
+String summerPalaceExpressForLevel(int requestedLevel) {
+  final level = requestedLevel.clamp(1, 10).toInt();
+  if (level <= 2) {
+    return '请用两到三句话写出发生了什么、许澄怎样选择，以及她最后失去了什么、保住了什么。';
+  }
+  if (level <= 4) {
+    return '请用三句话写出十七孔桥、东堤、南湖岛和许澄站的位置，并说明这些地点怎样影响她的行动。';
+  }
+  if (level <= 6) {
+    return '请用三到四句话写出旧照片上的修复记录、许澄想要的“无瑕”画面，以及外婆为什么请她换一种看法。';
+  }
+  if (level <= 8) {
+    return '请用三到四句话说明冬至前后的季节、桥的方向、许澄的站位和桥洞光线怎样共同影响她的拍摄机会。';
+  }
+  return '请用三到五句话写一段校展说明。结合旧照片、“无瑕”和许澄最后留下的画面，写出你对保存历史痕迹的看法。';
+}
 
 bool summerPalaceN1ContainsGenericTouristEnrichment(JourneyLevelContent level) {
   final story = level.storyParagraphs.join();

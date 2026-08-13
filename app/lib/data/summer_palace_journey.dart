@@ -105,6 +105,6 @@ final summerPalaceJourneyExperience = DailyJourneyExperience(
   storyAnnotations: summerPalaceStoryAnnotations,
   words: summerPalaceWords,
   discoveries: summerPalaceDiscoveries,
-  wonderQuestion: '颐和园经历过损毁和修复。许澄最后把旧照片和正在暗下来的桥洞一起拍进画面，你觉得她对“无瑕”的理解发生了什么变化？',
-  expressQuestion: '请用三到五句话写一段许澄可能放在校展照片旁的说明。写出拍摄的时节、十七孔桥、旧照片，以及她最后决定留下什么。',
+  wonderQuestion: '为什么同一座十七孔桥，在不同季节、时间和站位下，会让许澄面对不同的拍摄机会？',
+  expressQuestion: '请用三到四句话说明冬至前后的季节、桥的方向、许澄的站位和桥洞光线怎样共同影响她的拍摄机会。',
 );
