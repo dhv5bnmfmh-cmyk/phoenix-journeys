@@ -332,7 +332,6 @@ All special Journeys MUST use an explicitly approved special or Journey-specific
 
 Each level MUST receive a separate Result and Evidence Level in the design matrix.
 
-
 ## 13. Automated validation limitations
 
 Automated validation MAY verify:
@@ -410,6 +409,11 @@ The following codes are binding minimum codes:
 - `STORY_MECHANISM_INCOMPLETE`
 - `LV1_CAUSAL_PROOF_FAILED`
 - `FACT_FIRST_PIPELINE_VIOLATION`
+- `SAME_PLACE_STORY_COLLISION`
+- `PLACE_STORY_UNIVERSE_VALUE_NOT_DISTINCT`
+- `TRUTH_MODE_UNDECLARED`
+- `FOLKLORE_PRESENTED_AS_VERIFIED_HISTORY`
+- `COVERAGE_QUOTA_OVERRIDES_GOLD`
 
 Every blocking-code record MUST include:
 
@@ -1027,52 +1031,6 @@ Every active vocabulary item MUST have provenance in `CURRENT STORY + ALL CURREN
 
 ### 19.8 Pilot-to-standard governance and authority
 
-## 20. Canonical Journey Content Expansion Standard
-
-20.1 Purpose
-
-This section formalizes the canonical three-layer Journey Content Expansion model (Phoenix 旅程内容三层扩展模型) and binding expansion-related gates that apply to new Journey proposals and major remediation. It is part of the canonical Narrative and Discovery Standard and is binding for Journey creation and acceptance.
-
-20.2 Three layers
-
-- LAYER 1 — NATIONAL COVERAGE: province-level and national coverage planning; long-term objective to seed culturally representative Journeys across regions while preserving Gold quality.
-- LAYER 2 — CITY PLACE NETWORK: city-level place network planning; a city may contain many Places and many candidate Journeys; CITY_COMPLETE is not defined by a fixed quota.
-- LAYER 3 — PLACE STORY UNIVERSE: multiple independent Journey universes per Place; ONE PLACE != ONE STORY; same Place may host distinct Journeys that differ by protagonist, relationship geometry, time layer, social perspective, narrative scale, Truth Mode, or cultural mechanism.
-
-20.3 Binding principles
-
-- ONE PLACE != ONE STORY — permitted but not automatic. Multiple Journeys require documented differentiation and incremental value.
-- SAME-PLACE STORY DIFFERENTIATION — every new same-Place candidate must run a human Same-Place differentiation comparing opening, protagonist, relationship, Goal, Conflict, Choice, Cost, Climax, Consequence, Memory Moment, Story Shape, and cultural mechanism; if de-skinned spine remains materially the same, candidate fails.
-- TRUTH MODE — every candidate must declare Truth Mode and provide evidence classification (VERIFIED HISTORY / VERIFIED CULTURAL FACT / CONTEMPORARY FICTION / FICTIONAL CHARACTER IN VERIFIED HISTORICAL SETTING / FOLKLORE / LITERARY TRADITION).
-- INCREMENTAL VALUE — candidate must demonstrate Incremental Cultural Value and Incremental Human Value relative to existing Place and whole-catalog entries; coverage objectives must not override Gold acceptance.
-- COVERAGE DOES NOT OVERRIDE GOLD — strategic coverage or roadmap priorities do not lower Gold quality gates or permit quota-driven acceptance.
-
-20.4 Required records and tests
-
-- Same-Place inventory record: list of existing Stories at the Place and their primary cultural mechanisms.
-- Place Story Universe record: candidate slot, time layer, social perspective, primary cultural mechanism, and incremental value rationale.
-- Generic-Place Substitution Test: document whether replacing the Place with a generic site preserves the candidate's Goal→Conflict→Choice→Climax→Consequence; if preserved, candidate is `GENERIC-PLACE STORY — NOT GOLD READY`.
-- Cultural Fact Action Test: every cultural fact used causally must be documented through the chain: fact/mechanism → character encounter → character action → relationship/pressure change → choice/cost/consequence.
-
-20.5 Authority and Founder strategic roadmap
-
-- Founder strategic roadmap remains non-binding with respect to canonical quality gates. Founder decisions (City depth sufficient, Place freeze, reopening) are authoritative for sequencing but do not change Gold acceptance criteria.
-- Founder must explicitly authorize strategic coverage decisions; Founder approval for merge remains `PENDING`
-
-- vocabulary;
-- grammar;
-- sentence length;
-- paragraph density;
-- amount of dialogue;
-- explanatory detail.
-
-Simplification MUST NOT remove causality or turn Story back into tourism exposition.
-
-All special Journeys MUST use an explicitly approved special or Journey-specific adaptation policy. Generic adaptation is prohibited when it flattens the literary mechanism.
-
-Each level MUST receive a separate Result and Evidence Level in the design matrix.
-
-
 Methods affecting Story model, cultural integration, Discovery depth, or Level philosophy follow:
 
 `one Pilot → full machine validation → independent exact-head audit → Founder Experience → revise the same Pilot/PR if needed → final Founder audit → classify MUST FIX / SHOULD FIX / LATER → Founder Experience PASS → canonical formalization → horizontal Gold audit → one Journey at a time remediation`.
@@ -1092,3 +1050,203 @@ Recommended Founder Level sampling is Lv1, Lv3, Lv5, Lv7, Lv10 plus adjacent Lv9
 Founder approval is SHA-bound: `PR HEAD SHA = Founder review Candidate SHA = Preview release SHA`. Any later source commit invalidates approval and requires complete exact-head validation, Preview, independent audit, and Founder review again.
 
 Machine gates are necessary, not literary authority. Green CI, 360/360, score 100, and semantic arithmetic never independently establish Story Gold, humanity, place causality, or Founder approval.
+
+## 20. Canonical Journey Content Expansion Standard
+
+### 20.1 Purpose and authority
+
+This section formalizes the **Phoenix 旅程内容三层扩展模型** as the binding long-term content-expansion method. It governs where Phoenix expands and how new Story value is justified. It does not replace §17 Semantic Anti-Template, §18 Story Truth + Place Causality, §19 Story × Culture × Level, the New Journey Creation Standard, or Founder exact-head approval.
+
+The three-layer model standardizes expansion decisions, not Story content. Narrative identity, cultural identity, emotional identity, causal structure, and literary structure MUST remain independent.
+
+### 20.2 Three-layer content model
+
+**LAYER 1 — NATIONAL COVERAGE / 全国地理覆盖层**
+
+Phoenix has a long-term objective to seed Gold-quality Journey coverage across China's province-level regions and the cities that enter the Phoenix content map. Coverage is a strategic direction, not a quota. A province-level Journey MUST NOT be a city Story with a province label substituted, and administrative completeness MUST NOT lower Gold requirements.
+
+**LAYER 2 — CITY PLACE NETWORK / 城市地点网络层**
+
+`ONE CITY != ONE STORY`. A city may contain many culturally distinct Places and many Journeys. City depth comes from Place diversity, cultural coverage, Story diversity, and product experience, not a fixed count. No automated system may define `CITY_COMPLETE` from a Journey number.
+
+**LAYER 3 — PLACE STORY UNIVERSE / 地点故事宇宙层**
+
+`ONE PLACE != ONE STORY`. A Place may support multiple independent Journeys when each adds real Human Story value and cultural understanding. Different protagonists, relationships, eras, social perspectives, narrative scales, Truth Modes, and cultural mechanisms are permitted possibilities, not template slots.
+
+A user may re-enter the same Place through a different human life, cultural mechanism, time layer, or truth category and receive a genuinely different Story experience and new Cultural Understanding.
+
+### 20.3 Same-Place Anti-Template hard gate
+
+Every new same-Place candidate MUST compare against:
+
+1. every active Journey already attached to that Place;
+2. the current City's Journey inventory; and
+3. the complete Founder-approved Gold catalog.
+
+The human comparison MUST include at least:
+
+- Opening;
+- Protagonist;
+- Relationship;
+- Goal;
+- Conflict;
+- Choice;
+- Cost;
+- Climax;
+- Consequence;
+- Transformation;
+- Ending;
+- Memory Moment;
+- Story Shape;
+- Narrative Engine;
+- Cultural Mechanism; and
+- Emotional Texture.
+
+Remove place names, character names, professions, eras, props, and cultural nouns. If the remaining `Goal → Conflict → Choice → Cost → Climax → Ending` machine remains materially the same as an existing same-Place Story, the required result is:
+
+`SAME_PLACE_STORY_COLLISION — FAIL`
+
+Changing a royal figure to a craftsperson, an elder to a student, a present-day character to a historical character, or one artifact to another does not create Story diversity when causal structure is reused.
+
+### 20.4 Place Story Universe Record
+
+Before Story lock, every candidate MUST record:
+
+```text
+Parent Province-Level Region:
+Parent City:
+Place:
+Existing Journey count at this Place:
+Existing Story identities:
+Existing cultural mechanisms:
+Existing relationship geometries:
+Existing Story Shapes:
+Candidate Story:
+Candidate cultural slice:
+Candidate time layer:
+Candidate social perspective:
+Candidate narrative scale:
+Candidate Truth Mode:
+Candidate primary cultural mechanism:
+Candidate human need:
+Candidate relationship:
+Candidate Memory Moment:
+Incremental Cultural Value:
+Incremental Human Value:
+Why an existing Story cannot already provide this experience:
+Same-Place Differentiation Result:
+Whole-Library Differentiation Result:
+Founder Strategic Authorization:
+```
+
+The record is a design/audit artifact. It does not authorize a new UI, stage, screen, badge, or runtime architecture.
+
+### 20.5 Narrative scale, social perspective, and cultural slice are non-quota
+
+`MICRO STORY`, `MIDDLE / MESO STORY`, and `GRAND STORY` MAY be used as descriptive planning vocabulary. A Story may cover one small action, a family or community relationship, or a large historical/social transition. No Place is required to contain one Story of each scale.
+
+Different social perspectives MAY include, when the Story and evidence support them, royal or official actors, craftspeople, builders, merchants, workers, residents, families, children, elders, modern staff, conservators, restorers, visitors, and other lived roles. This is a possibility space, not a character quota.
+
+Different cultural slices MAY include architecture, garden/landscape, craft, material, painting, calligraphy, ritual, daily life, family life, food, trade, transport, ecology, water systems, conservation, restoration, urban development, literature, folk memory, historical transition, art, technology, local custom, or other Place-specific mechanisms. These are examples, not mandatory categories.
+
+### 20.6 One Story should not exhaust the Place
+
+`ONE STORY SHOULD NOT EXHAUST THE PLACE`.
+
+A Journey should carry the minimum sufficient cultural scope needed for its Human Story and primary cultural mechanism. A Story MUST NOT attempt to consume all of a Place's history, architecture, art, politics, conservation, folklore, craft, and social life merely because those facts are available.
+
+Cultural material that does not belong to the current Story may remain available for future independent Journeys. Depth is created by focused, causally integrated Stories across time, not by turning one Journey into an encyclopedia.
+
+### 20.7 Truth Mode and folklore boundary
+
+Every new Journey MUST declare a high-level Truth Mode that maps onto, and does not replace, the claim-level Fact/Fiction governance in §18.3. Permitted Truth Modes include:
+
+- `VERIFIED HISTORY`;
+- `VERIFIED CULTURAL FACT`;
+- `CONTEMPORARY FICTION`;
+- `FICTIONAL CHARACTER IN VERIFIED HISTORICAL SETTING`;
+- `FOLKLORE / LEGEND`; and
+- `LITERARY TRADITION`.
+
+`FOLKLORE / LEGEND` and literary tradition are valid Phoenix cultural material when honestly classified, but MUST NOT be presented as `VERIFIED HISTORY`. A user-facing disclosure may be designed only under separate product authorization; this standards section does not add a new UI label.
+
+Real historical people remain protected by §18.4. Phoenix MUST NOT invent their consequential dialogue, private thoughts, secret motives, intentions, or actions and present those inventions as verified history.
+
+If Truth Mode is undeclared, use `TRUTH_MODE_UNDECLARED`. If folklore is presented as verified history, use `FOLKLORE_PRESENTED_AS_VERIFIED_HISTORY`.
+
+### 20.8 Incremental Cultural Value + Incremental Human Value
+
+Every new Journey MUST demonstrate both:
+
+`INCREMENTAL CULTURAL VALUE`
+
+and
+
+`INCREMENTAL HUMAN VALUE`.
+
+A candidate fails when it merely:
+
+- retells the same cultural knowledge with a different character;
+- introduces new knowledge while characters function only as explanation containers; or
+- introduces new characters while the Place mechanism and causal Story remain materially the same.
+
+The Story must add a cultural understanding that existing Stories do not already provide and a human experience that existing Stories do not already provide. Failure is `PLACE_STORY_UNIVERSE_VALUE_NOT_DISTINCT`.
+
+### 20.9 Cultural Fact Action Test and Place Causality remain binding
+
+Place Story Universe expansion does not weaken §18 or §19. Any cultural fact used as core dramatic evidence must still satisfy:
+
+`fact / mechanism → character encounter → character action → relationship / pressure change → Choice / Cost / Consequence change`.
+
+The Generic Place Substitution Test remains binding. A same-Place Story is not Gold merely because it uses a different topic within the Place. If the exact causal chain works substantially unchanged at a generic museum, park, heritage site, garden, palace, old street, or other unrelated attraction, it remains `GENERIC-PLACE STORY — NOT GOLD READY`.
+
+### 20.10 Place Freeze and no mechanical Story count
+
+Phoenix MUST NOT require:
+
+- X Stories per Place;
+- X Journeys per City; or
+- X Stories per Province-Level Region.
+
+`NO MECHANICAL STORY COUNT` is binding. Depth comes from cultural worlds, Story diversity, and human value, not a numeric target.
+
+If a Place already contains multiple genuinely distinct cultural mechanisms and new proposals repeatedly collide with existing Stories or can differ only through surface substitutions, the correct decision is:
+
+`PLACE EXPANSION SHOULD FREEZE`.
+
+Development should move to another Place in the same City or to another Founder-authorized City. A frozen Place may reopen later when new evidence or a genuinely new Human Story opportunity appears.
+
+### 20.11 Founder strategic authority and Standard vs Roadmap
+
+The canonical Standard defines the permanent expansion method. The Founder strategic Roadmap defines the current sequencing strategy. Changing the sequence of priority cities does not require rewriting this quality standard.
+
+Founder authority determines:
+
+- the current strategic City or region;
+- when City depth is sufficient;
+- when to move to the next City;
+- when to return to a previously developed City;
+- when a Place should freeze; and
+- when a Place may reopen.
+
+AI, machine score, CI, catalog size, or a Journey count MUST NOT independently declare `BEIJING COMPLETE`, `SHANGHAI NEXT`, `PLACE COMPLETE`, or `CITY COMPLETE`.
+
+Coverage goals MUST NOT override Gold. If administrative or numeric coverage pressure is used to justify weaker Story quality, use `COVERAGE_QUOTA_OVERRIDES_GOLD`.
+
+### 20.12 Summer Palace Pilot status
+
+Beijing Summer Palace `《留下痕迹的风景》` remains:
+
+- a Founder-approved Gold Story; and
+- Founder-approved Method Pilot evidence for Story × Culture × Level formalization.
+
+It is NOT:
+
+- a future Summer Palace Story template;
+- a Beijing Story template;
+- a China Story template;
+- a Level content template;
+- a Cultural Mechanism template; or
+- a Place Story Universe template.
+
+Future Summer Palace Journeys must pass the same incremental-value, truth, place-causality, Same-Place Anti-Template, and whole-library differentiation gates as any other candidate.
