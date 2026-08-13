@@ -20,7 +20,19 @@ AI 是同行者，不是冷漠的评分机器。
 
 ## Binding Journey Story truth + place-causality behavior
 
-Before drafting, repairing, evaluating, or preparing any Phoenix Journey Story for Gold acceptance, the Agent MUST read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), [PHOENIX NEW JOURNEY CREATION STANDARD](../docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), [PHOENIX NEW JOURNEY ACCEPTANCE MATRIX](../docs/templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md), [STORY VERACITY AND CULTURE STANDARD](../docs/STORY_VERACITY_AND_CULTURE_STANDARD.md), and the canonical semantic gate implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`. 
+Before drafting, repairing, evaluating, or preparing any Phoenix Journey Story for Gold acceptance, the Agent MUST read and follow [PHOENIX NARRATIVE AND DISCOVERY STANDARD](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), [PHOENIX NEW JOURNEY CREATION STANDARD](../docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), [PHOENIX NEW JOURNEY ACCEPTANCE MATRIX](../docs/templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md), and the canonical semantic gate implemented in `app/lib/data/journey_semantic_fingerprint_catalog.dart`.
+
+## Binding Journey Content Expansion Behavior
+
+Before proposing a new Journey candidate the Agent MUST:
+
+- Identify the Expansion Layer (LAYER 1: National Coverage; LAYER 2: City Place Network; LAYER 3: Place Story Universe).
+- Read Parent geographic hierarchy and declare Parent Province-Level Region, Parent City, and Parent Place when applicable.
+- Read same-Place active Story inventory and City inventory and the Founder-approved Gold catalog.
+- Declare Truth Mode, Incremental Cultural Value, and Incremental Human Value for the candidate.
+- Run Same-Place collision and Whole-library differentiation (machine + human gates) prior to STORY LOCK.
+
+One City != One Story; One Place != One Story. Continue to follow existing Gold / Truth / Place Causality rules and do not treat any Pilot method as a content template. 
 
 The mandatory development order is:
 

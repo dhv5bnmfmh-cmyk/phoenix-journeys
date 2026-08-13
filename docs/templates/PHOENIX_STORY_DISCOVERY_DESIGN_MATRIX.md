@@ -30,6 +30,17 @@ Founder Approval State: APPROVED / REJECTED / PENDING
 Level Scope:
 Owner:
 Reviewer:
+Expansion Layer: LAYER 1 / LAYER 2 / LAYER 3
+Parent Province-Level Region:
+Parent City:
+Parent Place:
+Existing Place Story Inventory:
+Candidate Story Universe Slot:
+Truth Mode:
+Incremental Cultural Value:
+Incremental Human Value:
+Same-Place Differentiation Result:
+Whole-Library Differentiation Result:
 ```
 
 ## 2. Stage Function Contracts

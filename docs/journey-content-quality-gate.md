@@ -57,6 +57,15 @@ The report must state the exact implemented scope rather than imply natural-lang
 
 ## What the deterministic agent cannot prove
 
+Additionally, the Quality Gate enforces the minimal expansion principles for new Journey proposals when applicable:
+
+- ONE PLACE != ONE STORY — allow multiple independent Journeys per Place, but require Same-Place Differentiation proof.
+- SAME PLACE STORY DIFFERENTIATION — candidates must pass Same-Place collision and Whole-library differentiation checks.
+- TRUTH MODE — candidates must declare and verify Truth Mode (VERIFIED HISTORY / VERIFIED CULTURAL FACT / CONTEMPORARY FICTION / FICTIONAL CHARACTER IN VERIFIED HISTORICAL SETTING / FOLKLORE / LITERARY TRADITION).
+- INCREMENTAL VALUE — candidates must declare Incremental Cultural Value and Incremental Human Value; coverage quotas must not override Gold requirements.
+
+## What the deterministic agent cannot prove
+
 Automated green status cannot prove:
 
 - that a protagonist feels alive;

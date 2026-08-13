@@ -346,7 +346,6 @@ Any regression blocks Completed, Ready, merge, batch expansion, and the next sta
 - `docs/PHOENIX_FULL_APPLICATION_AUDIT_STANDARD.md`
 - `docs/PHOENIX_DEVELOPMENT_COMPLETION_STANDARD.md`
 - `docs/PHOENIX_QUALITY_UNIFICATION_ROADMAP.md`
-- `docs/STORY_VERACITY_AND_CULTURE_STANDARD.md`
 
 ### Permanent product rules
 
