@@ -24,7 +24,7 @@ void main() {
       );
       expect(
         standard.discoveries.length,
-        inInclusiveRange(1, 2),
+        journey.id == 'beijing-summer-palace' ? 3 : inInclusiveRange(1, 2),
         reason: '${journey.id} standard discoveries',
       );
 
@@ -40,7 +40,9 @@ void main() {
         );
         expect(
           content.discoveries.length,
-          inInclusiveRange(1, 2),
+          journey.id == 'beijing-summer-palace'
+              ? (profile.phoenixLevel! <= 4 ? 2 : 3)
+              : inInclusiveRange(1, 2),
           reason: '${journey.id} ${profile.displayLabel} discoveries',
         );
         expect(

@@ -1,188 +1,123 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
+import 'package:phoenix_journeys/data/batch_one_adaptive_story_levels.dart';
 import 'package:phoenix_journeys/data/extended_journey_catalog.dart';
 import 'package:phoenix_journeys/data/guangzhou_chen_clan_one_pass.dart';
-import 'package:phoenix_journeys/data/journey_level_catalog.dart';
+import 'package:phoenix_journeys/models/language_proficiency.dart';
+import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
+
+ChineseProficiencyProfile profile(int level) => ChineseProficiencyProfile(
+  track: ChineseExamTrack.hsk, levelCode: '$level', levelLabel: '$level',
+  band: PhoenixReadingBand.intermediate, phoenixLevel: level,
+);
 
 void main() {
   final experience = extendedJourneyExperiences.singleWhere(
     (item) => item.id == guangzhouChenClanJourneyId,
   );
 
-  test('Guangzhou exposes exactly ten canonical Gold levels', () {
+  test('Guangzhou exposes ten locked Not in Frame levels', () {
+    expect(guangzhouChenClanCanonicalTitle, '不入镜');
     expect(guangzhouChenClanOnePassLevels, hasLength(10));
-    expect(guangzhouChenClanCanonicalTitle, '纸桥');
-    expect(guangzhouChenClanMemoryAnchor, '纸桥');
-    expect(guangzhouChenClanChallengeSpecs, hasLength(30));
-    expect(guangzhouChenClanDiscoverySpecs, hasLength(10));
-    expect(guangzhouChenClanReflectionPrompts, hasLength(10));
-    expect(guangzhouChenClanWritingPrompts, hasLength(10));
-  });
-
-  test('every level keeps the full material-translation causal contract', () {
     for (var level = 1; level <= 10; level++) {
       final story = guangzhouChenClanOnePassLevels[level - 1].storyParagraphs.join();
-      expect(story, contains('梁遥'), reason: 'Lv$level protagonist');
-      expect(story, contains('二十二岁'), reason: 'Lv$level age');
-      expect(story, contains('贺真'), reason: 'Lv$level peer');
-      expect(story, contains('陈家祠'), reason: 'Lv$level cultural anchor');
-      expect(story, contains('原型'), reason: 'Lv$level prototype');
-      expect(story, anyOf(contains('断开'), contains('散开')), reason: 'Lv$level physical failure');
-      expect(story, contains('纸桥'), reason: 'Lv$level enacted choice');
-      expect(story, anyOf(contains('第二张'), contains('第二件'), contains('第二个')), reason: 'Lv$level revised prototype');
-      expect(story, anyOf(contains('提起'), contains('拿起')), reason: 'Lv$level physical climax');
-      expect(story, anyOf(contains('认出'), contains('识别'), contains('指出')), reason: 'Lv$level peer legibility test');
-      expect(
-        story,
-        anyOf(
-          contains('翻译'),
-          contains('改对'),
-          contains('改变编码'),
-          contains('编码改变'),
-          contains('改变表达方式'),
-          contains('改变连接'),
-        ),
-        reason: 'Lv$level transformation/consequence',
+      expect(story, contains('陈秀仪'));
+      expect(story, contains('刘嘉禾'));
+      expect(story, contains('陈家祠'));
+      expect(story, contains('不入镜'));
+      expect(story, contains('并排'));
+      expect(story, isNot(contains('纸桥')));
+      expect(story, isNot(contains('梁遥')));
+    }
+  });
+
+  test('runtime Lv1 Lv5 Lv10 equal canonical package', () {
+    for (final level in <int>[1, 5, 10]) {
+      final runtime = resolveAdaptiveJourneyLevel(
+        experience,
+        profile: profile(level),
       );
-      expect(story, contains('工作室'), reason: 'Lv$level action ending');
-      expect(
-        story,
-        anyOf(
-          contains('新材料'),
-          contains('版材'),
-          contains('新的版材'),
-          contains('另一种版画材料'),
-        ),
-        reason: 'Lv$level next material study',
-      );
-      expect(story, isNot(contains(guangzhouChenClanLegacyOpening)), reason: 'Lv$level legacy opening retired');
-      expect(story, isNot(contains(guangzhouChenClanLegacyMetaphor)), reason: 'Lv$level legacy metaphor retired');
+      final canonical = guangzhouChenClanOnePassLevelContent(level);
+      expect(runtime.storyParagraphs, canonical.storyParagraphs);
+      expect(runtime.discoveries, canonical.discoveries);
+      expect(runtime.wonderQuestion, canonical.wonderQuestion);
+      expect(runtime.expressQuestion, canonical.expressQuestion);
     }
   });
 
-  test('Lv6-Lv10 reader Story excludes semantic-governance meta language', () {
-  final advancedStory = <String>[
-    for (var index = 5; index <= 9; index++)
-      ...guangzhouChenClanOnePassLevels[index].storyParagraphs,
-  ].join();
-  const forbiddenMeta = <String>[
-    '历史证据',
-    '重新分类',
-    '历史解释',
-    '导师',
-    '妥协',
-    '改分类',
-    '故意残缺',
-    '时间压力拒绝',
-    '因为时间压力拒绝',
-    '牺牲结果',
-  ];
-  for (final phrase in forbiddenMeta) {
-    expect(advancedStory, isNot(contains(phrase)), reason: phrase);
-  }
-  expect(guangzhouChenClanOnePassLevels[5].storyParagraphs.join(), contains('把散开的几片并回原来的位置'));
-  expect(guangzhouChenClanOnePassLevels[6].storyParagraphs.join(), contains('贺真没有看她的底稿，只看着成品'));
-  expect(guangzhouChenClanOnePassLevels[7].storyParagraphs.join(), contains('第二张纸的局部轮廓已经改变'));
-  expect(guangzhouChenClanOnePassLevels[8].storyParagraphs.join(), contains('把断开的几片重新并在桌上'));
-  expect(guangzhouChenClanOnePassLevels[8].storyParagraphs.join(), contains('把草图扣在桌面，只看成品'));
-  expect(guangzhouChenClanOnePassLevels[9].storyParagraphs.join(), contains('纸桥改变了局部轮廓'));
-});
-
-  test('Story explicitly avoids heritage-surface contact', () {
-    final story = guangzhouChenClanOnePassLevels.expand((item) => item.storyParagraphs).join();
-    const forbiddenContact = <String>[
-      '在文物上描',
-      '把纸贴在文物',
-      '把纸贴到历史装饰',
-      '在历史表面拓印',
-      '对历史装饰拓印',
-      '切割建筑',
-      '在雕刻上切',
-    ];
-    for (final phrase in forbiddenContact) {
-      expect(story, isNot(contains(phrase)), reason: phrase);
-    }
-    expect(story, contains('所有试切都在自己的材料上完成'));
+  test('Memory and Completion preserve the baseline generic product branch', () {
+    expect(batchOneMemorySpecFor(guangzhouChenClanJourneyId), isNull);
   });
 
-  test('Story stays making-led while Discovery carries factual craft breadth', () {
-    final story = guangzhouChenClanOnePassLevels.expand((item) => item.storyParagraphs).join();
-    final discovery = guangzhouChenClanOnePassDiscoveries.map((item) => item.text).join();
-    expect(story, contains('纸桥'));
-    expect(story, contains('梁遥'));
-    expect(discovery, isNot(contains('梁遥')));
-    expect(discovery, isNot(contains('贺真')));
-    expect(discovery, isNot(contains('纸桥')));
-    for (final craft in const ['木雕', '砖雕', '石雕', '陶塑', '灰塑', '铸造', '彩绘']) {
-      expect(discovery, contains(craft), reason: 'Discovery factual craft: $craft');
+  test('knownWords keep baseline review semantics on canonical vocabulary', () {
+    final baseline = resolveAdaptiveJourneyLevel(experience, profile: profile(10));
+    final known = baseline.words
+        .where((entry) => !guangzhouChenClanVocabularyLevelCatalog[entry.word]!.isCulture)
+        .map((entry) => entry.word)
+        .take(1)
+        .toSet();
+    final reviewed = resolveAdaptiveJourneyLevel(
+      experience,
+      profile: profile(10),
+      knownWords: known,
+    );
+    expect(reviewed.words.map((entry) => entry.word).toSet().intersection(known), isNotEmpty);
+    expect(
+      reviewed.words.map((entry) => entry.word).toList(),
+      isNot(equals(baseline.words.map((entry) => entry.word).toList())),
+    );
+    expect(reviewed.words.length, lessThanOrEqualTo(20));
+    expect(reviewed.storyParagraphs, baseline.storyParagraphs);
+    for (final stale in <String>['梁遥', '原型', '纸桥', '版画', '材料翻译']) {
+      expect(reviewed.words.map((entry) => entry.word), isNot(contains(stale)));
     }
   });
 
-  test('Words are curated in Story context and provenance is truthful', () {
-    final stories = <String>[
-      for (final level in guangzhouChenClanOnePassLevels)
-        level.storyParagraphs.join(),
-    ];
-    final allStory = stories.join('\n');
-    for (var level = 1; level <= 10; level++) {
+  test('Lv1 Lv5 Lv10 Reading Support follows every Not in Frame paragraph', () {
+    for (final level in <int>[1, 5, 10]) {
       final content = guangzhouChenClanOnePassLevelContent(level);
-      final story = content.storyParagraphs.join();
-      expect(content.words.map((word) => word.word).toSet(), hasLength(content.words.length));
-      for (final word in content.words) {
-        expect(story, contains(word.word), reason: 'Lv$level ${word.word}');
-        expect(guangzhouChenClanWordFirstAppears[word.word], lessThanOrEqualTo(level));
+      expect(content.storyAnnotations, hasLength(content.storyParagraphs.length));
+      final support = content.storyAnnotations
+          .map((item) => '${item.pinyin} ${item.vietnamese} ${item.english}')
+          .join(' ');
+      expect(support, contains('Xiuyi'));
+      expect(support, contains('Jiahe'));
+      expect(support, contains('picture'));
+      expect(support, isNot(contains('Liang Yao')));
+      expect(support, isNot(contains('paper bridge')));
+      for (final annotation in content.storyAnnotations) {
+        expect(annotation.pinyin.trim(), isNotEmpty);
+        expect(annotation.vietnamese.trim(), isNotEmpty);
+        expect(annotation.english.trim(), isNotEmpty);
       }
     }
-    for (final word in guangzhouChenClanOnePassWords) {
-      final observedFirstLevel = stories.indexWhere((story) => story.contains(word.word)) + 1;
-      expect(observedFirstLevel, greaterThan(0), reason: '${word.word} must occur in Story');
-      expect(
-        guangzhouChenClanWordFirstAppears[word.word],
-        observedFirstLevel,
-        reason: '${word.word} exact Story first appearance',
-      );
-    }
-    for (final trace in guangzhouChenClanWordTraces) {
-      expect(trace.sourceText, contains(trace.word), reason: trace.word);
-      expect(allStory, contains(trace.sourceText), reason: trace.word);
-    }
   });
 
-  test('Memory, completion, reflection and writing stay synchronized', () {
-    expect(guangzhouChenClanMemory, hasLength(3));
-    final memoryPayload = guangzhouChenClanMemory
-        .map((item) => '${item.prompt}${item.answer}')
-        .join();
-    expect(memoryPayload, contains('纸桥'));
-    expect(guangzhouChenClanCompletion.memoryAnchor, '纸桥');
-    expect(guangzhouChenClanCompletion.journeySummary, contains('第二件单张纸'));
+  test('Discovery remains factual and separate from plot', () {
+    final discovery = guangzhouChenClanOnePassDiscoveries.map((e) => e.text).join();
+    expect(discovery, contains('陈氏书院'));
+    expect(discovery, contains('宗族'));
+    expect(discovery, isNot(contains('陈秀仪')));
+    expect(discovery, isNot(contains('刘嘉禾')));
+    expect(discovery, isNot(contains('纸桥')));
+  });
+
+  test('Lv1-Lv10 Discovery and vocabulary are distinct, visible, and on target', () {
+    const agent = PhoenixLanguageLevelAgent();
+    final discoveries = <String>{};
     for (var level = 1; level <= 10; level++) {
-      final content = guangzhouChenClanOnePassLevelContent(level);
-      expect(content.wonderQuestion, contains('纸桥'));
-      expect(content.expressQuestion, contains('第一件断开'));
+      final actual = resolveAdaptiveJourneyLevel(experience, profile: profile(level));
+      final canonical = guangzhouChenClanOnePassLevelContent(level);
+      final plan = agent.planFor(profile(level));
+      expect(actual.storyParagraphs, canonical.storyParagraphs, reason: 'Lv$level Story');
+      expect(actual.discoveries, canonical.discoveries, reason: 'Lv$level Discovery');
+      expect(discoveries.add(actual.discoveries.single.text), isTrue, reason: 'Lv$level learner value');
+      expect(actual.words.length, greaterThanOrEqualTo(plan.targetVocabularyCount), reason: 'Lv$level target');
+      expect(actual.words.length, lessThanOrEqualTo(plan.maximumVocabularyCount), reason: 'Lv$level maximum');
+      final visible = '${actual.storyParagraphs.join()}${actual.discoveries.single.text}';
+      for (final word in actual.words) {
+        expect(visible, contains(word.word), reason: 'Lv$level ${word.word}');
+      }
     }
-  });
-
-  test('runtime difficulty mapping resolves Guangzhou to Lv1 Lv5 Lv10', () {
-    expect(
-      resolveJourneyLevel(experience, JourneyDifficulty.easy).storyParagraphs,
-      guangzhouChenClanOnePassLevels[0].storyParagraphs,
-    );
-    expect(
-      resolveJourneyLevel(experience, JourneyDifficulty.standard).storyParagraphs,
-      guangzhouChenClanOnePassLevels[4].storyParagraphs,
-    );
-    expect(
-      resolveJourneyLevel(experience, JourneyDifficulty.challenge).storyParagraphs,
-      guangzhouChenClanOnePassLevels[9].storyParagraphs,
-    );
-  });
-
-  test('legacy Guangzhou product identity and geo node remain stable', () {
-    expect(experience.id, 'guangzhou-chen-clan-academy');
-    expect(experience.city, '广州');
-    expect(experience.cityCode, 'CAN');
-    expect(experience.place, '陈家祠');
-    expect(experience.content.geoNodeId, 'cn-guangdong-guangzhou-chen-clan');
-    expect(guangzhouChenClanRemediatedJourney.id, experience.id);
   });
 }

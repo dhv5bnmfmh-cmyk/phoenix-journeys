@@ -2093,7 +2093,8 @@ class _ChallengeSession {
       'hangzhou-west-lake' ||
       'chengdu-kuanzhai-alley' ||
       'nanjing-qinhuai-river' ||
-      'guangzhou-chen-clan-academy' =>
+      'guangzhou-chen-clan-academy' ||
+      'suzhou-humble-administrators-garden' =>
         _adaptiveGrammarForJourney(journeyId, difficulty),
       'literary-roaming' ||
       'myth-tracing' ||
@@ -2166,14 +2167,14 @@ class _ChallengeSession {
           resultAction: '显得更加庄严清晰',
         ),
       'beijing-summer-palace' => (
-          focus: '昆明湖的倒影',
-          insight: '看见万寿山进入画面',
-          subject: '长廊',
-          action: '连接沿湖景点',
-          result: '改变观看节奏',
-          cause: '昆明湖产生了倒影',
-          resultSubject: '万寿山',
-          resultAction: '进入完整的湖山画面',
+          focus: '冬至前后十七孔桥的金光',
+          insight: '看见时间怎样改变桥洞',
+          subject: '十七孔桥',
+          action: '连接东堤和南湖岛',
+          result: '读出昆明湖上的空间关系',
+          cause: '冬至前后落日角度较低',
+          resultSubject: '桥洞东侧内壁',
+          resultAction: '逐渐被夕阳照亮',
         ),
       'shanghai-bund' => (
           focus: '外滩与浦东两岸',
@@ -2196,14 +2197,14 @@ class _ChallengeSession {
           resultAction: '变得清楚可辨',
         ),
       'hangzhou-west-lake' => (
-          focus: '苏堤、桥与远山',
-          insight: '发现西湖景色的变化',
-          subject: '苏堤',
-          action: '组织沿湖路线',
-          result: '逐步看见不同景层',
-          cause: '天气和季节不断变化',
-          resultSubject: '西湖十景',
-          resultAction: '呈现不同的观看感受',
+          focus: '断桥残雪、湿石阶和预约卡',
+          insight: '理解地点记忆与人物行动的差别',
+          subject: '题名景观',
+          action: '连接地点、季节与观看条件',
+          result: '理解景名不是一次记忆考试',
+          cause: '湿石阶触发了下意识的扶持',
+          resultSubject: '方毓的连续提问',
+          resultAction: '停在交出预约卡之前',
         ),
       'chengdu-kuanzhai-alley' => (
           focus: '宽、窄、井三条巷子',
@@ -2226,14 +2227,24 @@ class _ChallengeSession {
           resultAction: '承载更多历史记忆',
         ),
       'guangzhou-chen-clan-academy' => (
-          focus: '屋脊陶塑和木石雕刻',
-          insight: '读懂其中的岭南故事',
-          subject: '陈家祠装饰',
-          action: '保存岭南工艺',
-          result: '理解宗族文化记忆',
-          cause: '多种雕塑共同讲述地方故事',
-          resultSubject: '建筑细节',
-          resultAction: '成为可阅读的文化线索',
+          focus: '共同兴建与陈氏书院匾额',
+          insight: '理解共同兴建与空间组织',
+          subject: '三路三进格局',
+          action: '组织厅堂、院落和廊道',
+          result: '理解建筑的前后层次',
+          cause: '多地陈姓宗族共同兴建陈氏书院',
+          resultSubject: '合族祠与书院身份',
+          resultAction: '在同一建筑中相互联系',
+        ),
+      'suzhou-humble-administrators-garden' => (
+          focus: '长廊转弯、曲桥和池水',
+          insight: '理解视线怎样遮挡又重新打开',
+          subject: '长廊与建筑转折',
+          action: '暂时收紧视线',
+          result: '看见池水重新打开空间',
+          cause: '廊、墙和植物形成前后遮挡',
+          resultSubject: '园林视野',
+          resultAction: '随着行走连续变化',
         ),
       'literary-roaming' => (
           focus: '蓝色蝴蝶和竹林梦境',
@@ -2379,10 +2390,10 @@ class _ChallengeSession {
         '红墙与城台只负责装饰，从未影响进入宫城的方式。',
       ],
       'beijing-summer-palace' => [
-        '昆明湖的倒影始终不变，与光线和视角没有关系。',
-        '长廊只为缩短距离，不会改变游人的观看节奏。',
-        '十七孔桥遮住全部远山，使湖面失去空间层次。',
-        '万寿山与昆明湖彼此分离，无法组成完整景观。',
+        '十七孔桥的季节光线整晚不变，因此不需要等待。',
+        '十七孔桥不连接东堤与南湖岛，只是一处独立观景点。',
+        '许澄捡回旧照片后，桥洞金光仍停在原位。',
+        '周岚继续替许澄调整每一张构图。',
       ],
       'shanghai-bund' => [
         '外滩西岸只保留住宅，与银行和贸易没有联系。',
@@ -2397,10 +2408,10 @@ class _ChallengeSession {
         '站在城墙上只能看见过去，看不到现代城市扩张。',
       ],
       'hangzhou-west-lake' => [
-        '苏堤和白堤远离湖面，不会改变游人的观看路线。',
-        '西湖十景只记录固定地点，与季节天气没有关系。',
-        '桥、柳树与远山始终保持同一位置和视觉层次。',
-        '文化命名消除了湖景变化，使每次观看完全相同。',
+        '方毓把预约卡收回包里，决定不再告诉周绍庭。',
+        '周绍庭答对全部景名以后，独自离开了断桥。',
+        '湿石阶上，方毓扶住周绍庭并替他回答问题。',
+        '公交车到站后，方毓把预约卡交给了司机。',
       ],
       'chengdu-kuanzhai-alley' => [
         '三条巷子的尺度完全相同，也没有不同生活节奏。',
@@ -2415,10 +2426,16 @@ class _ChallengeSession {
         '河流只负责分隔两岸，从未承载居民生活记忆。',
       ],
       'guangzhou-chen-clan-academy' => [
-        '屋脊装饰全部来自现代印刷，与岭南工艺没有关系。',
-        '陶塑、灰塑和木石雕刻只重复一种图案和故事。',
-        '陈家祠从未承担宗族教育或成员联络功能。',
-        '改为博物馆以后，建筑与社群记忆完全失去联系。',
+        '陈秀仪把镜头转向刘嘉禾，拍下了公开认亲照。',
+        '刘嘉禾戴上红围巾，在匾额下改回了陈姓。',
+        '亲族视频结束后，陈秀仪独自留在第一座院子。',
+        '刘嘉禾走过门槛时加快脚步，没有等待陈秀仪。',
+      ],
+      'suzhou-humble-administrators-garden' => [
+        '程朗第一次消失后，陈玉兰没有叫他回来。',
+        '第二次看不见程朗时，陈玉兰立刻追过转弯。',
+        '程朗在下一处没有回头，也没有等待外婆。',
+        '陈玉兰说完“下一处等我”，最后还是追了上去。',
       ],
       _ => [
         '故事中的地点突然改变，却没有任何前文线索。',

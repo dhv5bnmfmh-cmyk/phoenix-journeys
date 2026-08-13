@@ -44,7 +44,7 @@ const extendedJourneySources = <StorySourceRecord>[
     title: '广东民间工艺博物馆',
     publisher: '广州市人民政府',
     url:
-        'https://www.gz.gov.cn/zlgz/gzly/wzgz/wbcg/content/mpost_9587900.html',
+        'https://www.gz.gov.cn/zlgz/gzly/wzgz/wbcg/content/post_9587900.html',
     kind: StorySourceKind.government,
     languageCode: 'zh-CN',
     geoNodeIds: ['cn-guangdong-guangzhou-chen-clan'],
@@ -80,57 +80,45 @@ JourneyContentRecord _buildJourney({
 }
 
 const hangzhouStoryParagraphs = <String>[
-  '清晨，你沿着苏堤慢慢向前走。湖面像一张安静的镜子，远处的山、桥和柳树倒映在水中。',
-  '西湖不是完全自然形成的风景。历代人们修筑堤岸、疏浚湖水，又建起亭台、宝塔和园林，让自然与人的设计彼此融合。',
-  '从唐宋以来，诗人、画家和学者不断描写这里。许多景点因此不仅有形状，也有名字、故事和情感。',
-  '站在湖边，你会发现西湖真正特别的地方，是人们没有把自然变成背景，而是让城市生活与山水一起呼吸。',
+  '方毓六十九岁，和周绍庭结婚四十三年。最近半年，周绍庭开始把日期、人名和刚说过的话弄混，有时出门后还会忘记原来的方向。女儿替他约了周一的记忆门诊，方毓把预约卡放在包内层，几次想拿出来，又怕他觉得自己被当成病人。',
+  '星期六，她说很久没走西湖，拉他从断桥出发。一路上，她不断问“断桥残雪是什么季节”“远处是哪座塔”“他们第一次来时下没下雨”。周绍庭把冬景说成夏天，又说错塔名；第三个问题没有回答。散步渐渐只剩方毓在出题。',
+  '雨点落下来，桥边石阶很快湿了。方毓回头看他，脚下一偏，周绍庭下意识扶住她的手肘：“这里一直滑。”四十三年前第一次走这段路时，他也曾在湿石阶上这样扶她。景名和日期都乱了，这个动作却先于回答发生。',
+  '方毓把下一道题停住，从包里拿出预约卡，承认今天不是来赏景，而是想证明他还记得两个人的日子。周绍庭没有把卡推回去：“我知道你在怕什么。我也怕。”他看清日期，把卡放进自己的钱包。公交车到站后，他没有让方毓替自己开口，先问司机：“去医院，哪一站下？”',
 ];
 
 const hangzhouStoryAnnotations = <ReadingAnnotation>[
   ReadingAnnotation(
-    pinyin:
-        'Qīngchén, nǐ yánzhe Sūdī mànmàn xiàng qián zǒu. Húmiàn xiàng yì zhāng ānjìng de jìngzi, yuǎnchù de shān, qiáo hé liǔshù dàoyìng zài shuǐ zhōng.',
-    vietnamese:
-        'Sáng sớm, bạn chậm rãi đi dọc đê Tô. Mặt hồ như một tấm gương yên tĩnh, phản chiếu núi, cầu và hàng liễu phía xa.',
-    english:
-        'At dawn, you walk slowly along Su Causeway. The lake is a quiet mirror reflecting distant hills, bridges, and willows.',
+    pinyin: 'Fāng Yù hé Zhōu Shàotíng jiéhūn sìshísān nián. Tā dài zhe yīyuàn yùyuē kǎ, péi tā cóng Duànqiáo zǒu Xīhú.',
+    vietnamese: 'Phương Dục và Chu Thiệu Đình đã kết hôn bốn mươi ba năm. Bà giấu thẻ hẹn khám trong túi khi hai người đi bộ từ Đoạn Kiều.',
+    english: 'Fang Yu and Zhou Shaoting have been married for forty-three years. She hides a clinic appointment card during their West Lake walk from Broken Bridge.',
   ),
   ReadingAnnotation(
-    pinyin:
-        'Xīhú bú shì wánquán zìrán xíngchéng de fēngjǐng. Lìdài rénmen xiūzhù dī àn, shūjùn húshuǐ, yòu jiànqǐ tíngtái, bǎotǎ hé yuánlín, ràng zìrán yǔ rén de shèjì bǐcǐ rónghé.',
-    vietnamese:
-        'Tây Hồ không phải là cảnh quan hoàn toàn tự nhiên. Qua nhiều triều đại, con người xây đê, nạo vét hồ và dựng đình, tháp, vườn để kết hợp thiên nhiên với thiết kế của con người.',
-    english:
-        'West Lake is not a wholly natural landscape. Generations built causeways, dredged the lake, and added pavilions, pagodas, and gardens.',
+    pinyin: 'Tāmen cóng Duànqiáo chūfā. Fāng Yù bùduàn wèn Xīhú jǐngmíng, Zhōu Shàotíng dá cuò le liǎng cì.',
+    vietnamese: 'Họ xuất phát từ Đoạn Kiều. Phương Dục liên tục hỏi tên cảnh Tây Hồ, còn Chu Thiệu Đình trả lời sai hai lần.',
+    english: 'They set out from Broken Bridge. Fang Yu keeps asking West Lake view-name questions, and Zhou Shaoting answers two incorrectly.',
   ),
   ReadingAnnotation(
-    pinyin:
-        'Cóng Táng Sòng yǐlái, shīrén, huàjiā hé xuézhě bùduàn miáoxiě zhèlǐ. Xǔduō jǐngdiǎn yīncǐ bùjǐn yǒu xíngzhuàng, yě yǒu míngzi, gùshì hé qínggǎn.',
-    vietnamese:
-        'Từ thời Đường Tống, thi nhân, họa sĩ và học giả liên tục miêu tả nơi đây. Vì vậy nhiều thắng cảnh không chỉ có hình dáng mà còn có tên gọi, câu chuyện và cảm xúc.',
-    english:
-        'Since the Tang and Song periods, poets, painters, and scholars have given the scenery names, stories, and emotion.',
+    pinyin: 'Shíjiē shàng, Zhōu Shàotíng fú zhù tā de shǒuzhǒu. Fāng Yù bù zài chūtí, bǎ yùyuē kǎ jiāo gěi tā.',
+    vietnamese: 'Trên bậc đá ướt, ông đỡ khuỷu tay bà theo phản xạ, như nhiều năm trước.',
+    english: 'On a wet stone step he instinctively catches her elbow, as he did many years earlier.',
   ),
   ReadingAnnotation(
-    pinyin:
-        'Zhàn zài húbiān, nǐ huì fāxiàn Xīhú zhēnzhèng tèbié de dìfang, shì rénmen méiyǒu bǎ zìrán biàn chéng bèijǐng, ér shì ràng chéngshì shēnghuó yǔ shānshuǐ yìqǐ hūxī.',
-    vietnamese:
-        'Đứng bên hồ, bạn nhận ra điều đặc biệt của Tây Hồ là con người không biến thiên nhiên thành phông nền, mà để đời sống đô thị cùng hít thở với núi nước.',
-    english:
-        'West Lake is special because nature is not merely a backdrop; city life and landscape breathe together.',
+    pinyin: 'Fāng Yù bù zài chūtí, bǎ yùyuē kǎ jiāo gěi tā. Tā bǎ kǎ fàng jìn zìjǐ de qiánbāo.',
+    vietnamese: 'Bà thôi kiểm tra và trao thẳng thẻ hẹn; ông cất nó vào ví rồi chủ động hỏi trạm bệnh viện.',
+    english: 'She stops testing and hands over the appointment card; he puts it in his own wallet and asks for the hospital stop.',
   ),
 ];
 
 const hangzhouWords = <WordEntry>[
-  WordEntry(word: '苏堤', pinyin: 'Sūdī', partOfSpeech: '名词（专名）', simpleChinese: '横跨西湖的重要堤道。', translation: 'Đê Tô, con đê nổi tiếng trên Tây Hồ.', englishDefinition: 'Su Causeway', symbol: '🌉'),
-  WordEntry(word: '倒映', pinyin: 'dàoyìng', partOfSpeech: '动词', simpleChinese: '物体的影子映在水面或镜面上。', translation: 'Phản chiếu trên mặt nước hoặc gương.', englishDefinition: 'to be reflected', symbol: '🪞'),
-  WordEntry(word: '堤岸', pinyin: 'dī’àn', partOfSpeech: '名词', simpleChinese: '防止水流漫出的岸边建筑。', translation: 'Bờ đê ngăn nước tràn.', englishDefinition: 'embankment', symbol: '🧱'),
-  WordEntry(word: '疏浚', pinyin: 'shūjùn', partOfSpeech: '动词', simpleChinese: '清理河湖底部，让水道更通畅。', translation: 'Nạo vét để dòng nước thông thoáng.', englishDefinition: 'to dredge', symbol: '⛏️'),
-  WordEntry(word: '亭台', pinyin: 'tíngtái', partOfSpeech: '名词', simpleChinese: '园林中的亭子和台阁。', translation: 'Đình và lầu trong vườn cảnh.', englishDefinition: 'pavilions and terraces', symbol: '🏯'),
-  WordEntry(word: '融合', pinyin: 'rónghé', partOfSpeech: '动词', simpleChinese: '不同事物结合在一起。', translation: 'Hòa hợp hoặc kết hợp với nhau.', englishDefinition: 'to blend or integrate', symbol: '🫶'),
-  WordEntry(word: '景点', pinyin: 'jǐngdiǎn', partOfSpeech: '名词', simpleChinese: '值得参观的风景或地点。', translation: 'Điểm tham quan.', englishDefinition: 'scenic spot', symbol: '📍'),
-  WordEntry(word: '山水', pinyin: 'shānshuǐ', partOfSpeech: '名词', simpleChinese: '山和水组成的自然景色。', translation: 'Phong cảnh núi non và sông nước.', englishDefinition: 'mountains-and-water landscape', symbol: '🏞️'),
-  WordEntry(word: '彼此', pinyin: 'bǐcǐ', partOfSpeech: '代词', simpleChinese: '双方互相。', translation: 'Lẫn nhau, đôi bên.', englishDefinition: 'each other', symbol: '↔️'),
+  WordEntry(word: '西湖', pinyin: 'Xīhú', partOfSpeech: '名词（专名）', simpleChinese: '杭州的湖泊文化景观。', translation: 'Tây Hồ.', englishDefinition: 'West Lake', symbol: '🌊'),
+  WordEntry(word: '断桥', pinyin: 'Duànqiáo', partOfSpeech: '名词（专名）', simpleChinese: '西湖白堤东端附近的著名桥梁。', translation: 'Đoạn Kiều.', englishDefinition: 'Broken Bridge', symbol: '🌉'),
+  WordEntry(word: '预约卡', pinyin: 'yùyuē kǎ', partOfSpeech: '名词', simpleChinese: '写有预约时间和地点的卡片。', translation: 'Thẻ hẹn.', englishDefinition: 'appointment card', symbol: '🗓️'),
+  WordEntry(word: '记忆', pinyin: 'jìyì', partOfSpeech: '名词', simpleChinese: '保存和想起经历的能力。', translation: 'Trí nhớ.', englishDefinition: 'memory', symbol: '🧠'),
+  WordEntry(word: '门诊', pinyin: 'ménzhěn', partOfSpeech: '名词', simpleChinese: '不住院的诊察服务。', translation: 'Khám ngoại trú.', englishDefinition: 'outpatient clinic', symbol: '🏥'),
+  WordEntry(word: '石阶', pinyin: 'shíjiē', partOfSpeech: '名词', simpleChinese: '石头做成的台阶。', translation: 'Bậc đá.', englishDefinition: 'stone steps', symbol: '🪨'),
+  WordEntry(word: '手肘', pinyin: 'shǒuzhǒu', partOfSpeech: '名词', simpleChinese: '手臂中间弯曲的关节。', translation: 'Khuỷu tay.', englishDefinition: 'elbow', symbol: '💪'),
+  WordEntry(word: '下意识', pinyin: 'xiàyìshí', partOfSpeech: '副词', simpleChinese: '没有先思考就自然做出。', translation: 'Theo phản xạ.', englishDefinition: 'instinctively', symbol: '⚡'),
+  WordEntry(word: '公交车', pinyin: 'gōngjiāochē', partOfSpeech: '名词', simpleChinese: '按固定路线载客的公共汽车。', translation: 'Xe buýt.', englishDefinition: 'public bus', symbol: '🚌'),
 ];
 
 const hangzhouDiscoveries = <DiscoveryEntry>[
@@ -193,9 +181,9 @@ final guangzhouDiscoveries = guangzhouChenClanOnePassDiscoveries;
 
 final hangzhouWestLakeJourney = _buildJourney(
   id: 'hangzhou-west-lake',
-  title: '杭州 · 西湖：让城市与山水一起呼吸',
+  title: '杭州 · 西湖：还认得这条路',
   geoNodeId: 'cn-zhejiang-hangzhou-west-lake',
-  tags: const ['杭州', '西湖', '世界遗产', '园林', '山水'],
+  tags: const ['杭州', '西湖', '断桥', '夫妻', '记忆'],
   paragraphs: hangzhouStoryParagraphs,
   sourceIds: const ['unesco-hangzhou-west-lake'],
 );
@@ -220,9 +208,9 @@ final nanjingQinhuaiJourney = _buildJourney(
 
 final guangzhouChenClanJourney = _buildJourney(
   id: guangzhouChenClanJourneyId,
-  title: '广州 · 陈家祠：纸桥',
+  title: '广州 · 陈家祠：不入镜',
   geoNodeId: 'cn-guangdong-guangzhou-chen-clan',
-  tags: const ['广州', '陈家祠', '岭南', '版画', '纸桥', '材料翻译'],
+  tags: const ['广州', '陈家祠', '陈氏书院', '宗族', '名字', '边界'],
   paragraphs: guangzhouStoryParagraphs,
   sourceIds: const [guangzhouChenClanSourceRecordId],
 );
@@ -241,18 +229,18 @@ final extendedJourneyExperiences = <DailyJourneyExperience>[
     cityCode: 'HGH',
     place: '西湖',
     appBarTitle: '杭州 · 西湖',
-    storyTitle: '西湖故事',
-    headline: '让城市与山水一起呼吸',
-    description: '沿苏堤阅读诗意景观、园林设计与人与自然的关系。',
-    discoveryTeaser: '西湖为什么不仅是自然风景？',
+    storyTitle: '还认得这条路',
+    headline: '方毓把一次西湖散步变成了不敢说破的记忆测试',
+    description: '结婚四十三年后，方毓带周绍庭重走断桥；湿石阶上的一个旧动作，让两个人终于拿出藏着的医院预约。',
+    discoveryTeaser: '“断桥残雪”这类题名景观，怎样把地点、季节与观看条件连在一起？',
     distanceLabel: '1,760 km',
     stampSymbol: '湖',
     content: hangzhouWestLakeJourney,
     storyAnnotations: hangzhouStoryAnnotations,
     words: hangzhouWords,
     discoveries: hangzhouDiscoveries,
-    wonderQuestion: '如果你能为西湖的一处风景重新命名，你会选择什么名字？为什么？',
-    expressQuestion: '请用两到三句话描写你想象中的西湖清晨。',
+    wonderQuestion: '方毓为什么在周绍庭扶住她以后停止用西湖景名测试他？',
+    expressQuestion: '请按顺序写出方毓隐瞒预约卡、不断出题、湿石阶被扶住和公开交卡四件事。',
   ),
   DailyJourneyExperience(
     id: chengduKuanzhaiJourney.id,
@@ -260,9 +248,9 @@ final extendedJourneyExperiences = <DailyJourneyExperience>[
     cityCode: 'CTU',
     place: '宽窄巷子',
     appBarTitle: '成都 · 宽窄巷子',
-    storyTitle: '巷子故事',
-    headline: '在院落里读懂成都慢生活',
-    description: '走进三条老巷，观察历史街区怎样继续服务今天。',
+    storyTitle: '一把没有固定位置的竹椅',
+    headline: '林夏要让停留与通行都在院落里有位置',
+    description: '一把竹椅在茶桌、墙边与门槛之间反复让位；当周叔自己把它移开，共享节奏不再只靠林夏维持。',
     discoveryTeaser: '为什么这里既是古街，也是现代生活空间？',
     distanceLabel: '1,020 km',
     stampSymbol: '巷',
@@ -270,8 +258,8 @@ final extendedJourneyExperiences = <DailyJourneyExperience>[
     storyAnnotations: chengduStoryAnnotations,
     words: chengduWords,
     discoveries: chengduDiscoveries,
-    wonderQuestion: '在宽巷、窄巷和井巷中，你最想在哪一条巷子停下来？为什么？',
-    expressQuestion: '请用两到三句话介绍你理想中的成都慢生活。',
+    wonderQuestion: '为什么这把竹椅没有固定位置，反而让院落更容易同时服务停留与通行？',
+    expressQuestion: '周叔在没有提醒时主动移椅，怎样证明共享节奏已经不只属于林夏？',
   ),
   DailyJourneyExperience(
     id: nanjingQinhuaiJourney.id,
@@ -279,18 +267,18 @@ final extendedJourneyExperiences = <DailyJourneyExperience>[
     cityCode: 'NKG',
     place: '秦淮河',
     appBarTitle: '南京 · 秦淮河',
-    storyTitle: '秦淮故事',
-    headline: '沿着灯影寻找城市记忆',
-    description: '从夫子庙、贡院与灯会理解南京的教育和民俗传统。',
-    discoveryTeaser: '为什么秦淮河不只是一条观光河？',
+    storyTitle: '亮灯以后留下的暗段',
+    headline: '七分钟里，魏舟必须决定什么不能抢着修好',
+    description: '秦淮灯会开场前发生故障，魏舟拒绝未经确认的临时改线，让主要路线安全亮起，也让一段装饰灯继续黑着。',
+    discoveryTeaser: '秦淮河岸、古桥与灯会照明为什么同时受到风貌保护和安全管理约束？',
     distanceLabel: '1,860 km',
     stampSymbol: '淮',
     content: nanjingQinhuaiJourney,
     storyAnnotations: nanjingStoryAnnotations,
     words: nanjingWords,
     discoveries: nanjingDiscoveries,
-    wonderQuestion: '如果你夜游秦淮河，最想停在哪一种文化场景前：古桥、贡院、灯会还是小吃街？',
-    expressQuestion: '请用两到三句话描写秦淮河夜晚的灯光和声音。',
+    wonderQuestion: '为什么魏舟宁可让一段装饰灯继续黑着，也不在最后几分钟改变已经确认的照明安排？',
+    expressQuestion: '请用两到三句话说明魏舟做了什么取舍，以及周工最后怎样把责任交给他。',
   ),
   DailyJourneyExperience(
     id: guangzhouChenClanJourney.id,
@@ -298,10 +286,10 @@ final extendedJourneyExperiences = <DailyJourneyExperience>[
     cityCode: 'CAN',
     place: '陈家祠',
     appBarTitle: '广州 · 陈家祠',
-    storyTitle: '纸桥',
-    headline: '让一张纸学会新的连接方式',
-    description: '跟着梁遥把观察到的形体关系翻译成一张不断开的纸。',
-    discoveryTeaser: '为什么陈家祠适合观察不同材料怎样形成装饰？',
+    storyTitle: '不入镜',
+    headline: '一张迟到三十四年的合照，要不要拍',
+    description: '陈秀仪第一次单独见到如今叫刘嘉禾的亲生女儿；亲戚的视频打来后，她必须决定这次见面属于谁。',
+    discoveryTeaser: '为什么“陈氏书院”由广东各地陈姓宗族共同兴建，又同时具有合族祠与书院功能？',
     distanceLabel: '820 km',
     stampSymbol: '艺',
     content: guangzhouChenClanJourney,

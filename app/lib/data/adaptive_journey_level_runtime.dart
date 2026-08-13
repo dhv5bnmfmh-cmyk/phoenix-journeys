@@ -12,6 +12,8 @@ import 'forbidden_city_content_cache.dart';
 import 'forbidden_city_journey_runtime.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
+import 'guangzhou_chen_clan_one_pass.dart';
+import 'journey_expansion_catalog.dart';
 import 'summer_palace_adaptive_story_levels.dart';
 import 'summer_palace_language_level_catalog.dart';
 
@@ -50,6 +52,20 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   }
   if (experience.id == 'beijing-summer-palace') {
     return _resolveSummerPalaceN1Level(
+      profile: profile,
+      knownWords: knownWords,
+    );
+  }
+  if (experience.id == guangzhouChenClanJourneyId) {
+    return guangzhouChenClanOnePassLevelContent(
+      profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band),
+      profile: profile,
+      knownWords: knownWords,
+    );
+  }
+  if (experience.id == 'suzhou-humble-administrators-garden') {
+    return suzhouGardenCanonicalLevelContent(
+      profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band),
       profile: profile,
       knownWords: knownWords,
     );
@@ -174,10 +190,18 @@ JourneyLevelContent _resolveSummerPalaceN1Level({
   final level = profile.phoenixLevel ?? _legacySummerPalaceLevel(profile.band);
   final target = phoenixStoryLengthTargetFor(profile);
   final plan = _languageLevelAgent.planFor(profile);
-  final base = summerPalaceN1LevelForPhoenixLevel(level).withReadingLimit(
+  final source = summerPalaceN1LevelForPhoenixLevel(level);
+  final limited = source.withReadingLimit(
     paragraphCount:
         profile.isPhoenix ? target.paragraphCount : plan.paragraphCount,
-    discoveryCount: _summerPalaceN1DiscoveryCount(profile.band),
+  );
+  final base = JourneyLevelContent(
+    storyParagraphs: limited.storyParagraphs,
+    storyAnnotations: limited.storyAnnotations,
+    words: source.words,
+    discoveries: source.discoveries,
+    wonderQuestion: source.wonderQuestion,
+    expressQuestion: source.expressQuestion,
   );
   final context = <String>[
     ...base.storyParagraphs,
@@ -202,15 +226,6 @@ JourneyLevelContent _resolveSummerPalaceN1Level({
     expressQuestion: base.expressQuestion,
   );
 }
-
-int _summerPalaceN1DiscoveryCount(PhoenixReadingBand band) => switch (band) {
-      PhoenixReadingBand.beginner => 1,
-      PhoenixReadingBand.elementary ||
-      PhoenixReadingBand.intermediate => 2,
-      PhoenixReadingBand.upperIntermediate ||
-      PhoenixReadingBand.advanced ||
-      PhoenixReadingBand.mastery => 2,
-    };
 
 int _legacySummerPalaceLevel(PhoenixReadingBand band) => switch (band) {
       PhoenixReadingBand.beginner => 1,

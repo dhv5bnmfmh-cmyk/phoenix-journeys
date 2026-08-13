@@ -94,63 +94,133 @@ const chengduRemediatedNarrativeDna = JourneyNarrativeDnaRecord(
       'place-chair-first-handoff-fixed-layout-fails-again-negotiate-repeat-independent-reproduction-release-control',
 );
 
+const hangzhouReopenedNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'hangzhou-west-lake',
+  narrativeIdentity: 'long-married-couple-end-hidden-memory-test-and-name-shared-fear',
+  protagonistIdentity: 'Fang-Yu-sixty-nine-year-old-wife-facing-husbands-memory-decline',
+  protagonistAgeIdentity: 'sixty-nine-year-old-older-spouse',
+  protagonistArchetype: 'older-spouse-concealing-clinic-appointment-behind-familiar-walk',
+  openingSituation: 'familiar-West-Lake-walk-is-secretly-used-as-memory-test-before-clinic-visit',
+  storyGoal: 'learn-what-husband-remembers-without-directly-naming-medical-fear',
+  locationMechanism: 'named-seasonal-views-and-wet-Broken-Bridge-route-cue-conflicting-verbal-and-embodied-memory',
+  movementPattern: 'questioning-walk-from-named-view-to-wet-step-then-bus',
+  conflictType: 'proof-seeking-memory-quiz-vs-honest-mutual-recognition-of-decline',
+  choiceType: 'stop-testing-and-openly-hand-over-clinic-appointment',
+  climaxType: 'instinctive-elbow-catch-breaks-quiz-and-both-spouses-name-their-fear',
+  consequenceType: 'husband-keeps-appointment-card-and-asks-for-hospital-stop-himself',
+  emotionalArc: 'concealment-to-testing-to-humiliation-to-embodied-recognition-to-mutual-admission',
+  historicalLearningMechanism: 'named-West-Lake-views-link-place-season-and-viewing-conditions-while-factual-cultural-landscape-learning-remains-in-Discovery',
+  resolutionType: 'medical-uncertainty-is-faced-through-disclosure-not-a-correct-memory-score',
+  endingMechanism: 'husband-asks-bus-driver-for-hospital-stop-with-card-in-own-wallet',
+  memoryAnchorType: 'hand-catching-wifes-elbow-on-familiar-wet-stone-step',
+  achievementType: 'shared-fear-spoken-without-memory-exam',
+  rewardSymbolism: 'wet-step-and-held-elbow-mark-embodied-care-not-project-success-or-separation',
+  temporalPattern: 'single-weekend-walk-before-Monday-memory-clinic',
+  supportingStructure: 'long-married-spouses-each-conceal-fear-until-direct-mutual-admission',
+  centralMetaphor: 'a-shared-life-is-not-reducible-to-correct-place-name-answers',
+  narrativeVoice: 'third-person-older-wife-close-action-led',
+  storyRhythm: 'hidden-card-serial-questions-wrong-answers-silence-slip-catch-disclosure-card-accepted-bus-question',
+);
+
 const guangzhouChenClanGoldNarrativeDna = JourneyNarrativeDnaRecord(
   journeyId: 'guangzhou-chen-clan-academy',
-  narrativeIdentity: 'paper-bridges-translate-relief-across-material-constraints',
-  protagonistIdentity:
-      'Liang-Yao-twenty-two-year-old-fictional-Guangzhou-printmaking-student',
-  protagonistAgeIdentity: 'twenty-two-year-old-young-maker',
-  protagonistArchetype:
-      'young-maker-translating-form-across-material-constraints',
-  openingSituation:
-      'first-literal-contour-single-sheet-paper-prototype-separates-into-disconnected-pieces',
-  storyGoal:
-      'make-one-connected-single-sheet-interpretation-while-preserving-a-recognisable-source-relation',
-  locationMechanism:
-      'Chen-Clan-Academy-multi-craft-architecture-makes-material-difference-causal-to-the-making-problem',
-  movementPattern:
-      'observe-own-paper-prototype-fail-redraw-connections-cut-again-lift-and-test-legibility',
-  conflictType:
-      'literal-surface-fidelity-vs-paper-specific-structural-integrity',
-  choiceType:
-      'introduce-deliberate-paper-bridges-and-reencode-connections-for-the-new-medium',
-  climaxType:
-      'revised-paper-object-lifts-intact-while-peer-still-recognises-the-important-relation',
-  consequenceType:
-      'translated-object-functions-as-one-paper-piece-because-its-encoding-changed',
-  emotionalArc:
-      'copying-confidence-to-physical-failure-to-material-questioning-to-deliberate-reencoding-to-functional-proof',
-  historicalLearningMechanism:
-      'verified-multi-craft-Lingnan-decoration-provides-the-material-comparison-context-while-factual-expansion-remains-in-Discovery',
-  resolutionType:
-      'cross-medium-translation-preserves-relation-through-medium-specific-structure',
-  endingMechanism:
-      'changed-translation-method-is-applied-immediately-to-the-next-material-study',
-  memoryAnchorType:
-      'paper-bridges-absent-from-the-source-surface-but-necessary-for-the-translated-medium',
-  achievementType: 'material-relation-translator',
-  rewardSymbolism:
-      'connected-paper-bridge-symbolises-successful-reencoding-not-sacrifice-or-incompletion',
-  temporalPattern: 'single-material-study-session-without-external-countdown',
-  supportingStructure:
-      'peer-makers-Liang-Yao-and-ceramics-student-He-Zhen-test-legibility-without-mentor-authority',
-  centralMetaphor:
-      'fidelity-can-live-in-a-relation-even-when-a-new-material-needs-new-connections',
-  narrativeVoice: 'third-person-action-led-maker-prototype-testing',
-  storyRhythm:
-      'observe-literal-prototype-fails-material-conflict-reencode-paper-bridges-lift-peer-recognition-next-material',
+  narrativeIdentity: 'birth-mother-refuses-public-kinship-proof-to-protect-daughters-present-name',
+  protagonistIdentity: 'Chen-Xiuyi-sixty-one-year-old-birth-mother-meeting-adult-daughter-Liu-Jiahe',
+  protagonistAgeIdentity: 'sixty-one-year-old-mother-and-thirty-four-year-old-daughter',
+  protagonistArchetype: 'estranged-birth-mother-facing-cost-of-respecting-an-adult-childs-boundary',
+  openingSituation: 'first-private-meeting-after-thirty-four-years-with-no-relatives-and-no-reunion-photo-agreed',
+  storyGoal: 'continue-a-private-relationship-without-erasing-the-daughters-adoptive-name-and-life',
+  locationMechanism: 'jointly-funded-Chen-lineage-academy-plaque-and-layered-courtyards-intensify-public-surname-pressure',
+  movementPattern: 'private-entry-lineage-plaque-video-demand-phone-down-next-courtyard-side-by-side',
+  conflictType: 'public-kinship-recognition-and-family-face-vs-daughters-stated-name-and-boundary',
+  choiceType: 'turn-phone-face-down-name-Liu-Jiahe-and-refuse-public-image',
+  climaxType: 'mother-denies-relatives-the-proof-she-has-wanted-for-thirty-four-years',
+  consequenceType: 'no-reunion-photo-exists-but-daughter-continues-the-walk',
+  emotionalArc: 'contained-hope-to-surname-pressure-to-exposure-to-costly-restraint-to-tentative-continuation',
+  historicalLearningMechanism: 'verified-multi-lineage-funding-and-academy-identity-create-causal-surname-pressure-while-family-actions-remain-fiction',
+  resolutionType: 'private-continuation-without-public-restoration-claim',
+  endingMechanism: 'daughter-slows-at-threshold-and-the-two-enter-next-courtyard-side-by-side',
+  memoryAnchorType: 'phone-face-down-on-brick-beneath-academy-plaque',
+  achievementType: 'present-name-boundary-keeper',
+  rewardSymbolism: 'silent-screen-on-brick-symbolises-refused-public-proof',
+  temporalPattern: 'single-first-meeting-with-unplanned-live-family-call',
+  supportingStructure: 'estranged-birth-mother-and-adult-daughter-under-remote-kin-pressure',
+  centralMetaphor: 'a-shared-surname-cannot-replace-consent-to-a-shared-image',
+  narrativeVoice: 'third-person-close-to-mother-with-action-and-silence',
+  storyRhythm: 'agreement-entry-name-pressure-call-raised-phone-step-back-phone-down-cost-threshold-slowing',
+);
+
+const suzhouGardenGoldNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'suzhou-humble-administrators-garden',
+  narrativeIdentity: 'grandmother-releases-visual-control-through-repeated-disappearance-and-return',
+  protagonistIdentity: 'Chen-Yulan-grandmother-preparing-Cheng-Lang-for-independent-travel',
+  protagonistAgeIdentity: 'older-grandmother-and-twelve-year-old-grandson',
+  protagonistArchetype: 'daily-caregiver-learning-to-release-immediate-visual-control',
+  openingSituation: 'last-Sunday-before-grandson-begins-travelling-to-school-alone',
+  storyGoal: 'let-grandson-walk-ahead-without-breaking-their-practical-care-bond',
+  locationMechanism: 'garden-corridors-buildings-bridges-and-water-alternate-occlusion-with-reappearance',
+  movementPattern: 'grandson-walks-ahead-disappears-at-turns-and-waits-where-water-opens',
+  conflictType: 'protective-visual-control-vs-age-appropriate-independent-movement',
+  choiceType: 'lower-raised-hand-and-withhold-second-call',
+  climaxType: 'grandmother-completes-unseen-steps-before-grandson-reappears-looking-back',
+  consequenceType: 'grandson-keeps-leading-while-taking-responsibility-to-wait-and-look-back',
+  emotionalArc: 'habitual-vigilance-to-alarm-to-contained-fear-to-mutual-trust',
+  historicalLearningMechanism: 'layered-garden-space-makes-short-loss-and-recovery-of-sight-causal-without-turning-Discovery-into-plot',
+  resolutionType: 'care-shifts-from-continuous-visibility-to-reciprocal-waiting',
+  endingMechanism: 'grandmother-says-next-place-wait-for-me-and-does-not-catch-up',
+  memoryAnchorType: 'raised-then-lowered-hand-and-grandson-looking-back-at-next-opening',
+  achievementType: 'reciprocal-waiting-between-caregiver-and-growing-child',
+  rewardSymbolism: 'opening-sightline-marks-trust-without-erasing-separation',
+  temporalPattern: 'single-Sunday-walk-before-Monday-independent-travel',
+  supportingStructure: 'grandmother-grandson-care-relationship-without-mentor-approval',
+  centralMetaphor: 'care-can-survive-a-few-steps-out-of-sight',
+  narrativeVoice: 'third-person-grandmother-close-action-led',
+  storyRhythm: 'request-first-disappearance-call-return-second-disappearance-restraint-reappearance-reciprocal-waiting',
+);
+
+const summerPalaceCulturalIntegrationNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'beijing-summer-palace',
+  narrativeIdentity: 'winter-solstice-bridge-light-forces-old-photo-recovery',
+  protagonistIdentity: 'Xu-Cheng-seventeen-year-old-student-photographer-with-grandmother-Zhou-Lan',
+  protagonistAgeIdentity: 'seventeen-year-old-student-photographer',
+  protagonistArchetype: 'young-photographer-proving-independent-judgment',
+  openingSituation: 'winter-solstice-season-photo-window-for-school-exhibition',
+  storyGoal: 'make-a-flawless-Summer-Palace-photograph-without-grandmother-composition-control',
+  locationMechanism: 'Long-Corridor-lake-route-and-winter-solstice-Seventeen-Arch-Bridge-light-window',
+  movementPattern: 'corridor-pace-conflict-to-northwest-bridge-vantage-and-bend-to-retrieve-photo',
+  conflictType: 'flawless-image-vs-restoration-trace-and-grandmother-trust',
+  choiceType: 'lower-camera-during-moving-bridge-light-to-retrieve-grandmothers-old-photograph',
+  climaxType: 'seasonal-Seventeen-Arch-Bridge-light-shifts-during-photograph-retrieval',
+  consequenceType: 'desired-seasonal-shot-is-lost-and-cannot-be-recreated-that-moment',
+  emotionalArc: 'control-to-irritation-to-time-pressure-to-costly-choice-to-trust-with-residue',
+  historicalLearningMechanism: '1860-damage-1886-restoration-and-seasonal-bridge-light-enter-through-object-position-and-timing',
+  resolutionType: 'independent-authorship-is-recognized-after-preserving-relational-evidence-at-real-cost',
+  endingMechanism: 'grandmother-entrusts-old-photo-and-old-new-images-share-one-camera-bag-layer',
+  memoryAnchorType: 'camera-lowered-as-old-photo-falls-during-moving-bridge-light',
+  achievementType: 'place-grounded-relational-photographer',
+  rewardSymbolism: 'old-and-new-photographs-together-mark-trust-without-erasing-history',
+  temporalPattern: 'single-clear-winter-afternoon-with-expiring-seasonal-bridge-light',
+  supportingStructure: 'grandmother-with-restoration-history-shifts-from-composition-control-to-entrustment',
+  centralMetaphor: 'a-photograph-cannot-freeze-light-or-history-without-choosing-what-to-preserve',
+  narrativeVoice: 'third-person-close-to-Xu-Cheng-action-led',
+  storyRhythm: 'season-arrival-corridor-pace-history-object-vantage-light-photo-fall-choice-loss-reframe-trust',
 );
 
 final approvedNarrativeDnaCatalog =
     List<JourneyNarrativeDnaRecord>.unmodifiable(<JourneyNarrativeDnaRecord>[
   for (final record in baseline.approvedNarrativeDnaCatalog)
-    if (record.journeyId == 'beijing-forbidden-city')
+    if (record.journeyId == 'beijing-summer-palace')
+      summerPalaceCulturalIntegrationNarrativeDna
+    else if (record.journeyId == 'beijing-forbidden-city')
       forbiddenCityRemediatedNarrativeDna
     else if (record.journeyId == 'chengdu-kuanzhai-alley')
       chengduRemediatedNarrativeDna
+    else if (record.journeyId == 'hangzhou-west-lake')
+      hangzhouReopenedNarrativeDna
     else
       record,
   guangzhouChenClanGoldNarrativeDna,
+  suzhouGardenGoldNarrativeDna,
 ]);
 
 int duplicatedMajorDimensions(

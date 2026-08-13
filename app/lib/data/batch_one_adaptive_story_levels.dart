@@ -78,7 +78,7 @@ BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
   final journey = switch (journeyId) {
     shanghaiBundJourneyId => shanghaiBundOnePassRemediation,
     xianCityWallJourneyId => xianCityWallOnePassRemediation,
-    hangzhouWestLakeJourneyId => hangzhouWestLakeOnePassRemediation,
+    hangzhouWestLakeJourneyId => hangzhouWestLakeReopenedRemediation,
     chengduKuanzhaiJourneyId => chengduKuanzhaiOnePassRemediation,
     nanjingQinhuaiJourneyId => nanjingQinhuaiRemediatedJourney,
     _ => null,

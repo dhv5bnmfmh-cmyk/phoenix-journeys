@@ -1,14 +1,17 @@
 # Phoenix Approved Gold Semantic Audit
 
 **Status:** DETERMINISTIC AUDIT RECORD  
-**Catalog scope:** eight approved Gold Journeys  
+**Catalog scope:** nine approved Gold Journeys
 **Protected baseline:** seven approved Gold Journeys / 21 unique pairs  
 **Source of truth:** `app/lib/data/journey_semantic_fingerprint_catalog.dart`  
-**Pair count:** 28 unique pairs
+**Pair count:** 36 unique pairs
 
 This document records the deterministic output of the normalized semantic fingerprint catalog. It does not override the catalog. If a fingerprint changes, regenerate/review this audit from the canonical registry and active Story evidence.
 
-The original seven-Gold baseline and its 21 pair explanations remain protected. Guangzhou promotion extends that state with seven new comparisons; it does not rewrite the prior pair conclusions.
+The original seven-Gold baseline and its 21 pair explanations remain protected.
+Guangzhou and Suzhou extend that state to nine Gold Stories and 36 current
+comparisons. The executable catalog and pair audit are authoritative for the
+current result.
 
 Collision thresholds remain binding and unchanged:
 
@@ -21,7 +24,12 @@ Collision thresholds remain binding and unchanged:
 
 `VERIFIED` means the registered CORE evidence contract has valid active-Story provenance, aligned dimension/mechanism metadata, and a non-empty semantic rationale. It does **not** mean CI independently understands or proves natural-language semantic classification. Semantic sufficiency remains a Founder/Agent review of cited active-Story spans plus causal rationale.
 
-## Pairwise audit
+## Historical eight-Gold pairwise audit
+
+The 28 rows below preserve the earlier audit record. They are superseded where
+the row describes Hangzhou's former sound-recording Story or Guangzhou's former
+《纸桥》 Story. Current Hangzhou, Guangzhou and Suzhou conclusions are recorded
+below and enforced by the executable 36-pair audit.
 
 | # | Journey A | Journey B | Same engine | Matching CORE dimensions | CORE count | Matching secondary dimensions | Story evidence | Classification | Notes |
 |---:|---|---|---|---|---:|---|---|---|---|
@@ -75,7 +83,11 @@ Forbidden City uses `coexistingValidPerspectivesSynthesizeRelationalModel`; Nanj
 **Rule A:** NOT TRIGGERED.  
 **Rule B:** NOT TRIGGERED.
 
-Hangzhou is protected and remains `evidenceForcesReclassification`: a prior purity model is contradicted by lived sound, the protagonist stops filtering that evidence, and the changed recording/archive preserves revised understanding.
+Hangzhou now uses `embodiedRecognitionEndsHiddenMemoryExam`: a wife conceals a
+memory-clinic appointment behind a familiar walk, tests her husband with named
+views, and stops when his instinctive care on a wet stone step interrupts the
+verbal exam. The appointment is faced through mutual disclosure, not a corrected
+answer, revised artifact, archive, separation, or public-boundary refusal.
 
 Chengdu has moved entirely away from that causal architecture. Its active Story now starts with one courtyard threshold being needed by tea seating and passage, rejects permanent spatial allocation after repeated practical failure, establishes a physical yield-and-return handoff, and reaches climax when a recurring participant independently reproduces that handoff. The ending extends the behavior to another user while Lin Xia does not intervene. No survey form, authenticity-category revision, crossed-out record, or revised artifact carries the resolution.
 
@@ -89,11 +101,13 @@ Chengdu has moved entirely away from that causal architecture. Its active Story 
 
 The pre-promotion Stage A head kept `approvedGoldSemanticFingerprints.length == 7` while the existing `evaluateFutureGoldSemanticCandidate(...)` evaluated the Guangzhou fingerprint against all seven approved references. Promotion occurred only after that gate was green.
 
-### Guangzhou all-Gold result
+### Guangzhou legacy 《纸桥》 result — SUPERSEDED / NON-CANONICAL
 
 **Result:** `DISTINCT` or `RELATED_BUT_DISTINCT` from all seven other approved Gold Journeys, with zero collisions.
 
-Its engine is `materialConstraintForcesCrossMediumReencoding`. A literal-contour paper prototype physically fails; Liang Yao then changes the target medium's connection encoding by leaving paper bridges; the revised single sheet survives handling and a peer still recognizes the important visual relation. The causal result is a successful cross-medium translation, not sacrifice, synthesis of rival perspectives, historical continuity through crossing, completed-circuit continuation, evidence reclassification, repeated social handoff, or operational refusal.
+This paragraph records the former audit only. Its engine was
+`materialConstraintForcesCrossMediumReencoding`; it is no longer active runtime,
+Gold governance, Entry, Challenge, Memory, Completion, or test authority.
 
 ### Chengdu all-Gold result
 
@@ -127,9 +141,88 @@ Its engine remains a deliberately completed closed circuit that becomes the depa
 
 ## Debt policy
 
-The original protected seven-Gold baseline contains **zero** historical semantic collision debt across 21 pairs. The promoted eight-Gold catalog also contains **zero** historical semantic collision debt across 28 pairs.
+The original protected seven-Gold baseline contains **zero** historical semantic collision debt across 21 pairs. The current nine-Gold catalog requires **36** pair comparisons.
 
 - `EXISTING_SEMANTIC_COLLISION_DEBT`: **NONE**
-- Gold-to-Gold semantic collisions: **0 / 28 pairs**
+- Gold-to-Gold semantic collisions target: **0 / 36 pairs**
 
 No allowlist or exception was created. Rule A and Rule B remain unchanged. A future Gold candidate that collides with an approved Journey still returns `TEMPLATE COLLISION - NOT GOLD READY` until its causal dramatic mechanism is redesigned.
+
+## Suzhou Humble Administrator's Garden promotion synchronization
+
+**Founder status:** approved and merged in PR `#173`.
+
+**Canonical Story:** 《下一处等我》. Chen Yulan's second withheld call—not a
+tourism observation—is the enacted choice. The garden's alternating corridor,
+building, bridge, planting, and open-water sightlines create repeated short
+occlusion and reappearance; Discovery explains that spatial mechanism without
+replaying the family plot.
+
+**Human de-skinned result:** `DISTINCT`. The engine is reciprocal waiting after
+a caregiver releases continuous visual control. It is not an artifact project,
+deadline sacrifice, route synthesis, historical crossing, closed-circuit
+continuation, evidence reclassification, shared-use handoff, operational
+refusal, or prototype iteration.
+
+The Story is included as an approved Gold reference for every subsequent human
+and deterministic comparison through the canonical Narrative DNA and semantic
+fingerprint registries.
+
+## Guangzhou major-remediation architecture record
+
+### Authoritative fact boundary
+
+- Guangzhou government and Guangdong Folk Arts Museum records identify the
+  Chen Clan Academy/Ancestral Hall as a late-Qing complex completed in 1893,
+  jointly funded by Chen lineages from different parts of Guangdong.
+- Official records describe its historical ancestral-hall and academy/lodging
+  functions, three-route/three-depth courtyard organization, and concentrated
+  wood, brick and stone carving, ceramic and lime sculpture, casting, and
+  painting.
+- Chen Xiuyi, Liu Jiahe, their dialogue, the family video call, adoption history,
+  meeting and choices are contemporary fiction. The Story asserts no historical
+  dialogue, named donor action, visitor rule, ritual requirement, or intention
+  beyond the cited institutional descriptions.
+
+### Architecture A — 《不入镜》 — SELECTED
+
+- Protagonist/life stage: Chen Xiuyi, 61, meeting the adult daughter adopted by
+  another family decades earlier.
+- Relationship/desire: birth mother wants one public family photograph; Liu
+  Jiahe agreed only to a private meeting and retains her adoptive family name.
+- Place pressure: beneath the Chen Academy name and the history of multiple Chen
+  lineages pooling identity and resources, relatives treat a shared surname as
+  proof that private distance has ended.
+- Conflict/choice/cost: when relatives begin a video call and ask for an
+  “acknowledgement” photograph, Xiuyi must choose public face or Jiahe's stated
+  boundary. She turns the phone face-down and loses the reunion image she wanted.
+- Climax/consequence/ending: she says “Her name is Liu Jiahe,” ends the call, and
+  walks beside Jiahe through the next courtyard without asking for a photograph.
+- Memory moment: the face-down phone beneath the academy plaque while she speaks
+  the daughter's present name.
+- Shape: anticipated public restoration → boundary exposed → social pressure →
+  mother refuses public proof → relationship continues privately without image.
+
+### Architecture B — 《留一间房》 — NOT SELECTED
+
+An elderly father uses the academy's historical lodging function to demand that
+his emigrating son always keep a room and key in Guangzhou. He finally removes
+the reserved key. This is emotionally viable but too close to Shanghai and
+Xi'an's departure/continuity spines.
+
+### Architecture C — 《谁的名字在前》 — NOT SELECTED
+
+Two sisters dispute how their late mother's names should be ordered on a family
+record while confronting the academy's pooled lineage history. It risks solving
+the relationship through a redesigned inscription, too close to Phoenix's
+artifact-revision family.
+
+### Human de-skinned comparison
+
+Architecture A removes public evidence of reunion rather than producing a
+successful object. Its nearest Gold is Suzhou because both concern care and
+release, but Suzhou's caregiver withholds a recall so a child can move ahead and
+the child reciprocally waits; Guangzhou's estranged adults face collective
+surname pressure, and the birth mother sacrifices public recognition to preserve
+the daughter's already-lived identity. No other Gold uses public kinship proof
+versus a privately bounded reunion as its engine. `HUMAN ANTI-TEMPLATE: PASS`.
