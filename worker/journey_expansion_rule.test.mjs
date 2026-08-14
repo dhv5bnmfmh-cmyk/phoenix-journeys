@@ -30,9 +30,10 @@ test('first city expansion batch follows journey and passport contracts', () => 
   }
 });
 
-test('every expanded journey has two verified authoritative sources and a geo node', () => {
-  assert.equal((expansion.match(/StoryVerificationStatus\.verified/g) ?? []).length, 6);
+test('every expanded journey has at least two verified authoritative sources and a geo node', () => {
+  assert.ok((expansion.match(/StoryVerificationStatus\.verified/g) ?? []).length >= 6);
   assert.equal((expansion.match(/kind: StorySourceKind\.unesco/g) ?? []).length, 3);
+  assert.match(expansion, /id: 'suzhou-garden-bureau-water-design'/);
   for (const [, , place] of journeys) {
     assert.match(geo, new RegExp(`name: '${place}'`));
   }
