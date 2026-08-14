@@ -51,7 +51,7 @@ class DailyJourneyExperience {
   final String _expressQuestion;
 
   bool get _isLongmenGold => id == luoyangLongmenJourneyId;
-  JourneyLevelContent get _longmenBase => luoyangLongmenOnePassLevelContent(5);
+  get _longmenBase => luoyangLongmenOnePassLevelContent(5);
 
   String get storyTitle =>
       _isLongmenGold ? luoyangLongmenCanonicalTitle : _storyTitle;
