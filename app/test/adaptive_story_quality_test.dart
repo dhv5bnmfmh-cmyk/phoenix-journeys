@@ -8,10 +8,18 @@ import 'package:phoenix_journeys/data/journey_level_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
+int? _goldDiscoveryCount(String journeyId, int phoenixLevel) {
+  if (journeyId == 'beijing-summer-palace' ||
+      journeyId == 'suzhou-humble-administrators-garden') {
+    return phoenixLevel <= 4 ? 2 : 3;
+  }
+  return null;
+}
+
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
 
-  test('every regular and special journey stays within two reading blocks', () {
+  test('every regular and special journey stays within its approved reading shape', () {
     for (final journey in allJourneyExperiences) {
       final standard = resolveJourneyLevel(
         journey,
@@ -24,7 +32,10 @@ void main() {
       );
       expect(
         standard.discoveries.length,
-        journey.id == 'beijing-summer-palace' ? 3 : inInclusiveRange(1, 2),
+        journey.id == 'beijing-summer-palace' ||
+                journey.id == 'suzhou-humble-administrators-garden'
+            ? 3
+            : inInclusiveRange(1, 2),
         reason: '${journey.id} standard discoveries',
       );
 
@@ -38,11 +49,13 @@ void main() {
           inInclusiveRange(1, 2),
           reason: '${journey.id} ${profile.displayLabel} story',
         );
+        final goldDepth = _goldDiscoveryCount(
+          journey.id,
+          profile.phoenixLevel!,
+        );
         expect(
           content.discoveries.length,
-          journey.id == 'beijing-summer-palace'
-              ? (profile.phoenixLevel! <= 4 ? 2 : 3)
-              : inInclusiveRange(1, 2),
+          goldDepth ?? inInclusiveRange(1, 2),
           reason: '${journey.id} ${profile.displayLabel} discoveries',
         );
         expect(
