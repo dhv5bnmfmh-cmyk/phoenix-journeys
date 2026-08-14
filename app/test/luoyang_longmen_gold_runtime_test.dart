@@ -42,7 +42,7 @@ void main() {
     expect(usesDedicatedAdaptiveJourneyRuntime(luoyangLongmenJourneyId), isTrue);
     expect(isBatchOneGoldJourney(luoyangLongmenJourneyId), isTrue);
 
-    const expectedDiscoveryCounts = <int>[2, 2, 2, 2, 3, 3, 3, 3, 3, 3];
+    const expectedDiscoveryCounts = <int>[1, 1, 2, 2, 2, 2, 2, 2, 2, 2];
     for (var level = 1; level <= 10; level++) {
       final profile = agent.profileForPhoenixLevel(level);
       final plan = agent.planFor(profile);
@@ -88,7 +88,7 @@ void main() {
       expect(
         active.discoveries,
         hasLength(expectedDiscoveryCounts[level - 1]),
-        reason: 'Lv$level canonical Discovery depth',
+        reason: 'Lv$level approved runtime Discovery shape',
       );
       for (final discovery in active.discoveries) {
         expect(discovery.pinyin, _canonicalPinyin(discovery.text));

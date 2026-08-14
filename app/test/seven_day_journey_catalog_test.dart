@@ -3,6 +3,7 @@ import 'package:phoenix_journeys/data/chengdu_kuanzhai_one_pass.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/guangzhou_chen_clan_one_pass.dart';
+import 'package:phoenix_journeys/data/luoyang_longmen_one_pass.dart';
 
 void main() {
   test('reviewed destinations rotate without repeating during one cycle',
@@ -45,6 +46,12 @@ void main() {
           guangzhouChenClanOnePassLevels[4].storyParagraphs,
           reason: journey.id,
         );
+      } else if (journey.id == luoyangLongmenJourneyId) {
+        expect(
+          journey.content.storyParagraphs,
+          luoyangLongmenOnePassLevels[4].storyParagraphs,
+          reason: journey.id,
+        );
       } else if (journey.id == 'beijing-summer-palace') {
         expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
         for (final paragraph in journey.content.storyParagraphs) {
@@ -73,6 +80,12 @@ void main() {
         expect(
           journey.discoveries,
           hasLength(guangzhouChenClanOnePassDiscoveries.length),
+          reason: journey.id,
+        );
+      } else if (journey.id == luoyangLongmenJourneyId) {
+        expect(
+          journey.discoveries,
+          hasLength(luoyangLongmenOnePassLevels[4].discoveries.length),
           reason: journey.id,
         );
       } else if (journey.id == 'beijing-summer-palace') {
