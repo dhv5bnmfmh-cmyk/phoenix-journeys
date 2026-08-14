@@ -692,9 +692,9 @@ List<_LongmenStorySegment> _storySegmentsForLevel(int level) => <_LongmenStorySe
 List<JourneyLevelContent> _buildLongmenLevels() =>
     List<JourneyLevelContent>.generate(10, (index) {
       final level = index + 1;
-      final core = _longmenCoreSegments;
-      final details = _longmenDepthSegments
-          .where((segment) => level >= segment.fromLevel)
+      const core = _longmenCoreSegments;
+      final details = _storySegmentsForLevel(level)
+          .skip(core.length)
           .toList(growable: false);
       late final List<List<_LongmenStorySegment>> paragraphSegments;
       if (level <= 2) {
