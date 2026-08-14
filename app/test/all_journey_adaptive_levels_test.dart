@@ -5,6 +5,14 @@ import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
+int? _goldDiscoveryCount(String journeyId, int phoenixLevel) {
+  if (journeyId == 'beijing-summer-palace' ||
+      journeyId == 'suzhou-humble-administrators-garden') {
+    return phoenixLevel <= 4 ? 2 : 3;
+  }
+  return null;
+}
+
 void main() {
   const agent = PhoenixLanguageLevelAgent();
 
@@ -16,12 +24,15 @@ void main() {
           profile: profile,
         );
         final storyTarget = phoenixStoryLengthTargetFor(profile);
-        final expectedDiscoveryShape =
-            journey.id == 'beijing-summer-palace'
-                ? hasLength(profile.phoenixLevel! <= 4 ? 2 : 3)
-                : profile.band == PhoenixReadingBand.beginner
-                    ? hasLength(1)
-                    : hasLength(inInclusiveRange(1, 2));
+        final goldDepth = _goldDiscoveryCount(
+          journey.id,
+          profile.phoenixLevel!,
+        );
+        final expectedDiscoveryShape = goldDepth != null
+            ? hasLength(goldDepth)
+            : profile.band == PhoenixReadingBand.beginner
+                ? hasLength(1)
+                : hasLength(inInclusiveRange(1, 2));
         final storyCharacters = level.storyParagraphs.join().runes.length;
 
         expect(
