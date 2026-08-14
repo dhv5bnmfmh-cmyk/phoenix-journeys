@@ -440,7 +440,7 @@ const _suzhouAgency8En =
 const _suzhouAgencyQuestionVi = 'Cậu hỏi: “Bà ơi, cháu vẫn được đi phía trước chứ?”';
 const _suzhouAgencyQuestionEn = '“Grandma, can I still walk in front?” he asks.';
 const _suzhouBalance9Vi =
-    'Trình Lãng không quay lại. Trần Ngọc Lan cũng không gọi cậu lùi về; giữa hai bà cháu vẫn còn mấy bước ấy. Bà đi gần hơn nhưng không biến “đi phía trước” trở lại thành “đi bên cạnh”.';
+    'Trình Lãng không quay lại. Trần Ngọc Lan cũng không gọi cậu lùi về; giữa hai bà cháu vẫn còn mấy bước ấy. Bà đi gần hơn nhưng không biến “đi phía trước” trở lại thành“đi bên cạnh”.';
 const _suzhouBalance9En =
     'Cheng Lang does not walk back. Chen Yulan does not call him back either; those few steps remain between them. She comes closer without turning “walking ahead” back into “walking beside her.”';
 const _suzhouEndingReplyVi =
@@ -738,7 +738,7 @@ final journeyExpansionExperiences = <DailyJourneyExperience>[
     storyAnnotations: _quanzhouAnnotations,
     words: _quanzhouWords,
     discoveries: _quanzhouDiscoveries,
-    wonderQuestion: '如果你是宋元时期来到泉州的旅行者，最想在港口寻找哪一种语言或商品？为什么？',
+    wonderQuestion: '如果你是宋元时期来到泉州的旅行者，最想在港口寻找哪一种语言或商品？',
     expressQuestion: '请用两到三句话介绍开元寺双塔与泉州港口历史的关系。',
   ),
 ];
