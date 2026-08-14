@@ -342,7 +342,8 @@ List<DiscoveryEntry> _suzhouDiscoveriesForLevel(int level) {
 }
 
 /// Founder-locked adaptive package for 《下一处等我》. Every level preserves the
-/// four approved causal beats; higher levels add detail without changing them.
+/// four approved causal beats; higher levels deepen the same Story without
+/// adding a second plot or explanatory epilogue.
 JourneyLevelContent suzhouGardenCanonicalLevelContent(
   int requestedLevel, {
   ChineseProficiencyProfile? profile,
@@ -408,6 +409,11 @@ const _suzhouVocabularyLevelCatalog = <String, VocabularyLevelTag>{
   '保护': VocabularyLevelTag(hskLevel: 4, tocflLevel: 3),
 };
 
+const _suzhouHigherFirstVietnamese =
+    'Thứ Hai tuần sau, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường trung học cơ sở. Suốt sáu năm, bà ngoại Trần Ngọc Lan gần như ngày nào cũng đón cậu tan học; Chủ nhật này, bà đưa cậu đến Chuyết Chính Viên. Trình Lãng lần đầu nghiêm túc đề nghị: “Hôm nay để cháu đi phía trước nhé, cháu sẽ đợi bà ở chỗ tiếp theo.” Trần Ngọc Lan nhìn cậu rồi chỉ nói: “Đừng đi nhanh quá.” Đi dọc mặt nước rồi rẽ qua hành lang dài, đình, tường trắng và bóng cây từng lớp che khuất con đường phía trước. Lần đầu bóng lưng Trình Lãng biến khỏi tầm mắt, bà lập tức gọi tên cậu. Tiếng gọi ấy kéo cậu trở lại từ phía bên kia góc tường; cậu không tranh cãi, chỉ đi chậm hơn một chút.';
+const _suzhouHigherFirstEnglish =
+    'Next Monday, twelve-year-old Cheng Lang will begin travelling to middle school on his own. For six years, his grandmother Chen Yulan has picked him up after school almost every day; this Sunday she takes him to the Humble Administrator’s Garden. Cheng Lang asks seriously for the first time, “Let me walk ahead today. I’ll wait for you at the next place.” Chen Yulan looks at him and says only, “Don’t go too fast.” Along the water and around a long corridor, pavilions, white walls, and tree shadows layer across the path ahead. The first time Cheng Lang disappears from sight, she immediately calls his name. That call brings him back from beyond the wall corner; he does not argue and simply slows his pace a little.';
+
 List<(String, String)> _suzhouReadingSupport(int level) => switch (level) {
   1 => const [(
       'Thứ Hai tới, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường. Chủ nhật, bà ngoại Trần Ngọc Lan đưa cậu đến Chuyết Chính Viên. Trình Lãng nói: “Hôm nay để cháu đi trước. Cháu đợi bà ở chỗ kế tiếp.” Sau khúc quanh hành lang, cậu biến khỏi tầm mắt lần đầu và bà lập tức gọi cậu quay lại. Lần thứ hai, cầu cong và góc nhà lại chắn tầm nhìn. Trần Ngọc Lan giơ tay nhưng không gọi, tự đi hết mấy bước ấy. Khi mặt nước mở ra trở lại, Trình Lãng đang đợi phía trước. Bà chỉ nói: “Đợi bà ở chỗ kế tiếp.” Trình Lãng tiếp tục đi, và bà không đuổi theo.',
@@ -441,35 +447,42 @@ List<(String, String)> _suzhouReadingSupport(int level) => switch (level) {
       ('${_suzhouAnnotations[0].vietnamese} ${_suzhouAnnotations[1].vietnamese}', '${_suzhouAnnotations[0].english} ${_suzhouAnnotations[1].english}'),
       ('${_suzhouAnnotations[2].vietnamese} ${_suzhouAnnotations[3].vietnamese}', '${_suzhouAnnotations[2].english} ${_suzhouAnnotations[3].english}'),
     ],
-  _ => <(String, String)>[
+  6 => [
+      (_suzhouHigherFirstVietnamese, _suzhouHigherFirstEnglish),
+      ('${_suzhouAnnotations[2].vietnamese} ${_suzhouAnnotations[3].vietnamese}', '${_suzhouAnnotations[2].english} ${_suzhouAnnotations[3].english}'),
+    ],
+  7 => const [
+      (_suzhouHigherFirstVietnamese, _suzhouHigherFirstEnglish),
       (
-        '${_suzhouAnnotations[0].vietnamese} ${_suzhouAnnotations[1].vietnamese} ${_suzhouFirstRestatementSupport(level).$1}${level >= 8 ? ' Thứ Hai tới, Trình Lãng sẽ tự đi xe.' : ''}',
-        '${_suzhouAnnotations[0].english} ${_suzhouAnnotations[1].english} ${_suzhouFirstRestatementSupport(level).$2}${level >= 8 ? ' Next Monday, Cheng Lang will travel by himself.' : ''}',
+        'Đi tiếp, cầu cong và góc nhà lại cắt đứt tầm nhìn, tiếng người dưới hành lang át tiếng bước chân. Trần Ngọc Lan giơ tay, tên Trình Lãng đã ở đầu môi. Lần này bà không phát ra tiếng. Bà hạ tay xuống và tự đi hết mấy bước không nhìn thấy cậu. Khi mặt nước ở chỗ tiếp theo mở ra, Trình Lãng đã dừng phía trước và đang ngoái lại tìm bà. Cậu hỏi: “Bà ơi, cháu vẫn được đi phía trước chứ?” Bà kéo quai bình nước trên vai lên rồi nói: “Đợi bà ở chỗ tiếp theo.” Trình Lãng quay đi, bóng lưng nhanh chóng lại bị căn nhà che khuất. Bà không đuổi theo.',
+        'Farther on, a curved bridge and building corner cut the sightline again, while voices under the corridor cover the footsteps. Chen Yulan raises her hand, Cheng Lang’s name already at her lips. This time she makes no sound. She lowers her hand and walks those few unseen steps herself. When the water at the next place opens into view, Cheng Lang has stopped ahead and is looking back for her. “Grandma, can I still walk in front?” he asks. She adjusts the water-bottle strap on her shoulder and says, “Wait for me at the next place.” Cheng Lang turns away and his back is soon hidden by a building again. She does not chase after him.'
       ),
+    ],
+  8 => const [
+      (_suzhouHigherFirstVietnamese, _suzhouHigherFirstEnglish),
       (
-        '${_suzhouAnnotations[2].vietnamese} ${_suzhouSecondRestatementSupport(level).$1} ${_suzhouAnnotations[3].vietnamese}',
-        '${_suzhouAnnotations[2].english} ${_suzhouSecondRestatementSupport(level).$2} ${_suzhouAnnotations[3].english}',
+        'Đi tiếp, cầu cong và góc nhà lại che Trình Lãng, tiếng người dưới hành lang át tiếng bước chân. Trần Ngọc Lan giơ tay, tên cậu đã ở đầu môi nhưng bà không gọi; bà hạ tay và tự đi hết mấy bước không nhìn thấy cậu. Khi mặt nước mở ra trở lại, Trình Lãng không tiếp tục đi xa hơn. Cậu đã dừng phía trước và đang ngoái lại tìm bà. Cậu hỏi: “Bà ơi, cháu vẫn được đi phía trước chứ?” Bà kéo quai bình nước trên vai lên rồi nói: “Đợi bà ở chỗ tiếp theo.” Trình Lãng quay đi, bóng lưng lại bị căn nhà che khuất; bà không đuổi theo.',
+        'Farther on, a curved bridge and building corner hide Cheng Lang again, while voices under the corridor cover his footsteps. Chen Yulan raises her hand, his name already at her lips, but does not call; she lowers her hand and walks those few unseen steps herself. When the water opens into view again, Cheng Lang does not keep going farther. He has stopped ahead and is looking back for her. “Grandma, can I still walk in front?” he asks. She adjusts the water-bottle strap on her shoulder and says, “Wait for me at the next place.” Cheng Lang turns away, his back hidden by a building again; she does not chase after him.'
+      ),
+    ],
+  9 => const [
+      (_suzhouHigherFirstVietnamese, _suzhouHigherFirstEnglish),
+      (
+        'Đi tiếp, cầu cong và góc nhà lại che Trình Lãng, tiếng người dưới hành lang át tiếng bước chân. Trần Ngọc Lan giơ tay, tên cậu đã ở đầu môi nhưng bà không gọi; bà hạ tay và tự đi hết mấy bước không nhìn thấy cậu. Khi mặt nước mở ra, Trình Lãng đang đứng phía trước đợi bà và ngoái lại tìm bà. Cậu hỏi: “Bà ơi, cháu vẫn được đi phía trước chứ?” Trần Ngọc Lan không bắt cậu quay lại, chỉ kéo quai bình nước trên vai lên: “Đợi bà ở chỗ tiếp theo.” Trình Lãng quay đi, bóng lưng nhanh chóng lại bị căn nhà che khuất. Bà không đuổi theo.',
+        'Farther on, a curved bridge and building corner hide Cheng Lang again, while voices under the corridor cover his footsteps. Chen Yulan raises her hand, his name already at her lips, but does not call; she lowers her hand and walks those few unseen steps herself. When the water opens into view, Cheng Lang is standing ahead, waiting for her and looking back. “Grandma, can I still walk in front?” he asks. Chen Yulan does not make him come back; she only adjusts the water-bottle strap on her shoulder: “Wait for me at the next place.” Cheng Lang turns away and his back is soon hidden by a building again. She does not chase after him.'
+      ),
+    ],
+  _ => const [
+      (_suzhouHigherFirstVietnamese, _suzhouHigherFirstEnglish),
+      (
+        'Đi tiếp, cầu cong và góc nhà lại cắt đứt tầm nhìn, tiếng người dưới hành lang át cả tiếng bước chân của Trình Lãng. Trần Ngọc Lan không nhìn thấy cậu, cũng không nghe rõ cậu đã đi đến đâu. Bà giơ tay, tên cậu đã ở đầu môi nhưng bà không gọi; bà hạ tay xuống và tự đi hết mấy bước không nhìn thấy cậu. Khi mặt nước ở chỗ tiếp theo mở ra trở lại, Trình Lãng đã dừng phía trước và đang ngoái lại tìm bà. Cậu hỏi: “Bà ơi, cháu vẫn được đi phía trước chứ?” Trần Ngọc Lan kéo quai bình nước trên vai lên rồi nói: “Đợi bà ở chỗ tiếp theo.” Trình Lãng quay đi, bóng lưng nhanh chóng lại bị căn nhà che khuất. Tiếng người dưới hành lang vẫn còn đó. Trần Ngọc Lan không đuổi theo.',
+        'Farther on, a curved bridge and building corner cut the sightline again, while voices under the corridor cover Cheng Lang’s footsteps as well. Chen Yulan cannot see him, nor can she make out how far along the path he has gone. She raises her hand, his name already at her lips, but does not call; she lowers her hand and walks those few unseen steps herself. When the water at the next place opens into view again, Cheng Lang has stopped ahead and is looking back for her. “Grandma, can I still walk in front?” he asks. Chen Yulan adjusts the water-bottle strap on her shoulder and says, “Wait for me at the next place.” Cheng Lang turns away and his back is soon hidden by a building again. The voices under the corridor are still there. Chen Yulan does not chase after him.'
       ),
     ],
 };
 
-(String, String) _suzhouFirstRestatementSupport(int level) => switch (level) {
-  6 => ('Trước khúc quanh đầu, Trình Lãng đi phía trước; sau khúc quanh, cậu quay lại theo tiếng gọi của bà. Trần Ngọc Lan nhìn cậu và chỉ nói: “Đừng đi nhanh quá.”', 'Before the first turn, Cheng Lang walks ahead; after it, he comes back when his grandmother calls. Chen Yulan looks at him and only says, “Don’t walk too fast.”'),
-  7 => ('Trước khúc quanh đầu, Trình Lãng đi phía trước; sau khúc quanh, cậu quay lại theo tiếng gọi, chỉ giảm tốc độ. Trần Ngọc Lan nhìn cậu và nói: “Đừng đi nhanh quá.”', 'Before the first turn, Cheng Lang walks ahead; after it, he returns when called and merely slows down. Chen Yulan looks at him and says, “Don’t walk too fast.”'),
-  8 => ('Trước khúc quanh đầu, Trình Lãng đi phía trước; sau đó cậu quay lại theo tiếng gọi, không tranh cãi, chỉ đi chậm hơn. Trần Ngọc Lan nói: “Đừng đi nhanh quá.” Hành lang, đình, tường trắng và bóng cây chia cùng một con đường thành những đoạn nhìn thấy và tạm thời không nhìn thấy.', 'Before the first turn, Cheng Lang walks ahead; afterward he comes back when called, does not argue, and merely slows down. Chen Yulan says, “Don’t walk too fast.” Corridors, pavilions, white walls, and tree shadows divide the same path into visible and temporarily hidden stretches.'),
-  9 => ('Trước khúc quanh đầu, Trình Lãng đi phía trước; sau đó cậu quay lại theo tiếng gọi, không tranh cãi, chỉ đi chậm hơn. Trần Ngọc Lan nói: “Đừng đi nhanh quá.” Hành lang, đình, tường trắng và bóng cây chia con đường thành những đoạn thấy và khuất. Việc thứ Hai cậu tự đi xe, sáu năm bà đón tan học, và hôm nay lần đầu cậu xin đi trước đều là những điều hai người đã nói.', 'Before the first turn, Cheng Lang walks ahead; afterward he returns when called, does not argue, and merely slows down. Chen Yulan says, “Don’t walk too fast.” Corridors, pavilions, white walls, and tree shadows divide the path into visible and hidden stretches. His traveling alone on Monday, her six years of meeting him after school, and his first request to walk ahead today are all facts the two have spoken aloud.'),
-  10 => ('Trước khúc quanh đầu, Trình Lãng đi phía trước; sau đó cậu quay lại theo tiếng gọi, không tranh cãi, chỉ đi chậm hơn. Trần Ngọc Lan nói: “Đừng đi nhanh quá.” Hành lang, đình, tường trắng và bóng cây chia con đường thành những đoạn thấy và khuất. Thứ Hai cậu tự đi xe, sáu năm bà đón tan học, và hôm nay lần đầu cậu xin đi trước đều đã được nói ra. Trình Lãng nói “cháu đợi bà ở chỗ kế tiếp”; phản ứng đầu tiên của bà là gọi tên, nên cậu quay lại khỏi khúc quanh.', 'Before the first turn, Cheng Lang walks ahead; afterward he returns when called, does not argue, and merely slows down. Chen Yulan says, “Don’t walk too fast.” Corridors, pavilions, white walls, and tree shadows divide the path into visible and hidden stretches. His traveling alone on Monday, her six years of meeting him after school, and his first request to walk ahead today have all been stated. Cheng Lang says, “I’ll wait for you at the next place”; her first response is to call his name, so he comes back from the turn.'),
-  _ => ('', ''),
-};
-
-(String, String) _suzhouSecondRestatementSupport(int level) => switch (level) {
-  6 => ('', ''),
-  7 => ('Lần thứ hai, Trần Ngọc Lan vẫn đứng trên đoạn đường bị cầu cong và góc nhà chắn tầm nhìn. Bà giơ tay, tên cậu đã ở đầu môi nhưng cuối cùng không gọi, rồi hạ tay xuống. Trình Lãng đang ngoái lại tìm bà.', 'The second time, Chen Yulan still stands where the curved bridge and building corner block her view. She raises her hand, his name at her lips, but ultimately does not call, then lowers her hand. Cheng Lang is looking back for her.'),
-  8 => ('Lần thứ hai, cầu cong và góc nhà lại che Trình Lãng, tiếng người dưới hành lang lấn cả tiếng chân. Trần Ngọc Lan giơ tay, tên cậu đã ở đầu môi nhưng không gọi; bà tự đi hết mấy bước rồi hạ tay. Trình Lãng đang ngoái lại tìm bà.', 'The second time, the curved bridge and building corner hide Cheng Lang again, while voices under the corridor cover his footsteps. Chen Yulan raises her hand, his name at her lips, but does not call; she walks those steps alone and lowers her hand. Cheng Lang is looking back for her.'),
-  9 => ('Lần thứ hai, cầu cong và góc nhà lại che Trình Lãng, tiếng người lấn tiếng chân. Trần Ngọc Lan giơ tay nhưng không gọi; bà hạ tay và tự đi hết mấy bước. Khi mặt nước mở ra, Trình Lãng đã dừng và ngoái lại tìm bà.', 'The second time, the curved bridge and building corner hide Cheng Lang again, and voices cover his footsteps. Chen Yulan raises her hand but does not call; she lowers it and walks those steps alone. When the water opens into view, Cheng Lang has stopped and is looking back for her.'),
-  10 => ('Lần thứ hai, cầu cong và góc nhà lại che Trình Lãng, tiếng người lấn tiếng chân. Trần Ngọc Lan giơ tay nhưng không gọi; bà hạ tay và tự đi hết mấy bước. Khi mặt nước mở ra, Trình Lãng đã dừng và ngoái lại. Cậu hỏi mình còn được đi trước không; bà chỉnh dây bình nước và đáp: “Đợi bà ở chỗ kế tiếp.”', 'The second time, the curved bridge and building corner hide Cheng Lang again, and voices cover his footsteps. Chen Yulan raises her hand but does not call; she lowers it and walks those steps alone. When the water opens into view, Cheng Lang has stopped and is looking back. He asks whether he may still walk ahead; she adjusts her water-bottle strap and answers, “Wait for me at the next place.”'),
-  _ => ('', ''),
-};
+const _suzhouHigherFirst =
+    '下周一，十二岁的程朗要开始自己坐车去初中。六年来，外婆陈玉兰几乎每天都去接他放学；这个星期天，她带他来到拙政园。程朗第一次认真提出：“今天让我走前面吧，我在下一处等你。”陈玉兰看了他一眼，只说：“别走太快。”沿着池水转过长廊，亭子、白墙和树影一层层遮住前路。程朗的背影第一次从她眼前消失，陈玉兰立刻喊了他的名字。那一声把已经转过墙角的程朗叫了回来；他没有争辩，只把脚步放慢了一点。';
 
 List<String> _suzhouAdaptiveStory(int level) => switch (level) {
   1 => <String>[
@@ -490,21 +503,26 @@ List<String> _suzhouAdaptiveStory(int level) => switch (level) {
       '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}',
       '${_suzhouParagraphs[2]}${_suzhouParagraphs[3]}',
     ],
-  _ => <String>[
-      '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}${_suzhouLockedRestatement(level).$1}${level >= 8 ? '下周一，程朗要自己坐车。' : ''}',
-      '${_suzhouParagraphs[2]}${_suzhouLockedRestatement(level).$2}${_suzhouParagraphs[3]}',
+  6 => <String>[
+      _suzhouHigherFirst,
+      '${_suzhouParagraphs[2]}${_suzhouParagraphs[3]}',
     ],
-};
-
-/// Higher levels may restate only facts already present in the four Founder-
-/// approved paragraphs. They never append an event after the locked ending.
-(String, String) _suzhouLockedRestatement(int level) => switch (level) {
-  6 => ('第一次转角前，程朗走在前面；转角后，他按外婆的喊声退回来。陈玉兰看了他一眼，只说：“别走太快。”', ''),
-  7 => ('第一次转角前，程朗走在前面；转角后，他按外婆的喊声退回来，只把速度放慢。陈玉兰看了他一眼，只说：“别走太快。”', '第二次，陈玉兰仍站在被曲桥和屋角挡住视线的路上；她抬起手，名字到了嘴边，最后没有喊。她把手放下来。程朗正回头找她。'),
-  8 => ('第一次转角前，程朗走在前面；转角后，他按外婆的喊声退回来，没有争辩，只把速度放慢。陈玉兰看了他一眼，只说：“别走太快。”长廊、亭子、白墙和树影把同一条路分成看得见与暂时看不见的几段。', '第二次，曲桥和屋角再次挡住程朗，廊下人声又盖住脚步声。陈玉兰抬起手，名字到了嘴边，最后没有喊；她独自走完那几步。她把手放下来。程朗正回头找她。'),
-  9 => ('第一次转角前，程朗走在前面；转角后，他按外婆的喊声退回来，没有争辩，只把速度放慢。陈玉兰看了他一眼，只说：“别走太快。”长廊、亭子、白墙和树影把同一条路分成看得见与暂时看不见的几段。下周一自己坐车、六年来外婆接他放学，以及今天第一次要求走在前面，都是两人此时已经说出的事实。', '第二次，曲桥和屋角再次挡住程朗，廊下人声又盖住脚步声。陈玉兰抬起手，名字到了嘴边，最后没有喊；她放下手，独自走完那几步。水面重新打开后，程朗已经停下并回头找她。她把手放下来。程朗正回头找她。'),
-  10 => ('第一次转角前，程朗走在前面；转角后，他按外婆的喊声退回来，没有争辩，只把速度放慢。陈玉兰看了他一眼，只说：“别走太快。”长廊、亭子、白墙和树影把同一条路分成看得见与暂时看不见的几段。下周一自己坐车、六年来外婆接他放学，以及今天第一次要求走在前面，都是两人此时已经说出的事实。程朗说的是“我在下一处等你”，陈玉兰第一次回应的是喊他的名字；程朗因此从转角退回。', '第二次，曲桥和屋角再次挡住程朗，廊下人声又盖住脚步声。陈玉兰抬起手，名字到了嘴边，最后没有喊；她放下手，独自走完那几步。水面重新打开后，程朗已经停下并回头找她。他问自己还能不能走在前面，陈玉兰提了提肩上的水壶带，回答“下一处等我”。她把手放下来。程朗正回头找她。'),
-  _ => ('', ''),
+  7 => const <String>[
+      _suzhouHigherFirst,
+      '再往前走，曲桥和屋角又一次截断视线，廊下的人声盖住脚步声。陈玉兰抬起手，程朗的名字已经到了嘴边。这一次，她没有出声。她把手放下来，自己走完那几步看不见他的路。下一处水面重新打开时，程朗已经停在前面，正回头找她。他问：“外婆，我还能走前面吗？”陈玉兰把肩上的水壶带往上提了提，说：“下一处等我。”程朗转过去，背影很快又被房屋挡住。陈玉兰没有追上去。',
+    ],
+  8 => const <String>[
+      _suzhouHigherFirst,
+      '再往前走，曲桥和屋角又一次挡住程朗，廊下的人声盖住他的脚步声。陈玉兰抬起手，名字已经到了嘴边，却没有喊；她把手放下来，自己走完那几步看不见他的路。水面重新打开时，程朗没有继续往远处走。他已经停在前面，正回头找她。他问：“外婆，我还能走前面吗？”陈玉兰把肩上的水壶带往上提了提，说：“下一处等我。”程朗转过去，背影又被房屋挡住；她没有追上去。',
+    ],
+  9 => const <String>[
+      _suzhouHigherFirst,
+      '再往前走，曲桥和屋角又一次挡住程朗，廊下的人声盖住他的脚步声。陈玉兰抬起手，名字已经到了嘴边，却没有喊；她把手放下来，自己走完那几步看不见他的路。水面重新打开时，程朗站在前面等她，正回头找她。他问：“外婆，我还能走前面吗？”陈玉兰没有让他退回来，只把肩上的水壶带往上提了提：“下一处等我。”程朗转过去，背影很快又被房屋挡住。她没有追上去。',
+    ],
+  _ => const <String>[
+      _suzhouHigherFirst,
+      '再往前走，曲桥和屋角又一次截断视线，廊下的人声把程朗的脚步声也盖住。陈玉兰看不见他，也听不清他走到哪里。她抬起手，名字已经到了嘴边，却没有喊；她把手放下来，自己走完那几步看不见他的路。下一处水面重新打开时，程朗已经停在前面，正回头找她。他问：“外婆，我还能走前面吗？”陈玉兰把肩上的水壶带往上提了提，说：“下一处等我。”程朗转过去，背影很快又被房屋挡住。廊下的人声仍在。陈玉兰没有追上去。',
+    ],
 };
 
 const suzhouGardenMemoryResult =
@@ -672,7 +690,7 @@ final journeyExpansionExperiences = <DailyJourneyExperience>[
     storyAnnotations: _quanzhouAnnotations,
     words: _quanzhouWords,
     discoveries: _quanzhouDiscoveries,
-    wonderQuestion: '如果你是宋元时期来到泉州的旅行者，最想在港口寻找哪一种语言或商品？',
+    wonderQuestion: '如果你是宋元时期来到泉州的旅行者，最想在港口寻找哪一种语言或商品？为什么？',
     expressQuestion: '请用两到三句话介绍开元寺双塔与泉州港口历史的关系。',
   ),
 ];
