@@ -158,7 +158,7 @@ void main() {
 
   test('Lv6-Lv10 add one new understanding each without duplicate event rendering', () {
     final byLevel = <int, String>{};
-    final scaffoldChinese = const [
+    const scaffoldChinese = [
       '已经说出的事实',
       '这意味着',
       '这说明',
@@ -169,7 +169,7 @@ void main() {
       '表现了',
       '体现了',
     ];
-    final scaffoldSupport = const [
+    const scaffoldSupport = [
       'facts the two have spoken aloud',
       'have all been stated',
       'this means',
