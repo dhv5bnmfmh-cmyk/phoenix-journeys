@@ -30,7 +30,7 @@ test('canonical Journey scope isolation gate is binding', () => {
     '`GOOD CHANGE != AUTHORIZED CHANGE`',
     '`NOTICE != AUTHORIZATION`',
     '`GREEN CI != SCOPE APPROVAL`',
-    '`OTHER_JOURNEY_CONTENT_DELTA`',
+    'OTHER_JOURNEY_CONTENT_DELTA = NONE / FOUND',
     '`SHARED_INFRASTRUCTURE_DELTA`',
     '`OUT_OF_SCOPE_FINDING`',
     'SCOPE LEAKAGE — NOT READY FOR FOUNDER APPROVAL',
@@ -54,7 +54,7 @@ test('AI and development governance require ownership-level scope audit', () => 
     'FINAL DIFF OWNERSHIP AUDIT',
     '`AUTHORIZED_BASELINE_SHA`',
     '`AUTHORIZED_JOURNEY_SET`',
-    '`OTHER_JOURNEY_CONTENT_DELTA`',
+    'OTHER_JOURNEY_CONTENT_DELTA = NONE / FOUND',
     '`JOURNEY_SCOPE_LEAKAGE`',
   ]) {
     assert.match(developmentWorkflow, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
