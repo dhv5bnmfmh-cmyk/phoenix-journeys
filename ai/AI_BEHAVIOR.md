@@ -200,6 +200,20 @@ Before any write, report and verify `STARTING_MAIN_SHA`, `ACTIVE_DEVELOPMENT_BRA
 
 Follow `ONE JOURNEY AT A TIME`, `ONE ACTIVE DEVELOPMENT PR AT A TIME`, `ONE ACTIVE DEVELOPMENT BRANCH AT A TIME`, and `ONE ACTIVE DEVELOPMENT LINE`. Old PRs, Preview branches, temporary validation branches, prototypes, and remediation branches are historical evidence, never a starting baseline.
 
+### Journey scope isolation
+
+Before editing Journey-owned learner-visible content, the Agent MUST read Founder authorization and the binding [Journey Scope Isolation Gate](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md#2013-journey-scope-isolation-gate). Record `AUTHORIZED_BASELINE_SHA` before implementation and derive `AUTHORIZED_JOURNEY_SET` only from Journey IDs explicitly authorized by Founder. A standards-only task that authorizes no Journey learner content has `AUTHORIZED_JOURNEY_SET = EMPTY`.
+
+`SHARED FILE != SHARED AUTHORITY`. Editing one Journey inside a shared catalog does not authorize neighboring Journey Story, title, headline, description, teaser, Entry copy, Vocabulary, Discovery, Reading Support, Wonder, Express, Challenge, Memory, Completion, narration, learner-facing metadata, questions, prompts, translations, or meaning-bearing labels.
+
+The Agent MUST NOT perform opportunistic or nearby content cleanup. `NOTICE != AUTHORIZATION`: report an unrelated defect as `OUT_OF_SCOPE_FINDING` and leave that Journey's learner-visible content unchanged. Test success, better grammar, a useful correction, a tiny delta, or an already-open shared file never expands scope.
+
+Before declaring a candidate Founder-review ready, perform a Journey ownership-level final diff audit against `AUTHORIZED_BASELINE_SHA` and report `AUTHORIZED_JOURNEY_SET`, `SHARED_INFRASTRUCTURE_DELTA`, `OTHER_JOURNEY_CONTENT_DELTA`, and `JOURNEY_SCOPE_LEAKAGE`. If unauthorized learner-visible content belonging to any `OUT_OF_SCOPE_JOURNEY` changed, stop with `JOURNEY_SCOPE_LEAKAGE` and `SCOPE LEAKAGE — NOT READY FOR FOUNDER APPROVAL`.
+
+Leakage may be restored only when baseline provenance is deterministic and the restoration is itself authorized, or when Founder explicitly expands `AUTHORIZED_JOURNEY_SET`. The Agent MUST NOT silently convert discovered work into authorized work. Green CI is validation evidence, never scope authorization.
+
+The scope audit is SHA-bound together with Founder review. Any later source commit invalidates the prior exact-head scope audit and prior Founder approval and requires a new exact-head audit, Preview validation where applicable, and Founder review.
+
 ### No silent product replacement
 
 `ABSENCE OF AUTHORIZATION = PRESERVE CURRENT MAIN`. A historical checkout must never restore or overwrite current UI, navigation, runtime, six-stage behavior, active Story, or any other unauthorized product surface. Before writing, create a `PROTECTED BASELINE MANIFEST` covering the current main SHA, scoped screen/runtime path, active Story source, Journey IDs, six-stage behavior, and UI/navigation behavior. Closeout must prove the authorized delta plus protected baseline parity.

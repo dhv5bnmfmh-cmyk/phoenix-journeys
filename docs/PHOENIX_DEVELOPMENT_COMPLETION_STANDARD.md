@@ -195,6 +195,16 @@ The final report MUST distinguish:
 
 The changed-path inventory MUST be compared with the authorized scope. One unexpected path is sufficient to block completion until reviewed.
 
+### 7.1 Journey Scope Isolation completion evidence
+
+Every Journey-scoped development task MUST identify `AUTHORIZED_BASELINE_SHA` and `AUTHORIZED_JOURNEY_SET` before implementation and complete the binding Journey Scope Isolation Gate in `PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md` before Ready or Founder review. A standards-only task with no Journey learner-visible authorization uses `AUTHORIZED_JOURNEY_SET = EMPTY`.
+
+The completion evidence MUST separately report authorized Journey content, necessary shared infrastructure, and learner-visible content owned by every out-of-scope Journey. For a single-Journey task, completion requires `OTHER_JOURNEY_CONTENT_DELTA = NONE` unless Founder explicitly authorized more than one Journey. Any unauthorized learner-visible out-of-scope Journey change is `JOURNEY_SCOPE_LEAKAGE` and blocks Ready, completion, and Founder approval.
+
+Tests pass is technical evidence, not scope authorization. Green CI, a beneficial change, a small change, or a shared source file cannot waive `JOURNEY_SCOPE_LEAKAGE`. The leakage must be restored to the authorized baseline with deterministic provenance or Founder must explicitly expand the authorized Journey set.
+
+The final scope audit and Founder approval are Candidate-SHA-bound. Any later source commit requires a new scope audit and exact-head validation before completion can be declared.
+
 ## 8. Technical validation
 
 Required validation depends on scope. The report MUST state the actual status of every required check:
