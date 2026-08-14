@@ -30,6 +30,17 @@ const journeyExpansionSources = <StorySourceRecord>[
     accessedOn: '2026-07-29',
   ),
   StorySourceRecord(
+    id: 'suzhou-garden-bureau-water-design',
+    title: '理水',
+    publisher: '苏州市园林和绿化管理局',
+    url: 'https://ylj.suzhou.gov.cn/szsylj/ylys/201903/df5a3bf3bdbd49b0b787076f355b1074.shtml',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-jiangsu-suzhou-gusu-humble-administrators-garden'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-08-14',
+  ),
+  StorySourceRecord(
     id: 'unesco-luoyang-longmen-grottoes',
     title: 'Longmen Grottoes',
     publisher: 'UNESCO World Heritage Centre',
@@ -155,7 +166,7 @@ const _suzhouWords = <WordEntry>[
   WordEntry(word: '保护', pinyin: 'bǎohù', partOfSpeech: '动词', simpleChinese: '防止重要事物受到损害。', translation: 'Bảo vệ.', englishDefinition: 'to protect; conservation', symbol: '🛡️'),
 ];
 
-const _suzhouDiscoveries = <DiscoveryEntry>[
+const _suzhouCoreDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '拙政园以水面为园林空间的重要中心，建筑、植物和道路沿水展开，让游人边走边看见不同景色。', pinyin: 'Zhuōzhèng Yuán yǐ shuǐmiàn wéi yuánlín kōngjiān de zhòngyào zhōngxīn, jiànzhù, zhíwù hé dàolù yán shuǐ zhǎnkāi, ràng yóurén biān zǒu biān kànjiàn bùtóng jǐngsè.', simpleChinese: '拙政园围绕水面安排建筑、植物和道路。', vietnamese: 'Chuyết Chính Viên tổ chức kiến trúc, cây cối và lối đi quanh mặt nước, để cảnh vật thay đổi theo bước chân.', english: 'The Humble Administrator’s Garden organizes buildings, planting, and paths around water so views change as visitors walk.'),
   DiscoveryEntry(text: '亭子提供停留和观景的位置，长廊连接不同建筑与院落；它们与池水一起组织游园路线，而不只是在园中摆放装饰。', pinyin: 'Tíngzi tígōng tíngliú hé guānjǐng de wèizhi, chángláng liánjiē bùtóng jiànzhù yǔ yuànluò; tāmen yǔ chíshuǐ yìqǐ zǔzhī yóuyuán lùxiàn, ér bù zhǐshì zài yuán zhōng bǎifàng zhuāngshì.', simpleChinese: '亭子让人停下看景，长廊把建筑和院落连起来。', vietnamese: 'Đình là nơi dừng lại ngắm cảnh, còn hành lang dài nối các công trình và sân; cùng với mặt nước, chúng tổ chức tuyến tham quan.', english: 'Pavilions provide places to pause and look, while corridors connect buildings and courtyards; together with the water, they organize movement through the garden.'),
   DiscoveryEntry(text: '长廊的转折、建筑的墙面和植物的遮挡会暂时收紧视线，使同一条路被分成看得见与暂时看不见的几段。', pinyin: 'Chángláng de zhuǎnzhé, jiànzhù de qiángmiàn hé zhíwù de zhēdǎng huì zànshí shōujǐn shìxiàn, shǐ tóng yì tiáo lù bèi fēnchéng kàndéjiàn yǔ zànshí kànbujiàn de jǐ duàn.', simpleChinese: '廊、墙和植物会让前面的景物暂时看不见。', vietnamese: 'Các khúc ngoặt của hành lang, tường nhà và cây cối tạm thời thu hẹp tầm nhìn, chia một lối đi thành những đoạn thấy và khuất.', english: 'Turns in corridors, building walls, and planting temporarily narrow sightlines, dividing one path into visible and hidden stretches.'),
@@ -168,6 +179,168 @@ const _suzhouDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '拙政园属于“苏州古典园林”世界遗产。世界遗产价值不仅在单座亭子或一片池水，也在整体空间设计和延续至今的造园传统；保护需要维护水体、山石、植物、建筑及其观看关系。', pinyin: 'Zhuōzhèng Yuán shǔyú “Sūzhōu Gǔdiǎn Yuánlín” Shìjiè Yíchǎn. Shìjiè Yíchǎn jiàzhí bùjǐn zài dān zuò tíngzi huò yí piàn chíshuǐ, yě zài zhěngtǐ kōngjiān shèjì hé yánxù zhìjīn de zàoyuán chuántǒng; bǎohù xūyào wéihù shuǐtǐ, shānshí, zhíwù, jiànzhù jí qí guānkàn guānxì.', simpleChinese: '保护拙政园，要保护水、石、植物、建筑和它们组成的整体空间。', vietnamese: 'Chuyết Chính Viên thuộc Di sản Thế giới “Vườn cổ điển Tô Châu”. Giá trị nằm ở thiết kế tổng thể và truyền thống tạo vườn, nên bảo tồn phải giữ cả nước, đá, cây, kiến trúc và quan hệ nhìn giữa chúng.', english: 'The Humble Administrator’s Garden is part of the Classical Gardens of Suzhou World Heritage property. Its value lies in the complete spatial design and continuing garden tradition, so conservation must sustain water, rocks, planting, buildings, and their viewing relationships.'),
 ];
 
+DiscoveryEntry _suzhouSupplementalDiscovery({
+  required String text,
+  required String simpleChinese,
+  required String vietnamese,
+  required String english,
+}) =>
+    DiscoveryEntry(
+      text: text,
+      pinyin: PinyinHelper.getPinyinE(
+        text,
+        separator: ' ',
+        format: PinyinFormat.WITH_TONE_MARK,
+      ),
+      simpleChinese: simpleChinese,
+      vietnamese: vietnamese,
+      english: english,
+    );
+
+final _suzhouDiscoveries = <DiscoveryEntry>[
+  _suzhouCoreDiscoveries[0],
+  _suzhouSupplementalDiscovery(
+    text: '拙政园中部池水面积约占三分之一，以水为主，临水建筑形体不一、高低错落。',
+    simpleChinese: '中部约三分之一是池水，临水建筑高低不同。',
+    vietnamese: 'Ở khu trung tâm, mặt nước chiếm khoảng một phần ba diện tích; nước là yếu tố chính và các công trình ven nước có hình dáng, cao thấp khác nhau.',
+    english: 'In the central garden, water occupies about one third of the area; water is primary and waterside buildings vary in form and height.',
+  ),
+  _suzhouCoreDiscoveries[1],
+  _suzhouSupplementalDiscovery(
+    text: '苏州园林常沿水池安排景物和观赏点，桥、廊与临水建筑把行走、停留和观看串成连续路线。',
+    simpleChinese: '桥、廊和临水建筑把走路、停留和看景连在一起。',
+    vietnamese: 'Vườn Tô Châu thường bố trí cảnh và điểm ngắm quanh hồ; cầu, hành lang và công trình ven nước nối việc đi, dừng và quan sát thành một tuyến liên tục.',
+    english: 'Suzhou gardens often arrange scenery and viewing points around water; bridges, corridors, and waterside buildings link movement, pause, and viewing into a continuous route.',
+  ),
+  _suzhouCoreDiscoveries[2],
+  _suzhouSupplementalDiscovery(
+    text: '拙政园水面被二山、房屋、曲桥、竹丛和树木分成几部分，但池水仍流通环回，因此空间似分又连。',
+    simpleChinese: '山、房屋、桥和植物把水面分开，但池水仍相通。',
+    vietnamese: 'Ở Chuyết Chính Viên, hai gò núi, nhà, cầu cong, bụi tre và cây chia mặt nước thành nhiều phần, nhưng nước vẫn lưu thông vòng quanh nên không gian vừa tách vừa nối.',
+    english: 'At the Humble Administrator’s Garden, two hills, buildings, curved bridges, bamboo, and trees divide the water into parts, yet the water still circulates and remains connected.',
+  ),
+  _suzhouCoreDiscoveries[3],
+  _suzhouSupplementalDiscovery(
+    text: '苏州园林理水讲究“有聚有分”：聚时水面开阔明朗，分时与山石、花木、屋宇掩映而显得幽曲；拙政园同时利用这两种空间感。',
+    simpleChinese: '水面有时集中开阔，有时分开幽曲，形成开合变化。',
+    vietnamese: 'Nghệ thuật xử lý nước của vườn Tô Châu coi trọng cả tụ và phân: khi tụ, mặt nước rộng sáng; khi phân, nước xen với đá, cây và nhà tạo cảm giác uốn khúc kín đáo. Chuyết Chính Viên dùng cả hai.',
+    english: 'Suzhou water design balances gathering and division: gathered water feels open and bright, while divided water intertwines with rocks, planting, and buildings to create winding enclosure; the Humble Administrator’s Garden uses both.',
+  ),
+  _suzhouCoreDiscoveries[4],
+  _suzhouSupplementalDiscovery(
+    text: '同一片水面从不同观赏点看，会因房屋、桥、竹丛和树木的前后关系呈现不同层次；观看位置本身就是园林设计的一部分。',
+    simpleChinese: '换一个观看位置，同一片水面会出现不同层次。',
+    vietnamese: 'Cùng một mặt nước sẽ hiện ra các lớp khác nhau từ những điểm nhìn khác nhau vì quan hệ trước sau giữa nhà, cầu, tre và cây; vị trí người xem là một phần của thiết kế.',
+    english: 'The same water reveals different layers from different viewing points because buildings, bridges, bamboo, and trees overlap differently; the viewer’s position is part of the design.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '拙政园的空间可以暂时挡住视线，却没有切断连续的水面和游线；“看不见”与“走散”在这种园林空间里不是同一件事。',
+    simpleChinese: '暂时看不见前方，不等于路线被切断。',
+    vietnamese: 'Không gian Chuyết Chính Viên có thể tạm che tầm nhìn mà không cắt đứt mặt nước hay tuyến đi liên tục; “không nhìn thấy” không đồng nghĩa với “bị tách rời”.',
+    english: 'The garden can temporarily block a sightline without breaking the continuity of water or route; in this spatial system, losing sight is not the same as becoming disconnected.',
+  ),
+  _suzhouCoreDiscoveries[5],
+  _suzhouSupplementalDiscovery(
+    text: '拙政园一些桥位于开阔池水上，桥身空透，使被划分的水面仍彼此贯通，同时增加层次和倒影。',
+    simpleChinese: '桥把水面分开，也让两边保持贯通。',
+    vietnamese: 'Một số cầu ở Chuyết Chính Viên bắc qua mặt nước rộng với thân cầu thoáng, nên các phần nước bị chia vẫn thông nhau, đồng thời tăng lớp không gian và phản chiếu.',
+    english: 'Some bridges over the broad water are visually open, so divided water spaces remain connected while gaining additional layers and reflections.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '水廊和桥既能分隔空间，也能维持通行与观看的连续，因此园路不需要一直笔直无遮挡，仍能形成完整的空间经验。',
+    simpleChinese: '廊和桥可以一边分隔，一边保持路线连续。',
+    vietnamese: 'Hành lang trên nước và cầu vừa có thể chia không gian vừa duy trì sự liên tục của việc đi và nhìn; tuyến vườn không cần luôn thẳng và không bị che mà vẫn tạo thành trải nghiệm hoàn chỉnh.',
+    english: 'Water corridors and bridges can divide space while preserving continuity of movement and viewing, so a garden route need not remain straight and unobstructed to feel continuous.',
+  ),
+  _suzhouCoreDiscoveries[6],
+  _suzhouSupplementalDiscovery(
+    text: '苏州园林的池面处理讲究“聚分得体”：较大水面建立主次，被分出的水湾和水道制造似断似续的幽曲感。',
+    simpleChinese: '大水面建立主次，小分隔制造曲折变化。',
+    vietnamese: 'Xử lý mặt nước trong vườn Tô Châu chú trọng tụ và phân hợp lý: mặt nước lớn tạo quan hệ chính phụ, còn các vịnh và nhánh nước nhỏ tạo cảm giác lúc đứt lúc nối.',
+    english: 'Suzhou gardens balance gathered and divided water: larger surfaces establish hierarchy, while smaller inlets and channels create a winding sense of seeming interruption and continuation.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '聚与分、开与合、转折与层次共同让游园成为连续变化的过程，而不是站在一个位置一次看完全部景色。',
+    simpleChinese: '园林用聚分、开合和转折让景色一步步变化。',
+    vietnamese: 'Tụ và phân, mở và khép, khúc ngoặt và lớp không gian cùng khiến việc dạo vườn trở thành một quá trình biến đổi liên tục, thay vì nhìn hết từ một điểm.',
+    english: 'Gathering and division, opening and enclosure, turns and layers make the garden a continuously changing experience rather than a panorama seen from one position.',
+  ),
+  _suzhouCoreDiscoveries[7],
+  _suzhouSupplementalDiscovery(
+    text: '苏州古典园林在有限空间中把水、山石、植物和建筑组织成自然世界的缩影，使人工设计与自然意象同时成立。',
+    simpleChinese: '有限空间里的水、石、植物和建筑共同形成自然缩影。',
+    vietnamese: 'Vườn cổ Tô Châu tổ chức nước, đá, cây và kiến trúc trong không gian hữu hạn thành một thế giới tự nhiên thu nhỏ, nơi thiết kế nhân tạo và ý niệm tự nhiên cùng tồn tại.',
+    english: 'Classical Suzhou gardens organize water, rocks, planting, and buildings within limited space as a miniature natural world, joining deliberate design with an image of nature.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '建筑、山石、花木和水体的价值来自彼此配合；观看位置把这些要素连接成完整构图，而不是把它们当作互不相关的单件景物。',
+    simpleChinese: '水、石、植物和建筑要一起看，不能只看一个物件。',
+    vietnamese: 'Giá trị của kiến trúc, đá, cây hoa và nước đến từ sự phối hợp giữa chúng; điểm nhìn nối các yếu tố thành một bố cục hoàn chỉnh thay vì những vật rời rạc.',
+    english: 'Buildings, rocks, planting, and water gain meaning through their relationships; viewpoint connects them into a composition rather than a set of unrelated objects.',
+  ),
+  _suzhouCoreDiscoveries[8],
+  _suzhouSupplementalDiscovery(
+    text: '世界遗产“完整性”要求遗产地的环境与特征覆盖苏州古典园林的必要要素和关键价值，不能只剩少数孤立景物。',
+    simpleChinese: '完整性要求重要要素和整体环境都得到保存。',
+    vietnamese: 'Tính toàn vẹn của Di sản Thế giới yêu cầu bối cảnh và đặc trưng của di sản bao quát các yếu tố thiết yếu và giá trị chính của vườn cổ Tô Châu, chứ không chỉ còn vài cảnh vật rời rạc.',
+    english: 'World Heritage integrity requires the setting and features to contain the essential elements and key values of the classical gardens, not merely a few isolated sights.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '“真实性”不仅看外观；历代诗文、绘画、地图、古树、匾额和砖石雕刻，以及延续的传统造园材料和技术，共同记录园林的历史延续。',
+    simpleChinese: '真实性来自历史记录、实物和延续的传统材料与技术。',
+    vietnamese: 'Tính xác thực không chỉ nằm ở vẻ ngoài; thơ văn, tranh, bản đồ, cây cổ, biển bảng, chạm khắc gạch đá cùng vật liệu và kỹ thuật làm vườn truyền thống nối tiếp nhau ghi lại lịch sử của khu vườn.',
+    english: 'Authenticity is not only about appearance; historical writings, paintings, maps, old trees, plaques, carvings, and continuing traditional materials and techniques record the gardens’ continuity.',
+  ),
+  _suzhouCoreDiscoveries[9],
+  _suzhouSupplementalDiscovery(
+    text: 'UNESCO记录显示，苏州园林历代修缮持续使用传统材料和技术，以延续既有的造园观念和地方做法。',
+    simpleChinese: '修缮要重视传统材料、技术和造园方法的延续。',
+    vietnamese: 'UNESCO ghi nhận rằng việc sửa chữa vườn Tô Châu qua các thời kỳ tiếp tục sử dụng vật liệu và kỹ thuật truyền thống để duy trì quan niệm và thực hành làm vườn địa phương.',
+    english: 'UNESCO records that repairs to the Suzhou gardens have continued to use traditional materials and techniques, sustaining established design concepts and local practice.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '保护工作强调最小干预，并控制周边城市化影响；因此保护判断要维护整体格局、必要要素及其关系，而不是只把单个亭子或池塘处理好。',
+    simpleChinese: '保护要少干预，并维护整体格局和要素关系。',
+    vietnamese: 'Công tác bảo tồn nhấn mạnh can thiệp tối thiểu và kiểm soát tác động đô thị hóa xung quanh; vì vậy phải giữ bố cục tổng thể, các yếu tố thiết yếu và quan hệ giữa chúng, không chỉ xử lý tốt một đình hay một ao riêng lẻ.',
+    english: 'Conservation emphasizes minimum intervention and control of surrounding urban impacts; judgment therefore has to protect the overall layout, essential elements, and their relationships, not only a single pavilion or pond.',
+  ),
+];
+
+const _suzhouDiscoveryRanges = <(int, int)>[
+  (0, 2),
+  (2, 4),
+  (4, 6),
+  (6, 8),
+  (8, 11),
+  (11, 14),
+  (14, 17),
+  (17, 20),
+  (20, 23),
+  (23, 26),
+];
+
+DiscoveryEntry _suzhouCanonicalizeDiscoveryPinyin(DiscoveryEntry entry) =>
+    DiscoveryEntry(
+      text: entry.text,
+      pinyin: PinyinHelper.getPinyinE(
+        entry.text,
+        separator: ' ',
+        format: PinyinFormat.WITH_TONE_MARK,
+      ),
+      simpleChinese: entry.simpleChinese,
+      vietnamese: entry.vietnamese,
+      english: entry.english,
+    );
+
+List<DiscoveryEntry> _suzhouDiscoveriesForLevel(int level) {
+  final range = _suzhouDiscoveryRanges[level - 1];
+  return List<DiscoveryEntry>.unmodifiable(
+    _suzhouDiscoveries
+        .sublist(range.$1, range.$2)
+        .map(_suzhouCanonicalizeDiscoveryPinyin),
+  );
+}
+
 /// Founder-locked adaptive package for 《下一处等我》. Every level preserves the
 /// four approved causal beats; higher levels add detail without changing them.
 JourneyLevelContent suzhouGardenCanonicalLevelContent(
@@ -177,7 +350,7 @@ JourneyLevelContent suzhouGardenCanonicalLevelContent(
 }) {
   final level = requestedLevel.clamp(1, 10).toInt();
   final story = _suzhouAdaptiveStory(level);
-  final discovery = _suzhouDiscoveries[level - 1];
+  final discoveries = _suzhouDiscoveriesForLevel(level);
   final support = _suzhouReadingSupport(level);
   final annotations = <ReadingAnnotation>[
     for (var index = 0; index < story.length; index++)
@@ -191,7 +364,7 @@ JourneyLevelContent suzhouGardenCanonicalLevelContent(
         english: support[index].$2,
       ),
   ];
-  final searchable = '${story.join()}${discovery.text}';
+  final searchable = '${story.join()}${discoveries.map((entry) => entry.text).join()}';
   return JourneyLevelContent(
     storyParagraphs: List<String>.unmodifiable(story),
     storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
@@ -205,7 +378,7 @@ JourneyLevelContent suzhouGardenCanonicalLevelContent(
         knownWords: knownWords,
       ),
     ),
-    discoveries: <DiscoveryEntry>[discovery],
+    discoveries: discoveries,
     wonderQuestion: '陈玉兰第二次看不见程朗时，为什么抬起手却没有喊他的名字？',
     expressQuestion: '请写出“下一处等我”在故事开头和结尾分别是谁对谁说，以及这句话的意思怎样改变。',
   );
@@ -385,7 +558,11 @@ final suzhouGardenJourney = _journeyRecord(
   geoNodeId: 'cn-jiangsu-suzhou-gusu-humble-administrators-garden',
   tags: const ['苏州', '拙政园', '古典园林', '借景', '世界遗产'],
   paragraphs: _suzhouParagraphs,
-  sourceIds: const ['unesco-suzhou-classical-gardens', 'suzhou-garden-bureau-humble-administrators-garden'],
+  sourceIds: const [
+    'unesco-suzhou-classical-gardens',
+    'suzhou-garden-bureau-humble-administrators-garden',
+    'suzhou-garden-bureau-water-design',
+  ],
 );
 
 final luoyangLongmenJourney = _journeyRecord(
