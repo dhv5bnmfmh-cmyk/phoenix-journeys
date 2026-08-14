@@ -5,6 +5,14 @@ import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
+int? _goldDiscoveryCount(String journeyId, int phoenixLevel) {
+  if (journeyId == 'beijing-summer-palace' ||
+      journeyId == 'suzhou-humble-administrators-garden') {
+    return phoenixLevel <= 4 ? 2 : 3;
+  }
+  return null;
+}
+
 void main() {
   const agent = PhoenixLanguageLevelAgent();
 
@@ -56,13 +64,16 @@ void main() {
           isTrue,
           reason: '${journey.id} should preserve multilingual reading support',
         );
+        final goldDepth = _goldDiscoveryCount(
+          journey.id,
+          profile.phoenixLevel!,
+        );
         expect(
           content.discoveries.length,
-          journey.id == 'beijing-summer-palace'
-              ? (profile.phoenixLevel! <= 4 ? 2 : 3)
-              : profile.band == PhoenixReadingBand.beginner
+          goldDepth ??
+              (profile.band == PhoenixReadingBand.beginner
                   ? 1
-                  : inInclusiveRange(1, 2),
+                  : inInclusiveRange(1, 2)),
           reason: '${journey.id} should use the approved discovery shape',
         );
         expect(content.words, isNotEmpty, reason: journey.id);
