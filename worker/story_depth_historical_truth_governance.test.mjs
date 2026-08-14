@@ -75,7 +75,7 @@ test('Story Depth is causal and remains a non-checklist possibility space', () =
   ]);
 
   containsAll(designMatrix, [
-    'STORY DEPTH PROFILE',
+    'Story Depth Profile',
     'PRIMARY_DEPTH_MECHANISM',
     'SECONDARY_DEPTH_MECHANISMS',
     'INTENTIONALLY_UNUSED_DEPTH',
