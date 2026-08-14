@@ -243,3 +243,36 @@ The background standard is binding, not advisory. In particular:
 - no Agent may hard-code `PASS`, skip Rights review, skip required Founder review, skip the Pilot rule, create an undocumented Journey-specific exception, weaken or remove tests, or change canonical Story merely to get background production accepted.
 
 Any exception MUST be explicit, documented, scoped, and Founder-approved where the governing Phoenix standard requires it.
+
+## Binding Story Depth + Historical Truth behavior
+
+Before drafting or locking a Story that uses historical people, artifacts, historical events, historical settings, or material historical causality, the Agent MUST also read and follow [Story Depth + Historical Story Universe Appendix](../docs/PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD_APPENDIX_STORY_DEPTH_HISTORY.md). The appendix is a binding supporting extension of the parent Narrative and Discovery Standard, not a parallel Story standard.
+
+Historical truth is higher priority than narrative convenience. The Agent MUST NOT invent a historical fact to make a Story complete, dramatic, emotionally satisfying, or easier to differentiate.
+
+For every material historical claim that drives Story causality, the Agent MUST:
+
+1. record claim-level provenance;
+2. preserve the parent source hierarchy;
+3. assign truth status and source confidence;
+4. keep `UNKNOWN` unknown and `CONTESTED` contested;
+5. preserve certainty strength across Chinese, Pinyin, Vietnamese, and English;
+6. verify temporal consistency where period-specific people, artifacts, institutions, technologies, practices, routes, or building phases are involved;
+7. never invent real-person consequential action, dialogue, private motive, inner thought, relationship, belief, or design intention;
+8. never invent missing artifact ownership, movement, excavation, discovery, restoration, or collection provenance;
+9. use `OBJECT BIOGRAPHY` only when verified object life creates human causal pressure rather than a fact timeline;
+10. stop rather than fill a historical gap with plausible fiction presented as fact.
+
+Before Story Lock for every new Gold Story or Founder-authorized major remediation, the Agent MUST declare a `STORY DEPTH PROFILE` with exactly one `PRIMARY_DEPTH_MECHANISM`, normally one to three `SECONDARY_DEPTH_MECHANISMS`, optional supporting depth, and meaningful `INTENTIONALLY_UNUSED_DEPTH` where useful.
+
+The sixteen Story Depth dimensions are a possibility space, not a checklist. Primary and Secondary depth used as Gold evidence must pass `DEPTH ACTION TEST`. If removing the claimed depth leaves Goal, Conflict, Choice, Cost, and Consequence materially unchanged, it is decorative. `PRIMARY_DEPTH_DECORATIVE` blocks Gold.
+
+The Agent MUST distinguish `GOLD DEFECT`, `GOLD DEPTH OPPORTUNITY`, and `FUTURE PLACE STORY OPPORTUNITY`. `DEPTH OPPORTUNITY != GOLD DEFECT`; an already complete Gold Story is not reopened merely because further depth can be imagined.
+
+When evaluating a later same-Place Story, the Agent MUST additionally compare Subject, Time Layer, Human Lens, Historical Scale, Truth Mode, Cultural Slice, Primary/Secondary Depth, Human Need, social position, material/practice mechanism, value tension, Memory type, emotional texture, Story Signature, Incremental Human Value, and Incremental Cultural Value.
+
+The Agent MUST treat `PLACE → PLACE STORY UNIVERSE → STORY EXPERIENCE → JOURNEY RUN` as future experience semantics only. Standards authorization does not authorize runtime Story rotation, Story Experience persistence, progress UI, schema migration, or a second same-Place Story implementation.
+
+Future multi-Story semantics are `UNSEEN FIRST`, `DIFFERENT PER NEW RUN`, and `STABLE WITHIN THE RUN`. Pure random is not the preferred primary selection strategy, and reopening a page is not automatically a new Journey Run.
+
+`EXPERIENCE DIVERSITY COMES FROM MULTIPLE APPROVED GOLD STORIES, NOT RUNTIME-GENERATED RANDOMNESS`. Every future Story Experience remains a full Gold package across Story, Lv1–Lv10, Vocabulary, Discovery, Reading Support, Challenge, Memory, and Completion.
