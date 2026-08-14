@@ -71,8 +71,8 @@ void main() {
       } else if (journey.id == suzhouGardenJourney.id) {
         expect(
           journey.discoveries.length,
-          10,
-          reason: 'Suzhou publishes one progressive Discovery for each level',
+          26,
+          reason: 'Suzhou publishes the complete Gold Discovery pool for level slicing',
         );
       } else {
         expect(
