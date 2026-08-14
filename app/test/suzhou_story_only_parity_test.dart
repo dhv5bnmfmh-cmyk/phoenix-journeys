@@ -49,7 +49,7 @@ void main() {
       '世界遗产',
       '保护',
     ]));
-    expect(suzhou.discoveries, hasLength(10));
+    expect(suzhou.discoveries, hasLength(26));
   });
 
   test('Founder-visible Lv1 Lv5 Lv10 use the new Story through the original runtime', () {
