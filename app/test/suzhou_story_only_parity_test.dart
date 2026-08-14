@@ -98,4 +98,38 @@ void main() {
       );
     }
   });
+
+  test('Lv3 Lv4 Lv5 add distinct Story-understanding deltas without changing the spine', () {
+    final byLevel = <int, String>{};
+
+    for (final level in const [3, 4, 5]) {
+      final profile = levelAgent.allProfiles.firstWhere(
+        (profile) => profile.phoenixLevel == level,
+      );
+      final content = resolveAdaptiveJourneyLevel(
+        suzhou,
+        profile: profile,
+      );
+      final story = content.storyParagraphs.join();
+      byLevel[level] = story;
+
+      expect(story, contains('程朗'));
+      expect(story, contains('陈玉兰'));
+      expect(story, contains('没有喊'));
+      expect(story, contains('下一处等我'));
+      expect(story, contains('没有追'));
+      expect(content.storyAnnotations, hasLength(content.storyParagraphs.length));
+      for (final annotation in content.storyAnnotations) {
+        expect(annotation.pinyin, isNotEmpty);
+        expect(annotation.vietnamese, isNotEmpty);
+        expect(annotation.english, isNotEmpty);
+      }
+    }
+
+    expect(byLevel[3], isNot(equals(byLevel[4])));
+    expect(byLevel[4], isNot(equals(byLevel[5])));
+    expect(byLevel[3], contains('白墙和树影把前后的视线分成一段一段'));
+    expect(byLevel[4], contains('看不见他的几步，仍在同一条向前的路上'));
+    expect(byLevel[5], contains('外婆，我还能走前面吗'));
+  });
 }
