@@ -112,18 +112,6 @@ void main() {
     ['limited urban land', 'concealment', 'borrowed scenery', 'landscape painting'],
     ['world heritage', 'complete spatial design', 'garden tradition', 'conservation'],
   ];
-  final suzhouPinyin = <List<String>>[
-    ['shuǐmiàn wéi yuánlín', 'jiànzhù, zhíwù hé dàolù', 'bùtóng jǐngsè'],
-    ['tíngzi tígōng', 'chángláng liánjiē', 'chíshuǐ yìqǐ'],
-    ['chángláng de zhuǎnzhé', 'zhíwù de zhēdǎng', 'zànshí kànbujiàn'],
-    ['jiào zhǎi de lángdào', 'shuǐmiàn bǎ tiānkōng', 'kuòdà kōngjiāngǎn'],
-    ['qiánhòu zhēdǎng', 'yuǎnjìn duìzhào', 'xíngchéng céngcì'],
-    ['lòuchuāng', 'lìng yí cè', 'wèizhi gǎibiàn'],
-    ['jièjǐng', 'yuèguò yuánqiáng', 'guānkàn wèizhi'],
-    ['shuǐ zǔzhī kāihé', 'shānshí xíngchéng', 'zhíwù suí jìjié'],
-    ['yǒuxiàn chéngshì yòngdì', 'kuàngjǐng hé jièjǐng', 'shānshuǐhuà'],
-    ['shìjiè yíchǎn', 'zhěngtǐ kōngjiān shèjì', 'bǎohù xūyào wéihù'],
-  ];
 
   test('active Lv1-Lv10 Discovery support preserves every semantic fixture', () {
     final journeys = [
@@ -137,14 +125,22 @@ void main() {
           journey.$1,
           profile: _profile(level),
         );
-        final discovery = active.discoveries.single;
+        final discoveryVietnamese =
+            active.discoveries.map((entry) => entry.vietnamese).join(' ');
+        final discoveryEnglish =
+            active.discoveries.map((entry) => entry.english).join(' ');
+
         if (journey.$1.id == 'suzhou-humble-administrators-garden') {
-          _expectAnchors(
-            discovery.pinyin,
-            suzhouPinyin[level - 1],
-            '${journey.$1.id} Lv$level Pinyin clauses',
-          );
+          for (final discovery in active.discoveries) {
+            expect(
+              discovery.pinyin,
+              _canonicalPinyin(discovery.text),
+              reason: '${journey.$1.id} Lv$level complete Discovery Pinyin',
+            );
+          }
         } else {
+          expect(active.discoveries, hasLength(1));
+          final discovery = active.discoveries.single;
           expect(
             discovery.pinyin,
             _canonicalPinyin(discovery.text),
@@ -152,12 +148,12 @@ void main() {
           );
         }
         _expectAnchors(
-          discovery.vietnamese,
+          discoveryVietnamese,
           journey.$2[level - 1],
           '${journey.$1.id} Lv$level Vietnamese',
         );
         _expectAnchors(
-          discovery.english,
+          discoveryEnglish,
           journey.$3[level - 1],
           '${journey.$1.id} Lv$level English',
         );
@@ -178,9 +174,11 @@ void main() {
         final storySupport = active.storyAnnotations
             .map((annotation) => '${annotation.pinyin} ${annotation.vietnamese} ${annotation.english}')
             .join(' ');
-        final visible = '$story $storySupport ${active.discoveries.single.text} '
-            '${active.discoveries.single.pinyin} ${active.discoveries.single.vietnamese} '
-            '${active.discoveries.single.english} ${active.words.map((word) => word.word).join(' ')} '
+        final discoverySupport = active.discoveries
+            .map((entry) => '${entry.text} ${entry.pinyin} ${entry.vietnamese} ${entry.english}')
+            .join(' ');
+        final visible = '$story $storySupport $discoverySupport '
+            '${active.words.map((word) => word.word).join(' ')} '
             '${active.wonderQuestion} ${active.expressQuestion}';
         for (final anchor in item.$2) {
           expect(story, contains(anchor), reason: '${item.$1.id} Lv$level $anchor');
@@ -209,7 +207,8 @@ void main() {
         final profile = _profile(level);
         final plan = agent.planFor(profile);
         final active = resolveAdaptiveJourneyLevel(journey, profile: profile);
-        final visible = '${active.storyParagraphs.join()}${active.discoveries.single.text}';
+        final visible = '${active.storyParagraphs.join()}'
+            '${active.discoveries.map((entry) => entry.text).join()}';
         expect(active.words.length, greaterThanOrEqualTo(plan.targetVocabularyCount));
         expect(active.words.length, lessThanOrEqualTo(plan.maximumVocabularyCount));
         for (final word in active.words) {
