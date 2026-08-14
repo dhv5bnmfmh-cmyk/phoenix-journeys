@@ -200,10 +200,10 @@ DiscoveryEntry _suzhouSupplementalDiscovery({
 final _suzhouDiscoveries = <DiscoveryEntry>[
   _suzhouCoreDiscoveries[0],
   _suzhouSupplementalDiscovery(
-    text: '拙政园中部池水面积约占三分之一，以水为主，临水建筑形体不一、高低错落。',
-    simpleChinese: '中部约三分之一是池水，临水建筑高低不同。',
-    vietnamese: 'Ở khu trung tâm, mặt nước chiếm khoảng một phần ba diện tích; nước là yếu tố chính và các công trình ven nước có hình dáng, cao thấp khác nhau.',
-    english: 'In the central garden, water occupies about one third of the area; water is primary and waterside buildings vary in form and height.',
+    text: '拙政园中部以大片池水为主，池广树茂，临水建筑形体不一、高低错落。',
+    simpleChinese: '中部以大片池水为主，临水建筑高低不同。',
+    vietnamese: 'Khu trung tâm của Chuyết Chính Viên lấy mặt nước rộng làm chủ đạo, cây cối sum suê và các công trình ven nước có hình dáng, cao thấp khác nhau.',
+    english: 'The central garden is organized around broad water, with abundant planting and waterside buildings that vary in form and height.',
   ),
   _suzhouCoreDiscoveries[1],
   _suzhouSupplementalDiscovery(
@@ -417,7 +417,27 @@ List<(String, String)> _suzhouReadingSupport(int level) => switch (level) {
       'Thứ Hai tới, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường cấp hai. Sáu năm qua, bà ngoại Trần Ngọc Lan hầu như ngày nào cũng đón cậu tan học. Chủ nhật này bà đưa cậu đến Chuyết Chính Viên, và cậu lần đầu nghiêm túc nói: “Hôm nay để cháu đi trước. Cháu đợi bà ở chỗ kế tiếp.” Sau khúc quanh hành lang, bóng lưng cậu biến mất lần đầu; bà lập tức gọi tên. Trình Lãng quay lại, không tranh cãi, chỉ đi chậm hơn. Phía trước, cầu cong và góc nhà lại cắt đứt tầm nhìn. Bà giơ tay, tên cậu đã ở đầu môi nhưng bà không gọi; bà tự đi hết mấy bước. Khi mặt nước mở ra, Trình Lãng đang ngoái lại tìm bà. Bà chỉnh dây bình nước: “Đợi bà ở chỗ kế tiếp.” Cậu quay đi tiếp; bà không đuổi theo.',
       'Next Monday, twelve-year-old Cheng Lang will begin traveling to middle school alone. For six years, his grandmother Chen Yulan has met him after school almost every day. This Sunday she takes him to the Humble Administrator’s Garden, where for the first time he says seriously, “Let me walk ahead today. I’ll wait for you at the next place.” After the corridor turns, his back disappears for the first time and she immediately calls his name. Cheng Lang comes back without arguing and merely slows down. Farther on, a curved bridge and building corner cut off her view again. Chen Yulan raises her hand, his name already at her lips, but does not call; she walks those few steps herself. When the water opens again, Cheng Lang is looking back for her. She adjusts her water-bottle strap: “Wait for me at the next place.” He turns and continues; she does not chase him.'
     )],
-  3 || 4 || 5 => [
+  3 => const [
+      (
+        'Thứ Hai tuần sau, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường trung học cơ sở. Suốt sáu năm, bà ngoại Trần Ngọc Lan gần như ngày nào cũng đón cậu tan học. Chủ nhật, bà đưa cậu đến Chuyết Chính Viên. Trình Lãng nói: “Hôm nay để cháu đi trước nhé, cháu sẽ đợi bà ở chỗ tiếp theo.” Hai bà cháu đi dọc mặt nước vào hành lang dài; tường trắng và bóng cây chia tầm nhìn trước sau thành từng đoạn. Lần đầu rẽ qua góc tường, Trình Lãng biến khỏi tầm mắt, bà lập tức gọi tên cậu. Cậu quay lại, không tranh cãi, chỉ đi chậm hơn.',
+        'Next Monday, twelve-year-old Cheng Lang will begin travelling to middle school on his own. For six years, his grandmother Chen Yulan has picked him up after school almost every day. On Sunday she brings him to the Humble Administrator’s Garden. Cheng Lang says, “Let me walk ahead today. I’ll wait for you at the next place.” They walk beside the water into a long corridor; white walls and tree shadows divide the view ahead into separate stretches. The first time Cheng Lang turns around a wall corner and disappears from sight, Chen Yulan immediately calls his name. He comes back without arguing and simply slows down.'
+      ),
+      (
+        'Đi tiếp, cầu cong và góc nhà lại che Trình Lãng. Trần Ngọc Lan giơ tay, tên cậu đã ở đầu môi nhưng bà không gọi; bà tự đi hết mấy bước không nhìn thấy cậu. Khi rời mép công trình, mặt nước mở ra trở lại và Trình Lãng đã dừng phía trước, ngoái lại tìm bà. Bà chỉnh dây bình nước rồi nói: “Đợi bà ở chỗ tiếp theo.” Trình Lãng tiếp tục đi; bà không đuổi theo.',
+        'Farther on, a curved bridge and building corner hide Cheng Lang again. Chen Yulan raises her hand, his name already at her lips, but does not call; she walks those few unseen steps herself. As she clears the edge of the building, the water opens into view again and Cheng Lang has stopped ahead, looking back for her. She adjusts the water-bottle strap and says, “Wait for me at the next place.” Cheng Lang continues forward; she does not chase him.'
+      ),
+    ],
+  4 => const [
+      (
+        'Thứ Hai tuần sau, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường trung học cơ sở. Suốt sáu năm, bà ngoại Trần Ngọc Lan gần như ngày nào cũng đón cậu tan học; Chủ nhật này, bà đưa cậu đến Chuyết Chính Viên. Trình Lãng lần đầu nghiêm túc nói: “Hôm nay để cháu đi phía trước nhé, cháu sẽ đợi bà ở chỗ tiếp theo.” Đi dọc mặt nước rồi rẽ qua hành lang dài, đình, tường trắng và bóng cây tạo thành nhiều lớp trước sau. Trình Lãng vẫn đi trên cùng một tuyến vườn, nhưng góc tường khiến bóng lưng cậu lần đầu biến khỏi tầm mắt bà. Bà lập tức gọi tên; cậu quay lại từ khúc rẽ, không tranh cãi, chỉ đi chậm hơn một chút.',
+        'Next Monday, twelve-year-old Cheng Lang will begin travelling to middle school on his own. For six years, his grandmother Chen Yulan has picked him up after school almost every day; this Sunday she takes him to the Humble Administrator’s Garden. Cheng Lang asks seriously for the first time, “Let me walk ahead today. I’ll wait for you at the next place.” Along the water and around a long corridor, pavilions, white walls, and tree shadows form layers in front and behind. Cheng Lang is still following the same garden route, but a wall corner makes his back disappear from her sight for the first time. She immediately calls his name; he comes back from the turn without arguing and simply slows down a little.'
+      ),
+      (
+        'Đi tiếp, cầu cong và góc nhà lại cắt đứt tầm nhìn, tiếng người dưới hành lang át tiếng bước chân của Trình Lãng; những bước không nhìn thấy cậu vẫn nằm trên cùng con đường đi về phía trước. Trần Ngọc Lan giơ tay, tên cậu đã ở đầu môi nhưng bà không gọi. Bà hạ tay và tự đi hết đoạn đường bị che khuất ấy. Khi mặt nước ở chỗ tiếp theo mở ra trở lại, Trình Lãng đã dừng phía trước và ngoái lại tìm bà. Bà chỉnh dây bình nước rồi nói: “Đợi bà ở chỗ tiếp theo.” Trình Lãng quay đi, bóng lưng lại bị căn nhà che khuất; bà không đuổi theo.',
+        'Farther on, a curved bridge and building corner cut the sightline again, while voices under the corridor cover Cheng Lang’s footsteps; the unseen steps are still part of the same path forward. Chen Yulan raises her hand, his name already at her lips, but does not call. She lowers her hand and walks the hidden stretch herself. When the water at the next place opens into view again, Cheng Lang has stopped ahead and is looking back for her. She adjusts the water-bottle strap and says, “Wait for me at the next place.” Cheng Lang turns away, his back hidden by a building again; she does not chase him.'
+      ),
+    ],
+  5 => [
       ('${_suzhouAnnotations[0].vietnamese} ${_suzhouAnnotations[1].vietnamese}', '${_suzhouAnnotations[0].english} ${_suzhouAnnotations[1].english}'),
       ('${_suzhouAnnotations[2].vietnamese} ${_suzhouAnnotations[3].vietnamese}', '${_suzhouAnnotations[2].english} ${_suzhouAnnotations[3].english}'),
     ],
@@ -458,7 +478,15 @@ List<String> _suzhouAdaptiveStory(int level) => switch (level) {
   2 => <String>[
       '下周一，十二岁的程朗要开始自己坐车去初中。六年来，外婆陈玉兰几乎每天都接他放学。这个星期天，她带他到拙政园，程朗第一次认真说：“今天让我走前面吧，我在下一处等你。”转过长廊，他的背影第一次消失，陈玉兰立刻喊了他的名字。程朗退回来，没有争辩，只把脚步放慢。再往前，曲桥和屋角又截断视线。陈玉兰抬起手，名字已经到了嘴边，却没有喊；她自己走完那几步。水面重新打开时，程朗正在前面回头找她。陈玉兰提了提水壶带：“下一处等我。”程朗转身继续走，她没有追上去。',
     ],
-  3 || 4 || 5 => <String>[
+  3 => <String>[
+      '下周一，十二岁的程朗要开始自己坐车去初中。六年来，外婆陈玉兰几乎每天都接他放学。星期天，她带他到拙政园。程朗说：“今天让我走前面吧，我在下一处等你。”两人沿池水走进长廊，白墙和树影把前后的视线分成一段一段。第一次转过墙角，程朗从她眼前消失，陈玉兰立刻喊了他的名字。他退回来，没有争辩，只把脚步放慢。',
+      '再往前，曲桥和屋角又把程朗挡住。陈玉兰抬起手，名字已经到了嘴边，却没有喊；她自己走完那几步看不见他的路。转出建筑边，水面重新打开，程朗已经停在前面回头找她。陈玉兰提了提水壶带，说：“下一处等我。”程朗继续往前，她没有追上去。',
+    ],
+  4 => <String>[
+      '下周一，十二岁的程朗要开始自己坐车去初中。六年来，外婆陈玉兰几乎每天都接他放学；这个星期天，她带他到拙政园，程朗第一次认真说：“今天让我走前面吧，我在下一处等你。”沿着池水转过长廊，亭子、白墙和树影叠出前后层次。程朗一直走在同一条园路上，墙角却让他的背影第一次从陈玉兰眼前消失。她立刻喊了他的名字；程朗从转角退回来，没有争辩，只把脚步放慢一点。',
+      '再往前，曲桥和屋角又一次截断视线，廊下人声盖住程朗的脚步声；看不见他的几步，仍在同一条向前的路上。陈玉兰抬起手，名字到了嘴边，却没有喊。她放下手，自己走完那段被遮住的路。下一处水面重新打开时，程朗已经停在前面回头找她。陈玉兰提了提水壶带，说：“下一处等我。”程朗转过去，背影又被房屋挡住；她没有追上去。',
+    ],
+  5 => <String>[
       '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}',
       '${_suzhouParagraphs[2]}${_suzhouParagraphs[3]}',
     ],
