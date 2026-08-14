@@ -218,12 +218,15 @@ void main() {
       }
     }
 
-    expect(byLevel[6], contains('那一声把已经转过墙角的程朗叫了回来'));
-    expect(byLevel[7], contains('这一次，她没有出声'));
-    expect(byLevel[8], contains('程朗没有继续往远处走'));
-    expect(byLevel[9], contains('陈玉兰没有让他退回来'));
-    expect(byLevel[10], contains('陈玉兰看不见他，也听不清他走到哪里'));
-    expect(byLevel[10], endsWith('廊下的人声仍在。陈玉兰没有追上去。'));
+    expect(byLevel[6], contains('两人之间原本拉开的距离缩短了'));
+    expect(byLevel[7], contains('同样的遮挡又来了'));
+    expect(byLevel[8], contains('程朗没有继续把距离拉远'));
+    expect(byLevel[9], contains('没有把“走在前面”重新变成“走在身边”'));
+    expect(byLevel[10], contains('眼前没有他的背影，耳边也没有能辨认出的脚步'));
+    expect(
+      byLevel[10],
+      endsWith('程朗转过去，背影很快又被房屋挡住。陈玉兰没有追上去。'),
+    );
 
     for (var level = 6; level <= 10; level++) {
       expect(
