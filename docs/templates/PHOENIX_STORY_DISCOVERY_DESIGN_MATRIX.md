@@ -452,3 +452,130 @@ Decision date:
 ```
 
 `Next phase authorized` MUST be `NO` whenever any blocking code, machine semantic collision, human Story collision, missing evidence, regression, rejected Candidate, or required pending Founder approval remains.
+
+## 11. Story Depth + Historical Truth extension
+
+Use this section with the binding [Story Depth + Historical Story Universe Appendix](../PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD_APPENDIX_STORY_DEPTH_HISTORY.md). These are conditional design records, not a requirement to fill every historical or depth dimension.
+
+### 11.1 Historical Truth Record
+
+Complete when historical people, artifacts, events, historical settings, or material historical claims are used.
+
+```text
+Historical content applicable: YES / NO
+Truth Mode:
+SOURCE CONFIDENCE: HIGH / MEDIUM / CONTESTED / LEGENDARY / UNKNOWN
+CLAIM-LEVEL PROVENANCE LEDGER:
+Real historical person present: YES / NO
+Real-person verified identity / role / action / event / relationship / quote / place connection:
+Unsupported real-person interiority or dialogue present: YES / NO
+Artifact present: YES / NO
+ARTIFACT PROVENANCE STATUS:
+OBJECT BIOGRAPHY applicable: YES / NO
+UNKNOWN PROVENANCE preserved as unknown: YES / NO
+TEMPORAL CONSISTENCY TEST:
+CONTESTED claims preserved as contested: YES / NO
+LEGEND / FOLKLORE separated from verified history: YES / NO
+CN/Pinyin/VI/EN certainty parity:
+Historical Truth Result:
+Evidence Level:
+```
+
+### 11.2 Story Universe coordinates
+
+```text
+SUBJECT: HUMAN / ARTIFACT / CRAFT / PLACE / COMMUNITY_OR_INSTITUTION / ECOLOGY / IDEA_OR_PRACTICE
+TIME LAYER:
+HUMAN LENS:
+HISTORICAL SCALE:
+TRUTH MODE:
+CULTURAL SLICE:
+PRIMARY DEPTH:
+HUMAN NEED:
+NARRATIVE ENGINE:
+HISTORICAL STORY FAMILY, if applicable:
+```
+
+These fields describe identity and comparison. They MUST NOT become quotas or automatic Story generators.
+
+### 11.3 Story Depth Profile
+
+```text
+PRIMARY_DEPTH_MECHANISM:
+SECONDARY_DEPTH_MECHANISMS: normally 1–3
+SUPPORTING_DEPTH: optional
+INTENTIONALLY_UNUSED_DEPTH:
+STORY SIGNATURE:
+FUTURE_PLACE_STORY_OPPORTUNITIES:
+```
+
+Depth possibility space:
+
+`PLACE / SPATIAL CAUSALITY`; `MATERIAL CAUSALITY`; `PRACTICE / RITUAL CAUSALITY`; `SOCIAL CAUSALITY`; `INSTITUTIONAL / POWER CAUSALITY`; `ECONOMIC / LIVELIHOOD CAUSALITY`; `ECOLOGICAL CAUSALITY`; `TEMPORAL TRACE`; `INTERGENERATIONAL TRANSMISSION`; `COLLECTIVE MEMORY`; `CULTURAL VALUE TENSION`; `SENSORY CAUSALITY`; `LOCAL VOICE`; `AMBIGUITY / UNCERTAINTY`; `ABSENCE / LOSS`; `NARRATIVE SUBTEXT / RESTRAINT`.
+
+Do not score a Story by dimension count.
+
+### 11.4 Depth Action Test
+
+Repeat for Primary Depth and each Secondary Depth used as Gold evidence.
+
+| Depth mechanism | Source / Place basis | Character encounter | Action caused | Constraint / pressure | Choice effect | Cost effect | Consequence effect | Removal test | Result |
+|---|---|---|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  |  |  | BLOCKED |
+
+If removing Primary Depth leaves Goal, Conflict, Choice, Cost, and Consequence materially unchanged, record `PRIMARY_DEPTH_DECORATIVE` and do not lock Story.
+
+### 11.5 Gold completion versus future depth
+
+```text
+GOLD DEFECTS:
+GOLD DEPTH OPPORTUNITIES:
+FUTURE PLACE STORY OPPORTUNITIES:
+Story can freeze without consuming future Place depth: YES / NO
+DEPTH OPPORTUNITY treated as Gold defect: YES / NO
+Result:
+```
+
+`DEPTH OPPORTUNITY treated as Gold defect` MUST be `NO`.
+
+### 11.6 Same-Place historical/depth differentiation
+
+For a second or later Story at the same Place, compare at minimum:
+
+| Dimension | Existing Story | Candidate | Materially distinct | Evidence |
+|---|---|---|---|---|
+| Subject |  |  | YES / NO |  |
+| Time Layer |  |  | YES / NO |  |
+| Human Lens |  |  | YES / NO |  |
+| Historical Scale |  |  | YES / NO |  |
+| Truth Mode |  |  | YES / NO |  |
+| Cultural Slice |  |  | YES / NO |  |
+| Primary Depth |  |  | YES / NO |  |
+| Secondary Depth |  |  | YES / NO |  |
+| Human Need |  |  | YES / NO |  |
+| Social Position |  |  | YES / NO |  |
+| Material / Practice |  |  | YES / NO |  |
+| Value Tension |  |  | YES / NO |  |
+| Memory Type |  |  | YES / NO |  |
+| Emotional Texture |  |  | YES / NO |  |
+| Story Signature |  |  | YES / NO |  |
+| Incremental Human Value |  |  | YES / NO |  |
+| Incremental Cultural Value |  |  | YES / NO |  |
+
+Changing only name, profession, era, artifact, or wording does not establish same-Place Story independence.
+
+### 11.7 Future experience semantics record
+
+This record is documentation only until separately authorized product implementation exists.
+
+```text
+PLACE → PLACE STORY UNIVERSE → STORY EXPERIENCE → JOURNEY RUN defined: YES / NO
+UNSEEN FIRST defined: YES / NO
+DIFFERENT PER NEW RUN defined: YES / NO
+STABLE WITHIN THE RUN defined: YES / NO
+Lv1–Lv10 same Story Experience: YES / NO
+PLACE PROGRESS concept defined: YES / NO
+STORY EXPERIENCE PROGRESS concept defined: YES / NO
+Runtime multi-Story implementation authorized by this record: NO
+Data-model migration authorized by this record: NO
+```

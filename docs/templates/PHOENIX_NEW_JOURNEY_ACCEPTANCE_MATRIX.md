@@ -153,6 +153,34 @@ For background-production rows, `Background Gate State` is a subordinate visual-
 | NJ-108 | Coverage quota did not override Gold | REQUIRED | Evidence showing coverage not used to justify acceptance |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 | NJ-109 | Founder strategic authorization verified | REQUIRED | Founder strategic authorization record or explicit note (if required) |  | BLOCKED | UNVERIFIED |  |  | NOT_REQUIRED |
 
+## Historical Truth + Story Depth acceptance extension
+
+Use these rows with the binding [Story Depth + Historical Story Universe Appendix](../PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD_APPENDIX_STORY_DEPTH_HISTORY.md). Historical rows are `CONDITIONALLY_REQUIRED` where the stated historical condition applies; Story Depth Profile rows are required for a new Gold Story or Founder-authorized major remediation.
+
+| ID | Acceptance item | Requirement | Expected evidence | Actual evidence | Result | Evidence Level | Issue / Required action | Owner | Founder Approval |
+|---|---|---|---|---|---|---|---|---|---|
+| NJ-110 | Claim-level historical provenance | CONDITIONALLY_REQUIRED | Material historical claims linked to approved source IDs/locations, truth status, source type, confidence, Story use, interpretation boundary |  | BLOCKED | UNVERIFIED | `NO RELIABLE SOURCE → NO VERIFIED FACT CLAIM` |  | NOT_REQUIRED |
+| NJ-111 | Historical source confidence | CONDITIONALLY_REQUIRED | HIGH / MEDIUM / CONTESTED / LEGENDARY / UNKNOWN applied without certainty inflation |  | BLOCKED | UNVERIFIED | `UNKNOWN REMAINS UNKNOWN`; `CONTESTED REMAINS CONTESTED` |  | NOT_REQUIRED |
+| NJ-112 | Real historical person strict truth record | CONDITIONALLY_REQUIRED | Verified identity/role/action/event/relationship/quote/place connection; unsupported interiority absent |  | BLOCKED | UNVERIFIED | Historical celebrity value never overrides truth |  | NOT_REQUIRED |
+| NJ-113 | Artifact provenance integrity | CONDITIONALLY_REQUIRED | Verified artifact lifecycle/provenance only; missing ownership/movement/discovery/restoration links retained as unknown |  | BLOCKED | UNVERIFIED | `ARTIFACT_PROVENANCE_FABRICATED` on invented provenance |  | NOT_REQUIRED |
+| NJ-114 | Object Biography causality | CONDITIONALLY_REQUIRED | Object material/use/movement/damage/preservation/change creates human pressure rather than fact chronology |  | BLOCKED | UNVERIFIED | `ARTIFACT != FACT CONTAINER` |  | NOT_REQUIRED |
+| NJ-115 | Temporal consistency | CONDITIONALLY_REQUIRED | Period-correct person, artifact, site phase, institution/title, technology, material/practice, transport/route, event order |  | BLOCKED | UNVERIFIED | `TEMPORAL_ANACHRONISM` on unsupported anachronism |  | NOT_REQUIRED |
+| NJ-116 | Fact / interpretation / fiction boundary | REQUIRED | Verified fact/action/quote/practice, interpretive narration, fiction, legend, contested interpretation, unknown remain separately classified |  | BLOCKED | UNVERIFIED | Narrative convenience cannot upgrade truth status |  | NOT_REQUIRED |
+| NJ-117 | Multilingual truth parity | CONDITIONALLY_REQUIRED | CN/Pinyin/VI/EN preserve certainty, uncertainty, attribution, legendary/contested status, and causality |  | BLOCKED | UNVERIFIED | Translation must not increase certainty |  | NOT_REQUIRED |
+| NJ-118 | Story Depth Profile | REQUIRED | Exactly one Primary Depth, normally 1–3 Secondary Depths, optional supporting depth, meaningful Intentionally Unused Depth |  | BLOCKED | UNVERIFIED | Sixteen dimensions are a possibility space, not a checklist |  | NOT_REQUIRED |
+| NJ-119 | Primary Depth Action Test | REQUIRED | Source/place basis, encounter, action, pressure, Choice effect, Cost effect, Consequence effect, Removal Test |  | BLOCKED | UNVERIFIED | `PRIMARY_DEPTH_DECORATIVE` if causal machine survives unchanged |  | NOT_REQUIRED |
+| NJ-120 | Secondary Depth Action Test | CONDITIONALLY_REQUIRED | Same causal evidence for each Secondary Depth used as Gold evidence |  | BLOCKED | UNVERIFIED | Decorative Secondary Depth cannot be claimed as Gold evidence |  | NOT_REQUIRED |
+| NJ-121 | Story Signature | REQUIRED | Primary Depth × Human Need/Relationship × Place/Historical Mechanism |  | BLOCKED | UNVERIFIED | Signature supplements, never replaces, anti-template gates |  | NOT_REQUIRED |
+| NJ-122 | Gold defect versus Depth Opportunity | REQUIRED | Separate GOLD DEFECT / GOLD DEPTH OPPORTUNITY / FUTURE PLACE STORY OPPORTUNITY record |  | BLOCKED | UNVERIFIED | `DEPTH OPPORTUNITY != GOLD DEFECT` |  | NOT_REQUIRED |
+| NJ-123 | Intentionally unused Place depth | REQUIRED | Evidence that current Story does not consume all viable Place history/culture merely for completeness |  | BLOCKED | UNVERIFIED | `ONE STORY SHOULD NOT EXHAUST THE PLACE` |  | NOT_REQUIRED |
+| NJ-124 | Historical Story Universe coordinates | REQUIRED | Subject, Time Layer, Human Lens, Historical Scale, Truth Mode, Cultural Slice, Primary Depth, Human Need, Narrative Engine |  | BLOCKED | UNVERIFIED | Coordinates are descriptive, not quotas/templates |  | NOT_REQUIRED |
+| NJ-125 | Continuity × Change | CONDITIONALLY_REQUIRED | What survived/changed/why/cause/cost/meaning/remains with source basis |  | BLOCKED | UNVERIFIED | Required for Stories claiming meaningful multi-period continuity/change |  | NOT_REQUIRED |
+| NJ-126 | Multiple-perspective truth | CONDITIONALLY_REQUIRED | Distinct perspectives supported by evidence; no invented symmetrical controversy |  | BLOCKED | UNVERIFIED | `MULTIPLE PERSPECTIVES != MANUFACTURED CONTROVERSY` |  | NOT_REQUIRED |
+| NJ-127 | Place Network Story provenance | CONDITIONALLY_REQUIRED | Every asserted trade/migration/pilgrimage/craft/material/route/network connection source-grounded |  | BLOCKED | UNVERIFIED | Network complexity cannot substitute for evidence |  | NOT_REQUIRED |
+| NJ-128 | Same-Place depth/historical differentiation | CONDITIONALLY_REQUIRED | Comparison of Subject, Time Layer, Human Lens, Scale, Truth Mode, Cultural Slice, Primary/Secondary Depth, Human Need, social position, material/practice, value tension, Memory type, emotional texture, Story Signature, incremental values |  | BLOCKED | UNVERIFIED | Surface era/artifact/profession change alone cannot pass |  | NOT_REQUIRED |
+| NJ-129 | Story Experience Gold completeness | CONDITIONALLY_REQUIRED | Each future Story Experience is a full Gold Story + Lv1–Lv10 + Vocabulary + Discovery + Reading Support + Challenge + Memory + Completion + truth/depth records |  | BLOCKED | UNVERIFIED | No Gold-plus-random-mini-story model |  | NOT_REQUIRED |
+| NJ-130 | Future run semantics boundary | CONDITIONALLY_REQUIRED | `UNSEEN FIRST`, `DIFFERENT PER NEW RUN`, `STABLE WITHIN THE RUN`, Lv1–Lv10 same Story Experience documented without runtime implementation |  | BLOCKED | UNVERIFIED | Standards do not authorize runtime selection or persistence |  | NOT_REQUIRED |
+
 ## Background production acceptance extension
 
 This section is REQUIRED whenever a new or replacement Journey background is in scope. It implements the binding gates from [PHOENIX AI BACKGROUND PRODUCTION STANDARD](../PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md). The original Journey rows above remain binding and are not replaced by this extension.
@@ -241,6 +269,13 @@ Narrative extension for phase records:
 - Phase E records that automated validation success does not establish literary PASS, factual-interpretation sufficiency, place-native Story quality, or visual background PASS.
 - Phase G reviews Story identity, Discovery distinction, emotional continuity, place causality, semantic distinctness beyond mechanical thresholds, level adaptation, Journey memorability, and applicable background mobile/visual approval.
 
+Historical/Depth phase extension:
+
+- Phase A additionally requires applicable claim-level historical provenance, Source Confidence, real-person protection, artifact provenance, temporal consistency, Fact/Interpretation/Fiction separation, Story Universe coordinates, and Story Depth Profile before Story Lock.
+- Phase A/B cannot advance when `PRIMARY_DEPTH_DECORATIVE`, `ARTIFACT_PROVENANCE_FABRICATED`, `TEMPORAL_ANACHRONISM`, `UNVERIFIED_FACTUAL_CLAIM`, or `REAL_HISTORICAL_PERSON_FABRICATION` is open.
+- Phase B preserves `DEPTH OPPORTUNITY != GOLD DEFECT`; optional future depth cannot be used to create endless reopening after all binding Gold gates pass.
+- Future multi-Story run semantics are documentation only until separately authorized runtime work exists.
+
 ## Final decision
 
 ```text
@@ -257,6 +292,15 @@ Source Truth Gate:
 Unsupported Factual Claims:
 Fact / Fiction Boundary:
 Real Historical Person Protection:
+Historical Claim Provenance:
+Historical Source Confidence:
+Artifact Provenance Integrity:
+Temporal Consistency:
+Multilingual Truth Parity:
+Story Depth Profile:
+Primary Depth Action Test:
+Story Signature:
+Gold Defect vs Depth Opportunity:
 Place Causal Mechanism:
 Generic Place Substitution Test:
 Story Mechanism Gate:
