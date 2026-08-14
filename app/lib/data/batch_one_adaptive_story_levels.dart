@@ -5,6 +5,7 @@ import 'daily_journey_experience.dart';
 import 'hangzhou_west_lake_one_pass.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
+import 'luoyang_longmen_level_depth.dart';
 import 'luoyang_longmen_one_pass.dart';
 import 'nanjing_qinhuai_one_pass.dart';
 import 'nanjing_qinhuai_vocabulary_curation.dart';
@@ -36,7 +37,7 @@ JourneyLevelContent buildBatchOneGoldLevel(
     hangzhouWestLakeJourneyId => hangzhouWestLakeOnePassLevelContent(level),
     chengduKuanzhaiJourneyId => chengduKuanzhaiOnePassLevelContent(level),
     nanjingQinhuaiJourneyId => nanjingQinhuaiCuratedLevelContent(level),
-    luoyangLongmenJourneyId => luoyangLongmenOnePassLevelContent(level),
+    luoyangLongmenJourneyId => luoyangLongmenGoldLevelContent(level),
     _ => shanghaiBundOnePassRemediation.levelContent(level),
   };
   final unseenWords = base.words
