@@ -414,6 +414,7 @@ The following codes are binding minimum codes:
 - `TRUTH_MODE_UNDECLARED`
 - `FOLKLORE_PRESENTED_AS_VERIFIED_HISTORY`
 - `COVERAGE_QUOTA_OVERRIDES_GOLD`
+- `JOURNEY_SCOPE_LEAKAGE`
 
 Every blocking-code record MUST include:
 
@@ -1250,3 +1251,66 @@ It is NOT:
 - a Place Story Universe template.
 
 Future Summer Palace Journeys must pass the same incremental-value, truth, place-causality, Same-Place Anti-Template, and whole-library differentiation gates as any other candidate.
+
+### 20.13 Journey Scope Isolation Gate
+
+The **Phoenix 单 Journey 开发范围隔离门 / Journey Scope Isolation Gate** is binding for every task that authorizes learner-visible Journey content and for every standards-only task that must prove no Journey content changed.
+
+Before implementation, record:
+
+- `AUTHORIZED_BASELINE_SHA` — the exact Founder-authorized task-start baseline, normally the current approved `main` SHA;
+- `AUTHORIZED_JOURNEY_SET` — exactly the Journey IDs explicitly included in Founder authorization; and
+- `OUT_OF_SCOPE_JOURNEY` — every Journey ID not in `AUTHORIZED_JOURNEY_SET`.
+
+A standards-only governance task that authorizes no learner-visible Journey content MUST use `AUTHORIZED_JOURNEY_SET = EMPTY`.
+
+The following distinctions are binding:
+
+- `SHARED FILE != SHARED AUTHORITY`;
+- `GOOD CHANGE != AUTHORIZED CHANGE`;
+- `NOTICE != AUTHORIZATION`;
+- `GREEN CI != SCOPE APPROVAL`.
+
+Learner-visible Journey content includes, where applicable: Story; Story title; headline; description; teaser; Entry copy; Vocabulary; Discovery; Reading Support in Chinese, Pinyin, Vietnamese, and English; Wonder; Express; Challenge content; Memory; Completion; Journey-specific narration content; Journey-specific learner-facing metadata; Journey-specific questions or prompts; and Journey-specific labels whose wording changes learner meaning. This definition does not classify every repository metadata field, test fixture, or infrastructure record as learner-visible content.
+
+Phoenix stores multiple Journeys in shared files. Authorization therefore follows **Journey-content ownership**, not filename ownership. Permission to edit Suzhou, for example, does not authorize learner-visible edits to a neighboring Quanzhou or Luoyang record merely because the same source file is open.
+
+The final diff against `AUTHORIZED_BASELINE_SHA` MUST classify changes into:
+
+A. learner-visible content owned by `AUTHORIZED_JOURNEY_SET`;
+B. shared infrastructure, tests, validators, type definitions, resolver support, or semantic-registry infrastructure genuinely necessary for authorized scope; and
+C. learner-visible content owned by any `OUT_OF_SCOPE_JOURNEY`.
+
+Category B is not scope leakage merely because it is shared. It MUST be reported separately as `SHARED_INFRASTRUCTURE_DELTA = NONE / EXPECTED / UNEXPECTED`, and it MUST NOT intentionally alter unrelated Journey learner-visible content or unrelated product behavior. Category C is automatic Journey scope leakage.
+
+Before any candidate is declared ready for Founder review, the required scope record is:
+
+```text
+AUTHORIZED_BASELINE_SHA =
+AUTHORIZED_JOURNEY_SET =
+AUTHORIZED_JOURNEY_DELTA = EXPECTED / UNEXPECTED
+SHARED_INFRASTRUCTURE_DELTA = NONE / EXPECTED / UNEXPECTED
+OTHER_JOURNEY_CONTENT_DELTA = NONE / FOUND
+JOURNEY_SCOPE_LEAKAGE = NONE / FOUND
+```
+
+If `OTHER_JOURNEY_CONTENT_DELTA = FOUND`, then `JOURNEY_SCOPE_LEAKAGE = FOUND` unless Founder explicitly authorized the affected Journey before candidate freeze. The binding stop result is:
+
+`SCOPE LEAKAGE — NOT READY FOR FOUNDER APPROVAL`
+
+`JOURNEY_SCOPE_LEAKAGE` cannot be waived because CI is green, the change is beneficial, the change is tiny, grammar is better, a translation is more complete, the affected Journey is not under active review, or the same shared source file was already being edited.
+
+`JOURNEY_SCOPE_LEAKAGE` may be closed only by:
+
+A. restoring the unrelated Journey exactly to `AUTHORIZED_BASELINE_SHA` with deterministic provenance and authorization for that restoration; or
+B. obtaining explicit Founder authorization that expands `AUTHORIZED_JOURNEY_SET`.
+
+An Agent MUST NOT silently convert unauthorized work into authorized work.
+
+If an Agent notices an unrelated Journey defect while working in a shared file, it MUST record `OUT_OF_SCOPE_FINDING` and leave that learner-visible content unchanged. “While I am here” cleanup, drive-by copy editing, opportunistic translation improvement, and nearby question improvement are prohibited without explicit scope expansion.
+
+Scope isolation does not create a parallel approval model. It binds to the existing exact-head rule in §19.8. Founder approval applies only to the exact candidate SHA whose scope audit was reviewed. Any later source commit, including a cleanup commit, invalidates the prior scope audit and prior Founder approval and requires a new exact-head diff ownership audit, applicable Preview validation, and Founder review.
+
+A concise governance provenance example is PR #178: a Suzhou-only remediation accidentally changed an unrelated Quanzhou learner-facing question. The change was harmless in isolation but unauthorized and was restored before Founder approval. The rule exists to preserve content ownership, not to make that PR a permanent implementation dependency.
+
+This gate is governance only. It does not add runtime scope-check UI, warnings, badges, screens, Journey stages, resolver behavior, product selection logic, or any other product functionality.

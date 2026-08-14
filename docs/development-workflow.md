@@ -45,6 +45,33 @@ PR #137 对应的已批准 `main` 是 Phoenix 当前唯一稳定产品基线。P
 9. 合并后由 Cloudflare 正式部署。
 10. PR 关闭后自动删除独立 Preview Worker。
 
+### Journey Scope Isolation candidate gate
+
+Journey 内容任务必须在实现前记录 `AUTHORIZED_BASELINE_SHA`，并从 Founder 明示授权推导 `AUTHORIZED_JOURNEY_SET`。共享文件只说明存储位置，不扩大 Journey 内容权限。标准任务若没有任何 Journey learner-visible content 授权，`AUTHORIZED_JOURNEY_SET = EMPTY`。
+
+Journey candidate 的治理顺序是：
+
+> **AUTHORIZED BASELINE** → **AUTHORIZED JOURNEY SET** → **IMPLEMENT** → **TEST** → **FINAL DIFF OWNERSHIP AUDIT** → **JOURNEY SCOPE ISOLATION GATE** → **EXACT-HEAD PREVIEW** → **FOUNDER REVIEW**
+
+`FINAL DIFF OWNERSHIP AUDIT` 必须按 Journey 内容所有权而不是仅按文件名分类，并记录：
+
+```text
+AUTHORIZED_BASELINE_SHA =
+AUTHORIZED_JOURNEY_SET =
+AUTHORIZED_JOURNEY_DELTA = EXPECTED / UNEXPECTED
+SHARED_INFRASTRUCTURE_DELTA = NONE / EXPECTED / UNEXPECTED
+OTHER_JOURNEY_CONTENT_DELTA = NONE / FOUND
+JOURNEY_SCOPE_LEAKAGE = NONE / FOUND
+```
+
+Shared resolver logic、generic validators、shared types、通用测试或为授权 Journey 必需的其他基础设施变化，可被分类为 `SHARED_INFRASTRUCTURE_DELTA = EXPECTED`，但不得因此修改未授权 Journey 的 learner-visible content 或无关 product behavior。
+
+若 `OTHER_JOURNEY_CONTENT_DELTA = FOUND`，除非 Founder 已明确扩大授权范围，否则必须记录 `JOURNEY_SCOPE_LEAKAGE = FOUND`，候选状态为 `SCOPE LEAKAGE — NOT READY FOR FOUNDER APPROVAL`。Green CI、测试全通过、修改很小、语法更好或同一 shared file 已在编辑，都不是 scope authorization。
+
+发现未授权 Journey 的问题时，只记录 `OUT_OF_SCOPE_FINDING`；不得执行 “while I am here” 修复。Scope leakage 只能通过可证明来源的 authorized-baseline 精确恢复，或 Founder 明确扩大 `AUTHORIZED_JOURNEY_SET` 关闭。
+
+Scope audit 与 Founder exact-head review 绑定同一 Candidate SHA。任何后续 source commit 都使之前的 scope audit 和 Founder approval 失效，必须对新 head 重做 audit、Preview（适用时）和 Founder review。
+
 ## 永久朗读开发准则
 
 以下规则适用于故事、发现、生词、例句、「注」、AI 内容以及今后新增的任何朗读入口，不得单独实现另一套朗读逻辑：
