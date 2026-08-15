@@ -1,6 +1,5 @@
 import '../models/story_content.dart';
 import 'daily_journey_experience.dart';
-import 'journey_data.dart';
 import 'kaiping_diaolou_gold_content.dart';
 
 const kaipingActiveGeoNodeId = 'cn-guangdong-jiangmen-kaiping-zili-village';

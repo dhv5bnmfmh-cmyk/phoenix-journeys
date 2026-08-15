@@ -22,15 +22,15 @@ class _LongmenMasterySupplement {
 const _longmenMasterySupplements = <_LongmenMasterySupplement>[
   _LongmenMasterySupplement(
     fromLevel: 7,
-    chinese: '周澄还把每个画面旁边的来源编号写进清单，让“谁提供了依据”不再藏在制作流程末端。',
-    vietnamese: 'Chu Trừng còn ghi mã nguồn bên cạnh từng hình ảnh trong danh sách, để câu hỏi “ai cung cấp căn cứ này” không còn bị giấu ở cuối quy trình sản xuất.',
-    english: 'Zhou Cheng also puts a source identifier beside each image in the production list, so “who provided the evidence” is no longer hidden at the end of the workflow.',
+    chinese: '周澄把资料摊在两人之间，遇到说不清的画面就停住；林砚不再催她先往下剪。',
+    vietnamese: 'Chu Trừng trải tư liệu ra giữa hai người và dừng lại mỗi khi một hình ảnh chưa thể giải thích rõ; Lâm Nghiên không còn giục cô cứ dựng tiếp.',
+    english: 'Zhou Cheng spreads the sources between them and stops whenever an image cannot be explained; Lin Yan no longer urges her to keep cutting first.',
   ),
   _LongmenMasterySupplement(
     fromLevel: 8,
-    chinese: '林砚也不再把周澄的核对当作收尾审查，而把它变成共同创作开始时必须完成的一步。',
-    vietnamese: 'Lâm Nghiên cũng không còn xem việc Chu Trừng kiểm tra là khâu xét duyệt cuối cùng; cô biến nó thành một bước phải hoàn thành ngay khi hai người bắt đầu đồng sáng tạo.',
-    english: 'Lin Yan no longer treats Zhou Cheng’s verification as a final review; she turns it into a step that must happen when their joint creation begins.',
+    chinese: '下一处龛像又出现缺口时，林砚先把鼠标让给周澄。周澄没有替她做画面，只把能找到的照片推回来。',
+    vietnamese: 'Khi hốc tượng tiếp theo lại có phần khuyết, Lâm Nghiên nhường chuột cho Chu Trừng trước. Chu Trừng không làm hình ảnh thay cô, chỉ đẩy những bức ảnh tìm được trở lại.',
+    english: 'When the next niche has another gap, Lin Yan passes the mouse to Zhou Cheng first. Zhou Cheng does not make the image for her; she only pushes back the photographs she can find.',
   ),
   _LongmenMasterySupplement(
     fromLevel: 9,
@@ -40,9 +40,9 @@ const _longmenMasterySupplements = <_LongmenMasterySupplement>[
   ),
   _LongmenMasterySupplement(
     fromLevel: 10,
-    chinese: '她知道以后还会遇到无法补齐的缺口；这次留下的不是一个方便答案，而是一条可以重复使用的工作边界。',
-    vietnamese: 'Cô biết sau này vẫn sẽ gặp những khoảng trống không thể lấp đầy; điều còn lại từ lần này không phải một câu trả lời thuận tiện mà là một ranh giới làm việc có thể tiếp tục áp dụng.',
-    english: 'She knows she will meet gaps that cannot be filled again; what remains from this choice is not a convenient answer but a working boundary she can apply repeatedly.',
+    chinese: '导出后，林砚没有清空那一层，而把它和周澄的来源清单一起留在下一次建模模板的最前面。',
+    vietnamese: 'Sau khi xuất phim, Lâm Nghiên không xóa lớp đó; cô đặt nó cùng danh sách nguồn của Chu Trừng ở đầu mẫu dựng hình cho lần sau.',
+    english: 'After export, Lin Yan does not delete the layer; she leaves it with Zhou Cheng’s source list at the front of their next modeling template.',
   ),
 ];
 
@@ -152,9 +152,9 @@ final _longmenStorySupplementWords = <WordEntry>[
     vietnamese: 'phim ngắn hoặc video ngắn',
     english: 'short film or video',
     symbol: '🎬',
-    sourceSentence: '二十九岁的林砚和周澄合做一段龙门石窟数字短片，林砚做三维画面，周澄核对史料。',
-    sourceVietnamese: 'Lâm Nghiên, hai mươi chín tuổi, cùng Chu Trừng làm một phim ngắn kỹ thuật số về Long Môn. Lâm Nghiên phụ trách hình ảnh 3D, còn Chu Trừng kiểm tra tư liệu lịch sử.',
-    sourceEnglish: 'Twenty-nine-year-old Lin Yan and Zhou Cheng are making a digital short about the Longmen Grottoes. Lin Yan builds the 3D visuals, while Zhou Cheng checks the historical sources.',
+    sourceSentence: '二十九岁的林砚和周澄合做一段龙门石窟数字短片。两人约定共同署名，也共同为每个复原画面的依据负责。',
+    sourceVietnamese: 'Lâm Nghiên, hai mươi chín tuổi, cùng Chu Trừng làm một phim ngắn kỹ thuật số về Long Môn. Hai người thống nhất cùng ký tên và cùng chịu trách nhiệm về căn cứ của từng hình ảnh phục dựng.',
+    sourceEnglish: 'Twenty-nine-year-old Lin Yan and Zhou Cheng are making a digital short about the Longmen Grottoes. They agree to share credit and responsibility for the evidence behind every restored image.',
   ),
   _longmenStoryWord(
     word: '导出',
