@@ -10,6 +10,7 @@ import 'luoyang_longmen_level_depth.dart';
 import 'luoyang_longmen_one_pass.dart';
 import 'nanjing_qinhuai_one_pass.dart';
 import 'nanjing_qinhuai_vocabulary_curation.dart';
+import 'quanzhou_kaiyuan_gold_content.dart';
 import 'shanghai_bund_one_pass.dart';
 import 'xian_city_wall_one_pass.dart';
 
@@ -20,7 +21,8 @@ bool isBatchOneGoldJourney(String journeyId) =>
     journeyId == chengduKuanzhaiJourneyId ||
     journeyId == nanjingQinhuaiJourneyId ||
     journeyId == luoyangLongmenJourneyId ||
-    journeyId == kaipingDiaolouJourneyId;
+    journeyId == kaipingDiaolouJourneyId ||
+    journeyId == quanzhouKaiyuanJourneyId;
 
 /// Thin adaptive adapter over canonical one-pass content packages.
 /// Story, Words, Discovery, Challenge, Memory, and Completion remain immutable
@@ -41,6 +43,7 @@ JourneyLevelContent buildBatchOneGoldLevel(
     nanjingQinhuaiJourneyId => nanjingQinhuaiCuratedLevelContent(level),
     luoyangLongmenJourneyId => luoyangLongmenGoldLevelContent(level),
     kaipingDiaolouJourneyId => kaipingDiaolouGoldLevelContent(level),
+    quanzhouKaiyuanJourneyId => quanzhouKaiyuanGoldLevelContent(level),
     _ => shanghaiBundOnePassRemediation.levelContent(level),
   };
   final unseenWords = base.words
@@ -90,6 +93,7 @@ BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
     nanjingQinhuaiJourneyId => nanjingQinhuaiRemediatedJourney,
     luoyangLongmenJourneyId => luoyangLongmenGoldJourney,
     kaipingDiaolouJourneyId => kaipingDiaolouGoldJourney,
+    quanzhouKaiyuanJourneyId => quanzhouKaiyuanGoldJourney,
     _ => null,
   };
   if (journey == null) return null;
@@ -103,7 +107,7 @@ BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
       '${memoryAnswer('history')} ${memoryAnswer('preservation')}',
     nanjingQinhuaiJourneyId =>
       '${memoryAnswer('选择')} ${memoryAnswer('画面')}',
-    luoyangLongmenJourneyId || kaipingDiaolouJourneyId =>
+    luoyangLongmenJourneyId || kaipingDiaolouJourneyId || quanzhouKaiyuanJourneyId =>
       '${memoryAnswer('truth')} ${memoryAnswer('place')}',
     xianCityWallJourneyId || hangzhouWestLakeJourneyId =>
       '${memoryAnswer('history')} ${memoryAnswer('culture')}',
