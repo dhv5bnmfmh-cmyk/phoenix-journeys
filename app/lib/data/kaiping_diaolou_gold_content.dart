@@ -484,8 +484,8 @@ final kaipingDiaolouDiscoveryPool = <DiscoveryEntry>[
     english: 'Official Kaiping sources record elements including plaster relief, murals, colonnades, arches, and decorative gables, with many buildings made by local craftspeople. Imported forms still passed through local selection and recombination.',
   ),
   _kaipingDiscovery(
-    chinese: '世界遗产价值不仅在碉楼本身，也包括周边村屋和农业景观。理解开平碉楼，需要同时看塔楼怎样与村落、田地和道路共同存在。',
-    simple: '碉楼要放在村落和田野环境中一起理解。',
+    chinese: '世界遗产价值不仅在碉楼本身，也包括周边民居和农业景观。理解开平碉楼，需要同时看塔楼怎样与村落、田地和道路共同存在。',
+    simple: '碉楼要放在民居、村落和田野环境中一起理解。',
     vietnamese: 'Giá trị di sản không chỉ nằm ở bản thân điêu lâu mà còn ở nhà làng và cảnh quan nông nghiệp xung quanh. Hiểu điêu lâu Khai Bình cần nhìn cách tháp, làng, ruộng và đường cùng tồn tại.',
     english: 'The World Heritage value lies not only in the towers but also in surrounding village houses and agricultural landscape. Kaiping diaolou are understood together with villages, fields, and paths.',
   ),
@@ -586,7 +586,7 @@ const _kaipingDiscoveryIndexes = <List<int>>[
   [0, 4, 6],
   [3, 5, 6],
   [2, 3, 6],
-  [4, 5, 6],
+  [3, 5, 6],
   [3, 6, 7],
 ];
 
