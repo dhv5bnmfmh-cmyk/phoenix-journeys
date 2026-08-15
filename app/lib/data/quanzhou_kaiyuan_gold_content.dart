@@ -480,13 +480,6 @@ const _quanzhouStorySegments = <_QuanzhouStorySegment>[
     english: 'Xu Ning closes her hand around the key without saying, “Don’t come back.” She says, “You knock, I’ll open.” The words preserve kinship without restoring the old life unchanged.',
   ),
   _QuanzhouStorySegment(
-    fromLevel: 8,
-    paragraph: 1,
-    chinese: '许宁收起钥匙，没有把弟弟推到门外，也没有说“家永远不变”。姐弟可以继续，不必靠空房作保证。',
-    vietnamese: 'Hứa Ninh cất chìa khóa, không đẩy em trai ra ngoài cánh cửa, cũng không nói “nhà sẽ mãi không đổi”. Họ vẫn có thể là chị em mà không cần một căn phòng trống làm bảo chứng.',
-    english: 'Xu Ning puts the key away. She neither pushes her brother outside the family nor promises that “home will never change.” They can remain siblings without an empty room serving as proof.',
-  ),
-  _QuanzhouStorySegment(
     fromLevel: 9,
     paragraph: 1,
     chinese: '许安点头，没有再问那间房会给谁，也没有要求姐姐保证下一次回来时桌椅、床铺仍在原处。',
