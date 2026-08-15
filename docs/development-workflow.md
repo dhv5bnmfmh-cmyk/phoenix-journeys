@@ -3,12 +3,13 @@
 ## 稳定基线
 
 - 正式分支：`main`
-- 当前稳定产品 PR：`#137`
-- 当前稳定 main Commit：`5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
+- 历史最低产品质量基线 PR：`#137`
+- 历史最低产品质量基线 Commit：`5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
+- 当前开发来源：任务 preflight 时重新读取的精确 remote `main`；若 Founder 明确授权继续唯一 active development line，则继续该 line
 - 正式体验版：`https://phoenix-journeys-alpha.7hn5tyrjgh.workers.dev`
 - 基线身份唯一权威来源：`docs/PHOENIX_STABLE_BASELINE_STANDARD.md`
 
-PR #137 对应的已批准 `main` 是 Phoenix 当前唯一稳定产品基线。PR #132 是历史已合并版本，不是当前开发基线。关闭的 PR #138–#141 只可作为历史或问题证据，不得作为开发基线、实现来源、视觉参考或合并目标。
+PR #137 对应的已批准产品状态是 Phoenix 当前记录的历史最低质量比较基线，不是要求从旧 SHA 开发的分支来源。后续已经 Founder 批准并合并的 remote `main` 是当前产品与开发来源；候选还必须保持 `NEW RESULT >=` 该历史质量底线。PR #132 是历史已合并版本，不是当前开发基线。关闭的 PR #138–#141 只可作为历史或问题证据，不得作为开发基线、实现来源、视觉参考或合并目标。
 
 最新 PR、Preview、分支、Commit 或成功 CI 不会自动成为稳定版本。稳定基线只有在 Founder 明确批准候选 Commit、相关 PR 合并进 `main`，并在 `docs/PHOENIX_STABLE_BASELINE_STANDARD.md` 中记录后才能更新。
 
@@ -16,8 +17,8 @@ PR #137 对应的已批准 `main` 是 Phoenix 当前唯一稳定产品基线。P
 
 ### 唯一基线永久规则
 
-1. 今后所有新功能、修复、视觉升级和实验版本，必须从当时最新且已批准的稳定 `main` 创建全新独立分支。
-2. 新分支创建前必须核对 `docs/PHOENIX_STABLE_BASELINE_STANDARD.md` 中记录的 Stable PR 与 Stable Commit；禁止从历史 PR、旧体验分支、旧提交或关闭分支继续开发。
+1. 今后所有新功能、修复、视觉升级和实验版本，必须从 preflight 重新读取的精确 remote `main` 创建；若 Founder 明确授权继续唯一 active development line，则不得创建第二分支。
+2. 开发前必须同时记录 current remote `main` SHA 与 `docs/PHOENIX_STABLE_BASELINE_STANDARD.md` 中的历史最低质量基线；禁止从历史 PR、旧体验分支、旧提交或关闭分支继续开发。
 3. 同一时间只保留用户正在验收的开发 PR；版本确认合并后，必须关闭其他所有开发 PR，并由清理工作流删除它们的 Cloudflare Preview Worker。
 4. 任何新 PR 都必须在说明中记录 `base` 的 `main` Commit；如果不是当时最新批准的稳定 `main`，CI 或人工检查必须阻止发布与合并。
 5. 不得用旧体验链接替代正式稳定版；开发体验只允许使用当前 PR 的独立链接。
@@ -34,7 +35,7 @@ PR #137 对应的已批准 `main` 是 Phoenix 当前唯一稳定产品基线。P
 
 ## 标准流程
 
-1. 从最新批准的稳定 `main` 创建独立分支。
+1. 从 preflight 确认的 current remote `main` 创建独立分支，或继续 Founder 明确授权的唯一 active development line。
 2. 只在独立分支修改代码。
 3. 创建 Pull Request。
 4. 自动运行 Agent 测试、Flutter Analyze、Flutter Test 和 Web Release 构建。

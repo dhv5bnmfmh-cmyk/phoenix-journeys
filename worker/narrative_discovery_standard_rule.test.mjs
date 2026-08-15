@@ -298,10 +298,10 @@ test('standards prohibit tourism Story, aggregate literary approval, premature b
 });
 
 test('existing stable-baseline rules remain intact', () => {
-  assert.match(workflow, /当前稳定产品 PR：`#137`/);
+  assert.match(workflow, /历史最低产品质量基线 PR：`#137`/);
   assert.match(
     workflow,
-    /当前稳定 main Commit：`5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`/,
+    /历史最低产品质量基线 Commit：`5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`/,
   );
   assert.match(
     workflow,
@@ -309,10 +309,10 @@ test('existing stable-baseline rules remain intact', () => {
   );
   assert.match(workflow, /禁止直接在 `main` 开发或试验/);
   assert.match(workflow, /NEW RESULT >= CURRENT STABLE BASELINE/);
-  assert.match(stableBaseline, /\*\*Stable PR:\*\* `#137`/);
+  assert.match(stableBaseline, /\*\*Historical minimum-quality baseline PR:\*\* `#137`/);
   assert.match(
     stableBaseline,
-    /\*\*Stable Commit:\*\* `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`/,
+    /\*\*Historical minimum-quality baseline Commit:\*\* `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`/,
   );
   assert.match(
     stableBaseline,

@@ -42,7 +42,7 @@ void main() {
     expect(usesDedicatedAdaptiveJourneyRuntime(luoyangLongmenJourneyId), isTrue);
     expect(isBatchOneGoldJourney(luoyangLongmenJourneyId), isTrue);
 
-    const expectedDiscoveryCounts = <int>[1, 1, 2, 2, 2, 2, 2, 2, 2, 2];
+    const expectedDiscoveryCounts = <int>[2, 2, 2, 2, 3, 3, 3, 3, 3, 3];
     for (var level = 1; level <= 10; level++) {
       final profile = agent.profileForPhoenixLevel(level);
       final plan = agent.planFor(profile);
@@ -55,7 +55,7 @@ void main() {
 
       expect(story, contains('林砚'), reason: 'Lv$level protagonist');
       expect(story, contains('周澄'), reason: 'Lv$level relationship');
-      expect(story, contains('依据在哪里'), reason: 'Lv$level conflict');
+      expect(story, contains('不能放在我们两个人的名字下面'), reason: 'Lv$level relationship conflict');
       expect(story, contains('关掉那一层'), reason: 'Lv$level enacted choice');
       expect(story, contains('无依据，不使用'), reason: 'Lv$level memory ending');
       expect(story, isNot(contains('河水向前流')), reason: 'Lv$level legacy');

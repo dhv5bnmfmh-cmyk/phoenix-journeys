@@ -304,9 +304,9 @@ const _kaipingStorySegments = <_KaipingStorySegment>[
   _KaipingStorySegment(
     fromLevel: 1,
     paragraph: 0,
-    chinese: '20世纪20年代，开平。虚构青年梁川留在家乡，哥哥梁海在海外谋生，寄回一张带拱券和柱廊的建筑图样，希望家里照着建一座新楼。',
-    vietnamese: 'Vào thập niên 1920 ở Khai Bình, chàng trai hư cấu Lương Xuyên ở lại quê nhà, còn anh trai Lương Hải mưu sinh ở nước ngoài. Người anh gửi về một bản vẽ có vòm cuốn và hàng cột, mong gia đình xây một tòa nhà mới theo bản vẽ ấy.',
-    english: 'In 1920s Kaiping, the fictional young man Liang Chuan stays in his home village while his older brother Liang Hai works overseas. His brother sends home a building sketch with arches and colonnades, hoping the family will build a new tower from it.',
+    chinese: '20世纪20年代，开平。虚构青年梁川留在家乡，哥哥梁海在海外谋生，寄回一张带拱券和柱廊的建筑图样。他在信里说，这份投入只用于家里的独楼；若要改作别用，就寄还给他。',
+    vietnamese: 'Vào thập niên 1920 ở Khai Bình, chàng trai hư cấu Lương Xuyên ở lại quê nhà, còn anh trai Lương Hải mưu sinh ở nước ngoài. Người anh gửi về một bản vẽ có vòm cuốn và hàng cột. Trong thư, anh nói phần đóng góp ấy chỉ dành cho tòa nhà riêng của gia đình; nếu dùng vào việc khác thì hãy gửi trả.',
+    english: 'In 1920s Kaiping, the fictional young man Liang Chuan stays in his home village while his older brother Liang Hai works overseas. His brother sends a building sketch with arches and colonnades. The letter says his contribution is only for the family’s private tower; if it is used otherwise, it should be returned.',
   ),
   _KaipingStorySegment(
     fromLevel: 2,
@@ -346,9 +346,9 @@ const _kaipingStorySegments = <_KaipingStorySegment>[
   _KaipingStorySegment(
     fromLevel: 1,
     paragraph: 1,
-    chinese: '他最后把原图折起，对工匠说：“外面的样子可以带回来，里面得让大家一起用。”家里放弃独建计划，哥哥也要接受图样被改。',
-    vietnamese: 'Cuối cùng anh gấp bản vẽ lại và nói với người thợ: “Dáng vẻ bên ngoài có thể mang về, nhưng bên trong phải để mọi người cùng dùng.” Gia đình từ bỏ kế hoạch xây riêng, và người anh cũng phải chấp nhận bản vẽ bị thay đổi.',
-    english: 'At last he folds the original sketch and tells the craftsperson, “The outside forms can come home, but the inside has to work for everyone.” His family gives up the separate building plan, and his brother will have to accept that the sketch has been changed.',
+    chinese: '他最后把原图折起，对工匠说：“外面的样子可以带回来，里面得让大家一起用。”家里放弃独建；梁川把改过的众楼图和退还投入的承诺一起寄给哥哥。',
+    vietnamese: 'Cuối cùng anh gấp bản vẽ lại và nói với người thợ: “Dáng vẻ bên ngoài có thể mang về, nhưng bên trong phải để mọi người cùng dùng.” Gia đình từ bỏ kế hoạch xây riêng; Lương Xuyên gửi cho anh bản vẽ chúng lâu đã sửa cùng lời hứa hoàn lại phần đóng góp.',
+    english: 'At last he folds the original sketch and tells the craftsperson, “The outside forms can come home, but the inside has to work for everyone.” The family gives up its private tower; Liang Chuan sends his brother the revised communal-tower plan together with a promise to return the contribution.',
   ),
   _KaipingStorySegment(
     fromLevel: 6,
@@ -360,37 +360,37 @@ const _kaipingStorySegments = <_KaipingStorySegment>[
   _KaipingStorySegment(
     fromLevel: 1,
     paragraph: 1,
-    chinese: '众楼继续施工。梁川把没被照搬的图留在箱底，只记住一句：回来，不等于照搬。',
-    vietnamese: 'Chúng lâu tiếp tục được xây. Lương Xuyên cất bản vẽ không được sao chép nguyên xi xuống đáy hòm và chỉ nhớ một câu: trở về không có nghĩa là sao chép nguyên vẹn.',
-    english: 'Construction on the communal tower continues. Liang Chuan keeps the sketch that was not copied unchanged at the bottom of a trunk and remembers one line: coming home does not mean copying home.',
+    chinese: '回信到了。梁海没有称赞改图，只在“我家的楼”旁划了一道线，改写成“我们家在众楼里的一份”，并让梁川保留一道拱券。众楼继续施工；原图留在箱底。',
+    vietnamese: 'Thư hồi âm đến. Lương Hải không khen bản vẽ sửa; anh gạch bên cạnh cụm “tòa nhà của nhà ta”, đổi thành “phần của nhà ta trong chúng lâu”, và nhờ Lương Xuyên giữ lại một vòm cuốn. Chúng lâu tiếp tục được xây; bản vẽ gốc nằm dưới đáy hòm.',
+    english: 'The reply arrives. Liang Hai does not praise the revision; beside “our family’s tower,” he draws a line and rewrites it as “our family’s share in the communal tower,” asking Liang Chuan to keep one arch. Construction continues; the original sketch stays at the bottom of the trunk.',
   ),
   _KaipingStorySegment(
     fromLevel: 7,
     paragraph: 1,
-    chinese: '他后来更清楚：碉楼并不只有一种功能，侨户也并非都用同一种方式建楼。海外联系带回资金、见闻和建筑影响，但每座楼仍有自己的用途和处境。',
-    vietnamese: 'Về sau anh hiểu rõ hơn: điêu lâu không chỉ có một chức năng, và các hộ kiều dân cũng không xây theo cùng một cách. Liên hệ hải ngoại mang về tiền bạc, kiến thức và ảnh hưởng kiến trúc, nhưng mỗi tòa nhà vẫn có công dụng và hoàn cảnh riêng.',
-    english: 'Later he sees more clearly that diaolou did not all serve one function, nor did overseas-linked households build in one identical way. Overseas ties brought money, experience, and architectural influence, while each tower still had its own use and circumstances.',
+    chinese: '梁川把哥哥改过的那行字拿给工匠看。工匠量过众楼共用的空间，只把拱券留在入口，没有让柱廊占掉多户避难的位置。',
+    vietnamese: 'Lương Xuyên đưa dòng chữ anh trai đã sửa cho người thợ xem. Sau khi đo không gian dùng chung của chúng lâu, người thợ chỉ giữ vòm cuốn ở lối vào và không để hàng cột chiếm chỗ trú ẩn của nhiều hộ.',
+    english: 'Liang Chuan shows the craftsperson the line his brother revised. After measuring the shared space, the craftsperson keeps an arch at the entrance but does not let a colonnade take space needed for several households to shelter.',
   ),
   _KaipingStorySegment(
     fromLevel: 8,
     paragraph: 1,
-    chinese: '再看图样时，他不问“哪一种更洋气”，而问“哪一种能在这个村里工作”。碉楼与民居、田地和村路共同构成环境，不能只从楼顶装饰理解它。',
-    vietnamese: 'Khi nhìn lại bản vẽ, anh không hỏi “kiểu nào Tây hơn” mà hỏi “kiểu nào vận hành được trong ngôi làng này”. Điêu lâu cùng nhà dân, ruộng đồng và đường làng tạo thành một môi trường chung, không thể chỉ hiểu nó qua trang trí trên mái.',
-    english: 'Looking at the sketch again, he no longer asks which version looks more foreign, but which one can work in this village. Diaolou belong with houses, fields, and village paths, and cannot be understood from rooftop decoration alone.',
+    chinese: '开工后，梁川沿村路看运料的位置，又和几户人家核对进出路线。图样不再只回答楼顶怎样好看，也要回答这座众楼怎样被共同使用。',
+    vietnamese: 'Sau khi khởi công, Lương Xuyên đi dọc đường làng xem chỗ chuyển vật liệu rồi cùng vài hộ kiểm tra lối ra vào. Bản vẽ không còn chỉ trả lời phần mái trông đẹp thế nào mà còn phải trả lời chúng lâu sẽ được dùng chung ra sao.',
+    english: 'After work begins, Liang Chuan walks the village paths to check material access and confirms entry routes with several households. The plan must now answer not only how the roof will look, but how the communal tower will be used together.',
   ),
   _KaipingStorySegment(
     fromLevel: 9,
     paragraph: 1,
-    chinese: '哥哥的图样没有失败。拱券、柱廊代表的远方经验被保留一部分，却不再支配整座建筑。梁川懂得，文化交流也包括选择、调整和重新组合。',
-    vietnamese: 'Bản vẽ của người anh không hề thất bại. Một phần kinh nghiệm phương xa thể hiện qua vòm cuốn và hàng cột vẫn được giữ lại, nhưng không còn chi phối toàn bộ công trình. Lương Xuyên hiểu rằng giao lưu văn hóa còn bao gồm lựa chọn, điều chỉnh và kết hợp lại.',
-    english: 'His brother’s sketch has not failed. Some distant experience represented by arches and colonnades remains, but no longer dictates the whole building. Liang Chuan understands that cultural exchange also means selection, adjustment, and recombination.',
+    chinese: '第一道拱券砌好时，梁川把照片寄给哥哥，背面只写了各户共同使用的位置。梁海下一封信问的不是“像不像原图”，而是哪一层给老人和孩子临时避难。',
+    vietnamese: 'Khi vòm cuốn đầu tiên xây xong, Lương Xuyên gửi ảnh cho anh, mặt sau chỉ ghi vị trí các hộ sẽ cùng sử dụng. Trong thư kế tiếp, Lương Hải không hỏi “có giống bản vẽ gốc không” mà hỏi tầng nào dành cho người già và trẻ em trú tạm.',
+    english: 'When the first arch is built, Liang Chuan sends his brother a photograph, noting only where the households will share the space. Liang Hai’s next letter does not ask whether it resembles the original; he asks which floor will shelter elders and children.',
   ),
   _KaipingStorySegment(
     fromLevel: 10,
     paragraph: 1,
-    chinese: '多年后，他没有把侨乡故事讲成单纯的“出海成功再衣锦还乡”。碉楼也留下地方不安、家庭期待与共同防卫的痕迹；跨国联系与本地需要纠缠，才形成开平自己的建筑语言。',
-    vietnamese: 'Nhiều năm sau, anh không kể câu chuyện kiều hương thành một tuyến đơn giản “ra biển thành công rồi vinh quy”. Điêu lâu cũng lưu dấu bất an địa phương, kỳ vọng gia đình và phòng vệ chung; chính sự đan xen giữa liên hệ xuyên quốc gia và nhu cầu bản địa tạo nên ngôn ngữ kiến trúc riêng của Khai Bình.',
-    english: 'Years later, he does not reduce the qiaoxiang story to “go abroad, succeed, return in glory.” Diaolou also carry traces of local insecurity, family expectation, and shared defence; Kaiping’s architectural language emerged from the entanglement of transnational ties and local needs.',
+    chinese: '多年后，梁川仍把原图和两封回信收在一起。纸上的柱廊没有盖成，入口那道拱券却通向多户共同使用的空间；梁海改过的那行字已经褪色。',
+    vietnamese: 'Nhiều năm sau, Lương Xuyên vẫn giữ bản vẽ gốc cùng hai lá thư hồi âm. Hàng cột trên giấy không được xây, nhưng vòm cuốn ở lối vào dẫn vào không gian nhiều hộ cùng sử dụng; dòng chữ Lương Hải sửa đã phai màu.',
+    english: 'Years later, Liang Chuan still keeps the original sketch with the two replies. The paper colonnade was never built, but the entrance arch leads into space shared by several households; the line Liang Hai revised has faded.',
   ),
 ];
 
@@ -543,8 +543,6 @@ const _kaipingWordSpecs = <_KaipingWordSpec>[
 ];
 
 WordEntry _kaipingWord(_KaipingWordSpec spec) {
-  final secondChinese = '在开平故事里，“${spec.word}”帮助解释人物为什么改变选择。';
-  final thirdChinese = '发现卡片用“${spec.word}”帮助理解碉楼的历史或建筑机制。';
   return WordEntry(
     word: spec.word,
     pinyin: spec.pinyin,
@@ -561,16 +559,16 @@ WordEntry _kaipingWord(_KaipingWordSpec spec) {
         english: spec.exampleEnglish,
       ),
       WordExample(
-        chinese: secondChinese,
-        pinyin: _kaipingPinyin(secondChinese),
-        vietnamese: 'Trong câu chuyện Khai Bình, từ “${spec.word}” giúp giải thích vì sao nhân vật thay đổi lựa chọn.',
-        english: 'In the Kaiping story, “${spec.word}” helps explain why the character changes his choice.',
+        chinese: spec.exampleChinese,
+        pinyin: _kaipingPinyin(spec.exampleChinese),
+        vietnamese: spec.exampleVietnamese,
+        english: spec.exampleEnglish,
       ),
       WordExample(
-        chinese: thirdChinese,
-        pinyin: _kaipingPinyin(thirdChinese),
-        vietnamese: 'Thẻ Khám phá dùng “${spec.word}” để giúp hiểu cơ chế lịch sử hoặc kiến trúc của điêu lâu.',
-        english: 'A Discovery card uses “${spec.word}” to support understanding of a historical or architectural diaolou mechanism.',
+        chinese: spec.exampleChinese,
+        pinyin: _kaipingPinyin(spec.exampleChinese),
+        vietnamese: spec.exampleVietnamese,
+        english: spec.exampleEnglish,
       ),
     ],
   );
@@ -580,16 +578,16 @@ final kaipingDiaolouWords =
     List<WordEntry>.unmodifiable(_kaipingWordSpecs.map(_kaipingWord));
 
 const _kaipingDiscoveryIndexes = <List<int>>[
-  [0],
-  [1],
+  [0, 2],
+  [1, 3],
   [0, 2],
   [2, 5],
-  [0, 3],
-  [0, 4],
-  [3, 5],
-  [2, 6],
-  [5, 6],
-  [3, 7],
+  [0, 3, 5],
+  [0, 4, 6],
+  [3, 5, 6],
+  [2, 6, 7],
+  [4, 5, 6],
+  [3, 6, 7],
 ];
 
 const _kaipingAgent = PhoenixLanguageLevelAgent();

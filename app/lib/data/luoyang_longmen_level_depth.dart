@@ -80,16 +80,16 @@ WordEntry _longmenStoryWord({
         english: sourceEnglish,
       ),
       WordExample(
-        chinese: '故事原句：$sourceSentence',
-        pinyin: canonicalPinyin('故事原句：$sourceSentence'),
-        vietnamese: 'Câu gốc trong truyện: $sourceVietnamese',
-        english: 'Story source: $sourceEnglish',
+        chinese: sourceSentence,
+        pinyin: canonicalPinyin(sourceSentence),
+        vietnamese: sourceVietnamese,
+        english: sourceEnglish,
       ),
       WordExample(
-        chinese: '回看故事原句：$sourceSentence',
-        pinyin: canonicalPinyin('回看故事原句：$sourceSentence'),
-        vietnamese: 'Xem lại câu gốc trong truyện: $sourceVietnamese',
-        english: 'Revisit the story sentence: $sourceEnglish',
+        chinese: sourceSentence,
+        pinyin: canonicalPinyin(sourceSentence),
+        vietnamese: sourceVietnamese,
+        english: sourceEnglish,
       ),
     ],
   );
@@ -198,16 +198,8 @@ List<DiscoveryEntry> _approvedLongmenDiscoveries(
   int level,
   List<DiscoveryEntry> discoveries,
 ) {
-  if (level <= 2) {
-    return List<DiscoveryEntry>.unmodifiable(discoveries.take(1));
-  }
-  if (discoveries.length <= 2) {
-    return List<DiscoveryEntry>.unmodifiable(discoveries);
-  }
-  return List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
-    discoveries[1],
-    discoveries.last,
-  ]);
+  final target = level <= 4 ? 2 : 3;
+  return List<DiscoveryEntry>.unmodifiable(discoveries.take(target));
 }
 
 JourneyLevelContent luoyangLongmenGoldLevelContent(int requestedLevel) {

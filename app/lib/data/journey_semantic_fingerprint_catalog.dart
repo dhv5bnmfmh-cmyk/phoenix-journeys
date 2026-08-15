@@ -1,7 +1,10 @@
 import 'guangzhou_chen_clan_one_pass.dart';
 import 'hangzhou_west_lake_one_pass.dart';
+import 'kaiping_diaolou_gold_content.dart';
 import 'journey_expansion_catalog.dart';
 import 'journey_semantic_fingerprint_baseline_snapshot.dart' as baseline;
+import 'luoyang_longmen_level_depth.dart';
+import 'luoyang_longmen_one_pass.dart';
 import 'summer_palace_adaptive_story_levels.dart';
 
 /// Machine-controlled dimensions used by the Phoenix semantic anti-template gate.
@@ -229,6 +232,40 @@ enum NarrativeMechanismFamily {
   weekendBeforeMemoryClinic,
   spouseAcknowledgesFearAndKeepsCard,
   embodiedRecognitionEndsHiddenMemoryExam,
+
+  // Reusable families introduced by evidence-bound equal co-authorship.
+  sharedCreditBeginsWithEvidencePledge,
+  equalCollaboratorsWithMutualCreditBoundary,
+  publishSharedArtifactWithDefensibleSources,
+  aestheticCompletionVsJointAccountability,
+  destructiveRemovalToPreserveJointAccountability,
+  coauthorCreditBoundaryForcesDeletion,
+  sourcedTimelineReplacesUnsupportedClimax,
+  soloVisualJudgmentToPrecommittedSourceReview,
+  mutualCreditAfterJointVerification,
+  inscriptionDamageAndPhotographBoundRepresentation,
+  unsupportedLayerEmbodiesUnsharedRisk,
+  editingTimelineRebuiltAroundSourceLayers,
+  deliveryWindowAfterSunkRendering,
+  collaboratorSuppliesSourcesAndSharesLiability,
+  evidenceBoundaryNegotiationPreservesCoauthorship,
+
+  // Reusable families introduced by transnational kinship negotiation.
+  conditionalFamilyContributionArrivesFromAway,
+  separatedSiblingsRenegotiateSharedResponsibility,
+  redirectPrivateContributionIntoCommunalUse,
+  privateCommemorationVsCommunalSafety,
+  riskReturnToRequestCollectiveConsent,
+  replyRewritesPrivateOwnershipAsSharedPart,
+  communalConstructionContinuesWithFamilyCommitment,
+  inheritedCopyingModelToLocalRecombination,
+  fadedRevisionBesideUnbuiltPrivatePlan,
+  communalTowerFunctionReorganizesImportedForm,
+  returnedSketchAndLettersRecordNegotiation,
+  villageRoutesAndSharedInteriorGovernPlan,
+  replyWindowBeforeConstructionCommitment,
+  distantSiblingAcceptsAndExtendsSharedDuty,
+  transnationalLetterExchangeReallocatesFamilyBuildingDuty,
 }
 
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
@@ -987,6 +1024,93 @@ final hangzhouWestLakeReopenedSemanticFingerprint = JourneySemanticFingerprint(
 );
 
 const _summerPalace = 'beijing-summer-palace';
+const _longmen = luoyangLongmenJourneyId;
+const _kaiping = kaipingDiaolouJourneyId;
+
+NarrativeMechanismEvidence _activeEvidence(
+  String journeyId,
+  NarrativeSemanticDimension dimension,
+  NarrativeMechanismFamily mechanism,
+  List<String> sourceTexts,
+  String rationale,
+) => NarrativeMechanismEvidence(
+  journeyId: journeyId,
+  dimension: dimension,
+  mechanism: mechanism,
+  activeSourceId: activeGoldStorySourceId,
+  sourceTexts: List<String>.unmodifiable(sourceTexts),
+  semanticRationale: rationale,
+);
+
+final longmenGoldSemanticFingerprint = JourneySemanticFingerprint(
+  journeyId: _longmen,
+  surfaceIdentity: 'Lin Yan / Zhou Cheng / Longmen digital short / unsupported face layer / source list',
+  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
+    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.sharedCreditBeginsWithEvidencePledge,
+    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.creatorProvingIndependentJudgment,
+    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.equalCollaboratorsWithMutualCreditBoundary,
+    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.publishSharedArtifactWithDefensibleSources,
+    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.aestheticCompletionVsJointAccountability,
+    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.destructiveRemovalToPreserveJointAccountability,
+    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.coauthorCreditBoundaryForcesDeletion,
+    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.sourcedTimelineReplacesUnsupportedClimax,
+    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.soloVisualJudgmentToPrecommittedSourceReview,
+    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.mutualCreditAfterJointVerification,
+    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.inscriptionDamageAndPhotographBoundRepresentation,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.unsupportedLayerEmbodiesUnsharedRisk,
+    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.editingTimelineRebuiltAroundSourceLayers,
+    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.deliveryWindowAfterSunkRendering,
+    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.collaboratorSuppliesSourcesAndSharesLiability,
+    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.evidenceBoundaryNegotiationPreservesCoauthorship,
+  }),
+  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
+    _activeEvidence(_longmen, NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.sharedCreditBeginsWithEvidencePledge, ['两人约定共同署名，也共同为每个复原画面的依据负责。'], 'The work begins with a reciprocal credit-and-evidence pledge, so accountability is relational before the disputed layer exists.'),
+    _activeEvidence(_longmen, NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.equalCollaboratorsWithMutualCreditBoundary, ['这一层没有依据，就不能放在我们两个人的名字下面。', '导出前，周澄没有删掉任何一个名字'], 'Zhou Cheng can withhold shared credit from unsupported work, while the final preserved credit depends on Lin Yan honoring their equal-author agreement.'),
+    _activeEvidence(_longmen, NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.aestheticCompletionVsJointAccountability, ['林砚为了让转场完整，另做了一层“补全脸部”的模型。', '这一层没有依据，就不能放在我们两个人的名字下面。'], 'The desired seamless image now risks attributing an unsupported claim to both collaborators.'),
+    _activeEvidence(_longmen, NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.destructiveRemovalToPreserveJointAccountability, ['最后亲手关掉那一层。'], 'Lin Yan destroys usable completed work so the shared artifact can remain jointly accountable.'),
+    _activeEvidence(_longmen, NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.coauthorCreditBoundaryForcesDeletion, ['又看见片尾并列的两个名字，最后亲手关掉那一层。'], 'The co-authorship boundary is physically visible at the moment she deletes the unsupported layer.'),
+    _activeEvidence(_longmen, NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.sourcedTimelineReplacesUnsupportedClimax, ['短片少了最顺滑的镜头；周澄把老照片和来源清单重新接回时间线。'], 'Deletion visibly removes the smooth climax and causes the sourced evidence sequence to return to the edit.'),
+    _activeEvidence(_longmen, NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.soloVisualJudgmentToPrecommittedSourceReview, ['两人的合作也变了：林砚开始在建模前先问，每一层证据究竟能支持到哪里。'], 'Her future behavior moves source review before modeling and makes Zhou Cheng part of authorship rather than a final checker.'),
+    _activeEvidence(_longmen, NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.mutualCreditAfterJointVerification, ['林砚逐项核完，把那一层改名为“无依据，不使用”，按下导出。'], 'The film is exported only after joint evidence work is checked and the unsupported layer remains named but unused.'),
+    _activeEvidence(_longmen, NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.inscriptionDamageAndPhotographBoundRepresentation, ['题记留下发愿造像者和完成时间，像的脸部却已残损。', '官方复原以历史老照片为基础'], 'Longmen-specific inscription, present loss, and historical photographs define different representational limits and create the dispute.'),
+    _activeEvidence(_longmen, NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.evidenceBoundaryNegotiationPreservesCoauthorship, ['这一层没有依据，就不能放在我们两个人的名字下面。', '最后亲手关掉那一层。', '周澄没有删掉任何一个名字'], 'An equal collaborator invokes shared-liability boundaries; destructive deletion then preserves both truthful representation and co-authorship.'),
+  ]),
+);
+
+final kaipingGoldCandidateSemanticFingerprint = JourneySemanticFingerprint(
+  journeyId: _kaiping,
+  surfaceIdentity: 'Liang Chuan / Liang Hai / Kaiping communal tower / returned sketch and letters',
+  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
+    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.conditionalFamilyContributionArrivesFromAway,
+    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.localMoverTestingBelonging,
+    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.separatedSiblingsRenegotiateSharedResponsibility,
+    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.redirectPrivateContributionIntoCommunalUse,
+    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.privateCommemorationVsCommunalSafety,
+    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.riskReturnToRequestCollectiveConsent,
+    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.replyRewritesPrivateOwnershipAsSharedPart,
+    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.communalConstructionContinuesWithFamilyCommitment,
+    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.inheritedCopyingModelToLocalRecombination,
+    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.fadedRevisionBesideUnbuiltPrivatePlan,
+    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.communalTowerFunctionReorganizesImportedForm,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.returnedSketchAndLettersRecordNegotiation,
+    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.villageRoutesAndSharedInteriorGovernPlan,
+    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.replyWindowBeforeConstructionCommitment,
+    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.distantSiblingAcceptsAndExtendsSharedDuty,
+    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.transnationalLetterExchangeReallocatesFamilyBuildingDuty,
+  }),
+  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
+    _activeEvidence(_kaiping, NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.conditionalFamilyContributionArrivesFromAway, ['这份投入只用于家里的独楼；若要改作别用，就寄还给他。'], 'The overseas brother opens the Story with a conditional family contribution that makes later reallocation relationally costly.'),
+    _activeEvidence(_kaiping, NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.separatedSiblingsRenegotiateSharedResponsibility, ['梁川把改过的众楼图和退还投入的承诺一起寄给哥哥。', '改写成“我们家在众楼里的一份”'], 'The brothers act across distance through proposal, risk of return, and a written counter-commitment that changes ownership language.'),
+    _activeEvidence(_kaiping, NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.privateCommemorationVsCommunalSafety, ['这份投入只用于家里的独楼', '村里几户人家正合建一座众楼，遇到危险时可临时避难。'], 'A private family monument and its condition compete with the village need for a jointly used refuge.'),
+    _activeEvidence(_kaiping, NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.riskReturnToRequestCollectiveConsent, ['家里放弃独建；梁川把改过的众楼图和退还投入的承诺一起寄给哥哥。'], 'Liang Chuan enacts the choice while accepting that his brother may withdraw the contribution.'),
+    _activeEvidence(_kaiping, NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.replyRewritesPrivateOwnershipAsSharedPart, ['改写成“我们家在众楼里的一份”'], 'Liang Hai’s written revision converts the disputed private tower into a bounded family share of collective responsibility.'),
+    _activeEvidence(_kaiping, NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.communalConstructionContinuesWithFamilyCommitment, ['众楼继续施工；原图留在箱底。'], 'The reply directly permits construction to continue while the private design is materially set aside.'),
+    _activeEvidence(_kaiping, NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.inheritedCopyingModelToLocalRecombination, ['只把拱券留在入口，没有让柱廊占掉多户避难的位置。', '梁海下一封信问的不是“像不像原图”'], 'Both brothers move from fidelity to the returned sketch toward selective form and accountable communal use.'),
+    _activeEvidence(_kaiping, NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.fadedRevisionBesideUnbuiltPrivatePlan, ['纸上的柱廊没有盖成，入口那道拱券却通向多户共同使用的空间；梁海改过的那行字已经褪色。'], 'The ending holds absent private form, surviving selected form, shared use, and the brother’s faded revision in one restrained image.'),
+    _activeEvidence(_kaiping, NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.communalTowerFunctionReorganizesImportedForm, ['外面的样子可以带回来，里面得让大家一起用。', '只把拱券留在入口，没有让柱廊占掉多户避难的位置。'], 'The Kaiping distinction between imported architectural influence and communal-tower use directly reorganizes the building plan.'),
+    _activeEvidence(_kaiping, NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.transnationalLetterExchangeReallocatesFamilyBuildingDuty, ['若要改作别用，就寄还给他。', '梁川把改过的众楼图和退还投入的承诺一起寄给哥哥。', '改写成“我们家在众楼里的一份”'], 'A transnational sibling exchange changes who the family contribution serves and makes continued communal building the visible result.'),
+  ]),
+);
 
 final _summerPalaceBaselineFingerprint =
     _convertBaselineFingerprint(baseline.approvedGoldSemanticFingerprints[_summerPalace]!);
@@ -1023,6 +1147,7 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
             : _convertBaselineFingerprint(entry.value),
   _guangzhou: guangzhouChenClanGoldSemanticFingerprint,
   _suzhou: suzhouGardenGoldSemanticFingerprint,
+  _longmen: longmenGoldSemanticFingerprint,
 });
 
 String activeCanonicalGoldStoryText(String journeyId) {
@@ -1041,6 +1166,12 @@ String activeCanonicalGoldStoryText(String journeyId) {
   }
   if (journeyId == _suzhou) {
     return suzhouGardenCanonicalLevelContent(10).storyParagraphs.join('\n');
+  }
+  if (journeyId == _longmen) {
+    return List<String>.generate(10, (index) => luoyangLongmenGoldLevelContent(index + 1).storyParagraphs.join('\n')).join('\n');
+  }
+  if (journeyId == _kaiping) {
+    return List<String>.generate(10, (index) => kaipingDiaolouGoldLevelContent(index + 1).storyParagraphs.join('\n')).join('\n');
   }
   return baseline.activeCanonicalGoldStoryText(journeyId);
 }
