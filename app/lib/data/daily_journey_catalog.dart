@@ -5,7 +5,7 @@ import 'beijing_story_catalog.dart';
 import 'daily_journey_experience.dart';
 import 'extended_journey_catalog.dart';
 import 'journey_data.dart';
-import 'journey_expansion_catalog.dart';
+import 'journey_expansion_catalog.dart' hide quanzhouKaiyuanJourney;
 import 'journey_expansion_batch_two.dart';
 import 'journey_expansion_batch_three.dart';
 import 'journey_expansion_batch_four.dart';
