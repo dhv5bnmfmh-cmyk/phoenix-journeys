@@ -19,23 +19,23 @@ void main() {
     );
   });
 
-  test('approved Gold catalog has ten identities and forty-five clean pairs', () {
-    expect(approvedGoldSemanticFingerprints, hasLength(10));
+  test('approved Gold catalog has eleven identities and fifty-five clean pairs', () {
+    expect(approvedGoldSemanticFingerprints, hasLength(11));
     final audit = auditApprovedGoldSemanticPairs();
-    expect(audit, hasLength(45));
+    expect(audit, hasLength(55));
     expect(audit.where((item) => item.ruleA || item.ruleB), isEmpty);
   });
 
-  test('Kaiping candidate has active evidence and compares with Longmen', () {
-    expect(
-      semanticEvidenceContractErrors(kaipingGoldCandidateSemanticFingerprint),
-      isEmpty,
-    );
-    final gate =
-        evaluateFutureGoldSemanticCandidate(kaipingGoldCandidateSemanticFingerprint);
-    expect(gate.comparisons, hasLength(10));
-    expect(gate.comparisons.where((item) => item.isCollision), isEmpty);
-    final longmen = gate.comparisons.singleWhere(
+  test('Kaiping is approved Gold and remains distinct from the other ten', () {
+    final kaiping = approvedGoldSemanticFingerprints[kaipingDiaolouJourneyId];
+    expect(kaiping, same(kaipingGoldCandidateSemanticFingerprint));
+    expect(semanticEvidenceContractErrors(kaiping!), isEmpty);
+    expect(semanticEvidenceProvenanceErrors(kaiping), isEmpty);
+
+    final comparisons = semanticDifferenceMatrixAgainstApprovedGold(kaiping);
+    expect(comparisons, hasLength(10));
+    expect(comparisons.where((item) => item.isCollision), isEmpty);
+    final longmen = comparisons.singleWhere(
       (item) =>
           item.journeyA == luoyangLongmenJourneyId ||
           item.journeyB == luoyangLongmenJourneyId,
