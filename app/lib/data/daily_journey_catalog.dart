@@ -10,6 +10,7 @@ import 'journey_expansion_batch_two.dart';
 import 'journey_expansion_batch_three.dart';
 import 'journey_expansion_batch_four.dart';
 import 'journey_expansion_batch_five.dart';
+import 'quanzhou_kaiyuan_gold_content.dart';
 import 'summer_palace_journey.dart';
 import 'special_journey_catalog.dart';
 
@@ -502,6 +503,9 @@ final dailyStorySources = <StorySourceRecord>[
   ...xianStorySources,
   ...extendedJourneySources,
   ...journeyExpansionSources,
+  ...quanzhouKaiyuanSources.where(
+    (source) => !journeyExpansionSources.any((existing) => existing.id == source.id),
+  ),
   ...journeyExpansionBatchTwoSources,
   ...journeyExpansionBatchThreeSources,
   ...journeyExpansionBatchFourSources,
@@ -514,7 +518,10 @@ final dailyJourneyRecords = <JourneyContentRecord>[
   shanghaiBundJourney,
   xianCityWallJourney,
   ...extendedJourneyRecords,
-  ...journeyExpansionRecords,
+  ...journeyExpansionRecords.where(
+    (journey) => journey.id != quanzhouKaiyuanJourneyId,
+  ),
+  quanzhouKaiyuanJourney,
   ...journeyExpansionBatchTwoRecords,
   ...journeyExpansionBatchThreeRecords,
   ...journeyExpansionBatchFourRecords,
@@ -581,7 +588,10 @@ final dailyJourneyExperiences = <DailyJourneyExperience>[
     expressQuestion: '城墙的闭合形状与周遥连续的生活路线怎样形成对照？',
   ),
   ...extendedJourneyExperiences,
-  ...journeyExpansionExperiences,
+  ...journeyExpansionExperiences.where(
+    (journey) => journey.id != quanzhouKaiyuanJourneyId,
+  ),
+  quanzhouKaiyuanExperience,
   ...journeyExpansionBatchTwoExperiences,
   ...journeyExpansionBatchThreeExperiences,
   ...journeyExpansionBatchFourExperiences,

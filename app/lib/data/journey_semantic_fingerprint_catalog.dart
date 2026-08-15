@@ -5,6 +5,7 @@ import 'journey_expansion_catalog.dart';
 import 'journey_semantic_fingerprint_baseline_snapshot.dart' as baseline;
 import 'luoyang_longmen_level_depth.dart';
 import 'luoyang_longmen_one_pass.dart';
+import 'quanzhou_kaiyuan_gold_content.dart';
 import 'summer_palace_adaptive_story_levels.dart';
 
 /// Machine-controlled dimensions used by the Phoenix semantic anti-template gate.
@@ -266,6 +267,24 @@ enum NarrativeMechanismFamily {
   replyWindowBeforeConstructionCommitment,
   distantSiblingAcceptsAndExtendsSharedDuty,
   transnationalLetterExchangeReallocatesFamilyBuildingDuty,
+
+  // Reusable families introduced by an enacted ordination threshold and sibling-home renegotiation.
+  ordinationDayMakesDeferredChangeImmediate,
+  adultVocationChangerSeekingUnchangedFallback,
+  adultSiblingsSeparateKinshipFromFrozenHousehold,
+  enterNewVocationWithoutOutsourcingHouseholdStasis,
+  enduringKinshipVsDemandForUnchangedHomeAccess,
+  relinquishAutomaticHouseholdAccess,
+  keyTransferredBeforeRitualThreshold,
+  householdCanChangeWhileFutureWelcomeRequiresKnock,
+  fallbackEntitlementToRequestedBelonging,
+  emptyWaistAndRetainedKeyWithoutReturn,
+  ordinationPlatformMakesIdentityChangeEnacted,
+  householdKeyEmbodiesRelinquishedFallback,
+  domesticDoorToOrdinationThreshold,
+  ordinationCeremonyMakesTodayNonDeferrable,
+  sisterRefusesFrozenWaitingWithoutBlockingVocation,
+  ritualThresholdEndsOutsourcedHouseholdStasis,
 }
 
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
@@ -1026,6 +1045,7 @@ final hangzhouWestLakeReopenedSemanticFingerprint = JourneySemanticFingerprint(
 const _summerPalace = 'beijing-summer-palace';
 const _longmen = luoyangLongmenJourneyId;
 const _kaiping = kaipingDiaolouJourneyId;
+const _quanzhou = quanzhouKaiyuanJourneyId;
 
 NarrativeMechanismEvidence _activeEvidence(
   String journeyId,
@@ -1112,6 +1132,42 @@ final kaipingGoldCandidateSemanticFingerprint = JourneySemanticFingerprint(
   ]),
 );
 
+
+final quanzhouKaiyuanGoldSemanticFingerprint = JourneySemanticFingerprint(
+  journeyId: _quanzhou,
+  surfaceIdentity: 'Xu An / Xu Ning / Kaiyuan ordination threshold / returned household key / knock-before-opening',
+  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
+    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.ordinationDayMakesDeferredChangeImmediate,
+    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.adultVocationChangerSeekingUnchangedFallback,
+    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.adultSiblingsSeparateKinshipFromFrozenHousehold,
+    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.enterNewVocationWithoutOutsourcingHouseholdStasis,
+    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.enduringKinshipVsDemandForUnchangedHomeAccess,
+    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.relinquishAutomaticHouseholdAccess,
+    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.keyTransferredBeforeRitualThreshold,
+    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.householdCanChangeWhileFutureWelcomeRequiresKnock,
+    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.fallbackEntitlementToRequestedBelonging,
+    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.emptyWaistAndRetainedKeyWithoutReturn,
+    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.ordinationPlatformMakesIdentityChangeEnacted,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.householdKeyEmbodiesRelinquishedFallback,
+    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.domesticDoorToOrdinationThreshold,
+    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.ordinationCeremonyMakesTodayNonDeferrable,
+    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.sisterRefusesFrozenWaitingWithoutBlockingVocation,
+    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.ritualThresholdEndsOutsourcedHouseholdStasis,
+  }),
+  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
+    _activeEvidence(_quanzhou, NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.ordinationDayMakesDeferredChangeImmediate, ['民国初年，泉州开元寺仍有开坛传戒的仪式。'], 'A verified ordination day makes the life change immediate instead of a deferred intention.'),
+    _activeEvidence(_quanzhou, NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.adultSiblingsSeparateKinshipFromFrozenHousehold, ['许宁说，她不会不认这个弟弟，但不能永远替他守着一间空房。'], 'The sister explicitly separates enduring kinship from an obligation to freeze household space.'),
+    _activeEvidence(_quanzhou, NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.enduringKinshipVsDemandForUnchangedHomeAccess, ['你要我认你这个弟弟，还是要我替你把以前的日子也一起锁住？'], 'The human conflict is continued sibling belonging versus demanding that another household remain unchanged.'),
+    _activeEvidence(_quanzhou, NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.relinquishAutomaticHouseholdAccess, ['房间别替我留了。我以后回来，先敲门。'], 'Xu An enacts the choice by ending the requirement for a preserved room and automatic entry.'),
+    _activeEvidence(_quanzhou, NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.keyTransferredBeforeRitualThreshold, ['把钥匙放进姐姐手里'], 'The relinquishment becomes irreversible as a physical transfer before he proceeds toward ordination.'),
+    _activeEvidence(_quanzhou, NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.householdCanChangeWhileFutureWelcomeRequiresKnock, ['你敲，我就开。'], 'The sister preserves welcome while changing the future access rule; belonging remains without restoring the frozen room.'),
+    _activeEvidence(_quanzhou, NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.fallbackEntitlementToRequestedBelonging, ['没有再问那间房会给谁，也没有要求姐姐保证下一次回来时桌椅、床铺仍在原处。'], 'His future behavior stops demanding material proof that the household must remain unchanged for him.'),
+    _activeEvidence(_quanzhou, NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.emptyWaistAndRetainedKeyWithoutReturn, ['手在腰边摸了一下，只摸到空处。许宁站在原地，掌心里的钥匙没有再递回去。'], 'The ending keeps the cost tactile and unreversed rather than explaining a moral.'),
+    _activeEvidence(_quanzhou, NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.ordinationPlatformMakesIdentityChangeEnacted, ['受戒的仪式没有替他解决姐弟之间的问题，却把“以后再说”压成了今天必须完成的动作。'], 'The verified ritual threshold causes action without being used as a moral lesson or touristic backdrop.'),
+    _activeEvidence(_quanzhou, NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.ritualThresholdEndsOutsourcedHouseholdStasis, ['受戒的仪式没有替他解决姐弟之间的问题，却把“以后再说”压成了今天必须完成的动作。', '把钥匙放进姐姐手里'], 'An enacted religious threshold forces a sibling to stop outsourcing the cost of keeping his former household life unchanged.'),
+  ]),
+);
+
 final _summerPalaceBaselineFingerprint =
     _convertBaselineFingerprint(baseline.approvedGoldSemanticFingerprints[_summerPalace]!);
 
@@ -1149,6 +1205,7 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
   _suzhou: suzhouGardenGoldSemanticFingerprint,
   _longmen: longmenGoldSemanticFingerprint,
   _kaiping: kaipingGoldCandidateSemanticFingerprint,
+  _quanzhou: quanzhouKaiyuanGoldSemanticFingerprint,
 });
 
 String activeCanonicalGoldStoryText(String journeyId) {
@@ -1173,6 +1230,9 @@ String activeCanonicalGoldStoryText(String journeyId) {
   }
   if (journeyId == _kaiping) {
     return List<String>.generate(10, (index) => kaipingDiaolouGoldLevelContent(index + 1).storyParagraphs.join('\n')).join('\n');
+  }
+  if (journeyId == _quanzhou) {
+    return List<String>.generate(10, (index) => quanzhouKaiyuanGoldLevelContent(index + 1).storyParagraphs.join('\n')).join('\n');
   }
   return baseline.activeCanonicalGoldStoryText(journeyId);
 }

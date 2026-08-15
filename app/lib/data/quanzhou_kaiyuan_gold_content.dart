@@ -642,7 +642,7 @@ const _quanzhouDiscoveryIndexes = <List<int>>[
   [2, 3, 6],
   [3, 4, 5],
   [2, 6, 7],
-  [0, 4, 7],
+  [2, 4, 7],
 ];
 
 const _quanzhouAgent = PhoenixLanguageLevelAgent();

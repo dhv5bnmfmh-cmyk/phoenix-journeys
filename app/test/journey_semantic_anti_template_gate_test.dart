@@ -14,6 +14,7 @@ const _goldIds = <String>{
   'suzhou-humble-administrators-garden',
   'luoyang-longmen-grottoes',
   'jiangmen-kaiping-diaolou',
+  'quanzhou-kaiyuan-temple',
 };
 
 JourneySemanticFingerprint _synthetic(

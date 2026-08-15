@@ -283,6 +283,35 @@ const kaipingGoldNarrativeDna = JourneyNarrativeDnaRecord(
       'conditional-sketch-communal-need-private-plan-risk-revision-letter-counter-revision-construction-selective-form-faded-ending',
 );
 
+
+const quanzhouKaiyuanGoldNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'quanzhou-kaiyuan-temple',
+  narrativeIdentity: 'ordination-threshold-forces-relinquishment-of-unchanged-household-fallback',
+  protagonistIdentity: 'Xu-An-fictional-early-Republican-adult-entering-monastic-ordination',
+  protagonistAgeIdentity: 'fictional-adult-younger-brother',
+  protagonistArchetype: 'adult-changing-vocation-while-clinging-to-automatic-home-fallback',
+  openingSituation: 'ordination-day-at-Kaiyuan-makes-deferred-household-question-immediate',
+  storyGoal: 'proceed-with-ordination-without-requiring-sister-to-freeze-his-former-home-life',
+  locationMechanism: 'verified-Kaiyuan-ordination-platform-and-Republican-ordination-practice-make-vocation-change-enacted-here',
+  movementPattern: 'household-key-in-brothers-hand-to-sisters-hand-to-ordination-platform',
+  conflictType: 'continuing-sibling-belonging-vs-demand-for-unchanged-household-access',
+  choiceType: 'hand-over-key-and-stop-requiring-empty-room-to-be-kept-unchanged',
+  climaxType: 'key-transferred-to-sister-before-walking-toward-ordination',
+  consequenceType: 'sister-may-reconfigure-home-and-future-return-requires-a-knock',
+  emotionalArc: 'certainty-with-hidden-fallback-to-defensiveness-to-recognition-of-sisters-cost-to-relinquishment-to-restrained-belonging',
+  historicalLearningMechanism: 'verified-ordination-practice-causes-Story-threshold-while-Song-Yuan-maritime-and-material-history-remain-in-Discovery',
+  resolutionType: 'kinship-continues-without-automatic-unchanged-access',
+  endingMechanism: 'Xu-An-touches-empty-key-place-while-sister-keeps-key',
+  memoryAnchorType: 'empty-key-place-and-key-kept-in-sisters-palm',
+  achievementType: 'requested-belonging-after-life-change',
+  rewardSymbolism: 'knock-before-opening-marks-continued-kinship-without-frozen-home',
+  temporalPattern: 'single-Republican-ordination-day',
+  supportingStructure: 'adult-sister-refuses-frozen-waiting-without-blocking-brothers-vocation',
+  centralMetaphor: 'belonging-can-remain-while-the-door-no-longer-opens-automatically',
+  narrativeVoice: 'third-person-close-to-Xu-An-with-restrained-sibling-action',
+  storyRhythm: 'ordination-arrival-fallback-request-sister-boundary-key-transfer-cost-sister-welcome-walk-empty-waist',
+);
+
 final approvedNarrativeDnaCatalog =
     List<JourneyNarrativeDnaRecord>.unmodifiable(<JourneyNarrativeDnaRecord>[
   for (final record in baseline.approvedNarrativeDnaCatalog)
@@ -300,6 +329,7 @@ final approvedNarrativeDnaCatalog =
   suzhouGardenGoldNarrativeDna,
   longmenGoldNarrativeDna,
   kaipingGoldNarrativeDna,
+  quanzhouKaiyuanGoldNarrativeDna,
 ]);
 
 int duplicatedMajorDimensions(

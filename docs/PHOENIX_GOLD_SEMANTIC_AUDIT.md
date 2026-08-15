@@ -1,18 +1,19 @@
 # Phoenix Approved Gold Semantic Audit
 
 **Status:** DETERMINISTIC AUDIT RECORD  
-**Catalog scope:** eleven approved Gold Journeys
+**Catalog scope:** twelve approved Gold Journeys
 **Protected baseline:** seven approved Gold Journeys / 21 unique pairs  
 **Source of truth:** `app/lib/data/journey_semantic_fingerprint_catalog.dart`  
-**Pair count:** 55 unique pairs
+**Pair count:** 66 unique pairs
 
 This document records the deterministic output of the normalized semantic fingerprint catalog. It does not override the catalog. If a fingerprint changes, regenerate/review this audit from the canonical registry and active Story evidence.
 
 The original seven-Gold baseline and its 21 pair explanations remain protected.
 Guangzhou, Suzhou, and Founder-approved Longmen historically extended that state
 to ten Gold Stories and 45 comparisons. Founder-approved Kaiping now extends the
-current catalog to eleven Gold Stories and 55 comparisons. The executable catalog
-and pair audit are authoritative for the current result.
+current catalog to eleven Gold Stories and 55 comparisons. Founder-authorized Quanzhou
+Gold remediation now extends the registry to twelve Gold Stories and 66 comparisons.
+The executable catalog and pair audit are authoritative for the current result.
 
 Collision thresholds remain binding and unchanged:
 
