@@ -80,7 +80,8 @@ void main() {
           luoyangLongmenOnePassLevels[4].discoveries.length,
           reason: journey.id,
         );
-      } else if (journey.id == 'jiangmen-kaiping-diaolou') {
+      } else if (journey.id == 'jiangmen-kaiping-diaolou' ||
+          journey.id == 'quanzhou-kaiyuan-temple') {
         expect(journey.discoveries.length, 3, reason: journey.id);
       } else if (journey.id == suzhouGardenJourney.id) {
         expect(

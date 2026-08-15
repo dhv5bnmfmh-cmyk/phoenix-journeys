@@ -97,8 +97,11 @@ void main() {
       ).storyParagraphs.join());
     }
     for (var index = 1; index < stories.length; index++) {
-      expect(stories[index], isNot(stories[index - 1]));
-      expect(stories[index], contains(stories[index - 1]));
+      expect(stories[index], isNot(stories[index - 1]), reason: 'Lv${index + 1} must add semantic depth');
+      expect(stories[index], contains('许安'), reason: 'Lv${index + 1} protagonist invariant');
+      expect(stories[index], contains('许宁'), reason: 'Lv${index + 1} relationship invariant');
+      expect(stories[index], contains('把钥匙放进姐姐手里'), reason: 'Lv${index + 1} enacted-choice invariant');
+      expect(stories[index], contains('房间别替我留了'), reason: 'Lv${index + 1} cost/consequence spine');
     }
     expect(stories[4], contains('你要我认你这个弟弟'));
     expect(stories[7], contains('你敲，我就开'));

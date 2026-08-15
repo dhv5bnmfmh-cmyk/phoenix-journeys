@@ -752,7 +752,7 @@ final quanzhouKaiyuanJourney = JourneyContentRecord(
       JourneyStorySection(
         id: 'story-$index',
         text: _quanzhouBaseLevel.storyParagraphs[index],
-        sourceIds: const ['quanzhou-government-kaiyuan-temple', 'quanzhou-government-buddhism-history'],
+        sourceIds: const ['quanzhou-government-kaiyuan-temple', 'quanzhou-government-buddhism-history', 'quanzhou-religion-kaiyuan'],
       ),
   ],
 );

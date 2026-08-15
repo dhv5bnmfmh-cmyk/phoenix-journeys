@@ -12,7 +12,8 @@ int? _goldDiscoveryCount(String journeyId, int phoenixLevel) {
   if (journeyId == 'beijing-summer-palace' ||
       journeyId == 'suzhou-humble-administrators-garden' ||
       journeyId == 'luoyang-longmen-grottoes' ||
-      journeyId == 'jiangmen-kaiping-diaolou') {
+      journeyId == 'jiangmen-kaiping-diaolou' ||
+      journeyId == 'quanzhou-kaiyuan-temple') {
     return phoenixLevel <= 4 ? 2 : 3;
   }
   return null;
