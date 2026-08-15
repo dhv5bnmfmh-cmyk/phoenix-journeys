@@ -52,6 +52,8 @@ void main() {
           luoyangLongmenOnePassLevels[4].storyParagraphs,
           reason: journey.id,
         );
+      } else if (journey.id == 'jiangmen-kaiping-diaolou') {
+        expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
       } else if (journey.id == 'beijing-summer-palace') {
         expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
         for (final paragraph in journey.content.storyParagraphs) {
@@ -88,6 +90,8 @@ void main() {
           hasLength(luoyangLongmenOnePassLevels[4].discoveries.length),
           reason: journey.id,
         );
+      } else if (journey.id == 'jiangmen-kaiping-diaolou') {
+        expect(journey.discoveries, hasLength(3), reason: journey.id);
       } else if (journey.id == 'beijing-summer-palace') {
         expect(journey.discoveries, hasLength(2), reason: journey.id);
       } else {

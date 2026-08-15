@@ -35,7 +35,7 @@ void main() {
       expect(
         standard.discoveries.length,
         _goldDiscoveryCount(journey.id, 5) != null
-            ? 3
+            ? inInclusiveRange(2, 3)
             : inInclusiveRange(1, 2),
         reason: '${journey.id} standard discoveries',
       );

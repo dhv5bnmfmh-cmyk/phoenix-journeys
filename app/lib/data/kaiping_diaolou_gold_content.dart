@@ -346,9 +346,9 @@ const _kaipingStorySegments = <_KaipingStorySegment>[
   _KaipingStorySegment(
     fromLevel: 1,
     paragraph: 1,
-    chinese: '他最后把原图折起，对工匠说：“外面的样子可以带回来，里面得让大家一起用。”家里放弃独建；梁川把改过的众楼图和退还投入的承诺一起寄给哥哥。',
-    vietnamese: 'Cuối cùng anh gấp bản vẽ lại và nói với người thợ: “Dáng vẻ bên ngoài có thể mang về, nhưng bên trong phải để mọi người cùng dùng.” Gia đình từ bỏ kế hoạch xây riêng; Lương Xuyên gửi cho anh bản vẽ chúng lâu đã sửa cùng lời hứa hoàn lại phần đóng góp.',
-    english: 'At last he folds the original sketch and tells the craftsperson, “The outside forms can come home, but the inside has to work for everyone.” The family gives up its private tower; Liang Chuan sends his brother the revised communal-tower plan together with a promise to return the contribution.',
+    chinese: '梁川最后把原图折起，对工匠说：“外面的样子可以带回来，里面得让大家一起用。”家里放弃独建；梁川把改过的众楼图和退还投入的承诺一起寄给哥哥。',
+    vietnamese: 'Cuối cùng Lương Xuyên gấp bản vẽ lại và nói với người thợ: “Dáng vẻ bên ngoài có thể mang về, nhưng bên trong phải để mọi người cùng dùng.” Gia đình từ bỏ kế hoạch xây riêng; Lương Xuyên gửi cho anh bản vẽ chúng lâu đã sửa cùng lời hứa hoàn lại phần đóng góp.',
+    english: 'At last Liang Chuan folds the original sketch and tells the craftsperson, “The outside forms can come home, but the inside has to work for everyone.” The family gives up its private tower; Liang Chuan sends his brother the revised communal-tower plan together with a promise to return the contribution.',
   ),
   _KaipingStorySegment(
     fromLevel: 6,

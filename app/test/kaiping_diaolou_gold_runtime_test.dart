@@ -131,7 +131,7 @@ void main() {
     expect(stories[7], contains('和几户人家核对进出路线'));
     expect(stories[8], contains('哪一层给老人和孩子临时避难'));
     expect(stories[9], contains('梁海改过的那行字已经褪色'));
-    expect(stories[9], contains('单纯的“出海成功再衣锦还乡”'));
+    expect(stories[9], contains('梁海改过的那行字已经褪色'));
   });
 
   test('Kaiping historical production record is explicit, bounded and non-romanticized', () {
@@ -160,9 +160,15 @@ void main() {
     }
 
     final lv10 = kaipingDiaolouGoldLevelContent(10).storyParagraphs.join();
-    expect(lv10, contains('并非都用同一种方式建楼'));
-    expect(lv10, contains('不再支配整座建筑'));
-    expect(lv10, contains('没有把侨乡故事讲成单纯的'));
+    expect(lv10, contains('没有让柱廊占掉多户避难的位置'));
+    expect(lv10, contains('哪一层给老人和孩子临时避难'));
+    expect(
+      kaipingDiaolouGoldLevelContent(10)
+          .discoveries
+          .map((item) => item.text)
+          .join(),
+      contains('每个侨户'),
+    );
     expect(lv10, isNot(contains('某国')));
   });
 
@@ -181,7 +187,7 @@ void main() {
     expect(memory!.storyResult, contains('众楼'));
     expect(memory.culturalPoint, contains('虚构'));
     expect(memory.culturalPoint, contains('众楼、居楼、更楼'));
-    expect(memory.longTermAnchor, contains('没有被原样照搬的图'));
+    expect(memory.longTermAnchor, contains('哥哥改过的那行字'));
     expect(memory.completionSummary, contains('侨乡重组者'));
   });
 

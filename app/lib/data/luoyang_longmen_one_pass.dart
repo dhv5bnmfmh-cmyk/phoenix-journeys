@@ -354,9 +354,9 @@ class _LongmenStorySegment {
 const _longmenCoreSegments = <_LongmenStorySegment>[
   _LongmenStorySegment(
     fromLevel: 1,
-    chinese: '二十九岁的林砚和周澄合做一段龙门石窟数字短片。两人约定共同署名，也共同为每个复原画面的依据负责。',
-    vietnamese: 'Lâm Nghiên, hai mươi chín tuổi, cùng Chu Trừng làm một phim ngắn kỹ thuật số về Long Môn. Họ thỏa thuận cùng đứng tên và cùng chịu trách nhiệm về căn cứ của từng hình ảnh phục dựng.',
-    english: 'Twenty-nine-year-old Lin Yan and Zhou Cheng are making a digital short about the Longmen Grottoes. They agree to share the credit and responsibility for the evidence behind every restored image.',
+    chinese: '林砚和周澄合做龙门石窟数字短片，约定并列署名，共同为复原依据负责。',
+    vietnamese: 'Lâm Nghiên và Chu Trừng cùng làm phim ngắn kỹ thuật số về Long Môn, thống nhất cùng đứng tên và cùng chịu trách nhiệm về căn cứ phục dựng.',
+    english: 'Lin Yan and Zhou Cheng make a digital short about Longmen, agreeing to share credit and responsibility for its restoration evidence.',
   ),
   _LongmenStorySegment(
     fromLevel: 1,
@@ -366,9 +366,9 @@ const _longmenCoreSegments = <_LongmenStorySegment>[
   ),
   _LongmenStorySegment(
     fromLevel: 1,
-    chinese: '林砚为了让转场完整，另做了一层“补全脸部”的模型。周澄把自己整理的老照片停在画面旁：“这一层没有依据，就不能放在我们两个人的名字下面。”',
-    vietnamese: 'Để đoạn chuyển cảnh trông hoàn chỉnh, Lâm Nghiên làm thêm một lớp mô hình “bù lại khuôn mặt”. Chu Trừng dừng những bức ảnh cũ mình đã sắp xếp cạnh khung hình: “Lớp này không có căn cứ thì không thể đặt dưới tên của cả hai chúng ta.”',
-    english: 'To make the transition feel complete, Lin Yan adds a “completed face” model layer. Zhou Cheng pauses the old photographs she has organized beside the frame. “If this layer has no evidence, it cannot sit under both our names.”',
+    chinese: '林砚为转场做了“补全脸部”模型。周澄摆出老照片：“没依据，不能放在我们两人的名字下。”',
+    vietnamese: 'Lâm Nghiên làm lớp mô hình “bù lại khuôn mặt” cho đoạn chuyển cảnh. Chu Trừng đặt ảnh cũ ra: “Không có căn cứ thì không thể đặt dưới tên hai chúng ta.”',
+    english: 'Lin Yan makes a “completed face” model for the transition. Zhou Cheng lays out the old photographs. “Without evidence, it cannot sit under both our names.”',
   ),
   _LongmenStorySegment(
     fromLevel: 1,
@@ -378,15 +378,15 @@ const _longmenCoreSegments = <_LongmenStorySegment>[
   ),
   _LongmenStorySegment(
     fromLevel: 1,
-    chinese: '她看着已渲染三天的画面，又看见片尾并列的两个名字，最后亲手关掉那一层。短片少了最顺滑的镜头；周澄把老照片和来源清单重新接回时间线。',
-    vietnamese: 'Cô nhìn cảnh đã kết xuất suốt ba ngày rồi nhìn hai cái tên đặt cạnh nhau ở phần cuối phim, cuối cùng tự tay tắt lớp đó. Phim mất đoạn chuyển mượt nhất; Chu Trừng nối lại ảnh cũ và danh mục nguồn vào dòng thời gian.',
-    english: 'She looks at the image she has spent three days rendering, then at their two names side by side in the credits, and turns the layer off herself. The short loses its smoothest transition; Zhou Cheng reconnects the old photographs and source list to the timeline.',
+    chinese: '她看了三天渲染和片尾两个名字，亲手关掉那层。短片失去最顺滑的镜头；周澄把老照片接回时间线。',
+    vietnamese: 'Cô nhìn ba ngày kết xuất và hai cái tên cuối phim rồi tự tay tắt lớp đó. Phim mất cảnh chuyển mượt nhất; Chu Trừng nối ảnh cũ trở lại dòng thời gian.',
+    english: 'She looks at three days of rendering and the two names in the credits, then turns the layer off herself. The short loses its smoothest transition; Zhou Cheng reconnects the old photographs to the timeline.',
   ),
   _LongmenStorySegment(
     fromLevel: 1,
-    chinese: '导出前，周澄没有删掉任何一个名字，只把来源清单推到林砚面前。林砚逐项核完，把那一层改名为“无依据，不使用”，按下导出。',
-    vietnamese: 'Trước khi xuất file, Chu Trừng không xóa tên ai mà chỉ đẩy danh mục nguồn về phía Lâm Nghiên. Lâm Nghiên kiểm tra từng mục, đổi tên lớp thành “không có căn cứ, không sử dụng” rồi bấm xuất.',
-    english: 'Before export, Zhou Cheng removes neither name; she only slides the source list toward Lin Yan. Lin Yan checks it item by item, renames the layer “unsupported, do not use,” and presses Export.',
+    chinese: '导出前，周澄保留并列署名，推来来源清单。林砚核完，把那层改名为“无依据，不使用”，按下导出。',
+    vietnamese: 'Trước khi xuất file, Chu Trừng giữ nguyên tên hai người và đẩy danh mục nguồn sang. Lâm Nghiên kiểm tra xong, đổi tên lớp thành “không có căn cứ, không sử dụng” rồi bấm xuất.',
+    english: 'Before export, Zhou Cheng keeps both names and slides over the source list. Lin Yan checks it, renames the layer “unsupported, do not use,” and presses Export.',
   ),
 ];
 

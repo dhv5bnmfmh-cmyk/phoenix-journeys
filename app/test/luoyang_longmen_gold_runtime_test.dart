@@ -126,7 +126,7 @@ void main() {
     expect(stories[4], contains('历史老照片支持复原'));
     expect(stories[6], contains('现存状态'));
     expect(stories[7], contains('建模前先问'));
-    expect(stories[8], contains('三个能区分的时间层'));
+    expect(stories[8], contains('成片只留下三层'));
     expect(stories[9], contains('放进下一次模板'));
   });
 
