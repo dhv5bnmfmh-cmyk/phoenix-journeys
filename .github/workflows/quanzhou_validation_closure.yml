@@ -1,0 +1,31 @@
+name: Quanzhou exact validation closure
+
+on:
+  push:
+    branches: [dev/current]
+    paths:
+      - '.github/workflows/quanzhou_validation_closure.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev/current
+          fetch-depth: 0
+      - name: Apply exact Quanzhou validation closure
+        run: python3 .github/scripts/quanzhou_validation_closure.py
+      - name: Verify exact diff
+        run: git diff --check
+      - name: Commit validation closure
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/lib app/test
+          git diff --cached --check
+          git commit -m 'Close Quanzhou Gold validation synchronization gaps'
+          git push origin HEAD:dev/current
