@@ -57,10 +57,13 @@ void main() {
       expect(story, contains('许安'), reason: 'Lv$level protagonist');
       expect(story, contains('许宁'), reason: 'Lv$level relationship');
       expect(story, contains('受戒'), reason: 'Lv$level place/ritual anchor');
+      expect(story, contains('西街'), reason: 'Lv$level Kaiyuan-specific spatial hinge');
       expect(story, contains('钥匙'), reason: 'Lv$level enacted choice object');
       expect(story, contains('先敲门'), reason: 'Lv$level caused consequence');
       expect(story, isNot(contains('上午，你走进泉州开元寺')));
       expect(story, isNot(contains('离开寺院时，你会发现')));
+      expect(story, isNot(contains('戒坛始建于1019年')), reason: 'Lv$level history explanation belongs in Discovery');
+      expect(story, isNot(contains('官方资料还记录')), reason: 'Lv$level source commentary belongs in Discovery');
       expect(story.length, greaterThanOrEqualTo(target.acceptedMinimumCharacters));
       expect(story.length, lessThanOrEqualTo(target.acceptedMaximumCharacters));
       expect(active.storyParagraphs, hasLength(target.paragraphCount));
@@ -88,6 +91,24 @@ void main() {
     }
   });
 
+  test('Quanzhou repaired Story keeps Kaiyuan place causality without exposition leakage', () {
+    final lv1 = resolveAdaptiveJourneyLevel(
+      quanzhou,
+      profile: agent.profileForPhoenixLevel(1),
+    );
+    final lv5 = resolveAdaptiveJourneyLevel(
+      quanzhou,
+      profile: agent.profileForPhoenixLevel(5),
+    );
+    expect(lv1.storyParagraphs.join(), contains('旧宅也在西街'));
+    expect(lv1.storyParagraphs.join(), contains('沿街走到甘露戒坛前'));
+    expect(lv5.storyParagraphs.join(), contains('你又不是走得回不来'));
+    expect(lv5.storyParagraphs.join(), isNot(contains('1019年')));
+    expect(lv5.storyParagraphs.join(), isNot(contains('官方资料')));
+    expect(lv5.discoveries.any((item) => item.text.contains('1019年')), isTrue);
+    expect(lv5.discoveries.any((item) => item.text.contains('西街中段北侧')), isTrue);
+  });
+
   test('Quanzhou adjacent levels deepen one locked Story and Lv10 keeps action ending', () {
     final stories = <String>[];
     for (var level = 1; level <= 10; level++) {
@@ -113,7 +134,7 @@ void main() {
   });
 
   test('Quanzhou Fact First, A-B-C and depth records remain bounded', () {
-    expect(quanzhouSourceLedger, hasLength(4));
+    expect(quanzhouSourceLedger, hasLength(5));
     expect(quanzhouStoryArchitectures, hasLength(3));
     expect(quanzhouStoryArchitectures.where((item) => item['SELECTED'] == 'YES'), hasLength(1));
     expect(
@@ -123,6 +144,8 @@ void main() {
     expect(quanzhouPrimaryDepthMechanism, 'PRACTICE / RITUAL CAUSALITY');
     expect(quanzhouDepthActionTest['RESULT'], 'PASS');
     expect(quanzhouPlaceCausalMechanism['GENERIC_PLACE_SUBSTITUTION'], startsWith('PASS'));
+    expect(quanzhouPlaceCausalMechanism['VERIFIED_PLACE_PROPERTY'], contains('西街'));
+    expect(quanzhouFactFictionLedger.any((item) => item['ITEM'] == '许安、许宁的虚构旧宅也设在西街'), isTrue);
     for (final claim in quanzhouClaimLedger) {
       expect(claim['RESULT'], 'PASS', reason: claim['CLAIM_ID']);
       expect(claim['SOURCE']!.trim(), isNotEmpty);

@@ -1135,7 +1135,7 @@ final kaipingGoldCandidateSemanticFingerprint = JourneySemanticFingerprint(
 
 final quanzhouKaiyuanGoldSemanticFingerprint = JourneySemanticFingerprint(
   journeyId: _quanzhou,
-  surfaceIdentity: 'Xu An / Xu Ning / Kaiyuan ordination threshold / returned household key / knock-before-opening',
+  surfaceIdentity: 'Xu An / Xu Ning / Kaiyuan-on-West-Street ordination threshold / nearby household key / knock-before-opening',
   mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
     NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.ordinationDayMakesDeferredChangeImmediate,
     NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.adultVocationChangerSeekingUnchangedFallback,
