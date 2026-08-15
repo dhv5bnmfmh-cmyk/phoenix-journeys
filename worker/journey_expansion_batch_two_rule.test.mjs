@@ -14,11 +14,14 @@ const backgrounds = readFileSync(
   new URL('../app/lib/data/journey_background_generated.dart', import.meta.url),
   'utf8',
 );
+const kaipingGold = readFileSync(
+  new URL('../app/lib/data/kaiping_diaolou_registration.dart', import.meta.url),
+  'utf8',
+);
 
 const journeys = [
   ['datong-yungang-grottoes', '大同', '云冈石窟'],
   ['lijiang-old-town', '丽江', '大研古城'],
-  ['jiangmen-kaiping-diaolou', '江门', '开平碉楼'],
 ];
 
 test('second expansion batch follows journey and passport contracts', () => {
@@ -29,16 +32,24 @@ test('second expansion batch follows journey and passport contracts', () => {
     assert.match(backgrounds, new RegExp(`journeyId: '${id}'`));
     assert.match(geo, new RegExp(`name: '${place}'`));
   }
+  assert.match(kaipingGold, /kaipingDiaolouJourneyId/);
+  assert.match(kaipingGold, /city: '江门'/);
+  assert.match(kaipingGold, /place: '开平碉楼与村落'/);
+  assert.match(backgrounds, /journeyId: 'jiangmen-kaiping-diaolou'/);
+  assert.match(geo, /name: '开平碉楼'/);
 });
 
 test('every second-batch journey has UNESCO and government verification', () => {
   assert.equal(
     (catalog.match(/StoryVerificationStatus\.verified/g) ?? []).length,
-    6,
+    4,
   );
-  assert.equal((catalog.match(/kind: StorySourceKind\.unesco/g) ?? []).length, 3);
+  assert.equal((catalog.match(/kind: StorySourceKind\.unesco/g) ?? []).length, 2);
   assert.equal(
     (catalog.match(/kind: StorySourceKind\.government/g) ?? []).length,
-    3,
+    2,
   );
+  assert.ok((kaipingGold.match(/StoryVerificationStatus\.verified/g) ?? []).length >= 3);
+  assert.ok((kaipingGold.match(/kind: StorySourceKind\.unesco/g) ?? []).length >= 1);
+  assert.ok((kaipingGold.match(/kind: StorySourceKind\.government/g) ?? []).length >= 2);
 });

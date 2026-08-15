@@ -10,7 +10,9 @@ import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 int? _goldDiscoveryCount(String journeyId, int phoenixLevel) {
   if (journeyId == 'beijing-summer-palace' ||
-      journeyId == 'suzhou-humble-administrators-garden') {
+      journeyId == 'suzhou-humble-administrators-garden' ||
+      journeyId == 'luoyang-longmen-grottoes' ||
+      journeyId == 'jiangmen-kaiping-diaolou') {
     return phoenixLevel <= 4 ? 2 : 3;
   }
   return null;
@@ -32,8 +34,7 @@ void main() {
       );
       expect(
         standard.discoveries.length,
-        journey.id == 'beijing-summer-palace' ||
-                journey.id == 'suzhou-humble-administrators-garden'
+        _goldDiscoveryCount(journey.id, 5) != null
             ? 3
             : inInclusiveRange(1, 2),
         reason: '${journey.id} standard discoveries',

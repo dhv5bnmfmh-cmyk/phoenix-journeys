@@ -47,28 +47,6 @@ const journeyExpansionBatchTwoSources = <StorySourceRecord>[
     verificationStatus: StoryVerificationStatus.verified,
     accessedOn: '2026-07-29',
   ),
-  StorySourceRecord(
-    id: 'unesco-jiangmen-kaiping-diaolou',
-    title: 'Kaiping Diaolou and Villages',
-    publisher: 'UNESCO World Heritage Centre',
-    url: 'https://whc.unesco.org/en/list/1112',
-    kind: StorySourceKind.unesco,
-    languageCode: 'en',
-    geoNodeIds: ['cn-guangdong-jiangmen-kaiping-zili-village'],
-    verificationStatus: StoryVerificationStatus.verified,
-    accessedOn: '2026-07-29',
-  ),
-  StorySourceRecord(
-    id: 'kaiping-government-zili-village',
-    title: '开平碉楼文化旅游区',
-    publisher: '开平市人民政府',
-    url: 'https://www.kaiping.gov.cn/kpszfw/zwgk/zdlyxxgkzl/lyscjgzfxx/lyml/content/post_2867978.html',
-    kind: StorySourceKind.government,
-    languageCode: 'zh-CN',
-    geoNodeIds: ['cn-guangdong-jiangmen-kaiping-zili-village'],
-    verificationStatus: StoryVerificationStatus.verified,
-    accessedOn: '2026-07-29',
-  ),
 ];
 
 JourneyContentRecord _record({
@@ -162,39 +140,6 @@ const _lijiangDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '茶马古道让丽江成为多民族经济与文化交流节点。', pinyin: 'Chámǎ Gǔdào ràng Lìjiāng chéngwéi duō mínzú jīngjì yǔ wénhuà jiāoliú jiédiǎn.', simpleChinese: '茶马古道连接了不同人群。', vietnamese: 'Trà Mã Cổ Đạo biến Lệ Giang thành nút giao kinh tế và văn hóa đa dân tộc.', english: 'The Tea Horse Road made Lijiang a hub of multi-ethnic exchange.'),
 ];
 
-const _kaipingParagraphs = <String>[
-  '清晨，你沿稻田走进江门开平自力村。荷塘和低矮民居之间，一座座碉楼向上升起，远看像乡村里的塔，近看却同时拥有窗洞、厚墙和屋顶亭台。',
-  '碉楼既用于居住，也回应洪水与治安风险。十九世纪末到二十世纪初，海外开平人把积蓄、建筑经验和新的材料带回故乡，帮助家人修建更坚固的房屋。',
-  '仔细观察铭石楼一类建筑，你会发现岭南村落传统与拱券、柱式、山花等外来元素并置。它们不是简单复制，而是华侨根据家乡需要重新组合的设计。',
-  '碉楼之间仍有稻田、荷塘、古树与普通民居。这里真正珍贵的不只是高楼外形，而是建筑、侨乡记忆和农业景观共同保存的一段跨海生活史。',
-];
-
-const _kaipingAnnotations = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Qīngchén, nǐ yán dàotián zǒujìn Jiāngmén Kāipíng Zìlì Cūn. Hétáng hé dīǎi mínjū zhījiān, yí zuò zuò diāolóu xiàng shàng shēngqǐ.', vietnamese: 'Buổi sớm, bạn đi qua ruộng lúa vào làng Tự Lực, nơi các tháp điêu lâu vươn lên giữa ao sen và nhà thấp.', english: 'At dawn, diaolou rise above rice fields, lotus ponds, and low houses in Zili Village.'),
-  ReadingAnnotation(pinyin: 'Diāolóu jì yòngyú jūzhù, yě huíyìng hóngshuǐ yǔ zhì ān fēngxiǎn. Hǎiwài Kāipíng rén bǎ jīxù, jiànzhù jīngyàn hé xīn cáiliào dài huí gùxiāng.', vietnamese: 'Điêu lâu vừa để ở vừa ứng phó lũ lụt và an ninh; người Khai Bình ở hải ngoại mang tiền, kinh nghiệm và vật liệu về quê.', english: 'Overseas Kaiping people brought savings, experience, and materials home to build safer residences.'),
-  ReadingAnnotation(pinyin: 'Zǐxì guānchá Míngshí Lóu yí lèi jiànzhù, nǐ huì fāxiàn Lǐngnán cūnluò chuántǒng yǔ gǒngquàn, zhùshì, shānhuā děng wàilái yuánsù bìngzhì.', vietnamese: 'Ở Minh Thạch Lâu, truyền thống làng Lĩnh Nam đứng cạnh vòm, thức cột và đầu hồi du nhập.', english: 'Mingshi Tower combines Lingnan village traditions with imported arches, columns, and pediments.'),
-  ReadingAnnotation(pinyin: 'Diāolóu zhījiān réng yǒu dàotián, hétáng, gǔshù yǔ pǔtōng mínjū. Jiànzhù, qiáoxiāng jìyì hé nóngyè jǐngguān gòngtóng bǎocún yí duàn kuàhǎi shēnghuóshǐ.', vietnamese: 'Ruộng, ao sen, cây cổ và nhà dân cùng các điêu lâu lưu giữ lịch sử đời sống vượt biển của quê hương Hoa kiều.', english: 'Architecture, migrant memory, and the farming landscape preserve a transoceanic history together.'),
-];
-
-const _kaipingWords = <WordEntry>[
-  WordEntry(word: '稻田', pinyin: 'dàotián', partOfSpeech: '名词', simpleChinese: '种水稻的田地。', translation: 'Ruộng lúa.', englishDefinition: 'rice field', symbol: '🌾'),
-  WordEntry(word: '荷塘', pinyin: 'hétáng', partOfSpeech: '名词', simpleChinese: '种有荷花的池塘。', translation: 'Ao sen.', englishDefinition: 'lotus pond', symbol: '🪷'),
-  WordEntry(word: '碉楼', pinyin: 'diāolóu', partOfSpeech: '名词', simpleChinese: '兼有居住和防卫功能的高楼。', translation: 'Nhà tháp có chức năng ở và phòng vệ.', englishDefinition: 'defensive tower house', symbol: '🏰'),
-  WordEntry(word: '厚墙', pinyin: 'hòuqiáng', partOfSpeech: '名词', simpleChinese: '厚而坚固的墙。', translation: 'Tường dày và chắc.', englishDefinition: 'thick wall', symbol: '🧱'),
-  WordEntry(word: '积蓄', pinyin: 'jīxù', partOfSpeech: '名词', simpleChinese: '长期保存下来的钱。', translation: 'Tiền tiết kiệm.', englishDefinition: 'savings', symbol: '💰'),
-  WordEntry(word: '拱券', pinyin: 'gǒngquàn', partOfSpeech: '名词', simpleChinese: '建筑中的弧形承重结构。', translation: 'Kết cấu vòm chịu lực.', englishDefinition: 'architectural arch', symbol: '🌉'),
-  WordEntry(word: '柱式', pinyin: 'zhùshì', partOfSpeech: '名词', simpleChinese: '柱子的设计形式。', translation: 'Kiểu thức cột.', englishDefinition: 'column order', symbol: '🏛️'),
-  WordEntry(word: '华侨', pinyin: 'huáqiáo', partOfSpeech: '名词', simpleChinese: '长期生活在国外的中国公民。', translation: 'Hoa kiều.', englishDefinition: 'overseas Chinese citizen', symbol: '🧳'),
-  WordEntry(word: '侨乡', pinyin: 'qiáoxiāng', partOfSpeech: '名词', simpleChinese: '许多华侨来自的家乡。', translation: 'Quê hương của nhiều Hoa kiều.', englishDefinition: 'home region of overseas Chinese', symbol: '🏡'),
-];
-
-const _kaipingDiscoveries = <DiscoveryEntry>[
-  DiscoveryEntry(text: '开平碉楼是集居住、防卫与建筑艺术于一体的多层乡土建筑。', pinyin: 'Kāipíng Diāolóu shì jí jūzhù, fángwèi yǔ jiànzhù yìshù yú yìtǐ de duōcéng xiāngtǔ jiànzhù.', simpleChinese: '碉楼可以居住，也可以防卫。', vietnamese: 'Điêu lâu Khai Bình kết hợp cư trú, phòng vệ và nghệ thuật kiến trúc.', english: 'Kaiping diaolou combine residence, defence, and architectural expression.'),
-  DiscoveryEntry(text: '世界遗产包含四组村落中的代表性碉楼。', pinyin: 'Shìjiè Yíchǎn bāohán sì zǔ cūnluò zhōng de dàibiǎoxìng diāolóu.', simpleChinese: '四组村落共同组成遗产。', vietnamese: 'Di sản gồm các điêu lâu tiêu biểu trong bốn nhóm làng.', english: 'The World Heritage property includes representative towers in four village groups.'),
-  DiscoveryEntry(text: '中西建筑元素的融合反映了海外开平人与故乡的长期联系。', pinyin: 'Zhōngxī jiànzhù yuánsù de rónghé fǎnyìng le hǎiwài Kāipíng rén yǔ gùxiāng de chángqī liánxì.', simpleChinese: '建筑记录了华侨与家乡的联系。', vietnamese: 'Sự kết hợp kiến trúc Đông–Tây phản ánh liên hệ lâu dài giữa người Khai Bình hải ngoại và quê nhà.', english: 'The hybrid architecture reflects lasting ties between emigrants and home villages.'),
-  DiscoveryEntry(text: '自力村的稻田、荷塘、民居与碉楼共同形成完整的乡村景观。', pinyin: 'Zìlì Cūn de dàotián, hétáng, mínjū yǔ diāolóu gòngtóng xíngchéng wánzhěng de xiāngcūn jǐngguān.', simpleChinese: '自然和建筑一起构成村落。', vietnamese: 'Ruộng, ao sen, nhà dân và điêu lâu cùng tạo thành cảnh quan làng hoàn chỉnh.', english: 'Fields, ponds, houses, and towers form an integrated rural landscape.'),
-];
-
 final datongYungangJourney = _record(
   id: 'datong-yungang-grottoes',
   title: '大同 · 云冈石窟：听见北魏刻进山崖的回声',
@@ -213,19 +158,9 @@ final lijiangOldTownJourney = _record(
   tags: const ['丽江', '大研古城', '纳西文化', '茶马古道', '水系'],
 );
 
-final jiangmenKaipingJourney = _record(
-  id: 'jiangmen-kaiping-diaolou',
-  title: '江门 · 开平碉楼：一座侨乡建筑里的跨海记忆',
-  geoNodeId: 'cn-guangdong-jiangmen-kaiping-zili-village',
-  paragraphs: _kaipingParagraphs,
-  sources: const ['unesco-jiangmen-kaiping-diaolou', 'kaiping-government-zili-village'],
-  tags: const ['江门', '开平碉楼', '自力村', '华侨', '世界遗产'],
-);
-
 final journeyExpansionBatchTwoRecords = <JourneyContentRecord>[
   datongYungangJourney,
   lijiangOldTownJourney,
-  jiangmenKaipingJourney,
 ];
 
 final journeyExpansionBatchTwoExperiences = <DailyJourneyExperience>[
@@ -266,24 +201,5 @@ final journeyExpansionBatchTwoExperiences = <DailyJourneyExperience>[
     discoveries: _lijiangDiscoveries,
     wonderQuestion: '如果你住在古城，你希望水道继续承担哪些日常功能？',
     expressQuestion: '请用两到三句话描写雨后石板路、流水与木屋的声音和光线。',
-  ),
-  DailyJourneyExperience(
-    id: jiangmenKaipingJourney.id,
-    city: '江门',
-    cityCode: 'JMN',
-    place: '开平碉楼',
-    appBarTitle: '江门 · 开平碉楼',
-    storyTitle: '侨乡建筑故事',
-    headline: '一座碉楼里的跨海记忆',
-    description: '穿过自力村稻田与荷塘，读懂碉楼如何连接防卫、生活与华侨记忆。',
-    discoveryTeaser: '为什么岭南乡村会出现融合多种建筑风格的高楼？',
-    distanceLabel: '760 km',
-    stampSymbol: '侨',
-    content: jiangmenKaipingJourney,
-    storyAnnotations: _kaipingAnnotations,
-    words: _kaipingWords,
-    discoveries: _kaipingDiscoveries,
-    wonderQuestion: '如果你从海外回乡建房，会保留哪一种家乡元素，又带回哪一种新设计？',
-    expressQuestion: '请用两到三句话介绍碉楼、稻田与荷塘共同形成的侨乡景观。',
   ),
 ];

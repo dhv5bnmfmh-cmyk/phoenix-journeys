@@ -22,27 +22,27 @@ class _LongmenMasterySupplement {
 const _longmenMasterySupplements = <_LongmenMasterySupplement>[
   _LongmenMasterySupplement(
     fromLevel: 7,
-    chinese: '周澄把资料摊在两人之间，遇到说不清的画面就停住；林砚不再催她先往下剪。',
-    vietnamese: 'Chu Trừng trải tư liệu ra giữa hai người và dừng lại mỗi khi một hình ảnh chưa thể giải thích rõ; Lâm Nghiên không còn giục cô cứ dựng tiếp.',
-    english: 'Zhou Cheng spreads the sources between them and stops whenever an image cannot be explained; Lin Yan no longer urges her to keep cutting first.',
+    chinese: '周澄把资料摊在两人之间；说不清时，林砚不再催她往下剪。',
+    vietnamese: 'Chu Trừng trải tư liệu ra giữa hai người; khi chưa thể giải thích rõ, Lâm Nghiên không còn giục cô dựng tiếp.',
+    english: 'Zhou Cheng spreads the sources between them; when something cannot be explained, Lin Yan no longer urges her to keep cutting.',
   ),
   _LongmenMasterySupplement(
     fromLevel: 8,
-    chinese: '下一处龛像又出现缺口时，林砚先把鼠标让给周澄。周澄没有替她做画面，只把能找到的照片推回来。',
-    vietnamese: 'Khi hốc tượng tiếp theo lại có phần khuyết, Lâm Nghiên nhường chuột cho Chu Trừng trước. Chu Trừng không làm hình ảnh thay cô, chỉ đẩy những bức ảnh tìm được trở lại.',
-    english: 'When the next niche has another gap, Lin Yan passes the mouse to Zhou Cheng first. Zhou Cheng does not make the image for her; she only pushes back the photographs she can find.',
+    chinese: '下一处缺口前，林砚先把鼠标让给周澄，等她推回能找到的照片。',
+    vietnamese: 'Trước khoảng khuyết tiếp theo, Lâm Nghiên nhường chuột cho Chu Trừng và chờ cô đưa lại những bức ảnh tìm được.',
+    english: 'At the next gap, Lin Yan passes the mouse to Zhou Cheng and waits for the photographs she can find.',
   ),
   _LongmenMasterySupplement(
     fromLevel: 9,
-    chinese: '观众最后看到的不是一个被“补好”的过去，而是三个能区分的时间层：今天的石面、历史照片和有据复原。',
-    vietnamese: 'Điều khán giả cuối cùng thấy không phải một quá khứ đã được “bù cho hoàn chỉnh”, mà là ba lớp thời gian có thể phân biệt: mặt đá hôm nay, ảnh lịch sử và phục dựng có căn cứ.',
-    english: 'What viewers finally see is not a past that has been “completed,” but three distinguishable time layers: the stone today, historical photographs, and evidence-based restoration.',
+    chinese: '成片只留下三层：今天的石面、历史照片和有据复原。',
+    vietnamese: 'Bản phim chỉ giữ lại ba lớp: mặt đá hôm nay, ảnh lịch sử và phục dựng có căn cứ.',
+    english: 'The finished film keeps only three layers: the stone today, historical photographs, and evidence-based restoration.',
   ),
   _LongmenMasterySupplement(
     fromLevel: 10,
-    chinese: '导出后，林砚没有清空那一层，而把它和周澄的来源清单一起留在下一次建模模板的最前面。',
-    vietnamese: 'Sau khi xuất phim, Lâm Nghiên không xóa lớp đó; cô đặt nó cùng danh sách nguồn của Chu Trừng ở đầu mẫu dựng hình cho lần sau.',
-    english: 'After export, Lin Yan does not delete the layer; she leaves it with Zhou Cheng’s source list at the front of their next modeling template.',
+    chinese: '导出后，那一层和周澄的来源清单被放进下一次模板。',
+    vietnamese: 'Sau khi xuất phim, lớp đó và danh sách nguồn của Chu Trừng được đặt vào mẫu cho lần sau.',
+    english: 'After export, that layer and Zhou Cheng’s source list go into the next template.',
   ),
 ];
 

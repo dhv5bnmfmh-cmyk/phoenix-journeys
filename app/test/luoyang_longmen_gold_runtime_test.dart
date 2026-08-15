@@ -127,7 +127,7 @@ void main() {
     expect(stories[6], contains('现存状态'));
     expect(stories[7], contains('建模前先问'));
     expect(stories[8], contains('三个能区分的时间层'));
-    expect(stories[9], contains('可以重复使用的工作边界'));
+    expect(stories[9], contains('放进下一次模板'));
   });
 
   test('Longmen historical production record is explicit and bounded', () {
