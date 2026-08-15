@@ -21,7 +21,7 @@ void main() {
   );
   const agent = PhoenixLanguageLevelAgent();
 
-  test('Kaiping is registered at the exact Guangdong-Jiangmen-Kaiping-place hierarchy', () {
+  test('Kaiping binds to the existing Guangdong-Jiangmen-Kaiping-place hierarchy', () {
     final place = worldGeoCatalog.singleWhere(
       (node) => node.id == kaipingDiaolouGeoNodeId,
     );
@@ -33,9 +33,11 @@ void main() {
     expect(city.name, '江门市');
     expect(county.name, '开平市');
     expect(county.localType, '县级市');
-    expect(place.name, '开平碉楼与村落');
-    expect(place.latitude, isNull, reason: 'serial property must not invent one point');
-    expect(place.longitude, isNull, reason: 'serial property must not invent one point');
+    expect(place.name, kaipingActiveGeoDisplayName);
+    expect(place.name, '开平碉楼');
+    expect(place.aliases, contains('Kaiping Diaolou'));
+    expect(place.latitude, isNotNull, reason: 'existing repository node is retained unchanged');
+    expect(place.longitude, isNotNull, reason: 'existing repository node is retained unchanged');
 
     expect(kaiping.city, '江门');
     expect(kaiping.place, '开平碉楼与村落');
