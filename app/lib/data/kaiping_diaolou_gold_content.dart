@@ -466,10 +466,10 @@ final kaipingDiaolouDiscoveryPool = <DiscoveryEntry>[
     english: 'UNESCO identifies the complex fusion of Chinese and Western structural and decorative forms as a key value of Kaiping diaolou, shaped by both local rural traditions and overseas cultural contact.',
   ),
   _kaipingDiscovery(
-    chinese: '十九世纪末至二十世纪初，大量海外开平人与故乡保持联系。世界遗产评价特别强调这种跨国联系及其带回的建筑影响，但并不意味着每个家庭拥有同样的迁移经历。',
-    simple: '海外联系影响了开平，但每个家庭的经历并不相同。',
-    vietnamese: 'Cuối thế kỷ XIX và đầu thế kỷ XX, nhiều người Khai Bình ở hải ngoại vẫn duy trì liên hệ với quê nhà. Đánh giá di sản nhấn mạnh các liên hệ xuyên quốc gia và ảnh hưởng kiến trúc được mang về, nhưng điều đó không có nghĩa mọi gia đình có cùng một lịch sử di cư.',
-    english: 'In the late nineteenth and early twentieth centuries, many Kaiping emigrants remained connected to their home area. World Heritage assessments emphasize these transnational links and architectural influences without implying that every family shared the same migration history.',
+    chinese: '十九世纪末至二十世纪初，大量海外开平人与故乡保持联系。世界遗产评价特别强调这种跨国联系及其带回的建筑影响，但并不意味着每个侨户拥有同样的迁移经历。',
+    simple: '海外联系影响了开平，但每个侨户的经历并不相同。',
+    vietnamese: 'Cuối thế kỷ XIX và đầu thế kỷ XX, nhiều người Khai Bình ở hải ngoại vẫn duy trì liên hệ với quê nhà. Đánh giá di sản nhấn mạnh các liên hệ xuyên quốc gia và ảnh hưởng kiến trúc được mang về, nhưng điều đó không có nghĩa mọi hộ gia đình có liên hệ hải ngoại đều có cùng một lịch sử di cư.',
+    english: 'In the late nineteenth and early twentieth centuries, many Kaiping emigrants remained connected to their home area. World Heritage assessments emphasize these transnational links and architectural influences without implying that every overseas-linked household shared the same migration history.',
   ),
   _kaipingDiscovery(
     chinese: '开平地方建造防御性塔楼的传统可追溯到明代并与当地匪患有关。后来的碉楼把防御传统、居住需要和侨乡资源结合起来，但不同类型的碉楼承担的功能并不完全一样。',
