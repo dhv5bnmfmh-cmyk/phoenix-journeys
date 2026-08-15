@@ -304,7 +304,7 @@ const _kaipingStorySegments = <_KaipingStorySegment>[
   _KaipingStorySegment(
     fromLevel: 1,
     paragraph: 0,
-    chinese: '20世纪20年代，开平。虚构青年梁川留在家乡，哥哥梁海在海外谋生，寄回一张带拱券和柱廊的建筑图样。他在信里说，这份投入只用于家里的独楼；若要改作别用，就寄还给他。',
+    chinese: '20世纪20年代，开平。虚构青年梁川留在家乡，哥哥梁海在海外谋生，寄回带拱券和柱廊的建筑图样。他在信里说，这份投入只用于家里的独楼；若要改作别用，就寄还给他。',
     vietnamese: 'Vào thập niên 1920 ở Khai Bình, chàng trai hư cấu Lương Xuyên ở lại quê nhà, còn anh trai Lương Hải mưu sinh ở nước ngoài. Người anh gửi về một bản vẽ có vòm cuốn và hàng cột. Trong thư, anh nói phần đóng góp ấy chỉ dành cho tòa nhà riêng của gia đình; nếu dùng vào việc khác thì hãy gửi trả.',
     english: 'In 1920s Kaiping, the fictional young man Liang Chuan stays in his home village while his older brother Liang Hai works overseas. His brother sends a building sketch with arches and colonnades. The letter says his contribution is only for the family’s private tower; if it is used otherwise, it should be returned.',
   ),

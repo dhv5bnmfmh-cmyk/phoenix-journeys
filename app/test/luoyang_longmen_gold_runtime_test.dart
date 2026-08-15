@@ -55,7 +55,7 @@ void main() {
 
       expect(story, contains('林砚'), reason: 'Lv$level protagonist');
       expect(story, contains('周澄'), reason: 'Lv$level relationship');
-      expect(story, contains('不能放在我们两个人的名字下面'), reason: 'Lv$level relationship conflict');
+      expect(story, contains('没依据，不能放在我们两人的名字下'), reason: 'Lv$level relationship conflict');
       expect(story, contains('关掉那一层'), reason: 'Lv$level enacted choice');
       expect(story, contains('无依据，不使用'), reason: 'Lv$level memory ending');
       expect(story, isNot(contains('河水向前流')), reason: 'Lv$level legacy');
@@ -120,7 +120,7 @@ void main() {
     for (var index = 1; index < stories.length; index++) {
       expect(stories[index], isNot(stories[index - 1]), reason: 'Lv${index + 1} semantic delta');
       expect(stories[index], contains('林砚'));
-      expect(stories[index], contains('关掉那一层'));
+      expect(stories[index], contains('关掉那层'));
     }
 
     expect(stories[4], contains('历史老照片支持复原'));

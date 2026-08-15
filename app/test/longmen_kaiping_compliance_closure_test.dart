@@ -12,8 +12,8 @@ void main() {
     expect(
       activeCanonicalGoldStoryText(luoyangLongmenJourneyId),
       allOf(
-        contains('不能放在我们两个人的名字下面'),
-        contains('周澄把老照片和来源清单重新接回时间线'),
+        contains('没依据，不能放在我们两人的名字下'),
+        contains('周澄把老照片接回时间线'),
         contains('无依据，不使用'),
       ),
     );
