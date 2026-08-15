@@ -332,8 +332,8 @@ const _kaipingStorySegments = <_KaipingStorySegment>[
   _KaipingStorySegment(
     fromLevel: 4,
     paragraph: 0,
-    chinese: '他也明白，开平碉楼的外来元素并非整套建筑原样搬回，而是在本地传统、生活需要和新审美之间重新组合。',
-    vietnamese: 'Anh cũng hiểu rằng những yếu tố từ bên ngoài trong điêu lâu Khai Bình không phải là cả tòa nhà được bê nguyên về, mà được kết hợp lại giữa truyền thống địa phương, nhu cầu sống và thẩm mỹ mới.',
+    chinese: '他也明白，开平碉楼的外来元素并非整套建筑照搬回来，而是在本地传统、生活需要和新审美之间重新组合。',
+    vietnamese: 'Anh cũng hiểu rằng những yếu tố từ bên ngoài trong điêu lâu Khai Bình không phải là cả tòa nhà được sao chép nguyên xi về, mà được kết hợp lại giữa truyền thống địa phương, nhu cầu sống và thẩm mỹ mới.',
     english: 'He also understands that Kaiping’s imported architectural elements were not entire buildings copied home unchanged, but were recombined with local traditions, practical needs, and new tastes.',
   ),
   _KaipingStorySegment(
@@ -585,7 +585,7 @@ const _kaipingDiscoveryIndexes = <List<int>>[
   [0, 3, 5],
   [0, 4, 6],
   [3, 5, 6],
-  [2, 6, 7],
+  [2, 3, 6],
   [4, 5, 6],
   [3, 6, 7],
 ];
