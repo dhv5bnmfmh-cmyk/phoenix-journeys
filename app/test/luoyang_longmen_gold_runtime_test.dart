@@ -56,7 +56,7 @@ void main() {
       expect(story, contains('林砚'), reason: 'Lv$level protagonist');
       expect(story, contains('周澄'), reason: 'Lv$level relationship');
       expect(story, contains('没依据，不能放在我们两人的名字下'), reason: 'Lv$level relationship conflict');
-      expect(story, contains('关掉那一层'), reason: 'Lv$level enacted choice');
+      expect(story, contains('关掉那层'), reason: 'Lv$level enacted choice');
       expect(story, contains('无依据，不使用'), reason: 'Lv$level memory ending');
       expect(story, isNot(contains('河水向前流')), reason: 'Lv$level legacy');
       expect(story, isNot(contains('一部刻在山崖上的艺术史')), reason: 'Lv$level legacy');
