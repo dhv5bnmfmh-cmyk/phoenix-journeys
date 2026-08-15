@@ -21,25 +21,25 @@ function extractRequired(text, pattern, label) {
   return match[1];
 }
 
-test('current approved stable baseline is recorded and authoritative', () => {
+test('historical quality floor is recorded while current remote main remains development authority', () => {
   const workflowPr = extractRequired(
     workflow,
-    /当前稳定产品 PR：`#(\d+)`/,
+    /历史最低产品质量基线 PR：`#(\d+)`/,
     'development workflow stable PR',
   );
   const workflowCommit = extractRequired(
     workflow,
-    /当前稳定 main Commit：`([0-9a-f]{40})`/,
+    /历史最低产品质量基线 Commit：`([0-9a-f]{40})`/,
     'development workflow stable Commit',
   );
   const standardPr = extractRequired(
     stableBaseline,
-    /\*\*Stable PR:\*\* `#(\d+)`/,
+    /\*\*Historical minimum-quality baseline PR:\*\* `#(\d+)`/,
     'Stable Baseline Standard stable PR',
   );
   const standardCommit = extractRequired(
     stableBaseline,
-    /\*\*Stable Commit:\*\* `([0-9a-f]{40})`/,
+    /\*\*Historical minimum-quality baseline Commit:\*\* `([0-9a-f]{40})`/,
     'Stable Baseline Standard stable Commit',
   );
 
@@ -49,6 +49,7 @@ test('current approved stable baseline is recorded and authoritative', () => {
   assert.equal(workflowCommit, standardCommit);
 
   assert.match(stableBaseline, /NEW RESULT >= CURRENT STABLE BASELINE/);
+  assert.match(stableBaseline, /development source authority[^\n]*exact current remote `main`/);
   assert.match(
     stableBaseline,
     /The stable baseline does not automatically move to the newest PR/,
@@ -77,14 +78,14 @@ test('current approved stable baseline is recorded and authoritative', () => {
   assert.doesNotMatch(stableBaseline, /\*\*Stable PR:\*\* `#132`/);
 });
 
-test('all future work must branch from the latest approved stable main', () => {
+test('all future work must use current remote main or the sole authorized active line', () => {
   assert.match(
     workflow,
-    /必须从当时最新且已批准的稳定 `main` 创建全新独立分支/,
+    /必须从 preflight 重新读取的精确 remote `main` 创建/,
   );
   assert.match(
     workflow,
-    /新分支创建前必须核对 `docs\/PHOENIX_STABLE_BASELINE_STANDARD\.md` 中记录的 Stable PR 与 Stable Commit/,
+    /开发前必须同时记录 current remote `main` SHA 与 `docs\/PHOENIX_STABLE_BASELINE_STANDARD\.md` 中的历史最低质量基线/,
   );
   assert.match(
     workflow,

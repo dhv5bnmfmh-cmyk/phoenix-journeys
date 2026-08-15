@@ -206,6 +206,34 @@ const summerPalaceCulturalIntegrationNarrativeDna = JourneyNarrativeDnaRecord(
   storyRhythm: 'season-arrival-corridor-pace-history-object-vantage-light-photo-fall-choice-loss-reframe-trust',
 );
 
+const longmenGoldNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'luoyang-longmen-grottoes',
+  narrativeIdentity: 'equal-coauthors-delete-unsupported-restoration-to-keep-shared-credit-truthful',
+  protagonistIdentity: 'Lin-Yan-3D-creator-with-equal-source-collaborator-Zhou-Cheng',
+  protagonistAgeIdentity: 'twenty-nine-year-old-contemporary-visual-creator',
+  protagonistArchetype: 'creator-learning-to-share-evidentiary-authorship',
+  openingSituation: 'joint-Longmen-film-begins-with-shared-credit-and-shared-evidence-liability',
+  storyGoal: 'export-a-jointly-credited-film-both-collaborators-can-defend',
+  locationMechanism: 'Wanfo-inscription-present-damage-old-photograph-and-evidence-based-restoration-set-different-limits',
+  movementPattern: 'editing-timeline-moves-from-unsupported-face-layer-back-to-sourced-photograph-sequence',
+  conflictType: 'visual-seamlessness-vs-equal-coauthor-evidence-accountability',
+  choiceType: 'personally-disable-three-days-of-unsupported-rendering',
+  climaxType: 'two-names-in-credits-make-shared-liability-visible-at-deletion',
+  consequenceType: 'smoothest-shot-disappears-and-source-sequence-returns',
+  emotionalArc: 'defensive-solo-judgment-to-costly-recognition-to-mutual-professional-trust',
+  historicalLearningMechanism: 'inscription-damage-and-old-photograph-bound-what-can-be-represented',
+  resolutionType: 'joint-authorship-survives-because-unsupported-completion-does-not',
+  endingMechanism: 'both-names-remain-after-itemized-source-check-and-unused-layer-is-renamed',
+  memoryAnchorType: 'unsupported-do-not-use-layer-retained-in-project-file',
+  achievementType: 'equal-collaborator-evidence-boundary',
+  rewardSymbolism: 'side-by-side-credits-remain-without-false-completion',
+  temporalPattern: 'delivery-after-three-days-of-sunk-rendering',
+  supportingStructure: 'equal-collaborator-supplies-source-evidence-and-can-refuse-joint-attribution',
+  centralMetaphor: 'an-empty-part-can-preserve-more-trust-than-a-seamless-invention',
+  narrativeVoice: 'third-person-close-to-Lin-Yan-with-restrained-dialogue',
+  storyRhythm: 'shared-pledge-niche-evidence-layer-objection-sunk-cost-deletion-source-return-joint-export',
+);
+
 final approvedNarrativeDnaCatalog =
     List<JourneyNarrativeDnaRecord>.unmodifiable(<JourneyNarrativeDnaRecord>[
   for (final record in baseline.approvedNarrativeDnaCatalog)
@@ -221,6 +249,7 @@ final approvedNarrativeDnaCatalog =
       record,
   guangzhouChenClanGoldNarrativeDna,
   suzhouGardenGoldNarrativeDna,
+  longmenGoldNarrativeDna,
 ]);
 
 int duplicatedMajorDimensions(

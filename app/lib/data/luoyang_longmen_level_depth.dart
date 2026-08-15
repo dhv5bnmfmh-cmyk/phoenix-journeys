@@ -22,27 +22,27 @@ class _LongmenMasterySupplement {
 const _longmenMasterySupplements = <_LongmenMasterySupplement>[
   _LongmenMasterySupplement(
     fromLevel: 7,
-    chinese: '周澄还把每个画面旁边的来源编号写进清单，让“谁提供了依据”不再藏在制作流程末端。',
-    vietnamese: 'Chu Trừng còn ghi mã nguồn bên cạnh từng hình ảnh trong danh sách, để câu hỏi “ai cung cấp căn cứ này” không còn bị giấu ở cuối quy trình sản xuất.',
-    english: 'Zhou Cheng also puts a source identifier beside each image in the production list, so “who provided the evidence” is no longer hidden at the end of the workflow.',
+    chinese: '周澄把资料摊在两人之间；说不清时，林砚不再催她往下剪。',
+    vietnamese: 'Chu Trừng trải tư liệu ra giữa hai người; khi chưa thể giải thích rõ, Lâm Nghiên không còn giục cô dựng tiếp.',
+    english: 'Zhou Cheng spreads the sources between them; when something cannot be explained, Lin Yan no longer urges her to keep cutting.',
   ),
   _LongmenMasterySupplement(
     fromLevel: 8,
-    chinese: '林砚也不再把周澄的核对当作收尾审查，而把它变成共同创作开始时必须完成的一步。',
-    vietnamese: 'Lâm Nghiên cũng không còn xem việc Chu Trừng kiểm tra là khâu xét duyệt cuối cùng; cô biến nó thành một bước phải hoàn thành ngay khi hai người bắt đầu đồng sáng tạo.',
-    english: 'Lin Yan no longer treats Zhou Cheng’s verification as a final review; she turns it into a step that must happen when their joint creation begins.',
+    chinese: '下一处缺口前，林砚先把鼠标让给周澄，等她推回能找到的照片。',
+    vietnamese: 'Trước khoảng khuyết tiếp theo, Lâm Nghiên nhường chuột cho Chu Trừng và chờ cô đưa lại những bức ảnh tìm được.',
+    english: 'At the next gap, Lin Yan passes the mouse to Zhou Cheng and waits for the photographs she can find.',
   ),
   _LongmenMasterySupplement(
     fromLevel: 9,
-    chinese: '观众最后看到的不是一个被“补好”的过去，而是三个能区分的时间层：今天的石面、历史照片和有据复原。',
-    vietnamese: 'Điều khán giả cuối cùng thấy không phải một quá khứ đã được “bù cho hoàn chỉnh”, mà là ba lớp thời gian có thể phân biệt: mặt đá hôm nay, ảnh lịch sử và phục dựng có căn cứ.',
-    english: 'What viewers finally see is not a past that has been “completed,” but three distinguishable time layers: the stone today, historical photographs, and evidence-based restoration.',
+    chinese: '成片只留下三层：今天的石面、历史照片和有据复原。',
+    vietnamese: 'Bản phim chỉ giữ lại ba lớp: mặt đá hôm nay, ảnh lịch sử và phục dựng có căn cứ.',
+    english: 'The finished film keeps only three layers: the stone today, historical photographs, and evidence-based restoration.',
   ),
   _LongmenMasterySupplement(
     fromLevel: 10,
-    chinese: '她知道以后还会遇到无法补齐的缺口；这次留下的不是一个方便答案，而是一条可以重复使用的工作边界。',
-    vietnamese: 'Cô biết sau này vẫn sẽ gặp những khoảng trống không thể lấp đầy; điều còn lại từ lần này không phải một câu trả lời thuận tiện mà là một ranh giới làm việc có thể tiếp tục áp dụng.',
-    english: 'She knows she will meet gaps that cannot be filled again; what remains from this choice is not a convenient answer but a working boundary she can apply repeatedly.',
+    chinese: '导出后，那一层和周澄的来源清单被放进下一次模板。',
+    vietnamese: 'Sau khi xuất phim, lớp đó và danh sách nguồn của Chu Trừng được đặt vào mẫu cho lần sau.',
+    english: 'After export, that layer and Zhou Cheng’s source list go into the next template.',
   ),
 ];
 
@@ -80,16 +80,16 @@ WordEntry _longmenStoryWord({
         english: sourceEnglish,
       ),
       WordExample(
-        chinese: '故事原句：$sourceSentence',
-        pinyin: canonicalPinyin('故事原句：$sourceSentence'),
-        vietnamese: 'Câu gốc trong truyện: $sourceVietnamese',
-        english: 'Story source: $sourceEnglish',
+        chinese: sourceSentence,
+        pinyin: canonicalPinyin(sourceSentence),
+        vietnamese: sourceVietnamese,
+        english: sourceEnglish,
       ),
       WordExample(
-        chinese: '回看故事原句：$sourceSentence',
-        pinyin: canonicalPinyin('回看故事原句：$sourceSentence'),
-        vietnamese: 'Xem lại câu gốc trong truyện: $sourceVietnamese',
-        english: 'Revisit the story sentence: $sourceEnglish',
+        chinese: sourceSentence,
+        pinyin: canonicalPinyin(sourceSentence),
+        vietnamese: sourceVietnamese,
+        english: sourceEnglish,
       ),
     ],
   );
@@ -152,9 +152,9 @@ final _longmenStorySupplementWords = <WordEntry>[
     vietnamese: 'phim ngắn hoặc video ngắn',
     english: 'short film or video',
     symbol: '🎬',
-    sourceSentence: '二十九岁的林砚和周澄合做一段龙门石窟数字短片，林砚做三维画面，周澄核对史料。',
-    sourceVietnamese: 'Lâm Nghiên, hai mươi chín tuổi, cùng Chu Trừng làm một phim ngắn kỹ thuật số về Long Môn. Lâm Nghiên phụ trách hình ảnh 3D, còn Chu Trừng kiểm tra tư liệu lịch sử.',
-    sourceEnglish: 'Twenty-nine-year-old Lin Yan and Zhou Cheng are making a digital short about the Longmen Grottoes. Lin Yan builds the 3D visuals, while Zhou Cheng checks the historical sources.',
+    sourceSentence: '二十九岁的林砚和周澄合做一段龙门石窟数字短片。两人约定共同署名，也共同为每个复原画面的依据负责。',
+    sourceVietnamese: 'Lâm Nghiên, hai mươi chín tuổi, cùng Chu Trừng làm một phim ngắn kỹ thuật số về Long Môn. Hai người thống nhất cùng ký tên và cùng chịu trách nhiệm về căn cứ của từng hình ảnh phục dựng.',
+    sourceEnglish: 'Twenty-nine-year-old Lin Yan and Zhou Cheng are making a digital short about the Longmen Grottoes. They agree to share credit and responsibility for the evidence behind every restored image.',
   ),
   _longmenStoryWord(
     word: '导出',
@@ -198,16 +198,8 @@ List<DiscoveryEntry> _approvedLongmenDiscoveries(
   int level,
   List<DiscoveryEntry> discoveries,
 ) {
-  if (level <= 2) {
-    return List<DiscoveryEntry>.unmodifiable(discoveries.take(1));
-  }
-  if (discoveries.length <= 2) {
-    return List<DiscoveryEntry>.unmodifiable(discoveries);
-  }
-  return List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
-    discoveries[1],
-    discoveries.last,
-  ]);
+  final target = level <= 4 ? 2 : 3;
+  return List<DiscoveryEntry>.unmodifiable(discoveries.take(target));
 }
 
 JourneyLevelContent luoyangLongmenGoldLevelContent(int requestedLevel) {

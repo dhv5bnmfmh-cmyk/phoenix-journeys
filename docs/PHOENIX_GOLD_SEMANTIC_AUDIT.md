@@ -1,15 +1,15 @@
 # Phoenix Approved Gold Semantic Audit
 
 **Status:** DETERMINISTIC AUDIT RECORD  
-**Catalog scope:** nine approved Gold Journeys
+**Catalog scope:** ten approved Gold Journeys
 **Protected baseline:** seven approved Gold Journeys / 21 unique pairs  
 **Source of truth:** `app/lib/data/journey_semantic_fingerprint_catalog.dart`  
-**Pair count:** 36 unique pairs
+**Pair count:** 45 unique pairs
 
 This document records the deterministic output of the normalized semantic fingerprint catalog. It does not override the catalog. If a fingerprint changes, regenerate/review this audit from the canonical registry and active Story evidence.
 
 The original seven-Gold baseline and its 21 pair explanations remain protected.
-Guangzhou and Suzhou extend that state to nine Gold Stories and 36 current
+Guangzhou, Suzhou, and Founder-approved Longmen extend that state to ten Gold Stories and 45 current
 comparisons. The executable catalog and pair audit are authoritative for the
 current result.
 
@@ -141,12 +141,35 @@ Its engine remains a deliberately completed closed circuit that becomes the depa
 
 ## Debt policy
 
-The original protected seven-Gold baseline contains **zero** historical semantic collision debt across 21 pairs. The current nine-Gold catalog requires **36** pair comparisons.
+The original protected seven-Gold baseline contains **zero** historical semantic collision debt across 21 pairs. The current ten-Gold catalog requires **45** pair comparisons.
 
 - `EXISTING_SEMANTIC_COLLISION_DEBT`: **NONE**
-- Gold-to-Gold semantic collisions target: **0 / 36 pairs**
+- Gold-to-Gold semantic collisions target: **0 / 45 pairs**
 
 No allowlist or exception was created. Rule A and Rule B remain unchanged. A future Gold candidate that collides with an approved Journey still returns `TEMPLATE COLLISION - NOT GOLD READY` until its causal dramatic mechanism is redesigned.
+
+## Luoyang Longmen Grottoes promotion synchronization
+
+**Founder status:** approved and merged in PR `#181`.
+
+**Canonical Story:** 《证据到这里》. Equal collaborators Lin Yan and Zhou Cheng
+begin with shared credit and shared responsibility for evidence. Zhou's source
+work and right to refuse unsupported joint attribution make her causal rather
+than an exposition device. Lin deletes three days of visually seamless work;
+the sourced photograph sequence returns to the timeline, both names remain,
+and the unused layer is retained as “无依据，不使用”.
+
+**Machine result:** registered in the one canonical Gold registry, with exact
+active Lv1-Lv10 Story provenance for all CORE dimensions. Rule A and Rule B
+produce no collision against the other nine approved Gold Stories. The ten-Gold
+executable audit contains 45 pairs.
+
+**Human de-skinned result:** `DISTINCT`. Its nearest surface relative is a
+creative-work Story, but its causal engine is an equal co-author invoking shared
+evidentiary liability, followed by destructive deletion that preserves truthful
+joint authorship. It is not Summer Palace's expiring photographic tradeoff,
+Forbidden City's plural-route synthesis, Guangzhou's kinship boundary, or a
+responsible shortcut refusal that leaves an operational failure visible.
 
 ## Suzhou Humble Administrator's Garden promotion synchronization
 

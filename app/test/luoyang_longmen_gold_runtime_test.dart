@@ -42,7 +42,7 @@ void main() {
     expect(usesDedicatedAdaptiveJourneyRuntime(luoyangLongmenJourneyId), isTrue);
     expect(isBatchOneGoldJourney(luoyangLongmenJourneyId), isTrue);
 
-    const expectedDiscoveryCounts = <int>[1, 1, 2, 2, 2, 2, 2, 2, 2, 2];
+    const expectedDiscoveryCounts = <int>[2, 2, 2, 2, 3, 3, 3, 3, 3, 3];
     for (var level = 1; level <= 10; level++) {
       final profile = agent.profileForPhoenixLevel(level);
       final plan = agent.planFor(profile);
@@ -55,8 +55,8 @@ void main() {
 
       expect(story, contains('林砚'), reason: 'Lv$level protagonist');
       expect(story, contains('周澄'), reason: 'Lv$level relationship');
-      expect(story, contains('依据在哪里'), reason: 'Lv$level conflict');
-      expect(story, contains('关掉那一层'), reason: 'Lv$level enacted choice');
+      expect(story, contains('没依据，不能放在我们两人的名字下'), reason: 'Lv$level relationship conflict');
+      expect(story, contains('关掉那层'), reason: 'Lv$level enacted choice');
       expect(story, contains('无依据，不使用'), reason: 'Lv$level memory ending');
       expect(story, isNot(contains('河水向前流')), reason: 'Lv$level legacy');
       expect(story, isNot(contains('一部刻在山崖上的艺术史')), reason: 'Lv$level legacy');
@@ -120,14 +120,14 @@ void main() {
     for (var index = 1; index < stories.length; index++) {
       expect(stories[index], isNot(stories[index - 1]), reason: 'Lv${index + 1} semantic delta');
       expect(stories[index], contains('林砚'));
-      expect(stories[index], contains('关掉那一层'));
+      expect(stories[index], contains('关掉那层'));
     }
 
     expect(stories[4], contains('历史老照片支持复原'));
     expect(stories[6], contains('现存状态'));
     expect(stories[7], contains('建模前先问'));
-    expect(stories[8], contains('三个能区分的时间层'));
-    expect(stories[9], contains('可以重复使用的工作边界'));
+    expect(stories[8], contains('成片只留下三层'));
+    expect(stories[9], contains('放进下一次模板'));
   });
 
   test('Longmen historical production record is explicit and bounded', () {

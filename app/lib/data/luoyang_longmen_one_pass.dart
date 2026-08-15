@@ -354,9 +354,9 @@ class _LongmenStorySegment {
 const _longmenCoreSegments = <_LongmenStorySegment>[
   _LongmenStorySegment(
     fromLevel: 1,
-    chinese: '二十九岁的林砚和周澄合做一段龙门石窟数字短片，林砚做三维画面，周澄核对史料。',
-    vietnamese: 'Lâm Nghiên, hai mươi chín tuổi, cùng Chu Trừng làm một phim ngắn kỹ thuật số về Long Môn. Lâm Nghiên phụ trách hình ảnh 3D, còn Chu Trừng kiểm tra tư liệu lịch sử.',
-    english: 'Twenty-nine-year-old Lin Yan and Zhou Cheng are making a digital short about the Longmen Grottoes. Lin Yan builds the 3D visuals, while Zhou Cheng checks the historical sources.',
+    chinese: '林砚和周澄合做龙门石窟数字短片，约定并列署名，共同为复原依据负责。',
+    vietnamese: 'Lâm Nghiên và Chu Trừng cùng làm phim ngắn kỹ thuật số về Long Môn, thống nhất cùng đứng tên và cùng chịu trách nhiệm về căn cứ phục dựng.',
+    english: 'Lin Yan and Zhou Cheng make a digital short about Longmen, agreeing to share credit and responsibility for its restoration evidence.',
   ),
   _LongmenStorySegment(
     fromLevel: 1,
@@ -366,9 +366,9 @@ const _longmenCoreSegments = <_LongmenStorySegment>[
   ),
   _LongmenStorySegment(
     fromLevel: 1,
-    chinese: '林砚为了让转场完整，另做了一层“补全脸部”的模型。周澄只问：“依据在哪里？”',
-    vietnamese: 'Để đoạn chuyển cảnh trông hoàn chỉnh, Lâm Nghiên làm thêm một lớp mô hình “bù lại khuôn mặt”. Chu Trừng chỉ hỏi: “Căn cứ ở đâu?”',
-    english: 'To make the transition feel complete, Lin Yan adds a “completed face” model layer. Zhou Cheng asks only, “What is the evidence for this layer?”',
+    chinese: '林砚为转场做了“补全脸部”模型。周澄摆出老照片：“没依据，不能放在我们两人的名字下。”',
+    vietnamese: 'Lâm Nghiên làm lớp mô hình “bù lại khuôn mặt” cho đoạn chuyển cảnh. Chu Trừng đặt ảnh cũ ra: “Không có căn cứ thì không thể đặt dưới tên hai chúng ta.”',
+    english: 'Lin Yan makes a “completed face” model for the transition. Zhou Cheng lays out the old photographs. “Without evidence, it cannot sit under both our names.”',
   ),
   _LongmenStorySegment(
     fromLevel: 1,
@@ -378,15 +378,15 @@ const _longmenCoreSegments = <_LongmenStorySegment>[
   ),
   _LongmenStorySegment(
     fromLevel: 1,
-    chinese: '她看着已渲染三天的画面，最后关掉那一层。短片少了最顺滑的镜头，却不再把证据和想象混成同一种事实。',
-    vietnamese: 'Cô nhìn cảnh đã kết xuất suốt ba ngày rồi tắt lớp đó. Phim mất cảnh chuyển mượt nhất, nhưng không còn trộn bằng chứng và tưởng tượng thành cùng một loại sự thật.',
-    english: 'She looks at the image she has spent three days rendering and turns the layer off. The short loses its smoothest transition, but evidence and invention are no longer presented as the same kind of fact.',
+    chinese: '她看了三天渲染和片尾两个名字，亲手关掉那层。短片失去最顺滑的镜头；周澄把老照片接回时间线。',
+    vietnamese: 'Cô nhìn ba ngày kết xuất và hai cái tên cuối phim rồi tự tay tắt lớp đó. Phim mất cảnh chuyển mượt nhất; Chu Trừng nối ảnh cũ trở lại dòng thời gian.',
+    english: 'She looks at three days of rendering and the two names in the credits, then turns the layer off herself. The short loses its smoothest transition; Zhou Cheng reconnects the old photographs to the timeline.',
   ),
   _LongmenStorySegment(
     fromLevel: 1,
-    chinese: '导出前，周澄留下两人的并列署名。林砚把那一层改名为“无依据，不使用”，按下导出。',
-    vietnamese: 'Trước khi xuất bản, Chu Trừng giữ nguyên tên hai người đặt cạnh nhau. Lâm Nghiên đổi tên lớp đó thành “không có căn cứ, không sử dụng” rồi bấm xuất file.',
-    english: 'Before export, Zhou Cheng keeps their names side by side in the credits. Lin Yan renames the layer “unsupported, do not use” and presses Export.',
+    chinese: '导出前，周澄保留并列署名，推来来源清单。林砚核完，把那层改名为“无依据，不使用”，按下导出。',
+    vietnamese: 'Trước khi xuất file, Chu Trừng giữ nguyên tên hai người và đẩy danh mục nguồn sang. Lâm Nghiên kiểm tra xong, đổi tên lớp thành “không có căn cứ, không sử dụng” rồi bấm xuất.',
+    english: 'Before export, Zhou Cheng keeps both names and slides over the source list. Lin Yan checks it, renames the layer “unsupported, do not use,” and presses Export.',
   ),
 ];
 

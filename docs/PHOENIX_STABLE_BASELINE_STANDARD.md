@@ -2,12 +2,13 @@
 
 **System:** Phoenix Product Standard System v1.0  
 **Status:** BINDING  
-**Stable PR:** `#137`  
-**Stable Commit:** `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
+**Historical minimum-quality baseline PR:** `#137`
+**Historical minimum-quality baseline Commit:** `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
+**Current development source:** the exact current remote `main` resolved at task preflight
 
 ## 1. Purpose
 
-This standard defines the only approved Phoenix product baseline and the rules for comparing, approving, updating, and restoring that baseline. It applies to every developer, reviewer, Codex task, automation, pull request, Preview, and release decision.
+This standard defines Phoenix's minimum approved product-quality floor and the rules for comparing, approving, updating, and restoring that floor. It also distinguishes that historical comparison floor from the current Founder-approved remote `main`, which is the only normal source for new development. It applies to every developer, reviewer, Codex task, automation, pull request, Preview, and release decision.
 
 The binding rule is:
 
@@ -15,13 +16,20 @@ The binding rule is:
 
 A candidate is not complete merely because files exist, tests pass, a Preview deploys, or rights records are present. The candidate must preserve or improve the verified stable product experience.
 
-## 2. Current binding baseline
+## 2. Historical quality floor and current development source
 
-The current and only approved stable product baseline is:
+The currently recorded historical minimum-quality floor is:
 
 - Stable PR: `#137`
 - Stable `main` Commit: `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
-- Stable branch: `main`
+- Historical source branch at approval: `main`
+
+This identity is a protected comparison floor, not an instruction to branch from an old commit. Every task MUST fetch remote state before writing and use the exact current remote `main` as its development source, unless the Founder has explicitly authorized continuation of the sole active development line. Later Founder-approved merges on `main` are current product authority even when this historical quality-floor identity has not yet been formally advanced under Section 4.
+
+- **development source authority** = exact current remote `main` at preflight;
+- **minimum product-quality comparison floor** = the recorded historical baseline above;
+- a candidate MUST preserve all current-main behavior outside its authorized delta and MUST also satisfy `NEW RESULT >= CURRENT STABLE BASELINE`;
+- the historical commit MUST NOT be checked out or used as a new branch base merely because its quality-floor record remains here.
 
 PR `#132` is a historical merged version and is not the current development baseline. Closed PRs `#138`, `#139`, `#140`, and `#141` are historical and problem evidence only. They MUST NOT be used as a development baseline, inherited implementation source, visual reference, or merge target.
 
@@ -36,7 +44,7 @@ This file, `docs/PHOENIX_STABLE_BASELINE_STANDARD.md`, is the single normative a
 - A conflict MUST NOT be silently ignored.
 - Permanent product-rule references MUST NOT be deleted merely to hide a baseline conflict; the valid permanent rules must be preserved while the obsolete baseline identity is corrected.
 - After any approved stable-baseline update, every governance document containing a hard-coded Stable PR or Stable Commit MUST be updated in the same controlled change.
-- Every future development task MUST begin from the latest approved stable `main` identified by this standard.
+- Every future development task MUST begin from the exact current remote `main` established by preflight, or continue the sole Founder-authorized active development line. This standard remains the authority for the historical minimum-quality comparison floor, not a competing branch-source rule.
 
 ## 3. Baseline scope
 
@@ -68,7 +76,7 @@ Any applicable category below the stable baseline is `REGRESSION`.
 
 The stable baseline MAY be updated only when all of the following are VERIFIED:
 
-1. The candidate started from the latest approved stable `main`.
+1. The candidate started from the exact current remote `main`, or continued the sole Founder-authorized active development line, and preserved the recorded historical minimum-quality floor.
 2. The authorized task scope and changed paths are exact and complete.
 3. Required automated validation reached a terminal successful state.
 4. The mandatory `STABLE_BASELINE_COMPARISON` is complete.
@@ -82,7 +90,7 @@ The stable baseline MAY be updated only when all of the following are VERIFIED:
 12. The resulting `main` Commit is recorded as the new stable Commit.
 13. Every governance document with a hard-coded baseline identity is synchronized to the new approved identity.
 
-Until all conditions are satisfied, the binding baseline remains PR `#137` and Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`.
+Until all conditions are satisfied, PR `#137` and Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977` remain the recorded historical minimum-quality floor. This does not supersede later Founder-approved remote `main` as the current product and development source.
 
 ## 5. PR #137 minimum product and visual standard
 

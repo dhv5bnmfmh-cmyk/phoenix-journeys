@@ -3,6 +3,7 @@ import 'chengdu_kuanzhai_one_pass.dart';
 import 'daily_journey_experience.dart';
 import 'guangzhou_chen_clan_one_pass.dart';
 import 'journey_data.dart';
+import 'kaiping_diaolou_gold.dart';
 
 const extendedJourneySources = <StorySourceRecord>[
   StorySourceRecord(
@@ -51,6 +52,7 @@ const extendedJourneySources = <StorySourceRecord>[
     verificationStatus: StoryVerificationStatus.verified,
     accessedOn: '2026-07-20',
   ),
+  ...kaipingDiaolouSources,
 ];
 
 JourneyContentRecord _buildJourney({
@@ -220,6 +222,7 @@ final extendedJourneyRecords = <JourneyContentRecord>[
   chengduKuanzhaiJourney,
   nanjingQinhuaiJourney,
   guangzhouChenClanJourney,
+  kaipingDiaolouJourney,
 ];
 
 final extendedJourneyExperiences = <DailyJourneyExperience>[
@@ -299,4 +302,5 @@ final extendedJourneyExperiences = <DailyJourneyExperience>[
     wonderQuestion: guangzhouChenClanReflectionPrompts[4],
     expressQuestion: guangzhouChenClanWritingPrompts[4],
   ),
+  kaipingDiaolouExperience,
 ];

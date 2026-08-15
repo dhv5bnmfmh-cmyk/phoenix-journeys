@@ -7,7 +7,9 @@ import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 int? _goldDiscoveryCount(String journeyId, int phoenixLevel) {
   if (journeyId == 'beijing-summer-palace' ||
-      journeyId == 'suzhou-humble-administrators-garden') {
+      journeyId == 'suzhou-humble-administrators-garden' ||
+      journeyId == 'luoyang-longmen-grottoes' ||
+      journeyId == 'jiangmen-kaiping-diaolou') {
     return phoenixLevel <= 4 ? 2 : 3;
   }
   return null;
