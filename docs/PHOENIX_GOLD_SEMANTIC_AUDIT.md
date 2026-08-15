@@ -1,17 +1,18 @@
 # Phoenix Approved Gold Semantic Audit
 
 **Status:** DETERMINISTIC AUDIT RECORD  
-**Catalog scope:** ten approved Gold Journeys
+**Catalog scope:** eleven approved Gold Journeys
 **Protected baseline:** seven approved Gold Journeys / 21 unique pairs  
 **Source of truth:** `app/lib/data/journey_semantic_fingerprint_catalog.dart`  
-**Pair count:** 45 unique pairs
+**Pair count:** 55 unique pairs
 
 This document records the deterministic output of the normalized semantic fingerprint catalog. It does not override the catalog. If a fingerprint changes, regenerate/review this audit from the canonical registry and active Story evidence.
 
 The original seven-Gold baseline and its 21 pair explanations remain protected.
-Guangzhou, Suzhou, and Founder-approved Longmen extend that state to ten Gold Stories and 45 current
-comparisons. The executable catalog and pair audit are authoritative for the
-current result.
+Guangzhou, Suzhou, and Founder-approved Longmen historically extended that state
+to ten Gold Stories and 45 comparisons. Founder-approved Kaiping now extends the
+current catalog to eleven Gold Stories and 55 comparisons. The executable catalog
+and pair audit are authoritative for the current result.
 
 Collision thresholds remain binding and unchanged:
 
@@ -29,7 +30,7 @@ Collision thresholds remain binding and unchanged:
 The 28 rows below preserve the earlier audit record. They are superseded where
 the row describes Hangzhou's former sound-recording Story or Guangzhou's former
 《纸桥》 Story. Current Hangzhou, Guangzhou and Suzhou conclusions are recorded
-below and enforced by the executable 36-pair audit.
+below and enforced by the executable 36-pair audit from that historical stage.
 
 | # | Journey A | Journey B | Same engine | Matching CORE dimensions | CORE count | Matching secondary dimensions | Story evidence | Classification | Notes |
 |---:|---|---|---|---|---:|---|---|---|---|
@@ -141,12 +142,38 @@ Its engine remains a deliberately completed closed circuit that becomes the depa
 
 ## Debt policy
 
-The original protected seven-Gold baseline contains **zero** historical semantic collision debt across 21 pairs. The current ten-Gold catalog requires **45** pair comparisons.
+The original protected seven-Gold baseline contains **zero** historical semantic collision debt across 21 pairs. The current eleven-Gold catalog requires **55** pair comparisons.
 
 - `EXISTING_SEMANTIC_COLLISION_DEBT`: **NONE**
-- Gold-to-Gold semantic collisions target: **0 / 45 pairs**
+- Gold-to-Gold semantic collisions target: **0 / 55 pairs**
 
 No allowlist or exception was created. Rule A and Rule B remain unchanged. A future Gold candidate that collides with an approved Journey still returns `TEMPLATE COLLISION - NOT GOLD READY` until its causal dramatic mechanism is redesigned.
+
+## Jiangmen Kaiping Diaolou promotion synchronization
+
+**Founder status:** approved and merged in PR `#182`.
+
+**Canonical Story:** 《回来，不等于照搬》. Fictional brothers Liang Chuan and
+Liang Hai negotiate a contribution sent from overseas for a private family
+tower while several households are building a communal tower for shared refuge.
+Liang Chuan gives up the private build and risks the contribution by sending a
+revised communal plan with a promise to return the money. Liang Hai answers by
+crossing out private ownership language and writing “我们家在众楼里的一份”.
+Communal construction continues; the original private design remains unbuilt.
+
+**Machine result:** registered in the one canonical approved-Gold registry with
+exact active Lv1-Lv10 Story provenance for every CORE dimension. Kaiping remains
+collision-free against the other ten approved Gold Stories. The current
+eleven-Gold executable audit contains 55 pairs with zero Rule A / Rule B debt.
+
+**Human de-skinned result:** `DISTINCT`. Its causal engine is a transnational
+sibling exchange that reallocates a conditioned private family contribution into
+shared village responsibility. The decisive result depends on the elder brother's
+written counter-commitment and the communal-tower function reorganizing returned
+architectural form. It is not Longmen's equal-coauthor evidence boundary,
+Summer Palace's expiring photographic tradeoff, Guangzhou's public-kinship
+boundary, Chengdu's repeated shared-space handoff, or Nanjing's operational
+shortcut refusal.
 
 ## Luoyang Longmen Grottoes promotion synchronization
 
@@ -160,9 +187,10 @@ the sourced photograph sequence returns to the timeline, both names remain,
 and the unused layer is retained as “无依据，不使用”.
 
 **Machine result:** registered in the one canonical Gold registry, with exact
-active Lv1-Lv10 Story provenance for all CORE dimensions. Rule A and Rule B
-produce no collision against the other nine approved Gold Stories. The ten-Gold
-executable audit contains 45 pairs.
+active Lv1-Lv10 Story provenance for all CORE dimensions. At Longmen's promotion,
+Rule A and Rule B produced no collision against the other nine approved Gold
+Stories and the ten-Gold executable audit contained 45 pairs. Longmen remains
+part of the current eleven-Gold / 55-pair audit.
 
 **Human de-skinned result:** `DISTINCT`. Its nearest surface relative is a
 creative-work Story, but its causal engine is an equal co-author invoking shared

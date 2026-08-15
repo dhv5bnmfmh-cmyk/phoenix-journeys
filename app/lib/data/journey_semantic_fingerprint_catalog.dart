@@ -1148,6 +1148,7 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
   _guangzhou: guangzhouChenClanGoldSemanticFingerprint,
   _suzhou: suzhouGardenGoldSemanticFingerprint,
   _longmen: longmenGoldSemanticFingerprint,
+  _kaiping: kaipingGoldCandidateSemanticFingerprint,
 });
 
 String activeCanonicalGoldStoryText(String journeyId) {

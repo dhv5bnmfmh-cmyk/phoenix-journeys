@@ -13,6 +13,7 @@ const _goldIds = <String>{
   'guangzhou-chen-clan-academy',
   'suzhou-humble-administrators-garden',
   'luoyang-longmen-grottoes',
+  'jiangmen-kaiping-diaolou',
 };
 
 JourneySemanticFingerprint _synthetic(

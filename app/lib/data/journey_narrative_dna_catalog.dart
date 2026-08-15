@@ -234,6 +234,55 @@ const longmenGoldNarrativeDna = JourneyNarrativeDnaRecord(
   storyRhythm: 'shared-pledge-niche-evidence-layer-objection-sunk-cost-deletion-source-return-joint-export',
 );
 
+const kaipingGoldNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'jiangmen-kaiping-diaolou',
+  narrativeIdentity:
+      'separated-brothers-reallocate-private-building-duty-into-communal-tower-use',
+  protagonistIdentity:
+      'Liang-Chuan-fictional-young-local-brother-with-overseas-elder-brother-Liang-Hai',
+  protagonistAgeIdentity: 'fictional-young-local-brother-and-overseas-elder-brother',
+  protagonistArchetype:
+      'local-brother-renegotiating-how-overseas-family-experience-serves-home-village-needs',
+  openingSituation:
+      'overseas-brother-sends-design-and-contribution-conditioned-on-a-private-family-tower',
+  storyGoal:
+      'decide-how-the-family-will-participate-in-a-building-choice-without-erasing-the-brothers-overseas-experience-or-local-communal-need',
+  locationMechanism:
+      'Kaiping-communal-residential-watch-tower-functions-and-transnational-architectural-fusion-force-use-before-form',
+  movementPattern:
+      'returned-sketch-moves-from-private-plan-to-revised-communal-plan-to-built-shared-interior-while-original-remains-unbuilt',
+  conflictType:
+      'private-family-commemoration-and-conditioned-contribution-vs-multi-household-communal-refuge-use',
+  choiceType:
+      'abandon-private-build-and-send-revised-communal-plan-with-promise-to-return-contribution',
+  climaxType:
+      'overseas-brother-crosses-out-private-ownership-language-and-rewrites-family-share-as-part-of-communal-tower',
+  consequenceType:
+      'communal-construction-continues-with-family-commitment-while-private-original-stays-unbuilt',
+  emotionalArc:
+      'inherited-obligation-to-risk-of-rejection-to-written-renegotiation-to-reciprocal-recognition',
+  historicalLearningMechanism:
+      'verified-Kaiping-tower-functional-differences-diaspora-ties-and-architectural-fusion-constrain-the-fictional-family-choice',
+  resolutionType:
+      'transnational-family-duty-is-reallocated-through-communal-function-and-selective-local-recombination',
+  endingMechanism:
+      'unbuilt-colonnade-and-surviving-entry-arch-remain-beside-the-faded-written-revision',
+  memoryAnchorType:
+      'crossed-out-private-ownership-line-rewritten-as-the-family-share-in-a-communal-tower',
+  achievementType: 'shared-family-duty-reframed-through-communal-use',
+  rewardSymbolism:
+      'retained-arch-and-absent-colonnade-mark-selective-return-rather-than-literal-copy',
+  temporalPattern:
+      '1920s-fictional-building-choice-with-letter-reply-before-construction-commitment',
+  supportingStructure:
+      'separated-brothers-negotiate-contribution-ownership-and-duty-through-letters-without-mentor-authority',
+  centralMetaphor:
+      'what-returns-from-overseas-can-belong-at-home-without-being-copied-whole',
+  narrativeVoice: 'third-person-close-to-fictional-local-brother-action-led',
+  storyRhythm:
+      'conditional-sketch-communal-need-private-plan-risk-revision-letter-counter-revision-construction-selective-form-faded-ending',
+);
+
 final approvedNarrativeDnaCatalog =
     List<JourneyNarrativeDnaRecord>.unmodifiable(<JourneyNarrativeDnaRecord>[
   for (final record in baseline.approvedNarrativeDnaCatalog)
@@ -250,6 +299,7 @@ final approvedNarrativeDnaCatalog =
   guangzhouChenClanGoldNarrativeDna,
   suzhouGardenGoldNarrativeDna,
   longmenGoldNarrativeDna,
+  kaipingGoldNarrativeDna,
 ]);
 
 int duplicatedMajorDimensions(
