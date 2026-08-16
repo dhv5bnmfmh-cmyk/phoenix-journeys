@@ -114,3 +114,8 @@ After this adoption candidate is Founder-approved and merged, the next developme
 Human Challenge review under the newly adopted canonical contract found a `TEMPLATE` defect after the first Challenge Gold mapping: Datong `grammarRepair` had level-aware historical nouns but still reused the same three adaptive grammar-error skeletons used by other Journeys. Green static/runtime checks could not approve that content shape.
 
 Datong now owns ten level-bound Chinese grammar repairs. The progression moves through word order, `把` construction, duplicate result conjunctions, subject completeness, verb-complement collocation, time-structure contamination, aspect, paired conjunctions, logical relation choice, and active/passive argument structure. Historical context remains taught-before-tested at the same level, but the answer depends on Chinese structure rather than historical trivia. No other Journey Challenge content is remediated in PR #186.
+
+
+## Datong grammar distractor quality repair
+
+A second human Challenge pass rejected several technically wrong grammar distractors because they were too mechanically malformed to be plausible learner choices. Before exact-head release, Datong grammar distractors were tightened around diagnosable Chinese misconceptions: modifier order, subject omission after a time frame, `得/的` and result-complement confusion, contaminated time frames, concession-versus-result conjunction choice, paired conjunctions, and active/passive argument structure. The keyed answer remains unique; wrong choices are wrong for a language reason rather than because they look machine-broken.
