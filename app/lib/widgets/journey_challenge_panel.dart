@@ -3079,7 +3079,7 @@ class _ChallengeSession {
 
   static List<String> _extractSentences(List<String> paragraphs) {
     final sentences = <String>[];
-    final pattern = RegExp(r'[^。！？!?]+[。！？!?]?');
+    final pattern = RegExp(r'[^。！？!?]+[。！？!?]?[”’\"」』）》】]*');
     for (final paragraph in paragraphs) {
       for (final match in pattern.allMatches(paragraph)) {
         var value = match.group(0)?.trim() ?? '';
