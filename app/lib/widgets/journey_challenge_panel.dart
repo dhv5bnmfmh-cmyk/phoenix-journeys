@@ -2094,7 +2094,8 @@ class _ChallengeSession {
       'chengdu-kuanzhai-alley' ||
       'nanjing-qinhuai-river' ||
       'guangzhou-chen-clan-academy' ||
-      'suzhou-humble-administrators-garden' =>
+      'suzhou-humble-administrators-garden' ||
+      'datong-yungang-grottoes' =>
         _adaptiveGrammarForJourney(journeyId, difficulty),
       'literary-roaming' ||
       'myth-tracing' ||
@@ -2245,6 +2246,16 @@ class _ChallengeSession {
           cause: '廊、墙和植物形成前后遮挡',
           resultSubject: '园林视野',
           resultAction: '随着行走连续变化',
+        ),
+      'datong-yungang-grottoes' => (
+          focus: '昙曜五窟与迁都后的较小窟龛',
+          insight: '理解云冈规模怎样随时代改变',
+          subject: '云冈的早中晚分期',
+          action: '记录营造规模和艺术语言的变化',
+          result: '理解迁都前后的历史转折',
+          cause: '494年北魏迁都洛阳',
+          resultSubject: '云冈大规模的皇家开凿',
+          resultAction: '随之停止，而较小窟龛继续出现',
         ),
       'literary-roaming' => (
           focus: '蓝色蝴蝶和竹林梦境',
@@ -2437,6 +2448,12 @@ class _ChallengeSession {
         '程朗在下一处没有回头，也没有等待外婆。',
         '陈玉兰说完“下一处等我”，最后还是追了上去。',
       ],
+      'datong-yungang-grottoes' => [
+        '父亲把三段墨绳重新接回一根，三个人继续等他发号施令。',
+        '魏岚保住了唯一传人的位置，也没有把墨绳分给魏朔和阿砾。',
+        '魏朔第一次弹线时，魏岚立刻替他收回绳子并改掉黑线。',
+        '父亲在崖路转弯处叫魏岚追上去，她带着整根墨绳离开。',
+      ],
       _ => [
         '故事中的地点突然改变，却没有任何前文线索。',
         '人物作出决定以后，后面的结果与决定完全无关。',
@@ -2451,6 +2468,9 @@ class _ChallengeSession {
     List<String> discoveries,
     JourneyChallengeDifficulty difficulty,
   ) {
+    if (journeyId == 'datong-yungang-grottoes') {
+      return _regularJourneyDistractors(journeyId);
+    }
     final specific = switch (journeyId) {
       'literary-roaming' => [
         '他决定统计竹子的数量，不再观察蝴蝶。',

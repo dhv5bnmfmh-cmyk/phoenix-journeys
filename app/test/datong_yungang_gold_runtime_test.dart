@@ -43,13 +43,45 @@ void main() {
     }
   });
 
-  test('Discovery is deep and vocabulary is active-only', () {
+  test('Discovery is deep, chronological and four-language aligned', () {
+    const newKnowledgeAnchors = <String>[
+      '398年北魏定都平城',
+      '460年',
+      '宗教政策',
+      '早、中、晚三个主要阶段',
+      '中期',
+      '494年',
+      '贵族、中下层官吏与普通信众',
+      '南亚、中亚',
+      '历史时间线',
+      '东亚',
+    ];
     for (var level = 1; level <= 10; level++) {
       final content = datongYungangGoldLevelContent(level);
       expect(content.discoveries.length, level < 5 ? 2 : 3);
+      expect(content.discoveries.last.text, contains(newKnowledgeAnchors[level - 1]));
+      expect(
+        content.discoveries.every(
+          (item) => item.pinyin.isNotEmpty && item.vietnamese.isNotEmpty && item.english.isNotEmpty,
+        ),
+        isTrue,
+      );
+      if (level >= 5) {
+        expect(
+          content.discoveries[1].text,
+          datongYungangGoldLevelContent(level - 1).discoveries.last.text,
+        );
+      }
       final visible = '${content.storyParagraphs.join()}${content.discoveries.map((item) => item.text).join()}';
       expect(content.words.every((word) => visible.contains(word.word)), isTrue);
     }
+  });
+
+  test('Founder-reviewed Datong vocabulary catalog is preserved', () {
+    expect(
+      datongYungangWords.map((word) => word.word).toList(growable: false),
+      const ['迁都', '墨绳', '巨像', '传人', '散伙', '石阶', '断口', '小龛', '开凿', '崖壁', '分期', '营造'],
+    );
   });
 
   test('DNA and semantic fingerprint describe the active causal Story', () {
