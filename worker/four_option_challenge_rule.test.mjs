@@ -21,9 +21,10 @@ test('every challenge mode keeps four candidate answers', () => {
 
 test('all challenge modes use unique length-balanced distractors', () => {
   assert.match(panel, /challenge_option_balancer\.dart/);
+  assert.match(panel, /List<String> _goldDistractors\(/);
   assert.equal(
     (panel.match(/selectBalancedChallengeDistractors\(/g) ?? []).length,
-    3,
+    4,
   );
   assert.match(panel, /grammar\.segments\[grammar\.problemSegmentIndex\]/);
   assert.match(panel, /discoveryCandidate/);
