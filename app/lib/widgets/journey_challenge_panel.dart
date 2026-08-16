@@ -1973,7 +1973,7 @@ class _ChallengeSession {
       correctIds: correctOptions.map((option) => option.id).toList(),
       questionTitle: '重建事件关系',
       instruction: '当前 Lv$level：${profile.paragraphPrompt} 不靠原句记忆，先判断动作、关系与因果。',
-      explanation: '正确排序来自当前 Lv$level active Story 的事件推进；判断重点是前一动作怎样制造后一结果。',
+      explanation: '正确排序来自当前 Lv$level 故事的事件推进；判断重点是前一动作怎样制造后一结果。',
       memoryTip: '先标出人物动作，再找不可逆的选择、成本或结果。',
       trainingGoalOverride: profile.paragraphGoals[level - 1],
     );
@@ -2088,7 +2088,7 @@ class _ChallengeSession {
       correctIds: const <String>['correct'],
       questionTitle: '补全上下文关系',
       instruction: '当前 Lv$level：${profile.missingPrompt} 答案必须同时承接前句并解释后句。',
-      explanation: '正确答案与当前 active Story 一致，但判断依据是前后文中的人物、关系与因果，不是关键词重复。',
+      explanation: '正确答案与当前 Lv$level 故事情节一致，但判断依据是前后文中的人物、关系与因果，不是关键词重复。',
       memoryTip: '先问“前一句留下什么问题”，再问“后一句为什么能发生”。',
       contextBefore: before,
       contextAfter: after,
