@@ -15,5 +15,11 @@ new = '''    top_level_profiles = list(
 '''
 if text.count(old) != 1:
     raise SystemExit(f'helper locator anchor expected 1, found {text.count(old)}')
-path.write_text(text.replace(old, new, 1), encoding='utf-8')
-print('fixed human-gate helper top-level Journey section locator')
+text = text.replace(old, new, 1)
+old_xian = "    'xian-city-wall',\n    'subject-position',"
+new_xian = "    'xian-city-wall',\n    'time-order',"
+if text.count(old_xian) != 1:
+    raise SystemExit(f'Xi’an target anchor expected 1, found {text.count(old_xian)}')
+text = text.replace(old_xian, new_xian, 1)
+path.write_text(text, encoding='utf-8')
+print('fixed human-gate helper Journey locator and Xi’an target id')
