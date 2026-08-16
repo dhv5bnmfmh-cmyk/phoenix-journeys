@@ -1,0 +1,53 @@
+name: All-Gold Challenge Audit Snapshot Once
+
+on:
+  push:
+    branches:
+      - dev/current
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    if: contains(github.event.head_commit.message, 'run all-Gold Challenge audit snapshot')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out audit head
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Export all-Gold active Challenge snapshot
+        working-directory: app
+        env:
+          PHOENIX_ALL_GOLD_SNAPSHOT_JSON: ${{ github.workspace }}/all-gold-challenge-snapshot.json
+        run: >-
+          flutter test test/all_gold_challenge_runtime_snapshot_test.dart
+          --reporter expanded
+
+      - name: Validate snapshot shape
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const p = JSON.parse(fs.readFileSync('all-gold-challenge-snapshot.json', 'utf8'));
+          if (p.approvedGoldCount !== 12) throw new Error(`unexpected Gold count ${p.approvedGoldCount}`);
+          if (p.expectedChallengeUnits !== 360) throw new Error(`unexpected unit count ${p.expectedChallengeUnits}`);
+          if (!Array.isArray(p.rows) || p.rows.length !== 360) throw new Error(`unexpected rows ${p.rows?.length}`);
+          console.log(`ALL_GOLD_SNAPSHOT approved=${p.approvedGoldCount} units=${p.rows.length}`);
+          NODE
+
+      - name: Upload raw all-Gold Challenge snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-all-gold-challenge-audit-snapshot
+          path: all-gold-challenge-snapshot.json
+          if-no-files-found: error
