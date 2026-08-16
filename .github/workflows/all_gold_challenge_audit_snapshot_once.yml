@@ -6,11 +6,11 @@ on:
       - dev/current
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   snapshot:
-    if: contains(github.event.head_commit.message, 'run all-Gold Challenge audit snapshot')
+    if: contains(github.event.head_commit.message, 'freeze all-Gold Challenge audit inventory')
     runs-on: ubuntu-latest
     steps:
       - name: Check out audit head
@@ -34,20 +34,28 @@ jobs:
           flutter test test/all_gold_challenge_runtime_snapshot_test.dart
           --reporter expanded
 
-      - name: Validate snapshot shape
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          const p = JSON.parse(fs.readFileSync('all-gold-challenge-snapshot.json', 'utf8'));
-          if (p.approvedGoldCount !== 12) throw new Error(`unexpected Gold count ${p.approvedGoldCount}`);
-          if (p.expectedChallengeUnits !== 360) throw new Error(`unexpected unit count ${p.expectedChallengeUnits}`);
-          if (!Array.isArray(p.rows) || p.rows.length !== 360) throw new Error(`unexpected rows ${p.rows?.length}`);
-          console.log(`ALL_GOLD_SNAPSHOT approved=${p.approvedGoldCount} units=${p.rows.length}`);
-          NODE
+      - name: Build complete defect matrix
+        run: >-
+          python3 tools/analyze_all_gold_challenge_snapshot.py
+          all-gold-challenge-snapshot.json
+          docs/PHOENIX_ALL_GOLD_CHALLENGE_MATRIX.csv
+          docs/PHOENIX_ALL_GOLD_CHALLENGE_AUDIT_BASELINE.md
 
-      - name: Upload raw all-Gold Challenge snapshot
+      - name: Upload frozen audit evidence
         uses: actions/upload-artifact@v4
         with:
-          name: phoenix-all-gold-challenge-audit-snapshot
-          path: all-gold-challenge-snapshot.json
+          name: phoenix-all-gold-challenge-audit-inventory
+          path: |
+            all-gold-challenge-snapshot.json
+            docs/PHOENIX_ALL_GOLD_CHALLENGE_MATRIX.csv
+            docs/PHOENIX_ALL_GOLD_CHALLENGE_AUDIT_BASELINE.md
           if-no-files-found: error
+
+      - name: Commit audit-first inventory
+        shell: bash
+        run: |
+          git config user.name "Phoenix Audit Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/PHOENIX_ALL_GOLD_CHALLENGE_MATRIX.csv docs/PHOENIX_ALL_GOLD_CHALLENGE_AUDIT_BASELINE.md
+          git commit -m "audit: freeze all-Gold Challenge defect inventory"
+          git push origin HEAD:dev/current
