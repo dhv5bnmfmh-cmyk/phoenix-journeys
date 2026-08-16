@@ -466,6 +466,10 @@ Historical content applicable: YES / NO
 Truth Mode:
 SOURCE CONFIDENCE: HIGH / MEDIUM / CONTESTED / LEGENDARY / UNKNOWN
 CLAIM-LEVEL PROVENANCE LEDGER:
+VERIFIED WORLD CLAIMS:
+FICTIONAL HUMAN MATERIAL: identity / backstory / action / relationship / dialogue / motivation / choice / cost / consequence
+Fictional ordinary-character private material incorrectly source-gated: YES / NO
+Unsupported world claim hidden inside character fiction: YES / NO
 Real historical person present: YES / NO
 Real-person verified identity / role / action / event / relationship / quote / place connection:
 Unsupported real-person interiority or dialogue present: YES / NO
@@ -480,6 +484,32 @@ CN/Pinyin/VI/EN certainty parity:
 Historical Truth Result:
 Evidence Level:
 ```
+
+For every material premise, use this boundary test:
+
+| Premise | Scope | Classification | Source required | Plausibility / non-contradiction evidence | Implicit world claim | Result |
+|---|---|---|---|---|---|---|
+|  | WORLD CLAIM / CHARACTER FICTION / INTERPRETIVE DEVICE | canonical Fact/Fiction category | YES for verified world claim; NO for clearly fictional private material |  |  | BLOCKED |
+
+`FICTIONAL CHARACTER ACTION` is not `UNSUPPORTED FACTUAL CLAIM`. A fictional ordinary character's private choice needs plausibility, not archival proof. A law, institution, practice, access restriction, duty, punishment, chronology, real-person action, or other world claim still requires evidence.
+
+### 11.1A Place Causality control-case integrity
+
+```text
+VERIFIED PLACE PROPERTY:
+FICTIONAL CHARACTER ENCOUNTER:
+HUMAN PRESSURE:
+GOAL / RELATIONSHIP / CONFLICT CHANGE:
+FICTIONAL CHOICE:
+COST:
+VISIBLE CONSEQUENCE:
+GENERIC CONTROL AFTER REMOVING/REPLACING THE PLACE-SPECIFIC CAUSE:
+CAUSE TRANSPLANTED INTO CONTROL: YES / NO
+CURRENT CHAIN SURVIVES WITHOUT SUBSTANTIAL REDESIGN: YES / NO
+RESULT:
+```
+
+`CAUSE TRANSPLANTED INTO CONTROL` MUST be `NO`. Do not move a fictional house, unique property, institution, event, or equivalent mechanism into the control case. The question concerns the current Story architecture, not whether another writer could build a different dilemma elsewhere.
 
 ### 11.2 Story Universe coordinates
 

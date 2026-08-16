@@ -56,13 +56,13 @@ The Agent MUST NOT jump from a location name directly to a full Lv1-Lv10 Story.
 Before Story lock the Agent MUST:
 
 1. research the real place using the binding source hierarchy: UNESCO/equivalent heritage authority; government; official museum/heritage/monument authority; official cultural institution; reputable academic/institutional source when required;
-2. classify every material Story premise as `VERIFIED FACT`, `FICTIONAL CHARACTER ACTION`, `FICTIONAL DIALOGUE`, `FICTIONAL PERSONAL MOTIVATION`, `INTERPRETIVE STORY DEVICE`, or `UNSUPPORTED FACTUAL CLAIM`;
+2. classify every material Story premise using the canonical world/character categories in §18.3; a fictional ordinary character's identity, backstory, relationship, private action, dialogue, motivation, choice, cost, and personal consequence do not require documentary proof merely because the Story has a historical setting;
 3. trace every verified factual premise that materially supports Goal, Conflict, Choice, Climax, Consequence, Transformation, Ending, Cultural Anchor, or dramatic engine to approved source evidence;
-4. keep fictional protagonists, dialogue, motives, present-day actions, and protagonist-created objects clearly fictional and compatible with the verified setting;
+4. keep fictional protagonists, relationships, dialogue, motives, historical or present-day private actions, and protagonist-created objects clearly fictional, historically/socially/physically plausible, and compatible with the verified setting;
 5. never invent historical events, heritage rules, architecture, conservation restrictions, cultural practices, named historical actions, spatial facts, causal explanations, real-person dialogue, real-person intentions, or other factual premises because they make the Story work;
 6. distinguish observed spatial effect from documented historical intention; one does not prove the other;
 7. create a `PLACE_CAUSAL_MECHANISM` record identifying the verified place property, authoritative evidence, generic-place substitution result, and affected Story causal dimensions;
-8. reject a Story whose Goal → Conflict → Choice → Climax → Consequence remains substantially unchanged when the named place is replaced with a generic park, café, museum, old street, school, or unrelated attraction;
+8. reject a Story whose current Goal → Conflict → Choice → Climax → Consequence remains substantially unchanged when the verified place mechanism is removed or replaced by the genuine generic-place condition; do not transplant the place-specific cause, institution, event, property, or fictional setup into the control case;
 9. define Story architecture before full prose: protagonist, relationship geometry, goal, human stakes, conflict, choice, cost, climax, consequence, transformation, ending, Story Shape, Memory Moment, cultural-anchor function, and dramatic engine;
 10. compare the candidate against every approved Gold semantic fingerprint using the existing Rule A / Rule B machine gate;
 11. separately compare the de-skinned Story spine against every approved Gold Story at the human-reader level;
@@ -81,6 +81,14 @@ The Agent MUST use these exact stop outcomes where applicable:
 - `HUMAN STORY COLLISION — NOT GOLD READY`
 - `LV1 CAUSAL PROOF FAILED — DO NOT EXPAND`
 - `LV1 HUMAN STORY PROOF FAILED — DO NOT EXPAND`
+
+`SOURCE EVIDENCE INSUFFICIENT` applies only when a required world claim cannot be verified or every plausible architecture would require a prohibited invented world fact. A failed fictional plot means `REDESIGN`; it does not by itself prove that the Journey is evidence-blocked.
+
+The Agent MUST NOT search endlessly for a documented historical individual to serve as protagonist, reject a fictional ordinary character because private choices lack sources, or treat `FICTIONAL CHARACTER ACTION` as `UNSUPPORTED FACTUAL CLAIM`. The Agent MUST verify every world claim the fictional character encounters. The binding construction model is:
+
+> **VERIFIED WORLD + FICTIONAL HUMAN CHARACTER + PLAUSIBLE FICTIONAL HUMAN ACTION = VALID HISTORICAL-CULTURAL FICTION**
+
+`PHOENIX PROTECTS THE TRUTH OF THE WORLD, NOT THE DOCUMENTARY EXISTENCE OF EVERY FICTIONAL CHARACTER.` Fiction may create human meaning. Fiction may not create false history.
 
 The Agent MUST NOT continue after a binding STOP condition, fabricate a workaround, weaken tests to admit a candidate, or add filler facts merely to create drama. Distinctness never overrides truth.
 
