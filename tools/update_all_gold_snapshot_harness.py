@@ -44,7 +44,34 @@ new = '''Future<void> _completeParagraph(
 }
 '''
 if text.count(old) != 1:
-    raise SystemExit('snapshot paragraph harness anchor mismatch')
+    raise SystemExit('snapshot paragraph completion anchor mismatch')
 text = text.replace(old, new, 1)
+
+old_answer = '''        String paragraphAnswer;
+        if (journeyId == 'beijing-forbidden-city') {
+          final record = forbiddenCityParagraphRebuild.singleWhere(
+            (entry) => entry.level == level,
+          );
+          paragraphAnswer = record.correctOrder
+              .map((index) => record.segments[index])
+              .join('\\n');
+        } else {
+          paragraphAnswer = <String>[
+            for (var index = 0; index < 4; index++)
+              if (_optionText('challenge-option-correct-$index').isNotEmpty)
+                _optionText('challenge-option-correct-$index'),
+          ].join('\\n');
+        }
+'''
+new_answer = '''        final paragraphAnswer = <String>[
+          for (var index = 0; index < 4; index++)
+            if (_optionText('challenge-option-correct-$index').isNotEmpty)
+              _optionText('challenge-option-correct-$index'),
+        ].join('\\n');
+'''
+if text.count(old_answer) != 1:
+    raise SystemExit('snapshot paragraph answer anchor mismatch')
+text = text.replace(old_answer, new_answer, 1)
+
 path.write_text(text, encoding='utf-8')
-print('updated all-Gold snapshot harness for current runtime option IDs')
+print('updated all-Gold snapshot harness to read active runtime answers only')
