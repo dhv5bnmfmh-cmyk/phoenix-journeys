@@ -1,0 +1,30 @@
+name: Datong Challenge Gold Once
+
+on:
+  push:
+    branches:
+      - dev/current
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev/current
+          fetch-depth: 0
+      - name: Apply canonical and Datong Challenge Gold patch
+        run: python3 tools/datong_challenge_gold_patch.py
+      - name: Verify whitespace
+        run: git diff --check
+      - name: Commit final product tree
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: canonicalize Challenge Gold standard"
+          git push origin HEAD:dev/current
