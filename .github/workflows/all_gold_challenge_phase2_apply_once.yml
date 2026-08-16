@@ -19,6 +19,12 @@ jobs:
       - name: Apply Journey-specific Challenge runtime wiring
         run: python3 tools/apply_all_gold_challenge_phase2.py
 
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
       - name: Format Challenge Dart files
         id: format
         continue-on-error: true
@@ -46,12 +52,6 @@ jobs:
       - name: Enforce formatter result
         if: steps.format.outcome != 'success'
         run: exit 1
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
 
       - name: Install dependencies
         working-directory: app
