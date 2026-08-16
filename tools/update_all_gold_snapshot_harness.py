@@ -3,11 +3,12 @@ from pathlib import Path
 path = Path('app/test/all_gold_challenge_runtime_snapshot_test.dart')
 text = path.read_text(encoding='utf-8')
 
-text = text.replace(
+for obsolete_import in (
     "import 'package:phoenix_journeys/data/forbidden_city_challenge_package.dart';\n",
-    '',
-    1,
-)
+    "import 'package:phoenix_journeys/data/daily_journey_experience.dart';\n",
+):
+    text = text.replace(obsolete_import, '', 1)
+
 old = '''Future<void> _completeParagraph(
   WidgetTester tester, {
   required String journeyId,
