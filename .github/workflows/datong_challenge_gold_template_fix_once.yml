@@ -1,0 +1,70 @@
+name: Datong Challenge Gold Template Fix Once
+
+on:
+  push:
+    branches:
+      - dev/current
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev/current
+          fetch-depth: 0
+      - name: Apply Datong Challenge Gold anti-template fix
+        run: python3 tools/datong_challenge_gold_template_fix.py
+      - name: Normalize generated whitespace defects
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import subprocess
+
+          result = subprocess.run(['git', 'diff', '--check'], capture_output=True, text=True)
+          if result.returncode == 0:
+              raise SystemExit(0)
+          line_fixes = {}
+          eof_fixes = set()
+          unknown = []
+          for diagnostic in result.stdout.splitlines():
+              trailing = re.match(r'^(.*?):(\d+): trailing whitespace\.$', diagnostic)
+              if trailing:
+                  line_fixes.setdefault(trailing.group(1), set()).add(int(trailing.group(2)))
+                  continue
+              blank_eof = re.match(r'^(.*?):(\d+): new blank line at EOF\.$', diagnostic)
+              if blank_eof:
+                  eof_fixes.add(blank_eof.group(1))
+                  continue
+              if diagnostic.startswith('+') or not diagnostic.strip():
+                  continue
+              unknown.append(diagnostic)
+          if unknown:
+              print(result.stdout, end='')
+              raise SystemExit('Unrecognized git diff --check diagnostic; refusing to hide it.')
+          for path, line_numbers in line_fixes.items():
+              file = Path(path)
+              lines = file.read_text().splitlines()
+              for line_number in line_numbers:
+                  lines[line_number - 1] = lines[line_number - 1].rstrip(' \t')
+              file.write_text('\n'.join(lines) + '\n')
+          for path in eof_fixes:
+              file = Path(path)
+              lines = file.read_text().splitlines()
+              while lines and not lines[-1].strip():
+                  lines.pop()
+              file.write_text('\n'.join(lines) + '\n')
+          PY
+      - name: Verify whitespace
+        run: git diff --check
+      - name: Commit final Datong Challenge tree
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: de-template Datong Challenge grammar"
+          git push origin HEAD:dev/current
