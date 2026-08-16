@@ -15,7 +15,7 @@ void main() {
 
   test('Lv1 proves actual Yungang hinge, choice, cost and consequence', () {
     final story = datongYungangGoldLevelContent(1).storyParagraphs.join();
-    expect(story, contains('北魏迁都洛阳后，云冈不再像从前那样营造巨像'));
+    expect(story, contains('北魏迁都洛阳后，云冈不再营造巨像'));
     expect(story, contains('父亲只肯把手艺交给一个人'));
     expect(story, contains('割成三段'));
     expect(story, contains('失去了父亲许诺的唯一位置'));

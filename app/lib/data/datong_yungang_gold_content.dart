@@ -129,7 +129,7 @@ final datongYungangWords = <WordEntry>[
   const WordEntry(word: '散伙', pinyin: 'sànhuǒ', partOfSpeech: '动词', simpleChinese: '一起做事的人分开。', translation: 'tan nhóm', englishDefinition: 'to disband', symbol: '↔️'),
   const WordEntry(word: '石阶', pinyin: 'shíjiē', partOfSpeech: '名词', simpleChinese: '石头做成的台阶。', translation: 'bậc đá', englishDefinition: 'stone step', symbol: '🪨'),
   const WordEntry(word: '断口', pinyin: 'duànkǒu', partOfSpeech: '名词', simpleChinese: '物体断开的地方。', translation: 'chỗ đứt', englishDefinition: 'a cut or broken end', symbol: '✂️'),
-  const WordEntry(word: '石龛', pinyin: 'shíkān', partOfSpeech: '名词', simpleChinese: '石壁上安置造像的小空间。', translation: 'khám đá', englishDefinition: 'a stone niche', symbol: '⛰️'),
+  const WordEntry(word: '小龛', pinyin: 'xiǎokān', partOfSpeech: '名词', simpleChinese: '石壁上安置造像的小空间。', translation: 'khám đá nhỏ', englishDefinition: 'a small stone niche', symbol: '⛰️'),
   const WordEntry(word: '开凿', pinyin: 'kāizáo', partOfSpeech: '动词', simpleChinese: '用工具凿出洞窟或形状。', translation: 'khai tạc', englishDefinition: 'to excavate or carve', symbol: '⛏️'),
   const WordEntry(word: '崖壁', pinyin: 'yábì', partOfSpeech: '名词', simpleChinese: '陡直的山崖表面。', translation: 'vách đá', englishDefinition: 'cliff face', symbol: '🏔️'),
   const WordEntry(word: '分期', pinyin: 'fēnqī', partOfSpeech: '名词/动词', simpleChinese: '按时间和特点分成阶段。', translation: 'phân kỳ', englishDefinition: 'periodization', symbol: '🕰️'),
