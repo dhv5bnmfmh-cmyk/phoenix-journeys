@@ -1,0 +1,1 @@
+Temporary trigger for the all-Gold Challenge audit snapshot workflow. Remove before the final candidate tree.
