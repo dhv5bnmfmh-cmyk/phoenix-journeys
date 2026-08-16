@@ -4,3 +4,4 @@ Phase2 analyzer retry: snapshot harness imports only current runtime dependencie
 Final human-gate product snapshot trigger.
 Quote-boundary remediation snapshot trigger.
 De-skinned grammar closure snapshot trigger.
+Distractor naturalization snapshot trigger.
