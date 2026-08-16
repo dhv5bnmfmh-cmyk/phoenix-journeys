@@ -722,7 +722,9 @@ This semantic standard is deterministic and local where machine enforcement is c
 For every future new Journey, every future Story remediation explicitly authorized by Founder, and every future Gold promotion, Story development MUST proceed in this order:
 
 > **FACT FIRST**  
+> → **VERIFIED WORLD MODEL**
 > → **PLACE CAUSALITY**  
+> → **FICTIONAL HUMAN STORY MECHANISM**
 > → **STORY MECHANISM**  
 > → **ANTI-TEMPLATE COMPARISON**  
 > → **LV1 CAUSAL PROOF**  
@@ -752,17 +754,17 @@ Tourism blogs, social-media posts, unsourced travel articles, search-result snip
 
 At minimum, factual claims involving history, dates, historical development, real historical people, architecture, construction, restoration, conservation, heritage status, cultural practices, traditional crafts, spatial organization, building functions, landscape design, water systems, paths, bridges, gates, pavilions, windows, materials, inscriptions, rituals, regulations, prohibitions, named historical events, current heritage management, and factual site-specific cause/effect claims require approved source provenance when asserted as fact.
 
-If a factual statement materially supports Goal, Conflict, Choice, Climax, Consequence, Transformation, Ending, Cultural Anchor, or the dramatic engine, its approved source provenance is mandatory.
+If a factual statement about the real world materially supports Goal, Conflict, Choice, Climax, Consequence, Transformation, Ending, Cultural Anchor, or the dramatic engine, its approved source provenance is mandatory. This requirement does not convert a clearly fictional ordinary character's private identity, relationship, motivation, dialogue, choice, cost, or personal consequence into a documentary historical claim.
 
 Binding stop condition:
 
 `SOURCE EVIDENCE INSUFFICIENT — STORY DEVELOPMENT STOPPED`
 
-When evidence is insufficient the Agent may only:
+When evidence for a required world claim is insufficient the Agent may only:
 
 A. remove the unsupported claim;
 B. replace it with a verified factual mechanism;
-C. convert the relevant action into clearly fictional contemporary character behavior when that conversion does not falsely imply historical truth; or
+C. convert the relevant private human action into clearly fictional historical or contemporary character behavior when that conversion does not falsely imply a historical rule, practice, event, restriction, obligation, or real-person action; or
 D. stop and report insufficient evidence.
 
 Inventing a plausible fact is never an allowed option.
@@ -771,33 +773,62 @@ An untraceable factual premise produces:
 
 `UNVERIFIED FACTUAL CLAIM — BLOCKED`
 
-### 18.3 Blocking Gate B — Fact / Fiction Boundary
+Story-design difficulty is not evidence insufficiency. A failed architecture requires redesign. A Journey is evidence-blocked only when the required world fact itself cannot be verified or all plausible Story approaches would require inventing a prohibited historical fact.
 
-Phoenix may use fictional narrative. The following are permitted when compatible with the verified setting and clearly treated as fiction:
+### 18.3 Blocking Gate B — Verified World / Fictional Human Boundary
+
+Phoenix is historical-cultural fiction, not a documentary-biography-only system. Its canonical construction model is:
+
+`VERIFIED WORLD + FICTIONAL HUMAN CHARACTER + PLAUSIBLE FICTIONAL HUMAN ACTION = VALID HISTORICAL-CULTURAL FICTION`
+
+The historical world is constrained. The fictional human Story is creative. Phoenix protects the truth of the world, not the documentary existence of every fictional character.
+
+The following world claims require approved evidence when asserted as factual: place, architecture, material, chronology, historical event, institution, religious or social practice, law/rule/order, political event, trade/economic system, access restriction, professional duty, punishment, cultural requirement, and the role/action/quote of a specific real historical person.
+
+The following may be invented for a clearly fictional ordinary character when historically, socially, and physically plausible and compatible with verified world conditions:
 
 - fictional protagonist;
 - fictional supporting characters;
-- fictional contemporary assignment;
+- fictional identity, age, family, occupation, home, possession, and backstory;
+- fictional relationship;
 - fictional dialogue;
 - fictional personal motivation;
 - fictional interpersonal conflict;
-- fictional present-day action;
+- fictional historical or present-day private action, mistake, refusal, departure, return, and sacrifice;
+- fictional personal goal, decision, choice, cost, consequence, emotion, transformation, and ending action;
 - fictional object created or used by the protagonist.
 
 Before Story lock the source-governance record MUST classify material premises as one of:
 
 - `VERIFIED FACT`
+- `VERIFIED HISTORICAL ACTION`
+- `VERIFIED CULTURAL PRACTICE`
+- `VERIFIED INSTITUTIONAL CONDITION`
+- `VERIFIED PHYSICAL / SPATIAL CONDITION`
+- `FICTIONAL CHARACTER IDENTITY`
+- `FICTIONAL CHARACTER BACKSTORY`
 - `FICTIONAL CHARACTER ACTION`
+- `FICTIONAL RELATIONSHIP`
 - `FICTIONAL DIALOGUE`
 - `FICTIONAL PERSONAL MOTIVATION`
+- `FICTIONAL PERSONAL CHOICE`
+- `FICTIONAL PERSONAL COST`
+- `FICTIONAL PERSONAL CONSEQUENCE`
 - `INTERPRETIVE STORY DEVICE`
+- `LEGEND / FOLKLORE`
+- `CONTESTED`
+- `UNKNOWN`
 - `UNSUPPORTED FACTUAL CLAIM`
 
 `UNSUPPORTED FACTUAL CLAIM` is always `BLOCKED`.
 
-Fictional actions MUST NOT be represented as documented historical events or practices. An interpretive Story device is allowed only when it does not falsely assert unsupported historical fact.
+`FICTIONAL CHARACTER ACTION` is a distinct truth category from `VERIFIED HISTORICAL ACTION`. A fictional person's choice, argument, relationship, failure, sacrifice, departure, return, or refusal does not become an unsupported historical claim merely because the Story is set in a historical place. It does not require evidence that a documented individual performed that action.
 
-### 18.4 Real historical person protection
+Fictional actions MUST NOT be represented as documented historical events or practices and MUST NOT implicitly create a false historical rule. `A fictional artisan chooses not to leave with a friend` may be valid; `all artisans were forbidden to leave` is a world claim and requires evidence. An interpretive Story device is allowed only when it does not falsely assert unsupported historical fact.
+
+Fiction remains bounded by plausibility and non-contradiction. A character may use only places, buildings, materials, technologies, routes, roles, and practices compatible with the verified period. Fiction may create private human meaning; it may not create invented law, institution, religious rule, historical event, access restriction, punishment, official obligation, or real-person action.
+
+### 18.4 Real identifiable historical person protection
 
 Phoenix MUST NOT invent consequential actions, dialogue, private thoughts, intentions, motives, or design purposes for a real historical person and present them as fact.
 
@@ -806,6 +837,10 @@ A sentence equivalent to `乾隆在这里决定……` requires approved evidenc
 Observed spatial effect, present-day interpretation, and documented historical intention are three different claim types. One MUST NOT be silently converted into another.
 
 Unsupported real-person action, intention, or dialogue is `REAL_HISTORICAL_PERSON_FABRICATION` and `UNVERIFIED FACTUAL CLAIM — BLOCKED`.
+
+This higher-protection class applies especially to emperors, political or religious leaders, famous artists or scholars, named officials, patrons, monks, architects, and historical witnesses. Their private motivation, dialogue, romantic relationship, secret intention, undocumented decision/conflict/emotion, and moral judgment MUST NOT be freely invented. Prefer a fictional ordinary person when full literary interiority is required.
+
+Phoenix may choose either historical fictional characters or present-day fictional characters. Do not default to the present merely because historical characters feel risky, and do not default to the past merely because the Place is historic. Choose the period by Place Causality, Human Story quality, Fact/Fiction clarity, literary value, and anti-template differentiation.
 
 ### 18.5 Blocking Gate C — Place Causality
 
@@ -824,13 +859,21 @@ Human semantic-sufficiency review:
 Result:
 ```
 
-**Generic Place Substitution Test:** ask whether the exact Goal → Conflict → Choice → Climax → Consequence chain would work substantially unchanged if the named location were replaced by a generic city park, café, museum, old street, school, or unrelated attraction.
+**Generic Place Substitution Test:** remove or replace the verified place-specific mechanism with the genuine generic-place condition, then ask whether the current Goal → Conflict → Choice → Climax → Consequence chain still works for substantially the same reason and without substantial redesign.
+
+Do not move the cause when testing whether the cause matters. The control case MUST NOT move the fictional house too, grant the generic place the same unique property, recreate the same institution or historical event elsewhere, or otherwise transplant the causal mechanism along with the Story. The test compares the current architecture; it does not ask whether a writer could invent a different fictional setup somewhere else that creates a comparable universal human dilemma.
 
 If YES, the required stop result is:
 
 `GENERIC-PLACE STORY — NOT GOLD READY`
 
 The location's verified properties MUST affect at least one major causal dimension and SHOULD affect more than one. A place name or decorative reference to a pavilion, bridge, lotus, old wall, tea, river, palace, garden, carving, or other motif does not satisfy place causality by itself.
+
+A mechanism need not be unique in all human history. Capital movement, trade, migration, water management, ritual, craft, political change, and patronage may occur in multiple places. The requirement is that this Journey's verified configuration materially causes this Story's action. The valid chain is:
+
+`VERIFIED PLACE PROPERTY → FICTIONAL CHARACTER ENCOUNTER → HUMAN PRESSURE → GOAL / RELATIONSHIP / CONFLICT CHANGE → FICTIONAL CHOICE → COST → VISIBLE CONSEQUENCE`
+
+Historical records need not document that exact fictional human sequence.
 
 The design record MUST identify what causal element breaks when the place property is removed. CI may verify that the record and source links exist and that a declared substitution result is present; Founder/Agent review determines whether that causal claim is intellectually and creatively sufficient.
 

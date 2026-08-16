@@ -30,13 +30,18 @@ For every material premise:
 ```text
 Claim ID:
 Claim:
-Classification: VERIFIED FACT / FICTIONAL CHARACTER ACTION / FICTIONAL DIALOGUE / FICTIONAL PERSONAL MOTIVATION / INTERPRETIVE STORY DEVICE / UNSUPPORTED FACTUAL CLAIM
-Source IDs when VERIFIED FACT:
+Claim scope: WORLD CLAIM / CHARACTER FICTION / INTERPRETIVE DEVICE
+Classification: VERIFIED FACT / VERIFIED HISTORICAL ACTION / VERIFIED CULTURAL PRACTICE / VERIFIED INSTITUTIONAL CONDITION / VERIFIED PHYSICAL_OR_SPATIAL CONDITION / FICTIONAL CHARACTER IDENTITY / FICTIONAL CHARACTER BACKSTORY / FICTIONAL CHARACTER ACTION / FICTIONAL RELATIONSHIP / FICTIONAL DIALOGUE / FICTIONAL PERSONAL MOTIVATION / FICTIONAL PERSONAL CHOICE / FICTIONAL PERSONAL COST / FICTIONAL PERSONAL CONSEQUENCE / INTERPRETIVE STORY DEVICE / LEGEND_OR_FOLKLORE / CONTESTED / UNKNOWN / UNSUPPORTED FACTUAL CLAIM
+Source IDs when a verified world claim:
+Historical/social/physical plausibility basis when character fiction:
+Implicit historical rule or world claim created: YES / NO
 Material to Goal / Conflict / Choice / Climax / Consequence / Transformation / Ending / Cultural Anchor / Engine:
 Result:
 ```
 
 Any `UNSUPPORTED FACTUAL CLAIM` is `BLOCKED`.
+
+Character fiction does not require documentary proof of the fictional person or private action. It fails only when implausible, contradictory, presented as documented history, or dependent on an unsupported world claim.
 
 ## REAL HISTORICAL PERSON REVIEW
 
@@ -54,7 +59,9 @@ Result:
 Verified place property:
 Authoritative source IDs:
 Why the property creates the dramatic possibility:
-Why a generic place substitution breaks the causal chain:
+Generic control condition after removing/replacing the place-specific mechanism:
+Place-specific cause transplanted into control: YES / NO
+Why the current causal chain requires substantial redesign under the control:
 Affected causal dimensions:
 Generic Place Substitution Test: PASS / FAIL
 Human semantic-sufficiency review:
@@ -62,6 +69,8 @@ Result:
 ```
 
 `FAIL` means `GENERIC-PLACE STORY — NOT GOLD READY`.
+
+Do not move the cause when testing whether the cause matters. The test does not ask whether a writer could invent a different setup elsewhere.
 
 ## STORY MECHANISM
 

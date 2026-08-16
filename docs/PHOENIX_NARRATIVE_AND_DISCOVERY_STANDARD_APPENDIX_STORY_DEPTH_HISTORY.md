@@ -70,6 +70,10 @@ The parent §18.3 claim classes remain binding and are extended, where applicabl
 
 `UNSUPPORTED FACTUAL CLAIM` remains blocked.
 
+The ledger MUST distinguish verified world claims from fictional human material. Canonical fictional categories include identity, backstory, action, relationship, dialogue, personal motivation, personal choice, personal cost, and personal consequence. These categories do not require documentary proof for a clearly fictional ordinary character; they require plausibility, period compatibility, and non-contradiction with verified world conditions.
+
+`FICTIONAL CHARACTER ACTION != VERIFIED HISTORICAL ACTION` and `FICTIONAL CHARACTER ACTION != UNSUPPORTED FACTUAL CLAIM`.
+
 Interpretive narration MUST NOT silently become documentary fact. Fiction MUST NOT imply that an invented event, relationship, motive, quote, or causal explanation is documented history.
 
 ### A.4 Real historical person protection
@@ -105,13 +109,24 @@ If a real historical person cannot remain protagonist without fabricated interio
 
 ### A.5 Fictional character in verified historical setting
 
-A fictional character MAY appear in a verified historical setting only when:
+A fictional ordinary character MAY have a complete invented literary life in a verified historical setting. Name, age, family, occupation, relationship, personal history, home, possession, memory, dialogue, Goal, desire, fear, conflict, mistake, choice, personal cost, emotion, transformation, and ending action may be fictional. Documentary evidence that this exact person existed or performed the private action is not required.
+
+The fictional character remains valid only when:
 
 - the character is clearly classified as fictional in production governance;
 - the historical setting and material premises remain source-grounded;
 - the fictional character is not made the false cause of a real major event;
 - an invented relationship with a real historical person does not masquerade as documentation;
 - fictional dialogue does not convert uncertain history into fact.
+
+The character's actions must be historically, socially, and physically plausible. They MUST NOT require invented architecture, technology, institutional duty, access restriction, punishment, law, official order, religious rule, cultural custom, or other world claim. A fictional ordinary person may respond privately to a verified world condition; fiction may not silently rewrite that condition.
+
+Review examples:
+
+- **VALID:** Yungang construction under Northern Wei imperial patronage is verified; a fictional ordinary worker argues with a fictional family member over a personal decision created by that changing environment, without inventing an institutional rule.
+- **INVALID unless sourced:** every Yungang artisan was legally required to surrender family property before joining construction.
+- **VALID:** a fictional resident feels conflicted about a verified change in the city and makes a fictional personal choice.
+- **HIGH-RISK / BLOCKED unless directly supported:** a named emperor privately tells a fictional artisan why he commissioned a cave; this invents a real ruler's dialogue and motive.
 
 ### A.6 Artifact provenance and Object Biography
 

@@ -533,7 +533,9 @@ No Agent or implementation may create a Journey-specific exception, hard-code `P
 Before Phase B may produce a full Story, every new Journey MUST execute the Story-development pre-lock sequence from [Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md):
 
 > **FACT FIRST**  
+> → **VERIFIED WORLD MODEL**
 > → **PLACE CAUSALITY**  
+> → **FICTIONAL HUMAN STORY MECHANISM**
 > → **STORY MECHANISM**  
 > → **ANTI-TEMPLATE COMPARISON**  
 > → **LV1 CAUSAL PROOF**  
@@ -549,16 +551,22 @@ Before Story architecture is accepted, Phase A MUST contain:
 
 - authoritative place-source inventory using the approved source hierarchy;
 - source-governance claim record separating verified facts from fictional actions/dialogue/motivation and interpretive devices;
+- explicit confirmation that fictional ordinary-character identity, relationship, private action, motivation, choice, cost, and personal consequence are literary fiction rather than source-required world claims;
 - explicit absence of unsupported factual premises;
 - real-historical-person protection review where applicable;
 - `PLACE_CAUSAL_MECHANISM` record;
 - Generic Place Substitution Test;
+- control-case record proving the place-specific cause was removed rather than transplanted into the generic place;
 - candidate Story Mechanism architecture;
 - candidate normalized semantic fingerprint and all-approved-Gold comparison;
 - taxonomy-family governance record when a new family is proposed;
 - human semantic-sufficiency review separate from CI contract validation.
 
 Phase A MUST NOT pass when the site is merely decorative, a material factual premise lacks approved evidence, a real-person action/intention is fabricated, or semantic collision is unresolved.
+
+A failed fictional architecture requires redesign. Phase A MUST NOT classify a Journey as evidence-blocked merely because several plots fail. `SOURCE EVIDENCE INSUFFICIENT` applies only when a required world fact cannot be verified or all plausible approaches would require a prohibited invented world claim. Phoenix does not require a documented historical individual as protagonist and does not require sources for a clearly fictional ordinary character's private choices.
+
+Canonical classification remains explicit: `FICTIONAL CHARACTER ACTION` is not an `UNSUPPORTED FACTUAL CLAIM`. The former is governed by plausibility and compatibility with the verified world; the latter is blocked.
 
 ### Phase B ordering added
 
