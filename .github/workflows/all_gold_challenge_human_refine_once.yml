@@ -22,6 +22,9 @@ jobs:
       - name: Apply human-gate Challenge refinements
         run: python3 tools/refine_all_gold_human_gate.py
 
+      - name: Close cross-Gold DNA defects
+        run: python3 tools/close_cross_gold_dna_defects.py
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
