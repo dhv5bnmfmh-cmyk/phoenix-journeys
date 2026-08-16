@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../data/datong_yungang_gold_content.dart';
 import '../data/forbidden_city_challenge_package.dart';
 import '../data/forbidden_city_journey_runtime.dart';
 import '../models/language_proficiency.dart';
@@ -209,6 +210,9 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     final forbiddenCityLevel = widget.journeyId == forbiddenCityJourneyId
         ? _resolveForbiddenCityChallengeLevel(widget.storyParagraphs)
         : null;
+    final datongLevel = widget.journeyId == datongYungangJourneyId
+        ? _resolveDatongChallengeLevel(widget.storyParagraphs)
+        : null;
     _sessions = <_ChallengeSession>[
       for (var index = 0; index < fixedJourneyChallengeTypes.length; index++)
         _ChallengeSession.build(
@@ -219,6 +223,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           type: fixedJourneyChallengeTypes[index],
           seed: widget.seed + index * 997,
           forbiddenCityLevel: forbiddenCityLevel,
+          datongLevel: datongLevel,
         ),
     ];
     _activeIndex = 0;
@@ -1390,6 +1395,55 @@ class _ModeChip extends StatelessWidget {
 String _normalizeForbiddenCityChallengeText(String value) =>
     value.replaceAll(RegExp(r'\s+'), '');
 
+int _resolveDatongChallengeLevel(List<String> storyParagraphs) {
+  final activeStory = storyParagraphs.map((value) => value.trim()).join('\n\n');
+  for (var level = 1; level <= 10; level++) {
+    final candidate = datongYungangGoldLevelContent(level)
+        .storyParagraphs
+        .map((value) => value.trim())
+        .join('\n\n');
+    if (candidate == activeStory) return level;
+  }
+  throw StateError(
+    'Datong Challenge requires an exact active Lv1-Lv10 Story binding.',
+  );
+}
+
+@visibleForTesting
+String datongChallengeGoldPrimaryIntent(
+  int level,
+  JourneyChallengeType type,
+) {
+  if (level < 1 || level > 10) throw RangeError.range(level, 1, 10, 'level');
+  return switch (type) {
+    JourneyChallengeType.grammarRepair => 'LANGUAGE',
+    JourneyChallengeType.paragraphRebuild => level <= 2
+        ? 'STORY'
+        : level <= 6
+            ? 'CAUSAL_REASONING'
+            : level <= 8
+                ? 'STORY'
+                : 'CAUSAL_REASONING',
+    JourneyChallengeType.missingSentence => level <= 2
+        ? 'STORY'
+        : level <= 4
+            ? 'CAUSAL_REASONING'
+            : level <= 6
+                ? 'HISTORY'
+                : level <= 8
+                    ? 'STORY'
+                    : 'CULTURE',
+  };
+}
+
+@visibleForTesting
+int datongChallengeWindowStart(int level, int sourceLength, int count) {
+  if (level < 1 || level > 10) throw RangeError.range(level, 1, 10, 'level');
+  final maxStart = math.max(0, sourceLength - count);
+  if (maxStart == 0) return 0;
+  return ((level - 1) * maxStart / 9).round().clamp(0, maxStart);
+}
+
 int _resolveForbiddenCityChallengeLevel(List<String> storyParagraphs) {
   final activeStory = _normalizeForbiddenCityChallengeText(
     storyParagraphs.join('\n\n'),
@@ -1486,6 +1540,7 @@ class _ChallengeSession {
     required JourneyChallengeType type,
     required int seed,
     int? forbiddenCityLevel,
+    int? datongLevel,
   }) {
     if (journeyId == forbiddenCityJourneyId) {
       final level = forbiddenCityLevel;
@@ -1505,11 +1560,13 @@ class _ChallengeSession {
         storyParagraphs,
         difficulty,
         seed,
+        datongLevel: datongLevel,
       ),
       JourneyChallengeType.grammarRepair => _buildGrammar(
         journeyId,
         difficulty,
         seed,
+        datongLevel: datongLevel,
       ),
       JourneyChallengeType.missingSentence => _buildMissing(
         journeyId,
@@ -1517,6 +1574,7 @@ class _ChallengeSession {
         discoveryTexts,
         difficulty,
         seed,
+        datongLevel: datongLevel,
       ),
     };
   }
@@ -1912,14 +1970,21 @@ class _ChallengeSession {
     String journeyId,
     List<String> storyParagraphs,
     JourneyChallengeDifficulty difficulty,
-    int seed,
-  ) {
+    int seed, {
+    int? datongLevel,
+  }) {
     final requiredCount = switch (difficulty) {
       JourneyChallengeDifficulty.beginner => 2,
       JourneyChallengeDifficulty.standard => 3,
       JourneyChallengeDifficulty.advanced => 3,
     };
-    final source = _extractSentences(storyParagraphs);
+    final allSource = _extractSentences(storyParagraphs);
+    final source = datongLevel == null
+        ? allSource
+        : allSource
+            .skip(datongChallengeWindowStart(datongLevel, allSource.length, requiredCount))
+            .take(requiredCount)
+            .toList(growable: false);
     final fallback = <String>[
       '清晨，探索者来到今天的目的地。',
       '他沿着主要路线慢慢向前走。',
@@ -1967,8 +2032,12 @@ class _ChallengeSession {
       options: options,
       correctIds: correctOptions.map((option) => option.id).toList(),
       questionTitle: '把散开的故事拼回来',
-      instruction: '四个候选句中有 ${correctOptions.length} 句属于原文。请按故事发生的顺序依次点击。',
-      explanation: '段落通常先交代地点或时间，再写行动，最后出现观察、变化或决定。',
+      instruction: datongLevel == null
+          ? '四个候选句中有 ${correctOptions.length} 句属于原文。请按故事发生的顺序依次点击。'
+          : '按当前 Lv$datongLevel 已学故事的事件、时间与因果推进，复原这组句子。',
+      explanation: datongLevel == null
+          ? '段落通常先交代地点或时间，再写行动，最后出现观察、变化或决定。'
+          : '正确顺序来自当前等级已学 Story，并随等级逐步移向选择、代价、关系变化与结果。',
       memoryTip: '记住“整体 → 行动 → 变化”，不要只看单句是否通顺。',
     );
   }
@@ -1976,9 +2045,10 @@ class _ChallengeSession {
   static _ChallengeSession _buildGrammar(
     String journeyId,
     JourneyChallengeDifficulty difficulty,
-    int seed,
-  ) {
-    final grammar = _grammarForJourney(journeyId, difficulty, seed);
+    int seed, {
+    int? datongLevel,
+  }) {
+    final grammar = _grammarForJourney(journeyId, difficulty, seed, datongLevel: datongLevel);
 
     final replacementCandidates = <String>[
       grammar.correctReplacement,
@@ -2039,12 +2109,16 @@ class _ChallengeSession {
     List<String> storyParagraphs,
     List<String> discoveryTexts,
     JourneyChallengeDifficulty difficulty,
-    int seed,
-  ) {
+    int seed, {
+    int? datongLevel,
+  }) {
     final source = _extractSentences(storyParagraphs);
-    final before = source.isNotEmpty ? source[0] : '清晨，探索者来到今天的目的地。';
-    final correct = source.length >= 2 ? source[1] : '他沿着主要路线慢慢向前走。';
-    final after = source.length >= 3 ? source[2] : '一路上的景色因此不断发生变化。';
+    final start = datongLevel == null
+        ? 0
+        : datongChallengeWindowStart(datongLevel, source.length, 3);
+    final before = source.isNotEmpty ? source[start] : '清晨，探索者来到今天的目的地。';
+    final correct = source.length > start + 1 ? source[start + 1] : '他沿着主要路线慢慢向前走。';
+    final after = source.length > start + 2 ? source[start + 2] : '一路上的景色因此不断发生变化。';
     final distractors = selectBalancedChallengeDistractors(
     correctAnswers: <String>[correct],
     candidates: _missingDistractors(
@@ -2083,8 +2157,9 @@ class _ChallengeSession {
   static _GrammarSpec _grammarForJourney(
     String journeyId,
     JourneyChallengeDifficulty difficulty,
-    int seed,
-  ) {
+    int seed, {
+    int? datongLevel,
+  }) {
     final journeySpec = switch (journeyId) {
       'beijing-forbidden-city' ||
       'beijing-summer-palace' ||
@@ -2096,7 +2171,7 @@ class _ChallengeSession {
       'guangzhou-chen-clan-academy' ||
       'suzhou-humble-administrators-garden' ||
       'datong-yungang-grottoes' =>
-        _adaptiveGrammarForJourney(journeyId, difficulty),
+        _adaptiveGrammarForJourney(journeyId, difficulty, datongLevel: datongLevel),
       'literary-roaming' ||
       'myth-tracing' ||
       'strange-night-talks' ||
@@ -2154,8 +2229,9 @@ class _ChallengeSession {
 
   static _GrammarSpec _adaptiveGrammarForJourney(
     String journeyId,
-    JourneyChallengeDifficulty difficulty,
-  ) {
+    JourneyChallengeDifficulty difficulty, {
+    int? datongLevel,
+  }) {
     final context = switch (journeyId) {
       'beijing-forbidden-city' => (
           focus: '午门和中轴线',
@@ -2247,16 +2323,109 @@ class _ChallengeSession {
           resultSubject: '园林视野',
           resultAction: '随着行走连续变化',
         ),
-      'datong-yungang-grottoes' => (
-          focus: '昙曜五窟与迁都后的较小窟龛',
-          insight: '理解云冈规模怎样随时代改变',
-          subject: '云冈的早中晚分期',
-          action: '记录营造规模和艺术语言的变化',
-          result: '理解迁都前后的历史转折',
-          cause: '494年北魏迁都洛阳',
-          resultSubject: '云冈大规模的皇家开凿',
-          resultAction: '随之停止，而较小窟龛继续出现',
-        ),
+      'datong-yungang-grottoes' => switch (datongLevel ?? 1) {
+          1 => (
+              focus: '北魏定都平城后云冈靠近政治中心',
+              insight: '理解地点与时代的基本关系',
+              subject: '平城附近的云冈',
+              action: '靠近北魏政治中心',
+              result: '理解早期营造的历史背景',
+              cause: '北魏定都平城',
+              resultSubject: '云冈',
+              resultAction: '处在接近政治中心的位置',
+            ),
+          2 => (
+              focus: '昙曜五窟与早期皇家支持',
+              insight: '理解早期大型造像的背景',
+              subject: '昙曜五窟',
+              action: '体现早期大型营造',
+              result: '联系皇家支持与造像规模',
+              cause: '朝廷支持早期大型造像',
+              resultSubject: '昙曜五窟',
+              resultAction: '成为早期云冈的重要代表',
+            ),
+          3 => (
+              focus: '朝廷支持与大型石窟营造',
+              insight: '理解资源怎样影响营造规模',
+              subject: '朝廷支持',
+              action: '集中营造资源',
+              result: '理解早期大型开凿的条件',
+              cause: '国家力量能够集中资源',
+              resultSubject: '大型石窟营造',
+              resultAction: '获得更强的组织条件',
+            ),
+          4 => (
+              focus: '云冈早中晚分期与494年迁都转折',
+              insight: '理解营造阶段怎样发生变化',
+              subject: '早中晚分期',
+              action: '整理营造时间线',
+              result: '看清迁都前后的转折',
+              cause: '494年北魏迁都洛阳',
+              resultSubject: '云冈营造',
+              resultAction: '进入新的历史阶段',
+            ),
+          5 => (
+              focus: '中期营造高峰与更复杂的艺术表达',
+              insight: '理解中期云冈怎样继续发展',
+              subject: '中期洞窟',
+              action: '发展更复杂的布局与雕饰',
+              result: '理解云冈艺术语言的变化',
+              cause: '中期营造持续发展',
+              resultSubject: '洞窟布局与雕饰',
+              resultAction: '呈现更丰富的表达',
+            ),
+          6 => (
+              focus: '494年迁都与大型皇家开凿的变化',
+              insight: '理解迁都为什么改变营造规模',
+              subject: '迁都后的云冈',
+              action: '改变原有营造条件',
+              result: '理解大型皇家开凿为何停止',
+              cause: '494年北魏迁都洛阳',
+              resultSubject: '大规模皇家开凿',
+              resultAction: '不再按原有规模继续',
+            ),
+          7 => (
+              focus: '迁都后中小窟龛继续出现',
+              insight: '理解赞助者与营造规模的变化',
+              subject: '晚期中小窟龛',
+              action: '延续造像活动',
+              result: '理解云冈没有在迁都后立刻沉寂',
+              cause: '迁都改变了皇家营造条件',
+              resultSubject: '较小规模的造像活动',
+              resultAction: '仍由不同赞助者继续',
+            ),
+          8 => (
+              focus: '南亚中亚佛教艺术因素与中国传统的融合',
+              insight: '理解云冈艺术交流不是单向复制',
+              subject: '云冈造像艺术',
+              action: '吸收并重组不同艺术传统',
+              result: '理解文化交流形成的新表达',
+              cause: '多种佛教艺术传统在云冈相遇',
+              resultSubject: '云冈艺术语言',
+              resultAction: '形成融合后的独特面貌',
+            ),
+          9 => (
+              focus: '政治中心、赞助体系与营造规模的连续变化',
+              insight: '连接云冈历史的多步因果链',
+              subject: '赞助与营造条件',
+              action: '随着政治环境改变',
+              result: '解释规模与艺术语言的变化',
+              cause: '政治中心和赞助条件先后改变',
+              resultSubject: '云冈的营造方式',
+              resultAction: '呈现出连续而非突然中断的转变',
+            ),
+          10 => (
+              focus: '云冈在中国与东亚佛教石窟艺术中的影响',
+              insight: '综合理解云冈的历史与文化意义',
+              subject: '云冈艺术',
+              action: '形成有影响力的石窟艺术表达',
+              result: '理解其超越单一遗址的意义',
+              cause: '云冈融合多种传统并形成鲜明表达',
+              resultSubject: '后来的佛教石窟艺术',
+              resultAction: '受到持续影响',
+            ),
+          _ => throw RangeError.range(datongLevel ?? 0, 1, 10, 'datongLevel'),
+        },
       'literary-roaming' => (
           focus: '蓝色蝴蝶和竹林梦境',
           insight: '分辨梦与醒的边界',

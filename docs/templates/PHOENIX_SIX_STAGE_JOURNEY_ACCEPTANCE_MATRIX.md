@@ -145,3 +145,7 @@ Only one:
 - `SCOPE_EXPANSION_REQUIRED`
 - `READY_FOR_MERGE_AUTHORIZATION`
 - `MERGED`
+
+## Stage 3 Challenge Gold evidence
+
+Stage 3 remains the existing `challenge` stage and MUST NOT introduce a new user-visible stage or mode. In addition to confirming all three runtime modes, attach the Challenge Gold gate results from [Phoenix Six-Stage Journey Standard §3](../PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes), including Lv1/Lv5/Lv10 human review.

@@ -327,3 +327,26 @@ Controlled Release Authorized: YES / NO
 ```
 
 Any missing `REQUIRED` item or applicable `CONDITIONALLY_REQUIRED` item blocks Completed. Any required background gate that is `FAIL`, `PENDING`, or `BLOCKED` blocks background runtime integration.
+
+## Challenge Gold required gates
+
+Detailed definitions are owned by [Phoenix Six-Stage Journey Standard §3](../PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes). Record each row independently; do not infer one PASS from another.
+
+| Gate | Class | Required evidence |
+|---|---|---|
+| Challenge Learning Intent | REQUIRED | One primary intent per active item |
+| Mode Differentiation | REQUIRED | Three modes exercise distinct canonical functions |
+| Paragraph Rebuild Quality | REQUIRED | Structure/sequence/causal-order evidence; not punctuation or rote ordering |
+| Grammar Repair Quality | REQUIRED | Genuine, explainable, level-fit Chinese repair |
+| Missing Sentence Quality | REQUIRED | Contextual comprehension/inference; not keyword matching |
+| One Defensible Answer | REQUIRED | Unique best answer under taught context |
+| Distractor Quality | REQUIRED | Plausible, non-duplicated, non-trick distractors |
+| Distractor Misconception Logic | REQUIRED | Misunderstanding represented by each distractor |
+| Teach Before Test | REQUIRED | Necessary knowledge taught at current/earlier level |
+| Challenge Provenance | REQUIRED | Active Story/Discovery/Vocabulary or explicit language objective |
+| Level Progression | REQUIRED | Deeper reasoning across levels, not length inflation |
+| Story / Discovery Closed Loop | REQUIRED | Challenge reorganizes/applies taught Journey learning |
+| Historical Truth | REQUIRED | No cheap fabricated-history distractors or unsupported claims |
+| Human Challenge Review | REQUIRED | Lv1/Lv5/Lv10 human evidence |
+
+Any row not `PASS` with appropriate evidence blocks Gold Founder Review.

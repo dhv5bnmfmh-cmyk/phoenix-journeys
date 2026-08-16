@@ -82,3 +82,22 @@ This is not Longmen’s coauthors deleting unsupported work, Kaiping’s sibling
 - Vocabulary is selected only when visible in active Story or Discovery.
 - Challenge contains only `paragraphRebuild`, `grammarRepair`, and `missingSentence`.
 - Memory and Completion use the three-line image and Datong-specific consequence.
+
+## Challenge Gold matrix · Founder canonicalization
+
+This evidence applies the binding Challenge Gold contract in `PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md` to the active Datong runtime. Story and Vocabulary remain locked. Challenge remains Stage 3 with the three existing modes; only Datong content mapping is made level-aware.
+
+| Level | Primary learning intent by mode | Source provenance / teach-before-test | Correct-answer logic | Diagnosable distractor misconception | Level appropriateness / human audit |
+|---|---|---|---|---|---|
+| Lv1 | paragraph=`STORY`; grammar=`LANGUAGE`; missing=`STORY` | current Lv1 Story + Lv1 Pingcheng/period context | Story order; genuine subject repair; local context bridge | reverses the rope choice, sole-successor status, or who controls the line | recognition/basic comprehension; human PASS |
+| Lv2 | `STORY` / `LANGUAGE` / `STORY` | current/earlier Story + taught Tan Yao Five Caves context | same mode contracts, Lv2 source window | confuses who receives the line or early cave context | basic comprehension with added context; human PASS |
+| Lv3 | `CAUSAL_REASONING` / `LANGUAGE` / `CAUSAL_REASONING` | current/earlier Story + taught court-support context | order and connection, not date trivia | mistakes resource/cause relation or Story agency | sequence/simple causality; human PASS |
+| Lv4 | `CAUSAL_REASONING` / `LANGUAGE` / `CAUSAL_REASONING` | current/earlier Story + taught phase/494 turning-point context | causal sequence and clear grammar structure | moves consequence before cause or treats phase change as static | sequence/simple causality; human PASS |
+| Lv5 | `CAUSAL_REASONING` / `LANGUAGE` / `HISTORY` | current/earlier Story + taught middle-period development | choice/cost sequence plus taught historical context | confuses Goal, Choice, and changed artistic/historical conditions | relationship/choice/historical cause; human PASS |
+| Lv6 | `CAUSAL_REASONING` / `LANGUAGE` / `HISTORY` | current/earlier Story + taught 494 impact | connects relocation pressure to changed scale without requiring untaught facts | assumes relocation erased all activity or reverses cause/effect | relationship/choice/historical cause; human PASS |
+| Lv7 | `STORY` / `LANGUAGE` / `STORY` | current/earlier Story + taught continuation of smaller niches | later Story relationship/order plus language repair | confuses lost title, sibling relation, or continued carving context | causal chain begins; human PASS |
+| Lv8 | `STORY` / `LANGUAGE` / `STORY` | current/earlier Story + taught cultural-fusion context | deeper relationship/implicit sequence | treats fusion as simple copying or removes responsibility from the trio | causal chain/implicit meaning; human PASS |
+| Lv9 | `CAUSAL_REASONING` / `LANGUAGE` / `CULTURE` | accumulated Story + taught patronage/scale/art-language chain | multi-step consequence and integrated inference | collapses multiple historical changes into one unsupported cause | integrated interpretation; human PASS |
+| Lv10 | `CAUSAL_REASONING` / `LANGUAGE` / `CULTURE` | complete Story + taught Yungang legacy context | final relationship/causal closure plus cultural integration | confuses inheritance with restored sole authority or reduces legacy to size alone | integrated interpretation; human PASS |
+
+`paragraphRebuild` now advances its active Story window across levels instead of repeatedly sampling the Lv1 opening. `missingSentence` advances the same way. `grammarRepair` keeps LANGUAGE as primary intent while its historical context is selected from knowledge already taught at that exact level or earlier. Datong distractors remain fictional Story counterfactuals or language-structure errors; they do not fabricate cheap false history.

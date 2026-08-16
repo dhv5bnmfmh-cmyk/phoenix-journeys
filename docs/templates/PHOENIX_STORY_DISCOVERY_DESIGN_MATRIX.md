@@ -609,3 +609,9 @@ STORY EXPERIENCE PROGRESS concept defined: YES / NO
 Runtime multi-Story implementation authorized by this record: NO
 Data-model migration authorized by this record: NO
 ```
+
+## Challenge Gold design extension
+
+Use this matrix together with [Phoenix Six-Stage Journey Standard §3](../PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes). The Six-Stage Standard owns the detailed semantics; this template records design evidence.
+
+For every active Challenge item record: `Level`, `Mode`, `Primary Learning Intent`, `Source Provenance`, `Taught Before Tested`, `Correct Answer`, `Why Correct`, each `Distractor Misconception`, `Level Appropriateness`, and `Human Review`. The three modes MUST show distinct learning functions, and Lv1/Lv5/Lv10 MUST receive explicit human review.

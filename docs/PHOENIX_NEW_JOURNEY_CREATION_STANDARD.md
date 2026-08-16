@@ -607,3 +607,15 @@ Default Discovery depth is `2 / 2 / 2 / 2 / 3 / 3 / 3 / 3 / 3 / 3`; deviations r
 Pilot governance is binding: one Pilot, exact-head validation and Preview, independent audit, Founder Experience, final Founder audit, canonical formalization only after PASS, then horizontal audit and one-Journey-at-a-time remediation. Any source commit after Founder Experience invalidates that SHA-bound approval.
 
 The six-stage product architecture is unchanged. Wonder/Express cognitive bands are content semantics, not standalone stages.
+
+## Challenge Gold lifecycle binding
+
+The authoritative Challenge content-quality contract is [Phoenix Six-Stage Journey Standard §3](PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes). This standard does not redefine those rules.
+
+For every new or materially repaired Journey, the learning-package development order is binding:
+
+> **Story Lock → Discovery → Vocabulary → Challenge Design → Challenge Gold Audit → Memory → Completion → Runtime → Validation**
+
+Phase B MUST define a primary learning intent, active source provenance, teach-before-test evidence, one-defensible-answer evidence, distractor misconception logic, and level-progression intent for every active Challenge item. Phase E machine validation covers the structurally testable portions; Lv1/Lv5/Lv10 human Challenge review remains REQUIRED before Gold Founder Review.
+
+A Journey is blocked if Challenge was filled after the fact from random source sentences, if the three modes do not have distinct learning functions, or if any required Challenge Gold gate from the Six-Stage Standard fails.

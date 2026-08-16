@@ -284,3 +284,11 @@ The Agent MUST treat `PLACE → PLACE STORY UNIVERSE → STORY EXPERIENCE → JO
 Future multi-Story semantics are `UNSEEN FIRST`, `DIFFERENT PER NEW RUN`, and `STABLE WITHIN THE RUN`. Pure random is not the preferred primary selection strategy, and reopening a page is not automatically a new Journey Run.
 
 `EXPERIENCE DIVERSITY COMES FROM MULTIPLE APPROVED GOLD STORIES, NOT RUNTIME-GENERATED RANDOMNESS`. Every future Story Experience remains a full Gold package across Story, Lv1–Lv10, Vocabulary, Discovery, Reading Support, Challenge, Memory, and Completion.
+
+## Challenge Gold development behavior
+
+For Journey work, AI MUST treat [Phoenix Six-Stage Journey Standard §3](../docs/PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes) as the single detailed authority for Challenge Gold quality.
+
+AI MUST read the active Story, Discovery, level, vocabulary provenance, and intended learning objective before designing Challenge. Challenge MUST NOT be generated as end-of-pipeline filler. Before proposing `PASS`, AI MUST actively look for ambiguous answers, weak or duplicate distractors, untaught knowledge, legacy/cross-Journey contamination, mode duplication, level mismatch, trivia dependency, keyword matching, and fabricated historical distractors. A real failure requires rewriting the item or its content mapping, not weakening a gate or test.
+
+Human Challenge review at Lv1/Lv5/Lv10 is mandatory and cannot be replaced by green CI or a numeric quality score.

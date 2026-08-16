@@ -1,6 +1,6 @@
 # Phoenix Six-Stage Journey Standard
 
-**System:** Phoenix Product Standard System v1.1  
+**System:** Phoenix Product Standard System v1.2
 **Status:** BINDING  
 **Effective scope:** all new Journeys, Story repairs, Journey flow changes, acceptance matrices, quality gates, previews, and release decisions created after this standard  
 **Stable baseline:** PR `#137`, Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
@@ -49,6 +49,37 @@ Acceptance rules:
 - mode order may be fixed by the product, but a Journey may not silently omit a mode;
 - difficulty adaptation may change wording, number of items, distractors, grammar density, and support, but must preserve learning intent and answer validity;
 - Reward quantity, wallet rules, and idempotency remain governed by the existing approved Reward system.
+
+### 3.1 Phoenix Challenge Gold quality contract
+
+Challenge is a **verification and reorganization layer**, not a warehouse for new teaching. Its canonical chain is:
+
+> **TAUGHT CONTENT → CLEAR LEARNING INTENT → FAIR QUESTION → PLAUSIBLE DISTRACTORS → ONE DEFENSIBLE ANSWER → DIAGNOSABLE MISUNDERSTANDING → LEVEL-APPROPRIATE REASONING → STORY + LANGUAGE + CULTURE REINFORCEMENT**
+
+Every active Challenge item MUST satisfy all of the following:
+
+1. **TEACH BEFORE TEST.** Any historical fact, cultural concept, Story relationship/turn, or language structure necessary for the answer MUST already be taught in the current or an earlier level through active Story, Vocabulary, or Discovery. Synthesis and inference are allowed; untaught core knowledge is not.
+2. **One primary learning intent.** Each item MUST have exactly one primary intent: `LANGUAGE`, `STORY`, `HISTORY`, `CULTURE`, or `CAUSAL_REASONING`. Secondary intents are allowed. The item MUST have a defensible learning reason to exist and MUST NOT be filler generated from a random sentence.
+3. **Mode differentiation.** `paragraphRebuild` primarily tests structure, sequence, time, or causal order; it MUST NOT reduce to punctuation/length guessing or sentence memorization. `grammarRepair` primarily tests language structure; its defect MUST be genuine, explainable, level-appropriate, and unambiguous rather than a history-trivia trap. `missingSentence` primarily tests comprehension and inference across context; it MUST NOT reduce to keyword matching or verbatim recall alone. If all three modes effectively test memorization of the same source sentence, Challenge Gold fails.
+4. **One defensible best answer.** The intended answer MUST be uniquely supportable from taught Journey context and level-appropriate Chinese. If two options remain reasonably defensible, rewrite the item; do not declare one correct by author intent. External knowledge, test-pattern guessing, tricks, and extreme-detail trivia are prohibited dependencies.
+5. **Gold distractors.** A distractor MUST be plausible but wrong for a teachable reason. Preferred misconception classes include wrong sequence, reversed causality, relationship confusion, Goal/Consequence confusion, a taught true fact used in the wrong context, cultural misunderstanding, or a language-structure misconception. Absurd answers, random noun/city/person swaps, broken grammar unrelated to the learning intent, other-Journey material, inactive/legacy text, and cheap fabricated history are prohibited. Historical Truth applies to Challenge.
+6. **Diagnosable misunderstanding.** Human audit MUST be able to state what misunderstanding each distractor represents. This is content-design evidence and does not require new feedback UI.
+7. **Closed learning loop.** Story and Discovery provide experience and verified knowledge; Challenge asks the learner to reorganize, apply, compare, or infer from that taught material. Chinese learning remains active even when history or culture supplies the context.
+8. **Provenance.** Every item MUST trace to active Story, active Discovery, active Vocabulary, or an explicit current language objective. Legacy seed text, old Story, another Journey, random cultural trivia, and inactive content are blocking defects.
+9. **Fairness.** Phoenix Challenge may be challenging, but MUST NOT be tricky. The learner must be able to answer from the Journey already experienced plus the expected language ability for that level.
+10. **Cognitive progression.** Subject to the canonical Three Gradients and Five Cognitive Bands, the default Challenge progression is: Lv1–2 recognition/basic comprehension; Lv3–4 sequence/simple causality; Lv5–6 relationship/choice/historical cause; Lv7–8 causal chain/implicit meaning; Lv9–10 integrated interpretation. Higher level means deeper reasoning, not merely longer questions, longer vocabulary, more options, or colder trivia.
+
+For Story-sourced items, prefer people, relationship, Goal, Conflict, Choice, Cost, Consequence, Transformation, sequence, or subtext over isolated noun recall. For Discovery-sourced items, prefer understanding, sequence, causality, connection, change, and cultural meaning over year/number memorization unless the exact fact is an explicit level target.
+
+### 3.2 Challenge Gold human gate
+
+Machine checks are necessary but cannot approve fairness, naturalness, misconception quality, or learning value. Every Gold Journey MUST receive human Challenge review at **Lv1, Lv5, and Lv10**. Each review asks: what is the question testing; was it taught; is one answer best; are distractors plausible and diagnosable; is Chinese learning occurring; does Story/culture/history reinforcement fit the level; does the item feel repetitive or machine-filled?
+
+The final human question is: **after completing the Challenge, is the learner clearer about at least one core Story, Chinese, cultural, historical, or causal learning target?** If the learner merely clicked the keyed answer without reinforced understanding, `CHALLENGE GOLD QUALITY = FAIL`.
+
+### 3.3 Gold blocking gates
+
+Before a Journey may enter Gold Founder Review, all applicable rows MUST be `PASS`: `CHALLENGE LEARNING INTENT`, `MODE DIFFERENTIATION`, `PARAGRAPH REBUILD QUALITY`, `GRAMMAR REPAIR QUALITY`, `MISSING SENTENCE QUALITY`, `ONE DEFENSIBLE ANSWER`, `DISTRACTOR QUALITY`, `DISTRACTOR MISCONCEPTION LOGIC`, `TEACH-BEFORE-TEST`, `CHALLENGE PROVENANCE`, `LEVEL PROGRESSION`, `STORY / DISCOVERY CLOSED LOOP`, `HISTORICAL TRUTH`, and `HUMAN CHALLENGE REVIEW`. A machine PASS cannot substitute for the human gate.
 
 ## 4. Story requirements
 
@@ -121,7 +152,7 @@ A new Journey must pass these gates in order:
 
 1. Proposal and catalog differentiation
 2. Story / Discovery design and Function Contracts
-3. Vocabulary, three-mode Challenge, Memory, Completion, Reward, and multilingual design
+3. Vocabulary → Challenge Design → Challenge Gold Audit → Memory → Completion → Reward and multilingual design
 4. Visual concept and mobile crop review
 5. Authorized implementation
 6. Automated structural validation
@@ -139,7 +170,8 @@ No later gate may be inferred from an earlier PASS.
 Automated checks MUST directly verify, where applicable:
 
 - exact six-stage labels and `0–5` range;
-- presence of all three Challenge modes;
+- presence and canonical runtime mapping of all three Challenge modes;
+- structurally testable Challenge provenance, duplicate distractors, level coverage, taught-before-tested prerequisites, and answer-key uniqueness;
 - Story, Discovery, Vocabulary, Memory, and Completion records;
 - Journey IDs, routes, languages, annotations, and asset mappings;
 - Lv.1–10 structural invariants;
@@ -169,6 +201,7 @@ A Journey is blocked when any of the following is true:
 
 - user-visible flow is not exactly Story → Vocabulary → Discovery → Challenge → Memory → Completion;
 - one of the three Challenge modes is absent;
+- any required Challenge Gold gate in §3.3 fails;
 - Reflection or Writing appears as a standalone user-visible stage;
 - Story lacks any required causal element;
 - Discovery duplicates Story;

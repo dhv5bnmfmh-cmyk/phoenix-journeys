@@ -207,3 +207,9 @@ New work must fetch current remote main and branch from that exact SHA. `RELATED
 The gate includes `NO SILENT PRODUCT REPLACEMENT`: `ABSENCE OF AUTHORIZATION = PRESERVE CURRENT MAIN`. Record a `PROTECTED BASELINE MANIFEST` before writing and prove `AUTHORIZED DELTA + PROTECTED BASELINE PARITY` at closeout.
 
 `FILE EXISTS != ACTIVE PRODUCT`. Current judgments must establish active runtime identity from `ACTIVE RUNTIME`, `ACTIVE RESOLVER`, `ACTIVE BINDING`, and `CURRENT MAIN` before using content as defect evidence. Legacy constants and inactive packages cannot define current product behavior. Founder approval remains SHA-bound.
+
+## Challenge Gold gate
+
+Challenge quality is governed in detail by [Phoenix Six-Stage Journey Standard §3](PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes). This gate only records its acceptance boundary to avoid a parallel standard.
+
+A Gold candidate MUST demonstrate: clear primary learning intent; teach-before-test; differentiated `paragraphRebuild` / `grammarRepair` / `missingSentence`; one defensible best answer; plausible and diagnosable distractors; active-content provenance; level-appropriate cognitive progression; Story/Discovery closed loop; Historical Truth; and human Lv1/Lv5/Lv10 Challenge review. Any required failure blocks the quality gate even when mode-presence tests and aggregate scores are green.
