@@ -5,3 +5,4 @@ Final human-gate product snapshot trigger.
 Quote-boundary remediation snapshot trigger.
 De-skinned grammar closure snapshot trigger.
 Distractor naturalization snapshot trigger.
+Human checkpoint polish snapshot trigger.
