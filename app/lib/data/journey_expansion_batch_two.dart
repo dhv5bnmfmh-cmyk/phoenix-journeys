@@ -184,7 +184,7 @@ final journeyExpansionBatchTwoExperiences = <DailyJourneyExperience>[
     stampSymbol: '云',
     content: datongYungangJourney,
     storyAnnotations: datongYungangGoldLevelContent(5).storyAnnotations,
-    words: datongYungangGoldLevelContent(5).words,
+    words: datongYungangWords,
     discoveries: datongYungangGoldLevelContent(5).discoveries,
     wonderQuestion: datongYungangGoldLevelContent(5).wonderQuestion,
     expressQuestion: datongYungangGoldLevelContent(5).expressQuestion,

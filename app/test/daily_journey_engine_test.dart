@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/chengdu_kuanzhai_one_pass.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/datong_yungang_gold_content.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/guangzhou_chen_clan_one_pass.dart';
 import 'package:phoenix_journeys/data/journey_expansion_catalog.dart';
@@ -80,6 +81,9 @@ void main() {
           luoyangLongmenOnePassLevels[4].discoveries.length,
           reason: journey.id,
         );
+      } else if (journey.id == datongYungangJourneyId) {
+        expect(journey.content.storyParagraphs, datongYungangGoldLevelContent(5).storyParagraphs, reason: journey.id);
+        expect(journey.discoveries, hasLength(3), reason: journey.id);
       } else if (journey.id == 'jiangmen-kaiping-diaolou') {
         expect(journey.discoveries.length, 3, reason: journey.id);
       } else if (journey.id == suzhouGardenJourney.id) {

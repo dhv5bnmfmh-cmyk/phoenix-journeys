@@ -91,6 +91,9 @@ const _depth = <_Segment>[
   _Segment('阿砾没有道谢。他把自己的绳段绕上手腕，给魏岚留下了拒绝这份分配的余地。', 'A Lịch không cảm ơn. Anh quấn đoạn dây quanh cổ tay, để cho Ngụy Lam khoảng trống có thể từ chối sự phân chia này.', 'A Li does not thank her. He winds his piece around his wrist, leaving Wei Lan room to refuse the arrangement.', from: 8),
   _Segment('她终于明白，继承不一定是一个人把整根绳子带走；也可能是三个人各自承担一条线，再也不能把失误推回同一双手。', 'Cuối cùng cô hiểu kế thừa không nhất thiết là một người mang đi cả sợi dây; cũng có thể là ba người tự chịu trách nhiệm cho đường của mình và không còn đẩy sai lầm về cùng một đôi tay.', 'She finally understands that inheritance need not mean one person carrying away the whole line; it may mean three people owning their own marks, unable to return every mistake to the same hands.', from: 9),
   _Segment('崖路吞没父亲的背影后，风把三段绳尾同时吹起。它们没有重新碰在一起。', 'Sau khi con đường vách đá nuốt bóng người cha, gió nâng ba đầu dây cùng lúc. Chúng không chạm lại vào nhau.', 'After the cliff road swallows her father’s figure, the wind lifts all three cord ends at once. They do not touch again.', from: 10),
+  _Segment('石粉落在三个人的鞋面上。谁先弹线、谁校正偏差，他们第一次必须当面商量，而不是抬头等父亲开口。', 'Bụi đá rơi trên giày của cả ba. Lần đầu họ phải bàn ai bật dây trước và ai sửa sai lệch.', 'Stone dust settles on all three pairs of shoes. For the first time they must decide who snaps first and who corrects a deviation.', from: 8),
+  _Segment('魏岚把“留下”从一句挽留改成一份责任：弟弟若把线弹歪，不能再说那是姐姐或父亲的命令；她自己也失去了替别人收回绳子的权利。', 'Ngụy Lam biến “ở lại” từ lời níu kéo thành trách nhiệm; mỗi người phải nhận sai lệch của mình.', 'Wei Lan turns “staying” from a plea into responsibility; each person must own a deviation.', from: 9),
+  _Segment('她看见父亲停步，却没有把沉默误认成同意。三段绳保住的不是一团和气，而是三个人从此都要承认自己的线、自己的偏差和自己的后果。', 'Cô thấy cha dừng bước nhưng không nhầm im lặng với đồng ý. Mỗi người phải nhận đường kẻ và hậu quả của mình.', 'She sees her father stop but does not mistake silence for agreement. Each person must own a line and its consequence.', from: 10),
 ];
 
 class _Fact {
@@ -135,12 +138,12 @@ final datongYungangWords = <WordEntry>[
 
 List<JourneyLevelContent> _buildLevels() => List<JourneyLevelContent>.generate(10, (index) {
   final level = index + 1;
+  String renderChinese(Iterable<_Segment> items) => items.map((item) => item.zh).join().replaceFirst(level == 1 ? '虚构石工' : '__never__', '石工').replaceFirst(level == 1 ? '不再像从前那样' : '__never2__', '不再');
   final segments = <_Segment>[..._core, ..._depth.where((item) => level >= item.from)];
-  final split = level <= 2 ? segments.length : 3;
-  final groups = level <= 2 ? <List<_Segment>>[segments] : <List<_Segment>>[segments.take(split).toList(), segments.skip(split).toList()];
-  final paragraphs = groups.map((group) => group.map((item) => item.zh).join()).toList(growable: false);
+  final groups = level <= 2 ? <List<_Segment>>[segments] : <List<_Segment>>[segments.take(4).toList(), segments.skip(4).toList()];
+  final paragraphs = groups.map(renderChinese).toList(growable: false);
   final annotations = groups.map((group) {
-    final zh = group.map((item) => item.zh).join();
+    final zh = renderChinese(group);
     return ReadingAnnotation(pinyin: PinyinHelper.getPinyinE(zh, separator: ' ', format: PinyinFormat.WITH_TONE_MARK), vietnamese: group.map((item) => item.vi).join(' '), english: group.map((item) => item.en).join(' '));
   }).toList(growable: false);
   final discoveries = <DiscoveryEntry>[_discovery(_commonDiscovery), _discovery(_levelFacts[level - 1]), if (level >= 5) _discovery(_levelFacts[(level + 3) % _levelFacts.length])];
