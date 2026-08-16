@@ -3,3 +3,4 @@ Phase2 runtime retry: active snapshot answers now come only from current rendere
 Phase2 analyzer retry: snapshot harness imports only current runtime dependencies.
 Final human-gate product snapshot trigger.
 Quote-boundary remediation snapshot trigger.
+De-skinned grammar closure snapshot trigger.
