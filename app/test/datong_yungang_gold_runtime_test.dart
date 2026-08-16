@@ -58,7 +58,7 @@ void main() {
     final fingerprint = approvedGoldSemanticFingerprints[datongYungangJourneyId]!;
     expect(semanticFingerprintCompletenessErrors(fingerprint), isEmpty);
     expect(semanticEvidenceContractErrors(fingerprint), isEmpty);
-    expect(auditFutureGoldCandidate(fingerprint, approvedGoldSemanticFingerprints.values).isGoldReady, isTrue);
+    expect(evaluateFutureGoldSemanticCandidate(fingerprint).isGoldReady, isTrue);
   });
 
   test('challenge, memory and completion are Datong-specific', () {

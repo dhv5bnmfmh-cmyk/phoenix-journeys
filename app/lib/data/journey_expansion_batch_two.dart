@@ -75,6 +75,8 @@ JourneyContentRecord _record({
       ),
     );
 
+// Legacy seed retained only as an inactive migration reference.
+// ignore: unused_element
 const _datongParagraphs = <String>[
   '午后的光落在大同武州山南麓。你沿着崖壁前行，一座座洞窟在砂岩中展开，远看像沉默的门，近看却布满细密的雕刻。',
   '云冈石窟主要开凿于北魏时期。来自不同地方的工匠在这里相遇，把造像、衣纹、飞天与建筑图案刻进山体，也留下文化交流的痕迹。',
@@ -82,6 +84,7 @@ const _datongParagraphs = <String>[
   '石窟经历漫长岁月，风与水仍会影响岩体。今天的参观不仅是看古代艺术，也是在理解人们如何用研究、记录和修复守护这座石头史书。',
 ];
 
+// ignore: unused_element
 const _datongAnnotations = <ReadingAnnotation>[
   ReadingAnnotation(pinyin: 'Wǔhòu de guāng luò zài Dàtóng Wǔzhōu Shān nánlù. Nǐ yánzhe yábì qiánxíng, yí zuò zuò dòngkū zài shāyán zhōng zhǎnkāi, yuǎn kàn xiàng chénmò de mén, jìn kàn què bùmǎn xìmì de diāokè.', vietnamese: 'Ánh chiều rơi xuống sườn nam núi Vũ Châu ở Đại Đồng. Dọc vách đá, những hang động mở ra với các chi tiết chạm khắc dày đặc.', english: 'Afternoon light reaches Wuzhou Mountain as carved caves unfold along the sandstone cliff.'),
   ReadingAnnotation(pinyin: 'Yúngāng Shíkū zhǔyào kāizáo yú Běiwèi shíqī. Láizì bùtóng dìfāng de gōngjiàng zài zhèlǐ xiāngyù, bǎ zàoxiàng, yīwén, fēitiān yǔ jiànzhù tú àn kè jìn shāntǐ.', vietnamese: 'Vân Cương chủ yếu được đục tạc thời Bắc Ngụy; nghệ nhân từ nhiều nơi để lại tượng, nếp áo và hoa văn kiến trúc.', english: 'Artisans of the Northern Wei carved figures, drapery, flying beings, and architectural patterns into the mountain.'),
@@ -89,6 +92,7 @@ const _datongAnnotations = <ReadingAnnotation>[
   ReadingAnnotation(pinyin: 'Shíkū jīnglì màncháng suìyuè, fēng yǔ shuǐ réng huì yǐngxiǎng yántǐ. Jīntiān de cānguān yě shì zài lǐjiě rénmen rúhé shǒuhù zhè zuò shítou shǐshū.', vietnamese: 'Gió và nước vẫn tác động lên đá; tham quan hôm nay cũng là hiểu cách nghiên cứu và tu bổ bảo vệ cuốn sử bằng đá này.', english: 'Wind and water still affect the rock, making documentation and conservation part of the visit.'),
 ];
 
+// ignore: unused_element
 const _datongWords = <WordEntry>[
   WordEntry(word: '崖壁', pinyin: 'yábì', partOfSpeech: '名词', simpleChinese: '陡直的山崖表面。', translation: 'Bề mặt vách núi dựng đứng.', englishDefinition: 'cliff face', symbol: '⛰️'),
   WordEntry(word: '洞窟', pinyin: 'dòngkū', partOfSpeech: '名词', simpleChinese: '在山体中开出的空间。', translation: 'Hang được tạo trong núi.', englishDefinition: 'rock-cut cave', symbol: '🪨'),
@@ -101,6 +105,7 @@ const _datongWords = <WordEntry>[
   WordEntry(word: '修复', pinyin: 'xiūfù', partOfSpeech: '动词', simpleChinese: '把受损部分保护并恢复。', translation: 'Tu bổ phần bị hư hại.', englishDefinition: 'to conserve and restore', symbol: '🧰'),
 ];
 
+// ignore: unused_element
 const _datongDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '云冈石窟的主要洞窟开凿于公元五至六世纪。', pinyin: 'Yúngāng Shíkū de zhǔyào dòngkū kāizáo yú gōngyuán wǔ zhì liù shìjì.', simpleChinese: '主要洞窟来自五到六世纪。', vietnamese: 'Các hang chính được tạc vào thế kỷ V–VI.', english: 'The principal caves were carved in the fifth and sixth centuries.'),
   DiscoveryEntry(text: '昙曜五窟以统一的空间与造像设计成为云冈的重要代表。', pinyin: 'Tányào Wǔkū yǐ tǒngyī de kōngjiān yǔ zàoxiàng shèjì chéngwéi Yúngāng de zhòngyào dàibiǎo.', simpleChinese: '昙曜五窟的设计非常完整。', vietnamese: 'Năm hang Đàm Diệu nổi bật nhờ thiết kế không gian và tượng thống nhất.', english: 'The Five Caves of Tanyao are notable for coherent spatial and sculptural design.'),
