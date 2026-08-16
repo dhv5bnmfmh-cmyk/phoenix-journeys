@@ -1,0 +1,119 @@
+name: Memory Completion Audio Patch Validate Once
+
+on:
+  push:
+    branches:
+      - dev/current
+    paths:
+      - .github/workflows/memory_completion_audio_patch_validate_once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact dev/current
+        uses: actions/checkout@v4
+        with:
+          ref: dev/current
+          fetch-depth: 0
+
+      - name: Normalize transport-only title indentation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('app/lib/screens/journey_screen.dart')
+          lines = path.read_text(encoding='utf-8').splitlines()
+          counts = [0, 0, 0]
+          for i, line in enumerate(lines):
+              stripped = line.strip()
+              if stripped == "title: '旅程回忆',":
+                  lines[i] = "        title: '旅程回忆',"
+                  counts[0] += 1
+              elif stripped == "title: '${_experience.city}已点亮',":
+                  lines[i] = "        title: '${_experience.city}已点亮',"
+                  counts[1] += 1
+              elif stripped == "title: '北京已点亮',":
+                  lines[i] = "      title: '北京已点亮',"
+                  counts[2] += 1
+          if counts != [3, 2, 1]:
+              raise SystemExit(f'unexpected title counts: {counts}')
+          path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          PY
+
+      - name: Apply scoped narration patch
+        run: python tools/memory_completion_audio_patch.py
+
+      - name: Apply analyzer corrections
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          widget = Path('app/lib/widgets/journey_stage_narration_button.dart')
+          text = widget.read_text(encoding='utf-8')
+          text = text.replace('@visibleForTesting\nString journeyStageNarrationLanguageCode', 'String journeyStageNarrationLanguageCode')
+          text = text.replace('@visibleForTesting\nList<NarrationItem> buildJourneyStageNarrationItems', 'List<NarrationItem> buildJourneyStageNarrationItems')
+          widget.write_text(text, encoding='utf-8')
+
+          journey = Path('app/lib/screens/journey_screen.dart')
+          text = journey.read_text(encoding='utf-8')
+          text = text.replace("'${_experience.id}:${_readingLevelLabel}:$stage'", "'${_experience.id}:$_readingLevelLabel:$stage'")
+          journey.write_text(text, encoding='utf-8')
+
+          contract = Path('app/test/journey_memory_completion_narration_contract_test.dart')
+          text = contract.read_text(encoding='utf-8')
+          text = text.replace('contains("\'${_experience.id}:${_readingLevelLabel}:$stage\'")', 'contains(r"\'${_experience.id}:$_readingLevelLabel:$stage\'")')
+          contract.write_text(text, encoding='utf-8')
+
+          widget_test = Path('app/test/journey_stage_narration_button_test.dart')
+          text = widget_test.read_text(encoding='utf-8')
+          text = text.replace(
+              "await tester.pumpWidget(\n      MaterialApp(\n        home: MediaQuery(\n          data: const MediaQueryData(textScaler: TextScaler.linear(2)),\n          child: const Scaffold(",
+              "await tester.pumpWidget(\n      const MaterialApp(\n        home: MediaQuery(\n          data: MediaQueryData(textScaler: TextScaler.linear(2)),\n          child: Scaffold("
+          )
+          widget_test.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Format scoped Dart files
+        run: |
+          dart format \
+            app/lib/screens/journey_screen.dart \
+            app/lib/widgets/journey_stage_narration_button.dart \
+            app/test/journey_stage_narration_button_test.dart \
+            app/test/journey_memory_completion_narration_contract_test.dart
+
+      - name: Targeted validation
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test \
+            test/journey_stage_narration_button_test.dart \
+            test/journey_memory_completion_narration_contract_test.dart \
+            test/journey_runtime_architecture_gate_test.dart
+
+      - name: Diff check
+        run: git diff --check
+
+      - name: Remove one-shot transport
+        run: |
+          rm -f .github/workflows/memory_completion_audio_patch_once.yml
+          rm -f .github/workflows/memory_completion_audio_patch_fix_once.yml
+          rm -f .github/workflows/memory_completion_audio_patch_validate_once.yml
+          rm -f tools/memory_completion_audio_patch.py
+
+      - name: Commit implementation to same single track
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: add Memory and Completion narration accessibility"
+          git push origin HEAD:dev/current
