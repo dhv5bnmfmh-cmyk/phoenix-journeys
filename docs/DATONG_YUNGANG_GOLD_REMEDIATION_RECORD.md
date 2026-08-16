@@ -107,3 +107,10 @@ This evidence applies the binding Challenge Gold contract in `PHOENIX_SIX_STAGE_
 PR #186 establishes the canonical Challenge Gold governance while keeping the active product/content remediation scope on Datong. It does not begin the all-Gold remediation line and does not authorize another branch or PR.
 
 After this adoption candidate is Founder-approved and merged, the next development priority is the single **PHOENIX ALL-GOLD CHALLENGE AUDIT AND REMEDIATION** line from merged current `main`, before new Journey Story development unless the Founder explicitly changes priority. Existing Gold Challenge receives no grandfather exemption; Founder-approved Story spines remain locked by default during Challenge remediation.
+
+
+## Datong grammar anti-template repair
+
+Human Challenge review under the newly adopted canonical contract found a `TEMPLATE` defect after the first Challenge Gold mapping: Datong `grammarRepair` had level-aware historical nouns but still reused the same three adaptive grammar-error skeletons used by other Journeys. Green static/runtime checks could not approve that content shape.
+
+Datong now owns ten level-bound Chinese grammar repairs. The progression moves through word order, `把` construction, duplicate result conjunctions, subject completeness, verb-complement collocation, time-structure contamination, aspect, paired conjunctions, logical relation choice, and active/passive argument structure. Historical context remains taught-before-tested at the same level, but the answer depends on Chinese structure rather than historical trivia. No other Journey Challenge content is remediated in PR #186.

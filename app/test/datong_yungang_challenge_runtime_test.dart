@@ -80,23 +80,29 @@ void main() {
     expect(find.textContaining('长廊'), findsNothing);
     await _finishBeginnerParagraph(tester);
     expect(find.byKey(const ValueKey('challenge-mode-grammarRepair')), findsOneWidget);
-    expect(find.textContaining('北魏定都平城后云冈靠近政治中心'), findsWidgets);
+    expect(find.textContaining('北魏定都平城后'), findsWidgets);
+    expect(find.textContaining('云冈大规模后来有条件集中资源进行开凿'), findsWidgets);
     expect(find.textContaining('494年'), findsNothing);
     expect(find.textContaining('昙曜五窟'), findsNothing);
+    expect(find.textContaining('通过观察'), findsNothing);
   });
 
   testWidgets('Datong Lv5 active Challenge advances to taught middle-period context', (tester) async {
     await _pumpLevel(tester, 5);
     await _finishBeginnerParagraph(tester);
-    expect(find.textContaining('中期营造高峰与更复杂的艺术表达'), findsWidgets);
-    expect(find.textContaining('北魏定都平城后云冈靠近政治中心'), findsNothing);
+    expect(find.textContaining('中期营造继续发展'), findsWidgets);
+    expect(find.textContaining('呈现得更加丰富的表达'), findsWidgets);
+    expect(find.textContaining('北魏定都平城后'), findsNothing);
+    expect(find.textContaining('不但'), findsNothing);
   });
 
   testWidgets('Datong Lv10 active Challenge reaches integrated cultural context', (tester) async {
     await _pumpLevel(tester, 10);
     await _finishBeginnerParagraph(tester);
-    expect(find.textContaining('云冈在中国与东亚佛教石窟艺术中的影响'), findsWidgets);
-    expect(find.textContaining('北魏定都平城后云冈靠近政治中心'), findsNothing);
+    expect(find.textContaining('云冈融合多种传统并形成鲜明表达'), findsWidgets);
+    expect(find.textContaining('对后来的佛教石窟艺术受到影响'), findsWidgets);
+    expect(find.textContaining('北魏定都平城后'), findsNothing);
+    expect(find.textContaining('由于'), findsNothing);
   });
 
   testWidgets('Datong active Challenge remains journey-grounded in all three modes', (tester) async {
