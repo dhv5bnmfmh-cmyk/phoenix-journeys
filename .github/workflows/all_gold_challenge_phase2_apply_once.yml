@@ -20,12 +20,32 @@ jobs:
         run: python3 tools/apply_all_gold_challenge_phase2.py
 
       - name: Format Challenge Dart files
+        id: format
+        continue-on-error: true
         working-directory: app
-        run: >-
-          dart format
-          lib/data/all_gold_challenge_gold_profiles.dart
-          lib/widgets/journey_challenge_panel.dart
-          test/all_gold_challenge_phase2_contract_test.dart
+        shell: bash
+        run: |
+          set +e
+          dart format \
+            lib/data/all_gold_challenge_gold_profiles.dart \
+            lib/widgets/journey_challenge_panel.dart \
+            test/all_gold_challenge_phase2_contract_test.dart \
+            > ../phase2-format.log 2>&1
+          status=$?
+          cat ../phase2-format.log
+          exit $status
+
+      - name: Upload formatter diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2-format-diagnostics
+          path: phase2-format.log
+          if-no-files-found: error
+
+      - name: Enforce formatter result
+        if: steps.format.outcome != 'success'
+        run: exit 1
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
