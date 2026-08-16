@@ -21,10 +21,8 @@ jobs:
           fetch-depth: 0
       - name: Apply Datong refinement
         run: python3 tools/datong_founder_refine_once.py
-      - name: Format and verify patch
-        run: |
-          dart format app/lib/data/datong_yungang_gold_content.dart app/lib/widgets/journey_challenge_panel.dart app/test/datong_yungang_gold_runtime_test.dart app/test/datong_yungang_challenge_runtime_test.dart
-          git diff --check
+      - name: Verify patch whitespace
+        run: git diff --check
       - name: Commit final refinement tree
         run: |
           git config user.name "phoenix-founder-refinement"
