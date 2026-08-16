@@ -77,8 +77,8 @@ void main() {
         findsOneWidget,
       );
 
-      expect(find.textContaining('十七孔桥'), findsWidgets);
-      expect(find.textContaining('冬至前后'), findsWidgets);
+      expect(find.textContaining('旧照片'), findsWidgets);
+      expect(find.textContaining('拍摄过程'), findsWidgets);
       expect(find.textContaining('昆明湖的倒影'), findsNothing);
       _expectNoQaLanguageInVisibleChallenge();
 
@@ -94,7 +94,8 @@ void main() {
       await _tap(tester, 'challenge-submit');
       await _tap(tester, 'challenge-dialog-action');
 
-      expect(find.textContaining('十七孔桥'), findsWidgets);
+      expect(find.textContaining('等了一下午的金光'), findsWidgets);
+      expect(find.textContaining('旧照片'), findsWidgets);
       expect(find.textContaining('昆明湖的倒影'), findsNothing);
       _expectNoQaLanguageInVisibleChallenge();
 
