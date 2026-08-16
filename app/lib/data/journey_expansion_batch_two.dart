@@ -1,5 +1,6 @@
 import '../models/story_content.dart';
 import 'daily_journey_experience.dart';
+import 'datong_yungang_gold_content.dart';
 import 'journey_data.dart';
 
 const journeyExpansionBatchTwoSources = <StorySourceRecord>[
@@ -144,7 +145,7 @@ final datongYungangJourney = _record(
   id: 'datong-yungang-grottoes',
   title: '大同 · 云冈石窟：听见北魏刻进山崖的回声',
   geoNodeId: 'cn-shanxi-datong-yungang-yungang-grottoes',
-  paragraphs: _datongParagraphs,
+  paragraphs: datongYungangGoldLevelContent(5).storyParagraphs,
   sources: const ['unesco-datong-yungang-grottoes', 'ncha-datong-yungang-grottoes'],
   tags: const ['大同', '云冈石窟', '北魏', '石刻', '世界遗产'],
 );
@@ -170,18 +171,18 @@ final journeyExpansionBatchTwoExperiences = <DailyJourneyExperience>[
     cityCode: 'DAT',
     place: '云冈石窟',
     appBarTitle: '大同 · 云冈石窟',
-    storyTitle: '北魏石刻故事',
-    headline: '听见刻进山崖的回声',
-    description: '沿武州山崖壁观察洞窟、造像与文化交流留下的石刻细节。',
-    discoveryTeaser: '为什么云冈造像能看见不同艺术传统的相遇？',
+    storyTitle: datongYungangCanonicalTitle,
+    headline: datongYungangHeadline,
+    description: datongYungangDescription,
+    discoveryTeaser: datongYungangDiscoveryTeaser,
     distanceLabel: '1,620 km',
     stampSymbol: '云',
     content: datongYungangJourney,
-    storyAnnotations: _datongAnnotations,
-    words: _datongWords,
-    discoveries: _datongDiscoveries,
-    wonderQuestion: '如果只能选择一个细节记录云冈，你会画面容、手势、衣纹还是洞窟空间？为什么？',
-    expressQuestion: '请用两到三句话描写砂岩、光线与造像形成的空间感。',
+    storyAnnotations: datongYungangGoldLevelContent(5).storyAnnotations,
+    words: datongYungangGoldLevelContent(5).words,
+    discoveries: datongYungangGoldLevelContent(5).discoveries,
+    wonderQuestion: datongYungangGoldLevelContent(5).wonderQuestion,
+    expressQuestion: datongYungangGoldLevelContent(5).expressQuestion,
   ),
   DailyJourneyExperience(
     id: lijiangOldTownJourney.id,

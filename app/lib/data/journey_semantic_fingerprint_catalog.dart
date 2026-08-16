@@ -1,5 +1,6 @@
 import 'guangzhou_chen_clan_one_pass.dart';
 import 'hangzhou_west_lake_one_pass.dart';
+import 'datong_yungang_gold_content.dart';
 import 'kaiping_diaolou_gold_content.dart';
 import 'journey_expansion_catalog.dart';
 import 'journey_semantic_fingerprint_baseline_snapshot.dart' as baseline;
@@ -20,1339 +21,16 @@ enum NarrativeSemanticDimension {
   transformationMechanism,
   endingMechanism,
   culturalAnchorFunction,
-  artifactObjectNarrativeFunction,
-  movementSpatialMechanism,
-  temporalPressureMechanism,
-  supportingCharacterFunction,
-  dramaticEngineFamily,
-}
-
-/// Reusable causal families. Identifiers describe mechanisms, never cities,
-/// character names, or Journey-specific landmarks.
-enum NarrativeMechanismFamily {
-  deadlineWithIdealizedTarget,
-  incompleteKnowledgeOpportunity,
-  lifeTransitionWithCarriedPast,
-  farewellCompletionRitual,
-  fieldAssignmentWithPurityModel,
-  fieldSurveyWithPriorClassification,
-  operationalFailureCountdown,
-  creatorProvingIndependentJudgment,
-  apprenticeSeekingCompleteUnderstanding,
-  youngProfessionalAtTransition,
-  localMoverTestingBelonging,
-  fieldRecorderTestingAuthenticityModel,
-  researcherTestingAuthenticityModel,
-  technicianSeekingIndependentTrust,
-  intergenerationalMentorToRecognizedAgency,
-  mentorToEntrustedAgency,
-  parentChildContinuityWithoutCareerControl,
-  familyAsBelongingAnchor,
-  soloFieldworkAgainstInternalModel,
-  supervisorToEntrustedResponsibility,
-  produceIdealArtifact,
-  completeKnowledgeRecord,
-  crossIntoNewRoleWithoutPast,
-  completeFarewellCircuit,
-  capturePurifiedRecord,
-  validatePriorAuthenticityModel,
-  restoreCompleteOperationalResult,
-  aestheticPerfectionVsRelationalTrace,
-  completeResultVsResponsibleBoundary,
-  ruptureVsContinuity,
-  addressChangeVsBelongingContinuity,
-  purityModelVsLivedEvidence,
-  sacrificeIdealResultToPreserveRelationalEvidence,
-  responsibleRefusalOfAvailableShortcut,
-  carryPastObjectIntoChosenFuture,
-  continueBeyondDeclaredFinish,
-  reviseClassificationInsteadOfFilteringEvidence,
-  forcedTradeoffCreatesNewFrame,
-  refusalAtAvailableThreshold,
-  spatialCrossingTriggersContinuityRecognition,
-  completedCircuitBecomesDeparturePoint,
-  evidenceReclassificationEnactedInArtifact,
-  operationalRefusalLeavesVisibleIncompletion,
-  sacrificedIdealCreatesAlternativeArtifact,
-  intentionalVisibleIncompletion,
-  carriedObjectCrossesIdentityBoundary,
-  completedRecordExtendsBeyondOriginalBoundary,
-  retainedEvidencePreservesReclassification,
-  independenceReframedAsTraceableResponsibility,
-  completionDriveToResponsibleRestraint,
-  cleanBreakModelToContinuityModel,
-  boundedBelongingToContinuingBelonging,
-  purityModelToLayeredAuthenticity,
-  intergenerationalObjectEntrustment,
-  responsibilityTransferAfterRestraint,
-  arrivalWithCarriedContinuityObject,
-  artifactRecordsOpenContinuation,
-  revisedArtifactRecordsChangedUnderstanding,
-  restorationTraceMakesTimeReadable,
-  heritageBoundaryMakesRestraintMeaningful,
-  riverFlowConnectsCommercialEras,
-  fortificationBoundaryReframesBelonging,
-  livedCulturalLandscapeDisprovesPurity,
-  livedUseDisprovesFrozenAuthenticity,
-  heritageOperationsConstrainSpectacle,
-  inheritedPhotographForcesRelationalChoice,
-  mapBlankRecordsChosenBoundary,
-  carriedTradeDocumentConnectsEras,
-  runningRecordTurnsFinishIntoContinuation,
-  fieldRecordingStoresReclassifiedEvidence,
-  markedSurveyStoresReclassifiedEvidence,
-  statusRecordTransfersOperationalOwnership,
-  vantageSearchThenRecomposition,
-  approachToUncrossedThreshold,
-  oneWayCrossingBetweenContrastedBanks,
-  closedCircuitThenOutboundContinuation,
-  linearFieldTransectWithReorientation,
-  comparativeFieldSurveyWithReturn,
-  fixedFailureZoneDecision,
-  expiringCreativeOpportunity,
-  openAccessWithoutExternalDeadline,
-  nextDayLifeTransition,
-  selfDeclaredFinalOccurrence,
-  approachingWeatherWindow,
-  fieldDayThenSubmission,
-  explicitOperationalCountdown,
-  elderEmbodiesPriorKnowledgeThenEntrusts,
-  mentorDefinesBoundaryThenWithholdsIntervention,
-  parentOffersObjectWithoutBlockingDeparture,
-  familyMessageReorientsMeaningOfDestination,
-  noDecisiveSupportingCharacter,
-  supervisorAbsentForChoiceThenTransfersOwnership,
-  forcedTradeoffReframesCreativeAuthorship,
-  spatialCrossingReframesTemporalContinuity,
-  completedClosureBecomesOpenContinuation,
-  evidenceForcesReclassification,
-
-  // Reusable families introduced by Forbidden City debt remediation.
-  dualValidRoutesCreateOpeningContradiction,
-  crossRolePeerPerspectiveExchange,
-  makePluralRouteRelationsLegible,
-  singleAuthoritativeRouteVsCoexistingValidRoutes,
-  preserveBothRoutesThroughOverlay,
-  sharedNodeRevealsOverlapAndDivergence,
-  compositeRepresentationAddsRelationalInformation,
-  singleRouteTruthToRoleDependentSpatialSystem,
-  sharedNodeThenPurposefulDivergence,
-  roleDifferentiatedArchitectureMakesPluralRoutesLegible,
-  overlaidRoutesPreserveCoexistingPerspectives,
-  compareAlignOverlayThenDiverge,
-  singleStudyDayWithoutExternalCountdown,
-  peerContributesIndependentRoutePerspective,
-  coexistingValidPerspectivesSynthesizeRelationalModel,
-
-  // Reusable families introduced by Chengdu shared-space debt remediation.
-  immediateSharedUseContentionAtThreshold,
-  serviceHostManagingChangingSharedSpace,
-  serviceParticipantNegotiatedHandoff,
-  maintainUsabilityAcrossSequentialUses,
-  fixedAssignmentVsTimeDependentSharedUse,
-  facilitateHandoffInsteadOfPermanentAllocation,
-  participantIndependentlyReproducesHandoff,
-  repeatedHandoffsSustainSharedUsability,
-  controllerToSharedRhythmFacilitator,
-  sharedProtocolContinuesBeyondFacilitator,
-  historicCourtyardMorphologyConstrainsSharedUse,
-  movableObjectEmbodiesTemporaryClaim,
-  thresholdRepositioningAcrossSequentialUses,
-  singleAfternoonUseCycleWithoutDeadline,
-  regularParticipantLearnsAndReproducesProtocol,
-  repeatedSpatialHandoffsCreateSharedUseProtocol,
-
-  // Reusable families introduced by Guangzhou cross-medium making.
-  prototypeFailureExposesMediumConstraint,
-  youngMakerTranslatingHistoricCraft,
-  peerMakersTestFidelityThroughPrototype,
-  preserveSourceRelationInNewMedium,
-  literalCopyVsMaterialSpecificStructure,
-  reencodeConnectionsForNewMedium,
-  translatedPrototypeSurvivesAndRemainsLegible,
-  changedFormFunctionsInNewMedium,
-  surfaceCopyistToMaterialTranslator,
-  translationMethodCarriesIntoNextMaterial,
-  multiCraftArchitectureMakesMaterialDifferenceCausal,
-  prototypeEmbodiesMediumSpecificTranslation,
-  observePrototypeReviseMaterialTranslation,
-  peerTestsLegibilityWithoutMentorAuthority,
-  materialConstraintForcesCrossMediumReencoding,
-
-  // Reusable families introduced by caregiver/child visibility release.
-  impendingIndependentTravelRehearsal,
-  dailyCaregiverReleasingVisualControl,
-  caregiverChildReciprocalAdjustment,
-  practiceIndependentMovementWithoutBreakingCare,
-  continuousVisibilityVsAgeAppropriateSeparation,
-  withholdProtectiveRecall,
-  completeIntervalWithoutVisualContact,
-  childWaitsAndLooksBackWithoutRecall,
-  vigilanceToReciprocalTrust,
-  separationAndWaitingContinueWithoutPursuit,
-  layeredSightlinesCreateLossAndRecoveryOfView,
-  raisedThenLoweredHandEmbodiesRestraint,
-  repeatedOcclusionAndReappearance,
-  lastWalkBeforeIndependentRoutine,
-  childAcceptsResponsibilityToWaitAndLookBack,
-  releasedVisualControlCreatesReciprocalWaiting,
-
-  // Reusable families introduced by private kinship boundary protection.
-  privateReunionWithNoPublicProofAgreement,
-  estrangedBirthMotherSeekingContinuedContact,
-  birthMotherAdultDaughterWithRemoteKinPressure,
-  continueContactWithoutErasingPresentIdentity,
-  publicKinshipProofVsAdultChildBoundary,
-  refusePublicImageAndNamePresentIdentity,
-  faceDownPhoneRejectsCollectiveRecognition,
-  noReunionPhotoButPrivateWalkContinues,
-  hopedForRestorationToConsentBasedContinuation,
-  thresholdSlowdownContinuesUnrepairedRelationship,
-  pooledLineageInstitutionIntensifiesSurnameClaim,
-  phoneAsRefusedPublicProof,
-  courtyardProgressionUnderRemoteFamilyGaze,
-  unplannedLiveFamilyCall,
-  daughterSetsBoundaryAndOffersSmallContinuation,
-  publicKinshipProofSacrificedForPresentIdentity,
-
-  // Reusable families introduced by the reopened older-spouse memory Story.
-  concealedClinicVisitBehindFamiliarWalk,
-  olderSpouseTestingPartnersMemory,
-  longMarriedSpousesConcealSharedFear,
-  verifySharedPastThroughPlaceNameAnswers,
-  memoryQuizVsHonestMedicalDisclosure,
-  stopTestingAndHandOverAppointment,
-  embodiedCareInterruptsVerbalMemoryTest,
-  appointmentAcceptedAndHospitalRouteRequested,
-  proofSeekingToMutualAdmission,
-  hospitalQuestionEndsConcealment,
-  namedSeasonalViewsCueConflictingMemory,
-  appointmentCardEmbodiesNamedFear,
-  questioningWalkToWetStepAndBus,
-  weekendBeforeMemoryClinic,
-  spouseAcknowledgesFearAndKeepsCard,
-  embodiedRecognitionEndsHiddenMemoryExam,
-
-  // Reusable families introduced by evidence-bound equal co-authorship.
-  sharedCreditBeginsWithEvidencePledge,
-  equalCollaboratorsWithMutualCreditBoundary,
-  publishSharedArtifactWithDefensibleSources,
-  aestheticCompletionVsJointAccountability,
-  destructiveRemovalToPreserveJointAccountability,
-  coauthorCreditBoundaryForcesDeletion,
-  sourcedTimelineReplacesUnsupportedClimax,
-  soloVisualJudgmentToPrecommittedSourceReview,
-  mutualCreditAfterJointVerification,
-  inscriptionDamageAndPhotographBoundRepresentation,
-  unsupportedLayerEmbodiesUnsharedRisk,
-  editingTimelineRebuiltAroundSourceLayers,
-  deliveryWindowAfterSunkRendering,
-  collaboratorSuppliesSourcesAndSharesLiability,
-  evidenceBoundaryNegotiationPreservesCoauthorship,
-
-  // Reusable families introduced by transnational kinship negotiation.
-  conditionalFamilyContributionArrivesFromAway,
-  separatedSiblingsRenegotiateSharedResponsibility,
-  redirectPrivateContributionIntoCommunalUse,
-  privateCommemorationVsCommunalSafety,
-  riskReturnToRequestCollectiveConsent,
-  replyRewritesPrivateOwnershipAsSharedPart,
-  communalConstructionContinuesWithFamilyCommitment,
-  inheritedCopyingModelToLocalRecombination,
-  fadedRevisionBesideUnbuiltPrivatePlan,
-  communalTowerFunctionReorganizesImportedForm,
-  returnedSketchAndLettersRecordNegotiation,
-  villageRoutesAndSharedInteriorGovernPlan,
-  replyWindowBeforeConstructionCommitment,
-  distantSiblingAcceptsAndExtendsSharedDuty,
-  transnationalLetterExchangeReallocatesFamilyBuildingDuty,
-}
-
-const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
-  NarrativeSemanticDimension.openingMechanism,
-  NarrativeSemanticDimension.conflictMechanism,
-  NarrativeSemanticDimension.choiceMechanism,
-  NarrativeSemanticDimension.climaxMechanism,
-  NarrativeSemanticDimension.consequenceMechanism,
-  NarrativeSemanticDimension.transformationMechanism,
-  NarrativeSemanticDimension.endingMechanism,
-  NarrativeSemanticDimension.relationshipGeometry,
-  NarrativeSemanticDimension.culturalAnchorFunction,
-  NarrativeSemanticDimension.dramaticEngineFamily,
-};
-
-const int semanticCollisionSameEngineAdditionalCoreThreshold = 3;
-const int semanticCollisionIndependentCoreThreshold = 4;
-const String semanticTemplateCollisionNotGoldReady =
-    'TEMPLATE COLLISION - NOT GOLD READY';
-const String activeGoldStorySourceId = 'active-lv1-lv10-story-package';
-
-class NarrativeMechanismEvidence {
-  const NarrativeMechanismEvidence({
-    required this.journeyId,
-    required this.dimension,
-    required this.mechanism,
-    required this.activeSourceId,
-    required this.sourceTexts,
-    required this.semanticRationale,
-  });
-
-  final String journeyId;
-  final NarrativeSemanticDimension dimension;
-  final NarrativeMechanismFamily mechanism;
-  final String activeSourceId;
-  final List<String> sourceTexts;
-  final String semanticRationale;
-
-  String get sourceText => sourceTexts.isEmpty ? '' : sourceTexts.first;
-}
-
-class JourneySemanticFingerprint {
-  const JourneySemanticFingerprint({
-    required this.journeyId,
-    required this.surfaceIdentity,
-    required this.mechanisms,
-    required this.coreEvidence,
-  });
-
-  final String journeyId;
-  final String surfaceIdentity;
-  final Map<NarrativeSemanticDimension, NarrativeMechanismFamily> mechanisms;
-  final List<NarrativeMechanismEvidence> coreEvidence;
-
-  NarrativeMechanismFamily mechanism(NarrativeSemanticDimension dimension) =>
-      mechanisms[dimension]!;
-}
-
-enum SemanticCollisionClassification {
-  distinct,
-  relatedButDistinct,
-  semanticCollision,
-  existingSemanticCollisionDebt,
-}
-
-class NarrativeSemanticComparison {
-  const NarrativeSemanticComparison({
-    required this.journeyA,
-    required this.journeyB,
-    required this.matchingCoreDimensions,
-    required this.matchingSecondaryDimensions,
-    required this.sameDramaticEngine,
-    required this.ruleA,
-    required this.ruleB,
-    required this.classification,
-  });
-
-  final String journeyA;
-  final String journeyB;
-  final List<NarrativeSemanticDimension> matchingCoreDimensions;
-  final List<NarrativeSemanticDimension> matchingSecondaryDimensions;
-  final bool sameDramaticEngine;
-  final bool ruleA;
-  final bool ruleB;
-  final SemanticCollisionClassification classification;
-
-  int get coreMatchCount => matchingCoreDimensions.length;
-  bool get isCollision => ruleA || ruleB;
-}
-
-class FutureGoldSemanticGateResult {
-  const FutureGoldSemanticGateResult({
-    required this.isGoldReady,
-    required this.status,
-    required this.comparisons,
-  });
-
-  final bool isGoldReady;
-  final String status;
-  final List<NarrativeSemanticComparison> comparisons;
-}
-
-NarrativeSemanticDimension _dimensionFromBaseline(
-  baseline.NarrativeSemanticDimension value,
-) =>
-    NarrativeSemanticDimension.values.byName(value.name);
-
-NarrativeMechanismFamily _mechanismFromBaseline(
-  baseline.NarrativeMechanismFamily value,
-) =>
-    NarrativeMechanismFamily.values.byName(value.name);
-
-JourneySemanticFingerprint _convertBaselineFingerprint(
-  baseline.JourneySemanticFingerprint source,
-) =>
-    JourneySemanticFingerprint(
-      journeyId: source.journeyId,
-      surfaceIdentity: source.surfaceIdentity,
-      mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
-        for (final entry in source.mechanisms.entries)
-          _dimensionFromBaseline(entry.key): _mechanismFromBaseline(entry.value),
-      }),
-      coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
-        for (final evidence in source.coreEvidence)
-          NarrativeMechanismEvidence(
-            journeyId: evidence.journeyId,
-            dimension: _dimensionFromBaseline(evidence.dimension),
-            mechanism: _mechanismFromBaseline(evidence.mechanism),
-            activeSourceId: evidence.activeSourceId,
-            sourceTexts: List<String>.unmodifiable(evidence.sourceTexts),
-            semanticRationale: evidence.semanticRationale,
-          ),
-      ]),
-    );
-
-const _forbidden = 'beijing-forbidden-city';
-const _chengdu = 'chengdu-kuanzhai-alley';
-const _guangzhou = guangzhouChenClanJourneyId;
-
-final _forbiddenFingerprint = JourneySemanticFingerprint(
-  journeyId: _forbidden,
-  surfaceIdentity:
-      'Shen Yan / seventeen-year-old construction apprentice / A Ning / overlaid dual-route learning map',
-  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
-    NarrativeSemanticDimension.openingMechanism:
-        NarrativeMechanismFamily.dualValidRoutesCreateOpeningContradiction,
-    NarrativeSemanticDimension.protagonistRolePattern:
-        NarrativeMechanismFamily.apprenticeSeekingCompleteUnderstanding,
-    NarrativeSemanticDimension.relationshipGeometry:
-        NarrativeMechanismFamily.crossRolePeerPerspectiveExchange,
-    NarrativeSemanticDimension.goalMechanism:
-        NarrativeMechanismFamily.makePluralRouteRelationsLegible,
-    NarrativeSemanticDimension.conflictMechanism:
-        NarrativeMechanismFamily.singleAuthoritativeRouteVsCoexistingValidRoutes,
-    NarrativeSemanticDimension.choiceMechanism:
-        NarrativeMechanismFamily.preserveBothRoutesThroughOverlay,
-    NarrativeSemanticDimension.climaxMechanism:
-        NarrativeMechanismFamily.sharedNodeRevealsOverlapAndDivergence,
-    NarrativeSemanticDimension.consequenceMechanism:
-        NarrativeMechanismFamily.compositeRepresentationAddsRelationalInformation,
-    NarrativeSemanticDimension.transformationMechanism:
-        NarrativeMechanismFamily.singleRouteTruthToRoleDependentSpatialSystem,
-    NarrativeSemanticDimension.endingMechanism:
-        NarrativeMechanismFamily.sharedNodeThenPurposefulDivergence,
-    NarrativeSemanticDimension.culturalAnchorFunction:
-        NarrativeMechanismFamily.roleDifferentiatedArchitectureMakesPluralRoutesLegible,
-    NarrativeSemanticDimension.artifactObjectNarrativeFunction:
-        NarrativeMechanismFamily.overlaidRoutesPreserveCoexistingPerspectives,
-    NarrativeSemanticDimension.movementSpatialMechanism:
-        NarrativeMechanismFamily.compareAlignOverlayThenDiverge,
-    NarrativeSemanticDimension.temporalPressureMechanism:
-        NarrativeMechanismFamily.singleStudyDayWithoutExternalCountdown,
-    NarrativeSemanticDimension.supportingCharacterFunction:
-        NarrativeMechanismFamily.peerContributesIndependentRoutePerspective,
-    NarrativeSemanticDimension.dramaticEngineFamily:
-        NarrativeMechanismFamily.coexistingValidPerspectivesSynthesizeRelationalModel,
-  }),
-  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
-    const NarrativeMechanismEvidence(
-      journeyId: _forbidden,
-      dimension: NarrativeSemanticDimension.openingMechanism,
-      mechanism: NarrativeMechanismFamily.dualValidRoutesCreateOpeningContradiction,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'æ²ˆç šæŠŠè‡ªå·±çš„è§‚å¯Ÿé¡ºåºè¿æˆä¸€æ¡æ¸…æ¥šçš„çº¿ï¼Œç›´è§‰ä¸Šè®¤ä¸ºâ€œæ­£ç¡®çš„ç©ºé—´å›¾â€åº”å½“æ”¶æŸä¸ºä¸€ä¸ªæœ€æƒå¨çš„è·¯çº¿ã€‚',
-        'é˜¿å®åœ¨çº¸ä¸Šç”»ä¸‹è¿™æ¬¡å…·ä½“è¡ŒåŠ¨çš„è·¯çº¿ï¼Œæ˜ç¡®åªæ˜¯è‡ªå·±çš„èµ°æ³•ï¼Œä¸æ˜¯å®˜æ–¹å†å²è·¯çº¿ã€‚',
-      ],
-      semanticRationale:
-          'The opening problem is generated by two action-grounded route representations that cannot both fit Shen Yanâ€™s single-authoritative-route assumption; neither route is introduced as a shortcut or failure.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _forbidden,
-      dimension: NarrativeSemanticDimension.conflictMechanism,
-      mechanism: NarrativeMechanismFamily.singleAuthoritativeRouteVsCoexistingValidRoutes,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'ä¸¤å¼ å›¾éƒ½å¿ å®äºå„è‡ªè¡ŒåŠ¨ï¼Œå´åœ¨â€œåªæœ‰ä¸€æ¡æ­£ç¡®è·¯å¾„â€çš„å‡è®¾ä¸‹å½¼æ­¤å†²çªã€‚',
-        'æ²ˆç šæ²¡æœ‰æŠŠé—®é¢˜è§£å†³æˆè°å¯¹è°é”™ã€‚',
-      ],
-      semanticRationale:
-          'Both routes remain valid descriptions of different actorsâ€™ movement, so the conflict is between a single-route authority model and simultaneous route validity, not bad model versus disproving evidence.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _forbidden,
-      dimension: NarrativeSemanticDimension.choiceMechanism,
-      mechanism: NarrativeMechanismFamily.preserveBothRoutesThroughOverlay,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'æ²ˆç šäºæ˜¯é€‰æ‹©åˆæˆï¼Œè€Œä¸æ˜¯è£å†³ã€‚',
-        'ä»–ç”¨å®çº¿ä¸ç‚¹çº¿åœ¨åŒä¸€å¼ çº¸ä¸Šä¿ç•™ä¸¤æ¡å®Œæ•´è·¯çº¿ï¼Œæ ‡å‡ºå…±äº«èŠ‚ç‚¹ã€é‡åˆæ®µä¸åˆ†å²”ï¼Œä½¿å»ºç­‘ç»“æ„å’Œäººçš„ç›®çš„åŒæ—¶å¯è¯»ã€‚',
-      ],
-      semanticRationale:
-          'Shen Yan enacts synthesis by preserving both complete paths in distinguishable line styles instead of refusing an opportunity, deleting one route, or correcting one into the other.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _forbidden,
-      dimension: NarrativeSemanticDimension.climaxMechanism,
-      mechanism: NarrativeMechanismFamily.sharedNodeRevealsOverlapAndDivergence,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'è·¯çº¿åœ¨ä¹¾æ¸…é—¨å‰çŸ­æš‚é‡åˆï¼Œåˆå› è§’è‰²å’Œç›®çš„ä¸åŒå‘ä¸åŒæ–¹å‘å»¶ä¼¸ã€‚',
-        'è¿™ä¸ªé‡åˆä¸åˆ†å²”åŒæ—¶å‡ºç°çš„ç¬é—´æˆä¸ºå…³é”®ï¼šå¦‚æœæ“¦æ‰ä»»ä½•ä¸€æ¡ï¼Œå›¾éƒ½ä¼šå¤±å»çœŸå®å…³ç³»ã€‚',
-      ],
-      semanticRationale:
-          'The decisive discovery is produced by spatial alignment itself: the lines share a node and then diverge for different purposes, revealing a relation that cannot exist if either perspective is erased.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _forbidden,
-      dimension: NarrativeSemanticDimension.consequenceMechanism,
-      mechanism: NarrativeMechanismFamily.compositeRepresentationAddsRelationalInformation,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å¤åˆå›¾æ­ç¤ºäº†ä¸¤å¼ åŸå›¾å•ç‹¬éƒ½æ²¡æœ‰è¡¨è¾¾å‡ºçš„å…³ç³»ï¼šåŒä¸€å®«åŸå¹¶ä¸æ˜¯ä¸€å¼ â€œäººäººåŒè·¯â€çš„å¹³é¢ï¼Œå»ºç­‘çš„è½´çº¿ã€å®«é—¨ã€åº­é™¢ä¸åŠŸèƒ½åˆ†åŒºæä¾›å…±åŒç©ºé—´éª¨æ¶ï¼Œä¸åŒè§’è‰²åˆ™å› è¡ŒåŠ¨ç›®çš„è€Œå½¢æˆä¸åŒçš„åˆæ³•å™äº‹è§†è§’ã€‚',
-      ],
-      semanticRationale:
-          'The enacted overlay produces additional relational information about shared structure and differentiated movement; the consequence is informational plurality rather than visible incompletion.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _forbidden,
-      dimension: NarrativeSemanticDimension.transformationMechanism,
-      mechanism: NarrativeMechanismFamily.singleRouteTruthToRoleDependentSpatialSystem,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'æ²ˆç šæŠŠè‡ªå·±çš„è§‚å¯Ÿé¡ºåºè¿æˆä¸€æ¡æ¸…æ¥šçš„çº¿ï¼Œç›´è§‰ä¸Šè®¤ä¸ºâ€œæ­£ç¡®çš„ç©ºé—´å›¾â€åº”å½“æ”¶æŸä¸ºä¸€ä¸ªæœ€æƒå¨çš„è·¯çº¿ã€‚',
-        'å¤åˆå›¾æ­ç¤ºäº†ä¸¤å¼ åŸå›¾å•ç‹¬éƒ½æ²¡æœ‰è¡¨è¾¾å‡ºçš„å…³ç³»ï¼šåŒä¸€å®«åŸå¹¶ä¸æ˜¯ä¸€å¼ â€œäººäººåŒè·¯â€çš„å¹³é¢ï¼Œå»ºç­‘çš„è½´çº¿ã€å®«é—¨ã€åº­é™¢ä¸åŠŸèƒ½åˆ†åŒºæä¾›å…±åŒç©ºé—´éª¨æ¶ï¼Œä¸åŒè§’è‰²åˆ™å› è¡ŒåŠ¨ç›®çš„è€Œå½¢æˆä¸åŒçš„åˆæ³•å™äº‹è§†è§’ã€‚',
-      ],
-      semanticRationale:
-          'His spatial model changes from one definitive route to a role- and purpose-dependent system in which common architecture supports several simultaneously valid movement logics.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _forbidden,
-      dimension: NarrativeSemanticDimension.endingMechanism,
-      mechanism: NarrativeMechanismFamily.sharedNodeThenPurposefulDivergence,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å‚æ™šï¼Œæ²ˆç šä¸é˜¿å®ä»å…±åŒèŠ‚ç‚¹åˆ†åˆ«ï¼Œç»§ç»­å„è‡ªè¦åšçš„äº‹ã€‚',
-        'ä¸€å¼ å ç€ä¸¤æ¡è·¯çº¿çš„å›¾ç•™åœ¨çº¸ä¸Šï¼Œä¸¤æ¡çº¿éƒ½æ¸…æ¥šã€éƒ½å®Œæ•´ï¼Œä¹Ÿå½¼æ­¤è¯´æ˜ã€‚',
-      ],
-      semanticRationale:
-          'The two participants continue along different purpose-appropriate paths while the final artifact preserves both; no mentor reward or transfer of authority closes the Story.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _forbidden,
-      dimension: NarrativeSemanticDimension.relationshipGeometry,
-      mechanism: NarrativeMechanismFamily.crossRolePeerPerspectiveExchange,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å¹´å¹¼ä¾å½¹é˜¿å®çœ‹åå´è¯´ï¼Œè‡ªå·±ä»Šå¤©ä»ä¸œä¾§ç©ºé—´æ¥è¿‘ä¹¾æ¸…é—¨å‰ï¼Œéšåè¿˜è¦è½¬å‘å¦ä¸€å¤„ï¼Œå› æ­¤ä¸ä¼šæ²¿æ²ˆç šçš„æ•´æ¡çº¿ç§»åŠ¨ã€‚',
-        'ä»–ä¸é˜¿å®æŠŠä¸¤å¼ çº¸æŒ‰å…±åŒå®«é—¨ã€åº­é™¢æ–¹å‘å’Œä¹¾æ¸…é—¨å‰çš„ä½ç½®é€ç‚¹å¯¹é½ï¼Œå¹¶è¿½é—®æ¯æ®µè·¯çº¿åœ¨åšä»€ä¹ˆã€‚',
-      ],
-      semanticRationale:
-          'A Ning contributes information Shen Yan cannot generate from his own movement, and the two young characters jointly compare their representations; the mentor does not own the decisive synthesis.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _forbidden,
-      dimension: NarrativeSemanticDimension.culturalAnchorFunction,
-      mechanism: NarrativeMechanismFamily.roleDifferentiatedArchitectureMakesPluralRoutesLegible,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'åˆé—¨æ˜¯ç´«ç¦åŸæ­£é—¨ï¼Œä½äºå—åŒ—è½´çº¿ä¸Šï¼›å¤–æœçš„æ ¸å¿ƒæ®¿å®‡ã€å¼€é˜”åº­é™¢å’Œå±‚å±‚é—¨åºå…±åŒå½¢æˆå¼ºçƒˆçš„è½´çº¿ç§©åºã€‚',
-        'ä¹¾æ¸…é—¨æ—¢æ˜¯å†…å»·æ­£å®«é—¨ï¼Œä¹Ÿæ˜¯è¿æ¥å†…å»·ä¸å¤–æœå¾€æ¥çš„é‡è¦é€šé“ã€‚',
-        'å»ºç­‘çš„è½´çº¿ã€å®«é—¨ã€åº­é™¢ä¸åŠŸèƒ½åˆ†åŒºæä¾›å…±åŒç©ºé—´éª¨æ¶ï¼Œä¸åŒè§’è‰²åˆ™å› è¡ŒåŠ¨ç›®çš„è€Œå½¢æˆä¸åŒçš„åˆæ³•å™äº‹è§†è§’ã€‚',
-      ],
-      semanticRationale:
-          'Verified Forbidden City axis, gate, courtyard, and Outer/Inner Court relationships supply the shared architectural framework that makes route overlap and role-dependent divergence meaningful and non-interchangeable with a generic setting.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _forbidden,
-      dimension: NarrativeSemanticDimension.dramaticEngineFamily,
-      mechanism: NarrativeMechanismFamily.coexistingValidPerspectivesSynthesizeRelationalModel,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'ä¸¤å¼ å›¾éƒ½å¿ å®äºå„è‡ªè¡ŒåŠ¨ï¼Œå´åœ¨â€œåªæœ‰ä¸€æ¡æ­£ç¡®è·¯å¾„â€çš„å‡è®¾ä¸‹å½¼æ­¤å†²çªã€‚',
-        'æ²ˆç šæ²¡æœ‰æŠŠé—®é¢˜è§£å†³æˆè°å¯¹è°é”™ã€‚',
-        'æ²ˆç šäºæ˜¯é€‰æ‹©åˆæˆï¼Œè€Œä¸æ˜¯è£å†³ã€‚',
-        'è·¯çº¿åœ¨ä¹¾æ¸…é—¨å‰çŸ­æš‚é‡åˆï¼Œåˆå› è§’è‰²å’Œç›®çš„ä¸åŒå‘ä¸åŒæ–¹å‘å»¶ä¼¸ã€‚',
-        'ä¸€å¼ å ç€ä¸¤æ¡è·¯çº¿çš„å›¾ç•™åœ¨çº¸ä¸Šï¼Œä¸¤æ¡çº¿éƒ½æ¸…æ¥šã€éƒ½å®Œæ•´ï¼Œä¹Ÿå½¼æ­¤è¯´æ˜ã€‚',
-      ],
-      semanticRationale:
-          'The causal engine requires two valid partial perspectives, comparison without falsification, enacted composite synthesis, and a relation visible only after overlay; it is neither refusal/incompletion nor evidence-driven category replacement.',
-    ),
-  ]),
-);
-
-final _chengduFingerprint = JourneySemanticFingerprint(
-  journeyId: _chengdu,
-  surfaceIdentity:
-      'Lin Xia / twenty-four-year-old fictional courtyard teahouse host / Zhou Shu / movable bamboo chair',
-  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
-    NarrativeSemanticDimension.openingMechanism:
-        NarrativeMechanismFamily.immediateSharedUseContentionAtThreshold,
-    NarrativeSemanticDimension.protagonistRolePattern:
-        NarrativeMechanismFamily.serviceHostManagingChangingSharedSpace,
-    NarrativeSemanticDimension.relationshipGeometry:
-        NarrativeMechanismFamily.serviceParticipantNegotiatedHandoff,
-    NarrativeSemanticDimension.goalMechanism:
-        NarrativeMechanismFamily.maintainUsabilityAcrossSequentialUses,
-    NarrativeSemanticDimension.conflictMechanism:
-        NarrativeMechanismFamily.fixedAssignmentVsTimeDependentSharedUse,
-    NarrativeSemanticDimension.choiceMechanism:
-        NarrativeMechanismFamily.facilitateHandoffInsteadOfPermanentAllocation,
-    NarrativeSemanticDimension.climaxMechanism:
-        NarrativeMechanismFamily.participantIndependentlyReproducesHandoff,
-    NarrativeSemanticDimension.consequenceMechanism:
-        NarrativeMechanismFamily.repeatedHandoffsSustainSharedUsability,
-    NarrativeSemanticDimension.transformationMechanism:
-        NarrativeMechanismFamily.controllerToSharedRhythmFacilitator,
-    NarrativeSemanticDimension.endingMechanism:
-        NarrativeMechanismFamily.sharedProtocolContinuesBeyondFacilitator,
-    NarrativeSemanticDimension.culturalAnchorFunction:
-        NarrativeMechanismFamily.historicCourtyardMorphologyConstrainsSharedUse,
-    NarrativeSemanticDimension.artifactObjectNarrativeFunction:
-        NarrativeMechanismFamily.movableObjectEmbodiesTemporaryClaim,
-    NarrativeSemanticDimension.movementSpatialMechanism:
-        NarrativeMechanismFamily.thresholdRepositioningAcrossSequentialUses,
-    NarrativeSemanticDimension.temporalPressureMechanism:
-        NarrativeMechanismFamily.singleAfternoonUseCycleWithoutDeadline,
-    NarrativeSemanticDimension.supportingCharacterFunction:
-        NarrativeMechanismFamily.regularParticipantLearnsAndReproducesProtocol,
-    NarrativeSemanticDimension.dramaticEngineFamily:
-        NarrativeMechanismFamily.repeatedSpatialHandoffsCreateSharedUseProtocol,
-  }),
-  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
-    const NarrativeMechanismEvidence(
-      journeyId: _chengdu,
-      dimension: NarrativeSemanticDimension.openingMechanism,
-      mechanism: NarrativeMechanismFamily.immediateSharedUseContentionAtThreshold,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å¥¹æŠŠä¸€æŠŠæ™®é€šç«¹æ¤…æ”¾åˆ°é—¨è¾¹ï¼Œå¸¸æ¥çš„å‘¨å”ä¹ æƒ¯ååœ¨é å…¥å£çš„èŒ¶æ¡Œæ—ï¼Œæ—¢èƒ½å–èŒ¶ï¼Œä¹Ÿèƒ½çœ‹è§å··å­ã€‚',
-        'å‘¨å”åˆšè½åº§ï¼ŒæœåŠ¡å‘˜æ‰˜ç€èŒ¶ç›˜è¿›é—¨ï¼Œæ¤…èƒŒä¾¿å‹ç¼©äº†è½¬èº«ç©ºé—´ã€‚',
-      ],
-      semanticRationale:
-          'The Story opens on one threshold immediately needed by two legitimate uses, making physical contention visible before exposition.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _chengdu,
-      dimension: NarrativeSemanticDimension.conflictMechanism,
-      mechanism: NarrativeMechanismFamily.fixedAssignmentVsTimeDependentSharedUse,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'ç¬¬äºŒä¸ªæ–¹æ¡ˆä¹Ÿå¤±è´¥äº†ã€‚æ—å¤å¼€å§‹çƒ¦èºï¼Œå› ä¸ºæ¯ä¸€ç§æ°¸ä¹…å®‰æ’éƒ½åªé€‚åˆåˆšæ‰é‚£ä¸€åˆ»ã€‚',
-        'çœŸæ­£å†²çªçš„æ˜¯é™¢è½å…¥å£çš„æœ‰é™ç©ºé—´ä¸ä¸æ–­å˜åŒ–çš„ä½¿ç”¨æ—¶åºï¼šåŒä¸€å°å—åœ°æ–¹ä¸èƒ½æ°¸ä¹…äº¤ç»™ä¸€ç§ç”¨é€”ï¼Œå´å¯ä»¥åœ¨ä¸åŒæ—¶é—´æœåŠ¡ä¸åŒçš„äººã€‚',
-      ],
-      semanticRationale:
-          'The conflict is spatial and temporal: permanent allocation cannot serve legitimate uses that recur at different moments.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _chengdu,
-      dimension: NarrativeSemanticDimension.choiceMechanism,
-      mechanism: NarrativeMechanismFamily.facilitateHandoffInsteadOfPermanentAllocation,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'æ—å¤æ”¾å¼ƒç»™ç«¹æ¤…æŒ‡å®šæ°¸ä¹…å½’å±ï¼Œæ”¹æˆäº²æ‰‹å»ºç«‹äº¤æ¥èŠ‚å¥ã€‚',
-        'å¥¹é‚€è¯·å‘¨å”ä¸€èµ·ç•™æ„ä¸‹ä¸€æ¬¡éœ€è¦ï¼Œè°å…ˆçœ‹è§ï¼Œè°å…ˆç§»åŠ¨ï¼Œä¸å¿…ç­‰å¥¹å‘ä»¤ã€‚',
-      ],
-      semanticRationale:
-          'Lin Xia enacts the choice by replacing permanent allocation with a temporary yield-and-return handoff shared with another participant.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _chengdu,
-      dimension: NarrativeSemanticDimension.climaxMechanism,
-      mechanism: NarrativeMechanismFamily.participantIndependentlyReproducesHandoff,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å‘¨å”å…ˆçœ‹è§æ¥äººï¼Œæ²¡æœ‰å–Šå¥¹ï¼Œä¹Ÿæ²¡æœ‰ç­‰æç¤ºï¼Œè‡ªå·±èµ·èº«æŠŠç«¹æ¤…æŒªåˆ°é™¢å¢™è¾¹ï¼›å®¢äººè·¨è¿‡é—¨æ§›è¿›å…¥é™¢è½åï¼Œä»–åˆæŠŠæ¤…å­æ¨å›èŒ¶æ¡Œæ—ï¼Œç»§ç»­å–èŒ¶ã€‚',
-      ],
-      semanticRationale:
-          'The climax is behavioral replication by Zhou Shu without instruction, proving the protocol has become shared social choreography.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _chengdu,
-      dimension: NarrativeSemanticDimension.consequenceMechanism,
-      mechanism: NarrativeMechanismFamily.repeatedHandoffsSustainSharedUsability,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'èŒ¶å®¢ç»§ç»­åœç•™ï¼ŒæœåŠ¡äººå‘˜ç»§ç»­ç©¿è¡Œï¼Œé™¢è½åœ¨ä¸€è½®è½®ä¸´æ—¶äº¤æ¥ä¸­ä¿æŒå¯ç”¨ã€‚',
-      ],
-      semanticRationale:
-          'The consequence is continued usability across sequential tea, service, and passage rather than a revised record or sacrificed result.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _chengdu,
-      dimension: NarrativeSemanticDimension.transformationMechanism,
-      mechanism: NarrativeMechanismFamily.controllerToSharedRhythmFacilitator,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å¥¹ä¸€å‘ç›¸ä¿¡ï¼ŒæŠŠæ¡Œæ¤…ä¸€æ¬¡æ‘†åˆ°â€œæ­£ç¡®ä½ç½®â€æ‰ç®—æŠŠç©ºé—´ç®¡å¥½ï¼Œäºæ˜¯è¶å…¥å£æš‚æ—¶ç©ºä¸‹ï¼Œé‡æ–°è°ƒæ•´ç«¹æ¤…ï¼Œæƒ³ç»™å®ƒä¸€ä¸ªæ•´æ—¥ä¸‹åˆéƒ½ä¸ç”¨æ”¹å˜çš„å›ºå®šä½ç½®ã€‚',
-        'å¥¹æ²¡æœ‰å†ä¼¸æ‰‹ï¼Œä¹Ÿæ²¡æœ‰æŠŠæ¤…å­æ ¡æ­£åˆ°æŸä¸ªæ ‡å‡†ç‚¹ã€‚',
-      ],
-      semanticRationale:
-          'Lin Xia changes from personally controlling permanent placement to allowing participants to carry a shared use rhythm themselves.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _chengdu,
-      dimension: NarrativeSemanticDimension.endingMechanism,
-      mechanism: NarrativeMechanismFamily.sharedProtocolContinuesBeyondFacilitator,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'æœ€åï¼Œä¸€ä½ç¦»æ¡Œçš„å®¢äººé¡ºæ‰‹åˆä¸ºç»è¿‡çš„äººç§»å¼€åŒä¸€æŠŠç«¹æ¤…ã€‚',
-        'æ—å¤çœ‹ç€é‚£åªæ‰‹å®ŒæˆåŠ¨ä½œï¼Œæ²¡æœ‰å‡ºå£°ã€‚',
-        'ä¸€æŠŠæ²¡æœ‰å›ºå®šä½ç½®çš„ç«¹æ¤…ï¼Œå·²ç»æŠŠå…±äº«ç©ºé—´çš„èŠ‚å¥äº¤ç»™äº†ä¸‹ä¸€ä½ä½¿ç”¨è€…ã€‚',
-      ],
-      semanticRationale:
-          'The ending proves continuation beyond Lin Xia because a further participant performs the handoff while she deliberately does not intervene.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _chengdu,
-      dimension: NarrativeSemanticDimension.relationshipGeometry,
-      mechanism: NarrativeMechanismFamily.serviceParticipantNegotiatedHandoff,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å¥¹é‚€è¯·å‘¨å”ä¸€èµ·ç•™æ„ä¸‹ä¸€æ¬¡éœ€è¦ï¼Œè°å…ˆçœ‹è§ï¼Œè°å…ˆç§»åŠ¨ï¼Œä¸å¿…ç­‰å¥¹å‘ä»¤ã€‚',
-        'å‘¨å”å…ˆçœ‹è§æ¥äººï¼Œæ²¡æœ‰å–Šå¥¹ï¼Œä¹Ÿæ²¡æœ‰ç­‰æç¤ºï¼Œè‡ªå·±èµ·èº«æŠŠç«¹æ¤…æŒªåˆ°é™¢å¢™è¾¹ï¼›å®¢äººè·¨è¿‡é—¨æ§›è¿›å…¥é™¢è½åï¼Œä»–åˆæŠŠæ¤…å­æ¨å›èŒ¶æ¡Œæ—ï¼Œç»§ç»­å–èŒ¶ã€‚',
-      ],
-      semanticRationale:
-          'Host and regular negotiate and then jointly perform the practical handoff; Zhou Shu is causal rather than a mentor delivering interpretation.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _chengdu,
-      dimension: NarrativeSemanticDimension.culturalAnchorFunction,
-      mechanism: NarrativeMechanismFamily.historicCourtyardMorphologyConstrainsSharedUse,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å®½å··å­ã€çª„å··å­ä¸äº•å··å­æ„æˆå†å²è¡—åŒºçš„æ ¸å¿ƒè¡—å··ï¼Œæ²¿å··é™¢è½æŠŠè¡—é¢çš„æµåŠ¨æ”¶è¿›æ›´å°çš„å…¥å£ã€é—¨æ§›å’Œå†…éƒ¨åœç•™ç©ºé—´ã€‚',
-        'çœŸæ­£å†²çªçš„æ˜¯é™¢è½å…¥å£çš„æœ‰é™ç©ºé—´ä¸ä¸æ–­å˜åŒ–çš„ä½¿ç”¨æ—¶åºï¼šåŒä¸€å°å—åœ°æ–¹ä¸èƒ½æ°¸ä¹…äº¤ç»™ä¸€ç§ç”¨é€”ï¼Œå´å¯ä»¥åœ¨ä¸åŒæ—¶é—´æœåŠ¡ä¸åŒçš„äººã€‚',
-      ],
-      semanticRationale:
-          'Kuanzhai street-lane-courtyard morphology is causal because its threshold compresses tea stopping and circulation into the shared zone that requires handoff.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _chengdu,
-      dimension: NarrativeSemanticDimension.dramaticEngineFamily,
-      mechanism: NarrativeMechanismFamily.repeatedSpatialHandoffsCreateSharedUseProtocol,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'æ—å¤æ”¾å¼ƒç»™ç«¹æ¤…æŒ‡å®šæ°¸ä¹…å½’å±ï¼Œæ”¹æˆäº²æ‰‹å»ºç«‹äº¤æ¥èŠ‚å¥ã€‚',
-        'èµ·åˆå‘¨å”ä»çœ‹å¥¹ä¸€çœ¼æ‰åŠ¨ï¼Œåæ¥æœåŠ¡å‘˜ç«¯èŒ¶ã€å®¢äººç¦»é™¢ã€å¦ä¸€æ¡Œæœ‰äººç»è¿‡ï¼Œç«¹æ¤…åå¤å‡ æ¬¡è®©ä½åˆå½’è¿˜ï¼ŒåŠ¨ä½œè¶Šæ¥è¶Šè‡ªç„¶ã€‚',
-        'å‘¨å”å…ˆçœ‹è§æ¥äººï¼Œæ²¡æœ‰å–Šå¥¹ï¼Œä¹Ÿæ²¡æœ‰ç­‰æç¤ºï¼Œè‡ªå·±èµ·èº«æŠŠç«¹æ¤…æŒªåˆ°é™¢å¢™è¾¹ï¼›å®¢äººè·¨è¿‡é—¨æ§›è¿›å…¥é™¢è½åï¼Œä»–åˆæŠŠæ¤…å­æ¨å›èŒ¶æ¡Œæ—ï¼Œç»§ç»­å–èŒ¶ã€‚',
-        'æœ€åï¼Œä¸€ä½ç¦»æ¡Œçš„å®¢äººé¡ºæ‰‹åˆä¸ºç»è¿‡çš„äººç§»å¼€åŒä¸€æŠŠç«¹æ¤…ã€‚',
-      ],
-      semanticRationale:
-          'The engine requires repeated physical yield-and-return handoffs until participants reproduce the behavior independently; no evidence classification, representational synthesis, refusal, or artifact correction drives the change.',
-    ),
-  ]),
-);
-
-final guangzhouChenClanLegacyPaperBridgeSemanticFingerprint = JourneySemanticFingerprint(
-  journeyId: _guangzhou,
-  surfaceIdentity:
-      'Liang Yao / twenty-two-year-old fictional printmaking student / He Zhen ceramics peer / connected single-sheet paper prototype',
-  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
-    NarrativeSemanticDimension.openingMechanism:
-        NarrativeMechanismFamily.prototypeFailureExposesMediumConstraint,
-    NarrativeSemanticDimension.protagonistRolePattern:
-        NarrativeMechanismFamily.youngMakerTranslatingHistoricCraft,
-    NarrativeSemanticDimension.relationshipGeometry:
-        NarrativeMechanismFamily.peerMakersTestFidelityThroughPrototype,
-    NarrativeSemanticDimension.goalMechanism:
-        NarrativeMechanismFamily.preserveSourceRelationInNewMedium,
-    NarrativeSemanticDimension.conflictMechanism:
-        NarrativeMechanismFamily.literalCopyVsMaterialSpecificStructure,
-    NarrativeSemanticDimension.choiceMechanism:
-        NarrativeMechanismFamily.reencodeConnectionsForNewMedium,
-    NarrativeSemanticDimension.climaxMechanism:
-        NarrativeMechanismFamily.translatedPrototypeSurvivesAndRemainsLegible,
-    NarrativeSemanticDimension.consequenceMechanism:
-        NarrativeMechanismFamily.changedFormFunctionsInNewMedium,
-    NarrativeSemanticDimension.transformationMechanism:
-        NarrativeMechanismFamily.surfaceCopyistToMaterialTranslator,
-    NarrativeSemanticDimension.endingMechanism:
-        NarrativeMechanismFamily.translationMethodCarriesIntoNextMaterial,
-    NarrativeSemanticDimension.culturalAnchorFunction:
-        NarrativeMechanismFamily.multiCraftArchitectureMakesMaterialDifferenceCausal,
-    NarrativeSemanticDimension.artifactObjectNarrativeFunction:
-        NarrativeMechanismFamily.prototypeEmbodiesMediumSpecificTranslation,
-    NarrativeSemanticDimension.movementSpatialMechanism:
-        NarrativeMechanismFamily.observePrototypeReviseMaterialTranslation,
-    NarrativeSemanticDimension.temporalPressureMechanism:
-        NarrativeMechanismFamily.singleStudyDayWithoutExternalCountdown,
-    NarrativeSemanticDimension.supportingCharacterFunction:
-        NarrativeMechanismFamily.peerTestsLegibilityWithoutMentorAuthority,
-    NarrativeSemanticDimension.dramaticEngineFamily:
-        NarrativeMechanismFamily.materialConstraintForcesCrossMediumReencoding,
-  }),
-  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
-    const NarrativeMechanismEvidence(
-      journeyId: _guangzhou,
-      dimension: NarrativeSemanticDimension.openingMechanism,
-      mechanism: NarrativeMechanismFamily.prototypeFailureExposesMediumConstraint,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å¥¹çš„ç¬¬ä¸€ä»¶åŸå‹å´åœ¨æ¡Œé¢ä¸Šæ•£å¼€ï¼šå¥¹æŠŠæ¯ä¸€é“çœ‹è§çš„è½®å»“éƒ½å½“æˆå¿…é¡»ç…§æ¬çš„è¾¹ç•Œï¼Œå‰ªåˆ°ä¸¤ç»„å½¢ä½“ä¹‹é—´æ—¶ï¼Œçº¸ä¸ŠåŸæœ¬æ‰¿æ‹…è¿æ¥çš„éƒ¨åˆ†ä¹Ÿè¢«ä¸€èµ·å»æ‰ï¼Œå‡ ä¸ªéƒ¨åˆ†éšå³æ–­å¼€ã€‚',
-      ],
-      semanticRationale:
-          'The causal problem enters as a physical prototype failure produced by the new medium, not as exposition, missing evidence, a route conflict, or an operational shortcut.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _guangzhou,
-      dimension: NarrativeSemanticDimension.conflictMechanism,
-      mechanism: NarrativeMechanismFamily.literalCopyVsMaterialSpecificStructure,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å¥¹æŠŠæ•£å¼€çš„å‡ ç‰‡é‡æ–°å¹¶åœ¨æ¡Œä¸Šï¼Œå‘ç°æœ€åè¢«å‰ªæ‰çš„æ­£æ˜¯è®©æ•´å¼ çº¸ä¿æŒç›¸è¿çš„éƒ¨åˆ†ã€‚åŸæ¥çš„å½¢ä½“å¯ä»¥ä¾é ææ–™å’ŒåŸºåº•ä¿æŒå…³ç³»ï¼Œå•å¼ è–„çº¸å´éœ€è¦è‡ªå·±çš„è¿æ¥ã€‚',
-        'å­—é¢å¤åˆ¶è¶Šå½»åº•ï¼Œå•å¼ çº¸åè€Œè¶Šæ— æ³•æˆä¸ºä¸€ä»¶ä¸œè¥¿ã€‚',
-      ],
-      semanticRationale:
-          'Literal surface fidelity directly destroys the structural connectedness required by paper, so the conflict belongs to medium-specific making rather than authenticity classification or responsible refusal.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _guangzhou,
-      dimension: NarrativeSemanticDimension.choiceMechanism,
-      mechanism: NarrativeMechanismFamily.reencodeConnectionsForNewMedium,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å¥¹åœä¸‹é€çº¿ææ‘¹ï¼Œåœ¨ç¬¬äºŒå¼ è‡ªå·±çš„çº¸ä¸Šé‡æ–°ç¼–ç è¿æ¥ï¼šä¿ç•™ä¸»è¦å½¢ä½“çš„ç›¸å¯¹ä½ç½®ï¼Œå´åœ¨åŸæœ¬ä¼šæ–­å¼€çš„åœ°æ–¹ç•™ä¸‹çª„çª„çš„çº¸æ¡¥ã€‚',
-      ],
-      semanticRationale:
-          'Liang Yao enacts the choice on her own second sheet by deliberately changing the connection encoding instead of sacrificing the goal, rejecting a shortcut, or revising a classification.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _guangzhou,
-      dimension: NarrativeSemanticDimension.climaxMechanism,
-      mechanism: NarrativeMechanismFamily.translatedPrototypeSurvivesAndRemainsLegible,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å¥¹å‰ªå®Œç¬¬äºŒä»¶åŸå‹ï¼Œä»ä¸€è§’æŠŠå®ƒæèµ·ï¼›æ•´å¼ çº¸æ²¡æœ‰æ•£å¼€ã€‚',
-        'è´ºçœŸæŠŠè‰å›¾æ‰£åœ¨æ¡Œé¢ï¼Œåªçœ‹æˆå“ã€‚å‡ ç§’åï¼Œä»–å‡†ç¡®æŒ‡å‡ºä¸¤ç»„ä¸»è¦å½¢ä½“ä¹‹é—´åŸå…ˆæœ€é‡è¦çš„ç›¸æ¥å…³ç³»ã€‚',
-      ],
-      semanticRationale:
-          'The climax is a two-part physical test: the translated object survives handling as one piece and a peer independently confirms the important visual relation remains legible.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _guangzhou,
-      dimension: NarrativeSemanticDimension.consequenceMechanism,
-      mechanism: NarrativeMechanismFamily.changedFormFunctionsInNewMedium,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'æ¢é¥æ”¹å˜è¿æ¥åï¼Œçº¸æ¡¥æ”¹å˜äº†å±€éƒ¨è½®å»“ï¼Œå´è®©æ•´å¼ çº¸æ—¢èƒ½è¢«æ‹¿èµ·ï¼Œä¹Ÿæ²¡æœ‰ä¸¢æ‰é‚£ç»„ç›¸æ¥å…³ç³»ã€‚',
-      ],
-      semanticRationale:
-          'The revised form succeeds according to the new mediumâ€™s logic; its changed geometry creates both structural function and legibility rather than leaving a responsible defect.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _guangzhou,
-      dimension: NarrativeSemanticDimension.transformationMechanism,
-      mechanism: NarrativeMechanismFamily.surfaceCopyistToMaterialTranslator,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å¥¹åœ¨ç¬”è®°æœ¬ä¸ŠæŠŠâ€œç…§ç€è¡¨é¢å¤åˆ¶â€åˆ’æ‰ï¼Œå†™ä¸‹â€œå…ˆé—®ææ–™æ€æ ·è¿æ¥â€ã€‚',
-      ],
-      semanticRationale:
-          'Her working rule changes from copying source contours to interrogating how a target material must carry relations, marking a maker-level transformation rather than a theory-only conclusion.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _guangzhou,
-      dimension: NarrativeSemanticDimension.endingMechanism,
-      mechanism: NarrativeMechanismFamily.translationMethodCarriesIntoNextMaterial,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å›åˆ°å·¥ä½œå®¤ï¼Œå¥¹æ‹¿èµ·ä¸€å—æ–°çš„ç‰ˆæï¼Œå…ˆæ ‡å‡ºè¿™ç§ææ–™å¿…é¡»ä¿ç•™çš„è¿æ¥ï¼Œå†å¼€å§‹ä¸‹ä¸€æ¬¡ææ–™ç ”ç©¶ã€‚',
-      ],
-      semanticRationale:
-          'The ending is enacted continuation of the new translation method on a fresh material problem, not a mentor judgment, philosophical summary, record correction, or farewell continuation engine.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _guangzhou,
-      dimension: NarrativeSemanticDimension.relationshipGeometry,
-      mechanism: NarrativeMechanismFamily.peerMakersTestFidelityThroughPrototype,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'äºŒåäºŒå²çš„ç‰ˆç”»å­¦ç”Ÿæ¢é¥å’Œé™¶è‰ºåŒå­¦è´ºçœŸåœ¨å¹¿å·é™ˆå®¶ç¥ è§‚å¯Ÿå»ºç­‘è£…é¥°ã€‚',
-        'è´ºçœŸæŠŠè‰å›¾æ‰£åœ¨æ¡Œé¢ï¼Œåªçœ‹æˆå“ã€‚å‡ ç§’åï¼Œä»–å‡†ç¡®æŒ‡å‡ºä¸¤ç»„ä¸»è¦å½¢ä½“ä¹‹é—´åŸå…ˆæœ€é‡è¦çš„ç›¸æ¥å…³ç³»ã€‚',
-      ],
-      semanticRationale:
-          'He Zhen is a maker peer whose independent recognition tests the translated prototype; he neither mentors Liang Yao nor transfers authority to her.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _guangzhou,
-      dimension: NarrativeSemanticDimension.culturalAnchorFunction,
-      mechanism: NarrativeMechanismFamily.multiCraftArchitectureMakesMaterialDifferenceCausal,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'é™ˆå®¶ç¥ é›†ä¸­å±•ç¤ºå¤šç§å²­å—è£…é¥°å·¥è‰ºï¼Œæ­£å› ä¸ºææ–™å¹¶ä¸ç›¸åŒï¼Œæ¢é¥æŠŠâ€œææ–™æ€æ ·è®©å½¢ä½“ç›¸æ¥â€å½“æˆè§‚å¯Ÿé‡ç‚¹ã€‚',
-      ],
-      semanticRationale:
-          'The verified multi-craft character of the Chen Clan Academy makes material difference causal to Liang Yaoâ€™s making question, while factual craft enumeration remains in Discovery.',
-    ),
-    const NarrativeMechanismEvidence(
-      journeyId: _guangzhou,
-      dimension: NarrativeSemanticDimension.dramaticEngineFamily,
-      mechanism: NarrativeMechanismFamily.materialConstraintForcesCrossMediumReencoding,
-      activeSourceId: activeGoldStorySourceId,
-      sourceTexts: <String>[
-        'å¥¹çš„ç¬¬ä¸€ä»¶åŸå‹å´åœ¨æ¡Œé¢ä¸Šæ•£å¼€ï¼šå¥¹æŠŠæ¯ä¸€é“çœ‹è§çš„è½®å»“éƒ½å½“æˆå¿…é¡»ç…§æ¬çš„è¾¹ç•Œï¼Œå‰ªåˆ°ä¸¤ç»„å½¢ä½“ä¹‹é—´æ—¶ï¼Œçº¸ä¸ŠåŸæœ¬æ‰¿æ‹…è¿æ¥çš„éƒ¨åˆ†ä¹Ÿè¢«ä¸€èµ·å»æ‰ï¼Œå‡ ä¸ªéƒ¨åˆ†éšå³æ–­å¼€ã€‚',
-        'å¥¹åœä¸‹é€çº¿ææ‘¹ï¼Œåœ¨ç¬¬äºŒå¼ è‡ªå·±çš„çº¸ä¸Šé‡æ–°ç¼–ç è¿æ¥ï¼šä¿ç•™ä¸»è¦å½¢ä½“çš„ç›¸å¯¹ä½ç½®ï¼Œå´åœ¨åŸæœ¬ä¼šæ–­å¼€çš„åœ°æ–¹ç•™ä¸‹çª„çª„çš„çº¸æ¡¥ã€‚',
-        'å¥¹å‰ªå®Œç¬¬äºŒä»¶åŸå‹ï¼Œä»ä¸€è§’æŠŠå®ƒæèµ·ï¼›æ•´å¼ çº¸æ²¡æœ‰æ•£å¼€ã€‚',
-        'è´ºçœŸæŠŠè‰å›¾æ‰£åœ¨æ¡Œé¢ï¼Œåªçœ‹æˆå“ã€‚å‡ ç§’åï¼Œä»–å‡†ç¡®æŒ‡å‡ºä¸¤ç»„ä¸»è¦å½¢ä½“ä¹‹é—´åŸå…ˆæœ€é‡è¦çš„ç›¸æ¥å…³ç³»ã€‚',
-      ],
-      semanticRationale:
-          'The engine requires a material-caused physical failure, deliberate cross-medium re-encoding, and a successful structural-plus-legibility test. It is not tradeoff, synthesis, crossing, closure, reclassification, handoff, or refusal.',
-    ),
-  ]),
-);
-
-final guangzhouChenClanGoldSemanticFingerprint = JourneySemanticFingerprint(
-  journeyId: _guangzhou,
-  surfaceIdentity: 'birth-mother-turns-family-video-face-down-and-names-adult-daughter-Liu-Jiahe',
-  mechanisms: const <NarrativeSemanticDimension, NarrativeMechanismFamily>{
-    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.privateReunionWithNoPublicProofAgreement,
-    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.estrangedBirthMotherSeekingContinuedContact,
-    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.birthMotherAdultDaughterWithRemoteKinPressure,
-    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.continueContactWithoutErasingPresentIdentity,
-    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.publicKinshipProofVsAdultChildBoundary,
-    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.refusePublicImageAndNamePresentIdentity,
-    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.faceDownPhoneRejectsCollectiveRecognition,
-    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.noReunionPhotoButPrivateWalkContinues,
-    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.hopedForRestorationToConsentBasedContinuation,
-    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.thresholdSlowdownContinuesUnrepairedRelationship,
-    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.pooledLineageInstitutionIntensifiesSurnameClaim,
-    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.phoneAsRefusedPublicProof,
-    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.courtyardProgressionUnderRemoteFamilyGaze,
-    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.unplannedLiveFamilyCall,
-    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.daughterSetsBoundaryAndOffersSmallContinuation,
-    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.publicKinshipProofSacrificedForPresentIdentity,
-  },
-  coreEvidence: <NarrativeMechanismEvidence>[
-    for (final item in <(NarrativeSemanticDimension, NarrativeMechanismFamily, String, String)>[
-      (NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.privateReunionWithNoPublicProofAgreement, 'å˜‰ç¦¾äº‹å…ˆè¯´å¥½ï¼šåªè§å¥¹ï¼Œä¸è§é™ˆå®¶äº²æˆšï¼Œä¹Ÿä¸æ‹â€œè®¤å›æ¥â€çš„ç…§ç‰‡ã€‚', 'The first meeting begins with an explicit privacy and image boundary.'),
-      (NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.birthMotherAdultDaughterWithRemoteKinPressure, 'ä¸‰åå››å¹´å‰ï¼Œå¥¹æŠŠåˆšå‡ºç”Ÿçš„å¥³å„¿äº¤ç»™äº²æˆšæ”¶å…»ã€‚å¥³å„¿å¦‚ä»Šå«åˆ˜å˜‰ç¦¾ã€‚', 'An estranged birth mother and adopted adult daughter face pressure from remote birth relatives.'),
-      (NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.publicKinshipProofVsAdultChildBoundary, 'æœ‰äººå‚¬ç§€ä»ªæŠŠé•œå¤´è½¬è¿‡å»ï¼Œè¯´åœ¨é™ˆæ°ä¹¦é™¢å‰æ‹ä¸€å¼ ï¼Œäº‹æƒ…å°±ç®—åœ†æ»¡ã€‚', 'Relatives demand visible completion that conflicts with the daughterâ€™s boundary.'),
-      (NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.refusePublicImageAndNamePresentIdentity, 'å¥¹æŠŠæ‰‹æœºç¿»è¿‡æ¥ï¼Œæ‰£åœ¨èº«æ—çš„é’ç –å°ä¸Šï¼Œè¯´ï¼šâ€œå¥¹å«åˆ˜å˜‰ç¦¾ã€‚ä»Šå¤©ä¸å…¥é•œã€‚â€', 'Xiuyi enacts refusal and affirms the daughterâ€™s present name.'),
-      (NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.faceDownPhoneRejectsCollectiveRecognition, 'å¥¹æŠŠæ‰‹æœºç¿»è¿‡æ¥ï¼Œæ‰£åœ¨èº«æ—çš„é’ç –å°ä¸Š', 'The face-down phone visibly denies collective access to the reunion.'),
-      (NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.noReunionPhotoButPrivateWalkContinues, 'é‚£å¼ å¥¹ç­‰äº†ä¸‰åå››å¹´çš„åˆç…§æ²¡æœ‰æ‹æˆã€‚', 'The desired public image is genuinely lost rather than replaced.'),
-      (NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.hopedForRestorationToConsentBasedContinuation, 'ç§€ä»ªæ²¡æœ‰å»æ‹‰å¥¹ï¼ŒåªæŠŠçº¢å›´å·¾ç•™åœ¨åŒ…é‡Œï¼Œè·Ÿåˆ°å¥¹èº«è¾¹ã€‚', 'Xiuyi stops staging restoration and follows without claiming or dressing the daughter.'),
-      (NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.thresholdSlowdownContinuesUnrepairedRelationship, 'ç»è¿‡é—¨æ§›æ—¶ï¼Œå˜‰ç¦¾æ”¾æ…¢äº†ä¸€æ­¥ã€‚ä¸¤ä¸ªäººå¹¶æ’èµ°äº†è¿›å»ã€‚', 'A small reciprocal action continues the unrepaired relationship without declaring completion.'),
-      (NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.pooledLineageInstitutionIntensifiesSurnameClaim, 'ç§€ä»ªè¯´èµ·è¿™é‡Œç”±å¹¿ä¸œå„åœ°é™ˆå§“å®—æ—åˆèµ„å…´å»º', 'The verified pooled-lineage identity makes surname-based public pressure causal.'),
-      (NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.publicKinshipProofSacrificedForPresentIdentity, 'å¥¹å«åˆ˜å˜‰ç¦¾ã€‚ä»Šå¤©ä¸å…¥é•œã€‚', 'The engine sacrifices public kinship proof to preserve an adult daughterâ€™s present identity and consent.'),
-    ])
-      NarrativeMechanismEvidence(journeyId: _guangzhou, dimension: item.$1, mechanism: item.$2, activeSourceId: activeGoldStorySourceId, sourceTexts: <String>[item.$3], semanticRationale: item.$4),
-  ],
-);
-
-const _suzhou = 'suzhou-humble-administrators-garden';
-
-final suzhouGardenGoldSemanticFingerprint = JourneySemanticFingerprint(
-  journeyId: _suzhou,
-  surfaceIdentity: 'grandmother-grandson-disappear-wait-and-reappear-in-layered-garden-space',
-  mechanisms: const <NarrativeSemanticDimension, NarrativeMechanismFamily>{
-    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.impendingIndependentTravelRehearsal,
-    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.dailyCaregiverReleasingVisualControl,
-    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.caregiverChildReciprocalAdjustment,
-    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.practiceIndependentMovementWithoutBreakingCare,
-    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.continuousVisibilityVsAgeAppropriateSeparation,
-    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.withholdProtectiveRecall,
-    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.completeIntervalWithoutVisualContact,
-    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.childWaitsAndLooksBackWithoutRecall,
-    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.vigilanceToReciprocalTrust,
-    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.separationAndWaitingContinueWithoutPursuit,
-    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.layeredSightlinesCreateLossAndRecoveryOfView,
-    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.raisedThenLoweredHandEmbodiesRestraint,
-    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.repeatedOcclusionAndReappearance,
-    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.lastWalkBeforeIndependentRoutine,
-    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.childAcceptsResponsibilityToWaitAndLookBack,
-    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.releasedVisualControlCreatesReciprocalWaiting,
-  },
-  coreEvidence: <NarrativeMechanismEvidence>[
-    for (final item in <(NarrativeSemanticDimension, NarrativeMechanismFamily, String, String)>[
-      (NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.impendingIndependentTravelRehearsal, 'ä¸‹å‘¨ä¸€ï¼ŒåäºŒå²çš„ç¨‹æœ—è¦å¼€å§‹è‡ªå·±åè½¦å»åˆä¸­ã€‚', 'The coming Monday makes this walk the last rehearsal before independent travel.'),
-      (NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.caregiverChildReciprocalAdjustment, 'å…­å¹´æ¥ï¼Œå¤–å©†é™ˆç‰å…°å‡ ä¹æ¯å¤©éƒ½å»æ¥ä»–æ”¾å­¦', 'A long daily-care relationship, not a mentor or peer project, creates the emotional pressure.'),
-      (NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.continuousVisibilityVsAgeAppropriateSeparation, 'ç¨‹æœ—çš„èƒŒå½±ç¬¬ä¸€æ¬¡ä»å¥¹çœ¼å‰æ¶ˆå¤±æ—¶ï¼Œé™ˆç‰å…°ç«‹åˆ»å–Šäº†ä»–çš„åå­—ã€‚', 'The conflict is continuous protective visibility against a child beginning independent movement.'),
-      (NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.withholdProtectiveRecall, 'é™ˆç‰å…°æŠ¬èµ·æ‰‹ï¼Œä»–çš„åå­—å·²ç»åˆ°äº†å˜´è¾¹ï¼Œå´æ²¡æœ‰å–Šï¼›å¥¹æŠŠæ‰‹æ”¾ä¸‹æ¥', 'The enacted choice is the visible withholding of an immediately available call.'),
-      (NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.completeIntervalWithoutVisualContact, 'å¥¹æŠŠæ‰‹æ”¾ä¸‹æ¥ï¼Œè‡ªå·±èµ°å®Œé‚£å‡ æ­¥çœ‹ä¸è§ä»–çš„è·¯ã€‚', 'She physically completes the unseen interval instead of restoring control by calling.'),
-      (NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.childWaitsAndLooksBackWithoutRecall, 'ä¸‹ä¸€å¤„æ°´é¢é‡æ–°æ‰“å¼€æ—¶ï¼Œç¨‹æœ—å·²ç»åœåœ¨å‰é¢ï¼Œæ­£å›å¤´æ‰¾å¥¹ã€‚', 'The child answers released control with reciprocal waiting and looking back.'),
-      (NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.vigilanceToReciprocalTrust, 'å¤–å©†ï¼Œæˆ‘è¿˜èƒ½èµ°å‰é¢å—ï¼Ÿ', 'Care changes from one-sided visual vigilance to mutual adjustment.'),
-      (NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.separationAndWaitingContinueWithoutPursuit, 'ç¨‹æœ—è½¬è¿‡å»ï¼ŒèƒŒå½±å¾ˆå¿«åˆè¢«æˆ¿å±‹æŒ¡ä½ã€‚é™ˆç‰å…°æ²¡æœ‰è¿½ä¸Šå»ã€‚', 'The new wait-and-look-back relation continues without the caregiver catching up.'),
-      (NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.layeredSightlinesCreateLossAndRecoveryOfView, 'æ›²æ¡¥å’Œå±‹è§’åˆä¸€æ¬¡æˆªæ–­è§†çº¿', 'Garden turns and built layers causally alternate concealment with reappearance.'),
-      (NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.releasedVisualControlCreatesReciprocalWaiting, 'ä¸‹ä¸€å¤„ç­‰æˆ‘ã€‚', 'Repeated loss and recovery of sight transforms continuous control into reciprocal waiting.'),
-    ])
-      NarrativeMechanismEvidence(
-        journeyId: _suzhou,
-        dimension: item.$1,
-        mechanism: item.$2,
-        activeSourceId: activeGoldStorySourceId,
-        sourceTexts: <String>[item.$3],
-        semanticRationale: item.$4,
-      ),
-  ],
-);
-
-const _hangzhouReopened = 'hangzhou-west-lake';
-
-final hangzhouWestLakeReopenedSemanticFingerprint = JourneySemanticFingerprint(
-  journeyId: _hangzhouReopened,
-  surfaceIdentity: 'Fang Yu / sixty-nine-year-old wife / Zhou Shaoting / hidden memory-clinic card / Broken Bridge walk',
-  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
-    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.concealedClinicVisitBehindFamiliarWalk,
-    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.olderSpouseTestingPartnersMemory,
-    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.longMarriedSpousesConcealSharedFear,
-    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.verifySharedPastThroughPlaceNameAnswers,
-    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.memoryQuizVsHonestMedicalDisclosure,
-    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.stopTestingAndHandOverAppointment,
-    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.embodiedCareInterruptsVerbalMemoryTest,
-    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.appointmentAcceptedAndHospitalRouteRequested,
-    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.proofSeekingToMutualAdmission,
-    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.hospitalQuestionEndsConcealment,
-    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.namedSeasonalViewsCueConflictingMemory,
-    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.appointmentCardEmbodiesNamedFear,
-    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.questioningWalkToWetStepAndBus,
-    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.weekendBeforeMemoryClinic,
-    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.spouseAcknowledgesFearAndKeepsCard,
-    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.embodiedRecognitionEndsHiddenMemoryExam,
-  }),
-  coreEvidence: <NarrativeMechanismEvidence>[
-    for (final item in <(NarrativeSemanticDimension, NarrativeMechanismFamily, String, String)>[
-      (NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.concealedClinicVisitBehindFamiliarWalk, 'å‘¨ä¸€ä»–è¦å»åŒ»é™¢åšè®°å¿†æ£€æŸ¥ï¼Œå¥¹å´ä¸€ç›´æ²¡æŠŠé¢„çº¦å¡æ‹¿å‡ºæ¥ã€‚', 'A familiar walk conceals an already scheduled clinic visit.'),
-      (NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.longMarriedSpousesConcealSharedFear, 'æ–¹æ¯“å…­åä¹å²ï¼Œå’Œå‘¨ç»åº­ç»“å©šå››åä¸‰å¹´ã€‚', 'The causal relationship is a forty-three-year marriage facing memory decline, not a project team or mentor pair.'),
-      (NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.memoryQuizVsHonestMedicalDisclosure, 'ä¸¤äººä»æ–­æ¡¥å¾€å‰èµ°ï¼Œæ–¹æ¯“ä¸åœé—®ä»–è¥¿æ¹–æ™¯åã€‚', 'Serial place-name questions substitute for direct disclosure and humiliate rather than clarify.'),
-      (NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.stopTestingAndHandOverAppointment, 'æ–¹æ¯“ä¸å†å‡ºé¢˜ï¼ŒæŠŠé¢„çº¦å¡äº¤ç»™ä»–ã€‚', 'The choice is to end concealment and hand over the medical appointment openly.'),
-      (NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.embodiedCareInterruptsVerbalMemoryTest, 'æ–¹æ¯“è„šä¸‹ä¸€æ»‘ï¼Œä»–ç«‹åˆ»æ‰¶ä½å¥¹çš„æ‰‹è‚˜ï¼Œè¯´ï¼šâ€œè¿™é‡Œä¸€ç›´æ»‘ã€‚â€', 'Embodied relational memory interrupts the verbal test without proving cognitive recovery.'),
-      (NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.appointmentAcceptedAndHospitalRouteRequested, 'ä»–æŠŠå¡æ”¾è¿›è‡ªå·±çš„é’±åŒ…ã€‚å…¬äº¤è½¦æ¥æ—¶ï¼Œä»–é—®å¸æœºï¼šâ€œå»åŒ»é™¢ï¼Œå“ªä¸€ç«™ä¸‹ï¼Ÿâ€', 'He accepts the appointment and takes practical ownership of the hospital route.'),
-      (NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.proofSeekingToMutualAdmission, 'æˆ‘çŸ¥é“ä½ åœ¨æ€•ä»€ä¹ˆã€‚æˆ‘ä¹Ÿæ€•ã€‚', 'Both spouses move from private proof-seeking to naming shared fear.'),
-      (NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.hospitalQuestionEndsConcealment, 'å»åŒ»é™¢ï¼Œå“ªä¸€ç«™ä¸‹ï¼Ÿ', 'The ending is a practical question toward care, not an artifact, archive, separation, or restored result.'),
-      (NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.namedSeasonalViewsCueConflictingMemory, 'å‘¨ç»åº­æŠŠâ€œæ–­æ¡¥æ®‹é›ªâ€è¯´æˆå¤å¤©ã€‚', 'A named seasonal West Lake view makes place, season, and memory answer causally inseparable.'),
-      (NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.embodiedRecognitionEndsHiddenMemoryExam, 'çŸ³é˜¶è¢«é›¨æ‰“æ¹¿ï¼Œæ–¹æ¯“è„šä¸‹ä¸€æ»‘ï¼Œä»–ç«‹åˆ»æ‰¶ä½å¥¹çš„æ‰‹è‚˜', 'The engine turns on embodied recognition ending a concealed spousal exam, materially unlike project revision, boundary refusal, or visual separation.'),
-    ])
-      NarrativeMechanismEvidence(
-        journeyId: _hangzhouReopened,
-        dimension: item.$1,
-        mechanism: item.$2,
-        activeSourceId: activeGoldStorySourceId,
-        sourceTexts: <String>[item.$3],
-        semanticRationale: item.$4,
-      ),
-  ],
-);
-
-const _summerPalace = 'beijing-summer-palace';
-const _longmen = luoyangLongmenJourneyId;
-const _kaiping = kaipingDiaolouJourneyId;
-
-NarrativeMechanismEvidence _activeEvidence(
-  String journeyId,
-  NarrativeSemanticDimension dimension,
-  NarrativeMechanismFamily mechanism,
-  List<String> sourceTexts,
-  String rationale,
-) => NarrativeMechanismEvidence(
-  journeyId: journeyId,
-  dimension: dimension,
-  mechanism: mechanism,
-  activeSourceId: activeGoldStorySourceId,
-  sourceTexts: List<String>.unmodifiable(sourceTexts),
-  semanticRationale: rationale,
-);
-
-final longmenGoldSemanticFingerprint = JourneySemanticFingerprint(
-  journeyId: _longmen,
-  surfaceIdentity: 'Lin Yan / Zhou Cheng / Longmen digital short / unsupported face layer / source list',
-  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
-    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.sharedCreditBeginsWithEvidencePledge,
-    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.creatorProvingIndependentJudgment,
-    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.equalCollaboratorsWithMutualCreditBoundary,
-    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.publishSharedArtifactWithDefensibleSources,
-    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.aestheticCompletionVsJointAccountability,
-    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.destructiveRemovalToPreserveJointAccountability,
-    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.coauthorCreditBoundaryForcesDeletion,
-    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.sourcedTimelineReplacesUnsupportedClimax,
-    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.soloVisualJudgmentToPrecommittedSourceReview,
-    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.mutualCreditAfterJointVerification,
-    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.inscriptionDamageAndPhotographBoundRepresentation,
-    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.unsupportedLayerEmbodiesUnsharedRisk,
-    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.editingTimelineRebuiltAroundSourceLayers,
-    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.deliveryWindowAfterSunkRendering,
-    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.collaboratorSuppliesSourcesAndSharesLiability,
-    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.evidenceBoundaryNegotiationPreservesCoauthorship,
-  }),
-  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
-    _activeEvidence(_longmen, NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.sharedCreditBeginsWithEvidencePledge, ['çº¦å®šå¹¶åˆ—ç½²åï¼Œå…±åŒä¸ºå¤åŸä¾æ®è´Ÿè´£ã€‚'], 'The work begins with a reciprocal credit-and-evidence pledge, so accountability is relational before the disputed layer exists.'),
-    _activeEvidence(_longmen, NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.equalCollaboratorsWithMutualCreditBoundary, ['æ²¡ä¾æ®ï¼Œä¸èƒ½æ”¾åœ¨æˆ‘ä»¬ä¸¤äººçš„åå­—ä¸‹ã€‚', 'å¯¼å‡ºå‰ï¼Œå‘¨æ¾„ä¿ç•™å¹¶åˆ—ç½²å'], 'Zhou Cheng can withhold shared credit from unsupported work, while the final preserved credit depends on Lin Yan honoring their equal-author agreement.'),
-    _activeEvidence(_longmen, NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.aestheticCompletionVsJointAccountability, ['æ—ç šä¸ºè½¬åœºåšäº†â€œè¡¥å…¨è„¸éƒ¨â€æ¨¡å‹ã€‚', 'æ²¡ä¾æ®ï¼Œä¸èƒ½æ”¾åœ¨æˆ‘ä»¬ä¸¤äººçš„åå­—ä¸‹ã€‚'], 'The desired seamless image now risks attributing an unsupported claim to both collaborators.'),
-    _activeEvidence(_longmen, NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.destructiveRemovalToPreserveJointAccountability, ['äº²æ‰‹å…³æ‰é‚£å±‚ã€‚'], 'Lin Yan destroys usable completed work so the shared artifact can remain jointly accountable.'),
-    _activeEvidence(_longmen, NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.coauthorCreditBoundaryForcesDeletion, ['å¥¹çœ‹äº†ä¸‰å¤©æ¸²æŸ“å’Œç‰‡å°¾ä¸¤ä¸ªåå­—ï¼Œäº²æ‰‹å…³æ‰é‚£å±‚ã€‚'], 'The co-authorship boundary is physically visible at the moment she deletes the unsupported layer.'),
-    _activeEvidence(_longmen, NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.sourcedTimelineReplacesUnsupportedClimax, ['çŸ­ç‰‡å¤±å»æœ€é¡ºæ»‘çš„é•œå¤´ï¼›å‘¨æ¾„æŠŠè€ç…§ç‰‡æ¥å›æ—¶é—´çº¿ã€‚'], 'Deletion visibly removes the smooth climax and causes the sourced evidence sequence to return to the edit.'),
-    _activeEvidence(_longmen, NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.soloVisualJudgmentToPrecommittedSourceReview, ['ä¸¤äººçš„åˆä½œä¹Ÿå˜äº†ï¼šæ—ç šå¼€å§‹åœ¨å»ºæ¨¡å‰å…ˆé—®ï¼Œæ¯ä¸€å±‚è¯æ®ç©¶ç«Ÿèƒ½æ”¯æŒåˆ°å“ªé‡Œã€‚'], 'Her future behavior moves source review before modeling and makes Zhou Cheng part of authorship rather than a final checker.'),
-    _activeEvidence(_longmen, NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.mutualCreditAfterJointVerification, ['æ—ç šæ ¸å®Œï¼ŒæŠŠé‚£å±‚æ”¹åä¸ºâ€œæ— ä¾æ®ï¼Œä¸ä½¿ç”¨â€ï¼ŒæŒ‰ä¸‹å¯¼å‡ºã€‚'], 'The film is exported only after joint evidence work is checked and the unsupported layer remains named but unused.'),
-    _activeEvidence(_longmen, NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.inscriptionDamageAndPhotographBoundRepresentation, ['é¢˜è®°ç•™ä¸‹å‘æ„¿é€ åƒè€…å’Œå®Œæˆæ—¶é—´ï¼Œåƒçš„è„¸éƒ¨å´å·²æ®‹æŸã€‚', 'å®˜æ–¹å¤åŸä»¥å†å²è€ç…§ç‰‡ä¸ºåŸºç¡€'], 'Longmen-specific inscription, present loss, and historical photographs define different representational limits and create the dispute.'),
-    _activeEvidence(_longmen, NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.evidenceBoundaryNegotiationPreservesCoauthorship, ['æ²¡ä¾æ®ï¼Œä¸èƒ½æ”¾åœ¨æˆ‘ä»¬ä¸¤äººçš„åå­—ä¸‹ã€‚', 'äº²æ‰‹å…³æ‰é‚£å±‚ã€‚', 'å‘¨æ¾„ä¿ç•™å¹¶åˆ—ç½²å'], 'An equal collaborator invokes shared-liability boundaries; destructive deletion then preserves both truthful representation and co-authorship.'),
-  ]),
-);
-
-final kaipingGoldCandidateSemanticFingerprint = JourneySemanticFingerprint(
-  journeyId: _kaiping,
-  surfaceIdentity: 'Liang Chuan / Liang Hai / Kaiping communal tower / returned sketch and letters',
-  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
-    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.conditionalFamilyContributionArrivesFromAway,
-    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.localMoverTestingBelonging,
-    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.separatedSiblingsRenegotiateSharedResponsibility,
-    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.redirectPrivateContributionIntoCommunalUse,
-    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.privateCommemorationVsCommunalSafety,
-    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.riskReturnToRequestCollectiveConsent,
-    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.replyRewritesPrivateOwnershipAsSharedPart,
-    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.communalConstructionContinuesWithFamilyCommitment,
-    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.inheritedCopyingModelToLocalRecombination,
-    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.fadedRevisionBesideUnbuiltPrivatePlan,
-    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.communalTowerFunctionReorganizesImportedForm,
-    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.returnedSketchAndLettersRecordNegotiation,
-    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.villageRoutesAndSharedInteriorGovernPlan,
-    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.replyWindowBeforeConstructionCommitment,
-    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.distantSiblingAcceptsAndExtendsSharedDuty,
-    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.transnationalLetterExchangeReallocatesFamilyBuildingDuty,
-  }),
-  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
-    _activeEvidence(_kaiping, NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.conditionalFamilyContributionArrivesFromAway, ['è¿™ä»½æŠ•å…¥åªç”¨äºå®¶é‡Œçš„ç‹¬æ¥¼ï¼›è‹¥è¦æ”¹ä½œåˆ«ç”¨ï¼Œå°±å¯„è¿˜ç»™ä»–ã€‚'], 'The overseas brother opens the Story with a conditional family contribution that makes later reallocation relationally costly.'),
-    _activeEvidence(_kaiping, NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.separatedSiblingsRenegotiateSharedResponsibility, ['æ¢å·æŠŠæ”¹è¿‡çš„ä¼—æ¥¼å›¾å’Œé€€è¿˜æŠ•å…¥çš„æ‰¿è¯ºä¸€èµ·å¯„ç»™å“¥å“¥ã€‚', 'æ”¹å†™æˆâ€œæˆ‘ä»¬å®¶åœ¨ä¼—æ¥¼é‡Œçš„ä¸€ä»½â€'], 'The brothers act across distance through proposal, risk of return, and a written counter-commitment that changes ownership language.'),
-    _activeEvidence(_kaiping, NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.privateCommemorationVsCommunalSafety, ['è¿™ä»½æŠ•å…¥åªç”¨äºå®¶é‡Œçš„ç‹¬æ¥¼', 'æ‘é‡Œå‡ æˆ·äººå®¶æ­£åˆå»ºä¸€åº§ä¼—æ¥¼ï¼Œé‡åˆ°å±é™©æ—¶å¯ä¸´æ—¶é¿éš¾ã€‚'], 'A private family monument and its condition compete with the village need for a jointly used refuge.'),
-    _activeEvidence(_kaiping, NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.riskReturnToRequestCollectiveConsent, ['å®¶é‡Œæ”¾å¼ƒç‹¬å»ºï¼›æ¢å·æŠŠæ”¹è¿‡çš„ä¼—æ¥¼å›¾å’Œé€€è¿˜æŠ•å…¥çš„æ‰¿è¯ºä¸€èµ·å¯„ç»™å“¥å“¥ã€‚'], 'Liang Chuan enacts the choice while accepting that his brother may withdraw the contribution.'),
-    _activeEvidence(_kaiping, NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.replyRewritesPrivateOwnershipAsSharedPart, ['æ”¹å†™æˆâ€œæˆ‘ä»¬å®¶åœ¨ä¼—æ¥¼é‡Œçš„ä¸€ä»½â€'], 'Liang Haiâ€™s written revision converts the disputed private tower into a bounded family share of collective responsibility.'),
-    _activeEvidence(_kaiping, NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.communalConstructionContinuesWithFamilyCommitment, ['ä¼—æ¥¼ç»§ç»­æ–½å·¥ï¼›åŸå›¾ç•™åœ¨ç®±åº•ã€‚'], 'The reply directly permits construction to continue while the private design is materially set aside.'),
-    _activeEvidence(_kaiping, NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.inheritedCopyingModelToLocalRecombination, ['åªæŠŠæ‹±åˆ¸ç•™åœ¨å…¥å£ï¼Œæ²¡æœ‰è®©æŸ±å»Šå æ‰å¤šæˆ·é¿éš¾çš„ä½ç½®ã€‚', 'æ¢æµ·ä¸‹ä¸€å°ä¿¡é—®çš„ä¸æ˜¯â€œåƒä¸åƒåŸå›¾â€'], 'Both brothers move from fidelity to the returned sketch toward selective form and accountable communal use.'),
-    _activeEvidence(_kaiping, NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.fadedRevisionBesideUnbuiltPrivatePlan, ['çº¸ä¸Šçš„æŸ±å»Šæ²¡æœ‰ç›–æˆï¼Œå…¥å£é‚£é“æ‹±åˆ¸å´é€šå‘å¤šæˆ·å…±åŒä½¿ç”¨çš„ç©ºé—´ï¼›æ¢æµ·æ”¹è¿‡çš„é‚£è¡Œå­—å·²ç»è¤ªè‰²ã€‚'], 'The ending holds absent private form, surviving selected form, shared use, and the brotherâ€™s faded revision in one restrained image.'),
-    _activeEvidence(_kaiping, NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.communalTowerFunctionReorganizesImportedForm, ['å¤–é¢çš„æ ·å­å¯ä»¥å¸¦å›æ¥ï¼Œé‡Œé¢å¾—è®©å¤§å®¶ä¸€èµ·ç”¨ã€‚', 'åªæŠŠæ‹±åˆ¸ç•™åœ¨å…¥å£ï¼Œæ²¡æœ‰è®©æŸ±å»Šå æ‰å¤šæˆ·é¿éš¾çš„ä½ç½®ã€‚'], 'The Kaiping distinction between imported architectural influence and communal-tower use directly reorganizes the building plan.'),
-    _activeEvidence(_kaiping, NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.transnationalLetterExchangeReallocatesFamilyBuildingDuty, ['è‹¥è¦æ”¹ä½œåˆ«ç”¨ï¼Œå°±å¯„è¿˜ç»™ä»–ã€‚', 'æ¢å·æŠŠæ”¹è¿‡çš„ä¼—æ¥¼å›¾å’Œé€€è¿˜æŠ•å…¥çš„æ‰¿è¯ºä¸€èµ·å¯„ç»™å“¥å“¥ã€‚', 'æ”¹å†™æˆâ€œæˆ‘ä»¬å®¶åœ¨ä¼—æ¥¼é‡Œçš„ä¸€ä»½â€'], 'A transnational sibling exchange changes who the family contribution serves and makes continued communal building the visible result.'),
-  ]),
-);
-
-final _summerPalaceBaselineFingerprint =
-    _convertBaselineFingerprint(baseline.approvedGoldSemanticFingerprints[_summerPalace]!);
-
-final summerPalaceCulturalIntegrationSemanticFingerprint = JourneySemanticFingerprint(
-  journeyId: _summerPalace,
-  surfaceIdentity: 'Xu Cheng / student photographer / grandmother Zhou Lan / winter-solstice Seventeen-Arch Bridge light / old photograph',
-  mechanisms: _summerPalaceBaselineFingerprint.mechanisms,
-  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
-    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.openingMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.openingMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['å†¬è‡³å‰ï¼Œè®¸æ¾„å¸¦ç›¸æœºåˆ°é¢å’Œå›­ã€‚', 'å¥¹è¦ä¸ºæ ¡å±•æ‹ä¸€å¼ â€œæ— ç‘•â€ç…§ç‰‡ã€‚'], semanticRationale: 'A school-exhibition goal begins inside a verified seasonal Summer Palace time window.'),
-    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.relationshipGeometry, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.relationshipGeometry), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['å¥¹æƒ³è¯æ˜ä¸é å¤–å©†å‘¨å²šé€‰æ„å›¾ã€‚', 'å‘¨å²šçœ‹å®Œï¼Œä¸å†æ›¿å¥¹è°ƒæ„å›¾ã€‚', 'å¥¹æŠŠæ—§ç…§ç‰‡äº¤ç»™è®¸æ¾„ä¿å­˜ã€‚'], semanticRationale: 'Guidance changes into recognized agency and object entrustment after the costly choice.'),
-    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.conflictMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.conflictMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['è®¸æ¾„é¿å¼€æ—§ç—•è¿¹ï¼Œå‘¨å²šè¦å¥¹å¤šçœ‹ä¸€çœ¼ã€‚', 'æ—§ç…§ç‰‡èƒŒé¢å†™ç€ï¼šâ€œä¸€å…«å…­ã€‡å¹´å—æŸï¼Œä¸€å…«å…«å…­å¹´ä¿®å¤ã€‚â€è®¸æ¾„æƒ³æŠŠè¿™è¡Œå­—è£æ‰ï¼Œå‘¨å²šæŠŠç…§ç‰‡ç¿»å›æ­£é¢ã€‚'], semanticRationale: 'Aesthetic perfection collides physically with restoration history through the old photograph.'),
-    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.choiceMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.choiceMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['è®¸æ¾„æ”¾ä¸‹ç›¸æœºï¼Œå…ˆæ¡å›ç…§ç‰‡ã€‚'], semanticRationale: 'She gives up the available desired shot and acts first to preserve the relational object.'),
-    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.climaxMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.climaxMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['åä¸ƒå­”æ¡¥è¥¿åŒ—ä¾§ï¼Œæ¡¥æ´äº®èµ·æ—¶ï¼Œæ—§ç…§ç‰‡è¢«é£å¹è½ã€‚', 'å¥¹å¿…é¡»åœ¨æŒ‰å¿«é—¨å’Œæ¡ç…§ç‰‡ä¹‹é—´é€‰æ‹©ã€‚'], semanticRationale: 'A Summer-Palace-specific bridge-light moment forces the tradeoff.'),
-    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.consequenceMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.consequenceMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['å¥¹å†ä¸¾æœºæ—¶ï¼Œæ¡¥æ´é‡‘å…‰å·²ç§»åŠ¨ï¼Œç­‰äº†ä¸€ä¸‹åˆçš„ç”»é¢æ²¡äº†ã€‚'], semanticRationale: 'The seasonal light moves while she retrieves the photograph, making the cost irreversible.'),
-    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.transformationMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.transformationMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['å¥¹æ²¡æœ‰åˆ æ‰â€œæ— ç‘•â€è¿™ä¸ªè¯ï¼Œåªåœ¨æ—è¾¹ç”»äº†ä¸€é“é—®å·ã€‚', 'è®¸æ¾„æŠŠæ–°æ—§ç…§ç‰‡æ”¾è¿›ç›¸æœºåŒ…ã€‚'], semanticRationale: 'Her perfection language changes through small physical actions rather than an essay conclusion.'),
-    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.endingMechanism, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.endingMechanism), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['å¥¹æŠŠæ—§ç…§ç‰‡äº¤ç»™è®¸æ¾„ä¿å­˜ã€‚', 'è®¸æ¾„æŠŠæ–°æ—§ç…§ç‰‡æ”¾è¿›ç›¸æœºåŒ…ã€‚'], semanticRationale: 'The ending is intergenerational entrustment followed by old and new images kept together.'),
-    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.culturalAnchorFunction, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.culturalAnchorFunction), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['å‘¨å²šåšè¿‡å›­æ—ä¿®å¤ï¼Œå¸¦ç€æ—§ç…§ç‰‡ã€‚', 'æ—§ç…§ç‰‡èƒŒé¢å†™ç€ï¼šâ€œä¸€å…«å…­ã€‡å¹´å—æŸï¼Œä¸€å…«å…«å…­å¹´ä¿®å¤ã€‚â€è®¸æ¾„æƒ³æŠŠè¿™è¡Œå­—è£æ‰ï¼Œå‘¨å²šæŠŠç…§ç‰‡ç¿»å›æ­£é¢ã€‚'], semanticRationale: 'Verified damage/restoration history is attached to the core object and causes framing conflict.'),
-    NarrativeMechanismEvidence(journeyId: _summerPalace, dimension: NarrativeSemanticDimension.dramaticEngineFamily, mechanism: _summerPalaceBaselineFingerprint.mechanism(NarrativeSemanticDimension.dramaticEngineFamily), activeSourceId: activeGoldStorySourceId, sourceTexts: const ['å¥¹å¿…é¡»åœ¨æŒ‰å¿«é—¨å’Œæ¡ç…§ç‰‡ä¹‹é—´é€‰æ‹©ã€‚', 'è®¸æ¾„æ”¾ä¸‹ç›¸æœºï¼Œå…ˆæ¡å›ç…§ç‰‡ã€‚', 'å¥¹å†ä¸¾æœºæ—¶ï¼Œæ¡¥æ´é‡‘å…‰å·²ç§»åŠ¨ï¼Œç­‰äº†ä¸€ä¸‹åˆçš„ç”»é¢æ²¡äº†ã€‚'], semanticRationale: 'A place-timed forced tradeoff reframes authorship through a real lost image opportunity.'),
-  ]),
-);
-
-final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
-    Map<String, JourneySemanticFingerprint>.unmodifiable({
-  for (final entry in baseline.approvedGoldSemanticFingerprints.entries)
-    entry.key: entry.key == _summerPalace
-        ? summerPalaceCulturalIntegrationSemanticFingerprint
-        : entry.key == _hangzhouReopened
-        ? hangzhouWestLakeReopenedSemanticFingerprint
-        : entry.key == _forbidden
-        ? _forbiddenFingerprint
-        : entry.key == _chengdu
-            ? _chengduFingerprint
-            : _convertBaselineFingerprint(entry.value),
-  _guangzhou: guangzhouChenClanGoldSemanticFingerprint,
-  _suzhou: suzhouGardenGoldSemanticFingerprint,
-  _longmen: longmenGoldSemanticFingerprint,
-  _kaiping: kaipingGoldCandidateSemanticFingerprint,
-});
-
-String activeCanonicalGoldStoryText(String journeyId) {
-  if (journeyId == _summerPalace) {
-    return List<String>.generate(10, (index) => summerPalaceN1LevelForPhoenixLevel(index + 1).storyParagraphs.join('\n')).join('\n');
-  }
-  if (journeyId == _hangzhouReopened) {
-    return hangzhouWestLakeReopenedLevels
-        .expand((level) => level.storyParagraphs)
-        .join('\n');
-  }
-  if (journeyId == _guangzhou) {
-    return guangzhouChenClanOnePassLevels
-        .expand((level) => level.storyParagraphs)
-        .join('\n');
-  }
-  if (journeyId == _suzhou) {
-    return suzhouGardenCanonicalLevelContent(10).storyParagraphs.join('\n');
-  }
-  if (journeyId == _longmen) {
-    return List<String>.generate(10, (index) => luoyangLongmenGoldLevelContent(index + 1).storyParagraphs.join('\n')).join('\n');
-  }
-  if (journeyId == _kaiping) {
-    return List<String>.generate(10, (index) => kaipingDiaolouGoldLevelContent(index + 1).storyParagraphs.join('\n')).join('\n');
-  }
-  return baseline.activeCanonicalGoldStoryText(journeyId);
-}
-
-List<String> semanticFingerprintCompletenessErrors(
-  JourneySemanticFingerprint fingerprint,
-) {
-  final errors = <String>[];
-  for (final dimension in NarrativeSemanticDimension.values) {
-    if (!fingerprint.mechanisms.containsKey(dimension)) {
-      errors.add('${fingerprint.journeyId}: missing ${dimension.name}');
-    }
-  }
-  final evidenceByDimension =
-      <NarrativeSemanticDimension, List<NarrativeMechanismEvidence>>{};
-  for (final evidence in fingerprint.coreEvidence) {
-    evidenceByDimension.putIfAbsent(evidence.dimension, () => []).add(evidence);
-  }
-  for (final dimension in narrativeSemanticCoreDimensions) {
-    final records = evidenceByDimension[dimension] ?? const [];
-    if (records.isEmpty) {
-      errors.add('${fingerprint.journeyId}: missing evidence ${dimension.name}');
-      continue;
-    }
-    if (records.length != 1) {
-      errors.add('${fingerprint.journeyId}: duplicate evidence ${dimension.name}');
-      continue;
-    }
-    if (records.single.mechanism != fingerprint.mechanism(dimension)) {
-      errors.add('${fingerprint.journeyId}: evidence mismatch ${dimension.name}');
-    }
-  }
-  return errors;
-}
-
-List<String> semanticEvidenceProvenanceErrors(
-  JourneySemanticFingerprint fingerprint,
-) {
-  final story = activeCanonicalGoldStoryText(fingerprint.journeyId);
-  final errors = <String>[];
-  for (final evidence in fingerprint.coreEvidence) {
-    final prefix = '${fingerprint.journeyId}:${evidence.dimension.name}';
-    if (evidence.journeyId != fingerprint.journeyId) {
-      errors.add('$prefix:journey');
-    }
-    if (evidence.activeSourceId != activeGoldStorySourceId) {
-      errors.add('$prefix:activeSourceId');
-    }
-    if (evidence.sourceTexts.isEmpty) {
-      errors.add('$prefix:missing-source-text');
-      continue;
-    }
-    for (var index = 0; index < evidence.sourceTexts.length; index++) {
-      final sourceText = evidence.sourceTexts[index];
-      if (sourceText.trim().isEmpty) {
-        errors.add('$prefix:empty-source-text-$index');
-      } else if (!story.contains(sourceText)) {
-        errors.add('$prefix:source-not-in-active-story-$index');
-      }
-    }
-  }
-  return errors;
-}
-
-List<String> semanticEvidenceContractErrors(
-  JourneySemanticFingerprint fingerprint,
-) {
-  final errors = <String>[
-    ...semanticFingerprintCompletenessErrors(fingerprint),
-    ...semanticEvidenceProvenanceErrors(fingerprint),
-  ];
-  for (final evidence in fingerprint.coreEvidence) {
-    final prefix = '${fingerprint.journeyId}:${evidence.dimension.name}';
-    if (!narrativeSemanticCoreDimensions.contains(evidence.dimension)) {
-      errors.add('$prefix:not-core');
-    }
-    if (fingerprint.mechanisms[evidence.dimension] != evidence.mechanism) {
-      errors.add('$prefix:mechanism-mismatch');
-    }
-    if (evidence.semanticRationale.trim().isEmpty) {
-      errors.add('$prefix:missing-semantic-rationale');
-    }
-  }
-  return errors;
-}
-
-List<String> semanticEvidenceFidelityErrors(
-  JourneySemanticFingerprint fingerprint,
-) =>
-    semanticEvidenceProvenanceErrors(fingerprint);
-
-NarrativeSemanticComparison compareSemanticFingerprints(
-  JourneySemanticFingerprint left,
-  JourneySemanticFingerprint right, {
-  bool approvedCatalogAudit = false,
-}) {
-  final matchingCore = <NarrativeSemanticDimension>[];
-  final matchingSecondary = <NarrativeSemanticDimension>[];
-  for (final dimension in NarrativeSemanticDimension.values) {
-    if (left.mechanism(dimension) != right.mechanism(dimension)) continue;
-    if (narrativeSemanticCoreDimensions.contains(dimension)) {
-      matchingCore.add(dimension);
-    } else {
-      matchingSecondary.add(dimension);
-    }
-  }
-
-  final sameEngine =
-      left.mechanism(NarrativeSemanticDimension.dramaticEngineFamily) ==
-          right.mechanism(NarrativeSemanticDimension.dramaticEngineFamily);
-  final additionalCoreMatches = matchingCore
-      .where(
-        (dimension) =>
-            dimension != NarrativeSemanticDimension.dramaticEngineFamily,
-      )
-      .length;
-  final ruleA = sameEngine &&
-      additionalCoreMatches >=
-          semanticCollisionSameEngineAdditionalCoreThreshold;
-  final ruleB =
-      matchingCore.length >= semanticCollisionIndependentCoreThreshold;
-  final collision = ruleA || ruleB;
-
-  final classification = collision
-      ? (approvedCatalogAudit
-          ? SemanticCollisionClassification.existingSemanticCollisionDebt
-          : SemanticCollisionClassification.semanticCollision)
-      : (matchingCore.isNotEmpty || matchingSecondary.isNotEmpty
-          ? SemanticCollisionClassification.relatedButDistinct
-          : SemanticCollisionClassification.distinct);
-
-  return NarrativeSemanticComparison(
-    journeyA: left.journeyId,
-    journeyB: right.journeyId,
-    matchingCoreDimensions: List.unmodifiable(matchingCore),
-    matchingSecondaryDimensions: List.unmodifiable(matchingSecondary),
-    sameDramaticEngine: sameEngine,
-    ruleA: ruleA,
-    ruleB: ruleB,
-    classification: classification,
-  );
-}
-
-List<NarrativeSemanticComparison> semanticDifferenceMatrixAgainstApprovedGold(
-  JourneySemanticFingerprint candidate,
-) =>
-    List<NarrativeSemanticComparison>.unmodifiable([
-      for (final reference in approvedGoldSemanticFingerprints.values)
-        if (reference.journeyId != candidate.journeyId)
-          compareSemanticFingerprints(candidate, reference),
-    ]);
-
-List<NarrativeSemanticComparison> auditApprovedGoldSemanticPairs() {
-  final catalog = approvedGoldSemanticFingerprints.values.toList(growable: false);
-  final results = <NarrativeSemanticComparison>[];
-  for (var i = 0; i < catalog.length; i++) {
-    for (var j = i + 1; j < catalog.length; j++) {
-      results.add(
-        compareSemanticFingerprints(
-          catalog[i],
-          catalog[j],
-          approvedCatalogAudit: true,
-        ),
-      );
-    }
-  }
-  return List<NarrativeSemanticComparison>.unmodifiable(results);
-}
-
-FutureGoldSemanticGateResult evaluateFutureGoldSemanticCandidate(
-  JourneySemanticFingerprint candidate,
-) {
-  final comparisons = semanticDifferenceMatrixAgainstApprovedGold(candidate);
-  final collisions =
-      comparisons.where((comparison) => comparison.isCollision).toList();
-  return FutureGoldSemanticGateResult(
-    isGoldReady: collisions.isEmpty,
-    status: collisions.isEmpty
-        ? 'SEMANTIC ANTI-TEMPLATE PASS'
-        : semanticTemplateCollisionNotGoldReady,
-    comparisons: comparisons,
-  );
-}
+  artifactObjectNarrativeFunctk_<ß«h‘éì¶»§q«^vâ–’¶'š"Gœ°€I•Á•…Ñ•±½ÍÌ…¹É•½Ù•Éä½˜Í¥¡ĞÑÉ…¹Í™½ÉµÌ½¹Ñ¥¹Õ½ÕÌ½¹ÑÉ½°¥¹Ñ¼É•¥ÁÉ½…°İ…¥Ñ¥¹œ¸œ¤°(€€€t¤(€€€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹” (€€€€€€€©½ÕÉ¹•å%è}ÍÕé¡½Ô°(€€€€€€€‘¥µ•¹Í¥½¸è¥Ñ•´¸Ä°(€€€€€€€µ•¡…¹¥Í´è¥Ñ•´¸È°(€€€€€€€…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°(€€€€€€€Í½ÕÉ•Q•áÑÌè€ñMÑÉ¥¹œùm¥Ñ•´¸Ít°(€€€€€€€Í•µ…¹Ñ¥I…Ñ¥½¹…±”è¥Ñ•´¸Ğ°(€€€€€€¤°(€t°(¤ì()½¹ÍĞ}¡…¹é¡½ÕI•½Á•¹•€ô€¡…¹é¡½Ôµİ•ÍĞµ±…­”œì()™¥¹…°¡…¹é¡½Õ]•ÍÑ1…­•I•½Á•¹•‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ€ô)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ (€©½ÕÉ¹•å%è}¡…¹é¡½ÕI•½Á•¹•°(€ÍÕÉ™…•%‘•¹Ñ¥Ñäè€…¹œeÔ€¼Í¥áÑäµ¹¥¹”µå•…Èµ½±İ¥™”€¼i¡½ÔM¡…½Ñ¥¹œ€¼¡¥‘‘•¸µ•µ½Éäµ±¥¹¥Œ…É€¼	É½­•¸	É¥‘”İ…±¬œ°(€µ•¡…¹¥ÍµÌè5…Àñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±äø¹Õ¹µ½‘¥™¥…‰±”¡ì(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½Á•¹¥¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½¹•…±•‘±¥¹¥Y¥Í¥Ñ	•¡¥¹‘…µ¥±¥…É]…±¬°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÁÉ½Ñ…½¹¥ÍÑI½±•A…ÑÑ•É¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½±‘•ÉMÁ½ÕÍ•Q•ÍÑ¥¹A…ÉÑ¹•ÉÍ5•µ½Éä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹É•±…Ñ¥½¹Í¡¥Á•½µ•ÑÉäè9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹±½¹5…ÉÉ¥•‘MÁ½ÕÍ•Í½¹•…±M¡…É•‘•…È°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½…±5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Ù•É¥™åM¡…É•‘A…ÍÑQ¡É½Õ¡A±…•9…µ•¹Íİ•ÉÌ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹™±¥Ñ5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹µ•µ½ÉåEÕ¥éYÍ!½¹•ÍÑ5•‘¥…±¥Í±½ÍÕÉ”°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹¡½¥•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÍÑ½ÁQ•ÍÑ¥¹¹‘!…¹‘=Ù•ÉÁÁ½¥¹Ñµ•¹Ğ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹±¥µ…á5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹•µ‰½‘¥•‘…É•%¹Ñ•ÉÉÕÁÑÍY•É‰…±5•µ½ÉåQ•ÍĞ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹Í•ÅÕ•¹•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹…ÁÁ½¥¹Ñµ•¹Ñ•ÁÑ•‘¹‘!½ÍÁ¥Ñ…±I½ÕÑ•I•ÅÕ•ÍÑ•°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÑÉ…¹Í™½Éµ…Ñ¥½¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÁÉ½½™M••­¥¹Q½5ÕÑÕ…±‘µ¥ÍÍ¥½¸°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹•¹‘¥¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹¡½ÍÁ¥Ñ…±EÕ•ÍÑ¥½¹¹‘Í½¹•…±µ•¹Ğ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Õ±ÑÕÉ…±¹¡½ÉÕ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹¹…µ•‘M•…Í½¹…±Y¥•İÍÕ•½¹™±¥Ñ¥¹5•µ½Éä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹…ÉÑ¥™…Ñ=‰©•Ñ9…ÉÉ…Ñ¥Ù•Õ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹…ÁÁ½¥¹Ñµ•¹Ñ…É‘µ‰½‘¥•Í9…µ•‘•…È°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹µ½Ù•µ•¹ÑMÁ…Ñ¥…±5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÅÕ•ÍÑ¥½¹¥¹]…±­Q½]•ÑMÑ•Á¹‘	ÕÌ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Ñ•µÁ½É…±AÉ•ÍÍÕÉ•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹İ••­•¹‘	•™½É•5•µ½Éå±¥¹¥Œ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÍÕÁÁ½ÉÑ¥¹¡…É…Ñ•ÉÕ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÍÁ½ÕÍ•­¹½İ±•‘•Í•…É¹‘-••ÁÍ…É°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±äè9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹•µ‰½‘¥•‘I•½¹¥Ñ¥½¹¹‘Í!¥‘‘•¹5•µ½Éåá…´°(€ô¤°(€½É•Ù¥‘•¹”è€ñ9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”ùl(€€€™½È€¡™¥¹…°¥Ñ•´¥¸€ğ¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä°MÑÉ¥¹œ°MÑÉ¥¹œ¤ùl(€€€€€€¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½Á•¹¥¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½¹•…±•‘±¥¹¥Y¥Í¥Ñ	•¡¥¹‘…µ¥±¥…É]…±¬°€Ÿ–F£’â’î[¢š–:ï–2ï¦f‹–k¢ºÃ–şšš~—¾ò3––ç–6Ó’ânÓšÊ‡š*+¦Šê›–6‡š.ÿ–ëšv—œ°€™…µ¥±¥…Èİ…±¬½¹•…±Ì…¸…±É•…‘äÍ¡•‘Õ±•±¥¹¥ŒÙ¥Í¥Ğ¸œ¤°(€€€€€€¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹É•±…Ñ¥½¹Í¡¥Á•½µ•ÑÉä°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹±½¹5…ÉÉ¥•‘MÁ½ÕÍ•Í½¹•…±M¡…É•‘•…È°€ŸšZçš¾O–·–6’æw–Ê¾ò3–J3–F£î7–ê·îO–¦k–no–6’â'–æÓœ°€Q¡”…ÕÍ…°É•±…Ñ¥½¹Í¡¥À¥Ì„™½ÉÑäµÑ¡É•”µå•…Èµ…ÉÉ¥…”™…¥¹œµ•µ½Éä‘•±¥¹”°¹½Ğ„ÁÉ½©•ĞÑ•…´½Èµ•¹Ñ½ÈÁ…¥È¸œ¤°(€€€€€€¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹™±¥Ñ5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹µ•µ½ÉåEÕ¥éYÍ!½¹•ÍÑ5•‘¥…±¥Í±½ÍÕÉ”°€Ÿ’â“’êë’î;šZ·š†—–ú–&7¢ÖÃ¾ò3šZçš¾O’â7–s¦^»’î[¢–ÿšæ[šf¿–B7œ°€M•É¥…°Á±…”µ¹…µ”ÅÕ•ÍÑ¥½¹ÌÍÕ‰ÍÑ¥ÑÕÑ”™½È‘¥É•Ğ‘¥Í±½ÍÕÉ”…¹¡Õµ¥±¥…Ñ”É…Ñ¡•ÈÑ¡…¸±…É¥™ä¸œ¤°(€€€€€€¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹¡½¥•5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÍÑ½ÁQ•ÍÑ¥¹¹‘!…¹‘=Ù•ÉÁÁ½¥¹Ñµ•¹Ğ°€ŸšZçš¾O’â7–7–ë¦Šc¾ò3š*+¦Šê›–6‡’ê“îg’î[œ°€Q¡”¡½¥”¥ÌÑ¼•¹½¹•…±µ•¹Ğ…¹¡…¹½Ù•ÈÑ¡”µ•‘¥…°…ÁÁ½¥¹Ñµ•¹Ğ½Á•¹±ä¸œ¤°(€€€€€€¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹±¥µ…á5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹•µ‰½‘¥•‘…É•%¹Ñ•ÉÉÕÁÑÍY•É‰…±5•µ½ÉåQ•ÍĞ°€ŸšZçš¾O¢k’â/’âšîG¾ò3’î[®/–"ïš&Û’ö?––çjš&/¢
+c¾ò3¢¾Ó¾òkŠs¢şg¦3’ânÓšîGŠtœ°€µ‰½‘¥•É•±…Ñ¥½¹…°µ•µ½Éä¥¹Ñ•ÉÉÕÁÑÌÑ¡”Ù•É‰…°Ñ•ÍĞİ¥Ñ¡½ÕĞÁÉ½Ù¥¹œ½¹¥Ñ¥Ù”É•½Ù•Éä¸œ¤°(€€€€€€¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹Í•ÅÕ•¹•5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹…ÁÁ½¥¹Ñµ•¹Ñ•ÁÑ•‘¹‘!½ÍÁ¥Ñ…±I½ÕÑ•I•ÅÕ•ÍÑ•°€Ÿ’î[š*+–6‡šRû¢şo¢«–ŞÇj¦JÇ–2–³’ê“¢ö›šv—š^Û¾ò3’î[¦^»–>ãšrë¾òkŠs–:ï–2ï¦f‹¾ò3–N«’â®g’â/¾òŠtœ°€!”…•ÁÑÌÑ¡”…ÁÁ½¥¹Ñµ•¹Ğ…¹Ñ…­•ÌÁÉ…Ñ¥…°½İ¹•ÉÍ¡¥À½˜Ñ¡”¡½ÍÁ¥Ñ…°É½ÕÑ”¸œ¤°(€€€€€€¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÑÉ…¹Í™½Éµ…Ñ¥½¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÁÉ½½™M••­¥¹Q½5ÕÑÕ…±‘µ¥ÍÍ¥½¸°€Ÿš"G~—¦O’öƒ–r£šW’î’æ#š"G’æšWœ°€	½Ñ ÍÁ½ÕÍ•Ìµ½Ù”™É½´ÁÉ¥Ù…Ñ”ÁÉ½½˜µÍ••­¥¹œÑ¼¹…µ¥¹œÍ¡…É•™•…È¸œ¤°(€€€€€€¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹•¹‘¥¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹¡½ÍÁ¥Ñ…±EÕ•ÍÑ¥½¹¹‘Í½¹•…±µ•¹Ğ°€Ÿ–:ï–2ï¦f‹¾ò3–N«’â®g’â/¾ò|œ°€Q¡”•¹‘¥¹œ¥Ì„ÁÉ…Ñ¥…°ÅÕ•ÍÑ¥½¸Ñ½İ…É…É”°¹½Ğ…¸…ÉÑ¥™…Ğ°…É¡¥Ù”°Í•Á…É…Ñ¥½¸°½ÈÉ•ÍÑ½É•É•ÍÕ±Ğ¸œ¤°(€€€€€€¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Õ±ÑÕÉ…±¹¡½ÉÕ¹Ñ¥½¸°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹¹…µ•‘M•…Í½¹…±Y¥•İÍÕ•½¹™±¥Ñ¥¹5•µ½Éä°€Ÿ–F£î7–ê·š*+ŠsšZ·š†—šº/¦n«Šw¢¾Óš"C–’?–’§œ°€¹…µ•Í•…Í½¹…°]•ÍĞ1…­”Ù¥•Üµ…­•ÌÁ±…”°Í•…Í½¸°…¹µ•µ½Éä…¹Íİ•È…ÕÍ…±±ä¥¹Í•Á…É…‰±”¸œ¤°(€€€€€€¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±ä°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹•µ‰½‘¥•‘I•½¹¥Ñ¥½¹¹‘Í!¥‘‘•¹5•µ½Éåá…´°€Ÿ~Ï¦bÛ¢Š¯¦n£š&Ošæÿ¾ò3šZçš¾O¢k’â/’âšîG¾ò3’î[®/–"ïš&Û’ö?––çjš&/¢
+`œ°€Q¡”•¹¥¹”ÑÕÉ¹Ì½¸•µ‰½‘¥•É•½¹¥Ñ¥½¸•¹‘¥¹œ„½¹•…±•ÍÁ½ÕÍ…°•á…´°µ…Ñ•É¥…±±äÕ¹±¥­”ÁÉ½©•ĞÉ•Ù¥Í¥½¸°‰½Õ¹‘…ÉäÉ•™ÕÍ…°°½ÈÙ¥ÍÕ…°Í•Á…É…Ñ¥½¸¸œ¤°(€€€t¤(€€€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹” (€€€€€€€©½ÕÉ¹•å%è}¡…¹é¡½ÕI•½Á•¹•°(€€€€€€€‘¥µ•¹Í¥½¸è¥Ñ•´¸Ä°(€€€€€€€µ•¡…¹¥Í´è¥Ñ•´¸È°(€€€€€€€…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°(€€€€€€€Í½ÕÉ•Q•áÑÌè€ñMÑÉ¥¹œùm¥Ñ•´¸Ít°(€€€€€€€Í•µ…¹Ñ¥I…Ñ¥½¹…±”è¥Ñ•´¸Ğ°(€€€€€€¤°(€t°(¤ì()½¹ÍĞ}ÍÕµµ•ÉA…±…”€ô€‰•¥©¥¹œµÍÕµµ•ÈµÁ…±…”œì)½¹ÍĞ}±½¹µ•¸€ô±Õ½å…¹1½¹µ•¹)½ÕÉ¹•å%ì)½¹ÍĞ}­…¥Á¥¹œ€ô­…¥Á¥¹¥…½±½Õ)½ÕÉ¹•å%ì()9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”}…Ñ¥Ù•Ù¥‘•¹” (€MÑÉ¥¹œ©½ÕÉ¹•å%°(€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸‘¥µ•¹Í¥½¸°(€9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±äµ•¡…¹¥Í´°(€1¥ÍĞñMÑÉ¥¹œøÍ½ÕÉ•Q•áÑÌ°(€MÑÉ¥¹œÉ…Ñ¥½¹…±”°(¤€ôø9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹” (€©½ÕÉ¹•å%è©½ÕÉ¹•å%°(€‘¥µ•¹Í¥½¸è‘¥µ•¹Í¥½¸°(€µ•¡…¹¥Í´èµ•¡…¹¥Í´°(€…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°(€Í½ÕÉ•Q•áÑÌè1¥ÍĞñMÑÉ¥¹œø¹Õ¹µ½‘¥™¥…‰±”¡Í½ÕÉ•Q•áÑÌ¤°(€Í•µ…¹Ñ¥I…Ñ¥½¹…±”èÉ…Ñ¥½¹…±”°(¤ì()™¥¹…°±½¹µ•¹½±‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ€ô)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ (€©½ÕÉ¹•å%è}±½¹µ•¸°(€ÍÕÉ™…•%‘•¹Ñ¥Ñäè€1¥¸e…¸€¼i¡½Ô¡•¹œ€¼1½¹µ•¸‘¥¥Ñ…°Í¡½ÉĞ€¼Õ¹ÍÕÁÁ½ÉÑ•™…”±…å•È€¼Í½ÕÉ”±¥ÍĞœ°(€µ•¡…¹¥ÍµÌè5…Àñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±äø¹Õ¹µ½‘¥™¥…‰±”¡ì(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½Á•¹¥¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Í¡…É•‘É•‘¥Ñ	•¥¹Í]¥Ñ¡Ù¥‘•¹•A±•‘”°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÁÉ½Ñ…½¹¥ÍÑI½±•A…ÑÑ•É¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹É•…Ñ½ÉAÉ½Ù¥¹%¹‘•Á•¹‘•¹Ñ)Õ‘µ•¹Ğ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹É•±…Ñ¥½¹Í¡¥Á•½µ•ÑÉäè9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹•ÅÕ…±½±±…‰½É…Ñ½ÉÍ]¥Ñ¡5ÕÑÕ…±É•‘¥Ñ	½Õ¹‘…Éä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½…±5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÁÕ‰±¥Í¡M¡…É•‘ÉÑ¥™…Ñ]¥Ñ¡•™•¹Í¥‰±•M½ÕÉ•Ì°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹™±¥Ñ5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹…•ÍÑ¡•Ñ¥½µÁ±•Ñ¥½¹YÍ)½¥¹Ñ½Õ¹Ñ…‰¥±¥Ñä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹¡½¥•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹‘•ÍÑÉÕÑ¥Ù•I•µ½Ù…±Q½AÉ•Í•ÉÙ•)½¥¹Ñ½Õ¹Ñ…‰¥±¥Ñä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹±¥µ…á5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½…ÕÑ¡½ÉÉ•‘¥Ñ	½Õ¹‘…Éå½É•Í•±•Ñ¥½¸°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹Í•ÅÕ•¹•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Í½ÕÉ•‘Q¥µ•±¥¹•I•Á±…•ÍU¹ÍÕÁÁ½ÉÑ•‘±¥µ…à°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÑÉ…¹Í™½Éµ…Ñ¥½¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Í½±½Y¥ÍÕ…±)Õ‘µ•¹ÑQ½AÉ•½µµ¥ÑÑ•‘M½ÕÉ•I•Ù¥•Ü°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹•¹‘¥¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹µÕÑÕ…±É•‘¥Ñ™Ñ•É)½¥¹ÑY•É¥™¥…Ñ¥½¸°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Õ±ÑÕÉ…±¹¡½ÉÕ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹¥¹ÍÉ¥ÁÑ¥½¹…µ…•¹‘A¡½Ñ½É…Á¡	½Õ¹‘I•ÁÉ•Í•¹Ñ…Ñ¥½¸°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹…ÉÑ¥™…Ñ=‰©•Ñ9…ÉÉ…Ñ¥Ù•Õ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Õ¹ÍÕÁÁ½ÉÑ•‘1…å•Éµ‰½‘¥•ÍU¹Í¡…É•‘I¥Í¬°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹µ½Ù•µ•¹ÑMÁ…Ñ¥…±5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹•‘¥Ñ¥¹Q¥µ•±¥¹•I•‰Õ¥±ÑÉ½Õ¹‘M½ÕÉ•1…å•ÉÌ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Ñ•µÁ½É…±AÉ•ÍÍÕÉ•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹‘•±¥Ù•Éå]¥¹‘½İ™Ñ•ÉMÕ¹­I•¹‘•É¥¹œ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÍÕÁÁ½ÉÑ¥¹¡…É…Ñ•ÉÕ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½±±…‰½É…Ñ½ÉMÕÁÁ±¥•ÍM½ÕÉ•Í¹‘M¡…É•Í1¥…‰¥±¥Ñä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±äè9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹•Ù¥‘•¹•	½Õ¹‘…Éå9•½Ñ¥…Ñ¥½¹AÉ•Í•ÉÙ•Í½…ÕÑ¡½ÉÍ¡¥À°(€ô¤°(€½É•Ù¥‘•¹”è1¥ÍĞñ9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”ø¹Õ¹µ½‘¥™¥…‰±”¡l(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}±½¹µ•¸°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½Á•¹¥¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Í¡…É•‘É•‘¥Ñ	•¥¹Í]¥Ñ¡Ù¥‘•¹•A±•‘”°lŸê›–ºk–æÛ–"_öË–B7¾ò3–Ç–B3’âë–’7–:’úwš6»¢Ò¢Òt°€Q¡”İ½É¬‰•¥¹Ìİ¥Ñ „É•¥ÁÉ½…°É•‘¥Ğµ…¹µ•Ù¥‘•¹”Á±•‘”°Í¼…½Õ¹Ñ…‰¥±¥Ñä¥ÌÉ•±…Ñ¥½¹…°‰•™½É”Ñ¡”‘¥ÍÁÕÑ•±…å•È•á¥ÍÑÌ¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}±½¹µ•¸°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹É•±…Ñ¥½¹Í¡¥Á•½µ•ÑÉä°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹•ÅÕ…±½±±…‰½É…Ñ½ÉÍ]¥Ñ¡5ÕÑÕ…±É•‘¥Ñ	½Õ¹‘…Éä°lŸšÊ‡’úwš6»¾ò3’â7¢÷šRû–r£š"G’î³’â“’êëj–B7–¶_’â/œ°€Ÿ–¾ó–ë–&7¾ò3–F£šú’şwVg–æÛ–"_öË–B4t°€i¡½Ô¡•¹œ…¸İ¥Ñ¡¡½±Í¡…É•É•‘¥Ğ™É½´Õ¹ÍÕÁÁ½ÉÑ•İ½É¬°İ¡¥±”Ñ¡”™¥¹…°ÁÉ•Í•ÉÙ•É•‘¥Ğ‘•Á•¹‘Ì½¸1¥¸e…¸¡½¹½É¥¹œÑ¡•¥È•ÅÕ…°µ…ÕÑ¡½È…É••µ•¹Ğ¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}±½¹µ•¸°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹™±¥Ñ5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹…•ÍÑ¡•Ñ¥½µÁ±•Ñ¥½¹YÍ)½¥¹Ñ½Õ¹Ñ…‰¥±¥Ñä°lŸšz_‚k’âë¢ö³–rë–k’êŠs¢†—–£¢ã¦£Šwš¢‡–z/œ°€ŸšÊ‡’úwš6»¾ò3’â7¢÷šRû–r£š"G’î³’â“’êëj–B7–¶_’â/t°€Q¡”‘•Í¥É•Í•…µ±•ÍÌ¥µ…”¹½ÜÉ¥Í­Ì…ÑÑÉ¥‰ÕÑ¥¹œ…¸Õ¹ÍÕÁÁ½ÉÑ•±…¥´Ñ¼‰½Ñ ½±±…‰½É…Ñ½ÉÌ¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}±½¹µ•¸°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹¡½¥•5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹‘•ÍÑÉÕÑ¥Ù•I•µ½Ù…±Q½AÉ•Í•ÉÙ•)½¥¹Ñ½Õ¹Ñ…‰¥±¥Ñä°lŸ’êËš&/–Ïš:'¦
+–Æt°€1¥¸e…¸‘•ÍÑÉ½åÌÕÍ…‰±”½µÁ±•Ñ•İ½É¬Í¼Ñ¡”Í¡…É•…ÉÑ¥™…Ğ…¸É•µ…¥¸©½¥¹Ñ±ä…½Õ¹Ñ…‰±”¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}±½¹µ•¸°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹±¥µ…á5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½…ÕÑ¡½ÉÉ•‘¥Ñ	½Õ¹‘…Éå½É•Í•±•Ñ¥½¸°lŸ––çr/’ê’â'–’§šâËš~O–J3&–Âû’â“’â«–B7–¶_¾ò3’êËš&/–Ïš:'¦
+–Æt°€Q¡”¼µ…ÕÑ¡½ÉÍ¡¥À‰½Õ¹‘…Éä¥ÌÁ¡åÍ¥…±±äÙ¥Í¥‰±”…ĞÑ¡”µ½µ•¹ĞÍ¡”‘•±•Ñ•ÌÑ¡”Õ¹ÍÕÁÁ½ÉÑ•±…å•È¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}±½¹µ•¸°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹Í•ÅÕ•¹•5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Í½ÕÉ•‘Q¥µ•±¥¹•I•Á±…•ÍU¹ÍÕÁÁ½ÉÑ•‘±¥µ…à°lŸ~·&–’Ç–:ïšr¦†ëšîGj¦Vs–’Ó¾òo–F£šúš*+¢Ÿ&š:—–n{š^Û¦^Óêÿt°€•±•Ñ¥½¸Ù¥Í¥‰±äÉ•µ½Ù•ÌÑ¡”Íµ½½Ñ ±¥µ…à…¹…ÕÍ•ÌÑ¡”Í½ÕÉ••Ù¥‘•¹”Í•ÅÕ•¹”Ñ¼É•ÑÕÉ¸Ñ¼Ñ¡”•‘¥Ğ¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}±½¹µ•¸°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÑÉ…¹Í™½Éµ…Ñ¥½¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Í½±½Y¥ÍÕ…±)Õ‘µ•¹ÑQ½AÉ•½µµ¥ÑÑ•‘M½ÕÉ•I•Ù¥•Ü°lŸ’â“’êëj–B#’ös’æ–>c’ê¾òkšz_‚k–ò–/–r£–îëš¢‡–&7–#¦^»¾ò3š¾?’â–Æ¢¾š6»¦Û®¢÷šR¿š2–"Ã–N«¦3t°€!•È™ÕÑÕÉ”‰•¡…Ù¥½Èµ½Ù•ÌÍ½ÕÉ”É•Ù¥•Ü‰•™½É”µ½‘•±¥¹œ…¹µ…­•Ìi¡½Ô¡•¹œÁ…ÉĞ½˜…ÕÑ¡½ÉÍ¡¥ÀÉ…Ñ¡•ÈÑ¡…¸„™¥¹…°¡•­•È¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}±½¹µ•¸°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹•¹‘¥¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹µÕÑÕ…±É•‘¥Ñ™Ñ•É)½¥¹ÑY•É¥™¥…Ñ¥½¸°lŸšz_‚kš‚ã–º3¾ò3š*+¦
+–ÆšRç–B7’âëŠsš^ƒ’úwš6»¾ò3’â7’öÿR£Šw¾ò3š2'’â/–¾ó–ët°€Q¡”™¥±´¥Ì•áÁ½ÉÑ•½¹±ä…™Ñ•È©½¥¹Ğ•Ù¥‘•¹”İ½É¬¥Ì¡•­•…¹Ñ¡”Õ¹ÍÕÁÁ½ÉÑ•±…å•ÈÉ•µ…¥¹Ì¹…µ•‰ÕĞÕ¹ÕÍ•¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}±½¹µ•¸°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Õ±ÑÕÉ…±¹¡½ÉÕ¹Ñ¥½¸°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹¥¹ÍÉ¥ÁÑ¥½¹…µ…•¹‘A¡½Ñ½É…Á¡	½Õ¹‘I•ÁÉ•Í•¹Ñ…Ñ¥½¸°lŸ¦Šc¢ºÃVg’â/–>Gšÿ¦ƒ–?¢–J3–º3š"Cš^Û¦^Ó¾ò3–?j¢ã¦£–6Ó–ŞËšº/š6œ°€Ÿ–ºcšZç–’7–:’î—–:–>Ë¢Ÿ&’âë–~ë† t°€1½¹µ•¸µÍÁ•¥™¥Œ¥¹ÍÉ¥ÁÑ¥½¸°ÁÉ•Í•¹Ğ±½ÍÌ°…¹¡¥ÍÑ½É¥…°Á¡½Ñ½É…Á¡Ì‘•™¥¹”‘¥™™•É•¹ĞÉ•ÁÉ•Í•¹Ñ…Ñ¥½¹…°±¥µ¥ÑÌ…¹É•…Ñ”Ñ¡”‘¥ÍÁÕÑ”¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}±½¹µ•¸°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±ä°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹•Ù¥‘•¹•	½Õ¹‘…Éå9•½Ñ¥…Ñ¥½¹AÉ•Í•ÉÙ•Í½…ÕÑ¡½ÉÍ¡¥À°lŸšÊ‡’úwš6»¾ò3’â7¢÷šRû–r£š"G’î³’â“’êëj–B7–¶_’â/œ°€Ÿ’êËš&/–Ïš:'¦
+–Æœ°€Ÿ–F£šú’şwVg–æÛ–"_öË–B4t°€¸•ÅÕ…°½±±…‰½É…Ñ½È¥¹Ù½­•ÌÍ¡…É•µ±¥…‰¥±¥Ñä‰½Õ¹‘…É¥•Ìì‘•ÍÑÉÕÑ¥Ù”‘•±•Ñ¥½¸Ñ¡•¸ÁÉ•Í•ÉÙ•Ì‰½Ñ ÑÉÕÑ¡™Õ°É•ÁÉ•Í•¹Ñ…Ñ¥½¸…¹¼µ…ÕÑ¡½ÉÍ¡¥À¸œ¤°(€t¤°(¤ì()™¥¹…°­…¥Á¥¹½±‘…¹‘¥‘…Ñ•M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ€ô)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ (€©½ÕÉ¹•å%è}­…¥Á¥¹œ°(€ÍÕÉ™…•%‘•¹Ñ¥Ñäè€1¥…¹œ¡Õ…¸€¼1¥…¹œ!…¤€¼-…¥Á¥¹œ½µµÕ¹…°Ñ½İ•È€¼É•ÑÕÉ¹•Í­•Ñ …¹±•ÑÑ•ÉÌœ°(€µ•¡…¹¥ÍµÌè5…Àñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±äø¹Õ¹µ½‘¥™¥…‰±”¡ì(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½Á•¹¥¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½¹‘¥Ñ¥½¹…±…µ¥±å½¹ÑÉ¥‰ÕÑ¥½¹ÉÉ¥Ù•ÍÉ½µİ…ä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÁÉ½Ñ…½¹¥ÍÑI½±•A…ÑÑ•É¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹±½…±5½Ù•ÉQ•ÍÑ¥¹	•±½¹¥¹œ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹É•±…Ñ¥½¹Í¡¥Á•½µ•ÑÉäè9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Í•Á…É…Ñ•‘M¥‰±¥¹ÍI•¹•½Ñ¥…Ñ•M¡…É•‘I•ÍÁ½¹Í¥‰¥±¥Ñä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½…±5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹É•‘¥É•ÑAÉ¥Ù…Ñ•½¹ÑÉ¥‰ÕÑ¥½¹%¹Ñ½½µµÕ¹…±UÍ”°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹™±¥Ñ5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÁÉ¥Ù…Ñ•½µµ•µ½É…Ñ¥½¹YÍ½µµÕ¹…±M…™•Ñä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹¡½¥•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹É¥Í­I•ÑÕÉ¹Q½I•ÅÕ•ÍÑ½±±•Ñ¥Ù•½¹Í•¹Ğ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹±¥µ…á5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹É•Á±åI•İÉ¥Ñ•ÍAÉ¥Ù…Ñ•=İ¹•ÉÍ¡¥ÁÍM¡…É•‘A…ÉĞ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹Í•ÅÕ•¹•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½µµÕ¹…±½¹ÍÑÉÕÑ¥½¹½¹Ñ¥¹Õ•Í]¥Ñ¡…µ¥±å½µµ¥Ñµ•¹Ğ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÑÉ…¹Í™½Éµ…Ñ¥½¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹¥¹¡•É¥Ñ•‘½Áå¥¹5½‘•±Q½1½…±I•½µ‰¥¹…Ñ¥½¸°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹•¹‘¥¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹™…‘•‘I•Ù¥Í¥½¹	•Í¥‘•U¹‰Õ¥±ÑAÉ¥Ù…Ñ•A±…¸°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Õ±ÑÕÉ…±¹¡½ÉÕ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½µµÕ¹…±Q½İ•ÉÕ¹Ñ¥½¹I•½É…¹¥é•Í%µÁ½ÉÑ•‘½É´°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹…ÉÑ¥™…Ñ=‰©•Ñ9…ÉÉ…Ñ¥Ù•Õ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹É•ÑÕÉ¹•‘M­•Ñ¡¹‘1•ÑÑ•ÉÍI•½É‘9•½Ñ¥…Ñ¥½¸°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹µ½Ù•µ•¹ÑMÁ…Ñ¥…±5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Ù¥±±…•I½ÕÑ•Í¹‘M¡…É•‘%¹Ñ•É¥½É½Ù•É¹A±…¸°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Ñ•µÁ½É…±AÉ•ÍÍÕÉ•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹É•Á±å]¥¹‘½İ	•™½É•½¹ÍÑÉÕÑ¥½¹½µµ¥Ñµ•¹Ğ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÍÕÁÁ½ÉÑ¥¹¡…É…Ñ•ÉÕ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹‘¥ÍÑ…¹ÑM¥‰±¥¹•ÁÑÍ¹‘áÑ•¹‘ÍM¡…É•‘ÕÑä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±äè9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÑÉ…¹Í¹…Ñ¥½¹…±1•ÑÑ•Éá¡…¹•I•…±±½…Ñ•Í…µ¥±å	Õ¥±‘¥¹ÕÑä°(€ô¤°(€½É•Ù¥‘•¹”è1¥ÍĞñ9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”ø¹Õ¹µ½‘¥™¥…‰±”¡l(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}­…¥Á¥¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½Á•¹¥¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½¹‘¥Ñ¥½¹…±…µ¥±å½¹ÑÉ¥‰ÕÑ¥½¹ÉÉ¥Ù•ÍÉ½µİ…ä°lŸ¢şg’î÷š*W–—–>«R£’ê;–ºÛ¦3j.³š–ó¾òo¢.—¢ššRç’ös–"¯R£¾ò3–ÂÇ–¾¢şcîg’î[t°€Q¡”½Ù•ÉÍ•…Ì‰É½Ñ¡•È½Á•¹ÌÑ¡”MÑ½Éäİ¥Ñ „½¹‘¥Ñ¥½¹…°™…µ¥±ä½¹ÑÉ¥‰ÕÑ¥½¸Ñ¡…Ğµ…­•Ì±…Ñ•ÈÉ•…±±½…Ñ¥½¸É•±…Ñ¥½¹…±±ä½ÍÑ±ä¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}­…¥Á¥¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹É•±…Ñ¥½¹Í¡¥Á•½µ•ÑÉä°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Í•Á…É…Ñ•‘M¥‰±¥¹ÍI•¹•½Ñ¥…Ñ•M¡…É•‘I•ÍÁ½¹Í¥‰¥±¥Ñä°lŸšŠ–Şwš*+šRç¢şj’ò_š–ó–nû–J3¦¢şcš*W–—jš&ÿ¢¾ë’â¢Öß–¾îg–N—–N—œ°€ŸšRç–gš"CŠsš"G’î³–ºÛ–r£’ò_š–ó¦3j’â’î÷Štt°€Q¡”‰É½Ñ¡•ÉÌ…Ğ…É½ÍÌ‘¥ÍÑ…¹”Ñ¡É½Õ ÁÉ½Á½Í…°°É¥Í¬½˜É•ÑÕÉ¸°…¹„İÉ¥ÑÑ•¸½Õ¹Ñ•Èµ½µµ¥Ñµ•¹ĞÑ¡…Ğ¡…¹•Ì½İ¹•ÉÍ¡¥À±…¹Õ…”¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}­…¥Á¥¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹™±¥Ñ5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÁÉ¥Ù…Ñ•½µµ•µ½É…Ñ¥½¹YÍ½µµÕ¹…±M…™•Ñä°lŸ¢şg’î÷š*W–—–>«R£’ê;–ºÛ¦3j.³š–ğœ°€ŸšvG¦3–ƒš"ß’êë–ºÛš¶–B#–îë’â–êŸ’ò_š–ó¾ò3¦–"Ã–6Ç¦f§š^Û–>¿’âÓš^Û¦ÿ¦jût°€ÁÉ¥Ù…Ñ”™…µ¥±äµ½¹Õµ•¹Ğ…¹¥ÑÌ½¹‘¥Ñ¥½¸½µÁ•Ñ”İ¥Ñ Ñ¡”Ù¥±±…”¹••™½È„©½¥¹Ñ±äÕÍ•É•™Õ”¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}­…¥Á¥¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹¡½¥•5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹É¥Í­I•ÑÕÉ¹Q½I•ÅÕ•ÍÑ½±±•Ñ¥Ù•½¹Í•¹Ğ°lŸ–ºÛ¦3šRû–ò.³–îë¾òošŠ–Şwš*+šRç¢şj’ò_š–ó–nû–J3¦¢şcš*W–—jš&ÿ¢¾ë’â¢Öß–¾îg–N—–N—t°€1¥…¹œ¡Õ…¸•¹…ÑÌÑ¡”¡½¥”İ¡¥±”…•ÁÑ¥¹œÑ¡…Ğ¡¥Ì‰É½Ñ¡•Èµ…äİ¥Ñ¡‘É…ÜÑ¡”½¹ÑÉ¥‰ÕÑ¥½¸¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}­…¥Á¥¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹±¥µ…á5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹É•Á±åI•İÉ¥Ñ•ÍAÉ¥Ù…Ñ•=İ¹•ÉÍ¡¥ÁÍM¡…É•‘A…ÉĞ°lŸšRç–gš"CŠsš"G’î³–ºÛ–r£’ò_š–ó¦3j’â’î÷Štt°€1¥…¹œ!…§ŠeÌİÉ¥ÑÑ•¸É•Ù¥Í¥½¸½¹Ù•ÉÑÌÑ¡”‘¥ÍÁÕÑ•ÁÉ¥Ù…Ñ”Ñ½İ•È¥¹Ñ¼„‰½Õ¹‘•™…µ¥±äÍ¡…É”½˜½±±•Ñ¥Ù”É•ÍÁ½¹Í¥‰¥±¥Ñä¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}­…¥Á¥¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹Í•ÅÕ•¹•5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½µµÕ¹…±½¹ÍÑÉÕÑ¥½¹½¹Ñ¥¹Õ•Í]¥Ñ¡…µ¥±å½µµ¥Ñµ•¹Ğ°lŸ’ò_š–óîŸî·šZ÷–Ş—¾òo–:–nûVg–r£ºÇ–êWt°€Q¡”É•Á±ä‘¥É•Ñ±äÁ•Éµ¥ÑÌ½¹ÍÑÉÕÑ¥½¸Ñ¼½¹Ñ¥¹Õ”İ¡¥±”Ñ¡”ÁÉ¥Ù…Ñ”‘•Í¥¸¥Ìµ…Ñ•É¥…±±äÍ•Ğ…Í¥‘”¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}­…¥Á¥¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÑÉ…¹Í™½Éµ…Ñ¥½¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹¥¹¡•É¥Ñ•‘½Áå¥¹5½‘•±Q½1½…±I•½µ‰¥¹…Ñ¥½¸°lŸ–>«š*+š.Ç–"ãVg–r£–—–>¾ò3šÊ‡šr'¢º§š~Ç–î+–6ƒš:'–’kš"ß¦ÿ¦jûj’ö7ö»œ°€ŸšŠšÖß’â/’â–Â’ş‡¦^»j’â7šb¿Šs–?’â7–?–:–nûŠtt°€	½Ñ ‰É½Ñ¡•ÉÌµ½Ù”™É½´™¥‘•±¥ÑäÑ¼Ñ¡”É•ÑÕÉ¹•Í­•Ñ Ñ½İ…ÉÍ•±•Ñ¥Ù”™½É´…¹…½Õ¹Ñ…‰±”½µµÕ¹…°ÕÍ”¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}­…¥Á¥¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹•¹‘¥¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹™…‘•‘I•Ù¥Í¥½¹	•Í¥‘•U¹‰Õ¥±ÑAÉ¥Ù…Ñ•A±…¸°lŸêã’â+jš~Ç–î+šÊ‡šr'n[š"C¾ò3–—–>¦
+¦Oš.Ç–"ã–6Ó¦k–BG–’kš"ß–Ç–B3’öÿR£j¦ë¦^Ó¾òošŠšÖßšRç¢şj¦
+¢†3–¶_–ŞËî?¢’«¢&Ët°€Q¡”•¹‘¥¹œ¡½±‘Ì…‰Í•¹ĞÁÉ¥Ù…Ñ”™½É´°ÍÕÉÙ¥Ù¥¹œÍ•±•Ñ•™½É´°Í¡…É•ÕÍ”°…¹Ñ¡”‰É½Ñ¡•ËŠeÌ™…‘•É•Ù¥Í¥½¸¥¸½¹”É•ÍÑÉ…¥¹•¥µ…”¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}­…¥Á¥¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Õ±ÑÕÉ…±¹¡½ÉÕ¹Ñ¥½¸°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹½µµÕ¹…±Q½İ•ÉÕ¹Ñ¥½¹I•½É…¹¥é•Í%µÁ½ÉÑ•‘½É´°lŸ–’[¦v‹jš‚ß–¶C–>¿’î—–â›–n{šv—¾ò3¦3¦v‹–ú_¢º§–’Ÿ–ºÛ’â¢ÖßR£œ°€Ÿ–>«š*+š.Ç–"ãVg–r£–—–>¾ò3šÊ‡šr'¢º§š~Ç–î+–6ƒš:'–’kš"ß¦ÿ¦jûj’ö7ö»t°€Q¡”-…¥Á¥¹œ‘¥ÍÑ¥¹Ñ¥½¸‰•Ñİ••¸¥µÁ½ÉÑ•…É¡¥Ñ•ÑÕÉ…°¥¹™±Õ•¹”…¹½µµÕ¹…°µÑ½İ•ÈÕÍ”‘¥É•Ñ±äÉ•½É…¹¥é•ÌÑ¡”‰Õ¥±‘¥¹œÁ±…¸¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}­…¥Á¥¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±ä°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÑÉ…¹Í¹…Ñ¥½¹…±1•ÑÑ•Éá¡…¹•I•…±±½…Ñ•Í…µ¥±å	Õ¥±‘¥¹ÕÑä°lŸ¢.—¢ššRç’ös–"¯R£¾ò3–ÂÇ–¾¢şcîg’î[œ°€ŸšŠ–Şwš*+šRç¢şj’ò_š–ó–nû–J3¦¢şcš*W–—jš&ÿ¢¾ë’â¢Öß–¾îg–N—–N—œ°€ŸšRç–gš"CŠsš"G’î³–ºÛ–r£’ò_š–ó¦3j’â’î÷Štt°€ÑÉ…¹Í¹…Ñ¥½¹…°Í¥‰±¥¹œ•á¡…¹”¡…¹•Ìİ¡¼Ñ¡”™…µ¥±ä½¹ÑÉ¥‰ÕÑ¥½¸Í•ÉÙ•Ì…¹µ…­•Ì½¹Ñ¥¹Õ•½µµÕ¹…°‰Õ¥±‘¥¹œÑ¡”Ù¥Í¥‰±”É•ÍÕ±Ğ¸œ¤°(€t¤°(¤ì()™¥¹…°}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ€ô(€€€}½¹Ù•ÉÑ	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¡‰…Í•±¥¹”¹…ÁÁÉ½Ù•‘½±‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹ÑÍm}ÍÕµµ•ÉA…±…•t„¤ì()™¥¹…°ÍÕµµ•ÉA…±…•Õ±ÑÕÉ…±%¹Ñ•É…Ñ¥½¹M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ€ô)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ (€©½ÕÉ¹•å%è}ÍÕµµ•ÉA…±…”°(€ÍÕÉ™…•%‘•¹Ñ¥Ñäè€aÔ¡•¹œ€¼ÍÑÕ‘•¹ĞÁ¡½Ñ½É…Á¡•È€¼É…¹‘µ½Ñ¡•Èi¡½Ô1…¸€¼İ¥¹Ñ•ÈµÍ½±ÍÑ¥”M•Ù•¹Ñ••¸µÉ 	É¥‘”±¥¡Ğ€¼½±Á¡½Ñ½É…Á œ°(€µ•¡…¹¥ÍµÌè}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥ÍµÌ°(€½É•Ù¥‘•¹”è1¥ÍĞñ9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”ø¹Õ¹µ½‘¥™¥…‰±”¡l(€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”¡©½ÕÉ¹•å%è}ÍÕµµ•ÉA…±…”°‘¥µ•¹Í¥½¸è9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½Á•¹¥¹5•¡…¹¥Í´°µ•¡…¹¥Í´è}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½Á•¹¥¹5•¡…¹¥Í´¤°…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°Í½ÕÉ•Q•áÑÌè½¹ÍĞlŸ–³¢Ï–&7¾ò3¢ºãšú–â›nãšrë–"Ã¦ŠC–J3–n·œ°€Ÿ––ç¢š’âëš‚‡–ÆWš.7’â–òƒŠsš^ƒFWŠwŸ&t°Í•µ…¹Ñ¥I…Ñ¥½¹…±”è€Í¡½½°µ•á¡¥‰¥Ñ¥½¸½…°‰•¥¹Ì¥¹Í¥‘”„Ù•É¥™¥•Í•…Í½¹…°MÕµµ•ÈA…±…”Ñ¥µ”İ¥¹‘½Ü¸œ¤°(€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”¡©½ÕÉ¹•å%è}ÍÕµµ•ÉA…±…”°‘¥µ•¹Í¥½¸è9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹É•±…Ñ¥½¹Í¡¥Á•½µ•ÑÉä°µ•¡…¹¥Í´è}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹É•±…Ñ¥½¹Í¡¥Á•½µ•ÑÉä¤°…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°Í½ÕÉ•Q•áÑÌè½¹ÍĞlŸ––çšÏ¢¾šb;’â7¦vƒ–’[–¦–F£–Êk¦'šz–nûœ°€Ÿ–F£–Êkr/–º3¾ò3’â7–7šnÿ––ç¢Âšz–nûœ°€Ÿ––çš*+š^ŸŸ&’ê“îg¢ºãšú’şw–¶ct°Í•µ…¹Ñ¥I…Ñ¥½¹…±”è€Õ¥‘…¹”¡…¹•Ì¥¹Ñ¼É•½¹¥é•…•¹ä…¹½‰©•Ğ•¹ÑÉÕÍÑµ•¹Ğ…™Ñ•ÈÑ¡”½ÍÑ±ä¡½¥”¸œ¤°(€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”¡©½ÕÉ¹•å%è}ÍÕµµ•ÉA…±…”°‘¥µ•¹Í¥½¸è9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹™±¥Ñ5•¡…¹¥Í´°µ•¡…¹¥Í´è}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹™±¥Ñ5•¡…¹¥Í´¤°…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°Í½ÕÉ•Q•áÑÌè½¹ÍĞlŸ¢ºãšú¦ÿ–òš^Ÿ^W¢şç¾ò3–F£–Êk¢š––ç–’kr/’âróœ°€Ÿš^ŸŸ&¢3¦v‹–gv¾òkŠs’â–¯–·–æÓ–>_š6¾ò3’â–¯–¯–·–æÓ’ş»–’7Šw¢ºãšúšÏš*+¢şg¢†3–¶_¢š:'¾ò3–F£–Êkš*+Ÿ&şï–n{š¶¦v‹t°Í•µ…¹Ñ¥I…Ñ¥½¹…±”è€•ÍÑ¡•Ñ¥ŒÁ•É™•Ñ¥½¸½±±¥‘•ÌÁ¡åÍ¥…±±äİ¥Ñ É•ÍÑ½É…Ñ¥½¸¡¥ÍÑ½ÉäÑ¡É½Õ Ñ¡”½±Á¡½Ñ½É…Á ¸œ¤°(€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”¡©½ÕÉ¹•å%è}ÍÕµµ•ÉA…±…”°‘¥µ•¹Í¥½¸è9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹¡½¥•5•¡…¹¥Í´°µ•¡…¹¥Í´è}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹¡½¥•5•¡…¹¥Í´¤°…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°Í½ÕÉ•Q•áÑÌè½¹ÍĞlŸ¢ºãšúšRû’â/nãšrë¾ò3–#š6‡–n{Ÿ&t°Í•µ…¹Ñ¥I…Ñ¥½¹…±”è€M¡”¥Ù•ÌÕÀÑ¡”…Ù…¥±…‰±”‘•Í¥É•Í¡½Ğ…¹…ÑÌ™¥ÉÍĞÑ¼ÁÉ•Í•ÉÙ”Ñ¡”É•±…Ñ¥½¹…°½‰©•Ğ¸œ¤°(€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”¡©½ÕÉ¹•å%è}ÍÕµµ•ÉA…±…”°‘¥µ•¹Í¥½¸è9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹±¥µ…á5•¡…¹¥Í´°µ•¡…¹¥Í´è}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹±¥µ…á5•¡…¹¥Í´¤°…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°Í½ÕÉ•Q•áÑÌè½¹ÍĞlŸ–6’â–¶Sš†—¢–ÿ–2_’úŸ¾ò3š†—šÒ{’ê»¢Ößš^Û¾ò3š^ŸŸ&¢Š¯¦;–Bç¢B÷œ°€Ÿ––ç–ş¦†ï–r£š2'–ş¯¦^£–J3š6‡Ÿ&’æ/¦^Ó¦'š.§t°Í•µ…¹Ñ¥I…Ñ¥½¹…±”è€MÕµµ•ÈµA…±…”µÍÁ•¥™¥Œ‰É¥‘”µ±¥¡Ğµ½µ•¹Ğ™½É•ÌÑ¡”ÑÉ…‘•½™˜¸œ¤°(€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”¡©½ÕÉ¹•å%è}ÍÕµµ•ÉA…±…”°‘¥µ•¹Í¥½¸è9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹Í•ÅÕ•¹•5•¡…¹¥Í´°µ•¡…¹¥Í´è}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹Í•ÅÕ•¹•5•¡…¹¥Í´¤°…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°Í½ÕÉ•Q•áÑÌè½¹ÍĞlŸ––ç–7’âûšrëš^Û¾ò3š†—šÒ{¦G–'–ŞËï–*£¾ò3¶'’ê’â’â/–6#jRï¦v‹šÊ‡’êt°Í•µ…¹Ñ¥I…Ñ¥½¹…±”è€Q¡”Í•…Í½¹…°±¥¡Ğµ½Ù•Ìİ¡¥±”Í¡”É•ÑÉ¥•Ù•ÌÑ¡”Á¡½Ñ½É…Á °µ…­¥¹œÑ¡”½ÍĞ¥ÉÉ•Ù•ÉÍ¥‰±”¸œ¤°(€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”¡©½ÕÉ¹•å%è}ÍÕµµ•ÉA…±…”°‘¥µ•¹Í¥½¸è9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÑÉ…¹Í™½Éµ…Ñ¥½¹5•¡…¹¥Í´°µ•¡…¹¥Í´è}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÑÉ…¹Í™½Éµ…Ñ¥½¹5•¡…¹¥Í´¤°…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°Í½ÕÉ•Q•áÑÌè½¹ÍĞlŸ––çšÊ‡šr'–"ƒš:'Šsš^ƒFWŠw¢şg’â«¢¾7¾ò3–>«–r£š^¢úçRï’ê’â¦O¦^»–>ßœ°€Ÿ¢ºãšúš*+šZÃš^ŸŸ&šRû¢şonãšrë–2t°Í•µ…¹Ñ¥I…Ñ¥½¹…±”è€!•ÈÁ•É™•Ñ¥½¸±…¹Õ…”¡…¹•ÌÑ¡É½Õ Íµ…±°Á¡åÍ¥…°…Ñ¥½¹ÌÉ…Ñ¡•ÈÑ¡…¸…¸•ÍÍ…ä½¹±ÕÍ¥½¸¸œ¤°(€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”¡©½ÕÉ¹•å%è}ÍÕµµ•ÉA…±…”°‘¥µ•¹Í¥½¸è9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹•¹‘¥¹5•¡…¹¥Í´°µ•¡…¹¥Í´è}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹•¹‘¥¹5•¡…¹¥Í´¤°…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°Í½ÕÉ•Q•áÑÌè½¹ÍĞlŸ––çš*+š^ŸŸ&’ê“îg¢ºãšú’şw–¶cœ°€Ÿ¢ºãšúš*+šZÃš^ŸŸ&šRû¢şonãšrë–2t°Í•µ…¹Ñ¥I…Ñ¥½¹…±”è€Q¡”•¹‘¥¹œ¥Ì¥¹Ñ•É•¹•É…Ñ¥½¹…°•¹ÑÉÕÍÑµ•¹Ğ™½±±½İ•‰ä½±…¹¹•Ü¥µ…•Ì­•ÁĞÑ½•Ñ¡•È¸œ¤°(€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”¡©½ÕÉ¹•å%è}ÍÕµµ•ÉA…±…”°‘¥µ•¹Í¥½¸è9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Õ±ÑÕÉ…±¹¡½ÉÕ¹Ñ¥½¸°µ•¡…¹¥Í´è}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Õ±ÑÕÉ…±¹¡½ÉÕ¹Ñ¥½¸¤°…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°Í½ÕÉ•Q•áÑÌè½¹ÍĞlŸ–F£–Êk–k¢ş–n·šz_’ş»–’7¾ò3–â›vš^ŸŸ&œ°€Ÿš^ŸŸ&¢3¦v‹–gv¾òkŠs’â–¯–·–æÓ–>_š6¾ò3’â–¯–¯–·–æÓ’ş»–’7Šw¢ºãšúšÏš*+¢şg¢†3–¶_¢š:'¾ò3–F£–Êkš*+Ÿ&şï–n{š¶¦v‹t°Í•µ…¹Ñ¥I…Ñ¥½¹…±”è€Y•É¥™¥•‘…µ…”½É•ÍÑ½É…Ñ¥½¸¡¥ÍÑ½Éä¥Ì…ÑÑ…¡•Ñ¼Ñ¡”½É”½‰©•Ğ…¹…ÕÍ•Ì™É…µ¥¹œ½¹™±¥Ğ¸œ¤°(€€€9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”¡©½ÕÉ¹•å%è}ÍÕµµ•ÉA…±…”°‘¥µ•¹Í¥½¸è9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±ä°µ•¡…¹¥Í´è}ÍÕµµ•ÉA…±…•	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±ä¤°…Ñ¥Ù•M½ÕÉ•%è…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%°Í½ÕÉ•Q•áÑÌè½¹ÍĞlŸ––ç–ş¦†ï–r£š2'–ş¯¦^£–J3š6‡Ÿ&’æ/¦^Ó¦'š.§œ°€Ÿ¢ºãšúšRû’â/nãšrë¾ò3–#š6‡–n{Ÿ&œ°€Ÿ––ç–7’âûšrëš^Û¾ò3š†—šÒ{¦G–'–ŞËï–*£¾ò3¶'’ê’â’â/–6#jRï¦v‹šÊ‡’êt°Í•µ…¹Ñ¥I…Ñ¥½¹…±”è€Á±…”µÑ¥µ•™½É•ÑÉ…‘•½™˜É•™É…µ•Ì…ÕÑ¡½ÉÍ¡¥ÀÑ¡É½Õ „É•…°±½ÍĞ¥µ…”½ÁÁ½ÉÑÕ¹¥Ñä¸œ¤°(€t¤°(¤ì()½¹ÍĞ}‘…Ñ½¹œ€ô€‘…Ñ½¹œµåÕ¹…¹œµÉ½ÑÑ½•Ìœì()™¥¹…°‘…Ñ½¹eÕ¹…¹½±‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ€ô)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ (€©½ÕÉ¹•å%è}‘…Ñ½¹œ°(€ÍÕÉ™…•%‘•¹Ñ¥Ñäè€]•¤1…¸€¼™¥Ñ¥½¹…°9½ÉÑ¡•É¸]•¤É…™Ğ™…µ¥±ä€¼±½¹œ¥¹¬±¥¹”€¼Ñ¡É•”Íµ…±°ÍÑ½¹”™…•Ìœ°(€µ•¡…¹¥ÍµÌè5…Àñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±äø¹Õ¹µ½‘¥™¥…‰±”¡ì(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½Á•¹¥¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹…Á¥Ñ…±M¡¥™Ñ¡…¹•Í%¹¡•É¥Ñ•‘M…±”°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÁÉ½Ñ…½¹¥ÍÑI½±•A…ÑÑ•É¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹‘•Í¥¹…Ñ•‘…Õ¡Ñ•ÉYÍ…Ñ¡•É¹‘µ•É¥¹A••ÉÌ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹É•±…Ñ¥½¹Í¡¥Á•½µ•ÑÉäè9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹‘•Í¥¹…Ñ•‘…Õ¡Ñ•ÉYÍ…Ñ¡•É¹‘µ•É¥¹A••ÉÌ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½…±5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹‘¥ÍÑÉ¥‰ÕÑ•É…™Ñ•¹å]¥Ñ¡½ÕÑá±ÕÍ¥Ù•Q¥Ñ±”°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹™±¥Ñ5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹•á±ÕÍ¥Ù•MÕ•ÍÍ¥½¹YÍ¥ÍÑÉ¥‰ÕÑ•‘I•ÍÁ½¹Í¥‰¥±¥Ñä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹¡½¥•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÕÑM¥¹±•%¹¡•É¥Ñ•‘Q½½±%¹Ñ½Q¡É•”°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹±¥µ…á5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹İ…¥Ñ¥¹…Ñ¡•É]¥Ñ¹•ÍÍ•Í%ÉÉ•Ù•ÉÍ¥‰±•ÕĞ°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹Í•ÅÕ•¹•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Ñ¡É••%¹‘•Á•¹‘•¹Ñ5…É­ÍI•Á±…•M¥¹±•½µµ…¹°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÑÉ…¹Í™½Éµ…Ñ¥½¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹¡½Í•¹!•¥ÉQ½ÅÕ…±I•ÍÁ½¹Í¥‰±•5…­•È°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹•¹‘¥¹5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹™…Ñ¡•É1½½­Í	…­]¥Ñ¡½ÕÑI•½¹¥±¥…Ñ¥½¸°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Õ±ÑÕÉ…±¹¡½ÉÕ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Á½ÍÑ…Á¥Ñ…±½±½ÍÍ…±Q½Mµ…±±•É…ÉÙ¥¹QÉ…¹Í¥Ñ¥½¸°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹…ÉÑ¥™…Ñ=‰©•Ñ9…ÉÉ…Ñ¥Ù•Õ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹µ•…ÍÕÉ¥¹1¥¹•µ‰½‘¥•Íá±ÕÍ¥Ù•ÕÑ¡½É¥Ñä°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹µ½Ù•µ•¹ÑMÁ…Ñ¥…±5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹±¥™™I½…‘¹‘Q¡É••MÑ½¹•…•Í¥Ù•É”°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Ñ•µÁ½É…±AÉ•ÍÍÕÉ•5•¡…¹¥Í´è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹‘…İ¹•Á…ÉÑÕÉ•™Ñ•ÉA½±¥Ñ¥…±•¹Ñ•É5½Ù•Ì°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÍÕÁÁ½ÉÑ¥¹¡…É…Ñ•ÉÕ¹Ñ¥½¸è9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹‰É½Ñ¡•É¹‘A••É•ÁÑ%¹‘•Á•¹‘•¹Ñ1¥¹•Ì°(€€€9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±äè9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Í…±•QÉ…¹Í¥Ñ¥½¹½É•Í%¹¡•É¥Ñ…¹•I•‘¥ÍÑÉ¥‰ÕÑ¥½¸°(€ô¤°(€½É•Ù¥‘•¹”è1¥ÍĞñ9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”ø¹Õ¹µ½‘¥™¥…‰±”¡l(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}‘…Ñ½¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½Á•¹¥¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹…Á¥Ñ…±M¡¥™Ñ¡…¹•Í%¹¡•É¥Ñ•‘M…±”°lŸ–2_¦¶?¢ş¦÷šÒo¦bÏ–B;¾ò3’êG–#’â7–7–?’î;–&7¦
+š‚ß¢B—¦ƒ–Ş£–?t°€Q¡”Ù•É¥™¥•…Á¥Ñ…°µ…¹µÍ…±”ÑÉ…¹Í¥Ñ¥½¸½Á•¹ÌÑ¡”™¥Ñ¥½¹…°™…µ¥±äÁÉ•ÍÍÕÉ”¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}‘…Ñ½¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹É•±…Ñ¥½¹Í¡¥Á•½µ•ÑÉä°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹‘•Í¥¹…Ñ•‘…Õ¡Ñ•ÉYÍ…Ñ¡•É¹‘µ•É¥¹A••ÉÌ°lŸ"Û’êË–>«¢
+¿š*+š&/¢&ë’ê“îg’â’â«’êë¾òoVg’â/j–ò–ò¦¶?šrS–J3–B3’òÓ¦bÿ‚û’úÿ¢šîŸî·šnÿ––çš&ÛîÏ¾ò3š"[¢šV’ògt°€™…Ñ¡•Èµ‘…Õ¡Ñ•ÈÍÕ•ÍÍ¥½¸‘•µ…¹µ…Ñ•É¥…±±ä™¥á•ÌÑ¡”‰É½Ñ¡•È…¹Á••È‰•¹•…Ñ ½¹”…ÕÑ¡½É¥Ñä¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}‘…Ñ½¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹™±¥Ñ5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹•á±ÕÍ¥Ù•MÕ•ÍÍ¥½¹YÍ¥ÍÑÉ¥‰ÕÑ•‘I•ÍÁ½¹Í¥‰¥±¥Ñä°lŸ¦¶?–ÊkšÏVg’â/’â'’â«’êë¾ò3–6Ó’â7¢÷–B3š^Û’şw’ö?Šs–R¿’â’òƒ’êëŠwj’ö7ö»t°€Q¡”¡Õµ…¸½¹™±¥Ğ¥Ì•á±ÕÍ¥Ù”É•½¹¥Ñ¥½¸Ù•ÉÍÕÌ‘¥ÍÑÉ¥‰ÕÑ•…•¹ä¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}‘…Ñ½¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹¡½¥•5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹ÕÑM¥¹±•%¹¡•É¥Ñ•‘Q½½±%¹Ñ½Q¡É•”°lŸ¦¶?–Êk–6Óš*+–Š£îÏš2'–r£~Ï¦bÛ’â+¾ò3–&Ëš"C’â'šº×¾ò3’âšº×îg¦¶?šrS¾ò3’âšº×îg¦bÿ‚û¾ò3šr–B;’âšº×Vg–r£¢«–ŞÇš:3–şt°€M¡”•¹…ÑÌÑ¡”¡½¥”Ñ¡É½Õ …¸¥ÉÉ•Ù•ÉÍ¥‰±”‘¥Ù¥Í¥½¸½˜Ñ¡”…ÕÑ¡½É¥Ñäµ‰•…É¥¹œÑ½½°¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}‘…Ñ½¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹±¥µ…á5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹İ…¥Ñ¥¹…Ñ¡•É]¥Ñ¹•ÍÍ•Í%ÉÉ•Ù•ÉÍ¥‰±•ÕĞ°lŸ–’§’ê»š^Û¾ò3"Û’êË’òãš&/¶'––çšRÛîÏ¦¶?–Êk–6Óš*+–Š£îÏš2'–r£~Ï¦bÛ’â+¾ò3–&Ëš"C’â'šºÔt°€Q¡”ÕĞ¡…ÁÁ•¹ÌÕ¹‘•ÈÑ¡”İ…¥Ñ¥¹œ™…Ñ¡•ËŠeÌ…é”É…Ñ¡•ÈÑ¡…¸…ĞÑ…Í¬½µÁ±•Ñ¥½¸¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}‘…Ñ½¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹½¹Í•ÅÕ•¹•5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Ñ¡É••%¹‘•Á•¹‘•¹Ñ5…É­ÍI•Á±…•M¥¹±•½µµ…¹°lŸ’â'’â«’êë’â7–7¶'–B3’â–>3š&/–>G–>ßšZ÷’î“¦¶?šrS²³’âš²‡¢«–ŞÇ–òç–ë–Š£êüt°€Q¡”¡½¥”Ù¥Í¥‰±ä¡…¹•Ìİ¡¼µ…äÁ±…”Ñ¡”¹•áĞ±¥¹”¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}‘…Ñ½¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹ÑÉ…¹Í™½Éµ…Ñ¥½¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹¡½Í•¹!•¥ÉQ½ÅÕ…±I•ÍÁ½¹Í¥‰±•5…­•È°lŸ––ç–’Ç–:ï’ê"Û’êË¢ºã¢¾ëj–R¿’â’ö7ö»œ°€Ÿ’â'’â«’êë’â7–7¶'–B3’â–>3š&/–>G–>ßšZ÷’î“t°€MÑ…ÑÕÌ±½ÍÌÉ•…Ñ•Ì•ÅÕ…°É•ÍÁ½¹Í¥‰¥±¥ÑäÉ…Ñ¡•ÈÑ¡…¸µ•¹Ñ½È…ÁÁÉ½Ù…°¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}‘…Ñ½¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹•¹‘¥¹5•¡…¹¥Í´°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹™…Ñ¡•É1½½­Í	…­]¥Ñ¡½ÕÑI•½¹¥±¥…Ñ¥½¸°lŸ"Û’êË¢ÖÃ–"Ã–Ò[¢Ş¿¢ö³–ò¿–’¾ò3–n{–’Ór/’ê¦
+’â'¦O¦îGêÿ’âró¦¶?–ÊkšÊ‡šr'¢ş÷’â+–:ït°€±½½¬…¹¹½¸µÁÕÉÍÕ¥Ğ±½Í”Ñ¡”¡…¹•É•±…Ñ¥½¹Í¡¥Àİ¥Ñ¡½ÕĞ•áÁ±…¹…Ñ¥½¸¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}‘…Ñ½¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Õ±ÑÕÉ…±¹¡½ÉÕ¹Ñ¥½¸°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Á½ÍÑ…Á¥Ñ…±½±½ÍÍ…±Q½Mµ…±±•É…ÉÙ¥¹QÉ…¹Í¥Ñ¥½¸°lŸ¦îG–6Ã¢B÷–r£’â–v_–>«–’–ò–Â?¦úoj~Ï¦v‹’â+t°€Q¡”Íµ…±±•ÈÁ½ÍĞµ…Á¥Ñ…°…ÉÙ¥¹œÍ…±”…ÉÉ¥•ÌÑ¡”½¹Í•ÅÕ•¹”¥¹Ñ¼Á±…”¸œ¤°(€€€}…Ñ¥Ù•Ù¥‘•¹”¡}‘…Ñ½¹œ°9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±ä°9…ÉÉ…Ñ¥Ù•5•¡…¹¥Íµ…µ¥±ä¹Í…±•QÉ…¹Í¥Ñ¥½¹½É•Í%¹¡•É¥Ñ…¹•I•‘¥ÍÑÉ¥‰ÕÑ¥½¸°lŸ’êG–#’â7–7–?’î;–&7¦
+š‚ß¢B—¦ƒ–Ş£–?œ°€Ÿ¦¶?–Êk–6Óš*+–Š£îÏš2'–r£~Ï¦bÛ’â+¾ò3–&Ëš"C’â'šºÔt°€Ù•É¥™¥•Í¡¥™Ğ½˜Í…±”™½É•Ì„™¥Ñ¥½¹…°É•‘¥ÍÑÉ¥‰ÕÑ¥½¸½˜¥¹¡•É¥Ñ•…ÕÑ¡½É¥Ñä¸œ¤°(€t¤°(¤ì()™¥¹…°5…ÀñMÑÉ¥¹œ°)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğø…ÁÁÉ½Ù•‘½±‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹ÑÌ€ô(€€€5…ÀñMÑÉ¥¹œ°)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğø¹Õ¹µ½‘¥™¥…‰±”¡ì(€™½È€¡™¥¹…°•¹ÑÉä¥¸‰…Í•±¥¹”¹…ÁÁÉ½Ù•‘½±‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹ÑÌ¹•¹ÑÉ¥•Ì¤(€€€•¹ÑÉä¹­•äè•¹ÑÉä¹­•ä€ôô}ÍÕµµ•ÉA…±…”(€€€€€€€€üÍÕµµ•ÉA…±…•Õ±ÑÕÉ…±%¹Ñ•É…Ñ¥½¹M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ(€€€€€€€€è•¹ÑÉä¹­•ä€ôô}¡…¹é¡½ÕI•½Á•¹•(€€€€€€€€ü¡…¹é¡½Õ]•ÍÑ1…­•I•½Á•¹•‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ(€€€€€€€€è•¹ÑÉä¹­•ä€ôô}™½É‰¥‘‘•¸(€€€€€€€€ü}™½É‰¥‘‘•¹¥¹•ÉÁÉ¥¹Ğ(€€€€€€€€è•¹ÑÉä¹­•ä€ôô}¡•¹‘Ô(€€€€€€€€€€€€ü}¡•¹‘Õ¥¹•ÉÁÉ¥¹Ğ(€€€€€€€€€€€€è}½¹Ù•ÉÑ	…Í•±¥¹•¥¹•ÉÁÉ¥¹Ğ¡•¹ÑÉä¹Ù…±Õ”¤°(€}Õ…¹é¡½ÔèÕ…¹é¡½Õ¡•¹±…¹½±‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ°(€}ÍÕé¡½ÔèÍÕé¡½Õ…É‘•¹½±‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ°(€}±½¹µ•¸è±½¹µ•¹½±‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ°(€}­…¥Á¥¹œè­…¥Á¥¹½±‘…¹‘¥‘…Ñ•M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ°(€}‘…Ñ½¹œè‘…Ñ½¹eÕ¹…¹½±‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ°)ô¤ì()MÑÉ¥¹œ…Ñ¥Ù•…¹½¹¥…±½±‘MÑ½ÉåQ•áĞ¡MÑÉ¥¹œ©½ÕÉ¹•å%¤ì(€¥˜€¡©½ÕÉ¹•å%€ôô}ÍÕµµ•ÉA…±…”¤ì(€€€É•ÑÕÉ¸1¥ÍĞñMÑÉ¥¹œø¹•¹•É…Ñ” ÄÀ°€¡¥¹‘•à¤€ôøÍÕµµ•ÉA…±…•8Å1•Ù•±½ÉA¡½•¹¥á1•Ù•°¡¥¹‘•à€¬€Ä¤¹ÍÑ½ÉåA…É…É…Á¡Ì¹©½¥¸ q¸œ¤¤¹©½¥¸ q¸œ¤ì(€ô(€¥˜€¡©½ÕÉ¹•å%€ôô}¡…¹é¡½ÕI•½Á•¹•¤ì(€€€É•ÑÕÉ¸¡…¹é¡½Õ]•ÍÑ1…­•I•½Á•¹•‘1•Ù•±Ì(€€€€€€€€¹•áÁ…¹ ¡±•Ù•°¤€ôø±•Ù•°¹ÍÑ½ÉåA…É…É…Á¡Ì¤(€€€€€€€€¹©½¥¸ q¸œ¤ì(€ô(€¥˜€¡©½ÕÉ¹•å%€ôô}Õ…¹é¡½Ô¤ì(€€€É•ÑÕÉ¸Õ…¹é¡½Õ¡•¹±…¹=¹•A…ÍÍ1•Ù•±Ì(€€€€€€€€¹•áÁ…¹ ¡±•Ù•°¤€ôø±•Ù•°¹ÍÑ½ÉåA…É…É…Á¡Ì¤(€€€€€€€€¹©½¥¸ q¸œ¤ì(€ô(€¥˜€¡©½ÕÉ¹•å%€ôô}ÍÕé¡½Ô¤ì(€€€É•ÑÕÉ¸ÍÕé¡½Õ…É‘•¹…¹½¹¥…±1•Ù•±½¹Ñ•¹Ğ ÄÀ¤¹ÍÑ½ÉåA…É…É…Á¡Ì¹©½¥¸ q¸œ¤ì(€ô(€¥˜€¡©½ÕÉ¹•å%€ôô}±½¹µ•¸¤ì(€€€É•ÑÕÉ¸1¥ÍĞñMÑÉ¥¹œø¹•¹•É…Ñ” ÄÀ°€¡¥¹‘•à¤€ôø±Õ½å…¹1½¹µ•¹½±‘1•Ù•±½¹Ñ•¹Ğ¡¥¹‘•à€¬€Ä¤¹ÍÑ½ÉåA…É…É…Á¡Ì¹©½¥¸ q¸œ¤¤¹©½¥¸ q¸œ¤ì(€ô(€¥˜€¡©½ÕÉ¹•å%€ôô}­…¥Á¥¹œ¤ì(€€€É•ÑÕÉ¸1¥ÍĞñMÑÉ¥¹œø¹•¹•É…Ñ” ÄÀ°€¡¥¹‘•à¤€ôø­…¥Á¥¹¥…½±½Õ½±‘1•Ù•±½¹Ñ•¹Ğ¡¥¹‘•à€¬€Ä¤¹ÍÑ½ÉåA…É…É…Á¡Ì¹©½¥¸ q¸œ¤¤¹©½¥¸ q¸œ¤ì(€ô(€¥˜€¡©½ÕÉ¹•å%€ôô}‘…Ñ½¹œ¤ì(€€€É•ÑÕÉ¸1¥ÍĞñMÑÉ¥¹œø¹•¹•É…Ñ” ÄÀ°€¡¥¹‘•à¤€ôø‘…Ñ½¹eÕ¹…¹½±‘1•Ù•±½¹Ñ•¹Ğ¡¥¹‘•à€¬€Ä¤¹ÍÑ½ÉåA…É…É…Á¡Ì¹©½¥¸ q¸œ¤¤¹©½¥¸ q¸œ¤ì(€ô(€É•ÑÕÉ¸‰…Í•±¥¹”¹…Ñ¥Ù•…¹½¹¥…±½±‘MÑ½ÉåQ•áĞ¡©½ÕÉ¹•å%¤ì)ô()1¥ÍĞñMÑÉ¥¹œøÍ•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ñ½µÁ±•Ñ•¹•ÍÍÉÉ½ÉÌ (€)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ™¥¹•ÉÁÉ¥¹Ğ°(¤ì(€™¥¹…°•ÉÉ½ÉÌ€ô€ñMÑÉ¥¹œùmtì(€™½È€¡™¥¹…°‘¥µ•¹Í¥½¸¥¸9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Ù…±Õ•Ì¤ì(€€€¥˜€ …™¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥ÍµÌ¹½¹Ñ…¥¹Í-•ä¡‘¥µ•¹Í¥½¸¤¤ì(€€€€€•ÉÉ½ÉÌ¹…‘ œ‘í™¥¹•ÉÁÉ¥¹Ğ¹©½ÕÉ¹•å%‘ôèµ¥ÍÍ¥¹œ€‘í‘¥µ•¹Í¥½¸¹¹…µ•ôœ¤ì(€€€ô(€ô(€™¥¹…°•Ù¥‘•¹•	å¥µ•¹Í¥½¸€ô(€€€€€€ñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸°1¥ÍĞñ9…ÉÉ…Ñ¥Ù•5•¡…¹¥ÍµÙ¥‘•¹”øùíôì(€™½È€¡™¥¹…°•Ù¥‘•¹”¥¸™¥¹•ÉÁÉ¥¹Ğ¹½É•Ù¥‘•¹”¤ì(€€€•Ù¥‘•¹•	å¥µ•¹Í¥½¸¹ÁÕÑ%™‰Í•¹Ğ¡•Ù¥‘•¹”¹‘¥µ•¹Í¥½¸°€ ¤€ôømt¤¹…‘¡•Ù¥‘•¹”¤ì(€ô(€™½È€¡™¥¹…°‘¥µ•¹Í¥½¸¥¸¹…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥½É•¥µ•¹Í¥½¹Ì¤ì(€€€™¥¹…°É•½É‘Ì€ô•Ù¥‘•¹•	å¥µ•¹Í¥½¹m‘¥µ•¹Í¥½¹t€üü½¹ÍĞmtì(€€€¥˜€¡É•½É‘Ì¹¥ÍµÁÑä¤ì(€€€€€•ÉÉ½ÉÌ¹…‘ œ‘í™¥¹•ÉÁÉ¥¹Ğ¹©½ÕÉ¹•å%‘ôèµ¥ÍÍ¥¹œ•Ù¥‘•¹”€‘í‘¥µ•¹Í¥½¸¹¹…µ•ôœ¤ì(€€€€€½¹Ñ¥¹Õ”ì(€€€ô(€€€¥˜€¡É•½É‘Ì¹±•¹Ñ €„ô€Ä¤ì(€€€€€•ÉÉ½ÉÌ¹…‘ œ‘í™¥¹•ÉÁÉ¥¹Ğ¹©½ÕÉ¹•å%‘ôè‘ÕÁ±¥…Ñ”•Ù¥‘•¹”€‘í‘¥µ•¹Í¥½¸¹¹…µ•ôœ¤ì(€€€€€½¹Ñ¥¹Õ”ì(€€€ô(€€€¥˜€¡É•½É‘Ì¹Í¥¹±”¹µ•¡…¹¥Í´€„ô™¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥Í´¡‘¥µ•¹Í¥½¸¤¤ì(€€€€€•ÉÉ½ÉÌ¹…‘ œ‘í™¥¹•ÉÁÉ¥¹Ğ¹©½ÕÉ¹•å%‘ôè•Ù¥‘•¹”µ¥Íµ…Ñ €‘í‘¥µ•¹Í¥½¸¹¹…µ•ôœ¤ì(€€€ô(€ô(€É•ÑÕÉ¸•ÉÉ½ÉÌì)ô()1¥ÍĞñMÑÉ¥¹œøÍ•µ…¹Ñ¥Ù¥‘•¹•AÉ½Ù•¹…¹•ÉÉ½ÉÌ (€)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ™¥¹•ÉÁÉ¥¹Ğ°(¤ì(€™¥¹…°ÍÑ½Éä€ô…Ñ¥Ù•…¹½¹¥…±½±‘MÑ½ÉåQ•áĞ¡™¥¹•ÉÁÉ¥¹Ğ¹©½ÕÉ¹•å%¤ì(€™¥¹…°•ÉÉ½ÉÌ€ô€ñMÑÉ¥¹œùmtì(€™½È€¡™¥¹…°•Ù¥‘•¹”¥¸™¥¹•ÉÁÉ¥¹Ğ¹½É•Ù¥‘•¹”¤ì(€€€™¥¹…°ÁÉ•™¥à€ô€œ‘í™¥¹•ÉÁÉ¥¹Ğ¹©½ÕÉ¹•å%‘ôè‘í•Ù¥‘•¹”¹‘¥µ•¹Í¥½¸¹¹…µ•ôœì(€€€¥˜€¡•Ù¥‘•¹”¹©½ÕÉ¹•å%€„ô™¥¹•ÉÁÉ¥¹Ğ¹©½ÕÉ¹•å%¤ì(€€€€€•ÉÉ½ÉÌ¹…‘ œ‘ÁÉ•™¥àé©½ÕÉ¹•äœ¤ì(€€€ô(€€€¥˜€¡•Ù¥‘•¹”¹…Ñ¥Ù•M½ÕÉ•%€„ô…Ñ¥Ù•½±‘MÑ½ÉåM½ÕÉ•%¤ì(€€€€€•ÉÉ½ÉÌ¹…‘ œ‘ÁÉ•™¥àé…Ñ¥Ù•M½ÕÉ•%œ¤ì(€€€ô(€€€¥˜€¡•Ù¥‘•¹”¹Í½ÕÉ•Q•áÑÌ¹¥ÍµÁÑä¤ì(€€€€€•ÉÉ½ÉÌ¹…‘ œ‘ÁÉ•™¥àéµ¥ÍÍ¥¹œµÍ½ÕÉ”µÑ•áĞœ¤ì(€€€€€½¹Ñ¥¹Õ”ì(€€€ô(€€€™½È€¡Ù…È¥¹‘•à€ô€Àì¥¹‘•à€ğ•Ù¥‘•¹”¹Í½ÕÉ•Q•áÑÌ¹±•¹Ñ ì¥¹‘•à¬¬¤ì(€€€€€™¥¹…°Í½ÕÉ•Q•áĞ€ô•Ù¥‘•¹”¹Í½ÕÉ•Q•áÑÍm¥¹‘•átì(€€€€€¥˜€¡Í½ÕÉ•Q•áĞ¹ÑÉ¥´ ¤¹¥ÍµÁÑä¤ì(€€€€€€€•ÉÉ½ÉÌ¹…‘ œ‘ÁÉ•™¥àé•µÁÑäµÍ½ÕÉ”µÑ•áĞ´‘¥¹‘•àœ¤ì(€€€€€ô•±Í”¥˜€ …ÍÑ½Éä¹½¹Ñ…¥¹Ì¡Í½ÕÉ•Q•áĞ¤¤ì(€€€€€€€•ÉÉ½ÉÌ¹…‘ œ‘ÁÉ•™¥àéÍ½ÕÉ”µ¹½Ğµ¥¸µ…Ñ¥Ù”µÍÑ½Éä´‘¥¹‘•àœ¤ì(€€€€€ô(€€€ô(€ô(€É•ÑÕÉ¸•ÉÉ½ÉÌì)ô()1¥ÍĞñMÑÉ¥¹œøÍ•µ…¹Ñ¥Ù¥‘•¹•½¹ÑÉ…ÑÉÉ½ÉÌ (€)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ™¥¹•ÉÁÉ¥¹Ğ°(¤ì(€™¥¹…°•ÉÉ½ÉÌ€ô€ñMÑÉ¥¹œùl(€€€€¸¸¹Í•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ñ½µÁ±•Ñ•¹•ÍÍÉÉ½ÉÌ¡™¥¹•ÉÁÉ¥¹Ğ¤°(€€€€¸¸¹Í•µ…¹Ñ¥Ù¥‘•¹•AÉ½Ù•¹…¹•ÉÉ½ÉÌ¡™¥¹•ÉÁÉ¥¹Ğ¤°(€tì(€™½È€¡™¥¹…°•Ù¥‘•¹”¥¸™¥¹•ÉÁÉ¥¹Ğ¹½É•Ù¥‘•¹”¤ì(€€€™¥¹…°ÁÉ•™¥à€ô€œ‘í™¥¹•ÉÁÉ¥¹Ğ¹©½ÕÉ¹•å%‘ôè‘í•Ù¥‘•¹”¹‘¥µ•¹Í¥½¸¹¹…µ•ôœì(€€€¥˜€ …¹…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥½É•¥µ•¹Í¥½¹Ì¹½¹Ñ…¥¹Ì¡•Ù¥‘•¹”¹‘¥µ•¹Í¥½¸¤¤ì(€€€€€•ÉÉ½ÉÌ¹…‘ œ‘ÁÉ•™¥àé¹½Ğµ½É”œ¤ì(€€€ô(€€€¥˜€¡™¥¹•ÉÁÉ¥¹Ğ¹µ•¡…¹¥ÍµÍm•Ù¥‘•¹”¹‘¥µ•¹Í¥½¹t€„ô•Ù¥‘•¹”¹µ•¡…¹¥Í´¤ì(€€€€€•ÉÉ½ÉÌ¹…‘ œ‘ÁÉ•™¥àéµ•¡…¹¥Í´µµ¥Íµ…Ñ œ¤ì(€€€ô(€€€¥˜€¡•Ù¥‘•¹”¹Í•µ…¹Ñ¥I…Ñ¥½¹…±”¹ÑÉ¥´ ¤¹¥ÍµÁÑä¤ì(€€€€€•ÉÉ½ÉÌ¹…‘ œ‘ÁÉ•™¥àéµ¥ÍÍ¥¹œµÍ•µ…¹Ñ¥ŒµÉ…Ñ¥½¹…±”œ¤ì(€€€ô(€ô(€É•ÑÕÉ¸•ÉÉ½ÉÌì)ô()1¥ÍĞñMÑÉ¥¹œøÍ•µ…¹Ñ¥Ù¥‘•¹•¥‘•±¥ÑåÉÉ½ÉÌ (€)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ™¥¹•ÉÁÉ¥¹Ğ°(¤€ôø(€€€Í•µ…¹Ñ¥Ù¥‘•¹•AÉ½Ù•¹…¹•ÉÉ½ÉÌ¡™¥¹•ÉÁÉ¥¹Ğ¤ì()9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥½µÁ…É¥Í½¸½µÁ…É•M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹ÑÌ (€)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ±•™Ğ°(€)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹ĞÉ¥¡Ğ°ì(€‰½½°…ÁÁÉ½Ù•‘…Ñ…±½Õ‘¥Ğ€ô™…±Í”°)ô¤ì(€™¥¹…°µ…Ñ¡¥¹½É”€ô€ñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸ùmtì(€™¥¹…°µ…Ñ¡¥¹M•½¹‘…Éä€ô€ñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸ùmtì(€™½È€¡™¥¹…°‘¥µ•¹Í¥½¸¥¸9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹Ù…±Õ•Ì¤ì(€€€¥˜€¡±•™Ğ¹µ•¡…¹¥Í´¡‘¥µ•¹Í¥½¸¤€„ôÉ¥¡Ğ¹µ•¡…¹¥Í´¡‘¥µ•¹Í¥½¸¤¤½¹Ñ¥¹Õ”ì(€€€¥˜€¡¹…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥½É•¥µ•¹Í¥½¹Ì¹½¹Ñ…¥¹Ì¡‘¥µ•¹Í¥½¸¤¤ì(€€€€€µ…Ñ¡¥¹½É”¹…‘¡‘¥µ•¹Í¥½¸¤ì(€€€ô•±Í”ì(€€€€€µ…Ñ¡¥¹M•½¹‘…Éä¹…‘¡‘¥µ•¹Í¥½¸¤ì(€€€ô(€ô((€™¥¹…°Í…µ•¹¥¹”€ô(€€€€€±•™Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±ä¤€ôô(€€€€€€€€€É¥¡Ğ¹µ•¡…¹¥Í´¡9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±ä¤ì(€™¥¹…°…‘‘¥Ñ¥½¹…±½É•5…Ñ¡•Ì€ôµ…Ñ¡¥¹½É”(€€€€€€¹İ¡•É” (€€€€€€€€¡‘¥µ•¹Í¥½¸¤€ôø(€€€€€€€€€€€‘¥µ•¹Í¥½¸€„ô9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥¥µ•¹Í¥½¸¹‘É…µ…Ñ¥¹¥¹•…µ¥±ä°(€€€€€€¤(€€€€€€¹±•¹Ñ ì(€™¥¹…°ÉÕ±•€ôÍ…µ•¹¥¹”€˜˜(€€€€€…‘‘¥Ñ¥½¹…±½É•5…Ñ¡•Ì€øô(€€€€€€€€€Í•µ…¹Ñ¥½±±¥Í¥½¹M…µ•¹¥¹•‘‘¥Ñ¥½¹…±½É•Q¡É•Í¡½±ì(€™¥¹…°ÉÕ±•€ô(€€€€€µ…Ñ¡¥¹½É”¹±•¹Ñ €øôÍ•µ…¹Ñ¥½±±¥Í¥½¹%¹‘•Á•¹‘•¹Ñ½É•Q¡É•Í¡½±ì(€™¥¹…°½±±¥Í¥½¸€ôÉÕ±•ñğÉÕ±•ì((€™¥¹…°±…ÍÍ¥™¥…Ñ¥½¸€ô½±±¥Í¥½¸(€€€€€€ü€¡…ÁÁÉ½Ù•‘…Ñ…±½Õ‘¥Ğ(€€€€€€€€€€üM•µ…¹Ñ¥½±±¥Í¥½¹±…ÍÍ¥™¥…Ñ¥½¸¹•á¥ÍÑ¥¹M•µ…¹Ñ¥½±±¥Í¥½¹•‰Ğ(€€€€€€€€€€èM•µ…¹Ñ¥½±±¥Í¥½¹±…ÍÍ¥™¥…Ñ¥½¸¹Í•µ…¹Ñ¥½±±¥Í¥½¸¤(€€€€€€è€¡µ…Ñ¡¥¹½É”¹¥Í9½ÑµÁÑäñğµ…Ñ¡¥¹M•½¹‘…Éä¹¥Í9½ÑµÁÑä(€€€€€€€€€€üM•µ…¹Ñ¥½±±¥Í¥½¹±…ÍÍ¥™¥…Ñ¥½¸¹É•±…Ñ•‘	ÕÑ¥ÍÑ¥¹Ğ(€€€€€€€€€€èM•µ…¹Ñ¥½±±¥Í¥½¹±…ÍÍ¥™¥…Ñ¥½¸¹‘¥ÍÑ¥¹Ğ¤ì((€É•ÑÕÉ¸9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥½µÁ…É¥Í½¸ (€€€©½ÕÉ¹•åè±•™Ğ¹©½ÕÉ¹•å%°(€€€©½ÕÉ¹•åèÉ¥¡Ğ¹©½ÕÉ¹•å%°(€€€µ…Ñ¡¥¹½É•¥µ•¹Í¥½¹Ìè1¥ÍĞ¹Õ¹µ½‘¥™¥…‰±”¡µ…Ñ¡¥¹½É”¤°(€€€µ…Ñ¡¥¹M•½¹‘…Éå¥µ•¹Í¥½¹Ìè1¥ÍĞ¹Õ¹µ½‘¥™¥…‰±”¡µ…Ñ¡¥¹M•½¹‘…Éä¤°(€€€Í…µ•É…µ…Ñ¥¹¥¹”èÍ…µ•¹¥¹”°(€€€ÉÕ±•èÉÕ±•°(€€€ÉÕ±•èÉÕ±•°(€€€±…ÍÍ¥™¥…Ñ¥½¸è±…ÍÍ¥™¥…Ñ¥½¸°(€€¤ì)ô()1¥ÍĞñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥½µÁ…É¥Í½¸øÍ•µ…¹Ñ¥¥™™•É•¹•5…ÑÉ¥á…¥¹ÍÑÁÁÉ½Ù•‘½± (€)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ…¹‘¥‘…Ñ”°(¤€ôø(€€€1¥ÍĞñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥½µÁ…É¥Í½¸ø¹Õ¹µ½‘¥™¥…‰±”¡l(€€€€€™½È€¡™¥¹…°É•™•É•¹”¥¸…ÁÁÉ½Ù•‘½±‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹ÑÌ¹Ù…±Õ•Ì¤(€€€€€€€¥˜€¡É•™•É•¹”¹©½ÕÉ¹•å%€„ô…¹‘¥‘…Ñ”¹©½ÕÉ¹•å%¤(€€€€€€€€€½µÁ…É•M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹ÑÌ¡…¹‘¥‘…Ñ”°É•™•É•¹”¤°(€€€t¤ì()1¥ÍĞñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥½µÁ…É¥Í½¸ø…Õ‘¥ÑÁÁÉ½Ù•‘½±‘M•µ…¹Ñ¥A…¥ÉÌ ¤ì(€™¥¹…°…Ñ…±½œ€ô…ÁÁÉ½Ù•‘½±‘M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹ÑÌ¹Ù…±Õ•Ì¹Ñ½1¥ÍĞ¡É½İ…‰±”è™…±Í”¤ì(€™¥¹…°É•ÍÕ±ÑÌ€ô€ñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥½µÁ…É¥Í½¸ùmtì(€™½È€¡Ù…È¤€ô€Àì¤€ğ…Ñ…±½œ¹±•¹Ñ ì¤¬¬¤ì(€€€™½È€¡Ù…È¨€ô¤€¬€Äì¨€ğ…Ñ…±½œ¹±•¹Ñ ì¨¬¬¤ì(€€€€€É•ÍÕ±ÑÌ¹…‘ (€€€€€€€½µÁ…É•M•µ…¹Ñ¥¥¹•ÉÁÉ¥¹ÑÌ (€€€€€€€€€…Ñ…±½m¥t°(€€€€€€€€€…Ñ…±½m©t°(€€€€€€€€€…ÁÁÉ½Ù•‘…Ñ…±½Õ‘¥ĞèÑÉÕ”°(€€€€€€€€¤°(€€€€€€¤ì(€€€ô(€ô(€É•ÑÕÉ¸1¥ÍĞñ9…ÉÉ…Ñ¥Ù•M•µ…¹Ñ¥½µÁ…É¥Í½¸ø¹Õ¹µ½‘¥™¥…‰±”¡É•ÍÕ±ÑÌ¤ì)ô()ÕÑÕÉ•½±‘M•µ…¹Ñ¥…Ñ•I•ÍÕ±Ğ•Ù…±Õ…Ñ•ÕÑÕÉ•½±‘M•µ…¹Ñ¥…¹‘¥‘…Ñ” (€)½ÕÉ¹•åM•µ…¹Ñ¥¥¹•ÉÁÉ¥¹Ğ…¹‘¥‘…Ñ”°(¤ì(€™¥¹…°½µÁ…É¥Í½¹Ì€ôÍ•µ…¹Ñ¥¥™™•É•¹•5…ÑÉ¥á…¥¹ÍÑÁÁÉ½Ù•‘½±¡…¹‘¥‘…Ñ”¤ì(€™¥¹…°½±±¥Í¥½¹Ì€ô(€€€€€½µÁ…É¥Í½¹Ì¹İ¡•É” ¡½µÁ…É¥Í½¸¤€ôø½µÁ…É¥Í½¸¹¥Í½±±¥Í¥½¸¤¹Ñ½1¥ÍĞ ¤ì(€É•ÑÕÉ¸ÕÑÕÉ•½±‘M•µ…¹Ñ¥…Ñ•I•ÍÕ±Ğ (€€€¥Í½±‘I•…‘äè½±±¥Í¥½¹Ì¹¥ÍµÁÑä°(€€€ÍÑ…ÑÕÌè½±±¥Í¥½¹Ì¹¥ÍµÁÑä(€€€€€€€€ü€M59Q%9Q$µQ5A1QAMLœ(€€€€€€€€èÍ•µ…¹Ñ¥Q•µÁ±…Ñ•½±±¥Í¥½¹9½Ñ½±‘I•…‘ä°(€€€½µÁ…É¥Í½¹Ìè½µÁ…É¥Í½¹Ì°(€€¤ì)ô

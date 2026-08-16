@@ -20,7 +20,7 @@ void main() {
   });
 
   test('approved Gold catalog has eleven identities and fifty-five clean pairs', () {
-    expect(approvedGoldSemanticFingerprints, hasLength(11));
+    expect(approvedGoldSemanticFingerprints, hasLength(12));
     final audit = auditApprovedGoldSemanticPairs();
     expect(audit, hasLength(55));
     expect(audit.where((item) => item.ruleA || item.ruleB), isEmpty);

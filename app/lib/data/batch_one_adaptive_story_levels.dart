@@ -2,6 +2,7 @@ import '../models/language_proficiency.dart';
 import 'batch_one_journey_remediation.dart';
 import 'chengdu_kuanzhai_one_pass.dart';
 import 'daily_journey_experience.dart';
+import 'datong_yungang_gold_content.dart';
 import 'hangzhou_west_lake_one_pass.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
@@ -20,7 +21,8 @@ bool isBatchOneGoldJourney(String journeyId) =>
     journeyId == chengduKuanzhaiJourneyId ||
     journeyId == nanjingQinhuaiJourneyId ||
     journeyId == luoyangLongmenJourneyId ||
-    journeyId == kaipingDiaolouJourneyId;
+    journeyId == kaipingDiaolouJourneyId ||
+    journeyId == datongYungangJourneyId;
 
 /// Thin adaptive adapter over canonical one-pass content packages.
 /// Story, Words, Discovery, Challenge, Memory, and Completion remain immutable
@@ -41,6 +43,7 @@ JourneyLevelContent buildBatchOneGoldLevel(
     nanjingQinhuaiJourneyId => nanjingQinhuaiCuratedLevelContent(level),
     luoyangLongmenJourneyId => luoyangLongmenGoldLevelContent(level),
     kaipingDiaolouJourneyId => kaipingDiaolouGoldLevelContent(level),
+    datongYungangJourneyId => datongYungangGoldLevelContent(level),
     _ => shanghaiBundOnePassRemediation.levelContent(level),
   };
   final unseenWords = base.words
@@ -90,6 +93,7 @@ BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
     nanjingQinhuaiJourneyId => nanjingQinhuaiRemediatedJourney,
     luoyangLongmenJourneyId => luoyangLongmenGoldJourney,
     kaipingDiaolouJourneyId => kaipingDiaolouGoldJourney,
+    datongYungangJourneyId => datongYungangGoldJourney,
     _ => null,
   };
   if (journey == null) return null;
@@ -103,6 +107,8 @@ BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
       '${memoryAnswer('history')} ${memoryAnswer('preservation')}',
     nanjingQinhuaiJourneyId =>
       '${memoryAnswer('选择')} ${memoryAnswer('画面')}',
+    datongYungangJourneyId =>
+      '${memoryAnswer('choice')} ${memoryAnswer('place')}',
     luoyangLongmenJourneyId || kaipingDiaolouJourneyId =>
       '${memoryAnswer('truth')} ${memoryAnswer('place')}',
     xianCityWallJourneyId || hangzhouWestLakeJourneyId =>
