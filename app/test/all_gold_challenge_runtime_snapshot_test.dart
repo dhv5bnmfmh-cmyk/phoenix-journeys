@@ -6,10 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
-import 'package:phoenix_journeys/data/daily_journey_experience.dart';
 import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/data/extended_journey_catalog.dart';
-import 'package:phoenix_journeys/data/forbidden_city_challenge_package.dart';
 import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
 import 'package:phoenix_journeys/widgets/journey_challenge_panel.dart';
 
@@ -69,8 +67,9 @@ Future<void> _pump(
           child: JourneyChallengePanel(
             journeyId: journey.id,
             storyParagraphs: active.storyParagraphs,
-            discoveryTexts:
-                active.discoveries.map((entry) => entry.text).toList(growable: false),
+            discoveryTexts: active.discoveries
+                .map((entry) => entry.text)
+                .toList(growable: false),
             profile: profile,
             seed: 17000 + level,
             displayText: _identity,
@@ -90,18 +89,9 @@ Future<void> _completeParagraph(
   required String journeyId,
   required int level,
 }) async {
-  if (journeyId == 'beijing-forbidden-city') {
-    final record = forbiddenCityParagraphRebuild.singleWhere(
-      (entry) => entry.level == level,
-    );
-    for (final index in record.correctOrder) {
-      await _tap(tester, 'challenge-option-story-$index');
-    }
-  } else {
-    for (var index = 0; index < 4; index++) {
-      final key = 'challenge-option-correct-$index';
-      if (_key(key).evaluate().isNotEmpty) await _tap(tester, key);
-    }
+  for (var index = 0; index < 4; index++) {
+    final key = 'challenge-option-correct-$index';
+    if (_key(key).evaluate().isNotEmpty) await _tap(tester, key);
   }
   await _tap(tester, 'challenge-submit');
   expect(_key('challenge-explanation-dialog'), findsOneWidget);
@@ -151,8 +141,10 @@ Map<String, Object?> _baseRow({
     'discovery': discovery,
     'vocabulary': vocabulary,
     'activeStorySource': 'resolveAdaptiveJourneyLevel:${journey.id}:Lv$level',
-    'activeDiscoverySource': 'resolveAdaptiveJourneyLevel:${journey.id}:Lv$level',
-    'activeVocabularySource': 'resolveAdaptiveJourneyLevel:${journey.id}:Lv$level',
+    'activeDiscoverySource':
+        'resolveAdaptiveJourneyLevel:${journey.id}:Lv$level',
+    'activeVocabularySource':
+        'resolveAdaptiveJourneyLevel:${journey.id}:Lv$level',
     'activeChallengeSource': 'JourneyChallengePanel',
     'activeResolver': 'resolveAdaptiveJourneyLevel',
     'activeBinding': 'dedicatedAdaptiveJourneyIds',
@@ -160,7 +152,9 @@ Map<String, Object?> _baseRow({
 }
 
 void main() {
-  testWidgets('exports every approved Gold active Challenge unit', (tester) async {
+  testWidgets('exports every approved Gold active Challenge unit', (
+    tester,
+  ) async {
     const agent = PhoenixLanguageLevelAgent();
     final approvedIds = approvedNarrativeDnaCatalog
         .map((record) => record.journeyId)
@@ -184,74 +178,83 @@ void main() {
         final profile = agent.profileForPhoenixLevel(level);
         final active = resolveAdaptiveJourneyLevel(journey, profile: profile);
         final story = active.storyParagraphs.toList(growable: false);
-        final discovery =
-            active.discoveries.map((entry) => entry.text).toList(growable: false);
-        final vocabulary =
-            active.words.map((entry) => entry.word).toList(growable: false);
+        final discovery = active.discoveries
+            .map((entry) => entry.text)
+            .toList(growable: false);
+        final vocabulary = active.words
+            .map((entry) => entry.word)
+            .toList(growable: false);
 
         await _pump(tester, journey: journey, level: level);
 
-        String paragraphAnswer;
-        if (journeyId == 'beijing-forbidden-city') {
-          final record = forbiddenCityParagraphRebuild.singleWhere(
-            (entry) => entry.level == level,
-          );
-          paragraphAnswer = record.correctOrder
-              .map((index) => record.segments[index])
-              .join('\n');
-        } else {
-          paragraphAnswer = <String>[
-            for (var index = 0; index < 4; index++)
-              if (_optionText('challenge-option-correct-$index').isNotEmpty)
-                _optionText('challenge-option-correct-$index'),
-          ].join('\n');
-        }
-        rows.add(_baseRow(
-          journey: journey,
-          level: level,
-          mode: 'paragraphRebuild',
-          story: story,
-          discovery: discovery,
-          vocabulary: vocabulary,
-          correctAnswer: paragraphAnswer,
-        ));
+        final paragraphAnswer = <String>[
+          for (var index = 0; index < 4; index++)
+            if (_optionText('challenge-option-correct-$index').isNotEmpty)
+              _optionText('challenge-option-correct-$index'),
+        ].join('\n');
+        rows.add(
+          _baseRow(
+            journey: journey,
+            level: level,
+            mode: 'paragraphRebuild',
+            story: story,
+            discovery: discovery,
+            vocabulary: vocabulary,
+            correctAnswer: paragraphAnswer,
+          ),
+        );
         await _completeParagraph(tester, journeyId: journeyId, level: level);
-        rows.last['explanation'] = _textsUnder(_key('challenge-explanation-dialog'));
+        rows.last['explanation'] = _textsUnder(
+          _key('challenge-explanation-dialog'),
+        );
         await _tap(tester, 'challenge-dialog-action');
 
         final grammarAnswer = _optionText('challenge-option-correct');
-        rows.add(_baseRow(
-          journey: journey,
-          level: level,
-          mode: 'grammarRepair',
-          story: story,
-          discovery: discovery,
-          vocabulary: vocabulary,
-          correctAnswer: grammarAnswer,
-        ));
-        rows.last['grammarSentence'] = _key('challenge-grammar-sentence').evaluate().isEmpty
+        rows.add(
+          _baseRow(
+            journey: journey,
+            level: level,
+            mode: 'grammarRepair',
+            story: story,
+            discovery: discovery,
+            vocabulary: vocabulary,
+            correctAnswer: grammarAnswer,
+          ),
+        );
+        rows.last['grammarSentence'] =
+            _key('challenge-grammar-sentence').evaluate().isEmpty
             ? const <String>[]
             : _textsUnder(_key('challenge-grammar-sentence'));
         await _completeGrammar(tester);
-        rows.last['explanation'] = _textsUnder(_key('challenge-explanation-dialog'));
+        rows.last['explanation'] = _textsUnder(
+          _key('challenge-explanation-dialog'),
+        );
         await _tap(tester, 'challenge-dialog-action');
 
         final missingAnswer = _optionText('challenge-option-correct');
-        rows.add(_baseRow(
-          journey: journey,
-          level: level,
-          mode: 'missingSentence',
-          story: story,
-          discovery: discovery,
-          vocabulary: vocabulary,
-          correctAnswer: missingAnswer,
-        ));
-        rows.last['contextBefore'] = _textsUnder(find.byKey(const ValueKey('challenge-fit-area')))
-            .where((value) => story.any((paragraph) => paragraph.contains(value)))
-            .take(4)
-            .toList(growable: false);
+        rows.add(
+          _baseRow(
+            journey: journey,
+            level: level,
+            mode: 'missingSentence',
+            story: story,
+            discovery: discovery,
+            vocabulary: vocabulary,
+            correctAnswer: missingAnswer,
+          ),
+        );
+        rows.last['contextBefore'] =
+            _textsUnder(find.byKey(const ValueKey('challenge-fit-area')))
+                .where(
+                  (value) =>
+                      story.any((paragraph) => paragraph.contains(value)),
+                )
+                .take(4)
+                .toList(growable: false);
         await _completeMissing(tester);
-        rows.last['explanation'] = _textsUnder(_key('challenge-explanation-dialog'));
+        rows.last['explanation'] = _textsUnder(
+          _key('challenge-explanation-dialog'),
+        );
         await _tap(tester, 'challenge-dialog-action');
       }
     }
@@ -267,7 +270,9 @@ void main() {
     if (output != null && output.isNotEmpty) {
       File(output)
         ..createSync(recursive: true)
-        ..writeAsStringSync(const JsonEncoder.withIndent('  ').convert(payload));
+        ..writeAsStringSync(
+          const JsonEncoder.withIndent('  ').convert(payload),
+        );
     }
   });
 }
