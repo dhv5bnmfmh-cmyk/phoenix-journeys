@@ -19,6 +19,9 @@ jobs:
       - name: Apply Journey-specific Challenge runtime wiring
         run: python3 tools/apply_all_gold_challenge_phase2.py
 
+      - name: Refine Longmen anti-template grammar progression
+        run: python3 tools/refine_longmen_challenge_profile.py
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
