@@ -327,3 +327,33 @@ Controlled Release Authorized: YES / NO
 ```
 
 Any missing `REQUIRED` item or applicable `CONDITIONALLY_REQUIRED` item blocks Completed. Any required background gate that is `FAIL`, `PENDING`, or `BLOCKED` blocks background runtime integration.
+
+## Challenge Gold required gates
+
+Detailed definitions are owned by [Phoenix Six-Stage Journey Standard §3](../PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes). Record each row independently; do not infer one PASS from another.
+
+| Gate | Class | Required evidence |
+|---|---|---|
+| Challenge Learning Intent | REQUIRED | One primary intent per active item |
+| Mode Differentiation | REQUIRED | Three modes exercise distinct canonical functions |
+| Paragraph Rebuild Quality | REQUIRED | Structure/sequence/causal-order evidence; not punctuation or rote ordering |
+| Grammar Repair Quality | REQUIRED | Genuine, explainable, level-fit Chinese repair |
+| Missing Sentence Quality | REQUIRED | Contextual comprehension/inference; not keyword matching |
+| One Defensible Answer | REQUIRED | Unique best answer under taught context |
+| Distractor Quality | REQUIRED | Plausible, non-duplicated, non-trick distractors |
+| Distractor Misconception Logic | REQUIRED | Misunderstanding represented by each distractor |
+| Teach Before Test | REQUIRED | Necessary knowledge taught at current/earlier level |
+| Challenge Provenance | REQUIRED | Active Story/Discovery/Vocabulary or explicit language objective |
+| Level Progression | REQUIRED | Deeper reasoning across levels, not length inflation |
+| Story / Discovery Closed Loop | REQUIRED | Challenge reorganizes/applies taught Journey learning |
+| Historical Truth | REQUIRED | No cheap fabricated-history distractors or unsupported claims |
+| Active Content Provenance | REQUIRED | Active Story/Discovery/Vocabulary or explicit current language objective; no inactive seed |
+| No Legacy Contamination | REQUIRED | No inactive/legacy Challenge content in active options or answer logic |
+| No Cross-Journey Contamination | REQUIRED | No other-Journey content in active options or answer logic |
+| Level-Appropriate Reasoning | REQUIRED | Reasoning fits current level and canonical cognitive band |
+| Cognitive Progression | REQUIRED | Lv1→Lv10 deepens reasoning rather than length/trivia |
+| Language Learning Value | REQUIRED | Chinese learning remains active even when Story/history/culture supplies context |
+| Human Challenge Review | REQUIRED | Separate Lv1, Lv5, and Lv10 human evidence |
+| Cross-Gold Anti-Template | REQUIRED for Gold convergence | No noun-swapped Challenge content shape |
+
+Any required row not `PASS` with appropriate evidence means `GOLD CHALLENGE = FAIL` and blocks Gold Founder Review. Existing Gold is not grandfathered against later canonical Challenge quality.

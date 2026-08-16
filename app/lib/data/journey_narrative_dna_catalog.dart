@@ -283,6 +283,34 @@ const kaipingGoldNarrativeDna = JourneyNarrativeDnaRecord(
       'conditional-sketch-communal-need-private-plan-risk-revision-letter-counter-revision-construction-selective-form-faded-ending',
 );
 
+const datongYungangGoldNarrativeDna = JourneyNarrativeDnaRecord(
+  journeyId: 'datong-yungang-grottoes',
+  narrativeIdentity: 'daughter-cuts-single-colossal-measuring-line-into-three-independent-lines',
+  protagonistIdentity: 'Wei-Lan-fictional-Northern-Wei-ordinary-stoneworker',
+  protagonistAgeIdentity: 'fictional-adult-daughter-in-historical-work-family',
+  protagonistArchetype: 'designated-successor-refusing-exclusive-inheritance',
+  openingSituation: 'capital-has-moved-and-father-prepares-to-carry-the-colossal-image-line-south',
+  storyGoal: 'let-three-remaining-workers-own-their-craft-without-preserving-her-exclusive-title',
+  locationMechanism: 'Yungang-transition-from-capital-backed-colossal-caves-to-continuing-smaller-post-494-niches',
+  movementPattern: 'long-line-moves-from-fathers-hand-to-stone-step-to-three-hands-and-three-small-stone-faces',
+  conflictType: 'exclusive-paternal-succession-vs-distributed-responsibility-after-scale-transition',
+  choiceType: 'cut-the-inherited-long-ink-line-into-three-working-lines',
+  climaxType: 'blade-cuts-line-while-father-waits-for-daughter-to-coil-it',
+  consequenceType: 'sole-successor-title-is-lost-and-three-workers-mark-stone-independently',
+  emotionalArc: 'chosen-heir-certainty-to-relational-separation-to-accountable-equality',
+  historicalLearningMechanism: 'verified-capital-move-and-post-move-smaller-carving-change-the-scale-and-social-pressure-encountered-by-fictional-people',
+  resolutionType: 'inheritance-becomes-distributed-responsibility-without-paternal-reconciliation',
+  endingMechanism: 'father-looks-back-at-three-black-lines-and-daughter-does-not-follow',
+  memoryAnchorType: 'one-blackened-long-line-cut-into-three-on-a-stone-step',
+  achievementType: 'distributed-craft-responsibility',
+  rewardSymbolism: 'three-separate-lines-mark-agency-without-a-generic-heritage-slogan',
+  temporalPattern: 'dawn-departure-after-the-494-capital-shift',
+  supportingStructure: 'father-daughter-succession-conflict-with-brother-and-peer-becoming-independent',
+  centralMetaphor: 'a-scale-made-for-one-colossal-order-cannot-measure-three-futures',
+  narrativeVoice: 'third-person-close-to-fictional-daughter-action-led',
+  storyRhythm: 'capital-shift-inheritance-demand-group-risk-cut-title-loss-first-lines-fathers-glance',
+);
+
 final approvedNarrativeDnaCatalog =
     List<JourneyNarrativeDnaRecord>.unmodifiable(<JourneyNarrativeDnaRecord>[
   for (final record in baseline.approvedNarrativeDnaCatalog)
@@ -300,6 +328,7 @@ final approvedNarrativeDnaCatalog =
   suzhouGardenGoldNarrativeDna,
   longmenGoldNarrativeDna,
   kaipingGoldNarrativeDna,
+  datongYungangGoldNarrativeDna,
 ]);
 
 int duplicatedMajorDimensions(

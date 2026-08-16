@@ -609,3 +609,39 @@ STORY EXPERIENCE PROGRESS concept defined: YES / NO
 Runtime multi-Story implementation authorized by this record: NO
 Data-model migration authorized by this record: NO
 ```
+
+## Challenge Gold design extension
+
+Use this matrix together with [Phoenix Six-Stage Journey Standard §3](../PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes). The Six-Stage Standard owns the detailed semantics; this template records design evidence.
+
+For every active Challenge item record: `Level`, `Mode`, `Primary Learning Intent`, `Source Provenance`, `Taught Before Tested`, `Correct Answer`, `Why Correct`, each `Distractor Misconception`, `Level Appropriateness`, and `Human Review`. The three modes MUST show distinct learning functions, and Lv1/Lv5/Lv10 MUST receive explicit human review.
+
+### All-Gold Challenge audit matrix
+
+Detailed semantics remain owned by Phoenix Six-Stage Journey Standard §3. For global Challenge convergence, create one row for every current approved Gold `Journey × Level × Mode` using the registry from merged current `main`.
+
+| Journey ID | Level | Mode | Primary Learning Intent | Secondary Intent | Active Source | Source Provenance | Taught Before Tested | Correct Answer | Why Correct | Alternative Answer Ambiguity | Distractor Quality | Distractor Misconception | Historical Truth | Language Value | Story / Discovery Connection | Level Appropriateness | Cognitive Band | Legacy Contamination | Cross-Journey Contamination | Result |
+|---|---:|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `PASS / REPAIR REQUIRED` |
+
+Audit defect code:
+
+`TBT / AMB / DST / MODE / PROV / LEGACY / CROSS / LEVEL / PROG / HIST / LANG / LOOP / TEMPLATE`
+
+Cross-Gold anti-template record:
+
+```text
+Question logic repetition:
+Distractor logic repetition:
+Same sentence skeleton:
+Same causal question:
+Same missing-sentence trick:
+Same paragraph-rebuild pattern:
+Same grammar-error pattern:
+Only nouns changed: YES / NO
+Nearest Gold Challenge pattern:
+Decisive Journey-specific difference:
+Human anti-template result: PASS / REPAIR REQUIRED
+```
+
+Lv1, Lv5, and Lv10 human review remains mandatory for every Gold Journey; all other levels and modes still require complete audit rows.

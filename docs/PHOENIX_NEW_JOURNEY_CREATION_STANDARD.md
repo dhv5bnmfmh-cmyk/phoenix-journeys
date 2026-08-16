@@ -594,7 +594,7 @@ Changing source facts does not establish Story uniqueness, and Story uniqueness 
 
 Automated validation may prove source-record presence, approved authority classification, fact/fiction contract completeness, declared substitution result, mechanism fields, fingerprint completeness, Rule A / Rule B results, taxonomy-governance fields, and Lv1 causal-contract fields. It MUST NOT be described as proving historical interpretation, place-native literary sufficiency, cultural nuance, creative distinctness beyond the deterministic threshold, or literary quality. Those remain Founder/Agent review responsibilities.
 
-This extension governs future new Journeys and separately authorized future remediations. It does not reopen Founder-approved Gold Stories and does not authorize background, Passport, map, or location-hierarchy work.
+This extension governs future new Journeys and separately authorized future remediations. It does not automatically reopen Founder-approved Gold **Story spines** and does not authorize background, Passport, map, or location-hierarchy work. Challenge remains separately auditable under the current canonical Challenge Gold contract; existing Gold Challenge is not grandfathered against later Challenge quality requirements.
 
 ## 17. Binding Story × Culture × Level lifecycle extension
 
@@ -607,3 +607,23 @@ Default Discovery depth is `2 / 2 / 2 / 2 / 3 / 3 / 3 / 3 / 3 / 3`; deviations r
 Pilot governance is binding: one Pilot, exact-head validation and Preview, independent audit, Founder Experience, final Founder audit, canonical formalization only after PASS, then horizontal audit and one-Journey-at-a-time remediation. Any source commit after Founder Experience invalidates that SHA-bound approval.
 
 The six-stage product architecture is unchanged. Wonder/Express cognitive bands are content semantics, not standalone stages.
+
+## Challenge Gold lifecycle binding
+
+The authoritative Challenge content-quality contract is [Phoenix Six-Stage Journey Standard §3](PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes). This standard does not redefine those rules.
+
+For every new or materially repaired Journey, the learning-package development order is binding:
+
+> **FACT FIRST → STORY ARCHITECTURE → STORY LOCK → DISCOVERY → VOCABULARY → CHALLENGE DESIGN → CHALLENGE GOLD AUDIT → MEMORY → COMPLETION → RUNTIME → FULL VALIDATION → EXACT-HEAD PREVIEW → FOUNDER REVIEW**
+
+Phase B MUST define a primary learning intent, active source provenance, teach-before-test evidence, one-defensible-answer evidence, distractor misconception logic, and level-progression intent for every active Challenge item. Phase E machine validation covers the structurally testable portions; Lv1/Lv5/Lv10 human Challenge review remains REQUIRED before Gold Founder Review.
+
+A Journey is blocked if Challenge was filled after the fact from random source sentences, if the three modes do not have distinct learning functions, or if any required Challenge Gold gate from the Six-Stage Standard fails.
+
+### Challenge Gold global convergence precondition
+
+The detailed authority remains Phoenix Six-Stage Journey Standard §3. When a materially stronger Challenge Gold contract has been merged, no new Journey Story development may begin while the required current all-Gold Challenge audit/remediation remains incomplete, unless the Founder explicitly changes priority.
+
+The all-Gold line MUST read the approved Gold registry dynamically from merged current `main`, audit all Lv1-Lv10 active `paragraphRebuild`, `grammarRepair`, and `missingSentence` items before mass rewrite, complete the required matrix and defect inventory, repair real defects with the smallest teaching-layer change, and pass Lv1/Lv5/Lv10 human Challenge review plus cross-Gold anti-template review for every Gold Journey.
+
+This convergence gate does not authorize a second development branch, a second PR, Challenge UI redesign, Six-Stage UI changes, Map, Passport, Navigation, Reward, Progress, audio architecture, location hierarchy, dependency changes, or automatic Story rewrite.

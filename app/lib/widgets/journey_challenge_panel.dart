@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../data/datong_yungang_gold_content.dart';
 import '../data/forbidden_city_challenge_package.dart';
 import '../data/forbidden_city_journey_runtime.dart';
 import '../models/language_proficiency.dart';
@@ -209,6 +210,9 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
     final forbiddenCityLevel = widget.journeyId == forbiddenCityJourneyId
         ? _resolveForbiddenCityChallengeLevel(widget.storyParagraphs)
         : null;
+    final datongLevel = widget.journeyId == datongYungangJourneyId
+        ? _resolveDatongChallengeLevel(widget.storyParagraphs)
+        : null;
     _sessions = <_ChallengeSession>[
       for (var index = 0; index < fixedJourneyChallengeTypes.length; index++)
         _ChallengeSession.build(
@@ -219,6 +223,7 @@ class _JourneyChallengePanelState extends State<JourneyChallengePanel> {
           type: fixedJourneyChallengeTypes[index],
           seed: widget.seed + index * 997,
           forbiddenCityLevel: forbiddenCityLevel,
+          datongLevel: datongLevel,
         ),
     ];
     _activeIndex = 0;
@@ -1390,6 +1395,55 @@ class _ModeChip extends StatelessWidget {
 String _normalizeForbiddenCityChallengeText(String value) =>
     value.replaceAll(RegExp(r'\s+'), '');
 
+int _resolveDatongChallengeLevel(List<String> storyParagraphs) {
+  final activeStory = storyParagraphs.map((value) => value.trim()).join('\n\n');
+  for (var level = 1; level <= 10; level++) {
+    final candidate = datongYungangGoldLevelContent(level)
+        .storyParagraphs
+        .map((value) => value.trim())
+        .join('\n\n');
+    if (candidate == activeStory) return level;
+  }
+  throw StateError(
+    'Datong Challenge requires an exact active Lv1-Lv10 Story binding.',
+  );
+}
+
+@visibleForTesting
+String datongChallengeGoldPrimaryIntent(
+  int level,
+  JourneyChallengeType type,
+) {
+  if (level < 1 || level > 10) throw RangeError.range(level, 1, 10, 'level');
+  return switch (type) {
+    JourneyChallengeType.grammarRepair => 'LANGUAGE',
+    JourneyChallengeType.paragraphRebuild => level <= 2
+        ? 'STORY'
+        : level <= 6
+            ? 'CAUSAL_REASONING'
+            : level <= 8
+                ? 'STORY'
+                : 'CAUSAL_REASONING',
+    JourneyChallengeType.missingSentence => level <= 2
+        ? 'STORY'
+        : level <= 4
+            ? 'CAUSAL_REASONING'
+            : level <= 6
+                ? 'HISTORY'
+                : level <= 8
+                    ? 'STORY'
+                    : 'CULTURE',
+  };
+}
+
+@visibleForTesting
+int datongChallengeWindowStart(int level, int sourceLength, int count) {
+  if (level < 1 || level > 10) throw RangeError.range(level, 1, 10, 'level');
+  final maxStart = math.max(0, sourceLength - count);
+  if (maxStart == 0) return 0;
+  return ((level - 1) * maxStart / 9).round().clamp(0, maxStart);
+}
+
 int _resolveForbiddenCityChallengeLevel(List<String> storyParagraphs) {
   final activeStory = _normalizeForbiddenCityChallengeText(
     storyParagraphs.join('\n\n'),
@@ -1486,6 +1540,7 @@ class _ChallengeSession {
     required JourneyChallengeType type,
     required int seed,
     int? forbiddenCityLevel,
+    int? datongLevel,
   }) {
     if (journeyId == forbiddenCityJourneyId) {
       final level = forbiddenCityLevel;
@@ -1505,11 +1560,13 @@ class _ChallengeSession {
         storyParagraphs,
         difficulty,
         seed,
+        datongLevel: datongLevel,
       ),
       JourneyChallengeType.grammarRepair => _buildGrammar(
         journeyId,
         difficulty,
         seed,
+        datongLevel: datongLevel,
       ),
       JourneyChallengeType.missingSentence => _buildMissing(
         journeyId,
@@ -1517,6 +1574,7 @@ class _ChallengeSession {
         discoveryTexts,
         difficulty,
         seed,
+        datongLevel: datongLevel,
       ),
     };
   }
@@ -1912,14 +1970,21 @@ class _ChallengeSession {
     String journeyId,
     List<String> storyParagraphs,
     JourneyChallengeDifficulty difficulty,
-    int seed,
-  ) {
+    int seed, {
+    int? datongLevel,
+  }) {
     final requiredCount = switch (difficulty) {
       JourneyChallengeDifficulty.beginner => 2,
       JourneyChallengeDifficulty.standard => 3,
       JourneyChallengeDifficulty.advanced => 3,
     };
-    final source = _extractSentences(storyParagraphs);
+    final allSource = _extractSentences(storyParagraphs);
+    final source = datongLevel == null
+        ? allSource
+        : allSource
+            .skip(datongChallengeWindowStart(datongLevel, allSource.length, requiredCount))
+            .take(requiredCount)
+            .toList(growable: false);
     final fallback = <String>[
       '清晨，探索者来到今天的目的地。',
       '他沿着主要路线慢慢向前走。',
@@ -1967,8 +2032,12 @@ class _ChallengeSession {
       options: options,
       correctIds: correctOptions.map((option) => option.id).toList(),
       questionTitle: '把散开的故事拼回来',
-      instruction: '四个候选句中有 ${correctOptions.length} 句属于原文。请按故事发生的顺序依次点击。',
-      explanation: '段落通常先交代地点或时间，再写行动，最后出现观察、变化或决定。',
+      instruction: datongLevel == null
+          ? '四个候选句中有 ${correctOptions.length} 句属于原文。请按故事发生的顺序依次点击。'
+          : '按当前 Lv$datongLevel 已学故事的事件、时间与因果推进，复原这组句子。',
+      explanation: datongLevel == null
+          ? '段落通常先交代地点或时间，再写行动，最后出现观察、变化或决定。'
+          : '正确顺序来自当前等级已学 Story，并随等级逐步移向选择、代价、关系变化与结果。',
       memoryTip: '记住“整体 → 行动 → 变化”，不要只看单句是否通顺。',
     );
   }
@@ -1976,9 +2045,10 @@ class _ChallengeSession {
   static _ChallengeSession _buildGrammar(
     String journeyId,
     JourneyChallengeDifficulty difficulty,
-    int seed,
-  ) {
-    final grammar = _grammarForJourney(journeyId, difficulty, seed);
+    int seed, {
+    int? datongLevel,
+  }) {
+    final grammar = _grammarForJourney(journeyId, difficulty, seed, datongLevel: datongLevel);
 
     final replacementCandidates = <String>[
       grammar.correctReplacement,
@@ -2039,12 +2109,16 @@ class _ChallengeSession {
     List<String> storyParagraphs,
     List<String> discoveryTexts,
     JourneyChallengeDifficulty difficulty,
-    int seed,
-  ) {
+    int seed, {
+    int? datongLevel,
+  }) {
     final source = _extractSentences(storyParagraphs);
-    final before = source.isNotEmpty ? source[0] : '清晨，探索者来到今天的目的地。';
-    final correct = source.length >= 2 ? source[1] : '他沿着主要路线慢慢向前走。';
-    final after = source.length >= 3 ? source[2] : '一路上的景色因此不断发生变化。';
+    final start = datongLevel == null
+        ? 0
+        : datongChallengeWindowStart(datongLevel, source.length, 3);
+    final before = source.isNotEmpty ? source[start] : '清晨，探索者来到今天的目的地。';
+    final correct = source.length > start + 1 ? source[start + 1] : '他沿着主要路线慢慢向前走。';
+    final after = source.length > start + 2 ? source[start + 2] : '一路上的景色因此不断发生变化。';
     final distractors = selectBalancedChallengeDistractors(
     correctAnswers: <String>[correct],
     candidates: _missingDistractors(
@@ -2083,8 +2157,9 @@ class _ChallengeSession {
   static _GrammarSpec _grammarForJourney(
     String journeyId,
     JourneyChallengeDifficulty difficulty,
-    int seed,
-  ) {
+    int seed, {
+    int? datongLevel,
+  }) {
     final journeySpec = switch (journeyId) {
       'beijing-forbidden-city' ||
       'beijing-summer-palace' ||
@@ -2096,6 +2171,12 @@ class _ChallengeSession {
       'guangzhou-chen-clan-academy' ||
       'suzhou-humble-administrators-garden' =>
         _adaptiveGrammarForJourney(journeyId, difficulty),
+      'datong-yungang-grottoes' => _datongGrammarForLevel(
+          datongLevel ??
+              (throw StateError(
+                'Datong grammarRepair requires an exact active level binding.',
+              )),
+        ),
       'literary-roaming' ||
       'myth-tracing' ||
       'strange-night-talks' ||
@@ -2149,6 +2230,232 @@ class _ChallengeSession {
     // Replays stay anchored to the selected destination and proficiency.
     // Generic grammar drills would break the journey's narrative continuity.
     return journeySpec;
+  }
+
+  static _GrammarSpec _datongGrammarForLevel(int level) {
+    return switch (level) {
+      1 => const _GrammarSpec(
+          segments: [
+            '北魏定都平城后，',
+            '云冈大规模后来有条件集中资源进行开凿',
+            '。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence: '北魏定都平城后，云冈大规模后来有条件集中资源进行开凿。',
+          correctedSentence: '北魏定都平城后，云冈后来有条件集中资源进行大规模开凿。',
+          correctOptionId: 'correct',
+          correctReplacement: '云冈后来有条件集中资源进行大规模开凿',
+          distractors: [
+            '云冈大规模后来有条件集中资源进行开凿',
+            '云冈后来大规模有条件集中资源进行开凿',
+            '云冈后来有大规模条件集中资源进行开凿',
+          ],
+          errorType: '语序不当：范围修饰语位置混乱',
+          errorLocation: '“大规模后来……进行开凿”',
+          whyWrong: '“大规模”修饰“开凿”，应放在“开凿”前；“后来”应先交代时间，再说明具备的条件。',
+          revisionRule: '先放时间，再放条件，把方式或规模修饰语放到它修饰的动作前。',
+          memoryTip: '中文语序先理时间和条件，再让“大规模”贴近“开凿”。',
+        ),
+      2 => const _GrammarSpec(
+          segments: [
+            '在早期皇家支持下，',
+            '把昙曜五窟成为早期大型营造的重要代表',
+            '。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence: '在早期皇家支持下，把昙曜五窟成为早期大型营造的重要代表。',
+          correctedSentence: '在早期皇家支持下，昙曜五窟成为早期大型营造的重要代表。',
+          correctOptionId: 'correct',
+          correctReplacement: '昙曜五窟成为早期大型营造的重要代表',
+          distractors: [
+            '把昙曜五窟作为早期大型营造成为代表',
+            '昙曜五窟把早期大型营造成为重要代表',
+            '使昙曜五窟把早期大型营造作为重要代表',
+          ],
+          errorType: '把字句误用：“成为”不能直接作把字句谓语',
+          errorLocation: '“把昙曜五窟成为”',
+          whyWrong: '“成为”表示主体身份或状态变化，不能写成“把某物成为……”。这里让“昙曜五窟”直接作主语最自然。',
+          revisionRule: '遇到“成为”时先找发生身份变化的主语，不要机械套“把”。',
+          memoryTip: '“谁成为谁”可以；“把谁成为谁”不可以。',
+        ),
+      3 => const _GrammarSpec(
+          segments: [
+            '国家力量能够集中资源，',
+            '因此大型石窟营造所以获得更强的组织条件',
+            '。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence: '国家力量能够集中资源，因此大型石窟营造所以获得更强的组织条件。',
+          correctedSentence: '国家力量能够集中资源，因此大型石窟营造获得更强的组织条件。',
+          correctOptionId: 'correct',
+          correctReplacement: '因此大型石窟营造获得更强的组织条件',
+          distractors: [
+            '所以因此大型石窟营造获得更强的组织条件',
+            '因此所以大型石窟营造获得更强的组织条件',
+            '大型石窟营造因此所以获得更强的组织条件',
+          ],
+          errorType: '关联词重复：结果标记叠加',
+          errorLocation: '“因此……所以……”',
+          whyWrong: '“因此”和“所以”都表示结果，同一层因果关系不需要连续使用两个结果标记。',
+          revisionRule: '一层因果只保留一个清楚的结果关联词。',
+          memoryTip: '看到“因此”和“所以”同时出现，先检查是不是重复表达同一个结果。',
+        ),
+      4 => const _GrammarSpec(
+          segments: [
+            '在494年北魏迁都洛阳以后，',
+            '使云冈营造进入新的历史阶段',
+            '。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence: '在494年北魏迁都洛阳以后，使云冈营造进入新的历史阶段。',
+          correctedSentence: '494年北魏迁都洛阳以后，云冈营造进入新的历史阶段。',
+          correctOptionId: 'correct',
+          correctReplacement: '云冈营造进入新的历史阶段',
+          distractors: [
+            '使云冈营造进入新的历史阶段',
+            '因此使云冈营造进入新的历史阶段',
+            '从而使云冈营造进入新的历史阶段',
+          ],
+          errorType: '主语残缺：介词结构后又使用使令动词',
+          errorLocation: '“在……以后，使云冈营造……”',
+          whyWrong: '句首“在……以后”已经是时间状语，再接“使”会让整句缺少自然主语。让“云冈营造”直接作主语即可。',
+          revisionRule: '时间状语之后要检查主句是否有明确主语。',
+          memoryTip: '“在……以后”只是时间背景，后面仍需要一个能直接行动或变化的主语。',
+        ),
+      5 => const _GrammarSpec(
+          segments: [
+            '中期营造继续发展，',
+            '洞窟布局与雕饰呈现得更加丰富的表达',
+            '。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence: '中期营造继续发展，洞窟布局与雕饰呈现得更加丰富的表达。',
+          correctedSentence: '中期营造继续发展，洞窟布局与雕饰呈现出更加丰富的表达。',
+          correctOptionId: 'correct',
+          correctReplacement: '洞窟布局与雕饰呈现出更加丰富的表达',
+          distractors: [
+            '洞窟布局与雕饰呈现得更加丰富的表达',
+            '洞窟布局与雕饰呈现的更加丰富的表达',
+            '洞窟布局与雕饰呈现得出更加丰富的表达',
+          ],
+          errorType: '动词搭配不当：“呈现”与结果宾语的搭配',
+          errorLocation: '“呈现得……表达”',
+          whyWrong: '这里后面跟的是“表达”这个结果宾语，应使用“呈现出……表达”，而不是用“得”引出程度补语。',
+          revisionRule: '动词后接结果或显现出的内容时，检查是否需要“出”而不是“得”。',
+          memoryTip: '“呈现出某种面貌/表达”是完整搭配。',
+        ),
+      6 => const _GrammarSpec(
+          segments: [
+            '随着494年北魏迁都洛阳以后，',
+            '大规模皇家开凿不再按原有规模继续',
+            '。',
+          ],
+          problemSegmentIndex: 0,
+          originalSentence: '随着494年北魏迁都洛阳以后，大规模皇家开凿不再按原有规模继续。',
+          correctedSentence: '494年北魏迁都洛阳以后，大规模皇家开凿不再按原有规模继续。',
+          correctOptionId: 'correct',
+          correctReplacement: '494年北魏迁都洛阳以后，',
+          distractors: [
+            '随着494年北魏迁都洛阳以后，',
+            '随着494年北魏迁都洛阳之后，',
+            '在494年北魏随着迁都洛阳以后，',
+          ],
+          errorType: '时间结构杂糅：“随着”与“……以后”重复套用',
+          errorLocation: '“随着……以后”',
+          whyWrong: '“随着……”和“……以后”都能建立时间变化背景，但这里叠在一起造成结构杂糅。',
+          revisionRule: '同一时间关系选择一种完整结构，不要把两个框架套在一起。',
+          memoryTip: '“随着变化”或“变化以后”二选一，句子会更干净。',
+        ),
+      7 => const _GrammarSpec(
+          segments: [
+            '尽管迁都改变了皇家营造条件，',
+            '所以较小规模的造像活动仍然继续出现',
+            '。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence: '尽管迁都改变了皇家营造条件，所以较小规模的造像活动仍然继续出现。',
+          correctedSentence: '尽管迁都改变了皇家营造条件，但较小规模的造像活动仍然继续出现。',
+          correctOptionId: 'correct',
+          correctReplacement: '但较小规模的造像活动仍然继续出现',
+          distractors: [
+            '所以较小规模的造像活动仍然继续出现',
+            '因此较小规模的造像活动仍然继续出现',
+            '因为较小规模的造像活动仍然继续出现',
+          ],
+          errorType: '关联关系错误：“尽管”需要转折承接而不是因果结果',
+          errorLocation: '“尽管……所以……”',
+          whyWrong: '“尽管”先承认一个不利条件，后半句应转折说明仍然发生的事实；“所以/因此”会把让步关系误写成因果结果。',
+          revisionRule: '先判断前半句是原因还是让步条件；“尽管/虽然”通常用“但/但是/却”承接。',
+          memoryTip: '看到“尽管”，先找转折，不要顺手接“所以”。',
+        ),
+      8 => const _GrammarSpec(
+          segments: [
+            '云冈造像艺术',
+            '既吸收多种艺术传统，并且又与中国传统结合',
+            '，形成融合后的独特面貌。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence: '云冈造像艺术既吸收多种艺术传统，并且又与中国传统结合，形成融合后的独特面貌。',
+          correctedSentence: '云冈造像艺术既吸收多种艺术传统，又与中国传统结合，形成融合后的独特面貌。',
+          correctOptionId: 'correct',
+          correctReplacement: '既吸收多种艺术传统，又与中国传统结合',
+          distractors: [
+            '既吸收多种艺术传统，并且又与中国传统结合',
+            '不但吸收多种艺术传统，又与中国传统结合',
+            '既吸收多种艺术传统，所以与中国传统结合',
+          ],
+          errorType: '关联结构杂糅：“既……又……”被其他关联词打断',
+          errorLocation: '“既……并且又……”',
+          whyWrong: '这里是并列的两个方面，“既……又……”已经完整，再插入“并且”会造成关联结构重复。',
+          revisionRule: '成对关联词要保持成套、对称，不要在中间叠加同义连接词。',
+          memoryTip: '看到“既”，优先寻找与它成对的“又”。',
+        ),
+      9 => const _GrammarSpec(
+          segments: [
+            '政治中心和赞助条件先后改变，',
+            '云冈的营造方式不是突然中断，就是逐步转变',
+            '。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence: '政治中心和赞助条件先后改变，云冈的营造方式不是突然中断，就是逐步转变。',
+          correctedSentence: '政治中心和赞助条件先后改变，云冈的营造方式不是突然中断，而是逐步转变。',
+          correctOptionId: 'correct',
+          correctReplacement: '云冈的营造方式不是突然中断，而是逐步转变',
+          distractors: [
+            '云冈的营造方式不是突然中断，或者是逐步转变',
+            '云冈的营造方式虽然突然中断，还是逐步转变',
+            '云冈的营造方式既然突然中断，就是逐步转变',
+          ],
+          errorType: '关联关系错误：选择关系误代转折校正关系',
+          errorLocation: '“不是……就是……”',
+          whyWrong: '这里不是在两个可能结果中二选一，而是在否定“突然中断”后指出真正的理解“逐步转变”，应使用“不是……而是……”。',
+          revisionRule: '先判断逻辑关系是选择、并列、因果还是纠正，再选关联词。',
+          memoryTip: '“不是A，而是B”用于纠正理解；“不是A，就是B”用于二选一。',
+        ),
+      10 => const _GrammarSpec(
+          segments: [
+            '云冈融合多种传统并形成鲜明表达，',
+            '这不仅塑造了自身艺术语言，而且也对后来的佛教石窟艺术受到影响',
+            '。',
+          ],
+          problemSegmentIndex: 1,
+          originalSentence: '云冈融合多种传统并形成鲜明表达，这不仅塑造了自身艺术语言，而且也对后来的佛教石窟艺术受到影响。',
+          correctedSentence: '云冈融合多种传统并形成鲜明表达，这不仅塑造了自身艺术语言，而且也影响了后来的佛教石窟艺术。',
+          correctOptionId: 'correct',
+          correctReplacement: '这不仅塑造了自身艺术语言，而且也影响了后来的佛教石窟艺术',
+          distractors: [
+            '这不仅塑造了自身艺术语言，而且也对后来的佛教石窟艺术受到影响',
+            '这不仅塑造了自身艺术语言，而且也被后来的佛教石窟艺术产生影响',
+            '这不仅塑造了自身艺术语言，而且也对后来的佛教石窟艺术被影响',
+          ],
+          errorType: '主动与被动结构混用：“对……受到影响”搭配冲突',
+          errorLocation: '“对后来的佛教石窟艺术受到影响”',
+          whyWrong: '“对……”要求后面说明主体施加的作用；“受到影响”却把同一对象放在被动位置，两种结构不能这样混用。',
+          revisionRule: '明确谁影响谁：主动写“影响了……”，被动写“……受到影响”。',
+          memoryTip: '复杂因果句先画出施事者和受事者，再决定用主动还是被动。',
+        ),
+      _ => throw RangeError.range(level, 1, 10, 'level'),
+    };
   }
 
   static _GrammarSpec _adaptiveGrammarForJourney(
@@ -2437,6 +2744,12 @@ class _ChallengeSession {
         '程朗在下一处没有回头，也没有等待外婆。',
         '陈玉兰说完“下一处等我”，最后还是追了上去。',
       ],
+      'datong-yungang-grottoes' => [
+        '父亲把三段墨绳重新接回一根，三个人继续等他发号施令。',
+        '魏岚保住了唯一传人的位置，也没有把墨绳分给魏朔和阿砾。',
+        '魏朔第一次弹线时，魏岚立刻替他收回绳子并改掉黑线。',
+        '父亲在崖路转弯处叫魏岚追上去，她带着整根墨绳离开。',
+      ],
       _ => [
         '故事中的地点突然改变，却没有任何前文线索。',
         '人物作出决定以后，后面的结果与决定完全无关。',
@@ -2451,6 +2764,9 @@ class _ChallengeSession {
     List<String> discoveries,
     JourneyChallengeDifficulty difficulty,
   ) {
+    if (journeyId == 'datong-yungang-grottoes') {
+      return _regularJourneyDistractors(journeyId);
+    }
     final specific = switch (journeyId) {
       'literary-roaming' => [
         '他决定统计竹子的数量，不再观察蝴蝶。',

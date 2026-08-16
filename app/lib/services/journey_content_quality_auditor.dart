@@ -162,7 +162,8 @@ JourneyContentQualityReport auditJourneyContentQuality(
       (experience.id == 'beijing-summer-palace' ||
               experience.id == 'suzhou-humble-administrators-garden' ||
               experience.id == 'luoyang-longmen-grottoes' ||
-              experience.id == 'jiangmen-kaiping-diaolou') &&
+              experience.id == 'jiangmen-kaiping-diaolou' ||
+              experience.id == 'datong-yungang-grottoes') &&
           profile.phoenixLevel != null
           ? (profile.phoenixLevel! <= 4 ? 2 : 3)
           : null;

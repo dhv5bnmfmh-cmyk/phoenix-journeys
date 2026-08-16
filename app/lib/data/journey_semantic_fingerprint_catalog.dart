@@ -1,5 +1,6 @@
 import 'guangzhou_chen_clan_one_pass.dart';
 import 'hangzhou_west_lake_one_pass.dart';
+import 'datong_yungang_gold_content.dart';
 import 'kaiping_diaolou_gold_content.dart';
 import 'journey_expansion_catalog.dart';
 import 'journey_semantic_fingerprint_baseline_snapshot.dart' as baseline;
@@ -266,6 +267,23 @@ enum NarrativeMechanismFamily {
   replyWindowBeforeConstructionCommitment,
   distantSiblingAcceptsAndExtendsSharedDuty,
   transnationalLetterExchangeReallocatesFamilyBuildingDuty,
+
+  // Reusable families introduced by Yungang scale-transition inheritance.
+  capitalShiftChangesInheritedScale,
+  designatedDaughterVsFatherAndEmergingPeers,
+  distributeCraftAgencyWithoutExclusiveTitle,
+  exclusiveSuccessionVsDistributedResponsibility,
+  cutSingleInheritedToolIntoThree,
+  waitingFatherWitnessesIrreversibleCut,
+  threeIndependentMarksReplaceSingleCommand,
+  chosenHeirToEqualResponsibleMaker,
+  fatherLooksBackWithoutReconciliation,
+  postCapitalColossalToSmallerCarvingTransition,
+  measuringLineEmbodiesExclusiveAuthority,
+  cliffRoadAndThreeStoneFacesDiverge,
+  dawnDepartureAfterPoliticalCenterMoves,
+  brotherAndPeerAcceptIndependentLines,
+  scaleTransitionForcesInheritanceRedistribution,
 }
 
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
@@ -1133,6 +1151,43 @@ final summerPalaceCulturalIntegrationSemanticFingerprint = JourneySemanticFinger
   ]),
 );
 
+const _datong = 'datong-yungang-grottoes';
+
+final datongYungangGoldSemanticFingerprint = JourneySemanticFingerprint(
+  journeyId: _datong,
+  surfaceIdentity: 'Wei Lan / fictional Northern Wei craft family / long ink line / three small stone faces',
+  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
+    NarrativeSemanticDimension.openingMechanism: NarrativeMechanismFamily.capitalShiftChangesInheritedScale,
+    NarrativeSemanticDimension.protagonistRolePattern: NarrativeMechanismFamily.designatedDaughterVsFatherAndEmergingPeers,
+    NarrativeSemanticDimension.relationshipGeometry: NarrativeMechanismFamily.designatedDaughterVsFatherAndEmergingPeers,
+    NarrativeSemanticDimension.goalMechanism: NarrativeMechanismFamily.distributeCraftAgencyWithoutExclusiveTitle,
+    NarrativeSemanticDimension.conflictMechanism: NarrativeMechanismFamily.exclusiveSuccessionVsDistributedResponsibility,
+    NarrativeSemanticDimension.choiceMechanism: NarrativeMechanismFamily.cutSingleInheritedToolIntoThree,
+    NarrativeSemanticDimension.climaxMechanism: NarrativeMechanismFamily.waitingFatherWitnessesIrreversibleCut,
+    NarrativeSemanticDimension.consequenceMechanism: NarrativeMechanismFamily.threeIndependentMarksReplaceSingleCommand,
+    NarrativeSemanticDimension.transformationMechanism: NarrativeMechanismFamily.chosenHeirToEqualResponsibleMaker,
+    NarrativeSemanticDimension.endingMechanism: NarrativeMechanismFamily.fatherLooksBackWithoutReconciliation,
+    NarrativeSemanticDimension.culturalAnchorFunction: NarrativeMechanismFamily.postCapitalColossalToSmallerCarvingTransition,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction: NarrativeMechanismFamily.measuringLineEmbodiesExclusiveAuthority,
+    NarrativeSemanticDimension.movementSpatialMechanism: NarrativeMechanismFamily.cliffRoadAndThreeStoneFacesDiverge,
+    NarrativeSemanticDimension.temporalPressureMechanism: NarrativeMechanismFamily.dawnDepartureAfterPoliticalCenterMoves,
+    NarrativeSemanticDimension.supportingCharacterFunction: NarrativeMechanismFamily.brotherAndPeerAcceptIndependentLines,
+    NarrativeSemanticDimension.dramaticEngineFamily: NarrativeMechanismFamily.scaleTransitionForcesInheritanceRedistribution,
+  }),
+  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
+    _activeEvidence(_datong, NarrativeSemanticDimension.openingMechanism, NarrativeMechanismFamily.capitalShiftChangesInheritedScale, ['北魏迁都洛阳后，云冈不再像从前那样营造巨像。'], 'The verified capital-and-scale transition opens the fictional family pressure.'),
+    _activeEvidence(_datong, NarrativeSemanticDimension.relationshipGeometry, NarrativeMechanismFamily.designatedDaughterVsFatherAndEmergingPeers, ['父亲只肯把手艺交给一个人；留下的弟弟魏朔和同伴阿砾便要继续替她扶绳，或者散伙。'], 'A father-daughter succession demand materially fixes the brother and peer beneath one authority.'),
+    _activeEvidence(_datong, NarrativeSemanticDimension.conflictMechanism, NarrativeMechanismFamily.exclusiveSuccessionVsDistributedResponsibility, ['魏岚想留下三个人，却不能同时保住“唯一传人”的位置。'], 'The human conflict is exclusive recognition versus distributed agency.'),
+    _activeEvidence(_datong, NarrativeSemanticDimension.choiceMechanism, NarrativeMechanismFamily.cutSingleInheritedToolIntoThree, ['魏岚却把墨绳按在石阶上，割成三段，一段给魏朔，一段给阿砾，最后一段留在自己掌心。'], 'She enacts the choice through an irreversible division of the authority-bearing tool.'),
+    _activeEvidence(_datong, NarrativeSemanticDimension.climaxMechanism, NarrativeMechanismFamily.waitingFatherWitnessesIrreversibleCut, ['天亮时，父亲伸手等她收绳。魏岚却把墨绳按在石阶上，割成三段'], 'The cut happens under the waiting father’s gaze rather than at task completion.'),
+    _activeEvidence(_datong, NarrativeSemanticDimension.consequenceMechanism, NarrativeMechanismFamily.threeIndependentMarksReplaceSingleCommand, ['三个人不再等同一双手发号施令。魏朔第一次自己弹出墨线'], 'The choice visibly changes who may place the next line.'),
+    _activeEvidence(_datong, NarrativeSemanticDimension.transformationMechanism, NarrativeMechanismFamily.chosenHeirToEqualResponsibleMaker, ['她失去了父亲许诺的唯一位置。', '三个人不再等同一双手发号施令。'], 'Status loss creates equal responsibility rather than mentor approval.'),
+    _activeEvidence(_datong, NarrativeSemanticDimension.endingMechanism, NarrativeMechanismFamily.fatherLooksBackWithoutReconciliation, ['父亲走到崖路转弯处，回头看了那三道黑线一眼。魏岚没有追上去。'], 'A look and non-pursuit close the changed relationship without explanation.'),
+    _activeEvidence(_datong, NarrativeSemanticDimension.culturalAnchorFunction, NarrativeMechanismFamily.postCapitalColossalToSmallerCarvingTransition, ['黑印落在一块只够开小龛的石面上。'], 'The smaller post-capital carving scale carries the consequence into place.'),
+    _activeEvidence(_datong, NarrativeSemanticDimension.dramaticEngineFamily, NarrativeMechanismFamily.scaleTransitionForcesInheritanceRedistribution, ['云冈不再像从前那样营造巨像。', '魏岚却把墨绳按在石阶上，割成三段'], 'A verified shift of scale forces a fictional redistribution of inherited authority.'),
+  ]),
+);
+
 final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     Map<String, JourneySemanticFingerprint>.unmodifiable({
   for (final entry in baseline.approvedGoldSemanticFingerprints.entries)
@@ -1149,6 +1204,7 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
   _suzhou: suzhouGardenGoldSemanticFingerprint,
   _longmen: longmenGoldSemanticFingerprint,
   _kaiping: kaipingGoldCandidateSemanticFingerprint,
+  _datong: datongYungangGoldSemanticFingerprint,
 });
 
 String activeCanonicalGoldStoryText(String journeyId) {
@@ -1173,6 +1229,9 @@ String activeCanonicalGoldStoryText(String journeyId) {
   }
   if (journeyId == _kaiping) {
     return List<String>.generate(10, (index) => kaipingDiaolouGoldLevelContent(index + 1).storyParagraphs.join('\n')).join('\n');
+  }
+  if (journeyId == _datong) {
+    return List<String>.generate(10, (index) => datongYungangGoldLevelContent(index + 1).storyParagraphs.join('\n')).join('\n');
   }
   return baseline.activeCanonicalGoldStoryText(journeyId);
 }
