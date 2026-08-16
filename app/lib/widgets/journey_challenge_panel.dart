@@ -3084,7 +3084,9 @@ class _ChallengeSession {
       for (final match in pattern.allMatches(paragraph)) {
         var value = match.group(0)?.trim() ?? '';
         if (value.isEmpty) continue;
-        if (!RegExp(r'[。！？!?]$').hasMatch(value)) value = '$value。';
+        if (!RegExp(r'[。！？!?][”’\"」』）》】]*$').hasMatch(value)) {
+          value = '$value。';
+        }
         if (!sentences.contains(value)) sentences.add(value);
       }
     }

@@ -260,6 +260,22 @@ void main() {
     }
 
     expect(rows.length, approvedIds.length * 10 * 3);
+    for (final row in rows) {
+      final visible = <String>[
+        if (row['correctAnswer'] case final String value) value,
+        for (final value in (row['options'] as List<String>)) value,
+      ];
+      for (final value in visible) {
+        expect(
+          value.contains('。”。') ||
+              value.contains('！”。') ||
+              value.contains('？”。'),
+          isFalse,
+          reason:
+              '${row['journeyId']} Lv${row['level']} ${row['mode']} duplicated quote punctuation: $value',
+        );
+      }
+    }
     final payload = <String, Object?>{
       'approvedGoldCount': approvedIds.length,
       'expectedChallengeUnits': approvedIds.length * 10 * 3,
