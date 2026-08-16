@@ -101,3 +101,9 @@ This evidence applies the binding Challenge Gold contract in `PHOENIX_SIX_STAGE_
 | Lv10 | `CAUSAL_REASONING` / `LANGUAGE` / `CULTURE` | complete Story + taught Yungang legacy context | final relationship/causal closure plus cultural integration | confuses inheritance with restored sole authority or reduces legacy to size alone | integrated interpretation; human PASS |
 
 `paragraphRebuild` now advances its active Story window across levels instead of repeatedly sampling the Lv1 opening. `missingSentence` advances the same way. `grammarRepair` keeps LANGUAGE as primary intent while its historical context is selected from knowledge already taught at that exact level or earlier. Datong distractors remain fictional Story counterfactuals or language-structure errors; they do not fabricate cheap false history.
+
+## Challenge Gold global adoption boundary
+
+PR #186 establishes the canonical Challenge Gold governance while keeping the active product/content remediation scope on Datong. It does not begin the all-Gold remediation line and does not authorize another branch or PR.
+
+After this adoption candidate is Founder-approved and merged, the next development priority is the single **PHOENIX ALL-GOLD CHALLENGE AUDIT AND REMEDIATION** line from merged current `main`, before new Journey Story development unless the Founder explicitly changes priority. Existing Gold Challenge receives no grandfather exemption; Founder-approved Story spines remain locked by default during Challenge remediation.

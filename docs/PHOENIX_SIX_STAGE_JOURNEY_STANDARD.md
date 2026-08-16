@@ -2,7 +2,7 @@
 
 **System:** Phoenix Product Standard System v1.2
 **Status:** BINDING  
-**Effective scope:** all new Journeys, Story repairs, Journey flow changes, acceptance matrices, quality gates, previews, and release decisions created after this standard  
+**Effective scope:** all new Journeys, Story repairs, Journey flow changes, acceptance matrices, quality gates, previews, and release decisions; §3 Challenge Gold additionally governs every current Founder-approved Gold Journey, every remediated/modified Journey, and every future Gold promotion candidate
 **Stable baseline:** PR `#137`, Commit `5fcadcb4a1c424706957e9d6bd72cc7f9f2c6977`
 
 ## 1. Normative precedence
@@ -79,7 +79,62 @@ The final human question is: **after completing the Challenge, is the learner cl
 
 ### 3.3 Gold blocking gates
 
-Before a Journey may enter Gold Founder Review, all applicable rows MUST be `PASS`: `CHALLENGE LEARNING INTENT`, `MODE DIFFERENTIATION`, `PARAGRAPH REBUILD QUALITY`, `GRAMMAR REPAIR QUALITY`, `MISSING SENTENCE QUALITY`, `ONE DEFENSIBLE ANSWER`, `DISTRACTOR QUALITY`, `DISTRACTOR MISCONCEPTION LOGIC`, `TEACH-BEFORE-TEST`, `CHALLENGE PROVENANCE`, `LEVEL PROGRESSION`, `STORY / DISCOVERY CLOSED LOOP`, `HISTORICAL TRUTH`, and `HUMAN CHALLENGE REVIEW`. A machine PASS cannot substitute for the human gate.
+Before a Journey may enter or retain Gold Challenge status, every applicable canonical gate MUST be `PASS`:
+
+- `CHALLENGE LEARNING INTENT`
+- `TEACH BEFORE TEST`
+- `MODE DIFFERENTIATION`
+- `PARAGRAPH REBUILD QUALITY`
+- `GRAMMAR REPAIR QUALITY`
+- `MISSING SENTENCE QUALITY`
+- `ONE DEFENSIBLE ANSWER`
+- `PLAUSIBLE DISTRACTORS`
+- `DIAGNOSABLE MISUNDERSTANDING`
+- `HISTORICAL TRUTH IN CHALLENGE`
+- `ACTIVE CONTENT PROVENANCE`
+- `NO LEGACY CONTAMINATION`
+- `NO CROSS-JOURNEY CONTAMINATION`
+- `LEVEL-APPROPRIATE REASONING`
+- `COGNITIVE PROGRESSION`
+- `STORY / DISCOVERY CLOSED LOOP`
+- `LANGUAGE LEARNING VALUE`
+- `LV1 HUMAN CHALLENGE REVIEW`
+- `LV5 HUMAN CHALLENGE REVIEW`
+- `LV10 HUMAN CHALLENGE REVIEW`
+
+`DISTRACTOR QUALITY`, `DISTRACTOR MISCONCEPTION LOGIC`, `CHALLENGE PROVENANCE`, `LEVEL PROGRESSION`, `HISTORICAL TRUTH`, and `HUMAN CHALLENGE REVIEW` remain valid compatibility labels for evidence already recorded under the gates above; they do not define parallel standards. **Any required gate failure means `GOLD CHALLENGE = FAIL`.** A machine PASS cannot substitute for a human gate.
+
+### 3.4 Existing Gold is not grandfathered
+
+**EXISTING GOLD IS NOT GRANDFATHERED AGAINST NEW CANONICAL CHALLENGE QUALITY.** Founder approval, prior Gold status, merge history, or previously green tests do not prove compliance with a later Challenge Gold requirement.
+
+When Challenge Gold governance is newly adopted or materially strengthened, Phoenix MUST audit the **current approved Gold registry from merged current `main` at audit start**. Do not use a remembered count, stale handoff, or historical registry snapshot. Every Gold Journey in that registry MUST be audited at **Lv1-Lv10 across all three active modes**: `paragraphRebuild`, `grammarRepair`, and `missingSentence`. Lv1, Lv5, and Lv10 additionally require the human gate in §3.2. No item may receive `PASS BY LEGACY APPROVAL`.
+
+After the first merge that establishes a materially stronger Challenge Gold contract, the next content-development line MUST be an all-Gold Challenge audit and remediation before a new Journey Story enters development, unless the Founder explicitly changes priority. This convergence requirement does not authorize a parallel branch or PR and does not authorize unrelated product redesign.
+
+### 3.5 All-Gold audit matrix and audit-first policy
+
+The canonical **PHOENIX ALL-GOLD CHALLENGE MATRIX** records one row per `Journey × Level × Mode`. Each row MUST record at least: `JOURNEY ID`, `LEVEL`, `MODE`, `PRIMARY LEARNING INTENT`, optional `SECONDARY INTENT`, `ACTIVE SOURCE`, `SOURCE PROVENANCE`, `TAUGHT BEFORE TESTED`, `CORRECT ANSWER`, `WHY CORRECT`, `ALTERNATIVE ANSWER AMBIGUITY`, `DISTRACTOR QUALITY`, `DISTRACTOR MISCONCEPTION`, `HISTORICAL TRUTH`, `LANGUAGE VALUE`, `STORY / DISCOVERY CONNECTION`, `LEVEL APPROPRIATENESS`, `COGNITIVE BAND`, `LEGACY CONTAMINATION`, `CROSS-JOURNEY CONTAMINATION`, and `RESULT`. `RESULT` is only `PASS` or `REPAIR REQUIRED`.
+
+Global convergence MUST use **AUDIT FIRST**. Do not mass-generate replacement questions before the defect inventory exists. Defects use these canonical audit codes: `TBT` teach-before-test violation; `AMB` ambiguous answer; `DST` weak distractor; `MODE` mode duplication; `PROV` provenance failure; `LEGACY` legacy contamination; `CROSS` cross-Journey contamination; `LEVEL` level mismatch; `PROG` weak cognitive progression; `HIST` historical-truth defect; `LANG` weak Chinese learning value; `LOOP` Story/Discovery closed-loop failure; `TEMPLATE` cross-Journey template repetition.
+
+Repair the smallest real defect. Prefer Challenge content, mapping, distractors, and level binding. If required knowledge is genuinely absent and belongs in the learning package, prefer the minimum Discovery teaching repair or Vocabulary provenance repair. Founder-approved Story spine, Human Story, and Memory Moment remain locked by default; Story is the last teaching layer to reopen and requires a concrete independent reason.
+
+### 3.6 Cross-Gold anti-template and content-shape protection
+
+Challenge quality process is standardized; Challenge content shape is not. **STANDARDIZE THE QUALITY PROCESS. DO NOT STANDARDIZE THE CONTENT SHAPE.**
+
+Cross-Gold human review MUST compare question logic, distractor logic, sentence skeleton, causal-question pattern, missing-sentence trick, paragraph-rebuild pattern, and grammar-error pattern. A remediation that copies one Challenge template and merely swaps city, person, building, artifact, or historical nouns is `TEMPLATE` and fails. Journey-specific Challenge must arise from that Journey's own Story, Discovery, language objective, historical mechanism, human relationship, and cultural identity.
+
+Historical Journeys should, where truthful and level-appropriate, let learners enter history through human experience. Challenge must not collapse into a history quiz: across the Journey it must preserve meaningful balance among Chinese language, Story comprehension, history/culture, and causal reasoning.
+
+### 3.7 Global cognitive and machine/human governance
+
+Every Gold Journey MUST demonstrate real Lv1→Lv10 cognitive growth. The default direction is `Recognition → Sequence → Causality → Relationship → Interpretation → Integrated Understanding`, subject to the canonical Three Gradients, Five Cognitive Bands, and current level governance. Longer sentences, longer options, or colder facts do not establish progression.
+
+Reasonable machine governance includes dynamic Gold-registry coverage, all-Gold Challenge coverage, mode coverage, runtime provenance, level mapping, teach-before-test, legacy and cross-Journey contamination, duplicate distractors, answer structural uniqueness, cognitive-band mapping, historical regression, and Challenge source mapping. Machine checks MUST NOT be described as proving fairness, naturalness, literary quality, or human-designed feel.
+
+All-Gold convergence is complete only when every current Gold Journey is `CHALLENGE GOLD PASS`, every level and mode has been audited, Lv1/Lv5/Lv10 human review passes for every Journey, cross-Gold anti-template review passes, no legacy or cross-Journey contamination remains, full regression passes, and the exact-head Preview passes.
 
 ## 4. Story requirements
 

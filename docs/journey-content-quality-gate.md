@@ -213,3 +213,9 @@ The gate includes `NO SILENT PRODUCT REPLACEMENT`: `ABSENCE OF AUTHORIZATION = P
 Challenge quality is governed in detail by [Phoenix Six-Stage Journey Standard §3](PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes). This gate only records its acceptance boundary to avoid a parallel standard.
 
 A Gold candidate MUST demonstrate: clear primary learning intent; teach-before-test; differentiated `paragraphRebuild` / `grammarRepair` / `missingSentence`; one defensible best answer; plausible and diagnosable distractors; active-content provenance; level-appropriate cognitive progression; Story/Discovery closed loop; Historical Truth; and human Lv1/Lv5/Lv10 Challenge review. Any required failure blocks the quality gate even when mode-presence tests and aggregate scores are green.
+
+### Existing-Gold Challenge convergence gate
+
+Challenge Gold detail remains owned by Phoenix Six-Stage Journey Standard §3. Existing Gold is not grandfathered: a later Challenge quality requirement triggers re-audit of the dynamic approved Gold registry from merged current `main`. Prior Gold approval or green CI cannot produce `PASS BY LEGACY APPROVAL`.
+
+The global gate requires complete Journey × Lv1-Lv10 × three-mode audit coverage, a defect inventory before mass rewrite, Lv1/Lv5/Lv10 human review for every Gold Journey, cross-Gold anti-template review, no legacy/cross-Journey contamination, and exact-head full regression/Preview evidence. Automated registry/provenance/coverage/TBT/duplication/mapping checks are machine evidence only; fairness, naturalness, misconception quality, and human-designed feel remain human gates.

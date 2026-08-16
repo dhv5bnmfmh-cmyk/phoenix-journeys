@@ -347,6 +347,13 @@ Detailed definitions are owned by [Phoenix Six-Stage Journey Standard §3](../PH
 | Level Progression | REQUIRED | Deeper reasoning across levels, not length inflation |
 | Story / Discovery Closed Loop | REQUIRED | Challenge reorganizes/applies taught Journey learning |
 | Historical Truth | REQUIRED | No cheap fabricated-history distractors or unsupported claims |
-| Human Challenge Review | REQUIRED | Lv1/Lv5/Lv10 human evidence |
+| Active Content Provenance | REQUIRED | Active Story/Discovery/Vocabulary or explicit current language objective; no inactive seed |
+| No Legacy Contamination | REQUIRED | No inactive/legacy Challenge content in active options or answer logic |
+| No Cross-Journey Contamination | REQUIRED | No other-Journey content in active options or answer logic |
+| Level-Appropriate Reasoning | REQUIRED | Reasoning fits current level and canonical cognitive band |
+| Cognitive Progression | REQUIRED | Lv1→Lv10 deepens reasoning rather than length/trivia |
+| Language Learning Value | REQUIRED | Chinese learning remains active even when Story/history/culture supplies context |
+| Human Challenge Review | REQUIRED | Separate Lv1, Lv5, and Lv10 human evidence |
+| Cross-Gold Anti-Template | REQUIRED for Gold convergence | No noun-swapped Challenge content shape |
 
-Any row not `PASS` with appropriate evidence blocks Gold Founder Review.
+Any required row not `PASS` with appropriate evidence means `GOLD CHALLENGE = FAIL` and blocks Gold Founder Review. Existing Gold is not grandfathered against later canonical Challenge quality.
