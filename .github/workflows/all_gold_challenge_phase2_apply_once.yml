@@ -22,6 +22,9 @@ jobs:
       - name: Refine Longmen anti-template grammar progression
         run: python3 tools/refine_longmen_challenge_profile.py
 
+      - name: Update all-Gold snapshot harness for current runtime
+        run: python3 tools/update_all_gold_snapshot_harness.py
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -39,6 +42,7 @@ jobs:
             lib/data/all_gold_challenge_gold_profiles.dart \
             lib/widgets/journey_challenge_panel.dart \
             test/all_gold_challenge_phase2_contract_test.dart \
+            test/all_gold_challenge_runtime_snapshot_test.dart \
             > ../phase2-format.log 2>&1
           status=$?
           cat ../phase2-format.log
@@ -80,6 +84,6 @@ jobs:
         run: |
           git config user.name "Phoenix Remediation Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add app/lib/data/all_gold_challenge_gold_profiles.dart app/lib/widgets/journey_challenge_panel.dart app/test/all_gold_challenge_phase2_contract_test.dart
+          git add app/lib/data/all_gold_challenge_gold_profiles.dart app/lib/widgets/journey_challenge_panel.dart app/test/all_gold_challenge_phase2_contract_test.dart app/test/all_gold_challenge_runtime_snapshot_test.dart
           git commit -m "remediate: wire Journey-specific all-Gold Challenges"
           git push origin HEAD:dev/current
