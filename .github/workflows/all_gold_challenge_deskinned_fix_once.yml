@@ -25,6 +25,9 @@ jobs:
       - name: Close Datong-reference grammar collisions
         run: python3 tools/close_datong_reference_grammar_collisions.py
 
+      - name: Close residual de-skinned collisions
+        run: python3 tools/close_remaining_deskinned_collisions.py
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
