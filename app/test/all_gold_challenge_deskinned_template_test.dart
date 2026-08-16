@@ -37,7 +37,8 @@ void main() {
     expect(
       defects,
       isEmpty,
-      reason: 'De-skinned grammar template collisions:\n${defects.join('\n\n')}',
+      reason:
+          'De-skinned grammar template collisions:\n${defects.join('\n\n')}',
     );
   });
 
