@@ -16,6 +16,9 @@ jobs:
       - name: Check out exact remediation head
         uses: actions/checkout@v4
 
+      - name: Make distractor naturalizer duplicate-safe
+        run: python3 tools/fix_naturalizer_dedup.py
+
       - name: Naturalize all non-Datong grammar distractors
         run: python3 tools/naturalize_all_gold_grammar_distractors.py
 
