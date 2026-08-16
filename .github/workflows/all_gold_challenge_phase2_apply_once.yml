@@ -1,0 +1,62 @@
+name: All-Gold Challenge Phase2 Apply Once
+
+on:
+  push:
+    branches:
+      - dev/current
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: contains(github.event.head_commit.message, 'run all-Gold Challenge phase2 apply')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact remediation head
+        uses: actions/checkout@v4
+
+      - name: Apply Journey-specific Challenge runtime wiring
+        run: python3 tools/apply_all_gold_challenge_phase2.py
+
+      - name: Format Challenge Dart files
+        working-directory: app
+        run: >-
+          dart format
+          lib/data/all_gold_challenge_gold_profiles.dart
+          lib/widgets/journey_challenge_panel.dart
+          test/all_gold_challenge_phase2_contract_test.dart
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Run profile integrity contracts
+        working-directory: app
+        run: flutter test test/all_gold_challenge_phase2_contract_test.dart --reporter expanded
+
+      - name: Run all-Gold active runtime snapshot test
+        working-directory: app
+        run: flutter test test/all_gold_challenge_runtime_snapshot_test.dart --reporter expanded
+
+      - name: Analyze affected runtime
+        working-directory: app
+        run: flutter analyze lib/data/all_gold_challenge_gold_profiles.dart lib/widgets/journey_challenge_panel.dart test/all_gold_challenge_phase2_contract_test.dart test/all_gold_challenge_runtime_snapshot_test.dart
+
+      - name: Verify whitespace
+        run: git diff --check
+
+      - name: Commit validated Phase2 runtime
+        shell: bash
+        run: |
+          git config user.name "Phoenix Remediation Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add app/lib/data/all_gold_challenge_gold_profiles.dart app/lib/widgets/journey_challenge_panel.dart app/test/all_gold_challenge_phase2_contract_test.dart
+          git commit -m "remediate: wire Journey-specific all-Gold Challenges"
+          git push origin HEAD:dev/current
