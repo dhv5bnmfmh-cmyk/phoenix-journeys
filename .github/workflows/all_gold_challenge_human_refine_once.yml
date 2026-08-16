@@ -16,6 +16,9 @@ jobs:
       - name: Check out exact remediation head
         uses: actions/checkout@v4
 
+      - name: Fix human-gate helper locator
+        run: python3 tools/fix_human_gate_helper.py
+
       - name: Apply human-gate Challenge refinements
         run: python3 tools/refine_all_gold_human_gate.py
 
