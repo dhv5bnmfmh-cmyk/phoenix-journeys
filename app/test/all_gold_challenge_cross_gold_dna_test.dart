@@ -4,6 +4,7 @@ import 'package:phoenix_journeys/data/all_gold_challenge_gold_profiles.dart';
 void main() {
   test('no two Gold Journeys share a four-level grammar-target run', () {
     final seen = <String, String>{};
+    final collisions = <String>[];
     for (final profile in nonDatongGoldChallengeProfiles.values) {
       for (var start = 0; start <= profile.grammar.length - 4; start++) {
         final signature = profile.grammar
@@ -11,16 +12,20 @@ void main() {
             .take(4)
             .map((item) => item.targetId)
             .join('>');
+        final current = '${profile.journeyId} Lv${start + 1}-Lv${start + 4}';
         final previous = seen[signature];
-        expect(
-          previous,
-          isNull,
-          reason:
-              '${profile.journeyId} Lv${start + 1}-Lv${start + 4} duplicates $previous: $signature',
-        );
-        seen[signature] = '${profile.journeyId} Lv${start + 1}-Lv${start + 4}';
+        if (previous != null) {
+          collisions.add('$current duplicates $previous: $signature');
+        } else {
+          seen[signature] = current;
+        }
       }
     }
+    expect(
+      collisions,
+      isEmpty,
+      reason: 'Cross-Gold grammar collisions:\n${collisions.join('\n')}',
+    );
   });
 
   test('level-aware Story windows materially move from Lv1 to Lv10', () {
@@ -77,15 +82,29 @@ void main() {
       '其他',
       '不正确',
     };
+    final defects = <String>[];
     for (final profile in nonDatongGoldChallengeProfiles.values) {
-      for (final item in profile.storyDistractors) {
-        expect(genericFillers.contains(item.misconception.trim()), isFalse);
-        expect(item.misconception.trim().length, greaterThanOrEqualTo(8));
+      for (var index = 0; index < profile.storyDistractors.length; index++) {
+        final value = profile.storyDistractors[index].misconception.trim();
+        if (genericFillers.contains(value) || value.length < 8) {
+          defects.add(
+            '${profile.journeyId} story distractor ${index + 1}: "$value" (${value.length})',
+          );
+        }
       }
-      for (final grammar in profile.grammar) {
-        expect(genericFillers.contains(grammar.misconception.trim()), isFalse);
-        expect(grammar.misconception.trim().length, greaterThanOrEqualTo(8));
+      for (var level = 1; level <= profile.grammar.length; level++) {
+        final value = profile.grammar[level - 1].misconception.trim();
+        if (genericFillers.contains(value) || value.length < 8) {
+          defects.add(
+            '${profile.journeyId} Lv$level grammar: "$value" (${value.length})',
+          );
+        }
       }
     }
+    expect(
+      defects,
+      isEmpty,
+      reason: 'Weak misconception rationales:\n${defects.join('\n')}',
+    );
   });
 }
