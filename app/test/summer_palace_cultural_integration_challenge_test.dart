@@ -104,7 +104,8 @@ void main() {
       await _tap(tester, 'challenge-submit');
       await _tap(tester, 'challenge-dialog-action');
 
-      expect(find.text('补回故事中消失的一句'), findsOneWidget);
+      expect(find.textContaining('从前后文判断'), findsWidgets);
+      expect(find.textContaining('放下相机'), findsWidgets);
       await _tap(tester, 'challenge-option-correct');
       await _tap(tester, 'challenge-submit');
       _expectNoQaLanguageInVisibleChallenge();
