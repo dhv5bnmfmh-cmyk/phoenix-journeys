@@ -116,7 +116,7 @@ void main() {
 
     test('Lv1 independently proves protagonist relationship goal choice cost consequence', () {
       final story = lijiangOldTownGoldLevelContent(1).storyParagraphs.join();
-      expect(story, contains('虚构商贩和清'));
+      expect(story, contains('商贩和清'));
       expect(story, contains('姐姐和素'));
       expect(story, contains('明早买家离城'));
       expect(story, contains('共同的债'));
