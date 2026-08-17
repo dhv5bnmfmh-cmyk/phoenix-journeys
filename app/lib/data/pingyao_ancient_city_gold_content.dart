@@ -221,7 +221,7 @@ const pingyaoAncientCityWords = <WordEntry>[
   WordEntry(word:'核验',pinyin:'héyàn',partOfSpeech:'动词',simpleChinese:'检查票据、金额或信息是否真实相符。',translation:'Kiểm tra chứng từ và thông tin có khớp, có thật hay không.',englishDefinition:'to verify',symbol:'🔍'),
   WordEntry(word:'兑付',pinyin:'duìfù',partOfSpeech:'动词',simpleChinese:'按票据或约定支付相应款项。',translation:'Chi trả tiền theo chứng từ hoặc thỏa thuận.',englishDefinition:'to redeem or pay',symbol:'💱'),
   WordEntry(word:'柜台',pinyin:'guìtái',partOfSpeech:'名词',simpleChinese:'商店或票号办理业务的台面。',translation:'Quầy giao dịch trong cửa hàng hoặc phiếu hiệu.',englishDefinition:'service counter',symbol:'🧾'),
-  WordEntry(word:'印记',pinyin:'yìnjì',partOfSpeech:'名词',simpleChinese:'用于识别或确认文件的印章痕迹。',translation:'Dấu dùng để nhận biết hoặc xác nhận giấy tờ.',englishDefinition:'seal mark',symbol:'🔖'),
+  WordEntry(word:'责任',pinyin:'zérèn',partOfSpeech:'名词',simpleChinese:'对事情、关系或结果应当承担的义务。',translation:'Trách nhiệm phải gánh đối với công việc, quan hệ hoặc kết quả.',englishDefinition:'responsibility',symbol:'⚖️'),
   WordEntry(word:'异地',pinyin:'yìdì',partOfSpeech:'名词',simpleChinese:'与当前所在地不同的地方。',translation:'Một nơi khác với nơi hiện tại.',englishDefinition:'another location',symbol:'🧭'),
   WordEntry(word:'商路',pinyin:'shānglù',partOfSpeech:'名词',simpleChinese:'商人和货物往来的路线。',translation:'Tuyến đường thương mại.',englishDefinition:'trade route',symbol:'🛤️'),
   WordEntry(word:'风险',pinyin:'fēngxiǎn',partOfSpeech:'名词',simpleChinese:'可能造成损失或失败的不确定性。',translation:'Rủi ro có thể gây mất mát hoặc thất bại.',englishDefinition:'risk',symbol:'⚠️'),

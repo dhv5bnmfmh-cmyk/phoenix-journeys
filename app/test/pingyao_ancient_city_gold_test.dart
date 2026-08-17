@@ -120,7 +120,9 @@ void main() {
         }
       }
       expect(pingyaoDiscoveriesForLevel(1).map((e) => e.text).join(), contains('金融中心'));
-      expect(pingyaoDiscoveriesForLevel(5).map((e) => e.text).join(), contains('谁必须离开'));
+      final lv5Discovery = pingyaoDiscoveriesForLevel(5).map((e) => e.text).join();
+      expect(lv5Discovery, contains('钱怎样移动'));
+      expect(lv5Discovery, contains('人是否必须跟着移动'));
       expect(pingyaoDiscoveriesForLevel(10).map((e) => e.text).join(), contains('虚构普通人'));
       expect(pingyaoAncientCityAllDiscoveries, hasLength(26));
     });
@@ -153,20 +155,27 @@ void main() {
       expect(gold.storyDistractors.length, greaterThanOrEqualTo(6));
       expect(gold.paragraphAnchors.last - gold.paragraphAnchors.first, greaterThanOrEqualTo(.75));
       expect(gold.missingAnchors.last - gold.missingAnchors.first, greaterThanOrEqualTo(.75));
-      final allActive = <String>[
-        for (var level = 1; level <= 10; level++) pingyaoAncientCityGoldLevelContent(level).storyParagraphs.join(),
-        for (var level = 1; level <= 10; level++) pingyaoDiscoveriesForLevel(level).map((entry) => entry.text).join(),
-      ].join();
-      for (final grammar in gold.grammar) {
+      String normalizeTeaching(String value) =>
+          value.replaceAll(RegExp(r'[\s，。；：“”？、‘’（）]'), '');
+      for (var index = 0; index < gold.grammar.length; index++) {
+        final grammar = gold.grammar[index];
         expect(grammar.correctReplacement, isNot(grammar.brokenSegment));
         expect(<String>{grammar.correctReplacement, ...grammar.distractors}, hasLength(4));
         expect(grammar.misconception.trim().length, greaterThanOrEqualTo(8));
-        final token = grammar.correctReplacement.replaceAll(RegExp(r'[，。；：“”？、]'), '');
-        final taughtToken = token.length <= 8 ? token : token.substring(0, 8);
+
+        final taughtThroughLevel = <String>[
+          for (var level = 1; level <= index + 1; level++)
+            pingyaoAncientCityGoldLevelContent(level).storyParagraphs.join(),
+          for (var level = 1; level <= index + 1; level++)
+            pingyaoDiscoveriesForLevel(level).map((entry) => entry.text).join(),
+        ].join();
+
         expect(
-          allActive.contains(taughtToken) || allActive.contains(grammar.correctedSentence.replaceAll('。', '')),
+          normalizeTeaching(taughtThroughLevel)
+              .contains(normalizeTeaching(grammar.correctReplacement)),
           isTrue,
-          reason: grammar.targetId,
+          reason:
+              '${grammar.targetId} must be taught in current or earlier Story/Discovery',
         );
       }
     });

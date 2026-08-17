@@ -8,6 +8,7 @@ import 'package:phoenix_journeys/data/journey_expansion_catalog.dart';
 import 'package:phoenix_journeys/data/lijiang_old_town_gold_content.dart';
 import 'package:phoenix_journeys/data/honghe_hani_rice_terraces_gold_content.dart';
 import 'package:phoenix_journeys/data/luoyang_longmen_one_pass.dart';
+import 'package:phoenix_journeys/data/pingyao_ancient_city_gold_content.dart';
 import 'package:phoenix_journeys/data/world_story_runtime.dart';
 
 void main() {
@@ -110,6 +111,17 @@ void main() {
         expect(
           journey.discoveries,
           hasLength(hongheHaniRiceTerracesGoldLevelContent(5).discoveries.length),
+          reason: journey.id,
+        );
+      } else if (journey.id == pingyaoAncientCityJourneyId) {
+        expect(
+          journey.content.storyParagraphs,
+          pingyaoAncientCityGoldLevelContent(5).storyParagraphs,
+          reason: 'Pingyao candidate catalog metadata must bind active Lv5 Story',
+        );
+        expect(
+          journey.discoveries,
+          hasLength(pingyaoAncientCityGoldLevelContent(5).discoveries.length),
           reason: journey.id,
         );
       } else if (journey.id == 'jiangmen-kaiping-diaolou') {
