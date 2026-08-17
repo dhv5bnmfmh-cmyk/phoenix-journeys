@@ -288,11 +288,15 @@ void main() {
       ]));
     });
 
-    test('candidate semantic fingerprint passes Rule A/Rule B against approved Gold', () {
+    test('promoted semantic fingerprint remains collision-free against approved Gold', () {
       final gate = lijiangOldTownSemanticGate();
       expect(gate.isGoldReady, isTrue, reason: gate.status);
-      expect(gate.comparisons, isNotEmpty);
+      expect(gate.comparisons, hasLength(12));
       expect(gate.comparisons.where((item) => item.isCollision), isEmpty);
+      expect(
+        approvedGoldSemanticFingerprints[lijiangOldTownJourneyId],
+        same(lijiangOldTownGoldSemanticFingerprint),
+      );
       expect(
         lijiangOldTownCandidateSemanticFingerprint.mechanisms.keys.toSet(),
         NarrativeSemanticDimension.values.toSet(),
@@ -305,13 +309,17 @@ void main() {
       );
     });
 
-    test('candidate Narrative DNA is unique and does not self-promote into approved registry', () {
+    test('Founder-approved merged Lijiang is in both approved Gold registries', () {
       expect(lijiangNarrativeDnaIsUniqueAgainstApproved(), isTrue);
       expect(
         approvedNarrativeDnaCatalog.any(
           (record) => record.journeyId == lijiangOldTownJourneyId,
         ),
-        isFalse,
+        isTrue,
+      );
+      expect(
+        approvedGoldSemanticFingerprints.containsKey(lijiangOldTownJourneyId),
+        isTrue,
       );
     });
   });

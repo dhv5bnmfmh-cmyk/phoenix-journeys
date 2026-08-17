@@ -19,21 +19,21 @@ void main() {
     );
   });
 
-  test('approved Gold catalog has twelve identities and sixty-six clean pairs', () {
-    expect(approvedGoldSemanticFingerprints, hasLength(12));
+  test('approved Gold catalog has thirteen identities and seventy-eight clean pairs', () {
+    expect(approvedGoldSemanticFingerprints, hasLength(13));
     final audit = auditApprovedGoldSemanticPairs();
-    expect(audit, hasLength(66));
+    expect(audit, hasLength(78));
     expect(audit.where((item) => item.ruleA || item.ruleB), isEmpty);
   });
 
-  test('Kaiping is approved Gold and remains distinct from the other eleven', () {
+  test('Kaiping is approved Gold and remains distinct from the other twelve', () {
     final kaiping = approvedGoldSemanticFingerprints[kaipingDiaolouJourneyId];
     expect(kaiping, same(kaipingGoldCandidateSemanticFingerprint));
     expect(semanticEvidenceContractErrors(kaiping!), isEmpty);
     expect(semanticEvidenceProvenanceErrors(kaiping), isEmpty);
 
     final comparisons = semanticDifferenceMatrixAgainstApprovedGold(kaiping);
-    expect(comparisons, hasLength(11));
+    expect(comparisons, hasLength(12));
     expect(comparisons.where((item) => item.isCollision), isEmpty);
     final longmen = comparisons.singleWhere(
       (item) =>
