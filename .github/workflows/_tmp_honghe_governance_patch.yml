@@ -1,0 +1,239 @@
+name: Temporary Honghe governance patch
+
+on:
+  push:
+    branches:
+      - dev/current
+    paths:
+      - .github/workflows/_tmp_honghe_governance_patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: dev/current
+          fetch-depth: 0
+      - name: Apply exact Honghe post-merge governance closure
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          def must_replace(text, old, new, label, count=1):
+              actual = text.count(old)
+              if actual != count:
+                  raise SystemExit(f'{label}: expected {count} matches, got {actual}')
+              return text.replace(old, new, count)
+
+          # 1) Promote exact candidate Narrative DNA into the approved catalog.
+          dna_candidate_path = Path('app/lib/data/honghe_hani_rice_terraces_narrative_dna.dart')
+          dna_catalog_path = Path('app/lib/data/journey_narrative_dna_catalog.dart')
+          candidate_text = dna_candidate_path.read_text()
+          catalog = dna_catalog_path.read_text()
+          m = re.search(
+              r"const hongheHaniRiceTerracesCandidateNarrativeDna = JourneyNarrativeDnaRecord\([\s\S]*?\n\);",
+              candidate_text,
+          )
+          if not m:
+              raise SystemExit('Honghe candidate Narrative DNA block not found')
+          approved_dna = m.group(0).replace(
+              'hongheHaniRiceTerracesCandidateNarrativeDna',
+              'hongheHaniRiceTerracesNarrativeDna',
+              1,
+          )
+          marker = 'final approvedNarrativeDnaCatalog =\n'
+          if marker not in catalog:
+              raise SystemExit('approved Narrative DNA catalog marker not found')
+          catalog = catalog.replace(marker, approved_dna + '\n\n' + marker, 1)
+          catalog = must_replace(
+              catalog,
+              '  lijiangOldTownGoldNarrativeDna,\n]);',
+              '  lijiangOldTownGoldNarrativeDna,\n  hongheHaniRiceTerracesNarrativeDna,\n]);',
+              'approved Narrative DNA membership',
+          )
+          dna_catalog_path.write_text(catalog)
+
+          # 2) Promote the exact candidate semantic fingerprint into the approved catalog.
+          semantic_candidate_path = Path('app/lib/data/honghe_hani_rice_terraces_semantic_fingerprint.dart')
+          semantic_catalog_path = Path('app/lib/data/journey_semantic_fingerprint_catalog.dart')
+          candidate_semantic = semantic_candidate_path.read_text()
+          semantic = semantic_catalog_path.read_text()
+
+          import_line = "import 'honghe_hani_rice_terraces_gold_content.dart';\n"
+          if import_line not in semantic:
+              anchor = "import 'gold_content_models.dart';\n"
+              semantic = must_replace(
+                  semantic,
+                  anchor,
+                  anchor + import_line,
+                  'Honghe Gold content import',
+              )
+
+          m = re.search(
+              r"final hongheHaniRiceTerracesCandidateSemanticFingerprint =\n    JourneySemanticFingerprint\([\s\S]*?\n\);",
+              candidate_semantic,
+          )
+          if not m:
+              raise SystemExit('Honghe candidate semantic fingerprint block not found')
+          approved_semantic = m.group(0)
+          approved_semantic = approved_semantic.replace(
+              'hongheHaniRiceTerracesCandidateSemanticFingerprint',
+              'hongheHaniRiceTerracesSemanticFingerprint',
+              1,
+          ).replace('_e(', '_hongheEvidence(')
+
+          helper = """NarrativeMechanismEvidence _hongheEvidence(
+  NarrativeSemanticDimension dimension,
+  NarrativeMechanismFamily mechanism,
+  String text,
+  String rationale,
+) =>
+    NarrativeMechanismEvidence(
+      journeyId: 'honghe-hani-rice-terraces',
+      dimension: dimension,
+      mechanism: mechanism,
+      activeSourceId: activeGoldStorySourceId,
+      sourceTexts: <String>[text],
+      semanticRationale: rationale,
+    );
+"""
+          marker = 'final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =\n'
+          if marker not in semantic:
+              raise SystemExit('approved semantic catalog marker not found')
+          semantic = semantic.replace(
+              marker,
+              helper + '\n' + approved_semantic + '\n\n' + marker,
+              1,
+          )
+          semantic = must_replace(
+              semantic,
+              '  _lijiang: lijiangOldTownGoldSemanticFingerprint,\n});',
+              "  _lijiang: lijiangOldTownGoldSemanticFingerprint,\n  'honghe-hani-rice-terraces': hongheHaniRiceTerracesSemanticFingerprint,\n});",
+              'approved semantic membership',
+          )
+          semantic = must_replace(
+              semantic,
+              "  if (journeyId == _lijiang) {\n    return List<String>.generate(10, (index) => lijiangOldTownGoldLevelContent(index + 1).storyParagraphs.join('\\n')).join('\\n');\n  }\n  return baseline.activeCanonicalGoldStoryText(journeyId);",
+              "  if (journeyId == _lijiang) {\n    return List<String>.generate(10, (index) => lijiangOldTownGoldLevelContent(index + 1).storyParagraphs.join('\\n')).join('\\n');\n  }\n  if (journeyId == 'honghe-hani-rice-terraces') {\n    return List<String>.generate(10, (index) => hongheHaniRiceTerracesGoldLevelContent(index + 1).storyParagraphs.join('\\n')).join('\\n');\n  }\n  return baseline.activeCanonicalGoldStoryText(journeyId);",
+              'Honghe active canonical Story resolver',
+          )
+          semantic_catalog_path.write_text(semantic)
+
+          # 3) Close Honghe's explicit lifecycle contract without changing learner content.
+          honghe_test_path = Path('app/test/honghe_hani_rice_terraces_gold_test.dart')
+          test = honghe_test_path.read_text()
+          old = """    test('candidate Narrative DNA is unique but lifecycle remains pre-approval', () {
+      expect(hongheNarrativeDnaIsUniqueAgainstApproved(), isTrue);
+      expect(
+        approvedNarrativeDnaCatalog.any(
+          (record) => record.journeyId == hongheHaniRiceTerracesJourneyId,
+        ),
+        isFalse,
+      );
+      expect(
+        approvedGoldSemanticFingerprints.containsKey(hongheHaniRiceTerracesJourneyId),
+        isFalse,
+      );
+      expect(
+        nonDatongGoldChallengeProfiles.containsKey(hongheHaniRiceTerracesJourneyId),
+        isTrue,
+      );
+    });
+"""
+          new = """    test('approved lifecycle preserves the Founder-approved Honghe candidate', () {
+      expect(hongheNarrativeDnaIsUniqueAgainstApproved(), isTrue);
+      final approvedDna = approvedNarrativeDnaCatalog.singleWhere(
+        (record) => record.journeyId == hongheHaniRiceTerracesJourneyId,
+      );
+      expect(
+        approvedDna.majorDimensions,
+        hongheHaniRiceTerracesCandidateNarrativeDna.majorDimensions,
+      );
+      final approvedSemantic =
+          approvedGoldSemanticFingerprints[hongheHaniRiceTerracesJourneyId];
+      expect(approvedSemantic, isNotNull);
+      expect(
+        approvedSemantic!.surfaceIdentity,
+        hongheHaniRiceTerracesCandidateSemanticFingerprint.surfaceIdentity,
+      );
+      expect(
+        approvedSemantic.mechanisms,
+        hongheHaniRiceTerracesCandidateSemanticFingerprint.mechanisms,
+      );
+      expect(semanticEvidenceContractErrors(approvedSemantic), isEmpty);
+      expect(
+        nonDatongGoldChallengeProfiles.containsKey(hongheHaniRiceTerracesJourneyId),
+        isTrue,
+      );
+    });
+"""
+          test = must_replace(test, old, new, 'Honghe lifecycle test')
+          honghe_test_path.write_text(test)
+
+          # 4) Update only direct approved-Gold membership/count contracts.
+          guangzhou_path = Path('app/test/guangzhou_future_gold_candidate_test.dart')
+          text = guangzhou_path.read_text()
+          if text.count('hasLength(13)') != 2:
+              raise SystemExit('Guangzhou approved count anchors changed')
+          text = text.replace('hasLength(13)', 'hasLength(14)')
+          guangzhou_path.write_text(text)
+
+          anti_path = Path('app/test/journey_semantic_anti_template_gate_test.dart')
+          text = anti_path.read_text()
+          text = must_replace(
+              text,
+              "  'lijiang-old-town',\n};",
+              "  'lijiang-old-town',\n  'honghe-hani-rice-terraces',\n};",
+              'all-approved-Gold ID set',
+          )
+          anti_path.write_text(text)
+
+          compliance_path = Path('app/test/longmen_kaiping_compliance_closure_test.dart')
+          text = compliance_path.read_text()
+          text = must_replace(
+              text,
+              "test('approved Gold catalog has thirteen identities and seventy-eight clean pairs', () {",
+              "test('approved Gold catalog has fourteen identities and ninety-one clean pairs', () {",
+              'approved Gold count test title',
+          )
+          text = must_replace(text, 'hasLength(13)', 'hasLength(14)', 'approved Gold count')
+          text = must_replace(text, 'hasLength(78)', 'hasLength(91)', 'approved Gold pair count')
+          text = must_replace(
+              text,
+              "test('Kaiping is approved Gold and remains distinct from the other twelve', () {",
+              "test('Kaiping is approved Gold and remains distinct from the other thirteen', () {",
+              'Kaiping comparison title',
+          )
+          text = must_replace(text, 'hasLength(12)', 'hasLength(13)', 'Kaiping comparison count')
+          compliance_path.write_text(text)
+          PY
+
+          dart format \
+            app/lib/data/journey_narrative_dna_catalog.dart \
+            app/lib/data/journey_semantic_fingerprint_catalog.dart \
+            app/test/honghe_hani_rice_terraces_gold_test.dart \
+            app/test/guangzhou_future_gold_candidate_test.dart \
+            app/test/journey_semantic_anti_template_gate_test.dart \
+            app/test/longmen_kaiping_compliance_closure_test.dart || true
+
+          git diff --check
+          git rm .github/workflows/_tmp_honghe_governance_patch.yml
+          git diff --check
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add \
+            app/lib/data/journey_narrative_dna_catalog.dart \
+            app/lib/data/journey_semantic_fingerprint_catalog.dart \
+            app/test/honghe_hani_rice_terraces_gold_test.dart \
+            app/test/guangzhou_future_gold_candidate_test.dart \
+            app/test/journey_semantic_anti_template_gate_test.dart \
+            app/test/longmen_kaiping_compliance_closure_test.dart \
+            .github/workflows/_tmp_honghe_governance_patch.yml
+          git commit -m 'chore: close Honghe Gold governance lifecycle'
+          git push origin HEAD:dev/current
