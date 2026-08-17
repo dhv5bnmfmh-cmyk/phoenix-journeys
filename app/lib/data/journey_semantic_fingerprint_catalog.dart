@@ -4,6 +4,7 @@ import 'datong_yungang_gold_content.dart';
 import 'kaiping_diaolou_gold_content.dart';
 import 'journey_expansion_catalog.dart';
 import 'journey_semantic_fingerprint_baseline_snapshot.dart' as baseline;
+import 'lijiang_old_town_gold_content.dart';
 import 'luoyang_longmen_level_depth.dart';
 import 'luoyang_longmen_one_pass.dart';
 import 'summer_palace_adaptive_story_levels.dart';
@@ -1170,6 +1171,7 @@ final summerPalaceCulturalIntegrationSemanticFingerprint = JourneySemanticFinger
 );
 
 const _datong = 'datong-yungang-grottoes';
+const _lijiang = lijiangOldTownJourneyId;
 
 final datongYungangGoldSemanticFingerprint = JourneySemanticFingerprint(
   journeyId: _datong,
@@ -1206,6 +1208,118 @@ final datongYungangGoldSemanticFingerprint = JourneySemanticFingerprint(
   ]),
 );
 
+final lijiangOldTownGoldSemanticFingerprint = JourneySemanticFingerprint(
+  journeyId: _lijiang,
+  surfaceIdentity:
+      'He Qing / late-Qing fictional small trader / older sister He Su / jointly owned wet tea / canal bridge bucket relay',
+  mechanisms: Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.unmodifiable({
+    NarrativeSemanticDimension.openingMechanism:
+        NarrativeMechanismFamily.marketClosingBeforeSingleSaleWindow,
+    NarrativeSemanticDimension.protagonistRolePattern:
+        NarrativeMechanismFamily.smallTraderProtectingSharedLivelihood,
+    NarrativeSemanticDimension.relationshipGeometry:
+        NarrativeMechanismFamily.jointOwnersUnderSharedDebt,
+    NarrativeSemanticDimension.goalMechanism:
+        NarrativeMechanismFamily.preserveSharedLivelihoodBeforeBuyerLeaves,
+    NarrativeSemanticDimension.conflictMechanism:
+        NarrativeMechanismFamily.privateLivelihoodAssetVsImmediateSharedSafety,
+    NarrativeSemanticDimension.choiceMechanism:
+        NarrativeMechanismFamily.destroySharedAssetToOpenEmergencyAccess,
+    NarrativeSemanticDimension.climaxMechanism:
+        NarrativeMechanismFamily.bridgeClearsAsCargoFallsIntoCanal,
+    NarrativeSemanticDimension.consequenceMechanism:
+        NarrativeMechanismFamily.emergencyWaterFlowContainsHazardWithTradeLoss,
+    NarrativeSemanticDimension.transformationMechanism:
+        NarrativeMechanismFamily.unilateralControlToJointlyBorneLoss,
+    NarrativeSemanticDimension.endingMechanism:
+        NarrativeMechanismFamily.sharedCleanupWithoutVerbalReconciliation,
+    NarrativeSemanticDimension.culturalAnchorFunction:
+        NarrativeMechanismFamily.distributedWaterInfrastructureEnablesEmergencyResponse,
+    NarrativeSemanticDimension.artifactObjectNarrativeFunction:
+        NarrativeMechanismFamily.wetTradeGoodsEmbodyIrreversibleSharedCost,
+    NarrativeSemanticDimension.movementSpatialMechanism:
+        NarrativeMechanismFamily.blockedBridgeToBucketRelay,
+    NarrativeSemanticDimension.temporalPressureMechanism:
+        NarrativeMechanismFamily.nextMorningTradeWindowAfterMarketClose,
+    NarrativeSemanticDimension.supportingCharacterFunction:
+        NarrativeMechanismFamily.sisterOpposesLossThenSharesCleanup,
+    NarrativeSemanticDimension.dramaticEngineFamily:
+        NarrativeMechanismFamily.placeInfrastructureForcesLivelihoodSacrificeUnderHazard,
+  }),
+  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
+    _activeEvidence(
+      _lijiang,
+      NarrativeSemanticDimension.openingMechanism,
+      NarrativeMechanismFamily.marketClosingBeforeSingleSaleWindow,
+      <String>[lijiangOldTownGoldLevelContent(1).storyParagraphs.first],
+      'The Story opens after Sifang market dispersal with one next-morning sale window; this is an economic timing condition, not a generic school deadline or aesthetic opportunity.',
+    ),
+    _activeEvidence(
+      _lijiang,
+      NarrativeSemanticDimension.relationshipGeometry,
+      NarrativeMechanismFamily.jointOwnersUnderSharedDebt,
+      <String>[lijiangOldTownGoldLevelContent(5).storyParagraphs.first],
+      'The sister and brother jointly own the endangered tea and jointly owe the debt; removing the sister deletes the authority conflict inside the choice.',
+    ),
+    _activeEvidence(
+      _lijiang,
+      NarrativeSemanticDimension.conflictMechanism,
+      NarrativeMechanismFamily.privateLivelihoodAssetVsImmediateSharedSafety,
+      <String>[lijiangOldTownGoldLevelContent(5).storyParagraphs.first],
+      'The same jointly owned livelihood asset must be preserved for debt repayment yet physically blocks the shortest access across the canal during a fictional fire.',
+    ),
+    _activeEvidence(
+      _lijiang,
+      NarrativeSemanticDimension.choiceMechanism,
+      NarrativeMechanismFamily.destroySharedAssetToOpenEmergencyAccess,
+      <String>[lijiangOldTownGoldLevelContent(5).storyParagraphs.last],
+      'He Qing irreversibly cuts lashings and accepts damage to property that is not solely his, directly creating emergency passage.',
+    ),
+    _activeEvidence(
+      _lijiang,
+      NarrativeSemanticDimension.climaxMechanism,
+      NarrativeMechanismFamily.bridgeClearsAsCargoFallsIntoCanal,
+      <String>[lijiangOldTownGoldLevelContent(10).storyParagraphs.last],
+      'The climax is a physical change of state: the last rope parts, cargo falls and a narrow strip of bridge becomes usable.',
+    ),
+    _activeEvidence(
+      _lijiang,
+      NarrativeSemanticDimension.consequenceMechanism,
+      NarrativeMechanismFamily.emergencyWaterFlowContainsHazardWithTradeLoss,
+      <String>[lijiangOldTownGoldLevelContent(6).storyParagraphs.last],
+      'The immediate benefit and cost coexist: buckets cross the opened bridge while wet tea loses its sale and the debt remains.',
+    ),
+    _activeEvidence(
+      _lijiang,
+      NarrativeSemanticDimension.transformationMechanism,
+      NarrativeMechanismFamily.unilateralControlToJointlyBorneLoss,
+      <String>[lijiangOldTownGoldLevelContent(10).storyParagraphs.last],
+      'The relationship changes without declaring a winner: the sister first opposes unilateral loss, then joins the bucket relay and later shares the carrying weight.',
+    ),
+    _activeEvidence(
+      _lijiang,
+      NarrativeSemanticDimension.endingMechanism,
+      NarrativeMechanismFamily.sharedCleanupWithoutVerbalReconciliation,
+      <String>[lijiangOldTownGoldLevelContent(10).storyParagraphs.last],
+      'The ending refuses a reconciliation summary; the carrying pole shifts until its weight is literally borne between the siblings.',
+    ),
+    _activeEvidence(
+      _lijiang,
+      NarrativeSemanticDimension.culturalAnchorFunction,
+      NarrativeMechanismFamily.distributedWaterInfrastructureEnablesEmergencyResponse,
+      <String>[lijiangOldTownGoldLevelContent(8).storyParagraphs.first],
+      'Verified Lijiang canals, bridges, timber lanes and fire-prevention water change what actions are possible; water is a causal infrastructure, not decorative heritage vocabulary.',
+    ),
+    _activeEvidence(
+      _lijiang,
+      NarrativeSemanticDimension.dramaticEngineFamily,
+      NarrativeMechanismFamily.placeInfrastructureForcesLivelihoodSacrificeUnderHazard,
+      <String>[lijiangOldTownGoldLevelContent(10).storyParagraphs.join('\n')],
+      'Place infrastructure turns a jointly owned commercial load into an immediate physical obstruction, forcing irreversible livelihood sacrifice to release emergency flow.',
+    ),
+  ]),
+);
+
 final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
     Map<String, JourneySemanticFingerprint>.unmodifiable({
   for (final entry in baseline.approvedGoldSemanticFingerprints.entries)
@@ -1223,6 +1337,7 @@ final Map<String, JourneySemanticFingerprint> approvedGoldSemanticFingerprints =
   _longmen: longmenGoldSemanticFingerprint,
   _kaiping: kaipingGoldCandidateSemanticFingerprint,
   _datong: datongYungangGoldSemanticFingerprint,
+  _lijiang: lijiangOldTownGoldSemanticFingerprint,
 });
 
 String activeCanonicalGoldStoryText(String journeyId) {
@@ -1250,6 +1365,9 @@ String activeCanonicalGoldStoryText(String journeyId) {
   }
   if (journeyId == _datong) {
     return List<String>.generate(10, (index) => datongYungangGoldLevelContent(index + 1).storyParagraphs.join('\n')).join('\n');
+  }
+  if (journeyId == _lijiang) {
+    return List<String>.generate(10, (index) => lijiangOldTownGoldLevelContent(index + 1).storyParagraphs.join('\n')).join('\n');
   }
   return baseline.activeCanonicalGoldStoryText(journeyId);
 }
