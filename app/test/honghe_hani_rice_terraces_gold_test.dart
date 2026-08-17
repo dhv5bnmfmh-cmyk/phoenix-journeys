@@ -322,18 +322,27 @@ void main() {
       );
     });
 
-    test('candidate Narrative DNA is unique but lifecycle remains pre-approval', () {
+    test('approved lifecycle preserves the Founder-approved Honghe candidate', () {
       expect(hongheNarrativeDnaIsUniqueAgainstApproved(), isTrue);
-      expect(
-        approvedNarrativeDnaCatalog.any(
-          (record) => record.journeyId == hongheHaniRiceTerracesJourneyId,
-        ),
-        isFalse,
+      final approvedDna = approvedNarrativeDnaCatalog.singleWhere(
+        (record) => record.journeyId == hongheHaniRiceTerracesJourneyId,
       );
       expect(
-        approvedGoldSemanticFingerprints.containsKey(hongheHaniRiceTerracesJourneyId),
-        isFalse,
+        approvedDna.majorDimensions,
+        hongheHaniRiceTerracesCandidateNarrativeDna.majorDimensions,
       );
+      final approvedSemantic =
+          approvedGoldSemanticFingerprints[hongheHaniRiceTerracesJourneyId];
+      expect(approvedSemantic, isNotNull);
+      expect(
+        approvedSemantic!.surfaceIdentity,
+        hongheHaniRiceTerracesCandidateSemanticFingerprint.surfaceIdentity,
+      );
+      expect(
+        approvedSemantic.mechanisms,
+        hongheHaniRiceTerracesCandidateSemanticFingerprint.mechanisms,
+      );
+      expect(semanticEvidenceContractErrors(approvedSemantic), isEmpty);
       expect(
         nonDatongGoldChallengeProfiles.containsKey(hongheHaniRiceTerracesJourneyId),
         isTrue,

@@ -5,7 +5,7 @@ import 'package:phoenix_journeys/data/journey_semantic_fingerprint_catalog.dart'
 
 void main() {
   test('promoted Guangzhou compares against every other Gold Journey', () {
-    expect(approvedGoldSemanticFingerprints, hasLength(13));
+    expect(approvedGoldSemanticFingerprints, hasLength(14));
     expect(
       approvedGoldSemanticFingerprints[guangzhouChenClanJourneyId],
       same(guangzhouChenClanGoldSemanticFingerprint),
@@ -39,7 +39,7 @@ void main() {
   });
 
   test('Guangzhou descriptive DNA is synchronized to current Story', () {
-    expect(approvedNarrativeDnaCatalog, hasLength(13));
+    expect(approvedNarrativeDnaCatalog, hasLength(14));
     expect(
       approvedNarrativeDnaCatalog.where(
         (record) => record.journeyId == guangzhouChenClanJourneyId,
