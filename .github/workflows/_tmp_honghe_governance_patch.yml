@@ -36,6 +36,6 @@ jobs:
           git diff --check
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add app/lib/data/journey_narrative_dna_catalog.dart app/lib/data/journey_semantic_fingerprint_catalog.dart app/test/honghe_hani_rice_terraces_gold_test.dart app/test/guangzhou_future_gold_candidate_test.dart app/test/journey_semantic_anti_template_gate_test.dart app/test/longmen_kaiping_compliance_closure_test.dart .github/workflows/_tmp_honghe_governance_patch.yml
+          git add -A
           git commit -m 'chore: close Honghe Gold governance lifecycle'
           git push origin HEAD:dev/current
