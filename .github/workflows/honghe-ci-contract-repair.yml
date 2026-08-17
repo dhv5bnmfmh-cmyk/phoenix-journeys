@@ -1,0 +1,33 @@
+name: Honghe CI Contract Repair
+
+on:
+  push:
+    branches: [dev/current]
+    paths:
+      - scripts/repair_honghe_ci_contracts.py
+      - .github/workflows/honghe-ci-contract-repair.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev/current
+          fetch-depth: 0
+      - name: Repair exact failed contracts
+        run: python scripts/repair_honghe_ci_contracts.py
+      - name: Validate patch
+        run: |
+          git diff --check
+          git diff -- app/test/seven_day_journey_catalog_test.dart app/test/daily_journey_engine_test.dart app/test/honghe_hani_rice_terraces_gold_test.dart
+      - name: Commit repair
+        run: |
+          git config user.name "phoenix-ci"
+          git config user.email "actions@users.noreply.github.com"
+          git add app/test/seven_day_journey_catalog_test.dart app/test/daily_journey_engine_test.dart app/test/honghe_hani_rice_terraces_gold_test.dart
+          git commit -m "test: reconcile Honghe dedicated candidate contracts"
+          git push origin HEAD:dev/current
