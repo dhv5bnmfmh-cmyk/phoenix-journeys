@@ -1,0 +1,28 @@
+name: Lijiang Alignment Fix
+
+on:
+  push:
+    branches:
+      - dev/current
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: dev/current
+          fetch-depth: 0
+      - run: python .github/lijiang_alignment_fix.py
+      - run: git diff --check
+      - shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/lib/data/lijiang_old_town_gold_content.dart app/test/lijiang_old_town_gold_test.dart
+          git commit -m 'fix: align Lijiang four-language Story depth'
+          git push origin HEAD:dev/current
