@@ -2,19 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
-int? _goldDiscoveryCount(String journeyId, int phoenixLevel) {
-  if (journeyId == 'beijing-summer-palace' ||
-      journeyId == 'suzhou-humble-administrators-garden' ||
-      journeyId == 'luoyang-longmen-grottoes' ||
-      journeyId == 'jiangmen-kaiping-diaolou' ||
-      journeyId == 'datong-yungang-grottoes') {
-    return phoenixLevel <= 4 ? 2 : 3;
-  }
-  return null;
-}
+int? _goldDiscoveryCount(String journeyId, int phoenixLevel) =>
+    canonicalDiscoveryDepthForJourney(journeyId, phoenixLevel);
 
 void main() {
   const agent = PhoenixLanguageLevelAgent();

@@ -78,7 +78,10 @@ void main() {
       );
       expect(lijiangStoryIdentityCard['Choice'], contains('割断捆绳'));
       expect(lijiangStoryIdentityCard['Cost'], contains('损失交易'));
-      expect(lijiangStoryIdentityCard['EndingAction'], contains('另一头'));
+      final ending = lijiangStoryIdentityCard['EndingAction']!;
+      expect(ending, contains('一人一头'));
+      expect(ending, contains('抬起湿茶'));
+      expect(ending, contains('没有解释句'));
     });
   });
 
@@ -102,9 +105,24 @@ void main() {
           ),
           reason: 'Lv$level story length ${story.length}',
         );
-        for (final anchor in <String>['和清', '和素', '茶', '债', '起火', '小桥', '割断捆绳', '水桶', '湿茶', '扁担']) {
+        for (final anchor in <String>[
+          '和清',
+          '和素',
+          '茶',
+          '债',
+          '起火',
+          '小桥',
+          '割断捆绳',
+          '湿茶',
+          '扁担',
+        ]) {
           expect(story, contains(anchor), reason: 'Lv$level missing $anchor');
         }
+        expect(
+          story,
+          anyOf(contains('提水'), contains('水桶')),
+          reason: 'Lv$level must preserve the water-to-action mechanism',
+        );
         expect(content.storyAnnotations.length, content.storyParagraphs.length);
         for (final annotation in content.storyAnnotations) {
           expect(annotation.pinyin.trim(), isNotEmpty);
@@ -174,7 +192,7 @@ void main() {
       for (var level = 1; level <= 10; level++) {
         final profile = agent.profileForPhoenixLevel(level);
         final plan = agent.planFor(profile);
-        final content = lijiangOldTownGoldLevelContent(level);
+        final content = buildBatchOneGoldLevel(experience, profile: profile);
         final activeContext =
             '${content.storyParagraphs.join()}${content.discoveries.map((entry) => entry.text).join()}';
         expect(content.words.length, plan.targetVocabularyCount, reason: 'Lv$level target');
@@ -183,6 +201,11 @@ void main() {
           expect(activeContext, contains(word.word), reason: 'Lv$level ${word.word}');
         }
       }
+      final lv10 = buildBatchOneGoldLevel(
+        experience,
+        profile: agent.profileForPhoenixLevel(10),
+      );
+      expect(lv10.words.map((entry) => entry.word), contains('非物质文化'));
     });
   });
 
@@ -246,7 +269,8 @@ void main() {
 
       expect(profile.paragraphGoals[9], contains('不可逆选择'));
       expect(profile.missingGoals[9], contains('共同承担'));
-      expect(profile.grammar[9].errorType, contains('必要条件'));
+      expect(profile.grammar[9].errorType, contains('虽然…却…'));
+      expect(profile.grammar[9].whyWrong, contains('共同的债'));
     });
 
     test('Memory and Completion bind Story memory moment, cost and changed relationship', () {

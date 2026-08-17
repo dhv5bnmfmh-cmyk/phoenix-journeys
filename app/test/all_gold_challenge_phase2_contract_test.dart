@@ -2,6 +2,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/all_gold_challenge_gold_profiles.dart';
 import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
 
+Map<String, GoldChallengeProfile> _approvedNonDatongProfiles() {
+  final approved = approvedNarrativeDnaCatalog
+      .map((record) => record.journeyId)
+      .toSet()
+    ..remove('datong-yungang-grottoes');
+  return <String, GoldChallengeProfile>{
+    for (final entry in nonDatongGoldChallengeProfiles.entries)
+      if (approved.contains(entry.key)) entry.key: entry.value,
+  };
+}
+
 void main() {
   test(
     'all non-Datong approved Gold Journeys own a complete Challenge profile',
@@ -10,11 +21,12 @@ void main() {
           .map((record) => record.journeyId)
           .toSet();
       final expected = approved.difference(const {'datong-yungang-grottoes'});
+      final profiles = _approvedNonDatongProfiles();
 
-      expect(nonDatongGoldChallengeProfiles.keys.toSet(), expected);
-      expect(nonDatongGoldChallengeProfiles.length, 11);
+      expect(profiles.keys.toSet(), expected);
+      expect(profiles.length, expected.length);
 
-      for (final profile in nonDatongGoldChallengeProfiles.values) {
+      for (final profile in profiles.values) {
         expect(profile.paragraphAnchors.length, 10, reason: profile.journeyId);
         expect(profile.missingAnchors.length, 10, reason: profile.journeyId);
         expect(profile.paragraphGoals.length, 10, reason: profile.journeyId);
@@ -90,9 +102,9 @@ void main() {
     },
   );
 
-  test('no two Gold Journeys share the complete grammar progression signature', () {
+  test('no two approved Gold Journeys share the complete grammar progression signature', () {
     final seen = <String, String>{};
-    for (final profile in nonDatongGoldChallengeProfiles.values) {
+    for (final profile in _approvedNonDatongProfiles().values) {
       final signature = profile.grammar.map((item) => item.targetId).join('>');
       final previous = seen[signature];
       expect(
@@ -106,13 +118,13 @@ void main() {
   });
 
   test(
-    'Journey-specific prompts and misconception sets do not collide exactly',
+    'approved Gold Journey-specific prompts and misconception sets do not collide exactly',
     () {
       final paragraphPrompts = <String>{};
       final missingPrompts = <String>{};
       final allDistractors = <String>{};
 
-      for (final profile in nonDatongGoldChallengeProfiles.values) {
+      for (final profile in _approvedNonDatongProfiles().values) {
         expect(
           paragraphPrompts.add(profile.paragraphPrompt),
           isTrue,

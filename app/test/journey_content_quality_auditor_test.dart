@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/journey_data.dart';
 import 'package:phoenix_journeys/data/journey_level_catalog.dart';
@@ -76,9 +77,9 @@ void main() {
     expect(report.hasCriticalIssues, isTrue);
   });
 
-  test('detects an unresolved reference at the start of paragraph two', () {
+  test('detects an unresolved reference introduced by generic paragraph shaping', () {
     final journey = dailyJourneyExperiences.firstWhere(
-      (item) => item.id != forbiddenCityJourneyId,
+      (item) => usesSharedGenericAdaptivePipeline(item.id),
     );
     final profile = agent.allProfiles.firstWhere(
       (item) => agent.planFor(item).paragraphCount == 2,

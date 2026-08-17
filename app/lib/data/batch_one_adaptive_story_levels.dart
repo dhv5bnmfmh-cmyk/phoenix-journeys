@@ -26,6 +26,40 @@ bool isBatchOneGoldJourney(String journeyId) =>
     journeyId == datongYungangJourneyId ||
     journeyId == lijiangOldTownJourneyId;
 
+const _lijiangLv10IntangibleCultureWord = WordEntry(
+  word: '非物质文化',
+  pinyin: 'fēi wùzhì wénhuà',
+  partOfSpeech: '名词',
+  simpleChinese: '通过知识、技艺、习俗等方式持续传承的文化。',
+  translation: 'Văn hóa phi vật thể.',
+  englishDefinition: 'intangible culture carried through living knowledge, skills, and practices',
+  symbol: '🧩',
+);
+
+JourneyLevelContent _withLijiangLv10Vocabulary(
+  String journeyId,
+  int level,
+  JourneyLevelContent base,
+) {
+  if (journeyId != lijiangOldTownJourneyId || level != 10) return base;
+  final activeContext = '${base.storyParagraphs.join()}${base.discoveries.map((entry) => entry.text).join()}';
+  if (!activeContext.contains(_lijiangLv10IntangibleCultureWord.word) ||
+      base.words.any((entry) => entry.word == _lijiangLv10IntangibleCultureWord.word)) {
+    return base;
+  }
+  return JourneyLevelContent(
+    storyParagraphs: base.storyParagraphs,
+    storyAnnotations: base.storyAnnotations,
+    words: List<WordEntry>.unmodifiable(<WordEntry>[
+      ...base.words,
+      _lijiangLv10IntangibleCultureWord,
+    ]),
+    discoveries: base.discoveries,
+    wonderQuestion: base.wonderQuestion,
+    expressQuestion: base.expressQuestion,
+  );
+}
+
 /// Thin adaptive adapter over canonical one-pass content packages.
 /// Story, Words, Discovery, Challenge, Memory, and Completion remain immutable
 /// content definitions; narration/progress updates never rebuild them.
@@ -38,7 +72,7 @@ JourneyLevelContent buildBatchOneGoldLevel(
     throw ArgumentError.value(experience.id, 'experience.id');
   }
   final level = profile.phoenixLevel ?? _legacyLevel(profile.band);
-  final base = switch (experience.id) {
+  final sourceBase = switch (experience.id) {
     xianCityWallJourneyId => xianCityWallOnePassLevelContent(level),
     hangzhouWestLakeJourneyId => hangzhouWestLakeOnePassLevelContent(level),
     chengduKuanzhaiJourneyId => chengduKuanzhaiOnePassLevelContent(level),
@@ -49,6 +83,7 @@ JourneyLevelContent buildBatchOneGoldLevel(
     lijiangOldTownJourneyId => lijiangOldTownGoldLevelContent(level),
     _ => shanghaiBundOnePassRemediation.levelContent(level),
   };
+  final base = _withLijiangLv10Vocabulary(experience.id, level, sourceBase);
   final unseenWords = base.words
       .where((entry) => !knownWords.contains(entry.word))
       .toList(growable: false);
