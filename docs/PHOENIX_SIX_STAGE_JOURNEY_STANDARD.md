@@ -320,3 +320,18 @@ Final decision:
 A Journey is not complete because files exist, CI is green, or an automated report says `100`.
 
 A Journey is complete only when the exact six-stage product, all three Challenge modes, narrative quality, semantic alignment, runtime behavior, stable comparison, exact-Head Preview, and required Founder decision are all independently verified.
+
+## Memory / Completion narration accessibility
+
+**MEMORY AND COMPLETION MUST SUPPORT USER-INITIATED NARRATION.** This is a shared product requirement inside the existing Stage 5 Memory and Stage 6 Completion surfaces; it does not create an Audio stage or change the six-stage order.
+
+Required behavior:
+- a visible, quiet speaker control on Memory and Completion;
+- user-initiated play and stop, with no forced autoplay;
+- one active narration at a time and no overlapping speech;
+- leave-page auto stop, including stage navigation, Journey exit, restart, and level change;
+- narration of the current learner-facing content in natural reading order, excluding internal metadata, IDs, debug text, and developer terminology;
+- narration must match the learner-facing script/locale currently displayed, including Simplified/Traditional mode;
+- accessible play/stop semantics, keyboard/screen-reader reachability, and an adequate mobile touch target;
+- graceful empty-content and unavailable-TTS behavior without a crash;
+- implementation must reuse Phoenix's shared narration architecture and MUST NOT introduce forced autoplay or a parallel TTS system when the shared runtime can satisfy the requirement.
