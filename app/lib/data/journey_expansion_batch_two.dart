@@ -49,17 +49,6 @@ const journeyExpansionBatchTwoSources = <StorySourceRecord>[
     verificationStatus: StoryVerificationStatus.verified,
     accessedOn: '2026-07-29',
   ),
-  StorySourceRecord(
-    id: 'neac-naxi-customs',
-    title: '纳西族风俗习惯',
-    publisher: '国家民族事务委员会',
-    url: 'https://www.neac.gov.cn/seac/ztzl/nxz/fsxg.shtml',
-    kind: StorySourceKind.government,
-    languageCode: 'zh-CN',
-    geoNodeIds: ['cn-yunnan-lijiang-gucheng-dayan-old-town'],
-    verificationStatus: StoryVerificationStatus.verified,
-    accessedOn: '2026-08-17',
-  ),
 ];
 
 JourneyContentRecord _record({
@@ -168,15 +157,11 @@ final datongYungangJourney = _record(
 );
 
 final lijiangOldTownJourney = _record(
-  id: lijiangOldTownJourneyId,
+  id: 'lijiang-old-town',
   title: '丽江 · 大研古城：$lijiangOldTownCanonicalTitle',
   geoNodeId: 'cn-yunnan-lijiang-gucheng-dayan-old-town',
   paragraphs: lijiangOldTownGoldLevelContent(5).storyParagraphs,
-  sources: const [
-    'unesco-lijiang-old-town',
-    'yunnan-lijiang-old-town',
-    'neac-naxi-customs',
-  ],
+  sources: const ['unesco-lijiang-old-town', 'yunnan-lijiang-old-town'],
   tags: const ['丽江', '大研古城', '纳西文化', '茶马古道', '水系'],
 );
 
