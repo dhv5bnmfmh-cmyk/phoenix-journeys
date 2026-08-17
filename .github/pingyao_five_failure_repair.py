@@ -14,7 +14,7 @@ def replace_once(path: str, old: str, new: str) -> None:
 def regex_once(path: str, pattern: str, replacement: str) -> None:
     p = Path(path)
     text = p.read_text()
-    updated, count = re.subn(pattern, replacement, text, count=1, flags=re.S)
+    updated, count = re.subn(pattern, lambda _: replacement, text, count=1, flags=re.S)
     if count != 1:
         raise SystemExit(f"{path}: expected one regex match, found {count}")
     p.write_text(updated)
