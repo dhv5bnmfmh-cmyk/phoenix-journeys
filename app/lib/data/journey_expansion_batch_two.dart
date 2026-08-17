@@ -2,6 +2,7 @@ import '../models/story_content.dart';
 import 'daily_journey_experience.dart';
 import 'datong_yungang_gold_content.dart';
 import 'journey_data.dart';
+import 'lijiang_old_town_gold_content.dart';
 
 const journeyExpansionBatchTwoSources = <StorySourceRecord>[
   StorySourceRecord(
@@ -113,39 +114,6 @@ const _datongDiscoveries = <DiscoveryEntry>[
   DiscoveryEntry(text: '数字记录、环境监测与岩体修复共同参与石窟保护。', pinyin: 'Shùzì jìlù, huánjìng jiāncè yǔ yántǐ xiūfù gòngtóng cānyù shíkū bǎohù.', simpleChinese: '保护需要记录、监测和修复。', vietnamese: 'Bảo tồn kết hợp ghi chép số, quan trắc môi trường và tu bổ đá.', english: 'Digital records, environmental monitoring, and rock conservation work together.'),
 ];
 
-const _lijiangParagraphs = <String>[
-  '雨后的傍晚，你走进丽江大研古城。石板路顺着地势起伏，清水穿过街巷，在小桥下分成多条水道，灯影随着水面轻轻移动。',
-  '丽江古城没有整齐的棋盘格。道路、水系和院落适应山地，自然地连接四方街、住宅与市场，让城市像一张沿水生长的网络。',
-  '这里曾是茶马古道上的交流节点。纳西、汉、藏、白等不同文化长期往来，建筑、语言、音乐和生活方式因此留下彼此影响的痕迹。',
-  '古城仍有人生活，也面对商业与保护之间的压力。真正的旅程不只寻找漂亮屋顶，更要听见流水、居民日常和传统技艺共同组成的城市声音。',
-];
-
-const _lijiangAnnotations = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Yǔhòu de bàngwǎn, nǐ zǒujìn Lìjiāng Dàyán Gǔchéng. Shíbǎnlù shùnzhe dìshì qǐfú, qīngshuǐ chuānguò jiēxiàng, zài xiǎoqiáo xià fēnchéng duō tiáo shuǐdào.', vietnamese: 'Chiều sau mưa, bạn bước vào Đại Nghiên cổ trấn. Đường đá theo địa hình và dòng nước chia thành nhiều nhánh dưới cầu nhỏ.', english: 'After rain, stone lanes and clear channels wind through Dayan Old Town.'),
-  ReadingAnnotation(pinyin: 'Lìjiāng Gǔchéng méiyǒu zhěngqí de qípángé. Dàolù, shuǐxì hé yuànluò shìyìng shāndì, ràng chéngshì xiàng yì zhāng yán shuǐ shēngzhǎng de wǎngluò.', vietnamese: 'Cổ thành không theo ô bàn cờ; đường, nước và sân nhà thích ứng địa hình như một mạng lưới lớn lên theo dòng nước.', english: 'Roads, waterways, and courtyards adapt to the terrain rather than a rigid grid.'),
-  ReadingAnnotation(pinyin: 'Zhèlǐ céng shì Chámǎ Gǔdào shàng de jiāoliú jiédiǎn. Bùtóng wénhuà chángqī wǎnglái, liúxià bǐcǐ yǐngxiǎng de hénjì.', vietnamese: 'Đây từng là nút giao trên Trà Mã Cổ Đạo, nơi nhiều nền văn hóa để lại ảnh hưởng lẫn nhau.', english: 'As a Tea Horse Road hub, Lijiang connected several peoples and cultural traditions.'),
-  ReadingAnnotation(pinyin: 'Gǔchéng réng yǒu rén shēnghuó, yě miànduì shāngyè yǔ bǎohù zhījiān de yālì. Lǚchéng yě yào tīngjiàn jūmín rìcháng yǔ chuántǒng jìyì.', vietnamese: 'Cổ thành vẫn là nơi sinh sống và phải cân bằng thương mại với bảo tồn; hãy lắng nghe đời sống cư dân và nghề truyền thống.', english: 'The living town must balance commerce with conservation and resident life.'),
-];
-
-const _lijiangWords = <WordEntry>[
-  WordEntry(word: '石板路', pinyin: 'shíbǎnlù', partOfSpeech: '名词', simpleChinese: '用石板铺成的道路。', translation: 'Đường lát đá.', englishDefinition: 'stone-paved lane', symbol: '🧱'),
-  WordEntry(word: '街巷', pinyin: 'jiēxiàng', partOfSpeech: '名词', simpleChinese: '街道和小巷。', translation: 'Đường phố và ngõ nhỏ.', englishDefinition: 'streets and lanes', symbol: '🏘️'),
-  WordEntry(word: '水道', pinyin: 'shuǐdào', partOfSpeech: '名词', simpleChinese: '让水流过的通道。', translation: 'Kênh dẫn nước.', englishDefinition: 'water channel', symbol: '💧'),
-  WordEntry(word: '棋盘格', pinyin: 'qípángé', partOfSpeech: '名词', simpleChinese: '像棋盘一样整齐的格子。', translation: 'Mạng lưới ô bàn cờ.', englishDefinition: 'grid pattern', symbol: '▦'),
-  WordEntry(word: '院落', pinyin: 'yuànluò', partOfSpeech: '名词', simpleChinese: '房屋围成的院子空间。', translation: 'Khoảng sân có nhà bao quanh.', englishDefinition: 'courtyard compound', symbol: '🏡'),
-  WordEntry(word: '地势', pinyin: 'dìshì', partOfSpeech: '名词', simpleChinese: '地面的高低形态。', translation: 'Địa thế cao thấp.', englishDefinition: 'terrain', symbol: '🗻'),
-  WordEntry(word: '节点', pinyin: 'jiédiǎn', partOfSpeech: '名词', simpleChinese: '网络中重要的连接位置。', translation: 'Điểm kết nối quan trọng.', englishDefinition: 'network hub', symbol: '🔗'),
-  WordEntry(word: '往来', pinyin: 'wǎnglái', partOfSpeech: '动词', simpleChinese: '互相来往和交流。', translation: 'Qua lại và giao lưu.', englishDefinition: 'to interact and travel between', symbol: '🐎'),
-  WordEntry(word: '技艺', pinyin: 'jìyì', partOfSpeech: '名词', simpleChinese: '经过学习形成的手艺。', translation: 'Kỹ nghệ truyền thống.', englishDefinition: 'craft skill', symbol: '🪡'),
-];
-
-const _lijiangDiscoveries = <DiscoveryEntry>[
-  DiscoveryEntry(text: '丽江古城的道路与水系顺应山地环境，没有采用规则棋盘格。', pinyin: 'Lìjiāng Gǔchéng de dàolù yǔ shuǐxì shùnyìng shāndì huánjìng, méiyǒu cǎiyòng guīzé qípángé.', simpleChinese: '道路和水系跟着地形变化。', vietnamese: 'Đường và kênh nước thích ứng địa hình thay vì theo ô bàn cờ.', english: 'The street and water networks adapt to mountain terrain rather than a fixed grid.'),
-  DiscoveryEntry(text: '大研、白沙与束河共同构成世界遗产丽江古城。', pinyin: 'Dàyán, Báishā yǔ Shùhé gòngtóng gòuchéng Shìjiè Yíchǎn Lìjiāng Gǔchéng.', simpleChinese: '三个城镇共同组成遗产。', vietnamese: 'Đại Nghiên, Bạch Sa và Thúc Hà cùng tạo thành di sản.', english: 'Dayan, Baisha, and Shuhe together form the World Heritage property.'),
-  DiscoveryEntry(text: '古城水系至今仍参与居民生活与街区环境。', pinyin: 'Gǔchéng shuǐxì zhìjīn réng cānyù jūmín shēnghuó yǔ jiēqū huánjìng.', simpleChinese: '流水现在仍服务古城生活。', vietnamese: 'Hệ thống nước vẫn gắn với đời sống và môi trường khu phố.', english: 'The historic water system still supports daily life and the urban environment.'),
-  DiscoveryEntry(text: '茶马古道让丽江成为多民族经济与文化交流节点。', pinyin: 'Chámǎ Gǔdào ràng Lìjiāng chéngwéi duō mínzú jīngjì yǔ wénhuà jiāoliú jiédiǎn.', simpleChinese: '茶马古道连接了不同人群。', vietnamese: 'Trà Mã Cổ Đạo biến Lệ Giang thành nút giao kinh tế và văn hóa đa dân tộc.', english: 'The Tea Horse Road made Lijiang a hub of multi-ethnic exchange.'),
-];
-
 final datongYungangJourney = _record(
   id: 'datong-yungang-grottoes',
   title: '大同 · 云冈石窟：听见北魏刻进山崖的回声',
@@ -157,9 +125,9 @@ final datongYungangJourney = _record(
 
 final lijiangOldTownJourney = _record(
   id: 'lijiang-old-town',
-  title: '丽江 · 大研古城：沿流水读懂山地城市',
+  title: '丽江 · 大研古城：$lijiangOldTownCanonicalTitle',
   geoNodeId: 'cn-yunnan-lijiang-gucheng-dayan-old-town',
-  paragraphs: _lijiangParagraphs,
+  paragraphs: lijiangOldTownGoldLevelContent(5).storyParagraphs,
   sources: const ['unesco-lijiang-old-town', 'yunnan-lijiang-old-town'],
   tags: const ['丽江', '大研古城', '纳西文化', '茶马古道', '水系'],
 );
@@ -195,17 +163,17 @@ final journeyExpansionBatchTwoExperiences = <DailyJourneyExperience>[
     cityCode: 'LJG',
     place: '大研古城',
     appBarTitle: '丽江 · 大研古城',
-    storyTitle: '茶马古道故事',
-    headline: '沿流水读懂山地城市',
-    description: '跟随石板路与水道，理解古城如何连接地形、贸易与多民族生活。',
-    discoveryTeaser: '没有规则棋盘格，丽江古城为什么仍能高效运作？',
+    storyTitle: lijiangOldTownCanonicalTitle,
+    headline: lijiangOldTownHeadline,
+    description: lijiangOldTownDescription,
+    discoveryTeaser: lijiangOldTownDiscoveryTeaser,
     distanceLabel: '1,460 km',
     stampSymbol: '水',
     content: lijiangOldTownJourney,
-    storyAnnotations: _lijiangAnnotations,
-    words: _lijiangWords,
-    discoveries: _lijiangDiscoveries,
-    wonderQuestion: '如果你住在古城，你希望水道继续承担哪些日常功能？',
-    expressQuestion: '请用两到三句话描写雨后石板路、流水与木屋的声音和光线。',
+    storyAnnotations: lijiangOldTownGoldLevelContent(5).storyAnnotations,
+    words: lijiangOldTownGoldLevelContent(5).words,
+    discoveries: lijiangOldTownGoldLevelContent(5).discoveries,
+    wonderQuestion: lijiangOldTownGoldLevelContent(5).wonderQuestion,
+    expressQuestion: lijiangOldTownGoldLevelContent(5).expressQuestion,
   ),
 ];

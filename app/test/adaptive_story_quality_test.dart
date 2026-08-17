@@ -8,16 +8,8 @@ import 'package:phoenix_journeys/data/journey_level_catalog.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
-int? _goldDiscoveryCount(String journeyId, int phoenixLevel) {
-  if (journeyId == 'beijing-summer-palace' ||
-      journeyId == 'suzhou-humble-administrators-garden' ||
-      journeyId == 'luoyang-longmen-grottoes' ||
-      journeyId == 'jiangmen-kaiping-diaolou' ||
-      journeyId == 'datong-yungang-grottoes') {
-    return phoenixLevel <= 4 ? 2 : 3;
-  }
-  return null;
-}
+int? _goldDiscoveryCount(String journeyId, int phoenixLevel) =>
+    canonicalDiscoveryDepthForJourney(journeyId, phoenixLevel);
 
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();

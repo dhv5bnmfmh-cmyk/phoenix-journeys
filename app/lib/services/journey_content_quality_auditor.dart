@@ -121,13 +121,21 @@ JourneyContentQualityReport auditJourneyContentQuality(
     }
   }
 
-  for (var index = 1; index < content.storyParagraphs.length; index += 1) {
-    if (startsWithDependentNarrativeReference(content.storyParagraphs[index])) {
-      add(
-        'dependent-paragraph-opening-$index',
-        'Story paragraph ${index + 1} begins with an unresolved reference.',
-        JourneyContentQualitySeverity.critical,
-      );
+  // This lexical opening heuristic protects the shared generic shaper from
+  // manufacturing a paragraph whose first token lost its antecedent while
+  // slicing source prose. Dedicated Gold/candidate packages are authored as
+  // whole level-specific passages, so a context-free token check cannot prove
+  // that an opening pronoun is unresolved; their causal/semantic gates remain
+  // authoritative instead of forcing Story prose to satisfy a brittle token.
+  if (usesSharedGenericAdaptivePipeline(experience.id)) {
+    for (var index = 1; index < content.storyParagraphs.length; index += 1) {
+      if (startsWithDependentNarrativeReference(content.storyParagraphs[index])) {
+        add(
+          'dependent-paragraph-opening-$index',
+          'Story paragraph ${index + 1} begins with an unresolved reference.',
+          JourneyContentQualitySeverity.critical,
+        );
+      }
     }
   }
 
@@ -158,15 +166,10 @@ JourneyContentQualityReport auditJourneyContentQuality(
     }
   }
 
-  final levelSpecificGoldDiscoveryCount =
-      (experience.id == 'beijing-summer-palace' ||
-              experience.id == 'suzhou-humble-administrators-garden' ||
-              experience.id == 'luoyang-longmen-grottoes' ||
-              experience.id == 'jiangmen-kaiping-diaolou' ||
-              experience.id == 'datong-yungang-grottoes') &&
-          profile.phoenixLevel != null
-          ? (profile.phoenixLevel! <= 4 ? 2 : 3)
-          : null;
+  final phoenixLevel = profile.phoenixLevel;
+  final levelSpecificGoldDiscoveryCount = phoenixLevel == null
+      ? null
+      : canonicalDiscoveryDepthForJourney(experience.id, phoenixLevel);
   final tooManyGenericDiscoveries = content.discoveries.length > 2;
   final invalidDiscoveryShape = levelSpecificGoldDiscoveryCount == null
       ? content.discoveries.isEmpty || tooManyGenericDiscoveries

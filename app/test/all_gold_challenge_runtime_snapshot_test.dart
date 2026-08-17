@@ -159,8 +159,11 @@ void main() {
     final approvedIds = approvedNarrativeDnaCatalog
         .map((record) => record.journeyId)
         .toSet();
-    expect(approvedIds, dedicatedAdaptiveJourneyIds);
-    expect(approvedIds.length, 12);
+
+    // Runtime candidate membership is intentionally broader than Founder-approved
+    // Gold membership. Every approved Gold must be active, but an active candidate
+    // such as Lijiang must not be promoted merely to satisfy this snapshot.
+    expect(dedicatedAdaptiveJourneyIds, containsAll(approvedIds));
 
     final byId = <String, DailyJourneyExperience>{
       for (final journey in <DailyJourneyExperience>[
