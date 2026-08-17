@@ -237,7 +237,7 @@ void main() {
       expect(semantic.comparisons, hasLength(approvedGoldSemanticFingerprints.length));
       expect(semantic.comparisons.where((item) => item.isCollision), isEmpty);
       expect(approvedNarrativeDnaCatalog.map((item) => item.journeyId), isNot(contains(pingyaoAncientCityJourneyId)));
-      expect(approvedGoldSemanticFingerprints.map((item) => item.journeyId), isNot(contains(pingyaoAncientCityJourneyId)));
+      expect(approvedGoldSemanticFingerprints.keys, isNot(contains(pingyaoAncientCityJourneyId)));
     });
   });
 }
