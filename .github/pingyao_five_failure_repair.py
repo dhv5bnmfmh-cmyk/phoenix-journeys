@@ -90,7 +90,7 @@ replace_once(
     "  WordEntry(word:'责任',pinyin:'zérèn',partOfSpeech:'名词',simpleChinese:'对事情、关系或结果应当承担的义务。',translation:'Trách nhiệm phải gánh đối với công việc, quan hệ hoặc kết quả.',englishDefinition:'responsibility',symbol:'⚖️'),",
 )
 
-# 4. Retarget Lv2 grammar repair to the 不必 structure actually taught in Lv2 Discovery.
+# 4. Retarget Lv2 grammar repair to a structure literally taught in active Lv2 Discovery.
 challenge = "app/lib/data/pingyao_ancient_city_challenge_profile.dart"
 pattern = r"""    GoldChallengeGrammarSpec\(
       targetId:'pingyao-instead-of',
@@ -98,16 +98,16 @@ pattern = r"""    GoldChallengeGrammarSpec\(
     \),"""
 replacement = """    GoldChallengeGrammarSpec(
       targetId:'pingyao-instead-of',
-      prefix:'这样的安排使长距离商业结算',
-      brokenSegment:'总由同一批现银一路不必押送',
+      prefix:'票号经营异地汇兑，使',
+      brokenSegment:'商人把大批现银不必一路搬到远方',
       suffix:'。',
-      correctReplacement:'不必总由同一批现银一路押送',
-      distractors:<String>['总不必由同一批现银一路押送','总由同一批现银不必一路押送','由同一批现银一路不必押送'],
-      errorType:'否定情态副词“不必”的位置',
-      whyWrong:'Lv2 Discovery 已用“不必总由同一批现银一路押送”说明结算方式的变化；“不必”应放在它否定的整个押送谓语之前。',
-      revisionRule:'表达“没有必要做某事”时，用“不必 + 动词/动词短语”，并保持否定范围清楚。',
-      memoryTip:'先说“不必”，再说哪件事不再必须发生。',
-      misconception:'把“不必”的作用范围移进押送短语，破坏原有否定关系',
+      correctReplacement:'商人不必把大批现银一路搬到远方',
+      distractors:<String>['商人把大批现银一路不必搬到远方','商人不把大批现银必一路搬到远方','商人把不必大批现银一路搬到远方'],
+      errorType:'“不必 + 把 + 对象 + 动作”语序',
+      whyWrong:'Lv2 Discovery 已明确写出“使商人不必把大批现银一路搬到远方”；“不必”应放在“把”字处置结构之前，否定整项搬运行为。',
+      revisionRule:'表达没有必要执行某个“把”字动作时，用“不必 + 把 + 对象 + 动作”。',
+      memoryTip:'先说“不必”，再说把什么搬到哪里。',
+      misconception:'把“不必”塞进“把”字结构内部，破坏否定范围',
     ),"""
 regex_once(challenge, pattern, replacement)
 
