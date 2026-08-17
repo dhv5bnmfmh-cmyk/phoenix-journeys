@@ -15,6 +15,7 @@ const _goldIds = <String>{
   'luoyang-longmen-grottoes',
   'jiangmen-kaiping-diaolou',
   'datong-yungang-grottoes',
+  'lijiang-old-town',
 };
 
 JourneySemanticFingerprint _synthetic(
