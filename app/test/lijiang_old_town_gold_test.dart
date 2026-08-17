@@ -218,7 +218,7 @@ void main() {
       for (final grammar in gold.grammar) {
         expect(grammar.correctReplacement, isNot(grammar.brokenSegment));
         expect(
-          <String>[grammar.correctReplacement, ...grammar.distractors].toSet(),
+          <String>{grammar.correctReplacement, ...grammar.distractors},
           hasLength(4),
         );
       }

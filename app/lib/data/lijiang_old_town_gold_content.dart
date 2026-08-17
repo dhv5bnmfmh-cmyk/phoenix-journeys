@@ -378,7 +378,7 @@ final lijiangOldTownGoldLevels = List<JourneyLevelContent>.unmodifiable(_buildLi
 JourneyLevelContent lijiangOldTownGoldLevelContent(int requestedLevel) =>
     lijiangOldTownGoldLevels[requestedLevel.clamp(1, 10).toInt() - 1];
 
-final lijiangOldTownWords = <WordEntry>[
+const lijiangOldTownWords = <WordEntry>[
   WordEntry(word: '四方街', pinyin: 'Sìfāng Jiē', partOfSpeech: '专名', simpleChinese: '丽江大研古城的传统商业中心。', translation: 'Phố Tứ Phương, trung tâm thương mại truyền thống của Đại Nghiên.', englishDefinition: 'Sifang Street, Dayan’s traditional commercial center', symbol: '🧭'),
   WordEntry(word: '商贩', pinyin: 'shāngfàn', partOfSpeech: '名词', simpleChinese: '做小规模买卖的人。', translation: 'Người buôn bán nhỏ.', englishDefinition: 'small trader', symbol: '🧺'),
   WordEntry(word: '茶叶', pinyin: 'cháyè', partOfSpeech: '名词', simpleChinese: '加工后用来冲泡的茶。', translation: 'Lá trà đã chế biến.', englishDefinition: 'tea leaves', symbol: '🍵'),
