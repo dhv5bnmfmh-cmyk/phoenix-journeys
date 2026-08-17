@@ -70,12 +70,19 @@ jobs:
 
           # Dedicated runtime and canonical Discovery depth only; not Approved Gold.
           path = 'app/lib/data/dedicated_adaptive_journey_catalog.dart'
-          replace_once(path,
-              "  'honghe-hani-rice-terraces',\n};",
-              "  'honghe-hani-rice-terraces',\n  'pingyao-ancient-city',\n};",
-              'dedicated runtime membership')
-          # The same marker occurs in the second set after first replacement, so target the comment-bounded second set.
           p = Path(path)
+          s = p.read_text()
+          marker = "const dedicatedAdaptiveJourneyIds = <String>{\n"
+          start = s.index(marker) + len(marker)
+          end = s.index("};", start)
+          block = s[start:end]
+          if "  'pingyao-ancient-city',\n" not in block:
+              if "  'honghe-hani-rice-terraces',\n" not in block:
+                  raise SystemExit('dedicated runtime set: Honghe marker missing')
+              block = block.replace("  'honghe-hani-rice-terraces',\n", "  'honghe-hani-rice-terraces',\n  'pingyao-ancient-city',\n", 1)
+              p.write_text(s[:start] + block + s[end:])
+
+          # Target the canonical Discovery-depth set separately.
           s = p.read_text()
           marker = "const canonicalExpandedDiscoveryJourneyIds = <String>{\n"
           start = s.index(marker) + len(marker)
