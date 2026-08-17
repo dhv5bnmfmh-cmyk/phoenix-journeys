@@ -291,7 +291,7 @@ void main() {
     test('promoted semantic fingerprint remains collision-free against approved Gold', () {
       final gate = lijiangOldTownSemanticGate();
       expect(gate.isGoldReady, isTrue, reason: gate.status);
-      expect(gate.comparisons, hasLength(12));
+      expect(gate.comparisons, hasLength(13));
       expect(gate.comparisons.where((item) => item.isCollision), isEmpty);
       expect(
         approvedGoldSemanticFingerprints[lijiangOldTownJourneyId],
