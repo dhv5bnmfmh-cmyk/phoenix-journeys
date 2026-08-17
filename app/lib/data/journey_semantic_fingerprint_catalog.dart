@@ -303,6 +303,24 @@ enum NarrativeMechanismFamily {
   nextMorningTradeWindowAfterMarketClose,
   sisterOpposesLossThenSharesCleanup,
   placeInfrastructureForcesLivelihoodSacrificeUnderHazard,
+
+  // Reusable families introduced by living communal water-allocation duty.
+  springIrrigationDutyBeginsWithPrivateLaborDependency,
+  electedWaterKeeperDependentOnReciprocalNeighborLabor,
+  neighboringFarmersBoundByPrivateLaborExchange,
+  restoreAgreedWaterSharesAndFinishOwnField,
+  communalWaterAllocationVsPrivateLaborReciprocity,
+  restoreAgreedFlowDespitePrivateLaborLoss,
+  carvedDividerResetsBranchFlows,
+  downstreamFlowRestoredWhileOwnPloughingIsLost,
+  privateReciprocityToAcceptedPublicRoleCost,
+  ownFieldWorkContinuesWithoutRelationalRepair,
+  carvedWaterDividerEmbodiesCollectiveAgreement,
+  alteredGrooveEmbodiesPrivateAdvantage,
+  branchingWaterRedistributionDownTerraceSlope,
+  sameDaySpringIrrigationAndPloughingWindow,
+  friendWithdrawsLaborAfterAllocationRestoration,
+  communalWaterRuleForcesPrivateReciprocityCost,
 }
 
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {
