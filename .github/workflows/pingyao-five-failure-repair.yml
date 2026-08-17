@@ -6,6 +6,7 @@ on:
       - dev/current
     paths:
       - .github/workflows/pingyao-five-failure-repair.yml
+      - .github/pingyao_five_failure_repair.py
 
 permissions:
   contents: write
