@@ -102,7 +102,7 @@ void main() {
           '分水口',
           '凹槽',
           '议定',
-          '水牛',
+          '牛',
           '梯田',
         ]) {
           expect(story, contains(anchor), reason: 'Lv$level missing $anchor');
@@ -295,7 +295,7 @@ void main() {
       expect(spec.culturalPoint, contains('木刻分水'));
       expect(spec.culturalPoint, contains('牛铃'));
       expect(spec.longTermAnchor, contains('两道水'));
-      expect(spec.longTermAnchor, contains('没犁完'));
+      expect(spec.longTermAnchor, contains('没有犁完'));
       expect(spec.reviews.map((item) => item.category).toSet(), containsAll(<String>[
         'choice',
         'cost',
