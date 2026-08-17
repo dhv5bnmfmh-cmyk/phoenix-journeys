@@ -119,6 +119,12 @@ void main() {
           hasLength(lijiangOldTownGoldLevelContent(5).discoveries.length),
           reason: journey.id,
         );
+      } else if (journey.id == hongheHaniRiceTerracesJourneyId) {
+        expect(
+          journey.discoveries,
+          hasLength(hongheHaniRiceTerracesGoldLevelContent(5).discoveries.length),
+          reason: journey.id,
+        );
       } else if (journey.id == 'jiangmen-kaiping-diaolou') {
         expect(journey.discoveries, hasLength(3), reason: journey.id);
       } else if (journey.id == 'beijing-summer-palace') {
