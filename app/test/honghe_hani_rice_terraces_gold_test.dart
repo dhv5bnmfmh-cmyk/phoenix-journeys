@@ -305,10 +305,13 @@ void main() {
       ]));
     });
 
-    test('candidate semantic fingerprint passes Rule A/B against all approved Gold', () {
+    test('candidate semantic fingerprint passes Rule A/B against all other approved Gold', () {
       final gate = hongheHaniRiceTerracesSemanticGate();
       expect(gate.isGoldReady, isTrue, reason: gate.status);
-      expect(gate.comparisons, hasLength(approvedGoldSemanticFingerprints.length));
+      expect(
+        gate.comparisons,
+        hasLength(approvedGoldSemanticFingerprints.length - 1),
+      );
       expect(gate.comparisons.where((item) => item.isCollision), isEmpty);
       expect(
         hongheHaniRiceTerracesCandidateSemanticFingerprint.mechanisms.keys.toSet(),
