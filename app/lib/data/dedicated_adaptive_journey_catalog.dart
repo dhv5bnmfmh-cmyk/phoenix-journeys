@@ -13,6 +13,7 @@ const dedicatedAdaptiveJourneyIds = <String>{
   'datong-yungang-grottoes',
   'lijiang-old-town',
   'honghe-hani-rice-terraces',
+  'pingyao-ancient-city',
 };
 
 /// Journeys whose dedicated Story/Culture packages have adopted the canonical
@@ -29,6 +30,7 @@ const canonicalExpandedDiscoveryJourneyIds = <String>{
   'datong-yungang-grottoes',
   'lijiang-old-town',
   'honghe-hani-rice-terraces',
+  'pingyao-ancient-city',
 };
 
 int? canonicalDiscoveryDepthForJourney(String journeyId, int phoenixLevel) =>

@@ -2,10 +2,12 @@ import '../models/story_content.dart';
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
 import 'honghe_hani_rice_terraces_gold_content.dart';
+import 'pingyao_ancient_city_gold_content.dart';
 
 const journeyExpansionBatchFourSources = <StorySourceRecord>[
   StorySourceRecord(id: 'unesco-pingyao', title: 'Ancient City of Ping Yao', publisher: 'UNESCO World Heritage Centre', url: 'https://whc.unesco.org/en/list/812', kind: StorySourceKind.unesco, languageCode: 'en', geoNodeIds: ['cn-shanxi-jinzhong-pingyao-ancient-city'], verificationStatus: StoryVerificationStatus.verified, accessedOn: '2026-07-29'),
   StorySourceRecord(id: 'shanxi-pingyao', title: '平遥古城：2800岁正青春', publisher: '山西省文化和旅游厅', url: 'https://wlt.shanxi.gov.cn/xwzx/wlxx/202305/t20230517_8565714.shtml', kind: StorySourceKind.government, languageCode: 'zh-CN', geoNodeIds: ['cn-shanxi-jinzhong-pingyao-ancient-city'], verificationStatus: StoryVerificationStatus.verified, accessedOn: '2026-07-29'),
+  StorySourceRecord(id: 'gjbmj-jinshang-piaohao', title: '晋商票号：防伪保密制度的创制者', publisher: '国家保密局互联网门户网站', url: 'https://www.gjbmj.gov.cn/n1/2020/0911/c413725-31858628.html', kind: StorySourceKind.government, languageCode: 'zh-CN', geoNodeIds: ['cn-shanxi-jinzhong-pingyao-ancient-city'], verificationStatus: StoryVerificationStatus.verified, accessedOn: '2026-08-17'),
   StorySourceRecord(id: 'unesco-qufu', title: 'Temple and Cemetery of Confucius and the Kong Family Mansion in Qufu', publisher: 'UNESCO World Heritage Centre', url: 'https://whc.unesco.org/en/list/704', kind: StorySourceKind.unesco, languageCode: 'en', geoNodeIds: ['cn-shandong-jining-qufu-confucius-temple'], verificationStatus: StoryVerificationStatus.verified, accessedOn: '2026-07-29'),
   StorySourceRecord(id: 'shandong-qufu', title: '活起来的文化遗产，火起来的旅游市场', publisher: '山东省文化和旅游厅', url: 'https://whhly.shandong.gov.cn/art/2023/4/21/art_68375_10320513.html', kind: StorySourceKind.government, languageCode: 'zh-CN', geoNodeIds: ['cn-shandong-jining-qufu-confucius-temple'], verificationStatus: StoryVerificationStatus.verified, accessedOn: '2026-07-29'),
   StorySourceRecord(id: 'unesco-leshan', title: 'Mount Emei Scenic Area, including Leshan Giant Buddha Scenic Area', publisher: 'UNESCO World Heritage Centre', url: 'https://whc.unesco.org/en/list/779', kind: StorySourceKind.unesco, languageCode: 'en', geoNodeIds: ['cn-sichuan-leshan-shizhong-giant-buddha'], verificationStatus: StoryVerificationStatus.verified, accessedOn: '2026-07-29'),
@@ -21,36 +23,6 @@ JourneyContentRecord _record(String id, String title, String geo, List<String> p
   verificationStatus: StoryVerificationStatus.published, tags: tags,
   sections: List.generate(paragraphs.length, (i) => JourneyStorySection(id: 'story-$i', text: paragraphs[i], sourceIds: sources)),
 );
-
-const _pingyaoP = <String>[
-  '晨光越过城墙，你从迎薰门走进平遥古城。灰砖街巷保持明清县城的格局，市楼、店铺与院落沿中轴和支路展开。',
-  '古城并不是一组孤立建筑。城墙、衙署、寺庙、民居和商业街彼此连接，四大街、八小街与众多巷道共同组织居民生活。',
-  '十九世纪到二十世纪初，平遥成为重要金融中心。票号用汇兑连接远方商路，深宅院落和店面至今保存晋商经营留下的痕迹。',
-  '古城仍有居民生活。保护既要修缮灰砖木构，也要管理消防、排水与游客压力，让活态社区和历史格局继续共存。',
-];
-const _pingyaoA = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin: 'Chénguāng yuèguò chéngqiáng, nǐ cóng Yíngxūn Mén zǒujìn Píngyáo Gǔchéng. Huīzhuān jiēxiàng bǎochí Míng-Qīng xiànchéng de géjú.', vietnamese: 'Ánh sớm vượt tường thành; phố gạch xám giữ bố cục huyện thành Minh–Thanh.', english: 'Grey-brick streets preserve the plan of a Ming-Qing county town.'),
-  ReadingAnnotation(pinyin: 'Chéngqiáng, yáshǔ, sìmiào, mínjū hé shāngyèjiē bǐcǐ liánjiē, gòngtóng zǔzhī jūmín shēnghuó.', vietnamese: 'Tường thành, nha môn, chùa, nhà ở và phố buôn bán cùng tổ chức đời sống.', english: 'Walls, offices, temples, homes, and markets form one living city.'),
-  ReadingAnnotation(pinyin: 'Shíjiǔ shìjì dào èrshí shìjì chū, Píngyáo chéngwéi zhòngyào jīnróng zhōngxīn. Piàohào yòng huìduì liánjiē yuǎnfāng shānglù.', vietnamese: 'Thế kỷ XIX–đầu XX, các phiếu hiệu Bình Dao kết nối thương lộ bằng chuyển tiền.', english: 'Draft banks made Pingyao an important financial centre.'),
-  ReadingAnnotation(pinyin: 'Bǎohù jì yào xiūshàn huīzhuān mùgòu, yě yào guǎnlǐ xiāofáng, páishuǐ yǔ yóukè yālì.', vietnamese: 'Bảo tồn gồm tu bổ, phòng cháy, thoát nước và quản lý áp lực du khách.', english: 'Conservation balances repair, fire safety, drainage, and visitor pressure.'),
-];
-const _pingyaoW = <WordEntry>[
-  WordEntry(word:'城墙',pinyin:'chéngqiáng',partOfSpeech:'名词',simpleChinese:'围绕古城的高墙。',translation:'Tường bao quanh thành cổ.',englishDefinition:'city wall',symbol:'🧱'),
-  WordEntry(word:'街巷',pinyin:'jiēxiàng',partOfSpeech:'名词',simpleChinese:'街道和小巷。',translation:'Đường và ngõ.',englishDefinition:'streets and lanes',symbol:'🏘️'),
-  WordEntry(word:'格局',pinyin:'géjú',partOfSpeech:'名词',simpleChinese:'整体结构和安排。',translation:'Bố cục tổng thể.',englishDefinition:'urban layout',symbol:'▦'),
-  WordEntry(word:'衙署',pinyin:'yáshǔ',partOfSpeech:'名词',simpleChinese:'古代官员办公处。',translation:'Nha môn cổ.',englishDefinition:'historic government office',symbol:'🏛️'),
-  WordEntry(word:'院落',pinyin:'yuànluò',partOfSpeech:'名词',simpleChinese:'房屋围成的院子。',translation:'Sân nhà truyền thống.',englishDefinition:'courtyard compound',symbol:'🏡'),
-  WordEntry(word:'金融',pinyin:'jīnróng',partOfSpeech:'名词',simpleChinese:'资金流通活动。',translation:'Hoạt động tài chính.',englishDefinition:'finance',symbol:'💰'),
-  WordEntry(word:'票号',pinyin:'piàohào',partOfSpeech:'名词',simpleChinese:'旧时经营汇兑的商号。',translation:'Hiệu ngân phiếu cổ.',englishDefinition:'draft bank',symbol:'📜'),
-  WordEntry(word:'汇兑',pinyin:'huìduì',partOfSpeech:'名词',simpleChinese:'把钱转到异地。',translation:'Chuyển tiền liên vùng.',englishDefinition:'remittance exchange',symbol:'🔁'),
-  WordEntry(word:'修缮',pinyin:'xiūshàn',partOfSpeech:'动词',simpleChinese:'修理并保护旧建筑。',translation:'Tu bổ công trình cũ.',englishDefinition:'to conserve',symbol:'🧰'),
-];
-const _pingyaoD = <DiscoveryEntry>[
-  DiscoveryEntry(text:'平遥古城完整保存城墙、街巷、店铺、民居与寺庙组成的县城格局。',pinyin:'Píngyáo Gǔchéng wánzhěng bǎocún xiànchéng géjú.',simpleChinese:'古城的整体结构保存完整。',vietnamese:'Bố cục huyện thành được bảo tồn hoàn chỉnh.',english:'The county-town layout survives as an integrated whole.'),
-  DiscoveryEntry(text:'古城与双林寺、镇国寺共同构成世界遗产。',pinyin:'Gǔchéng yǔ Shuānglín Sì, Zhènguó Sì gòngtóng gòuchéng Shìjiè Yíchǎn.',simpleChinese:'遗产包括古城和两座寺庙。',vietnamese:'Di sản gồm thành cổ và hai ngôi chùa.',english:'The property includes the city, Shuanglin Temple, and Zhenguo Temple.'),
-  DiscoveryEntry(text:'票号与汇兑业务让平遥成为近代重要金融中心。',pinyin:'Piàohào yǔ huìduì yèwù ràng Píngyáo chéngwéi jīnróng zhōngxīn.',simpleChinese:'票号连接远方资金。',vietnamese:'Phiếu hiệu và chuyển tiền tạo nên trung tâm tài chính.',english:'Draft banks and remittance made Pingyao a financial hub.'),
-  DiscoveryEntry(text:'活态保护同时关注居民、消防、排水与古建筑修缮。',pinyin:'Huótài bǎohù tóngshí guānzhù jūmín, xiāofáng, páishuǐ yǔ xiūshàn.',simpleChinese:'保护也要照顾日常生活。',vietnamese:'Bảo tồn sống quan tâm cư dân và hạ tầng.',english:'Living conservation includes residents and infrastructure.'),
-];
 
 const _qufuP = <String>[
   '清晨，你沿中轴走进曲阜孔庙。古柏遮住一部分天空，门坊、碑亭与院落层层展开，脚步自然慢下来。',
@@ -143,7 +115,7 @@ const _wuyiD = <DiscoveryEntry>[
 ];
 
 
-final pingyaoJourney = _record('pingyao-ancient-city','平遥 · 古城：在灰砖街巷读懂晋商','cn-shanxi-jinzhong-pingyao-ancient-city',_pingyaoP,const ['unesco-pingyao','shanxi-pingyao'],const ['平遥','古城','晋商','票号','世界遗产']);
+final pingyaoJourney = _record(pingyaoAncientCityJourneyId,pingyaoAncientCityCanonicalTitle,'cn-shanxi-jinzhong-pingyao-ancient-city',pingyaoAncientCityGoldLevelContent(5).storyParagraphs,const ['unesco-pingyao','shanxi-pingyao','gjbmj-jinshang-piaohao'],const ['平遥','古城','晋商','票号','汇票','异地汇兑','世界遗产']);
 final qufuJourney = _record('qufu-confucius-sites','曲阜 · 三孔：沿中轴读懂礼与学','cn-shandong-jining-qufu-confucius-temple',_qufuP,const ['unesco-qufu','shandong-qufu'],const ['曲阜','三孔','孔子','儒家','世界遗产']);
 final leshanJourney = _record('leshan-giant-buddha','乐山 · 大佛：三江与石刻的千年守望','cn-sichuan-leshan-shizhong-giant-buddha',_leshanP,const ['unesco-leshan','leshan-government-buddha'],const ['乐山','大佛','石刻','三江','世界遗产']);
 final wuyishanJourney = _record('wuyishan-nine-bend-stream','武夷山 · 九曲溪：山水之间的理学回声','cn-fujian-nanping-wuyishan-nine-bend-stream',_wuyiP,const ['unesco-wuyishan','fujian-wuyishan'],const ['武夷山','九曲溪','生态','朱子理学','世界遗产']);
@@ -151,7 +123,7 @@ final hongheJourney = _record('honghe-hani-rice-terraces',hongheHaniRiceTerraces
 
 final journeyExpansionBatchFourRecords=<JourneyContentRecord>[pingyaoJourney,qufuJourney,leshanJourney,wuyishanJourney,hongheJourney];
 final journeyExpansionBatchFourExperiences=<DailyJourneyExperience>[
-  DailyJourneyExperience(id:pingyaoJourney.id,city:'平遥',cityCode:'PYG',place:'平遥古城',appBarTitle:'平遥 · 古城',storyTitle:'晋商古城故事',headline:'在灰砖街巷读懂晋商',description:'穿过城墙、票号与院落，理解古代县城和金融网络。',discoveryTeaser:'没有现代银行，平遥票号怎样连接远方？',distanceLabel:'1,660 km',stampSymbol:'票',content:pingyaoJourney,storyAnnotations:_pingyaoA,words:_pingyaoW,discoveries:_pingyaoD,wonderQuestion:'如果你经营一家古代票号，最重要的是信用、速度还是安全？为什么？',expressQuestion:'请用两到三句话描写晨光中的城墙、灰砖街巷与市楼。'),
+  DailyJourneyExperience(id:pingyaoJourney.id,city:'平遥',cityCode:'PYG',place:'平遥古城',appBarTitle:'平遥 · 古城',storyTitle:pingyaoAncientCityCanonicalTitle,headline:'一张汇票让谁留下',description:'跟随程砚在票号、银箱与两本账之间，看异地汇兑怎样改变人的在场与责任。',discoveryTeaser:'银子没有上路，远方为什么仍能兑付？',distanceLabel:'1,660 km',stampSymbol:'票',content:pingyaoJourney,storyAnnotations:pingyaoAncientCityGoldLevelContent(5).storyAnnotations,words:pingyaoAncientCityWords,discoveries:pingyaoAncientCityGoldLevelContent(5).discoveries,wonderQuestion:pingyaoAncientCityGoldLevelContent(5).wonderQuestion,expressQuestion:pingyaoAncientCityGoldLevelContent(5).expressQuestion),
   DailyJourneyExperience(id:qufuJourney.id,city:'曲阜',cityCode:'JNG',place:'孔庙',appBarTitle:'曲阜 · 三孔',storyTitle:'儒家文化故事',headline:'沿中轴读懂礼与学',description:'观察孔庙、孔府与孔林如何连接思想、教育和家族记忆。',discoveryTeaser:'为什么思想需要建筑和礼仪来传播？',distanceLabel:'1,690 km',stampSymbol:'礼',content:qufuJourney,storyAnnotations:_qufuA,words:_qufuW,discoveries:_qufuD,wonderQuestion:'你认为学习空间应该强调秩序、自由还是交流？',expressQuestion:'请用两到三句话描写古柏、石碑和层层院落形成的氛围。'),
   DailyJourneyExperience(id:leshanJourney.id,city:'乐山',cityCode:'LSS',place:'乐山大佛',appBarTitle:'乐山 · 大佛',storyTitle:'三江石刻故事',headline:'三江与石刻的千年守望',description:'从江面观察七十一米石刻、隐蔽排水和现代保护。',discoveryTeaser:'大佛的发髻和衣纹为什么也参与排水？',distanceLabel:'1,210 km',stampSymbol:'佛',content:leshanJourney,storyAnnotations:_leshanA,words:_leshanW,discoveries:_leshanD,wonderQuestion:'面对巨大的山体石刻，你会先观察尺度、表情还是工程细节？',expressQuestion:'请用两到三句话描写三江、红砂岩崖壁与大佛的尺度。'),
   DailyJourneyExperience(id:wuyishanJourney.id,city:'武夷山',cityCode:'WUS',place:'九曲溪',appBarTitle:'武夷山 · 九曲溪',storyTitle:'山水理学故事',headline:'山水之间的理学回声',description:'沿九曲溪认识丹霞森林、生物多样性与朱子文化。',discoveryTeaser:'为什么一条溪流能同时承载自然与思想史？',distanceLabel:'650 km',stampSymbol:'曲',content:wuyishanJourney,storyAnnotations:_wuyiA,words:_wuyiW,discoveries:_wuyiD,wonderQuestion:'如果在九曲溪边设一座现代书院，你希望学生怎样观察自然？',expressQuestion:'请用两到三句话描写竹筏、碧水、丹霞峰林与云雾。'),
