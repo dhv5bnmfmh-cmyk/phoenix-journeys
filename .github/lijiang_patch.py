@@ -1,0 +1,221 @@
+from pathlib import Path
+
+
+def replace_once(path: str, old: str, new: str) -> None:
+    p = Path(path)
+    text = p.read_text()
+    if old not in text:
+        raise SystemExit(f'marker missing in {path}: {old[:80]!r}')
+    p.write_text(text.replace(old, new, 1))
+
+
+# Active batch-two experience: retain legacy seed constants as inactive migration
+# references, while routing learner-visible Lijiang through the Gold package.
+path = 'app/lib/data/journey_expansion_batch_two.dart'
+replace_once(
+    path,
+    "import 'datong_yungang_gold_content.dart';\nimport 'journey_data.dart';",
+    "import 'datong_yungang_gold_content.dart';\nimport 'journey_data.dart';\nimport 'lijiang_old_town_gold_content.dart';",
+)
+p = Path(path)
+text = p.read_text()
+source_marker = "];\n\nJourneyContentRecord _record"
+insert = """  StorySourceRecord(
+    id: 'neac-naxi-customs',
+    title: '纳西族风俗习惯',
+    publisher: '国家民族事务委员会',
+    url: 'https://www.neac.gov.cn/seac/ztzl/nxz/fsxg.shtml',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-yunnan-lijiang-gucheng-dayan-old-town'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-08-17',
+  ),
+"""
+if "id: 'neac-naxi-customs'" not in text:
+    if source_marker not in text:
+        raise SystemExit('source list marker missing')
+    text = text.replace(source_marker, insert + source_marker, 1)
+old_record = """final lijiangOldTownJourney = _record(
+  id: 'lijiang-old-town',
+  title: '丽江 · 大研古城：沿流水读懂山地城市',
+  geoNodeId: 'cn-yunnan-lijiang-gucheng-dayan-old-town',
+  paragraphs: _lijiangParagraphs,
+  sources: const ['unesco-lijiang-old-town', 'yunnan-lijiang-old-town'],
+  tags: const ['丽江', '大研古城', '纳西文化', '茶马古道', '水系'],
+);"""
+new_record = """final lijiangOldTownJourney = _record(
+  id: lijiangOldTownJourneyId,
+  title: '丽江 · 大研古城：$lijiangOldTownCanonicalTitle',
+  geoNodeId: 'cn-yunnan-lijiang-gucheng-dayan-old-town',
+  paragraphs: lijiangOldTownGoldLevelContent(5).storyParagraphs,
+  sources: const [
+    'unesco-lijiang-old-town',
+    'yunnan-lijiang-old-town',
+    'neac-naxi-customs',
+  ],
+  tags: const ['丽江', '大研古城', '纳西文化', '茶马古道', '水系'],
+);"""
+if old_record not in text:
+    raise SystemExit('active Lijiang record marker missing')
+text = text.replace(old_record, new_record, 1)
+old_exp = """    storyTitle: '茶马古道故事',
+    headline: '沿流水读懂山地城市',
+    description: '跟随石板路与水道，理解古城如何连接地形、贸易与多民族生活。',
+    discoveryTeaser: '没有规则棋盘格，丽江古城为什么仍能高效运作？',
+    distanceLabel: '1,460 km',
+    stampSymbol: '水',
+    content: lijiangOldTownJourney,
+    storyAnnotations: _lijiangAnnotations,
+    words: _lijiangWords,
+    discoveries: _lijiangDiscoveries,
+    wonderQuestion: '如果你住在古城，你希望水道继续承担哪些日常功能？',
+    expressQuestion: '请用两到三句话描写雨后石板路、流水与木屋的声音和光线。',"""
+new_exp = """    storyTitle: lijiangOldTownCanonicalTitle,
+    headline: lijiangOldTownHeadline,
+    description: lijiangOldTownDescription,
+    discoveryTeaser: lijiangOldTownDiscoveryTeaser,
+    distanceLabel: '1,460 km',
+    stampSymbol: '水',
+    content: lijiangOldTownJourney,
+    storyAnnotations: lijiangOldTownGoldLevelContent(5).storyAnnotations,
+    words: lijiangOldTownGoldLevelContent(5).words,
+    discoveries: lijiangOldTownGoldLevelContent(5).discoveries,
+    wonderQuestion: lijiangOldTownGoldLevelContent(5).wonderQuestion,
+    expressQuestion: lijiangOldTownGoldLevelContent(5).expressQuestion,"""
+if old_exp not in text:
+    raise SystemExit('active Lijiang experience marker missing')
+p.write_text(text.replace(old_exp, new_exp, 1))
+
+
+# Literary cleanup and source-provenance normalization.
+path = 'app/lib/data/lijiang_old_town_gold_content.dart'
+replace_once(
+    path,
+    '从不同方向进城的商旅常在四方街汇聚；姐弟俩的买家也只是其中一支。对他们来说，明早的交易不是故事背景，而是眼前能不能还债的机会。',
+    '下午，和清亲眼看着几支马帮从不同巷口挤进四方街。姐姐踮脚找了三次，才认出约好明早来收茶的人。',
+)
+replace_once(
+    path,
+    '古城的水渠贴着街巷走，许多桥直接跨在水上。平日它们让买卖和生活靠得很近，起火时也让取水离木屋很近。',
+    '和清低头就看见桥下的水光。离火最近的几户已经把木桶拖到巷口，却被那驮横在桥上的茶挡住。',
+)
+replace_once(
+    path,
+    '姐弟俩把没进水的茶搬到墙边，谁也没提明早的买家。共同的债从争谁做主，变成了两人都要承担的损失。',
+    '姐弟俩把没进水的茶搬到墙边。和素数到第五包时停了一下，把还能卖的那一包推到两人中间。',
+)
+replace_once(path, 'for (var i = 0; i < 25; i++)', 'for (var i = 0; i < 26; i++)')
+p = Path(path)
+text = p.read_text()
+text = text.replace(
+    "sourceIds: const ['unesco-lijiang-old-town', 'ncha-lijiang-old-town-2025', 'neac-naxi-customs']",
+    "sourceIds: const ['unesco-lijiang-old-town', 'yunnan-lijiang-old-town', 'neac-naxi-customs']",
+)
+text = text.replace(
+    "RemediatedSourceBinding(id: 'ncha-lijiang-old-town-2025', publisher: '国家文物局', scope: 'three-eye wells, Sifang Street, Tea Horse Road, no-wall trade morphology'),",
+    "RemediatedSourceBinding(id: 'yunnan-lijiang-old-town', publisher: '云南省文化和旅游厅', scope: 'Lijiang water-city relation, living heritage and local historical context'),",
+)
+p.write_text(text)
+
+
+# Reusable semantic mechanism families. They encode causal functions, not city names.
+path = 'app/lib/data/journey_semantic_fingerprint_catalog.dart'
+replace_once(
+    path,
+    '  scaleTransitionForcesInheritanceRedistribution,\n}',
+    '''  scaleTransitionForcesInheritanceRedistribution,
+
+  // Reusable families introduced by immediate shared-livelihood loss under hazard.
+  marketClosingBeforeSingleSaleWindow,
+  smallTraderProtectingSharedLivelihood,
+  jointOwnersUnderSharedDebt,
+  preserveSharedLivelihoodBeforeBuyerLeaves,
+  privateLivelihoodAssetVsImmediateSharedSafety,
+  destroySharedAssetToOpenEmergencyAccess,
+  bridgeClearsAsCargoFallsIntoCanal,
+  emergencyWaterFlowContainsHazardWithTradeLoss,
+  unilateralControlToJointlyBorneLoss,
+  sharedCleanupWithoutVerbalReconciliation,
+  distributedWaterInfrastructureEnablesEmergencyResponse,
+  wetTradeGoodsEmbodyIrreversibleSharedCost,
+  blockedBridgeToBucketRelay,
+  nextMorningTradeWindowAfterMarketClose,
+  sisterOpposesLossThenSharesCleanup,
+  placeInfrastructureForcesLivelihoodSacrificeUnderHazard,
+}''',
+)
+
+
+# Challenge Gold profile: mode-specific pedagogy and level progression.
+path = 'app/lib/data/all_gold_challenge_gold_profiles.dart'
+p = Path(path)
+text = p.read_text()
+marker = "  'jiangmen-kaiping-diaolou': GoldChallengeProfile("
+if "'lijiang-old-town': GoldChallengeProfile(" not in text:
+    profile = r'''  'lijiang-old-town': GoldChallengeProfile(
+    journeyId: 'lijiang-old-town',
+    paragraphPrompt: '按共同债务、堵桥、割绳、传水与湿茶收尾，重建“桥空出来”为什么必须付出代价。',
+    missingPrompt: '结合姐弟共同所有权和桥下水渠，选出最能让前后行动真正相接的一句。',
+    paragraphAnchors: <double>[0.00, 0.03, 0.10, 0.20, 0.31, 0.43, 0.56, 0.68, 0.81, 0.94],
+    missingAnchors: <double>[0.02, 0.08, 0.16, 0.27, 0.39, 0.51, 0.64, 0.76, 0.88, 0.97],
+    paragraphGoals: <String>[
+      '辨认姐弟共同债务、起火与割绳后的直接顺序',
+      '理解明早交易为什么让茶包成为真实生计压力',
+      '重建水渠、小桥与驮货发生冲突的空间顺序',
+      '判断姐姐先保货与弟弟看见火星之间的关系压力',
+      '连接共同所有权与割绳前的犹豫',
+      '重建火星越墙、割绳、第一桶水越桥的因果链',
+      '理解马帮商业空间怎样进入这次私人选择',
+      '判断水渠防火功能为何必须通过清空桥面才能进入行动',
+      '整合姐弟争谁做主与共同承担货损的关系变化',
+      '解释桥、水、市场、木屋与共同本钱怎样共同制造不可逆选择',
+    ],
+    missingGoals: <String>[
+      '补足“货堵桥”与“水就在桥下”的直接关系',
+      '根据共同债务判断为何不能把茶叶当作无代价道具',
+      '根据街巷和桥面推断为什么绕行不是同样即时',
+      '补足姐姐对共同本钱的决定权',
+      '理解和清的犹豫不是怕刀，而是怕替姐姐决定损失',
+      '根据第一桶水判断割绳改变了什么行动条件',
+      '连接四方街商贸与次日买家的时间压力',
+      '推断水系的历史防火功能怎样成为 Story 机制而非知识标签',
+      '补足火后数茶包与姐弟关系的无言变化',
+      '根据扁担结尾解释共同承担为何不同于一句“和好了”',
+    ],
+    paragraphIntents: <String>[
+      'STORY','STORY','CAUSAL_REASONING','STORY','CAUSAL_REASONING',
+      'CAUSAL_REASONING','HISTORY','CULTURE','CAUSAL_REASONING','CAUSAL_REASONING',
+    ],
+    missingIntents: <String>[
+      'STORY','STORY','CAUSAL_REASONING','STORY','CAUSAL_REASONING',
+      'CAUSAL_REASONING','HISTORY','CULTURE','CAUSAL_REASONING','CAUSAL_REASONING',
+    ],
+    grammar: <GoldChallengeGrammarSpec>[
+      GoldChallengeGrammarSpec(targetId: 'lv1-sequence', prefix: '和清', brokenSegment: '先割断捆绳，但是再', suffix: '把茶包推开。', correctReplacement: '先割断捆绳，再', distractors: <String>['先割断捆绳，但是再','虽然割断捆绳，再','先割断捆绳，所以再'], errorType: '先…再…：动作顺承', whyWrong: '割绳和推开茶包是连续动作，不是转折。', revisionRule: '连续步骤用“先A，再B”。', memoryTip: '先找哪个动作让下一个动作成为可能。', misconception: '把连续动作误写成转折'),
+      GoldChallengeGrammarSpec(targetId: 'lv2-shared-purpose', prefix: '姐弟俩', brokenSegment: '把这笔交易为了还', suffix: '共同的债。', correctReplacement: '要用这笔交易的钱还', distractors: <String>['把这笔交易为了还','用给这笔交易还','让这笔交易被还给'], errorType: '目的与宾语结构', whyWrong: '“还债”的工具是交易所得的钱，不能把“交易”直接套进“把…为了”。', revisionRule: '先说动作主体，再明确“用什么做什么”。', memoryTip: '谁用什么来还债？', misconception: '把目的标记和把字句混成一个结构'),
+      GoldChallengeGrammarSpec(targetId: 'lv3-location-ba', prefix: '他们的驮货', brokenSegment: '把小桥堵在了', suffix: '水渠上方。', correctReplacement: '堵在了', distractors: <String>['把小桥堵在了','给小桥堵到了','被小桥堵在了'], errorType: '主语与处所补语', whyWrong: '“驮货”本身是堵住桥面的主体，不需要再把“小桥”提前成把字宾语。', revisionRule: '主语直接执行动作时，用“主语+动词+处所”。', memoryTip: '先问到底是谁堵在桥上。', misconception: '看到受影响对象就机械使用把字句'),
+      GoldChallengeGrammarSpec(targetId: 'lv4-half-capital', prefix: '茶包里', brokenSegment: '不但有和清的本钱，所以也有', suffix: '和素的一半。', correctReplacement: '不但有和清的本钱，也有', distractors: <String>['不但有和清的本钱，所以也有','因为有和清的本钱，也有','虽然有和清的本钱，所以有'], errorType: '不但…也…：并列共有', whyWrong: '两人的本钱同时压在货里，是并列关系，不是因果。', revisionRule: '两个同层事实用“不但A，也B”。', memoryTip: '姐姐的本钱不是弟弟本钱造成的结果。', misconception: '把共同所有误写成因果'),
+      GoldChallengeGrammarSpec(targetId: 'lv5-not-only', prefix: '割绳', brokenSegment: '不只是毁掉自己的货，而且替姐姐决定她的一半也受损', suffix: '。', correctReplacement: '不只是毁掉自己的货，还等于替姐姐决定她的一半也受损', distractors: <String>['不只是毁掉自己的货，而且替姐姐决定她的一半也受损','因为毁掉自己的货，所以替姐姐决定她的一半也受损','虽然毁掉自己的货，但是替姐姐决定她的一半也受损'], errorType: '递进与语义承接', whyWrong: '后半句不是另一个并列动作，而是同一选择增加的共同所有权代价；“还等于”更准确。', revisionRule: '当后项深化前项意义时，用能表达递进解释的结构。', memoryTip: '先写物质损失，再写这个动作多承担了什么关系意义。', misconception: '把递进解释压成表面并列'),
+      GoldChallengeGrammarSpec(targetId: 'lv6-before-second-call', prefix: '和素', brokenSegment: '还没喊出第二声，火星就已经', suffix: '越过院墙。', correctReplacement: '还没喊出第二声，火星已经', distractors: <String>['还没喊出第二声，火星就已经','还没喊出第二声，所以火星已经','虽然没喊第二声，火星才已经'], errorType: '还没…已经…：时间先后', whyWrong: '这里强调第二声尚未发生，火星已经越墙；“就已经”叠加会显得冗余。', revisionRule: '“还没A，B已经……”可以直接表达B先发生。', memoryTip: '比较第二声和火星哪个先发生。', misconception: '重复叠加同层时间副词'),
+      GoldChallengeGrammarSpec(targetId: 'lv7-convergence', prefix: '不同巷口来的马帮', brokenSegment: '既在四方街汇聚，所以又', suffix: '从不同方向离开。', correctReplacement: '在四方街汇聚，也会', distractors: <String>['既在四方街汇聚，所以又','因为在四方街汇聚，所以才','虽然在四方街汇聚，因此'], errorType: '并列空间动作而非因果', whyWrong: '汇聚与离开描述商旅在中心空间的两个动作，不是“因为汇聚所以离开”的因果。', revisionRule: '同一主体的并列空间动作可用“A，也会B”。', memoryTip: '不要把路线先后自动写成因果。', misconception: '把空间顺序误写成逻辑原因'),
+      GoldChallengeGrammarSpec(targetId: 'lv8-water-function', prefix: '水渠', brokenSegment: '既靠近木屋，而且所以能', suffix: '在起火时提供近处水源。', correctReplacement: '靠近木屋，因此能', distractors: <String>['既靠近木屋，而且所以能','靠近木屋，但是能','虽然靠近木屋，所以却能'], errorType: '因此：空间条件与行动结果', whyWrong: '这里需要表达“水源位置近”怎样改变取水条件，不能把并列和因果词叠在一起。', revisionRule: '明确原因A和结果B时，用“A，因此B”。', memoryTip: '先判断这句话是在列两件事，还是解释为什么能更快取水。', misconception: '把并列、转折和因果标记混用'),
+      GoldChallengeGrammarSpec(targetId: 'lv9-both-bear', prefix: '货物受损以后，姐弟俩', brokenSegment: '不但谁做主，而是', suffix: '要一起处理剩下的茶和债。', correctReplacement: '不再只争谁做主，而是', distractors: <String>['不但谁做主，而是','不仅谁做主，所以','不是谁做主，而且所以'], errorType: '不再只…而是…：重心变化', whyWrong: '前半句要表达原有争执被移开，不是“不但”式递进。', revisionRule: '从旧重心转向新重心可用“不再只A，而是B”。', memoryTip: '争论没有被证明谁赢了，行动把问题改成了共同承担。', misconception: '把关系重心变化误写成并列递进'),
+      GoldChallengeGrammarSpec(targetId: 'lv10-necessary-place-cause', prefix: '只有桥面真正空出来，邻人', brokenSegment: '就能', suffix: '把水桶连续递过桥。', correctReplacement: '才能', distractors: <String>['就能','仍能','所以能'], errorType: '只有…才…：必要条件', whyWrong: 'Story 里清空桥面是桶传过桥的必要条件，“只有”应与“才”呼应。', revisionRule: '必要条件用“只有A，才B”。', memoryTip: '问：没有A，B在这个故事里还能以同样方式发生吗？', misconception: '把必要条件写成一般充分条件'),
+    ],
+    storyDistractors: <GoldChallengeStoryDistractor>[
+      GoldChallengeStoryDistractor('和清把茶完整牵出桥面，既没有损失货物，也没有耽误取水。', '抹掉选择必须付出的物质代价'),
+      GoldChallengeStoryDistractor('和素同意弟弟先毁掉两人的货，因此割绳前不存在共同所有权冲突。', '抹掉姐姐反对与共同决定权'),
+      GoldChallengeStoryDistractor('邻院起火后，大家等到第二天买家离开才开始从水渠提水。', '颠倒紧急行动与交易时间压力'),
+      GoldChallengeStoryDistractor('火被控制后，湿茶恢复原样，姐弟当天就把共同债全部还清。', '把不可逆损失改成无成本成功'),
+      GoldChallengeStoryDistractor('丽江水渠在故事里只负责倒映灯光，与取水和桥面行动没有关系。', '把地方机制退回旅游景观标签'),
+      GoldChallengeStoryDistractor('和清割绳后独自离开，姐姐拒绝处理任何剩余货物。', '忽略结尾共同承担的关系动作'),
+      GoldChallengeStoryDistractor('四方街是一处与商贸无关的封闭庭院，马帮不会在这里集散。', '用错误历史背景破坏已教过的商业空间'),
+      GoldChallengeStoryDistractor('桥一直空着，茶包从未占住通道；割绳只是为了显得果断。', '删除桥面阻塞后仍保留动作，破坏 Place Causality'),
+    ],
+  ),
+'''
+    if marker not in text:
+        raise SystemExit('challenge insertion marker missing')
+    text = text.replace(marker, profile + marker, 1)
+    p.write_text(text)
