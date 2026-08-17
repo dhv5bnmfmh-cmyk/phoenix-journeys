@@ -284,6 +284,24 @@ enum NarrativeMechanismFamily {
   dawnDepartureAfterPoliticalCenterMoves,
   brotherAndPeerAcceptIndependentLines,
   scaleTransitionForcesInheritanceRedistribution,
+
+  // Reusable families introduced by immediate shared-livelihood loss under hazard.
+  marketClosingBeforeSingleSaleWindow,
+  smallTraderProtectingSharedLivelihood,
+  jointOwnersUnderSharedDebt,
+  preserveSharedLivelihoodBeforeBuyerLeaves,
+  privateLivelihoodAssetVsImmediateSharedSafety,
+  destroySharedAssetToOpenEmergencyAccess,
+  bridgeClearsAsCargoFallsIntoCanal,
+  emergencyWaterFlowContainsHazardWithTradeLoss,
+  unilateralControlToJointlyBorneLoss,
+  sharedCleanupWithoutVerbalReconciliation,
+  distributedWaterInfrastructureEnablesEmergencyResponse,
+  wetTradeGoodsEmbodyIrreversibleSharedCost,
+  blockedBridgeToBucketRelay,
+  nextMorningTradeWindowAfterMarketClose,
+  sisterOpposesLossThenSharesCleanup,
+  placeInfrastructureForcesLivelihoodSacrificeUnderHazard,
 }
 
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {

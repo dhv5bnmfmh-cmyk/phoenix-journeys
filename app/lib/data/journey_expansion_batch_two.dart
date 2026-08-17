@@ -2,6 +2,7 @@ import '../models/story_content.dart';
 import 'daily_journey_experience.dart';
 import 'datong_yungang_gold_content.dart';
 import 'journey_data.dart';
+import 'lijiang_old_town_gold_content.dart';
 
 const journeyExpansionBatchTwoSources = <StorySourceRecord>[
   StorySourceRecord(
@@ -47,6 +48,17 @@ const journeyExpansionBatchTwoSources = <StorySourceRecord>[
     geoNodeIds: ['cn-yunnan-lijiang-gucheng-dayan-old-town'],
     verificationStatus: StoryVerificationStatus.verified,
     accessedOn: '2026-07-29',
+  ),
+  StorySourceRecord(
+    id: 'neac-naxi-customs',
+    title: '纳西族风俗习惯',
+    publisher: '国家民族事务委员会',
+    url: 'https://www.neac.gov.cn/seac/ztzl/nxz/fsxg.shtml',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-yunnan-lijiang-gucheng-dayan-old-town'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-08-17',
   ),
 ];
 
@@ -156,11 +168,15 @@ final datongYungangJourney = _record(
 );
 
 final lijiangOldTownJourney = _record(
-  id: 'lijiang-old-town',
-  title: '丽江 · 大研古城：沿流水读懂山地城市',
+  id: lijiangOldTownJourneyId,
+  title: '丽江 · 大研古城：$lijiangOldTownCanonicalTitle',
   geoNodeId: 'cn-yunnan-lijiang-gucheng-dayan-old-town',
-  paragraphs: _lijiangParagraphs,
-  sources: const ['unesco-lijiang-old-town', 'yunnan-lijiang-old-town'],
+  paragraphs: lijiangOldTownGoldLevelContent(5).storyParagraphs,
+  sources: const [
+    'unesco-lijiang-old-town',
+    'yunnan-lijiang-old-town',
+    'neac-naxi-customs',
+  ],
   tags: const ['丽江', '大研古城', '纳西文化', '茶马古道', '水系'],
 );
 
@@ -195,17 +211,17 @@ final journeyExpansionBatchTwoExperiences = <DailyJourneyExperience>[
     cityCode: 'LJG',
     place: '大研古城',
     appBarTitle: '丽江 · 大研古城',
-    storyTitle: '茶马古道故事',
-    headline: '沿流水读懂山地城市',
-    description: '跟随石板路与水道，理解古城如何连接地形、贸易与多民族生活。',
-    discoveryTeaser: '没有规则棋盘格，丽江古城为什么仍能高效运作？',
+    storyTitle: lijiangOldTownCanonicalTitle,
+    headline: lijiangOldTownHeadline,
+    description: lijiangOldTownDescription,
+    discoveryTeaser: lijiangOldTownDiscoveryTeaser,
     distanceLabel: '1,460 km',
     stampSymbol: '水',
     content: lijiangOldTownJourney,
-    storyAnnotations: _lijiangAnnotations,
-    words: _lijiangWords,
-    discoveries: _lijiangDiscoveries,
-    wonderQuestion: '如果你住在古城，你希望水道继续承担哪些日常功能？',
-    expressQuestion: '请用两到三句话描写雨后石板路、流水与木屋的声音和光线。',
+    storyAnnotations: lijiangOldTownGoldLevelContent(5).storyAnnotations,
+    words: lijiangOldTownGoldLevelContent(5).words,
+    discoveries: lijiangOldTownGoldLevelContent(5).discoveries,
+    wonderQuestion: lijiangOldTownGoldLevelContent(5).wonderQuestion,
+    expressQuestion: lijiangOldTownGoldLevelContent(5).expressQuestion,
   ),
 ];

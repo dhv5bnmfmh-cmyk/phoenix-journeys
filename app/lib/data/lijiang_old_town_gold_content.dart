@@ -290,12 +290,12 @@ class _LijiangSegment {
 const _segments = <_LijiangSegment>[
   _LijiangSegment(0, 1, '清末黄昏，四方街刚散市。虚构商贩和清与姐姐和素守着一驮茶叶；明早买家离城，这笔钱要还两人共同的债。', 'Một buổi chiều cuối thời Thanh, chợ ở Tứ Phương vừa tan. Người buôn hư cấu Hòa Thanh và chị gái Hòa Tố trông một chuyến trà; sáng mai người mua rời thành và số tiền này phải trả món nợ chung của hai chị em.', 'At dusk in the late Qing, the market at Sifang Street has just dispersed. The fictional trader He Qing and his older sister He Su guard a mule-load of tea; the buyer leaves in the morning, and the sale must pay their shared debt.'),
   _LijiangSegment(0, 2, '这驮茶是姐弟俩合钱收下的；和素已经把买家的时辰记在心里，错过这一趟，他们又要多背一季债。', 'Hai chị em đã góp tiền mua lô trà này. Hòa Tố nhớ kỹ giờ hẹn; lỡ chuyến này nghĩa là họ phải gánh món nợ thêm một mùa nữa.', 'The siblings pooled their money for this load. He Su has memorized the buyer’s time; missing this deal means carrying the debt for another season.'),
-  _LijiangSegment(0, 7, '从不同方向进城的商旅常在四方街汇聚；姐弟俩的买家也只是其中一支。对他们来说，明早的交易不是故事背景，而是眼前能不能还债的机会。', 'Thương nhân từ nhiều hướng tụ về Tứ Phương; người mua của hai chị em chỉ là một đoàn trong số đó. Với họ, giao dịch sáng mai không phải phông nền lịch sử mà là cơ hội thực sự để trả nợ.', 'Traders arriving from different directions gather at Sifang Street; the siblings’ buyer is only one group among them. For the pair, tomorrow’s sale is not historical scenery but their immediate chance to clear debt.'),
+  _LijiangSegment(0, 7, '下午，和清亲眼看着几支马帮从不同巷口挤进四方街。姐姐踮脚找了三次，才认出约好明早来收茶的人。', 'Thương nhân từ nhiều hướng tụ về Tứ Phương; người mua của hai chị em chỉ là một đoàn trong số đó. Với họ, giao dịch sáng mai không phải phông nền lịch sử mà là cơ hội thực sự để trả nợ.', 'Traders arriving from different directions gather at Sifang Street; the siblings’ buyer is only one group among them. For the pair, tomorrow’s sale is not historical scenery but their immediate chance to clear debt.'),
 
   _LijiangSegment(1, 1, '邻院突然起火。水渠就在桥下，可他们的驮货正堵着小桥。', 'Một sân nhà bên cạnh bất ngờ bốc cháy. Kênh nước ở ngay dưới cầu, nhưng hàng của họ đang chặn chiếc cầu nhỏ.', 'A neighboring courtyard suddenly catches fire. The canal is directly below, but their loaded goods block the small bridge.'),
   _LijiangSegment(1, 3, '四方街周围的巷子顺着地势和水道展开，桥把两边的铺面连在一起。散市后，人和牲口都在往不同方向退。', 'Các ngõ quanh Tứ Phương đi theo địa hình và dòng nước, những cây cầu nối các cửa hàng hai bờ. Sau khi chợ tan, người và súc vật cùng rút về nhiều hướng.', 'Lanes around Sifang Street follow the terrain and waterways, while bridges join shops on opposite banks. After the market disperses, people and pack animals withdraw in different directions.'),
   _LijiangSegment(1, 5, '烟贴着屋檐压下来。桥窄，满载的骡子不肯倒退；要绕到另一处过水，得穿过刚散去的人群。', 'Khói ép thấp dưới mái hiên. Cầu hẹp, con la chở nặng không chịu lùi; muốn vòng sang chỗ khác lấy nước phải xuyên qua đám đông vừa tan.', 'Smoke presses under the eaves. The bridge is narrow and the loaded mule refuses to back up; reaching another crossing means pushing through the dispersing crowd.'),
-  _LijiangSegment(1, 8, '古城的水渠贴着街巷走，许多桥直接跨在水上。平日它们让买卖和生活靠得很近，起火时也让取水离木屋很近。', 'Kênh nước chạy sát các phố ngõ và nhiều cầu bắc thẳng qua dòng nước. Ngày thường chúng kéo buôn bán và đời sống lại gần nhau; khi có cháy, nguồn nước cũng ở rất gần nhà gỗ.', 'Canals run beside the lanes and many bridges cross the water directly. In ordinary life they pull trade and homes close together; during fire they also put water close to timber houses.'),
+  _LijiangSegment(1, 8, '和清低头就看见桥下的水光。离火最近的几户已经把木桶拖到巷口，却被那驮横在桥上的茶挡住。', 'Kênh nước chạy sát các phố ngõ và nhiều cầu bắc thẳng qua dòng nước. Ngày thường chúng kéo buôn bán và đời sống lại gần nhau; khi có cháy, nguồn nước cũng ở rất gần nhà gỗ.', 'Canals run beside the lanes and many bridges cross the water directly. In ordinary life they pull trade and homes close together; during fire they also put water close to timber houses.'),
 
   _LijiangSegment(2, 1, '和素要他先保住货。和清看见火星已经扑向隔壁木屋。', 'Hòa Tố bảo em phải giữ hàng trước. Hòa Thanh thấy tia lửa đã lao về căn nhà gỗ kế bên.', 'He Su tells him to save the goods first. He Qing sees sparks already reaching toward the neighboring timber house.'),
   _LijiangSegment(2, 4, '和素一把抓住骡缰：“先把货牵出去。”她也有一半本钱压在茶包里。和清伸手去接缰绳，却听见木头炸开一声。', 'Hòa Tố chộp dây cương: “Dắt hàng ra trước.” Một nửa vốn của cô cũng nằm trong những bao trà. Hòa Thanh vừa đưa tay nhận dây thì nghe gỗ nổ đánh một tiếng.', 'He Su grabs the rein. “Get the load out first.” Half her capital is tied up in those tea sacks too. He Qing reaches for the rein and hears timber crack.'),
@@ -313,7 +313,7 @@ const _segments = <_LijiangSegment>[
 
   _LijiangSegment(5, 1, '天亮，和清搬起湿茶。和素没说话，只扛起扁担另一头，和他一起往院里走。', 'Trời sáng, Hòa Thanh nhấc những bao trà ướt. Hòa Tố không nói gì, chỉ ghé vai vào đầu kia của đòn gánh và cùng em đi về sân nhà.', 'At dawn, He Qing lifts the wet tea. He Su says nothing; she simply shoulders the other end of the carrying pole and walks back to the courtyard with him.'),
   _LijiangSegment(5, 8, '火势压下去以后，和素蹲在水边摸了一把茶包。她没有看和清，只问：“还能剩几包？”和清说不知道。', 'Sau khi lửa dịu xuống, Hòa Tố ngồi bên nước sờ một bao trà. Cô không nhìn em, chỉ hỏi: “Còn được mấy bao?” Hòa Thanh nói không biết.', 'After the fire subsides, He Su crouches by the water and touches a tea sack. She does not look at He Qing, only asks, “How many can we keep?” He says he does not know.'),
-  _LijiangSegment(5, 9, '姐弟俩把没进水的茶搬到墙边，谁也没提明早的买家。共同的债从争谁做主，变成了两人都要承担的损失。', 'Hai chị em chuyển phần trà chưa ngấm nước vào sát tường, không ai nhắc người mua sáng mai. Món nợ chung từ cuộc cãi vã xem ai quyết định trở thành thiệt hại cả hai đều phải gánh.', 'The siblings move the dry sacks to the wall and neither mentions the morning buyer. Their shared debt changes from an argument over who gets to decide into a loss both must carry.'),
+  _LijiangSegment(5, 9, '姐弟俩把没进水的茶搬到墙边。和素数到第五包时停了一下，把还能卖的那一包推到两人中间。', 'Hai chị em chuyển phần trà chưa ngấm nước vào sát tường, không ai nhắc người mua sáng mai. Món nợ chung từ cuộc cãi vã xem ai quyết định trở thành thiệt hại cả hai đều phải gánh.', 'The siblings move the dry sacks to the wall and neither mentions the morning buyer. Their shared debt changes from an argument over who gets to decide into a loss both must carry.'),
   _LijiangSegment(5, 10, '天色发白，买家会不会等仍没答案。和素把扁担往弟弟那边挪了一点，让重量落在两人中间。', 'Trời dần sáng và không ai biết người mua có chờ hay không. Hòa Tố dịch đòn gánh một chút về phía em để sức nặng nằm giữa hai người.', 'Daylight grows and there is still no answer about whether the buyer will wait. He Su shifts the carrying pole slightly toward her brother so the weight settles between them.'),
 ];
 
@@ -504,11 +504,11 @@ final lijiangOldTownGoldJourney = RemediatedJourney(
   ],
   discoveries: [for (var level = 1; level <= 10; level++) ...lijiangDiscoveriesForLevel(level)],
   discoveryTraces: [
-    for (var i = 0; i < 25; i++)
+    for (var i = 0; i < 26; i++)
       RemediatedDiscoveryTrace(
         discoveryIndex: i,
         storyEventIds: i < 8 ? const ['LJ-E1', 'LJ-E2'] : const <String>[],
-        sourceIds: const ['unesco-lijiang-old-town', 'ncha-lijiang-old-town-2025', 'neac-naxi-customs'],
+        sourceIds: const ['unesco-lijiang-old-town', 'yunnan-lijiang-old-town', 'neac-naxi-customs'],
       ),
   ],
   challenges: const [
@@ -532,7 +532,7 @@ final lijiangOldTownGoldJourney = RemediatedJourney(
   ),
   sources: const [
     RemediatedSourceBinding(id: 'unesco-lijiang-old-town', publisher: 'UNESCO World Heritage Centre', scope: 'world model: topography, water, fire prevention, trade, architecture, multi-cultural exchange'),
-    RemediatedSourceBinding(id: 'ncha-lijiang-old-town-2025', publisher: '国家文物局', scope: 'three-eye wells, Sifang Street, Tea Horse Road, no-wall trade morphology'),
+    RemediatedSourceBinding(id: 'yunnan-lijiang-old-town', publisher: '云南省文化和旅游厅', scope: 'Lijiang water-city relation, living heritage and local historical context'),
     RemediatedSourceBinding(id: 'neac-naxi-customs', publisher: '国家民族事务委员会', scope: 'Naxi residence/water/bridge context and Qing-period architectural exchange'),
   ],
 );
