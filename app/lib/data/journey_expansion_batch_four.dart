@@ -1,6 +1,7 @@
 import '../models/story_content.dart';
 import 'daily_journey_experience.dart';
 import 'journey_data.dart';
+import 'honghe_hani_rice_terraces_gold_content.dart';
 
 const journeyExpansionBatchFourSources = <StorySourceRecord>[
   StorySourceRecord(id: 'unesco-pingyao', title: 'Ancient City of Ping Yao', publisher: 'UNESCO World Heritage Centre', url: 'https://whc.unesco.org/en/list/812', kind: StorySourceKind.unesco, languageCode: 'en', geoNodeIds: ['cn-shanxi-jinzhong-pingyao-ancient-city'], verificationStatus: StoryVerificationStatus.verified, accessedOn: '2026-07-29'),
@@ -141,41 +142,12 @@ const _wuyiD = <DiscoveryEntry>[
   DiscoveryEntry(text:'旅游承载量管理同时保护九曲溪、森林和文化遗迹。',pinyin:'Lǚyóu chéngzàiliàng guǎnlǐ tóngshí bǎohù héliú, sēnlín hé wénhuà yíjì.',simpleChinese:'游客数量也影响保护。',vietnamese:'Quản lý sức chứa bảo vệ sông, rừng và di tích.',english:'Visitor capacity management protects nature and heritage.'),
 ];
 
-const _hongheP = <String>[
-  '日出越过哀牢山，元阳哈尼梯田的水面逐层亮起。森林在山顶蓄水，蘑菇房村寨位于中部，梯田沿陡坡一直延伸到河谷。',
-  '哈尼族等各族居民用一千三百多年营造这套农耕系统。沟渠把森林水源引过村寨，分入层层田块，维持红米、水牛、鱼鸭共同参与的生产。',
-  '森林、村寨、梯田与水系不是四幅分开的风景。上方森林涵养水源，村寨连接生活与肥料循环，下方梯田利用水和养分，形成完整生态。',
-  '梯田仍在生产，也面对缺水、人口变化与旅游压力。保护需要维护沟渠、传统知识和社区收益，让农耕文化继续活在日常劳动中。',
-];
-const _hongheA = <ReadingAnnotation>[
-  ReadingAnnotation(pinyin:'Rìchū yuèguò Āiláo Shān, Yuányáng Hāní Tītián de shuǐmiàn zhúcéng liàngqǐ.',vietnamese:'Mặt nước ruộng bậc thang Nguyên Dương sáng dần dưới bình minh Ai Lao.',english:'Sunrise lights the flooded terraces below Ailao Mountain.'),
-  ReadingAnnotation(pinyin:'Gōuqú bǎ sēnlín shuǐyuán yǐnguò cūnzhài, fēnrù céngcéng tiánkuài.',vietnamese:'Kênh dẫn nước rừng qua làng rồi chia vào từng thửa ruộng.',english:'Channels carry forest water through villages into layered fields.'),
-  ReadingAnnotation(pinyin:'Sēnlín, cūnzhài, tītián yǔ shuǐxì xíngchéng wánzhěng shēngtài.',vietnamese:'Rừng, làng, ruộng và hệ nước tạo thành một sinh thái hoàn chỉnh.',english:'Forest, villages, terraces, and water form one integrated ecology.'),
-  ReadingAnnotation(pinyin:'Bǎohù xūyào wéihù gōuqú, chuántǒng zhīshi hé shèqū shōuyì.',vietnamese:'Bảo tồn cần giữ kênh, tri thức truyền thống và lợi ích cộng đồng.',english:'Conservation sustains channels, knowledge, and community benefit.'),
-];
-const _hongheW = <WordEntry>[
-  WordEntry(word:'梯田',pinyin:'tītián',partOfSpeech:'名词',simpleChinese:'山坡上的阶梯状农田。',translation:'Ruộng bậc thang.',englishDefinition:'rice terrace',symbol:'🌾'),
-  WordEntry(word:'蓄水',pinyin:'xùshuǐ',partOfSpeech:'动词',simpleChinese:'保存水。',translation:'Tích nước.',englishDefinition:'to retain water',symbol:'💧'),
-  WordEntry(word:'蘑菇房',pinyin:'mógufáng',partOfSpeech:'名词',simpleChinese:'哈尼传统房屋。',translation:'Nhà nấm truyền thống Hani.',englishDefinition:'mushroom-shaped house',symbol:'🏠'),
-  WordEntry(word:'村寨',pinyin:'cūnzhài',partOfSpeech:'名词',simpleChinese:'乡村聚居地。',translation:'Bản làng.',englishDefinition:'village settlement',symbol:'🏘️'),
-  WordEntry(word:'农耕',pinyin:'nónggēng',partOfSpeech:'名词',simpleChinese:'种田生产活动。',translation:'Canh tác nông nghiệp.',englishDefinition:'farming',symbol:'🌱'),
-  WordEntry(word:'沟渠',pinyin:'gōuqú',partOfSpeech:'名词',simpleChinese:'引水的小河道。',translation:'Kênh dẫn nước.',englishDefinition:'irrigation channel',symbol:'〰️'),
-  WordEntry(word:'水源',pinyin:'shuǐyuán',partOfSpeech:'名词',simpleChinese:'水的来源。',translation:'Nguồn nước.',englishDefinition:'water source',symbol:'🏔️'),
-  WordEntry(word:'涵养',pinyin:'hányǎng',partOfSpeech:'动词',simpleChinese:'保存并补充水分。',translation:'Nuôi dưỡng và giữ nước.',englishDefinition:'to conserve water',symbol:'🌳'),
-  WordEntry(word:'循环',pinyin:'xúnhuán',partOfSpeech:'名词',simpleChinese:'不断回到系统中使用。',translation:'Vòng tuần hoàn.',englishDefinition:'cycle',symbol:'♻️'),
-];
-const _hongheD = <DiscoveryEntry>[
-  DiscoveryEntry(text:'哈尼梯田是延续一千三百多年的活态农耕文化景观。',pinyin:'Hāní Tītián shì yánxù yìqiān sānbǎi duō nián de huótài nónggēng jǐngguān.',simpleChinese:'梯田有一千三百多年历史。',vietnamese:'Cảnh quan canh tác sống đã kéo dài hơn 1.300 năm.',english:'The living farming landscape has developed for over 1,300 years.'),
-  DiscoveryEntry(text:'森林蓄水，沟渠把水源引过村寨并送入梯田。',pinyin:'Sēnlín xùshuǐ, gōuqú bǎ shuǐyuán yǐnguò cūnzhài bìng sòngrù tītián.',simpleChinese:'水从森林流向梯田。',vietnamese:'Rừng giữ nước, kênh dẫn qua làng tới ruộng.',english:'Forests retain water and channels deliver it through villages to fields.'),
-  DiscoveryEntry(text:'蘑菇房村寨位于上方森林与下方梯田之间。',pinyin:'Mógufáng cūnzhài wèiyú sēnlín yǔ tītián zhījiān.',simpleChinese:'村寨连接森林和农田。',vietnamese:'Làng nhà nấm nằm giữa rừng và ruộng.',english:'Mushroom-house villages sit between forest and terraces.'),
-  DiscoveryEntry(text:'水、肥料、作物与动物循环维持完整农耕生态。',pinyin:'Shuǐ, féiliào, zuòwù yǔ dòngwù xúnhuán wéichí nónggēng shēngtài.',simpleChinese:'多种资源在系统里循环。',vietnamese:'Nước, phân, cây trồng và vật nuôi tuần hoàn trong hệ thống.',english:'Water, nutrients, crops, and animals cycle through the farming system.'),
-];
 
 final pingyaoJourney = _record('pingyao-ancient-city','平遥 · 古城：在灰砖街巷读懂晋商','cn-shanxi-jinzhong-pingyao-ancient-city',_pingyaoP,const ['unesco-pingyao','shanxi-pingyao'],const ['平遥','古城','晋商','票号','世界遗产']);
 final qufuJourney = _record('qufu-confucius-sites','曲阜 · 三孔：沿中轴读懂礼与学','cn-shandong-jining-qufu-confucius-temple',_qufuP,const ['unesco-qufu','shandong-qufu'],const ['曲阜','三孔','孔子','儒家','世界遗产']);
 final leshanJourney = _record('leshan-giant-buddha','乐山 · 大佛：三江与石刻的千年守望','cn-sichuan-leshan-shizhong-giant-buddha',_leshanP,const ['unesco-leshan','leshan-government-buddha'],const ['乐山','大佛','石刻','三江','世界遗产']);
 final wuyishanJourney = _record('wuyishan-nine-bend-stream','武夷山 · 九曲溪：山水之间的理学回声','cn-fujian-nanping-wuyishan-nine-bend-stream',_wuyiP,const ['unesco-wuyishan','fujian-wuyishan'],const ['武夷山','九曲溪','生态','朱子理学','世界遗产']);
-final hongheJourney = _record('honghe-hani-rice-terraces','红河 · 哈尼梯田：让森林的水流进稻田','cn-yunnan-honghe-yuanyang-hani-terraces',_hongheP,const ['unesco-honghe','yunnan-honghe'],const ['红河','元阳','哈尼梯田','农耕','世界遗产']);
+final hongheJourney = _record('honghe-hani-rice-terraces',hongheHaniRiceTerracesCanonicalTitle,'cn-yunnan-honghe-yuanyang-hani-terraces',hongheHaniRiceTerracesGoldLevelContent(5).storyParagraphs,const ['unesco-honghe','yunnan-honghe'],const ['红河','元阳','哈尼梯田','赶沟人','木刻分水','世界遗产']);
 
 final journeyExpansionBatchFourRecords=<JourneyContentRecord>[pingyaoJourney,qufuJourney,leshanJourney,wuyishanJourney,hongheJourney];
 final journeyExpansionBatchFourExperiences=<DailyJourneyExperience>[
@@ -183,5 +155,5 @@ final journeyExpansionBatchFourExperiences=<DailyJourneyExperience>[
   DailyJourneyExperience(id:qufuJourney.id,city:'曲阜',cityCode:'JNG',place:'孔庙',appBarTitle:'曲阜 · 三孔',storyTitle:'儒家文化故事',headline:'沿中轴读懂礼与学',description:'观察孔庙、孔府与孔林如何连接思想、教育和家族记忆。',discoveryTeaser:'为什么思想需要建筑和礼仪来传播？',distanceLabel:'1,690 km',stampSymbol:'礼',content:qufuJourney,storyAnnotations:_qufuA,words:_qufuW,discoveries:_qufuD,wonderQuestion:'你认为学习空间应该强调秩序、自由还是交流？',expressQuestion:'请用两到三句话描写古柏、石碑和层层院落形成的氛围。'),
   DailyJourneyExperience(id:leshanJourney.id,city:'乐山',cityCode:'LSS',place:'乐山大佛',appBarTitle:'乐山 · 大佛',storyTitle:'三江石刻故事',headline:'三江与石刻的千年守望',description:'从江面观察七十一米石刻、隐蔽排水和现代保护。',discoveryTeaser:'大佛的发髻和衣纹为什么也参与排水？',distanceLabel:'1,210 km',stampSymbol:'佛',content:leshanJourney,storyAnnotations:_leshanA,words:_leshanW,discoveries:_leshanD,wonderQuestion:'面对巨大的山体石刻，你会先观察尺度、表情还是工程细节？',expressQuestion:'请用两到三句话描写三江、红砂岩崖壁与大佛的尺度。'),
   DailyJourneyExperience(id:wuyishanJourney.id,city:'武夷山',cityCode:'WUS',place:'九曲溪',appBarTitle:'武夷山 · 九曲溪',storyTitle:'山水理学故事',headline:'山水之间的理学回声',description:'沿九曲溪认识丹霞森林、生物多样性与朱子文化。',discoveryTeaser:'为什么一条溪流能同时承载自然与思想史？',distanceLabel:'650 km',stampSymbol:'曲',content:wuyishanJourney,storyAnnotations:_wuyiA,words:_wuyiW,discoveries:_wuyiD,wonderQuestion:'如果在九曲溪边设一座现代书院，你希望学生怎样观察自然？',expressQuestion:'请用两到三句话描写竹筏、碧水、丹霞峰林与云雾。'),
-  DailyJourneyExperience(id:hongheJourney.id,city:'红河',cityCode:'HHE',place:'哈尼梯田',appBarTitle:'红河 · 哈尼梯田',storyTitle:'山地农耕故事',headline:'让森林的水流进稻田',description:'理解森林、村寨、梯田与水系如何组成活态农耕生态。',discoveryTeaser:'山顶森林为什么决定山下梯田的收成？',distanceLabel:'680 km',stampSymbol:'田',content:hongheJourney,storyAnnotations:_hongheA,words:_hongheW,discoveries:_hongheD,wonderQuestion:'如果只能保护森林、沟渠、村寨或梯田中的一项，你会怎样解释它们不能分开？',expressQuestion:'请用两到三句话描写日出、云海与层层水田的颜色变化。'),
+  DailyJourneyExperience(id:hongheJourney.id,city:'红河',cityCode:'HHE',place:'哈尼梯田',appBarTitle:'红河 · 哈尼梯田',storyTitle:hongheHaniRiceTerracesCanonicalTitle,headline:hongheHaniRiceTerracesHeadline,description:hongheHaniRiceTerracesDescription,discoveryTeaser:hongheHaniRiceTerracesDiscoveryTeaser,distanceLabel:'680 km',stampSymbol:'田',content:hongheJourney,storyAnnotations:hongheHaniRiceTerracesGoldLevelContent(5).storyAnnotations,words:hongheHaniRiceTerracesGoldLevelContent(5).words,discoveries:hongheHaniRiceTerracesGoldLevelContent(5).discoveries,wonderQuestion:hongheHaniRiceTerracesGoldLevelContent(5).wonderQuestion,expressQuestion:hongheHaniRiceTerracesGoldLevelContent(5).expressQuestion),
 ];
