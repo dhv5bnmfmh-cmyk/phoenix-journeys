@@ -305,10 +305,13 @@ void main() {
       ]));
     });
 
-    test('candidate semantic fingerprint passes Rule A/B against all approved Gold', () {
+    test('candidate semantic fingerprint passes Rule A/B against all other approved Gold', () {
       final gate = hongheHaniRiceTerracesSemanticGate();
       expect(gate.isGoldReady, isTrue, reason: gate.status);
-      expect(gate.comparisons, hasLength(approvedGoldSemanticFingerprints.length));
+      expect(
+        gate.comparisons,
+        hasLength(approvedGoldSemanticFingerprints.length - 1),
+      );
       expect(gate.comparisons.where((item) => item.isCollision), isEmpty);
       expect(
         hongheHaniRiceTerracesCandidateSemanticFingerprint.mechanisms.keys.toSet(),
@@ -322,18 +325,27 @@ void main() {
       );
     });
 
-    test('candidate Narrative DNA is unique but lifecycle remains pre-approval', () {
+    test('approved lifecycle preserves the Founder-approved Honghe candidate', () {
       expect(hongheNarrativeDnaIsUniqueAgainstApproved(), isTrue);
-      expect(
-        approvedNarrativeDnaCatalog.any(
-          (record) => record.journeyId == hongheHaniRiceTerracesJourneyId,
-        ),
-        isFalse,
+      final approvedDna = approvedNarrativeDnaCatalog.singleWhere(
+        (record) => record.journeyId == hongheHaniRiceTerracesJourneyId,
       );
       expect(
-        approvedGoldSemanticFingerprints.containsKey(hongheHaniRiceTerracesJourneyId),
-        isFalse,
+        approvedDna.majorDimensions,
+        hongheHaniRiceTerracesCandidateNarrativeDna.majorDimensions,
       );
+      final approvedSemantic =
+          approvedGoldSemanticFingerprints[hongheHaniRiceTerracesJourneyId];
+      expect(approvedSemantic, isNotNull);
+      expect(
+        approvedSemantic!.surfaceIdentity,
+        hongheHaniRiceTerracesCandidateSemanticFingerprint.surfaceIdentity,
+      );
+      expect(
+        approvedSemantic.mechanisms,
+        hongheHaniRiceTerracesCandidateSemanticFingerprint.mechanisms,
+      );
+      expect(semanticEvidenceContractErrors(approvedSemantic), isEmpty);
       expect(
         nonDatongGoldChallengeProfiles.containsKey(hongheHaniRiceTerracesJourneyId),
         isTrue,
