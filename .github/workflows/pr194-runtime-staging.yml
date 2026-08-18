@@ -139,7 +139,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          live="$(git ls-remote origin refs/heads/dev/current | awk '{print $1}')"
+          live="$(git -C candidate ls-remote origin refs/heads/dev/current | awk '{print $1}')"
           echo "LIVE DEV/CURRENT BEFORE PUBLISH = $live"
           test "$live" = "34484e4600f1ccadf52b89f7b7c73adc35aba248"
           cd candidate
