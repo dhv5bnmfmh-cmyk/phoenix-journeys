@@ -31,6 +31,8 @@ jobs:
           test "$(git -C candidate rev-parse HEAD)" = "34484e4600f1ccadf52b89f7b7c73adc35aba248"
           python3 -m py_compile harness/.github/scripts/pr194_runtime_remediation.py
           sed -i "s/lazy_group('app\/lib\/data\/extended_journey_catalog.dart', 'extendedJourneyExperiences', 5)/lazy_group('app\/lib\/data\/extended_journey_catalog.dart', 'extendedJourneyExperiences', 4)/" harness/.github/scripts/pr194_runtime_remediation.py
+          sed -i 's/final journeyExpansionBatchFourExperiences=<DailyJourneyExperience>\[/final journeyExpansionBatchFourExperiences = <DailyJourneyExperience>[/' candidate/app/lib/data/journey_expansion_batch_four.dart
+          sed -i 's/final journeyExpansionBatchFiveExperiences=<DailyJourneyExperience>\[/final journeyExpansionBatchFiveExperiences = <DailyJourneyExperience>[/' candidate/app/lib/data/journey_expansion_batch_five.dart
           python3 harness/.github/scripts/pr194_runtime_remediation.py candidate
           python3 - <<'PY'
           from pathlib import Path
