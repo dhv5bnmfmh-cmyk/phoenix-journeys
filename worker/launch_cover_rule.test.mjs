@@ -4,7 +4,7 @@ import test from 'node:test';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-test('Phoenix launch cover animates a journey from ancient to modern worlds', async () => {
+test('Phoenix launch cover animates a short branded journey and waits for real app readiness', async () => {
   const [index, bootstrap, manifest, earthArtwork, phoenixArtwork] = await Promise.all([
     read('app/web/index.html'),
     read('app/web/flutter_bootstrap.js'),
@@ -27,12 +27,16 @@ test('Phoenix launch cover animates a journey from ancient to modern worlds', as
   assert.match(index, /phoenix-time-flight/);
   assert.match(index, /phoenix-wing-cycle/);
   assert.match(index, /phoenix-time-mist/);
-  assert.match(index, /12\.4s cubic-bezier/);
+  assert.match(index, /phoenix-time-flight-v2 3\.2s cubic-bezier/);
   assert.match(index, /phoenix-time-flight-v2/);
   assert.match(index, /animation-duration: 18s/);
-  assert.match(bootstrap, /minimumJourneyDurationMs = 11550/);
+  assert.match(bootstrap, /minimumJourneyDurationMs = 3200/);
+  assert.match(bootstrap, /phoenixFlightDurationMs = 3200/);
+  assert.match(bootstrap, /phoenix-startup-settled/);
+  assert.match(bootstrap, /waitForStartupSettled\(\)/);
+  assert.match(bootstrap, /await waitForStartupSettled\(\)/);
   assert.match(bootstrap, /await hideLoading\(\)/);
-  assert.match(bootstrap, /凤凰即将抵达现代世界/);
+  assert.match(bootstrap, /phoenix-home-ready/);
   assert.doesNotMatch(index, /mix-blend-mode: screen/);
   assert.match(index, /phoenix-time-portal/);
   assert.match(index, /phoenix-portal-spin/);
