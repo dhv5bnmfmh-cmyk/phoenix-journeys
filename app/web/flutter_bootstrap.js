@@ -152,36 +152,40 @@ async function hideLoading() {
   }, 760);
 }
 
-try {
-  const retiredLegacyWorker = await retireLegacyFlutterWorker();
-  const reloadingAfterLegacyWorkerRetirement =
-    retiredLegacyWorker && reloadAfterLegacyWorkerRetirement();
+async function startPhoenix() {
+  try {
+    const retiredLegacyWorker = await retireLegacyFlutterWorker();
+    const reloadingAfterLegacyWorkerRetirement =
+      retiredLegacyWorker && reloadAfterLegacyWorkerRetirement();
 
-  if (!reloadingAfterLegacyWorkerRetirement) {
-    mark('phoenix-flutter-loader-start');
-    await _flutter.loader.load({
-      onEntrypointLoaded: async (engineInitializer) => {
-        mark('phoenix-entrypoint-loaded');
-        mark('phoenix-engine-initialize-start');
-        const appRunner = await engineInitializer.initializeEngine({
-          useColorEmoji: true,
-        });
-        mark('phoenix-engine-initialize-end');
-        mark('phoenix-app-runner-start');
-        await appRunner.runApp();
-        mark('phoenix-app-runner-end');
-        await waitForStartupSettled();
-        await hideLoading();
-      },
-    });
-  }
-} catch (error) {
-  console.error('Phoenix startup failed:', error);
-  mark('phoenix-startup-bootstrap-error');
-  if (cover) {
-    cover.querySelector('.phoenix-loading-title').textContent =
-      'Phoenix Journeys · 启动失败';
-    cover.querySelector('.phoenix-loading-subtitle').textContent =
-      '请刷新页面后重试';
+    if (!reloadingAfterLegacyWorkerRetirement) {
+      mark('phoenix-flutter-loader-start');
+      await _flutter.loader.load({
+        onEntrypointLoaded: async (engineInitializer) => {
+          mark('phoenix-entrypoint-loaded');
+          mark('phoenix-engine-initialize-start');
+          const appRunner = await engineInitializer.initializeEngine({
+            useColorEmoji: true,
+          });
+          mark('phoenix-engine-initialize-end');
+          mark('phoenix-app-runner-start');
+          await appRunner.runApp();
+          mark('phoenix-app-runner-end');
+          await waitForStartupSettled();
+          await hideLoading();
+        },
+      });
+    }
+  } catch (error) {
+    console.error('Phoenix startup failed:', error);
+    mark('phoenix-startup-bootstrap-error');
+    if (cover) {
+      cover.querySelector('.phoenix-loading-title').textContent =
+        'Phoenix Journeys · 启动失败';
+      cover.querySelector('.phoenix-loading-subtitle').textContent =
+        '请刷新页面后重试';
+    }
   }
 }
+
+startPhoenix();
