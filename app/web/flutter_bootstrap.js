@@ -2,17 +2,27 @@
 {{flutter_build_config}}
 
 const cover = document.getElementById('phoenix-loading');
-const traveler = cover?.querySelector('.phoenix-time-traveler') ?? null;
+const traveler = cover?.querySelector('.phoenix-loading__traveler') ?? null;
 const loadingStartedAt = performance.now();
 const minimumJourneyDurationMs = 3200;
 const phoenixFlightDurationMs = 3200;
+const coverExitTransitionMs = 360;
 const legacyWorkerResetKey = 'phoenix-legacy-flutter-worker-reset';
 let coverHidden = false;
+let flightAnimation = null;
 let hoverAnimation = null;
+let flightSettled = traveler == null;
+let resolveFlightCompletion;
+
+const flightCompleted = new Promise((resolve) => {
+  resolveFlightCompletion = resolve;
+  if (flightSettled) resolve();
+});
 
 window.__phoenixStartupTiming = {
   minimumJourneyDurationMs,
   phoenixFlightDurationMs,
+  coverExitTransitionMs,
 };
 
 function mark(name) {
@@ -85,29 +95,135 @@ function reloadAfterLegacyWorkerRetirement() {
   return true;
 }
 
-mark('phoenix-cover-created');
+function startTravelerHover() {
+  if (
+    coverHidden ||
+    !traveler ||
+    typeof traveler.animate !== 'function' ||
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  ) {
+    return;
+  }
 
-if (traveler) {
-  traveler.addEventListener('animationstart', (event) => {
-    if (event.animationName === 'phoenix-time-flight-v2') {
-      mark('phoenix-flight-start');
-    }
-  }, {passive: true});
-  traveler.addEventListener('animationend', (event) => {
-    if (event.animationName !== 'phoenix-time-flight-v2') return;
-    mark('phoenix-flight-end');
-    if (!coverHidden && typeof traveler.animate === 'function') {
-      hoverAnimation = traveler.animate(
-        [
-          {transform: 'translateY(0) scale(1)', filter: 'brightness(1)'},
-          {transform: 'translateY(-5px) scale(1.025)', filter: 'brightness(1.08)'},
-          {transform: 'translateY(0) scale(1)', filter: 'brightness(1)'},
-        ],
-        {duration: 1350, iterations: Infinity, easing: 'ease-in-out'},
-      );
-    }
-  }, {passive: true});
+  hoverAnimation?.cancel();
+  hoverAnimation = traveler.animate(
+    [
+      {
+        transform: 'translate3d(56vw, -20vh, 0) scale(.58) rotate(8deg)',
+        filter: 'brightness(1.05) drop-shadow(0 0 14px rgba(255, 190, 76, .8))',
+      },
+      {
+        transform: 'translate3d(56vw, -20.8vh, 0) scale(.59) rotate(7deg)',
+        filter: 'brightness(1.1) drop-shadow(0 0 17px rgba(255, 198, 88, .86))',
+      },
+      {
+        transform: 'translate3d(56vw, -20vh, 0) scale(.58) rotate(8deg)',
+        filter: 'brightness(1.05) drop-shadow(0 0 14px rgba(255, 190, 76, .8))',
+      },
+    ],
+    {
+      duration: 1450,
+      iterations: Infinity,
+      easing: 'ease-in-out',
+    },
+  );
 }
+
+function finishPhoenixFlight() {
+  if (flightSettled) return;
+  flightSettled = true;
+  mark('phoenix-flight-end');
+  resolveFlightCompletion?.();
+  startTravelerHover();
+}
+
+function startPhoenixFlight() {
+  if (!traveler) return;
+
+  traveler.classList.add('phoenix-time-traveler');
+  mark('phoenix-flight-start');
+
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    finishPhoenixFlight();
+    return;
+  }
+
+  if (typeof traveler.animate !== 'function') {
+    const onAnimationEnd = (event) => {
+      if (event.animationName !== 'phoenix-time-flight-v2') return;
+      traveler.removeEventListener('animationend', onAnimationEnd);
+      finishPhoenixFlight();
+    };
+    traveler.addEventListener('animationend', onAnimationEnd, {passive: true});
+    setTimeout(finishPhoenixFlight, phoenixFlightDurationMs + 120);
+    return;
+  }
+
+  traveler.style.animation = 'phoenix-wing-cycle 1.12s steps(1, end) infinite';
+  flightAnimation = traveler.animate(
+    [
+      {
+        offset: 0,
+        opacity: 0,
+        transform: 'translate3d(-88vw, 18vh, 0) scale(.38) rotate(-9deg)',
+        filter: 'brightness(.76) drop-shadow(0 0 5px rgba(255, 125, 30, .38))',
+        easing: 'cubic-bezier(.45, 0, .72, .48)',
+      },
+      {
+        offset: .14,
+        opacity: 1,
+        transform: 'translate3d(-69vw, 12vh, 0) scale(.48) rotate(-7deg)',
+        filter: 'brightness(.9) drop-shadow(0 0 9px rgba(255, 145, 38, .52))',
+        easing: 'cubic-bezier(.28, .08, .28, 1)',
+      },
+      {
+        offset: .38,
+        opacity: 1,
+        transform: 'translate3d(-36vw, 3vh, 0) scale(.67) rotate(-3deg)',
+        filter: 'brightness(1.02) drop-shadow(0 0 13px rgba(255, 174, 55, .7))',
+        easing: 'cubic-bezier(.22, .5, .3, 1)',
+      },
+      {
+        offset: .62,
+        opacity: 1,
+        transform: 'translate3d(-5vw, -10vh, 0) scale(.98) rotate(2deg)',
+        filter: 'brightness(1.2) drop-shadow(0 0 20px rgba(255, 204, 99, .92))',
+        easing: 'cubic-bezier(.2, .58, .28, 1)',
+      },
+      {
+        offset: .82,
+        opacity: 1,
+        transform: 'translate3d(26vw, -16vh, 0) scale(.78) rotate(6deg)',
+        filter: 'brightness(1.13) drop-shadow(0 0 17px rgba(255, 187, 72, .84))',
+        easing: 'cubic-bezier(.18, .6, .28, 1)',
+      },
+      {
+        offset: .94,
+        opacity: 1,
+        transform: 'translate3d(47vw, -19vh, 0) scale(.63) rotate(8deg)',
+        filter: 'brightness(1.08) drop-shadow(0 0 15px rgba(255, 180, 67, .8))',
+        easing: 'cubic-bezier(.18, .62, .3, 1)',
+      },
+      {
+        offset: 1,
+        opacity: 1,
+        transform: 'translate3d(56vw, -20vh, 0) scale(.58) rotate(8deg)',
+        filter: 'brightness(1.05) drop-shadow(0 0 14px rgba(255, 190, 76, .8))',
+      },
+    ],
+    {
+      duration: phoenixFlightDurationMs,
+      fill: 'both',
+      easing: 'linear',
+    },
+  );
+
+  flightAnimation.finished.then(finishPhoenixFlight).catch(finishPhoenixFlight);
+  setTimeout(finishPhoenixFlight, phoenixFlightDurationMs + 120);
+}
+
+mark('phoenix-cover-created');
+startPhoenixFlight();
 
 let settleResolve;
 const startupSettled = new Promise((resolve) => {
@@ -138,18 +254,34 @@ async function hideLoading() {
   const elapsed = performance.now() - loadingStartedAt;
   const remaining = Math.max(0, minimumJourneyDurationMs - elapsed);
   mark('phoenix-minimum-duration-wait-start');
-  if (remaining > 0) {
-    await new Promise((resolve) => setTimeout(resolve, remaining));
-  }
+
+  await Promise.all([
+    remaining > 0
+      ? new Promise((resolve) => setTimeout(resolve, remaining))
+      : Promise.resolve(),
+    flightCompleted,
+  ]);
+
   mark('phoenix-minimum-duration-wait-end');
   coverHidden = true;
   hoverAnimation?.cancel();
-  cover.classList.add('phoenix-loading-hidden');
+  mark('phoenix-cover-exit-start');
+  cover.style.transition =
+    `opacity ${coverExitTransitionMs}ms cubic-bezier(.22, .61, .36, 1), ` +
+    `visibility 0s linear ${coverExitTransitionMs}ms`;
+  cover.classList.add('phoenix-loading--hidden');
   mark('phoenix-cover-hidden');
+
+  requestAnimationFrame(() => {
+    mark('phoenix-main-interactive');
+  });
+
   setTimeout(() => {
+    flightAnimation?.cancel();
+    hoverAnimation?.cancel();
     cover.remove();
     mark('phoenix-cover-removed');
-  }, 760);
+  }, coverExitTransitionMs + 80);
 }
 
 async function startPhoenix() {
