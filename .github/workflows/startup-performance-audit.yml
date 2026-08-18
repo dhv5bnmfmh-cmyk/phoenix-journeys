@@ -115,11 +115,11 @@ jobs:
               'state foundation import': "import 'package:flutter/foundation.dart';\n",
               'state catalog import': "import '../data/daily_journey_catalog.dart';\n",
               'state load start': "  Future<void> load() async {\n    loadStatus = AppLoadStatus.loading;\n",
-              'preferences load': "    final preferences = await _preferencesLoader();\n    _preferences = preferences;\n    _restoreNonCriticalPreferences(preferences);\n",
-              'critical read': "    var committed = await _criticalStore!.readCommitted();\n    if (committed == null) {\n",
-              'legacy path': "      committed = await _criticalStore!.commitInitial(\n        legacy.snapshot.toJson(),\n      );\n    } else if (committed.schemaVersion ==\n",
-              'apply committed': "    _applyCommitted(\n      snapshot,\n      revision: committed.revision,\n      schemaVersion: committed.schemaVersion,\n    );\n",
-              'state ready': "    _activeIdentityReady = true;\n    loadStatus = AppLoadStatus.ready;\n  } catch (error, stackTrace) {\n",
+              'preferences load': "      final preferences = await _preferencesLoader();\n      _preferences = preferences;\n      _restoreNonCriticalPreferences(preferences);\n",
+              'critical read': "      var committed = await _criticalStore!.readCommitted();\n      if (committed == null) {\n",
+              'legacy path': "        committed = await _criticalStore!.commitInitial(\n          legacy.snapshot.toJson(),\n        );\n      } else if (committed.schemaVersion ==\n",
+              'apply committed': "      _applyCommitted(\n        snapshot,\n        revision: committed.revision,\n        schemaVersion: committed.schemaVersion,\n      );\n",
+              'state ready': "      _activeIdentityReady = true;\n      loadStatus = AppLoadStatus.ready;\n    } catch (error, stackTrace) {\n",
               'final load notification': "    notifyListeners();\n  }\n\n  @override\n  Future<void> activateJourney",
           }
 
@@ -198,49 +198,49 @@ jobs:
           )
           state = state.replace(
               state_anchors['preferences load'],
-              "    startupPerformanceMark('phoenix-preferences-start');\n"
-              "    final preferences = await _preferencesLoader();\n"
-              "    startupPerformanceMark('phoenix-preferences-ready');\n"
-              "    _preferences = preferences;\n"
-              "    _restoreNonCriticalPreferences(preferences);\n"
-              "    startupPerformanceMark('phoenix-noncritical-preferences-restored');\n",
+              "      startupPerformanceMark('phoenix-preferences-start');\n"
+              "      final preferences = await _preferencesLoader();\n"
+              "      startupPerformanceMark('phoenix-preferences-ready');\n"
+              "      _preferences = preferences;\n"
+              "      _restoreNonCriticalPreferences(preferences);\n"
+              "      startupPerformanceMark('phoenix-noncritical-preferences-restored');\n",
               1,
           )
           state = state.replace(
               state_anchors['critical read'],
-              "    startupPerformanceMark('phoenix-critical-read-start');\n"
-              "    var committed = await _criticalStore!.readCommitted();\n"
-              "    startupPerformanceMark('phoenix-critical-read-end');\n"
-              "    if (committed == null) {\n"
-              "      startupPerformanceMark('phoenix-legacy-path-start');\n",
+              "      startupPerformanceMark('phoenix-critical-read-start');\n"
+              "      var committed = await _criticalStore!.readCommitted();\n"
+              "      startupPerformanceMark('phoenix-critical-read-end');\n"
+              "      if (committed == null) {\n"
+              "        startupPerformanceMark('phoenix-legacy-path-start');\n",
               1,
           )
           state = state.replace(
               state_anchors['legacy path'],
-              "      committed = await _criticalStore!.commitInitial(\n"
-              "        legacy.snapshot.toJson(),\n"
-              "      );\n"
-              "      startupPerformanceMark('phoenix-legacy-path-end');\n"
-              "    } else if (committed.schemaVersion ==\n",
+              "        committed = await _criticalStore!.commitInitial(\n"
+              "          legacy.snapshot.toJson(),\n"
+              "        );\n"
+              "        startupPerformanceMark('phoenix-legacy-path-end');\n"
+              "      } else if (committed.schemaVersion ==\n",
               1,
           )
           state = state.replace(
               state_anchors['apply committed'],
-              "    startupPerformanceMark('phoenix-apply-committed-start');\n"
-              "    _applyCommitted(\n"
-              "      snapshot,\n"
-              "      revision: committed.revision,\n"
-              "      schemaVersion: committed.schemaVersion,\n"
-              "    );\n"
-              "    startupPerformanceMark('phoenix-apply-committed-end');\n",
+              "      startupPerformanceMark('phoenix-apply-committed-start');\n"
+              "      _applyCommitted(\n"
+              "        snapshot,\n"
+              "        revision: committed.revision,\n"
+              "        schemaVersion: committed.schemaVersion,\n"
+              "      );\n"
+              "      startupPerformanceMark('phoenix-apply-committed-end');\n",
               1,
           )
           state = state.replace(
               state_anchors['state ready'],
-              "    _activeIdentityReady = true;\n"
-              "    loadStatus = AppLoadStatus.ready;\n"
-              "    startupPerformanceMark('phoenix-state-ready');\n"
-              "  } catch (error, stackTrace) {\n",
+              "      _activeIdentityReady = true;\n"
+              "      loadStatus = AppLoadStatus.ready;\n"
+              "      startupPerformanceMark('phoenix-state-ready');\n"
+              "    } catch (error, stackTrace) {\n",
               1,
           )
           state = state.replace(
