@@ -17,6 +17,7 @@ concurrency:
 
 env:
   CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  FAILED_FOUNDER_SHA: 789de4ca630fbb74a93c5850cb6645a5913afc21
 
 jobs:
   mobile-interaction:
@@ -77,5 +78,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 .github/scripts/assert_content_delta.py --require-none
+          git diff --name-only "$FAILED_FOUNDER_SHA" "$CANDIDATE_SHA" | sort > "$RUNNER_TEMP/founder-revision-delta.txt"
+          cat > "$RUNNER_TEMP/allowed-founder-revision-delta.txt" <<'EOF'
+          .github/scripts/verify_mobile_interaction.mjs
+          .github/workflows/mobile-interaction-audit.yml
+          app/test/home_post_cover_interaction_test.dart
+          app/web/flutter_bootstrap.js
+          worker/launch_cover_rule.test.mjs
+          EOF
+          sort -o "$RUNNER_TEMP/allowed-founder-revision-delta.txt" "$RUNNER_TEMP/allowed-founder-revision-delta.txt"
+          echo 'FOUNDER REVISION DELTA:'
+          cat "$RUNNER_TEMP/founder-revision-delta.txt"
+          diff -u "$RUNNER_TEMP/allowed-founder-revision-delta.txt" "$RUNNER_TEMP/founder-revision-delta.txt"
+          if git diff --unified=0 "$FAILED_FOUNDER_SHA" "$CANDIDATE_SHA" -- \
+            'app/lib/data/**' \
+            'app/lib/models/**' \
+            'app/assets/**' \
+            'worker/journey-content/**' | grep -E '^[+-][^+-]'; then
+            echo 'LEARNER CONTENT DELTA = FAIL'
+            exit 1
+          fi
           echo 'LEARNER CONTENT DELTA = NONE'
