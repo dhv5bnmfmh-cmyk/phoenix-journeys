@@ -81,6 +81,29 @@ class AccessControlledAppState extends AppState {
     'ice-city-star-map',
   };
 
+  static const Set<String> _registeredSpecialJourneyIds = <String>{
+    'literary-roaming',
+    'myth-tracing',
+    'strange-night-talks',
+    'folk-secret-land',
+    ...heldSpecialJourneyIds,
+  };
+
+  static bool _isRegisteredJourneyId(String journeyId) =>
+      dailyJourneyIds.contains(journeyId) ||
+      _registeredSpecialJourneyIds.contains(journeyId);
+
+  static String _storageNamespaceForJourneyId(String journeyId) {
+    final separator = journeyId.indexOf('-');
+    final cityId = separator <= 0 ? journeyId : journeyId.substring(0, separator);
+    final destinationId = journeyId == 'guangzhou-chen-clan-academy'
+        ? 'chen-clan-ancestral-hall'
+        : separator < 0 || separator == journeyId.length - 1
+            ? journeyId
+            : journeyId.substring(separator + 1);
+    return 'journey.$cityId/$destinationId';
+  }
+
   final DateTime Function() _clock;
   final Future<SharedPreferences> Function() _preferencesLoader;
   final Uri _runtimeUri;
@@ -1501,14 +1524,14 @@ class _PhoenixCriticalSnapshot {
         '$explorerSeedVersion.',
       );
     }
-    final active = journeyExperienceById(activeJourneyId);
-    if (active == null) {
+    if (!AccessControlledAppState._isRegisteredJourneyId(activeJourneyId)) {
       throw CriticalPersistenceException(
         'Committed active Journey is not registered: $activeJourneyId.',
       );
     }
-    final binding = requireJourneyLocation(activeJourneyId);
-    if (activeJourneyNamespace != binding.storageNamespace) {
+    final activeStorageNamespace =
+        AccessControlledAppState._storageNamespaceForJourneyId(activeJourneyId);
+    if (activeJourneyNamespace != activeStorageNamespace) {
       throw CriticalPersistenceException(
         'Committed active Journey namespace mismatch for $activeJourneyId.',
       );
@@ -1527,7 +1550,7 @@ class _PhoenixCriticalSnapshot {
     }
     for (final entry in journeys.entries) {
       if (entry.key != entry.value.journeyId ||
-          journeyExperienceById(entry.key) == null) {
+          !AccessControlledAppState._isRegisteredJourneyId(entry.key)) {
         throw CriticalPersistenceException(
           'Invalid committed Journey domain identity: ${entry.key}.',
         );
@@ -1544,7 +1567,7 @@ class _PhoenixCriticalSnapshot {
       ...earnedJourneyStampIds,
       ...unlockedSpecialJourneyIds,
     }) {
-      if (journeyExperienceById(id) == null) {
+      if (!AccessControlledAppState._isRegisteredJourneyId(id)) {
         throw CriticalPersistenceException(
           'Committed Journey ID is not registered: $id.',
         );
@@ -1863,8 +1886,9 @@ class _JourneyCriticalState {
       );
 
   void validate() {
-    final binding = requireJourneyLocation(journeyId);
-    if (storageNamespace != binding.storageNamespace) {
+    final expectedStorageNamespace =
+        AccessControlledAppState._storageNamespaceForJourneyId(journeyId);
+    if (storageNamespace != expectedStorageNamespace) {
       throw CriticalPersistenceException(
         'Journey namespace mismatch for $journeyId.',
       );
