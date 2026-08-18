@@ -31,6 +31,59 @@ function mark(name) {
   } catch (_) {}
 }
 
+function isCoverHitTarget(target) {
+  return Boolean(cover && target && (target === cover || cover.contains(target)));
+}
+
+function coverCapturesHitTesting() {
+  if (!cover?.isConnected || typeof document.elementFromPoint !== 'function') {
+    return false;
+  }
+
+  const width = Math.max(1, window.innerWidth || document.documentElement.clientWidth || 1);
+  const height = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1);
+  const points = [
+    [width * .5, height * .5],
+    [width * .5, Math.max(1, height - 32)],
+    [width * .24, height * .38],
+    [width * .76, height * .62],
+  ];
+
+  return points.some(([x, y]) => isCoverHitTarget(document.elementFromPoint(x, y)));
+}
+
+function releaseCoverInteraction() {
+  if (!cover?.isConnected) return;
+
+  // Do not rely only on a transition class here. Mobile WebKit can keep a
+  // composited fixed layer in the hit-test tree for a frame while opacity and
+  // visibility transition. Inline pointer release + inert makes the handoff
+  // explicit before the visual fade begins.
+  cover.style.pointerEvents = 'none';
+  cover.setAttribute('inert', '');
+  cover.setAttribute('aria-hidden', 'true');
+  cover.removeAttribute('aria-live');
+  mark('phoenix-cover-input-released');
+}
+
+function verifyCoverInteractionReleased() {
+  if (!cover?.isConnected) {
+    mark('phoenix-cover-hit-test-safe');
+    return;
+  }
+
+  if (coverCapturesHitTesting()) {
+    console.warn(
+      'Phoenix startup cover still captured hit testing after release; removing it immediately.',
+    );
+    cover.remove();
+    mark('phoenix-cover-hit-test-fallback-removed');
+    return;
+  }
+
+  mark('phoenix-cover-hit-test-safe');
+}
+
 function isLegacyFlutterWorker(worker) {
   if (!worker || !worker.scriptURL) return false;
   try {
@@ -266,6 +319,9 @@ async function hideLoading() {
   coverHidden = true;
   hoverAnimation?.cancel();
   mark('phoenix-cover-exit-start');
+
+  releaseCoverInteraction();
+
   cover.style.transition =
     `opacity ${coverExitTransitionMs}ms cubic-bezier(.22, .61, .36, 1), ` +
     `visibility 0s linear ${coverExitTransitionMs}ms`;
@@ -273,6 +329,7 @@ async function hideLoading() {
   mark('phoenix-cover-hidden');
 
   requestAnimationFrame(() => {
+    verifyCoverInteractionReleased();
     mark('phoenix-main-interactive');
   });
 
