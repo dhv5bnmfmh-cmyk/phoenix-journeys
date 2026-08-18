@@ -38,7 +38,7 @@ void main() {
     await tester.tap(cityPicker);
     await tester.pump();
     expect(find.byType(BottomSheet), findsWidgets);
-    await tester.pageBack();
+    await tester.binding.handlePopRoute();
     await tester.pump();
 
     final levelGuide = find.byKey(const ValueKey('phoenix-level-guide'));
@@ -46,7 +46,7 @@ void main() {
     await tester.tap(levelGuide);
     await tester.pump();
     expect(find.byType(BottomSheet), findsWidgets);
-    await tester.pageBack();
+    await tester.binding.handlePopRoute();
     await tester.pump();
 
     final passportNav = find.text('护照').last;
@@ -69,7 +69,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(JourneyScreen), findsOneWidget);
 
-    await tester.pageBack();
+    await tester.binding.handlePopRoute();
     await tester.pump();
     expect(find.byType(HomeShell), findsOneWidget);
     expect(state.selectedTab, 0);
