@@ -7,10 +7,12 @@ lib = root / 'app' / 'lib'
 main_path = lib / 'main.dart'
 state_path = lib / 'state' / 'access_controlled_app_state.dart'
 app_state_path = lib / 'state' / 'app_state.dart'
+daily_catalog_path = lib / 'data' / 'daily_journey_catalog.dart'
 location_path = lib / 'services' / 'journey_location_binding.dart'
 main = main_path.read_text(encoding='utf-8')
 state = state_path.read_text(encoding='utf-8')
 app_state = app_state_path.read_text(encoding='utf-8')
+daily_catalog = daily_catalog_path.read_text(encoding='utf-8')
 location = location_path.read_text(encoding='utf-8')
 
 anchors = {
@@ -37,6 +39,10 @@ anchors = {
         'app state catalog import': "import '../data/daily_journey_catalog.dart';\n",
         'daily journey constructor': "    activeJourneyId = dailyJourneyForDate(_clock()).id;\n",
     },
+    'daily_catalog': {
+        'catalog import': "import '../models/story_content.dart';\n",
+        'daily journey function': "DailyJourneyExperience dailyJourneyForDate(DateTime date) {\n  final day = DateTime.utc(date.year, date.month, date.day);\n  final epoch = DateTime.utc(2026, 1, 1);\n  final dayNumber = day.difference(epoch).inDays;\n  final index = dayNumber % dailyJourneyExperiences.length;\n  return dailyJourneyExperiences[index < 0\n      ? index + dailyJourneyExperiences.length\n      : index];\n}\n",
+    },
     'location': {
         'location model import': "import '../models/geo_node.dart';\n",
         'binding build start': "Map<String, JourneyLocationBinding> _buildJourneyLocationBindings() {\n  final bindings = <String, JourneyLocationBinding>{};\n",
@@ -48,6 +54,7 @@ texts = {
     'main': main,
     'state': state,
     'app_state': app_state,
+    'daily_catalog': daily_catalog,
     'location': location,
 }
 failures = []
@@ -226,6 +233,31 @@ app_state = app_state.replace(
 )
 app_state_path.write_text(app_state, encoding='utf-8')
 
+daily_catalog = daily_catalog.replace(
+    anchors['daily_catalog']['catalog import'],
+    "import '../models/story_content.dart';\nimport '../startup_performance_probe.dart';\n",
+    1,
+)
+daily_catalog = daily_catalog.replace(
+    anchors['daily_catalog']['daily journey function'],
+    "DailyJourneyExperience dailyJourneyForDate(DateTime date) {\n"
+    "  final day = DateTime.utc(date.year, date.month, date.day);\n"
+    "  final epoch = DateTime.utc(2026, 1, 1);\n"
+    "  final dayNumber = day.difference(epoch).inDays;\n"
+    "  startupPerformanceMark('phoenix-daily-catalog-first-touch-start');\n"
+    "  final catalogLength = dailyJourneyExperiences.length;\n"
+    "  startupPerformanceMark('phoenix-daily-catalog-length-ready');\n"
+    "  final index = dayNumber % catalogLength;\n"
+    "  final normalizedIndex = index < 0 ? index + catalogLength : index;\n"
+    "  startupPerformanceMark('phoenix-daily-catalog-index-start');\n"
+    "  final experience = dailyJourneyExperiences[normalizedIndex];\n"
+    "  startupPerformanceMark('phoenix-daily-catalog-index-ready');\n"
+    "  return experience;\n"
+    "}\n",
+    1,
+)
+daily_catalog_path.write_text(daily_catalog, encoding='utf-8')
+
 location = location.replace(
     anchors['location']['location model import'],
     "import '../models/geo_node.dart';\nimport '../startup_performance_probe.dart';\n",
@@ -256,6 +288,10 @@ expected_marks = (
     'phoenix-first-frame',
     'phoenix-appstate-daily-journey-start',
     'phoenix-appstate-daily-journey-end',
+    'phoenix-daily-catalog-first-touch-start',
+    'phoenix-daily-catalog-length-ready',
+    'phoenix-daily-catalog-index-start',
+    'phoenix-daily-catalog-index-ready',
     'phoenix-state-load-start',
     'phoenix-preferences-start',
     'phoenix-preferences-ready',
@@ -283,7 +319,13 @@ expected_marks = (
 )
 combined = ''.join(
     path.read_text(encoding='utf-8')
-    for path in (main_path, state_path, app_state_path, location_path)
+    for path in (
+        main_path,
+        state_path,
+        app_state_path,
+        daily_catalog_path,
+        location_path,
+    )
 )
 if not probe_path.exists():
     raise SystemExit('temporary startup probe file was not created')

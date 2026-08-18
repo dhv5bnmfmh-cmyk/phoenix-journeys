@@ -72,6 +72,8 @@ async function sample(label, {cold, freshState}) {
       firstFrameMs: diff('phoenix-runapp-start', 'phoenix-first-frame'),
       runAppToStateLoadMs: diff('phoenix-runapp-start', 'phoenix-state-load-start'),
       appStateDailyJourneyInitMs: diff('phoenix-appstate-daily-journey-start', 'phoenix-appstate-daily-journey-end'),
+      dailyCatalogFirstTouchMs: diff('phoenix-daily-catalog-first-touch-start', 'phoenix-daily-catalog-length-ready'),
+      dailyCatalogIndexLookupMs: diff('phoenix-daily-catalog-index-start', 'phoenix-daily-catalog-index-ready'),
       appStateRestoreMs: diff('phoenix-state-load-start', 'phoenix-state-ready'),
       sharedPreferencesMs: diff('phoenix-preferences-start', 'phoenix-preferences-ready'),
       criticalReadMs: diff('phoenix-critical-read-start', 'phoenix-critical-read-end'),
@@ -122,7 +124,8 @@ function summary(values) {
 
 const fields = [
   'totalToMeaningfulMs', 'mainEntryToMeaningfulMs', 'preRunAppMs', 'languageInitMs',
-  'firstFrameMs', 'runAppToStateLoadMs', 'appStateDailyJourneyInitMs', 'appStateRestoreMs',
+  'firstFrameMs', 'runAppToStateLoadMs', 'appStateDailyJourneyInitMs',
+  'dailyCatalogFirstTouchMs', 'dailyCatalogIndexLookupMs', 'appStateRestoreMs',
   'sharedPreferencesMs', 'criticalReadMs', 'legacyPathMs', 'legacyBuildMs',
   'legacyValidateMs', 'commitInitialMs', 'snapshotDecodeValidateMs', 'locationBindingsMs',
   'applyCommittedMs', 'restoreEligibilityMs', 'firstContentfulPaintMs', 'domContentLoadedMs',
