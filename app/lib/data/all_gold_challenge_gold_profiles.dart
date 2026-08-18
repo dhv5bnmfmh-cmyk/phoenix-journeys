@@ -1,10 +1,12 @@
 import 'all_gold_challenge_gold_profiles_base.dart' as base;
+import 'pingyao_ancient_city_challenge_profile.dart';
 
 export 'all_gold_challenge_gold_profiles_base.dart'
     hide nonDatongGoldChallengeProfileFor, nonDatongGoldChallengeProfiles;
 
 const _lijiangOldTownJourneyId = 'lijiang-old-town';
 const _hongheHaniRiceTerracesJourneyId = 'honghe-hani-rice-terraces';
+const _pingyaoAncientCityJourneyId = 'pingyao-ancient-city';
 
 const _lijiangLv10SharedBurdenRepair = base.GoldChallengeGrammarSpec(
   targetId: 'lv10-concession-shared-burden',
@@ -252,6 +254,7 @@ final Map<String, base.GoldChallengeProfile> nonDatongGoldChallengeProfiles =
           ? _repairLijiangProfile(entry.value)
           : entry.value,
     _hongheHaniRiceTerracesJourneyId: _hongheHaniRiceTerracesChallengeProfile,
+    _pingyaoAncientCityJourneyId: pingyaoAncientCityChallengeProfile,
   },
 );
 

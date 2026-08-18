@@ -322,6 +322,24 @@ enum NarrativeMechanismFamily {
   sameDaySpringIrrigationAndPloughingWindow,
   friendWithdrawsLaborAfterAllocationRestoration,
   communalWaterRuleForcesPrivateReciprocityCost,
+
+  // Reusable families introduced by Pingyao networked-credit responsibility.
+  lateQingShopDayCombinesIllnessAndDuePayment,
+  coownerReframingResponsibilityThroughNetworkedCredit,
+  coowningBrothersBoundBySharedRiskPractice,
+  settleDistantPaymentWhileRemainingWithSickMother,
+  bodilySilverCustodyVsNetworkedCreditPresence,
+  sendVerifiableDraftInsteadOfEscortSilver,
+  draftDepartsAsSharedLedgerSeparates,
+  paymentCanSettleWhileBusinessPartnershipSplits,
+  bodilyRiskProofToInstitutionalCreditResponsibility,
+  newLedgerBeginsWithoutBrotherlyVindication,
+  draftBankRemittanceSeparatesValueFromSilverTransport,
+  stationarySilverChestAndSeparatedLedgerShowChangedMobility,
+  draftMovesAcrossBranchNetworkWhileBodyStays,
+  sameDayIllnessAndDuePaymentPressure,
+  olderBrotherSeparatesAccountsAfterRemittanceChoice,
+  networkedCreditReassignsWhoMustTravelAtPrivateRelationshipCost,
 }
 
 const Set<NarrativeSemanticDimension> narrativeSemanticCoreDimensions = {

@@ -198,13 +198,34 @@ jobs:
             }));
           ' "${PREVIEW_URL}/?unlock=all&prototype=journeys&v=${PREVIEW_RELEASE}")"
 
-          curl --fail --silent --show-error \
-            --request POST \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer $GITHUB_TOKEN" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
-            --data "$payload"
+          response_file="$RUNNER_TEMP/phoenix-status-response.json"
+          header_file="$RUNNER_TEMP/phoenix-status-headers.txt"
+
+          http_code="$(
+            curl \
+              --silent \
+              --show-error \
+              --output "$response_file" \
+              --dump-header "$header_file" \
+              --write-out '%{http_code}' \
+              --request POST \
+              --header "Accept: application/vnd.github+json" \
+              --header "Authorization: Bearer $GITHUB_TOKEN" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
+              --data "$payload"
+          )"
+
+          echo "GitHub Commit Status API HTTP status: $http_code"
+          grep -iE \
+            '^(x-github-request-id|x-accepted-github-permissions):' \
+            "$header_file" || true
+          cat "$response_file"
+
+          if [[ "$http_code" -lt 200 || "$http_code" -ge 300 ]]; then
+            echo "GitHub Commit Status publication failed."
+            exit 1
+          fi
 
       - name: Add or update preview comment
         uses: actions/github-script@v7

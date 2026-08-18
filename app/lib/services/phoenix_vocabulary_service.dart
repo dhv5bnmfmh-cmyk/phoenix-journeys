@@ -141,6 +141,37 @@ class PhoenixVocabularyService {
       qualityReviewed: true,
       qualityScore: 100,
     ),
+    // Pingyao candidate-owned preload contexts, reviewed against active Story/Discovery.
+    '信任': PhoenixVocabularyExample(
+      chinese: '票号没有把信任变成抽象口号，而是把它分配给柜台、账本、分号和凭证。',
+      pinyin:
+          'Piàohào méiyǒu bǎ xìnrèn biàn chéng chōuxiàng kǒuhào, érshì bǎ tā fēnpèi gěi guìtái, zhàngběn, fēnhào hé píngzhèng.',
+      native:
+          'Phiếu hiệu không biến niềm tin thành khẩu hiệu trừu tượng mà phân bổ nó cho quầy giao dịch, sổ sách, chi nhánh và chứng từ.',
+      english:
+          'The remittance house does not turn trust into an abstract slogan; it distributes trust across the counter, ledgers, branches, and documents.',
+      usageNote: '平遥候选词汇例句，直接绑定 Lv8 Story 的信用机制语境。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
+    '结算': PhoenixVocabularyExample(
+      chinese: '从现银押运到汇票结算，关键变化不是“钱变成纸”，而是信用被放进可以跨地点核验的制度关系。',
+      pinyin:
+          'Cóng xiànyín yāyùn dào huìpiào jiésuàn, guānjiàn biànhuà bú shì “qián biàn chéng zhǐ”, érshì xìnyòng bèi fàng jìn kěyǐ kuà dìdiǎn héyàn de zhìdù guānxì.',
+      native:
+          'Từ áp tải bạc tiền mặt đến thanh toán bằng hối phiếu, thay đổi then chốt không phải là “tiền biến thành giấy”, mà là tín dụng được đặt vào quan hệ thể chế có thể kiểm tra giữa nhiều nơi.',
+      english:
+          'From escorting physical silver to settlement by draft, the key change is not that “money becomes paper”, but that credit is embedded in institutional relations that can be verified across locations.',
+      usageNote: '平遥候选词汇例句，直接绑定 Lv8 Discovery 的汇票结算语境。',
+      isOfflineFallback: true,
+      provider: 'phoenix-preloaded-pack',
+      model: 'bundled',
+      qualityReviewed: true,
+      qualityScore: 100,
+    ),
   };
 
   static const PhoenixVocabularyExample _legacyForbiddenOpening =

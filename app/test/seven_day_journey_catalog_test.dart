@@ -6,6 +6,7 @@ import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/guangzhou_chen_clan_one_pass.dart';
 import 'package:phoenix_journeys/data/lijiang_old_town_gold_content.dart';
 import 'package:phoenix_journeys/data/honghe_hani_rice_terraces_gold_content.dart';
+import 'package:phoenix_journeys/data/pingyao_ancient_city_gold_content.dart';
 import 'package:phoenix_journeys/data/luoyang_longmen_one_pass.dart';
 
 void main() {
@@ -73,6 +74,12 @@ void main() {
           hongheHaniRiceTerracesGoldLevelContent(5).storyParagraphs,
           reason: journey.id,
         );
+      } else if (journey.id == pingyaoAncientCityJourneyId) {
+        expect(
+          journey.content.storyParagraphs,
+          pingyaoAncientCityGoldLevelContent(5).storyParagraphs,
+          reason: journey.id,
+        );
       } else if (journey.id == 'jiangmen-kaiping-diaolou') {
         expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
       } else if (journey.id == 'beijing-summer-palace') {
@@ -123,6 +130,12 @@ void main() {
         expect(
           journey.discoveries,
           hasLength(hongheHaniRiceTerracesGoldLevelContent(5).discoveries.length),
+          reason: journey.id,
+        );
+      } else if (journey.id == pingyaoAncientCityJourneyId) {
+        expect(
+          journey.discoveries,
+          hasLength(pingyaoAncientCityGoldLevelContent(5).discoveries.length),
           reason: journey.id,
         );
       } else if (journey.id == 'jiangmen-kaiping-diaolou') {
