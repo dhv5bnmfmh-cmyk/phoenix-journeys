@@ -30,7 +30,18 @@ jobs:
           set -euo pipefail
           test "$(git -C candidate rev-parse HEAD)" = "34484e4600f1ccadf52b89f7b7c73adc35aba248"
           python3 -m py_compile harness/.github/scripts/pr194_runtime_remediation.py
+          sed -i "s/lazy_group('app\/lib\/data\/extended_journey_catalog.dart', 'extendedJourneyExperiences', 5)/lazy_group('app\/lib\/data\/extended_journey_catalog.dart', 'extendedJourneyExperiences', 4)/" harness/.github/scripts/pr194_runtime_remediation.py
           python3 harness/.github/scripts/pr194_runtime_remediation.py candidate
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('candidate/app/lib/data/extended_journey_catalog.dart')
+          text = path.read_text(encoding='utf-8')
+          old = '  kaipingDiaolouExperience,\n]);'
+          new = '  () => kaipingDiaolouExperience,\n]);'
+          if text.count(old) != 1:
+              raise SystemExit(f'Kaiping lazy wrapper anchor count={text.count(old)}')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
