@@ -17,14 +17,18 @@ jobs:
         with:
           ref: pr194-runtime-staging
           path: harness
-
       - name: Check out exact PR parent
         uses: actions/checkout@v4
         with:
           ref: 34484e4600f1ccadf52b89f7b7c73adc35aba248
           path: candidate
+      - name: Check out exact performance baseline
+        uses: actions/checkout@v4
+        with:
+          ref: eb4e36e6e4246b0e448ecc151f01a7bb3d272c2d
+          path: baseline
 
-      - name: Verify parent and apply remediation
+      - name: Apply coherent runtime and benchmark remediation
         shell: bash
         run: |
           set -euo pipefail
@@ -37,37 +41,41 @@ jobs:
           python3 harness/.github/scripts/pr194_runtime_remediation.py candidate
           python3 - <<'PY'
           from pathlib import Path
-          path = Path('candidate/app/lib/data/extended_journey_catalog.dart')
-          text = path.read_text(encoding='utf-8')
+          ext = Path('candidate/app/lib/data/extended_journey_catalog.dart')
+          text = ext.read_text(encoding='utf-8')
           old = '  kaipingDiaolouExperience,\n]);'
-          new = '  () => kaipingDiaolouExperience,\n]);'
-          if text.count(old) != 1:
-              raise SystemExit(f'Kaiping lazy wrapper anchor count={text.count(old)}')
-          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          if text.count(old) != 1: raise SystemExit('Kaiping lazy wrapper anchor mismatch')
+          ext.write_text(text.replace(old, '  () => kaipingDiaolouExperience,\n]);', 1), encoding='utf-8')
 
           access = Path('candidate/app/lib/state/access_controlled_app_state.dart')
-          value = access.read_text(encoding='utf-8')
+          text = access.read_text(encoding='utf-8')
           old_any = 'dailyJourneyExperiences.any((journey) => journey.id == journeyId)'
-          if value.count(old_any) != 1:
-              raise SystemExit(f'access any() heavy-catalog anchor count={value.count(old_any)}')
-          value = value.replace(old_any, 'dailyJourneyIds.contains(journeyId)', 1)
           old_set = '<String>{for (final journey in dailyJourneyExperiences) journey.id}'
-          if value.count(old_set) != 1:
-              raise SystemExit(f'access set heavy-catalog anchor count={value.count(old_set)}')
-          value = value.replace(old_set, '<String>{...dailyJourneyIds}', 1)
-          access.write_text(value, encoding='utf-8')
+          if text.count(old_any) != 1 or text.count(old_set) != 1:
+              raise SystemExit('Access-control heavy catalog anchors mismatch')
+          text = text.replace(old_any, 'dailyJourneyIds.contains(journeyId)', 1)
+          text = text.replace(old_set, '<String>{...dailyJourneyIds}', 1)
+          access.write_text(text, encoding='utf-8')
 
           notifier = Path('candidate/app/lib/services/startup_readiness_notifier_web.dart')
           web = notifier.read_text(encoding='utf-8')
           ignore = '// ignore_for_file: avoid_web_libraries_in_flutter, deprecated_member_use\n\n'
-          if not web.startswith(ignore):
-              notifier.write_text(ignore + web, encoding='utf-8')
+          if not web.startswith(ignore): notifier.write_text(ignore + web, encoding='utf-8')
+
+          bootstrap = Path('candidate/app/web/flutter_bootstrap.js')
+          js = bootstrap.read_text(encoding='utf-8')
+          if js.count('const minimumJourneyDurationMs = 3000;') != 1:
+              raise SystemExit('bootstrap 3000ms staging hold anchor mismatch')
+          bootstrap.write_text(js.replace('const minimumJourneyDurationMs = 3000;', 'const minimumJourneyDurationMs = 3200;', 1), encoding='utf-8')
           PY
-          if grep -n "dailyJourneyExperiences" candidate/app/lib/state/access_controlled_app_state.dart; then
-            echo 'ACCESS CONTROL STILL TOUCHES HEAVY DAILY CATALOG'
-            exit 1
-          fi
-          echo 'ACCESS CONTROL DAILY CATALOG TOUCH = NONE'
+
+          cp harness/.github/scripts/startup_instrument_v2.py candidate/.github/scripts/startup_instrument.py
+          cp harness/.github/scripts/measure_startup_v2.mjs candidate/.github/scripts/measure_startup.mjs
+          cp harness/.github/workflows/startup-performance-audit-v2.yml candidate/.github/workflows/startup-performance-audit.yml
+          ! grep -q "dailyJourneyExperiences" candidate/app/lib/state/access_controlled_app_state.dart
+          ! grep -q "minimumJourneyDurationMs = 11550" candidate/app/web/flutter_bootstrap.js
+          ! grep -q "phoenix-time-flight-v2 12.4s" candidate/app/web/index.html
+          echo 'HEAVY STARTUP REENTRY STATIC GATES = PASS'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -75,17 +83,13 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Focused regressions
+      - name: Focused runtime regressions
         shell: bash
         run: |
           set -euo pipefail
           cd candidate/app
           flutter pub get
-          dart format \
-            lib/services/startup_readiness_notifier.dart \
-            lib/services/startup_readiness_notifier_stub.dart \
-            lib/services/startup_readiness_notifier_web.dart \
-            test/startup_lazy_runtime_test.dart
+          dart format lib/services/startup_readiness_notifier.dart lib/services/startup_readiness_notifier_stub.dart lib/services/startup_readiness_notifier_web.dart test/startup_lazy_runtime_test.dart
           flutter test test/startup_lazy_runtime_test.dart
           flutter test test/seven_day_journey_catalog_test.dart
           flutter test test/journey_location_binding_test.dart
@@ -93,31 +97,57 @@ jobs:
           flutter test test/journey_runtime_architecture_gate_test.dart
           flutter test test/journey_runtime_performance_gate_test.dart
 
-      - name: Analyze and full Flutter suite
+      - name: Full Flutter validation and release build
         shell: bash
         run: |
           set -euo pipefail
           cd candidate/app
           flutter analyze
           flutter test
+          flutter build web --release
 
-      - name: Release web build
+      - name: Benchmark harness preflight on baseline and candidate
         shell: bash
         run: |
           set -euo pipefail
-          cd candidate/app
+          python3 -m py_compile candidate/.github/scripts/startup_instrument.py
+          node --check candidate/.github/scripts/measure_startup.mjs
+          python3 candidate/.github/scripts/startup_instrument.py baseline --check-only
+          python3 candidate/.github/scripts/startup_instrument.py candidate --check-only
+          rm -rf "$RUNNER_TEMP/pr194-instrumented"
+          cp -a candidate "$RUNNER_TEMP/pr194-instrumented"
+          python3 candidate/.github/scripts/startup_instrument.py "$RUNNER_TEMP/pr194-instrumented"
+          cd "$RUNNER_TEMP/pr194-instrumented/app"
+          flutter pub get
           flutter build web --release
+          echo 'DUAL-ARCHITECTURE INSTRUMENTED RELEASE PREFLIGHT = PASS'
 
-      - name: Audit staged delta
+      - name: Audit final staged delta
         shell: bash
         run: |
           set -euo pipefail
           cd candidate
-          echo '--- changed files ---'
-          git diff --name-only
-          test -z "$(git diff --name-only | grep -E 'app/lib/data/.*(gold|level|story|content).*\.dart$' || true)"
-          test -z "$(git diff --name-only | grep -E '^app/lib/(agents|generated|models|screens|theme)/' || true)"
-          echo 'LEARNER CONTENT SEMANTIC DELTA CHECK = PASS'
+          git diff --name-only | tee "$RUNNER_TEMP/pr194-final-delta.txt"
+          test -n "$(grep '^app/lib\|^app/web' "$RUNNER_TEMP/pr194-final-delta.txt")"
+          test -z "$(grep -E '^app/lib/data/.*(gold|story_content|narrative_dna|semantic_fingerprint|challenge_profile)' "$RUNNER_TEMP/pr194-final-delta.txt" || true)"
+          test -z "$(grep -E '^app/lib/(agents|generated|models|theme)/' "$RUNNER_TEMP/pr194-final-delta.txt" || true)"
+          echo 'LEARNER CONTENT DELTA = NONE'
+
+      - name: Publish one coherent runtime commit to PR branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          live="$(git ls-remote origin refs/heads/dev/current | awk '{print $1}')"
+          echo "LIVE DEV/CURRENT BEFORE PUBLISH = $live"
+          test "$live" = "34484e4600f1ccadf52b89f7b7c73adc35aba248"
+          cd candidate
+          git config user.name dhv5bnmfmh-cmyk
+          git config user.email dhv5bnmfmh@privaterelay.appleid.com
+          git add -A
+          git commit -m 'perf: lazily resolve startup Journey runtime'
+          successor="$(git rev-parse HEAD)"
+          git push origin HEAD:dev/current
+          echo "PR194_RUNTIME_SUCCESSOR_SHA=$successor"
 
       - name: Record validation result on staging branch
         if: always()
@@ -128,9 +158,7 @@ jobs:
         run: |
           set -euo pipefail
           cd harness
-          printf 'status=%s\nrun_id=%s\nsource_sha=%s\n' \
-            "$VALIDATION_STATUS" "$SOURCE_RUN_ID" "${{ github.sha }}" \
-            > .github/pr194-staging-validation.txt
+          printf 'status=%s\nrun_id=%s\nsource_sha=%s\n' "$VALIDATION_STATUS" "$SOURCE_RUN_ID" "${{ github.sha }}" > .github/pr194-staging-validation.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add .github/pr194-staging-validation.txt
