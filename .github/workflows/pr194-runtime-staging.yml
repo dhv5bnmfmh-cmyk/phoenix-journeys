@@ -69,6 +69,8 @@ jobs:
               raise SystemExit('bootstrap 3000ms staging hold anchor mismatch')
           bootstrap.write_text(js.replace('const minimumJourneyDurationMs = 3000;', 'const minimumJourneyDurationMs = 3200;', 1), encoding='utf-8')
           PY
+          sed -i 's/getEntriesByName(name)/getEntriesByName(name, null)/g' harness/.github/scripts/startup_instrument_v2.py
+          sed -i 's/getEntriesByName(prerequisite)/getEntriesByName(prerequisite, null)/g' harness/.github/scripts/startup_instrument_v2.py
           cp harness/.github/scripts/startup_instrument_v2.py candidate/.github/scripts/startup_instrument.py
           cp harness/.github/scripts/measure_startup_v2.mjs candidate/.github/scripts/measure_startup.mjs
           cp harness/.github/workflows/startup-performance-audit-v2.yml candidate/.github/workflows/startup-performance-audit.yml
