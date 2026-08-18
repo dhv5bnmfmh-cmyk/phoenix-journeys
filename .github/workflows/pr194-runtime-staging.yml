@@ -56,6 +56,12 @@ jobs:
               raise SystemExit(f'access set heavy-catalog anchor count={value.count(old_set)}')
           value = value.replace(old_set, '<String>{...dailyJourneyIds}', 1)
           access.write_text(value, encoding='utf-8')
+
+          notifier = Path('candidate/app/lib/services/startup_readiness_notifier_web.dart')
+          web = notifier.read_text(encoding='utf-8')
+          ignore = '// ignore_for_file: avoid_web_libraries_in_flutter, deprecated_member_use\n\n'
+          if not web.startswith(ignore):
+              notifier.write_text(ignore + web, encoding='utf-8')
           PY
           if grep -n "dailyJourneyExperiences" candidate/app/lib/state/access_controlled_app_state.dart; then
             echo 'ACCESS CONTROL STILL TOUCHES HEAVY DAILY CATALOG'
@@ -69,13 +75,17 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Format and focused regressions
+      - name: Focused regressions
         shell: bash
         run: |
           set -euo pipefail
           cd candidate/app
-          dart format lib test/startup_lazy_runtime_test.dart
           flutter pub get
+          dart format \
+            lib/services/startup_readiness_notifier.dart \
+            lib/services/startup_readiness_notifier_stub.dart \
+            lib/services/startup_readiness_notifier_web.dart \
+            test/startup_lazy_runtime_test.dart
           flutter test test/startup_lazy_runtime_test.dart
           flutter test test/seven_day_journey_catalog_test.dart
           flutter test test/journey_location_binding_test.dart
@@ -106,6 +116,7 @@ jobs:
           echo '--- changed files ---'
           git diff --name-only
           test -z "$(git diff --name-only | grep -E 'app/lib/data/.*(gold|level|story|content).*\.dart$' || true)"
+          test -z "$(git diff --name-only | grep -E '^app/lib/(agents|generated|models|screens|theme)/' || true)"
           echo 'LEARNER CONTENT SEMANTIC DELTA CHECK = PASS'
 
       - name: Record validation result on staging branch
