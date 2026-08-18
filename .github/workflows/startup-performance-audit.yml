@@ -120,28 +120,28 @@ jobs:
               'state foundation import': "import 'package:flutter/foundation.dart';\n",
               'state catalog import': "import '../data/daily_journey_catalog.dart';\n",
               'state load start': """  Future<void> load() async {
-              loadStatus = AppLoadStatus.loading;
+            loadStatus = AppLoadStatus.loading;
           """,
-              'preferences load': """      final preferences = await _preferencesLoader();
-              _preferences = preferences;
-              _restoreNonCriticalPreferences(preferences);
+              'preferences load': """    final preferences = await _preferencesLoader();
+            _preferences = preferences;
+            _restoreNonCriticalPreferences(preferences);
           """,
-              'critical read': """      var committed = await _criticalStore!.readCommitted();
-              if (committed == null) {
+              'critical read': """    var committed = await _criticalStore!.readCommitted();
+            if (committed == null) {
           """,
-              'legacy path': """        committed = await _criticalStore!.commitInitial(
-                  legacy.snapshot.toJson(),
-                );
-              } else if (committed.schemaVersion ==
+              'legacy path': """      committed = await _criticalStore!.commitInitial(
+              legacy.snapshot.toJson(),
+            );
+            } else if (committed.schemaVersion ==
           """,
-              'apply committed': """      _applyCommitted(
-                snapshot,
-                revision: committed.revision,
-                schemaVersion: committed.schemaVersion,
-              );
+              'apply committed': """    _applyCommitted(
+              snapshot,
+              revision: committed.revision,
+              schemaVersion: committed.schemaVersion,
+            );
           """,
-              'state ready': """      _activeIdentityReady = true;
-              loadStatus = AppLoadStatus.ready;
+              'state ready': """    _activeIdentityReady = true;
+            loadStatus = AppLoadStatus.ready;
             } catch (error, stackTrace) {
           """,
               'final load notification': """    notifyListeners();
@@ -151,19 +151,24 @@ jobs:
             Future<void> activateJourney""",
           }
 
-          def require_all_once(label, text, anchors):
+          failures = []
+
+          def inspect_all(label, text, anchors):
               for name, anchor in anchors.items():
                   count = text.count(anchor)
                   print(f'ANCHOR {label}:{name} MATCH COUNT = {count}')
-                  if count == 0:
-                      raise SystemExit(f'anchor missing: {label}:{name}')
-                  if count > 1:
-                      raise SystemExit(f'anchor ambiguous: {label}:{name} count={count}')
+                  if count != 1:
+                      failures.append(f'{label}:{name} count={count}')
 
-          require_all_once('main', main, main_anchors)
-          require_all_once('state', state, state_anchors)
+          inspect_all('main', main, main_anchors)
+          inspect_all('state', state, state_anchors)
+          if failures:
+              print('STARTUP INSTRUMENTATION ANCHOR PREFLIGHT = FAIL')
+              for failure in failures:
+                  print(f'ANCHOR FAILURE = {failure}')
+              raise SystemExit(1)
+          print('ALL STARTUP INSTRUMENTATION ANCHORS = PASS')
           if check_only:
-              print('ALL STARTUP INSTRUMENTATION ANCHORS = PASS')
               raise SystemExit(0)
 
           probe_path = lib / 'startup_performance_probe.dart'
@@ -217,59 +222,59 @@ jobs:
           state = state.replace(
               state_anchors['state load start'],
               """  Future<void> load() async {
-              startupPerformanceMark('phoenix-state-load-start');
-              loadStatus = AppLoadStatus.loading;
+            startupPerformanceMark('phoenix-state-load-start');
+            loadStatus = AppLoadStatus.loading;
           """,
               1,
           )
           state = state.replace(
               state_anchors['preferences load'],
-              """      startupPerformanceMark('phoenix-preferences-start');
-              final preferences = await _preferencesLoader();
-              startupPerformanceMark('phoenix-preferences-ready');
-              _preferences = preferences;
-              _restoreNonCriticalPreferences(preferences);
-              startupPerformanceMark('phoenix-noncritical-preferences-restored');
+              """    startupPerformanceMark('phoenix-preferences-start');
+            final preferences = await _preferencesLoader();
+            startupPerformanceMark('phoenix-preferences-ready');
+            _preferences = preferences;
+            _restoreNonCriticalPreferences(preferences);
+            startupPerformanceMark('phoenix-noncritical-preferences-restored');
           """,
               1,
           )
           state = state.replace(
               state_anchors['critical read'],
-              """      startupPerformanceMark('phoenix-critical-read-start');
-              var committed = await _criticalStore!.readCommitted();
-              startupPerformanceMark('phoenix-critical-read-end');
-              if (committed == null) {
-                startupPerformanceMark('phoenix-legacy-build-start');
+              """    startupPerformanceMark('phoenix-critical-read-start');
+            var committed = await _criticalStore!.readCommitted();
+            startupPerformanceMark('phoenix-critical-read-end');
+            if (committed == null) {
+              startupPerformanceMark('phoenix-legacy-path-start');
           """,
               1,
           )
           state = state.replace(
               state_anchors['legacy path'],
-              """        committed = await _criticalStore!.commitInitial(
-                  legacy.snapshot.toJson(),
-                );
-                startupPerformanceMark('phoenix-legacy-build-end');
-              } else if (committed.schemaVersion ==
+              """      committed = await _criticalStore!.commitInitial(
+              legacy.snapshot.toJson(),
+            );
+              startupPerformanceMark('phoenix-legacy-path-end');
+            } else if (committed.schemaVersion ==
           """,
               1,
           )
           state = state.replace(
               state_anchors['apply committed'],
-              """      startupPerformanceMark('phoenix-apply-committed-start');
-              _applyCommitted(
-                snapshot,
-                revision: committed.revision,
-                schemaVersion: committed.schemaVersion,
-              );
-              startupPerformanceMark('phoenix-apply-committed-end');
+              """    startupPerformanceMark('phoenix-apply-committed-start');
+            _applyCommitted(
+              snapshot,
+              revision: committed.revision,
+              schemaVersion: committed.schemaVersion,
+            );
+            startupPerformanceMark('phoenix-apply-committed-end');
           """,
               1,
           )
           state = state.replace(
               state_anchors['state ready'],
-              """      _activeIdentityReady = true;
-              loadStatus = AppLoadStatus.ready;
-              startupPerformanceMark('phoenix-state-ready');
+              """    _activeIdentityReady = true;
+            loadStatus = AppLoadStatus.ready;
+            startupPerformanceMark('phoenix-state-ready');
             } catch (error, stackTrace) {
           """,
               1,
@@ -277,11 +282,11 @@ jobs:
           state = state.replace(
               state_anchors['final load notification'],
               """    notifyListeners();
-              if (loadStatus == AppLoadStatus.ready) {
-                SchedulerBinding.instance.addPostFrameCallback((_) {
-                  startupPerformanceMark('phoenix-first-meaningful-screen');
-                });
-              }
+            if (loadStatus == AppLoadStatus.ready) {
+              SchedulerBinding.instance.addPostFrameCallback((_) {
+                startupPerformanceMark('phoenix-first-meaningful-screen');
+              });
+            }
             }
 
             @override
@@ -302,8 +307,8 @@ jobs:
               'phoenix-noncritical-preferences-restored',
               'phoenix-critical-read-start',
               'phoenix-critical-read-end',
-              'phoenix-legacy-build-start',
-              'phoenix-legacy-build-end',
+              'phoenix-legacy-path-start',
+              'phoenix-legacy-path-end',
               'phoenix-apply-committed-start',
               'phoenix-apply-committed-end',
               'phoenix-state-ready',
@@ -312,11 +317,16 @@ jobs:
           combined = main_path.read_text(encoding='utf-8') + state_path.read_text(encoding='utf-8')
           if not probe_path.exists():
               raise SystemExit('temporary startup probe file was not created')
+          mark_failures = []
           for mark in expected_marks:
               count = combined.count(mark)
               print(f'MARK {mark} SOURCE COUNT = {count}')
               if count != 1:
-                  raise SystemExit(f'expected exactly one source mark for {mark}; got {count}')
+                  mark_failures.append(f'{mark} count={count}')
+          if mark_failures:
+              for failure in mark_failures:
+                  print(f'MARK FAILURE = {failure}')
+              raise SystemExit(1)
           print('TEMPORARY STARTUP INSTRUMENTATION = PASS')
           PY
 
@@ -397,7 +407,7 @@ jobs:
                 appStateRestoreMs: diff('phoenix-state-load-start', 'phoenix-state-ready'),
                 sharedPreferencesMs: diff('phoenix-preferences-start', 'phoenix-preferences-ready'),
                 criticalReadMs: diff('phoenix-critical-read-start', 'phoenix-critical-read-end'),
-                legacyBuildMs: diff('phoenix-legacy-build-start', 'phoenix-legacy-build-end'),
+                legacyPathMs: diff('phoenix-legacy-path-start', 'phoenix-legacy-path-end'),
                 applyCommittedMs: diff('phoenix-apply-committed-start', 'phoenix-apply-committed-end'),
                 firstContentfulPaintMs: paints['first-contentful-paint'] ?? null,
                 domContentLoadedMs: nav?.domContentLoadedEventEnd ?? null,
@@ -441,7 +451,7 @@ jobs:
           const fields = [
             'totalToMeaningfulMs', 'mainEntryToMeaningfulMs', 'preRunAppMs',
             'languageInitMs', 'firstFrameMs', 'appStateRestoreMs', 'sharedPreferencesMs',
-            'criticalReadMs', 'legacyBuildMs', 'applyCommittedMs', 'firstContentfulPaintMs',
+            'criticalReadMs', 'legacyPathMs', 'applyCommittedMs', 'firstContentfulPaintMs',
             'domContentLoadedMs', 'loadEventMs', 'responseEndMs',
           ];
           const stats = {};
@@ -463,12 +473,39 @@ jobs:
           await browser.close();
           JS
 
-      - name: Preflight every instrumentation anchor
+      - name: Preflight all anchors and helper loading
         shell: bash
+        env:
+          PUPPETEER_CORE_PATH: ${{ runner.temp }}/startup-audit-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
         run: |
           set -euo pipefail
-          python3 "$RUNNER_TEMP/instrument_startup.py" "$GITHUB_WORKSPACE/baseline" --check-only
-          python3 "$RUNNER_TEMP/instrument_startup.py" "$GITHUB_WORKSPACE/candidate" --check-only
+          status=0
+          python3 "$RUNNER_TEMP/instrument_startup.py" "$GITHUB_WORKSPACE/baseline" --check-only || status=1
+          python3 "$RUNNER_TEMP/instrument_startup.py" "$GITHUB_WORKSPACE/candidate" --check-only || status=1
+          node --check "$RUNNER_TEMP/measure_startup.mjs" || status=1
+          PUPPETEER_CORE_PATH="$PUPPETEER_CORE_PATH" node --input-type=module <<'JS' || status=1
+          import { pathToFileURL } from 'node:url';
+          const loaded = await import(pathToFileURL(process.env.PUPPETEER_CORE_PATH).href);
+          const puppeteer = loaded.default ?? loaded;
+          if (typeof puppeteer.launch !== 'function') {
+            throw new Error('puppeteer-core dynamic import did not expose launch()');
+          }
+          console.log('PUPPETEER DYNAMIC IMPORT = PASS');
+          JS
+          test "$status" -eq 0
+
+          rm -rf "$RUNNER_TEMP/startup-preflight"
+          cp -a baseline "$RUNNER_TEMP/startup-preflight"
+          python3 "$RUNNER_TEMP/instrument_startup.py" "$RUNNER_TEMP/startup-preflight"
+          pushd "$RUNNER_TEMP/startup-preflight/app" >/dev/null
+          dart format --output=none \
+            lib/main.dart \
+            lib/state/access_controlled_app_state.dart \
+            lib/startup_performance_probe.dart
+          flutter pub get
+          flutter build web --release
+          popd >/dev/null
+          echo "INSTRUMENTED DART RELEASE BUILD PREFLIGHT = PASS"
 
       - name: Benchmark baseline and candidate
         shell: bash
@@ -529,12 +566,15 @@ jobs:
             python3 -m http.server 8080 --directory build/web >"$RUNNER_TEMP/${label}-server.log" 2>&1 &
             server_pid=$!
             trap 'kill "$server_pid" 2>/dev/null || true' RETURN
+            server_ready=0
             for _ in {1..30}; do
               if curl --fail --silent http://127.0.0.1:8080/ >/dev/null; then
+                server_ready=1
                 break
               fi
               sleep 1
             done
+            test "$server_ready" -eq 1
             PUPPETEER_CORE_PATH="$PUPPETEER_CORE_PATH" \
               node "$RUNNER_TEMP/measure_startup.mjs" \
               http://127.0.0.1:8080/ \
