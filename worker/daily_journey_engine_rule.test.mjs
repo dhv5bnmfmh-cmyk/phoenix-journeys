@@ -22,15 +22,20 @@ const appState = fs.readFileSync(
   'utf8',
 );
 
-test('daily catalog keeps a real multi-destination Journey registry', () => {
+test('daily catalog keeps a lightweight multi-destination Journey registry', () => {
   assert.match(catalog, /final dailyJourneyRecords = <JourneyContentRecord>\[/);
   assert.match(catalog, /beijingForbiddenCityJourney,/);
   assert.match(catalog, /summerPalaceJourneyContent,/);
   assert.match(catalog, /shanghaiBundJourney,/);
-  assert.match(catalog, /final dailyJourneyExperiences = <DailyJourneyExperience>\[/);
+  assert.match(catalog, /final List<String> dailyJourneyIds = List<String>\.unmodifiable\(/);
+  assert.match(catalog, /'beijing-forbidden-city'/);
+  assert.match(catalog, /'beijing-summer-palace'/);
+  assert.match(catalog, /'shanghai-bund'/);
+  assert.match(catalog, /final dailyJourneyExperiences = LazyJourneyList/);
   assert.match(catalog, /id: beijingForbiddenCityJourney\.id/);
-  assert.match(catalog, /summerPalaceJourneyExperience,/);
+  assert.match(catalog, /summerPalaceJourneyExperience/);
   assert.match(catalog, /id: shanghaiBundJourney\.id/);
+  assert.match(catalog, /String dailyJourneyIdForDate\(DateTime date\)/);
   assert.match(catalog, /final allJourneyExperiences = <DailyJourneyExperience>\[/);
   assert.match(catalog, /requireDailyJourneyExperience/);
 });
