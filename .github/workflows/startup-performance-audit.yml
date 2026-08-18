@@ -17,14 +17,16 @@ concurrency:
 
 env:
   STARTUP_BASELINE_SHA: eb4e36e6e4246b0e448ecc151f01a7bb3d272c2d
+  CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   benchmark:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out candidate harness
+      - name: Check out exact candidate head
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.CANDIDATE_SHA }}
           path: candidate
 
       - name: Check out exact startup baseline
@@ -32,6 +34,53 @@ jobs:
         with:
           ref: ${{ env.STARTUP_BASELINE_SHA }}
           path: baseline
+
+      - name: Verify exact checkout identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p startup-performance-results
+          candidate_actual="$(git -C candidate rev-parse HEAD)"
+          baseline_actual="$(git -C baseline rev-parse HEAD)"
+          echo "EXPECTED CANDIDATE SHA = $CANDIDATE_SHA"
+          echo "ACTUAL CANDIDATE CHECKOUT SHA = $candidate_actual"
+          echo "EXPECTED BASELINE SHA = $STARTUP_BASELINE_SHA"
+          echo "ACTUAL BASELINE CHECKOUT SHA = $baseline_actual"
+          test "$candidate_actual" = "$CANDIDATE_SHA"
+          test "$baseline_actual" = "$STARTUP_BASELINE_SHA"
+          python3 - "$CANDIDATE_SHA" "$candidate_actual" "$STARTUP_BASELINE_SHA" "$baseline_actual" <<'PY'
+          import json
+          from pathlib import Path
+          import sys
+
+          candidate_expected, candidate_actual, baseline_expected, baseline_actual = sys.argv[1:]
+          Path('startup-performance-results/checkout-identity.json').write_text(
+              json.dumps(
+                  {
+                      'candidate_expected_sha': candidate_expected,
+                      'candidate_actual_sha': candidate_actual,
+                      'candidate_checkout_identity': candidate_expected == candidate_actual,
+                      'baseline_expected_sha': baseline_expected,
+                      'baseline_actual_sha': baseline_actual,
+                      'baseline_checkout_identity': baseline_expected == baseline_actual,
+                      'instrumentation': 'temporary runner working-tree only',
+                  },
+                  indent=2,
+              ),
+              encoding='utf-8',
+          )
+          PY
+
+      - name: Confirm harness-only runtime delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! diff -qr baseline/app/lib candidate/app/lib >"$RUNNER_TEMP/runtime-delta.txt"; then
+            echo "Committed app/lib delta exists before runtime remediation is authorized."
+            cat "$RUNNER_TEMP/runtime-delta.txt"
+            exit 1
+          fi
+          echo "RUNTIME DELTA = NONE"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -50,8 +99,75 @@ jobs:
           import sys
 
           root = Path(sys.argv[1])
+          check_only = '--check-only' in sys.argv[2:]
           lib = root / 'app' / 'lib'
-          (lib / 'startup_performance_probe.dart').write_text(
+          main_path = lib / 'main.dart'
+          state_path = lib / 'state' / 'access_controlled_app_state.dart'
+          main = main_path.read_text(encoding='utf-8')
+          state = state_path.read_text(encoding='utf-8')
+
+          main_anchors = {
+              'main import': "import 'app.dart';\n",
+              'main startup': """Future<void> main() async {
+            WidgetsFlutterBinding.ensureInitialized();
+            await const LanguageLevelPreferenceStore().initializePhoenixLevel();
+          """,
+              'runApp callback': """    () {
+                runApp(
+          """,
+          }
+          state_anchors = {
+              'state foundation import': "import 'package:flutter/foundation.dart';\n",
+              'state catalog import': "import '../data/daily_journey_catalog.dart';\n",
+              'state load start': """  Future<void> load() async {
+              loadStatus = AppLoadStatus.loading;
+          """,
+              'preferences load': """      final preferences = await _preferencesLoader();
+              _preferences = preferences;
+              _restoreNonCriticalPreferences(preferences);
+          """,
+              'critical read': """      var committed = await _criticalStore!.readCommitted();
+              if (committed == null) {
+          """,
+              'legacy path': """        committed = await _criticalStore!.commitInitial(
+                  legacy.snapshot.toJson(),
+                );
+              } else if (committed.schemaVersion ==
+          """,
+              'apply committed': """      _applyCommitted(
+                snapshot,
+                revision: committed.revision,
+                schemaVersion: committed.schemaVersion,
+              );
+          """,
+              'state ready': """      _activeIdentityReady = true;
+              loadStatus = AppLoadStatus.ready;
+            } catch (error, stackTrace) {
+          """,
+              'final load notification': """    notifyListeners();
+            }
+
+            @override
+            Future<void> activateJourney""",
+          }
+
+          def require_all_once(label, text, anchors):
+              for name, anchor in anchors.items():
+                  count = text.count(anchor)
+                  print(f'ANCHOR {label}:{name} MATCH COUNT = {count}')
+                  if count == 0:
+                      raise SystemExit(f'anchor missing: {label}:{name}')
+                  if count > 1:
+                      raise SystemExit(f'anchor ambiguous: {label}:{name} count={count}')
+
+          require_all_once('main', main, main_anchors)
+          require_all_once('state', state, state_anchors)
+          if check_only:
+              print('ALL STARTUP INSTRUMENTATION ANCHORS = PASS')
+              raise SystemExit(0)
+
+          probe_path = lib / 'startup_performance_probe.dart'
+          probe_path.write_text(
               "import 'dart:html' as html;\n\n"
               "void startupPerformanceMark(String name) {\n"
               "  html.window.performance.mark(name);\n"
@@ -59,150 +175,108 @@ jobs:
               encoding='utf-8',
           )
 
-          main_path = lib / 'main.dart'
-          main = main_path.read_text(encoding='utf-8')
           main = main.replace(
-              "import 'app.dart';\n",
+              main_anchors['main import'],
               "import 'app.dart';\nimport 'startup_performance_probe.dart';\n",
               1,
           )
-          old = """Future<void> main() async {
-            WidgetsFlutterBinding.ensureInitialized();
-            await const LanguageLevelPreferenceStore().initializePhoenixLevel();
-          """
-          new = """Future<void> main() async {
+          main = main.replace(
+              main_anchors['main startup'],
+              """Future<void> main() async {
             startupPerformanceMark('phoenix-main-entry');
             WidgetsFlutterBinding.ensureInitialized();
             startupPerformanceMark('phoenix-language-init-start');
             await const LanguageLevelPreferenceStore().initializePhoenixLevel();
             startupPerformanceMark('phoenix-language-init-end');
-          """
-          if old not in main:
-              raise SystemExit('main startup shape changed; refusing ambiguous instrumentation')
-          main = main.replace(old, new, 1)
-          old = """    () {
-                runApp(
-          """
-          new = """    () {
+          """,
+              1,
+          )
+          main = main.replace(
+              main_anchors['runApp callback'],
+              """    () {
                 startupPerformanceMark('phoenix-runapp-start');
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  startupPerformanceMark('phoenix-first-frame');
+                });
                 runApp(
-          """
-          if old not in main:
-              raise SystemExit('runApp startup shape changed; refusing ambiguous instrumentation')
-          main = main.replace(old, new, 1)
-          old = """        ),
-              );
-            },
-          """
-          new = """        ),
-              );
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                startupPerformanceMark('phoenix-first-frame');
-              });
-            },
-          """
-          if old not in main:
-              raise SystemExit('runApp close shape changed; refusing ambiguous instrumentation')
-          main = main.replace(old, new, 1)
+          """,
+              1,
+          )
           main_path.write_text(main, encoding='utf-8')
 
-          state_path = lib / 'state' / 'access_controlled_app_state.dart'
-          state = state_path.read_text(encoding='utf-8')
           state = state.replace(
-              "import 'package:flutter/foundation.dart';\n",
+              state_anchors['state foundation import'],
               "import 'package:flutter/foundation.dart';\nimport 'package:flutter/scheduler.dart';\n",
               1,
           )
           state = state.replace(
-              "import '../data/daily_journey_catalog.dart';\n",
+              state_anchors['state catalog import'],
               "import '../data/daily_journey_catalog.dart';\nimport '../startup_performance_probe.dart';\n",
               1,
           )
-          old = """  Future<void> load() async {
-              loadStatus = AppLoadStatus.loading;
-          """
-          new = """  Future<void> load() async {
+          state = state.replace(
+              state_anchors['state load start'],
+              """  Future<void> load() async {
               startupPerformanceMark('phoenix-state-load-start');
               loadStatus = AppLoadStatus.loading;
-          """
-          if old not in state:
-              raise SystemExit('state load shape changed; refusing ambiguous instrumentation')
-          state = state.replace(old, new, 1)
-          old = """      final preferences = await _preferencesLoader();
-              _preferences = preferences;
-              _restoreNonCriticalPreferences(preferences);
-          """
-          new = """      startupPerformanceMark('phoenix-preferences-start');
+          """,
+              1,
+          )
+          state = state.replace(
+              state_anchors['preferences load'],
+              """      startupPerformanceMark('phoenix-preferences-start');
               final preferences = await _preferencesLoader();
               startupPerformanceMark('phoenix-preferences-ready');
               _preferences = preferences;
               _restoreNonCriticalPreferences(preferences);
               startupPerformanceMark('phoenix-noncritical-preferences-restored');
-          """
-          if old not in state:
-              raise SystemExit('preferences restore shape changed; refusing ambiguous instrumentation')
-          state = state.replace(old, new, 1)
-          old = """      var committed = await _criticalStore!.readCommitted();
-              if (committed == null) {
-          """
-          new = """      startupPerformanceMark('phoenix-critical-read-start');
+          """,
+              1,
+          )
+          state = state.replace(
+              state_anchors['critical read'],
+              """      startupPerformanceMark('phoenix-critical-read-start');
               var committed = await _criticalStore!.readCommitted();
               startupPerformanceMark('phoenix-critical-read-end');
               if (committed == null) {
                 startupPerformanceMark('phoenix-legacy-build-start');
-          """
-          if old not in state:
-              raise SystemExit('critical read shape changed; refusing ambiguous instrumentation')
-          state = state.replace(old, new, 1)
-          old = """        committed = await _criticalStore!.commitInitial(
-                  legacy.snapshot.toJson(),
-                );
-              } else if (committed.schemaVersion ==
-          """
-          new = """        committed = await _criticalStore!.commitInitial(
+          """,
+              1,
+          )
+          state = state.replace(
+              state_anchors['legacy path'],
+              """        committed = await _criticalStore!.commitInitial(
                   legacy.snapshot.toJson(),
                 );
                 startupPerformanceMark('phoenix-legacy-build-end');
               } else if (committed.schemaVersion ==
-          """
-          if old not in state:
-              raise SystemExit('legacy commit shape changed; refusing ambiguous instrumentation')
-          state = state.replace(old, new, 1)
-          old = """      _applyCommitted(
-                snapshot,
-                revision: committed.revision,
-                schemaVersion: committed.schemaVersion,
-              );
-          """
-          new = """      startupPerformanceMark('phoenix-apply-committed-start');
+          """,
+              1,
+          )
+          state = state.replace(
+              state_anchors['apply committed'],
+              """      startupPerformanceMark('phoenix-apply-committed-start');
               _applyCommitted(
                 snapshot,
                 revision: committed.revision,
                 schemaVersion: committed.schemaVersion,
               );
               startupPerformanceMark('phoenix-apply-committed-end');
-          """
-          if old not in state:
-              raise SystemExit('apply committed shape changed; refusing ambiguous instrumentation')
-          state = state.replace(old, new, 1)
-          old = """      _activeIdentityReady = true;
-              loadStatus = AppLoadStatus.ready;
-            } catch (error, stackTrace) {
-          """
-          new = """      _activeIdentityReady = true;
+          """,
+              1,
+          )
+          state = state.replace(
+              state_anchors['state ready'],
+              """      _activeIdentityReady = true;
               loadStatus = AppLoadStatus.ready;
               startupPerformanceMark('phoenix-state-ready');
             } catch (error, stackTrace) {
-          """
-          if old not in state:
-              raise SystemExit('state-ready shape changed; refusing ambiguous instrumentation')
-          state = state.replace(old, new, 1)
-          old = """    notifyListeners();
-            }
-
-            @override
-            Future<void> activateJourney"""
-          new = """    notifyListeners();
+          """,
+              1,
+          )
+          state = state.replace(
+              state_anchors['final load notification'],
+              """    notifyListeners();
               if (loadStatus == AppLoadStatus.ready) {
                 SchedulerBinding.instance.addPostFrameCallback((_) {
                   startupPerformanceMark('phoenix-first-meaningful-screen');
@@ -211,19 +285,53 @@ jobs:
             }
 
             @override
-            Future<void> activateJourney"""
-          if old not in state:
-              raise SystemExit('final load notification shape changed; refusing ambiguous instrumentation')
-          state = state.replace(old, new, 1)
+            Future<void> activateJourney""",
+              1,
+          )
           state_path.write_text(state, encoding='utf-8')
+
+          expected_marks = (
+              'phoenix-main-entry',
+              'phoenix-language-init-start',
+              'phoenix-language-init-end',
+              'phoenix-runapp-start',
+              'phoenix-first-frame',
+              'phoenix-state-load-start',
+              'phoenix-preferences-start',
+              'phoenix-preferences-ready',
+              'phoenix-noncritical-preferences-restored',
+              'phoenix-critical-read-start',
+              'phoenix-critical-read-end',
+              'phoenix-legacy-build-start',
+              'phoenix-legacy-build-end',
+              'phoenix-apply-committed-start',
+              'phoenix-apply-committed-end',
+              'phoenix-state-ready',
+              'phoenix-first-meaningful-screen',
+          )
+          combined = main_path.read_text(encoding='utf-8') + state_path.read_text(encoding='utf-8')
+          if not probe_path.exists():
+              raise SystemExit('temporary startup probe file was not created')
+          for mark in expected_marks:
+              count = combined.count(mark)
+              print(f'MARK {mark} SOURCE COUNT = {count}')
+              if count != 1:
+                  raise SystemExit(f'expected exactly one source mark for {mark}; got {count}')
+          print('TEMPORARY STARTUP INSTRUMENTATION = PASS')
           PY
 
           cat > "$RUNNER_TEMP/measure_startup.mjs" <<'JS'
-          import puppeteer from process.env.PUPPETEER_CORE_PATH;
+          import { pathToFileURL } from 'node:url';
           import fs from 'node:fs';
+
+          const puppeteerModule = await import(
+            pathToFileURL(process.env.PUPPETEER_CORE_PATH).href,
+          );
+          const puppeteer = puppeteerModule.default ?? puppeteerModule;
 
           const url = process.argv[2];
           const output = process.argv[3];
+          const sourceSha = process.argv[4];
           const chrome = process.env.CHROME_PATH;
           const browser = await puppeteer.launch({
             executablePath: chrome,
@@ -289,6 +397,7 @@ jobs:
                 appStateRestoreMs: diff('phoenix-state-load-start', 'phoenix-state-ready'),
                 sharedPreferencesMs: diff('phoenix-preferences-start', 'phoenix-preferences-ready'),
                 criticalReadMs: diff('phoenix-critical-read-start', 'phoenix-critical-read-end'),
+                legacyBuildMs: diff('phoenix-legacy-build-start', 'phoenix-legacy-build-end'),
                 applyCommittedMs: diff('phoenix-apply-committed-start', 'phoenix-apply-committed-end'),
                 firstContentfulPaintMs: paints['first-contentful-paint'] ?? null,
                 domContentLoadedMs: nav?.domContentLoadedEventEnd ?? null,
@@ -310,7 +419,6 @@ jobs:
             return samples;
           }
 
-          // Warm the HTTP/SW cache once without preserving local state as user state.
           await clearHttpAndWorkerCache();
           await clearLocalState();
           await sample('prewarm', {cold: false, freshState: true});
@@ -319,32 +427,48 @@ jobs:
             cold_new: await runScenario('cold_new', {cold: true, freshState: true}),
             warm_new: await runScenario('warm_new', {cold: false, freshState: true}),
           };
-          // warm_new leaves a valid initialized local state for the existing-user paths.
           all.cold_existing = await runScenario('cold_existing', {cold: true, freshState: false});
           all.warm_existing = await runScenario('warm_existing', {cold: false, freshState: false});
 
-          function median(values) {
-            const clean = values.filter((v) => Number.isFinite(v)).sort((a, b) => a - b);
-            if (!clean.length) return null;
+          function summary(values) {
+            const clean = values.filter((value) => Number.isFinite(value)).sort((a, b) => a - b);
+            if (!clean.length) return {min: null, median: null, max: null};
             const mid = Math.floor(clean.length / 2);
-            return clean.length % 2 ? clean[mid] : (clean[mid - 1] + clean[mid]) / 2;
+            const median = clean.length % 2 ? clean[mid] : (clean[mid - 1] + clean[mid]) / 2;
+            return {min: clean[0], median, max: clean[clean.length - 1]};
           }
+
           const fields = [
             'totalToMeaningfulMs', 'mainEntryToMeaningfulMs', 'preRunAppMs',
             'languageInitMs', 'firstFrameMs', 'appStateRestoreMs', 'sharedPreferencesMs',
-            'criticalReadMs', 'applyCommittedMs', 'firstContentfulPaintMs',
+            'criticalReadMs', 'legacyBuildMs', 'applyCommittedMs', 'firstContentfulPaintMs',
             'domContentLoadedMs', 'loadEventMs', 'responseEndMs',
           ];
+          const stats = {};
           const medians = {};
           for (const [scenario, samples] of Object.entries(all)) {
+            stats[scenario] = Object.fromEntries(
+              fields.map((field) => [field, summary(samples.map((sample) => sample[field]))]),
+            );
             medians[scenario] = Object.fromEntries(
-              fields.map((field) => [field, median(samples.map((sample) => sample[field]))]),
+              fields.map((field) => [field, stats[scenario][field].median]),
             );
           }
-          fs.writeFileSync(output, JSON.stringify({medians, samples: all}, null, 2));
-          console.log(JSON.stringify(medians, null, 2));
+          fs.writeFileSync(
+            output,
+            JSON.stringify({sourceSha, sampleCount: 5, stats, medians, samples: all}, null, 2),
+          );
+          console.log(`SOURCE SHA = ${sourceSha}`);
+          console.log(JSON.stringify(stats, null, 2));
           await browser.close();
           JS
+
+      - name: Preflight every instrumentation anchor
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/instrument_startup.py" "$GITHUB_WORKSPACE/baseline" --check-only
+          python3 "$RUNNER_TEMP/instrument_startup.py" "$GITHUB_WORKSPACE/candidate" --check-only
 
       - name: Benchmark baseline and candidate
         shell: bash
@@ -354,31 +478,40 @@ jobs:
           set -euo pipefail
           CHROME_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           export CHROME_PATH
-          mkdir -p startup-performance-results
 
           benchmark_tree() {
             local tree="$1"
             local label="$2"
+            local source_sha="$3"
+            local actual_sha
+            actual_sha="$(git -C "$tree" rev-parse HEAD)"
+            test "$actual_sha" = "$source_sha"
+            echo "[$label] SOURCE SHA = $source_sha"
+            echo "[$label] UNINSTRUMENTED BUILD SHA IDENTITY = $actual_sha"
+
             pushd "$tree/app" >/dev/null
             flutter pub get
             flutter build web --release
-            python3 - "$label" "$GITHUB_WORKSPACE/startup-performance-results/${label}-bundle.json" <<'PY'
+            python3 - "$label" "$source_sha" "$GITHUB_WORKSPACE/startup-performance-results/${label}-bundle.json" <<'PY'
           import json
           from pathlib import Path
           import sys
-          label, output = sys.argv[1], Path(sys.argv[2])
+
+          label, source_sha, output = sys.argv[1], sys.argv[2], Path(sys.argv[3])
           build = Path('build/web')
           def size(name):
               path = build / name
               return path.stat().st_size if path.exists() else None
-          files = [p for p in build.rglob('*') if p.is_file()]
+          files = [path for path in build.rglob('*') if path.is_file()]
           report = {
               'label': label,
+              'source_sha': source_sha,
+              'instrumented': False,
               'main.dart.js': size('main.dart.js'),
               'flutter_bootstrap.js': size('flutter_bootstrap.js'),
               'flutter.js': size('flutter.js'),
               'asset_manifest': size('assets/AssetManifest.bin'),
-              'total_build_bytes': sum(p.stat().st_size for p in files),
+              'total_build_bytes': sum(path.stat().st_size for path in files),
               'file_count': len(files),
           }
           output.write_text(json.dumps(report, indent=2), encoding='utf-8')
@@ -388,25 +521,32 @@ jobs:
 
             python3 "$RUNNER_TEMP/instrument_startup.py" "$tree"
             pushd "$tree/app" >/dev/null
+            dart format --output=none \
+              lib/main.dart \
+              lib/state/access_controlled_app_state.dart \
+              lib/startup_performance_probe.dart
             flutter build web --release
             python3 -m http.server 8080 --directory build/web >"$RUNNER_TEMP/${label}-server.log" 2>&1 &
             server_pid=$!
             trap 'kill "$server_pid" 2>/dev/null || true' RETURN
             for _ in {1..30}; do
-              curl --fail --silent http://127.0.0.1:8080/ >/dev/null && break
+              if curl --fail --silent http://127.0.0.1:8080/ >/dev/null; then
+                break
+              fi
               sleep 1
             done
             PUPPETEER_CORE_PATH="$PUPPETEER_CORE_PATH" \
               node "$RUNNER_TEMP/measure_startup.mjs" \
               http://127.0.0.1:8080/ \
-              "$GITHUB_WORKSPACE/startup-performance-results/${label}-timings.json"
+              "$GITHUB_WORKSPACE/startup-performance-results/${label}-timings.json" \
+              "$source_sha"
             kill "$server_pid"
             trap - RETURN
             popd >/dev/null
           }
 
-          benchmark_tree "$GITHUB_WORKSPACE/baseline" baseline
-          benchmark_tree "$GITHUB_WORKSPACE/candidate" candidate
+          benchmark_tree "$GITHUB_WORKSPACE/baseline" baseline "$STARTUP_BASELINE_SHA"
+          benchmark_tree "$GITHUB_WORKSPACE/candidate" candidate "$CANDIDATE_SHA"
 
       - name: Summarize startup measurements
         shell: bash
@@ -414,30 +554,36 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
+
           root = Path('startup-performance-results')
-          baseline = json.loads((root / 'baseline-timings.json').read_text())['medians']
-          candidate = json.loads((root / 'candidate-timings.json').read_text())['medians']
-          baseline_bundle = json.loads((root / 'baseline-bundle.json').read_text())
-          candidate_bundle = json.loads((root / 'candidate-bundle.json').read_text())
-          print('STARTUP_BASELINE_SHA =', '${{ env.STARTUP_BASELINE_SHA }}')
-          print('CANDIDATE_SHA =', '${{ github.event.pull_request.head.sha || github.sha }}')
+          baseline = json.loads((root / 'baseline-timings.json').read_text(encoding='utf-8'))
+          candidate = json.loads((root / 'candidate-timings.json').read_text(encoding='utf-8'))
+          baseline_bundle = json.loads((root / 'baseline-bundle.json').read_text(encoding='utf-8'))
+          candidate_bundle = json.loads((root / 'candidate-bundle.json').read_text(encoding='utf-8'))
+          print('STARTUP_BASELINE_SHA =', baseline['sourceSha'])
+          print('MEASURED_CANDIDATE_SHA =', candidate['sourceSha'])
+          print('RUNTIME_DELTA = NONE')
+          print('PERFORMANCE_IMPROVEMENT = NOT YET CLAIMED')
           for scenario in ('cold_new', 'warm_new', 'cold_existing', 'warm_existing'):
               print(f'[{scenario}]')
-              for field, before in baseline[scenario].items():
-                  after = candidate[scenario].get(field)
-                  delta = None if before is None or after is None else after - before
-                  print(f'{field}: before={before} after={after} delta={delta}')
+              for field, before_stats in baseline['stats'][scenario].items():
+                  after_stats = candidate['stats'][scenario][field]
+                  print(
+                      f"{field}: "
+                      f"baseline(min/median/max)={before_stats['min']}/{before_stats['median']}/{before_stats['max']} "
+                      f"candidate-control(min/median/max)={after_stats['min']}/{after_stats['median']}/{after_stats['max']}"
+                  )
           print('[bundle]')
-          for key, before in baseline_bundle.items():
-              if isinstance(before, (int, float)):
-                  after = candidate_bundle.get(key)
-                  delta = None if after is None else after - before
-                  print(f'{key}: before={before} after={after} delta={delta}')
+          for key in (
+              'main.dart.js', 'flutter_bootstrap.js', 'flutter.js', 'asset_manifest',
+              'total_build_bytes', 'file_count',
+          ):
+              print(f'{key}: baseline={baseline_bundle[key]} candidate-control={candidate_bundle[key]}')
           PY
 
       - name: Upload startup audit evidence
         uses: actions/upload-artifact@v4
         with:
-          name: startup-performance-audit
+          name: startup-performance-audit-${{ env.CANDIDATE_SHA }}
           path: startup-performance-results/
           if-no-files-found: error
