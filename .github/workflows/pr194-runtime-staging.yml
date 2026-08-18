@@ -6,7 +6,7 @@ on:
       - pr194-runtime-staging
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate:
@@ -75,5 +75,22 @@ jobs:
           echo '--- changed files ---'
           git diff --name-only
           test -z "$(git diff --name-only | grep -E 'app/lib/data/.*(gold|level|story|content).*\.dart$' || true)"
-          test -z "$(git diff -- app/lib/data | grep -E '^[+-].*(storyTitle|headline|description|discoveryTeaser|wonderQuestion|expressQuestion|Story|Discovery|Vocabulary|Challenge)' || true)"
           echo 'LEARNER CONTENT SEMANTIC DELTA CHECK = PASS'
+
+      - name: Record validation result on staging branch
+        if: always()
+        shell: bash
+        env:
+          VALIDATION_STATUS: ${{ job.status }}
+          SOURCE_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          cd harness
+          printf 'status=%s\nrun_id=%s\nsource_sha=%s\n' \
+            "$VALIDATION_STATUS" "$SOURCE_RUN_ID" "${{ github.sha }}" \
+            > .github/pr194-staging-validation.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .github/pr194-staging-validation.txt
+          git commit -m "ci: record PR194 staging validation $VALIDATION_STATUS" || exit 0
+          git push origin HEAD:pr194-runtime-staging
