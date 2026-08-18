@@ -1,0 +1,81 @@
+name: Mobile Interaction Audit
+
+on:
+  push:
+    branches:
+      - dev/current
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-interaction-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  mobile-interaction:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+
+      - name: Verify exact candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          echo "MOBILE INTERACTION CANDIDATE SHA = $CANDIDATE_SHA"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install browser driver
+        run: npm install --no-save --prefix "$RUNNER_TEMP/mobile-interaction-node" puppeteer-core@24
+
+      - name: Build release web
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd app
+          flutter pub get
+          flutter build web --release
+
+      - name: Run mobile post-cover hit-test regression
+        shell: bash
+        env:
+          PUPPETEER_CORE_PATH: ${{ runner.temp }}/mobile-interaction-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
+        run: |
+          set -euo pipefail
+          CHROME_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          export CHROME_PATH
+          python3 -m http.server 8080 --directory app/build/web >"$RUNNER_TEMP/mobile-interaction-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for _ in {1..30}; do
+            curl --fail --silent http://127.0.0.1:8080/ >/dev/null && break
+            sleep 1
+          done
+          node .github/scripts/verify_mobile_interaction.mjs \
+            http://127.0.0.1:8080/ \
+            "$CANDIDATE_SHA"
+          kill "$server_pid"
+          trap - EXIT
+
+      - name: Enforce learner-content firewall
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/assert_content_delta.py --require-none
+          echo 'LEARNER CONTENT DELTA = NONE'
