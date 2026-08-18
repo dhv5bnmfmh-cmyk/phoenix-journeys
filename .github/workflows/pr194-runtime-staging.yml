@@ -44,6 +44,18 @@ jobs:
           if text.count(old) != 1:
               raise SystemExit(f'Kaiping lazy wrapper anchor count={text.count(old)}')
           path.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          access = Path('candidate/app/lib/state/access_controlled_app_state.dart')
+          value = access.read_text(encoding='utf-8')
+          old_any = 'dailyJourneyExperiences.any((journey) => journey.id == journeyId)'
+          if value.count(old_any) != 1:
+              raise SystemExit(f'access any() heavy-catalog anchor count={value.count(old_any)}')
+          value = value.replace(old_any, 'dailyJourneyIds.contains(journeyId)', 1)
+          old_set = '<String>{for (final journey in dailyJourneyExperiences) journey.id}'
+          if value.count(old_set) != 1:
+              raise SystemExit(f'access set heavy-catalog anchor count={value.count(old_set)}')
+          value = value.replace(old_set, '<String>{...dailyJourneyIds}', 1)
+          access.write_text(value, encoding='utf-8')
           PY
           if grep -n "dailyJourneyExperiences" candidate/app/lib/state/access_controlled_app_state.dart; then
             echo 'ACCESS CONTROL STILL TOUCHES HEAVY DAILY CATALOG'
