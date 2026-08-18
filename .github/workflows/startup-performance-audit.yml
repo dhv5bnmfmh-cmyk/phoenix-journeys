@@ -28,6 +28,7 @@ jobs:
         with:
           ref: ${{ env.CANDIDATE_SHA }}
           path: candidate
+          fetch-depth: 0
       - name: Check out exact startup baseline
         uses: actions/checkout@v4
         with:
