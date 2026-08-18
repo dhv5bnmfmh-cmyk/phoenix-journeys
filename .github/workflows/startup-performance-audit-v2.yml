@@ -1,0 +1,185 @@
+name: Startup Performance Audit
+
+on:
+  push:
+    branches:
+      - dev/current
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: startup-performance-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  STARTUP_BASELINE_SHA: eb4e36e6e4246b0e448ecc151f01a7bb3d272c2d
+  CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+      - name: Check out exact startup baseline
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.STARTUP_BASELINE_SHA }}
+          path: baseline
+
+      - name: Verify exact identities and runtime delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p startup-performance-results
+          test "$(git -C candidate rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git -C baseline rev-parse HEAD)" = "$STARTUP_BASELINE_SHA"
+          git -C candidate diff --name-only "$STARTUP_BASELINE_SHA" "$CANDIDATE_SHA" > startup-performance-results/committed-delta.txt
+          if ! grep -q '^app/lib\|^app/web/' startup-performance-results/committed-delta.txt; then
+            echo 'RUNTIME DELTA = NONE'
+            exit 1
+          fi
+          echo 'RUNTIME DELTA != NONE'
+          cat startup-performance-results/committed-delta.txt
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install benchmark browser driver
+        run: npm install --no-save --prefix "$RUNNER_TEMP/startup-audit-node" puppeteer-core@24
+
+      - name: Preflight dual-architecture benchmark harness
+        shell: bash
+        env:
+          PUPPETEER_CORE_PATH: ${{ runner.temp }}/startup-audit-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
+        run: |
+          set -euo pipefail
+          python3 -m py_compile candidate/.github/scripts/startup_instrument.py
+          node --check candidate/.github/scripts/measure_startup.mjs
+          python3 candidate/.github/scripts/startup_instrument.py "$GITHUB_WORKSPACE/baseline" --check-only
+          python3 candidate/.github/scripts/startup_instrument.py "$GITHUB_WORKSPACE/candidate" --check-only
+          rm -rf "$RUNNER_TEMP/startup-preflight"
+          cp -a candidate "$RUNNER_TEMP/startup-preflight"
+          python3 candidate/.github/scripts/startup_instrument.py "$RUNNER_TEMP/startup-preflight"
+          pushd "$RUNNER_TEMP/startup-preflight/app" >/dev/null
+          flutter pub get
+          flutter build web --release
+          popd >/dev/null
+          echo 'INSTRUMENTED REMEDIATED RELEASE BUILD PREFLIGHT = PASS'
+
+      - name: Benchmark exact baseline and remediated candidate
+        shell: bash
+        env:
+          PUPPETEER_CORE_PATH: ${{ runner.temp }}/startup-audit-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
+        run: |
+          set -euo pipefail
+          CHROME_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          export CHROME_PATH
+          benchmark_tree() {
+            local tree="$1" label="$2" source_sha="$3"
+            test "$(git -C "$tree" rev-parse HEAD)" = "$source_sha"
+            pushd "$tree/app" >/dev/null
+            flutter pub get
+            flutter build web --release
+            python3 - "$label" "$source_sha" "$GITHUB_WORKSPACE/startup-performance-results/${label}-bundle.json" <<'PY'
+          import json, sys
+          from pathlib import Path
+          label, source_sha, output = sys.argv[1], sys.argv[2], Path(sys.argv[3])
+          build = Path('build/web')
+          files = [p for p in build.rglob('*') if p.is_file()]
+          def size(name):
+              p = build / name
+              return p.stat().st_size if p.exists() else None
+          report = {
+              'label': label, 'source_sha': source_sha, 'instrumented': False,
+              'main.dart.js': size('main.dart.js'),
+              'flutter_bootstrap.js': size('flutter_bootstrap.js'),
+              'flutter.js': size('flutter.js'),
+              'asset_manifest': size('assets/AssetManifest.bin'),
+              'total_build_bytes': sum(p.stat().st_size for p in files),
+              'file_count': len(files),
+          }
+          output.write_text(json.dumps(report, indent=2), encoding='utf-8')
+          print(json.dumps(report, indent=2))
+          PY
+            popd >/dev/null
+            python3 candidate/.github/scripts/startup_instrument.py "$tree"
+            pushd "$tree/app" >/dev/null
+            flutter build web --release
+            python3 -m http.server 8080 --directory build/web >"$RUNNER_TEMP/${label}-server.log" 2>&1 &
+            server_pid=$!
+            trap 'kill "$server_pid" 2>/dev/null || true' RETURN
+            for _ in {1..30}; do
+              curl --fail --silent http://127.0.0.1:8080/ >/dev/null && break
+              sleep 1
+            done
+            node "$GITHUB_WORKSPACE/candidate/.github/scripts/measure_startup.mjs" \
+              http://127.0.0.1:8080/ \
+              "$GITHUB_WORKSPACE/startup-performance-results/${label}-timings.json" \
+              "$source_sha"
+            kill "$server_pid"
+            trap - RETURN
+            popd >/dev/null
+          }
+          benchmark_tree "$GITHUB_WORKSPACE/baseline" baseline "$STARTUP_BASELINE_SHA"
+          benchmark_tree "$GITHUB_WORKSPACE/candidate" candidate "$CANDIDATE_SHA"
+
+      - name: Enforce material improvement and summarize
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('startup-performance-results')
+          before = json.loads((root/'baseline-timings.json').read_text())
+          after = json.loads((root/'candidate-timings.json').read_text())
+          bb = json.loads((root/'baseline-bundle.json').read_text())
+          ab = json.loads((root/'candidate-bundle.json').read_text())
+          scenarios = ('cold_new','warm_new','cold_existing','warm_existing')
+          key_fields = ('totalToMeaningfulMs','firstFrameMs','appStateDailyJourneyInitMs','locationBindingsMs','coverVisibleMs','postFlightCoverStallMs','journeyOpenStoryUsableMs')
+          failed = []
+          for scenario in scenarios:
+              print(f'[{scenario}]')
+              for field in key_fields:
+                  b = before['stats'][scenario][field]['median']
+                  a = after['stats'][scenario][field]['median']
+                  print(f'{field}: BEFORE={b} AFTER={a}')
+              b = before['stats'][scenario]['totalToMeaningfulMs']['median']
+              a = after['stats'][scenario]['totalToMeaningfulMs']['median']
+              if not (b and a is not None and a <= b * 0.70):
+                  failed.append(f'{scenario}: first meaningful improvement <30%')
+              catalog = after['stats'][scenario]['appStateDailyJourneyInitMs']['median']
+              if catalog is None or catalog > 3000:
+                  failed.append(f'{scenario}: daily Journey init still too expensive ({catalog})')
+              cover = after['stats'][scenario]['coverVisibleMs']['median']
+              if cover is None or cover > 7000:
+                  failed.append(f'{scenario}: cover still too long ({cover})')
+              opened = after['stats'][scenario]['journeyOpenStoryUsableMs']['median']
+              if opened is None or opened > 5000:
+                  failed.append(f'{scenario}: Journey open shifted startup delay ({opened})')
+          print('[bundle]')
+          for key in ('main.dart.js','flutter_bootstrap.js','flutter.js','asset_manifest','total_build_bytes','file_count'):
+              print(f'{key}: BEFORE={bb[key]} AFTER={ab[key]} DELTA={(ab[key]-bb[key]) if isinstance(bb[key], int) and isinstance(ab[key], int) else None}')
+          if failed:
+              print('PERFORMANCE ACCEPTANCE = FAIL')
+              for item in failed: print('FAIL:', item)
+              raise SystemExit(1)
+          print('PERFORMANCE ACCEPTANCE = PASS')
+          PY
+
+      - name: Upload startup audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: startup-performance-audit-${{ env.CANDIDATE_SHA }}
+          path: startup-performance-results/
+          if-no-files-found: error
