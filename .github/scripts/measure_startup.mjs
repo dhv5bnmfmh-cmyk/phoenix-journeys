@@ -19,6 +19,39 @@ const client = await page.createCDPSession();
 await client.send('Network.enable');
 await client.send('Network.setCacheDisabled', {cacheDisabled: false});
 
+await page.evaluateOnNewDocument(() => {
+  const mark = (name) => {
+    try {
+      if (!performance.getEntriesByName(name).length) performance.mark(name);
+    } catch (_) {}
+  };
+  let coverSeen = false;
+  let travelerBound = false;
+  const inspect = () => {
+    const cover = document.getElementById('phoenix-loading');
+    if (cover && !coverSeen) {
+      coverSeen = true;
+      mark('benchmark-cover-created');
+    }
+    const traveler = cover?.querySelector('.phoenix-time-traveler');
+    if (traveler && !travelerBound) {
+      travelerBound = true;
+      traveler.addEventListener('animationstart', (event) => {
+        if (event.animationName === 'phoenix-time-flight-v2') mark('benchmark-flight-start');
+      }, {passive: true});
+      traveler.addEventListener('animationend', (event) => {
+        if (event.animationName === 'phoenix-time-flight-v2') mark('benchmark-flight-end');
+      }, {passive: true});
+    }
+    if (coverSeen && !cover) mark('benchmark-cover-removed');
+  };
+  const observer = new MutationObserver(inspect);
+  document.addEventListener('DOMContentLoaded', () => {
+    observer.observe(document.documentElement, {childList: true, subtree: true});
+    inspect();
+  }, {once: true});
+});
+
 async function clearHttpAndWorkerCache() {
   await client.send('Network.clearBrowserCache');
   await client.send('Storage.clearDataForOrigin', {
@@ -42,6 +75,19 @@ async function sample(label, {cold, freshState}) {
     () => performance.getEntriesByName('phoenix-first-meaningful-screen').length > 0,
     {timeout: 60000},
   );
+  await page.waitForFunction(
+    () => performance.getEntriesByName('benchmark-cover-removed').length > 0,
+    {timeout: 60000},
+  );
+
+  await page.evaluate(() => {
+    window.dispatchEvent(new Event('phoenix-benchmark-open-current-journey'));
+  });
+  await page.waitForFunction(
+    () => performance.getEntriesByName('phoenix-journey-story-usable').length > 0,
+    {timeout: 60000},
+  );
+
   const result = await page.evaluate(() => {
     const marks = Object.fromEntries(
       performance.getEntriesByType('mark').map((entry) => [entry.name, entry.startTime]),
@@ -50,22 +96,14 @@ async function sample(label, {cold, freshState}) {
     const paints = Object.fromEntries(
       performance.getEntriesByType('paint').map((entry) => [entry.name, entry.startTime]),
     );
-    const resources = performance.getEntriesByType('resource');
-    const wanted = ['flutter_bootstrap.js', 'main.dart.js', 'canvaskit.js', 'canvaskit.wasm'];
-    const startupResources = {};
-    for (const wantedName of wanted) {
-      const entry = resources.find((item) => item.name.includes(wantedName));
-      if (entry) {
-        startupResources[wantedName] = {
-          durationMs: entry.duration,
-          transferSize: entry.transferSize,
-          encodedBodySize: entry.encodedBodySize,
-        };
-      }
-    }
     const diff = (a, b) => marks[a] != null && marks[b] != null ? marks[b] - marks[a] : null;
+    const coverCreated = marks['benchmark-cover-created'] ?? 0;
+    const coverRemoved = marks['benchmark-cover-removed'];
+    const flightStart = marks['benchmark-flight-start'];
+    const flightEnd = marks['benchmark-flight-end'];
+    const appReady = marks['phoenix-first-meaningful-screen'];
     return {
-      totalToMeaningfulMs: marks['phoenix-first-meaningful-screen'],
+      totalToMeaningfulMs: appReady,
       mainEntryToMeaningfulMs: diff('phoenix-main-entry', 'phoenix-first-meaningful-screen'),
       preRunAppMs: diff('phoenix-main-entry', 'phoenix-runapp-start'),
       languageInitMs: diff('phoenix-language-init-start', 'phoenix-language-init-end'),
@@ -85,12 +123,18 @@ async function sample(label, {cold, freshState}) {
       locationBindingsMs: diff('phoenix-location-bindings-start', 'phoenix-location-bindings-end'),
       applyCommittedMs: diff('phoenix-apply-committed-start', 'phoenix-apply-committed-end'),
       restoreEligibilityMs: diff('phoenix-restore-eligibility-start', 'phoenix-restore-eligibility-end'),
+      coverVisibleMs: coverRemoved != null ? coverRemoved - coverCreated : null,
+      phoenixFlightMs: flightStart != null && flightEnd != null ? flightEnd - flightStart : null,
+      postFlightCoverStallMs: flightEnd != null && coverRemoved != null ? Math.max(0, coverRemoved - flightEnd) : null,
+      appReadyBeforeFlightEndMs: appReady != null && flightEnd != null ? flightEnd - appReady : null,
+      intentionalMinimumWaitMs: diff('phoenix-minimum-duration-wait-start', 'phoenix-minimum-duration-wait-end'),
+      runtimeWaitAfterFlightMs: flightEnd != null && appReady != null ? Math.max(0, appReady - flightEnd) : null,
+      journeyOpenContentReadyMs: diff('phoenix-journey-open-start', 'phoenix-journey-content-ready'),
+      journeyOpenStoryUsableMs: diff('phoenix-journey-open-start', 'phoenix-journey-story-usable'),
       firstContentfulPaintMs: paints['first-contentful-paint'] ?? null,
       domContentLoadedMs: nav?.domContentLoadedEventEnd ?? null,
       loadEventMs: nav?.loadEventEnd ?? null,
       responseEndMs: nav?.responseEnd ?? null,
-      transferSize: nav?.transferSize ?? null,
-      startupResources,
       marks,
     };
   });
@@ -106,7 +150,6 @@ async function runScenario(label, options, count = 5) {
 await clearHttpAndWorkerCache();
 await clearLocalState();
 await sample('prewarm', {cold: false, freshState: true});
-
 const all = {
   cold_new: await runScenario('cold_new', {cold: true, freshState: true}),
   warm_new: await runScenario('warm_new', {cold: false, freshState: true}),
@@ -128,23 +171,18 @@ const fields = [
   'dailyCatalogFirstTouchMs', 'dailyCatalogIndexLookupMs', 'appStateRestoreMs',
   'sharedPreferencesMs', 'criticalReadMs', 'legacyPathMs', 'legacyBuildMs',
   'legacyValidateMs', 'commitInitialMs', 'snapshotDecodeValidateMs', 'locationBindingsMs',
-  'applyCommittedMs', 'restoreEligibilityMs', 'firstContentfulPaintMs', 'domContentLoadedMs',
-  'loadEventMs', 'responseEndMs',
+  'applyCommittedMs', 'restoreEligibilityMs', 'coverVisibleMs', 'phoenixFlightMs',
+  'postFlightCoverStallMs', 'appReadyBeforeFlightEndMs', 'intentionalMinimumWaitMs',
+  'runtimeWaitAfterFlightMs', 'journeyOpenContentReadyMs', 'journeyOpenStoryUsableMs',
+  'firstContentfulPaintMs', 'domContentLoadedMs', 'loadEventMs', 'responseEndMs',
 ];
 const stats = {};
 const medians = {};
 for (const [scenario, samples] of Object.entries(all)) {
-  stats[scenario] = Object.fromEntries(
-    fields.map((field) => [field, summary(samples.map((sample) => sample[field]))]),
-  );
-  medians[scenario] = Object.fromEntries(
-    fields.map((field) => [field, stats[scenario][field].median]),
-  );
+  stats[scenario] = Object.fromEntries(fields.map((field) => [field, summary(samples.map((sample) => sample[field]))]));
+  medians[scenario] = Object.fromEntries(fields.map((field) => [field, stats[scenario][field].median]));
 }
-fs.writeFileSync(
-  output,
-  JSON.stringify({sourceSha, sampleCount: 5, stats, medians, samples: all}, null, 2),
-);
+fs.writeFileSync(output, JSON.stringify({sourceSha, sampleCount: 5, stats, medians, samples: all}, null, 2));
 console.log(`SOURCE SHA = ${sourceSha}`);
 console.log(JSON.stringify(stats, null, 2));
 await browser.close();

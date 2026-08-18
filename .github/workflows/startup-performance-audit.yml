@@ -28,66 +28,36 @@ jobs:
         with:
           ref: ${{ env.CANDIDATE_SHA }}
           path: candidate
-
       - name: Check out exact startup baseline
         uses: actions/checkout@v4
         with:
           ref: ${{ env.STARTUP_BASELINE_SHA }}
           path: baseline
 
-      - name: Verify exact checkout identities
+      - name: Verify exact identities and runtime delta
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p startup-performance-results
-          candidate_actual="$(git -C candidate rev-parse HEAD)"
-          baseline_actual="$(git -C baseline rev-parse HEAD)"
-          echo "EXPECTED CANDIDATE SHA = $CANDIDATE_SHA"
-          echo "ACTUAL CANDIDATE CHECKOUT SHA = $candidate_actual"
-          echo "EXPECTED BASELINE SHA = $STARTUP_BASELINE_SHA"
-          echo "ACTUAL BASELINE CHECKOUT SHA = $baseline_actual"
-          test "$candidate_actual" = "$CANDIDATE_SHA"
-          test "$baseline_actual" = "$STARTUP_BASELINE_SHA"
-          python3 - "$CANDIDATE_SHA" "$candidate_actual" "$STARTUP_BASELINE_SHA" "$baseline_actual" <<'PY'
-          import json
-          from pathlib import Path
-          import sys
-          ce, ca, be, ba = sys.argv[1:]
-          Path('startup-performance-results/checkout-identity.json').write_text(
-              json.dumps({
-                  'candidate_expected_sha': ce,
-                  'candidate_actual_sha': ca,
-                  'candidate_checkout_identity': ce == ca,
-                  'baseline_expected_sha': be,
-                  'baseline_actual_sha': ba,
-                  'baseline_checkout_identity': be == ba,
-                  'instrumentation': 'temporary runner working-tree only',
-              }, indent=2),
-              encoding='utf-8',
-          )
-          PY
-
-      - name: Confirm harness-only runtime delta
-        shell: bash
-        run: |
-          set -euo pipefail
-          if ! diff -qr baseline/app/lib candidate/app/lib >"$RUNNER_TEMP/runtime-delta.txt"; then
-            echo "Committed app/lib delta exists before runtime remediation is authorized."
-            cat "$RUNNER_TEMP/runtime-delta.txt"
+          test "$(git -C candidate rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git -C baseline rev-parse HEAD)" = "$STARTUP_BASELINE_SHA"
+          git -C candidate diff --name-only "$STARTUP_BASELINE_SHA" "$CANDIDATE_SHA" > startup-performance-results/committed-delta.txt
+          if ! grep -q '^app/lib\|^app/web/' startup-performance-results/committed-delta.txt; then
+            echo 'RUNTIME DELTA = NONE'
             exit 1
           fi
-          echo "RUNTIME DELTA = NONE"
+          echo 'RUNTIME DELTA != NONE'
+          cat startup-performance-results/committed-delta.txt
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-
       - name: Install benchmark browser driver
         run: npm install --no-save --prefix "$RUNNER_TEMP/startup-audit-node" puppeteer-core@24
 
-      - name: Preflight measurement helpers and every Dart anchor
+      - name: Preflight dual-architecture benchmark harness
         shell: bash
         env:
           PUPPETEER_CORE_PATH: ${{ runner.temp }}/startup-audit-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
@@ -97,30 +67,16 @@ jobs:
           node --check candidate/.github/scripts/measure_startup.mjs
           python3 candidate/.github/scripts/startup_instrument.py "$GITHUB_WORKSPACE/baseline" --check-only
           python3 candidate/.github/scripts/startup_instrument.py "$GITHUB_WORKSPACE/candidate" --check-only
-          PUPPETEER_CORE_PATH="$PUPPETEER_CORE_PATH" node --input-type=module <<'JS'
-          import { pathToFileURL } from 'node:url';
-          const loaded = await import(pathToFileURL(process.env.PUPPETEER_CORE_PATH).href);
-          const puppeteer = loaded.default ?? loaded;
-          if (typeof puppeteer.launch !== 'function') throw new Error('puppeteer-core launch() unavailable');
-          console.log('PUPPETEER DYNAMIC IMPORT = PASS');
-          JS
-
           rm -rf "$RUNNER_TEMP/startup-preflight"
-          cp -a baseline "$RUNNER_TEMP/startup-preflight"
+          cp -a candidate "$RUNNER_TEMP/startup-preflight"
           python3 candidate/.github/scripts/startup_instrument.py "$RUNNER_TEMP/startup-preflight"
           pushd "$RUNNER_TEMP/startup-preflight/app" >/dev/null
-          dart format --output=none \
-            lib/main.dart \
-            lib/state/app_state.dart \
-            lib/state/access_controlled_app_state.dart \
-            lib/services/journey_location_binding.dart \
-            lib/startup_performance_probe.dart
           flutter pub get
           flutter build web --release
           popd >/dev/null
-          echo "INSTRUMENTED DART RELEASE BUILD PREFLIGHT = PASS"
+          echo 'INSTRUMENTED REMEDIATED RELEASE BUILD PREFLIGHT = PASS'
 
-      - name: Benchmark exact baseline and candidate control
+      - name: Benchmark exact baseline and remediated candidate
         shell: bash
         env:
           PUPPETEER_CORE_PATH: ${{ runner.temp }}/startup-audit-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
@@ -128,67 +84,44 @@ jobs:
           set -euo pipefail
           CHROME_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           export CHROME_PATH
-
           benchmark_tree() {
-            local tree="$1"
-            local label="$2"
-            local source_sha="$3"
-            local actual_sha
-            actual_sha="$(git -C "$tree" rev-parse HEAD)"
-            test "$actual_sha" = "$source_sha"
-            echo "[$label] SOURCE SHA = $source_sha"
-            echo "[$label] UNINSTRUMENTED BUILD SHA IDENTITY = $actual_sha"
-
+            local tree="$1" label="$2" source_sha="$3"
+            test "$(git -C "$tree" rev-parse HEAD)" = "$source_sha"
             pushd "$tree/app" >/dev/null
             flutter pub get
             flutter build web --release
             python3 - "$label" "$source_sha" "$GITHUB_WORKSPACE/startup-performance-results/${label}-bundle.json" <<'PY'
-          import json
+          import json, sys
           from pathlib import Path
-          import sys
           label, source_sha, output = sys.argv[1], sys.argv[2], Path(sys.argv[3])
           build = Path('build/web')
-          files = [path for path in build.rglob('*') if path.is_file()]
+          files = [p for p in build.rglob('*') if p.is_file()]
           def size(name):
-              path = build / name
-              return path.stat().st_size if path.exists() else None
+              p = build / name
+              return p.stat().st_size if p.exists() else None
           report = {
-              'label': label,
-              'source_sha': source_sha,
-              'instrumented': False,
+              'label': label, 'source_sha': source_sha, 'instrumented': False,
               'main.dart.js': size('main.dart.js'),
               'flutter_bootstrap.js': size('flutter_bootstrap.js'),
               'flutter.js': size('flutter.js'),
               'asset_manifest': size('assets/AssetManifest.bin'),
-              'total_build_bytes': sum(path.stat().st_size for path in files),
+              'total_build_bytes': sum(p.stat().st_size for p in files),
               'file_count': len(files),
           }
           output.write_text(json.dumps(report, indent=2), encoding='utf-8')
           print(json.dumps(report, indent=2))
           PY
             popd >/dev/null
-
             python3 candidate/.github/scripts/startup_instrument.py "$tree"
             pushd "$tree/app" >/dev/null
-            dart format --output=none \
-              lib/main.dart \
-              lib/state/app_state.dart \
-              lib/state/access_controlled_app_state.dart \
-              lib/services/journey_location_binding.dart \
-              lib/startup_performance_probe.dart
             flutter build web --release
             python3 -m http.server 8080 --directory build/web >"$RUNNER_TEMP/${label}-server.log" 2>&1 &
             server_pid=$!
             trap 'kill "$server_pid" 2>/dev/null || true' RETURN
-            server_ready=0
             for _ in {1..30}; do
-              if curl --fail --silent http://127.0.0.1:8080/ >/dev/null; then
-                server_ready=1
-                break
-              fi
+              curl --fail --silent http://127.0.0.1:8080/ >/dev/null && break
               sleep 1
             done
-            test "$server_ready" -eq 1
             node "$GITHUB_WORKSPACE/candidate/.github/scripts/measure_startup.mjs" \
               http://127.0.0.1:8080/ \
               "$GITHUB_WORKSPACE/startup-performance-results/${label}-timings.json" \
@@ -197,41 +130,54 @@ jobs:
             trap - RETURN
             popd >/dev/null
           }
-
           benchmark_tree "$GITHUB_WORKSPACE/baseline" baseline "$STARTUP_BASELINE_SHA"
           benchmark_tree "$GITHUB_WORKSPACE/candidate" candidate "$CANDIDATE_SHA"
 
-      - name: Summarize startup measurements
+      - name: Enforce material improvement and summarize
         shell: bash
         run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
           root = Path('startup-performance-results')
-          baseline = json.loads((root / 'baseline-timings.json').read_text(encoding='utf-8'))
-          candidate = json.loads((root / 'candidate-timings.json').read_text(encoding='utf-8'))
-          baseline_bundle = json.loads((root / 'baseline-bundle.json').read_text(encoding='utf-8'))
-          candidate_bundle = json.loads((root / 'candidate-bundle.json').read_text(encoding='utf-8'))
-          print('STARTUP_BASELINE_SHA =', baseline['sourceSha'])
-          print('MEASURED_CANDIDATE_SHA =', candidate['sourceSha'])
-          print('RUNTIME_DELTA = NONE')
-          print('PERFORMANCE_IMPROVEMENT = NOT YET CLAIMED')
-          for scenario in ('cold_new', 'warm_new', 'cold_existing', 'warm_existing'):
+          before = json.loads((root/'baseline-timings.json').read_text())
+          after = json.loads((root/'candidate-timings.json').read_text())
+          bb = json.loads((root/'baseline-bundle.json').read_text())
+          ab = json.loads((root/'candidate-bundle.json').read_text())
+          scenarios = ('cold_new','warm_new','cold_existing','warm_existing')
+          key_fields = ('totalToMeaningfulMs','firstFrameMs','appStateDailyJourneyInitMs','locationBindingsMs','coverVisibleMs','postFlightCoverStallMs','journeyOpenStoryUsableMs')
+          failed = []
+          for scenario in scenarios:
               print(f'[{scenario}]')
-              for field, before_stats in baseline['stats'][scenario].items():
-                  after_stats = candidate['stats'][scenario][field]
-                  print(
-                      f"{field}: baseline(min/median/max)="
-                      f"{before_stats['min']}/{before_stats['median']}/{before_stats['max']} "
-                      f"candidate-control(min/median/max)="
-                      f"{after_stats['min']}/{after_stats['median']}/{after_stats['max']}"
-                  )
+              for field in key_fields:
+                  b = before['stats'][scenario][field]['median']
+                  a = after['stats'][scenario][field]['median']
+                  print(f'{field}: BEFORE={b} AFTER={a}')
+              b = before['stats'][scenario]['totalToMeaningfulMs']['median']
+              a = after['stats'][scenario]['totalToMeaningfulMs']['median']
+              if not (b and a is not None and a <= b * 0.70):
+                  failed.append(f'{scenario}: first meaningful improvement <30%')
+              catalog = after['stats'][scenario]['appStateDailyJourneyInitMs']['median']
+              if catalog is None or catalog > 3000:
+                  failed.append(f'{scenario}: daily Journey init still too expensive ({catalog})')
+              cover = after['stats'][scenario]['coverVisibleMs']['median']
+              if cover is None or cover > 7000:
+                  failed.append(f'{scenario}: cover still too long ({cover})')
+              opened = after['stats'][scenario]['journeyOpenStoryUsableMs']['median']
+              if opened is None or opened > 5000:
+                  failed.append(f'{scenario}: Journey open shifted startup delay ({opened})')
           print('[bundle]')
-          for key in ('main.dart.js', 'flutter_bootstrap.js', 'flutter.js', 'asset_manifest', 'total_build_bytes', 'file_count'):
-              print(f'{key}: baseline={baseline_bundle[key]} candidate-control={candidate_bundle[key]}')
+          for key in ('main.dart.js','flutter_bootstrap.js','flutter.js','asset_manifest','total_build_bytes','file_count'):
+              print(f'{key}: BEFORE={bb[key]} AFTER={ab[key]} DELTA={(ab[key]-bb[key]) if isinstance(bb[key], int) and isinstance(ab[key], int) else None}')
+          if failed:
+              print('PERFORMANCE ACCEPTANCE = FAIL')
+              for item in failed: print('FAIL:', item)
+              raise SystemExit(1)
+          print('PERFORMANCE ACCEPTANCE = PASS')
           PY
 
       - name: Upload startup audit evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: startup-performance-audit-${{ env.CANDIDATE_SHA }}

@@ -116,9 +116,7 @@ class AccessControlledAppState extends AppState {
       journeyAccessMode == JourneyAccessMode.developmentExperience;
 
   List<String> get eligibleRegularJourneyIds =>
-      List<String>.unmodifiable(
-        <String>{for (final journey in dailyJourneyExperiences) journey.id},
-      );
+      List<String>.unmodifiable(dailyJourneyIds);
 
   DailyJourneyAssignment get dailyAssignment {
     if (!_isValidExplorerSeed(localExplorerSeed)) {
@@ -1269,7 +1267,7 @@ class AccessControlledAppState extends AppState {
           journeyNarrationOffset > 0);
 
   bool _isRegularJourneyId(String journeyId) =>
-      dailyJourneyExperiences.any((journey) => journey.id == journeyId);
+      dailyJourneyIds.contains(journeyId);
 
   String _accessDenialReason(String journeyId) {
     if (_isRegularJourneyId(journeyId)) {
@@ -2059,5 +2057,5 @@ extension JourneyAccessAppState on AppState {
 
   Set<String> get releasedDailyJourneyIds =>
       _accessControlledState?.releasedDailyJourneyIds ??
-      <String>{for (final journey in dailyJourneyExperiences) journey.id};
+      <String>{...dailyJourneyIds};
 }

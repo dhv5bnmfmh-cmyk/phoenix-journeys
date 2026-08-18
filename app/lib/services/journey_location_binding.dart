@@ -233,61 +233,81 @@ final Map<String, JourneyLocationBinding> journeyLocationBindings =
 final JourneyLocationCoverage journeyLocationCoverage =
     JourneyLocationCoverage.fromBindings(journeyLocationBindings.values);
 
-Map<String, JourneyLocationBinding> _buildJourneyLocationBindings() {
+final Map<String, JourneyLocationBinding> _journeyLocationBindingCache =
+    <String, JourneyLocationBinding>{};
+
+JourneyLocationBinding _buildJourneyLocationBinding(
+  DailyJourneyExperience journey,
+) {
+  final node = _journeyGeoAgent.find(journey.geoNodeId);
+  if (node == null) {
+    throw StateError(
+      'Journey ${journey.id} references unknown GeoNode: ${journey.geoNodeId}.',
+    );
+  }
+  if (!node.isPlace || node.latitude == null || node.longitude == null) {
+    throw StateError(
+      'Journey ${journey.id} must bind to a place GeoNode with coordinates.',
+    );
+  }
+
+  final geoPath = _journeyGeoAgent.pathTo(node.id);
+  if (geoPath.isEmpty || geoPath.last.id != node.id) {
+    throw StateError('Incomplete GeoNode path for Journey ${journey.id}.');
+  }
+
+  final countryNodes = geoPath.where(
+    (pathNode) => pathNode.kind == GeoNodeKind.country,
+  );
+  if (countryNodes.length != 1) {
+    throw StateError(
+      'Journey ${journey.id} must have exactly one country ancestor.',
+    );
+  }
+
+  return JourneyLocationBinding(
+    journey: journey,
+    placeNode: node,
+    geoPath: List<GeoNode>.unmodifiable(geoPath),
+  );
+}
+
+Map<String, JourneyLocationBinding> buildJourneyLocationBindingsForValidation(
+  Iterable<DailyJourneyExperience> journeys,
+) {
   final bindings = <String, JourneyLocationBinding>{};
   final paths = <String>{};
   final geoNodeIds = <String>{};
 
-  for (final journey in allJourneyExperiences) {
-    final node = _journeyGeoAgent.find(journey.content.geoNodeId);
-    if (node == null) {
+  for (final journey in journeys) {
+    final binding = _buildJourneyLocationBinding(journey);
+    if (!paths.add(binding.locationPath)) {
       throw StateError(
-        'Journey ${journey.id} references unknown GeoNode: '
-        '${journey.content.geoNodeId}.',
+        'Duplicate Journey location path: ${binding.locationPath}.',
       );
     }
-    if (!node.isPlace || node.latitude == null || node.longitude == null) {
+    if (!geoNodeIds.add(binding.geoNodeId)) {
       throw StateError(
-        'Journey ${journey.id} must bind to a place GeoNode with coordinates.',
+        'Duplicate Journey GeoNode binding: ${binding.geoNodeId}.',
       );
     }
-    if (!paths.add(journey.locationPath)) {
-      throw StateError(
-        'Duplicate Journey location path: ${journey.locationPath}.',
-      );
+    if (bindings.containsKey(journey.id)) {
+      throw StateError('Duplicate Journey ID: ${journey.id}.');
     }
-    if (!geoNodeIds.add(node.id)) {
-      throw StateError('Duplicate Journey GeoNode binding: ${node.id}.');
-    }
-
-    final geoPath = _journeyGeoAgent.pathTo(node.id);
-    if (geoPath.isEmpty || geoPath.last.id != node.id) {
-      throw StateError('Incomplete GeoNode path for Journey ${journey.id}.');
-    }
-
-    final countryNodes = geoPath.where(
-      (pathNode) => pathNode.kind == GeoNodeKind.country,
-    );
-    if (countryNodes.length != 1) {
-      throw StateError(
-        'Journey ${journey.id} must have exactly one country ancestor.',
-      );
-    }
-
-    bindings[journey.id] = JourneyLocationBinding(
-      journey: journey,
-      placeNode: node,
-      geoPath: List<GeoNode>.unmodifiable(geoPath),
-    );
+    bindings[journey.id] = binding;
   }
 
   return Map<String, JourneyLocationBinding>.unmodifiable(bindings);
 }
 
+Map<String, JourneyLocationBinding> _buildJourneyLocationBindings() =>
+    buildJourneyLocationBindingsForValidation(allJourneyExperiences);
+
 JourneyLocationBinding requireJourneyLocation(String journeyId) {
-  final binding = journeyLocationBindings[journeyId];
-  if (binding == null) {
-    throw StateError('Journey location is not registered: $journeyId.');
-  }
+  final cached = _journeyLocationBindingCache[journeyId];
+  if (cached != null) return cached;
+  final journey = requireDailyJourneyExperience(journeyId);
+  final binding = _buildJourneyLocationBinding(journey);
+  _journeyLocationBindingCache[journeyId] = binding;
   return binding;
 }
