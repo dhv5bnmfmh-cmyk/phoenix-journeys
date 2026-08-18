@@ -11,26 +11,43 @@ import 'explore_screen.dart';
 import 'me_screen.dart';
 import 'shadowing_training_screen.dart';
 
-class HomeShell extends StatelessWidget {
+class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
-  static const _pages = [
-    ExploreScreen(),
-    CityPassportScreen(),
-    ShadowingTrainingScreen(embedded: true),
-    MeScreen(),
-  ];
+  @override
+  State<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends State<HomeShell> {
+  final Set<int> _mountedTabs = <int>{0};
+
+  Widget _pageFor(int index) {
+    return switch (index) {
+      0 => const ExploreScreen(),
+      1 => const CityPassportScreen(),
+      2 => const ShadowingTrainingScreen(embedded: true),
+      3 => const MeScreen(),
+      _ => const SizedBox.shrink(),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    _mountedTabs.add(state.selectedTab);
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 800;
         final indexedPages = IndexedStack(
           index: state.selectedTab,
-          children: _pages,
+          children: List<Widget>.generate(
+            4,
+            (index) => _mountedTabs.contains(index)
+                ? _pageFor(index)
+                : const SizedBox.shrink(),
+            growable: false,
+          ),
         );
         final pageType = switch (state.selectedTab) {
           1 => JourneyBackgroundPage.passport,
