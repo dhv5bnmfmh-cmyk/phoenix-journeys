@@ -6,6 +6,7 @@ const traveler = cover?.querySelector('.phoenix-time-traveler') ?? null;
 const loadingStartedAt = performance.now();
 const minimumJourneyDurationMs = 3200;
 const phoenixFlightDurationMs = 3200;
+const legacyWorkerResetKey = 'phoenix-legacy-flutter-worker-reset';
 let coverHidden = false;
 let hoverAnimation = null;
 
@@ -18,6 +19,70 @@ function mark(name) {
   try {
     performance.mark(name);
   } catch (_) {}
+}
+
+function isLegacyFlutterWorker(worker) {
+  if (!worker || !worker.scriptURL) return false;
+  try {
+    const scriptUrl = new URL(worker.scriptURL, window.location.href);
+    return scriptUrl.pathname.endsWith('/flutter_service_worker.js');
+  } catch (_) {
+    return false;
+  }
+}
+
+async function retireLegacyFlutterWorker() {
+  if (!('serviceWorker' in navigator)) return false;
+
+  try {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    const legacyRegistrations = registrations.filter((registration) => {
+      return [registration.active, registration.waiting, registration.installing]
+        .some(isLegacyFlutterWorker);
+    });
+    const controllerIsLegacy = isLegacyFlutterWorker(
+      navigator.serviceWorker.controller,
+    );
+
+    if (legacyRegistrations.length === 0 && !controllerIsLegacy) return false;
+
+    await Promise.all(
+      legacyRegistrations.map((registration) => registration.unregister()),
+    );
+
+    if ('caches' in window) {
+      const cacheNames = await window.caches.keys();
+      const legacyCacheNames = cacheNames.filter((name) => {
+        return name === 'flutter-app-cache' ||
+          name === 'flutter-temp-cache' ||
+          name.startsWith('flutter-');
+      });
+      await Promise.all(
+        legacyCacheNames.map((name) => window.caches.delete(name)),
+      );
+    }
+
+    return true;
+  } catch (error) {
+    console.warn('Phoenix could not retire the legacy Flutter cache.', error);
+    return false;
+  }
+}
+
+function reloadAfterLegacyWorkerRetirement() {
+  if (!isLegacyFlutterWorker(navigator.serviceWorker.controller)) return false;
+
+  try {
+    if (window.sessionStorage.getItem(legacyWorkerResetKey) === 'done') {
+      return false;
+    }
+    window.sessionStorage.setItem(legacyWorkerResetKey, 'done');
+  } catch (_) {
+    // Reload once even when Safari blocks session storage in private mode.
+  }
+
+  window.location.reload();
+  return true;
 }
 
 mark('phoenix-cover-created');
@@ -88,22 +153,28 @@ async function hideLoading() {
 }
 
 try {
-  mark('phoenix-flutter-loader-start');
-  await _flutter.loader.load({
-    onEntrypointLoaded: async (engineInitializer) => {
-      mark('phoenix-entrypoint-loaded');
-      mark('phoenix-engine-initialize-start');
-      const appRunner = await engineInitializer.initializeEngine({
-        useColorEmoji: true,
-      });
-      mark('phoenix-engine-initialize-end');
-      mark('phoenix-app-runner-start');
-      await appRunner.runApp();
-      mark('phoenix-app-runner-end');
-      await waitForStartupSettled();
-      await hideLoading();
-    },
-  });
+  const retiredLegacyWorker = await retireLegacyFlutterWorker();
+  const reloadingAfterLegacyWorkerRetirement =
+    retiredLegacyWorker && reloadAfterLegacyWorkerRetirement();
+
+  if (!reloadingAfterLegacyWorkerRetirement) {
+    mark('phoenix-flutter-loader-start');
+    await _flutter.loader.load({
+      onEntrypointLoaded: async (engineInitializer) => {
+        mark('phoenix-entrypoint-loaded');
+        mark('phoenix-engine-initialize-start');
+        const appRunner = await engineInitializer.initializeEngine({
+          useColorEmoji: true,
+        });
+        mark('phoenix-engine-initialize-end');
+        mark('phoenix-app-runner-start');
+        await appRunner.runApp();
+        mark('phoenix-app-runner-end');
+        await waitForStartupSettled();
+        await hideLoading();
+      },
+    });
+  }
 } catch (error) {
   console.error('Phoenix startup failed:', error);
   mark('phoenix-startup-bootstrap-error');
