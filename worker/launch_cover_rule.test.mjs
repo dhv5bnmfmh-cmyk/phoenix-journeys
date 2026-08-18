@@ -30,6 +30,7 @@ test('Phoenix launch cover animates a short branded journey and waits for real a
   assert.match(index, /phoenix-time-flight-v2 3\.2s cubic-bezier/);
   assert.match(index, /phoenix-time-flight-v2/);
   assert.match(index, /animation-duration: 18s/);
+  assert.match(index, /#phoenix-loading\.phoenix-loading--hidden[\s\S]*pointer-events: none/);
   assert.match(bootstrap, /minimumJourneyDurationMs = 3200/);
   assert.match(bootstrap, /phoenixFlightDurationMs = 3200/);
   assert.match(bootstrap, /coverExitTransitionMs = 360/);
@@ -46,6 +47,15 @@ test('Phoenix launch cover animates a short branded journey and waits for real a
   assert.match(bootstrap, /phoenix-flight-start/);
   assert.match(bootstrap, /phoenix-flight-end/);
   assert.match(bootstrap, /phoenix-cover-exit-start/);
+  assert.match(bootstrap, /releaseCoverInteraction\(\)/);
+  assert.match(bootstrap, /cover\.style\.pointerEvents = 'none'/);
+  assert.match(bootstrap, /cover\.setAttribute\('inert', ''\)/);
+  assert.match(bootstrap, /cover\.setAttribute\('aria-hidden', 'true'\)/);
+  assert.match(bootstrap, /document\.elementFromPoint/);
+  assert.match(bootstrap, /coverCapturesHitTesting\(\)/);
+  assert.match(bootstrap, /phoenix-cover-input-released/);
+  assert.match(bootstrap, /phoenix-cover-hit-test-safe/);
+  assert.match(bootstrap, /phoenix-cover-hit-test-fallback-removed/);
   assert.match(bootstrap, /classList\.add\('phoenix-loading--hidden'\)/);
   assert.match(bootstrap, /phoenix-main-interactive/);
   assert.doesNotMatch(bootstrap, /classList\.add\('phoenix-loading-hidden'\)/);
