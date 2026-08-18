@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: pr194-runtime-staging
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -46,7 +50,6 @@ jobs:
           old = '  kaipingDiaolouExperience,\n]);'
           if text.count(old) != 1: raise SystemExit('Kaiping lazy wrapper anchor mismatch')
           ext.write_text(text.replace(old, '  () => kaipingDiaolouExperience,\n]);', 1), encoding='utf-8')
-
           access = Path('candidate/app/lib/state/access_controlled_app_state.dart')
           text = access.read_text(encoding='utf-8')
           old_any = 'dailyJourneyExperiences.any((journey) => journey.id == journeyId)'
@@ -56,19 +59,16 @@ jobs:
           text = text.replace(old_any, 'dailyJourneyIds.contains(journeyId)', 1)
           text = text.replace(old_set, '<String>{...dailyJourneyIds}', 1)
           access.write_text(text, encoding='utf-8')
-
           notifier = Path('candidate/app/lib/services/startup_readiness_notifier_web.dart')
           web = notifier.read_text(encoding='utf-8')
           ignore = '// ignore_for_file: avoid_web_libraries_in_flutter, deprecated_member_use\n\n'
           if not web.startswith(ignore): notifier.write_text(ignore + web, encoding='utf-8')
-
           bootstrap = Path('candidate/app/web/flutter_bootstrap.js')
           js = bootstrap.read_text(encoding='utf-8')
           if js.count('const minimumJourneyDurationMs = 3000;') != 1:
               raise SystemExit('bootstrap 3000ms staging hold anchor mismatch')
           bootstrap.write_text(js.replace('const minimumJourneyDurationMs = 3000;', 'const minimumJourneyDurationMs = 3200;', 1), encoding='utf-8')
           PY
-
           cp harness/.github/scripts/startup_instrument_v2.py candidate/.github/scripts/startup_instrument.py
           cp harness/.github/scripts/measure_startup_v2.mjs candidate/.github/scripts/measure_startup.mjs
           cp harness/.github/workflows/startup-performance-audit-v2.yml candidate/.github/workflows/startup-performance-audit.yml
