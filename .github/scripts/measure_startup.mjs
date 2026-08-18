@@ -1,4 +1,5 @@
 import { pathToFileURL } from 'node:url';
+import path from 'node:path';
 import fs from 'node:fs';
 
 const puppeteerModule = await import(
@@ -9,6 +10,27 @@ const puppeteer = puppeteerModule.default ?? puppeteerModule;
 const url = process.argv[2];
 const output = process.argv[3];
 const sourceSha = process.argv[4];
+const benchmarkIdentity = path.basename(output).replace(/-timings\.json$/, '');
+const servedRoot = path.resolve(process.cwd(), 'build/web');
+const servedMainJsPath = path.join(servedRoot, 'main.dart.js');
+const servedMainJs = fs.existsSync(servedMainJsPath)
+  ? fs.readFileSync(servedMainJsPath, 'utf8')
+  : '';
+const servedArtifactState = {
+  benchmarkIdentity,
+  sourceSha,
+  cwd: process.cwd(),
+  servedRoot,
+  servedMainJsPath,
+  servedMainJsExists: fs.existsSync(servedMainJsPath),
+  servedMainJsBytes: servedMainJs ? Buffer.byteLength(servedMainJs) : null,
+  servedJsContainsPhoenixPerf: servedMainJs.includes('__phoenix_perf'),
+  servedJsContainsAppFirstMeaningful: servedMainJs.includes('app.firstMeaningful'),
+  servedJsContainsFirstMeaningfulPerformanceMark: servedMainJs.includes('phoenix-first-meaningful-screen'),
+};
+console.log('STARTUP BENCHMARK SERVED ARTIFACT DIAGNOSTICS');
+console.log(JSON.stringify(servedArtifactState, null, 2));
+
 const browser = await puppeteer.launch({
   executablePath: process.env.CHROME_PATH,
   headless: true,
@@ -18,6 +40,131 @@ const page = await browser.newPage();
 const client = await page.createCDPSession();
 await client.send('Network.enable');
 await client.send('Network.setCacheDisabled', {cacheDisabled: false});
+
+const browserConsole = [];
+const pageErrors = [];
+const failedRequests = [];
+const httpErrors = [];
+
+page.on('console', (message) => {
+  const entry = {
+    type: message.type(),
+    text: message.text(),
+    location: message.location(),
+  };
+  browserConsole.push(entry);
+  console.log(`[browser console:${entry.type}] ${entry.text}`);
+});
+page.on('pageerror', (error) => {
+  const entry = {
+    name: error?.name ?? 'Error',
+    message: error?.message ?? String(error),
+    stack: error?.stack ?? null,
+  };
+  pageErrors.push(entry);
+  console.error('[browser pageerror]', entry.stack ?? entry.message);
+});
+page.on('requestfailed', (request) => {
+  const entry = {
+    url: request.url(),
+    method: request.method(),
+    resourceType: request.resourceType(),
+    errorText: request.failure()?.errorText ?? null,
+  };
+  failedRequests.push(entry);
+  console.error('[browser requestfailed]', JSON.stringify(entry));
+});
+page.on('response', (response) => {
+  if (response.status() < 400) return;
+  const request = response.request();
+  const entry = {
+    url: response.url(),
+    status: response.status(),
+    statusText: response.statusText(),
+    method: request.method(),
+    resourceType: request.resourceType(),
+  };
+  httpErrors.push(entry);
+  console.error('[browser http-error]', JSON.stringify(entry));
+});
+
+async function runtimeDiagnosticState(sampleLabel, phase) {
+  let runtime = null;
+  try {
+    runtime = await page.evaluate(() => {
+      const controller = navigator.serviceWorker?.controller ?? null;
+      const marks = performance.getEntriesByType('mark').map((entry) => ({
+        name: entry.name,
+        startTime: entry.startTime,
+        duration: entry.duration,
+      }));
+      let phoenixPerf = null;
+      try {
+        phoenixPerf = window.__phoenix_perf ?? null;
+      } catch (error) {
+        phoenixPerf = {diagnosticReadError: String(error)};
+      }
+      return {
+        finalBrowserUrl: window.location.href,
+        documentReadyState: document.readyState,
+        phoenixPerf,
+        appFirstMeaningfulGlobal:
+          window.__phoenix_perf?.['app.firstMeaningful'] ?? null,
+        firstMeaningfulPerformanceMark:
+          performance.getEntriesByName('phoenix-first-meaningful-screen').map((entry) => ({
+            name: entry.name,
+            startTime: entry.startTime,
+            duration: entry.duration,
+          })),
+        marks,
+        serviceWorker: {
+          supported: 'serviceWorker' in navigator,
+          controller: controller
+            ? {
+                scriptURL: controller.scriptURL,
+                state: controller.state,
+              }
+            : null,
+        },
+      };
+    });
+  } catch (error) {
+    runtime = {
+      diagnosticEvaluationError: error?.stack ?? error?.message ?? String(error),
+      finalBrowserUrl: page.url(),
+    };
+  }
+  return {
+    benchmarkIdentity,
+    sourceSha,
+    sampleLabel,
+    phase,
+    requestedUrl: url,
+    finalBrowserUrl: page.url(),
+    servedArtifact: servedArtifactState,
+    runtime,
+    browserConsole,
+    browserConsoleErrors: browserConsole.filter((entry) => entry.type === 'error'),
+    pageErrors,
+    failedRequests,
+    httpErrors,
+  };
+}
+
+async function dumpRuntimeDiagnostics(sampleLabel, phase) {
+  const state = await runtimeDiagnosticState(sampleLabel, phase);
+  console.error(`STARTUP BENCHMARK RUNTIME DIAGNOSTICS [${sampleLabel}] [${phase}]`);
+  console.error(JSON.stringify(state, null, 2));
+}
+
+async function waitForFunctionWithDiagnostics(sampleLabel, phase, predicate) {
+  try {
+    await page.waitForFunction(predicate, {timeout: 60000});
+  } catch (error) {
+    await dumpRuntimeDiagnostics(sampleLabel, phase);
+    throw error;
+  }
+}
 
 await page.evaluateOnNewDocument(() => {
   const mark = (name) => {
@@ -70,22 +217,32 @@ async function clearLocalState() {
 async function sample(label, {cold, freshState}) {
   if (cold) await clearHttpAndWorkerCache();
   if (freshState) await clearLocalState();
-  await page.goto(url, {waitUntil: 'load', timeout: 60000});
-  await page.waitForFunction(
+  try {
+    await page.goto(url, {waitUntil: 'load', timeout: 60000});
+  } catch (error) {
+    await dumpRuntimeDiagnostics(label, 'navigation');
+    throw error;
+  }
+  console.log(`STARTUP SAMPLE [${label}] REQUESTED URL = ${url}`);
+  console.log(`STARTUP SAMPLE [${label}] FINAL URL = ${page.url()}`);
+  await waitForFunctionWithDiagnostics(
+    label,
+    'phoenix-first-meaningful-screen',
     () => performance.getEntriesByName('phoenix-first-meaningful-screen').length > 0,
-    {timeout: 60000},
   );
-  await page.waitForFunction(
+  await waitForFunctionWithDiagnostics(
+    label,
+    'benchmark-cover-removed',
     () => performance.getEntriesByName('benchmark-cover-removed').length > 0,
-    {timeout: 60000},
   );
 
   await page.evaluate(() => {
     window.dispatchEvent(new Event('phoenix-benchmark-open-current-journey'));
   });
-  await page.waitForFunction(
+  await waitForFunctionWithDiagnostics(
+    label,
+    'phoenix-journey-story-usable',
     () => performance.getEntriesByName('phoenix-journey-story-usable').length > 0,
-    {timeout: 60000},
   );
 
   const result = await page.evaluate(() => {
