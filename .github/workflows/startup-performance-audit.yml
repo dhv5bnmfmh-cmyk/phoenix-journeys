@@ -108,47 +108,19 @@ jobs:
 
           main_anchors = {
               'main import': "import 'app.dart';\n",
-              'main startup': """Future<void> main() async {
-            WidgetsFlutterBinding.ensureInitialized();
-            await const LanguageLevelPreferenceStore().initializePhoenixLevel();
-          """,
-              'runApp callback': """    () {
-                runApp(
-          """,
+              'main startup': "Future<void> main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  await const LanguageLevelPreferenceStore().initializePhoenixLevel();\n",
+              'runApp callback': "    () {\n      runApp(\n",
           }
           state_anchors = {
               'state foundation import': "import 'package:flutter/foundation.dart';\n",
               'state catalog import': "import '../data/daily_journey_catalog.dart';\n",
-              'state load start': """  Future<void> load() async {
-            loadStatus = AppLoadStatus.loading;
-          """,
-              'preferences load': """    final preferences = await _preferencesLoader();
-            _preferences = preferences;
-            _restoreNonCriticalPreferences(preferences);
-          """,
-              'critical read': """    var committed = await _criticalStore!.readCommitted();
-            if (committed == null) {
-          """,
-              'legacy path': """      committed = await _criticalStore!.commitInitial(
-              legacy.snapshot.toJson(),
-            );
-            } else if (committed.schemaVersion ==
-          """,
-              'apply committed': """    _applyCommitted(
-              snapshot,
-              revision: committed.revision,
-              schemaVersion: committed.schemaVersion,
-            );
-          """,
-              'state ready': """    _activeIdentityReady = true;
-            loadStatus = AppLoadStatus.ready;
-            } catch (error, stackTrace) {
-          """,
-              'final load notification': """    notifyListeners();
-            }
-
-            @override
-            Future<void> activateJourney""",
+              'state load start': "  Future<void> load() async {\n    loadStatus = AppLoadStatus.loading;\n",
+              'preferences load': "    final preferences = await _preferencesLoader();\n    _preferences = preferences;\n    _restoreNonCriticalPreferences(preferences);\n",
+              'critical read': "    var committed = await _criticalStore!.readCommitted();\n    if (committed == null) {\n",
+              'legacy path': "      committed = await _criticalStore!.commitInitial(\n        legacy.snapshot.toJson(),\n      );\n    } else if (committed.schemaVersion ==\n",
+              'apply committed': "    _applyCommitted(\n      snapshot,\n      revision: committed.revision,\n      schemaVersion: committed.schemaVersion,\n    );\n",
+              'state ready': "    _activeIdentityReady = true;\n    loadStatus = AppLoadStatus.ready;\n  } catch (error, stackTrace) {\n",
+              'final load notification': "    notifyListeners();\n  }\n\n  @override\n  Future<void> activateJourney",
           }
 
           failures = []
@@ -187,24 +159,22 @@ jobs:
           )
           main = main.replace(
               main_anchors['main startup'],
-              """Future<void> main() async {
-            startupPerformanceMark('phoenix-main-entry');
-            WidgetsFlutterBinding.ensureInitialized();
-            startupPerformanceMark('phoenix-language-init-start');
-            await const LanguageLevelPreferenceStore().initializePhoenixLevel();
-            startupPerformanceMark('phoenix-language-init-end');
-          """,
+              "Future<void> main() async {\n"
+              "  startupPerformanceMark('phoenix-main-entry');\n"
+              "  WidgetsFlutterBinding.ensureInitialized();\n"
+              "  startupPerformanceMark('phoenix-language-init-start');\n"
+              "  await const LanguageLevelPreferenceStore().initializePhoenixLevel();\n"
+              "  startupPerformanceMark('phoenix-language-init-end');\n",
               1,
           )
           main = main.replace(
               main_anchors['runApp callback'],
-              """    () {
-                startupPerformanceMark('phoenix-runapp-start');
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  startupPerformanceMark('phoenix-first-frame');
-                });
-                runApp(
-          """,
+              "    () {\n"
+              "      startupPerformanceMark('phoenix-runapp-start');\n"
+              "      WidgetsBinding.instance.addPostFrameCallback((_) {\n"
+              "        startupPerformanceMark('phoenix-first-frame');\n"
+              "      });\n"
+              "      runApp(\n",
               1,
           )
           main_path.write_text(main, encoding='utf-8')
@@ -221,76 +191,69 @@ jobs:
           )
           state = state.replace(
               state_anchors['state load start'],
-              """  Future<void> load() async {
-            startupPerformanceMark('phoenix-state-load-start');
-            loadStatus = AppLoadStatus.loading;
-          """,
+              "  Future<void> load() async {\n"
+              "    startupPerformanceMark('phoenix-state-load-start');\n"
+              "    loadStatus = AppLoadStatus.loading;\n",
               1,
           )
           state = state.replace(
               state_anchors['preferences load'],
-              """    startupPerformanceMark('phoenix-preferences-start');
-            final preferences = await _preferencesLoader();
-            startupPerformanceMark('phoenix-preferences-ready');
-            _preferences = preferences;
-            _restoreNonCriticalPreferences(preferences);
-            startupPerformanceMark('phoenix-noncritical-preferences-restored');
-          """,
+              "    startupPerformanceMark('phoenix-preferences-start');\n"
+              "    final preferences = await _preferencesLoader();\n"
+              "    startupPerformanceMark('phoenix-preferences-ready');\n"
+              "    _preferences = preferences;\n"
+              "    _restoreNonCriticalPreferences(preferences);\n"
+              "    startupPerformanceMark('phoenix-noncritical-preferences-restored');\n",
               1,
           )
           state = state.replace(
               state_anchors['critical read'],
-              """    startupPerformanceMark('phoenix-critical-read-start');
-            var committed = await _criticalStore!.readCommitted();
-            startupPerformanceMark('phoenix-critical-read-end');
-            if (committed == null) {
-              startupPerformanceMark('phoenix-legacy-path-start');
-          """,
+              "    startupPerformanceMark('phoenix-critical-read-start');\n"
+              "    var committed = await _criticalStore!.readCommitted();\n"
+              "    startupPerformanceMark('phoenix-critical-read-end');\n"
+              "    if (committed == null) {\n"
+              "      startupPerformanceMark('phoenix-legacy-path-start');\n",
               1,
           )
           state = state.replace(
               state_anchors['legacy path'],
-              """      committed = await _criticalStore!.commitInitial(
-              legacy.snapshot.toJson(),
-            );
-              startupPerformanceMark('phoenix-legacy-path-end');
-            } else if (committed.schemaVersion ==
-          """,
+              "      committed = await _criticalStore!.commitInitial(\n"
+              "        legacy.snapshot.toJson(),\n"
+              "      );\n"
+              "      startupPerformanceMark('phoenix-legacy-path-end');\n"
+              "    } else if (committed.schemaVersion ==\n",
               1,
           )
           state = state.replace(
               state_anchors['apply committed'],
-              """    startupPerformanceMark('phoenix-apply-committed-start');
-            _applyCommitted(
-              snapshot,
-              revision: committed.revision,
-              schemaVersion: committed.schemaVersion,
-            );
-            startupPerformanceMark('phoenix-apply-committed-end');
-          """,
+              "    startupPerformanceMark('phoenix-apply-committed-start');\n"
+              "    _applyCommitted(\n"
+              "      snapshot,\n"
+              "      revision: committed.revision,\n"
+              "      schemaVersion: committed.schemaVersion,\n"
+              "    );\n"
+              "    startupPerformanceMark('phoenix-apply-committed-end');\n",
               1,
           )
           state = state.replace(
               state_anchors['state ready'],
-              """    _activeIdentityReady = true;
-            loadStatus = AppLoadStatus.ready;
-            startupPerformanceMark('phoenix-state-ready');
-            } catch (error, stackTrace) {
-          """,
+              "    _activeIdentityReady = true;\n"
+              "    loadStatus = AppLoadStatus.ready;\n"
+              "    startupPerformanceMark('phoenix-state-ready');\n"
+              "  } catch (error, stackTrace) {\n",
               1,
           )
           state = state.replace(
               state_anchors['final load notification'],
-              """    notifyListeners();
-            if (loadStatus == AppLoadStatus.ready) {
-              SchedulerBinding.instance.addPostFrameCallback((_) {
-                startupPerformanceMark('phoenix-first-meaningful-screen');
-              });
-            }
-            }
-
-            @override
-            Future<void> activateJourney""",
+              "    notifyListeners();\n"
+              "    if (loadStatus == AppLoadStatus.ready) {\n"
+              "      SchedulerBinding.instance.addPostFrameCallback((_) {\n"
+              "        startupPerformanceMark('phoenix-first-meaningful-screen');\n"
+              "      });\n"
+              "    }\n"
+              "  }\n\n"
+              "  @override\n"
+              "  Future<void> activateJourney",
               1,
           )
           state_path.write_text(state, encoding='utf-8')
