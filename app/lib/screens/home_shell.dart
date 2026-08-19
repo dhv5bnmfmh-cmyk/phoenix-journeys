@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/journey_background.dart';
 import '../state/app_state.dart';
+import '../services/interaction_audit_sink.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/destination_background.dart';
 import '../widgets/interaction_audit_probe.dart';
@@ -20,18 +21,6 @@ class HomeShell extends StatefulWidget {
 }
 
 class _HomeShellState extends State<HomeShell> {
-  final Set<int> _mountedTabs = <int>{0};
-
-  Widget _pageFor(int index) {
-    return switch (index) {
-      0 => const ExploreScreen(),
-      1 => const CityPassportScreen(),
-      2 => const ShadowingTrainingScreen(embedded: true),
-      3 => const MeScreen(),
-      _ => const SizedBox.shrink(),
-    };
-  }
-
   Future<void> _showDiscovery(BuildContext context, AppState state) {
     return showModalBottomSheet<void>(
       context: context,
@@ -87,6 +76,7 @@ class _HomeShellState extends State<HomeShell> {
     required AppState state,
     required Widget child,
   }) {
+    if (!phoenixInteractionAuditEnabled) return child;
     return PhoenixHomeInteractionBoundary(
       selectedTab: state.selectedTab,
       onDiscoveryTap: () => _showDiscovery(context, state),
@@ -97,20 +87,17 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    _mountedTabs.add(state.selectedTab);
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 800;
         final indexedPages = IndexedStack(
           index: state.selectedTab,
-          children: List<Widget>.generate(
-            4,
-            (index) => _mountedTabs.contains(index)
-                ? _pageFor(index)
-                : const SizedBox.shrink(),
-            growable: false,
-          ),
+          children: const <Widget>[
+            ExploreScreen(),
+            CityPassportScreen(),
+            ShadowingTrainingScreen(embedded: true),
+            MeScreen(),
+          ],
         );
         final pageType = switch (state.selectedTab) {
           1 => JourneyBackgroundPage.passport,
