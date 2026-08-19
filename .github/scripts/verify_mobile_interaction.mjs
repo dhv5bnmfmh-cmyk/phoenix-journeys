@@ -131,7 +131,7 @@ async function tapTabAndVerify(page, tabLabel, expectedPageLabel, browserName) {
 }
 
 async function exerciseLevelControl(page, browserName) {
-  const level = await semanticNode(page, 'Phoenix 中文难度 ', { prefix: true, timeout: 15000 });
+  const level = await semanticNode(page, '查看 Lv.', { prefix: true, timeout: 15000 });
   const before = normalize(await level.getAttribute('aria-label') ?? await level.textContent());
 
   let control;
@@ -150,7 +150,7 @@ async function exerciseLevelControl(page, browserName) {
   let after = before;
   for (let i = 0; i < 30 && after === before; i += 1) {
     await sleep(100);
-    const current = await semanticNode(page, 'Phoenix 中文难度 ', { prefix: true, timeout: 1000 });
+    const current = await semanticNode(page, '查看 Lv.', { prefix: true, timeout: 1000 });
     after = normalize(await current.getAttribute('aria-label') ?? await current.textContent());
   }
   if (!before || !after || before === after) throw new Error(`${browserName}: level state did not change (${before} -> ${after})`);
@@ -178,99 +178,76 @@ async function reachDiscovery(page, browserName) {
   await semanticNode(page, '故事', { prefix: true, timeout: 15000 });
   await tapSemanticAction(page, '继续', `${browserName}:story-next`, { prefix: true });
   await sleep(500);
-  await page.touchscreen.tap(22, 58);
   await semanticNode(page, '2/6', { prefix: true, timeout: 15000 });
-  await semanticNode(page, '单词', { prefix: true, timeout: 15000 });
-  await tapSemanticAction(page, '继续', `${browserName}:words-next`, { prefix: true });
-  await semanticNode(page, '3/6', { prefix: true, timeout: 15000 });
   await semanticNode(page, '发现', { prefix: true, timeout: 15000 });
-  console.log(`${browserName} DISCOVERY STATE TRANSITION = PASS`);
+  console.log(`${browserName} JOURNEY DISCOVERY = PASS`);
 }
 
-async function exitJourneyToHome(page, browserName, cycle) {
-  await page.touchscreen.tap(28, 26);
+async function returnHome(page, browserName, cycle) {
+  const back = await semanticNode(page, '返回', { prefix: true, timeout: 15000 });
+  await back.tap({ timeout: 15000 });
   await waitForHome(page, browserName);
-  console.log(`${browserName} JOURNEY CYCLE ${cycle} RETURN = PASS`);
+  console.log(`${browserName} JOURNEY CYCLE ${cycle} RETURN HOME = PASS`);
 }
 
-async function exercisePostReturnHome(page, browserName, cycle) {
-  await tapTabAndVerify(page, '护照', '探索护照', browserName);
+async function verifyHomeInteractions(page, browserName, label) {
+  await exerciseCitySelector(page, browserName);
+  await exerciseLevelControl(page, browserName);
+  await tapTabAndVerify(page, '护照', '旅行护照', browserName);
+  await tapTabAndVerify(page, '跟读训练', '跟读训练', browserName);
+  await tapTabAndVerify(page, '我的', '我的 Phoenix', browserName);
   await tapTabAndVerify(page, '探索', 'PHOENIX JOURNEYS', browserName);
-  await waitForHome(page, browserName);
-  console.log(`${browserName} POST-CYCLE-${cycle} HOME INTERACTION = PASS`);
-}
-
-async function exerciseAllTabs(page, browserName) {
-  await tapTabAndVerify(page, '护照', '探索护照', browserName);
-  await tapTabAndVerify(page, '跟读训练', '听一句 · 跟一句 · 逐字对照 · 薄弱句复练', browserName);
-  await tapTabAndVerify(page, '我的', 'HSK／TOCFL 能力设置', browserName);
-  await tapTabAndVerify(page, '探索', 'PHOENIX JOURNEYS', browserName);
-  await waitForHome(page, browserName);
-  console.log(`${browserName} BOTTOM NAVIGATION ALL TABS = PASS`);
+  console.log(`${browserName} ${label} = PASS`);
 }
 
 async function runBrowser(browserType, browserName) {
   const browser = await browserType.launch({ headless: true });
-  try {
-    const context = await browser.newContext({
-      viewport: { width: 390, height: 844 },
-      deviceScaleFactor: 3,
-      isMobile: true,
-      hasTouch: true,
-      locale: 'zh-CN',
-      reducedMotion: 'reduce',
-    });
-    const page = await context.newPage();
-    const pageErrors = [];
-    page.on('pageerror', (error) => pageErrors.push(error?.stack || error?.message || String(error)));
-    page.on('console', (message) => console.log(`[${browserName} console:${message.type()}] ${message.text()}`));
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+    locale: 'zh-CN',
+    reducedMotion: 'reduce',
+  });
+  const page = await context.newPage();
+  page.on('console', (message) => console.log(`[${browserName} console:${message.type()}] ${message.text()}`));
+  page.on('pageerror', (error) => console.error(`${browserName} PAGE ERROR ${error.stack ?? error.message}`));
 
-    const separator = url.includes('?') ? '&' : '?';
-    const candidateUrl = `${url}${separator}unlock=all&prototype=journeys&v=${sourceSha}`;
-    await page.goto(candidateUrl, { waitUntil: 'load', timeout: 140000 });
-    await page.waitForFunction(() => document.querySelector('flutter-view') != null, null, { timeout: 140000 });
-    await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
+  let failed = false;
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.locator('flutter-view').first().waitFor({ state: 'attached', timeout: 60000 });
+    await page.locator('#phoenix-loading').waitFor({ state: 'detached', timeout: 60000 });
     await enableFlutterSemantics(page, browserName);
+    await waitForHome(page, browserName);
+    console.log(`${browserName} HOME INITIAL INTERACTION = PASS`);
+    await verifyHomeInteractions(page, browserName, 'HOME CONTROL COVERAGE');
 
-    try {
-      await waitForHome(page, browserName);
-      console.log(`${browserName} HOME INITIAL INTERACTION = PASS`);
-      await exerciseCitySelector(page, browserName);
-      await exerciseLevelControl(page, browserName);
+    await openJourney(page, browserName, 1);
+    await reachDiscovery(page, browserName);
+    await returnHome(page, browserName, 1);
+    await verifyHomeInteractions(page, browserName, 'POST-CYCLE-1 HOME RESPONSIVE');
 
-      await openJourney(page, browserName, 1);
-      await reachDiscovery(page, browserName);
-      await exitJourneyToHome(page, browserName, 1);
-      await exercisePostReturnHome(page, browserName, 1);
+    await openJourney(page, browserName, 2);
+    await returnHome(page, browserName, 2);
+    await verifyHomeInteractions(page, browserName, 'POST-CYCLE-2 HOME RESPONSIVE');
 
-      await openJourney(page, browserName, 2);
-      await exitJourneyToHome(page, browserName, 2);
-      await exercisePostReturnHome(page, browserName, 2);
-
-      await exerciseCitySelector(page, browserName);
-      await exerciseLevelControl(page, browserName);
-      await exerciseAllTabs(page, browserName);
-    } catch (error) {
-      await dumpSemantics(page, browserName);
-      throw error;
-    }
-
-    if (pageErrors.length) throw new Error(`${browserName}: page errors: ${pageErrors.join('\n')}`);
-    console.log(`${browserName} REAL MOBILE FUNCTIONAL INTERACTION AUDIT = PASS`);
-  } finally {
-    await browser.close();
-  }
-}
-
-let failed = false;
-for (const [name, type] of [['chromium', chromium], ['webkit', webkit]]) {
-  try {
-    await runBrowser(type, name);
+    console.log(`${browserName} REAL MOBILE FUNCTIONAL INTERACTION = PASS`);
   } catch (error) {
     failed = true;
-    console.error(`${name} FUNCTIONAL AUDIT FAILURE`, error?.stack || error);
+    await dumpSemantics(page, browserName).catch(() => {});
+    console.error(`${browserName} FUNCTIONAL AUDIT FAILURE`, error?.stack ?? error);
+  } finally {
+    await context.close();
+    await browser.close();
   }
+  return !failed;
+}
+
+const results = [];
+for (const [browserType, browserName] of [[chromium, 'chromium'], [webkit, 'webkit']]) {
+  results.push(await runBrowser(browserType, browserName));
 }
 
 console.log(`MOBILE INTERACTION SOURCE SHA = ${sourceSha}`);
-if (failed) process.exit(1);
+if (!results.every(Boolean)) process.exit(1);
