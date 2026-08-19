@@ -90,6 +90,7 @@ jobs:
           app/lib/services/interaction_audit_sink_stub.dart
           app/lib/services/interaction_audit_sink_web.dart
           app/lib/widgets/interaction_audit_probe.dart
+          app/test/home_post_cover_interaction_test.dart
           app/web/flutter_bootstrap.js
           worker/launch_cover_rule.test.mjs
           FILES
