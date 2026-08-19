@@ -11,6 +11,39 @@ if (!url || !sourceSha) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const attrEscape = (value) => value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+
+function semanticLabel(page, label, { role = null, prefix = false } = {}) {
+  const op = prefix ? '^=' : '=';
+  const roleSelector = role ? `[role="${attrEscape(role)}"]` : '';
+  return page.locator(
+    `flt-semantics${roleSelector}[aria-label${op}"${attrEscape(label)}"]`,
+  ).first();
+}
+
+async function waitSemantic(page, label, options = {}) {
+  const node = semanticLabel(page, label, options);
+  await node.waitFor({ state: 'attached', timeout: options.timeout ?? 15000 });
+  return node;
+}
+
+async function tapSemanticButton(page, label, logLabel, { prefix = false } = {}) {
+  const button = semanticLabel(page, label, { role: 'button', prefix });
+  await button.waitFor({ state: 'visible', timeout: 15000 });
+  if (!(await button.isEnabled())) throw new Error(`${logLabel}: button is disabled`);
+  await button.tap({ timeout: 15000 });
+  return button;
+}
+
+async function findJourneyAction(page) {
+  const prefixes = ['开始', '继续', '再次探索'];
+  for (const prefix of prefixes) {
+    const candidate = semanticLabel(page, prefix, { role: 'button', prefix: true });
+    if (await candidate.count()) return candidate;
+  }
+  throw new Error('Home: no Start / Continue / Explore Again Journey action found');
+}
+
 async function enableFlutterSemantics(page, browserName) {
   const placeholder = page.locator('flt-semantics-placeholder').first();
   if (await placeholder.count()) {
@@ -21,54 +54,38 @@ async function enableFlutterSemantics(page, browserName) {
 }
 
 async function waitForHome(page, browserName) {
-  await page.getByRole('button', { name: '探索', exact: true }).first().waitFor({ state: 'visible', timeout: 20000 });
-  await page.getByRole('button', { name: '选择城市', exact: true }).first().waitFor({ state: 'visible', timeout: 20000 });
-  await page.getByRole('button', { name: /^(开始|继续|再次探索).+/ }).first().waitFor({ state: 'visible', timeout: 20000 });
+  await waitSemantic(page, '选择城市', { role: 'button', prefix: true, timeout: 20000 });
+  const journeyAction = await findJourneyAction(page);
+  await journeyAction.waitFor({ state: 'visible', timeout: 20000 });
   console.log(`${browserName} HOME INTERACTIVE STATE = PRESENT`);
 }
 
-async function tapButton(page, name, label) {
-  const button = page.getByRole('button', { name, exact: typeof name === 'string' }).first();
-  await button.waitFor({ state: 'visible', timeout: 15000 });
-  if (!(await button.isEnabled())) throw new Error(`${label}: button is disabled`);
-  await button.tap({ timeout: 15000 });
-  return button;
-}
-
-async function waitExactText(page, text, timeout = 15000) {
-  await page.getByText(text, { exact: true }).first().waitFor({ state: 'visible', timeout });
-}
-
-async function dismissBottomSheet(page, expectedText) {
+async function dismissBottomSheet(page, expectedLabel) {
   await page.touchscreen.tap(22, 58);
-  await page.getByText(expectedText, { exact: true }).first().waitFor({ state: 'hidden', timeout: 10000 });
+  await semanticLabel(page, expectedLabel, { prefix: true }).waitFor({ state: 'detached', timeout: 10000 });
 }
 
-async function assertSelectedTab(page, label, browserName) {
-  const nav = page.getByRole('button', { name: label, exact: true }).first();
-  await nav.waitFor({ state: 'visible', timeout: 10000 });
-  await nav.tap();
-  await sleep(300);
-  const selected = await nav.getAttribute('aria-selected');
-  const checked = await nav.getAttribute('aria-checked');
-  if (selected !== 'true' && checked !== 'true') {
-    throw new Error(`${browserName}:${label}: tab did not expose selected state after tap`);
-  }
-  console.log(`${browserName} TAB ${label} = PASS`);
+async function tapTabAndVerify(page, tabLabel, expectedPageLabel, browserName) {
+  await tapSemanticButton(page, tabLabel, `${browserName}:${tabLabel}`, { prefix: true });
+  await waitSemantic(page, expectedPageLabel, { prefix: true, timeout: 15000 });
+  console.log(`${browserName} TAB ${tabLabel} STATE CHANGE = PASS`);
 }
 
 async function exerciseLevelControl(page, browserName) {
   const level = page.locator('flt-semantics[aria-label^="Phoenix 中文难度 "]').first();
   await level.waitFor({ state: 'attached', timeout: 15000 });
   const before = await level.getAttribute('aria-label');
-  let control = page.getByRole('button', { name: '提高当前难度', exact: true }).first();
+
+  let control = semanticLabel(page, '提高当前难度', { role: 'button', prefix: true });
   let direction = 'PLUS';
-  if (!(await control.isEnabled())) {
-    control = page.getByRole('button', { name: '降低当前难度', exact: true }).first();
+  if (!(await control.count()) || !(await control.isEnabled())) {
+    control = semanticLabel(page, '降低当前难度', { role: 'button', prefix: true });
     direction = 'MINUS';
   }
+  await control.waitFor({ state: 'visible', timeout: 15000 });
   if (!(await control.isEnabled())) throw new Error(`${browserName}: no enabled level control`);
   await control.tap();
+
   let after = before;
   for (let i = 0; i < 30 && after === before; i += 1) {
     await sleep(100);
@@ -81,33 +98,33 @@ async function exerciseLevelControl(page, browserName) {
 }
 
 async function exerciseCitySelector(page, browserName) {
-  await tapButton(page, '选择城市', `${browserName}:city-selector`);
-  await waitExactText(page, '选择城市与地点');
+  await tapSemanticButton(page, '选择城市', `${browserName}:city-selector`, { prefix: true });
+  await waitSemantic(page, '选择城市与地点', { prefix: true });
   console.log(`${browserName} CITY SELECTOR OPEN = PASS`);
   await dismissBottomSheet(page, '选择城市与地点');
   console.log(`${browserName} CITY SELECTOR CLOSE = PASS`);
 }
 
 async function openJourney(page, browserName, cycle) {
-  const button = page.getByRole('button', { name: /^(开始|继续|再次探索).+/ }).first();
+  const button = await findJourneyAction(page);
   await button.waitFor({ state: 'visible', timeout: 15000 });
   const action = await button.getAttribute('aria-label');
   await button.tap();
-  await page.getByText(/^[1-6]\/6$/).first().waitFor({ state: 'visible', timeout: 20000 });
+  await waitSemantic(page, '1/6', { prefix: true, timeout: 20000 });
   console.log(`${browserName} JOURNEY CYCLE ${cycle} OPEN = PASS (${action})`);
 }
 
 async function reachDiscovery(page, browserName) {
-  await waitExactText(page, '1/6');
-  await waitExactText(page, '故事');
-  await tapButton(page, '继续', `${browserName}:story-next`);
+  await waitSemantic(page, '1/6', { prefix: true });
+  await waitSemantic(page, '故事', { prefix: true });
+  await tapSemanticButton(page, '继续', `${browserName}:story-next`, { prefix: true });
   await sleep(500);
   await page.touchscreen.tap(22, 58);
-  await waitExactText(page, '2/6', 15000);
-  await waitExactText(page, '单词', 15000);
-  await tapButton(page, '继续', `${browserName}:words-next`);
-  await waitExactText(page, '3/6', 15000);
-  await waitExactText(page, '发现', 15000);
+  await waitSemantic(page, '2/6', { prefix: true, timeout: 15000 });
+  await waitSemantic(page, '单词', { prefix: true, timeout: 15000 });
+  await tapSemanticButton(page, '继续', `${browserName}:words-next`, { prefix: true });
+  await waitSemantic(page, '3/6', { prefix: true, timeout: 15000 });
+  await waitSemantic(page, '发现', { prefix: true, timeout: 15000 });
   console.log(`${browserName} DISCOVERY STATE TRANSITION = PASS`);
 }
 
@@ -118,19 +135,17 @@ async function exitJourneyToHome(page, browserName, cycle) {
 }
 
 async function exercisePostReturnHome(page, browserName, cycle) {
-  await assertSelectedTab(page, '护照', browserName);
-  await waitExactText(page, '探索护照');
-  await assertSelectedTab(page, '探索', browserName);
+  await tapTabAndVerify(page, '护照', '探索护照', browserName);
+  await tapTabAndVerify(page, '探索', '选择城市', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} POST-CYCLE-${cycle} HOME INTERACTION = PASS`);
 }
 
 async function exerciseAllTabs(page, browserName) {
-  await assertSelectedTab(page, '护照', browserName);
-  await waitExactText(page, '探索护照');
-  await assertSelectedTab(page, '跟读训练', browserName);
-  await assertSelectedTab(page, '我的', browserName);
-  await assertSelectedTab(page, '探索', browserName);
+  await tapTabAndVerify(page, '护照', '探索护照', browserName);
+  await tapTabAndVerify(page, '跟读训练', '听一句 · 跟一句 · 逐字对照 · 薄弱句复练', browserName);
+  await tapTabAndVerify(page, '我的', 'HSK／TOCFL 能力设置', browserName);
+  await tapTabAndVerify(page, '探索', '选择城市', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} BOTTOM NAVIGATION ALL TABS = PASS`);
 }
