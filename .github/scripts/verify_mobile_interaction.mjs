@@ -329,17 +329,122 @@ async function runBrowser(browserType, browserName) {
       `(entry) => entry.type === 'route-pop'`,
       `${browserName}:journey-back-route`,
     );
-    console.log(`${browserName} BACK = PASS`);
+    console.log(`${browserName} FIRST RETURN = PASS`);
+    console.log(`${browserName} POST-FIRST-RETURN DOM STATE`);
+    console.log(JSON.stringify(await startupState(page), null, 2));
 
-    const discovery = await waitForRect(page, 'discovery');
-    actionStart = await rawTouch(page, discovery, `${browserName}:discovery`);
+    const secondStartJourney = await waitForRect(page, 'start-journey');
+    actionStart = await rawTouch(
+      page,
+      secondStartJourney,
+      `${browserName}:second-start-journey`,
+    );
     await waitForAuditEvent(
       page,
       actionStart,
       `(entry) => entry.type === 'route-push'`,
-      `${browserName}:discovery-route`,
+      `${browserName}:second-start-journey-route`,
     );
-    console.log(`${browserName} DISCOVERY = PASS`);
+    console.log(`${browserName} SECOND JOURNEY OPEN = PASS`);
+
+    actionStart = await rawTouch(
+      page,
+      { x: 0, y: 0, width: 56, height: 52 },
+      `${browserName}:second-journey-back`,
+    );
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'route-pop'`,
+      `${browserName}:second-journey-back-route`,
+    );
+    console.log(`${browserName} SECOND RETURN = PASS`);
+    console.log(`${browserName} POST-SECOND-RETURN DOM STATE`);
+    console.log(JSON.stringify(await startupState(page), null, 2));
+
+    const postReturnPassport = await waitForRect(page, 'bottom-nav-passport');
+    actionStart = await rawTouch(
+      page,
+      postReturnPassport,
+      `${browserName}:post-return-bottom-nav-passport`,
+    );
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'home-tab-state' && entry.selectedTab === 1`,
+      `${browserName}:post-return-bottom-nav-passport-state`,
+    );
+
+    const postReturnExplore = await waitForRect(page, 'bottom-nav-explore');
+    actionStart = await rawTouch(
+      page,
+      postReturnExplore,
+      `${browserName}:post-return-bottom-nav-explore`,
+    );
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'home-tab-state' && entry.selectedTab === 0`,
+      `${browserName}:post-return-bottom-nav-explore-state`,
+    );
+    console.log(`${browserName} POST-JOURNEY BOTTOM NAVIGATION = PASS`);
+
+    let postReturnLevel = await waitForRect(page, 'level-plus');
+    actionStart = await rawTouch(
+      page,
+      postReturnLevel,
+      `${browserName}:post-return-level-plus`,
+    );
+    try {
+      await waitForAuditEvent(
+        page,
+        actionStart,
+        `(entry) => entry.type === 'level-state'`,
+        `${browserName}:post-return-level-state`,
+        4000,
+      );
+    } catch (_) {
+      postReturnLevel = await waitForRect(page, 'level-minus');
+      actionStart = await rawTouch(
+        page,
+        postReturnLevel,
+        `${browserName}:post-return-level-minus`,
+      );
+      await waitForAuditEvent(
+        page,
+        actionStart,
+        `(entry) => entry.type === 'level-state'`,
+        `${browserName}:post-return-level-state-fallback`,
+      );
+    }
+    console.log(`${browserName} POST-JOURNEY LV CONTROL = PASS`);
+
+    const postReturnCity = await waitForRect(page, 'city-selector');
+    actionStart = await rawTouch(
+      page,
+      postReturnCity,
+      `${browserName}:post-return-city-selector`,
+    );
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'route-push'`,
+      `${browserName}:post-return-city-selector-route`,
+    );
+    console.log(`${browserName} POST-JOURNEY CITY SELECTOR = PASS`);
+    await dismissModalByTouch(page, browserName);
+
+    const discovery = await waitForRect(page, 'discovery');
+    actionStart = await rawTouch(page, discovery, `${browserName}:post-return-discovery`);
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'route-push'`,
+      `${browserName}:post-return-discovery-route`,
+    );
+    console.log(`${browserName} POST-JOURNEY DISCOVERY = PASS`);
+    await dismissModalByTouch(page, browserName);
+    console.log(`${browserName} ROUND-TRIP HOME INTERACTION = PASS`);
 
     if (pageErrors.length) {
       throw new Error(`${browserName}: page errors: ${pageErrors.join('\n')}`);
