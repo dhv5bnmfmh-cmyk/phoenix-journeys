@@ -14,7 +14,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function enableFlutterSemantics(page, browserName) {
   const placeholder = page.locator('flt-semantics-placeholder').first();
   if (await placeholder.count()) {
-    await placeholder.click({ force: true });
+    await placeholder.evaluate((element) => element.click());
   }
   await page.locator('flt-semantics').first().waitFor({ state: 'attached', timeout: 15000 });
   console.log(`${browserName} FLUTTER SEMANTICS = ENABLED`);
