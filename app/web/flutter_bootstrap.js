@@ -3,8 +3,8 @@
 
 const loading = document.getElementById('phoenix-loading');
 const loadingText = document.getElementById('phoenix-loading-text');
-const loadingStartedAt = window.performance.now();
-const minimumJourneyDurationMs = 6200;
+const phoenixTraveler = document.querySelector('.phoenix-loading__traveler');
+const phoenixFlightAnimationName = 'phoenix-time-flight-v2';
 const legacyWorkerResetKey = 'phoenix-legacy-flutter-worker-reset';
 
 function updateLoadingText(message) {
@@ -13,17 +13,79 @@ function updateLoadingText(message) {
   }
 }
 
-async function hideLoading() {
+function logStartupTimestamp(label) {
+  const timestamp = window.performance.now();
+  console.info(`${label} = ${timestamp.toFixed(1)}ms`);
+  return timestamp;
+}
+
+function waitForPhoenixFlight() {
+  if (!phoenixTraveler) {
+    const finishedAt = logStartupTimestamp('PHOENIX FLIGHT END');
+    return Promise.resolve({ finishedAt, animationActive: false });
+  }
+
+  const animations = typeof phoenixTraveler.getAnimations === 'function'
+    ? phoenixTraveler.getAnimations()
+    : [];
+  const phoenixFlight = animations.find((animation) => {
+    return animation.animationName === phoenixFlightAnimationName;
+  });
+
+  if (phoenixFlight) {
+    return phoenixFlight.finished.then(
+      () => ({
+        finishedAt: logStartupTimestamp('PHOENIX FLIGHT END'),
+        animationActive: true,
+      }),
+      () => ({
+        finishedAt: logStartupTimestamp('PHOENIX FLIGHT END'),
+        animationActive: false,
+      }),
+    );
+  }
+
+  const animationNames = window.getComputedStyle(phoenixTraveler)
+    .animationName
+    .split(',')
+    .map((name) => name.trim());
+  if (!animationNames.includes(phoenixFlightAnimationName)) {
+    const finishedAt = logStartupTimestamp('PHOENIX FLIGHT END');
+    return Promise.resolve({ finishedAt, animationActive: false });
+  }
+
+  return new Promise((resolve) => {
+    const finish = (event, animationActive) => {
+      if (event.animationName !== phoenixFlightAnimationName) {
+        return;
+      }
+      phoenixTraveler.removeEventListener('animationend', onAnimationEnd);
+      phoenixTraveler.removeEventListener('animationcancel', onAnimationCancel);
+      resolve({
+        finishedAt: logStartupTimestamp('PHOENIX FLIGHT END'),
+        animationActive,
+      });
+    };
+    const onAnimationEnd = (event) => finish(event, true);
+    const onAnimationCancel = (event) => finish(event, false);
+    phoenixTraveler.addEventListener('animationend', onAnimationEnd);
+    phoenixTraveler.addEventListener('animationcancel', onAnimationCancel);
+  });
+}
+
+const phoenixFlightFinished = waitForPhoenixFlight();
+
+function hideLoading({ flightEndAt, runAppReadyAt, animationActive }) {
   if (!loading) {
     return;
   }
 
-  const elapsed = window.performance.now() - loadingStartedAt;
-  const remaining = Math.max(0, minimumJourneyDurationMs - elapsed);
-  if (remaining > 0) {
-    updateLoadingText('凤凰即将抵达现代世界…');
-    await new Promise((resolve) => window.setTimeout(resolve, remaining));
+  const coverFadeStartedAt = logStartupTimestamp('COVER FADE START');
+  if (animationActive) {
+    const finalFrameExtraWait = Math.max(0, coverFadeStartedAt - flightEndAt);
+    console.info(`FINAL-FRAME EXTRA WAIT = ${finalFrameExtraWait.toFixed(1)}ms`);
   }
+  console.info(`FLUTTER runApp READY = ${runAppReadyAt.toFixed(1)}ms`);
 
   loading.classList.add('phoenix-loading--hidden');
   window.setTimeout(() => loading.remove(), 760);
@@ -122,8 +184,15 @@ function reloadAfterLegacyWorkerRetirement() {
         updateLoadingText('正在启动旅行引擎…');
         const appRunner = await engineInitializer.initializeEngine();
         updateLoadingText('正在打开 Phoenix…');
-        await appRunner.runApp();
-        await hideLoading();
+        const [runAppReadyAt, flight] = await Promise.all([
+          appRunner.runApp().then(() => logStartupTimestamp('FLUTTER runApp READY')),
+          phoenixFlightFinished,
+        ]);
+        hideLoading({
+          flightEndAt: flight.finishedAt,
+          runAppReadyAt,
+          animationActive: flight.animationActive,
+        });
       },
     });
   } catch (error) {
