@@ -34,11 +34,13 @@ class PhoenixHomeInteractionBoundary extends StatefulWidget {
   const PhoenixHomeInteractionBoundary({
     super.key,
     required this.selectedTab,
+    required this.activeJourneyId,
     required this.onDiscoveryTap,
     required this.child,
   });
 
   final int selectedTab;
+  final String activeJourneyId;
   final VoidCallback onDiscoveryTap;
   final Widget child;
 
@@ -58,6 +60,13 @@ class _PhoenixHomeInteractionBoundaryState
   void initState() {
     super.initState();
     _lastSelectedTab = widget.selectedTab;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      emitPhoenixInteractionAudit(
+        'home-journey-state',
+        detail: <String, Object?>{'journeyId': widget.activeJourneyId},
+      );
+    });
     _levelController.addListener(_handleLevelChanged);
   }
 
@@ -69,6 +78,13 @@ class _PhoenixHomeInteractionBoundaryState
       emitPhoenixInteractionAudit(
         'home-tab-state',
         detail: <String, Object?>{'selectedTab': widget.selectedTab},
+      );
+      _scheduleTargetScan();
+    }
+    if (widget.activeJourneyId != oldWidget.activeJourneyId) {
+      emitPhoenixInteractionAudit(
+        'home-journey-state',
+        detail: <String, Object?>{'journeyId': widget.activeJourneyId},
       );
       _scheduleTargetScan();
     }
