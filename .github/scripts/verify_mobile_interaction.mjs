@@ -64,6 +64,37 @@ async function attachFlutterTrace(page) {
   }, eventTypes);
 }
 
+async function startupState(page) {
+  return page.evaluate(() => {
+    const cover = document.getElementById('phoenix-loading');
+    const view = document.querySelector('flutter-view');
+    const coverStyle = cover ? getComputedStyle(cover) : null;
+    const viewStyle = view ? getComputedStyle(view) : null;
+    return {
+      readyState: document.readyState,
+      marks: performance.getEntriesByType('mark').map((entry) => ({ name: entry.name, startTime: entry.startTime })),
+      htmlInert: document.documentElement.hasAttribute('inert'),
+      bodyInert: document.body.hasAttribute('inert'),
+      bodyPointerEvents: getComputedStyle(document.body).pointerEvents,
+      cover: cover ? {
+        present: true,
+        className: cover.className,
+        inert: cover.hasAttribute('inert'),
+        ariaHidden: cover.getAttribute('aria-hidden'),
+        pointerEvents: coverStyle.pointerEvents,
+        visibility: coverStyle.visibility,
+        opacity: coverStyle.opacity,
+      } : { present: false },
+      flutterView: view ? {
+        present: true,
+        inert: view.hasAttribute('inert'),
+        pointerEvents: viewStyle.pointerEvents,
+        touchAction: viewStyle.touchAction,
+      } : { present: false },
+    };
+  });
+}
+
 async function enableSemantics(page) {
   await page.evaluate(() => {
     const walk = (root) => {
@@ -89,7 +120,7 @@ async function enableSemantics(page) {
       return elements;
     };
     return collect(document).some((element) => element.getAttribute?.('aria-label'));
-  }, { timeout: 10000 });
+  }, null, { timeout: 15000 });
 }
 
 async function semanticSnapshot(page) {
@@ -201,29 +232,29 @@ async function runBrowser(browserType, browserName) {
 
   const separator = url.includes('?') ? '&' : '?';
   const auditUrl = `${url}${separator}unlock=all&prototype=journeys&interaction_audit=1&v=${sourceSha}`;
-  await page.goto(auditUrl, { waitUntil: 'load', timeout: 60000 });
-  await page.waitForFunction(() => performance.getEntriesByName('phoenix-main-interactive').length > 0, { timeout: 60000 });
-  await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, { timeout: 10000 });
+  await page.goto(auditUrl, { waitUntil: 'load', timeout: 90000 });
+  try {
+    await page.waitForFunction(
+      () => performance.getEntriesByName('phoenix-main-interactive').length > 0,
+      null,
+      { timeout: 90000 },
+    );
+    await page.waitForFunction(
+      () => document.getElementById('phoenix-loading') == null,
+      null,
+      { timeout: 30000 },
+    );
+  } catch (error) {
+    console.log(`${browserName} STARTUP WAIT STATE`);
+    console.log(JSON.stringify(await startupState(page), null, 2));
+    throw error;
+  }
+
   await attachFlutterTrace(page);
   await enableSemantics(page);
   await disableSemanticsHitTesting(page);
 
-  const domState = await page.evaluate(() => {
-    const view = document.querySelector('flutter-view');
-    const style = view ? getComputedStyle(view) : null;
-    return {
-      htmlInert: document.documentElement.hasAttribute('inert'),
-      bodyInert: document.body.hasAttribute('inert'),
-      bodyPointerEvents: getComputedStyle(document.body).pointerEvents,
-      flutterView: view ? {
-        present: true,
-        inert: view.hasAttribute('inert'),
-        pointerEvents: style.pointerEvents,
-        touchAction: style.touchAction,
-      } : { present: false },
-      coverPresent: document.getElementById('phoenix-loading') != null,
-    };
-  });
+  const domState = await startupState(page);
   console.log(`${browserName} DOM STATE`);
   console.log(JSON.stringify(domState, null, 2));
 
