@@ -232,7 +232,7 @@ async function runBrowser(browserType, browserName) {
     await installAuditBridge(page);
 
     const separator = url.includes('?') ? '&' : '?';
-    const auditUrl = `${url}${separator}unlock=all&prototype=journeys&interaction_audit=1&v=${sourceSha}`;
+    const auditUrl = `${url}${separator}unlock=all&prototype=journeys&interaction_audit=1&interaction_journey=quanzhou-kaiyuan-temple&v=${sourceSha}`;
     await page.goto(auditUrl, { waitUntil: 'load', timeout: 140000 });
     try {
       await page.waitForFunction(
@@ -254,6 +254,14 @@ async function runBrowser(browserType, browserName) {
     await attachFlutterDomTrace(page);
     console.log(`${browserName} POST-STARTUP DOM STATE`);
     console.log(JSON.stringify(await startupState(page), null, 2));
+    await waitForAuditEvent(
+      page,
+      0,
+      `(entry) => entry.type === 'home-journey-state' && entry.journeyId === 'quanzhou-kaiyuan-temple'`,
+      `${browserName}:quanzhou-home-state`,
+      15000,
+    );
+    console.log(`${browserName} QUANZHOU JOURNEY PIN = PASS`);
 
     const passport = await waitForRect(page, 'bottom-nav-passport');
     let actionStart = await rawTouch(page, passport, `${browserName}:bottom-nav-passport`);
