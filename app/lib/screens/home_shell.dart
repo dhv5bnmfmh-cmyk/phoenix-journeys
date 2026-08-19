@@ -21,6 +21,8 @@ class HomeShell extends StatefulWidget {
 }
 
 class _HomeShellState extends State<HomeShell> {
+  bool _auditJourneyActivationScheduled = false;
+
   Future<void> _showDiscovery(BuildContext context, AppState state) {
     return showModalBottomSheet<void>(
       context: context,
@@ -77,8 +79,21 @@ class _HomeShellState extends State<HomeShell> {
     required Widget child,
   }) {
     if (!phoenixInteractionAuditEnabled) return child;
+    final requestedJourneyId =
+        Uri.base.queryParameters['interaction_journey'];
+    if (!_auditJourneyActivationScheduled &&
+        requestedJourneyId != null &&
+        requestedJourneyId.isNotEmpty &&
+        state.activeJourneyId != requestedJourneyId) {
+      _auditJourneyActivationScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        await state.activateJourney(requestedJourneyId);
+      });
+    }
     return PhoenixHomeInteractionBoundary(
       selectedTab: state.selectedTab,
+      activeJourneyId: state.activeJourneyId,
       onDiscoveryTap: () => _showDiscovery(context, state),
       child: child,
     );
