@@ -3,129 +3,34 @@ import 'package:provider/provider.dart';
 
 import '../models/journey_background.dart';
 import '../state/app_state.dart';
-import '../services/interaction_audit_sink.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/destination_background.dart';
-import '../widgets/interaction_audit_probe.dart';
 import '../widgets/journey_level_selector_button.dart';
 import 'city_passport_screen.dart';
 import 'explore_screen.dart';
 import 'me_screen.dart';
 import 'shadowing_training_screen.dart';
 
-class HomeShell extends StatefulWidget {
+class HomeShell extends StatelessWidget {
   const HomeShell({super.key});
 
-  @override
-  State<HomeShell> createState() => _HomeShellState();
-}
-
-class _HomeShellState extends State<HomeShell> {
-  final Set<int> _mountedTabs = <int>{0};
-  bool _auditJourneyActivationScheduled = false;
-
-  Widget _pageFor(int index) {
-    return switch (index) {
-      0 => const ExploreScreen(),
-      1 => const CityPassportScreen(),
-      2 => const ShadowingTrainingScreen(embedded: true),
-      3 => const MeScreen(),
-      _ => const SizedBox.shrink(),
-    };
-  }
-
-  Future<void> _showDiscovery(BuildContext context, AppState state) {
-    return showModalBottomSheet<void>(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      backgroundColor: const Color(0xFFFFFBF3),
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.fromLTRB(18, 2, 18, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Color(0xFF7B1E1E),
-                  child: Icon(Icons.auto_awesome, color: Colors.white, size: 19),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    state.displayText('Discovery · 今日发现'),
-                    style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Text(
-              state.displayText(state.activeJourney.discoveryTeaser),
-              style: const TextStyle(fontSize: 15, height: 1.35),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              state.displayText('朗读后用探索者语言理解，再继续表达。'),
-              style: const TextStyle(
-                color: Colors.black54,
-                fontSize: 12,
-                height: 1.3,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _withInteractionBoundary({
-    required BuildContext context,
-    required AppState state,
-    required Widget child,
-  }) {
-    if (!phoenixInteractionAuditEnabled) return child;
-    final requestedJourneyId =
-        Uri.base.queryParameters['interaction_journey'];
-    if (!_auditJourneyActivationScheduled &&
-        requestedJourneyId != null &&
-        requestedJourneyId.isNotEmpty &&
-        state.activeJourneyId != requestedJourneyId) {
-      _auditJourneyActivationScheduled = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted) return;
-        await state.activateJourney(requestedJourneyId);
-      });
-    }
-    return PhoenixHomeInteractionBoundary(
-      selectedTab: state.selectedTab,
-      activeJourneyId: state.activeJourneyId,
-      onDiscoveryTap: () => _showDiscovery(context, state),
-      child: child,
-    );
-  }
+  static const _pages = [
+    ExploreScreen(),
+    CityPassportScreen(),
+    ShadowingTrainingScreen(embedded: true),
+    MeScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    _mountedTabs.add(state.selectedTab);
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 800;
         final indexedPages = IndexedStack(
           index: state.selectedTab,
-          children: List<Widget>.generate(
-            4,
-            (index) => _mountedTabs.contains(index)
-                ? _pageFor(index)
-                : const SizedBox.shrink(),
-            growable: false,
-          ),
+          children: _pages,
         );
         final pageType = switch (state.selectedTab) {
           1 => JourneyBackgroundPage.passport,
@@ -152,68 +57,60 @@ class _HomeShellState extends State<HomeShell> {
         );
 
         if (isWide) {
-          return _withInteractionBoundary(
-            context: context,
-            state: state,
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: SafeArea(
-                child: Row(
-                  children: [
-                    NavigationRail(
-                      selectedIndex: state.selectedTab,
-                      onDestinationSelected: state.setTab,
-                      labelType: NavigationRailLabelType.all,
-                      leading: const Padding(
-                        padding: EdgeInsets.only(top: 12, bottom: 20),
-                        child: _PhoenixRailMark(),
-                      ),
-                      destinations: [
-                        NavigationRailDestination(
-                          icon: const Icon(Icons.public),
-                          label: Text(state.displayText('探索')),
-                        ),
-                        NavigationRailDestination(
-                          icon: const Icon(Icons.auto_stories),
-                          label: Text(state.displayText('护照')),
-                        ),
-                        NavigationRailDestination(
-                          icon: const Icon(Icons.mic_rounded),
-                          label: Text(state.displayText('跟读训练')),
-                        ),
-                        NavigationRailDestination(
-                          icon: const Icon(Icons.person_outline),
-                          label: Text(state.displayText('我的')),
-                        ),
-                      ],
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            body: SafeArea(
+              child: Row(
+                children: [
+                  NavigationRail(
+                    selectedIndex: state.selectedTab,
+                    onDestinationSelected: state.setTab,
+                    labelType: NavigationRailLabelType.all,
+                    leading: const Padding(
+                      padding: EdgeInsets.only(top: 12, bottom: 20),
+                      child: _PhoenixRailMark(),
                     ),
-                    const VerticalDivider(width: 1),
-                    Expanded(
-                      child: ColoredBox(
-                        color: Colors.transparent,
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 760),
-                            child: content,
-                          ),
+                    destinations: [
+                      NavigationRailDestination(
+                        icon: const Icon(Icons.public),
+                        label: Text(state.displayText('探索')),
+                      ),
+                      NavigationRailDestination(
+                        icon: const Icon(Icons.auto_stories),
+                        label: Text(state.displayText('护照')),
+                      ),
+                      NavigationRailDestination(
+                        icon: const Icon(Icons.mic_rounded),
+                        label: Text(state.displayText('跟读训练')),
+                      ),
+                      NavigationRailDestination(
+                        icon: const Icon(Icons.person_outline),
+                        label: Text(state.displayText('我的')),
+                      ),
+                    ],
+                  ),
+                  const VerticalDivider(width: 1),
+                  Expanded(
+                    child: ColoredBox(
+                      color: Colors.transparent,
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 760),
+                          child: content,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );
         }
 
-        return _withInteractionBoundary(
-          context: context,
-          state: state,
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: SafeArea(bottom: false, child: content),
-            bottomNavigationBar: _CompactBottomNavigation(state: state),
-          ),
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(bottom: false, child: content),
+          bottomNavigationBar: _CompactBottomNavigation(state: state),
         );
       },
     );
@@ -248,28 +145,24 @@ class _CompactBottomNavigation extends StatelessWidget {
           child: Row(
             children: [
               _CompactNavItem(
-                auditId: 'bottom-nav-explore',
                 icon: Icons.public_rounded,
                 label: state.displayText('探索'),
                 selected: state.selectedTab == 0,
                 onTap: () => state.setTab(0),
               ),
               _CompactNavItem(
-                auditId: 'bottom-nav-passport',
                 icon: Icons.auto_stories_rounded,
                 label: state.displayText('护照'),
                 selected: state.selectedTab == 1,
                 onTap: () => state.setTab(1),
               ),
               _CompactNavItem(
-                auditId: 'bottom-nav-shadowing',
                 icon: Icons.mic_rounded,
                 label: state.displayText('跟读训练'),
                 selected: state.selectedTab == 2,
                 onTap: () => state.setTab(2),
               ),
               _CompactNavItem(
-                auditId: 'bottom-nav-me',
                 icon: Icons.person_outline_rounded,
                 label: state.displayText('我的'),
                 selected: state.selectedTab == 3,
@@ -285,14 +178,12 @@ class _CompactBottomNavigation extends StatelessWidget {
 
 class _CompactNavItem extends StatelessWidget {
   const _CompactNavItem({
-    required this.auditId,
     required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
   });
 
-  final String auditId;
   final IconData icon;
   final String label;
   final bool selected;
@@ -308,7 +199,6 @@ class _CompactNavItem extends StatelessWidget {
         selected: selected,
         label: label,
         child: InkWell(
-          key: ValueKey('interaction-audit-$auditId'),
           onTap: onTap,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -4,7 +4,7 @@ import test from 'node:test';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-test('Phoenix launch cover animates a short branded journey and waits for real app readiness', async () => {
+test('Phoenix launch cover animates a journey from ancient to modern worlds', async () => {
   const [index, bootstrap, manifest, earthArtwork, phoenixArtwork] = await Promise.all([
     read('app/web/index.html'),
     read('app/web/flutter_bootstrap.js'),
@@ -27,36 +27,12 @@ test('Phoenix launch cover animates a short branded journey and waits for real a
   assert.match(index, /phoenix-time-flight/);
   assert.match(index, /phoenix-wing-cycle/);
   assert.match(index, /phoenix-time-mist/);
-  assert.match(index, /phoenix-time-flight-v2 3\.2s cubic-bezier/);
+  assert.match(index, /12\.4s cubic-bezier/);
   assert.match(index, /phoenix-time-flight-v2/);
   assert.match(index, /animation-duration: 18s/);
-  assert.match(index, /#phoenix-loading\.phoenix-loading--hidden[\s\S]*pointer-events: none/);
-  assert.match(bootstrap, /minimumJourneyDurationMs = 3200/);
-  assert.match(bootstrap, /phoenixFlightDurationMs = 3200/);
-  assert.match(bootstrap, /coverExitTransitionMs = 620/);
-  assert.match(bootstrap, /querySelector\('\.phoenix-loading__traveler'\)/);
-  assert.match(bootstrap, /traveler\.animate/);
-  assert.match(bootstrap, /cubic-bezier\(\.45, 0, \.72, \.48\)/);
-  assert.match(bootstrap, /cubic-bezier\(\.18, \.62, \.3, 1\)/);
-  assert.match(bootstrap, /phoenix-startup-settled/);
-  assert.match(bootstrap, /waitForStartupSettled\(\)/);
-  assert.match(bootstrap, /await waitForStartupSettled\(\)/);
+  assert.match(bootstrap, /minimumJourneyDurationMs = 11550/);
   assert.match(bootstrap, /await hideLoading\(\)/);
-  assert.match(bootstrap, /flightCompleted/);
-  assert.match(bootstrap, /phoenix-home-ready/);
-  assert.match(bootstrap, /phoenix-flight-start/);
-  assert.match(bootstrap, /phoenix-flight-end/);
-  assert.match(bootstrap, /phoenix-cover-exit-start/);
-  assert.match(bootstrap, /classList\.add\('phoenix-loading--hidden'\)/);
-  assert.match(bootstrap, /phoenix-main-interactive/);
-  assert.doesNotMatch(bootstrap, /releaseCoverInteraction/);
-  assert.doesNotMatch(bootstrap, /coverCapturesHitTesting/);
-  assert.doesNotMatch(bootstrap, /document\.elementFromPoint/);
-  assert.doesNotMatch(bootstrap, /setAttribute\('inert'/);
-  assert.doesNotMatch(bootstrap, /setAttribute\('aria-hidden'/);
-  assert.doesNotMatch(bootstrap, /cover\.style\.pointerEvents/);
-  assert.doesNotMatch(bootstrap, /phoenix-cover-hit-test-fallback-removed/);
-  assert.doesNotMatch(bootstrap, /classList\.add\('phoenix-loading-hidden'\)/);
+  assert.match(bootstrap, /凤凰即将抵达现代世界/);
   assert.doesNotMatch(index, /mix-blend-mode: screen/);
   assert.match(index, /phoenix-time-portal/);
   assert.match(index, /phoenix-portal-spin/);

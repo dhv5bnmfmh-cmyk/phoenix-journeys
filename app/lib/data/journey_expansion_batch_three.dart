@@ -228,8 +228,8 @@ final journeyExpansionBatchThreeRecords = <JourneyContentRecord>[
   xiamenKulangsuJourney,
 ];
 
-final journeyExpansionBatchThreeExperiences = LazyJourneyList(<DailyJourneyExperience Function()>[
-  () => DailyJourneyExperience(
+final journeyExpansionBatchThreeExperiences = <DailyJourneyExperience>[
+  DailyJourneyExperience(
     id: dunhuangMogaoJourney.id,
     city: '敦煌',
     cityCode: 'DNH',
@@ -248,7 +248,7 @@ final journeyExpansionBatchThreeExperiences = LazyJourneyList(<DailyJourneyExper
     wonderQuestion: '如果你要为未来留下一幅壁画，会画旅途、城市、人物还是自然？为什么？',
     expressQuestion: '请用两到三句话描写晨光、崖壁与沙漠绿洲形成的层次。',
   ),
-  () => DailyJourneyExperience(
+  DailyJourneyExperience(
     id: chengdeMountainResortJourney.id,
     city: '承德',
     cityCode: 'CDE',
@@ -267,7 +267,7 @@ final journeyExpansionBatchThreeExperiences = LazyJourneyList(<DailyJourneyExper
     wonderQuestion: '如果你设计一条山庄路线，会先让人看见湖泊、亭榭、平原还是山峦？',
     expressQuestion: '请用两到三句话描写薄雾、湖面与亭榭共同形成的园林空间。',
   ),
-  () => DailyJourneyExperience(
+  DailyJourneyExperience(
     id: xiamenKulangsuJourney.id,
     city: '厦门',
     cityCode: 'XMN',
@@ -286,4 +286,4 @@ final journeyExpansionBatchThreeExperiences = LazyJourneyList(<DailyJourneyExper
     wonderQuestion: '如果一座老房子能讲述一次文化相遇，你最想听建筑材料、居民还是海港的故事？',
     expressQuestion: '请用两到三句话描写榕树、石阶、老建筑与海面之间的关系。',
   ),
-]);
+];

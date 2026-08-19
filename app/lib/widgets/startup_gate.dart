@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../screens/home_shell.dart';
-import '../services/startup_readiness_notifier.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 
@@ -15,61 +14,16 @@ class StartupGate extends StatelessWidget {
 
     return switch (state.loadStatus) {
       AppLoadStatus.loading => _StartupLoading(state: state),
-      AppLoadStatus.error => _StartupSettled(
-          ready: false,
-          child: _StartupError(
-            state: state,
-            message: state.displayText(
-              state.loadErrorMessage ?? '暂时无法打开 Phoenix Journeys。',
-            ),
-            onRetry: state.load,
+      AppLoadStatus.error => _StartupError(
+          state: state,
+          message: state.displayText(
+            state.loadErrorMessage ?? '暂时无法打开 Phoenix Journeys。',
           ),
+          onRetry: state.load,
         ),
-      AppLoadStatus.ready => const _StartupSettled(
-          ready: true,
-          child: HomeShell(),
-        ),
+      AppLoadStatus.ready => const HomeShell(),
     };
   }
-}
-
-
-class _StartupSettled extends StatefulWidget {
-  const _StartupSettled({required this.ready, required this.child});
-
-  final bool ready;
-  final Widget child;
-
-  @override
-  State<_StartupSettled> createState() => _StartupSettledState();
-}
-
-class _StartupSettledState extends State<_StartupSettled> {
-  bool _notified = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _notify());
-  }
-
-  @override
-  void didUpdateWidget(covariant _StartupSettled oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.ready != widget.ready) {
-      _notified = false;
-      WidgetsBinding.instance.addPostFrameCallback((_) => _notify());
-    }
-  }
-
-  void _notify() {
-    if (!mounted || _notified) return;
-    _notified = true;
-    notifyPhoenixStartupSettled(ready: widget.ready);
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
 }
 
 class _StartupLoading extends StatelessWidget {

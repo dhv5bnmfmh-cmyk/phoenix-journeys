@@ -17,7 +17,7 @@ concurrency:
 
 env:
   CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-  FAILED_FOUNDER_SHA: 2efca8e9905ca48801ac550c1cdcfd915212ced1
+  STABLE_RUNTIME_REF: aaa02d5a08d9c6fef10141125d3906fc1f8909f3
 
 jobs:
   mobile-interaction:
@@ -76,33 +76,32 @@ jobs:
           kill "$server_pid"
           trap - EXIT
 
-      - name: Enforce learner-content firewall
+      - name: Enforce stable-product and learner-content firewall
         shell: bash
         run: |
           set -euo pipefail
-          git diff --name-only "$FAILED_FOUNDER_SHA" "$CANDIDATE_SHA" | sort > "$RUNNER_TEMP/founder-revision-delta.txt"
-          cat > "$RUNNER_TEMP/allowed-founder-revision-delta.txt" <<'FILES'
-          .github/scripts/verify_mobile_interaction.mjs
-          .github/workflows/mobile-interaction-audit.yml
-          app/lib/app.dart
-          app/lib/screens/home_shell.dart
-          app/lib/services/interaction_audit_sink.dart
-          app/lib/services/interaction_audit_sink_stub.dart
-          app/lib/services/interaction_audit_sink_web.dart
-          app/lib/widgets/interaction_audit_probe.dart
-          app/web/flutter_bootstrap.js
-          worker/launch_cover_rule.test.mjs
-          FILES
-          sort -o "$RUNNER_TEMP/allowed-founder-revision-delta.txt" "$RUNNER_TEMP/allowed-founder-revision-delta.txt"
-          echo 'FOUNDER REVISION DELTA:'
-          cat "$RUNNER_TEMP/founder-revision-delta.txt"
-          diff -u "$RUNNER_TEMP/allowed-founder-revision-delta.txt" "$RUNNER_TEMP/founder-revision-delta.txt"
-          if git diff --unified=0 "$FAILED_FOUNDER_SHA" "$CANDIDATE_SHA" -- \
+          git fetch --no-tags origin "$STABLE_RUNTIME_REF"
+          git cat-file -e "$STABLE_RUNTIME_REF^{commit}"
+          if ! git diff --quiet "$STABLE_RUNTIME_REF" "$CANDIDATE_SHA" -- \
+            app/lib \
+            app/assets \
+            app/web; then
+            echo 'STABLE PRODUCT RUNTIME DELTA = FAIL'
+            git diff --stat "$STABLE_RUNTIME_REF" "$CANDIDATE_SHA" -- app/lib app/assets app/web
+            exit 1
+          fi
+          if ! git diff --quiet "$STABLE_RUNTIME_REF" "$CANDIDATE_SHA" -- \
             'app/lib/data/**' \
             'app/lib/models/**' \
             'app/assets/**' \
-            'worker/journey-content/**' | grep -E '^[+-][^+-]'; then
+            'worker/journey-content/**'; then
             echo 'LEARNER CONTENT DELTA = FAIL'
+            git diff --name-only "$STABLE_RUNTIME_REF" "$CANDIDATE_SHA" -- \
+              'app/lib/data/**' \
+              'app/lib/models/**' \
+              'app/assets/**' \
+              'worker/journey-content/**'
             exit 1
           fi
+          echo 'STABLE PRODUCT RUNTIME DELTA = NONE'
           echo 'LEARNER CONTENT DELTA = NONE'

@@ -137,8 +137,8 @@ final journeyExpansionBatchTwoRecords = <JourneyContentRecord>[
   lijiangOldTownJourney,
 ];
 
-final journeyExpansionBatchTwoExperiences = LazyJourneyList(<DailyJourneyExperience Function()>[
-  () => DailyJourneyExperience(
+final journeyExpansionBatchTwoExperiences = <DailyJourneyExperience>[
+  DailyJourneyExperience(
     id: datongYungangJourney.id,
     city: '大同',
     cityCode: 'DAT',
@@ -157,7 +157,7 @@ final journeyExpansionBatchTwoExperiences = LazyJourneyList(<DailyJourneyExperie
     wonderQuestion: datongYungangGoldLevelContent(5).wonderQuestion,
     expressQuestion: datongYungangGoldLevelContent(5).expressQuestion,
   ),
-  () => DailyJourneyExperience(
+  DailyJourneyExperience(
     id: lijiangOldTownJourney.id,
     city: '丽江',
     cityCode: 'LJG',
@@ -176,4 +176,4 @@ final journeyExpansionBatchTwoExperiences = LazyJourneyList(<DailyJourneyExperie
     wonderQuestion: lijiangOldTownGoldLevelContent(5).wonderQuestion,
     expressQuestion: lijiangOldTownGoldLevelContent(5).expressQuestion,
   ),
-]);
+];

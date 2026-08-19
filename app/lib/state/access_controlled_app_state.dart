@@ -81,29 +81,6 @@ class AccessControlledAppState extends AppState {
     'ice-city-star-map',
   };
 
-  static const Set<String> _registeredSpecialJourneyIds = <String>{
-    'literary-roaming',
-    'myth-tracing',
-    'strange-night-talks',
-    'folk-secret-land',
-    ...heldSpecialJourneyIds,
-  };
-
-  static bool _isRegisteredJourneyId(String journeyId) =>
-      dailyJourneyIds.contains(journeyId) ||
-      _registeredSpecialJourneyIds.contains(journeyId);
-
-  static String _storageNamespaceForJourneyId(String journeyId) {
-    final separator = journeyId.indexOf('-');
-    final cityId = separator <= 0 ? journeyId : journeyId.substring(0, separator);
-    final destinationId = journeyId == 'guangzhou-chen-clan-academy'
-        ? 'chen-clan-ancestral-hall'
-        : separator < 0 || separator == journeyId.length - 1
-            ? journeyId
-            : journeyId.substring(separator + 1);
-    return 'journey.$cityId/$destinationId';
-  }
-
   final DateTime Function() _clock;
   final Future<SharedPreferences> Function() _preferencesLoader;
   final Uri _runtimeUri;
@@ -139,7 +116,9 @@ class AccessControlledAppState extends AppState {
       journeyAccessMode == JourneyAccessMode.developmentExperience;
 
   List<String> get eligibleRegularJourneyIds =>
-      List<String>.unmodifiable(dailyJourneyIds);
+      List<String>.unmodifiable(
+        <String>{for (final journey in dailyJourneyExperiences) journey.id},
+      );
 
   DailyJourneyAssignment get dailyAssignment {
     if (!_isValidExplorerSeed(localExplorerSeed)) {
@@ -1290,7 +1269,7 @@ class AccessControlledAppState extends AppState {
           journeyNarrationOffset > 0);
 
   bool _isRegularJourneyId(String journeyId) =>
-      dailyJourneyIds.contains(journeyId);
+      dailyJourneyExperiences.any((journey) => journey.id == journeyId);
 
   String _accessDenialReason(String journeyId) {
     if (_isRegularJourneyId(journeyId)) {
@@ -1524,14 +1503,14 @@ class _PhoenixCriticalSnapshot {
         '$explorerSeedVersion.',
       );
     }
-    if (!AccessControlledAppState._isRegisteredJourneyId(activeJourneyId)) {
+    final active = journeyExperienceById(activeJourneyId);
+    if (active == null) {
       throw CriticalPersistenceException(
         'Committed active Journey is not registered: $activeJourneyId.',
       );
     }
-    final activeStorageNamespace =
-        AccessControlledAppState._storageNamespaceForJourneyId(activeJourneyId);
-    if (activeJourneyNamespace != activeStorageNamespace) {
+    final binding = requireJourneyLocation(activeJourneyId);
+    if (activeJourneyNamespace != binding.storageNamespace) {
       throw CriticalPersistenceException(
         'Committed active Journey namespace mismatch for $activeJourneyId.',
       );
@@ -1550,7 +1529,7 @@ class _PhoenixCriticalSnapshot {
     }
     for (final entry in journeys.entries) {
       if (entry.key != entry.value.journeyId ||
-          !AccessControlledAppState._isRegisteredJourneyId(entry.key)) {
+          journeyExperienceById(entry.key) == null) {
         throw CriticalPersistenceException(
           'Invalid committed Journey domain identity: ${entry.key}.',
         );
@@ -1567,7 +1546,7 @@ class _PhoenixCriticalSnapshot {
       ...earnedJourneyStampIds,
       ...unlockedSpecialJourneyIds,
     }) {
-      if (!AccessControlledAppState._isRegisteredJourneyId(id)) {
+      if (journeyExperienceById(id) == null) {
         throw CriticalPersistenceException(
           'Committed Journey ID is not registered: $id.',
         );
@@ -1886,9 +1865,8 @@ class _JourneyCriticalState {
       );
 
   void validate() {
-    final expectedStorageNamespace =
-        AccessControlledAppState._storageNamespaceForJourneyId(journeyId);
-    if (storageNamespace != expectedStorageNamespace) {
+    final binding = requireJourneyLocation(journeyId);
+    if (storageNamespace != binding.storageNamespace) {
       throw CriticalPersistenceException(
         'Journey namespace mismatch for $journeyId.',
       );
@@ -2081,5 +2059,5 @@ extension JourneyAccessAppState on AppState {
 
   Set<String> get releasedDailyJourneyIds =>
       _accessControlledState?.releasedDailyJourneyIds ??
-      <String>{...dailyJourneyIds};
+      <String>{for (final journey in dailyJourneyExperiences) journey.id};
 }

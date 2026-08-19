@@ -521,45 +521,8 @@ final dailyJourneyRecords = <JourneyContentRecord>[
   ...journeyExpansionBatchFiveRecords,
 ];
 
-final List<String> dailyJourneyIds = List<String>.unmodifiable(
-  const <String>[
-    'beijing-forbidden-city',
-    'beijing-summer-palace',
-    'shanghai-bund',
-    'xian-city-wall',
-    'hangzhou-west-lake',
-    'chengdu-kuanzhai-alley',
-    'nanjing-qinhuai-river',
-    'guangzhou-chen-clan-academy',
-    'jiangmen-kaiping-diaolou',
-    'suzhou-humble-administrators-garden',
-    'luoyang-longmen-grottoes',
-    'quanzhou-kaiyuan-temple',
-    'datong-yungang-grottoes',
-    'lijiang-old-town',
-    'dunhuang-mogao-caves',
-    'chengde-mountain-resort',
-    'xiamen-kulangsu',
-    'pingyao-ancient-city',
-    'qufu-confucius-sites',
-    'leshan-giant-buddha',
-    'wuyishan-nine-bend-stream',
-    'honghe-hani-rice-terraces',
-    'huangshan-cloud-peaks',
-    'zhangjiajie-wulingyuan',
-    'kaifeng-song-capital',
-    'dali-cangshan-erhai',
-    'harbin-central-street',
-  ],
-);
-
-final Map<String, int> _dailyJourneyIndexById = <String, int>{
-  for (var index = 0; index < dailyJourneyIds.length; index += 1)
-    dailyJourneyIds[index]: index,
-};
-
-final dailyJourneyExperiences = LazyJourneyList(<DailyJourneyExperience Function()>[
-  () => DailyJourneyExperience(
+final dailyJourneyExperiences = <DailyJourneyExperience>[
+  DailyJourneyExperience(
     id: beijingForbiddenCityJourney.id,
     city: '北京',
     cityCode: 'PEK',
@@ -578,8 +541,8 @@ final dailyJourneyExperiences = LazyJourneyList(<DailyJourneyExperience Function
     wonderQuestion: wonderQuestion,
     expressQuestion: expressQuestion,
   ),
-  () => summerPalaceJourneyExperience,
-  () => DailyJourneyExperience(
+  summerPalaceJourneyExperience,
+  DailyJourneyExperience(
     id: shanghaiBundJourney.id,
     city: '上海',
     cityCode: 'SHA',
@@ -598,7 +561,7 @@ final dailyJourneyExperiences = LazyJourneyList(<DailyJourneyExperience Function
     wonderQuestion: '林岸为什么在过江后不再把两岸理解成过去和未来？',
     expressQuestion: '旧海运提单与陆家嘴结算系统在故事里共同组织了哪些流动？',
   ),
-  () => DailyJourneyExperience(
+  DailyJourneyExperience(
     id: xianCityWallJourney.id,
     city: '西安',
     cityCode: 'XIY',
@@ -617,30 +580,13 @@ final dailyJourneyExperiences = LazyJourneyList(<DailyJourneyExperience Function
     wonderQuestion: '周遥为什么在跑完一整圈后故意不按停跑表？',
     expressQuestion: '城墙的闭合形状与周遥连续的生活路线怎样形成对照？',
   ),
-  () => extendedJourneyExperiences[0],
-  () => extendedJourneyExperiences[1],
-  () => extendedJourneyExperiences[2],
-  () => extendedJourneyExperiences[3],
-  () => extendedJourneyExperiences[4],
-  () => journeyExpansionExperiences[0],
-  () => journeyExpansionExperiences[1],
-  () => journeyExpansionExperiences[2],
-  () => journeyExpansionBatchTwoExperiences[0],
-  () => journeyExpansionBatchTwoExperiences[1],
-  () => journeyExpansionBatchThreeExperiences[0],
-  () => journeyExpansionBatchThreeExperiences[1],
-  () => journeyExpansionBatchThreeExperiences[2],
-  () => journeyExpansionBatchFourExperiences[0],
-  () => journeyExpansionBatchFourExperiences[1],
-  () => journeyExpansionBatchFourExperiences[2],
-  () => journeyExpansionBatchFourExperiences[3],
-  () => journeyExpansionBatchFourExperiences[4],
-  () => journeyExpansionBatchFiveExperiences[0],
-  () => journeyExpansionBatchFiveExperiences[1],
-  () => journeyExpansionBatchFiveExperiences[2],
-  () => journeyExpansionBatchFiveExperiences[3],
-  () => journeyExpansionBatchFiveExperiences[4],
-]);
+  ...extendedJourneyExperiences,
+  ...journeyExpansionExperiences,
+  ...journeyExpansionBatchTwoExperiences,
+  ...journeyExpansionBatchThreeExperiences,
+  ...journeyExpansionBatchFourExperiences,
+  ...journeyExpansionBatchFiveExperiences,
+];
 
 final allJourneyExperiences = <DailyJourneyExperience>[
   ...dailyJourneyExperiences,
@@ -656,11 +602,7 @@ final List<WordEntry> allDailyJourneyWords = List<WordEntry>.unmodifiable(
 
 DailyJourneyExperience? journeyExperienceById(String id) {
   if (id.isEmpty) return null;
-  final dailyIndex = _dailyJourneyIndexById[id];
-  if (dailyIndex != null) {
-    return dailyJourneyExperiences[dailyIndex];
-  }
-  for (final journey in specialJourneyExperiences) {
+  for (final journey in allJourneyExperiences) {
     if (journey.id == id) return journey;
   }
   return null;
@@ -674,15 +616,12 @@ DailyJourneyExperience requireDailyJourneyExperience(String id) {
   return journey;
 }
 
-String dailyJourneyIdForDate(DateTime date) {
+DailyJourneyExperience dailyJourneyForDate(DateTime date) {
   final day = DateTime.utc(date.year, date.month, date.day);
   final epoch = DateTime.utc(2026, 1, 1);
   final dayNumber = day.difference(epoch).inDays;
-  final index = dayNumber % dailyJourneyIds.length;
-  return dailyJourneyIds[index < 0 ? index + dailyJourneyIds.length : index];
-}
-
-DailyJourneyExperience dailyJourneyForDate(DateTime date) {
-  final id = dailyJourneyIdForDate(date);
-  return dailyJourneyExperiences[_dailyJourneyIndexById[id]!];
+  final index = dayNumber % dailyJourneyExperiences.length;
+  return dailyJourneyExperiences[index < 0
+      ? index + dailyJourneyExperiences.length
+      : index];
 }

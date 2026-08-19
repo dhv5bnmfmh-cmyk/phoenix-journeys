@@ -5,213 +5,134 @@ const { chromium, webkit } = playwrightModule;
 
 const url = process.argv[2];
 const sourceSha = process.argv[3];
-if (!url || !sourceSha) throw new Error('usage: verify_mobile_interaction.mjs <url> <source-sha>');
-
-const domEventTypes = [
-  'pointerdown',
-  'pointerup',
-  'pointercancel',
-  'touchstart',
-  'touchend',
-  'touchcancel',
-  'click',
-];
-
-async function installAuditBridge(page) {
-  await page.addInitScript((types) => {
-    window.__phoenixDomTrace = [];
-    window.__phoenixAuditEvents = [];
-    window.__phoenixAuditRects = {};
-
-    const describe = (node) => ({
-      tag: node?.tagName || node?.nodeName || null,
-      id: node?.id || null,
-      aria: node?.getAttribute?.('aria-label') || null,
-    });
-    const recordDom = (scope, event) => window.__phoenixDomTrace.push({
-      scope,
-      type: event.type,
-      target: describe(event.target),
-      currentTarget: describe(event.currentTarget),
-      pointerType: event.pointerType || null,
-      isTrusted: event.isTrusted,
-      time: performance.now(),
-    });
-
-    for (const type of types) {
-      window.addEventListener(type, (event) => recordDom('window', event), true);
-      document.addEventListener(type, (event) => recordDom('document', event), true);
-    }
-
-    window.addEventListener('phoenix-interaction-audit', (event) => {
-      let payload;
-      try {
-        payload = typeof event.detail === 'string' ? JSON.parse(event.detail) : event.detail;
-      } catch (_) {
-        payload = { type: 'invalid-audit-payload', raw: String(event.detail) };
-      }
-      if (!payload || typeof payload !== 'object') return;
-      const entry = { ...payload, time: performance.now() };
-      window.__phoenixAuditEvents.push(entry);
-      if (payload.type === 'target-rect' && payload.id) {
-        window.__phoenixAuditRects[payload.id] = {
-          x: Number(payload.x),
-          y: Number(payload.y),
-          width: Number(payload.width),
-          height: Number(payload.height),
-        };
-      }
-    });
-  }, domEventTypes);
+if (!url || !sourceSha) {
+  throw new Error('usage: verify_mobile_interaction.mjs <url> <source-sha>');
 }
 
-async function attachFlutterDomTrace(page) {
-  await page.evaluate((types) => {
-    const view = document.querySelector('flutter-view');
-    if (!view || view.dataset.phoenixTraceAttached === '1') return;
-    view.dataset.phoenixTraceAttached = '1';
-    const describe = (node) => ({
-      tag: node?.tagName || node?.nodeName || null,
-      id: node?.id || null,
-      aria: node?.getAttribute?.('aria-label') || null,
-    });
-    for (const type of types) {
-      view.addEventListener(type, (event) => {
-        window.__phoenixDomTrace.push({
-          scope: 'flutter-view',
-          type: event.type,
-          target: describe(event.target),
-          currentTarget: describe(event.currentTarget),
-          pointerType: event.pointerType || null,
-          isTrusted: event.isTrusted,
-          time: performance.now(),
-        });
-      }, true);
-    }
-  }, domEventTypes);
-}
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function startupState(page) {
-  return page.evaluate(() => {
-    const cover = document.getElementById('phoenix-loading');
-    const view = document.querySelector('flutter-view');
-    const coverStyle = cover ? getComputedStyle(cover) : null;
-    const viewStyle = view ? getComputedStyle(view) : null;
-    return {
-      marks: performance.getEntriesByType('mark').map((entry) => ({
-        name: entry.name,
-        startTime: entry.startTime,
-      })),
-      htmlInert: document.documentElement.hasAttribute('inert'),
-      bodyInert: document.body.hasAttribute('inert'),
-      bodyPointerEvents: getComputedStyle(document.body).pointerEvents,
-      cover: cover ? {
-        present: true,
-        className: cover.className,
-        inert: cover.hasAttribute('inert'),
-        ariaHidden: cover.getAttribute('aria-hidden'),
-        pointerEvents: coverStyle.pointerEvents,
-        visibility: coverStyle.visibility,
-        opacity: coverStyle.opacity,
-      } : { present: false },
-      flutterView: view ? {
-        present: true,
-        inert: view.hasAttribute('inert'),
-        pointerEvents: viewStyle.pointerEvents,
-        touchAction: viewStyle.touchAction,
-      } : { present: false },
-    };
-  });
-}
-
-async function waitForRect(page, id, timeout = 15000) {
-  await page.waitForFunction(
-    (targetId) => {
-      const rect = window.__phoenixAuditRects?.[targetId];
-      return rect && rect.width > 0 && rect.height > 0;
-    },
-    id,
-    { timeout },
-  );
-  return page.evaluate((targetId) => window.__phoenixAuditRects[targetId], id);
-}
-
-async function auditLength(page) {
-  return page.evaluate(() => window.__phoenixAuditEvents?.length || 0);
-}
-
-async function waitForAuditEvent(page, startIndex, predicateSource, label, timeout = 10000) {
-  const handle = await page.waitForFunction(
-    ({ startIndex, predicateSource }) => {
-      const predicate = new Function('entry', `return (${predicateSource})(entry);`);
-      const events = (window.__phoenixAuditEvents || []).slice(startIndex);
-      return events.find((entry) => predicate(entry)) || false;
-    },
-    { startIndex, predicateSource },
-    { timeout },
-  );
-  const event = await handle.jsonValue();
-  console.log(`${label} OBSERVED`);
-  console.log(JSON.stringify(event, null, 2));
-  return event;
-}
-
-async function rawTouch(page, rect, label) {
-  await page.evaluate(() => { window.__phoenixDomTrace = []; });
-  const startIndex = await auditLength(page);
-  const x = rect.x + rect.width / 2;
-  const y = rect.y + rect.height / 2;
-  await page.touchscreen.tap(x, y);
-  await page.waitForTimeout(350);
-
-  const domEvents = await page.evaluate(() => window.__phoenixDomTrace || []);
-  const auditEvents = await page.evaluate(
-    (index) => (window.__phoenixAuditEvents || []).slice(index),
-    startIndex,
-  );
-  console.log(`TOUCH TRACE ${label}`);
-  console.log(JSON.stringify({ x, y, domEvents, auditEvents }, null, 2));
-
-  const trustedDomStart = domEvents.some((entry) =>
-    entry.isTrusted && (entry.type === 'touchstart' || entry.type === 'pointerdown'));
-  const trustedDomEnd = domEvents.some((entry) =>
-    entry.isTrusted && (entry.type === 'touchend' || entry.type === 'pointerup'));
-  const trustedFlutterViewStart = domEvents.some((entry) =>
-    entry.scope === 'flutter-view' &&
-    entry.isTrusted &&
-    (entry.type === 'touchstart' || entry.type === 'pointerdown'));
-  const trustedFlutterViewEnd = domEvents.some((entry) =>
-    entry.scope === 'flutter-view' &&
-    entry.isTrusted &&
-    (entry.type === 'touchend' || entry.type === 'pointerup'));
-
-  console.log(`ACTION = ${label}`);
-  console.log(`DOM pointer/touch start = ${trustedDomStart ? 'YES' : 'NO'}`);
-  console.log(`DOM pointer/touch end = ${trustedDomEnd ? 'YES' : 'NO'}`);
-  console.log(`flutter-view start = ${trustedFlutterViewStart ? 'YES' : 'NO'}`);
-  console.log(`flutter-view end = ${trustedFlutterViewEnd ? 'YES' : 'NO'}`);
-
-  if (!trustedDomStart || !trustedDomEnd) {
-    throw new Error(`${label}: incomplete trusted DOM touch sequence`);
+async function enableFlutterSemantics(page, browserName) {
+  const placeholder = page.locator('flt-semantics-placeholder').first();
+  if (await placeholder.count()) {
+    await placeholder.click({ force: true });
   }
-  if (!trustedFlutterViewStart || !trustedFlutterViewEnd) {
-    throw new Error(`${label}: trusted touch sequence did not reach flutter-view`);
-  }
-  return startIndex;
+  await page.locator('flt-semantics').first().waitFor({ state: 'attached', timeout: 15000 });
+  console.log(`${browserName} FLUTTER SEMANTICS = ENABLED`);
 }
 
-async function dismissModalByTouch(page, browserName) {
-  const startIndex = await rawTouch(
-    page,
-    { x: 0, y: 60, width: 40, height: 40 },
-    `${browserName}:modal-dismiss`,
-  );
-  await waitForAuditEvent(
-    page,
-    startIndex,
-    `(entry) => entry.type === 'route-pop'`,
-    `${browserName}:modal-dismiss-route`,
-  );
+async function waitForHome(page, browserName) {
+  await page.getByRole('button', { name: '探索', exact: true }).first().waitFor({ state: 'visible', timeout: 20000 });
+  await page.getByRole('button', { name: '选择城市', exact: true }).first().waitFor({ state: 'visible', timeout: 20000 });
+  await page.getByRole('button', { name: /^(开始|继续|再次探索).+/ }).first().waitFor({ state: 'visible', timeout: 20000 });
+  console.log(`${browserName} HOME INTERACTIVE STATE = PRESENT`);
+}
+
+async function tapButton(page, name, label) {
+  const button = page.getByRole('button', { name, exact: typeof name === 'string' }).first();
+  await button.waitFor({ state: 'visible', timeout: 15000 });
+  if (!(await button.isEnabled())) throw new Error(`${label}: button is disabled`);
+  await button.tap({ timeout: 15000 });
+  return button;
+}
+
+async function waitExactText(page, text, timeout = 15000) {
+  await page.getByText(text, { exact: true }).first().waitFor({ state: 'visible', timeout });
+}
+
+async function dismissBottomSheet(page, expectedText) {
+  await page.touchscreen.tap(22, 58);
+  await page.getByText(expectedText, { exact: true }).first().waitFor({ state: 'hidden', timeout: 10000 });
+}
+
+async function assertSelectedTab(page, label, browserName) {
+  const nav = page.getByRole('button', { name: label, exact: true }).first();
+  await nav.waitFor({ state: 'visible', timeout: 10000 });
+  await nav.tap();
+  await sleep(300);
+  const selected = await nav.getAttribute('aria-selected');
+  const checked = await nav.getAttribute('aria-checked');
+  if (selected !== 'true' && checked !== 'true') {
+    throw new Error(`${browserName}:${label}: tab did not expose selected state after tap`);
+  }
+  console.log(`${browserName} TAB ${label} = PASS`);
+}
+
+async function exerciseLevelControl(page, browserName) {
+  const level = page.locator('flt-semantics[aria-label^="Phoenix 中文难度 "]').first();
+  await level.waitFor({ state: 'attached', timeout: 15000 });
+  const before = await level.getAttribute('aria-label');
+  let control = page.getByRole('button', { name: '提高当前难度', exact: true }).first();
+  let direction = 'PLUS';
+  if (!(await control.isEnabled())) {
+    control = page.getByRole('button', { name: '降低当前难度', exact: true }).first();
+    direction = 'MINUS';
+  }
+  if (!(await control.isEnabled())) throw new Error(`${browserName}: no enabled level control`);
+  await control.tap();
+  let after = before;
+  for (let i = 0; i < 30 && after === before; i += 1) {
+    await sleep(100);
+    after = await level.getAttribute('aria-label');
+  }
+  if (!before || !after || before === after) {
+    throw new Error(`${browserName}: level state did not change (${before} -> ${after})`);
+  }
+  console.log(`${browserName} LV ${direction} = PASS (${before} -> ${after})`);
+}
+
+async function exerciseCitySelector(page, browserName) {
+  await tapButton(page, '选择城市', `${browserName}:city-selector`);
+  await waitExactText(page, '选择城市与地点');
+  console.log(`${browserName} CITY SELECTOR OPEN = PASS`);
+  await dismissBottomSheet(page, '选择城市与地点');
+  console.log(`${browserName} CITY SELECTOR CLOSE = PASS`);
+}
+
+async function openJourney(page, browserName, cycle) {
+  const button = page.getByRole('button', { name: /^(开始|继续|再次探索).+/ }).first();
+  await button.waitFor({ state: 'visible', timeout: 15000 });
+  const action = await button.getAttribute('aria-label');
+  await button.tap();
+  await page.getByText(/^[1-6]\/6$/).first().waitFor({ state: 'visible', timeout: 20000 });
+  console.log(`${browserName} JOURNEY CYCLE ${cycle} OPEN = PASS (${action})`);
+}
+
+async function reachDiscovery(page, browserName) {
+  await waitExactText(page, '1/6');
+  await waitExactText(page, '故事');
+  await tapButton(page, '继续', `${browserName}:story-next`);
+  await sleep(500);
+  await page.touchscreen.tap(22, 58);
+  await waitExactText(page, '2/6', 15000);
+  await waitExactText(page, '单词', 15000);
+  await tapButton(page, '继续', `${browserName}:words-next`);
+  await waitExactText(page, '3/6', 15000);
+  await waitExactText(page, '发现', 15000);
+  console.log(`${browserName} DISCOVERY STATE TRANSITION = PASS`);
+}
+
+async function exitJourneyToHome(page, browserName, cycle) {
+  await page.touchscreen.tap(28, 26);
+  await waitForHome(page, browserName);
+  console.log(`${browserName} JOURNEY CYCLE ${cycle} RETURN = PASS`);
+}
+
+async function exercisePostReturnHome(page, browserName, cycle) {
+  await assertSelectedTab(page, '护照', browserName);
+  await waitExactText(page, '探索护照');
+  await assertSelectedTab(page, '探索', browserName);
+  await waitForHome(page, browserName);
+  console.log(`${browserName} POST-CYCLE-${cycle} HOME INTERACTION = PASS`);
+}
+
+async function exerciseAllTabs(page, browserName) {
+  await assertSelectedTab(page, '护照', browserName);
+  await waitExactText(page, '探索护照');
+  await assertSelectedTab(page, '跟读训练', browserName);
+  await assertSelectedTab(page, '我的', browserName);
+  await assertSelectedTab(page, '探索', browserName);
+  await waitForHome(page, browserName);
+  console.log(`${browserName} BOTTOM NAVIGATION ALL TABS = PASS`);
 }
 
 async function runBrowser(browserType, browserName) {
@@ -229,230 +150,31 @@ async function runBrowser(browserType, browserName) {
     const pageErrors = [];
     page.on('pageerror', (error) => pageErrors.push(error?.stack || error?.message || String(error)));
     page.on('console', (message) => console.log(`[${browserName} console:${message.type()}] ${message.text()}`));
-    await installAuditBridge(page);
 
     const separator = url.includes('?') ? '&' : '?';
-    const auditUrl = `${url}${separator}unlock=all&prototype=journeys&interaction_audit=1&interaction_journey=quanzhou-kaiyuan-temple&v=${sourceSha}`;
-    await page.goto(auditUrl, { waitUntil: 'load', timeout: 140000 });
-    try {
-      await page.waitForFunction(
-        () => performance.getEntriesByName('phoenix-main-interactive').length > 0,
-        null,
-        { timeout: 140000 },
-      );
-      await page.waitForFunction(
-        () => document.getElementById('phoenix-loading') == null,
-        null,
-        { timeout: 30000 },
-      );
-    } catch (error) {
-      console.log(`${browserName} STARTUP WAIT STATE`);
-      console.log(JSON.stringify(await startupState(page), null, 2));
-      throw error;
-    }
+    const candidateUrl = `${url}${separator}unlock=all&prototype=journeys&v=${sourceSha}`;
+    await page.goto(candidateUrl, { waitUntil: 'load', timeout: 140000 });
+    await page.waitForFunction(() => document.querySelector('flutter-view') != null, null, { timeout: 140000 });
+    await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
+    await enableFlutterSemantics(page, browserName);
+    await waitForHome(page, browserName);
+    console.log(`${browserName} HOME INITIAL INTERACTION = PASS`);
 
-    await attachFlutterDomTrace(page);
-    console.log(`${browserName} POST-STARTUP DOM STATE`);
-    console.log(JSON.stringify(await startupState(page), null, 2));
-    await waitForAuditEvent(
-      page,
-      0,
-      `(entry) => entry.type === 'home-journey-state' && entry.journeyId === 'quanzhou-kaiyuan-temple'`,
-      `${browserName}:quanzhou-home-state`,
-      15000,
-    );
-    console.log(`${browserName} QUANZHOU JOURNEY PIN = PASS`);
+    await exerciseCitySelector(page, browserName);
+    await exerciseLevelControl(page, browserName);
 
-    const passport = await waitForRect(page, 'bottom-nav-passport');
-    let actionStart = await rawTouch(page, passport, `${browserName}:bottom-nav-passport`);
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'home-tab-state' && entry.selectedTab === 1`,
-      `${browserName}:bottom-nav-passport-state`,
-    );
-    console.log(`${browserName} BOTTOM NAVIGATION PASSPORT = PASS`);
+    await openJourney(page, browserName, 1);
+    await reachDiscovery(page, browserName);
+    await exitJourneyToHome(page, browserName, 1);
+    await exercisePostReturnHome(page, browserName, 1);
 
-    const explore = await waitForRect(page, 'bottom-nav-explore');
-    actionStart = await rawTouch(page, explore, `${browserName}:bottom-nav-explore`);
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'home-tab-state' && entry.selectedTab === 0`,
-      `${browserName}:bottom-nav-explore-state`,
-    );
-    console.log(`${browserName} BOTTOM NAVIGATION = PASS`);
+    await openJourney(page, browserName, 2);
+    await exitJourneyToHome(page, browserName, 2);
+    await exercisePostReturnHome(page, browserName, 2);
 
-    let levelRect = await waitForRect(page, 'level-plus');
-    actionStart = await rawTouch(page, levelRect, `${browserName}:level-plus`);
-    try {
-      await waitForAuditEvent(
-        page,
-        actionStart,
-        `(entry) => entry.type === 'level-state'`,
-        `${browserName}:level-state`,
-        4000,
-      );
-    } catch (_) {
-      levelRect = await waitForRect(page, 'level-minus');
-      actionStart = await rawTouch(page, levelRect, `${browserName}:level-minus`);
-      await waitForAuditEvent(
-        page,
-        actionStart,
-        `(entry) => entry.type === 'level-state'`,
-        `${browserName}:level-state-fallback`,
-      );
-    }
-    console.log(`${browserName} LV CONTROL = PASS`);
-
-    const city = await waitForRect(page, 'city-selector');
-    actionStart = await rawTouch(page, city, `${browserName}:city-selector`);
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'route-push'`,
-      `${browserName}:city-selector-route`,
-    );
-    console.log(`${browserName} CITY SELECTOR = PASS`);
-    await dismissModalByTouch(page, browserName);
-
-    const startJourney = await waitForRect(page, 'start-journey');
-    actionStart = await rawTouch(page, startJourney, `${browserName}:start-journey`);
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'route-push'`,
-      `${browserName}:start-journey-route`,
-    );
-    console.log(`${browserName} START JOURNEY = PASS`);
-
-    actionStart = await rawTouch(
-      page,
-      { x: 0, y: 0, width: 56, height: 52 },
-      `${browserName}:journey-back`,
-    );
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'route-pop'`,
-      `${browserName}:journey-back-route`,
-    );
-    console.log(`${browserName} FIRST RETURN = PASS`);
-    console.log(`${browserName} POST-FIRST-RETURN DOM STATE`);
-    console.log(JSON.stringify(await startupState(page), null, 2));
-
-    const secondStartJourney = await waitForRect(page, 'start-journey');
-    actionStart = await rawTouch(
-      page,
-      secondStartJourney,
-      `${browserName}:second-start-journey`,
-    );
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'route-push'`,
-      `${browserName}:second-start-journey-route`,
-    );
-    console.log(`${browserName} SECOND JOURNEY OPEN = PASS`);
-
-    actionStart = await rawTouch(
-      page,
-      { x: 0, y: 0, width: 56, height: 52 },
-      `${browserName}:second-journey-back`,
-    );
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'route-pop'`,
-      `${browserName}:second-journey-back-route`,
-    );
-    console.log(`${browserName} SECOND RETURN = PASS`);
-    console.log(`${browserName} POST-SECOND-RETURN DOM STATE`);
-    console.log(JSON.stringify(await startupState(page), null, 2));
-
-    const postReturnPassport = await waitForRect(page, 'bottom-nav-passport');
-    actionStart = await rawTouch(
-      page,
-      postReturnPassport,
-      `${browserName}:post-return-bottom-nav-passport`,
-    );
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'home-tab-state' && entry.selectedTab === 1`,
-      `${browserName}:post-return-bottom-nav-passport-state`,
-    );
-
-    const postReturnExplore = await waitForRect(page, 'bottom-nav-explore');
-    actionStart = await rawTouch(
-      page,
-      postReturnExplore,
-      `${browserName}:post-return-bottom-nav-explore`,
-    );
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'home-tab-state' && entry.selectedTab === 0`,
-      `${browserName}:post-return-bottom-nav-explore-state`,
-    );
-    console.log(`${browserName} POST-JOURNEY BOTTOM NAVIGATION = PASS`);
-
-    let postReturnLevel = await waitForRect(page, 'level-plus');
-    actionStart = await rawTouch(
-      page,
-      postReturnLevel,
-      `${browserName}:post-return-level-plus`,
-    );
-    try {
-      await waitForAuditEvent(
-        page,
-        actionStart,
-        `(entry) => entry.type === 'level-state'`,
-        `${browserName}:post-return-level-state`,
-        4000,
-      );
-    } catch (_) {
-      postReturnLevel = await waitForRect(page, 'level-minus');
-      actionStart = await rawTouch(
-        page,
-        postReturnLevel,
-        `${browserName}:post-return-level-minus`,
-      );
-      await waitForAuditEvent(
-        page,
-        actionStart,
-        `(entry) => entry.type === 'level-state'`,
-        `${browserName}:post-return-level-state-fallback`,
-      );
-    }
-    console.log(`${browserName} POST-JOURNEY LV CONTROL = PASS`);
-
-    const postReturnCity = await waitForRect(page, 'city-selector');
-    actionStart = await rawTouch(
-      page,
-      postReturnCity,
-      `${browserName}:post-return-city-selector`,
-    );
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'route-push'`,
-      `${browserName}:post-return-city-selector-route`,
-    );
-    console.log(`${browserName} POST-JOURNEY CITY SELECTOR = PASS`);
-    await dismissModalByTouch(page, browserName);
-
-    const discovery = await waitForRect(page, 'discovery');
-    actionStart = await rawTouch(page, discovery, `${browserName}:post-return-discovery`);
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'route-push'`,
-      `${browserName}:post-return-discovery-route`,
-    );
-    console.log(`${browserName} POST-JOURNEY DISCOVERY = PASS`);
-    await dismissModalByTouch(page, browserName);
-    console.log(`${browserName} ROUND-TRIP HOME INTERACTION = PASS`);
+    await exerciseCitySelector(page, browserName);
+    await exerciseLevelControl(page, browserName);
+    await exerciseAllTabs(page, browserName);
 
     if (pageErrors.length) {
       throw new Error(`${browserName}: page errors: ${pageErrors.join('\n')}`);
