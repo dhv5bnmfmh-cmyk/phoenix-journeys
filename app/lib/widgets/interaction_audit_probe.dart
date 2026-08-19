@@ -51,8 +51,6 @@ class _PhoenixHomeInteractionBoundaryState
     extends State<PhoenixHomeInteractionBoundary> {
   final PhoenixLevelController _levelController = PhoenixLevelController.instance;
   Rect? _discoveryRect;
-  Offset? _pointerDownPosition;
-  bool _pointerDownOnDiscovery = false;
   bool _scanScheduled = false;
   late int _lastSelectedTab;
 
@@ -72,6 +70,7 @@ class _PhoenixHomeInteractionBoundaryState
         'home-tab-state',
         detail: <String, Object?>{'selectedTab': widget.selectedTab},
       );
+      _scheduleTargetScan();
     }
   }
 
@@ -100,9 +99,9 @@ class _PhoenixHomeInteractionBoundaryState
     var found = false;
     void visit(Element element) {
       if (found) return;
-      final widget = element.widget;
-      if (widget is Text) {
-        final text = widget.data ?? '';
+      final childWidget = element.widget;
+      if (childWidget is Text) {
+        final text = childWidget.data ?? '';
         if (text.contains('Journey') || text.startsWith('再次探索')) {
           found = true;
           return;
@@ -143,8 +142,8 @@ class _PhoenixHomeInteractionBoundaryState
     final targets = <String, Rect>{};
 
     void visit(Element element) {
-      final widget = element.widget;
-      final key = widget.key;
+      final childWidget = element.widget;
+      final key = childWidget.key;
       if (key is ValueKey<String>) {
         final id = switch (key.value) {
           'choose-city-journey' => 'city-selector',
@@ -160,17 +159,17 @@ class _PhoenixHomeInteractionBoundaryState
         }
       }
 
-      if (widget is FilledButton && _subtreeHasStartJourneyLabel(element)) {
+      if (childWidget is FilledButton && _subtreeHasStartJourneyLabel(element)) {
         final rect = _rectForElement(element);
         if (rect != null && !rect.isEmpty) targets['start-journey'] = rect;
       }
 
-      if (widget is Text) {
-        final text = widget.data ?? '';
+      if (childWidget is Text) {
+        final text = childWidget.data ?? '';
         if (text.startsWith('Discovery ·')) {
           final rect = _rectForElement(element);
           if (rect != null && !rect.isEmpty) {
-            discovery = rect.inflate(6);
+            discovery = rect.inflate(8);
             targets['discovery'] = discovery!;
           }
         }
@@ -180,7 +179,10 @@ class _PhoenixHomeInteractionBoundaryState
     }
 
     context.visitChildElements(visit);
-    _discoveryRect = widget.selectedTab == 0 ? discovery : null;
+    final nextDiscovery = widget.selectedTab == 0 ? discovery : null;
+    if (_discoveryRect != nextDiscovery) {
+      setState(() => _discoveryRect = nextDiscovery);
+    }
 
     if (!phoenixInteractionAuditEnabled) return;
     for (final entry in targets.entries) {
@@ -195,54 +197,33 @@ class _PhoenixHomeInteractionBoundaryState
     );
   }
 
-  void _onPointerDown(PointerDownEvent event) {
-    _pointerDownPosition = event.position;
-    _pointerDownOnDiscovery =
-        widget.selectedTab == 0 &&
-        (_discoveryRect?.contains(event.position) ?? false);
-    emitPhoenixInteractionAudit(
-      'flutter-pointer-down',
-      detail: <String, Object?>{
-        'x': event.position.dx,
-        'y': event.position.dy,
-        'kind': event.kind.name,
-      },
-    );
-  }
-
-  void _onPointerUp(PointerUpEvent event) {
-    emitPhoenixInteractionAudit(
-      'flutter-pointer-up',
-      detail: <String, Object?>{
-        'x': event.position.dx,
-        'y': event.position.dy,
-        'kind': event.kind.name,
-      },
-    );
-
-    final down = _pointerDownPosition;
-    final shouldOpenDiscovery =
-        _pointerDownOnDiscovery &&
-        down != null &&
-        (event.position - down).distance <= 12 &&
-        (_discoveryRect?.contains(event.position) ?? false);
-    _pointerDownPosition = null;
-    _pointerDownOnDiscovery = false;
-
-    if (shouldOpenDiscovery) {
-      emitPhoenixInteractionAudit('discovery-callback');
-      widget.onDiscoveryTap();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     _scheduleTargetScan();
-    return Listener(
-      behavior: HitTestBehavior.translucent,
-      onPointerDown: _onPointerDown,
-      onPointerUp: _onPointerUp,
-      child: widget.child,
+    final discoveryRect = _discoveryRect;
+    if (discoveryRect == null || widget.selectedTab != 0) {
+      return widget.child;
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned.fill(child: widget.child),
+        Positioned.fromRect(
+          rect: discoveryRect,
+          child: Semantics(
+            button: true,
+            label: 'Discovery · 今日发现',
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                key: const ValueKey('discovery-action'),
+                onTap: widget.onDiscoveryTap,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
