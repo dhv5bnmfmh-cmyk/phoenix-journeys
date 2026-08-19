@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import '../models/story_content.dart';
 import 'journey_data.dart';
 import 'luoyang_longmen_one_pass.dart';
@@ -114,4 +116,39 @@ class DailyJourneyExperience {
   String get locationPath => '$cityId/$destinationId';
 
   String get stampTitle => '$city · $place';
+}
+
+
+typedef DailyJourneyExperienceBuilder = DailyJourneyExperience Function();
+
+class LazyJourneyList extends ListBase<DailyJourneyExperience> {
+  LazyJourneyList(List<DailyJourneyExperienceBuilder> builders)
+      : _builders = List<DailyJourneyExperienceBuilder>.unmodifiable(builders),
+        _cache = List<DailyJourneyExperience?>.filled(
+          builders.length,
+          null,
+          growable: false,
+        );
+
+  final List<DailyJourneyExperienceBuilder> _builders;
+  final List<DailyJourneyExperience?> _cache;
+
+  @override
+  int get length => _builders.length;
+
+  @override
+  set length(int value) {
+    throw UnsupportedError('LazyJourneyList is immutable.');
+  }
+
+  @override
+  DailyJourneyExperience operator [](int index) {
+    RangeError.checkValidIndex(index, this);
+    return _cache[index] ??= _builders[index]();
+  }
+
+  @override
+  void operator []=(int index, DailyJourneyExperience value) {
+    throw UnsupportedError('LazyJourneyList is immutable.');
+  }
 }
