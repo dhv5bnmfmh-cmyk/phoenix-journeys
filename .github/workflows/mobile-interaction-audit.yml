@@ -84,6 +84,12 @@ jobs:
           cat > "$RUNNER_TEMP/allowed-founder-revision-delta.txt" <<'FILES'
           .github/scripts/verify_mobile_interaction.mjs
           .github/workflows/mobile-interaction-audit.yml
+          app/lib/app.dart
+          app/lib/screens/home_shell.dart
+          app/lib/services/interaction_audit_sink.dart
+          app/lib/services/interaction_audit_sink_stub.dart
+          app/lib/services/interaction_audit_sink_web.dart
+          app/lib/widgets/interaction_audit_probe.dart
           FILES
           sort -o "$RUNNER_TEMP/allowed-founder-revision-delta.txt" "$RUNNER_TEMP/allowed-founder-revision-delta.txt"
           echo 'FOUNDER REVISION DELTA:'
