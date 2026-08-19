@@ -90,6 +90,8 @@ jobs:
           app/lib/services/interaction_audit_sink_stub.dart
           app/lib/services/interaction_audit_sink_web.dart
           app/lib/widgets/interaction_audit_probe.dart
+          app/web/flutter_bootstrap.js
+          worker/launch_cover_rule.test.mjs
           FILES
           sort -o "$RUNNER_TEMP/allowed-founder-revision-delta.txt" "$RUNNER_TEMP/allowed-founder-revision-delta.txt"
           echo 'FOUNDER REVISION DELTA:'
