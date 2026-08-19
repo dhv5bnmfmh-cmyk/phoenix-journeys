@@ -195,7 +195,7 @@ async function exitJourneyToHome(page, browserName, cycle) {
 
 async function exercisePostReturnHome(page, browserName, cycle) {
   await tapTabAndVerify(page, '护照', '探索护照', browserName);
-  await tapTabAndVerify(page, '探索', 'PHOENIX JOURNEYS', browserName);
+  await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} POST-CYCLE-${cycle} HOME INTERACTION = PASS`);
 }
@@ -204,7 +204,7 @@ async function exerciseAllTabs(page, browserName) {
   await tapTabAndVerify(page, '护照', '探索护照', browserName);
   await tapTabAndVerify(page, '跟读训练', '听一句 · 跟一句 · 逐字对照 · 薄弱句复练', browserName);
   await tapTabAndVerify(page, '我的', 'HSK／TOCFL 能力设置', browserName);
-  await tapTabAndVerify(page, '探索', 'PHOENIX JOURNEYS', browserName);
+  await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} BOTTOM NAVIGATION ALL TABS = PASS`);
 }
