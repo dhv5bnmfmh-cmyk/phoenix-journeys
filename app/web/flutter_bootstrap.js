@@ -4,7 +4,7 @@
 const loading = document.getElementById('phoenix-loading');
 const loadingText = document.getElementById('phoenix-loading-text');
 const loadingStartedAt = window.performance.now();
-const minimumJourneyDurationMs = 11550;
+const minimumJourneyDurationMs = 6200;
 const legacyWorkerResetKey = 'phoenix-legacy-flutter-worker-reset';
 
 function updateLoadingText(message) {
