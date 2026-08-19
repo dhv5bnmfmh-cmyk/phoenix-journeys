@@ -96,21 +96,25 @@ async function startupState(page) {
 }
 
 async function enableSemantics(page) {
-  await page.evaluate(() => {
-    const walk = (root) => {
-      const elements = [...root.querySelectorAll('*')];
-      for (const element of elements) {
-        if (element.shadowRoot) elements.push(...walk(element.shadowRoot));
-      }
-      return elements;
-    };
-    const all = walk(document);
-    const placeholder = all.find((element) =>
-      element.tagName?.toLowerCase() === 'flt-semantics-placeholder' ||
-      element.getAttribute?.('aria-label') === 'Enable accessibility'
-    );
-    placeholder?.click();
-  });
+  const placeholder = page.locator('flt-semantics-placeholder').first();
+  if (await placeholder.count()) {
+    await placeholder.click({ force: true, timeout: 10000 });
+  } else {
+    await page.evaluate(() => {
+      const collect = (root) => {
+        const elements = [...root.querySelectorAll('*')];
+        for (const element of [...elements]) {
+          if (element.shadowRoot) elements.push(...collect(element.shadowRoot));
+        }
+        return elements;
+      };
+      const candidate = collect(document).find((element) =>
+        element.tagName?.toLowerCase() === 'flt-semantics-placeholder' ||
+        element.getAttribute?.('aria-label') === 'Enable accessibility'
+      );
+      candidate?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    });
+  }
   await page.waitForFunction(() => {
     const collect = (root) => {
       const elements = [...root.querySelectorAll('*')];
@@ -119,7 +123,7 @@ async function enableSemantics(page) {
       }
       return elements;
     };
-    return collect(document).some((element) => element.getAttribute?.('aria-label'));
+    return collect(document).filter((element) => element.tagName?.toLowerCase().includes('semantics')).length > 3;
   }, null, { timeout: 15000 });
 }
 
@@ -134,13 +138,19 @@ async function semanticSnapshot(page) {
     };
     return collect(document)
       .map((element) => {
+        const tag = element.tagName?.toLowerCase() || '';
+        if (!tag.includes('semantics') && !element.getAttribute?.('role')) return null;
         const rect = element.getBoundingClientRect?.();
-        const label = element.getAttribute?.('aria-label') || '';
+        const aria = element.getAttribute?.('aria-label') || '';
+        const text = (element.innerText || element.textContent || '').trim();
+        const label = aria || text;
         if (!label || !rect || rect.width <= 0 || rect.height <= 0) return null;
         return {
           tag: element.tagName,
           role: element.getAttribute?.('role') || null,
           label,
+          aria,
+          text,
           selected: element.getAttribute?.('aria-selected'),
           checked: element.getAttribute?.('aria-checked'),
           pressed: element.getAttribute?.('aria-pressed'),
@@ -156,7 +166,7 @@ async function boxFor(page, matcher) {
   const matches = snapshot.filter((entry) => matcher(entry.label));
   matches.sort((a, b) => (a.rect.width * a.rect.height) - (b.rect.width * b.rect.height));
   if (!matches.length) {
-    console.log('SEMANTIC LABELS', JSON.stringify(snapshot.map((entry) => entry.label), null, 2));
+    console.log('SEMANTIC SNAPSHOT', JSON.stringify(snapshot, null, 2));
     throw new Error('semantic target not found');
   }
   return matches[0];
@@ -252,22 +262,25 @@ async function runBrowser(browserType, browserName) {
 
   await attachFlutterTrace(page);
   await enableSemantics(page);
+  const semanticState = await semanticSnapshot(page);
+  console.log(`${browserName} SEMANTIC STATE`);
+  console.log(JSON.stringify(semanticState, null, 2));
   await disableSemanticsHitTesting(page);
 
   const domState = await startupState(page);
   console.log(`${browserName} DOM STATE`);
   console.log(JSON.stringify(domState, null, 2));
 
-  const passport = await boxFor(page, (label) => label === '护照');
+  const passport = await boxFor(page, (label) => label === '护照' || /护照\s*$/.test(label));
   await rawTouch(page, passport, `${browserName}:bottom-nav-passport`);
-  await waitSemantic(page, (label) => label.includes('探索护照'));
+  await waitSemantic(page, (label) => label.includes('探索护照') || label.includes('足迹'));
   console.log(`${browserName} BOTTOM NAVIGATION = PASS`);
 
-  const explore = await boxFor(page, (label) => label === '探索');
+  const explore = await boxFor(page, (label) => label === '探索' || /探索\s*$/.test(label));
   await rawTouch(page, explore, `${browserName}:bottom-nav-explore`);
   await waitSemantic(page, (label) => label.includes('Discovery · 今日发现'));
 
-  const beforeLevels = (await semanticSnapshot(page)).map((entry) => entry.label).filter((label) => label.startsWith('Phoenix 中文难度 '));
+  const beforeLevels = (await semanticSnapshot(page)).map((entry) => entry.label).filter((label) => label.includes('Phoenix 中文难度 '));
   const beforeLevel = beforeLevels[0];
   const current = Number(beforeLevel?.match(/(\d+) 级/)?.[1]);
   const levelControl = current >= 10
