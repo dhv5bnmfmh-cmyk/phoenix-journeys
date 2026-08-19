@@ -5,44 +5,80 @@ const { chromium, webkit } = playwrightModule;
 
 const url = process.argv[2];
 const sourceSha = process.argv[3];
-if (!url || !sourceSha) {
-  throw new Error('usage: verify_mobile_interaction.mjs <url> <source-sha>');
-}
+if (!url || !sourceSha) throw new Error('usage: verify_mobile_interaction.mjs <url> <source-sha>');
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const normalize = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
 
-const attrEscape = (value) => value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
-
-function semanticLabel(page, label, { role = null, prefix = false } = {}) {
-  const op = prefix ? '^=' : '=';
-  const roleSelector = role ? `[role="${attrEscape(role)}"]` : '';
-  return page.locator(
-    `flt-semantics${roleSelector}[aria-label${op}"${attrEscape(label)}"]`,
-  ).first();
+async function semanticNode(page, label, { prefix = false, timeout = 15000 } = {}) {
+  const wanted = normalize(label);
+  const deadline = Date.now() + timeout;
+  const nodes = page.locator('flt-semantics');
+  while (Date.now() < deadline) {
+    const index = await nodes.evaluateAll((elements, args) => {
+      const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
+      const matches = (value) => args.prefix ? clean(value).startsWith(args.wanted) : clean(value) === args.wanted;
+      const candidates = [];
+      for (let i = 0; i < elements.length; i += 1) {
+        const element = elements[i];
+        const values = [
+          element.getAttribute('aria-label'),
+          element.getAttribute('aria-valuetext'),
+          element.getAttribute('aria-description'),
+          element.textContent,
+        ];
+        if (!values.some(matches)) continue;
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        const visible = rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
+        candidates.push({ i, visible });
+      }
+      const visible = candidates.find((entry) => entry.visible);
+      return visible?.i ?? candidates[0]?.i ?? -1;
+    }, { wanted, prefix });
+    if (index >= 0) return nodes.nth(index);
+    await sleep(100);
+  }
+  throw new Error(`semantic state not found: ${label}`);
 }
 
-async function waitSemantic(page, label, options = {}) {
-  const node = semanticLabel(page, label, options);
-  await node.waitFor({ state: 'attached', timeout: options.timeout ?? 15000 });
-  return node;
+async function semanticExists(page, label, options = {}) {
+  try {
+    await semanticNode(page, label, { ...options, timeout: options.timeout ?? 800 });
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+async function dumpSemantics(page, browserName) {
+  const snapshot = await page.locator('flt-semantics').evaluateAll((elements) => elements.slice(0, 120).map((element) => ({
+    ariaLabel: element.getAttribute('aria-label'),
+    ariaValueText: element.getAttribute('aria-valuetext'),
+    role: element.getAttribute('role'),
+    text: String(element.textContent ?? '').replace(/\s+/g, ' ').trim(),
+    rect: (() => {
+      const rect = element.getBoundingClientRect();
+      return [Math.round(rect.x), Math.round(rect.y), Math.round(rect.width), Math.round(rect.height)];
+    })(),
+  })));
+  console.error(`${browserName} SEMANTICS SNAPSHOT = ${JSON.stringify(snapshot)}`);
 }
 
 async function tapSemanticAction(page, label, logLabel, { prefix = false } = {}) {
-  const action = semanticLabel(page, label, { prefix });
+  const action = await semanticNode(page, label, { prefix, timeout: 15000 });
   await action.waitFor({ state: 'visible', timeout: 15000 });
   const disabled = await action.getAttribute('aria-disabled');
-  if (disabled === 'true' || !(await action.isEnabled())) {
-    throw new Error(`${logLabel}: action is disabled`);
-  }
+  if (disabled === 'true' || !(await action.isEnabled())) throw new Error(`${logLabel}: action is disabled`);
   await action.tap({ timeout: 15000 });
   return action;
 }
 
 async function findJourneyAction(page) {
-  const prefixes = ['开始', '继续', '再次探索'];
-  for (const prefix of prefixes) {
-    const candidate = semanticLabel(page, prefix, { prefix: true });
-    if (await candidate.count()) return candidate;
+  for (const prefix of ['开始', '继续', '再次探索']) {
+    try {
+      return await semanticNode(page, prefix, { prefix: true, timeout: 1000 });
+    } catch (_) {}
   }
   throw new Error('Home: no Start / Continue / Explore Again Journey action found');
 }
@@ -51,76 +87,79 @@ async function findJourneyProgress(page, timeout = 20000) {
   const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
     for (let step = 1; step <= 6; step += 1) {
-      const candidate = semanticLabel(page, `${step}/6`, { prefix: true });
-      if (await candidate.count()) {
-        await candidate.waitFor({ state: 'attached', timeout: 2000 });
-        return { node: candidate, label: await candidate.getAttribute('aria-label') };
-      }
+      try {
+        const node = await semanticNode(page, `${step}/6`, { prefix: true, timeout: 250 });
+        return { node, label: normalize(await node.getAttribute('aria-label') ?? await node.textContent()) };
+      } catch (_) {}
     }
-    await sleep(100);
   }
   throw new Error('Journey: no semantic progress state (1/6..6/6) appeared');
 }
 
 async function enableFlutterSemantics(page, browserName) {
   const placeholder = page.locator('flt-semantics-placeholder').first();
-  if (await placeholder.count()) {
-    await placeholder.evaluate((element) => element.click());
-  }
+  if (await placeholder.count()) await placeholder.evaluate((element) => element.click());
   await page.locator('flt-semantics').first().waitFor({ state: 'attached', timeout: 15000 });
   console.log(`${browserName} FLUTTER SEMANTICS = ENABLED`);
 }
 
 async function waitForHome(page, browserName) {
-  await waitSemantic(page, '探索', { prefix: true, timeout: 20000 });
+  await semanticNode(page, 'PHOENIX JOURNEYS', { timeout: 20000 });
   const journeyAction = await findJourneyAction(page);
   await journeyAction.waitFor({ state: 'visible', timeout: 20000 });
   console.log(`${browserName} HOME INTERACTIVE STATE = PRESENT`);
 }
 
+async function waitDetached(page, label, { prefix = false, timeout = 10000 } = {}) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    if (!(await semanticExists(page, label, { prefix, timeout: 200 }))) return;
+    await sleep(100);
+  }
+  throw new Error(`semantic state did not detach: ${label}`);
+}
+
 async function dismissBottomSheet(page, expectedLabel) {
   await page.touchscreen.tap(22, 58);
-  await semanticLabel(page, expectedLabel, { prefix: true }).waitFor({ state: 'detached', timeout: 10000 });
+  await waitDetached(page, expectedLabel, { prefix: true, timeout: 10000 });
 }
 
 async function tapTabAndVerify(page, tabLabel, expectedPageLabel, browserName) {
   await tapSemanticAction(page, tabLabel, `${browserName}:${tabLabel}`, { prefix: true });
-  await waitSemantic(page, expectedPageLabel, { prefix: true, timeout: 15000 });
+  await semanticNode(page, expectedPageLabel, { prefix: true, timeout: 15000 });
   console.log(`${browserName} TAB ${tabLabel} STATE CHANGE = PASS`);
 }
 
 async function exerciseLevelControl(page, browserName) {
-  const level = page.locator('flt-semantics[aria-label^="Phoenix 中文难度 "]').first();
-  await level.waitFor({ state: 'attached', timeout: 15000 });
-  const before = await level.getAttribute('aria-label');
+  const level = await semanticNode(page, 'Phoenix 中文难度 ', { prefix: true, timeout: 15000 });
+  const before = normalize(await level.getAttribute('aria-label') ?? await level.textContent());
 
-  let control = semanticLabel(page, '提高当前难度', { prefix: true });
-  let direction = 'PLUS';
-  if (!(await control.count()) || !(await control.isEnabled())) {
-    control = semanticLabel(page, '降低当前难度', { prefix: true });
+  let control;
+  let direction;
+  try {
+    control = await semanticNode(page, '提高当前难度', { prefix: true, timeout: 1000 });
+    direction = 'PLUS';
+  } catch (_) {
+    control = await semanticNode(page, '降低当前难度', { prefix: true, timeout: 1000 });
     direction = 'MINUS';
   }
-  await control.waitFor({ state: 'visible', timeout: 15000 });
   const disabled = await control.getAttribute('aria-disabled');
-  if (disabled === 'true' || !(await control.isEnabled())) {
-    throw new Error(`${browserName}: no enabled level control`);
-  }
+  if (disabled === 'true' || !(await control.isEnabled())) throw new Error(`${browserName}: no enabled level control`);
   await control.tap();
 
   let after = before;
   for (let i = 0; i < 30 && after === before; i += 1) {
     await sleep(100);
-    after = await level.getAttribute('aria-label');
+    const current = await semanticNode(page, 'Phoenix 中文难度 ', { prefix: true, timeout: 1000 });
+    after = normalize(await current.getAttribute('aria-label') ?? await current.textContent());
   }
-  if (!before || !after || before === after) {
-    throw new Error(`${browserName}: level state did not change (${before} -> ${after})`);
-  }
+  if (!before || !after || before === after) throw new Error(`${browserName}: level state did not change (${before} -> ${after})`);
   console.log(`${browserName} LV ${direction} = PASS (${before} -> ${after})`);
 }
 
 async function exerciseCitySelector(page, browserName) {
   await tapSemanticAction(page, '选择城市', `${browserName}:city-selector`, { prefix: true });
-  await waitSemantic(page, '选择城市与地点', { prefix: true });
+  await semanticNode(page, '选择城市与地点', { prefix: true, timeout: 15000 });
   console.log(`${browserName} CITY SELECTOR OPEN = PASS`);
   await dismissBottomSheet(page, '选择城市与地点');
   console.log(`${browserName} CITY SELECTOR CLOSE = PASS`);
@@ -128,45 +167,35 @@ async function exerciseCitySelector(page, browserName) {
 
 async function openJourney(page, browserName, cycle) {
   const button = await findJourneyAction(page);
-  await button.waitFor({ state: 'visible', timeout: 15000 });
-  const action = await button.getAttribute('aria-label');
-  const beforeUrl = page.url();
-  await button.tap();
+  const action = normalize(await button.getAttribute('aria-label') ?? await button.textContent());
+  await button.tap({ timeout: 15000 });
   const progress = await findJourneyProgress(page, 20000);
-  if (page.url() === beforeUrl && !(await progress.node.count())) {
-    throw new Error(`${browserName}: Journey cycle ${cycle} did not change route/state`);
-  }
   console.log(`${browserName} JOURNEY CYCLE ${cycle} OPEN = PASS (${action}; ${progress.label})`);
 }
 
 async function reachDiscovery(page, browserName) {
-  await waitSemantic(page, '1/6', { prefix: true });
-  await waitSemantic(page, '故事', { prefix: true });
+  await semanticNode(page, '1/6', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '故事', { prefix: true, timeout: 15000 });
   await tapSemanticAction(page, '继续', `${browserName}:story-next`, { prefix: true });
   await sleep(500);
   await page.touchscreen.tap(22, 58);
-  await waitSemantic(page, '2/6', { prefix: true, timeout: 15000 });
-  await waitSemantic(page, '单词', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '2/6', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '单词', { prefix: true, timeout: 15000 });
   await tapSemanticAction(page, '继续', `${browserName}:words-next`, { prefix: true });
-  await waitSemantic(page, '3/6', { prefix: true, timeout: 15000 });
-  await waitSemantic(page, '发现', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '3/6', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '发现', { prefix: true, timeout: 15000 });
   console.log(`${browserName} DISCOVERY STATE TRANSITION = PASS`);
 }
 
 async function exitJourneyToHome(page, browserName, cycle) {
-  const beforeUrl = page.url();
   await page.touchscreen.tap(28, 26);
   await waitForHome(page, browserName);
-  const journeyAction = await findJourneyAction(page);
-  if (!(await journeyAction.count())) {
-    throw new Error(`${browserName}: Journey cycle ${cycle} return did not restore Home action`);
-  }
-  console.log(`${browserName} JOURNEY CYCLE ${cycle} RETURN = PASS (${beforeUrl} -> ${page.url()})`);
+  console.log(`${browserName} JOURNEY CYCLE ${cycle} RETURN = PASS`);
 }
 
 async function exercisePostReturnHome(page, browserName, cycle) {
   await tapTabAndVerify(page, '护照', '探索护照', browserName);
-  await tapTabAndVerify(page, '探索', '欢迎回来，Explorer', browserName);
+  await tapTabAndVerify(page, '探索', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} POST-CYCLE-${cycle} HOME INTERACTION = PASS`);
 }
@@ -175,7 +204,7 @@ async function exerciseAllTabs(page, browserName) {
   await tapTabAndVerify(page, '护照', '探索护照', browserName);
   await tapTabAndVerify(page, '跟读训练', '听一句 · 跟一句 · 逐字对照 · 薄弱句复练', browserName);
   await tapTabAndVerify(page, '我的', 'HSK／TOCFL 能力设置', browserName);
-  await tapTabAndVerify(page, '探索', '欢迎回来，Explorer', browserName);
+  await tapTabAndVerify(page, '探索', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} BOTTOM NAVIGATION ALL TABS = PASS`);
 }
@@ -202,28 +231,31 @@ async function runBrowser(browserType, browserName) {
     await page.waitForFunction(() => document.querySelector('flutter-view') != null, null, { timeout: 140000 });
     await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
     await enableFlutterSemantics(page, browserName);
-    await waitForHome(page, browserName);
-    console.log(`${browserName} HOME INITIAL INTERACTION = PASS`);
 
-    await exerciseCitySelector(page, browserName);
-    await exerciseLevelControl(page, browserName);
+    try {
+      await waitForHome(page, browserName);
+      console.log(`${browserName} HOME INITIAL INTERACTION = PASS`);
+      await exerciseCitySelector(page, browserName);
+      await exerciseLevelControl(page, browserName);
 
-    await openJourney(page, browserName, 1);
-    await reachDiscovery(page, browserName);
-    await exitJourneyToHome(page, browserName, 1);
-    await exercisePostReturnHome(page, browserName, 1);
+      await openJourney(page, browserName, 1);
+      await reachDiscovery(page, browserName);
+      await exitJourneyToHome(page, browserName, 1);
+      await exercisePostReturnHome(page, browserName, 1);
 
-    await openJourney(page, browserName, 2);
-    await exitJourneyToHome(page, browserName, 2);
-    await exercisePostReturnHome(page, browserName, 2);
+      await openJourney(page, browserName, 2);
+      await exitJourneyToHome(page, browserName, 2);
+      await exercisePostReturnHome(page, browserName, 2);
 
-    await exerciseCitySelector(page, browserName);
-    await exerciseLevelControl(page, browserName);
-    await exerciseAllTabs(page, browserName);
-
-    if (pageErrors.length) {
-      throw new Error(`${browserName}: page errors: ${pageErrors.join('\n')}`);
+      await exerciseCitySelector(page, browserName);
+      await exerciseLevelControl(page, browserName);
+      await exerciseAllTabs(page, browserName);
+    } catch (error) {
+      await dumpSemantics(page, browserName);
+      throw error;
     }
+
+    if (pageErrors.length) throw new Error(`${browserName}: page errors: ${pageErrors.join('\n')}`);
     console.log(`${browserName} REAL MOBILE FUNCTIONAL INTERACTION AUDIT = PASS`);
   } finally {
     await browser.close();
