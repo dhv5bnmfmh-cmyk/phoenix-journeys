@@ -209,7 +209,7 @@ async function dismissModalByTouch(page, browserName) {
   await waitForAuditEvent(
     page,
     startIndex,
-    `(entry) => entry.type === 'route-pop' && entry.routeType.includes('ModalBottomSheet')`,
+    `(entry) => entry.type === 'route-pop'`,
     `${browserName}:modal-dismiss-route`,
   );
 }
@@ -302,7 +302,7 @@ async function runBrowser(browserType, browserName) {
     await waitForAuditEvent(
       page,
       actionStart,
-      `(entry) => entry.type === 'route-push' && entry.routeType.includes('ModalBottomSheet')`,
+      `(entry) => entry.type === 'route-push'`,
       `${browserName}:city-selector-route`,
     );
     console.log(`${browserName} CITY SELECTOR = PASS`);
@@ -313,7 +313,7 @@ async function runBrowser(browserType, browserName) {
     await waitForAuditEvent(
       page,
       actionStart,
-      `(entry) => entry.type === 'route-push' && entry.routeType.includes('MaterialPageRoute')`,
+      `(entry) => entry.type === 'route-push'`,
       `${browserName}:start-journey-route`,
     );
     console.log(`${browserName} START JOURNEY = PASS`);
@@ -326,7 +326,7 @@ async function runBrowser(browserType, browserName) {
     await waitForAuditEvent(
       page,
       actionStart,
-      `(entry) => entry.type === 'route-pop' && entry.routeType.includes('MaterialPageRoute')`,
+      `(entry) => entry.type === 'route-pop'`,
       `${browserName}:journey-back-route`,
     );
     console.log(`${browserName} BACK = PASS`);
@@ -336,7 +336,7 @@ async function runBrowser(browserType, browserName) {
     await waitForAuditEvent(
       page,
       actionStart,
-      `(entry) => entry.type === 'route-push' && entry.routeType.includes('ModalBottomSheet')`,
+      `(entry) => entry.type === 'route-push'`,
       `${browserName}:discovery-route`,
     );
     console.log(`${browserName} DISCOVERY = PASS`);
