@@ -17,7 +17,7 @@ concurrency:
 
 env:
   CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-  FAILED_FOUNDER_SHA: 789de4ca630fbb74a93c5850cb6645a5913afc21
+  FAILED_FOUNDER_SHA: 2efca8e9905ca48801ac550c1cdcfd915212ced1
 
 jobs:
   mobile-interaction:
@@ -42,8 +42,12 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install browser driver
-        run: npm install --no-save --prefix "$RUNNER_TEMP/mobile-interaction-node" puppeteer-core@24
+      - name: Install Chromium and WebKit functional drivers
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix "$RUNNER_TEMP/mobile-interaction-node" playwright
+          "$RUNNER_TEMP/mobile-interaction-node/node_modules/.bin/playwright" install --with-deps chromium webkit
 
       - name: Build release web
         shell: bash
@@ -53,14 +57,12 @@ jobs:
           flutter pub get
           flutter build web --release
 
-      - name: Run mobile post-cover hit-test regression
+      - name: Run real mobile functional interaction audit
         shell: bash
         env:
-          PUPPETEER_CORE_PATH: ${{ runner.temp }}/mobile-interaction-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/mobile-interaction-node/node_modules/playwright/index.mjs
         run: |
           set -euo pipefail
-          CHROME_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
-          export CHROME_PATH
           python3 -m http.server 8080 --directory app/build/web >"$RUNNER_TEMP/mobile-interaction-server.log" 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
@@ -79,13 +81,10 @@ jobs:
         run: |
           set -euo pipefail
           git diff --name-only "$FAILED_FOUNDER_SHA" "$CANDIDATE_SHA" | sort > "$RUNNER_TEMP/founder-revision-delta.txt"
-          cat > "$RUNNER_TEMP/allowed-founder-revision-delta.txt" <<'EOF'
+          cat > "$RUNNER_TEMP/allowed-founder-revision-delta.txt" <<'FILES'
           .github/scripts/verify_mobile_interaction.mjs
           .github/workflows/mobile-interaction-audit.yml
-          app/test/home_post_cover_interaction_test.dart
-          app/web/flutter_bootstrap.js
-          worker/launch_cover_rule.test.mjs
-          EOF
+          FILES
           sort -o "$RUNNER_TEMP/allowed-founder-revision-delta.txt" "$RUNNER_TEMP/allowed-founder-revision-delta.txt"
           echo 'FOUNDER REVISION DELTA:'
           cat "$RUNNER_TEMP/founder-revision-delta.txt"
