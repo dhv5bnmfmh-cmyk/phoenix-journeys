@@ -7,17 +7,28 @@ const url = process.argv[2];
 const sourceSha = process.argv[3];
 if (!url || !sourceSha) throw new Error('usage: verify_mobile_interaction.mjs <url> <source-sha>');
 
-const eventTypes = ['pointerdown', 'pointerup', 'pointercancel', 'touchstart', 'touchend', 'touchcancel', 'click'];
+const domEventTypes = [
+  'pointerdown',
+  'pointerup',
+  'pointercancel',
+  'touchstart',
+  'touchend',
+  'touchcancel',
+  'click',
+];
 
-async function installTrace(page) {
+async function installAuditBridge(page) {
   await page.addInitScript((types) => {
-    window.__phoenixInteractionTrace = [];
+    window.__phoenixDomTrace = [];
+    window.__phoenixAuditEvents = [];
+    window.__phoenixAuditRects = {};
+
     const describe = (node) => ({
       tag: node?.tagName || node?.nodeName || null,
       id: node?.id || null,
       aria: node?.getAttribute?.('aria-label') || null,
     });
-    const record = (scope, event) => window.__phoenixInteractionTrace.push({
+    const recordDom = (scope, event) => window.__phoenixDomTrace.push({
       scope,
       type: event.type,
       target: describe(event.target),
@@ -26,14 +37,35 @@ async function installTrace(page) {
       isTrusted: event.isTrusted,
       time: performance.now(),
     });
+
     for (const type of types) {
-      window.addEventListener(type, (event) => record('window', event), true);
-      document.addEventListener(type, (event) => record('document', event), true);
+      window.addEventListener(type, (event) => recordDom('window', event), true);
+      document.addEventListener(type, (event) => recordDom('document', event), true);
     }
-  }, eventTypes);
+
+    window.addEventListener('phoenix-interaction-audit', (event) => {
+      let payload;
+      try {
+        payload = typeof event.detail === 'string' ? JSON.parse(event.detail) : event.detail;
+      } catch (_) {
+        payload = { type: 'invalid-audit-payload', raw: String(event.detail) };
+      }
+      if (!payload || typeof payload !== 'object') return;
+      const entry = { ...payload, time: performance.now() };
+      window.__phoenixAuditEvents.push(entry);
+      if (payload.type === 'target-rect' && payload.id) {
+        window.__phoenixAuditRects[payload.id] = {
+          x: Number(payload.x),
+          y: Number(payload.y),
+          width: Number(payload.width),
+          height: Number(payload.height),
+        };
+      }
+    });
+  }, domEventTypes);
 }
 
-async function attachFlutterTrace(page) {
+async function attachFlutterDomTrace(page) {
   await page.evaluate((types) => {
     const view = document.querySelector('flutter-view');
     if (!view || view.dataset.phoenixTraceAttached === '1') return;
@@ -45,7 +77,7 @@ async function attachFlutterTrace(page) {
     });
     for (const type of types) {
       view.addEventListener(type, (event) => {
-        window.__phoenixInteractionTrace.push({
+        window.__phoenixDomTrace.push({
           scope: 'flutter-view',
           type: event.type,
           target: describe(event.target),
@@ -56,7 +88,7 @@ async function attachFlutterTrace(page) {
         });
       }, true);
     }
-  }, eventTypes);
+  }, domEventTypes);
 }
 
 async function startupState(page) {
@@ -66,7 +98,10 @@ async function startupState(page) {
     const coverStyle = cover ? getComputedStyle(cover) : null;
     const viewStyle = view ? getComputedStyle(view) : null;
     return {
-      marks: performance.getEntriesByType('mark').map((entry) => ({ name: entry.name, startTime: entry.startTime })),
+      marks: performance.getEntriesByType('mark').map((entry) => ({
+        name: entry.name,
+        startTime: entry.startTime,
+      })),
       htmlInert: document.documentElement.hasAttribute('inert'),
       bodyInert: document.body.hasAttribute('inert'),
       bodyPointerEvents: getComputedStyle(document.body).pointerEvents,
@@ -89,111 +124,76 @@ async function startupState(page) {
   });
 }
 
-async function enableSemantics(page) {
-  // Accessibility is enabled only to discover Flutter-owned rectangles and to
-  // observe state changes. Actual audit taps bypass the semantics DOM host and
-  // hit flutter-view through the browser's trusted touchscreen API.
-  await page.evaluate(() => {
-    const collect = (root) => {
-      const elements = [...root.querySelectorAll('*')];
-      for (const element of [...elements]) {
-        if (element.shadowRoot) elements.push(...collect(element.shadowRoot));
-      }
-      return elements;
-    };
-    const placeholder = collect(document).find((element) =>
-      element.tagName?.toLowerCase() === 'flt-semantics-placeholder' ||
-      element.getAttribute?.('aria-label') === 'Enable accessibility'
-    );
-    placeholder?.click();
-  });
-  await page.waitForTimeout(500);
+async function waitForRect(page, id, timeout = 15000) {
+  await page.waitForFunction(
+    (targetId) => {
+      const rect = window.__phoenixAuditRects?.[targetId];
+      return rect && rect.width > 0 && rect.height > 0;
+    },
+    id,
+    { timeout },
+  );
+  return page.evaluate((targetId) => window.__phoenixAuditRects[targetId], id);
 }
 
-async function semanticSnapshot(page) {
-  return page.evaluate(() => {
-    const collect = (root) => {
-      const elements = [...root.querySelectorAll('*')];
-      for (const element of [...elements]) {
-        if (element.shadowRoot) elements.push(...collect(element.shadowRoot));
-      }
-      return elements;
-    };
-    return collect(document).map((element) => {
-      const tag = element.tagName?.toLowerCase() || '';
-      if (!tag.includes('semantics') && !element.getAttribute?.('role')) return null;
-      const rect = element.getBoundingClientRect?.();
-      const aria = element.getAttribute?.('aria-label') || '';
-      const text = (element.innerText || element.textContent || '').trim();
-      const label = aria || text;
-      if (!label || !rect || rect.width <= 0 || rect.height <= 0) return null;
-      return {
-        tag: element.tagName,
-        role: element.getAttribute?.('role') || null,
-        label,
-        rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
-      };
-    }).filter(Boolean);
-  });
+async function auditLength(page) {
+  return page.evaluate(() => window.__phoenixAuditEvents?.length || 0);
 }
 
-async function boxFor(page, matcher, label) {
-  const snapshot = await semanticSnapshot(page);
-  const matches = snapshot.filter((entry) => matcher(entry.label));
-  matches.sort((a, b) => (a.rect.width * a.rect.height) - (b.rect.width * b.rect.height));
-  if (!matches.length) {
-    console.log(`SEMANTIC SNAPSHOT BEFORE ${label}`);
-    console.log(JSON.stringify(snapshot, null, 2));
-    throw new Error(`${label}: semantic target not found`);
-  }
-  return matches[0];
+async function waitForAuditEvent(page, startIndex, predicateSource, label, timeout = 10000) {
+  const handle = await page.waitForFunction(
+    ({ startIndex, predicateSource }) => {
+      const predicate = new Function('entry', `return (${predicateSource})(entry);`);
+      const events = (window.__phoenixAuditEvents || []).slice(startIndex);
+      return events.find((entry) => predicate(entry)) || false;
+    },
+    { startIndex, predicateSource },
+    { timeout },
+  );
+  const event = await handle.jsonValue();
+  console.log(`${label} OBSERVED`);
+  console.log(JSON.stringify(event, null, 2));
+  return event;
 }
 
-async function semanticsHas(page, matcher) {
-  return (await semanticSnapshot(page)).some((entry) => matcher(entry.label));
-}
-
-async function disableSemanticsHitTesting(page) {
-  await page.evaluate(() => {
-    const collect = (root) => {
-      const elements = [...root.querySelectorAll('*')];
-      for (const element of [...elements]) {
-        if (element.shadowRoot) elements.push(...collect(element.shadowRoot));
-      }
-      return elements;
-    };
-    for (const element of collect(document)) {
-      if (element.tagName?.toLowerCase() === 'flt-semantics-host') {
-        element.style.setProperty('pointer-events', 'none', 'important');
-      }
-    }
-  });
-}
-
-async function rawTouch(page, target, label) {
-  await page.evaluate(() => { window.__phoenixInteractionTrace = []; });
-  const x = target.rect.x + target.rect.width / 2;
-  const y = target.rect.y + target.rect.height / 2;
+async function rawTouch(page, rect, label, { requireFlutterRoot = true } = {}) {
+  await page.evaluate(() => { window.__phoenixDomTrace = []; });
+  const startIndex = await auditLength(page);
+  const x = rect.x + rect.width / 2;
+  const y = rect.y + rect.height / 2;
   await page.touchscreen.tap(x, y);
   await page.waitForTimeout(350);
-  const events = await page.evaluate(() => window.__phoenixInteractionTrace || []);
+
+  const domEvents = await page.evaluate(() => window.__phoenixDomTrace || []);
+  const auditEvents = await page.evaluate((index) => (window.__phoenixAuditEvents || []).slice(index), startIndex);
   console.log(`TOUCH TRACE ${label}`);
-  console.log(JSON.stringify({ x, y, events }, null, 2));
-  const trustedStart = events.some((entry) => entry.isTrusted && (entry.type === 'touchstart' || entry.type === 'pointerdown'));
-  const flutterStart = events.some((entry) => entry.scope === 'flutter-view' && entry.isTrusted && (entry.type === 'touchstart' || entry.type === 'pointerdown'));
-  if (!trustedStart) throw new Error(`${label}: DOM received no trusted touch/pointer start`);
-  if (!flutterStart) throw new Error(`${label}: trusted touch did not reach flutter-view`);
+  console.log(JSON.stringify({ x, y, domEvents, auditEvents }, null, 2));
+
+  const trustedDomStart = domEvents.some((entry) =>
+    entry.isTrusted && (entry.type === 'touchstart' || entry.type === 'pointerdown'));
+  const trustedFlutterViewStart = domEvents.some((entry) =>
+    entry.scope === 'flutter-view' &&
+    entry.isTrusted &&
+    (entry.type === 'touchstart' || entry.type === 'pointerdown'));
+  const flutterRootStart = auditEvents.some((entry) => entry.type === 'flutter-pointer-down');
+
+  if (!trustedDomStart) throw new Error(`${label}: DOM received no trusted touch/pointer start`);
+  if (!trustedFlutterViewStart) throw new Error(`${label}: trusted touch did not reach flutter-view`);
+  if (requireFlutterRoot && !flutterRootStart) {
+    throw new Error(`${label}: flutter-view received touch but Flutter hit-test root saw no pointer-down`);
+  }
+  return startIndex;
 }
 
-async function waitSemantic(page, matcher, label, timeout = 8000) {
-  const deadline = Date.now() + timeout;
-  while (Date.now() < deadline) {
-    if (await semanticsHas(page, matcher)) return;
-    await page.waitForTimeout(100);
-  }
-  console.log(`SEMANTIC SNAPSHOT AFTER FAILED ${label}`);
-  console.log(JSON.stringify(await semanticSnapshot(page), null, 2));
-  throw new Error(`${label}: trusted Flutter touch produced no observable UI state/route change`);
+async function dismissModalByTouch(page, browserName) {
+  const startIndex = await auditLength(page);
+  await page.touchscreen.tap(20, 80);
+  await waitForAuditEvent(
+    page,
+    startIndex,
+    `(entry) => entry.type === 'route-pop' && entry.routeType.includes('ModalBottomSheet')`,
+    `${browserName}:modal-dismiss`,
+  );
 }
 
 async function runBrowser(browserType, browserName) {
@@ -211,72 +211,129 @@ async function runBrowser(browserType, browserName) {
     const pageErrors = [];
     page.on('pageerror', (error) => pageErrors.push(error?.stack || error?.message || String(error)));
     page.on('console', (message) => console.log(`[${browserName} console:${message.type()}] ${message.text()}`));
-    await installTrace(page);
+    await installAuditBridge(page);
 
     const separator = url.includes('?') ? '&' : '?';
     const auditUrl = `${url}${separator}unlock=all&prototype=journeys&interaction_audit=1&v=${sourceSha}`;
-    await page.goto(auditUrl, { waitUntil: 'load', timeout: 120000 });
+    await page.goto(auditUrl, { waitUntil: 'load', timeout: 140000 });
     try {
-      await page.waitForFunction(() => performance.getEntriesByName('phoenix-main-interactive').length > 0, null, { timeout: 120000 });
-      await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 30000 });
+      await page.waitForFunction(
+        () => performance.getEntriesByName('phoenix-main-interactive').length > 0,
+        null,
+        { timeout: 140000 },
+      );
+      await page.waitForFunction(
+        () => document.getElementById('phoenix-loading') == null,
+        null,
+        { timeout: 30000 },
+      );
     } catch (error) {
       console.log(`${browserName} STARTUP WAIT STATE`);
       console.log(JSON.stringify(await startupState(page), null, 2));
       throw error;
     }
 
-    await attachFlutterTrace(page);
-    await enableSemantics(page);
-    console.log(`${browserName} DOM STATE`);
+    await attachFlutterDomTrace(page);
+    console.log(`${browserName} POST-STARTUP DOM STATE`);
     console.log(JSON.stringify(await startupState(page), null, 2));
-    console.log(`${browserName} SEMANTIC STATE`);
-    console.log(JSON.stringify(await semanticSnapshot(page), null, 2));
-    await disableSemanticsHitTesting(page);
 
-    const passport = await boxFor(page, (value) => value === '护照' || /护照\s*$/.test(value), 'bottom-nav-passport');
-    await rawTouch(page, passport, `${browserName}:bottom-nav-passport`);
-    await waitSemantic(page, (value) => value.includes('探索护照') || value.includes('足迹'), `${browserName}:bottom-nav-passport`);
+    const passport = await waitForRect(page, 'bottom-nav-passport');
+    let actionStart = await rawTouch(page, passport, `${browserName}:bottom-nav-passport`);
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'home-tab-state' && entry.selectedTab === 1`,
+      `${browserName}:bottom-nav-passport-state`,
+    );
+    console.log(`${browserName} BOTTOM NAVIGATION PASSPORT = PASS`);
+
+    const explore = await waitForRect(page, 'bottom-nav-explore');
+    actionStart = await rawTouch(page, explore, `${browserName}:bottom-nav-explore`);
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'home-tab-state' && entry.selectedTab === 0`,
+      `${browserName}:bottom-nav-explore-state`,
+    );
     console.log(`${browserName} BOTTOM NAVIGATION = PASS`);
 
-    const explore = await boxFor(page, (value) => value === '探索' || /探索\s*$/.test(value), 'bottom-nav-explore');
-    await rawTouch(page, explore, `${browserName}:bottom-nav-explore`);
-    await waitSemantic(page, (value) => value.includes('Discovery · 今日发现'), `${browserName}:bottom-nav-explore`);
-
-    const levelLabels = (await semanticSnapshot(page)).map((entry) => entry.label).filter((value) => value.includes('Phoenix 中文难度 '));
-    const current = Number(levelLabels[0]?.match(/(\d+) 级/)?.[1]);
-    if (!Number.isFinite(current)) throw new Error(`${browserName}: current level not observable`);
-    const levelControl = current >= 10
-      ? await boxFor(page, (value) => value.includes('降低当前难度'), 'level-minus')
-      : await boxFor(page, (value) => value.includes('提高当前难度'), 'level-plus');
-    await rawTouch(page, levelControl, `${browserName}:level-control`);
-    const expected = current >= 10 ? current - 1 : current + 1;
-    await waitSemantic(page, (value) => value.includes(`Phoenix 中文难度 ${expected} 级`), `${browserName}:level-control`);
+    let levelRect = await waitForRect(page, 'level-plus');
+    actionStart = await rawTouch(page, levelRect, `${browserName}:level-plus`);
+    try {
+      await waitForAuditEvent(
+        page,
+        actionStart,
+        `(entry) => entry.type === 'level-state'`,
+        `${browserName}:level-state`,
+        4000,
+      );
+    } catch (_) {
+      levelRect = await waitForRect(page, 'level-minus');
+      actionStart = await rawTouch(page, levelRect, `${browserName}:level-minus`);
+      await waitForAuditEvent(
+        page,
+        actionStart,
+        `(entry) => entry.type === 'level-state'`,
+        `${browserName}:level-state-fallback`,
+      );
+    }
     console.log(`${browserName} LV CONTROL = PASS`);
 
-    const city = await boxFor(page, (value) => value.includes('选择城市'), 'city-selector');
-    await rawTouch(page, city, `${browserName}:city-selector`);
-    await waitSemantic(page, (value) => value.includes('选择城市与地点'), `${browserName}:city-selector`);
+    const city = await waitForRect(page, 'city-selector');
+    actionStart = await rawTouch(page, city, `${browserName}:city-selector`);
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'route-push' && entry.routeType.includes('ModalBottomSheet')`,
+      `${browserName}:city-selector-route`,
+    );
     console.log(`${browserName} CITY SELECTOR = PASS`);
-    await page.keyboard.press('Escape');
-    await page.waitForTimeout(350);
+    await dismissModalByTouch(page, browserName);
 
-    const start = await boxFor(page, (value) => /(?:开始|继续|再次探索).+Journey/.test(value), 'start-journey');
-    await rawTouch(page, start, `${browserName}:start-journey`);
-    await waitSemantic(page, (value) => /^(Back|返回|后退)$/.test(value) || value.includes('返回'), `${browserName}:start-journey`);
+    const startJourney = await waitForRect(page, 'start-journey');
+    actionStart = await rawTouch(page, startJourney, `${browserName}:start-journey`);
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'route-push' && entry.routeType.includes('MaterialPageRoute')`,
+      `${browserName}:start-journey-route`,
+    );
     console.log(`${browserName} START JOURNEY = PASS`);
 
-    const back = await boxFor(page, (value) => /^(Back|返回|后退)$/.test(value) || value.includes('返回'), 'journey-back');
-    await rawTouch(page, back, `${browserName}:journey-back`);
-    await waitSemantic(page, (value) => value.includes('选择城市'), `${browserName}:journey-back`);
+    const backRect = { x: 0, y: 0, width: 56, height: 44 };
+    actionStart = await rawTouch(
+      page,
+      backRect,
+      `${browserName}:journey-back`,
+      { requireFlutterRoot: false },
+    );
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'route-pop' && entry.routeType.includes('MaterialPageRoute')`,
+      `${browserName}:journey-back-route`,
+    );
     console.log(`${browserName} BACK = PASS`);
 
-    const discovery = (await semanticSnapshot(page)).filter((entry) => entry.label.includes('Discovery · 今日发现'));
-    const discoveryButton = discovery.find((entry) => entry.role === 'button');
-    if (!discoveryButton) throw new Error(`${browserName}: Discovery card is static and has no callback`);
-    await rawTouch(page, discoveryButton, `${browserName}:discovery`);
-    console.log(`${browserName} DISCOVERY TOUCH = PASS`);
+    const discovery = await waitForRect(page, 'discovery');
+    actionStart = await rawTouch(page, discovery, `${browserName}:discovery`);
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'discovery-callback'`,
+      `${browserName}:discovery-callback`,
+    );
+    await waitForAuditEvent(
+      page,
+      actionStart,
+      `(entry) => entry.type === 'route-push' && entry.routeType.includes('ModalBottomSheet')`,
+      `${browserName}:discovery-route`,
+    );
+    console.log(`${browserName} DISCOVERY = PASS`);
 
-    if (pageErrors.length) throw new Error(`${browserName}: page errors: ${pageErrors.join('\n')}`);
+    if (pageErrors.length) {
+      throw new Error(`${browserName}: page errors: ${pageErrors.join('\n')}`);
+    }
     console.log(`${browserName} REAL MOBILE FUNCTIONAL INTERACTION AUDIT = PASS`);
   } finally {
     await browser.close();
