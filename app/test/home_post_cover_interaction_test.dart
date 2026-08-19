@@ -31,7 +31,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byType(HomeShell), findsOneWidget);
-    expect(find.byKey(const ValueKey('discovery-action')).hitTestable(), findsOneWidget);
+    expect(find.text('Discovery · 今日发现').hitTestable(), findsOneWidget);
 
     final cityPicker = find.byKey(const ValueKey('choose-city-journey'));
     expect(cityPicker.hitTestable(), findsOneWidget);
