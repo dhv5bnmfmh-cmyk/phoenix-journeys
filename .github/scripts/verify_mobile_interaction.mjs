@@ -175,15 +175,15 @@ async function openJourney(page, browserName, cycle) {
 
 async function reachDiscovery(page, browserName) {
   await semanticNode(page, '1/6', { prefix: true, timeout: 15000 });
-  await semanticNode(page, '故事', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '1/6 故事', { prefix: true, timeout: 15000 });
   await tapSemanticAction(page, '继续', `${browserName}:story-next`, { prefix: true });
   await sleep(500);
   await page.touchscreen.tap(22, 58);
   await semanticNode(page, '2/6', { prefix: true, timeout: 15000 });
-  await semanticNode(page, '单词', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '2/6 单词', { prefix: true, timeout: 15000 });
   await tapSemanticAction(page, '继续', `${browserName}:words-next`, { prefix: true });
   await semanticNode(page, '3/6', { prefix: true, timeout: 15000 });
-  await semanticNode(page, '发现', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '3/6 发现', { prefix: true, timeout: 15000 });
   console.log(`${browserName} DISCOVERY STATE TRANSITION = PASS`);
 }
 
