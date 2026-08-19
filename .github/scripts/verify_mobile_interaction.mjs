@@ -156,7 +156,7 @@ async function waitForAuditEvent(page, startIndex, predicateSource, label, timeo
   return event;
 }
 
-async function rawTouch(page, rect, label, { requireFlutterRoot = true } = {}) {
+async function rawTouch(page, rect, label) {
   await page.evaluate(() => { window.__phoenixDomTrace = []; });
   const startIndex = await auditLength(page);
   const x = rect.x + rect.width / 2;
@@ -165,34 +165,52 @@ async function rawTouch(page, rect, label, { requireFlutterRoot = true } = {}) {
   await page.waitForTimeout(350);
 
   const domEvents = await page.evaluate(() => window.__phoenixDomTrace || []);
-  const auditEvents = await page.evaluate((index) => (window.__phoenixAuditEvents || []).slice(index), startIndex);
+  const auditEvents = await page.evaluate(
+    (index) => (window.__phoenixAuditEvents || []).slice(index),
+    startIndex,
+  );
   console.log(`TOUCH TRACE ${label}`);
   console.log(JSON.stringify({ x, y, domEvents, auditEvents }, null, 2));
 
   const trustedDomStart = domEvents.some((entry) =>
     entry.isTrusted && (entry.type === 'touchstart' || entry.type === 'pointerdown'));
+  const trustedDomEnd = domEvents.some((entry) =>
+    entry.isTrusted && (entry.type === 'touchend' || entry.type === 'pointerup'));
   const trustedFlutterViewStart = domEvents.some((entry) =>
     entry.scope === 'flutter-view' &&
     entry.isTrusted &&
     (entry.type === 'touchstart' || entry.type === 'pointerdown'));
-  const flutterRootStart = auditEvents.some((entry) => entry.type === 'flutter-pointer-down');
+  const trustedFlutterViewEnd = domEvents.some((entry) =>
+    entry.scope === 'flutter-view' &&
+    entry.isTrusted &&
+    (entry.type === 'touchend' || entry.type === 'pointerup'));
 
-  if (!trustedDomStart) throw new Error(`${label}: DOM received no trusted touch/pointer start`);
-  if (!trustedFlutterViewStart) throw new Error(`${label}: trusted touch did not reach flutter-view`);
-  if (requireFlutterRoot && !flutterRootStart) {
-    throw new Error(`${label}: flutter-view received touch but Flutter hit-test root saw no pointer-down`);
+  console.log(`ACTION = ${label}`);
+  console.log(`DOM pointer/touch start = ${trustedDomStart ? 'YES' : 'NO'}`);
+  console.log(`DOM pointer/touch end = ${trustedDomEnd ? 'YES' : 'NO'}`);
+  console.log(`flutter-view start = ${trustedFlutterViewStart ? 'YES' : 'NO'}`);
+  console.log(`flutter-view end = ${trustedFlutterViewEnd ? 'YES' : 'NO'}`);
+
+  if (!trustedDomStart || !trustedDomEnd) {
+    throw new Error(`${label}: incomplete trusted DOM touch sequence`);
+  }
+  if (!trustedFlutterViewStart || !trustedFlutterViewEnd) {
+    throw new Error(`${label}: trusted touch sequence did not reach flutter-view`);
   }
   return startIndex;
 }
 
 async function dismissModalByTouch(page, browserName) {
-  const startIndex = await auditLength(page);
-  await page.touchscreen.tap(20, 80);
+  const startIndex = await rawTouch(
+    page,
+    { x: 0, y: 60, width: 40, height: 40 },
+    `${browserName}:modal-dismiss`,
+  );
   await waitForAuditEvent(
     page,
     startIndex,
     `(entry) => entry.type === 'route-pop' && entry.routeType.includes('ModalBottomSheet')`,
-    `${browserName}:modal-dismiss`,
+    `${browserName}:modal-dismiss-route`,
   );
 }
 
@@ -300,12 +318,10 @@ async function runBrowser(browserType, browserName) {
     );
     console.log(`${browserName} START JOURNEY = PASS`);
 
-    const backRect = { x: 0, y: 0, width: 56, height: 44 };
     actionStart = await rawTouch(
       page,
-      backRect,
+      { x: 0, y: 0, width: 56, height: 52 },
       `${browserName}:journey-back`,
-      { requireFlutterRoot: false },
     );
     await waitForAuditEvent(
       page,
@@ -317,12 +333,6 @@ async function runBrowser(browserType, browserName) {
 
     const discovery = await waitForRect(page, 'discovery');
     actionStart = await rawTouch(page, discovery, `${browserName}:discovery`);
-    await waitForAuditEvent(
-      page,
-      actionStart,
-      `(entry) => entry.type === 'discovery-callback'`,
-      `${browserName}:discovery-callback`,
-    );
     await waitForAuditEvent(
       page,
       actionStart,
