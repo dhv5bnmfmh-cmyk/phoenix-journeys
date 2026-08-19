@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'screens/coin_journey_screen.dart';
 import 'theme/phoenix_theme.dart';
+import 'widgets/interaction_audit_probe.dart';
 import 'widgets/startup_gate.dart';
 
 class PhoenixApp extends StatelessWidget {
@@ -22,6 +23,9 @@ class PhoenixApp extends StatelessWidget {
       title: 'Phoenix Journeys',
       debugShowCheckedModeBanner: false,
       scaffoldMessengerKey: scaffoldMessengerKey,
+      navigatorObservers: <NavigatorObserver>[
+        phoenixInteractionAuditNavigatorObserver,
+      ],
       theme: PhoenixTheme.light,
       home: showCoinJourney
           ? const CoinJourneyPrototypeScreen()
