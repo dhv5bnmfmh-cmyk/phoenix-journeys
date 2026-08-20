@@ -146,7 +146,7 @@ jobs:
           bb = json.loads((root/'baseline-bundle.json').read_text())
           ab = json.loads((root/'candidate-bundle.json').read_text())
           scenarios = ('cold_new','warm_new','cold_existing','warm_existing')
-          key_fields = ('totalToMeaningfulMs','firstFrameMs','appStateDailyJourneyInitMs','locationBindingsMs','coverVisibleMs','postFlightCoverStallMs','journeyOpenStoryUsableMs')
+          key_fields = ('totalToMeaningfulMs','firstFrameMs','appStateDailyJourneyInitMs','locationBindingsMs','coverVisibleMs','coverFadeStartMs','brandingDeadlineToFadeStartMs','coverRemovalAfterFadeStartMs','journeyOpenStoryUsableMs')
           failed = []
           for scenario in scenarios:
               print(f'[{scenario}]')
@@ -161,9 +161,15 @@ jobs:
               catalog = after['stats'][scenario]['appStateDailyJourneyInitMs']['median']
               if catalog is None or catalog > 3000:
                   failed.append(f'{scenario}: daily Journey init still too expensive ({catalog})')
-              cover = after['stats'][scenario]['coverVisibleMs']['median']
-              if cover is None or cover > 7000:
-                  failed.append(f'{scenario}: cover still too long ({cover})')
+              ready_margin = after['stats'][scenario]['homeReadyBeforeBrandingDeadlineMs']['median']
+              if ready_margin is None or ready_margin < 0:
+                  failed.append(f'{scenario}: Home was not ready before branding deadline ({ready_margin})')
+              fade_delay = after['stats'][scenario]['brandingDeadlineToFadeStartMs']['max']
+              if fade_delay is None or fade_delay > 250:
+                  failed.append(f'{scenario}: branding deadline to cover fade exceeded 250ms ({fade_delay})')
+              removal_delay = after['stats'][scenario]['coverRemovalAfterFadeStartMs']['max']
+              if removal_delay is None or removal_delay > 1000:
+                  failed.append(f'{scenario}: cover removal after fade exceeded 1000ms ({removal_delay})')
               opened = after['stats'][scenario]['journeyOpenStoryUsableMs']['median']
               if opened is None or opened > 5000:
                   failed.append(f'{scenario}: Journey open shifted startup delay ({opened})')

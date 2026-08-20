@@ -172,6 +172,17 @@ await page.evaluateOnNewDocument(() => {
       if (!performance.getEntriesByName(name).length) performance.mark(name);
     } catch (_) {}
   };
+  const originalConsoleInfo = console.info.bind(console);
+  console.info = (...args) => {
+    const message = String(args[0] ?? '');
+    const match = message.match(/^PHOENIX BRANDING DEADLINE = ([0-9.]+)ms$/);
+    if (match && !performance.getEntriesByName('benchmark-branding-deadline').length) {
+      performance.mark('benchmark-branding-deadline', {
+        startTime: Number(match[1]),
+      });
+    }
+    originalConsoleInfo(...args);
+  };
   let coverSeen = false;
   let travelerBound = false;
   const inspect = () => {
@@ -190,11 +201,19 @@ await page.evaluateOnNewDocument(() => {
         if (event.animationName === 'phoenix-time-flight-v2') mark('benchmark-flight-end');
       }, {passive: true});
     }
+    if (cover?.classList.contains('phoenix-loading--hidden')) {
+      mark('benchmark-cover-fade-start');
+    }
     if (coverSeen && !cover) mark('benchmark-cover-removed');
   };
   const observer = new MutationObserver(inspect);
   document.addEventListener('DOMContentLoaded', () => {
-    observer.observe(document.documentElement, {childList: true, subtree: true});
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class'],
+    });
     inspect();
   }, {once: true});
 });
@@ -232,6 +251,11 @@ async function sample(label, {cold, freshState}) {
   );
   await waitForFunctionWithDiagnostics(
     label,
+    'benchmark-cover-fade-start',
+    () => performance.getEntriesByName('benchmark-cover-fade-start').length > 0,
+  );
+  await waitForFunctionWithDiagnostics(
+    label,
     'benchmark-cover-removed',
     () => performance.getEntriesByName('benchmark-cover-removed').length > 0,
   );
@@ -255,7 +279,9 @@ async function sample(label, {cold, freshState}) {
     );
     const diff = (a, b) => marks[a] != null && marks[b] != null ? marks[b] - marks[a] : null;
     const coverCreated = marks['benchmark-cover-created'] ?? 0;
+    const coverFadeStart = marks['benchmark-cover-fade-start'];
     const coverRemoved = marks['benchmark-cover-removed'];
+    const brandingDeadline = marks['benchmark-branding-deadline'] ?? coverCreated + 6800;
     const flightStart = marks['benchmark-flight-start'];
     const flightEnd = marks['benchmark-flight-end'];
     const appReady = marks['phoenix-first-meaningful-screen'];
@@ -281,6 +307,10 @@ async function sample(label, {cold, freshState}) {
       applyCommittedMs: diff('phoenix-apply-committed-start', 'phoenix-apply-committed-end'),
       restoreEligibilityMs: diff('phoenix-restore-eligibility-start', 'phoenix-restore-eligibility-end'),
       coverVisibleMs: coverRemoved != null ? coverRemoved - coverCreated : null,
+      coverFadeStartMs: coverFadeStart != null ? coverFadeStart - coverCreated : null,
+      coverRemovalAfterFadeStartMs: coverFadeStart != null && coverRemoved != null ? coverRemoved - coverFadeStart : null,
+      brandingDeadlineToFadeStartMs: coverFadeStart != null ? Math.max(0, coverFadeStart - brandingDeadline) : null,
+      homeReadyBeforeBrandingDeadlineMs: appReady != null ? brandingDeadline - appReady : null,
       phoenixFlightMs: flightStart != null && flightEnd != null ? flightEnd - flightStart : null,
       postFlightCoverStallMs: flightEnd != null && coverRemoved != null ? Math.max(0, coverRemoved - flightEnd) : null,
       appReadyBeforeFlightEndMs: appReady != null && flightEnd != null ? flightEnd - appReady : null,
@@ -329,6 +359,8 @@ const fields = [
   'sharedPreferencesMs', 'criticalReadMs', 'legacyPathMs', 'legacyBuildMs',
   'legacyValidateMs', 'commitInitialMs', 'snapshotDecodeValidateMs', 'locationBindingsMs',
   'applyCommittedMs', 'restoreEligibilityMs', 'coverVisibleMs', 'phoenixFlightMs',
+  'coverFadeStartMs', 'coverRemovalAfterFadeStartMs', 'brandingDeadlineToFadeStartMs',
+  'homeReadyBeforeBrandingDeadlineMs',
   'postFlightCoverStallMs', 'appReadyBeforeFlightEndMs', 'intentionalMinimumWaitMs',
   'runtimeWaitAfterFlightMs', 'journeyOpenContentReadyMs', 'journeyOpenStoryUsableMs',
   'firstContentfulPaintMs', 'domContentLoadedMs', 'loadEventMs', 'responseEndMs',
