@@ -1,0 +1,174 @@
+name: PR194 Targeted Startup Diagnostic
+
+on:
+  push:
+    branches:
+      - dev/current
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr194-targeted-startup-diagnostic
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Run smallest saved vocabulary regression
+        working-directory: app
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter test test/saved_vocabulary_library_test.dart
+
+      - name: Install one-sample browser driver
+        run: npm install --no-save --prefix "$RUNNER_TEMP/pr194-node" puppeteer-core@24
+
+      - name: Inject candidate-only passive startup timings
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/startup_instrument.py "$GITHUB_WORKSPACE"
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path('.')
+
+          def replace_one(path, old, new, label):
+              text = path.read_text(encoding='utf-8')
+              count = text.count(old)
+              print(f'{label} MATCH COUNT = {count}')
+              if count != 1:
+                  raise SystemExit(f'{label}: expected exactly one anchor, found {count}')
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          passport = root / 'app/lib/screens/city_passport_screen.dart'
+          replace_one(
+              passport,
+              "import '../services/journey_location_binding.dart';\n",
+              "import '../services/journey_location_binding.dart';\nimport '../startup_performance_probe.dart';\n",
+              'passport probe import',
+          )
+          replace_one(
+              passport,
+              "  Widget build(BuildContext context) {\n    final state = context.watch<AppState>();\n\n    return Stack(\n",
+              "  Widget build(BuildContext context) {\n    startupPerformanceMark('phoenix-passport-build-start');\n    final state = context.watch<AppState>();\n\n    return Stack(\n",
+              'passport build start',
+          )
+          replace_one(
+              passport,
+              "        final markerPlacements = _resolveCityMarkerPlacements(\n          geographicMapRect,\n        );\n",
+              "        startupPerformanceMark('phoenix-passport-marker-resolve-start');\n        final markerPlacements = _resolveCityMarkerPlacements(\n          geographicMapRect,\n        );\n        startupPerformanceMark('phoenix-passport-marker-resolve-end');\n",
+              'passport marker resolver',
+          )
+
+          city_catalog = root / 'app/lib/data/journey_city_catalog.dart'
+          replace_one(
+              city_catalog,
+              "import 'daily_journey_catalog.dart';\n",
+              "import 'daily_journey_catalog.dart';\nimport '../startup_performance_probe.dart';\n",
+              'city catalog probe import',
+          )
+          replace_one(
+              city_catalog,
+              "final List<JourneyCityCatalogEntry> journeyCityCatalog =\n    buildJourneyCityCatalog(dailyJourneyExperiences);\n",
+              "final List<JourneyCityCatalogEntry> journeyCityCatalog =\n    _buildInstrumentedJourneyCityCatalog();\n\nList<JourneyCityCatalogEntry> _buildInstrumentedJourneyCityCatalog() {\n  startupPerformanceMark('phoenix-journey-city-catalog-build-start');\n  final result = buildJourneyCityCatalog(dailyJourneyExperiences);\n  startupPerformanceMark('phoenix-journey-city-catalog-build-end');\n  return result;\n}\n",
+              'city catalog runtime build',
+          )
+
+          experience = root / 'app/lib/data/daily_journey_experience.dart'
+          replace_one(
+              experience,
+              "import '../models/story_content.dart';\n",
+              "import '../models/story_content.dart';\nimport '../startup_performance_probe.dart';\n",
+              'lazy list probe import',
+          )
+          replace_one(
+              experience,
+              "  DailyJourneyExperience operator [](int index) {\n    RangeError.checkValidIndex(index, this);\n    return _cache[index] ??= _builders[index]();\n  }\n",
+              "  DailyJourneyExperience operator [](int index) {\n    RangeError.checkValidIndex(index, this);\n    final cached = _cache[index];\n    if (cached != null) return cached;\n    startupPerformanceMark('phoenix-lazy-journey-$index-start');\n    final value = _builders[index]();\n    startupPerformanceMark('phoenix-lazy-journey-$index-end');\n    _cache[index] = value;\n    return value;\n  }\n",
+              'lazy list materialization',
+          )
+
+          location = root / 'app/lib/services/journey_location_binding.dart'
+          replace_one(
+              location,
+              "JourneyLocationBinding requireJourneyLocation(String journeyId) {\n  final cached = _journeyLocationBindingCache[journeyId];\n  if (cached != null) return cached;\n  final journey = requireDailyJourneyExperience(journeyId);\n  final binding = _buildJourneyLocationBinding(journey);\n  _journeyLocationBindingCache[journeyId] = binding;\n  return binding;\n}\n",
+              "JourneyLocationBinding requireJourneyLocation(String journeyId) {\n  startupPerformanceMark('phoenix-require-location-$journeyId-start');\n  final cached = _journeyLocationBindingCache[journeyId];\n  if (cached != null) {\n    startupPerformanceMark('phoenix-require-location-$journeyId-end');\n    return cached;\n  }\n  final journey = requireDailyJourneyExperience(journeyId);\n  startupPerformanceMark('phoenix-require-location-$journeyId-journey-ready');\n  final binding = _buildJourneyLocationBinding(journey);\n  _journeyLocationBindingCache[journeyId] = binding;\n  startupPerformanceMark('phoenix-require-location-$journeyId-end');\n  return binding;\n}\n",
+              'location resolver',
+          )
+          PY
+
+      - name: Build instrumented candidate release
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Run one candidate startup sample
+        shell: bash
+        env:
+          PUPPETEER_CORE_PATH: ${{ runner.temp }}/pr194-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 --directory app/build/web >"$RUNNER_TEMP/pr194-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for _ in {1..30}; do
+            curl --fail --silent http://127.0.0.1:8080/ >/dev/null && break
+            sleep 1
+          done
+          CHROME_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          export CHROME_PATH
+          node --input-type=module <<'JS'
+          import { pathToFileURL } from 'node:url';
+          import fs from 'node:fs';
+          const module = await import(pathToFileURL(process.env.PUPPETEER_CORE_PATH).href);
+          const puppeteer = module.default ?? module;
+          const browser = await puppeteer.launch({
+            executablePath: process.env.CHROME_PATH,
+            headless: true,
+            args: ['--no-sandbox', '--disable-dev-shm-usage'],
+          });
+          try {
+            const page = await browser.newPage();
+            await page.goto('http://127.0.0.1:8080/?unlock=all&prototype=journeys', {
+              waitUntil: 'load',
+              timeout: 90000,
+            });
+            await page.waitForFunction(
+              () => performance.getEntriesByName('phoenix-first-frame').length > 0,
+              {timeout: 90000},
+            );
+            const marks = await page.evaluate(() => Object.fromEntries(
+              performance.getEntriesByType('mark').map((entry) => [entry.name, entry.startTime]),
+            ));
+            const sorted = Object.entries(marks).sort((a, b) => a[1] - b[1]);
+            const payload = {sourceSha: process.env.GITHUB_SHA, marks, sorted};
+            fs.writeFileSync('pr194-targeted-startup-marks.json', JSON.stringify(payload, null, 2));
+            console.log('PR194 TARGETED STARTUP MARKS');
+            for (const [name, value] of sorted) console.log(`${value.toFixed(1)}ms ${name}`);
+          } finally {
+            await browser.close();
+          }
+          JS
+
+      - name: Upload targeted timing evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr194-targeted-startup-${{ github.sha }}
+          path: pr194-targeted-startup-marks.json
+          if-no-files-found: warn
