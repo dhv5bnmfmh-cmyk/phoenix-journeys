@@ -324,42 +324,6 @@ List<GeoNode> _selectedJourneyGeoPath(String id) {
   return path.reversed.toList(growable: false);
 }
 
-JourneyLocationBinding _buildSelectedJourneyLocationBinding(
-  DailyJourneyExperience journey,
-) {
-  final node = _findSelectedJourneyGeoNode(journey.geoNodeId);
-  if (node == null) {
-    throw StateError(
-      'Journey ${journey.id} references unknown GeoNode: ${journey.geoNodeId}.',
-    );
-  }
-  if (!node.isPlace || node.latitude == null || node.longitude == null) {
-    throw StateError(
-      'Journey ${journey.id} must bind to a place GeoNode with coordinates.',
-    );
-  }
-
-  final geoPath = _selectedJourneyGeoPath(node.id);
-  if (geoPath.isEmpty || geoPath.last.id != node.id) {
-    throw StateError('Incomplete GeoNode path for Journey ${journey.id}.');
-  }
-
-  final countryNodes = geoPath.where(
-    (pathNode) => pathNode.kind == GeoNodeKind.country,
-  );
-  if (countryNodes.length != 1) {
-    throw StateError(
-      'Journey ${journey.id} must have exactly one country ancestor.',
-    );
-  }
-
-  return JourneyLocationBinding(
-    journey: journey,
-    placeNode: node,
-    geoPath: List<GeoNode>.unmodifiable(geoPath),
-  );
-}
-
 Map<String, JourneyLocationBinding> buildJourneyLocationBindingsForValidation(
   Iterable<DailyJourneyExperience> journeys,
 ) {

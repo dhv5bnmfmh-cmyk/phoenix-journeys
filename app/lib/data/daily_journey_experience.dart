@@ -120,6 +120,7 @@ class DailyJourneyExperience {
 
 
 class DeferredDailyJourneyExperience extends DailyJourneyExperience {
+  // ignore: use_super_parameters
   DeferredDailyJourneyExperience({
     required String id,
     required String city,
