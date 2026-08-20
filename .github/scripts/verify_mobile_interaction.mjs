@@ -131,6 +131,44 @@ async function tapTabAndVerify(page, tabLabel, expectedPageLabel, browserName) {
   console.log(`${browserName} TAB ${tabLabel} STATE CHANGE = PASS`);
 }
 
+async function tapFirstSemanticAction(page, labels, logLabel) {
+  for (const label of labels) {
+    try {
+      await tapSemanticAction(page, label, logLabel, { prefix: true });
+      return label;
+    } catch (_) {}
+  }
+  throw new Error(`${logLabel}: none of the expected actions were available (${labels.join(', ')})`);
+}
+
+async function exercisePassport(page, browserName) {
+  await tapTabAndVerify(page, '护照', '探索护照', browserName);
+
+  await tapSemanticAction(page, '中国', `${browserName}:passport-china`, { prefix: true });
+  await semanticNode(page, '请从左侧选择省份', { prefix: true, timeout: 15000 });
+  console.log(`${browserName} PASSPORT CHINA STATE CHANGE = PASS`);
+
+  await tapFirstSemanticAction(page, ['浙江省', '浙江'], `${browserName}:passport-province`);
+  await semanticNode(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
+  console.log(`${browserName} PASSPORT PROVINCE STATE CHANGE = PASS`);
+
+  await tapFirstSemanticAction(page, ['杭州市', '杭州'], `${browserName}:passport-city`);
+  await semanticNode(page, '浙江', { prefix: true, timeout: 15000 });
+  console.log(`${browserName} PASSPORT CITY STATE CHANGE = PASS`);
+
+  await tapSemanticAction(page, '返回上一级', `${browserName}:passport-back`, { prefix: true });
+  await semanticNode(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
+  console.log(`${browserName} PASSPORT BACK STATE CHANGE = PASS`);
+
+  await tapSemanticAction(page, '欧洲', `${browserName}:passport-europe`, { prefix: true });
+  await semanticNode(page, '目的地即将开放', { prefix: true, timeout: 15000 });
+  console.log(`${browserName} PASSPORT CONTINENT STATE CHANGE = PASS`);
+
+  await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
+  await waitForHome(page, browserName);
+  console.log(`${browserName} PASSPORT TO EXPLORE = PASS`);
+}
+
 async function exerciseLevelControl(page, browserName) {
   const level = await semanticNode(page, '查看 Lv.', { prefix: true, timeout: 15000 });
   const before = normalize(await level.getAttribute('aria-label') ?? await level.textContent());
@@ -236,6 +274,7 @@ async function runBrowser(browserType, browserName) {
     try {
       await waitForHome(page, browserName);
       console.log(`${browserName} HOME INITIAL INTERACTION = PASS`);
+      await exercisePassport(page, browserName);
       await exerciseCitySelector(page, browserName);
       await exerciseLevelControl(page, browserName);
 
