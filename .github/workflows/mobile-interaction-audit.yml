@@ -91,6 +91,14 @@ jobs:
               app/lib/data/daily_journey_experience.dart|\
               app/lib/data/journey_city_catalog.dart|\
               app/lib/data/journey_startup_metadata.dart|\
+              app/lib/data/extended_journey_catalog.dart|\
+              app/lib/data/journey_expansion_catalog.dart|\
+              app/lib/data/journey_expansion_batch_two.dart|\
+              app/lib/data/journey_expansion_batch_three.dart|\
+              app/lib/data/journey_expansion_batch_four.dart|\
+              app/lib/data/journey_expansion_batch_five.dart|\
+              app/lib/data/special_journey_catalog.dart|\
+              app/lib/data/special_journey_expansion_batch_one.dart|\
               app/lib/services/journey_location_binding.dart|\
               app/lib/services/journey_startup_resolver.dart)
                 ;;

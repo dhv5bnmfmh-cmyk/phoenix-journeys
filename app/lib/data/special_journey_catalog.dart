@@ -592,8 +592,8 @@ final specialJourneyRecords = <JourneyContentRecord>[
   ...specialJourneyExpansionBatchOneRecords,
 ];
 
-final specialJourneyExperiences = <DailyJourneyExperience>[
-  DailyJourneyExperience(
+final specialJourneyExperiences = LazyJourneyList(<DailyJourneyExperienceBuilder>[
+  () => DailyJourneyExperience(
     id: literaryRoamingRecord.id,
     city: '梦境',
     cityCode: 'DRM',
@@ -612,7 +612,7 @@ final specialJourneyExperiences = <DailyJourneyExperience>[
     wonderQuestion: '如果一场梦真正改变了醒来后的你，那场梦算不算真实？',
     expressQuestion: '请写下你会选择回到人间，还是继续追随蝴蝶，并说明原因。',
   ),
-  DailyJourneyExperience(
+  () => DailyJourneyExperience(
     id: mythTracingRecord.id,
     city: '月境',
     cityCode: 'LUN',
@@ -631,7 +631,7 @@ final specialJourneyExperiences = <DailyJourneyExperience>[
     wonderQuestion: '有些东西留下才能记住，有些东西归还才算完整。你会怎样选择？',
     expressQuestion: '请用两到三句话写出你如何处理月宫遗简，以及你的理由。',
   ),
-  DailyJourneyExperience(
+  () => DailyJourneyExperience(
     id: strangeNightRecord.id,
     city: '夜境',
     cityCode: 'NGT',
@@ -650,7 +650,7 @@ final specialJourneyExperiences = <DailyJourneyExperience>[
     wonderQuestion: '门外传来你最想念的声音时，你会守住承诺吗？为什么？',
     expressQuestion: '请写下你在鸡鸣以前会做什么，并使用一个表示推测或怀疑的词。',
   ),
-  DailyJourneyExperience(
+  () => DailyJourneyExperience(
     id: folkSecretRecord.id,
     city: '灯河',
     cityCode: 'LMP',
@@ -670,4 +670,4 @@ final specialJourneyExperiences = <DailyJourneyExperience>[
     expressQuestion: '请写下你会接住河灯还是让它继续逆流，并说明你的理由。',
   ),
   ...specialJourneyExpansionBatchOneExperiences,
-];
+]);

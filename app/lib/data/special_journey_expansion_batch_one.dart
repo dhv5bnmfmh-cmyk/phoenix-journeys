@@ -328,10 +328,10 @@ final specialJourneyExpansionBatchOneRecords = <JourneyContentRecord>[
   _iceCityRecord,
 ];
 
-final specialJourneyExpansionBatchOneExperiences = <DailyJourneyExperience>[
-  _changanExperience,
-  _tideExperience,
-  _arcadeExperience,
-  _teaHorseExperience,
-  _iceCityExperience,
-];
+final specialJourneyExpansionBatchOneExperiences = LazyJourneyList(<DailyJourneyExperienceBuilder>[
+  () => _changanExperience,
+  () => _tideExperience,
+  () => _arcadeExperience,
+  () => _teaHorseExperience,
+  () => _iceCityExperience,
+]);
