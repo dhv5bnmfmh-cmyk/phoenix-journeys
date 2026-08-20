@@ -225,8 +225,8 @@ final extendedJourneyRecords = <JourneyContentRecord>[
   kaipingDiaolouJourney,
 ];
 
-final extendedJourneyExperiences = <DailyJourneyExperience>[
-  DailyJourneyExperience(
+final extendedJourneyExperiences = LazyJourneyList(<DailyJourneyExperienceBuilder>[
+  () => DailyJourneyExperience(
     id: hangzhouWestLakeJourney.id,
     city: '杭州',
     cityCode: 'HGH',
@@ -245,7 +245,7 @@ final extendedJourneyExperiences = <DailyJourneyExperience>[
     wonderQuestion: '方毓为什么在周绍庭扶住她以后停止用西湖景名测试他？',
     expressQuestion: '请按顺序写出方毓隐瞒预约卡、不断出题、湿石阶被扶住和公开交卡四件事。',
   ),
-  DailyJourneyExperience(
+  () => DailyJourneyExperience(
     id: chengduKuanzhaiJourney.id,
     city: '成都',
     cityCode: 'CTU',
@@ -264,7 +264,7 @@ final extendedJourneyExperiences = <DailyJourneyExperience>[
     wonderQuestion: '为什么这把竹椅没有固定位置，反而让院落更容易同时服务停留与通行？',
     expressQuestion: '周叔在没有提醒时主动移椅，怎样证明共享节奏已经不只属于林夏？',
   ),
-  DailyJourneyExperience(
+  () => DailyJourneyExperience(
     id: nanjingQinhuaiJourney.id,
     city: '南京',
     cityCode: 'NKG',
@@ -283,7 +283,7 @@ final extendedJourneyExperiences = <DailyJourneyExperience>[
     wonderQuestion: '为什么魏舟宁可让一段装饰灯继续黑着，也不在最后几分钟改变已经确认的照明安排？',
     expressQuestion: '请用两到三句话说明魏舟做了什么取舍，以及周工最后怎样把责任交给他。',
   ),
-  DailyJourneyExperience(
+  () => DailyJourneyExperience(
     id: guangzhouChenClanJourney.id,
     city: '广州',
     cityCode: 'CAN',
@@ -302,5 +302,5 @@ final extendedJourneyExperiences = <DailyJourneyExperience>[
     wonderQuestion: guangzhouChenClanReflectionPrompts[4],
     expressQuestion: guangzhouChenClanWritingPrompts[4],
   ),
-  kaipingDiaolouExperience,
-];
+  () => kaipingDiaolouExperience,
+]);

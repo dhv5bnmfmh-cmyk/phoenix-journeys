@@ -74,14 +74,14 @@ test('arrival reveals a direct destination-selection handoff', () => {
 
 test('arrival picker is locked to landmarks in the landed city', () => {
   assert.match(explore, /chooseArrivedCityDestination/);
-  assert.match(explore, /initialCityId: state\.activeJourney\.cityId/);
+  assert.match(explore, /initialCityId: state\.activeJourneyMetadata\.cityId/);
   assert.match(explore, /lockToInitialCity: true/);
   assert.match(explore, /onArrived: \(\) => unawaited\(chooseArrivedCityDestination\(\)\)/);
 
   assert.match(picker, /String\? initialCityId/);
   assert.match(picker, /bool lockToInitialCity = false/);
-  assert.match(picker, /initialCityId \?\? state\.activeJourney\.cityId/);
-  assert.match(picker, /lockToInitialCity \? 1 : journeyCityCatalog\.length/);
-  assert.match(picker, /lockToInitialCity[\s\S]{0,80}\? selectedCity[\s\S]{0,80}: journeyCityCatalog\[index\]/);
+  assert.match(picker, /initialCityId \?\? state\.activeJourneyMetadata\.cityId/);
+  assert.match(picker, /lockToInitialCity \? 1 : journeyStartupCityCatalog\.length/);
+  assert.match(picker, /lockToInitialCity[\s\S]{0,80}\? selectedCity[\s\S]{0,80}: journeyStartupCityCatalog\[index\]/);
   assert.match(picker, /你已抵达\$\{selectedCity\.name\}，请选择本城景点/);
 });

@@ -3,9 +3,16 @@
 
 const loading = document.getElementById('phoenix-loading');
 const loadingText = document.getElementById('phoenix-loading-text');
-const loadingStartedAt = window.performance.now();
-const minimumJourneyDurationMs = 11550;
+const bootstrapStartedAt = window.performance.now();
+const phoenixFlightDurationMs = 6800;
+const phoenixBrandingDeadlineAt = bootstrapStartedAt + phoenixFlightDurationMs;
 const legacyWorkerResetKey = 'phoenix-legacy-flutter-worker-reset';
+
+let homeReadyAt = null;
+let resolveStartupSettled;
+const startupSettled = new Promise((resolve) => {
+  resolveStartupSettled = resolve;
+});
 
 function updateLoadingText(message) {
   if (loadingText) {
@@ -13,16 +20,58 @@ function updateLoadingText(message) {
   }
 }
 
-async function hideLoading() {
+function logStartupTimestamp(label) {
+  const timestamp = window.performance.now();
+  console.info(`${label} = ${timestamp.toFixed(1)}ms`);
+  return timestamp;
+}
+
+window.addEventListener(
+  'phoenix-startup-settled',
+  (event) => {
+    const status = event?.detail === 'error' ? 'error' : 'ready';
+    const settledAt = logStartupTimestamp(
+      status === 'ready' ? 'HOME READY' : 'STARTUP ERROR READY',
+    );
+    if (status === 'ready') {
+      homeReadyAt = settledAt;
+    }
+    resolveStartupSettled({ status, settledAt });
+  },
+  { once: true },
+);
+
+const brandingDeadline = new Promise((resolve) => {
+  const remaining = Math.max(
+    0,
+    phoenixBrandingDeadlineAt - window.performance.now(),
+  );
+  window.setTimeout(() => {
+    const reachedAt = window.performance.now();
+    console.info(`PHOENIX FLIGHT = ${(phoenixFlightDurationMs / 1000).toFixed(1)}s`);
+    console.info(`PHOENIX BRANDING DEADLINE = ${phoenixBrandingDeadlineAt.toFixed(1)}ms`);
+    console.info(`PHOENIX BRANDING TIMER RESUMED = ${reachedAt.toFixed(1)}ms`);
+    if (homeReadyAt == null) {
+      console.info('HOME READY AT PHOENIX FLIGHT END = PENDING');
+    }
+    resolve({ deadlineAt: phoenixBrandingDeadlineAt, reachedAt });
+  }, remaining);
+});
+
+function hideLoading({ brandingDeadlineAt, runAppReadyAt, startup }) {
   if (!loading) {
     return;
   }
 
-  const elapsed = window.performance.now() - loadingStartedAt;
-  const remaining = Math.max(0, minimumJourneyDurationMs - elapsed);
-  if (remaining > 0) {
-    updateLoadingText('凤凰即将抵达现代世界…');
-    await new Promise((resolve) => window.setTimeout(resolve, remaining));
+  const coverFadeStartedAt = logStartupTimestamp('COVER FADE START');
+  const finalFrameExtraWait = Math.max(
+    0,
+    coverFadeStartedAt - brandingDeadlineAt,
+  );
+  console.info(`FINAL-FRAME EXTRA WAIT = ${finalFrameExtraWait.toFixed(1)}ms`);
+  console.info(`FLUTTER runApp READY = ${runAppReadyAt.toFixed(1)}ms`);
+  if (startup.status === 'ready') {
+    console.info(`HOME READY = ${startup.settledAt.toFixed(1)}ms`);
   }
 
   loading.classList.add('phoenix-loading--hidden');
@@ -122,8 +171,18 @@ function reloadAfterLegacyWorkerRetirement() {
         updateLoadingText('正在启动旅行引擎…');
         const appRunner = await engineInitializer.initializeEngine();
         updateLoadingText('正在打开 Phoenix…');
-        await appRunner.runApp();
-        await hideLoading();
+        const runAppReadyAt = await appRunner
+          .runApp()
+          .then(() => logStartupTimestamp('FLUTTER runApp READY'));
+        const [branding, startup] = await Promise.all([
+          brandingDeadline,
+          startupSettled,
+        ]);
+        hideLoading({
+          brandingDeadlineAt: branding.deadlineAt,
+          runAppReadyAt,
+          startup,
+        });
       },
     });
   } catch (error) {

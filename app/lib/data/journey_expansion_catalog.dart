@@ -683,8 +683,8 @@ final journeyExpansionRecords = <JourneyContentRecord>[
   quanzhouKaiyuanJourney,
 ];
 
-final journeyExpansionExperiences = <DailyJourneyExperience>[
-  DailyJourneyExperience(
+final journeyExpansionExperiences = LazyJourneyList(<DailyJourneyExperienceBuilder>[
+  () => DailyJourneyExperience(
     id: suzhouGardenJourney.id,
     city: '苏州',
     cityCode: 'SZV',
@@ -703,7 +703,7 @@ final journeyExpansionExperiences = <DailyJourneyExperience>[
     wonderQuestion: '如果你是陈玉兰，第二次看不见程朗时，你会喊他回来吗？为什么？',
     expressQuestion: '请用两到三句话写出陈玉兰抬起手却没有喊名字的那个瞬间。',
   ),
-  DailyJourneyExperience(
+  () => DailyJourneyExperience(
     id: luoyangLongmenJourney.id,
     city: '洛阳',
     cityCode: 'LYA',
@@ -722,7 +722,7 @@ final journeyExpansionExperiences = <DailyJourneyExperience>[
     wonderQuestion: '面对龙门石窟，你最想先观察整体规模还是一尊造像的细节？为什么？',
     expressQuestion: '请用两到三句话描写石窟、山崖与伊河形成的景象。',
   ),
-  DailyJourneyExperience(
+  () => DailyJourneyExperience(
     id: quanzhouKaiyuanJourney.id,
     city: '泉州',
     cityCode: 'JJN',
@@ -741,4 +741,4 @@ final journeyExpansionExperiences = <DailyJourneyExperience>[
     wonderQuestion: '如果你是宋元时期来到泉州的旅行者，最想在港口寻找哪一种语言或商品？',
     expressQuestion: '请用两到三句话介绍开元寺双塔与泉州港口历史的关系。',
   ),
-];
+]);

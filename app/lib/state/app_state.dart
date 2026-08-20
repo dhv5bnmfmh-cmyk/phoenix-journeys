@@ -78,7 +78,7 @@ class AppState extends ChangeNotifier {
   })  : _clock = clock ?? DateTime.now,
         _preferencesLoader =
             preferencesLoader ?? SharedPreferences.getInstance {
-    activeJourneyId = dailyJourneyForDate(_clock()).id;
+    activeJourneyId = dailyJourneyIdForDate(_clock());
   }
 
   static const int journeyLastStep = 5;

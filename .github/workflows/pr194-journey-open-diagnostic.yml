@@ -1,0 +1,242 @@
+name: PR194 Journey Open Diagnostic
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install one-sample browser driver
+        run: npm install --no-save --prefix "$RUNNER_TEMP/pr194-open-node" puppeteer-core@24
+      - name: Inject passive journey-open timings
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/startup_instrument.py "$GITHUB_WORKSPACE"
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_one(path, old, new, label):
+              text = path.read_text(encoding='utf-8')
+              count = text.count(old)
+              print(f'{label} MATCH COUNT = {count}')
+              if count != 1:
+                  raise SystemExit(f'{label}: expected exactly one anchor, found {count}')
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          experience = Path('app/lib/data/daily_journey_experience.dart')
+          replace_one(
+              experience,
+              "import '../models/story_content.dart';\n",
+              "import '../models/story_content.dart';\nimport '../startup_performance_probe.dart';\n",
+              'lazy list probe import',
+          )
+          replace_one(
+              experience,
+              "  DailyJourneyExperience operator [](int index) {\n    RangeError.checkValidIndex(index, this);\n    return _cache[index] ??= _builders[index]();\n  }\n",
+              "  DailyJourneyExperience operator [](int index) {\n    RangeError.checkValidIndex(index, this);\n    final cached = _cache[index];\n    if (cached != null) return cached;\n    startupPerformanceMark('phoenix-lazy-journey-$index-start');\n    final value = _builders[index]();\n    startupPerformanceMark('phoenix-lazy-journey-$index-end');\n    _cache[index] = value;\n    return value;\n  }\n",
+              'lazy list materialization',
+          )
+
+          explore = Path('app/lib/screens/explore_screen.dart')
+          replace_one(
+              explore,
+              "      Navigator.of(context).push(\n        MaterialPageRoute(builder: (_) => JourneyScreen(journeyId: journeyId)),\n      );\n",
+              "      startupPerformanceMark('phoenix-journey-route-push-start');\n      Navigator.of(context).push(\n        MaterialPageRoute(\n          builder: (_) {\n            startupPerformanceMark('phoenix-journey-route-builder-start');\n            return JourneyScreen(journeyId: journeyId);\n          },\n        ),\n      );\n",
+              'journey route push',
+          )
+
+          journey = Path('app/lib/screens/journey_screen.dart')
+          replace_one(
+              journey,
+              "  void initState() {\n    super.initState();\n    WidgetsBinding.instance.addObserver(this);\n    _narration = NarrationController();\n    _narration.addListener(_handleNarrationCheckpoint);\n",
+              "  void initState() {\n    startupPerformanceMark('phoenix-journey-screen-init-start');\n    super.initState();\n    WidgetsBinding.instance.addObserver(this);\n    startupPerformanceMark('phoenix-journey-narration-controller-start');\n    _narration = NarrationController();\n    startupPerformanceMark('phoenix-journey-narration-controller-end');\n    _narration.addListener(_handleNarrationCheckpoint);\n",
+              'journey init and narration controller',
+          )
+          replace_one(
+              journey,
+              "    _experience = requireDailyJourneyExperience(journeyId);\n",
+              "    startupPerformanceMark('phoenix-journey-selected-resolver-start');\n    _experience = requireDailyJourneyExperience(journeyId);\n    startupPerformanceMark('phoenix-journey-selected-resolver-end');\n",
+              'selected journey resolver',
+          )
+          replace_one(
+              journey,
+              "    memoryFocusNode.addListener(_handleWritingFocusChanged);\n  }\n\n  void _handleWritingFocusChanged() {\n",
+              "    memoryFocusNode.addListener(_handleWritingFocusChanged);\n    startupPerformanceMark('phoenix-journey-screen-init-end');\n  }\n\n  void _handleWritingFocusChanged() {\n",
+              'journey init end',
+          )
+          replace_one(
+              journey,
+              "  void didChangeDependencies() {\n    super.didChangeDependencies();\n    if (_initialized) return;\n\n",
+              "  void didChangeDependencies() {\n    super.didChangeDependencies();\n    if (_initialized) return;\n    startupPerformanceMark('phoenix-journey-dependencies-start');\n\n",
+              'journey dependencies start',
+          )
+          replace_one(
+              journey,
+              "    _initialized = true;\n    unawaited(_loadLanguageProfile());\n  }\n",
+              "    _initialized = true;\n    startupPerformanceMark('phoenix-journey-dependencies-end');\n    unawaited(_loadLanguageProfile());\n  }\n",
+              'journey dependencies end',
+          )
+          replace_one(
+              journey,
+              "  JourneyLevelContent get _levelContent {\n    final profile = _languageProfile;\n",
+              "  JourneyLevelContent get _levelContent {\n    startupPerformanceMark('phoenix-story-level-content-start');\n    final profile = _languageProfile;\n",
+              'level content start',
+          )
+          replace_one(
+              journey,
+              "      return cached;\n    }\n\n    late final JourneyLevelContent resolved;\n",
+              "      startupPerformanceMark('phoenix-story-level-content-end');\n      return cached;\n    }\n\n    late final JourneyLevelContent resolved;\n",
+              'level content cached end',
+          )
+          replace_one(
+              journey,
+              "        resolved = resolveJourneyLevel(_experience, difficulty);\n",
+              "        startupPerformanceMark('phoenix-story-level-resolver-start');\n        resolved = resolveJourneyLevel(_experience, difficulty);\n        startupPerformanceMark('phoenix-story-level-resolver-end');\n",
+              'legacy level resolver',
+          )
+          replace_one(
+              journey,
+              "      resolved = resolveAdaptiveJourneyLevel(\n        _experience,\n        profile: profile,\n        knownWords: _appState.savedWords,\n      );\n",
+              "      startupPerformanceMark('phoenix-story-adaptive-level-start');\n      resolved = resolveAdaptiveJourneyLevel(\n        _experience,\n        profile: profile,\n        knownWords: _appState.savedWords,\n      );\n      startupPerformanceMark('phoenix-story-adaptive-level-end');\n",
+              'adaptive level resolver',
+          )
+          replace_one(
+              journey,
+              "    _cachedKnownWordsHash = knownWordsHash;\n    return resolved;\n  }\n",
+              "    _cachedKnownWordsHash = knownWordsHash;\n    startupPerformanceMark('phoenix-story-level-content-end');\n    return resolved;\n  }\n",
+              'level content resolved end',
+          )
+          replace_one(
+              journey,
+              "  Widget build(BuildContext context) {\n    final stepThreePage = _isSummerPalacePilot\n",
+              "  Widget build(BuildContext context) {\n    startupPerformanceMark('phoenix-journey-screen-build-start');\n    Widget measuredPage(String name, Widget Function() builder) {\n      startupPerformanceMark('phoenix-journey-page-$name-start');\n      final value = builder();\n      startupPerformanceMark('phoenix-journey-page-$name-end');\n      return value;\n    }\n    final stepThreePage = _isSummerPalacePilot\n",
+              'journey build start',
+          )
+          replace_one(
+              journey,
+              "    final pages = <Widget>[\n      _storyPage(),\n      _wordsPage(),\n      _discoveryPage(),\n      stepThreePage == PilotN1CompositePage.reflection\n          ? _wonderPage()\n          : _challengePage(),\n      stepFourPage == PilotN1CompositePage.writing\n          ? _expressPage()\n          : _memoryPage(),\n      _completePage(),\n    ];\n\n    return DestinationBackground(\n",
+              "    final pages = <Widget>[\n      measuredPage('story', _storyPage),\n      measuredPage('words', _wordsPage),\n      measuredPage('discovery', _discoveryPage),\n      measuredPage(\n        'step-three',\n        stepThreePage == PilotN1CompositePage.reflection\n            ? _wonderPage\n            : _challengePage,\n      ),\n      measuredPage(\n        'step-four',\n        stepFourPage == PilotN1CompositePage.writing\n            ? _expressPage\n            : _memoryPage,\n      ),\n      measuredPage('complete', _completePage),\n    ];\n    startupPerformanceMark('phoenix-journey-screen-pages-end');\n    startupPerformanceMark('phoenix-journey-screen-build-sync-end');\n\n    return DestinationBackground(\n",
+              'journey page build boundaries',
+          )
+          replace_one(
+              journey,
+              "  double _fitJourneyTextSize(\n    BuildContext context,\n",
+              "  double _fitJourneyTextSize(\n    BuildContext context,\n",
+              'text fit signature guard',
+          )
+          replace_one(
+              journey,
+              "    if (texts.isEmpty || !constraints.hasBoundedHeight) return minSize;\n\n    final availableWidth = (constraints.maxWidth - 58)\n",
+              "    startupPerformanceMark('phoenix-story-text-fit-start');\n    if (texts.isEmpty || !constraints.hasBoundedHeight) {\n      startupPerformanceMark('phoenix-story-text-fit-end');\n      return minSize;\n    }\n\n    final availableWidth = (constraints.maxWidth - 58)\n",
+              'text fit start',
+          )
+          replace_one(
+              journey,
+              "    return low;\n  }\n\n  void _onWonderChanged(String _) {\n",
+              "    startupPerformanceMark('phoenix-story-text-fit-end');\n    return low;\n  }\n\n  void _onWonderChanged(String _) {\n",
+              'text fit end',
+          )
+          replace_one(
+              journey,
+              "    final levelContent = _levelContent;\n    final storyParagraphs = levelContent.storyParagraphs;\n    final storyAnnotations = levelContent.storyAnnotations;\n    final words = levelContent.words;\n\n    return _page(\n",
+              "    startupPerformanceMark('phoenix-story-preparation-start');\n    final levelContent = _levelContent;\n    final storyParagraphs = levelContent.storyParagraphs;\n    final storyAnnotations = levelContent.storyAnnotations;\n    final words = levelContent.words;\n    startupPerformanceMark('phoenix-story-preparation-end');\n\n    return _page(\n",
+              'story preparation',
+          )
+          replace_one(
+              journey,
+              "        startupPerformanceJourneyStoryUsable();\n",
+              "        startupPerformanceMark('phoenix-journey-first-story-frame');\n        startupPerformanceJourneyStoryUsable();\n",
+              'first story frame mark',
+          )
+
+          interactive = Path('app/lib/widgets/interactive_story_text.dart')
+          replace_one(
+              interactive,
+              "import '../data/journey_data.dart';\n",
+              "import '../data/journey_data.dart';\nimport '../startup_performance_probe.dart';\n",
+              'interactive story probe import',
+          )
+          replace_one(
+              interactive,
+              "  void _buildSegments() {\n    _segments = segmentStoryText(widget.text, widget.entries)\n",
+              "  void _buildSegments() {\n    startupPerformanceMark('phoenix-story-segments-${widget.narrationItemId ?? 'unknown'}-start');\n    _segments = segmentStoryText(widget.text, widget.entries)\n",
+              'story segment preparation start',
+          )
+          replace_one(
+              interactive,
+              "        })\n        .toList(growable: false);\n  }\n\n  void _showEntry(WordEntry entry) {\n",
+              "        })\n        .toList(growable: false);\n    startupPerformanceMark('phoenix-story-segments-${widget.narrationItemId ?? 'unknown'}-end');\n  }\n\n  void _showEntry(WordEntry entry) {\n",
+              'story segment preparation end',
+          )
+          replace_one(
+              interactive,
+              "              final highlightEnd = hasExplicitHighlight\n                  ? widget.highlightEnd!\n                  : isCurrentNarrationItem\n                  ? snapshot!.end\n                  : -1;\n\n              return AnimatedContainer(\n",
+              "              final highlightEnd = hasExplicitHighlight\n                  ? widget.highlightEnd!\n                  : isCurrentNarrationItem\n                  ? snapshot!.end\n                  : -1;\n              startupPerformanceMark('phoenix-story-spans-${widget.narrationItemId ?? 'unknown'}-start');\n              final storySpans = _segments\n                  .expand((segment) {\n                    return _buildSegmentSpans(\n                      segment,\n                      state: state,\n                      baseStyle: baseStyle,\n                      highlightStart: highlightStart,\n                      highlightEnd: highlightEnd,\n                      revealCursor: _currentRevealCursor,\n                    );\n                  })\n                  .toList(growable: false);\n              startupPerformanceMark('phoenix-story-spans-${widget.narrationItemId ?? 'unknown'}-end');\n\n              return AnimatedContainer(\n",
+              'story span preparation start/end',
+          )
+          replace_one(
+              interactive,
+              "                    children: _segments\n                        .expand((segment) {\n                          return _buildSegmentSpans(\n                            segment,\n                            state: state,\n                            baseStyle: baseStyle,\n                            highlightStart: highlightStart,\n                            highlightEnd: highlightEnd,\n                            revealCursor: _currentRevealCursor,\n                          );\n                        })\n                        .toList(growable: false),\n",
+              "                    children: storySpans,\n",
+              'story span use',
+          )
+          PY
+      - name: Build instrumented release
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter build web --release
+      - name: Run one cold journey-open sample
+        shell: bash
+        env:
+          PUPPETEER_CORE_PATH: ${{ runner.temp }}/pr194-open-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 --directory app/build/web >"$RUNNER_TEMP/pr194-open-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for _ in {1..30}; do curl --fail --silent http://127.0.0.1:8080/ >/dev/null && break; sleep 1; done
+          CHROME_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          export CHROME_PATH
+          node --input-type=module <<'JS'
+          import { pathToFileURL } from 'node:url';
+          const module = await import(pathToFileURL(process.env.PUPPETEER_CORE_PATH).href);
+          const puppeteer = module.default ?? module;
+          const browser = await puppeteer.launch({executablePath: process.env.CHROME_PATH, headless: true, args: ['--no-sandbox','--disable-dev-shm-usage']});
+          try {
+            const page = await browser.newPage();
+            await page.goto('http://127.0.0.1:8080/?unlock=all&prototype=journeys', {waitUntil:'load', timeout:90000});
+            await page.waitForFunction(() => performance.getEntriesByName('phoenix-first-meaningful-screen').length > 0, {timeout:90000});
+            await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, {timeout:20000});
+            await page.evaluate(() => window.dispatchEvent(new Event('phoenix-benchmark-open-current-journey')));
+            await page.waitForFunction(() => performance.getEntriesByName('phoenix-journey-story-usable').length > 0, {timeout:90000});
+            const entries = await page.evaluate(() => performance.getEntriesByType('mark').map(e => [e.name,e.startTime]));
+            const marks = Object.fromEntries(entries);
+            const start = marks['phoenix-journey-open-start'];
+            const contentReady = marks['phoenix-journey-content-ready'];
+            const usable = marks['phoenix-journey-story-usable'];
+            console.log(`PR194 JOURNEY OPEN TOTAL = ${(usable-start).toFixed(1)}ms`);
+            console.log(`PR194 CONTENT READY TO STORY USABLE = ${(usable-contentReady).toFixed(1)}ms`);
+            console.log('PR194 POST-CONTENT MARKS');
+            for (const [name,value] of entries.sort((a,b)=>a[1]-b[1])) {
+              if (value >= contentReady - 1 && value <= usable + 1) console.log(`${value.toFixed(1)}ms ${name}`);
+            }
+          } finally {
+            await browser.close();
+          }
+          JS

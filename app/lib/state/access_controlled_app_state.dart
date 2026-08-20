@@ -81,6 +81,42 @@ class AccessControlledAppState extends AppState {
     'ice-city-star-map',
   };
 
+  static const Set<String> _releasedSpecialJourneyIds = <String>{
+    'literary-roaming',
+    'myth-tracing',
+    'strange-night-talks',
+    'folk-secret-land',
+  };
+
+  static final Set<String> _regularJourneyIds =
+      Set<String>.unmodifiable(dailyJourneyIds);
+
+  static final Set<String> _registeredJourneyIds = Set<String>.unmodifiable(
+    <String>{
+      ...dailyJourneyIds,
+      ..._releasedSpecialJourneyIds,
+      ...heldSpecialJourneyIds,
+    },
+  );
+
+  static bool _isRegisteredJourneyId(String journeyId) =>
+      _registeredJourneyIds.contains(journeyId);
+
+  static String _storageNamespaceForJourneyId(String journeyId) {
+    final separator = journeyId.indexOf('-');
+    final cityId =
+        separator <= 0 ? journeyId : journeyId.substring(0, separator);
+    final destinationId = journeyId == 'guangzhou-chen-clan-academy'
+        ? 'chen-clan-ancestral-hall'
+        : separator < 0 || separator == journeyId.length - 1
+            ? journeyId
+            : journeyId.substring(separator + 1);
+    return 'journey.$cityId/$destinationId';
+  }
+
+  static String _legacyStorageNamespaceForJourneyId(String journeyId) =>
+      'journey.$journeyId';
+
   final DateTime Function() _clock;
   final Future<SharedPreferences> Function() _preferencesLoader;
   final Uri _runtimeUri;
@@ -115,10 +151,7 @@ class AccessControlledAppState extends AppState {
   bool get isDevelopmentExperience =>
       journeyAccessMode == JourneyAccessMode.developmentExperience;
 
-  List<String> get eligibleRegularJourneyIds =>
-      List<String>.unmodifiable(
-        <String>{for (final journey in dailyJourneyExperiences) journey.id},
-      );
+  List<String> get eligibleRegularJourneyIds => dailyJourneyIds;
 
   DailyJourneyAssignment get dailyAssignment {
     if (!_isValidExplorerSeed(localExplorerSeed)) {
@@ -238,8 +271,7 @@ class AccessControlledAppState extends AppState {
       _criticalNarrationOffsets[contentId] ?? 0;
 
   bool canOpenJourney(String journeyId) {
-    final journey = journeyExperienceById(journeyId);
-    if (journey == null) return false;
+    if (!_isRegisteredJourneyId(journeyId)) return false;
 
     if (_isRegularJourneyId(journeyId)) {
       return policyAccessibleRegularJourneyIds.contains(journeyId);
@@ -975,12 +1007,12 @@ class AccessControlledAppState extends AppState {
 
     final preferences = _preferences;
     if (preferences != null) {
-      final binding = requireJourneyLocation(activeJourneyId);
+      final currentNamespace = _storageNamespaceForJourneyId(activeJourneyId);
+      final legacyNamespace =
+          _legacyStorageNamespaceForJourneyId(activeJourneyId);
       final storedDifficulty =
-          preferences.getString('${binding.storageNamespace}.difficulty') ??
-              preferences.getString(
-                '${binding.legacyStorageNamespace}.difficulty',
-              );
+          preferences.getString('$currentNamespace.difficulty') ??
+              preferences.getString('$legacyNamespace.difficulty');
       journeyDifficulty = parseJourneyDifficulty(storedDifficulty);
       journeyDifficultyChosen = storedDifficulty != null;
     }
@@ -1042,8 +1074,7 @@ class AccessControlledAppState extends AppState {
         localDate: _clock(),
       );
       initialJourneyId = assignment.journeyIdFor(currentDailySlot);
-      initialNamespace =
-          requireJourneyLocation(initialJourneyId).storageNamespace;
+      initialNamespace = _storageNamespaceForJourneyId(initialJourneyId);
     } else {
       if (!hasActiveId || !hasActiveNamespace || !hasActiveVersion) {
         final requested =
@@ -1056,13 +1087,14 @@ class AccessControlledAppState extends AppState {
       initialJourneyId =
           preferences.getString(_activeJourneyIdStorageKey) ?? '';
       if (initialJourneyId.trim().isEmpty ||
-          journeyExperienceById(initialJourneyId) == null) {
+          !_isRegisteredJourneyId(initialJourneyId)) {
         _failActiveIdentity(
           initialJourneyId,
           'Persisted active Journey is missing or no longer registered.',
         );
       }
-      final binding = requireJourneyLocation(initialJourneyId);
+      final expectedNamespace =
+          _storageNamespaceForJourneyId(initialJourneyId);
       initialNamespace =
           preferences.getString(_activeJourneyNamespaceStorageKey) ?? '';
       final version = preferences.getInt(_activeJourneyVersionStorageKey);
@@ -1073,18 +1105,18 @@ class AccessControlledAppState extends AppState {
           '$version.',
         );
       }
-      if (initialNamespace != binding.storageNamespace) {
+      if (initialNamespace != expectedNamespace) {
         _failActiveIdentity(
           initialJourneyId,
           'Active Journey namespace mismatch: expected '
-          '${binding.storageNamespace}, found $initialNamespace.',
+          '$expectedNamespace, found $initialNamespace.',
         );
       }
     }
 
     final journeys = <String, _JourneyCriticalState>{};
-    for (final journey in allJourneyExperiences) {
-      journeys[journey.id] = _readLegacyJourney(preferences, journey.id);
+    for (final journeyId in _registeredJourneyIds) {
+      journeys[journeyId] = _readLegacyJourney(preferences, journeyId);
     }
 
     final stamps = <String>{
@@ -1129,9 +1161,8 @@ class AccessControlledAppState extends AppState {
     SharedPreferences preferences,
     String journeyId,
   ) {
-    final binding = requireJourneyLocation(journeyId);
-    final current = binding.storageNamespace;
-    final legacy = binding.legacyStorageNamespace;
+    final current = _storageNamespaceForJourneyId(journeyId);
+    final legacy = _legacyStorageNamespaceForJourneyId(journeyId);
     final isBeijing = journeyId == 'beijing-forbidden-city';
 
     int? readInt(String suffix) =>
@@ -1204,7 +1235,7 @@ class AccessControlledAppState extends AppState {
 
     return _JourneyCriticalState(
       journeyId: journeyId,
-      storageNamespace: binding.storageNamespace,
+      storageNamespace: current,
       flowVersion: journeyFlowVersionFor(journeyId),
       step: step,
       furthestStep: furthest,
@@ -1269,7 +1300,7 @@ class AccessControlledAppState extends AppState {
           journeyNarrationOffset > 0);
 
   bool _isRegularJourneyId(String journeyId) =>
-      dailyJourneyExperiences.any((journey) => journey.id == journeyId);
+      _regularJourneyIds.contains(journeyId);
 
   String _accessDenialReason(String journeyId) {
     if (_isRegularJourneyId(journeyId)) {
@@ -1503,14 +1534,14 @@ class _PhoenixCriticalSnapshot {
         '$explorerSeedVersion.',
       );
     }
-    final active = journeyExperienceById(activeJourneyId);
-    if (active == null) {
+    if (!AccessControlledAppState._isRegisteredJourneyId(activeJourneyId)) {
       throw CriticalPersistenceException(
         'Committed active Journey is not registered: $activeJourneyId.',
       );
     }
-    final binding = requireJourneyLocation(activeJourneyId);
-    if (activeJourneyNamespace != binding.storageNamespace) {
+    final expectedNamespace =
+        AccessControlledAppState._storageNamespaceForJourneyId(activeJourneyId);
+    if (activeJourneyNamespace != expectedNamespace) {
       throw CriticalPersistenceException(
         'Committed active Journey namespace mismatch for $activeJourneyId.',
       );
@@ -1529,7 +1560,7 @@ class _PhoenixCriticalSnapshot {
     }
     for (final entry in journeys.entries) {
       if (entry.key != entry.value.journeyId ||
-          journeyExperienceById(entry.key) == null) {
+          !AccessControlledAppState._isRegisteredJourneyId(entry.key)) {
         throw CriticalPersistenceException(
           'Invalid committed Journey domain identity: ${entry.key}.',
         );
@@ -1546,7 +1577,7 @@ class _PhoenixCriticalSnapshot {
       ...earnedJourneyStampIds,
       ...unlockedSpecialJourneyIds,
     }) {
-      if (journeyExperienceById(id) == null) {
+      if (!AccessControlledAppState._isRegisteredJourneyId(id)) {
         throw CriticalPersistenceException(
           'Committed Journey ID is not registered: $id.',
         );
@@ -1621,8 +1652,7 @@ class _JourneyCriticalState {
         json['writingFeedbackCorrected'] as String? ?? '';
     final writingExplanation =
         json['writingFeedbackExplanation'] as String? ?? '';
-    final writingNatural =
-        json['writingFeedbackNatural'] as String? ?? '';
+    final writingNatural = json['writingFeedbackNatural'] as String? ?? '';
     final writingEncouragement =
         json['writingFeedbackEncouragement'] as String? ?? '';
     final writingOffline = json['writingFeedbackOffline'] as bool? ?? false;
@@ -1865,8 +1895,9 @@ class _JourneyCriticalState {
       );
 
   void validate() {
-    final binding = requireJourneyLocation(journeyId);
-    if (storageNamespace != binding.storageNamespace) {
+    final expectedNamespace =
+        AccessControlledAppState._storageNamespaceForJourneyId(journeyId);
+    if (storageNamespace != expectedNamespace) {
       throw CriticalPersistenceException(
         'Journey namespace mismatch for $journeyId.',
       );

@@ -38,7 +38,18 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Test Phoenix agents
-        run: node --test worker/*.test.mjs
+        shell: bash
+        run: |
+          set -o pipefail
+          node --test worker/*.test.mjs 2>&1 | tee phoenix-agents-preview.log
+
+      - name: Upload Phoenix agent failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-agents-preview-${{ github.event.pull_request.head.sha }}
+          path: phoenix-agents-preview.log
+          if-no-files-found: error
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2

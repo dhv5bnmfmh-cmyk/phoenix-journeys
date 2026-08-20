@@ -2,6 +2,7 @@ import '../agents/phoenix_world_story_agent.dart';
 import '../data/daily_journey_catalog.dart';
 import '../data/world_geo_catalog.dart';
 import '../models/geo_node.dart';
+import '../data/journey_startup_metadata.dart';
 
 class JourneyMapPoint {
   const JourneyMapPoint({required this.x, required this.y});
@@ -18,13 +19,34 @@ class JourneyMapPoint {
 }
 
 class JourneyLocationBinding {
-  const JourneyLocationBinding({
-    required this.journey,
+  JourneyLocationBinding({
+    required DailyJourneyExperience journey,
     required this.placeNode,
     required this.geoPath,
-  });
+  })  : _journey = journey,
+        _journeyId = journey.id,
+        _cityId = journey.cityId,
+        _destinationId = journey.destinationId,
+        _locationPath = journey.locationPath;
 
-  final DailyJourneyExperience journey;
+  JourneyLocationBinding._startup({
+    required JourneyStartupMetadata metadata,
+    required this.placeNode,
+    required this.geoPath,
+  })  : _journey = null,
+        _journeyId = metadata.id,
+        _cityId = metadata.cityId,
+        _destinationId = metadata.destinationId,
+        _locationPath = metadata.locationPath;
+
+  final DailyJourneyExperience? _journey;
+  final String _journeyId;
+  final String _cityId;
+  final String _destinationId;
+  final String _locationPath;
+
+  DailyJourneyExperience get journey =>
+      _journey ?? requireDailyJourneyExperience(_journeyId);
   final GeoNode placeNode;
   final List<GeoNode> geoPath;
 
@@ -83,10 +105,10 @@ class JourneyLocationBinding {
   String get compactAdministrativeLabel =>
       compactAdministrativeNames.join(' · ');
 
-  String get journeyId => journey.id;
-  String get cityId => journey.cityId;
-  String get destinationId => journey.destinationId;
-  String get locationPath => journey.locationPath;
+  String get journeyId => _journeyId;
+  String get cityId => _cityId;
+  String get destinationId => _destinationId;
+  String get locationPath => _locationPath;
   String get geoNodeId => placeNode.id;
   String get storageNamespace => 'journey.$locationPath';
   String get legacyStorageNamespace => 'journey.$journeyId';
@@ -233,61 +255,137 @@ final Map<String, JourneyLocationBinding> journeyLocationBindings =
 final JourneyLocationCoverage journeyLocationCoverage =
     JourneyLocationCoverage.fromBindings(journeyLocationBindings.values);
 
-Map<String, JourneyLocationBinding> _buildJourneyLocationBindings() {
+final Map<String, JourneyLocationBinding> _journeyLocationBindingCache =
+    <String, JourneyLocationBinding>{};
+
+JourneyLocationBinding _buildJourneyLocationBinding(
+  DailyJourneyExperience journey,
+) {
+  final node = _journeyGeoAgent.find(journey.geoNodeId);
+  if (node == null) {
+    throw StateError(
+      'Journey ${journey.id} references unknown GeoNode: ${journey.geoNodeId}.',
+    );
+  }
+  if (!node.isPlace || node.latitude == null || node.longitude == null) {
+    throw StateError(
+      'Journey ${journey.id} must bind to a place GeoNode with coordinates.',
+    );
+  }
+
+  final geoPath = _journeyGeoAgent.pathTo(node.id);
+  if (geoPath.isEmpty || geoPath.last.id != node.id) {
+    throw StateError('Incomplete GeoNode path for Journey ${journey.id}.');
+  }
+
+  final countryNodes = geoPath.where(
+    (pathNode) => pathNode.kind == GeoNodeKind.country,
+  );
+  if (countryNodes.length != 1) {
+    throw StateError(
+      'Journey ${journey.id} must have exactly one country ancestor.',
+    );
+  }
+
+  return JourneyLocationBinding(
+    journey: journey,
+    placeNode: node,
+    geoPath: List<GeoNode>.unmodifiable(geoPath),
+  );
+}
+
+GeoNode? _findSelectedJourneyGeoNode(String id) {
+  for (final node in worldGeoCatalog) {
+    if (node.id == id) return node;
+  }
+  return null;
+}
+
+List<GeoNode> _selectedJourneyGeoPath(String id) {
+  final path = <GeoNode>[];
+  final visited = <String>{};
+  var current = _findSelectedJourneyGeoNode(id);
+
+  while (current != null) {
+    if (!visited.add(current.id)) {
+      throw StateError(
+        'Circular GeoNode hierarchy detected at ${current.id}',
+      );
+    }
+    path.add(current);
+    final parentId = current.parentId;
+    if (parentId == null) break;
+    current = _findSelectedJourneyGeoNode(parentId);
+    if (current == null) {
+      throw StateError('Parent GeoNode not registered: $parentId');
+    }
+  }
+
+  return path.reversed.toList(growable: false);
+}
+
+Map<String, JourneyLocationBinding> buildJourneyLocationBindingsForValidation(
+  Iterable<DailyJourneyExperience> journeys,
+) {
   final bindings = <String, JourneyLocationBinding>{};
   final paths = <String>{};
   final geoNodeIds = <String>{};
 
-  for (final journey in allJourneyExperiences) {
-    final node = _journeyGeoAgent.find(journey.content.geoNodeId);
-    if (node == null) {
+  for (final journey in journeys) {
+    final binding = _buildJourneyLocationBinding(journey);
+    if (!paths.add(binding.locationPath)) {
       throw StateError(
-        'Journey ${journey.id} references unknown GeoNode: '
-        '${journey.content.geoNodeId}.',
+        'Duplicate Journey location path: ${binding.locationPath}.',
       );
     }
-    if (!node.isPlace || node.latitude == null || node.longitude == null) {
+    if (!geoNodeIds.add(binding.geoNodeId)) {
       throw StateError(
-        'Journey ${journey.id} must bind to a place GeoNode with coordinates.',
+        'Duplicate Journey GeoNode binding: ${binding.geoNodeId}.',
       );
     }
-    if (!paths.add(journey.locationPath)) {
-      throw StateError(
-        'Duplicate Journey location path: ${journey.locationPath}.',
-      );
+    if (bindings.containsKey(journey.id)) {
+      throw StateError('Duplicate Journey ID: ${journey.id}.');
     }
-    if (!geoNodeIds.add(node.id)) {
-      throw StateError('Duplicate Journey GeoNode binding: ${node.id}.');
-    }
-
-    final geoPath = _journeyGeoAgent.pathTo(node.id);
-    if (geoPath.isEmpty || geoPath.last.id != node.id) {
-      throw StateError('Incomplete GeoNode path for Journey ${journey.id}.');
-    }
-
-    final countryNodes = geoPath.where(
-      (pathNode) => pathNode.kind == GeoNodeKind.country,
-    );
-    if (countryNodes.length != 1) {
-      throw StateError(
-        'Journey ${journey.id} must have exactly one country ancestor.',
-      );
-    }
-
-    bindings[journey.id] = JourneyLocationBinding(
-      journey: journey,
-      placeNode: node,
-      geoPath: List<GeoNode>.unmodifiable(geoPath),
-    );
+    bindings[journey.id] = binding;
   }
 
   return Map<String, JourneyLocationBinding>.unmodifiable(bindings);
 }
 
+Map<String, JourneyLocationBinding> _buildJourneyLocationBindings() =>
+    buildJourneyLocationBindingsForValidation(allJourneyExperiences);
+
 JourneyLocationBinding requireJourneyLocation(String journeyId) {
-  final binding = journeyLocationBindings[journeyId];
-  if (binding == null) {
-    throw StateError('Journey location is not registered: $journeyId.');
+  final cached = _journeyLocationBindingCache[journeyId];
+  if (cached != null) return cached;
+  final metadata = journeyStartupMetadataById(journeyId);
+  if (metadata == null) {
+    final binding = _buildJourneyLocationBinding(
+      requireDailyJourneyExperience(journeyId),
+    );
+    _journeyLocationBindingCache[journeyId] = binding;
+    return binding;
   }
+  final node = _findSelectedJourneyGeoNode(metadata.geoNodeId);
+  if (node == null) {
+    throw StateError(
+      'Journey ${metadata.id} references unknown GeoNode: ${metadata.geoNodeId}.',
+    );
+  }
+  if (!node.isPlace || node.latitude == null || node.longitude == null) {
+    throw StateError(
+      'Journey ${metadata.id} must bind to a place GeoNode with coordinates.',
+    );
+  }
+  final geoPath = _selectedJourneyGeoPath(node.id);
+  if (geoPath.isEmpty || geoPath.last.id != node.id) {
+    throw StateError('Incomplete GeoNode path for Journey ${metadata.id}.');
+  }
+  final binding = JourneyLocationBinding._startup(
+    metadata: metadata,
+    placeNode: node,
+    geoPath: List<GeoNode>.unmodifiable(geoPath),
+  );
+  _journeyLocationBindingCache[journeyId] = binding;
   return binding;
 }

@@ -137,12 +137,19 @@ class _MeScreenState extends State<MeScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
+  List<WordEntry> _resolveSavedEntries(AppState state) {
     final savedEntries = allDailyJourneyWords
         .where((entry) => state.savedWords.contains(entry.word))
         .toList(growable: false);
+    return savedEntries;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final savedEntries = state.selectedTab == 3 && state.savedWords.isNotEmpty
+        ? _resolveSavedEntries(state)
+        : const <WordEntry>[];
 
     return LayoutBuilder(
       builder: (context, constraints) {

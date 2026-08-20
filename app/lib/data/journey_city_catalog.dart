@@ -1,3 +1,4 @@
+import 'journey_startup_metadata.dart';
 import 'daily_journey_catalog.dart';
 
 class JourneyCityCatalogEntry {
@@ -6,16 +7,16 @@ class JourneyCityCatalogEntry {
     required this.name,
     required this.cityCode,
     required this.destinations,
+    required this.primaryDestination,
   });
 
   final String id;
   final String name;
   final String cityCode;
   final List<DailyJourneyExperience> destinations;
+  final ({String id}) primaryDestination;
 
   int get destinationCount => destinations.length;
-
-  DailyJourneyExperience get primaryDestination => destinations.first;
 
   DailyJourneyExperience? destinationById(String destinationId) {
     for (final destination in destinations) {
@@ -71,13 +72,41 @@ List<JourneyCityCatalogEntry> buildJourneyCityCatalog(
         name: city.city,
         cityCode: city.cityCode,
         destinations: destinations,
+        primaryDestination: (id: city.id),
       );
     }),
   );
 }
 
+DailyJourneyExperience _deferredJourney(
+  JourneyStartupMetadata metadata,
+) {
+  return DeferredDailyJourneyExperience(
+    id: metadata.id,
+    city: metadata.city,
+    cityCode: metadata.cityCode,
+    place: metadata.place,
+    distanceLabel: metadata.distanceLabel,
+    stampSymbol: metadata.stampSymbol,
+    geoNodeId: metadata.geoNodeId,
+    resolve: () => requireDailyJourneyExperience(metadata.id),
+  );
+}
+
 final List<JourneyCityCatalogEntry> journeyCityCatalog =
-    buildJourneyCityCatalog(dailyJourneyExperiences);
+    List<JourneyCityCatalogEntry>.unmodifiable(
+  journeyStartupCityCatalog.map(
+    (city) => JourneyCityCatalogEntry(
+      id: city.id,
+      name: city.name,
+      cityCode: city.cityCode,
+      destinations: List<DailyJourneyExperience>.unmodifiable(
+        city.destinations.map(_deferredJourney),
+      ),
+      primaryDestination: (id: city.primaryDestination.id),
+    ),
+  ),
+);
 
 JourneyCityCatalogEntry? journeyCityById(String cityId) {
   if (cityId.isEmpty) return null;

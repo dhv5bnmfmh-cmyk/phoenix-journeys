@@ -128,7 +128,13 @@ void main() {
       journeyCityById(shanghai.cityId)?.destinationById(
         shanghai.destinationId,
       ),
-      same(shanghai),
+      isA<DailyJourneyExperience>()
+          .having((journey) => journey.id, 'id', shanghai.id)
+          .having(
+            (journey) => journey.destinationId,
+            'destinationId',
+            shanghai.destinationId,
+          ),
     );
   });
 
