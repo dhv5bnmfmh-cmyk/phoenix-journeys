@@ -228,11 +228,14 @@ async function exerciseCitySelector(page, browserName) {
 async function openJourney(page, browserName, cycle) {
   const button = await findJourneyAction(page);
   const action = normalize(await button.getAttribute('aria-label') ?? await button.textContent());
-  const startedAt = Date.now();
+  const gestureStartedAt = Date.now();
   await button.tap({ timeout: 15000 });
+  const dispatchedAt = Date.now();
+  console.log(`${browserName} JOURNEY CYCLE ${cycle} TAP DISPATCH = ${dispatchedAt - gestureStartedAt}ms`);
   const progress = await findJourneyProgress(page, 20000);
   console.log(`${browserName} JOURNEY CYCLE ${cycle} OPEN = PASS (${action}; ${progress.label})`);
-  reportDuration(browserName, `JOURNEY CYCLE ${cycle} OPEN`, startedAt);
+  reportDuration(browserName, `JOURNEY CYCLE ${cycle} CALLBACK TO OPEN`, dispatchedAt, 2000);
+  reportDuration(browserName, `JOURNEY CYCLE ${cycle} TOTAL`, gestureStartedAt, 15000);
 }
 
 async function reachDiscovery(page, browserName) {
