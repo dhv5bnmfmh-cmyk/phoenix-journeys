@@ -1,5 +1,11 @@
 # PHOENIX ALL-GOLD CHALLENGE REMEDIATION — AFTER EVIDENCE
 
+> Historical 12-Gold remediation snapshot only. It is not the current registry,
+> current all-Gold matrix, or reusable proof of a present human gate. Current
+> authority is `PHOENIX_GLOBAL_CURRENT_STANDARD_COMPLIANCE.md`; the dynamic
+> 14-Gold machine evidence and the provenance-safe human review packet live in
+> the current convergence files named there.
+
 This document is **AFTER remediation evidence**. It does not replace or rewrite the frozen BEFORE audit.
 
 - Frozen audit commit: `abf381e1a756156f5361c6adfe87b2cb4cd62b5e`
