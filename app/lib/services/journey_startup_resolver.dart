@@ -26,6 +26,8 @@ class JourneyStartupMetadata {
   final String headline;
   final String discoveryTeaser;
 
+  String get description => _journeyStartupDescriptions[id] ?? '';
+
   String get cityId {
     final separator = id.indexOf('-');
     return separator <= 0 ? id : id.substring(0, separator);
@@ -43,6 +45,36 @@ class JourneyStartupMetadata {
 
   String get locationPath => '$cityId/$destinationId';
 }
+
+const Map<String, String> _journeyStartupDescriptions = <String, String>{
+  'beijing-forbidden-city': '跟随沈砚与阿宁对照两条不同路线，在共同节点看见宫殿空间怎样因身份与目的而改变。',
+  'beijing-summer-palace': '冬至前后的十七孔桥光线和一张旧照片，把许澄与外婆周岚推入一次不可兼得的选择。',
+  'shanghai-bund': '母亲在外滩把外祖父的旧提单交给林岸；过江以后，他不再把上海分成互不相干的过去与未来。',
+  'xian-city-wall': '搬家前，周遥想用最后一圈告别城内生活；跑表越过永宁门后，他把老家与新家留在同一条路线上。',
+  'hangzhou-west-lake': '结婚四十三年后，方毓带周绍庭重走断桥；湿石阶上的一个旧动作，让两个人终于拿出藏着的医院预约。',
+  'chengdu-kuanzhai-alley': '一把竹椅在茶桌、墙边与门槛之间反复让位；当周叔自己把它移开，共享节奏不再只靠林夏维持。',
+  'nanjing-qinhuai-river': '秦淮灯会开场前发生故障，魏舟拒绝未经确认的临时改线，让主要路线安全亮起，也让一段装饰灯继续黑着。',
+  'guangzhou-chen-clan-academy': '陈秀仪第一次单独见到如今叫刘嘉禾的亲生女儿；亲戚的视频打来后，她必须决定这次见面属于谁。',
+  'jiangmen-kaiping-diaolou': '人物、家书与具体建楼选择为虚构；碉楼类型、侨乡联系与建筑融合机制依据 UNESCO 与开平官方资料。',
+  'suzhou-humble-administrators-garden': '外婆第一次让十二岁的外孙走在前面，在拙政园一次次消失又重现的视线里学着不再把他喊回来。',
+  'luoyang-longmen-grottoes': '在龙门石窟的题记、残损现状与有据复原之间，做一次不替历史补空白的选择。',
+  'quanzhou-kaiyuan-temple': '从开元寺双塔出发，寻找宋元泉州连接世界的城市痕迹。',
+  'datong-yungang-grottoes': '迁都后的云冈，一位虚构女石工割开父亲留下的长墨绳，也割开“唯一传人”的安排。',
+  'lijiang-old-town': '清末丽江，虚构商贩和清在四方街散市后的火情里割断姐弟共同货物的捆绳，让桥下古城水系真正进入人的选择与代价。',
+  'dunhuang-mogao-caves': '沿宕泉河与崖壁理解洞窟艺术、丝路交流和现代保护。',
+  'chengde-mountain-resort': '沿湖泊与山峦观察皇家园林如何连接自然、多民族文化和保护。',
+  'xiamen-kulangsu': '穿过榕树与石阶，读懂海岛建筑、国际交往和生活社区。',
+  'pingyao-ancient-city': '跟随程砚在票号、银箱与两本账之间，看异地汇兑怎样改变人的在场与责任。',
+  'qufu-confucius-sites': '观察孔庙、孔府与孔林如何连接思想、教育和家族记忆。',
+  'leshan-giant-buddha': '从江面观察七十一米石刻、隐蔽排水和现代保护。',
+  'wuyishan-nine-bend-stream': '沿九曲溪认识丹霞森林、生物多样性与朱子文化。',
+  'honghe-hani-rice-terraces': '当代元阳春灌前夕，虚构赶沟人罗秋发现朋友私自削宽木刻分水槽。她恢复共同议定的水份额，也承担朋友收回水牛、自己的最后一块田当天无法犁完的私人代价。',
+  'huangshan-cloud-peaks': '穿过花岗岩峰、黄山松与云海，理解壮阔景观背后的脆弱生态。',
+  'zhangjiajie-wulingyuan': '在石英砂岩峰柱、峡谷和森林之间，阅读亿万年的地貌变化。',
+  'kaifeng-song-capital': '从街市、河道、考古与现代演绎之间，理解北宋都城。',
+  'dali-cangshan-erhai': '连接白族古城、苍山与洱海，理解文化生活和湖泊生态。',
+  'harbin-central-street': '沿面包石和历史建筑，理解铁路、迁移与东北城市文化交融。',
+};
 
 const List<JourneyStartupMetadata> journeyStartupMetadata =
     <JourneyStartupMetadata>[
