@@ -1,0 +1,162 @@
+name: PR194 Journey Location Fix
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Apply selected-only lightweight geo path
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/services/journey_location_binding.dart')
+          text = path.read_text(encoding='utf-8')
+          if '_buildSelectedJourneyLocationBinding' in text:
+              print('Selected Journey location fix already present.')
+              raise SystemExit(0)
+
+          old = """final Map<String, JourneyLocationBinding> _journeyLocationBindingCache =
+    <String, JourneyLocationBinding>{};
+
+JourneyLocationBinding requireJourneyLocation(String journeyId) {
+  final cached = _journeyLocationBindingCache[journeyId];
+  if (cached != null) return cached;
+  final journey = requireDailyJourneyExperience(journeyId);
+  final binding = _buildJourneyLocationBinding(journey);
+  _journeyLocationBindingCache[journeyId] = binding;
+  return binding;
+}
+"""
+          new = """final Map<String, JourneyLocationBinding> _journeyLocationBindingCache =
+    <String, JourneyLocationBinding>{};
+
+GeoNode? _findSelectedJourneyGeoNode(String id) {
+  for (final node in worldGeoCatalog) {
+    if (node.id == id) return node;
+  }
+  return null;
+}
+
+List<GeoNode> _selectedJourneyGeoPath(String nodeId) {
+  final path = <GeoNode>[];
+  final visited = <String>{};
+  var current = _findSelectedJourneyGeoNode(nodeId);
+  while (current != null) {
+    if (!visited.add(current.id)) {
+      throw StateError('Cycle detected at ${current.id}');
+    }
+    path.add(current);
+    final parentId = current.parentId;
+    current = parentId == null ? null : _findSelectedJourneyGeoNode(parentId);
+  }
+  return path.reversed.toList(growable: false);
+}
+
+JourneyLocationBinding _buildSelectedJourneyLocationBinding(
+  DailyJourneyExperience journey,
+) {
+  final node = _findSelectedJourneyGeoNode(journey.geoNodeId);
+  if (node == null) {
+    throw StateError(
+      'Journey ${journey.id} references unknown geo node ${journey.geoNodeId}.',
+    );
+  }
+
+  final path = _selectedJourneyGeoPath(journey.geoNodeId);
+  if (node.type != GeoNodeType.place) {
+    throw StateError('Journey ${journey.id} must bind to a place node.');
+  }
+  if (node.region != GeoRegion.china) {
+    throw StateError('Journey ${journey.id} must bind to a China geo node.');
+  }
+  if (node.latitude == null || node.longitude == null) {
+    throw StateError('Journey ${journey.id} geo node needs coordinates.');
+  }
+
+  final expectedPath = 'china/${journey.cityId}/${journey.destinationId}';
+  final locationPath = geoLocationPath(path);
+  if (locationPath != expectedPath) {
+    throw StateError(
+      'Journey ${journey.id} location path $locationPath does not match '
+      '$expectedPath.',
+    );
+  }
+  if (!node.learningEnabled) {
+    throw StateError('Journey ${journey.id} geo node is not learning-enabled.');
+  }
+  if (node.learningStatus != GeoLearningStatus.gold) {
+    throw StateError('Journey ${journey.id} geo node is not Gold-ready.');
+  }
+
+  return JourneyLocationBinding(
+    journey: journey,
+    placeNode: node,
+    geoPath: path,
+    storageNamespace: 'geo.$locationPath',
+    subtitle: journeyGeoSubtitle(path),
+    mapPoint: _mapPointByJourneyId[journey.id]!,
+  );
+}
+
+JourneyLocationBinding requireJourneyLocation(String journeyId) {
+  final cached = _journeyLocationBindingCache[journeyId];
+  if (cached != null) return cached;
+  final journey = requireDailyJourneyExperience(journeyId);
+  final binding = _buildSelectedJourneyLocationBinding(journey);
+  _journeyLocationBindingCache[journeyId] = binding;
+  return binding;
+}
+"""
+          count = text.count(old)
+          print('selected location tail MATCH COUNT =', count)
+          if count != 1:
+              raise SystemExit(f'expected selected location tail once, found {count}')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          git diff --check
+          git diff -- app/lib/services/journey_location_binding.dart
+      - name: Validate selected location contract
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter analyze
+          mapfile -t tests < <(grep -rlE 'requireJourneyLocation|buildJourneyLocationBindingsForValidation' test --include='*.dart' || true)
+          if (( ${#tests[@]} > 0 )); then
+            printf 'Targeted location tests:\n%s\n' "${tests[@]}"
+            flutter test "${tests[@]}"
+          else
+            echo 'No focused location test file found; analyze passed and full Flutter CI will validate.'
+          fi
+      - name: Commit selected location fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'phoenix-pr194-bot'
+          git config user.email 'phoenix-pr194-bot@users.noreply.github.com'
+          git add app/lib/services/journey_location_binding.dart
+          if git diff --cached --quiet; then
+            echo 'No product diff to commit.'
+            exit 0
+          fi
+          git commit -m 'perf: avoid full geo agent on selected journey open'
+          git push origin HEAD:dev/current
