@@ -81,7 +81,7 @@ test('arrival picker is locked to landmarks in the landed city', () => {
   assert.match(picker, /String\? initialCityId/);
   assert.match(picker, /bool lockToInitialCity = false/);
   assert.match(picker, /initialCityId \?\? state\.activeJourneyMetadata\.cityId/);
-  assert.match(picker, /lockToInitialCity \? 1 : journeyCityCatalog\.length/);
-  assert.match(picker, /lockToInitialCity[\s\S]{0,80}\? selectedCity[\s\S]{0,80}: journeyCityCatalog\[index\]/);
+  assert.match(picker, /lockToInitialCity \? 1 : journeyStartupCityCatalog\.length/);
+  assert.match(picker, /lockToInitialCity[\s\S]{0,80}\? selectedCity[\s\S]{0,80}: journeyStartupCityCatalog\[index\]/);
   assert.match(picker, /你已抵达\$\{selectedCity\.name\}，请选择本城景点/);
 });
