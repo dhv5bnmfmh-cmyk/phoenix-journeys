@@ -90,7 +90,9 @@ jobs:
             case "$path" in
               app/lib/data/daily_journey_experience.dart|\
               app/lib/data/journey_city_catalog.dart|\
-              app/lib/services/journey_location_binding.dart)
+              app/lib/data/journey_startup_metadata.dart|\
+              app/lib/services/journey_location_binding.dart|\
+              app/lib/services/journey_startup_resolver.dart)
                 ;;
               *)
                 echo "UNAUTHORIZED PRODUCT OR LEARNER CONTENT DELTA = $path"

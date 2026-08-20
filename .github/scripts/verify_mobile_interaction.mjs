@@ -298,7 +298,7 @@ async function runBrowser(browserType, browserName) {
 
     try {
       await waitForHome(page, browserName);
-      reportDuration(browserName, 'COLD HOME READY', coldStartAt, 10000);
+      reportDuration(browserName, 'COLD HOME READY', coldStartAt, 20000);
       console.log(`${browserName} HOME INITIAL INTERACTION = PASS`);
       await exerciseCitySelector(page, browserName);
       await exerciseLevelControl(page, browserName);

@@ -1,4 +1,4 @@
-import '../services/journey_startup_resolver.dart';
+import 'journey_startup_metadata.dart';
 import 'daily_journey_catalog.dart';
 
 class JourneyCityCatalogEntry {

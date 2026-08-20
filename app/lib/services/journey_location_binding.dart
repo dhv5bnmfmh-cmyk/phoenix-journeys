@@ -2,7 +2,7 @@ import '../agents/phoenix_world_story_agent.dart';
 import '../data/daily_journey_catalog.dart';
 import '../data/world_geo_catalog.dart';
 import '../models/geo_node.dart';
-import 'journey_startup_resolver.dart';
+import '../data/journey_startup_metadata.dart';
 
 class JourneyMapPoint {
   const JourneyMapPoint({required this.x, required this.y});
