@@ -140,9 +140,11 @@ class _MeScreenState extends State<MeScreen> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final savedEntries = allDailyJourneyWords
-        .where((entry) => state.savedWords.contains(entry.word))
-        .toList(growable: false);
+    final savedEntries = state.selectedTab == 3 && state.savedWords.isNotEmpty
+        ? allDailyJourneyWords
+            .where((entry) => state.savedWords.contains(entry.word))
+            .toList(growable: false)
+        : const <WordEntry>[];
 
     return LayoutBuilder(
       builder: (context, constraints) {
