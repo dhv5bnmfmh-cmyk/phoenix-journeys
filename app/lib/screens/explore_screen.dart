@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../services/journey_location_binding.dart';
+import '../services/journey_startup_resolver.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/journey_picker_sheet.dart';
@@ -54,7 +55,7 @@ class ExploreScreen extends StatelessWidget {
       final journeyId = await showJourneyPickerSheet(
         context: context,
         state: state,
-        initialCityId: state.activeJourney.cityId,
+        initialCityId: state.activeJourneyMetadata.cityId,
         lockToInitialCity: true,
       );
       if (journeyId != null) {
@@ -452,14 +453,14 @@ class _FlightMapCardState extends State<_FlightMapCard>
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
-    final destination = state.activeJourneyLocation;
+    final destination = state.activeJourneyStartupLocation;
     final status = state.journeyCompleted
-        ? '${state.activeJourney.city}已点亮 · 印章已获得'
+        ? '${state.activeJourneyMetadata.city}已点亮 · 印章已获得'
         : state.hasJourneyInProgress
             ? '${state.activeJourneyStampEarned ? '印章已收藏 · ' : ''}旅程 ${state.beijingJourneyProgressPercent}%'
             : state.activeJourneyStampEarned
-                ? '${state.activeJourney.city}印章已收藏 · 可以再次出发'
-                : '${state.activeJourney.distanceLabel} · 学习航程';
+                ? '${state.activeJourneyMetadata.city}印章已收藏 · 可以再次出发'
+                : '${state.activeJourneyMetadata.distanceLabel} · 学习航程';
 
     return Container(
       height: widget.height,
@@ -631,9 +632,9 @@ class _FlightMapCardState extends State<_FlightMapCard>
                               top: geometry.destination.dy - 16,
                               child: _CityMarker(
                                 label: state.displayText(
-                                  state.activeJourney.city,
+                                  state.activeJourneyMetadata.city,
                                 ),
-                                subtitle: state.activeJourney.cityCode,
+                                subtitle: state.activeJourneyMetadata.cityCode,
                                 active: state.activeJourneyStampEarned || landingT > .35,
                                 pulse: _controller.value,
                               ),
@@ -665,7 +666,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
                               const SizedBox(height: 1),
                               Text(
                                 state.displayText(
-                                  '河内  →  ${state.activeJourney.city}',
+                                  '河内  →  ${state.activeJourneyMetadata.city}',
                                 ),
                                 style: const TextStyle(
                                   color: Colors.white,
@@ -739,7 +740,7 @@ class _FlightMapCardState extends State<_FlightMapCard>
                             child: Text(
                               state.displayText(
                                 arrivalT >= .96
-                                    ? '${state.activeJourney.city}已抵达 · 选择景点继续'
+                                    ? '${state.activeJourneyMetadata.city}已抵达 · 选择景点继续'
                                     : status,
                               ),
                               maxLines: 1,
@@ -1082,11 +1083,11 @@ class _JourneyCard extends StatelessWidget {
   final VoidCallback onChoose;
 
   String get _buttonText {
-    if (state.journeyCompleted) return '再次探索${state.activeJourney.city}';
+    if (state.journeyCompleted) return '再次探索${state.activeJourneyMetadata.city}';
     if (state.hasJourneyInProgress) {
-      return '继续${state.activeJourney.city} Journey';
+      return '继续${state.activeJourneyMetadata.city} Journey';
     }
-    return '开始${state.activeJourney.city} Journey';
+    return '开始${state.activeJourneyMetadata.city} Journey';
   }
 
   IconData get _buttonIcon {
@@ -1111,7 +1112,7 @@ class _JourneyCard extends StatelessWidget {
             children: [
               _Pill(
                 icon: Icons.place_outlined,
-                text: state.displayText('中国 · ${state.activeJourney.city}'),
+                text: state.displayText('中国 · ${state.activeJourneyMetadata.city}'),
               ),
               const Spacer(),
               TextButton.icon(
@@ -1136,7 +1137,7 @@ class _JourneyCard extends StatelessWidget {
           ),
           const SizedBox(height: 7),
           Text(
-            state.displayText(state.activeJourney.headline),
+            state.displayText(state.activeJourneyMetadata.headline),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontSize: 19,
                   height: 1.05,
@@ -1145,7 +1146,7 @@ class _JourneyCard extends StatelessWidget {
           ),
           const SizedBox(height: 3),
           Text(
-            state.displayText(state.activeJourney.description),
+            state.displayText(state.activeJourneyMetadata.description),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 11.5, height: 1.15),
@@ -1158,7 +1159,7 @@ class _JourneyCard extends StatelessWidget {
                   child: Text(
                     state.displayText(
                       state.journeyCompleted
-                          ? '旅程完成 · ${state.activeJourney.place}印章已收入护照'
+                          ? '旅程完成 · ${state.activeJourneyMetadata.place}印章已收入护照'
                           : '上次停在「${state.beijingJourneyStepLabel}」',
                     ),
                     maxLines: 1,
@@ -1193,7 +1194,7 @@ class _JourneyCard extends StatelessWidget {
           ] else if (state.activeJourneyStampEarned) ...[
             const SizedBox(height: 6),
             Text(
-              state.displayText('${state.activeJourney.city}印章已收藏，可以随时再次体验。'),
+              state.displayText('${state.activeJourneyMetadata.city}印章已收藏，可以随时再次体验。'),
               maxLines: 1,
               style: const TextStyle(
                 color: PhoenixTheme.red,
@@ -1293,7 +1294,7 @@ class _DiscoveryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  state.displayText(state.activeJourney.discoveryTeaser),
+                  state.displayText(state.activeJourneyMetadata.discoveryTeaser),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 11, height: 1.05),

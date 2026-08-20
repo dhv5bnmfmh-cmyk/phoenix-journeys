@@ -271,8 +271,7 @@ class AccessControlledAppState extends AppState {
       _criticalNarrationOffsets[contentId] ?? 0;
 
   bool canOpenJourney(String journeyId) {
-    final journey = journeyExperienceById(journeyId);
-    if (journey == null) return false;
+    if (!_isRegisteredJourneyId(journeyId)) return false;
 
     if (_isRegularJourneyId(journeyId)) {
       return policyAccessibleRegularJourneyIds.contains(journeyId);

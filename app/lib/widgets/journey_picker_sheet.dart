@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../data/journey_city_catalog.dart';
+import '../services/journey_startup_resolver.dart';
 import '../state/access_controlled_app_state.dart';
 import '../theme/phoenix_theme.dart';
 
@@ -10,7 +10,7 @@ Future<String?> showJourneyPickerSheet({
   String? initialCityId,
   bool lockToInitialCity = false,
 }) async {
-  var selectedCityId = initialCityId ?? state.activeJourney.cityId;
+  var selectedCityId = initialCityId ?? state.activeJourneyMetadata.cityId;
 
   return showModalBottomSheet<String>(
     context: context,
@@ -20,7 +20,7 @@ Future<String?> showJourneyPickerSheet({
     builder: (sheetContext) {
       return StatefulBuilder(
         builder: (context, setSheetState) {
-          final selectedCity = requireJourneyCity(selectedCityId);
+          final selectedCity = requireJourneyStartupCity(selectedCityId);
 
           return FractionallySizedBox(
             heightFactor: .82,
@@ -54,12 +54,12 @@ Future<String?> showJourneyPickerSheet({
                     height: 58,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: lockToInitialCity ? 1 : journeyCityCatalog.length,
+                      itemCount: lockToInitialCity ? 1 : journeyStartupCityCatalog.length,
                       separatorBuilder: (_, __) => const SizedBox(width: 7),
                       itemBuilder: (context, index) {
                         final city = lockToInitialCity
                             ? selectedCity
-                            : journeyCityCatalog[index];
+                            : journeyStartupCityCatalog[index];
                         final selected = city.id == selectedCityId;
                         final earnedCount = city.destinations
                             .where(

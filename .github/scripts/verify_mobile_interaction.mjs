@@ -10,7 +10,7 @@ if (!url || !sourceSha) throw new Error('usage: verify_mobile_interaction.mjs <u
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const normalize = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
 
-async function semanticNode(page, label, { prefix = false, timeout = 15000 } = {}) {
+async function semanticNode(page, label, { prefix = false, timeout = 15000, role = null } = {}) {
   const wanted = normalize(label);
   const deadline = Date.now() + timeout;
   const nodes = page.locator('flt-semantics');
@@ -28,6 +28,7 @@ async function semanticNode(page, label, { prefix = false, timeout = 15000 } = {
           element.textContent,
         ];
         if (!values.some(matches)) continue;
+        if (args.role && element.getAttribute('role') !== args.role) continue;
         const rect = element.getBoundingClientRect();
         const style = getComputedStyle(element);
         const visible = rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
@@ -35,7 +36,7 @@ async function semanticNode(page, label, { prefix = false, timeout = 15000 } = {
       }
       const visible = candidates.find((entry) => entry.visible);
       return visible?.i ?? candidates[0]?.i ?? -1;
-    }, { wanted, prefix });
+    }, { wanted, prefix, role });
     if (index >= 0) return nodes.nth(index);
     await sleep(100);
   }
@@ -66,7 +67,7 @@ async function dumpSemantics(page, browserName) {
 }
 
 async function tapSemanticAction(page, label, logLabel, { prefix = false } = {}) {
-  const action = await semanticNode(page, label, { prefix, timeout: 15000 });
+  const action = await semanticNode(page, label, { prefix, timeout: 15000, role: 'button' });
   await action.waitFor({ state: 'visible', timeout: 15000 });
   const disabled = await action.getAttribute('aria-disabled');
   if (disabled === 'true' || !(await action.isEnabled())) throw new Error(`${logLabel}: action is disabled`);
