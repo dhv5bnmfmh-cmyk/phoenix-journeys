@@ -274,7 +274,6 @@ async function runBrowser(browserType, browserName) {
     try {
       await waitForHome(page, browserName);
       console.log(`${browserName} HOME INITIAL INTERACTION = PASS`);
-      await exercisePassport(page, browserName);
       await exerciseCitySelector(page, browserName);
       await exerciseLevelControl(page, browserName);
 
@@ -287,6 +286,7 @@ async function runBrowser(browserType, browserName) {
       await exitJourneyToHome(page, browserName, 2);
       await exercisePostReturnHome(page, browserName, 2);
 
+      await exercisePassport(page, browserName);
       await exerciseCitySelector(page, browserName);
       await exerciseLevelControl(page, browserName);
       await exerciseAllTabs(page, browserName);
