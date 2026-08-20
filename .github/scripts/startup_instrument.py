@@ -161,4 +161,249 @@ journey_screen = replace_one(journey_screen, "    _experience = requireDailyJour
 journey_screen = replace_one(journey_screen, "    _initialized = true;\n    unawaited(_loadLanguageProfile());\n", "    _initialized = true;\n    WidgetsBinding.instance.addPostFrameCallback((_) {\n      startupPerformanceMarkAfter('phoenix-journey-story-usable', 'phoenix-journey-open-start');\n    });\n    unawaited(_loadLanguageProfile());\n", 'journey story usable')
 journey_screen_path.write_text(journey_screen, encoding='utf-8')
 
-print('TEMPORARY STARTUP + JOURNEY-OPEN INSTRUMENTATION = PASS')
+# Passive first-frame render-path instrumentation. This only exists in the
+# benchmark working tree produced by this script; product behavior is not
+# changed by these marks.
+startup_gate_path = lib / 'widgets' / 'startup_gate.dart'
+home_shell_path = lib / 'screens' / 'home_shell.dart'
+city_passport_path = lib / 'screens' / 'city_passport_screen.dart'
+city_catalog_path = lib / 'data' / 'journey_city_catalog.dart'
+daily_experience_path = lib / 'data' / 'daily_journey_experience.dart'
+
+startup_gate = read(startup_gate_path)
+home_shell = read(home_shell_path)
+city_passport = read(city_passport_path)
+city_catalog = read(city_catalog_path)
+daily_experience = read(daily_experience_path)
+
+startup_gate = replace_one(
+    startup_gate,
+    "import '../state/app_state.dart';\n",
+    "import '../state/app_state.dart';\nimport '../startup_performance_probe.dart';\n",
+    'startup gate probe import',
+)
+startup_gate = replace_one(
+    startup_gate,
+    "  Widget build(BuildContext context) {\n    final state = context.watch<AppState>();\n\n    return switch (state.loadStatus) {\n",
+    "  Widget build(BuildContext context) {\n    final state = context.watch<AppState>();\n    if (state.loadStatus == AppLoadStatus.ready) {\n      startupPerformanceMark('phoenix-startup-gate-ready-build-start');\n    }\n\n    return switch (state.loadStatus) {\n",
+    'startup gate ready build start',
+)
+startup_gate = replace_one(
+    startup_gate,
+    "  @override\n  Widget build(BuildContext context) => widget.child;\n",
+    "  @override\n  Widget build(BuildContext context) {\n    startupPerformanceMarkAfter(\n      'phoenix-startup-gate-ready-child-start',\n      'phoenix-state-ready',\n    );\n    final child = widget.child;\n    startupPerformanceMarkAfter(\n      'phoenix-startup-gate-ready-child-end',\n      'phoenix-state-ready',\n    );\n    return child;\n  }\n",
+    'startup settled child build',
+)
+startup_gate_path.write_text(startup_gate, encoding='utf-8')
+
+home_shell = replace_one(
+    home_shell,
+    "import '../state/app_state.dart';\n",
+    "import '../state/app_state.dart';\nimport '../startup_performance_probe.dart';\n",
+    'home shell probe import',
+)
+home_shell = replace_one(
+    home_shell,
+    "  Widget build(BuildContext context) {\n    final state = context.watch<AppState>();\n\n    return LayoutBuilder(\n      builder: (context, constraints) {\n",
+    "  Widget build(BuildContext context) {\n    final state = context.watch<AppState>();\n    startupPerformanceMarkAfter('phoenix-home-shell-build-start', 'phoenix-state-ready');\n\n    return LayoutBuilder(\n      builder: (context, constraints) {\n        startupPerformanceMarkAfter('phoenix-home-shell-layout-start', 'phoenix-state-ready');\n",
+    'home shell build start',
+)
+home_shell = replace_one(
+    home_shell,
+    "        if (isWide) {\n          return Scaffold(\n",
+    "        if (isWide) {\n          startupPerformanceMarkAfter('phoenix-home-shell-layout-end', 'phoenix-state-ready');\n          return Scaffold(\n",
+    'home shell wide layout end',
+)
+home_shell = replace_one(
+    home_shell,
+    "        }\n\n        return Scaffold(\n          backgroundColor: Colors.transparent,\n          body: SafeArea(bottom: false, child: content),\n",
+    "        }\n\n        startupPerformanceMarkAfter('phoenix-home-shell-layout-end', 'phoenix-state-ready');\n        return Scaffold(\n          backgroundColor: Colors.transparent,\n          body: SafeArea(bottom: false, child: content),\n",
+    'home shell mobile layout end',
+)
+home_shell_path.write_text(home_shell, encoding='utf-8')
+
+explore = read(explore_path)
+explore = replace_one(
+    explore,
+    "  Widget build(BuildContext context) {\n    final state = context.watch<AppState>();\n    final viewportHeight = MediaQuery.sizeOf(context).height;\n",
+    "  Widget build(BuildContext context) {\n    final state = context.watch<AppState>();\n    startupPerformanceMarkAfter('phoenix-explore-build-start', 'phoenix-state-ready');\n    final viewportHeight = MediaQuery.sizeOf(context).height;\n",
+    'explore build start',
+)
+explore = replace_one(
+    explore,
+    "  Widget build(BuildContext context) {\n    final state = widget.state;\n    final destination = state.activeJourneyLocation;\n",
+    "  Widget build(BuildContext context) {\n    final state = widget.state;\n    startupPerformanceMarkAfter('phoenix-home-flight-card-build-start', 'phoenix-state-ready');\n    final destination = state.activeJourneyLocation;\n    startupPerformanceMarkAfter('phoenix-home-flight-card-location-ready', 'phoenix-state-ready');\n",
+    'flight card build start',
+)
+explore_path.write_text(explore, encoding='utf-8')
+
+city_passport = replace_one(
+    city_passport,
+    "import '../state/access_controlled_app_state.dart';\n",
+    "import '../state/access_controlled_app_state.dart';\nimport '../startup_performance_probe.dart';\n",
+    'passport probe import',
+)
+city_passport = replace_one(
+    city_passport,
+    "  Widget build(BuildContext context) {\n    final state = context.watch<AppState>();\n\n    return Stack(\n",
+    "  Widget build(BuildContext context) {\n    final state = context.watch<AppState>();\n    startupPerformanceMarkAfter('phoenix-passport-build-start', 'phoenix-state-ready');\n\n    return Stack(\n",
+    'passport build start',
+)
+city_passport = replace_one(
+    city_passport,
+    "Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Rect mapRect) {\n  const markerSize = Size(72, 28);\n",
+    "Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Rect mapRect) {\n  startupPerformanceMarkAfter('phoenix-passport-marker-resolve-start', 'phoenix-state-ready');\n  const markerSize = Size(72, 28);\n",
+    'passport marker resolve start',
+)
+city_passport = replace_one(
+    city_passport,
+    "  return Map<String, _CityMarkerPlacement>.unmodifiable(placements);\n}\n",
+    "  startupPerformanceMarkAfter('phoenix-passport-marker-resolve-end', 'phoenix-state-ready');\n  return Map<String, _CityMarkerPlacement>.unmodifiable(placements);\n}\n",
+    'passport marker resolve end',
+)
+city_passport_path.write_text(city_passport, encoding='utf-8')
+
+city_catalog = replace_one(
+    city_catalog,
+    "import 'daily_journey_catalog.dart';\n",
+    "import 'daily_journey_catalog.dart';\nimport '../startup_performance_probe.dart';\n",
+    'city catalog probe import',
+)
+old_city_builder = """List<JourneyCityCatalogEntry> buildJourneyCityCatalog(
+  Iterable<DailyJourneyExperience> journeys,
+) {
+  final cityOrder = <String>[];
+  final grouped = <String, List<DailyJourneyExperience>>{};
+
+  for (final journey in journeys) {
+    final cityId = journey.cityId;
+    final destinations = grouped.putIfAbsent(cityId, () {
+      cityOrder.add(cityId);
+      return <DailyJourneyExperience>[];
+    });
+
+    if (destinations.isNotEmpty) {
+      final city = destinations.first;
+      if (city.city != journey.city || city.cityCode != journey.cityCode) {
+        throw StateError(
+          'Journey city metadata does not match for $cityId: '
+          '${city.city}/${city.cityCode} and '
+          '${journey.city}/${journey.cityCode}.',
+        );
+      }
+    }
+
+    if (destinations.any(
+      (destination) => destination.destinationId == journey.destinationId,
+    )) {
+      throw StateError(
+        'Duplicate destination ${journey.destinationId} in city $cityId.',
+      );
+    }
+
+    destinations.add(journey);
+  }
+
+  return List<JourneyCityCatalogEntry>.unmodifiable(
+    cityOrder.map((cityId) {
+      final destinations = List<DailyJourneyExperience>.unmodifiable(
+        grouped[cityId]!,
+      );
+      final city = destinations.first;
+      return JourneyCityCatalogEntry(
+        id: cityId,
+        name: city.city,
+        cityCode: city.cityCode,
+        destinations: destinations,
+      );
+    }),
+  );
+}
+"""
+new_city_builder = old_city_builder.replace(
+    ") {\n  final cityOrder",
+    ") {\n  startupPerformanceMarkAfter('phoenix-city-catalog-build-start', 'phoenix-state-ready');\n  final cityOrder",
+).replace(
+    "  return List<JourneyCityCatalogEntry>.unmodifiable(\n",
+    "  final result = List<JourneyCityCatalogEntry>.unmodifiable(\n",
+).replace(
+    "    }),\n  );\n}\n",
+    "    }),\n  );\n  startupPerformanceMarkAfter('phoenix-city-catalog-build-end', 'phoenix-state-ready');\n  return result;\n}\n",
+)
+city_catalog = replace_one(
+    city_catalog,
+    old_city_builder,
+    new_city_builder,
+    'city catalog builder timing',
+)
+city_catalog_path.write_text(city_catalog, encoding='utf-8')
+
+daily_experience = replace_one(
+    daily_experience,
+    "import 'dart:collection';\n",
+    "import 'dart:collection';\n\nimport '../startup_performance_probe.dart';\n",
+    'lazy journey probe import',
+)
+daily_experience = replace_one(
+    daily_experience,
+    "  DailyJourneyExperience operator [](int index) {\n    RangeError.checkValidIndex(index, this);\n    return _cache[index] ??= _builders[index]();\n  }\n",
+    "  DailyJourneyExperience operator [](int index) {\n    RangeError.checkValidIndex(index, this);\n    startupPerformanceMark('phoenix-lazy-journey-$index-start');\n    final journey = _cache[index] ??= _builders[index]();\n    startupPerformanceMark('phoenix-lazy-journey-$index-end');\n    return journey;\n  }\n",
+    'lazy journey item timing',
+)
+daily_experience_path.write_text(daily_experience, encoding='utf-8')
+
+app_state = read(app_state_path)
+app_state = replace_one(
+    app_state,
+    "  DailyJourneyExperience get activeJourney =>\n      requireDailyJourneyExperience(activeJourneyId);\n",
+    "  DailyJourneyExperience get activeJourney {\n    startupPerformanceMarkAfter('phoenix-active-journey-resolve-start', 'phoenix-state-ready');\n    final journey = requireDailyJourneyExperience(activeJourneyId);\n    startupPerformanceMarkAfter('phoenix-active-journey-resolve-end', 'phoenix-state-ready');\n    return journey;\n  }\n",
+    'active journey resolver timing',
+)
+app_state_path.write_text(app_state, encoding='utf-8')
+
+state = read(state_path)
+state = replace_one(
+    state,
+    "  List<String> get eligibleRegularJourneyIds => dailyJourneyIds;\n",
+    "  List<String> get eligibleRegularJourneyIds {\n    startupPerformanceMarkAfter('phoenix-eligible-regular-ids-start', 'phoenix-state-ready');\n    final ids = dailyJourneyIds;\n    startupPerformanceMarkAfter('phoenix-eligible-regular-ids-end', 'phoenix-state-ready');\n    return ids;\n  }\n",
+    'eligible regular ids timing',
+)
+state = replace_one(
+    state,
+    "  DailyJourneyAssignment get dailyAssignment {\n    if (!_isValidExplorerSeed(localExplorerSeed)) {\n",
+    "  DailyJourneyAssignment get dailyAssignment {\n    startupPerformanceMarkAfter('phoenix-daily-assignment-start', 'phoenix-state-ready');\n    if (!_isValidExplorerSeed(localExplorerSeed)) {\n",
+    'daily assignment start',
+)
+state = replace_one(
+    state,
+    "    return JourneyAccessPolicy.assignDailyJourneys(\n      journeyIds: eligibleRegularJourneyIds,\n      explorerSeed: localExplorerSeed,\n      localDate: _clock(),\n    );\n  }\n",
+    "    final assignment = JourneyAccessPolicy.assignDailyJourneys(\n      journeyIds: eligibleRegularJourneyIds,\n      explorerSeed: localExplorerSeed,\n      localDate: _clock(),\n    );\n    startupPerformanceMarkAfter('phoenix-daily-assignment-end', 'phoenix-state-ready');\n    return assignment;\n  }\n",
+    'daily assignment end',
+)
+state = replace_one(
+    state,
+    "  Set<String> get releasedDailyJourneyIds =>\n      dailyAssignment.unlockedJourneyIds(releasedDailySlots);\n",
+    "  Set<String> get releasedDailyJourneyIds {\n    startupPerformanceMarkAfter('phoenix-released-daily-ids-start', 'phoenix-state-ready');\n    final ids = dailyAssignment.unlockedJourneyIds(releasedDailySlots);\n    startupPerformanceMarkAfter('phoenix-released-daily-ids-end', 'phoenix-state-ready');\n    return ids;\n  }\n",
+    'released daily ids timing',
+)
+state = replace_one(
+    state,
+    "  Set<String> get policyAccessibleRegularJourneyIds =>\n      JourneyAccessPolicy.accessibleJourneyIds(\n        mode: journeyAccessMode,\n        allJourneyIds: eligibleRegularJourneyIds,\n        freeAssignment: dailyAssignment,\n        releasedFreeSlots: releasedDailySlots,\n      );\n",
+    "  Set<String> get policyAccessibleRegularJourneyIds {\n    startupPerformanceMarkAfter('phoenix-policy-accessible-ids-start', 'phoenix-state-ready');\n    final ids = JourneyAccessPolicy.accessibleJourneyIds(\n      mode: journeyAccessMode,\n      allJourneyIds: eligibleRegularJourneyIds,\n      freeAssignment: dailyAssignment,\n      releasedFreeSlots: releasedDailySlots,\n    );\n    startupPerformanceMarkAfter('phoenix-policy-accessible-ids-end', 'phoenix-state-ready');\n    return ids;\n  }\n",
+    'policy accessible ids timing',
+)
+state = replace_one(
+    state,
+    "  @override\n  DailyJourneyExperience get todayJourney {\n    if (!_isValidExplorerSeed(localExplorerSeed)) {\n",
+    "  @override\n  DailyJourneyExperience get todayJourney {\n    startupPerformanceMarkAfter('phoenix-today-journey-start', 'phoenix-state-ready');\n    if (!_isValidExplorerSeed(localExplorerSeed)) {\n",
+    'today journey start',
+)
+state = replace_one(
+    state,
+    "    return requireDailyJourneyExperience(\n      dailyAssignment.journeyIdFor(currentDailySlot),\n    );\n  }\n",
+    "    final journey = requireDailyJourneyExperience(\n      dailyAssignment.journeyIdFor(currentDailySlot),\n    );\n    startupPerformanceMarkAfter('phoenix-today-journey-end', 'phoenix-state-ready');\n    return journey;\n  }\n",
+    'today journey end',
+)
+state_path.write_text(state, encoding='utf-8')
+
+print('TEMPORARY STARTUP + JOURNEY-OPEN + FIRST-FRAME INSTRUMENTATION = PASS')
