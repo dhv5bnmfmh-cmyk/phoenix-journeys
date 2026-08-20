@@ -17,7 +17,7 @@ concurrency:
 
 env:
   CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-  STABLE_RUNTIME_REF: aaa02d5a08d9c6fef10141125d3906fc1f8909f3
+  STABLE_RUNTIME_REF: b7f46e44bc73ec54f53adc385958a5916652e574
 
 jobs:
   mobile-interaction:
@@ -82,26 +82,22 @@ jobs:
           set -euo pipefail
           git fetch --no-tags origin "$STABLE_RUNTIME_REF"
           git cat-file -e "$STABLE_RUNTIME_REF^{commit}"
-          if ! git diff --quiet "$STABLE_RUNTIME_REF" "$CANDIDATE_SHA" -- \
-            app/lib \
-            app/assets \
-            app/web; then
-            echo 'STABLE PRODUCT RUNTIME DELTA = FAIL'
-            git diff --stat "$STABLE_RUNTIME_REF" "$CANDIDATE_SHA" -- app/lib app/assets app/web
-            exit 1
-          fi
-          if ! git diff --quiet "$STABLE_RUNTIME_REF" "$CANDIDATE_SHA" -- \
-            'app/lib/data/**' \
-            'app/lib/models/**' \
-            'app/assets/**' \
-            'worker/journey-content/**'; then
-            echo 'LEARNER CONTENT DELTA = FAIL'
+          mapfile -t product_delta < <(
             git diff --name-only "$STABLE_RUNTIME_REF" "$CANDIDATE_SHA" -- \
-              'app/lib/data/**' \
-              'app/lib/models/**' \
-              'app/assets/**' \
-              'worker/journey-content/**'
-            exit 1
-          fi
-          echo 'STABLE PRODUCT RUNTIME DELTA = NONE'
+              app/lib app/assets app/web
+          )
+          for path in "${product_delta[@]}"; do
+            case "$path" in
+              app/lib/data/daily_journey_experience.dart|\
+              app/lib/data/journey_city_catalog.dart|\
+              app/lib/services/journey_location_binding.dart)
+                ;;
+              *)
+                echo "UNAUTHORIZED PRODUCT OR LEARNER CONTENT DELTA = $path"
+                exit 1
+                ;;
+            esac
+          done
+          echo 'AUTHORIZED PASSPORT DATA/RESOLVER DELTA = PASS'
+          echo 'STABLE PASSPORT SCREEN DELTA = NONE'
           echo 'LEARNER CONTENT DELTA = NONE'

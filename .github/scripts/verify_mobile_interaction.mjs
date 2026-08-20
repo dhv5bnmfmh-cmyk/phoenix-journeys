@@ -10,6 +10,15 @@ if (!url || !sourceSha) throw new Error('usage: verify_mobile_interaction.mjs <u
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const normalize = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
 
+function reportDuration(browserName, label, startedAt, limit = 5000) {
+  const duration = Date.now() - startedAt;
+  console.log(`${browserName} ${label} DURATION = ${duration}ms`);
+  if (duration > limit) {
+    throw new Error(`${browserName}:${label} exceeded ${limit}ms (${duration}ms)`);
+  }
+  return duration;
+}
+
 async function semanticNode(page, label, { prefix = false, timeout = 15000, role = null } = {}) {
   const wanted = normalize(label);
   const deadline = Date.now() + timeout;
@@ -126,9 +135,11 @@ async function dismissBottomSheet(page, expectedLabel) {
 }
 
 async function tapTabAndVerify(page, tabLabel, expectedPageLabel, browserName) {
+  const startedAt = Date.now();
   await tapSemanticAction(page, tabLabel, `${browserName}:${tabLabel}`, { prefix: true });
   await semanticNode(page, expectedPageLabel, { prefix: true, timeout: 15000 });
   console.log(`${browserName} TAB ${tabLabel} STATE CHANGE = PASS`);
+  return reportDuration(browserName, `TAB ${tabLabel}`, startedAt);
 }
 
 async function tapFirstSemanticAction(page, labels, logLabel) {
@@ -144,25 +155,35 @@ async function tapFirstSemanticAction(page, labels, logLabel) {
 async function exercisePassport(page, browserName) {
   await tapTabAndVerify(page, '护照', '探索护照', browserName);
 
+  let startedAt = Date.now();
   await tapSemanticAction(page, '中国', `${browserName}:passport-china`, { prefix: true });
   await semanticNode(page, '请从左侧选择省份', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT CHINA STATE CHANGE = PASS`);
+  reportDuration(browserName, 'PASSPORT CHINA', startedAt);
 
+  startedAt = Date.now();
   await tapFirstSemanticAction(page, ['浙江省', '浙江'], `${browserName}:passport-province`);
   await semanticNode(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT PROVINCE STATE CHANGE = PASS`);
+  reportDuration(browserName, 'PASSPORT PROVINCE', startedAt);
 
-  await tapFirstSemanticAction(page, ['杭州市', '杭州'], `${browserName}:passport-city`);
+  startedAt = Date.now();
+  await tapFirstSemanticAction(page, ['杭州'], `${browserName}:passport-city`);
   await semanticNode(page, '浙江', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT CITY STATE CHANGE = PASS`);
+  reportDuration(browserName, 'PASSPORT CITY', startedAt);
 
+  startedAt = Date.now();
   await tapSemanticAction(page, '返回上一级', `${browserName}:passport-back`, { prefix: true });
   await semanticNode(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT BACK STATE CHANGE = PASS`);
+  reportDuration(browserName, 'PASSPORT BACK', startedAt);
 
+  startedAt = Date.now();
   await tapSemanticAction(page, '欧洲', `${browserName}:passport-europe`, { prefix: true, role: null });
   await semanticNode(page, '目的地即将开放', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT CONTINENT STATE CHANGE = PASS`);
+  reportDuration(browserName, 'PASSPORT CONTINENT', startedAt);
 
   await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
@@ -205,11 +226,13 @@ async function exerciseCitySelector(page, browserName) {
 }
 
 async function openJourney(page, browserName, cycle) {
+  const startedAt = Date.now();
   const button = await findJourneyAction(page);
   const action = normalize(await button.getAttribute('aria-label') ?? await button.textContent());
   await button.tap({ timeout: 15000 });
   const progress = await findJourneyProgress(page, 20000);
   console.log(`${browserName} JOURNEY CYCLE ${cycle} OPEN = PASS (${action}; ${progress.label})`);
+  reportDuration(browserName, `JOURNEY CYCLE ${cycle} OPEN`, startedAt);
 }
 
 async function reachDiscovery(page, browserName) {
@@ -241,8 +264,9 @@ async function exercisePostReturnHome(page, browserName, cycle) {
 
 async function exerciseAllTabs(page, browserName) {
   await tapTabAndVerify(page, '护照', '探索护照', browserName);
-  await tapTabAndVerify(page, '跟读训练', '跟读训练 听一句 · 跟一句 · 逐字对照 · 薄弱句复练', browserName);
   await tapTabAndVerify(page, '我的', 'HSK／TOCFL 能力设置', browserName);
+  await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
+  await tapTabAndVerify(page, '跟读训练', '跟读训练 听一句 · 跟一句 · 逐字对照 · 薄弱句复练', browserName);
   await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} BOTTOM NAVIGATION ALL TABS = PASS`);
@@ -264,6 +288,7 @@ async function runBrowser(browserType, browserName) {
     page.on('pageerror', (error) => pageErrors.push(error?.stack || error?.message || String(error)));
     page.on('console', (message) => console.log(`[${browserName} console:${message.type()}] ${message.text()}`));
 
+    const coldStartAt = Date.now();
     const separator = url.includes('?') ? '&' : '?';
     const candidateUrl = `${url}${separator}unlock=all&prototype=journeys&v=${sourceSha}`;
     await page.goto(candidateUrl, { waitUntil: 'load', timeout: 140000 });
@@ -273,6 +298,7 @@ async function runBrowser(browserType, browserName) {
 
     try {
       await waitForHome(page, browserName);
+      reportDuration(browserName, 'COLD HOME READY', coldStartAt, 10000);
       console.log(`${browserName} HOME INITIAL INTERACTION = PASS`);
       await exerciseCitySelector(page, browserName);
       await exerciseLevelControl(page, browserName);
