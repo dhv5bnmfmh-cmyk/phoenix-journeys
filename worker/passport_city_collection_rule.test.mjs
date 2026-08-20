@@ -15,7 +15,7 @@ test('Home uses the city-grouped Passport screen', () => {
 });
 
 test('Passport keeps every city journey reachable on the transparent atlas', () => {
-  assert.match(passport, /for \(final city in journeyCityCatalog\)/);
+  assert.match(passport, /for \(final city in journeyStartupCityCatalog\)/);
   assert.match(passport, /_CityMapMarker\(/);
   assert.match(passport, /city\.destinations/);
   assert.match(passport, /passport-city-\$\{city\.id\}/);
