@@ -7,7 +7,6 @@ import '../data/daily_journey_catalog.dart';
 import '../data/journey_city_catalog.dart';
 import '../data/journey_geography_catalog.dart';
 import '../services/journey_location_binding.dart';
-import '../services/journey_startup_resolver.dart';
 import '../state/access_controlled_app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/journey_symbol_badge.dart';
@@ -326,15 +325,23 @@ class _PassportMapState extends State<_PassportMap> {
                         Positioned.fill(
                           child: ColoredBox(
                             color: const Color(0xFFE8D7AF),
-                            child: Image.asset(
-                              mapAsset,
-                              key: const ValueKey(
-                                'passport-hd-atlas-image',
+                            child: ColorFiltered(
+                              colorFilter: const ColorFilter.matrix(<double>[
+                                1.28, -.08, -.08, 0, -4,
+                                -.08, 1.28, -.08, 0, -4,
+                                -.08, -.08, 1.28, 0, -4,
+                                0, 0, 0, 1, 0,
+                              ]),
+                              child: Image.asset(
+                                mapAsset,
+                                key: const ValueKey(
+                                  'passport-hd-atlas-image',
+                                ),
+                                fit: mapFit,
+                                alignment: Alignment.center,
+                                filterQuality: FilterQuality.high,
+                                gaplessPlayback: true,
                               ),
-                              fit: mapFit,
-                              alignment: Alignment.center,
-                              filterQuality: FilterQuality.medium,
-                              gaplessPlayback: true,
                             ),
                           ),
                         ),
@@ -835,8 +842,8 @@ Map<String, _CityMarkerPlacement> _resolveCityMarkerPlacements(Rect mapRect) {
   final occupied = <Rect>[];
   final placements = <String, _CityMarkerPlacement>{};
 
-  for (final city in journeyStartupCityCatalog) {
-    final binding = requireJourneyStartupLocation(city.primaryDestination.id);
+  for (final city in journeyCityCatalog) {
+    final binding = requireJourneyLocation(city.primaryDestination.id);
     final longitudeRatio = ((binding.longitude - 73) / (135 - 73)).clamp(0, 1);
     final latitudeRatio = ((binding.latitude - 18) / (54 - 18)).clamp(0, 1);
     final anchor = Offset(
