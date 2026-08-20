@@ -326,23 +326,15 @@ class _PassportMapState extends State<_PassportMap> {
                         Positioned.fill(
                           child: ColoredBox(
                             color: const Color(0xFFE8D7AF),
-                            child: ColorFiltered(
-                              colorFilter: const ColorFilter.matrix(<double>[
-                                1.28, -.08, -.08, 0, -4,
-                                -.08, 1.28, -.08, 0, -4,
-                                -.08, -.08, 1.28, 0, -4,
-                                0, 0, 0, 1, 0,
-                              ]),
-                              child: Image.asset(
-                                mapAsset,
-                                key: const ValueKey(
-                                  'passport-hd-atlas-image',
-                                ),
-                                fit: mapFit,
-                                alignment: Alignment.center,
-                                filterQuality: FilterQuality.high,
-                                gaplessPlayback: true,
+                            child: Image.asset(
+                              mapAsset,
+                              key: const ValueKey(
+                                'passport-hd-atlas-image',
                               ),
+                              fit: mapFit,
+                              alignment: Alignment.center,
+                              filterQuality: FilterQuality.medium,
+                              gaplessPlayback: true,
                             ),
                           ),
                         ),
