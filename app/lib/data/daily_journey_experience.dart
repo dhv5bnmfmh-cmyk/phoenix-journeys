@@ -111,7 +111,7 @@ class DailyJourneyExperience {
     return id.substring(separator + 1);
   }
 
-  String get geoNodeId => content.geoNodeId;
+  String get geoNodeId => _content.geoNodeId;
 
   String get locationPath => '$cityId/$destinationId';
 
