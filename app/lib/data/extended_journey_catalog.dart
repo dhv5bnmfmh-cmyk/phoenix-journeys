@@ -302,5 +302,5 @@ final extendedJourneyExperiences = LazyJourneyList(<DailyJourneyExperienceBuilde
     wonderQuestion: guangzhouChenClanReflectionPrompts[4],
     expressQuestion: guangzhouChenClanWritingPrompts[4],
   ),
-  kaipingDiaolouExperience,
+  () => kaipingDiaolouExperience,
 ]);

@@ -669,5 +669,9 @@ final specialJourneyExperiences = LazyJourneyList(<DailyJourneyExperienceBuilder
     wonderQuestion: '如果未来的你只能留下一句话，你最希望现在的自己听见什么？',
     expressQuestion: '请写下你会接住河灯还是让它继续逆流，并说明你的理由。',
   ),
-  ...specialJourneyExpansionBatchOneExperiences,
+  () => specialJourneyExpansionBatchOneExperiences[0],
+  () => specialJourneyExpansionBatchOneExperiences[1],
+  () => specialJourneyExpansionBatchOneExperiences[2],
+  () => specialJourneyExpansionBatchOneExperiences[3],
+  () => specialJourneyExpansionBatchOneExperiences[4],
 ]);
