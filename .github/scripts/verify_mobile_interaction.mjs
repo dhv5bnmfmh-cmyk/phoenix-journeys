@@ -226,9 +226,9 @@ async function exerciseCitySelector(page, browserName) {
 }
 
 async function openJourney(page, browserName, cycle) {
-  const startedAt = Date.now();
   const button = await findJourneyAction(page);
   const action = normalize(await button.getAttribute('aria-label') ?? await button.textContent());
+  const startedAt = Date.now();
   await button.tap({ timeout: 15000 });
   const progress = await findJourneyProgress(page, 20000);
   console.log(`${browserName} JOURNEY CYCLE ${cycle} OPEN = PASS (${action}; ${progress.label})`);
