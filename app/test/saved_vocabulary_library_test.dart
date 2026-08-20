@@ -33,6 +33,7 @@ void main() {
     final state = AppState(clock: () => DateTime(2026, 7, 21));
     await state.load();
     await state.toggleSavedWord('牌坊');
+    state.setTab(3);
 
     await tester.pumpWidget(
       ChangeNotifierProvider.value(
