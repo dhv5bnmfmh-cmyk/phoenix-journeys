@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:pinyin/pinyin.dart';
 
 import '../agents/phoenix_language_level_agent.dart';
@@ -610,6 +612,72 @@ List<DiscoveryEntry> _longmenDiscoveriesForLevel(int level) {
   return List<DiscoveryEntry>.unmodifiable(facts.map(_discovery));
 }
 
+class _LazyLongmenWordExamples extends ListBase<WordExample> {
+  _LazyLongmenWordExamples({
+    required this.word,
+    required this.sourceSentence,
+    required this.sourceVietnamese,
+    required this.sourceEnglish,
+  }) : _cache = List<WordExample?>.filled(3, null, growable: false);
+
+  final String word;
+  final String sourceSentence;
+  final String sourceVietnamese;
+  final String sourceEnglish;
+  final List<WordExample?> _cache;
+
+  @override
+  int get length => 3;
+
+  @override
+  set length(int value) {
+    throw UnsupportedError('Longmen word examples are immutable.');
+  }
+
+  @override
+  WordExample operator [](int index) {
+    RangeError.checkValidIndex(index, this);
+    return _cache[index] ??= switch (index) {
+      0 => WordExample(
+          chinese: sourceSentence,
+          pinyin: PinyinHelper.getPinyinE(
+            sourceSentence,
+            separator: ' ',
+            format: PinyinFormat.WITH_TONE_MARK,
+          ),
+          vietnamese: sourceVietnamese,
+          english: sourceEnglish,
+        ),
+      1 => WordExample(
+          chinese: '故事里，“$word”必须回到当前证据和上下文来理解。',
+          pinyin: PinyinHelper.getPinyinE(
+            '故事里，“$word”必须回到当前证据和上下文来理解。',
+            separator: ' ',
+            format: PinyinFormat.WITH_TONE_MARK,
+          ),
+          vietnamese: 'Trong câu chuyện, “$word” phải được hiểu từ chứng cứ và ngữ cảnh hiện tại.',
+          english: 'In the story, “$word” must be understood from the current evidence and context.',
+        ),
+      2 => WordExample(
+          chinese: '回看原句，判断“$word”怎样影响人物选择或历史理解。',
+          pinyin: PinyinHelper.getPinyinE(
+            '回看原句，判断“$word”怎样影响人物选择或历史理解。',
+            separator: ' ',
+            format: PinyinFormat.WITH_TONE_MARK,
+          ),
+          vietnamese: 'Hãy đọc lại câu gốc và xem “$word” ảnh hưởng đến lựa chọn của nhân vật hoặc cách hiểu lịch sử như thế nào.',
+          english: 'Re-read the source sentence and decide how “$word” affects the character’s choice or historical understanding.',
+        ),
+      _ => throw RangeError.index(index, this),
+    };
+  }
+
+  @override
+  void operator []=(int index, WordExample value) {
+    throw UnsupportedError('Longmen word examples are immutable.');
+  }
+}
+
 WordEntry _longmenWord({
   required String word,
   required String pinyin,
@@ -630,38 +698,12 @@ WordEntry _longmenWord({
     translation: vietnamese,
     englishDefinition: english,
     symbol: symbol,
-    examples: <WordExample>[
-      WordExample(
-        chinese: sourceSentence,
-        pinyin: PinyinHelper.getPinyinE(
-          sourceSentence,
-          separator: ' ',
-          format: PinyinFormat.WITH_TONE_MARK,
-        ),
-        vietnamese: sourceVietnamese,
-        english: sourceEnglish,
-      ),
-      WordExample(
-        chinese: '故事里，“$word”必须回到当前证据和上下文来理解。',
-        pinyin: PinyinHelper.getPinyinE(
-          '故事里，“$word”必须回到当前证据和上下文来理解。',
-          separator: ' ',
-          format: PinyinFormat.WITH_TONE_MARK,
-        ),
-        vietnamese: 'Trong câu chuyện, “$word” phải được hiểu từ chứng cứ và ngữ cảnh hiện tại.',
-        english: 'In the story, “$word” must be understood from the current evidence and context.',
-      ),
-      WordExample(
-        chinese: '回看原句，判断“$word”怎样影响人物选择或历史理解。',
-        pinyin: PinyinHelper.getPinyinE(
-          '回看原句，判断“$word”怎样影响人物选择或历史理解。',
-          separator: ' ',
-          format: PinyinFormat.WITH_TONE_MARK,
-        ),
-        vietnamese: 'Hãy đọc lại câu gốc và xem “$word” ảnh hưởng đến lựa chọn của nhân vật hoặc cách hiểu lịch sử như thế nào.',
-        english: 'Re-read the source sentence and decide how “$word” affects the character’s choice or historical understanding.',
-      ),
-    ],
+    examples: _LazyLongmenWordExamples(
+      word: word,
+      sourceSentence: sourceSentence,
+      sourceVietnamese: sourceVietnamese,
+      sourceEnglish: sourceEnglish,
+    ),
   );
 }
 
@@ -689,71 +731,95 @@ List<_LongmenStorySegment> _storySegmentsForLevel(int level) => <_LongmenStorySe
       ..._longmenDepthSegments.where((segment) => level >= segment.fromLevel),
     ];
 
-List<JourneyLevelContent> _buildLongmenLevels() =>
-    List<JourneyLevelContent>.generate(10, (index) {
-      final level = index + 1;
-      const core = _longmenCoreSegments;
-      final details = _storySegmentsForLevel(level)
-          .skip(core.length)
-          .toList(growable: false);
-      late final List<List<_LongmenStorySegment>> paragraphSegments;
-      if (level <= 2) {
-        paragraphSegments = <List<_LongmenStorySegment>>[
-          <_LongmenStorySegment>[...core, ...details],
-        ];
-      } else {
-        paragraphSegments = <List<_LongmenStorySegment>>[
-          core.take(3).toList(growable: false),
-          <_LongmenStorySegment>[...core.skip(3), ...details],
-        ];
-      }
+JourneyLevelContent _buildLongmenLevel(int level) {
+  const core = _longmenCoreSegments;
+  final details = _storySegmentsForLevel(level)
+      .skip(core.length)
+      .toList(growable: false);
+  late final List<List<_LongmenStorySegment>> paragraphSegments;
+  if (level <= 2) {
+    paragraphSegments = <List<_LongmenStorySegment>>[
+      <_LongmenStorySegment>[...core, ...details],
+    ];
+  } else {
+    paragraphSegments = <List<_LongmenStorySegment>>[
+      core.take(3).toList(growable: false),
+      <_LongmenStorySegment>[...core.skip(3), ...details],
+    ];
+  }
 
-      final paragraphs = paragraphSegments
-          .map((segments) => segments.map((segment) => segment.chinese).join())
-          .toList(growable: false);
-      final annotations = paragraphSegments
-          .map((segments) {
-            final chinese = segments.map((segment) => segment.chinese).join();
-            return ReadingAnnotation(
-              pinyin: PinyinHelper.getPinyinE(
-                chinese,
-                separator: ' ',
-                format: PinyinFormat.WITH_TONE_MARK,
-              ),
-              vietnamese: segments.map((segment) => segment.vietnamese).join(' '),
-              english: segments.map((segment) => segment.english).join(' '),
-            );
-          })
-          .toList(growable: false);
-      final discoveries = _longmenDiscoveriesForLevel(level);
-      final visible = '${paragraphs.join()}${discoveries.map((entry) => entry.text).join()}';
-      final profile = const PhoenixLanguageLevelAgent().profileForPhoenixLevel(level);
-      final plan = const PhoenixLanguageLevelAgent().planFor(profile);
-      final words = luoyangLongmenWords
-          .where((entry) => visible.contains(entry.word))
-          .take(plan.targetVocabularyCount)
-          .toList(growable: false);
+  final paragraphs = paragraphSegments
+      .map((segments) => segments.map((segment) => segment.chinese).join())
+      .toList(growable: false);
+  final annotations = paragraphSegments
+      .map((segments) {
+        final chinese = segments.map((segment) => segment.chinese).join();
+        return ReadingAnnotation(
+          pinyin: PinyinHelper.getPinyinE(
+            chinese,
+            separator: ' ',
+            format: PinyinFormat.WITH_TONE_MARK,
+          ),
+          vietnamese: segments.map((segment) => segment.vietnamese).join(' '),
+          english: segments.map((segment) => segment.english).join(' '),
+        );
+      })
+      .toList(growable: false);
+  final discoveries = _longmenDiscoveriesForLevel(level);
+  final visible = '${paragraphs.join()}${discoveries.map((entry) => entry.text).join()}';
+  final profile = const PhoenixLanguageLevelAgent().profileForPhoenixLevel(level);
+  final plan = const PhoenixLanguageLevelAgent().planFor(profile);
+  final words = luoyangLongmenWords
+      .where((entry) => visible.contains(entry.word))
+      .take(plan.targetVocabularyCount)
+      .toList(growable: false);
 
-      return JourneyLevelContent(
-        storyParagraphs: List<String>.unmodifiable(paragraphs),
-        storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
-        words: List<WordEntry>.unmodifiable(words),
-        discoveries: discoveries,
-        wonderQuestion: level <= 4
-            ? '林砚为什么最后关掉已经做了三天的模型层？'
-            : level <= 7
-                ? '“现存状态”“有据复原”和“解释性示意”为什么不能混成一个标签？'
-                : '当历史资料只能支持到某一步时，创作者应该怎样处理仍然未知的部分？',
-        expressQuestion: level <= 4
-            ? '请按“依据问题→选择→成本→结果”说明林砚的决定。'
-            : level <= 7
-                ? '请用龙门观音像龛的例子说明“看起来完整”为什么不等于“历史上有依据”。'
-                : '请分析林砚把来源核对前移到建模之前，怎样改变了她和周澄的合作。',
-      );
-    }, growable: false);
+  return JourneyLevelContent(
+    storyParagraphs: List<String>.unmodifiable(paragraphs),
+    storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
+    words: List<WordEntry>.unmodifiable(words),
+    discoveries: discoveries,
+    wonderQuestion: level <= 4
+        ? '林砚为什么最后关掉已经做了三天的模型层？'
+        : level <= 7
+            ? '“现存状态”“有据复原”和“解释性示意”为什么不能混成一个标签？'
+            : '当历史资料只能支持到某一步时，创作者应该怎样处理仍然未知的部分？',
+    expressQuestion: level <= 4
+        ? '请按“依据问题→选择→成本→结果”说明林砚的决定。'
+        : level <= 7
+            ? '请用龙门观音像龛的例子说明“看起来完整”为什么不等于“历史上有依据”。'
+            : '请分析林砚把来源核对前移到建模之前，怎样改变了她和周澄的合作。',
+  );
+}
 
-final luoyangLongmenOnePassLevels =
-    List<JourneyLevelContent>.unmodifiable(_buildLongmenLevels());
+class _LazyLongmenLevelList extends ListBase<JourneyLevelContent> {
+  _LazyLongmenLevelList()
+      : _cache = List<JourneyLevelContent?>.filled(10, null, growable: false);
+
+  final List<JourneyLevelContent?> _cache;
+
+  @override
+  int get length => 10;
+
+  @override
+  set length(int value) {
+    throw UnsupportedError('Longmen levels are immutable.');
+  }
+
+  @override
+  JourneyLevelContent operator [](int index) {
+    RangeError.checkValidIndex(index, this);
+    return _cache[index] ??= _buildLongmenLevel(index + 1);
+  }
+
+  @override
+  void operator []=(int index, JourneyLevelContent value) {
+    throw UnsupportedError('Longmen levels are immutable.');
+  }
+}
+
+final List<JourneyLevelContent> luoyangLongmenOnePassLevels =
+    _LazyLongmenLevelList();
 
 JourneyLevelContent luoyangLongmenOnePassLevelContent(int requestedLevel) {
   final level = requestedLevel.clamp(1, 10).toInt();
