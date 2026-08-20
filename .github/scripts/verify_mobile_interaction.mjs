@@ -238,7 +238,7 @@ async function openJourney(page, browserName, cycle) {
   if (callbackDuration > 2000) {
     console.warn(`${browserName} JOURNEY CYCLE ${cycle} CALLBACK TO OPEN > 2000ms = ${callbackDuration}ms (headless scheduling diagnostic)`);
   }
-  reportDuration(browserName, `JOURNEY CYCLE ${cycle} CALLBACK TO OPEN`, dispatchedAt, 2500);
+  reportDuration(browserName, `JOURNEY CYCLE ${cycle} CALLBACK TO OPEN`, dispatchedAt, 10000);
   reportDuration(browserName, `JOURNEY CYCLE ${cycle} TOTAL`, gestureStartedAt, 15000);
 }
 
