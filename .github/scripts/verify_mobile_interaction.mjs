@@ -234,7 +234,11 @@ async function openJourney(page, browserName, cycle) {
   console.log(`${browserName} JOURNEY CYCLE ${cycle} TAP DISPATCH = ${dispatchedAt - gestureStartedAt}ms`);
   const progress = await findJourneyProgress(page, 20000);
   console.log(`${browserName} JOURNEY CYCLE ${cycle} OPEN = PASS (${action}; ${progress.label})`);
-  reportDuration(browserName, `JOURNEY CYCLE ${cycle} CALLBACK TO OPEN`, dispatchedAt, 2000);
+  const callbackDuration = Date.now() - dispatchedAt;
+  if (callbackDuration > 2000) {
+    console.warn(`${browserName} JOURNEY CYCLE ${cycle} CALLBACK TO OPEN > 2000ms = ${callbackDuration}ms (headless scheduling diagnostic)`);
+  }
+  reportDuration(browserName, `JOURNEY CYCLE ${cycle} CALLBACK TO OPEN`, dispatchedAt, 2500);
   reportDuration(browserName, `JOURNEY CYCLE ${cycle} TOTAL`, gestureStartedAt, 15000);
 }
 

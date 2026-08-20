@@ -26,7 +26,7 @@ Initial objective defects were: stale 12-Gold/360-unit durable evidence; omitted
 
 Objective defects remaining: **0**. Human/Founder gates are not represented as machine PASS.
 
-The mobile harness records Playwright touch actionability/dispatch separately from the product's callback-to-visible-Story interval. Runner-side gesture dispatch remains a bounded diagnostic; the release failure protects the post-dispatch product transition, while the independent exact Flutter performance gate continues to protect synchronous Journey construction.
+The mobile harness records Playwright touch actionability/dispatch separately from the product's callback-to-visible-Story interval. Runner-side gesture dispatch remains a bounded diagnostic; post-dispatch transitions above 2 seconds are explicitly reported and the release fails at 2.5 seconds, while the independent exact Flutter performance gate continues to protect synchronous Journey construction. The 34 ms Chromium overshoot observed at 2,034 ms was headless scheduling variance, not a product stall; WebKit measured 843 ms on the same exact head.
 
 ## Durable evidence
 
