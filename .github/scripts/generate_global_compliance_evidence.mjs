@@ -114,9 +114,17 @@ for (const journey of allJourneys) for (const requirement of requirements) {
 }
 writeFileSync('docs/PHOENIX_GLOBAL_REQUIREMENT_JOURNEY_MATRIX.csv', matrixRows.map(row => row.map(esc).join(',')).join('\n') + '\n');
 
-const humanRows = [['JOURNEY_ID','LEVEL','MODE','GATE','ACTIVE_SOURCE','REVIEWER','REVIEW_DATE','PROVENANCE','RESULT']];
-for (const journey of gold) for (const level of [1,5,10]) for (const mode of ['paragraphRebuild','grammarRepair','missingSentence']) humanRows.push([journey, level, mode, 'Natural; taught; fair; one defensible answer; plausible distractors; Chinese value; Story reinforcement; level fit; Journey identity', `resolveAdaptiveJourneyLevel:${journey}:Lv${level} -> JourneyChallengePanel`, '', '', 'Fresh named human provenance required; historical aggregate PASS is not inheritable without reviewer/date/content identity', 'HUMAN_REVIEW_REQUIRED']);
-writeFileSync('docs/PHOENIX_CURRENT_HUMAN_REVIEW_PACKET.csv', humanRows.map(row => row.map(esc).join(',')).join('\n') + '\n');
+// The content-rich Human packet is built from Flutter's active-runtime export by
+// build_founder_review_packets.mjs. Never replace it with resolver-only rows.
+const humanPacket = readFileSync('docs/PHOENIX_CURRENT_HUMAN_REVIEW_PACKET.csv', 'utf8');
+for (const requiredField of ['CHALLENGE_PROMPT','TAUGHT_SOURCE_TEXT','WHY_EACH_DISTRACTOR_IS_WRONG','HUMAN_RESULT']) {
+  if (!humanPacket.startsWith('"JOURNEY_ID"') || !humanPacket.includes(`"${requiredField}"`)) {
+    throw new Error(`content-rich Human packet is missing ${requiredField}`);
+  }
+}
+if ((humanPacket.match(/"HUMAN_REVIEW_REQUIRED"/g) || []).length !== 126) {
+  throw new Error('content-rich Human packet must contain exactly 126 review checkpoints');
+}
 
 const humanRequirementCount = requirements.filter(r => evidenceFor(r).result === 'BLOCKED').length;
 const objectiveRequirementCount = requirements.length - humanRequirementCount;
@@ -135,7 +143,7 @@ const report = `# Phoenix global current-standard compliance\n\n` +
 `## Precedence\n\n` +
 `The current Six-Stage Standard supersedes the older Journey System wording that exposed standalone Reflection and Writing stages. The binding visible flow is Story, Vocabulary, Discovery, Challenge, Memory, Completion. Reflection and writing intent may exist only in absorbed forms authorized by the Six-Stage Standard.\n\n` +
 `## Objective result\n\n` +
-`Exact-main CI passed 386 Phoenix-agent tests and 656 Flutter tests, including dynamic 14-Gold/420-unit Challenge coverage, 91 semantic Gold pairs, Narrative Rule A/B, de-skinned Challenge anti-template, provenance, multilingual, location, persistence, entitlement, narration, accessibility, release build and runtime-performance gates. No product or learner-content repair was required.\n\n` +
+`Exact-main CI passed 386 Phoenix-agent tests and 656 Flutter tests, including dynamic 14-Gold/420-unit Challenge coverage, 91 semantic Gold pairs, Narrative Rule A/B, de-skinned Challenge anti-template, provenance, multilingual, location, persistence, entitlement, narration, accessibility, release build and runtime-performance gates. Learner content did not change. The product release configuration changed by adding five required background asset bundle mappings; the underlying visual asset bytes did not change.\n\n` +
 `Initial objective governance defects were: stale 12-Gold/360-unit durable evidence; omitted Lijiang and Honghe from the old all-Gold evidence; and an aggregate human PASS without reusable named reviewer/date/content provenance. This convergence evidence repairs the dynamic inventory and matrix. It deliberately converts the unsupported aggregate human assertion into the attached **126-checkpoint HUMAN_REVIEW_REQUIRED packet**.\n\n` +
 `Objective defects remaining: **0**. Human/Founder gates are not represented as machine PASS.\n\n` +
 `## Durable evidence\n\n` +
@@ -144,7 +152,7 @@ const report = `# Phoenix global current-standard compliance\n\n` +
 `- \`PHOENIX_GLOBAL_REQUIREMENT_JOURNEY_MATRIX.csv\` — explicit result/evidence for every extracted normative clause × active Journey; no empty row.\n` +
 `- \`PHOENIX_CURRENT_HUMAN_REVIEW_PACKET.csv\` — 14 Gold × Lv1/Lv5/Lv10 × three modes; no fabricated human evidence.\n\n` +
 `## Stable-baseline domains\n\n` +
-`Visual: VERIFIED by asset/background/UI gates; Functional: VERIFIED; Interaction: VERIFIED; Mobile: VERIFIED; Performance: VERIFIED; Content: VERIFIED objectively / human literary gates pending; Audio: VERIFIED; Accessibility: VERIFIED; Persistence: VERIFIED; Access/Entitlement: VERIFIED; Rights: VERIFIED by source-id and asset-policy records, with human visual/rights judgment retained where explicitly required.\n`;
+`Visual: OBJECTIVE PASS / Human visual judgment pending for the five newly bundled Journey surfaces; Functional: VERIFIED; Interaction: VERIFIED; Mobile: OBJECTIVE PASS / final Founder mobile approval pending; Performance: VERIFIED; Content: OBJECTIVE PASS and AGENT PASS / Human narrative and Challenge gates pending; Audio: VERIFIED; Accessibility: VERIFIED; Persistence: VERIFIED; Access/Entitlement: VERIFIED; Rights: OBJECTIVE PASS by AI-original provenance and asset-policy records; no separate Human rights gate is required for unchanged bytes.\n`;
 writeFileSync('docs/PHOENIX_GLOBAL_CURRENT_STANDARD_COMPLIANCE.md', report);
 
 console.log(JSON.stringify({ standards: standards.length, requirements: requirements.length, objectiveRequirementCount, humanRequirementCount, activeJourneys: allJourneys.length, approvedGold: gold.length, goldCandidates: candidates.length, matrixRows: requirements.length * allJourneys.length, humanRows: gold.length * 3 * 3 }, null, 2));

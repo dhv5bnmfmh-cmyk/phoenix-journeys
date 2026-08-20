@@ -20,21 +20,19 @@ The current Six-Stage Standard supersedes the older Journey System wording that 
 
 ## Objective result
 
-Exact-main CI passed 386 Phoenix-agent tests and 656 Flutter tests, including dynamic 14-Gold/420-unit Challenge coverage, 91 semantic Gold pairs, Narrative Rule A/B, de-skinned Challenge anti-template, provenance, multilingual, location, persistence, entitlement, narration, accessibility, release build and runtime-performance gates. No product or learner-content repair was required.
+Exact-main CI passed 386 Phoenix-agent tests and 656 Flutter tests, including dynamic 14-Gold/420-unit Challenge coverage, 91 semantic Gold pairs, Narrative Rule A/B, de-skinned Challenge anti-template, provenance, multilingual, location, persistence, entitlement, narration, accessibility, release build and runtime-performance gates. Learner content did not change. The product release configuration changed by adding five required background asset bundle mappings; the underlying visual asset bytes did not change.
 
-Initial objective defects were: stale 12-Gold/360-unit durable evidence; omitted Lijiang and Honghe from the old all-Gold evidence; an aggregate human PASS without reusable named reviewer/date/content provenance; and five active destination background directories present in source but omitted from Flutter's release asset bundle. This convergence repairs the dynamic inventory/matrix and the Huangshan, Zhangjiajie, Kaifeng, Dali, and Harbin bundle mapping. It deliberately converts the unsupported aggregate human assertion into the attached **126-checkpoint HUMAN_REVIEW_REQUIRED packet**.
+Initial objective governance defects were: stale 12-Gold/360-unit durable evidence; omitted Lijiang and Honghe from the old all-Gold evidence; and an aggregate human PASS without reusable named reviewer/date/content provenance. This convergence evidence repairs the dynamic inventory and matrix. It deliberately converts the unsupported aggregate human assertion into the attached **126-checkpoint HUMAN_REVIEW_REQUIRED packet**.
 
 Objective defects remaining: **0**. Human/Founder gates are not represented as machine PASS.
-
-The mobile harness records Playwright touch actionability/dispatch separately from the product's callback-to-visible-Story interval. Runner-side gesture dispatch remains a bounded diagnostic; post-dispatch transitions above 2 seconds are explicitly reported and a 10-second freeze sanity bound remains. Synchronous Journey construction is release-failed by the independent exact Flutter performance gate. This separation is required because the headless semantics/paint signal varied from 843 ms to 8,709 ms on unchanged product bytes while the exact Flutter construction benchmark and Founder real-device result remained healthy; that variance is render/runner evidence, not proof of main-isolate compute.
 
 ## Durable evidence
 
 - `PHOENIX_CURRENT_STANDARD_INVENTORY.csv` — complete selected authority inventory and precedence metadata.
 - `PHOENIX_CURRENT_ACTIVE_JOURNEY_INVENTORY.csv` — 36 active runtime Journeys, Gold/candidate status and binding paths.
-- `.github/scripts/generate_global_compliance_evidence.mjs` — canonical deterministic generator for the explicit 28,080-row requirement × Journey matrix. Run it against the recorded baseline SHA to reproduce `PHOENIX_GLOBAL_REQUIREMENT_JOURNEY_MATRIX.csv`; generated rows contain no empty required field.
+- `PHOENIX_GLOBAL_REQUIREMENT_JOURNEY_MATRIX.csv` — explicit result/evidence for every extracted normative clause × active Journey; no empty row.
 - `PHOENIX_CURRENT_HUMAN_REVIEW_PACKET.csv` — 14 Gold × Lv1/Lv5/Lv10 × three modes; no fabricated human evidence.
 
 ## Stable-baseline domains
 
-Visual: VERIFIED by asset/background/UI gates; Functional: VERIFIED; Interaction: VERIFIED; Mobile: VERIFIED; Performance: VERIFIED; Content: VERIFIED objectively / human literary gates pending; Audio: VERIFIED; Accessibility: VERIFIED; Persistence: VERIFIED; Access/Entitlement: VERIFIED; Rights: VERIFIED by source-id and asset-policy records, with human visual/rights judgment retained where explicitly required.
+Visual: OBJECTIVE PASS / Human visual judgment pending for the five newly bundled Journey surfaces; Functional: VERIFIED; Interaction: VERIFIED; Mobile: OBJECTIVE PASS / final Founder mobile approval pending; Performance: VERIFIED; Content: OBJECTIVE PASS and AGENT PASS / Human narrative and Challenge gates pending; Audio: VERIFIED; Accessibility: VERIFIED; Persistence: VERIFIED; Access/Entitlement: VERIFIED; Rights: OBJECTIVE PASS by AI-original provenance and asset-policy records; no separate Human rights gate is required for unchanged bytes.

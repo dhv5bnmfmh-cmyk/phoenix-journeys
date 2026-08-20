@@ -33,8 +33,18 @@ test('requirement matrix generator maps every extracted clause to every active J
 test('human Gold evidence is provenance-safe and never machine-promoted', () => {
   const human = csv('docs/PHOENIX_CURRENT_HUMAN_REVIEW_PACKET.csv');
   assert.equal(human.rows.length, 14 * 3 * 3);
+  for (const field of [
+    'CHALLENGE_PROMPT',
+    'ALL_CANDIDATE_ANSWERS_OPTIONS',
+    'CORRECT_ANSWER',
+    'WHY_EACH_DISTRACTOR_IS_WRONG',
+    'TAUGHT_SOURCE_TEXT',
+    'AGENT_PRECHECK_RESULT',
+  ]) assert.match(human.header, new RegExp(`"${field}"`));
   for (const row of human.rows) {
     assert.match(row, /HUMAN_REVIEW_REQUIRED/);
+    assert.match(row, /AGENT PASS/);
+    assert.doesNotMatch(row, /JourneyChallengePanel","","","Fresh named human provenance/);
     assert.doesNotMatch(row, /,"PASS"$/);
   }
   const summary = readFileSync(
