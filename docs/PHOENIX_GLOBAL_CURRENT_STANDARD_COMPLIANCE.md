@@ -22,7 +22,7 @@ The current Six-Stage Standard supersedes the older Journey System wording that 
 
 Exact-main CI passed 386 Phoenix-agent tests and 656 Flutter tests, including dynamic 14-Gold/420-unit Challenge coverage, 91 semantic Gold pairs, Narrative Rule A/B, de-skinned Challenge anti-template, provenance, multilingual, location, persistence, entitlement, narration, accessibility, release build and runtime-performance gates. No product or learner-content repair was required.
 
-Initial objective governance defects were: stale 12-Gold/360-unit durable evidence; omitted Lijiang and Honghe from the old all-Gold evidence; and an aggregate human PASS without reusable named reviewer/date/content provenance. This convergence evidence repairs the dynamic inventory and matrix. It deliberately converts the unsupported aggregate human assertion into the attached **126-checkpoint HUMAN_REVIEW_REQUIRED packet**.
+Initial objective defects were: stale 12-Gold/360-unit durable evidence; omitted Lijiang and Honghe from the old all-Gold evidence; an aggregate human PASS without reusable named reviewer/date/content provenance; and five active destination background directories present in source but omitted from Flutter's release asset bundle. This convergence repairs the dynamic inventory/matrix and the Huangshan, Zhangjiajie, Kaifeng, Dali, and Harbin bundle mapping. It deliberately converts the unsupported aggregate human assertion into the attached **126-checkpoint HUMAN_REVIEW_REQUIRED packet**.
 
 Objective defects remaining: **0**. Human/Founder gates are not represented as machine PASS.
 
