@@ -32,7 +32,7 @@ jobs:
           void main() {
             test('dump journey metadata', () {
               for (final journey in dailyJourneyExperiences) {
-                print('PR194META|${journey.id}|${journey.city}|${journey.cityCode}|${journey.place}|${journey.distanceLabel}|${journey.geoNodeId}|${journey.discoveryTeaser.replaceAll('|', '¦')}');
+                print('PR194META|${journey.id}|${journey.city}|${journey.cityCode}|${journey.place}|${journey.distanceLabel}|${journey.geoNodeId}|${journey.stampSymbol}|${journey.headline.replaceAll('|', '¦')}|${journey.discoveryTeaser.replaceAll('|', '¦')}');
               }
             });
           }
