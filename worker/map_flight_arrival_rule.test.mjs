@@ -74,7 +74,7 @@ test('arrival reveals a direct destination-selection handoff', () => {
 
 test('arrival picker is locked to landmarks in the landed city', () => {
   assert.match(explore, /chooseArrivedCityDestination/);
-  assert.match(explore, /initialCityId: state\.activeJourney\.cityId/);
+  assert.match(explore, /initialCityId: state\.activeJourneyMetadata\.cityId/);
   assert.match(explore, /lockToInitialCity: true/);
   assert.match(explore, /onArrived: \(\) => unawaited\(chooseArrivedCityDestination\(\)\)/);
 
