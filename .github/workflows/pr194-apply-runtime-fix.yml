@@ -1,0 +1,148 @@
+name: PR194 Apply Runtime Fix
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Apply proven lightweight resolver path
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_one(path, old, new, label):
+              text = path.read_text(encoding='utf-8')
+              count = text.count(old)
+              print(f'{label} MATCH COUNT = {count}')
+              if count != 1:
+                  raise SystemExit(f'{label}: expected exactly one anchor, found {count}')
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          explore = Path('app/lib/screens/explore_screen.dart')
+          replace_one(
+              explore,
+              "import '../services/journey_location_binding.dart';\n",
+              "import '../services/journey_location_binding.dart';\nimport '../services/journey_startup_resolver.dart';\n",
+              'Explore startup resolver import',
+          )
+          text = explore.read_text(encoding='utf-8')
+          location_count = text.count('state.activeJourneyLocation')
+          metadata_count = text.count('state.activeJourney.')
+          print('Explore active location count =', location_count)
+          print('Explore active metadata count =', metadata_count)
+          if location_count != 1 or metadata_count < 1:
+              raise SystemExit('Explore startup access anchors changed')
+          text = text.replace('state.activeJourneyLocation', 'state.activeJourneyStartupLocation')
+          text = text.replace('state.activeJourney.', 'state.activeJourneyMetadata.')
+          explore.write_text(text, encoding='utf-8')
+
+          picker = Path('app/lib/widgets/journey_picker_sheet.dart')
+          replace_one(
+              picker,
+              "import '../data/journey_city_catalog.dart';\n",
+              "import '../services/journey_startup_resolver.dart';\n",
+              'Picker lightweight city import',
+          )
+          text = picker.read_text(encoding='utf-8')
+          for old, new, expected in [
+              ('state.activeJourney.cityId', 'state.activeJourneyMetadata.cityId', 1),
+              ('journeyCityCatalog', 'journeyStartupCityCatalog', 2),
+              ('requireJourneyCity', 'requireJourneyStartupCity', 1),
+          ]:
+              count = text.count(old)
+              print(f'Picker {old} MATCH COUNT = {count}')
+              if count != expected:
+                  raise SystemExit(f'Picker {old}: expected {expected}, found {count}')
+              text = text.replace(old, new)
+          picker.write_text(text, encoding='utf-8')
+
+          passport = Path('app/lib/screens/city_passport_screen.dart')
+          replace_one(
+              passport,
+              "import '../services/journey_location_binding.dart';\n",
+              "import '../services/journey_location_binding.dart';\nimport '../services/journey_startup_resolver.dart';\n",
+              'Passport startup resolver import',
+          )
+          replace_one(
+              passport,
+              "  for (final city in journeyCityCatalog) {\n    final binding = requireJourneyLocation(city.primaryDestination.id);\n",
+              "  for (final city in journeyStartupCityCatalog) {\n    final binding = requireJourneyStartupLocation(city.primaryDestination.id);\n",
+              'Passport initial marker resolver',
+          )
+
+          access = Path('app/lib/state/access_controlled_app_state.dart')
+          replace_one(
+              access,
+              "  bool canOpenJourney(String journeyId) {\n    final journey = journeyExperienceById(journeyId);\n    if (journey == null) return false;\n\n",
+              "  bool canOpenJourney(String journeyId) {\n    if (!_isRegisteredJourneyId(journeyId)) return false;\n\n",
+              'Access identity check',
+          )
+
+          mobile = Path('.github/scripts/verify_mobile_interaction.mjs')
+          replace_one(
+              mobile,
+              "async function semanticNode(page, label, { prefix = false, timeout = 15000 } = {}) {\n",
+              "async function semanticNode(page, label, { prefix = false, timeout = 15000, role = null } = {}) {\n",
+              'Mobile semantics role option',
+          )
+          replace_one(
+              mobile,
+              "        if (!values.some(matches)) continue;\n        const rect = element.getBoundingClientRect();\n",
+              "        if (!values.some(matches)) continue;\n        if (args.role && element.getAttribute('role') !== args.role) continue;\n        const rect = element.getBoundingClientRect();\n",
+              'Mobile actionable role filter',
+          )
+          replace_one(
+              mobile,
+              "    }, { wanted, prefix });\n",
+              "    }, { wanted, prefix, role });\n",
+              'Mobile semantics role argument',
+          )
+          replace_one(
+              mobile,
+              "  const action = await semanticNode(page, label, { prefix, timeout: 15000 });\n",
+              "  const action = await semanticNode(page, label, { prefix, timeout: 15000, role: 'button' });\n",
+              'Mobile tap real button',
+          )
+          PY
+          git diff --check
+          git diff -- app/lib/screens/explore_screen.dart app/lib/widgets/journey_picker_sheet.dart app/lib/screens/city_passport_screen.dart app/lib/state/access_controlled_app_state.dart .github/scripts/verify_mobile_interaction.mjs
+      - name: Validate targeted product contracts
+        working-directory: app
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter analyze
+          flutter test test/saved_vocabulary_library_test.dart
+      - name: Validate permanent saved vocabulary rule
+        run: node --test worker/saved_vocabulary_rule.test.mjs
+      - name: Commit proven runtime fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'phoenix-pr194-bot'
+          git config user.email 'phoenix-pr194-bot@users.noreply.github.com'
+          git add app/lib/screens/explore_screen.dart app/lib/widgets/journey_picker_sheet.dart app/lib/screens/city_passport_screen.dart app/lib/state/access_controlled_app_state.dart .github/scripts/verify_mobile_interaction.mjs
+          if git diff --cached --quiet; then
+            echo 'No runtime patch needed.'
+            exit 0
+          fi
+          git commit -m 'perf: keep startup on lightweight journey metadata'
+          git push origin HEAD:dev/current
