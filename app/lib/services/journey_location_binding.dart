@@ -358,7 +358,14 @@ Map<String, JourneyLocationBinding> _buildJourneyLocationBindings() =>
 JourneyLocationBinding requireJourneyLocation(String journeyId) {
   final cached = _journeyLocationBindingCache[journeyId];
   if (cached != null) return cached;
-  final metadata = requireJourneyStartupMetadata(journeyId);
+  final metadata = journeyStartupMetadataById(journeyId);
+  if (metadata == null) {
+    final binding = _buildJourneyLocationBinding(
+      requireDailyJourneyExperience(journeyId),
+    );
+    _journeyLocationBindingCache[journeyId] = binding;
+    return binding;
+  }
   final node = _findSelectedJourneyGeoNode(metadata.geoNodeId);
   if (node == null) {
     throw StateError(

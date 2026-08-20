@@ -242,8 +242,11 @@ final Map<String, JourneyStartupMetadata> _journeyStartupMetadataById =
   for (final metadata in journeyStartupMetadata) metadata.id: metadata,
 };
 
+JourneyStartupMetadata? journeyStartupMetadataById(String journeyId) =>
+    _journeyStartupMetadataById[journeyId];
+
 JourneyStartupMetadata requireJourneyStartupMetadata(String journeyId) {
-  final metadata = _journeyStartupMetadataById[journeyId];
+  final metadata = journeyStartupMetadataById(journeyId);
   if (metadata == null) {
     throw StateError('Journey startup metadata is not registered: "$journeyId".');
   }
