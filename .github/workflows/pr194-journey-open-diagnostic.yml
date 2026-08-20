@@ -1,0 +1,81 @@
+name: PR194 Journey Open Diagnostic
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install one-sample browser driver
+        run: npm install --no-save --prefix "$RUNNER_TEMP/pr194-open-node" puppeteer-core@24
+      - name: Inject passive journey-open timings
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/startup_instrument.py "$GITHUB_WORKSPACE"
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('app/lib/data/daily_journey_experience.dart')
+          text = path.read_text(encoding='utf-8')
+          old_import = "import '../models/story_content.dart';\n"
+          new_import = "import '../models/story_content.dart';\nimport '../startup_performance_probe.dart';\n"
+          old_get = "  DailyJourneyExperience operator [](int index) {\n    RangeError.checkValidIndex(index, this);\n    return _cache[index] ??= _builders[index]();\n  }\n"
+          new_get = "  DailyJourneyExperience operator [](int index) {\n    RangeError.checkValidIndex(index, this);\n    final cached = _cache[index];\n    if (cached != null) return cached;\n    startupPerformanceMark('phoenix-lazy-journey-$index-start');\n    final value = _builders[index]();\n    startupPerformanceMark('phoenix-lazy-journey-$index-end');\n    _cache[index] = value;\n    return value;\n  }\n"
+          if text.count(old_import) != 1 or text.count(old_get) != 1:
+              raise SystemExit('Journey-open instrumentation anchor changed')
+          path.write_text(text.replace(old_import, new_import, 1).replace(old_get, new_get, 1), encoding='utf-8')
+          PY
+      - name: Build instrumented release
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter build web --release
+      - name: Run one cold journey-open sample
+        shell: bash
+        env:
+          PUPPETEER_CORE_PATH: ${{ runner.temp }}/pr194-open-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 --directory app/build/web >"$RUNNER_TEMP/pr194-open-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for _ in {1..30}; do curl --fail --silent http://127.0.0.1:8080/ >/dev/null && break; sleep 1; done
+          CHROME_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          export CHROME_PATH
+          node --input-type=module <<'JS'
+          import { pathToFileURL } from 'node:url';
+          const module = await import(pathToFileURL(process.env.PUPPETEER_CORE_PATH).href);
+          const puppeteer = module.default ?? module;
+          const browser = await puppeteer.launch({executablePath: process.env.CHROME_PATH, headless: true, args: ['--no-sandbox','--disable-dev-shm-usage']});
+          try {
+            const page = await browser.newPage();
+            await page.goto('http://127.0.0.1:8080/?unlock=all&prototype=journeys', {waitUntil:'load', timeout:90000});
+            await page.waitForFunction(() => performance.getEntriesByName('phoenix-first-meaningful-screen').length > 0, {timeout:90000});
+            await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, {timeout:20000});
+            await page.evaluate(() => window.dispatchEvent(new Event('phoenix-benchmark-open-current-journey')));
+            await page.waitForFunction(() => performance.getEntriesByName('phoenix-journey-story-usable').length > 0, {timeout:90000});
+            const marks = await page.evaluate(() => Object.fromEntries(performance.getEntriesByType('mark').map(e => [e.name,e.startTime])));
+            const start = marks['phoenix-journey-open-start'];
+            const usable = marks['phoenix-journey-story-usable'];
+            console.log(`PR194 JOURNEY OPEN STORY USABLE = ${(usable-start).toFixed(1)}ms`);
+            for (const [name,value] of Object.entries(marks).sort((a,b)=>a[1]-b[1])) {
+              if (name.includes('journey-open') || name.includes('journey-content') || name.includes('journey-story') || name.includes('lazy-journey')) console.log(`${value.toFixed(1)}ms ${name}`);
+            }
+          } finally {
+            await browser.close();
+          }
+          JS
