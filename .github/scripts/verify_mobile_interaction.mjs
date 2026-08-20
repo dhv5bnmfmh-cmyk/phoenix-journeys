@@ -66,8 +66,8 @@ async function dumpSemantics(page, browserName) {
   console.error(`${browserName} SEMANTICS SNAPSHOT = ${JSON.stringify(snapshot)}`);
 }
 
-async function tapSemanticAction(page, label, logLabel, { prefix = false } = {}) {
-  const action = await semanticNode(page, label, { prefix, timeout: 15000, role: 'button' });
+async function tapSemanticAction(page, label, logLabel, { prefix = false, role = 'button' } = {}) {
+  const action = await semanticNode(page, label, { prefix, timeout: 15000, role });
   await action.waitFor({ state: 'visible', timeout: 15000 });
   const disabled = await action.getAttribute('aria-disabled');
   if (disabled === 'true' || !(await action.isEnabled())) throw new Error(`${logLabel}: action is disabled`);
@@ -160,7 +160,7 @@ async function exercisePassport(page, browserName) {
   await semanticNode(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT BACK STATE CHANGE = PASS`);
 
-  await tapSemanticAction(page, '欧洲', `${browserName}:passport-europe`, { prefix: true });
+  await tapSemanticAction(page, '欧洲', `${browserName}:passport-europe`, { prefix: true, role: null });
   await semanticNode(page, '目的地即将开放', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT CONTINENT STATE CHANGE = PASS`);
 
