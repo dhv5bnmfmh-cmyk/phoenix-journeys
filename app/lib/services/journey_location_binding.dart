@@ -2,6 +2,7 @@ import '../agents/phoenix_world_story_agent.dart';
 import '../data/daily_journey_catalog.dart';
 import '../data/world_geo_catalog.dart';
 import '../models/geo_node.dart';
+import 'journey_startup_resolver.dart';
 
 class JourneyMapPoint {
   const JourneyMapPoint({required this.x, required this.y});
@@ -18,13 +19,34 @@ class JourneyMapPoint {
 }
 
 class JourneyLocationBinding {
-  const JourneyLocationBinding({
-    required this.journey,
+  JourneyLocationBinding({
+    required DailyJourneyExperience journey,
     required this.placeNode,
     required this.geoPath,
-  });
+  })  : _journey = journey,
+        _journeyId = journey.id,
+        _cityId = journey.cityId,
+        _destinationId = journey.destinationId,
+        _locationPath = journey.locationPath;
 
-  final DailyJourneyExperience journey;
+  JourneyLocationBinding._startup({
+    required JourneyStartupMetadata metadata,
+    required this.placeNode,
+    required this.geoPath,
+  })  : _journey = null,
+        _journeyId = metadata.id,
+        _cityId = metadata.cityId,
+        _destinationId = metadata.destinationId,
+        _locationPath = metadata.locationPath;
+
+  final DailyJourneyExperience? _journey;
+  final String _journeyId;
+  final String _cityId;
+  final String _destinationId;
+  final String _locationPath;
+
+  DailyJourneyExperience get journey =>
+      _journey ?? requireDailyJourneyExperience(_journeyId);
   final GeoNode placeNode;
   final List<GeoNode> geoPath;
 
@@ -83,10 +105,10 @@ class JourneyLocationBinding {
   String get compactAdministrativeLabel =>
       compactAdministrativeNames.join(' · ');
 
-  String get journeyId => journey.id;
-  String get cityId => journey.cityId;
-  String get destinationId => journey.destinationId;
-  String get locationPath => journey.locationPath;
+  String get journeyId => _journeyId;
+  String get cityId => _cityId;
+  String get destinationId => _destinationId;
+  String get locationPath => _locationPath;
   String get geoNodeId => placeNode.id;
   String get storageNamespace => 'journey.$locationPath';
   String get legacyStorageNamespace => 'journey.$journeyId';
@@ -372,8 +394,27 @@ Map<String, JourneyLocationBinding> _buildJourneyLocationBindings() =>
 JourneyLocationBinding requireJourneyLocation(String journeyId) {
   final cached = _journeyLocationBindingCache[journeyId];
   if (cached != null) return cached;
-  final journey = requireDailyJourneyExperience(journeyId);
-  final binding = _buildSelectedJourneyLocationBinding(journey);
+  final metadata = requireJourneyStartupMetadata(journeyId);
+  final node = _findSelectedJourneyGeoNode(metadata.geoNodeId);
+  if (node == null) {
+    throw StateError(
+      'Journey ${metadata.id} references unknown GeoNode: ${metadata.geoNodeId}.',
+    );
+  }
+  if (!node.isPlace || node.latitude == null || node.longitude == null) {
+    throw StateError(
+      'Journey ${metadata.id} must bind to a place GeoNode with coordinates.',
+    );
+  }
+  final geoPath = _selectedJourneyGeoPath(node.id);
+  if (geoPath.isEmpty || geoPath.last.id != node.id) {
+    throw StateError('Incomplete GeoNode path for Journey ${metadata.id}.');
+  }
+  final binding = JourneyLocationBinding._startup(
+    metadata: metadata,
+    placeNode: node,
+    geoPath: List<GeoNode>.unmodifiable(geoPath),
+  );
   _journeyLocationBindingCache[journeyId] = binding;
   return binding;
 }

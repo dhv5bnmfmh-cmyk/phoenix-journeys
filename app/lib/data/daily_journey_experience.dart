@@ -119,6 +119,90 @@ class DailyJourneyExperience {
 }
 
 
+class DeferredDailyJourneyExperience extends DailyJourneyExperience {
+  DeferredDailyJourneyExperience({
+    required String id,
+    required String city,
+    required String cityCode,
+    required String place,
+    required String distanceLabel,
+    required String stampSymbol,
+    required String geoNodeId,
+    required DailyJourneyExperienceBuilder resolve,
+  })  : _resolveBuilder = resolve,
+        _identityGeoNodeId = geoNodeId,
+        super(
+          id: id,
+          city: city,
+          cityCode: cityCode,
+          place: place,
+          appBarTitle: '',
+          storyTitle: '',
+          headline: '',
+          description: '',
+          discoveryTeaser: '',
+          distanceLabel: distanceLabel,
+          stampSymbol: stampSymbol,
+          content: JourneyContentRecord(
+            id: id,
+            title: '',
+            geoNodeId: geoNodeId,
+            languageCode: 'zh-CN',
+            sections: const <JourneyStorySection>[],
+            verificationStatus: StoryVerificationStatus.draft,
+          ),
+          storyAnnotations: const <ReadingAnnotation>[],
+          words: const <WordEntry>[],
+          discoveries: const <DiscoveryEntry>[],
+          wonderQuestion: '',
+          expressQuestion: '',
+        );
+
+  final DailyJourneyExperienceBuilder _resolveBuilder;
+  final String _identityGeoNodeId;
+  DailyJourneyExperience? _resolvedJourney;
+
+  DailyJourneyExperience get _resolved =>
+      _resolvedJourney ??= _resolveBuilder();
+
+  @override
+  String get appBarTitle => _resolved.appBarTitle;
+
+  @override
+  String get storyTitle => _resolved.storyTitle;
+
+  @override
+  String get headline => _resolved.headline;
+
+  @override
+  String get description => _resolved.description;
+
+  @override
+  String get discoveryTeaser => _resolved.discoveryTeaser;
+
+  @override
+  JourneyContentRecord get content => _resolved.content;
+
+  @override
+  List<ReadingAnnotation> get storyAnnotations => _resolved.storyAnnotations;
+
+  @override
+  List<WordEntry> get words => _resolved.words;
+
+  @override
+  List<DiscoveryEntry> get discoveries => _resolved.discoveries;
+
+  @override
+  String get wonderQuestion => _resolved.wonderQuestion;
+
+  @override
+  String get expressQuestion => _resolved.expressQuestion;
+
+  @override
+  String get geoNodeId => _identityGeoNodeId;
+}
+
+
 typedef DailyJourneyExperienceBuilder = DailyJourneyExperience Function();
 
 class LazyJourneyList extends ListBase<DailyJourneyExperience> {
