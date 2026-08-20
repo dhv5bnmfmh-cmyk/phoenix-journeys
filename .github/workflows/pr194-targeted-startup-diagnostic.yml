@@ -4,12 +4,15 @@ on:
   push:
     branches:
       - dev/current
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
 
 concurrency:
-  group: pr194-targeted-startup-diagnostic
+  group: pr194-targeted-startup-diagnostic-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -19,7 +22,7 @@ jobs:
       - name: Check out exact candidate head
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
       - name: Set up Flutter
@@ -169,6 +172,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pr194-targeted-startup-${{ github.sha }}
+          name: pr194-targeted-startup-${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           path: pr194-targeted-startup-marks.json
           if-no-files-found: warn
