@@ -1,6 +1,9 @@
 {
   "id": "CN-BJ-001",
   "runtime_id": "beijing-forbidden-city",
+  "reference_location_id": "PHOENIX_REFERENCE_LOCATION_001",
+  "canonical_geo_node_id": "cn-beijing-dongcheng-forbidden-city",
+  "canonical_hierarchy": ["Asia", "China", "Beijing", "Forbidden City"],
   "country": "China",
   "city": "Beijing",
   "place": "Forbidden City",
@@ -8,29 +11,36 @@
   "title_zh_hant": "北京 · 紫禁城",
   "mood": "awe",
   "estimated_minutes": 15,
-  "status": "ready_for_app_integration",
+  "status": "reference_candidate",
   "architecture": [
     "story",
-    "words",
+    "vocabulary",
     "discovery",
     "challenge",
     "memory",
-    "complete"
+    "completion"
   ],
-  "story_levels": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-  "challenge_types": [
+  "story_levels": [1,2,3,4,5,6,7,8,9,10],
+  "challenge_cognitive_targets": [
+    "story_comprehension",
+    "evidence_relationship_reasoning",
+    "transfer_decision"
+  ],
+  "challenge_renderer_modes": [
     "paragraphRebuild",
     "grammarRepair",
     "missingSentence"
   ],
-  "memory_anchor": "一道没有跨过的门槛",
+  "memory_anchor": "两条都能走通的路线",
+  "core_takeaway": "一条常用路线，并不等于唯一正确的路线。",
   "reflection": false,
   "writing": false,
+  "source_of_truth": "app/lib/data/forbidden_city_journey_runtime.dart",
+  "legacy_active_runtime_allowed": false,
   "review": {
-    "factual": "validated",
-    "cultural": "validated",
-    "copyright": "original_fiction_with_verified_historical_context",
-    "word_trace": "validated_at_runtime",
-    "level_binding": "locked"
+    "standard": "Phoenix Journey Acceptance Contract",
+    "reference_location": 1,
+    "human_content_gate_required": true,
+    "gold_requires_zero_blockers": true
   }
 }
