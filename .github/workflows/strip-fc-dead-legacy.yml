@@ -1,0 +1,30 @@
+name: Strip Forbidden City dead legacy branches
+
+on:
+  push:
+    branches:
+      - feature/forbidden-city-final-integration
+
+permissions:
+  contents: write
+
+jobs:
+  strip:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/forbidden-city-final-integration
+      - name: Strip dead Forbidden City branches
+        run: python3 tools/strip_fc_dead_legacy.py
+      - name: Verify source delta
+        run: git diff --check
+      - name: Commit cleaned shared runtime
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm tools/strip_fc_dead_legacy.py .github/workflows/strip-fc-dead-legacy.yml
+          git add app/lib/screens/journey_screen_legacy.dart app/lib/widgets/journey_challenge_panel_legacy.dart
+          git commit -m "Remove dead Forbidden City branches from shared legacy runtimes"
+          git push
