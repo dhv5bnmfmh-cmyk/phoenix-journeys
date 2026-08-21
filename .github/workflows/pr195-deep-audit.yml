@@ -4,23 +4,34 @@ on:
   push:
     branches:
       - dev/current
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: pr195-deep-audit-${{ github.ref }}
+  group: pr195-deep-audit-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   structural-and-runtime-evidence:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.number == 195 }}
     runs-on: ubuntu-latest
     env:
       PR195_BASE_SHA: e3d1f30b951d6ab27d7660b9b729d4f8af9a8d49
+      AUDIT_HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Check out exact audit head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.AUDIT_HEAD_SHA }}
 
       - name: Record exact identities
         shell: bash
@@ -29,7 +40,7 @@ jobs:
           mkdir -p pr195-audit
           actual_head="$(git rev-parse HEAD)"
           printf 'HEAD_SHA=%s\nBASE_SHA=%s\n' "$actual_head" "$PR195_BASE_SHA" | tee pr195-audit/exact-identities.txt
-          test "$actual_head" = "${GITHUB_SHA}"
+          test "$actual_head" = "$AUDIT_HEAD_SHA"
 
       - name: Preserve pre-generation durable evidence
         shell: bash
@@ -187,7 +198,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pr195-deep-audit-${{ github.sha }}
+          name: pr195-deep-audit-${{ env.AUDIT_HEAD_SHA }}
           path: |
             pr195-audit/
             docs/PHOENIX_CURRENT_STANDARD_INVENTORY.csv
