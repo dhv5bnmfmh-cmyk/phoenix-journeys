@@ -44,6 +44,13 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Format check
+        id: format
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          dart format --output=none --set-exit-if-changed lib test 2>&1 | tee format.log
+
       - name: Analyze
         id: analyze
         continue-on-error: true
@@ -81,6 +88,7 @@ jobs:
           path: |
             worker-test.log
             worker-build.log
+            app/format.log
             app/analyze.log
             app/test.log
             app/build-web.log
@@ -92,6 +100,7 @@ jobs:
           failures=0
           for result in \
             "${{ steps.agents.outcome }}" \
+            "${{ steps.format.outcome }}" \
             "${{ steps.analyze.outcome }}" \
             "${{ steps.test.outcome }}" \
             "${{ steps.build.outcome }}" \
