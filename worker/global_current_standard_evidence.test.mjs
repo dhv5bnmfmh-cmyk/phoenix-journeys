@@ -54,3 +54,26 @@ test('human Gold evidence is provenance-safe and never machine-promoted', () => 
   assert.match(summary, /Objective defects remaining: \*\*0\*\*/);
   assert.match(summary, /Human\/Founder gates are not represented as machine PASS/);
 });
+
+test('visual evidence separates product basis from current Founder review identity', () => {
+  const visual = readFileSync(
+    new URL('../docs/PHOENIX_VISUAL_RIGHTS_REVIEW_PACKET.md', import.meta.url),
+    'utf8',
+  );
+  assert.match(
+    visual,
+    /PRODUCT_VISUAL_EVIDENCE_BASIS_SHA: `d2392bdb6f5ecf3dae50883cf5be1390928656fb`/,
+  );
+  assert.match(visual, /CURRENT_FOUNDER_REVIEW_HEAD: resolve from remote PR `#195` at review time/);
+  assert.match(visual, /v=<CURRENT_PR_HEAD>/);
+  assert.match(visual, /image bytes, an active asset path, a release asset mapping/);
+  assert.match(visual, /visual runtime behavior, relevant layout\/render behavior/);
+  assert.match(visual, /evidence-only, documentation-only, or test-only commit does not invalidate/);
+  assert.match(visual, /Preview and Health identities match the current remote PR head/);
+  assert.doesNotMatch(visual, /Exact candidate:/);
+  assert.doesNotMatch(visual, /must be regenerated if the head changes/);
+  assert.doesNotMatch(visual, /v=[0-9a-f]{40}/);
+  assert.doesNotMatch(visual, /HUMAN VISUAL RESULT:\s*(?:PASS|APPROVED)/);
+  assert.match(visual, /HUMAN VISUAL RESULT: HUMAN_REVIEW_REQUIRED/);
+  assert.match(visual, /FINAL FOUNDER MOBILE APPROVAL: PENDING/);
+});
