@@ -1,5 +1,6 @@
 enum GeoNodeKind {
   world,
+  continent,
   country,
   adminLevel1,
   adminLevel2,
