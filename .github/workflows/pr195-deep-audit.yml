@@ -46,9 +46,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cp docs/PHOENIX_CURRENT_EFFECTIVE_REQUIREMENTS.csv pr195-audit/before-current-effective-requirements.csv
           cp docs/PHOENIX_CURRENT_STANDARD_INVENTORY.csv pr195-audit/before-current-standard-inventory.csv
           cp docs/PHOENIX_GLOBAL_CURRENT_STANDARD_COMPLIANCE.md pr195-audit/before-global-current-standard-compliance.md
+          for path in \
+            docs/PHOENIX_CURRENT_EFFECTIVE_REQUIREMENTS.csv \
+            docs/PHOENIX_GLOBAL_REQUIREMENT_JOURNEY_MATRIX.csv; do
+            if [[ -f "$path" ]]; then
+              cp "$path" "pr195-audit/before-$(basename "$path")"
+              printf '%s=present\n' "$path"
+            else
+              printf '%s=absent\n' "$path"
+            fi
+          done | tee pr195-audit/pre-generation-artifact-presence.txt
 
       - name: Execute structural current-standard generator
         shell: bash
@@ -61,35 +70,52 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import csv, json
+          import csv, json, re
           from pathlib import Path
 
           root = Path('.')
           summary = json.loads((root / 'pr195-audit/structural-generator-summary.json').read_text())
-          before_path = root / 'pr195-audit/before-current-effective-requirements.csv'
           after_path = root / 'docs/PHOENIX_CURRENT_EFFECTIVE_REQUIREMENTS.csv'
+          prior_report = (root / 'pr195-audit/before-global-current-standard-compliance.md').read_text(encoding='utf-8')
+          match = re.search(r'Extracted explicit normative clauses:\s*\*\*(\d+)\*\*', prior_report)
+          if not match:
+              raise AssertionError('Prior durable report does not expose its extracted-clause baseline count')
+          prior_report_count = int(match.group(1))
 
-          def rows(path):
-              with path.open(newline='', encoding='utf-8') as f:
-                  return list(csv.DictReader(f))
+          with after_path.open(newline='', encoding='utf-8') as f:
+              after = list(csv.DictReader(f))
 
-          before = rows(before_path)
-          after = rows(after_path)
-          def key(row):
-              return (
-                  row.get('STANDARD', '').strip(),
-                  row.get('SECTION', '').strip(),
-                  row.get('REQUIREMENT', '').strip(),
+          before_csv = root / 'pr195-audit/before-PHOENIX_CURRENT_EFFECTIVE_REQUIREMENTS.csv'
+          exact_newly_found = None
+          exact_no_longer_extracted = None
+          if before_csv.exists():
+              with before_csv.open(newline='', encoding='utf-8') as f:
+                  before = list(csv.DictReader(f))
+              def key(row):
+                  return (
+                      row.get('STANDARD', '').strip(),
+                      row.get('SECTION', '').strip(),
+                      row.get('REQUIREMENT', '').strip(),
+                  )
+              before_keys = {key(row) for row in before}
+              after_keys = {key(row) for row in after}
+              exact_newly_found = len(after_keys - before_keys)
+              exact_no_longer_extracted = len(before_keys - after_keys)
+
+          current_count = summary['totalCurrentEffectiveRequirements']
+          net_new_vs_prior_durable_report = current_count - prior_report_count
+          if net_new_vs_prior_durable_report < 0:
+              raise AssertionError(
+                  f'Current extraction shrank below prior durable count: {current_count} < {prior_report_count}'
               )
 
-          before_keys = {key(row) for row in before}
-          after_keys = {key(row) for row in after}
-          newly_found = sorted(after_keys - before_keys)
-          no_longer_extracted = sorted(before_keys - after_keys)
-
           result = {
-              'TOTAL_CURRENT_EFFECTIVE_REQUIREMENTS': summary['totalCurrentEffectiveRequirements'],
-              'PREVIOUSLY_OMITTED_REQUIREMENTS_FOUND': len(newly_found),
+              'TOTAL_CURRENT_EFFECTIVE_REQUIREMENTS': current_count,
+              'PREVIOUS_DURABLE_REPORT_REQUIREMENTS': prior_report_count,
+              'PREVIOUSLY_OMITTED_REQUIREMENTS_FOUND': net_new_vs_prior_durable_report,
+              'PREVIOUSLY_OMITTED_COUNT_BASIS': 'net newly extracted requirements versus prior committed durable report aggregate; exact set diff unavailable because prior requirements CSV was not committed',
+              'EXACT_SET_NEWLY_FOUND_IF_PRIOR_CSV_PRESENT': exact_newly_found,
+              'EXACT_SET_NO_LONGER_EXTRACTED_IF_PRIOR_CSV_PRESENT': exact_no_longer_extracted,
               'CURRENT_EFFECTIVE_DOCS_WITH_UNEXTRACTED_RULES': summary['currentEffectiveDocsWithUnextractedRules'],
               'UNMAPPED_REQUIREMENTS': summary['unmappedRequirements'],
               'SEMANTIC_PASSES_ASSERTED_BY_GENERATOR': summary['semanticPassesAssertedByGenerator'],
@@ -100,15 +126,6 @@ jobs:
               'APPROVED_GOLD': summary['approvedGold'],
               'GOLD_CANDIDATES': summary['goldCandidates'],
               'REQUIREMENT_JOURNEY_ROWS': summary['requirementJourneyRows'],
-              'PREVIOUSLY_PRESENT_REQUIREMENTS_NO_LONGER_EXTRACTED': len(no_longer_extracted),
-              'newly_found_requirements': [
-                  {'standard': item[0], 'section': item[1], 'requirement': item[2]}
-                  for item in newly_found
-              ],
-              'no_longer_extracted_requirements': [
-                  {'standard': item[0], 'section': item[1], 'requirement': item[2]}
-                  for item in no_longer_extracted
-              ],
           }
           (root / 'pr195-audit/structural-proof.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
           print(json.dumps(result, ensure_ascii=False, indent=2))
