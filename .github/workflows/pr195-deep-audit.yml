@@ -1,0 +1,197 @@
+name: PR195 Deep Audit Evidence
+
+on:
+  push:
+    branches:
+      - dev/current
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr195-deep-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  structural-and-runtime-evidence:
+    runs-on: ubuntu-latest
+    env:
+      PR195_BASE_SHA: e3d1f30b951d6ab27d7660b9b729d4f8af9a8d49
+    steps:
+      - name: Check out exact audit head
+        uses: actions/checkout@v4
+
+      - name: Record exact identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pr195-audit
+          actual_head="$(git rev-parse HEAD)"
+          printf 'HEAD_SHA=%s\nBASE_SHA=%s\n' "$actual_head" "$PR195_BASE_SHA" | tee pr195-audit/exact-identities.txt
+          test "$actual_head" = "${GITHUB_SHA}"
+
+      - name: Preserve pre-generation durable evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp docs/PHOENIX_CURRENT_EFFECTIVE_REQUIREMENTS.csv pr195-audit/before-current-effective-requirements.csv
+          cp docs/PHOENIX_CURRENT_STANDARD_INVENTORY.csv pr195-audit/before-current-standard-inventory.csv
+          cp docs/PHOENIX_GLOBAL_CURRENT_STANDARD_COMPLIANCE.md pr195-audit/before-global-current-standard-compliance.md
+
+      - name: Execute structural current-standard generator
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/generate_global_compliance_evidence.mjs "$PR195_BASE_SHA" | tee pr195-audit/structural-generator-summary.json
+
+      - name: Prove extraction and mapping counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import csv, json
+          from pathlib import Path
+
+          root = Path('.')
+          summary = json.loads((root / 'pr195-audit/structural-generator-summary.json').read_text())
+          before_path = root / 'pr195-audit/before-current-effective-requirements.csv'
+          after_path = root / 'docs/PHOENIX_CURRENT_EFFECTIVE_REQUIREMENTS.csv'
+
+          def rows(path):
+              with path.open(newline='', encoding='utf-8') as f:
+                  return list(csv.DictReader(f))
+
+          before = rows(before_path)
+          after = rows(after_path)
+          def key(row):
+              return (
+                  row.get('STANDARD', '').strip(),
+                  row.get('SECTION', '').strip(),
+                  row.get('REQUIREMENT', '').strip(),
+              )
+
+          before_keys = {key(row) for row in before}
+          after_keys = {key(row) for row in after}
+          newly_found = sorted(after_keys - before_keys)
+          no_longer_extracted = sorted(before_keys - after_keys)
+
+          result = {
+              'TOTAL_CURRENT_EFFECTIVE_REQUIREMENTS': summary['totalCurrentEffectiveRequirements'],
+              'PREVIOUSLY_OMITTED_REQUIREMENTS_FOUND': len(newly_found),
+              'CURRENT_EFFECTIVE_DOCS_WITH_UNEXTRACTED_RULES': summary['currentEffectiveDocsWithUnextractedRules'],
+              'UNMAPPED_REQUIREMENTS': summary['unmappedRequirements'],
+              'SEMANTIC_PASSES_ASSERTED_BY_GENERATOR': summary['semanticPassesAssertedByGenerator'],
+              'CURRENT_EFFECTIVE_DOCUMENTS': summary['currentEffectiveDocuments'],
+              'ACTIVE_JOURNEYS': summary['activeJourneys'],
+              'NORMAL_JOURNEYS': summary['normalJourneys'],
+              'SPECIAL_JOURNEYS': summary['specialJourneys'],
+              'APPROVED_GOLD': summary['approvedGold'],
+              'GOLD_CANDIDATES': summary['goldCandidates'],
+              'REQUIREMENT_JOURNEY_ROWS': summary['requirementJourneyRows'],
+              'PREVIOUSLY_PRESENT_REQUIREMENTS_NO_LONGER_EXTRACTED': len(no_longer_extracted),
+              'newly_found_requirements': [
+                  {'standard': item[0], 'section': item[1], 'requirement': item[2]}
+                  for item in newly_found
+              ],
+              'no_longer_extracted_requirements': [
+                  {'standard': item[0], 'section': item[1], 'requirement': item[2]}
+                  for item in no_longer_extracted
+              ],
+          }
+          (root / 'pr195-audit/structural-proof.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+
+          assert result['TOTAL_CURRENT_EFFECTIVE_REQUIREMENTS'] == len(after)
+          assert result['CURRENT_EFFECTIVE_DOCS_WITH_UNEXTRACTED_RULES'] == 0
+          assert result['UNMAPPED_REQUIREMENTS'] == 0
+          assert result['SEMANTIC_PASSES_ASSERTED_BY_GENERATOR'] == 0
+          assert result['ACTIVE_JOURNEYS'] == 36
+          assert result['NORMAL_JOURNEYS'] == 27
+          assert result['SPECIAL_JOURNEYS'] == 9
+          assert result['APPROVED_GOLD'] == 14
+          assert result['GOLD_CANDIDATES'] == 1
+          PY
+
+      - name: Capture generated durable-evidence delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff -- \
+            docs/PHOENIX_CURRENT_STANDARD_INVENTORY.csv \
+            docs/PHOENIX_CURRENT_EFFECTIVE_REQUIREMENTS.csv \
+            docs/PHOENIX_GLOBAL_REQUIREMENT_JOURNEY_MATRIX.csv \
+            docs/PHOENIX_GLOBAL_CURRENT_STANDARD_COMPLIANCE.md \
+            > pr195-audit/generated-evidence.diff || true
+          git status --short > pr195-audit/generated-evidence-status.txt
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Flutter dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Export active runtime review payload
+        working-directory: app
+        env:
+          PHOENIX_GLOBAL_AGENT_REVIEW_JSON: ../pr195-audit/global-agent-review.json
+        run: flutter test test/global_agent_review_export_test.dart
+
+      - name: Execute 360 Journey x Level automated content audit
+        working-directory: app
+        env:
+          PHOENIX_GENERATE_QUALITY_REPORT: '1'
+          PHOENIX_QUALITY_MARKDOWN: ../pr195-audit/journey-quality-report.md
+          PHOENIX_QUALITY_JSON: ../pr195-audit/journey-quality-report.json
+        run: flutter test test/journey_quality_report_ci_test.dart
+
+      - name: Prove 360 runtime inspection scope without literary overclaim
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('pr195-audit/journey-quality-report.json').read_text())
+          proof = {
+              'ACTIVE_JOURNEYS': report['journeyCount'],
+              'NORMAL_JOURNEYS': report['regularJourneyCount'],
+              'SPECIAL_JOURNEYS': report['specialJourneyCount'],
+              'PHOENIX_LEVELS': report['profileCount'],
+              'JOURNEY_LEVEL_INSPECTIONS': report['inspectionCount'],
+              'AUTOMATED_APPROVED': report['approvedCount'],
+              'AUTOMATED_REQUIRES_REVISION': report['needsRevisionCount'],
+              'AUTOMATED_BLOCKED': report['blockedCount'],
+              'AUTOMATED_GATE_STATUS': report['automatedGateStatus'],
+              'AGENT_SEMANTIC_SUFFICIENCY_STATUS': report['agentSemanticSufficiencyStatus'],
+              'HUMAN_NARRATIVE_ANTI_TEMPLATE_STATUS': report['humanNarrativeAntiTemplateStatus'],
+              'FOUNDER_STORY_APPROVAL_STATUS': report['founderStoryApprovalStatus'],
+          }
+          Path('pr195-audit/runtime-360-proof.json').write_text(json.dumps(proof, indent=2) + '\n')
+          print(json.dumps(proof, indent=2))
+          assert proof['ACTIVE_JOURNEYS'] == 36
+          assert proof['PHOENIX_LEVELS'] == 10
+          assert proof['JOURNEY_LEVEL_INSPECTIONS'] == 360
+          assert proof['AUTOMATED_REQUIRES_REVISION'] == 0
+          assert proof['AUTOMATED_BLOCKED'] == 0
+          assert proof['AGENT_SEMANTIC_SUFFICIENCY_STATUS'] != 'pass'
+          assert proof['HUMAN_NARRATIVE_ANTI_TEMPLATE_STATUS'] != 'pass'
+          assert proof['FOUNDER_STORY_APPROVAL_STATUS'] != 'pass'
+          PY
+
+      - name: Upload exact-head deep-audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr195-deep-audit-${{ github.sha }}
+          path: |
+            pr195-audit/
+            docs/PHOENIX_CURRENT_STANDARD_INVENTORY.csv
+            docs/PHOENIX_CURRENT_EFFECTIVE_REQUIREMENTS.csv
+            docs/PHOENIX_GLOBAL_REQUIREMENT_JOURNEY_MATRIX.csv
+            docs/PHOENIX_GLOBAL_CURRENT_STANDARD_COMPLIANCE.md
+          if-no-files-found: error
