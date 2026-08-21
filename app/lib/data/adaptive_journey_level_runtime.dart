@@ -18,11 +18,19 @@ import 'summer_palace_adaptive_story_levels.dart';
 import 'summer_palace_language_level_catalog.dart';
 
 const _languageLevelAgent = PhoenixLanguageLevelAgent();
-const _specialJourneyIds = <String>{
+
+/// The runtime Special identity is deliberately public so tests can prove
+/// catalog identity and adaptive coverage remain exactly aligned.
+const specialAdaptiveJourneyIds = <String>{
   'literary-roaming',
   'myth-tracing',
   'strange-night-talks',
   'folk-secret-land',
+  'changan-last-bus',
+  'tide-letter',
+  'arcade-lost-property',
+  'tea-horse-echo',
+  'ice-city-star-map',
 };
 
 JourneyLevelContent resolveAdaptiveJourneyLevel(
@@ -57,11 +65,12 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     );
   }
   if (experience.id == guangzhouChenClanJourneyId) {
-    return guangzhouChenClanOnePassLevelContent(
+    final content = guangzhouChenClanOnePassLevelContent(
       profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band),
       profile: profile,
       knownWords: knownWords,
     );
+    return _preserveKnownWordReviewSemantics(content, knownWords);
   }
   if (experience.id == 'suzhou-humble-administrators-garden') {
     return suzhouGardenCanonicalLevelContent(
@@ -72,6 +81,29 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   }
   throw StateError(
     'Dedicated adaptive Journey has no registered resolver: ${experience.id}',
+  );
+}
+
+JourneyLevelContent _preserveKnownWordReviewSemantics(
+  JourneyLevelContent content,
+  Set<String> knownWords,
+) {
+  if (knownWords.isEmpty) return content;
+  final unseen = content.words
+      .where((entry) => !knownWords.contains(entry.word))
+      .toList(growable: false);
+  final review = content.words
+      .where((entry) => knownWords.contains(entry.word))
+      .toList(growable: false);
+  if (review.isEmpty || unseen.isEmpty) return content;
+
+  return JourneyLevelContent(
+    storyParagraphs: content.storyParagraphs,
+    storyAnnotations: content.storyAnnotations,
+    words: <WordEntry>[...unseen, ...review],
+    discoveries: content.discoveries,
+    wonderQuestion: content.wonderQuestion,
+    expressQuestion: content.expressQuestion,
   );
 }
 
@@ -147,7 +179,7 @@ JourneyLevelContent resolveSharedAdaptiveJourneyLevel(
     profile: profile,
   );
   if (!profile.isPhoenix) return refined;
-  if (_specialJourneyIds.contains(experience.id)) {
+  if (specialAdaptiveJourneyIds.contains(experience.id)) {
     return expandSpecialJourneyStoryToTarget(
       experience.id,
       refined,

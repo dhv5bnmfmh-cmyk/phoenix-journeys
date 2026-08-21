@@ -11,7 +11,25 @@ enum PhoenixReadingBand {
 
 enum VocabularyKind { general, cultural, properNoun, idiom }
 
-enum VocabularyLevelEvidence { official, curated, cultural }
+/// Exam-level evidence is intentionally stricter than historical `curated`.
+///
+/// `officialHsk`, `officialTocfl`, and `verifiedCuratedEquivalence` are the
+/// only evidence categories that may make an HSK/TOCFL number authoritative.
+/// Historical `curated` and `cultural` values remain source-compatible but
+/// are treated as EXAM_LEVEL=N/A until explicitly re-verified.
+enum VocabularyLevelEvidence {
+  official,
+  curated,
+  cultural,
+  officialHsk,
+  officialTocfl,
+  verifiedCuratedEquivalence,
+  culturalTerm,
+  properNoun,
+  idiomOrSpecialTerm,
+}
+
+enum PedagogicalLoad { low, medium, high }
 
 extension ChineseExamTrackPresentation on ChineseExamTrack {
   String get storageValue => switch (this) {
@@ -97,35 +115,68 @@ class VocabularyLevelTag {
     this.tocflLevel,
     this.kind = VocabularyKind.general,
     this.evidence = VocabularyLevelEvidence.curated,
-  });
+    this.phoenixSupportLevel,
+    this.supportRationale,
+    this.pedagogicalLoad = PedagogicalLoad.medium,
+  }) : assert(
+          phoenixSupportLevel == null ||
+              (phoenixSupportLevel >= 1 && phoenixSupportLevel <= 10),
+        );
 
   const VocabularyLevelTag.ungraded()
       : hskLevel = null,
         tocflLevel = null,
         kind = VocabularyKind.general,
-        evidence = VocabularyLevelEvidence.curated;
+        evidence = VocabularyLevelEvidence.curated,
+        phoenixSupportLevel = null,
+        supportRationale = 'No verified exam-level evidence; teach in context.',
+        pedagogicalLoad = PedagogicalLoad.medium;
 
   final int? hskLevel;
   final int? tocflLevel;
   final VocabularyKind kind;
   final VocabularyLevelEvidence evidence;
 
+  /// Phoenix-owned support threshold. This is pedagogical evidence only and
+  /// must never be presented as official HSK/TOCFL certificate equivalence.
+  final int? phoenixSupportLevel;
+  final String? supportRationale;
+  final PedagogicalLoad pedagogicalLoad;
+
   bool get isCulture =>
       kind == VocabularyKind.cultural ||
       kind == VocabularyKind.properNoun ||
       kind == VocabularyKind.idiom;
 
-  int? levelFor(ChineseExamTrack track) => switch (track) {
-        ChineseExamTrack.hsk => hskLevel,
-        ChineseExamTrack.tocfl => tocflLevel,
+  bool get hasAuthoritativeExamEvidence => switch (evidence) {
+        VocabularyLevelEvidence.official ||
+        VocabularyLevelEvidence.officialHsk ||
+        VocabularyLevelEvidence.officialTocfl ||
+        VocabularyLevelEvidence.verifiedCuratedEquivalence => true,
+        _ => false,
       };
 
+  int? levelFor(ChineseExamTrack track) {
+    if (!hasAuthoritativeExamEvidence) return null;
+    return switch ((track, evidence)) {
+      (ChineseExamTrack.hsk, VocabularyLevelEvidence.officialTocfl) => null,
+      (ChineseExamTrack.tocfl, VocabularyLevelEvidence.officialHsk) => null,
+      (ChineseExamTrack.hsk, _) => hskLevel,
+      (ChineseExamTrack.tocfl, _) => tocflLevel,
+    };
+  }
+
   int? levelForProfile(ChineseProficiencyProfile profile) {
+    if (profile.isPhoenix && phoenixSupportLevel != null) {
+      return phoenixSupportLevel;
+    }
     if (!profile.isPhoenix) return levelFor(profile.track);
 
+    final authoritativeHsk = levelFor(ChineseExamTrack.hsk);
+    final authoritativeTocfl = levelFor(ChineseExamTrack.tocfl);
     final anchors = <int>[
-      if (hskLevel != null) _phoenixFromHsk(hskLevel!),
-      if (tocflLevel != null) _phoenixFromTocfl(tocflLevel!),
+      if (authoritativeHsk != null) _phoenixFromHsk(authoritativeHsk),
+      if (authoritativeTocfl != null) _phoenixFromTocfl(authoritativeTocfl),
     ];
     if (anchors.isEmpty) return null;
     return (anchors.reduce((left, right) => left + right) / anchors.length)

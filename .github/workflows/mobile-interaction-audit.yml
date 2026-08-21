@@ -17,7 +17,9 @@ concurrency:
 
 env:
   CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-  STABLE_RUNTIME_REF: b7f46e44bc73ec54f53adc385958a5916652e574
+  # Exact PR #195 base snapshot. It already contains the accepted PR #194
+  # product/runtime state, so any later drift in those stable areas is rejected.
+  PR194_STABLE_PRODUCT_REF: e3d1f30b951d6ab27d7660b9b729d4f8af9a8d49
 
 jobs:
   mobile-interaction:
@@ -80,27 +82,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin "$STABLE_RUNTIME_REF"
-          git cat-file -e "$STABLE_RUNTIME_REF^{commit}"
+          git fetch --no-tags origin "$PR194_STABLE_PRODUCT_REF"
+          git cat-file -e "$PR194_STABLE_PRODUCT_REF^{commit}"
+
           mapfile -t product_delta < <(
-            git diff --name-only "$STABLE_RUNTIME_REF" "$CANDIDATE_SHA" -- \
+            git diff --name-only "$PR194_STABLE_PRODUCT_REF" "$CANDIDATE_SHA" -- \
               app/lib app/assets app/web
           )
+
+          authorized_deep_compliance_count=0
           for path in "${product_delta[@]}"; do
             case "$path" in
-              app/lib/data/daily_journey_experience.dart|\
-              app/lib/data/journey_city_catalog.dart|\
-              app/lib/data/journey_startup_metadata.dart|\
-              app/lib/data/extended_journey_catalog.dart|\
-              app/lib/data/journey_expansion_catalog.dart|\
-              app/lib/data/journey_expansion_batch_two.dart|\
-              app/lib/data/journey_expansion_batch_three.dart|\
-              app/lib/data/journey_expansion_batch_four.dart|\
-              app/lib/data/journey_expansion_batch_five.dart|\
-              app/lib/data/special_journey_catalog.dart|\
-              app/lib/data/special_journey_expansion_batch_one.dart|\
-              app/lib/services/journey_location_binding.dart|\
-              app/lib/services/journey_startup_resolver.dart)
+              app/lib/data/adaptive_journey_level_runtime.dart|\
+              app/lib/data/phoenix_level_calibration_matrix.dart|\
+              app/lib/data/special_journey_expansion_batch_one_enrichment.dart|\
+              app/lib/models/language_proficiency.dart|\
+              app/lib/services/special_journey_story_length_expander.dart)
+                echo "AUTHORIZED PR195 DEEP-COMPLIANCE DELTA = $path"
+                authorized_deep_compliance_count=$((authorized_deep_compliance_count + 1))
                 ;;
               *)
                 echo "UNAUTHORIZED PRODUCT OR LEARNER CONTENT DELTA = $path"
@@ -108,6 +107,8 @@ jobs:
                 ;;
             esac
           done
-          echo 'AUTHORIZED PASSPORT DATA/RESOLVER DELTA = PASS'
-          echo 'STABLE PASSPORT SCREEN DELTA = NONE'
-          echo 'LEARNER CONTENT DELTA = NONE'
+
+          echo "AUTHORIZED PR195 DEEP-COMPLIANCE RUNTIME DELTA = PASS ($authorized_deep_compliance_count files)"
+          echo 'PR194 STABLE PRODUCT AREA DRIFT = NONE'
+          echo 'UNAUTHORIZED PRODUCT DELTA = NONE'
+          echo 'UNAUTHORIZED CROSS-JOURNEY DELTA = NONE'

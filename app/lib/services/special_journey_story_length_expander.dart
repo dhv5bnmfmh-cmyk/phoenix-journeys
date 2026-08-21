@@ -1,5 +1,6 @@
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
+import '../data/special_journey_expansion_batch_one_enrichment.dart';
 import '../data/special_journey_story_enrichment.dart';
 import '../models/language_proficiency.dart';
 import 'phoenix_story_length_policy.dart';
@@ -18,13 +19,28 @@ class _SpecialStoryPacket {
   final String english;
 }
 
+_SpecialStoryPacket? _minimumBridgeFor(String journeyId) => switch (journeyId) {
+      'ice-city-star-map' => const _SpecialStoryPacket(
+          chinese: '冰城寒夜也照见普通工人的劳动。',
+          pinyin: 'Bīngchéng hányè yě zhàojiàn pǔtōng gōngrén de láodòng.',
+          vietnamese:
+              'Đêm lạnh của thành phố băng giá cũng soi rõ lao động của những công nhân bình thường.',
+          english:
+              'The Ice City night also brings ordinary factory labor into view.',
+        ),
+      _ => null,
+    };
+
 JourneyLevelContent expandSpecialJourneyStoryToTarget(
   String journeyId,
   JourneyLevelContent content, {
   required ChineseProficiencyProfile profile,
 }) {
   final source = _packetsFromContent(content);
-  final enrichment = specialJourneyStoryEnrichmentFor(journeyId)
+  final enrichment = <SpecialJourneyEnrichmentText>[
+    ...specialJourneyStoryEnrichmentFor(journeyId),
+    ...specialJourneyExpansionBatchOneEnrichmentFor(journeyId),
+  ]
       .map(
         (item) => _SpecialStoryPacket(
           chinese: item.chinese,
@@ -43,7 +59,12 @@ JourneyLevelContent expandSpecialJourneyStoryToTarget(
       ? source.sublist(1, source.length - 1)
       : const <_SpecialStoryPacket>[];
   final selected = <_SpecialStoryPacket>[opening];
-  final candidates = <_SpecialStoryPacket>[...middle, ...enrichment];
+  final bridge = _minimumBridgeFor(journeyId);
+  final candidates = <_SpecialStoryPacket>[
+    ...middle,
+    ...enrichment,
+    if (bridge != null) bridge,
+  ];
 
   for (final packet in candidates) {
     final projected = _characterCount(selected) +

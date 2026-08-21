@@ -30,6 +30,23 @@ test('every remaining journey uses the new cinematic dynamic background', () => 
   assert.match(background, /class _CinematicDestinationBackground/);
 });
 
+test('every current batch-five background directory is bundled for release', () => {
+  const pubspec = readFileSync(new URL('../app/pubspec.yaml', import.meta.url), 'utf8');
+  for (const directory of [
+    'huangshan/cloud-peaks',
+    'zhangjiajie/wulingyuan',
+    'kaifeng/song-capital',
+    'dali/cangshan-erhai',
+    'harbin/central-street',
+  ]) {
+    assert.match(
+      pubspec,
+      new RegExp(`assets/images/backgrounds/generated/${directory.replaceAll('/', '\\/')}/`),
+      `missing Flutter asset bundle entry for ${directory}`,
+    );
+  }
+});
+
 test('remaining journey motion is premium, local, and phone-safe', () => {
   const start = background.indexOf('class _CinematicDestinationBackground');
   const end = background.indexOf('class _JourneyBackgroundScrim');
