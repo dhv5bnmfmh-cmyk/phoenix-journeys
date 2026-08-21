@@ -135,7 +135,7 @@ const _arcadeLostProperty = <SpecialJourneyEnrichmentText>[
 const _teaHorseEcho = <SpecialJourneyEnrichmentText>[
   SpecialJourneyEnrichmentText(
     chinese: '你把录音机带上茶马古道，本来只想收集马铃和脚步声，却在空无一人的转弯处录到一支看不见的马帮。声音不是完整的传说：有人咳嗽、有人争论路况、有人笑着抱怨鞋底进水，普通生活反而比英雄故事更清楚。',
-    pinyin: 'Nǐ bǎ lùyīnjī dài shàng Chámǎ Gǔdào, běnlái zhǐ xiǎng shōují mǎlíng hé jiǎobùshēng, què zài kōngwú yì rén de zhuǎnwān chù lù dào yì zhī kànbujiàn de mǎbāng. Shēngyīn bú shì wánzhěng de chuánshuō: yǒurén késou, yǒurén zhēnglùn lùkuàng, yǒurén xiàozhe bàoyuàn xiédǐ jìnshuǐ, pǔtōng shēnghuó fǎn'ér bǐ yīngxióng gùshi gèng qīngchu.',
+    pinyin: 'Nǐ bǎ lùyīnjī dài shàng Chámǎ Gǔdào, běnlái zhǐ xiǎng shōují mǎlíng hé jiǎobùshēng, què zài kōngwú yì rén de zhuǎnwān chù lù dào yì zhī kànbujiàn de mǎbāng. Shēngyīn bú shì wánzhěng de chuánshuō: yǒurén késou, yǒurén zhēnglùn lùkuàng, yǒurén xiàozhe bàoyuàn xiédǐ jìnshuǐ, pǔtōng shēnghuó fǎn’ér bǐ yīngxióng gùshi gèng qīngchu.',
     vietnamese: 'Bạn mang máy ghi âm lên Trà Mã Cổ Đạo để thu tiếng chuông ngựa và bước chân, nhưng ở một khúc cua vắng lại ghi được một đoàn ngựa vô hình. Đó không phải truyền thuyết trọn vẹn: có tiếng ho, cãi đường, cười vì giày ướt. Đời thường rõ hơn chuyện anh hùng.',
     english: 'You bring a recorder to the Tea Horse Road for bells and footsteps, then capture an invisible caravan at an empty bend. Coughs, route arguments and wet-shoe complaints are clearer than heroic legend, making ordinary lives the roads strongest echo.',
   ),
@@ -153,7 +153,7 @@ const _teaHorseEcho = <SpecialJourneyEnrichmentText>[
   ),
   SpecialJourneyEnrichmentText(
     chinese: '你把录音机装进口袋去搬石头，马铃声没有再出现。傍晚大家停下来时，老人开始讲谁曾在这条路上背茶、运盐、送药，孩子们则把今天清路的声音录进同一个档案。古道的“回声”第一次包括了仍活着的人。',
-    pinyin: 'Nǐ bǎ lùyīnjī zhuāng jìn kǒudài qù bān shítou, mǎlíngshēng méiyǒu zài chūxiàn. Bàngwǎn dàjiā tíngxiàlái shí, lǎorén kāishǐ jiǎng shéi céng zài zhè tiáo lù shàng bēi chá, yùn yán, sòng yào, háizimen zé bǎ jīntiān qīnglù de shēngyīn lù jìn tóng yí ge dàng'àn. Gǔdào de “huíshēng” dì yí cì bāokuò le réng huózhe de rén.',
+    pinyin: 'Nǐ bǎ lùyīnjī zhuāng jìn kǒudài qù bān shítou, mǎlíngshēng méiyǒu zài chūxiàn. Bàngwǎn dàjiā tíngxiàlái shí, lǎorén kāishǐ jiǎng shéi céng zài zhè tiáo lù shàng bēi chá, yùn yán, sòng yào, háizimen zé bǎ jīntiān qīnglù de shēngyīn lù jìn tóng yí ge dàng’àn. Gǔdào de “huíshēng” dì yí cì bāokuò le réng huózhe de rén.',
     vietnamese: 'Bạn cất máy vào túi để chuyển đá và tiếng chuông không trở lại. Chiều xuống, người già kể về những người từng gùi trà, chở muối, đưa thuốc, còn trẻ con ghi âm tiếng dọn đường hôm nay vào cùng kho lưu trữ. “Tiếng vọng” của cổ đạo lần đầu gồm cả người đang sống.',
     english: 'You pocket the recorder and move stones; the bells do not return. By evening elders tell of tea carriers, salt haulers and medicine runners while children record todays road clearing into the same archive. The roads echo now includes living people.',
   ),
@@ -204,7 +204,7 @@ const _iceCityStarMap = <SpecialJourneyEnrichmentText>[
   ),
   SpecialJourneyEnrichmentText(
     chinese: '离开旧厂时，外面的冰面映出真正的夜空，墙上的星图则留在暖光里。你没有把两者解释成谁模仿谁；记忆锚点是那颗仍写着“待考”的小星，因为一个公共档案既可以照亮普通人的劳动，也可以诚实保留尚未解决的黑暗。',
-    pinyin: 'Líkāi jiùchǎng shí, wàimiàn de bīngmiàn yìngchū zhēnzhèng de yèkōng, qiáng shàng de xīngtú zé liú zài nuǎnguāng lǐ. Nǐ méiyǒu bǎ liǎngzhě jiěshì chéng shéi mófǎng shéi; jìyì máodiǎn shì nà kē réng xiězhe “dàikǎo” de xiǎo xīng, yīnwèi yí ge gōnggòng dàng'àn jì kěyǐ zhàoliàng pǔtōngrén de láodòng, yě kěyǐ chéngshí bǎoliú shàngwèi jiějué de hēi'àn.',
+    pinyin: 'Líkāi jiùchǎng shí, wàimiàn de bīngmiàn yìngchū zhēnzhèng de yèkōng, qiáng shàng de xīngtú zé liú zài nuǎnguāng lǐ. Nǐ méiyǒu bǎ liǎngzhě jiěshì chéng shéi mófǎng shéi; jìyì máodiǎn shì nà kē réng xiězhe “dàikǎo” de xiǎo xīng, yīnwèi yí ge gōnggòng dàng’àn jì kěyǐ zhàoliàng pǔtōngrén de láodòng, yě kěyǐ chéngshí bǎoliú shàngwèi jiějué de hēi’àn.',
     vietnamese: 'Rời nhà máy, mặt băng ngoài trời phản chiếu bầu trời thật còn bản đồ sao ở lại trong ánh sáng ấm. Bạn không giải thích cái nào bắt chước cái nào. Neo ký ức là ngôi sao nhỏ vẫn ghi “chờ khảo chứng”: một kho lưu trữ công cộng vừa có thể soi sáng lao động bình thường vừa giữ trung thực vùng tối chưa giải quyết.',
     english: 'Outside, ice reflects the real night while the factory star map stays in warm light. The memory anchor is the small star still marked pending: a public archive can illuminate ordinary labor while honestly preserving what remains unresolved.',
   ),
