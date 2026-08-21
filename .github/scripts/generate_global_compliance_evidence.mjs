@@ -44,7 +44,7 @@ function parseCsv(text) {
     row.push(cell);
     rows.push(row);
   }
-  return rows.filter(candidate => candidate.some(value => value.trim().isNotEmpty));
+  return rows.filter(candidate => candidate.some(value => value.trim().length > 0));
 }
 
 function recordsFromCsv(text) {
@@ -119,7 +119,7 @@ function extractRequirements(file) {
     const isTable = trimmed.startsWith('|') && trimmed.includes('|', 1);
     const isCheckbox = /^[-*+]\s*\[[ xX]\]\s+/.test(trimmed);
     const isList = isCheckbox || /^[-*+]\s+/.test(trimmed) || /^\d+[.)]\s+/.test(trimmed);
-    let kind = isCheckbox ? 'checkbox' : isTable ? 'table' : isList ? 'list' : 'paragraph';
+    const kind = isCheckbox ? 'checkbox' : isTable ? 'table' : isList ? 'list' : 'paragraph';
     let candidate = trimmed;
 
     if (isTable) {
