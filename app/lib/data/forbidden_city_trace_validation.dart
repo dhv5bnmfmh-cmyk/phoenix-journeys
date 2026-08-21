@@ -15,6 +15,8 @@ ForbiddenCityWordRecord _normalizedRecord(ForbiddenCityWordRecord record) {
     usageNote: record.usageNote,
     storySource: record.storySource,
     firstAppearsAt: earliest ?? record.firstAppearsAt,
+    contrastNote: record.contrastNote,
+    narrativeNote: record.narrativeNote,
   );
 }
 
@@ -57,8 +59,7 @@ List<WordEntry> forbiddenCityValidatedWordsForLevel(int level) {
   final selected = forbiddenCityWordsForLevel(level)
       .map((entry) => entry.word)
       .toSet();
-  return forbiddenCityTraceRecordsForLevel(level)
-      .where((record) => selected.contains(record.entry.word))
-      .map((record) => record.entry)
+  return forbiddenCityWordsForLevel(level)
+      .where((entry) => selected.contains(entry.word))
       .toList(growable: false);
 }
