@@ -58,14 +58,14 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   }
   if (experience.id == guangzhouChenClanJourneyId) {
     return guangzhouChenClanOnePassLevelContent(
-      profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band),
+      profile.phoenixLevel ?? _levelForBand(profile.band),
       profile: profile,
       knownWords: knownWords,
     );
   }
   if (experience.id == 'suzhou-humble-administrators-garden') {
     return suzhouGardenCanonicalLevelContent(
-      profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band),
+      profile.phoenixLevel ?? _levelForBand(profile.band),
       profile: profile,
       knownWords: knownWords,
     );
@@ -79,11 +79,8 @@ JourneyLevelContent _resolveForbiddenCityAdaptiveLevel(
   ChineseProficiencyProfile profile, {
   required Set<String> knownWords,
 }) {
-  final level = profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band);
-  final base = _normalizeForbiddenCityReadingSupport(
-    cachedForbiddenCityLevelContent(level),
-    level,
-  );
+  final level = profile.phoenixLevel ?? _levelForBand(profile.band);
+  final base = cachedForbiddenCityLevelContent(level);
   final unseenWords = base.words
       .where((entry) => !knownWords.contains(entry.word))
       .toList(growable: false);
@@ -97,32 +94,7 @@ JourneyLevelContent _resolveForbiddenCityAdaptiveLevel(
   );
 }
 
-JourneyLevelContent _normalizeForbiddenCityReadingSupport(
-  JourneyLevelContent base,
-  int level,
-) {
-  if (level != 8 && level != 10) return base;
-  final annotations = List<ReadingAnnotation>.of(base.storyAnnotations);
-  final index = annotations.length - 1;
-  final current = annotations[index];
-  annotations[index] = ReadingAnnotation(
-    pinyin: current.pinyin,
-    vietnamese: level == 8
-        ? 'Cậu nhận ra việc bước qua chỉ để lấp đầy bản đồ có thể biến “hiểu” thành “chiếm hữu”, nên giữ lại khoảng trống như một phần của hiểu biết lịch sử.'
-        : 'Khi cánh cổng mở, cậu từ chối biến khả năng thành quyền chiếm hữu, để “giới”, bản đồ thứ hai và chiếc thước gỗ cũ trở thành dấu mốc của cách nhìn mới.',
-    english: current.english,
-  );
-  return JourneyLevelContent(
-    storyParagraphs: base.storyParagraphs,
-    storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
-    words: base.words,
-    discoveries: base.discoveries,
-    wonderQuestion: base.wonderQuestion,
-    expressQuestion: base.expressQuestion,
-  );
-}
-
-int _legacyForbiddenCityLevel(PhoenixReadingBand band) => switch (band) {
+int _levelForBand(PhoenixReadingBand band) => switch (band) {
       PhoenixReadingBand.beginner => 1,
       PhoenixReadingBand.elementary => 3,
       PhoenixReadingBand.intermediate => 5,
