@@ -65,11 +65,12 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     );
   }
   if (experience.id == guangzhouChenClanJourneyId) {
-    return guangzhouChenClanOnePassLevelContent(
+    final content = guangzhouChenClanOnePassLevelContent(
       profile.phoenixLevel ?? _legacyForbiddenCityLevel(profile.band),
       profile: profile,
       knownWords: knownWords,
     );
+    return _preserveKnownWordReviewSemantics(content, knownWords);
   }
   if (experience.id == 'suzhou-humble-administrators-garden') {
     return suzhouGardenCanonicalLevelContent(
@@ -80,6 +81,29 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   }
   throw StateError(
     'Dedicated adaptive Journey has no registered resolver: ${experience.id}',
+  );
+}
+
+JourneyLevelContent _preserveKnownWordReviewSemantics(
+  JourneyLevelContent content,
+  Set<String> knownWords,
+) {
+  if (knownWords.isEmpty) return content;
+  final unseen = content.words
+      .where((entry) => !knownWords.contains(entry.word))
+      .toList(growable: false);
+  final review = content.words
+      .where((entry) => knownWords.contains(entry.word))
+      .toList(growable: false);
+  if (review.isEmpty || unseen.isEmpty) return content;
+
+  return JourneyLevelContent(
+    storyParagraphs: content.storyParagraphs,
+    storyAnnotations: content.storyAnnotations,
+    words: <WordEntry>[...unseen, ...review],
+    discoveries: content.discoveries,
+    wonderQuestion: content.wonderQuestion,
+    expressQuestion: content.expressQuestion,
   );
 }
 
