@@ -17,17 +17,58 @@ test('global convergence evidence uses the current active and Gold registries', 
   assert.match(active.rows.find(row => row.includes('pingyao-ancient-city')), /GOLD_CANDIDATE/);
 });
 
-test('requirement matrix generator maps every extracted clause to every active Journey', () => {
+test('current-standard generator is structural and cannot manufacture semantic PASS', () => {
   const standards = csv('docs/PHOENIX_CURRENT_STANDARD_INVENTORY.csv');
   const generator = readFileSync(
     new URL('../.github/scripts/generate_global_compliance_evidence.mjs', import.meta.url),
     'utf8',
   );
+
   assert.equal(standards.rows.length, 23);
-  assert.match(generator, /for \(const journey of allJourneys\) for \(const requirement of requirements\)/);
-  assert.match(generator, /EVIDENCE_LEVEL/);
-  assert.match(generator, /REPAIR_SHA/);
+  assert.match(generator, /CURRENT_EFFECTIVE/);
+  assert.match(generator, /normativeSections/);
+  assert.match(generator, /explicitNormative/);
+  assert.match(generator, /imperative/);
+  assert.match(generator, /sourceKind/);
+  assert.match(generator, /currentEffectiveDocsWithUnextractedRules/);
+  assert.match(generator, /unmappedRequirements/);
+  assert.match(generator, /semanticPassesAssertedByGenerator:\s*0/);
+  assert.match(generator, /NOT_ASSERTED_BY_GENERATOR/);
+  assert.match(generator, /PENDING_REQUIREMENT_SPECIFIC_VERIFICATION/);
   assert.match(generator, /requirements\.length \* allJourneys\.length/);
+  assert.doesNotMatch(
+    generator,
+    /return\s*\{[^}]*level:\s*['"]VERIFIED['"][^}]*result:\s*['"]PASS['"]/s,
+  );
+  assert.doesNotMatch(generator, /Objective defects remaining:\s*\*\*0\*\*/);
+});
+
+test('requirement mappings are requirement-specific even when Agent review is needed', () => {
+  const generator = readFileSync(
+    new URL('../.github/scripts/generate_global_compliance_evidence.mjs', import.meta.url),
+    'utf8',
+  );
+  for (const contract of [
+    'CHALLENGE_RUNTIME_CONTRACT',
+    'SPECIAL_MECHANISM_CONTRACT',
+    'VOCABULARY_LEVEL_PROVENANCE_CONTRACT',
+    'STORY_NARRATIVE_CONTRACT',
+    'DISCOVERY_CLOSED_LOOP_CONTRACT',
+    'MEMORY_COMPLETION_CONTRACT',
+    'MULTILINGUAL_SEMANTIC_CONTRACT',
+    'NARRATION_AUDIO_CONTRACT',
+    'PERFORMANCE_LAZY_RUNTIME_CONTRACT',
+    'LOCATION_PASSPORT_CONTRACT',
+    'MOBILE_ACCESSIBILITY_INTERACTION_CONTRACT',
+    'ASSET_VISUAL_RIGHTS_CONTRACT',
+    'DEVELOPMENT_GOVERNANCE_CONTRACT',
+  ]) {
+    assert.match(generator, new RegExp(contract));
+  }
+  assert.match(
+    generator,
+    /docs\/PHOENIX_DEEP_AUDIT_REPORT\.md#\$\{requirement\.requirementId\}/,
+  );
 });
 
 test('human Gold evidence is provenance-safe and never machine-promoted', () => {
@@ -47,12 +88,14 @@ test('human Gold evidence is provenance-safe and never machine-promoted', () => 
     assert.doesNotMatch(row, /JourneyChallengePanel","","","Fresh named human provenance/);
     assert.doesNotMatch(row, /,"PASS"$/);
   }
-  const summary = readFileSync(
-    new URL('../docs/PHOENIX_GLOBAL_CURRENT_STANDARD_COMPLIANCE.md', import.meta.url),
+
+  const generator = readFileSync(
+    new URL('../.github/scripts/generate_global_compliance_evidence.mjs', import.meta.url),
     'utf8',
   );
-  assert.match(summary, /Objective defects remaining: \*\*0\*\*/);
-  assert.match(summary, /Human\/Founder gates are not represented as machine PASS/);
+  assert.match(generator, /HUMAN_OR_FOUNDER_GATE/);
+  assert.match(generator, /HUMAN_GATE/);
+  assert.match(generator, /Human results remain unasserted until a Human records them/);
 });
 
 test('visual evidence separates product basis from current Founder review identity', () => {
