@@ -1,0 +1,69 @@
+name: Forbidden City Final Repair
+
+on:
+  push:
+    branches:
+      - feature/forbidden-city-final-integration
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair-and-format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/forbidden-city-final-integration
+          fetch-depth: 0
+
+      - name: Restore shared legacy implementations used by non-Forbidden-City routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git show origin/main:app/lib/screens/journey_screen.dart > app/lib/screens/journey_screen_legacy.dart
+          git show origin/main:app/lib/widgets/journey_challenge_panel.dart > app/lib/widgets/journey_challenge_panel_legacy.dart
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies before formatting
+        working-directory: app
+        run: flutter pub get
+
+      - name: Format every Dart file changed from main
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(git diff --name-only origin/main...HEAD -- app/lib app/test | grep '\.dart$' || true)
+          files+=("app/lib/screens/journey_screen_legacy.dart")
+          files+=("app/lib/widgets/journey_challenge_panel_legacy.dart")
+          cd app
+          rel=()
+          for f in "${files[@]}"; do
+            rel+=("${f#app/}")
+          done
+          dart format "${rel[@]}"
+          cd ..
+          git status --short
+
+      - name: Commit repaired runtime and formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet && git diff --cached --quiet && [[ -z "$(git status --porcelain)" ]]; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib app/test
+          git commit -m "Restore shared Journey implementations and format Reference changes"
+          git push origin HEAD:feature/forbidden-city-final-integration
