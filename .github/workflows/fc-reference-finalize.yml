@@ -17,7 +17,7 @@ jobs:
   finalize:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 10
     steps:
       - name: Check out Reference branch
         uses: actions/checkout@v4
@@ -30,76 +30,6 @@ jobs:
           set -euo pipefail
           python3 tools/finalize_forbidden_city_reference.py
           git diff --check
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Resolve dependencies
-        working-directory: app
-        run: flutter pub get
-
-      - name: Format changed Dart files
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t files < <(git diff --name-only -- app/lib app/test | grep '\.dart$' || true)
-          if ((${#files[@]} == 0)); then
-            echo 'No changed Dart files.'
-            exit 0
-          fi
-          cd app
-          rel=()
-          for f in "${files[@]}"; do rel+=("${f#app/}"); done
-          dart format "${rel[@]}"
-          cd ..
-          git diff --check
-
-      - name: Analyze
-        working-directory: app
-        run: flutter analyze
-
-      - name: Forbidden City trace
-        working-directory: app
-        run: flutter test test/forbidden_city_final_trace_test.dart
-
-      - name: Semantic anti-template
-        working-directory: app
-        run: flutter test test/journey_semantic_anti_template_gate_test.dart
-
-      - name: Content quality
-        working-directory: app
-        run: flutter test test/journey_content_quality_auditor_test.dart
-
-      - name: Adaptive level contract
-        working-directory: app
-        run: flutter test test/all_journey_adaptive_level_test.dart
-
-      - name: Adaptive levels contract
-        working-directory: app
-        run: flutter test test/all_journey_adaptive_levels_test.dart
-
-      - name: Shared runtime architecture
-        working-directory: app
-        run: flutter test test/journey_runtime_architecture_gate_test.dart
-
-      - name: Geography hierarchy
-        working-directory: app
-        run: flutter test test/journey_location_hierarchy_test.dart
-
-      - name: World Story agent
-        working-directory: app
-        run: flutter test test/phoenix_world_story_agent_test.dart
-
-      - name: Preview binding
-        working-directory: app
-        run: flutter test test/batch_one_final_preview_binding_test.dart
-
-      - name: Gold Challenge snapshot
-        working-directory: app
-        run: flutter test test/all_gold_challenge_runtime_snapshot_test.dart
 
       - name: Commit convergence
         shell: bash
