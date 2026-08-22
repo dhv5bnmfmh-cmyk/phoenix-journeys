@@ -31,11 +31,13 @@ jobs:
           cache: true
 
       - name: Apply content-only bindings
-        run: python3 tools/forbidden_city_content_only_patch.py
+        run: |
+          python3 tools/forbidden_city_content_only_patch.py
+          python3 tools/forbidden_city_vocab_focus_patch.py
 
       - name: Format only touched Dart files
         working-directory: app
-        run: dart format lib/screens/journey_screen.dart test/forbidden_city_ten_level_content_contract_test.dart
+        run: dart format lib/screens/journey_screen.dart lib/data/forbidden_city_journey_runtime.dart test/forbidden_city_ten_level_content_contract_test.dart
 
       - name: Resolve Flutter packages
         working-directory: app
@@ -47,7 +49,7 @@ jobs:
 
       - name: Verify shared Journey UI still compiles
         working-directory: app
-        run: flutter analyze lib/screens/journey_screen.dart
+        run: flutter analyze lib/screens/journey_screen.dart lib/data/forbidden_city_journey_runtime.dart
 
       - name: Commit verified content-only repair
         run: |
