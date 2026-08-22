@@ -1,0 +1,60 @@
+name: Forbidden City PR Autoformat
+
+on:
+  push:
+    branches:
+      - feature/forbidden-city-final-integration
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  format-pr-dart:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/forbidden-city-final-integration
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Format Dart files changed from main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          mapfile -t files < <(git diff --name-only origin/main...HEAD -- app/lib app/test | grep '\.dart$' || true)
+          if ((${#files[@]} == 0)); then
+            echo "No changed Dart files."
+            exit 0
+          fi
+          cd app
+          rel=()
+          for f in "${files[@]}"; do
+            rel+=("${f#app/}")
+          done
+          dart format "${rel[@]}"
+          cd ..
+          git status --short
+
+      - name: Commit formatting if needed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "Formatting already clean."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib app/test
+          git commit -m "Format Forbidden City PR Dart changes"
+          git push origin HEAD:feature/forbidden-city-final-integration
