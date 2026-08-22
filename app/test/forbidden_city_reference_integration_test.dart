@@ -298,8 +298,10 @@ void main() {
     testWidgets('Lv$level full Reference Journey persists and returns', (
       tester,
     ) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'phoenix.reference.cn-beijing-dongcheng-forbidden-city.level': level,
+      });
       final state = await _pumpHarness(tester);
-      await _tapKey(tester, 'forbidden-city-level-$level');
 
       expect(
         find.byKey(ValueKey('forbidden-city-stage-story-lv-$level')),
@@ -367,6 +369,16 @@ void main() {
       expect(restored.journeyStep, AppState.journeyLastStep);
       expect(restored.isJourneyStampEarned(forbiddenCityJourneyId), isTrue);
 
+      final completionList = find.byKey(
+        ValueKey('forbidden-city-stage-completion-lv-$level'),
+      );
+      for (var attempt = 0;
+          attempt < 4 &&
+              find.byKey(const ValueKey('forbidden-city-return')).evaluate().isEmpty;
+          attempt++) {
+        await tester.drag(completionList, const Offset(0, -420));
+        await tester.pumpAndSettle();
+      }
       await _tapKey(tester, 'forbidden-city-return');
       expect(
         find.byKey(const ValueKey('launch-forbidden-city')),

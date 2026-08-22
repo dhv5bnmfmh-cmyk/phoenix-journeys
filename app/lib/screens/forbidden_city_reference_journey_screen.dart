@@ -176,6 +176,7 @@ class _ForbiddenCityReferenceJourneyScreenState
 
   @override
   Widget build(BuildContext context) {
+    context.watch<AppState>();
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
