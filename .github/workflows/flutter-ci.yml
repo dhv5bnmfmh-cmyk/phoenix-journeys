@@ -125,7 +125,8 @@ jobs:
           for f in "${files[@]}"; do
             rel+=("${f#app/}")
           done
-          dart format --output=none --set-exit-if-changed "${rel[@]}" 2>&1 | tee format.log
+          dart format "${rel[@]}" 2>&1 | tee format.log
+          git diff --exit-code -- "${rel[@]}"
 
       - name: analyze
         run: |
@@ -153,6 +154,11 @@ jobs:
             app/analyze.log
             app/test.log
             app/build-web.log
+            app/lib/data/journey_narrative_dna_catalog.dart
+            app/lib/data/journey_semantic_fingerprint_catalog.dart
+            app/test/all_gold_challenge_runtime_snapshot_test.dart
+            app/test/forbidden_city_final_trace_test.dart
+            app/test/journey_semantic_anti_template_gate_test.dart
           if-no-files-found: warn
 
   forbidden-city-reference-gate:
