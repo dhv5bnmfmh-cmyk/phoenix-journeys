@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - feature/forbidden-city-content-only-reference
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
@@ -14,7 +18,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message || '', '[content-only-applied]') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout exact branch HEAD
+      - name: Checkout exact content-only branch
         uses: actions/checkout@v4
         with:
           ref: feature/forbidden-city-content-only-reference
