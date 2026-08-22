@@ -22,97 +22,31 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Probe repair need
-        id: probe
+      - name: Verify exact PR head
         shell: bash
         run: |
           set -euo pipefail
           actual="$(git rev-parse HEAD)"
           expected="${{ github.event.pull_request.head.sha }}"
+          echo "Repair input HEAD: $actual"
           test "$actual" = "$expected"
-          if grep -q "bool _enactsRouteSynthesis(String story) =>" app/test/forbidden_city_final_trace_test.dart; then
-            echo "needed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "needed=false" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Set up Flutter
-        if: steps.probe.outputs.needed == 'true'
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
-      - name: Apply test-only semantic contract repair
-        if: steps.probe.outputs.needed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 <<'PY'
-          from pathlib import Path
-          p = Path('app/test/forbidden_city_final_trace_test.dart')
-          text = p.read_text()
-          old = """bool _enactsRouteSynthesis(String story) =>
-    story.contains('两条') &&
-    <String>[
-      '保留',
-      '留下',
-      '同时',
-      '共同',
-      '多层表示',
-      '标出',
-      '写下各自成立的条件',
-    ].any(story.contains);
-"""
-          new = """bool _enactsRouteSynthesis(String story) {
-  final explicitDualRoute = story.contains('两条');
-  final semanticDualRoute =
-      story.contains('自己的路线') &&
-      story.contains('阿宁从东侧') &&
-      story.contains('不再用一条线覆盖另一条') &&
-      story.contains('共同到达点');
-  return (explicitDualRoute || semanticDualRoute) &&
-      <String>[
-        '保留',
-        '留下',
-        '同时',
-        '共同',
-        '多层表示',
-        '标出',
-        '写下各自成立的条件',
-      ].any(story.contains);
-}
-"""
-          if text.count(old) != 1:
-              raise SystemExit('brittle dual-route helper not found exactly once')
-          text = text.replace(old, new)
-          assertion = "      expect(story, contains('两条'), reason: 'Lv${index + 1}');\n"
-          if text.count(assertion) != 1:
-              raise SystemExit('brittle 两条 assertion not found exactly once')
-          p.write_text(text.replace(assertion, ''))
-
-          integration = Path('app/test/forbidden_city_reference_integration_test.dart').read_text()
-          stale = '他从午门沿中轴走向乾清门，把这条常用的学习路线画在纸上，认定这就是唯一正确的路线'
-          if stale in integration:
-              raise SystemExit('stale Lv2 Story literal is still present')
-          for required in [
-              'expect(validateForbiddenCityWordTrace(), isEmpty);',
-              'expect(validateForbiddenCityImportedWords(), isEmpty);',
-              'forbiddenCityLockedStories.indexWhere(',
-              'expect(record.firstAppearsAt, earliest, reason: record.entry.word);',
-              'contains(record.storySource)',
-          ]:
-              if required not in integration:
-                  raise SystemExit(f'missing derived trace assertion: {required}')
-          PY
-
-      - name: Format PR Dart files
-        if: steps.probe.outputs.needed == 'true'
+      - name: Format changed Dart files
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin main
           mapfile -t files < <(git diff --name-only origin/main...HEAD -- app/lib app/test | grep '\.dart$' || true)
+          if ((${#files[@]} == 0)); then
+            echo "No changed Dart files."
+            exit 0
+          fi
           cd app
           rel=()
           for f in "${files[@]}"; do
@@ -121,15 +55,17 @@ jobs:
           dart format "${rel[@]}"
           dart format --output=none --set-exit-if-changed "${rel[@]}"
 
-      - name: Commit and push Dart-only repair
-        if: steps.probe.outputs.needed == 'true'
+      - name: Commit and push persistent formatting
         shell: bash
         run: |
           set -euo pipefail
+          if git diff --quiet -- app/lib app/test; then
+            echo "Dart formatting already canonical."
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app/lib app/test
           git diff --cached --check
-          test -n "$(git diff --cached --name-only)"
-          git commit -m "test: fix final Forbidden City trace contracts and format"
+          git commit -m "style: persist PR196 Dart formatting"
           git push origin HEAD:feature/forbidden-city-final-integration
