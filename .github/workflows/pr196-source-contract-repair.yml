@@ -1,4 +1,5 @@
 name: PR196 Source Contract Repair
+# Second push intentionally triggers this already-present self-removing repair workflow.
 
 on:
   push:
