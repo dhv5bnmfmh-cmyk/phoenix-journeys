@@ -383,7 +383,7 @@ void main() {
       await tester.scrollUntilVisible(
         level10,
         240,
-        scrollable: find.byType(GridView),
+        scrollable: find.byType(Scrollable).first,
       );
       await tester.tap(level10);
       await tester.pumpAndSettle();
