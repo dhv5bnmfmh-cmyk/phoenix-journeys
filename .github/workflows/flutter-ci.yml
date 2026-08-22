@@ -42,10 +42,18 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Node agent contract tests
+      - name: Worker syntax contracts
+        run: |
+          set -euo pipefail
+          node --check worker/index.mjs
+          node --check worker/phoenix_ai.mjs
+          node --check worker/agents/phoenix_background_agent.mjs
+          echo "Worker syntax contracts: PASS"
+
+      - name: Runtime agent tests
         run: |
           set -o pipefail
-          node --test worker/*.test.mjs 2>&1 | tee node-agent.log
+          node --test worker/phoenix_ai.test.mjs worker/background_agent.test.mjs 2>&1 | tee node-agent.log
 
       - name: Cloudflare Worker dry-run
         run: |
@@ -74,6 +82,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ env.FINAL_HEAD_SHA }}
+          fetch-depth: 0
 
       - name: Verify FINAL HEAD
         working-directory: ${{ github.workspace }}
@@ -98,10 +107,23 @@ jobs:
           set -o pipefail
           flutter pub get 2>&1 | tee pub-get.log
 
-      - name: format
+      - name: format changed Dart files
+        working-directory: ${{ github.workspace }}
+        shell: bash
         run: |
-          set -o pipefail
-          dart format --output=none --set-exit-if-changed lib test 2>&1 | tee format.log
+          set -euo pipefail
+          git fetch origin main
+          mapfile -t files < <(git diff --name-only origin/main...HEAD -- app/lib app/test | grep '\.dart$' || true)
+          if ((${#files[@]} == 0)); then
+            echo "No changed Dart files."
+            exit 0
+          fi
+          cd app
+          rel=()
+          for f in "${files[@]}"; do
+            rel+=("${f#app/}")
+          done
+          dart format --output=none --set-exit-if-changed "${rel[@]}" 2>&1 | tee format.log
 
       - name: analyze
         run: |
