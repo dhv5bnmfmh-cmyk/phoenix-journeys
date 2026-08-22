@@ -35,7 +35,6 @@ import '../widgets/narration_player_card.dart';
 import '../widgets/narration_speed_stepper.dart';
 import '../widgets/phoenix_agent_cards.dart';
 import '../widgets/word_detail_sheet.dart';
-import 'forbidden_city_reference_journey_screen.dart';
 
 @visibleForTesting
 int? stableNarrationRevealEnd({
@@ -170,7 +169,6 @@ class _JourneyScreenState extends State<JourneyScreen>
   List<NarrationItem>? _cachedStoryNarrationItems;
   JourneyLevelContent? _cachedDiscoveryNarrationContent;
   List<NarrationItem>? _cachedDiscoveryNarrationItems;
-  Widget? _dedicatedRuntimeScreen;
 
   // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
   bool get _isSummerPalacePilot => false;
@@ -186,7 +184,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
     _experience = requireDailyJourneyExperience(journeyId);
-    _dedicatedRuntimeScreen = resolveDedicatedJourneyRuntimeScreen(journeyId);
     if (_experience.id == forbiddenCityJourneyId) {
       warmForbiddenCityContentCache();
     }
@@ -208,10 +205,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (_initialized) return;
 
     _appState = context.read<AppState>();
-    if (_isForbiddenCity) {
-      _initialized = true;
-      return;
-    }
     step = _appState.beijingJourneyStep;
     wonderController.text = _appState.wonderDraft;
     expressController.text = _appState.expressDraft;
@@ -239,7 +232,7 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_isForbiddenCity || state == AppLifecycleState.resumed) return;
+    if (state == AppLifecycleState.resumed) return;
     _narrationCheckpointTimer?.cancel();
     _narrationCheckpointTimer = null;
     unawaited(_persistNarrationPosition());
@@ -250,7 +243,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    if (_initialized && !_isForbiddenCity) {
+    if (_initialized) {
       unawaited(_persistNarrationPosition());
       unawaited(_persistProgress());
     }
@@ -1226,10 +1219,6 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   @override
   Widget build(BuildContext context) {
-    final dedicatedRuntime = _dedicatedRuntimeScreen;
-    if (dedicatedRuntime != null) {
-      return dedicatedRuntime;
-    }
     final stepThreePage = _isSummerPalacePilot
         ? resolvePilotN1CompositePage(
             step: 3,

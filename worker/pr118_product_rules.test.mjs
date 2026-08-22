@@ -19,7 +19,7 @@ test('PR118 keeps language level in settings and does not autoplay restored disc
 test('PR118 always presents three sequential four-choice challenge modes', async () => {
   const [journey, challenge] = await Promise.all([
     read('app/lib/screens/journey_screen.dart'),
-    read('app/lib/widgets/journey_challenge_panel.dart'),
+    read('app/lib/widgets/journey_challenge_panel_legacy.dart'),
   ]);
 
   assert.match(journey, /onAllCompleted/);

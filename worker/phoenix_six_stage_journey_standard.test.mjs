@@ -10,7 +10,7 @@ function read(path) {
 const standard = read('docs/PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md');
 const matrix = read('docs/templates/PHOENIX_SIX_STAGE_JOURNEY_ACCEPTANCE_MATRIX.md');
 const state = read('app/lib/state/app_state.dart');
-const challenge = read('app/lib/widgets/journey_challenge_panel.dart');
+const challenge = read('app/lib/widgets/journey_challenge_panel_legacy.dart');
 
 const requiredStageLabels = ['故事', '单词', '发现', '挑战', '回忆', '完成'];
 const requiredModes = ['paragraphRebuild', 'grammarRepair', 'missingSentence'];

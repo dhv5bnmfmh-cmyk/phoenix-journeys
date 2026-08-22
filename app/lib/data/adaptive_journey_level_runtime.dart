@@ -10,7 +10,6 @@ import 'daily_journey_experience.dart';
 import 'dedicated_adaptive_journey_catalog.dart';
 import 'forbidden_city_content_cache.dart';
 import 'forbidden_city_journey_runtime.dart';
-import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 import 'guangzhou_chen_clan_one_pass.dart';
 import 'journey_expansion_catalog.dart';
@@ -38,10 +37,7 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     );
   }
   if (experience.id == forbiddenCityJourneyId) {
-    return _resolveForbiddenCityAdaptiveLevel(
-      profile,
-      knownWords: knownWords,
-    );
+    return _resolveForbiddenCityAdaptiveLevel(profile, knownWords: knownWords);
   }
   if (isBatchOneGoldJourney(experience.id)) {
     return buildBatchOneGoldLevel(
@@ -126,11 +122,7 @@ JourneyLevelContent resolveSharedAdaptiveJourneyLevel(
       profile: profile,
     );
   }
-  return expandJourneyStoryToTarget(
-    experience,
-    refined,
-    profile: profile,
-  );
+  return expandJourneyStoryToTarget(experience, refined, profile: profile);
 }
 
 JourneyLevelContent resolveLegacySummerPalaceGenericExpansionForTesting(
@@ -148,11 +140,7 @@ JourneyLevelContent resolveLegacySummerPalaceGenericExpansionForTesting(
     content,
     profile: profile,
   );
-  return expandJourneyStoryToTarget(
-    experience,
-    refined,
-    profile: profile,
-  );
+  return expandJourneyStoryToTarget(experience, refined, profile: profile);
 }
 
 JourneyLevelContent _resolveSummerPalaceN1Level({

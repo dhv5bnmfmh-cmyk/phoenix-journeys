@@ -1,5 +1,6 @@
 enum GeoNodeKind {
   world,
+  continent,
   country,
   adminLevel1,
   adminLevel2,
@@ -40,7 +41,8 @@ class GeoNode {
         GeoNodeKind.adminLevel3 ||
         GeoNodeKind.city ||
         GeoNodeKind.district ||
-        GeoNodeKind.town => true,
+        GeoNodeKind.town =>
+          true,
         _ => false,
       };
 }

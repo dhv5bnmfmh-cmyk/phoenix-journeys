@@ -17,7 +17,7 @@ const dailyCatalog = read('app/lib/data/daily_journey_catalog.dart');
 const extendedCatalog = read('app/lib/data/extended_journey_catalog.dart');
 const expansionCatalog = read('app/lib/data/journey_expansion_catalog.dart');
 const summerPalace = read('app/lib/data/summer_palace_journey.dart');
-const forbiddenCity = read('app/lib/data/forbidden_city_journey_runtime.dart');
+const forbiddenCity = read('app/lib/data/forbidden_city_journey_runtime_base.dart');
 const shanghai = read('app/lib/data/shanghai_bund_one_pass.dart');
 const chengdu = read('app/lib/data/chengdu_kuanzhai_one_pass.dart');
 const hangzhou = read('app/lib/data/hangzhou_west_lake_one_pass.dart');
@@ -237,10 +237,10 @@ test('Hangzhou, Guangzhou, and Nanjing identity fields match canonical package m
 
 test('Forbidden City and Shanghai keep initial Goal separate from enacted Choice', () => {
   requiresEvery(forbiddenCity, [
-    '想做一张能解释宫城空间的学习图',
-    '一张好图应该有一条明确主线',
-    '两条路线都来自真实的行动',
-    '不选一条覆盖另一条',
+    '沈砚想做一张能解释紫禁城空间组织的学习图',
+    '认定“清楚”就应该意味着只有一条主线',
+    '把两条路线都保留',
+    '保留两条路线并写下各自成立的条件',
     forbiddenCity.match(/const forbiddenCityMemoryAnchor = '([^']+)'/)[1],
   ], 'Forbidden City active runtime');
   const forbiddenFields = identityFields('beijing-forbidden-city');

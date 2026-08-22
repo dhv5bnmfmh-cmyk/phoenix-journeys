@@ -1,0 +1,59 @@
+name: PR196 Final Dart Format Guard
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+
+permissions:
+  contents: read
+
+jobs:
+  format-guard:
+    if: github.event.pull_request.number == 196
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact PR head
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          expected="${{ github.event.pull_request.head.sha }}"
+          echo "Format guard HEAD: $actual"
+          test "$actual" = "$expected"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve app dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Verify changed Dart files are canonical
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          mapfile -t files < <(git diff --name-only origin/main...HEAD -- app/lib app/test | grep '\.dart$' || true)
+          if ((${#files[@]} == 0)); then
+            echo "No changed Dart files."
+            exit 0
+          fi
+          cd app
+          rel=()
+          for f in "${files[@]}"; do
+            rel+=("${f#app/}")
+          done
+          dart format --output=none --set-exit-if-changed "${rel[@]}"
