@@ -25,9 +25,8 @@ bool _containsSemanticEvidence(String story, List<String> evidence) =>
     evidence.any(story.contains);
 
 ({bool shenPerspective, bool aNingPerspective, bool divergence, bool synthesis})
-_dualRouteSemanticAxes(String story) {
-  final shenPerspective =
-      story.contains('沈砚') &&
+    _dualRouteSemanticAxes(String story) {
+  final shenPerspective = story.contains('沈砚') &&
       _containsSemanticEvidence(story, const <String>[
         '这条常用的学习路线',
         '这条常用路线',
@@ -42,8 +41,7 @@ _dualRouteSemanticAxes(String story) {
         '自己的图',
       ]);
 
-  final aNingPerspective =
-      story.contains('阿宁') &&
+  final aNingPerspective = story.contains('阿宁') &&
       _containsSemanticEvidence(story, const <String>[
         '阿宁却从东侧',
         '阿宁从东侧',
@@ -196,8 +194,7 @@ void main() {
         isNotEmpty,
         reason: record.entry.word,
       );
-      final earliest =
-          forbiddenCityLockedStories.indexWhere(
+      final earliest = forbiddenCityLockedStories.indexWhere(
             (story) => story.contains(record.entry.word),
           ) +
           1;
@@ -265,7 +262,9 @@ void main() {
     },
   );
 
-  test('Discovery stays grounded in Forbidden City architecture and route reasoning', () {
+  test(
+      'Discovery stays grounded in Forbidden City architecture and route reasoning',
+      () {
     final corpus = forbiddenCityDiscoveries.map((item) => item.text).join('\n');
     expect(corpus, contains('午门是紫禁城正门'));
     expect(corpus, contains('南北轴线'));
@@ -280,7 +279,8 @@ void main() {
     }
   });
 
-  test('Memory and Completion are level-bound and share the same Journey core', () {
+  test('Memory and Completion are level-bound and share the same Journey core',
+      () {
     final memoryPayloads = <String>{};
     final completionPayloads = <String>{};
     for (var level = 1; level <= 10; level++) {

@@ -36,12 +36,13 @@ class GeoNode {
 
   bool get isPlace => kind == GeoNodeKind.place;
   bool get isAdministrative => switch (kind) {
-    GeoNodeKind.adminLevel1 ||
-    GeoNodeKind.adminLevel2 ||
-    GeoNodeKind.adminLevel3 ||
-    GeoNodeKind.city ||
-    GeoNodeKind.district ||
-    GeoNodeKind.town => true,
-    _ => false,
-  };
+        GeoNodeKind.adminLevel1 ||
+        GeoNodeKind.adminLevel2 ||
+        GeoNodeKind.adminLevel3 ||
+        GeoNodeKind.city ||
+        GeoNodeKind.district ||
+        GeoNodeKind.town =>
+          true,
+        _ => false,
+      };
 }

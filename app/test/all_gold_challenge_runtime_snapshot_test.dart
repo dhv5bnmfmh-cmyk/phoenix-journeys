@@ -157,12 +157,10 @@ void main() {
     tester,
   ) async {
     const agent = PhoenixLanguageLevelAgent();
-    final approvedIds = approvedNarrativeDnaCatalog
-        .map((record) => record.journeyId)
-        .toSet();
-    final genericSnapshotIds = approvedIds
-        .where((id) => id != forbiddenCityJourneyId)
-        .toSet();
+    final approvedIds =
+        approvedNarrativeDnaCatalog.map((record) => record.journeyId).toSet();
+    final genericSnapshotIds =
+        approvedIds.where((id) => id != forbiddenCityJourneyId).toSet();
 
     // Runtime candidate membership is intentionally broader than Founder-approved
     // Gold membership. Every approved Gold must be active, but an active candidate
@@ -188,9 +186,8 @@ void main() {
         final discovery = active.discoveries
             .map((entry) => entry.text)
             .toList(growable: false);
-        final vocabulary = active.words
-            .map((entry) => entry.word)
-            .toList(growable: false);
+        final vocabulary =
+            active.words.map((entry) => entry.word).toList(growable: false);
 
         await _pump(tester, journey: journey, level: level);
 
@@ -230,8 +227,8 @@ void main() {
         );
         rows.last['grammarSentence'] =
             _key('challenge-grammar-sentence').evaluate().isEmpty
-            ? const <String>[]
-            : _textsUnder(_key('challenge-grammar-sentence'));
+                ? const <String>[]
+                : _textsUnder(_key('challenge-grammar-sentence'));
         await _completeGrammar(tester);
         rows.last['explanation'] = _textsUnder(
           _key('challenge-explanation-dialog'),
