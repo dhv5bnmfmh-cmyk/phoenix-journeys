@@ -1,0 +1,68 @@
+name: Forbidden City Lifecycle Format Fix
+
+on:
+  push:
+    branches:
+      - feature/forbidden-city-final-integration
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/forbidden-city-final-integration
+          fetch-depth: 0
+
+      - name: Isolate Reference lifecycle from shared Journey state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('app/lib/screens/journey_screen.dart')
+          text = p.read_text()
+
+          old = """    _appState = context.read<AppState>();\n    step = _appState.beijingJourneyStep;\n"""
+          new = """    _appState = context.read<AppState>();\n    if (_isForbiddenCity) {\n      _initialized = true;\n      return;\n    }\n    step = _appState.beijingJourneyStep;\n"""
+          if old not in text:
+              raise SystemExit('didChangeDependencies marker not found')
+          text = text.replace(old, new, 1)
+
+          old = """  void didChangeAppLifecycleState(AppLifecycleState state) {\n    if (state == AppLifecycleState.resumed) return;\n"""
+          new = """  void didChangeAppLifecycleState(AppLifecycleState state) {\n    if (_isForbiddenCity || state == AppLifecycleState.resumed) return;\n"""
+          if old not in text:
+              raise SystemExit('lifecycle marker not found')
+          text = text.replace(old, new, 1)
+
+          old = """    if (_initialized) {\n      unawaited(_persistNarrationPosition());\n      unawaited(_persistProgress());\n    }\n"""
+          new = """    if (_initialized && !_isForbiddenCity) {\n      unawaited(_persistNarrationPosition());\n      unawaited(_persistProgress());\n    }\n"""
+          if old not in text:
+              raise SystemExit('dispose persistence marker not found')
+          text = text.replace(old, new, 1)
+          p.write_text(text)
+          PY
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Format changed Dart
+        working-directory: app
+        run: dart format lib/screens/journey_screen.dart test/forbidden_city_reference_integration_test.dart
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart app/test/forbidden_city_reference_integration_test.dart
+          git commit -m "Isolate Reference lifecycle and format E2E tests"
+          git push origin HEAD:feature/forbidden-city-final-integration
