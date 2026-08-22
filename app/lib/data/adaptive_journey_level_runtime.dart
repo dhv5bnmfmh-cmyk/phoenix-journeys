@@ -37,10 +37,7 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     );
   }
   if (experience.id == forbiddenCityJourneyId) {
-    return _resolveForbiddenCityAdaptiveLevel(
-      profile,
-      knownWords: knownWords,
-    );
+    return _resolveForbiddenCityAdaptiveLevel(profile, knownWords: knownWords);
   }
   if (isBatchOneGoldJourney(experience.id)) {
     return buildBatchOneGoldLevel(
@@ -94,13 +91,13 @@ JourneyLevelContent _resolveForbiddenCityAdaptiveLevel(
 }
 
 int _levelForBand(PhoenixReadingBand band) => switch (band) {
-      PhoenixReadingBand.beginner => 1,
-      PhoenixReadingBand.elementary => 3,
-      PhoenixReadingBand.intermediate => 5,
-      PhoenixReadingBand.upperIntermediate => 7,
-      PhoenixReadingBand.advanced => 9,
-      PhoenixReadingBand.mastery => 10,
-    };
+  PhoenixReadingBand.beginner => 1,
+  PhoenixReadingBand.elementary => 3,
+  PhoenixReadingBand.intermediate => 5,
+  PhoenixReadingBand.upperIntermediate => 7,
+  PhoenixReadingBand.advanced => 9,
+  PhoenixReadingBand.mastery => 10,
+};
 
 JourneyLevelContent resolveSharedAdaptiveJourneyLevel(
   DailyJourneyExperience experience, {
@@ -125,11 +122,7 @@ JourneyLevelContent resolveSharedAdaptiveJourneyLevel(
       profile: profile,
     );
   }
-  return expandJourneyStoryToTarget(
-    experience,
-    refined,
-    profile: profile,
-  );
+  return expandJourneyStoryToTarget(experience, refined, profile: profile);
 }
 
 JourneyLevelContent resolveLegacySummerPalaceGenericExpansionForTesting(
@@ -147,11 +140,7 @@ JourneyLevelContent resolveLegacySummerPalaceGenericExpansionForTesting(
     content,
     profile: profile,
   );
-  return expandJourneyStoryToTarget(
-    experience,
-    refined,
-    profile: profile,
-  );
+  return expandJourneyStoryToTarget(experience, refined, profile: profile);
 }
 
 JourneyLevelContent _resolveSummerPalaceN1Level({
@@ -163,8 +152,9 @@ JourneyLevelContent _resolveSummerPalaceN1Level({
   final plan = _languageLevelAgent.planFor(profile);
   final source = summerPalaceN1LevelForPhoenixLevel(level);
   final limited = source.withReadingLimit(
-    paragraphCount:
-        profile.isPhoenix ? target.paragraphCount : plan.paragraphCount,
+    paragraphCount: profile.isPhoenix
+        ? target.paragraphCount
+        : plan.paragraphCount,
   );
   final base = JourneyLevelContent(
     storyParagraphs: limited.storyParagraphs,
@@ -199,10 +189,10 @@ JourneyLevelContent _resolveSummerPalaceN1Level({
 }
 
 int _legacySummerPalaceLevel(PhoenixReadingBand band) => switch (band) {
-      PhoenixReadingBand.beginner => 1,
-      PhoenixReadingBand.elementary => 3,
-      PhoenixReadingBand.intermediate => 5,
-      PhoenixReadingBand.upperIntermediate => 7,
-      PhoenixReadingBand.advanced => 8,
-      PhoenixReadingBand.mastery => 10,
-    };
+  PhoenixReadingBand.beginner => 1,
+  PhoenixReadingBand.elementary => 3,
+  PhoenixReadingBand.intermediate => 5,
+  PhoenixReadingBand.upperIntermediate => 7,
+  PhoenixReadingBand.advanced => 8,
+  PhoenixReadingBand.mastery => 10,
+};

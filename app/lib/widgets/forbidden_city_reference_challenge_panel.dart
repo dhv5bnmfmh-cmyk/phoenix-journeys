@@ -76,8 +76,9 @@ class _ForbiddenCityReferenceChallengePanelState
   }
 
   int _resolveLevel() {
-    final active =
-        widget.storyParagraphs.map((item) => item.trim()).join('\n\n');
+    final active = widget.storyParagraphs
+        .map((item) => item.trim())
+        .join('\n\n');
     for (var level = 1; level <= forbiddenCityLockedStories.length; level++) {
       if (forbiddenCityLockedStories[level - 1].trim() == active) return level;
     }
@@ -101,35 +102,37 @@ class _ForbiddenCityReferenceChallengePanelState
   }
 
   String get _modeLabel => switch (_mode) {
-        _ReferenceChallengeMode.story => '故事理解',
-        _ReferenceChallengeMode.evidence => '证据推理',
-        _ReferenceChallengeMode.transfer => '迁移决策',
-      };
+    _ReferenceChallengeMode.story => '故事理解',
+    _ReferenceChallengeMode.evidence => '证据推理',
+    _ReferenceChallengeMode.transfer => '迁移决策',
+  };
 
   String get _trainingGoal => switch (_mode) {
-        _ReferenceChallengeMode.story => _storyRecord.cognitiveTarget,
-        _ReferenceChallengeMode.evidence => _level <= 3
-            ? '从 Story 找人物、目标与路线证据'
-            : _level <= 6
-                ? '比较建筑连接、任务与路线理由'
-                : _level <= 8
-                    ? '用多条证据修正人物判断'
-                    : '识别过度推论并权衡多重空间证据',
-        _ReferenceChallengeMode.transfer => _level <= 3
-            ? '把基本理解用于新的路线选择'
-            : _level <= 6
-                ? '迁移“建筑条件 + 人物任务”的判断方法'
-                : _level <= 8
-                    ? '在新情境中选择关键证据'
-                    : '综合空间约束、目标与行动后果作决定',
-      };
+    _ReferenceChallengeMode.story => _storyRecord.cognitiveTarget,
+    _ReferenceChallengeMode.evidence =>
+      _level <= 3
+          ? '从 Story 找人物、目标与路线证据'
+          : _level <= 6
+          ? '比较建筑连接、任务与路线理由'
+          : _level <= 8
+          ? '用多条证据修正人物判断'
+          : '识别过度推论并权衡多重空间证据',
+    _ReferenceChallengeMode.transfer =>
+      _level <= 3
+          ? '把基本理解用于新的路线选择'
+          : _level <= 6
+          ? '迁移“建筑条件 + 人物任务”的判断方法'
+          : _level <= 8
+          ? '在新情境中选择关键证据'
+          : '综合空间约束、目标与行动后果作决定',
+  };
 
   String get _question => switch (_mode) {
-        _ReferenceChallengeMode.story =>
-          '按人物行动与因果关系，把当前 Lv$_level Story 的四个事件放回正确顺序。',
-        _ReferenceChallengeMode.evidence => _evidenceRecord.evidenceQuestion,
-        _ReferenceChallengeMode.transfer => _transferRecord.transferQuestion,
-      };
+    _ReferenceChallengeMode.story =>
+      '按人物行动与因果关系，把当前 Lv$_level Story 的四个事件放回正确顺序。',
+    _ReferenceChallengeMode.evidence => _evidenceRecord.evidenceQuestion,
+    _ReferenceChallengeMode.transfer => _transferRecord.transferQuestion,
+  };
 
   List<_ReferenceChoice> get _choices {
     if (_mode == _ReferenceChallengeMode.evidence) {
@@ -160,20 +163,21 @@ class _ForbiddenCityReferenceChallengePanelState
       : _selectedChoice != null;
 
   String get _correctAnswer => switch (_mode) {
-        _ReferenceChallengeMode.story => _storyRecord.correctOrder
-            .map((index) => _storyRecord.segments[index])
-            .join('\n'),
-        _ReferenceChallengeMode.evidence => _evidenceRecord.evidenceAnswer,
-        _ReferenceChallengeMode.transfer => _transferRecord.transferAnswer,
-      };
+    _ReferenceChallengeMode.story =>
+      _storyRecord.correctOrder
+          .map((index) => _storyRecord.segments[index])
+          .join('\n'),
+    _ReferenceChallengeMode.evidence => _evidenceRecord.evidenceAnswer,
+    _ReferenceChallengeMode.transfer => _transferRecord.transferAnswer,
+  };
 
   String get _explanation => switch (_mode) {
-        _ReferenceChallengeMode.story => _storyRecord.explanation,
-        _ReferenceChallengeMode.evidence =>
-          '${_evidenceRecord.focus} ${_evidenceRecord.evidenceAnswer}',
-        _ReferenceChallengeMode.transfer =>
-          '把 Journey 原则迁移到新情境，而不是恢复原句。依据：${_transferRecord.sourceEvidence}',
-      };
+    _ReferenceChallengeMode.story => _storyRecord.explanation,
+    _ReferenceChallengeMode.evidence =>
+      '${_evidenceRecord.focus} ${_evidenceRecord.evidenceAnswer}',
+    _ReferenceChallengeMode.transfer =>
+      '把 Journey 原则迁移到新情境，而不是恢复原句。依据：${_transferRecord.sourceEvidence}',
+  };
 
   bool _isCorrect(List<_ReferenceChoice> choices) {
     if (_mode == _ReferenceChallengeMode.story) {
@@ -200,8 +204,8 @@ class _ForbiddenCityReferenceChallengePanelState
         _feedback = _mode == _ReferenceChallengeMode.story
             ? '顺序还没有形成完整因果链。先找目标、冲突、选择和结果。'
             : _mode == _ReferenceChallengeMode.evidence
-                ? '这个判断存在错误因果、错误动机、错误空间关系或过度推论。'
-                : '先检查空间是否可行，再看人物目标、任务和行动后果。';
+            ? '这个判断存在错误因果、错误动机、错误空间关系或过度推论。'
+            : '先检查空间是否可行，再看人物目标、任务和行动后果。';
         _storySelection.clear();
         _selectedChoice = null;
       }
@@ -350,8 +354,8 @@ class _ForbiddenCityReferenceChallengePanelState
             t(
               _resolved
                   ? (_mode == _ReferenceChallengeMode.transfer
-                      ? '完成 Challenge'
-                      : '进入下一项')
+                        ? '完成 Challenge'
+                        : '进入下一项')
                   : '提交答案',
             ),
             style: const TextStyle(fontWeight: FontWeight.w900),
@@ -411,12 +415,12 @@ class _ForbiddenCityReferenceChallengePanelState
             _storySelection.isEmpty
                 ? t('依次选择 4 个事件')
                 : _storySelection
-                    .map((index) => t(record.segments[index]))
-                    .toList()
-                    .asMap()
-                    .entries
-                    .map((entry) => '${entry.key + 1}. ${entry.value}')
-                    .join('\n'),
+                      .map((index) => t(record.segments[index]))
+                      .toList()
+                      .asMap()
+                      .entries
+                      .map((entry) => '${entry.key + 1}. ${entry.value}')
+                      .join('\n'),
             style: const TextStyle(color: Colors.white, height: 1.4),
           ),
         ),
@@ -449,39 +453,40 @@ class _ForbiddenCityReferenceChallengePanelState
   }
 
   Widget _evidenceContext() => Container(
-        key: const ValueKey('forbidden-city-evidence-context'),
-        padding: const EdgeInsets.all(9),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: .22),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          t(
-            '待检验判断 · ${_evidenceRecord.broken}\nStory 证据 · ${_evidenceRecord.correct}',
-          ),
-          style: const TextStyle(color: Colors.white, height: 1.4),
-        ),
-      );
+    key: const ValueKey('forbidden-city-evidence-context'),
+    padding: const EdgeInsets.all(9),
+    decoration: BoxDecoration(
+      color: Colors.black.withValues(alpha: .22),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Text(
+      t(
+        '待检验判断 · ${_evidenceRecord.broken}\nStory 证据 · ${_evidenceRecord.correct}',
+      ),
+      style: const TextStyle(color: Colors.white, height: 1.4),
+    ),
+  );
 
   Widget _transferContext() => Container(
-        key: const ValueKey('forbidden-city-transfer-context'),
-        padding: const EdgeInsets.all(9),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: .22),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          t('已学依据 · ${_transferRecord.sourceEvidence}'),
-          style: const TextStyle(color: Colors.white, height: 1.4),
-        ),
-      );
+    key: const ValueKey('forbidden-city-transfer-context'),
+    padding: const EdgeInsets.all(9),
+    decoration: BoxDecoration(
+      color: Colors.black.withValues(alpha: .22),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Text(
+      t('已学依据 · ${_transferRecord.sourceEvidence}'),
+      style: const TextStyle(color: Colors.white, height: 1.4),
+    ),
+  );
 
   Widget _choiceTile(_ReferenceChoice choice, int index) {
     final selected = _selectedChoice == index;
     return OutlinedButton(
       key: ValueKey('forbidden-city-cognition-option-$index'),
-      onPressed:
-          _resolved ? null : () => setState(() => _selectedChoice = index),
+      onPressed: _resolved
+          ? null
+          : () => setState(() => _selectedChoice = index),
       style: OutlinedButton.styleFrom(
         foregroundColor: selected ? const Color(0xFFFFD879) : Colors.white,
         side: BorderSide(
@@ -495,34 +500,34 @@ class _ForbiddenCityReferenceChallengePanelState
   }
 
   Widget _resolutionCard() => Container(
-        key: const ValueKey('forbidden-city-challenge-resolution'),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: const Color(0xFFE9F0DF),
-          borderRadius: BorderRadius.circular(12),
+    key: const ValueKey('forbidden-city-challenge-resolution'),
+    padding: const EdgeInsets.all(10),
+    decoration: BoxDecoration(
+      color: const Color(0xFFE9F0DF),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          t('正确答案'),
+          style: const TextStyle(
+            color: Color(0xFF315B32),
+            fontWeight: FontWeight.w900,
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              t('正确答案'),
-              style: const TextStyle(
-                color: Color(0xFF315B32),
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            Text(
-              t(_correctAnswer),
-              style: const TextStyle(color: Color(0xFF263B27), height: 1.35),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              t(_explanation),
-              style: const TextStyle(color: Color(0xFF263B27), height: 1.35),
-            ),
-          ],
+        Text(
+          t(_correctAnswer),
+          style: const TextStyle(color: Color(0xFF263B27), height: 1.35),
         ),
-      );
+        const SizedBox(height: 5),
+        Text(
+          t(_explanation),
+          style: const TextStyle(color: Color(0xFF263B27), height: 1.35),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ReferenceChoice {

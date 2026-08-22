@@ -31,32 +31,32 @@ String _earliestStorySource(String word) {
 /// This prevents hand-authored earliest-level and Story-source drift.
 final List<base.ForbiddenCityWordRecord> forbiddenCityWordRecords =
     List<base.ForbiddenCityWordRecord>.unmodifiable([
-  for (final record in base.forbiddenCityWordRecords)
-    base.ForbiddenCityWordRecord(
-      entry: record.entry,
-      usageNote: record.usageNote,
-      storySource: _earliestStorySource(record.entry.word),
-      firstAppearsAt: _earliestStoryLevel(record.entry.word),
-      contrastNote: record.contrastNote,
-      narrativeNote: record.narrativeNote,
-    ),
-]);
+      for (final record in base.forbiddenCityWordRecords)
+        base.ForbiddenCityWordRecord(
+          entry: record.entry,
+          usageNote: record.usageNote,
+          storySource: _earliestStorySource(record.entry.word),
+          firstAppearsAt: _earliestStoryLevel(record.entry.word),
+          contrastNote: record.contrastNote,
+          narrativeNote: record.narrativeNote,
+        ),
+    ]);
 
 String _pinyin(String text) => PinyinHelper.getPinyinE(
-      text,
-      separator: ' ',
-      format: PinyinFormat.WITH_TONE_MARK,
-    );
+  text,
+  separator: ' ',
+  format: PinyinFormat.WITH_TONE_MARK,
+);
 
 WordEntry _wordEntryForLevel(base.ForbiddenCityWordRecord record, int level) {
   final source = record.entry;
   final band = level <= 3
       ? 1
       : level <= 6
-          ? 2
-          : level <= 8
-              ? 3
-              : 4;
+      ? 2
+      : level <= 8
+      ? 3
+      : 4;
   final notes = <WordExample>[
     WordExample(
       chinese: 'Story 原句：${record.storySource}',
