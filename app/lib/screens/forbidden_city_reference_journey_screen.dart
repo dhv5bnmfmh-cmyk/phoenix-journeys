@@ -336,8 +336,8 @@ class _ForbiddenCityReferenceJourneyScreenState
                 color: index == _step
                     ? PhoenixTheme.red
                     : index < _step
-                    ? const Color(0xFF315B32)
-                    : Colors.black.withValues(alpha: .1),
+                        ? const Color(0xFF315B32)
+                        : Colors.black.withValues(alpha: .1),
                 borderRadius: BorderRadius.circular(8),
               ),
               alignment: Alignment.center,
