@@ -1,44 +1,56 @@
 name: PR196 Final Dart Repair
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/forbidden-city-final-integration
+      - main
+    types:
+      - synchronize
 
 permissions:
   contents: write
 
 jobs:
   repair-and-certify:
-    if: github.event.head_commit.message == 'ci: run PR196 final local repair'
+    if: github.event.pull_request.number == 196
     runs-on: ubuntu-latest
     timeout-minutes: 70
     steps:
       - name: Check out exact repair input
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Verify repair input
+      - name: Probe whether repair is still needed
+        id: probe
         shell: bash
         run: |
           set -euo pipefail
           actual="$(git rev-parse HEAD)"
+          expected="${{ github.event.pull_request.head.sha }}"
           echo "Repair input HEAD: $actual"
-          test "$actual" = "$GITHUB_SHA"
+          test "$actual" = "$expected"
+          if grep -q "bool _enactsRouteSynthesis(String story) =>" app/test/forbidden_city_final_trace_test.dart; then
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up Flutter
+        if: steps.probe.outputs.needed == 'true'
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
       - name: Install dependencies
+        if: steps.probe.outputs.needed == 'true'
         working-directory: app
         run: flutter pub get
 
       - name: Repair only stale Forbidden City test contracts
+        if: steps.probe.outputs.needed == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -84,14 +96,13 @@ jobs:
           old_literal_assert = "      expect(story, contains('两条'), reason: 'Lv${index + 1}');\n"
           if text.count(old_literal_assert) != 1:
               raise SystemExit('Expected brittle 两条 assertion exactly once')
-          text = text.replace(old_literal_assert, '')
-          final_trace.write_text(text)
+          final_trace.write_text(text.replace(old_literal_assert, ''))
 
           integration = Path('app/test/forbidden_city_reference_integration_test.dart')
           integration_text = integration.read_text()
           stale = '他从午门沿中轴走向乾清门，把这条常用的学习路线画在纸上，认定这就是唯一正确的路线'
           if stale in integration_text:
-              raise SystemExit('Stale Lv2 literal is still present; repair must use derived trace, not old Story text')
+              raise SystemExit('Stale Lv2 literal is still present; runtime-derived trace contract is required')
           required_contracts = [
               'expect(validateForbiddenCityWordTrace(), isEmpty);',
               'expect(validateForbiddenCityImportedWords(), isEmpty);',
@@ -105,6 +116,7 @@ jobs:
           PY
 
       - name: Format PR Dart files
+        if: steps.probe.outputs.needed == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -122,6 +134,7 @@ jobs:
           dart format "${rel[@]}"
 
       - name: A targeted failing tests
+        if: steps.probe.outputs.needed == 'true'
         working-directory: app
         shell: bash
         run: |
@@ -130,6 +143,7 @@ jobs:
           flutter test test/forbidden_city_final_trace_test.dart --plain-name "Forbidden City Lv1-Lv10 preserve the dual-route causal identity"
 
       - name: B dart format check
+        if: steps.probe.outputs.needed == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -142,18 +156,22 @@ jobs:
           dart format --output=none --set-exit-if-changed "${rel[@]}"
 
       - name: C full flutter test
+        if: steps.probe.outputs.needed == 'true'
         working-directory: app
         run: flutter test
 
       - name: D flutter analyze
+        if: steps.probe.outputs.needed == 'true'
         working-directory: app
         run: flutter analyze
 
       - name: E build web release
+        if: steps.probe.outputs.needed == 'true'
         working-directory: app
         run: flutter build web --release
 
       - name: F Forbidden City Reference Gate
+        if: steps.probe.outputs.needed == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -163,6 +181,7 @@ jobs:
           flutter test test/forbidden_city_reference_integration_test.dart
 
       - name: G commit and push certified Dart repair
+        if: steps.probe.outputs.needed == 'true'
         shell: bash
         run: |
           set -euo pipefail
