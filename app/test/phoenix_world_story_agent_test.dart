@@ -19,10 +19,14 @@ void main() {
 
     final path = agent.pathTo('cn-beijing-dongcheng-forbidden-city');
 
-    expect(
-      path.map((node) => node.name),
-      ['世界', '亚洲', '中国', '北京市', '东城区', '故宫博物院'],
-    );
+    expect(path.map((node) => node.name), [
+      '世界',
+      '亚洲',
+      '中国',
+      '北京市',
+      '东城区',
+      '故宫博物院',
+    ]);
   });
 
   test('searches local and international aliases', () {
@@ -35,10 +39,7 @@ void main() {
   test('rejects orphan geographic nodes', () {
     final agent = PhoenixWorldStoryAgent();
 
-    expect(
-      () => agent.register(worldGeoCatalog.last),
-      throwsStateError,
-    );
+    expect(() => agent.register(worldGeoCatalog.last), throwsStateError);
   });
 
   test('binds the Beijing Journey to its precise place and evidence', () {
@@ -60,10 +61,13 @@ void main() {
         .map((journey) => journey.id)
         .toSet();
 
-    expect(ids, containsAll(<String>[
-      'beijing-forbidden-city',
-      'beijing-temple-of-heaven',
-    ]));
+    expect(
+      ids,
+      containsAll(<String>[
+        'beijing-forbidden-city',
+        'beijing-temple-of-heaven',
+      ]),
+    );
     expect(agent.journeysForGeo('cn'), isEmpty);
   });
 

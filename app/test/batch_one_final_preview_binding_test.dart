@@ -20,35 +20,44 @@ void main() {
     expect(batchOneMemorySpecFor(forbiddenCityJourneyId), isNull);
   });
 
-  test('Forbidden City review levels expose the normal Phoenix paragraph shape', () {
-    for (final level in <int>[1, 5, 10]) {
-      final content = forbiddenCityLevelContent(level);
-      expect(content.storyParagraphs.length, level <= 2 ? 1 : 2);
-      expect(content.storyAnnotations.length, content.storyParagraphs.length);
-      expect(content.storyParagraphs.join('\n\n'), forbiddenCityLockedStories[level - 1]);
-    }
-  });
+  test(
+    'Forbidden City review levels expose the normal Phoenix paragraph shape',
+    () {
+      for (final level in <int>[1, 5, 10]) {
+        final content = forbiddenCityLevelContent(level);
+        expect(content.storyParagraphs.length, level <= 2 ? 1 : 2);
+        expect(content.storyAnnotations.length, content.storyParagraphs.length);
+        expect(
+          content.storyParagraphs.join('\n\n'),
+          forbiddenCityLockedStories[level - 1],
+        );
+      }
+    },
+  );
 
-  test('final preview binds Shanghai Bund to the one-pass Lv1-Lv10 package', () {
-    expect(isBatchOneGoldJourney(shanghaiBundJourneyId), isTrue);
-    expect(shanghaiBundOnePassRemediation.levels, hasLength(10));
-    expect(shanghaiBundOnePassRemediation.protagonist, contains('林岸'));
-    expect(shanghaiBundOnePassRemediation.title, contains('过江之前'));
-    final canonical = <String>[];
-    for (var level = 1; level <= 10; level++) {
-      final content = shanghaiBundOnePassRemediation.levelContent(level);
-      final story = content.storyParagraphs.join();
-      canonical.add(story);
-      expect(content.storyParagraphs.length, level <= 2 ? 1 : 2);
-      expect(story, contains('林岸'));
-      expect(story, contains('外滩'));
-      expect(story, contains('陆家嘴'));
-      expect(story, isNot(contains('陆潮')));
-      expect(story, isNot(contains('九点半')));
-      expect(story, isNot(contains('赞助动画')));
-      expect(story, isNot(contains('直播断线')));
-    }
-    expect(canonical.join(), contains('黄浦江'));
-    expect(batchOneMemorySpecFor(shanghaiBundJourneyId), isNotNull);
-  });
+  test(
+    'final preview binds Shanghai Bund to the one-pass Lv1-Lv10 package',
+    () {
+      expect(isBatchOneGoldJourney(shanghaiBundJourneyId), isTrue);
+      expect(shanghaiBundOnePassRemediation.levels, hasLength(10));
+      expect(shanghaiBundOnePassRemediation.protagonist, contains('林岸'));
+      expect(shanghaiBundOnePassRemediation.title, contains('过江之前'));
+      final canonical = <String>[];
+      for (var level = 1; level <= 10; level++) {
+        final content = shanghaiBundOnePassRemediation.levelContent(level);
+        final story = content.storyParagraphs.join();
+        canonical.add(story);
+        expect(content.storyParagraphs.length, level <= 2 ? 1 : 2);
+        expect(story, contains('林岸'));
+        expect(story, contains('外滩'));
+        expect(story, contains('陆家嘴'));
+        expect(story, isNot(contains('陆潮')));
+        expect(story, isNot(contains('九点半')));
+        expect(story, isNot(contains('赞助动画')));
+        expect(story, isNot(contains('直播断线')));
+      }
+      expect(canonical.join(), contains('黄浦江'));
+      expect(batchOneMemorySpecFor(shanghaiBundJourneyId), isNotNull);
+    },
+  );
 }
