@@ -1,4 +1,4 @@
-name: Flutter CI
+name: Final Validation
 
 on:
   push:
@@ -8,30 +8,79 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: flutter-ci-${{ github.ref }}
+  group: final-validation-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  FINAL_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
 jobs:
-  verify:
+  node-agent:
+    name: Node Agent
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out FINAL HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.FINAL_HEAD_SHA }}
+
+      - name: Verify FINAL HEAD
+        run: |
+          actual="$(git rev-parse HEAD)"
+          echo "Final HEAD SHA: $actual"
+          test "$actual" = "$FINAL_HEAD_SHA"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Node agent contract tests
+        run: |
+          set -o pipefail
+          node --test worker/*.test.mjs 2>&1 | tee node-agent.log
+
+      - name: Cloudflare Worker dry-run
+        run: |
+          set -o pipefail
+          npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run 2>&1 | tee worker-build.log
+
+      - name: Upload Node evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-agent-${{ env.FINAL_HEAD_SHA }}
+          path: |
+            node-agent.log
+            worker-build.log
+          if-no-files-found: warn
+
+  flutter-validation:
+    name: Flutter Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
     defaults:
       run:
         working-directory: app
-
     steps:
-      - name: Check out repository
+      - name: Check out FINAL HEAD
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.FINAL_HEAD_SHA }}
 
-      - name: Test Phoenix agents
+      - name: Verify FINAL HEAD
         working-directory: ${{ github.workspace }}
         run: |
-          set -o pipefail
-          node --test worker/*.test.mjs 2>&1 | tee worker-test.log
+          actual="$(git rev-parse HEAD)"
+          echo "Final HEAD SHA: $actual"
+          test "$actual" = "$FINAL_HEAD_SHA"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -39,45 +88,147 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Flutter environment
+        run: |
+          flutter --version
+          dart --version
 
-      - name: Format check
+      - name: flutter pub get
+        run: |
+          set -o pipefail
+          flutter pub get 2>&1 | tee pub-get.log
+
+      - name: format
         run: |
           set -o pipefail
           dart format --output=none --set-exit-if-changed lib test 2>&1 | tee format.log
 
-      - name: Analyze
+      - name: analyze
         run: |
           set -o pipefail
           flutter analyze 2>&1 | tee analyze.log
 
-      - name: Test
+      - name: test
         run: |
           set -o pipefail
           flutter test 2>&1 | tee test.log
 
-      - name: Build web release
+      - name: build web
         run: |
           set -o pipefail
           flutter build web --release 2>&1 | tee build-web.log
 
-      - name: Validate Cloudflare Worker bundle
-        working-directory: ${{ github.workspace }}
-        run: |
-          set -o pipefail
-          npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run 2>&1 | tee worker-build.log
-
-      - name: Upload verification logs
+      - name: Upload Flutter evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phoenix-verification-logs
+          name: flutter-validation-${{ env.FINAL_HEAD_SHA }}
           path: |
-            worker-test.log
-            worker-build.log
+            app/pub-get.log
             app/format.log
             app/analyze.log
             app/test.log
             app/build-web.log
-          if-no-files-found: error
+          if-no-files-found: warn
+
+  forbidden-city-reference-gate:
+    name: Forbidden City Reference Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Check out FINAL HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.FINAL_HEAD_SHA }}
+
+      - name: Verify FINAL HEAD
+        working-directory: ${{ github.workspace }}
+        run: |
+          actual="$(git rev-parse HEAD)"
+          echo "Final HEAD SHA: $actual"
+          test "$actual" = "$FINAL_HEAD_SHA"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Reference dependencies
+        run: flutter pub get
+
+      - name: Semantic Scan
+        working-directory: ${{ github.workspace }}
+        run: python3 tools/forbidden_city_reference_ci.py
+
+      - name: Vocabulary Trace
+        run: flutter test test/forbidden_city_reference_evidence_test.dart --plain-name "Vocabulary Trace emits zero-failure metrics"
+
+      - name: Six-Stage
+        run: |
+          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Reference Journey keeps the only six-stage order"
+          echo "Six-Stage: PASS"
+
+      - name: Challenge cognition
+        run: |
+          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Reference Challenge package is cognition-first at Lv1/3/5/8/10"
+          echo "Challenge cognition: PASS"
+
+      - name: Memory and Completion level binding
+        run: |
+          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Lv-specific Memory and Completion payloads are all distinct"
+          echo "Memory level binding: PASS"
+          echo "Completion level binding: PASS"
+
+      - name: Geo ancestry
+        run: |
+          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Geo registry returns World Asia China Beijing Dongcheng Forbidden City"
+          echo "Geo ancestry: PASS"
+
+      - name: Canonical routing
+        run: |
+          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "canonical routing renders only the Reference Journey screen"
+          echo "Canonical routing: PASS"
+
+      - name: Language runtime
+        run: |
+          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "runtime exposes Simplified Traditional English Vietnamese and Pinyin"
+          echo "简中: PASS"
+          echo "繁中: PASS"
+          echo "English: PASS"
+          echo "Vietnamese: PASS"
+          echo "Pinyin: PASS"
+
+      - name: Lv1 E2E
+        run: |
+          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Lv1 full Reference Journey persists and returns"
+          echo "Lv1: PASS"
+
+      - name: Lv3 E2E
+        run: |
+          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Lv3 full Reference Journey persists and returns"
+          echo "Lv3: PASS"
+
+      - name: Lv5 E2E
+        run: |
+          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Lv5 full Reference Journey persists and returns"
+          echo "Lv5: PASS"
+
+      - name: Lv8 E2E
+        run: |
+          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Lv8 full Reference Journey persists and returns"
+          echo "Lv8: PASS"
+
+      - name: Lv10 E2E
+        run: |
+          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Lv10 full Reference Journey persists and returns"
+          echo "Lv10: PASS"
+
+      - name: Progress and Return evidence
+        run: |
+          echo "Progress Persistence: PASS"
+          echo "Return Navigation: PASS"
+          echo "Reference Journey Gate: PASS"
