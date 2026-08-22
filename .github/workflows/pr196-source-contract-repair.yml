@@ -79,24 +79,15 @@ jobs:
               "const forbiddenCity = read('app/lib/data/forbidden_city_journey_runtime_base.dart');",
               count=1,
           )
-
-          workflow = Path('.github/workflows/flutter-ci.yml')
-          text = workflow.read_text()
-          diagnostic = '''      - name: Diagnose semantic duplicate detector blocker\n        run: |\n          set -euo pipefail\n          target="agents/semantic-duplicate-detector.test.js"\n          echo "SEMANTIC_TEST_BLOB=$(git rev-parse HEAD:$target)"\n          nl -ba "$target" | sed -n '130,215p'\n\n'''
-          if text.count(diagnostic) != 1:
-              raise SystemExit('Final Validation diagnostic block not found exactly once')
-          workflow.write_text(text.replace(diagnostic, ''))
-
-          Path('.github/workflows/pr196-source-contract-repair.yml').unlink()
           PY
 
-      - name: Commit repair and remove this workflow
+      - name: Commit worker source-contract repair
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add worker
           git diff --cached --check
-          git commit -m "ci: align source contracts with split runtimes"
+          git commit -m "test: align source contracts with split runtimes"
           git push origin HEAD:feature/forbidden-city-final-integration
