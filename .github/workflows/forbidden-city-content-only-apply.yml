@@ -34,6 +34,7 @@ jobs:
         run: |
           python3 tools/forbidden_city_content_only_patch.py
           python3 tools/forbidden_city_vocab_focus_patch.py
+          python3 tools/forbidden_city_discovery_focus_patch.py
 
       - name: Format only touched Dart files
         working-directory: app
