@@ -1,0 +1,49 @@
+name: Format Forbidden City Reference Convergence
+
+on:
+  push:
+    branches:
+      - feature/forbidden-city-final-integration
+
+permissions:
+  contents: write
+
+concurrency:
+  group: forbidden-city-reference-format
+  cancel-in-progress: true
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/forbidden-city-final-integration
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Format convergence files
+        working-directory: app
+        run: |
+          dart format \
+            lib/data/journey_narrative_dna_catalog.dart \
+            lib/data/journey_semantic_fingerprint_catalog.dart \
+            test/all_gold_challenge_runtime_snapshot_test.dart \
+            test/batch_one_final_preview_binding_test.dart \
+            test/forbidden_city_final_trace_test.dart \
+            test/journey_location_hierarchy_test.dart \
+            test/journey_semantic_anti_template_gate_test.dart \
+            test/phoenix_world_story_agent_test.dart
+      - name: Commit formatting
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/fc-reference-format.yml
+          git add -A
+          git diff --cached --check
+          git commit -m 'Format Forbidden City Reference convergence'
+          git push origin HEAD:feature/forbidden-city-final-integration
