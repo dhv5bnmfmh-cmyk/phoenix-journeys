@@ -143,8 +143,7 @@ void main() {
     expect(validateForbiddenCityImportedWords(), isEmpty);
 
     for (final record in forbiddenCityWordRecords) {
-      final earliest =
-          forbiddenCityLockedStories.indexWhere(
+      final earliest = forbiddenCityLockedStories.indexWhere(
             (story) => story.contains(record.entry.word),
           ) +
           1;

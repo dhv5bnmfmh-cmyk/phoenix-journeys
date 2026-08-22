@@ -31,8 +31,7 @@ void main() {
       }
 
       final declaredIndex = record.firstAppearsAt - 1;
-      final declaredLevelValid =
-          declaredIndex >= 0 &&
+      final declaredLevelValid = declaredIndex >= 0 &&
           declaredIndex < forbiddenCityLockedStories.length;
       if (!declaredLevelValid ||
           source.isEmpty ||

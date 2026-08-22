@@ -77,8 +77,7 @@ void main() {
         isNotEmpty,
         reason: record.entry.word,
       );
-      final earliest =
-          forbiddenCityLockedStories.indexWhere(
+      final earliest = forbiddenCityLockedStories.indexWhere(
             (story) => story.contains(record.entry.word),
           ) +
           1;
@@ -146,7 +145,9 @@ void main() {
     },
   );
 
-  test('Discovery stays grounded in Forbidden City architecture and route reasoning', () {
+  test(
+      'Discovery stays grounded in Forbidden City architecture and route reasoning',
+      () {
     final corpus = forbiddenCityDiscoveries.map((item) => item.text).join('\n');
     expect(corpus, contains('午门是紫禁城的正门'));
     expect(corpus, contains('南北轴线'));
@@ -160,7 +161,8 @@ void main() {
     }
   });
 
-  test('Memory and Completion are level-bound and share the same Journey core', () {
+  test('Memory and Completion are level-bound and share the same Journey core',
+      () {
     final memoryPayloads = <String>{};
     final completionPayloads = <String>{};
     for (var level = 1; level <= 10; level++) {

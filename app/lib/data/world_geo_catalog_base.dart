@@ -234,7 +234,6 @@ const worldGeoCatalog = <GeoNode>[
     longitude: 113.2420,
     aliases: ['陈氏书院', 'Chen Clan Ancestral Hall', 'Chen Clan Academy'],
   ),
-
   GeoNode(
     id: 'cn-jiangsu-suzhou',
     name: '苏州市',
@@ -340,7 +339,6 @@ const worldGeoCatalog = <GeoNode>[
     longitude: 118.5853,
     aliases: ['Kaiyuan Temple', '泉州开元寺', '东西塔'],
   ),
-
   GeoNode(
     id: 'phoenix-realms',
     name: '万象异境',
