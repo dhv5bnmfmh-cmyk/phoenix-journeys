@@ -1,22 +1,24 @@
 name: PR196 Source Contract Repair
-# Second push intentionally triggers this already-present self-removing repair workflow.
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/forbidden-city-final-integration
+      - main
+    types:
+      - synchronize
 
 permissions:
   contents: write
 
 jobs:
   repair:
+    if: github.event.pull_request.number == 196
     runs-on: ubuntu-latest
     steps:
-      - name: Check out exact branch head
+      - name: Check out exact PR head
         uses: actions/checkout@v4
         with:
-          ref: feature/forbidden-city-final-integration
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Align source-contract tests with split runtimes
@@ -36,9 +38,6 @@ jobs:
                   raise SystemExit(f'{path}: missing expected source contract {old!r}')
               p.write_text(text.replace(old, new))
 
-          # Generic Challenge source-contract tests now inspect the legacy generic
-          # implementation. Forbidden City is certified separately by its dedicated
-          # Reference Gate and cognition-first panel.
           for path in [
               'worker/adaptive_challenge_pedagogy_rule.test.mjs',
               'worker/four_option_challenge_rule.test.mjs',
@@ -53,17 +52,12 @@ jobs:
                   count=1,
               )
 
-          # Do not make the dedicated Forbidden City Reference Challenge depend on
-          # the generic distractor/grammar snapshot.
           p = Path('worker/four_option_challenge_rule.test.mjs')
           text = p.read_text()
           text = text.replace("    'beijing-forbidden-city',\n", '')
           text = text.replace("    '午门和中轴线',\n", '')
           p.write_text(text)
 
-          # Geo registry is now a continent-aware facade over the stable base
-          # catalog. Historical destination source-contract tests inspect the base
-          # where those nodes are defined; the Reference Gate verifies Asia ancestry.
           for path in [
               'worker/journey_expansion_batch_five_rule.test.mjs',
               'worker/journey_expansion_batch_four_rule.test.mjs',
@@ -79,9 +73,6 @@ jobs:
                   count=1,
               )
 
-          # Forbidden City runtime is likewise a facade over the locked Story base.
-          # Identity assertions should inspect the source that owns the Story and
-          # Memory constants instead of assuming every symbol is textually in the facade.
           replace(
               'worker/story_culture_level_standard.test.mjs',
               "const forbiddenCity = read('app/lib/data/forbidden_city_journey_runtime.dart');",
@@ -89,8 +80,6 @@ jobs:
               count=1,
           )
 
-          # Remove the temporary detector diagnostic. The referenced agents file is
-          # absent from the exact PR HEAD and is not part of the active worker suite.
           workflow = Path('.github/workflows/flutter-ci.yml')
           text = workflow.read_text()
           diagnostic = '''      - name: Diagnose semantic duplicate detector blocker\n        run: |\n          set -euo pipefail\n          target="agents/semantic-duplicate-detector.test.js"\n          echo "SEMANTIC_TEST_BLOB=$(git rev-parse HEAD:$target)"\n          nl -ba "$target" | sed -n '130,215p'\n\n'''
@@ -98,7 +87,6 @@ jobs:
               raise SystemExit('Final Validation diagnostic block not found exactly once')
           workflow.write_text(text.replace(diagnostic, ''))
 
-          # This repair workflow must not survive the repair commit.
           Path('.github/workflows/pr196-source-contract-repair.yml').unlink()
           PY
 
