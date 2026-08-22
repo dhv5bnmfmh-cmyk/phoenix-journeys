@@ -37,13 +37,6 @@ jobs:
           echo "Final HEAD SHA: $actual"
           test "$actual" = "$FINAL_HEAD_SHA"
 
-      - name: Diagnose semantic duplicate detector blocker
-        run: |
-          set -euo pipefail
-          target="agents/semantic-duplicate-detector.test.js"
-          echo "SEMANTIC_TEST_BLOB=$(git rev-parse HEAD:$target)"
-          nl -ba "$target" | sed -n '130,215p'
-
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
