@@ -37,9 +37,8 @@ class _RouteHarness extends StatelessWidget {
           key: const ValueKey('launch-forbidden-city'),
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (_) => const JourneyScreen(
-                journeyId: forbiddenCityJourneyId,
-              ),
+              builder: (_) =>
+                  const JourneyScreen(journeyId: forbiddenCityJourneyId),
             ),
           ),
           child: const Text('Launch Forbidden City'),
@@ -79,10 +78,7 @@ Future<void> _tapExactText(WidgetTester tester, String text) async {
   await tester.pumpAndSettle();
 }
 
-Future<void> _finishReferenceChallenge(
-  WidgetTester tester,
-  int level,
-) async {
+Future<void> _finishReferenceChallenge(WidgetTester tester, int level) async {
   final story = forbiddenCityParagraphRebuild.singleWhere(
     (item) => item.level == level,
   );
@@ -98,20 +94,26 @@ Future<void> _finishReferenceChallenge(
     await _tapKey(tester, 'forbidden-city-story-option-$index');
   }
   await _tapKey(tester, 'forbidden-city-challenge-submit');
-  expect(find.byKey(const ValueKey('forbidden-city-challenge-resolution')),
-      findsOneWidget);
+  expect(
+    find.byKey(const ValueKey('forbidden-city-challenge-resolution')),
+    findsOneWidget,
+  );
   await _tapKey(tester, 'forbidden-city-challenge-continue');
 
   expect(find.text('证据推理'), findsOneWidget);
-  expect(find.byKey(const ValueKey('forbidden-city-evidence-context')),
-      findsOneWidget);
+  expect(
+    find.byKey(const ValueKey('forbidden-city-evidence-context')),
+    findsOneWidget,
+  );
   await _tapExactText(tester, evidence.evidenceAnswer);
   await _tapKey(tester, 'forbidden-city-challenge-submit');
   await _tapKey(tester, 'forbidden-city-challenge-continue');
 
   expect(find.text('迁移决策'), findsOneWidget);
-  expect(find.byKey(const ValueKey('forbidden-city-transfer-context')),
-      findsOneWidget);
+  expect(
+    find.byKey(const ValueKey('forbidden-city-transfer-context')),
+    findsOneWidget,
+  );
   await _tapExactText(tester, transfer.transferAnswer);
   await _tapKey(tester, 'forbidden-city-challenge-submit');
   await _tapKey(tester, 'forbidden-city-challenge-continue');
@@ -125,10 +127,14 @@ void main() {
   });
 
   test('Reference Journey keeps the only six-stage order', () {
-    expect(
-      AppState.journeyStepLabels,
-      const <String>['故事', '单词', '发现', '挑战', '回忆', '完成'],
-    );
+    expect(AppState.journeyStepLabels, const <String>[
+      '故事',
+      '单词',
+      '发现',
+      '挑战',
+      '回忆',
+      '完成',
+    ]);
     expect(AppState.journeyLastStep, 5);
   });
 
@@ -137,7 +143,8 @@ void main() {
     expect(validateForbiddenCityImportedWords(), isEmpty);
 
     for (final record in forbiddenCityWordRecords) {
-      final earliest = forbiddenCityLockedStories.indexWhere(
+      final earliest =
+          forbiddenCityLockedStories.indexWhere(
             (story) => story.contains(record.entry.word),
           ) +
           1;
@@ -171,8 +178,11 @@ void main() {
           (record) => record.entry.word == word.word,
         );
         expect(story, contains(word.word), reason: 'Lv$level ${word.word}');
-        expect(story, contains(trace.storySource),
-            reason: 'Lv$level ${word.word} storySource');
+        expect(
+          story,
+          contains(trace.storySource),
+          reason: 'Lv$level ${word.word} storySource',
+        );
       }
     }
   });
@@ -224,52 +234,59 @@ void main() {
     expect(completions, hasLength(_referenceLevels.length));
   });
 
-  test('Geo registry returns World Asia China Beijing Dongcheng Forbidden City', () {
-    final binding = requireJourneyLocation(forbiddenCityJourneyId);
-    expect(binding.geoNodeId, 'cn-beijing-dongcheng-forbidden-city');
-    expect(
-      binding.geoPath.map((node) => node.id).toList(growable: false),
-      const <String>[
-        'world',
-        'asia',
-        'cn',
-        'cn-beijing',
-        'cn-beijing-dongcheng',
-        'cn-beijing-dongcheng-forbidden-city',
-      ],
-    );
-    expect(binding.countryNode?.id, 'cn');
-    expect(binding.districtNode?.id, 'cn-beijing-dongcheng');
-  });
+  test(
+    'Geo registry returns World Asia China Beijing Dongcheng Forbidden City',
+    () {
+      final binding = requireJourneyLocation(forbiddenCityJourneyId);
+      expect(binding.geoNodeId, 'cn-beijing-dongcheng-forbidden-city');
+      expect(
+        binding.geoPath.map((node) => node.id).toList(growable: false),
+        const <String>[
+          'world',
+          'asia',
+          'cn',
+          'cn-beijing',
+          'cn-beijing-dongcheng',
+          'cn-beijing-dongcheng-forbidden-city',
+        ],
+      );
+      expect(binding.countryNode?.id, 'cn');
+      expect(binding.districtNode?.id, 'cn-beijing-dongcheng');
+    },
+  );
 
-  test('active Reference payloads contain zero legacy Forbidden City semantics', () {
-    final active = StringBuffer()
-      ..writeln(forbiddenCityLockedStories.join('\n'))
-      ..writeln(forbiddenCityDiscoveries.map((item) => item.text).join('\n'));
-    for (var level = 1; level <= 10; level++) {
-      final memory = forbiddenCityMemoryForLevel(level);
-      final completion = forbiddenCityCompletionForLevel(level);
-      active
-        ..writeln(memory.recall)
-        ..writeln(memory.characterShift)
-        ..writeln(memory.anchor)
-        ..writeln(memory.takeaway)
-        ..writeln(completion.storyClosure)
-        ..writeln(completion.discovery)
-        ..writeln(completion.learning)
-        ..writeln(completion.memory)
-        ..writeln(completion.relationship)
-        ..writeln(completion.emotionalClosure)
-        ..writeln(completion.unlockResult);
-    }
-    final corpus = active.toString().toLowerCase();
-    for (final legacy in _legacyStoryTokens) {
-      expect(corpus, isNot(contains(legacy.toLowerCase())), reason: legacy);
-    }
-  });
+  test(
+    'active Reference payloads contain zero legacy Forbidden City semantics',
+    () {
+      final active = StringBuffer()
+        ..writeln(forbiddenCityLockedStories.join('\n'))
+        ..writeln(forbiddenCityDiscoveries.map((item) => item.text).join('\n'));
+      for (var level = 1; level <= 10; level++) {
+        final memory = forbiddenCityMemoryForLevel(level);
+        final completion = forbiddenCityCompletionForLevel(level);
+        active
+          ..writeln(memory.recall)
+          ..writeln(memory.characterShift)
+          ..writeln(memory.anchor)
+          ..writeln(memory.takeaway)
+          ..writeln(completion.storyClosure)
+          ..writeln(completion.discovery)
+          ..writeln(completion.learning)
+          ..writeln(completion.memory)
+          ..writeln(completion.relationship)
+          ..writeln(completion.emotionalClosure)
+          ..writeln(completion.unlockResult);
+      }
+      final corpus = active.toString().toLowerCase();
+      for (final legacy in _legacyStoryTokens) {
+        expect(corpus, isNot(contains(legacy.toLowerCase())), reason: legacy);
+      }
+    },
+  );
 
-  testWidgets('canonical routing renders only the Reference Journey screen',
-      (tester) async {
+  testWidgets('canonical routing renders only the Reference Journey screen', (
+    tester,
+  ) async {
     await _pumpHarness(tester);
     expect(find.byType(ForbiddenCityReferenceJourneyScreen), findsOneWidget);
     expect(
@@ -279,8 +296,9 @@ void main() {
   });
 
   for (final level in _referenceLevels) {
-    testWidgets('Lv$level full Reference Journey persists and returns',
-        (tester) async {
+    testWidgets('Lv$level full Reference Journey persists and returns', (
+      tester,
+    ) async {
       final state = await _pumpHarness(tester);
       await _tapKey(tester, 'forbidden-city-level-$level');
 
@@ -292,8 +310,10 @@ void main() {
         find.byKey(const ValueKey('forbidden-city-six-stage-header')),
         findsOneWidget,
       );
-      expect(find.byKey(const ValueKey('forbidden-city-pinyin-0')),
-          findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('forbidden-city-pinyin-0')),
+        findsOneWidget,
+      );
       final speak = tester.widget<IconButton>(
         find.byKey(const ValueKey('forbidden-city-story-speak-0')),
       );
@@ -356,24 +376,32 @@ void main() {
     });
   }
 
-  testWidgets('runtime exposes Simplified Traditional English Vietnamese and Pinyin',
-      (tester) async {
-    final state = await _pumpHarness(tester);
-    await _tapKey(tester, 'forbidden-city-level-10');
-    final content = forbiddenCityLevelContent(10);
-    final annotation = content.storyAnnotations.first;
+  testWidgets(
+    'runtime exposes Simplified Traditional English Vietnamese and Pinyin',
+    (tester) async {
+      final state = await _pumpHarness(tester);
+      await _tapKey(tester, 'forbidden-city-level-10');
+      final content = forbiddenCityLevelContent(10);
+      final annotation = content.storyAnnotations.first;
 
-    expect(find.text(content.storyParagraphs.first), findsOneWidget);
-    expect(find.text(annotation.vietnamese), findsOneWidget);
-    expect(find.text(annotation.pinyin), findsOneWidget);
+      expect(find.text(content.storyParagraphs.first), findsOneWidget);
+      expect(find.text(annotation.vietnamese), findsOneWidget);
+      expect(find.text(annotation.pinyin), findsOneWidget);
 
-    await state.setTranslationLanguage('英语');
-    await tester.pumpAndSettle();
-    expect(find.text(annotation.english), findsOneWidget);
+      await state.setTranslationLanguage('英语');
+      await tester.pumpAndSettle();
+      expect(find.text(annotation.english), findsOneWidget);
 
-    await state.toggleScript();
-    await tester.pumpAndSettle();
-    expect(find.text(state.displayText(content.storyParagraphs.first)), findsOneWidget);
-    expect(find.byKey(const ValueKey('forbidden-city-pinyin-0')), findsOneWidget);
-  });
+      await state.toggleScript();
+      await tester.pumpAndSettle();
+      expect(
+        find.text(state.displayText(content.storyParagraphs.first)),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('forbidden-city-pinyin-0')),
+        findsOneWidget,
+      );
+    },
+  );
 }

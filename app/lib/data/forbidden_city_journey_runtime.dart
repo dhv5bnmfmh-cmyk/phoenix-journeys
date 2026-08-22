@@ -22,26 +22,32 @@ int _earliestStoryLevel(String word) {
 /// This prevents hand-authored earliest-level drift.
 final List<base.ForbiddenCityWordRecord> forbiddenCityWordRecords =
     List<base.ForbiddenCityWordRecord>.unmodifiable([
-  for (final record in base.forbiddenCityWordRecords)
-    base.ForbiddenCityWordRecord(
-      entry: record.entry,
-      usageNote: record.usageNote,
-      storySource: record.storySource,
-      firstAppearsAt: _earliestStoryLevel(record.entry.word),
-      contrastNote: record.contrastNote,
-      narrativeNote: record.narrativeNote,
-    ),
-]);
+      for (final record in base.forbiddenCityWordRecords)
+        base.ForbiddenCityWordRecord(
+          entry: record.entry,
+          usageNote: record.usageNote,
+          storySource: record.storySource,
+          firstAppearsAt: _earliestStoryLevel(record.entry.word),
+          contrastNote: record.contrastNote,
+          narrativeNote: record.narrativeNote,
+        ),
+    ]);
 
 String _pinyin(String text) => PinyinHelper.getPinyinE(
-      text,
-      separator: ' ',
-      format: PinyinFormat.WITH_TONE_MARK,
-    );
+  text,
+  separator: ' ',
+  format: PinyinFormat.WITH_TONE_MARK,
+);
 
 WordEntry _wordEntryForLevel(base.ForbiddenCityWordRecord record, int level) {
   final source = record.entry;
-  final band = level <= 3 ? 1 : level <= 6 ? 2 : level <= 8 ? 3 : 4;
+  final band = level <= 3
+      ? 1
+      : level <= 6
+      ? 2
+      : level <= 8
+      ? 3
+      : 4;
   final notes = <WordExample>[
     WordExample(
       chinese: 'Story 原句：${record.storySource}',
@@ -54,9 +60,7 @@ WordEntry _wordEntryForLevel(base.ForbiddenCityWordRecord record, int level) {
           ? '意思：${source.simpleChinese}'
           : '搭配与语境：${record.usageNote}',
       pinyin: _pinyin(
-        band == 1
-            ? '意思：${source.simpleChinese}'
-            : '搭配与语境：${record.usageNote}',
+        band == 1 ? '意思：${source.simpleChinese}' : '搭配与语境：${record.usageNote}',
       ),
       vietnamese: band == 1
           ? 'Nghĩa: ${source.translation}'
@@ -70,9 +74,7 @@ WordEntry _wordEntryForLevel(base.ForbiddenCityWordRecord record, int level) {
           ? '在这段 Story 里：${record.usageNote}'
           : '对比：${record.contrastNote}',
       pinyin: _pinyin(
-        band <= 2
-            ? '在这段故事里：${record.usageNote}'
-            : '对比：${record.contrastNote}',
+        band <= 2 ? '在这段故事里：${record.usageNote}' : '对比：${record.contrastNote}',
       ),
       vietnamese: band <= 2
           ? 'Trong Story: ${record.usageNote}'

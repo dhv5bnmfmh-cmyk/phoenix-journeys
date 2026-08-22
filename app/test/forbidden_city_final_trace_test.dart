@@ -21,22 +21,11 @@ const _legacyStoryTokens = <String>[
   '不该跨',
 ];
 
-bool _enactsRouteSynthesis(String story) => <String>[
-      '同一张',
-      '叠',
-      '保留',
-      '同时进入一张图',
-      '复合表示',
-      '同处一页',
-    ].any(story.contains);
+bool _enactsRouteSynthesis(String story) =>
+    <String>['同一张', '叠', '保留', '同时进入一张图', '复合表示', '同处一页'].any(story.contains);
 
-bool _preservesPurposefulRouteDivergence(String story) => <String>[
-      '分开',
-      '分向',
-      '分岔',
-      '转向别处',
-      '转向各自的方向',
-    ].any(story.contains);
+bool _preservesPurposefulRouteDivergence(String story) =>
+    <String>['分开', '分向', '分岔', '转向别处', '转向各自的方向'].any(story.contains);
 
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
@@ -58,7 +47,11 @@ void main() {
         reason: 'Lv${index + 1}',
       );
       for (final obsolete in _legacyStoryTokens) {
-        expect(story, isNot(contains(obsolete)), reason: 'Lv${index + 1}: $obsolete');
+        expect(
+          story,
+          isNot(contains(obsolete)),
+          reason: 'Lv${index + 1}: $obsolete',
+        );
       }
     }
   });
@@ -69,16 +62,33 @@ void main() {
     for (final record in forbiddenCityValidatedWordRecords) {
       expect(record.entry.word.trim(), isNotEmpty);
       expect(record.entry.pinyin.trim(), isNotEmpty, reason: record.entry.word);
-      expect(record.entry.partOfSpeech.trim(), isNotEmpty, reason: record.entry.word);
-      expect(record.entry.translation.trim(), isNotEmpty, reason: record.entry.word);
-      expect(record.entry.englishDefinition.trim(), isNotEmpty, reason: record.entry.word);
-      final earliest = forbiddenCityLockedStories.indexWhere(
+      expect(
+        record.entry.partOfSpeech.trim(),
+        isNotEmpty,
+        reason: record.entry.word,
+      );
+      expect(
+        record.entry.translation.trim(),
+        isNotEmpty,
+        reason: record.entry.word,
+      );
+      expect(
+        record.entry.englishDefinition.trim(),
+        isNotEmpty,
+        reason: record.entry.word,
+      );
+      final earliest =
+          forbiddenCityLockedStories.indexWhere(
             (story) => story.contains(record.entry.word),
           ) +
           1;
       expect(earliest, greaterThan(0), reason: record.entry.word);
       expect(record.firstAppearsAt, earliest, reason: record.entry.word);
-      expect(record.storySource, contains(record.entry.word), reason: record.entry.word);
+      expect(
+        record.storySource,
+        contains(record.entry.word),
+        reason: record.entry.word,
+      );
       expect(
         forbiddenCityLockedStories[earliest - 1],
         contains(record.storySource),
@@ -91,7 +101,11 @@ void main() {
     for (var level = 1; level <= 10; level++) {
       final words = forbiddenCityWordsForLevel(level);
       final story = forbiddenCityLockedStories[level - 1];
-      expect(words.length, lessThanOrEqualTo(ceilings[level - 1]), reason: 'Lv$level');
+      expect(
+        words.length,
+        lessThanOrEqualTo(ceilings[level - 1]),
+        reason: 'Lv$level',
+      );
       expect(
         words.every((entry) => story.contains(entry.word)),
         isTrue,
@@ -100,31 +114,37 @@ void main() {
     }
   });
 
-  test('Challenge package expresses comprehension evidence and transfer cognition', () {
-    for (var level = 1; level <= 10; level++) {
-      final story = forbiddenCityLockedStories[level - 1];
-      final comprehension = forbiddenCityParagraphRebuild.singleWhere(
-        (item) => item.level == level,
-      );
-      final evidence = forbiddenCityGrammarRepair.singleWhere(
-        (item) => item.level == level,
-      );
-      final transfer = forbiddenCityMissingSentence.singleWhere(
-        (item) => item.level == level,
-      );
+  test(
+    'Challenge package expresses comprehension evidence and transfer cognition',
+    () {
+      for (var level = 1; level <= 10; level++) {
+        final story = forbiddenCityLockedStories[level - 1];
+        final comprehension = forbiddenCityParagraphRebuild.singleWhere(
+          (item) => item.level == level,
+        );
+        final evidence = forbiddenCityGrammarRepair.singleWhere(
+          (item) => item.level == level,
+        );
+        final transfer = forbiddenCityMissingSentence.singleWhere(
+          (item) => item.level == level,
+        );
 
-      expect(comprehension.cognitiveTarget, startsWith('Story comprehension'));
-      expect(comprehension.segments.every(story.contains), isTrue);
-      expect(evidence.evidenceQuestion.trim(), isNotEmpty);
-      expect(evidence.evidenceAnswer.trim(), isNotEmpty);
-      expect(evidence.evidenceAnswer, isNot(equals(evidence.broken)));
-      expect(transfer.transferOptions, hasLength(4));
-      expect(transfer.transferOptions, contains(transfer.transferAnswer));
-      expect(story, isNot(contains(transfer.transferQuestion)));
-      expect(story, isNot(contains(transfer.transferAnswer)));
-      expect(transfer.transferQuestion, isNot(equals(transfer.answer)));
-    }
-  });
+        expect(
+          comprehension.cognitiveTarget,
+          startsWith('Story comprehension'),
+        );
+        expect(comprehension.segments.every(story.contains), isTrue);
+        expect(evidence.evidenceQuestion.trim(), isNotEmpty);
+        expect(evidence.evidenceAnswer.trim(), isNotEmpty);
+        expect(evidence.evidenceAnswer, isNot(equals(evidence.broken)));
+        expect(transfer.transferOptions, hasLength(4));
+        expect(transfer.transferOptions, contains(transfer.transferAnswer));
+        expect(story, isNot(contains(transfer.transferQuestion)));
+        expect(story, isNot(contains(transfer.transferAnswer)));
+        expect(transfer.transferQuestion, isNot(equals(transfer.answer)));
+      }
+    },
+  );
 
   test('Discovery stays grounded in Forbidden City architecture and route reasoning', () {
     final corpus = forbiddenCityDiscoveries.map((item) => item.text).join('\n');
@@ -159,28 +179,34 @@ void main() {
     }
     expect(memoryPayloads, hasLength(10));
     expect(completionPayloads, hasLength(10));
-    expect(forbiddenCityMemoryForLevel(1).anchor,
-        isNot(equals(forbiddenCityMemoryForLevel(10).anchor)));
+    expect(
+      forbiddenCityMemoryForLevel(1).anchor,
+      isNot(equals(forbiddenCityMemoryForLevel(10).anchor)),
+    );
     expect(
       forbiddenCityCompletionForLevel(1).storyClosure,
       isNot(equals(forbiddenCityCompletionForLevel(10).storyClosure)),
     );
   });
 
-  test('Narrative DNA and semantic fingerprint remain derived from active Story', () {
-    final dna = approvedNarrativeDnaCatalog.singleWhere(
-      (item) => item.journeyId == forbiddenCityJourneyId,
-    );
-    final fingerprint = approvedGoldSemanticFingerprints[forbiddenCityJourneyId]!;
-    expect(dna.narrativeIdentity, contains('dual-valid-route-overlay'));
-    expect(dna.memoryAnchorType, contains('two-overlaid-routes'));
-    expect(
-      fingerprint.mechanism(NarrativeSemanticDimension.dramaticEngineFamily),
-      NarrativeMechanismFamily
-          .coexistingValidPerspectivesSynthesizeRelationalModel,
-    );
-    expect(semanticEvidenceContractErrors(fingerprint), isEmpty);
-  });
+  test(
+    'Narrative DNA and semantic fingerprint remain derived from active Story',
+    () {
+      final dna = approvedNarrativeDnaCatalog.singleWhere(
+        (item) => item.journeyId == forbiddenCityJourneyId,
+      );
+      final fingerprint =
+          approvedGoldSemanticFingerprints[forbiddenCityJourneyId]!;
+      expect(dna.narrativeIdentity, contains('dual-valid-route-overlay'));
+      expect(dna.memoryAnchorType, contains('two-overlaid-routes'));
+      expect(
+        fingerprint.mechanism(NarrativeSemanticDimension.dramaticEngineFamily),
+        NarrativeMechanismFamily
+            .coexistingValidPerspectivesSynthesizeRelationalModel,
+      );
+      expect(semanticEvidenceContractErrors(fingerprint), isEmpty);
+    },
+  );
 
   test('Forbidden City uses the unified quality agent at every level', () {
     final journey = requireDailyJourneyExperience(forbiddenCityJourneyId);

@@ -178,9 +178,7 @@ class _ForbiddenCityReferenceJourneyScreenState
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (!_levelChosen && !app.journeyCompleted) return _levelSelection();
 
@@ -223,8 +221,9 @@ class _ForbiddenCityReferenceJourneyScreenState
                     Expanded(
                       child: FilledButton.icon(
                         key: const ValueKey('forbidden-city-next'),
-                        onPressed:
-                            _step == 3 && !_challengeCompleted ? null : _advance,
+                        onPressed: _step == 3 && !_challengeCompleted
+                            ? null
+                            : _advance,
                         style: FilledButton.styleFrom(
                           backgroundColor: PhoenixTheme.red,
                           foregroundColor: Colors.white,
@@ -235,9 +234,7 @@ class _ForbiddenCityReferenceJourneyScreenState
                               : Icons.arrow_forward_rounded,
                         ),
                         label: Text(
-                          app.displayText(
-                            _step == 4 ? '完成旅程' : '进入下一阶段',
-                          ),
+                          app.displayText(_step == 4 ? '完成旅程' : '进入下一阶段'),
                           style: const TextStyle(fontWeight: FontWeight.w900),
                         ),
                       ),
@@ -278,7 +275,10 @@ class _ForbiddenCityReferenceJourneyScreenState
               const SizedBox(height: 12),
               Text(
                 app.displayText('选择 Story Journey 等级'),
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(height: 8),
               Expanded(
@@ -336,8 +336,8 @@ class _ForbiddenCityReferenceJourneyScreenState
                 color: index == _step
                     ? PhoenixTheme.red
                     : index < _step
-                        ? const Color(0xFF315B32)
-                        : Colors.black.withValues(alpha: .1),
+                    ? const Color(0xFF315B32)
+                    : Colors.black.withValues(alpha: .1),
                 borderRadius: BorderRadius.circular(8),
               ),
               alignment: Alignment.center,
@@ -526,15 +526,14 @@ class _ForbiddenCityReferenceJourneyScreenState
       child: JourneyChallengePanel(
         journeyId: forbiddenCityJourneyId,
         storyParagraphs: content.storyParagraphs,
-        discoveryTexts:
-            content.discoveries.map((item) => item.text).toList(growable: false),
+        discoveryTexts: content.discoveries
+            .map((item) => item.text)
+            .toList(growable: false),
         profile: null,
         seed: _challengeSeed,
         displayText: app.displayText,
-        onResolved: (reward, awardId) => app.awardChallengeRewardOnce(
-          reward: reward,
-          awardId: awardId,
-        ),
+        onResolved: (reward, awardId) =>
+            app.awardChallengeRewardOnce(reward: reward, awardId: awardId),
         onAllCompleted: () async {
           await app.saveJourneyProgress(
             step: 4,
@@ -556,7 +555,10 @@ class _ForbiddenCityReferenceJourneyScreenState
     return ListView(
       key: ValueKey('forbidden-city-stage-memory-lv-$_level'),
       children: [
-        _referenceCard(title: '回想 Story', child: Text(app.displayText(memory.recall))),
+        _referenceCard(
+          title: '回想 Story',
+          child: Text(app.displayText(memory.recall)),
+        ),
         const SizedBox(height: 7),
         _referenceCard(
           title: '人物关系变化',
