@@ -18,17 +18,35 @@ int _earliestStoryLevel(String word) {
   throw StateError('Forbidden City vocabulary is orphaned from Story: $word');
 }
 
-String _earliestStorySource(String word) {
-  final story = base.forbiddenCityLockedStories[_earliestStoryLevel(word) - 1];
+String _storySource(String word, String story, {required String context}) {
   for (final segment in story.split(RegExp(r'[。！？!?；;\n]'))) {
     final source = segment.trim();
     if (source.contains(word)) return source;
   }
-  throw StateError('Forbidden City vocabulary has no Story source: $word');
+  throw StateError('Forbidden City vocabulary has no $context Story source: $word');
 }
 
-/// Canonical vocabulary metadata is derived from the locked Lv1-Lv10 Story.
-/// This prevents hand-authored earliest-level and Story-source drift.
+String _earliestStorySource(String word) {
+  final level = _earliestStoryLevel(word);
+  return _storySource(
+    word,
+    base.forbiddenCityLockedStories[level - 1],
+    context: 'earliest-level',
+  );
+}
+
+String _sameLevelStorySource(String word, int level) {
+  final safeLevel = level.clamp(1, 10).toInt();
+  return _storySource(
+    word,
+    base.forbiddenCityLockedStories[safeLevel - 1],
+    context: 'Lv$safeLevel',
+  );
+}
+
+/// Canonical first-appearance metadata is derived from the locked Lv1-Lv10
+/// Story. Teaching examples below derive their source again from the selected
+/// level so first-appearance provenance and same-level trace cannot drift.
 final List<base.ForbiddenCityWordRecord> forbiddenCityWordRecords =
     List<base.ForbiddenCityWordRecord>.unmodifiable([
   for (final record in base.forbiddenCityWordRecords)
@@ -50,6 +68,7 @@ String _pinyin(String text) => PinyinHelper.getPinyinE(
 
 WordEntry _wordEntryForLevel(base.ForbiddenCityWordRecord record, int level) {
   final source = record.entry;
+  final sameLevelStorySource = _sameLevelStorySource(source.word, level);
   final band = level <= 3
       ? 1
       : level <= 6
@@ -59,10 +78,10 @@ WordEntry _wordEntryForLevel(base.ForbiddenCityWordRecord record, int level) {
               : 4;
   final notes = <WordExample>[
     WordExample(
-      chinese: 'Story 原句：${record.storySource}',
-      pinyin: _pinyin(record.storySource),
-      vietnamese: 'Câu gốc trong Story: ${record.storySource}',
-      english: 'Story source: ${record.storySource}',
+      chinese: 'Story 原句：$sameLevelStorySource',
+      pinyin: _pinyin(sameLevelStorySource),
+      vietnamese: 'Câu gốc trong Story: $sameLevelStorySource',
+      english: 'Story source: $sameLevelStorySource',
     ),
     WordExample(
       chinese: band == 1
@@ -135,8 +154,7 @@ List<WordEntry> forbiddenCityWordsForLevel(int level) {
       .where(
         (record) =>
             record.firstAppearsAt <= safeLevel &&
-            story.contains(record.entry.word) &&
-            story.contains(record.storySource),
+            story.contains(record.entry.word),
       )
       .take(maximum)
       .map((record) => _wordEntryForLevel(record, safeLevel))
