@@ -18,15 +18,24 @@ int _earliestStoryLevel(String word) {
   throw StateError('Forbidden City vocabulary is orphaned from Story: $word');
 }
 
+String _earliestStorySource(String word) {
+  final story = base.forbiddenCityLockedStories[_earliestStoryLevel(word) - 1];
+  for (final segment in story.split(RegExp(r'[。！？!?；;\n]'))) {
+    final source = segment.trim();
+    if (source.contains(word)) return source;
+  }
+  throw StateError('Forbidden City vocabulary has no Story source: $word');
+}
+
 /// Canonical vocabulary metadata is derived from the locked Lv1-Lv10 Story.
-/// This prevents hand-authored earliest-level drift.
+/// This prevents hand-authored earliest-level and Story-source drift.
 final List<base.ForbiddenCityWordRecord> forbiddenCityWordRecords =
     List<base.ForbiddenCityWordRecord>.unmodifiable([
       for (final record in base.forbiddenCityWordRecords)
         base.ForbiddenCityWordRecord(
           entry: record.entry,
           usageNote: record.usageNote,
-          storySource: record.storySource,
+          storySource: _earliestStorySource(record.entry.word),
           firstAppearsAt: _earliestStoryLevel(record.entry.word),
           contrastNote: record.contrastNote,
           narrativeNote: record.narrativeNote,
