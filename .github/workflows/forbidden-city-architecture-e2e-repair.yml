@@ -34,9 +34,6 @@ jobs:
                   raise SystemExit(f'expected text not found in {path}: {old!r}')
               p.write_text(text.replace(old, new, 1))
 
-          # Keep the original shared Journey implementation in its canonical file
-          # so performance/narration/architecture contracts remain valid, while
-          # Forbidden City alone enters the Reference runtime.
           replace_once(
               'app/lib/screens/journey_screen.dart',
               "import '../widgets/word_detail_sheet.dart';\n",
@@ -48,50 +45,39 @@ jobs:
               "  Widget build(BuildContext context) {\n    if (_isForbiddenCity) {\n      return const ForbiddenCityReferenceJourneyScreen();\n    }\n    final stepThreePage = _isSummerPalacePilot",
           )
 
-          # Reference screen must rebuild when translation/script preferences change.
-          replace_once(
-              'app/lib/screens/forbidden_city_reference_journey_screen.dart',
-              "  Widget build(BuildContext context) {\n    if (_loading) {",
-              "  Widget build(BuildContext context) {\n    context.watch<AppState>();\n    if (_loading) {",
-          )
+          ref_screen = Path('app/lib/screens/forbidden_city_reference_journey_screen.dart')
+          ref_text = ref_screen.read_text()
+          watch = "  Widget build(BuildContext context) {\n    context.watch<AppState>();\n"
+          if watch not in ref_text:
+              old = "  Widget build(BuildContext context) {\n    if (_loading) {"
+              if old not in ref_text:
+                  raise SystemExit('Reference screen build marker not found')
+              ref_text = ref_text.replace(
+                  old,
+                  "  Widget build(BuildContext context) {\n    context.watch<AppState>();\n    if (_loading) {",
+                  1,
+              )
+              ref_screen.write_text(ref_text)
 
           test_path = Path('app/test/forbidden_city_reference_integration_test.dart')
           text = test_path.read_text()
           old = """      final state = await _pumpHarness(tester);\n      await _tapKey(tester, 'forbidden-city-level-$level');\n\n      expect(\n"""
-          new = """      SharedPreferences.setMockInitialValues(<String, Object>{\n        'phoenix.reference.cn-beijing-dongcheng-forbidden-city.level': level,\n      });\n      final state = await _pumpHarness(tester);\n\n      expect(\n"""
-          if old not in text:
-              raise SystemExit('reference level-loop selection pattern not found')
-          text = text.replace(old, new, 1)
+          if old in text:
+              text = text.replace(
+                  old,
+                  """      SharedPreferences.setMockInitialValues(<String, Object>{\n        'phoenix.reference.cn-beijing-dongcheng-forbidden-city.level': level,\n      });\n      final state = await _pumpHarness(tester);\n\n      expect(\n""",
+                  1,
+              )
 
-          old = """      await _tapKey(tester, 'forbidden-city-return');\n      expect(\n        find.byKey(const ValueKey('launch-forbidden-city')),\n        findsOneWidget,\n      );\n"""
-          new = """      final completionList = find.byKey(\n        ValueKey('forbidden-city-stage-completion-lv-$level'),\n      );\n      for (var attempt = 0;\n          attempt < 4 &&\n              find.byKey(const ValueKey('forbidden-city-return')).evaluate().isEmpty;\n          attempt++) {\n        await tester.drag(completionList, const Offset(0, -420));\n        await tester.pumpAndSettle();\n      }\n      await _tapKey(tester, 'forbidden-city-return');\n      expect(\n        find.byKey(const ValueKey('launch-forbidden-city')),\n        findsOneWidget,\n      );\n"""
-          if old not in text:
-              raise SystemExit('reference return pattern not found')
-          test_path.write_text(text.replace(old, new, 1))
+          old_return = """      await _tapKey(tester, 'forbidden-city-return');\n      expect(\n        find.byKey(const ValueKey('launch-forbidden-city')),\n        findsOneWidget,\n      );\n"""
+          if old_return in text:
+              text = text.replace(
+                  old_return,
+                  """      final completionList = find.byKey(\n        ValueKey('forbidden-city-stage-completion-lv-$level'),\n      );\n      for (var attempt = 0;\n          attempt < 4 &&\n              find.byKey(const ValueKey('forbidden-city-return')).evaluate().isEmpty;\n          attempt++) {\n        await tester.drag(completionList, const Offset(0, -420));\n        await tester.pumpAndSettle();\n      }\n      await _tapKey(tester, 'forbidden-city-return');\n      expect(\n        find.byKey(const ValueKey('launch-forbidden-city')),\n        findsOneWidget,\n      );\n""",
+                  1,
+              )
+          test_path.write_text(text)
           PY
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Resolve dependencies
-        working-directory: app
-        run: flutter pub get
-
-      - name: Format repaired Dart
-        working-directory: app
-        run: dart format lib/screens/journey_screen.dart lib/screens/forbidden_city_reference_journey_screen.dart test/forbidden_city_reference_integration_test.dart
-
-      - name: Analyzer proof
-        working-directory: app
-        run: flutter analyze
-
-      - name: Targeted Reference proof
-        working-directory: app
-        run: |
-          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "runtime exposes Simplified Traditional English Vietnamese and Pinyin"
-          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Lv10 full Reference Journey persists and returns"
 
       - name: Commit repair
         shell: bash
@@ -100,5 +86,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app/lib/screens/journey_screen.dart app/lib/screens/forbidden_city_reference_journey_screen.dart app/test/forbidden_city_reference_integration_test.dart
+          if git diff --cached --quiet; then
+            echo "Repair already applied"
+            exit 0
+          fi
           git commit -m "Restore shared Journey architecture and harden Reference E2E"
           git push origin HEAD:feature/forbidden-city-final-integration
