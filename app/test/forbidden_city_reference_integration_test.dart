@@ -173,14 +173,22 @@ void main() {
     for (var level = 1; level <= 10; level++) {
       final story = forbiddenCityLockedStories[level - 1];
       for (final word in forbiddenCityWordsForLevel(level)) {
-        final trace = forbiddenCityWordRecords.singleWhere(
-          (record) => record.entry.word == word.word,
-        );
         expect(story, contains(word.word), reason: 'Lv$level ${word.word}');
+        final storyExample = word.examples.first;
+        const storyPrefix = 'Story 原句：';
+        expect(
+          storyExample.chinese,
+          startsWith(storyPrefix),
+          reason: 'Lv$level ${word.word} Story example',
+        );
+        final sameLevelSource = storyExample.chinese.substring(
+          storyPrefix.length,
+        );
+        expect(sameLevelSource, contains(word.word));
         expect(
           story,
-          contains(trace.storySource),
-          reason: 'Lv$level ${word.word} storySource',
+          contains(sameLevelSource),
+          reason: 'Lv$level ${word.word} same-level Story source',
         );
       }
     }
