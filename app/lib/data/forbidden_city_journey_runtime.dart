@@ -72,14 +72,14 @@ class ForbiddenCityCompletionMoment {
   final String unlockResult;
 
   String get narration => <String>[
-    storyClosure,
-    discovery,
-    learning,
-    '记住：$memory',
-    relationship,
-    emotionalClosure,
-    unlockResult,
-  ].join(' ');
+        storyClosure,
+        discovery,
+        learning,
+        '记住：$memory',
+        relationship,
+        emotionalClosure,
+        unlockResult,
+      ].join(' ');
 }
 
 final forbiddenCityStoryParagraphsByLevel = <List<String>>[
@@ -128,10 +128,10 @@ final forbiddenCityLockedStories = forbiddenCityStoryParagraphsByLevel
     .toList(growable: false);
 
 String _pinyin(String text) => PinyinHelper.getPinyinE(
-  text,
-  separator: ' ',
-  format: PinyinFormat.WITH_TONE_MARK,
-);
+      text,
+      separator: ' ',
+      format: PinyinFormat.WITH_TONE_MARK,
+    );
 
 const _support = <List<(String, String)>>[
   <(String, String)>[
@@ -242,7 +242,7 @@ List<ReadingAnnotation> _storyAnnotationsForLevel(int level) {
   );
 }
 
-const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
+const _forbiddenCityWordRecordDefinitions = <ForbiddenCityWordRecord>[
   ForbiddenCityWordRecord(
     entry: WordEntry(
       word: '路线',
@@ -565,26 +565,77 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
   ),
 ];
 
+int _earliestStoryLevel(String word) {
+  for (var index = 0; index < forbiddenCityLockedStories.length; index += 1) {
+    if (forbiddenCityLockedStories[index].contains(word)) return index + 1;
+  }
+  throw StateError('Forbidden City vocabulary is orphaned from Story: $word');
+}
+
+String _storySource(String word, String story, {required String context}) {
+  for (final segment in story.split(RegExp(r'[。！？!?；;\n]'))) {
+    final source = segment.trim();
+    if (source.contains(word)) return source;
+  }
+  throw StateError(
+    'Forbidden City vocabulary has no $context Story source: $word',
+  );
+}
+
+String _earliestStorySource(String word) {
+  final level = _earliestStoryLevel(word);
+  return _storySource(
+    word,
+    forbiddenCityLockedStories[level - 1],
+    context: 'earliest-level',
+  );
+}
+
+String _sameLevelStorySource(String word, int level) {
+  final safeLevel = level.clamp(1, 10).toInt();
+  return _storySource(
+    word,
+    forbiddenCityLockedStories[safeLevel - 1],
+    context: 'Lv$safeLevel',
+  );
+}
+
+/// First-appearance provenance is derived from the locked ten Story levels.
+/// Teaching examples are derived again from the currently selected Story, so
+/// Vocabulary can never show a sentence copied from a different level.
+final List<ForbiddenCityWordRecord> forbiddenCityWordRecords =
+    List<ForbiddenCityWordRecord>.unmodifiable([
+  for (final record in _forbiddenCityWordRecordDefinitions)
+    ForbiddenCityWordRecord(
+      entry: record.entry,
+      usageNote: record.usageNote,
+      storySource: _earliestStorySource(record.entry.word),
+      firstAppearsAt: _earliestStoryLevel(record.entry.word),
+      contrastNote: record.contrastNote,
+      narrativeNote: record.narrativeNote,
+    ),
+]);
+
 WordEntry _wordEntryForLevel(ForbiddenCityWordRecord record, int level) {
   final base = record.entry;
+  final sameLevelStorySource = _sameLevelStorySource(base.word, level);
   final band = level <= 3
       ? 1
       : level <= 6
-      ? 2
-      : level <= 8
-      ? 3
-      : 4;
+          ? 2
+          : level <= 8
+              ? 3
+              : 4;
   final notes = <WordExample>[
     WordExample(
-      chinese: 'Story 原句：${record.storySource}',
-      pinyin: _pinyin(record.storySource),
-      vietnamese: 'Câu gốc trong Story: ${record.storySource}',
-      english: 'Story source: ${record.storySource}',
+      chinese: 'Story 原句：$sameLevelStorySource',
+      pinyin: _pinyin(sameLevelStorySource),
+      vietnamese: 'Câu gốc trong Story: $sameLevelStorySource',
+      english: 'Story source: $sameLevelStorySource',
     ),
     WordExample(
-      chinese: band == 1
-          ? '意思：${base.simpleChinese}'
-          : '搭配与语境：${record.usageNote}',
+      chinese:
+          band == 1 ? '意思：${base.simpleChinese}' : '搭配与语境：${record.usageNote}',
       pinyin: _pinyin(
         band == 1 ? '意思：${base.simpleChinese}' : '搭配与语境：${record.usageNote}',
       ),
@@ -634,13 +685,14 @@ DiscoveryEntry _discovery(
   String simpleChinese,
   String vietnamese,
   String english,
-) => DiscoveryEntry(
-  text: text,
-  pinyin: _pinyin(text),
-  simpleChinese: simpleChinese,
-  vietnamese: vietnamese,
-  english: english,
-);
+) =>
+    DiscoveryEntry(
+      text: text,
+      pinyin: _pinyin(text),
+      simpleChinese: simpleChinese,
+      vietnamese: vietnamese,
+      english: english,
+    );
 
 final forbiddenCityDiscoveries = <DiscoveryEntry>[
   _discovery(
@@ -1054,16 +1106,16 @@ JourneyLevelContent forbiddenCityLevelContent(int level) {
     wonderQuestion: safeLevel <= 3
         ? '阿宁为什么能从另一条路线来到乾清门前？'
         : safeLevel <= 6
-        ? '建筑连接、人物目标和任务怎样共同影响两条路线？'
-        : safeLevel <= 8
-        ? '哪些证据让沈砚改变“只有一条正确路线”的判断？'
-        : '如果换一个人物和任务，怎样用空间约束、目标与后果判断一条新路线是否合理？',
+            ? '建筑连接、人物目标和任务怎样共同影响两条路线？'
+            : safeLevel <= 8
+                ? '哪些证据让沈砚改变“只有一条正确路线”的判断？'
+                : '如果换一个人物和任务，怎样用空间约束、目标与后果判断一条新路线是否合理？',
     expressQuestion: safeLevel <= 3
         ? '请用自己的话说出沈砚最后为什么留下两条路线。'
         : safeLevel <= 6
-        ? '请比较沈砚与阿宁的目标、路线和共同空间节点。'
-        : safeLevel <= 8
-        ? '请选择至少两条 Story 或 Discovery 证据，说明两条路线为什么可以同时成立。'
-        : '请把“一条常用路线，并不等于唯一正确的路线”迁移到一个新的紫禁城任务情境，并说明判断条件。',
+            ? '请比较沈砚与阿宁的目标、路线和共同空间节点。'
+            : safeLevel <= 8
+                ? '请选择至少两条 Story 或 Discovery 证据，说明两条路线为什么可以同时成立。'
+                : '请把“一条常用路线，并不等于唯一正确的路线”迁移到一个新的紫禁城任务情境，并说明判断条件。',
   );
 }

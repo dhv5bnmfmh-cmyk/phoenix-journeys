@@ -3,7 +3,8 @@ import 'package:phoenix_journeys/data/forbidden_city_challenge_package.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 
 void main() {
-  test('Forbidden City has ten genuinely distinct six-stage content levels', () {
+  test('Forbidden City has ten genuinely distinct six-stage content levels',
+      () {
     expect(forbiddenCityLockedStories.length, 10);
     expect(forbiddenCityMemoryMoments.length, 10);
     expect(forbiddenCityCompletionMoments.length, 10);
@@ -37,6 +38,16 @@ void main() {
           isTrue,
           reason:
               'Lv$level Vocabulary must trace to same-level Story: ${word.word}',
+        );
+        final source = word.studyExamples.first.chinese.replaceFirst(
+          'Story 原句：',
+          '',
+        );
+        expect(
+          source.contains(word.word) && joinedStory.contains(source),
+          isTrue,
+          reason:
+              'Lv$level teaching source must be an exact same-level Story sentence: ${word.word}',
         );
       }
 
@@ -96,6 +107,22 @@ void main() {
       completion.length,
       10,
       reason: 'Completion must differ at every level',
+    );
+  });
+
+  test('Forbidden City vocabulary provenance is derived from Story', () {
+    expect(validateForbiddenCityWordTrace(), isEmpty);
+    expect(
+      forbiddenCityWordRecords
+          .firstWhere((record) => record.entry.word == '判断')
+          .firstAppearsAt,
+      3,
+    );
+    expect(
+      forbiddenCityWordRecords
+          .firstWhere((record) => record.entry.word == '证据')
+          .firstAppearsAt,
+      5,
     );
   });
 
