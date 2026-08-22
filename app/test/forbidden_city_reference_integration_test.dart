@@ -379,7 +379,14 @@ void main() {
     'runtime exposes Simplified Traditional English Vietnamese and Pinyin',
     (tester) async {
       final state = await _pumpHarness(tester);
-      await _tapKey(tester, 'forbidden-city-level-10');
+      final level10 = find.byKey(const ValueKey('forbidden-city-level-10'));
+      await tester.scrollUntilVisible(
+        level10,
+        240,
+        scrollable: find.byType(GridView),
+      );
+      await tester.tap(level10);
+      await tester.pumpAndSettle();
       final content = forbiddenCityLevelContent(10);
       final annotation = content.storyAnnotations.first;
 

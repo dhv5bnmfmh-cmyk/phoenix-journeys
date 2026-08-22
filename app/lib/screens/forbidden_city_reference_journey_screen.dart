@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/forbidden_city_journey_runtime.dart';
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
-import '../services/journey_location_binding.dart';
 import '../services/narration_controller.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
