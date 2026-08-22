@@ -57,7 +57,9 @@ jobs:
 
       - name: Cloudflare Worker dry-run
         run: |
-          set -o pipefail
+          set -euo pipefail
+          mkdir -p app/build/web
+          printf '<!doctype html><title>Phoenix CI asset stub</title>\n' > app/build/web/index.html
           npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run 2>&1 | tee worker-build.log
 
       - name: Upload Node evidence
