@@ -23,7 +23,9 @@ String _storySource(String word, String story, {required String context}) {
     final source = segment.trim();
     if (source.contains(word)) return source;
   }
-  throw StateError('Forbidden City vocabulary has no $context Story source: $word');
+  throw StateError(
+    'Forbidden City vocabulary has no $context Story source: $word',
+  );
 }
 
 String _earliestStorySource(String word) {

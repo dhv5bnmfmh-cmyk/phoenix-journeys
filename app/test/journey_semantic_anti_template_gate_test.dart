@@ -23,30 +23,28 @@ JourneySemanticFingerprint _synthetic(
   String id,
   String surfaceIdentity,
   Map<NarrativeSemanticDimension, NarrativeMechanismFamily> mechanisms,
-) =>
-    JourneySemanticFingerprint(
-      journeyId: id,
-      surfaceIdentity: surfaceIdentity,
-      mechanisms: Map.unmodifiable(mechanisms),
-      coreEvidence: const [],
-    );
+) => JourneySemanticFingerprint(
+  journeyId: id,
+  surfaceIdentity: surfaceIdentity,
+  mechanisms: Map.unmodifiable(mechanisms),
+  coreEvidence: const [],
+);
 
 JourneySemanticFingerprint _replaceEvidence(
   JourneySemanticFingerprint source,
   NarrativeMechanismEvidence replacement,
-) =>
-    JourneySemanticFingerprint(
-      journeyId: source.journeyId,
-      surfaceIdentity: source.surfaceIdentity,
-      mechanisms: source.mechanisms,
-      coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
-        for (final evidence in source.coreEvidence)
-          if (evidence.dimension == replacement.dimension)
-            replacement
-          else
-            evidence,
-      ]),
-    );
+) => JourneySemanticFingerprint(
+  journeyId: source.journeyId,
+  surfaceIdentity: source.surfaceIdentity,
+  mechanisms: source.mechanisms,
+  coreEvidence: List<NarrativeMechanismEvidence>.unmodifiable([
+    for (final evidence in source.coreEvidence)
+      if (evidence.dimension == replacement.dimension)
+        replacement
+      else
+        evidence,
+  ]),
+);
 
 NarrativeSemanticComparison _pair(String a, String b) =>
     auditApprovedGoldSemanticPairs().singleWhere(
@@ -62,10 +60,9 @@ String _pairKey(String a, String b) {
 
 Map<NarrativeSemanticDimension, NarrativeMechanismFamily> _cloneGold(
   String id,
-) =>
-    Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.from(
-      approvedGoldSemanticFingerprints[id]!.mechanisms,
-    );
+) => Map<NarrativeSemanticDimension, NarrativeMechanismFamily>.from(
+  approvedGoldSemanticFingerprints[id]!.mechanisms,
+);
 
 void main() {
   test('all approved Gold Journeys keep complete normalized fingerprints', () {
@@ -89,8 +86,7 @@ void main() {
     }
   });
 
-  test('every CORE evidence record preserves provenance and rationale contract',
-      () {
+  test('every CORE evidence record preserves provenance and rationale contract', () {
     for (final fingerprint in approvedGoldSemanticFingerprints.values) {
       final activeStory = activeCanonicalGoldStoryText(fingerprint.journeyId);
       expect(
@@ -261,9 +257,7 @@ void main() {
     expect(active, isNot(contains('旧木尺')));
   });
 
-  test(
-      'all descriptive Gold registry entries still resolve to active Story evidence',
-      () {
+  test('all descriptive Gold registry entries still resolve to active Story evidence', () {
     expect(
       approvedNarrativeDnaCatalog.map((item) => item.journeyId).toSet(),
       _goldIds,
@@ -281,9 +275,7 @@ void main() {
     }
   });
 
-  test(
-      'Hangzhou reopened evidence stays grounded in the active married-couple Story',
-      () {
+  test('Hangzhou reopened evidence stays grounded in the active married-couple Story', () {
     final fingerprint = approvedGoldSemanticFingerprints['hangzhou-west-lake']!;
     final relationship = fingerprint.coreEvidence.singleWhere(
       (item) =>
@@ -403,8 +395,7 @@ void main() {
     expect(comparison.ruleB, isTrue);
   });
 
-  test('current approved Gold audit remains pair-complete and deterministic',
-      () {
+  test('current approved Gold audit remains pair-complete and deterministic', () {
     final first = auditApprovedGoldSemanticPairs();
     final second = auditApprovedGoldSemanticPairs();
     final count = approvedGoldSemanticFingerprints.length;

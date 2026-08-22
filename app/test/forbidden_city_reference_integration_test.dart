@@ -143,7 +143,8 @@ void main() {
     expect(validateForbiddenCityImportedWords(), isEmpty);
 
     for (final record in forbiddenCityWordRecords) {
-      final earliest = forbiddenCityLockedStories.indexWhere(
+      final earliest =
+          forbiddenCityLockedStories.indexWhere(
             (story) => story.contains(record.entry.word),
           ) +
           1;
@@ -380,13 +381,15 @@ void main() {
       final completionList = find.byKey(
         ValueKey('forbidden-city-stage-completion-lv-$level'),
       );
-      for (var attempt = 0;
-          attempt < 4 &&
-              find
-                  .byKey(const ValueKey('forbidden-city-return'))
-                  .evaluate()
-                  .isEmpty;
-          attempt++) {
+      for (
+        var attempt = 0;
+        attempt < 4 &&
+            find
+                .byKey(const ValueKey('forbidden-city-return'))
+                .evaluate()
+                .isEmpty;
+        attempt++
+      ) {
         await tester.drag(completionList, const Offset(0, -420));
         await tester.pumpAndSettle();
       }

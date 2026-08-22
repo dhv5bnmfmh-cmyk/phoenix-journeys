@@ -24,12 +24,7 @@ const _legacyStoryTokens = <String>[
 bool _containsSemanticEvidence(String story, List<String> evidence) =>
     evidence.any(story.contains);
 
-({
-  bool shenPerspective,
-  bool aNingPerspective,
-  bool divergence,
-  bool synthesis,
-})
+({bool shenPerspective, bool aNingPerspective, bool divergence, bool synthesis})
 _dualRouteSemanticAxes(String story) {
   final shenPerspective =
       story.contains('沈砚') &&
@@ -201,7 +196,8 @@ void main() {
         isNotEmpty,
         reason: record.entry.word,
       );
-      final earliest = forbiddenCityLockedStories.indexWhere(
+      final earliest =
+          forbiddenCityLockedStories.indexWhere(
             (story) => story.contains(record.entry.word),
           ) +
           1;
@@ -269,55 +265,49 @@ void main() {
     },
   );
 
-  test(
-    'Discovery stays grounded in Forbidden City architecture and route reasoning',
-    () {
-      final corpus = forbiddenCityDiscoveries.map((item) => item.text).join('\n');
-      expect(corpus, contains('午门是紫禁城正门'));
-      expect(corpus, contains('南北轴线'));
-      expect(corpus, contains('外朝'));
-      expect(corpus, contains('内廷'));
-      expect(corpus, contains('乾清门'));
-      expect(corpus, contains('景运门'));
-      expect(corpus, contains('路线必须服从这些真实空间条件'));
-      expect(corpus, isNot(contains('不是历史官方')));
-      for (final obsolete in _legacyStoryTokens) {
-        expect(corpus, isNot(contains(obsolete)), reason: obsolete);
-      }
-    },
-  );
+  test('Discovery stays grounded in Forbidden City architecture and route reasoning', () {
+    final corpus = forbiddenCityDiscoveries.map((item) => item.text).join('\n');
+    expect(corpus, contains('午门是紫禁城正门'));
+    expect(corpus, contains('南北轴线'));
+    expect(corpus, contains('外朝'));
+    expect(corpus, contains('内廷'));
+    expect(corpus, contains('乾清门'));
+    expect(corpus, contains('景运门'));
+    expect(corpus, contains('路线必须服从这些真实空间条件'));
+    expect(corpus, isNot(contains('不是历史官方')));
+    for (final obsolete in _legacyStoryTokens) {
+      expect(corpus, isNot(contains(obsolete)), reason: obsolete);
+    }
+  });
 
-  test(
-    'Memory and Completion are level-bound and share the same Journey core',
-    () {
-      final memoryPayloads = <String>{};
-      final completionPayloads = <String>{};
-      for (var level = 1; level <= 10; level++) {
-        final memory = forbiddenCityMemoryForLevel(level);
-        final completion = forbiddenCityCompletionForLevel(level);
-        memoryPayloads.add(
-          '${memory.recall}|${memory.characterShift}|${memory.anchor}|${memory.takeaway}',
-        );
-        completionPayloads.add(
-          '${completion.storyClosure}|${completion.discovery}|${completion.learning}|'
-          '${completion.memory}|${completion.relationship}|'
-          '${completion.emotionalClosure}|${completion.unlockResult}',
-        );
-        expect(memory.anchor.trim(), isNotEmpty, reason: 'Lv$level');
-        expect(completion.unlockResult, contains('Lv$level'));
-      }
-      expect(memoryPayloads, hasLength(10));
-      expect(completionPayloads, hasLength(10));
-      expect(
-        forbiddenCityMemoryForLevel(1).anchor,
-        isNot(equals(forbiddenCityMemoryForLevel(10).anchor)),
+  test('Memory and Completion are level-bound and share the same Journey core', () {
+    final memoryPayloads = <String>{};
+    final completionPayloads = <String>{};
+    for (var level = 1; level <= 10; level++) {
+      final memory = forbiddenCityMemoryForLevel(level);
+      final completion = forbiddenCityCompletionForLevel(level);
+      memoryPayloads.add(
+        '${memory.recall}|${memory.characterShift}|${memory.anchor}|${memory.takeaway}',
       );
-      expect(
-        forbiddenCityCompletionForLevel(1).storyClosure,
-        isNot(equals(forbiddenCityCompletionForLevel(10).storyClosure)),
+      completionPayloads.add(
+        '${completion.storyClosure}|${completion.discovery}|${completion.learning}|'
+        '${completion.memory}|${completion.relationship}|'
+        '${completion.emotionalClosure}|${completion.unlockResult}',
       );
-    },
-  );
+      expect(memory.anchor.trim(), isNotEmpty, reason: 'Lv$level');
+      expect(completion.unlockResult, contains('Lv$level'));
+    }
+    expect(memoryPayloads, hasLength(10));
+    expect(completionPayloads, hasLength(10));
+    expect(
+      forbiddenCityMemoryForLevel(1).anchor,
+      isNot(equals(forbiddenCityMemoryForLevel(10).anchor)),
+    );
+    expect(
+      forbiddenCityCompletionForLevel(1).storyClosure,
+      isNot(equals(forbiddenCityCompletionForLevel(10).storyClosure)),
+    );
+  });
 
   test(
     'Narrative DNA and semantic fingerprint remain derived from active Story',
