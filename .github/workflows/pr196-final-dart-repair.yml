@@ -1,4 +1,4 @@
-name: PR196 Persist Dart Format
+name: PR196 Final Dart Format Guard
 
 on:
   pull_request:
@@ -8,10 +8,10 @@ on:
       - synchronize
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  format-persist:
+  format-guard:
     if: github.event.pull_request.number == 196
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -28,7 +28,7 @@ jobs:
           set -euo pipefail
           actual="$(git rev-parse HEAD)"
           expected="${{ github.event.pull_request.head.sha }}"
-          echo "Format input HEAD: $actual"
+          echo "Format guard HEAD: $actual"
           test "$actual" = "$expected"
 
       - name: Set up Flutter
@@ -41,7 +41,7 @@ jobs:
         working-directory: app
         run: flutter pub get
 
-      - name: Format changed Dart files with resolved package config
+      - name: Verify changed Dart files are canonical
         shell: bash
         run: |
           set -euo pipefail
@@ -56,20 +56,4 @@ jobs:
           for f in "${files[@]}"; do
             rel+=("${f#app/}")
           done
-          dart format "${rel[@]}"
           dart format --output=none --set-exit-if-changed "${rel[@]}"
-
-      - name: Commit persistent formatting
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- app/lib app/test; then
-            echo "Dart formatting already canonical."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/lib app/test
-          git diff --cached --check
-          git commit -m "style: format PR196 Dart sources"
-          git push origin HEAD:feature/forbidden-city-final-integration
