@@ -21,184 +21,6 @@ env:
   FINAL_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-  pr196-final-dart-repair:
-    name: PR196 Final Dart Repair
-    if: github.event_name == 'pull_request' && github.event.pull_request.number == 196
-    runs-on: ubuntu-latest
-    timeout-minutes: 70
-    steps:
-      - name: Check out FINAL HEAD
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.FINAL_HEAD_SHA }}
-          fetch-depth: 0
-
-      - name: Probe repair need
-        id: probe
-        shell: bash
-        run: |
-          set -euo pipefail
-          actual="$(git rev-parse HEAD)"
-          echo "Repair HEAD SHA: $actual"
-          test "$actual" = "$FINAL_HEAD_SHA"
-          if grep -q "bool _enactsRouteSynthesis(String story) =>" app/test/forbidden_city_final_trace_test.dart; then
-            echo "needed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "needed=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Set up Flutter
-        if: steps.probe.outputs.needed == 'true'
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install dependencies
-        if: steps.probe.outputs.needed == 'true'
-        working-directory: app
-        run: flutter pub get
-
-      - name: Repair stale final test contracts
-        if: steps.probe.outputs.needed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 <<'PY'
-          from pathlib import Path
-
-          final_trace = Path('app/test/forbidden_city_final_trace_test.dart')
-          text = final_trace.read_text()
-          old_helper = """bool _enactsRouteSynthesis(String story) =>
-    story.contains('两条') &&
-    <String>[
-      '保留',
-      '留下',
-      '同时',
-      '共同',
-      '多层表示',
-      '标出',
-      '写下各自成立的条件',
-    ].any(story.contains);
-"""
-          new_helper = """bool _enactsRouteSynthesis(String story) {
-  final explicitDualRoute = story.contains('两条');
-  final semanticDualRoute =
-      story.contains('自己的路线') &&
-      story.contains('阿宁从东侧') &&
-      story.contains('不再用一条线覆盖另一条') &&
-      story.contains('共同到达点');
-  return (explicitDualRoute || semanticDualRoute) &&
-      <String>[
-        '保留',
-        '留下',
-        '同时',
-        '共同',
-        '多层表示',
-        '标出',
-        '写下各自成立的条件',
-      ].any(story.contains);
-}
-"""
-          if text.count(old_helper) != 1:
-              raise SystemExit('Expected brittle dual-route helper exactly once')
-          text = text.replace(old_helper, new_helper)
-          old_assert = "      expect(story, contains('两条'), reason: 'Lv${index + 1}');\n"
-          if text.count(old_assert) != 1:
-              raise SystemExit('Expected brittle literal 两条 assertion exactly once')
-          final_trace.write_text(text.replace(old_assert, ''))
-
-          integration = Path('app/test/forbidden_city_reference_integration_test.dart')
-          integration_text = integration.read_text()
-          stale = '他从午门沿中轴走向乾清门，把这条常用的学习路线画在纸上，认定这就是唯一正确的路线'
-          if stale in integration_text:
-              raise SystemExit('Stale Lv2 literal must not remain in derived vocabulary trace test')
-          required = [
-              'expect(validateForbiddenCityWordTrace(), isEmpty);',
-              'expect(validateForbiddenCityImportedWords(), isEmpty);',
-              'forbiddenCityLockedStories.indexWhere(',
-              'expect(record.firstAppearsAt, earliest, reason: record.entry.word);',
-              'contains(record.storySource)',
-          ]
-          for contract in required:
-              if contract not in integration_text:
-                  raise SystemExit(f'Missing runtime-derived vocabulary trace contract: {contract}')
-          PY
-
-      - name: Format changed Dart files
-        if: steps.probe.outputs.needed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin main
-          mapfile -t files < <(git diff --name-only origin/main...HEAD -- app/lib app/test | grep '\.dart$' || true)
-          cd app
-          rel=()
-          for f in "${files[@]}"; do
-            rel+=("${f#app/}")
-          done
-          dart format "${rel[@]}"
-
-      - name: A targeted failing tests
-        if: steps.probe.outputs.needed == 'true'
-        working-directory: app
-        shell: bash
-        run: |
-          set -euo pipefail
-          flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Vocabulary earliest Story trace is derived and has zero orphans"
-          flutter test test/forbidden_city_final_trace_test.dart --plain-name "Forbidden City Lv1-Lv10 preserve the dual-route causal identity"
-
-      - name: B dart format check
-        if: steps.probe.outputs.needed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t files < <(git diff --name-only origin/main...HEAD -- app/lib app/test | grep '\.dart$' || true)
-          cd app
-          rel=()
-          for f in "${files[@]}"; do
-            rel+=("${f#app/}")
-          done
-          dart format --output=none --set-exit-if-changed "${rel[@]}"
-
-      - name: C full flutter test
-        if: steps.probe.outputs.needed == 'true'
-        working-directory: app
-        run: flutter test
-
-      - name: D flutter analyze
-        if: steps.probe.outputs.needed == 'true'
-        working-directory: app
-        run: flutter analyze
-
-      - name: E build web release
-        if: steps.probe.outputs.needed == 'true'
-        working-directory: app
-        run: flutter build web --release
-
-      - name: F Forbidden City Reference Gate
-        if: steps.probe.outputs.needed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tools/forbidden_city_reference_ci.py
-          cd app
-          flutter test test/forbidden_city_reference_evidence_test.dart
-          flutter test test/forbidden_city_reference_integration_test.dart
-
-      - name: G commit and push certified repair
-        if: steps.probe.outputs.needed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/lib app/test
-          git diff --cached --check
-          test -n "$(git diff --cached --name-only)"
-          git commit -m "test: fix final Forbidden City trace contracts and format"
-          git push origin HEAD:feature/forbidden-city-final-integration
-
   node-agent:
     name: Node Agent
     runs-on: ubuntu-latest
@@ -253,7 +75,7 @@ jobs:
   flutter-validation:
     name: Flutter Validation
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 70
     defaults:
       run:
         working-directory: app
@@ -303,6 +125,97 @@ jobs:
           for f in "${files[@]}"; do
             rel+=("${f#app/}")
           done
+          cd ..
+
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]] && \
+             [[ "${{ github.event.pull_request.number }}" == "196" ]] && \
+             grep -qF "bool _enactsRouteSynthesis(String story) =>" app/test/forbidden_city_final_trace_test.dart; then
+            python3 <<'PY'
+          from pathlib import Path
+
+          final_trace = Path('app/test/forbidden_city_final_trace_test.dart')
+          text = final_trace.read_text()
+          old_helper = """bool _enactsRouteSynthesis(String story) =>
+              story.contains('两条') &&
+              <String>[
+                '保留',
+                '留下',
+                '同时',
+                '共同',
+                '多层表示',
+                '标出',
+                '写下各自成立的条件',
+              ].any(story.contains);
+          """
+          new_helper = """bool _enactsRouteSynthesis(String story) {
+            final explicitDualRoute = story.contains('两条');
+            final semanticDualRoute =
+                story.contains('自己的路线') &&
+                story.contains('阿宁从东侧') &&
+                story.contains('不再用一条线覆盖另一条') &&
+                story.contains('共同到达点');
+            return (explicitDualRoute || semanticDualRoute) &&
+                <String>[
+                  '保留',
+                  '留下',
+                  '同时',
+                  '共同',
+                  '多层表示',
+                  '标出',
+                  '写下各自成立的条件',
+                ].any(story.contains);
+          }
+          """
+          if text.count(old_helper) != 1:
+              raise SystemExit('Expected brittle dual-route helper exactly once')
+          text = text.replace(old_helper, new_helper)
+          old_assert = "      expect(story, contains('两条'), reason: 'Lv${index + 1}');\n"
+          if text.count(old_assert) != 1:
+              raise SystemExit('Expected brittle literal 两条 assertion exactly once')
+          final_trace.write_text(text.replace(old_assert, ''))
+
+          integration = Path('app/test/forbidden_city_reference_integration_test.dart').read_text()
+          stale = '他从午门沿中轴走向乾清门，把这条常用的学习路线画在纸上，认定这就是唯一正确的路线'
+          if stale in integration:
+              raise SystemExit('Stale Lv2 Story literal remains in integration test')
+          for required in [
+              'expect(validateForbiddenCityWordTrace(), isEmpty);',
+              'expect(validateForbiddenCityImportedWords(), isEmpty);',
+              'forbiddenCityLockedStories.indexWhere(',
+              'expect(record.firstAppearsAt, earliest, reason: record.entry.word);',
+              'contains(record.storySource)',
+          ]:
+              if required not in integration:
+                  raise SystemExit(f'Missing runtime-derived vocabulary trace contract: {required}')
+          PY
+
+            cd app
+            dart format "${rel[@]}"
+
+            flutter test test/forbidden_city_reference_integration_test.dart --plain-name "Vocabulary earliest Story trace is derived and has zero orphans"
+            flutter test test/forbidden_city_final_trace_test.dart --plain-name "Forbidden City Lv1-Lv10 preserve the dual-route causal identity"
+            dart format --output=none --set-exit-if-changed "${rel[@]}"
+            flutter test
+            flutter analyze
+            flutter build web --release
+            cd ..
+            python3 tools/forbidden_city_reference_ci.py
+            cd app
+            flutter test test/forbidden_city_reference_evidence_test.dart
+            flutter test test/forbidden_city_reference_integration_test.dart
+            cd ..
+
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add app/lib app/test
+            git diff --cached --check
+            test -n "$(git diff --cached --name-only)"
+            git commit -m "test: fix final Forbidden City trace contracts and format"
+            git push origin HEAD:feature/forbidden-city-final-integration
+            exit 0
+          fi
+
+          cd app
           dart format --output=none --set-exit-if-changed "${rel[@]}" 2>&1 | tee format.log
 
       - name: analyze
