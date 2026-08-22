@@ -176,6 +176,17 @@ class _JourneyScreenState extends State<JourneyScreen>
   bool get _isSummerPalacePilot => false;
   bool get _isForbiddenCity => _experience.id == forbiddenCityJourneyId;
 
+  int get _forbiddenCityContentLevel {
+    final story = _levelContent.storyParagraphs.join('\n');
+    final index = forbiddenCityLockedStories.indexOf(story);
+    if (index < 0) {
+      throw StateError(
+        'Forbidden City level could not be derived from active Story.',
+      );
+    }
+    return index + 1;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -449,13 +460,14 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
     }
     if (_isForbiddenCity) {
+      final memory = forbiddenCityMemoryForLevel(_forbiddenCityContentLevel);
       return buildJourneyStageNarrationItems(
         stage: 'memory',
         displayedLines: [
-          for (final item in forbiddenCityMemoryReviews) ...[
-            _appState.displayText(item.prompt),
-            _appState.displayText(item.answer),
-          ],
+          _appState.displayText(memory.recall),
+          _appState.displayText(memory.characterShift),
+          _appState.displayText(memory.anchor),
+          _appState.displayText(memory.takeaway),
         ],
       );
     }
@@ -481,15 +493,20 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
     }
     if (_isForbiddenCity) {
+      final completion = forbiddenCityCompletionForLevel(
+        _forbiddenCityContentLevel,
+      );
       return buildJourneyStageNarrationItems(
         stage: 'completion',
-        displayedLines: const [
+        displayedLines: [
           forbiddenCityAchievementName,
-          forbiddenCityJourneySummary,
-          forbiddenCityMemoryAnchor,
-          forbiddenCityChallengeRewardName,
-          forbiddenCityChallengeRewardMeaning,
-          forbiddenCityJourneyCompletion,
+          completion.storyClosure,
+          completion.discovery,
+          completion.learning,
+          completion.memory,
+          completion.relationship,
+          completion.emotionalClosure,
+          completion.unlockResult,
         ],
       );
     }
@@ -1192,7 +1209,9 @@ class _JourneyScreenState extends State<JourneyScreen>
       memoryController.text = _batchOneStructuredMemory(batchSpec);
     }
     await _appState.completeJourney(
-      _isForbiddenCity ? forbiddenCityMemoryAnchor : memoryController.text,
+      _isForbiddenCity
+          ? forbiddenCityMemoryForLevel(_forbiddenCityContentLevel).anchor
+          : memoryController.text,
     );
     if (!mounted) return;
     setState(() => step = AppState.journeyLastStep);
@@ -2186,6 +2205,16 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _forbiddenCityMemoryPage() {
+    final memory = forbiddenCityMemoryForLevel(_forbiddenCityContentLevel);
+    final reviews = <ForbiddenCityMemoryReview>[
+      ForbiddenCityMemoryReview(prompt: '回想 Story', answer: memory.recall),
+      ForbiddenCityMemoryReview(
+        prompt: '人物关系变化',
+        answer: memory.characterShift,
+      ),
+      ForbiddenCityMemoryReview(prompt: 'Memory Anchor', answer: memory.anchor),
+      ForbiddenCityMemoryReview(prompt: '这一等级要带走什么', answer: memory.takeaway),
+    ];
     return _page(
       title: '旅程回忆',
       narrationStage: 'memory',
@@ -2195,10 +2224,10 @@ class _JourneyScreenState extends State<JourneyScreen>
       onNext: () => unawaited(_finishJourney()),
       child: ListView.separated(
         padding: const EdgeInsets.only(bottom: 6),
-        itemCount: forbiddenCityMemoryReviews.length,
+        itemCount: reviews.length,
         separatorBuilder: (_, __) => const SizedBox(height: 6),
         itemBuilder: (context, index) {
-          final item = forbiddenCityMemoryReviews[index];
+          final item = reviews[index];
           return Container(
             padding: const EdgeInsets.all(10),
             decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
@@ -2421,6 +2450,9 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _forbiddenCityCompletePage() {
+    final completion = forbiddenCityCompletionForLevel(
+      _forbiddenCityContentLevel,
+    );
     return _page(
       title: '北京已点亮',
       narrationStage: 'completion',
@@ -2449,25 +2481,25 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
             const SizedBox(height: 8),
-            const _ForbiddenCityCompleteCard(
+            _ForbiddenCityCompleteCard(
               title: 'Journey Summary',
-              body: forbiddenCityJourneySummary,
+              body: completion.storyClosure,
             ),
             const SizedBox(height: 6),
-            const _ForbiddenCityCompleteCard(
+            _ForbiddenCityCompleteCard(
               title: 'Memory Anchor',
-              body: forbiddenCityMemoryAnchor,
+              body: completion.memory,
             ),
             const SizedBox(height: 6),
-            const _ForbiddenCityCompleteCard(
+            _ForbiddenCityCompleteCard(
               title: 'Challenge Reward',
-              body:
-                  '$forbiddenCityChallengeRewardName\n$forbiddenCityChallengeRewardMeaning',
+              body: '$forbiddenCityChallengeRewardName\n${completion.learning}',
             ),
             const SizedBox(height: 6),
-            const _ForbiddenCityCompleteCard(
+            _ForbiddenCityCompleteCard(
               title: 'Journey Completion',
-              body: forbiddenCityJourneyCompletion,
+              body:
+                  '${completion.discovery}\n${completion.relationship}\n${completion.emotionalClosure}\n${completion.unlockResult}',
             ),
             const SizedBox(height: 8),
             SizedBox(

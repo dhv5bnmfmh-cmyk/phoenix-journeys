@@ -72,14 +72,14 @@ class ForbiddenCityCompletionMoment {
   final String unlockResult;
 
   String get narration => <String>[
-        storyClosure,
-        discovery,
-        learning,
-        '记住：$memory',
-        relationship,
-        emotionalClosure,
-        unlockResult,
-      ].join(' ');
+    storyClosure,
+    discovery,
+    learning,
+    '记住：$memory',
+    relationship,
+    emotionalClosure,
+    unlockResult,
+  ].join(' ');
 }
 
 final forbiddenCityStoryParagraphsByLevel = <List<String>>[
@@ -128,98 +128,102 @@ final forbiddenCityLockedStories = forbiddenCityStoryParagraphsByLevel
     .toList(growable: false);
 
 String _pinyin(String text) => PinyinHelper.getPinyinE(
-      text,
-      separator: ' ',
-      format: PinyinFormat.WITH_TONE_MARK,
-    );
+  text,
+  separator: ' ',
+  format: PinyinFormat.WITH_TONE_MARK,
+);
 
 const _support = <List<(String, String)>>[
-  <(String, String)>[(
-    'Thẩm Nghiên đi từ Ngọ Môn theo trục giữa đến Càn Thanh Môn và cho rằng đó là tuyến đúng duy nhất. A Ninh đến từ phía đông vì có mục tiêu khác. Cô chủ động đề nghị so sánh hai tuyến; cuối cùng cả hai giữ lại hai đường và bắt đầu tôn trọng cách quan sát của nhau.',
-    'Shen Yan walks from the Meridian Gate along the central axis to the Gate of Heavenly Purity and assumes it is the only correct route. A Ning arrives from the east for a different goal. She actively asks him to compare the two routes; they keep both lines and begin respecting each other’s observations.'
-  )],
-  <(String, String)>[(
-    'Thẩm Nghiên xem tuyến quen thuộc dọc trục giữa là cách đi đúng duy nhất. A Ninh có nhiệm vụ ở phía đông, nên cô mời anh đi kiểm tra thay vì tranh cãi. Hai tuyến cùng đến Càn Thanh Môn và phục vụ hai nhiệm vụ khác nhau; cả hai cũng thay đổi cách nhìn về nhau.',
-    'Shen Yan treats the familiar central-axis route as the only correct way. A Ning has an east-side task, so she invites him to check rather than argue. Both routes reach the Gate of Heavenly Purity for different tasks, and both characters revise how they see each other.'
-  )],
+  <(String, String)>[
+    (
+      'Thẩm Nghiên đi từ Ngọ Môn theo trục giữa đến Càn Thanh Môn và cho rằng đó là tuyến đúng duy nhất. A Ninh đến từ phía đông vì có mục tiêu khác. Cô chủ động đề nghị so sánh hai tuyến; cuối cùng cả hai giữ lại hai đường và bắt đầu tôn trọng cách quan sát của nhau.',
+      'Shen Yan walks from the Meridian Gate along the central axis to the Gate of Heavenly Purity and assumes it is the only correct route. A Ning arrives from the east for a different goal. She actively asks him to compare the two routes; they keep both lines and begin respecting each other’s observations.',
+    ),
+  ],
+  <(String, String)>[
+    (
+      'Thẩm Nghiên xem tuyến quen thuộc dọc trục giữa là cách đi đúng duy nhất. A Ninh có nhiệm vụ ở phía đông, nên cô mời anh đi kiểm tra thay vì tranh cãi. Hai tuyến cùng đến Càn Thanh Môn và phục vụ hai nhiệm vụ khác nhau; cả hai cũng thay đổi cách nhìn về nhau.',
+      'Shen Yan treats the familiar central-axis route as the only correct way. A Ning has an east-side task, so she invites him to check rather than argue. Both routes reach the Gate of Heavenly Purity for different tasks, and both characters revise how they see each other.',
+    ),
+  ],
   <(String, String)>[
     (
       'Thẩm Nghiên ghi cổng và sân dọc trục giữa rồi coi tuyến của mình là đáp án duy nhất. A Ninh đến từ phía đông để hoàn thành một nhiệm vụ khác, nên hai người xung đột về cách đọc cùng một không gian.',
-      'Shen Yan records gates and courtyards along the central axis and treats his route as the single answer. A Ning approaches from the east for a different task, creating a conflict over how to read the same space.'
+      'Shen Yan records gates and courtyards along the central axis and treats his route as the single answer. A Ning approaches from the east for a different task, creating a conflict over how to read the same space.',
     ),
     (
       'A Ninh chủ động hy sinh thời gian để dẫn Thẩm Nghiên kiểm tra lại các điểm nối. Anh giữ cả hai tuyến và mời cô tự đánh dấu đường của mình; cô cũng thêm trục giữa để hai bản ghi liên hệ được với nhau.',
-      'A Ning deliberately gives up time to lead Shen Yan back through the connections. He keeps both routes and asks her to mark her own line; she adds the central axis so the two records can relate to each other.'
+      'A Ning deliberately gives up time to lead Shen Yan back through the connections. He keeps both routes and asks her to mark her own line; she adds the central axis so the two records can relate to each other.',
     ),
   ],
   <(String, String)>[
     (
       'Trục giữa giúp Thẩm Nghiên tổ chức quan sát Ngoại triều, nhưng nhiệm vụ phía đông khiến A Ninh tiếp cận Càn Thanh Môn theo cách khác.',
-      'The central axis helps Shen Yan organize his view of the Outer Court, while A Ning’s east-side task brings her to the Gate of Heavenly Purity by another approach.'
+      'The central axis helps Shen Yan organize his view of the Outer Court, while A Ning’s east-side task brings her to the Gate of Heavenly Purity by another approach.',
     ),
     (
       'Họ tách câu hỏi “không gian nối được hay không” khỏi “tuyến nào phù hợp với mục tiêu”. Thẩm Nghiên sửa phán đoán, còn A Ninh bổ sung bản ghi của mình để hợp tác tốt hơn.',
-      'They separate “can the spaces connect?” from “which route fits the goal?” Shen Yan revises his judgment, while A Ning improves her own record for better collaboration.'
+      'They separate “can the spaces connect?” from “which route fits the goal?” Shen Yan revises his judgment, while A Ning improves her own record for better collaboration.',
     ),
   ],
   <(String, String)>[
     (
       'Thẩm Nghiên coi sự rõ ràng của tuyến trục giữa là lý do để chọn một đường chính. A Ninh có nhiệm vụ riêng ở phía đông và không chấp nhận việc tuyến của mình bị xem là kém chính xác.',
-      'Shen Yan treats the clarity of the central-axis route as a reason to choose one main line. A Ning has her own east-side task and rejects the claim that her route is less accurate.'
+      'Shen Yan treats the clarity of the central-axis route as a reason to choose one main line. A Ning has her own east-side task and rejects the claim that her route is less accurate.',
     ),
     (
       'A Ninh yêu cầu kiểm tra bằng chứng tại các cổng, sân và điểm gặp. Thẩm Nghiên ghi rõ hai nhiệm vụ và hai tuyến; quan hệ của họ chuyển từ phán xét sang trao đổi quan sát.',
-      'A Ning asks them to check evidence at gates, courtyards, and the meeting point. Shen Yan labels both tasks and routes; their relationship moves from judgment toward exchanging observations.'
+      'A Ning asks them to check evidence at gates, courtyards, and the meeting point. Shen Yan labels both tasks and routes; their relationship moves from judgment toward exchanging observations.',
     ),
   ],
   <(String, String)>[
     (
       'Thẩm Nghiên nhận ra mình đã nhầm tuyến dễ tổ chức nhất với tuyến mà mọi người phải dùng. A Ninh phân biệt khả năng kết nối của kiến trúc với sự phù hợp của tuyến đối với nhiệm vụ.',
-      'Shen Yan realizes he confused the easiest route to organize with a route everyone must use. A Ning distinguishes architectural connectivity from a route’s fitness for a task.'
+      'Shen Yan realizes he confused the easiest route to organize with a route everyone must use. A Ning distinguishes architectural connectivity from a route’s fitness for a task.',
     ),
     (
       'Anh ghi Ngoại triều, Nội đình, điểm chung và nhiệm vụ thay vì hạ tuyến của A Ninh xuống thành đường phụ. Cả hai cũng thay đổi đánh giá về khả năng hợp tác của người kia.',
-      'He labels the Outer Court, Inner Court, shared point, and tasks instead of demoting A Ning’s route to a side line. Both also revise their judgment of the other as a collaborator.'
+      'He labels the Outer Court, Inner Court, shared point, and tasks instead of demoting A Ning’s route to a side line. Both also revise their judgment of the other as a collaborator.',
     ),
   ],
   <(String, String)>[
     (
       'Thẩm Nghiên coi tuyến trục giữa liên tục là cách đại diện tốt nhất cho không gian. A Ninh yêu cầu anh kiểm tra bằng chứng và tách điều kiến trúc cho phép khỏi điều nhiệm vụ yêu cầu.',
-      'Shen Yan treats the continuous central-axis route as the best representation of space. A Ning asks him to inspect evidence and separate what architecture permits from what a task requires.'
+      'Shen Yan treats the continuous central-axis route as the best representation of space. A Ning asks him to inspect evidence and separate what architecture permits from what a task requires.',
     ),
     (
       'Cùng một ràng buộc kiến trúc có thể dẫn đến lựa chọn khác khi nhiệm vụ và góc nhìn khác nhau. Thẩm Nghiên rút lại phán đoán độc nhất; A Ninh cũng thay đổi cách nhìn về anh.',
-      'The same architectural constraints can produce different choices when tasks and perspectives differ. Shen Yan withdraws his exclusive judgment; A Ning also changes how she sees him.'
+      'The same architectural constraints can produce different choices when tasks and perspectives differ. Shen Yan withdraws his exclusive judgment; A Ning also changes how she sees him.',
     ),
   ],
   <(String, String)>[
     (
       'A Ninh biến xung đột thành ba câu hỏi về bằng chứng không gian, nhiệm vụ và những điều kiện kiến trúc không thể bỏ qua. Điều đó buộc Thẩm Nghiên kiểm tra góc nhìn của chính mình.',
-      'A Ning turns the conflict into three questions about spatial evidence, tasks, and architectural conditions that neither route can ignore. This forces Shen Yan to examine his own perspective.'
+      'A Ning turns the conflict into three questions about spatial evidence, tasks, and architectural conditions that neither route can ignore. This forces Shen Yan to examine his own perspective.',
     ),
     (
       'Họ thấy trục, cổng và sân là điều kiện chung, nhưng mục tiêu tạo ra lựa chọn khác. Quan hệ chuyển từ “ai sửa ai” thành “ai cung cấp loại bằng chứng nào”.',
-      'They find that axes, gates, and courtyards are shared conditions, while goals produce different choices. Their relationship shifts from “who corrects whom” to “who contributes which evidence.”'
+      'They find that axes, gates, and courtyards are shared conditions, while goals produce different choices. Their relationship shifts from “who corrects whom” to “who contributes which evidence.”',
     ),
   ],
   <(String, String)>[
     (
       'Tuyến dọc trục giữa là một ưu tiên có sức giải thích đối với nhiệm vụ học của Thẩm Nghiên, còn A Ninh cần một tuyến phù hợp với các điểm ghi chép phía đông.',
-      'The central-axis route is an explanatory preference for Shen Yan’s study task, while A Ning needs a route suited to east-side recording points.'
+      'The central-axis route is an explanatory preference for Shen Yan’s study task, while A Ning needs a route suited to east-side recording points.',
     ),
     (
       'Họ tách khung không gian chung khỏi mục tiêu riêng, rồi vẽ chúng thành nhiều lớp. Thẩm Nghiên trao quyền giải thích tuyến của A Ninh cho chính cô; cô nhờ anh bổ sung quan hệ tổng thể.',
-      'They separate the shared spatial framework from individual goals and map them in layers. Shen Yan gives A Ning authority over explaining her route; she asks him to add the broader spatial relation.'
+      'They separate the shared spatial framework from individual goals and map them in layers. Shen Yan gives A Ning authority over explaining her route; she asks him to add the broader spatial relation.',
     ),
   ],
   <(String, String)>[
     (
       'Thẩm Nghiên dùng tuyến dọc trục giữa như đáp án mặc định. A Ninh phải cân nhắc nhiệm vụ, kết nối kiến trúc và điểm gặp, nên cô yêu cầu kiểm tra hai tuyến bằng ba loại bằng chứng.',
-      'Shen Yan treats the central-axis route as the default answer. A Ning must balance task, architectural connections, and meeting point, so she asks that both routes be tested against three kinds of evidence.'
+      'Shen Yan treats the central-axis route as the default answer. A Ning must balance task, architectural connections, and meeting point, so she asks that both routes be tested against three kinds of evidence.',
     ),
     (
       'Xóa tuyến A Ninh sẽ làm mất logic của nhiệm vụ phía đông; bỏ trục giữa lại làm mất quan hệ tổng thể. Họ giữ cả hai tuyến, cùng ký tên, và kết luận rằng tuyến thường dùng không đồng nghĩa với tuyến đúng duy nhất.',
-      'Erasing A Ning’s route would lose the logic of the east-side task; ignoring the central axis would lose the larger relation. They keep both routes, sign together, and conclude that a common route is not the only correct route.'
+      'Erasing A Ning’s route would lose the logic of the east-side task; ignoring the central axis would lose the larger relation. They keep both routes, sign together, and conclude that a common route is not the only correct route.',
     ),
   ],
 ];
@@ -240,7 +244,15 @@ List<ReadingAnnotation> _storyAnnotationsForLevel(int level) {
 
 const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '路线', pinyin: 'lùxiàn', partOfSpeech: '名词', simpleChinese: '从一个地方到另一个地方所经过的方向和路径。', translation: 'tuyến đường; lộ trình', englishDefinition: 'route; path of travel', symbol: '🗺️'),
+    entry: WordEntry(
+      word: '路线',
+      pinyin: 'lùxiàn',
+      partOfSpeech: '名词',
+      simpleChinese: '从一个地方到另一个地方所经过的方向和路径。',
+      translation: 'tuyến đường; lộ trình',
+      englishDefinition: 'route; path of travel',
+      symbol: '🗺️',
+    ),
     usageNote: '常用搭配：路线图、选择路线、比较路线。',
     storySource: '他从午门沿中轴走向乾清门，把这条常用的学习路线画在纸上，认定这就是唯一正确的路线。',
     firstAppearsAt: 1,
@@ -248,7 +260,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: 'Story 用“路线”承载人物判断，所以换成“方向”会削弱“整条行动方案”的意味。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '中轴', pinyin: 'zhōngzhóu', partOfSpeech: '名词', simpleChinese: '组织建筑群的重要中心轴线。', translation: 'trục trung tâm', englishDefinition: 'central axis', symbol: '↕️'),
+    entry: WordEntry(
+      word: '中轴',
+      pinyin: 'zhōngzhóu',
+      partOfSpeech: '名词',
+      simpleChinese: '组织建筑群的重要中心轴线。',
+      translation: 'trục trung tâm',
+      englishDefinition: 'central axis',
+      symbol: '↕️',
+    ),
     usageNote: '常用搭配：沿中轴、中轴关系、中轴空间。',
     storySource: '他从午门沿中轴走向乾清门，把这条常用的学习路线画在纸上，认定这就是唯一正确的路线。',
     firstAppearsAt: 1,
@@ -256,7 +276,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '它在 Story 中既是可靠空间证据，也制造了沈砚把“重要”误读成“排他”的冲突。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '午门', pinyin: 'Wǔmén', partOfSpeech: '专有名词', simpleChinese: '紫禁城正门，位于南北轴线上。', translation: 'Ngọ Môn', englishDefinition: 'the Meridian Gate', symbol: '🚪'),
+    entry: WordEntry(
+      word: '午门',
+      pinyin: 'Wǔmén',
+      partOfSpeech: '专有名词',
+      simpleChinese: '紫禁城正门，位于南北轴线上。',
+      translation: 'Ngọ Môn',
+      englishDefinition: 'the Meridian Gate',
+      symbol: '🚪',
+    ),
     usageNote: 'Story 把午门作为沈砚中轴观察的起点。',
     storySource: '他从午门沿中轴走向乾清门，把这条常用的学习路线画在纸上，认定这就是唯一正确的路线。',
     firstAppearsAt: 1,
@@ -264,7 +292,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '如果换成普通“入口”，Story 会失去紫禁城中轴空间的具体锚点。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '乾清门', pinyin: 'Qiánqīngmén', partOfSpeech: '专有名词', simpleChinese: '紫禁城内廷正宫门，也是连接内廷与外朝往来的重要通道。', translation: 'Càn Thanh Môn', englishDefinition: 'the Gate of Heavenly Purity', symbol: '🏯'),
+    entry: WordEntry(
+      word: '乾清门',
+      pinyin: 'Qiánqīngmén',
+      partOfSpeech: '专有名词',
+      simpleChinese: '紫禁城内廷正宫门，也是连接内廷与外朝往来的重要通道。',
+      translation: 'Càn Thanh Môn',
+      englishDefinition: 'the Gate of Heavenly Purity',
+      symbol: '🏯',
+    ),
     usageNote: 'Story 中它是两条路线发生关系的共同位置。',
     storySource: '阿宁却从东侧来到乾清门前。',
     firstAppearsAt: 1,
@@ -272,7 +308,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '换成普通地名会削弱两条路线为何能在同一宫城结构里比较的机制。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '目标', pinyin: 'mùbiāo', partOfSpeech: '名词', simpleChinese: '想要到达的结果或要完成的事情。', translation: 'mục tiêu', englishDefinition: 'goal; objective', symbol: '🎯'),
+    entry: WordEntry(
+      word: '目标',
+      pinyin: 'mùbiāo',
+      partOfSpeech: '名词',
+      simpleChinese: '想要到达的结果或要完成的事情。',
+      translation: 'mục tiêu',
+      englishDefinition: 'goal; objective',
+      symbol: '🎯',
+    ),
     usageNote: '常用搭配：任务目标、共同目标、目标不同。',
     storySource: '她要把一份记录送到东边，目标和沈砚不同。',
     firstAppearsAt: 1,
@@ -280,7 +324,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: 'Story 用它把空间差异变成人物动机差异，避免“两条线”只剩地图技巧。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '东侧', pinyin: 'dōngcè', partOfSpeech: '方位名词', simpleChinese: '一个空间的东边部分。', translation: 'phía đông', englishDefinition: 'the eastern side', symbol: '➡️'),
+    entry: WordEntry(
+      word: '东侧',
+      pinyin: 'dōngcè',
+      partOfSpeech: '方位名词',
+      simpleChinese: '一个空间的东边部分。',
+      translation: 'phía đông',
+      englishDefinition: 'the eastern side',
+      symbol: '➡️',
+    ),
     usageNote: '常用搭配：东侧空间、东侧入口、东侧路线。',
     storySource: '阿宁却从东侧来到乾清门前。',
     firstAppearsAt: 1,
@@ -288,7 +340,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '它让阿宁的路线与紫禁城空间方向发生具体关系。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '任务', pinyin: 'rènwù', partOfSpeech: '名词', simpleChinese: '需要完成的工作或事情。', translation: 'nhiệm vụ', englishDefinition: 'task; assignment', symbol: '📋'),
+    entry: WordEntry(
+      word: '任务',
+      pinyin: 'rènwù',
+      partOfSpeech: '名词',
+      simpleChinese: '需要完成的工作或事情。',
+      translation: 'nhiệm vụ',
+      englishDefinition: 'task; assignment',
+      symbol: '📋',
+    ),
     usageNote: '常用搭配：完成任务、任务不同、服务任务。',
     storySource: '两条线都能到乾清门前，却服务不同任务。',
     firstAppearsAt: 2,
@@ -296,7 +356,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '它解释阿宁为什么主动坚持自己的路线，使她不是只用来证明沈砚错误的人。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '院落', pinyin: 'yuànluò', partOfSpeech: '名词', simpleChinese: '由建筑围合或组织起来的院子空间。', translation: 'sân trong; khu sân', englishDefinition: 'courtyard; courtyard compound', symbol: '🏛️'),
+    entry: WordEntry(
+      word: '院落',
+      pinyin: 'yuànluò',
+      partOfSpeech: '名词',
+      simpleChinese: '由建筑围合或组织起来的院子空间。',
+      translation: 'sân trong; khu sân',
+      englishDefinition: 'courtyard; courtyard compound',
+      symbol: '🏛️',
+    ),
     usageNote: '常用搭配：连续院落、经过院落、院落关系。',
     storySource: '他沿中轴记录宫门和院落，把自己的学习路线一路画到乾清门前。',
     firstAppearsAt: 3,
@@ -304,7 +372,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '它把路线冲突固定在紫禁城真实的门与院落序列中。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '汇合', pinyin: 'huìhé', partOfSpeech: '动词', simpleChinese: '从不同方向来到一起。', translation: 'hội tụ; gặp nhau', englishDefinition: 'converge; meet', symbol: '🔀'),
+    entry: WordEntry(
+      word: '汇合',
+      pinyin: 'huìhé',
+      partOfSpeech: '动词',
+      simpleChinese: '从不同方向来到一起。',
+      translation: 'hội tụ; gặp nhau',
+      englishDefinition: 'converge; meet',
+      symbol: '🔀',
+    ),
     usageNote: '常用搭配：两路汇合、在某处汇合。',
     storySource: '路线先贴着东侧空间移动，再在乾清门前与沈砚汇合。',
     firstAppearsAt: 3,
@@ -312,7 +388,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '它把乾清门前从普通终点变成两种行动逻辑可比较的关系节点。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '外朝', pinyin: 'wàicháo', partOfSpeech: '名词', simpleChinese: '紫禁城中与重大典礼和政务关系密切的主要区域。', translation: 'Ngoại triều', englishDefinition: 'Outer Court', symbol: '🏛️'),
+    entry: WordEntry(
+      word: '外朝',
+      pinyin: 'wàicháo',
+      partOfSpeech: '名词',
+      simpleChinese: '紫禁城中与重大典礼和政务关系密切的主要区域。',
+      translation: 'Ngoại triều',
+      englishDefinition: 'Outer Court',
+      symbol: '🏛️',
+    ),
     usageNote: '常用搭配：外朝建筑、外朝空间、外朝区域。',
     storySource: '他沿中轴观察外朝的宫门与院落，再向乾清门前移动。',
     firstAppearsAt: 4,
@@ -320,7 +404,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '它把沈砚的中轴观察与紫禁城真实功能分区连接起来。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '连接', pinyin: 'liánjiē', partOfSpeech: '动词/名词', simpleChinese: '使两个空间、位置或关系相通。', translation: 'kết nối', englishDefinition: 'connect; connection', symbol: '🔗'),
+    entry: WordEntry(
+      word: '连接',
+      pinyin: 'liánjiē',
+      partOfSpeech: '动词/名词',
+      simpleChinese: '使两个空间、位置或关系相通。',
+      translation: 'kết nối',
+      englishDefinition: 'connect; connection',
+      symbol: '🔗',
+    ),
     usageNote: '常用搭配：空间连接、连接条件、彼此连接。',
     storySource: '她主动请沈砚把图放在一边，先看空间连接。',
     firstAppearsAt: 4,
@@ -328,7 +420,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '它是 Story 从“谁对谁错”转向“先检查空间条件”的关键动词。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '内廷', pinyin: 'nèitíng', partOfSpeech: '名词', simpleChinese: '紫禁城中与帝后生活关系更密切的主要区域。', translation: 'Nội đình', englishDefinition: 'Inner Court', symbol: '🏯'),
+    entry: WordEntry(
+      word: '内廷',
+      pinyin: 'nèitíng',
+      partOfSpeech: '名词',
+      simpleChinese: '紫禁城中与帝后生活关系更密切的主要区域。',
+      translation: 'Nội đình',
+      englishDefinition: 'Inner Court',
+      symbol: '🏯',
+    ),
     usageNote: '常用搭配：内廷建筑、内廷空间、进入内廷。',
     storySource: '从这里再向北，空间进入与内廷关系更密切的区域。',
     firstAppearsAt: 6,
@@ -336,7 +436,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '它让乾清门前的空间转换获得真实建筑背景。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '标注', pinyin: 'biāozhù', partOfSpeech: '动词', simpleChinese: '在图、文字或物件上加上说明。', translation: 'đánh dấu; ghi chú', englishDefinition: 'label; annotate', symbol: '✍️'),
+    entry: WordEntry(
+      word: '标注',
+      pinyin: 'biāozhù',
+      partOfSpeech: '动词',
+      simpleChinese: '在图、文字或物件上加上说明。',
+      translation: 'đánh dấu; ghi chú',
+      englishDefinition: 'label; annotate',
+      symbol: '✍️',
+    ),
     usageNote: '常用搭配：标注路线、标注任务、图上标注。',
     storySource: '于是他在图上分别标注“中轴观察”和“东侧记录”，把两条路线都保留。',
     firstAppearsAt: 5,
@@ -344,7 +452,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '它把沈砚的心理变化变成可见行动，而不只让旁白宣布他“明白了”。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '判断', pinyin: 'pànduàn', partOfSpeech: '名词/动词', simpleChinese: '根据所见信息形成结论。', translation: 'phán đoán', englishDefinition: 'judgment; assess', symbol: '⚖️'),
+    entry: WordEntry(
+      word: '判断',
+      pinyin: 'pànduàn',
+      partOfSpeech: '名词/动词',
+      simpleChinese: '根据所见信息形成结论。',
+      translation: 'phán đoán',
+      englishDefinition: 'judgment; assess',
+      symbol: '⚖️',
+    ),
     usageNote: '常用搭配：作出判断、修改判断、判断依据。',
     storySource: '沈砚看见她的线偏离中轴，判断她的方法不够准确；阿宁没有接受这个判断，也没有要求他删掉自己的线。',
     firstAppearsAt: 5,
@@ -352,7 +468,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '高等级 Story 用它把人物成长变成“证据改变判断”的过程。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '证据', pinyin: 'zhèngjù', partOfSpeech: '名词', simpleChinese: '用来支持或检验一个判断的信息。', translation: 'bằng chứng', englishDefinition: 'evidence', symbol: '🔎'),
+    entry: WordEntry(
+      word: '证据',
+      pinyin: 'zhèngjù',
+      partOfSpeech: '名词',
+      simpleChinese: '用来支持或检验一个判断的信息。',
+      translation: 'bằng chứng',
+      englishDefinition: 'evidence',
+      symbol: '🔎',
+    ),
     usageNote: '常用搭配：检查证据、空间证据、证据改变结论。',
     storySource: '沈砚把差异当成错误，阿宁却要求他先检查证据。',
     firstAppearsAt: 7,
@@ -360,7 +484,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '它让 Lv7 以后从立场冲突升级为可检验的推理冲突。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '视角', pinyin: 'shìjiǎo', partOfSpeech: '名词', simpleChinese: '观察或理解事情的位置和方式。', translation: 'góc nhìn', englishDefinition: 'perspective; viewpoint', symbol: '👁️'),
+    entry: WordEntry(
+      word: '视角',
+      pinyin: 'shìjiǎo',
+      partOfSpeech: '名词',
+      simpleChinese: '观察或理解事情的位置和方式。',
+      translation: 'góc nhìn',
+      englishDefinition: 'perspective; viewpoint',
+      symbol: '👁️',
+    ),
     usageNote: '常用搭配：人物视角、不同视角、从某种视角。',
     storySource: '两人面对的是同一组建筑约束，却从不同任务与视角作出选择。',
     firstAppearsAt: 7,
@@ -368,7 +500,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '换成“看法”会弱化 Story 中观察位置、任务和空间证据共同作用的意味。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '约束', pinyin: 'yuēshù', partOfSpeech: '名词/动词', simpleChinese: '限制选择范围的条件。', translation: 'ràng buộc', englishDefinition: 'constraint; restrict', symbol: '🧭'),
+    entry: WordEntry(
+      word: '约束',
+      pinyin: 'yuēshù',
+      partOfSpeech: '名词/动词',
+      simpleChinese: '限制选择范围的条件。',
+      translation: 'ràng buộc',
+      englishDefinition: 'constraint; restrict',
+      symbol: '🧭',
+    ),
     usageNote: '常用搭配：空间约束、受到约束、共同约束。',
     storySource: '两人面对的是同一组建筑约束，却从不同任务与视角作出选择。',
     firstAppearsAt: 7,
@@ -376,7 +516,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '这是高等级路线推理的核心关系词：建筑限制行动，却不替人物决定全部行动。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '空间骨架', pinyin: 'kōngjiān gǔjià', partOfSpeech: '名词短语', simpleChinese: '组织多个空间关系的基础结构。', translation: 'khung không gian', englishDefinition: 'spatial framework', symbol: '🏗️'),
+    entry: WordEntry(
+      word: '空间骨架',
+      pinyin: 'kōngjiān gǔjià',
+      partOfSpeech: '名词短语',
+      simpleChinese: '组织多个空间关系的基础结构。',
+      translation: 'khung không gian',
+      englishDefinition: 'spatial framework',
+      symbol: '🏗️',
+    ),
     usageNote: '常用搭配：共同空间骨架、形成空间骨架。',
     storySource: '沈砚从午门沿中轴进入紫禁城，外朝连续的宫门与院落让他的观察形成稳定的空间骨架。',
     firstAppearsAt: 9,
@@ -384,7 +532,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '它把多处建筑关系压缩为可推理的整体，同时保留人物路线可以不同的余地。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '偏好', pinyin: 'piānhào', partOfSpeech: '名词/动词', simpleChinese: '在多个可行选择中更倾向某一种。', translation: 'sự ưu tiên; thiên hướng', englishDefinition: 'preference', symbol: '🧠'),
+    entry: WordEntry(
+      word: '偏好',
+      pinyin: 'piānhào',
+      partOfSpeech: '名词/动词',
+      simpleChinese: '在多个可行选择中更倾向某一种。',
+      translation: 'sự ưu tiên; thiên hướng',
+      englishDefinition: 'preference',
+      symbol: '🧠',
+    ),
     usageNote: '常用搭配：路线偏好、个人偏好、形成偏好。',
     storySource: '到乾清门前，他把这条常用路线视为最有解释力的路线偏好，并进一步误认为其他路线都应向它靠拢。',
     firstAppearsAt: 9,
@@ -392,7 +548,15 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
     narrativeNote: '这个词揭示沈砚错误的层级：他把适合自己任务的偏好升级成了普遍答案。',
   ),
   ForbiddenCityWordRecord(
-    entry: WordEntry(word: '权衡', pinyin: 'quánhéng', partOfSpeech: '动词', simpleChinese: '比较多个条件后决定怎样选择。', translation: 'cân nhắc; đánh đổi', englishDefinition: 'weigh; balance trade-offs', symbol: '⚖️'),
+    entry: WordEntry(
+      word: '权衡',
+      pinyin: 'quánhéng',
+      partOfSpeech: '动词',
+      simpleChinese: '比较多个条件后决定怎样选择。',
+      translation: 'cân nhắc; đánh đổi',
+      englishDefinition: 'weigh; balance trade-offs',
+      symbol: '⚖️',
+    ),
     usageNote: '常用搭配：权衡条件、权衡利弊、在……之间权衡。',
     storySource: '阿宁从东侧抵达，她负责东边记录点，必须在任务效率、可连接的宫门与会合地点之间权衡。',
     firstAppearsAt: 10,
@@ -403,7 +567,13 @@ const forbiddenCityWordRecords = <ForbiddenCityWordRecord>[
 
 WordEntry _wordEntryForLevel(ForbiddenCityWordRecord record, int level) {
   final base = record.entry;
-  final band = level <= 3 ? 1 : level <= 6 ? 2 : level <= 8 ? 3 : 4;
+  final band = level <= 3
+      ? 1
+      : level <= 6
+      ? 2
+      : level <= 8
+      ? 3
+      : 4;
   final notes = <WordExample>[
     WordExample(
       chinese: 'Story 原句：${record.storySource}',
@@ -412,16 +582,32 @@ WordEntry _wordEntryForLevel(ForbiddenCityWordRecord record, int level) {
       english: 'Story source: ${record.storySource}',
     ),
     WordExample(
-      chinese: band == 1 ? '意思：${base.simpleChinese}' : '搭配与语境：${record.usageNote}',
-      pinyin: _pinyin(band == 1 ? '意思：${base.simpleChinese}' : '搭配与语境：${record.usageNote}'),
-      vietnamese: band == 1 ? 'Nghĩa: ${base.translation}' : 'Ngữ cảnh: ${record.usageNote}',
-      english: band == 1 ? 'Meaning: ${base.englishDefinition}' : 'Collocation/context: ${record.usageNote}',
+      chinese: band == 1
+          ? '意思：${base.simpleChinese}'
+          : '搭配与语境：${record.usageNote}',
+      pinyin: _pinyin(
+        band == 1 ? '意思：${base.simpleChinese}' : '搭配与语境：${record.usageNote}',
+      ),
+      vietnamese: band == 1
+          ? 'Nghĩa: ${base.translation}'
+          : 'Ngữ cảnh: ${record.usageNote}',
+      english: band == 1
+          ? 'Meaning: ${base.englishDefinition}'
+          : 'Collocation/context: ${record.usageNote}',
     ),
     WordExample(
-      chinese: band <= 2 ? '在这段 Story 里：${record.usageNote}' : '对比：${record.contrastNote}',
-      pinyin: _pinyin(band <= 2 ? '在这段故事里：${record.usageNote}' : '对比：${record.contrastNote}'),
-      vietnamese: band <= 2 ? 'Trong Story: ${record.usageNote}' : 'So sánh ngữ nghĩa: ${record.contrastNote}',
-      english: band <= 2 ? 'In this Story: ${record.usageNote}' : 'Semantic contrast: ${record.contrastNote}',
+      chinese: band <= 2
+          ? '在这段 Story 里：${record.usageNote}'
+          : '对比：${record.contrastNote}',
+      pinyin: _pinyin(
+        band <= 2 ? '在这段故事里：${record.usageNote}' : '对比：${record.contrastNote}',
+      ),
+      vietnamese: band <= 2
+          ? 'Trong Story: ${record.usageNote}'
+          : 'So sánh ngữ nghĩa: ${record.contrastNote}',
+      english: band <= 2
+          ? 'In this Story: ${record.usageNote}'
+          : 'Semantic contrast: ${record.contrastNote}',
     ),
     if (band == 4)
       WordExample(
@@ -449,12 +635,12 @@ DiscoveryEntry _discovery(
   String vietnamese,
   String english,
 ) => DiscoveryEntry(
-      text: text,
-      pinyin: _pinyin(text),
-      simpleChinese: simpleChinese,
-      vietnamese: vietnamese,
-      english: english,
-    );
+  text: text,
+  pinyin: _pinyin(text),
+  simpleChinese: simpleChinese,
+  vietnamese: vietnamese,
+  english: english,
+);
 
 final forbiddenCityDiscoveries = <DiscoveryEntry>[
   _discovery(
@@ -489,65 +675,274 @@ final forbiddenCityDiscoveries = <DiscoveryEntry>[
   ),
 ];
 
+final forbiddenCityDiscoveryFocusByLevel = <DiscoveryEntry>[
+  _discovery(
+    'Lv1 先认清三个 Story 地点：午门在紫禁城南端并位于中轴线上；沿中轴向北，沈砚把乾清门前当作自己的到达点。阿宁从不同方向来到同一位置，所以“到同一个地方”不自动等于“走同一条路”。',
+    '先认午门、中轴和乾清门。两个人可以从不同方向到同一个地方。',
+    'Lv1: Hãy nhận ra Ngọ Môn, trục giữa và Càn Thanh Môn. Hai người có thể đến cùng một nơi từ những hướng khác nhau.',
+    'Lv1: First identify the Meridian Gate, the central axis, and the Gate of Heavenly Purity. Two people can reach the same place from different directions.',
+  ),
+  _discovery(
+    'Lv2 的关键不是背“另一条路”，而是看任务。中轴是一条非常清楚、常用的观察框架；阿宁却要把记录送回东边。乾清门前成为共同节点后，两人的下一步任务仍然不同，因此路线选择也可以不同。',
+    '共同地点不等于共同任务。任务不同，合理路线也可能不同。',
+    'Lv2: Cùng một điểm đến không có nghĩa là cùng một nhiệm vụ. Khi nhiệm vụ khác nhau, tuyến hợp lý cũng có thể khác.',
+    'Lv2: A shared destination does not mean a shared task. Different tasks can justify different routes.',
+  ),
+  _discovery(
+    'Lv3 要把“为什么能汇合”放回建筑里理解。紫禁城由连续的宫门、院落和方向关系组织，人物不是在空白地图上画线。两条路线能在乾清门前汇合，是因为它们都要遵守真实的空间连接。',
+    '路线必须经过真实的门、院落和连接；汇合不是随便画出来的。',
+    'Lv3: Tuyến đi phải dựa trên cổng, sân và kết nối có thật. Điểm hội tụ không phải là một nét vẽ tùy ý.',
+    'Lv3: Routes must follow real gates, courtyards, and connections. A convergence point is not something that can be drawn arbitrarily.',
+  ),
+  _discovery(
+    'Lv4 开始区分“空间结构”和“人物目标”。外朝的宫门、院落与中轴形成强烈秩序，乾清门又处在理解外朝与内廷关系的重要位置。建筑告诉人物哪些连接成立，却不会替沈砚和阿宁决定同一个任务。',
+    '建筑决定哪些连接可能成立；人物目标决定为什么选择其中一条。',
+    'Lv4: Kiến trúc cho biết kết nối nào có thể tồn tại; mục tiêu của nhân vật giải thích vì sao họ chọn một tuyến cụ thể.',
+    'Lv4: Architecture determines which connections are possible; a character’s goal explains why one of those routes is chosen.',
+  ),
+  _discovery(
+    'Lv5 可以用一个具体证据检查阿宁的东侧路线。故宫博物院资料显示，景运门位于乾清门前广场东侧，是进入这一广场的重要门户之一。这说明乾清门前不只属于南北中轴，它也与东侧空间发生真实连接。',
+    '景运门在乾清门前广场东侧，证明这个共同节点也和东边空间相连。',
+    'Lv5: Cảnh Vận Môn nằm phía đông quảng trường trước Càn Thanh Môn, cho thấy điểm chung này thật sự kết nối với không gian phía đông.',
+    'Lv5: Jingyun Gate stands on the east side of the forecourt before the Gate of Heavenly Purity, showing that this shared node genuinely connects eastward.',
+  ),
+  _discovery(
+    'Lv6 要把两个判断拆开：一条路线“能不能走通”，取决于门、院落、方向与功能分区等空间连接；它“适不适合任务”，还要看人物接下来必须完成什么。可行性和任务适配不是同一个问题。',
+    '先判断空间是否可行，再判断是否适合任务；这两个问题不能混在一起。',
+    'Lv6: Trước hết xét tuyến có khả thi trong không gian hay không, sau đó xét nó có phù hợp nhiệm vụ hay không. Hai phán đoán này khác nhau.',
+    'Lv6: First test whether a route is spatially feasible, then whether it fits the task. These are two different judgments.',
+  ),
+  _discovery(
+    'Lv7 的“证据”至少有两层。第一层是共同空间事实，例如中轴、宫门、院落和乾清门前的连接；第二层是人物任务与视角。只有同时检查这两层，才能解释为什么同一组建筑约束之内仍可能出现不同的合理选择。',
+    '共同空间事实限制选择，任务和视角解释不同选择为什么仍然合理。',
+    'Lv7: Sự thật không gian chung giới hạn lựa chọn; nhiệm vụ và góc nhìn giải thích vì sao các lựa chọn khác nhau vẫn có thể hợp lý.',
+    'Lv7: Shared spatial facts constrain choices, while tasks and perspectives explain why different choices can still be reasonable.',
+  ),
+  _discovery(
+    'Lv8 不把“不同视角”理解成“各说各话”。沈砚和阿宁都必须接受同一批建筑事实检验：路线是否真的连接、共同节点是否存在、任务是否被满足。视角可以不同，但证据标准不能随人物改变。',
+    '视角可以不同，事实标准不能不同。两条路线都要接受同一组空间证据检查。',
+    'Lv8: Góc nhìn có thể khác, nhưng tiêu chuẩn sự thật không thể thay đổi theo người. Cả hai tuyến phải chịu cùng một phép kiểm tra bằng chứng không gian.',
+    'Lv8: Perspectives may differ, but the factual standard cannot change by person. Both routes must pass the same spatial-evidence test.',
+  ),
+  _discovery(
+    'Lv9 可以把路线图分成两层来读：底层是紫禁城共同的空间骨架，包括中轴、门、院落、功能分区和东西连接；上层才是人物因任务形成的路线偏好。这样既不会把个人路线冒充整座宫城，也不会把真实任务差异抹掉。',
+    '先画共同空间骨架，再叠加人物任务路线，可以区分事实与路线偏好。',
+    'Lv9: Hãy dựng khung không gian chung trước rồi chồng tuyến nhiệm vụ của từng người lên trên để phân biệt sự thật không gian với ưu tiên tuyến.',
+    'Lv9: Build the shared spatial framework first, then layer each person’s task route on top to distinguish spatial facts from route preferences.',
+  ),
+  _discovery(
+    'Lv10 的迁移标准不是“保留所有路线”，而是写清每条路线成立的条件。面对一个新任务，应同时检验建筑连接、人物目标与行动后果：空间上走不通的路线应排除；能走通但不服务任务的路线也不能自动成为最佳选择。',
+    '新情境要同时看空间连接、人物目标和行动后果，并说明每条路线凭什么成立。',
+    'Lv10: Trong tình huống mới, cần xét đồng thời kết nối kiến trúc, mục tiêu nhân vật và hệ quả hành động, rồi nêu rõ điều kiện khiến mỗi tuyến đứng vững.',
+    'Lv10: In a new situation, test architectural connections, character goals, and action consequences together, and state the conditions under which each route is justified.',
+  ),
+];
+
 List<DiscoveryEntry> _discoveriesForLevel(int level) {
-  if (level <= 2) return <DiscoveryEntry>[forbiddenCityDiscoveries[0]];
-  if (level <= 4) {
-    return <DiscoveryEntry>[
-      forbiddenCityDiscoveries[0],
-      forbiddenCityDiscoveries[1],
-    ];
-  }
-  if (level <= 6) {
-    return <DiscoveryEntry>[
-      forbiddenCityDiscoveries[1],
-      forbiddenCityDiscoveries[2],
-    ];
-  }
-  if (level <= 8) {
-    return <DiscoveryEntry>[
-      forbiddenCityDiscoveries[2],
-      forbiddenCityDiscoveries[3],
-    ];
-  }
-  return <DiscoveryEntry>[
-    forbiddenCityDiscoveries[3],
-    forbiddenCityDiscoveries[4],
-  ];
+  final safeLevel = level.clamp(1, 10).toInt();
+  final focus = forbiddenCityDiscoveryFocusByLevel[safeLevel - 1];
+  final grounding = switch (safeLevel) {
+    1 || 2 => forbiddenCityDiscoveries[0],
+    3 || 4 => forbiddenCityDiscoveries[1],
+    5 || 6 => forbiddenCityDiscoveries[2],
+    7 || 8 => forbiddenCityDiscoveries[3],
+    _ => forbiddenCityDiscoveries[4],
+  };
+  return <DiscoveryEntry>[focus, grounding];
 }
 
 const forbiddenCityMemoryMoments = <ForbiddenCityMemoryMoment>[
-  ForbiddenCityMemoryMoment(level: 1, anchor: '两条都走到乾清门前的线', recall: '想起沈砚先说阿宁走错，后来却把她的线留下。', characterShift: '沈砚开始听阿宁说明；阿宁也愿意听他讲中轴。', takeaway: '同一个地方可以有不同走法。'),
-  ForbiddenCityMemoryMoment(level: 2, anchor: '两条都能走通的路线', recall: '阿宁先请沈砚去看，再决定要不要删线。', characterShift: '沈砚把两人的目标写上图；阿宁不再觉得他只相信自己的主线。', takeaway: '先看目标和实际路线，再判断。'),
-  ForbiddenCityMemoryMoment(level: 3, anchor: '一张留下两个目标的路线图', recall: '阿宁宁可晚一点交记录，也带沈砚回看宫门和院落。', characterShift: '沈砚让阿宁亲手画她的线；阿宁补上中轴，让两种观察能连接。', takeaway: '常走的路不等于只有它正确。'),
-  ForbiddenCityMemoryMoment(level: 4, anchor: '建筑相同，目标可以不同', recall: '两人先检查空间怎样连接，再讨论路线是否适合任务。', characterShift: '沈砚愿意改判断；阿宁也补完整自己的记录。', takeaway: '建筑提供条件，目标影响路线。'),
-  ForbiddenCityMemoryMoment(level: 5, anchor: '标着任务的两条路线', recall: '阿宁让证据说话，沈砚把“中轴观察”和“东侧记录”分别标出。', characterShift: '两人从互相判断变成交换观察。', takeaway: '路线要和任务、空间证据一起读。'),
-  ForbiddenCityMemoryMoment(level: 6, anchor: '空间连接与任务选择是两个问题', recall: '阿宁把“能不能连通”和“适不适合任务”分开。', characterShift: '沈砚不再把阿宁的线当次要旁线；阿宁也愿意让他补整体关系。', takeaway: '一条路线成立，需要空间条件与任务理由同时说得通。'),
-  ForbiddenCityMemoryMoment(level: 7, anchor: '证据改变判断的那张图', recall: '两人用建筑连接、任务和视角检查原先的结论。', characterShift: '沈砚撤回排他判断；阿宁看到他愿意被证据说服。', takeaway: '共同约束之内仍可能有不同合理选择。'),
-  ForbiddenCityMemoryMoment(level: 8, anchor: '谁提供哪一种证据', recall: '阿宁提出空间证据、任务和共同条件三个问题。', characterShift: '合作从“谁纠正谁”变成“谁贡献哪一种证据”。', takeaway: '常用框架有解释力，但不能自动排除其他视角。'),
-  ForbiddenCityMemoryMoment(level: 9, anchor: '共同空间骨架上的两层路线', recall: '沈砚把空间骨架放底层，把两人的目标与路线分别放上去。', characterShift: '他让阿宁解释自己的路线；阿宁请他补整体关系。', takeaway: '路线偏好来自任务，不应冒充普遍答案。'),
-  ForbiddenCityMemoryMoment(level: 10, anchor: '一条常用路线，并不等于唯一正确的路线。', recall: '两人用建筑连接、人物目标和行动后果检验路线，并保留各自成立的条件。', characterShift: '他们不再争谁服从谁，而是共同署名一张保留差异的图。', takeaway: '空间事实限定可能性，身份与任务改变优先次序；好的判断要说明自己凭什么成立。'),
+  ForbiddenCityMemoryMoment(
+    level: 1,
+    anchor: '两条都走到乾清门前的线',
+    recall: '想起沈砚先说阿宁走错，后来却把她的线留下。',
+    characterShift: '沈砚开始听阿宁说明；阿宁也愿意听他讲中轴。',
+    takeaway: '同一个地方可以有不同走法。',
+  ),
+  ForbiddenCityMemoryMoment(
+    level: 2,
+    anchor: '两条都能走通的路线',
+    recall: '阿宁先请沈砚去看，再决定要不要删线。',
+    characterShift: '沈砚把两人的目标写上图；阿宁不再觉得他只相信自己的主线。',
+    takeaway: '先看目标和实际路线，再判断。',
+  ),
+  ForbiddenCityMemoryMoment(
+    level: 3,
+    anchor: '一张留下两个目标的路线图',
+    recall: '阿宁宁可晚一点交记录，也带沈砚回看宫门和院落。',
+    characterShift: '沈砚让阿宁亲手画她的线；阿宁补上中轴，让两种观察能连接。',
+    takeaway: '常走的路不等于只有它正确。',
+  ),
+  ForbiddenCityMemoryMoment(
+    level: 4,
+    anchor: '建筑相同，目标可以不同',
+    recall: '两人先检查空间怎样连接，再讨论路线是否适合任务。',
+    characterShift: '沈砚愿意改判断；阿宁也补完整自己的记录。',
+    takeaway: '建筑提供条件，目标影响路线。',
+  ),
+  ForbiddenCityMemoryMoment(
+    level: 5,
+    anchor: '标着任务的两条路线',
+    recall: '阿宁让证据说话，沈砚把“中轴观察”和“东侧记录”分别标出。',
+    characterShift: '两人从互相判断变成交换观察。',
+    takeaway: '路线要和任务、空间证据一起读。',
+  ),
+  ForbiddenCityMemoryMoment(
+    level: 6,
+    anchor: '空间连接与任务选择是两个问题',
+    recall: '阿宁把“能不能连通”和“适不适合任务”分开。',
+    characterShift: '沈砚不再把阿宁的线当次要旁线；阿宁也愿意让他补整体关系。',
+    takeaway: '一条路线成立，需要空间条件与任务理由同时说得通。',
+  ),
+  ForbiddenCityMemoryMoment(
+    level: 7,
+    anchor: '证据改变判断的那张图',
+    recall: '两人用建筑连接、任务和视角检查原先的结论。',
+    characterShift: '沈砚撤回排他判断；阿宁看到他愿意被证据说服。',
+    takeaway: '共同约束之内仍可能有不同合理选择。',
+  ),
+  ForbiddenCityMemoryMoment(
+    level: 8,
+    anchor: '谁提供哪一种证据',
+    recall: '阿宁提出空间证据、任务和共同条件三个问题。',
+    characterShift: '合作从“谁纠正谁”变成“谁贡献哪一种证据”。',
+    takeaway: '常用框架有解释力，但不能自动排除其他视角。',
+  ),
+  ForbiddenCityMemoryMoment(
+    level: 9,
+    anchor: '共同空间骨架上的两层路线',
+    recall: '沈砚把空间骨架放底层，把两人的目标与路线分别放上去。',
+    characterShift: '他让阿宁解释自己的路线；阿宁请他补整体关系。',
+    takeaway: '路线偏好来自任务，不应冒充普遍答案。',
+  ),
+  ForbiddenCityMemoryMoment(
+    level: 10,
+    anchor: '一条常用路线，并不等于唯一正确的路线。',
+    recall: '两人用建筑连接、人物目标和行动后果检验路线，并保留各自成立的条件。',
+    characterShift: '他们不再争谁服从谁，而是共同署名一张保留差异的图。',
+    takeaway: '空间事实限定可能性，身份与任务改变优先次序；好的判断要说明自己凭什么成立。',
+  ),
 ];
 
 ForbiddenCityMemoryMoment forbiddenCityMemoryForLevel(int level) =>
     forbiddenCityMemoryMoments[level.clamp(1, 10).toInt() - 1];
 
 const forbiddenCityMemoryReviews = <ForbiddenCityMemoryReview>[
-  ForbiddenCityMemoryReview(prompt: '离开紫禁城前，先记住哪幅画面？', answer: '沈砚和阿宁把两条都能走通的路线留在同一张图上。'),
-  ForbiddenCityMemoryReview(prompt: '人物关系真正改变在哪里？', answer: '沈砚开始让阿宁解释自己的路线；阿宁也愿意让沈砚补充整体空间关系。'),
-  ForbiddenCityMemoryReview(prompt: '这次 Journey 最值得带走的一句话是什么？', answer: forbiddenCityCoreTakeaway),
+  ForbiddenCityMemoryReview(
+    prompt: '离开紫禁城前，先记住哪幅画面？',
+    answer: '沈砚和阿宁把两条都能走通的路线留在同一张图上。',
+  ),
+  ForbiddenCityMemoryReview(
+    prompt: '人物关系真正改变在哪里？',
+    answer: '沈砚开始让阿宁解释自己的路线；阿宁也愿意让沈砚补充整体空间关系。',
+  ),
+  ForbiddenCityMemoryReview(
+    prompt: '这次 Journey 最值得带走的一句话是什么？',
+    answer: forbiddenCityCoreTakeaway,
+  ),
 ];
 
 const forbiddenCityCompletionMoments = <ForbiddenCityCompletionMoment>[
-  ForbiddenCityCompletionMoment(level: 1, storyClosure: '沈砚没有擦掉阿宁的线，两人从乾清门前带着两条路线继续走。', discovery: '你看见午门、中轴和乾清门把故事真正放进紫禁城。', learning: '你能分清人物、地点、目标和结果。', memory: '两条都走到乾清门前的线', relationship: '沈砚开始听阿宁说明，阿宁也愿意听他讲中轴。', emotionalClosure: '这张图不再只属于一个人的答案。', unlockResult: 'Lv1 Journey 完成，紫禁城进度已记录。'),
-  ForbiddenCityCompletionMoment(level: 2, storyClosure: '阿宁先带沈砚去看路线，再让他决定；沈砚最后保留两条线。', discovery: '你发现中轴很重要，但人物还会因为任务不同而选择不同路线。', learning: '你能解释“为什么这样走”。', memory: '两条都能走通的路线', relationship: '沈砚写下两人的目标，阿宁也开始信任他的观察。', emotionalClosure: '争论第一次变成了共同检查。', unlockResult: 'Lv2 Journey 完成，紫禁城进度已记录。'),
-  ForbiddenCityCompletionMoment(level: 3, storyClosure: '阿宁牺牲一点时间带沈砚回看空间，最后两人共同完成路线图。', discovery: '你把宫门、院落、方向和共同终点连成了空间线索。', learning: '你能用原因和结果说明两条路线为何都成立。', memory: '一张留下两个目标的路线图', relationship: '沈砚让阿宁亲手画线，阿宁也主动补上中轴。', emotionalClosure: '他们没有赢过对方，却得到一张更好的图。', unlockResult: 'Lv3 Journey 完成，紫禁城进度已记录。'),
-  ForbiddenCityCompletionMoment(level: 4, storyClosure: '两人先看建筑怎样连接，再讨论路线怎样服务目标。', discovery: '你认识外朝、乾清门前与东侧连接如何参与路线判断。', learning: '你能把建筑关系与人物行动联系起来。', memory: '建筑相同，目标可以不同', relationship: '沈砚改了判断，阿宁也改进了自己的记录。', emotionalClosure: '一张路线图开始同时看见建筑和人。', unlockResult: 'Lv4 Journey 完成，紫禁城进度已记录。'),
-  ForbiddenCityCompletionMoment(level: 5, storyClosure: '沈砚把“中轴观察”和“东侧记录”分别标注，两条路线都有了理由。', discovery: '你看见真实宫门和院落怎样限制并组织移动。', learning: '你能比较路线、任务与共同节点。', memory: '标着任务的两条路线', relationship: '两人从互相判断转向交换观察。', emotionalClosure: '图上的两种线终于不再争夺同一个位置。', unlockResult: 'Lv5 Journey 完成，紫禁城进度已记录。'),
-  ForbiddenCityCompletionMoment(level: 6, storyClosure: '阿宁把空间连通与任务适配分开，沈砚据此重做整张图。', discovery: '你把外朝、内廷、乾清门和东侧门户放进同一个空间关系里。', learning: '你能说明“可行”与“适合”不是同一判断。', memory: '空间连接与任务选择是两个问题', relationship: '沈砚不再把阿宁的路线降级，阿宁也让他参与自己的记录。', emotionalClosure: '他们开始把差异当作信息，而不是麻烦。', unlockResult: 'Lv6 Journey 完成，紫禁城进度已记录。'),
-  ForbiddenCityCompletionMoment(level: 7, storyClosure: '证据让沈砚撤回“只有一条正确路线”的结论。', discovery: '你理解建筑约束会限定路线，但不会替每个任务选出同一答案。', learning: '你能用证据、因果和视角解释人物判断。', memory: '证据改变判断的那张图', relationship: '阿宁看到沈砚会被证据说服，沈砚也开始尊重她的判断。', emotionalClosure: '两条线被保留，是因为它们经得起同一组条件检查。', unlockResult: 'Lv7 Journey 完成，紫禁城进度已记录。'),
-  ForbiddenCityCompletionMoment(level: 8, storyClosure: '两人用空间证据、任务和共同条件重做判断，不再争谁纠正谁。', discovery: '你把中轴、门、院落与东西方向连接读成一个空间系统。', learning: '你能比较多种证据，并说明一条常用框架为什么不能自动排除其他路线。', memory: '谁提供哪一种证据', relationship: '他们的合作方式变成互相补足证据。', emotionalClosure: '这次旅程留下的不是折中，而是一种更严格的理解。', unlockResult: 'Lv8 Journey 完成，紫禁城进度已记录。'),
-  ForbiddenCityCompletionMoment(level: 9, storyClosure: '沈砚把共同空间骨架与人物路线分层表示，并让阿宁解释她自己的线。', discovery: '你理解路线偏好如何由任务形成，又如何受共同建筑条件约束。', learning: '你能区分空间事实、局部视角和路线偏好。', memory: '共同空间骨架上的两层路线', relationship: '沈砚交出解释权，阿宁则主动向他索取整体关系。', emotionalClosure: '他们不再把完整理解误认成只有一个声音。', unlockResult: 'Lv9 Journey 完成，紫禁城进度已记录。'),
-  ForbiddenCityCompletionMoment(level: 10, storyClosure: '三类证据检验后，两条路线都写明成立条件，沈砚与阿宁共同署名。', discovery: '你把中轴与功能分区、门与院落、东西连接、人物身份与任务放进同一套空间推理。', learning: '你能在新情境里权衡空间约束、目标与行动后果，而不是套用默认路线。', memory: '一条常用路线，并不等于唯一正确的路线。', relationship: '沈砚允许别人的证据改变自己的图，阿宁也允许整体关系改变自己的局部记录。', emotionalClosure: '紫禁城没有给他们一条万能答案，却教会他们怎样让不同答案接受同一组事实检验。', unlockResult: 'Lv10 Journey 完成，Reference Journey 进度已记录。'),
+  ForbiddenCityCompletionMoment(
+    level: 1,
+    storyClosure: '沈砚没有擦掉阿宁的线，两人从乾清门前带着两条路线继续走。',
+    discovery: '你看见午门、中轴和乾清门把故事真正放进紫禁城。',
+    learning: '你能分清人物、地点、目标和结果。',
+    memory: '两条都走到乾清门前的线',
+    relationship: '沈砚开始听阿宁说明，阿宁也愿意听他讲中轴。',
+    emotionalClosure: '这张图不再只属于一个人的答案。',
+    unlockResult: 'Lv1 Journey 完成，紫禁城进度已记录。',
+  ),
+  ForbiddenCityCompletionMoment(
+    level: 2,
+    storyClosure: '阿宁先带沈砚去看路线，再让他决定；沈砚最后保留两条线。',
+    discovery: '你发现中轴很重要，但人物还会因为任务不同而选择不同路线。',
+    learning: '你能解释“为什么这样走”。',
+    memory: '两条都能走通的路线',
+    relationship: '沈砚写下两人的目标，阿宁也开始信任他的观察。',
+    emotionalClosure: '争论第一次变成了共同检查。',
+    unlockResult: 'Lv2 Journey 完成，紫禁城进度已记录。',
+  ),
+  ForbiddenCityCompletionMoment(
+    level: 3,
+    storyClosure: '阿宁牺牲一点时间带沈砚回看空间，最后两人共同完成路线图。',
+    discovery: '你把宫门、院落、方向和共同终点连成了空间线索。',
+    learning: '你能用原因和结果说明两条路线为何都成立。',
+    memory: '一张留下两个目标的路线图',
+    relationship: '沈砚让阿宁亲手画线，阿宁也主动补上中轴。',
+    emotionalClosure: '他们没有赢过对方，却得到一张更好的图。',
+    unlockResult: 'Lv3 Journey 完成，紫禁城进度已记录。',
+  ),
+  ForbiddenCityCompletionMoment(
+    level: 4,
+    storyClosure: '两人先看建筑怎样连接，再讨论路线怎样服务目标。',
+    discovery: '你认识外朝、乾清门前与东侧连接如何参与路线判断。',
+    learning: '你能把建筑关系与人物行动联系起来。',
+    memory: '建筑相同，目标可以不同',
+    relationship: '沈砚改了判断，阿宁也改进了自己的记录。',
+    emotionalClosure: '一张路线图开始同时看见建筑和人。',
+    unlockResult: 'Lv4 Journey 完成，紫禁城进度已记录。',
+  ),
+  ForbiddenCityCompletionMoment(
+    level: 5,
+    storyClosure: '沈砚把“中轴观察”和“东侧记录”分别标注，两条路线都有了理由。',
+    discovery: '你看见真实宫门和院落怎样限制并组织移动。',
+    learning: '你能比较路线、任务与共同节点。',
+    memory: '标着任务的两条路线',
+    relationship: '两人从互相判断转向交换观察。',
+    emotionalClosure: '图上的两种线终于不再争夺同一个位置。',
+    unlockResult: 'Lv5 Journey 完成，紫禁城进度已记录。',
+  ),
+  ForbiddenCityCompletionMoment(
+    level: 6,
+    storyClosure: '阿宁把空间连通与任务适配分开，沈砚据此重做整张图。',
+    discovery: '你把外朝、内廷、乾清门和东侧门户放进同一个空间关系里。',
+    learning: '你能说明“可行”与“适合”不是同一判断。',
+    memory: '空间连接与任务选择是两个问题',
+    relationship: '沈砚不再把阿宁的路线降级，阿宁也让他参与自己的记录。',
+    emotionalClosure: '他们开始把差异当作信息，而不是麻烦。',
+    unlockResult: 'Lv6 Journey 完成，紫禁城进度已记录。',
+  ),
+  ForbiddenCityCompletionMoment(
+    level: 7,
+    storyClosure: '证据让沈砚撤回“只有一条正确路线”的结论。',
+    discovery: '你理解建筑约束会限定路线，但不会替每个任务选出同一答案。',
+    learning: '你能用证据、因果和视角解释人物判断。',
+    memory: '证据改变判断的那张图',
+    relationship: '阿宁看到沈砚会被证据说服，沈砚也开始尊重她的判断。',
+    emotionalClosure: '两条线被保留，是因为它们经得起同一组条件检查。',
+    unlockResult: 'Lv7 Journey 完成，紫禁城进度已记录。',
+  ),
+  ForbiddenCityCompletionMoment(
+    level: 8,
+    storyClosure: '两人用空间证据、任务和共同条件重做判断，不再争谁纠正谁。',
+    discovery: '你把中轴、门、院落与东西方向连接读成一个空间系统。',
+    learning: '你能比较多种证据，并说明一条常用框架为什么不能自动排除其他路线。',
+    memory: '谁提供哪一种证据',
+    relationship: '他们的合作方式变成互相补足证据。',
+    emotionalClosure: '这次旅程留下的不是折中，而是一种更严格的理解。',
+    unlockResult: 'Lv8 Journey 完成，紫禁城进度已记录。',
+  ),
+  ForbiddenCityCompletionMoment(
+    level: 9,
+    storyClosure: '沈砚把共同空间骨架与人物路线分层表示，并让阿宁解释她自己的线。',
+    discovery: '你理解路线偏好如何由任务形成，又如何受共同建筑条件约束。',
+    learning: '你能区分空间事实、局部视角和路线偏好。',
+    memory: '共同空间骨架上的两层路线',
+    relationship: '沈砚交出解释权，阿宁则主动向他索取整体关系。',
+    emotionalClosure: '他们不再把完整理解误认成只有一个声音。',
+    unlockResult: 'Lv9 Journey 完成，紫禁城进度已记录。',
+  ),
+  ForbiddenCityCompletionMoment(
+    level: 10,
+    storyClosure: '三类证据检验后，两条路线都写明成立条件，沈砚与阿宁共同署名。',
+    discovery: '你把中轴与功能分区、门与院落、东西连接、人物身份与任务放进同一套空间推理。',
+    learning: '你能在新情境里权衡空间约束、目标与行动后果，而不是套用默认路线。',
+    memory: '一条常用路线，并不等于唯一正确的路线。',
+    relationship: '沈砚允许别人的证据改变自己的图，阿宁也允许整体关系改变自己的局部记录。',
+    emotionalClosure: '紫禁城没有给他们一条万能答案，却教会他们怎样让不同答案接受同一组事实检验。',
+    unlockResult: 'Lv10 Journey 完成，Reference Journey 进度已记录。',
+  ),
 ];
 
 ForbiddenCityCompletionMoment forbiddenCityCompletionForLevel(int level) =>
@@ -587,9 +982,45 @@ List<WordEntry> forbiddenCityWordsForLevel(int level) {
   final safeLevel = level.clamp(1, 10).toInt();
   final story = forbiddenCityLockedStories[safeLevel - 1];
   final maximum = <int>[5, 6, 7, 7, 8, 8, 8, 8, 8, 8][safeLevel - 1];
-  return forbiddenCityWordRecords
-      .where((record) => record.firstAppearsAt <= safeLevel && story.contains(record.entry.word))
-      .take(maximum)
+  final candidates = forbiddenCityWordRecords
+      .where(
+        (record) =>
+            record.firstAppearsAt <= safeLevel &&
+            story.contains(record.entry.word),
+      )
+      .toList(growable: false);
+  if (candidates.length <= maximum) {
+    return candidates
+        .map((record) => _wordEntryForLevel(record, safeLevel))
+        .toList(growable: false);
+  }
+
+  // Each level keeps newly introduced Story words, then rotates the remaining
+  // same-level Story vocabulary. This makes Vocabulary a real Lv1-Lv10
+  // progression instead of reusing one late-level word set.
+  final introduced = candidates
+      .where((record) => record.firstAppearsAt == safeLevel)
+      .toList(growable: false);
+  final prior = candidates
+      .where((record) => record.firstAppearsAt != safeLevel)
+      .toList(growable: false);
+  final remainingSlots = (maximum - introduced.length).clamp(0, maximum);
+  final offset = prior.isEmpty ? 0 : ((safeLevel - 1) * 2) % prior.length;
+  final rotated = prior.isEmpty
+      ? <ForbiddenCityWordRecord>[]
+      : <ForbiddenCityWordRecord>[...prior.skip(offset), ...prior.take(offset)];
+  final selected = <ForbiddenCityWordRecord>[
+    ...introduced.take(maximum),
+    ...rotated.take(remainingSlots),
+  ];
+
+  // Present words in Story order so the shared Phoenix vocabulary UI remains
+  // natural and unchanged while the selected teaching focus differs by level.
+  selected.sort(
+    (a, b) =>
+        story.indexOf(a.entry.word).compareTo(story.indexOf(b.entry.word)),
+  );
+  return selected
       .map((record) => _wordEntryForLevel(record, safeLevel))
       .toList(growable: false);
 }
@@ -623,16 +1054,16 @@ JourneyLevelContent forbiddenCityLevelContent(int level) {
     wonderQuestion: safeLevel <= 3
         ? '阿宁为什么能从另一条路线来到乾清门前？'
         : safeLevel <= 6
-            ? '建筑连接、人物目标和任务怎样共同影响两条路线？'
-            : safeLevel <= 8
-                ? '哪些证据让沈砚改变“只有一条正确路线”的判断？'
-                : '如果换一个人物和任务，怎样用空间约束、目标与后果判断一条新路线是否合理？',
+        ? '建筑连接、人物目标和任务怎样共同影响两条路线？'
+        : safeLevel <= 8
+        ? '哪些证据让沈砚改变“只有一条正确路线”的判断？'
+        : '如果换一个人物和任务，怎样用空间约束、目标与后果判断一条新路线是否合理？',
     expressQuestion: safeLevel <= 3
         ? '请用自己的话说出沈砚最后为什么留下两条路线。'
         : safeLevel <= 6
-            ? '请比较沈砚与阿宁的目标、路线和共同空间节点。'
-            : safeLevel <= 8
-                ? '请选择至少两条 Story 或 Discovery 证据，说明两条路线为什么可以同时成立。'
-                : '请把“一条常用路线，并不等于唯一正确的路线”迁移到一个新的紫禁城任务情境，并说明判断条件。',
+        ? '请比较沈砚与阿宁的目标、路线和共同空间节点。'
+        : safeLevel <= 8
+        ? '请选择至少两条 Story 或 Discovery 证据，说明两条路线为什么可以同时成立。'
+        : '请把“一条常用路线，并不等于唯一正确的路线”迁移到一个新的紫禁城任务情境，并说明判断条件。',
   );
 }
