@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 const challengeSource = readFileSync(
-  new URL('../app/lib/widgets/journey_challenge_panel.dart', import.meta.url),
+  new URL('../app/lib/widgets/journey_challenge_panel_legacy.dart', import.meta.url),
   'utf8',
 );
 

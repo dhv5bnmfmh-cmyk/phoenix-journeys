@@ -4,7 +4,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 
 const catalog = readFileSync('app/lib/data/daily_journey_catalog.dart', 'utf8');
 const journey = readFileSync('app/lib/data/summer_palace_journey.dart', 'utf8');
-const geo = readFileSync('app/lib/data/world_geo_catalog.dart', 'utf8');
+const geo = readFileSync('app/lib/data/world_geo_catalog_base.dart', 'utf8');
 const backgrounds = readFileSync(
   'app/lib/data/journey_background_generated.dart',
   'utf8',

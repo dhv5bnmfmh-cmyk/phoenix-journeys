@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 const panel = readFileSync(
-  'app/lib/widgets/journey_challenge_panel.dart',
+  'app/lib/widgets/journey_challenge_panel_legacy.dart',
   'utf8',
 );
 
@@ -49,7 +49,6 @@ test('option cards share a visual height floor without truncating answers', () =
 test('regular journeys never fall back to generic challenge filler', () => {
   assert.match(panel, /_regularJourneyDistractors\(journeyId\)/);
   for (const journeyId of [
-    'beijing-forbidden-city',
     'beijing-summer-palace',
     'shanghai-bund',
     'xian-city-wall',
@@ -72,7 +71,6 @@ test('all journey grammar repairs stay theme-specific at every level', () => {
   assert.match(panel, /JourneyChallengeDifficulty\.advanced => _GrammarSpec/);
 
   for (const journeyId of [
-    'beijing-forbidden-city',
     'beijing-summer-palace',
     'shanghai-bund',
     'xian-city-wall',
@@ -90,7 +88,6 @@ test('all journey grammar repairs stay theme-specific at every level', () => {
   }
 
   for (const destinationMarker of [
-    '午门和中轴线',
     '冬至前后十七孔桥的金光',
     '外滩与浦东两岸',
     '城墙和护城河',

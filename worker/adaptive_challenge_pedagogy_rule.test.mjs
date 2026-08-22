@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 const panel = readFileSync(
-  'app/lib/widgets/journey_challenge_panel.dart',
+  'app/lib/widgets/journey_challenge_panel_legacy.dart',
   'utf8',
 );
 

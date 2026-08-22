@@ -7,7 +7,7 @@ const expansion = readFileSync(
   'utf8',
 );
 const geo = readFileSync(
-  new URL('../app/lib/data/world_geo_catalog.dart', import.meta.url),
+  new URL('../app/lib/data/world_geo_catalog_base.dart', import.meta.url),
   'utf8',
 );
 const backgrounds = readFileSync(
