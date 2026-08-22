@@ -23,7 +23,15 @@ const _legacyStoryTokens = <String>[
 
 bool _enactsRouteSynthesis(String story) =>
     story.contains('两条') &&
-    <String>['保留', '同时', '共同', '多层表示', '标出', '写下各自成立的条件'].any(story.contains);
+    <String>[
+      '保留',
+      '留下',
+      '同时',
+      '共同',
+      '多层表示',
+      '标出',
+      '写下各自成立的条件',
+    ].any(story.contains);
 
 bool _preservesPurposefulRouteDivergence(String story) =>
     story.contains('中轴') &&
