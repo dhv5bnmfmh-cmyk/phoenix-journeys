@@ -1,3 +1,4 @@
+# One-shot repair; remove after bot commit.
 name: Forbidden City Lint Language Repair
 
 on:
