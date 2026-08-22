@@ -1,0 +1,84 @@
+name: Forbidden City Lint Language Repair
+
+on:
+  push:
+    branches:
+      - feature/forbidden-city-final-integration
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/forbidden-city-final-integration
+          fetch-depth: 0
+
+      - name: Repair analyzer findings and Lv10 language test navigation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f'expected text not found in {path}: {old!r}')
+              p.write_text(text.replace(old, new, 1))
+
+          replace(
+              'app/lib/data/adaptive_journey_level_runtime.dart',
+              "import 'journey_data.dart';\n",
+              '',
+          )
+          replace(
+              'app/lib/screens/forbidden_city_reference_journey_screen.dart',
+              "import '../services/journey_location_binding.dart';\n",
+              '',
+          )
+
+          evidence = Path('app/test/forbidden_city_reference_evidence_test.dart')
+          text = evidence.read_text()
+          if not text.startswith('// ignore_for_file: avoid_print'):
+              evidence.write_text('// ignore_for_file: avoid_print\n\n' + text)
+
+          replace(
+              'app/test/forbidden_city_reference_integration_test.dart',
+              "      await _tapKey(tester, 'forbidden-city-level-10');\n      final content = forbiddenCityLevelContent(10);",
+              "      final level10 = find.byKey(const ValueKey('forbidden-city-level-10'));\n      await tester.scrollUntilVisible(\n        level10,\n        240,\n        scrollable: find.byType(GridView),\n      );\n      await tester.tap(level10);\n      await tester.pumpAndSettle();\n      final content = forbiddenCityLevelContent(10);",
+          )
+          PY
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Format repaired files
+        working-directory: app
+        run: dart format lib/data/adaptive_journey_level_runtime.dart lib/screens/forbidden_city_reference_journey_screen.dart test/forbidden_city_reference_evidence_test.dart test/forbidden_city_reference_integration_test.dart
+
+      - name: Analyzer proof
+        working-directory: app
+        run: flutter analyze
+
+      - name: Commit repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib app/test
+          git commit -m "Fix Reference Journey analyzer and Lv10 language navigation"
+          git push origin HEAD:feature/forbidden-city-final-integration
