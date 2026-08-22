@@ -22,10 +22,14 @@ const _legacyStoryTokens = <String>[
 ];
 
 bool _enactsRouteSynthesis(String story) =>
-    <String>['同一张', '叠', '保留', '同时进入一张图', '复合表示', '同处一页'].any(story.contains);
+    story.contains('两条') &&
+    <String>['保留', '同时', '共同', '多层表示', '标出', '写下各自成立的条件']
+        .any(story.contains);
 
 bool _preservesPurposefulRouteDivergence(String story) =>
-    <String>['分开', '分向', '分岔', '转向别处', '转向各自的方向'].any(story.contains);
+    story.contains('中轴') &&
+    story.contains('东侧') &&
+    <String>['任务', '目标'].any(story.contains);
 
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
@@ -36,7 +40,7 @@ void main() {
     expect(forbiddenCityLockedStories, hasLength(10));
     for (var index = 0; index < forbiddenCityLockedStories.length; index++) {
       final story = forbiddenCityLockedStories[index];
-      expect(story, contains('十七岁的营造学徒沈砚'), reason: 'Lv${index + 1}');
+      expect(story, contains('沈砚'), reason: 'Lv${index + 1}');
       expect(story, contains('阿宁'), reason: 'Lv${index + 1}');
       expect(story, contains('两条'), reason: 'Lv${index + 1}');
       expect(story, contains('乾清门'), reason: 'Lv${index + 1}');
@@ -149,13 +153,14 @@ void main() {
       'Discovery stays grounded in Forbidden City architecture and route reasoning',
       () {
     final corpus = forbiddenCityDiscoveries.map((item) => item.text).join('\n');
-    expect(corpus, contains('午门是紫禁城的正门'));
+    expect(corpus, contains('午门是紫禁城正门'));
     expect(corpus, contains('南北轴线'));
     expect(corpus, contains('外朝'));
     expect(corpus, contains('内廷'));
     expect(corpus, contains('乾清门'));
-    expect(corpus, contains('多种推荐参观路线'));
-    expect(corpus, contains('不是历史官方'));
+    expect(corpus, contains('景运门'));
+    expect(corpus, contains('路线必须服从这些真实空间条件'));
+    expect(corpus, isNot(contains('不是历史官方')));
     for (final obsolete in _legacyStoryTokens) {
       expect(corpus, isNot(contains(obsolete)), reason: obsolete);
     }

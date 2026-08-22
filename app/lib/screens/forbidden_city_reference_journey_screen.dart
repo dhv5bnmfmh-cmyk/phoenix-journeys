@@ -12,6 +12,13 @@ import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/journey_challenge_panel.dart';
 
+Widget? resolveDedicatedJourneyRuntimeScreen(String journeyId) {
+  if (journeyId == forbiddenCityJourneyId) {
+    return const ForbiddenCityReferenceJourneyScreen();
+  }
+  return null;
+}
+
 class ForbiddenCityReferenceJourneyScreen extends StatefulWidget {
   const ForbiddenCityReferenceJourneyScreen({super.key});
 

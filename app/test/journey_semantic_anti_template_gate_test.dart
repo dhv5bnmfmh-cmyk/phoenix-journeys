@@ -199,19 +199,20 @@ void main() {
     final active = activeCanonicalGoldStoryText('beijing-forbidden-city');
     expect(record.protagonistIdentity, contains('Shen-Yan'));
     expect(record.protagonistIdentity, contains('seventeen-year-old'));
-    expect(record.protagonistArchetype, contains('construction-apprentice'));
+    expect(record.protagonistArchetype, contains('heritage-building-apprentice'));
     expect(record.narrativeIdentity, contains('dual-valid-route-overlay'));
     expect(record.conflictType, contains('coexisting-role-and-purpose-dependent-routes'));
     expect(record.choiceType, contains('preserve-both-valid-routes'));
-    expect(record.consequenceType, contains('composite-map-adds-relational-information'));
-    expect(record.endingMechanism, contains('different-directions'));
+    expect(record.consequenceType, contains('coauthored-map-keeps-two-routes'));
+    expect(record.endingMechanism, contains('co-sign'));
     expect(record.memoryAnchorType, contains('two-overlaid-routes'));
     expect(record.choiceType, isNot(contains('threshold')));
     expect(record.consequenceType, isNot(contains('blank')));
     expect(record.endingMechanism, isNot(contains('wooden-ruler')));
-    expect(active, contains('十七岁的营造学徒沈砚'));
-    expect(active, contains('年幼侍役阿宁'));
-    expect(active, contains('一张叠着两条路线的图'));
+    expect(active, contains('十七岁的古建学徒沈砚'));
+    expect(active, contains('阿宁'));
+    expect(active, contains('把两条路线都留下'));
+    expect(active, contains('共同署名'));
     expect(active, isNot(contains('旧木尺')));
   });
 

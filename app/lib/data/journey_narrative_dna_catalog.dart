@@ -6,48 +6,49 @@ export 'journey_narrative_dna_baseline_snapshot.dart' show JourneyNarrativeDnaRe
 const forbiddenCityRemediatedNarrativeDna = JourneyNarrativeDnaRecord(
   journeyId: 'beijing-forbidden-city',
   narrativeIdentity:
-      'dual-valid-route-overlay-reveals-role-dependent-palace-space',
+      'dual-valid-route-overlay-becomes-evidence-tested-coauthored-palace-map',
   protagonistIdentity:
-      'Shen-Yan-seventeen-year-old-palace-construction-apprentice',
+      'Shen-Yan-seventeen-year-old-heritage-building-apprentice',
   protagonistAgeIdentity: 'seventeen-year-old-apprentice',
   protagonistArchetype:
-      'young-construction-apprentice-building-readable-spatial-representation',
+      'young-heritage-building-apprentice-revising-route-judgment-through-evidence',
   openingSituation:
-      'two-different-route-drawings-to-the-same-palace-node-appear-to-contradict',
+      'familiar-central-axis-route-is-mistaken-for-the-only-correct-route-before-A-Ning-arrives-from-the-east',
   storyGoal:
-      'represent-how-palace-spaces-connect-without-treating-one-persons-route-as-the-only-valid-path',
+      'make-palace-spatial-relations-readable-without-erasing-task-dependent-route-differences',
   locationMechanism:
-      'Meridian-Gate-central-axis-Outer-Court-Inner-Court-and-Gate-of-Heavenly-Purity-as-shared-spatial-framework',
+      'Meridian-Gate-central-axis-Outer-Court-Inner-Court-Gate-of-Heavenly-Purity-and-east-side-connections-form-the-shared-spatial-framework',
   movementPattern:
-      'two-role-dependent-approaches-align-at-a-shared-node-briefly-overlap-then-diverge',
+      'central-axis-observation-and-east-side-task-route-meet-at-Gate-of-Heavenly-Purity-then-are-compared-and-layered',
   conflictType:
       'single-authoritative-route-model-vs-coexisting-role-and-purpose-dependent-routes',
   choiceType:
-      'preserve-both-valid-routes-by-overlaying-distinguishable-lines-on-one-sheet',
+      'preserve-both-valid-routes-and-label-their-task-conditions-on-one-map',
   climaxType:
-      'aligned-routes-reveal-a-shared-junction-overlap-and-purpose-driven-divergence',
+      'shared-architectural-evidence-forces-route-judgment-revision-at-the-common-node',
   consequenceType:
-      'composite-map-adds-relational-information-without-erasing-either-route',
+      'coauthored-map-keeps-two-routes-and-their-validity-conditions-visible',
   emotionalArc:
-      'single-line-certainty-to-apparent-contradiction-to-comparative-curiosity-to-plural-spatial-understanding',
+      'single-line-certainty-to-judgment-to-evidence-check-to-reciprocal-respect-to-coauthorship',
   historicalLearningMechanism:
-      'verified-axis-gate-and-Outer-Inner-Court-relations-become-the-common-spatial-scaffold-for-fictional-route-comparison',
+      'verified-axis-gate-courtyard-Outer-Inner-Court-and-east-side-gate-relations-become-the-common-spatial-scaffold-for-fictional-route-comparison',
   resolutionType:
-      'two-partial-valid-perspectives-combine-into-one-readable-relational-representation',
+      'two-task-dependent-routes-survive-one-common-evidence-test-without-being-collapsed',
   endingMechanism:
-      'Shen-Yan-and-A-Ning-leave-the-shared-node-in-different-directions-while-both-lines-remain-legible',
-  memoryAnchorType: 'one-sheet-with-two-overlaid-routes-and-a-shared-junction',
-  achievementType: 'multi-perspective-palace-space-reader',
+      'Shen-Yan-and-A-Ning-co-sign-a-map-with-both-routes-and-their-conditions-legible',
+  memoryAnchorType:
+      'two-overlaid-routes-with-explicit-validity-conditions-on-one-shared-map',
+  achievementType: 'evidence-tested-multi-perspective-palace-space-reader',
   rewardSymbolism:
-      'shared-junction-mark-represents-relational-information-not-mentor-approval',
-  temporalPattern: 'single-study-day-with-comparison-at-a-shared-palace-node',
+      'two-clearly-labeled-lines-represent-conditional-validity-and-reciprocal-interpretation',
+  temporalPattern: 'single-study-day-without-external-countdown',
   supportingStructure:
-      'cross-role-peer-perspective-exchange-between-Shen-Yan-and-fictional-young-attendant-A-Ning-with-mentor-nondecisive',
+      'cross-role-peer-perspective-exchange-between-Shen-Yan-and-A-Ning-with-mentor-refusing-to-supply-the-answer',
   centralMetaphor:
-      'one-architectural-frame-can-hold-multiple-valid-movement-logics-at-once',
-  narrativeVoice: 'third-person-apprentice-spatial-comparison',
+      'one-architectural-framework-can-support-multiple-valid-movement-logics-when-their-conditions-are-made-explicit',
+  narrativeVoice: 'third-person-action-led-spatial-comparison',
   storyRhythm:
-      'route-assertion-peer-contradiction-comparison-alignment-overlay-shared-node-divergence',
+      'route-assertion-peer-contradiction-evidence-check-mutual-correction-layered-map-coauthorship',
 );
 
 const chengduRemediatedNarrativeDna = JourneyNarrativeDnaRecord(

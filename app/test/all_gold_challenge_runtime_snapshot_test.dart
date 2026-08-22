@@ -8,6 +8,7 @@ import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/data/extended_journey_catalog.dart';
+import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
 import 'package:phoenix_journeys/widgets/journey_challenge_panel.dart';
 
@@ -159,6 +160,9 @@ void main() {
     final approvedIds = approvedNarrativeDnaCatalog
         .map((record) => record.journeyId)
         .toSet();
+    final genericSnapshotIds = approvedIds
+        .where((id) => id != forbiddenCityJourneyId)
+        .toSet();
 
     // Runtime candidate membership is intentionally broader than Founder-approved
     // Gold membership. Every approved Gold must be active, but an active candidate
@@ -175,7 +179,7 @@ void main() {
     expect(byId.keys, containsAll(approvedIds));
 
     final rows = <Map<String, Object?>>[];
-    for (final journeyId in approvedIds.toList()..sort()) {
+    for (final journeyId in genericSnapshotIds.toList()..sort()) {
       final journey = byId[journeyId]!;
       for (var level = 1; level <= 10; level++) {
         final profile = agent.profileForPhoenixLevel(level);
@@ -262,7 +266,7 @@ void main() {
       }
     }
 
-    expect(rows.length, approvedIds.length * 10 * 3);
+    expect(rows.length, genericSnapshotIds.length * 10 * 3);
     for (final row in rows) {
       final visible = <String>[
         if (row['correctAnswer'] case final String value) value,
@@ -281,7 +285,7 @@ void main() {
     }
     final payload = <String, Object?>{
       'approvedGoldCount': approvedIds.length,
-      'expectedChallengeUnits': approvedIds.length * 10 * 3,
+      'expectedChallengeUnits': genericSnapshotIds.length * 10 * 3,
       'approvedJourneyIds': approvedIds.toList()..sort(),
       'rows': rows,
     };

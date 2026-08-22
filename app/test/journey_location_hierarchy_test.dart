@@ -29,10 +29,10 @@ void main() {
 
   test('normal provinces resolve canonical country to place hierarchy', () {
     final cases = <String, List<String>>{
-      'chengdu-kuanzhai-alley': ['中国', '四川省', '成都市', '宽窄巷子'],
-      'hangzhou-west-lake': ['中国', '浙江省', '杭州市', '西湖文化景观'],
-      'xian-city-wall': ['中国', '陕西省', '西安市', '西安城墙'],
-      'nanjing-qinhuai-river': ['中国', '江苏省', '南京市', '夫子庙秦淮风光带'],
+      'chengdu-kuanzhai-alley': ['亚洲', '中国', '四川省', '成都市', '宽窄巷子'],
+      'hangzhou-west-lake': ['亚洲', '中国', '浙江省', '杭州市', '西湖文化景观'],
+      'xian-city-wall': ['亚洲', '中国', '陕西省', '西安市', '西安城墙'],
+      'nanjing-qinhuai-river': ['亚洲', '中国', '江苏省', '南京市', '夫子庙秦淮风光带'],
     };
 
     for (final entry in cases.entries) {
@@ -49,7 +49,7 @@ void main() {
       expect(location.isMunicipality, isFalse);
       expect(
         location.compactAdministrativeLabel,
-        '${entry.value[1]} · ${entry.value[2]}',
+        '${entry.value[2]} · ${entry.value[3]}',
       );
     }
   });
@@ -88,7 +88,7 @@ void main() {
 
     expect(
       path.where((node) => node.id != 'world').map((node) => node.name),
-      orderedEquals(['中国', '广东省', '广州市', '陈家祠']),
+      orderedEquals(['亚洲', '中国', '广东省', '广州市', '陈家祠']),
     );
     expect(path.last.latitude, isNotNull);
     expect(path.last.longitude, isNotNull);

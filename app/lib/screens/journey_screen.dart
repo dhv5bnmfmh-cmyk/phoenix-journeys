@@ -170,6 +170,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   List<NarrationItem>? _cachedStoryNarrationItems;
   JourneyLevelContent? _cachedDiscoveryNarrationContent;
   List<NarrationItem>? _cachedDiscoveryNarrationItems;
+  Widget? _dedicatedRuntimeScreen;
 
   // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
   bool get _isSummerPalacePilot => false;
@@ -185,6 +186,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
     _experience = requireDailyJourneyExperience(journeyId);
+    _dedicatedRuntimeScreen = resolveDedicatedJourneyRuntimeScreen(journeyId);
     if (_experience.id == forbiddenCityJourneyId) {
       warmForbiddenCityContentCache();
     }
@@ -1224,8 +1226,9 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (_isForbiddenCity) {
-      return const ForbiddenCityReferenceJourneyScreen();
+    final dedicatedRuntime = _dedicatedRuntimeScreen;
+    if (dedicatedRuntime != null) {
+      return dedicatedRuntime;
     }
     final stepThreePage = _isSummerPalacePilot
         ? resolvePilotN1CompositePage(
