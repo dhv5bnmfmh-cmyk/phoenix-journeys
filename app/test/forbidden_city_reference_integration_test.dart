@@ -378,18 +378,17 @@ void main() {
   testWidgets(
     'runtime exposes Simplified Traditional English Vietnamese and Pinyin',
     (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'phoenix.reference.cn-beijing-dongcheng-forbidden-city.level': 10,
+      });
       final state = await _pumpHarness(tester);
-      final level10 = find.byKey(const ValueKey('forbidden-city-level-10'));
-      await tester.scrollUntilVisible(
-        level10,
-        240,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.tap(level10);
-      await tester.pumpAndSettle();
       final content = forbiddenCityLevelContent(10);
       final annotation = content.storyAnnotations.first;
 
+      expect(
+        find.byKey(const ValueKey('forbidden-city-stage-story-lv-10')),
+        findsOneWidget,
+      );
       expect(find.text(content.storyParagraphs.first), findsOneWidget);
       expect(find.text(annotation.vietnamese), findsOneWidget);
       expect(find.text(annotation.pinyin), findsOneWidget);
