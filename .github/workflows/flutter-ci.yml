@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: final-validation-${{ github.ref }}
@@ -126,7 +126,15 @@ jobs:
             rel+=("${f#app/}")
           done
           dart format "${rel[@]}" 2>&1 | tee format.log
-          git diff --exit-code -- "${rel[@]}"
+          if ! git diff --quiet -- "${rel[@]}"; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -- "${rel[@]}"
+            git commit -m "Format changed Dart files"
+            git push origin HEAD:feature/forbidden-city-final-integration
+            echo "Exact Dart formatter output pushed."
+            exit 1
+          fi
 
       - name: analyze
         run: |
@@ -154,11 +162,6 @@ jobs:
             app/analyze.log
             app/test.log
             app/build-web.log
-            app/lib/data/journey_narrative_dna_catalog.dart
-            app/lib/data/journey_semantic_fingerprint_catalog.dart
-            app/test/all_gold_challenge_runtime_snapshot_test.dart
-            app/test/forbidden_city_final_trace_test.dart
-            app/test/journey_semantic_anti_template_gate_test.dart
           if-no-files-found: warn
 
   forbidden-city-reference-gate:
