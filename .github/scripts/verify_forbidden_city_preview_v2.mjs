@@ -182,14 +182,15 @@ async function nextToChallenge(page, level) {
   await findSemantic(page, '提交第 1 / 3 次答案', { role: 'button', prefix: true, timeout: 15000 });
 }
 
-async function challengeOptionIndices(page) {
+async function challengeOptionTargets(page) {
   const rs = await records(page);
+  const toTarget = (r) => ({ role: r.role, label: clean(r.label), text: recText(r) });
   const lettered = rs.filter((r) => {
     if (!r.visible || r.disabled) return false;
     const label = clean(r.label);
     return /^[A-D]\s/.test(label) && /[\u3400-\u9fff]/.test(label);
   }).sort((a, b) => a.index - b.index);
-  if (lettered.length) return lettered.map((r) => r.index);
+  if (lettered.length) return lettered.map(toTarget);
 
   const excluded = [
     '提交第', '朗读', '进入下一种挑战', '完成三连挑战', '再练重点项', '继续留下回忆',
@@ -202,7 +203,7 @@ async function challengeOptionIndices(page) {
     if (text.length < 4 || !/[\u3400-\u9fff]/.test(text)) return false;
     if (!['button', 'group'].includes(r.role)) return false;
     return !excluded.some((x) => text.includes(x));
-  }).sort((a, b) => b.area - a.area).map((r) => r.index);
+  }).sort((a, b) => b.area - a.area).map(toTarget);
 }
 
 async function requiredChallengeSelections(page) {
@@ -224,15 +225,25 @@ async function ensureGrammarSegment(page) {
   await sleep(120);
 }
 
+async function tapChallengeTarget(page, target) {
+  const rs = await records(page);
+  const matches = rs.filter((r) => {
+    if (!r.visible || r.disabled) return false;
+    if (target.label) return clean(r.label) === target.label;
+    return r.role === target.role && recText(r) === target.text;
+  }).sort((a, b) => a.area - b.area);
+  if (!matches.length) throw new Error(`challenge option target disappeared: ${target.label || target.text}`);
+  await page.locator('flt-semantics').nth(matches[0].index).tap({ timeout: 10000 });
+  await sleep(120);
+}
+
 async function chooseOptions(page) {
   await ensureGrammarSegment(page);
   const count = await requiredChallengeSelections(page);
-  const indices = await challengeOptionIndices(page);
-  if (indices.length < count) throw new Error(`only ${indices.length} challenge options found; need ${count}`);
-  for (const index of indices.slice(0, count)) {
-    const node = page.locator('flt-semantics').nth(index);
-    await node.tap({ timeout: 10000 });
-    await sleep(120);
+  const targets = await challengeOptionTargets(page);
+  if (targets.length < count) throw new Error(`only ${targets.length} challenge options found; need ${count}`);
+  for (const target of targets.slice(0, count)) {
+    await tapChallengeTarget(page, target);
   }
 }
 
