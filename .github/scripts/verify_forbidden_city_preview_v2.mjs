@@ -182,42 +182,58 @@ async function nextToChallenge(page, level) {
   await findSemantic(page, '提交第 1 / 3 次答案', { role: 'button', prefix: true, timeout: 15000 });
 }
 
-const excludedOptionText = [
-  '提交第', '朗读', '进入下一种挑战', '完成三连挑战', '再练重点项', '继续留下回忆',
-  '完成挑战后继续', '返回', 'Back', '查看 Lv.', '提高当前难度', '降低当前难度',
-  '段落重组', '语法修复', '补回句子', '简 / 繁', '声线', '减速', '加速', '提示',
-];
-
-async function candidateOptionIndices(page) {
+async function challengeOptionIndices(page) {
   const rs = await records(page);
+  const lettered = rs.filter((r) => {
+    if (!r.visible || r.disabled) return false;
+    const label = clean(r.label);
+    return /^[A-D]\s/.test(label) && /[\u3400-\u9fff]/.test(label);
+  }).sort((a, b) => a.index - b.index);
+  if (lettered.length) return lettered.map((r) => r.index);
+
+  const excluded = [
+    '提交第', '朗读', '进入下一种挑战', '完成三连挑战', '再练重点项', '继续留下回忆',
+    '完成挑战后继续', '返回', 'Back', '查看 Lv.', '提高当前难度', '降低当前难度',
+    '短文复原', '语病修复', '补回句子', '简 / 繁', '声线', '减速', '加速', '提示',
+  ];
   return rs.filter((r) => {
-    if (!r.visible || r.disabled || r.role !== 'button') return false;
+    if (!r.visible || r.disabled) return false;
     const text = recText(r);
     if (text.length < 4 || !/[\u3400-\u9fff]/.test(text)) return false;
-    return !excludedOptionText.some((x) => text.includes(x));
+    if (!['button', 'group'].includes(r.role)) return false;
+    return !excluded.some((x) => text.includes(x));
   }).sort((a, b) => b.area - a.area).map((r) => r.index);
 }
 
-async function chooseOptions(page, count) {
-  const indices = await candidateOptionIndices(page);
-  if (indices.length < count) throw new Error(`only ${indices.length} challenge option buttons found; need ${count}`);
+async function requiredChallengeSelections(page) {
+  const text = await visibleText(page);
+  const match = text.match(/依次点击\s*(\d+)\s*句/);
+  if (match) return Number(match[1]);
+  return 1;
+}
+
+async function chooseOptions(page) {
+  const count = await requiredChallengeSelections(page);
+  const indices = await challengeOptionIndices(page);
+  if (indices.length < count) throw new Error(`only ${indices.length} challenge options found; need ${count}`);
   for (const index of indices.slice(0, count)) {
-    await page.locator('flt-semantics').nth(index).tap({ timeout: 10000 });
+    const node = page.locator('flt-semantics').nth(index);
+    await node.tap({ timeout: 10000 });
+    await sleep(120);
   }
 }
 
 async function resolveChallengeMode(page, modeIndex) {
-  const selectionCount = modeIndex === 0 ? 4 : 1;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
-    await chooseOptions(page, selectionCount);
+    await chooseOptions(page);
     await tapButton(page, '提交第', { prefix: true });
-    await sleep(400);
+    await sleep(500);
 
-    if (await exists(page, '进入下一种挑战', { role: 'button', timeout: 700 })) {
+    if (await exists(page, '进入下一种挑战', { role: 'button', timeout: 1000 })) {
       await tapButton(page, '进入下一种挑战');
       return;
     }
-    if (await exists(page, '完成三连挑战', { role: 'button', timeout: 700 })) {
+    if (await exists(page, '完成三连挑战', { role: 'button', timeout: 1000 })) {
       await tapButton(page, '完成三连挑战');
       return;
     }
