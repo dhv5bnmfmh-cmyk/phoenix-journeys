@@ -59,9 +59,27 @@ async function exists(page, needle, options = {}) {
 }
 
 async function tapButton(page, needle, { prefix = false, timeout = 15000 } = {}) {
-  const node = await findSemantic(page, needle, { role: 'button', prefix, timeout });
-  if ((await node.getAttribute('aria-disabled')) === 'true') throw new Error(`button disabled: ${needle}`);
-  await node.tap({ timeout });
+  const deadline = Date.now() + timeout;
+  let lastError = null;
+  while (Date.now() < deadline) {
+    const remaining = Math.max(250, deadline - Date.now());
+    try {
+      const node = await findSemantic(page, needle, {
+        role: 'button',
+        prefix,
+        timeout: Math.min(1500, remaining),
+      });
+      const disabled = await node.getAttribute('aria-disabled', { timeout: Math.min(750, remaining) });
+      if (disabled === 'true') throw new Error(`button disabled: ${needle}`);
+      await node.tap({ timeout: Math.min(2000, remaining) });
+      return;
+    } catch (error) {
+      if (String(error?.message || error).includes(`button disabled: ${needle}`)) throw error;
+      lastError = error;
+      await sleep(100);
+    }
+  }
+  throw lastError ?? new Error(`button not tappable: ${needle}`);
 }
 
 async function visibleText(page) {
