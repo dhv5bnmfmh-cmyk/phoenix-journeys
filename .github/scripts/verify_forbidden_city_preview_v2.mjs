@@ -212,7 +212,20 @@ async function requiredChallengeSelections(page) {
   return 1;
 }
 
+async function ensureGrammarSegment(page) {
+  const text = await visibleText(page);
+  if (!text.includes('第一步 · 点击有问题的部分')) return;
+  const rs = await records(page);
+  const segments = rs.filter((r) =>
+    r.visible && !r.disabled && r.role === 'checkbox' && /[\u3400-\u9fff]/.test(recText(r))
+  ).sort((a, b) => a.index - b.index);
+  if (!segments.length) throw new Error('grammar repair segment selector not found');
+  await page.locator('flt-semantics').nth(segments[0].index).tap({ timeout: 10000 });
+  await sleep(120);
+}
+
 async function chooseOptions(page) {
+  await ensureGrammarSegment(page);
   const count = await requiredChallengeSelections(page);
   const indices = await challengeOptionIndices(page);
   if (indices.length < count) throw new Error(`only ${indices.length} challenge options found; need ${count}`);
