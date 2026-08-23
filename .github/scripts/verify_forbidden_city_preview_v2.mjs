@@ -177,7 +177,13 @@ async function nextToDiscovery(page, level) {
     text.includes('建筑') &&
     text.includes('路线') &&
     (text.includes('连接') || text.includes('共同节点'));
-  if (!hasSpecificSpatialAnchor && !hasCausalSpatialMechanism) {
+  const hasLv10TransferSpatialMechanism = level === 10 &&
+    text.includes('建筑') &&
+    text.includes('连接') &&
+    text.includes('路线') &&
+    text.includes('人物目标') &&
+    text.includes('行动后果');
+  if (!hasSpecificSpatialAnchor && !hasCausalSpatialMechanism && !hasLv10TransferSpatialMechanism) {
     throw new Error(`Lv${level} Discovery missing Forbidden City spatial content`);
   }
 }
