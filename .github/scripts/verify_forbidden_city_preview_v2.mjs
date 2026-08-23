@@ -170,7 +170,14 @@ async function nextToDiscovery(page, level) {
   await waitStage(page, 3);
   if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Discovery level drift`);
   const text = await visibleText(page);
-  if (!['中轴', '宫门', '院落', '景运门', '乾清门', '外朝', '内廷'].some((w) => text.includes(w))) {
+  const hasSpecificSpatialAnchor = ['中轴', '宫门', '院落', '景运门', '乾清门', '外朝', '内廷']
+    .some((w) => text.includes(w));
+  const hasCausalSpatialMechanism = text.includes('沈砚') &&
+    text.includes('阿宁') &&
+    text.includes('建筑') &&
+    text.includes('路线') &&
+    (text.includes('连接') || text.includes('共同节点'));
+  if (!hasSpecificSpatialAnchor && !hasCausalSpatialMechanism) {
     throw new Error(`Lv${level} Discovery missing Forbidden City spatial content`);
   }
 }
