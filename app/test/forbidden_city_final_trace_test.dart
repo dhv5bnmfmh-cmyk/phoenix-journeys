@@ -228,7 +228,7 @@ void main() {
     );
     expect(active, contains('十七岁的营造学徒沈砚'));
     expect(active, contains('阿宁'));
-    expect(active, contains('景运门').or(contains('东侧')));
+    expect(active.contains('景运门') || active.contains('东侧'), isTrue);
     expect(active, contains('建筑连接'));
     expect(active, contains('人物目标'));
     expect(active, contains('行动后果'));
