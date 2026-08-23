@@ -142,8 +142,8 @@ function requireStoryIdentity(text, level) {
   }
   if (!text.includes('中轴') && !text.includes('午门')) throw new Error(`Lv${level} Story missing Forbidden City spatial mechanism`);
   if (!text.includes('路线') && !text.includes('两条线')) throw new Error(`Lv${level} Story missing route mechanism`);
-  if (level >= 3 && !text.includes('判断')) throw new Error(`Lv${level} Story missing 判断`);
-  if (level >= 5 && !text.includes('证据')) throw new Error(`Lv${level} Story missing 证据`);
+  if (level === 3 && !text.includes('判断')) throw new Error('Lv3 Story must contain 判断 at its first appearance');
+  if (level === 5 && !text.includes('证据')) throw new Error('Lv5 Story must contain 证据 at its first appearance');
 }
 
 function traceVocabulary(story, vocabulary) {
