@@ -223,18 +223,24 @@ async function chooseOptions(page) {
   }
 }
 
+async function waitForNextChallenge(page) {
+  await findSemantic(page, '提交第 1 / 3 次答案', { role: 'button', prefix: true, timeout: 12000 });
+}
+
 async function resolveChallengeMode(page, modeIndex) {
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     await chooseOptions(page);
     await tapButton(page, '提交第', { prefix: true });
     await sleep(500);
 
-    if (await exists(page, '进入下一种挑战', { role: 'button', timeout: 1000 })) {
+    if (await exists(page, '进入下一种挑战', { role: 'button', timeout: 1200 })) {
       await tapButton(page, '进入下一种挑战');
+      await waitForNextChallenge(page);
       return;
     }
-    if (await exists(page, '完成三连挑战', { role: 'button', timeout: 1000 })) {
+    if (await exists(page, '完成三连挑战', { role: 'button', timeout: 1200 })) {
       await tapButton(page, '完成三连挑战');
+      await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 12000 });
       return;
     }
 
