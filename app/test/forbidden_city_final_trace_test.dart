@@ -199,11 +199,18 @@ void main() {
     for (final anchor in <String>[
       '沈砚',
       '阿宁',
-      '乾清门',
       '两条都能走通的路线',
     ]) {
       expect(memory, contains(anchor), reason: anchor);
     }
+    final levelMemory = forbiddenCityMemoryMoments
+        .map(
+          (item) =>
+              '${item.anchor}${item.recall}${item.characterShift}${item.takeaway}',
+        )
+        .join('\n');
+    expect(levelMemory, contains('乾清门'));
+    expect(levelMemory, contains(forbiddenCityMemoryAnchor));
     expect(forbiddenCityMemoryAnchor, '两条都能走通的路线');
     expect(forbiddenCityChallengeRewardName, contains('空间证据'));
     expect(forbiddenCityJourneyCompletion, contains('两条写明条件的路线'));
