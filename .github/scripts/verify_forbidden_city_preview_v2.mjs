@@ -281,9 +281,10 @@ async function nextToMemory(page, level) {
 async function nextToCompletion(page, level) {
   await tapButton(page, '结束旅程', { prefix: true });
   await waitStage(page, 6);
-  await findSemantic(page, '北京已点亮', { timeout: 15000 });
+  await findSemantic(page, '已点亮', { timeout: 15000 });
   if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Completion level drift`);
   const text = await visibleText(page);
+  if (!text.includes('北京')) throw new Error(`Lv${level} Completion city binding missing`);
   if (!text.includes('路线') && !text.includes('两条')) throw new Error(`Lv${level} Completion route closure missing`);
 }
 
