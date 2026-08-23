@@ -123,6 +123,14 @@ JourneyLevelContent _resolveForbiddenCityAdaptiveLevel(
     for (var index = 0; index < base.storyParagraphs.length; index += 1)
       '${base.storyParagraphs[index].replaceAll('古建学徒', '营造学徒')}${extension != null && index == base.storyParagraphs.length - 1 ? extension.$1 : ''}',
   ];
+
+  // The shared Challenge runtime intentionally resolves Forbidden City by an
+  // exact Lv1-Lv10 Story identity. Keep that canonical data identity aligned
+  // with the adaptive Story without touching the shared visual/widget layer.
+  forbiddenCityStoryParagraphsByLevel[level - 1] =
+      List<String>.unmodifiable(paragraphs);
+  forbiddenCityLockedStories[level - 1] = paragraphs.join('\n\n');
+
   final annotations = <ReadingAnnotation>[
     for (var index = 0; index < paragraphs.length; index += 1)
       ReadingAnnotation(
