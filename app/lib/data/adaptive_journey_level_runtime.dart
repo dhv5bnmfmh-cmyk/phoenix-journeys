@@ -12,6 +12,7 @@ import 'daily_journey_experience.dart';
 import 'dedicated_adaptive_journey_catalog.dart';
 import 'forbidden_city_content_cache.dart';
 import 'forbidden_city_journey_runtime.dart';
+import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 import 'guangzhou_chen_clan_one_pass.dart';
 import 'journey_expansion_catalog.dart';
@@ -35,12 +36,12 @@ const _forbiddenCityStoryExtensions =
   ),
   7: (
     '周师傅没有替两人裁定，而是让他们把刚才检查过的连接重新写到图边。沈砚先指出中轴、外朝院落与乾清门前这些共同事实，阿宁再补上东侧任务要求她经过的节点。两人发现，只要少掉其中一类证据，判断都会变得过快。沈砚于是把原先写在图角的“错误路线”划掉，改成“另一任务下成立的路线”，并请阿宁检查自己的改写有没有歪曲她的目的。',
-    'Thầy Chu không phán xử thay họ mà yêu cầu ghi lại các kết nối vừa kiểm tra. Thẩm Nghiên nêu những sự thật chung về trục giữa, sân Ngoại triều và khu trước Càn Thanh Môn; A Ninh bổ sung các điểm mà nhiệm vụ phía đông buộc cô phải đi qua. Họ nhận ra thiếu một lớp bằng chứng sẽ dẫn đến kết luận quá nhanh. Thẩm Nghiên xóa nhãn “tuyến sai” và đổi thành “tuyến成立 trong một nhiệm vụ khác”, rồi nhờ A Ninh kiểm tra xem anh có bóp méo mục đích của cô không.',
+    'Thầy Chu không phán xử thay họ mà yêu cầu ghi lại các kết nối vừa kiểm tra. Thẩm Nghiên nêu những sự thật chung về trục giữa, sân Ngoại triều và khu trước Càn Thanh Môn; A Ninh bổ sung các điểm mà nhiệm vụ phía đông buộc cô phải đi qua. Họ nhận ra thiếu một lớp bằng chứng sẽ dẫn đến kết luận quá nhanh. Thẩm Nghiên xóa nhãn “tuyến sai” và đổi thành “tuyến hợp lệ trong một nhiệm vụ khác”, rồi nhờ A Ninh kiểm tra xem anh có bóp méo mục đích của cô không.',
     'Master Zhou refuses to decide for them and asks them to write the verified connections beside the map. Shen Yan states the shared facts of the central axis, Outer Court courtyards, and the area before the Gate of Heavenly Purity; A Ning adds the nodes required by her east-side task. They see that omitting either evidence layer makes the judgment premature. Shen Yan crosses out “wrong route,” replaces it with “a route valid for another task,” and asks A Ning whether his revision misstates her purpose.',
   ),
   8: (
     '阿宁随后提出一个更难的问题：如果两个人都说自己有不同视角，怎样避免把任何路线都说成合理？她把图转回沈砚面前，让他先指出不能改变的事实。两人重新确认中轴、宫门、院落和乾清门前的连接，再分别说明各自任务。沈砚意识到，视角只能解释为什么偏好不同，不能替代空间事实；一条路线如果穿过并不存在的连接，即使符合个人愿望也不能成立。阿宁因此接受同一套事实标准，同时坚持自己的任务路线。',
-    'A Ninh đặt câu hỏi khó hơn: nếu ai cũng viện dẫn góc nhìn riêng, làm sao tránh coi mọi tuyến đều hợp lý? Cô đưa bản đồ lại cho Thẩm Nghiên và yêu cầu anh nêu trước những sự thật không thể thay đổi. Họ xác nhận lại trục giữa, cổng, sân và kết nối trước Càn Thanh Môn rồi mới giải thích nhiệm vụ riêng. Thẩm Nghiên hiểu rằng góc nhìn giải thích ưu tiên, nhưng không thể thay thế sự thật không gian; một tuyến đi qua kết nối không tồn tại thì không thể成立. A Ninh chấp nhận cùng tiêu chuẩn sự thật mà vẫn giữ tuyến phù hợp nhiệm vụ của mình.',
+    'A Ninh đặt câu hỏi khó hơn: nếu ai cũng viện dẫn góc nhìn riêng, làm sao tránh coi mọi tuyến đều hợp lý? Cô đưa bản đồ lại cho Thẩm Nghiên và yêu cầu anh nêu trước những sự thật không thể thay đổi. Họ xác nhận lại trục giữa, cổng, sân và kết nối trước Càn Thanh Môn rồi mới giải thích nhiệm vụ riêng. Thẩm Nghiên hiểu rằng góc nhìn giải thích ưu tiên, nhưng không thể thay thế sự thật không gian; một tuyến đi qua kết nối không tồn tại thì không thể hợp lệ. A Ninh chấp nhận cùng tiêu chuẩn sự thật mà vẫn giữ tuyến phù hợp nhiệm vụ của mình.',
     'A Ning then raises a harder question: if everyone cites a different perspective, how do they avoid calling every route reasonable? She turns the map back to Shen Yan and asks him to state the facts that cannot change. They reconfirm the central axis, gates, courtyards, and the connections before the Gate of Heavenly Purity before explaining their separate tasks. Shen Yan realizes that perspective can explain different preferences but cannot replace spatial fact; a route through a nonexistent connection cannot be valid. A Ning accepts the same factual standard while keeping her task-based route.',
   ),
   9: (
@@ -50,7 +51,7 @@ const _forbiddenCityStoryExtensions =
   ),
   10: (
     '为了检验新方法，周师傅临时换了任务：假设要从午门进入后先说明外朝的中轴秩序，再到乾清门前核对东侧记录，最后把两组信息交给后来的人复查。沈砚没有立刻沿用自己的旧线，而是先和阿宁列出建筑连接、人物目标和每一步行动可能造成的后果。阿宁指出，如果一条线虽然空间上能走通，却让她错过东侧记录点，就不能因为“熟悉”而被选作最佳路线；沈砚则提醒，如果一条线忽略中轴与功能分区，后来的人就难以理解局部记录属于整座宫城的什么位置。两人据此重新权衡，在共同空间骨架上保留不同任务段，并给每一段写明成立条件。',
-    'Để kiểm tra phương pháp mới, thầy Chu đổi nhiệm vụ: sau khi vào từ Ngọ Môn phải giải thích trật tự trục giữa của Ngoại triều, đến khu trước Càn Thanh Môn kiểm tra ghi chép phía đông, rồi giao cả hai nhóm thông tin cho người đến sau kiểm chứng. Thẩm Nghiên không dùng ngay tuyến cũ mà cùng A Ninh liệt kê kết nối kiến trúc, mục tiêu và hệ quả hành động. Họ loại các tuyến tuy đi được nhưng bỏ lỡ nhiệm vụ, đồng thời giữ quan hệ với trục giữa và phân khu chức năng. Cuối cùng hai người ghi rõ điều kiện成立 cho từng đoạn nhiệm vụ trên cùng khung không gian.',
+    'Để kiểm tra phương pháp mới, thầy Chu đổi nhiệm vụ: sau khi vào từ Ngọ Môn phải giải thích trật tự trục giữa của Ngoại triều, đến khu trước Càn Thanh Môn kiểm tra ghi chép phía đông, rồi giao cả hai nhóm thông tin cho người đến sau kiểm chứng. Thẩm Nghiên không dùng ngay tuyến cũ mà cùng A Ninh liệt kê kết nối kiến trúc, mục tiêu và hệ quả hành động. Họ loại các tuyến tuy đi được nhưng bỏ lỡ nhiệm vụ, đồng thời giữ quan hệ với trục giữa và phân khu chức năng. Cuối cùng hai người ghi rõ điều kiện để từng đoạn tuyến được xem là hợp lệ trên cùng khung không gian.',
     'To test the new method, Master Zhou changes the assignment: enter through Meridian Gate, explain the Outer Court’s axial order, verify east-side records before the Gate of Heavenly Purity, then leave both sets of information for later review. Shen Yan does not automatically reuse his old line. He and A Ning list architectural connections, goals, and action consequences first. They reject routes that are spatially possible but fail the task, while preserving the relation to the axis and functional zones. They then keep different task segments on the shared framework and state the conditions under which each segment is justified.',
   ),
 };
@@ -139,7 +140,9 @@ JourneyLevelContent _resolveForbiddenCityAdaptiveLevel(
     storyParagraphs: List<String>.unmodifiable(paragraphs),
     storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
     words: unseenWords.isEmpty ? base.words : unseenWords,
-    discoveries: List.unmodifiable(<DiscoveryEntry>[base.discoveries.first]),
+    discoveries: List<DiscoveryEntry>.unmodifiable(
+      <DiscoveryEntry>[base.discoveries.first],
+    ),
     wonderQuestion: base.wonderQuestion,
     expressQuestion: base.expressQuestion,
   );
