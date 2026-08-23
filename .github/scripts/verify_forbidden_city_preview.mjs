@@ -86,7 +86,7 @@ async function semanticExists(page, matcher, options = {}) {
 }
 
 async function tapSemantic(page, matcher, {
-  role = null,
+  role = 'button',
   mode = 'contains',
   timeout = 15000,
 } = {}) {
@@ -128,7 +128,7 @@ async function assertNoRuntimeError(page, pageErrors, label) {
 async function waitForHome(page) {
   await semanticNode(page, 'PHOENIX JOURNEYS', { timeout: 30000 });
   for (const prefix of ['开始', '继续', '再次探索']) {
-    if (await semanticExists(page, prefix, { mode: 'prefix', timeout: 1200 })) return;
+    if (await semanticExists(page, prefix, { role: 'button', mode: 'prefix', timeout: 1200 })) return;
   }
   throw new Error('Home journey action not available');
 }
@@ -172,7 +172,7 @@ async function setLevel(page, target) {
 
 async function openJourney(page) {
   for (const prefix of ['开始', '继续', '再次探索']) {
-    if (await semanticExists(page, prefix, { mode: 'prefix', timeout: 1000 })) {
+    if (await semanticExists(page, prefix, { role: 'button', mode: 'prefix', timeout: 1000 })) {
       await tapSemantic(page, prefix, { mode: 'prefix' });
       await semanticNode(page, '1/6', { mode: 'prefix', timeout: 25000 });
       return;
@@ -278,11 +278,11 @@ async function solveChallengeMode(page, modeIndex) {
     await selectChallengeAnswer(page, modeIndex);
     await tapSemantic(page, '提交第', { mode: 'prefix', timeout: 10000 });
     await sleep(350);
-    if (await semanticExists(page, '进入下一种挑战', { timeout: 500 })) {
+    if (await semanticExists(page, '进入下一种挑战', { role: 'button', timeout: 500 })) {
       await tapSemantic(page, '进入下一种挑战', { timeout: 10000 });
       return;
     }
-    if (await semanticExists(page, '完成三连挑战', { timeout: 500 })) {
+    if (await semanticExists(page, '完成三连挑战', { role: 'button', timeout: 500 })) {
       await tapSemantic(page, '完成三连挑战', { timeout: 10000 });
       return;
     }
@@ -295,7 +295,7 @@ async function completeChallenge(page, level) {
     await solveChallengeMode(page, modeIndex);
     await sleep(250);
   }
-  await semanticNode(page, '继续留下回忆', { mode: 'prefix', timeout: 15000 });
+  await semanticNode(page, '继续留下回忆', { role: 'button', mode: 'prefix', timeout: 15000 });
   console.log(`Lv${level} CHALLENGE COMPLETE = PASS`);
 }
 
