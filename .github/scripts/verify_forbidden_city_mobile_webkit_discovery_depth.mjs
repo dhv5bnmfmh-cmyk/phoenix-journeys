@@ -31,6 +31,7 @@ async function semanticButton(
 ) {
   const deadline = Date.now() + timeout;
   const wanted = clean(needle);
+  let ambiguousLabels = [];
 
   while (Date.now() < deadline) {
     const locator = page.getByRole('button', {
@@ -46,7 +47,7 @@ async function semanticButton(
       return locator;
     }
     if (count > 1) {
-      const labels = await locator.evaluateAll((elements) =>
+      ambiguousLabels = await locator.evaluateAll((elements) =>
         elements.map((element) =>
           [
             element.getAttribute('aria-label') || '',
@@ -58,14 +59,19 @@ async function semanticButton(
             .join(' '),
         ),
       );
-      throw new Error(
-        'Mobile WebKit semantic button ambiguous: ' +
-          needle +
-          ' :: ' +
-          labels.join(' || '),
-      );
+      await sleep(100);
+      continue;
     }
     await sleep(100);
+  }
+
+  if (ambiguousLabels.length > 1) {
+    throw new Error(
+      'Mobile WebKit semantic button ambiguous after settle: ' +
+        needle +
+        ' :: ' +
+        ambiguousLabels.join(' || '),
+    );
   }
   throw new Error('Mobile WebKit semantic button not found: ' + needle);
 }
@@ -113,11 +119,13 @@ async function activateSemanticButton(
 
 async function currentStage(page) {
   const rs = await records(page);
+  const stages = [];
   for (const record of rs) {
     if (!record.visible) continue;
     const match = recordText(record).match(/^([1-6])\/6(?:\s|$)/);
-    if (match) return Number(match[1]);
+    if (match) stages.push(Number(match[1]));
   }
+  if (stages.length > 0) return Math.max(...stages);
   throw new Error('Mobile WebKit Journey stage not found');
 }
 
@@ -157,6 +165,16 @@ async function advanceStage(page, fromStage, toStage, diagnostics) {
 
   for (let attempt = 1; attempt <= 4; attempt += 1) {
     await closeHarnessWordDetailDialog(page);
+    observed = await currentStage(page).catch(() => observed);
+    if (observed >= toStage) {
+      diagnostics.assertNoBlockingRuntimeError();
+      return;
+    }
+    if (observed !== fromStage) {
+      await sleep(250);
+      continue;
+    }
+
     await activateSemanticButton(page, '继续');
 
     const deadline = Date.now() + 7000;
@@ -168,7 +186,7 @@ async function advanceStage(page, fromStage, toStage, diagnostics) {
       }
       if (await wordDetailDialogOpen(page)) {
         await closeHarnessWordDetailDialog(page);
-        break;
+        continue;
       }
       await sleep(100);
     }
@@ -197,6 +215,7 @@ async function advanceStage(page, fromStage, toStage, diagnostics) {
 async function ensureDiscoveryStage(page, diagnostics) {
   for (let guard = 0; guard < 10; guard += 1) {
     await closeHarnessWordDetailDialog(page);
+    await sleep(300);
     let stage = await currentStage(page);
 
     if (stage === 3) {
@@ -265,10 +284,13 @@ async function setLevel(page, target) {
     while (Date.now() < deadline) {
       if (await wordDetailDialogOpen(page)) {
         await closeHarnessWordDetailDialog(page);
-        break;
+        continue;
       }
       const settled = await currentLevel(page).catch(() => before);
-      if (settled === target) return;
+      if (settled === target) {
+        await sleep(400);
+        if ((await currentLevel(page).catch(() => before)) === target) return;
+      }
       if (settled !== before) {
         moved = true;
         break;
