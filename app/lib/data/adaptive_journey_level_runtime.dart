@@ -29,10 +29,15 @@ const _specialJourneyIds = <String>{
 
 const _forbiddenCityStoryExtensions =
     <int, (String chinese, String vietnamese, String english)>{
+  5: (
+    '周师傅没有替两人裁定哪条线更正确，只让他们分别说清“中轴观察”和“东侧记录”的标注理由。沈砚因此把自己的判断也当成需要说明依据的记录，而不是图上天然拥有优先权的主线。',
+    'Thầy Chu không quyết định tuyến nào đúng hơn mà yêu cầu hai người nói rõ lý do của hai nhãn “quan sát trục giữa” và “ghi chép phía đông”. Vì thế Thẩm Nghiên cũng xem phán đoán của mình là một ghi chép cần nêu căn cứ, chứ không phải đường chính đương nhiên có quyền ưu tiên.',
+    'Master Zhou does not decide which line is more correct. He asks them to explain why they labeled one “central-axis observation” and the other “east-side record.” Shen Yan therefore treats his own judgment as something that needs grounds, not as a main line with automatic priority.',
+  ),
   6: (
-    '阿宁没有停在口头解释上。她把自己的记录点、下一步要回到东边的任务和乾清门前的会合位置逐一圈出，再请沈砚沿着宫门与院落核对每一处连接。沈砚发现，同一段空间既能支持他的中轴观察，也能支持阿宁完成东侧任务；真正需要比较的不是谁更像“标准路线”，而是哪条路线在真实建筑条件下更适合当前任务。',
-    'A Ninh không dừng ở lời giải thích. Cô khoanh từng điểm ghi chép, nhiệm vụ phải quay về phía đông và điểm gặp trước Càn Thanh Môn, rồi cùng Thẩm Nghiên kiểm tra từng kết nối qua cổng và sân. Anh nhận ra cùng một không gian có thể phục vụ cả quan sát theo trục giữa lẫn nhiệm vụ phía đông; điều cần so sánh là tuyến nào phù hợp nhiệm vụ trong điều kiện kiến trúc có thật.',
-    'A Ning does not stop at explanation. She circles her recording points, her need to return east, and the meeting place before the Gate of Heavenly Purity, then asks Shen Yan to verify every connection through gates and courtyards. He sees that the same space can support both his axial study and her east-side task; the real comparison is which route fits the task under the actual architectural conditions.',
+    '阿宁没有停在口头解释上。她把自己的记录点、下一步要回到东边的任务和乾清门前的会合位置逐一圈出，再请沈砚沿着宫门与院落核对每一处连接。沈砚发现，同一段空间既能支持他的中轴观察，也能支持阿宁完成东侧任务；真正需要比较的不是谁更像“标准路线”，而是哪条路线在真实建筑条件下更适合当前任务。周师傅只提醒他们把两个问题分开写清：空间能不能连接，路线是否适合当前任务。',
+    'A Ninh không dừng ở lời giải thích. Cô khoanh từng điểm ghi chép, nhiệm vụ phải quay về phía đông và điểm gặp trước Càn Thanh Môn, rồi cùng Thẩm Nghiên kiểm tra từng kết nối qua cổng và sân. Anh nhận ra cùng một không gian có thể phục vụ cả quan sát theo trục giữa lẫn nhiệm vụ phía đông; điều cần so sánh là tuyến nào phù hợp nhiệm vụ trong điều kiện kiến trúc có thật. Thầy Chu chỉ nhắc họ viết tách hai câu hỏi: không gian có nối được không và tuyến có phù hợp nhiệm vụ hiện tại không.',
+    'A Ning does not stop at explanation. She circles her recording points, her need to return east, and the meeting place before the Gate of Heavenly Purity, then asks Shen Yan to verify every connection through gates and courtyards. He sees that the same space can support both his axial study and her east-side task; the real comparison is which route fits the task under the actual architectural conditions. Master Zhou only reminds them to write the two questions separately: can the spaces connect, and does the route fit the current task?',
   ),
   7: (
     '周师傅没有替两人裁定，而是让他们把刚才检查过的连接重新写到图边。沈砚先指出中轴、外朝院落与乾清门前这些共同事实，阿宁再补上东侧任务要求她经过的节点。两人发现，只要少掉其中一类证据，判断都会变得过快。沈砚于是把原先写在图角的“错误路线”划掉，改成“另一任务下成立的路线”，并请阿宁检查自己的改写有没有歪曲她的目的。',
@@ -40,9 +45,9 @@ const _forbiddenCityStoryExtensions =
     'Master Zhou refuses to decide for them and asks them to write the verified connections beside the map. Shen Yan states the shared facts of the central axis, Outer Court courtyards, and the area before the Gate of Heavenly Purity; A Ning adds the nodes required by her east-side task. They see that omitting either evidence layer makes the judgment premature. Shen Yan crosses out “wrong route,” replaces it with “a route valid for another task,” and asks A Ning whether his revision misstates her purpose.',
   ),
   8: (
-    '阿宁随后提出一个更难的问题：如果两个人都说自己有不同视角，怎样避免把任何路线都说成合理？她把图转回沈砚面前，让他先指出不能改变的事实。两人重新确认中轴、宫门、院落和乾清门前的连接，再分别说明各自任务。沈砚意识到，视角只能解释为什么偏好不同，不能替代空间事实；一条路线如果穿过并不存在的连接，即使符合个人愿望也不能成立。阿宁因此接受同一套事实标准，同时坚持自己的任务路线。',
-    'A Ninh đặt câu hỏi khó hơn: nếu ai cũng viện dẫn góc nhìn riêng, làm sao tránh coi mọi tuyến đều hợp lý? Cô đưa bản đồ lại cho Thẩm Nghiên và yêu cầu anh nêu trước những sự thật không thể thay đổi. Họ xác nhận lại trục giữa, cổng, sân và kết nối trước Càn Thanh Môn rồi mới giải thích nhiệm vụ riêng. Thẩm Nghiên hiểu rằng góc nhìn giải thích ưu tiên, nhưng không thể thay thế sự thật không gian; một tuyến đi qua kết nối không tồn tại thì không thể hợp lệ. A Ninh chấp nhận cùng tiêu chuẩn sự thật mà vẫn giữ tuyến phù hợp nhiệm vụ của mình.',
-    'A Ning then raises a harder question: if everyone cites a different perspective, how do they avoid calling every route reasonable? She turns the map back to Shen Yan and asks him to state the facts that cannot change. They reconfirm the central axis, gates, courtyards, and the connections before the Gate of Heavenly Purity before explaining their separate tasks. Shen Yan realizes that perspective can explain different preferences but cannot replace spatial fact; a route through a nonexistent connection cannot be valid. A Ning accepts the same factual standard while keeping her task-based route.',
+    '阿宁随后提出一个更难的问题：如果两个人都说自己有不同视角，怎样避免把任何路线都说成合理？她把图转回沈砚面前，让他先指出不能改变的事实。两人重新确认中轴、宫门、院落和乾清门前的连接，再分别说明各自任务。沈砚意识到，视角只能解释为什么偏好不同，不能替代空间事实；一条路线如果穿过并不存在的连接，即使符合个人愿望也不能成立。阿宁因此接受同一套事实标准，同时坚持自己的任务路线。周师傅让他们先圈出共同事实，再分别写下各自的判断，避免把“视角不同”变成“事实也可以不同”。',
+    'A Ninh đặt câu hỏi khó hơn: nếu ai cũng viện dẫn góc nhìn riêng, làm sao tránh coi mọi tuyến đều hợp lý? Cô đưa bản đồ lại cho Thẩm Nghiên và yêu cầu anh nêu trước những sự thật không thể thay đổi. Họ xác nhận lại trục giữa, cổng, sân và kết nối trước Càn Thanh Môn rồi mới giải thích nhiệm vụ riêng. Thẩm Nghiên hiểu rằng góc nhìn giải thích ưu tiên, nhưng không thể thay thế sự thật không gian; một tuyến đi qua kết nối không tồn tại thì không thể hợp lệ. A Ninh chấp nhận cùng tiêu chuẩn sự thật mà vẫn giữ tuyến phù hợp nhiệm vụ của mình. Thầy Chu yêu cầu họ khoanh các sự thật chung trước rồi mới viết phán đoán riêng, để “khác góc nhìn” không biến thành “sự thật cũng khác”.',
+    'A Ning then raises a harder question: if everyone cites a different perspective, how do they avoid calling every route reasonable? She turns the map back to Shen Yan and asks him to state the facts that cannot change. They reconfirm the central axis, gates, courtyards, and the connections before the Gate of Heavenly Purity before explaining their separate tasks. Shen Yan realizes that perspective can explain different preferences but cannot replace spatial fact; a route through a nonexistent connection cannot be valid. A Ning accepts the same factual standard while keeping her task-based route. Master Zhou has them circle the shared facts first and write their judgments separately, so “different perspectives” never becomes “different facts.”',
   ),
   9: (
     '周师傅让他们把两张记录叠放，却不准先写结论。沈砚先画共同空间骨架：午门、中轴、外朝院落、乾清门前以及与东侧相接的门户；阿宁再把任务节点和行动方向叠在上面。图上有些段落重合，有些在共同节点后分开。沈砚这才看出，所谓路线偏好必须依附于共同空间事实，而不能把个人习惯冒充整座宫城的唯一结构。他把自己原来的粗线改细，并在旁边补上“学习任务”四个字。阿宁也把自己的东侧记录补上回到共同节点的条件，避免把局部经验说成普遍规律。',
@@ -141,16 +146,15 @@ JourneyLevelContent _resolveForbiddenCityAdaptiveLevel(
             '${base.storyAnnotations[index].english}${extension != null && index == paragraphs.length - 1 ? ' ${extension.$3}' : ''}',
       ),
   ];
-  final unseenWords = base.words
+  final activeWords = forbiddenCityWordsForLevel(level);
+  final unseenWords = activeWords
       .where((entry) => !knownWords.contains(entry.word))
       .toList(growable: false);
   return JourneyLevelContent(
     storyParagraphs: List<String>.unmodifiable(paragraphs),
     storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
-    words: unseenWords.isEmpty ? base.words : unseenWords,
-    discoveries: List<DiscoveryEntry>.unmodifiable(
-      <DiscoveryEntry>[base.discoveries.first],
-    ),
+    words: unseenWords.isEmpty ? activeWords : unseenWords,
+    discoveries: base.discoveries,
     wonderQuestion: base.wonderQuestion,
     expressQuestion: base.expressQuestion,
   );

@@ -1,3 +1,4 @@
+import 'forbidden_city_discovery_curriculum.dart';
 import 'forbidden_city_journey_runtime.dart';
 import 'journey_level_catalog.dart';
 
@@ -14,7 +15,9 @@ final List<JourneyLevelContent> _forbiddenCityLevelSnapshots =
     storyParagraphs: List<String>.unmodifiable(base.storyParagraphs),
     storyAnnotations: List.unmodifiable(base.storyAnnotations),
     words: List.unmodifiable(base.words),
-    discoveries: List.unmodifiable(base.discoveries),
+    discoveries: List.unmodifiable(
+      forbiddenCityDiscoveryCurriculumForLevel(index + 1),
+    ),
     wonderQuestion: base.wonderQuestion,
     expressQuestion: base.expressQuestion,
   );
