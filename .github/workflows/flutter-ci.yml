@@ -4,9 +4,21 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'app/**'
+      - 'worker/**'
+      - 'wrangler.toml'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
   pull_request:
     branches:
       - main
+    paths:
+      - 'app/**'
+      - 'worker/**'
+      - 'wrangler.toml'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
 
 permissions:
   contents: read
@@ -94,6 +106,15 @@ jobs:
         run: |
           set -o pipefail
           npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run 2>&1 | tee worker-build.log
+
+      - name: Upload exact tested web artifact
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-web-${{ env.CANDIDATE_SHA }}
+          path: app/build/web
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Upload verification logs
         if: always()

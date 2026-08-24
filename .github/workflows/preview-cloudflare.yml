@@ -9,6 +9,12 @@ on:
       - synchronize
       - reopened
       - closed
+    paths:
+      - 'app/**'
+      - 'worker/**'
+      - 'wrangler.toml'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
 
 permissions:
   contents: read

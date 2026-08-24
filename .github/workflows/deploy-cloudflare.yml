@@ -1,51 +1,61 @@
 name: Deploy Cloudflare
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Flutter CI
+    types:
+      - completed
     branches:
       - main
-  workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
   statuses: write
 
 concurrency:
   group: cloudflare-production
   cancel-in-progress: true
 
+env:
+  CANDIDATE_SHA: ${{ github.event.workflow_run.head_sha }}
+  SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+
 jobs:
   deploy:
-    name: Build and deploy production
+    name: Deploy exact tested production artifact
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
+      - name: Check out exact tested candidate
         uses: actions/checkout@v6
-
-      - name: Test Phoenix agents
-        id: agent_tests
-        run: node --test worker/*.test.mjs
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          cache: true
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
 
-      - name: Install dependencies
-        id: dependencies
-        working-directory: app
-        run: flutter pub get
+      - name: Verify exact candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
 
-      - name: Build Flutter web release
-        id: web_build
-        working-directory: app
-        run: flutter build web --release
+      - name: Download exact tested web artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: phoenix-web-${{ env.CANDIDATE_SHA }}
+          path: app/build/web
+          github-token: ${{ github.token }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
 
-      - name: Validate Worker bundle
-        id: worker_validation
-        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
+      - name: Verify tested artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f app/build/web/index.html
+          test -f app/build/web/main.dart.js
+          echo "PRODUCTION ARTIFACT SHA = $CANDIDATE_SHA"
 
       - name: Check Cloudflare credentials
         id: cloudflare_credentials
@@ -58,101 +68,70 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "Cloudflare deployment skipped: add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID as repository secrets."
+            echo "Cloudflare deployment blocked: credentials are unavailable."
+            exit 1
           fi
 
       - name: Deploy to Cloudflare Workers
         id: cloudflare_deploy
-        if: steps.cloudflare_credentials.outputs.ready == 'true'
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: "4"
-          command: "deploy --var PHOENIX_RELEASE:${{ github.sha }}"
-
-      - name: Verify production Agent health
-        id: production_health
-        if: steps.cloudflare_credentials.outputs.ready == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         shell: bash
         run: |
-          health_url="https://phoenix-journeys-alpha.7hn5tyrjgh.workers.dev/api/health?commit=${GITHUB_SHA}"
-          verified="false"
+          set -euo pipefail
+          npx --yes wrangler@4 deploy --var "PHOENIX_RELEASE:$CANDIDATE_SHA"
 
+      - name: Verify production Agent health and exact release
+        id: production_health
+        shell: bash
+        run: |
+          set -euo pipefail
+          health_url="https://phoenix-journeys-alpha.7hn5tyrjgh.workers.dev/api/health?commit=${CANDIDATE_SHA}"
+          verified=false
           for attempt in {1..18}; do
             response="$(curl --fail --silent --show-error "$health_url" || true)"
             echo "Cloudflare release check ${attempt}/18: ${response:-no response}"
-
             if node -e '
               let health;
-              try {
-                health = JSON.parse(process.argv[1]);
-              } catch (_) {
-                process.exit(1);
-              }
-              const expectedRelease = process.argv[2];
-              if (!health.ok ||
-                  !health.ai ||
-                  health.service !== "phoenix-journeys" ||
-                  health.release !== expectedRelease) {
-                process.exit(1);
-              }
-            ' "$response" "$GITHUB_SHA"; then
-              verified="true"
+              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
+              const expected = process.argv[2];
+              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expected) process.exit(1);
+            ' "$response" "$CANDIDATE_SHA"; then
+              verified=true
               break
             fi
-
             sleep 5
           done
-
-          if [[ "$verified" != "true" ]]; then
-            echo "Phoenix Agent health check failed: the expected release did not propagate."
-            exit 1
-          fi
+          [[ "$verified" == true ]]
 
       - name: Publish Cloudflare deployment receipt
         if: always()
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          CREDENTIALS_READY: ${{ steps.cloudflare_credentials.outputs.ready }}
-          AGENT_TESTS: ${{ steps.agent_tests.outcome }}
-          DEPENDENCIES: ${{ steps.dependencies.outcome }}
-          WEB_BUILD: ${{ steps.web_build.outcome }}
-          WORKER_VALIDATION: ${{ steps.worker_validation.outcome }}
-          CLOUDFLARE_DEPLOY: ${{ steps.cloudflare_deploy.outcome }}
-          PRODUCTION_HEALTH: ${{ steps.production_health.outcome }}
+          DEPLOY_RESULT: ${{ steps.cloudflare_deploy.outcome }}
+          HEALTH_RESULT: ${{ steps.production_health.outcome }}
         run: |
-          state="success"
-          description="Cloudflare deployed; Phoenix Agents healthy"
-
-          if [[ "$CREDENTIALS_READY" != "true" ]]; then
-            state="error"
-            description="Deployment skipped: Cloudflare secrets missing"
-          elif [[ "$AGENT_TESTS" != "success" || \
-                  "$DEPENDENCIES" != "success" || \
-                  "$WEB_BUILD" != "success" || \
-                  "$WORKER_VALIDATION" != "success" || \
-                  "$CLOUDFLARE_DEPLOY" != "success" || \
-                  "$PRODUCTION_HEALTH" != "success" ]]; then
-            state="failure"
-            description="Cloudflare deployment or Agent health check failed"
+          state=success
+          description="Exact tested artifact deployed; Phoenix healthy"
+          if [[ "$DEPLOY_RESULT" != success || "$HEALTH_RESULT" != success ]]; then
+            state=failure
+            description="Production deployment or exact-release health failed"
           fi
-
           payload="$(node -e '
-            const [state, description] = process.argv.slice(1);
+            const [state, description, url] = process.argv.slice(1);
             process.stdout.write(JSON.stringify({
               state,
               description,
               context: "cloudflare/production",
-              target_url: "https://phoenix-journeys-alpha.7hn5tyrjgh.workers.dev/"
+              target_url: url
             }));
-          ' "$state" "$description")"
-
+          ' "$state" "$description" "https://phoenix-journeys-alpha.7hn5tyrjgh.workers.dev/")"
           curl --fail --silent --show-error \
             --request POST \
             --header "Accept: application/vnd.github+json" \
             --header "Authorization: Bearer $GITHUB_TOKEN" \
             --header "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${CANDIDATE_SHA}" \
             --data "$payload"

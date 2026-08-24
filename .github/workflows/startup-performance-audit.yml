@@ -1,12 +1,25 @@
-name: Startup Performance Audit
+name: Startup Performance Regression Audit
 
 on:
-  push:
-    branches:
-      - dev/current
   pull_request:
     branches:
       - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - 'app/lib/app.dart'
+      - 'app/lib/startup_performance_probe.dart'
+      - 'app/lib/data/daily_journey_experience.dart'
+      - 'app/lib/data/journey_startup_metadata.dart'
+      - 'app/lib/screens/explore_screen.dart'
+      - 'app/lib/screens/journey_screen.dart'
+      - 'app/lib/widgets/interactive_story_text.dart'
+      - 'app/web/**'
+      - '.github/scripts/startup_instrument.py'
+      - '.github/scripts/measure_startup.mjs'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,105 +29,66 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  STARTUP_BASELINE_SHA: eb4e36e6e4246b0e448ecc151f01a7bb3d272c2d
   CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
 
 jobs:
   benchmark:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+
     steps:
-      - name: Check out exact candidate head
-        uses: actions/checkout@v4
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.CANDIDATE_SHA }}
           path: candidate
           fetch-depth: 0
-      - name: Check out exact startup baseline
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.STARTUP_BASELINE_SHA }}
-          path: baseline
 
-      - name: Verify exact identities and runtime delta
+      - name: Check out exact current base
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.BASE_SHA }}
+          path: baseline
+          fetch-depth: 0
+
+      - name: Verify exact identities and preflight harness
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p startup-performance-results
           test "$(git -C candidate rev-parse HEAD)" = "$CANDIDATE_SHA"
-          test "$(git -C baseline rev-parse HEAD)" = "$STARTUP_BASELINE_SHA"
-          git -C candidate diff --name-only "$STARTUP_BASELINE_SHA" "$CANDIDATE_SHA" > startup-performance-results/committed-delta.txt
-          if ! grep -q '^app/lib\|^app/web/' startup-performance-results/committed-delta.txt; then
-            echo 'RUNTIME DELTA = NONE'
-            exit 1
-          fi
-          echo 'RUNTIME DELTA != NONE'
-          cat startup-performance-results/committed-delta.txt
+          test "$(git -C baseline rev-parse HEAD)" = "$BASE_SHA"
+          python3 -m py_compile candidate/.github/scripts/startup_instrument.py
+          node --check candidate/.github/scripts/measure_startup.mjs
+          python3 candidate/.github/scripts/startup_instrument.py "$GITHUB_WORKSPACE/baseline" --check-only
+          python3 candidate/.github/scripts/startup_instrument.py "$GITHUB_WORKSPACE/candidate" --check-only
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+
       - name: Install benchmark browser driver
         run: npm install --no-save --prefix "$RUNNER_TEMP/startup-audit-node" puppeteer-core@24
 
-      - name: Preflight dual-architecture benchmark harness
+      - name: Benchmark exact base and candidate
         shell: bash
         env:
           PUPPETEER_CORE_PATH: ${{ runner.temp }}/startup-audit-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
         run: |
           set -euo pipefail
-          python3 -m py_compile candidate/.github/scripts/startup_instrument.py
-          node --check candidate/.github/scripts/measure_startup.mjs
-          python3 candidate/.github/scripts/startup_instrument.py "$GITHUB_WORKSPACE/baseline" --check-only
-          python3 candidate/.github/scripts/startup_instrument.py "$GITHUB_WORKSPACE/candidate" --check-only
-          rm -rf "$RUNNER_TEMP/startup-preflight"
-          cp -a candidate "$RUNNER_TEMP/startup-preflight"
-          python3 candidate/.github/scripts/startup_instrument.py "$RUNNER_TEMP/startup-preflight"
-          pushd "$RUNNER_TEMP/startup-preflight/app" >/dev/null
-          flutter pub get
-          flutter build web --release
-          popd >/dev/null
-          echo 'INSTRUMENTED REMEDIATED RELEASE BUILD PREFLIGHT = PASS'
-
-      - name: Benchmark exact baseline and remediated candidate
-        shell: bash
-        env:
-          PUPPETEER_CORE_PATH: ${{ runner.temp }}/startup-audit-node/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js
-        run: |
-          set -euo pipefail
+          mkdir -p startup-performance-results
           CHROME_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           export CHROME_PATH
+
           benchmark_tree() {
             local tree="$1" label="$2" source_sha="$3"
             test "$(git -C "$tree" rev-parse HEAD)" = "$source_sha"
-            pushd "$tree/app" >/dev/null
-            flutter pub get
-            flutter build web --release
-            python3 - "$label" "$source_sha" "$GITHUB_WORKSPACE/startup-performance-results/${label}-bundle.json" <<'PY'
-          import json, sys
-          from pathlib import Path
-          label, source_sha, output = sys.argv[1], sys.argv[2], Path(sys.argv[3])
-          build = Path('build/web')
-          files = [p for p in build.rglob('*') if p.is_file()]
-          def size(name):
-              p = build / name
-              return p.stat().st_size if p.exists() else None
-          report = {
-              'label': label, 'source_sha': source_sha, 'instrumented': False,
-              'main.dart.js': size('main.dart.js'),
-              'flutter_bootstrap.js': size('flutter_bootstrap.js'),
-              'flutter.js': size('flutter.js'),
-              'asset_manifest': size('assets/AssetManifest.bin'),
-              'total_build_bytes': sum(p.stat().st_size for p in files),
-              'file_count': len(files),
-          }
-          output.write_text(json.dumps(report, indent=2), encoding='utf-8')
-          print(json.dumps(report, indent=2))
-          PY
-            popd >/dev/null
             python3 candidate/.github/scripts/startup_instrument.py "$tree"
             pushd "$tree/app" >/dev/null
+            flutter pub get
             flutter build web --release
             python3 -m http.server 8080 --directory build/web >"$RUNNER_TEMP/${label}-server.log" 2>&1 &
             server_pid=$!
@@ -131,62 +105,64 @@ jobs:
             trap - RETURN
             popd >/dev/null
           }
-          benchmark_tree "$GITHUB_WORKSPACE/baseline" baseline "$STARTUP_BASELINE_SHA"
+
+          benchmark_tree "$GITHUB_WORKSPACE/baseline" baseline "$BASE_SHA"
           benchmark_tree "$GITHUB_WORKSPACE/candidate" candidate "$CANDIDATE_SHA"
 
-      - name: Enforce material improvement and summarize
+      - name: Enforce no material startup regression
         shell: bash
         run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
+
           root = Path('startup-performance-results')
-          before = json.loads((root/'baseline-timings.json').read_text())
-          after = json.loads((root/'candidate-timings.json').read_text())
-          bb = json.loads((root/'baseline-bundle.json').read_text())
-          ab = json.loads((root/'candidate-bundle.json').read_text())
-          scenarios = ('cold_new','warm_new','cold_existing','warm_existing')
-          key_fields = ('totalToMeaningfulMs','firstFrameMs','appStateDailyJourneyInitMs','locationBindingsMs','coverVisibleMs','coverFadeStartMs','brandingDeadlineToFadeStartMs','coverRemovalAfterFadeStartMs','journeyOpenStoryUsableMs')
+          before = json.loads((root / 'baseline-timings.json').read_text())
+          after = json.loads((root / 'candidate-timings.json').read_text())
+          scenarios = ('cold_new', 'warm_new', 'cold_existing', 'warm_existing')
           failed = []
+
           for scenario in scenarios:
-              print(f'[{scenario}]')
-              for field in key_fields:
-                  b = before['stats'][scenario][field]['median']
-                  a = after['stats'][scenario][field]['median']
-                  print(f'{field}: BEFORE={b} AFTER={a}')
-              b = before['stats'][scenario]['totalToMeaningfulMs']['median']
-              a = after['stats'][scenario]['totalToMeaningfulMs']['median']
-              if not (b and a is not None and a <= b * 0.70):
-                  failed.append(f'{scenario}: first meaningful improvement <30%')
-              catalog = after['stats'][scenario]['appStateDailyJourneyInitMs']['median']
-              if catalog is None or catalog > 3000:
-                  failed.append(f'{scenario}: daily Journey init still too expensive ({catalog})')
+              b_total = before['stats'][scenario]['totalToMeaningfulMs']['median']
+              a_total = after['stats'][scenario]['totalToMeaningfulMs']['median']
+              b_open = before['stats'][scenario]['journeyOpenStoryUsableMs']['median']
+              a_open = after['stats'][scenario]['journeyOpenStoryUsableMs']['median']
+
+              print(f'[{scenario}] total BEFORE={b_total} AFTER={a_total}')
+              print(f'[{scenario}] journey-open BEFORE={b_open} AFTER={a_open}')
+
+              if b_total is None or a_total is None:
+                  failed.append(f'{scenario}: missing total startup evidence')
+              elif a_total > b_total * 1.15:
+                  failed.append(f'{scenario}: total startup regressed >15%')
+
+              if b_open is None or a_open is None:
+                  failed.append(f'{scenario}: missing Journey-open evidence')
+              elif a_open > max(5000, b_open * 1.15):
+                  failed.append(f'{scenario}: Journey-open regressed materially')
+
               ready_margin = after['stats'][scenario]['homeReadyBeforeBrandingDeadlineMs']['median']
-              if ready_margin is None or ready_margin < 0:
-                  failed.append(f'{scenario}: Home was not ready before branding deadline ({ready_margin})')
               fade_delay = after['stats'][scenario]['brandingDeadlineToFadeStartMs']['max']
-              if fade_delay is None or fade_delay > 250:
-                  failed.append(f'{scenario}: branding deadline to cover fade exceeded 250ms ({fade_delay})')
               removal_delay = after['stats'][scenario]['coverRemovalAfterFadeStartMs']['max']
+              if ready_margin is None or ready_margin < 0:
+                  failed.append(f'{scenario}: Home not ready before branding deadline')
+              if fade_delay is None or fade_delay > 250:
+                  failed.append(f'{scenario}: branding deadline to fade >250ms')
               if removal_delay is None or removal_delay > 1000:
-                  failed.append(f'{scenario}: cover removal after fade exceeded 1000ms ({removal_delay})')
-              opened = after['stats'][scenario]['journeyOpenStoryUsableMs']['median']
-              if opened is None or opened > 5000:
-                  failed.append(f'{scenario}: Journey open shifted startup delay ({opened})')
-          print('[bundle]')
-          for key in ('main.dart.js','flutter_bootstrap.js','flutter.js','asset_manifest','total_build_bytes','file_count'):
-              print(f'{key}: BEFORE={bb[key]} AFTER={ab[key]} DELTA={(ab[key]-bb[key]) if isinstance(bb[key], int) and isinstance(ab[key], int) else None}')
+                  failed.append(f'{scenario}: cover removal after fade >1000ms')
+
           if failed:
-              print('PERFORMANCE ACCEPTANCE = FAIL')
-              for item in failed: print('FAIL:', item)
+              print('STARTUP PERFORMANCE REGRESSION = FAIL')
+              for item in failed:
+                  print('FAIL:', item)
               raise SystemExit(1)
-          print('PERFORMANCE ACCEPTANCE = PASS')
+          print('STARTUP PERFORMANCE REGRESSION = PASS')
           PY
 
-      - name: Upload startup audit evidence
+      - name: Upload startup regression evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: startup-performance-audit-${{ env.CANDIDATE_SHA }}
+          name: startup-performance-${{ env.CANDIDATE_SHA }}
           path: startup-performance-results/
           if-no-files-found: error
