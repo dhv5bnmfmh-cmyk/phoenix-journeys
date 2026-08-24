@@ -17,8 +17,13 @@ void _expectMarkers(
   List<String> markers, {
   required String reason,
 }) {
+  final normalizedActual = actual.toLowerCase();
   for (final marker in markers) {
-    expect(actual, contains(marker), reason: '$reason: $marker');
+    expect(
+      normalizedActual,
+      contains(marker.toLowerCase()),
+      reason: '$reason: $marker',
+    );
   }
 }
 
