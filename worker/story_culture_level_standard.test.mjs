@@ -237,10 +237,10 @@ test('Hangzhou, Guangzhou, and Nanjing identity fields match canonical package m
 
 test('Forbidden City and Shanghai keep initial Goal separate from enacted Choice', () => {
   requiresEvery(forbiddenCity, [
-    '想做一张能解释宫城空间的学习图',
-    '一张好图应该有一条明确主线',
-    '两条路线都来自真实的行动',
-    '不选一条覆盖另一条',
+    '想做一张能解释紫禁城空间组织的学习图',
+    '误把“最容易组织的路线”当成“所有人都应采用的路线”',
+    '两条路线都能走通',
+    '不再用一条线覆盖另一条',
     forbiddenCity.match(/const forbiddenCityMemoryAnchor = '([^']+)'/)[1],
   ], 'Forbidden City active runtime');
   const forbiddenFields = identityFields('beijing-forbidden-city');

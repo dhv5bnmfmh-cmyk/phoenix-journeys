@@ -14,9 +14,7 @@ class PhoenixApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final uri = Uri.base;
     final prototype = uri.queryParameters['prototype'];
-    final isPreviewHost = uri.host.startsWith('phoenix-journeys-pr-');
-    final showCoinJourney =
-        prototype == 'coin-journey' || (isPreviewHost && prototype == null);
+    final showCoinJourney = prototype == 'coin-journey';
 
     return MaterialApp(
       title: 'Phoenix Journeys',

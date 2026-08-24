@@ -15,7 +15,7 @@ void main() {
       expect(story, isNot(contains('旧木尺')));
       expect(story, isNot(contains('没有跨过门槛')));
     }
-    expect(forbiddenCityMemoryAnchor, '一张叠着两条路线的图');
+    expect(forbiddenCityMemoryAnchor, '两条都能走通的路线');
     expect(isBatchOneGoldJourney(forbiddenCityJourneyId), isFalse);
     expect(batchOneMemorySpecFor(forbiddenCityJourneyId), isNull);
   });

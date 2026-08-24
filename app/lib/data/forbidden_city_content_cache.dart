@@ -1,4 +1,6 @@
+import 'forbidden_city_discovery_curriculum.dart';
 import 'forbidden_city_journey_runtime.dart';
+import 'forbidden_city_story_annotation_support.dart';
 import 'journey_level_catalog.dart';
 
 /// Immutable Lv1-Lv10 content snapshots for the Forbidden City Journey.
@@ -9,12 +11,21 @@ import 'journey_level_catalog.dart';
 /// narration progress rebuilds.
 final List<JourneyLevelContent> _forbiddenCityLevelSnapshots =
     List<JourneyLevelContent>.generate(10, (index) {
-  final base = forbiddenCityLevelContent(index + 1);
+  final level = index + 1;
+  final base = forbiddenCityLevelContent(level);
+  final paragraphs = List<String>.unmodifiable(base.storyParagraphs);
   return JourneyLevelContent(
-    storyParagraphs: List<String>.unmodifiable(base.storyParagraphs),
-    storyAnnotations: List.unmodifiable(base.storyAnnotations),
+    storyParagraphs: paragraphs,
+    storyAnnotations: List.unmodifiable(
+      forbiddenCityStoryAnnotationsForCurrentParagraphs(
+        level: level,
+        paragraphs: paragraphs,
+      ),
+    ),
     words: List.unmodifiable(base.words),
-    discoveries: List.unmodifiable(base.discoveries),
+    discoveries: List.unmodifiable(
+      forbiddenCityDiscoveryCurriculumForLevel(level),
+    ),
     wonderQuestion: base.wonderQuestion,
     expressQuestion: base.expressQuestion,
   );
