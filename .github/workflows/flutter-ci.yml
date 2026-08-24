@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - "feature/**"
   pull_request:
     branches:
       - main
@@ -16,6 +15,9 @@ concurrency:
   group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -24,8 +26,28 @@ jobs:
         working-directory: app
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+
+      - name: Verify exact candidate identity
+        working-directory: ${{ github.workspace }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          echo "FLUTTER CI CANDIDATE SHA = $CANDIDATE_SHA"
+
+      - name: Preflight checked-in JavaScript harness syntax
+        working-directory: ${{ github.workspace }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find .github/scripts -type f -name '*.mjs' -print0)
 
       - name: Test Phoenix agents
         id: agents
@@ -77,7 +99,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phoenix-verification-logs
+          name: phoenix-verification-logs-${{ env.CANDIDATE_SHA }}
           path: |
             worker-test.log
             worker-build.log

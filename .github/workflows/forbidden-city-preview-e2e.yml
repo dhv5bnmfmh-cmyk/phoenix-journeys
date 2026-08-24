@@ -1,4 +1,4 @@
-name: Forbidden City PR Preview E2E
+name: Reference Journey E2E
 
 on:
   pull_request:
@@ -8,12 +8,25 @@ on:
       - opened
       - synchronize
       - reopened
+    paths:
+      - 'app/lib/app.dart'
+      - 'app/lib/screens/journey_screen.dart'
+      - 'app/lib/widgets/**'
+      - 'app/lib/data/adaptive_journey_level_runtime.dart'
+      - 'app/lib/data/dedicated_adaptive_journey_catalog.dart'
+      - 'app/lib/data/forbidden_city_*.dart'
+      - 'app/test/forbidden_city_*.dart'
+      - 'app/web/**'
+      - 'worker/**'
+      - 'wrangler.toml'
+      - '.github/scripts/verify_forbidden_city_*.mjs'
+      - '.github/workflows/forbidden-city-preview-e2e.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: forbidden-city-preview-e2e-pr-${{ github.event.pull_request.number }}
+  group: reference-journey-e2e-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 env:
@@ -21,8 +34,7 @@ env:
   PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event.pull_request.number }}.7hn5tyrjgh.workers.dev/
 
 jobs:
-  forbidden-city-preview-e2e:
-    if: github.event.pull_request.number == 197
+  reference-journey-e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 40
 
@@ -38,7 +50,15 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          echo "FORBIDDEN CITY E2E CANDIDATE SHA = $CANDIDATE_SHA"
+          echo "REFERENCE JOURNEY E2E CANDIDATE SHA = $CANDIDATE_SHA"
+
+      - name: Preflight browser harness syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in .github/scripts/verify_forbidden_city_*.mjs; do
+            node --check "$file"
+          done
 
       - name: Wait for exact Cloudflare preview release
         shell: bash
@@ -63,58 +83,50 @@ jobs:
             echo "Waiting for exact preview release ${attempt}/180"
             sleep 5
           done
-          if [[ "$verified" != true ]]; then
-            echo "Exact PR preview release did not become healthy."
-            exit 1
-          fi
+          [[ "$verified" == true ]]
 
       - name: Install Chromium and WebKit functional drivers
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-save --prefix "$RUNNER_TEMP/forbidden-city-e2e-node" playwright
-          "$RUNNER_TEMP/forbidden-city-e2e-node/node_modules/.bin/playwright" install --with-deps chromium webkit
+          npm install --no-save --prefix "$RUNNER_TEMP/reference-journey-e2e-node" playwright
+          "$RUNNER_TEMP/reference-journey-e2e-node/node_modules/.bin/playwright" install --with-deps chromium webkit
 
-      - name: Verify actual Forbidden City Lv1 Lv3 Lv5 Lv8 Lv10 experience
+      - name: Verify Forbidden City Lv1 Lv3 Lv5 Lv8 Lv10 six-stage experience
         shell: bash
         env:
-          PLAYWRIGHT_PATH: ${{ runner.temp }}/forbidden-city-e2e-node/node_modules/playwright/index.mjs
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/reference-journey-e2e-node/node_modules/playwright/index.mjs
         run: |
           set -euo pipefail
           mkdir -p test-results
           node .github/scripts/verify_forbidden_city_preview_v2_level_race_fix.mjs \
-            "$PREVIEW_URL" \
-            "$CANDIDATE_SHA" \
+            "$PREVIEW_URL" "$CANDIDATE_SHA" \
             2>&1 | tee test-results/forbidden-city-preview-e2e.log
 
       - name: Verify Forbidden City Story Reading Support
         shell: bash
         env:
-          PLAYWRIGHT_PATH: ${{ runner.temp }}/forbidden-city-e2e-node/node_modules/playwright/index.mjs
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/reference-journey-e2e-node/node_modules/playwright/index.mjs
         run: |
           set -euo pipefail
-          mkdir -p test-results
           node .github/scripts/verify_forbidden_city_story_reading_support.mjs \
-            "$PREVIEW_URL" \
-            "$CANDIDATE_SHA" \
+            "$PREVIEW_URL" "$CANDIDATE_SHA" \
             2>&1 | tee test-results/forbidden-city-story-reading-support.log
 
-      - name: Verify iPhone WebKit startup and Forbidden City entry
+      - name: Verify iPhone WebKit startup, entry, and Discovery depth
         shell: bash
         env:
-          PLAYWRIGHT_PATH: ${{ runner.temp }}/forbidden-city-e2e-node/node_modules/playwright/index.mjs
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/reference-journey-e2e-node/node_modules/playwright/index.mjs
         run: |
           set -euo pipefail
-          mkdir -p test-results
           node .github/scripts/verify_forbidden_city_mobile_webkit_discovery_depth.mjs \
-            "$PREVIEW_URL" \
-            "$CANDIDATE_SHA" \
+            "$PREVIEW_URL" "$CANDIDATE_SHA" \
             2>&1 | tee test-results/forbidden-city-mobile-webkit.log
 
-      - name: Upload Forbidden City E2E evidence
+      - name: Upload Reference Journey E2E evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: forbidden-city-preview-e2e-${{ env.CANDIDATE_SHA }}
+          name: reference-journey-e2e-${{ env.CANDIDATE_SHA }}
           path: test-results/
           if-no-files-found: warn
