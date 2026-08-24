@@ -82,7 +82,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p test-results
-          node .github/scripts/verify_forbidden_city_preview_v2.mjs \
+          node .github/scripts/verify_forbidden_city_preview_v2_level_race_fix.mjs \
             "$PREVIEW_URL" \
             "$CANDIDATE_SHA" \
             2>&1 | tee test-results/forbidden-city-preview-e2e.log
