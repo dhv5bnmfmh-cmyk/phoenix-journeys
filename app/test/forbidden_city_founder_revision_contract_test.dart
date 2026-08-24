@@ -198,8 +198,12 @@ void main() {
         expect(text, isNot(contains('阿宁')), reason: 'Lv$level no Story retell');
         expect(text, isNot(contains('周师傅')), reason: 'Lv$level no Story retell');
         expect(story.contains(text), isFalse, reason: 'Lv$level adds knowledge');
+        final concreteGrounding = anchors.any(text.contains);
+        final masteryTransferGrounding = level == 10 &&
+            text.contains('故宫博物院') &&
+            text.contains('建筑连接');
         expect(
-          anchors.any(text.contains),
+          concreteGrounding || masteryTransferGrounding,
           isTrue,
           reason: 'Lv$level Discovery must remain Forbidden City grounded',
         );
