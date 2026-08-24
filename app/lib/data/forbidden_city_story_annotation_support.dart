@@ -1,6 +1,6 @@
 import 'package:pinyin/pinyin.dart';
 
-import 'daily_journey_experience.dart';
+import 'journey_data.dart';
 
 const _forbiddenCityStorySupport = <List<(String vietnamese, String english)>>[
   <(String, String)>[
