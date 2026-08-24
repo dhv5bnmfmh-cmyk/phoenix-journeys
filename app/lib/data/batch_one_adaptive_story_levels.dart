@@ -17,6 +17,8 @@ import 'nanjing_qinhuai_vocabulary_curation.dart';
 import 'shanghai_bund_one_pass.dart';
 import 'xian_city_wall_one_pass.dart';
 
+const _summerPalaceJourneyId = 'beijing-summer-palace';
+
 bool isBatchOneGoldJourney(String journeyId) =>
     journeyId == shanghaiBundJourneyId ||
     journeyId == xianCityWallJourneyId ||
@@ -129,7 +131,63 @@ class BatchOneJourneyMemorySpec {
   final String completionSummary;
 }
 
+const _summerPalaceMemorySpec = BatchOneJourneyMemorySpec(
+  storyResult:
+      '许澄在十七孔桥金光亮起、旧照片被风吹落时放下相机先捡照片。她错过等了一下午的画面，却改拍旧照片、外婆的手和正在暗下的桥洞，并把作品命名为《留下痕迹的风景》。',
+  culturalPoint:
+      '颐和园的价值不只在一张“无瑕”风景照里。清漪园在1860年遭毁，1886年开始重建；今天的园林景观同时承载自然山水、人工营造与历史修复留下的时间层次。',
+  reviews: <RemediatedMemoryReview>[
+    RemediatedMemoryReview(
+      category: 'choice',
+      prompt: '金光亮起、旧照片被风吹落时，许澄真正做了什么选择？',
+      answer: '她放下相机先捡回旧照片，因此错过了等了一下午的金光画面。',
+      storyEventIds: <String>[
+        'photographFalls',
+        'forcedChoice',
+        'enactedChoice',
+        'lostLight',
+      ],
+    ),
+    RemediatedMemoryReview(
+      category: 'relationship',
+      prompt: '这次选择怎样改变了许澄和周岚的关系？',
+      answer: '周岚不再替许澄调构图，让她自己决定下一张，并把旧照片交给她保存。',
+      storyEventIds: <String>[
+        'trustChange',
+        'photographEntrusted',
+      ],
+    ),
+    RemediatedMemoryReview(
+      category: 'place',
+      prompt: '为什么这个故事不能随便搬到另一座普通公园？',
+      answer:
+          '十七孔桥冬至前后的短暂落日光影制造了不可暂停的拍摄窗口，而颐和园1860年受损、1886年开始重建的历史又让旧照片与“留下痕迹”真正有意义。',
+      storyEventIds: <String>[
+        'grandmotherConservationBackground',
+        'photographFalls',
+        'lostLight',
+        'changedUnderstanding',
+      ],
+    ),
+    RemediatedMemoryReview(
+      category: 'memory',
+      prompt: '离开颐和园后，最值得长期记住的画面是什么？',
+      answer: '许澄手里留下旧照片，镜头里留下外婆的手和正在暗下的十七孔桥。',
+      storyEventIds: <String>[
+        'threeLayerComposition',
+        'workTitle',
+        'photographEntrusted',
+      ],
+    ),
+  ],
+  longTermAnchor: '她没有留下“无瑕”的金光，却留下了旧照片、外婆的手和一幅承认时间痕迹的新作品。',
+  completionSummary:
+      '作品《留下痕迹的风景》完成了这次 Journey：许澄失去预想中的完美画面，却获得独立判断，也接过旧照片与修复记忆。下一次面对“完美”与真实痕迹的冲突时，先问自己准备留下什么、又愿意为选择承担什么。',
+);
+
 BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
+  if (journeyId == _summerPalaceJourneyId) return _summerPalaceMemorySpec;
+
   final journey = switch (journeyId) {
     shanghaiBundJourneyId => shanghaiBundOnePassRemediation,
     xianCityWallJourneyId => xianCityWallOnePassRemediation,
