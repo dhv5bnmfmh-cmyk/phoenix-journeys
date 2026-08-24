@@ -24,7 +24,7 @@ async function currentLevel(page) {
   throw new Error('Mobile WebKit Phoenix level selector not found');
 }
 
-async function clickSemanticButton(page, needle, { prefix = true, timeout = 20000 } = {}) {
+async function pressSemanticButton(page, needle, { prefix = true, timeout = 20000 } = {}) {
   const deadline = Date.now() + timeout;
   const wanted = clean(needle);
   while (Date.now() < deadline) {
@@ -36,10 +36,9 @@ async function clickSemanticButton(page, needle, { prefix = true, timeout = 2000
       })
       .sort((left, right) => left.area - right.area);
     if (matches.length) {
-      await page
-        .locator('flt-semantics')
-        .nth(matches[0].index)
-        .evaluate((element) => element.click());
+      const node = page.locator('flt-semantics').nth(matches[0].index);
+      await node.focus();
+      await node.press('Enter');
       return;
     }
     await sleep(100);
@@ -87,10 +86,9 @@ async function setLevel(page, target) {
     }
 
     const before = level;
-    await page
-      .locator('flt-semantics')
-      .nth(button.index)
-      .evaluate((element) => element.click());
+    const node = page.locator('flt-semantics').nth(button.index);
+    await node.focus();
+    await node.press('Enter');
 
     let moved = false;
     for (let i = 0; i < 40; i += 1) {
@@ -146,10 +144,12 @@ async function waitDiscoveryDepth(page, level, expected) {
 
 async function verifyBareDiscoveryDepth(page, diagnostics) {
   await setLevel(page, 1);
-  await clickSemanticButton(page, '继续');
+  await pressSemanticButton(page, '继续');
   await waitStage(page, 2);
-  await clickSemanticButton(page, '继续');
+  diagnostics.assertNoBlockingRuntimeError();
+  await pressSemanticButton(page, '继续');
   await waitStage(page, 3);
+  diagnostics.assertNoBlockingRuntimeError();
 
   for (let level = 1; level <= 10; level += 1) {
     await setLevel(page, level);
