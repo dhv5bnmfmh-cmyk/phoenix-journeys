@@ -40,6 +40,7 @@ function attachDiagnostics(page, label) {
         runtime = await page.evaluate(() => ({
           url: location.href,
           readyState: document.readyState,
+          loadingSeen: Boolean(window.__phoenixLoadingSeen),
           loadingPresent: Boolean(document.getElementById('phoenix-loading')),
           loadingText:
             document.getElementById('phoenix-loading-text')?.textContent || null,
@@ -105,12 +106,28 @@ function attachDiagnostics(page, label) {
 async function installStartupProbe(page) {
   await page.addInitScript(() => {
     window.__phoenixStartupEvents = [];
+    window.__phoenixLoadingSeen = false;
+
+    const markLoading = () => {
+      if (document.getElementById('phoenix-loading')) {
+        window.__phoenixLoadingSeen = true;
+      }
+    };
+
     window.addEventListener('phoenix-startup-settled', (event) => {
       window.__phoenixStartupEvents.push({
         detail: event?.detail ?? null,
         at: performance.now(),
       });
     });
+
+    document.addEventListener('readystatechange', markLoading);
+    document.addEventListener('DOMContentLoaded', markLoading);
+    new MutationObserver(markLoading).observe(document, {
+      childList: true,
+      subtree: true,
+    });
+    markLoading();
   });
 }
 
@@ -256,10 +273,14 @@ async function requireStartup(page, url, label) {
     null,
     { timeout: 45000 },
   );
-  const startupEvents = await page.evaluate(
-    () => window.__phoenixStartupEvents || [],
-  );
-  if (!startupEvents.some((event) => event.detail === 'ready')) {
+  const startup = await page.evaluate(() => ({
+    loadingSeen: Boolean(window.__phoenixLoadingSeen),
+    events: window.__phoenixStartupEvents || [],
+  }));
+  if (!startup.loadingSeen) {
+    throw new Error(`${label}: Phoenix launch cover was never observed`);
+  }
+  if (!startup.events.some((event) => event.detail === 'ready')) {
     throw new Error(
       `${label}: phoenix-startup-settled ready event was not observed`,
     );
@@ -268,46 +289,20 @@ async function requireStartup(page, url, label) {
   await findSemantic(page, 'PHOENIX JOURNEYS', { timeout: 30000 });
 }
 
-async function verifyBarePreviewStartup(browser) {
+async function verifyFounderEquivalentBareExperience(browser) {
   const context = await browser.newContext({
     ...devices['iPhone 13'],
     locale: 'zh-CN',
   });
   const page = await context.newPage();
-  const diagnostics = attachDiagnostics(page, 'bare-startup');
+  const diagnostics = attachDiagnostics(page, 'bare-founder-experience');
   await installStartupProbe(page);
   try {
-    const separator = baseUrl.includes('?') ? '&' : '?';
-    await requireStartup(
-      page,
-      `${baseUrl}${separator}v=${sourceSha}`,
-      'bare preview startup',
-    );
+    await requireStartup(page, baseUrl, 'bare preview startup');
     diagnostics.assertNoBlockingRuntimeError();
     console.log(
-      `MOBILE WEBKIT STARTUP = PASS | DEVICE=iPhone 13 | SHA=${sourceSha}`,
+      `MOBILE WEBKIT BARE STARTUP = PASS | DEVICE=iPhone 13 | SHA=${sourceSha}`,
     );
-  } catch (error) {
-    await diagnostics.dump(error?.stack || error?.message || String(error));
-    throw error;
-  } finally {
-    await context.close();
-  }
-}
-
-async function verifyForbiddenCityEntry(browser) {
-  const context = await browser.newContext({
-    ...devices['iPhone 13'],
-    locale: 'zh-CN',
-  });
-  const page = await context.newPage();
-  const diagnostics = attachDiagnostics(page, 'forbidden-city-entry');
-  await installStartupProbe(page);
-  try {
-    const separator = baseUrl.includes('?') ? '&' : '?';
-    const experienceUrl =
-      `${baseUrl}${separator}unlock=all&prototype=journeys&v=${sourceSha}`;
-    await requireStartup(page, experienceUrl, 'Forbidden City experience startup');
 
     await tapButton(page, '选择城市', { prefix: true });
     await findSemantic(page, '选择城市与地点', { timeout: 20000 });
@@ -319,9 +314,9 @@ async function verifyForbiddenCityEntry(browser) {
     await findSemantic(page, '1/6', { prefix: true, timeout: 30000 });
     diagnostics.assertNoBlockingRuntimeError();
     console.log(
-      `MOBILE WEBKIT FORBIDDEN CITY ENTRY = PASS | DEVICE=iPhone 13 | SHA=${sourceSha}`,
+      `MOBILE WEBKIT BARE FORBIDDEN CITY ENTRY = PASS | DEVICE=iPhone 13 | SHA=${sourceSha}`,
     );
-    console.log(`MOBILE WEBKIT EXPERIENCE URL = ${experienceUrl}`);
+    console.log(`MOBILE WEBKIT BARE EXPERIENCE URL = ${baseUrl}`);
   } catch (error) {
     await diagnostics.dump(error?.stack || error?.message || String(error));
     throw error;
@@ -332,8 +327,7 @@ async function verifyForbiddenCityEntry(browser) {
 
 const browser = await webkit.launch({ headless: true });
 try {
-  await verifyBarePreviewStartup(browser);
-  await verifyForbiddenCityEntry(browser);
+  await verifyFounderEquivalentBareExperience(browser);
   console.log(
     `FORBIDDEN CITY MOBILE WEBKIT E2E = PASS | SHA=${sourceSha}`,
   );
