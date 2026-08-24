@@ -14,6 +14,9 @@ const helpers = String.raw`async function visibleText(page) {
     .join('\n');
 }
 
+const escapeRegExp = (value) =>
+  String(value).replace(/[.*+?^\${}()|[\]\\]/g, '\\$&');
+
 async function currentLevel(page) {
   const rs = await records(page);
   for (const record of rs) {
@@ -24,84 +27,190 @@ async function currentLevel(page) {
   throw new Error('Mobile WebKit Phoenix level selector not found');
 }
 
-async function pressSemanticButton(page, needle, { prefix = true, timeout = 20000 } = {}) {
+async function semanticButton(
+  page,
+  needle,
+  { prefix = true, timeout = 20000 } = {},
+) {
   const deadline = Date.now() + timeout;
   const wanted = clean(needle);
+  const escaped = escapeRegExp(wanted);
+  const name = prefix
+    ? new RegExp('^' + escaped)
+    : new RegExp('^' + escaped + '$');
+
   while (Date.now() < deadline) {
-    const matches = (await records(page))
-      .filter((record) => {
-        if (!record.visible || record.disabled || record.role !== 'button') return false;
-        const text = recordText(record);
-        return prefix ? text.startsWith(wanted) : text.includes(wanted);
-      })
-      .sort((left, right) => left.area - right.area);
-    if (matches.length) {
-      const node = page.locator('flt-semantics').nth(matches[0].index);
-      await node.focus();
-      await node.press('Enter');
-      return;
+    const locator = page.getByRole('button', { name });
+    const count = await locator.count();
+    if (count === 1) {
+      const disabled = await locator.getAttribute('aria-disabled').catch(() => null);
+      if (disabled === 'true') {
+        throw new Error('Mobile WebKit semantic button disabled: ' + needle);
+      }
+      return locator;
+    }
+    if (count > 1) {
+      const labels = await locator.evaluateAll((elements) =>
+        elements.map((element) =>
+          [
+            element.getAttribute('aria-label') || '',
+            element.getAttribute('aria-valuetext') || '',
+            element.getAttribute('aria-description') || '',
+            String(element.textContent || '').replace(/\s+/g, ' ').trim(),
+          ]
+            .filter(Boolean)
+            .join(' '),
+        ),
+      );
+      throw new Error(
+        'Mobile WebKit semantic button ambiguous: ' +
+          needle +
+          ' :: ' +
+          labels.join(' || '),
+      );
     }
     await sleep(100);
   }
   throw new Error('Mobile WebKit semantic button not found: ' + needle);
 }
 
+async function wordDetailDialogOpen(page) {
+  const text = await visibleText(page);
+  if (
+    !text.includes('收藏单词') ||
+    !text.includes('上一个单词') ||
+    !text.includes('下一个单词')
+  ) {
+    return false;
+  }
+  return (await page.getByRole('button', { name: /^Dismiss$/ }).count()) === 1;
+}
+
+async function closeHarnessWordDetailDialog(page) {
+  if (!(await wordDetailDialogOpen(page))) return false;
+  const dismiss = await semanticButton(page, 'Dismiss', {
+    prefix: false,
+    timeout: 3000,
+  });
+  await dismiss.focus();
+  const focused = await dismiss.evaluate(
+    (element) => document.activeElement === element,
+  );
+  if (!focused) {
+    throw new Error('Mobile WebKit could not focus Word Detail dismiss control');
+  }
+  await page.keyboard.press('Enter');
+
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    if (!(await wordDetailDialogOpen(page))) {
+      console.log('MOBILE WEBKIT HARNESS RECOVERED WORD DETAIL DIALOG');
+      return true;
+    }
+    await sleep(100);
+  }
+  throw new Error('Mobile WebKit harness could not dismiss Word Detail dialog');
+}
+
+async function activateSemanticButton(
+  page,
+  needle,
+  { prefix = true, timeout = 20000 } = {},
+) {
+  await closeHarnessWordDetailDialog(page);
+  const button = await semanticButton(page, needle, { prefix, timeout });
+  await button.focus();
+  const focused = await button.evaluate(
+    (element) => document.activeElement === element,
+  );
+  if (!focused) {
+    throw new Error('Mobile WebKit semantic focus failed: ' + needle);
+  }
+  await page.keyboard.press('Enter');
+}
+
+async function stageVisible(page, stage) {
+  const wanted = String(stage) + '/6';
+  return (await records(page)).some(
+    (record) => record.visible && recordText(record).startsWith(wanted),
+  );
+}
+
+async function waitStage(page, stage, timeout = 30000) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    if (await stageVisible(page, stage)) return;
+    await sleep(100);
+  }
+  throw new Error('semantic state not found: ' + stage + '/6');
+}
+
+async function advanceStage(page, fromStage, toStage, diagnostics) {
+  await waitStage(page, fromStage);
+  for (let attempt = 1; attempt <= 4; attempt += 1) {
+    await closeHarnessWordDetailDialog(page);
+    await activateSemanticButton(page, '继续');
+
+    const deadline = Date.now() + 7000;
+    while (Date.now() < deadline) {
+      if (await stageVisible(page, toStage)) {
+        diagnostics.assertNoBlockingRuntimeError();
+        return;
+      }
+      if (await wordDetailDialogOpen(page)) {
+        await closeHarnessWordDetailDialog(page);
+        break;
+      }
+      await sleep(100);
+    }
+
+    diagnostics.assertNoBlockingRuntimeError();
+    if (await stageVisible(page, toStage)) return;
+    console.log(
+      'MOBILE WEBKIT HARNESS RETRY STAGE ' +
+        fromStage +
+        '→' +
+        toStage +
+        ' ATTEMPT=' +
+        attempt,
+    );
+  }
+  throw new Error(
+    'Mobile WebKit failed semantic stage transition ' +
+      fromStage +
+      '/6→' +
+      toStage +
+      '/6',
+  );
+}
+
 async function setLevel(page, target) {
-  for (let guard = 0; guard < 12; guard += 1) {
+  for (let guard = 0; guard < 16; guard += 1) {
+    await closeHarnessWordDetailDialog(page);
     const level = await currentLevel(page);
     if (level === target) return;
 
     const direction = level < target ? '提高当前难度' : '降低当前难度';
-    const rs = await records(page);
-    const matches = rs
-      .filter((record) =>
-        record.visible &&
-        record.role === 'button' &&
-        recordText(record).startsWith(direction)
-      )
-      .sort((left, right) => left.area - right.area);
-    if (!matches.length) {
-      throw new Error('Mobile WebKit level selector button missing: ' + direction);
-    }
-
-    const button = matches[0];
-    if (button.disabled) {
-      for (let i = 0; i < 20; i += 1) {
-        await sleep(100);
-        const settled = await currentLevel(page);
-        if (settled === target) return;
-        if (settled !== level) break;
-      }
-      const settled = await currentLevel(page);
-      if (settled === target) return;
-      if (settled !== level) continue;
-      throw new Error(
-        'Mobile WebKit level selector disabled before target: current Lv' +
-          settled +
-          ', target Lv' +
-          target +
-          ', button ' +
-          direction,
-      );
-    }
-
     const before = level;
-    const node = page.locator('flt-semantics').nth(button.index);
-    await node.focus();
-    await node.press('Enter');
+    await activateSemanticButton(page, direction);
 
     let moved = false;
-    for (let i = 0; i < 40; i += 1) {
-      await sleep(100);
-      const settled = await currentLevel(page);
+    const deadline = Date.now() + 5000;
+    while (Date.now() < deadline) {
+      if (await wordDetailDialogOpen(page)) {
+        await closeHarnessWordDetailDialog(page);
+        break;
+      }
+      const settled = await currentLevel(page).catch(() => before);
       if (settled === target) return;
       if (settled !== before) {
         moved = true;
         break;
       }
+      await sleep(100);
     }
     if (!moved) {
-      throw new Error('Mobile WebKit level selector did not move from ' + before);
+      continue;
     }
   }
 
@@ -110,13 +219,6 @@ async function setLevel(page, target) {
   throw new Error(
     'Mobile WebKit failed to select Lv' + target + '; current Lv' + finalLevel,
   );
-}
-
-async function waitStage(page, stage) {
-  await findSemantic(page, String(stage) + '/6', {
-    prefix: true,
-    timeout: 30000,
-  });
 }
 
 async function waitDiscoveryDepth(page, level, expected) {
@@ -144,12 +246,8 @@ async function waitDiscoveryDepth(page, level, expected) {
 
 async function verifyBareDiscoveryDepth(page, diagnostics) {
   await setLevel(page, 1);
-  await pressSemanticButton(page, '继续');
-  await waitStage(page, 2);
-  diagnostics.assertNoBlockingRuntimeError();
-  await pressSemanticButton(page, '继续');
-  await waitStage(page, 3);
-  diagnostics.assertNoBlockingRuntimeError();
+  await advanceStage(page, 1, 2, diagnostics);
+  await advanceStage(page, 2, 3, diagnostics);
 
   for (let level = 1; level <= 10; level += 1) {
     await setLevel(page, level);
