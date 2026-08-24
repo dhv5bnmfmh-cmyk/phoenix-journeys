@@ -24,7 +24,7 @@ jobs:
   forbidden-city-preview-e2e:
     if: github.event.pull_request.number == 197
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
 
     steps:
       - name: Check out exact candidate head
@@ -68,12 +68,12 @@ jobs:
             exit 1
           fi
 
-      - name: Install Chromium functional driver
+      - name: Install Chromium and WebKit functional drivers
         shell: bash
         run: |
           set -euo pipefail
           npm install --no-save --prefix "$RUNNER_TEMP/forbidden-city-e2e-node" playwright
-          "$RUNNER_TEMP/forbidden-city-e2e-node/node_modules/.bin/playwright" install --with-deps chromium
+          "$RUNNER_TEMP/forbidden-city-e2e-node/node_modules/.bin/playwright" install --with-deps chromium webkit
 
       - name: Verify actual Forbidden City Lv1 Lv3 Lv5 Lv8 Lv10 experience
         shell: bash
@@ -87,10 +87,22 @@ jobs:
             "$CANDIDATE_SHA" \
             2>&1 | tee test-results/forbidden-city-preview-e2e.log
 
+      - name: Verify iPhone WebKit startup and Forbidden City entry
+        shell: bash
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/forbidden-city-e2e-node/node_modules/playwright/index.mjs
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          node .github/scripts/verify_forbidden_city_mobile_webkit.mjs \
+            "$PREVIEW_URL" \
+            "$CANDIDATE_SHA" \
+            2>&1 | tee test-results/forbidden-city-mobile-webkit.log
+
       - name: Upload Forbidden City E2E evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: forbidden-city-preview-e2e-${{ env.CANDIDATE_SHA }}
-          path: test-results/forbidden-city-preview-e2e.log
+          path: test-results/
           if-no-files-found: warn
