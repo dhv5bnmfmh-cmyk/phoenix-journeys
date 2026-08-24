@@ -24,6 +24,29 @@ async function currentLevel(page) {
   throw new Error('Mobile WebKit Phoenix level selector not found');
 }
 
+async function clickSemanticButton(page, needle, { prefix = true, timeout = 20000 } = {}) {
+  const deadline = Date.now() + timeout;
+  const wanted = clean(needle);
+  while (Date.now() < deadline) {
+    const matches = (await records(page))
+      .filter((record) => {
+        if (!record.visible || record.disabled || record.role !== 'button') return false;
+        const text = recordText(record);
+        return prefix ? text.startsWith(wanted) : text.includes(wanted);
+      })
+      .sort((left, right) => left.area - right.area);
+    if (matches.length) {
+      await page
+        .locator('flt-semantics')
+        .nth(matches[0].index)
+        .evaluate((element) => element.click());
+      return;
+    }
+    await sleep(100);
+  }
+  throw new Error('Mobile WebKit semantic button not found: ' + needle);
+}
+
 async function setLevel(page, target) {
   for (let guard = 0; guard < 12; guard += 1) {
     const level = await currentLevel(page);
@@ -64,15 +87,10 @@ async function setLevel(page, target) {
     }
 
     const before = level;
-    try {
-      await page.locator('flt-semantics').nth(button.index).tap({ timeout: 2500 });
-    } catch (error) {
-      await sleep(100);
-      const settled = await currentLevel(page).catch(() => before);
-      if (settled === target) return;
-      if (settled !== before) continue;
-      throw error;
-    }
+    await page
+      .locator('flt-semantics')
+      .nth(button.index)
+      .evaluate((element) => element.click());
 
     let moved = false;
     for (let i = 0; i < 40; i += 1) {
@@ -128,9 +146,9 @@ async function waitDiscoveryDepth(page, level, expected) {
 
 async function verifyBareDiscoveryDepth(page, diagnostics) {
   await setLevel(page, 1);
-  await tapButton(page, '继续', { prefix: true });
+  await clickSemanticButton(page, '继续');
   await waitStage(page, 2);
-  await tapButton(page, '继续', { prefix: true });
+  await clickSemanticButton(page, '继续');
   await waitStage(page, 3);
 
   for (let level = 1; level <= 10; level += 1) {
