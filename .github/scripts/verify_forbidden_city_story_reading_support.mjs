@@ -215,6 +215,37 @@ function requireMarkers(text, markers, label) {
   }
 }
 
+function includesStoryMarkerAcrossInlineSemantics(text, marker) {
+  if (text.includes(marker)) return true;
+  const characters = [...marker];
+  if (!characters.length) return true;
+  const maxTotalSpan = Math.max(80, Math.min(240, characters.length * 60));
+  let start = text.indexOf(characters[0]);
+  while (start !== -1) {
+    let cursor = start;
+    let matched = true;
+    for (let index = 1; index < characters.length; index += 1) {
+      const next = text.indexOf(characters[index], cursor + 1);
+      if (next === -1 || next - start > maxTotalSpan) {
+        matched = false;
+        break;
+      }
+      cursor = next;
+    }
+    if (matched) return true;
+    start = text.indexOf(characters[0], start + 1);
+  }
+  return false;
+}
+
+function requireStoryMarkers(text, markers, label) {
+  for (const marker of markers) {
+    if (!includesStoryMarkerAcrossInlineSemantics(text, marker)) {
+      throw new Error(`${label} missing semantic marker: ${marker}`);
+    }
+  }
+}
+
 async function openFirstStoryAnnotation(page) {
   const notes = page.getByRole('button', { name: '注', exact: true });
   const count = await notes.count();
@@ -261,7 +292,7 @@ try {
     }
 
     const storyText = await visibleText(page);
-    requireMarkers(storyText, expected[level].story, `Lv${level} CURRENT Story`);
+    requireStoryMarkers(storyText, expected[level].story, `Lv${level} CURRENT Story`);
 
     await openFirstStoryAnnotation(page);
     const supportText = await visibleText(page);
