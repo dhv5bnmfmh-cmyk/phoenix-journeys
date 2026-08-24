@@ -119,8 +119,8 @@ List<ReadingAnnotation> forbiddenCityStoryAnnotationsForCurrentParagraphs({
     paragraphs.length,
     (index) => ReadingAnnotation(
       pinyin: _pinyin(paragraphs[index]),
-      vietnamese: support[index].vietnamese,
-      english: support[index].english,
+      vietnamese: support[index].$1,
+      english: support[index].$2,
     ),
     growable: false,
   );
