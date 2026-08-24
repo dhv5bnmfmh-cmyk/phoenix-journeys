@@ -185,9 +185,9 @@ async function openForbiddenCity(page) {
   await waitForText(page, 'PHOENIX JOURNEYS', 30000);
   await activateButton(page, '选择城市', { exact: false });
   await waitForText(page, '选择城市与地点');
-  await activateButton(page, '北京');
+  await activateButton(page, '北京', { exact: false });
   await waitForText(page, '北京的地点');
-  await activateButton(page, '紫禁城');
+  await activateButton(page, '紫禁城', { exact: false });
 
   const deadline = Date.now() + 30000;
   while (Date.now() < deadline) {
