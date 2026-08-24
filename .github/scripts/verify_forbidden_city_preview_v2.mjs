@@ -75,6 +75,7 @@ async function tapButton(page, needle, { prefix = false, timeout = 15000 } = {})
       return;
     } catch (error) {
       if (String(error?.message || error).includes(`button disabled: ${needle}`)) throw error;
+      if (!(await exists(page, needle, { role: 'button', prefix, timeout: 200 }))) return;
       lastError = error;
       await sleep(100);
     }
