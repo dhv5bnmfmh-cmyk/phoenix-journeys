@@ -111,6 +111,16 @@ async function activateSemanticButton(
   await button.evaluate((element) => element.click());
 }
 
+async function currentStage(page) {
+  const rs = await records(page);
+  for (const record of rs) {
+    if (!record.visible) continue;
+    const match = recordText(record).match(/^([1-6])\/6(?:\s|$)/);
+    if (match) return Number(match[1]);
+  }
+  throw new Error('Mobile WebKit Journey stage not found');
+}
+
 async function stageVisible(page, stage) {
   const wanted = String(stage) + '/6';
   return (await records(page)).some(
@@ -166,6 +176,62 @@ async function advanceStage(page, fromStage, toStage, diagnostics) {
   );
 }
 
+async function ensureDiscoveryStage(page, diagnostics) {
+  for (let guard = 0; guard < 10; guard += 1) {
+    await closeHarnessWordDetailDialog(page);
+    let stage = await currentStage(page);
+
+    if (stage === 3) {
+      await sleep(500);
+      stage = await currentStage(page);
+      if (stage === 3) {
+        diagnostics.assertNoBlockingRuntimeError();
+        return;
+      }
+    }
+
+    if (stage < 3) {
+      await advanceStage(page, stage, stage + 1, diagnostics);
+      continue;
+    }
+
+    const before = stage;
+    await activateSemanticButton(page, '上一步');
+    const deadline = Date.now() + 5000;
+    let moved = false;
+    while (Date.now() < deadline) {
+      if (await wordDetailDialogOpen(page)) {
+        await closeHarnessWordDetailDialog(page);
+      }
+      const settled = await currentStage(page).catch(() => before);
+      if (settled !== before) {
+        moved = true;
+        break;
+      }
+      await sleep(100);
+    }
+    diagnostics.assertNoBlockingRuntimeError();
+    if (!moved) {
+      throw new Error(
+        'Mobile WebKit could not restore Discovery from stage ' + before + '/6',
+      );
+    }
+    console.log(
+      'MOBILE WEBKIT HARNESS RESTORED STAGE ' +
+        before +
+        '/6→' +
+        (await currentStage(page)) +
+        '/6',
+    );
+  }
+
+  throw new Error(
+    'Mobile WebKit could not restore Discovery stage; current ' +
+      (await currentStage(page)) +
+      '/6',
+  );
+}
+
 async function setLevel(page, target) {
   for (let guard = 0; guard < 16; guard += 1) {
     await closeHarnessWordDetailDialog(page);
@@ -203,10 +269,15 @@ async function setLevel(page, target) {
   );
 }
 
-async function waitDiscoveryDepth(page, level, expected) {
+async function waitDiscoveryDepth(page, level, expected, diagnostics) {
   const deadline = Date.now() + 12000;
   const countNeedle = String(expected) + ' 段';
   while (Date.now() < deadline) {
+    const stage = await currentStage(page).catch(() => null);
+    if (stage !== 3) {
+      await ensureDiscoveryStage(page, diagnostics);
+      continue;
+    }
     const text = await visibleText(page);
     if (
       text.includes('3/6') &&
@@ -233,8 +304,9 @@ async function verifyBareDiscoveryDepth(page, diagnostics) {
 
   for (let level = 1; level <= 10; level += 1) {
     await setLevel(page, level);
+    await ensureDiscoveryStage(page, diagnostics);
     const expected = level <= 4 ? 2 : 3;
-    await waitDiscoveryDepth(page, level, expected);
+    await waitDiscoveryDepth(page, level, expected, diagnostics);
     diagnostics.assertNoBlockingRuntimeError();
     console.log(
       'MOBILE WEBKIT DISCOVERY DEPTH Lv' +
