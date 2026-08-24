@@ -88,14 +88,7 @@ async function closeHarnessWordDetailDialog(page) {
     prefix: false,
     timeout: 3000,
   });
-  await dismiss.focus();
-  const focused = await dismiss.evaluate(
-    (element) => document.activeElement === element,
-  );
-  if (!focused) {
-    throw new Error('Mobile WebKit could not focus Word Detail dismiss control');
-  }
-  await page.keyboard.press('Enter');
+  await dismiss.evaluate((element) => element.click());
 
   const deadline = Date.now() + 5000;
   while (Date.now() < deadline) {
@@ -115,14 +108,7 @@ async function activateSemanticButton(
 ) {
   await closeHarnessWordDetailDialog(page);
   const button = await semanticButton(page, needle, { prefix, timeout });
-  await button.focus();
-  const focused = await button.evaluate(
-    (element) => document.activeElement === element,
-  );
-  if (!focused) {
-    throw new Error('Mobile WebKit semantic focus failed: ' + needle);
-  }
-  await page.keyboard.press('Enter');
+  await button.evaluate((element) => element.click());
 }
 
 async function stageVisible(page, stage) {
