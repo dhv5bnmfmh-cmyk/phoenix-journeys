@@ -13,22 +13,21 @@ const [workflow, reportTool, reportRunner] = await Promise.all([
 ]);
 
 test('generates and publishes the quality agent report before preview deployment', () => {
-  const generateIndex = workflow.indexOf('Generate journey quality agent report');
+  const generateIndex = workflow.indexOf('Test Flutter app and generate quality report once');
+  const uploadIndex = workflow.indexOf('Upload journey quality report');
   const commentIndex = workflow.indexOf('Add or update quality agent comment');
   const enforceIndex = workflow.indexOf('Enforce quality agent release decision');
   const buildIndex = workflow.indexOf('Build preview web app');
   const deployIndex = workflow.indexOf('Deploy isolated preview Worker');
 
   assert.ok(generateIndex >= 0);
-  assert.ok(commentIndex > generateIndex);
+  assert.ok(uploadIndex > generateIndex);
+  assert.ok(commentIndex > uploadIndex);
   assert.ok(enforceIndex > commentIndex);
   assert.ok(buildIndex > enforceIndex);
   assert.ok(deployIndex > buildIndex);
-  assert.match(
-    workflow,
-    /flutter test test\/journey_quality_report_ci_test\.dart/,
-  );
-  assert.match(workflow, /PHOENIX_GENERATE_QUALITY_REPORT/);
+  assert.match(workflow, /PHOENIX_GENERATE_QUALITY_REPORT: '1'/);
+  assert.match(workflow, /run: flutter test/);
   assert.match(workflow, /phoenix-content-quality-agent-report/);
   assert.match(workflow, /journey-quality-report\.json/);
   assert.match(workflow, /if \(!report\.canPublish\)/);

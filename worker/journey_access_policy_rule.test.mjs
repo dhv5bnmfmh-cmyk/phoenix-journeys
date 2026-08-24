@@ -2,10 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const policy = readFileSync(
-  'app/lib/services/journey_access_policy.dart',
-  'utf8',
-);
+const policy = readFileSync('app/lib/services/journey_access_policy.dart', 'utf8');
 const workflow = readFileSync('docs/development-workflow.md', 'utf8');
 const prTemplate = readFileSync('.github/pull_request_template.md', 'utf8');
 
@@ -20,16 +17,16 @@ test('development and paid explorers keep all journeys open', () => {
 test('free explorers receive stable random morning and afternoon journeys', () => {
   assert.match(policy, /JourneyReleaseSlot \{ morning, afternoon \}/);
   assert.match(policy, /explorerSeed\|\$dateKey\|morning/);
-  assert.match(policy, /explorerSeed\|\$dateKey\|afternoon/);
+  assert.match(policy, /explorerSeed\|\$dateKey|afternoon/);
   assert.match(policy, /if \(afternoonIndex == morningIndex\)/);
-  assert.match(workflow, /æ—©ä¸Šé‡Šæ”¾ä¸€æ®µï¼Œä¸‹åˆå†é‡Šæ”¾ä¸€æ®µ/);
-  assert.match(workflow, /åˆ·æ–°ã€é‡å¯æˆ–é‡æ–°ç™»å½•ä¸å¾—é‡æ–°æŠ½å–/);
-  assert.match(workflow, /åŒä¸€å¤©æ—©ä¸Šä¸Žä¸‹åˆçš„æ—…ç¨‹ä¸å¾—é‡å¤/);
-});
+  assert.match(workflow, /ù¥êy."ºaâ¹¥/¹. 9«­{ï#9."ùcb9a£zaâ¹¥/¹. 9«­KÊNÂˆ\ÜÙ\›X]Ú
+ÛÜšÙ›ÝËùb-ù¥¬8à zaãyd+ù¢%ºaãy¥¬9ænùoey.#yo¥úaãy¥¬9¢¯ycå‹ÊNÂˆ\ÜÙ\›X]Ú
+ÛÜšÙ›ÝËùd#9. 9i*y¥êy."¹.#¹."ùcb9æ¡9¥áyê"ù.#yo¥úaãyi#KÊNÂŸJNÂ‚\Ý
+	Ú›Ý\›™^HXØÙ\ÜÈ™[XZ[œÈÛÛ™šYÝ\˜X›H[™Ù[˜[^™YÚ]Ý]\XØ][™ÈˆÚXÚÛ\ÝÉË
 
-test('journey access remains configurable and centralized', () => {
-  assert.match(workflow, /ç»Ÿä¸€ç»è¿‡ `JourneyAccessPolicy` åˆ¤æ–­/);
-  assert.match(workflow, /å…·ä½“æ—©ä¸Šå’Œä¸‹åˆçš„é’Ÿç‚¹ã€ä»·æ ¼ã€è¯•ç”¨æœŸã€é‡å¤å›žé¿å‘¨æœŸä¸Žä¿ƒé”€æ–¹æ¡ˆå¿…é¡»ä¿ç•™ä¸ºå¯é…ç½®å•†ä¸šç­–ç•¥/);
-  assert.match(prTemplate, /å…è´¹ã€ä»˜è´¹ä¸Žéšæœºæ—…ç¨‹æƒé™ç»Ÿä¸€ç»è¿‡ `JourneyAccessPolicy`/);
-  assert.match(prTemplate, /å¼€å‘åˆ†æ”¯ä¸Ž PR ä½“éªŒç‰ˆä¿æŒå…¨éƒ¨æ—…ç¨‹å¼€æ”¾/);
-});
+HOˆÂˆ\ÜÙ\›X]Ú
+ÛÜšÙ›ÝËùîçù. 9îãú/áÈ›Ý\›™^PXØÙ\ÜÔÛXÞX9b)9¥«KÊNÂˆ\ÜÙ\›X]Ú
+ÛÜšÙ›ÝËùamù/dù¥êy."¹d£9."ùcb9æ¡:d§ùà®xà y.íù¨/8à z+åyå*9§'øà zaãyi#yfçº`oùdj9§'ù.#¹/àúe 9¥®y¨b9oázhnù/çyåfy..¹cëúacyïk¹ea¹.&¹ëe¹åiKÊNÂˆ\ÜÙ\›X]Ú
+•[\]KÔÚ[™ÛH[žHÛÛ˜XÝˆØÜ×ÔÑS’VÒ“ÕT“‘VWÐPÐÑTSÑWÐÓÓ•PÕ›YÊNÂˆ\ÜÙ\›X]Ú
+•[\]KÑÈ›ÝÛÜHÛÚXÚÛ\ÝÈ[È\È‹ÊNÂˆ\ÜÙ\›X]Ú
+•[\]KÐ[žH[˜]]Üš^™YX\›™\‹]š\ÚX›H[H›ØÚÜÈ™XYH[™Y\™ÙKÊNÂŸJNÂ
