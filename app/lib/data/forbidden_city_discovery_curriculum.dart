@@ -1,7 +1,6 @@
 import 'package:pinyin/pinyin.dart';
 
 import 'journey_data.dart';
-import 'journey_level_catalog.dart';
 
 /// Canonical Forbidden City Discovery depth for the current Phoenix curriculum.
 const forbiddenCityDiscoveryDepthByLevel = <int>[
