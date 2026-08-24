@@ -87,6 +87,18 @@ jobs:
             "$CANDIDATE_SHA" \
             2>&1 | tee test-results/forbidden-city-preview-e2e.log
 
+      - name: Verify Forbidden City Story Reading Support
+        shell: bash
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/forbidden-city-e2e-node/node_modules/playwright/index.mjs
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          node .github/scripts/verify_forbidden_city_story_reading_support.mjs \
+            "$PREVIEW_URL" \
+            "$CANDIDATE_SHA" \
+            2>&1 | tee test-results/forbidden-city-story-reading-support.log
+
       - name: Verify iPhone WebKit startup and Forbidden City entry
         shell: bash
         env:
