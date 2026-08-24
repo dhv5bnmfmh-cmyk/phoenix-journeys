@@ -138,14 +138,31 @@ async function waitStage(page, stage, timeout = 30000) {
 }
 
 async function advanceStage(page, fromStage, toStage, diagnostics) {
-  await waitStage(page, fromStage);
+  let observed = await currentStage(page);
+  if (observed >= toStage) {
+    diagnostics.assertNoBlockingRuntimeError();
+    return;
+  }
+  if (observed !== fromStage) {
+    throw new Error(
+      'Mobile WebKit unexpected stage before transition ' +
+        fromStage +
+        '/6→' +
+        toStage +
+        '/6; current ' +
+        observed +
+        '/6',
+    );
+  }
+
   for (let attempt = 1; attempt <= 4; attempt += 1) {
     await closeHarnessWordDetailDialog(page);
     await activateSemanticButton(page, '继续');
 
     const deadline = Date.now() + 7000;
     while (Date.now() < deadline) {
-      if (await stageVisible(page, toStage)) {
+      observed = await currentStage(page).catch(() => observed);
+      if (observed >= toStage) {
         diagnostics.assertNoBlockingRuntimeError();
         return;
       }
@@ -157,7 +174,8 @@ async function advanceStage(page, fromStage, toStage, diagnostics) {
     }
 
     diagnostics.assertNoBlockingRuntimeError();
-    if (await stageVisible(page, toStage)) return;
+    observed = await currentStage(page).catch(() => observed);
+    if (observed >= toStage) return;
     console.log(
       'MOBILE WEBKIT HARNESS RETRY STAGE ' +
         fromStage +
