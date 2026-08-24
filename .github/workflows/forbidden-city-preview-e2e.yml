@@ -94,7 +94,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p test-results
-          node .github/scripts/verify_forbidden_city_mobile_webkit.mjs \
+          node .github/scripts/verify_forbidden_city_mobile_webkit_discovery_depth.mjs \
             "$PREVIEW_URL" \
             "$CANDIDATE_SHA" \
             2>&1 | tee test-results/forbidden-city-mobile-webkit.log
