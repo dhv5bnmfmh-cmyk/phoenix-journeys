@@ -93,7 +93,7 @@ void main() {
     ],
     <List<String>>[
       <String>['spatial relationships', 'thick line', 'checking', 'judgment'],
-      <String>['evidence', 'gates', 'courtyards', 'central-axis observation', 'cooperate'],
+      <String>['evidence', 'gate', 'courtyards', 'central-axis observation', 'cooperate'],
     ],
     <List<String>>[
       <String>['Outer Court', 'Inner Court', 'easiest route to organize', 'east'],
