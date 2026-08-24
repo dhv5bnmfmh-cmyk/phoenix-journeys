@@ -84,14 +84,37 @@ async function visibleText(page) {
 }
 
 async function enableSemantics(page) {
-  const placeholder = page.locator('flt-semantics-placeholder').first();
-  if (await placeholder.count()) {
-    await placeholder.evaluate((element) => element.click());
+  const deadline = Date.now() + 60000;
+  while (Date.now() < deadline) {
+    const placeholder = page.locator('flt-semantics-placeholder').first();
+    if (await placeholder.count()) {
+      await placeholder.evaluate((element) => element.click());
+    }
+    if (await page.locator('flt-semantics').count()) return;
+    await sleep(100);
   }
-  await page
-    .locator('flt-semantics')
-    .first()
-    .waitFor({ state: 'attached', timeout: 30000 });
+  throw new Error('Flutter semantics did not become available after startup readiness');
+}
+
+async function requireStartup(page) {
+  const response = await page.goto(baseUrl, {
+    waitUntil: 'load',
+    timeout: 140000,
+  });
+  if (!response?.ok()) {
+    throw new Error(`Story Reading Support HTTP load failed: ${response?.status()}`);
+  }
+  await page.waitForFunction(
+    () => document.querySelector('flutter-view') != null,
+    null,
+    { timeout: 140000 },
+  );
+  await page.waitForFunction(
+    () => document.getElementById('phoenix-loading') == null,
+    null,
+    { timeout: 45000 },
+  );
+  await enableSemantics(page);
 }
 
 async function waitForText(page, needle, timeout = 20000) {
@@ -227,8 +250,7 @@ page.on('requestfailed', (request) => {
 });
 
 try {
-  await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await enableSemantics(page);
+  await requireStartup(page);
   await openForbiddenCity(page);
 
   for (const level of levels) {
