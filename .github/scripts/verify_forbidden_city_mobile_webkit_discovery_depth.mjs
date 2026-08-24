@@ -14,9 +14,6 @@ const helpers = String.raw`async function visibleText(page) {
     .join('\n');
 }
 
-const escapeRegExp = (value) =>
-  String(value).replace(/[.*+?^\${}()|[\]\\]/g, '\\$&');
-
 async function currentLevel(page) {
   const rs = await records(page);
   for (const record of rs) {
@@ -34,13 +31,12 @@ async function semanticButton(
 ) {
   const deadline = Date.now() + timeout;
   const wanted = clean(needle);
-  const escaped = escapeRegExp(wanted);
-  const name = prefix
-    ? new RegExp('^' + escaped)
-    : new RegExp('^' + escaped + '$');
 
   while (Date.now() < deadline) {
-    const locator = page.getByRole('button', { name });
+    const locator = page.getByRole('button', {
+      name: wanted,
+      exact: !prefix,
+    });
     const count = await locator.count();
     if (count === 1) {
       const disabled = await locator.getAttribute('aria-disabled').catch(() => null);
@@ -83,7 +79,7 @@ async function wordDetailDialogOpen(page) {
   ) {
     return false;
   }
-  return (await page.getByRole('button', { name: /^Dismiss$/ }).count()) === 1;
+  return (await page.getByRole('button', { name: 'Dismiss', exact: true }).count()) === 1;
 }
 
 async function closeHarnessWordDetailDialog(page) {
