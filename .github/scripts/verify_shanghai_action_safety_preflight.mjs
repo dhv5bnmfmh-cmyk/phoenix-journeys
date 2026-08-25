@@ -35,13 +35,26 @@ forbidContains('seekNarrationProgress', seek, [
 ]);
 requireContains('seekNarrationProgress', seek, [
   `narrationExplicitlyCompleted(page)`,
+  `const maxRemountAttempts = 5`,
+  `for (let attempt = 1; attempt <= maxRemountAttempts; attempt += 1)`,
+  `const rs = await records(page)`,
   `bindStableSemanticRecord(page, rail`,
   `expectedNeedle: '朗读进度，可拖动跳转'`,
   `handle.boundingBox()`,
   `readBoundSemanticHandle(handle)`,
+  `isSemanticRemountRace(error)`,
   `handle.click({ position`,
   `handle.tap({ position`,
 ]);
+const recordsPos = seek.indexOf(`const rs = await records(page)`);
+const loopPos = seek.indexOf(`for (let attempt = 1; attempt <= maxRemountAttempts; attempt += 1)`);
+const bindPosInSeek = seek.indexOf(`bindStableSemanticRecord(page, rail`);
+if (!(loopPos >= 0 && recordsPos > loopPos && bindPosInSeek > recordsPos)) {
+  throw new Error('seekNarrationProgress: every remount attempt must start with a fresh semantic snapshot before live binding');
+}
+if (!source.includes(`function isSemanticRemountRace(error)`)) {
+  throw new Error('semantic-remount classifier missing');
+}
 
 const terminal = functionBody('narrationExplicitlyCompleted');
 requireContains('narrationExplicitlyCompleted', terminal, [
@@ -109,4 +122,4 @@ requireContains('collectDiscoveryStageSemantics', discovery, [
   `TERMINAL_CORPUS=AUTHORITATIVE`,
 ]);
 
-console.log('SHANGHAI ACTION SAFETY STATIC PREFLIGHT = PASS | semantic index is observation metadata only | seek/modal/grammar/challenge bind + recheck live identity | Discovery seek level guarded | terminal authority requires exact stage + exact level + explicit completion + complete terminal anchors | segment accounting remains strict off-terminal');
+console.log('SHANGHAI ACTION SAFETY STATIC PREFLIGHT = PASS | semantic index is observation metadata only | detached seek handles use finite fresh snapshot + live rebind | no stale index/handle reuse | seek/modal/grammar/challenge bind + recheck live identity | Discovery seek level guarded | terminal authority requires exact stage + exact level + explicit completion + complete terminal anchors | segment accounting remains strict off-terminal');
