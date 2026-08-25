@@ -1,0 +1,195 @@
+import fs from 'node:fs';
+
+const target = process.argv[2];
+if (!target) {
+  throw new Error('usage: patch_shanghai_modal_close_settle.mjs <patched-verify-script>');
+}
+
+let source = fs.readFileSync(target, 'utf8');
+
+function replaceOnce(label, needle, replacement) {
+  const first = source.indexOf(needle);
+  const last = source.lastIndexOf(needle);
+  if (first < 0 || first !== last) {
+    throw new Error(`${label}: expected exactly one patch target`);
+  }
+  source = `${source.slice(0, first)}${replacement}${source.slice(first + needle.length)}`;
+}
+
+replaceOnce(
+  'known modal close-state abstraction',
+  `function knownTransientModalCloseRecord(recordsToClassify, classification) {
+  if (classification.kind !== 'known') return null;
+  for (const label of classification.definition.closeLabels) {
+    const exact = recordsToClassify.find((record) =>
+      record.visible !== false &&
+      !record.disabled &&
+      record.role === 'button' &&
+      semanticRecordText(record) === label
+    );
+    if (exact) return exact;
+  }
+  return null;
+}
+
+function runTransientModalFixturePreflight() {`,
+  `function knownTransientModalCloseRecord(recordsToClassify, classification) {
+  if (classification.kind !== 'known') return null;
+  for (const label of classification.definition.closeLabels) {
+    const exact = recordsToClassify.find((record) =>
+      record.visible !== false &&
+      !record.disabled &&
+      record.role === 'button' &&
+      semanticRecordText(record) === label
+    );
+    if (exact) return exact;
+  }
+  return null;
+}
+
+function transientModalCloseState(recordsToClassify) {
+  const classification = classifyTransientModalRecords(recordsToClassify);
+  if (classification.kind !== 'known') return classification;
+  const closeRecord = knownTransientModalCloseRecord(recordsToClassify, classification);
+  return closeRecord
+    ? { kind: 'known-ready', definition: classification.definition, closeRecord }
+    : { kind: 'known-waiting-close', definition: classification.definition };
+}
+
+function runTransientModalFixturePreflight() {`
+);
+
+replaceOnce(
+  'delayed close-control fixture',
+  `  const vocabulary = classifyTransientModalRecords(vocabularyModal);
+  if (vocabulary.kind !== 'known' || vocabulary.definition.id !== 'vocabulary-word-detail') {
+    throw new Error('Known Vocabulary word-detail modal fixture was not recognized');
+  }
+  const vocabularyClose = knownTransientModalCloseRecord(vocabularyModal, vocabulary);
+  if (!vocabularyClose || semanticRecordText(vocabularyClose) !== 'Dismiss') {
+    throw new Error('Known Vocabulary word-detail modal fixture did not resolve its real Dismiss control');
+  }
+
+  const postDismissStage = [`,
+  `  const vocabulary = classifyTransientModalRecords(vocabularyModal);
+  if (vocabulary.kind !== 'known' || vocabulary.definition.id !== 'vocabulary-word-detail') {
+    throw new Error('Known Vocabulary word-detail modal fixture was not recognized');
+  }
+  const vocabularyClose = knownTransientModalCloseRecord(vocabularyModal, vocabulary);
+  if (!vocabularyClose || semanticRecordText(vocabularyClose) !== 'Dismiss') {
+    throw new Error('Known Vocabulary word-detail modal fixture did not resolve its real Dismiss control');
+  }
+
+  const vocabularyMounting = vocabularyModal.filter((record) => record.role !== 'button');
+  const mountingState = transientModalCloseState(vocabularyMounting);
+  if (mountingState.kind !== 'known-waiting-close' || mountingState.definition.id !== 'vocabulary-word-detail') {
+    throw new Error('Known Vocabulary modal mounting fixture did not wait for its close semantics');
+  }
+  const readyState = transientModalCloseState(vocabularyModal);
+  if (readyState.kind !== 'known-ready' || semanticRecordText(readyState.closeRecord) !== 'Dismiss') {
+    throw new Error('Known Vocabulary modal did not transition from mounting to close-ready semantics');
+  }
+
+  const postDismissStage = [`
+);
+
+replaceOnce(
+  'runtime close-control settle polling',
+  `async function dismissKnownTransientModal(page) {
+  const currentRecords = await records(page);
+  const classification = classifyTransientModalRecords(currentRecords);
+  if (classification.kind === 'none') return false;
+  if (classification.kind === 'unknown') {
+    throw new Error(\`UNKNOWN MODAL != AUTO-DISMISS | \${classification.dialogs.join(' || ')}\`);
+  }
+
+  const closeRecord = knownTransientModalCloseRecord(currentRecords, classification);
+  if (!closeRecord) {
+    throw new Error(\`Known transient modal \${classification.definition.id} has no allowed close control\`);
+  }
+
+  console.log(
+    \`KNOWN TRANSIENT MODAL = \${classification.definition.id} | TITLE=\${classification.definition.title} | ACTION=\${semanticRecordText(closeRecord)}\`
+  );
+  await activateSemantic(page, page.locator('flt-semantics').nth(closeRecord.index));
+
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    await sleep(100);
+    const after = classifyTransientModalRecords(await records(page));
+    if (after.kind === 'none') {
+      console.log(\`KNOWN TRANSIENT MODAL DISMISSED = \${classification.definition.id} | RE-READ SEMANTICS\`);
+      return true;
+    }
+    if (after.kind === 'unknown') {
+      throw new Error(\`UNKNOWN MODAL != AUTO-DISMISS | \${after.dialogs.join(' || ')}\`);
+    }
+  }
+  throw new Error(\`Known transient modal did not dismiss: \${classification.definition.id}\`);
+}`,
+  `async function dismissKnownTransientModal(page) {
+  const initial = classifyTransientModalRecords(await records(page));
+  if (initial.kind === 'none') return false;
+  if (initial.kind === 'unknown') {
+    throw new Error(\`UNKNOWN MODAL != AUTO-DISMISS | \${initial.dialogs.join(' || ')}\`);
+  }
+
+  const expectedId = initial.definition.id;
+  console.log(\`KNOWN TRANSIENT MODAL = \${expectedId} | TITLE=\${initial.definition.title} | WAITING FOR ALLOWED CLOSE SEMANTICS\`);
+
+  const closeDeadline = Date.now() + 5000;
+  let closeRecord = null;
+  while (Date.now() < closeDeadline) {
+    const snapshot = await records(page);
+    const state = transientModalCloseState(snapshot);
+    if (state.kind === 'none') {
+      console.log(\`KNOWN TRANSIENT MODAL DISAPPEARED = \${expectedId} | RE-READ SEMANTICS\`);
+      return true;
+    }
+    if (state.kind === 'unknown') {
+      throw new Error(\`UNKNOWN MODAL != AUTO-DISMISS | \${state.dialogs.join(' || ')}\`);
+    }
+    if (state.definition.id !== expectedId) {
+      throw new Error(\`Transient modal identity changed before close: \${expectedId} -> \${state.definition.id}\`);
+    }
+    if (state.kind === 'known-ready') {
+      closeRecord = state.closeRecord;
+      break;
+    }
+    await sleep(100);
+  }
+
+  if (!closeRecord) {
+    throw new Error(\`Known transient modal \${expectedId} did not mount an allowed close control\`);
+  }
+
+  console.log(\`KNOWN TRANSIENT MODAL CLOSE READY = \${expectedId} | ACTION=\${semanticRecordText(closeRecord)}\`);
+  await activateSemantic(page, page.locator('flt-semantics').nth(closeRecord.index));
+
+  const dismissDeadline = Date.now() + 5000;
+  while (Date.now() < dismissDeadline) {
+    await sleep(100);
+    const after = classifyTransientModalRecords(await records(page));
+    if (after.kind === 'none') {
+      console.log(\`KNOWN TRANSIENT MODAL DISMISSED = \${expectedId} | RE-READ SEMANTICS\`);
+      return true;
+    }
+    if (after.kind === 'unknown') {
+      throw new Error(\`UNKNOWN MODAL != AUTO-DISMISS | \${after.dialogs.join(' || ')}\`);
+    }
+    if (after.definition.id !== expectedId) {
+      throw new Error(\`Transient modal identity changed while dismissing: \${expectedId} -> \${after.definition.id}\`);
+    }
+  }
+  throw new Error(\`Known transient modal did not dismiss: \${expectedId}\`);
+}`
+);
+
+replaceOnce(
+  'modal fixture success log settle rule',
+  `  console.log('TRANSIENT MODAL FIXTURE PREFLIGHT = PASS | Flutter label=Dialog voice + Vocabulary modals recognized -> real close controls -> Stage semantics re-read | unknown Dialog rejected');`,
+  `  console.log('TRANSIENT MODAL FIXTURE PREFLIGHT = PASS | Flutter label=Dialog voice + Vocabulary modals recognized | delayed close mount waits -> ready | real close controls -> Stage semantics re-read | unknown Dialog rejected');`
+);
+
+fs.writeFileSync(target, source, 'utf8');
+console.log(`TRANSIENT MODAL CLOSE-SETTLE PATCH = PASS | ${target}`);
