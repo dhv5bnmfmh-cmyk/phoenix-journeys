@@ -14,6 +14,7 @@ on:
       - '.github/scripts/patch_shanghai_transient_modal_guard.mjs'
       - '.github/scripts/patch_shanghai_transient_modal_semantic_shape.mjs'
       - '.github/scripts/patch_shanghai_modal_close_settle.mjs'
+      - '.github/scripts/patch_shanghai_stable_semantic_activation.mjs'
 
 permissions:
   contents: read
@@ -59,11 +60,14 @@ jobs:
           node --check .validation-harness/.github/scripts/patch_shanghai_transient_modal_guard.mjs
           node --check .validation-harness/.github/scripts/patch_shanghai_transient_modal_semantic_shape.mjs
           node --check .validation-harness/.github/scripts/patch_shanghai_modal_close_settle.mjs
+          node --check .validation-harness/.github/scripts/patch_shanghai_stable_semantic_activation.mjs
           node .validation-harness/.github/scripts/patch_shanghai_transient_modal_guard.mjs \
             .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
           node .validation-harness/.github/scripts/patch_shanghai_transient_modal_semantic_shape.mjs \
             .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
           node .validation-harness/.github/scripts/patch_shanghai_modal_close_settle.mjs \
+            .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
+          node .validation-harness/.github/scripts/patch_shanghai_stable_semantic_activation.mjs \
             .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
           node --check .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
 
@@ -84,6 +88,12 @@ jobs:
         run: |
           set -euo pipefail
           node .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs --transient-modal-preflight
+
+      - name: Cheap stable level and semantic-index fixture preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs --level-settle-preflight
 
       - name: Verify PR 199 exact Cloudflare preview release
         shell: bash
@@ -114,7 +124,7 @@ jobs:
           npm install --no-save --prefix "$RUNNER_TEMP/shanghai-exact-e2e-node" playwright
           "$RUNNER_TEMP/shanghai-exact-e2e-node/node_modules/.bin/playwright" install --with-deps chromium webkit
 
-      - name: Cheap browser mode and Shanghai SPA open preflight
+      - name: Cheap browser mode, Shanghai SPA open, and WebKit Lv3 settle preflight
         shell: bash
         env:
           PLAYWRIGHT_PATH: ${{ runner.temp }}/shanghai-exact-e2e-node/node_modules/playwright/index.mjs
