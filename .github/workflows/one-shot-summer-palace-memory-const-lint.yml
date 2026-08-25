@@ -1,0 +1,56 @@
+name: One-shot Summer Palace memory const lint fix
+
+on:
+  push:
+    branches:
+      - automation/summer-palace-memory-const-lint
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact PR candidate
+        uses: actions/checkout@v4
+        with:
+          ref: feature/summer-palace-content-completion
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify exact source candidate
+        run: test "$(git rev-parse HEAD)" = "e74d1b4ac44eb6578b14a28af01f0d35453e7672"
+
+      - name: Apply lint-only const fix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('app/lib/data/batch_one_adaptive_story_levels.dart')
+          text = path.read_text()
+          replacements = [
+              ("      RemediatedMemoryReview(\n        category: 'choice',", "      const RemediatedMemoryReview(\n        category: 'choice',"),
+              ("      RemediatedMemoryReview(\n        category: 'relationship',", "      const RemediatedMemoryReview(\n        category: 'relationship',"),
+              ("      RemediatedMemoryReview(\n        category: 'memory',", "      const RemediatedMemoryReview(\n        category: 'memory',"),
+          ]
+          for old, new in replacements:
+              assert text.count(old) == 1, old
+              text = text.replace(old, new, 1)
+          assert "      RemediatedMemoryReview(\n        category: 'place'," in text
+          path.write_text(text)
+          PY
+          git diff --check
+
+      - name: Verify minimal scope
+        run: |
+          test "$(git diff --name-only)" = "app/lib/data/batch_one_adaptive_story_levels.dart"
+          test -z "$(git diff --name-only | grep -E '(^|/)(screens|widgets)/|journey_screen\.dart' || true)"
+
+      - name: Commit directly to PR branch
+        run: |
+          git config user.name "phoenix-journeys-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/data/batch_one_adaptive_story_levels.dart
+          git commit -m "fix: satisfy Summer Palace memory const lint"
+          git push origin HEAD:feature/summer-palace-content-completion
