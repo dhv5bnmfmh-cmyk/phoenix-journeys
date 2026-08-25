@@ -196,7 +196,7 @@ BatchOneJourneyMemorySpec _summerPalaceMemorySpecForLevel(int phoenixLevel) {
         '许澄在十七孔桥金光亮起、旧照片被风吹落时放下相机先捡照片。她错过等了一下午的画面，却改拍旧照片、外婆的手和正在暗下的桥洞，并把作品命名为《留下痕迹的风景》。',
     culturalPoint: culturalPoint,
     reviews: <RemediatedMemoryReview>[
-      RemediatedMemoryReview(
+      const RemediatedMemoryReview(
         category: 'choice',
         prompt: '金光亮起、旧照片被风吹落时，许澄真正做了什么选择？',
         answer: '她放下相机先捡回旧照片，因此错过了等了一下午的金光画面。',
@@ -207,7 +207,7 @@ BatchOneJourneyMemorySpec _summerPalaceMemorySpecForLevel(int phoenixLevel) {
           'lostLight',
         ],
       ),
-      RemediatedMemoryReview(
+      const RemediatedMemoryReview(
         category: 'relationship',
         prompt: '这次选择怎样改变了许澄和周岚的关系？',
         answer: '周岚不再替许澄调构图，让她自己决定下一张，并把旧照片交给她保存。',
@@ -224,7 +224,7 @@ BatchOneJourneyMemorySpec _summerPalaceMemorySpecForLevel(int phoenixLevel) {
           'changedUnderstanding',
         ],
       ),
-      RemediatedMemoryReview(
+      const RemediatedMemoryReview(
         category: 'memory',
         prompt: '离开颐和园后，最值得长期记住的画面是什么？',
         answer: '许澄手里留下旧照片，镜头里留下外婆的手和正在暗下的十七孔桥。',
