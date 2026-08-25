@@ -1,364 +1,309 @@
 # Phoenix Failure Lessons
 
-Canonical governance record for recurring Phoenix development and validation failures.
+Canonical governance record for recurring Phoenix development and validation failures. This file is governance only. A red validation gate is not learner-product evidence until the failing boundary proves a learner-facing defect on the exact formal candidate.
 
-This document records failure mechanisms, the correct class of fix, forbidden shortcuts, and cheap preflights that should run before expensive CI, browser, preview, or Founder-review gates. It is governance only. A validation failure is not product evidence unless the failing gate demonstrates an actual learner-facing defect on the exact formal product candidate.
-
-## Core principles
+## Core rules
 
 1. **CLASSIFY BEFORE FIXING.** Separate PRODUCT, HARNESS, PATCH-MECHANISM, ENVIRONMENT, and EVIDENCE failures before touching learner code.
-2. **FORMAL PRODUCT HEAD IS IMMUTABLE DURING HARNESS REPAIR.** Validation infrastructure must adapt to the real product contract; learner content must not be rewritten merely to satisfy a brittle validator.
-3. **CHEAP BEFORE EXPENSIVE.** Syntax, fixture, identity, scope, and semantic-contract preflights run before browser installation, full suites, preview deploys, or duplicated cross-Journey gates.
-4. **EXACT HEAD BEFORE CLAIMS.** Every release, preview, browser result, and Founder handoff must be traceable to the exact candidate SHA being reviewed.
-5. **REUSE VALID EVIDENCE WHILE THE FORMAL SHA IS FROZEN.** Harness-only changes do not invalidate already-green product CI, Preview, Mobile, or unrelated reference-Journey evidence.
+2. **FORMAL PRODUCT HEAD STAYS IMMUTABLE DURING HARNESS REPAIR.** Validation infrastructure adapts to the real product contract, never the reverse.
+3. **CHEAP BEFORE EXPENSIVE.** Syntax, fixture, identity, scope, and semantic preflights run before browser installation, full suites, preview deploys, or duplicate cross-Journey gates.
+4. **EXACT HEAD OR NO RELEASE CLAIM.** Preview, CI, browser evidence, and Founder handoff must resolve to the exact formal SHA.
+5. **REUSE UNINVALIDATED EVIDENCE WHILE PRODUCT SHA IS FROZEN.** Harness/docs changes do not automatically invalidate already-green product CI, Preview, Mobile, or unrelated reference-Journey evidence.
 
 ---
 
 ## PATCH-MECHANISM FAILURE
 
-**Failure**
+**Failure**  
+Shanghai run `32814724621`, job `97700622623`, failed at `Capture helper generator outside repository tree`. Product checkout, Flutter setup, dependencies, targeted tests, Analyze, and full Flutter tests never started.
 
-A validation workflow failed while capturing or transporting the helper generator before any product validation ran. Shanghai example: run `32814724621`, job `97700622623`, failed at `Capture helper generator outside repository tree`; subsequent checkout, Flutter setup, dependencies, diff validation, targeted tests, Analyze, and full Flutter tests never started.
-
-**Classification**
-
+**Classification**  
 `HARNESS / PATCH-MECHANISM FAILURE`
 
-**Root Cause**
+**Root Cause**  
+The helper capture/replay mechanism was invalid before learner-product execution.
 
-The mechanism used to preserve or reapply the validation helper across checkout boundaries was invalid. The failure occurred before learner-product execution and therefore was not product evidence.
+**Correct Fix**  
+Repair only helper transport/patch/workflow mechanics. Require every patch target count to be exactly one, capture helpers outside destructive checkout scope when needed, and run syntax checks before expensive dependencies.
 
-**Correct Fix**
+**Forbidden Fix**  
+Do not modify Story, Vocabulary, Discovery, Challenge, Memory, Completion, ReadingAnnotation, UI, or navigation to compensate for helper delivery failure.
 
-Repair only helper capture/replay/workflow mechanics. Keep the formal product candidate unchanged and rerun from the earliest invalidated validation boundary.
+**Cheap Preflight**  
+Capture/replay helper -> exact patch-target count -> smallest unique target -> helper-only patch -> `node --check` / `python -m py_compile` as appropriate -> stop before Flutter/browser work on failure.
 
-**Forbidden Fix**
-
-Do not modify Story, Vocabulary, Discovery, Challenge, Memory, Completion, ReadingAnnotation, UI, or navigation to compensate for a helper transport failure.
-
-**Cheap Preflight**
-
-Before dependencies or expensive tests, verify that the helper artifact exists outside destructive checkout scope, is readable/executable, and can survive the exact reset/checkout sequence used by the workflow.
-
-**Long-term rule**
-
+**Long-term rule**  
 `PATCH DELIVERY FAILURE != PRODUCT FAILURE`
 
 ---
 
 ## BROWSER INTERACTION CAPABILITY: CLICK VS TAP
 
-**Failure**
+**Failure**  
+A universal `tap()` path was used for desktop Chromium and touch WebKit.
 
-A universal touch interaction was used for both desktop Chromium and mobile WebKit.
-
-**Classification**
-
+**Classification**  
 `HARNESS / BROWSER-INTERACTION FAILURE`
 
-**Root Cause**
+**Root Cause**  
+Browser capability and interaction mode were conflated.
 
-Browser capability and device interaction mode were conflated.
+**Correct Fix**  
+Use one semantic activation abstraction with explicit desktop-click and mobile-touch modes.
 
-**Correct Fix**
+**Forbidden Fix**  
+Do not fake touch capability on desktop or alter learner UI to make the harness pass.
 
-Use one semantic activation abstraction with explicit desktop-click and mobile-touch modes. Validate each mode independently before multi-level E2E.
+**Cheap Preflight**  
+Before multi-level E2E, prove one real semantic activation and expected state transition in each browser mode.
 
-**Forbidden Fix**
-
-Do not enable fake touch capability on desktop merely to make `tap()` succeed. Do not alter learner UI to accommodate the harness.
-
-**Cheap Preflight**
-
-In every browser mode, activate one stable semantic control and prove the expected application state transition.
-
-**Long-term rule**
-
+**Long-term rule**  
 `INTERACTION MODE IS PART OF THE HARNESS CONTRACT`
 
 ---
 
 ## SEMANTIC STATE > IMPLICIT NAVIGATION WAIT
 
-**Failure**
+**Failure**  
+Desktop Chromium reached the correct Shanghai `1/6 Story` SPA state, while Playwright continued waiting for an irrelevant browser navigation lifecycle and timed out.
 
-Desktop Chromium successfully activated Shanghai · Bund and reached the `1/6 Story` application state, but Playwright continued waiting for an implicit browser navigation lifecycle and timed out.
-
-**Classification**
-
+**Classification**  
 `HARNESS / SPA-ACTIVATION WAIT FALSE NEGATIVE`
 
-**Root Cause**
+**Root Cause**  
+A Flutter SPA semantic transition was coupled to traditional navigation waiting.
 
-A Flutter SPA semantic transition was incorrectly coupled to a traditional page-navigation waiter.
+**Correct Fix**  
+Trigger the real interaction, then wait for explicit application semantics.
 
-**Correct Fix**
+**Forbidden Fix**  
+Do not modify routing/UI to manufacture a browser navigation event.
 
-Let the interaction trigger the action, then wait explicitly for the expected app semantic state. For desktop semantic clicks, do not let an irrelevant navigation waiter override an already-proven SPA state transition.
+**Cheap Preflight**  
+Open the target Journey through the real UI and require its first stable six-stage semantic state.
 
-**Forbidden Fix**
-
-Do not change learner routing, destination behavior, or UI to manufacture a browser navigation event.
-
-**Cheap Preflight**
-
-Open the target Journey through the real UI and require the first stable stage semantic state before expensive coverage begins.
-
-**Long-term rule**
-
+**Long-term rule**  
 `SEMANTIC STATE > IMPLICIT NAVIGATION WAIT`
 
 ---
 
 ## INVARIANT MEANING != INVARIANT WORDING
 
-**Failure**
+**Failure**  
+A Shanghai Story validator required one identical place literal at every adaptive level even when the correct Bund spatial engine was preserved through level-appropriate wording.
 
-The Shanghai Story harness required one exact place literal, `黄浦江`, at every adaptive level. A correct Lv5 Story expressed the stronger spatial engine through `外滩 / 浦西 + 金陵东路轮渡 / 过江 / 两岸 + 浦东 / 陆家嘴` but failed the literal assertion.
-
-**Classification**
-
+**Classification**  
 `HARNESS / SEMANTIC-ANCHOR FALSE NEGATIVE`
 
-**Root Cause**
+**Root Cause**  
+Level-invariant meaning was encoded as level-invariant surface wording.
 
-A level-invariant meaning was represented as level-invariant surface wording.
+**Correct Fix**  
+Validate narrative identity, hard Journey identity, and semantic role groups. For Shanghai, preserve `west-bank Bund -> river crossing -> east-bank Lujiazui` without forcing identical prose.
 
-**Correct Fix**
+**Forbidden Fix**  
+Do not inject literals into correct learner prose merely to satisfy a brittle assertion.
 
-Validate narrative identity, hard Journey identity, and semantic role groups. For Shanghai · Bund, preserve the Story engine `west-bank Bund -> river crossing -> east-bank Lujiazui` while allowing level-appropriate wording.
+**Cheap Preflight**  
+Replay representative real semantics and a negative fixture that keeps the protagonist but removes the Journey-specific spatial engine.
 
-**Forbidden Fix**
-
-Do not inject a missing literal into otherwise-correct learner prose just to satisfy the validator. Do not weaken place causality into a generic-place check.
-
-**Cheap Preflight**
-
-Replay representative real semantics snapshots against the validator and include a negative fixture that keeps the protagonist but removes the Journey-specific spatial engine.
-
-**Long-term rule**
-
+**Long-term rule**  
 `INVARIANT MEANING != INVARIANT WORDING`
 
 ---
 
 ## STAGE CORPUS != CURRENTLY MOUNTED SEGMENT
 
-**Failure**
+**Failure**  
+WebKit Lv8 Discovery showed narration item `1 / 2` containing `海运提单`; `1990` existed later in the same formal Discovery Stage corpus. The harness validated only the currently revealed segment and falsely failed the Stage-level anchor.
 
-The harness validated only currently revealed Discovery semantics while requiring anchors that belong to the full segmented Discovery Stage. In Shanghai WebKit Lv8, narration item `1 / 2` exposed `海运提单`; `1990` existed later in the same formal Discovery corpus but was not yet present in the visible semantics snapshot.
-
-**Classification**
-
+**Classification**  
 `HARNESS / SEGMENTED-DISCOVERY VISIBILITY FALSE NEGATIVE`
 
-**Root Cause**
+**Root Cause**  
+Currently mounted/revealed semantics were treated as the entire Stage corpus.
 
-Narration-gated viewport semantics were treated as the entire Stage corpus.
+**Correct Fix**  
+Stay in real `3/6 Discovery`, follow the runtime's actual narration/item progression, collect all stable segment semantics, validate anchors over the combined Stage corpus, then transition to Challenge.
 
-**Correct Fix**
+**Forbidden Fix**  
+Do not remove `1990`, move it to segment 1, flatten Discovery, or change Journey content/UI for harness visibility.
 
-Stay in the real `3/6 Discovery` Stage, follow the runtime's actual narration/item progression, collect stable semantics across all segments, validate Stage-level anchors against the combined corpus, and only then transition to Challenge.
+**Cheap Preflight**  
+Positive split-segment fixture with required anchors in different segments; missing-later-anchor negative; single-segment fixture.
 
-**Forbidden Fix**
-
-Do not delete the later-segment anchor. Do not move it into segment 1. Do not flatten Discovery. Do not change Journey UI/content for harness visibility.
-
-**Cheap Preflight**
-
-Use a positive multi-segment fixture with required anchors split across segments, a negative fixture missing the later anchor, and a single-segment fixture proving the abstraction still handles simple stages.
-
-**Long-term rules**
-
-`STAGE CORPUS != CURRENTLY MOUNTED SEGMENT`
-
+**Long-term rules**  
+`STAGE CORPUS != CURRENTLY MOUNTED SEGMENT`  
 `VALIDATE ALL SEGMENTS BEFORE STAGE-LEVEL ASSERTIONS`
 
 ---
 
 ## CONTENT VALIDATION != TTS AVAILABILITY
 
-**Failure**
+**Failure**  
+A browser exposed complete learner Discovery text while TTS reported `朗读暂时不可用`; the harness incorrectly required an active narration item before accepting the corpus.
 
-A browser exposed the complete learner Discovery text while browser TTS reported `朗读暂时不可用`, but the harness required an active narration item index before accepting the Stage corpus.
-
-**Classification**
-
+**Classification**  
 `HARNESS / NARRATION-AVAILABILITY COUPLING FALSE NEGATIVE`
 
-**Root Cause**
+**Root Cause**  
+Optional narration availability became a prerequisite for content correctness.
 
-Optional runtime narration availability was incorrectly made a prerequisite for content correctness. Phoenix intentionally reveals full text when the narration session is inactive or unavailable.
+**Correct Fix**  
+When narration is available, traverse its segmented progression. When unavailable, validate the already fully revealed Stage semantics directly. Keep identical content anchors in both paths.
 
-**Correct Fix**
+**Forbidden Fix**  
+Do not weaken content anchors or alter narration UI/audio configuration merely to make a content validator run.
 
-When narration is available, traverse and collect its segmented semantic progression. When narration is unavailable, validate the already fully revealed Stage semantics directly. The content anchor contract is identical in both paths.
+**Cheap Preflight**  
+A TTS-unavailable full-text fixture carrying the same Stage anchors must pass without narration indices.
 
-**Forbidden Fix**
-
-Do not weaken Discovery anchors because TTS is unavailable. Do not modify learner content, narration UI, or browser audio configuration merely to make a content validator execute.
-
-**Cheap Preflight**
-
-Include a TTS-unavailable full-text fixture with the same required Stage anchors and require it to pass without narration indices.
-
-**Long-term rule**
-
+**Long-term rule**  
 `CONTENT VALIDATION != TTS AVAILABILITY`
 
 ---
 
 ## MODAL OVERLAY != STAGE LOSS
 
-**Failure**
+**Failure**  
+Shanghai run `32833535493`, job `97757291939`, reached WebKit Lv3 after Chromium Lv1/Lv3/Lv5/Lv8/Lv10 and WebKit Lv1 passed. A legitimate `中文朗读声线` Dialog temporarily replaced mounted Journey semantics and the harness reported `semantic state not found: 3/6`.
 
-A legitimate transient browser/runtime modal temporarily hid Journey Stage semantics. Shanghai run `32833535493`, job `97757291939`, reached WebKit Lv3 after Chromium Lv1/Lv3/Lv5/Lv8/Lv10 and WebKit Lv1 had passed. The semantics snapshot showed the `中文朗读声线` Dialog, including real `关闭` / `Dismiss` controls and the browser message `当前浏览器没有提供可选择的中文声线`, while the harness reported `semantic state not found: 3/6`.
-
-**Classification**
-
+**Classification**  
 `HARNESS / TRANSIENT-MODAL-OVERLAY FALSE NEGATIVE`
 
-**Root Cause**
+**Root Cause**  
+Temporary modal-overlay state was interpreted as loss of the underlying Journey Stage.
 
-The harness did not distinguish a temporary modal overlay state from the underlying Journey state. Mounted Stage semantics being temporarily absent from the exposed semantic tree was incorrectly interpreted as Stage loss.
+**Correct Fix**  
+Recognize only explicitly known transient runtime dialogs, log identity, close through a real semantic `关闭` / `Dismiss` control, wait for the Dialog to disappear, then re-read semantics and enforce the original Stage assertion unchanged.
 
-**Correct Fix**
+**Forbidden Fix**  
+Do not remove Stage assertions, globally dismiss arbitrary dialogs, or change learner/narration UI to prevent a legitimate modal.
 
-Recognize only explicitly known transient runtime dialogs. Record the modal identity, close it through its real semantic `关闭` / `Dismiss` control, wait for that Dialog to disappear, then re-read semantics and enforce the original Stage postcondition unchanged.
+**Cheap Preflight**  
+Known voice modal -> recognized -> real close target -> Stage semantics re-read. Unknown modal -> must remain non-dismissible and fail classification.
 
-**Forbidden Fix**
+**Long-term rules**  
+`MODAL OVERLAY != STAGE LOSS`  
+`DISMISS KNOWN TRANSIENT STATE, THEN RE-READ SEMANTICS`  
+`UNKNOWN MODAL != AUTO-DISMISS`
 
-Do not remove or weaken Stage assertions. Do not globally dismiss arbitrary dialogs. Do not change learner UI, narration UI, voice-selection behavior, or Journey content to prevent a legitimate transient modal from appearing.
+---
 
-**Cheap Preflight**
+## DIALOG IDENTITY IS SEMANTIC, NOT ONE DOM ROLE SHAPE
 
-Replay a known `中文朗读声线` modal semantics fixture and prove `known modal -> recognized -> real close target -> Stage semantics re-read`. Include an unknown-Dialog negative fixture and require it to remain non-dismissible and fail classification rather than being silently closed.
+**Failure**  
+Shanghai run `32837154670`, job `97768541821`, passed all pure fixtures, exact-preview identity, and Chromium/WebKit interaction + Shanghai SPA preflight. During Chromium Lv1, the normal Vocabulary word-detail modal for `外滩` appeared after Story. Its snapshot included `已下载例句`, reviewed Story example, Pinyin/Vietnamese/English support, `收藏单词`, `上一个单词`, `下一个单词`, and a real `Dismiss` button. Flutter exposed the modal record as `role=null, label="Dialog"`, while the strict harness recognized only `role="Dialog"`; it therefore reported `semantic state not found: 2/6`.
 
-**Long-term rules**
+**Classification**  
+`HARNESS / KNOWN-TRANSIENT-MODAL SEMANTIC-SHAPE FALSE NEGATIVE`
 
-`MODAL OVERLAY != STAGE LOSS`
+**Root Cause**  
+The harness encoded one DOM representation of Dialog identity instead of Flutter semantics, and its explicit transient allowlist omitted the historically expected Vocabulary word-detail modal.
 
-`DISMISS KNOWN TRANSIENT STATE, THEN RE-READ SEMANTICS`
+**Correct Fix**  
+Normalize Dialog identity across the observed Flutter semantic shapes (`role="Dialog"` or exact semantic `label="Dialog"`). Keep an explicit allowlist for known transient identities such as `中文朗读声线` and Vocabulary word detail. Match each by specific content markers, close only through its allowed real control, then re-read and prove the unchanged Stage postcondition.
 
+**Forbidden Fix**  
+Do not restore a global `if Dismiss exists -> close it` rule. Do not treat every `label="Dialog"` as safe. Do not close unknown dialogs. Do not change Vocabulary, Story, UI, or Stage behavior.
+
+**Cheap Preflight**  
+Replay real Flutter-shaped fixtures with `role=null, label="Dialog"` for both known voice-selection and Vocabulary-detail states; require both to resolve an allowlisted close control. Replay an unknown `role=null, label="Dialog"` fixture and require rejection.
+
+**Long-term rules**  
+`DIALOG IDENTITY IS SEMANTIC, NOT A SINGLE DOM ROLE SHAPE`  
+`KNOWN TRANSIENT ALLOWLIST MUST BE EXPLICIT`  
 `UNKNOWN MODAL != AUTO-DISMISS`
 
 ---
 
 ## CURRENT LEVEL LEAKAGE
 
-**Failure pattern**
+**Failure pattern**  
+Adaptive validation can accidentally read stale, hidden, cached, or non-active level material and satisfy/fail assertions using the wrong level.
 
-Adaptive Journey validation can accidentally read stale, hidden, cached, or non-active level material and either satisfy an assertion with the wrong level or report contamination that is not learner-visible at the current level.
-
-**Classification**
-
+**Classification**  
 `HARNESS / CURRENT-LEVEL LEAKAGE`
 
-**Root Cause**
+**Root Cause**  
+The broader DOM/semantic/runtime corpus was treated as equivalent to the active Phoenix level.
 
-The validator treated the broader DOM/semantic/runtime corpus as equivalent to the active Phoenix level.
+**Correct Fix**  
+Prove exact active level first, then bind Story, Vocabulary, Discovery, Challenge, Memory, and Completion assertions to learner-visible current-level state.
 
-**Correct Fix**
+**Forbidden Fix**  
+Do not remove level-specific requirements or accept anchors merely because they exist in another level's corpus.
 
-Prove the exact active Phoenix level first, then bind Story, Vocabulary, Discovery, Challenge, Memory, and Completion assertions to the learner-visible active-level state. Level progression assertions compare intentional semantic deltas, not leftovers from another level.
+**Cheap Preflight**  
+Place a required anchor only in a non-active-level fixture and require the active-level validator to reject it.
 
-**Forbidden Fix**
-
-Do not remove level-specific quality requirements because stale content was observed. Do not rewrite learner content to hide material that is not active. Do not accept an anchor merely because it exists somewhere in another level's corpus.
-
-**Cheap Preflight**
-
-Use fixtures with a required anchor present only in a non-active level and require the active-level validator to reject it. Also assert that current level identity is stable before stage-specific checks run.
-
-**Long-term rule**
-
+**Long-term rule**  
 `CURRENT LEVEL IS THE ASSERTION BOUNDARY`
 
 ---
 
 ## ARBITRARY 5000MS PERFORMANCE GATE
 
-**Failure pattern**
+**Failure pattern**  
+A fixed `5000 ms` wall-clock threshold was treated as universal product quality despite runner variance, cold starts, network latency, or lack of an owned performance contract.
 
-A fixed `5000 ms` threshold was treated as a universal product-quality boundary even when runner variance, cold-start cost, browser installation, network/preview latency, or the measured user interaction being tested did not justify that number.
-
-**Classification**
-
+**Classification**  
 `HARNESS / ARBITRARY PERFORMANCE THRESHOLD`
 
-**Root Cause**
+**Root Cause**  
+A magic timeout was substituted for a defined performance specification.
 
-A magic wall-clock cutoff was substituted for an explicit performance contract.
+**Correct Fix**  
+Measure the user-relevant operation, define boundaries and warm/cold conditions, and source the threshold from an owned SLA or stable baseline with documented tolerance. Keep correctness timeouts separate from performance assertions.
 
-**Correct Fix**
+**Forbidden Fix**  
+Do not simplify learner content to satisfy a magic number, silently raise the number until green, or interpret infrastructure latency as product regression without evidence.
 
-Measure the user-relevant operation, define the threshold from an owned performance/SLA contract or a stable baseline with documented tolerance, and separate correctness timeouts from performance assertions. Record cold/warm conditions when they matter.
+**Cheap Preflight**  
+Require named operation, measurement boundaries, warm/cold mode, threshold source, and tolerance before enabling a performance gate.
 
-**Forbidden Fix**
-
-Do not speed up or simplify learner content solely to satisfy an unexplained magic timeout. Do not silently raise the number until green. Do not interpret infrastructure latency as learner-runtime regression without evidence.
-
-**Cheap Preflight**
-
-Validate the performance-gate configuration itself: named operation, measurement boundaries, warm/cold mode, threshold source, and tolerance. Reject bare magic-number gates with no contract owner.
-
-**Long-term rule**
-
+**Long-term rule**  
 `TIMEOUT != PERFORMANCE SPEC`
 
 ---
 
 ## EXACT-HEAD IDENTITY AND RERUN COST
 
-**Failure pattern**
+**Failure pattern**  
+Evidence becomes ambiguous and CI cost balloons when validation targets a merge ref, stale preview, moving branch, or re-runs unrelated successful gates after harness-only changes.
 
-Expensive gates are wasted or evidence becomes ambiguous when a workflow validates a merge ref, stale preview, moving branch, or re-runs unrelated successful gates after a validation-only change.
-
-**Classification**
-
+**Classification**  
 `EVIDENCE / EXACT-HEAD DRIFT` or `HARNESS / RERUN-COST WASTE`
 
-**Root Cause**
+**Root Cause**  
+Formal candidate identity, preview identity, validation-harness identity, and evidence-reuse policy were not separated.
 
-Candidate identity, preview identity, validation-harness identity, and evidence reuse policy were not separated explicitly.
+**Correct Fix**  
+Pin the formal SHA; verify preview release SHA; record validation harness SHA independently; run cheap gates first; reuse already-green product CI/Preview/Mobile/reference evidence while formal SHA is unchanged and the changed harness did not invalidate that evidence; run a final HEAD-drift check immediately before Founder handoff.
 
-**Correct Fix**
+**Forbidden Fix**  
+Do not claim moving-branch/merge-ref evidence as exact-head proof, and do not habitually rerun every expensive gate after docs/harness-only changes.
 
-- Pin the formal product to one exact candidate SHA.
-- Verify preview health/release SHA equals the formal candidate before browser E2E.
-- Pin or record the validation harness HEAD independently.
-- Run cheap syntax/fixture checks before browser installation or full suites.
-- When the formal product SHA is unchanged, reuse successful product CI, Preview, Mobile, and unrelated reference-Journey evidence unless the changed validation mechanism actually invalidates that evidence.
-- Perform a final HEAD-drift check immediately before Founder handoff.
+**Cheap Preflight**  
+Print and compare formal product SHA, preview release SHA, validation harness SHA, changed-file scope, and reusable-green gate list before expensive work.
 
-**Forbidden Fix**
-
-Do not claim a moving branch or merge ref as exact-head evidence. Do not rerun every expensive gate after a docs/harness-only change by habit. Do not reuse evidence if the formal product SHA changed or if the changed harness directly invalidates that evidence.
-
-**Cheap Preflight**
-
-Before expensive work, print and compare: formal product SHA, expected preview release SHA, validation harness SHA, changed-file scope, and the list of previously-green gates eligible for reuse.
-
-**Long-term rules**
-
-`EXACT HEAD OR NO RELEASE CLAIM`
-
+**Long-term rules**  
+`EXACT HEAD OR NO RELEASE CLAIM`  
 `FROZEN PRODUCT SHA => REUSE UNINVALIDATED EVIDENCE`
 
 ---
 
 ## Failure handling template
 
-Every new Phoenix failure lesson should record:
-
-- **Failure**: the concrete observed behavior and exact failing boundary.
+Every new lesson records:
+- **Failure**: concrete observed behavior and exact failing boundary.
 - **Classification**: PRODUCT / HARNESS / PATCH-MECHANISM / ENVIRONMENT / EVIDENCE.
-- **Root Cause**: why the failure happened, without retrofitting product blame.
-- **Correct Fix**: the smallest layer that owns the defect.
-- **Forbidden Fix**: shortcuts that would corrupt learner quality or evidence.
-- **Cheap Preflight**: a low-cost regression that catches recurrence before expensive gates.
-- **Long-term rule**: one reusable invariant.
+- **Root Cause**: why it happened without retrofitting product blame.
+- **Correct Fix**: smallest layer that owns the defect.
+- **Forbidden Fix**: shortcuts that corrupt learner quality or evidence.
+- **Cheap Preflight**: low-cost regression before expensive gates.
+- **Long-term rule**: reusable invariant.
 
 ## Founder handoff rule
 
-Machine validation may prove exact-head identity, scope, contracts, browser execution, and regression safety. It does not replace Founder experience review. A candidate is only ready for Founder review after all required exact-head gates are green and final HEAD drift is clean; merge or approval remains a separate explicit Founder action.
+Machine validation can prove exact-head identity, scope, contracts, browser execution, and regression safety. It does not replace Founder experience review. A candidate is only ready for Founder review after all required exact-head gates are green and final HEAD drift is clean. Merge or approval remains a separate explicit Founder action.
