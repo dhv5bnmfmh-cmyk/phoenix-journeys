@@ -168,6 +168,30 @@ Canonical governance record for recurring Phoenix development and validation fai
 
 ---
 
+## DETACHED LIVE HANDLE != REUSABLE ACTION IDENTITY
+
+**Failure:** run `32869775939`, job `97873732061`, reached WebKit Lv8 Discovery with the target level and Stage intact, but a narration semantic node remounted between snapshot resolution and live binding. The previously observed `ElementHandle` detached before action, and the safety guard stopped instead of risking activation of a neighboring control.  
+**Classification:** `HARNESS / SEMANTIC-REMOUNT BIND RACE SAFE-FAIL`  
+**Root Cause:** a live semantic node was implicitly treated as stable across a Flutter remount boundary. Once detached, the old handle, index, and geometry were no longer valid action identity.  
+**Correct Fix:** on a recognized remount race, discard all stale observation data and use a finite retry loop: `fresh snapshot -> resolve -> bind live element -> recheck identity -> get geometry -> activate`. Every retry must begin from a new semantic snapshot and must re-prove the intended control before action.  
+**Forbidden Fix:** do not reuse a detached handle, stale numeric index, stale geometry, or global coordinate. Do not retarget by proximity. Do not retry forever. Do not modify learner UI or content to make semantic nodes artificially stable.  
+**Cheap Preflight:** simulate an observed narration rail detaching while a nearby difficulty control remains mounted, then require the old handle to be discarded and the narration rail to be resolved from a fresh snapshot. The finite retry path must either bind the intended narration control or fail safely.  
+**Rules:** `DETACHED LIVE HANDLE != REUSABLE ACTION IDENTITY`; `FRESH SNAPSHOT -> RESOLVE -> BIND LIVE ELEMENT -> RECHECK IDENTITY -> GEOMETRY -> ACTIVATE`; `RETRY MUST BE FINITE`
+
+---
+
+## STAGE IDENTITY != LOCALE SURFACE WORDING
+
+**Failure:** run `32870217027`, job `97875143846`, reached the real WebKit Lv8 Discovery Stage. Flutter exposed the structural Stage progress semantics as `3/6 · 发现`, while the harness required the English literal `3/6 Discovery` and falsely rejected the correct Stage.  
+**Classification:** `HARNESS / STAGE-IDENTITY LOCALIZATION FALSE NEGATIVE`  
+**Root Cause:** structural Stage identity was coupled to localized surface wording even though the semantics already provided a visible progressbar and exact six-stage index.  
+**Correct Fix:** prove Stage authority from the visible progressbar role plus exact structural stage index, such as `3/6`, independent of `Discovery`, `发现`, or another locale label. Continue to validate narration content separately and strictly: exact `Discovery，Lv.x` identity, exact target level, explicit `100%` terminal state when terminal authority is used, and all required level anchors.  
+**Forbidden Fix:** do not drop the Stage check, accept any progressbar, weaken exact target-level checks, weaken terminal completion, or remove Discovery anchors. Do not change product locale wording to satisfy the validator.  
+**Cheap Preflight:** localized `3/6 · 发现` progressbar must satisfy structural Stage 3 identity; a wrong structural index such as `2/6` must fail even if its text contains Discovery-like words. Narration level and anchor negatives remain independently enforced.  
+**Rules:** `STAGE IDENTITY != LOCALE SURFACE WORDING`; `STAGE AUTHORITY = VISIBLE PROGRESSBAR + EXACT STRUCTURAL STAGE INDEX`; `CONTENT CONTRACT REMAINS STRICT AFTER STRUCTURAL STAGE RESOLUTION`
+
+---
+
 ## CURRENT LEVEL LEAKAGE
 
 **Failure pattern:** stale/hidden/non-active level content can accidentally satisfy or fail adaptive assertions.  
