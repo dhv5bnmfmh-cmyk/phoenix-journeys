@@ -1,5 +1,6 @@
 name: Shanghai Bund Exact-HEAD Browser Gates
 
+# Validation-only workflow. Never modifies the formal Shanghai product candidate.
 on:
   push:
     branches:
