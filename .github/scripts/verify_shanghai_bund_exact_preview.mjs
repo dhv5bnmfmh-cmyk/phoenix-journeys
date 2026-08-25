@@ -80,7 +80,7 @@ function registerInteractionMode(page, mode) {
 async function activateSemantic(page, locator, { timeout = 10000 } = {}) {
   const mode = interactionModeByPage.get(page);
   if (mode === interactionModes.desktop) {
-    await locator.click({ timeout });
+    await locator.click({ timeout, noWaitAfter: true });
     return;
   }
   if (mode === interactionModes.touch) {
@@ -362,10 +362,14 @@ async function runBrowserModePreflight(browserType, browserName) {
     const stableButton = await findSemantic(page, '选择城市', { role: 'button', prefix: true, timeout: 15000 });
     await activateSemantic(page, stableButton);
     await findSemantic(page, '选择城市与地点', { timeout: 15000 });
+    await activateButton(page, '上海');
+    await findSemantic(page, '上海的地点', { timeout: 15000 });
+    await activateButton(page, '外滩');
+    await waitStage(page, 1);
     if (browserName === 'webkit') {
-      console.log('BROWSER MODE PREFLIGHT WEBKIT MOBILE = PASS | INTERACTION=tap');
+      console.log('BROWSER MODE PREFLIGHT WEBKIT MOBILE = PASS | INTERACTION=tap | SHANGHAI SPA OPEN=PASS');
     } else {
-      console.log('BROWSER MODE PREFLIGHT CHROMIUM DESKTOP = PASS | INTERACTION=click');
+      console.log('BROWSER MODE PREFLIGHT CHROMIUM DESKTOP = PASS | INTERACTION=click | SHANGHAI SPA OPEN=PASS');
     }
   } finally {
     await context.close();
@@ -434,7 +438,7 @@ async function runLevel(browserType, browserName, level) {
 
 await runBrowserModePreflight(playwright.chromium, 'chromium');
 await runBrowserModePreflight(playwright.webkit, 'webkit');
-console.log('BROWSER MODE PREFLIGHT = PASS | desktop-click + mobile-touch');
+console.log('BROWSER MODE PREFLIGHT = PASS | desktop-click + mobile-touch | Shanghai SPA open');
 
 for (const [browserName, browserType] of [['chromium', playwright.chromium], ['webkit', playwright.webkit]]) {
   for (const level of levels) await runLevel(browserType, browserName, level);
