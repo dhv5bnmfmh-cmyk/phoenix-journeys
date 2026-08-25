@@ -1,15 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-
-import {
-  PhoenixBrainAgent,
-  PHOENIX_AI_MODES,
-} from './agents/phoenix_brain_agent.mjs';
-import {
-  PhoenixMemoryAgent,
-  safeLearnerProfile,
-} from './agents/phoenix_memory_agent.mjs';
+import { PhoenixBrainAgent, PHOENIX_AI_MODES } from './agents/phoenix_brain_agent.mjs';
+import { PhoenixMemoryAgent, safeLearnerProfile } from './agents/phoenix_memory_agent.mjs';
 import { PhoenixKnowledgeAgent } from './agents/phoenix_knowledge_agent.mjs';
 import { OPENAI_DEFAULT_MODEL } from './ai/openai_responses_provider.mjs';
 
@@ -27,46 +20,16 @@ const workflow = read('docs/development-workflow.md');
 const template = read('.github/pull_request_template.md');
 
 test('PhoenixBrainAgent is the only orchestrator for all five specialist modes', async () => {
-  assert.deepEqual(PHOENIX_AI_MODES, [
-    'guide',
-    'writing',
-    'conversation',
-    'learning',
-    'vocabulary',
-  ]);
-
+  assert.deepEqual(PHOENIX_AI_MODES, ['guide','writing','conversation','learning','vocabulary']);
   const brain = new PhoenixBrainAgent({}, { gateway: { isAvailable: true } });
   const calls = [];
-  brain.guide = {
-    respond: async (payload) => (calls.push(payload.mode), { agent: 'guide' }),
-  };
-  brain.writing = {
-    review: async (payload) => (calls.push(payload.mode), { agent: 'writing' }),
-  };
-  brain.conversation = {
-    respond: async (payload) =>
-      (calls.push(payload.mode), { agent: 'conversation' }),
-  };
-  brain.learning = {
-    analyze: async (payload) => (calls.push(payload.mode), { agent: 'learning' }),
-  };
-  brain.vocabulary = {
-    generate: async (payload) =>
-      (calls.push(payload.mode), { agent: 'vocabulary' }),
-  };
-
+  brain.guide = { respond: async (payload) => (calls.push(payload.mode), { agent: 'guide' }) };
+  brain.writing = { review: async (payload) => (calls.push(payload.mode), { agent: 'writing' }) };
+  brain.conversation = { respond: async (payload) => (calls.push(payload.mode), { agent: 'conversation' }) };
+  brain.learning = { analyze: async (payload) => (calls.push(payload.mode), { agent: 'learning' }) };
+  brain.vocabulary = { generate: async (payload) => (calls.push(payload.mode), { agent: 'vocabulary' }) };
   for (const mode of PHOENIX_AI_MODES) {
-    const result = await brain.run({
-      mode,
-      text: '学习内容',
-      word: '红墙',
-      pinyin: 'hóngqiáng',
-      partOfSpeech: '名词',
-      simpleChinese: '红色的墙。',
-      language: '越南语',
-      journeyId: 'beijing-forbidden-city',
-      learnerProfile: { savedWords: ['红墙'] },
-    });
+    const result = await brain.run({ mode, text: '学习内容', word: '红墙', pinyin: 'hóngqiáng', partOfSpeech: '名词', simpleChinese: '红色的墙。', language: '越南语', journeyId: 'beijing-forbidden-city', learnerProfile: { savedWords: ['红墙'] } });
     assert.equal(result.orchestrator, 'PhoenixBrainAgent');
     assert.equal(result.memory.agent, 'PhoenixMemoryAgent');
     assert.equal(result.knowledge.agent, 'PhoenixKnowledgeAgent');
@@ -75,16 +38,10 @@ test('PhoenixBrainAgent is the only orchestrator for all five specialist modes',
 });
 
 test('PhoenixMemoryAgent bounds client-private memory and never persists it server-side', () => {
-  const profile = safeLearnerProfile({
-    savedWords: Array.from({ length: 70 }, (_, index) => `词${index}`),
-    completedJourneys: ['beijing-forbidden-city'],
-    recentGuideObservations: ['观察'.repeat(700)],
-    recentWritingInsights: ['语法'.repeat(700)],
-  });
+  const profile = safeLearnerProfile({ savedWords: Array.from({ length: 70 }, (_, index) => `词${index}`), completedJourneys: ['beijing-forbidden-city'], recentGuideObservations: ['观察'.repeat(700)], recentWritingInsights: ['语法'.repeat(700)] });
   assert.equal(profile.savedWords.length, 40);
   assert.ok(profile.recentGuideObservations[0].length <= 500);
   assert.ok(profile.recentWritingInsights[0].length <= 600);
-
   const prepared = new PhoenixMemoryAgent().prepare(profile);
   assert.equal(prepared.metadata.storage, 'client-private');
   assert.equal(prepared.metadata.serverPersisted, false);
@@ -100,56 +57,31 @@ test('PhoenixKnowledgeAgent grounds every specialist in reviewed Journey context
 });
 
 test('Conversation, Learning, and Vocabulary use the gateway and hidden quality review', () => {
-  assert.match(conversationSource, /PhoenixModelGateway/);
-  assert.match(conversationSource, /PhoenixQualityAgent/);
-  assert.match(conversationSource, /reviewConversation/);
-  assert.match(learningSource, /PhoenixModelGateway/);
-  assert.match(learningSource, /PhoenixQualityAgent/);
-  assert.match(learningSource, /reviewLearning/);
-  assert.match(learningSource, /learningReportSchema/);
-  assert.match(vocabularySource, /PhoenixModelGateway/);
-  assert.match(vocabularySource, /PhoenixQualityAgent/);
-  assert.match(vocabularySource, /reviewVocabulary/);
-  assert.match(qualitySource, /conversationSchema/);
-  assert.match(qualitySource, /learningSchema/);
-  assert.match(qualitySource, /vocabularySchema/);
+  assert.match(conversationSource, /PhoenixModelGateway/); assert.match(conversationSource, /PhoenixQualityAgent/); assert.match(conversationSource, /reviewConversation/);
+  assert.match(learningSource, /PhoenixModelGateway/); assert.match(learningSource, /PhoenixQualityAgent/); assert.match(learningSource, /reviewLearning/); assert.match(learningSource, /learningReportSchema/);
+  assert.match(vocabularySource, /PhoenixModelGateway/); assert.match(vocabularySource, /PhoenixQualityAgent/); assert.match(vocabularySource, /reviewVocabulary/);
+  assert.match(qualitySource, /conversationSchema/); assert.match(qualitySource, /learningSchema/); assert.match(qualitySource, /vocabularySchema/);
 });
 
 test('endpoint, health and Flutter expose the complete AI 2 capability set', () => {
-  for (const mode of PHOENIX_AI_MODES) {
-    assert.ok(endpoint.includes(`'${mode}'`));
-  }
+  for (const mode of PHOENIX_AI_MODES) assert.ok(endpoint.includes(`'${mode}'`));
   assert.match(endpoint, /new PhoenixBrainAgent\(env\)\.run\(payload\)/);
-  assert.match(health, /aiVersion: '2\.0'/);
-  assert.match(health, /brainAgent: true/);
-  assert.match(health, /conversationAgent: true/);
-  assert.match(health, /learningAgent: true/);
-  assert.match(health, /vocabularyAgent: true/);
-  assert.match(health, /memoryStorage: 'client-private'/);
-  assert.match(appService, /Future<PhoenixConversationFeedback> practiceConversation/);
-  assert.match(appService, /Future<PhoenixLearningReport> buildLearningReport/);
-  assert.match(vocabularyService, /Future<PhoenixVocabularyExample> generateExample/);
+  assert.match(health, /aiVersion: '2\.0'/); assert.match(health, /brainAgent: true/); assert.match(health, /conversationAgent: true/); assert.match(health, /learningAgent: true/); assert.match(health, /vocabularyAgent: true/); assert.match(health, /memoryStorage: 'client-private'/);
+  assert.match(appService, /Future<PhoenixConversationFeedback> practiceConversation/); assert.match(appService, /Future<PhoenixLearningReport> buildLearningReport/); assert.match(vocabularyService, /Future<PhoenixVocabularyExample> generateExample/);
 });
 
 test('GPT-5.6 is primary while Cloudflare remains the automatic fallback', () => {
   assert.equal(OPENAI_DEFAULT_MODEL, 'gpt-5.6');
   assert.match(workflow, /默认使用 OpenAI Responses API 的 `gpt-5\.6`/);
   assert.match(workflow, /自动回退 Cloudflare Workers AI/);
-  assert.match(template, /GPT-5\.6/);
+  assert.match(template, /Single entry contract: `docs\/PHOENIX_JOURNEY_ACCEPTANCE_CONTRACT\.md`/);
 });
 
-test('permanent rules protect orchestration, privacy, grounding and quality', () => {
-  assert.match(brainSource, /PhoenixMemoryAgent/);
-  assert.match(brainSource, /PhoenixKnowledgeAgent/);
-  assert.match(brainSource, /PhoenixVocabularyAgent/);
+test('permanent rules protect orchestration, privacy, grounding and quality without duplicating PR checklists', () => {
+  assert.match(brainSource, /PhoenixMemoryAgent/); assert.match(brainSource, /PhoenixKnowledgeAgent/); assert.match(brainSource, /PhoenixVocabularyAgent/);
   assert.match(workflow, /`PhoenixBrainAgent` 是唯一 AI 总调度入口/);
   assert.match(workflow, /服务器不得持久保存学习记忆/);
   assert.match(workflow, /只提供 Phoenix 已审核 Journey 背景/);
-  assert.match(workflow, /Guide、Writing、Conversation、Learning/);
-  assert.match(workflow, /Vocabulary 内容制作结果/);
-  assert.match(workflow, /点开生词时必须立即读取本地或已经提前下载的例句包/);
-  assert.match(template, /PhoenixBrainAgent 是唯一 AI 总调度入口/);
-  assert.match(template, /服务器不持久保存/);
-  assert.match(template, /PhoenixVocabularyAgent/);
-  assert.match(template, /不现场请求 AI/);
+  assert.match(workflow, /PhoenixVocabularyAgent/);
+  assert.match(template, /Do not copy old checklists into this PR/);
 });

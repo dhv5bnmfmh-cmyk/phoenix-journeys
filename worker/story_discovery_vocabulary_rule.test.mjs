@@ -30,8 +30,8 @@ test('permanent rules prevent Story and Discovery vocabulary from drifting apart
   assert.match(workflow, /不得隐藏这两项释义/);
   assert.match(workflow, /PhoenixVocabularyAgent/);
   assert.match(workflow, /永久禁止使用“故事里出现了这个词”/);
-  assert.match(template, /故事页与发现页生词均显示词性、探索者母语和英文释义/);
-  assert.match(template, /PhoenixVocabularyAgent/);
+  assert.match(template, /Single entry contract: `docs\/PHOENIX_JOURNEY_ACCEPTANCE_CONTRACT\.md`/);
+  assert.match(template, /Vocabulary CURRENT-level provenance/);
 });
 
 test('Story Continue enters the first vocabulary word from the selected level', () => {
@@ -39,8 +39,5 @@ test('Story Continue enters the first vocabulary word from the selected level', 
   assert.match(journey, /await _goToStep\(1\);/);
   assert.match(journey, /await WidgetsBinding\.instance\.endOfFrame;/);
   assert.match(journey, /await _openWord\(_levelContent\.words\.first\);/);
-  assert.match(
-    journey,
-    /onNext: \(\) => unawaited\(_enterVocabularyAtFirstWord\(\)\),/,
-  );
+  assert.match(journey, /onNext: \(\) => unawaited\(_enterVocabularyAtFirstWord\(\)\),/);
 });

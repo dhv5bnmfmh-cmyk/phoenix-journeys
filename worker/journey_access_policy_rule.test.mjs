@@ -27,9 +27,17 @@ test('free explorers receive stable random morning and afternoon journeys', () =
   assert.match(workflow, /同一天早上与下午的旅程不得重复/);
 });
 
-test('journey access remains configurable and centralized', () => {
+test('journey access remains configurable and centralized while PR evidence uses the canonical contract', () => {
   assert.match(workflow, /统一经过 `JourneyAccessPolicy` 判断/);
-  assert.match(workflow, /具体早上和下午的钟点、价格、试用期、重复回避周期与促销方案必须保留为可配置商业策略/);
-  assert.match(prTemplate, /免费、付费与随机旅程权限统一经过 `JourneyAccessPolicy`/);
-  assert.match(prTemplate, /开发分支与 PR 体验版保持全部旅程开放/);
+  assert.match(
+    workflow,
+    /具体早上和下午的钟点、价格、试用期、重复回避周期与促销方案必须保留为可配置商业策略/,
+  );
+  assert.match(
+    prTemplate,
+    /Single entry contract: `docs\/PHOENIX_JOURNEY_ACCEPTANCE_CONTRACT\.md`/,
+  );
+  assert.match(prTemplate, /Do not copy old checklists into this PR/);
+  assert.match(prTemplate, /AUTHORIZED_JOURNEY_SET/);
+  assert.match(prTemplate, /Any unauthorized learner-visible delta blocks Ready and merge/);
 });

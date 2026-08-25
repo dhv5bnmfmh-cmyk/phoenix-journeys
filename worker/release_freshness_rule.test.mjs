@@ -9,10 +9,7 @@ const worker = readFileSync('worker/index.mjs', 'utf8');
 const deploy = readFileSync('.github/workflows/deploy-cloudflare.yml', 'utf8');
 
 test('every Flutter bootstrap URL carries a generated release version', () => {
-  assert.match(
-    index,
-    /flutter_bootstrap\.js\?v=\{\{flutter_service_worker_version\}\}/,
-  );
+  assert.match(index, /flutter_bootstrap\.js\?v=\{\{flutter_service_worker_version\}\}/);
 });
 
 test('legacy Flutter service workers and caches are retired safely', () => {
@@ -25,23 +22,16 @@ test('legacy Flutter service workers and caches are retired safely', () => {
 });
 
 test('Phoenix app-shell files are never served stale', () => {
-  for (const path of [
-    '/',
-    '/index.html',
-    '/flutter_bootstrap.js',
-    '/main.dart.js',
-    '/flutter_service_worker.js',
-  ]) {
+  for (const path of ['/','/index.html','/flutter_bootstrap.js','/main.dart.js','/flutter_service_worker.js']) {
     assert.match(headers, new RegExp(`(^|\\n)${path.replaceAll('/', '\\/')}\\n`));
   }
-  assert.match(
-    headers,
-    /Cache-Control: no-store, no-cache, must-revalidate, max-age=0/,
-  );
+  assert.match(headers, /Cache-Control: no-store, no-cache, must-revalidate, max-age=0/);
 });
 
-test('production health proves the exact commit is live', () => {
+test('production health proves the exact tested candidate is live', () => {
   assert.match(worker, /release: env\?\.PHOENIX_RELEASE \?\? 'local'/);
-  assert.match(deploy, /PHOENIX_RELEASE:\$\{\{ github\.sha \}\}/);
-  assert.match(deploy, /health\.release !== expectedRelease/);
+  assert.match(deploy, /CANDIDATE_SHA: \$\{\{ github\.event\.workflow_run\.head_sha \}\}/);
+  assert.match(deploy, /--var "PHOENIX_RELEASE:\$CANDIDATE_SHA"/);
+  assert.match(deploy, /health\.release !== expected/);
+  assert.match(deploy, /"\$response" "\$CANDIDATE_SHA"/);
 });

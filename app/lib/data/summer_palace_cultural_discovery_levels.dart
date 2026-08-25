@@ -105,7 +105,7 @@ const summerPalaceDiscoveryUnitsByLevel =
   3: [
     SummerPalaceDiscoveryUnit(
       learnerQuestion: '颐和园最早何时形成，又经历了什么破坏？',
-      newFactOrConcept: '1750年建成，1860年遭受严重破坏。',
+      newFactOrConcept: '1750年开始兴建，1860年遭受严重破坏。',
       sourceIds: [summerPalaceUnescoSourceId, summerPalaceOverviewSourceId],
       whyDistinct: '先建立建造与损毁的时间层次。',
       storyBridge: '旧照片上的历史日期让“痕迹”具有真实地点历史。',
@@ -116,14 +116,14 @@ const summerPalaceDiscoveryUnitsByLevel =
     ),
     SummerPalaceDiscoveryUnit(
       learnerQuestion: '破坏之后的颐和园怎样继续存在？',
-      newFactOrConcept: '1886年在原有基础上修复，形成可读的历史层次。',
+      newFactOrConcept: '1886年开始在原有基础上修复，形成可读的历史层次。',
       sourceIds: [summerPalaceUnescoSourceId, summerPalaceOverviewSourceId],
       whyDistinct: '回答损毁之后的修复阶段。',
       storyBridge: '周岚的旧照片把“受损—修复”转化为人物手中的物件。',
-      chinese: '一八八六年，颐和园在原有基础上重新修复。建造、损毁和修复共同构成今天理解这处遗产时不能忽略的历史层次。',
-      pinyin: 'Yī bā bā liù nián, Yíhéyuán zài yuányǒu jīchǔ shàng chóngxīn xiūfù. Jiànzào, sǔnhuǐ hé xiūfù gòngtóng gòuchéng jīntiān lǐjiě zhè chù yíchǎn shí bù néng hūlüè de lìshǐ céngcì.',
-      vietnamese: 'Năm 1886, Di Hòa Viên được phục hồi trên nền tảng vốn có. Xây dựng, hư hại và phục hồi cùng tạo thành những lớp lịch sử không thể bỏ qua khi hiểu di sản hôm nay.',
-      english: 'In 1886 the Summer Palace was restored on its existing foundations. Construction, destruction, and restoration together form historical layers that matter to understanding the property today.',
+      chinese: '一八八六年，颐和园开始在原有基础上重新修复。建造、损毁和修复共同构成今天理解这处遗产时不能忽略的历史层次。',
+      pinyin: 'Yī bā bā liù nián, Yíhéyuán kāishǐ zài yuányǒu jīchǔ shàng chóngxīn xiūfù. Jiànzào, sǔnhuǐ hé xiūfù gòngtóng gòuchéng jīntiān lǐjiě zhè chù yíchǎn shí bù néng hūlüè de lìshǐ céngcì.',
+      vietnamese: 'Năm 1886, Di Hòa Viên bắt đầu được phục hồi trên nền tảng vốn có. Xây dựng, hư hại và phục hồi cùng tạo thành những lớp lịch sử không thể bỏ qua khi hiểu di sản hôm nay.',
+      english: 'In 1886 restoration of the Summer Palace began on its existing foundations. Construction, destruction, and restoration together form historical layers that matter to understanding the property today.',
     ),
   ],
   4: [
