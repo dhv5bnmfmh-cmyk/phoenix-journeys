@@ -1,13 +1,68 @@
 import { pathToFileURL } from 'node:url';
 
+const levels = [1, 3, 5, 8, 10];
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
+
+const storyPlaceRoles = Object.freeze({
+  west: ['外滩', '浦西', '西岸'],
+  crossing: ['黄浦江', '金陵东路轮渡', '轮渡', '江对岸', '过江', '两岸'],
+  east: ['浦东', '陆家嘴'],
+});
+
+function requireStory(text, level) {
+  if (!text.includes('林岸')) throw new Error(`Lv${level} Story missing narrative identity 林岸`);
+  if (!text.includes('提单')) throw new Error(`Lv${level} Story missing 提单 narrative object`);
+  if (!text.includes('外滩')) throw new Error(`Lv${level} Story missing Bund identity 外滩`);
+
+  for (const forbidden of ['沈砚', '阿宁', '许澄', '周岚']) {
+    if (text.includes(forbidden)) throw new Error(`Lv${level} Story leaked another Journey: ${forbidden}`);
+  }
+
+  const missingRoles = Object.entries(storyPlaceRoles)
+    .filter(([, markers]) => !markers.some((marker) => text.includes(marker)))
+    .map(([role]) => role);
+  if (missingRoles.length) {
+    throw new Error(`Lv${level} Story missing Shanghai place-causality role(s): ${missingRoles.join(', ')}`);
+  }
+}
+
+function runStoryAnchorFixturePreflight() {
+  // Representative text copied from the real Chromium Lv5 Story semantics snapshot in run 32826795797.
+  const realLv5Semantics = [
+    '上海 · 外滩 林岸二十四岁，成长在一个与上海港口贸易相连的家庭。桌上常有提单副本。',
+    '第二天，他将到浦东陆家嘴上班。他把这份工作想成一次干净的切割：西岸属于船、海关和纸张，东岸属于数据、账户和新的金融基础设施。',
+    '傍晚，他在外滩附近见母亲。她递给他一张外祖父留下的旧海运提单副本。林岸看着江对岸说：“过了江，我就算离开旧上海了。”',
+    '两人沿滨水空间向南走到金陵东路轮渡站前。轮渡离开浦西，浦东天际线越来越近。就在两岸同时进入视野的几分钟里，他继续向陆家嘴走。',
+  ].join(' ');
+  requireStory(realLv5Semantics, 5);
+
+  const negatives = [
+    '林岸今天走进一座普通公园。',
+    '林岸带着一张旧提单来到外滩旁的普通公园，然后原路回家。',
+  ];
+  for (const [index, sample] of negatives.entries()) {
+    let rejected = false;
+    try {
+      requireStory(sample, 5);
+    } catch (_) {
+      rejected = true;
+    }
+    if (!rejected) throw new Error(`Story anchor negative fixture ${index + 1} unexpectedly passed`);
+  }
+  console.log('STORY ANCHOR FIXTURE PREFLIGHT = PASS | real Lv5 semantics accepted | non-Bund/non-crossing negatives rejected');
+}
+
+if (process.argv.includes('--story-anchor-preflight')) {
+  runStoryAnchorFixturePreflight();
+  process.exit(0);
+}
+
 const playwright = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
 const baseUrl = process.argv[2];
 const sourceSha = process.argv[3];
 if (!baseUrl || !sourceSha) throw new Error('usage: verify_shanghai_bund_exact_preview.mjs <preview-url> <sha>');
 
-const levels = [1, 3, 5, 8, 10];
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
 const interactionModeByPage = new WeakMap();
 
 const interactionModes = Object.freeze({
@@ -196,15 +251,6 @@ async function openShanghaiBund(page) {
     }
   }
   throw new Error('Shanghai Bund did not open after destination selection');
-}
-
-function requireStory(text, level) {
-  for (const marker of ['林岸', '提单', '黄浦江', '外滩', '陆家嘴']) {
-    if (!text.includes(marker)) throw new Error(`Lv${level} Story missing ${marker}`);
-  }
-  for (const forbidden of ['沈砚', '阿宁', '许澄', '周岚']) {
-    if (text.includes(forbidden)) throw new Error(`Lv${level} Story leaked another Journey: ${forbidden}`);
-  }
 }
 
 const discoveryAnchorGroups = {
