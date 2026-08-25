@@ -190,9 +190,16 @@ async function exercisePassport(page, browserName) {
   console.log(`${browserName} PASSPORT TO EXPLORE = PASS`);
 }
 
+function levelNumbers(label) {
+  return [...normalize(label).matchAll(/Lv\.(\d+)/g)].map((match) => Number(match[1]));
+}
+
 async function exerciseLevelControl(page, browserName) {
   const level = await semanticNode(page, '查看 Lv.', { prefix: true, timeout: 15000 });
   const before = normalize(await level.getAttribute('aria-label') ?? await level.textContent());
+  const beforeNumbers = levelNumbers(before);
+  const beforeLevel = beforeNumbers[0];
+  if (!Number.isInteger(beforeLevel)) throw new Error(`${browserName}: unable to resolve current level from ${before}`);
 
   let control;
   let direction;
@@ -205,15 +212,39 @@ async function exerciseLevelControl(page, browserName) {
   }
   const disabled = await control.getAttribute('aria-disabled');
   if (disabled === 'true' || !(await control.isEnabled())) throw new Error(`${browserName}: no enabled level control`);
+
+  const expectedLevel = direction === 'PLUS' ? beforeLevel + 1 : beforeLevel - 1;
   await control.tap();
 
-  let after = before;
-  for (let i = 0; i < 30 && after === before; i += 1) {
+  const deadline = Date.now() + 10000;
+  let stableReads = 0;
+  let after = '';
+  while (Date.now() < deadline) {
     await sleep(100);
     const current = await semanticNode(page, '查看 Lv.', { prefix: true, timeout: 1000 });
-    after = normalize(await current.getAttribute('aria-label') ?? await current.textContent());
+    const currentLabel = normalize(await current.getAttribute('aria-label') ?? await current.textContent());
+    const numbers = levelNumbers(currentLabel);
+    const consistent = numbers.length > 0 && numbers.every((value) => value === expectedLevel);
+
+    if (consistent) {
+      try {
+        const journeyAction = await findJourneyAction(page);
+        if (await journeyAction.isVisible()) {
+          stableReads += 1;
+          after = currentLabel;
+          if (stableReads >= 3) break;
+          continue;
+        }
+      } catch (_) {}
+    }
+
+    stableReads = 0;
+    after = '';
   }
-  if (!before || !after || before === after) throw new Error(`${browserName}: level state did not change (${before} -> ${after})`);
+
+  if (!after || stableReads < 3) {
+    throw new Error(`${browserName}: level state did not settle at Lv.${expectedLevel} (${before} -> ${after || 'unstable'})`);
+  }
   console.log(`${browserName} LV ${direction} = PASS (${before} -> ${after})`);
 }
 
