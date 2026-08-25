@@ -30,6 +30,27 @@ jobs:
         run: |
           set -euo pipefail
           cp .github/scripts/shanghai_bund_preserve_first_v3.py /tmp/shanghai_bund_preserve_first_v3.py
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('/tmp/shanghai_bund_preserve_first_v3.py')
+          text = path.read_text()
+          old = '''memory_match = re.search(r"^BatchOneJourneyMemorySpec\\? batchOneMemorySpecFor\\(", runtime, re.M)
+          assert memory_match
+          brace = runtime.find("{", memory_match.end())
+          assert brace >= 0
+          early = """'''
+          new = '''memory_match = re.search(r"^BatchOneJourneyMemorySpec\\? batchOneMemorySpecFor\\(", runtime, re.M)
+          assert memory_match
+          parameter_open = runtime.find("(", memory_match.start())
+          assert parameter_open >= 0
+          parameter_close = find_matching(runtime, parameter_open, "(", ")")
+          brace = runtime.find("{", parameter_close + 1)
+          assert brace >= 0
+          early = """'''
+          if old not in text:
+              raise SystemExit('helper structural-body patch target not found')
+          path.write_text(text.replace(old, new, 1))
+          PY
           python3 -m py_compile /tmp/shanghai_bund_preserve_first_v3.py
 
       - name: Reset validation checkout to exact main base
