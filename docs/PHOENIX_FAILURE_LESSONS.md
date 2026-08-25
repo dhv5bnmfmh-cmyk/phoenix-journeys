@@ -120,6 +120,18 @@ Canonical governance record for recurring Phoenix development and validation fai
 
 ---
 
+## DIALOG ROOT != DIALOG IDENTITY ALREADY MOUNTED
+
+**Failure:** run `32838502863`, job `97772693316`, again proved Chromium Lv1/Lv3/Lv5/Lv8/Lv10 all six-stage PASS and WebKit Lv1 PASS. At WebKit Lv3 the failure snapshot contained only a visible Flutter `label="Dialog"` root with empty text and no controls or identity markers; the harness immediately classified that empty shell as an unknown modal and stopped with `UNKNOWN MODAL != AUTO-DISMISS | Dialog`.  
+**Classification:** `HARNESS / MODAL-IDENTITY MOUNT RACE FALSE NEGATIVE`  
+**Root Cause:** Flutter can mount the Dialog semantic root before the Dialog's identifying text/content/control semantics. The harness correctly refused to auto-dismiss unknown dialogs, but incorrectly treated a not-yet-identifiable empty shell as already-classified unknown state.  
+**Correct Fix:** distinguish only the structurally empty Dialog shell as `mounting-unidentified`, wait for semantic identity to settle, then classify. If it resolves to an explicit allowlisted modal, continue to its real allowed close control. If concrete unknown content appears, stop immediately. If the shell never gains identity, stop without dismissal.  
+**Forbidden Fix:** do not classify every blank/partial dialog as known; do not auto-dismiss the empty shell; do not soften the unknown-dialog rule; do not change learner UI/content to alter Flutter semantics mount timing.  
+**Cheap Preflight:** replay `empty Dialog shell -> known Vocabulary modal` and require wait then known; replay `empty Dialog shell -> concrete unknown modal` and require hard stop; a permanently unidentified shell must not produce an auto-dismiss target.  
+**Rules:** `DIALOG ROOT != DIALOG IDENTITY ALREADY MOUNTED`; `UNIDENTIFIED SHELL => WAIT, NEVER DISMISS`; `CONCRETE UNKNOWN IDENTITY => STOP`
+
+---
+
 ## CURRENT LEVEL LEAKAGE
 
 **Failure pattern:** stale/hidden/non-active level content can accidentally satisfy or fail adaptive assertions.  
