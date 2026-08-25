@@ -32,35 +32,43 @@ async function isAuthoritativeTerminalDiscoveryCorpus(page, level, snapshots, fi
   await waitStage(page, 3);
   await assertTargetLevel(page, level, 'Discovery terminal corpus authority');
 
-  if (!finalText.includes('3/6 Discovery')) {
+  // Flutter exposes important Stage/narration identity in semantic labels, not
+  // necessarily in rendered text nodes. Authority therefore uses one fresh
+  // semantic snapshot for identity while preserving visible body text as corpus.
+  const terminalRecords = await records(page);
+  const terminalSemantics = terminalRecords.map((record) => recText(record)).join('\\n');
+  const terminalEvidence = \`\${finalText}\\n\${terminalSemantics}\`;
+
+  if (!terminalEvidence.includes('3/6 Discovery')) {
     throw new Error(\`Lv\${level} terminal Discovery corpus lost exact 3/6 Stage identity\`);
   }
-  if (!finalText.includes(\`Phoenix 中文难度 \${level} 级\`)) {
+  if (!terminalEvidence.includes(\`Phoenix 中文难度 \${level} 级\`)) {
     throw new Error(\`LEVEL DRIFT DURING DISCOVERY TERMINAL AUTHORITY | expected Lv\${level} | terminal selector identity missing\`);
   }
-  if (!finalText.includes(\`Discovery，Lv.\${level}\`)) {
+  if (!terminalEvidence.includes(\`Discovery，Lv.\${level}\`)) {
     throw new Error(\`Lv\${level} terminal Discovery corpus does not declare the expected Discovery level\`);
   }
 
-  const state = discoveryNarrationState(finalText);
-  if (!state.finished || !finalText.includes('朗读完成 · 100%')) {
+  const state = discoveryNarrationState(terminalEvidence);
+  if (!state.finished || !terminalEvidence.includes('朗读完成 · 100%')) {
     return { authoritative: false, reason: 'not-explicit-terminal' };
   }
 
-  const modal = classifyTransientModalRecords(await records(page));
+  const modal = classifyTransientModalRecords(terminalRecords);
   if (modal.kind !== 'none') {
     throw new Error(\`Lv\${level} terminal Discovery corpus has unresolved modal state: \${modal.kind}\`);
   }
 
   for (const fatal of ['Unhandled Exception', 'A RenderFlex overflowed', 'Bad state:']) {
-    if (finalText.includes(fatal)) {
+    if (terminalEvidence.includes(fatal)) {
       throw new Error(\`Lv\${level} terminal Discovery corpus contains fatal runtime semantics: \${fatal}\`);
     }
   }
 
-  // Authority is granted only when the terminal snapshot itself proves the full level corpus.
-  requireDiscoveryAnchors(finalText, level);
-  const corpus = discoveryStageCorpus([...snapshots, finalText]);
+  // Required content anchors must be present in the actual terminal runtime
+  // semantic evidence, not borrowed from a stale earlier level or Stage.
+  requireDiscoveryAnchors(terminalEvidence, level);
+  const corpus = discoveryStageCorpus([...snapshots, finalText, terminalSemantics]);
   requireDiscoveryAnchors(corpus, level);
   return { authoritative: true, corpus };
 }
