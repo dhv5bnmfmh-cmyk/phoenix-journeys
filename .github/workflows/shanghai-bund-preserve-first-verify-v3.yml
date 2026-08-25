@@ -34,6 +34,7 @@ jobs:
           from pathlib import Path
           path = Path('/tmp/shanghai_bund_preserve_first_v3.py')
           text = path.read_text()
+
           old = '''memory_match = re.search(r"^BatchOneJourneyMemorySpec\\? batchOneMemorySpecFor\\(", runtime, re.M)
           assert memory_match
           brace = runtime.find("{", memory_match.end())
@@ -49,7 +50,27 @@ jobs:
           early = """'''
           if old not in text:
               raise SystemExit('helper structural-body patch target not found')
-          path.write_text(text.replace(old, new, 1))
+          text = text.replace(old, new, 1)
+
+          replacements = {
+              "外滩现海关大楼于1927年建成。它见证了更早开始、又持续变化的上海对外贸易与城市史，因此不能把1843年开埠时的外滩与1927年的现建筑当成同一个时间切片。":
+                  "外滩现海关大楼于1927年建成。今天看到的这座建筑属于二十世纪的城市历史，理解外滩时要把现存建筑的建成年代与更早的滨水贸易历史分开。",
+              "Tòa nhà Hải quan hiện nay ở Ngoại Than được hoàn thành năm 1927; không thể gộp Ngoại Than năm 1843 và công trình hiện tại vào cùng một lát cắt thời gian.":
+                  "Tòa nhà Hải quan hiện nay ở Ngoại Than được hoàn thành năm 1927. Công trình còn thấy ngày nay thuộc lịch sử đô thị thế kỷ XX, vì vậy niên đại của công trình hiện hữu cần được phân biệt với lịch sử thương mại ven sông sớm hơn.",
+              "The present Bund Customs House was completed in 1927, so the Bund of 1843 and the current building cannot be collapsed into the same historical moment.":
+                  "The present Bund Customs House was completed in 1927. The building visible today belongs to twentieth-century urban history, so its construction date should be distinguished from the Bund's earlier waterfront trade history.",
+              "Wàitān xiàn Hǎiguān Dàlóu yú yī jiǔ èr qī nián jiànchéng. Tā jiànzhèng le gèng zǎo kāishǐ, yòu chíxù biànhuà de Shànghǎi duìwài màoyì yǔ chéngshì shǐ, yīncǐ bùnéng bǎ yī bā sì sān nián kāibù shí de Wàitān yǔ yī jiǔ èr qī nián de xiàn jiànzhù dàngchéng tóng yí gè shíjiān qiēpiàn.":
+                  "Wàitān xiàn Hǎiguān Dàlóu yú yī jiǔ èr qī nián jiànchéng. Jīntiān kàndào de zhè zuò jiànzhù shǔyú èrshí shìjì de chéngshì lìshǐ, lǐjiě Wàitān shí yào bǎ xiàncún jiànzhù de jiànchéng niándài yǔ gèng zǎo de bīnshuǐ màoyì lìshǐ fēnkāi.",
+              "外滩现海关大楼于1927年建成；建筑、黄浦江航运与轮渡共同形成西岸的贸易城市界面，因此不能把1843年的外滩与现建筑混成同一时间切片。":
+                  "外滩现海关大楼于1927年建成；这座二十世纪建筑与黄浦江航运、轮渡共同构成今天可见的西岸城市界面，现存建筑的年代需要与更早的外滩历史分开理解。",
+          }
+          for old_value, new_value in replacements.items():
+              count = text.count(old_value)
+              if count != 1:
+                  raise SystemExit(f'expected one candidate text occurrence, got {count}: {old_value[:30]}')
+              text = text.replace(old_value, new_value, 1)
+
+          path.write_text(text)
           PY
           python3 -m py_compile /tmp/shanghai_bund_preserve_first_v3.py
 
@@ -136,9 +157,7 @@ jobs:
 
           base_sha = os.environ['BASE_SHA']
           path = 'app/lib/data/shanghai_bund_one_pass.dart'
-          before = subprocess.check_output(
-              ['git', 'show', f'{base_sha}:{path}'], text=True
-          )
+          before = subprocess.check_output(['git', 'show', f'{base_sha}:{path}'], text=True)
           after = Path(path).read_text()
 
           def story_payload(text):
@@ -146,10 +165,7 @@ jobs:
               end = text.index('WordEntry _w(', start)
               section = text[start:end]
               calls = re.findall(r'_bundLevel\(\s*\[(.*?)\]\s*\)', section, re.S)
-              levels = []
-              for call in calls:
-                  strings = re.findall(r"'((?:\\.|[^'])*)'", call)
-                  levels.append(strings)
+              levels = [re.findall(r"'((?:\\.|[^'])*)'", call) for call in calls]
               if len(levels) != 10:
                   raise SystemExit(f'Story parser expected 10 levels, got {len(levels)}')
               return levels
