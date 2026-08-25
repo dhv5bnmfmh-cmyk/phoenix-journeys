@@ -128,18 +128,58 @@ jobs:
             exit 1
           fi
 
-          if git diff --unified=0 "$BASE_SHA" -- app/lib/data/shanghai_bund_one_pass.dart | grep -E '^[+-].*_bundLevel\(\['; then
-            echo 'Story KEEP violation' >&2
-            exit 1
-          fi
-          if git diff --unified=0 "$BASE_SHA" -- app/lib/data/shanghai_bund_one_pass.dart | grep -E '^[+-].*RemediatedChallengeTrace'; then
-            echo 'Challenge KEEP violation' >&2
-            exit 1
-          fi
+          BASE_SHA="$BASE_SHA" python3 <<'PY'
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          base_sha = os.environ['BASE_SHA']
+          path = 'app/lib/data/shanghai_bund_one_pass.dart'
+          before = subprocess.check_output(
+              ['git', 'show', f'{base_sha}:{path}'], text=True
+          )
+          after = Path(path).read_text()
+
+          def story_payload(text):
+              start = text.index('final shanghaiBundOnePassLevels')
+              end = text.index('WordEntry _w(', start)
+              section = text[start:end]
+              calls = re.findall(r'_bundLevel\(\s*\[(.*?)\]\s*\)', section, re.S)
+              levels = []
+              for call in calls:
+                  strings = re.findall(r"'((?:\\.|[^'])*)'", call)
+                  levels.append(strings)
+              if len(levels) != 10:
+                  raise SystemExit(f'Story parser expected 10 levels, got {len(levels)}')
+              return levels
+
+          def challenge_payload(text):
+              start = text.index('const shanghaiBundOnePassChallenges')
+              end = text.index('const shanghaiBundOnePassMemory', start)
+              section = text[start:end]
+              records = []
+              for body in re.findall(r'RemediatedChallengeTrace\((.*?)\)', section, re.S):
+                  type_match = re.search(r"type\s*:\s*'([^']+)'", body)
+                  anchor_match = re.search(r"anchor\s*:\s*'([^']+)'", body)
+                  ids_match = re.search(r'storyEventIds\s*:\s*<String>\[(.*?)\]', body, re.S)
+                  if not (type_match and anchor_match and ids_match):
+                      raise SystemExit('Challenge parser could not read canonical structure')
+                  ids = tuple(re.findall(r"'([^']+)'", ids_match.group(1)))
+                  records.append((type_match.group(1), ids, anchor_match.group(1)))
+              if len(records) != 3:
+                  raise SystemExit(f'Challenge parser expected 3 records, got {len(records)}')
+              return records
+
+          if story_payload(before) != story_payload(after):
+              raise SystemExit('Story KEEP semantic violation')
+          if challenge_payload(before) != challenge_payload(after):
+              raise SystemExit('Challenge KEEP semantic violation')
+          print('STORY KEEP SEMANTIC CONTENT = PASS')
+          print('CHALLENGE KEEP SEMANTIC STRUCTURE = PASS')
+          PY
 
           echo 'UNIFIED DIFF APPLY CHECK = PASS'
-          echo 'STORY KEEP STATIC DIFF = PASS'
-          echo 'CHALLENGE KEEP STATIC DIFF = PASS'
           echo 'NO UI CHANGES STATIC SCOPE = PASS'
 
       - name: Shanghai targeted contracts
