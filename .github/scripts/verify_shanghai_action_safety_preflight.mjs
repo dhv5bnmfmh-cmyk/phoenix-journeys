@@ -84,12 +84,29 @@ for (const forbidden of [
   if (source.includes(forbidden)) throw new Error(`active Shanghai action path still contains stale snapshot-index activation: ${forbidden}`);
 }
 
+const terminalAuthority = functionBody('isAuthoritativeTerminalDiscoveryCorpus');
+requireContains('isAuthoritativeTerminalDiscoveryCorpus', terminalAuthority, [
+  `waitStage(page, 3)`,
+  `assertTargetLevel(page, level, 'Discovery terminal corpus authority')`,
+  `finalText.includes('3/6 Discovery')`,
+  `finalText.includes(\`Phoenix 中文难度 \${level} 级\`)`,
+  `finalText.includes(\`Discovery，Lv.\${level}\`)`,
+  `discoveryNarrationState(finalText)`,
+  `finalText.includes('朗读完成 · 100%')`,
+  `classifyTransientModalRecords(await records(page))`,
+  `requireDiscoveryAnchors(finalText, level)`,
+]);
+
 const discovery = functionBody('collectDiscoveryStageSemantics');
 requireContains('collectDiscoveryStageSemantics', discovery, [
   `firstState.finished`,
   `NARRATION=ALREADY-COMPLETED`,
   `assertDiscoveryTargetLevel(page, level`,
   `assertTargetLevel(page, level, 'Discovery narration transition')`,
+  `seenSegments.size < total`,
+  `isAuthoritativeTerminalDiscoveryCorpus(page, level, snapshots, finalText)`,
+  `SEGMENT_IDS_OBSERVED=`,
+  `TERMINAL_CORPUS=AUTHORITATIVE`,
 ]);
 
-console.log('SHANGHAI ACTION SAFETY STATIC PREFLIGHT = PASS | semantic index is observation metadata only | seek/modal/grammar/challenge bind + recheck live identity | Discovery seek level guarded | explicit 100% narration is terminal and requires no seek');
+console.log('SHANGHAI ACTION SAFETY STATIC PREFLIGHT = PASS | semantic index is observation metadata only | seek/modal/grammar/challenge bind + recheck live identity | Discovery seek level guarded | terminal authority requires exact stage + exact level + explicit completion + complete terminal anchors | segment accounting remains strict off-terminal');
