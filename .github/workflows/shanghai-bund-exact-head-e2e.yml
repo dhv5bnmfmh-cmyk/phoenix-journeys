@@ -1,0 +1,116 @@
+name: Shanghai Bund Exact-HEAD Browser Gates
+
+on:
+  push:
+    branches:
+      - automation/shanghai-bund-exact-head-e2e
+    paths:
+      - '.github/scripts/verify_shanghai_bund_exact_preview.mjs'
+      - '.github/workflows/shanghai-bund-exact-head-e2e.yml'
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_SHA: 52f58542c72ae9c7c5021b3e2a4b9e5256e5c403
+  PREVIEW_URL: https://phoenix-journeys-pr-199.7hn5tyrjgh.workers.dev/
+
+jobs:
+  exact-head-browser-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+
+    steps:
+      - name: Check out exact formal candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+
+      - name: Verify exact formal candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          echo "EXACT FORMAL CANDIDATE = $CANDIDATE_SHA"
+
+      - name: Check out validation-only browser harness
+        uses: actions/checkout@v6
+        with:
+          ref: automation/shanghai-bund-exact-head-e2e
+          path: .validation-harness
+          fetch-depth: 1
+
+      - name: Cheap browser harness preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
+          node --check .github/scripts/verify_forbidden_city_preview_v2.mjs
+          node --check .github/scripts/verify_forbidden_city_preview_v2_level_race_fix.mjs
+          node --check .github/scripts/verify_forbidden_city_story_reading_support.mjs
+          node --check .github/scripts/verify_forbidden_city_mobile_webkit_discovery_depth.mjs
+
+      - name: Wait for exact candidate Cloudflare preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          health_url="${PREVIEW_URL}api/health?commit=${CANDIDATE_SHA}"
+          verified=false
+          for attempt in {1..180}; do
+            response="$(curl --fail --silent --show-error "$health_url" || true)"
+            if node -e '
+              let health;
+              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
+              const expected = process.argv[2];
+              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expected) process.exit(1);
+            ' "$response" "$CANDIDATE_SHA"; then
+              echo "EXACT PREVIEW RELEASE = PASS | $CANDIDATE_SHA"
+              verified=true
+              break
+            fi
+            sleep 5
+          done
+          [[ "$verified" == true ]]
+
+      - name: Install Chromium and WebKit only
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix "$RUNNER_TEMP/shanghai-exact-e2e-node" playwright
+          "$RUNNER_TEMP/shanghai-exact-e2e-node/node_modules/.bin/playwright" install --with-deps chromium webkit
+
+      - name: Forbidden City Reference Journey regression
+        shell: bash
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/shanghai-exact-e2e-node/node_modules/playwright/index.mjs
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          node .github/scripts/verify_forbidden_city_preview_v2_level_race_fix.mjs \
+            "$PREVIEW_URL" "$CANDIDATE_SHA" \
+            2>&1 | tee test-results/forbidden-city-six-stage.log
+          node .github/scripts/verify_forbidden_city_story_reading_support.mjs \
+            "$PREVIEW_URL" "$CANDIDATE_SHA" \
+            2>&1 | tee test-results/forbidden-city-reading-support.log
+          node .github/scripts/verify_forbidden_city_mobile_webkit_discovery_depth.mjs \
+            "$PREVIEW_URL" "$CANDIDATE_SHA" \
+            2>&1 | tee test-results/forbidden-city-mobile-webkit.log
+
+      - name: Shanghai Bund Chromium and WebKit six-stage E2E
+        shell: bash
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/shanghai-exact-e2e-node/node_modules/playwright/index.mjs
+        run: |
+          set -euo pipefail
+          node .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs \
+            "$PREVIEW_URL" "$CANDIDATE_SHA" \
+            2>&1 | tee test-results/shanghai-bund-exact-preview.log
+
+      - name: Upload exact-head browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shanghai-bund-exact-head-browser-${{ env.CANDIDATE_SHA }}
+          path: test-results/
+          if-no-files-found: warn
