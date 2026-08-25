@@ -15,10 +15,9 @@ function replaceOnce(label, needle, replacement) {
 replaceOnce(
   'terminal Discovery authority helper insertion',
   `async function collectDiscoveryStageSemantics(page, level) {`,
-  `function terminalDiscoveryAuthorityFixture({ expectedLevel, actualLevel, stage, completed, terminalText }) {
-  if (stage !== 3 || actualLevel !== expectedLevel || !completed) return false;
+  `function terminalDiscoveryAuthorityFixture({ expectedLevel, actualLevel, stageLabel, completed, terminalText }) {
+  if (!/^3\\/6(?:\\s|$)/.test(stageLabel) || actualLevel !== expectedLevel || !completed) return false;
   if (!terminalText.includes('朗读完成 · 100%')) return false;
-  if (!terminalText.includes(\`3/6 Discovery\`)) return false;
   if (!terminalText.includes(\`Discovery，Lv.\${expectedLevel}\`)) return false;
   try {
     requireDiscoveryAnchors(terminalText, expectedLevel);
@@ -28,20 +27,28 @@ replaceOnce(
   return true;
 }
 
+function terminalDiscoveryStageRecord(recordsSnapshot) {
+  return recordsSnapshot.find((record) =>
+    record.visible &&
+    record.role === 'progressbar' &&
+    /^3\\/6(?:\\s|$)/.test(recText(record).trim())
+  ) || null;
+}
+
 async function isAuthoritativeTerminalDiscoveryCorpus(page, level, snapshots, finalText) {
   await waitStage(page, 3);
   await assertTargetLevel(page, level, 'Discovery terminal corpus authority');
 
-  // Flutter exposes important Stage/narration identity in semantic labels, not
-  // necessarily in rendered text nodes. Authority therefore uses one fresh
-  // semantic snapshot for identity while preserving visible body text as corpus.
+  // Stage identity is structural and locale-independent: the exact third-stage
+  // progressbar is 3/6 even when its surface label is localized (for example 发现).
   const terminalRecords = await records(page);
+  const terminalStage = terminalDiscoveryStageRecord(terminalRecords);
+  if (!terminalStage) {
+    throw new Error(\`Lv\${level} terminal Discovery corpus lost structural Stage 3/6 progressbar identity\`);
+  }
   const terminalSemantics = terminalRecords.map((record) => recText(record)).join('\\n');
   const terminalEvidence = \`\${finalText}\\n\${terminalSemantics}\`;
 
-  if (!terminalEvidence.includes('3/6 Discovery')) {
-    throw new Error(\`Lv\${level} terminal Discovery corpus lost exact 3/6 Stage identity\`);
-  }
   if (!terminalEvidence.includes(\`Phoenix 中文难度 \${level} 级\`)) {
     throw new Error(\`LEVEL DRIFT DURING DISCOVERY TERMINAL AUTHORITY | expected Lv\${level} | terminal selector identity missing\`);
   }
@@ -65,7 +72,7 @@ async function isAuthoritativeTerminalDiscoveryCorpus(page, level, snapshots, fi
     }
   }
 
-  // Required content anchors must be present in the actual terminal runtime
+  // Required content anchors must be present in the current terminal runtime
   // semantic evidence, not borrowed from a stale earlier level or Stage.
   requireDiscoveryAnchors(terminalEvidence, level);
   const corpus = discoveryStageCorpus([...snapshots, finalText, terminalSemantics]);
@@ -114,40 +121,49 @@ replaceOnce(
   `  const terminalPositive = terminalDiscoveryAuthorityFixture({
     expectedLevel: 8,
     actualLevel: 8,
-    stage: 3,
+    stageLabel: '3/6\\n发现\\n下一步 挑战 50',
     completed: true,
-    terminalText: '3/6 Discovery Phoenix 中文难度 8 级 Discovery，Lv.8 · 分段短文 · 2 段 朗读完成 · 100% 海运提单 1990',
+    terminalText: 'Phoenix 中文难度 8 级 Discovery，Lv.8 · 分段短文 · 2 段 朗读完成 · 100% 海运提单 1990',
   });
-  if (!terminalPositive) throw new Error('terminal authoritative positive fixture rejected complete Lv8 terminal corpus');
+  if (!terminalPositive) throw new Error('localized Stage 3/6 terminal authoritative positive fixture rejected complete Lv8 corpus');
+
+  const terminalWrongStage = terminalDiscoveryAuthorityFixture({
+    expectedLevel: 8,
+    actualLevel: 8,
+    stageLabel: '2/6\\n词汇\\n下一步 发现 33',
+    completed: true,
+    terminalText: 'Phoenix 中文难度 8 级 Discovery，Lv.8 · 分段短文 · 2 段 朗读完成 · 100% 海运提单 1990',
+  });
+  if (terminalWrongStage) throw new Error('wrong-stage 2/6 fixture unexpectedly gained terminal Discovery authority');
 
   const terminalMissingAnchor = terminalDiscoveryAuthorityFixture({
     expectedLevel: 8,
     actualLevel: 8,
-    stage: 3,
+    stageLabel: '3/6\\n发现',
     completed: true,
-    terminalText: '3/6 Discovery Phoenix 中文难度 8 级 Discovery，Lv.8 · 分段短文 · 2 段 朗读完成 · 100% 海运提单',
+    terminalText: 'Phoenix 中文难度 8 级 Discovery，Lv.8 · 分段短文 · 2 段 朗读完成 · 100% 海运提单',
   });
   if (terminalMissingAnchor) throw new Error('terminal missing-anchor negative fixture unexpectedly passed without 1990');
 
   const nonTerminalIncomplete = terminalDiscoveryAuthorityFixture({
     expectedLevel: 8,
     actualLevel: 8,
-    stage: 3,
+    stageLabel: '3/6\\n发现',
     completed: false,
-    terminalText: '3/6 Discovery Phoenix 中文难度 8 级 Discovery，Lv.8 · 分段短文 · 2 段 海运提单 1990',
+    terminalText: 'Phoenix 中文难度 8 级 Discovery，Lv.8 · 分段短文 · 2 段 海运提单 1990',
   });
   if (nonTerminalIncomplete) throw new Error('non-terminal incomplete traversal fixture unexpectedly gained terminal authority');
 
   const terminalWrongLevel = terminalDiscoveryAuthorityFixture({
     expectedLevel: 8,
     actualLevel: 7,
-    stage: 3,
+    stageLabel: '3/6\\n发现',
     completed: true,
-    terminalText: '3/6 Discovery Phoenix 中文难度 7 级 Discovery，Lv.7 · 分段短文 · 2 段 朗读完成 · 100% 海运提单 1990',
+    terminalText: 'Phoenix 中文难度 7 级 Discovery，Lv.7 · 分段短文 · 2 段 朗读完成 · 100% 海运提单 1990',
   });
   if (terminalWrongLevel) throw new Error('terminal level-drift negative fixture unexpectedly passed');
 
-  console.log('LEVEL + STABLE ACTIVATION FIXTURE PREFLIGHT = PASS | transient level rejected | stable target required | semantic index reorder demonstrates fixed-handle requirement | seek rail reorder cannot target difficulty decrement | Lv8 mid-stage drift rejected | terminal 1/2 + complete corpus PASS | terminal missing anchor FAIL | non-terminal 1/2 FAIL | terminal wrong level FAIL');`
+  console.log('LEVEL + STABLE ACTIVATION FIXTURE PREFLIGHT = PASS | localized 3/6 发现 structural Stage PASS | wrong 2/6 Stage FAIL | transient level rejected | stable target required | semantic index reorder demonstrates fixed-handle requirement | seek rail reorder cannot target difficulty decrement | Lv8 mid-stage drift rejected | terminal 1/2 + complete corpus PASS | terminal missing anchor FAIL | non-terminal 1/2 FAIL | terminal wrong level FAIL');`
 );
 
 fs.writeFileSync(target, source, 'utf8');
