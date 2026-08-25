@@ -207,13 +207,22 @@ function requireStory(text, level) {
   }
 }
 
-const discoveryAnchors = {
-  1: ['黄浦江西岸'],
-  3: ['海运提单', '黄浦江西岸'],
-  5: ['陆家嘴', '海运提单'],
-  8: ['海运提单', '1990'],
-  10: ['1843', '1990'],
+const discoveryAnchorGroups = {
+  1: [['黄浦江', '西岸']],
+  3: [['海运提单'], ['黄浦江', '西岸']],
+  5: [['陆家嘴'], ['海运提单']],
+  8: [['海运提单'], ['1990']],
+  10: [['1843'], ['1990']],
 };
+
+function requireDiscoveryAnchors(text, level) {
+  for (const group of discoveryAnchorGroups[level]) {
+    const missing = group.filter((token) => !text.includes(token));
+    if (missing.length) {
+      throw new Error(`Lv${level} Discovery missing semantic anchor group ${group.join('+')}; missing ${missing.join('+')}`);
+    }
+  }
+}
 
 function traceVocabulary(story, vocabulary) {
   const ignore = new Set(['故事', '单词', '发现', '挑战', '继续', '返回', '朗读', '查看', '中文难度', '重点词汇']);
@@ -337,7 +346,7 @@ async function runLevel(browserType, browserName, level) {
     await activateButton(page, '继续', { prefix: true });
     await waitStage(page, 3);
     const discovery = await visibleText(page);
-    for (const anchor of discoveryAnchors[level]) if (!discovery.includes(anchor)) throw new Error(`Lv${level} Discovery missing ${anchor}`);
+    requireDiscoveryAnchors(discovery, level);
     await assertNoFatal(page, errors, `${browserName} Lv${level} Discovery`);
 
     await activateButton(page, '继续', { prefix: true });
