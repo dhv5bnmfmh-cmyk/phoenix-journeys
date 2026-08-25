@@ -78,8 +78,6 @@ function verifyBoundSemanticIdentity(live, { expectedRole = null, allowedTexts =
 }
 
 async function bindStableSemanticRecord(page, record, identity = {}) {
-  // record.index is observation metadata only. It may locate the initial live node once;
-  // every later read/geometry/action stays on this bound handle and rechecks identity.
   const locator = page.locator('flt-semantics').nth(record.index);
   const handle = await locator.elementHandle();
   if (!handle) throw new Error('semantic record detached before live binding');
@@ -211,7 +209,6 @@ replaceOnce(
     y: box.height / 2,
   };
 
-  // Geometry and activation belong to the same bound, rechecked live element.
   verifyBoundSemanticIdentity(await readBoundSemanticHandle(handle), identity);
   const mode = interactionModeByPage.get(page);
   if (mode === interactionModes.desktop) {
@@ -318,6 +315,10 @@ replaceOnce(
     await assertTargetLevel(page, 8, 'WebKit Lv8 Discovery preflight final');
     requireDiscoveryAnchors(corpus, 8);
     console.log('WEBKIT Lv8 DISCOVERY SEEK PREFLIGHT = PASS | TARGET LEVEL=Lv8 THROUGHOUT | ANCHORS=海运提单,1990');
+  } catch (error) {
+    const snapshot = await records(page).catch(() => []);
+    console.error(\`WEBKIT Lv8 DISCOVERY PREFLIGHT SEMANTICS SNAPSHOT = \${JSON.stringify(snapshot.slice(0, 180))}\`);
+    throw error;
   } finally {
     await context.close();
     await browser.close();
