@@ -1,0 +1,178 @@
+name: Shanghai Bund Preserve-First Verify V3
+
+on:
+  push:
+    branches:
+      - automation/shanghai-bund-preserve-first-verify-v3
+    paths:
+      - '.github/scripts/shanghai_bund_preserve_first_v3.py'
+      - '.github/workflows/shanghai-bund-preserve-first-verify-v3.yml'
+
+permissions:
+  contents: write
+
+env:
+  BASE_SHA: 8385036ed574997bac5ee97a02e1230d90230d3c
+  VALIDATED_BRANCH: automation/shanghai-bund-validated-product
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out helper only to capture generator
+        uses: actions/checkout@v6
+        with:
+          ref: automation/shanghai-bund-preserve-first-verify-v3
+          fetch-depth: 0
+
+      - name: Capture helper generator outside repository tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .github/scripts/shanghai_bund_preserve_first_v3.py /tmp/shanghai_bund_preserve_first_v3.py
+          python3 -m py_compile /tmp/shanghai_bund_preserve_first_v3.py
+
+      - name: Reset validation checkout to exact main base
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$BASE_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          test -z "$(git status --porcelain)"
+          echo "SHANGHAI VALIDATION BASE SHA = $BASE_SHA"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Generate exact-source unified diff and validate apply
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          BASE_SHA="$BASE_SHA" python3 /tmp/shanghai_bund_preserve_first_v3.py
+
+          dart format \
+            app/lib/data/shanghai_bund_level_support.dart \
+            app/lib/data/shanghai_bund_one_pass.dart \
+            app/lib/data/batch_one_adaptive_story_levels.dart \
+            app/test/shanghai_bund_preserve_first_contract_test.dart
+
+          git add -A -- \
+            app/lib/data/shanghai_bund_level_support.dart \
+            app/lib/data/shanghai_bund_one_pass.dart \
+            app/lib/data/batch_one_adaptive_story_levels.dart \
+            app/test/shanghai_bund_preserve_first_contract_test.dart
+
+          expected="$(printf '%s\n' \
+            app/lib/data/batch_one_adaptive_story_levels.dart \
+            app/lib/data/shanghai_bund_level_support.dart \
+            app/lib/data/shanghai_bund_one_pass.dart \
+            app/test/shanghai_bund_preserve_first_contract_test.dart | sort)"
+          staged="$(git diff --cached --name-only "$BASE_SHA" | sort)"
+          printf 'EXPECTED FILES\n%s\nACTUAL FILES\n%s\n' "$expected" "$staged"
+          test "$staged" = "$expected"
+          git diff --cached --check
+          git diff --cached --binary "$BASE_SHA" > /tmp/shanghai-bund.patch
+          test -s /tmp/shanghai-bund.patch
+
+          git reset --hard "$BASE_SHA"
+          git clean -fd
+          test -z "$(git status --porcelain)"
+
+          git apply --check /tmp/shanghai-bund.patch
+          git apply /tmp/shanghai-bund.patch
+          git diff --check
+          dart format --output=none --set-exit-if-changed \
+            app/lib/data/shanghai_bund_level_support.dart \
+            app/lib/data/shanghai_bund_one_pass.dart \
+            app/lib/data/batch_one_adaptive_story_levels.dart \
+            app/test/shanghai_bund_preserve_first_contract_test.dart
+
+          git add -N \
+            app/lib/data/shanghai_bund_level_support.dart \
+            app/test/shanghai_bund_preserve_first_contract_test.dart
+          applied="$(git diff --name-only "$BASE_SHA" | sort)"
+          printf 'APPLIED FILES\n%s\n' "$applied"
+          test "$applied" = "$expected"
+
+          if printf '%s\n' "$applied" | grep -E '(^|/)(screens|widgets)/|navigation|routing|router|journey_screen\.dart'; then
+            echo 'UI scope violation' >&2
+            exit 1
+          fi
+
+          if git diff --unified=0 "$BASE_SHA" -- app/lib/data/shanghai_bund_one_pass.dart | grep -E '^[+-].*_bundLevel\(\['; then
+            echo 'Story KEEP violation' >&2
+            exit 1
+          fi
+          if git diff --unified=0 "$BASE_SHA" -- app/lib/data/shanghai_bund_one_pass.dart | grep -E '^[+-].*RemediatedChallengeTrace'; then
+            echo 'Challenge KEEP violation' >&2
+            exit 1
+          fi
+
+          echo 'UNIFIED DIFF APPLY CHECK = PASS'
+          echo 'STORY KEEP STATIC DIFF = PASS'
+          echo 'CHALLENGE KEEP STATIC DIFF = PASS'
+          echo 'NO UI CHANGES STATIC SCOPE = PASS'
+
+      - name: Shanghai targeted contracts
+        working-directory: app
+        run: |
+          set -euo pipefail
+          flutter test \
+            test/shanghai_bund_preserve_first_contract_test.dart \
+            test/shanghai_bund_one_pass_gate_test.dart
+
+      - name: All existing Shanghai tests
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t tests < <(find test -type f -iname '*shanghai*test.dart' -print | sort)
+          printf 'SHANGHAI TEST FILES\n%s\n' "${tests[*]}"
+          test "${#tests[@]}" -ge 2
+          flutter test "${tests[@]}"
+
+      - name: Flutter Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Full Flutter Test
+        working-directory: app
+        run: flutter test
+
+      - name: Recheck scope and create product-only validation commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="$(printf '%s\n' \
+            app/lib/data/batch_one_adaptive_story_levels.dart \
+            app/lib/data/shanghai_bund_level_support.dart \
+            app/lib/data/shanghai_bund_one_pass.dart \
+            app/test/shanghai_bund_preserve_first_contract_test.dart | sort)"
+          git reset
+          changed="$(git status --porcelain | sed -E 's/^.. //' | sort)"
+          printf 'FINAL VALIDATED FILES\n%s\n' "$changed"
+          test "$changed" = "$expected"
+          git diff --check
+
+          git config user.name 'phoenix-validation-bot'
+          git config user.email 'phoenix-validation-bot@users.noreply.github.com'
+          git add -- \
+            app/lib/data/shanghai_bund_level_support.dart \
+            app/lib/data/shanghai_bund_one_pass.dart \
+            app/lib/data/batch_one_adaptive_story_levels.dart \
+            app/test/shanghai_bund_preserve_first_contract_test.dart
+          git commit -m 'feat: complete Shanghai Bund preserve-first support'
+          test "$(git rev-parse HEAD^)" = "$BASE_SHA"
+          committed="$(git diff-tree --no-commit-id --name-only -r HEAD | sort)"
+          test "$committed" = "$expected"
+          git push --force origin "HEAD:refs/heads/$VALIDATED_BRANCH"
+          echo "SHANGHAI VALIDATED PRODUCT SHA = $(git rev-parse HEAD)"
+          echo "SHANGHAI VALIDATED PRODUCT PARENT = $(git rev-parse HEAD^)"
