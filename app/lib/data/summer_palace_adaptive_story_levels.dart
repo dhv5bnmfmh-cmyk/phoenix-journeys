@@ -115,10 +115,10 @@ const summerPalaceN1SemanticEvents = <SummerPalaceN1SemanticEvent>[
     corePinyin: 'Zhōu Lán zuò guò yuánlín xiūfù, dàizhe jiù zhàopiàn.',
     coreVietnamese: 'Chu Lam từng làm công việc phục hồi khu vườn và mang theo một bức ảnh cũ.',
     coreEnglish: 'Zhou Lan once worked on garden restoration and carries an old photograph.',
-    detailChinese: '旧照片背面写着：“一八六〇年受损，一八八六年修复。”许澄想把这行字裁掉，周岚把照片翻回正面。',
-    detailPinyin: 'Jiù zhàopiàn bèimiàn xiězhe: “yī bā liù líng nián shòusǔn, yī bā bā liù nián xiūfù.” Xǔ Chéng xiǎng bǎ zhè háng zì cáidiào, Zhōu Lán bǎ zhàopiàn fān huí zhèngmiàn.',
-    detailVietnamese: 'Mặt sau ảnh ghi: “bị hư hại năm 1860, phục hồi năm 1886.” Hứa Trừng muốn cắt bỏ dòng chữ ấy, nhưng Chu Lam lật ảnh trở lại mặt trước.',
-    detailEnglish: 'The back reads, “damaged in 1860, restored in 1886.” Xu Cheng wants to crop out that line, but Zhou Lan turns the photograph face-up again.',
+    detailChinese: '旧照片背面写着：“一八六〇年受损，一八八六年开始修复。”许澄想把这行字裁掉，周岚把照片翻回正面。',
+    detailPinyin: 'Jiù zhàopiàn bèimiàn xiězhe: “yī bā liù líng nián shòusǔn, yī bā bā liù nián kāishǐ xiūfù.” Xǔ Chéng xiǎng bǎ zhè háng zì cáidiào, Zhōu Lán bǎ zhàopiàn fān huí zhèngmiàn.',
+    detailVietnamese: 'Mặt sau ảnh ghi: “bị hư hại năm 1860, bắt đầu được phục hồi vào năm 1886.” Hứa Trừng muốn cắt bỏ dòng chữ ấy, nhưng Chu Lam lật ảnh trở lại mặt trước.',
+    detailEnglish: 'The back reads, “damaged in 1860, restoration began in 1886.” Xu Cheng wants to crop out that line, but Zhou Lan turns the photograph face-up again.',
     detailFromLevel: 5,
   ),
   SummerPalaceN1SemanticEvent(
@@ -298,7 +298,7 @@ const summerPalaceStoryCulturalCausality =
     whatBreaksIfRemoved: '冲突只剩口头争论，地点不参与关系推进。',
   ),
   SummerPalaceStoryCulturalCausalityRecord(
-    factOrMechanism: '颐和园1750年建成、1860年严重受损、1886年在原有基础上修复。',
+    factOrMechanism: '清漪园1750年开始兴建、1860年严重受损、1886年开始修复，1888年改名为颐和园。',
     sourceIds: [summerPalaceUnescoSourceId, summerPalaceOverviewSourceId],
     whereItAppears: '旧照片背面的1860/1886记录。',
     storyActionCaused: '许澄想裁掉历史字样，周岚把照片翻回正面。',
