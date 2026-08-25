@@ -1,18 +1,14 @@
 import fs from 'node:fs';
 
 const target = process.argv[2];
-if (!target) {
-  throw new Error('usage: patch_shanghai_modal_close_settle.mjs <patched-verify-script>');
-}
+if (!target) throw new Error('usage: patch_shanghai_modal_close_settle.mjs <patched-verify-script>');
 
 let source = fs.readFileSync(target, 'utf8');
 
 function replaceOnce(label, needle, replacement) {
   const first = source.indexOf(needle);
   const last = source.lastIndexOf(needle);
-  if (first < 0 || first !== last) {
-    throw new Error(`${label}: expected exactly one patch target`);
-  }
+  if (first < 0 || first !== last) throw new Error(`${label}: expected exactly one patch target`);
   source = `${source.slice(0, first)}${replacement}${source.slice(first + needle.length)}`;
 }
 
@@ -58,9 +54,7 @@ function isUnidentifiedDialogShellClassification(classification) {
 
 function transientModalIdentityState(recordsToClassify) {
   const classification = classifyTransientModalRecords(recordsToClassify);
-  if (isUnidentifiedDialogShellClassification(classification)) {
-    return { kind: 'mounting-unidentified' };
-  }
+  if (isUnidentifiedDialogShellClassification(classification)) return { kind: 'mounting-unidentified' };
   return classification;
 }
 
@@ -110,8 +104,7 @@ replaceOnce(
   const emptyDialogShell = [
     { index: 0, role: null, label: 'Dialog', text: '', visible: true, disabled: false },
   ];
-  const emptyShellState = transientModalIdentityState(emptyDialogShell);
-  if (emptyShellState.kind !== 'mounting-unidentified') {
+  if (transientModalIdentityState(emptyDialogShell).kind !== 'mounting-unidentified') {
     throw new Error('Empty Flutter Dialog shell fixture was not treated as identity-mounting state');
   }
   const shellThenKnownState = transientModalIdentityState(vocabularyModal);
@@ -143,9 +136,7 @@ replaceOnce(
   if (knownTransientModalCloseRecord(unknownModal, unknown) !== null) {
     throw new Error('Unknown dialog fixture unexpectedly produced an auto-dismiss target');
   }
-
-  const shellThenUnknownState = transientModalIdentityState(unknownModal);
-  if (shellThenUnknownState.kind !== 'unknown') {
+  if (transientModalIdentityState(unknownModal).kind !== 'unknown') {
     throw new Error('Empty Dialog shell settling to an unknown modal did not remain a hard-stop classification');
   }
 
@@ -153,7 +144,7 @@ replaceOnce(
 );
 
 replaceOnce(
-  'runtime close-control settle polling',
+  'runtime close-control and identity settle polling',
   `async function dismissKnownTransientModal(page) {
   const currentRecords = await records(page);
   const classification = classifyTransientModalRecords(currentRecords);
@@ -202,10 +193,7 @@ replaceOnce(
     initial = state;
     break;
   }
-
-  if (!initial) {
-    throw new Error('UNIDENTIFIED MODAL SHELL did not mount semantic identity');
-  }
+  if (!initial) throw new Error('UNIDENTIFIED MODAL SHELL did not mount semantic identity');
 
   const expectedId = initial.definition.id;
   console.log(\`KNOWN TRANSIENT MODAL = \${expectedId} | TITLE=\${initial.definition.title} | WAITING FOR ALLOWED CLOSE SEMANTICS\`);
@@ -213,8 +201,7 @@ replaceOnce(
   const closeDeadline = Date.now() + 5000;
   let closeRecord = null;
   while (Date.now() < closeDeadline) {
-    const snapshot = await records(page);
-    const state = transientModalCloseState(snapshot);
+    const state = transientModalCloseState(await records(page));
     if (state.kind === 'none') {
       console.log(\`KNOWN TRANSIENT MODAL DISAPPEARED = \${expectedId} | RE-READ SEMANTICS\`);
       return true;
@@ -235,10 +222,7 @@ replaceOnce(
     }
     await sleep(100);
   }
-
-  if (!closeRecord) {
-    throw new Error(\`Known transient modal \${expectedId} did not mount an allowed close control\`);
-  }
+  if (!closeRecord) throw new Error(\`Known transient modal \${expectedId} did not mount an allowed close control\`);
 
   console.log(\`KNOWN TRANSIENT MODAL CLOSE READY = \${expectedId} | ACTION=\${semanticRecordText(closeRecord)}\`);
   await activateSemantic(page, page.locator('flt-semantics').nth(closeRecord.index));
@@ -251,10 +235,7 @@ replaceOnce(
       console.log(\`KNOWN TRANSIENT MODAL DISMISSED = \${expectedId} | RE-READ SEMANTICS\`);
       return true;
     }
-    if (after.kind === 'mounting-unidentified') {
-      await sleep(100);
-      continue;
-    }
+    if (after.kind === 'mounting-unidentified') continue;
     if (after.kind === 'unknown') {
       throw new Error(\`UNKNOWN MODAL != AUTO-DISMISS | \${after.dialogs.join(' || ')}\`);
     }
@@ -264,12 +245,6 @@ replaceOnce(
   }
   throw new Error(\`Known transient modal did not dismiss: \${expectedId}\`);
 }`
-);
-
-replaceOnce(
-  'modal fixture success log settle rule',
-  `  console.log('TRANSIENT MODAL FIXTURE PREFLIGHT = PASS | Flutter label=Dialog voice + Vocabulary modals recognized -> real close controls -> Stage semantics re-read | unknown Dialog rejected');`,
-  `  console.log('TRANSIENT MODAL FIXTURE PREFLIGHT = PASS | Flutter label=Dialog voice + Vocabulary modals recognized | empty Dialog shell waits for identity | delayed close mount waits -> ready | real close controls -> Stage semantics re-read | concrete unknown Dialog rejected');`
 );
 
 fs.writeFileSync(target, source, 'utf8');
