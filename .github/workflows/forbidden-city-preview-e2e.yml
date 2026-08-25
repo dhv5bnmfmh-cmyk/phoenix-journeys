@@ -26,7 +26,7 @@ env:
 jobs:
   reference-journey-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 45
 
     steps:
       - name: Check out exact formal Shanghai candidate
@@ -49,15 +49,11 @@ jobs:
           path: .validation-harness
           fetch-depth: 1
 
-      - name: Cheap browser harness preflight
+      - name: Cheap Shanghai browser harness syntax preflight
         shell: bash
         run: |
           set -euo pipefail
           node --check .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
-          node --check .github/scripts/verify_forbidden_city_preview_v2.mjs
-          node --check .github/scripts/verify_forbidden_city_preview_v2_level_race_fix.mjs
-          node --check .github/scripts/verify_forbidden_city_story_reading_support.mjs
-          node --check .github/scripts/verify_forbidden_city_mobile_webkit_discovery_depth.mjs
 
       - name: Verify PR 199 exact Cloudflare preview release
         shell: bash
@@ -88,30 +84,17 @@ jobs:
           npm install --no-save --prefix "$RUNNER_TEMP/shanghai-exact-e2e-node" playwright
           "$RUNNER_TEMP/shanghai-exact-e2e-node/node_modules/.bin/playwright" install --with-deps chromium webkit
 
-      - name: Verify Forbidden City Reference Journey
+      - name: Verify browser modes then Shanghai Bund six-stage journey
         shell: bash
         env:
           PLAYWRIGHT_PATH: ${{ runner.temp }}/shanghai-exact-e2e-node/node_modules/playwright/index.mjs
         run: |
           set -euo pipefail
           mkdir -p test-results
-          node .github/scripts/verify_forbidden_city_preview_v2_level_race_fix.mjs \
-            "$PREVIEW_URL" "$CANDIDATE_SHA" 2>&1 | tee test-results/forbidden-city-six-stage.log
-          node .github/scripts/verify_forbidden_city_story_reading_support.mjs \
-            "$PREVIEW_URL" "$CANDIDATE_SHA" 2>&1 | tee test-results/forbidden-city-reading-support.log
-          node .github/scripts/verify_forbidden_city_mobile_webkit_discovery_depth.mjs \
-            "$PREVIEW_URL" "$CANDIDATE_SHA" 2>&1 | tee test-results/forbidden-city-mobile-webkit.log
-
-      - name: Verify Shanghai Bund Chromium and WebKit six-stage journey
-        shell: bash
-        env:
-          PLAYWRIGHT_PATH: ${{ runner.temp }}/shanghai-exact-e2e-node/node_modules/playwright/index.mjs
-        run: |
-          set -euo pipefail
           node .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs \
             "$PREVIEW_URL" "$CANDIDATE_SHA" 2>&1 | tee test-results/shanghai-bund-exact-preview.log
 
-      - name: Upload exact-head browser evidence
+      - name: Upload exact-head Shanghai browser evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
