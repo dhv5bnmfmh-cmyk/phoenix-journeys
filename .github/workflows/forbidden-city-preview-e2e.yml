@@ -55,6 +55,12 @@ jobs:
           set -euo pipefail
           node --check .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
 
+      - name: Cheap Shanghai Story semantic-anchor fixture preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs --story-anchor-preflight
+
       - name: Verify PR 199 exact Cloudflare preview release
         shell: bash
         run: |
