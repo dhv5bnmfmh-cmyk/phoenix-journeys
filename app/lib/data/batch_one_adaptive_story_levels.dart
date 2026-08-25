@@ -1,4 +1,5 @@
 import '../models/language_proficiency.dart';
+import '../services/phoenix_level_controller.dart';
 import 'batch_one_journey_remediation.dart';
 import 'chengdu_kuanzhai_one_pass.dart';
 import 'daily_journey_experience.dart';
@@ -131,62 +132,125 @@ class BatchOneJourneyMemorySpec {
   final String completionSummary;
 }
 
-const _summerPalaceMemorySpec = BatchOneJourneyMemorySpec(
-  storyResult:
-      '许澄在十七孔桥金光亮起、旧照片被风吹落时放下相机先捡照片。她错过等了一下午的画面，却改拍旧照片、外婆的手和正在暗下的桥洞，并把作品命名为《留下痕迹的风景》。',
-  culturalPoint:
-      '颐和园的价值不只在一张“无瑕”风景照里。清漪园在1860年遭毁，1886年开始重建；今天的园林景观同时承载自然山水、人工营造与历史修复留下的时间层次。',
-  reviews: <RemediatedMemoryReview>[
-    RemediatedMemoryReview(
-      category: 'choice',
-      prompt: '金光亮起、旧照片被风吹落时，许澄真正做了什么选择？',
-      answer: '她放下相机先捡回旧照片，因此错过了等了一下午的金光画面。',
-      storyEventIds: <String>[
-        'photographFalls',
-        'forcedChoice',
-        'enactedChoice',
-        'lostLight',
-      ],
-    ),
-    RemediatedMemoryReview(
-      category: 'relationship',
-      prompt: '这次选择怎样改变了许澄和周岚的关系？',
-      answer: '周岚不再替许澄调构图，让她自己决定下一张，并把旧照片交给她保存。',
-      storyEventIds: <String>[
-        'trustChange',
-        'photographEntrusted',
-      ],
-    ),
-    RemediatedMemoryReview(
-      category: 'place',
-      prompt: '为什么这个故事不能随便搬到另一座普通公园？',
-      answer:
-          '十七孔桥冬至前后的短暂落日光影制造了不可暂停的拍摄窗口，而颐和园1860年受损、1886年开始重建的历史又让旧照片与“留下痕迹”真正有意义。',
-      storyEventIds: <String>[
-        'grandmotherConservationBackground',
-        'photographFalls',
-        'lostLight',
-        'changedUnderstanding',
-      ],
-    ),
-    RemediatedMemoryReview(
-      category: 'memory',
-      prompt: '离开颐和园后，最值得长期记住的画面是什么？',
-      answer: '许澄手里留下旧照片，镜头里留下外婆的手和正在暗下的十七孔桥。',
-      storyEventIds: <String>[
-        'threeLayerComposition',
-        'workTitle',
-        'photographEntrusted',
-      ],
-    ),
-  ],
-  longTermAnchor: '她没有留下“无瑕”的金光，却留下了旧照片、外婆的手和一幅承认时间痕迹的新作品。',
-  completionSummary:
-      '作品《留下痕迹的风景》完成了这次 Journey：许澄失去预想中的完美画面，却获得独立判断，也接过旧照片与修复记忆。下一次面对“完美”与真实痕迹的冲突时，先问自己准备留下什么、又愿意为选择承担什么。',
-);
+BatchOneJourneyMemorySpec _summerPalaceMemorySpecForLevel(int phoenixLevel) {
+  final level = phoenixLevel.clamp(1, 10).toInt();
+  final culturalPoint = switch (level) {
+    1 =>
+      '万寿山与昆明湖构成颐和园最基本的山水框架，自然山水与亭台、殿堂、寺庙、桥梁等人工要素共同形成整体皇家园林。',
+    2 =>
+      '颐和园不只用于观景。UNESCO资料记录政治行政、居住、精神和游憩等不同功能共同存在于湖山园林之中。',
+    3 =>
+      '颐和园始建于一七五〇年，一八六〇年遭受严重破坏；一八八六年开始在原有基础上重新修复，建造、损毁和修复形成可读的历史层次。',
+    4 =>
+      '长廊位于万寿山南麓、临近昆明湖。沿长廊移动时，观看位置持续变化，湖、山和建筑会按行走顺序进入视野。',
+    5 =>
+      '颐和园的观看还会把视线延伸到园外。北京官方资料把玉泉山和香山列为重要借景，近处园景与远处山体因此形成空间层次。',
+    6 =>
+      '十七孔桥东接东堤、西连南湖岛。桥把岛、堤和水面组织成可通行的空间关系，因此不能只把它当成一个孤立造型。',
+    7 =>
+      '北京官方资料记录，十一月下旬到冬至前后的晴朗傍晚可见十七孔桥桥洞逐渐被夕阳照亮；现有史料没有证明这种冬至金光是造园者刻意设计的。',
+    8 =>
+      '颐和园的山、水、建筑、寺庙、桥梁与人的移动路线共同构成园林系统；功能与景观需要放在同一整体中理解。',
+    9 =>
+      '昆明湖中的岛、岸与桥梁构成多重连接。南湖岛通过十七孔桥与东堤相连，西堤及其桥梁又形成另一组连接结构。',
+    _ =>
+      '颐和园于一九九八年列入《世界遗产名录》。UNESCO强调自然山水与人工建筑形成的和谐整体，遗产保存也需要让建造、损毁与修复的历史信息继续可读。',
+  };
+  final placeAnswer = switch (level) {
+    1 =>
+      '十七孔桥冬至前后的短暂落日光影制造了不可暂停的拍摄窗口；本级又从万寿山、昆明湖与人工要素的整体关系理解为什么这里不是普通公园。',
+    2 =>
+      '十七孔桥的短暂光线让许澄必须现场选择；本级看到同一皇家园林还承载政治行政、居住、精神和游憩等不同功能。',
+    3 =>
+      '十七孔桥的短暂光线制造不可暂停的选择，而一七五〇年兴建、一八六〇年受损、一八八六年开始修复的历史让旧照片与“留下痕迹”有了真实地点因果。',
+    4 =>
+      '故事中的长廊不是背景贴图：沿廊移动会持续改变湖、山与建筑进入视野的顺序，也直接改变许澄和周岚的行走节奏。',
+    5 =>
+      '许澄的取景选择依赖真实视线关系；玉泉山、香山等园外远景参与借景，使“只留下无瑕局部”与完整观看之间产生地点性的张力。',
+    6 =>
+      '十七孔桥东接东堤、西连南湖岛，桥上的选择发生在真实的岛、堤、水面连接关系中，因此不能等价搬到任意公园。',
+    7 =>
+      '冬至前后的桥洞金光提供真实季节窗口，但现有史料并不支持“造园者特意设计冬至金光”的说法；故事只使用可验证的现象与观看位置。',
+    8 =>
+      '许澄一路遇到的山、水、长廊、桥梁与移动路线属于同一园林系统，地点结构本身推动她从单一完美画面转向关系性的观看。',
+    9 =>
+      '昆明湖不是孤立水面：岛、东堤、西堤与桥梁形成多重连接，十七孔桥上的取舍因此嵌在更大的湖区空间网络中。',
+    _ =>
+      '世界遗产价值来自自然与人工要素的整体关系，也包括让历史层次保持可读；许澄最终保留痕迹而非抹平痕迹，与这一地点逻辑形成呼应。',
+  };
+  final completionLens = switch (level) {
+    1 => '本级收束在湖、山与人工要素如何共同组成一座园林。',
+    2 => '本级进一步把多种功能空间放回同一湖山园林理解。',
+    3 => '本级用兴建、损毁、修复三个时间节点理解“痕迹”不是抽象修辞。',
+    4 => '本级把长廊中的移动位置与观看顺序纳入人物选择。',
+    5 => '本级把借景与近远空间层次纳入取景判断。',
+    6 => '本级把十七孔桥两端的真实连接关系纳入地点因果。',
+    7 => '本级区分可验证的季节光影与没有史料支持的“刻意设计”推断。',
+    8 => '本级把功能、景观与移动整合成园林系统来理解。',
+    9 => '本级把昆明湖读成由岛、岸、堤与桥共同形成的连接网络。',
+    _ => '本级综合世界遗产整体价值与历史信息可读性，完成保存判断。',
+  };
 
-BatchOneJourneyMemorySpec? batchOneMemorySpecFor(String journeyId) {
-  if (journeyId == _summerPalaceJourneyId) return _summerPalaceMemorySpec;
+  return BatchOneJourneyMemorySpec(
+    storyResult:
+        '许澄在十七孔桥金光亮起、旧照片被风吹落时放下相机先捡照片。她错过等了一下午的画面，却改拍旧照片、外婆的手和正在暗下的桥洞，并把作品命名为《留下痕迹的风景》。',
+    culturalPoint: culturalPoint,
+    reviews: <RemediatedMemoryReview>[
+      RemediatedMemoryReview(
+        category: 'choice',
+        prompt: '金光亮起、旧照片被风吹落时，许澄真正做了什么选择？',
+        answer: '她放下相机先捡回旧照片，因此错过了等了一下午的金光画面。',
+        storyEventIds: <String>[
+          'photographFalls',
+          'forcedChoice',
+          'enactedChoice',
+          'lostLight',
+        ],
+      ),
+      RemediatedMemoryReview(
+        category: 'relationship',
+        prompt: '这次选择怎样改变了许澄和周岚的关系？',
+        answer: '周岚不再替许澄调构图，让她自己决定下一张，并把旧照片交给她保存。',
+        storyEventIds: <String>['trustChange', 'photographEntrusted'],
+      ),
+      RemediatedMemoryReview(
+        category: 'place',
+        prompt: '为什么这个故事不能随便搬到另一座普通公园？',
+        answer: placeAnswer,
+        storyEventIds: <String>[
+          'grandmotherConservationBackground',
+          'photographFalls',
+          'lostLight',
+          'changedUnderstanding',
+        ],
+      ),
+      RemediatedMemoryReview(
+        category: 'memory',
+        prompt: '离开颐和园后，最值得长期记住的画面是什么？',
+        answer: '许澄手里留下旧照片，镜头里留下外婆的手和正在暗下的十七孔桥。',
+        storyEventIds: <String>[
+          'threeLayerComposition',
+          'workTitle',
+          'photographEntrusted',
+        ],
+      ),
+    ],
+    longTermAnchor:
+        '她没有留下“无瑕”的金光，却留下了旧照片、外婆的手和一幅承认时间痕迹的新作品。',
+    completionSummary:
+        '作品《留下痕迹的风景》完成了这次 Journey：许澄失去预想中的完美画面，却获得独立判断，也接过旧照片与修复记忆。$completionLens 下一次面对“完美”与真实痕迹的冲突时，先问自己准备留下什么、又愿意为选择承担什么。',
+  );
+}
+
+BatchOneJourneyMemorySpec? batchOneMemorySpecFor(
+  String journeyId, {
+  int? phoenixLevel,
+}) {
+  if (journeyId == _summerPalaceJourneyId) {
+    return _summerPalaceMemorySpecForLevel(
+      phoenixLevel ?? PhoenixLevelController.instance.level,
+    );
+  }
 
   final journey = switch (journeyId) {
     shanghaiBundJourneyId => shanghaiBundOnePassRemediation,
