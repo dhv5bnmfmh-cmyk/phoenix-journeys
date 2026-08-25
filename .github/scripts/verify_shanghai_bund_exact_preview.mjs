@@ -27,8 +27,31 @@ function requireStory(text, level) {
   }
 }
 
+const discoveryAnchorGroups = {
+  1: [['黄浦江', '西岸']],
+  3: [['海运提单'], ['黄浦江', '西岸']],
+  5: [['陆家嘴'], ['海运提单']],
+  8: [['海运提单'], ['1990']],
+  10: [['1843'], ['1990']],
+};
+
+function discoveryStageCorpus(segments) {
+  if (!Array.isArray(segments) || !segments.length) {
+    throw new Error('Discovery stage corpus requires at least one segment');
+  }
+  return segments.map(clean).filter(Boolean).join('\n');
+}
+
+function requireDiscoveryAnchors(text, level) {
+  for (const group of discoveryAnchorGroups[level]) {
+    const missing = group.filter((token) => !text.includes(token));
+    if (missing.length) {
+      throw new Error(`Lv${level} Discovery missing semantic anchor group ${group.join('+')}; missing ${missing.join('+')}`);
+    }
+  }
+}
+
 function runStoryAnchorFixturePreflight() {
-  // Representative text copied from the real Chromium Lv5 Story semantics snapshot in run 32826795797.
   const realLv5Semantics = [
     '上海 · 外滩 林岸二十四岁，成长在一个与上海港口贸易相连的家庭。桌上常有提单副本。',
     '第二天，他将到浦东陆家嘴上班。他把这份工作想成一次干净的切割：西岸属于船、海关和纸张，东岸属于数据、账户和新的金融基础设施。',
@@ -53,8 +76,38 @@ function runStoryAnchorFixturePreflight() {
   console.log('STORY ANCHOR FIXTURE PREFLIGHT = PASS | real Lv5 semantics accepted | non-Bund/non-crossing negatives rejected');
 }
 
+function runDiscoveryCorpusFixturePreflight() {
+  const splitLv8 = discoveryStageCorpus([
+    '第一段保留上海港口贸易脉络与海运提单。',
+    '第二段说明现代陆家嘴金融城是在1990年浦东开发开放以后持续发展形成的。',
+  ]);
+  requireDiscoveryAnchors(splitLv8, 8);
+
+  let rejected = false;
+  try {
+    requireDiscoveryAnchors(discoveryStageCorpus([
+      '第一段保留上海港口贸易脉络与海运提单。',
+      '第二段只谈现代城市变化，但没有目标年份。',
+    ]), 8);
+  } catch (_) {
+    rejected = true;
+  }
+  if (!rejected) throw new Error('Discovery corpus negative fixture unexpectedly passed without 1990');
+
+  requireDiscoveryAnchors(discoveryStageCorpus([
+    '黄浦江西岸连接外滩历史空间。',
+  ]), 1);
+
+  console.log('DISCOVERY CORPUS FIXTURE PREFLIGHT = PASS | split Lv8 anchors combine across segments | missing-1990 negative rejected | single-segment contract preserved');
+}
+
 if (process.argv.includes('--story-anchor-preflight')) {
   runStoryAnchorFixturePreflight();
+  process.exit(0);
+}
+
+if (process.argv.includes('--discovery-corpus-preflight')) {
+  runDiscoveryCorpusFixturePreflight();
   process.exit(0);
 }
 
@@ -253,21 +306,105 @@ async function openShanghaiBund(page) {
   throw new Error('Shanghai Bund did not open after destination selection');
 }
 
-const discoveryAnchorGroups = {
-  1: [['黄浦江', '西岸']],
-  3: [['海运提单'], ['黄浦江', '西岸']],
-  5: [['陆家嘴'], ['海运提单']],
-  8: [['海运提单'], ['1990']],
-  10: [['1843'], ['1990']],
-};
+function discoveryNarrationState(text) {
+  const match = text.match(/第\s*(\d+)\s*\/\s*(\d+)\s*段/);
+  return {
+    current: match ? Number(match[1]) : null,
+    total: match ? Number(match[2]) : null,
+    finished: text.includes('朗读完成 · 100%'),
+  };
+}
 
-function requireDiscoveryAnchors(text, level) {
-  for (const group of discoveryAnchorGroups[level]) {
-    const missing = group.filter((token) => !text.includes(token));
-    if (missing.length) {
-      throw new Error(`Lv${level} Discovery missing semantic anchor group ${group.join('+')}; missing ${missing.join('+')}`);
+async function seekNarrationProgress(page, progress) {
+  const rs = await records(page);
+  const rail = rs.find((r) => r.visible && recText(r).includes('朗读进度，可拖动跳转'));
+  if (!rail) throw new Error('Discovery narration seek rail not found');
+  const locator = page.locator('flt-semantics').nth(rail.index);
+  const box = await locator.boundingBox();
+  if (!box || box.width <= 2 || box.height <= 2) throw new Error('Discovery narration seek rail has no actionable geometry');
+  const x = box.x + Math.max(1, Math.min(box.width - 1, box.width * progress));
+  const y = box.y + box.height / 2;
+  const mode = interactionModeByPage.get(page);
+  if (mode === interactionModes.desktop) {
+    await page.mouse.click(x, y);
+  } else if (mode === interactionModes.touch) {
+    await page.touchscreen.tap(x, y);
+  } else {
+    throw new Error('browser interaction mode was not registered before narration seek');
+  }
+  await sleep(300);
+}
+
+async function collectDiscoveryStageSemantics(page, level) {
+  await waitStage(page, 3);
+  const deadline = Date.now() + 25000;
+  const snapshots = [];
+  const seenSegments = new Set();
+  let total = null;
+
+  while (Date.now() < deadline && total == null) {
+    const text = await visibleText(page);
+    snapshots.push(text);
+    const state = discoveryNarrationState(text);
+    if (state.current != null && state.total != null) {
+      seenSegments.add(state.current);
+      total = state.total;
+      break;
+    }
+    if (state.finished) {
+      total = 1;
+      break;
+    }
+    await sleep(150);
+  }
+  if (total == null) throw new Error(`Lv${level} Discovery narration segment state not found`);
+
+  const coarse = [0.08, 0.18, 0.28, 0.38, 0.48, 0.58, 0.68, 0.78, 0.88, 0.95];
+  for (const progress of coarse) {
+    if (seenSegments.size >= total) break;
+    await seekNarrationProgress(page, progress);
+    await waitStage(page, 3);
+    const text = await visibleText(page);
+    snapshots.push(text);
+    const state = discoveryNarrationState(text);
+    if (state.current != null) seenSegments.add(state.current);
+  }
+
+  if (seenSegments.size < total && total > 1) {
+    for (let i = 1; i < 99 && seenSegments.size < total; i += 2) {
+      await seekNarrationProgress(page, i / 100);
+      await waitStage(page, 3);
+      const text = await visibleText(page);
+      snapshots.push(text);
+      const state = discoveryNarrationState(text);
+      if (state.current != null) seenSegments.add(state.current);
     }
   }
+
+  await seekNarrationProgress(page, 0.999);
+  const finishDeadline = Date.now() + 10000;
+  let finalText = '';
+  while (Date.now() < finishDeadline) {
+    await waitStage(page, 3);
+    finalText = await visibleText(page);
+    snapshots.push(finalText);
+    const state = discoveryNarrationState(finalText);
+    if (state.current != null) seenSegments.add(state.current);
+    if (state.finished) break;
+    await sleep(150);
+  }
+
+  if (!finalText.includes('朗读完成 · 100%')) {
+    throw new Error(`Lv${level} Discovery narration did not reach stable completed semantics`);
+  }
+  if (seenSegments.size < total) {
+    throw new Error(`Lv${level} Discovery traversal saw ${seenSegments.size}/${total} narration segments`);
+  }
+
+  const corpus = discoveryStageCorpus([...snapshots, finalText]);
+  requireDiscoveryAnchors(corpus, level);
+  console.log(`SHANGHAI BUND Lv${level} DISCOVERY STAGE CORPUS = PASS | SEGMENTS=${total} | SEEN=${[...seenSegments].sort((a, b) => a - b).join(',')}`);
+  return corpus;
 }
 
 function traceVocabulary(story, vocabulary) {
@@ -403,8 +540,7 @@ async function runLevel(browserType, browserName, level) {
 
     await activateButton(page, '继续', { prefix: true });
     await waitStage(page, 3);
-    const discovery = await visibleText(page);
-    requireDiscoveryAnchors(discovery, level);
+    await collectDiscoveryStageSemantics(page, level);
     await assertNoFatal(page, errors, `${browserName} Lv${level} Discovery`);
 
     await activateButton(page, '继续', { prefix: true });
