@@ -69,27 +69,14 @@ jobs:
                   "      10: <String>['1843', '1990'],",
               "      expect(content.discoveries.length, level <= 2 ? 1 : level == 10 ? 3 : 2);":
                   "      expect(content.discoveries.length, level <= 2 ? 1 : 2);",
+              "    return '旧海运提单与陆家嘴结算工作在故事里共同组织了哪些流动？';":
+                  "    return level == 5\n        ? '旧海运提单与陆家嘴结算系统在故事里共同组织了哪些流动？'\n        : '旧海运提单与陆家嘴结算工作在故事里共同组织了哪些流动？';",
           }
           for old_value, new_value in replacements.items():
               count = text.count(old_value)
               if count != 1:
                   raise SystemExit(f'expected one candidate text occurrence, got {count}: {old_value[:30]}')
               text = text.replace(old_value, new_value, 1)
-
-          prompt_old = """  if (level <= 5) {
-            return '旧海运提单与陆家嘴结算工作在故事里共同组织了哪些流动？';
-          }
-          return '结合外滩长期形成的贸易金融功能与陆家嘴现代结算，解释“变化的是载体，不是流动本身”是否充分。';"""
-          prompt_new = """  if (level <= 4) {
-            return '旧海运提单与陆家嘴结算工作在故事里共同组织了哪些流动？';
-          }
-          if (level == 5) {
-            return '旧海运提单与陆家嘴结算系统在故事里共同组织了哪些流动？';
-          }
-          return '结合外滩长期形成的贸易金融功能与陆家嘴现代结算，解释“变化的是载体，不是流动本身”是否充分。';"""
-          if text.count(prompt_old) != 1:
-              raise SystemExit('expected one Shanghai prompt block')
-          text = text.replace(prompt_old, prompt_new, 1)
 
           path.write_text(text)
           PY
