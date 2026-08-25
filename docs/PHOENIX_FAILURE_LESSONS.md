@@ -156,6 +156,18 @@ Canonical governance record for recurring Phoenix development and validation fai
 
 ---
 
+## FINAL TERMINAL CORPUS > INTERMEDIATE NARRATION ID COUNT
+
+**Failure:** run `32848677242`, job `97804230512`, reached explicit WebKit Lv8 Discovery terminal completion. Runtime still showed exact `3/6 Discovery`, exact `Phoenix 中文难度 8 级`, `Discovery，Lv.8 · 分段短文 · 2 段`, `朗读完成 · 100%`, both visible paragraphs, and both required Lv8 anchors `海运提单` and `1990`. The harness nevertheless rejected the Stage with `Lv8 Discovery traversal saw 1/2 narration segments` because only one intermediate narration segment ID had been observed before terminal completion.  
+**Classification:** `HARNESS / TERMINAL-COMPLETION SEGMENT-ACCOUNTING FALSE NEGATIVE`  
+**Root Cause:** intermediate traversal bookkeeping was incorrectly treated as stronger evidence than the authoritative final Stage corpus.  
+**Correct Fix:** when and only when exact Stage + exact Level + explicit 100% terminal completion + current Discovery level identity + full terminal corpus anchors all pass, with no unresolved modal, level drift, or fatal runtime semantics, accept the terminal corpus as authoritative. Preserve observed segment counts as diagnostic evidence; do not fabricate missing intermediate IDs.  
+**Forbidden Fix:** do not fabricate observed segment IDs; do not remove non-terminal traversal checks; do not weaken Discovery anchors; do not modify learner content or narration behavior; do not accept `100%` if Stage or Level has drifted.  
+**Cheap Preflight:** terminal `1/2` observed + complete Lv8 terminal corpus must PASS; terminal missing `1990` must FAIL; non-terminal `1/2` must FAIL; terminal wrong-level Lv7 with anchors must FAIL.  
+**Rules:** `FINAL TERMINAL CORPUS > INTERMEDIATE NARRATION ID COUNT`; `SEGMENT ACCOUNTING SERVES CORPUS VALIDATION, NOT THE REVERSE`; `TERMINAL AUTHORITY REQUIRES EXACT STAGE + EXACT LEVEL + EXPLICIT COMPLETION + COMPLETE ANCHORS`
+
+---
+
 ## CURRENT LEVEL LEAKAGE
 
 **Failure pattern:** stale/hidden/non-active level content can accidentally satisfy or fail adaptive assertions.  
