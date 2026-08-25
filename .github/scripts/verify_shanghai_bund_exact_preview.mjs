@@ -51,6 +51,10 @@ function requireDiscoveryAnchors(text, level) {
   }
 }
 
+function narrationUnavailable(text) {
+  return text.includes('朗读暂时不可用') || text.includes('当前设备暂时无法朗读');
+}
+
 function runStoryAnchorFixturePreflight() {
   const realLv5Semantics = [
     '上海 · 外滩 林岸二十四岁，成长在一个与上海港口贸易相连的家庭。桌上常有提单副本。',
@@ -98,7 +102,15 @@ function runDiscoveryCorpusFixturePreflight() {
     '黄浦江西岸连接外滩历史空间。',
   ]), 1);
 
-  console.log('DISCOVERY CORPUS FIXTURE PREFLIGHT = PASS | split Lv8 anchors combine across segments | missing-1990 negative rejected | single-segment contract preserved');
+  const unavailableLv8 = [
+    'Discovery，Lv.8 · 分段短文 · 2 段，朗读暂时不可用，进度 0%',
+    '当前设备暂时无法朗读，请检查声音设置后重试。',
+    '第一段保留海运提单。第二段说明1990年浦东开发开放以后陆家嘴持续发展。',
+  ].join(' ');
+  if (!narrationUnavailable(unavailableLv8)) throw new Error('Narration-unavailable fixture was not recognized');
+  requireDiscoveryAnchors(unavailableLv8, 8);
+
+  console.log('DISCOVERY CORPUS FIXTURE PREFLIGHT = PASS | split Lv8 anchors combine across segments | missing-1990 negative rejected | single-segment contract preserved | TTS-unavailable full-text fallback preserved');
 }
 
 if (process.argv.includes('--story-anchor-preflight')) {
@@ -337,14 +349,26 @@ async function seekNarrationProgress(page, progress) {
 
 async function collectDiscoveryStageSemantics(page, level) {
   await waitStage(page, 3);
+  const firstText = await visibleText(page);
+  if (narrationUnavailable(firstText)) {
+    requireDiscoveryAnchors(firstText, level);
+    console.log(`SHANGHAI BUND Lv${level} DISCOVERY STAGE CORPUS = PASS | NARRATION=UNAVAILABLE | FULL-TEXT SEMANTICS`);
+    return firstText;
+  }
+
   const deadline = Date.now() + 25000;
-  const snapshots = [];
+  const snapshots = [firstText];
   const seenSegments = new Set();
   let total = null;
 
   while (Date.now() < deadline && total == null) {
     const text = await visibleText(page);
     snapshots.push(text);
+    if (narrationUnavailable(text)) {
+      requireDiscoveryAnchors(text, level);
+      console.log(`SHANGHAI BUND Lv${level} DISCOVERY STAGE CORPUS = PASS | NARRATION=UNAVAILABLE | FULL-TEXT SEMANTICS`);
+      return text;
+    }
     const state = discoveryNarrationState(text);
     if (state.current != null && state.total != null) {
       seenSegments.add(state.current);
@@ -391,6 +415,11 @@ async function collectDiscoveryStageSemantics(page, level) {
     const state = discoveryNarrationState(finalText);
     if (state.current != null) seenSegments.add(state.current);
     if (state.finished) break;
+    if (narrationUnavailable(finalText)) {
+      requireDiscoveryAnchors(finalText, level);
+      console.log(`SHANGHAI BUND Lv${level} DISCOVERY STAGE CORPUS = PASS | NARRATION=UNAVAILABLE | FULL-TEXT SEMANTICS`);
+      return finalText;
+    }
     await sleep(150);
   }
 
