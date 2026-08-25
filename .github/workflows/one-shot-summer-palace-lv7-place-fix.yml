@@ -1,0 +1,75 @@
+name: One-shot Summer Palace Lv7 place fix
+
+on:
+  push:
+    branches:
+      - automation/summer-palace-lv7-place-fix-12ba
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact PR candidate
+        uses: actions/checkout@v6
+        with:
+          ref: feature/summer-palace-content-completion
+          fetch-depth: 0
+
+      - name: Verify exact source candidate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "12ba2f096387c280adcfbacbe5b7f57b5b6d401a"
+
+      - name: Apply minimal Lv7 place causality fix
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('app/lib/data/batch_one_adaptive_story_levels.dart')
+          text = path.read_text()
+          old = "'冬至前后的桥洞金光提供真实季节窗口，但现有史料并不支持“造园者特意设计冬至金光”的说法；故事只使用可验证的现象与观看位置。'"
+          new = "'十七孔桥冬至前后的桥洞金光提供真实季节窗口，但现有史料并不支持“造园者特意设计冬至金光”的说法；故事只使用可验证的现象与观看位置。'"
+          if text.count(old) != 1:
+              raise SystemExit(f'expected exactly one Lv7 placeAnswer match, found {text.count(old)}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          git diff -- app/lib/data/batch_one_adaptive_story_levels.dart
+          test "$(git diff --name-only | wc -l)" -eq 1
+          test "$(git diff --name-only)" = "app/lib/data/batch_one_adaptive_story_levels.dart"
+          git diff --check
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Targeted Summer Palace Memory Completion test
+        working-directory: app
+        run: flutter test test/summer_palace_memory_completion_contract_test.dart
+
+      - name: Flutter analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Full Flutter test
+        working-directory: app
+        run: flutter test
+
+      - name: Commit directly to PR branch
+        run: |
+          set -euo pipefail
+          test "$(git diff --name-only | wc -l)" -eq 1
+          test "$(git diff --name-only)" = "app/lib/data/batch_one_adaptive_story_levels.dart"
+          git config user.name "phoenix-journeys-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/lib/data/batch_one_adaptive_story_levels.dart
+          git commit -m "fix: bind Summer Palace Lv7 place review to Seventeen-Arch Bridge"
+          git push origin HEAD:feature/summer-palace-content-completion
