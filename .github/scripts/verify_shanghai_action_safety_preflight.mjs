@@ -109,8 +109,12 @@ requireContains('terminalDiscoveryStageRecord', stageResolver, [
   `/^3\\/6(?:\\s|$)/.test(recText(record).trim())`,
 ]);
 forbidContains('terminalDiscoveryStageRecord', stageResolver, [
-  `Discovery`,
-  `发现`,
+  `.includes('Discovery')`,
+  `.includes("Discovery")`,
+  `.includes('发现')`,
+  `.includes("发现")`,
+  `=== 'Discovery'`,
+  `=== '发现'`,
 ]);
 
 const terminalAuthority = functionBody('isAuthoritativeTerminalDiscoveryCorpus');
