@@ -208,6 +208,42 @@ Include a TTS-unavailable full-text fixture with the same required Stage anchors
 
 ---
 
+## MODAL OVERLAY != STAGE LOSS
+
+**Failure**
+
+A legitimate transient browser/runtime modal temporarily hid Journey Stage semantics. Shanghai run `32833535493`, job `97757291939`, reached WebKit Lv3 after Chromium Lv1/Lv3/Lv5/Lv8/Lv10 and WebKit Lv1 had passed. The semantics snapshot showed the `中文朗读声线` Dialog, including real `关闭` / `Dismiss` controls and the browser message `当前浏览器没有提供可选择的中文声线`, while the harness reported `semantic state not found: 3/6`.
+
+**Classification**
+
+`HARNESS / TRANSIENT-MODAL-OVERLAY FALSE NEGATIVE`
+
+**Root Cause**
+
+The harness did not distinguish a temporary modal overlay state from the underlying Journey state. Mounted Stage semantics being temporarily absent from the exposed semantic tree was incorrectly interpreted as Stage loss.
+
+**Correct Fix**
+
+Recognize only explicitly known transient runtime dialogs. Record the modal identity, close it through its real semantic `关闭` / `Dismiss` control, wait for that Dialog to disappear, then re-read semantics and enforce the original Stage postcondition unchanged.
+
+**Forbidden Fix**
+
+Do not remove or weaken Stage assertions. Do not globally dismiss arbitrary dialogs. Do not change learner UI, narration UI, voice-selection behavior, or Journey content to prevent a legitimate transient modal from appearing.
+
+**Cheap Preflight**
+
+Replay a known `中文朗读声线` modal semantics fixture and prove `known modal -> recognized -> real close target -> Stage semantics re-read`. Include an unknown-Dialog negative fixture and require it to remain non-dismissible and fail classification rather than being silently closed.
+
+**Long-term rules**
+
+`MODAL OVERLAY != STAGE LOSS`
+
+`DISMISS KNOWN TRANSIENT STATE, THEN RE-READ SEMANTICS`
+
+`UNKNOWN MODAL != AUTO-DISMISS`
+
+---
+
 ## CURRENT LEVEL LEAKAGE
 
 **Failure pattern**
