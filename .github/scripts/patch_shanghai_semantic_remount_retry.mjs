@@ -102,7 +102,7 @@ async function seekNarrationProgress(page, progress) {
     }
 
     try {
-      // The numeric snapshot index is used only to find this candidate. Every retry starts
+      // The numeric snapshot index is observation metadata only. Every retry starts
       // from a fresh semantics snapshot, then binds and re-proves the live narration rail.
       const { handle } = await bindStableSemanticRecord(page, rail, identity);
       let live = await readBoundSemanticHandle(handle);
@@ -148,8 +148,10 @@ async function seekNarrationProgress(page, progress) {
 
 replaceOnce(
   'semantic remount fixture',
-  `  console.log('LEVEL + STABLE ACTIVATION FIXTURE PREFLIGHT = PASS | transient level rejected | stable target required | semantic index reorder demonstrates fixed-handle requirement | seek rail reorder cannot target difficulty decrement | Lv8 mid-stage drift rejected | terminal 1/2 + complete corpus PASS | terminal missing anchor FAIL | non-terminal 1/2 FAIL | terminal wrong level FAIL');`,
-  `  const remountSequence = [
+  `  if (terminalWrongLevel) throw new Error('terminal level-drift negative fixture unexpectedly passed');`,
+  `  if (terminalWrongLevel) throw new Error('terminal level-drift negative fixture unexpectedly passed');
+
+  const remountSequence = [
     { index: 18, connected: false, role: 'button', text: '朗读进度，可拖动跳转 2%' },
     { index: 7, connected: true, role: 'button', text: '降低当前难度' },
     { index: 19, connected: true, role: 'button', text: '朗读进度，可拖动跳转 2%' },
@@ -158,9 +160,7 @@ replaceOnce(
   const reboundRail = remountSequence.find((entry) => entry.connected && entry.role === 'button' && entry.text.includes('朗读进度，可拖动跳转'));
   if (staleDetached.connected) throw new Error('semantic-remount fixture did not detach original narration rail');
   if (!reboundRail || reboundRail.index !== 19) throw new Error('semantic-remount fixture failed to re-resolve fresh narration identity');
-  if (remountSequence[1].text !== '降低当前难度') throw new Error('semantic-remount fixture did not preserve nearby difficulty-control risk');
-
-  console.log('LEVEL + STABLE ACTIVATION FIXTURE PREFLIGHT = PASS | transient level rejected | stable target required | semantic index reorder demonstrates fixed-handle requirement | seek rail reorder cannot target difficulty decrement | detached narration handle triggers fresh snapshot + live rebind only | Lv8 mid-stage drift rejected | terminal 1/2 + complete corpus PASS | terminal missing anchor FAIL | non-terminal 1/2 FAIL | terminal wrong level FAIL');`
+  if (remountSequence[1].text !== '降低当前难度') throw new Error('semantic-remount fixture did not preserve nearby difficulty-control risk');`
 );
 
 fs.writeFileSync(target, source, 'utf8');
