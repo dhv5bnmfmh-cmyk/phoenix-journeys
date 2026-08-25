@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pinyin/pinyin.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
+import 'package:phoenix_journeys/data/batch_one_adaptive_story_levels.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
@@ -9,6 +11,48 @@ import 'package:phoenix_journeys/services/phoenix_story_length_policy.dart';
 
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
+
+  test('Fact Pack separates verified world facts from ordinary fiction', () {
+    final sourceIds = xianCityWallSourceLedger
+        .map((source) => source['id'])
+        .whereType<String>()
+        .toSet();
+    expect(sourceIds, hasLength(xianCityWallSourceLedger.length));
+    expect(
+      xianCityWallSourceLedger.every(
+        (source) {
+          final uri = Uri.parse(source['url']!);
+          return source['publisher']!.trim().isNotEmpty &&
+              uri.hasScheme &&
+              uri.host.isNotEmpty &&
+              source['supports']!.trim().isNotEmpty;
+        },
+      ),
+      isTrue,
+    );
+    expect(
+      xianCityWallClaimLedger.where(
+        (claim) => !claim['status']!.startsWith('ALLOWED'),
+      ),
+      isEmpty,
+    );
+    expect(
+      xianCityWallFactFictionLedger.any(
+        (row) =>
+            row['category'] == 'REAL PERSON HIGH-PROTECTION' &&
+            row['status'] == 'NOT USED',
+      ),
+      isTrue,
+    );
+    expect(
+      xianCityWallFactFictionLedger.any(
+        (row) =>
+            row['category'] == 'UNSUPPORTED / FALSE FACTUAL CLAIM' &&
+            row['status']!.startsWith('BLOCKED'),
+      ),
+      isTrue,
+    );
+  });
 
   test('Xi\'an Story obeys Lv1-Lv10 requested length and paragraph policy', () {
     expect(xianCityWallOnePassLevels, hasLength(10));
@@ -32,6 +76,25 @@ void main() {
         reason: 'Lv$level strict paragraph shape',
       );
       expect(content.storyAnnotations.length, content.storyParagraphs.length);
+      for (var paragraph = 0;
+          paragraph < content.storyParagraphs.length;
+          paragraph++) {
+        final source = content.storyParagraphs[paragraph];
+        final annotation = content.storyAnnotations[paragraph];
+        expect(
+          annotation.pinyin,
+          PinyinHelper.getPinyinE(
+            source,
+            separator: ' ',
+            format: PinyinFormat.WITH_TONE_MARK,
+          ),
+          reason: 'Lv$level paragraph ${paragraph + 1} Pinyin source identity',
+        );
+        expect(annotation.vietnamese.trim(), isNotEmpty);
+        expect(annotation.english.trim(), isNotEmpty);
+        expect(annotation.vietnamese, isNot(contains(source)));
+        expect(annotation.english, isNot(contains(source)));
+      }
     }
   });
 
@@ -111,8 +174,23 @@ void main() {
       expect(spec.sourceIds, isNotEmpty);
       expect(spec.sourceIds.every(sourceIds.contains), isTrue);
       final levelContent = xianCityWallOnePassLevelContent(level);
-      expect(levelContent.discoveries, hasLength(1));
-      expect(identical(levelContent.discoveries.single, spec.entry), isTrue);
+      expect(
+        levelContent.discoveries,
+        hasLength(level <= 4 ? 2 : 3),
+      );
+      expect(levelContent.discoveries, contains(spec.entry));
+      for (final discovery in levelContent.discoveries) {
+        expect(
+          discovery.pinyin,
+          PinyinHelper.getPinyinE(
+            discovery.text,
+            separator: ' ',
+            format: PinyinFormat.WITH_TONE_MARK,
+          ),
+        );
+        expect(discovery.vietnamese, isNot(contains(discovery.text)));
+        expect(discovery.english, isNot(contains(discovery.text)));
+      }
     }
   });
 
@@ -170,6 +248,34 @@ void main() {
     expect(xianCityWallCompletion.memoryAnchor, '永宁门后没有按停的跑表');
     expect(xianCityWallCompletion.challengeReward, '长安续程牌');
     expect(xianCityWallCompletion.journeyCompletion, contains('“回家”'));
+  });
+
+  test('Vocabulary popup examples stay on the current Story sentence', () {
+    for (var level = 1; level <= 10; level++) {
+      final content = xianCityWallOnePassLevelContent(level);
+      final story = content.storyParagraphs.join();
+      for (final word in content.words) {
+        expect(word.examples, hasLength(3), reason: 'Lv$level ${word.word}');
+        expect(story, contains(word.examples.first.chinese));
+        expect(word.examples.first.chinese, contains(word.word));
+        expect(word.examples.first.vietnamese.trim(), isNotEmpty);
+        expect(word.examples.first.english.trim(), isNotEmpty);
+      }
+    }
+  });
+
+  test('Memory and Completion are isolated to the requested level', () {
+    final lv1 = batchOneMemorySpecFor(xianCityWallJourneyId, phoenixLevel: 1)!;
+    final lv5 = batchOneMemorySpecFor(xianCityWallJourneyId, phoenixLevel: 5)!;
+    final lv10 = batchOneMemorySpecFor(xianCityWallJourneyId, phoenixLevel: 10)!;
+    expect(lv1.culturalPoint, isNot(contains('1961')));
+    expect(lv1.culturalPoint, isNot(contains('监测')));
+    expect(lv5.culturalPoint, contains('护城河'));
+    expect(lv10.culturalPoint, contains('明代主体'));
+    expect(lv10.culturalPoint, contains('现代监测'));
+    expect(lv1.completionSummary, isNot(lv10.completionSummary));
+    expect(lv5.completionSummary, isNot(lv10.completionSummary));
+    expect(lv10.longTermAnchor, lv1.longTermAnchor);
   });
 
   test('Narrative DNA metadata and difference matrix cover all Gold Journeys', () {
@@ -265,7 +371,7 @@ void main() {
         isNot(contains('傍晚，你从永宁门走上西安城墙')),
       );
       expect(resolved.storyAnnotations.length, resolved.storyParagraphs.length);
-      expect(resolved.discoveries, hasLength(1));
+      expect(resolved.discoveries, hasLength(level <= 4 ? 2 : 3));
     }
   });
 

@@ -1,3 +1,5 @@
+import 'package:pinyin/pinyin.dart';
+
 import 'batch_one_journey_remediation.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
@@ -105,20 +107,46 @@ class XianCompleteSpec {
   final String journeyCompletion;
 }
 
-JourneyLevelContent _xianLevel(List<String> paragraphs) => JourneyLevelContent(
+const _xianStoryVietnamese = <List<String>>[
+  <String>['Chu Dao, 22 tuổi, lớn lên trong khu phố cũ bên trong tường thành Tây An. Cuối tuần này cả nhà chuyển ra ngôi nhà mới ngoài thành. Cậu bắt đầu một vòng chạy từ cổng Vĩnh Ninh và định coi đó là lời chia tay cuối cùng. Tin nhắn của mẹ nhắc cậu về bữa cơm ở nhà mới; khi trở lại cổng Vĩnh Ninh, cậu không dừng đồng hồ mà tiếp tục chạy về phía nam.'],
+  <String>['Chu Dao, 22 tuổi, lớn lên cùng cha mẹ trong phố cũ bên trong tường thành. Trước ngày chuyển nhà, cậu quyết định chạy trọn một vòng từ cổng Vĩnh Ninh để khép lại cuộc sống trong thành. Nhưng sau khi đồng hồ báo đủ vòng, cậu không dừng mà xuống thành, tiếp tục chạy theo đường phía nam tới nhà mới.'],
+  <String>['Chu Dao bắt đầu vòng chạy chia tay từ cổng Vĩnh Ninh trước khi gia đình chuyển tới nhà mới ở phía nam ngoài thành. Nhìn phố cũ bên trong và khu nhà mới bên ngoài, cậu cho rằng đổi địa chỉ cũng có nghĩa đời sống cũ kết thúc ở cổng thành.', 'Khi trở lại cổng Vĩnh Ninh, đồng hồ báo đủ một vòng. Bức ảnh mẹ gửi từ ban công nhà mới cho thấy ánh đèn tường thành ở xa. Chu Dao không dừng đồng hồ; cậu xuống thành, chạy qua giờ cao điểm và để quãng đường tiếp tục tăng.'],
+  <String>['Chu Dao coi tuyến vòng dài hơn mười ba kilômét là lời chia tay chính thức trước khi chuyển nhà. Trong hoàng hôn, cậu thấy phố ngõ quen thuộc ở bên trong và giao thông, nhà ở mới ở bên ngoài; cậu lo rằng chuyển ra ngoài thành sẽ cắt cuộc đời mình thành hai phần.', 'Trên đường chạy, cậu nhận ra tường thành hiện còn chủ yếu hình thành thời Minh, được tu bổ và đi vào đời sống công cộng ngày nay. Trở lại cổng Vĩnh Ninh, cậu thấy ảnh ban công nhà mới, không dừng đồng hồ và tiếp tục chạy về phía nam.'],
+  <String>['Chu Dao biến tuyến vòng hơn mười ba kilômét thành một nghi thức riêng: chạy quanh thành rồi kết thúc ở cổng Vĩnh Ninh để cất gọn cuộc sống trong thành. Tin mẹ về bữa cơm đầu tiên ở nhà mới làm nỗi lo đổi địa chỉ thành mất quan hệ với phố cổ càng rõ.', 'Khi chạy qua tuyến tường thành khép kín, cậu thấy các lớp hình thành thời Minh, những bộ phận được bảo vệ và những tuyến đời mình vốn luôn qua lại cổng thành. Đến cổng Vĩnh Ninh, cậu bỏ qua nút dừng và nối vòng chạy với con đường tới nhà mới.'],
+  <String>['Chu Dao đặt tuyến khoảng 13,74 kilômét thành “vòng cuối”, muốn dùng một bản ghi có điểm đầu và điểm cuối để lưu lại đời sống trong thành. Cậu nhìn phố cũ, khu nhà mới và tự hỏi việc chuyển địa chỉ có làm mình không còn thuộc về phố cổ.', 'Cậu chạy qua cấu trúc tường thành chủ yếu hình thành từ năm Hồng Vũ thứ bảy đến thứ mười một trên nền đô thị sớm hơn, cùng tường, cổng, công trình phụ và hào được bảo vệ. Những tuyến học tập, đi xe và chạy bộ của cậu chưa từng dừng ở cổng; vì vậy cậu không dừng đồng hồ tại cổng Vĩnh Ninh mà chạy tiếp tới nhà mới.'],
+  <String>['Chu Dao cố biến vòng 13,74 kilômét thành lời chia tay có thể đo được. Cậu không ghét nhà mới, nhưng lo rằng địa chỉ ngoài thành sẽ làm cảm giác mình là người Tây An mỏng đi.', 'Tường thành thời Minh, các phần nền sớm hơn và hệ thống tường, cổng, công trình phụ, hào cho thấy một không gian phòng thủ được bảo vệ và tiếp tục dùng trong đời sống công cộng. Các tuyến đời thường của Chu Dao luôn nối trong với ngoài; ảnh nhà mới khiến cậu bỏ tay khỏi nút dừng và chạy tiếp.'],
+  <String>['Chu Dao định dùng vòng 13,74 kilômét khép kín để đặt dấu chấm hết cho hơn hai mươi năm sống trong thành. Cậu hiểu nhà mới tốt hơn, nhưng vẫn dùng một vòng có thể đo để kiểm soát sự thay đổi không thể đo của ký ức và cảm giác thuộc về.', 'Tường thành chủ yếu hình thành từ năm Hồng Vũ thứ bảy đến thứ mười một, được bảo vệ, quan trắc và đưa vào đời sống công cộng. Những tuyến học tập, gia đình và chạy bộ nhiều lần qua cổng cho thấy đời sống hiện đại nối trong với ngoài. Khi mẹ gửi ảnh nhà mới, cậu không dừng đồng hồ mà tiếp tục chạy; tuyến khép kín trở thành một hành trình mở.'],
+  <String>['Chu Dao biến vòng 13,74 kilômét thành nghi thức chia tay trước khi cả nhà chuyển ra ngoài thành. Cậu không phản đối nhà mới; điều cậu muốn kiểm soát là nỗi sợ đổi địa chỉ sẽ cắt đứt ký ức và cảm giác thuộc về.', 'Tường thành hiện còn chủ yếu hình thành thời Minh, một số đoạn phía nam và tây dựa trên nền sớm hơn; năm 1961 được xếp vào đợt đầu di tích trọng điểm cấp quốc gia. Chính các tuyến cá nhân qua cổng, chứ không phải niên đại tự nó, làm Chu Dao đổi cách hiểu. Cậu chạy qua cổng Vĩnh Ninh tới nhà mới rồi mới dừng đồng hồ và lưu một tuyến liên tục.'],
+  <String>['Chu Dao muốn dùng vòng 13,74 kilômét khép kín để chứng minh một giai đoạn sống trong thành đã kết thúc. Cậu đặt ký ức, quan hệ và cảm giác thuộc về vào đường ranh hình học của tường thành dù nhà mới đem lại nhiều thuận tiện.', 'Tường thành hiện còn chủ yếu đạt quy mô ngày nay từ năm Hồng Vũ thứ bảy đến thứ mười một; các đoạn nam, tây tiếp nối nền sớm hơn. Tường, cổng, công trình phụ và hào từng tổ chức phòng thủ, đi lại và điều động; từ năm 1961 chúng được bảo vệ bằng quy định, quan trắc và tu bổ. Các tuyến đời Chu Dao luôn xuyên qua ranh giới ấy. Cậu không dừng ở cổng Vĩnh Ninh, chỉ dừng tại nhà mới; hôm sau đặt tên bản ghi là “Về nhà”.'],
+];
+
+const _xianStoryEnglish = <List<String>>[
+  <String>['Zhou Yao, twenty-two, grew up in the old streets inside Xi’an City Wall. His family is moving to a new home outside the wall this weekend. He starts a circuit from Yongning Gate as a final farewell. When he returns, he does not stop his running watch; he descends and keeps running south toward the new home.'],
+  <String>['Zhou Yao, twenty-two, grew up with his parents inside the wall. Before moving, he decides to complete one circuit from Yongning Gate and treat it as the end of his life inside the old city. When the watch marks a full lap, he leaves it running, descends, and continues toward the new home.'],
+  <String>['Before his family moves south beyond the wall, Zhou Yao begins a farewell circuit at Yongning Gate. Seeing familiar streets inside and new housing outside, he assumes that a changed address will also end his old life at the gate.', 'Back at Yongning Gate, the watch records a full lap. His mother sends a photo from the new balcony with the wall lights in the distance. Zhou Yao does not stop the watch; he descends, crosses evening traffic, and lets the distance keep growing.'],
+  <String>['Zhou Yao treats the wall’s circuit of more than thirteen kilometres as a formal farewell before moving. At dusk he sees familiar lanes inside and traffic and new housing outside, fearing that moving beyond the wall will cut his life into two parts.', 'As he runs, the surviving wall’s principally Ming formation, continuing conservation, and public use enter the route. Returning to Yongning Gate, he sees his mother’s photo from the new home, leaves the watch running, and continues south.'],
+  <String>['Zhou Yao turns the circuit of more than thirteen kilometres into a private ritual: circle the wall and finish at Yongning Gate so that life inside can be neatly stored away. His mother’s message about the first meal in the new home sharpens his fear that a new address will end his bond with the old city.', 'The closed route reveals a wall shaped principally in the Ming period, protected as a connected system, and crossed repeatedly by his own memories. At Yongning Gate he refuses the expected endpoint and joins the lap to the road toward the new home.'],
+  <String>['Zhou Yao names the roughly 13.74-kilometre circuit his “last lap,” using a measured start and finish to preserve life inside the wall. He looks between the old lanes and new housing and wonders whether moving will end his belonging.', 'He passes a wall principally formed from the seventh to eleventh years of the Hongwu reign on earlier urban foundations, with walls, gates, associated structures, and moat protected together. His school, cycling, and running routes never ended at the gates, so he leaves the watch running and continues toward the new home.'],
+  <String>['Zhou Yao makes the 13.74-kilometre circuit a measurable farewell. He does not dislike the new home; he fears that an address beyond the wall will thin his sense of being from Xi’an.', 'The Ming wall, earlier foundations, walls, gates, associated structures, and moat show a defence system now conserved and used in public life. His daily routes repeatedly connect inside and outside. A photo from the new home makes him lower his hand from the stop button and keep running.'],
+  <String>['Zhou Yao intends the closed 13.74-kilometre lap to end more than twenty years inside the wall. He knows the new home is better, but uses a measurable circuit to control an immeasurable change in memory and belonging.', 'The wall was principally shaped from the seventh to eleventh Hongwu years and is now conserved, monitored, and used in public life. School, family, and running routes repeatedly cross its gates. His mother’s photo leads him to keep the watch running, turning a closed circuit into an open continuation.'],
+  <String>['Zhou Yao turns the 13.74-kilometre circuit into a farewell before the family moves outside the wall. He accepts the new home; what he tries to control is the fear that changing address will sever memory and belonging.', 'The surviving wall was principally expanded in the Ming period, with some southern and western sections using earlier foundations, and it became part of the first group of nationally protected cultural sites in 1961. His lived routes, rather than dates alone, change his judgment. He runs beyond Yongning Gate and stops only at the new home, saving one continuous route.'],
+  <String>['Zhou Yao wants the closed 13.74-kilometre circuit to prove that one stage of life inside the wall has ended. Although the new home is practical, he has placed memory, relationships, and belonging inside the wall’s geometric boundary.', 'The surviving wall reached its principal present scale from the seventh to eleventh Hongwu years, with southern and western sections carrying earlier foundations. Walls, gates, associated structures, and moat once organized defence, access, patrol, and movement; since 1961 they have remained protected through regulation, monitoring, and conservation. Zhou Yao’s own routes repeatedly cross that boundary. He keeps running beyond Yongning Gate, stops at the new home, and names the record “Home” the next day.'],
+];
+
+String _xianPinyin(String chinese) => PinyinHelper.getPinyinE(
+      chinese,
+      separator: ' ',
+      format: PinyinFormat.WITH_TONE_MARK,
+    );
+
+JourneyLevelContent _xianLevel(int level, List<String> paragraphs) => JourneyLevelContent(
       storyParagraphs: List<String>.unmodifiable(paragraphs),
       storyAnnotations: List<ReadingAnnotation>.unmodifiable([
         for (var i = 0; i < paragraphs.length; i++)
           ReadingAnnotation(
-            pinyin: i == 0
-                ? 'Zhōu Yáo èrshí’èr suì, cóng Xī’ān chéngqiáng nèi de lǎojiē chūfā, zài Yǒngníngmén kāishǐ zuìhòu yí cì rào chéng pǎobù.'
-                : 'Yèsè luòxià, tā huídào Yǒngníngmén, què méiyǒu àn tíng pǎobiǎo, ér shì xià chéng jìxù pǎo xiàng xīn jiā.',
-            vietnamese: i == 0
-                ? 'Chu Dao, 22 tuổi, lớn lên trong khu phố cũ bên trong tường thành Tây An. Trước khi gia đình chuyển ra ngoài thành, cậu bắt đầu một vòng chạy từ cổng Vĩnh Ninh và định biến nó thành lời chia tay cuối cùng.'
-                : 'Khi đêm xuống và cậu trở lại cổng Vĩnh Ninh, đồng hồ báo hoàn thành vòng thành. Cậu không dừng đồng hồ mà xuống thành, tiếp tục chạy về ngôi nhà mới; tuyến đường khép kín trở thành một hành trình tiếp nối.',
-            english: i == 0
-                ? 'Zhou Yao, 22, grew up in the old neighborhoods inside Xi’an City Wall. Before his family moves outside the wall, he starts a full circuit from Yongning Gate and intends it as a final farewell.'
-                : 'When night falls and he returns to Yongning Gate, his watch marks the completed circuit. Instead of stopping it, he descends and keeps running toward the new home, turning a closed lap into a continuing route.',
+            pinyin: _xianPinyin(paragraphs[i]),
+            vietnamese: _xianStoryVietnamese[level - 1][i],
+            english: _xianStoryEnglish[level - 1][i],
           ),
       ]),
       words: const <WordEntry>[],
@@ -128,16 +156,16 @@ JourneyLevelContent _xianLevel(List<String> paragraphs) => JourneyLevelContent(
     );
 
 final xianCityWallOnePassLevels = List<JourneyLevelContent>.unmodifiable([
-  _xianLevel(['周遥二十二岁，从小住在西安城墙里。这个周末，全家要搬到城外的新家。傍晚，他从永宁门登上城墙，给跑表按下开始，想跑完一圈，把这条熟悉的路当成最后一次告别。夕阳照着砖石，城内的街巷和城外的道路同时亮着。母亲发来消息，说搬家车已经到了，让他跑完就去新家吃饭。周遥经过转角和城门时，一直想：搬出去以后，自己还算不算“城里人”。夜色落下来，他又回到永宁门，跑表刚好记下一整圈。他没有按停，而是下城继续往南跑。身后的城墙亮起灯，他的距离还在增加。']),
-  _xianLevel(['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到城外的新家。傍晚，他从永宁门登上城墙，给跑表按下开始，决定完整跑一圈，把它当作搬家前最后一次“绕城”。夕阳把砖石拉出长影，向内能看见老城街巷，向外是车流和更远的新城区。母亲发来语音，说搬家车已经到新家，饭也快好了。周遥继续沿墙跑，经过城门和转角，心里却越来越别扭：如果住址变了，自己和这座老城的关系是不是也结束了？天色变深，他再次看见永宁门，跑表完成一整圈。原本这里应是终点。周遥抬手看了一眼，没有按停计时，直接下城，沿南边的街道继续向新家跑去。城墙灯光在身后连成一圈，而跑表上的数字越过了那一圈。']),
-  _xianLevel(['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上城墙，给跑表按下开始，想完整跑一圈，把这次“绕城”当成搬家前的告别。夕阳把砖石拉出长影，墙内是熟悉的街巷，墙外是车流和新住宅。母亲发来语音，说搬家车已经到了，新家的第一顿饭等他回来。周遥继续跑，心里却认定：住址一变，旧生活也会在城门处结束。', '天色渐暗，他经过转角和城门，又回到永宁门。跑表完成一整圈，屏幕亮起提示。原本这里应是终点，母亲却发来一张新家阳台的照片，远处正能看见城墙的灯。周遥抬手看了看跑表，没有按停。他下城后继续向南跑，穿过晚高峰的路口。身后的城墙连成一圈亮线，跑表上的距离却继续增加。']),
-  _xianLevel(['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈，把十三公里多的环线当作搬家前最后一次正式告别。夕阳压低，砖石和城楼投下长影。向内是他熟悉的街巷、院落和晚饭香，向外是车流、地铁口与不断延伸的新住宅。母亲发来语音，说搬家车已经到达，新家的第一顿饭等他回来。周遥只回了一个“好”，继续沿墙跑。他一直觉得，搬出城墙就等于离开老城，自己的生活会在某座城门处被切成两段。', '天色从橙色变成深蓝，他经过转角、城门和宽阔的墙顶。现存西安城墙主要形成于明代，后来持续修缮；过去的防御设施今天仍被保护，也进入城市公共生活。周遥小时候在墙下骑车，上学后又常来跑步，这些记忆并不只在墙内。回到永宁门时，跑表完成一整圈，屏幕亮起提示。原本这里应是终点，母亲却发来新家阳台的照片，远处正能看见亮起的城墙。周遥没有按停计时。他下城后继续向南跑，穿过晚高峰的路口。城墙灯光在身后合成一圈，而跑表上的距离越过那一圈。']),
-  _xianLevel(['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他把这十三公里多的环线当成一场私人告别：跑表归零，绕城一周，再在永宁门结束，好像这样就能把“城内生活”整齐收好。夕阳从南墙斜过去，砖石、垛口和城楼留下长影。向内是熟悉的街巷、院落与钟楼方向，向外是车流、地铁口和不断延伸的现代城区。母亲发来语音，说搬家车已到，新家的第一顿饭等他。周遥只回了一个“好”。他继续跑，却反复想：住址一旦越过城墙，自己和老城的关系是不是也会在城门处结束。', '天色由金黄转成深蓝，他沿封闭的长方形城墙经过转角与城门。现存城墙在明洪武年间形成今天的主要尺度，并在后世持续修缮；墙体、城门、护城河等共同构成需要长期保护的遗产。周遥并没有把这些当成讲解词。他记得小时候在护城河边学骑车，也记得高考前沿南门附近慢跑，生活早就不断进出城门。再次看见永宁门时，跑表完成一整圈，震动提醒他“目标完成”。原本这就是终点。母亲此时发来一张新家阳台的照片，夜色里远远能看见城墙灯光。周遥停了半步，没有按停计时，而是直接下城，沿南边街道继续跑向新家。身后灯线围住老城，跑表的数字却越过了完整的一圈。']),
-  _xianLevel(['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他故意把这条十三点七四公里左右的环线设成“最后一次绕城”：从南门出发，沿墙跑完封闭的一周，再回到原点，把城内生活像训练记录一样保存起来。夕阳落到城楼一侧，砖石、女儿墙和垛口被拉出长影。向内是熟悉的街巷与院落，向外是车流、地铁线和更远的新住宅。母亲发来语音，说搬家车已经卸完，新家的第一顿饭等他回来。周遥只回了一个“好”。他继续跑，心里却固执地把住址变化理解成身份变化：搬出城墙以后，自己是不是就不再属于老城？', '暮色逐渐压下来，他沿城墙经过不同方向的城门与转角。现存西安城墙主要形成于明洪武七年至十一年，建立在更早城市墙体基础上；墙体、城门、附属建筑和护城河属于整体保护对象。过去，宽阔墙顶服务防御、巡查和人员物资调动；今天，这条环线又承载保护、展示与公共活动。周遥没有停下来背年代。他想起小时候在环城公园骑车，想起中学时从城内坐车去城外补课，也想起近几年常把城墙当跑步坐标。那些生活从来没有在门洞前断开。夜色完全落下，他回到永宁门，跑表震动，显示一整圈完成。母亲恰好发来新家阳台的照片，远处城墙刚亮灯。周遥抬手，本可以按下停止，却把手指移开。他下城后继续向南跑，穿过晚高峰的路口。身后的灯线封成一圈，跑表的距离却继续向前。']),
-  _xianLevel(['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他故意把十三点七四公里左右的环线设成一场私人告别：从南门出发，沿封闭城墙跑完一周，再回到原点，让“住在城里”的日子像一次训练记录那样有清楚的起点和终点。夕阳贴着城楼下降，砖石、女儿墙和垛口的影子被拉长。墙内是熟悉的街巷、院落和钟楼方向，墙外是车流、地铁口与继续生长的住宅区。母亲发来语音，说搬家车已经卸完，新家的厨房第一次开火，让他跑完直接过去。周遥只回了一个“好”。他没有舍不得新家；房间更亮，通勤也方便。他真正不安的是另一件事：如果地址离开城墙以内，自己从小建立的“西安人”感觉会不会也跟着变薄？', '暮色由金黄转成蓝黑，他沿城墙经过不同方向的城门和转角。现存西安城墙的主体在明洪武年间扩建形成，南墙和西墙部分利用更早的城市墙体基础；今天，城墙墙体、城门、附属建筑和护城河受到整体保护。过去宽阔墙顶服务防御、巡查与调动，如今同一条环线又进入日常公共生活。周遥并没有停下来读讲解牌。他只是不断遇见自己的路线：小学时在环城公园学骑车，中学时每天穿过城门去上课，大学后回家常沿南墙跑步。所谓“城内”和“城外”，在地图上清楚，在生活里却被公交、亲友、学校和习惯反复连接。夜色完全落下，他再次看见永宁门。跑表震动，显示整圈完成。他本来应该在这里按停，让告别成立。母亲恰好发来新家阳台的照片，远处一段城墙刚亮灯。周遥停了半步，把已经抬起的手放下，没有结束计时。他下城，沿南边街道继续跑向新家。城墙灯光在身后围成闭合的一圈，跑表上的数字却越过了那条闭环。']),
-  _xianLevel(['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他刻意把十三点七四公里左右的环线设成一场私人告别：从南门起跑，沿封闭城墙绕回原点，再停止计时，让二十多年“住在城里”的生活也得到一个干净的句号。夕阳贴着城楼下降，砖石、女儿墙和垛口被拉出长影。墙内是熟悉的街巷、院落与钟楼轮廓，墙外是车流、地铁线和扩展的住宅区。母亲发来语音，说搬家车已经卸完，新家的厨房第一次开火，让他跑完直接过去。周遥并不排斥新家：房间更亮，父母上下班也方便。他介意的是“搬出去”这三个字，仿佛住址越过城墙以后，童年路线和归属也必须改名。为了让这种不安显得可以控制，他才给今天安排了一个明确的圆周和终点。', '太阳落下以后，他沿长方形城墙继续向前。现存西安城墙的主体在明洪武七年至十一年形成今天的主要尺度，部分墙段承接更早的城市墙体基础；墙体、城门、附属建筑和护城河被整体保护。过去，宽阔的墙顶属于城市防御体系，也服务巡查和调动；今天，它又被保护、监测并进入市民运动与公共文化生活。周遥没有把跑步变成历史课。他只是发现自己的生活早就不断穿过这套空间：小时候在环城公园学骑车，中学每天从城内坐车到城外，大学以后又把南墙当作返乡跑步的坐标。城门在军事体系里曾控制出入，现代生活却用日常路线把内外缝在一起。夜色完全落下，他再次看见永宁门。跑表震动，整圈完成。他原本准备按停，让这里成为告别的句点；母亲却恰好发来新家阳台的照片，远处城墙灯光刚亮，弟弟还在照片角落举着两只没拆封的纸箱。周遥笑了，把手指从停止键上移开。他下城后继续向南跑，穿过晚高峰路口。城墙在身后围成清楚的闭环，跑表上的距离却继续增长。那一晚，他带到新家的不是城墙里的一块东西，而是一条没有在永宁门结束的路线。']),
-  _xianLevel(['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他刻意把十三点七四公里左右的环线设成一场私人告别：从南门起跑，沿封闭城墙绕回原点，再停止计时，让二十多年“住在城里”的日子也得到一个干净的句号。夕阳沿城楼一侧下降，砖石、女儿墙、垛口和墙顶路面被拉出长影。墙内是熟悉的街巷、院落与钟楼轮廓，墙外是车流、地铁线和扩展的现代城区。母亲发来语音，说搬家车已经卸完，新家的厨房第一次开火，让他跑完直接过去。周遥并不反感新家：房间更亮，父母通勤更方便，弟弟也离学校更近。他真正不安的是“搬出城墙”被自己偷偷解释成“搬出老西安”。如果住址改变，童年路线和归属感，会不会也在门洞里被截断？于是他给这次跑步规定了闭合的一圈，希望用一个可测量的终点处理一件无法测量的变化。', '太阳落下以后，他沿长方形城墙经过不同方向的城门和转角。现存西安城墙主体在明洪武年间扩建形成，部分南、西墙段利用更早的城市墙体基础；1961年，西安城墙被列入第一批全国重点文物保护单位。今天，墙体、城门、附属建筑和护城河被持续保护，现代监测也进入维护。对周遥来说，这些事实并没有替他回答“属于哪里”。真正改变他的，是一路不断出现的私人路线：小时候在环城公园学骑车，中学每天穿城门去上课，周末跟家人去城外办事，大学后回家又沿南墙跑步。军事防御体系曾经需要清楚的出入口，但现代生活把同一座城市的内外用公交、学校、亲友与习惯反复缝合。夜色完全落下，他再次看见永宁门。跑表震动，整圈完成。他原本准备按停，让“最后一次绕城”成立；母亲却恰好发来新家阳台的照片，城墙灯光在远处横着一段，弟弟站在纸箱旁催他吃饭。周遥抬起手，停了半步，又把手指从停止键上移开。他下城，沿南边街道继续跑向新家。身后的城墙围成完整亮环，跑表上的距离却越过十三点七四公里继续增加。到新家楼下时，计时还在走。他这才按停，把这条记录保存成一条从老家门口经过城墙、再抵达新家的连续路线。']),
-  _xianLevel(['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他刻意把十三点七四公里左右的环线设成一场私人告别：从南门起跑，沿封闭城墙绕回原点，再停止计时，让二十多年“住在城里”的生活得到一个干净句号。夕阳沿城楼下降，砖石、女儿墙、垛口和宽阔墙顶拉出长影。墙内是熟悉的街巷、院落与钟楼方向，墙外是车流、地铁线和扩展的新城区。母亲发来语音，说搬家车已卸完，新家的第一顿饭等他。周遥并不排斥新生活：新家更亮，父母通勤更方便，弟弟离学校也近。他真正介意的是“搬出去”被自己解释成身份变化。城墙在地图上清楚画出内外，他便把记忆、关系和归属也塞进这条几何线里，想用一次可量化的闭环证明某段生活已经结束。', '太阳落下以后，他沿长方形城墙经过城门、转角和不同墙段。现存西安城墙主体在明洪武七年至十一年形成今天的主要尺度，南墙、西墙部分承接更早城市墙体基础；古代防御体系用墙体、城门、附属建筑与护城河组织防守、出入、巡查和调动。1961年，西安城墙被列入第一批全国重点文物保护单位，今天仍通过法规、监测和修缮持续保护。周遥没有因此突然“理解历史”。真正改写终点线的，是一路撞上的私人路线：小时候在环城公园学骑车，中学每天穿城门上课，亲友和日常活动一直分布在墙内墙外，大学以后他又把南墙当返乡跑步坐标。夜色完全落下，他回到永宁门，跑表震动，整圈完成。母亲恰好发来新家阳台的照片：远处城墙亮灯，弟弟站在纸箱旁催他吃饭。周遥抬手，手指碰到停止键又移开。他直接下城，沿南边街道继续跑。跑表越过十三点七四公里继续增加。到新家楼下，他才按停并保存路线。图上，城墙是闭合长方形，轨迹却从永宁门伸到新住址。第二天，他把这条记录命名为“回家”。']),
+  _xianLevel(1, ['周遥二十二岁，从小住在西安城墙里。这个周末，全家要搬到城外的新家。傍晚，他从永宁门登上城墙，给跑表按下开始，想跑完一圈，把这条熟悉的路当成最后一次告别。夕阳照着砖石，城内的街巷和城外的道路同时亮着。母亲发来消息，说搬家车已经到了，让他跑完就去新家吃饭。周遥经过转角和城门时，一直想：搬出去以后，自己还算不算“城里人”。夜色落下来，他又回到永宁门，跑表刚好记下一整圈。他没有按停，而是下城继续往南跑。身后的城墙亮起灯，他的距离还在增加。']),
+  _xianLevel(2, ['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到城外的新家。傍晚，他从永宁门登上城墙，给跑表按下开始，决定完整跑一圈，把它当作搬家前最后一次“绕城”。夕阳把砖石拉出长影，向内能看见老城街巷，向外是车流和更远的新城区。母亲发来语音，说搬家车已经到新家，饭也快好了。周遥继续沿墙跑，经过城门和转角，心里却越来越别扭：如果住址变了，自己和这座老城的关系是不是也结束了？天色变深，他再次看见永宁门，跑表完成一整圈。原本这里应是终点。周遥抬手看了一眼，没有按停计时，直接下城，沿南边的街道继续向新家跑去。城墙灯光在身后连成一圈，而跑表上的数字越过了那一圈。']),
+  _xianLevel(3, ['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上城墙，给跑表按下开始，想完整跑一圈，把这次“绕城”当成搬家前的告别。夕阳把砖石拉出长影，墙内是熟悉的街巷，墙外是车流和新住宅。母亲发来语音，说搬家车已经到了，新家的第一顿饭等他回来。周遥继续跑，心里却认定：住址一变，旧生活也会在城门处结束。', '天色渐暗，他经过转角和城门，又回到永宁门。跑表完成一整圈，屏幕亮起提示。原本这里应是终点，母亲却发来一张新家阳台的照片，远处正能看见城墙的灯。周遥抬手看了看跑表，没有按停。他下城后继续向南跑，穿过晚高峰的路口。身后的城墙连成一圈亮线，跑表上的距离却继续增加。']),
+  _xianLevel(4, ['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈，把十三公里多的环线当作搬家前最后一次正式告别。夕阳压低，砖石和城楼投下长影。向内是他熟悉的街巷、院落和晚饭香，向外是车流、地铁口与不断延伸的新住宅。母亲发来语音，说搬家车已经到达，新家的第一顿饭等他回来。周遥只回了一个“好”，继续沿墙跑。他一直觉得，搬出城墙就等于离开老城，自己的生活会在某座城门处被切成两段。', '天色从橙色变成深蓝，他经过转角、城门和宽阔的墙顶。现存西安城墙主要形成于明代，后来持续修缮；过去的防御设施今天仍被保护，也进入城市公共生活。周遥小时候在墙下骑车，上学后又常来跑步，这些记忆并不只在墙内。回到永宁门时，跑表完成一整圈，屏幕亮起提示。原本这里应是终点，母亲却发来新家阳台的照片，远处正能看见亮起的城墙。周遥没有按停计时。他下城后继续向南跑，穿过晚高峰的路口。城墙灯光在身后合成一圈，而跑表上的距离越过那一圈。']),
+  _xianLevel(5, ['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他把这十三公里多的环线当成一场私人告别：跑表归零，绕城一周，再在永宁门结束，好像这样就能把“城内生活”整齐收好。夕阳从南墙斜过去，砖石、垛口和城楼留下长影。向内是熟悉的街巷、院落与钟楼方向，向外是车流、地铁口和不断延伸的现代城区。母亲发来语音，说搬家车已到，新家的第一顿饭等他。周遥只回了一个“好”。他继续跑，却反复想：住址一旦越过城墙，自己和老城的关系是不是也会在城门处结束。', '天色由金黄转成深蓝，他沿封闭的长方形城墙经过转角与城门。现存城墙在明洪武年间形成今天的主要尺度，并在后世持续修缮；墙体、城门、护城河等共同构成需要长期保护的遗产。周遥并没有把这些当成讲解词。他记得小时候在护城河边学骑车，也记得高考前沿南门附近慢跑，生活早就不断进出城门。再次看见永宁门时，跑表完成一整圈，震动提醒他“目标完成”。原本这就是终点。母亲此时发来一张新家阳台的照片，夜色里远远能看见城墙灯光。周遥停了半步，没有按停计时，而是直接下城，沿南边街道继续跑向新家。身后灯线围住老城，跑表的数字却越过了完整的一圈。']),
+  _xianLevel(6, ['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他故意把这条十三点七四公里左右的环线设成“最后一次绕城”：从南门出发，沿墙跑完封闭的一周，再回到原点，把城内生活像训练记录一样保存起来。夕阳落到城楼一侧，砖石、女儿墙和垛口被拉出长影。向内是熟悉的街巷与院落，向外是车流、地铁线和更远的新住宅。母亲发来语音，说搬家车已经卸完，新家的第一顿饭等他回来。周遥只回了一个“好”。他继续跑，心里却固执地把住址变化理解成身份变化：搬出城墙以后，自己是不是就不再属于老城？', '暮色逐渐压下来，他沿城墙经过不同方向的城门与转角。现存西安城墙主要形成于明洪武七年至十一年，建立在更早城市墙体基础上；墙体、城门、附属建筑和护城河属于整体保护对象。过去，宽阔墙顶服务防御、巡查和人员物资调动；今天，这条环线又承载保护、展示与公共活动。周遥没有停下来背年代。他想起小时候在环城公园骑车，想起中学时从城内坐车去城外补课，也想起近几年常把城墙当跑步坐标。那些生活从来没有在门洞前断开。夜色完全落下，他回到永宁门，跑表震动，显示一整圈完成。母亲恰好发来新家阳台的照片，远处城墙刚亮灯。周遥抬手，本可以按下停止，却把手指移开。他下城后继续向南跑，穿过晚高峰的路口。身后的灯线封成一圈，跑表的距离却继续向前。']),
+  _xianLevel(7, ['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他故意把十三点七四公里左右的环线设成一场私人告别：从南门出发，沿封闭城墙跑完一周，再回到原点，让“住在城里”的日子像一次训练记录那样有清楚的起点和终点。夕阳贴着城楼下降，砖石、女儿墙和垛口的影子被拉长。墙内是熟悉的街巷、院落和钟楼方向，墙外是车流、地铁口与继续生长的住宅区。母亲发来语音，说搬家车已经卸完，新家的厨房第一次开火，让他跑完直接过去。周遥只回了一个“好”。他没有舍不得新家；房间更亮，通勤也方便。他真正不安的是另一件事：如果地址离开城墙以内，自己从小建立的“西安人”感觉会不会也跟着变薄？', '暮色由金黄转成蓝黑，他沿城墙经过不同方向的城门和转角。现存西安城墙的主体在明洪武年间扩建形成，南墙和西墙部分利用更早的城市墙体基础；今天，城墙墙体、城门、附属建筑和护城河受到整体保护。过去宽阔墙顶服务防御、巡查与调动，如今同一条环线又进入日常公共生活。周遥并没有停下来读讲解牌。他只是不断遇见自己的路线：小学时在环城公园学骑车，中学时每天穿过城门去上课，大学后回家常沿南墙跑步。所谓“城内”和“城外”，在地图上清楚，在生活里却被公交、亲友、学校和习惯反复连接。夜色完全落下，他再次看见永宁门。跑表震动，显示整圈完成。他本来应该在这里按停，让告别成立。母亲恰好发来新家阳台的照片，远处一段城墙刚亮灯。周遥停了半步，把已经抬起的手放下，没有结束计时。他下城，沿南边街道继续跑向新家。城墙灯光在身后围成闭合的一圈，跑表上的数字却越过了那条闭环。']),
+  _xianLevel(8, ['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他刻意把十三点七四公里左右的环线设成一场私人告别：从南门起跑，沿封闭城墙绕回原点，再停止计时，让二十多年“住在城里”的生活也得到一个干净的句号。夕阳贴着城楼下降，砖石、女儿墙和垛口被拉出长影。墙内是熟悉的街巷、院落与钟楼轮廓，墙外是车流、地铁线和扩展的住宅区。母亲发来语音，说搬家车已经卸完，新家的厨房第一次开火，让他跑完直接过去。周遥并不排斥新家：房间更亮，父母上下班也方便。他介意的是“搬出去”这三个字，仿佛住址越过城墙以后，童年路线和归属也必须改名。为了让这种不安显得可以控制，他才给今天安排了一个明确的圆周和终点。', '太阳落下以后，他沿长方形城墙继续向前。现存西安城墙的主体在明洪武七年至十一年形成今天的主要尺度，部分墙段承接更早的城市墙体基础；墙体、城门、附属建筑和护城河被整体保护。过去，宽阔的墙顶属于城市防御体系，也服务巡查和调动；今天，它又被保护、监测并进入市民运动与公共文化生活。周遥没有把跑步变成历史课。他只是发现自己的生活早就不断穿过这套空间：小时候在环城公园学骑车，中学每天从城内坐车到城外，大学以后又把南墙当作返乡跑步的坐标。城门在军事体系里曾控制出入，现代生活却用日常路线把内外缝在一起。夜色完全落下，他再次看见永宁门。跑表震动，整圈完成。他原本准备按停，让这里成为告别的句点；母亲却恰好发来新家阳台的照片，远处城墙灯光刚亮，弟弟还在照片角落举着两只没拆封的纸箱。周遥笑了，把手指从停止键上移开。他下城后继续向南跑，穿过晚高峰路口。城墙在身后围成清楚的闭环，跑表上的距离却继续增长。那一晚，他带到新家的不是城墙里的一块东西，而是一条没有在永宁门结束的路线。']),
+  _xianLevel(9, ['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他刻意把十三点七四公里左右的环线设成一场私人告别：从南门起跑，沿封闭城墙绕回原点，再停止计时，让二十多年“住在城里”的日子也得到一个干净的句号。夕阳沿城楼一侧下降，砖石、女儿墙、垛口和墙顶路面被拉出长影。墙内是熟悉的街巷、院落与钟楼轮廓，墙外是车流、地铁线和扩展的现代城区。母亲发来语音，说搬家车已经卸完，新家的厨房第一次开火，让他跑完直接过去。周遥并不反感新家：房间更亮，父母通勤更方便，弟弟也离学校更近。他真正不安的是“搬出城墙”被自己偷偷解释成“搬出老西安”。如果住址改变，童年路线和归属感，会不会也在门洞里被截断？于是他给这次跑步规定了闭合的一圈，希望用一个可测量的终点处理一件无法测量的变化。', '太阳落下以后，他沿长方形城墙经过不同方向的城门和转角。现存西安城墙主体在明洪武年间扩建形成，部分南、西墙段利用更早的城市墙体基础；1961年，西安城墙被列入第一批全国重点文物保护单位。今天，墙体、城门、附属建筑和护城河被持续保护，现代监测也进入维护。对周遥来说，这些事实并没有替他回答“属于哪里”。真正改变他的，是一路不断出现的私人路线：小时候在环城公园学骑车，中学每天穿城门去上课，周末跟家人去城外办事，大学后回家又沿南墙跑步。军事防御体系曾经需要清楚的出入口，但现代生活把同一座城市的内外用公交、学校、亲友与习惯反复缝合。夜色完全落下，他再次看见永宁门。跑表震动，整圈完成。他原本准备按停，让“最后一次绕城”成立；母亲却恰好发来新家阳台的照片，城墙灯光在远处横着一段，弟弟站在纸箱旁催他吃饭。周遥抬起手，停了半步，又把手指从停止键上移开。他下城，沿南边街道继续跑向新家。身后的城墙围成完整亮环，跑表上的距离却越过十三点七四公里继续增加。到新家楼下时，计时还在走。他这才按停，把这条记录保存成一条从老家门口经过城墙、再抵达新家的连续路线。']),
+  _xianLevel(10, ['周遥二十二岁，从小跟父母住在西安城墙内的老街。这个周末，全家要搬到南边城外的新家。傍晚，他从永宁门登上西安城墙，给跑表按下开始，决定完整跑一圈。他刻意把十三点七四公里左右的环线设成一场私人告别：从南门起跑，沿封闭城墙绕回原点，再停止计时，让二十多年“住在城里”的生活得到一个干净句号。夕阳沿城楼下降，砖石、女儿墙、垛口和宽阔墙顶拉出长影。墙内是熟悉的街巷、院落与钟楼方向，墙外是车流、地铁线和扩展的新城区。母亲发来语音，说搬家车已卸完，新家的第一顿饭等他。周遥并不排斥新生活：新家更亮，父母通勤更方便，弟弟离学校也近。他真正介意的是“搬出去”被自己解释成身份变化。城墙在地图上清楚画出内外，他便把记忆、关系和归属也塞进这条几何线里，想用一次可量化的闭环证明某段生活已经结束。', '太阳落下以后，他沿长方形城墙经过城门、转角和不同墙段。现存西安城墙主体在明洪武七年至十一年形成今天的主要尺度，南墙、西墙部分承接更早城市墙体基础；古代防御体系用墙体、城门、附属建筑与护城河组织防守、出入、巡查和调动。1961年，西安城墙被列入第一批全国重点文物保护单位，今天仍通过法规、监测和修缮持续保护。周遥没有因此突然“理解历史”。真正改写终点线的，是一路撞上的私人路线：小时候在环城公园学骑车，中学每天穿城门上课，亲友和日常活动一直分布在墙内墙外，大学以后他又把南墙当返乡跑步坐标。夜色完全落下，他回到永宁门，跑表震动，整圈完成。母亲恰好发来新家阳台的照片：远处城墙亮灯，弟弟站在纸箱旁催他吃饭。周遥抬手，手指碰到停止键又移开。他直接下城，沿南边街道继续跑。跑表越过十三点七四公里继续增加。到新家楼下，他才按停并保存路线。图上，城墙是闭合长方形，轨迹却从永宁门伸到新住址。第二天，他把这条记录命名为“回家”。']),
 ]);
 
 WordEntry _word(String word, String pinyin, String part, String simple, String vi, String en, String symbol) => WordEntry(
@@ -194,13 +222,134 @@ const xianCityWallWordFirstAppears = <String, int>{
   '归属感': 9, '全国重点文物保护单位': 9,
 };
 
-DiscoveryEntry _discovery(String text) => DiscoveryEntry(
-  text: text,
-  pinyin: 'Xī’ān Chéngqiáng de lìshǐ jiégòu yǔ jīntiān de chéngshì shēnghuó zài gùshì lǐ liánjiē qǐlái.',
-  simpleChinese: text,
-  vietnamese: 'Khám phá về tường thành Tây An: $text',
-  english: 'Xi’an City Wall discovery: $text',
-);
+const xianCityWallSourceLedger = <Map<String, String>>[
+  {
+    'id': 'xian-local-gazetteer-wall',
+    'publisher': '陕西省地方志办公室',
+    'url': 'https://dfz.shaanxi.gov.cn/zslm/zjyd/fzsy/200611/t20061123_2621352.html',
+    'supports': '明洪武七年起修筑；西、南墙沿用更早城垣；1983年起大规模修缮与环城建设。',
+  },
+  {
+    'id': 'unesco-ming-qing-walls-5324',
+    'publisher': 'UNESCO World Heritage Centre',
+    'url': 'https://whc.unesco.org/en/tentativelists/5324/',
+    'supports': '西安城墙明代扩建、西南墙基时间层、1961年首批国保、1983年综合修缮，以及“中国明清城墙”预备名录身份。',
+  },
+  {
+    'id': 'mofcom-xian-historic-city-regulation-2025',
+    'publisher': '商务部全球法规网（西安市地方性法规）',
+    'url': 'https://policy.mofcom.gov.cn/claw/clawContent.shtml?id=104518',
+    'supports': '历史城区包括西安城墙区域及其以内完整片区；城墙、城门、护城河外沿与历史文化街区属系统保护范围。',
+  },
+  {
+    'id': 'xinhua-xian-digital-conservation-2026',
+    'publisher': '新华社',
+    'url': 'https://www.news.cn/culture/20260108/221ab2e65a65494b8e994ca76e591896/c.html',
+    'supports': '13.74公里长度；无损检测、裂缝位移测量、数字孪生与持续监测管理。',
+  },
+];
+
+const xianCityWallClaimLedger = <Map<String, String>>[
+  {'claim': '现存西安城墙主体于明代形成今日主要规模，西、南墙段承接更早城垣基础。', 'source': 'xian-local-gazetteer-wall + unesco-ming-qing-walls-5324', 'status': 'ALLOWED'},
+  {'claim': '西安城墙全长约13.74公里。', 'source': 'xinhua-xian-digital-conservation-2026', 'status': 'ALLOWED'},
+  {'claim': '西安城墙于1961年列入第一批全国重点文物保护单位。', 'source': 'unesco-ming-qing-walls-5324', 'status': 'ALLOWED'},
+  {'claim': '西安城墙是“中国明清城墙”世界遗产预备名录组成部分，不等于已列入世界遗产名录。', 'source': 'unesco-ming-qing-walls-5324', 'status': 'ALLOWED'},
+  {'claim': '今日保护包括无损检测、裂缝和位移测量、数字化数据管理。', 'source': 'xinhua-xian-digital-conservation-2026', 'status': 'ALLOWED'},
+  {'claim': '历史城区、城墙、城门、护城河与历史文化街区需要整体保护。', 'source': 'mofcom-xian-historic-city-regulation-2025', 'status': 'ALLOWED'},
+  {'claim': '周遥、其家人、搬家、跑步记录、对话与“回家”命名。', 'source': 'FICTION-GOVERNANCE', 'status': 'ALLOWED FICTION'},
+];
+
+const xianCityWallFactFictionLedger = <Map<String, String>>[
+  {'item': '城墙长度、明代主体、更早城垣基础、1961年国保身份、预备名录与当代监测。', 'category': 'VERIFIED WORLD', 'status': 'ALLOWED'},
+  {'item': '周遥、父母、弟弟、新旧住所与个人生活路线。', 'category': 'FICTIONAL ORDINARY PEOPLE / BACKSTORY / RELATIONSHIP', 'status': 'ALLOWED'},
+  {'item': '告别跑、母亲消息、不按停跑表、继续跑到新家与路线命名。', 'category': 'FICTIONAL PRIVATE ACTION / CHOICE / CONSEQUENCE', 'status': 'ALLOWED'},
+  {'item': '把周遥的选择写成真实新闻或纪录事件。', 'category': 'FICTION PRESENTED AS DOCUMENTED HISTORY', 'status': 'BLOCKED / NOT USED'},
+  {'item': '把世界遗产预备名录写成已列入世界遗产，或把西安城墙时间层压成单一朝代。', 'category': 'UNSUPPORTED / FALSE FACTUAL CLAIM', 'status': 'BLOCKED / NOT USED'},
+  {'item': '真实历史人物的私人动机、对话或未载行动。', 'category': 'REAL PERSON HIGH-PROTECTION', 'status': 'NOT USED'},
+];
+
+WordEntry _xianWordWithStoryExamples(
+  int level,
+  List<String> paragraphs,
+  WordEntry word,
+) {
+  final paragraphIndex = paragraphs.indexWhere(
+    (paragraph) => paragraph.contains(word.word),
+  );
+  if (paragraphIndex < 0) {
+    throw StateError(
+      'Missing Xi\'an current Story source for Lv$level ${word.word}',
+    );
+  }
+  final source = paragraphs[paragraphIndex];
+  final vietnamese = _xianStoryVietnamese[level - 1][paragraphIndex];
+  final english = _xianStoryEnglish[level - 1][paragraphIndex];
+  return WordEntry(
+    word: word.word,
+    pinyin: word.pinyin,
+    partOfSpeech: word.partOfSpeech,
+    simpleChinese: word.simpleChinese,
+    translation: word.translation,
+    englishDefinition: word.englishDefinition,
+    symbol: word.symbol,
+    examples: List<WordExample>.unmodifiable(<WordExample>[
+      WordExample(
+        chinese: source,
+        pinyin: _xianPinyin(source),
+        vietnamese: vietnamese,
+        english: english,
+      ),
+      WordExample(
+        chinese: '故事原句：$source',
+        pinyin: _xianPinyin('故事原句：$source'),
+        vietnamese: 'Câu trong truyện: $vietnamese',
+        english: 'Story sentence: $english',
+      ),
+      WordExample(
+        chinese: '回看故事原句：$source',
+        pinyin: _xianPinyin('回看故事原句：$source'),
+        vietnamese: 'Đọc lại câu trong truyện: $vietnamese',
+        english: 'Review the story sentence: $english',
+      ),
+    ]),
+  );
+}
+
+DiscoveryEntry _discovery(String text) {
+  final support = switch (text) {
+    '西安城墙周长约13.74公里，今天仍形成封闭的长方形环线。' => ('Tường thành Tây An dài khoảng 13,74 km và ngày nay vẫn tạo thành một tuyến vòng hình chữ nhật khép kín.', 'Xi’an City Wall is about 13.74 kilometres long and still forms a closed rectangular circuit.'),
+    '明清时期西安城墙传统四门分别为东长乐、南永宁、西安定、北安远；永宁门是南门。' => ('Bốn cổng truyền thống thời Minh–Thanh là Trường Lạc phía đông, Vĩnh Ninh phía nam, An Định phía tây và An Viễn phía bắc; Vĩnh Ninh là cổng nam.', 'The four traditional Ming–Qing gates were Changle in the east, Yongning in the south, Anding in the west, and Anyuan in the north; Yongning is the southern gate.'),
+    '官方资料记载城墙顶宽约12至14米；历史上宽阔墙顶有利于防御、巡查和人员物资调动。' => ('Tư liệu chính thức ghi mặt tường rộng khoảng 12–14 m; trong lịch sử, bề rộng này hỗ trợ phòng thủ, tuần tra và điều động người, vật tư.', 'Official material records a wall-top width of about 12–14 metres; historically, that width supported defence, patrol, and movement of people and supplies.'),
+    '现存西安城墙主体在明洪武七年至十一年（1374—1378）形成今天的主要尺度，并承接更早城市墙体基础。' => ('Phần chủ thể còn lại của tường thành đạt quy mô chính ngày nay vào năm Hồng Vũ thứ 7–11 (1374–1378), đồng thời tiếp nối nền tường đô thị sớm hơn.', 'The surviving wall reached its principal present scale in the seventh to eleventh Hongwu years (1374–1378), while carrying forward earlier urban-wall foundations.'),
+    '《西安城墙保护条例》把明代城墙墙体、城门、附属建筑、护城河及其遗址遗迹作为西安城墙保护对象。' => ('Quy định bảo vệ tường thành Tây An bao gồm thân tường thời Minh, cổng, công trình phụ, hào cùng các di chỉ và dấu tích liên quan.', 'The Xi’an City Wall conservation regulation protects the Ming wall body, gates, associated structures, moat, and related sites and remains.'),
+    '城墙曾属于城市防御体系，今天在保护前提下也承载参观、运动等公共活动。' => ('Tường thành từng thuộc hệ thống phòng thủ đô thị; ngày nay, trong điều kiện được bảo vệ, nó còn phục vụ tham quan, vận động và hoạt động công cộng.', 'The wall once belonged to the urban defence system; today, under conservation, it also supports visiting, exercise, and public activity.'),
+    '1983年西安启动环城建设与大规模城墙修复工程，此后保护进入更系统、持续的阶段。' => ('Năm 1983, Tây An khởi động xây dựng vành đai cùng công trình tu sửa tường thành quy mô lớn; từ đó việc bảo vệ trở nên hệ thống và liên tục hơn.', 'In 1983 Xi’an began ring-city construction and large-scale wall restoration, after which conservation entered a more systematic and continuous phase.'),
+    '现代保护采用监测点、无损检测和数字化技术跟踪沉降、位移等风险，让传统城墙进入持续的科学管理。' => ('Bảo tồn hiện đại dùng điểm quan trắc, kiểm tra không phá hủy và công nghệ số để theo dõi lún, dịch chuyển và các rủi ro khác.', 'Modern conservation uses monitoring points, non-destructive testing, and digital methods to track settlement, displacement, and other risks.'),
+    '西安城墙于1961年被列入第一批全国重点文物保护单位；它也是“中国明清城墙”世界文化遗产预备名录组成部分之一。' => ('Năm 1961, tường thành Tây An được xếp vào đợt đầu di tích trọng điểm cấp quốc gia; nó cũng là một thành phần của hồ sơ dự kiến “Tường thành Minh–Thanh Trung Quốc”.', 'Xi’an City Wall entered the first group of National Key Cultural Relic Protection Units in 1961 and is also one component of the “City Walls of the Ming and Qing Dynasties” World Heritage tentative-list property.'),
+    '城墙内仍是西安历史城区，包含历史文化街区和大量各级文物资源；城墙与当代交通、居住、工作和公共生活并存。' => ('Bên trong tường thành vẫn là khu đô thị lịch sử Tây An, có các khu phố lịch sử–văn hóa và nhiều tài nguyên di tích; tường thành cùng tồn tại với giao thông, cư trú, công việc và đời sống công cộng hiện đại.', 'Inside the wall remains Xi’an’s historic urban area, with historic-cultural districts and many heritage resources; the wall coexists with contemporary transport, housing, work, and public life.'),
+    _ => throw StateError('Missing Xi\'an Discovery language support: $text'),
+  };
+  return DiscoveryEntry(
+    text: text,
+    pinyin: _xianPinyin(text),
+    simpleChinese: text,
+    vietnamese: support.$1,
+    english: support.$2,
+  );
+}
+
+const _xianDiscoveryIndexesByLevel = <List<int>>[
+  <int>[0, 1],
+  <int>[1, 0],
+  <int>[2, 1],
+  <int>[3, 2],
+  <int>[4, 3, 2],
+  <int>[5, 4, 3],
+  <int>[6, 5, 4],
+  <int>[7, 6, 5],
+  <int>[8, 7, 4],
+  <int>[9, 8, 7],
+];
 
 final xianCityWallDiscoverySpecs = List<XianDiscoverySpec>.unmodifiable([
   XianDiscoverySpec(level: 1, title: '一圈有多长', storyLink: '周遥把完整一圈设成告别路线。', entry: _discovery('西安城墙周长约13.74公里，今天仍形成封闭的长方形环线。'), keyTerms: const ['13.74公里', '环线'], learnerInsight: '城墙的几何闭合解释了周遥为何误把它当成生活的终点。', check: '周遥为什么能用“一整圈”给自己设终点？', answer: '因为城墙本身形成封闭环线。', sourceIds: const ['shaanxi-gov-city-wall-2021', 'xian-planning-photogrammetry']),
@@ -334,13 +483,15 @@ JourneyLevelContent xianCityWallOnePassLevelContent(int requestedLevel) {
   final visibleWords = xianCityWallOnePassWords
       .where((entry) => story.contains(entry.word))
       .take((4 + level).clamp(5, 12))
+      .map((word) => _xianWordWithStoryExamples(level, base.storyParagraphs, word))
       .toList(growable: false);
   return JourneyLevelContent(
     storyParagraphs: base.storyParagraphs,
     storyAnnotations: base.storyAnnotations,
     words: List<WordEntry>.unmodifiable(visibleWords),
     discoveries: List<DiscoveryEntry>.unmodifiable(<DiscoveryEntry>[
-      xianCityWallDiscoverySpecs[level - 1].entry,
+      for (final index in _xianDiscoveryIndexesByLevel[level - 1])
+        xianCityWallDiscoverySpecs[index].entry,
     ]),
     wonderQuestion: '周遥为什么在跑完一整圈后故意不按停跑表？',
     expressQuestion: '城墙的闭合形状与周遥连续的生活路线怎样形成对照？',
