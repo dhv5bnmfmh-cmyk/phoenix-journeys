@@ -132,6 +132,18 @@ Canonical governance record for recurring Phoenix development and validation fai
 
 ---
 
+## SEMANTIC SNAPSHOT INDEX != STABLE ACTIVATION IDENTITY
+
+**Failure:** run `32839390229`, job `97775317225`, proved Chromium Lv1/Lv3/Lv5/Lv8/Lv10 and WebKit Lv1 six-stage PASS. During WebKit Lv3, known Vocabulary and Chinese voice dialogs were recognized and dismissed, but the final Discovery snapshot reported `Phoenix 中文难度 2 级 / Lv.2` while the harness believed it was validating Lv3, then failed with `Lv3 Discovery narration did not reach stable completed semantics`. The modal close path activated `page.locator('flt-semantics').nth(closeRecord.index)` using an index captured from an earlier semantics snapshot.  
+**Classification:** `HARNESS / STALE-SEMANTIC-INDEX ACTIVATION FALSE NEGATIVE`  
+**Root Cause:** Flutter can reorder its semantics nodes between snapshot collection and a WebKit tap. A dynamic `nth(index)` locator is not a stable identity; if the index shifts before activation, the tap can target a different live control. The harness also accepted a target difficulty after a single observation and did not re-prove the level at later Stage boundaries, allowing a level drift symptom to surface later as an unrelated narration error.  
+**Correct Fix:** after resolving an explicitly allowed modal close control, bind to the concrete live element, re-check its role/text identity, then click/tap that fixed handle so semantic reordering cannot retarget the action. Require the requested Phoenix level to settle across consecutive reads and re-assert the target level at Stage boundaries. If the learner product itself then changes level, report an explicit `LEVEL DRIFT` failure instead of continuing with wrong-level assertions.  
+**Forbidden Fix:** do not change learner difficulty controls, narration UI, Story/Discovery content, or disable level assertions. Do not treat one transient target-level read as durable state. Do not use a stale semantic-tree index as an activation identity.  
+**Cheap Preflight:** model a semantics reorder where the old close-control index now points to another button and prove the resolver requires the original live role/text identity; include stable-level positive and transient/drift negative sequences. In the browser-mode preflight, set WebKit to Lv3 and require stable consecutive Lv3 reads before the full matrix.  
+**Rules:** `SEMANTIC SNAPSHOT INDEX != STABLE ACTIVATION IDENTITY`; `RESOLVE -> BIND LIVE ELEMENT -> RECHECK -> ACTIVATE`; `TARGET LEVEL MUST BE A STABLE POSTCONDITION`; `LEVEL DRIFT MUST FAIL AT THE STAGE BOUNDARY`
+
+---
+
 ## CURRENT LEVEL LEAKAGE
 
 **Failure pattern:** stale/hidden/non-active level content can accidentally satisfy or fail adaptive assertions.  
