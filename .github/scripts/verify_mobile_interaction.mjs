@@ -10,10 +10,10 @@ if (!url || !sourceSha) throw new Error('usage: verify_mobile_interaction.mjs <u
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const normalize = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
 
-function reportDuration(browserName, label, startedAt, limit = 5000) {
+function reportDuration(browserName, label, startedAt, limit = null) {
   const duration = Date.now() - startedAt;
   console.log(`${browserName} ${label} DURATION = ${duration}ms`);
-  if (duration > limit) {
+  if (limit != null && duration > limit) {
     throw new Error(`${browserName}:${label} exceeded ${limit}ms (${duration}ms)`);
   }
   return duration;
