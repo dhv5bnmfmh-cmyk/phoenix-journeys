@@ -61,6 +61,12 @@ jobs:
           set -euo pipefail
           node .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs --story-anchor-preflight
 
+      - name: Cheap Shanghai Discovery whole-stage corpus fixture preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs --discovery-corpus-preflight
+
       - name: Verify PR 199 exact Cloudflare preview release
         shell: bash
         run: |
