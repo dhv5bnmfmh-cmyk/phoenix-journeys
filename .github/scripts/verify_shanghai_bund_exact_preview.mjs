@@ -8,6 +8,32 @@ if (!baseUrl || !sourceSha) throw new Error('usage: verify_shanghai_bund_exact_p
 const levels = [1, 3, 5, 8, 10];
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
+const interactionModeByPage = new WeakMap();
+
+const interactionModes = Object.freeze({
+  desktop: 'desktop-click',
+  touch: 'mobile-touch',
+});
+
+function registerInteractionMode(page, mode) {
+  if (!Object.values(interactionModes).includes(mode)) {
+    throw new Error(`unsupported browser interaction mode: ${mode}`);
+  }
+  interactionModeByPage.set(page, mode);
+}
+
+async function activateSemantic(page, locator, { timeout = 10000 } = {}) {
+  const mode = interactionModeByPage.get(page);
+  if (mode === interactionModes.desktop) {
+    await locator.click({ timeout });
+    return;
+  }
+  if (mode === interactionModes.touch) {
+    await locator.tap({ timeout });
+    return;
+  }
+  throw new Error('browser interaction mode was not registered before semantic activation');
+}
 
 async function records(page) {
   return page.locator('flt-semantics').evaluateAll((els) => els.map((el, index) => {
@@ -61,7 +87,7 @@ async function exists(page, needle, options = {}) {
 async function tapButton(page, needle, { prefix = false, timeout = 15000 } = {}) {
   const node = await findSemantic(page, needle, { role: 'button', prefix, timeout });
   if (await node.getAttribute('aria-disabled') === 'true') throw new Error(`button disabled: ${needle}`);
-  await node.tap({ timeout: 10000 });
+  await activateSemantic(page, node);
 }
 
 async function visibleText(page) {
@@ -72,6 +98,41 @@ async function enableSemantics(page) {
   const placeholder = page.locator('flt-semantics-placeholder').first();
   if (await placeholder.count()) await placeholder.evaluate((el) => el.click());
   await page.locator('flt-semantics').first().waitFor({ state: 'attached', timeout: 30000 });
+}
+
+function previewUrl() {
+  const sep = baseUrl.includes('?') ? '&' : '?';
+  return `${baseUrl}${sep}unlock=all&prototype=journeys&v=${sourceSha}`;
+}
+
+async function loadExperience(page) {
+  const response = await page.goto(previewUrl(), { waitUntil: 'load', timeout: 140000 });
+  if (!response?.ok()) throw new Error(`Preview HTTP load failed: ${response?.status()}`);
+  await page.waitForFunction(() => document.querySelector('flutter-view') != null, null, { timeout: 140000 });
+  await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
+  await enableSemantics(page);
+}
+
+function contextOptions(browserName) {
+  if (browserName === 'webkit') {
+    return {
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 3,
+      isMobile: true,
+      hasTouch: true,
+      locale: 'zh-CN',
+      reducedMotion: 'reduce',
+    };
+  }
+  return {
+    viewport: { width: 1440, height: 1000 },
+    locale: 'zh-CN',
+    reducedMotion: 'reduce',
+  };
+}
+
+function interactionModeFor(browserName) {
+  return browserName === 'webkit' ? interactionModes.touch : interactionModes.desktop;
 }
 
 async function currentLevel(page) {
@@ -169,7 +230,7 @@ async function ensureGrammarSegment(page) {
   const rs = await records(page);
   const segment = rs.find((r) => r.visible && !r.disabled && r.role === 'checkbox' && /[\u3400-\u9fff]/.test(recText(r)));
   if (!segment) throw new Error('grammar repair segment selector not found');
-  await page.locator('flt-semantics').nth(segment.index).tap({ timeout: 10000 });
+  await activateSemantic(page, page.locator('flt-semantics').nth(segment.index));
 }
 
 async function chooseChallenge(page) {
@@ -183,7 +244,7 @@ async function chooseChallenge(page) {
     const rs = await records(page);
     const hit = rs.find((r) => r.visible && !r.disabled && ((target.label && clean(r.label) === target.label) || (r.role === target.role && recText(r) === target.text)));
     if (!hit) throw new Error('challenge target disappeared');
-    await page.locator('flt-semantics').nth(hit.index).tap({ timeout: 10000 });
+    await activateSemantic(page, page.locator('flt-semantics').nth(hit.index));
     await sleep(120);
   }
 }
@@ -220,25 +281,37 @@ async function assertNoFatal(page, pageErrors, label) {
   }
 }
 
+async function runBrowserModePreflight(browserType, browserName) {
+  const browser = await browserType.launch({ headless: true });
+  const context = await browser.newContext(contextOptions(browserName));
+  const page = await context.newPage();
+  registerInteractionMode(page, interactionModeFor(browserName));
+  try {
+    await loadExperience(page);
+    await findSemantic(page, 'PHOENIX JOURNEYS', { timeout: 30000 });
+    const stableButton = await findSemantic(page, '选择城市', { role: 'button', prefix: true, timeout: 15000 });
+    await activateSemantic(page, stableButton);
+    await findSemantic(page, '选择城市与地点', { timeout: 15000 });
+    if (browserName === 'webkit') {
+      console.log('BROWSER MODE PREFLIGHT WEBKIT MOBILE = PASS | INTERACTION=tap');
+    } else {
+      console.log('BROWSER MODE PREFLIGHT CHROMIUM DESKTOP = PASS | INTERACTION=click');
+    }
+  } finally {
+    await context.close();
+    await browser.close();
+  }
+}
+
 async function runLevel(browserType, browserName, level) {
   const browser = await browserType.launch({ headless: true });
-  const mobile = browserName === 'webkit';
-  const context = await browser.newContext(mobile ? {
-    viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: 'zh-CN', reducedMotion: 'reduce',
-  } : {
-    viewport: { width: 1440, height: 1000 }, locale: 'zh-CN', reducedMotion: 'reduce',
-  });
+  const context = await browser.newContext(contextOptions(browserName));
   const page = await context.newPage();
+  registerInteractionMode(page, interactionModeFor(browserName));
   const errors = [];
   page.on('pageerror', (e) => errors.push(e?.stack || e?.message || String(e)));
   try {
-    const sep = baseUrl.includes('?') ? '&' : '?';
-    const url = `${baseUrl}${sep}unlock=all&prototype=journeys&v=${sourceSha}`;
-    const response = await page.goto(url, { waitUntil: 'load', timeout: 140000 });
-    if (!response?.ok()) throw new Error(`Preview HTTP load failed: ${response?.status()}`);
-    await page.waitForFunction(() => document.querySelector('flutter-view') != null, null, { timeout: 140000 });
-    await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
-    await enableSemantics(page);
+    await loadExperience(page);
     await openShanghaiBund(page);
     await waitStage(page, 1);
     await setLevel(page, level);
@@ -250,21 +323,25 @@ async function runLevel(browserType, browserName, level) {
     await waitStage(page, 2);
     const vocabulary = await visibleText(page);
     if (!traceVocabulary(story, vocabulary).length) throw new Error(`Lv${level} Vocabulary has no visible Story trace`);
+    await assertNoFatal(page, errors, `${browserName} Lv${level} Vocabulary`);
 
     await tapButton(page, '继续', { prefix: true });
     await waitStage(page, 3);
     const discovery = await visibleText(page);
     for (const anchor of discoveryAnchors[level]) if (!discovery.includes(anchor)) throw new Error(`Lv${level} Discovery missing ${anchor}`);
+    await assertNoFatal(page, errors, `${browserName} Lv${level} Discovery`);
 
     await tapButton(page, '继续', { prefix: true });
     await waitStage(page, 4);
     await findSemantic(page, '提交第 1 / 3 次答案', { role: 'button', prefix: true, timeout: 15000 });
     await completeChallenge(page);
+    await assertNoFatal(page, errors, `${browserName} Lv${level} Challenge`);
 
     await tapButton(page, '继续留下回忆', { prefix: true });
     await waitStage(page, 5);
     const memory = await visibleText(page);
     if (!memory.includes('林岸') && !memory.includes('旧提单')) throw new Error(`Lv${level} Memory missing Shanghai closure`);
+    await assertNoFatal(page, errors, `${browserName} Lv${level} Memory`);
 
     await tapButton(page, '结束旅程', { prefix: true });
     await waitStage(page, 6);
@@ -282,6 +359,10 @@ async function runLevel(browserType, browserName, level) {
     await browser.close();
   }
 }
+
+await runBrowserModePreflight(playwright.chromium, 'chromium');
+await runBrowserModePreflight(playwright.webkit, 'webkit');
+console.log('BROWSER MODE PREFLIGHT = PASS | desktop-click + mobile-touch');
 
 for (const [browserName, browserType] of [['chromium', playwright.chromium], ['webkit', playwright.webkit]]) {
   for (const level of levels) await runLevel(browserType, browserName, level);
