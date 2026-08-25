@@ -1,0 +1,471 @@
+name: Shanghai Bund Preserve-First Verify V2
+
+on:
+  push:
+    branches:
+      - automation/shanghai-bund-preserve-first-verify-v2
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: automation/shanghai-bund-preserve-first-verify-v2
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Apply evidence-scoped Shanghai refinement
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          import textwrap
+
+          legacy = Path('.github/workflows/shanghai-bund-preserve-first-verify.yml').read_text()
+
+          def heredoc_body(path):
+              pattern = rf"cat > {re.escape(path)} <<'DART'\n(?P<body>.*?)\n\s*DART\n"
+              match = re.search(pattern, legacy, re.S)
+              assert match, f'missing heredoc {path}'
+              return textwrap.dedent(match.group('body'))
+
+          Path('app/lib/data/shanghai_bund_level_support.dart').write_text(
+              heredoc_body('app/lib/data/shanghai_bund_level_support.dart') + '\n'
+          )
+
+          # Preserve the existing Story verbatim. Only bind support to the exact
+          # current level/paragraph, refine Discovery sequencing, and strengthen
+          # source provenance.
+          path = Path('app/lib/data/shanghai_bund_one_pass.dart')
+          text = path.read_text()
+          import_anchor = "import 'journey_level_catalog.dart';"
+          assert import_anchor in text, 'missing Shanghai import anchor'
+          text = text.replace(
+              import_anchor,
+              import_anchor + "\nimport 'shanghai_bund_level_support.dart';",
+              1,
+          )
+
+          start = text.index('JourneyLevelContent _bundLevel(')
+          end = text.index('\n\nfinal shanghaiBundOnePassLevels', start)
+          text = text[:start] + '''JourneyLevelContent _bundLevel(int level, List<String> paragraphs) => JourneyLevelContent(
+            storyParagraphs: List<String>.unmodifiable(paragraphs),
+            storyAnnotations: List<ReadingAnnotation>.unmodifiable(<ReadingAnnotation>[
+              for (var i = 0; i < paragraphs.length; i++)
+                shanghaiBundReadingAnnotationFor(level, i, paragraphs[i]),
+            ]),
+            words: const <WordEntry>[],
+            discoveries: const <DiscoveryEntry>[],
+            wonderQuestion: '',
+            expressQuestion: '',
+          );''' + text[end:]
+
+          level_counter = 0
+          def number_level(_):
+              global level_counter
+              level_counter += 1
+              return f'_bundLevel({level_counter}, ['
+          text, count = re.subn(r'_bundLevel\(\[', number_level, text)
+          assert count == 10 and level_counter == 10, f'level calls={count}/{level_counter}'
+
+          word_start = text.index('WordEntry _w(')
+          word_end = text.index('\n\nfinal shanghaiBundOnePassWords', word_start)
+          text = text[:word_start] + '''WordEntry _w(String word, String pinyin, String pos, String zh, String vi,
+                  String en, String source) =>
+              WordEntry(
+                word: word,
+                pinyin: pinyin,
+                partOfSpeech: pos,
+                simpleChinese: zh,
+                translation: vi,
+                englishDefinition: en,
+                symbol: '◇',
+                examples: shanghaiBundWordExamples(source),
+              );''' + text[word_end:]
+
+          discoveries_end_marker = '\n];\n\nconst shanghaiBundOnePassDiscoveryTraces = <RemediatedDiscoveryTrace>['
+          assert discoveries_end_marker in text, 'missing discovery list end'
+          new_discoveries = '''
+            DiscoveryEntry(
+              text:'外滩现海关大楼于1927年建成。它见证了更早开始、又持续变化的上海对外贸易与城市史，因此不能把1843年开埠时的外滩与1927年的现建筑当成同一个时间切片。',
+              simpleChinese:'现海关大楼1927年建成，不能把不同年代的外滩混成同一时刻。',
+              vietnamese:'Tòa nhà Hải quan hiện nay ở Ngoại Than được hoàn thành năm 1927; không thể gộp Ngoại Than năm 1843 và công trình hiện tại vào cùng một lát cắt thời gian.',
+              english:'The present Bund Customs House was completed in 1927, so the Bund of 1843 and the current building cannot be collapsed into the same historical moment.',
+              pinyin:'Wàitān xiàn Hǎiguān Dàlóu yú yī jiǔ èr qī nián jiànchéng. Tā jiànzhèng le gèng zǎo kāishǐ, yòu chíxù biànhuà de Shànghǎi duìwài màoyì yǔ chéngshì shǐ, yīncǐ bùnéng bǎ yī bā sì sān nián kāibù shí de Wàitān yǔ yī jiǔ èr qī nián de xiàn jiànzhù dàngchéng tóng yí gè shíjiān qiēpiàn.'),
+            DiscoveryEntry(
+              text:'现代陆家嘴金融城是在1990年浦东开发开放以后持续发展形成的。把这一现代金融空间直接倒置到十九世纪，会混淆外滩近代贸易金融史与浦东后来形成的城市功能。',
+              simpleChinese:'现代陆家嘴金融城是在1990年浦东开发开放以后逐步形成的。',
+              vietnamese:'Khu tài chính Lục Gia Chủy hiện đại phát triển dần sau khi Phố Đông bắt đầu công cuộc khai phát và mở cửa năm 1990; không nên đảo ngược không gian hiện đại này vào thế kỷ XIX.',
+              english:'Modern Lujiazui Financial City developed after Pudong’s development and opening began in 1990; projecting that modern financial space directly back into the nineteenth century would blur distinct historical stages.',
+              pinyin:'Xiàndài Lùjiāzuǐ Jīnróngchéng shì zài yī jiǔ jiǔ líng nián Pǔdōng kāifā kāifàng yǐhòu chíxù fāzhǎn xíngchéng de. Bǎ zhè yí xiàndài jīnróng kōngjiān zhíjiē dàozhì dào shíjiǔ shìjì, huì hùnxiáo Wàitān jìndài màoyì jīnróng shǐ yǔ Pǔdōng hòulái xíngchéng de chéngshì gōngnéng.'),'''
+          text = text.replace(
+              discoveries_end_marker,
+              new_discoveries + discoveries_end_marker,
+              1,
+          )
+
+          trace_end_marker = '\n];\nconst shanghaiBundOnePassChallenges = <RemediatedChallengeTrace>['
+          assert trace_end_marker in text, 'missing discovery trace end'
+          new_traces = '''
+            RemediatedDiscoveryTrace(discoveryIndex:6,storyEventIds:<String>['BD2-E2','BD2-E5'],sourceIds:<String>['shanghai-gov-customs-house-1927']),
+            RemediatedDiscoveryTrace(discoveryIndex:7,storyEventIds:<String>['BD2-E5','BD2-E9'],sourceIds:<String>['shanghai-gov-pudong-lujiazui-development']),'''
+          text = text.replace(trace_end_marker, new_traces + trace_end_marker, 1)
+
+          plan_marker = '\nconst shanghaiBundOnePassDiscoveryTraces = <RemediatedDiscoveryTrace>['
+          assert plan_marker in text, 'missing discovery plan insertion marker'
+          plan = '''
+          const _shanghaiBundDiscoveryPlan = <List<int>>[
+            <int>[0],
+            <int>[4],
+            <int>[3, 0],
+            <int>[6, 4],
+            <int>[5, 3],
+            <int>[6, 1],
+            <int>[2, 6],
+            <int>[3, 7],
+            <int>[7, 5],
+            <int>[1, 6, 7],
+          ];
+
+          JourneyLevelContent shanghaiBundOnePassLevelContent(int requestedLevel) {
+            final level = requestedLevel.clamp(1, 10).toInt();
+            final base = shanghaiBundOnePassRemediation.levelContent(level);
+            final discoveries = _shanghaiBundDiscoveryPlan[level - 1]
+                .map((index) => shanghaiBundOnePassDiscoveries[index])
+                .toList(growable: false);
+            return JourneyLevelContent(
+              storyParagraphs: base.storyParagraphs,
+              storyAnnotations: base.storyAnnotations,
+              words: base.words,
+              discoveries: List<DiscoveryEntry>.unmodifiable(discoveries),
+              wonderQuestion: base.wonderQuestion,
+              expressQuestion: base.expressQuestion,
+            );
+          }
+          '''
+          text = text.replace(plan_marker, '\n' + textwrap.dedent(plan) + plan_marker, 1)
+
+          old_bill_source = "RemediatedSourceBinding(id:'shanghai-port-trade-document-context',publisher:'Shanghai trade-document context',scope:'海运提单作为普通商业运输文件的对象边界')"
+          new_bill_source = "RemediatedSourceBinding(id:'shanghai-port-trade-document-context',publisher:'全国人民代表大会 / 《中华人民共和国海商法》',scope:'提单作为海上货物运输合同证明、货物收据及承运人据以交付货物的单证之法律边界')"
+          assert old_bill_source in text, 'missing bill source binding'
+          text = text.replace(old_bill_source, new_bill_source, 1)
+
+          source_end_marker = '\n];\n\nfinal shanghaiBundOnePassRemediation = RemediatedJourney('
+          assert source_end_marker in text, 'missing source list end'
+          extra_sources = '''
+            RemediatedSourceBinding(id:'shanghai-gov-customs-house-1927',publisher:'上海市人民政府 / 上海市文化和旅游局',scope:'外滩现海关大楼1927年建成及其历史建筑时间边界'),
+            RemediatedSourceBinding(id:'shanghai-gov-pudong-lujiazui-development',publisher:'上海市人民政府 / 浦东新区人民政府',scope:'1990年浦东开发开放以后陆家嘴现代金融城持续发展形成的时间边界'),'''
+          text = text.replace(source_end_marker, extra_sources + source_end_marker, 1)
+          path.write_text(text)
+
+          # Shared runtime: use Shanghai's level-aware Discovery/questions and
+          # level-aware Memory/Completion. No screen/widget/UI changes.
+          path = Path('app/lib/data/batch_one_adaptive_story_levels.dart')
+          text = path.read_text()
+          old_level = '_ => shanghaiBundOnePassRemediation.levelContent(level),'
+          assert old_level in text, 'missing Shanghai level branch'
+          text = text.replace(old_level, '_ => shanghaiBundOnePassLevelContent(level),', 1)
+
+          qstart = text.index('  final wonderQuestion = experience.id == shanghaiBundJourneyId')
+          qend = text.index('\n\n  return JourneyLevelContent(', qstart)
+          questions = '''  final wonderQuestion = experience.id == shanghaiBundJourneyId
+              ? level == 1
+                  ? '林岸为什么最后没有把旧提单留在西岸？'
+                  : level <= 5
+                      ? '林岸为什么在过江后不再把两岸理解成过去和未来？'
+                      : '历史时间层次为什么让“旧上海到新上海”的直线说法变得不够准确？'
+              : base.wonderQuestion;
+            final expressQuestion = experience.id == shanghaiBundJourneyId
+              ? level == 1
+                  ? '轮渡、旧提单和两岸距离怎样共同推动林岸做出选择？'
+                  : level <= 5
+                      ? '旧海运提单与陆家嘴结算工作在故事里共同组织了哪些流动？'
+                      : '结合外滩长期形成的贸易金融功能与陆家嘴现代结算，解释“变化的是载体，不是流动本身”是否充分。'
+              : base.expressQuestion;'''
+          text = text[:qstart] + textwrap.dedent(questions) + text[qend:]
+
+          memory_marker = 'BatchOneJourneyMemorySpec? batchOneMemorySpecFor('
+          assert memory_marker in text, 'missing memory resolver marker'
+          memory_fn = r'''BatchOneJourneyMemorySpec _shanghaiBundMemorySpecForLevel(int phoenixLevel) {
+            final level = phoenixLevel.clamp(1, 10).toInt();
+            final culturalPoint = switch (level) {
+              1 => '黄浦江把外滩与浦东放进同一条真实跨江关系里；林岸必须实际离开西岸，故事的选择才会发生。',
+              2 => '东金线把浦西金陵东路与浦东东昌路连接起来，轮渡让“过江”成为可执行的城市行动，而不是抽象隐喻。',
+              3 => '海运提单把货物、承运、交付与责任固定成可追踪的商业关系，旧单据因此不是怀旧道具，而是家庭工作经验的具体载体。',
+              4 => '外滩现海关大楼于1927年建成；建筑、黄浦江航运与轮渡共同形成西岸的贸易城市界面，因此不能把1843年的外滩与现建筑混成同一时间切片。',
+              5 => '外滩与陆家嘴隔江同时可见，使林岸能够把“旧/新”从替代关系改读成同一城市中不同阶段、不同工具共同组织流动。',
+              6 => '上海1843年的开埠发生在十九世纪不平等条约体系下；外滩贸易、航运、海关、银行与商业功能经历长期发展，不能被压缩成中性的一夜现代化。',
+              7 => '外滩的贸易、航运、海关、银行与商业机构经过长期聚集和重组；1927年建成的现海关大楼本身也提示需要区分不同历史时段。',
+              8 => '旧提单用纸面组织货物、信用、责任与付款；1990年浦东开发开放以后持续形成的现代陆家嘴金融空间，则以新的基础设施和数字系统组织流动。',
+              9 => '现代陆家嘴金融核心区并不意味着外滩相关金融与航运历史被清空；两岸需要放在同一城市经济系统的长期重组中理解。',
+              _ => '综合1843年的不平等条约背景、1927年现海关大楼的时间边界、1990年后陆家嘴现代金融空间的发展与黄浦江跨江关系，可以区分历史连续性、制度变化与简单“新替旧”叙事。',
+            };
+            final completionLens = switch (level) {
+              1 => '本级收束在一次真实过江与“是否带走旧提单”的选择。',
+              2 => '本级把轮渡路线与职业转向放在同一个可行动的城市空间中。',
+              3 => '本级用提单的运输与责任关系理解旧纸为什么值得带过江。',
+              4 => '本级用1927年现海关大楼的时间边界避免把不同年代的外滩混成一幅静止图。',
+              5 => '本级从两岸同时可见理解“旧/新”不是简单替代。',
+              6 => '本级加入1843年不平等条约背景，并拒绝中性化的一夜现代化叙事。',
+              7 => '本级进一步用长期聚集、制度重组和建筑年代解释外滩功能的形成。',
+              8 => '本级比较纸面单据与1990年后现代金融空间中的数字结算如何组织流动。',
+              9 => '本级把外滩与陆家嘴放入同一城市经济系统进行多角度判断。',
+              _ => '本级综合1843、1927与1990后三个时间层，完成历史、空间与现代金融关系的证据化判断。',
+            };
+            final storyResult = level == 1
+                ? '林岸把旧提单带过黄浦江，仍继续走向新的工作；他没有用丢掉旧纸来证明自己已经离开过去。'
+                : level <= 5
+                    ? '林岸仍选择去陆家嘴开始新工作，但把外祖父留下的旧海运提单一起带过黄浦江，不再把西岸当成必须丢下的过去。'
+                    : '林岸仍选择离开家庭旧行业、乘轮渡去陆家嘴开始新工作，但他把外祖父留下的旧海运提单带过黄浦江，并开始用历史、空间与流动关系重新判断“旧上海/新上海”的直线说法。';
+            final relationshipAnswer = level == 1
+                ? '母亲没有劝他留下，只把旧提单交给他，让他自己决定是否带它过江。'
+                : level == 2
+                    ? '母亲没有反驳他的职业选择，只问他要不要把旧提单带走，把判断留给林岸自己。'
+                    : '母亲没有要求他留下或接班，只把旧提单交给他，并用纸船记忆和问题让他自己判断“换工作”是否等于“切断来路”。';
+
+            return BatchOneJourneyMemorySpec(
+              storyResult: storyResult,
+              culturalPoint: culturalPoint,
+              reviews: <RemediatedMemoryReview>[
+                const RemediatedMemoryReview(
+                  category: 'choice',
+                  prompt: '到轮渡站前，林岸真正做了什么选择？',
+                  answer: '他没有把旧提单还给母亲，而是把它放进包里带上轮渡，同时保留去陆家嘴开始新工作的决定。',
+                  storyEventIds: <String>['BD2-E6', 'BD2-E7', 'BD2-E9'],
+                ),
+                RemediatedMemoryReview(
+                  category: 'relationship',
+                  prompt: '母亲怎样影响林岸，而没有替他选择职业？',
+                  answer: relationshipAnswer,
+                  storyEventIds: const <String>['BD2-E2', 'BD2-E3', 'BD2-E6'],
+                ),
+                RemediatedMemoryReview(
+                  category: 'place',
+                  prompt: '为什么这个故事不能随便搬到另一座城市的普通河岸？',
+                  answer: culturalPoint,
+                  storyEventIds: const <String>['BD2-E4', 'BD2-E7', 'BD2-E8'],
+                ),
+                const RemediatedMemoryReview(
+                  category: 'memory',
+                  prompt: '哪一个物件把家庭经验、人物选择与过江行动留在一起？',
+                  answer: '外祖父留下的旧海运提单副本。它跟林岸一起过江，成为“一张过江的旧提单”。',
+                  storyEventIds: <String>['BD2-E2', 'BD2-E7'],
+                ),
+              ],
+              longTermAnchor: '一张过江的旧提单',
+              completionSummary:
+                  '“双岸行者”完成：林岸没有放弃新职业，也没有通过丢掉旧提单来证明自己属于“新上海”。$completionLens 下一次遇到“新旧替代”的说法时，先分清哪些是可验证的历史与空间事实，哪些只是方便的直线叙事。',
+            );
+          }
+
+          '''
+          text = text.replace(memory_marker, textwrap.dedent(memory_fn) + memory_marker, 1)
+
+          general_marker = '  final journey = switch (journeyId) {'
+          assert general_marker in text, 'missing generic memory journey switch'
+          early = '''  if (journeyId == shanghaiBundJourneyId) {
+              return _shanghaiBundMemorySpecForLevel(
+                phoenixLevel ?? PhoenixLevelController.instance.level,
+              );
+            }
+
+          '''
+          text = text.replace(general_marker, textwrap.dedent(early) + general_marker, 1)
+          path.write_text(text)
+          PY
+
+          cat > app/test/shanghai_bund_preserve_first_contract_test.dart <<'DART'
+          import 'package:flutter_test/flutter_test.dart';
+          import 'package:pinyin/pinyin.dart';
+          import 'package:phoenix_journeys/data/batch_one_adaptive_story_levels.dart';
+          import 'package:phoenix_journeys/data/shanghai_bund_one_pass.dart';
+
+          String pinyinFor(String chinese) => PinyinHelper.getPinyinE(
+                chinese,
+                separator: ' ',
+                format: PinyinFormat.WITH_TONE_MARK,
+              );
+
+          void main() {
+            test('Shanghai reading support follows every current paragraph', () {
+              final fingerprints = <String>{};
+              for (var level = 1; level <= 10; level++) {
+                final content = shanghaiBundOnePassLevels[level - 1];
+                expect(content.storyAnnotations, hasLength(content.storyParagraphs.length));
+                for (var index = 0; index < content.storyParagraphs.length; index++) {
+                  final paragraph = content.storyParagraphs[index];
+                  final support = content.storyAnnotations[index];
+                  expect(support.pinyin, pinyinFor(paragraph),
+                      reason: 'Lv$level paragraph ${index + 1}');
+                  expect(support.vietnamese.trim(), isNotEmpty);
+                  expect(support.english.trim(), isNotEmpty);
+                  fingerprints.add('${support.vietnamese}|${support.english}');
+                }
+              }
+              expect(fingerprints, hasLength(18));
+              expect(shanghaiBundOnePassLevels[5].storyAnnotations[1].english,
+                  contains('1843'));
+              expect(shanghaiBundOnePassLevels[9].storyAnnotations[1].english,
+                  contains('unequal-treaty'));
+            });
+
+            test('Shanghai vocabulary examples sync Chinese Pinyin Vietnamese English', () {
+              for (final word in shanghaiBundOnePassWords) {
+                expect(word.examples, hasLength(3), reason: word.word);
+                for (final example in word.examples) {
+                  expect(example.pinyin, pinyinFor(example.chinese),
+                      reason: '${word.word}: ${example.chinese}');
+                  expect(example.vietnamese.trim(), isNotEmpty);
+                  expect(example.english.trim(), isNotEmpty);
+                }
+                expect(word.examples.first.chinese, contains(word.word), reason: word.word);
+              }
+            });
+
+            test('Shanghai Discovery is current-level and preserves time boundaries', () {
+              final expected = <int, List<String>>{
+                1: <String>['黄浦江西岸'],
+                2: <String>['东金线'],
+                3: <String>['海运提单', '黄浦江西岸'],
+                4: <String>['1927', '东金线'],
+                5: <String>['陆家嘴', '海运提单'],
+                6: <String>['1927', '1843'],
+                7: <String>['长期发展', '1927'],
+                8: <String>['海运提单', '1990'],
+                9: <String>['1990', '陆家嘴'],
+                10: <String>['1843', '1927', '1990'],
+              };
+              for (var level = 1; level <= 10; level++) {
+                final content = shanghaiBundOnePassLevelContent(level);
+                final joined = content.discoveries.map((entry) => entry.text).join('|');
+                for (final anchor in expected[level]!) {
+                  expect(joined, contains(anchor), reason: 'Lv$level $anchor');
+                }
+                if (level < 4) expect(joined, isNot(contains('1927')));
+                if (level < 6) {
+                  expect(joined, isNot(contains('1843')));
+                  expect(joined, isNot(contains('不平等条约')));
+                }
+                if (level < 8) expect(joined, isNot(contains('1990')));
+              }
+              expect(shanghaiBundOnePassLevelContent(10).discoveries, hasLength(3));
+            });
+
+            test('Shanghai Memory and Completion stay inside current level', () {
+              final closures = <String>{};
+              for (var level = 1; level <= 10; level++) {
+                final spec = batchOneMemorySpecFor(
+                  shanghaiBundJourneyId,
+                  phoenixLevel: level,
+                )!;
+                final joined = '${spec.storyResult}|${spec.culturalPoint}|${spec.completionSummary}|${spec.reviews.map((e) => e.answer).join('|')}';
+                closures.add('${spec.culturalPoint}|${spec.completionSummary}');
+                expect(spec.reviews.map((entry) => entry.category).toSet(),
+                    containsAll(<String>{'choice', 'relationship', 'place', 'memory'}));
+                expect(spec.storyResult, contains('林岸'));
+                expect(spec.longTermAnchor, '一张过江的旧提单');
+                if (level < 3) expect(joined, isNot(contains('纸船')));
+                if (level < 4) expect(joined, isNot(contains('1927')));
+                if (level < 6) {
+                  expect(joined, isNot(contains('1843')));
+                  expect(joined, isNot(contains('不平等条约')));
+                }
+                if (level < 8) expect(joined, isNot(contains('1990')));
+              }
+              expect(closures, hasLength(10));
+            });
+
+            test('Shanghai Fact Pack uses authoritative time and legal boundaries', () {
+              final bill = shanghaiBundOnePassSources.firstWhere(
+                (entry) => entry.id == 'shanghai-port-trade-document-context',
+              );
+              expect(bill.publisher, contains('全国人民代表大会'));
+              expect(bill.scope, contains('海上货物运输合同'));
+              expect(bill.scope, contains('货物收据'));
+              final customs = shanghaiBundOnePassSources.firstWhere(
+                (entry) => entry.id == 'shanghai-gov-customs-house-1927',
+              );
+              expect(customs.publisher, contains('上海市人民政府'));
+              final lujiazui = shanghaiBundOnePassSources.firstWhere(
+                (entry) => entry.id == 'shanghai-gov-pudong-lujiazui-development',
+              );
+              expect(lujiazui.scope, contains('1990'));
+            });
+
+            test('Shanghai keeps its independent narrative engine', () {
+              final story = shanghaiBundOnePassLevels
+                  .map((level) => level.storyParagraphs.join())
+                  .join();
+              expect(story, contains('旧海运提单'));
+              expect(story, contains('黄浦江'));
+              expect(story, contains('陆家嘴'));
+              for (final term in <String>['中轴观察', '东侧记录', '错误路线', '标准路线']) {
+                expect(story, isNot(contains(term)));
+              }
+              for (final term in <String>['许澄', '周岚', '校展', '金光画面', '旧照片被风吹落']) {
+                expect(story, isNot(contains(term)));
+              }
+            });
+          }
+          DART
+
+          dart format app/lib/data/shanghai_bund_level_support.dart \
+            app/lib/data/shanghai_bund_one_pass.dart \
+            app/lib/data/batch_one_adaptive_story_levels.dart \
+            app/test/shanghai_bund_preserve_first_contract_test.dart
+
+          git diff --check
+          changed="$(git diff --name-only)"
+          echo "$changed"
+          test -n "$changed"
+          if echo "$changed" | grep -E '(^|/)(screens|widgets)/|journey_screen\.dart|navigation|router|routing' ; then
+            echo 'UI scope violation' >&2
+            exit 1
+          fi
+          test "$(echo "$changed" | wc -l)" -eq 4
+          grep -qx 'app/lib/data/shanghai_bund_level_support.dart' <<<"$changed"
+          grep -qx 'app/lib/data/shanghai_bund_one_pass.dart' <<<"$changed"
+          grep -qx 'app/lib/data/batch_one_adaptive_story_levels.dart' <<<"$changed"
+          grep -qx 'app/test/shanghai_bund_preserve_first_contract_test.dart' <<<"$changed"
+
+      - name: Targeted Shanghai contracts
+        working-directory: app
+        run: |
+          set -euo pipefail
+          flutter test test/shanghai_bund_one_pass_gate_test.dart test/shanghai_bund_preserve_first_contract_test.dart
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Full Flutter test
+        working-directory: app
+        run: flutter test
+
+      - name: Commit verified source tree on helper branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add app/lib/data/shanghai_bund_level_support.dart \
+            app/lib/data/shanghai_bund_one_pass.dart \
+            app/lib/data/batch_one_adaptive_story_levels.dart \
+            app/test/shanghai_bund_preserve_first_contract_test.dart
+          git commit -m 'feat: refine Shanghai Bund current-level learning sync'
+          git push origin HEAD:automation/shanghai-bund-preserve-first-verify-v2
