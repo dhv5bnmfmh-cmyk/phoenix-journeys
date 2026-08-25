@@ -12,6 +12,7 @@ on:
       - '.github/workflows/forbidden-city-preview-e2e.yml'
       - '.github/scripts/verify_shanghai_bund_exact_preview.mjs'
       - '.github/scripts/patch_shanghai_transient_modal_guard.mjs'
+      - '.github/scripts/patch_shanghai_transient_modal_semantic_shape.mjs'
 
 permissions:
   contents: read
@@ -55,7 +56,10 @@ jobs:
         run: |
           set -euo pipefail
           node --check .validation-harness/.github/scripts/patch_shanghai_transient_modal_guard.mjs
+          node --check .validation-harness/.github/scripts/patch_shanghai_transient_modal_semantic_shape.mjs
           node .validation-harness/.github/scripts/patch_shanghai_transient_modal_guard.mjs \
+            .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
+          node .validation-harness/.github/scripts/patch_shanghai_transient_modal_semantic_shape.mjs \
             .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
           node --check .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
 
