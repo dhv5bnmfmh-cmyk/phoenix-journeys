@@ -328,22 +328,20 @@ async function runBrowserModePreflight(browserType, browserName) {`
 );
 
 replaceOnce(
-  'WebKit Lv8 Discovery preflight main dispatch',
-  `await runBrowserModePreflight(playwright.chromium, 'chromium');
-await runBrowserModePreflight(playwright.webkit, 'webkit');
-console.log('BROWSER MODE PREFLIGHT = PASS | desktop-click + mobile-touch | Shanghai SPA open');
-
-for (const [browserName, browserType] of [['chromium', playwright.chromium], ['webkit', playwright.webkit]]) {`,
+  'WebKit Lv8 Discovery preflight matrix dispatch',
+  `for (const [browserName, browserType] of [['chromium', playwright.chromium], ['webkit', playwright.webkit]]) {
+  for (const level of levels) await runLevel(browserType, browserName, level);
+}
+console.log(\`SHANGHAI BUND EXACT PREVIEW E2E = PASS | SHA=\${sourceSha} | LEVELS=\${levels.join(',')} | BROWSERS=chromium,webkit\`);`,
   `if (process.argv.includes('--webkit-lv8-discovery-preflight')) {
   await runWebKitLv8DiscoveryPreflight();
   process.exit(0);
 }
 
-await runBrowserModePreflight(playwright.chromium, 'chromium');
-await runBrowserModePreflight(playwright.webkit, 'webkit');
-console.log('BROWSER MODE PREFLIGHT = PASS | desktop-click + mobile-touch | Shanghai SPA open');
-
-for (const [browserName, browserType] of [['chromium', playwright.chromium], ['webkit', playwright.webkit]]) {`
+for (const [browserName, browserType] of [['chromium', playwright.chromium], ['webkit', playwright.webkit]]) {
+  for (const level of levels) await runLevel(browserType, browserName, level);
+}
+console.log(\`SHANGHAI BUND EXACT PREVIEW E2E = PASS | SHA=\${sourceSha} | LEVELS=\${levels.join(',')} | BROWSERS=chromium,webkit\`);`
 );
 
 fs.writeFileSync(target, source, 'utf8');
