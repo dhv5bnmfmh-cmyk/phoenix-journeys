@@ -16,6 +16,7 @@ on:
       - '.github/scripts/patch_shanghai_modal_close_settle.mjs'
       - '.github/scripts/patch_shanghai_stable_semantic_activation.mjs'
       - '.github/scripts/patch_shanghai_seek_action_safety.mjs'
+      - '.github/scripts/patch_shanghai_seek_terminal_state.mjs'
       - '.github/scripts/verify_shanghai_action_safety_preflight.mjs'
 
 permissions:
@@ -64,6 +65,7 @@ jobs:
           node --check .validation-harness/.github/scripts/patch_shanghai_modal_close_settle.mjs
           node --check .validation-harness/.github/scripts/patch_shanghai_stable_semantic_activation.mjs
           node --check .validation-harness/.github/scripts/patch_shanghai_seek_action_safety.mjs
+          node --check .validation-harness/.github/scripts/patch_shanghai_seek_terminal_state.mjs
           node --check .validation-harness/.github/scripts/verify_shanghai_action_safety_preflight.mjs
           node .validation-harness/.github/scripts/patch_shanghai_transient_modal_guard.mjs \
             .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
@@ -74,6 +76,8 @@ jobs:
           node .validation-harness/.github/scripts/patch_shanghai_stable_semantic_activation.mjs \
             .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
           node .validation-harness/.github/scripts/patch_shanghai_seek_action_safety.mjs \
+            .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
+          node .validation-harness/.github/scripts/patch_shanghai_seek_terminal_state.mjs \
             .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
           node --check .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
 
@@ -102,7 +106,7 @@ jobs:
           set -euo pipefail
           node .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs --transient-modal-preflight
 
-      - name: Cheap stable level, seek-rail reorder, and semantic-index fixture preflight
+      - name: Cheap stable level, seek-rail reorder, terminal narration, and semantic-index fixture preflight
         shell: bash
         run: |
           set -euo pipefail
