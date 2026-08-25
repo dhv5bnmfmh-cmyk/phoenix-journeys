@@ -399,7 +399,16 @@ const summerPalaceCulturalPilotWords = <WordEntry>[
     simpleChinese: '以前拍摄并保存下来的照片。',
     translation: 'Bức ảnh cũ.',
     englishDefinition: 'old photograph',
-    symbol: '📷'),
+    symbol: '📷',
+    examples: [
+      WordExample(
+        chinese: '风把外婆的旧照片吹向石栏。',
+        pinyin: 'Fēng bǎ wàipó de jiù zhàopiàn chuī xiàng shílán.',
+        vietnamese: 'Gió thổi bức ảnh cũ của bà về phía lan can đá.',
+        english: 'The wind blows Grandmother’s old photograph toward the stone railing.',
+      ),
+    ],
+  ),
   WordEntry(
     word: '桥洞',
     pinyin: 'qiáodòng',
@@ -407,7 +416,16 @@ const summerPalaceCulturalPilotWords = <WordEntry>[
     simpleChinese: '桥下面形成的拱形或其他开口。',
     translation: 'Vòm hoặc lỗ mở dưới cầu.',
     englishDefinition: 'bridge arch opening',
-    symbol: '🌉'),
+    symbol: '🌉',
+    examples: [
+      WordExample(
+        chinese: '夕阳逐渐照亮十七孔桥的桥洞。',
+        pinyin: 'Xīyáng zhújiàn zhàoliàng Shíqīkǒng Qiáo de qiáodòng.',
+        vietnamese: 'Nắng hoàng hôn dần chiếu sáng các vòm cầu Thập Thất Khổng.',
+        english: 'The sunset gradually illuminates the Seventeen-Arch Bridge arches.',
+      ),
+    ],
+  ),
   WordEntry(
     word: '金光',
     pinyin: 'jīnguāng',
@@ -415,7 +433,16 @@ const summerPalaceCulturalPilotWords = <WordEntry>[
     simpleChinese: '金黄色的光。',
     translation: 'Ánh sáng vàng.',
     englishDefinition: 'golden light',
-    symbol: '✨'),
+    symbol: '✨',
+    examples: [
+      WordExample(
+        chinese: '许澄再举机时，桥洞金光已经移动。',
+        pinyin: 'Xǔ Chéng zài jǔ jī shí, qiáodòng jīnguāng yǐjīng yídòng.',
+        vietnamese: 'Khi Hứa Trừng nâng máy lại, ánh vàng trong các vòm cầu đã dịch chuyển.',
+        english: 'When Xu Cheng raises the camera again, the golden light in the arches has moved.',
+      ),
+    ],
+  ),
   WordEntry(
     word: '快门',
     pinyin: 'kuàimén',
@@ -423,7 +450,16 @@ const summerPalaceCulturalPilotWords = <WordEntry>[
     simpleChinese: '相机控制曝光时间的装置，也常指拍照动作。',
     translation: 'Màn trập máy ảnh.',
     englishDefinition: 'camera shutter',
-    symbol: '📸'),
+    symbol: '📸',
+    examples: [
+      WordExample(
+        chinese: '她必须在按快门和先捡照片之间选。',
+        pinyin: 'Tā bìxū zài àn kuàimén hé xiān jiǎn zhàopiàn zhījiān xuǎn.',
+        vietnamese: 'Cô phải chọn giữa bấm máy và nhặt bức ảnh trước.',
+        english: 'She must choose between pressing the shutter and retrieving the photograph first.',
+      ),
+    ],
+  ),
   WordEntry(
     word: '保存',
     pinyin: 'bǎocún',
@@ -431,7 +467,16 @@ const summerPalaceCulturalPilotWords = <WordEntry>[
     simpleChinese: '使东西继续存在而不丢失。',
     translation: 'Gìn giữ, bảo quản.',
     englishDefinition: 'to preserve; to keep safe',
-    symbol: '🗂️'),
+    symbol: '🗂️',
+    examples: [
+      WordExample(
+        chinese: '周岚把旧照片交给许澄保存。',
+        pinyin: 'Zhōu Lán bǎ jiù zhàopiàn jiāogěi Xǔ Chéng bǎocún.',
+        vietnamese: 'Chu Lam giao bức ảnh cũ cho Hứa Trừng gìn giữ.',
+        english: 'Zhou Lan entrusts the old photograph to Xu Cheng for safekeeping.',
+      ),
+    ],
+  ),
   WordEntry(
     word: '东堤',
     pinyin: 'Dōngdī',
@@ -439,7 +484,16 @@ const summerPalaceCulturalPilotWords = <WordEntry>[
     simpleChinese: '昆明湖东侧的重要堤岸。',
     translation: 'Đê Đông của hồ Côn Minh.',
     englishDefinition: 'the East Dike of Kunming Lake',
-    symbol: '🧭'),
+    symbol: '🧭',
+    examples: [
+      WordExample(
+        chinese: '十七孔桥东接东堤，西连南湖岛。',
+        pinyin: 'Shíqīkǒng Qiáo dōng jiē Dōngdī, xī lián Nánhú Dǎo.',
+        vietnamese: 'Cầu Thập Thất Khổng nối đê Đông ở phía đông và đảo Nam Hồ ở phía tây.',
+        english: 'The Seventeen-Arch Bridge connects the East Dike on the east and Nanhu Island on the west.',
+      ),
+    ],
+  ),
   WordEntry(
     word: '南湖岛',
     pinyin: 'Nánhú Dǎo',
@@ -447,7 +501,16 @@ const summerPalaceCulturalPilotWords = <WordEntry>[
     simpleChinese: '昆明湖中的主要岛屿之一。',
     translation: 'Đảo Nam Hồ trong hồ Côn Minh.',
     englishDefinition: 'Nanhu Island',
-    symbol: '🏝️'),
+    symbol: '🏝️',
+    examples: [
+      WordExample(
+        chinese: '南湖岛通过十七孔桥与东堤相连。',
+        pinyin: 'Nánhú Dǎo tōngguò Shíqīkǒng Qiáo yǔ Dōngdī xiānglián.',
+        vietnamese: 'Đảo Nam Hồ nối với đê Đông qua cầu Thập Thất Khổng.',
+        english: 'Nanhu Island is linked to the East Dike by the Seventeen-Arch Bridge.',
+      ),
+    ],
+  ),
 ];
 
 const summerPalaceCulturalPilotVocabularyLevels = <String, VocabularyLevelTag>{
