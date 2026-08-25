@@ -23,7 +23,7 @@ function requireContains(label, body, tokens) {
 
 function forbidContains(label, body, tokens) {
   for (const token of tokens) {
-    if (body.includes(token)) throw new Error(`${label}: forbidden stale-index action token found: ${token}`);
+    if (body.includes(token)) throw new Error(`${label}: forbidden token found: ${token}`);
   }
 }
 
@@ -97,14 +97,30 @@ for (const forbidden of [
   if (source.includes(forbidden)) throw new Error(`active Shanghai action path still contains stale snapshot-index activation: ${forbidden}`);
 }
 
+if (!source.includes(`function terminalDiscoveryStageRecord(recordsSnapshot)`)) {
+  throw new Error('terminal Discovery structural stage resolver missing');
+}
+const stageResolverStart = source.indexOf(`function terminalDiscoveryStageRecord(recordsSnapshot)`);
+const stageResolverEnd = source.indexOf(`\nasync function `, stageResolverStart);
+const stageResolver = source.slice(stageResolverStart, stageResolverEnd);
+requireContains('terminalDiscoveryStageRecord', stageResolver, [
+  `record.visible`,
+  `record.role === 'progressbar'`,
+  `/^3\\/6(?:\\s|$)/.test(recText(record).trim())`,
+]);
+forbidContains('terminalDiscoveryStageRecord', stageResolver, [
+  `Discovery`,
+  `发现`,
+]);
+
 const terminalAuthority = functionBody('isAuthoritativeTerminalDiscoveryCorpus');
 requireContains('isAuthoritativeTerminalDiscoveryCorpus', terminalAuthority, [
   `waitStage(page, 3)`,
   `assertTargetLevel(page, level, 'Discovery terminal corpus authority')`,
   `const terminalRecords = await records(page)`,
+  `const terminalStage = terminalDiscoveryStageRecord(terminalRecords)`,
+  `if (!terminalStage)`,
   `terminalRecords.map((record) => recText(record)).join('\\n')`,
-  `const terminalEvidence =`,
-  `terminalEvidence.includes('3/6 Discovery')`,
   `terminalEvidence.includes(\`Phoenix 中文难度 \${level} 级\`)`,
   `terminalEvidence.includes(\`Discovery，Lv.\${level}\`)`,
   `discoveryNarrationState(terminalEvidence)`,
@@ -113,7 +129,9 @@ requireContains('isAuthoritativeTerminalDiscoveryCorpus', terminalAuthority, [
   `requireDiscoveryAnchors(terminalEvidence, level)`,
 ]);
 forbidContains('isAuthoritativeTerminalDiscoveryCorpus', terminalAuthority, [
-  `finalText.includes('3/6 Discovery')`,
+  `3/6 Discovery`,
+  `3/6 发现`,
+  `finalText.includes('3/6`,
   `classifyTransientModalRecords(await records(page))`,
 ]);
 
@@ -129,4 +147,4 @@ requireContains('collectDiscoveryStageSemantics', discovery, [
   `TERMINAL_CORPUS=AUTHORITATIVE`,
 ]);
 
-console.log('SHANGHAI ACTION SAFETY STATIC PREFLIGHT = PASS | semantic index is observation metadata only | detached seek handles use finite fresh snapshot + live rebind | no stale index/handle reuse | seek/modal/grammar/challenge bind + recheck live identity | Discovery seek level guarded | terminal Stage/Level/completion identity comes from fresh semantic labels + text | terminal authority requires exact stage + exact level + explicit completion + complete terminal anchors | segment accounting remains strict off-terminal');
+console.log('SHANGHAI ACTION SAFETY STATIC PREFLIGHT = PASS | semantic index is observation metadata only | detached seek handles use finite fresh snapshot + live rebind | no stale index/handle reuse | Stage 3 authority = progressbar role + exact 3/6 index, independent of localized surface wording | exact level + Discovery narration identity + 100% + anchors remain required | segment accounting remains strict off-terminal');
