@@ -290,6 +290,14 @@ async function completeChallenge(page) {
   await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 15000 });
 }
 
+async function completeMemory(page) {
+  if (await exists(page, '保存回忆并完成', { role: 'button', prefix: true, timeout: 1200 })) {
+    await activateButton(page, '保存回忆并完成', { prefix: true });
+    return;
+  }
+  await activateButton(page, '结束旅程', { prefix: true });
+}
+
 async function assertNoFatal(page, pageErrors, label) {
   const joined = `${await visibleText(page).catch(() => '')}\n${pageErrors.join('\n')}`;
   for (const fatal of ['Unhandled Exception', 'A RenderFlex overflowed', 'Bad state:']) {
@@ -361,7 +369,7 @@ async function runLevel(browserType, browserName, level) {
     if (!memory.includes('林岸') && !memory.includes('旧提单')) throw new Error(`Lv${level} Memory missing Shanghai closure`);
     await assertNoFatal(page, errors, `${browserName} Lv${level} Memory`);
 
-    await activateButton(page, '结束旅程', { prefix: true });
+    await completeMemory(page);
     await waitStage(page, 6);
     await findSemantic(page, '已点亮', { timeout: 15000 });
     const completion = await visibleText(page);
