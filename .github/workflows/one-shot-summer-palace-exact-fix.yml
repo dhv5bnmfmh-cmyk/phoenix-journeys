@@ -1,0 +1,103 @@
+name: One-shot Summer Palace exact fix
+
+on:
+  push:
+    branches:
+      - automation/summer-palace-exact-fix-a994
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target candidate
+        uses: actions/checkout@v4
+        with:
+          ref: feature/summer-palace-content-completion
+          fetch-depth: 0
+
+      - name: Apply evidence-bound minimal patch
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def replace_exact(path, old, new, expected_count=1):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != expected_count:
+                  raise SystemExit(f'{path}: expected {expected_count} matches, found {count}: {old}')
+              p.write_text(text.replace(old, new), encoding='utf-8')
+
+          # Governance metadata: two Summer Palace evidence records cite the corrected historical event.
+          replace_exact(
+              'app/lib/data/journey_semantic_fingerprint_catalog.dart',
+              '旧照片背面写着：“一八六〇年受损，一八八六年修复。”许澄想把这行字裁掉，周岚把照片翻回正面。',
+              '旧照片背面写着：“一八六〇年受损，一八八六年开始修复。”许澄想把这行字裁掉，周岚把照片翻回正面。',
+              expected_count=2,
+          )
+
+          # Stale test expectations caused by the authoritative fact correction.
+          replace_exact(
+              'app/test/summer_palace_pilot_n1_effective_levels_test.dart',
+              '一八六〇年受损，一八八六年修复',
+              '一八六〇年受损，一八八六年开始修复',
+          )
+          replace_exact(
+              'app/test/summer_palace_pilot_n1_multilingual_alignment_test.dart',
+              '1886年在原有基础上修复',
+              '1886年开始在原有基础上修复',
+          )
+
+          # Lv6 was 582 Chinese characters only because the fact correction added two characters.
+          # Remove the redundant modifier “普通” from a Lv6+ detail and keep all four languages aligned.
+          replace_exact(
+              'app/lib/data/summer_palace_adaptive_story_levels.dart',
+              '她等的不是普通夕阳，而是桥洞被落日逐渐照亮的短暂时刻。',
+              '她等的不是夕阳，而是桥洞被落日逐渐照亮的短暂时刻。',
+          )
+          replace_exact(
+              'app/lib/data/summer_palace_adaptive_story_levels.dart',
+              'Tā děng de bú shì pǔtōng xīyáng, ér shì qiáodòng bèi luòrì zhújiàn zhàoliàng de duǎnzàn shíkè.',
+              'Tā děng de bú shì xīyáng, ér shì qiáodòng bèi luòrì zhújiàn zhàoliàng de duǎnzàn shíkè.',
+          )
+          replace_exact(
+              'app/lib/data/summer_palace_adaptive_story_levels.dart',
+              'Điều cô chờ không phải hoàng hôn bình thường mà là khoảnh khắc ngắn khi nắng lặn dần chiếu sáng các vòm cầu.',
+              'Điều cô chờ không phải hoàng hôn mà là khoảnh khắc ngắn khi nắng lặn dần chiếu sáng các vòm cầu.',
+          )
+          replace_exact(
+              'app/lib/data/summer_palace_adaptive_story_levels.dart',
+              'She is not waiting for an ordinary sunset but for the brief moment when the setting sun gradually illuminates the bridge arches.',
+              'She is not waiting for sunset but for the brief moment when the setting sun gradually illuminates the bridge arches.',
+          )
+
+      - name: Verify patch scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only)"
+          expected="$(printf '%s\n' \
+            app/lib/data/journey_semantic_fingerprint_catalog.dart \
+            app/lib/data/summer_palace_adaptive_story_levels.dart \
+            app/test/summer_palace_pilot_n1_effective_levels_test.dart \
+            app/test/summer_palace_pilot_n1_multilingual_alignment_test.dart | sort)"
+          actual="$(printf '%s\n' "$changed" | sort)"
+          test "$actual" = "$expected"
+          git diff --check
+
+      - name: Commit directly to PR branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "phoenix-journeys-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            app/lib/data/journey_semantic_fingerprint_catalog.dart \
+            app/lib/data/summer_palace_adaptive_story_levels.dart \
+            app/test/summer_palace_pilot_n1_effective_levels_test.dart \
+            app/test/summer_palace_pilot_n1_multilingual_alignment_test.dart
+          git commit -m "fix: sync Summer Palace fact evidence and level shape"
+          git push origin HEAD:feature/summer-palace-content-completion
