@@ -34,12 +34,19 @@ forbidContains('seekNarrationProgress', seek, [
   `page.touchscreen.tap(`,
 ]);
 requireContains('seekNarrationProgress', seek, [
+  `narrationExplicitlyCompleted(page)`,
   `bindStableSemanticRecord(page, rail`,
   `expectedNeedle: '朗读进度，可拖动跳转'`,
   `handle.boundingBox()`,
   `readBoundSemanticHandle(handle)`,
   `handle.click({ position`,
   `handle.tap({ position`,
+]);
+
+const terminal = functionBody('narrationExplicitlyCompleted');
+requireContains('narrationExplicitlyCompleted', terminal, [
+  `visibleText(page)`,
+  `discoveryNarrationState(text).finished`,
 ]);
 
 const modal = functionBody('dismissKnownTransientModal');
@@ -79,8 +86,10 @@ for (const forbidden of [
 
 const discovery = functionBody('collectDiscoveryStageSemantics');
 requireContains('collectDiscoveryStageSemantics', discovery, [
+  `firstState.finished`,
+  `NARRATION=ALREADY-COMPLETED`,
   `assertDiscoveryTargetLevel(page, level`,
   `assertTargetLevel(page, level, 'Discovery narration transition')`,
 ]);
 
-console.log('SHANGHAI ACTION SAFETY STATIC PREFLIGHT = PASS | semantic index is observation metadata only | seek/modal/grammar/challenge bind + recheck live identity | Discovery seek level guarded');
+console.log('SHANGHAI ACTION SAFETY STATIC PREFLIGHT = PASS | semantic index is observation metadata only | seek/modal/grammar/challenge bind + recheck live identity | Discovery seek level guarded | explicit 100% narration is terminal and requires no seek');
