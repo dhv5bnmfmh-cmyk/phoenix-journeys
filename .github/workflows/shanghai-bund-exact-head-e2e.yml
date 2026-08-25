@@ -1,13 +1,10 @@
 name: Shanghai Bund Exact-HEAD Browser Gates
 
-# Validation-only workflow. Never modifies the formal Shanghai product candidate.
+# Validation-only manual fallback. Automatic PR #200 evidence runs through
+# Reference Journey E2E, which is Shanghai-only and reuses already-green
+# Forbidden City reference evidence while the formal product SHA is frozen.
 on:
-  push:
-    branches:
-      - automation/shanghai-bund-exact-head-e2e
-    paths:
-      - '.github/scripts/verify_shanghai_bund_exact_preview.mjs'
-      - '.github/workflows/shanghai-bund-exact-head-e2e.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -47,6 +44,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs
+          node .validation-harness/.github/scripts/verify_shanghai_bund_exact_preview.mjs --story-anchor-preflight
           node --check .github/scripts/verify_forbidden_city_preview_v2.mjs
           node --check .github/scripts/verify_forbidden_city_preview_v2_level_race_fix.mjs
           node --check .github/scripts/verify_forbidden_city_story_reading_support.mjs
