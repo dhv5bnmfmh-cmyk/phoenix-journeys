@@ -84,10 +84,17 @@ async function exists(page, needle, options = {}) {
   }
 }
 
-async function tapButton(page, needle, { prefix = false, timeout = 15000 } = {}) {
+async function activateButton(page, needle, { prefix = false, timeout = 15000 } = {}) {
   const node = await findSemantic(page, needle, { role: 'button', prefix, timeout });
   if (await node.getAttribute('aria-disabled') === 'true') throw new Error(`button disabled: ${needle}`);
   await activateSemantic(page, node);
+}
+
+async function dismissVocabularyDialogIfPresent(page) {
+  if (!(await exists(page, 'Dismiss', { role: 'button', timeout: 1200 }))) return false;
+  await activateButton(page, 'Dismiss');
+  await sleep(250);
+  return true;
 }
 
 async function visibleText(page) {
@@ -148,7 +155,7 @@ async function setLevel(page, target) {
   let level = await currentLevel(page);
   for (let guard = 0; level !== target && guard < 12; guard += 1) {
     const before = level;
-    await tapButton(page, level < target ? '提高当前难度' : '降低当前难度', { prefix: true });
+    await activateButton(page, level < target ? '提高当前难度' : '降低当前难度', { prefix: true });
     for (let i = 0; i < 50; i += 1) {
       await sleep(100);
       level = await currentLevel(page);
@@ -169,11 +176,11 @@ async function openShanghaiBund(page) {
     return;
   }
   await findSemantic(page, 'PHOENIX JOURNEYS', { timeout: 30000 });
-  await tapButton(page, '选择城市', { prefix: true });
+  await activateButton(page, '选择城市', { prefix: true });
   await findSemantic(page, '选择城市与地点', { timeout: 15000 });
-  await tapButton(page, '上海');
+  await activateButton(page, '上海');
   await findSemantic(page, '上海的地点', { timeout: 15000 });
-  await tapButton(page, '外滩');
+  await activateButton(page, '外滩');
   for (let i = 0; i < 100; i += 1) {
     if (await exists(page, '1/6', { prefix: true, timeout: 120 })) return;
     if (await exists(page, 'PHOENIX JOURNEYS', { timeout: 120 })) break;
@@ -182,7 +189,7 @@ async function openShanghaiBund(page) {
   if (await exists(page, 'PHOENIX JOURNEYS', { timeout: 800 })) {
     for (const action of ['开始', '继续', '再次探索']) {
       if (await exists(page, action, { role: 'button', prefix: true, timeout: 600 })) {
-        await tapButton(page, action, { prefix: true });
+        await activateButton(page, action, { prefix: true });
         await waitStage(page, 1);
         return;
       }
@@ -254,16 +261,16 @@ async function completeChallenge(page) {
     let resolved = false;
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       await chooseChallenge(page);
-      await tapButton(page, '提交第', { prefix: true });
+      await activateButton(page, '提交第', { prefix: true });
       await sleep(500);
       if (await exists(page, '进入下一种挑战', { role: 'button', timeout: 1000 })) {
-        await tapButton(page, '进入下一种挑战');
+        await activateButton(page, '进入下一种挑战');
         await findSemantic(page, '提交第 1 / 3 次答案', { role: 'button', prefix: true, timeout: 12000 });
         resolved = true;
         break;
       }
       if (await exists(page, '完成三连挑战', { role: 'button', timeout: 1000 })) {
-        await tapButton(page, '完成三连挑战');
+        await activateButton(page, '完成三连挑战');
         await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 12000 });
         return;
       }
@@ -319,31 +326,33 @@ async function runLevel(browserType, browserName, level) {
     requireStory(story, level);
     await assertNoFatal(page, errors, `${browserName} Lv${level} Story`);
 
-    await tapButton(page, '继续', { prefix: true });
+    await activateButton(page, '继续', { prefix: true });
+    await sleep(350);
+    await dismissVocabularyDialogIfPresent(page);
     await waitStage(page, 2);
     const vocabulary = await visibleText(page);
     if (!traceVocabulary(story, vocabulary).length) throw new Error(`Lv${level} Vocabulary has no visible Story trace`);
     await assertNoFatal(page, errors, `${browserName} Lv${level} Vocabulary`);
 
-    await tapButton(page, '继续', { prefix: true });
+    await activateButton(page, '继续', { prefix: true });
     await waitStage(page, 3);
     const discovery = await visibleText(page);
     for (const anchor of discoveryAnchors[level]) if (!discovery.includes(anchor)) throw new Error(`Lv${level} Discovery missing ${anchor}`);
     await assertNoFatal(page, errors, `${browserName} Lv${level} Discovery`);
 
-    await tapButton(page, '继续', { prefix: true });
+    await activateButton(page, '继续', { prefix: true });
     await waitStage(page, 4);
     await findSemantic(page, '提交第 1 / 3 次答案', { role: 'button', prefix: true, timeout: 15000 });
     await completeChallenge(page);
     await assertNoFatal(page, errors, `${browserName} Lv${level} Challenge`);
 
-    await tapButton(page, '继续留下回忆', { prefix: true });
+    await activateButton(page, '继续留下回忆', { prefix: true });
     await waitStage(page, 5);
     const memory = await visibleText(page);
     if (!memory.includes('林岸') && !memory.includes('旧提单')) throw new Error(`Lv${level} Memory missing Shanghai closure`);
     await assertNoFatal(page, errors, `${browserName} Lv${level} Memory`);
 
-    await tapButton(page, '结束旅程', { prefix: true });
+    await activateButton(page, '结束旅程', { prefix: true });
     await waitStage(page, 6);
     await findSemantic(page, '已点亮', { timeout: 15000 });
     const completion = await visibleText(page);
