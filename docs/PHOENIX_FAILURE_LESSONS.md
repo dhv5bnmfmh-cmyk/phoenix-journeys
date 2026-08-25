@@ -176,6 +176,38 @@ Use a positive multi-segment fixture with required anchors split across segments
 
 ---
 
+## CONTENT VALIDATION != TTS AVAILABILITY
+
+**Failure**
+
+A browser exposed the complete learner Discovery text while browser TTS reported `朗读暂时不可用`, but the harness required an active narration item index before accepting the Stage corpus.
+
+**Classification**
+
+`HARNESS / NARRATION-AVAILABILITY COUPLING FALSE NEGATIVE`
+
+**Root Cause**
+
+Optional runtime narration availability was incorrectly made a prerequisite for content correctness. Phoenix intentionally reveals full text when the narration session is inactive or unavailable.
+
+**Correct Fix**
+
+When narration is available, traverse and collect its segmented semantic progression. When narration is unavailable, validate the already fully revealed Stage semantics directly. The content anchor contract is identical in both paths.
+
+**Forbidden Fix**
+
+Do not weaken Discovery anchors because TTS is unavailable. Do not modify learner content, narration UI, or browser audio configuration merely to make a content validator execute.
+
+**Cheap Preflight**
+
+Include a TTS-unavailable full-text fixture with the same required Stage anchors and require it to pass without narration indices.
+
+**Long-term rule**
+
+`CONTENT VALIDATION != TTS AVAILABILITY`
+
+---
+
 ## CURRENT LEVEL LEAKAGE
 
 **Failure pattern**
