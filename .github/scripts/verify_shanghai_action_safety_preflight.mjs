@@ -101,13 +101,20 @@ const terminalAuthority = functionBody('isAuthoritativeTerminalDiscoveryCorpus')
 requireContains('isAuthoritativeTerminalDiscoveryCorpus', terminalAuthority, [
   `waitStage(page, 3)`,
   `assertTargetLevel(page, level, 'Discovery terminal corpus authority')`,
+  `const terminalRecords = await records(page)`,
+  `terminalRecords.map((record) => recText(record)).join('\\n')`,
+  `const terminalEvidence =`,
+  `terminalEvidence.includes('3/6 Discovery')`,
+  `terminalEvidence.includes(\`Phoenix 中文难度 \${level} 级\`)`,
+  `terminalEvidence.includes(\`Discovery，Lv.\${level}\`)`,
+  `discoveryNarrationState(terminalEvidence)`,
+  `terminalEvidence.includes('朗读完成 · 100%')`,
+  `classifyTransientModalRecords(terminalRecords)`,
+  `requireDiscoveryAnchors(terminalEvidence, level)`,
+]);
+forbidContains('isAuthoritativeTerminalDiscoveryCorpus', terminalAuthority, [
   `finalText.includes('3/6 Discovery')`,
-  `finalText.includes(\`Phoenix 中文难度 \${level} 级\`)`,
-  `finalText.includes(\`Discovery，Lv.\${level}\`)`,
-  `discoveryNarrationState(finalText)`,
-  `finalText.includes('朗读完成 · 100%')`,
   `classifyTransientModalRecords(await records(page))`,
-  `requireDiscoveryAnchors(finalText, level)`,
 ]);
 
 const discovery = functionBody('collectDiscoveryStageSemantics');
@@ -122,4 +129,4 @@ requireContains('collectDiscoveryStageSemantics', discovery, [
   `TERMINAL_CORPUS=AUTHORITATIVE`,
 ]);
 
-console.log('SHANGHAI ACTION SAFETY STATIC PREFLIGHT = PASS | semantic index is observation metadata only | detached seek handles use finite fresh snapshot + live rebind | no stale index/handle reuse | seek/modal/grammar/challenge bind + recheck live identity | Discovery seek level guarded | terminal authority requires exact stage + exact level + explicit completion + complete terminal anchors | segment accounting remains strict off-terminal');
+console.log('SHANGHAI ACTION SAFETY STATIC PREFLIGHT = PASS | semantic index is observation metadata only | detached seek handles use finite fresh snapshot + live rebind | no stale index/handle reuse | seek/modal/grammar/challenge bind + recheck live identity | Discovery seek level guarded | terminal Stage/Level/completion identity comes from fresh semantic labels + text | terminal authority requires exact stage + exact level + explicit completion + complete terminal anchors | segment accounting remains strict off-terminal');
