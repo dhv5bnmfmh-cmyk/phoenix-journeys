@@ -39,6 +39,12 @@ void main() {
       chineseContentSimilarity('城墙永宁门', '完全不同'),
       0,
     );
+    expect(
+      chineseContentSimilarity('城墙永宁门', '城墙永定门'),
+      closeTo(1 / 3, 1e-12),
+    );
+    expect(chineseContentSimilarity('城', '城'), 1);
+    expect(chineseContentSimilarity('城', '墙'), 0);
   });
 
   test('quality agent blocks repeated discovery content and explains the fix', () {

@@ -149,21 +149,19 @@ JourneyContentQualityReport auditJourneyContentQuality(
   }
 
   if (usesSharedGeneric) {
-    final sourceSentences = splitChineseQualitySentences(
+    final sourceBoundary = _normalizedSentenceBoundary(
       experience.content.storyParagraphs.join(),
     );
-    final shapedSentences = splitChineseQualitySentences(storyText);
-    if (sourceSentences.isNotEmpty && shapedSentences.isNotEmpty) {
-      if (_normalizeChinese(sourceSentences.first) !=
-          _normalizeChinese(shapedSentences.first)) {
+    final shapedBoundary = _normalizedSentenceBoundary(storyText);
+    if (sourceBoundary != null && shapedBoundary != null) {
+      if (sourceBoundary.first != shapedBoundary.first) {
         add(
           'opening-scene-lost',
           'Adaptive shaping removed the original opening scene.',
           JourneyContentQualitySeverity.critical,
         );
       }
-      if (_normalizeChinese(sourceSentences.last) !=
-          _normalizeChinese(shapedSentences.last)) {
+      if (sourceBoundary.last != shapedBoundary.last) {
         add(
           'closing-meaning-lost',
           'Adaptive shaping removed the original closing meaning.',
@@ -194,7 +192,7 @@ JourneyContentQualityReport auditJourneyContentQuality(
   }
 
   final storyPairs = content.discoveries.isEmpty
-      ? const <String>{}
+      ? const <int>{}
       : _chineseBigrams(storyText);
   final seenDiscoveries = <String>{};
   for (var index = 0; index < content.discoveries.length; index += 1) {
@@ -292,6 +290,22 @@ List<String> splitChineseQualitySentences(String value) {
       .toList(growable: false);
 }
 
+({String first, String last})? _normalizedSentenceBoundary(String value) {
+  final text = value.trim();
+  if (text.isEmpty) return null;
+
+  String? first;
+  String? last;
+  for (final match in _qualitySentencePattern.allMatches(text)) {
+    final sentence = match.group(0)?.trim() ?? '';
+    if (sentence.isEmpty) continue;
+    first ??= sentence;
+    last = sentence;
+  }
+  if (first == null || last == null) return null;
+  return (first: _normalizeChinese(first), last: _normalizeChinese(last));
+}
+
 double chineseContentSimilarity(String left, String right) =>
     _chineseContentSimilarityFromPairs(
       _chineseBigrams(left),
@@ -299,30 +313,41 @@ double chineseContentSimilarity(String left, String right) =>
     );
 
 double _chineseContentSimilarityFromPairs(
-  Set<String> leftPairs,
-  Set<String> rightPairs,
+  Set<int> leftPairs,
+  Set<int> rightPairs,
 ) {
   if (leftPairs.isEmpty || rightPairs.isEmpty) return 0;
 
-  final intersection = leftPairs.intersection(rightPairs).length;
-  final union = leftPairs.union(rightPairs).length;
+  final leftIsSmaller = leftPairs.length <= rightPairs.length;
+  final smaller = leftIsSmaller ? leftPairs : rightPairs;
+  final larger = leftIsSmaller ? rightPairs : leftPairs;
+  var intersection = 0;
+  for (final pair in smaller) {
+    if (larger.contains(pair)) intersection += 1;
+  }
+  final union = leftPairs.length + rightPairs.length - intersection;
   return union == 0 ? 0 : intersection / union;
 }
 
-Set<String> _chineseBigrams(String value) =>
+Set<int> _chineseBigrams(String value) =>
     _chineseBigramsFromNormalized(_normalizeChinese(value));
 
-Set<String> _chineseBigramsFromNormalized(String normalized) {
-  final characters = normalized.runes
-      .map(String.fromCharCode)
-      .toList(growable: false);
-  if (characters.isEmpty) return const <String>{};
-  if (characters.length == 1) return <String>{characters.first};
+Set<int> _chineseBigramsFromNormalized(String normalized) {
+  final runes = normalized.runes.iterator;
+  if (!runes.moveNext()) return const <int>{};
 
-  return <String>{
-    for (var index = 0; index < characters.length - 1; index += 1)
-      '${characters[index]}${characters[index + 1]}',
-  };
+  final first = runes.current;
+  if (!runes.moveNext()) return <int>{-first - 1};
+
+  const runeBase = 0x110000;
+  final pairs = <int>{};
+  var previous = first;
+  do {
+    final current = runes.current;
+    pairs.add(previous * runeBase + current);
+    previous = current;
+  } while (runes.moveNext());
+  return pairs;
 }
 
 String _normalizeChinese(String value) =>
