@@ -1,17 +1,36 @@
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 export const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
 
-const phoenixBottomNavLabels = new Set(['探索', '护照', '跟读训练', '我的']);
+const phoenixBottomNavPositions = new Map([
+  ['探索', 1],
+  ['护照', 2],
+  ['跟读训练', 3],
+  ['我的', 4],
+]);
 
-export function normalizePhoenixSemanticSpec(spec = {}) {
-  const normalized = { ...spec };
+function phoenixNavigationCanonicalLabel(spec = {}) {
+  if (spec.role !== 'button') return '';
   const exact = clean(spec.exact);
   const prefix = clean(spec.prefix);
-  const label = exact || prefix;
-  if (spec.role === 'button' && phoenixBottomNavLabels.has(label)) {
-    normalized.role = 'tab';
+  if (phoenixBottomNavPositions.has(exact)) return exact;
+  if (phoenixBottomNavPositions.has(prefix)) return prefix;
+  return '';
+}
+
+function phoenixNavigationMatches(record, spec = {}) {
+  const canonical = phoenixNavigationCanonicalLabel(spec);
+  if (!canonical) return null;
+  const ownLabel = clean(record?.label);
+  if (record?.role === 'button') return ownLabel === canonical;
+  if (record?.role === 'tab') {
+    const position = phoenixBottomNavPositions.get(canonical);
+    return ownLabel === canonical || ownLabel === `${canonical} Tab ${position} of 4`;
   }
-  return normalized;
+  return false;
+}
+
+export function normalizePhoenixSemanticSpec(spec = {}) {
+  return { ...spec };
 }
 
 export function recordText(record) {
@@ -20,9 +39,13 @@ export function recordText(record) {
 
 export function semanticMatches(record, spec = {}) {
   if (!record || (spec.visible !== false && !record.visible)) return false;
-  if (spec.role && record.role !== spec.role) return false;
   if (spec.enabled === true && record.disabled) return false;
   if (spec.enabled === false && !record.disabled) return false;
+
+  const phoenixNavigationMatch = phoenixNavigationMatches(record, spec);
+  if (phoenixNavigationMatch != null) return phoenixNavigationMatch;
+
+  if (spec.role && record.role !== spec.role) return false;
   const text = recordText(record);
   const label = clean(record.label);
   if (spec.exact != null) {
@@ -88,6 +111,29 @@ export async function visibleText(page) {
   return (await records(page)).filter((record) => record.visible).map(recordText).filter(Boolean).join('\n');
 }
 
+function sortLiveCandidates(candidates) {
+  candidates.sort((left, right) => {
+    if (left.record.role === 'button' && right.record.role !== 'button') return -1;
+    if (right.record.role === 'button' && left.record.role !== 'button') return 1;
+    return left.record.area - right.record.area;
+  });
+}
+
+async function findLiveSemanticOnce(page, spec) {
+  const handles = await page.locator('flt-semantics').elementHandles();
+  const candidates = [];
+  for (const handle of handles) {
+    const record = await recordForHandle(handle);
+    if (record && semanticMatches(record, spec)) candidates.push({ handle, record });
+  }
+  sortLiveCandidates(candidates);
+  for (const candidate of candidates) {
+    const fresh = await recordForHandle(candidate.handle);
+    if (fresh && semanticMatches(fresh, spec)) return { handle: candidate.handle, record: fresh };
+  }
+  return null;
+}
+
 export async function bindLiveSemantic(page, spec, { timeout = 15000 } = {}) {
   const effectiveSpec = normalizePhoenixSemanticSpec(spec);
   const deadline = Date.now() + timeout;
@@ -99,11 +145,7 @@ export async function bindLiveSemantic(page, spec, { timeout = 15000 } = {}) {
       const record = await recordForHandle(handle);
       if (record && semanticMatches(record, effectiveSpec)) candidates.push({ handle, record });
     }
-    candidates.sort((left, right) => {
-      if (left.record.role === 'button' && right.record.role !== 'button') return -1;
-      if (right.record.role === 'button' && left.record.role !== 'button') return 1;
-      return left.record.area - right.record.area;
-    });
+    sortLiveCandidates(candidates);
     lastObserved = candidates.map(({ record }) => recordText(record));
     for (const candidate of candidates) {
       const fresh = await recordForHandle(candidate.handle);
@@ -114,22 +156,54 @@ export async function bindLiveSemantic(page, spec, { timeout = 15000 } = {}) {
   throw new Error(`live semantic not found: ${JSON.stringify(effectiveSpec)} observed=${JSON.stringify(lastObserved.slice(0, 8))}`);
 }
 
-export async function activateSemantic(page, spec, { mode = 'click', timeout = 15000, retries = 3 } = {}) {
+export async function activateSemantic(page, spec, { mode = 'click', timeout = 15000, retries = 3, canRetryCommittedAction = null } = {}) {
   const effectiveSpec = normalizePhoenixSemanticSpec({ ...spec, enabled: true });
   let lastError = null;
   for (let attempt = 1; attempt <= retries; attempt += 1) {
+    let bound;
+    let before;
+
+    // Phase A: all retries here are pre-action. A detached handle is safe to rebind.
     try {
-      const bound = await bindLiveSemantic(page, effectiveSpec, { timeout });
-      const before = await recordForHandle(bound.handle);
+      bound = await bindLiveSemantic(page, effectiveSpec, { timeout });
+      before = await recordForHandle(bound.handle);
       if (!before || !semanticMatches(before, effectiveSpec)) {
         throw new Error('live semantic identity changed before activation');
       }
+    } catch (error) {
+      lastError = error;
+      if (attempt < retries) {
+        await sleep(120);
+        continue;
+      }
+      throw error;
+    }
+
+    // Phase B: once click/tap is issued, the action is committed for retry-policy purposes.
+    try {
       if (mode === 'tap') await bound.handle.tap({ timeout: Math.min(timeout, 5000) });
       else await bound.handle.click({ timeout: Math.min(timeout, 5000) });
       return before;
     } catch (error) {
       lastError = error;
-      if (attempt < retries) await sleep(120);
+    }
+
+    // Phase C: never blindly repeat a committed action. If the old target vanished,
+    // return to the caller so its expected next-state semantics remain authoritative.
+    const oldTarget = await findLiveSemanticOnce(page, effectiveSpec);
+    if (!oldTarget) return before;
+
+    // Old-target persistence is not success/failure authority. A committed action may
+    // be retried only when the caller explicitly proves its next-state postcondition
+    // has not occurred and authorizes a bounded retry.
+    const retryAuthorized =
+      typeof canRetryCommittedAction === 'function' &&
+      (await canRetryCommittedAction({ page, spec: effectiveSpec, before, error: lastError, attempt })) === true;
+    if (!retryAuthorized) return before;
+
+    if (attempt < retries) {
+      await sleep(120);
+      continue;
     }
   }
   throw lastError ?? new Error(`semantic activation failed: ${JSON.stringify(effectiveSpec)}`);

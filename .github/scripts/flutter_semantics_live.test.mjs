@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  activateSemantic,
   classifyDialogState,
   discoveryDepthFromText,
   levelFromRecords,
@@ -15,6 +16,38 @@ const rec = (text, overrides = {}) => ({
   role: '', label: text, value: '', description: '', text: '', disabled: false, visible: true, area: 100,
   ...overrides,
 });
+
+function fakePage(state) {
+  return {
+    locator() {
+      return {
+        async elementHandles() {
+          return state.handles;
+        },
+      };
+    },
+  };
+}
+
+function fakeHandle(state, record, behavior = {}) {
+  let evaluations = 0;
+  return {
+    async evaluate() {
+      evaluations += 1;
+      if (behavior.onEvaluate) return behavior.onEvaluate({ state, record, evaluations });
+      if (!state.handles.includes(this)) throw new Error('detached');
+      return { ...record };
+    },
+    async click() {
+      state.activations += 1;
+      if (behavior.onAction) return behavior.onAction({ state, mode: 'click' });
+    },
+    async tap() {
+      state.activations += 1;
+      if (behavior.onAction) return behavior.onAction({ state, mode: 'tap' });
+    },
+  };
+}
 
 test('localized stage wording does not matter when structural progress is present', () => {
   assert.equal(stageFromRecords([rec('3/6 发现'), rec('Discovery')]), 3);
@@ -50,13 +83,116 @@ test('semantic reorder fixture proves identity matching ignores old numeric posi
   assert.equal(semanticMatches(moved, { role: 'slider', prefix: '朗读进度' }), true);
 });
 
-test('Phoenix bottom navigation button intent normalizes only to deployed tab roles', () => {
-  for (const label of ['探索', '护照', '跟读训练', '我的']) {
-    assert.equal(normalizePhoenixSemanticSpec({ role: 'button', exact: label }).role, 'tab');
-    assert.equal(normalizePhoenixSemanticSpec({ role: 'button', prefix: label }).role, 'tab');
-  }
-  assert.equal(normalizePhoenixSemanticSpec({ role: 'button', exact: '中国' }).role, 'button');
-  assert.equal(normalizePhoenixSemanticSpec({ role: 'group', exact: '护照' }).role, 'group');
+test('compact Phoenix nav uses the deployed button role without global role rewriting', () => {
+  assert.equal(normalizePhoenixSemanticSpec({ role: 'button', exact: '护照' }).role, 'button');
+  assert.equal(
+    semanticMatches(rec('', { role: 'button', label: '护照', text: '护照' }), { role: 'button', exact: '护照' }),
+    true,
+  );
+});
+
+test('wide NavigationRail accepts only the bounded structural own-label decoration', () => {
+  assert.equal(
+    semanticMatches(rec('', { role: 'tab', label: '护照 Tab 2 of 4' }), { role: 'button', exact: '护照' }),
+    true,
+  );
+  assert.equal(
+    semanticMatches(rec('', { role: 'tab', label: '护照 Tab 3 of 4' }), { role: 'button', exact: '护照' }),
+    false,
+  );
+  assert.equal(
+    semanticMatches(rec('', { role: 'tab', label: '护照' }), { role: 'button', exact: '护照' }),
+    true,
+  );
+});
+
+test('Phoenix nav does not use aggregate descendant text as actionable identity', () => {
+  assert.equal(
+    semanticMatches(rec('', { role: 'button', label: '其他', text: '护照' }), { role: 'button', exact: '护照' }),
+    false,
+  );
+});
+
+test('Phoenix nav rejects correct label on an unrelated role', () => {
+  assert.equal(
+    semanticMatches(rec('', { role: 'group', label: '护照' }), { role: 'button', exact: '护照' }),
+    false,
+  );
+});
+
+test('pre-action detach rebinds from a fresh semantic snapshot before one activation', async () => {
+  const state = { handles: [], activations: 0 };
+  const record = rec('', { role: 'button', label: '中国' });
+  let replacement;
+  const first = fakeHandle(state, record, {
+    onEvaluate({ evaluations }) {
+      if (evaluations === 3) {
+        state.handles = [replacement];
+        throw new Error('detached before activation');
+      }
+      return { ...record };
+    },
+  });
+  replacement = fakeHandle(state, record);
+  state.handles = [first];
+
+  await activateSemantic(fakePage(state), { role: 'button', exact: '中国' }, { timeout: 50, retries: 2 });
+  assert.equal(state.activations, 1);
+});
+
+test('post-action target disappearance returns control to caller without repeating the action', async () => {
+  const state = { handles: [], activations: 0 };
+  const record = rec('', { role: 'button', label: '紫禁城' });
+  const handle = fakeHandle(state, record, {
+    onAction({ state: liveState }) {
+      liveState.handles = [];
+      throw new Error('detached after committed navigation');
+    },
+  });
+  state.handles = [handle];
+
+  await activateSemantic(fakePage(state), { role: 'button', exact: '紫禁城' }, { timeout: 50, retries: 3 });
+  assert.equal(state.activations, 1);
+});
+
+test('post-action error may retry only when the old target is still live and actionable', async () => {
+  const state = { handles: [], activations: 0 };
+  const record = rec('', { role: 'button', label: '继续' });
+  let first = true;
+  const handle = fakeHandle(state, record, {
+    onAction() {
+      if (first) {
+        first = false;
+        throw new Error('action transport error while target persists');
+      }
+    },
+  });
+  state.handles = [handle];
+
+  await activateSemantic(
+    fakePage(state),
+    { role: 'button', exact: '继续' },
+    {
+      timeout: 50,
+      retries: 2,
+      canRetryCommittedAction: async () => true,
+    },
+  );
+  assert.equal(state.activations, 2);
+});
+
+test('committed non-idempotent action is never blindly double-activated without caller authorization', async () => {
+  const state = { handles: [], activations: 0 };
+  const record = rec('', { role: 'button', label: '西安城墙' });
+  const handle = fakeHandle(state, record, {
+    onAction() {
+      throw new Error('ambiguous committed action error while target persists');
+    },
+  });
+  state.handles = [handle];
+
+  await activateSemantic(fakePage(state), { role: 'button', exact: '西安城墙' }, { timeout: 50, retries: 5 });
+  assert.equal(state.activations, 1);
 });
 
 test('exact semantic identity can use aria-label despite nested child text while preserving role', () => {
