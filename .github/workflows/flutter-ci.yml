@@ -31,8 +31,16 @@ env:
   CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-  verify:
+  produce:
     runs-on: ubuntu-latest
+    outputs:
+      agents_outcome: ${{ steps.agents.outcome }}
+      analyze_outcome: ${{ steps.analyze.outcome }}
+      test_outcome: ${{ steps.test.outcome }}
+      quality_outcome: ${{ steps.quality.outcome }}
+      quality_contract_outcome: ${{ steps.quality_contract.outcome }}
+      build_outcome: ${{ steps.build.outcome }}
+      worker_outcome: ${{ steps.worker.outcome }}
     defaults:
       run:
         working-directory: app
@@ -190,19 +198,25 @@ jobs:
             app/quality-report-test.log
           if-no-files-found: error
 
+  producer-verdict:
+    needs: produce
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
       - name: Enforce verification results
-        if: always()
         shell: bash
         run: |
+          set -euo pipefail
           failures=0
           for result in \
-            "${{ steps.agents.outcome }}" \
-            "${{ steps.analyze.outcome }}" \
-            "${{ steps.test.outcome }}" \
-            "${{ steps.quality.outcome }}" \
-            "${{ steps.quality_contract.outcome }}" \
-            "${{ steps.build.outcome }}" \
-            "${{ steps.worker.outcome }}"; do
+            "${{ needs.produce.outputs.agents_outcome }}" \
+            "${{ needs.produce.outputs.analyze_outcome }}" \
+            "${{ needs.produce.outputs.test_outcome }}" \
+            "${{ needs.produce.outputs.quality_outcome }}" \
+            "${{ needs.produce.outputs.quality_contract_outcome }}" \
+            "${{ needs.produce.outputs.build_outcome }}" \
+            "${{ needs.produce.outputs.worker_outcome }}"; do
             if [[ "$result" != "success" ]]; then
               failures=1
             fi

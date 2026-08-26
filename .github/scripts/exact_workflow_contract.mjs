@@ -13,6 +13,71 @@ const terminalFailures = new Set([
 ]);
 const activeStatuses = new Set(['queued', 'in_progress', 'requested', 'waiting', 'pending']);
 
+function workflowJobBlock(source, jobName) {
+  const lines = String(source ?? '').replace(/\r\n/g, '\n').split('\n');
+  const start = lines.findIndex((line) => line === `  ${jobName}:`);
+  if (start < 0) throw new Error(`Flutter CI topology missing job: ${jobName}`);
+  let end = lines.length;
+  for (let index = start + 1; index < lines.length; index += 1) {
+    if (/^  [A-Za-z0-9_-]+:\s*$/.test(lines[index])) {
+      end = index;
+      break;
+    }
+  }
+  return lines.slice(start, end).join('\n');
+}
+
+function requireWorkflowMarkers(block, markers, label) {
+  for (const marker of markers) {
+    if (!block.includes(marker)) throw new Error(`${label} missing topology marker: ${marker}`);
+  }
+}
+
+export function validateFlutterProducerTopology(source) {
+  const produce = workflowJobBlock(source, 'produce');
+  const verdict = workflowJobBlock(source, 'producer-verdict');
+  const outcomes = ['agents', 'analyze', 'test', 'quality', 'quality_contract', 'build', 'worker'];
+
+  requireWorkflowMarkers(produce, [
+    '- name: Full Flutter Test',
+    '- name: Dedicated isolated Journey quality report',
+    '- name: Upload exact Journey quality artifact',
+    '- name: Build web release',
+    '- name: Validate Cloudflare Worker bundle',
+    '- name: Upload exact tested web artifact',
+    'outputs:',
+  ], 'Flutter heavy producer');
+  for (const outcome of outcomes) {
+    const outputName = `${outcome}_outcome`;
+    requireWorkflowMarkers(
+      produce,
+      [`${outputName}: \${{ steps.${outcome}.outcome }}`],
+      'Flutter heavy producer outputs',
+    );
+    requireWorkflowMarkers(
+      verdict,
+      [`\${{ needs.produce.outputs.${outputName} }}`],
+      'Flutter producer verdict inputs',
+    );
+  }
+  if (produce.includes('- name: Enforce verification results')) {
+    throw new Error('Flutter heavy producer must not own final enforcement verdict');
+  }
+
+  requireWorkflowMarkers(verdict, [
+    'needs: produce',
+    'if: always()',
+    'timeout-minutes: 5',
+    '- name: Enforce verification results',
+  ], 'Flutter producer verdict');
+  for (const forbidden of ['flutter test', 'flutter build web', 'wrangler@4', 'actions/upload-artifact']) {
+    if (verdict.includes(forbidden)) {
+      throw new Error(`Flutter producer verdict must remain a cheap retry unit: ${forbidden}`);
+    }
+  }
+  return true;
+}
+
 export function classifyExactRuns(runs, workflowName, candidateSha) {
   const exact = runs
     .filter((run) => run?.name === workflowName && run?.head_sha === candidateSha)
