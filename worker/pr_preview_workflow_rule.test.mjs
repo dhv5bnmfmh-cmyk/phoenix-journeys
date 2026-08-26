@@ -20,17 +20,13 @@ test('preview uses the exact feature head rather than the pull request merge ref
   assert.match(workflow, /PHOENIX_RELEASE:\$PREVIEW_RELEASE/);
 });
 
-test('preview exact health identity is verified before status and link publication', () => {
-  const verifyIndex = workflow.indexOf('name: Verify exact preview release identity');
+test('preview is exact-release verified before its link is published', () => {
+  const verifyIndex = workflow.indexOf('name: Verify preview release');
   const statusIndex = workflow.indexOf('name: Publish preview status');
   const commentIndex = workflow.indexOf('name: Add or update preview comment');
-  assert.ok(verifyIndex >= 0);
-  assert.ok(statusIndex > verifyIndex);
-  assert.ok(commentIndex > statusIndex);
-  assert.match(workflow, /validateHealthIdentity/);
-  assert.match(workflow, /health_url="\$\{PREVIEW_URL\}\/api\/health\?commit=\$\{PREVIEW_RELEASE\}"/);
-  assert.match(workflow, /statuses\/\$\{PREVIEW_RELEASE\}/);
-  assert.match(workflow, /v=\$\{release\}/);
+  assert.ok(verifyIndex >= 0); assert.ok(statusIndex > verifyIndex); assert.ok(commentIndex > statusIndex);
+  assert.match(workflow, /health\.release !== expected/);
+  assert.match(workflow, /"\$response" "\$PREVIEW_RELEASE"/);
 });
 
 test('preview workers are removed when pull requests close', () => {

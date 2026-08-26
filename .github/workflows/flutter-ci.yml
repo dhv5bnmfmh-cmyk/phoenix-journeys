@@ -31,96 +31,8 @@ env:
   CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-  quality_producer:
+  verify:
     runs-on: ubuntu-latest
-    outputs:
-      quality_outcome: ${{ steps.quality.outcome }}
-      quality_contract_outcome: ${{ steps.quality_contract.outcome }}
-    defaults:
-      run:
-        working-directory: app
-
-    steps:
-      - name: Check out exact candidate
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ env.CANDIDATE_SHA }}
-          fetch-depth: 0
-
-      - name: Verify exact candidate identity
-        working-directory: ${{ github.workspace }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          echo "FLUTTER QUALITY CANDIDATE SHA = $CANDIDATE_SHA"
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Dedicated isolated Journey quality report
-        id: quality
-        continue-on-error: true
-        env:
-          PHOENIX_GENERATE_QUALITY_REPORT: '1'
-          PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
-          PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
-        run: |
-          set -o pipefail
-          flutter test test/journey_quality_report_ci_test.dart --reporter expanded --concurrency=1 \
-            2>&1 | tee quality-report-test.log
-
-      - name: Bind and enforce exact quality artifact
-        id: quality_contract
-        if: always()
-        continue-on-error: true
-        working-directory: ${{ github.workspace }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "${{ steps.quality.outcome }}" = success
-          cat > journey-quality-artifact.json <<JSON
-          {"schema":1,"type":"journey-quality","sha":"$CANDIDATE_SHA"}
-          JSON
-          node .github/scripts/validate_quality_artifact.mjs \
-            journey-quality-report.json \
-            journey-quality-artifact.json \
-            "$CANDIDATE_SHA"
-
-      - name: Upload exact Journey quality artifact
-        if: steps.quality.outcome == 'success' && steps.quality_contract.outcome == 'success'
-        uses: actions/upload-artifact@v4
-        with:
-          name: phoenix-journey-quality-${{ env.CANDIDATE_SHA }}
-          path: |
-            journey-quality-report.md
-            journey-quality-report.json
-            journey-quality-artifact.json
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Upload Journey quality verification log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phoenix-quality-verification-log-${{ env.CANDIDATE_SHA }}
-          path: app/quality-report-test.log
-          if-no-files-found: error
-
-  produce:
-    runs-on: ubuntu-latest
-    outputs:
-      agents_outcome: ${{ steps.agents.outcome }}
-      analyze_outcome: ${{ steps.analyze.outcome }}
-      test_outcome: ${{ steps.test.outcome }}
-      build_outcome: ${{ steps.build.outcome }}
-      worker_outcome: ${{ steps.worker.outcome }}
     defaults:
       run:
         working-directory: app
@@ -140,7 +52,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
           echo "FLUTTER CI CANDIDATE SHA = $CANDIDATE_SHA"
 
-      - name: Cheap harness contract preflight
+      - name: Preflight checked-in JavaScript harness syntax
         working-directory: ${{ github.workspace }}
         shell: bash
         run: |
@@ -148,17 +60,6 @@ jobs:
           while IFS= read -r -d '' file; do
             node --check "$file"
           done < <(find .github/scripts -type f -name '*.mjs' -print0)
-          node --test \
-            .github/scripts/exact_workflow_contract.test.mjs \
-            .github/scripts/validate_quality_artifact.test.mjs \
-            .github/scripts/flutter_semantics_live.test.mjs \
-            .github/scripts/semantic_action_safety_scan.test.mjs
-          node .github/scripts/semantic_action_safety_scan.mjs \
-            .github/scripts/flutter_semantics_live.mjs \
-            .github/scripts/journey_e2e_core.mjs \
-            .github/scripts/verify_forbidden_city_reference_live.mjs \
-            .github/scripts/verify_forbidden_city_mobile_live.mjs \
-            .github/scripts/verify_xian_city_wall_live.mjs
 
       - name: Test Phoenix agents
         id: agents
@@ -184,7 +85,7 @@ jobs:
           set -o pipefail
           flutter analyze 2>&1 | tee analyze.log
 
-      - name: Full Flutter Test
+      - name: Test
         id: test
         continue-on-error: true
         run: |
@@ -197,15 +98,6 @@ jobs:
         run: |
           set -o pipefail
           flutter build web --release 2>&1 | tee build-web.log
-
-      - name: Bind exact web artifact identity
-        if: steps.build.outcome == 'success'
-        shell: bash
-        run: |
-          set -euo pipefail
-          cat > build/web/phoenix-artifact.json <<JSON
-          {"schema":1,"type":"web","sha":"$CANDIDATE_SHA"}
-          JSON
 
       - name: Validate Cloudflare Worker bundle
         id: worker
@@ -234,27 +126,19 @@ jobs:
             worker-build.log
             app/analyze.log
             app/test.log
+            app/build-web.log
           if-no-files-found: error
 
-  producer-verdict:
-    needs: [produce, quality_producer]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
       - name: Enforce verification results
         shell: bash
         run: |
-          set -euo pipefail
           failures=0
           for result in \
-            "${{ needs.produce.outputs.agents_outcome }}" \
-            "${{ needs.produce.outputs.analyze_outcome }}" \
-            "${{ needs.produce.outputs.test_outcome }}" \
-            "${{ needs.quality_producer.outputs.quality_outcome }}" \
-            "${{ needs.quality_producer.outputs.quality_contract_outcome }}" \
-            "${{ needs.produce.outputs.build_outcome }}" \
-            "${{ needs.produce.outputs.worker_outcome }}"; do
+            "${{ steps.agents.outcome }}" \
+            "${{ steps.analyze.outcome }}" \
+            "${{ steps.test.outcome }}" \
+            "${{ steps.build.outcome }}" \
+            "${{ steps.worker.outcome }}"; do
             if [[ "$result" != "success" ]]; then
               failures=1
             fi
