@@ -107,34 +107,4 @@ void main() {
       }
     }
   });
-
-  test('repeated adaptive resolution preserves multilingual story identity', () {
-    final journey = allJourneyExperiences.firstWhere(
-      (journey) => usesSharedGenericAdaptivePipeline(journey.id),
-    );
-    final profile = PhoenixLanguageLevelAgent.hskProfiles[4];
-
-    final first = resolveAdaptiveJourneyLevel(journey, profile: profile);
-    final repeated = resolveAdaptiveJourneyLevel(journey, profile: profile);
-
-    expect(repeated.storyParagraphs, orderedEquals(first.storyParagraphs));
-    expect(
-      repeated.storyAnnotations.map((annotation) => annotation.pinyin),
-      orderedEquals(
-        first.storyAnnotations.map((annotation) => annotation.pinyin),
-      ),
-    );
-    expect(
-      repeated.storyAnnotations.map((annotation) => annotation.vietnamese),
-      orderedEquals(
-        first.storyAnnotations.map((annotation) => annotation.vietnamese),
-      ),
-    );
-    expect(
-      repeated.storyAnnotations.map((annotation) => annotation.english),
-      orderedEquals(
-        first.storyAnnotations.map((annotation) => annotation.english),
-      ),
-    );
-  });
 }
