@@ -42,6 +42,13 @@ class JourneyContentQualityReport {
   }
 }
 
+final RegExp _dependentNarrativeOpeningPattern = RegExp(
+  r'^(它|他|她|他们|她们|因此|于是|所以|然而|但是|但|同时|其中|此时|后来|随后|最后|而且|也|其(?!中))',
+);
+final RegExp _qualitySentencePattern = RegExp(r'[^。！？!?]+[。！？!?]?');
+final RegExp _normalizeChinesePattern =
+    RegExp(r'[\s，。！？!?、；;：:“”‘’（）()\-—…·]');
+
 JourneyContentQualityReport auditJourneyContentQuality(
   DailyJourneyExperience experience,
   JourneyLevelContent content, {
@@ -49,6 +56,8 @@ JourneyContentQualityReport auditJourneyContentQuality(
 }) {
   final issues = <JourneyContentQualityIssue>[];
   final storyTarget = phoenixStoryLengthTargetFor(profile);
+  final usesSharedGeneric = usesSharedGenericAdaptivePipeline(experience.id);
+  final storyText = content.storyParagraphs.join();
 
   void add(
     String code,
@@ -80,7 +89,7 @@ JourneyContentQualityReport auditJourneyContentQuality(
     );
   }
 
-  final storyCharacterCount = content.storyParagraphs.join().runes.length;
+  final storyCharacterCount = storyText.runes.length;
   if (storyCharacterCount < storyTarget.acceptedMinimumCharacters) {
     add(
       'story-below-level-range',
@@ -127,7 +136,7 @@ JourneyContentQualityReport auditJourneyContentQuality(
   // whole level-specific passages, so a context-free token check cannot prove
   // that an opening pronoun is unresolved; their causal/semantic gates remain
   // authoritative instead of forcing Story prose to satisfy a brittle token.
-  if (usesSharedGenericAdaptivePipeline(experience.id)) {
+  if (usesSharedGeneric) {
     for (var index = 1; index < content.storyParagraphs.length; index += 1) {
       if (startsWithDependentNarrativeReference(content.storyParagraphs[index])) {
         add(
@@ -139,13 +148,11 @@ JourneyContentQualityReport auditJourneyContentQuality(
     }
   }
 
-  if (usesSharedGenericAdaptivePipeline(experience.id)) {
+  if (usesSharedGeneric) {
     final sourceSentences = splitChineseQualitySentences(
       experience.content.storyParagraphs.join(),
     );
-    final shapedSentences = splitChineseQualitySentences(
-      content.storyParagraphs.join(),
-    );
+    final shapedSentences = splitChineseQualitySentences(storyText);
     if (sourceSentences.isNotEmpty && shapedSentences.isNotEmpty) {
       if (_normalizeChinese(sourceSentences.first) !=
           _normalizeChinese(shapedSentences.first)) {
@@ -186,7 +193,9 @@ JourneyContentQualityReport auditJourneyContentQuality(
     );
   }
 
-  final storyText = content.storyParagraphs.join();
+  final storyPairs = content.discoveries.isEmpty
+      ? const <String>{}
+      : _chineseBigrams(storyText);
   final seenDiscoveries = <String>{};
   for (var index = 0; index < content.discoveries.length; index += 1) {
     final discovery = content.discoveries[index];
@@ -208,7 +217,11 @@ JourneyContentQualityReport auditJourneyContentQuality(
       );
     }
 
-    if (chineseContentSimilarity(storyText, discovery.text) >= .97) {
+    if (_chineseContentSimilarityFromPairs(
+          storyPairs,
+          _chineseBigramsFromNormalized(normalized),
+        ) >=
+        .97) {
       add(
         'discovery-repeats-story-$index',
         'Discovery ${index + 1} repeats the story instead of adding context.',
@@ -266,23 +279,29 @@ JourneyContentQualityReport auditJourneyContentQuality(
   );
 }
 
-bool startsWithDependentNarrativeReference(String value) => RegExp(
-      r'^(它|他|她|他们|她们|因此|于是|所以|然而|但是|但|同时|其中|此时|后来|随后|最后|而且|也|其(?!中))',
-    ).hasMatch(value.trim());
+bool startsWithDependentNarrativeReference(String value) =>
+    _dependentNarrativeOpeningPattern.hasMatch(value.trim());
 
 List<String> splitChineseQualitySentences(String value) {
   final text = value.trim();
   if (text.isEmpty) return const <String>[];
-  return RegExp(r'[^。！？!?]+[。！？!?]?')
+  return _qualitySentencePattern
       .allMatches(text)
       .map((match) => match.group(0)?.trim() ?? '')
       .where((sentence) => sentence.isNotEmpty)
       .toList(growable: false);
 }
 
-double chineseContentSimilarity(String left, String right) {
-  final leftPairs = _chineseBigrams(left);
-  final rightPairs = _chineseBigrams(right);
+double chineseContentSimilarity(String left, String right) =>
+    _chineseContentSimilarityFromPairs(
+      _chineseBigrams(left),
+      _chineseBigrams(right),
+    );
+
+double _chineseContentSimilarityFromPairs(
+  Set<String> leftPairs,
+  Set<String> rightPairs,
+) {
   if (leftPairs.isEmpty || rightPairs.isEmpty) return 0;
 
   final intersection = leftPairs.intersection(rightPairs).length;
@@ -290,9 +309,11 @@ double chineseContentSimilarity(String left, String right) {
   return union == 0 ? 0 : intersection / union;
 }
 
-Set<String> _chineseBigrams(String value) {
-  final characters = _normalizeChinese(value)
-      .runes
+Set<String> _chineseBigrams(String value) =>
+    _chineseBigramsFromNormalized(_normalizeChinese(value));
+
+Set<String> _chineseBigramsFromNormalized(String normalized) {
+  final characters = normalized.runes
       .map(String.fromCharCode)
       .toList(growable: false);
   if (characters.isEmpty) return const <String>{};
@@ -304,6 +325,5 @@ Set<String> _chineseBigrams(String value) {
   };
 }
 
-String _normalizeChinese(String value) => value
-    .replaceAll(RegExp(r'[\s，。！？!?、；;：:“”‘’（）()\-—…·]'), '')
-    .toLowerCase();
+String _normalizeChinese(String value) =>
+    value.replaceAll(_normalizeChinesePattern, '').toLowerCase();

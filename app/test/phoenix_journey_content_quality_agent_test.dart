@@ -6,6 +6,7 @@ import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/journey_data.dart';
 import 'package:phoenix_journeys/data/journey_level_catalog.dart';
+import 'package:phoenix_journeys/services/journey_content_quality_auditor.dart';
 
 void main() {
   const qualityAgent = PhoenixJourneyContentQualityAgent();
@@ -27,6 +28,17 @@ void main() {
     expect(batch.approvedCount, batch.decisions.length);
     expect(batch.minimumScore, greaterThanOrEqualTo(90));
     expect(batch.canPublish, isTrue);
+  });
+
+  test('quality similarity keeps punctuation-normalized bigram semantics', () {
+    expect(
+      chineseContentSimilarity('城墙，永宁门。', '城墙永宁门'),
+      1,
+    );
+    expect(
+      chineseContentSimilarity('城墙永宁门', '完全不同'),
+      0,
+    );
   });
 
   test('quality agent blocks repeated discovery content and explains the fix', () {
