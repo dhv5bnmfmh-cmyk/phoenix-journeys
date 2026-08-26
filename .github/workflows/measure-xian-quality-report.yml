@@ -1,0 +1,128 @@
+name: Measure isolated Journey quality report
+
+on:
+  push:
+    branches:
+      - measurement/xian-quality-report-f6ea663f
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CANDIDATE_SHA: f6ea663fb3823bae40bbdeeab4be157f4ba274e6
+      PHOENIX_GENERATE_QUALITY_REPORT: '1'
+      PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
+      PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
+    steps:
+      - name: Check out exact candidate product tree
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+
+      - name: Verify exact candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Measure exact isolated quality-report test
+        id: measure
+        working-directory: app
+        shell: bash
+        run: |
+          set -uo pipefail
+          rm -f "$PHOENIX_QUALITY_MARKDOWN" "$PHOENIX_QUALITY_JSON" "$GITHUB_WORKSPACE/quality-measurement.log"
+          start="$(date +%s)"
+          set +e
+          flutter test test/journey_quality_report_ci_test.dart --concurrency=1 2>&1 | tee "$GITHUB_WORKSPACE/quality-measurement.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          end="$(date +%s)"
+          elapsed=$((end - start))
+          echo "phase=exact" | tee -a "$GITHUB_WORKSPACE/quality-measurement.log"
+          echo "exact_status=$status" | tee -a "$GITHUB_WORKSPACE/quality-measurement.log"
+          echo "exact_wall_seconds=$elapsed" | tee -a "$GITHUB_WORKSPACE/quality-measurement.log"
+
+          if [[ $status -eq 0 ]]; then
+            echo "classification=A_ISOLATED_UNDER_2_MIN" | tee -a "$GITHUB_WORKSPACE/quality-measurement.log"
+          else
+            echo "Exact 2-minute source budget did not complete; running measurement-only bounded probe of the same isolated test." | tee -a "$GITHUB_WORKSPACE/quality-measurement.log"
+            rm -f "$PHOENIX_QUALITY_MARKDOWN" "$PHOENIX_QUALITY_JSON"
+            python3 - <<'PY'
+          from pathlib import Path
+          path = Path('test/journey_quality_report_ci_test.dart')
+          text = path.read_text()
+          old = 'timeout: const Timeout(Duration(minutes: 2))'
+          new = 'timeout: const Timeout(Duration(minutes: 10))'
+          if text.count(old) != 1:
+              raise SystemExit(f'expected exactly one measurement timeout target, found {text.count(old)}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+            probe_start="$(date +%s)"
+            set +e
+            flutter test test/journey_quality_report_ci_test.dart --concurrency=1 2>&1 | tee -a "$GITHUB_WORKSPACE/quality-measurement.log"
+            probe_status=${PIPESTATUS[0]}
+            set -e
+            probe_end="$(date +%s)"
+            probe_elapsed=$((probe_end - probe_start))
+            echo "phase=bounded_probe" | tee -a "$GITHUB_WORKSPACE/quality-measurement.log"
+            echo "probe_status=$probe_status" | tee -a "$GITHUB_WORKSPACE/quality-measurement.log"
+            echo "probe_wall_seconds=$probe_elapsed" | tee -a "$GITHUB_WORKSPACE/quality-measurement.log"
+            if [[ $probe_status -eq 0 ]]; then
+              echo "classification=B_ISOLATED_OVER_2_MIN_DETERMINISTIC" | tee -a "$GITHUB_WORKSPACE/quality-measurement.log"
+            else
+              echo "classification=C_STALL_OR_NONDETERMINISTIC" | tee -a "$GITHUB_WORKSPACE/quality-measurement.log"
+              exit $probe_status
+            fi
+          fi
+
+      - name: Verify complete 360-inspection outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$PHOENIX_QUALITY_MARKDOWN"
+          test -s "$PHOENIX_QUALITY_JSON"
+          node <<'NODE'
+          const fs = require('node:fs');
+          const report = JSON.parse(fs.readFileSync(process.env.PHOENIX_QUALITY_JSON, 'utf8'));
+          const expected = {
+            journeyCount: 36,
+            profileCount: 10,
+            inspectionCount: 360,
+            approvedCount: 360,
+            needsRevisionCount: 0,
+            blockedCount: 0,
+            canPublish: true,
+          };
+          for (const [key, value] of Object.entries(expected)) {
+            if (report[key] !== value) {
+              throw new Error(`${key}: expected ${JSON.stringify(value)}, got ${JSON.stringify(report[key])}`);
+            }
+          }
+          console.log('quality_report_contract=360/360 PASS');
+          NODE
+
+      - name: Upload measurement evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xian-quality-report-measurement-f6ea663f
+          path: |
+            quality-measurement.log
+            journey-quality-report.md
+            journey-quality-report.json
+          if-no-files-found: warn
