@@ -34,20 +34,51 @@ function requireWorkflowMarkers(block, markers, label) {
 }
 
 export function validateFlutterProducerTopology(source) {
+  const qualityProducer = workflowJobBlock(source, 'quality_producer');
   const produce = workflowJobBlock(source, 'produce');
   const verdict = workflowJobBlock(source, 'producer-verdict');
-  const outcomes = ['agents', 'analyze', 'test', 'quality', 'quality_contract', 'build', 'worker'];
+  const produceOutcomes = ['agents', 'analyze', 'test', 'build', 'worker'];
+  const qualityOutcomes = ['quality', 'quality_contract'];
+
+  requireWorkflowMarkers(qualityProducer, [
+    '- name: Dedicated isolated Journey quality report',
+    'flutter test test/journey_quality_report_ci_test.dart --reporter expanded --concurrency=1',
+    '- name: Bind and enforce exact quality artifact',
+    '- name: Upload exact Journey quality artifact',
+    'quality_outcome: ${{ steps.quality.outcome }}',
+    'quality_contract_outcome: ${{ steps.quality_contract.outcome }}',
+  ], 'Flutter isolated quality producer');
+
+  for (const forbidden of [
+    '- name: Full Flutter Test',
+    '- name: Build web release',
+    '- name: Validate Cloudflare Worker bundle',
+    '- name: Upload exact tested web artifact',
+  ]) {
+    if (qualityProducer.includes(forbidden)) {
+      throw new Error(`Flutter isolated quality producer must not duplicate main producer work: ${forbidden}`);
+    }
+  }
 
   requireWorkflowMarkers(produce, [
     '- name: Full Flutter Test',
-    '- name: Dedicated isolated Journey quality report',
-    '- name: Upload exact Journey quality artifact',
     '- name: Build web release',
     '- name: Validate Cloudflare Worker bundle',
     '- name: Upload exact tested web artifact',
     'outputs:',
   ], 'Flutter heavy producer');
-  for (const outcome of outcomes) {
+  for (const forbidden of [
+    '- name: Dedicated isolated Journey quality report',
+    '- name: Upload exact Journey quality artifact',
+    'quality_outcome:',
+    'quality_contract_outcome:',
+  ]) {
+    if (produce.includes(forbidden)) {
+      throw new Error(`Flutter heavy producer must keep Journey quality on a fresh runner: ${forbidden}`);
+    }
+  }
+
+  for (const outcome of produceOutcomes) {
     const outputName = `${outcome}_outcome`;
     requireWorkflowMarkers(
       produce,
@@ -60,12 +91,22 @@ export function validateFlutterProducerTopology(source) {
       'Flutter producer verdict inputs',
     );
   }
-  if (produce.includes('- name: Enforce verification results')) {
-    throw new Error('Flutter heavy producer must not own final enforcement verdict');
+  for (const outcome of qualityOutcomes) {
+    const outputName = `${outcome}_outcome`;
+    requireWorkflowMarkers(
+      verdict,
+      [`\${{ needs.quality_producer.outputs.${outputName} }}`],
+      'Flutter quality producer verdict inputs',
+    );
+  }
+
+  if (produce.includes('- name: Enforce verification results') ||
+      qualityProducer.includes('- name: Enforce verification results')) {
+    throw new Error('Flutter producer jobs must not own final enforcement verdict');
   }
 
   requireWorkflowMarkers(verdict, [
-    'needs: produce',
+    'needs: [produce, quality_producer]',
     'if: always()',
     'timeout-minutes: 5',
     '- name: Enforce verification results',

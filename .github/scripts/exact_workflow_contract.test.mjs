@@ -81,10 +81,20 @@ test('preview health requires exact release identity', () => {
   );
 });
 
-const splitTopologyFixture = `jobs:\n  produce:\n    outputs:\n      agents_outcome: \${{ steps.agents.outcome }}\n      analyze_outcome: \${{ steps.analyze.outcome }}\n      test_outcome: \${{ steps.test.outcome }}\n      quality_outcome: \${{ steps.quality.outcome }}\n      quality_contract_outcome: \${{ steps.quality_contract.outcome }}\n      build_outcome: \${{ steps.build.outcome }}\n      worker_outcome: \${{ steps.worker.outcome }}\n    steps:\n      - name: Full Flutter Test\n      - name: Dedicated isolated Journey quality report\n      - name: Upload exact Journey quality artifact\n      - name: Build web release\n      - name: Validate Cloudflare Worker bundle\n      - name: Upload exact tested web artifact\n  producer-verdict:\n    needs: produce\n    if: always()\n    runs-on: ubuntu-latest\n    timeout-minutes: 5\n    steps:\n      - name: Enforce verification results\n        run: |\n          echo \"\${{ needs.produce.outputs.agents_outcome }}\"\n          echo \"\${{ needs.produce.outputs.analyze_outcome }}\"\n          echo \"\${{ needs.produce.outputs.test_outcome }}\"\n          echo \"\${{ needs.produce.outputs.quality_outcome }}\"\n          echo \"\${{ needs.produce.outputs.quality_contract_outcome }}\"\n          echo \"\${{ needs.produce.outputs.build_outcome }}\"\n          echo \"\${{ needs.produce.outputs.worker_outcome }}\"\n`;
+const splitTopologyFixture = `jobs:\n  quality_producer:\n    outputs:\n      quality_outcome: \${{ steps.quality.outcome }}\n      quality_contract_outcome: \${{ steps.quality_contract.outcome }}\n    steps:\n      - name: Dedicated isolated Journey quality report\n        run: flutter test test/journey_quality_report_ci_test.dart --reporter expanded --concurrency=1\n      - name: Bind and enforce exact quality artifact\n      - name: Upload exact Journey quality artifact\n  produce:\n    outputs:\n      agents_outcome: \${{ steps.agents.outcome }}\n      analyze_outcome: \${{ steps.analyze.outcome }}\n      test_outcome: \${{ steps.test.outcome }}\n      build_outcome: \${{ steps.build.outcome }}\n      worker_outcome: \${{ steps.worker.outcome }}\n    steps:\n      - name: Full Flutter Test\n      - name: Build web release\n      - name: Validate Cloudflare Worker bundle\n      - name: Upload exact tested web artifact\n  producer-verdict:\n    needs: [produce, quality_producer]\n    if: always()\n    runs-on: ubuntu-latest\n    timeout-minutes: 5\n    steps:\n      - name: Enforce verification results\n        run: |\n          echo \"\${{ needs.produce.outputs.agents_outcome }}\"\n          echo \"\${{ needs.produce.outputs.analyze_outcome }}\"\n          echo \"\${{ needs.produce.outputs.test_outcome }}\"\n          echo \"\${{ needs.quality_producer.outputs.quality_outcome }}\"\n          echo \"\${{ needs.quality_producer.outputs.quality_contract_outcome }}\"\n          echo \"\${{ needs.produce.outputs.build_outcome }}\"\n          echo \"\${{ needs.produce.outputs.worker_outcome }}\"\n`;
 
-test('split heavy producer and cheap verdict topology is accepted', () => {
+test('fresh-runner quality producer plus cheap verdict topology is accepted', () => {
   assert.equal(validateFlutterProducerTopology(splitTopologyFixture), true);
+});
+
+test('quality folded back into the heavy producer is rejected', () => {
+  const contendedTopology = splitTopologyFixture
+    .replace('  quality_producer:', '  quality_producer-disabled:')
+    .replace('  produce:\n', '  produce:\n      - name: Dedicated isolated Journey quality report\n');
+  assert.throws(
+    () => validateFlutterProducerTopology(contendedTopology),
+    /missing job: quality_producer|fresh runner/,
+  );
 });
 
 test('same-job enforcement topology is rejected', () => {
@@ -94,7 +104,15 @@ test('same-job enforcement topology is rejected', () => {
   assert.throws(() => validateFlutterProducerTopology(oldTopology), /final enforcement|missing topology marker/);
 });
 
-test('checked-in Flutter CI keeps producer and verdict as separate retry units', async () => {
+test('checked-in Flutter CI keeps quality on a fresh runner and verdict separate', async () => {
   const workflow = await readFile(new URL('../workflows/flutter-ci.yml', import.meta.url), 'utf8');
   assert.equal(validateFlutterProducerTopology(workflow), true);
+});
+
+test('Journey quality test keeps the original two-minute watchdog', async () => {
+  const qualityTest = await readFile(
+    new URL('../../app/test/journey_quality_report_ci_test.dart', import.meta.url),
+    'utf8',
+  );
+  assert.match(qualityTest, /timeout: const Timeout\(Duration\(minutes: 2\)\)/);
 });
