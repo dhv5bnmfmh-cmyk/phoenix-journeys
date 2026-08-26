@@ -5,6 +5,10 @@ import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 
 const _languageLevelAgent = PhoenixLanguageLevelAgent();
+final _storySentencePacketsByExperience =
+    Expando<List<_StorySentence>>(
+      'adaptive story sentence packets',
+    );
 
 JourneyLevelContent buildAdaptiveLevelForJourney(
   DailyJourneyExperience experience, {
@@ -107,9 +111,16 @@ _AdaptiveStory _buildStory(
 List<_StorySentence> _storySentencePackets(
   DailyJourneyExperience experience,
 ) {
+  final cached = _storySentencePacketsByExperience[experience];
+  if (cached != null) return cached;
+
   final paragraphs = experience.content.storyParagraphs;
   final annotations = experience.storyAnnotations;
-  if (paragraphs.isEmpty || annotations.isEmpty) return const [];
+  if (paragraphs.isEmpty || annotations.isEmpty) {
+    const empty = <_StorySentence>[];
+    _storySentencePacketsByExperience[experience] = empty;
+    return empty;
+  }
 
   final packets = <_StorySentence>[];
   for (var paragraphIndex = 0;
@@ -136,7 +147,9 @@ List<_StorySentence> _storySentencePackets(
       );
     }
   }
-  return packets;
+  final immutablePackets = List<_StorySentence>.unmodifiable(packets);
+  _storySentencePacketsByExperience[experience] = immutablePackets;
+  return immutablePackets;
 }
 
 List<_StorySentence> _selectNarrativePackets(
