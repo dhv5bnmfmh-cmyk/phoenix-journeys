@@ -9,6 +9,10 @@ final _storySentencePacketsByExperience =
     Expando<List<_StorySentence>>(
       'adaptive story sentence packets',
     );
+final _vocabularyCatalogByExperience =
+    Expando<Map<String, VocabularyLevelTag>>(
+      'adaptive vocabulary catalog',
+    );
 
 JourneyLevelContent buildAdaptiveLevelForJourney(
   DailyJourneyExperience experience, {
@@ -27,7 +31,7 @@ JourneyLevelContent buildAdaptiveLevelForJourney(
       wordsInContent.isEmpty ? experience.words : wordsInContent;
   final selectedWords = _languageLevelAgent.selectVocabulary(
     words: vocabularyCandidates,
-    levelCatalog: _buildVocabularyCatalog(experience.words),
+    levelCatalog: _vocabularyCatalogForExperience(experience),
     profile: profile,
     knownWords: knownWords,
   );
@@ -369,6 +373,19 @@ DiscoveryEntry _mergeDiscoveryEntries(Iterable<DiscoveryEntry> source) {
     vietnamese: _joinLatin(entries.map((entry) => entry.vietnamese)),
     english: _joinLatin(entries.map((entry) => entry.english)),
   );
+}
+
+Map<String, VocabularyLevelTag> _vocabularyCatalogForExperience(
+  DailyJourneyExperience experience,
+) {
+  final cached = _vocabularyCatalogByExperience[experience];
+  if (cached != null) return cached;
+
+  final catalog = Map<String, VocabularyLevelTag>.unmodifiable(
+    _buildVocabularyCatalog(experience.words),
+  );
+  _vocabularyCatalogByExperience[experience] = catalog;
+  return catalog;
 }
 
 Map<String, VocabularyLevelTag> _buildVocabularyCatalog(
