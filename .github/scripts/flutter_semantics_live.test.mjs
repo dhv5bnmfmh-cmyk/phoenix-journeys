@@ -4,6 +4,7 @@ import {
   classifyDialogState,
   discoveryDepthFromText,
   levelFromRecords,
+  normalizePhoenixSemanticSpec,
   semanticMatches,
   shouldAcceptTerminalCorpus,
   stageFromRecords,
@@ -47,6 +48,28 @@ test('semantic reorder fixture proves identity matching ignores old numeric posi
   assert.equal(semanticMatches(old, { role: 'slider', prefix: '朗读进度' }), true);
   assert.equal(semanticMatches(wrongAtOldIndex, { role: 'slider', prefix: '朗读进度' }), false);
   assert.equal(semanticMatches(moved, { role: 'slider', prefix: '朗读进度' }), true);
+});
+
+test('Phoenix bottom navigation button intent normalizes only to deployed tab roles', () => {
+  for (const label of ['探索', '护照', '跟读训练', '我的']) {
+    assert.equal(normalizePhoenixSemanticSpec({ role: 'button', exact: label }).role, 'tab');
+    assert.equal(normalizePhoenixSemanticSpec({ role: 'button', prefix: label }).role, 'tab');
+  }
+  assert.equal(normalizePhoenixSemanticSpec({ role: 'button', exact: '中国' }).role, 'button');
+  assert.equal(normalizePhoenixSemanticSpec({ role: 'group', exact: '护照' }).role, 'group');
+});
+
+test('exact semantic identity can use aria-label despite nested child text while preserving role', () => {
+  const answer = 'A 他从午门沿中轴走向乾清门，把这条常用的学习路线画在纸上，认定这就是唯一正确的路线。';
+  const richGroup = rec('', {
+    role: 'group',
+    label: answer,
+    text: '朗读',
+  });
+  assert.equal(semanticMatches(richGroup, { role: 'group', exact: answer }), true);
+  assert.equal(semanticMatches(richGroup, { role: 'group', labelExact: answer }), true);
+  assert.equal(semanticMatches(richGroup, { role: 'group', exact: `B ${answer}` }), false);
+  assert.equal(semanticMatches(richGroup, { role: 'button', exact: answer }), false);
 });
 
 test('Discovery segmented corpus fixture parses canonical depth', () => {

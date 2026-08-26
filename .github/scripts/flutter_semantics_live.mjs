@@ -1,6 +1,19 @@
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 export const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
 
+const phoenixBottomNavLabels = new Set(['探索', '护照', '跟读训练', '我的']);
+
+export function normalizePhoenixSemanticSpec(spec = {}) {
+  const normalized = { ...spec };
+  const exact = clean(spec.exact);
+  const prefix = clean(spec.prefix);
+  const label = exact || prefix;
+  if (spec.role === 'button' && phoenixBottomNavLabels.has(label)) {
+    normalized.role = 'tab';
+  }
+  return normalized;
+}
+
 export function recordText(record) {
   return clean([record?.label, record?.value, record?.description, record?.text].filter(Boolean).join(' '));
 }
@@ -11,7 +24,12 @@ export function semanticMatches(record, spec = {}) {
   if (spec.enabled === true && record.disabled) return false;
   if (spec.enabled === false && !record.disabled) return false;
   const text = recordText(record);
-  if (spec.exact != null && text !== clean(spec.exact)) return false;
+  const label = clean(record.label);
+  if (spec.exact != null) {
+    const expected = clean(spec.exact);
+    if (text !== expected && label !== expected) return false;
+  }
+  if (spec.labelExact != null && label !== clean(spec.labelExact)) return false;
   if (spec.prefix != null && !text.startsWith(clean(spec.prefix))) return false;
   if (spec.includes != null && !text.includes(clean(spec.includes))) return false;
   if (spec.pattern && !spec.pattern.test(text)) return false;
@@ -71,6 +89,7 @@ export async function visibleText(page) {
 }
 
 export async function bindLiveSemantic(page, spec, { timeout = 15000 } = {}) {
+  const effectiveSpec = normalizePhoenixSemanticSpec(spec);
   const deadline = Date.now() + timeout;
   let lastObserved = [];
   while (Date.now() <= deadline) {
@@ -78,7 +97,7 @@ export async function bindLiveSemantic(page, spec, { timeout = 15000 } = {}) {
     const candidates = [];
     for (const handle of handles) {
       const record = await recordForHandle(handle);
-      if (record && semanticMatches(record, spec)) candidates.push({ handle, record });
+      if (record && semanticMatches(record, effectiveSpec)) candidates.push({ handle, record });
     }
     candidates.sort((left, right) => {
       if (left.record.role === 'button' && right.record.role !== 'button') return -1;
@@ -88,20 +107,21 @@ export async function bindLiveSemantic(page, spec, { timeout = 15000 } = {}) {
     lastObserved = candidates.map(({ record }) => recordText(record));
     for (const candidate of candidates) {
       const fresh = await recordForHandle(candidate.handle);
-      if (fresh && semanticMatches(fresh, spec)) return { handle: candidate.handle, record: fresh };
+      if (fresh && semanticMatches(fresh, effectiveSpec)) return { handle: candidate.handle, record: fresh };
     }
     await sleep(100);
   }
-  throw new Error(`live semantic not found: ${JSON.stringify(spec)} observed=${JSON.stringify(lastObserved.slice(0, 8))}`);
+  throw new Error(`live semantic not found: ${JSON.stringify(effectiveSpec)} observed=${JSON.stringify(lastObserved.slice(0, 8))}`);
 }
 
 export async function activateSemantic(page, spec, { mode = 'click', timeout = 15000, retries = 3 } = {}) {
+  const effectiveSpec = normalizePhoenixSemanticSpec({ ...spec, enabled: true });
   let lastError = null;
   for (let attempt = 1; attempt <= retries; attempt += 1) {
     try {
-      const bound = await bindLiveSemantic(page, { ...spec, enabled: true }, { timeout });
+      const bound = await bindLiveSemantic(page, effectiveSpec, { timeout });
       const before = await recordForHandle(bound.handle);
-      if (!before || !semanticMatches(before, { ...spec, enabled: true })) {
+      if (!before || !semanticMatches(before, effectiveSpec)) {
         throw new Error('live semantic identity changed before activation');
       }
       if (mode === 'tap') await bound.handle.tap({ timeout: Math.min(timeout, 5000) });
@@ -112,7 +132,7 @@ export async function activateSemantic(page, spec, { mode = 'click', timeout = 1
       if (attempt < retries) await sleep(120);
     }
   }
-  throw lastError ?? new Error(`semantic activation failed: ${JSON.stringify(spec)}`);
+  throw lastError ?? new Error(`semantic activation failed: ${JSON.stringify(effectiveSpec)}`);
 }
 
 export function stageFromRecords(items) {
