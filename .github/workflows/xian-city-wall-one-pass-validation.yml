@@ -1,210 +1,136 @@
-name: Xi'an City Wall One-Pass Validation
+name: Xi'an City Wall Exact-Release E2E
 
 on:
-  push:
+  pull_request:
     branches:
-      - remediation/xian-city-wall-one-pass
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - 'app/lib/data/xian_city_wall_one_pass.dart'
+      - 'app/lib/data/batch_one_adaptive_story_levels.dart'
+      - 'app/lib/data/dedicated_adaptive_journey_catalog.dart'
+      - 'app/lib/data/adaptive_journey_level_runtime.dart'
+      - 'app/lib/data/journey_startup_metadata.dart'
+      - 'app/lib/data/journey_city_catalog.dart'
+      - 'app/lib/data/journey_geography_catalog.dart'
+      - 'app/lib/services/journey_location_binding.dart'
+      - 'app/lib/screens/city_passport_screen.dart'
+      - 'app/lib/screens/home_shell.dart'
+      - 'app/lib/screens/journey_screen.dart'
+      - 'app/lib/widgets/**'
+      - 'app/test/xian_city_wall_one_pass_gate_test.dart'
+      - 'app/web/**'
+      - 'worker/**'
+      - 'wrangler.toml'
+      - '.github/scripts/**'
+      - '.github/workflows/xian-city-wall-one-pass-validation.yml'
+      - '.github/workflows/preview-cloudflare.yml'
+      - '.github/workflows/flutter-ci.yml'
 
 permissions:
+  actions: read
   contents: read
-  statuses: write
+
+concurrency:
+  group: xian-city-wall-e2e-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 env:
-  PREVIEW_WORKER: phoenix-journeys-pr-157
-  PREVIEW_URL: https://phoenix-journeys-pr-157.7hn5tyrjgh.workers.dev
-  PREVIEW_RELEASE: ${{ github.sha }}
-  STARTING_MAIN_SHA: b63a8ba60edbb569200698b27a4fc05da9ef1e4e
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
+  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event.pull_request.number }}.7hn5tyrjgh.workers.dev/
 
 jobs:
-  validate-and-deploy:
+  xian-city-wall-e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 125
+
     steps:
-      - name: Repository starting SHA and exact candidate
+      - name: Check out exact candidate head
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ env.CANDIDATE_SHA }}
           fetch-depth: 0
 
-      - name: Working tree verification
+      - name: Verify exact candidate identity
         shell: bash
         run: |
-          test "$(git log -1 --format=%H)" = "$PREVIEW_RELEASE"
-          test -z "$(git status --porcelain)"
-          git merge-base --is-ancestor "$STARTING_MAIN_SHA" "$PREVIEW_RELEASE"
-          git log -1 --format=%H
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          echo "XI'AN E2E CANDIDATE SHA = $CANDIDATE_SHA"
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install dependencies
-        working-directory: app
-        run: flutter pub get
-
-      - name: Targeted Xi'an regression cluster
-        working-directory: app
+      - name: Cheap Xi'an harness preflight
         shell: bash
         run: |
-          set -o pipefail
-          flutter test test/summer_palace_pilot_n1_effective_levels_test.dart --reporter expanded
-          flutter test test/narrative_quality_shaper_test.dart --reporter expanded
-          flutter test test/adaptive_story_quality_test.dart --reporter expanded
-          flutter test test/journey_content_quality_auditor_test.dart --reporter expanded
-          flutter test test/phoenix_journey_content_quality_agent_test.dart --reporter expanded
-          flutter test test/xian_city_wall_one_pass_gate_test.dart --reporter expanded
-
-      - name: Xi'an canonical content validation
-        working-directory: app
-        run: flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Xi'an Story obeys Lv1-Lv10 requested length and paragraph policy" --reporter expanded
-
-      - name: Narrative Difference Matrix
-        working-directory: app
-        run: |
-          flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Narrative DNA metadata and difference matrix cover all Gold Journeys" --reporter expanded
-          flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Narrative DNA differs materially from all approved Gold references" --reporter expanded
-          flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "anti-template regression logic fails a three-dimension template copy" --reporter expanded
-
-      - name: Words exact trace validation
-        working-directory: app
-        run: flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Words have exact Story trace and truthful first appearance" --reporter expanded
-
-      - name: Discovery source and Story binding
-        working-directory: app
-        run: flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Discovery is exactly one level-bound card with sources and Story Link" --reporter expanded
-
-      - name: Challenge active-level binding
-        working-directory: app
-        run: flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Challenge covers all ten levels with only approved active-story types" --reporter expanded
-
-      - name: Memory canonical binding
-        working-directory: app
-        run: flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Memory and Complete remain bound to Zhou Yao route and original anchor" --reporter expanded
-
-      - name: Complete binding
-        working-directory: app
-        run: flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Memory and Complete remain bound to Zhou Yao route and original anchor" --reporter expanded
-
-      - name: Phoenix Agent Tests
-        shell: bash
-        run: |
-          set -o pipefail
-          mkdir -p test-results
-          node --test --test-reporter=spec worker/*.test.mjs \
-            2>&1 | tee test-results/phoenix-agent-tests.log
-
-      - name: Flutter Analyze
-        working-directory: app
-        run: flutter analyze
-
-      - name: Full Flutter Tests
-        working-directory: app
-        run: flutter test
-
-      - name: Journey Quality Gates
-        working-directory: app
-        env:
-          PHOENIX_GENERATE_QUALITY_REPORT: '1'
-          PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
-          PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
-        run: |
-          flutter test test/journey_quality_report_ci_test.dart --reporter expanded
-          node <<'NODE'
-          const fs = require('node:fs');
-          const report = JSON.parse(fs.readFileSync(process.env.PHOENIX_QUALITY_JSON, 'utf8'));
-          console.log(`Phoenix quality gate: ${report.approvedCount}/${report.inspectionCount} approved; minimum ${report.minimumScore}; average ${report.averageScore}.`);
-          if (!report.canPublish) process.exit(1);
-          NODE
-
-      - name: Journey Runtime Architecture Gate
-        working-directory: app
-        run: flutter test test/journey_runtime_architecture_gate_test.dart --reporter expanded
-
-      - name: Narrative Uniqueness Gate
-        working-directory: app
-        run: |
-          flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "Narrative DNA differs materially from all approved Gold references" --reporter expanded
-          flutter test test/xian_city_wall_one_pass_gate_test.dart --plain-name "anti-template regression logic fails a three-dimension template copy" --reporter expanded
-
-      - name: Technical Performance Checks
-        working-directory: app
-        run: |
-          flutter test test/journey_runtime_performance_gate_test.dart --reporter expanded
-          flutter test test/xian_city_wall_one_pass_gate_test.dart --reporter expanded
-
-      - name: Protected Gold content scope verification
-        shell: bash
-        run: |
-          git diff --exit-code "$STARTING_MAIN_SHA"..."$PREVIEW_RELEASE" -- \
-            app/lib/data/summer_palace_journey.dart \
-            app/lib/data/summer_palace_adaptive_story_levels.dart \
-            app/lib/data/forbidden_city_journey_runtime.dart \
-            app/lib/data/forbidden_city_challenge_package.dart \
-            app/lib/data/shanghai_bund_one_pass.dart
-          test -z "$(git diff --name-only "$STARTING_MAIN_SHA"..."$PREVIEW_RELEASE" -- app/lib/data/shanghai_bund_one_pass.dart)"
-
-      - name: Upload journey quality report
-        uses: actions/upload-artifact@v4
-        with:
-          name: phoenix-journey-content-quality-pr-157
-          path: |
-            journey-quality-report.md
-            journey-quality-report.json
-          if-no-files-found: error
-
-      - name: Web Build
-        working-directory: app
-        run: flutter build web --release
-
-      - name: Preview Deployment
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        shell: bash
-        run: |
-          test -n "$CLOUDFLARE_API_TOKEN"
-          test -n "$CLOUDFLARE_ACCOUNT_ID"
-          test "$(git log -1 --format=%H)" = "$PREVIEW_RELEASE"
-          npx --yes wrangler@4 deploy \
-            --name "$PREVIEW_WORKER" \
-            --var "PHOENIX_RELEASE:$PREVIEW_RELEASE"
-
-      - name: Release Health
-        shell: bash
-        run: |
-          health_url="${PREVIEW_URL}/api/health?commit=${PREVIEW_RELEASE}"
-          verified="false"
-          for attempt in {1..18}; do
-            response="$(curl --fail --silent --show-error "$health_url" || true)"
-            echo "Preview release check ${attempt}/18: ${response:-no response}"
-            if node -e '
-              let health;
-              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
-              const expectedRelease = process.argv[2];
-              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expectedRelease) process.exit(1);
-            ' "$response" "$PREVIEW_RELEASE"; then
-              verified="true"
-              break
-            fi
-            sleep 5
+          set -euo pipefail
+          for file in \
+            .github/scripts/exact_workflow_contract.mjs \
+            .github/scripts/flutter_semantics_live.mjs \
+            .github/scripts/journey_e2e_core.mjs \
+            .github/scripts/verify_xian_city_wall_live.mjs; do
+            node --check "$file"
           done
-          [[ "$verified" == "true" ]]
+          node --test \
+            .github/scripts/exact_workflow_contract.test.mjs \
+            .github/scripts/flutter_semantics_live.test.mjs \
+            .github/scripts/semantic_action_safety_scan.test.mjs
+          node .github/scripts/semantic_action_safety_scan.mjs \
+            .github/scripts/flutter_semantics_live.mjs \
+            .github/scripts/journey_e2e_core.mjs \
+            .github/scripts/verify_xian_city_wall_live.mjs
 
-      - name: Publish preview status
+      - name: Resolve successful exact Preview producer
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          target="${PREVIEW_URL}/?unlock=all&prototype=journeys"
-          payload="$(node -e '
-            const [url] = process.argv.slice(1);
-            process.stdout.write(JSON.stringify({state:"success",description:"Xian City Wall Founder preview is ready",context:"cloudflare/xian-city-wall-preview",target_url:url}));
-          ' "$target")"
-          curl --fail --silent --show-error \
-            --request POST \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer $GITHUB_TOKEN" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PREVIEW_RELEASE}" \
-            --data "$payload"
+          set -euo pipefail
+          node .github/scripts/exact_workflow_contract.mjs \
+            await "Cloudflare PR Preview" "$CANDIDATE_SHA" 2700
+
+      - name: Verify exact Preview health identity after producer success
+        shell: bash
+        run: |
+          set -euo pipefail
+          health_url="${PREVIEW_URL}api/health?commit=${CANDIDATE_SHA}"
+          for attempt in {1..12}; do
+            response="$(curl --fail --silent --show-error "$health_url" || true)"
+            if RESPONSE="$response" EXPECTED="$CANDIDATE_SHA" node -e '
+              const health = JSON.parse(process.env.RESPONSE);
+              if (health.ok !== true || health.ai !== true || health.service !== "phoenix-journeys" || health.release !== process.env.EXPECTED) process.exit(1);
+            '; then
+              echo "XI'AN EXACT PREVIEW HEALTH = PASS | SHA=$CANDIDATE_SHA"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "PREVIEW PRODUCER SUCCEEDED BUT XI'AN EXACT HEALTH IDENTITY IS UNAVAILABLE" >&2
+          exit 1
+
+      - name: Install Chromium and WebKit functional drivers
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix "$RUNNER_TEMP/xian-e2e-node" playwright
+          "$RUNNER_TEMP/xian-e2e-node/node_modules/.bin/playwright" install --with-deps chromium webkit
+
+      - name: Verify Xi'an deterministic Passport entry and representative six-stage experience
+        shell: bash
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/xian-e2e-node/node_modules/playwright/index.mjs
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          node .github/scripts/verify_xian_city_wall_live.mjs \
+            "$PREVIEW_URL" "$CANDIDATE_SHA" \
+            2>&1 | tee test-results/xian-city-wall-exact-release-e2e.log
+
+      - name: Upload Xi'an exact-release E2E evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xian-city-wall-e2e-${{ env.CANDIDATE_SHA }}
+          path: test-results/
+          if-no-files-found: warn

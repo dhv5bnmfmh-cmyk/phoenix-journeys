@@ -12,11 +12,13 @@ on:
       - 'app/**'
       - 'worker/**'
       - 'wrangler.toml'
-      - '.github/scripts/verify_mobile_interaction.mjs'
+      - '.github/scripts/**'
       - '.github/workflows/mobile-interaction-audit.yml'
       - '.github/workflows/preview-cloudflare.yml'
+      - '.github/workflows/flutter-ci.yml'
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -30,7 +32,7 @@ env:
 jobs:
   mobile-interaction:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 75
 
     steps:
       - name: Check out exact candidate head
@@ -45,29 +47,50 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
 
-      - name: Preflight mobile harness syntax
-        run: node --check .github/scripts/verify_mobile_interaction.mjs
+      - name: Cheap mobile harness preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/exact_workflow_contract.mjs
+          node --check .github/scripts/flutter_semantics_live.mjs
+          node --check .github/scripts/journey_e2e_core.mjs
+          node --check .github/scripts/verify_mobile_interaction_live.mjs
+          node --test \
+            .github/scripts/exact_workflow_contract.test.mjs \
+            .github/scripts/flutter_semantics_live.test.mjs \
+            .github/scripts/semantic_action_safety_scan.test.mjs
+          node .github/scripts/semantic_action_safety_scan.mjs \
+            .github/scripts/flutter_semantics_live.mjs \
+            .github/scripts/journey_e2e_core.mjs \
+            .github/scripts/verify_mobile_interaction_live.mjs
 
-      - name: Wait for exact Cloudflare preview release
+      - name: Resolve successful exact Preview producer
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/exact_workflow_contract.mjs \
+            await "Cloudflare PR Preview" "$CANDIDATE_SHA" 2700
+
+      - name: Verify exact Preview health identity after producer success
         shell: bash
         run: |
           set -euo pipefail
           health_url="${PREVIEW_URL}api/health?commit=${CANDIDATE_SHA}"
-          verified=false
-          for attempt in {1..180}; do
+          for attempt in {1..12}; do
             response="$(curl --fail --silent --show-error "$health_url" || true)"
-            if node -e '
-              let health;
-              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
-              const expected = process.argv[2];
-              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expected) process.exit(1);
-            ' "$response" "$CANDIDATE_SHA"; then
-              verified=true
-              break
+            if RESPONSE="$response" EXPECTED="$CANDIDATE_SHA" node -e '
+              const health = JSON.parse(process.env.RESPONSE);
+              if (health.ok !== true || health.ai !== true || health.service !== "phoenix-journeys" || health.release !== process.env.EXPECTED) process.exit(1);
+            '; then
+              echo "EXACT PREVIEW HEALTH = PASS | SHA=$CANDIDATE_SHA"
+              exit 0
             fi
             sleep 5
           done
-          [[ "$verified" == true ]]
+          echo "PREVIEW PRODUCER SUCCEEDED BUT EXACT HEALTH IDENTITY IS UNAVAILABLE" >&2
+          exit 1
 
       - name: Install Chromium and WebKit functional drivers
         shell: bash
@@ -76,12 +99,12 @@ jobs:
           npm install --no-save --prefix "$RUNNER_TEMP/mobile-interaction-node" playwright
           "$RUNNER_TEMP/mobile-interaction-node/node_modules/.bin/playwright" install --with-deps chromium webkit
 
-      - name: Run real deployed mobile functional interaction audit
+      - name: Run real deployed generic mobile functional interaction audit
         shell: bash
         env:
           PLAYWRIGHT_PATH: ${{ runner.temp }}/mobile-interaction-node/node_modules/playwright/index.mjs
         run: |
           set -euo pipefail
-          node .github/scripts/verify_mobile_interaction.mjs \
+          node .github/scripts/verify_mobile_interaction_live.mjs \
             "$PREVIEW_URL" \
             "$CANDIDATE_SHA"

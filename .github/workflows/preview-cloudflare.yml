@@ -17,6 +17,7 @@ on:
       - '.github/workflows/**'
 
 permissions:
+  actions: read
   contents: read
   pull-requests: write
   statuses: write
@@ -36,6 +37,7 @@ jobs:
       github.event.action != 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    timeout-minutes: 55
 
     steps:
       - name: Check out exact candidate head
@@ -50,58 +52,61 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$PREVIEW_RELEASE"
 
-      - name: Preflight checked-in JavaScript harness syntax
+      - name: Cheap orchestration preflight
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r -d '' file; do
-            node --check "$file"
-          done < <(find .github/scripts -type f -name '*.mjs' -print0)
+          node --check .github/scripts/exact_workflow_contract.mjs
+          node --check .github/scripts/validate_quality_artifact.mjs
+          node --test \
+            .github/scripts/exact_workflow_contract.test.mjs \
+            .github/scripts/validate_quality_artifact.test.mjs
 
-      - name: Test Phoenix agents
+      - name: Resolve successful exact Flutter CI producer
+        id: producer
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          set -o pipefail
-          node --test worker/*.test.mjs 2>&1 | tee phoenix-agents-preview.log
+          set -euo pipefail
+          node .github/scripts/exact_workflow_contract.mjs \
+            await "Flutter CI" "$PREVIEW_RELEASE" 2700
+          test "${{ steps.producer.outputs.producer_sha }}" = "$PREVIEW_RELEASE"
 
-      - name: Upload Phoenix agent failure evidence
-        if: failure()
-        uses: actions/upload-artifact@v4
+      - name: Download exact tested web artifact
+        uses: actions/download-artifact@v4
         with:
-          name: phoenix-agents-preview-${{ env.PREVIEW_RELEASE }}
-          path: phoenix-agents-preview.log
-          if-no-files-found: error
+          name: phoenix-web-${{ env.PREVIEW_RELEASE }}
+          path: app/build/web
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.producer.outputs.run_id }}
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: Download exact Journey quality artifact
+        uses: actions/download-artifact@v4
         with:
-          channel: stable
-          cache: true
+          name: phoenix-journey-quality-${{ env.PREVIEW_RELEASE }}
+          path: .phoenix-quality
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.producer.outputs.run_id }}
 
-      - name: Install dependencies
-        working-directory: app
-        run: flutter pub get
-
-      - name: Analyze
-        working-directory: app
-        run: flutter analyze
-
-      - name: Test Flutter app and generate quality report once
-        working-directory: app
-        env:
-          PHOENIX_GENERATE_QUALITY_REPORT: '1'
-          PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
-          PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
-        run: flutter test
-
-      - name: Upload journey quality report
-        uses: actions/upload-artifact@v4
-        with:
-          name: phoenix-journey-content-quality-pr-${{ github.event.pull_request.number }}
-          path: |
-            journey-quality-report.md
-            journey-quality-report.json
-          if-no-files-found: error
+      - name: Verify downloaded exact artifact identity and quality contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const sha = process.env.PREVIEW_RELEASE;
+          const manifest = JSON.parse(fs.readFileSync('app/build/web/phoenix-artifact.json', 'utf8'));
+          if (manifest.schema !== 1 || manifest.type !== 'web' || manifest.sha !== sha) {
+            throw new Error(`web artifact identity mismatch: ${JSON.stringify(manifest)}`);
+          }
+          NODE
+          node .github/scripts/validate_quality_artifact.mjs \
+            .phoenix-quality/journey-quality-report.json \
+            .phoenix-quality/journey-quality-artifact.json \
+            "$PREVIEW_RELEASE"
 
       - name: Add or update quality agent comment
         uses: actions/github-script@v7
@@ -109,7 +114,7 @@ jobs:
           script: |
             const fs = require('node:fs');
             const marker = '<!-- phoenix-content-quality-agent-report -->';
-            const body = fs.readFileSync('journey-quality-report.md', 'utf8');
+            const body = fs.readFileSync('.phoenix-quality/journey-quality-report.md', 'utf8');
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -135,30 +140,7 @@ jobs:
               });
             }
 
-      - name: Enforce quality agent release decision
-        shell: bash
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          const report = JSON.parse(fs.readFileSync('journey-quality-report.json', 'utf8'));
-          console.log(
-            `Phoenix quality gate: ${report.approvedCount}/${report.inspectionCount} approved; ` +
-            `minimum ${report.minimumScore}; average ${report.averageScore}.`,
-          );
-          if (!report.canPublish) {
-            console.error(
-              `Release blocked: ${report.needsRevisionCount} need revision and ` +
-              `${report.blockedCount} are blocked.`,
-            );
-            process.exit(1);
-          }
-          NODE
-
-      - name: Build preview web app
-        working-directory: app
-        run: flutter build web --release
-
-      - name: Deploy isolated preview Worker
+      - name: Deploy exact tested web artifact to isolated preview Worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -168,11 +150,12 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test "$(git rev-parse HEAD)" = "$PREVIEW_RELEASE"
+          test "$(node -e "process.stdout.write(JSON.parse(require('fs').readFileSync('app/build/web/phoenix-artifact.json','utf8')).sha)")" = "$PREVIEW_RELEASE"
           npx --yes wrangler@4 deploy \
             --name "$PREVIEW_WORKER" \
             --var "PHOENIX_RELEASE:$PREVIEW_RELEASE"
 
-      - name: Verify preview release
+      - name: Verify exact preview release identity
         shell: bash
         run: |
           set -euo pipefail
@@ -181,12 +164,10 @@ jobs:
           for attempt in {1..18}; do
             response="$(curl --fail --silent --show-error "$health_url" || true)"
             echo "Preview release check ${attempt}/18: ${response:-no response}"
-            if node -e '
-              let health;
-              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
-              const expected = process.argv[2];
-              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expected) process.exit(1);
-            ' "$response" "$PREVIEW_RELEASE"; then
+            if RESPONSE="$response" node --input-type=module -e '
+              import { validateHealthIdentity } from "./.github/scripts/exact_workflow_contract.mjs";
+              validateHealthIdentity(JSON.parse(process.env.RESPONSE), process.env.PREVIEW_RELEASE);
+            '; then
               verified=true
               break
             fi
@@ -203,7 +184,7 @@ jobs:
             const [url] = process.argv.slice(1);
             process.stdout.write(JSON.stringify({
               state: "success",
-              description: "Isolated Phoenix preview is ready",
+              description: "Exact tested Phoenix preview is ready",
               context: "cloudflare/preview",
               target_url: url
             }));
@@ -227,7 +208,7 @@ jobs:
             const release = process.env.PHOENIX_PREVIEW_RELEASE;
             const shortRelease = release.slice(0, 8);
             const canonicalUrl = `${process.env.PHOENIX_PREVIEW_URL}/?unlock=all&prototype=journeys&v=${release}`;
-            const body = `${marker}\n## Phoenix 独立体验版 ✅\n\n[打开 PR 体验链接](${canonicalUrl})\n\n- PR：#${context.issue.number}\n- Commit：\`${shortRelease}\`\n- 与正式版 main 完全隔离\n- 只有确认通过后才会合并上线`;
+            const body = `${marker}\n## Phoenix 独立体验版 ✅\n\n[打开 PR 体验链接](${canonicalUrl})\n\n- PR：#${context.issue.number}\n- Commit：\`${shortRelease}\`\n- Artifact：Flutter CI exact tested web + 360/360 quality report\n- 与正式版 main 完全隔离\n- 只有 Founder 明确同意后才会合并上线`;
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
               repo: context.repo.repo,
