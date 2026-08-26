@@ -17,6 +17,17 @@ function phoenixNavigationCanonicalLabel(spec = {}) {
   return '';
 }
 
+export function phoenixNavigationAccessibleVariants(spec = {}) {
+  const canonical = phoenixNavigationCanonicalLabel(spec);
+  if (!canonical) return [];
+  const position = phoenixBottomNavPositions.get(canonical);
+  return [
+    { role: 'button', name: canonical },
+    { role: 'tab', name: canonical },
+    { role: 'tab', name: `${canonical} Tab ${position} of 4` },
+  ];
+}
+
 function phoenixNavigationMatches(record, spec = {}) {
   const canonical = phoenixNavigationCanonicalLabel(spec);
   if (!canonical) return null;
@@ -119,17 +130,68 @@ function sortLiveCandidates(candidates) {
   });
 }
 
-async function findLiveSemanticOnce(page, spec) {
-  const handles = await page.locator('flt-semantics').elementHandles();
+async function sameLiveElement(left, right) {
+  try {
+    return await left.evaluate((element, candidate) => element === candidate, right);
+  } catch (_) {
+    return false;
+  }
+}
+
+async function browserNavigationHandleMatches(page, handle, spec) {
+  const variants = phoenixNavigationAccessibleVariants(spec);
+  if (!variants.length) return null;
+  for (const variant of variants) {
+    const handles = await page.getByRole(variant.role, { name: variant.name, exact: true }).elementHandles();
+    for (const candidate of handles) {
+      if (await sameLiveElement(handle, candidate)) return true;
+    }
+  }
+  return false;
+}
+
+async function liveHandleMatches(page, handle, spec, record = null) {
+  const current = record ?? (await recordForHandle(handle));
+  if (!current || (spec.visible !== false && !current.visible)) return false;
+  if (spec.enabled === true && current.disabled) return false;
+  if (spec.enabled === false && !current.disabled) return false;
+  const navigationMatch = await browserNavigationHandleMatches(page, handle, spec);
+  if (navigationMatch != null) return navigationMatch;
+  return semanticMatches(current, spec);
+}
+
+async function liveCandidates(page, spec) {
+  const variants = phoenixNavigationAccessibleVariants(spec);
   const candidates = [];
-  for (const handle of handles) {
-    const record = await recordForHandle(handle);
-    if (record && semanticMatches(record, spec)) candidates.push({ handle, record });
+  if (variants.length) {
+    for (const variant of variants) {
+      const handles = await page.getByRole(variant.role, { name: variant.name, exact: true }).elementHandles();
+      for (const handle of handles) {
+        const record = await recordForHandle(handle);
+        if (!record || (spec.visible !== false && !record.visible)) continue;
+        if (spec.enabled === true && record.disabled) continue;
+        if (spec.enabled === false && !record.disabled) continue;
+        candidates.push({ handle, record });
+      }
+    }
+  } else {
+    const handles = await page.locator('flt-semantics').elementHandles();
+    for (const handle of handles) {
+      const record = await recordForHandle(handle);
+      if (record && semanticMatches(record, spec)) candidates.push({ handle, record });
+    }
   }
   sortLiveCandidates(candidates);
+  return candidates;
+}
+
+async function findLiveSemanticOnce(page, spec) {
+  const candidates = await liveCandidates(page, spec);
   for (const candidate of candidates) {
     const fresh = await recordForHandle(candidate.handle);
-    if (fresh && semanticMatches(fresh, spec)) return { handle: candidate.handle, record: fresh };
+    if (fresh && (await liveHandleMatches(page, candidate.handle, spec, fresh))) {
+      return { handle: candidate.handle, record: fresh };
+    }
   }
   return null;
 }
@@ -139,17 +201,13 @@ export async function bindLiveSemantic(page, spec, { timeout = 15000 } = {}) {
   const deadline = Date.now() + timeout;
   let lastObserved = [];
   while (Date.now() <= deadline) {
-    const handles = await page.locator('flt-semantics').elementHandles();
-    const candidates = [];
-    for (const handle of handles) {
-      const record = await recordForHandle(handle);
-      if (record && semanticMatches(record, effectiveSpec)) candidates.push({ handle, record });
-    }
-    sortLiveCandidates(candidates);
+    const candidates = await liveCandidates(page, effectiveSpec);
     lastObserved = candidates.map(({ record }) => recordText(record));
     for (const candidate of candidates) {
       const fresh = await recordForHandle(candidate.handle);
-      if (fresh && semanticMatches(fresh, effectiveSpec)) return { handle: candidate.handle, record: fresh };
+      if (fresh && (await liveHandleMatches(page, candidate.handle, effectiveSpec, fresh))) {
+        return { handle: candidate.handle, record: fresh };
+      }
     }
     await sleep(100);
   }
@@ -167,7 +225,7 @@ export async function activateSemantic(page, spec, { mode = 'click', timeout = 1
     try {
       bound = await bindLiveSemantic(page, effectiveSpec, { timeout });
       before = await recordForHandle(bound.handle);
-      if (!before || !semanticMatches(before, effectiveSpec)) {
+      if (!before || !(await liveHandleMatches(page, bound.handle, effectiveSpec, before))) {
         throw new Error('live semantic identity changed before activation');
       }
     } catch (error) {

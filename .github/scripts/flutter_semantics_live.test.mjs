@@ -6,6 +6,7 @@ import {
   discoveryDepthFromText,
   levelFromRecords,
   normalizePhoenixSemanticSpec,
+  phoenixNavigationAccessibleVariants,
   semanticMatches,
   shouldAcceptTerminalCorpus,
   stageFromRecords,
@@ -26,16 +27,26 @@ function fakePage(state) {
         },
       };
     },
+    getByRole(role, options = {}) {
+      return {
+        async elementHandles() {
+          return (state.accessible || [])
+            .filter((entry) => entry.role === role && entry.name === options.name)
+            .map((entry) => entry.handle);
+        },
+      };
+    },
   };
 }
 
 function fakeHandle(state, record, behavior = {}) {
   let evaluations = 0;
   return {
-    async evaluate() {
+    async evaluate(_callback, argument) {
+      if (!state.handles.includes(this)) throw new Error('detached');
+      if (argument !== undefined) return this === argument;
       evaluations += 1;
       if (behavior.onEvaluate) return behavior.onEvaluate({ state, record, evaluations });
-      if (!state.handles.includes(this)) throw new Error('detached');
       return { ...record };
     },
     async click() {
@@ -104,6 +115,41 @@ test('wide NavigationRail accepts only the bounded structural own-label decorati
     semanticMatches(rec('', { role: 'tab', label: '护照' }), { role: 'button', exact: '护照' }),
     true,
   );
+});
+
+test('Phoenix nav browser identity is bounded to responsive role plus exact accessible name', () => {
+  assert.deepEqual(phoenixNavigationAccessibleVariants({ role: 'button', exact: '护照' }), [
+    { role: 'button', name: '护照' },
+    { role: 'tab', name: '护照' },
+    { role: 'tab', name: '护照 Tab 2 of 4' },
+  ]);
+  assert.deepEqual(phoenixNavigationAccessibleVariants({ role: 'group', exact: '护照' }), []);
+  assert.deepEqual(phoenixNavigationAccessibleVariants({ role: 'button', exact: '其他' }), []);
+});
+
+test('Phoenix nav binds browser accessible name when raw aria-label is split from the actionable node', async () => {
+  const state = { handles: [], accessible: [], activations: 0 };
+  const record = rec('', { role: 'button', label: '', text: '护照 护照' });
+  const handle = fakeHandle(state, record);
+  state.handles = [handle];
+  state.accessible = [{ role: 'button', name: '护照', handle }];
+
+  await activateSemantic(fakePage(state), { role: 'button', exact: '护照' }, { timeout: 50, retries: 1 });
+  assert.equal(state.activations, 1);
+});
+
+test('Phoenix nav never promotes aggregate descendant text to accessible action identity', async () => {
+  const state = { handles: [], accessible: [], activations: 0 };
+  const record = rec('', { role: 'button', label: '', text: '护照 护照' });
+  const handle = fakeHandle(state, record);
+  state.handles = [handle];
+  state.accessible = [{ role: 'button', name: '帮助', handle }];
+
+  await assert.rejects(
+    activateSemantic(fakePage(state), { role: 'button', exact: '护照' }, { timeout: 0, retries: 1 }),
+    /live semantic not found/,
+  );
+  assert.equal(state.activations, 0);
 });
 
 test('Phoenix nav does not use aggregate descendant text as actionable identity', () => {
