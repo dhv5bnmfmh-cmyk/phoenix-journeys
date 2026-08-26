@@ -71,7 +71,13 @@ jobs:
           set -euo pipefail
           node .github/scripts/exact_workflow_contract.mjs \
             await "Flutter CI" "$PREVIEW_RELEASE" 2700
+
+      - name: Verify resolved exact producer identity
+        shell: bash
+        run: |
+          set -euo pipefail
           test "${{ steps.producer.outputs.producer_sha }}" = "$PREVIEW_RELEASE"
+          test -n "${{ steps.producer.outputs.run_id }}"
 
       - name: Download exact tested web artifact
         uses: actions/download-artifact@v4
