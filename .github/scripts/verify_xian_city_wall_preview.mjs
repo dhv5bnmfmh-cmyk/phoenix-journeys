@@ -14,30 +14,35 @@ const expected = {
 1: {
 story: ['周遥二十二岁', '最后一次告别', '距离还在增加'],
 discovery: ['13.74公里'],
+completion: '本级记住：跑完一圈以后，他选择继续跑。',
 vi: ['Chu Dao, 22 tuổi', 'lời chia tay cuối cùng'],
 en: ['Zhou Yao, twenty-two', 'final farewell'],
 },
 3: {
 story: ['住址一变', '新家阳台的照片', '继续增加'],
 discovery: ['12至14米'],
+completion: '本级按事件顺序连接搬家、完整一圈与继续向南。',
 vi: ['một khi địa chỉ đổi', 'ban công nhà mới'],
 en: ['once his address changes', 'new balcony'],
 },
 5: {
 story: ['一场私人告别', '护城河', '完整的一圈'],
 discovery: ['护城河'],
+completion: '本级理解物理闭环不等于关系和归属的闭环。',
 vi: ['một nghi thức chia tay riêng', 'hào'],
 en: ['private farewell ritual', 'moat'],
 },
 8: {
 story: ['一个干净的句号', '被保护、监测', '没有在永宁门结束的路线'],
 discovery: ['无损检测'],
+completion: '本级用保护、监测与日常路线建立完整因果链。',
 vi: ['một dấu chấm hết sạch sẽ', 'quan trắc'],
 en: ['a clean full stop', 'monitored'],
 },
 10: {
 story: ['可量化的闭环', '1961年', '命名为“回家”'],
 discovery: ['历史城区'],
+completion: '本级综合时间层、保护制度、空间边界和人物选择',
 vi: ['một vòng khép kín có thể đo', 'Năm 1961'],
 en: ['one measurable closed loop', 'In 1961'],
 },
@@ -528,7 +533,21 @@ await activate(page, '保存回忆并完成', { prefix: true });
 await waitStage(page, 6);
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Completion level drift`);
 const text = await visibleText(page);
-requireMarkers(text, ['西安已点亮', '永宁门', '回家'], `Lv${level} Completion`);
+requireMarkers(
+text,
+[
+'6/6',
+'西安 · 城墙',
+'西安城墙印章',
+'已点亮',
+'永宁门后没有按停的跑表',
+'Challenge 表现',
+'旅程结果',
+'旅程收束',
+expected[level].completion,
+],
+`Lv${level} Completion`,
+);
 if (!storyVocabularyTrace(storyText, text).length) {
 throw new Error(`Lv${level} Completion has no CURRENT Story vocabulary trace`);
 }
