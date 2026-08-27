@@ -196,15 +196,25 @@ void main() {
     expect(visibleSwap, greaterThanOrEqualTo(0));
     expect(postFrame, greaterThan(visibleSwap));
     expect(guideCleanup, greaterThan(postFrame));
-    expect(levelChange, contains('_narration.cancelPlaybackImmediately();'));
+    expect(
+      levelChange,
+      contains('final narrationCancellationToken =\n        _narration.cancelPlaybackImmediately();'),
+    );
     expect(levelChange, contains('final narrationPositionFuture ='));
     expect(levelChange, contains('final speechRateFuture ='));
     expect(levelChange, isNot(contains('await _stopJourneyNarration();')));
   });
 
   test('narration cancellation separates immediate state from engine stop', () {
-    expect(narration, contains('void cancelPlaybackImmediately('));
-    expect(narration, contains('Future<void> flushCancelledPlayback() async'));
+    expect(narration, contains('int cancelPlaybackImmediately('));
+    expect(
+      narration,
+      contains('Future<void> flushCancelledPlayback(int cancellationToken) async'),
+    );
+    expect(
+      narration,
+      contains('if (cancellationToken != _playbackIntentToken) return;'),
+    );
     expect(narration, contains('final shouldStopEngine = _engineStopPending;'));
     expect(
       narration,
@@ -213,6 +223,40 @@ void main() {
     expect(
       narration,
       contains('(_sharedSpeechRate - rate).abs() >= .001'),
+    );
+  });
+
+  test('stale level cleanup is rejected before dangerous side effects', () {
+    final levelChange = _section(
+      journey,
+      'Future<void> _applyPhoenixLevelChange()',
+      'void _checkpointNarrationBeforeStepChange()',
+    );
+    final settleStart = levelChange.indexOf('Future<void> _settlePhoenixLevelChange');
+    expect(settleStart, greaterThanOrEqualTo(0));
+    final settle = levelChange.substring(settleStart);
+    final guard = settle.indexOf('if (!mounted || token != _levelChangeToken) return;');
+    final flush = settle.indexOf('_narration.flushCancelledPlayback(');
+    final feedback = settle.indexOf('_appState.clearGuideFeedback()');
+    expect(guard, greaterThanOrEqualTo(0));
+    expect(flush, greaterThan(guard));
+    expect(feedback, greaterThan(guard));
+  });
+
+  test('narration persistence is serialized so latest intent wins on disk', () {
+    expect(
+      appState,
+      contains('Future<void> _journeyNarrationPersistence = Future<void>.value();'),
+    );
+    expect(
+      appState,
+      contains('Future<void> _queueJourneyNarrationPersistence('),
+    );
+    expect(appState, contains('final previous = _journeyNarrationPersistence;'));
+    expect(appState, contains('await previous;'));
+    expect(
+      appState,
+      contains('_journeyNarrationPersistence = next.catchError((_) {});'),
     );
   });
 

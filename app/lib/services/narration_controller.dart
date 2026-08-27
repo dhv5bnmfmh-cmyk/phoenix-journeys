@@ -195,6 +195,7 @@ class NarrationController extends ChangeNotifier {
   int _lastNativeOffset = 0;
   _NarrationSpeechMode _speechMode = _NarrationSpeechMode.idle;
   bool _engineStopPending = false;
+  int _playbackIntentToken = 0;
   bool _suppressEngineCallbacks = false;
   DateTime? _ignoreEngineCallbacksUntil;
   bool _isSpeakingWord = false;
@@ -497,6 +498,7 @@ class NarrationController extends ChangeNotifier {
     String languageCode = 'zh-CN',
     bool stopEngineFirst = true,
   }) async {
+    _playbackIntentToken += 1;
     final plan = NarrationTextPlan.fromItems(items);
     if (plan.isEmpty) return;
 
@@ -592,6 +594,7 @@ class NarrationController extends ChangeNotifier {
 
   Future<void> resumeFromOffset(int offset) async {
     if (_plan.isEmpty || _disposed) return;
+    _playbackIntentToken += 1;
     _isRestoredPosition = false;
 
     final maxOffset = _plan.text.isEmpty ? 0 : _plan.text.length - 1;
@@ -635,6 +638,7 @@ class NarrationController extends ChangeNotifier {
   Future<bool> speakWord(String word, {required String languageCode}) async {
     final value = word.trim();
     if (value.isEmpty || _disposed) return false;
+    _playbackIntentToken += 1;
 
     if (_status == NarrationStatus.playing) {
       await pause();
@@ -692,6 +696,7 @@ class NarrationController extends ChangeNotifier {
 
   Future<void> restart() async {
     if (_plan.isEmpty || _contentId == null) return;
+    _playbackIntentToken += 1;
     _isRestoredPosition = false;
     await _speakFrom(0);
   }
@@ -739,7 +744,8 @@ class NarrationController extends ChangeNotifier {
     }
   }
 
-  void cancelPlaybackImmediately({bool resetPosition = true}) {
+  int cancelPlaybackImmediately({bool resetPosition = true}) {
+    final cancellationToken = ++_playbackIntentToken;
     _engineStopPending = _engineStopPending ||
         _speechMode != _NarrationSpeechMode.idle ||
         _isSpeakingWord ||
@@ -758,9 +764,11 @@ class NarrationController extends ChangeNotifier {
       _speechBaseOffset = 0;
     }
     _safeNotify();
+    return cancellationToken;
   }
 
-  Future<void> flushCancelledPlayback() async {
+  Future<void> flushCancelledPlayback(int cancellationToken) async {
+    if (cancellationToken != _playbackIntentToken) return;
     final shouldStopEngine = _engineStopPending;
     _engineStopPending = false;
     if (shouldStopEngine) {
@@ -771,15 +779,16 @@ class NarrationController extends ChangeNotifier {
       _isSpeakingWord = false;
       _spokenWord = null;
     }
-    if (_disposed) return;
+    if (_disposed || cancellationToken != _playbackIntentToken) return;
     _status = NarrationStatus.idle;
     _currentItemIndex = null;
     _safeNotify();
   }
 
   Future<void> stop({bool resetPosition = true}) async {
-    cancelPlaybackImmediately(resetPosition: resetPosition);
-    await flushCancelledPlayback();
+    final cancellationToken =
+        cancelPlaybackImmediately(resetPosition: resetPosition);
+    await flushCancelledPlayback(cancellationToken);
   }
 
   double _ttsSpeechRate(double multiplier) {

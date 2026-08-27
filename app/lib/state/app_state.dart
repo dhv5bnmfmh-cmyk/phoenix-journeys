@@ -108,6 +108,7 @@ class AppState extends ChangeNotifier {
 
   final DateTime Function() _clock;
   final Future<SharedPreferences> Function() _preferencesLoader;
+  Future<void> _journeyNarrationPersistence = Future<void>.value();
 
   ScriptMode scriptMode = ScriptMode.simplified;
   String translationLanguage = '越南语';
@@ -832,28 +833,46 @@ class AppState extends ChangeNotifier {
     return journeyChallengeAttemptId;
   }
 
+  Future<void> _queueJourneyNarrationPersistence(
+    Future<void> Function(SharedPreferences preferences) operation,
+  ) {
+    final previous = _journeyNarrationPersistence;
+    final next = () async {
+      try {
+        await previous;
+      } catch (_) {
+        // Keep later latest-intent persistence moving after an older failure.
+      }
+      final preferences = await _preferencesLoader();
+      await operation(preferences);
+    }();
+    _journeyNarrationPersistence = next.catchError((_) {});
+    return next;
+  }
+
   Future<void> saveJourneyNarrationPosition({
     required String contentId,
     required String contentSignature,
     required int offset,
-  }) async {
+  }) {
     final safeOffset = math.max(0, offset);
     journeyNarrationContentId = contentId;
     journeyNarrationContentSignature = contentSignature;
     journeyNarrationOffset = safeOffset;
     _journeyNarrationSignatures[contentId] = contentSignature;
     _journeyNarrationOffsets[contentId] = safeOffset;
-    final prefs = await _preferencesLoader();
-    await Future.wait([
-      prefs.setString(_key('narrationContentId'), contentId),
-      prefs.setString(_key('narrationContentSignature'), contentSignature),
-      prefs.setInt(_key('narrationOffset'), safeOffset),
-      prefs.setString(_narrationKey(contentId, 'signature'), contentSignature),
-      prefs.setInt(_narrationKey(contentId, 'offset'), safeOffset),
-    ]);
+    return _queueJourneyNarrationPersistence(
+      (prefs) => Future.wait([
+        prefs.setString(_key('narrationContentId'), contentId),
+        prefs.setString(_key('narrationContentSignature'), contentSignature),
+        prefs.setInt(_key('narrationOffset'), safeOffset),
+        prefs.setString(_narrationKey(contentId, 'signature'), contentSignature),
+        prefs.setInt(_narrationKey(contentId, 'offset'), safeOffset),
+      ]),
+    );
   }
 
-  Future<void> clearJourneyNarrationPosition({String? contentId}) async {
+  Future<void> clearJourneyNarrationPosition({String? contentId}) {
     if (contentId != null) {
       _journeyNarrationSignatures.remove(contentId);
       _journeyNarrationOffsets.remove(contentId);
@@ -862,12 +881,12 @@ class AppState extends ChangeNotifier {
         journeyNarrationContentSignature = null;
         journeyNarrationOffset = 0;
       }
-      final prefs = await _preferencesLoader();
-      await Future.wait([
-        prefs.remove(_narrationKey(contentId, 'signature')),
-        prefs.remove(_narrationKey(contentId, 'offset')),
-      ]);
-      return;
+      return _queueJourneyNarrationPersistence(
+        (prefs) => Future.wait([
+          prefs.remove(_narrationKey(contentId, 'signature')),
+          prefs.remove(_narrationKey(contentId, 'offset')),
+        ]),
+      );
     }
 
     journeyNarrationContentId = null;
@@ -875,16 +894,17 @@ class AppState extends ChangeNotifier {
     journeyNarrationOffset = 0;
     _journeyNarrationSignatures.clear();
     _journeyNarrationOffsets.clear();
-    final prefs = await _preferencesLoader();
-    await Future.wait([
-      prefs.remove(_key('narrationContentId')),
-      prefs.remove(_key('narrationContentSignature')),
-      prefs.remove(_key('narrationOffset')),
-      for (final id in const ['story', 'discovery'])
-        prefs.remove(_narrationKey(id, 'signature')),
-      for (final id in const ['story', 'discovery'])
-        prefs.remove(_narrationKey(id, 'offset')),
-    ]);
+    return _queueJourneyNarrationPersistence(
+      (prefs) => Future.wait([
+        prefs.remove(_key('narrationContentId')),
+        prefs.remove(_key('narrationContentSignature')),
+        prefs.remove(_key('narrationOffset')),
+        for (final id in const ['story', 'discovery'])
+          prefs.remove(_narrationKey(id, 'signature')),
+        for (final id in const ['story', 'discovery'])
+          prefs.remove(_narrationKey(id, 'offset')),
+      ]),
+    );
   }
 
   Future<void> saveGuideFeedback({

@@ -690,7 +690,8 @@ class _JourneyScreenState extends State<JourneyScreen>
 
     _stageNarrationIntent += 1;
     _stageNarrationRequestedId = null;
-    _narration.cancelPlaybackImmediately();
+    final narrationCancellationToken =
+        _narration.cancelPlaybackImmediately();
     final narrationPositionFuture =
         _appState.clearJourneyNarrationPosition();
     final speechRateFuture = _narration.setSpeechRate(
@@ -713,6 +714,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       unawaited(
         _settlePhoenixLevelChange(
           token: token,
+          narrationCancellationToken: narrationCancellationToken,
           narrationPositionFuture: narrationPositionFuture,
           speechRateFuture: speechRateFuture,
         ),
@@ -735,11 +737,13 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Future<void> _settlePhoenixLevelChange({
     required int token,
+    required int narrationCancellationToken,
     required Future<void> narrationPositionFuture,
     required Future<void> speechRateFuture,
   }) async {
+    if (!mounted || token != _levelChangeToken) return;
     await Future.wait([
-      _narration.flushCancelledPlayback(),
+      _narration.flushCancelledPlayback(narrationCancellationToken),
       narrationPositionFuture,
       speechRateFuture,
       _appState.clearGuideFeedback(),
