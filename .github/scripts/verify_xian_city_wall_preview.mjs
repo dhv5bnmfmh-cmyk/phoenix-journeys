@@ -102,7 +102,7 @@ return page.locator('flt-semantics').nth(matches[0].index);
 }
 await sleep(100);
 }
-throw new Error(\`semantic state not found: \${needle}\`);
+throw new Error(`semantic state not found: ${needle}`);
 }
 async function exists(page, needle, options = {}) {
 try {
@@ -126,18 +126,18 @@ prefix,
 timeout: Math.min(1800, deadline - Date.now()),
 });
 const disabled = await node.getAttribute('aria-disabled').catch(() => null);
-if (disabled === 'true') throw new Error(\`button disabled: \${needle}\`);
+if (disabled === 'true') throw new Error(`button disabled: ${needle}`);
 await node.evaluate((element) => element.click());
 return;
 } catch (error) {
-if (String(error?.message || error).includes(\`button disabled: \${needle}\`)) {
+if (String(error?.message || error).includes(`button disabled: ${needle}`)) {
 throw error;
 }
 lastError = error;
 await sleep(100);
 }
 }
-throw lastError ?? new Error(\`button not activatable: \${needle}\`);
+throw lastError ?? new Error(`button not activatable: ${needle}`);
 }
 async function enableSemantics(page) {
 const deadline = Date.now() + 60000;
@@ -153,9 +153,9 @@ throw new Error('Flutter semantics did not become available');
 }
 async function requireStartup(page) {
 const sep = baseUrl.includes('?') ? '&' : '?';
-const url = \`\${baseUrl}\${sep}unlock=all&prototype=journeys&v=\${sourceSha}\`;
+const url = `${baseUrl}${sep}unlock=all&prototype=journeys&v=${sourceSha}`;
 const response = await page.goto(url, { waitUntil: 'load', timeout: 140000 });
-if (!response?.ok()) throw new Error(\`Preview HTTP load failed: \${response?.status()}\`);
+if (!response?.ok()) throw new Error(`Preview HTTP load failed: ${response?.status()}`);
 await page.waitForFunction(
 () => document.querySelector('flutter-view') != null,
 null,
@@ -194,12 +194,12 @@ moved = true;
 break;
 }
 }
-if (!moved) throw new Error(\`level selector did not move from \${before}\`);
+if (!moved) throw new Error(`level selector did not move from ${before}`);
 }
-throw new Error(\`failed to select Lv\${target}; current Lv\${await currentLevel(page)}\`);
+throw new Error(`failed to select Lv${target}; current Lv${await currentLevel(page)}`);
 }
 async function waitStage(page, number) {
-await findSemantic(page, \`\${number}/6\`, { prefix: true, timeout: 20000 });
+await findSemantic(page, `${number}/6`, { prefix: true, timeout: 20000 });
 }
 async function openViaPassport(page) {
 await activate(page, '护照', { prefix: true });
@@ -221,7 +221,7 @@ console.log('PASSPORT XIAN CITY WALL = PASS');
 }
 function requireMarkers(text, markers, label) {
 for (const marker of markers) {
-if (!text.includes(marker)) throw new Error(\`\${label} missing marker: \${marker}\`);
+if (!text.includes(marker)) throw new Error(`${label} missing marker: ${marker}`);
 }
 }
 function requireNoPriorMarker(text, prior, label) {
@@ -229,7 +229,7 @@ if (!prior) return;
 const stale = [...prior.story, ...prior.vi, ...prior.en]
 .filter((marker) => marker.length >= 8)
 .find((marker) => text.includes(marker));
-if (stale) throw new Error(\`\${label} contains stale previous-level marker: \${stale}\`);
+if (stale) throw new Error(`${label} contains stale previous-level marker: ${stale}`);
 }
 async function openFirstStoryAnnotation(page) {
 const notes = page.getByRole('button', { name: '注', exact: true });
@@ -258,19 +258,19 @@ throw new Error('Story Reading Support popup did not close');
 }
 async function verifyReadingSupport(page, level, prior, priorSupport) {
 const storyText = await visibleText(page);
-requireMarkers(storyText, expected[level].story, \`Lv\${level} CURRENT Story\`);
-requireNoPriorMarker(storyText, prior, \`Lv\${level} Story\`);
+requireMarkers(storyText, expected[level].story, `Lv${level} CURRENT Story`);
+requireNoPriorMarker(storyText, prior, `Lv${level} Story`);
 await openFirstStoryAnnotation(page);
 const supportText = await visibleText(page);
-requireMarkers(supportText, expected[level].vi, \`Lv\${level} Vietnamese\`);
-requireMarkers(supportText, expected[level].en, \`Lv\${level} English\`);
+requireMarkers(supportText, expected[level].vi, `Lv${level} Vietnamese`);
+requireMarkers(supportText, expected[level].en, `Lv${level} English`);
 if (!/拼音[\s\S]*[A-Za-zĀÁǍÀāáǎàĒÉĚÈēéěèĪÍǏÌīíǐìŌÓǑÒōóǒòŪÚǓÙūúǔùǕǗǙǛǖǘǚǜ]/.test(supportText)) {
-throw new Error(\`Lv\${level} Pinyin support is empty or malformed\`);
+throw new Error(`Lv${level} Pinyin support is empty or malformed`);
 }
 if (priorSupport && supportText === priorSupport) {
-throw new Error(\`Lv\${level} ReadingAnnotation reused previous-level support verbatim\`);
+throw new Error(`Lv${level} ReadingAnnotation reused previous-level support verbatim`);
 }
-requireNoPriorMarker(supportText, prior, \`Lv\${level} ReadingAnnotation\`);
+requireNoPriorMarker(supportText, prior, `Lv${level} ReadingAnnotation`);
 await closeReadingSupport(page);
 return { storyText, supportText };
 }
@@ -286,25 +286,25 @@ if (!(await exists(page, '2/6', { prefix: true, timeout: 700 }))) {
 await page.keyboard.press('Escape').catch(() => {});
 }
 await waitStage(page, 2);
-if ((await currentLevel(page)) !== level) throw new Error(\`Lv\${level} Vocabulary level drift\`);
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Vocabulary level drift`);
 const text = await visibleText(page);
 if (!storyVocabularyTrace(storyText, text).length) {
-throw new Error(\`Lv\${level} Vocabulary has no CURRENT Story trace\`);
+throw new Error(`Lv${level} Vocabulary has no CURRENT Story trace`);
 }
 return text;
 }
 async function toDiscovery(page, level) {
 await activate(page, '继续', { prefix: true });
 await waitStage(page, 3);
-if ((await currentLevel(page)) !== level) throw new Error(\`Lv\${level} Discovery level drift\`);
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Discovery level drift`);
 const text = await visibleText(page);
-requireMarkers(text, expected[level].discovery, \`Lv\${level} Discovery\`);
+requireMarkers(text, expected[level].discovery, `Lv${level} Discovery`);
 return text;
 }
 async function toChallenge(page, level) {
 await activate(page, '继续', { prefix: true });
 await waitStage(page, 4);
-if ((await currentLevel(page)) !== level) throw new Error(\`Lv\${level} Challenge level drift\`);
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge level drift`);
 await findSemantic(page, '提交第 1 / 3 次答案', {
 role: 'button',
 prefix: true,
@@ -373,7 +373,7 @@ if (target.label) return clean(record.label) === target.label;
 return record.role === target.role && recordText(record) === target.text;
 })
 .sort((left, right) => left.area - right.area);
-if (!matches.length) throw new Error(\`challenge option disappeared: \${target.label || target.text}\`);
+if (!matches.length) throw new Error(`challenge option disappeared: ${target.label || target.text}`);
 await page.locator('flt-semantics').nth(matches[0].index).evaluate((element) => element.click());
 await sleep(120);
 }
@@ -381,7 +381,7 @@ async function chooseOptions(page) {
 await ensureGrammarSegment(page);
 const count = await requiredChallengeSelections(page);
 const targets = await challengeOptionTargets(page);
-if (targets.length < count) throw new Error(\`only \${targets.length} challenge options found; need \${count}\`);
+if (targets.length < count) throw new Error(`only ${targets.length} challenge options found; need ${count}`);
 for (const target of targets.slice(0, count)) await activateChallengeTarget(page, target);
 }
 async function waitForNextChallenge(page) {
@@ -411,14 +411,14 @@ timeout: 12000,
 return;
 }
 if (attempt < 3) {
-await findSemantic(page, \`提交第 \${attempt + 1} / 3 次答案\`, {
+await findSemantic(page, `提交第 ${attempt + 1} / 3 次答案`, {
 role: 'button',
 prefix: true,
 timeout: 5000,
 });
 }
 }
-throw new Error(\`challenge mode \${modeIndex + 1} did not resolve\`);
+throw new Error(`challenge mode ${modeIndex + 1} did not resolve`);
 }
 async function completeChallenge(page, level) {
 for (let mode = 0; mode < 3; mode += 1) await resolveChallengeMode(page, mode);
@@ -427,16 +427,16 @@ role: 'button',
 prefix: true,
 timeout: 15000,
 });
-if ((await currentLevel(page)) !== level) throw new Error(\`Lv\${level} Challenge completion level drift\`);
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge completion level drift`);
 }
 async function toMemory(page, level, storyText) {
 await activate(page, '继续留下回忆', { prefix: true });
 await waitStage(page, 5);
-if ((await currentLevel(page)) !== level) throw new Error(\`Lv\${level} Memory level drift\`);
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Memory level drift`);
 const text = await visibleText(page);
-requireMarkers(text, ['永宁门', '跑表'], \`Lv\${level} Memory\`);
+requireMarkers(text, ['永宁门', '跑表'], `Lv${level} Memory`);
 if (!storyVocabularyTrace(storyText, text).length) {
-throw new Error(\`Lv\${level} Memory has no CURRENT Story vocabulary trace\`);
+throw new Error(`Lv${level} Memory has no CURRENT Story vocabulary trace`);
 }
 return text;
 }
@@ -446,20 +446,20 @@ await activate(page, '上一步', { prefix: true });
 await sleep(200);
 }
 await waitStage(page, 1);
-if ((await currentLevel(page)) !== level) throw new Error(\`Lv\${level} Story revisit level drift\`);
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story revisit level drift`);
 const text = await visibleText(page);
-requireMarkers(text, expected[level].story, \`Lv\${level} revisited Story\`);
-requireNoPriorMarker(text, prior, \`Lv\${level} revisited Story\`);
+requireMarkers(text, expected[level].story, `Lv${level} revisited Story`);
+requireNoPriorMarker(text, prior, `Lv${level} revisited Story`);
 await openFirstStoryAnnotation(page);
 const supportText = await visibleText(page);
-requireMarkers(supportText, expected[level].vi, \`Lv\${level} revisited Vietnamese\`);
-requireMarkers(supportText, expected[level].en, \`Lv\${level} revisited English\`);
+requireMarkers(supportText, expected[level].vi, `Lv${level} revisited Vietnamese`);
+requireMarkers(supportText, expected[level].en, `Lv${level} revisited English`);
 if (supportText !== expectedSupportText) {
-throw new Error(\`Lv\${level} ReadingAnnotation changed after Story revisit\`);
+throw new Error(`Lv${level} ReadingAnnotation changed after Story revisit`);
 }
 await closeReadingSupport(page);
 if (!text.includes(expected[level].story[0]) || !expectedStoryText.includes(expected[level].story[0])) {
-throw new Error(\`Lv\${level} Story revisit identity mismatch\`);
+throw new Error(`Lv${level} Story revisit identity mismatch`);
 }
 }
 async function forwardToMemoryAfterRevisit(page, level, storyText) {
@@ -467,20 +467,20 @@ await toVocabulary(page, level, storyText);
 await toDiscovery(page, level);
 await activate(page, '继续', { prefix: true });
 await waitStage(page, 4);
-if ((await currentLevel(page)) !== level) throw new Error(\`Lv\${level} Challenge revisit level drift\`);
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge revisit level drift`);
 await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 15000 });
 await activate(page, '继续留下回忆', { prefix: true });
 await waitStage(page, 5);
-if ((await currentLevel(page)) !== level) throw new Error(\`Lv\${level} Memory revisit level drift\`);
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Memory revisit level drift`);
 }
 async function toCompletion(page, level, storyText) {
 await activate(page, '保存回忆并完成', { prefix: true });
 await waitStage(page, 6);
-if ((await currentLevel(page)) !== level) throw new Error(\`Lv\${level} Completion level drift\`);
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Completion level drift`);
 const text = await visibleText(page);
-requireMarkers(text, ['西安已点亮', '永宁门', '回家'], \`Lv\${level} Completion\`);
+requireMarkers(text, ['西安已点亮', '永宁门', '回家'], `Lv${level} Completion`);
 if (!storyVocabularyTrace(storyText, text).length) {
-throw new Error(\`Lv\${level} Completion has no CURRENT Story vocabulary trace\`);
+throw new Error(`Lv${level} Completion has no CURRENT Story vocabulary trace`);
 }
 return text;
 }
@@ -490,9 +490,9 @@ await waitStage(page, 1);
 }
 async function assertNoBlockingError(page, pageErrors, label) {
 const text = await visibleText(page).catch(() => '');
-const joined = \`\${text}\n\${pageErrors.join('\n')}\`;
+const joined = `${text}\n${pageErrors.join('\n')}`;
 for (const fatal of ['Unhandled Exception', 'A RenderFlex overflowed', 'Bad state:']) {
-if (joined.includes(fatal)) throw new Error(\`\${label}: blocking runtime error: \${fatal}\`);
+if (joined.includes(fatal)) throw new Error(`${label}: blocking runtime error: ${fatal}`);
 }
 }
 async function runBrowser(browserName, browser, contextOptions) {
@@ -502,7 +502,7 @@ const pageErrors = [];
 const failedRequests = [];
 page.on('pageerror', (error) => pageErrors.push(error?.stack || error?.message || String(error)));
 page.on('requestfailed', (request) => {
-failedRequests.push(\`\${request.url()} :: \${request.failure()?.errorText || 'failed'}\`);
+failedRequests.push(`${request.url()} :: ${request.failure()?.errorText || 'failed'}`);
 });
 let prior = null;
 let priorSupport = null;
@@ -514,35 +514,35 @@ const level = levels[index];
 if (index > 0) await restart(page);
 await setLevel(page, level);
 await waitStage(page, 1);
-if ((await currentLevel(page)) !== level) throw new Error(\`Lv\${level} Story level switch failed\`);
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story level switch failed`);
 const { storyText, supportText } = await verifyReadingSupport(
 page,
 level,
 prior,
 priorSupport,
 );
-await assertNoBlockingError(page, pageErrors, \`\${browserName} Lv\${level} Story\`);
-console.log(\`\${browserName} Lv\${level} STORY + READINGANNOTATION + CN/PINYIN/VI/EN = PASS\`);
+await assertNoBlockingError(page, pageErrors, `${browserName} Lv${level} Story`);
+console.log(`${browserName} Lv${level} STORY + READINGANNOTATION + CN/PINYIN/VI/EN = PASS`);
 const vocabularyText = await toVocabulary(page, level, storyText);
-requireNoPriorMarker(vocabularyText, prior, \`\${browserName} Lv\${level} Vocabulary\`);
-console.log(\`\${browserName} Lv\${level} VOCABULARY = PASS\`);
+requireNoPriorMarker(vocabularyText, prior, `${browserName} Lv${level} Vocabulary`);
+console.log(`${browserName} Lv${level} VOCABULARY = PASS`);
 const discoveryText = await toDiscovery(page, level);
-requireNoPriorMarker(discoveryText, prior, \`\${browserName} Lv\${level} Discovery\`);
-console.log(\`\${browserName} Lv\${level} DISCOVERY = PASS\`);
+requireNoPriorMarker(discoveryText, prior, `${browserName} Lv${level} Discovery`);
+console.log(`${browserName} Lv${level} DISCOVERY = PASS`);
 const challengeText = await toChallenge(page, level);
-requireNoPriorMarker(challengeText, prior, \`\${browserName} Lv\${level} Challenge\`);
+requireNoPriorMarker(challengeText, prior, `${browserName} Lv${level} Challenge`);
 await completeChallenge(page, level);
-console.log(\`\${browserName} Lv\${level} CHALLENGE = PASS\`);
+console.log(`${browserName} Lv${level} CHALLENGE = PASS`);
 const memoryText = await toMemory(page, level, storyText);
-requireNoPriorMarker(memoryText, prior, \`\${browserName} Lv\${level} Memory\`);
-console.log(\`\${browserName} Lv\${level} MEMORY = PASS\`);
+requireNoPriorMarker(memoryText, prior, `${browserName} Lv${level} Memory`);
+console.log(`${browserName} Lv${level} MEMORY = PASS`);
 await revisitStoryFromMemory(page, level, storyText, supportText, prior);
-console.log(\`\${browserName} Lv\${level} STORY REVISIT + LEVEL STABILITY = PASS\`);
+console.log(`${browserName} Lv${level} STORY REVISIT + LEVEL STABILITY = PASS`);
 await forwardToMemoryAfterRevisit(page, level, storyText);
 const completionText = await toCompletion(page, level, storyText);
-requireNoPriorMarker(completionText, prior, \`\${browserName} Lv\${level} Completion\`);
-console.log(\`\${browserName} Lv\${level} COMPLETION = PASS\`);
-console.log(\`\${browserName} Lv\${level} SIX-STAGE = PASS\`);
+requireNoPriorMarker(completionText, prior, `${browserName} Lv${level} Completion`);
+console.log(`${browserName} Lv${level} COMPLETION = PASS`);
+console.log(`${browserName} Lv${level} SIX-STAGE = PASS`);
 prior = expected[level];
 priorSupport = supportText;
 }
@@ -550,19 +550,19 @@ const blockingRequests = failedRequests.filter(
 (entry) => !entry.includes('favicon') && !entry.includes('analytics'),
 );
 if (blockingRequests.length) {
-throw new Error(\`\${browserName} blocking failed requests: \${blockingRequests.join(' || ')}\`);
+throw new Error(`${browserName} blocking failed requests: ${blockingRequests.join(' || ')}`);
 }
 if (pageErrors.length) {
-throw new Error(\`\${browserName} page errors: \${pageErrors.join(' || ')}\`);
+throw new Error(`${browserName} page errors: ${pageErrors.join(' || ')}`);
 }
-console.log(\`\${browserName} XIAN CITY WALL DEPLOYED BROWSER = PASS | SHA=\${sourceSha}\`);
+console.log(`${browserName} XIAN CITY WALL DEPLOYED BROWSER = PASS | SHA=${sourceSha}`);
 } catch (error) {
-console.error(\`\${browserName} XIAN CITY WALL DEPLOYED BROWSER = FAIL\`);
-console.error(\`CURRENT URL = \${page.url()}\`);
-console.error(\`CURRENT LEVEL = \${await currentLevel(page).catch(() => 'unknown')}\`);
-console.error(\`SEMANTICS = \${(await visibleText(page).catch(() => '')).slice(0, 16000)}\`);
-console.error(\`PAGE ERRORS = \${JSON.stringify(pageErrors)}\`);
-console.error(\`FAILED REQUESTS = \${JSON.stringify(failedRequests)}\`);
+console.error(`${browserName} XIAN CITY WALL DEPLOYED BROWSER = FAIL`);
+console.error(`CURRENT URL = ${page.url()}`);
+console.error(`CURRENT LEVEL = ${await currentLevel(page).catch(() => 'unknown')}`);
+console.error(`SEMANTICS = ${(await visibleText(page).catch(() => '')).slice(0, 16000)}`);
+console.error(`PAGE ERRORS = ${JSON.stringify(pageErrors)}`);
+console.error(`FAILED REQUESTS = ${JSON.stringify(failedRequests)}`);
 throw error;
 } finally {
 await context.close();
@@ -588,4 +588,4 @@ reducedMotion: 'reduce',
 } finally {
 await webkitBrowser.close();
 }
-console.log(\`XIAN CITY WALL DEPLOYED BROWSER ACCEPTANCE = PASS | SHA=\${sourceSha} | LEVELS=\${levels.join(',')}\`);
+console.log(`XIAN CITY WALL DEPLOYED BROWSER ACCEPTANCE = PASS | SHA=${sourceSha} | LEVELS=${levels.join(',')}`);
