@@ -194,6 +194,7 @@ class NarrationController extends ChangeNotifier {
   DateTime? _lastNativeProgressAt;
   int _lastNativeOffset = 0;
   _NarrationSpeechMode _speechMode = _NarrationSpeechMode.idle;
+  bool _engineStopPending = false;
   bool _suppressEngineCallbacks = false;
   DateTime? _ignoreEngineCallbacksUntil;
   bool _isSpeakingWord = false;
@@ -704,13 +705,18 @@ class NarrationController extends ChangeNotifier {
 
     _sharedSpeechRate = option.rate;
     final controllers = List<NarrationController>.of(_instances);
-    for (final controller in controllers) {
-      await controller._applySharedSpeechRate(option.rate);
-    }
+    await Future.wait([
+      for (final controller in controllers)
+        controller._applySharedSpeechRate(option.rate),
+    ]);
   }
 
   Future<void> _applySharedSpeechRate(double rate) async {
-    if (_disposed || (_speechRate - rate).abs() < .001) return;
+    if (_disposed ||
+        (_speechRate - rate).abs() < .001 ||
+        (_sharedSpeechRate - rate).abs() >= .001) {
+      return;
+    }
 
     final wasPlaying =
         _status == NarrationStatus.playing &&
@@ -718,7 +724,7 @@ class NarrationController extends ChangeNotifier {
         !_plan.isEmpty;
     final resumeOffset = _currentOffset;
     if (wasPlaying) await pauseAtOffset(resumeOffset);
-    if (_disposed) return;
+    if (_disposed || (_sharedSpeechRate - rate).abs() >= .001) return;
 
     _speechRate = rate;
     if (_webSpeech.isAvailable && _status == NarrationStatus.paused) {
@@ -726,30 +732,54 @@ class NarrationController extends ChangeNotifier {
     }
     _safeNotify();
 
-    if (wasPlaying && !_disposed) {
+    if (wasPlaying &&
+        !_disposed &&
+        (_sharedSpeechRate - rate).abs() < .001) {
       await resumeFromOffset(resumeOffset);
     }
   }
 
-  Future<void> stop({bool resetPosition = true}) async {
+  void cancelPlaybackImmediately({bool resetPosition = true}) {
+    _engineStopPending = _engineStopPending ||
+        _speechMode != _NarrationSpeechMode.idle ||
+        _isSpeakingWord ||
+        _webSpeechPausedInPlace;
+    _speechSessionToken += 1;
     _cancelProgressClock();
     _status = NarrationStatus.idle;
     _errorMessage = null;
     _currentItemIndex = null;
     _highlightSnapshot = null;
     _isRestoredPosition = false;
+    _restartWebSpeechOnResume = false;
     NarrationHighlightBus.instance.clear(contentId: _contentId);
     if (resetPosition) {
       _currentOffset = 0;
       _speechBaseOffset = 0;
     }
     _safeNotify();
+  }
 
-    await _stopSpeechEngine();
+  Future<void> flushCancelledPlayback() async {
+    final shouldStopEngine = _engineStopPending;
+    _engineStopPending = false;
+    if (shouldStopEngine) {
+      await _stopSpeechEngine(advanceSessionToken: false);
+    } else {
+      _speechMode = _NarrationSpeechMode.idle;
+      _webSpeechPausedInPlace = false;
+      _isSpeakingWord = false;
+      _spokenWord = null;
+    }
     if (_disposed) return;
     _status = NarrationStatus.idle;
     _currentItemIndex = null;
     _safeNotify();
+  }
+
+  Future<void> stop({bool resetPosition = true}) async {
+    cancelPlaybackImmediately(resetPosition: resetPosition);
+    await flushCancelledPlayback();
   }
 
   double _ttsSpeechRate(double multiplier) {
@@ -945,8 +975,8 @@ class NarrationController extends ChangeNotifier {
     _safeNotify();
   }
 
-  Future<void> _stopSpeechEngine() async {
-    _speechSessionToken += 1;
+  Future<void> _stopSpeechEngine({bool advanceSessionToken = true}) async {
+    if (advanceSessionToken) _speechSessionToken += 1;
     if (_webSpeech.isAvailable && _speechMode != _NarrationSpeechMode.word) {
       await _webSpeech.stop();
       _webSpeechPausedInPlace = false;

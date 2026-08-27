@@ -854,7 +854,6 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> clearJourneyNarrationPosition({String? contentId}) async {
-    final prefs = await _preferencesLoader();
     if (contentId != null) {
       _journeyNarrationSignatures.remove(contentId);
       _journeyNarrationOffsets.remove(contentId);
@@ -863,6 +862,7 @@ class AppState extends ChangeNotifier {
         journeyNarrationContentSignature = null;
         journeyNarrationOffset = 0;
       }
+      final prefs = await _preferencesLoader();
       await Future.wait([
         prefs.remove(_narrationKey(contentId, 'signature')),
         prefs.remove(_narrationKey(contentId, 'offset')),
@@ -875,6 +875,7 @@ class AppState extends ChangeNotifier {
     journeyNarrationOffset = 0;
     _journeyNarrationSignatures.clear();
     _journeyNarrationOffsets.clear();
+    final prefs = await _preferencesLoader();
     await Future.wait([
       prefs.remove(_key('narrationContentId')),
       prefs.remove(_key('narrationContentSignature')),

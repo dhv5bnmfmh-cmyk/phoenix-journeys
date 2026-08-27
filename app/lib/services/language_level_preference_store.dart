@@ -55,6 +55,16 @@ class LanguageLevelPreferenceStore {
 
   Future<void> savePhoenixLevel(int level) async {
     final safeLevel = PhoenixLevelController.instance.setLevel(level);
+    await persistPhoenixLevel(safeLevel);
+  }
+
+  Future<void> persistPhoenixLevel(int level) async {
+    final safeLevel = level
+        .clamp(
+          PhoenixLevelController.minimumLevel,
+          PhoenixLevelController.maximumLevel,
+        )
+        .toInt();
     final preferences = await SharedPreferences.getInstance();
     await Future.wait([
       preferences.setInt(_phoenixLevelKey, safeLevel),

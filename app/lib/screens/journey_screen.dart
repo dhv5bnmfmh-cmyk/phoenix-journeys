@@ -688,17 +688,16 @@ class _JourneyScreenState extends State<JourneyScreen>
     final token = ++_levelChangeToken;
     final profile = _phoenixLevelController.profile;
 
-    await _stopJourneyNarration();
-    await _appState.clearJourneyNarrationPosition();
-    await _narration.setSpeechRate(
+    _stageNarrationIntent += 1;
+    _stageNarrationRequestedId = null;
+    _narration.cancelPlaybackImmediately();
+    final narrationPositionFuture =
+        _appState.clearJourneyNarrationPosition();
+    final speechRateFuture = _narration.setSpeechRate(
       _languageLevelAgent.planFor(profile).speechRate,
     );
-    await Future.wait([
-      _appState.clearGuideFeedback(),
-      _appState.clearWritingFeedback(),
-    ]);
-    if (!mounted || token != _levelChangeToken) return;
 
+    if (!mounted || token != _levelChangeToken) return;
     setState(() {
       _languageProfile = profile;
       _guideFeedback = null;
@@ -707,6 +706,17 @@ class _JourneyScreenState extends State<JourneyScreen>
       _pilotChallengeVisible = false;
       _pilotMemoryVisible = false;
       _challengeSeed += 1;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(
+        _settlePhoenixLevelChange(
+          token: token,
+          narrationPositionFuture: narrationPositionFuture,
+          speechRateFuture: speechRateFuture,
+        ),
+      );
     });
 
     final messenger = ScaffoldMessenger.of(context);
@@ -721,6 +731,21 @@ class _JourneyScreenState extends State<JourneyScreen>
           behavior: SnackBarBehavior.floating,
         ),
       );
+  }
+
+  Future<void> _settlePhoenixLevelChange({
+    required int token,
+    required Future<void> narrationPositionFuture,
+    required Future<void> speechRateFuture,
+  }) async {
+    await Future.wait([
+      _narration.flushCancelledPlayback(),
+      narrationPositionFuture,
+      speechRateFuture,
+      _appState.clearGuideFeedback(),
+      _appState.clearWritingFeedback(),
+    ]);
+    if (!mounted || token != _levelChangeToken) return;
   }
 
   void _checkpointNarrationBeforeStepChange() {
