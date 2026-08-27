@@ -216,7 +216,10 @@ await findSemantic(page, '陕西省，西安市', { prefix: true, timeout: 15000
 console.log('PASSPORT XIAN = PASS');
 await activate(page, '西安城墙', { prefix: false });
 await waitStage(page, 1);
-await findSemantic(page, '西安 · 城墙', { prefix: true, timeout: 30000 });
+const journeyState = await visibleText(page);
+if (!journeyState.includes('西安 · 城墙') || !journeyState.includes('周遥')) {
+throw new Error("Xi'an City Wall Journey state not visible after Passport route");
+}
 console.log('PASSPORT XIAN CITY WALL = PASS');
 }
 function requireMarkers(text, markers, label) {
