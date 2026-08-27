@@ -198,8 +198,24 @@ if (!moved) throw new Error(`level selector did not move from ${before}`);
 }
 throw new Error(`failed to select Lv${target}; current Lv${await currentLevel(page)}`);
 }
-async function waitStage(page, number) {
-await findSemantic(page, `${number}/6`, { prefix: true, timeout: 20000 });
+async function waitStage(
+page,
+number,
+{ journeyTitle = null, storyIdentity = null, timeout = 20000 } = {},
+) {
+try {
+await findSemantic(page, `${number}/6`, { prefix: true, timeout });
+return;
+} catch (error) {
+const snapshot = await visibleText(page);
+const stageReady = snapshot.includes(`${number}/6`);
+const identityReady =
+number !== 1 ||
+((journeyTitle == null || snapshot.includes(journeyTitle)) &&
+(storyIdentity == null || snapshot.includes(storyIdentity)));
+if (stageReady && identityReady) return;
+throw error;
+}
 }
 async function openViaPassport(page) {
 await activate(page, '护照', { prefix: true });
@@ -215,7 +231,10 @@ await activate(page, '西安', { prefix: true });
 await findSemantic(page, '陕西省，西安市', { prefix: true, timeout: 15000 });
 console.log('PASSPORT XIAN = PASS');
 await activate(page, '西安城墙', { prefix: false });
-await waitStage(page, 1);
+await waitStage(page, 1, {
+journeyTitle: '西安 · 城墙',
+storyIdentity: '周遥',
+});
 const journeyState = await visibleText(page);
 if (!journeyState.includes('西安 · 城墙') || !journeyState.includes('周遥')) {
 throw new Error("Xi'an City Wall Journey state not visible after Passport route");
