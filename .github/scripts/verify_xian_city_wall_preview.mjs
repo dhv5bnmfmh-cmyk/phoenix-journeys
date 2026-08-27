@@ -17,6 +17,14 @@ discovery: ['13.74公里'],
 completion: '本级记住：跑完一圈以后，他选择继续跑。',
 vi: ['Chu Dao, 22 tuổi', 'lời chia tay cuối cùng'],
 en: ['Zhou Yao, twenty-two', 'final farewell'],
+paragraphs: [
+{
+cn: ['周遥二十二岁', '距离还在增加'],
+pinyin: ['cóng xiǎo gēn fù mǔ zhù zài'],
+vi: ['Chu Dao, 22 tuổi', 'lời chia tay cuối cùng'],
+en: ['Zhou Yao, twenty-two', 'final farewell'],
+},
+],
 },
 3: {
 story: ['住址一变', '新家阳台的照片', '继续增加'],
@@ -24,6 +32,20 @@ discovery: ['12至14米'],
 completion: '本级按事件顺序连接搬家、完整一圈与继续向南。',
 vi: ['một khi địa chỉ đổi', 'ban công nhà mới'],
 en: ['once his address changes', 'new balcony'],
+paragraphs: [
+{
+cn: ['住址一变'],
+pinyin: ['zhù zhǐ yī biàn'],
+vi: ['một khi địa chỉ đổi'],
+en: ['once his address changes'],
+},
+{
+cn: ['新家阳台的照片', '继续增加'],
+pinyin: ['tiān sè jiàn àn'],
+vi: ['ban công nhà mới'],
+en: ['new balcony'],
+},
+],
 },
 5: {
 story: ['一场私人告别', '护城河', '完整的一圈'],
@@ -31,6 +53,20 @@ discovery: ['护城河'],
 completion: '本级理解物理闭环不等于关系和归属的闭环。',
 vi: ['một nghi thức chia tay riêng', 'hào'],
 en: ['private farewell ritual', 'moat'],
+paragraphs: [
+{
+cn: ['一场私人告别'],
+pinyin: ['cóng xiǎo gēn fù mǔ zhù zài'],
+vi: ['một nghi thức chia tay riêng'],
+en: ['private farewell ritual'],
+},
+{
+cn: ['护城河', '完整的一圈'],
+pinyin: ['tiān sè yóu jīn huáng'],
+vi: ['hào'],
+en: ['moat'],
+},
+],
 },
 8: {
 story: ['一个干净的句号', '被保护、监测', '没有在永宁门结束的路线'],
@@ -38,6 +74,20 @@ discovery: ['无损检测'],
 completion: '本级用保护、监测与日常路线建立完整因果链。',
 vi: ['một dấu chấm hết sạch sẽ', 'quan trắc'],
 en: ['a clean full stop', 'monitored'],
+paragraphs: [
+{
+cn: ['一个干净的句号'],
+pinyin: ['cóng xiǎo gēn fù mǔ zhù zài'],
+vi: ['một dấu chấm hết sạch sẽ'],
+en: ['a clean full stop'],
+},
+{
+cn: ['被保护、监测', '没有在永宁门结束的路线'],
+pinyin: ['tài yáng luò xià yǐ hòu'],
+vi: ['quan trắc'],
+en: ['monitored'],
+},
+],
 },
 10: {
 story: ['可量化的闭环', '1961年', '命名为“回家”'],
@@ -45,6 +95,20 @@ discovery: ['历史城区'],
 completion: '本级综合时间层、保护制度、空间边界和人物选择',
 vi: ['một vòng khép kín có thể đo', 'Năm 1961'],
 en: ['one measurable closed loop', 'In 1961'],
+paragraphs: [
+{
+cn: ['可量化的闭环'],
+pinyin: ['cóng xiǎo gēn fù mǔ zhù zài'],
+vi: ['một vòng khép kín có thể đo'],
+en: ['one measurable closed loop'],
+},
+{
+cn: ['1961年', '命名为“回家”'],
+pinyin: ['tài yáng luò xià yǐ hòu'],
+vi: ['Năm 1961'],
+en: ['In 1961'],
+},
+],
 },
 };
 async function records(page) {
@@ -278,48 +342,182 @@ const staleSupport = [...prior.vi, ...prior.en]
 const stale = staleStory ?? staleSupport;
 if (stale) throw new Error(`${label} contains stale previous-level marker: ${stale}`);
 }
-async function openFirstStoryAnnotation(page) {
+async function storyParagraphTexts(page, expectedCount) {
+const currentRecords = await records(page);
+const noteIndexes = currentRecords
+.filter((record) =>
+record.visible &&
+record.role === 'button' &&
+clean(recordText(record)) === '注'
+)
+.map((record) => record.index);
+if (noteIndexes.length !== expectedCount) {
+throw new Error(
+`Story paragraph count drift: ${noteIndexes.length} != ${expectedCount}`,
+);
+}
+const paragraphs = [];
+let lowerBound = -1;
+for (let paragraphIndex = 0; paragraphIndex < noteIndexes.length; paragraphIndex += 1) {
+const noteIndex = noteIndexes[paragraphIndex];
+let numberIndex = -1;
+for (const record of currentRecords) {
+if (
+record.index > lowerBound &&
+record.index < noteIndex &&
+clean(recordText(record)) === String(paragraphIndex + 1)
+) {
+numberIndex = record.index;
+}
+}
+if (numberIndex < 0) {
+throw new Error(`Story paragraph ${paragraphIndex + 1} semantic number missing`);
+}
+const candidates = currentRecords
+.filter((record) => {
+if (
+!record.visible ||
+record.index <= numberIndex ||
+record.index >= noteIndex ||
+record.role === 'button'
+) return false;
+const text = recordText(record);
+return text.length >= 12 && /[\u3400-\u9fff]/.test(text);
+})
+.sort((left, right) => recordText(right).length - recordText(left).length);
+if (!candidates.length) {
+throw new Error(`Story paragraph ${paragraphIndex + 1} semantic text missing`);
+}
+paragraphs.push(recordText(candidates[0]));
+lowerBound = noteIndex;
+}
+return paragraphs;
+}
+async function openStoryAnnotation(page, paragraphIndex, expectedCount) {
 const notes = page.getByRole('button', { name: '注', exact: true });
 const count = await notes.count();
-if (count < 1) throw new Error('Story Reading Support 注 button not found');
-await notes.first().evaluate((element) => element.click());
-await findSemantic(page, '故事第 1 段', { timeout: 15000 });
+if (count !== expectedCount) {
+throw new Error(`Story Reading Support paragraph count drift: ${count} != ${expectedCount}`);
+}
+await notes.nth(paragraphIndex).evaluate((element) => element.click());
+await findSemantic(page, `故事第 ${paragraphIndex + 1} 段`, { timeout: 15000 });
 await findSemantic(page, '拼音', { timeout: 15000 });
 await findSemantic(page, '探索者母语 · 越南语', { timeout: 15000 });
 await findSemantic(page, 'English', { timeout: 15000 });
 }
-async function closeReadingSupport(page) {
-for (const label of ['关闭', 'Close']) {
+async function closeReadingSupport(page, paragraphIndex) {
+const header = `故事第 ${paragraphIndex + 1} 段`;
+let dismissed = false;
+for (const label of ['Dismiss', '关闭', 'Close']) {
 if (await exists(page, label, { role: 'button', timeout: 500 })) {
 await activate(page, label);
-return;
+dismissed = true;
+break;
 }
 }
-await page.keyboard.press('Escape');
+if (!dismissed) await page.keyboard.press('Escape');
 const deadline = Date.now() + 5000;
 while (Date.now() < deadline) {
-if (!(await exists(page, '故事第 1 段', { timeout: 250 }))) return;
+if (!(await exists(page, header, { timeout: 200 }))) return;
 await sleep(100);
 }
-throw new Error('Story Reading Support popup did not close');
+throw new Error(`Story Reading Support popup did not close: ${header}`);
+}
+function requireNoSiblingParagraphSupport(text, specs, paragraphIndex, label) {
+for (let index = 0; index < specs.length; index += 1) {
+if (index === paragraphIndex) continue;
+for (const field of ['pinyin', 'vi', 'en']) {
+for (const marker of specs[index][field]) {
+if (
+marker.length >= 5 &&
+!specs[paragraphIndex][field].includes(marker) &&
+text.includes(marker)
+) {
+throw new Error(
+`${label} contains paragraph ${index + 1} ${field} marker: ${marker}`,
+);
+}
+}
+}
+}
+}
+async function verifyReadingSupportParagraphs(
+page,
+level,
+previousLevelSupports,
+expectedCurrentSupports = null,
+) {
+const specs = expected[level].paragraphs;
+const paragraphTexts = await storyParagraphTexts(page, specs.length);
+const supports = [];
+for (let index = 0; index < specs.length; index += 1) {
+const spec = specs[index];
+requireStoryMarkers(
+paragraphTexts[index],
+spec.cn,
+`Lv${level} paragraph ${index + 1} Chinese`,
+);
+for (let sibling = 0; sibling < specs.length; sibling += 1) {
+if (sibling === index) continue;
+for (const marker of specs[sibling].cn) {
+if (
+marker.length >= 4 &&
+!spec.cn.includes(marker) &&
+storyMarkerMatches(paragraphTexts[index], marker)
+) {
+throw new Error(
+`Lv${level} paragraph ${index + 1} contains paragraph ${sibling + 1} Chinese marker: ${marker}`,
+);
+}
+}
+}
+await openStoryAnnotation(page, index, specs.length);
+const supportText = await visibleText(page);
+requireMarkers(
+supportText,
+[`故事第 ${index + 1} 段`, ...spec.pinyin, ...spec.vi, ...spec.en],
+`Lv${level} paragraph ${index + 1} ReadingAnnotation`,
+);
+if (!/拼音[\s\S]*[A-Za-zĀÁǍÀāáǎàĒÉĚÈēéěèĪÍǏÌīíǐìŌÓǑÒōóǒòŪÚǓÙūúǔùǕǗǙǛǖǘǚǜ]/.test(supportText)) {
+throw new Error(`Lv${level} paragraph ${index + 1} Pinyin support is empty or malformed`);
+}
+requireNoSiblingParagraphSupport(
+supportText,
+specs,
+index,
+`Lv${level} paragraph ${index + 1} ReadingAnnotation`,
+);
+if (
+previousLevelSupports?.[index] &&
+supportText === previousLevelSupports[index]
+) {
+throw new Error(
+`Lv${level} paragraph ${index + 1} reused previous-level support verbatim`,
+);
+}
+if (
+expectedCurrentSupports?.[index] &&
+supportText !== expectedCurrentSupports[index]
+) {
+throw new Error(
+`Lv${level} paragraph ${index + 1} ReadingAnnotation changed after Story revisit`,
+);
+}
+supports.push(supportText);
+await closeReadingSupport(page, index);
+}
+return supports;
 }
 async function verifyReadingSupport(page, level, prior, priorSupport) {
 const storyText = await visibleText(page);
 requireStoryMarkers(storyText, expected[level].story, `Lv${level} CURRENT Story`);
 requireNoPriorMarker(storyText, prior, `Lv${level} Story`);
-await openFirstStoryAnnotation(page);
-const supportText = await visibleText(page);
-requireMarkers(supportText, expected[level].vi, `Lv${level} Vietnamese`);
-requireMarkers(supportText, expected[level].en, `Lv${level} English`);
-if (!/拼音[\s\S]*[A-Za-zĀÁǍÀāáǎàĒÉĚÈēéěèĪÍǏÌīíǐìŌÓǑÒōóǒòŪÚǓÙūúǔùǕǗǙǛǖǘǚǜ]/.test(supportText)) {
-throw new Error(`Lv${level} Pinyin support is empty or malformed`);
-}
-if (priorSupport && supportText === priorSupport) {
-throw new Error(`Lv${level} ReadingAnnotation reused previous-level support verbatim`);
-}
-requireNoPriorMarker(supportText, prior, `Lv${level} ReadingAnnotation`);
-await closeReadingSupport(page);
-return { storyText, supportText };
+const supportTexts = await verifyReadingSupportParagraphs(
+page,
+level,
+priorSupport,
+);
+return { storyText, supportTexts };
 }
 function storyVocabularyTrace(story, stageText) {
 const ignore = new Set(['故事', '单词', '发现', '挑战', '记忆', '完成', '继续', '返回', '朗读', '查看', '中文难度']);
@@ -493,7 +691,14 @@ throw new Error(`Lv${level} Memory has no CURRENT Story vocabulary trace`);
 }
 return text;
 }
-async function revisitStoryFromMemory(page, level, expectedStoryText, expectedSupportText, prior) {
+async function revisitStoryFromMemory(
+page,
+level,
+expectedStoryText,
+expectedSupportTexts,
+prior,
+previousLevelSupports,
+) {
 const readStage = async () => {
 for (let stage = 1; stage <= 5; stage += 1) {
 if (await exists(page, `${stage}/6`, { prefix: true, timeout: 120 })) return stage;
@@ -525,14 +730,12 @@ if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story revi
 const text = await visibleText(page);
 requireStoryMarkers(text, expected[level].story, `Lv${level} revisited Story`);
 requireNoPriorMarker(text, prior, `Lv${level} revisited Story`);
-await openFirstStoryAnnotation(page);
-const supportText = await visibleText(page);
-requireMarkers(supportText, expected[level].vi, `Lv${level} revisited Vietnamese`);
-requireMarkers(supportText, expected[level].en, `Lv${level} revisited English`);
-if (supportText !== expectedSupportText) {
-throw new Error(`Lv${level} ReadingAnnotation changed after Story revisit`);
-}
-await closeReadingSupport(page);
+await verifyReadingSupportParagraphs(
+page,
+level,
+previousLevelSupports,
+expectedSupportTexts,
+);
 if (
 !storyMarkerMatches(text, expected[level].story[0]) ||
 !storyMarkerMatches(expectedStoryText, expected[level].story[0])
@@ -607,7 +810,7 @@ if (index > 0) await restart(page);
 await setLevel(page, level);
 await waitStage(page, 1);
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story level switch failed`);
-const { storyText, supportText } = await verifyReadingSupport(
+const { storyText, supportTexts } = await verifyReadingSupport(
 page,
 level,
 prior,
@@ -628,7 +831,14 @@ console.log(`${browserName} Lv${level} CHALLENGE = PASS`);
 const memoryText = await toMemory(page, level, storyText);
 requireNoPriorMarker(memoryText, prior, `${browserName} Lv${level} Memory`);
 console.log(`${browserName} Lv${level} MEMORY = PASS`);
-await revisitStoryFromMemory(page, level, storyText, supportText, prior);
+await revisitStoryFromMemory(
+page,
+level,
+storyText,
+supportTexts,
+prior,
+priorSupport,
+);
 console.log(`${browserName} Lv${level} STORY REVISIT + LEVEL STABILITY = PASS`);
 await forwardToMemoryAfterRevisit(page, level, storyText);
 const completionText = await toCompletion(page, level, storyText);
@@ -636,7 +846,7 @@ requireNoPriorMarker(completionText, prior, `${browserName} Lv${level} Completio
 console.log(`${browserName} Lv${level} COMPLETION = PASS`);
 console.log(`${browserName} Lv${level} SIX-STAGE = PASS`);
 prior = expected[level];
-priorSupport = supportText;
+priorSupport = supportTexts;
 }
 const blockingRequests = failedRequests.filter(
 (entry) => !entry.includes('favicon') && !entry.includes('analytics'),
