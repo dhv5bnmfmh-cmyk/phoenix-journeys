@@ -251,11 +251,31 @@ for (const marker of markers) {
 if (!text.includes(marker)) throw new Error(`${label} missing marker: ${marker}`);
 }
 }
+function stripInlineStoryAnnotations(text) {
+return text.replace(
+/[，,、\s]*[\p{Script=Latin}0-9'’·.\-\s]+[，,、\s]*点按查看词语解释(?:[\u3400-\u9fff]{1,8}[，,、\s]*[\p{Script=Latin}0-9'’·.\-\s]+[，,、\s]*点按查看词语解释)*/gu,
+''
+);
+}
+function storyMarkerMatches(text, marker) {
+return stripInlineStoryAnnotations(text).includes(marker);
+}
+function requireStoryMarkers(text, markers, label) {
+for (const marker of markers) {
+if (!storyMarkerMatches(text, marker)) {
+throw new Error(`${label} missing annotation-aware marker: ${marker}`);
+}
+}
+}
 function requireNoPriorMarker(text, prior, label) {
 if (!prior) return;
-const stale = [...prior.story, ...prior.vi, ...prior.en]
+const staleStory = prior.story
+.filter((marker) => marker.length >= 8)
+.find((marker) => storyMarkerMatches(text, marker));
+const staleSupport = [...prior.vi, ...prior.en]
 .filter((marker) => marker.length >= 8)
 .find((marker) => text.includes(marker));
+const stale = staleStory ?? staleSupport;
 if (stale) throw new Error(`${label} contains stale previous-level marker: ${stale}`);
 }
 async function openFirstStoryAnnotation(page) {
@@ -285,7 +305,7 @@ throw new Error('Story Reading Support popup did not close');
 }
 async function verifyReadingSupport(page, level, prior, priorSupport) {
 const storyText = await visibleText(page);
-requireMarkers(storyText, expected[level].story, `Lv${level} CURRENT Story`);
+requireStoryMarkers(storyText, expected[level].story, `Lv${level} CURRENT Story`);
 requireNoPriorMarker(storyText, prior, `Lv${level} Story`);
 await openFirstStoryAnnotation(page);
 const supportText = await visibleText(page);
@@ -503,7 +523,7 @@ if (!changed) throw new Error(`Lv${level} Story revisit stage did not move from 
 await waitStage(page, 1);
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story revisit level drift`);
 const text = await visibleText(page);
-requireMarkers(text, expected[level].story, `Lv${level} revisited Story`);
+requireStoryMarkers(text, expected[level].story, `Lv${level} revisited Story`);
 requireNoPriorMarker(text, prior, `Lv${level} revisited Story`);
 await openFirstStoryAnnotation(page);
 const supportText = await visibleText(page);
@@ -513,7 +533,10 @@ if (supportText !== expectedSupportText) {
 throw new Error(`Lv${level} ReadingAnnotation changed after Story revisit`);
 }
 await closeReadingSupport(page);
-if (!text.includes(expected[level].story[0]) || !expectedStoryText.includes(expected[level].story[0])) {
+if (
+!storyMarkerMatches(text, expected[level].story[0]) ||
+!storyMarkerMatches(expectedStoryText, expected[level].story[0])
+) {
 throw new Error(`Lv${level} Story revisit identity mismatch`);
 }
 }
