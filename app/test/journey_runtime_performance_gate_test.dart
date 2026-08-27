@@ -267,10 +267,10 @@ void main() {
       'Future<void> saveGuideFeedback',
     );
     final memoryClear = clear.indexOf('journeyNarrationContentId = null;');
-    final preferences =
-        clear.lastIndexOf('final prefs = await _preferencesLoader();');
+    final persistence =
+        clear.indexOf('return _queueJourneyNarrationPersistence(');
     expect(memoryClear, greaterThanOrEqualTo(0));
-    expect(preferences, greaterThan(memoryClear));
+    expect(persistence, greaterThan(memoryClear));
   });
 
   test('rapid level intent is not blocked by persistence', () {

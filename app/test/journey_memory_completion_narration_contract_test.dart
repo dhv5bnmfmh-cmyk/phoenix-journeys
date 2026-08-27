@@ -45,7 +45,7 @@ void main() {
     );
     expect(
       journey,
-      contains('_narration.flushCancelledPlayback()'),
+      contains('_narration.flushCancelledPlayback(narrationCancellationToken)'),
     );
   });
 
