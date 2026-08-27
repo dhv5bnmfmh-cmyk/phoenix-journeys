@@ -20,7 +20,7 @@ en: ['Zhou Yao, twenty-two', 'final farewell'],
 paragraphs: [
 {
 cn: ['周遥二十二岁', '距离还在增加'],
-pinyin: ['cóng xiǎo gēn fù mǔ zhù zài'],
+pinyin: ['zhōu yáo èr shí èr suì'],
 vi: ['Chu Dao, 22 tuổi', 'lời chia tay cuối cùng'],
 en: ['Zhou Yao, twenty-two', 'final farewell'],
 },
@@ -41,7 +41,7 @@ en: ['once his address changes'],
 },
 {
 cn: ['新家阳台的照片', '继续增加'],
-pinyin: ['tiān sè jiàn àn'],
+pinyin: ['xīn jiā yáng tái de zhào piàn'],
 vi: ['ban công nhà mới'],
 en: ['new balcony'],
 },
@@ -56,13 +56,13 @@ en: ['private farewell ritual', 'moat'],
 paragraphs: [
 {
 cn: ['一场私人告别'],
-pinyin: ['cóng xiǎo gēn fù mǔ zhù zài'],
+pinyin: ['yī chǎng sī rén gào bié'],
 vi: ['một nghi thức chia tay riêng'],
 en: ['private farewell ritual'],
 },
 {
 cn: ['护城河', '完整的一圈'],
-pinyin: ['tiān sè yóu jīn huáng'],
+pinyin: ['hù chéng hé'],
 vi: ['hào'],
 en: ['moat'],
 },
@@ -77,7 +77,7 @@ en: ['a clean full stop', 'monitored'],
 paragraphs: [
 {
 cn: ['一个干净的句号'],
-pinyin: ['cóng xiǎo gēn fù mǔ zhù zài'],
+pinyin: ['gān jìng de jù hào'],
 vi: ['một dấu chấm hết sạch sẽ'],
 en: ['a clean full stop'],
 },
@@ -98,7 +98,7 @@ en: ['one measurable closed loop', 'In 1961'],
 paragraphs: [
 {
 cn: ['可量化的闭环'],
-pinyin: ['cóng xiǎo gēn fù mǔ zhù zài'],
+pinyin: ['kě liàng huà de bì huán'],
 vi: ['một vòng khép kín có thể đo'],
 en: ['one measurable closed loop'],
 },
