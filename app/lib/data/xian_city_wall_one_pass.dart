@@ -134,13 +134,32 @@ const _xianStoryEnglish = <List<String>>[
 ];
 
 String _xianPinyin(String chinese) {
-  final pinyin = PinyinHelper.getPinyinE(
+  var pinyin = PinyinHelper.getPinyinE(
     chinese,
     separator: ' ',
     format: PinyinFormat.WITH_TONE_MARK,
   );
-  if (chinese.contains('照片')) {
-    return pinyin.replaceAll('zhào piān', 'zhào piàn');
+  const phraseCorrections = <List<String>>[
+    <String>['照片', 'zhào piān', 'zhào piàn'],
+    <String>['得到', 'de dào', 'dé dào'],
+    <String>['干净', 'gàn jìng', 'gān jìng'],
+    <String>['长方形', 'zhǎng fāng xíng', 'cháng fāng xíng'],
+    <String>['调动', 'tiáo dòng', 'diào dòng'],
+    <String>['当作', 'dāng zuò', 'dàng zuò'],
+    <String>['成为', 'chéng wèi', 'chéng wéi'],
+    <String>['远处', 'yuǎn chǔ', 'yuǎn chù'],
+    <String>['两只', 'liǎng zhǐ', 'liǎng zhī'],
+    <String>['增长', 'zēng cháng', 'zēng zhǎng'],
+    <String>['可量化', 'kě liáng huà', 'kě liàng huà'],
+    <String>['塞进', 'sài jìn', 'sāi jìn'],
+    <String>['塞进', 'sè jìn', 'sāi jìn'],
+    <String>['当返乡', 'dāng fǎn xiāng', 'dàng fǎn xiāng'],
+    <String>['命名为', 'mìng míng wèi', 'mìng míng wéi'],
+  ];
+  for (final correction in phraseCorrections) {
+    if (chinese.contains(correction[0])) {
+      pinyin = pinyin.replaceAll(correction[1], correction[2]);
+    }
   }
   return pinyin;
 }
