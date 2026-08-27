@@ -81,15 +81,30 @@ void main() {
           paragraph++) {
         final source = content.storyParagraphs[paragraph];
         final annotation = content.storyAnnotations[paragraph];
+        final expectedPinyin = PinyinHelper.getPinyinE(
+          source,
+          separator: ' ',
+          format: PinyinFormat.WITH_TONE_MARK,
+        );
         expect(
           annotation.pinyin,
-          PinyinHelper.getPinyinE(
-            source,
-            separator: ' ',
-            format: PinyinFormat.WITH_TONE_MARK,
-          ),
+          source.contains('照片')
+              ? expectedPinyin.replaceAll('zhào piān', 'zhào piàn')
+              : expectedPinyin,
           reason: 'Lv$level paragraph ${paragraph + 1} Pinyin source identity',
         );
+        if (source.contains('照片')) {
+          expect(
+            annotation.pinyin,
+            contains('zhào piàn'),
+            reason: 'Lv$level paragraph ${paragraph + 1} 照片 phrase reading',
+          );
+          expect(
+            annotation.pinyin,
+            isNot(contains('zhào piān')),
+            reason: 'Lv$level paragraph ${paragraph + 1} must not use 片=piān in 照片',
+          );
+        }
         expect(annotation.vietnamese.trim(), isNotEmpty);
         expect(annotation.english.trim(), isNotEmpty);
         expect(annotation.vietnamese, isNot(contains(source)));

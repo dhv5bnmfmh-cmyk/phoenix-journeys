@@ -133,11 +133,17 @@ const _xianStoryEnglish = <List<String>>[
   <String>['Zhou Yao, twenty-two, grew up with his parents in the old streets inside Xi’an City Wall. His family is moving to a new home south of the wall this weekend. At dusk, he climbs onto the wall from Yongning Gate, starts his running watch, and decides to complete a full circuit. He deliberately makes the roughly 13.74-kilometre loop a private farewell: start at the South Gate, follow the closed wall back to the same point, then stop the timer so that more than twenty years “inside the wall” can receive a clean full stop. Sunset drops beside the gate tower, stretching shadows across the brickwork, parapets, battlements, and broad wall top. Inside are familiar lanes, courtyards, and the direction of the Bell Tower; outside are traffic, metro lines, and expanding new districts. His mother sends a voice message saying the moving truck has been unloaded and the first dinner in the new home is waiting. Zhou Yao does not reject the new life: the home is brighter, his parents’ commutes are easier, and his younger brother will be closer to school. What bothers him is that he has interpreted “moving outside” as an identity change. The wall draws a clear inside and outside on the map, and he has pushed memory, relationships, and belonging into that geometric boundary too, hoping that one measurable closed loop can prove a stage of life is over.', 'After sunset he runs along the rectangular wall through gates, corners, and different sections. The surviving Xi’an City Wall reached its principal present scale from the seventh to eleventh Hongwu years, while parts of the southern and western walls carry earlier urban-wall foundations. The historical defensive system used the wall body, gates, associated structures, and moat to organize defence, access, patrol, and movement. In 1961 Xi’an City Wall was included in the first group of National Key Cultural Relic Protection Units, and today it remains under continuing conservation through regulation, monitoring, and repair. Zhou Yao does not suddenly “understand history” because of that. What actually redraws his finish line are the private routes he keeps encountering: learning to cycle in the ring park, crossing the gates every day for school, relatives and daily activities spread on both sides of the wall, and later using the southern wall as a running landmark whenever he returned home after university. Night falls completely. He returns to Yongning Gate and the watch vibrates: the circuit is complete. At that moment his mother sends a photo from the new balcony: the wall glows in the distance, and his younger brother stands beside boxes calling him to dinner. Zhou Yao raises his hand; his finger touches the stop button and moves away. He descends immediately and keeps running south. The watch passes 13.74 kilometres and continues to increase. He stops only when he reaches the new home and saves the route. On the map, the wall is a closed rectangle, but his track extends from Yongning Gate to the new address. The next day he names the record “Home.”'],
 ];
 
-String _xianPinyin(String chinese) => PinyinHelper.getPinyinE(
-      chinese,
-      separator: ' ',
-      format: PinyinFormat.WITH_TONE_MARK,
-    );
+String _xianPinyin(String chinese) {
+  final pinyin = PinyinHelper.getPinyinE(
+    chinese,
+    separator: ' ',
+    format: PinyinFormat.WITH_TONE_MARK,
+  );
+  if (chinese.contains('照片')) {
+    return pinyin.replaceAll('zhào piān', 'zhào piàn');
+  }
+  return pinyin;
+}
 
 JourneyLevelContent _xianLevel(int level, List<String> paragraphs) => JourneyLevelContent(
       storyParagraphs: List<String>.unmodifiable(paragraphs),
