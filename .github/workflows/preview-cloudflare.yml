@@ -86,13 +86,17 @@ jobs:
         working-directory: app
         run: flutter analyze
 
-      - name: Test Flutter app and generate quality report once
+      - name: Test Flutter app
+        working-directory: app
+        run: flutter test
+
+      - name: Generate full journey quality report
         working-directory: app
         env:
           PHOENIX_GENERATE_QUALITY_REPORT: '1'
           PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
           PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
-        run: flutter test
+        run: flutter test test/journey_quality_report_ci_test.dart --reporter expanded
 
       - name: Upload journey quality report
         uses: actions/upload-artifact@v4
