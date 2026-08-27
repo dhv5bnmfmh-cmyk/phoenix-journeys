@@ -1,0 +1,66 @@
+name: PR202 Six-Stage Level Performance Probe
+
+on:
+  push:
+    branches:
+      - perf/pr202-six-stage-level-probe
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+        city: [beijing, shanghai, xian]
+    env:
+      CANDIDATE_SHA: 806244e8569275275d75a13e59b0d54472821e88
+      PREVIEW_URL: https://phoenix-journeys-pr-202.7hn5tyrjgh.workers.dev/
+      PROBE_BROWSER: ${{ matrix.browser }}
+      PROBE_CITY: ${{ matrix.city }}
+
+    steps:
+      - name: Check out temporary probe harness
+        uses: actions/checkout@v6
+
+      - name: Verify exact deployed candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --silent --show-error "${PREVIEW_URL}api/health?commit=${CANDIDATE_SHA}")"
+          node -e '
+            const health = JSON.parse(process.argv[1]);
+            const sha = process.argv[2];
+            if (!health.ok || health.service !== "phoenix-journeys" || health.release !== sha) process.exit(1);
+          ' "$response" "$CANDIDATE_SHA"
+          echo "EXACT PREVIEW HEALTH = PASS"
+
+      - name: Install performance browser driver
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix "$RUNNER_TEMP/pr202-perf-node" playwright
+          "$RUNNER_TEMP/pr202-perf-node/node_modules/.bin/playwright" install --with-deps "$PROBE_BROWSER"
+
+      - name: Run six-stage level performance probe
+        shell: bash
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/pr202-perf-node/node_modules/playwright/index.mjs
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          gunzip -c .github/scripts/pr202_level_performance_probe.mjs.gz > "$RUNNER_TEMP/pr202_level_performance_probe.mjs"
+          node --check "$RUNNER_TEMP/pr202_level_performance_probe.mjs"
+          node "$RUNNER_TEMP/pr202_level_performance_probe.mjs" 2>&1 | tee "test-results/perf-${PROBE_CITY}-${PROBE_BROWSER}.log"
+
+      - name: Upload probe evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr202-perf-${{ matrix.city }}-${{ matrix.browser }}
+          path: test-results/
+          if-no-files-found: warn
