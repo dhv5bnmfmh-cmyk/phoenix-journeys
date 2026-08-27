@@ -289,21 +289,28 @@ throw error;
 async function waitStageSettled(
 page,
 number,
-{ markers = [], predicate = null, timeout = 20000, stableMs = 400 } = {},
+{
+markers = [],
+absentMarkers = [],
+predicate = null,
+timeout = 20000,
+stableMs = 400,
+requireStage = true,
+} = {},
 ) {
+if (requireStage) {
+await waitStage(page, number, { timeout });
+}
 const deadline = Date.now() + timeout;
 let stableSince = null;
 let lastSnapshot = '';
 while (Date.now() < deadline) {
-const stageReady = await exists(page, `${number}/6`, {
-prefix: true,
-timeout: 180,
-});
 const snapshot = await visibleText(page);
 lastSnapshot = snapshot;
 const markersReady = markers.every((marker) => snapshot.includes(marker));
+const absentReady = absentMarkers.every((marker) => !snapshot.includes(marker));
 const predicateReady = predicate == null || predicate(snapshot);
-if (stageReady && markersReady && predicateReady) {
+if (markersReady && absentReady && predicateReady) {
 if (stableSince == null) stableSince = Date.now();
 if (Date.now() - stableSince >= stableMs) return snapshot;
 } else {
@@ -312,7 +319,7 @@ stableSince = null;
 await sleep(100);
 }
 throw new Error(
-`stage ${number}/6 did not settle with current content: ${lastSnapshot.slice(0, 1200)}`,
+`stage ${number}/6 content did not settle: ${lastSnapshot.slice(0, 1200)}`,
 );
 }
 async function openViaPassport(page) {
@@ -565,6 +572,7 @@ await page.touchscreen.tap(22, 58);
 }
 }
 const text = await waitStageSettled(page, 2, {
+absentMarkers: [expected[level].story[0]],
 predicate: (snapshot) => storyVocabularyTrace(storyText, snapshot).length > 0,
 });
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Vocabulary level drift`);
@@ -758,6 +766,7 @@ if (!changed) throw new Error(`Lv${level} Story revisit stage did not move from 
 }
 const text = await waitStageSettled(page, 1, {
 markers: [expected[level].story[0]],
+requireStage: false,
 });
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story revisit level drift`);
 requireStoryMarkers(text, expected[level].story, `Lv${level} revisited Story`);
@@ -841,7 +850,10 @@ for (let index = 0; index < levels.length; index += 1) {
 const level = levels[index];
 if (index > 0) await restart(page);
 await setLevel(page, level);
-await waitStageSettled(page, 1, { markers: [expected[level].story[0]] });
+await waitStageSettled(page, 1, {
+markers: [expected[level].story[0]],
+requireStage: false,
+});
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story level switch failed`);
 const { storyText, supportTexts } = await verifyReadingSupport(
 page,
