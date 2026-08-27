@@ -1273,17 +1273,34 @@ class _JourneyScreenState extends State<JourneyScreen>
             memoryVisible: _pilotMemoryVisible,
           )
         : PilotN1CompositePage.memory;
+    Widget profiledPage(String stage, Widget Function() builder) {
+      final stopwatch = Stopwatch()..start();
+      final page = builder();
+      stopwatch.stop();
+      debugPrint(
+        'PHOENIX_PAGE_BUILD_PROFILE stage=$stage micros=${stopwatch.elapsedMicroseconds} '
+        'visibleStep=${step + 1} level=${_phoenixLevelController.level}',
+      );
+      return page;
+    }
+
     final pages = <Widget>[
-      _storyPage(),
-      _wordsPage(),
-      _discoveryPage(),
-      stepThreePage == PilotN1CompositePage.reflection
-          ? _wonderPage()
-          : _challengePage(),
-      stepFourPage == PilotN1CompositePage.writing
-          ? _expressPage()
-          : _memoryPage(),
-      _completePage(),
+      profiledPage('Story', _storyPage),
+      profiledPage('Vocabulary', _wordsPage),
+      profiledPage('Discovery', _discoveryPage),
+      profiledPage(
+        'Challenge',
+        () => stepThreePage == PilotN1CompositePage.reflection
+            ? _wonderPage()
+            : _challengePage(),
+      ),
+      profiledPage(
+        'Memory',
+        () => stepFourPage == PilotN1CompositePage.writing
+            ? _expressPage()
+            : _memoryPage(),
+      ),
+      profiledPage('Completion', _completePage),
     ];
 
     return DestinationBackground(
