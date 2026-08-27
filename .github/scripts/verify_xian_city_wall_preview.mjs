@@ -450,9 +450,31 @@ throw new Error(`Lv${level} Memory has no CURRENT Story vocabulary trace`);
 return text;
 }
 async function revisitStoryFromMemory(page, level, expectedStoryText, expectedSupportText, prior) {
-for (let step = 0; step < 4; step += 1) {
+const readStage = async () => {
+for (let stage = 1; stage <= 5; stage += 1) {
+if (await exists(page, `${stage}/6`, { prefix: true, timeout: 120 })) return stage;
+}
+return null;
+};
+for (let guard = 0; guard < 6; guard += 1) {
+const beforeStage = await readStage();
+if (beforeStage === 1) break;
+if (beforeStage == null) throw new Error(`Lv${level} Story revisit stage unavailable`);
 await activate(page, '上一步', { prefix: true });
-await sleep(200);
+let changed = false;
+for (let i = 0; i < 40; i += 1) {
+await sleep(100);
+const afterStage = await readStage();
+if (afterStage === 1) {
+changed = true;
+break;
+}
+if (afterStage != null && afterStage !== beforeStage) {
+changed = true;
+break;
+}
+}
+if (!changed) throw new Error(`Lv${level} Story revisit stage did not move from ${beforeStage}/6`);
 }
 await waitStage(page, 1);
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story revisit level drift`);
