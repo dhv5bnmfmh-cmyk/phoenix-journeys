@@ -286,6 +286,35 @@ if (stageReady && identityReady) return;
 throw error;
 }
 }
+async function waitStageSettled(
+page,
+number,
+{ markers = [], predicate = null, timeout = 20000, stableMs = 400 } = {},
+) {
+const deadline = Date.now() + timeout;
+let stableSince = null;
+let lastSnapshot = '';
+while (Date.now() < deadline) {
+const stageReady = await exists(page, `${number}/6`, {
+prefix: true,
+timeout: 180,
+});
+const snapshot = await visibleText(page);
+lastSnapshot = snapshot;
+const markersReady = markers.every((marker) => snapshot.includes(marker));
+const predicateReady = predicate == null || predicate(snapshot);
+if (stageReady && markersReady && predicateReady) {
+if (stableSince == null) stableSince = Date.now();
+if (Date.now() - stableSince >= stableMs) return snapshot;
+} else {
+stableSince = null;
+}
+await sleep(100);
+}
+throw new Error(
+`stage ${number}/6 did not settle with current content: ${lastSnapshot.slice(0, 1200)}`,
+);
+}
 async function openViaPassport(page) {
 await activate(page, '护照', { prefix: true });
 await findSemantic(page, '探索护照', { prefix: true, timeout: 15000 });
@@ -300,9 +329,8 @@ await activate(page, '西安', { prefix: true });
 await findSemantic(page, '陕西省，西安市', { prefix: true, timeout: 15000 });
 console.log('PASSPORT XIAN = PASS');
 await activate(page, '西安城墙', { prefix: false });
-await waitStage(page, 1, {
-journeyTitle: '西安 · 城墙',
-storyIdentity: '周遥',
+await waitStageSettled(page, 1, {
+markers: ['西安 · 城墙', '周遥'],
 });
 const journeyState = await visibleText(page);
 if (!journeyState.includes('西安 · 城墙') || !journeyState.includes('周遥')) {
@@ -536,9 +564,10 @@ await activate(page, '关闭');
 await page.touchscreen.tap(22, 58);
 }
 }
-await waitStage(page, 2);
+const text = await waitStageSettled(page, 2, {
+predicate: (snapshot) => storyVocabularyTrace(storyText, snapshot).length > 0,
+});
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Vocabulary level drift`);
-const text = await visibleText(page);
 if (!storyVocabularyTrace(storyText, text).length) {
 throw new Error(`Lv${level} Vocabulary has no CURRENT Story trace`);
 }
@@ -546,15 +575,16 @@ return text;
 }
 async function toDiscovery(page, level) {
 await activate(page, '继续', { prefix: true });
-await waitStage(page, 3);
+const text = await waitStageSettled(page, 3, {
+markers: expected[level].discovery,
+});
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Discovery level drift`);
-const text = await visibleText(page);
 requireMarkers(text, expected[level].discovery, `Lv${level} Discovery`);
 return text;
 }
 async function toChallenge(page, level) {
 await activate(page, '继续', { prefix: true });
-await waitStage(page, 4);
+await waitStageSettled(page, 4, { markers: ['提交第 1 / 3 次答案'] });
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge level drift`);
 await findSemantic(page, '提交第 1 / 3 次答案', {
 role: 'button',
@@ -682,9 +712,10 @@ if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge 
 }
 async function toMemory(page, level, storyText) {
 await activate(page, '继续留下回忆', { prefix: true });
-await waitStage(page, 5);
+const text = await waitStageSettled(page, 5, {
+markers: ['永宁门', '跑表'],
+});
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Memory level drift`);
-const text = await visibleText(page);
 requireMarkers(text, ['永宁门', '跑表'], `Lv${level} Memory`);
 if (!storyVocabularyTrace(storyText, text).length) {
 throw new Error(`Lv${level} Memory has no CURRENT Story vocabulary trace`);
@@ -725,9 +756,10 @@ break;
 }
 if (!changed) throw new Error(`Lv${level} Story revisit stage did not move from ${beforeStage}/6`);
 }
-await waitStage(page, 1);
+const text = await waitStageSettled(page, 1, {
+markers: [expected[level].story[0]],
+});
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story revisit level drift`);
-const text = await visibleText(page);
 requireStoryMarkers(text, expected[level].story, `Lv${level} revisited Story`);
 requireNoPriorMarker(text, prior, `Lv${level} revisited Story`);
 await verifyReadingSupportParagraphs(
@@ -747,18 +779,19 @@ async function forwardToMemoryAfterRevisit(page, level, storyText) {
 await toVocabulary(page, level, storyText);
 await toDiscovery(page, level);
 await activate(page, '继续', { prefix: true });
-await waitStage(page, 4);
+await waitStageSettled(page, 4, { markers: ['继续留下回忆'] });
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge revisit level drift`);
 await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 15000 });
 await activate(page, '继续留下回忆', { prefix: true });
-await waitStage(page, 5);
+await waitStageSettled(page, 5, { markers: ['保存回忆并完成'] });
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Memory revisit level drift`);
 }
 async function toCompletion(page, level, storyText) {
 await activate(page, '保存回忆并完成', { prefix: true });
-await waitStage(page, 6);
+const text = await waitStageSettled(page, 6, {
+markers: ['西安 · 城墙', '西安城墙印章', '已点亮'],
+});
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Completion level drift`);
-const text = await visibleText(page);
 requireMarkers(
 text,
 [
@@ -781,7 +814,7 @@ return text;
 }
 async function restart(page) {
 await activate(page, '重新体验', { prefix: true });
-await waitStage(page, 1);
+await waitStageSettled(page, 1);
 }
 async function assertNoBlockingError(page, pageErrors, label) {
 const text = await visibleText(page).catch(() => '');
@@ -808,7 +841,7 @@ for (let index = 0; index < levels.length; index += 1) {
 const level = levels[index];
 if (index > 0) await restart(page);
 await setLevel(page, level);
-await waitStage(page, 1);
+await waitStageSettled(page, 1, { markers: [expected[level].story[0]] });
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story level switch failed`);
 const { storyText, supportTexts } = await verifyReadingSupport(
 page,
