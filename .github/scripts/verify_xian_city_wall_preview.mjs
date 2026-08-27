@@ -281,7 +281,7 @@ const stageReady = snapshot.includes(`${number}/6`);
 const identityReady =
 number !== 1 ||
 ((journeyTitle == null || snapshot.includes(journeyTitle)) &&
-(storyIdentity == null || snapshot.includes(storyIdentity)));
+(storyIdentity == null || storyMarkerMatches(snapshot, storyIdentity)));
 if (stageReady && identityReady) return;
 throw error;
 }
@@ -291,7 +291,9 @@ page,
 number,
 {
 markers = [],
+storyMarkers = [],
 absentMarkers = [],
+absentStoryMarkers = [],
 predicate = null,
 timeout = 20000,
 stableMs = 400,
@@ -308,9 +310,21 @@ while (Date.now() < deadline) {
 const snapshot = await visibleText(page);
 lastSnapshot = snapshot;
 const markersReady = markers.every((marker) => snapshot.includes(marker));
+const storyMarkersReady = storyMarkers.every((marker) =>
+storyMarkerMatches(snapshot, marker)
+);
 const absentReady = absentMarkers.every((marker) => !snapshot.includes(marker));
+const absentStoryReady = absentStoryMarkers.every(
+(marker) => !storyMarkerMatches(snapshot, marker)
+);
 const predicateReady = predicate == null || predicate(snapshot);
-if (markersReady && absentReady && predicateReady) {
+if (
+markersReady &&
+storyMarkersReady &&
+absentReady &&
+absentStoryReady &&
+predicateReady
+) {
 if (stableSince == null) stableSince = Date.now();
 if (Date.now() - stableSince >= stableMs) return snapshot;
 } else {
@@ -337,7 +351,8 @@ await findSemantic(page, '陕西省，西安市', { prefix: true, timeout: 15000
 console.log('PASSPORT XIAN = PASS');
 await activate(page, '西安城墙', { prefix: false });
 await waitStageSettled(page, 1, {
-markers: ['西安 · 城墙', '周遥'],
+markers: ['西安 · 城墙'],
+storyMarkers: ['周遥'],
 });
 const journeyState = await visibleText(page);
 if (!journeyState.includes('西安 · 城墙') || !journeyState.includes('周遥')) {
@@ -572,7 +587,7 @@ await page.touchscreen.tap(22, 58);
 }
 }
 const text = await waitStageSettled(page, 2, {
-absentMarkers: [expected[level].story[0]],
+absentStoryMarkers: [expected[level].story[0]],
 predicate: (snapshot) => storyVocabularyTrace(storyText, snapshot).length > 0,
 });
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Vocabulary level drift`);
@@ -765,7 +780,7 @@ break;
 if (!changed) throw new Error(`Lv${level} Story revisit stage did not move from ${beforeStage}/6`);
 }
 const text = await waitStageSettled(page, 1, {
-markers: [expected[level].story[0]],
+storyMarkers: [expected[level].story[0]],
 requireStage: false,
 });
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story revisit level drift`);
@@ -851,7 +866,7 @@ const level = levels[index];
 if (index > 0) await restart(page);
 await setLevel(page, level);
 await waitStageSettled(page, 1, {
-markers: [expected[level].story[0]],
+storyMarkers: [expected[level].story[0]],
 requireStage: false,
 });
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story level switch failed`);
