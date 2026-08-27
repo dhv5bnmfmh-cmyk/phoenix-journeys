@@ -1,0 +1,55 @@
+name: PR202 Shared Level Switch Preflight
+
+on:
+  push:
+    branches:
+      - perf/pr202-shared-level-switch-preflight
+
+permissions:
+  contents: read
+
+jobs:
+  targeted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CANDIDATE_SHA: 8847e01416488d23c72df814ae33af020cb15ee8
+    steps:
+      - name: Check out exact shared performance candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+
+      - name: Verify exact candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Analyze shared performance candidate
+        working-directory: app
+        run: flutter analyze
+
+      - name: Run targeted shared level runtime tests
+        working-directory: app
+        run: |
+          flutter test \
+            test/journey_level_selector_button_test.dart \
+            test/journey_runtime_performance_gate_test.dart \
+            test/journey_memory_completion_narration_contract_test.dart \
+            test/journey_stage_narration_button_test.dart \
+            test/narration_resume_offset_test.dart \
+            test/narration_seek_test.dart \
+            test/narration_progressive_reveal_test.dart \
+            --reporter expanded
