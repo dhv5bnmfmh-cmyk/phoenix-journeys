@@ -1,0 +1,161 @@
+name: PR202 Pre-Promotion Performance Acceptance
+
+on:
+  push:
+    branches:
+      - perf/pr202-eager-build-profile
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_SHA: f3ce7b73bcfb28ea52aa63d5469a31c9e35b393c
+  PROFILE_SHA: 35ad1c568649082ab75a63f88260381e510ac387
+  CANDIDATE_WORKER: phoenix-pr202-perf-candidate
+  PROFILE_WORKER: phoenix-pr202-perf-profile
+  CANDIDATE_URL: https://phoenix-pr202-perf-candidate.7hn5tyrjgh.workers.dev
+  PROFILE_URL: https://phoenix-pr202-perf-profile.7hn5tyrjgh.workers.dev
+
+jobs:
+  deploy_candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - name: Verify exact candidate
+        run: test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - working-directory: app
+        run: flutter pub get
+      - name: Analyze candidate
+        working-directory: app
+        run: flutter analyze
+      - name: Build exact candidate
+        working-directory: app
+        run: flutter build web --release
+      - name: Deploy isolated candidate
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 deploy --name "$CANDIDATE_WORKER" --var "PHOENIX_RELEASE:$CANDIDATE_SHA"
+      - name: Verify candidate health
+        run: |
+          set -euo pipefail
+          for attempt in {1..24}; do
+            response="$(curl --fail --silent --show-error "$CANDIDATE_URL/api/health?commit=$CANDIDATE_SHA" || true)"
+            echo "candidate health $attempt/24: ${response:-none}"
+            if node -e 'const h=JSON.parse(process.argv[1]); if(!h.ok||h.release!==process.argv[2]) process.exit(1)' "$response" "$CANDIDATE_SHA"; then exit 0; fi
+            sleep 5
+          done
+          exit 1
+
+  deploy_profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.PROFILE_SHA }}
+          fetch-depth: 0
+      - name: Verify exact profile build
+        run: test "$(git rev-parse HEAD)" = "$PROFILE_SHA"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - working-directory: app
+        run: flutter pub get
+      - name: Build profiling-only app
+        working-directory: app
+        run: flutter build web --release
+      - name: Deploy isolated profiling worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 deploy --name "$PROFILE_WORKER" --var "PHOENIX_RELEASE:$PROFILE_SHA"
+      - name: Verify profile health
+        run: |
+          set -euo pipefail
+          for attempt in {1..24}; do
+            response="$(curl --fail --silent --show-error "$PROFILE_URL/api/health?commit=$PROFILE_SHA" || true)"
+            echo "profile health $attempt/24: ${response:-none}"
+            if node -e 'const h=JSON.parse(process.argv[1]); if(!h.ok||h.release!==process.argv[2]) process.exit(1)' "$response" "$PROFILE_SHA"; then exit 0; fi
+            sleep 5
+          done
+          exit 1
+
+  eager_build_profile:
+    needs: deploy_profile
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+        city: [beijing, shanghai, xian]
+    env:
+      PROBE_BROWSER: ${{ matrix.browser }}
+      PROBE_CITY: ${{ matrix.city }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Playwright
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/perf-node" playwright
+          "$RUNNER_TEMP/perf-node/node_modules/.bin/playwright" install --with-deps "$PROBE_BROWSER"
+      - name: Run eager six-page build profile
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/perf-node/node_modules/playwright/index.mjs
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          gunzip -c .github/scripts/pr202_build_profile.mjs.gz > "$RUNNER_TEMP/pr202_build_profile.mjs"
+          node --check "$RUNNER_TEMP/pr202_build_profile.mjs"
+          PROFILE_URL="$PROFILE_URL" PROFILE_SHA="$PROFILE_SHA" node "$RUNNER_TEMP/pr202_build_profile.mjs" 2>&1 | tee "test-results/build-profile-${PROBE_CITY}-${PROBE_BROWSER}.log"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr202-build-profile-${{ matrix.city }}-${{ matrix.browser }}
+          path: test-results/
+
+  performance_matrix:
+    needs: deploy_candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+        city: [beijing, shanghai, xian]
+    env:
+      PROBE_BROWSER: ${{ matrix.browser }}
+      PROBE_CITY: ${{ matrix.city }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Playwright
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/perf-node" playwright
+          "$RUNNER_TEMP/perf-node/node_modules/.bin/playwright" install --with-deps "$PROBE_BROWSER"
+      - name: Run full six-stage pre-promotion acceptance
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/perf-node/node_modules/playwright/index.mjs
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          gunzip -c .github/scripts/pr202_perf_acceptance.mjs.gz > "$RUNNER_TEMP/pr202_perf_acceptance.mjs"
+          node --check "$RUNNER_TEMP/pr202_perf_acceptance.mjs"
+          PERF_URL="$CANDIDATE_URL" CANDIDATE_SHA="$CANDIDATE_SHA" node "$RUNNER_TEMP/pr202_perf_acceptance.mjs" 2>&1 | tee "test-results/perf-${PROBE_CITY}-${PROBE_BROWSER}.log"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr202-performance-${{ matrix.city }}-${{ matrix.browser }}
+          path: test-results/
