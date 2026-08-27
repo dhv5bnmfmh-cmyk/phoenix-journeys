@@ -286,7 +286,13 @@ async function toVocabulary(page, level, storyText) {
 await activate(page, '继续', { prefix: true });
 await sleep(300);
 if (!(await exists(page, '2/6', { prefix: true, timeout: 700 }))) {
-await page.keyboard.press('Escape').catch(() => {});
+if (await exists(page, 'Dismiss', { role: 'button', timeout: 700 })) {
+await activate(page, 'Dismiss');
+} else if (await exists(page, '关闭', { role: 'button', timeout: 700 })) {
+await activate(page, '关闭');
+} else {
+await page.touchscreen.tap(22, 58);
+}
 }
 await waitStage(page, 2);
 if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Vocabulary level drift`);
