@@ -143,6 +143,7 @@ String _xianPinyin(String chinese) {
     <String>['照片', 'zhào piān', 'zhào piàn'],
     <String>['得到', 'de dào', 'dé dào'],
     <String>['干净', 'gàn jìng', 'gān jìng'],
+    <String>['太阳落下', 'tài yang là xià', 'tài yáng luò xià'],
     <String>['长方形', 'zhǎng fāng xíng', 'cháng fāng xíng'],
     <String>['调动', 'tiáo dòng', 'diào dòng'],
     <String>['当作', 'dāng zuò', 'dàng zuò'],
