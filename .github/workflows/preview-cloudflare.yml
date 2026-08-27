@@ -90,7 +90,7 @@ jobs:
         working-directory: app
         run: flutter test
 
-      - name: Generate full journey quality report
+      - name: Test Flutter app and generate quality report once
         working-directory: app
         env:
           PHOENIX_GENERATE_QUALITY_REPORT: '1'
