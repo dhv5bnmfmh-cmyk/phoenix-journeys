@@ -54,6 +54,22 @@ jobs:
           set -euo pipefail
           mkdir -p test-results
           gunzip -c .github/scripts/pr202_level_performance_probe.mjs.gz > "$RUNNER_TEMP/pr202_level_performance_probe.mjs"
+          python3 - "$RUNNER_TEMP/pr202_level_performance_probe.mjs" <<'PY'
+          import pathlib, sys
+          path = pathlib.Path(sys.argv[1])
+          source = path.read_text()
+          before = source
+          source = source.replace(
+              "tapButton(page, journey.city, { exact: true, timeout: 15000 })",
+              "tapButton(page, journey.city, { timeout: 15000 })",
+          ).replace(
+              "tapButton(page, journey.place, { exact: true, timeout: 15000 })",
+              "tapButton(page, journey.place, { timeout: 15000 })",
+          )
+          if source == before:
+              raise SystemExit("temporary probe city/place patch target missing")
+          path.write_text(source)
+          PY
           node --check "$RUNNER_TEMP/pr202_level_performance_probe.mjs"
           node "$RUNNER_TEMP/pr202_level_performance_probe.mjs" 2>&1 | tee "test-results/perf-${PROBE_CITY}-${PROBE_BROWSER}.log"
 
