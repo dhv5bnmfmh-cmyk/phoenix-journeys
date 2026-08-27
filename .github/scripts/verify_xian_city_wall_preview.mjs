@@ -1,0 +1,953 @@
+import { pathToFileURL } from 'node:url';
+const { chromium, webkit, devices } = await import(
+pathToFileURL(process.env.PLAYWRIGHT_PATH).href
+);
+const baseUrl = process.argv[2];
+const sourceSha = process.argv[3];
+if (!baseUrl || !sourceSha) {
+throw new Error('usage: verify_xian_city_wall_preview.mjs <preview-url> <sha>');
+}
+const levels = [1, 3, 5, 8, 10];
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
+const expected = {
+1: {
+story: ['周遥二十二岁', '最后一次告别', '距离还在增加'],
+discovery: ['13.74公里'],
+completion: '本级记住：跑完一圈以后，他选择继续跑。',
+vi: ['Chu Dao, 22 tuổi', 'lời chia tay cuối cùng'],
+en: ['Zhou Yao, twenty-two', 'final farewell'],
+paragraphs: [
+{
+cn: ['周遥二十二岁', '距离还在增加'],
+pinyin: ['zhōu yáo èr shí èr suì'],
+vi: ['Chu Dao, 22 tuổi', 'lời chia tay cuối cùng'],
+en: ['Zhou Yao, twenty-two', 'final farewell'],
+},
+],
+},
+3: {
+story: ['住址一变', '新家阳台的照片', '继续增加'],
+discovery: ['12至14米'],
+completion: '本级按事件顺序连接搬家、完整一圈与继续向南。',
+vi: ['một khi địa chỉ đổi', 'ban công nhà mới'],
+en: ['once his address changes', 'new balcony'],
+paragraphs: [
+{
+cn: ['住址一变'],
+pinyin: ['zhù zhǐ yī biàn'],
+vi: ['một khi địa chỉ đổi'],
+en: ['once his address changes'],
+},
+{
+cn: ['新家阳台的照片', '继续增加'],
+pinyin: ['xīn jiā yáng tái de zhào piàn'],
+vi: ['ban công nhà mới'],
+en: ['new balcony'],
+},
+],
+},
+5: {
+story: ['一场私人告别', '护城河', '完整的一圈'],
+discovery: ['护城河'],
+completion: '本级理解物理闭环不等于关系和归属的闭环。',
+vi: ['một nghi thức chia tay riêng', 'hào'],
+en: ['private farewell ritual', 'moat'],
+paragraphs: [
+{
+cn: ['一场私人告别'],
+pinyin: ['yī chǎng sī rén gào bié'],
+vi: ['một nghi thức chia tay riêng'],
+en: ['private farewell ritual'],
+},
+{
+cn: ['护城河', '完整的一圈'],
+pinyin: ['hù chéng hé'],
+vi: ['hào'],
+en: ['moat'],
+},
+],
+},
+8: {
+story: ['一个干净的句号', '被保护、监测', '没有在永宁门结束的路线'],
+discovery: ['无损检测'],
+completion: '本级用保护、监测与日常路线建立完整因果链。',
+vi: ['một dấu chấm hết sạch sẽ', 'quan trắc'],
+en: ['a clean full stop', 'monitored'],
+paragraphs: [
+{
+cn: ['一个干净的句号'],
+pinyin: ['gān jìng de jù hào'],
+vi: ['một dấu chấm hết sạch sẽ'],
+en: ['a clean full stop'],
+},
+{
+cn: ['被保护、监测', '没有在永宁门结束的路线'],
+pinyin: ['tài yáng luò xià yǐ hòu'],
+vi: ['quan trắc'],
+en: ['monitored'],
+},
+],
+},
+10: {
+story: ['可量化的闭环', '1961年', '命名为“回家”'],
+discovery: ['历史城区'],
+completion: '本级综合时间层、保护制度、空间边界和人物选择',
+vi: ['một vòng khép kín có thể đo', 'Năm 1961'],
+en: ['one measurable closed loop', 'In 1961'],
+paragraphs: [
+{
+cn: ['可量化的闭环'],
+pinyin: ['kě liàng huà de bì huán'],
+vi: ['một vòng khép kín có thể đo'],
+en: ['one measurable closed loop'],
+},
+{
+cn: ['1961年', '命名为“回家”'],
+pinyin: ['tài yáng luò xià yǐ hòu'],
+vi: ['Năm 1961'],
+en: ['In 1961'],
+},
+],
+},
+};
+async function records(page) {
+return page.locator('flt-semantics').evaluateAll((elements) =>
+elements.map((element, index) => {
+const rect = element.getBoundingClientRect();
+const style = getComputedStyle(element);
+return {
+index,
+role: element.getAttribute('role'),
+label: element.getAttribute('aria-label') || '',
+value: element.getAttribute('aria-valuetext') || '',
+description: element.getAttribute('aria-description') || '',
+text: String(element.textContent || '').replace(/\s+/g, ' ').trim(),
+disabled: element.getAttribute('aria-disabled') === 'true',
+visible:
+rect.width > 0 &&
+rect.height > 0 &&
+style.display !== 'none' &&
+style.visibility !== 'hidden',
+area: rect.width * rect.height,
+};
+}),
+);
+}
+const recordText = (record) =>
+clean(
+[record.label, record.value, record.description, record.text]
+.filter(Boolean)
+.join(' '),
+);
+async function visibleText(page) {
+return (await records(page))
+.filter((record) => record.visible)
+.map(recordText)
+.filter(Boolean)
+.join('\n');
+}
+async function findSemantic(
+page,
+needle,
+{ role = null, prefix = false, timeout = 20000 } = {},
+) {
+const deadline = Date.now() + timeout;
+const wanted = clean(needle);
+while (Date.now() < deadline) {
+const matches = (await records(page))
+.filter((record) => {
+if (!record.visible || (role && record.role !== role)) return false;
+const text = recordText(record);
+return prefix ? text.startsWith(wanted) : text.includes(wanted);
+})
+.sort((left, right) => {
+if (left.role === 'button' && right.role !== 'button') return -1;
+if (right.role === 'button' && left.role !== 'button') return 1;
+return left.area - right.area;
+});
+if (matches.length) {
+return page.locator('flt-semantics').nth(matches[0].index);
+}
+await sleep(100);
+}
+throw new Error(`semantic state not found: ${needle}`);
+}
+async function exists(page, needle, options = {}) {
+try {
+await findSemantic(page, needle, {
+...options,
+timeout: options.timeout ?? 700,
+});
+return true;
+} catch (_) {
+return false;
+}
+}
+async function activate(page, needle, { prefix = false, timeout = 20000 } = {}) {
+const deadline = Date.now() + timeout;
+let lastError = null;
+while (Date.now() < deadline) {
+try {
+const node = await findSemantic(page, needle, {
+role: 'button',
+prefix,
+timeout: Math.min(1800, deadline - Date.now()),
+});
+const disabled = await node.getAttribute('aria-disabled').catch(() => null);
+if (disabled === 'true') throw new Error(`button disabled: ${needle}`);
+await node.evaluate((element) => element.click());
+return;
+} catch (error) {
+if (String(error?.message || error).includes(`button disabled: ${needle}`)) {
+throw error;
+}
+lastError = error;
+await sleep(100);
+}
+}
+throw lastError ?? new Error(`button not activatable: ${needle}`);
+}
+async function enableSemantics(page) {
+const deadline = Date.now() + 60000;
+while (Date.now() < deadline) {
+const placeholder = page.locator('flt-semantics-placeholder').first();
+if (await placeholder.count()) {
+await placeholder.evaluate((element) => element.click());
+}
+if (await page.locator('flt-semantics').count()) return;
+await sleep(100);
+}
+throw new Error('Flutter semantics did not become available');
+}
+async function requireStartup(page) {
+const sep = baseUrl.includes('?') ? '&' : '?';
+const url = `${baseUrl}${sep}unlock=all&prototype=journeys&v=${sourceSha}`;
+const response = await page.goto(url, { waitUntil: 'load', timeout: 140000 });
+if (!response?.ok()) throw new Error(`Preview HTTP load failed: ${response?.status()}`);
+await page.waitForFunction(
+() => document.querySelector('flutter-view') != null,
+null,
+{ timeout: 140000 },
+);
+await page.waitForFunction(
+() => document.getElementById('phoenix-loading') == null,
+null,
+{ timeout: 45000 },
+);
+await enableSemantics(page);
+await findSemantic(page, 'PHOENIX JOURNEYS', { timeout: 30000 });
+}
+async function currentLevel(page) {
+for (const record of await records(page)) {
+if (!record.visible) continue;
+const match = recordText(record).match(/Phoenix 中文难度\s*(\d+)\s*级/);
+if (match) return Number(match[1]);
+}
+throw new Error('Phoenix level selector not found');
+}
+async function setLevel(page, target) {
+for (let guard = 0; guard < 16; guard += 1) {
+const level = await currentLevel(page);
+if (level === target) return;
+const direction = level < target ? '提高当前难度' : '降低当前难度';
+const before = level;
+await activate(page, direction, { prefix: true });
+let moved = false;
+for (let i = 0; i < 50; i += 1) {
+await sleep(100);
+const settled = await currentLevel(page).catch(() => before);
+if (settled === target) return;
+if (settled !== before) {
+moved = true;
+break;
+}
+}
+if (!moved) throw new Error(`level selector did not move from ${before}`);
+}
+throw new Error(`failed to select Lv${target}; current Lv${await currentLevel(page)}`);
+}
+async function waitStage(
+page,
+number,
+{ journeyTitle = null, storyIdentity = null, timeout = 20000 } = {},
+) {
+try {
+await findSemantic(page, `${number}/6`, { prefix: true, timeout });
+return;
+} catch (error) {
+const snapshot = await visibleText(page);
+const stageReady = snapshot.includes(`${number}/6`);
+const identityReady =
+number !== 1 ||
+((journeyTitle == null || snapshot.includes(journeyTitle)) &&
+(storyIdentity == null || storyMarkerMatches(snapshot, storyIdentity)));
+if (stageReady && identityReady) return;
+throw error;
+}
+}
+async function waitStageSettled(
+page,
+number,
+{
+markers = [],
+storyMarkers = [],
+absentMarkers = [],
+absentStoryMarkers = [],
+predicate = null,
+timeout = 20000,
+stableMs = 400,
+requireStage = true,
+} = {},
+) {
+if (requireStage) {
+await waitStage(page, number, { timeout });
+}
+const deadline = Date.now() + timeout;
+let stableSince = null;
+let lastSnapshot = '';
+while (Date.now() < deadline) {
+const snapshot = await visibleText(page);
+lastSnapshot = snapshot;
+const markersReady = markers.every((marker) => snapshot.includes(marker));
+const storyMarkersReady = storyMarkers.every((marker) =>
+storyMarkerMatches(snapshot, marker)
+);
+const absentReady = absentMarkers.every((marker) => !snapshot.includes(marker));
+const absentStoryReady = absentStoryMarkers.every(
+(marker) => !storyMarkerMatches(snapshot, marker)
+);
+const predicateReady = predicate == null || predicate(snapshot);
+if (
+markersReady &&
+storyMarkersReady &&
+absentReady &&
+absentStoryReady &&
+predicateReady
+) {
+if (stableSince == null) stableSince = Date.now();
+if (Date.now() - stableSince >= stableMs) return snapshot;
+} else {
+stableSince = null;
+}
+await sleep(100);
+}
+throw new Error(
+`stage ${number}/6 content did not settle: ${lastSnapshot.slice(0, 1200)}`,
+);
+}
+async function openViaPassport(page) {
+await activate(page, '护照', { prefix: true });
+await findSemantic(page, '探索护照', { prefix: true, timeout: 15000 });
+console.log('PASSPORT = PASS');
+await activate(page, '中国', { prefix: true });
+await findSemantic(page, '请从左侧选择省份', { prefix: true, timeout: 15000 });
+console.log('PASSPORT CHINA = PASS');
+await activate(page, '陕西省', { prefix: true });
+await findSemantic(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
+console.log('PASSPORT SHAANXI = PASS');
+await activate(page, '西安', { prefix: true });
+await findSemantic(page, '陕西省，西安市', { prefix: true, timeout: 15000 });
+console.log('PASSPORT XIAN = PASS');
+await activate(page, '西安城墙', { prefix: false });
+await waitStageSettled(page, 1, {
+markers: ['西安 · 城墙'],
+storyMarkers: ['周遥'],
+});
+const journeyState = await visibleText(page);
+if (!journeyState.includes('西安 · 城墙') || !journeyState.includes('周遥')) {
+throw new Error("Xi'an City Wall Journey state not visible after Passport route");
+}
+console.log('PASSPORT XIAN CITY WALL = PASS');
+}
+function requireMarkers(text, markers, label) {
+for (const marker of markers) {
+if (!text.includes(marker)) throw new Error(`${label} missing marker: ${marker}`);
+}
+}
+function stripInlineStoryAnnotations(text) {
+return text.replace(
+/[，,、\s]*[\p{Script=Latin}0-9'’·.\-\s]+[，,、\s]*点按查看词语解释(?:[\u3400-\u9fff]{1,8}[，,、\s]*[\p{Script=Latin}0-9'’·.\-\s]+[，,、\s]*点按查看词语解释)*/gu,
+''
+);
+}
+function storyMarkerMatches(text, marker) {
+return stripInlineStoryAnnotations(text).includes(marker);
+}
+function requireStoryMarkers(text, markers, label) {
+for (const marker of markers) {
+if (!storyMarkerMatches(text, marker)) {
+throw new Error(`${label} missing annotation-aware marker: ${marker}`);
+}
+}
+}
+function requireNoPriorMarker(text, prior, label) {
+if (!prior) return;
+const staleStory = prior.story
+.filter((marker) => marker.length >= 8)
+.find((marker) => storyMarkerMatches(text, marker));
+const staleSupport = [...prior.vi, ...prior.en]
+.filter((marker) => marker.length >= 8)
+.find((marker) => text.includes(marker));
+const stale = staleStory ?? staleSupport;
+if (stale) throw new Error(`${label} contains stale previous-level marker: ${stale}`);
+}
+async function storyParagraphTexts(page, expectedCount) {
+const currentRecords = await records(page);
+const noteIndexes = currentRecords
+.filter((record) =>
+record.visible &&
+record.role === 'button' &&
+clean(recordText(record)) === '注'
+)
+.map((record) => record.index);
+if (noteIndexes.length !== expectedCount) {
+throw new Error(
+`Story paragraph count drift: ${noteIndexes.length} != ${expectedCount}`,
+);
+}
+const paragraphs = [];
+let lowerBound = -1;
+for (let paragraphIndex = 0; paragraphIndex < noteIndexes.length; paragraphIndex += 1) {
+const noteIndex = noteIndexes[paragraphIndex];
+let numberIndex = -1;
+for (const record of currentRecords) {
+if (
+record.index > lowerBound &&
+record.index < noteIndex &&
+clean(recordText(record)) === String(paragraphIndex + 1)
+) {
+numberIndex = record.index;
+}
+}
+if (numberIndex < 0) {
+throw new Error(`Story paragraph ${paragraphIndex + 1} semantic number missing`);
+}
+const candidates = currentRecords
+.filter((record) => {
+if (
+!record.visible ||
+record.index <= numberIndex ||
+record.index >= noteIndex ||
+record.role === 'button'
+) return false;
+const text = recordText(record);
+return text.length >= 12 && /[\u3400-\u9fff]/.test(text);
+})
+.sort((left, right) => recordText(right).length - recordText(left).length);
+if (!candidates.length) {
+throw new Error(`Story paragraph ${paragraphIndex + 1} semantic text missing`);
+}
+paragraphs.push(recordText(candidates[0]));
+lowerBound = noteIndex;
+}
+return paragraphs;
+}
+async function openStoryAnnotation(page, paragraphIndex, expectedCount) {
+const notes = page.getByRole('button', { name: '注', exact: true });
+const count = await notes.count();
+if (count !== expectedCount) {
+throw new Error(`Story Reading Support paragraph count drift: ${count} != ${expectedCount}`);
+}
+await notes.nth(paragraphIndex).evaluate((element) => element.click());
+await findSemantic(page, `故事第 ${paragraphIndex + 1} 段`, { timeout: 15000 });
+await findSemantic(page, '拼音', { timeout: 15000 });
+await findSemantic(page, '探索者母语 · 越南语', { timeout: 15000 });
+await findSemantic(page, 'English', { timeout: 15000 });
+}
+async function closeReadingSupport(page, paragraphIndex) {
+const header = `故事第 ${paragraphIndex + 1} 段`;
+let dismissed = false;
+for (const label of ['Dismiss', '关闭', 'Close']) {
+if (await exists(page, label, { role: 'button', timeout: 500 })) {
+await activate(page, label);
+dismissed = true;
+break;
+}
+}
+if (!dismissed) await page.keyboard.press('Escape');
+const deadline = Date.now() + 5000;
+while (Date.now() < deadline) {
+if (!(await exists(page, header, { timeout: 200 }))) return;
+await sleep(100);
+}
+throw new Error(`Story Reading Support popup did not close: ${header}`);
+}
+function requireNoSiblingParagraphSupport(text, specs, paragraphIndex, label) {
+for (let index = 0; index < specs.length; index += 1) {
+if (index === paragraphIndex) continue;
+for (const field of ['pinyin', 'vi', 'en']) {
+for (const marker of specs[index][field]) {
+if (
+marker.length >= 5 &&
+!specs[paragraphIndex][field].includes(marker) &&
+text.includes(marker)
+) {
+throw new Error(
+`${label} contains paragraph ${index + 1} ${field} marker: ${marker}`,
+);
+}
+}
+}
+}
+}
+async function verifyReadingSupportParagraphs(
+page,
+level,
+previousLevelSupports,
+expectedCurrentSupports = null,
+) {
+const specs = expected[level].paragraphs;
+const paragraphTexts = await storyParagraphTexts(page, specs.length);
+const supports = [];
+for (let index = 0; index < specs.length; index += 1) {
+const spec = specs[index];
+requireStoryMarkers(
+paragraphTexts[index],
+spec.cn,
+`Lv${level} paragraph ${index + 1} Chinese`,
+);
+for (let sibling = 0; sibling < specs.length; sibling += 1) {
+if (sibling === index) continue;
+for (const marker of specs[sibling].cn) {
+if (
+marker.length >= 4 &&
+!spec.cn.includes(marker) &&
+storyMarkerMatches(paragraphTexts[index], marker)
+) {
+throw new Error(
+`Lv${level} paragraph ${index + 1} contains paragraph ${sibling + 1} Chinese marker: ${marker}`,
+);
+}
+}
+}
+await openStoryAnnotation(page, index, specs.length);
+const supportText = await visibleText(page);
+requireMarkers(
+supportText,
+[`故事第 ${index + 1} 段`, ...spec.pinyin, ...spec.vi, ...spec.en],
+`Lv${level} paragraph ${index + 1} ReadingAnnotation`,
+);
+if (!/拼音[\s\S]*[A-Za-zĀÁǍÀāáǎàĒÉĚÈēéěèĪÍǏÌīíǐìŌÓǑÒōóǒòŪÚǓÙūúǔùǕǗǙǛǖǘǚǜ]/.test(supportText)) {
+throw new Error(`Lv${level} paragraph ${index + 1} Pinyin support is empty or malformed`);
+}
+requireNoSiblingParagraphSupport(
+supportText,
+specs,
+index,
+`Lv${level} paragraph ${index + 1} ReadingAnnotation`,
+);
+if (
+previousLevelSupports?.[index] &&
+supportText === previousLevelSupports[index]
+) {
+throw new Error(
+`Lv${level} paragraph ${index + 1} reused previous-level support verbatim`,
+);
+}
+if (
+expectedCurrentSupports?.[index] &&
+supportText !== expectedCurrentSupports[index]
+) {
+throw new Error(
+`Lv${level} paragraph ${index + 1} ReadingAnnotation changed after Story revisit`,
+);
+}
+supports.push(supportText);
+await closeReadingSupport(page, index);
+}
+return supports;
+}
+async function verifyReadingSupport(page, level, prior, priorSupport) {
+const storyText = await visibleText(page);
+requireStoryMarkers(storyText, expected[level].story, `Lv${level} CURRENT Story`);
+requireNoPriorMarker(storyText, prior, `Lv${level} Story`);
+const supportTexts = await verifyReadingSupportParagraphs(
+page,
+level,
+priorSupport,
+);
+return { storyText, supportTexts };
+}
+function storyVocabularyTrace(story, stageText) {
+const ignore = new Set(['故事', '单词', '发现', '挑战', '记忆', '完成', '继续', '返回', '朗读', '查看', '中文难度']);
+const words = [...new Set(stageText.match(/[\u3400-\u9fff]{2,8}/g) ?? [])];
+return words.filter((word) => !ignore.has(word) && story.includes(word));
+}
+async function toVocabulary(page, level, storyText) {
+await activate(page, '继续', { prefix: true });
+await sleep(300);
+if (!(await exists(page, '2/6', { prefix: true, timeout: 700 }))) {
+if (await exists(page, 'Dismiss', { role: 'button', timeout: 700 })) {
+await activate(page, 'Dismiss');
+} else if (await exists(page, '关闭', { role: 'button', timeout: 700 })) {
+await activate(page, '关闭');
+} else {
+await page.touchscreen.tap(22, 58);
+}
+}
+const text = await waitStageSettled(page, 2, {
+absentStoryMarkers: [expected[level].story[0]],
+predicate: (snapshot) => storyVocabularyTrace(storyText, snapshot).length > 0,
+});
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Vocabulary level drift`);
+if (!storyVocabularyTrace(storyText, text).length) {
+throw new Error(`Lv${level} Vocabulary has no CURRENT Story trace`);
+}
+return text;
+}
+async function toDiscovery(page, level) {
+await activate(page, '继续', { prefix: true });
+const text = await waitStageSettled(page, 3, {
+markers: expected[level].discovery,
+});
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Discovery level drift`);
+requireMarkers(text, expected[level].discovery, `Lv${level} Discovery`);
+return text;
+}
+async function toChallenge(page, level) {
+await activate(page, '继续', { prefix: true });
+await waitStageSettled(page, 4, { markers: ['提交第 1 / 3 次答案'] });
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge level drift`);
+await findSemantic(page, '提交第 1 / 3 次答案', {
+role: 'button',
+prefix: true,
+timeout: 15000,
+});
+return visibleText(page);
+}
+async function challengeOptionTargets(page) {
+const rs = await records(page);
+const toTarget = (record) => ({
+role: record.role,
+label: clean(record.label),
+text: recordText(record),
+});
+const lettered = rs
+.filter((record) => {
+if (!record.visible || record.disabled) return false;
+const label = clean(record.label);
+return /^[A-D]\s/.test(label) && /[\u3400-\u9fff]/.test(label);
+})
+.sort((left, right) => left.index - right.index);
+if (lettered.length) return lettered.map(toTarget);
+const excluded = [
+'提交第', '朗读', '进入下一种挑战', '完成三连挑战', '再练重点项',
+'继续留下回忆', '完成挑战后继续', '返回', 'Back', '查看 Lv.',
+'提高当前难度', '降低当前难度', '短文复原', '语病修复', '补回句子',
+'简 / 繁', '声线', '减速', '加速', '提示',
+];
+return rs
+.filter((record) => {
+if (!record.visible || record.disabled) return false;
+const text = recordText(record);
+if (text.length < 4 || !/[\u3400-\u9fff]/.test(text)) return false;
+if (!['button', 'group'].includes(record.role)) return false;
+return !excluded.some((item) => text.includes(item));
+})
+.sort((left, right) => right.area - left.area)
+.map(toTarget);
+}
+async function requiredChallengeSelections(page) {
+const text = await visibleText(page);
+const match = text.match(/依次点击\s*(\d+)\s*句/);
+return match ? Number(match[1]) : 1;
+}
+async function ensureGrammarSegment(page) {
+const text = await visibleText(page);
+if (!text.includes('第一步 · 点击有问题的部分')) return;
+const segments = (await records(page))
+.filter(
+(record) =>
+record.visible &&
+!record.disabled &&
+record.role === 'checkbox' &&
+/[\u3400-\u9fff]/.test(recordText(record)),
+)
+.sort((left, right) => left.index - right.index);
+if (!segments.length) throw new Error('grammar repair segment selector not found');
+await page.locator('flt-semantics').nth(segments[0].index).evaluate((element) => element.click());
+await sleep(120);
+}
+async function activateChallengeTarget(page, target) {
+const matches = (await records(page))
+.filter((record) => {
+if (!record.visible || record.disabled) return false;
+if (target.label) return clean(record.label) === target.label;
+return record.role === target.role && recordText(record) === target.text;
+})
+.sort((left, right) => left.area - right.area);
+if (!matches.length) throw new Error(`challenge option disappeared: ${target.label || target.text}`);
+await page.locator('flt-semantics').nth(matches[0].index).evaluate((element) => element.click());
+await sleep(120);
+}
+async function chooseOptions(page) {
+await ensureGrammarSegment(page);
+const count = await requiredChallengeSelections(page);
+const targets = await challengeOptionTargets(page);
+if (targets.length < count) throw new Error(`only ${targets.length} challenge options found; need ${count}`);
+for (const target of targets.slice(0, count)) await activateChallengeTarget(page, target);
+}
+async function waitForNextChallenge(page) {
+await findSemantic(page, '提交第 1 / 3 次答案', {
+role: 'button',
+prefix: true,
+timeout: 12000,
+});
+}
+async function resolveChallengeMode(page, modeIndex) {
+for (let attempt = 1; attempt <= 3; attempt += 1) {
+await chooseOptions(page);
+await activate(page, '提交第', { prefix: true });
+await sleep(500);
+if (await exists(page, '进入下一种挑战', { role: 'button', timeout: 1200 })) {
+await activate(page, '进入下一种挑战');
+await waitForNextChallenge(page);
+return;
+}
+if (await exists(page, '完成三连挑战', { role: 'button', timeout: 1200 })) {
+await activate(page, '完成三连挑战');
+await findSemantic(page, '继续留下回忆', {
+role: 'button',
+prefix: true,
+timeout: 12000,
+});
+return;
+}
+if (attempt < 3) {
+await findSemantic(page, `提交第 ${attempt + 1} / 3 次答案`, {
+role: 'button',
+prefix: true,
+timeout: 5000,
+});
+}
+}
+throw new Error(`challenge mode ${modeIndex + 1} did not resolve`);
+}
+async function completeChallenge(page, level) {
+for (let mode = 0; mode < 3; mode += 1) await resolveChallengeMode(page, mode);
+await findSemantic(page, '继续留下回忆', {
+role: 'button',
+prefix: true,
+timeout: 15000,
+});
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge completion level drift`);
+}
+async function toMemory(page, level, storyText) {
+await activate(page, '继续留下回忆', { prefix: true });
+const text = await waitStageSettled(page, 5, {
+markers: ['永宁门', '跑表'],
+});
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Memory level drift`);
+requireMarkers(text, ['永宁门', '跑表'], `Lv${level} Memory`);
+if (!storyVocabularyTrace(storyText, text).length) {
+throw new Error(`Lv${level} Memory has no CURRENT Story vocabulary trace`);
+}
+return text;
+}
+async function revisitStoryFromMemory(
+page,
+level,
+expectedStoryText,
+expectedSupportTexts,
+prior,
+previousLevelSupports,
+) {
+const readStage = async () => {
+for (let stage = 1; stage <= 5; stage += 1) {
+if (await exists(page, `${stage}/6`, { prefix: true, timeout: 120 })) return stage;
+}
+return null;
+};
+for (let guard = 0; guard < 6; guard += 1) {
+const beforeStage = await readStage();
+if (beforeStage === 1) break;
+if (beforeStage == null) throw new Error(`Lv${level} Story revisit stage unavailable`);
+await activate(page, '上一步', { prefix: true });
+let changed = false;
+for (let i = 0; i < 40; i += 1) {
+await sleep(100);
+const afterStage = await readStage();
+if (afterStage === 1) {
+changed = true;
+break;
+}
+if (afterStage != null && afterStage !== beforeStage) {
+changed = true;
+break;
+}
+}
+if (!changed) throw new Error(`Lv${level} Story revisit stage did not move from ${beforeStage}/6`);
+}
+const text = await waitStageSettled(page, 1, {
+storyMarkers: [expected[level].story[0]],
+requireStage: false,
+});
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story revisit level drift`);
+requireStoryMarkers(text, expected[level].story, `Lv${level} revisited Story`);
+requireNoPriorMarker(text, prior, `Lv${level} revisited Story`);
+await verifyReadingSupportParagraphs(
+page,
+level,
+previousLevelSupports,
+expectedSupportTexts,
+);
+if (
+!storyMarkerMatches(text, expected[level].story[0]) ||
+!storyMarkerMatches(expectedStoryText, expected[level].story[0])
+) {
+throw new Error(`Lv${level} Story revisit identity mismatch`);
+}
+}
+async function forwardToMemoryAfterRevisit(page, level, storyText) {
+await toVocabulary(page, level, storyText);
+await toDiscovery(page, level);
+await activate(page, '继续', { prefix: true });
+await waitStageSettled(page, 4, { markers: ['继续留下回忆'] });
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge revisit level drift`);
+await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 15000 });
+await activate(page, '继续留下回忆', { prefix: true });
+await waitStageSettled(page, 5, { markers: ['保存回忆并完成'] });
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Memory revisit level drift`);
+}
+async function toCompletion(page, level, storyText) {
+await activate(page, '保存回忆并完成', { prefix: true });
+const text = await waitStageSettled(page, 6, {
+markers: ['西安 · 城墙', '西安城墙印章', '已点亮'],
+});
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Completion level drift`);
+requireMarkers(
+text,
+[
+'6/6',
+'西安 · 城墙',
+'西安城墙印章',
+'已点亮',
+'永宁门后没有按停的跑表',
+'Challenge 表现',
+'旅程结果',
+'旅程收束',
+expected[level].completion,
+],
+`Lv${level} Completion`,
+);
+if (!storyVocabularyTrace(storyText, text).length) {
+throw new Error(`Lv${level} Completion has no CURRENT Story vocabulary trace`);
+}
+return text;
+}
+async function restart(page) {
+await activate(page, '重新体验', { prefix: true });
+await waitStageSettled(page, 1);
+}
+async function assertNoBlockingError(page, pageErrors, label) {
+const text = await visibleText(page).catch(() => '');
+const joined = `${text}\n${pageErrors.join('\n')}`;
+for (const fatal of ['Unhandled Exception', 'A RenderFlex overflowed', 'Bad state:']) {
+if (joined.includes(fatal)) throw new Error(`${label}: blocking runtime error: ${fatal}`);
+}
+}
+async function runBrowser(browserName, browser, contextOptions) {
+const context = await browser.newContext(contextOptions);
+const page = await context.newPage();
+const pageErrors = [];
+const failedRequests = [];
+page.on('pageerror', (error) => pageErrors.push(error?.stack || error?.message || String(error)));
+page.on('requestfailed', (request) => {
+failedRequests.push(`${request.url()} :: ${request.failure()?.errorText || 'failed'}`);
+});
+let prior = null;
+let priorSupport = null;
+try {
+await requireStartup(page);
+await openViaPassport(page);
+for (let index = 0; index < levels.length; index += 1) {
+const level = levels[index];
+if (index > 0) await restart(page);
+await setLevel(page, level);
+await waitStageSettled(page, 1, {
+storyMarkers: [expected[level].story[0]],
+requireStage: false,
+});
+if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story level switch failed`);
+const { storyText, supportTexts } = await verifyReadingSupport(
+page,
+level,
+prior,
+priorSupport,
+);
+await assertNoBlockingError(page, pageErrors, `${browserName} Lv${level} Story`);
+console.log(`${browserName} Lv${level} STORY + READINGANNOTATION + CN/PINYIN/VI/EN = PASS`);
+const vocabularyText = await toVocabulary(page, level, storyText);
+requireNoPriorMarker(vocabularyText, prior, `${browserName} Lv${level} Vocabulary`);
+console.log(`${browserName} Lv${level} VOCABULARY = PASS`);
+const discoveryText = await toDiscovery(page, level);
+requireNoPriorMarker(discoveryText, prior, `${browserName} Lv${level} Discovery`);
+console.log(`${browserName} Lv${level} DISCOVERY = PASS`);
+const challengeText = await toChallenge(page, level);
+requireNoPriorMarker(challengeText, prior, `${browserName} Lv${level} Challenge`);
+await completeChallenge(page, level);
+console.log(`${browserName} Lv${level} CHALLENGE = PASS`);
+const memoryText = await toMemory(page, level, storyText);
+requireNoPriorMarker(memoryText, prior, `${browserName} Lv${level} Memory`);
+console.log(`${browserName} Lv${level} MEMORY = PASS`);
+await revisitStoryFromMemory(
+page,
+level,
+storyText,
+supportTexts,
+prior,
+priorSupport,
+);
+console.log(`${browserName} Lv${level} STORY REVISIT + LEVEL STABILITY = PASS`);
+await forwardToMemoryAfterRevisit(page, level, storyText);
+const completionText = await toCompletion(page, level, storyText);
+requireNoPriorMarker(completionText, prior, `${browserName} Lv${level} Completion`);
+console.log(`${browserName} Lv${level} COMPLETION = PASS`);
+console.log(`${browserName} Lv${level} SIX-STAGE = PASS`);
+prior = expected[level];
+priorSupport = supportTexts;
+}
+const blockingRequests = failedRequests.filter(
+(entry) => !entry.includes('favicon') && !entry.includes('analytics'),
+);
+if (blockingRequests.length) {
+throw new Error(`${browserName} blocking failed requests: ${blockingRequests.join(' || ')}`);
+}
+if (pageErrors.length) {
+throw new Error(`${browserName} page errors: ${pageErrors.join(' || ')}`);
+}
+console.log(`${browserName} XIAN CITY WALL DEPLOYED BROWSER = PASS | SHA=${sourceSha}`);
+} catch (error) {
+console.error(`${browserName} XIAN CITY WALL DEPLOYED BROWSER = FAIL`);
+console.error(`CURRENT URL = ${page.url()}`);
+console.error(`CURRENT LEVEL = ${await currentLevel(page).catch(() => 'unknown')}`);
+console.error(`SEMANTICS = ${(await visibleText(page).catch(() => '')).slice(0, 16000)}`);
+console.error(`PAGE ERRORS = ${JSON.stringify(pageErrors)}`);
+console.error(`FAILED REQUESTS = ${JSON.stringify(failedRequests)}`);
+throw error;
+} finally {
+await context.close();
+}
+}
+const chromiumBrowser = await chromium.launch({ headless: true });
+try {
+await runBrowser('DESKTOP CHROMIUM', chromiumBrowser, {
+viewport: { width: 1280, height: 900 },
+locale: 'zh-CN',
+reducedMotion: 'reduce',
+});
+} finally {
+await chromiumBrowser.close();
+}
+const webkitBrowser = await webkit.launch({ headless: true });
+try {
+await runBrowser('IPHONE WEBKIT', webkitBrowser, {
+...devices['iPhone 13'],
+locale: 'zh-CN',
+reducedMotion: 'reduce',
+});
+} finally {
+await webkitBrowser.close();
+}
+console.log(`XIAN CITY WALL DEPLOYED BROWSER ACCEPTANCE = PASS | SHA=${sourceSha} | LEVELS=${levels.join(',')}`);
