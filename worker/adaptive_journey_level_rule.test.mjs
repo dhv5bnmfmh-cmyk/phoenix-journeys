@@ -8,7 +8,7 @@ const catalog = readFileSync(
 );
 const state = readFileSync('app/lib/state/app_state.dart', 'utf8');
 const screen = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
-const settings = readFileSync('app/lib/screens/settings_screen.dart', 'utf8');
+const me = readFileSync('app/lib/screens/me_screen.dart', 'utf8');
 const controller = readFileSync(
   'app/lib/services/phoenix_level_controller.dart',
   'utf8',
@@ -25,8 +25,9 @@ test('Summer Palace keeps persistent fallback journey levels', () => {
   assert.match(state, /_key\('difficulty'\)/);
 });
 
-test('Settings owns configured level while each journey snapshots one session level', () => {
-  assert.match(settings, /JourneyLevelSelectorButton/);
+test('Me owns configured level while each journey snapshots one session level', () => {
+  assert.equal((me.match(/JourneyLevelSelectorButton\(/g) ?? []).length, 1);
+  assert.doesNotMatch(me, /_chooseLevel|HSK／TOCFL 能力设置/);
   assert.match(screen, /snapshotJourneySessionProfile/);
   assert.match(screen, /_sessionLanguageProfile/);
   assert.match(screen, /journey-session-level-badge/);

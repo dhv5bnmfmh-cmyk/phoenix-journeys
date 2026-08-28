@@ -10,12 +10,12 @@ const homeShell = fs.readFileSync(
   new URL('../app/lib/screens/home_shell.dart', import.meta.url),
   'utf8',
 );
-const journeyScreen = fs.readFileSync(
-  new URL('../app/lib/screens/journey_screen.dart', import.meta.url),
+const meScreen = fs.readFileSync(
+  new URL('../app/lib/screens/me_screen.dart', import.meta.url),
   'utf8',
 );
-const settingsScreen = fs.readFileSync(
-  new URL('../app/lib/screens/settings_screen.dart', import.meta.url),
+const journeyScreen = fs.readFileSync(
+  new URL('../app/lib/screens/journey_screen.dart', import.meta.url),
   'utf8',
 );
 const selector = fs.readFileSync(
@@ -46,17 +46,20 @@ test('every reading band keeps an approved one-or-two paragraph shape', () => {
   assert.match(agent, /paragraphCount: 2/);
 });
 
-test('Home removes the floating level control and exposes Settings in both nav modes', () => {
-  assert.match(homeShell, /SettingsScreen\(\)/);
-  assert.match(homeShell, /NavigationRailDestination\([\s\S]*settings_outlined/);
-  assert.match(homeShell, /_CompactBottomNavigation/);
-  assert.equal((homeShell.match(/settings_outlined/g) ?? []).length, 2);
+test('Home keeps four destinations and no floating level control', () => {
+  assert.equal((homeShell.match(/NavigationRailDestination\(/g) ?? []).length, 4);
+  assert.equal((homeShell.match(/_CompactNavItem\(/g) ?? []).length, 5);
+  assert.doesNotMatch(homeShell, /SettingsScreen|settings_outlined|setTab\(4\)/);
   assert.doesNotMatch(homeShell, /JourneyLevelSelectorButton/);
   assert.doesNotMatch(homeShell, /Positioned\([\s\S]*top: 6,[\s\S]*right: 8/);
 });
 
-test('Settings owns the ten-level control and explains next-entry application', () => {
-  assert.match(settingsScreen, /JourneyLevelSelectorButton/);
+test('Me owns one ten-level control and explains next-entry application', () => {
+  assert.equal((meScreen.match(/JourneyLevelSelectorButton\(/g) ?? []).length, 1);
+  assert.match(meScreen, /me-learning-settings/);
+  assert.match(meScreen, /settings-script-mode/);
+  assert.match(meScreen, /settings-translation-language/);
+  assert.doesNotMatch(meScreen, /_chooseLevel|HSK／TOCFL 能力设置/);
   assert.ok(selector.includes('global-journey-level-selector'));
   assert.ok(selector.includes('phoenix-level-minus'));
   assert.ok(selector.includes('phoenix-level-plus'));

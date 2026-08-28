@@ -9,7 +9,6 @@ import 'city_passport_screen.dart';
 import 'explore_screen.dart';
 import 'me_screen.dart';
 import 'shadowing_training_screen.dart';
-import 'settings_screen.dart';
 
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key});
@@ -19,7 +18,6 @@ class HomeShell extends StatelessWidget {
     CityPassportScreen(),
     ShadowingTrainingScreen(embedded: true),
     MeScreen(),
-    SettingsScreen(),
   ];
 
   @override
@@ -35,7 +33,7 @@ class HomeShell extends StatelessWidget {
         );
         final pageType = switch (state.selectedTab) {
           1 => JourneyBackgroundPage.passport,
-          3 || 4 => JourneyBackgroundPage.profile,
+          3 => JourneyBackgroundPage.profile,
           _ => JourneyBackgroundPage.explore,
         };
         final baseContent = state.selectedTab == 0
@@ -77,10 +75,6 @@ class HomeShell extends StatelessWidget {
                       NavigationRailDestination(
                         icon: const Icon(Icons.person_outline),
                         label: Text(state.displayText('我的')),
-                      ),
-                      NavigationRailDestination(
-                        icon: const Icon(Icons.settings_outlined),
-                        label: Text(state.displayText('设置')),
                       ),
                     ],
                   ),
@@ -162,12 +156,6 @@ class _CompactBottomNavigation extends StatelessWidget {
                 label: state.displayText('我的'),
                 selected: state.selectedTab == 3,
                 onTap: () => state.setTab(3),
-              ),
-              _CompactNavItem(
-                icon: Icons.settings_outlined,
-                label: state.displayText('设置'),
-                selected: state.selectedTab == 4,
-                onTap: () => state.setTab(4),
               ),
             ],
           ),

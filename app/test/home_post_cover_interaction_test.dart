@@ -41,12 +41,13 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pump();
 
-    final settingsNav = find.text('设置').last;
-    expect(settingsNav.hitTestable(), findsOneWidget);
-    await tester.tap(settingsNav);
+    expect(find.text('设置'), findsNothing);
+    final meNav = find.text('我的').last;
+    expect(meNav.hitTestable(), findsOneWidget);
+    await tester.tap(meNav);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(state.selectedTab, 4);
+    expect(state.selectedTab, 3);
 
     final levelGuide = find.byKey(const ValueKey('phoenix-level-guide'));
     expect(levelGuide.hitTestable(), findsOneWidget);

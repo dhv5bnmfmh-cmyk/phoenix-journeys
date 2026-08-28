@@ -634,7 +634,7 @@ class AppState extends ChangeNotifier {
   }
 
   void setTab(int value) {
-    selectedTab = value.clamp(0, 4).toInt();
+    selectedTab = value.clamp(0, 3).toInt();
     notifyListeners();
   }
 
