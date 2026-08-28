@@ -688,17 +688,17 @@ class _JourneyScreenState extends State<JourneyScreen>
     final token = ++_levelChangeToken;
     final profile = _phoenixLevelController.profile;
 
-    await _stopJourneyNarration();
-    await _appState.clearJourneyNarrationPosition();
-    await _narration.setSpeechRate(
+    _stageNarrationIntent += 1;
+    _stageNarrationRequestedId = null;
+    final narrationCancellationToken =
+        _narration.cancelPlaybackImmediately();
+    final narrationPositionFuture =
+        _appState.clearJourneyNarrationPosition();
+    final speechRateFuture = _narration.setSpeechRate(
       _languageLevelAgent.planFor(profile).speechRate,
     );
-    await Future.wait([
-      _appState.clearGuideFeedback(),
-      _appState.clearWritingFeedback(),
-    ]);
-    if (!mounted || token != _levelChangeToken) return;
 
+    if (!mounted || token != _levelChangeToken) return;
     setState(() {
       _languageProfile = profile;
       _guideFeedback = null;
@@ -707,6 +707,18 @@ class _JourneyScreenState extends State<JourneyScreen>
       _pilotChallengeVisible = false;
       _pilotMemoryVisible = false;
       _challengeSeed += 1;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(
+        _settlePhoenixLevelChange(
+          token: token,
+          narrationCancellationToken: narrationCancellationToken,
+          narrationPositionFuture: narrationPositionFuture,
+          speechRateFuture: speechRateFuture,
+        ),
+      );
     });
 
     final messenger = ScaffoldMessenger.of(context);
@@ -721,6 +733,23 @@ class _JourneyScreenState extends State<JourneyScreen>
           behavior: SnackBarBehavior.floating,
         ),
       );
+  }
+
+  Future<void> _settlePhoenixLevelChange({
+    required int token,
+    required int narrationCancellationToken,
+    required Future<void> narrationPositionFuture,
+    required Future<void> speechRateFuture,
+  }) async {
+    if (!mounted || token != _levelChangeToken) return;
+    await Future.wait([
+      _narration.flushCancelledPlayback(narrationCancellationToken),
+      narrationPositionFuture,
+      speechRateFuture,
+      _appState.clearGuideFeedback(),
+      _appState.clearWritingFeedback(),
+    ]);
+    if (!mounted || token != _levelChangeToken) return;
   }
 
   void _checkpointNarrationBeforeStepChange() {
@@ -1244,18 +1273,18 @@ class _JourneyScreenState extends State<JourneyScreen>
             memoryVisible: _pilotMemoryVisible,
           )
         : PilotN1CompositePage.memory;
-    final pages = <Widget>[
-      _storyPage(),
-      _wordsPage(),
-      _discoveryPage(),
-      stepThreePage == PilotN1CompositePage.reflection
+    final page = switch (step) {
+      0 => _storyPage(),
+      1 => _wordsPage(),
+      2 => _discoveryPage(),
+      3 => stepThreePage == PilotN1CompositePage.reflection
           ? _wonderPage()
           : _challengePage(),
-      stepFourPage == PilotN1CompositePage.writing
+      4 => stepFourPage == PilotN1CompositePage.writing
           ? _expressPage()
           : _memoryPage(),
-      _completePage(),
-    ];
+      _ => _completePage(),
+    };
 
     return DestinationBackground(
       journeyId: _experience.id,
@@ -1291,7 +1320,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         ),
         body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 280),
-          child: pages[step],
+          child: page,
         ),
       ),
     );

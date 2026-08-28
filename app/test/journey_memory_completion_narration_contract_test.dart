@@ -37,9 +37,15 @@ void main() {
     );
     expect(
       journey,
-      contains(
-        'await _stopJourneyNarration();\n    await _appState.clearJourneyNarrationPosition();',
-      ),
+      contains('_narration.cancelPlaybackImmediately();'),
+    );
+    expect(
+      journey,
+      contains('final narrationPositionFuture ='),
+    );
+    expect(
+      journey,
+      contains('_narration.flushCancelledPlayback(narrationCancellationToken)'),
     );
   });
 
