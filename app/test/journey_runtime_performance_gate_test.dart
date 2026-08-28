@@ -281,6 +281,25 @@ void main() {
     expect(levelStore, contains('Future<void> persistPhoenixLevel(int level)'));
   });
 
+  test('level switch builds only the currently visible stage', () {
+    final build = _section(
+      journey,
+      'Widget build(BuildContext context)',
+      'Widget _page({',
+    );
+
+    expect(build, contains('final page = switch (step) {'));
+    expect(build, contains('0 => _storyPage()'));
+    expect(build, contains('1 => _wordsPage()'));
+    expect(build, contains('2 => _discoveryPage()'));
+    expect(build, contains('3 => stepThreePage'));
+    expect(build, contains('4 => stepFourPage'));
+    expect(build, contains('_ => _completePage()'));
+    expect(build, contains('child: page'));
+    expect(build, isNot(contains('final pages = <Widget>[')));
+    expect(build, isNot(contains('pages[step]')));
+  });
+
   test('performance remediation preserves shared cinematic Story architecture', () {
     final story = _section(
       journey,

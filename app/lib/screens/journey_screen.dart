@@ -1273,18 +1273,18 @@ class _JourneyScreenState extends State<JourneyScreen>
             memoryVisible: _pilotMemoryVisible,
           )
         : PilotN1CompositePage.memory;
-    final pages = <Widget>[
-      _storyPage(),
-      _wordsPage(),
-      _discoveryPage(),
-      stepThreePage == PilotN1CompositePage.reflection
+    final page = switch (step) {
+      0 => _storyPage(),
+      1 => _wordsPage(),
+      2 => _discoveryPage(),
+      3 => stepThreePage == PilotN1CompositePage.reflection
           ? _wonderPage()
           : _challengePage(),
-      stepFourPage == PilotN1CompositePage.writing
+      4 => stepFourPage == PilotN1CompositePage.writing
           ? _expressPage()
           : _memoryPage(),
-      _completePage(),
-    ];
+      _ => _completePage(),
+    };
 
     return DestinationBackground(
       journeyId: _experience.id,
@@ -1320,7 +1320,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         ),
         body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 280),
-          child: pages[step],
+          child: page,
         ),
       ),
     );
