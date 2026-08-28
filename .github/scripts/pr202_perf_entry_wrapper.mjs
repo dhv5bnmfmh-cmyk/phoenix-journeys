@@ -55,11 +55,15 @@ const perfEntryReplacement = `async function assertJourneyEntryIdentity(page) {
 
 // Challenge option discovery and activation intentionally reuse the compressed runner's
 // mature formal-E2E contract. Do not layer role filtering or synthetic de-duplication here.
+// Match the formal iPhone/WebKit verifier's semantic-click settle before submitting.
+const challengeClickSettleOriginal = `    await page.locator('flt-semantics').nth(matches[0].index).evaluate((e)=>e.click()); await sleep(70);`;
+const challengeClickSettleReplacement = `    await page.locator('flt-semantics').nth(matches[0].index).evaluate((e)=>e.click()); await sleep(120);`;
 
 const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   await completeChallenge(page);`;
 const challengeReadyReplacement = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   const challengeDeadline=Date.now()+20000;while(Date.now()<challengeDeadline){if(await exists(page,'提交第 1 / 3 次答案',{role:'button',prefix:true,timeout:300}))break;const snapshot=await visibleText(page);if(snapshot.includes('3/6')&&await exists(page,'继续',{role:'button',prefix:true,timeout:300}))await activate(page,'继续',{prefix:true,timeout:1200});await sleep(100);}await findSemantic(page,'提交第 1 / 3 次答案',{role:'button',prefix:true,timeout:5000});await waitStage(page,4,5000);
+  const optionDeadline=Date.now()+8000;let optionCount=0;let requiredCount=1;while(Date.now()<optionDeadline){requiredCount=await requiredChallengeSelections(page);optionCount=(await challengeOptionTargets(page)).length;if(optionCount>=requiredCount)break;await sleep(100);}if(optionCount<requiredCount)throw new Error('Challenge controls did not settle before interaction; targets='+optionCount+' required='+requiredCount);
   await completeChallenge(page); if(process.env.CHALLENGE_PREFLIGHT_ONLY==='1'){console.log('CHALLENGE_PREFLIGHT_PASS city='+cityKey+' browser='+browserName);process.exit(0);}`;
 
 const stageSelectOriginal = `  await activate(page,stageLabels[stage],{prefix:false,timeout:8000});
@@ -100,6 +104,7 @@ const narrationProofReplacement = `  if(stage===4||stage===5){ await activate(pa
 
 for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
+  [challengeClickSettleOriginal, challengeClickSettleReplacement, 'formal Challenge click settle'],
   [challengeReadyOriginal, challengeReadyReplacement, 'challenge settled entry'],
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
   [desktopTouchOriginal, desktopTouchReplacement, 'desktop semantic touch context'],
