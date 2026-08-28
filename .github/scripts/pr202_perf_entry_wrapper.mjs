@@ -68,6 +68,9 @@ const challengeTargetsReplacement = `  const count = await requiredChallengeSele
   }
   if (targets.length < count) throw new Error(\`only \${targets.length} challenge targets after settle; need \${count}\`);`;
 
+const actionableChallengeOriginal = `    if (!r.visible || r.disabled || !['button','group','checkbox'].includes(r.role)) return false;`;
+const actionableChallengeReplacement = `    if (!r.visible || r.disabled || !['button','checkbox'].includes(r.role)) return false;`;
+
 const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   await completeChallenge(page);`;
 const challengeReadyReplacement = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
@@ -77,12 +80,13 @@ const challengeReadyReplacement = `  await activate(page,'继续',{prefix:true})
 const stageSelectOriginal = `  await activate(page,stageLabels[stage],{prefix:false,timeout:8000});
   await waitStage(page,target,12000); await ensureVocabularyPopupClosed(page); await sleep(120);`;
 const stageSelectReplacement = `  const wanted = stageLabels[stage];
+  await findSemantic(page,'选择学习步骤 · 课程已完成',{timeout:8000});
   const stageDeadline = Date.now() + 8000;
   let selected = false;
   while (Date.now() < stageDeadline && !selected) {
     const candidates = (await records(page)).filter((record) =>
       record.visible && !record.disabled && record.role === 'button' &&
-      (clean(record.label) === wanted || recordText(record) === wanted));
+      recordText(record).includes(wanted) && recordText(record).includes(\`\${target}/6\`));
     if (candidates.length) {
       await page.locator('flt-semantics').nth(candidates.sort((a,b)=>a.area-b.area)[0].index).tap({ timeout: 10000 });
       selected = true;
@@ -100,6 +104,7 @@ for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
   [challengeTapOriginal, challengeTapReplacement, 'challenge semantic tap'],
   [challengeTargetsOriginal, challengeTargetsReplacement, 'challenge target settle'],
+  [actionableChallengeOriginal, actionableChallengeReplacement, 'actionable Challenge controls'],
   [challengeReadyOriginal, challengeReadyReplacement, 'challenge settled entry'],
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
   [desktopTouchOriginal, desktopTouchReplacement, 'desktop semantic touch context'],
