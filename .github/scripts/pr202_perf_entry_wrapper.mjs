@@ -63,10 +63,10 @@ const challengeTargetsReplacement = `  const count = await requiredChallengeSele
   let targets = [];
   while (Date.now() < targetDeadline) {
     targets = await challengeOptionTargets(page);
-    if (targets.length >= count) break;
+    if (targets.length > 0) break;
     await sleep(100);
   }
-  if (targets.length < count) throw new Error(\`only \${targets.length} challenge targets after settle; need \${count}\`);`;
+  if (!targets.length) throw new Error('no actionable challenge target after settle; need '+count+' sequential selection(s)');`;
 
 const actionableChallengeOriginal = `    if (!r.visible || r.disabled || !['button','group','checkbox'].includes(r.role)) return false;`;
 const actionableChallengeReplacement = `    if (!r.visible || r.disabled || !['button','checkbox'].includes(r.role)) return false;`;
@@ -80,15 +80,33 @@ const challengeSelectionOriginal = `  for (const t of targets.slice(0,count)) {
     await page.locator('flt-semantics').nth(matches[0].index).tap({ timeout: 10000 }); await sleep(120);
   }`;
 const challengeSelectionReplacement = `  let submissionReady = false;
-  for (const t of targets) {
-    const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((t.label&&clean(r.label)===t.label)||(!t.label&&r.role===t.role&&recordText(r)===t.text))).sort((a,b)=>a.area-b.area);
-    if (!matches.length) continue;
+  const chosen = new Set();
+  const selectionDeadline = Date.now() + 12000;
+  let selectionCount = 0;
+  while (Date.now() < selectionDeadline && selectionCount < Math.max(count * 3, 8)) {
+    const before = await records(page);
+    submissionReady = before.some((r)=>r.visible&&!r.disabled&&r.role==='button'&&recordText(r).startsWith('提交第'));
+    if (submissionReady) break;
+    const liveTargets = await challengeOptionTargets(page);
+    const target = liveTargets.find((candidate) => {
+      const key = [candidate.role,candidate.label,candidate.text].join('|');
+      return !chosen.has(key);
+    });
+    if (!target) {
+      await sleep(120);
+      continue;
+    }
+    const key = [target.role,target.label,target.text].join('|');
+    const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((target.label&&clean(r.label)===target.label)||(!target.label&&r.role===target.role&&recordText(r)===target.text))).sort((a,b)=>a.area-b.area);
+    if (!matches.length) { await sleep(100); continue; }
     await page.locator('flt-semantics').nth(matches[0].index).evaluate((element)=>element.click());
-    const readyDeadline=Date.now()+1600;
-    while(Date.now()<readyDeadline){const after=await records(page);submissionReady=after.some((r)=>r.visible&&!r.disabled&&r.role==='button'&&recordText(r).startsWith('提交第'));if(submissionReady)break;await sleep(80);}
+    chosen.add(key);
+    selectionCount += 1;
+    const readyDeadline=Date.now()+1800;
+    while(Date.now()<readyDeadline){const after=await records(page);submissionReady=after.some((r)=>r.visible&&!r.disabled&&r.role==='button'&&recordText(r).startsWith('提交第'));if(submissionReady)break;const nextTargets=await challengeOptionTargets(page);if(nextTargets.some((candidate)=>!chosen.has([candidate.role,candidate.label,candidate.text].join('|'))))break;await sleep(80);}
     if(submissionReady) break;
   }
-  if(!submissionReady) throw new Error(\`Challenge selection did not enable submit after \${targets.length} actionable controls\`);`;
+  if(!submissionReady) throw new Error('Challenge sequential selection did not enable submit after '+selectionCount+' click(s); required='+count);`;
 
 const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   await completeChallenge(page);`;
