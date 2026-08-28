@@ -54,7 +54,7 @@ const perfEntryReplacement = `async function assertJourneyEntryIdentity(page) {
 }`;
 
 const challengeTapOriginal = `    await page.locator('flt-semantics').nth(matches[0].index).evaluate((e)=>e.click()); await sleep(70);`;
-const challengeTapReplacement = `    await page.locator('flt-semantics').nth(matches[0].index).click({ timeout: 10000 }); await sleep(120);`;
+const challengeTapReplacement = `    await page.locator('flt-semantics').nth(matches[0].index).tap({ timeout: 10000 }); await sleep(120);`;
 
 const challengeTargetsOriginal = `  const count = await requiredChallengeSelections(page); const targets = await challengeOptionTargets(page);
   if (targets.length < count) throw new Error(\`only \${targets.length} challenge targets; need \${count}\`);`;
@@ -84,7 +84,7 @@ const stageSelectReplacement = `  const wanted = stageLabels[stage];
       record.visible && !record.disabled && record.role === 'button' &&
       (clean(record.label) === wanted || recordText(record) === wanted));
     if (candidates.length) {
-      await page.locator('flt-semantics').nth(candidates.sort((a,b)=>a.area-b.area)[0].index).click({ timeout: 10000 });
+      await page.locator('flt-semantics').nth(candidates.sort((a,b)=>a.area-b.area)[0].index).tap({ timeout: 10000 });
       selected = true;
       break;
     }
@@ -93,12 +93,16 @@ const stageSelectReplacement = `  const wanted = stageLabels[stage];
   if (!selected) throw new Error(\`completed-course stage control not found: \${wanted}\`);
   await waitStage(page,target,15000); await ensureVocabularyPopupClosed(page); await sleep(180);`;
 
+const desktopTouchOriginal = `const context=browserName==='webkit' ? await browser.newContext({...devices['iPhone 13']}) : await browser.newContext({viewport:{width:1440,height:1000}});`;
+const desktopTouchReplacement = `const context=browserName==='webkit' ? await browser.newContext({...devices['iPhone 13']}) : await browser.newContext({viewport:{width:1440,height:1000},hasTouch:true});`;
+
 for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
   [challengeTapOriginal, challengeTapReplacement, 'challenge semantic tap'],
   [challengeTargetsOriginal, challengeTargetsReplacement, 'challenge target settle'],
   [challengeReadyOriginal, challengeReadyReplacement, 'challenge settled entry'],
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
+  [desktopTouchOriginal, desktopTouchReplacement, 'desktop semantic touch context'],
 ]) {
   if (source.split(needle).length - 1 !== 1) {
     throw new Error(`Performance ${label} patch target mismatch`);
