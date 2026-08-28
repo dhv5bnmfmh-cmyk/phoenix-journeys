@@ -71,6 +71,9 @@ const challengeTargetsReplacement = `  const count = await requiredChallengeSele
 const actionableChallengeOriginal = `    if (!r.visible || r.disabled || !['button','group','checkbox'].includes(r.role)) return false;`;
 const actionableChallengeReplacement = `    if (!r.visible || r.disabled || !['button','checkbox'].includes(r.role)) return false;`;
 
+const letteredChallengeOriginal = `  const lettered = rs.filter((r) => r.visible && !r.disabled && /^[A-D]\\s/.test(clean(r.label)) && /[\\u3400-\\u9fff]/.test(clean(r.label))).sort((a,b)=>a.index-b.index);`;
+const letteredChallengeReplacement = `  const lettered = rs.filter((r) => r.visible && !r.disabled && r.role==='button' && /^[A-D]\\s/.test(clean(r.label)) && /[\\u3400-\\u9fff]/.test(clean(r.label))).sort((a,b)=>a.index-b.index);`;
+
 const challengeSelectionOriginal = `  for (const t of targets.slice(0,count)) {
     const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((t.label&&clean(r.label)===t.label)||(!t.label&&r.role===t.role&&recordText(r)===t.text))).sort((a,b)=>a.area-b.area);
     if (!matches.length) throw new Error('challenge target disappeared');
@@ -126,17 +129,22 @@ const timingIncompleteReplacement = `  const timingComplete=Boolean(t1&&t2&&t3&&
   const out={tag,stage:stage+1,from,to:target,badgeMs:Math.round(t1-t0),contentMs:Math.round(t2-t0),semanticStableMs:Math.round(t3-t0),interactiveMs:Math.round(t4-t0),timingComplete,contentChanged:targetState.hash!==source.hash,sourceHash:source.hash,targetHash:targetState.hash,requestCount:requests.length,requestUrls:[...new Set(requests)].slice(0,12)};
   out.pass=timingComplete&&out.badgeMs<=thresholds.badge&&out.contentMs<=thresholds.content&&out.interactiveMs<=thresholds.interactive;`;
 
+const narrationProofOriginal = `  if(stage===4||stage===5){ await activate(page,'播放朗读'); await findSemantic(page,'停止朗读',{role:'button',timeout:5000}); await activate(page,'停止朗读'); return; }`;
+const narrationProofReplacement = `  if(stage===4||stage===5){ await activate(page,'播放朗读');const narrationDeadline=Date.now()+6000;let playing=false;while(Date.now()<narrationDeadline){if(await exists(page,'正在朗读',{timeout:250})||await exists(page,'暂停朗读',{role:'button',timeout:250})||await exists(page,'停止朗读',{role:'button',timeout:250})){playing=true;break;}await sleep(80);}if(!playing)throw new Error(\`\${stageNames[stage]} narration did not enter playing state\`);if(await exists(page,'暂停朗读',{role:'button',timeout:500}))await activate(page,'暂停朗读');else if(await exists(page,'停止朗读',{role:'button',timeout:500}))await activate(page,'停止朗读');return; }`;
+
 for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
   [challengeTapOriginal, challengeTapReplacement, 'challenge semantic tap'],
   [challengeTargetsOriginal, challengeTargetsReplacement, 'challenge target settle'],
   [actionableChallengeOriginal, actionableChallengeReplacement, 'actionable Challenge controls'],
+  [letteredChallengeOriginal, letteredChallengeReplacement, 'lettered Challenge button role'],
   [challengeSelectionOriginal, challengeSelectionReplacement, 'Challenge submit readiness'],
   [challengeReadyOriginal, challengeReadyReplacement, 'challenge settled entry'],
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
   [desktopTouchOriginal, desktopTouchReplacement, 'desktop semantic touch context'],
   [progressStripOriginal, progressStripReplacement, 'completed progress strip activation'],
   [timingIncompleteOriginal, timingIncompleteReplacement, 'non-aborting performance sample'],
+  [narrationProofOriginal, narrationProofReplacement, 'Memory Completion narration proof'],
 ]) {
   if (source.split(needle).length - 1 !== 1) {
     throw new Error(`Performance ${label} patch target mismatch`);
