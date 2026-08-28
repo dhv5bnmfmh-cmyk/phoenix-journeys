@@ -44,9 +44,15 @@ const perfEntryReplacement = `async function assertJourneyEntryIdentity(page) {
     const groupsReady = journey.identityAny.every((group) =>
       group.some((marker) => snapshot.includes(marker)));
     if (stageReady && titleReady && allReady && groupsReady) return;
-    if (journey.route === 'xian-passport' && snapshot.includes('陕西省，西安市') &&
-        !stageReady && await exists(page, journey.place, { role: 'button', timeout: 250 })) {
-      await activate(page, journey.place, { prefix: false, timeout: 1200 });
+    if (journey.route === 'xian-passport' && snapshot.includes('陕西省，西安市') && !stageReady) {
+      try {
+        if (await exists(page, journey.place, { role: 'button', timeout: 500 })) {
+          await activate(page, journey.place, { prefix: false, timeout: 2500 });
+        }
+      } catch (_) {
+        // The Passport place control can disappear while navigation is already committing.
+        // Keep polling for 1/6 + Journey identity instead of treating that race as product failure.
+      }
     }
     await sleep(100);
   }
@@ -58,6 +64,29 @@ const perfEntryReplacement = `async function assertJourneyEntryIdentity(page) {
 // Match the formal iPhone/WebKit verifier's semantic-click settle before submitting.
 const challengeClickSettleOriginal = `    await page.locator('flt-semantics').nth(matches[0].index).evaluate((e)=>e.click()); await sleep(70);`;
 const challengeClickSettleReplacement = `    await page.locator('flt-semantics').nth(matches[0].index).evaluate((e)=>e.click()); await sleep(120);`;
+
+const challengeTargetsOriginal = `  const count = await requiredChallengeSelections(page); const targets = await challengeOptionTargets(page);
+  if (targets.length < count) throw new Error(\`only \${targets.length} challenge targets; need \${count}\`);`;
+const challengeTargetsReplacement = `  const count = await requiredChallengeSelections(page);
+  const targetDeadline = Date.now() + 8000;
+  let targets = [];
+  while (Date.now() < targetDeadline) {
+    targets = await challengeOptionTargets(page);
+    if (targets.length >= count) break;
+    await sleep(100);
+  }
+  if (targets.length < count) throw new Error(\`Challenge mode controls did not settle: only \${targets.length} targets; need \${count}\`);`;
+
+const challengeSelectionOriginal = `  for (const t of targets.slice(0,count)) {
+    const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((t.label&&clean(r.label)===t.label)||(!t.label&&r.role===t.role&&recordText(r)===t.text))).sort((a,b)=>a.area-b.area);
+    if (!matches.length) throw new Error('challenge target disappeared');
+    await page.locator('flt-semantics').nth(matches[0].index).tap({ timeout: 10000 }); await sleep(120);
+  }`;
+const challengeSelectionReplacement = `  for (const t of targets.slice(0,count)) {
+    const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((t.label&&clean(r.label)===t.label)||(!t.label&&r.role===t.role&&recordText(r)===t.text))).sort((a,b)=>a.area-b.area);
+    if (!matches.length) throw new Error('challenge target disappeared');
+    await page.locator('flt-semantics').nth(matches[0].index).evaluate((element)=>element.click()); await sleep(120);
+  }`;
 
 const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   await completeChallenge(page);`;
@@ -105,6 +134,8 @@ const narrationProofReplacement = `  if(stage===4||stage===5){ await activate(pa
 for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
   [challengeClickSettleOriginal, challengeClickSettleReplacement, 'formal Challenge click settle'],
+  [challengeTargetsOriginal, challengeTargetsReplacement, 'per-mode Challenge control settle'],
+  [challengeSelectionOriginal, challengeSelectionReplacement, 'formal Challenge semantic click'],
   [challengeReadyOriginal, challengeReadyReplacement, 'challenge settled entry'],
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
   [desktopTouchOriginal, desktopTouchReplacement, 'desktop semantic touch context'],
