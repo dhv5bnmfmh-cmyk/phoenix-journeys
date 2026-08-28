@@ -77,6 +77,9 @@ const challengeTargetsReplacement = `  const count = await requiredChallengeSele
   }
   if (targets.length < count) throw new Error(\`Challenge mode controls did not settle: only \${targets.length} targets; need \${count}\`);`;
 
+const actionableChallengeOriginal = `    if (!r.visible || r.disabled || !['button','group','checkbox'].includes(r.role)) return false;`;
+const actionableChallengeReplacement = `    if (!r.visible || r.disabled || !['button','group'].includes(r.role)) return false;`;
+
 const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   await completeChallenge(page);`;
 const challengeReadyReplacement = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
@@ -124,6 +127,7 @@ for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
   [challengeClickSettleOriginal, challengeClickSettleReplacement, 'formal Challenge click settle'],
   [challengeTargetsOriginal, challengeTargetsReplacement, 'per-mode Challenge control settle'],
+  [actionableChallengeOriginal, actionableChallengeReplacement, 'formal Challenge fallback roles'],
   [challengeReadyOriginal, challengeReadyReplacement, 'challenge settled entry'],
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
   [desktopTouchOriginal, desktopTouchReplacement, 'desktop semantic touch context'],
