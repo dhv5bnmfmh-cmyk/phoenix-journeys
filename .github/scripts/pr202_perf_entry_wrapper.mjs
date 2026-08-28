@@ -71,6 +71,21 @@ const challengeTargetsReplacement = `  const count = await requiredChallengeSele
 const actionableChallengeOriginal = `    if (!r.visible || r.disabled || !['button','group','checkbox'].includes(r.role)) return false;`;
 const actionableChallengeReplacement = `    if (!r.visible || r.disabled || !['button','checkbox'].includes(r.role)) return false;`;
 
+const challengeSelectionOriginal = `  for (const t of targets.slice(0,count)) {
+    const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((t.label&&clean(r.label)===t.label)||(!t.label&&r.role===t.role&&recordText(r)===t.text))).sort((a,b)=>a.area-b.area);
+    if (!matches.length) throw new Error('challenge target disappeared');
+    await page.locator('flt-semantics').nth(matches[0].index).tap({ timeout: 10000 }); await sleep(120);
+  }`;
+const challengeSelectionReplacement = `  let submissionReady = false;
+  for (const t of targets) {
+    const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((t.label&&clean(r.label)===t.label)||(!t.label&&r.role===t.role&&recordText(r)===t.text))).sort((a,b)=>a.area-b.area);
+    if (!matches.length) continue;
+    await page.locator('flt-semantics').nth(matches[0].index).tap({timeout:10000}); await sleep(120);
+    const after=await records(page); submissionReady=after.some((r)=>r.visible&&!r.disabled&&r.role==='button'&&recordText(r).startsWith('提交第'));
+    if(submissionReady) break;
+  }
+  if(!submissionReady) throw new Error(\`Challenge selection did not enable submit after \${targets.length} actionable controls\`);`;
+
 const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   await completeChallenge(page);`;
 const challengeReadyReplacement = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
@@ -100,14 +115,19 @@ const stageSelectReplacement = `  const wanted = stageLabels[stage];
 const desktopTouchOriginal = `const context=browserName==='webkit' ? await browser.newContext({...devices['iPhone 13']}) : await browser.newContext({viewport:{width:1440,height:1000}});`;
 const desktopTouchReplacement = `const context=browserName==='webkit' ? await browser.newContext({...devices['iPhone 13']}) : await browser.newContext({viewport:{width:1440,height:1000},hasTouch:true});`;
 
+const progressStripOriginal = `  await clickSemantic(page,'课程已完成 · 可自由选择',{timeout:5000});`;
+const progressStripReplacement = `  await activate(page,'课程已完成 · 可自由选择',{prefix:false,timeout:5000});`;
+
 for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
   [challengeTapOriginal, challengeTapReplacement, 'challenge semantic tap'],
   [challengeTargetsOriginal, challengeTargetsReplacement, 'challenge target settle'],
   [actionableChallengeOriginal, actionableChallengeReplacement, 'actionable Challenge controls'],
+  [challengeSelectionOriginal, challengeSelectionReplacement, 'Challenge submit readiness'],
   [challengeReadyOriginal, challengeReadyReplacement, 'challenge settled entry'],
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
   [desktopTouchOriginal, desktopTouchReplacement, 'desktop semantic touch context'],
+  [progressStripOriginal, progressStripReplacement, 'completed progress strip activation'],
 ]) {
   if (source.split(needle).length - 1 !== 1) {
     throw new Error(`Performance ${label} patch target mismatch`);
