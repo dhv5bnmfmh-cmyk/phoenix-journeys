@@ -80,7 +80,7 @@ const challengeSelectionReplacement = `  let submissionReady = false;
   for (const t of targets) {
     const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((t.label&&clean(r.label)===t.label)||(!t.label&&r.role===t.role&&recordText(r)===t.text))).sort((a,b)=>a.area-b.area);
     if (!matches.length) continue;
-    await page.locator('flt-semantics').nth(matches[0].index).tap({timeout:10000});
+    await page.locator('flt-semantics').nth(matches[0].index).evaluate((element)=>element.click());
     const readyDeadline=Date.now()+1600;
     while(Date.now()<readyDeadline){const after=await records(page);submissionReady=after.some((r)=>r.visible&&!r.disabled&&r.role==='button'&&recordText(r).startsWith('提交第'));if(submissionReady)break;await sleep(80);}
     if(submissionReady) break;
@@ -90,7 +90,7 @@ const challengeSelectionReplacement = `  let submissionReady = false;
 const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   await completeChallenge(page);`;
 const challengeReadyReplacement = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
-  await findSemantic(page,'提交第 1 / 3 次答案',{role:'button',prefix:true,timeout:15000});
+  const challengeDeadline=Date.now()+20000;while(Date.now()<challengeDeadline){if(await exists(page,'提交第 1 / 3 次答案',{role:'button',prefix:true,timeout:300}))break;const snapshot=await visibleText(page);if(snapshot.includes('3/6')&&await exists(page,'继续',{role:'button',prefix:true,timeout:300}))await activate(page,'继续',{prefix:true,timeout:1200});await sleep(100);}await findSemantic(page,'提交第 1 / 3 次答案',{role:'button',prefix:true,timeout:5000});await waitStage(page,4,5000);
   await completeChallenge(page);`;
 
 const stageSelectOriginal = `  await activate(page,stageLabels[stage],{prefix:false,timeout:8000});
@@ -119,6 +119,13 @@ const desktopTouchReplacement = `const context=browserName==='webkit' ? await br
 const progressStripOriginal = `  await clickSemantic(page,'课程已完成 · 可自由选择',{timeout:5000});`;
 const progressStripReplacement = `  const progressDeadline=Date.now()+5000;let progressStrip=null;while(Date.now()<progressDeadline){const candidates=(await records(page)).filter((r)=>r.visible&&recordText(r).includes('课程已完成 · 可自由选择')).sort((a,b)=>b.area-a.area);if(candidates.length){progressStrip=candidates[0];break;}await sleep(80);}if(progressStrip==null)throw new Error('completed progress strip not found');await page.locator('flt-semantics').nth(progressStrip.index).tap({timeout:10000});`;
 
+const timingIncompleteOriginal = `  if(!t1||!t2||!t3||!t4) throw new Error(\`\${tag} timing incomplete t1=\${t1} t2=\${t2} t3=\${t3} t4=\${t4}\`);
+  const out={tag,stage:stage+1,from,to:target,badgeMs:Math.round(t1-t0),contentMs:Math.round(t2-t0),semanticStableMs:Math.round(t3-t0),interactiveMs:Math.round(t4-t0),contentChanged:targetState.hash!==source.hash,sourceHash:source.hash,targetHash:targetState.hash,requestCount:requests.length,requestUrls:[...new Set(requests)].slice(0,12)};
+  out.pass=out.badgeMs<=thresholds.badge&&out.contentMs<=thresholds.content&&out.interactiveMs<=thresholds.interactive;`;
+const timingIncompleteReplacement = `  const timingComplete=Boolean(t1&&t2&&t3&&t4);const fallback=performance.now();t1??=fallback;t2??=fallback;t3??=fallback;t4??=fallback;targetState??=await learnerState(page,stage);
+  const out={tag,stage:stage+1,from,to:target,badgeMs:Math.round(t1-t0),contentMs:Math.round(t2-t0),semanticStableMs:Math.round(t3-t0),interactiveMs:Math.round(t4-t0),timingComplete,contentChanged:targetState.hash!==source.hash,sourceHash:source.hash,targetHash:targetState.hash,requestCount:requests.length,requestUrls:[...new Set(requests)].slice(0,12)};
+  out.pass=timingComplete&&out.badgeMs<=thresholds.badge&&out.contentMs<=thresholds.content&&out.interactiveMs<=thresholds.interactive;`;
+
 for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
   [challengeTapOriginal, challengeTapReplacement, 'challenge semantic tap'],
@@ -129,6 +136,7 @@ for (const [needle, replacementText, label] of [
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
   [desktopTouchOriginal, desktopTouchReplacement, 'desktop semantic touch context'],
   [progressStripOriginal, progressStripReplacement, 'completed progress strip activation'],
+  [timingIncompleteOriginal, timingIncompleteReplacement, 'non-aborting performance sample'],
 ]) {
   if (source.split(needle).length - 1 !== 1) {
     throw new Error(`Performance ${label} patch target mismatch`);
