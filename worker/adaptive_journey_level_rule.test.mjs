@@ -8,6 +8,7 @@ const catalog = readFileSync(
 );
 const state = readFileSync('app/lib/state/app_state.dart', 'utf8');
 const screen = readFileSync('app/lib/screens/journey_screen.dart', 'utf8');
+const settings = readFileSync('app/lib/screens/settings_screen.dart', 'utf8');
 const controller = readFileSync(
   'app/lib/services/phoenix_level_controller.dart',
   'utf8',
@@ -24,12 +25,15 @@ test('Summer Palace keeps persistent fallback journey levels', () => {
   assert.match(state, /_key\('difficulty'\)/);
 });
 
-test('every journey UI reacts to the unified Phoenix level controller', () => {
-  assert.match(screen, /JourneyLevelSelectorButton\(compact: true\)/);
+test('Settings owns configured level while each journey snapshots one session level', () => {
+  assert.match(settings, /JourneyLevelSelectorButton/);
+  assert.match(screen, /snapshotJourneySessionProfile/);
+  assert.match(screen, /_sessionLanguageProfile/);
+  assert.match(screen, /journey-session-level-badge/);
   assert.match(screen, /resolveAdaptiveJourneyLevel/);
-  assert.match(screen, /_phoenixLevelController\.profile/);
-  assert.match(screen, /_languageProfile = profile/);
-  assert.match(screen, /已即时应用到当前故事与挑战/);
+  assert.doesNotMatch(screen, /_phoenixLevelController\.addListener/);
+  assert.doesNotMatch(screen, /_handlePhoenixLevelChanged/);
+  assert.doesNotMatch(screen, /JourneyLevelSelectorButton\(compact: true\)/);
   assert.doesNotMatch(screen, /journey-difficulty-selector/);
   assert.doesNotMatch(screen, /_showLanguageProfilePicker/);
 });
