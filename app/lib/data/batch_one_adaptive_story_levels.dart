@@ -326,12 +326,71 @@ BatchOneJourneyMemorySpec _shanghaiBundMemorySpecForLevel(
   );
 }
 
+BatchOneJourneyMemorySpec _xianCityWallMemorySpecForLevel(int phoenixLevel) {
+  final level = phoenixLevel.clamp(1, 10).toInt();
+  final culturalPoint = switch (level) {
+    1 => '西安城墙形成一条完整环线，周遥因此能把“一圈”误当成告别终点。',
+    2 => '永宁门是南门，也是周遥起跑、返回和继续向新家的真实转折点。',
+    3 => '宽阔墙顶曾服务防御与巡查，今天也让连续绕墙运动成为可能。',
+    4 => '现存城墙主体主要在明代形成，并承接更早城市墙体基础；“现存明城墙”不等于西安历史始于明代。',
+    5 => '墙体、城门、附属建筑与护城河构成相互关联的保护系统，不只是孤立的一堵墙。',
+    6 => '城墙的功能从防御扩展到保护、展示和公共活动，但现代使用不取消保护责任。',
+    7 => '今天看见的完整环线来自长期修缮与保护；“保存下来”不是自然静止的结果。',
+    8 => '监测、无损检测与数字化记录让古代城墙进入持续的现代工程管理。',
+    9 => '1961年的全国重点文物保护单位身份与世界遗产预备名录是不同事实，不能混同。',
+    _ => '综合明代主体、更早墙体基础、整体保护、现代监测与历史城区生活，可以把城墙理解为受保护且仍被使用的城市空间。',
+  };
+  final reviews = <RemediatedMemoryReview>[
+    xianCityWallMemory.firstWhere((item) => item.category == 'conflict'),
+    xianCityWallMemory.firstWhere((item) => item.category == 'climax'),
+    xianCityWallMemory.firstWhere((item) => item.category == 'anchor'),
+    if (level >= 3)
+      xianCityWallMemory.firstWhere((item) => item.category == 'route'),
+    if (level >= 5)
+      xianCityWallMemory.firstWhere((item) => item.category == 'turningPoint'),
+    if (level >= 7)
+      xianCityWallMemory.firstWhere((item) => item.category == 'culture'),
+    if (level >= 9)
+      xianCityWallMemory.firstWhere((item) => item.category == 'history'),
+    if (level == 10)
+      xianCityWallMemory.firstWhere((item) => item.category == 'growth'),
+  ];
+  final completionLens = switch (level) {
+    1 => '本级记住：跑完一圈以后，他选择继续跑。',
+    2 => '本级把永宁门从预定终点改成通向新家的转折点。',
+    3 => '本级按事件顺序连接搬家、完整一圈与继续向南。',
+    4 => '本级区分城墙的明代主体与更早城市历史。',
+    5 => '本级理解物理闭环不等于关系和归属的闭环。',
+    6 => '本级连接历史防御功能、现代公共使用与持续保护。',
+    7 => '本级从个人路线推断“城内/城外”在生活中不断被穿过。',
+    8 => '本级用保护、监测与日常路线建立完整因果链。',
+    9 => '本级区分国家级保护身份、预备名录与个人归属判断。',
+    _ => '本级综合时间层、保护制度、空间边界和人物选择，解释封闭城墙为何产生开放的回家路线。',
+  };
+  return BatchOneJourneyMemorySpec(
+    storyResult: level <= 2
+        ? '周遥跑完城墙一圈后没有按停跑表，而是继续跑向城外的新家。'
+        : '周遥原想用一整圈城墙结束城内生活，却在回到永宁门后让跑表继续，把老街、城墙与新家留在同一条路线中。',
+    culturalPoint: culturalPoint,
+    reviews: List<RemediatedMemoryReview>.unmodifiable(reviews),
+    longTermAnchor: '永宁门后没有按停的跑表',
+    completionSummary:
+        '“续程跑者”完成：周遥没有否认城墙的真实边界，也没有让那条边界替他结束归属。$completionLens 下一次遇到清楚的空间边界时，继续分辨它实际组织了什么，又有哪些关系仍会穿过它。',
+  );
+}
+
 BatchOneJourneyMemorySpec? batchOneMemorySpecFor(
   String journeyId, {
   int? phoenixLevel,
 }) {
   if (journeyId == shanghaiBundJourneyId) {
     return _shanghaiBundMemorySpecForLevel(
+      phoenixLevel ?? PhoenixLevelController.instance.level,
+    );
+  }
+
+  if (journeyId == xianCityWallJourneyId) {
+    return _xianCityWallMemorySpecForLevel(
       phoenixLevel ?? PhoenixLevelController.instance.level,
     );
   }

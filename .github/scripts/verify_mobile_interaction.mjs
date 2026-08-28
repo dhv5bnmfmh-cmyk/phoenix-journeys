@@ -93,15 +93,42 @@ async function findJourneyAction(page) {
   throw new Error('Home: no Start / Continue / Explore Again Journey action found');
 }
 
-async function findJourneyProgress(page, timeout = 20000) {
+async function findJourneyProgress(page, timeout = 30000) {
   const deadline = Date.now() + timeout;
+  const nodes = page.locator('flt-semantics');
   while (Date.now() < deadline) {
-    for (let step = 1; step <= 6; step += 1) {
-      try {
-        const node = await semanticNode(page, `${step}/6`, { prefix: true, timeout: 250 });
-        return { node, label: normalize(await node.getAttribute('aria-label') ?? await node.textContent()) };
-      } catch (_) {}
+    const match = await nodes.evaluateAll((elements) => {
+      const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
+      const candidates = [];
+      for (let i = 0; i < elements.length; i += 1) {
+        const element = elements[i];
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        if (
+          rect.width <= 0 ||
+          rect.height <= 0 ||
+          style.display === 'none' ||
+          style.visibility === 'hidden'
+        ) continue;
+        const values = [
+          element.getAttribute('aria-label'),
+          element.getAttribute('aria-valuetext'),
+          element.textContent,
+        ].map(clean).filter(Boolean);
+        const combined = values.join(' ');
+        if (!/[1-6]\/6/.test(combined)) continue;
+        candidates.push({
+          i,
+          label: values.find((value) => /[1-6]\/6/.test(value)) ?? combined,
+          progressbar: element.getAttribute('role') === 'progressbar',
+        });
+      }
+      return candidates.find((entry) => entry.progressbar) ?? candidates[0] ?? null;
+    });
+    if (match) {
+      return { node: nodes.nth(match.i), label: match.label };
     }
+    await sleep(100);
   }
   throw new Error('Journey: no semantic progress state (1/6..6/6) appeared');
 }

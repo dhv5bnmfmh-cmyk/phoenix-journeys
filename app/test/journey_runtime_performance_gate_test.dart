@@ -23,6 +23,14 @@ void main() {
       File('lib/data/adaptive_journey_level_runtime.dart').readAsStringSync();
   final interactive =
       File('lib/widgets/interactive_story_text.dart').readAsStringSync();
+  final narration =
+      File('lib/services/narration_controller.dart').readAsStringSync();
+  final appState = File('lib/state/app_state.dart').readAsStringSync();
+  final selector =
+      File('lib/widgets/journey_level_selector_button.dart').readAsStringSync();
+  final levelStore =
+      File('lib/services/language_level_preference_store.dart')
+          .readAsStringSync();
 
   test('Forbidden City Lv1 Lv5 Lv10 reuse immutable level snapshots', () {
     warmForbiddenCityContentCache();
@@ -173,6 +181,123 @@ void main() {
     );
     expect(interactive, contains('if (textChanged || entriesChanged)'));
     expect(interactive, contains('_buildSegments();'));
+  });
+
+  test('level switch visible swap is outside persistence and engine cleanup', () {
+    final levelChange = _section(
+      journey,
+      'Future<void> _applyPhoenixLevelChange()',
+      'void _checkpointNarrationBeforeStepChange()',
+    );
+    final visibleSwap = levelChange.indexOf('_languageProfile = profile;');
+    final postFrame = levelChange.indexOf('addPostFrameCallback');
+    final guideCleanup = levelChange.indexOf('_appState.clearGuideFeedback()');
+
+    expect(visibleSwap, greaterThanOrEqualTo(0));
+    expect(postFrame, greaterThan(visibleSwap));
+    expect(guideCleanup, greaterThan(postFrame));
+    expect(
+      levelChange,
+      contains('final narrationCancellationToken =\n        _narration.cancelPlaybackImmediately();'),
+    );
+    expect(levelChange, contains('final narrationPositionFuture ='));
+    expect(levelChange, contains('final speechRateFuture ='));
+    expect(levelChange, isNot(contains('await _stopJourneyNarration();')));
+  });
+
+  test('narration cancellation separates immediate state from engine stop', () {
+    expect(narration, contains('int cancelPlaybackImmediately('));
+    expect(
+      narration,
+      contains('Future<void> flushCancelledPlayback(int cancellationToken) async'),
+    );
+    expect(
+      narration,
+      contains('if (cancellationToken != _playbackIntentToken) return;'),
+    );
+    expect(narration, contains('final shouldStopEngine = _engineStopPending;'));
+    expect(
+      narration,
+      contains('_stopSpeechEngine(advanceSessionToken: false)'),
+    );
+    expect(
+      narration,
+      contains('(_sharedSpeechRate - rate).abs() >= .001'),
+    );
+  });
+
+  test('stale level cleanup is rejected before dangerous side effects', () {
+    final levelChange = _section(
+      journey,
+      'Future<void> _applyPhoenixLevelChange()',
+      'void _checkpointNarrationBeforeStepChange()',
+    );
+    final settleStart = levelChange.indexOf('Future<void> _settlePhoenixLevelChange');
+    expect(settleStart, greaterThanOrEqualTo(0));
+    final settle = levelChange.substring(settleStart);
+    final guard = settle.indexOf('if (!mounted || token != _levelChangeToken) return;');
+    final flush = settle.indexOf('_narration.flushCancelledPlayback(');
+    final feedback = settle.indexOf('_appState.clearGuideFeedback()');
+    expect(guard, greaterThanOrEqualTo(0));
+    expect(flush, greaterThan(guard));
+    expect(feedback, greaterThan(guard));
+  });
+
+  test('narration persistence is serialized so latest intent wins on disk', () {
+    expect(
+      appState,
+      contains('Future<void> _journeyNarrationPersistence = Future<void>.value();'),
+    );
+    expect(
+      appState,
+      contains('Future<void> _queueJourneyNarrationPersistence('),
+    );
+    expect(appState, contains('final previous = _journeyNarrationPersistence;'));
+    expect(appState, contains('await previous;'));
+    expect(
+      appState,
+      contains('_journeyNarrationPersistence = next.catchError((_) {});'),
+    );
+  });
+
+  test('narration position memory clears before SharedPreferences I/O', () {
+    final clear = _section(
+      appState,
+      'Future<void> clearJourneyNarrationPosition',
+      'Future<void> saveGuideFeedback',
+    );
+    final memoryClear = clear.indexOf('journeyNarrationContentId = null;');
+    final persistence =
+        clear.indexOf('return _queueJourneyNarrationPersistence(');
+    expect(memoryClear, greaterThanOrEqualTo(0));
+    expect(persistence, greaterThan(memoryClear));
+  });
+
+  test('rapid level intent is not blocked by persistence', () {
+    expect(selector, isNot(contains('_changing')));
+    expect(selector, contains('Future<void> _levelPersistence'));
+    expect(selector, contains('_store.persistPhoenixLevel(next)'));
+    expect(selector, isNot(contains('await _store.savePhoenixLevel(next)')));
+    expect(levelStore, contains('Future<void> persistPhoenixLevel(int level)'));
+  });
+
+  test('level switch builds only the currently visible stage', () {
+    final build = _section(
+      journey,
+      'Widget build(BuildContext context)',
+      'Widget _page({',
+    );
+
+    expect(build, contains('final page = switch (step) {'));
+    expect(build, contains('0 => _storyPage()'));
+    expect(build, contains('1 => _wordsPage()'));
+    expect(build, contains('2 => _discoveryPage()'));
+    expect(build, contains('3 => stepThreePage'));
+    expect(build, contains('4 => stepFourPage'));
+    expect(build, contains('_ => _completePage()'));
+    expect(build, contains('child: page'));
+    expect(build, isNot(contains('final pages = <Widget>[')));
+    expect(build, isNot(contains('pages[step]')));
   });
 
   test('performance remediation preserves shared cinematic Story architecture', () {

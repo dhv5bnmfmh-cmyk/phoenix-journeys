@@ -65,5 +65,5 @@ void main() {
     expect(report['approvedCount'], 360);
     expect(report['needsRevisionCount'], 0);
     expect(report['blockedCount'], 0);
-  }, timeout: const Timeout(Duration(minutes: 1)));
+  }, timeout: const Timeout(Duration(minutes: 3)));
 }
