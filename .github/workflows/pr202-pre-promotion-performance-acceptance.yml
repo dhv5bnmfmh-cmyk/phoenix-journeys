@@ -131,6 +131,40 @@ jobs:
           name: pr202-entry-preflight-${{ matrix.city }}-${{ matrix.browser }}
           path: test-results/
 
+  challenge_preflight:
+    needs: [deploy_candidate, entry_preflight]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+        city: [beijing, shanghai, xian]
+    env:
+      PROBE_BROWSER: ${{ matrix.browser }}
+      PROBE_CITY: ${{ matrix.city }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Playwright
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/perf-node" playwright
+          "$RUNNER_TEMP/perf-node/node_modules/.bin/playwright" install --with-deps "$PROBE_BROWSER"
+      - name: Verify mature Challenge interaction on exact candidate
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/perf-node/node_modules/playwright/index.mjs
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          node --check .github/scripts/pr202_perf_entry_wrapper.mjs
+          CHALLENGE_PREFLIGHT_ONLY=1 PERF_URL="$CANDIDATE_URL" CANDIDATE_SHA="$CANDIDATE_SHA" \
+            node .github/scripts/pr202_perf_entry_wrapper.mjs \
+            2>&1 | tee "test-results/challenge-preflight-${PROBE_CITY}-${PROBE_BROWSER}.log"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr202-challenge-preflight-${{ matrix.city }}-${{ matrix.browser }}
+          path: test-results/
+
   eager_build_profile:
     needs: [deploy_profile, entry_preflight]
     runs-on: ubuntu-latest
@@ -164,7 +198,7 @@ jobs:
           path: test-results/
 
   performance_matrix:
-    needs: [deploy_candidate, entry_preflight]
+    needs: [deploy_candidate, entry_preflight, challenge_preflight]
     runs-on: ubuntu-latest
     timeout-minutes: 55
     strategy:

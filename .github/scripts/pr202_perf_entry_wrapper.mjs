@@ -53,66 +53,14 @@ const perfEntryReplacement = `async function assertJourneyEntryIdentity(page) {
   throw new Error(\`Journey entry did not settle with identity + 1/6 + Story evidence: \${journey.title}; snapshot=\${snapshot.slice(0, 1200)}\`);
 }`;
 
-const challengeTapOriginal = `    await page.locator('flt-semantics').nth(matches[0].index).evaluate((e)=>e.click()); await sleep(70);`;
-const challengeTapReplacement = `    await page.locator('flt-semantics').nth(matches[0].index).tap({ timeout: 10000 }); await sleep(120);`;
-
-const challengeTargetsOriginal = `  const count = await requiredChallengeSelections(page); const targets = await challengeOptionTargets(page);
-  if (targets.length < count) throw new Error(\`only \${targets.length} challenge targets; need \${count}\`);`;
-const challengeTargetsReplacement = `  const count = await requiredChallengeSelections(page);
-  const targetDeadline = Date.now() + 6000;
-  let targets = [];
-  while (Date.now() < targetDeadline) {
-    targets = await challengeOptionTargets(page);
-    if (targets.length > 0) break;
-    await sleep(100);
-  }
-  if (!targets.length) throw new Error('no actionable challenge target after settle; need '+count+' sequential selection(s)');`;
-
-const actionableChallengeOriginal = `    if (!r.visible || r.disabled || !['button','group','checkbox'].includes(r.role)) return false;`;
-const actionableChallengeReplacement = `    if (!r.visible || r.disabled || !['button','checkbox'].includes(r.role)) return false;`;
-
-const letteredChallengeOriginal = `  const lettered = rs.filter((r) => r.visible && !r.disabled && /^[A-D]\\s/.test(clean(r.label)) && /[\\u3400-\\u9fff]/.test(clean(r.label))).sort((a,b)=>a.index-b.index);`;
-const letteredChallengeReplacement = `  const lettered = rs.filter((r) => r.visible && !r.disabled && r.role==='button' && /^[A-D]\\s/.test(clean(r.label)) && /[\\u3400-\\u9fff]/.test(clean(r.label))).sort((a,b)=>a.index-b.index);`;
-
-const challengeSelectionOriginal = `  for (const t of targets.slice(0,count)) {
-    const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((t.label&&clean(r.label)===t.label)||(!t.label&&r.role===t.role&&recordText(r)===t.text))).sort((a,b)=>a.area-b.area);
-    if (!matches.length) throw new Error('challenge target disappeared');
-    await page.locator('flt-semantics').nth(matches[0].index).tap({ timeout: 10000 }); await sleep(120);
-  }`;
-const challengeSelectionReplacement = `  let submissionReady = false;
-  const chosen = new Set();
-  const selectionDeadline = Date.now() + 12000;
-  let selectionCount = 0;
-  while (Date.now() < selectionDeadline && selectionCount < Math.max(count * 3, 8)) {
-    const before = await records(page);
-    submissionReady = before.some((r)=>r.visible&&!r.disabled&&r.role==='button'&&recordText(r).startsWith('提交第'));
-    if (submissionReady) break;
-    const liveTargets = await challengeOptionTargets(page);
-    const target = liveTargets.find((candidate) => {
-      const key = [candidate.role,candidate.label,candidate.text].join('|');
-      return !chosen.has(key);
-    });
-    if (!target) {
-      await sleep(120);
-      continue;
-    }
-    const key = [target.role,target.label,target.text].join('|');
-    const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((target.label&&clean(r.label)===target.label)||(!target.label&&r.role===target.role&&recordText(r)===target.text))).sort((a,b)=>a.area-b.area);
-    if (!matches.length) { await sleep(100); continue; }
-    await page.locator('flt-semantics').nth(matches[0].index).evaluate((element)=>element.click());
-    chosen.add(key);
-    selectionCount += 1;
-    const readyDeadline=Date.now()+1800;
-    while(Date.now()<readyDeadline){const after=await records(page);submissionReady=after.some((r)=>r.visible&&!r.disabled&&r.role==='button'&&recordText(r).startsWith('提交第'));if(submissionReady)break;const nextTargets=await challengeOptionTargets(page);if(nextTargets.some((candidate)=>!chosen.has([candidate.role,candidate.label,candidate.text].join('|'))))break;await sleep(80);}
-    if(submissionReady) break;
-  }
-  if(!submissionReady) throw new Error('Challenge sequential selection did not enable submit after '+selectionCount+' click(s); required='+count);`;
+// Challenge option discovery and activation intentionally reuse the compressed runner's
+// mature formal-E2E contract. Do not layer role filtering or synthetic de-duplication here.
 
 const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   await completeChallenge(page);`;
 const challengeReadyReplacement = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   const challengeDeadline=Date.now()+20000;while(Date.now()<challengeDeadline){if(await exists(page,'提交第 1 / 3 次答案',{role:'button',prefix:true,timeout:300}))break;const snapshot=await visibleText(page);if(snapshot.includes('3/6')&&await exists(page,'继续',{role:'button',prefix:true,timeout:300}))await activate(page,'继续',{prefix:true,timeout:1200});await sleep(100);}await findSemantic(page,'提交第 1 / 3 次答案',{role:'button',prefix:true,timeout:5000});await waitStage(page,4,5000);
-  await completeChallenge(page);`;
+  await completeChallenge(page); if(process.env.CHALLENGE_PREFLIGHT_ONLY==='1'){console.log('CHALLENGE_PREFLIGHT_PASS city='+cityKey+' browser='+browserName);process.exit(0);}`;
 
 const stageSelectOriginal = `  await activate(page,stageLabels[stage],{prefix:false,timeout:8000});
   await waitStage(page,target,12000); await ensureVocabularyPopupClosed(page); await sleep(120);`;
@@ -152,11 +100,6 @@ const narrationProofReplacement = `  if(stage===4||stage===5){ await activate(pa
 
 for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
-  [challengeTapOriginal, challengeTapReplacement, 'challenge semantic tap'],
-  [challengeTargetsOriginal, challengeTargetsReplacement, 'challenge target settle'],
-  [actionableChallengeOriginal, actionableChallengeReplacement, 'actionable Challenge controls'],
-  [letteredChallengeOriginal, letteredChallengeReplacement, 'lettered Challenge button role'],
-  [challengeSelectionOriginal, challengeSelectionReplacement, 'Challenge submit readiness'],
   [challengeReadyOriginal, challengeReadyReplacement, 'challenge settled entry'],
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
   [desktopTouchOriginal, desktopTouchReplacement, 'desktop semantic touch context'],
