@@ -356,7 +356,7 @@ class _PhoenixLevelGuideSheet extends StatelessWidget {
               ),
             ),
             child: const Text(
-              '使用 − / + 调整等级后，当前故事、重点词汇、文化发现、挑战与朗读速度会立即同步更新。',
+              '新的等级将在下一次进入旅程时应用；已经打开的旅程会保持当前等级。',
               style: TextStyle(
                 color: Color(0xFF5B4237),
                 fontSize: 11.5,

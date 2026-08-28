@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_level_catalog.dart';
 import '../services/journey_location_binding.dart';
+import '../services/language_level_preference_store.dart';
 
 enum ScriptMode { simplified, traditional }
 
@@ -108,6 +109,8 @@ class AppState extends ChangeNotifier {
 
   final DateTime Function() _clock;
   final Future<SharedPreferences> Function() _preferencesLoader;
+  static const LanguageLevelPreferenceStore _languageLevelStore =
+      LanguageLevelPreferenceStore();
   Future<void> _journeyNarrationPersistence = Future<void>.value();
 
   ScriptMode scriptMode = ScriptMode.simplified;
@@ -269,6 +272,7 @@ class AppState extends ChangeNotifier {
           ? ScriptMode.traditional
           : ScriptMode.simplified;
       translationLanguage = prefs.getString('translationLanguage') ?? '越南语';
+      await _languageLevelStore.initializePhoenixLevel();
       memories
         ..clear()
         ..addAll(prefs.getStringList('memories') ?? <String>[]);
@@ -630,7 +634,7 @@ class AppState extends ChangeNotifier {
   }
 
   void setTab(int value) {
-    selectedTab = value;
+    selectedTab = value.clamp(0, 4).toInt();
     notifyListeners();
   }
 

@@ -15,7 +15,6 @@ import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
 import '../models/journey_background.dart';
 import '../models/language_proficiency.dart';
-import '../services/language_level_preference_store.dart';
 import '../services/phoenix_level_controller.dart';
 import '../services/narration_controller.dart';
 import '../services/phoenix_ai_service.dart';
@@ -26,7 +25,6 @@ import '../widgets/city_journey_stamp.dart';
 import '../widgets/destination_background.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_challenge_panel.dart';
-import '../widgets/journey_level_selector_button.dart';
 import '../widgets/journey_share_button.dart';
 import '../widgets/special_realm_story_intro.dart';
 import '../widgets/journey_progress_header.dart';
@@ -95,6 +93,11 @@ String narrationContentSignature(List<NarrationItem> items) {
 }
 
 @visibleForTesting
+ChineseProficiencyProfile snapshotJourneySessionProfile(
+  PhoenixLevelController controller,
+) => controller.profile;
+
+@visibleForTesting
 enum PilotN1CompositePage { reflection, challenge, writing, memory }
 
 @visibleForTesting
@@ -155,12 +158,10 @@ class _JourneyScreenState extends State<JourneyScreen>
   bool _initialized = false;
   static const PhoenixLanguageLevelAgent _languageLevelAgent =
       PhoenixLanguageLevelAgent();
-  static const LanguageLevelPreferenceStore _languageLevelStore =
-      LanguageLevelPreferenceStore();
   static final PhoenixLevelController _phoenixLevelController =
       PhoenixLevelController.instance;
-  ChineseProficiencyProfile? _languageProfile;
-  int _levelChangeToken = 0;
+  late final ChineseProficiencyProfile _sessionLanguageProfile;
+  ChineseProficiencyProfile? get _languageProfile => _sessionLanguageProfile;
   Timer? _narrationCheckpointTimer;
   int _lastSavedNarrationOffset = 0;
   JourneyLevelContent? _cachedLevelContent;
@@ -182,7 +183,8 @@ class _JourneyScreenState extends State<JourneyScreen>
     WidgetsBinding.instance.addObserver(this);
     _narration = NarrationController();
     _narration.addListener(_handleNarrationCheckpoint);
-    _phoenixLevelController.addListener(_handlePhoenixLevelChanged);
+    _sessionLanguageProfile =
+        snapshotJourneySessionProfile(_phoenixLevelController);
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
     _experience = requireDailyJourneyExperience(journeyId);
@@ -229,7 +231,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     _pilotChallengeVisible = _isSummerPalacePilot && _guideFeedback != null;
     _pilotMemoryVisible = _isSummerPalacePilot && _writingFeedback != null;
     _initialized = true;
-    unawaited(_loadLanguageProfile());
+    unawaited(_initializeJourneySession());
   }
 
   @override
@@ -249,7 +251,6 @@ class _JourneyScreenState extends State<JourneyScreen>
       unawaited(_persistNarrationPosition());
       unawaited(_persistProgress());
     }
-    _phoenixLevelController.removeListener(_handlePhoenixLevelChanged);
     _narration.removeListener(_handleNarrationCheckpoint);
     _narrationCheckpointTimer?.cancel();
     _stageNarrationIntent += 1;
@@ -583,16 +584,11 @@ class _JourneyScreenState extends State<JourneyScreen>
     Navigator.of(context).pop();
   }
 
-  Future<void> _loadLanguageProfile() async {
-    final profile = await _languageLevelStore.load();
+  Future<void> _initializeJourneySession() async {
+    await _narration.setSpeechRate(
+      _languageLevelAgent.planFor(_sessionLanguageProfile).speechRate,
+    );
     if (!mounted) return;
-    if (profile != null) {
-      await _narration.setSpeechRate(
-        _languageLevelAgent.planFor(profile).speechRate,
-      );
-      if (!mounted) return;
-      setState(() => _languageProfile = profile);
-    }
     _restoreNarrationPosition();
   }
 
@@ -677,79 +673,6 @@ class _JourneyScreenState extends State<JourneyScreen>
       offset: offset,
     );
     _lastSavedNarrationOffset = offset;
-  }
-
-  void _handlePhoenixLevelChanged() {
-    unawaited(_applyPhoenixLevelChange());
-  }
-
-  Future<void> _applyPhoenixLevelChange() async {
-    if (!_initialized) return;
-    final token = ++_levelChangeToken;
-    final profile = _phoenixLevelController.profile;
-
-    _stageNarrationIntent += 1;
-    _stageNarrationRequestedId = null;
-    final narrationCancellationToken =
-        _narration.cancelPlaybackImmediately();
-    final narrationPositionFuture =
-        _appState.clearJourneyNarrationPosition();
-    final speechRateFuture = _narration.setSpeechRate(
-      _languageLevelAgent.planFor(profile).speechRate,
-    );
-
-    if (!mounted || token != _levelChangeToken) return;
-    setState(() {
-      _languageProfile = profile;
-      _guideFeedback = null;
-      _writingFeedback = null;
-      _challengeResolved = false;
-      _pilotChallengeVisible = false;
-      _pilotMemoryVisible = false;
-      _challengeSeed += 1;
-    });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      unawaited(
-        _settlePhoenixLevelChange(
-          token: token,
-          narrationCancellationToken: narrationCancellationToken,
-          narrationPositionFuture: narrationPositionFuture,
-          speechRateFuture: speechRateFuture,
-        ),
-      );
-    });
-
-    final messenger = ScaffoldMessenger.of(context);
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            _appState.displayText('${profile.displayLabel} 已即时应用到当前故事与挑战'),
-          ),
-          duration: const Duration(milliseconds: 1200),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-  }
-
-  Future<void> _settlePhoenixLevelChange({
-    required int token,
-    required int narrationCancellationToken,
-    required Future<void> narrationPositionFuture,
-    required Future<void> speechRateFuture,
-  }) async {
-    if (!mounted || token != _levelChangeToken) return;
-    await Future.wait([
-      _narration.flushCancelledPlayback(narrationCancellationToken),
-      narrationPositionFuture,
-      speechRateFuture,
-      _appState.clearGuideFeedback(),
-      _appState.clearWritingFeedback(),
-    ]);
-    if (!mounted || token != _levelChangeToken) return;
   }
 
   void _checkpointNarrationBeforeStepChange() {
@@ -1299,9 +1222,34 @@ class _JourneyScreenState extends State<JourneyScreen>
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
           ),
           actions: [
-            const Padding(
-              padding: EdgeInsets.only(right: 4),
-              child: JourneyLevelSelectorButton(compact: true),
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: Semantics(
+                label:
+                    '当前旅程 Phoenix 中文等级 ${_sessionLanguageProfile.phoenixLevel}',
+                readOnly: true,
+                child: Container(
+                  key: const ValueKey('journey-session-level-badge'),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFDF4DF).withValues(alpha: .96),
+                    borderRadius: BorderRadius.circular(99),
+                    border: Border.all(
+                      color: PhoenixTheme.gold.withValues(alpha: .72),
+                      width: .8,
+                    ),
+                  ),
+                  child: Text(
+                    'Lv.${_sessionLanguageProfile.phoenixLevel}',
+                    style: const TextStyle(
+                      color: PhoenixTheme.red,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
             ),
             Consumer<AppState>(
               builder: (_, state, __) => TextButton(
