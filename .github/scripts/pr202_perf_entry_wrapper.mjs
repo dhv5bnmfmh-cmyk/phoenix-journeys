@@ -54,7 +54,19 @@ const perfEntryReplacement = `async function assertJourneyEntryIdentity(page) {
 }`;
 
 const challengeTapOriginal = `    await page.locator('flt-semantics').nth(matches[0].index).evaluate((e)=>e.click()); await sleep(70);`;
-const challengeTapReplacement = `    await page.locator('flt-semantics').nth(matches[0].index).tap({ timeout: 10000 }); await sleep(120);`;
+const challengeTapReplacement = `    await page.locator('flt-semantics').nth(matches[0].index).click({ timeout: 10000 }); await sleep(120);`;
+
+const challengeTargetsOriginal = `  const count = await requiredChallengeSelections(page); const targets = await challengeOptionTargets(page);
+  if (targets.length < count) throw new Error(\`only \${targets.length} challenge targets; need \${count}\`);`;
+const challengeTargetsReplacement = `  const count = await requiredChallengeSelections(page);
+  const targetDeadline = Date.now() + 6000;
+  let targets = [];
+  while (Date.now() < targetDeadline) {
+    targets = await challengeOptionTargets(page);
+    if (targets.length >= count) break;
+    await sleep(100);
+  }
+  if (targets.length < count) throw new Error(\`only \${targets.length} challenge targets after settle; need \${count}\`);`;
 
 const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   await completeChallenge(page);`;
@@ -72,7 +84,7 @@ const stageSelectReplacement = `  const wanted = stageLabels[stage];
       record.visible && !record.disabled && record.role === 'button' &&
       (clean(record.label) === wanted || recordText(record) === wanted));
     if (candidates.length) {
-      await page.locator('flt-semantics').nth(candidates.sort((a,b)=>a.area-b.area)[0].index).tap({ timeout: 10000 });
+      await page.locator('flt-semantics').nth(candidates.sort((a,b)=>a.area-b.area)[0].index).click({ timeout: 10000 });
       selected = true;
       break;
     }
@@ -84,6 +96,7 @@ const stageSelectReplacement = `  const wanted = stageLabels[stage];
 for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
   [challengeTapOriginal, challengeTapReplacement, 'challenge semantic tap'],
+  [challengeTargetsOriginal, challengeTargetsReplacement, 'challenge target settle'],
   [challengeReadyOriginal, challengeReadyReplacement, 'challenge settled entry'],
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
 ]) {
