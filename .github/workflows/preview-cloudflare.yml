@@ -92,6 +92,10 @@ jobs:
           PHOENIX_GENERATE_QUALITY_REPORT: '1'
           PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
           PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
+        run: flutter test test/journey_quality_report_ci_test.dart --reporter expanded
+
+      - name: Test Flutter app
+        working-directory: app
         run: flutter test
 
       - name: Upload journey quality report

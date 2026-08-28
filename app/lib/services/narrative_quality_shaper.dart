@@ -7,6 +7,8 @@ import '../data/journey_level_catalog.dart';
 import '../models/language_proficiency.dart';
 
 const _languageLevelAgent = PhoenixLanguageLevelAgent();
+final _storyPacketsByExperience =
+    Expando<List<_NarrativePacket>>('narrative story packets');
 
 class _NarrativePacket {
   const _NarrativePacket({
@@ -74,10 +76,15 @@ int _sentenceLimit(PhoenixReadingBand band, int sourceLength) => switch (band) {
     };
 
 List<_NarrativePacket> _storyPackets(DailyJourneyExperience experience) {
+  final cached = _storyPacketsByExperience[experience];
+  if (cached != null) return cached;
+
   final paragraphs = experience.content.storyParagraphs;
   final annotations = experience.storyAnnotations;
   if (paragraphs.isEmpty || annotations.isEmpty) {
-    return const <_NarrativePacket>[];
+    const empty = <_NarrativePacket>[];
+    _storyPacketsByExperience[experience] = empty;
+    return empty;
   }
 
   final packets = <_NarrativePacket>[];
@@ -108,7 +115,9 @@ List<_NarrativePacket> _storyPackets(DailyJourneyExperience experience) {
       );
     }
   }
-  return packets;
+  final immutablePackets = List<_NarrativePacket>.unmodifiable(packets);
+  _storyPacketsByExperience[experience] = immutablePackets;
+  return immutablePackets;
 }
 
 _NarrativeShape _shapeStory(
