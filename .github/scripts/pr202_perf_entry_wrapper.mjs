@@ -80,8 +80,9 @@ const challengeSelectionReplacement = `  let submissionReady = false;
   for (const t of targets) {
     const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((t.label&&clean(r.label)===t.label)||(!t.label&&r.role===t.role&&recordText(r)===t.text))).sort((a,b)=>a.area-b.area);
     if (!matches.length) continue;
-    await page.locator('flt-semantics').nth(matches[0].index).tap({timeout:10000}); await sleep(120);
-    const after=await records(page); submissionReady=after.some((r)=>r.visible&&!r.disabled&&r.role==='button'&&recordText(r).startsWith('提交第'));
+    await page.locator('flt-semantics').nth(matches[0].index).tap({timeout:10000});
+    const readyDeadline=Date.now()+1600;
+    while(Date.now()<readyDeadline){const after=await records(page);submissionReady=after.some((r)=>r.visible&&!r.disabled&&r.role==='button'&&recordText(r).startsWith('提交第'));if(submissionReady)break;await sleep(80);}
     if(submissionReady) break;
   }
   if(!submissionReady) throw new Error(\`Challenge selection did not enable submit after \${targets.length} actionable controls\`);`;
@@ -116,7 +117,7 @@ const desktopTouchOriginal = `const context=browserName==='webkit' ? await brows
 const desktopTouchReplacement = `const context=browserName==='webkit' ? await browser.newContext({...devices['iPhone 13']}) : await browser.newContext({viewport:{width:1440,height:1000},hasTouch:true});`;
 
 const progressStripOriginal = `  await clickSemantic(page,'课程已完成 · 可自由选择',{timeout:5000});`;
-const progressStripReplacement = `  await activate(page,'课程已完成 · 可自由选择',{prefix:false,timeout:5000});`;
+const progressStripReplacement = `  const progressDeadline=Date.now()+5000;let progressStrip=null;while(Date.now()<progressDeadline){const candidates=(await records(page)).filter((r)=>r.visible&&recordText(r).includes('课程已完成 · 可自由选择')).sort((a,b)=>b.area-a.area);if(candidates.length){progressStrip=candidates[0];break;}await sleep(80);}if(progressStrip==null)throw new Error('completed progress strip not found');await page.locator('flt-semantics').nth(progressStrip.index).tap({timeout:10000});`;
 
 for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
