@@ -127,25 +127,18 @@ void main() {
     expect(narrationDefinitions, isNot(contains('reveal')));
   });
 
-  test('narration cache identity follows Journey level content invalidation', () {
+  test('narration cache identity follows the locked Journey session content', () {
     final resolver = _section(
       journey,
       'JourneyLevelContent get _levelContent',
       'ReadingGenerationPlan? get _generationPlan',
     );
-    final levelChange = _section(
-      journey,
-      'Future<void> _applyPhoenixLevelChange()',
-      'void _checkpointNarrationBeforeStepChange()',
-    );
 
     expect(resolver, contains('final profile = _languageProfile;'));
-    expect(resolver, contains('final difficulty = _appState.journeyDifficulty;'));
-    expect(resolver, contains('final knownWordsHash = _knownWordsFingerprint;'));
     expect(resolver, contains('identical(_cachedLevelProfile, profile)'));
-    expect(resolver, contains('_cachedLevelDifficulty == difficulty'));
-    expect(resolver, contains('_cachedKnownWordsHash == knownWordsHash'));
-    expect(levelChange, contains('_languageProfile = profile;'));
+    expect(journey, contains('snapshotJourneySessionProfile('));
+    expect(journey, contains('late final ChineseProficiencyProfile _sessionLanguageProfile;'));
+    expect(journey, isNot(contains('_phoenixLevelController.addListener')));
     expect(
       journey,
       contains('_experience = requireDailyJourneyExperience(journeyId);'),
@@ -183,28 +176,6 @@ void main() {
     expect(interactive, contains('_buildSegments();'));
   });
 
-  test('level switch visible swap is outside persistence and engine cleanup', () {
-    final levelChange = _section(
-      journey,
-      'Future<void> _applyPhoenixLevelChange()',
-      'void _checkpointNarrationBeforeStepChange()',
-    );
-    final visibleSwap = levelChange.indexOf('_languageProfile = profile;');
-    final postFrame = levelChange.indexOf('addPostFrameCallback');
-    final guideCleanup = levelChange.indexOf('_appState.clearGuideFeedback()');
-
-    expect(visibleSwap, greaterThanOrEqualTo(0));
-    expect(postFrame, greaterThan(visibleSwap));
-    expect(guideCleanup, greaterThan(postFrame));
-    expect(
-      levelChange,
-      contains('final narrationCancellationToken =\n        _narration.cancelPlaybackImmediately();'),
-    );
-    expect(levelChange, contains('final narrationPositionFuture ='));
-    expect(levelChange, contains('final speechRateFuture ='));
-    expect(levelChange, isNot(contains('await _stopJourneyNarration();')));
-  });
-
   test('narration cancellation separates immediate state from engine stop', () {
     expect(narration, contains('int cancelPlaybackImmediately('));
     expect(
@@ -224,23 +195,6 @@ void main() {
       narration,
       contains('(_sharedSpeechRate - rate).abs() >= .001'),
     );
-  });
-
-  test('stale level cleanup is rejected before dangerous side effects', () {
-    final levelChange = _section(
-      journey,
-      'Future<void> _applyPhoenixLevelChange()',
-      'void _checkpointNarrationBeforeStepChange()',
-    );
-    final settleStart = levelChange.indexOf('Future<void> _settlePhoenixLevelChange');
-    expect(settleStart, greaterThanOrEqualTo(0));
-    final settle = levelChange.substring(settleStart);
-    final guard = settle.indexOf('if (!mounted || token != _levelChangeToken) return;');
-    final flush = settle.indexOf('_narration.flushCancelledPlayback(');
-    final feedback = settle.indexOf('_appState.clearGuideFeedback()');
-    expect(guard, greaterThanOrEqualTo(0));
-    expect(flush, greaterThan(guard));
-    expect(feedback, greaterThan(guard));
   });
 
   test('narration persistence is serialized so latest intent wins on disk', () {
@@ -281,7 +235,7 @@ void main() {
     expect(levelStore, contains('Future<void> persistPhoenixLevel(int level)'));
   });
 
-  test('level switch builds only the currently visible stage', () {
+  test('Journey builds only the currently visible stage', () {
     final build = _section(
       journey,
       'Widget build(BuildContext context)',

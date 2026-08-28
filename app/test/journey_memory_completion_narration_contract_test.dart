@@ -35,18 +35,8 @@ void main() {
         'Future<void> _restartJourney() async {\n    await _stopJourneyNarration();',
       ),
     );
-    expect(
-      journey,
-      contains('_narration.cancelPlaybackImmediately();'),
-    );
-    expect(
-      journey,
-      contains('final narrationPositionFuture ='),
-    );
-    expect(
-      journey,
-      contains('_narration.flushCancelledPlayback(narrationCancellationToken)'),
-    );
+    expect(journey, contains('_narration.dispose();'));
+    expect(journey, contains('await _narration.stop();'));
   });
 
   test('stage narration binds active Journey level and displayed script', () {
