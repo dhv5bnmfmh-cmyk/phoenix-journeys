@@ -6,6 +6,36 @@ import 'journey_level_catalog.dart';
 
 const xianCityWallJourneyId = 'xian-city-wall';
 
+int _xianPinyinProfileCalls = 0;
+int _xianPinyinProfileMicros = 0;
+final Map<String, int> _xianPinyinProfileSources = <String, int>{};
+final Map<String, int> _xianWordProfileMicros = <String, int>{};
+final Map<int, int> _xianLevelProfileMicros = <int, int>{};
+
+void resetXianLevelPerformanceProfile() {
+  _xianPinyinProfileCalls = 0;
+  _xianPinyinProfileMicros = 0;
+  _xianPinyinProfileSources.clear();
+  _xianWordProfileMicros.clear();
+  _xianLevelProfileMicros.clear();
+}
+
+Map<String, Object> xianLevelPerformanceProfileSnapshot() {
+  final duplicateCalls = _xianPinyinProfileSources.values.fold<int>(
+    0,
+    (total, calls) => total + (calls > 1 ? calls - 1 : 0),
+  );
+  return <String, Object>{
+    'pinyinCalls': _xianPinyinProfileCalls,
+    'pinyinMicros': _xianPinyinProfileMicros,
+    'uniqueSources': _xianPinyinProfileSources.length,
+    'duplicateCalls': duplicateCalls,
+    'sourceCalls': Map<String, int>.unmodifiable(_xianPinyinProfileSources),
+    'wordMicros': Map<String, int>.unmodifiable(_xianWordProfileMicros),
+    'levelMicros': Map<int, int>.unmodifiable(_xianLevelProfileMicros),
+  };
+}
+
 class XianNarrativeDna {
   const XianNarrativeDna({
     required this.narrativeIdentity,
@@ -134,6 +164,7 @@ const _xianStoryEnglish = <List<String>>[
 ];
 
 String _xianPinyin(String chinese) {
+  final stopwatch = Stopwatch()..start();
   var pinyin = PinyinHelper.getPinyinE(
     chinese,
     separator: ' ',
@@ -162,6 +193,14 @@ String _xianPinyin(String chinese) {
       pinyin = pinyin.replaceAll(correction[1], correction[2]);
     }
   }
+  stopwatch.stop();
+  _xianPinyinProfileCalls += 1;
+  _xianPinyinProfileMicros += stopwatch.elapsedMicroseconds;
+  _xianPinyinProfileSources.update(
+    chinese,
+    (calls) => calls + 1,
+    ifAbsent: () => 1,
+  );
   return pinyin;
 }
 
@@ -295,6 +334,19 @@ const xianCityWallFactFictionLedger = <Map<String, String>>[
 ];
 
 WordEntry _xianWordWithStoryExamples(
+  int level,
+  List<String> paragraphs,
+  WordEntry word,
+) {
+  final stopwatch = Stopwatch()..start();
+  final result = _buildXianWordWithStoryExamples(level, paragraphs, word);
+  stopwatch.stop();
+  _xianWordProfileMicros['Lv$level:${word.word}'] =
+      stopwatch.elapsedMicroseconds;
+  return result;
+}
+
+WordEntry _buildXianWordWithStoryExamples(
   int level,
   List<String> paragraphs,
   WordEntry word,
@@ -504,6 +556,14 @@ final xianCityWallOnePassRemediation = RemediatedJourney(
 
 JourneyLevelContent xianCityWallOnePassLevelContent(int requestedLevel) {
   final level = requestedLevel.clamp(1, 10).toInt();
+  final stopwatch = Stopwatch()..start();
+  final result = _buildXianCityWallOnePassLevelContent(level);
+  stopwatch.stop();
+  _xianLevelProfileMicros[level] = stopwatch.elapsedMicroseconds;
+  return result;
+}
+
+JourneyLevelContent _buildXianCityWallOnePassLevelContent(int level) {
   final base = xianCityWallOnePassLevels[level - 1];
   final story = base.storyParagraphs.join();
   final visibleWords = xianCityWallOnePassWords
