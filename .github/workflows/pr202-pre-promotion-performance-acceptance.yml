@@ -118,9 +118,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p test-results
-          gunzip -c .github/scripts/pr202_build_profile.mjs.gz > "$RUNNER_TEMP/pr202_build_profile.mjs"
-          node --check "$RUNNER_TEMP/pr202_build_profile.mjs"
-          PROFILE_URL="$PROFILE_URL" PROFILE_SHA="$PROFILE_SHA" node "$RUNNER_TEMP/pr202_build_profile.mjs" 2>&1 | tee "test-results/build-profile-${PROBE_CITY}-${PROBE_BROWSER}.log"
+          node --check .github/scripts/pr202_build_profile_entry_wrapper.mjs
+          PROFILE_URL="$PROFILE_URL" PROFILE_SHA="$PROFILE_SHA" node .github/scripts/pr202_build_profile_entry_wrapper.mjs 2>&1 | tee "test-results/build-profile-${PROBE_CITY}-${PROBE_BROWSER}.log"
       - if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -151,9 +150,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p test-results
-          gunzip -c .github/scripts/pr202_perf_acceptance.mjs.gz > "$RUNNER_TEMP/pr202_perf_acceptance.mjs"
-          node --check "$RUNNER_TEMP/pr202_perf_acceptance.mjs"
-          PERF_URL="$CANDIDATE_URL" CANDIDATE_SHA="$CANDIDATE_SHA" node "$RUNNER_TEMP/pr202_perf_acceptance.mjs" 2>&1 | tee "test-results/perf-${PROBE_CITY}-${PROBE_BROWSER}.log"
+          node --check .github/scripts/pr202_perf_entry_wrapper.mjs
+          PERF_URL="$CANDIDATE_URL" CANDIDATE_SHA="$CANDIDATE_SHA" node .github/scripts/pr202_perf_entry_wrapper.mjs 2>&1 | tee "test-results/perf-${PROBE_CITY}-${PROBE_BROWSER}.log"
       - if: always()
         uses: actions/upload-artifact@v4
         with:
