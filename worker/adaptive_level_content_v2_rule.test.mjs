@@ -49,7 +49,8 @@ test('every reading band keeps an approved one-or-two paragraph shape', () => {
 test('Home removes the floating level control and exposes Settings in both nav modes', () => {
   assert.match(homeShell, /SettingsScreen\(\)/);
   assert.match(homeShell, /NavigationRailDestination\([\s\S]*settings_outlined/);
-  assert.match(homeShell, /NavigationDestination\([\s\S]*settings_outlined/);
+  assert.match(homeShell, /_CompactBottomNavigation/);
+  assert.equal((homeShell.match(/settings_outlined/g) ?? []).length, 2);
   assert.doesNotMatch(homeShell, /JourneyLevelSelectorButton/);
   assert.doesNotMatch(homeShell, /Positioned\([\s\S]*top: 6,[\s\S]*right: 8/);
 });
