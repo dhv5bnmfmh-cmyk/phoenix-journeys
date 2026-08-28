@@ -77,17 +77,6 @@ const challengeTargetsReplacement = `  const count = await requiredChallengeSele
   }
   if (targets.length < count) throw new Error(\`Challenge mode controls did not settle: only \${targets.length} targets; need \${count}\`);`;
 
-const challengeSelectionOriginal = `  for (const t of targets.slice(0,count)) {
-    const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((t.label&&clean(r.label)===t.label)||(!t.label&&r.role===t.role&&recordText(r)===t.text))).sort((a,b)=>a.area-b.area);
-    if (!matches.length) throw new Error('challenge target disappeared');
-    await page.locator('flt-semantics').nth(matches[0].index).tap({ timeout: 10000 }); await sleep(120);
-  }`;
-const challengeSelectionReplacement = `  for (const t of targets.slice(0,count)) {
-    const rs=await records(page); const matches=rs.filter((r)=>r.visible&&!r.disabled&&((t.label&&clean(r.label)===t.label)||(!t.label&&r.role===t.role&&recordText(r)===t.text))).sort((a,b)=>a.area-b.area);
-    if (!matches.length) throw new Error('challenge target disappeared');
-    await page.locator('flt-semantics').nth(matches[0].index).evaluate((element)=>element.click()); await sleep(120);
-  }`;
-
 const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
   await completeChallenge(page);`;
 const challengeReadyReplacement = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
@@ -135,7 +124,6 @@ for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
   [challengeClickSettleOriginal, challengeClickSettleReplacement, 'formal Challenge click settle'],
   [challengeTargetsOriginal, challengeTargetsReplacement, 'per-mode Challenge control settle'],
-  [challengeSelectionOriginal, challengeSelectionReplacement, 'formal Challenge semantic click'],
   [challengeReadyOriginal, challengeReadyReplacement, 'challenge settled entry'],
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
   [desktopTouchOriginal, desktopTouchReplacement, 'desktop semantic touch context'],
