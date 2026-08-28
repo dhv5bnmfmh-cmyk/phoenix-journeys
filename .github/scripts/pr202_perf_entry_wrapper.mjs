@@ -5,6 +5,20 @@ import { pathToFileURL } from 'node:url';
 
 const sourceUrl = new URL('./pr202_perf_acceptance.mjs.gz', import.meta.url);
 let source = gunzipSync(await readFile(sourceUrl)).toString('utf8');
+function replaceSourceRange(startMarker, endMarker, replacementText, label) {
+  const startCount = source.split(startMarker).length - 1;
+  const endCount = source.split(endMarker).length - 1;
+  if (startCount !== 1 || endCount !== 1) {
+    throw new Error(`Performance ${label} range mismatch start=${startCount} end=${endCount}`);
+  }
+  const start = source.indexOf(startMarker);
+  const end = source.indexOf(endMarker, start + startMarker.length);
+  if (start < 0 || end < 0 || end <= start) {
+    throw new Error(`Performance ${label} range bounds invalid`);
+  }
+  source = source.slice(0, start) + replacementText + '\n\n' + source.slice(end);
+}
+
 
 const original = `    identityAll: ['林岸', '黄浦江'],
     identityAny: [['陆家嘴', '浦东'], ['提单', '结算']],`;
@@ -59,33 +73,208 @@ const perfEntryReplacement = `async function assertJourneyEntryIdentity(page) {
   throw new Error(\`Journey entry did not settle with identity + 1/6 + Story evidence: \${journey.title}; snapshot=\${snapshot.slice(0, 1200)}\`);
 }`;
 
-// Challenge option discovery and activation intentionally reuse the compressed runner's
-// mature formal-E2E contract. Do not layer role filtering or synthetic de-duplication here.
-// Match the formal iPhone/WebKit verifier's semantic-click settle before submitting.
-const challengeClickSettleOriginal = `    await page.locator('flt-semantics').nth(matches[0].index).evaluate((e)=>e.click()); await sleep(70);`;
-const challengeClickSettleReplacement = `    await page.locator('flt-semantics').nth(matches[0].index).evaluate((e)=>e.click()); await sleep(120);`;
+async function challengeOptionTargets(page) {
+  const rs = await records(page);
+  const toTarget = (record) => ({ role: record.role, label: clean(record.label), text: recordText(record) });
+  const lettered = rs.filter((record) => {
+    if (!record.visible || record.disabled) return false;
+    const label = clean(record.label);
+    return /^[A-D]\s/.test(label) && /[\u3400-\u9fff]/.test(label);
+  }).sort((left, right) => left.index - right.index);
+  if (lettered.length) return lettered.map(toTarget);
+  const excluded = ['提交第','朗读','进入下一种挑战','完成三连挑战','再练重点项','继续留下回忆','完成挑战后继续','返回','Back','查看 Lv.','提高当前难度','降低当前难度','短文复原','语病修复','补回句子','简 / 繁','声线','减速','加速','提示'];
+  return rs.filter((record) => {
+    if (!record.visible || record.disabled) return false;
+    const text = recordText(record);
+    if (text.length < 4 || !/[\u3400-\u9fff]/.test(text)) return false;
+    if (!['button', 'group'].includes(record.role)) return false;
+    return !excluded.some((item) => text.includes(item));
+  }).sort((left, right) => right.area - left.area).map(toTarget);
+}
 
-const challengeTargetsOriginal = `  const count = await requiredChallengeSelections(page); const targets = await challengeOptionTargets(page);
-  if (targets.length < count) throw new Error(\`only \${targets.length} challenge targets; need \${count}\`);`;
-const challengeTargetsReplacement = `  const count = await requiredChallengeSelections(page);
-  const targetDeadline = Date.now() + 8000;
-  let targets = [];
-  while (Date.now() < targetDeadline) {
-    targets = await challengeOptionTargets(page);
-    if (targets.length >= count) break;
-    await sleep(100);
+async function requiredChallengeSelections(page) {
+  const text = await visibleText(page);
+  const match = text.match(/依次点击\s*(\d+)\s*句/);
+  return match ? Number(match[1]) : 1;
+}
+
+function challengeRecordMatchesTarget(record, target) {
+  if (!record.visible || record.disabled) return false;
+  if (target.label) return clean(record.label) === target.label;
+  return record.role === target.role && recordText(record) === target.text;
+}
+
+async function ensureGrammarSegment(page) {
+  const text = await visibleText(page);
+  if (!text.includes('第一步 · 点击有问题的部分')) return;
+  const segments = (await records(page))
+    .filter((record) => record.visible && !record.disabled && record.role === 'checkbox' && /[\u3400-\u9fff]/.test(recordText(record)))
+    .sort((left, right) => left.index - right.index);
+  if (!segments.length) throw new Error('grammar repair segment selector not found');
+  const target = segments[0];
+  await page.locator('flt-semantics').nth(target.index).evaluate((element) => element.click());
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    const currentText = await visibleText(page);
+    if (!currentText.includes('第一步 · 点击有问题的部分')) return;
+    const live = (await records(page)).filter((record) =>
+      record.visible &&
+      record.role === 'checkbox' &&
+      (clean(record.label) === clean(target.label) || recordText(record).includes(recordText(target))));
+    if (!live.length) return;
+    const node = page.locator('flt-semantics').nth(live[0].index);
+    const attrs = await Promise.all([
+      node.getAttribute('aria-checked').catch(() => null),
+      node.getAttribute('aria-selected').catch(() => null),
+      node.getAttribute('aria-pressed').catch(() => null),
+    ]);
+    if (attrs.some((value) => value === 'true')) return;
+    if ((await challengeOptionTargets(page)).length) return;
+    await sleep(80);
   }
-  if (targets.length < count) throw new Error(\`Challenge mode controls did not settle: only \${targets.length} targets; need \${count}\`);`;
+  throw new Error('grammar repair segment did not settle');
+}
 
-const actionableChallengeOriginal = `    if (!r.visible || r.disabled || !['button','group','checkbox'].includes(r.role)) return false;`;
-const actionableChallengeReplacement = `    if (!r.visible || r.disabled || !['button','group'].includes(r.role)) return false;`;
+async function activateChallengeTarget(page, target) {
+  const matches = (await records(page))
+    .filter((record) => challengeRecordMatchesTarget(record, target))
+    .sort((left, right) => left.area - right.area);
+  if (!matches.length) throw new Error(`challenge option disappeared: ${target.label || target.text}`);
+  await page.locator('flt-semantics').nth(matches[0].index).evaluate((element) => element.click());
+  await sleep(120);
+}
 
-const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
-  await completeChallenge(page);`;
-const challengeReadyReplacement = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);
-  const challengeDeadline=Date.now()+20000;while(Date.now()<challengeDeadline){if(await exists(page,'提交第 1 / 3 次答案',{role:'button',prefix:true,timeout:300}))break;const snapshot=await visibleText(page);if(snapshot.includes('3/6')&&await exists(page,'继续',{role:'button',prefix:true,timeout:300}))await activate(page,'继续',{prefix:true,timeout:1200});await sleep(100);}await findSemantic(page,'提交第 1 / 3 次答案',{role:'button',prefix:true,timeout:5000});await waitStage(page,4,5000);
-  const optionDeadline=Date.now()+8000;let optionCount=0;let requiredCount=1;while(Date.now()<optionDeadline){requiredCount=await requiredChallengeSelections(page);optionCount=(await challengeOptionTargets(page)).length;if(optionCount>=requiredCount)break;await sleep(100);}if(optionCount<requiredCount)throw new Error('Challenge controls did not settle before interaction; targets='+optionCount+' required='+requiredCount);
-  await completeChallenge(page); if(process.env.CHALLENGE_PREFLIGHT_ONLY==='1'){console.log('CHALLENGE_PREFLIGHT_PASS city='+cityKey+' browser='+browserName);process.exit(0);}`;
+async function challengeSelectionState(page, target) {
+  const matches = (await records(page))
+    .filter((record) => challengeRecordMatchesTarget(record, target))
+    .sort((left, right) => left.area - right.area);
+  if (!matches.length) return { live: false, exposed: false, selected: false };
+  const node = page.locator('flt-semantics').nth(matches[0].index);
+  const attrs = await Promise.all([
+    node.getAttribute('aria-checked').catch(() => null),
+    node.getAttribute('aria-selected').catch(() => null),
+    node.getAttribute('aria-pressed').catch(() => null),
+  ]);
+  const exposed = attrs.some((value) => value !== null);
+  return { live: true, exposed, selected: attrs.some((value) => value === 'true') };
+}
+
+async function submitSemanticState(page) {
+  const submits = (await records(page))
+    .filter((record) => record.visible && record.role === 'button' && recordText(record).startsWith('提交第'))
+    .sort((left, right) => left.area - right.area);
+  return submits[0] ?? null;
+}
+
+async function waitChallengeSubmitReady(page, chosen, required) {
+  const deadline = Date.now() + 8000;
+  let last = '';
+  while (Date.now() < deadline) {
+    const states = [];
+    for (const target of chosen) states.push(await challengeSelectionState(page, target));
+    const live = states.filter((state) => state.live).length;
+    const exposedInvalid = states.some((state) => state.exposed && !state.selected);
+    const submit = await submitSemanticState(page);
+    last = `live=${live}/${required} exposedInvalid=${exposedInvalid} submit=${submit ? recordText(submit) : 'none'} disabled=${submit?.disabled}`;
+    if (live >= required && !exposedInvalid && submit && !submit.disabled) return;
+    await sleep(80);
+  }
+  throw new Error(`Challenge selections/submit did not settle: ${last}`);
+}
+
+async function waitChallengeReady(page) {
+  await waitStage(page, 4, 20000);
+  const deadline = Date.now() + 20000;
+  let snapshot = '';
+  while (Date.now() < deadline) {
+    snapshot = await visibleText(page);
+    const badgeReady = snapshot.includes('4/6');
+    const submit = await submitSemanticState(page);
+    const required = await requiredChallengeSelections(page);
+    const grammarMode = snapshot.includes('第一步 · 点击有问题的部分');
+    let controlsReady = false;
+    if (grammarMode) {
+      const grammarSegments = (await records(page)).filter((record) =>
+        record.visible && !record.disabled && record.role === 'checkbox' && /[\u3400-\u9fff]/.test(recordText(record)));
+      controlsReady = grammarSegments.length > 0;
+    } else {
+      controlsReady = (await challengeOptionTargets(page)).length >= required;
+    }
+    if (badgeReady && submit && controlsReady) return;
+    await sleep(80);
+  }
+  throw new Error(`Challenge 4/6 semantic state did not settle: ${snapshot.slice(0, 1200)}`);
+}
+
+async function chooseChallengeOptions(page) {
+  await ensureGrammarSegment(page);
+  const required = await requiredChallengeSelections(page);
+  const deadline = Date.now() + 8000;
+  let targets = [];
+  while (Date.now() < deadline) {
+    targets = await challengeOptionTargets(page);
+    if (targets.length >= required) break;
+    await sleep(80);
+  }
+  if (targets.length < required) {
+    throw new Error(`Challenge mode controls did not settle: only ${targets.length} targets; need ${required}`);
+  }
+  const chosen = targets.slice(0, required);
+  for (const target of chosen) await activateChallengeTarget(page, target);
+  await waitChallengeSubmitReady(page, chosen, required);
+}
+
+async function waitChallengeOutcome(page, attempt) {
+  const deadline = Date.now() + 12000;
+  while (Date.now() < deadline) {
+    if (await exists(page, '进入下一种挑战', { role: 'button', timeout: 250 })) return 'next-mode';
+    if (await exists(page, '完成三连挑战', { role: 'button', timeout: 250 })) return 'complete';
+    if (
+      attempt < 3 &&
+      await exists(page, `提交第 ${attempt + 1} / 3 次答案`, {
+        role: 'button',
+        prefix: true,
+        timeout: 250,
+      })
+    ) return 'retry';
+    await sleep(80);
+  }
+  throw new Error(`Challenge attempt ${attempt} did not reach a real next semantic state`);
+}
+
+async function resolveChallengeMode(page, modeIndex) {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    await chooseChallengeOptions(page);
+    await activate(page, '提交第', { prefix: true });
+    const outcome = await waitChallengeOutcome(page, attempt);
+    if (outcome === 'retry') continue;
+    if (outcome === 'next-mode') {
+      if (modeIndex >= 2) throw new Error('final Challenge mode exposed another-mode transition');
+      await activate(page, '进入下一种挑战');
+      await waitChallengeReady(page);
+      return;
+    }
+    if (outcome === 'complete') {
+      if (modeIndex !== 2) throw new Error(`Challenge completed before mode ${modeIndex + 1} closed`);
+      await activate(page, '完成三连挑战');
+      await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 12000 });
+      return;
+    }
+  }
+  throw new Error(`challenge mode ${modeIndex + 1} did not resolve`);
+}
+
+async function completeChallenge(page) {
+  for (let mode = 0; mode < 3; mode += 1) await resolveChallengeMode(page, mode);
+  await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 15000 });
+}
+
+const matureChallengeBlock = [challengeOptionTargets, requiredChallengeSelections, challengeRecordMatchesTarget, ensureGrammarSegment, activateChallengeTarget, challengeSelectionState, submitSemanticState, waitChallengeSubmitReady, waitChallengeReady, chooseChallengeOptions, waitChallengeOutcome, resolveChallengeMode, completeChallenge]
+  .map((fn) => fn.toString())
+  .join('\n\n');
+
+const challengeReadyOriginal = `  await activate(page,'继续',{prefix:true}); await waitStage(page,4);\n  await completeChallenge(page);`;
+const challengeReadyReplacement = `  await activate(page,'继续',{prefix:true}); await waitChallengeReady(page);\n  await completeChallenge(page); if(process.env.CHALLENGE_PREFLIGHT_ONLY==='1'){console.log('CHALLENGE_PREFLIGHT_PASS city='+cityKey+' browser='+browserName);process.exit(0);}`;
 
 const stageSelectOriginal = `  await activate(page,stageLabels[stage],{prefix:false,timeout:8000});
   await waitStage(page,target,12000); await ensureVocabularyPopupClosed(page); await sleep(120);`;
@@ -123,11 +312,14 @@ const timingIncompleteReplacement = `  const timingComplete=Boolean(t1&&t2&&t3&&
 const narrationProofOriginal = `  if(stage===4||stage===5){ await activate(page,'播放朗读'); await findSemantic(page,'停止朗读',{role:'button',timeout:5000}); await activate(page,'停止朗读'); return; }`;
 const narrationProofReplacement = `  if(stage===4||stage===5){ await activate(page,'播放朗读');const narrationDeadline=Date.now()+6000;let playing=false;while(Date.now()<narrationDeadline){if(await exists(page,'正在朗读',{timeout:250})||await exists(page,'暂停朗读',{role:'button',timeout:250})||await exists(page,'停止朗读',{role:'button',timeout:250})){playing=true;break;}await sleep(80);}if(!playing)throw new Error(\`\${stageNames[stage]} narration did not enter playing state\`);if(await exists(page,'暂停朗读',{role:'button',timeout:500}))await activate(page,'暂停朗读');else if(await exists(page,'停止朗读',{role:'button',timeout:500}))await activate(page,'停止朗读');return; }`;
 
+replaceSourceRange(
+  'async function challengeOptionTargets(page) {',
+  'async function completeJourneyOnce(',
+  matureChallengeBlock,
+  'mature Challenge helper block',
+);
 for (const [needle, replacementText, label] of [
   [perfEntryOriginal, perfEntryReplacement, 'mature entry assertion'],
-  [challengeClickSettleOriginal, challengeClickSettleReplacement, 'formal Challenge click settle'],
-  [challengeTargetsOriginal, challengeTargetsReplacement, 'per-mode Challenge control settle'],
-  [actionableChallengeOriginal, actionableChallengeReplacement, 'formal Challenge fallback roles'],
   [challengeReadyOriginal, challengeReadyReplacement, 'challenge settled entry'],
   [stageSelectOriginal, stageSelectReplacement, 'completed course stage selection'],
   [desktopTouchOriginal, desktopTouchReplacement, 'desktop semantic touch context'],
@@ -141,6 +333,30 @@ for (const [needle, replacementText, label] of [
   source = source.replace(needle, replacementText);
 }
 
+const challengeBlockStart = source.indexOf('async function challengeOptionTargets(page) {');
+const challengeBlockEnd = source.indexOf('async function completeJourneyOnce(', challengeBlockStart);
+const generatedChallengeBlock = source.slice(challengeBlockStart, challengeBlockEnd);
+for (const [needle, label] of [
+  ["async function ensureGrammarSegment(page)", 'grammar isolation helper'],
+  ["!['button', 'group'].includes(record.role)", 'button/group ordinary targets'],
+  ["async function activateChallengeTarget(page, target)", 'stable target activation'],
+  ["await sleep(120);", 'mature click settle'],
+  ["await challengeSelectionState(page, target)", 'live selected-state rebind'],
+  ["submit && !submit.disabled", 'submit enable settle'],
+  ["async function waitChallengeOutcome(page, attempt)", 'real post-submit state'],
+  ["await waitChallengeReady(page)", '4/6 semantic readiness'],
+  ["for (let mode = 0; mode < 3; mode += 1)", 'three-mode completion'],
+]) {
+  if (!generatedChallengeBlock.includes(needle)) {
+    throw new Error(`Performance mature Challenge static contract missing: ${label}`);
+  }
+}
+if (generatedChallengeBlock.includes("['button', 'group', 'checkbox']")) {
+  throw new Error('Performance mature Challenge static contract leaked grammar checkbox into ordinary targets');
+}
+if (generatedChallengeBlock.includes("await activateChallengeTarget(page, target);\n    await sleep(")) {
+  throw new Error('Performance mature Challenge static contract uses fixed post-option sleep');
+}
 const tempPath = path.join(
   process.env.RUNNER_TEMP || '/tmp',
   `pr202_perf_acceptance_entry_${process.pid}.mjs`,
