@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/screens/journey_screen.dart';
 import 'package:phoenix_journeys/screens/me_screen.dart';
 import 'package:phoenix_journeys/services/language_level_preference_store.dart';
@@ -35,6 +36,48 @@ void main() {
     expect(preferences.getInt('phoenix.level'), 7);
     expect(firstSession.phoenixLevel, 5);
     expect(secondSession.phoenixLevel, 7);
+  });
+
+  test('mounted Journey and narration stay bound to the Lv5 session snapshot',
+      () async {
+    const store = LanguageLevelPreferenceStore();
+    const agent = PhoenixLanguageLevelAgent();
+
+    await store.savePhoenixLevel(5);
+    final mountedSession =
+        snapshotJourneySessionProfile(PhoenixLevelController.instance);
+    final mountedRate = agent.planFor(mountedSession).speechRate;
+
+    await store.savePhoenixLevel(7);
+    final nextSession =
+        snapshotJourneySessionProfile(PhoenixLevelController.instance);
+    final nextRate = agent.planFor(nextSession).speechRate;
+
+    expect(PhoenixLevelController.instance.level, 7);
+    expect(mountedSession.phoenixLevel, 5);
+    expect(mountedRate, .92);
+    expect(nextSession.phoenixLevel, 7);
+    expect(nextRate, .98);
+
+    final journey = File('lib/screens/journey_screen.dart').readAsStringSync();
+    expect(
+      journey,
+      contains('late final ChineseProficiencyProfile _sessionLanguageProfile;'),
+    );
+    expect(
+      journey,
+      contains('snapshotJourneySessionProfile(_phoenixLevelController)'),
+    );
+    expect(
+      journey,
+      contains(
+        '_languageLevelAgent.planFor(_sessionLanguageProfile).speechRate',
+      ),
+    );
+    expect(
+      journey,
+      isNot(contains('addListener(_handlePhoenixLevelChanged)')),
+    );
   });
 
   testWidgets('Me exposes one canonical level and language preferences', (
