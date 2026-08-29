@@ -111,30 +111,15 @@ async function findJourneyProgress(page, timeout = 30000) {
         const element = elements[i];
         const rect = element.getBoundingClientRect();
         const style = getComputedStyle(element);
-        if (
-          rect.width <= 0 ||
-          rect.height <= 0 ||
-          style.display === 'none' ||
-          style.visibility === 'hidden'
-        ) continue;
-        const values = [
-          element.getAttribute('aria-label'),
-          element.getAttribute('aria-valuetext'),
-          element.textContent,
-        ].map(clean).filter(Boolean);
+        if (rect.width <= 0 || rect.height <= 0 || style.display === 'none' || style.visibility === 'hidden') continue;
+        const values = [element.getAttribute('aria-label'), element.getAttribute('aria-valuetext'), element.textContent].map(clean).filter(Boolean);
         const combined = values.join(' ');
         if (!/[1-6]\/6/.test(combined)) continue;
-        candidates.push({
-          i,
-          label: values.find((value) => /[1-6]\/6/.test(value)) ?? combined,
-          progressbar: element.getAttribute('role') === 'progressbar',
-        });
+        candidates.push({ i, label: values.find((value) => /[1-6]\/6/.test(value)) ?? combined, progressbar: element.getAttribute('role') === 'progressbar' });
       }
       return candidates.find((entry) => entry.progressbar) ?? candidates[0] ?? null;
     });
-    if (match) {
-      return { node: nodes.nth(match.i), label: match.label };
-    }
+    if (match) return { node: nodes.nth(match.i), label: match.label };
     await sleep(100);
   }
   throw new Error('Journey: no semantic progress state (1/6..6/6) appeared');
@@ -188,38 +173,32 @@ async function tapFirstSemanticAction(page, labels, logLabel) {
 
 async function exercisePassport(page, browserName) {
   await tapTabAndVerify(page, '护照', '探索护照', browserName);
-
   let startedAt = Date.now();
   await tapSemanticAction(page, '中国', `${browserName}:passport-china`, { prefix: true });
   await semanticNode(page, '请从左侧选择省份', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT CHINA STATE CHANGE = PASS`);
   reportDuration(browserName, 'PASSPORT CHINA', startedAt);
-
   startedAt = Date.now();
   await tapFirstSemanticAction(page, ['浙江省', '浙江'], `${browserName}:passport-province`);
   await semanticNode(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT PROVINCE STATE CHANGE = PASS`);
   reportDuration(browserName, 'PASSPORT PROVINCE', startedAt);
-
   startedAt = Date.now();
   await tapFirstSemanticAction(page, ['杭州'], `${browserName}:passport-city`);
   await semanticNode(page, '浙江', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT CITY STATE CHANGE = PASS`);
   reportDuration(browserName, 'PASSPORT CITY', startedAt);
-
   startedAt = Date.now();
   await tapSemanticAction(page, '返回上一级', `${browserName}:passport-back`, { prefix: true });
   await semanticNode(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT BACK STATE CHANGE = PASS`);
   reportDuration(browserName, 'PASSPORT BACK', startedAt);
-
   startedAt = Date.now();
   await tapSemanticAction(page, '欧洲', `${browserName}:passport-europe`, { prefix: true, role: null });
   await semanticNode(page, '目的地即将开放', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT CONTINENT STATE CHANGE = PASS`);
   reportDuration(browserName, 'PASSPORT CONTINENT', startedAt);
-
-  await tapTabAndVerify(page, '探索 Tab 1 of 4', 'PHOENIX JOURNEYS', browserName);
+  await tapTabAndVerify(page, '探索', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} PASSPORT TO EXPLORE = PASS`);
 }
@@ -264,7 +243,7 @@ async function exitJourneyToHome(page, browserName, cycle) {
 
 async function exercisePostReturnHome(page, browserName, cycle) {
   await tapTabAndVerify(page, '护照', '探索护照', browserName);
-  await tapTabAndVerify(page, '探索 Tab 1 of 4', 'PHOENIX JOURNEYS', browserName);
+  await tapTabAndVerify(page, '探索', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} POST-CYCLE-${cycle} HOME INTERACTION = PASS`);
 }
@@ -275,9 +254,9 @@ async function exerciseAllTabs(page, browserName) {
   await semanticNode(page, 'Phoenix 中文等级', { timeout: 15000 });
   await semanticNode(page, '中文字体', { timeout: 15000 });
   await semanticNode(page, '翻译语言', { timeout: 15000 });
-  await tapTabAndVerify(page, '探索 Tab 1 of 4', 'PHOENIX JOURNEYS', browserName);
+  await tapTabAndVerify(page, '探索', 'PHOENIX JOURNEYS', browserName);
   await tapTabAndVerify(page, '跟读训练', '跟读训练 听一句 · 跟一句 · 逐字对照 · 薄弱句复练', browserName);
-  await tapTabAndVerify(page, '探索 Tab 1 of 4', 'PHOENIX JOURNEYS', browserName);
+  await tapTabAndVerify(page, '探索', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} BOTTOM NAVIGATION ALL TABS = PASS`);
 }
@@ -285,19 +264,11 @@ async function exerciseAllTabs(page, browserName) {
 async function runBrowser(browserType, browserName) {
   const browser = await browserType.launch({ headless: true });
   try {
-    const context = await browser.newContext({
-      viewport: { width: 390, height: 844 },
-      deviceScaleFactor: 3,
-      isMobile: true,
-      hasTouch: true,
-      locale: 'zh-CN',
-      reducedMotion: 'reduce',
-    });
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: 'zh-CN', reducedMotion: 'reduce' });
     const page = await context.newPage();
     const pageErrors = [];
     page.on('pageerror', (error) => pageErrors.push(error?.stack || error?.message || String(error)));
     page.on('console', (message) => console.log(`[${browserName} console:${message.type()}] ${message.text()}`));
-
     const coldStartAt = Date.now();
     const separator = url.includes('?') ? '&' : '?';
     const candidateUrl = `${url}${separator}unlock=all&prototype=journeys&v=${sourceSha}`;
@@ -305,7 +276,6 @@ async function runBrowser(browserType, browserName) {
     await page.waitForFunction(() => document.querySelector('flutter-view') != null, null, { timeout: 140000 });
     await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
     await enableFlutterSemantics(page, browserName);
-
     try {
       await waitForHome(page, browserName);
       reportDuration(browserName, 'COLD HOME READY', coldStartAt, 20000);
@@ -315,7 +285,6 @@ async function runBrowser(browserType, browserName) {
       await setConfiguredLevel(page, 7);
       if ((await configuredLevel(page)) !== 7) throw new Error(`${browserName}: Me did not persist configured Lv7`);
       await returnToExplore(page);
-
       await openJourney(page, browserName, 1);
       if ((await journeySessionLevel(page)) !== 7) throw new Error(`${browserName}: Journey did not snapshot Lv7`);
       await assertNoJourneyLiveControls(page);
@@ -323,17 +292,14 @@ async function runBrowser(browserType, browserName) {
       if ((await journeySessionLevel(page)) !== 7) throw new Error(`${browserName}: current Journey drifted from Lv7`);
       await exitJourneyToHome(page, browserName, 1);
       await exercisePostReturnHome(page, browserName, 1);
-
       await setConfiguredLevel(page, 8);
       if ((await configuredLevel(page)) !== 8) throw new Error(`${browserName}: Me did not persist configured Lv8`);
       await returnToExplore(page);
-
       await openJourney(page, browserName, 2);
       if ((await journeySessionLevel(page)) !== 8) throw new Error(`${browserName}: next Journey did not snapshot Lv8`);
       await assertNoJourneyLiveControls(page);
       await exitJourneyToHome(page, browserName, 2);
       await exercisePostReturnHome(page, browserName, 2);
-
       await exercisePassport(page, browserName);
       await exerciseCitySelector(page, browserName);
       await exerciseAllTabs(page, browserName);
@@ -341,7 +307,6 @@ async function runBrowser(browserType, browserName) {
       await dumpSemantics(page, browserName);
       throw error;
     }
-
     if (pageErrors.length) throw new Error(`${browserName}: page errors: ${pageErrors.join('\n')}`);
     console.log(`${browserName} REAL MOBILE FUNCTIONAL INTERACTION AUDIT = PASS`);
   } finally {
