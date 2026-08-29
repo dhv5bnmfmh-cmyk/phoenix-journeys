@@ -92,7 +92,7 @@ export async function setConfiguredLevel(page, target) {
 }
 
 export async function returnToExplore(page) {
-  await tapButton(page, '探索 探索', { prefix: true });
+  await tapButton(page, '探索 Tab 1 of 4', { prefix: true });
   await findNode(page, 'PHOENIX JOURNEYS');
 }
 

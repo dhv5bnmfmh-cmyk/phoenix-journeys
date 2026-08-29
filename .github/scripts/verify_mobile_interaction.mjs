@@ -219,7 +219,7 @@ async function exercisePassport(page, browserName) {
   console.log(`${browserName} PASSPORT CONTINENT STATE CHANGE = PASS`);
   reportDuration(browserName, 'PASSPORT CONTINENT', startedAt);
 
-  await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
+  await tapTabAndVerify(page, '探索 Tab 1 of 4', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} PASSPORT TO EXPLORE = PASS`);
 }
@@ -264,7 +264,7 @@ async function exitJourneyToHome(page, browserName, cycle) {
 
 async function exercisePostReturnHome(page, browserName, cycle) {
   await tapTabAndVerify(page, '护照', '探索护照', browserName);
-  await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
+  await tapTabAndVerify(page, '探索 Tab 1 of 4', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} POST-CYCLE-${cycle} HOME INTERACTION = PASS`);
 }
@@ -275,9 +275,9 @@ async function exerciseAllTabs(page, browserName) {
   await semanticNode(page, 'Phoenix 中文等级', { timeout: 15000 });
   await semanticNode(page, '中文字体', { timeout: 15000 });
   await semanticNode(page, '翻译语言', { timeout: 15000 });
-  await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
+  await tapTabAndVerify(page, '探索 Tab 1 of 4', 'PHOENIX JOURNEYS', browserName);
   await tapTabAndVerify(page, '跟读训练', '跟读训练 听一句 · 跟一句 · 逐字对照 · 薄弱句复练', browserName);
-  await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
+  await tapTabAndVerify(page, '探索 Tab 1 of 4', 'PHOENIX JOURNEYS', browserName);
   await waitForHome(page, browserName);
   console.log(`${browserName} BOTTOM NAVIGATION ALL TABS = PASS`);
 }
