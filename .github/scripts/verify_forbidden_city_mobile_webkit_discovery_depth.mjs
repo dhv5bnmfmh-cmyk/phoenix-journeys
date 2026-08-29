@@ -1,5 +1,5 @@
 import { pathToFileURL } from 'node:url';
-import { assertNoJourneyLiveControls, journeySessionLevel, returnToExplore, setConfiguredLevel } from './journey_level_session_harness.mjs';
+import { assertNoJourneyLiveControls, journeySessionLevel, returnToExplore, setConfiguredLevel, tapSemanticChoice } from './journey_level_session_harness.mjs';
 
 const { webkit } = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
 const baseUrl = process.argv[2];
@@ -92,9 +92,9 @@ async function tapJourneyEntryForIdentity(page, identity) {
 async function openForbiddenCity(page) {
   await tap(page, '选择城市');
   await waitText(page, '选择城市与地点');
-  await tap(page, '北京');
+  await tapSemanticChoice(page, '北京', { expectedText: '北京的地点' });
   await waitText(page, '北京的地点');
-  await tap(page, '紫禁城');
+  await tapSemanticChoice(page, '紫禁城', { absentText: '北京的地点' });
   const postSelectionDeadline = Date.now() + 3000;
   while (Date.now() < postSelectionDeadline) {
     const text = await visibleText(page);

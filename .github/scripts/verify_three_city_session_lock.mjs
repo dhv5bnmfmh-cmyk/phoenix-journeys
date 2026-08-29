@@ -1,5 +1,5 @@
 import { pathToFileURL } from 'node:url';
-import { assertNoJourneyLiveControls, journeySessionLevel, returnToExplore, setConfiguredLevel } from './journey_level_session_harness.mjs';
+import { assertNoJourneyLiveControls, journeySessionLevel, returnToExplore, setConfiguredLevel, tapSemanticChoice } from './journey_level_session_harness.mjs';
 
 const { chromium, webkit } = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
 const baseUrl = process.argv[2];
@@ -114,9 +114,9 @@ async function tapJourneyEntryForIdentity(page, identity) {
 async function selectAndOpen(page, spec) {
   await tapButton(page, '选择城市', { prefix: true });
   await findSemantic(page, '选择城市与地点', { timeout: 15000 });
-  await tapButton(page, spec.city);
+  await tapSemanticChoice(page, spec.city, { expectedText: `${spec.city}的地点` });
   await findSemantic(page, `${spec.city}的地点`, { timeout: 15000 });
-  await tapButton(page, spec.place);
+  await tapSemanticChoice(page, spec.place, { absentText: `${spec.city}的地点` });
   const short = Date.now() + 2500;
   while (Date.now() < short) {
     const text = await visibleText(page);

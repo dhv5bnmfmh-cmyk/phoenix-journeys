@@ -16,6 +16,10 @@ async function semanticRecords(page) {
       ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim(),
       disabled: element.getAttribute('aria-disabled') === 'true',
       visible: rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden',
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
       area: rect.width * rect.height,
     };
   }));
@@ -47,6 +51,65 @@ async function tapButton(page, needle, { prefix = false } = {}) {
   } else {
     await node.click({ timeout: 15000 });
   }
+}
+
+
+export async function tapSemanticChoice(
+  page,
+  needle,
+  { expectedText = null, absentText = null, timeout = 20000 } = {},
+) {
+  const wanted = clean(needle);
+  const deadline = Date.now() + timeout;
+  const hasTouch = await page.evaluate(() => navigator.maxTouchPoints > 0);
+  let lastSnapshot = '';
+  while (Date.now() < deadline) {
+    const visible = (await semanticRecords(page)).filter(
+      (record) => record.visible && !record.disabled,
+    );
+    lastSnapshot = visible.map((record) => clean(record.text)).join(' | ');
+    const candidates = visible
+      .filter((record) => clean(record.text).includes(wanted))
+      .sort((a, b) => {
+        const aRole = a.role === 'button' ? 0 : 1;
+        const bRole = b.role === 'button' ? 0 : 1;
+        if (aRole !== bRole) return aRole - bRole;
+        const aExact = clean(a.text) === wanted ? 0 : 1;
+        const bExact = clean(b.text) === wanted ? 0 : 1;
+        if (aExact !== bExact) return aExact - bExact;
+        return a.area - b.area;
+      });
+    const target = candidates[0];
+    if (target) {
+      const x = target.x + target.width / 2;
+      const y = target.y + target.height / 2;
+      try {
+        if (hasTouch) {
+          await page.touchscreen.tap(x, y);
+        } else {
+          await page.mouse.click(x, y);
+        }
+      } catch (_) {
+        await sleep(100);
+        continue;
+      }
+      const settleDeadline = Date.now() + 1800;
+      while (Date.now() < settleDeadline) {
+        const text = (await semanticRecords(page))
+          .filter((record) => record.visible)
+          .map((record) => clean(record.text))
+          .join('\n');
+        const expectedOk = expectedText == null || text.includes(expectedText);
+        const absentOk = absentText == null || !text.includes(absentText);
+        if (expectedOk && absentOk) return;
+        await sleep(100);
+      }
+    }
+    await sleep(100);
+  }
+  throw new Error(
+    `semantic choice not actionable: ${needle}; snapshot=${lastSnapshot.slice(0, 1200)}`,
+  );
 }
 
 export async function configuredLevel(page) {

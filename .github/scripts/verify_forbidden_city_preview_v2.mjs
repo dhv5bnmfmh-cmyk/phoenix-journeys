@@ -4,6 +4,7 @@ import {
   journeySessionLevel,
   returnToExplore,
   setConfiguredLevel,
+  tapSemanticChoice,
 } from './journey_level_session_harness.mjs';
 
 const { chromium } = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
@@ -118,9 +119,9 @@ async function openForbiddenCity(page) {
   await findSemantic(page, 'PHOENIX JOURNEYS', { timeout: 30000 });
   await tapButton(page, '选择城市', { prefix: true });
   await findSemantic(page, '选择城市与地点', { timeout: 15000 });
-  await tapButton(page, '北京');
+  await tapSemanticChoice(page, '北京', { expectedText: '北京的地点' });
   await findSemantic(page, '北京的地点', { timeout: 15000 });
-  await tapButton(page, '紫禁城');
+  await tapSemanticChoice(page, '紫禁城', { absentText: '北京的地点' });
 
   for (let i = 0; i < 100; i += 1) {
     if (await exists(page, '1/6', { prefix: true, timeout: 120 })) return;
