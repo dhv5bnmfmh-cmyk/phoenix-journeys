@@ -1,4 +1,10 @@
 import { pathToFileURL } from 'node:url';
+import {
+assertNoJourneyLiveControls,
+journeySessionLevel,
+returnToExplore,
+setConfiguredLevel,
+} from './journey_level_session_harness.mjs';
 const { chromium, webkit, devices } = await import(
 pathToFileURL(process.env.PLAYWRIGHT_PATH).href
 );
@@ -238,34 +244,8 @@ null,
 await enableSemantics(page);
 await findSemantic(page, 'PHOENIX JOURNEYS', { timeout: 30000 });
 }
-async function currentLevel(page) {
-for (const record of await records(page)) {
-if (!record.visible) continue;
-const match = recordText(record).match(/Phoenix 中文难度\s*(\d+)\s*级/);
-if (match) return Number(match[1]);
-}
-throw new Error('Phoenix level selector not found');
-}
-async function setLevel(page, target) {
-for (let guard = 0; guard < 16; guard += 1) {
-const level = await currentLevel(page);
-if (level === target) return;
-const direction = level < target ? '提高当前难度' : '降低当前难度';
-const before = level;
-await activate(page, direction, { prefix: true });
-let moved = false;
-for (let i = 0; i < 50; i += 1) {
-await sleep(100);
-const settled = await currentLevel(page).catch(() => before);
-if (settled === target) return;
-if (settled !== before) {
-moved = true;
-break;
-}
-}
-if (!moved) throw new Error(`level selector did not move from ${before}`);
-}
-throw new Error(`failed to select Lv${target}; current Lv${await currentLevel(page)}`);
+async function currentSessionLevel(page) {
+return journeySessionLevel(page);
 }
 async function waitStage(
 page,
@@ -590,7 +570,7 @@ const text = await waitStageSettled(page, 2, {
 absentStoryMarkers: [expected[level].story[0]],
 predicate: (snapshot) => storyVocabularyTrace(storyText, snapshot).length > 0,
 });
-if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Vocabulary level drift`);
+if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Vocabulary level drift`);
 if (!storyVocabularyTrace(storyText, text).length) {
 throw new Error(`Lv${level} Vocabulary has no CURRENT Story trace`);
 }
@@ -601,14 +581,14 @@ await activate(page, '继续', { prefix: true });
 const text = await waitStageSettled(page, 3, {
 markers: expected[level].discovery,
 });
-if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Discovery level drift`);
+if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Discovery level drift`);
 requireMarkers(text, expected[level].discovery, `Lv${level} Discovery`);
 return text;
 }
 async function toChallenge(page, level) {
 await activate(page, '继续', { prefix: true });
 await waitStageSettled(page, 4, { markers: ['提交第 1 / 3 次答案'] });
-if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge level drift`);
+if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Challenge level drift`);
 await findSemantic(page, '提交第 1 / 3 次答案', {
 role: 'button',
 prefix: true,
@@ -633,7 +613,7 @@ return /^[A-D]\s/.test(label) && /[\u3400-\u9fff]/.test(label);
 if (lettered.length) return lettered.map(toTarget);
 const excluded = [
 '提交第', '朗读', '进入下一种挑战', '完成三连挑战', '再练重点项',
-'继续留下回忆', '完成挑战后继续', '返回', 'Back', '查看 Lv.',
+'继续留下回忆', '完成挑战后继续', '返回', 'Back',
 '提高当前难度', '降低当前难度', '短文复原', '语病修复', '补回句子',
 '简 / 繁', '声线', '减速', '加速', '提示',
 ];
@@ -731,14 +711,14 @@ role: 'button',
 prefix: true,
 timeout: 15000,
 });
-if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge completion level drift`);
+if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Challenge completion level drift`);
 }
 async function toMemory(page, level, storyText) {
 await activate(page, '继续留下回忆', { prefix: true });
 const text = await waitStageSettled(page, 5, {
 markers: ['永宁门', '跑表'],
 });
-if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Memory level drift`);
+if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Memory level drift`);
 requireMarkers(text, ['永宁门', '跑表'], `Lv${level} Memory`);
 if (!storyVocabularyTrace(storyText, text).length) {
 throw new Error(`Lv${level} Memory has no CURRENT Story vocabulary trace`);
@@ -783,7 +763,7 @@ const text = await waitStageSettled(page, 1, {
 storyMarkers: [expected[level].story[0]],
 requireStage: false,
 });
-if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story revisit level drift`);
+if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Story revisit level drift`);
 requireStoryMarkers(text, expected[level].story, `Lv${level} revisited Story`);
 requireNoPriorMarker(text, prior, `Lv${level} revisited Story`);
 await verifyReadingSupportParagraphs(
@@ -804,18 +784,18 @@ await toVocabulary(page, level, storyText);
 await toDiscovery(page, level);
 await activate(page, '继续', { prefix: true });
 await waitStageSettled(page, 4, { markers: ['继续留下回忆'] });
-if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge revisit level drift`);
+if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Challenge revisit level drift`);
 await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 15000 });
 await activate(page, '继续留下回忆', { prefix: true });
 await waitStageSettled(page, 5, { markers: ['保存回忆并完成'] });
-if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Memory revisit level drift`);
+if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Memory revisit level drift`);
 }
 async function toCompletion(page, level, storyText) {
 await activate(page, '保存回忆并完成', { prefix: true });
 const text = await waitStageSettled(page, 6, {
 markers: ['西安 · 城墙', '西安城墙印章', '已点亮'],
 });
-if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Completion level drift`);
+if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Completion level drift`);
 requireMarkers(
 text,
 [
@@ -860,16 +840,18 @@ let prior = null;
 let priorSupport = null;
 try {
 await requireStartup(page);
-await openViaPassport(page);
 for (let index = 0; index < levels.length; index += 1) {
 const level = levels[index];
-if (index > 0) await restart(page);
-await setLevel(page, level);
+if (index > 0) await requireStartup(page);
+await setConfiguredLevel(page, level);
+await returnToExplore(page);
+await openViaPassport(page);
 await waitStageSettled(page, 1, {
 storyMarkers: [expected[level].story[0]],
 requireStage: false,
 });
-if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Story level switch failed`);
+if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Story session snapshot failed`);
+await assertNoJourneyLiveControls(page);
 const { storyText, supportTexts } = await verifyReadingSupport(
 page,
 level,
@@ -921,7 +903,7 @@ console.log(`${browserName} XIAN CITY WALL DEPLOYED BROWSER = PASS | SHA=${sourc
 } catch (error) {
 console.error(`${browserName} XIAN CITY WALL DEPLOYED BROWSER = FAIL`);
 console.error(`CURRENT URL = ${page.url()}`);
-console.error(`CURRENT LEVEL = ${await currentLevel(page).catch(() => 'unknown')}`);
+console.error(`CURRENT LEVEL = ${await currentSessionLevel(page).catch(() => 'unknown')}`);
 console.error(`SEMANTICS = ${(await visibleText(page).catch(() => '')).slice(0, 16000)}`);
 console.error(`PAGE ERRORS = ${JSON.stringify(pageErrors)}`);
 console.error(`FAILED REQUESTS = ${JSON.stringify(failedRequests)}`);

@@ -1,4 +1,11 @@
 import { pathToFileURL } from 'node:url';
+import {
+  assertNoJourneyLiveControls,
+  configuredLevel,
+  journeySessionLevel,
+  returnToExplore,
+  setConfiguredLevel,
+} from './journey_level_session_harness.mjs';
 
 const playwrightModule = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
 const { chromium, webkit } = playwrightModule;
@@ -217,64 +224,6 @@ async function exercisePassport(page, browserName) {
   console.log(`${browserName} PASSPORT TO EXPLORE = PASS`);
 }
 
-function levelNumbers(label) {
-  return [...normalize(label).matchAll(/Lv\.(\d+)/g)].map((match) => Number(match[1]));
-}
-
-async function exerciseLevelControl(page, browserName) {
-  const level = await semanticNode(page, '查看 Lv.', { prefix: true, timeout: 15000 });
-  const before = normalize(await level.getAttribute('aria-label') ?? await level.textContent());
-  const beforeNumbers = levelNumbers(before);
-  const beforeLevel = beforeNumbers[0];
-  if (!Number.isInteger(beforeLevel)) throw new Error(`${browserName}: unable to resolve current level from ${before}`);
-
-  let control;
-  let direction;
-  try {
-    control = await semanticNode(page, '提高当前难度', { prefix: true, timeout: 1000 });
-    direction = 'PLUS';
-  } catch (_) {
-    control = await semanticNode(page, '降低当前难度', { prefix: true, timeout: 1000 });
-    direction = 'MINUS';
-  }
-  const disabled = await control.getAttribute('aria-disabled');
-  if (disabled === 'true' || !(await control.isEnabled())) throw new Error(`${browserName}: no enabled level control`);
-
-  const expectedLevel = direction === 'PLUS' ? beforeLevel + 1 : beforeLevel - 1;
-  await control.tap();
-
-  const deadline = Date.now() + 10000;
-  let stableReads = 0;
-  let after = '';
-  while (Date.now() < deadline) {
-    await sleep(100);
-    const current = await semanticNode(page, '查看 Lv.', { prefix: true, timeout: 1000 });
-    const currentLabel = normalize(await current.getAttribute('aria-label') ?? await current.textContent());
-    const numbers = levelNumbers(currentLabel);
-    const consistent = numbers.length > 0 && numbers.every((value) => value === expectedLevel);
-
-    if (consistent) {
-      try {
-        const journeyAction = await findJourneyAction(page);
-        if (await journeyAction.isVisible()) {
-          stableReads += 1;
-          after = currentLabel;
-          if (stableReads >= 3) break;
-          continue;
-        }
-      } catch (_) {}
-    }
-
-    stableReads = 0;
-    after = '';
-  }
-
-  if (!after || stableReads < 3) {
-    throw new Error(`${browserName}: level state did not settle at Lv.${expectedLevel} (${before} -> ${after || 'unstable'})`);
-  }
-  console.log(`${browserName} LV ${direction} = PASS (${before} -> ${after})`);
-}
-
 async function exerciseCitySelector(page, browserName) {
   await tapSemanticAction(page, '选择城市', `${browserName}:city-selector`, { prefix: true });
   await semanticNode(page, '选择城市与地点', { prefix: true, timeout: 15000 });
@@ -322,7 +271,10 @@ async function exercisePostReturnHome(page, browserName, cycle) {
 
 async function exerciseAllTabs(page, browserName) {
   await tapTabAndVerify(page, '护照', '探索护照', browserName);
-  await tapTabAndVerify(page, '我的', 'HSK／TOCFL 能力设置', browserName);
+  await tapTabAndVerify(page, '我的', '学习设置', browserName);
+  await semanticNode(page, 'Phoenix 中文等级', { timeout: 15000 });
+  await semanticNode(page, '中文字体', { timeout: 15000 });
+  await semanticNode(page, '翻译语言', { timeout: 15000 });
   await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
   await tapTabAndVerify(page, '跟读训练', '跟读训练 听一句 · 跟一句 · 逐字对照 · 薄弱句复练', browserName);
   await tapTabAndVerify(page, '探索 探索', 'PHOENIX JOURNEYS', browserName);
@@ -359,20 +311,31 @@ async function runBrowser(browserType, browserName) {
       reportDuration(browserName, 'COLD HOME READY', coldStartAt, 20000);
       console.log(`${browserName} HOME INITIAL INTERACTION = PASS`);
       await exerciseCitySelector(page, browserName);
-      await exerciseLevelControl(page, browserName);
+      await exerciseAllTabs(page, browserName);
+      await setConfiguredLevel(page, 7);
+      if ((await configuredLevel(page)) !== 7) throw new Error(`${browserName}: Me did not persist configured Lv7`);
+      await returnToExplore(page);
 
       await openJourney(page, browserName, 1);
+      if ((await journeySessionLevel(page)) !== 7) throw new Error(`${browserName}: Journey did not snapshot Lv7`);
+      await assertNoJourneyLiveControls(page);
       await reachDiscovery(page, browserName);
+      if ((await journeySessionLevel(page)) !== 7) throw new Error(`${browserName}: current Journey drifted from Lv7`);
       await exitJourneyToHome(page, browserName, 1);
       await exercisePostReturnHome(page, browserName, 1);
 
+      await setConfiguredLevel(page, 8);
+      if ((await configuredLevel(page)) !== 8) throw new Error(`${browserName}: Me did not persist configured Lv8`);
+      await returnToExplore(page);
+
       await openJourney(page, browserName, 2);
+      if ((await journeySessionLevel(page)) !== 8) throw new Error(`${browserName}: next Journey did not snapshot Lv8`);
+      await assertNoJourneyLiveControls(page);
       await exitJourneyToHome(page, browserName, 2);
       await exercisePostReturnHome(page, browserName, 2);
 
       await exercisePassport(page, browserName);
       await exerciseCitySelector(page, browserName);
-      await exerciseLevelControl(page, browserName);
       await exerciseAllTabs(page, browserName);
     } catch (error) {
       await dumpSemantics(page, browserName);

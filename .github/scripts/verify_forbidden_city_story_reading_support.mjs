@@ -1,4 +1,10 @@
 import { pathToFileURL } from 'node:url';
+import {
+  assertNoJourneyLiveControls,
+  journeySessionLevel,
+  returnToExplore,
+  setConfiguredLevel,
+} from './journey_level_session_harness.mjs';
 
 const { chromium } = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
 const baseUrl = process.argv[2];
@@ -149,32 +155,8 @@ async function activateButton(page, name, options = {}) {
   await button.evaluate((element) => element.click());
 }
 
-async function currentLevel(page) {
-  for (const record of await records(page)) {
-    if (!record.visible) continue;
-    const match = recordText(record).match(/Phoenix 中文难度\s*(\d+)\s*级/);
-    if (match) return Number(match[1]);
-  }
-  throw new Error('Phoenix level selector not found');
-}
-
-async function setLevel(page, target) {
-  for (let guard = 0; guard < 16; guard += 1) {
-    const level = await currentLevel(page);
-    if (level === target) return;
-    const direction = level < target ? '提高当前难度' : '降低当前难度';
-    await activateButton(page, direction, { exact: false });
-    const deadline = Date.now() + 6000;
-    while (Date.now() < deadline) {
-      const settled = await currentLevel(page).catch(() => level);
-      if (settled === target) return;
-      if (settled !== level) break;
-      await sleep(100);
-    }
-  }
-  throw new Error(
-    `failed to select Lv${target}; current Lv${await currentLevel(page)}`,
-  );
+async function currentSessionLevel(page) {
+  return journeySessionLevel(page);
 }
 
 async function openForbiddenCity(page) {
@@ -281,15 +263,16 @@ page.on('requestfailed', (request) => {
 });
 
 try {
-  await requireStartup(page);
-  await openForbiddenCity(page);
-
   for (const level of levels) {
-    await setLevel(page, level);
+    await requireStartup(page);
+    await setConfiguredLevel(page, level);
+    await returnToExplore(page);
+    await openForbiddenCity(page);
     await waitForText(page, '1/6');
-    if ((await currentLevel(page)) !== level) {
+    if ((await currentSessionLevel(page)) !== level) {
       throw new Error(`Lv${level} Story level drift before Reading Support`);
     }
+    await assertNoJourneyLiveControls(page);
 
     const storyText = await visibleText(page);
     requireStoryMarkers(storyText, expected[level].story, `Lv${level} CURRENT Story`);
@@ -327,7 +310,7 @@ try {
 } catch (error) {
   console.error('FORBIDDEN CITY STORY READING ANNOTATION E2E = FAIL');
   console.error(`CURRENT URL = ${page.url()}`);
-  console.error(`CURRENT LEVEL = ${await currentLevel(page).catch(() => 'unknown')}`);
+  console.error(`CURRENT LEVEL = ${await currentSessionLevel(page).catch(() => 'unknown')}`);
   console.error(`SEMANTICS = ${(await visibleText(page).catch(() => '')).slice(0, 12000)}`);
   console.error(`PAGE ERRORS = ${JSON.stringify(pageErrors)}`);
   console.error(`FAILED REQUESTS = ${JSON.stringify(failedRequests)}`);
