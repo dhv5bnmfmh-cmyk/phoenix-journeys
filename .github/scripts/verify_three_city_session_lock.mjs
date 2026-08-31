@@ -27,6 +27,7 @@ async function records(page) {
       text: String(el.textContent || '').replace(/\s+/g, ' ').trim(),
       disabled: el.getAttribute('aria-disabled') === 'true',
       visible: r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden',
+      inViewport: r.right > 0 && r.bottom > 0 && r.left < window.innerWidth && r.top < window.innerHeight,
       x: r.x, y: r.y, width: r.width, height: r.height, area: r.width * r.height,
     };
   }));
@@ -53,22 +54,102 @@ async function exists(page, needle, options = {}) {
   try { await findSemantic(page, needle, { ...options, timeout: options.timeout ?? 500 }); return true; } catch (_) { return false; }
 }
 
-async function tapButton(page, needle, { prefix = false, timeout = 15000 } = {}) {
+async function semanticActionDiagnostics(page, needle) {
+  const snapshot = await records(page);
+  const visible = snapshot.filter((r) => r.visible);
+  const wanted = clean(needle);
+  const matching = snapshot.filter((r) => recText(r).includes(wanted));
+  const buttons = snapshot.filter((r) => r.role === 'button');
+  const viewport = await page.evaluate(() => ({
+    width: window.innerWidth,
+    height: window.innerHeight,
+    scrollX: window.scrollX,
+    scrollY: window.scrollY,
+    documentScrollHeight: document.documentElement.scrollHeight,
+  }));
+  const text = visible.map(recText).join(' | ');
+  const stage = text.match(/(?:^|\s)([1-6])\/6(?:\s|$)/)?.[1] ?? 'UNKNOWN';
+  let sessionLevel = 'UNKNOWN';
+  try { sessionLevel = `Lv${await journeySessionLevel(page)}`; } catch (_) {}
+  return { needle, stage, sessionLevel, viewport, matching, buttons, visibleSemanticSnapshot: visible };
+}
+
+async function tapButton(page, needle, { prefix = false, timeout = 15000, maxScrollSteps = 8 } = {}) {
+  const wanted = clean(needle);
   const deadline = Date.now() + timeout;
+  let scrollSteps = 0;
+  let lastError = null;
+
   while (Date.now() < deadline) {
-    try {
-      const node = await findSemantic(page, needle, { role: 'button', prefix, timeout: 1200 });
-      if ((await node.getAttribute('aria-disabled')) === 'true') {
-        await sleep(100);
+    const rs = await records(page);
+    const matches = rs.filter((r) => {
+      if (!r.visible || r.role !== 'button') return false;
+      const text = recText(r);
+      return prefix ? text.startsWith(wanted) : text.includes(wanted);
+    }).sort((a, b) => {
+      if (a.disabled !== b.disabled) return a.disabled ? 1 : -1;
+      if (a.inViewport !== b.inViewport) return a.inViewport ? -1 : 1;
+      return a.area - b.area;
+    });
+
+    const target = matches[0];
+    if (target) {
+      if (target.disabled) {
+        await sleep(120);
         continue;
       }
-      await node.tap({ timeout: 2500 });
-      return;
-    } catch (error) {
-      await sleep(100);
+
+      const node = page.locator('flt-semantics').nth(target.index);
+      try {
+        await node.scrollIntoViewIfNeeded({ timeout: Math.min(1800, Math.max(250, deadline - Date.now())) });
+      } catch (error) {
+        lastError = error;
+      }
+
+      const refreshed = (await records(page)).filter((r) => {
+        if (!r.visible || r.role !== 'button') return false;
+        const text = recText(r);
+        return prefix ? text.startsWith(wanted) : text.includes(wanted);
+      }).sort((a, b) => {
+        if (a.disabled !== b.disabled) return a.disabled ? 1 : -1;
+        if (a.inViewport !== b.inViewport) return a.inViewport ? -1 : 1;
+        return a.area - b.area;
+      })[0];
+
+      if (refreshed && !refreshed.disabled && refreshed.inViewport) {
+        try {
+          await page.locator('flt-semantics').nth(refreshed.index).tap({
+            timeout: Math.min(3000, Math.max(250, deadline - Date.now())),
+          });
+          return;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      if (scrollSteps < maxScrollSteps) {
+        const viewport = page.viewportSize() ?? { width: 390, height: 844 };
+        const direction = (refreshed ?? target).y < 0 ? -1 : 1;
+        await page.mouse.move(viewport.width / 2, viewport.height / 2);
+        await page.mouse.wheel(0, direction * Math.max(240, Math.round(viewport.height * 0.65)));
+        scrollSteps += 1;
+        await sleep(180);
+        continue;
+      }
+    } else if (scrollSteps < maxScrollSteps) {
+      const viewport = page.viewportSize() ?? { width: 390, height: 844 };
+      await page.mouse.move(viewport.width / 2, viewport.height / 2);
+      await page.mouse.wheel(0, Math.max(240, Math.round(viewport.height * 0.65)));
+      scrollSteps += 1;
+      await sleep(180);
+      continue;
     }
+
+    await sleep(120);
   }
-  throw new Error(`button not tappable: ${needle}`);
+
+  console.error(`SEMANTIC ACTION DIAGNOSTICS = ${JSON.stringify(await semanticActionDiagnostics(page, needle))}`);
+  throw lastError ?? new Error(`button not tappable: ${needle}`);
 }
 
 async function enableSemantics(page) {
@@ -310,8 +391,10 @@ async function sixStages(page, spec, level, browserName) {
   await completeChallenge(page);
   await tapButton(page, '继续留下回忆', { prefix: true });
   await waitStage(page, 5); await assertLevel(page, level, `${browserName} ${spec.city} Memory`);
-  await tapButton(page, '结束旅程', { prefix: true });
-  await waitStage(page, 6); await assertLevel(page, level, `${browserName} ${spec.city} Completion`);
+  await tapButton(page, '结束旅程', { prefix: true, timeout: 20000, maxScrollSteps: 10 });
+  await waitStage(page, 6);
+  await findSemantic(page, spec.identity, { timeout: 12000 });
+  await assertLevel(page, level, `${browserName} ${spec.city} Completion`);
 }
 
 async function exitJourney(page) {
