@@ -39,18 +39,33 @@ async function findNode(page, needle, { role = null, prefix = false, timeout = 1
 }
 
 async function tapButton(page, needle, { prefix = false } = {}) {
-  const node = await findNode(page, needle, { role: 'button', prefix });
   const deadline = Date.now() + 15000;
-  while ((await node.getAttribute('aria-disabled')) === 'true') {
-    if (Date.now() >= deadline) throw new Error(`button remained disabled: ${needle}`);
-    await sleep(100);
-  }
   const hasTouch = await page.evaluate(() => navigator.maxTouchPoints > 0);
-  if (hasTouch) {
-    await node.tap({ timeout: 15000 });
-  } else {
-    await node.click({ timeout: 15000 });
+  let lastError = null;
+  while (Date.now() < deadline) {
+    const remaining = Math.max(250, deadline - Date.now());
+    try {
+      const node = await findNode(page, needle, {
+        role: 'button',
+        prefix,
+        timeout: Math.min(1200, remaining),
+      });
+      if ((await node.getAttribute('aria-disabled')) === 'true') {
+        await sleep(100);
+        continue;
+      }
+      if (hasTouch) {
+        await node.tap({ timeout: Math.min(2500, remaining) });
+      } else {
+        await node.click({ timeout: Math.min(2500, remaining) });
+      }
+      return;
+    } catch (error) {
+      lastError = error;
+      await sleep(100);
+    }
   }
+  throw lastError ?? new Error(`button not tappable: ${needle}`);
 }
 
 

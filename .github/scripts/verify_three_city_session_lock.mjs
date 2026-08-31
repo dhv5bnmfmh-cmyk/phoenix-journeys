@@ -58,11 +58,13 @@ async function tapButton(page, needle, { prefix = false, timeout = 15000 } = {})
   while (Date.now() < deadline) {
     try {
       const node = await findSemantic(page, needle, { role: 'button', prefix, timeout: 1200 });
-      if ((await node.getAttribute('aria-disabled')) === 'true') throw new Error(`button disabled: ${needle}`);
+      if ((await node.getAttribute('aria-disabled')) === 'true') {
+        await sleep(100);
+        continue;
+      }
       await node.tap({ timeout: 2500 });
       return;
     } catch (error) {
-      if (String(error).includes('button disabled')) throw error;
       await sleep(100);
     }
   }
