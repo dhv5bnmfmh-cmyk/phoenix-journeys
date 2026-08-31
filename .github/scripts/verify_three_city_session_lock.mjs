@@ -152,6 +152,117 @@ async function tapButton(page, needle, { prefix = false, timeout = 15000, maxScr
   throw lastError ?? new Error(`button not tappable: ${needle}`);
 }
 
+const memoryCompletionActionAllowlist = ['结束旅程', '保存回忆并完成'];
+
+function exactMemoryCompletionAction(record) {
+  const fields = [record.label, record.value, record.description, record.text]
+    .map(clean)
+    .filter(Boolean);
+  return memoryCompletionActionAllowlist.find((action) => fields.includes(action)) ?? null;
+}
+
+async function memoryCompletionDiagnostics(page, spec) {
+  const snapshot = await records(page);
+  const visible = snapshot.filter((record) => record.visible);
+  const buttons = snapshot.filter((record) => record.role === 'button');
+  const viewport = await page.evaluate(() => ({
+    width: window.innerWidth,
+    height: window.innerHeight,
+    scrollX: window.scrollX,
+    scrollY: window.scrollY,
+    documentScrollHeight: document.documentElement.scrollHeight,
+  }));
+  const text = visible.map(recText).join(' | ');
+  const stage = text.match(/(?:^|\s)([1-6])\/6(?:\s|$)/)?.[1] ?? 'UNKNOWN';
+  let sessionLevel = 'UNKNOWN';
+  try { sessionLevel = `Lv${await journeySessionLevel(page)}`; } catch (_) {}
+  return {
+    browser: spec.browserName ?? 'UNKNOWN',
+    city: spec.city,
+    stage,
+    sessionLevel,
+    allowlist: memoryCompletionActionAllowlist,
+    viewport,
+    buttons,
+    visibleSemanticSnapshot: visible,
+  };
+}
+
+async function tapMemoryCompletionAction(page, spec) {
+  const deadline = Date.now() + 20000;
+  const maxScrollSteps = 10;
+  let scrollSteps = 0;
+  let lastError = null;
+
+  while (Date.now() < deadline) {
+    const snapshot = await records(page);
+    const candidates = snapshot
+      .filter((record) => record.visible && record.role === 'button' && exactMemoryCompletionAction(record))
+      .map((record) => ({ ...record, action: exactMemoryCompletionAction(record) }))
+      .sort((a, b) => {
+        if (a.disabled !== b.disabled) return a.disabled ? 1 : -1;
+        if (a.inViewport !== b.inViewport) return a.inViewport ? -1 : 1;
+        const actionOrder = memoryCompletionActionAllowlist.indexOf(a.action) - memoryCompletionActionAllowlist.indexOf(b.action);
+        if (actionOrder !== 0) return actionOrder;
+        return a.area - b.area;
+      });
+
+    const target = candidates[0];
+    if (target && !target.disabled) {
+      try {
+        await page.locator('flt-semantics').nth(target.index).scrollIntoViewIfNeeded({
+          timeout: Math.min(1800, Math.max(250, deadline - Date.now())),
+        });
+      } catch (error) {
+        lastError = error;
+      }
+
+      const refreshed = (await records(page))
+        .filter((record) => record.visible && record.role === 'button' && exactMemoryCompletionAction(record))
+        .map((record) => ({ ...record, action: exactMemoryCompletionAction(record) }))
+        .sort((a, b) => {
+          if (a.disabled !== b.disabled) return a.disabled ? 1 : -1;
+          if (a.inViewport !== b.inViewport) return a.inViewport ? -1 : 1;
+          const actionOrder = memoryCompletionActionAllowlist.indexOf(a.action) - memoryCompletionActionAllowlist.indexOf(b.action);
+          if (actionOrder !== 0) return actionOrder;
+          return a.area - b.area;
+        })[0];
+
+      if (refreshed && !refreshed.disabled && refreshed.inViewport) {
+        try {
+          await page.locator('flt-semantics').nth(refreshed.index).tap({
+            timeout: Math.min(3000, Math.max(250, deadline - Date.now())),
+          });
+          console.log(`${spec.browserName ?? 'UNKNOWN'} ${spec.city} MEMORY COMPLETION ACTION = ${refreshed.action}`);
+          return refreshed.action;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+    }
+
+    if (target?.disabled) {
+      await sleep(120);
+      continue;
+    }
+
+    if (scrollSteps < maxScrollSteps) {
+      const viewport = page.viewportSize() ?? { width: 390, height: 844 };
+      const direction = target && target.y < 0 ? -1 : 1;
+      await page.mouse.move(viewport.width / 2, viewport.height / 2);
+      await page.mouse.wheel(0, direction * Math.max(240, Math.round(viewport.height * 0.65)));
+      scrollSteps += 1;
+      await sleep(180);
+      continue;
+    }
+
+    await sleep(120);
+  }
+
+  console.error(`MEMORY COMPLETION DIAGNOSTICS = ${JSON.stringify(await memoryCompletionDiagnostics(page, spec))}`);
+  throw lastError ?? new Error(`memory completion action not tappable for ${spec.city}`);
+}
+
 async function enableSemantics(page) {
   const placeholder = page.locator('flt-semantics-placeholder').first();
   if (await placeholder.count()) await placeholder.evaluate((el) => el.click());
@@ -391,7 +502,7 @@ async function sixStages(page, spec, level, browserName) {
   await completeChallenge(page);
   await tapButton(page, '继续留下回忆', { prefix: true });
   await waitStage(page, 5); await assertLevel(page, level, `${browserName} ${spec.city} Memory`);
-  await tapButton(page, '结束旅程', { prefix: true, timeout: 20000, maxScrollSteps: 10 });
+  await tapMemoryCompletionAction(page, { ...spec, browserName });
   await waitStage(page, 6);
   await findSemantic(page, spec.identity, { timeout: 12000 });
   await assertLevel(page, level, `${browserName} ${spec.city} Completion`);
