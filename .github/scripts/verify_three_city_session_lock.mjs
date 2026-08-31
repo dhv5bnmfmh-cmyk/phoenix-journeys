@@ -198,21 +198,26 @@ async function completeChallenge(page) {
 
 async function captureNarrationRate(page, expected, label) {
   await page.evaluate(() => { window.__phoenixSpeechRates = []; });
-  await tapSemanticChoice(page, '开始朗读', {
-    expectedText: '停止朗读',
-    timeout: 30000,
-  });
+  await tapButton(page, '开始朗读', { prefix: true, timeout: 30000 });
   try {
-    await page.waitForFunction(() => Array.isArray(window.__phoenixSpeechRates) && window.__phoenixSpeechRates.length > 0, null, { timeout: 6000 });
+    await Promise.all([
+      page.waitForFunction(
+        () => Array.isArray(window.__phoenixSpeechRates) && window.__phoenixSpeechRates.length > 0,
+        null,
+        { timeout: 6000 },
+      ),
+      findSemantic(page, '暂停朗读', {
+        role: 'button',
+        prefix: true,
+        timeout: 6000,
+      }),
+    ]);
     const rate = await page.evaluate(() => window.__phoenixSpeechRates.at(-1));
     if (Math.abs(rate - expected) > 0.03) throw new Error(`${label}: narration rate ${rate}, expected ${expected}`);
     console.log(`${label} NARRATION RATE = ${rate}`);
   } finally {
-    if (await exists(page, '停止朗读', { role: 'button', prefix: true, timeout: 500 })) {
-      await tapSemanticChoice(page, '停止朗读', {
-        expectedText: '开始朗读',
-        timeout: 10000,
-      });
+    if (await exists(page, '暂停朗读', { role: 'button', prefix: true, timeout: 500 })) {
+      await tapButton(page, '暂停朗读', { prefix: true, timeout: 10000 });
     }
   }
 }
