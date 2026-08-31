@@ -155,18 +155,38 @@ async function challengeTargets(page) {
 }
 
 async function chooseChallenge(page) {
-  const text = await visibleText(page);
-  if (text.includes('第一步 · 点击有问题的部分')) {
-    const segments = (await records(page)).filter((r) => r.visible && !r.disabled && r.role === 'checkbox' && /[\u3400-\u9fff]/.test(recText(r)));
-    if (segments.length) await page.locator('flt-semantics').nth(segments[0].index).tap();
-  }
-  const required = Number(text.match(/依次点击\s*(\d+)\s*句/)?.[1] ?? 1);
-  const targets = await challengeTargets(page);
-  if (targets.length < required) throw new Error(`challenge choices insufficient: ${targets.length}/${required}`);
-  for (const target of targets.slice(0, required)) {
+  const seen = new Set();
+  const submitEnabled = async () => (await records(page)).some((r) => r.visible && r.role === 'button' && !r.disabled && recText(r).startsWith('提交第'));
+  for (let guard = 0; guard < 16; guard += 1) {
+    if (await submitEnabled()) return;
+
+    const text = await visibleText(page);
+    let targets;
+    if (text.includes('第一步 · 点击有问题的部分')) {
+      targets = (await records(page)).filter((r) => r.visible && !r.disabled && r.role === 'checkbox' && /[\u3400-\u9fff]/.test(recText(r)));
+    } else {
+      targets = await challengeTargets(page);
+    }
+    const target = targets.find((r) => {
+      const signature = `${r.role}|${recText(r)}|${Math.round(r.x)}|${Math.round(r.y)}`;
+      if (seen.has(signature)) return false;
+      seen.add(signature);
+      return true;
+    });
+    if (!target) break;
     await page.locator('flt-semantics').nth(target.index).tap({ timeout: 10000 });
-    await sleep(120);
+    await sleep(180);
   }
+
+  // Flutter can omit ChoiceChip/InkWell answer text from the mobile semantics
+  // tree after FittedBox scaling. Sweep the answer column at its safe center;
+  // speaker controls remain on the right and navigation stays outside this band.
+  for (let y = 230; y <= 750; y += 20) {
+    await page.touchscreen.tap(195, y);
+    await sleep(100);
+    if (await submitEnabled()) return;
+  }
+  throw new Error(`challenge submit did not become enabled; snapshot=${(await visibleText(page)).slice(0, 1200)}`);
 }
 
 async function resolveChallengeMode(page) {
@@ -196,25 +216,83 @@ async function completeChallenge(page) {
   await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 12000 });
 }
 
-async function captureNarrationRate(page, expected, label) {
+async function narrationControls(page) {
+  const labels = ['开始朗读', '暂停朗读', '重新播放'];
+  return (await records(page)).filter((r) => r.visible && r.role === 'button' && labels.some((label) => recText(r).startsWith(label))).map((r) => ({
+    ...r,
+    // Flutter merges the always-enabled main control with the adjacent disabled
+    // replay button before the first playback, so the combined semantics node
+    // can inherit aria-disabled even though its main InkWell is actionable.
+    mergedMainControl: ['开始朗读', '暂停朗读'].some((label) => r.label.startsWith(label)) && r.text.includes('重新播放'),
+  }));
+}
+
+async function narrationDiagnostics(page, { browserName, city }) {
+  const snapshot = (await records(page)).filter((r) => r.visible);
+  const text = snapshot.map(recText).join(' | ');
+  const stage = text.match(/(?:^|\s)([1-6])\/6(?:\s|$)/)?.[1] ?? 'UNKNOWN';
+  let level = 'UNKNOWN';
+  try { level = `Lv${await journeySessionLevel(page)}`; } catch (_) {}
+  return {
+    browser: browserName,
+    city,
+    journeyStage: stage,
+    sessionLevel: level,
+    narrationSemanticSnapshot: snapshot,
+  };
+}
+
+async function tapNarrationControl(page, control) {
+  if (control.mergedMainControl && control.disabled) {
+    const replay = (await records(page)).find((r) => r.visible && r.role === 'button' && recText(r).startsWith('重新播放'));
+    if (!replay) throw new Error('merged narration main control has no replay geometry anchor');
+    await page.touchscreen.tap(replay.x - 18, replay.y + replay.height / 2);
+    return;
+  }
+  await page.locator('flt-semantics').nth(control.index).tap({ timeout: 2500 });
+}
+
+async function captureNarrationRate(page, expected, label, metadata) {
   await page.evaluate(() => { window.__phoenixSpeechRates = []; });
-  await tapButton(page, '开始朗读', { prefix: true, timeout: 30000 });
   try {
-    await Promise.all([
-      page.waitForFunction(
-        () => Array.isArray(window.__phoenixSpeechRates) && window.__phoenixSpeechRates.length > 0,
-        null,
-        { timeout: 6000 },
-      ),
-      findSemantic(page, '暂停朗读', {
-        role: 'button',
-        prefix: true,
-        timeout: 6000,
-      }),
-    ]);
+    const deadline = Date.now() + 30000;
+    let triggered = false;
+    while (Date.now() < deadline && !triggered) {
+      const controls = await narrationControls(page);
+      const actionable = controls.filter((r) => !r.disabled || r.mergedMainControl);
+      const start = actionable.find((r) => recText(r).startsWith('开始朗读'));
+      const replay = actionable.find((r) => recText(r).startsWith('重新播放'));
+      const pause = actionable.find((r) => recText(r).startsWith('暂停朗读'));
+      try {
+        if (start || replay) {
+          await tapNarrationControl(page, start ?? replay);
+          triggered = true;
+        } else if (pause) {
+          await tapNarrationControl(page, pause);
+          while (Date.now() < deadline) {
+            const next = (await narrationControls(page)).filter((r) => !r.disabled || r.mergedMainControl);
+            if (next.some((r) => ['开始朗读', '重新播放'].some((label) => recText(r).startsWith(label)))) break;
+            await sleep(100);
+          }
+        } else {
+          await sleep(100);
+        }
+      } catch (_) {
+        await sleep(100);
+      }
+    }
+    if (!triggered) throw new Error(`${label}: no actionable narration control within 30s`);
+    await page.waitForFunction(
+      () => Array.isArray(window.__phoenixSpeechRates) && window.__phoenixSpeechRates.length > 0,
+      null,
+      { timeout: Math.max(1, deadline - Date.now()) },
+    );
     const rate = await page.evaluate(() => window.__phoenixSpeechRates.at(-1));
     if (Math.abs(rate - expected) > 0.03) throw new Error(`${label}: narration rate ${rate}, expected ${expected}`);
     console.log(`${label} NARRATION RATE = ${rate}`);
+  } catch (error) {
+    console.error(`NARRATION DIAGNOSTICS = ${JSON.stringify(await narrationDiagnostics(page, metadata))}`);
+    throw error;
   } finally {
     if (await exists(page, '暂停朗读', { role: 'button', prefix: true, timeout: 500 })) {
       await tapButton(page, '暂停朗读', { prefix: true, timeout: 10000 });
@@ -224,8 +302,8 @@ async function captureNarrationRate(page, expected, label) {
 
 async function sixStages(page, spec, level, browserName) {
   await assertLevel(page, level, `${browserName} ${spec.city} Story`);
-  if (level === 5) await captureNarrationRate(page, .92, `${browserName} ${spec.city} Lv5`);
-  if (level === 7) await captureNarrationRate(page, .98, `${browserName} ${spec.city} Lv7`);
+  if (level === 5) await captureNarrationRate(page, .92, `${browserName} ${spec.city} Lv5`, { browserName, city: spec.city });
+  if (level === 7) await captureNarrationRate(page, .98, `${browserName} ${spec.city} Lv7`, { browserName, city: spec.city });
   await nextSimple(page, 2); await assertLevel(page, level, `${browserName} ${spec.city} Vocabulary`);
   await nextSimple(page, 3); await assertLevel(page, level, `${browserName} ${spec.city} Discovery`);
   await nextSimple(page, 4); await assertLevel(page, level, `${browserName} ${spec.city} Challenge`);
@@ -280,7 +358,7 @@ async function runCity(browserType, browserName, spec) {
     await returnToExplore(page);
     await selectAndOpen(page, spec);
     await assertLevel(page, 7, `${browserName} ${spec.city} next-entry`);
-    await captureNarrationRate(page, .98, `${browserName} ${spec.city} Lv7 next-entry`);
+    await captureNarrationRate(page, .98, `${browserName} ${spec.city} Lv7 next-entry`, { browserName, city: spec.city });
 
     if (pageErrors.length) throw new Error(`${browserName} ${spec.city} PAGE ERRORS: ${pageErrors.join(' | ')}`);
     if (failedRequests.length) throw new Error(`${browserName} ${spec.city} FAILED REQUESTS: ${JSON.stringify(failedRequests)}`);
