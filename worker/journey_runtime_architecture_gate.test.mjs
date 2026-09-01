@@ -106,13 +106,16 @@ test('normal Journeys use one shared cinematic reveal runtime', () => {
 
 test('normal Journeys keep the stable shared six-stage navigation', () => {
   assert.match(journey, /bool get _isSummerPalacePilot => false;/);
-  assert.match(
-    stageRuntime,
-    /final pages = <Widget>\[\s*_storyPage\(\),\s*_wordsPage\(\),\s*_discoveryPage\(\),/s,
-  );
-  assert.match(stageRuntime, /_challengePage\(\)/);
-  assert.match(stageRuntime, /_memoryPage\(\)/);
-  assert.match(stageRuntime, /_completePage\(\)/);
+  assert.match(stageRuntime, /final page = switch \(step\) \{/);
+  assert.match(stageRuntime, /0 => _storyPage\(\)/);
+  assert.match(stageRuntime, /1 => _wordsPage\(\)/);
+  assert.match(stageRuntime, /2 => _discoveryPage\(\)/);
+  assert.match(stageRuntime, /3 => stepThreePage[\s\S]*_challengePage\(\)/);
+  assert.match(stageRuntime, /4 => stepFourPage[\s\S]*_memoryPage\(\)/);
+  assert.match(stageRuntime, /_ => _completePage\(\)/);
+  assert.match(stageRuntime, /child: page/);
+  assert.doesNotMatch(stageRuntime, /final pages = <Widget>\[/);
+  assert.doesNotMatch(stageRuntime, /pages\[step\]/);
   assert.doesNotMatch(
     stageRuntime,
     /_is[A-Za-z0-9]*Journey\b|_isForbiddenCity|forbiddenCityJourneyId/,

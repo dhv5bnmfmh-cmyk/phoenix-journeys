@@ -1,4 +1,11 @@
 import { pathToFileURL } from 'node:url';
+import {
+  assertNoJourneyLiveControls,
+  journeySessionLevel,
+  returnToExplore,
+  setConfiguredLevel,
+  tapSemanticChoice,
+} from './journey_level_session_harness.mjs';
 
 const { chromium } = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
 const baseUrl = process.argv[2];
@@ -93,29 +100,8 @@ async function enableSemantics(page) {
   await page.locator('flt-semantics').first().waitFor({ state: 'attached', timeout: 30000 });
 }
 
-async function currentLevel(page) {
-  const rs = await records(page);
-  for (const r of rs) {
-    if (!r.visible) continue;
-    const m = recText(r).match(/Phoenix 中文难度\s*(\d+)\s*级/);
-    if (m) return Number(m[1]);
-  }
-  throw new Error('Phoenix level selector not found');
-}
-
-async function setLevel(page, target) {
-  let level = await currentLevel(page);
-  for (let guard = 0; level !== target && guard < 12; guard += 1) {
-    const before = level;
-    await tapButton(page, level < target ? '提高当前难度' : '降低当前难度', { prefix: true });
-    for (let i = 0; i < 40; i += 1) {
-      await sleep(100);
-      level = await currentLevel(page);
-      if (level !== before) break;
-    }
-    if (level === before) throw new Error(`level selector did not move from ${before}`);
-  }
-  if (level !== target) throw new Error(`failed to select Lv${target}; current Lv${level}`);
+async function currentSessionLevel(page) {
+  return journeySessionLevel(page);
 }
 
 async function waitStage(page, n) {
@@ -133,9 +119,9 @@ async function openForbiddenCity(page) {
   await findSemantic(page, 'PHOENIX JOURNEYS', { timeout: 30000 });
   await tapButton(page, '选择城市', { prefix: true });
   await findSemantic(page, '选择城市与地点', { timeout: 15000 });
-  await tapButton(page, '北京');
+  await tapSemanticChoice(page, '北京', { expectedText: '北京的地点' });
   await findSemantic(page, '北京的地点', { timeout: 15000 });
-  await tapButton(page, '紫禁城');
+  await tapSemanticChoice(page, '紫禁城', { absentText: '北京的地点' });
 
   for (let i = 0; i < 100; i += 1) {
     if (await exists(page, '1/6', { prefix: true, timeout: 120 })) return;
@@ -178,7 +164,7 @@ async function nextToVocabulary(page, level, storyText) {
     await page.touchscreen.tap(22, 58);
   }
   await waitStage(page, 2);
-  if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Vocabulary level drift`);
+  if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Vocabulary level drift`);
   const text = await visibleText(page);
   const traced = traceVocabulary(storyText, text);
   if (!traced.length) throw new Error(`Lv${level} Vocabulary has no visible same-level Story trace`);
@@ -187,7 +173,7 @@ async function nextToVocabulary(page, level, storyText) {
 async function nextToDiscovery(page, level) {
   await tapButton(page, '继续', { prefix: true });
   await waitStage(page, 3);
-  if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Discovery level drift`);
+  if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Discovery level drift`);
   const text = await visibleText(page);
   const hasSpecificSpatialAnchor = ['中轴', '宫门', '院落', '景运门', '乾清门', '外朝', '内廷']
     .some((w) => text.includes(w));
@@ -210,7 +196,7 @@ async function nextToDiscovery(page, level) {
 async function nextToChallenge(page, level) {
   await tapButton(page, '继续', { prefix: true });
   await waitStage(page, 4);
-  if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge level drift`);
+  if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Challenge level drift`);
   await findSemantic(page, '提交第 1 / 3 次答案', { role: 'button', prefix: true, timeout: 15000 });
 }
 
@@ -226,7 +212,7 @@ async function challengeOptionTargets(page) {
 
   const excluded = [
     '提交第', '朗读', '进入下一种挑战', '完成三连挑战', '再练重点项', '继续留下回忆',
-    '完成挑战后继续', '返回', 'Back', '查看 Lv.', '提高当前难度', '降低当前难度',
+    '完成挑战后继续', '返回', 'Back',
     '短文复原', '语病修复', '补回句子', '简 / 繁', '声线', '减速', '加速', '提示',
   ];
   return rs.filter((r) => {
@@ -310,13 +296,13 @@ async function resolveChallengeMode(page, modeIndex) {
 async function completeChallenge(page, level) {
   for (let mode = 0; mode < 3; mode += 1) await resolveChallengeMode(page, mode);
   await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 15000 });
-  if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Challenge completion level drift`);
+  if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Challenge completion level drift`);
 }
 
 async function nextToMemory(page, level) {
   await tapButton(page, '继续留下回忆', { prefix: true });
   await waitStage(page, 5);
-  if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Memory level drift`);
+  if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Memory level drift`);
   const text = await visibleText(page);
   if (!text.includes('两条都能走通的路线')) throw new Error(`Lv${level} Memory anchor missing`);
 }
@@ -325,7 +311,7 @@ async function nextToCompletion(page, level) {
   await tapButton(page, '结束旅程', { prefix: true });
   await waitStage(page, 6);
   await findSemantic(page, '已点亮', { timeout: 15000 });
-  if ((await currentLevel(page)) !== level) throw new Error(`Lv${level} Completion level drift`);
+  if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Completion level drift`);
   const text = await visibleText(page);
   if (!text.includes('北京')) throw new Error(`Lv${level} Completion city binding missing`);
   if (!text.includes('路线') && !text.includes('两条')) throw new Error(`Lv${level} Completion route closure missing`);
@@ -365,9 +351,12 @@ async function runLevel(browser, level) {
     await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
     await enableSemantics(page);
 
+    await setConfiguredLevel(page, level);
+    await returnToExplore(page);
     await openForbiddenCity(page);
     await waitStage(page, 1);
-    await setLevel(page, level);
+    if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Story session snapshot mismatch`);
+    await assertNoJourneyLiveControls(page);
     const story = await visibleText(page);
     requireStoryIdentity(story, level);
     await assertNoBlockingError(page, pageErrors, `Lv${level} Story`);

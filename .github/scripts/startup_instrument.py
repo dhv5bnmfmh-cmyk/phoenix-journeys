@@ -32,6 +32,12 @@ location = read(location_path)
 explore = read(explore_path)
 journey_screen = read(journey_screen_path)
 
+journey_session_init_anchor = (
+    "    _initialized = true;\n    unawaited(_initializeJourneySession());\n"
+    if "unawaited(_initializeJourneySession());" in journey_screen
+    else "    _initialized = true;\n    unawaited(_loadLanguageProfile());\n"
+)
+
 candidate_arch = 'dailyJourneyIdForDate(DateTime date)' in daily_catalog
 print('STARTUP ARCHITECTURE =', 'REMEDIATED' if candidate_arch else 'BASELINE')
 
@@ -54,7 +60,7 @@ required = [
     ('explore state import', explore, "import '../state/app_state.dart';\n"),
     ('explore open function', explore, "    Future<void> chooseJourney() async {\n"),
     ('journey state import', journey_screen, "import '../state/app_state.dart';\n"),
-    ('journey initialized', journey_screen, "    _initialized = true;\n    unawaited(_loadLanguageProfile());\n"),
+    ('journey session initialized', journey_screen, journey_session_init_anchor),
 ]
 ctor_anchor = (
     "    activeJourneyId = dailyJourneyIdForDate(_clock());\n"
@@ -158,7 +164,7 @@ explore_path.write_text(explore, encoding='utf-8')
 
 journey_screen = replace_one(journey_screen, "import '../state/app_state.dart';\n", "import '../state/app_state.dart';\nimport '../startup_performance_probe.dart';\n", 'journey state import')
 journey_screen = replace_one(journey_screen, "    _experience = requireDailyJourneyExperience(journeyId);\n", "    _experience = requireDailyJourneyExperience(journeyId);\n    startupPerformanceMarkAfter('phoenix-journey-content-ready', 'phoenix-journey-open-start');\n", 'journey content ready')
-journey_screen = replace_one(journey_screen, "    _initialized = true;\n    unawaited(_loadLanguageProfile());\n", "    _initialized = true;\n    WidgetsBinding.instance.addPostFrameCallback((_) {\n      startupPerformanceMarkAfter('phoenix-journey-story-usable', 'phoenix-journey-open-start');\n    });\n    unawaited(_loadLanguageProfile());\n", 'journey story usable')
+journey_screen = replace_one(journey_screen, journey_session_init_anchor, "    _initialized = true;\n    WidgetsBinding.instance.addPostFrameCallback((_) {\n      startupPerformanceMarkAfter('phoenix-journey-story-usable', 'phoenix-journey-open-start');\n    });\n" + journey_session_init_anchor.split("\n", 1)[1], 'journey story usable')
 journey_screen_path.write_text(journey_screen, encoding='utf-8')
 
 print('TEMPORARY STARTUP + JOURNEY-OPEN INSTRUMENTATION = PASS')

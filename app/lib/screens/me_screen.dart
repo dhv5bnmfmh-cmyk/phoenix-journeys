@@ -1,15 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
-import '../agents/phoenix_language_level_agent.dart';
-import '../models/language_proficiency.dart';
-import '../services/language_level_preference_store.dart';
 import '../services/narration_controller.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
+import '../widgets/journey_level_selector_button.dart';
 import '../widgets/word_detail_sheet.dart';
 import '../widgets/word_mark.dart';
 
@@ -22,101 +22,6 @@ class MeScreen extends StatefulWidget {
 
 class _MeScreenState extends State<MeScreen> {
   int _section = 0;
-  static const _levelAgent = PhoenixLanguageLevelAgent();
-  static const _levelStore = LanguageLevelPreferenceStore();
-  ChineseProficiencyProfile? _profile;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadProfile();
-  }
-
-  Future<void> _loadProfile() async {
-    final profile = await _levelStore.load();
-    if (mounted) setState(() => _profile = profile);
-  }
-
-  Future<void> _chooseLevel(AppState state) async {
-    final track = await showModalBottomSheet<ChineseExamTrack>(
-      context: context,
-      showDragHandle: true,
-      useSafeArea: true,
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              state.displayText('中文能力设置'),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-            ),
-            Text(
-              state.displayText('选择考试体系后，Phoenix 会自动调整旅程难度。'),
-              style: const TextStyle(fontSize: 11.5, color: Colors.black54),
-            ),
-            const SizedBox(height: 8),
-            for (final item in ChineseExamTrack.values)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  item == ChineseExamTrack.hsk
-                      ? Icons.translate_rounded
-                      : Icons.menu_book_rounded,
-                  color: PhoenixTheme.red,
-                ),
-                title: Text(item.label,
-                    style: const TextStyle(fontWeight: FontWeight.w900)),
-                subtitle: Text(
-                  state.displayText(
-                    item == ChineseExamTrack.hsk
-                        ? 'HSK 1 至 HSK 7–9'
-                        : '准备级至 TOCFL Level 6',
-                  ),
-                ),
-                onTap: () => Navigator.of(sheetContext).pop(item),
-              ),
-          ],
-        ),
-      ),
-    );
-    if (!mounted || track == null) return;
-    final selected = await showModalBottomSheet<ChineseProficiencyProfile>(
-      context: context,
-      showDragHandle: true,
-      useSafeArea: true,
-      isScrollControlled: true,
-      builder: (sheetContext) => FractionallySizedBox(
-        heightFactor: .75,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          children: [
-            Text(
-              state.displayText('选择 ${track.label} 等级'),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 8),
-            for (final item in _levelAgent.profilesFor(track))
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(item.displayLabel,
-                    style: const TextStyle(fontWeight: FontWeight.w900)),
-                subtitle: Text(state.displayText(item.band.label)),
-                trailing: _profile?.storageValue == item.storageValue
-                    ? const Icon(Icons.check_rounded, color: PhoenixTheme.red)
-                    : const Icon(Icons.chevron_right_rounded),
-                onTap: () => Navigator.of(sheetContext).pop(item),
-              ),
-          ],
-        ),
-      ),
-    );
-    if (selected == null) return;
-    await _levelStore.save(selected);
-    if (mounted) setState(() => _profile = selected);
-  }
-
   Future<void> _openSavedWord(
     BuildContext context,
     AppState state,
@@ -164,13 +69,7 @@ class _MeScreenState extends State<MeScreen> {
                 const _InstallAppStrip(),
                 SizedBox(height: compact ? 5 : 7),
               ],
-              _LanguageControl(state: state),
-              SizedBox(height: compact ? 5 : 7),
-              _AbilityControl(
-                state: state,
-                profile: _profile,
-                onTap: () => _chooseLevel(state),
-              ),
+              _LearningSettingsCard(state: state),
               SizedBox(height: compact ? 5 : 7),
               _MeSectionSwitch(
                 state: state,
@@ -201,60 +100,6 @@ class _MeScreenState extends State<MeScreen> {
           ),
         );
       },
-    );
-  }
-}
-
-class _AbilityControl extends StatelessWidget {
-  const _AbilityControl({
-    required this.state,
-    required this.profile,
-    required this.onTap,
-  });
-
-  final AppState state;
-  final ChineseProficiencyProfile? profile;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withValues(alpha: .78),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        key: const ValueKey('settings-language-level'),
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .28)),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.tune_rounded, size: 18, color: PhoenixTheme.red),
-              const SizedBox(width: 7),
-              Expanded(
-                child: Text(
-                  state.displayText('HSK／TOCFL 能力设置'),
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
-                ),
-              ),
-              Text(
-                profile?.displayLabel ?? state.displayText('请选择'),
-                style: const TextStyle(
-                  color: PhoenixTheme.red,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded, size: 17),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
@@ -404,54 +249,172 @@ class _MeHeader extends StatelessWidget {
   }
 }
 
-class _LanguageControl extends StatelessWidget {
-  const _LanguageControl({required this.state});
+class _LearningSettingsCard extends StatelessWidget {
+  const _LearningSettingsCard({required this.state});
+
+  static const _translationLanguages = <String>[
+    '越南语',
+    '英语',
+    '中文解释',
+    '双语',
+  ];
 
   final AppState state;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      key: const ValueKey('me-learning-settings'),
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 6),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: .86),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: PhoenixTheme.gold.withValues(alpha: .28)),
       ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.tune_rounded,
+                size: 17,
+                color: PhoenixTheme.red,
+              ),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  state.displayText('学习设置'),
+                  style: const TextStyle(
+                    color: Color(0xFF35211D),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Divider(
+            height: 1,
+            color: PhoenixTheme.gold.withValues(alpha: .18),
+          ),
+          _LearningSettingRow(
+            icon: Icons.local_fire_department_rounded,
+            title: state.displayText('Phoenix 中文等级'),
+            subtitle: state.displayText('新的等级将在下一次进入旅程时应用'),
+            trailing: const JourneyLevelSelectorButton(),
+          ),
+          Divider(
+            height: 1,
+            color: PhoenixTheme.gold.withValues(alpha: .14),
+          ),
+          _LearningSettingRow(
+            icon: Icons.translate_rounded,
+            title: state.displayText('中文字体'),
+            trailing: SegmentedButton<ScriptMode>(
+              key: const ValueKey('settings-script-mode'),
+              segments: const [
+                ButtonSegment(value: ScriptMode.simplified, label: Text('简')),
+                ButtonSegment(value: ScriptMode.traditional, label: Text('繁')),
+              ],
+              selected: <ScriptMode>{state.scriptMode},
+              showSelectedIcon: false,
+              onSelectionChanged: (selection) {
+                if (selection.single != state.scriptMode) {
+                  unawaited(state.toggleScript());
+                }
+              },
+            ),
+          ),
+          Divider(
+            height: 1,
+            color: PhoenixTheme.gold.withValues(alpha: .14),
+          ),
+          _LearningSettingRow(
+            icon: Icons.language_rounded,
+            title: state.displayText('翻译语言'),
+            trailing: DropdownButton<String>(
+              key: const ValueKey('settings-translation-language'),
+              value: state.translationLanguage,
+              underline: const SizedBox.shrink(),
+              isDense: true,
+              items: [
+                for (final language in _translationLanguages)
+                  DropdownMenuItem(
+                    value: language,
+                    child: Text(
+                      language == '英语'
+                          ? 'English'
+                          : language == '中文解释'
+                              ? '中文'
+                              : language,
+                    ),
+                  ),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  unawaited(state.setTranslationLanguage(value));
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LearningSettingRow extends StatelessWidget {
+  const _LearningSettingRow({
+    required this.icon,
+    required this.title,
+    required this.trailing,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 41),
       child: Row(
         children: [
-          const Icon(
-            Icons.translate_rounded,
-            size: 18,
-            color: PhoenixTheme.red,
-          ),
+          Icon(icon, size: 17, color: PhoenixTheme.red),
           const SizedBox(width: 7),
           Expanded(
-            child: Text(
-              state.displayText('探索者解释语言'),
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFF35211D),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                if (subtitle != null)
+                  Text(
+                    subtitle!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 9.5,
+                      height: 1.15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+              ],
             ),
           ),
-          DropdownButton<String>(
-            value: state.translationLanguage,
-            underline: const SizedBox.shrink(),
-            isDense: true,
-            style: const TextStyle(
-              color: PhoenixTheme.red,
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-            ),
-            items: const [
-              DropdownMenuItem(value: '越南语', child: Text('越南语')),
-              DropdownMenuItem(value: '英语', child: Text('English')),
-              DropdownMenuItem(value: '中文解释', child: Text('中文')),
-              DropdownMenuItem(value: '双语', child: Text('双语')),
-            ],
-            onChanged: (value) {
-              if (value != null) state.setTranslationLanguage(value);
-            },
-          ),
+          const SizedBox(width: 8),
+          trailing,
         ],
       ),
     );

@@ -20,6 +20,7 @@ on:
       - 'worker/**'
       - 'wrangler.toml'
       - '.github/scripts/verify_forbidden_city_*.mjs'
+      - '.github/scripts/journey_level_session_harness.mjs'
       - '.github/workflows/forbidden-city-preview-e2e.yml'
 
 permissions:
