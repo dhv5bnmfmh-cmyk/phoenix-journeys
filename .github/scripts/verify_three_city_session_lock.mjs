@@ -74,7 +74,32 @@ async function semanticActionDiagnostics(page, needle) {
   return { needle, stage, sessionLevel, viewport, matching, buttons, visibleSemanticSnapshot: visible };
 }
 
-async function tapButton(page, needle, { prefix = false, timeout = 15000, maxScrollSteps = 8 } = {}) {
+async function boundedSemanticScroll(page, { targetIndex = null, direction = 1 } = {}) {
+  const viewport = page.viewportSize() ?? { width: 390, height: 844 };
+  const amount = Math.max(240, Math.round(viewport.height * 0.65));
+  await page.evaluate(({ targetIndex, direction, amount }) => {
+    const semantics = [...document.querySelectorAll('flt-semantics')];
+    const target = targetIndex == null ? null : semantics[targetIndex];
+    if (target) {
+      target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
+      const rect = target.getBoundingClientRect();
+      if (rect.right > 0 && rect.bottom > 0 && rect.left < innerWidth && rect.top < innerHeight) return;
+    }
+
+    const start = target ?? document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+    const scrollables = [];
+    for (let node = start; node instanceof HTMLElement; node = node.parentElement) {
+      const style = getComputedStyle(node);
+      const scrollableY = /(auto|scroll)/.test(style.overflowY) && node.scrollHeight > node.clientHeight + 1;
+      if (scrollableY) scrollables.push(node);
+    }
+    const root = document.scrollingElement;
+    if (root && root.scrollHeight > root.clientHeight + 1 && !scrollables.includes(root)) scrollables.push(root);
+    for (const node of scrollables) node.scrollBy({ top: direction * amount, behavior: 'auto' });
+  }, { targetIndex, direction, amount });
+}
+
+async function tapButton(page, needle, { prefix = false, timeout = 15000, maxScrollSteps = 8, absentIsSuccess = false } = {}) {
   const wanted = clean(needle);
   const deadline = Date.now() + timeout;
   let scrollSteps = 0;
@@ -128,18 +153,16 @@ async function tapButton(page, needle, { prefix = false, timeout = 15000, maxScr
       }
 
       if (scrollSteps < maxScrollSteps) {
-        const viewport = page.viewportSize() ?? { width: 390, height: 844 };
         const direction = (refreshed ?? target).y < 0 ? -1 : 1;
-        await page.mouse.move(viewport.width / 2, viewport.height / 2);
-        await page.mouse.wheel(0, direction * Math.max(240, Math.round(viewport.height * 0.65)));
+        await boundedSemanticScroll(page, { targetIndex: (refreshed ?? target).index, direction });
         scrollSteps += 1;
         await sleep(180);
         continue;
       }
+    } else if (absentIsSuccess) {
+      return;
     } else if (scrollSteps < maxScrollSteps) {
-      const viewport = page.viewportSize() ?? { width: 390, height: 844 };
-      await page.mouse.move(viewport.width / 2, viewport.height / 2);
-      await page.mouse.wheel(0, Math.max(240, Math.round(viewport.height * 0.65)));
+      await boundedSemanticScroll(page);
       scrollSteps += 1;
       await sleep(180);
       continue;
@@ -247,10 +270,8 @@ async function tapMemoryCompletionAction(page, spec) {
     }
 
     if (scrollSteps < maxScrollSteps) {
-      const viewport = page.viewportSize() ?? { width: 390, height: 844 };
       const direction = target && target.y < 0 ? -1 : 1;
-      await page.mouse.move(viewport.width / 2, viewport.height / 2);
-      await page.mouse.wheel(0, direction * Math.max(240, Math.round(viewport.height * 0.65)));
+      await boundedSemanticScroll(page, { targetIndex: target?.index ?? null, direction });
       scrollSteps += 1;
       await sleep(180);
       continue;
@@ -487,7 +508,7 @@ async function captureNarrationRate(page, expected, label, metadata) {
     throw error;
   } finally {
     if (await exists(page, '暂停朗读', { role: 'button', prefix: true, timeout: 500 })) {
-      await tapButton(page, '暂停朗读', { prefix: true, timeout: 10000 });
+      await tapButton(page, '暂停朗读', { prefix: true, timeout: 10000, absentIsSuccess: true });
     }
   }
 }
