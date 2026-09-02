@@ -59,7 +59,7 @@ class _JourneyLevelSelectorButtonState
       LanguageLevelPreferenceStore();
 
   bool _loading = true;
-  bool _changing = false;
+  Future<void> _levelPersistence = Future<void>.value();
 
   @override
   void initState() {
@@ -73,8 +73,8 @@ class _JourneyLevelSelectorButtonState
     setState(() => _loading = false);
   }
 
-  Future<void> _adjust(int delta) async {
-    if (_loading || _changing) return;
+  void _adjust(int delta) {
+    if (_loading) return;
     final current = _controller.level;
     final next = (current + delta)
         .clamp(
@@ -84,15 +84,22 @@ class _JourneyLevelSelectorButtonState
         .toInt();
     if (next == current) return;
 
-    setState(() => _changing = true);
     _controller.setLevel(next);
     unawaited(HapticFeedback.selectionClick());
 
-    try {
-      await _store.savePhoenixLevel(next);
-    } finally {
-      if (mounted) setState(() => _changing = false);
-    }
+    final previousPersistence = _levelPersistence;
+    _levelPersistence = () async {
+      try {
+        await previousPersistence;
+      } catch (error) {
+        debugPrint('Unable to persist previous Phoenix level: $error');
+      }
+      try {
+        await _store.persistPhoenixLevel(next);
+      } catch (error) {
+        debugPrint('Unable to persist Phoenix level $next: $error');
+      }
+    }();
   }
 
   Future<void> _showLevelGuide(int level) async {
@@ -124,12 +131,10 @@ class _JourneyLevelSelectorButtonState
     return ValueListenableBuilder<int>(
       valueListenable: _controller,
       builder: (context, level, _) {
-        final canDecrease = !_loading &&
-            !_changing &&
-            level > PhoenixLevelController.minimumLevel;
-        final canIncrease = !_loading &&
-            !_changing &&
-            level < PhoenixLevelController.maximumLevel;
+        final canDecrease =
+            !_loading && level > PhoenixLevelController.minimumLevel;
+        final canIncrease =
+            !_loading && level < PhoenixLevelController.maximumLevel;
 
         return Semantics(
           label: 'Phoenix 中文难度 $level 级',
@@ -163,7 +168,7 @@ class _JourneyLevelSelectorButtonState
                   enabled: canDecrease,
                   size: buttonSize,
                   iconSize: iconSize,
-                  onPressed: () => unawaited(_adjust(-1)),
+                  onPressed: () => _adjust(-1),
                 ),
                 Tooltip(
                   message: '查看 Lv.$level 阅读强度',
@@ -216,7 +221,7 @@ class _JourneyLevelSelectorButtonState
                   enabled: canIncrease,
                   size: buttonSize,
                   iconSize: iconSize,
-                  onPressed: () => unawaited(_adjust(1)),
+                  onPressed: () => _adjust(1),
                 ),
               ],
             ),
@@ -351,7 +356,7 @@ class _PhoenixLevelGuideSheet extends StatelessWidget {
               ),
             ),
             child: const Text(
-              '使用 − / + 调整等级后，当前故事、重点词汇、文化发现、挑战与朗读速度会立即同步更新。',
+              '新的等级将在下一次进入旅程时应用；已经打开的旅程会保持当前等级。',
               style: TextStyle(
                 color: Color(0xFF5B4237),
                 fontSize: 11.5,

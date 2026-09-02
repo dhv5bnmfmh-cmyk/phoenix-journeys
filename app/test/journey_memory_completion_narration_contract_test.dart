@@ -35,12 +35,8 @@ void main() {
         'Future<void> _restartJourney() async {\n    await _stopJourneyNarration();',
       ),
     );
-    expect(
-      journey,
-      contains(
-        'await _stopJourneyNarration();\n    await _appState.clearJourneyNarrationPosition();',
-      ),
-    );
+    expect(journey, contains('_narration.dispose();'));
+    expect(journey, contains('await _narration.stop();'));
   });
 
   test('stage narration binds active Journey level and displayed script', () {

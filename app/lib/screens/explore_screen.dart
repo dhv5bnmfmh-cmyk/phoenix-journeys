@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../services/journey_location_binding.dart';
+import '../services/journey_preparation_coordinator.dart';
 import '../services/journey_startup_resolver.dart';
+import '../services/phoenix_level_controller.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/journey_picker_sheet.dart';
@@ -29,6 +31,31 @@ class ExploreScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final viewportHeight = MediaQuery.sizeOf(context).height;
     final mapHeight = compactExploreMapHeight(viewportHeight);
+
+    if (state.activeJourneyId == 'beijing-forbidden-city') {
+      final profile = PhoenixLevelController.instance.profile;
+      unawaited(
+        JourneyPreparationCoordinator.instance.prepare(
+          journeyId: state.activeJourneyId,
+          profile: profile,
+          scriptMode: state.scriptMode.name,
+          knownWords: state.savedWords,
+        ),
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        for (var variant = 1; variant <= 3; variant += 1) {
+          unawaited(
+            precacheImage(
+              AssetImage(
+                'assets/images/backgrounds/seed/beijing-forbidden-city-v$variant.webp',
+              ),
+              context,
+            ).catchError((_) {}),
+          );
+        }
+      });
+    }
 
     Future<void> openJourneyById(String journeyId) async {
       await state.activateJourney(journeyId);

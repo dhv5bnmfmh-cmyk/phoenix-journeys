@@ -4,16 +4,17 @@ import test from 'node:test';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-test('PR118 keeps language level in settings and does not autoplay restored discovery', async () => {
-  const [journey, settings] = await Promise.all([
+test('Me keeps one canonical Phoenix level and discovery does not autoplay', async () => {
+  const [journey, me] = await Promise.all([
     read('app/lib/screens/journey_screen.dart'),
     read('app/lib/screens/me_screen.dart'),
   ]);
 
   assert.doesNotMatch(journey, /_showDifficultyWelcome/);
   assert.doesNotMatch(journey, /_scheduleDiscoveryAutoStart/);
-  assert.match(settings, /settings-language-level/);
-  assert.match(settings, /HSK／TOCFL 能力设置/);
+  assert.match(me, /me-learning-settings/);
+  assert.equal((me.match(/JourneyLevelSelectorButton\(/g) ?? []).length, 1);
+  assert.doesNotMatch(me, /_chooseLevel|HSK／TOCFL 能力设置/);
 });
 
 test('PR118 always presents three sequential four-choice challenge modes', async () => {

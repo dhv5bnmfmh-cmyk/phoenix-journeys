@@ -25,6 +25,7 @@ const dedicatedAdaptiveJourneyIds = <String>{
 const canonicalExpandedDiscoveryJourneyIds = <String>{
   'beijing-summer-palace',
   'beijing-forbidden-city',
+  'xian-city-wall',
   'suzhou-humble-administrators-garden',
   'luoyang-longmen-grottoes',
   'jiangmen-kaiping-diaolou',

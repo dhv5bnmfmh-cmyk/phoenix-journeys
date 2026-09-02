@@ -13,6 +13,7 @@ on:
       - 'worker/**'
       - 'wrangler.toml'
       - '.github/scripts/verify_mobile_interaction.mjs'
+      - '.github/scripts/journey_level_session_harness.mjs'
       - '.github/workflows/mobile-interaction-audit.yml'
       - '.github/workflows/preview-cloudflare.yml'
 

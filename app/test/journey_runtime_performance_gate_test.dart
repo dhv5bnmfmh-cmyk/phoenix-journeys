@@ -23,9 +23,16 @@ void main() {
       File('lib/data/adaptive_journey_level_runtime.dart').readAsStringSync();
   final interactive =
       File('lib/widgets/interactive_story_text.dart').readAsStringSync();
+  final narration =
+      File('lib/services/narration_controller.dart').readAsStringSync();
+  final appState = File('lib/state/app_state.dart').readAsStringSync();
+  final selector =
+      File('lib/widgets/journey_level_selector_button.dart').readAsStringSync();
+  final levelStore =
+      File('lib/services/language_level_preference_store.dart')
+          .readAsStringSync();
 
   test('Forbidden City Lv1 Lv5 Lv10 reuse immutable level snapshots', () {
-    warmForbiddenCityContentCache();
     for (final level in <int>[1, 5, 10]) {
       final first = cachedForbiddenCityLevelContent(level);
       final second = cachedForbiddenCityLevelContent(level);
@@ -57,9 +64,30 @@ void main() {
     expect(runtime, contains('PinyinHelper.getPinyinE'));
     expect(
       cache,
-      contains('final List<JourneyLevelContent> _forbiddenCityLevelSnapshots'),
+      contains(
+        'final List<JourneyLevelContent?> _forbiddenCityLevelSnapshots',
+      ),
     );
-    expect(cache, contains('warmForbiddenCityContentCache'));
+    expect(
+      cache,
+      contains(
+        'List<JourneyLevelContent?>.filled(10, null, growable: false)',
+      ),
+    );
+    expect(
+      cache,
+      contains(
+        'return _forbiddenCityLevelSnapshots[safeLevel - 1] ??=',
+      ),
+    );
+    expect(
+      cache,
+      contains('_buildForbiddenCityLevelSnapshot(safeLevel);'),
+    );
+    expect(cache, isNot(contains('List<JourneyLevelContent>.generate')));
+    expect(story, isNot(contains('warmForbiddenCityContentCache')));
+    expect(levelResolver, isNot(contains('warmForbiddenCityContentCache')));
+    expect(story, isNot(contains('_buildForbiddenCityLevelSnapshot')));
     expect(adaptive, contains('cachedForbiddenCityLevelContent(level)'));
   });
 
@@ -119,25 +147,18 @@ void main() {
     expect(narrationDefinitions, isNot(contains('reveal')));
   });
 
-  test('narration cache identity follows Journey level content invalidation', () {
+  test('narration cache identity follows the locked Journey session content', () {
     final resolver = _section(
       journey,
       'JourneyLevelContent get _levelContent',
       'ReadingGenerationPlan? get _generationPlan',
     );
-    final levelChange = _section(
-      journey,
-      'Future<void> _applyPhoenixLevelChange()',
-      'void _checkpointNarrationBeforeStepChange()',
-    );
 
     expect(resolver, contains('final profile = _languageProfile;'));
-    expect(resolver, contains('final difficulty = _appState.journeyDifficulty;'));
-    expect(resolver, contains('final knownWordsHash = _knownWordsFingerprint;'));
     expect(resolver, contains('identical(_cachedLevelProfile, profile)'));
-    expect(resolver, contains('_cachedLevelDifficulty == difficulty'));
-    expect(resolver, contains('_cachedKnownWordsHash == knownWordsHash'));
-    expect(levelChange, contains('_languageProfile = profile;'));
+    expect(journey, contains('snapshotJourneySessionProfile('));
+    expect(journey, contains('late final ChineseProficiencyProfile _sessionLanguageProfile;'));
+    expect(journey, isNot(contains('_phoenixLevelController.addListener')));
     expect(
       journey,
       contains('_experience = requireDailyJourneyExperience(journeyId);'),
@@ -173,6 +194,84 @@ void main() {
     );
     expect(interactive, contains('if (textChanged || entriesChanged)'));
     expect(interactive, contains('_buildSegments();'));
+  });
+
+  test('narration cancellation separates immediate state from engine stop', () {
+    expect(narration, contains('int cancelPlaybackImmediately('));
+    expect(
+      narration,
+      contains('Future<void> flushCancelledPlayback(int cancellationToken) async'),
+    );
+    expect(
+      narration,
+      contains('if (cancellationToken != _playbackIntentToken) return;'),
+    );
+    expect(narration, contains('final shouldStopEngine = _engineStopPending;'));
+    expect(
+      narration,
+      contains('_stopSpeechEngine(advanceSessionToken: false)'),
+    );
+    expect(
+      narration,
+      contains('(_sharedSpeechRate - rate).abs() >= .001'),
+    );
+  });
+
+  test('narration persistence is serialized so latest intent wins on disk', () {
+    expect(
+      appState,
+      contains('Future<void> _journeyNarrationPersistence = Future<void>.value();'),
+    );
+    expect(
+      appState,
+      contains('Future<void> _queueJourneyNarrationPersistence('),
+    );
+    expect(appState, contains('final previous = _journeyNarrationPersistence;'));
+    expect(appState, contains('await previous;'));
+    expect(
+      appState,
+      contains('_journeyNarrationPersistence = next.catchError((_) {});'),
+    );
+  });
+
+  test('narration position memory clears before SharedPreferences I/O', () {
+    final clear = _section(
+      appState,
+      'Future<void> clearJourneyNarrationPosition',
+      'Future<void> saveGuideFeedback',
+    );
+    final memoryClear = clear.indexOf('journeyNarrationContentId = null;');
+    final persistence =
+        clear.indexOf('return _queueJourneyNarrationPersistence(');
+    expect(memoryClear, greaterThanOrEqualTo(0));
+    expect(persistence, greaterThan(memoryClear));
+  });
+
+  test('rapid level intent is not blocked by persistence', () {
+    expect(selector, isNot(contains('_changing')));
+    expect(selector, contains('Future<void> _levelPersistence'));
+    expect(selector, contains('_store.persistPhoenixLevel(next)'));
+    expect(selector, isNot(contains('await _store.savePhoenixLevel(next)')));
+    expect(levelStore, contains('Future<void> persistPhoenixLevel(int level)'));
+  });
+
+  test('Journey builds only the currently visible stage', () {
+    final build = _section(
+      journey,
+      'Widget build(BuildContext context)',
+      'Widget _page({',
+    );
+
+    expect(build, contains('final page = switch (step) {'));
+    expect(build, contains('0 => _storyPage()'));
+    expect(build, contains('1 => _wordsPage()'));
+    expect(build, contains('2 => _discoveryPage()'));
+    expect(build, contains('3 => stepThreePage'));
+    expect(build, contains('4 => stepFourPage'));
+    expect(build, contains('_ => _completePage()'));
+    expect(build, contains('child: page'));
+    expect(build, isNot(contains('final pages = <Widget>[')));
+    expect(build, isNot(contains('pages[step]')));
   });
 
   test('performance remediation preserves shared cinematic Story architecture', () {

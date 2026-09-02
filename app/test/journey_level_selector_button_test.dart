@@ -51,6 +51,35 @@ void main() {
     expect(find.text('Lv.5'), findsOneWidget);
   });
 
+  testWidgets('rapid plus minus preserves the final visible and persisted level',
+      (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(child: JourneyLevelSelectorButton()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(control('phoenix-level-plus'));
+    await tester.pump();
+    await tester.tap(control('phoenix-level-plus'));
+    await tester.pump();
+    await tester.tap(control('phoenix-level-plus'));
+    await tester.pump();
+    await tester.tap(control('phoenix-level-minus'));
+    await tester.pump();
+
+    expect(PhoenixLevelController.instance.level, 7);
+    expect(find.text('Lv.7'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getInt('phoenix.level'), 7);
+    expect(preferences.getString('phoenix.languageProficiency'), 'phoenix:7');
+  });
+
   testWidgets('tapping the level opens the current reading guide',
       (tester) async {
     await tester.pumpWidget(
@@ -70,7 +99,7 @@ void main() {
     expect(find.text('380–500 字'), findsOneWidget);
     expect(find.text('2 段短文'), findsOneWidget);
     expect(find.text('约 3 分钟'), findsOneWidget);
-    expect(find.textContaining('当前故事、重点词汇、文化发现'), findsOneWidget);
+    expect(find.textContaining('下一次进入旅程时应用'), findsOneWidget);
   });
 
   testWidgets('boundary buttons disable at one and ten', (tester) async {

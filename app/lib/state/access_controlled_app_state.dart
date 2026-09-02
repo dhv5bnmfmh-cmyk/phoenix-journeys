@@ -317,6 +317,7 @@ class AccessControlledAppState extends AppState {
       final preferences = await _preferencesLoader();
       _preferences = preferences;
       _restoreNonCriticalPreferences(preferences);
+      await loadJourneyMemoryEntries(preferences);
       _criticalStore ??= CriticalPersistenceStore(
         _injectedCriticalBackend ??
             SharedPreferencesCriticalPersistenceBackend(preferences),
@@ -720,7 +721,7 @@ class AccessControlledAppState extends AppState {
   }
 
   @override
-  Future<void> completeJourney(String memory) async {
+  Future<void> completeJourney(String memory, {int sessionLevel = 1}) async {
     final journeyId = activeJourneyId;
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
@@ -763,6 +764,9 @@ class AccessControlledAppState extends AppState {
         null,
       );
     });
+    if (activeJourneyId == 'beijing-forbidden-city') {
+      await saveActiveJourneyMemory(memory, sessionLevel: sessionLevel);
+    }
   }
 
   @override
