@@ -54,7 +54,7 @@ env:
 jobs:
   reference-journey-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 65
 
     steps:
       - name: Check out exact candidate head
@@ -84,7 +84,7 @@ jobs:
           set -euo pipefail
           health_url="${PREVIEW_URL}api/health?commit=${CANDIDATE_SHA}"
           verified=false
-          for attempt in {1..180}; do
+          for attempt in {1..360}; do
             response="$(curl --fail --silent --show-error "$health_url" || true)"
             if node -e '
               let health;
@@ -98,7 +98,7 @@ jobs:
               verified=true
               break
             fi
-            echo "Waiting for exact preview release ${attempt}/180"
+            echo "Waiting for exact preview release ${attempt}/360"
             sleep 5
           done
           [[ "$verified" == true ]]

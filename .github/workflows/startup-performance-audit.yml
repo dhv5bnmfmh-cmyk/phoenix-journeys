@@ -122,12 +122,22 @@ jobs:
           before_visible = json.loads((root / 'baseline-journey-open-visible.json').read_text())
           after_visible = json.loads((root / 'candidate-journey-open-visible.json').read_text())
           failed = []
+          before_identity = before_visible.get('identityKey')
+          after_identity = after_visible.get('identityKey')
+          same_identity = bool(before_identity) and before_identity == after_identity
+          print(f'[learner-visible] identity BEFORE={before_identity} AFTER={after_identity}')
+          if not before_identity or not after_identity:
+              failed.append('learner-visible Journey identity is missing')
           for scenario in ('cold_new','warm_new','cold_existing','warm_existing'):
               b = before['stats'][scenario]['totalToMeaningfulMs']['median']
               a = after['stats'][scenario]['totalToMeaningfulMs']['median']
               print(f'[{scenario}] total BEFORE={b} AFTER={a}')
-              if b is None or a is None: failed.append(f'{scenario}: missing total startup evidence')
-              elif a > b * 1.15: failed.append(f'{scenario}: total startup regressed >15%')
+              if b is None or a is None:
+                  failed.append(f'{scenario}: missing total startup evidence')
+              elif same_identity and a > b * 1.15:
+                  failed.append(f'{scenario}: total startup regressed >15%')
+              elif not same_identity:
+                  print(f'[{scenario}] relative total comparison = NOT APPLICABLE across different Journey identities')
               ready = after['stats'][scenario]['homeReadyBeforeBrandingDeadlineMs']['median']
               fade = after['stats'][scenario]['brandingDeadlineToFadeStartMs']['max']
               removal = after['stats'][scenario]['coverRemovalAfterFadeStartMs']['max']
@@ -138,7 +148,10 @@ jobs:
           a_open = after_visible['medianMs']
           print(f'[learner-visible] Journey-open BEFORE={b_open} AFTER={a_open}')
           print(f'[instrumentation] candidate legacy Journey-open={after["stats"]["warm_existing"]["journeyOpenStoryUsableMs"]["median"]}')
-          if a_open > max(5000, b_open * 1.15): failed.append('learner-visible Journey-open regressed materially')
+          if a_open > 5000:
+              failed.append('learner-visible Journey-open exceeded 5000ms absolute budget')
+          elif same_identity and a_open > b_open * 1.15:
+              failed.append('learner-visible Journey-open regressed materially')
           if a_open < 5000 and after['stats']['warm_existing']['journeyOpenStoryUsableMs']['median'] > 5000:
               print('INSTRUMENTATION FALSE POSITIVE = CONFIRMED')
           if before_visible.get('pageErrors') or after_visible.get('pageErrors'): failed.append('browser page errors in learner-visible metric')
