@@ -1,11 +1,16 @@
 import '../models/city_standard.dart';
 
 const beijingCityId = 'beijing';
+const chinaCountryId = 'china';
 const forbiddenCityPlaceId = 'beijing-forbidden-city';
 const forbiddenCityJourney01Id = 'beijing-forbidden-city-journey-01';
 const forbiddenCityRuntimeId = 'beijing-forbidden-city';
 
 const _dpm = 'https://www.dpm.org.cn/';
+const _meridianGate =
+    'https://www.dpm.org.cn/explore/building/236454.html';
+const _qianqingGate =
+    'https://www.dpm.org.cn/explore/building/236473.html';
 const _axisPlan =
     'https://www.beijing.gov.cn/zhengce/zhengcefagui/202309/W020230921615858870431.pdf';
 const _unesco = 'https://whc.unesco.org/en/list/439/';
@@ -130,6 +135,36 @@ const beijingKnowledgeMap = <CityKnowledgeDomain>[
       tags: ['当代']),
 ];
 
+const chinaReferenceCountry = CountryDefinition(
+  countryId: chinaCountryId,
+  title: '中国',
+  cityIds: [beijingCityId],
+  publicationState: PublicationState.reference,
+);
+
+const beijingReferenceCity = CityDefinition(
+  cityId: beijingCityId,
+  countryId: chinaCountryId,
+  title: '北京',
+  placeIds: [forbiddenCityPlaceId],
+  knowledgeDomainIds: [
+    'beijing.history',
+    'beijing.geography',
+    'beijing.architecture',
+    'beijing.food',
+    'beijing.folk_customs',
+    'beijing.language',
+    'beijing.arts',
+    'beijing.craft',
+    'beijing.education',
+    'beijing.technology',
+    'beijing.commerce',
+    'beijing.transport',
+    'beijing.modern_life',
+  ],
+  publicationState: PublicationState.reference,
+);
+
 const forbiddenCityPlace = PlaceDefinition(
   placeId: forbiddenCityPlaceId,
   cityId: beijingCityId,
@@ -138,6 +173,17 @@ const forbiddenCityPlace = PlaceDefinition(
     'beijing.history',
     'beijing.architecture',
     'beijing.craft'
+  ],
+  knowledgeAnchors: [
+    'history',
+    'architecture',
+    'imperial_palace',
+    'central_axis',
+    'court_life',
+    'craft',
+    'conservation',
+    'museum',
+    'spatial_reasoning',
   ],
   sourceRefs: [_dpm, _axisPlan, _unesco],
   publicationState: PublicationState.reference,
@@ -176,7 +222,7 @@ const forbiddenCityJourney01Scenes = <JourneySceneDefinition>[
       title: '午门进入',
       storyAnchor: '沈砚第一次进入并形成中轴是标准路线的初步判断。',
       knowledgeAnchors: ['午门', '中轴', '宫城入口'],
-      paragraphBindings: [0],
+      storyBinding: 'semantic-anchor:entry-through-first-observation',
       levelBands: ['Lv1-Lv10'],
       stageBindings: ['story.opening'],
       landscapeAsset: '$_assetRoot/fc01_a_entry_landscape.webp',
@@ -189,7 +235,7 @@ const forbiddenCityJourney01Scenes = <JourneySceneDefinition>[
           SceneSafeZone(left: .04, top: .38, right: .48, bottom: .94),
       altText: '晨光中从午门空间进入紫禁城，中央轴线向院落深处延伸。',
       historicalNotes: ['午门是紫禁城南面正门。', '中轴建筑序列向北组织宫门、院落与主要殿宇。'],
-      sourceRefs: [_dpm, _axisPlan],
+      sourceRefs: [_meridianGate, _axisPlan],
       visualVerification: [
         'Meridian Gate spatial threshold',
         'central-axis depth',
@@ -205,7 +251,7 @@ const forbiddenCityJourney01Scenes = <JourneySceneDefinition>[
       title: '中轴与院落',
       storyAnchor: '沈砚沿宫门与院落理解空间层级，并把自己的路线误当标准。',
       knowledgeAnchors: ['宫门序列', '院落', '空间层级'],
-      paragraphBindings: [1],
+      storyBinding: 'semantic-anchor:axis-judgment-before-east-task',
       levelBands: ['Lv1-Lv10'],
       stageBindings: ['story.axis', 'vocabulary'],
       landscapeAsset: '$_assetRoot/fc01_b_axis_landscape.webp',
@@ -234,7 +280,7 @@ const forbiddenCityJourney01Scenes = <JourneySceneDefinition>[
       title: '东侧任务',
       storyAnchor: '阿宁因东侧记录任务转向侧廊与院落连接，空间开始分流。',
       knowledgeAnchors: ['东路', '侧向连接', '任务路线'],
-      paragraphBindings: [2],
+      storyBinding: 'semantic-anchor:east-task-through-route-conflict',
       levelBands: ['Lv1-Lv10'],
       stageBindings: ['story.east_route', 'discovery'],
       landscapeAsset: '$_assetRoot/fc01_c_east_route_landscape.webp',
@@ -263,11 +309,11 @@ const forbiddenCityJourney01Scenes = <JourneySceneDefinition>[
       title: '共同节点',
       storyAnchor: '两人以乾清门前的共同空间事实校正判断，同时保留不同路线。',
       knowledgeAnchors: ['乾清门前', '外朝与内廷', '共同节点'],
-      paragraphBindings: [3],
+      storyBinding: 'semantic-anchor:shared-evidence-through-closure',
       levelBands: ['Lv1-Lv10'],
       stageBindings: ['story.closure', 'challenge', 'memory', 'completion'],
-      landscapeAsset: '$_assetRoot/fc01_d_shared_node_landscape.webp',
-      portraitAsset: '$_assetRoot/fc01_d_shared_node_portrait.webp',
+      landscapeAsset: '$_assetRoot/fc01_d_shared_node_landscape_v2.webp',
+      portraitAsset: '$_assetRoot/fc01_d_shared_node_portrait_v2.webp',
       mobileFocalPoint: (.57, .38),
       desktopFocalPoint: (.65, .43),
       mobileSafeZone:
@@ -276,30 +322,126 @@ const forbiddenCityJourney01Scenes = <JourneySceneDefinition>[
           SceneSafeZone(left: .03, top: .37, right: .47, bottom: .94),
       altText: '暖色夕光中的乾清门前空间，中轴与侧向连接在共同节点汇合。',
       historicalNotes: ['乾清门是内廷正门。', '乾清门前空间位于外朝与内廷关系的重要界面。'],
-      sourceRefs: [_dpm, _axisPlan],
+      sourceRefs: [_qianqingGate, _axisPlan],
       visualVerification: [
         'shared node legible',
         'axis and lateral relation',
         'warm closure'
       ],
-      promptVersion: 'fc01-v1',
-      assetVersion: '2026-09-02-v1'),
+      promptVersion: 'fc01-d-v2',
+      assetVersion: '2026-09-02-v2'),
 ];
 
 JourneySceneDefinition forbiddenCitySceneById(String sceneId) =>
     forbiddenCityJourney01Scenes
         .singleWhere((scene) => scene.sceneId == sceneId);
 
-JourneySceneDefinition forbiddenCitySceneForParagraph(int paragraphIndex) {
-  if (paragraphIndex <= 0) return forbiddenCitySceneById('FC01-A');
-  if (paragraphIndex == 1) return forbiddenCitySceneById('FC01-B');
-  if (paragraphIndex == 2) return forbiddenCitySceneById('FC01-C');
-  return forbiddenCitySceneById('FC01-D');
+const _storySceneIds = ['FC01-A', 'FC01-B', 'FC01-C', 'FC01-D'];
+const _sharedEvidenceAnchorByLevel = <int, String>{
+  1: '沈砚看清后',
+  2: '两条线都能到',
+  3: '两人重新对照',
+  4: '两人比较',
+  5: '沈砚发现',
+  6: '两人逐项比较后',
+  7: '证据改变了争论',
+  8: '他们重新检查后发现',
+  9: '比较结果没有',
+  10: '沈砚逐项重画后发现',
+};
+
+List<JourneyStorySceneSpan> forbiddenCityStorySceneSpans({
+  required int level,
+  required List<String> paragraphs,
+}) {
+  if (level < 1 || level > 10) {
+    throw RangeError.range(level, 1, 10, 'level');
+  }
+  if (paragraphs.isEmpty || paragraphs.any((paragraph) => paragraph.isEmpty)) {
+    throw ArgumentError.value(
+      paragraphs,
+      'paragraphs',
+      'must contain non-empty Story paragraphs',
+    );
+  }
+
+  final story = paragraphs.join();
+  final total = story.length;
+  final axisStart = story.indexOf('。') + 1;
+  final eastRouteStart = story.indexOf('阿宁', axisStart);
+  final sharedEvidenceAnchor = _sharedEvidenceAnchorByLevel[level]!;
+  final sharedNodeStart = story.indexOf(sharedEvidenceAnchor, eastRouteStart);
+  final boundaries = <int>[
+    0,
+    axisStart,
+    eastRouteStart,
+    sharedNodeStart,
+    total,
+  ];
+  if (boundaries.any((value) => value < 0) ||
+      List<int>.generate(boundaries.length - 1, (index) => index)
+          .any((index) => boundaries[index] >= boundaries[index + 1])) {
+    throw StateError(
+      'Forbidden City Lv.$level Story does not satisfy canonical scene anchors.',
+    );
+  }
+  final spans = <JourneyStorySceneSpan>[];
+  var globalParagraphStart = 0;
+  for (var paragraphIndex = 0;
+      paragraphIndex < paragraphs.length;
+      paragraphIndex += 1) {
+    final paragraphLength = paragraphs[paragraphIndex].length;
+    for (var sceneIndex = 0;
+        sceneIndex < _storySceneIds.length;
+        sceneIndex += 1) {
+      final globalStart = boundaries[sceneIndex];
+      final globalEnd = boundaries[sceneIndex + 1];
+      final localStart = (globalStart - globalParagraphStart)
+          .clamp(0, paragraphLength)
+          .toInt();
+      final localEnd =
+          (globalEnd - globalParagraphStart).clamp(0, paragraphLength).toInt();
+      if (localEnd <= localStart) continue;
+      spans.add(JourneyStorySceneSpan(
+        level: level,
+        paragraphIndex: paragraphIndex,
+        start: localStart,
+        end: localEnd,
+        sceneId: _storySceneIds[sceneIndex],
+      ));
+    }
+    globalParagraphStart += paragraphLength;
+  }
+  return List<JourneyStorySceneSpan>.unmodifiable(spans);
+}
+
+JourneySceneDefinition forbiddenCitySceneForStoryOffset({
+  required int level,
+  required List<String> paragraphs,
+  required int paragraphIndex,
+  required int characterOffset,
+}) {
+  if (paragraphIndex < 0 || paragraphIndex >= paragraphs.length) {
+    throw RangeError.index(paragraphIndex, paragraphs, 'paragraphIndex');
+  }
+  final safeOffset =
+      characterOffset.clamp(0, paragraphs[paragraphIndex].length - 1).toInt();
+  final span = forbiddenCityStorySceneSpans(
+    level: level,
+    paragraphs: paragraphs,
+  ).firstWhere(
+    (binding) =>
+        binding.paragraphIndex == paragraphIndex &&
+        binding.contains(safeOffset),
+  );
+  return forbiddenCitySceneById(span.sceneId);
 }
 
 JourneySceneDefinition forbiddenCitySceneForStage(String stage) {
-  if (stage == 'memory' || stage == 'completion') {
-    return forbiddenCitySceneById('FC01-D');
-  }
-  return forbiddenCitySceneById('FC01-A');
+  return switch (stage) {
+    'vocabulary' => forbiddenCitySceneById('FC01-B'),
+    'discovery' || 'challenge' => forbiddenCitySceneById('FC01-C'),
+    'memory' || 'completion' => forbiddenCitySceneById('FC01-D'),
+    _ => forbiddenCitySceneById('FC01-A'),
+  };
 }

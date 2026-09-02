@@ -1199,26 +1199,23 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   String? get _cityStandardSceneId {
     if (_experience.id != forbiddenCityRuntimeId) return null;
-    if (step == 1) return 'FC01-B';
-    if (step == 2 || step == 3) return 'FC01-C';
-    if (step >= 4) return 'FC01-D';
+    if (step == 1) return forbiddenCitySceneForStage('vocabulary').sceneId;
+    if (step == 2) return forbiddenCitySceneForStage('discovery').sceneId;
+    if (step == 3) return forbiddenCitySceneForStage('challenge').sceneId;
+    if (step == 4) return forbiddenCitySceneForStage('memory').sceneId;
+    if (step >= 5) return forbiddenCitySceneForStage('completion').sceneId;
 
     final snapshot = _narration.highlightSnapshot;
     if (snapshot?.contentId != 'story') return 'FC01-A';
     final itemId = snapshot!.itemId;
     final paragraphIndex = int.tryParse(itemId.split('-').last) ?? 0;
     final paragraphs = _levelContent.storyParagraphs;
-    final totalLength =
-        paragraphs.fold<int>(0, (sum, value) => sum + value.length);
-    final before = paragraphs
-        .take(paragraphIndex)
-        .fold<int>(0, (sum, value) => sum + value.length);
-    final progress =
-        totalLength == 0 ? 0.0 : (before + snapshot.start) / totalLength;
-    if (progress < .22) return 'FC01-A';
-    if (progress < .48) return 'FC01-B';
-    if (progress < .76) return 'FC01-C';
-    return 'FC01-D';
+    return forbiddenCitySceneForStoryOffset(
+      level: _sessionLanguageProfile.phoenixLevel ?? 1,
+      paragraphs: paragraphs,
+      paragraphIndex: paragraphIndex.clamp(0, paragraphs.length - 1).toInt(),
+      characterOffset: snapshot.start,
+    ).sceneId;
   }
 
   @override
@@ -1318,13 +1315,10 @@ class _JourneyScreenState extends State<JourneyScreen>
           ),
         );
 
-    if (_experience.id == forbiddenCityRuntimeId) {
-      return AnimatedBuilder(
-        animation: _narration,
-        builder: (_, __) => background(),
-      );
-    }
-    return background();
+    return AnimatedBuilder(
+      animation: _narration,
+      builder: (_, __) => background(),
+    );
   }
 
   Widget _page({

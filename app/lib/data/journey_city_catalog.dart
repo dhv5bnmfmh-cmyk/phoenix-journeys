@@ -108,6 +108,21 @@ final List<JourneyCityCatalogEntry> journeyCityCatalog =
   ),
 );
 
+final List<JourneyCityCatalogEntry> publishedJourneyCityCatalog =
+    List<JourneyCityCatalogEntry>.unmodifiable(
+  publishedJourneyStartupCityCatalog.map(
+    (city) => JourneyCityCatalogEntry(
+      id: city.id,
+      name: city.name,
+      cityCode: city.cityCode,
+      destinations: List<DailyJourneyExperience>.unmodifiable(
+        city.destinations.map(_deferredJourney),
+      ),
+      primaryDestination: (id: city.primaryDestination.id),
+    ),
+  ),
+);
+
 JourneyCityCatalogEntry? journeyCityById(String cityId) {
   if (cityId.isEmpty) return null;
   for (final city in journeyCityCatalog) {
@@ -122,6 +137,13 @@ JourneyCityCatalogEntry requireJourneyCity(String cityId) {
     throw StateError('Journey city is not registered: "$cityId".');
   }
   return city;
+}
+
+JourneyCityCatalogEntry requirePublishedJourneyCity(String cityId) {
+  for (final city in publishedJourneyCityCatalog) {
+    if (city.id == cityId) return city;
+  }
+  throw StateError('Published Journey city is not registered: "$cityId".');
 }
 
 List<DailyJourneyExperience> journeysForCity(String cityId) {

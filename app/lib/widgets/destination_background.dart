@@ -250,12 +250,26 @@ class DestinationBackground extends StatelessWidget {
       final scene = sceneId == null ? null : forbiddenCitySceneById(sceneId!);
       final portrait =
           MediaQuery.sizeOf(context).height > MediaQuery.sizeOf(context).width;
+      final sceneIndex = scene == null
+          ? -1
+          : forbiddenCityJourney01Scenes.indexWhere(
+              (candidate) => candidate.sceneId == scene.sceneId,
+            );
+      final nextScene = sceneIndex >= 0 &&
+              sceneIndex + 1 < forbiddenCityJourney01Scenes.length
+          ? forbiddenCityJourney01Scenes[sceneIndex + 1]
+          : null;
       return _ForbiddenCityDynamicBackground(
         assetPath: scene == null
             ? asset?.assetPath
             : portrait
                 ? scene.portraitAsset
                 : scene.landscapeAsset,
+        nextAssetPath: nextScene == null
+            ? null
+            : portrait
+                ? nextScene.portraitAsset
+                : nextScene.landscapeAsset,
         scrimStrength: visibleScrimStrength,
         child: child,
       );
@@ -302,11 +316,13 @@ class DestinationBackground extends StatelessWidget {
 class _ForbiddenCityDynamicBackground extends StatefulWidget {
   const _ForbiddenCityDynamicBackground({
     required this.assetPath,
+    required this.nextAssetPath,
     required this.scrimStrength,
     required this.child,
   });
 
   final String? assetPath;
+  final String? nextAssetPath;
   final double scrimStrength;
   final Widget child;
 
@@ -319,7 +335,7 @@ class _ForbiddenCityDynamicBackgroundState
     extends State<_ForbiddenCityDynamicBackground>
     with SingleTickerProviderStateMixin {
   late final AnimationController _motion;
-  String? _preloadedAssetPath;
+  final Set<String> _preloadedAssetPaths = <String>{};
 
   @override
   void initState() {
@@ -341,9 +357,9 @@ class _ForbiddenCityDynamicBackgroundState
   void didUpdateWidget(covariant _ForbiddenCityDynamicBackground oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.assetPath != widget.assetPath) {
-      _preloadedAssetPath = null;
       _preloadAsset();
     }
+    if (oldWidget.nextAssetPath != widget.nextAssetPath) _preloadAsset();
   }
 
   void _syncMotionPreference() {
@@ -357,10 +373,10 @@ class _ForbiddenCityDynamicBackgroundState
   }
 
   void _preloadAsset() {
-    final path = widget.assetPath;
-    if (path == null || path == _preloadedAssetPath) return;
-    _preloadedAssetPath = path;
-    precacheImage(AssetImage(path), context);
+    for (final path in <String?>[widget.assetPath, widget.nextAssetPath]) {
+      if (path == null || !_preloadedAssetPaths.add(path)) continue;
+      precacheImage(AssetImage(path), context);
+    }
   }
 
   @override
