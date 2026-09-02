@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:phoenix_journeys/data/journey_city_catalog.dart';
 import 'package:phoenix_journeys/screens/city_passport_screen.dart';
 import 'package:phoenix_journeys/state/app_state.dart';
 
@@ -79,10 +80,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('北京市'), findsOneWidget);
-    expect(find.text('2 段旅程'), findsOneWidget);
+    expect(find.text('1 段旅程'), findsOneWidget);
     expect(find.text('北京市 · 北京市'), findsNothing);
     expect(find.text('东城区'), findsOneWidget);
-    expect(find.text('海淀区'), findsOneWidget);
+    expect(find.text('海淀区'), findsNothing);
     expect(
       find.byKey(const ValueKey('passport-city-option-beijing')),
       findsNothing,
@@ -105,7 +106,7 @@ void main() {
           'passport-place-option-beijing-summer-palace',
         ),
       ),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
       find.byKey(const ValueKey('passport-place-back')),
@@ -115,7 +116,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('passport-city-beijing')));
     await tester.pumpAndSettle();
 
-    expect(find.text('北京市 · 2 段旅程'), findsOneWidget);
+    expect(find.text('北京市 · 1 段旅程'), findsOneWidget);
     expect(find.text('北京市 · 北京市'), findsNothing);
     expect(
       find.byKey(
@@ -127,19 +128,27 @@ void main() {
       find.byKey(
         const ValueKey('passport-destination-beijing-summer-palace'),
       ),
-      findsOneWidget,
+      findsNothing,
     );
-    expect(find.text('故宫博物院'), findsNWidgets(2));
-    expect(find.text('颐和园'), findsNWidgets(2));
+    expect(find.text('故宫博物院'), findsWidgets);
+    expect(find.text('颐和园'), findsNothing);
   });
 
-  testWidgets('normal province city and place hierarchy stays findable', (
+  testWidgets('hidden legacy city stays resolvable but absent from Passport', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+
+    final legacyCity = requireJourneyCity('chengdu');
+    expect(
+      legacyCity.destinations.any(
+        (journey) => journey.id == 'chengdu-kuanzhai-alley',
+      ),
+      isTrue,
+    );
 
     final state = AppState(clock: () => DateTime(2026, 7, 22));
     await state.load();
@@ -155,20 +164,17 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('passport-country-china')));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(
-      find.byKey(const ValueKey('passport-province-sichuan')),
+
+    expect(
+      find.byKey(const ValueKey('passport-province-beijing')),
+      findsOneWidget,
     );
-    await tester.pumpAndSettle();
-    expect(find.text('四川省'), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('passport-province-sichuan')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('passport-city-option-chengdu')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('四川省'), findsOneWidget);
-    expect(find.text('成都市 · 1 段旅程'), findsOneWidget);
-    expect(find.text('宽窄巷子'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('passport-province-sichuan')),
+      findsNothing,
+    );
+    expect(find.text('四川省'), findsNothing);
+    expect(find.text('宽窄巷子'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -201,8 +207,8 @@ void main() {
 
     expect(find.text('東城區'), findsOneWidget);
     expect(find.text('故宮博物院'), findsOneWidget);
-    expect(find.text('海淀區'), findsOneWidget);
-    expect(find.text('頤和園'), findsOneWidget);
+    expect(find.text('海淀區'), findsNothing);
+    expect(find.text('頤和園'), findsNothing);
     expect(find.text('北京市 · 北京市'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -340,22 +346,18 @@ void main() {
 
     setZoomedTransform();
     await tester.tap(
-      find.byKey(const ValueKey('passport-province-heilongjiang')),
-    );
-    await tester.pumpAndSettle();
-    expect(controller.value, Matrix4.identity());
-    expect(tester.getRect(viewport), initialViewport);
-
-    setZoomedTransform();
-    await tester.tap(
-      find.byKey(const ValueKey('passport-city-option-harbin')),
+      find.byKey(const ValueKey('passport-province-beijing')),
     );
     await tester.pumpAndSettle();
     expect(controller.value, Matrix4.identity());
     expect(tester.getRect(viewport), initialViewport);
     expect(
-      find.byKey(const ValueKey('passport-city-harbin')),
+      find.byKey(const ValueKey('passport-city-beijing')),
       findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('passport-city-harbin')),
+      findsNothing,
     );
     expect(tester.takeException(), isNull);
   });

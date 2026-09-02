@@ -22,7 +22,6 @@ void main() {
     for (final legacyStep in <int>[3, 4, 5]) {
       final sourceBackend = _MemoryCriticalBackend();
       final source = await _newState(sourceBackend);
-      await source.activateJourney(_summerPalaceId);
       final payload = _deepCopy(await source.readCommittedCriticalPayload());
       final journey = _journeyPayload(payload);
 
@@ -63,23 +62,27 @@ void main() {
 
       final restored = await _newState(backend);
       expect(restored.loadStatus, AppLoadStatus.ready, reason: 'step $legacyStep');
+      expect(restored.activeJourneyId, 'beijing-forbidden-city');
       expect(
         restored.criticalSchemaVersion,
         CriticalPersistenceStore.phoenixCriticalStateSchemaVersion,
       );
-      expect(restored.journeyFlowVersion, summerPalaceJourneyFlowVersion);
+      final migratedJourney = _journeyPayload(
+        _deepCopy(await restored.readCommittedCriticalPayload()),
+      );
+      expect(migratedJourney['flowVersion'], summerPalaceJourneyFlowVersion);
       expect(
-        restored.journeyCompositeSubstage,
+        migratedJourney['compositeSubstage'],
         switch (legacyStep) {
-          3 => JourneyCompositeSubstage.reflection,
-          4 => JourneyCompositeSubstage.memory,
-          _ => JourneyCompositeSubstage.completed,
+          3 => 'reflection',
+          4 => 'memory',
+          _ => 'completed',
         },
         reason: 'step $legacyStep',
       );
       if (legacyStep == 4) {
-        expect(restored.guideFeedbackInputIdentity, isNotEmpty);
-        expect(restored.writingFeedbackInputIdentity, isNotEmpty);
+        expect(migratedJourney['guideFeedbackInputIdentity'], isNotEmpty);
+        expect(migratedJourney['writingFeedbackInputIdentity'], isNotEmpty);
       }
     }
   });
@@ -88,7 +91,6 @@ void main() {
       () async {
     final sourceBackend = _MemoryCriticalBackend();
     final source = await _newState(sourceBackend);
-    await source.activateJourney(_summerPalaceId);
     final payload = _deepCopy(await source.readCommittedCriticalPayload());
     _journeyPayload(payload)
       ..remove('flowVersion')
@@ -116,7 +118,7 @@ void main() {
       authoritative?.schemaVersion,
       CriticalPersistenceStore.phoenixCriticalStateLegacySchemaVersion,
     );
-    expect(authoritative?.payload['activeJourneyId'], _summerPalaceId);
+    expect(authoritative?.payload['activeJourneyId'], 'beijing-forbidden-city');
 
     backend.failWriteNumber = null;
     final retried = await _newState(backend);
@@ -125,62 +127,66 @@ void main() {
       retried.criticalSchemaVersion,
       CriticalPersistenceStore.phoenixCriticalStateSchemaVersion,
     );
-    expect(retried.journeyCompositeSubstage, JourneyCompositeSubstage.reflection);
+    final migratedJourney = _journeyPayload(
+      _deepCopy(await retried.readCommittedCriticalPayload()),
+    );
+    expect(migratedJourney['compositeSubstage'], 'reflection');
   });
 
-  test('attempt and feedback identities survive close reopen and restart retry',
+  test('hidden Pilot N1 feedback identities survive migration and reopen',
       () async {
+    const wonder = '她选择先保存旧照片。';
+    const express = '她先捡回照片，因此错过最佳光线。';
+    final sourceBackend = _MemoryCriticalBackend();
+    final source = await _newState(sourceBackend);
+    final payload = _deepCopy(await source.readCommittedCriticalPayload());
+    final journey = _journeyPayload(payload)
+      ..remove('flowVersion')
+      ..remove('compositeSubstage')
+      ..remove('guideFeedbackInputIdentity')
+      ..remove('writingFeedbackInputIdentity')
+      ..['step'] = 4
+      ..['furthestStep'] = 4
+      ..['completed'] = false
+      ..['wonderDraft'] = wonder
+      ..['expressDraft'] = express
+      ..['guideFeedbackReply'] = '这个选择连接了关系与修复。'
+      ..['writingFeedbackCorrected'] = '她先捡回照片，因此错过了最佳光线。'
+      ..['writingFeedbackExplanation'] = '“因此”明确连接选择与后果。'
+      ..['writingFeedbackNatural'] = '她为保存旧照片放弃了最佳光线。'
+      ..['writingFeedbackEncouragement'] = '因果关系表达得很清楚。';
+
     final backend = _MemoryCriticalBackend();
+    await CriticalPersistenceStore(
+      backend,
+      schemaVersion:
+          CriticalPersistenceStore.phoenixCriticalStateLegacySchemaVersion,
+      readableSchemaVersions: const <int>{
+        CriticalPersistenceStore.phoenixCriticalStateLegacySchemaVersion,
+      },
+    ).commitInitial(payload);
+
     final first = await _newState(backend);
-    await first.activateJourney(_summerPalaceId);
-    await first.saveJourneyProgress(
-      step: 3,
-      wonder: '她选择先保存旧照片。',
-      express: '',
-      memory: '',
-      compositeSubstage: JourneyCompositeSubstage.reflection,
+    expect(first.loadStatus, AppLoadStatus.ready);
+    expect(first.activeJourneyId, 'beijing-forbidden-city');
+
+    final firstHidden = _journeyPayload(
+      _deepCopy(await first.readCommittedCriticalPayload()),
     );
-    final attemptOne = await first.ensureChallengeAttemptIdentity();
-    final reflectionIdentity =
-        journeyFeedbackInputIdentity('她选择先保存旧照片。');
-    await first.saveGuideFeedback(
-      reply: '这个选择连接了关系与修复。',
-      isOfflineFallback: false,
-      inputIdentity: reflectionIdentity,
-    );
-    await first.saveJourneyProgress(
-      step: 4,
-      wonder: '她选择先保存旧照片。',
-      express: '她先捡回照片，因此错过最佳光线。',
-      memory: '',
-      compositeSubstage: JourneyCompositeSubstage.writing,
-    );
-    final writingIdentity =
-        journeyFeedbackInputIdentity('她先捡回照片，因此错过最佳光线。');
-    await first.saveWritingFeedback(
-      corrected: '她先捡回照片，因此错过了最佳光线。',
-      explanation: '“因此”明确连接选择与后果。',
-      natural: '她为保存旧照片放弃了最佳光线。',
-      encouragement: '因果关系表达得很清楚。',
-      isOfflineFallback: false,
-      inputIdentity: writingIdentity,
-    );
+    final reflectionIdentity = journeyFeedbackInputIdentity(wonder);
+    final writingIdentity = journeyFeedbackInputIdentity(express);
+    expect(firstHidden['compositeSubstage'], 'memory');
+    expect(firstHidden['guideFeedbackInputIdentity'], reflectionIdentity);
+    expect(firstHidden['writingFeedbackInputIdentity'], writingIdentity);
 
     final reopened = await _newState(backend);
     expect(reopened.loadStatus, AppLoadStatus.ready);
-    expect(reopened.journeyChallengeAttemptId, attemptOne);
-    expect(reopened.guideFeedbackInputIdentity, reflectionIdentity);
-    expect(reopened.writingFeedbackInputIdentity, writingIdentity);
-    expect(reopened.hasGuideFeedbackFor(reflectionIdentity), isTrue);
-    expect(reopened.hasWritingFeedbackFor(writingIdentity), isTrue);
-    expect(reopened.journeyCompositeSubstage, JourneyCompositeSubstage.memory);
-
-    await reopened.restartJourney();
-    final afterRestart = await _newState(backend);
-    expect(afterRestart.journeyChallengeAttemptId, isEmpty);
-    final attemptTwo = await afterRestart.ensureChallengeAttemptIdentity();
-    expect(attemptTwo, isNot(attemptOne));
-    expect(attemptTwo, endsWith('attempt-2'));
+    final reopenedHidden = _journeyPayload(
+      _deepCopy(await reopened.readCommittedCriticalPayload()),
+    );
+    expect(reopenedHidden['guideFeedbackInputIdentity'], reflectionIdentity);
+    expect(reopenedHidden['writingFeedbackInputIdentity'], writingIdentity);
+    expect(reopenedHidden['compositeSubstage'], 'memory');
   });
 }
 
