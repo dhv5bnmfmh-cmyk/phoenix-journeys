@@ -140,7 +140,7 @@ void main() {
     final sourceBackend = _MemoryCriticalBackend();
     final source = await _newState(sourceBackend);
     final payload = _deepCopy(await source.readCommittedCriticalPayload());
-    final journey = _journeyPayload(payload)
+    _journeyPayload(payload)
       ..remove('flowVersion')
       ..remove('compositeSubstage')
       ..remove('guideFeedbackInputIdentity')

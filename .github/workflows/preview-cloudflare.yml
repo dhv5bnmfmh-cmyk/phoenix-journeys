@@ -35,10 +35,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PR_NUMBER: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}
-  PREVIEW_WORKER: phoenix-journeys-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}
-  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}.7hn5tyrjgh.workers.dev
-  PREVIEW_RELEASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  PREVIEW_WORKER: phoenix-journeys-pr-${{ github.event.pull_request.number }}
+  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event.pull_request.number }}.7hn5tyrjgh.workers.dev
+  PREVIEW_RELEASE: ${{ github.event.pull_request.head.sha }}
 
 jobs:
   deploy-preview:
@@ -47,6 +47,11 @@ jobs:
       (github.event.action != 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
+    env:
+      PR_NUMBER: ${{ github.event_name == 'push' && '208' || github.event.pull_request.number }}
+      PREVIEW_WORKER: ${{ github.event_name == 'push' && 'phoenix-journeys-pr-208' || format('phoenix-journeys-pr-{0}', github.event.pull_request.number) }}
+      PREVIEW_URL: ${{ github.event_name == 'push' && 'https://phoenix-journeys-pr-208.7hn5tyrjgh.workers.dev' || format('https://phoenix-journeys-pr-{0}.7hn5tyrjgh.workers.dev', github.event.pull_request.number) }}
+      PREVIEW_RELEASE: ${{ github.event_name == 'push' && github.sha || github.event.pull_request.head.sha }}
 
     steps:
       - name: Check out exact candidate head
