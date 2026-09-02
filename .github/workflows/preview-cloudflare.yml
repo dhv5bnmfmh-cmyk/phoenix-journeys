@@ -1,6 +1,15 @@
 name: Cloudflare PR Preview
 
 on:
+  push:
+    branches:
+      - product/city-standard-v1-beijing-forbidden-city
+    paths:
+      - 'app/**'
+      - 'worker/**'
+      - 'wrangler.toml'
+      - '.github/scripts/**'
+      - '.github/workflows/**'
   pull_request:
     branches:
       - main
@@ -22,19 +31,21 @@ permissions:
   statuses: write
 
 concurrency:
-  group: cloudflare-preview-pr-${{ github.event.pull_request.number }}
+  group: cloudflare-preview-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}
   cancel-in-progress: true
 
 env:
-  PREVIEW_WORKER: phoenix-journeys-pr-${{ github.event.pull_request.number }}
-  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event.pull_request.number }}.7hn5tyrjgh.workers.dev
-  PREVIEW_RELEASE: ${{ github.event.pull_request.head.sha }}
+  PR_NUMBER: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}
+  PREVIEW_WORKER: phoenix-journeys-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}
+  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}.7hn5tyrjgh.workers.dev
+  PREVIEW_RELEASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   deploy-preview:
     if: >-
-      github.event.action != 'closed' &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event_name == 'push' ||
+      (github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
 
     steps:
@@ -101,13 +112,14 @@ jobs:
       - name: Upload journey quality report
         uses: actions/upload-artifact@v4
         with:
-          name: phoenix-journey-content-quality-pr-${{ github.event.pull_request.number }}
+          name: phoenix-journey-content-quality-pr-${{ env.PR_NUMBER }}
           path: |
             journey-quality-report.md
             journey-quality-report.json
           if-no-files-found: error
 
       - name: Add or update quality agent comment
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
@@ -221,6 +233,7 @@ jobs:
             --data "$payload" >/dev/null
 
       - name: Add or update preview comment
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         env:
           PHOENIX_PREVIEW_URL: ${{ env.PREVIEW_URL }}
@@ -259,6 +272,7 @@ jobs:
 
   remove-preview:
     if: >-
+      github.event_name == 'pull_request' &&
       github.event.action == 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest

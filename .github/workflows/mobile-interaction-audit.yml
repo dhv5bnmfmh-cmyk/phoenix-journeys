@@ -1,6 +1,17 @@
 name: Mobile Interaction Audit
 
 on:
+  push:
+    branches:
+      - product/city-standard-v1-beijing-forbidden-city
+    paths:
+      - 'app/**'
+      - 'worker/**'
+      - 'wrangler.toml'
+      - '.github/scripts/verify_mobile_interaction.mjs'
+      - '.github/scripts/journey_level_session_harness.mjs'
+      - '.github/workflows/mobile-interaction-audit.yml'
+      - '.github/workflows/preview-cloudflare.yml'
   pull_request:
     branches:
       - main
@@ -21,12 +32,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: mobile-interaction-${{ github.event.pull_request.number }}
+  group: mobile-interaction-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}
   cancel-in-progress: true
 
 env:
-  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
-  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event.pull_request.number }}.7hn5tyrjgh.workers.dev/
+  CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}.7hn5tyrjgh.workers.dev/
 
 jobs:
   mobile-interaction:

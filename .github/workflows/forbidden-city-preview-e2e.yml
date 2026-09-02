@@ -1,6 +1,23 @@
 name: Reference Journey E2E
 
 on:
+  push:
+    branches:
+      - product/city-standard-v1-beijing-forbidden-city
+    paths:
+      - 'app/lib/app.dart'
+      - 'app/lib/screens/journey_screen.dart'
+      - 'app/lib/widgets/**'
+      - 'app/lib/data/adaptive_journey_level_runtime.dart'
+      - 'app/lib/data/dedicated_adaptive_journey_catalog.dart'
+      - 'app/lib/data/forbidden_city_*.dart'
+      - 'app/test/forbidden_city_*.dart'
+      - 'app/web/**'
+      - 'worker/**'
+      - 'wrangler.toml'
+      - '.github/scripts/verify_forbidden_city_*.mjs'
+      - '.github/scripts/journey_level_session_harness.mjs'
+      - '.github/workflows/forbidden-city-preview-e2e.yml'
   pull_request:
     branches:
       - main
@@ -27,12 +44,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: reference-journey-e2e-pr-${{ github.event.pull_request.number }}
+  group: reference-journey-e2e-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}
   cancel-in-progress: true
 
 env:
-  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
-  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event.pull_request.number }}.7hn5tyrjgh.workers.dev/
+  CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}.7hn5tyrjgh.workers.dev/
 
 jobs:
   reference-journey-e2e:

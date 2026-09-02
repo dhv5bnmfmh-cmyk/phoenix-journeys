@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - product/city-standard-v1-beijing-forbidden-city
     paths:
       - 'app/**'
       - 'worker/**'
