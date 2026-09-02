@@ -196,7 +196,7 @@ const forbiddenCityJourney01Scenes = <JourneySceneDefinition>[
         'no readable signage'
       ],
       promptVersion: 'fc01-v1',
-      assetVersion: '2026-09-02-v1'),
+      assetVersion: '2026-09-02-v2'),
   JourneySceneDefinition(
       sceneId: 'FC01-B',
       cityId: beijingCityId,

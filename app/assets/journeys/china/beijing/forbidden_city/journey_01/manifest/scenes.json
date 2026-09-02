@@ -1,7 +1,7 @@
 {
   "journeyId": "beijing-forbidden-city-journey-01",
   "runtimeId": "beijing-forbidden-city",
-  "assetVersion": "2026-09-02-v1",
+  "assetVersion": "2026-09-02-v2",
   "promptVersion": "fc01-v1",
   "generatedAt": "2026-09-02T00:00:00Z",
   "sources": [
@@ -12,12 +12,13 @@
   "scenes": [
     {
       "sceneId": "FC01-A",
+      "assetVersion": "2026-09-02-v2",
       "landscapePath": "masters/fc01_a_entry_landscape.webp",
       "portraitPath": "masters/fc01_a_entry_portrait.webp",
       "runtimeLandscapePath": "runtime/fc01_a_entry_landscape.webp",
       "runtimePortraitPath": "runtime/fc01_a_entry_portrait.webp",
       "verified": true,
-      "visualNotes": "Entry threshold, strong central-axis first impression, early morning.",
+      "visualNotes": "Entry threshold, strong central-axis first impression, early morning. Portrait v2 is a native 9:16 re-composition from the Founder-selected landscape identity, with a low-detail lower mobile safe zone.",
       "mobileCropVerified": true,
       "desktopCropVerified": true
     },
