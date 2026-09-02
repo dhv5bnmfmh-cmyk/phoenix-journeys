@@ -14,10 +14,15 @@ import '../data/forbidden_city_journey_runtime.dart';
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
 import '../models/journey_background.dart';
+import '../models/journey_prepared_bundle.dart';
+import '../models/journey_challenge.dart';
 import '../models/language_proficiency.dart';
 import '../services/phoenix_level_controller.dart';
 import '../services/narration_controller.dart';
+import '../services/journey_preparation_coordinator.dart';
+import '../services/journey_challenge_engine.dart';
 import '../services/phoenix_ai_service.dart';
+import '../services/journey_memory_photo_picker.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/batch_one_journey_summary.dart';
@@ -25,6 +30,7 @@ import '../widgets/city_journey_stamp.dart';
 import '../widgets/destination_background.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_challenge_panel.dart';
+import '../widgets/hsk_story_challenge.dart';
 import '../widgets/journey_share_button.dart';
 import '../widgets/special_realm_story_intro.dart';
 import '../widgets/journey_progress_header.dart';
@@ -172,6 +178,8 @@ class _JourneyScreenState extends State<JourneyScreen>
   List<NarrationItem>? _cachedStoryNarrationItems;
   JourneyLevelContent? _cachedDiscoveryNarrationContent;
   List<NarrationItem>? _cachedDiscoveryNarrationItems;
+  late final JourneyPreparedBundle _preparedBundle;
+  late final StoryChallengeSet _preparedChallenge;
 
   // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
   bool get _isSummerPalacePilot => false;
@@ -188,9 +196,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     final journeyId =
         widget.journeyId ?? dailyJourneyForDate(DateTime.now()).id;
     _experience = requireDailyJourneyExperience(journeyId);
-    if (_experience.id == forbiddenCityJourneyId) {
-      warmForbiddenCityContentCache();
-    }
     _challengeSeed =
         (DateTime.now().millisecondsSinceEpoch + journeyId.hashCode).abs();
     _ai = PhoenixAiService();
@@ -209,6 +214,22 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (_initialized) return;
 
     _appState = context.read<AppState>();
+    _preparedBundle = JourneyPreparationCoordinator.instance.prepared(
+          journeyId: _experience.id,
+          profile: _sessionLanguageProfile,
+          scriptMode: _appState.scriptMode.name,
+        ) ??
+        JourneyPreparationCoordinator.instance.prepareNow(
+          journeyId: _experience.id,
+          profile: _sessionLanguageProfile,
+          scriptMode: _appState.scriptMode.name,
+          knownWords: _appState.savedWords,
+        );
+    _preparedChallenge = const JourneyChallengeEngine().build(
+      journeyId: _experience.id,
+      sessionLevel: _sessionLanguageProfile.phoenixLevel ?? 1,
+      storyParagraphs: _preparedBundle.challengeSourceMaterial,
+    );
     step = _appState.beijingJourneyStep;
     wonderController.text = _appState.wonderDraft;
     expressController.text = _appState.expressDraft;
@@ -343,6 +364,10 @@ class _JourneyScreenState extends State<JourneyScreen>
       Object.hashAllUnordered(_appState.savedWords);
 
   JourneyLevelContent get _levelContent {
+    if (_preparedBundle.key.phoenixLevel ==
+        (_languageProfile?.phoenixLevel ?? 1)) {
+      return _preparedBundle.levelContent;
+    }
     final profile = _languageProfile;
     final difficulty = _appState.journeyDifficulty;
     final knownWordsHash = _knownWordsFingerprint;
@@ -1144,7 +1169,8 @@ class _JourneyScreenState extends State<JourneyScreen>
       memoryController.text = _batchOneStructuredMemory(batchSpec);
     }
     await _appState.completeJourney(
-      _isForbiddenCity ? forbiddenCityMemoryAnchor : memoryController.text,
+      memoryController.text,
+      sessionLevel: _sessionLanguageProfile.phoenixLevel ?? 1,
     );
     if (!mounted) return;
     setState(() => step = AppState.journeyLastStep);
@@ -1983,6 +2009,28 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
+  Future<void> _speakChallengeNarration(
+    String questionId,
+    String text,
+  ) async {
+    final contentId = 'challenge-$questionId';
+    _stageNarrationIntent += 1;
+    _stageNarrationRequestedId = null;
+    await _narration.stop();
+    if (!mounted || text.trim().isEmpty) return;
+    await _narration.play(
+      contentId: contentId,
+      items: [
+        NarrationItem(
+          id: contentId,
+          text: text,
+          label: '挑战朗读',
+        ),
+      ],
+      languageCode: journeyStageNarrationLanguageCode(_appState.isTraditional),
+    );
+  }
+
   Widget _challengePage() {
     final state = context.watch<AppState>();
     return _page(
@@ -1997,7 +2045,17 @@ class _JourneyScreenState extends State<JourneyScreen>
           ? Icons.arrow_forward_rounded
           : Icons.lock_outline_rounded,
       primaryEnabled: _challengeResolved,
-      child: JourneyChallengePanel(
+      child: _isForbiddenCity
+          ? HskStoryChallenge(
+              challenge: _preparedChallenge,
+              displayText: state.displayText,
+              onNarrate: _speakChallengeNarration,
+              onCompleted: () async {
+                if (!mounted || _challengeResolved) return;
+                setState(() => _challengeResolved = true);
+              },
+            )
+          : JourneyChallengePanel(
         key: ValueKey('journey-challenge-${_experience.id}-$_challengeSeed'),
         journeyId: _experience.id,
         storyParagraphs: _levelContent.storyParagraphs,
@@ -2017,7 +2075,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           if (!mounted || _challengeResolved) return;
           setState(() => _challengeResolved = true);
         },
-      ),
+            ),
     );
   }
 
@@ -2163,50 +2221,57 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _forbiddenCityMemoryPage() {
+    final existing = _appState.journeyMemories.where((entry) => entry.journeyId == _experience.id && !entry.legacy);
+    if (memoryController.text.isEmpty && existing.isNotEmpty) {
+      memoryController.text = existing.first.note;
+    }
     return _page(
-      title: '旅程回忆',
+      title: '我的旅程回忆',
       narrationStage: 'memory',
       narrationItems: _memoryNarrationItems(),
       buttonText: '结束旅程',
       buttonIcon: Icons.flag_rounded,
       onNext: () => unawaited(_finishJourney()),
-      child: ListView.separated(
+      child: ListView(
         padding: const EdgeInsets.only(bottom: 6),
-        itemCount: forbiddenCityMemoryReviews.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 6),
-        itemBuilder: (context, index) {
-          final item = forbiddenCityMemoryReviews[index];
-          return Container(
-            padding: const EdgeInsets.all(10),
-            decoration: PhoenixTheme.journeyPanelDecoration.copyWith(
-              color: Colors.black.withValues(alpha: .26),
-              borderRadius: BorderRadius.circular(12),
+        children: [
+          Text('${_experience.city} · ${_experience.place}  ·  Lv.${_sessionLanguageProfile.phoenixLevel}', style: const TextStyle(color: Color(0xFFFFD879), fontWeight: FontWeight.w800)),
+          const SizedBox(height: 10),
+          const Text('这段旅程，你最想留下什么？', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 15)),
+          const SizedBox(height: 8),
+          TextField(
+            key: const ValueKey('forbidden-city-memory-note'),
+            controller: memoryController,
+            focusNode: memoryFocusNode,
+            minLines: 5,
+            maxLines: 9,
+            onChanged: (_) => unawaited(_persistProgress()),
+            style: const TextStyle(color: Colors.white),
+            decoration: PhoenixTheme.journeyWritingInputDecoration('写下你的感受、发现，\n或者未来真正来到这里时想记住的事情……'),
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            key: const ValueKey('forbidden-city-add-photo'),
+            onPressed: () async {
+              final result = await pickJourneyMemoryPhotos();
+              if (result.isEmpty) return;
+              // Establish the stable Journey identity without completing the Journey.
+              var entry = await _appState.saveActiveJourneyMemory(memoryController.text, sessionLevel: _sessionLanguageProfile.phoenixLevel ?? 1);
+              for (final bytes in result) {
+                await _appState.addJourneyMemoryPhoto(entry, bytes);
+                entry = _appState.journeyMemories.firstWhere((item) => item.id == entry.id);
+              }
+              if (mounted) setState(() {});
+            },
+            icon: const Icon(Icons.add_photo_alternate_outlined),
+            label: const Text('添加照片'),
+          ),
+          if (existing.isNotEmpty && existing.first.photoRefs.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text('已添加 ${existing.first.photoRefs.length} 张照片', style: const TextStyle(color: Colors.white70)),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _appState.displayText(item.prompt),
-                  style: const TextStyle(
-                    color: Color(0xFFFFD879),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _appState.displayText(item.answer),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    height: 1.35,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+        ],
       ),
     );
   }
@@ -2399,7 +2464,7 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Widget _forbiddenCityCompletePage() {
     return _page(
-      title: '北京已点亮',
+      title: '本次学习回顾',
       narrationStage: 'completion',
       narrationItems: _completionNarrationItems(),
       buttonText: '返回首页',
@@ -2427,7 +2492,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             ),
             const SizedBox(height: 8),
             const _ForbiddenCityCompleteCard(
-              title: 'Journey Summary',
+              title: '重点词汇与文化知识',
               body: forbiddenCityJourneySummary,
             ),
             const SizedBox(height: 6),

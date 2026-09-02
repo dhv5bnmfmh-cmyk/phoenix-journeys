@@ -41,34 +41,88 @@ async function records() {
 }
 const recText = (r) => clean([r.label, r.value, r.description, r.text].filter(Boolean).join(' '));
 
-async function waitHome() {
-  const deadline = Date.now() + 30000;
-  while (Date.now() < deadline) {
-    const rs = (await records()).filter((r) => r.visible);
-    const home = rs.some((r) => recText(r).includes('PHOENIX JOURNEYS'));
-    const action = rs.some((r) => r.role === 'button' && !r.disabled && /^(开始|继续|再次探索)/.test(recText(r)) && !recText(r).includes('朗读'));
-    if (home && action) return;
-    await sleep(100);
-  }
-  throw new Error('learner-visible Home did not become interactive');
+function parseJourneyAction(text) {
+  const normalized = clean(text);
+  if (!normalized || normalized.includes('朗读')) return null;
+  const match = normalized.match(/^(开始|继续|再次探索)\s*(.+?)\s*Journey(?:\s|$)/i);
+  if (!match) return null;
+  const identityKey = clean(match[2]);
+  if (!identityKey) return null;
+  return { identityKey, actionText: normalized };
 }
 
-async function journeyAction() {
-  const rs = (await records()).filter((r) => r.visible);
-  const actions = rs.filter((r) => r.role === 'button' && !r.disabled && /^(开始|继续|再次探索)/.test(recText(r)) && !recText(r).includes('朗读'));
-  if (!actions.length) throw new Error('no learner Journey entry action');
-  const identities = rs.filter((r) => r.role !== 'button' && ['紫禁城','外滩','城墙','西湖','颐和园'].some((name) => recText(r).includes(name)));
-  const pairs = [];
-  for (const action of actions) {
-    for (const identity of identities) {
-      const distance = Math.hypot((identity.x + identity.width / 2) - (action.x + action.width / 2), (identity.y + identity.height / 2) - (action.y + action.height / 2));
-      pairs.push({ action, identity, distance });
+function journeyActions(rs) {
+  return rs
+    .filter((r) => r.visible && r.role === 'button' && !r.disabled)
+    .map((action) => {
+      const parsed = parseJourneyAction(recText(action));
+      return parsed ? { action, ...parsed } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.action.y - b.action.y || a.action.x - b.action.x || a.action.index - b.action.index);
+}
+
+function compactSnapshot(rs) {
+  return rs.filter((r) => r.visible).map((r) => ({
+    index: r.index,
+    role: r.role,
+    text: recText(r),
+    disabled: r.disabled,
+    x: Math.round(r.x),
+    y: Math.round(r.y),
+    width: Math.round(r.width),
+    height: Math.round(r.height),
+  }));
+}
+
+function resolveJourneyAction(rs, targetIdentityKey = null) {
+  const actions = journeyActions(rs);
+  if (targetIdentityKey == null) return actions[0] ?? null;
+  return actions.find((candidate) => candidate.identityKey === targetIdentityKey) ?? null;
+}
+
+async function failWithSemantics(message, rs = null) {
+  const snapshot = compactSnapshot(rs ?? await records());
+  console.error(`SEMANTICS SNAPSHOT = ${JSON.stringify(snapshot)}`);
+  throw new Error(message);
+}
+
+async function waitHome(targetIdentityKey = null) {
+  const deadline = Date.now() + 30000;
+  let stableMatches = 0;
+  let lastTarget = null;
+  while (Date.now() < deadline) {
+    const rs = await records();
+    const visible = rs.filter((r) => r.visible);
+    const texts = visible.map(recText);
+    const home = texts.some((text) => text.includes('PHOENIX JOURNEYS'));
+    const storyProgress = texts.some((text) => text.startsWith('1/6') || text.includes(' 1/6'));
+    const target = resolveJourneyAction(rs, targetIdentityKey);
+    if (home && !storyProgress && target?.identityKey) {
+      stableMatches += 1;
+      lastTarget = target;
+      if (stableMatches >= 2) return lastTarget;
+    } else {
+      stableMatches = 0;
+      lastTarget = null;
     }
+    await sleep(100);
   }
-  const chosen = pairs.sort((a, b) => a.distance - b.distance)[0] ?? { action: actions[0], identity: null };
-  const identityText = chosen.identity ? recText(chosen.identity) : '';
-  const identityToken = ['紫禁城','外滩','城墙','西湖','颐和园'].find((name) => identityText.includes(name)) ?? null;
-  return { actionIndex: chosen.action.index, identityToken, identityText };
+  await failWithSemantics(
+    `HARNESS IDENTITY RESOLUTION FAILURE: Home did not expose ${targetIdentityKey ?? 'a non-empty identity-bound Journey action'}`,
+  );
+}
+
+async function journeyAction(targetIdentityKey = null) {
+  const rs = await records();
+  const target = resolveJourneyAction(rs, targetIdentityKey);
+  if (!target?.identityKey) {
+    await failWithSemantics(
+      `HARNESS IDENTITY RESOLUTION FAILURE: no Journey action for ${targetIdentityKey ?? 'first sample'}`,
+      rs,
+    );
+  }
+  return target;
 }
 
 async function clickIndex(index) {
@@ -79,50 +133,89 @@ async function clickIndex(index) {
   }, index);
 }
 
-async function waitStoryUsable(identityToken) {
+async function waitStoryUsable() {
   const deadline = Date.now() + 10000;
   while (Date.now() < deadline) {
     const rs = (await records()).filter((r) => r.visible);
     const texts = rs.map(recText);
     const progress = texts.some((text) => text.startsWith('1/6') || text.includes(' 1/6'));
-    const identity = identityToken ? texts.some((text) => text.includes(identityToken)) : texts.some((text) => text.includes('故事'));
-    const interaction = rs.some((r) => r.role === 'button' && !r.disabled && ['继续','开始朗读','朗读'].some((needle) => recText(r).includes(needle)));
-    if (progress && identity && interaction) return;
+    const chineseStoryContent = texts.some(
+      (text) => (text.match(/[\u3400-\u9fff]/g) ?? []).length >= 12,
+    );
+    const interaction = rs.some(
+      (r) => r.role === 'button' && !r.disabled
+        && ['继续', '开始朗读', '朗读'].some((needle) => recText(r).includes(needle)),
+    );
+    const staleHomeJourneyEntry = journeyActions(rs).length > 0;
+    if (progress && chineseStoryContent && interaction && !staleHomeJourneyEntry) return;
     await sleep(50);
   }
-  throw new Error(`Journey Story never became learner-usable for ${identityToken ?? 'current Journey'}`);
+  await failWithSemantics('Journey Story never became learner-usable after locked Journey action click');
 }
 
-async function backHome() {
+async function backHome(targetIdentityKey) {
   await page.evaluate(() => history.back());
-  await waitHome();
+  await sleep(50);
   await enableSemantics();
+  await waitHome(targetIdentityKey);
 }
 
 const samples = [];
+let identityKey = null;
 try {
   await page.goto(url, { waitUntil: 'load', timeout: 120000 });
   await page.waitForFunction(() => document.querySelector('flutter-view') != null, { timeout: 120000 });
   await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, { timeout: 45000 });
   await enableSemantics();
   await waitHome();
+
   for (let i = 0; i < 5; i += 1) {
-    const target = await journeyAction();
+    const target = await journeyAction(identityKey);
+    if (i === 0) {
+      if (!target.identityKey) {
+        await failWithSemantics('HARNESS IDENTITY RESOLUTION FAILURE: first Journey sample produced an empty identity key');
+      }
+      identityKey = target.identityKey;
+      console.log(`LOCKED JOURNEY IDENTITY = ${identityKey}`);
+    } else if (target.identityKey !== identityKey) {
+      await failWithSemantics(
+        `HARNESS IDENTITY RESOLUTION FAILURE: Journey identity drifted from ${identityKey} to ${target.identityKey ?? 'null'} on sample ${i + 1}`,
+      );
+    }
+
     const startedAt = Date.now();
-    await clickIndex(target.actionIndex);
-    await waitStoryUsable(target.identityToken);
+    await clickIndex(target.action.index);
+    await waitStoryUsable();
     const elapsedMs = Date.now() - startedAt;
-    samples.push({ elapsedMs, identityToken: target.identityToken, identityText: target.identityText });
-    console.log(`LEARNER-VISIBLE JOURNEY OPEN SAMPLE ${i + 1} = ${elapsedMs}ms`);
-    if (i < 4) await backHome();
+    samples.push({ elapsedMs, identityKey: target.identityKey, actionText: target.actionText });
+    console.log(`LEARNER-VISIBLE JOURNEY OPEN SAMPLE ${i + 1} = ${elapsedMs}ms | IDENTITY=${target.identityKey}`);
+
+    if (i < 4) await backHome(identityKey);
+  }
+
+  if (samples.length !== 5) {
+    throw new Error(`Journey benchmark requires 5/5 valid samples, got ${samples.length}/5`);
+  }
+  if (!identityKey || samples.some((sample) => sample.identityKey !== identityKey)) {
+    throw new Error('HARNESS IDENTITY RESOLUTION FAILURE: samples are not bound to one non-empty Journey identity');
   }
 } finally {
   await browser.close();
 }
+
 const values = samples.map((s) => s.elapsedMs).sort((a, b) => a - b);
 const medianMs = values[Math.floor(values.length / 2)];
-const result = { sourceSha, metric: 'Home usable -> click Journey identity-bound entry -> Story 1/6 + identity + interaction target', samples, medianMs, pageErrors, failedRequests };
+const result = {
+  sourceSha,
+  metric: 'Home usable -> click SAME parsed Journey entry -> learner-usable Story 1/6 + Chinese content + interaction target',
+  identityKey,
+  validSamples: samples.length,
+  samples,
+  medianMs,
+  pageErrors,
+  failedRequests,
+};
 fs.writeFileSync(output, JSON.stringify(result, null, 2));
-console.log(`LEARNER-VISIBLE JOURNEY OPEN MEDIAN = ${medianMs}ms`);
+console.log(`LEARNER-VISIBLE JOURNEY OPEN MEDIAN = ${medianMs}ms | VALID=${samples.length}/5 | IDENTITY=${identityKey}`);
 if (pageErrors.length) throw new Error(`page errors: ${pageErrors.join(' | ')}`);
 if (failedRequests.length) throw new Error(`failed requests: ${JSON.stringify(failedRequests)}`);

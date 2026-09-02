@@ -9,9 +9,10 @@ import 'journey_level_catalog.dart';
 /// normal Journey UI code must consume these snapshots so annotation Pinyin,
 /// vocabulary filtering, discovery selection, and level assembly never run on
 /// narration progress rebuilds.
-final List<JourneyLevelContent> _forbiddenCityLevelSnapshots =
-    List<JourneyLevelContent>.generate(10, (index) {
-  final level = index + 1;
+final List<JourneyLevelContent?> _forbiddenCityLevelSnapshots =
+    List<JourneyLevelContent?>.filled(10, null, growable: false);
+
+JourneyLevelContent _buildForbiddenCityLevelSnapshot(int level) {
   final base = forbiddenCityLevelContent(level);
   final paragraphs = List<String>.unmodifiable(base.storyParagraphs);
   return JourneyLevelContent(
@@ -29,15 +30,18 @@ final List<JourneyLevelContent> _forbiddenCityLevelSnapshots =
     wonderQuestion: base.wonderQuestion,
     expressQuestion: base.expressQuestion,
   );
-}, growable: false);
+}
 
 /// Initializes every Forbidden City content snapshot once, outside narration
 /// animation. Calling this repeatedly is O(1) after the first initialization.
 void warmForbiddenCityContentCache() {
-  _forbiddenCityLevelSnapshots.length;
+  for (var level = 1; level <= 10; level += 1) {
+    cachedForbiddenCityLevelContent(level);
+  }
 }
 
 JourneyLevelContent cachedForbiddenCityLevelContent(int level) {
   final safeLevel = level.clamp(1, 10).toInt();
-  return _forbiddenCityLevelSnapshots[safeLevel - 1];
+  return _forbiddenCityLevelSnapshots[safeLevel - 1] ??=
+      _buildForbiddenCityLevelSnapshot(safeLevel);
 }

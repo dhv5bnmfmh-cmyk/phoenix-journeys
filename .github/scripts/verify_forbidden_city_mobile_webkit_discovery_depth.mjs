@@ -94,17 +94,19 @@ async function openForbiddenCity(page) {
   await waitText(page, '选择城市与地点');
   await tapSemanticChoice(page, '北京', { expectedText: '北京的地点' });
   await waitText(page, '北京的地点');
+  const startedAt = Date.now();
   await tapSemanticChoice(page, '紫禁城', { absentText: '北京的地点' });
   const postSelectionDeadline = Date.now() + 3000;
   while (Date.now() < postSelectionDeadline) {
     const text = await visibleText(page);
-    if (text.includes('1/6') && text.includes('紫禁城')) return;
+    if (text.includes('1/6') && text.includes('紫禁城')) return Date.now() - startedAt;
     if (text.includes('PHOENIX JOURNEYS')) break;
     await sleep(100);
   }
   await tapJourneyEntryForIdentity(page, '紫禁城');
   await waitText(page, '1/6');
   await waitText(page, '紫禁城');
+  return Date.now() - startedAt;
 }
 
 async function advance(page, expectedStage) {
@@ -121,12 +123,19 @@ async function advance(page, expectedStage) {
 const browser = await webkit.launch({ headless: true });
 const globalPageErrors = [];
 const globalFailedRequests = [];
+const entrySamples = [];
 try {
   for (let level = 1; level <= 10; level += 1) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: 'zh-CN', reducedMotion: 'reduce' });
     const page = await context.newPage();
     page.on('pageerror', (error) => globalPageErrors.push(error?.message || String(error)));
     page.on('requestfailed', (request) => globalFailedRequests.push({ url: request.url(), errorText: request.failure()?.errorText ?? null }));
+    if (level === 1) {
+      await page.route(/assets\/images\/backgrounds\//, async (route) => {
+        await sleep(3000);
+        await route.continue();
+      });
+    }
     try {
       const separator = baseUrl.includes('?') ? '&' : '?';
       const testUrl = baseUrl + separator + 'unlock=all&prototype=journeys&v=' + sourceSha + '&level=' + level;
@@ -137,7 +146,9 @@ try {
       await waitText(page, 'PHOENIX JOURNEYS');
       await setConfiguredLevel(page, level);
       await returnToExplore(page);
-      await openForbiddenCity(page);
+      const entryMs = await openForbiddenCity(page);
+      entrySamples.push(entryMs);
+      console.log('MOBILE WEBKIT STORY USABLE Lv' + level + ' = ' + entryMs + 'ms');
       if ((await journeySessionLevel(page)) !== level) throw new Error('Mobile WebKit Lv' + level + ' session snapshot mismatch');
       await assertNoJourneyLiveControls(page);
       await advance(page, 2);
@@ -152,6 +163,12 @@ try {
   }
   if (globalPageErrors.length) throw new Error(`PAGE ERRORS: ${globalPageErrors.join(' | ')}`);
   if (globalFailedRequests.length) throw new Error(`FAILED REQUESTS: ${JSON.stringify(globalFailedRequests)}`);
+  const coldMs = entrySamples[0];
+  const warm = entrySamples.slice(1).sort((a, b) => a - b);
+  const warmMedianMs = warm[Math.floor(warm.length / 2)];
+  if (coldMs > 700) throw new Error(`Cold WebKit entry ${coldMs}ms exceeds 700ms`);
+  if (warmMedianMs > 250) throw new Error(`Warm entry median ${warmMedianMs}ms exceeds 250ms`);
+  console.log(`WEBKIT ENTRY COLD = ${coldMs}ms | WARM MEDIAN = ${warmMedianMs}ms`);
   console.log('PAGE ERRORS = []');
   console.log('FAILED REQUESTS = []');
   console.log('MOBILE WEBKIT BARE DISCOVERY DEPTH = PASS | SHA=' + sourceSha + ' | SESSION-LOCKED');

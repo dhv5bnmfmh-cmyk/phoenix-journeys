@@ -6,7 +6,9 @@ import 'package:provider/provider.dart';
 
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
+import '../models/journey_memory_entry.dart';
 import '../services/narration_controller.dart';
+import '../services/journey_memory_photo_picker.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/journey_level_selector_button.dart';
@@ -75,7 +77,7 @@ class _MeScreenState extends State<MeScreen> {
                 state: state,
                 selected: _section,
                 vocabularyCount: savedEntries.length,
-                memoryCount: state.memories.length,
+                memoryCount: state.journeyMemories.length,
                 onSelected: (value) => setState(() => _section = value),
               ),
               const SizedBox(height: 7),
@@ -630,124 +632,81 @@ class _MemoryPanel extends StatelessWidget {
 
   final AppState state;
 
-  Future<void> _showAll(BuildContext context) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      useSafeArea: true,
-      builder: (_) => FractionallySizedBox(
-        heightFactor: .78,
-        child: ListView.separated(
-          padding: const EdgeInsets.fromLTRB(14, 0, 14, 20),
-          itemCount: state.memories.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 5),
-          itemBuilder: (context, index) {
-            final memory = state.memories[index];
-            return ListTile(
-              dense: true,
-              tileColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              leading: const Text('📖', style: TextStyle(fontSize: 21)),
-              title: Text(memory),
-              subtitle: Text(
-                state.displayText('第 ${state.memories.length - index} 次北京之旅'),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (state.memories.isEmpty) return const _EmptyMemoryCard();
-    final preview = state.memories.take(4).toList(growable: false);
-
-    return Column(
-      children: [
-        Expanded(
-          child: Column(
-            children: preview
-                .asMap()
-                .entries
-                .map((entry) {
-                  final index = state.memories.indexOf(entry.value);
-                  return Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .92),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: PhoenixTheme.gold.withValues(alpha: .24),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Text('📖', style: TextStyle(fontSize: 21)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  entry.value,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    height: 1.2,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  state.displayText(
-                                    '第 ${state.memories.length - index} 次北京之旅',
-                                  ),
-                                  style: const TextStyle(
-                                    fontSize: 9,
-                                    color: Colors.black45,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                })
-                .toList(growable: false),
+    if (state.journeyMemories.isEmpty) return const _EmptyMemoryCard();
+    return ListView.separated(
+      key: const ValueKey('journey-memory-timeline'),
+      itemCount: state.journeyMemories.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 6),
+      itemBuilder: (context, index) {
+        final entry = state.journeyMemories[index];
+        return ListTile(
+          key: ValueKey('journey-memory-${entry.id}'),
+          tileColor: Colors.white.withValues(alpha: .94),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          onTap: () => showModalBottomSheet<void>(
+            context: context, isScrollControlled: true, useSafeArea: true,
+            builder: (_) => _MemoryDetailEditor(state: state, initial: entry),
           ),
-        ),
-        if (state.memories.length > preview.length) ...[
-          const SizedBox(height: 5),
-          SizedBox(
-            height: 32,
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => _showAll(context),
-              icon: const Icon(Icons.history_rounded, size: 16),
-              label: Text(
-                state.displayText('查看全部 ${state.memories.length} 条回忆'),
-                style: const TextStyle(fontSize: 10.5),
-              ),
-            ),
-          ),
-        ],
-      ],
+          leading: entry.photoRefs.isEmpty ? const Text('📖', style: TextStyle(fontSize: 22)) : _MemoryThumbnail(state: state, ref: entry.photoRefs.first),
+          title: Text(entry.place.isEmpty ? entry.journeyTitle : '${entry.city} · ${entry.place}', style: const TextStyle(fontWeight: FontWeight.w800)),
+          subtitle: Text('${entry.initialCreatedAt.toLocal().toString().split(' ').first}  ·  Lv.${entry.sessionLevel}\n${entry.note.isEmpty ? '尚未写下文字' : entry.note}\n${entry.isVisited ? '我来过这里' : '线上探索'}', maxLines: 4, overflow: TextOverflow.ellipsis),
+          trailing: const Icon(Icons.chevron_right_rounded),
+        );
+      },
     );
   }
+}
+
+class _MemoryThumbnail extends StatelessWidget {
+  const _MemoryThumbnail({required this.state, required this.ref});
+  final AppState state;
+  final String ref;
+  @override Widget build(BuildContext context) => FutureBuilder<Uint8List?>(
+    future: state.journeyMemoryPhoto(ref),
+    builder: (_, snapshot) => snapshot.data == null ? const Icon(Icons.photo_outlined) : ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.memory(snapshot.data!, width: 48, height: 48, fit: BoxFit.cover)),
+  );
+}
+
+class _MemoryDetailEditor extends StatefulWidget {
+  const _MemoryDetailEditor({required this.state, required this.initial});
+  final AppState state;
+  final JourneyMemoryEntry initial;
+  @override State<_MemoryDetailEditor> createState() => _MemoryDetailEditorState();
+}
+
+class _MemoryDetailEditorState extends State<_MemoryDetailEditor> {
+  late JourneyMemoryEntry entry = widget.initial;
+  late final TextEditingController note = TextEditingController(text: entry.note);
+  late final TextEditingController visitNote = TextEditingController(text: entry.visitNote);
+  @override void dispose() { note.dispose(); visitNote.dispose(); super.dispose(); }
+  Future<void> save() async {
+    entry = entry.copyWith(updatedNote: note.text.trim(), updatedAt: DateTime.now(), visitNote: visitNote.text.trim());
+    await widget.state.saveJourneyMemory(entry);
+    if (mounted) Navigator.pop(context);
+  }
+  @override Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(18, 8, 18, MediaQuery.viewInsetsOf(context).bottom + 18),
+    child: SingleChildScrollView(child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text('${entry.city} · ${entry.place}', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
+      Text('${entry.journeyTitle}  ·  Lv.${entry.sessionLevel}'),
+      const SizedBox(height: 8),
+      const Text('当前回忆保存在此设备。', style: TextStyle(color: Colors.black54)),
+      const SizedBox(height: 12),
+      TextField(key: const ValueKey('memory-detail-note'), controller: note, minLines: 4, maxLines: 8, decoration: const InputDecoration(labelText: '我的回忆', border: OutlineInputBorder())),
+      const SizedBox(height: 10),
+      Wrap(spacing: 8, runSpacing: 8, children: [for (final ref in entry.photoRefs) Stack(children: [_MemoryThumbnail(state: widget.state, ref: ref), Positioned(right: 0, child: IconButton(tooltip: '删除照片', icon: const Icon(Icons.cancel, color: Colors.red), onPressed: () async { await widget.state.deleteJourneyMemoryPhoto(entry, ref); entry = widget.state.journeyMemories.firstWhere((item) => item.id == entry.id); if (mounted) setState(() {}); }))])]),
+      OutlinedButton.icon(key: const ValueKey('memory-detail-add-photo'), onPressed: () async { final picked = await pickJourneyMemoryPhotos(); for (final bytes in picked) { await widget.state.addJourneyMemoryPhoto(entry, bytes); entry = widget.state.journeyMemories.firstWhere((item) => item.id == entry.id); } if (mounted) setState(() {}); }, icon: const Icon(Icons.add_photo_alternate_outlined), label: const Text('添加照片')),
+      SwitchListTile(key: const ValueKey('memory-visited-switch'), contentPadding: EdgeInsets.zero, title: const Text('我真的来到这里了'), value: entry.isVisited, onChanged: (value) => setState(() => entry = entry.copyWith(isVisited: value, visitedAt: value ? (entry.visitedAt ?? DateTime.now()) : null, clearVisitedAt: !value))),
+      if (entry.isVisited) ...[
+        ListTile(contentPadding: EdgeInsets.zero, title: const Text('到访日期'), subtitle: Text((entry.visitedAt ?? DateTime.now()).toLocal().toString().split(' ').first), trailing: const Icon(Icons.calendar_today_outlined), onTap: () async { final date = await showDatePicker(context: context, firstDate: DateTime(1900), lastDate: DateTime.now(), initialDate: entry.visitedAt ?? DateTime.now()); if (date != null) setState(() => entry = entry.copyWith(visitedAt: date)); }),
+        TextField(key: const ValueKey('memory-visit-note'), controller: visitNote, minLines: 2, maxLines: 5, decoration: const InputDecoration(labelText: '现场感受', border: OutlineInputBorder())),
+      ],
+      const SizedBox(height: 12),
+      FilledButton(key: const ValueKey('memory-detail-save'), onPressed: save, child: const Text('保存修改')),
+    ])),
+  );
 }
 
 class _EmptyVocabularyCard extends StatelessWidget {

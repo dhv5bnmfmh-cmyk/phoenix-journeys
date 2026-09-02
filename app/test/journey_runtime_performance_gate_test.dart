@@ -33,7 +33,6 @@ void main() {
           .readAsStringSync();
 
   test('Forbidden City Lv1 Lv5 Lv10 reuse immutable level snapshots', () {
-    warmForbiddenCityContentCache();
     for (final level in <int>[1, 5, 10]) {
       final first = cachedForbiddenCityLevelContent(level);
       final second = cachedForbiddenCityLevelContent(level);
@@ -65,9 +64,30 @@ void main() {
     expect(runtime, contains('PinyinHelper.getPinyinE'));
     expect(
       cache,
-      contains('final List<JourneyLevelContent> _forbiddenCityLevelSnapshots'),
+      contains(
+        'final List<JourneyLevelContent?> _forbiddenCityLevelSnapshots',
+      ),
     );
-    expect(cache, contains('warmForbiddenCityContentCache'));
+    expect(
+      cache,
+      contains(
+        'List<JourneyLevelContent?>.filled(10, null, growable: false)',
+      ),
+    );
+    expect(
+      cache,
+      contains(
+        'return _forbiddenCityLevelSnapshots[safeLevel - 1] ??=',
+      ),
+    );
+    expect(
+      cache,
+      contains('_buildForbiddenCityLevelSnapshot(safeLevel);'),
+    );
+    expect(cache, isNot(contains('List<JourneyLevelContent>.generate')));
+    expect(story, isNot(contains('warmForbiddenCityContentCache')));
+    expect(levelResolver, isNot(contains('warmForbiddenCityContentCache')));
+    expect(story, isNot(contains('_buildForbiddenCityLevelSnapshot')));
     expect(adaptive, contains('cachedForbiddenCityLevelContent(level)'));
   });
 

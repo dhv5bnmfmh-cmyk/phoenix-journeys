@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_level_catalog.dart';
+import '../models/journey_memory_entry.dart';
+import '../services/journey_memory_repository.dart';
 import '../services/journey_location_binding.dart';
 import '../services/language_level_preference_store.dart';
 
@@ -120,6 +122,8 @@ class AppState extends ChangeNotifier {
   int selectedTab = 0;
   bool journeyCompleted = false;
   final List<String> memories = [];
+  final List<JourneyMemoryEntry> journeyMemories = [];
+  JourneyMemoryRepository? _journeyMemoryRepository;
   final Set<String> savedWords = <String>{};
   final Set<String> earnedJourneyStampIds = <String>{};
   int goldCoins = 0;
@@ -276,6 +280,7 @@ class AppState extends ChangeNotifier {
       memories
         ..clear()
         ..addAll(prefs.getStringList('memories') ?? <String>[]);
+      await loadJourneyMemoryEntries(prefs);
       savedWords
         ..clear()
         ..addAll(prefs.getStringList('savedWords') ?? <String>[]);
@@ -1096,7 +1101,7 @@ class AppState extends ChangeNotifier {
     ]);
   }
 
-  Future<void> completeJourney(String memory) async {
+  Future<void> completeJourney(String memory, {int sessionLevel = 1}) async {
     journeyCompleted = true;
     earnedJourneyStampIds.add(activeJourneyId);
     _journeyStep = journeyLastStep;
@@ -1106,7 +1111,13 @@ class AppState extends ChangeNotifier {
         : JourneyCompositeSubstage.none;
     journeyChallengeAttemptId = '';
     if (memory.trim().isNotEmpty) {
-      memories.insert(0, '${activeJourney.stampTitle}｜${memory.trim()}');
+      final compatibilityMemory = '${activeJourney.stampTitle}｜${memory.trim()}';
+      if (!memories.contains(compatibilityMemory)) {
+        memories.insert(0, compatibilityMemory);
+      }
+    }
+    if (activeJourneyId == 'beijing-forbidden-city') {
+      await saveActiveJourneyMemory(memory, sessionLevel: sessionLevel, notify: false);
     }
     wonderDraft = '';
     expressDraft = '';
@@ -1144,5 +1155,76 @@ class AppState extends ChangeNotifier {
       prefs.setString(_key('updatedAt'), journeyUpdatedAt!.toIso8601String()),
     ]);
     notifyListeners();
+  }
+
+  Future<void> saveJourneyMemory(JourneyMemoryEntry entry) async {
+    final repository = await _journeyMemoryRepo();
+    await repository.upsert(entry);
+    journeyMemories
+      ..removeWhere((item) => item.id == entry.id)
+      ..insert(0, entry);
+    notifyListeners();
+  }
+
+  @protected
+  Future<void> loadJourneyMemoryEntries(SharedPreferences preferences) async {
+    _journeyMemoryRepository = JourneyMemoryRepository(preferences);
+    journeyMemories
+      ..clear()
+      ..addAll(await _journeyMemoryRepository!.load());
+  }
+
+  Future<JourneyMemoryRepository> _journeyMemoryRepo() async {
+    if (_journeyMemoryRepository == null) {
+      await loadJourneyMemoryEntries(await _preferencesLoader());
+    }
+    return _journeyMemoryRepository!;
+  }
+
+  Future<JourneyMemoryEntry> saveActiveJourneyMemory(
+    String note, {
+    required int sessionLevel,
+    bool notify = true,
+  }) async {
+    final now = _clock();
+    JourneyMemoryEntry? existing;
+    for (final candidate in journeyMemories) {
+      if (candidate.journeyId == activeJourneyId && !candidate.legacy) {
+        existing = candidate;
+        break;
+      }
+    }
+    final entry = existing == null
+        ? JourneyMemoryEntry(
+            id: 'memory-$activeJourneyId', journeyId: activeJourneyId,
+            city: activeJourney.city, place: activeJourney.place,
+            journeyTitle: activeJourney.storyTitle, sessionLevel: sessionLevel,
+            initialNote: note.trim(), initialCreatedAt: now,
+            updatedNote: '', updatedAt: now, isVisited: false,
+            photoRefs: const [],
+          )
+        : existing.copyWith(updatedNote: note.trim(), updatedAt: now);
+    final repository = await _journeyMemoryRepo();
+    await repository.upsert(entry);
+    journeyMemories
+      ..removeWhere((item) => item.journeyId == activeJourneyId && !item.legacy)
+      ..insert(0, entry);
+    if (notify) notifyListeners();
+    return entry;
+  }
+
+  Future<String> addJourneyMemoryPhoto(JourneyMemoryEntry entry, Uint8List bytes) async {
+    final repository = await _journeyMemoryRepo();
+    final ref = await repository.addPhoto(entry.id, bytes, now: _clock());
+    await saveJourneyMemory(entry.copyWith(photoRefs: [...entry.photoRefs, ref], updatedAt: _clock()));
+    return ref;
+  }
+
+  Future<Uint8List?> journeyMemoryPhoto(String ref) async => (await _journeyMemoryRepo()).readPhoto(ref);
+
+  Future<void> deleteJourneyMemoryPhoto(JourneyMemoryEntry entry, String ref) async {
+    final repository = await _journeyMemoryRepo();
+    await repository.deletePhoto(ref);
+    await saveJourneyMemory(entry.copyWith(photoRefs: entry.photoRefs.where((item) => item != ref).toList(), updatedAt: _clock()));
   }
 }
