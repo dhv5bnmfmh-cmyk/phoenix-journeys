@@ -1,0 +1,58 @@
+{
+  "journeyId": "beijing-forbidden-city-journey-01",
+  "runtimeId": "beijing-forbidden-city",
+  "assetVersion": "2026-09-02-v1",
+  "promptVersion": "fc01-v1",
+  "generatedAt": "2026-09-02T00:00:00Z",
+  "sources": [
+    "https://www.dpm.org.cn/",
+    "https://www.beijing.gov.cn/zhengce/zhengcefagui/202309/W020230921615858870431.pdf",
+    "https://whc.unesco.org/en/list/439/"
+  ],
+  "scenes": [
+    {
+      "sceneId": "FC01-A",
+      "landscapePath": "masters/fc01_a_entry_landscape.webp",
+      "portraitPath": "masters/fc01_a_entry_portrait.webp",
+      "runtimeLandscapePath": "runtime/fc01_a_entry_landscape.webp",
+      "runtimePortraitPath": "runtime/fc01_a_entry_portrait.webp",
+      "verified": true,
+      "visualNotes": "Entry threshold, strong central-axis first impression, early morning.",
+      "mobileCropVerified": true,
+      "desktopCropVerified": true
+    },
+    {
+      "sceneId": "FC01-B",
+      "landscapePath": "masters/fc01_b_axis_landscape.webp",
+      "portraitPath": "masters/fc01_b_axis_portrait.webp",
+      "runtimeLandscapePath": "runtime/fc01_b_axis_landscape.webp",
+      "runtimePortraitPath": "runtime/fc01_b_axis_portrait.webp",
+      "verified": true,
+      "visualNotes": "Gate sequence, courtyard depth and spatial hierarchy.",
+      "mobileCropVerified": true,
+      "desktopCropVerified": true
+    },
+    {
+      "sceneId": "FC01-C",
+      "landscapePath": "masters/fc01_c_east_route_landscape.webp",
+      "portraitPath": "masters/fc01_c_east_route_portrait.webp",
+      "runtimeLandscapePath": "runtime/fc01_c_east_route_landscape.webp",
+      "runtimePortraitPath": "runtime/fc01_c_east_route_portrait.webp",
+      "verified": true,
+      "visualNotes": "Central ordering plus real side corridor and eastward turn; no route graphics.",
+      "mobileCropVerified": true,
+      "desktopCropVerified": true
+    },
+    {
+      "sceneId": "FC01-D",
+      "landscapePath": "masters/fc01_d_shared_node_landscape.webp",
+      "portraitPath": "masters/fc01_d_shared_node_portrait.webp",
+      "runtimeLandscapePath": "runtime/fc01_d_shared_node_landscape.webp",
+      "runtimePortraitPath": "runtime/fc01_d_shared_node_portrait.webp",
+      "verified": true,
+      "visualNotes": "Warm shared node with central and lateral relationships; plaque made unreadable.",
+      "mobileCropVerified": true,
+      "desktopCropVerified": true
+    }
+  ]
+}
