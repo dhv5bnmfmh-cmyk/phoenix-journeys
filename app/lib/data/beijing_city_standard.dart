@@ -350,6 +350,19 @@ JourneySceneDefinition forbiddenCitySceneById(String sceneId) =>
         .singleWhere((scene) => scene.sceneId == sceneId);
 
 const _storySceneIds = ['FC01-A', 'FC01-B', 'FC01-C', 'FC01-D'];
+const _axisObservationAnchorByLevel = <int, String>{
+  1: '沿中轴向北走',
+  2: '沿中轴向北走',
+  3: '沿中轴记录宫门和院落',
+  4: '沿中轴观察外朝',
+  5: '沿中轴观察外朝',
+  6: '沿中轴穿过外朝',
+  7: '沿中轴记录外朝',
+  8: '沿中轴观察外朝',
+  9: '沿中轴进入紫禁城',
+  10: '从午门沿中轴进入',
+};
+
 const _sharedEvidenceAnchorByLevel = <int, String>{
   1: '两人重新看图',
   2: '两人重新看图',
@@ -380,7 +393,8 @@ List<JourneyStorySceneSpan> forbiddenCityStorySceneSpans({
 
   final story = paragraphs.join();
   final total = story.length;
-  final axisStart = story.indexOf('。') + 1;
+  final axisAnchor = _axisObservationAnchorByLevel[level]!;
+  final axisStart = story.indexOf(axisAnchor);
   final eastRouteStart = story.indexOf('阿宁', axisStart);
   final sharedEvidenceAnchor = _sharedEvidenceAnchorByLevel[level]!;
   final sharedNodeStart = story.indexOf(sharedEvidenceAnchor, eastRouteStart);
