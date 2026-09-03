@@ -53,10 +53,12 @@ jobs:
           from pathlib import Path
           path = Path(".github/scripts/verify_forbidden_city_preview_v2.mjs")
           source = path.read_text()
-          story_start = source.find("    if (level === 5) {\\n      const header = await findSemantic(page, '1/6'")
-          story_end = source.find("\\n    await nextToVocabulary(page, level, story);", story_start)
-          if story_start >= 0 and story_end >= 0:
-              source = source[:story_start] + "    print('Lv5 STORY TTS CHECK = OUT OF CURRENT GRAMMAR SCOPE');\\n" + source[story_end:]
+          story_marker = source.find("      const header = await findSemantic(page, '1/6'")
+          story_start = source.rfind("    if (level === 5) {", 0, story_marker)
+          story_end = source.find("    await nextToVocabulary(page, level, story);", story_marker)
+          if story_marker < 0 or story_start < 0 or story_end < 0:
+              raise SystemExit("Story TTS targeted block anchors missing")
+          source = source[:story_start] + "    console.log('Lv5 STORY TTS CHECK = OUT OF CURRENT GRAMMAR SCOPE');\n" + source[story_end:]
           old = "    if (after.includes('回答错误')) {\n      const explicitMarker = before.includes('句子复原')\n        ? '位置错误'\n        : before.includes('语病修复')\n          ? '错误位置'\n          : '填错';\n      await findSemantic(page, explicitMarker, { timeout: 5000 });\n    }"
           new = "    if (after.includes('回答错误')) {\n      if (before.includes('句子复原')) {\n        await findSemantic(page, '位置错误', { timeout: 5000 });\n      } else if (before.includes('补全故事')) {\n        await findSemantic(page, '填错', { timeout: 5000 });\n      }\n    }"
           if old not in source:
