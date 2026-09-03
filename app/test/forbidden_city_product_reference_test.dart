@@ -411,6 +411,10 @@ void main() {
     expect(find.text('位置错误'), findsOneWidget);
     expect(find.text('继续修改'), findsOneWidget);
     expect(find.byKey(const ValueKey('grammar-correct-location')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('grammar-step1-why-wrong')),
+      findsOneWidget,
+    );
     expect(tester.widget<Text>(find.text(wrongLabel)).style?.color, Colors.redAccent);
     expect(
       tester.widget<Text>(find.text(correctLabel)).style?.color,
@@ -438,9 +442,20 @@ void main() {
     expect(feedback, isFalse);
     expect(find.byKey(const ValueKey('grammar-error-location')), findsOneWidget);
     expect(find.byKey(const ValueKey('grammar-wrong-location')), findsOneWidget);
-    expect(find.byKey(const ValueKey('grammar-wrong-repair')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('grammar-selected-repair')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('grammar-option-explanation')),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const ValueKey('challenge-inline-correct-answer')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('grammar-revision-rule')),
       findsOneWidget,
     );
   });
