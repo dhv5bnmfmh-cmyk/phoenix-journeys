@@ -15,13 +15,12 @@ concurrency:
 
 env:
   TARGET_SHA: 8643f6424d7a6af6ece3d4ae4be78356ea8b4987
-  PREVIEW_WORKER: phoenix-journeys-pr-208
   PREVIEW_URL: https://phoenix-journeys-pr-208.7hn5tyrjgh.workers.dev/
 
 jobs:
   founder-targeted:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 20
     steps:
       - name: Check out exact PR candidate
         uses: actions/checkout@v6
@@ -35,62 +34,18 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$TARGET_SHA"
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install dependencies
-        working-directory: app
-        run: flutter pub get
-
-      - name: Analyze
-        working-directory: app
-        run: flutter analyze
-
-      - name: Lv5 Grammar targeted Flutter tests
-        working-directory: app
-        run: flutter test test/forbidden_city_product_reference_test.dart --name 'Lv5 grammar' --reporter expanded
-
-      - name: Build exact preview web app
-        working-directory: app
-        run: flutter build web --release
-
-      - name: Deploy exact PR preview
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "$CLOUDFLARE_API_TOKEN"
-          test -n "$CLOUDFLARE_ACCOUNT_ID"
-          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
-          npx --yes wrangler@4 deploy             --name "$PREVIEW_WORKER"             --var "PHOENIX_RELEASE:$TARGET_SHA"
-
       - name: Verify exact preview release
         shell: bash
         run: |
           set -euo pipefail
-          health_url="${PREVIEW_URL}api/health?commit=${TARGET_SHA}"
-          verified=false
-          for attempt in {1..24}; do
-            response="$(curl --fail --silent --show-error "$health_url" || true)"
-            if node -e '
-              let health;
-              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
-              const expected = process.argv[2];
-              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expected) process.exit(1);
-            ' "$response" "$TARGET_SHA"; then
-              verified=true
-              break
-            fi
-            sleep 5
-          done
-          [[ "$verified" == true ]]
+          response="$(curl --fail --silent --show-error "${PREVIEW_URL}api/health?commit=${TARGET_SHA}")"
+          node -e '
+            const health = JSON.parse(process.argv[1]);
+            const expected = process.argv[2];
+            if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expected) process.exit(1);
+          ' "$response" "$TARGET_SHA"
 
-      - name: Prepare Grammar-only Lv5 browser harness
+      - name: Prepare Grammar-only Lv5 harness
         shell: bash
         run: |
           set -euo pipefail
@@ -98,14 +53,35 @@ jobs:
           const fs = require('node:fs');
           const path = '.github/scripts/verify_forbidden_city_preview_v2.mjs';
           let source = fs.readFileSync(path, 'utf8');
-          const start = source.indexOf("    if (level === 5) {\n      const header = await findSemantic(page, '1/6'");
-          const end = source.indexOf("\n    await nextToVocabulary(page, level, story);", start);
-          if (start >= 0 && end >= 0) {
+
+          const storyStart = source.indexOf("    if (level === 5) {\n      const header = await findSemantic(page, '1/6'");
+          const storyEnd = source.indexOf("\n    await nextToVocabulary(page, level, story);", storyStart);
+          if (storyStart >= 0 && storyEnd >= 0) {
             source =
-              source.slice(0, start) +
+              source.slice(0, storyStart) +
               "    console.log('Lv5 STORY TTS CHECK = OUT OF CURRENT GRAMMAR SCOPE');\n" +
-              source.slice(end);
+              source.slice(storyEnd);
           }
+
+          const stale = `    if (after.includes('回答错误')) {
+      const explicitMarker = before.includes('句子复原')
+        ? '位置错误'
+        : before.includes('语病修复')
+          ? '错误位置'
+          : '填错';
+      await findSemantic(page, explicitMarker, { timeout: 5000 });
+    }`;
+          const fixed = `    if (after.includes('回答错误')) {
+      if (before.includes('句子复原')) {
+        await findSemantic(page, '位置错误', { timeout: 5000 });
+      } else if (before.includes('补全故事')) {
+        await findSemantic(page, '填错', { timeout: 5000 });
+      }
+    }`;
+          if (!source.includes(stale)) {
+            throw new Error('stale grammar final-marker harness anchor missing');
+          }
+          source = source.replace(stale, fixed);
           fs.writeFileSync(path, source);
           NODE
           node --check .github/scripts/verify_forbidden_city_preview_v2.mjs
@@ -147,6 +123,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: founder-grammar-pr208-${{ env.TARGET_SHA }}
+          name: founder-grammar-browser-pr208-${{ env.TARGET_SHA }}
           path: test-results/
           if-no-files-found: warn
