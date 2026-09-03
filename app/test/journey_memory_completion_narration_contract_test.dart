@@ -49,8 +49,39 @@ void main() {
       contains('journeyStageNarrationLanguageCode(_appState.isTraditional)'),
     );
     expect(journey, contains('_appState.displayText(review.prompt)'));
-    expect(journey, contains('_appState.displayText(item.answer)'));
+    expect(journey, contains('_appState.displayText(memory.anchor)'));
+    expect(journey, contains('_appState.displayText(memory.recall)'));
+    expect(journey, contains('_appState.displayText(memory.characterShift)'));
+    expect(journey, contains('_appState.displayText(memory.takeaway)'));
     expect(journey, contains('memoryController.text.trim()'));
+  });
+
+  test('Forbidden City Memory and Completion bind the locked session level', () {
+    expect(
+      RegExp(r'forbiddenCityMemoryForLevel\(').allMatches(journey).length,
+      2,
+    );
+    expect(
+      RegExp(r'forbiddenCityCompletionForLevel\(').allMatches(journey).length,
+      2,
+    );
+    expect(
+      RegExp(r'_sessionLanguageProfile\.phoenixLevel \?\? 1')
+          .allMatches(journey)
+          .length,
+      greaterThanOrEqualTo(4),
+    );
+    for (final field in <String>[
+      'completion.storyClosure',
+      'completion.discovery',
+      'completion.learning',
+      'completion.memory',
+      'completion.relationship',
+      'completion.emotionalClosure',
+      'completion.unlockResult',
+    ]) {
+      expect(journey, contains(field), reason: field);
+    }
   });
 
   test('six-stage architecture is unchanged', () {

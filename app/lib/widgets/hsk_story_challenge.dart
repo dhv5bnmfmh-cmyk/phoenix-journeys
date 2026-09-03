@@ -32,6 +32,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
   int? selectedError;
   bool grammarLocationSubmitted = false;
   bool submitted = false;
+  bool completionReported = false;
   final List<String> built = [];
   late List<String> remaining;
   late List<int?> completionSelections;
@@ -108,6 +109,11 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
     final feedbackAudio = widget.onFeedbackAudio;
     if (feedbackAudio != null) {
       unawaited(feedbackAudio(question.id, correct));
+    }
+    if (index == widget.challenge.questions.length - 1 &&
+        !completionReported) {
+      completionReported = true;
+      unawaited(widget.onCompleted());
     }
   }
 
@@ -191,31 +197,33 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
           ),
         ),
         const SizedBox(height: 8),
-        FilledButton(
-          key: ValueKey(submitted ? 'challenge-next' : 'challenge-submit'),
-          onPressed: submitted
-              ? () => unawaited(_next())
-              : question.mode == StoryChallengeMode.grammarRepair &&
-                      grammarStep == 0
-                  ? grammarLocationSubmitted
-                      ? _continueGrammarRepair
-                      : selectedError != null
-                          ? _submit
-                          : null
-                  : _canSubmit
-                      ? _submit
-                      : null,
-          child: Text(
-            submitted
-                ? (index == 11 ? '完成挑战' : '下一题')
+        if (!(submitted &&
+            index == widget.challenge.questions.length - 1))
+          FilledButton(
+            key: ValueKey(submitted ? 'challenge-next' : 'challenge-submit'),
+            onPressed: submitted
+                ? () => unawaited(_next())
                 : question.mode == StoryChallengeMode.grammarRepair &&
                         grammarStep == 0
                     ? grammarLocationSubmitted
-                        ? '继续修改'
-                        : '确认位置'
-                    : '提交',
+                        ? _continueGrammarRepair
+                        : selectedError != null
+                            ? _submit
+                            : null
+                    : _canSubmit
+                        ? _submit
+                        : null,
+            child: Text(
+              submitted
+                  ? '下一题'
+                  : question.mode == StoryChallengeMode.grammarRepair &&
+                          grammarStep == 0
+                      ? grammarLocationSubmitted
+                          ? '继续修改'
+                          : '确认位置'
+                      : '提交',
+            ),
           ),
-        ),
       ],
     );
   }

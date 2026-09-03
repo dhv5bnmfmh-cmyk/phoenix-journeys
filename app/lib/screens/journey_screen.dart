@@ -474,13 +474,16 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
     }
     if (_isForbiddenCity) {
+      final memory = forbiddenCityMemoryForLevel(
+        _sessionLanguageProfile.phoenixLevel ?? 1,
+      );
       return buildJourneyStageNarrationItems(
         stage: 'memory',
         displayedLines: [
-          for (final item in forbiddenCityMemoryReviews) ...[
-            _appState.displayText(item.prompt),
-            _appState.displayText(item.answer),
-          ],
+          _appState.displayText(memory.anchor),
+          _appState.displayText(memory.recall),
+          _appState.displayText(memory.characterShift),
+          _appState.displayText(memory.takeaway),
         ],
       );
     }
@@ -506,15 +509,22 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
     }
     if (_isForbiddenCity) {
+      final completion = forbiddenCityCompletionForLevel(
+        _sessionLanguageProfile.phoenixLevel ?? 1,
+      );
       return buildJourneyStageNarrationItems(
         stage: 'completion',
-        displayedLines: const [
+        displayedLines: [
           forbiddenCityAchievementName,
-          forbiddenCityJourneySummary,
-          forbiddenCityMemoryAnchor,
+          completion.storyClosure,
+          completion.discovery,
+          completion.learning,
+          completion.memory,
+          completion.relationship,
+          completion.emotionalClosure,
+          completion.unlockResult,
           forbiddenCityChallengeRewardName,
           forbiddenCityChallengeRewardMeaning,
-          forbiddenCityJourneyCompletion,
         ],
       );
     }
@@ -2241,6 +2251,9 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _forbiddenCityMemoryPage() {
+    final memory = forbiddenCityMemoryForLevel(
+      _sessionLanguageProfile.phoenixLevel ?? 1,
+    );
     final existing = _appState.journeyMemories
         .where((entry) => entry.journeyId == _experience.id && !entry.legacy);
     if (memoryController.text.isEmpty && existing.isNotEmpty) {
@@ -2260,6 +2273,26 @@ class _JourneyScreenState extends State<JourneyScreen>
               '${_experience.city} · ${_experience.place}  ·  Lv.${_sessionLanguageProfile.phoenixLevel}',
               style: const TextStyle(
                   color: Color(0xFFFFD879), fontWeight: FontWeight.w800)),
+          const SizedBox(height: 10),
+          _ForbiddenCityCompleteCard(
+            title: 'Memory Anchor',
+            body: memory.anchor,
+          ),
+          const SizedBox(height: 6),
+          _ForbiddenCityCompleteCard(
+            title: '回想',
+            body: memory.recall,
+          ),
+          const SizedBox(height: 6),
+          _ForbiddenCityCompleteCard(
+            title: '人物变化',
+            body: memory.characterShift,
+          ),
+          const SizedBox(height: 6),
+          _ForbiddenCityCompleteCard(
+            title: '带走的理解',
+            body: memory.takeaway,
+          ),
           const SizedBox(height: 10),
           const Text('这段旅程，你最想留下什么？',
               style: TextStyle(
@@ -2496,6 +2529,9 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _forbiddenCityCompletePage() {
+    final completion = forbiddenCityCompletionForLevel(
+      _sessionLanguageProfile.phoenixLevel ?? 1,
+    );
     return _page(
       title: '本次学习回顾',
       narrationStage: 'completion',
@@ -2524,14 +2560,34 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
             const SizedBox(height: 8),
-            const _ForbiddenCityCompleteCard(
-              title: '重点词汇与文化知识',
-              body: forbiddenCityJourneySummary,
+            _ForbiddenCityCompleteCard(
+              title: '故事收束',
+              body: completion.storyClosure,
             ),
             const SizedBox(height: 6),
-            const _ForbiddenCityCompleteCard(
+            _ForbiddenCityCompleteCard(
+              title: '文化发现',
+              body: completion.discovery,
+            ),
+            const SizedBox(height: 6),
+            _ForbiddenCityCompleteCard(
+              title: '学习结果',
+              body: completion.learning,
+            ),
+            const SizedBox(height: 6),
+            _ForbiddenCityCompleteCard(
               title: 'Memory Anchor',
-              body: forbiddenCityMemoryAnchor,
+              body: completion.memory,
+            ),
+            const SizedBox(height: 6),
+            _ForbiddenCityCompleteCard(
+              title: '人物关系',
+              body: completion.relationship,
+            ),
+            const SizedBox(height: 6),
+            _ForbiddenCityCompleteCard(
+              title: '旅程收束',
+              body: completion.emotionalClosure,
             ),
             const SizedBox(height: 6),
             const _ForbiddenCityCompleteCard(
@@ -2540,9 +2596,9 @@ class _JourneyScreenState extends State<JourneyScreen>
                   '$forbiddenCityChallengeRewardName\n$forbiddenCityChallengeRewardMeaning',
             ),
             const SizedBox(height: 6),
-            const _ForbiddenCityCompleteCard(
+            _ForbiddenCityCompleteCard(
               title: 'Journey Completion',
-              body: forbiddenCityJourneyCompletion,
+              body: completion.unlockResult,
             ),
             const SizedBox(height: 8),
             SizedBox(

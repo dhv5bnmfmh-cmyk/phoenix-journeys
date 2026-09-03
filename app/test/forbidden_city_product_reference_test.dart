@@ -307,6 +307,52 @@ void main() {
     expect(find.text('下一题'), findsOneWidget);
   });
 
+  testWidgets('final Q12 submits once, keeps feedback, and has no internal CTA',
+      (tester) async {
+    final finalQuestion = challenge(5).questions.last;
+    var completed = 0;
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: HskStoryChallenge(
+            challenge: StoryChallengeSet(
+              journeyId: 'beijing-forbidden-city',
+              sessionLevel: 5,
+              questions: <StoryChallengeQuestion>[finalQuestion],
+            ),
+            displayText: (value) => value,
+            onNarrate: (_, __) async {},
+            onFeedbackAudio: (_, __) async {},
+            onCompleted: () async {
+              completed += 1;
+            },
+          ),
+        ),
+      ),
+    );
+
+    for (final blank in finalQuestion.completionBlanks) {
+      final correctIndex = blank.options.indexOf(blank.answer);
+      await tester.tap(
+        find.text('${String.fromCharCode(65 + correctIndex)}  ${blank.answer}'),
+      );
+      await tester.pump();
+    }
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(completed, 1);
+    expect(find.byKey(const ValueKey('challenge-inline-feedback')), findsOneWidget);
+    expect(find.byKey(const ValueKey('challenge-inline-correct-answer')), findsOneWidget);
+    expect(find.text('完成挑战'), findsNothing);
+    expect(find.byKey(const ValueKey('challenge-next')), findsNothing);
+
+    await tester.pump();
+    expect(completed, 1);
+  });
+
   Future<void> pumpSingleQuestion(
     WidgetTester tester,
     StoryChallengeQuestion question, {
