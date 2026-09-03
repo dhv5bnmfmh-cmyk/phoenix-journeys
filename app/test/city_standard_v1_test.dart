@@ -135,7 +135,7 @@ void main() {
     }
     expect(forbiddenCitySceneForStage('vocabulary').sceneId, 'FC01-B');
     expect(forbiddenCitySceneForStage('discovery').sceneId, 'FC01-C');
-    expect(forbiddenCitySceneForStage('challenge').sceneId, 'FC01-C');
+    expect(forbiddenCitySceneForStage('challenge').sceneId, 'FC01-D');
     expect(forbiddenCitySceneForStage('memory').sceneId, 'FC01-D');
     expect(forbiddenCitySceneForStage('completion').sceneId, 'FC01-D');
   });
