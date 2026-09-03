@@ -436,11 +436,11 @@ void main() {
   ) async {
     final question = challenge(5).questions
         .firstWhere((q) => q.mode == StoryChallengeMode.grammarRepair);
-    bool? feedback;
+    final feedback = <bool>[];
     await pumpSingleQuestion(
       tester,
       question,
-      onFeedback: (correct) async => feedback = correct,
+      onFeedback: (correct) async => feedback.add(correct),
     );
 
     final wrongError = (question.errorSegmentIndex! + 1) % 4;
