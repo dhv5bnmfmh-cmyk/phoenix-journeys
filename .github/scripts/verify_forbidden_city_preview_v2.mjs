@@ -530,8 +530,13 @@ async function committedMemoryEditorState(page, { expectPhoto }) {
   const fields = page.getByRole('textbox');
   const count = await fields.count();
   if (count < 2) throw new Error(`Memory committed editor expected 2 textboxes, found ${count}`);
-  const noteValue = clean(await fields.first().inputValue());
-  const visitValue = clean(await fields.nth(count - 1).inputValue());
+
+  const noteField = page.getByRole('textbox', { name: /我的回忆/ }).first();
+  const visitField = page.getByRole('textbox', { name: /现场感受/ }).first();
+  const resolvedNoteField = await noteField.count() ? noteField : fields.first();
+  const resolvedVisitField = await visitField.count() ? visitField : fields.nth(count - 1);
+  const noteValue = clean(await resolvedNoteField.inputValue());
+  const visitValue = clean(await resolvedVisitField.inputValue());
   if (noteValue !== '修改后的紫禁城回忆') {
     throw new Error(`Memory committed note mismatch: ${noteValue}`);
   }
