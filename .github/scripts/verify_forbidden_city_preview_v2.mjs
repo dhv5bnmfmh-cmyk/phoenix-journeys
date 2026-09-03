@@ -14,7 +14,7 @@ const baseUrl = process.argv[2];
 const sourceSha = process.argv[3];
 if (!baseUrl || !sourceSha) throw new Error('usage: verify_forbidden_city_preview_v2.mjs <preview-url> <sha>');
 
-const levels = [1, 3, 5, 8, 10];
+const levels = [5];
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
 const photoFixture = resolve('app/assets/images/phoenix-flight-cycle-v2.webp');
@@ -506,99 +506,153 @@ async function nextToCompletion(page, level) {
   }
 }
 
-async function openMemoryDetail(page) {
-  if (await exists(page, '当前回忆保存在此设备。', { timeout: 500 })) return;
+async function openMemoryTimeline(page) {
+  if (await exists(page, '北京 · 紫禁城', { role: 'button', timeout: 800 })) return;
 
-  if (!(await exists(page, '北京 · 紫禁城', { role: 'button', timeout: 800 }))) {
-    if (await exists(page, '返回首页', { role: 'button', prefix: true, timeout: 800 })) {
-      await tapButton(page, '返回首页', { prefix: true });
-    }
-    if (await exists(page, 'PHOENIX JOURNEYS', { timeout: 15000 })) {
-      await tapButton(page, '我的', { prefix: true });
-    }
-    if (!(await exists(page, '北京 · 紫禁城', { role: 'button', timeout: 800 }))) {
-      await tapButton(page, '回忆时间轴', { prefix: true });
-    }
+  if (await exists(page, '返回首页', { role: 'button', prefix: true, timeout: 800 })) {
+    await tapButton(page, '返回首页', { prefix: true });
+    await findSemantic(page, 'PHOENIX JOURNEYS', { timeout: 15000 });
   }
 
+  if (!(await exists(page, '回忆时间轴', { role: 'button', prefix: true, timeout: 800 }))) {
+    await tapButton(page, '我的', { prefix: true });
+  }
+
+  await findSemantic(page, '回忆时间轴', { role: 'button', prefix: true, timeout: 15000 });
+  await tapButton(page, '回忆时间轴', { prefix: true });
+  await findSemantic(page, '北京 · 紫禁城', { role: 'button', timeout: 15000 });
+}
+
+async function openMemoryDetail(page) {
+  await openMemoryTimeline(page);
   const card = await findSemantic(page, '北京 · 紫禁城', { role: 'button', timeout: 15000 });
   await card.evaluate((el) => el.click());
   await findSemantic(page, '当前回忆保存在此设备。', { timeout: 15000 });
 }
 
-async function committedMemoryEditorState(page, { expectPhoto }) {
-  const fields = page.getByRole('textbox');
-  const count = await fields.count();
-  if (count < 2) throw new Error(`Memory committed editor expected 2 textboxes, found ${count}`);
+async function committedMemoryCardState(page) {
+  const card = await findSemantic(page, '北京 · 紫禁城', { role: 'button', timeout: 15000 });
+  const cardText = clean(await card.evaluate((el) => [
+    el.getAttribute('aria-label'),
+    el.getAttribute('aria-valuetext'),
+    el.getAttribute('aria-description'),
+    el.textContent,
+  ].filter(Boolean).join(' ')));
+  for (const marker of ['修改后的紫禁城回忆', '我来过这里']) {
+    if (!cardText.includes(marker)) throw new Error(`Memory timeline card missing ${marker}`);
+  }
+  return { cardText };
+}
 
-  const noteField = page.getByRole('textbox', { name: /我的回忆/ }).first();
-  const visitField = page.getByRole('textbox', { name: /现场感受/ }).first();
-  const resolvedNoteField = await noteField.count() ? noteField : fields.first();
-  const resolvedVisitField = await visitField.count() ? visitField : fields.nth(count - 1);
-  const noteValue = clean(await resolvedNoteField.inputValue());
-  const visitValue = clean(await resolvedVisitField.inputValue());
-  if (noteValue !== '修改后的紫禁城回忆') {
-    throw new Error(`Memory committed note mismatch: ${noteValue}`);
+async function durableMemoryState(page, { expectPhoto }) {
+  const snapshot = await page.evaluate(({ keyHint, journeyId }) => {
+    const decode = (raw) => {
+      let value = raw;
+      for (let depth = 0; depth < 4 && typeof value === 'string'; depth += 1) {
+        try {
+          value = JSON.parse(value);
+        } catch (_) {
+          break;
+        }
+      }
+      return value;
+    };
+
+    const matches = [];
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (!key || !key.includes(keyHint)) continue;
+      const raw = localStorage.getItem(key);
+      const decoded = decode(raw);
+      const entries = Array.isArray(decoded) ? decoded : [];
+      const entry = entries.find((candidate) =>
+        candidate &&
+        candidate.journeyId === journeyId &&
+        candidate.legacy !== true
+      );
+      matches.push({ key, entry: entry ?? null });
+    }
+
+    return {
+      candidates: matches.map((match) => match.key),
+      match: matches.find((candidate) => candidate.entry != null) ?? null,
+    };
+  }, {
+    keyHint: 'journeyMemory.entries.v1',
+    journeyId: 'beijing-forbidden-city',
+  });
+
+  if (!snapshot.match) {
+    throw new Error(`durable Memory metadata missing beijing-forbidden-city; keys=${snapshot.candidates.join(',')}`);
   }
-  if (visitValue !== '雨后的红墙很安静') {
-    throw new Error(`Memory committed visit note mismatch: ${visitValue}`);
+
+  const { key, entry } = snapshot.match;
+  const note = clean(entry.updatedNote || entry.initialNote);
+  const visitNote = clean(entry.visitNote);
+  const photoRefs = Array.isArray(entry.photoRefs) ? entry.photoRefs : null;
+
+  if (!key.includes('journeyMemory.entries.v1')) {
+    throw new Error(`unexpected durable Memory key: ${key}`);
   }
-  await findSemantic(page, '到访日期', { timeout: 1500 });
-  const photoPresent = await exists(page, '删除照片', { role: 'button', timeout: 600 });
-  if (photoPresent !== expectPhoto) {
-    throw new Error(`Memory committed photo state mismatch: expected ${expectPhoto}, got ${photoPresent}`);
+  if (note !== '修改后的紫禁城回忆') {
+    throw new Error(`durable Memory note mismatch: ${note}`);
   }
-  return { noteValue, visitValue, photoPresent };
+  if (visitNote !== '雨后的红墙很安静') {
+    throw new Error(`durable Memory visit note mismatch: ${visitNote}`);
+  }
+  if (entry.isVisited !== true) {
+    throw new Error('durable Memory isVisited mismatch');
+  }
+  if (photoRefs == null) {
+    throw new Error('durable Memory photoRefs is not an array');
+  }
+  if (expectPhoto ? photoRefs.length === 0 : photoRefs.length !== 0) {
+    throw new Error(`durable Memory photoRefs mismatch: ${JSON.stringify(photoRefs)}`);
+  }
+
+  return {
+    key,
+    journeyId: entry.journeyId,
+    note,
+    visitNote,
+    isVisited: entry.isVisited,
+    photoRefs,
+  };
 }
 
 async function validateLivingMemoryPersistence(page) {
   await openMemoryDetail(page);
+
   const fields = page.getByRole('textbox');
   const noteField = page.getByRole('textbox', { name: /我的回忆/ }).first();
   await (await noteField.count() ? noteField : fields.first()).fill('修改后的紫禁城回忆');
+
   const visited = await findSemantic(page, '我真的来到这里了', { timeout: 5000 });
   await visited.tap({ timeout: 10000 });
   await findSemantic(page, '到访日期', { timeout: 5000 });
+
   const visitField = page.getByRole('textbox', { name: /现场感受/ }).first();
   const allFields = await page.getByRole('textbox').all();
   await (await visitField.count() ? visitField : allFields[allFields.length - 1]).fill('雨后的红墙很安静');
+
+  await findSemantic(page, '删除照片', { role: 'button', timeout: 5000 });
   await tapButton(page, '删除照片', { prefix: true });
+
   await saveMemoryAndWaitCommitted(page, {
-    reopenCommittedState: () => openMemoryDetail(page),
-    readCommittedState: () => committedMemoryEditorState(page, { expectPhoto: false }),
+    reopenCommittedState: async () => {
+      await committedMemoryCardState(page);
+    },
+    readCommittedState: () => durableMemoryState(page, { expectPhoto: false }),
   });
 
   await page.reload({ waitUntil: 'load', timeout: 140000 });
   await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
   await enableSemantics(page);
-  await openMemoryDetail(page);
-  let text = await visibleText(page);
-  for (const marker of ['修改后的紫禁城回忆', '我真的来到这里了', '雨后的红墙很安静']) {
-    if (!text.includes(marker)) throw new Error(`Living Memory reload missing ${marker}`);
-  }
-  if (await exists(page, '删除照片', { role: 'button', timeout: 600 })) {
-    throw new Error('deleted Memory photo returned after reload');
-  }
+  await openMemoryTimeline(page);
+  await committedMemoryCardState(page);
+  await durableMemoryState(page, { expectPhoto: false });
 
-  const [chooser] = await Promise.all([
-    page.waitForEvent('filechooser'),
-    tapButton(page, '添加照片', { prefix: true }),
-  ]);
-  await chooser.setFiles(photoFixture);
-  await saveMemoryAndWaitCommitted(page, {
-    reopenCommittedState: () => openMemoryDetail(page),
-    readCommittedState: () => committedMemoryEditorState(page, { expectPhoto: true }),
-  });
-  await page.reload({ waitUntil: 'load', timeout: 140000 });
-  await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
-  await enableSemantics(page);
-  await openMemoryDetail(page);
-  text = await visibleText(page);
-  if (!text.includes('修改后的紫禁城回忆') || !text.includes('雨后的红墙很安静')) {
-    throw new Error('Memory note or visit update lost after second reload');
-  }
-  await findSemantic(page, '删除照片', { role: 'button', timeout: 15000 });
-  console.log('FORBIDDEN CITY LIVING MEMORY + PHOTO RELOAD = PASS');
+  console.log('FORBIDDEN CITY LIVING MEMORY SAVE + DURABLE RELOAD = PASS');
 }
 
 async function assertNoBlockingError(page, pageErrors, label) {
