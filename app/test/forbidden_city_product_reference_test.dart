@@ -319,6 +319,7 @@ void main() {
             width: 390,
             height: 760,
             child: HskStoryChallenge(
+              key: UniqueKey(),
               challenge: StoryChallengeSet(
                 journeyId: 'beijing-forbidden-city',
                 sessionLevel: 5,
