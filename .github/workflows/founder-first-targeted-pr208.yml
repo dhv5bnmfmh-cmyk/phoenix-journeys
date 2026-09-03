@@ -14,13 +14,14 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  TARGET_SHA: 8880b594205cf70253b4710b62ec5a84a9cd2d18
+  TARGET_SHA: 47182e1ccaedf917617e2d3b06ba84093dace927
+  PREVIEW_WORKER: phoenix-journeys-pr-208
   PREVIEW_URL: https://phoenix-journeys-pr-208.7hn5tyrjgh.workers.dev/
 
 jobs:
   founder-targeted:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - name: Check out exact PR candidate
         uses: actions/checkout@v6
@@ -34,18 +35,62 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$TARGET_SHA"
 
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Lv5 Grammar targeted Flutter tests
+        working-directory: app
+        run: flutter test test/forbidden_city_product_reference_test.dart --name 'Lv5 grammar' --reporter expanded
+
+      - name: Build exact preview web app
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Deploy exact PR preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          npx --yes wrangler@4 deploy             --name "$PREVIEW_WORKER"             --var "PHOENIX_RELEASE:$TARGET_SHA"
+
       - name: Verify exact preview release
         shell: bash
         run: |
           set -euo pipefail
-          response="$(curl --fail --silent --show-error "${PREVIEW_URL}api/health?commit=${TARGET_SHA}")"
-          node -e '
-            const health = JSON.parse(process.argv[1]);
-            const expected = process.argv[2];
-            if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expected) process.exit(1);
-          ' "$response" "$TARGET_SHA"
+          health_url="${PREVIEW_URL}api/health?commit=${TARGET_SHA}"
+          verified=false
+          for attempt in {1..24}; do
+            response="$(curl --fail --silent --show-error "$health_url" || true)"
+            if node -e '
+              let health;
+              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
+              const expected = process.argv[2];
+              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expected) process.exit(1);
+            ' "$response" "$TARGET_SHA"; then
+              verified=true
+              break
+            fi
+            sleep 5
+          done
+          [[ "$verified" == true ]]
 
-      - name: Prepare Challenge-only Lv5 harness
+      - name: Prepare Grammar-only Lv5 browser harness
         shell: bash
         run: |
           set -euo pipefail
@@ -55,13 +100,12 @@ jobs:
           let source = fs.readFileSync(path, 'utf8');
           const start = source.indexOf("    if (level === 5) {\n      const header = await findSemantic(page, '1/6'");
           const end = source.indexOf("\n    await nextToVocabulary(page, level, story);", start);
-          if (start < 0 || end < 0) {
-            throw new Error('Story-only targeted block anchors missing');
+          if (start >= 0 && end >= 0) {
+            source =
+              source.slice(0, start) +
+              "    console.log('Lv5 STORY TTS CHECK = OUT OF CURRENT GRAMMAR SCOPE');\n" +
+              source.slice(end);
           }
-          source =
-            source.slice(0, start) +
-            "    console.log('Lv5 STORY TTS CHECK = OUT OF CURRENT FOUNDER SCOPE');\n" +
-            source.slice(end);
           fs.writeFileSync(path, source);
           NODE
           node --check .github/scripts/verify_forbidden_city_preview_v2.mjs
@@ -74,14 +118,14 @@ jobs:
           npm install --no-save --prefix "$RUNNER_TEMP/founder-targeted-node" playwright
           "$RUNNER_TEMP/founder-targeted-node/node_modules/.bin/playwright" install --with-deps chromium
 
-      - name: Lv5 Challenge iPhone viewport smoke
+      - name: Lv5 Grammar iPhone viewport smoke
         shell: bash
         env:
           PLAYWRIGHT_PATH: ${{ runner.temp }}/founder-targeted-node/node_modules/playwright/index.mjs
         run: |
           set -euo pipefail
           mkdir -p test-results
-          node .github/scripts/verify_forbidden_city_preview_v2.mjs             "$PREVIEW_URL" "$TARGET_SHA"             2>&1 | tee test-results/founder-lv5-preview.log
+          node .github/scripts/verify_forbidden_city_preview_v2.mjs             "$PREVIEW_URL" "$TARGET_SHA" grammar-only             2>&1 | tee test-results/founder-lv5-grammar.log
 
       - name: Publish exact preview status
         env:
@@ -92,8 +136,8 @@ jobs:
             const [url] = process.argv.slice(1);
             process.stdout.write(JSON.stringify({
               state: "success",
-              description: "Founder targeted preview is ready",
-              context: "founder/targeted-preview",
+              description: "Founder Grammar preview is ready",
+              context: "founder/grammar-preview",
               target_url: url
             }));
           ' "${PREVIEW_URL}?unlock=all&prototype=journeys&v=${TARGET_SHA}")"
@@ -103,6 +147,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: founder-targeted-pr208-${{ env.TARGET_SHA }}
+          name: founder-grammar-pr208-${{ env.TARGET_SHA }}
           path: test-results/
           if-no-files-found: warn
