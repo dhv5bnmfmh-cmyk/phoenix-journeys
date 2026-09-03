@@ -134,6 +134,14 @@ class JourneyChallengeEngine {
           'Forbidden City grammar must contain exactly one correct repair.',
         );
       }
+      if (record.optionExplanations.length != record.options.length ||
+          record.optionExplanations.any((explanation) => explanation.trim().isEmpty) ||
+          record.whyWrong.trim().isEmpty ||
+          record.revisionRule.trim().isEmpty) {
+        throw StateError(
+          'Forbidden City grammar explanations must cover every authored option.',
+        );
+      }
       final signatureSource = _Source(
         source.paragraphIndex,
         source.sentenceIndex,
@@ -148,6 +156,11 @@ class JourneyChallengeEngine {
         options: List.unmodifiable(record.options),
         errorSegments: List.unmodifiable(record.errorSegments),
         errorSegmentIndex: record.errorSegmentIndex,
+        grammarFamily: record.family,
+        grammarWhyWrong: record.whyWrong,
+        grammarRevisionRule: record.revisionRule,
+        grammarOptionExplanations:
+            List.unmodifiable(record.optionExplanations),
         narrationText: record.broken,
         signature: _signature(
           journeyId,
@@ -542,6 +555,9 @@ class _ForbiddenCityGrammarBlueprint {
     required this.errorSegments,
     required this.errorSegmentIndex,
     required this.options,
+    required this.whyWrong,
+    required this.revisionRule,
+    required this.optionExplanations,
   });
 
   final String family;
@@ -550,6 +566,9 @@ class _ForbiddenCityGrammarBlueprint {
   final List<String> errorSegments;
   final int errorSegmentIndex;
   final List<String> options;
+  final String whyWrong;
+  final String revisionRule;
+  final List<String> optionExplanations;
 }
 
 const _forbiddenCityGrammarBlueprints = <_ForbiddenCityGrammarBlueprint>[
@@ -570,6 +589,15 @@ const _forbiddenCityGrammarBlueprints = <_ForbiddenCityGrammarBlueprint>[
       '不但紫禁城的主要建筑沿中轴线展开，所以参观者能清楚观察空间层次。',
       '由于紫禁城的主要建筑沿中轴线展开，但是参观者能清楚观察空间层次。',
     ],
+    whyWrong:
+        '“虽然……所以……”关联关系冲突。“虽然”表示转折或让步，通常与“但是 / 但”呼应；本句表达原因与结果，应使用“因为……所以……”。',
+    revisionRule: '关联词必须与句子的逻辑关系一致，并且正确配对。',
+    optionExplanations: <String>[
+      '错。虽然……但是……本身是转折或让步结构，但这里需要表达“原因→结果”的因果关系。',
+      '对。因为……所以……准确表达原因和结果，关联词配对正确。',
+      '错。不但……所以……不是规范配对，句子的逻辑关系也不成立。',
+      '错。由于……但是……把因果与转折关系混在一起，关联词关系冲突。',
+    ],
   ),
   _ForbiddenCityGrammarBlueprint(
     family: '搭配错误',
@@ -587,6 +615,14 @@ const _forbiddenCityGrammarBlueprints = <_ForbiddenCityGrammarBlueprint>[
       '午门形成着紫禁城南侧主要入口的作用。',
       '午门发挥着紫禁城南侧主要入口的作用。',
       '午门发挥着紫禁城南侧主要入口的建筑。',
+    ],
+    whyWrong: '“发挥”通常与“作用 / 功能”等搭配，不能与“景观”搭配。',
+    revisionRule: '动词和宾语必须构成自然、规范的搭配。',
+    optionExplanations: <String>[
+      '错。“发挥……景观”搭配不成立。',
+      '错。“形成作用”不如“发挥作用”自然规范。',
+      '对。“发挥作用”是自然、规范的动宾搭配。',
+      '错。“发挥……建筑”搭配不成立。',
     ],
   ),
   _ForbiddenCityGrammarBlueprint(
@@ -606,6 +642,14 @@ const _forbiddenCityGrammarBlueprints = <_ForbiddenCityGrammarBlueprint>[
       '沈砚和阿宁一起沿着中轴线向前走。',
       '沈砚和阿宁一起共同沿着中轴线向前走。',
     ],
+    whyWrong: '“一起”和“共同”语义重复，同时保留会造成成分赘余。',
+    revisionRule: '表达同一语义的重复成分应删去一个，使句子简洁而完整。',
+    optionExplanations: <String>[
+      '错。“共同”和“一起”仍然重复，只是交换了顺序。',
+      '错。“一起”“共同”“都”叠加，赘余更明显。',
+      '对。保留“一起”，删去语义重复的“共同”，表达简洁完整。',
+      '错。原来的“一起共同”仍同时保留，赘余没有消除。',
+    ],
   ),
   _ForbiddenCityGrammarBlueprint(
     family: '成分缺失',
@@ -623,6 +667,14 @@ const _forbiddenCityGrammarBlueprints = <_ForbiddenCityGrammarBlueprint>[
       '乾清门位于外朝与内廷之间，是连接两者的重要空间节点。',
       '乾清门位于外朝与内廷之间，是连接两处之间的重要空间节点。',
       '乾清门位于外朝与内廷之间，是连接于的重要空间节点。',
+    ],
+    whyWrong: '“连接”后缺少宾语，没有说明连接什么。',
+    revisionRule: '及物动词需要完整的支配对象；这里应补充“两者”。',
+    optionExplanations: <String>[
+      '错。“连接”后仍然没有宾语，没有说明连接的对象。',
+      '对。补出“两者”，明确“连接”的对象是外朝和内廷。',
+      '错。“两处之间”与前面的“外朝与内廷之间”语义重复，结构也显得累赘。',
+      '错。“连接于”结构不完整，仍没有给出“连接”的宾语。',
     ],
   ),
 ];

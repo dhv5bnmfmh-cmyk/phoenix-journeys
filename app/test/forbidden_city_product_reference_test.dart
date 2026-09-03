@@ -107,7 +107,17 @@ void main() {
         expect(q.options, hasLength(4));
         expect(q.options.where((option) => option == q.answer), hasLength(1));
         expect(q.narrationText, q.prompt);
+        expect(q.grammarFamily, q.signature.errorFamily);
+        expect(q.grammarWhyWrong, isNotEmpty);
+        expect(q.grammarRevisionRule, isNotEmpty);
+        expect(q.grammarOptionExplanations, hasLength(4));
+        expect(
+          q.grammarOptionExplanations.every((value) => value.isNotEmpty),
+          isTrue,
+        );
       }
+      expect(grammar.map((q) => q.grammarWhyWrong).toSet(), hasLength(4));
+      expect(grammar.map((q) => q.grammarRevisionRule).toSet(), hasLength(4));
     });
 
     test('Lv$level completion has exactly level blanks in all four questions', () {
@@ -486,6 +496,310 @@ void main() {
       find.byKey(const ValueKey('challenge-inline-correct-answer')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('Lv5 grammar 1 authored explanations teach wrong and correct choices', (
+    tester,
+  ) async {
+    final question = challenge(5).questions
+        .where((q) => q.mode == StoryChallengeMode.grammarRepair)
+        .elementAt(0);
+
+    await pumpSingleQuestion(tester, question, onFeedback: (_) async {});
+
+    final wrongLocation = (question.errorSegmentIndex! + 1) % 4;
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + wrongLocation)}  '
+      '${question.errorSegments[wrongLocation]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('确认位置'));
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('grammar-step1-why-wrong')), findsOneWidget);
+    expect(find.textContaining(question.grammarWhyWrong!), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('grammar-selected-location-explanation')),
+      findsOneWidget,
+    );
+    expect(find.text('继续修改'), findsOneWidget);
+
+    await tester.tap(find.text('继续修改'));
+    await tester.pump();
+    final wrongOption = question.options.indexWhere(
+      (option) => option != question.answer,
+    );
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + wrongOption)}  '
+      '${question.options[wrongOption]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(find.text('修改错误'), findsOneWidget);
+    expect(
+      find.textContaining(question.grammarOptionExplanations[wrongOption]),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('grammar-revision-rule')), findsOneWidget);
+    expect(find.textContaining(question.grammarRevisionRule!), findsOneWidget);
+
+    await pumpSingleQuestion(tester, question, onFeedback: (_) async {});
+
+    final correctLocation = question.errorSegmentIndex!;
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + correctLocation)}  '
+      '${question.errorSegments[correctLocation]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('确认位置'));
+    await tester.pump();
+
+    expect(find.text('位置正确'), findsOneWidget);
+    expect(find.textContaining(question.grammarWhyWrong!), findsOneWidget);
+    await tester.tap(find.text('继续修改'));
+    await tester.pump();
+
+    final correctOption = question.options.indexOf(question.answer);
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + correctOption)}  '
+      '${question.options[correctOption]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(find.text('修改正确'), findsOneWidget);
+    expect(find.textContaining(question.grammarRevisionRule!), findsOneWidget);
+  });
+
+  testWidgets('Lv5 grammar 2 authored explanations teach wrong and correct choices', (
+    tester,
+  ) async {
+    final question = challenge(5).questions
+        .where((q) => q.mode == StoryChallengeMode.grammarRepair)
+        .elementAt(1);
+
+    await pumpSingleQuestion(tester, question, onFeedback: (_) async {});
+
+    final wrongLocation = (question.errorSegmentIndex! + 1) % 4;
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + wrongLocation)}  '
+      '${question.errorSegments[wrongLocation]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('确认位置'));
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('grammar-step1-why-wrong')), findsOneWidget);
+    expect(find.textContaining(question.grammarWhyWrong!), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('grammar-selected-location-explanation')),
+      findsOneWidget,
+    );
+    expect(find.text('继续修改'), findsOneWidget);
+
+    await tester.tap(find.text('继续修改'));
+    await tester.pump();
+    final wrongOption = question.options.indexWhere(
+      (option) => option != question.answer,
+    );
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + wrongOption)}  '
+      '${question.options[wrongOption]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(find.text('修改错误'), findsOneWidget);
+    expect(
+      find.textContaining(question.grammarOptionExplanations[wrongOption]),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('grammar-revision-rule')), findsOneWidget);
+    expect(find.textContaining(question.grammarRevisionRule!), findsOneWidget);
+
+    await pumpSingleQuestion(tester, question, onFeedback: (_) async {});
+
+    final correctLocation = question.errorSegmentIndex!;
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + correctLocation)}  '
+      '${question.errorSegments[correctLocation]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('确认位置'));
+    await tester.pump();
+
+    expect(find.text('位置正确'), findsOneWidget);
+    expect(find.textContaining(question.grammarWhyWrong!), findsOneWidget);
+    await tester.tap(find.text('继续修改'));
+    await tester.pump();
+
+    final correctOption = question.options.indexOf(question.answer);
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + correctOption)}  '
+      '${question.options[correctOption]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(find.text('修改正确'), findsOneWidget);
+    expect(find.textContaining(question.grammarRevisionRule!), findsOneWidget);
+  });
+
+  testWidgets('Lv5 grammar 3 authored explanations teach wrong and correct choices', (
+    tester,
+  ) async {
+    final question = challenge(5).questions
+        .where((q) => q.mode == StoryChallengeMode.grammarRepair)
+        .elementAt(2);
+
+    await pumpSingleQuestion(tester, question, onFeedback: (_) async {});
+
+    final wrongLocation = (question.errorSegmentIndex! + 1) % 4;
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + wrongLocation)}  '
+      '${question.errorSegments[wrongLocation]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('确认位置'));
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('grammar-step1-why-wrong')), findsOneWidget);
+    expect(find.textContaining(question.grammarWhyWrong!), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('grammar-selected-location-explanation')),
+      findsOneWidget,
+    );
+    expect(find.text('继续修改'), findsOneWidget);
+
+    await tester.tap(find.text('继续修改'));
+    await tester.pump();
+    final wrongOption = question.options.indexWhere(
+      (option) => option != question.answer,
+    );
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + wrongOption)}  '
+      '${question.options[wrongOption]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(find.text('修改错误'), findsOneWidget);
+    expect(
+      find.textContaining(question.grammarOptionExplanations[wrongOption]),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('grammar-revision-rule')), findsOneWidget);
+    expect(find.textContaining(question.grammarRevisionRule!), findsOneWidget);
+
+    await pumpSingleQuestion(tester, question, onFeedback: (_) async {});
+
+    final correctLocation = question.errorSegmentIndex!;
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + correctLocation)}  '
+      '${question.errorSegments[correctLocation]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('确认位置'));
+    await tester.pump();
+
+    expect(find.text('位置正确'), findsOneWidget);
+    expect(find.textContaining(question.grammarWhyWrong!), findsOneWidget);
+    await tester.tap(find.text('继续修改'));
+    await tester.pump();
+
+    final correctOption = question.options.indexOf(question.answer);
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + correctOption)}  '
+      '${question.options[correctOption]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(find.text('修改正确'), findsOneWidget);
+    expect(find.textContaining(question.grammarRevisionRule!), findsOneWidget);
+  });
+
+  testWidgets('Lv5 grammar 4 authored explanations teach wrong and correct choices', (
+    tester,
+  ) async {
+    final question = challenge(5).questions
+        .where((q) => q.mode == StoryChallengeMode.grammarRepair)
+        .elementAt(3);
+
+    await pumpSingleQuestion(tester, question, onFeedback: (_) async {});
+
+    final wrongLocation = (question.errorSegmentIndex! + 1) % 4;
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + wrongLocation)}  '
+      '${question.errorSegments[wrongLocation]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('确认位置'));
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('grammar-step1-why-wrong')), findsOneWidget);
+    expect(find.textContaining(question.grammarWhyWrong!), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('grammar-selected-location-explanation')),
+      findsOneWidget,
+    );
+    expect(find.text('继续修改'), findsOneWidget);
+
+    await tester.tap(find.text('继续修改'));
+    await tester.pump();
+    final wrongOption = question.options.indexWhere(
+      (option) => option != question.answer,
+    );
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + wrongOption)}  '
+      '${question.options[wrongOption]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(find.text('修改错误'), findsOneWidget);
+    expect(
+      find.textContaining(question.grammarOptionExplanations[wrongOption]),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('grammar-revision-rule')), findsOneWidget);
+    expect(find.textContaining(question.grammarRevisionRule!), findsOneWidget);
+
+    await pumpSingleQuestion(tester, question, onFeedback: (_) async {});
+
+    final correctLocation = question.errorSegmentIndex!;
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + correctLocation)}  '
+      '${question.errorSegments[correctLocation]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('确认位置'));
+    await tester.pump();
+
+    expect(find.text('位置正确'), findsOneWidget);
+    expect(find.textContaining(question.grammarWhyWrong!), findsOneWidget);
+    await tester.tap(find.text('继续修改'));
+    await tester.pump();
+
+    final correctOption = question.options.indexOf(question.answer);
+    await tester.tap(find.text(
+      '${String.fromCharCode(65 + correctOption)}  '
+      '${question.options[correctOption]}',
+    ));
+    await tester.pump();
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(find.text('修改正确'), findsOneWidget);
+    expect(find.textContaining(question.grammarRevisionRule!), findsOneWidget);
   });
 
   testWidgets('completion marks every wrong blank red and keeps answer inline', (

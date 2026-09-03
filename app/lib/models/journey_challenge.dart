@@ -70,6 +70,10 @@ class StoryChallengeQuestion {
     this.characterTiles = const [],
     this.errorSegments = const [],
     this.errorSegmentIndex,
+    this.grammarFamily,
+    this.grammarWhyWrong,
+    this.grammarRevisionRule,
+    this.grammarOptionExplanations = const [],
     this.completionSegments = const [],
     this.completionBlanks = const [],
   });
@@ -83,6 +87,10 @@ class StoryChallengeQuestion {
   final List<String> characterTiles;
   final List<String> errorSegments;
   final int? errorSegmentIndex;
+  final String? grammarFamily;
+  final String? grammarWhyWrong;
+  final String? grammarRevisionRule;
+  final List<String> grammarOptionExplanations;
   final List<String> completionSegments;
   final List<StoryCompletionBlank> completionBlanks;
   final String narrationText;

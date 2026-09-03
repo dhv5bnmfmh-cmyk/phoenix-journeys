@@ -258,7 +258,10 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
                 fontWeight: FontWeight.w900,
               ),
             ),
-            if (!_correct) ...[
+            if (question.mode == StoryChallengeMode.grammarRepair) ...[
+              const SizedBox(height: 8),
+              _grammarFinalFeedback(),
+            ] else if (!_correct) ...[
               const SizedBox(height: 8),
               _errorFeedback(),
             ],
@@ -268,13 +271,28 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
               key: const ValueKey('challenge-inline-correct-answer'),
               style: const TextStyle(color: Colors.white, height: 1.45),
             ),
+            if (question.mode == StoryChallengeMode.grammarRepair &&
+                question.grammarRevisionRule != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                (selectedOption != null &&
+                        question.options[selectedOption!] == question.answer)
+                    ? '为什么这样改：${question.grammarRevisionRule}'
+                    : '修改原则：${question.grammarRevisionRule}',
+                key: const ValueKey('grammar-revision-rule'),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  height: 1.45,
+                ),
+              ),
+            ],
           ],
         ],
       );
 
   Widget _errorFeedback() => switch (question.mode) {
         StoryChallengeMode.sentenceRebuild => _rebuildErrorFeedback(),
-        StoryChallengeMode.grammarRepair => _grammarErrorFeedback(),
+        StoryChallengeMode.grammarRepair => _grammarFinalFeedback(),
         StoryChallengeMode.storyCompletion => _completionErrorFeedback(),
       };
 
@@ -319,38 +337,67 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
     );
   }
 
-  Widget _grammarErrorFeedback() {
+  Widget _grammarFinalFeedback() {
     final errorIndex = question.errorSegmentIndex ?? 0;
     final actual = question.errorSegments[errorIndex];
-    final selected = selectedError == null
+    final selectedLocation = selectedError == null
         ? '未选择'
         : question.errorSegments[selectedError!];
     final selectedRepair =
         selectedOption == null ? '未选择' : question.options[selectedOption!];
+    final repairCorrect = selectedOption != null &&
+        question.options[selectedOption!] == question.answer;
+    final explanation = selectedOption != null &&
+            selectedOption! < question.grammarOptionExplanations.length
+        ? question.grammarOptionExplanations[selectedOption!]
+        : '';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '错误位置：$actual',
-          key: const ValueKey('grammar-error-location'),
-          style: const TextStyle(
-            color: Colors.redAccent,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        if (selectedError != errorIndex)
+        if (selectedError != errorIndex) ...[
           Text(
-            '你定位的是：$selected',
+            '错误位置：$actual',
+            key: const ValueKey('grammar-error-location'),
+            style: const TextStyle(
+              color: Colors.redAccent,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          Text(
+            '你定位的是：$selectedLocation',
             key: const ValueKey('grammar-wrong-location'),
             style: const TextStyle(color: Colors.redAccent),
           ),
-        if (selectedOption != null &&
-            question.options[selectedOption!] != question.answer)
-          Text(
-            '你选择的修改：$selectedRepair',
-            key: const ValueKey('grammar-wrong-repair'),
-            style: const TextStyle(color: Colors.redAccent),
+          const SizedBox(height: 4),
+        ],
+        Text(
+          repairCorrect ? '修改正确' : '修改错误',
+          key: const ValueKey('grammar-repair-feedback'),
+          style: TextStyle(
+            color: repairCorrect ? Colors.greenAccent : Colors.redAccent,
+            fontWeight: FontWeight.w900,
           ),
+        ),
+        Text(
+          '你选择：$selectedRepair',
+          key: const ValueKey('grammar-selected-repair'),
+          style: TextStyle(
+            color: repairCorrect ? Colors.greenAccent : Colors.redAccent,
+            height: 1.45,
+          ),
+        ),
+        if (explanation.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            repairCorrect ? '选项说明：$explanation' : '为什么不对：$explanation',
+            key: const ValueKey('grammar-option-explanation'),
+            style: const TextStyle(
+              color: Colors.white70,
+              height: 1.45,
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -538,6 +585,41 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
                 fontWeight: FontWeight.w800,
               ),
             ),
+            if (!locationCorrect && selectedError != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                '你选的“${question.errorSegments[selectedError!]}”本身在这个句子里语法成立。',
+                key: const ValueKey('grammar-selected-location-explanation'),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  height: 1.45,
+                ),
+              ),
+            ],
+            if (question.grammarWhyWrong != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                locationCorrect
+                    ? '为什么这里错：${question.grammarWhyWrong}'
+                    : '真正的问题：${question.grammarWhyWrong}',
+                key: const ValueKey('grammar-step1-why-wrong'),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  height: 1.45,
+                ),
+              ),
+            ],
+            if (question.grammarFamily != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                '语法点：${question.grammarFamily}',
+                key: const ValueKey('grammar-family'),
+                style: const TextStyle(
+                  color: PhoenixTheme.gold,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
           ],
         ] else ...[
           const Text(

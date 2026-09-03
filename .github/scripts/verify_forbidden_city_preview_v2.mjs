@@ -12,6 +12,7 @@ import {
 const { chromium } = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
 const baseUrl = process.argv[2];
 const sourceSha = process.argv[3];
+const grammarOnly = process.argv[4] === 'grammar-only';
 if (!baseUrl || !sourceSha) throw new Error('usage: verify_forbidden_city_preview_v2.mjs <preview-url> <sha>');
 
 const levels = [5];
@@ -339,7 +340,12 @@ async function advanceGrammarToStep2(page) {
   }
   if (locationWrong) {
     await findSemantic(page, '正确错误位置：', { timeout: 1000 });
+    await findSemantic(page, '本身在这个句子里语法成立', { timeout: 1000 });
+    await findSemantic(page, '真正的问题：', { timeout: 1000 });
+  } else {
+    await findSemantic(page, '为什么这里错：', { timeout: 1000 });
   }
+  await findSemantic(page, '语法点：', { timeout: 1000 });
   await tapButton(page, '继续修改', { exact: true });
   await findSemantic(page, 'STEP 2 · 怎么改？', { timeout: 1500 });
 }
@@ -379,6 +385,11 @@ async function completeHskChallenge(page, level) {
       }
     }
     await findSemantic(page, after.includes('回答正确') ? '回答正确' : '回答错误', { timeout: 5000 });
+    if (before.includes('语病修复')) {
+      await findSemantic(page, '修改错误', { timeout: 5000 });
+      await findSemantic(page, '为什么不对：', { timeout: 5000 });
+      await findSemantic(page, '修改原则：', { timeout: 5000 });
+    }
     if (after.includes('回答错误')) {
       const explicitMarker = before.includes('句子复原')
         ? '位置错误'
@@ -386,6 +397,10 @@ async function completeHskChallenge(page, level) {
           ? '错误位置'
           : '填错';
       await findSemantic(page, explicitMarker, { timeout: 5000 });
+    }
+    if (grammarOnly && question === 8) {
+      console.log('Lv5 GRAMMAR 4/4 EXPLANATION TARGETED = PASS');
+      return;
     }
     await tapButton(
       page,
@@ -764,6 +779,10 @@ async function runLevel(browser, level) {
     await assertNoBlockingError(page, pageErrors, `Lv${level} Challenge`);
     await completeChallenge(page, level);
     console.log(`Lv${level} CHALLENGE = PASS`);
+    if (grammarOnly) {
+      await assertNoBlockingError(page, pageErrors, `Lv${level} Grammar targeted`);
+      return;
+    }
 
     await nextToMemory(page, level);
     await assertNoBlockingError(page, pageErrors, `Lv${level} Memory`);
