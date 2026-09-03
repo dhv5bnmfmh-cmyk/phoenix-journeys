@@ -49,16 +49,37 @@ test('four canonical scenes bind paired landscape and portrait runtime assets', 
 
 test('Story progression and stage closure resolve canonical scenes', () => {
   const standard = read('app/lib/data/beijing_city_standard.dart');
-  const runtime = read('app/lib/data/forbidden_city_journey_runtime.dart');
   const journey = read('app/lib/screens/journey_screen.dart');
   const background = read('app/lib/widgets/destination_background.dart');
+
+  for (const contract of [
+    ['FC01-A', 'semantic-anchor:entry-through-first-observation', '午门'],
+    ['FC01-B', 'semantic-anchor:axis-judgment-before-east-task', '中轴'],
+    ['FC01-C', 'semantic-anchor:east-task-through-route-conflict', '东侧任务'],
+    ['FC01-D', 'semantic-anchor:shared-evidence-through-closure', '乾清门'],
+  ]) {
+    const [sceneId, binding, meaning] = contract;
+    const scene = standard.match(
+      new RegExp(`sceneId: '${sceneId}'[\\s\\S]*?(?=JourneySceneDefinition\\(|\\n\\];)`),
+    )?.[0];
+    assert.ok(scene, `${sceneId} definition exists`);
+    assert.match(scene, new RegExp(`storyBinding: '${binding}'`));
+    assert.match(scene, new RegExp(meaning));
+  }
+
+  assert.match(standard, /_storySceneIds = \['FC01-A', 'FC01-B', 'FC01-C', 'FC01-D'\]/);
+  assert.match(standard, /_axisObservationAnchorByLevel = <int, String>\{/);
+  assert.match(standard, /_sharedEvidenceAnchorByLevel = <int, String>\{/);
   assert.match(standard, /forbiddenCityStorySceneSpans/);
   assert.match(standard, /JourneyStorySceneSpan/);
-  for (const anchor of [
-    '沈砚看清后', '两条线都能到', '两人重新对照', '两人比较',
-    '沈砚发现', '两人逐项比较后', '证据改变了争论',
-    '他们重新检查后发现', '比较结果没有', '沈砚逐项重画后发现',
-  ]) assert.match(runtime, new RegExp(anchor));
+  assert.match(standard, /final axisStart = story\.indexOf\(axisAnchor\)/);
+  assert.match(standard, /final eastRouteStart = story\.indexOf\('阿宁', axisStart\)/);
+  assert.match(standard, /final sharedNodeStart = story\.indexOf\(sharedEvidenceAnchor, eastRouteStart\)/);
+  assert.match(standard, /forbiddenCitySceneForStoryOffset/);
+  assert.match(standard, /'vocabulary' => forbiddenCitySceneById\('FC01-B'\)/);
+  assert.match(standard, /'discovery' => forbiddenCitySceneById\('FC01-C'\)/);
+  assert.match(standard, /'challenge' \|\| 'memory' \|\| 'completion'/);
+  assert.match(standard, /forbiddenCitySceneById\('FC01-D'\)/);
   assert.match(journey, /forbiddenCitySceneForStoryOffset/);
   assert.match(background, /Duration\(milliseconds: 450\)/);
   assert.match(background, /scene\.portraitAsset/);
