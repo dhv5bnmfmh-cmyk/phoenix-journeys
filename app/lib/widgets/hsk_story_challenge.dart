@@ -12,12 +12,14 @@ class HskStoryChallenge extends StatefulWidget {
     required this.displayText,
     required this.onCompleted,
     required this.onNarrate,
+    this.onFeedbackAudio,
   });
 
   final StoryChallengeSet challenge;
   final String Function(String) displayText;
   final Future<void> Function() onCompleted;
   final Future<void> Function(String questionId, String text) onNarrate;
+  final Future<void> Function(String questionId, bool correct)? onFeedbackAudio;
 
   @override
   State<HskStoryChallenge> createState() => _HskStoryChallengeState();
@@ -67,7 +69,8 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
       return built.join() == question.answer;
     }
     if (question.mode == StoryChallengeMode.grammarRepair) {
-      return selectedOption != null &&
+      return selectedError == question.errorSegmentIndex &&
+          selectedOption != null &&
           question.options[selectedOption!] == question.answer;
     }
     for (var i = 0; i < question.completionBlanks.length; i++) {
@@ -101,7 +104,12 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
       return;
     }
     if (!_canSubmit) return;
+    final correct = _correct;
     setState(() => submitted = true);
+    final feedbackAudio = widget.onFeedbackAudio;
+    if (feedbackAudio != null) {
+      unawaited(feedbackAudio(question.id, correct));
+    }
   }
 
   Future<void> _next() async {
@@ -116,7 +124,11 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
   }
 
   String _narrationText() {
-    if (submitted) return question.answer;
+    if (submitted) {
+      return question.mode == StoryChallengeMode.sentenceRebuild
+          ? question.sourceSentence
+          : question.answer;
+    }
     if (question.mode != StoryChallengeMode.storyCompletion) {
       return question.narrationText;
     }
@@ -226,36 +238,152 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
             const SizedBox(height: 12),
             const Divider(color: Colors.white24),
             Text(
-              _correct ? '回答正确' : '回答错误',
+              _correct ? '回答正确' : '回答错误 · 请查看红色标记',
               key: const ValueKey('challenge-inline-feedback'),
               style: TextStyle(
-                color: _correct ? Colors.greenAccent : PhoenixTheme.gold,
+                color: _correct ? Colors.greenAccent : Colors.redAccent,
                 fontWeight: FontWeight.w900,
               ),
             ),
+            if (!_correct) ...[
+              const SizedBox(height: 8),
+              _errorFeedback(),
+            ],
             const SizedBox(height: 6),
             Text(
               '正确答案：${question.answer}',
+              key: const ValueKey('challenge-inline-correct-answer'),
               style: const TextStyle(color: Colors.white, height: 1.45),
             ),
           ],
         ],
       );
 
+  Widget _errorFeedback() => switch (question.mode) {
+        StoryChallengeMode.sentenceRebuild => _rebuildErrorFeedback(),
+        StoryChallengeMode.grammarRepair => _grammarErrorFeedback(),
+        StoryChallengeMode.storyCompletion => _completionErrorFeedback(),
+      };
+
+  List<String> get _rebuildCorrectChunks {
+    final available = List<String>.of(question.characterTiles);
+    final ordered = <String>[];
+    var cursor = 0;
+    while (available.isNotEmpty && cursor < question.answer.length) {
+      final match = available.indexWhere(
+        (tile) => question.answer.startsWith(tile, cursor),
+      );
+      if (match < 0) return const <String>[];
+      final tile = available.removeAt(match);
+      ordered.add(tile);
+      cursor += tile.length;
+    }
+    return cursor == question.answer.length
+        ? List<String>.unmodifiable(ordered)
+        : const <String>[];
+  }
+
+  Widget _rebuildErrorFeedback() {
+    final expected = _rebuildCorrectChunks;
+    final rows = <Widget>[];
+    for (var i = 0; i < built.length; i++) {
+      final expectedChunk = i < expected.length ? expected[i] : '—';
+      if (built[i] == expectedChunk) continue;
+      rows.add(
+        Text(
+          '第 ${i + 1} 块位置错误：${built[i]} → 正确应为 $expectedChunk',
+          key: ValueKey('challenge-rebuild-error-$i'),
+          style: const TextStyle(
+            color: Colors.redAccent,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: rows,
+    );
+  }
+
+  Widget _grammarErrorFeedback() {
+    final errorIndex = question.errorSegmentIndex ?? 0;
+    final actual = question.errorSegments[errorIndex];
+    final selected = selectedError == null
+        ? '未选择'
+        : question.errorSegments[selectedError!];
+    final selectedRepair =
+        selectedOption == null ? '未选择' : question.options[selectedOption!];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '错误位置：$actual',
+          key: const ValueKey('grammar-error-location'),
+          style: const TextStyle(
+            color: Colors.redAccent,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        if (selectedError != errorIndex)
+          Text(
+            '你定位的是：$selected',
+            key: const ValueKey('grammar-wrong-location'),
+            style: const TextStyle(color: Colors.redAccent),
+          ),
+        if (selectedOption != null &&
+            question.options[selectedOption!] != question.answer)
+          Text(
+            '你选择的修改：$selectedRepair',
+            key: const ValueKey('grammar-wrong-repair'),
+            style: const TextStyle(color: Colors.redAccent),
+          ),
+      ],
+    );
+  }
+
+  Widget _completionErrorFeedback() {
+    final rows = <Widget>[];
+    for (var i = 0; i < question.completionBlanks.length; i++) {
+      final blank = question.completionBlanks[i];
+      final selectedIndex = completionSelections[i];
+      if (selectedIndex == null) continue;
+      final selected = blank.options[selectedIndex];
+      if (selected == blank.answer) continue;
+      rows.add(
+        Text(
+          '空位 ${i + 1} 填错：$selected → 正确应填 ${blank.answer}',
+          key: ValueKey('completion-error-$i'),
+          style: const TextStyle(
+            color: Colors.redAccent,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: rows,
+    );
+  }
+
   Widget _rebuild() => Column(
         key: const ValueKey('challenge-rebuild-body'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '用语义块复原当前 Story 短句',
-            style: TextStyle(color: Colors.white70),
+            '复原一条与北京 · 紫禁城相关的知识句',
+            style: TextStyle(
+              color: Colors.white70,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 4,
             runSpacing: 4,
             children: [
-              for (final chunk in built) _tile(chunk, null),
+              for (var i = 0; i < built.length; i++) _builtTile(built[i], i),
             ],
           ),
           const Divider(color: Colors.white24),
@@ -264,13 +392,13 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
             runSpacing: 4,
             children: [
               for (var i = 0; i < remaining.length; i++)
-                _tile(remaining[i], i),
+                _remainingTile(remaining[i], i),
             ],
           ),
           Row(
             children: [
               TextButton(
-                onPressed: built.isEmpty
+                onPressed: built.isEmpty || submitted
                     ? null
                     : () => setState(() {
                           remaining.add(built.removeLast());
@@ -278,7 +406,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
                 child: const Text('撤销'),
               ),
               TextButton(
-                onPressed: () => setState(_resetQuestion),
+                onPressed: submitted ? null : () => setState(_resetQuestion),
                 child: const Text('重置'),
               ),
             ],
@@ -286,9 +414,47 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
         ],
       );
 
-  Widget _tile(String chunk, int? remainingIndex) => ActionChip(
+  Widget _builtTile(String chunk, int index) {
+    final expected = _rebuildCorrectChunks;
+    final correctPosition =
+        index < expected.length && expected[index] == chunk;
+    final wrong = submitted && !correctPosition;
+    final correct = submitted && correctPosition;
+    return Chip(
+      key: ValueKey(
+        wrong
+            ? 'challenge-wrong-rebuild-$index'
+            : 'challenge-rebuild-built-$index',
+      ),
+      label: Text(
+        chunk,
+        style: TextStyle(
+          color: wrong
+              ? Colors.redAccent
+              : correct
+                  ? Colors.greenAccent
+                  : Colors.white,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+      backgroundColor: wrong
+          ? Colors.red.withValues(alpha: .18)
+          : correct
+              ? Colors.green.withValues(alpha: .16)
+              : Colors.white.withValues(alpha: .08),
+      side: BorderSide(
+        color: wrong
+            ? Colors.redAccent
+            : correct
+                ? Colors.greenAccent
+                : Colors.white24,
+      ),
+    );
+  }
+
+  Widget _remainingTile(String chunk, int remainingIndex) => ActionChip(
         label: Text(chunk),
-        onPressed: remainingIndex == null || submitted
+        onPressed: submitted
             ? null
             : () => setState(() {
                   built.add(remaining.removeAt(remainingIndex));
@@ -307,15 +473,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            question.prompt,
-            key: const ValueKey('grammar-broken-sentence'),
-            style: const TextStyle(
-              color: Colors.white,
-              height: 1.45,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          _grammarSentence(),
           const SizedBox(height: 12),
           if (grammarStep == 0) ...[
             const Text(
@@ -341,6 +499,10 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
             for (var i = 0; i < question.options.length; i++)
               _choice(
                 selected: selectedOption == i,
+                correct: submitted && question.options[i] == question.answer,
+                wrong: submitted &&
+                    selectedOption == i &&
+                    question.options[i] != question.answer,
                 text:
                     '${String.fromCharCode(65 + i)}  ${question.options[i]}',
                 onTap: submitted
@@ -350,6 +512,43 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
           ],
         ],
       );
+
+  Widget _grammarSentence() {
+    final segments = question.errorSegments;
+    if (segments.isEmpty || segments.join() != question.prompt) {
+      return Text(
+        question.prompt,
+        key: const ValueKey('grammar-broken-sentence'),
+        style: const TextStyle(
+          color: Colors.white,
+          height: 1.45,
+          fontWeight: FontWeight.w700,
+        ),
+      );
+    }
+    return RichText(
+      key: const ValueKey('grammar-broken-sentence'),
+      text: TextSpan(
+        style: const TextStyle(
+          color: Colors.white,
+          height: 1.45,
+          fontWeight: FontWeight.w700,
+        ),
+        children: [
+          for (var i = 0; i < segments.length; i++)
+            TextSpan(
+              text: segments[i],
+              style: submitted && i == question.errorSegmentIndex
+                  ? const TextStyle(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.w900,
+                    )
+                  : null,
+            ),
+        ],
+      ),
+    );
+  }
 
   Widget _completion() {
     final active = completionSelections.indexWhere((value) => value == null);
@@ -379,6 +578,10 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
         for (var i = 0; i < blank.options.length; i++)
           _choice(
             selected: completionSelections[activeIndex] == i,
+            correct: submitted && blank.options[i] == blank.answer,
+            wrong: submitted &&
+                completionSelections[activeIndex] == i &&
+                blank.options[i] != blank.answer,
             text: '${String.fromCharCode(65 + i)}  ${blank.options[i]}',
             onTap: submitted
                 ? null
@@ -395,13 +598,23 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
     for (var i = 0; i < question.completionBlanks.length; i++) {
       spans.add(TextSpan(text: question.completionSegments[i]));
       final selection = completionSelections[i];
+      final selectedValue = selection == null
+          ? null
+          : question.completionBlanks[i].options[selection];
+      final correct = selectedValue != null &&
+          selectedValue == question.completionBlanks[i].answer;
+      final wrong = submitted && selectedValue != null && !correct;
       spans.add(
         TextSpan(
           text: selection == null
               ? '〔${i + 1}〕____'
-              : '〔${i + 1}〕${question.completionBlanks[i].options[selection]}',
-          style: const TextStyle(
-            color: PhoenixTheme.gold,
+              : '〔${i + 1}〕$selectedValue',
+          style: TextStyle(
+            color: wrong
+                ? Colors.redAccent
+                : submitted && correct
+                    ? Colors.greenAccent
+                    : PhoenixTheme.gold,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -421,6 +634,8 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
     required bool selected,
     required String text,
     required VoidCallback? onTap,
+    bool correct = false,
+    bool wrong = false,
   }) =>
       Padding(
         padding: const EdgeInsets.only(bottom: 6),
@@ -430,16 +645,36 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
           child: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: selected
-                  ? PhoenixTheme.gold.withValues(alpha: .22)
-                  : Colors.white.withValues(alpha: .06),
+              color: wrong
+                  ? Colors.red.withValues(alpha: .18)
+                  : correct
+                      ? Colors.green.withValues(alpha: .16)
+                      : selected
+                          ? PhoenixTheme.gold.withValues(alpha: .22)
+                          : Colors.white.withValues(alpha: .06),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: selected ? PhoenixTheme.gold : Colors.white24,
+                color: wrong
+                    ? Colors.redAccent
+                    : correct
+                        ? Colors.greenAccent
+                        : selected
+                            ? PhoenixTheme.gold
+                            : Colors.white24,
               ),
             ),
-            child: Text(text, style: const TextStyle(color: Colors.white)),
+            child: Text(
+              text,
+              style: TextStyle(
+                color: wrong
+                    ? Colors.redAccent
+                    : correct
+                        ? Colors.greenAccent
+                        : Colors.white,
+              ),
+            ),
           ),
         ),
       );
+
 }

@@ -1247,77 +1247,77 @@ class _JourneyScreenState extends State<JourneyScreen>
       _ => _completePage(),
     };
 
-    Widget background() => DestinationBackground(
-          journeyId: _experience.id,
-          pageType: _backgroundPageType,
-          sceneId: _cityStandardSceneId,
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            resizeToAvoidBottomInset: true,
-            appBar: AppBar(
-              toolbarHeight: 44,
-              title: Text(
-                _appState.displayText(_experience.appBarTitle),
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+    final shell = Scaffold(
+      backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+        toolbarHeight: 44,
+        title: Text(
+          _appState.displayText(_experience.appBarTitle),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Semantics(
+              label:
+                  '当前旅程 Phoenix 中文等级 ${_sessionLanguageProfile.phoenixLevel}',
+              readOnly: true,
+              child: Container(
+                key: const ValueKey('journey-session-level-badge'),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFDF4DF).withValues(alpha: .96),
+                  borderRadius: BorderRadius.circular(99),
+                  border: Border.all(
+                    color: PhoenixTheme.gold.withValues(alpha: .72),
+                    width: .8,
+                  ),
+                ),
+                child: Text(
+                  'Lv.${_sessionLanguageProfile.phoenixLevel}',
+                  style: const TextStyle(
+                    color: PhoenixTheme.red,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: Semantics(
-                    label:
-                        '当前旅程 Phoenix 中文等级 ${_sessionLanguageProfile.phoenixLevel}',
-                    readOnly: true,
-                    child: Container(
-                      key: const ValueKey('journey-session-level-badge'),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 9, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFDF4DF).withValues(alpha: .96),
-                        borderRadius: BorderRadius.circular(99),
-                        border: Border.all(
-                          color: PhoenixTheme.gold.withValues(alpha: .72),
-                          width: .8,
-                        ),
-                      ),
-                      child: Text(
-                        'Lv.${_sessionLanguageProfile.phoenixLevel}',
-                        style: const TextStyle(
-                          color: PhoenixTheme.red,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Consumer<AppState>(
-                  builder: (_, state, __) => TextButton(
-                    onPressed: state.toggleScript,
-                    style: TextButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    child: Text(
-                      state.scriptMode == ScriptMode.simplified
-                          ? '简 / 繁'
-                          : '繁 / 简',
-                      style: const TextStyle(fontSize: 10.5),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            body: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 280),
-              child: page,
             ),
           ),
-        );
+          Consumer<AppState>(
+            builder: (_, state, __) => TextButton(
+              onPressed: state.toggleScript,
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              child: Text(
+                state.scriptMode == ScriptMode.simplified
+                    ? '简 / 繁'
+                    : '繁 / 简',
+                style: const TextStyle(fontSize: 10.5),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 280),
+        child: page,
+      ),
+    );
 
     return AnimatedBuilder(
       animation: _narration,
-      builder: (_, __) => background(),
+      child: shell,
+      builder: (_, stableShell) => DestinationBackground(
+        journeyId: _experience.id,
+        pageType: _backgroundPageType,
+        sceneId: _cityStandardSceneId,
+        child: stableShell!,
+      ),
     );
   }
 
@@ -2039,6 +2039,16 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
+  Future<void> _playChallengeFeedbackAudio(
+    String _,
+    bool correct,
+  ) async {
+    await _narration.speakTemporaryText(
+      correct ? '回答正确' : '回答错误，请查看红色标记',
+      languageCode: journeyStageNarrationLanguageCode(_appState.isTraditional),
+    );
+  }
+
   Widget _challengePage() {
     final state = context.watch<AppState>();
     return _page(
@@ -2058,6 +2068,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               challenge: _preparedChallenge,
               displayText: state.displayText,
               onNarrate: _speakChallengeNarration,
+              onFeedbackAudio: _playChallengeFeedbackAudio,
               onCompleted: () async {
                 if (!mounted || _challengeResolved) return;
                 setState(() => _challengeResolved = true);

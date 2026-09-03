@@ -39,18 +39,51 @@ class JourneyChallengeEngine {
     _Source source,
     int index,
   ) {
+    if (journeyId == _forbiddenCityJourneyId) {
+      final record = _forbiddenCityRebuildBlueprint(level, index);
+      if (record.chunks.join() != record.sentence) {
+        throw StateError(
+          'Forbidden City rebuild chunks must exactly reconstruct the knowledge sentence.',
+        );
+      }
+      final safeTiles = _scrambleRebuildTiles(record.chunks, index);
+      final signatureSource = _Source(
+        source.paragraphIndex,
+        source.sentenceIndex,
+        '${record.sentence}。',
+      );
+      return StoryChallengeQuestion(
+        id: 'rebuild-${index + 1}',
+        mode: StoryChallengeMode.sentenceRebuild,
+        sourceSentence: '${record.sentence}。',
+        prompt: '复原一条与北京 · 紫禁城相关的知识句',
+        answer: record.sentence,
+        options: const [],
+        characterTiles: List.unmodifiable(safeTiles),
+        narrationText: '${record.sentence}。',
+        signature: _signature(
+          journeyId,
+          level,
+          signatureSource,
+          StoryChallengeMode.sentenceRebuild,
+          operation: '知识句语义块顺序恢复',
+          answerShape:
+              '${_hanCount(record.sentence)}字 / ${record.chunks.length}块',
+          distractor: [
+            '知识块反序',
+            '专名锚点轮换',
+            '空间关系块交错',
+            '文化知识块轮换',
+          ][index],
+        ),
+      );
+    }
+
     final compact = _hanOnly(source.sentence);
     final chunks = _semanticChunks(compact, index);
     final selected = _rebuildChunkWindow(chunks, index);
     final answer = selected.join();
-    final safeTiles = List<String>.of(selected.reversed);
-    if (safeTiles.length > 2) {
-      final shift = (index + 1) % safeTiles.length;
-      final rotated = [...safeTiles.skip(shift), ...safeTiles.take(shift)];
-      safeTiles
-        ..clear()
-        ..addAll(rotated);
-    }
+    final safeTiles = _scrambleRebuildTiles(selected, index);
     return StoryChallengeQuestion(
       id: 'rebuild-${index + 1}',
       mode: StoryChallengeMode.sentenceRebuild,
@@ -65,9 +98,19 @@ class JourneyChallengeEngine {
         level,
         source,
         StoryChallengeMode.sentenceRebuild,
-        operation: ['语义块顺序恢复', '专名锚点复原', '短语结构重建', '语义块逻辑复原'][index],
+        operation: [
+          '语义块顺序恢复',
+          '专名锚点复原',
+          '短语结构重建',
+          '语义块逻辑复原',
+        ][index],
         answerShape: '${_hanCount(answer)}字 / ${selected.length}块',
-        distractor: ['词块反序', '锚点保留后轮换', '短语块交错', '结构块轮换'][index],
+        distractor: [
+          '词块反序',
+          '锚点保留后轮换',
+          '短语块交错',
+          '结构块轮换',
+        ][index],
       ),
     );
   }
@@ -78,6 +121,52 @@ class JourneyChallengeEngine {
     _Source source,
     int index,
   ) {
+    if (journeyId == _forbiddenCityJourneyId) {
+      final record = _forbiddenCityGrammarBlueprints[index];
+      if (record.errorSegments.join() != record.broken) {
+        throw StateError(
+          'Forbidden City grammar segments must reconstruct the broken sentence.',
+        );
+      }
+      if (record.options.where((option) => option == record.correct).length !=
+          1) {
+        throw StateError(
+          'Forbidden City grammar must contain exactly one correct repair.',
+        );
+      }
+      final signatureSource = _Source(
+        source.paragraphIndex,
+        source.sentenceIndex,
+        record.broken,
+      );
+      return StoryChallengeQuestion(
+        id: 'grammar-${index + 1}',
+        mode: StoryChallengeMode.grammarRepair,
+        sourceSentence: record.correct,
+        prompt: record.broken,
+        answer: record.correct,
+        options: List.unmodifiable(record.options),
+        errorSegments: List.unmodifiable(record.errorSegments),
+        errorSegmentIndex: record.errorSegmentIndex,
+        narrationText: record.broken,
+        signature: _signature(
+          journeyId,
+          level,
+          signatureSource,
+          StoryChallengeMode.grammarRepair,
+          operation: '完整病句→定位错误→选择完整修正',
+          errorFamily: record.family,
+          answerShape: '完整修正句',
+          distractor: [
+            '关联词配对误项',
+            '搭配近项',
+            '赘余保留项',
+            '成分仍缺失项',
+          ][index],
+        ),
+      );
+    }
+
     const families = ['关联词', '成分赘余', '搭配', '成分缺失'];
     final family = families[index];
     final correct = source.sentence.trim();
@@ -103,7 +192,12 @@ class JourneyChallengeEngine {
         operation: '完整病句→定位错误→选择修正',
         errorFamily: family,
         answerShape: '完整自然句',
-        distractor: ['关联词逻辑近项', '赘余成分保留项', '搭配近义误项', '缺失成分未补项'][index],
+        distractor: [
+          '关联词逻辑近项',
+          '赘余成分保留项',
+          '搭配近义误项',
+          '缺失成分未补项',
+        ][index],
       ),
     );
   }
@@ -229,7 +323,7 @@ class ChallengeAntiTemplateAuditor {
     final rebuild = set.questions
         .where((q) => q.mode == StoryChallengeMode.sentenceRebuild)
         .toList(growable: false);
-    if (rebuild.any((q) => _hanCount(q.answer) > 10)) {
+    if (rebuild.any((q) => _hanCount(q.answer) > 30)) {
       failures.add('rebuild-length');
     }
     if (rebuild.any((q) => q.characterTiles.length < 2)) {
@@ -346,6 +440,192 @@ class _TextSpan {
   final int start;
   final int end;
 }
+
+// City Standard / Challenge Standard:
+// - auto-refresh must not create visual flashing;
+// - Challenge content must teach current Journey/Place knowledge, not mechanical fragments;
+// - every answer exposes correct/wrong state, audio, error location and correct answer;
+// - Grammar requires four genuinely different error families.
+const _forbiddenCityJourneyId = 'beijing-forbidden-city';
+
+class _RebuildLearningBlueprint {
+  const _RebuildLearningBlueprint(this.sentence, this.chunks);
+  final String sentence;
+  final List<String> chunks;
+}
+
+const _forbiddenCityRebuildBands = <List<_RebuildLearningBlueprint>>[
+  <_RebuildLearningBlueprint>[
+    _RebuildLearningBlueprint(
+      '午门位于紫禁城南侧也是重要入口',
+      <String>['午门', '位于紫禁城南侧', '也是重要入口'],
+    ),
+    _RebuildLearningBlueprint(
+      '中轴线串联紫禁城的主要宫殿',
+      <String>['中轴线', '串联', '紫禁城', '的主要宫殿'],
+    ),
+    _RebuildLearningBlueprint(
+      '乾清门位于外朝与内廷之间',
+      <String>['乾清门', '位于', '外朝', '与内廷之间'],
+    ),
+    _RebuildLearningBlueprint(
+      '故宫博物院保存丰富的宫廷文物',
+      <String>['故宫博物院', '保存', '丰富的', '宫廷文物'],
+    ),
+  ],
+  <_RebuildLearningBlueprint>[
+    _RebuildLearningBlueprint(
+      '紫禁城的中轴线组织主要宫殿的空间秩序',
+      <String>['紫禁城', '的中轴线', '组织', '主要宫殿', '的空间秩序'],
+    ),
+    _RebuildLearningBlueprint(
+      '午门既是重要入口也是礼仪空间的一部分',
+      <String>['午门', '既是重要入口', '也是', '礼仪空间', '的一部分'],
+    ),
+    _RebuildLearningBlueprint(
+      '乾清门位于外朝与内廷之间的转换位置',
+      <String>['乾清门', '位于', '外朝', '与内廷之间', '的转换位置'],
+    ),
+    _RebuildLearningBlueprint(
+      '故宫博物院让古建筑与馆藏文物共同讲述历史',
+      <String>['故宫博物院', '让古建筑', '与馆藏文物', '共同讲述', '历史'],
+    ),
+  ],
+  <_RebuildLearningBlueprint>[
+    _RebuildLearningBlueprint(
+      '紫禁城以中轴线统摄主要宫殿形成严整的空间秩序',
+      <String>['紫禁城', '以中轴线', '统摄主要宫殿', '形成', '严整的空间秩序'],
+    ),
+    _RebuildLearningBlueprint(
+      '午门不仅承担出入功能也参与塑造礼仪性的空间序列',
+      <String>['午门', '不仅承担出入功能', '也参与塑造', '礼仪性的', '空间序列'],
+    ),
+    _RebuildLearningBlueprint(
+      '乾清门处在外朝与内廷转换的关键位置',
+      <String>['乾清门', '处在', '外朝与内廷转换', '的关键位置'],
+    ),
+    _RebuildLearningBlueprint(
+      '故宫博物院把宫殿建筑与馆藏文物置于同一历史语境中',
+      <String>['故宫博物院', '把宫殿建筑', '与馆藏文物', '置于', '同一历史语境中'],
+    ),
+  ],
+];
+
+_RebuildLearningBlueprint _forbiddenCityRebuildBlueprint(
+  int level,
+  int index,
+) {
+  final band = level <= 3 ? 0 : (level <= 7 ? 1 : 2);
+  return _forbiddenCityRebuildBands[band][index];
+}
+
+List<String> _scrambleRebuildTiles(List<String> ordered, int index) {
+  final safeTiles = List<String>.of(ordered.reversed);
+  if (safeTiles.length > 2) {
+    final shift = (index + 1) % safeTiles.length;
+    final rotated = <String>[
+      ...safeTiles.skip(shift),
+      ...safeTiles.take(shift),
+    ];
+    safeTiles
+      ..clear()
+      ..addAll(rotated);
+  }
+  return safeTiles;
+}
+
+class _ForbiddenCityGrammarBlueprint {
+  const _ForbiddenCityGrammarBlueprint({
+    required this.family,
+    required this.broken,
+    required this.correct,
+    required this.errorSegments,
+    required this.errorSegmentIndex,
+    required this.options,
+  });
+
+  final String family;
+  final String broken;
+  final String correct;
+  final List<String> errorSegments;
+  final int errorSegmentIndex;
+  final List<String> options;
+}
+
+const _forbiddenCityGrammarBlueprints = <_ForbiddenCityGrammarBlueprint>[
+  _ForbiddenCityGrammarBlueprint(
+    family: '关联词错误',
+    broken: '虽然紫禁城的主要建筑沿中轴线展开，所以参观者能清楚观察空间层次。',
+    correct: '因为紫禁城的主要建筑沿中轴线展开，所以参观者能清楚观察空间层次。',
+    errorSegments: <String>[
+      '虽然',
+      '紫禁城的主要建筑沿中轴线展开',
+      '所以参观者能清楚观察',
+      '空间层次。',
+    ],
+    errorSegmentIndex: 0,
+    options: <String>[
+      '虽然紫禁城的主要建筑沿中轴线展开，但是参观者能清楚观察空间层次。',
+      '因为紫禁城的主要建筑沿中轴线展开，所以参观者能清楚观察空间层次。',
+      '不但紫禁城的主要建筑沿中轴线展开，所以参观者能清楚观察空间层次。',
+      '由于紫禁城的主要建筑沿中轴线展开，但是参观者能清楚观察空间层次。',
+    ],
+  ),
+  _ForbiddenCityGrammarBlueprint(
+    family: '搭配错误',
+    broken: '午门发挥着紫禁城南侧主要入口的景观。',
+    correct: '午门发挥着紫禁城南侧主要入口的作用。',
+    errorSegments: <String>[
+      '午门',
+      '发挥着',
+      '紫禁城南侧主要入口',
+      '的景观。',
+    ],
+    errorSegmentIndex: 3,
+    options: <String>[
+      '午门发挥着紫禁城南侧主要入口的景观。',
+      '午门形成着紫禁城南侧主要入口的作用。',
+      '午门发挥着紫禁城南侧主要入口的作用。',
+      '午门发挥着紫禁城南侧主要入口的建筑。',
+    ],
+  ),
+  _ForbiddenCityGrammarBlueprint(
+    family: '成分赘余',
+    broken: '沈砚和阿宁一起共同沿着中轴线向前走。',
+    correct: '沈砚和阿宁一起沿着中轴线向前走。',
+    errorSegments: <String>[
+      '沈砚和阿宁',
+      '一起共同',
+      '沿着中轴线',
+      '向前走。',
+    ],
+    errorSegmentIndex: 1,
+    options: <String>[
+      '沈砚和阿宁共同一起沿着中轴线向前走。',
+      '沈砚和阿宁一起共同都沿着中轴线向前走。',
+      '沈砚和阿宁一起沿着中轴线向前走。',
+      '沈砚和阿宁一起共同沿着中轴线向前走。',
+    ],
+  ),
+  _ForbiddenCityGrammarBlueprint(
+    family: '成分缺失',
+    broken: '乾清门位于外朝与内廷之间，是连接的重要空间节点。',
+    correct: '乾清门位于外朝与内廷之间，是连接两者的重要空间节点。',
+    errorSegments: <String>[
+      '乾清门位于',
+      '外朝与内廷之间',
+      '是连接的重要',
+      '空间节点。',
+    ],
+    errorSegmentIndex: 2,
+    options: <String>[
+      '乾清门位于外朝与内廷之间，是连接的重要空间节点。',
+      '乾清门位于外朝与内廷之间，是连接两者的重要空间节点。',
+      '乾清门位于外朝与内廷之间，是连接两处之间的重要空间节点。',
+      '乾清门位于外朝与内廷之间，是连接于的重要空间节点。',
+    ],
+  ),
+];
 
 const _protectedChallengeTerms = <String>[
   '紫禁城',

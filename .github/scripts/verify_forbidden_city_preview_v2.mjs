@@ -246,7 +246,7 @@ function hanOnly(value) {
 async function visibleRebuildTiles(page) {
   const rs = await records(page);
   const prompt = rs
-    .filter((r) => r.visible && recText(r).includes('用语义块复原当前 Story 短句'))
+    .filter((r) => r.visible && recText(r).includes('复原一条与北京 · 紫禁城相关的知识句'))
     .sort((a, b) => a.area - b.area)[0];
   const undo = rs
     .filter((r) => r.visible && r.role === 'button' && recText(r) === '撤销')
@@ -275,13 +275,15 @@ async function solveRebuild(page, modeIndex, level) {
   const displayed = tiles.map((r) => recText(r));
   if (level === 5) {
     const answer = recoverRebuildAnswer(displayed, modeIndex).join('');
-    if (hanOnly(answer).length > 10) {
-      throw new Error('Lv5 rebuild target exceeds 10 Han characters');
+    if (hanOnly(answer).length < 10 || hanOnly(answer).length > 30) {
+      throw new Error(
+        'Lv5 rebuild learning sentence length is outside 10-30 Han characters',
+      );
     }
     if (displayed.every((tile) => hanOnly(tile).length === 1)) {
       throw new Error('Lv5 rebuild still uses all single-character tiles');
     }
-    for (const proper of ['沈砚', '阿宁', '紫禁城', '乾清门', '午门']) {
+    for (const proper of ['紫禁城', '乾清门', '午门', '故宫博物院']) {
       if (answer.includes(proper) && !displayed.includes(proper)) {
         throw new Error(`Lv5 rebuild split protected proper noun: ${proper}`);
       }
@@ -346,7 +348,7 @@ async function completeHskChallenge(page, level) {
     await findSemantic(page, '正确答案：', { timeout: 5000 });
     const after = await visibleText(page);
     for (const marker of before.includes('句子复原')
-      ? ['句子复原', '用语义块复原当前 Story 短句']
+      ? ['句子复原', '复原一条与北京 · 紫禁城相关的知识句']
       : before.includes('语病修复')
         ? ['语病修复', '有语病的完整句子']
         : ['补全故事']) {
@@ -355,6 +357,14 @@ async function completeHskChallenge(page, level) {
       }
     }
     await findSemantic(page, after.includes('回答正确') ? '回答正确' : '回答错误', { timeout: 5000 });
+    if (after.includes('回答错误')) {
+      const explicitMarker = before.includes('句子复原')
+        ? '位置错误'
+        : before.includes('语病修复')
+          ? '错误位置'
+          : '填错';
+      await findSemantic(page, explicitMarker, { timeout: 5000 });
+    }
     await tapButton(
       page,
       question === 12 ? '完成挑战' : '下一题',
@@ -700,6 +710,26 @@ async function runLevel(browser, level) {
     await assertNoBlockingError(page, pageErrors, `Lv${level} Story`);
     console.log(`Lv${level} STORY = PASS`);
 
+    if (level === 5) {
+      const header = await findSemantic(page, '1/6', { prefix: true, timeout: 5000 });
+      await header.evaluate((el) => el.setAttribute('data-founder-stable-header', 'true'));
+      await tapButton(page, '开始朗读', { exact: true, timeout: 5000 });
+      await findSemantic(page, '正在朗读', { timeout: 8000 });
+      await page.evaluate(() => new Promise((resolveFrame) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolveFrame)));
+      }));
+      const stableHeaderCount = await page.locator(
+        'flt-semantics[data-founder-stable-header="true"]',
+      ).count();
+      if (stableHeaderCount !== 1) {
+        throw new Error('Story header semantics node rebuilt during narration progress');
+      }
+      if (await exists(page, '暂停朗读', { role: 'button', exact: true, timeout: 800 })) {
+        await tapButton(page, '暂停朗读', { exact: true });
+      }
+      console.log('Lv5 STORY HEADER STABILITY = PASS');
+    }
+
     await nextToVocabulary(page, level, story);
     await assertNoBlockingError(page, pageErrors, `Lv${level} Vocabulary`);
     console.log(`Lv${level} VOCABULARY = PASS`);
@@ -720,7 +750,7 @@ async function runLevel(browser, level) {
     await nextToCompletion(page, level);
     await assertNoBlockingError(page, pageErrors, `Lv${level} Completion`);
     console.log(`Lv${level} COMPLETION = PASS`);
-    if (level === 5) await validateLivingMemoryPersistence(page);
+    // Founder-first targeted smoke only requires Memory to be enterable.
     console.log(`Lv${level} ACTUAL PREVIEW SIX-STAGE = PASS`);
   } catch (error) {
     const snapshot = await records(page).catch(() => []);

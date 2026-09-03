@@ -67,9 +67,12 @@ void main() {
           .toList();
       expect(rebuild, hasLength(4));
       for (final q in rebuild) {
-        expect(hanCount(q.answer), lessThanOrEqualTo(10));
-        expect(q.sourceSentence.replaceAll(RegExp(r'[^\u3400-\u9fff]'), ''),
-            contains(q.answer));
+        expect(hanCount(q.answer), inInclusiveRange(10, 30));
+        expect(
+          q.sourceSentence.replaceAll(RegExp(r'[^\u3400-\u9fff]'), ''),
+          q.answer,
+        );
+        expect(q.prompt, contains('紫禁城相关的知识句'));
         expect(q.characterTiles, hasLength(greaterThanOrEqualTo(2)));
         expect(q.characterTiles.every((tile) => hanCount(tile) == 1), isFalse);
         expect(q.characterTiles.join().length, q.answer.length);
@@ -92,7 +95,7 @@ void main() {
           .toList();
       expect(grammar, hasLength(4));
       expect(grammar.map((q) => q.signature.errorFamily).toSet(),
-          {'关联词', '成分赘余', '搭配', '成分缺失'});
+          {'关联词错误', '搭配错误', '成分赘余', '成分缺失'});
       for (final q in grammar) {
         expect(q.prompt, isNotEmpty);
         expect(q.prompt, isNot(q.answer));
@@ -174,21 +177,42 @@ void main() {
     }
   });
 
-  test('all 12 questions remain Story-grounded and narratable without runtime AI', () {
+  test('Challenge Standard keeps learning value, place grounding and narration', () {
+    const placeAnchors = <String>[
+      '紫禁城',
+      '午门',
+      '中轴',
+      '乾清门',
+      '故宫博物院',
+      '外朝',
+      '内廷',
+      '沈砚',
+      '阿宁',
+    ];
     for (final level in [1, 5, 10]) {
       final set = challenge(level);
       final corpus = storyMaterial(level).join();
       for (final q in set.questions) {
         expect(q.narrationText.trim(), isNotEmpty);
-        final groundedPieces = RegExp(r'[^。！？!?]+[。！？!?]')
-            .allMatches(q.sourceSentence)
-            .map((match) => match.group(0)!.trim())
-            .where((piece) => piece.isNotEmpty);
-        for (final piece in groundedPieces) {
+        if (q.mode == StoryChallengeMode.storyCompletion) {
+          final groundedPieces = RegExp(r'[^。！？!?]+[。！？!?]')
+              .allMatches(q.sourceSentence)
+              .map((match) => match.group(0)!.trim())
+              .where((piece) => piece.isNotEmpty);
+          for (final piece in groundedPieces) {
+            expect(
+              corpus,
+              contains(piece),
+              reason:
+                  'Lv$level ${q.id} completion remains current-Story grounded',
+            );
+          }
+        } else {
           expect(
-            corpus,
-            contains(piece),
-            reason: 'Lv$level ${q.id} must stay grounded in current Story',
+            placeAnchors.any(q.sourceSentence.contains),
+            isTrue,
+            reason:
+                'Lv$level ${q.id} must teach current Journey/Place knowledge',
           );
         }
       }
@@ -206,6 +230,7 @@ void main() {
     final set = challenge(5);
     String? narratedId;
     String? narratedText;
+    bool? feedbackCorrect;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -218,6 +243,9 @@ void main() {
               onNarrate: (id, text) async {
                 narratedId = id;
                 narratedText = text;
+              },
+              onFeedbackAudio: (_, correct) async {
+                feedbackCorrect = correct;
               },
               onCompleted: () async {},
             ),
@@ -242,8 +270,172 @@ void main() {
 
     expect(find.byKey(const ValueKey('challenge-rebuild-body')), findsOneWidget);
     expect(find.byKey(const ValueKey('challenge-inline-feedback')), findsOneWidget);
-    expect(find.textContaining('正确答案：'), findsOneWidget);
+    expect(feedbackCorrect, isFalse);
+    expect(find.byKey(const ValueKey('challenge-wrong-rebuild-0')), findsOneWidget);
+    expect(find.textContaining('位置错误'), findsWidgets);
+    expect(
+      find.byKey(const ValueKey('challenge-inline-correct-answer')),
+      findsOneWidget,
+    );
     expect(find.text('下一题'), findsOneWidget);
+  });
+
+  Future<void> pumpSingleQuestion(
+    WidgetTester tester,
+    StoryChallengeQuestion question, {
+    required Future<void> Function(bool correct) onFeedback,
+  }) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 390,
+            height: 760,
+            child: HskStoryChallenge(
+              challenge: StoryChallengeSet(
+                journeyId: 'beijing-forbidden-city',
+                sessionLevel: 5,
+                questions: <StoryChallengeQuestion>[question],
+              ),
+              displayText: (value) => value,
+              onNarrate: (_, __) async {},
+              onFeedbackAudio: (_, correct) => onFeedback(correct),
+              onCompleted: () async {},
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  testWidgets('correct rebuild emits correct audio feedback', (tester) async {
+    final question = challenge(5).questions
+        .firstWhere((q) => q.mode == StoryChallengeMode.sentenceRebuild);
+    bool? feedback;
+    await pumpSingleQuestion(
+      tester,
+      question,
+      onFeedback: (correct) async => feedback = correct,
+    );
+
+    final available = List<String>.of(question.characterTiles);
+    final ordered = <String>[];
+    var cursor = 0;
+    while (available.isNotEmpty) {
+      final match = available.indexWhere(
+        (tile) => question.answer.startsWith(tile, cursor),
+      );
+      expect(match, isNonNegative);
+      final tile = available.removeAt(match);
+      ordered.add(tile);
+      cursor += tile.length;
+    }
+
+    for (final tile in ordered) {
+      await tester.tap(find.widgetWithText(ActionChip, tile));
+      await tester.pump();
+    }
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(feedback, isTrue);
+    expect(find.text('回答正确'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('challenge-inline-correct-answer')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('grammar wrong location and repair are explicit red feedback', (
+    tester,
+  ) async {
+    final question = challenge(5).questions
+        .firstWhere((q) => q.mode == StoryChallengeMode.grammarRepair);
+    bool? feedback;
+    await pumpSingleQuestion(
+      tester,
+      question,
+      onFeedback: (correct) async => feedback = correct,
+    );
+
+    final wrongError = (question.errorSegmentIndex! + 1) % 4;
+    await tester.tap(
+      find.text(
+        '${String.fromCharCode(65 + wrongError)}  '
+        '${question.errorSegments[wrongError]}',
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('提交位置'));
+    await tester.pump();
+
+    final wrongOption = question.options.indexWhere(
+      (option) => option != question.answer,
+    );
+    await tester.tap(
+      find.text(
+        '${String.fromCharCode(65 + wrongOption)}  '
+        '${question.options[wrongOption]}',
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(feedback, isFalse);
+    final errorLocation = tester.widget<Text>(
+      find.byKey(const ValueKey('grammar-error-location')),
+    );
+    expect(errorLocation.style?.color, Colors.redAccent);
+    expect(find.byKey(const ValueKey('grammar-wrong-location')), findsOneWidget);
+    expect(find.byKey(const ValueKey('grammar-wrong-repair')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('challenge-inline-correct-answer')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('completion marks every wrong blank red and keeps answer inline', (
+    tester,
+  ) async {
+    final question = challenge(5).questions
+        .firstWhere((q) => q.mode == StoryChallengeMode.storyCompletion);
+    bool? feedback;
+    await pumpSingleQuestion(
+      tester,
+      question,
+      onFeedback: (correct) async => feedback = correct,
+    );
+
+    for (var blankIndex = 0;
+        blankIndex < question.completionBlanks.length;
+        blankIndex++) {
+      final blank = question.completionBlanks[blankIndex];
+      final wrongOption = blank.options.indexWhere(
+        (option) => option != blank.answer,
+      );
+      await tester.tap(
+        find.text(
+          '${String.fromCharCode(65 + wrongOption)}  '
+          '${blank.options[wrongOption]}',
+        ),
+      );
+      await tester.pump();
+    }
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(feedback, isFalse);
+    for (var index = 0; index < question.completionBlanks.length; index++) {
+      final error = tester.widget<Text>(
+        find.byKey(ValueKey('completion-error-$index')),
+      );
+      expect(error.style?.color, Colors.redAccent);
+    }
+    expect(
+      find.byKey(const ValueKey('challenge-inline-correct-answer')),
+      findsOneWidget,
+    );
   });
 
   test('session challenge remains locked after global profile changes', () {
@@ -252,7 +444,7 @@ void main() {
     expect(locked.sessionLevel, 5);
     expect(locked.questions.every((q) => q.signature.sessionLevel == 5), isTrue);
     expect(next.sessionLevel, 7);
-    expect(locked.questions.first.sourceSentence,
-        isNot(next.questions.first.sourceSentence));
+    expect(locked.questions.every((q) => q.signature.sessionLevel == 5), isTrue);
+    expect(next.questions.every((q) => q.signature.sessionLevel == 7), isTrue);
   });
 }
