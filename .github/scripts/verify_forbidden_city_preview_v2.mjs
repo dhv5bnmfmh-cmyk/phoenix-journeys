@@ -507,26 +507,61 @@ async function nextToCompletion(page, level) {
 }
 
 async function openMemoryDetail(page) {
-  await tapButton(page, '返回首页', { prefix: true });
-  await findSemantic(page, 'PHOENIX JOURNEYS', { timeout: 15000 });
-  await tapButton(page, '我的', { prefix: true });
-  await tapButton(page, '回忆时间轴', { prefix: true });
+  if (await exists(page, '当前回忆保存在此设备。', { timeout: 500 })) return;
+
+  if (!(await exists(page, '北京 · 紫禁城', { role: 'button', timeout: 800 }))) {
+    if (await exists(page, '返回首页', { role: 'button', prefix: true, timeout: 800 })) {
+      await tapButton(page, '返回首页', { prefix: true });
+    }
+    if (await exists(page, 'PHOENIX JOURNEYS', { timeout: 15000 })) {
+      await tapButton(page, '我的', { prefix: true });
+    }
+    if (!(await exists(page, '北京 · 紫禁城', { role: 'button', timeout: 800 }))) {
+      await tapButton(page, '回忆时间轴', { prefix: true });
+    }
+  }
+
   const card = await findSemantic(page, '北京 · 紫禁城', { role: 'button', timeout: 15000 });
   await card.evaluate((el) => el.click());
   await findSemantic(page, '当前回忆保存在此设备。', { timeout: 15000 });
 }
 
+async function committedMemoryEditorState(page, { expectPhoto }) {
+  const fields = page.getByRole('textbox');
+  const count = await fields.count();
+  if (count < 2) throw new Error(`Memory committed editor expected 2 textboxes, found ${count}`);
+  const noteValue = clean(await fields.first().inputValue());
+  const visitValue = clean(await fields.nth(count - 1).inputValue());
+  if (noteValue !== '修改后的紫禁城回忆') {
+    throw new Error(`Memory committed note mismatch: ${noteValue}`);
+  }
+  if (visitValue !== '雨后的红墙很安静') {
+    throw new Error(`Memory committed visit note mismatch: ${visitValue}`);
+  }
+  await findSemantic(page, '到访日期', { timeout: 1500 });
+  const photoPresent = await exists(page, '删除照片', { role: 'button', timeout: 600 });
+  if (photoPresent !== expectPhoto) {
+    throw new Error(`Memory committed photo state mismatch: expected ${expectPhoto}, got ${photoPresent}`);
+  }
+  return { noteValue, visitValue, photoPresent };
+}
+
 async function validateLivingMemoryPersistence(page) {
   await openMemoryDetail(page);
   const fields = page.getByRole('textbox');
-  await fields.first().fill('修改后的紫禁城回忆');
+  const noteField = page.getByRole('textbox', { name: /我的回忆/ }).first();
+  await (await noteField.count() ? noteField : fields.first()).fill('修改后的紫禁城回忆');
   const visited = await findSemantic(page, '我真的来到这里了', { timeout: 5000 });
   await visited.tap({ timeout: 10000 });
   await findSemantic(page, '到访日期', { timeout: 5000 });
+  const visitField = page.getByRole('textbox', { name: /现场感受/ }).first();
   const allFields = await page.getByRole('textbox').all();
-  await allFields[allFields.length - 1].fill('雨后的红墙很安静');
+  await (await visitField.count() ? visitField : allFields[allFields.length - 1]).fill('雨后的红墙很安静');
   await tapButton(page, '删除照片', { prefix: true });
-  await saveMemoryAndWaitCommitted(page, { expectedValues: ['修改后的紫禁城回忆', '雨后的红墙很安静'] });
+  await saveMemoryAndWaitCommitted(page, {
+    reopenCommittedState: () => openMemoryDetail(page),
+    readCommittedState: () => committedMemoryEditorState(page, { expectPhoto: false }),
+  });
 
   await page.reload({ waitUntil: 'load', timeout: 140000 });
   await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
@@ -545,7 +580,10 @@ async function validateLivingMemoryPersistence(page) {
     tapButton(page, '添加照片', { prefix: true }),
   ]);
   await chooser.setFiles(photoFixture);
-  await saveMemoryAndWaitCommitted(page, { expectedValues: ['修改后的紫禁城回忆', '雨后的红墙很安静'] });
+  await saveMemoryAndWaitCommitted(page, {
+    reopenCommittedState: () => openMemoryDetail(page),
+    readCommittedState: () => committedMemoryEditorState(page, { expectPhoto: true }),
+  });
   await page.reload({ waitUntil: 'load', timeout: 140000 });
   await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
   await enableSemantics(page);

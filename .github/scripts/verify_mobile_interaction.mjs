@@ -59,6 +59,51 @@ async function semanticNode(page, label, { prefix = false, timeout = 15000, role
   throw new Error(`semantic state not found: ${label}`);
 }
 
+async function semanticNodeContainingAll(
+  page,
+  labels,
+  { timeout = 15000, role = null } = {},
+) {
+  const wanted = labels.map(normalize);
+  const deadline = Date.now() + timeout;
+  const nodes = page.locator('flt-semantics');
+  while (Date.now() < deadline) {
+    const index = await nodes.evaluateAll((elements, args) => {
+      const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
+      const candidates = [];
+      for (let i = 0; i < elements.length; i += 1) {
+        const element = elements[i];
+        if (args.role && element.getAttribute('role') !== args.role) continue;
+        const combined = [
+          element.getAttribute('aria-label'),
+          element.getAttribute('aria-valuetext'),
+          element.getAttribute('aria-description'),
+          element.textContent,
+        ].filter(Boolean).map(clean).join(' ');
+        if (!args.wanted.every((needle) => combined.includes(needle))) continue;
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        if (rect.width <= 0 || rect.height <= 0 || style.display === 'none' || style.visibility === 'hidden') continue;
+        candidates.push({ i, area: rect.width * rect.height });
+      }
+      candidates.sort((a, b) => a.area - b.area);
+      return candidates[0]?.i ?? -1;
+    }, { wanted, role });
+    if (index >= 0) return nodes.nth(index);
+    await sleep(100);
+  }
+  throw new Error(`semantic state not found containing all: ${labels.join(' + ')}`);
+}
+
+async function semanticContainsAllExists(page, labels, options = {}) {
+  try {
+    await semanticNodeContainingAll(page, labels, { ...options, timeout: options.timeout ?? 800 });
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 async function semanticExists(page, label, options = {}) {
   try {
     await semanticNode(page, label, { ...options, timeout: options.timeout ?? 800 });
@@ -181,9 +226,9 @@ async function exercisePassport(page, browserName) {
 
   startedAt = Date.now();
   await tapFirstSemanticAction(page, ['北京市', '北京'], `${browserName}:passport-published-province`);
-  await semanticNode(page, '故宫博物院', { prefix: true, timeout: 15000 });
+  await semanticNodeContainingAll(page, ['北京市', '故宫博物院'], { role: 'button', timeout: 15000 });
   for (const hidden of ['浙江', '杭州', '上海', '西安']) {
-    if (await semanticExists(page, hidden, { prefix: true, timeout: 300 })) {
+    if (await semanticContainsAllExists(page, [hidden], { timeout: 300 })) {
       throw new Error(`${browserName}: hidden city leaked into published Passport UI: ${hidden}`);
     }
   }
