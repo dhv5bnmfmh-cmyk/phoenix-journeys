@@ -15,7 +15,11 @@ const sourceSha = process.argv[3];
 const grammarOnly = process.argv[4] === 'grammar-only';
 if (!baseUrl || !sourceSha) throw new Error('usage: verify_forbidden_city_preview_v2.mjs <preview-url> <sha>');
 
-const levels = [5];
+const levels = (process.env.PHOENIX_TARGET_LEVELS ?? '1,3,5,8,10')
+  .split(',')
+  .map((value) => Number(value.trim()))
+  .filter((value) => Number.isInteger(value) && value >= 1 && value <= 10);
+if (!levels.length) throw new Error('PHOENIX_TARGET_LEVELS resolved to no valid levels');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
 const photoFixture = resolve('app/assets/images/phoenix-flight-cycle-v2.webp');

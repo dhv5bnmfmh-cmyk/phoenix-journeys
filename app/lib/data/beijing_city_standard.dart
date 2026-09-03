@@ -189,6 +189,19 @@ const forbiddenCityPlace = PlaceDefinition(
   publicationState: PublicationState.reference,
 );
 
+const forbiddenCityPhoenixLevelStandard = <int, String>{
+  1: '极短句；高频词；明确主谓宾；简单时间地点；保留必要专名。',
+  2: '简单因果；基础方向；简单任务描述。',
+  3: '简单复句；人物目的；基础文化解释。',
+  4: '转折、比较、原因与空间关系。',
+  5: '自然中级叙事；人物动机清楚；行动与证据开始结合。',
+  6: '复杂因果；观点差异；任务与空间关系。',
+  7: '较长复句；隐含信息；文化背景与证据意识。',
+  8: '推理；空间秩序；文化语义；共同事实与视角区分。',
+  9: '自然书面表达；更复杂人物判断；空间骨架与路线偏好。',
+  10: '成熟中文阅读；建筑、历史、制度、空间与文化解释可进入同一推理。',
+};
+
 const forbiddenCityJourney01 = JourneyDefinition(
   journeyId: forbiddenCityJourney01Id,
   runtimeId: forbiddenCityRuntimeId,
@@ -206,7 +219,7 @@ const forbiddenCityJourney01 = JourneyDefinition(
   storyIdentity: '沈砚、阿宁、周师傅在午门—中轴—东侧—乾清门前比较两条路线。',
   sceneIds: ['FC01-A', 'FC01-B', 'FC01-C', 'FC01-D'],
   levelPolicy:
-      'Lv1-Lv10 share one canonical Journey; only language and reasoning depth change.',
+      'Lv1-Lv10 share one canonical Journey and scene world; Phoenix language, reasoning depth, and cultural explanation progress by level.',
   publicationState: PublicationState.reference,
 );
 
@@ -338,8 +351,8 @@ JourneySceneDefinition forbiddenCitySceneById(String sceneId) =>
 
 const _storySceneIds = ['FC01-A', 'FC01-B', 'FC01-C', 'FC01-D'];
 const _sharedEvidenceAnchorByLevel = <int, String>{
-  1: '沈砚看清后',
-  2: '两条线都能到',
+  1: '两人重新看图',
+  2: '两人重新看图',
   3: '两人重新对照',
   4: '两人比较',
   5: '沈砚发现',
@@ -440,8 +453,9 @@ JourneySceneDefinition forbiddenCitySceneForStoryOffset({
 JourneySceneDefinition forbiddenCitySceneForStage(String stage) {
   return switch (stage) {
     'vocabulary' => forbiddenCitySceneById('FC01-B'),
-    'discovery' || 'challenge' => forbiddenCitySceneById('FC01-C'),
-    'memory' || 'completion' => forbiddenCitySceneById('FC01-D'),
+    'discovery' => forbiddenCitySceneById('FC01-C'),
+    'challenge' || 'memory' || 'completion' =>
+      forbiddenCitySceneById('FC01-D'),
     _ => forbiddenCitySceneById('FC01-A'),
   };
 }
