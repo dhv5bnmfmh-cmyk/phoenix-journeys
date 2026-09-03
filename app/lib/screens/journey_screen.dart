@@ -158,6 +158,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   bool _guideLoading = false;
   bool _writingLoading = false;
   bool _challengeResolved = false;
+  bool _forbiddenCityFinaleCompleted = false;
   bool _pilotChallengeVisible = false;
   bool _pilotMemoryVisible = false;
   late int _challengeSeed;
@@ -231,6 +232,12 @@ class _JourneyScreenState extends State<JourneyScreen>
       storyParagraphs: _preparedBundle.challengeSourceMaterial,
     );
     step = _appState.beijingJourneyStep;
+    if (_isForbiddenCity) {
+      _forbiddenCityFinaleCompleted = _appState.journeyCompleted;
+      if (_forbiddenCityFinaleCompleted || step >= AppState.journeyLastStep) {
+        step = 4;
+      }
+    }
     wonderController.text = _appState.wonderDraft;
     expressController.text = _appState.expressDraft;
     memoryController.text = _appState.memoryDraft;
@@ -477,14 +484,23 @@ class _JourneyScreenState extends State<JourneyScreen>
       final memory = forbiddenCityMemoryForLevel(
         _sessionLanguageProfile.phoenixLevel ?? 1,
       );
+      final completion = forbiddenCityCompletionForLevel(
+        _sessionLanguageProfile.phoenixLevel ?? 1,
+      );
       return buildJourneyStageNarrationItems(
         stage: 'memory',
-        displayedLines: [
-          _appState.displayText(memory.anchor),
-          _appState.displayText(memory.recall),
-          _appState.displayText(memory.characterShift),
-          _appState.displayText(memory.takeaway),
-        ],
+        displayedLines: _forbiddenCityFinaleCompleted
+            ? [
+                'Journey 完成',
+                forbiddenCityChallengeRewardName,
+                forbiddenCityChallengeRewardMeaning,
+                'Lv.${_sessionLanguageProfile.phoenixLevel} Journey 已记录',
+              ]
+            : [
+                _appState.displayText(completion.discovery),
+                _appState.displayText(completion.learning),
+                _appState.displayText(memory.anchor),
+              ],
       );
     }
     return buildJourneyStageNarrationItems(
@@ -509,22 +525,13 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
     }
     if (_isForbiddenCity) {
-      final completion = forbiddenCityCompletionForLevel(
-        _sessionLanguageProfile.phoenixLevel ?? 1,
-      );
       return buildJourneyStageNarrationItems(
         stage: 'completion',
         displayedLines: [
-          forbiddenCityAchievementName,
-          completion.storyClosure,
-          completion.discovery,
-          completion.learning,
-          completion.memory,
-          completion.relationship,
-          completion.emotionalClosure,
-          completion.unlockResult,
+          'Journey 完成',
           forbiddenCityChallengeRewardName,
           forbiddenCityChallengeRewardMeaning,
+          'Lv.${_sessionLanguageProfile.phoenixLevel} Journey 已记录',
         ],
       );
     }
@@ -1174,7 +1181,14 @@ class _JourneyScreenState extends State<JourneyScreen>
       sessionLevel: _sessionLanguageProfile.phoenixLevel ?? 1,
     );
     if (!mounted) return;
-    setState(() => step = AppState.journeyLastStep);
+    setState(() {
+      if (_isForbiddenCity) {
+        _forbiddenCityFinaleCompleted = true;
+        step = 4;
+      } else {
+        step = AppState.journeyLastStep;
+      }
+    });
   }
 
   Future<void> _restartJourney() async {
@@ -1192,6 +1206,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         _challengeResolved = false;
         _pilotChallengeVisible = false;
         _pilotMemoryVisible = false;
+        _forbiddenCityFinaleCompleted = false;
         _challengeSeed += 1;
         step = 0;
       });
@@ -1376,10 +1391,20 @@ class _JourneyScreenState extends State<JourneyScreen>
             children: [
               if (!keyboardVisible) ...[
                 JourneyProgressHeader(
-                  currentStep: step,
-                  furthestStep: state.beijingJourneyFurthestStep,
+                  currentStep: _isForbiddenCity ? step.clamp(0, 4) : step,
+                  furthestStep: _isForbiddenCity
+                      ? state.beijingJourneyFurthestStep.clamp(0, 4)
+                      : state.beijingJourneyFurthestStep,
                   isCompleted: state.journeyCompleted,
-                  labels: AppState.journeyStepLabels,
+                  labels: _isForbiddenCity
+                      ? const [
+                          'Story',
+                          'Vocabulary',
+                          'Discovery',
+                          'Challenge',
+                          '回忆 · 完成',
+                        ]
+                      : AppState.journeyStepLabels,
                   onStepSelected: (value) => unawaited(_goToStep(value)),
                 ),
                 SizedBox(height: compact ? 3 : 5),
@@ -2254,18 +2279,26 @@ class _JourneyScreenState extends State<JourneyScreen>
     final memory = forbiddenCityMemoryForLevel(
       _sessionLanguageProfile.phoenixLevel ?? 1,
     );
+    final completion = forbiddenCityCompletionForLevel(
+      _sessionLanguageProfile.phoenixLevel ?? 1,
+    );
     final existing = _appState.journeyMemories
         .where((entry) => entry.journeyId == _experience.id && !entry.legacy);
     if (memoryController.text.isEmpty && existing.isNotEmpty) {
       memoryController.text = existing.first.note;
     }
     return _page(
-      title: '我的旅程回忆',
+      title: '回忆 · 完成',
       narrationStage: 'memory',
       narrationItems: _memoryNarrationItems(),
-      buttonText: '结束旅程',
-      buttonIcon: Icons.flag_rounded,
-      onNext: () => unawaited(_finishJourney()),
+      buttonText: _forbiddenCityFinaleCompleted ? '返回首页' : '完成旅程',
+      buttonIcon: _forbiddenCityFinaleCompleted
+          ? Icons.home_outlined
+          : Icons.flag_rounded,
+      showBack: !_forbiddenCityFinaleCompleted,
+      onNext: _forbiddenCityFinaleCompleted
+          ? () => unawaited(_exitJourney())
+          : () => unawaited(_finishJourney()),
       child: ListView(
         padding: const EdgeInsets.only(bottom: 6),
         children: [
@@ -2274,76 +2307,109 @@ class _JourneyScreenState extends State<JourneyScreen>
               style: const TextStyle(
                   color: Color(0xFFFFD879), fontWeight: FontWeight.w800)),
           const SizedBox(height: 10),
-          _ForbiddenCityCompleteCard(
-            title: 'Memory Anchor',
-            body: memory.anchor,
-          ),
-          const SizedBox(height: 6),
-          _ForbiddenCityCompleteCard(
-            title: '回想',
-            body: memory.recall,
-          ),
-          const SizedBox(height: 6),
-          _ForbiddenCityCompleteCard(
-            title: '人物变化',
-            body: memory.characterShift,
-          ),
-          const SizedBox(height: 6),
-          _ForbiddenCityCompleteCard(
-            title: '带走的理解',
-            body: memory.takeaway,
-          ),
-          const SizedBox(height: 10),
-          const Text('这段旅程，你最想留下什么？',
+          if (_forbiddenCityFinaleCompleted) ...[
+            const Icon(Icons.check_circle_rounded,
+                color: Color(0xFFFFD879), size: 46),
+            const SizedBox(height: 6),
+            const Text(
+              'Journey 完成',
+              textAlign: TextAlign.center,
               style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w900,
-                  fontSize: 15)),
-          const SizedBox(height: 8),
-          TextField(
-            key: const ValueKey('forbidden-city-memory-note'),
-            controller: memoryController,
-            focusNode: memoryFocusNode,
-            minLines: 5,
-            maxLines: 9,
-            onChanged: (_) => unawaited(_persistProgress()),
-            style: const TextStyle(color: Colors.white),
-            decoration: PhoenixTheme.journeyWritingInputDecoration(
-                '写下你的感受、发现，\n或者未来真正来到这里时想记住的事情……'),
-          ),
-          const SizedBox(height: 10),
-          OutlinedButton.icon(
-            key: const ValueKey('forbidden-city-add-photo'),
-            onPressed: () async {
-              final result = await pickJourneyMemoryPhotos();
-              if (result.isEmpty) return;
-              // Establish the stable Journey identity without completing the Journey.
-              var entry = await _appState.saveActiveJourneyMemory(
-                  memoryController.text,
-                  sessionLevel: _sessionLanguageProfile.phoenixLevel ?? 1);
-              for (final bytes in result) {
-                await _appState.addJourneyMemoryPhoto(entry, bytes);
-                entry = _appState.journeyMemories
-                    .firstWhere((item) => item.id == entry.id);
-              }
-              if (mounted) setState(() {});
-            },
-            icon: const Icon(Icons.add_photo_alternate_outlined),
-            label: const Text('添加照片'),
-          ),
-          if (existing.isNotEmpty && existing.first.photoRefs.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text('已添加 ${existing.first.photoRefs.length} 张照片',
-                  style: const TextStyle(color: Colors.white70)),
+                  fontSize: 20),
             ),
+            const SizedBox(height: 10),
+            const _ForbiddenCityCompleteCard(
+              title: 'Challenge Reward',
+              body:
+                  '$forbiddenCityChallengeRewardName\n$forbiddenCityChallengeRewardMeaning',
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Lv.${_sessionLanguageProfile.phoenixLevel} Journey 已记录',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: Color(0xFFFFD879), fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () => unawaited(_restartJourney()),
+              icon: const Icon(Icons.replay_rounded),
+              label: const Text('重新体验'),
+            ),
+          ] else ...[
+            _ForbiddenCityCompleteCard(
+              title: '文化发现',
+              body: completion.discovery,
+            ),
+            const SizedBox(height: 6),
+            _ForbiddenCityCompleteCard(
+              title: '学习结果',
+              body: completion.learning,
+            ),
+            const SizedBox(height: 6),
+            _ForbiddenCityCompleteCard(
+              title: 'Memory Anchor',
+              body: memory.anchor,
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              '这段旅程，你最想留下什么？',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              key: const ValueKey('forbidden-city-memory-note'),
+              controller: memoryController,
+              focusNode: memoryFocusNode,
+              minLines: 5,
+              maxLines: 9,
+              onChanged: (_) => unawaited(_persistProgress()),
+              style: const TextStyle(color: Colors.white),
+              decoration: PhoenixTheme.journeyWritingInputDecoration(
+                '写下你的感受、发现，\n或者未来真正来到这里时想记住的事情……',
+              ),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              key: const ValueKey('forbidden-city-add-photo'),
+              onPressed: () async {
+                final result = await pickJourneyMemoryPhotos();
+                if (result.isEmpty) return;
+                // Establish the stable Journey identity without completing the Journey.
+                var entry = await _appState.saveActiveJourneyMemory(
+                  memoryController.text,
+                  sessionLevel: _sessionLanguageProfile.phoenixLevel ?? 1,
+                );
+                for (final bytes in result) {
+                  await _appState.addJourneyMemoryPhoto(entry, bytes);
+                  entry = _appState.journeyMemories
+                      .firstWhere((item) => item.id == entry.id);
+                }
+                if (mounted) setState(() {});
+              },
+              icon: const Icon(Icons.add_photo_alternate_outlined),
+              label: const Text('添加照片'),
+            ),
+            if (existing.isNotEmpty && existing.first.photoRefs.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text('已添加 ${existing.first.photoRefs.length} 张照片',
+                    style: const TextStyle(color: Colors.white70)),
+              ),
+          ],
         ],
       ),
     );
   }
 
   Widget _completePage() {
-    if (_isForbiddenCity) return _forbiddenCityCompletePage();
+    if (_isForbiddenCity) return _forbiddenCityMemoryPage();
 
     final batchSpec = batchOneMemorySpecFor(_experience.id);
     if (batchSpec != null) {
@@ -2528,111 +2594,6 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
-  Widget _forbiddenCityCompletePage() {
-    final completion = forbiddenCityCompletionForLevel(
-      _sessionLanguageProfile.phoenixLevel ?? 1,
-    );
-    return _page(
-      title: '本次学习回顾',
-      narrationStage: 'completion',
-      narrationItems: _completionNarrationItems(),
-      buttonText: '返回首页',
-      buttonIcon: Icons.home_outlined,
-      showBack: false,
-      onNext: () => unawaited(_exitJourney()),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Align(
-              alignment: Alignment.center,
-              child: AnimatedCityJourneyStamp(journey: _experience, size: 96),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              forbiddenCityAchievementName,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: PhoenixTheme.red,
-                fontSize: 17,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _ForbiddenCityCompleteCard(
-              title: '故事收束',
-              body: completion.storyClosure,
-            ),
-            const SizedBox(height: 6),
-            _ForbiddenCityCompleteCard(
-              title: '文化发现',
-              body: completion.discovery,
-            ),
-            const SizedBox(height: 6),
-            _ForbiddenCityCompleteCard(
-              title: '学习结果',
-              body: completion.learning,
-            ),
-            const SizedBox(height: 6),
-            _ForbiddenCityCompleteCard(
-              title: 'Memory Anchor',
-              body: completion.memory,
-            ),
-            const SizedBox(height: 6),
-            _ForbiddenCityCompleteCard(
-              title: '人物关系',
-              body: completion.relationship,
-            ),
-            const SizedBox(height: 6),
-            _ForbiddenCityCompleteCard(
-              title: '旅程收束',
-              body: completion.emotionalClosure,
-            ),
-            const SizedBox(height: 6),
-            const _ForbiddenCityCompleteCard(
-              title: 'Challenge Reward',
-              body:
-                  '$forbiddenCityChallengeRewardName\n$forbiddenCityChallengeRewardMeaning',
-            ),
-            const SizedBox(height: 6),
-            _ForbiddenCityCompleteCard(
-              title: 'Journey Completion',
-              body: completion.unlockResult,
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 36,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: JourneyShareButton(
-                      isTraditional: _appState.isTraditional,
-                      city: _experience.city,
-                      place: _experience.place,
-                      compact: true,
-                      label: _appState.displayText('分享旅程'),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => unawaited(_restartJourney()),
-                      icon: const Icon(Icons.replay_rounded, size: 16),
-                      label: const Text(
-                        '重新体验',
-                        style: TextStyle(fontSize: 10.5),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _ForbiddenCityCompleteCard extends StatelessWidget {

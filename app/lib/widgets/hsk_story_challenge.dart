@@ -100,7 +100,12 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
   void _submit() {
     if (question.mode == StoryChallengeMode.grammarRepair && grammarStep == 0) {
       if (selectedError == null) return;
+      final correct = selectedError == question.errorSegmentIndex;
       setState(() => grammarLocationSubmitted = true);
+      final feedbackAudio = widget.onFeedbackAudio;
+      if (feedbackAudio != null) {
+        unawaited(feedbackAudio(question.id, correct));
+      }
       return;
     }
     if (!_canSubmit) return;

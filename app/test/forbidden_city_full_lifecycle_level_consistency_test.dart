@@ -63,7 +63,20 @@ void main() {
     expect(stageFingerprints, hasLength(3));
   });
 
-  test('Journey UI wires level-specific Memory Completion and Q12 handoff', () {
+  test('Lv1 Lv5 Lv10 Finale summaries remain level-specific', () {
+    final finaleFingerprints = <String>{
+      for (final level in <int>[1, 5, 10])
+        <String>[
+          forbiddenCityCompletionForLevel(level).discovery,
+          forbiddenCityCompletionForLevel(level).learning,
+          forbiddenCityMemoryForLevel(level).anchor,
+        ].join('|'),
+    };
+
+    expect(finaleFingerprints, hasLength(3));
+  });
+
+  test('Journey UI wires level-specific one-page Finale and Q12 handoff', () {
     final journey = File('lib/screens/journey_screen.dart').readAsStringSync();
     final challenge =
         File('lib/widgets/hsk_story_challenge.dart').readAsStringSync();
@@ -77,5 +90,20 @@ void main() {
     expect(challenge, contains('completionReported = true'));
     expect(challenge, contains('unawaited(widget.onCompleted())'));
     expect(challenge, contains("? '下一题'"));
+    expect(journey, contains("title: '回忆 · 完成'"));
+    expect(journey, contains("title: '文化发现'"));
+    expect(journey, contains("title: '学习结果'"));
+    expect(journey, contains("title: 'Memory Anchor'"));
+    expect(journey, contains("buttonText: _forbiddenCityFinaleCompleted ? '返回首页' : '完成旅程'"));
+    expect(journey, contains("'Journey 完成'"));
+    expect(journey, contains("'Challenge Reward'"));
+    expect(journey, contains('Journey 已记录'));
+    expect(journey, contains('await _appState.completeJourney('));
+    expect(journey, contains('_forbiddenCityFinaleCompleted = true'));
+    expect(journey, contains('step = 4'));
+    expect(journey, isNot(contains('Widget _forbiddenCityCompletePage()')));
+    expect(journey, isNot(contains("title: '人物变化'")));
+    expect(journey, isNot(contains("title: '人物关系'")));
+    expect(journey, isNot(contains("title: '故事收束'")));
   });
 }

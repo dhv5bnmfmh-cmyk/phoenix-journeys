@@ -311,6 +311,7 @@ void main() {
       (tester) async {
     final finalQuestion = challenge(5).questions.last;
     var completed = 0;
+    final feedbackEvents = <bool>[];
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -324,7 +325,9 @@ void main() {
             ),
             displayText: (value) => value,
             onNarrate: (_, __) async {},
-            onFeedbackAudio: (_, __) async {},
+            onFeedbackAudio: (_, correct) async {
+              feedbackEvents.add(correct);
+            },
             onCompleted: () async {
               completed += 1;
             },
@@ -344,6 +347,7 @@ void main() {
     await tester.pump();
 
     expect(completed, 1);
+    expect(feedbackEvents, <bool>[true]);
     expect(find.byKey(const ValueKey('challenge-inline-feedback')), findsOneWidget);
     expect(find.byKey(const ValueKey('challenge-inline-correct-answer')), findsOneWidget);
     expect(find.text('完成挑战'), findsNothing);
@@ -385,11 +389,11 @@ void main() {
   testWidgets('correct rebuild emits correct audio feedback', (tester) async {
     final question = challenge(5).questions
         .firstWhere((q) => q.mode == StoryChallengeMode.sentenceRebuild);
-    bool? feedback;
+    final feedback = <bool>[];
     await pumpSingleQuestion(
       tester,
       question,
-      onFeedback: (correct) async => feedback = correct,
+      onFeedback: (correct) async => feedback.add(correct),
     );
 
     final available = List<String>.of(question.characterTiles);
@@ -412,7 +416,7 @@ void main() {
     await tester.tap(find.text('提交'));
     await tester.pump();
 
-    expect(feedback, isTrue);
+    expect(feedback, <bool>[true]);
     expect(find.text('回答正确'), findsOneWidget);
     final correctBuiltText = tester.widget<Text>(
       find.descendant(
@@ -466,10 +470,11 @@ void main() {
       tester.widget<Text>(find.text(correctLabel)).style?.color,
       Colors.greenAccent,
     );
-    expect(feedback, isNull);
+    expect(feedback, <bool>[false]);
 
     await tester.tap(find.text('继续修改'));
     await tester.pump();
+    expect(feedback, <bool>[false]);
     expect(find.text('STEP 2 · 怎么改？'), findsOneWidget);
 
     final wrongOption = question.options.indexWhere(
@@ -485,7 +490,7 @@ void main() {
     await tester.tap(find.text('提交'));
     await tester.pump();
 
-    expect(feedback, isFalse);
+    expect(feedback, <bool>[false, false]);
     expect(find.byKey(const ValueKey('grammar-error-location')), findsOneWidget);
     expect(find.byKey(const ValueKey('grammar-wrong-location')), findsOneWidget);
     expect(
@@ -511,11 +516,11 @@ void main() {
   ) async {
     final question = challenge(5).questions
         .firstWhere((q) => q.mode == StoryChallengeMode.grammarRepair);
-    bool? feedback;
+    final feedback = <bool>[];
     await pumpSingleQuestion(
       tester,
       question,
-      onFeedback: (correct) async => feedback = correct,
+      onFeedback: (correct) async => feedback.add(correct),
     );
 
     final errorIndex = question.errorSegmentIndex!;
@@ -535,10 +540,11 @@ void main() {
       tester.widget<Text>(find.text(correctLocationLabel)).style?.color,
       Colors.greenAccent,
     );
-    expect(feedback, isNull);
+    expect(feedback, <bool>[true]);
 
     await tester.tap(find.text('继续修改'));
     await tester.pump();
+    expect(feedback, <bool>[true]);
     expect(find.text('STEP 2 · 怎么改？'), findsOneWidget);
 
     final correctOption = question.options.indexOf(question.answer);
@@ -552,7 +558,7 @@ void main() {
     await tester.tap(find.text('提交'));
     await tester.pump();
 
-    expect(feedback, isTrue);
+    expect(feedback, <bool>[true, true]);
     expect(find.text('回答正确'), findsOneWidget);
     expect(
       find.byKey(const ValueKey('challenge-inline-correct-answer')),
