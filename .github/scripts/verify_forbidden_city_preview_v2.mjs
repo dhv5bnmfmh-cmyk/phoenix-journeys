@@ -211,7 +211,7 @@ async function firstHskChoice(page) {
   const visible = visibleAll.filter((r) => !r.disabled);
   const excluded = ['提交', '下一题', '完成挑战', '撤销', '重置', '朗读', '返回', 'Back'];
   const submit = visibleAll
-    .filter((r) => r.role === 'button' && recText(r).startsWith('提交'))
+    .filter((r) => r.role === 'button' && (recText(r).startsWith('提交') || recText(r) === '确认位置'))
     .sort((a, b) => a.area - b.area)[0];
   const prompt = visibleAll
     .filter((r) => r.role !== 'button' && (
@@ -284,7 +284,7 @@ async function solveRebuild(page, modeIndex, level) {
       throw new Error('Lv5 rebuild still uses all single-character tiles');
     }
     for (const proper of ['紫禁城', '乾清门', '午门', '故宫博物院']) {
-      if (answer.includes(proper) && !displayed.includes(proper)) {
+      if (answer.includes(proper) && !displayed.some((tile) => tile.includes(proper))) {
         throw new Error(`Lv5 rebuild split protected proper noun: ${proper}`);
       }
     }
@@ -299,6 +299,16 @@ async function solveRebuild(page, modeIndex, level) {
     if (!target) throw new Error(`rebuild tile disappeared: ${text}`);
     await page.locator('flt-semantics').nth(target.index).tap({ timeout: 10000 });
     await sleep(80);
+    const afterTap = await visibleText(page);
+    if (!afterTap.includes(text)) {
+      throw new Error(`built rebuild tile text became invisible after selection: ${text}`);
+    }
+  }
+  if (level === 5) {
+    await page.screenshot({
+      path: `test-results/lv5-rebuild-built-${modeIndex + 1}.png`,
+      fullPage: false,
+    });
   }
 }
 
@@ -310,16 +320,28 @@ async function fillCompletionBlanks(page, level) {
 }
 
 async function advanceGrammarToStep2(page) {
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    if (await exists(page, 'STEP 2 · 怎么改？', { timeout: 300 })) return;
-    if (!(await exists(page, 'STEP 1 · 哪里错？', { timeout: 300 }))) {
-      throw new Error('HSK grammar state drift before STEP 2');
-    }
-    await firstHskChoice(page);
-    await tapButton(page, '提交', { prefix: true });
-    if (await exists(page, 'STEP 2 · 怎么改？', { timeout: 1500 })) return;
+  if (!(await exists(page, 'STEP 1 · 哪里错？', { timeout: 1000 }))) {
+    throw new Error('HSK grammar state drift before STEP 1 confirmation');
   }
-  throw new Error('HSK grammar STEP 1 selection did not commit after 3 state-driven attempts');
+
+  await firstHskChoice(page);
+  await tapButton(page, '确认位置', { exact: true });
+  const locationCorrect = await exists(page, '位置正确', { timeout: 1500 });
+  const locationWrong = locationCorrect
+    ? false
+    : await exists(page, '位置错误', { timeout: 1500 });
+  if (!locationCorrect && !locationWrong) {
+    throw new Error('HSK grammar STEP 1 did not show location feedback');
+  }
+  await findSemantic(page, 'STEP 1 · 哪里错？', { timeout: 1000 });
+  if (await exists(page, 'STEP 2 · 怎么改？', { timeout: 300 })) {
+    throw new Error('HSK grammar auto-advanced before explicit continue');
+  }
+  if (locationWrong) {
+    await findSemantic(page, '正确错误位置：', { timeout: 1000 });
+  }
+  await tapButton(page, '继续修改', { exact: true });
+  await findSemantic(page, 'STEP 2 · 怎么改？', { timeout: 1500 });
 }
 
 async function completeHskChallenge(page, level) {

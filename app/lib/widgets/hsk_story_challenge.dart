@@ -30,6 +30,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
   int grammarStep = 0;
   int? selectedOption;
   int? selectedError;
+  bool grammarLocationSubmitted = false;
   bool submitted = false;
   final List<String> built = [];
   late List<String> remaining;
@@ -57,6 +58,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
     grammarStep = 0;
     selectedOption = null;
     selectedError = null;
+    grammarLocationSubmitted = false;
     submitted = false;
     built.clear();
     remaining = List.of(question.characterTiles);
@@ -97,10 +99,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
   void _submit() {
     if (question.mode == StoryChallengeMode.grammarRepair && grammarStep == 0) {
       if (selectedError == null) return;
-      setState(() {
-        grammarStep = 1;
-        selectedOption = null;
-      });
+      setState(() => grammarLocationSubmitted = true);
       return;
     }
     if (!_canSubmit) return;
@@ -110,6 +109,14 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
     if (feedbackAudio != null) {
       unawaited(feedbackAudio(question.id, correct));
     }
+  }
+
+  void _continueGrammarRepair() {
+    if (!grammarLocationSubmitted || grammarStep != 0) return;
+    setState(() {
+      grammarStep = 1;
+      selectedOption = null;
+    });
   }
 
   Future<void> _next() async {
@@ -188,18 +195,24 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
           key: ValueKey(submitted ? 'challenge-next' : 'challenge-submit'),
           onPressed: submitted
               ? () => unawaited(_next())
-              : (question.mode == StoryChallengeMode.grammarRepair &&
-                          grammarStep == 0
-                      ? selectedError != null
-                      : _canSubmit)
-                  ? _submit
-                  : null,
+              : question.mode == StoryChallengeMode.grammarRepair &&
+                      grammarStep == 0
+                  ? grammarLocationSubmitted
+                      ? _continueGrammarRepair
+                      : selectedError != null
+                          ? _submit
+                          : null
+                  : _canSubmit
+                      ? _submit
+                      : null,
           child: Text(
             submitted
                 ? (index == 11 ? '完成挑战' : '下一题')
-                : grammarStep == 0 &&
-                        question.mode == StoryChallengeMode.grammarRepair
-                    ? '提交位置'
+                : question.mode == StoryChallengeMode.grammarRepair &&
+                        grammarStep == 0
+                    ? grammarLocationSubmitted
+                        ? '继续修改'
+                        : '确认位置'
                     : '提交',
           ),
         ),
@@ -420,34 +433,40 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
         index < expected.length && expected[index] == chunk;
     final wrong = submitted && !correctPosition;
     final correct = submitted && correctPosition;
-    return Chip(
+    final backgroundColor = wrong
+        ? const Color(0xFF431C1C)
+        : correct
+            ? const Color(0xFF163D26)
+            : const Color(0xF0221815);
+    final borderColor = wrong
+        ? Colors.redAccent
+        : correct
+            ? Colors.greenAccent
+            : PhoenixTheme.gold.withValues(alpha: .78);
+    final textColor = wrong
+        ? Colors.redAccent
+        : correct
+            ? Colors.greenAccent
+            : Colors.white;
+
+    return Container(
       key: ValueKey(
         wrong
             ? 'challenge-wrong-rebuild-$index'
             : 'challenge-rebuild-built-$index',
       ),
-      label: Text(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: borderColor, width: 1.1),
+      ),
+      child: Text(
         chunk,
         style: TextStyle(
-          color: wrong
-              ? Colors.redAccent
-              : correct
-                  ? Colors.greenAccent
-                  : Colors.white,
-          fontWeight: FontWeight.w800,
+          color: textColor,
+          fontWeight: FontWeight.w900,
         ),
-      ),
-      backgroundColor: wrong
-          ? Colors.red.withValues(alpha: .18)
-          : correct
-              ? Colors.green.withValues(alpha: .16)
-              : Colors.white.withValues(alpha: .08),
-      side: BorderSide(
-        color: wrong
-            ? Colors.redAccent
-            : correct
-                ? Colors.greenAccent
-                : Colors.white24,
       ),
     );
   }
@@ -461,57 +480,88 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
                 }),
       );
 
-  Widget _grammar() => Column(
-        key: const ValueKey('challenge-grammar-body'),
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '有语病的完整句子',
-            style: TextStyle(
-              color: Colors.white70,
-              fontWeight: FontWeight.w800,
-            ),
+  Widget _grammar() {
+    final errorIndex = question.errorSegmentIndex ?? 0;
+    final locationCorrect =
+        grammarLocationSubmitted && selectedError == errorIndex;
+    return Column(
+      key: const ValueKey('challenge-grammar-body'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '有语病的完整句子',
+          style: TextStyle(
+            color: Colors.white70,
+            fontWeight: FontWeight.w800,
           ),
-          const SizedBox(height: 4),
-          _grammarSentence(),
-          const SizedBox(height: 12),
-          if (grammarStep == 0) ...[
-            const Text(
-              'STEP 1 · 哪里错？',
-              style: TextStyle(color: PhoenixTheme.gold),
+        ),
+        const SizedBox(height: 4),
+        _grammarSentence(),
+        const SizedBox(height: 12),
+        if (grammarStep == 0) ...[
+          const Text(
+            'STEP 1 · 哪里错？',
+            style: TextStyle(color: PhoenixTheme.gold),
+          ),
+          const SizedBox(height: 8),
+          for (var i = 0; i < question.errorSegments.length; i++)
+            _choice(
+              selected: selectedError == i,
+              correct: grammarLocationSubmitted && i == errorIndex,
+              wrong: grammarLocationSubmitted &&
+                  selectedError == i &&
+                  i != errorIndex,
+              text:
+                  '${String.fromCharCode(65 + i)}  ${question.errorSegments[i]}',
+              onTap: submitted || grammarLocationSubmitted
+                  ? null
+                  : () => setState(() => selectedError = i),
             ),
-            const SizedBox(height: 8),
-            for (var i = 0; i < question.errorSegments.length; i++)
-              _choice(
-                selected: selectedError == i,
-                text:
-                    '${String.fromCharCode(65 + i)}  ${question.errorSegments[i]}',
-                onTap: submitted
-                    ? null
-                    : () => setState(() => selectedError = i),
+          if (grammarLocationSubmitted) ...[
+            const SizedBox(height: 6),
+            Text(
+              locationCorrect ? '位置正确' : '位置错误',
+              key: const ValueKey('grammar-location-feedback'),
+              style: TextStyle(
+                color: locationCorrect
+                    ? Colors.greenAccent
+                    : Colors.redAccent,
+                fontWeight: FontWeight.w900,
               ),
-          ] else ...[
-            const Text(
-              'STEP 2 · 怎么改？',
-              style: TextStyle(color: PhoenixTheme.gold),
             ),
-            const SizedBox(height: 8),
-            for (var i = 0; i < question.options.length; i++)
-              _choice(
-                selected: selectedOption == i,
-                correct: submitted && question.options[i] == question.answer,
-                wrong: submitted &&
-                    selectedOption == i &&
-                    question.options[i] != question.answer,
-                text:
-                    '${String.fromCharCode(65 + i)}  ${question.options[i]}',
-                onTap: submitted
-                    ? null
-                    : () => setState(() => selectedOption = i),
+            const SizedBox(height: 4),
+            Text(
+              '正确错误位置：${question.errorSegments[errorIndex]}',
+              key: const ValueKey('grammar-correct-location'),
+              style: const TextStyle(
+                color: Colors.greenAccent,
+                fontWeight: FontWeight.w800,
               ),
+            ),
           ],
+        ] else ...[
+          const Text(
+            'STEP 2 · 怎么改？',
+            style: TextStyle(color: PhoenixTheme.gold),
+          ),
+          const SizedBox(height: 8),
+          for (var i = 0; i < question.options.length; i++)
+            _choice(
+              selected: selectedOption == i,
+              correct: submitted && question.options[i] == question.answer,
+              wrong: submitted &&
+                  selectedOption == i &&
+                  question.options[i] != question.answer,
+              text:
+                  '${String.fromCharCode(65 + i)}  ${question.options[i]}',
+              onTap: submitted
+                  ? null
+                  : () => setState(() => selectedOption = i),
+            ),
         ],
-      );
+      ],
+    );
+  }
 
   Widget _grammarSentence() {
     final segments = question.errorSegments;
@@ -538,7 +588,8 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
           for (var i = 0; i < segments.length; i++)
             TextSpan(
               text: segments[i],
-              style: submitted && i == question.errorSegmentIndex
+              style: (grammarLocationSubmitted || submitted) &&
+                      i == question.errorSegmentIndex
                   ? const TextStyle(
                       color: Colors.redAccent,
                       fontWeight: FontWeight.w900,

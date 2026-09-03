@@ -268,6 +268,20 @@ void main() {
     final firstTile = question.characterTiles.first;
     await tester.tap(find.widgetWithText(ActionChip, firstTile).last);
     await tester.pump();
+
+    final builtTile = tester.widget<Container>(
+      find.byKey(const ValueKey('challenge-rebuild-built-0')),
+    );
+    final builtDecoration = builtTile.decoration! as BoxDecoration;
+    expect(builtDecoration.color, const Color(0xF0221815));
+    final builtText = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(const ValueKey('challenge-rebuild-built-0')),
+        matching: find.text(firstTile),
+      ),
+    );
+    expect(builtText.style?.color, Colors.white);
+
     await tester.tap(find.text('提交'));
     await tester.pump();
 
@@ -343,13 +357,20 @@ void main() {
 
     expect(feedback, isTrue);
     expect(find.text('回答正确'), findsOneWidget);
+    final correctBuiltText = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(const ValueKey('challenge-rebuild-built-0')),
+        matching: find.text(ordered.first),
+      ),
+    );
+    expect(correctBuiltText.style?.color, Colors.greenAccent);
     expect(
       find.byKey(const ValueKey('challenge-inline-correct-answer')),
       findsOneWidget,
     );
   });
 
-  testWidgets('grammar wrong location and repair are explicit red feedback', (
+  testWidgets('grammar wrong STEP 1 stays visible before continue', (
     tester,
   ) async {
     final question = challenge(5).questions
@@ -362,15 +383,33 @@ void main() {
     );
 
     final wrongError = (question.errorSegmentIndex! + 1) % 4;
-    await tester.tap(
-      find.text(
+    final wrongLabel =
         '${String.fromCharCode(65 + wrongError)}  '
-        '${question.errorSegments[wrongError]}',
-      ),
+        '${question.errorSegments[wrongError]}';
+    final correctLabel =
+        '${String.fromCharCode(65 + question.errorSegmentIndex!)}  '
+        '${question.errorSegments[question.errorSegmentIndex!]}';
+
+    await tester.tap(find.text(wrongLabel));
+    await tester.pump();
+    await tester.tap(find.text('确认位置'));
+    await tester.pump();
+
+    expect(find.text('STEP 1 · 哪里错？'), findsOneWidget);
+    expect(find.text('STEP 2 · 怎么改？'), findsNothing);
+    expect(find.text('位置错误'), findsOneWidget);
+    expect(find.text('继续修改'), findsOneWidget);
+    expect(find.byKey(const ValueKey('grammar-correct-location')), findsOneWidget);
+    expect(tester.widget<Text>(find.text(wrongLabel)).style?.color, Colors.redAccent);
+    expect(
+      tester.widget<Text>(find.text(correctLabel)).style?.color,
+      Colors.greenAccent,
     );
+    expect(feedback, isNull);
+
+    await tester.tap(find.text('继续修改'));
     await tester.pump();
-    await tester.tap(find.text('提交位置'));
-    await tester.pump();
+    expect(find.text('STEP 2 · 怎么改？'), findsOneWidget);
 
     final wrongOption = question.options.indexWhere(
       (option) => option != question.answer,
@@ -386,12 +425,63 @@ void main() {
     await tester.pump();
 
     expect(feedback, isFalse);
-    final errorLocation = tester.widget<Text>(
-      find.byKey(const ValueKey('grammar-error-location')),
-    );
-    expect(errorLocation.style?.color, Colors.redAccent);
+    expect(find.byKey(const ValueKey('grammar-error-location')), findsOneWidget);
     expect(find.byKey(const ValueKey('grammar-wrong-location')), findsOneWidget);
     expect(find.byKey(const ValueKey('grammar-wrong-repair')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('challenge-inline-correct-answer')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('grammar correct STEP 1 waits for continue and final audio works', (
+    tester,
+  ) async {
+    final question = challenge(5).questions
+        .firstWhere((q) => q.mode == StoryChallengeMode.grammarRepair);
+    bool? feedback;
+    await pumpSingleQuestion(
+      tester,
+      question,
+      onFeedback: (correct) async => feedback = correct,
+    );
+
+    final errorIndex = question.errorSegmentIndex!;
+    final correctLocationLabel =
+        '${String.fromCharCode(65 + errorIndex)}  '
+        '${question.errorSegments[errorIndex]}';
+    await tester.tap(find.text(correctLocationLabel));
+    await tester.pump();
+    await tester.tap(find.text('确认位置'));
+    await tester.pump();
+
+    expect(find.text('STEP 1 · 哪里错？'), findsOneWidget);
+    expect(find.text('STEP 2 · 怎么改？'), findsNothing);
+    expect(find.text('位置正确'), findsOneWidget);
+    expect(find.text('继续修改'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text(correctLocationLabel)).style?.color,
+      Colors.greenAccent,
+    );
+    expect(feedback, isNull);
+
+    await tester.tap(find.text('继续修改'));
+    await tester.pump();
+    expect(find.text('STEP 2 · 怎么改？'), findsOneWidget);
+
+    final correctOption = question.options.indexOf(question.answer);
+    await tester.tap(
+      find.text(
+        '${String.fromCharCode(65 + correctOption)}  '
+        '${question.options[correctOption]}',
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('提交'));
+    await tester.pump();
+
+    expect(feedback, isTrue);
+    expect(find.text('回答正确'), findsOneWidget);
     expect(
       find.byKey(const ValueKey('challenge-inline-correct-answer')),
       findsOneWidget,
