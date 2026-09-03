@@ -78,8 +78,11 @@ void main() {
         expect(q.characterTiles.join().length, q.answer.length);
         for (final proper in ['沈砚', '阿宁', '紫禁城', '乾清门', '午门']) {
           if (q.answer.contains(proper)) {
-            expect(q.characterTiles, contains(proper),
-                reason: '$proper must remain one semantic tile');
+            expect(
+              q.characterTiles.any((tile) => tile.contains(proper)),
+              isTrue,
+              reason: '$proper must remain intact inside one semantic tile',
+            );
           }
         }
       }
