@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  TARGET_SHA: 47182e1ccaedf917617e2d3b06ba84093dace927
+  TARGET_SHA: 8643f6424d7a6af6ece3d4ae4be78356ea8b4987
   PREVIEW_WORKER: phoenix-journeys-pr-208
   PREVIEW_URL: https://phoenix-journeys-pr-208.7hn5tyrjgh.workers.dev/
 
