@@ -180,3 +180,62 @@ export async function assertNoJourneyLiveControls(page) {
     throw new Error('Journey unexpectedly exposes live Phoenix level controls');
   }
 }
+
+export async function saveMemoryAndWaitCommitted(
+  page,
+  { expectedValues = [], timeout = 15000 } = {},
+) {
+  const keyHint = 'journeyMemory.entries.v1';
+  const before = await page.evaluate((hint) => {
+    const candidates = [];
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (key && key.includes(hint)) candidates.push([key, localStorage.getItem(key)]);
+    }
+    candidates.sort((a, b) => a[0].localeCompare(b[0]));
+    const [key, value] = candidates[0] ?? [null, null];
+    return { key, value };
+  }, keyHint);
+
+  await page.evaluate(() => {
+    delete window.__phoenixMemoryCommitWitness;
+  });
+  await tapButton(page, '保存修改', { prefix: true });
+
+  await page.waitForFunction(
+    ({ keyHint: hint, beforeValue, expectedValues: expected }) => {
+      const candidates = [];
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const key = localStorage.key(i);
+        if (key && key.includes(hint)) candidates.push([key, localStorage.getItem(key)]);
+      }
+      candidates.sort((a, b) => a[0].localeCompare(b[0]));
+      const [key, value] = candidates[0] ?? [null, null];
+      if (value == null || value === beforeValue) return false;
+
+      let decoded = value;
+      for (let i = 0; i < 4 && typeof decoded === 'string'; i += 1) {
+        try {
+          const parsed = JSON.parse(decoded);
+          if (parsed === decoded) break;
+          decoded = parsed;
+        } catch (_) {
+          break;
+        }
+      }
+      const text = typeof decoded === 'string' ? decoded : JSON.stringify(decoded);
+      if (!expected.every((marker) => text.includes(marker))) return false;
+
+      const previous = window.__phoenixMemoryCommitWitness;
+      if (previous?.key === key && previous.value === value) {
+        previous.stableReads += 1;
+      } else {
+        window.__phoenixMemoryCommitWitness = { key, value, stableReads: 1 };
+      }
+      return window.__phoenixMemoryCommitWitness.stableReads >= 2;
+    },
+    { keyHint, beforeValue: before.value, expectedValues },
+    { polling: 'raf', timeout },
+  );
+}
+

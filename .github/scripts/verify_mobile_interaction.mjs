@@ -178,21 +178,24 @@ async function exercisePassport(page, browserName) {
   await semanticNode(page, '请从左侧选择省份', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT CHINA STATE CHANGE = PASS`);
   reportDuration(browserName, 'PASSPORT CHINA', startedAt);
+
   startedAt = Date.now();
-  await tapFirstSemanticAction(page, ['浙江省', '浙江'], `${browserName}:passport-province`);
-  await semanticNode(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
-  console.log(`${browserName} PASSPORT PROVINCE STATE CHANGE = PASS`);
-  reportDuration(browserName, 'PASSPORT PROVINCE', startedAt);
-  startedAt = Date.now();
-  await tapFirstSemanticAction(page, ['杭州'], `${browserName}:passport-city`);
-  await semanticNode(page, '浙江', { prefix: true, timeout: 15000 });
-  console.log(`${browserName} PASSPORT CITY STATE CHANGE = PASS`);
-  reportDuration(browserName, 'PASSPORT CITY', startedAt);
+  await tapFirstSemanticAction(page, ['北京市', '北京'], `${browserName}:passport-published-province`);
+  await semanticNode(page, '故宫博物院', { prefix: true, timeout: 15000 });
+  for (const hidden of ['浙江', '杭州', '上海', '西安']) {
+    if (await semanticExists(page, hidden, { prefix: true, timeout: 300 })) {
+      throw new Error(`${browserName}: hidden city leaked into published Passport UI: ${hidden}`);
+    }
+  }
+  console.log(`${browserName} PASSPORT PUBLISHED BEIJING STATE CHANGE = PASS`);
+  reportDuration(browserName, 'PASSPORT PUBLISHED BEIJING', startedAt);
+
   startedAt = Date.now();
   await tapSemanticAction(page, '返回上一级', `${browserName}:passport-back`, { prefix: true });
-  await semanticNode(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '请从左侧选择省份', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT BACK STATE CHANGE = PASS`);
   reportDuration(browserName, 'PASSPORT BACK', startedAt);
+
   startedAt = Date.now();
   await tapSemanticAction(page, '欧洲', `${browserName}:passport-europe`, { prefix: true, role: null });
   await semanticNode(page, '目的地即将开放', { prefix: true, timeout: 15000 });

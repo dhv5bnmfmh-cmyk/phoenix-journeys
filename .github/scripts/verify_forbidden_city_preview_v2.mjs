@@ -4,6 +4,7 @@ import {
   assertNoJourneyLiveControls,
   journeySessionLevel,
   returnToExplore,
+  saveMemoryAndWaitCommitted,
   setConfiguredLevel,
   tapSemanticChoice,
 } from './journey_level_session_harness.mjs';
@@ -525,7 +526,7 @@ async function validateLivingMemoryPersistence(page) {
   const allFields = await page.getByRole('textbox').all();
   await allFields[allFields.length - 1].fill('雨后的红墙很安静');
   await tapButton(page, '删除照片', { prefix: true });
-  await tapButton(page, '保存修改', { prefix: true });
+  await saveMemoryAndWaitCommitted(page, { expectedValues: ['修改后的紫禁城回忆', '雨后的红墙很安静'] });
 
   await page.reload({ waitUntil: 'load', timeout: 140000 });
   await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
@@ -544,7 +545,7 @@ async function validateLivingMemoryPersistence(page) {
     tapButton(page, '添加照片', { prefix: true }),
   ]);
   await chooser.setFiles(photoFixture);
-  await tapButton(page, '保存修改', { prefix: true });
+  await saveMemoryAndWaitCommitted(page, { expectedValues: ['修改后的紫禁城回忆', '雨后的红墙很安静'] });
   await page.reload({ waitUntil: 'load', timeout: 140000 });
   await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
   await enableSemantics(page);

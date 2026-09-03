@@ -16,6 +16,7 @@ on:
       - '.github/scripts/startup_instrument.py'
       - '.github/scripts/measure_startup.mjs'
       - '.github/scripts/measure_journey_open_visible.mjs'
+      - '.github/scripts/journey_level_session_harness.mjs'
       - '.github/workflows/**'
   pull_request:
     branches: [main]
@@ -32,6 +33,7 @@ on:
       - '.github/scripts/startup_instrument.py'
       - '.github/scripts/measure_startup.mjs'
       - '.github/scripts/measure_journey_open_visible.mjs'
+      - '.github/scripts/journey_level_session_harness.mjs'
       - '.github/workflows/startup-performance-audit.yml'
   workflow_dispatch:
 
