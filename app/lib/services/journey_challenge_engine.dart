@@ -559,7 +559,7 @@ const _forbiddenCityGrammarBlueprints = <_ForbiddenCityGrammarBlueprint>[
     correct: '因为紫禁城的主要建筑沿中轴线展开，所以参观者能清楚观察空间层次。',
     errorSegments: <String>[
       '虽然',
-      '紫禁城的主要建筑沿中轴线展开',
+      '紫禁城的主要建筑沿中轴线展开，',
       '所以参观者能清楚观察',
       '空间层次。',
     ],
@@ -613,7 +613,7 @@ const _forbiddenCityGrammarBlueprints = <_ForbiddenCityGrammarBlueprint>[
     correct: '乾清门位于外朝与内廷之间，是连接两者的重要空间节点。',
     errorSegments: <String>[
       '乾清门位于',
-      '外朝与内廷之间',
+      '外朝与内廷之间，',
       '是连接的重要',
       '空间节点。',
     ],
