@@ -2,6 +2,8 @@
 
 The product acceptance source of truth is `docs/PHOENIX_JOURNEY_ACCEPTANCE_CONTRACT.md`. Tests implement the current product contract; legacy tests do not override Founder-approved behavior.
 
+Operational ownership: `.github/workflows/preview-cloudflare.yml` is the PR release/Preview gate. `.github/workflows/flutter-ci.yml` is the main-branch post-merge verification gate. Do not run both for the same PR candidate SHA.
+
 1. Create a focused branch and keep one feature or fix per pull request.
 2. Add or update the smallest relevant tests. Record sources for factual content and licensing for every visual or audio asset.
 3. Use the three validation levels below. Do not repeat an expensive suite on the same exact SHA without new evidence or a materially different environment.
