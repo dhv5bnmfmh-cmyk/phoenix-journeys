@@ -7,17 +7,45 @@ const template = readFileSync('.github/pull_request_template.md', 'utf8');
 const processDoc = readFileSync('docs/development-workflow.md', 'utf8');
 const stableBaseline = readFileSync('docs/PHOENIX_STABLE_BASELINE_STANDARD.md', 'utf8');
 
-test('every Phoenix pull request gets an isolated Worker name and URL', () => {
-  assert.match(workflow, /PREVIEW_WORKER: phoenix-journeys-pr-\$\{\{ github\.event\.pull_request\.number \}\}/);
-  assert.match(workflow, /PREVIEW_URL: https:\/\/phoenix-journeys-pr-\$\{\{ github\.event\.pull_request\.number \}\}\.7hn5tyrjgh\.workers\.dev/);
+const envLine = (name) =>
+  workflow.split('\n').find((line) => line.trimStart().startsWith(`${name}:`)) ?? '';
+
+test('preview destinations resolve from the selected PR identity across supported triggers', () => {
+  const workerLine = envLine('PREVIEW_WORKER');
+  const urlLine = envLine('PREVIEW_URL');
+  assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /pr_number:/);
+  for (const line of [workerLine, urlLine]) {
+    assert.match(line, /github\.event\.pull_request\.number/);
+    assert.match(line, /inputs\.pr_number/);
+  }
+  assert.match(workerLine, /phoenix-journeys-pr-\{0\}/);
+  assert.match(urlLine, /https:\/\/phoenix-journeys-pr-\{0\}\.7hn5tyrjgh\.workers\.dev/);
   assert.match(workflow, /--name "\$PREVIEW_WORKER"/);
 });
 
-test('preview uses the exact feature head rather than the pull request merge ref', () => {
-  assert.match(workflow, /PREVIEW_RELEASE: \$\{\{ github\.event\.pull_request\.head\.sha \}\}/);
+test('preview release identity stays exact from event candidate through build and deploy', () => {
+  const releaseLine = envLine('PREVIEW_RELEASE');
+  assert.match(releaseLine, /github\.event\.pull_request\.head\.sha/);
+  assert.match(releaseLine, /github\.sha/);
+  assert.doesNotMatch(workflow, /candidate_sha:\s*$/m);
+  assert.doesNotMatch(workflow, /release_sha:\s*$/m);
   assert.match(workflow, /ref: \$\{\{ env\.PREVIEW_RELEASE \}\}/);
   assert.match(workflow, /test "\$\(git rev-parse HEAD\)" = "\$PREVIEW_RELEASE"/);
-  assert.match(workflow, /PHOENIX_RELEASE:\$PREVIEW_RELEASE/);
+  assert.equal((workflow.match(/flutter build web --release/g) ?? []).length, 1);
+
+  const buildIndex = workflow.indexOf('name: Build preview web app once');
+  const validateIndex = workflow.indexOf('name: Validate Cloudflare Worker bundle');
+  const deployIndex = workflow.indexOf('name: Deploy isolated preview Worker');
+  const verifyIndex = workflow.indexOf('name: Verify preview release');
+  assert.ok(buildIndex >= 0);
+  assert.ok(validateIndex > buildIndex);
+  assert.ok(deployIndex > validateIndex);
+  assert.ok(verifyIndex > deployIndex);
+
+  const deployBlock = workflow.slice(deployIndex, verifyIndex);
+  assert.match(deployBlock, /test "\$\(git rev-parse HEAD\)" = "\$PREVIEW_RELEASE"/);
+  assert.match(deployBlock, /PHOENIX_RELEASE:\$PREVIEW_RELEASE/);
 });
 
 test('preview is exact-release verified before its link is published', () => {
