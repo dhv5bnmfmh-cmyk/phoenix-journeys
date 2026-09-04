@@ -4,22 +4,12 @@ on:
   push:
     branches:
       - main
-      - product/city-standard-v1-beijing-forbidden-city
     paths:
       - 'app/**'
       - 'worker/**'
       - 'wrangler.toml'
       - '.github/scripts/**'
-      - '.github/workflows/**'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'app/**'
-      - 'worker/**'
-      - 'wrangler.toml'
-      - '.github/scripts/**'
-      - '.github/workflows/**'
+      - '.github/workflows/flutter-ci.yml'
 
 permissions:
   contents: read
@@ -29,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  CANDIDATE_SHA: ${{ github.sha }}
 
 jobs:
   verify:
@@ -91,7 +81,7 @@ jobs:
         continue-on-error: true
         run: |
           set -o pipefail
-          flutter test 2>&1 | tee test.log
+          flutter test --reporter expanded 2>&1 | tee test.log
 
       - name: Build web release
         id: build
