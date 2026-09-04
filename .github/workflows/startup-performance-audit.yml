@@ -17,7 +17,7 @@ on:
       - '.github/scripts/measure_startup.mjs'
       - '.github/scripts/measure_journey_open_visible.mjs'
       - '.github/scripts/journey_level_session_harness.mjs'
-      - '.github/workflows/**'
+      - '.github/workflows/startup-performance-audit.yml'
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
