@@ -8,7 +8,7 @@ mapping_tests=(
   test/story_discovery_no_yellow_dots_test.dart
   test/founder_real_device_ux_test.dart
   test/all_gold_challenge_cross_gold_dna_test.dart
-  test/all_gold_challenge_deskinned_template_test.dart
+  test/all_gold_challenge_phase2_contract_test.dart
   test/forbidden_city_full_lifecycle_level_consistency_test.dart
   test/journey_memory_completion_narration_contract_test.dart
   test/narration_compact_progress_test.dart
@@ -81,7 +81,7 @@ for file in "${changed_files[@]}"; do
     app/lib/widgets/hsk_story_challenge.dart|app/lib/services/journey_challenge_engine.dart|app/lib/models/journey_challenge.dart)
       product_change=true; needs_analyze=true; raise_risk MEDIUM
       add_test test/all_gold_challenge_cross_gold_dna_test.dart
-      add_test test/all_gold_challenge_deskinned_template_test.dart
+      add_test test/all_gold_challenge_phase2_contract_test.dart
       add_test test/forbidden_city_full_lifecycle_level_consistency_test.dart
       ;;
     app/lib/services/narration_controller.dart|app/lib/services/narration_follow_coordinator.dart|app/lib/widgets/narration_player_card.dart|app/lib/widgets/journey_stage_narration_button.dart)

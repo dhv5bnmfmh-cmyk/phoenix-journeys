@@ -22,6 +22,12 @@ on:
       - 'worker/**'
       - 'wrangler.toml'
       - '.github/workflows/preview-cloudflare.yml'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Preview PR number
+        required: false
+        default: '208'
 
 permissions:
   contents: read
@@ -29,27 +35,22 @@ permissions:
   statuses: write
 
 concurrency:
-  group: cloudflare-preview-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}
+  group: cloudflare-preview-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.event_name == 'workflow_dispatch' && inputs.pr_number || 208 }}
   cancel-in-progress: true
 
 env:
-  PR_NUMBER: ${{ github.event.pull_request.number }}
-  PREVIEW_WORKER: phoenix-journeys-pr-${{ github.event.pull_request.number }}
-  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event.pull_request.number }}.7hn5tyrjgh.workers.dev
-  PREVIEW_RELEASE: ${{ github.event.pull_request.head.sha }}
+  PR_NUMBER: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.event_name == 'workflow_dispatch' && inputs.pr_number || '208' }}
+  PREVIEW_WORKER: ${{ github.event_name == 'pull_request' && format('phoenix-journeys-pr-{0}', github.event.pull_request.number) || github.event_name == 'workflow_dispatch' && format('phoenix-journeys-pr-{0}', inputs.pr_number) || 'phoenix-journeys-pr-208' }}
+  PREVIEW_URL: ${{ github.event_name == 'pull_request' && format('https://phoenix-journeys-pr-{0}.7hn5tyrjgh.workers.dev', github.event.pull_request.number) || github.event_name == 'workflow_dispatch' && format('https://phoenix-journeys-pr-{0}.7hn5tyrjgh.workers.dev', inputs.pr_number) || 'https://phoenix-journeys-pr-208.7hn5tyrjgh.workers.dev' }}
+  PREVIEW_RELEASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   deploy-preview:
     if: >-
-      github.event_name == 'push' ||
+      github.event_name != 'pull_request' ||
       (github.event.action != 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
-    env:
-      PR_NUMBER: ${{ github.event_name == 'push' && '208' || github.event.pull_request.number }}
-      PREVIEW_WORKER: ${{ github.event_name == 'push' && 'phoenix-journeys-pr-208' || format('phoenix-journeys-pr-{0}', github.event.pull_request.number) }}
-      PREVIEW_URL: ${{ github.event_name == 'push' && 'https://phoenix-journeys-pr-208.7hn5tyrjgh.workers.dev' || format('https://phoenix-journeys-pr-{0}.7hn5tyrjgh.workers.dev', github.event.pull_request.number) }}
-      PREVIEW_RELEASE: ${{ github.event_name == 'push' && github.sha || github.event.pull_request.head.sha }}
 
     steps:
       - name: Check out exact candidate head
