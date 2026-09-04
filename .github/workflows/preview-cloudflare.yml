@@ -217,15 +217,15 @@ jobs:
           }
           NODE
 
+      - name: Build preview web app once
+        working-directory: app
+        run: flutter build web --release
+
       - name: Validate Cloudflare Worker bundle
         shell: bash
         run: |
           set -o pipefail
           npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run 2>&1 | tee worker-build.log
-
-      - name: Build preview web app once
-        working-directory: app
-        run: flutter build web --release
 
       - name: Deploy isolated preview Worker
         env:
