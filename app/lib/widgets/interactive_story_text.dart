@@ -600,10 +600,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
         : baseStyle?.copyWith(
             color: const Color(0xFFFFD879),
             fontWeight: FontWeight.w800,
-            decoration: TextDecoration.underline,
-            decorationColor: Colors.white,
-            decorationStyle: TextDecorationStyle.dotted,
-            decorationThickness: 1.6,
+            decoration: TextDecoration.none,
             shadows: const [
               Shadow(
                 color: Color(0xF0000000),
