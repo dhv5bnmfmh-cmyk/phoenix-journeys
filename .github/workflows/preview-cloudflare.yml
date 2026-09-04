@@ -81,13 +81,14 @@ jobs:
           done < <(find .github/scripts -type f -name '*.mjs' -print0)
 
       - name: Test Phoenix agents
+        id: agents
         shell: bash
         run: |
           set -o pipefail
           node --test worker/*.test.mjs 2>&1 | tee phoenix-agents-preview.log
 
       - name: Upload Phoenix agent failure evidence
-        if: failure()
+        if: steps.agents.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: phoenix-agents-preview-${{ env.PREVIEW_RELEASE }}
@@ -109,6 +110,7 @@ jobs:
         run: flutter analyze
 
       - name: Test Flutter app once and generate quality evidence
+        id: flutter_test
         working-directory: app
         shell: bash
         env:
@@ -147,7 +149,7 @@ jobs:
           exit "$test_status"
 
       - name: Upload Full Flutter failure evidence
-        if: failure()
+        if: steps.flutter_test.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: full-flutter-${{ env.PREVIEW_RELEASE }}
