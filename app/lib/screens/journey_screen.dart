@@ -2308,16 +2308,12 @@ class _JourneyScreenState extends State<JourneyScreen>
                   color: Color(0xFFFFD879), fontWeight: FontWeight.w800)),
           const SizedBox(height: 10),
           if (_forbiddenCityFinaleCompleted) ...[
-            const Icon(Icons.check_circle_rounded,
-                color: Color(0xFFFFD879), size: 46),
-            const SizedBox(height: 6),
-            const Text(
-              'Journey 完成',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 20),
+            Center(
+              child: AnimatedCityJourneyStamp(
+                key: const ValueKey('forbidden-city-finale-stamp'),
+                journey: _experience,
+                size: 92,
+              ),
             ),
             const SizedBox(height: 10),
             const _ForbiddenCityCompleteCard(

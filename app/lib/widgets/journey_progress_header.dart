@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../data/daily_journey_catalog.dart';
 import '../theme/phoenix_theme.dart';
-import 'city_journey_stamp.dart';
 
 class JourneyProgressHeader extends StatelessWidget {
   const JourneyProgressHeader({
@@ -26,12 +24,8 @@ class JourneyProgressHeader extends StatelessWidget {
     final nextLabel = currentStep < labels.length - 1
         ? labels[currentStep + 1]
         : '已完成';
-    final showForbiddenCityFinaleStamp = isCompleted &&
-        currentStep == labels.length - 1 &&
-        labels.isNotEmpty &&
-        labels.last == '回忆 · 完成';
 
-    final progressStrip = Material(
+    return Material(
       color: Colors.transparent,
       child: InkWell(
         key: const ValueKey('journey-progress-strip'),
@@ -107,24 +101,6 @@ class JourneyProgressHeader extends StatelessWidget {
           ),
         ),
       ),
-    );
-
-    if (!showForbiddenCityFinaleStamp) return progressStrip;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          height: 112,
-          child: Center(
-            child: AnimatedCityJourneyStamp(
-              key: const ValueKey('forbidden-city-finale-stamp'),
-              journey: requireDailyJourneyExperience('beijing-forbidden-city'),
-              size: 64,
-            ),
-          ),
-        ),
-        progressStrip,
-      ],
     );
   }
 

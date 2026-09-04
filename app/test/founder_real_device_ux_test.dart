@@ -2,12 +2,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:phoenix_journeys/models/journey_challenge.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
+import 'package:phoenix_journeys/screens/journey_screen.dart';
 import 'package:phoenix_journeys/services/journey_challenge_engine.dart';
 import 'package:phoenix_journeys/services/journey_preparation_coordinator.dart';
+import 'package:phoenix_journeys/state/app_state.dart';
 import 'package:phoenix_journeys/theme/phoenix_theme.dart';
 import 'package:phoenix_journeys/widgets/hsk_story_challenge.dart';
+import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
 import 'package:phoenix_journeys/widgets/journey_progress_header.dart';
 
 void main() {
@@ -83,6 +88,114 @@ void main() {
         as OutlineInputBorder;
     expect(focused.borderSide.color, PhoenixTheme.contentAccent);
     expect(focused.borderSide.width, greaterThan(0));
+  });
+
+  testWidgets(
+    'InteractiveStoryText keeps active narration tint without a rectangle border',
+    (tester) async {
+      final state = AppState();
+      addTearDown(state.dispose);
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<AppState>.value(
+          value: state,
+          child: const MaterialApp(
+            home: Scaffold(
+              body: InteractiveStoryText(
+                text: '紫禁城里的路线会改变人物的选择。',
+                entries: [],
+                narrationItemId: 'borderless-active',
+                highlightStart: 0,
+                highlightEnd: 3,
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final surface = tester.widget<AnimatedContainer>(
+        find.byKey(
+          const ValueKey('narration-follow-surface-borderless-active'),
+        ),
+      );
+      final decoration = surface.decoration! as BoxDecoration;
+      expect(decoration.border, isNull);
+      expect(decoration.color, const Color(0x16FFD879));
+    },
+  );
+
+  testWidgets(
+    'Lv1 Lv6 Lv10 Story and Discovery share borderless narration surfaces',
+    (tester) async {
+      final state = AppState();
+      addTearDown(state.dispose);
+
+      for (final level in <int>[1, 6, 10]) {
+        final bundle = JourneyPreparationCoordinator.instance.prepareNow(
+          journeyId: 'beijing-forbidden-city',
+          profile: profile(level),
+          scriptMode: 'simplified',
+        );
+        final samples = <String, String>{
+          'story-lv$level': bundle.levelContent.storyParagraphs.first,
+          'discovery-lv$level': bundle.levelContent.discoveries.first.text,
+        };
+
+        for (final sample in samples.entries) {
+          await tester.pumpWidget(
+            ChangeNotifierProvider<AppState>.value(
+              value: state,
+              child: MaterialApp(
+                home: Scaffold(
+                  body: InteractiveStoryText(
+                    text: sample.value,
+                    entries: bundle.levelContent.words,
+                    narrationItemId: sample.key,
+                    highlightStart: 0,
+                    highlightEnd: 1,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pump();
+
+          final surface = tester.widget<AnimatedContainer>(
+            find.byKey(ValueKey('narration-follow-surface-${sample.key}')),
+          );
+          final decoration = surface.decoration! as BoxDecoration;
+          expect(decoration.border, isNull, reason: sample.key);
+          expect(
+            decoration.color,
+            const Color(0x16FFD879),
+            reason: '${sample.key} must keep active narration feedback',
+          );
+        }
+      }
+    },
+  );
+
+  test('Story and Discovery both route through InteractiveStoryText', () {
+    final journey = File('lib/screens/journey_screen.dart').readAsStringSync();
+    final storyStart = journey.indexOf('Widget _defaultStoryPage()');
+    final storyEnd = journey.indexOf('Widget _wordsPage()', storyStart);
+    final discoveryStart = journey.indexOf('Widget _discoveryPage()');
+    final discoveryEnd = journey.indexOf('Widget _wonderPage()', discoveryStart);
+
+    expect(storyStart, isNonNegative);
+    expect(storyEnd, greaterThan(storyStart));
+    expect(discoveryStart, isNonNegative);
+    expect(discoveryEnd, greaterThan(discoveryStart));
+
+    final story = journey.substring(storyStart, storyEnd);
+    final discovery = journey.substring(discoveryStart, discoveryEnd);
+    expect(story, contains('InteractiveStoryText('));
+    expect(discovery, contains('InteractiveStoryText('));
+    expect(story, contains('transparentSurface: true'));
+    expect(discovery, contains('transparentSurface: true'));
   });
 
   testWidgets('Sentence Rebuild tap returns only the chosen built tile', (
@@ -187,74 +300,107 @@ void main() {
     expect(submitButton(tester).onPressed, isNotNull);
   });
 
-  testWidgets('Forbidden City completed Finale restores existing stamp motion', (
+  testWidgets('Forbidden City completed Finale centers exactly one stamp', (
     tester,
   ) async {
-    final completed = ValueNotifier<bool>(false);
-    addTearDown(completed.dispose);
-    const labels = <String>[
-      'Story',
-      'Vocabulary',
-      'Discovery',
-      'Challenge',
-      '回忆 · 完成',
-    ];
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final state = AppState();
+    addTearDown(state.dispose);
+    await state.load();
+    await state.activateJourney('beijing-forbidden-city');
+    await state.completeJourney('', sessionLevel: 4);
 
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
+      ChangeNotifierProvider<AppState>.value(
+        value: state,
+        child: const MaterialApp(
+          home: JourneyScreen(journeyId: 'beijing-forbidden-city'),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+
+    final stamp = find.byKey(const ValueKey('animated-city-journey-stamp'));
+    final city = find.textContaining('北京 · 紫禁城');
+    final reward = find.text('Challenge Reward');
+
+    expect(stamp, findsOneWidget);
+    expect(find.byKey(const ValueKey('city-stamp-tool')), findsOneWidget);
+    expect(find.byKey(const ValueKey('city-stamp-imprint')), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
+    expect(find.text('Journey 完成'), findsNothing);
+    expect(city, findsOneWidget);
+    expect(reward, findsOneWidget);
+    expect(find.textContaining('Spatial Evidence'), findsOneWidget);
+    expect(find.textContaining('Journey 已记录'), findsOneWidget);
+    expect(find.text('重新体验'), findsOneWidget);
+    expect(find.text('返回首页'), findsOneWidget);
+
+    expect(tester.getTopLeft(city).dy, lessThan(tester.getTopLeft(stamp).dy));
+    expect(tester.getTopLeft(stamp).dy, lessThan(tester.getTopLeft(reward).dy));
+  });
+
+  testWidgets('completed progress header has no standalone top stamp', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ValueListenableBuilder<bool>(
-            valueListenable: completed,
-            builder: (context, done, _) => Column(
-              children: [
-                JourneyProgressHeader(
-                  currentStep: 4,
-                  furthestStep: 4,
-                  isCompleted: done,
-                  labels: labels,
-                  onStepSelected: (_) {},
-                ),
-                if (done) ...const [
-                  Text('Journey 完成'),
-                  Text('Challenge Reward'),
-                  Text('返回首页'),
-                ],
-              ],
-            ),
+          body: JourneyProgressHeader(
+            currentStep: 4,
+            furthestStep: 4,
+            isCompleted: true,
+            labels: const <String>[
+              'Story',
+              'Vocabulary',
+              'Discovery',
+              'Challenge',
+              '回忆 · 完成',
+            ],
+            onStepSelected: (_) {},
           ),
         ),
       ),
     );
 
     expect(find.byKey(const ValueKey('animated-city-journey-stamp')), findsNothing);
-    completed.value = true;
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 16));
-
-    expect(
-      find.byKey(const ValueKey('animated-city-journey-stamp')),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('city-stamp-tool')), findsOneWidget);
-    expect(find.byKey(const ValueKey('city-stamp-imprint')), findsOneWidget);
-    expect(find.text('Journey 完成'), findsOneWidget);
-    expect(find.text('Challenge Reward'), findsOneWidget);
-    expect(find.text('返回首页'), findsOneWidget);
+    expect(find.text('5/5'), findsOneWidget);
+    expect(find.text('回忆 · 完成'), findsOneWidget);
+    expect(find.text('课程已完成 · 可自由选择'), findsOneWidget);
   });
 
-  test('Finale stamp wiring does not duplicate completion persistence', () {
+  test('Finale stamp wiring keeps persistence single and hero-local', () {
     final journey = File('lib/screens/journey_screen.dart').readAsStringSync();
     final progress =
         File('lib/widgets/journey_progress_header.dart').readAsStringSync();
 
     expect(journey, contains('await _appState.completeJourney('));
-    expect(journey, contains("'Journey 完成'"));
     expect(journey, contains("'Challenge Reward'"));
     expect(journey, contains('Journey 已记录'));
-    expect(progress, contains('AnimatedCityJourneyStamp('));
+    expect(progress, isNot(contains('AnimatedCityJourneyStamp(')));
     expect(progress, isNot(contains('completeJourney(')));
     expect(progress, isNot(contains('awardChallengeRewardOnce(')));
+
+    final completedStart =
+        journey.indexOf('if (_forbiddenCityFinaleCompleted) ...[');
+    final completedEnd = journey.indexOf('] else ...[', completedStart);
+    expect(completedStart, isNonNegative);
+    expect(completedEnd, greaterThan(completedStart));
+    final completedBranch = journey.substring(completedStart, completedEnd);
+
+    expect(completedBranch, contains('AnimatedCityJourneyStamp('));
+    expect(
+      completedBranch,
+      contains("key: const ValueKey('forbidden-city-finale-stamp')"),
+    );
+    expect(completedBranch, isNot(contains('check_circle_rounded')));
+    expect(completedBranch, isNot(contains("'Journey 完成'")));
+    expect(
+      'AnimatedCityJourneyStamp('.allMatches(completedBranch).length,
+      1,
+    );
   });
 }

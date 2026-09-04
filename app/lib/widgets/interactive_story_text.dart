@@ -527,11 +527,6 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
                       ? const Color(0x16FFD879)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isCurrentNarrationItem
-                        ? const Color(0x38FFD879)
-                        : Colors.transparent,
-                  ),
                   boxShadow: isCurrentNarrationItem
                       ? const [
                           BoxShadow(
