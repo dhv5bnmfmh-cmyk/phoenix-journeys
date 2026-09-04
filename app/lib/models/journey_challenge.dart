@@ -48,12 +48,14 @@ class StoryCompletionBlank {
     required this.answer,
     required this.options,
     required this.answerType,
+    required this.semanticSlotType,
     required this.sourceStart,
   });
 
   final String answer;
   final List<String> options;
   final String answerType;
+  final String semanticSlotType;
   final int sourceStart;
 }
 

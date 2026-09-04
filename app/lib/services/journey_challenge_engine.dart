@@ -122,7 +122,7 @@ class JourneyChallengeEngine {
     int index,
   ) {
     if (journeyId == _forbiddenCityJourneyId) {
-      final record = _forbiddenCityGrammarBlueprints[index];
+      final record = _forbiddenCityGrammarBlueprint(level, index);
       if (record.errorSegments.join() != record.broken) {
         throw StateError(
           'Forbidden City grammar segments must reconstruct the broken sentence.',
@@ -175,7 +175,7 @@ class JourneyChallengeEngine {
             '搭配近项',
             '赘余保留项',
             '成分仍缺失项',
-          ][index],
+          ][index] + ' / Band ${((level - 1) ~/ 2) + 1}',
         ),
       );
     }
@@ -222,8 +222,12 @@ class JourneyChallengeEngine {
     int index,
     List<_Source> all,
   ) {
-    final passage = _completionPassage(source, all, level, index);
-    final spans = _semanticSpans(passage, index);
+    final passage = journeyId == _forbiddenCityJourneyId
+        ? _forbiddenCityCompletionPassage(source, all, level)
+        : _completionPassage(source, all, level, index);
+    final spans = journeyId == _forbiddenCityJourneyId
+        ? _forbiddenCityCompletionSpans(passage)
+        : _semanticSpans(passage, index);
     final selected = _selectBlankSpans(passage, spans, level, index);
     final storyTokens = <String>{
       for (var pattern = 0; pattern < 4; pattern++)
@@ -238,13 +242,26 @@ class JourneyChallengeEngine {
       final span = selected[blankIndex];
       segments.add(passage.substring(cursor, span.start));
       final answer = passage.substring(span.start, span.end);
+      final semanticSlotType = journeyId == _forbiddenCityJourneyId
+          ? _forbiddenCitySlotFor(answer)
+          : _answerType(answer);
       blanks.add(
         StoryCompletionBlank(
           answer: answer,
           options: List.unmodifiable(
-            _blankOptions(answer, storyTokens, blankIndex, index),
+            journeyId == _forbiddenCityJourneyId
+                ? _forbiddenCityBlankOptions(
+                    answer: answer,
+                    slot: semanticSlotType,
+                    journeyId: journeyId,
+                    level: level,
+                    questionId: 'completion-${index + 1}',
+                    blankIndex: blankIndex,
+                  )
+                : _blankOptions(answer, storyTokens, blankIndex, index),
           ),
           answerType: _answerType(answer),
+          semanticSlotType: semanticSlotType,
           sourceStart: span.start,
         ),
       );
@@ -260,7 +277,10 @@ class JourneyChallengeEngine {
     }
     promptBuffer.write(segments.last);
 
-    final answerShape = blanks.map((blank) => blank.answerType).toSet().join('+');
+    final answerShape = blanks
+        .map((blank) => '${blank.answerType}:${blank.semanticSlotType}')
+        .toSet()
+        .join('+');
     final sourceForSignature = _Source(
       source.paragraphIndex,
       source.sentenceIndex,
@@ -345,6 +365,18 @@ class ChallengeAntiTemplateAuditor {
     if (rebuild.any((q) => q.characterTiles.every((tile) => _hanCount(tile) == 1))) {
       failures.add('rebuild-all-single-character');
     }
+    if (set.sessionLevel >= 7 &&
+        rebuild.any((q) => q.characterTiles.length < 4)) {
+      failures.add('rebuild-high-level-trivial');
+    }
+    if (set.journeyId == _forbiddenCityJourneyId &&
+        rebuild.any((q) => _protectedChallengeTerms.any(
+              (term) =>
+                  q.answer.contains(term) &&
+                  !q.characterTiles.any((tile) => tile.contains(term)),
+            ))) {
+      failures.add('rebuild-protected-term-split');
+    }
 
     final grammar = set.questions
         .where((q) => q.mode == StoryChallengeMode.grammarRepair)
@@ -354,6 +386,27 @@ class ChallengeAntiTemplateAuditor {
     }
     if (grammar.any((q) => q.errorSegments.length != 4 || q.options.length != 4)) {
       failures.add('grammar-four-choice-contract');
+    }
+    if (grammar.any((q) => q.options.toSet().length != 4)) {
+      failures.add('grammar-duplicate-options');
+    }
+    if (grammar.any((q) =>
+        q.grammarOptionExplanations.length != 4 ||
+        q.grammarOptionExplanations.any((item) => item.trim().isEmpty))) {
+      failures.add('grammar-option-explanations');
+    }
+    if (set.journeyId == _forbiddenCityJourneyId &&
+        grammar.any((q) =>
+            !q.signature.distractorStrategy.contains('Band ${((set.sessionLevel - 1) ~/ 2) + 1}'))) {
+      failures.add('grammar-level-band');
+    }
+    if (set.sessionLevel >= 7 &&
+        grammar.any((q) {
+          final lengths = q.options.map(_hanCount).toList()..sort();
+          return lengths.last - lengths.first > 8 ||
+              q.errorSegments.any((segment) => _hanCount(segment) < 2);
+        })) {
+      failures.add('grammar-high-level-plausibility');
     }
 
     final completion = set.questions
@@ -367,6 +420,39 @@ class ChallengeAntiTemplateAuditor {
     }
     if (completion.any((q) => q.completionBlanks.any((blank) => blank.options.length != 4))) {
       failures.add('completion-blank-options');
+    }
+    if (completion.any((q) => q.completionBlanks.any(
+          (blank) => blank.semanticSlotType.trim().isEmpty,
+        ))) {
+      failures.add('completion-slot-type');
+    }
+    if (completion.any((q) => q.completionBlanks.any(
+          (blank) => blank.options.toSet().length != 4,
+        ))) {
+      failures.add('completion-duplicate-options');
+    }
+    if (set.journeyId == _forbiddenCityJourneyId &&
+        completion.any((q) => q.completionBlanks.any(
+              (blank) => blank.options.any(
+                (option) => _forbiddenCitySlotFor(option) != blank.semanticSlotType,
+              ),
+            ))) {
+      failures.add('completion-slot-mismatch');
+    }
+    if (set.journeyId == _forbiddenCityJourneyId &&
+        completion.any((q) => q.completionBlanks.any(
+              (blank) => blank.options.any(_looksLikeLexicalFragment),
+            ))) {
+      failures.add('completion-lexical-fragment');
+    }
+    if (set.sessionLevel >= 3 &&
+        completion.any((q) => q.completionBlanks.any((blank) {
+          final answerLength = _hanCount(blank.answer);
+          return blank.options
+              .where((option) => option != blank.answer)
+              .every((option) => (_hanCount(option) - answerLength).abs() > 1);
+        }))) {
+      failures.add('completion-length-leak');
     }
     if (completion.any(
       (q) => q.completionBlanks.any(
@@ -387,6 +473,16 @@ class ChallengeAntiTemplateAuditor {
     }
     if (completion.map((q) => q.signature.distractorStrategy).toSet().length < 4) {
       failures.add('completion-distractor-diversity');
+    }
+    if (set.journeyId == _forbiddenCityJourneyId) {
+      final positions = <int>[
+        for (final question in completion)
+          for (final blank in question.completionBlanks)
+            blank.options.indexOf(blank.answer),
+      ];
+      if (_hasSimpleFourPositionCycle(positions)) {
+        failures.add('completion-correct-position-cycle');
+      }
     }
 
     if (set.questions.map((q) => q.signature.equivalenceKey).toSet().length != 12) {
@@ -522,13 +618,49 @@ const _forbiddenCityRebuildBands = <List<_RebuildLearningBlueprint>>[
       <String>['故宫博物院', '把宫殿建筑', '与馆藏文物', '置于', '同一历史语境中'],
     ),
   ],
+  <_RebuildLearningBlueprint>[
+    _RebuildLearningBlueprint(
+      '沿中轴观察时仍要区分建筑秩序与人物任务',
+      <String>['沿中轴观察时', '仍要区分', '建筑秩序', '与人物任务'],
+    ),
+    _RebuildLearningBlueprint(
+      '从午门进入形成的是观察顺序而不是唯一路线',
+      <String>['从午门进入', '形成的是', '观察顺序', '而不是', '唯一路线'],
+    ),
+    _RebuildLearningBlueprint(
+      '乾清门既连接空间也让不同任务在此会合',
+      <String>['乾清门', '既连接空间', '也让不同任务', '在此会合'],
+    ),
+    _RebuildLearningBlueprint(
+      '故宫博物院以建筑现场和馆藏证据共同解释历史',
+      <String>['故宫博物院', '以建筑现场', '和馆藏证据', '共同解释历史'],
+    ),
+  ],
+  <_RebuildLearningBlueprint>[
+    _RebuildLearningBlueprint(
+      '中轴提供整体框架却不替人物决定行动路线',
+      <String>['中轴', '提供整体框架', '却不替人物', '决定行动路线'],
+    ),
+    _RebuildLearningBlueprint(
+      '午门所开启的空间序列不能被等同于唯一答案',
+      <String>['午门所开启的', '空间序列', '不能被等同于', '唯一答案'],
+    ),
+    _RebuildLearningBlueprint(
+      '只有同时核对任务与连接乾清门才成为有效证据',
+      <String>['只有同时核对', '任务与连接', '乾清门', '才成为有效证据'],
+    ),
+    _RebuildLearningBlueprint(
+      '故宫博物院把空间事实放回制度与历史语境解释',
+      <String>['故宫博物院', '把空间事实', '放回制度', '与历史语境解释'],
+    ),
+  ],
 ];
 
 _RebuildLearningBlueprint _forbiddenCityRebuildBlueprint(
   int level,
   int index,
 ) {
-  final band = level <= 3 ? 0 : (level <= 7 ? 1 : 2);
+  final band = ((level.clamp(1, 10).toInt() - 1) ~/ 2).clamp(0, 4);
   return _forbiddenCityRebuildBands[band][index];
 }
 
@@ -678,6 +810,250 @@ const _forbiddenCityGrammarBlueprints = <_ForbiddenCityGrammarBlueprint>[
     ],
   ),
 ];
+
+class _GrammarRepairPattern {
+  const _GrammarRepairPattern({
+    required this.family,
+    required this.segments,
+    required this.errorSegmentIndex,
+    required this.correctSegment,
+    required this.candidateSegments,
+    required this.whyWrong,
+    required this.revisionRule,
+    required this.optionExplanations,
+  });
+
+  final String family;
+  final List<String> segments;
+  final int errorSegmentIndex;
+  final String correctSegment;
+  final List<String> candidateSegments;
+  final String whyWrong;
+  final String revisionRule;
+  final List<String> optionExplanations;
+}
+
+const _forbiddenCityIntermediateGrammar = <_GrammarRepairPattern>[
+  _GrammarRepairPattern(
+    family: '关联词错误',
+    segments: <String>['虽然任务不同，', '两条路线都利用真实连接，', '所以它们应被判断为', '同一种路线。'],
+    errorSegmentIndex: 2,
+    correctSegment: '却不能因此被判断为',
+    candidateSegments: <String>[
+      '所以它们应被判断为',
+      '却不能因此被判断为',
+      '因此它们自然成为',
+      '而且它们必须成为',
+    ],
+    whyWrong: '前文强调任务不同，后文应限制“共享连接”所能推出的结论，不能用“所以”导出路线相同。',
+    revisionRule: '关联词不仅要配对，还要准确表示证据与结论之间是推出、转折还是限制。',
+    optionExplanations: <String>[
+      '“所以”把共享连接误当成路线相同的充分理由，推论过强。',
+      '“却不能因此”既承接共同事实，也准确限制其结论范围。',
+      '“自然成为”仍把可能性写成必然结论，不符合任务差异。',
+      '“而且必须”增加了原句没有的强制关系，改变了逻辑。',
+    ],
+  ),
+  _GrammarRepairPattern(
+    family: '搭配错误',
+    segments: <String>['沈砚用中轴路线', '承担整座宫城的', '唯一解释，', '忽略了任务差异。'],
+    errorSegmentIndex: 1,
+    correctSegment: '作为理解空间的',
+    candidateSegments: <String>[
+      '承担整座宫城的',
+      '作为理解空间的',
+      '执行观察结果的',
+      '形成全部任务的',
+    ],
+    whyWrong: '路线可以“作为解释框架”，却不能“承担解释”；“承担”通常支配任务、责任等对象。',
+    revisionRule: '判断搭配时要同时检查动词的支配对象和句子真正要表达的功能。',
+    optionExplanations: <String>[
+      '“路线承担解释”支配关系不自然，且夸大了中轴路线的作用。',
+      '“作为理解空间的唯一解释”搭配完整，并保留原句要批评的判断。',
+      '“执行观察结果”搭配不当，结果不能由路线执行。',
+      '“形成全部任务”语义不成立，路线不会生成所有任务。',
+    ],
+  ),
+  _GrammarRepairPattern(
+    family: '成分赘余',
+    segments: <String>['在核对共同节点之后，', '沈砚又再次', '比较两人的任务条件，', '才修改判断。'],
+    errorSegmentIndex: 1,
+    correctSegment: '沈砚再次',
+    candidateSegments: <String>['沈砚又再次', '沈砚再次', '沈砚又重新再次', '沈砚仍旧又'],
+    whyWrong: '“又”和“再次”都表示动作重复，同时使用造成语义叠加。',
+    revisionRule: '删去重复时间或频率意义，只保留一个能准确连接上下文的成分。',
+    optionExplanations: <String>[
+      '“又再次”重复表达动作再发生。',
+      '“再次”独立承担重复意义，句子简洁完整。',
+      '“又、重新、再次”三层叠加，赘余更重。',
+      '“仍旧又”既重复又模糊了动作是否重新发生。',
+    ],
+  ),
+  _GrammarRepairPattern(
+    family: '成分缺失',
+    segments: <String>['阿宁请沈砚根据', '宫门与院落的连接，', '判断路线是否适合，', '再写明成立条件。'],
+    errorSegmentIndex: 2,
+    correctSegment: '判断路线是否适合各自任务，',
+    candidateSegments: <String>[
+      '判断路线是否适合，',
+      '判断路线是否适合各自任务，',
+      '判断路线是否适合的条件，',
+      '判断路线是否对任务，',
+    ],
+    whyWrong: '“适合”缺少对象，读者无法判断路线究竟适合什么。',
+    revisionRule: '形容或判断“适合”时应补足适用对象，并与人物任务建立明确关系。',
+    optionExplanations: <String>[
+      '仍未交代“适合”的对象，信息不完整。',
+      '补出“各自任务”，完整连接路线选择与人物目标。',
+      '“是否适合的条件”改变了判断对象，句意不完整。',
+      '“适合对任务”介词关系错误，不能补足原句。',
+    ],
+  ),
+];
+
+const _forbiddenCityMasteryGrammar = <_GrammarRepairPattern>[
+  _GrammarRepairPattern(
+    family: '关联词错误',
+    segments: <String>['中轴确实提供整体框架，', '阿宁的路线也符合真实连接，', '既然两者都成立，', '就必然具有相同解释力。'],
+    errorSegmentIndex: 2,
+    correctSegment: '但两者成立的条件不同，',
+    candidateSegments: <String>[
+      '既然两者都成立，',
+      '但两者成立的条件不同，',
+      '只要两者都成立，',
+      '即使两者同时成立，',
+    ],
+    whyWrong: '“既然……就必然……”把“各自可行”偷换成“解释力相同”，超出了证据允许的范围。',
+    revisionRule: '高阶关联关系要控制推论强度：事实并存不等于功能、条件或解释力相同。',
+    optionExplanations: <String>[
+      '句法自然，但把可行性直接推出相同解释力，结论过强。',
+      '准确保留两条路线都成立，同时指出成立条件不同。',
+      '“只要”把并存事实写成充分条件，仍造成过度推论。',
+      '“即使”需要与让步结论呼应，此处后文“必然相同”仍不成立。',
+    ],
+  ),
+  _GrammarRepairPattern(
+    family: '搭配错误',
+    segments: <String>['这张图通过共同节点', '论证了两条路线的', '空间条件，', '却没有替人物决定目标。'],
+    errorSegmentIndex: 1,
+    correctSegment: '呈现了两条路线的',
+    candidateSegments: <String>[
+      '论证了两条路线的',
+      '呈现了两条路线的',
+      '证明了两条路线的',
+      '确认了两条路线的',
+    ],
+    whyWrong: '地图可以“呈现”空间条件；“论证条件”把图面表达与逻辑论证混为一谈。',
+    revisionRule: '近义动词都可能通顺时，要选择与材料功能最精确的搭配。',
+    optionExplanations: <String>[
+      '局部通顺，但“论证条件”误写了地图的表达功能。',
+      '“呈现空间条件”准确描述图把连接关系显示出来。',
+      '“证明空间条件”语气过强，图本身不是全部证明过程。',
+      '“确认空间条件”更适合人的核对行为，不适合以图为主语。',
+    ],
+  ),
+  _GrammarRepairPattern(
+    family: '成分赘余',
+    segments: <String>['沈砚保留两条路线，', '并分别各自写明', '它们成立的任务条件，', '使差异能够被检验。'],
+    errorSegmentIndex: 1,
+    correctSegment: '并分别写明',
+    candidateSegments: <String>['并分别各自写明', '并分别写明', '并各自分别标注', '并逐一分别写明'],
+    whyWrong: '“分别”和“各自”在这里承担同一分配意义，同时保留使表达重复。',
+    revisionRule: '书面表达应区分必要强调与同义叠加，在不损失关系信息时删去重复成分。',
+    optionExplanations: <String>[
+      '“分别各自”意义重叠，句子虽可读但不够简洁。',
+      '保留“分别”即可清楚对应两条路线与两组条件。',
+      '“各自分别”仍然重复，并无新的关系信息。',
+      '“逐一分别”在两条路线语境中重复表达分配过程。',
+    ],
+  ),
+  _GrammarRepairPattern(
+    family: '成分缺失',
+    segments: <String>['若只保留中轴路线，', '图仍能说明整体秩序，', '却无法解释阿宁为何', '必须返回。'],
+    errorSegmentIndex: 3,
+    correctSegment: '必须返回东侧完成记录。',
+    candidateSegments: <String>[
+      '必须返回。',
+      '必须返回东侧完成记录。',
+      '必须返回路线。',
+      '必须返回这个判断。',
+    ],
+    whyWrong: '“返回”缺少目的地和任务结果，无法回答阿宁行动路线形成的原因。',
+    revisionRule: '高阶成分完整不仅是补宾语，还要补足使因果链成立的地点与目的。',
+    optionExplanations: <String>[
+      '句法勉强完整，但关键信息缺失，不能解释路线选择。',
+      '同时补足东侧目的地与记录任务，使人物行动因果完整。',
+      '“返回路线”对象关系不成立，也没有交代任务。',
+      '“返回判断”语义搭配不当，无法解释阿宁的行动。',
+    ],
+  ),
+];
+
+_ForbiddenCityGrammarBlueprint _patternBlueprint(_GrammarRepairPattern pattern) {
+  final broken = pattern.segments.join();
+  String replace(String value) {
+    final segments = List<String>.of(pattern.segments);
+    segments[pattern.errorSegmentIndex] = value;
+    return segments.join();
+  }
+
+  return _ForbiddenCityGrammarBlueprint(
+    family: pattern.family,
+    broken: broken,
+    correct: replace(pattern.correctSegment),
+    errorSegments: pattern.segments,
+    errorSegmentIndex: pattern.errorSegmentIndex,
+    options: pattern.candidateSegments.map(replace).toList(growable: false),
+    whyWrong: pattern.whyWrong,
+    revisionRule: pattern.revisionRule,
+    optionExplanations: pattern.optionExplanations,
+  );
+}
+
+_ForbiddenCityGrammarBlueprint _contextualizeGrammar(
+  _ForbiddenCityGrammarBlueprint source,
+  String context,
+) =>
+    _ForbiddenCityGrammarBlueprint(
+      family: source.family,
+      broken: '$context${source.broken}',
+      correct: '$context${source.correct}',
+      errorSegments: <String>[
+        '$context${source.errorSegments.first}',
+        ...source.errorSegments.skip(1),
+      ],
+      errorSegmentIndex: source.errorSegmentIndex,
+      options: source.options.map((option) => '$context$option').toList(),
+      whyWrong: source.whyWrong,
+      revisionRule: source.revisionRule,
+      optionExplanations: source.optionExplanations,
+    );
+
+_ForbiddenCityGrammarBlueprint _forbiddenCityGrammarBlueprint(
+  int level,
+  int index,
+) {
+  final band = ((level.clamp(1, 10).toInt() - 1) ~/ 2).clamp(0, 4);
+  return switch (band) {
+    0 => _forbiddenCityGrammarBlueprints[index],
+    1 => _contextualizeGrammar(
+        _forbiddenCityGrammarBlueprints[index],
+        '读完路线图后，',
+      ),
+    2 => _contextualizeGrammar(
+        _patternBlueprint(_forbiddenCityIntermediateGrammar[index]),
+        '在紫禁城中，',
+      ),
+    3 => _contextualizeGrammar(
+        _patternBlueprint(_forbiddenCityIntermediateGrammar[index]),
+        '综合紫禁城空间事实与人物任务后，',
+      ),
+    _ => _contextualizeGrammar(
+        _patternBlueprint(_forbiddenCityMasteryGrammar[index]),
+        '讨论紫禁城路线时，',
+      ),
+  };
+}
 
 const _protectedChallengeTerms = <String>[
   '紫禁城',
@@ -989,6 +1365,175 @@ List<String> _blankOptions(
     );
   }
   return reordered;
+}
+
+class _CompletionLexeme {
+  const _CompletionLexeme(this.value, this.slot);
+  final String value;
+  final String slot;
+}
+
+const _forbiddenCityCompletionLexemes = <_CompletionLexeme>[
+  _CompletionLexeme('沈砚', 'PERSON'),
+  _CompletionLexeme('阿宁', 'PERSON'),
+  _CompletionLexeme('周师傅', 'PERSON'),
+  _CompletionLexeme('参观者', 'PERSON'),
+  _CompletionLexeme('紫禁城', 'PLACE'),
+  _CompletionLexeme('宫城', 'PLACE'),
+  _CompletionLexeme('午门', 'PLACE'),
+  _CompletionLexeme('乾清门', 'PLACE'),
+  _CompletionLexeme('外朝', 'PLACE'),
+  _CompletionLexeme('内廷', 'PLACE'),
+  _CompletionLexeme('中轴', 'DIRECTION'),
+  _CompletionLexeme('中轴线', 'DIRECTION'),
+  _CompletionLexeme('东侧', 'DIRECTION'),
+  _CompletionLexeme('东边', 'DIRECTION'),
+  _CompletionLexeme('北侧', 'DIRECTION'),
+  _CompletionLexeme('西侧', 'DIRECTION'),
+  _CompletionLexeme('观察', 'ACTION'),
+  _CompletionLexeme('记录', 'ACTION'),
+  _CompletionLexeme('比较', 'ACTION'),
+  _CompletionLexeme('核对', 'ACTION'),
+  _CompletionLexeme('判断', 'ACTION'),
+  _CompletionLexeme('标出', 'ACTION'),
+  _CompletionLexeme('保留', 'ACTION'),
+  _CompletionLexeme('连接', 'ACTION'),
+  _CompletionLexeme('整理', 'ACTION'),
+  _CompletionLexeme('选择', 'ACTION'),
+  _CompletionLexeme('路线', 'OBJECT'),
+  _CompletionLexeme('路线图', 'OBJECT'),
+  _CompletionLexeme('任务', 'OBJECT'),
+  _CompletionLexeme('任务条件', 'OBJECT'),
+  _CompletionLexeme('证据', 'OBJECT'),
+  _CompletionLexeme('目标', 'OBJECT'),
+  _CompletionLexeme('记录点', 'OBJECT'),
+  _CompletionLexeme('共同终点', 'OBJECT'),
+  _CompletionLexeme('宫门', 'OBJECT'),
+  _CompletionLexeme('院落', 'OBJECT'),
+  _CompletionLexeme('空间', 'CULTURAL_CONCEPT'),
+  _CompletionLexeme('空间关系', 'CULTURAL_CONCEPT'),
+  _CompletionLexeme('礼制', 'CULTURAL_CONCEPT'),
+  _CompletionLexeme('秩序', 'CULTURAL_CONCEPT'),
+  _CompletionLexeme('功能', 'CULTURAL_CONCEPT'),
+  _CompletionLexeme('中轴关系', 'CULTURAL_CONCEPT'),
+  _CompletionLexeme('空间秩序', 'CULTURAL_CONCEPT'),
+  _CompletionLexeme('共同节点', 'CULTURAL_CONCEPT'),
+  _CompletionLexeme('因为', 'CONNECTOR'),
+  _CompletionLexeme('所以', 'CONNECTOR'),
+  _CompletionLexeme('虽然', 'CONNECTOR'),
+  _CompletionLexeme('但是', 'CONNECTOR'),
+  _CompletionLexeme('却', 'CONNECTOR'),
+  _CompletionLexeme('而是', 'CONNECTOR'),
+  _CompletionLexeme('为了', 'CONNECTOR'),
+  _CompletionLexeme('因此', 'CONNECTOR'),
+  _CompletionLexeme('不同', 'ATTRIBUTE'),
+  _CompletionLexeme('相同', 'ATTRIBUTE'),
+  _CompletionLexeme('清楚', 'ATTRIBUTE'),
+  _CompletionLexeme('完整', 'ATTRIBUTE'),
+];
+
+String _forbiddenCitySlotFor(String value) => _forbiddenCityCompletionLexemes
+    .firstWhere(
+      (item) => item.value == value,
+      orElse: () => const _CompletionLexeme('', 'SHORT_PHRASE'),
+    )
+    .slot;
+
+bool _looksLikeLexicalFragment(String value) =>
+    value.trim().isEmpty ||
+    const {'的任', '是把', '路线因', '的一', '任务的'}.contains(value);
+
+List<_TextSpan> _forbiddenCityCompletionSpans(String passage) {
+  final lexemes = [..._forbiddenCityCompletionLexemes]
+    ..sort((a, b) => b.value.length.compareTo(a.value.length));
+  final spans = <_TextSpan>[];
+  var cursor = 0;
+  while (cursor < passage.length) {
+    _CompletionLexeme? match;
+    for (final lexeme in lexemes) {
+      if (passage.startsWith(lexeme.value, cursor)) {
+        match = lexeme;
+        break;
+      }
+    }
+    if (match == null) {
+      cursor += 1;
+      continue;
+    }
+    spans.add(_TextSpan(cursor, cursor + match.value.length));
+    cursor += match.value.length;
+  }
+  return spans;
+}
+
+String _forbiddenCityCompletionPassage(
+  _Source source,
+  List<_Source> all,
+  int level,
+) {
+  var passage = source.sentence.trim();
+  var cursor = 1;
+  while (_forbiddenCityCompletionSpans(passage).length < level &&
+      cursor < all.length) {
+    final next = all[(all.indexOf(source) + cursor) % all.length].sentence.trim();
+    if (!passage.contains(next)) passage = '$passage$next';
+    cursor += 1;
+  }
+  if (_forbiddenCityCompletionSpans(passage).length < level) {
+    throw StateError('Forbidden City Lv$level lacks whole lexical blank spans.');
+  }
+  return passage;
+}
+
+List<String> _forbiddenCityBlankOptions({
+  required String answer,
+  required String slot,
+  required String journeyId,
+  required int level,
+  required String questionId,
+  required int blankIndex,
+}) {
+  final pool = _forbiddenCityCompletionLexemes
+      .where((item) => item.slot == slot && item.value != answer)
+      .map((item) => item.value)
+      .toList(growable: false);
+  final ranked = [...pool]
+    ..sort((a, b) {
+      final lengthA = (_hanCount(a) - _hanCount(answer)).abs();
+      final lengthB = (_hanCount(b) - _hanCount(answer)).abs();
+      if (lengthA != lengthB) return lengthA.compareTo(lengthB);
+      return _hash('$questionId:$blankIndex:$a')
+          .compareTo(_hash('$questionId:$blankIndex:$b'));
+    });
+  if (ranked.length < 3) {
+    throw StateError('Forbidden City slot $slot needs three distractors.');
+  }
+  final options = <String>[answer, ...ranked.take(3)];
+  return _stableHashShuffle(
+    options,
+    '$journeyId:$level:$questionId:$blankIndex',
+  );
+}
+
+List<String> _stableHashShuffle(List<String> values, String seed) {
+  final result = List<String>.of(values);
+  var state = int.parse(_hash(seed), radix: 16);
+  for (var index = result.length - 1; index > 0; index--) {
+    state = (state * 1664525 + 1013904223) & 0xffffffff;
+    final swap = state % (index + 1);
+    final value = result[index];
+    result[index] = result[swap];
+    result[swap] = value;
+  }
+  return result;
+}
+
+bool _hasSimpleFourPositionCycle(List<int> positions) {
+  if (positions.length < 8) return false;
+  for (var index = 4; index < positions.length; index++) {
+    if (positions[index] != positions[index % 4]) return false;
+  }
+  return true;
 }
 
 String _syntax(String sentence) {

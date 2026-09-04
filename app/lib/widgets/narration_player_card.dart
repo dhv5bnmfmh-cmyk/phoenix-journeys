@@ -707,19 +707,16 @@ class _NarrationPlayerCardState extends State<NarrationPlayerCard> {
                   ),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 160),
-                      child: Text(
-                        compactProgress,
-                        key: ValueKey('narration-compact-label-$compactProgress'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 8.4,
-                          fontWeight: FontWeight.w700,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
+                    child: Text(
+                      compactProgress,
+                      key: const ValueKey('narration-compact-label'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 8.4,
+                        fontWeight: FontWeight.w700,
+                        fontFeatures: [FontFeature.tabularFigures()],
                       ),
                     ),
                   ),

@@ -133,6 +133,7 @@ void main() {
         for (final blank in q.completionBlanks) {
           expect(blank.options, hasLength(4));
           expect(blank.options.toSet(), hasLength(4));
+          expect(blank.semanticSlotType, isNotEmpty);
           expect(
             blank.options.where((option) => option == blank.answer),
             hasLength(1),
@@ -187,6 +188,54 @@ void main() {
         isTrue,
         reason: 'Lv$level must expose exactly $level independent blanks',
       );
+    }
+  });
+
+  test('Challenge Difficulty v2 exposes five Grammar and Rebuild bands', () {
+    final bandLevels = <int>[1, 3, 5, 7, 9];
+    final grammarFingerprints = <String>{};
+    final rebuildFingerprints = <String>{};
+    for (final level in bandLevels) {
+      final set = challenge(level);
+      grammarFingerprints.add(set.questions
+          .where((q) => q.mode == StoryChallengeMode.grammarRepair)
+          .map((q) => '${q.prompt}|${q.options.join('¦')}')
+          .join('§'));
+      rebuildFingerprints.add(set.questions
+          .where((q) => q.mode == StoryChallengeMode.sentenceRebuild)
+          .map((q) => '${q.answer}|${q.characterTiles.join('¦')}')
+          .join('§'));
+    }
+    expect(grammarFingerprints, hasLength(5));
+    expect(rebuildFingerprints, hasLength(5));
+  });
+
+  test('Completion distractors are slot-compatible and avoid position cycles', () {
+    for (final level in <int>[1, 5, 10]) {
+      final positions = <int>[];
+      for (final question in challenge(level).questions.where(
+            (q) => q.mode == StoryChallengeMode.storyCompletion,
+          )) {
+        for (final blank in question.completionBlanks) {
+          expect(blank.semanticSlotType, isNotEmpty);
+          expect(blank.options, hasLength(4));
+          expect(blank.options.toSet(), hasLength(4));
+          expect(
+            blank.options.any(const {'的任', '是把', '路线因'}.contains),
+            isFalse,
+          );
+          positions.add(blank.options.indexOf(blank.answer));
+        }
+      }
+      if (positions.length >= 8) {
+        expect(
+          List<bool>.generate(
+            positions.length - 4,
+            (index) => positions[index + 4] == positions[index],
+          ).every((same) => same),
+          isFalse,
+        );
+      }
     }
   });
 
