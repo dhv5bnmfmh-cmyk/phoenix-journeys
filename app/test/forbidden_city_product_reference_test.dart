@@ -324,9 +324,31 @@ void main() {
     expect(narratedText, isNotEmpty);
 
     final question = set.questions.first;
-    final firstTile = question.characterTiles.first;
+    final submitFinder = find.byKey(const ValueKey('challenge-submit'));
+    expect(tester.widget<FilledButton>(submitFinder).onPressed, isNull);
+
+    final available = List<String>.of(question.characterTiles);
+    final correctOrder = <String>[];
+    var cursor = 0;
+    while (available.isNotEmpty) {
+      final match = available.indexWhere(
+        (tile) => question.answer.startsWith(tile, cursor),
+      );
+      expect(match, isNonNegative);
+      final tile = available.removeAt(match);
+      correctOrder.add(tile);
+      cursor += tile.length;
+    }
+    final wrongOrder = <String>[
+      ...correctOrder.skip(1),
+      correctOrder.first,
+    ];
+    expect(wrongOrder.join(), isNot(question.answer));
+
+    final firstTile = wrongOrder.first;
     await tester.tap(find.widgetWithText(ActionChip, firstTile).last);
     await tester.pump();
+    expect(tester.widget<FilledButton>(submitFinder).onPressed, isNull);
 
     final builtTile = tester.widget<Container>(
       find.byKey(const ValueKey('challenge-rebuild-built-0')),
@@ -340,6 +362,16 @@ void main() {
       ),
     );
     expect(builtText.style?.color, Colors.white);
+
+    for (var i = 1; i < wrongOrder.length - 1; i++) {
+      await tester.tap(find.widgetWithText(ActionChip, wrongOrder[i]).last);
+      await tester.pump();
+    }
+    expect(tester.widget<FilledButton>(submitFinder).onPressed, isNull);
+
+    await tester.tap(find.widgetWithText(ActionChip, wrongOrder.last).last);
+    await tester.pump();
+    expect(tester.widget<FilledButton>(submitFinder).onPressed, isNotNull);
 
     await tester.tap(find.text('提交'));
     await tester.pump();

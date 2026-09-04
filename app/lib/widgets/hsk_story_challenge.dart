@@ -89,7 +89,8 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
 
   bool get _canSubmit {
     if (question.mode == StoryChallengeMode.sentenceRebuild) {
-      return built.isNotEmpty;
+      return remaining.isEmpty &&
+          built.length == question.characterTiles.length;
     }
     if (question.mode == StoryChallengeMode.grammarRepair) {
       return grammarStep == 1 && selectedOption != null;
@@ -509,23 +510,31 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
             ? Colors.greenAccent
             : Colors.white;
 
-    return Container(
-      key: ValueKey(
-        wrong
-            ? 'challenge-wrong-rebuild-$index'
-            : 'challenge-rebuild-built-$index',
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: borderColor, width: 1.1),
-      ),
-      child: Text(
-        chunk,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.w900,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: submitted
+          ? null
+          : () => setState(() {
+                remaining.add(built.removeAt(index));
+              }),
+      child: Container(
+        key: ValueKey(
+          wrong
+              ? 'challenge-wrong-rebuild-$index'
+              : 'challenge-rebuild-built-$index',
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: borderColor, width: 1.1),
+        ),
+        child: Text(
+          chunk,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
     );
@@ -750,18 +759,33 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
       final correct = selectedValue != null &&
           selectedValue == question.completionBlanks[i].answer;
       final wrong = submitted && selectedValue != null && !correct;
+      final blankColor = wrong
+          ? Colors.redAccent
+          : submitted && correct
+              ? Colors.greenAccent
+              : PhoenixTheme.gold;
       spans.add(
-        TextSpan(
-          text: selection == null
-              ? '〔${i + 1}〕____'
-              : '〔${i + 1}〕$selectedValue',
-          style: TextStyle(
-            color: wrong
-                ? Colors.redAccent
-                : submitted && correct
-                    ? Colors.greenAccent
-                    : PhoenixTheme.gold,
-            fontWeight: FontWeight.w900,
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: GestureDetector(
+            key: ValueKey('completion-passage-blank-$i'),
+            behavior: HitTestBehavior.opaque,
+            onTap: submitted || selection == null
+                ? null
+                : () => setState(() {
+                      completionSelections[i] = null;
+                    }),
+            child: Text(
+              selection == null
+                  ? '〔${i + 1}〕____'
+                  : '〔${i + 1}〕$selectedValue',
+              style: TextStyle(
+                color: blankColor,
+                height: 1.5,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ),
         ),
       );
