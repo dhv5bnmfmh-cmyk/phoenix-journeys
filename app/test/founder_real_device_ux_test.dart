@@ -354,7 +354,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 16));
 
     final stamp = find.byKey(const ValueKey('animated-city-journey-stamp'));
-    final city = find.textContaining('北京 · 紫禁城');
+    final city = find.text('北京 · 紫禁城  ·  Lv.5');
     final reward = find.text('Challenge Reward');
 
     expect(stamp, findsOneWidget);
