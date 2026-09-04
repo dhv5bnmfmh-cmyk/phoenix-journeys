@@ -112,7 +112,45 @@ jobs:
 
       - name: Test Flutter app
         working-directory: app
-        run: flutter test
+        shell: bash
+        run: |
+          set +e
+          flutter test --reporter expanded 2>&1 | tee ../full_flutter.log
+          test_status=${PIPESTATUS[0]}
+          set -e
+          if [[ "$test_status" -ne 0 ]]; then
+            {
+              echo '## Full Flutter first useful failure'
+              echo
+              echo '```text'
+              awk '
+                BEGIN { capture=0; lines=0 }
+                /\[E\]|TestFailure|Expected:|Actual:|Which:|package:.*test|test\/.*\.dart/ {
+                  if (!capture) capture=1
+                }
+                capture && lines < 80 {
+                  print
+                  lines++
+                }
+              ' ../full_flutter.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            first_failure="$(awk '/\[E\]|TestFailure|Expected:|Actual:|Which:|test\/.*\.dart/ { print; exit }' ../full_flutter.log)"
+            if [[ -n "$first_failure" ]]; then
+              echo "::error title=Full Flutter first failure::$first_failure"
+            else
+              echo '::error title=Full Flutter first failure::See full-flutter failure artifact for complete output.'
+            fi
+          fi
+          exit "$test_status"
+
+      - name: Upload Full Flutter failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-flutter-${{ env.PREVIEW_RELEASE }}
+          path: full_flutter.log
+          if-no-files-found: error
 
       - name: Upload journey quality report
         uses: actions/upload-artifact@v4
