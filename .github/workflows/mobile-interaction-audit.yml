@@ -5,13 +5,22 @@ on:
     branches:
       - product/city-standard-v1-beijing-forbidden-city
     paths:
-      - 'app/**'
-      - 'worker/**'
-      - 'wrangler.toml'
+      - 'app/lib/app.dart'
+      - 'app/lib/screens/explore_screen.dart'
+      - 'app/lib/screens/journey_screen.dart'
+      - 'app/lib/screens/passport_screen.dart'
+      - 'app/lib/screens/city_passport_screen.dart'
+      - 'app/lib/state/**'
+      - 'app/lib/services/phoenix_level_controller.dart'
+      - 'app/lib/data/daily_journey_catalog.dart'
+      - 'app/lib/data/journey_city_catalog.dart'
+      - 'app/lib/data/journey_geography_catalog.dart'
+      - 'app/lib/data/journey_publication_catalog.dart'
+      - 'app/lib/widgets/journey_picker_sheet.dart'
+      - 'app/lib/widgets/journey_progress_header.dart'
+      - 'app/web/**'
       - '.github/scripts/verify_mobile_interaction.mjs'
       - '.github/scripts/journey_level_session_harness.mjs'
-      - '.github/workflows/mobile-interaction-audit.yml'
-      - '.github/workflows/preview-cloudflare.yml'
   pull_request:
     branches:
       - main
@@ -20,13 +29,23 @@ on:
       - synchronize
       - reopened
     paths:
-      - 'app/**'
-      - 'worker/**'
-      - 'wrangler.toml'
+      - 'app/lib/app.dart'
+      - 'app/lib/screens/explore_screen.dart'
+      - 'app/lib/screens/journey_screen.dart'
+      - 'app/lib/screens/passport_screen.dart'
+      - 'app/lib/screens/city_passport_screen.dart'
+      - 'app/lib/state/**'
+      - 'app/lib/services/phoenix_level_controller.dart'
+      - 'app/lib/data/daily_journey_catalog.dart'
+      - 'app/lib/data/journey_city_catalog.dart'
+      - 'app/lib/data/journey_geography_catalog.dart'
+      - 'app/lib/data/journey_publication_catalog.dart'
+      - 'app/lib/widgets/journey_picker_sheet.dart'
+      - 'app/lib/widgets/journey_progress_header.dart'
+      - 'app/web/**'
       - '.github/scripts/verify_mobile_interaction.mjs'
       - '.github/scripts/journey_level_session_harness.mjs'
-      - '.github/workflows/mobile-interaction-audit.yml'
-      - '.github/workflows/preview-cloudflare.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read

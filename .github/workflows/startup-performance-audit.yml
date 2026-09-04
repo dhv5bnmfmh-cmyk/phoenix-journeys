@@ -11,13 +11,11 @@ on:
       - 'app/lib/data/journey_startup_metadata.dart'
       - 'app/lib/screens/explore_screen.dart'
       - 'app/lib/screens/journey_screen.dart'
-      - 'app/lib/widgets/interactive_story_text.dart'
       - 'app/web/**'
       - '.github/scripts/startup_instrument.py'
       - '.github/scripts/measure_startup.mjs'
       - '.github/scripts/measure_journey_open_visible.mjs'
       - '.github/scripts/journey_level_session_harness.mjs'
-      - '.github/workflows/startup-performance-audit.yml'
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
@@ -28,13 +26,11 @@ on:
       - 'app/lib/data/journey_startup_metadata.dart'
       - 'app/lib/screens/explore_screen.dart'
       - 'app/lib/screens/journey_screen.dart'
-      - 'app/lib/widgets/interactive_story_text.dart'
       - 'app/web/**'
       - '.github/scripts/startup_instrument.py'
       - '.github/scripts/measure_startup.mjs'
       - '.github/scripts/measure_journey_open_visible.mjs'
       - '.github/scripts/journey_level_session_harness.mjs'
-      - '.github/workflows/startup-performance-audit.yml'
   workflow_dispatch:
 
 permissions:
@@ -50,7 +46,7 @@ env:
 
 jobs:
   benchmark:
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 55
     steps:

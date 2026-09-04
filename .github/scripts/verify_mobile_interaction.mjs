@@ -159,15 +159,15 @@ async function findJourneyProgress(page, timeout = 30000) {
         if (rect.width <= 0 || rect.height <= 0 || style.display === 'none' || style.visibility === 'hidden') continue;
         const values = [element.getAttribute('aria-label'), element.getAttribute('aria-valuetext'), element.textContent].map(clean).filter(Boolean);
         const combined = values.join(' ');
-        if (!/[1-6]\/6/.test(combined)) continue;
-        candidates.push({ i, label: values.find((value) => /[1-6]\/6/.test(value)) ?? combined, progressbar: element.getAttribute('role') === 'progressbar' });
+        if (!/[1-5]\/5/.test(combined)) continue;
+        candidates.push({ i, label: values.find((value) => /[1-5]\/5/.test(value)) ?? combined, progressbar: element.getAttribute('role') === 'progressbar' });
       }
       return candidates.find((entry) => entry.progressbar) ?? candidates[0] ?? null;
     });
     if (match) return { node: nodes.nth(match.i), label: match.label };
     await sleep(100);
   }
-  throw new Error('Journey: no semantic progress state (1/6..6/6) appeared');
+  throw new Error('Journey: no semantic progress state (1/5..5/5) appeared');
 }
 
 async function enableFlutterSemantics(page, browserName) {
@@ -270,16 +270,16 @@ async function openJourney(page, browserName, cycle) {
 }
 
 async function reachDiscovery(page, browserName) {
-  await semanticNode(page, '1/6', { prefix: true, timeout: 15000 });
-  await semanticNode(page, '1/6 故事', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '1/5', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '1/5 Story', { prefix: true, timeout: 15000 });
   await tapSemanticAction(page, '继续', `${browserName}:story-next`, { prefix: true });
   await sleep(500);
   await page.touchscreen.tap(22, 58);
-  await semanticNode(page, '2/6', { prefix: true, timeout: 15000 });
-  await semanticNode(page, '2/6 单词', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '2/5', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '2/5 Vocabulary', { prefix: true, timeout: 15000 });
   await tapSemanticAction(page, '继续', `${browserName}:words-next`, { prefix: true });
-  await semanticNode(page, '3/6', { prefix: true, timeout: 15000 });
-  await semanticNode(page, '3/6 发现', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '3/5', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '3/5 Discovery', { prefix: true, timeout: 15000 });
   console.log(`${browserName} DISCOVERY STATE TRANSITION = PASS`);
 }
 

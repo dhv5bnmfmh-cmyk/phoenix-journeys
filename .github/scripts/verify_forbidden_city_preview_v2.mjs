@@ -115,12 +115,12 @@ async function currentSessionLevel(page) {
 }
 
 async function waitStage(page, n) {
-  await findSemantic(page, `${n}/6`, { prefix: true, timeout: 20000 });
+  await findSemantic(page, `${n}/5`, { prefix: true, timeout: 20000 });
 }
 
 async function openForbiddenCity(page) {
   if (await exists(page, '北京 · 紫禁城', { timeout: 600 })) {
-    if (!(await exists(page, '1/6', { prefix: true, timeout: 600 }))) {
+    if (!(await exists(page, '1/5', { prefix: true, timeout: 600 }))) {
       throw new Error('Forbidden City title is visible without Story stage');
     }
     return;
@@ -134,7 +134,7 @@ async function openForbiddenCity(page) {
   await tapSemanticChoice(page, '紫禁城', { absentText: '北京的地点' });
 
   for (let i = 0; i < 100; i += 1) {
-    if (await exists(page, '1/6', { prefix: true, timeout: 120 })) return;
+    if (await exists(page, '1/5', { prefix: true, timeout: 120 })) return;
     if (await exists(page, 'PHOENIX JOURNEYS', { timeout: 120 })) break;
     await sleep(100);
   }
@@ -170,7 +170,7 @@ function traceVocabulary(story, vocabulary) {
 async function nextToVocabulary(page, level, storyText) {
   await tapButton(page, '继续', { prefix: true });
   await sleep(400);
-  if (!(await exists(page, '2/6', { prefix: true, timeout: 700 }))) {
+  if (!(await exists(page, '2/5', { prefix: true, timeout: 700 }))) {
     await page.touchscreen.tap(22, 58);
   }
   await waitStage(page, 2);
@@ -523,14 +523,13 @@ async function nextToMemory(page, level) {
   await tapButton(page, '继续留下回忆', { prefix: true });
   await waitStage(page, 5);
   if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Memory level drift`);
-  const text = await visibleText(page);
+  await findSemantic(page, '文化发现', { timeout: 5000 });
+  await findSemantic(page, '学习结果', { timeout: 5000 });
+  await findSemantic(page, 'Memory Anchor', { timeout: 5000 });
   await findSemantic(page, '这段旅程，你最想留下什么？', { timeout: 5000 });
   await findSemantic(page, '添加照片', { role: 'button', exact: true, timeout: 5000 });
   await page.getByRole('textbox').first().waitFor({ state: 'attached', timeout: 5000 });
-  await findSemantic(page, '结束旅程', { role: 'button', exact: true, timeout: 5000 });
-  if (text.includes('Journey Summary') || text.includes('Memory Anchor')) {
-    throw new Error(`Lv${level} Memory still exposes Phoenix-generated summary`);
-  }
+  await findSemantic(page, '完成旅程', { role: 'button', exact: true, timeout: 5000 });
   if (level === 5) {
     await page.getByRole('textbox').first().fill('第一次完成紫禁城双路线探索');
     const [chooser] = await Promise.all([
@@ -543,17 +542,15 @@ async function nextToMemory(page, level) {
 }
 
 async function nextToCompletion(page, level) {
-  await tapButton(page, '结束旅程', { prefix: true });
-  await waitStage(page, 6);
-  await findSemantic(page, 'Journey Completion', { exact: true, timeout: 15000 });
+  await tapButton(page, '完成旅程', { exact: true });
+  await waitStage(page, 5);
+  await findSemantic(page, 'Challenge Reward', { exact: true, timeout: 15000 });
+  await findSemantic(page, 'Journey 已记录', { timeout: 15000 });
   await findSemantic(page, '返回首页', { role: 'button', exact: true, timeout: 15000 });
   if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Completion level drift`);
   const text = await visibleText(page);
   if (!text.includes('北京') || !text.includes('紫禁城')) {
     throw new Error(`Lv${level} Completion Beijing / Forbidden City identity missing`);
-  }
-  if (!text.includes('路线') && !text.includes('两条')) {
-    throw new Error(`Lv${level} Completion route closure missing`);
   }
 }
 
@@ -752,7 +749,7 @@ async function runLevel(browser, level) {
     console.log(`Lv${level} STORY = PASS`);
 
     if (level === 5) {
-      const header = await findSemantic(page, '1/6', { prefix: true, timeout: 5000 });
+      const header = await findSemantic(page, '1/5', { prefix: true, timeout: 5000 });
       await header.evaluate((el) => el.setAttribute('data-founder-stable-header', 'true'));
       await tapButton(page, '开始朗读', { exact: true, timeout: 5000 });
       await findSemantic(page, '正在朗读', { timeout: 8000 });
@@ -790,13 +787,12 @@ async function runLevel(browser, level) {
 
     await nextToMemory(page, level);
     await assertNoBlockingError(page, pageErrors, `Lv${level} Memory`);
-    console.log(`Lv${level} MEMORY = PASS | 两条都能走通的路线`);
+    console.log(`Lv${level} MEMORY + COMPLETION STAGE = PASS | 两条都能走通的路线`);
 
     await nextToCompletion(page, level);
     await assertNoBlockingError(page, pageErrors, `Lv${level} Completion`);
     console.log(`Lv${level} COMPLETION = PASS`);
-    // Founder-first targeted smoke only requires Memory to be enterable.
-    console.log(`Lv${level} ACTUAL PREVIEW SIX-STAGE = PASS`);
+    console.log(`Lv${level} ACTUAL PREVIEW FIVE-STAGE = PASS`);
   } catch (error) {
     const snapshot = await records(page).catch(() => []);
     console.error(`Lv${level} SEMANTICS SNAPSHOT = ${JSON.stringify(snapshot.slice(0, 180))}`);

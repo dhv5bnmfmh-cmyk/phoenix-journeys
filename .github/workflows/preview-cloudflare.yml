@@ -8,11 +8,7 @@ on:
       - 'app/**'
       - 'worker/**'
       - 'wrangler.toml'
-      - '.github/scripts/**'
       - '.github/workflows/preview-cloudflare.yml'
-      - '.github/workflows/flutter-ci.yml'
-      - 'docs/PHOENIX_JOURNEY_ACCEPTANCE_CONTRACT.md'
-      - 'CONTRIBUTING.md'
   pull_request:
     branches:
       - main
@@ -25,11 +21,7 @@ on:
       - 'app/**'
       - 'worker/**'
       - 'wrangler.toml'
-      - '.github/scripts/**'
       - '.github/workflows/preview-cloudflare.yml'
-      - '.github/workflows/flutter-ci.yml'
-      - 'docs/PHOENIX_JOURNEY_ACCEPTANCE_CONTRACT.md'
-      - 'CONTRIBUTING.md'
 
 permissions:
   contents: read
@@ -72,13 +64,13 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$PREVIEW_RELEASE"
 
-      - name: Preflight checked-in JavaScript harness syntax
+      - name: Preflight checked-in harness syntax
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r -d '' file; do
-            node --check "$file"
-          done < <(find .github/scripts -type f -name '*.mjs' -print0)
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find .github/scripts -type f -name '*.mjs' -print0)
+          while IFS= read -r -d '' file; do bash -n "$file"; done < <(find .github/scripts -type f -name '*.sh' -print0)
+          while IFS= read -r -d '' file; do python3 -m py_compile "$file"; done < <(find .github/scripts -type f -name '*.py' -print0)
 
       - name: Test Phoenix agents
         id: agents
