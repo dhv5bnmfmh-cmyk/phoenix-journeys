@@ -1295,7 +1295,7 @@ List<_TextSpan> _selectBlankSpans(
 
   var probe = 0;
   while (selectedIndices.length < count) {
-    selectedIndices.add((probe * 3 + index) % spans.length);
+    selectedIndices.add((probe + index) % spans.length);
     probe += 1;
   }
   final selected = selectedIndices.map((i) => spans[i]).toList()
