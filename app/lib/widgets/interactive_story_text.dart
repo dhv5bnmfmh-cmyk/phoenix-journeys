@@ -761,7 +761,10 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       semanticsLabel: entry == null
           ? null
           : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
-      style: style.copyWith(color: cinematicColor.withValues(alpha: opacity)),
+      style: style.copyWith(
+        color: cinematicColor.withValues(alpha: opacity),
+        decoration: highlighted ? TextDecoration.none : style.decoration,
+      ),
     );
   }
 
@@ -843,6 +846,7 @@ class _InlineReadingMarker extends StatelessWidget {
             color: const Color(0xFFFFE7AA),
             height: lineHeight,
             fontWeight: FontWeight.w900,
+            decoration: TextDecoration.none,
           ),
         ),
       ),
