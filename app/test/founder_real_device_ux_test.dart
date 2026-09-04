@@ -162,7 +162,7 @@ void main() {
                 home: Scaffold(
                   body: InteractiveStoryText(
                     text: sample.value,
-                    entries: bundle.levelContent.words,
+                    entries: const [],
                     narrationItemId: sample.key,
                     highlightStart: 0,
                     highlightEnd: 1,
