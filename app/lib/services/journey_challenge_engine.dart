@@ -170,12 +170,12 @@ class JourneyChallengeEngine {
           operation: '完整病句→定位错误→选择完整修正',
           errorFamily: record.family,
           answerShape: '完整修正句',
-          distractor: [
+          distractor: '${[
             '关联词配对误项',
             '搭配近项',
             '赘余保留项',
             '成分仍缺失项',
-          ][index] + ' / Band ${((level - 1) ~/ 2) + 1}',
+          ][index]} / Band ${((level - 1) ~/ 2) + 1}',
         ),
       );
     }
