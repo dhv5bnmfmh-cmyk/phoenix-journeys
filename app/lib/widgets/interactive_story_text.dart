@@ -522,21 +522,6 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOutCubic,
                 padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
-                decoration: BoxDecoration(
-                  color: isCurrentNarrationItem
-                      ? const Color(0x16FFD879)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: isCurrentNarrationItem
-                      ? const [
-                          BoxShadow(
-                            color: Color(0x16FFD879),
-                            blurRadius: 10,
-                            spreadRadius: 1,
-                          ),
-                        ]
-                      : const [],
-                ),
                 child: Text.rich(
                   key: ValueKey(
                     'interactive-highlight-${widget.narrationItemId ?? widget.text}',

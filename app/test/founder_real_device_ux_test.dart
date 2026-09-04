@@ -91,7 +91,7 @@ void main() {
   });
 
   testWidgets(
-    'InteractiveStoryText keeps active narration tint without a rectangle border',
+    'NARRATION INLINE ACTIVE HIGHLIGHT has no yellow surface decoration',
     (tester) async {
       final state = AppState();
       addTearDown(state.dispose);
@@ -120,14 +120,25 @@ void main() {
           const ValueKey('narration-follow-surface-borderless-active'),
         ),
       );
-      final decoration = surface.decoration! as BoxDecoration;
-      expect(decoration.border, isNull);
-      expect(decoration.color, const Color(0x16FFD879));
+      expect(surface.decoration, isNull);
+
+      final marker = find.byKey(
+        const ValueKey('reading-highlight-borderless-active'),
+      );
+      expect(marker, findsOneWidget);
+      final activeTextFinder = find.descendant(
+        of: marker,
+        matching: find.byType(Text),
+      );
+      expect(activeTextFinder, findsOneWidget);
+      final activeText = tester.widget<Text>(activeTextFinder);
+      expect(activeText.style?.color, const Color(0xFFFFE7AA));
+      expect(activeText.style?.fontWeight, FontWeight.w900);
     },
   );
 
   testWidgets(
-    'Lv1 Lv6 Lv10 Story and Discovery share borderless narration surfaces',
+    'Lv1 Lv6 Lv10 Story and Discovery have no yellow narration surface',
     (tester) async {
       final state = AppState();
       addTearDown(state.dispose);
@@ -166,12 +177,31 @@ void main() {
           final surface = tester.widget<AnimatedContainer>(
             find.byKey(ValueKey('narration-follow-surface-${sample.key}')),
           );
-          final decoration = surface.decoration! as BoxDecoration;
-          expect(decoration.border, isNull, reason: sample.key);
           expect(
-            decoration.color,
-            const Color(0x16FFD879),
-            reason: '${sample.key} must keep active narration feedback',
+            surface.decoration,
+            isNull,
+            reason: '${sample.key} must have no background, border, or shadow',
+          );
+
+          final marker = find.byKey(
+            ValueKey('reading-highlight-${sample.key}'),
+          );
+          expect(marker, findsOneWidget, reason: sample.key);
+          final activeTextFinder = find.descendant(
+            of: marker,
+            matching: find.byType(Text),
+          );
+          expect(activeTextFinder, findsOneWidget, reason: sample.key);
+          final activeText = tester.widget<Text>(activeTextFinder);
+          expect(
+            activeText.style?.color,
+            const Color(0xFFFFE7AA),
+            reason: '${sample.key} must keep inline narration color',
+          );
+          expect(
+            activeText.style?.fontWeight,
+            FontWeight.w900,
+            reason: '${sample.key} must keep inline narration weight',
           );
         }
       }
