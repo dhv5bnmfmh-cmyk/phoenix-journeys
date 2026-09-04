@@ -9,7 +9,10 @@ on:
       - 'worker/**'
       - 'wrangler.toml'
       - '.github/scripts/**'
-      - '.github/workflows/**'
+      - '.github/workflows/preview-cloudflare.yml'
+      - '.github/workflows/flutter-ci.yml'
+      - 'docs/PHOENIX_JOURNEY_ACCEPTANCE_CONTRACT.md'
+      - 'CONTRIBUTING.md'
   pull_request:
     branches:
       - main
@@ -23,7 +26,10 @@ on:
       - 'worker/**'
       - 'wrangler.toml'
       - '.github/scripts/**'
-      - '.github/workflows/**'
+      - '.github/workflows/preview-cloudflare.yml'
+      - '.github/workflows/flutter-ci.yml'
+      - 'docs/PHOENIX_JOURNEY_ACCEPTANCE_CONTRACT.md'
+      - 'CONTRIBUTING.md'
 
 permissions:
   contents: read
@@ -102,17 +108,13 @@ jobs:
         working-directory: app
         run: flutter analyze
 
-      - name: Test Flutter app and generate quality report once
+      - name: Test Flutter app once and generate quality evidence
         working-directory: app
+        shell: bash
         env:
           PHOENIX_GENERATE_QUALITY_REPORT: '1'
           PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
           PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
-        run: flutter test test/journey_quality_report_ci_test.dart --reporter expanded
-
-      - name: Test Flutter app
-        working-directory: app
-        shell: bash
         run: |
           set +e
           flutter test --reporter expanded 2>&1 | tee ../full_flutter.log
@@ -213,7 +215,13 @@ jobs:
           }
           NODE
 
-      - name: Build preview web app
+      - name: Validate Cloudflare Worker bundle
+        shell: bash
+        run: |
+          set -o pipefail
+          npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run 2>&1 | tee worker-build.log
+
+      - name: Build preview web app once
         working-directory: app
         run: flutter build web --release
 
