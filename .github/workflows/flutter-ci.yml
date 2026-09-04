@@ -79,9 +79,37 @@ jobs:
       - name: Test
         id: test
         continue-on-error: true
+        shell: bash
         run: |
-          set -o pipefail
+          set +e
           flutter test --reporter expanded 2>&1 | tee test.log
+          test_status=${PIPESTATUS[0]}
+          set -e
+          if [[ "$test_status" -ne 0 ]]; then
+            {
+              echo '## Full Flutter first useful failure'
+              echo
+              echo '```text'
+              awk '
+                BEGIN { capture=0; lines=0 }
+                /\[E\]|TestFailure|Expected:|Actual:|Which:|package:.*test|test\/.*\.dart/ {
+                  if (!capture) capture=1
+                }
+                capture && lines < 80 {
+                  print
+                  lines++
+                }
+              ' test.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            first_failure="$(awk '/\[E\]|TestFailure|Expected:|Actual:|Which:|test\/.*\.dart/ { print; exit }' test.log)"
+            if [[ -n "$first_failure" ]]; then
+              echo "::error title=Full Flutter first failure::$first_failure"
+            else
+              echo '::error title=Full Flutter first failure::See verification log artifact for complete output.'
+            fi
+          fi
+          exit "$test_status"
 
       - name: Build web release
         id: build
