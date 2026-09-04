@@ -256,6 +256,7 @@ class JourneyChallengeEngine {
                     journeyId: journeyId,
                     level: level,
                     questionId: 'completion-${index + 1}',
+                    questionOrdinal: index,
                     blankIndex: blankIndex,
                   )
                 : _blankOptions(answer, storyTokens, blankIndex, index),
@@ -1491,6 +1492,7 @@ List<String> _forbiddenCityBlankOptions({
   required String journeyId,
   required int level,
   required String questionId,
+  required int questionOrdinal,
   required int blankIndex,
 }) {
   final pool = _forbiddenCityCompletionLexemes
@@ -1508,11 +1510,71 @@ List<String> _forbiddenCityBlankOptions({
   if (ranked.length < 3) {
     throw StateError('Forbidden City slot $slot needs three distractors.');
   }
-  final options = <String>[answer, ...ranked.take(3)];
-  return _stableHashShuffle(
-    options,
-    '$journeyId:$level:$questionId:$blankIndex',
+  final distractors = _stableHashShuffle(
+    ranked.take(3).toList(growable: false),
+    '$journeyId:$level:$questionId:$blankIndex:distractors',
   );
+  final correctIndex = _forbiddenCityCorrectOptionIndex(
+    journeyId: journeyId,
+    level: level,
+    questionOrdinal: questionOrdinal,
+    blankIndex: blankIndex,
+  );
+  final options = List<String>.of(distractors)..insert(correctIndex, answer);
+  if (options.length != 4 ||
+      options.toSet().length != 4 ||
+      options.where((option) => option == answer).length != 1 ||
+      options.indexOf(answer) != correctIndex) {
+    throw StateError(
+      'Forbidden City correct option scheduling invariant failed for "$answer"',
+    );
+  }
+  return options;
+}
+
+int _forbiddenCityCorrectOptionIndex({
+  required String journeyId,
+  required int level,
+  required int questionOrdinal,
+  required int blankIndex,
+}) {
+  final globalBlankOrdinal = questionOrdinal * level + blankIndex;
+  return _forbiddenCityCorrectOptionIndexForOrdinal(
+    journeyId: journeyId,
+    level: level,
+    globalBlankOrdinal: globalBlankOrdinal,
+  );
+}
+
+int _forbiddenCityCorrectOptionIndexForOrdinal({
+  required String journeyId,
+  required int level,
+  required int globalBlankOrdinal,
+}) {
+  final questionOrdinal = globalBlankOrdinal ~/ level;
+  final blankIndex = globalBlankOrdinal % level;
+  final questionId = 'completion-${questionOrdinal + 1}';
+  final basePosition = int.parse(
+        _hash('$journeyId:$level:$questionId:$blankIndex:correct-position'),
+        radix: 16,
+      ) %
+      4;
+  if (globalBlankOrdinal < 4) return basePosition;
+
+  final previousPosition = _forbiddenCityCorrectOptionIndexForOrdinal(
+    journeyId: journeyId,
+    level: level,
+    globalBlankOrdinal: globalBlankOrdinal - 4,
+  );
+  if (basePosition != previousPosition) return basePosition;
+
+  final cycleBreaker = 1 +
+      int.parse(
+            _hash('$journeyId:$level:$questionId:$blankIndex:cycle-breaker'),
+            radix: 16,
+          ) %
+          3;
+  return (basePosition + cycleBreaker) % 4;
 }
 
 List<String> _stableHashShuffle(List<String> values, String seed) {
