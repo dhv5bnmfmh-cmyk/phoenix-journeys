@@ -79,6 +79,7 @@ List<StoryTextSegment> segmentStoryText(String text, List<WordEntry> entries) {
   final sortedEntries = List<WordEntry>.of(entries)
     ..sort((a, b) => b.word.length.compareTo(a.word.length));
   final segments = <StoryTextSegment>[];
+  final annotatedWords = <String>{};
   final plainText = StringBuffer();
   var plainStart = 0;
   var cursor = 0;
@@ -109,6 +110,13 @@ List<StoryTextSegment> segmentStoryText(String text, List<WordEntry> entries) {
       if (plainText.isEmpty) plainStart = cursor;
       plainText.write(text[cursor]);
       cursor += 1;
+      continue;
+    }
+
+    if (!annotatedWords.add(match.word)) {
+      if (plainText.isEmpty) plainStart = cursor;
+      plainText.write(match.word);
+      cursor += match.word.length;
       continue;
     }
 
@@ -507,13 +515,13 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
               final highlightStart = hasExplicitHighlight
                   ? widget.highlightStart!
                   : isCurrentNarrationItem
-                  ? snapshot!.start
-                  : -1;
+                      ? snapshot!.start
+                      : -1;
               final highlightEnd = hasExplicitHighlight
                   ? widget.highlightEnd!
                   : isCurrentNarrationItem
-                  ? snapshot!.end
-                  : -1;
+                      ? snapshot!.end
+                      : -1;
 
               return AnimatedContainer(
                 key: ValueKey(
@@ -783,8 +791,8 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       semanticsLabel: hidden
           ? ''
           : entry == null
-          ? null
-          : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
+              ? null
+              : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
       style: style,
     );
   }
