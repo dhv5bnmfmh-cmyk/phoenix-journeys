@@ -214,16 +214,18 @@ void main() {
           '${String.fromCharCode(65 + correctLocation)}  ${question.errorSegments[correctLocation]}',
         ),
       );
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
+      await tester.tap(find.text('确认位置'));
+      await tester.pump();
+      await tester.tap(find.text('继续修改'));
       await tester.pump();
       await tester.tap(
         find.text(
           '${String.fromCharCode(65 + correctRepair)}  ${question.answer}',
         ),
       );
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
+      await tester.pump();
+      await tester.tap(find.text('提交'));
       await tester.pump();
 
       expect(find.text('回答正确'), findsOneWidget);
@@ -250,7 +252,8 @@ void main() {
           '${String.fromCharCode(65 + wrongLocation)}  ${question.errorSegments[wrongLocation]}',
         ),
       );
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
+      await tester.pump();
+      await tester.tap(find.text('确认位置'));
       await tester.pump();
 
       final wrongChoice = tester.widget<Text>(
@@ -266,14 +269,15 @@ void main() {
       expect(wrongChoice.style?.color, Colors.redAccent);
       expect(correctChoice.style?.color, Colors.greenAccent);
 
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
+      await tester.tap(find.text('继续修改'));
       await tester.pump();
       await tester.tap(
         find.text(
           '${String.fromCharCode(65 + correctRepair)}  ${question.answer}',
         ),
       );
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
+      await tester.pump();
+      await tester.tap(find.text('提交'));
       await tester.pump();
 
       expect(find.textContaining('回答错误'), findsOneWidget);
@@ -303,16 +307,18 @@ void main() {
           '${String.fromCharCode(65 + correctLocation)}  ${question.errorSegments[correctLocation]}',
         ),
       );
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
+      await tester.tap(find.text('确认位置'));
+      await tester.pump();
+      await tester.tap(find.text('继续修改'));
       await tester.pump();
       await tester.tap(
         find.text(
           '${String.fromCharCode(65 + wrongRepair)}  ${question.options[wrongRepair]}',
         ),
       );
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
+      await tester.pump();
+      await tester.tap(find.text('提交'));
       await tester.pump();
 
       expect(find.textContaining('回答错误'), findsOneWidget);
