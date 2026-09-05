@@ -794,22 +794,22 @@ final forbiddenCityDiscoveryFocusByLevel = <DiscoveryEntry>[
 const _forbiddenCityGroundingSourceRefs = <List<String>>[
   <String>[forbiddenCityMeridianGateSourceRef, forbiddenCityAxisPlanSourceRef],
   <String>[forbiddenCityQianqingGateSourceRef],
-  <String>[forbiddenCityDpmSourceRef],
-  <String>[forbiddenCityAxisPlanSourceRef, forbiddenCityUnescoSourceRef],
+  <String>[forbiddenCityJingyunGateSourceRef],
   <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[],
 ];
 
 const _forbiddenCityFocusSourceRefs = <List<String>>[
   <String>[forbiddenCityMeridianGateSourceRef, forbiddenCityAxisPlanSourceRef],
-  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[],
   <String>[forbiddenCityAxisPlanSourceRef],
   <String>[forbiddenCityQianqingGateSourceRef, forbiddenCityAxisPlanSourceRef],
-  <String>[forbiddenCityDpmSourceRef],
+  <String>[forbiddenCityJingyunGateSourceRef],
+  <String>[],
+  <String>[],
+  <String>[],
   <String>[forbiddenCityAxisPlanSourceRef],
-  <String>[forbiddenCityAxisPlanSourceRef],
-  <String>[forbiddenCityAxisPlanSourceRef],
-  <String>[forbiddenCityAxisPlanSourceRef, forbiddenCityUnescoSourceRef],
-  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[],
 ];
 
 DiscoveryEntry _discoveryWithSources(

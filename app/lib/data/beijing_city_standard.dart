@@ -11,6 +11,8 @@ const _meridianGate =
     'https://www.dpm.org.cn/explore/building/236454.html';
 const _qianqingGate =
     'https://www.dpm.org.cn/explore/building/236473.html';
+const _jingyunGate =
+    'https://www.dpm.org.cn/explore/building/236497.html';
 const _axisPlan =
     'https://www.beijing.gov.cn/zhengce/zhengcefagui/202309/W020230921615858870431.pdf';
 const _unesco = 'https://whc.unesco.org/en/list/439/';
@@ -19,6 +21,7 @@ const _unesco = 'https://whc.unesco.org/en/list/439/';
 const forbiddenCityDpmSourceRef = _dpm;
 const forbiddenCityMeridianGateSourceRef = _meridianGate;
 const forbiddenCityQianqingGateSourceRef = _qianqingGate;
+const forbiddenCityJingyunGateSourceRef = _jingyunGate;
 const forbiddenCityAxisPlanSourceRef = _axisPlan;
 const forbiddenCityUnescoSourceRef = _unesco;
 

@@ -7,7 +7,7 @@ import 'package:phoenix_journeys/widgets/discovery_authority_line.dart';
 import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
 
 void main() {
-  test('Forbidden City Discovery owns claim-specific canonical sources', () {
+  test('Forbidden City Discovery owns claim-specific optional canonical sources', () {
     for (var level = 1; level <= 10; level += 1) {
       final first = forbiddenCityLevelContent(level);
       final second = forbiddenCityLevelContent(level);
@@ -18,8 +18,8 @@ void main() {
         reason: 'Lv$level Discovery must remain deterministic',
       );
       for (final entry in first.discoveries) {
-        expect(entry.sourceRefs, isNotEmpty, reason: 'Lv$level claim needs provenance');
         expect(entry.sourceRefs.toSet().length, entry.sourceRefs.length);
+        if (entry.sourceRefs.isEmpty) continue;
         final labels = forbiddenCityAuthorityLabels(entry.sourceRefs);
         expect(labels, isNotEmpty);
         expect(
@@ -36,15 +36,46 @@ void main() {
     expect(lv1.text, contains('午门'));
     expect(lv1.sourceRefs, contains(forbiddenCityMeridianGateSourceRef));
     expect(lv1.sourceRefs, contains(forbiddenCityAxisPlanSourceRef));
+    expect(lv1.sourceRefs, isNot(contains(forbiddenCityQianqingGateSourceRef)));
+
+    final lv4 = forbiddenCityLevelContent(4).discoveries.first;
+    expect(lv4.text, contains('乾清门'));
+    expect(lv4.sourceRefs, contains(forbiddenCityQianqingGateSourceRef));
 
     final lv5 = forbiddenCityLevelContent(5).discoveries.first;
     expect(lv5.text, contains('景运门'));
-    expect(lv5.sourceRefs, equals(<String>[forbiddenCityDpmSourceRef]));
-
-    final lv9Grounding = forbiddenCityLevelContent(9).discoveries.last;
     expect(
-      lv9Grounding.sourceRefs,
-      equals(<String>[forbiddenCityAxisPlanSourceRef]),
+      lv5.sourceRefs,
+      equals(<String>[forbiddenCityJingyunGateSourceRef]),
+    );
+    expect(lv5.sourceRefs, isNot(contains(forbiddenCityDpmSourceRef)));
+    expect(lv5.sourceRefs, isNot(contains(forbiddenCityQianqingGateSourceRef)));
+
+    final lv6Inference = forbiddenCityLevelContent(6).discoveries.first;
+    expect(lv6Inference.text, contains('可行性和任务适配'));
+    expect(lv6Inference.sourceRefs, isEmpty);
+
+    final lv10 = forbiddenCityLevelContent(10).discoveries;
+    expect(lv10.every((entry) => entry.sourceRefs.isEmpty), isTrue);
+  });
+
+  test('source labels and URLs are non-empty for every displayed authority', () {
+    for (var level = 1; level <= 10; level += 1) {
+      for (final entry in forbiddenCityLevelContent(level).discoveries) {
+        for (final sourceRef in entry.sourceRefs) {
+          expect(sourceRef.trim(), isNotEmpty);
+          final uri = Uri.tryParse(sourceRef);
+          expect(uri, isNotNull);
+          expect(uri!.scheme, 'https');
+          final label = forbiddenCityAuthorityLabelForSourceRef(sourceRef);
+          expect(label, isNotNull);
+          expect(label!.trim(), isNotEmpty);
+        }
+      }
+    }
+    expect(
+      forbiddenCityJingyunGateSourceRef,
+      'https://www.dpm.org.cn/explore/building/236497.html',
     );
   });
 
