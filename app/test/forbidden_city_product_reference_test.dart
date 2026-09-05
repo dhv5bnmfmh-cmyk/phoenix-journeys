@@ -572,7 +572,10 @@ void main() {
     await tester.pump();
 
     expect(feedback, <bool>[false, false]);
-    expect(find.byKey(const ValueKey('grammar-error-location')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('grammar-correct-location-final')),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('grammar-wrong-location')), findsOneWidget);
     expect(
       find.byKey(const ValueKey('grammar-selected-repair')),
