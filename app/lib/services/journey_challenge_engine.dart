@@ -1,14 +1,17 @@
 import '../models/journey_challenge.dart';
+import 'challenge_option_balancer.dart';
 import 'journey_challenge_engine_legacy.dart' as legacy;
 
 export 'journey_challenge_engine_legacy.dart' hide JourneyChallengeEngine;
 
 /// Product-facing challenge adapter.
 ///
-/// The underlying challenge engine remains shared. Forbidden City Sentence
-/// Rebuild is authored here as a compact mobile learning interaction so the
-/// user rebuilds one meaningful knowledge sentence without turning the task
-/// into a long paragraph puzzle.
+/// The underlying challenge engine remains shared. Final A/B/C/D presentation
+/// order is normalized here after question content is authored, so answer
+/// placement can be deterministic and balanced without changing answer or
+/// distractor semantics. Forbidden City Sentence Rebuild is then authored as a
+/// compact mobile learning interaction so the user rebuilds one meaningful
+/// knowledge sentence without turning the task into a long paragraph puzzle.
 class JourneyChallengeEngine {
   const JourneyChallengeEngine();
 
@@ -22,11 +25,12 @@ class JourneyChallengeEngine {
       sessionLevel: sessionLevel,
       storyParagraphs: storyParagraphs,
     );
-    if (journeyId != _forbiddenCityJourneyId) return base;
+    final balanced = _balanceRenderedMultipleChoiceOrder(base);
+    if (journeyId != _forbiddenCityJourneyId) return balanced;
 
     var rebuildIndex = 0;
     final questions = <StoryChallengeQuestion>[];
-    for (final question in base.questions) {
+    for (final question in balanced.questions) {
       if (question.mode != StoryChallengeMode.sentenceRebuild) {
         questions.add(question);
         continue;
@@ -42,12 +46,171 @@ class JourneyChallengeEngine {
     }
 
     return StoryChallengeSet(
-      journeyId: base.journeyId,
-      sessionLevel: base.sessionLevel,
+      journeyId: balanced.journeyId,
+      sessionLevel: balanced.sessionLevel,
       questions: List<StoryChallengeQuestion>.unmodifiable(questions),
     );
   }
 }
+
+StoryChallengeSet _balanceRenderedMultipleChoiceOrder(
+  StoryChallengeSet source,
+) {
+  final directChoiceQuestions = source.questions
+      .where((question) => question.options.length == 4)
+      .toList(growable: false);
+  final directPositions = balancedChallengeAnswerPositions(
+    itemCount: directChoiceQuestions.length,
+    seed: '${source.journeyId}:direct:'
+        '${directChoiceQuestions.map((question) => question.id).join('|')}',
+    variationOrdinal: source.sessionLevel,
+  );
+
+  final completionKeys = <String>[];
+  for (final question in source.questions) {
+    for (var blankIndex = 0;
+        blankIndex < question.completionBlanks.length;
+        blankIndex += 1) {
+      if (question.completionBlanks[blankIndex].options.length == 4) {
+        completionKeys.add('${question.id}:$blankIndex');
+      }
+    }
+  }
+  final completionPositions = balancedChallengeAnswerPositions(
+    itemCount: completionKeys.length,
+    seed: '${source.journeyId}:${source.sessionLevel}:completion:'
+        '${completionKeys.join('|')}',
+    variationOrdinal: source.sessionLevel,
+    previousPositions: directPositions,
+  );
+
+  var directCursor = 0;
+  var completionCursor = 0;
+  final questions = <StoryChallengeQuestion>[];
+  for (final question in source.questions) {
+    var options = question.options;
+    var explanations = question.grammarOptionExplanations;
+    if (question.options.length == 4) {
+      final order = _optionIndexOrderForTarget(
+        question.options,
+        answer: question.answer,
+        targetIndex: directPositions[directCursor],
+      );
+      directCursor += 1;
+      options = List<String>.unmodifiable(
+        <String>[for (final index in order) question.options[index]],
+      );
+      if (question.grammarOptionExplanations.isNotEmpty) {
+        if (question.grammarOptionExplanations.length != question.options.length) {
+          throw StateError(
+            '${question.id} option explanations must align before reorder.',
+          );
+        }
+        explanations = List<String>.unmodifiable(
+          <String>[
+            for (final index in order)
+              question.grammarOptionExplanations[index],
+          ],
+        );
+      }
+    }
+
+    final blanks = <StoryCompletionBlank>[];
+    for (final blank in question.completionBlanks) {
+      if (blank.options.length != 4) {
+        blanks.add(blank);
+        continue;
+      }
+      final order = _optionIndexOrderForTarget(
+        blank.options,
+        answer: blank.answer,
+        targetIndex: completionPositions[completionCursor],
+      );
+      completionCursor += 1;
+      blanks.add(
+        StoryCompletionBlank(
+          answer: blank.answer,
+          options: List<String>.unmodifiable(
+            <String>[for (final index in order) blank.options[index]],
+          ),
+          answerType: blank.answerType,
+          semanticSlotType: blank.semanticSlotType,
+          sourceStart: blank.sourceStart,
+        ),
+      );
+    }
+
+    questions.add(
+      _copyQuestion(
+        question,
+        options: options,
+        grammarOptionExplanations: explanations,
+        completionBlanks: blanks.isEmpty && question.completionBlanks.isEmpty
+            ? question.completionBlanks
+            : List<StoryCompletionBlank>.unmodifiable(blanks),
+      ),
+    );
+  }
+
+  if (directCursor != directPositions.length ||
+      completionCursor != completionPositions.length) {
+    throw StateError('Rendered multiple-choice scheduling did not consume all items.');
+  }
+
+  return StoryChallengeSet(
+    journeyId: source.journeyId,
+    sessionLevel: source.sessionLevel,
+    questions: List<StoryChallengeQuestion>.unmodifiable(questions),
+  );
+}
+
+List<int> _optionIndexOrderForTarget(
+  List<String> options, {
+  required String answer,
+  required int targetIndex,
+}) {
+  if (targetIndex < 0 || targetIndex >= options.length) {
+    throw RangeError.index(targetIndex, options, 'targetIndex');
+  }
+  final correctIndices = <int>[
+    for (var index = 0; index < options.length; index += 1)
+      if (options[index] == answer) index,
+  ];
+  if (correctIndices.length != 1) {
+    throw StateError('Multiple-choice item must contain exactly one correct option.');
+  }
+  final correctIndex = correctIndices.single;
+  final order = List<int>.generate(options.length, (index) => index)
+    ..remove(correctIndex)
+    ..insert(targetIndex, correctIndex);
+  return order;
+}
+
+StoryChallengeQuestion _copyQuestion(
+  StoryChallengeQuestion source, {
+  required List<String> options,
+  required List<String> grammarOptionExplanations,
+  required List<StoryCompletionBlank> completionBlanks,
+}) =>
+    StoryChallengeQuestion(
+      id: source.id,
+      mode: source.mode,
+      sourceSentence: source.sourceSentence,
+      prompt: source.prompt,
+      answer: source.answer,
+      options: options,
+      characterTiles: source.characterTiles,
+      errorSegments: source.errorSegments,
+      errorSegmentIndex: source.errorSegmentIndex,
+      grammarFamily: source.grammarFamily,
+      grammarWhyWrong: source.grammarWhyWrong,
+      grammarRevisionRule: source.grammarRevisionRule,
+      grammarOptionExplanations: grammarOptionExplanations,
+      completionSegments: source.completionSegments,
+      completionBlanks: completionBlanks,
+      narrationText: source.narrationText,
+      signature: source.signature,
+    );
 
 const _forbiddenCityJourneyId = 'beijing-forbidden-city';
 
