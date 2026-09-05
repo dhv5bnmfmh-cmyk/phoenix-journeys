@@ -1,5 +1,6 @@
 import 'package:pinyin/pinyin.dart';
 
+import 'beijing_city_standard.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 
@@ -790,17 +791,64 @@ final forbiddenCityDiscoveryFocusByLevel = <DiscoveryEntry>[
   ),
 ];
 
+const _forbiddenCityGroundingSourceRefs = <List<String>>[
+  <String>[forbiddenCityMeridianGateSourceRef, forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityQianqingGateSourceRef],
+  <String>[forbiddenCityDpmSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef, forbiddenCityUnescoSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+];
+
+const _forbiddenCityFocusSourceRefs = <List<String>>[
+  <String>[forbiddenCityMeridianGateSourceRef, forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityQianqingGateSourceRef, forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityDpmSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef, forbiddenCityUnescoSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+];
+
+DiscoveryEntry _discoveryWithSources(
+  DiscoveryEntry entry,
+  List<String> sourceRefs,
+) {
+  final seen = <String>{};
+  return DiscoveryEntry(
+    text: entry.text,
+    simpleChinese: entry.simpleChinese,
+    vietnamese: entry.vietnamese,
+    english: entry.english,
+    pinyin: entry.pinyin,
+    sourceRefs: List<String>.unmodifiable(
+      sourceRefs.where((ref) => ref.trim().isNotEmpty && seen.add(ref)),
+    ),
+  );
+}
+
 List<DiscoveryEntry> _discoveriesForLevel(int level) {
   final safeLevel = level.clamp(1, 10).toInt();
-  final focus = forbiddenCityDiscoveryFocusByLevel[safeLevel - 1];
-  final grounding = switch (safeLevel) {
-    1 || 2 => forbiddenCityDiscoveries[0],
-    3 || 4 => forbiddenCityDiscoveries[1],
-    5 || 6 => forbiddenCityDiscoveries[2],
-    7 || 8 => forbiddenCityDiscoveries[3],
-    _ => forbiddenCityDiscoveries[4],
+  final focusIndex = safeLevel - 1;
+  final groundingIndex = switch (safeLevel) {
+    1 || 2 => 0,
+    3 || 4 => 1,
+    5 || 6 => 2,
+    7 || 8 => 3,
+    _ => 4,
   };
-  return <DiscoveryEntry>[focus, grounding];
+  return <DiscoveryEntry>[
+    _discoveryWithSources(
+      forbiddenCityDiscoveryFocusByLevel[focusIndex],
+      _forbiddenCityFocusSourceRefs[focusIndex],
+    ),
+    _discoveryWithSources(
+      forbiddenCityDiscoveries[groundingIndex],
+      _forbiddenCityGroundingSourceRefs[groundingIndex],
+    ),
+  ];
 }
 
 const forbiddenCityMemoryMoments = <ForbiddenCityMemoryMoment>[

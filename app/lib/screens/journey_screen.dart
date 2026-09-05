@@ -29,6 +29,7 @@ import '../theme/phoenix_theme.dart';
 import '../widgets/batch_one_journey_summary.dart';
 import '../widgets/city_journey_stamp.dart';
 import '../widgets/destination_background.dart';
+import '../widgets/discovery_authority_line.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_challenge_panel.dart';
 import '../widgets/hsk_story_challenge.dart';
@@ -1942,6 +1943,9 @@ class _JourneyScreenState extends State<JourneyScreen>
                           .entries
                           .map((entry) {
                         final item = entry.value;
+                        final sourceLabels = _isForbiddenCity
+                            ? forbiddenCityAuthorityLabels(item.sourceRefs)
+                            : const <String>[];
                         final snapshot = _narration.highlightSnapshot;
                         final isActive = snapshot?.contentId == 'discovery' &&
                             snapshot?.itemId == 'discovery-${entry.key}';
@@ -1949,6 +1953,14 @@ class _JourneyScreenState extends State<JourneyScreen>
                           index: entry.key + 1,
                           active: isActive,
                           transparentSurface: true,
+                          footer: sourceLabels.isEmpty
+                              ? null
+                              : DiscoveryAuthorityLine(
+                                  key: ValueKey(
+                                    'discovery-authoritative-source-${entry.key}',
+                                  ),
+                                  authorityLabels: sourceLabels,
+                                ),
                           onSupport: () => unawaited(
                             _showReadingSupport(
                               title: '今日发现 ${entry.key + 1}',
@@ -2655,6 +2667,7 @@ class _CompactTextBlock extends StatelessWidget {
     required this.active,
     required this.child,
     required this.onSupport,
+    this.footer,
     this.transparentSurface = false,
   });
 
@@ -2662,6 +2675,7 @@ class _CompactTextBlock extends StatelessWidget {
   final bool active;
   final Widget child;
   final VoidCallback onSupport;
+  final Widget? footer;
   final bool transparentSurface;
 
   @override
@@ -2696,7 +2710,17 @@ class _CompactTextBlock extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 4),
-          Expanded(child: child),
+          Expanded(
+            child: footer == null
+                ? child
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      child,
+                      footer!,
+                    ],
+                  ),
+          ),
           SizedBox(
             width: 23,
             height: 23,
