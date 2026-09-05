@@ -126,7 +126,6 @@ int challengeTextLength(String value) =>
 /// permutations without introducing runtime randomness. [previousPositions]
 /// carries the preceding rendered choice positions so streak and simple-cycle
 /// limits also hold across a family boundary.
-@visibleForTesting
 List<int> balancedChallengeAnswerPositions({
   required int itemCount,
   required String seed,
