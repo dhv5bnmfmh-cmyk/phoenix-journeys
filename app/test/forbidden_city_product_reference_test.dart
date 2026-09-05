@@ -317,11 +317,9 @@ void main() {
     );
 
     expect(find.byKey(const ValueKey('challenge-rebuild-body')), findsOneWidget);
-    expect(find.byTooltip('朗读当前题目'), findsOneWidget);
-    await tester.tap(find.byTooltip('朗读当前题目'));
-    await tester.pump();
-    expect(narratedId, 'rebuild-1');
-    expect(narratedText, isNotEmpty);
+    expect(find.byTooltip('朗读当前题目'), findsNothing);
+    expect(narratedId, isNull);
+    expect(narratedText, isNull);
 
     final question = set.questions.first;
     final submitFinder = find.byKey(const ValueKey('challenge-submit'));
@@ -385,6 +383,11 @@ void main() {
       find.byKey(const ValueKey('challenge-inline-correct-answer')),
       findsOneWidget,
     );
+    expect(find.byTooltip('朗读当前题目'), findsOneWidget);
+    await tester.tap(find.byTooltip('朗读当前题目'));
+    await tester.pump();
+    expect(narratedId, question.id);
+    expect(narratedText, question.answer);
     expect(find.text('下一题'), findsOneWidget);
   });
 
