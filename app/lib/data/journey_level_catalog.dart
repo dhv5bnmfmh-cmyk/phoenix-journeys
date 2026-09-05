@@ -160,12 +160,19 @@ ReadingAnnotation _mergeAnnotations(List<ReadingAnnotation> entries) {
 }
 
 DiscoveryEntry _mergeDiscoveries(List<DiscoveryEntry> entries) {
+  final seenRefs = <String>{};
+  final sourceRefs = <String>[
+    for (final entry in entries)
+      for (final sourceRef in entry.sourceRefs)
+        if (sourceRef.trim().isNotEmpty && seenRefs.add(sourceRef)) sourceRef,
+  ];
   return DiscoveryEntry(
     text: _joinChinese(entries.map((entry) => entry.text)),
     pinyin: _joinLatin(entries.map((entry) => entry.pinyin)),
     simpleChinese: _joinChinese(entries.map((entry) => entry.simpleChinese)),
     vietnamese: _joinLatin(entries.map((entry) => entry.vietnamese)),
     english: _joinLatin(entries.map((entry) => entry.english)),
+    sourceRefs: List<String>.unmodifiable(sourceRefs),
   );
 }
 

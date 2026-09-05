@@ -15,6 +15,30 @@ const _axisPlan =
     'https://www.beijing.gov.cn/zhengce/zhengcefagui/202309/W020230921615858870431.pdf';
 const _unesco = 'https://whc.unesco.org/en/list/439/';
 
+// Discovery provenance reuses these existing canonical Beijing sourceRefs.
+const forbiddenCityDpmSourceRef = _dpm;
+const forbiddenCityMeridianGateSourceRef = _meridianGate;
+const forbiddenCityQianqingGateSourceRef = _qianqingGate;
+const forbiddenCityAxisPlanSourceRef = _axisPlan;
+const forbiddenCityUnescoSourceRef = _unesco;
+
+String? forbiddenCityAuthorityLabelForSourceRef(String sourceRef) {
+  if (sourceRef.contains('dpm.org.cn')) return '故宫博物院';
+  if (sourceRef.contains('beijing.gov.cn')) return '北京市官方资料';
+  if (sourceRef.contains('whc.unesco.org')) return 'UNESCO';
+  return null;
+}
+
+List<String> forbiddenCityAuthorityLabels(Iterable<String> sourceRefs) {
+  final seen = <String>{};
+  final labels = <String>[];
+  for (final sourceRef in sourceRefs) {
+    final label = forbiddenCityAuthorityLabelForSourceRef(sourceRef);
+    if (label != null && seen.add(label)) labels.add(label);
+  }
+  return List<String>.unmodifiable(labels);
+}
+
 const beijingKnowledgeMap = <CityKnowledgeDomain>[
   CityKnowledgeDomain(
       id: 'beijing.history',
