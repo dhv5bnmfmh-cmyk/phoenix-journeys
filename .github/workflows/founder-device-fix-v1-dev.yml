@@ -1,0 +1,59 @@
+name: Founder Device Fix V1 Dev Validation
+
+on:
+  push:
+    branches:
+      - automation/founder-device-fix-v1
+
+permissions:
+  contents: write
+
+concurrency:
+  group: founder-device-fix-v1-dev
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out dev branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Apply focused product fix
+        run: python3 .github/scripts/founder_device_fix_v1.py
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Targeted tests
+        working-directory: app
+        run: |
+          flutter test test/founder_device_fix_v1_test.dart
+          flutter test test/founder_device_feedback_4point_regression_test.dart
+          flutter test test/forbidden_city_discovery_authoritative_source_v1_test.dart
+
+      - name: Analyze once for development candidate
+        working-directory: app
+        run: flutter analyze
+
+      - name: Commit clean validated tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/founder-device-fix-v1-dev.yml
+          rm -f .github/scripts/founder_device_fix_v1.py
+          git config user.name 'phoenix-governance-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: founder device sentence audio and photo memory'
+          git push origin HEAD:automation/founder-device-fix-v1
