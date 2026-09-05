@@ -1,0 +1,85 @@
+name: Release Truth Recovery Dev Validation
+
+on:
+  push:
+    branches:
+      - automation/release-truth-recovery-dev
+
+permissions:
+  contents: write
+
+jobs:
+  validate-and-stage-candidate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out frozen product candidate
+        uses: actions/checkout@v6
+        with:
+          ref: c3e40c17720a7fd99b71632a8ab22ada4e1f24b2
+          fetch-depth: 0
+
+      - name: Apply stale harness correction only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/test/forbidden_city_product_reference_test.dart')
+          text = path.read_text()
+
+          old_pre = """    expect(find.byKey(const ValueKey('challenge-rebuild-body')), findsOneWidget);\n    expect(find.byTooltip('朗读当前题目'), findsOneWidget);\n    await tester.tap(find.byTooltip('朗读当前题目'));\n    await tester.pump();\n    expect(narratedId, 'rebuild-1');\n    expect(narratedText, isNotEmpty);\n\n    final question = set.questions.first;\n"""
+          new_pre = """    expect(find.byKey(const ValueKey('challenge-rebuild-body')), findsOneWidget);\n    expect(find.byTooltip('朗读当前题目'), findsNothing);\n    expect(narratedId, isNull);\n    expect(narratedText, isNull);\n\n    final question = set.questions.first;\n"""
+          if text.count(old_pre) != 1:
+              raise SystemExit(f'pre-submit stale assertion match count={text.count(old_pre)}')
+          text = text.replace(old_pre, new_pre, 1)
+
+          old_post = """    expect(\n      find.byKey(const ValueKey('challenge-inline-correct-answer')),\n      findsOneWidget,\n    );\n    expect(find.text('下一题'), findsOneWidget);\n"""
+          new_post = """    expect(\n      find.byKey(const ValueKey('challenge-inline-correct-answer')),\n      findsOneWidget,\n    );\n    expect(find.byTooltip('朗读当前题目'), findsOneWidget);\n    await tester.tap(find.byTooltip('朗读当前题目'));\n    await tester.pump();\n    expect(narratedId, question.id);\n    expect(narratedText, question.answer);\n    expect(find.text('下一题'), findsOneWidget);\n"""
+          if text.count(old_post) != 1:
+              raise SystemExit(f'post-submit insertion match count={text.count(old_post)}')
+          text = text.replace(old_post, new_post, 1)
+          path.write_text(text)
+          PY
+
+          changed="$(git diff --name-only)"
+          test "$changed" = "app/test/forbidden_city_product_reference_test.dart"
+          git diff --check
+          git diff -- app/test/forbidden_city_product_reference_test.dart
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Focused stale-reference regression
+        working-directory: app
+        run: flutter test test/forbidden_city_product_reference_test.dart --reporter expanded
+
+      - name: Focused Founder device regression
+        working-directory: app
+        run: flutter test test/founder_device_fix_v1_test.dart --reporter expanded
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Stage clean test-only candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git diff --name-only)" = "app/test/forbidden_city_product_reference_test.dart"
+          git config user.name "phoenix-release-truth-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add app/test/forbidden_city_product_reference_test.dart
+          test "$(git diff --cached --name-only)" = "app/test/forbidden_city_product_reference_test.dart"
+          git commit -m "test: align sentence rebuild narration contract"
+          candidate_sha="$(git rev-parse HEAD)"
+          git push origin HEAD:refs/heads/automation/release-truth-recovery-candidate
+          echo "CLEAN CANDIDATE SHA = $candidate_sha"
+          echo "candidate_sha=$candidate_sha" >> "$GITHUB_OUTPUT"
