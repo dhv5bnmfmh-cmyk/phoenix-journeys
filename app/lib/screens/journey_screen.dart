@@ -32,6 +32,7 @@ import '../widgets/destination_background.dart';
 import '../widgets/discovery_authority_line.dart';
 import '../widgets/interactive_story_text.dart';
 import '../widgets/journey_challenge_panel.dart';
+import '../widgets/journey_memory_photo_panel.dart';
 import '../widgets/hsk_story_challenge.dart';
 import '../widgets/journey_share_button.dart';
 import '../widgets/special_realm_story_intro.dart';
@@ -158,6 +159,8 @@ class _JourneyScreenState extends State<JourneyScreen>
   PhoenixWritingFeedback? _writingFeedback;
   bool _guideLoading = false;
   bool _writingLoading = false;
+  bool _memoryPhotoBusy = false;
+  String? _memoryPhotoError;
   bool _challengeResolved = false;
   bool _forbiddenCityFinaleCompleted = false;
   bool _pilotChallengeVisible = false;
@@ -1202,6 +1205,8 @@ class _JourneyScreenState extends State<JourneyScreen>
     _writingFeedback = null;
     _guideLoading = false;
     _writingLoading = false;
+    _memoryPhotoBusy = false;
+    _memoryPhotoError = null;
     if (mounted) {
       setState(() {
         _challengeResolved = false;
@@ -2287,6 +2292,63 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
+  Future<void> _pickForbiddenCityMemoryPhoto() async {
+    if (_memoryPhotoBusy) return;
+    setState(() {
+      _memoryPhotoBusy = true;
+      _memoryPhotoError = null;
+    });
+    var photoRead = false;
+    try {
+      final bytes = await pickJourneyMemoryPhoto();
+      if (!mounted) return;
+      if (bytes == null) {
+        setState(() => _memoryPhotoBusy = false);
+        return;
+      }
+      photoRead = true;
+      final entry = await _appState.saveActiveJourneyMemory(
+        memoryController.text,
+        sessionLevel: _sessionLanguageProfile.phoenixLevel ?? 1,
+      );
+      await _appState.replaceJourneyMemoryPhoto(entry, bytes);
+      if (!mounted) return;
+      setState(() => _memoryPhotoBusy = false);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _memoryPhotoBusy = false;
+        _memoryPhotoError =
+            photoRead ? '无法保存照片，请重试' : '无法读取照片，请重试';
+      });
+    }
+  }
+
+  Future<void> _deleteForbiddenCityMemoryPhoto() async {
+    if (_memoryPhotoBusy) return;
+    final matches = _appState.journeyMemories
+        .where((entry) => entry.journeyId == _experience.id && !entry.legacy)
+        .toList(growable: false);
+    if (matches.isEmpty || matches.first.photoRefs.isEmpty) return;
+    final entry = matches.first;
+    final ref = entry.photoRefs.first;
+    setState(() {
+      _memoryPhotoBusy = true;
+      _memoryPhotoError = null;
+    });
+    try {
+      await _appState.deleteJourneyMemoryPhoto(entry, ref);
+      if (!mounted) return;
+      setState(() => _memoryPhotoBusy = false);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _memoryPhotoBusy = false;
+        _memoryPhotoError = '无法删除照片，请重试';
+      });
+    }
+  }
+
   Widget _forbiddenCityMemoryPage() {
     final memory = forbiddenCityMemoryForLevel(
       _sessionLanguageProfile.phoenixLevel ?? 1,
@@ -2299,6 +2361,9 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (memoryController.text.isEmpty && existing.isNotEmpty) {
       memoryController.text = existing.first.note;
     }
+    final photoRef = existing.isNotEmpty && existing.first.photoRefs.isNotEmpty
+        ? existing.first.photoRefs.first
+        : null;
     return _page(
       title: '回忆 · 完成',
       narrationStage: 'memory',
@@ -2384,32 +2449,16 @@ class _JourneyScreenState extends State<JourneyScreen>
               ),
             ),
             const SizedBox(height: 10),
-            OutlinedButton.icon(
-              key: const ValueKey('forbidden-city-add-photo'),
-              onPressed: () async {
-                final result = await pickJourneyMemoryPhotos();
-                if (result.isEmpty) return;
-                // Establish the stable Journey identity without completing the Journey.
-                var entry = await _appState.saveActiveJourneyMemory(
-                  memoryController.text,
-                  sessionLevel: _sessionLanguageProfile.phoenixLevel ?? 1,
-                );
-                for (final bytes in result) {
-                  await _appState.addJourneyMemoryPhoto(entry, bytes);
-                  entry = _appState.journeyMemories
-                      .firstWhere((item) => item.id == entry.id);
-                }
-                if (mounted) setState(() {});
-              },
-              icon: const Icon(Icons.add_photo_alternate_outlined),
-              label: const Text('添加照片'),
+            JourneyMemoryPhotoPanel(
+              photoRef: photoRef,
+              loadPhoto: _appState.journeyMemoryPhoto,
+              busy: _memoryPhotoBusy,
+              errorText: _memoryPhotoError,
+              onPick: () => unawaited(_pickForbiddenCityMemoryPhoto()),
+              onDelete: photoRef == null
+                  ? null
+                  : () => unawaited(_deleteForbiddenCityMemoryPhoto()),
             ),
-            if (existing.isNotEmpty && existing.first.photoRefs.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text('已添加 ${existing.first.photoRefs.length} 张照片',
-                    style: const TextStyle(color: Colors.white70)),
-              ),
           ],
         ],
       ),

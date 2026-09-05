@@ -1220,6 +1220,33 @@ class AppState extends ChangeNotifier {
     return ref;
   }
 
+  Future<String> replaceJourneyMemoryPhoto(
+    JourneyMemoryEntry entry,
+    Uint8List bytes,
+  ) async {
+    final repository = await _journeyMemoryRepo();
+    final previousRefs = List<String>.of(entry.photoRefs);
+    final ref = await repository.addPhoto(entry.id, bytes, now: _clock());
+    try {
+      await saveJourneyMemory(
+        entry.copyWith(photoRefs: <String>[ref], updatedAt: _clock()),
+      );
+    } catch (_) {
+      await repository.deletePhoto(ref);
+      rethrow;
+    }
+    for (final previousRef in previousRefs) {
+      if (previousRef == ref) continue;
+      try {
+        await repository.deletePhoto(previousRef);
+      } catch (_) {
+        // The new photo is already persisted and authoritative. A stale local
+        // blob can be cleaned later without breaking the Memory UX.
+      }
+    }
+    return ref;
+  }
+
   Future<Uint8List?> journeyMemoryPhoto(String ref) async => (await _journeyMemoryRepo()).readPhoto(ref);
 
   Future<void> deleteJourneyMemoryPhoto(JourneyMemoryEntry entry, String ref) async {

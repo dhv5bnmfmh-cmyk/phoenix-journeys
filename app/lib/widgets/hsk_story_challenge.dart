@@ -143,11 +143,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
   }
 
   String _narrationText() {
-    if (submitted) {
-      return question.mode == StoryChallengeMode.sentenceRebuild
-          ? question.sourceSentence
-          : question.answer;
-    }
+    if (submitted) return question.answer;
     if (question.mode != StoryChallengeMode.storyCompletion) {
       return question.narrationText;
     }
@@ -237,25 +233,26 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
   Widget _questionBody() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Spacer(),
-              IconButton(
-                key: ValueKey('challenge-speaker-${question.id}'),
-                tooltip: '朗读当前题目',
-                onPressed: () => unawaited(
-                  widget.onNarrate(
-                    question.id,
-                    widget.displayText(_narrationText()),
+          if (question.mode != StoryChallengeMode.sentenceRebuild || submitted)
+            Row(
+              children: [
+                const Spacer(),
+                IconButton(
+                  key: ValueKey('challenge-speaker-${question.id}'),
+                  tooltip: '朗读当前题目',
+                  onPressed: () => unawaited(
+                    widget.onNarrate(
+                      question.id,
+                      widget.displayText(_narrationText()),
+                    ),
+                  ),
+                  icon: const Icon(
+                    Icons.volume_up_rounded,
+                    color: PhoenixTheme.gold,
                   ),
                 ),
-                icon: const Icon(
-                  Icons.volume_up_rounded,
-                  color: PhoenixTheme.gold,
-                ),
-              ),
-            ],
-          ),
+              ],
+            ),
           switch (question.mode) {
             StoryChallengeMode.sentenceRebuild => _rebuild(),
             StoryChallengeMode.grammarRepair => _grammar(),
