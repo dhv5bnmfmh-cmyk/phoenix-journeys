@@ -1,0 +1,425 @@
+name: Temp Discovery Source V1 Patch
+
+on:
+  push:
+    branches:
+      - automation/discovery-source-v1-f749
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: automation/discovery-source-v1-f749
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Apply minimal product patch
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f'missing patch anchor in {path}: {old[:80]!r}')
+              p.write_text(text.replace(old, new, 1))
+
+          replace_once(
+              'app/lib/data/beijing_city_standard.dart',
+              "const _unesco = 'https://whc.unesco.org/en/list/439/';\n",
+              """const _unesco = 'https://whc.unesco.org/en/list/439/';
+
+// Public aliases keep Discovery provenance on the existing Beijing canonical
+// sourceRefs instead of creating a second source catalog.
+const forbiddenCityDpmSourceRef = _dpm;
+const forbiddenCityMeridianGateSourceRef = _meridianGate;
+const forbiddenCityQianqingGateSourceRef = _qianqingGate;
+const forbiddenCityAxisPlanSourceRef = _axisPlan;
+const forbiddenCityUnescoSourceRef = _unesco;
+
+String? forbiddenCityAuthorityLabelForSourceRef(String sourceRef) {
+  if (sourceRef.contains('dpm.org.cn')) return '故宫博物院';
+  if (sourceRef.contains('beijing.gov.cn')) return '北京市官方资料';
+  if (sourceRef.contains('whc.unesco.org')) return 'UNESCO';
+  return null;
+}
+
+List<String> forbiddenCityAuthorityLabels(Iterable<String> sourceRefs) {
+  final seen = <String>{};
+  final labels = <String>[];
+  for (final sourceRef in sourceRefs) {
+    final label = forbiddenCityAuthorityLabelForSourceRef(sourceRef);
+    if (label != null && seen.add(label)) labels.add(label);
+  }
+  return List<String>.unmodifiable(labels);
+}
+""",
+          )
+
+          replace_once(
+              'app/lib/data/journey_data.dart',
+              """    required this.english,
+    this.pinyin = '',
+  });
+
+  final String text;
+  final String simpleChinese;
+  final String vietnamese;
+  final String english;
+  final String pinyin;
+""",
+              """    required this.english,
+    this.pinyin = '',
+    this.sourceRefs = const <String>[],
+  });
+
+  final String text;
+  final String simpleChinese;
+  final String vietnamese;
+  final String english;
+  final String pinyin;
+  final List<String> sourceRefs;
+""",
+          )
+
+          replace_once(
+              'app/lib/data/journey_level_catalog.dart',
+              """DiscoveryEntry _mergeDiscoveries(List<DiscoveryEntry> entries) {
+  return DiscoveryEntry(
+    text: _joinChinese(entries.map((entry) => entry.text)),
+    pinyin: _joinLatin(entries.map((entry) => entry.pinyin)),
+    simpleChinese: _joinChinese(entries.map((entry) => entry.simpleChinese)),
+    vietnamese: _joinLatin(entries.map((entry) => entry.vietnamese)),
+    english: _joinLatin(entries.map((entry) => entry.english)),
+  );
+}
+""",
+              """DiscoveryEntry _mergeDiscoveries(List<DiscoveryEntry> entries) {
+  final seenRefs = <String>{};
+  final sourceRefs = <String>[
+    for (final entry in entries)
+      for (final sourceRef in entry.sourceRefs)
+        if (sourceRef.trim().isNotEmpty && seenRefs.add(sourceRef)) sourceRef,
+  ];
+  return DiscoveryEntry(
+    text: _joinChinese(entries.map((entry) => entry.text)),
+    pinyin: _joinLatin(entries.map((entry) => entry.pinyin)),
+    simpleChinese: _joinChinese(entries.map((entry) => entry.simpleChinese)),
+    vietnamese: _joinLatin(entries.map((entry) => entry.vietnamese)),
+    english: _joinLatin(entries.map((entry) => entry.english)),
+    sourceRefs: List<String>.unmodifiable(sourceRefs),
+  );
+}
+""",
+          )
+
+          replace_once(
+              'app/lib/data/forbidden_city_journey_runtime.dart',
+              """import 'journey_data.dart';
+import 'journey_level_catalog.dart';
+""",
+              """import 'beijing_city_standard.dart';
+import 'journey_data.dart';
+import 'journey_level_catalog.dart';
+""",
+          )
+
+          replace_once(
+              'app/lib/data/forbidden_city_journey_runtime.dart',
+              """List<DiscoveryEntry> _discoveriesForLevel(int level) {
+  final safeLevel = level.clamp(1, 10).toInt();
+  final focus = forbiddenCityDiscoveryFocusByLevel[safeLevel - 1];
+  final grounding = switch (safeLevel) {
+    1 || 2 => forbiddenCityDiscoveries[0],
+    3 || 4 => forbiddenCityDiscoveries[1],
+    5 || 6 => forbiddenCityDiscoveries[2],
+    7 || 8 => forbiddenCityDiscoveries[3],
+    _ => forbiddenCityDiscoveries[4],
+  };
+  return <DiscoveryEntry>[focus, grounding];
+}
+""",
+              """const _forbiddenCityGroundingSourceRefs = <List<String>>[
+  <String>[forbiddenCityMeridianGateSourceRef, forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityQianqingGateSourceRef],
+  <String>[forbiddenCityDpmSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef, forbiddenCityUnescoSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+];
+
+const _forbiddenCityFocusSourceRefs = <List<String>>[
+  <String>[forbiddenCityMeridianGateSourceRef, forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityQianqingGateSourceRef, forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityDpmSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef, forbiddenCityUnescoSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+];
+
+DiscoveryEntry _discoveryWithSources(
+  DiscoveryEntry entry,
+  List<String> sourceRefs,
+) {
+  final seen = <String>{};
+  return DiscoveryEntry(
+    text: entry.text,
+    simpleChinese: entry.simpleChinese,
+    vietnamese: entry.vietnamese,
+    english: entry.english,
+    pinyin: entry.pinyin,
+    sourceRefs: List<String>.unmodifiable(
+      sourceRefs.where((ref) => ref.trim().isNotEmpty && seen.add(ref)),
+    ),
+  );
+}
+
+List<DiscoveryEntry> _discoveriesForLevel(int level) {
+  final safeLevel = level.clamp(1, 10).toInt();
+  final focusIndex = safeLevel - 1;
+  final groundingIndex = switch (safeLevel) {
+    1 || 2 => 0,
+    3 || 4 => 1,
+    5 || 6 => 2,
+    7 || 8 => 3,
+    _ => 4,
+  };
+  return <DiscoveryEntry>[
+    _discoveryWithSources(
+      forbiddenCityDiscoveryFocusByLevel[focusIndex],
+      _forbiddenCityFocusSourceRefs[focusIndex],
+    ),
+    _discoveryWithSources(
+      forbiddenCityDiscoveries[groundingIndex],
+      _forbiddenCityGroundingSourceRefs[groundingIndex],
+    ),
+  ];
+}
+""",
+          )
+
+          journey = Path('app/lib/screens/journey_screen.dart')
+          text = journey.read_text()
+          discovery_anchor = text.index('  Widget _discoveryPage() {')
+          item_anchor = """                        final item = entry.value;
+                        final snapshot = _narration.highlightSnapshot;
+"""
+          item_pos = text.index(item_anchor, discovery_anchor)
+          text = text[:item_pos] + item_anchor.replace(
+              "                        final snapshot = _narration.highlightSnapshot;\n",
+              """                        final sourceLabels = _isForbiddenCity
+                            ? forbiddenCityAuthorityLabels(item.sourceRefs)
+                            : const <String>[];
+                        final snapshot = _narration.highlightSnapshot;
+""",
+          ) + text[item_pos + len(item_anchor):]
+
+          child_start = text.index(
+              "                          child: InteractiveStoryText(\n                            text: item.text,",
+              discovery_anchor,
+          )
+          child_end_marker = """                          ),
+                        );
+                      }).toList(growable: false),
+"""
+          child_end = text.index(child_end_marker, child_start)
+          original_child = text[child_start:child_end + len('                          ),\n')]
+          interactive = original_child.replace(
+              '                          child: ',
+              '                              ',
+              1,
+          )
+          wrapped = """                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+""" + interactive + """                              if (sourceLabels.isNotEmpty)
+                                Padding(
+                                  key: ValueKey(
+                                    'discovery-authoritative-source-${entry.key}',
+                                  ),
+                                  padding: const EdgeInsets.fromLTRB(3, 1, 3, 0),
+                                  child: Text(
+                                    '知识依据 · ${sourceLabels.join(' · ')}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: PhoenixTheme.journeyMetaStyle.copyWith(
+                                      color: Colors.white70,
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+"""
+          text = text[:child_start] + wrapped + text[child_end + len('                          ),\n'):]
+          journey.write_text(text)
+
+          resolver = Path('app/lib/data/forbidden_city_discovery_sources.dart')
+          if resolver.exists():
+              resolver.unlink()
+          PY
+
+          cat > app/test/forbidden_city_discovery_authoritative_source_v1_test.dart <<'DART'
+          import 'package:flutter/material.dart';
+          import 'package:flutter_test/flutter_test.dart';
+          import 'package:phoenix_journeys/data/beijing_city_standard.dart';
+          import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
+          import 'package:phoenix_journeys/data/journey_data.dart';
+          import 'package:phoenix_journeys/state/app_state.dart';
+          import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
+          import 'package:provider/provider.dart';
+
+          void main() {
+            test('Forbidden City Discovery owns claim-specific canonical sources', () {
+              for (var level = 1; level <= 10; level += 1) {
+                final first = forbiddenCityLevelContent(level);
+                final second = forbiddenCityLevelContent(level);
+                expect(
+                  second.discoveries.map((entry) => entry.text).toList(),
+                  first.discoveries.map((entry) => entry.text).toList(),
+                  reason: 'Lv$level Discovery content must stay deterministic',
+                );
+                expect(first.discoveries, hasLength(2));
+                for (final entry in first.discoveries) {
+                  expect(entry.sourceRefs, isNotEmpty, reason: 'Lv$level claim needs provenance');
+                  expect(entry.sourceRefs.toSet().length, entry.sourceRefs.length);
+                  expect(forbiddenCityAuthorityLabels(entry.sourceRefs), isNotEmpty);
+                  expect(
+                    forbiddenCityAuthorityLabels(entry.sourceRefs).length,
+                    lessThan(3),
+                    reason: 'Do not attach every authority to every claim',
+                  );
+                }
+              }
+            });
+
+            test('sourceRefs correspond to the concrete knowledge claim', () {
+              final lv1 = forbiddenCityLevelContent(1).discoveries.first;
+              expect(lv1.text, contains('午门'));
+              expect(lv1.sourceRefs, contains(forbiddenCityMeridianGateSourceRef));
+              expect(lv1.sourceRefs, contains(forbiddenCityAxisPlanSourceRef));
+
+              final lv5 = forbiddenCityLevelContent(5).discoveries.first;
+              expect(lv5.text, contains('景运门'));
+              expect(lv5.sourceRefs, equals(<String>[forbiddenCityDpmSourceRef]));
+
+              final lv9Grounding = forbiddenCityLevelContent(9).discoveries.last;
+              expect(lv9Grounding.sourceRefs, equals(<String>[forbiddenCityAxisPlanSourceRef]));
+            });
+
+            test('no-source Discovery stays safe and source resolution is deduplicated', () {
+              const entry = DiscoveryEntry(
+                text: '无来源测试正文',
+                simpleChinese: '无来源',
+                vietnamese: 'Không nguồn',
+                english: 'No source',
+              );
+              expect(entry.sourceRefs, isEmpty);
+              expect(forbiddenCityAuthorityLabels(entry.sourceRefs), isEmpty);
+              expect(
+                forbiddenCityAuthorityLabels(<String>[
+                  forbiddenCityDpmSourceRef,
+                  forbiddenCityMeridianGateSourceRef,
+                ]),
+                equals(<String>['故宫博物院']),
+              );
+            });
+
+            test('source attachment never mutates Discovery body or vocabulary progression', () {
+              for (var level = 1; level <= 10; level += 1) {
+                final beforeWords = forbiddenCityWordsForLevel(level)
+                    .map((entry) => entry.word)
+                    .toList(growable: false);
+                final content = forbiddenCityLevelContent(level);
+                final body = content.discoveries.map((entry) => entry.text).toList();
+                for (final entry in content.discoveries) {
+                  forbiddenCityAuthorityLabels(entry.sourceRefs);
+                }
+                expect(content.discoveries.map((entry) => entry.text).toList(), body);
+                expect(
+                  forbiddenCityWordsForLevel(level)
+                      .map((entry) => entry.word)
+                      .toList(growable: false),
+                  beforeWords,
+                );
+              }
+            });
+
+            testWidgets('Discovery source is lightweight while interactive text stays intact', (tester) async {
+              final discovery = forbiddenCityLevelContent(5).discoveries.first;
+              final state = AppState();
+              await tester.pumpWidget(
+                ChangeNotifierProvider<AppState>.value(
+                  value: state,
+                  child: MaterialApp(
+                    home: Scaffold(
+                      body: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          InteractiveStoryText(
+                            text: discovery.text,
+                            entries: forbiddenCityWordsForLevel(5),
+                            narrationContentId: 'discovery',
+                            narrationItemId: 'discovery-test',
+                          ),
+                          Text(
+                            '知识依据 · ${forbiddenCityAuthorityLabels(discovery.sourceRefs).join(' · ')}',
+                            key: const ValueKey('source-probe'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+              await tester.pump();
+
+              expect(find.text(discovery.text, findRichText: true), findsOneWidget);
+              expect(find.byKey(const ValueKey('source-probe')), findsOneWidget);
+              expect(
+                segmentStoryText(discovery.text, forbiddenCityWordsForLevel(5))
+                    .map((segment) => segment.text)
+                    .join(),
+                discovery.text,
+              );
+            });
+          }
+          DART
+
+      - name: Targeted tests and analyze
+        shell: bash
+        run: |
+          cd app
+          flutter pub get
+          flutter test test/forbidden_city_discovery_authoritative_source_v1_test.dart
+          flutter test test/founder_device_feedback_4point_regression_test.dart
+          flutter analyze
+
+      - name: Commit validated patch
+        shell: bash
+        run: |
+          git rm .github/workflows/temp-discovery-source-v1-patch.yml
+          git add app/lib/data/beijing_city_standard.dart \
+                  app/lib/data/journey_data.dart \
+                  app/lib/data/journey_level_catalog.dart \
+                  app/lib/data/forbidden_city_journey_runtime.dart \
+                  app/lib/screens/journey_screen.dart \
+                  app/test/forbidden_city_discovery_authoritative_source_v1_test.dart \
+                  app/lib/data/forbidden_city_discovery_sources.dart || true
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git commit -m 'feat: show authoritative Discovery knowledge sources'
+          git push origin HEAD:automation/discovery-source-v1-f749
