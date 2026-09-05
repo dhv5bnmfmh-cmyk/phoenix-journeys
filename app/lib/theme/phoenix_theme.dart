@@ -131,7 +131,6 @@ class PhoenixTheme {
   static BoxDecoration get journeyWritingPanelDecoration => BoxDecoration(
     color: writingSurface,
     borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: const Color(0x8FC79A43), width: 1.2),
     boxShadow: const [
       BoxShadow(color: Color(0x4D000000), blurRadius: 18, offset: Offset(0, 7)),
     ],
@@ -157,7 +156,6 @@ class PhoenixTheme {
   static BoxDecoration destinationGlass({double alpha = .16}) => BoxDecoration(
     color: Colors.black.withValues(alpha: alpha),
     borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: contentAccent.withValues(alpha: .42)),
     boxShadow: const [
       BoxShadow(color: Color(0x24000000), blurRadius: 14, offset: Offset(0, 5)),
     ],
@@ -184,7 +182,6 @@ class PhoenixTheme {
       stops: [0, .55, 1],
     ),
     borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: const Color(0xFFFFE39A), width: 1.4),
     boxShadow: const [
       BoxShadow(color: Color(0x66000000), blurRadius: 20, offset: Offset(0, 8)),
     ],

@@ -180,3 +180,59 @@ export async function assertNoJourneyLiveControls(page) {
     throw new Error('Journey unexpectedly exposes live Phoenix level controls');
   }
 }
+
+export async function saveMemoryAndWaitCommitted(
+  page,
+  { reopenCommittedState, readCommittedState, timeout = 15000 } = {},
+) {
+  if (typeof reopenCommittedState !== 'function' || typeof readCommittedState !== 'function') {
+    throw new Error('saveMemoryAndWaitCommitted requires authoritative committed-state callbacks');
+  }
+
+  await tapButton(page, '保存修改', { prefix: true });
+  await page.waitForFunction(() => {
+    const cleanText = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
+    return [...document.querySelectorAll('flt-semantics')].every((element) => {
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      if (rect.width <= 0 || rect.height <= 0 || style.display === 'none' || style.visibility === 'hidden') {
+        return true;
+      }
+      if (element.getAttribute('role') !== 'button') return true;
+      const text = cleanText([
+        element.getAttribute('aria-label'),
+        element.getAttribute('aria-valuetext'),
+        element.getAttribute('aria-description'),
+        element.textContent,
+      ].filter(Boolean).join(' '));
+      return !text.startsWith('保存修改');
+    });
+  }, null, { polling: 'raf', timeout });
+
+  await reopenCommittedState();
+
+  const deadline = Date.now() + timeout;
+  let previous = null;
+  let stableReads = 0;
+  let lastError = null;
+  while (Date.now() < deadline) {
+    try {
+      const state = await readCommittedState();
+      const fingerprint = clean(typeof state === 'string' ? state : JSON.stringify(state));
+      if (!fingerprint) throw new Error('empty committed Memory state');
+      if (fingerprint === previous) {
+        stableReads += 1;
+      } else {
+        previous = fingerprint;
+        stableReads = 1;
+      }
+      if (stableReads >= 2) return state;
+    } catch (error) {
+      lastError = error;
+      previous = null;
+      stableReads = 0;
+    }
+    await page.evaluate(() => new Promise((resolveFrame) => requestAnimationFrame(() => resolveFrame())));
+  }
+  throw lastError ?? new Error('Memory committed state did not become stable');
+}

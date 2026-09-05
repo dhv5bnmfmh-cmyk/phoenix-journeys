@@ -20,7 +20,12 @@ Future<String?> showJourneyPickerSheet({
     builder: (sheetContext) {
       return StatefulBuilder(
         builder: (context, setSheetState) {
-          final selectedCity = requireJourneyStartupCity(selectedCityId);
+          if (!publishedJourneyStartupCityCatalog
+              .any((city) => city.id == selectedCityId)) {
+            selectedCityId = publishedJourneyStartupCityCatalog.first.id;
+          }
+          final selectedCity =
+              requirePublishedJourneyStartupCity(selectedCityId);
 
           return FractionallySizedBox(
             heightFactor: .82,
@@ -36,9 +41,9 @@ Future<String?> showJourneyPickerSheet({
                           : '选择城市与地点',
                     ),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
-                    ),
+                          fontSize: 19,
+                          fontWeight: FontWeight.w900,
+                        ),
                   ),
                   const SizedBox(height: 3),
                   Text(
@@ -54,12 +59,14 @@ Future<String?> showJourneyPickerSheet({
                     height: 58,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: lockToInitialCity ? 1 : journeyStartupCityCatalog.length,
+                      itemCount: lockToInitialCity
+                          ? 1
+                          : publishedJourneyStartupCityCatalog.length,
                       separatorBuilder: (_, __) => const SizedBox(width: 7),
                       itemBuilder: (context, index) {
                         final city = lockToInitialCity
                             ? selectedCity
-                            : journeyStartupCityCatalog[index];
+                            : publishedJourneyStartupCityCatalog[index];
                         final selected = city.id == selectedCityId;
                         final earnedCount = city.destinations
                             .where(
@@ -216,7 +223,8 @@ Future<String?> showJourneyPickerSheet({
                           child: InkWell(
                             key: ValueKey('journey-destination-${journey.id}'),
                             onTap: canOpen
-                                ? () => Navigator.of(sheetContext).pop(journey.id)
+                                ? () =>
+                                    Navigator.of(sheetContext).pop(journey.id)
                                 : null,
                             borderRadius: BorderRadius.circular(16),
                             child: Container(
@@ -238,7 +246,8 @@ Future<String?> showJourneyPickerSheet({
                                   CircleAvatar(
                                     radius: 20,
                                     backgroundColor: canOpen
-                                        ? PhoenixTheme.red.withValues(alpha: .10)
+                                        ? PhoenixTheme.red
+                                            .withValues(alpha: .10)
                                         : Colors.black.withValues(alpha: .06),
                                     child: Text(
                                       state.displayText(journey.stampSymbol),

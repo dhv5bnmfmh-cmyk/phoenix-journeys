@@ -8,6 +8,9 @@ import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/forbidden_city_trace_validation.dart';
 import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
 import 'package:phoenix_journeys/data/journey_semantic_fingerprint_catalog.dart';
+import 'package:phoenix_journeys/models/journey_challenge.dart';
+import 'package:phoenix_journeys/services/journey_challenge_engine.dart';
+import 'package:phoenix_journeys/services/journey_preparation_coordinator.dart';
 
 List<String> _sentences(String story) => RegExp(r'[^。！？!?]+[。！？!?]')
     .allMatches(story)
@@ -18,6 +21,7 @@ List<String> _sentences(String story) => RegExp(r'[^。！？!?]+[。！？!?]')
 void main() {
   const levelAgent = PhoenixLanguageLevelAgent();
   const qualityAgent = PhoenixJourneyContentQualityAgent();
+  const challengeEngine = JourneyChallengeEngine();
   const ceilings = <int>[5, 6, 7, 8, 9, 10, 11, 13, 14, 15];
 
   List<String> activeStories() {
@@ -154,12 +158,74 @@ void main() {
       final story = forbiddenCityLockedStories[level - 1];
       final sentences = _sentences(story).toSet();
       final rebuild = forbiddenCityParagraphRebuild.singleWhere((item) => item.level == level);
-      final grammar = forbiddenCityGrammarRepair.singleWhere((item) => item.level == level);
       final missing = forbiddenCityMissingSentence.singleWhere((item) => item.level == level);
+      final profile = levelAgent.allProfiles[level - 1];
+      final prepared = JourneyPreparationCoordinator.instance.prepareNow(
+        journeyId: forbiddenCityJourneyId,
+        profile: profile,
+        scriptMode: 'simplified',
+      );
+      final grammar = challengeEngine
+          .build(
+            journeyId: forbiddenCityJourneyId,
+            sessionLevel: level,
+            storyParagraphs: prepared.challengeSourceMaterial,
+          )
+          .questions
+          .where((question) => question.mode == StoryChallengeMode.grammarRepair)
+          .toList(growable: false);
       expect(rebuild.segments.every(story.contains), isTrue,
           reason: 'Lv$level paragraphRebuild');
-      expect(story.contains(grammar.correct), isTrue,
-          reason: 'Lv$level grammarRepair');
+      expect(grammar, hasLength(4), reason: 'Lv$level grammarRepair');
+      expect(
+        grammar.map((question) => question.signature.errorFamily).toSet(),
+        {'关联词错误', '搭配错误', '成分赘余', '成分缺失'},
+        reason: 'Lv$level grammar families',
+      );
+      for (final question in grammar) {
+        expect(question.errorSegments.join(), question.prompt);
+        expect(question.prompt, isNot(question.answer));
+        expect(question.options, hasLength(4));
+        expect(
+          question.options.where((option) => option == question.answer),
+          hasLength(1),
+        );
+        expect(question.grammarWhyWrong?.trim(), isNotEmpty);
+        expect(question.grammarRevisionRule?.trim(), isNotEmpty);
+        expect(question.grammarOptionExplanations, hasLength(4));
+        expect(
+          question.grammarOptionExplanations
+              .every((explanation) => explanation.trim().isNotEmpty),
+          isTrue,
+        );
+        final grammarCorpus = <String>[
+          question.prompt,
+          question.answer,
+          ...question.options,
+          question.grammarWhyWrong!,
+          question.grammarRevisionRule!,
+          ...question.grammarOptionExplanations,
+        ].join();
+        expect(
+          <String>['紫禁城', '午门', '乾清门', '沈砚', '阿宁', '中轴']
+              .any(grammarCorpus.contains),
+          isTrue,
+          reason: 'Lv$level Grammar must stay in Forbidden City Journey scope',
+        );
+        for (final unrelated in <String>[
+          '外滩',
+          '西湖',
+          '秦淮',
+          '陈家祠',
+          '宽窄巷子',
+          '西安城墙',
+        ]) {
+          expect(grammarCorpus, isNot(contains(unrelated)));
+        }
+        for (final legacy in <String>['旧木尺', '没有跨过', '地图空白']) {
+          expect(grammarCorpus, isNot(contains(legacy)));
+        }
+      }
       expect(story.contains(missing.before), isTrue,
           reason: 'Lv$level missing before');
       expect(story.contains(missing.after), isTrue,
@@ -167,7 +233,7 @@ void main() {
       expect(sentences.contains(missing.answer), isTrue,
           reason: 'Lv$level missing answer must be literal Story sentence');
       final challengeCorpus =
-          '${rebuild.segments.join()}${grammar.correct}${missing.before}${missing.answer}${missing.after}';
+          '${rebuild.segments.join()}${missing.before}${missing.answer}${missing.after}';
       expect(challengeCorpus, isNot(contains('旧木尺')));
       expect(challengeCorpus, isNot(contains('没有跨过')));
     }

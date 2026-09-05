@@ -18,7 +18,6 @@ class JourneyProgressHeader extends StatelessWidget {
   final List<String> labels;
   final ValueChanged<int> onStepSelected;
 
-
   @override
   Widget build(BuildContext context) {
     final progress = (currentStep + 1) / labels.length;

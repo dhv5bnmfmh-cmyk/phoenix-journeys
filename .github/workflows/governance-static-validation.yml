@@ -1,0 +1,71 @@
+name: Governance Static Validation
+
+on:
+  push:
+    branches:
+      - main
+      - product/city-standard-v1-beijing-forbidden-city
+    paths:
+      - '.github/workflows/**'
+      - '.github/scripts/**'
+      - 'worker/*.test.mjs'
+      - 'docs/FAST_DEVELOPMENT_GOVERNANCE_V2.md'
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - '.github/workflows/**'
+      - '.github/scripts/**'
+      - 'worker/*.test.mjs'
+      - 'docs/FAST_DEVELOPMENT_GOVERNANCE_V2.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: governance-static-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out exact candidate head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+
+      - name: Verify exact candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+
+      - name: Validate workflow YAML syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby -e 'require "psych"; ARGV.each { |file| Psych.parse_file(file); puts "YAML OK: #{file}" }' .github/workflows/*.yml
+
+      - name: Validate checked-in harness syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find .github/scripts -type f -name '*.mjs' -print0)
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find worker -maxdepth 1 -type f -name '*.test.mjs' -print0)
+          while IFS= read -r -d '' file; do bash -n "$file"; done < <(find .github/scripts -type f -name '*.sh' -print0)
+          while IFS= read -r -d '' file; do python3 -m py_compile "$file"; done < <(find .github/scripts -type f -name '*.py' -print0)
+
+      - name: Validate fast feedback dependency mapping
+        shell: bash
+        run: ./.github/scripts/run_fast_feedback.sh --check-mapping

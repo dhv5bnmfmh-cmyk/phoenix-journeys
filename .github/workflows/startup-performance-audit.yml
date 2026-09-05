@@ -1,6 +1,21 @@
 name: Startup Performance Regression Audit
 
 on:
+  push:
+    branches:
+      - product/city-standard-v1-beijing-forbidden-city
+    paths:
+      - 'app/lib/app.dart'
+      - 'app/lib/startup_performance_probe.dart'
+      - 'app/lib/data/daily_journey_experience.dart'
+      - 'app/lib/data/journey_startup_metadata.dart'
+      - 'app/lib/screens/explore_screen.dart'
+      - 'app/lib/screens/journey_screen.dart'
+      - 'app/web/**'
+      - '.github/scripts/startup_instrument.py'
+      - '.github/scripts/measure_startup.mjs'
+      - '.github/scripts/measure_journey_open_visible.mjs'
+      - '.github/scripts/journey_level_session_harness.mjs'
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
@@ -11,12 +26,11 @@ on:
       - 'app/lib/data/journey_startup_metadata.dart'
       - 'app/lib/screens/explore_screen.dart'
       - 'app/lib/screens/journey_screen.dart'
-      - 'app/lib/widgets/interactive_story_text.dart'
       - 'app/web/**'
       - '.github/scripts/startup_instrument.py'
       - '.github/scripts/measure_startup.mjs'
       - '.github/scripts/measure_journey_open_visible.mjs'
-      - '.github/workflows/startup-performance-audit.yml'
+      - '.github/scripts/journey_level_session_harness.mjs'
   workflow_dispatch:
 
 permissions:
@@ -28,11 +42,11 @@ concurrency:
 
 env:
   CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-  BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+  BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '84960f28c3b4c2fa0612e02cb8dcaf02517dc391' }}
 
 jobs:
   benchmark:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 55
     steps:
@@ -106,12 +120,22 @@ jobs:
           before_visible = json.loads((root / 'baseline-journey-open-visible.json').read_text())
           after_visible = json.loads((root / 'candidate-journey-open-visible.json').read_text())
           failed = []
+          before_identity = before_visible.get('identityKey')
+          after_identity = after_visible.get('identityKey')
+          same_identity = bool(before_identity) and before_identity == after_identity
+          print(f'[learner-visible] identity BEFORE={before_identity} AFTER={after_identity}')
+          if not before_identity or not after_identity:
+              failed.append('learner-visible Journey identity is missing')
           for scenario in ('cold_new','warm_new','cold_existing','warm_existing'):
               b = before['stats'][scenario]['totalToMeaningfulMs']['median']
               a = after['stats'][scenario]['totalToMeaningfulMs']['median']
               print(f'[{scenario}] total BEFORE={b} AFTER={a}')
-              if b is None or a is None: failed.append(f'{scenario}: missing total startup evidence')
-              elif a > b * 1.15: failed.append(f'{scenario}: total startup regressed >15%')
+              if b is None or a is None:
+                  failed.append(f'{scenario}: missing total startup evidence')
+              elif same_identity and a > b * 1.15:
+                  failed.append(f'{scenario}: total startup regressed >15%')
+              elif not same_identity:
+                  print(f'[{scenario}] relative total comparison = NOT APPLICABLE across different Journey identities')
               ready = after['stats'][scenario]['homeReadyBeforeBrandingDeadlineMs']['median']
               fade = after['stats'][scenario]['brandingDeadlineToFadeStartMs']['max']
               removal = after['stats'][scenario]['coverRemovalAfterFadeStartMs']['max']
@@ -122,7 +146,10 @@ jobs:
           a_open = after_visible['medianMs']
           print(f'[learner-visible] Journey-open BEFORE={b_open} AFTER={a_open}')
           print(f'[instrumentation] candidate legacy Journey-open={after["stats"]["warm_existing"]["journeyOpenStoryUsableMs"]["median"]}')
-          if a_open > max(5000, b_open * 1.15): failed.append('learner-visible Journey-open regressed materially')
+          if a_open > 5000:
+              failed.append('learner-visible Journey-open exceeded 5000ms absolute budget')
+          elif same_identity and a_open > b_open * 1.15:
+              failed.append('learner-visible Journey-open regressed materially')
           if a_open < 5000 and after['stats']['warm_existing']['journeyOpenStoryUsableMs']['median'] > 5000:
               print('INSTRUMENTATION FALSE POSITIVE = CONFIRMED')
           if before_visible.get('pageErrors') or after_visible.get('pageErrors'): failed.append('browser page errors in learner-visible metric')

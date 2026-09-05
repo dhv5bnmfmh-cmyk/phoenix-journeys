@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
-import 'package:phoenix_journeys/data/journey_geography_catalog.dart';
 import 'package:phoenix_journeys/screens/city_passport_screen.dart';
 import 'package:phoenix_journeys/state/access_controlled_app_state.dart';
 import 'package:phoenix_journeys/widgets/journey_picker_sheet.dart';
@@ -49,13 +48,15 @@ void main() {
     expect(state.canOpenJourney('literary-roaming'), isFalse);
   });
 
-  testWidgets('Journey Picker disables unreleased regular Journey', (
+  testWidgets('Journey Picker excludes hidden regular Journey from discovery', (
     tester,
   ) async {
     final state = await loadProductionState();
-    final lockedJourney = dailyJourneyExperiences.firstWhere(
-      (journey) => !state.canOpenJourney(journey.id),
+    final hiddenJourney = requireDailyJourneyExperience(
+      'beijing-summer-palace',
     );
+
+    expect(state.canOpenJourney(hiddenJourney.id), isFalse);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -67,7 +68,7 @@ void main() {
                   showJourneyPickerSheet(
                     context: context,
                     state: state,
-                    initialCityId: lockedJourney.cityId,
+                    initialCityId: hiddenJourney.cityId,
                     lockToInitialCity: true,
                   );
                 },
@@ -82,20 +83,28 @@ void main() {
     await tester.tap(find.text('open picker'));
     await tester.pumpAndSettle();
 
-    final lockedTile = tester.widget<InkWell>(
-      find.byKey(ValueKey('journey-destination-${lockedJourney.id}')),
+    expect(
+      find.byKey(ValueKey('journey-destination-${hiddenJourney.id}')),
+      findsNothing,
     );
-    expect(lockedTile.onTap, isNull);
-    expect(find.text('今日未开放'), findsWidgets);
+    expect(
+      find.byKey(
+        const ValueKey('journey-destination-beijing-forbidden-city'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('今日未开放'), findsNothing);
   });
 
-  testWidgets('Journey Picker keeps the released morning Journey actionable', (
+  testWidgets('Journey Picker keeps the published reference actionable', (
     tester,
   ) async {
     final state = await loadProductionState();
     final releasedJourney = requireDailyJourneyExperience(
       state.dailyAssignment.morningJourneyId,
     );
+
+    expect(releasedJourney.id, 'beijing-forbidden-city');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -126,18 +135,15 @@ void main() {
       find.byKey(ValueKey('journey-destination-${releasedJourney.id}')),
     );
     expect(releasedTile.onTap, isNotNull);
-    expect(find.textContaining('上午旅程 · 已开放'), findsOneWidget);
+    expect(find.textContaining('已开放'), findsOneWidget);
   });
 
-  testWidgets('Passport ignores production unlock query and disables locked entry', (
+  testWidgets('Passport ignores unlock query and hides legacy destinations', (
     tester,
   ) async {
     final state = await loadProductionState();
-    final lockedJourney = dailyJourneyExperiences.firstWhere(
-      (journey) => !state.canOpenJourney(journey.id),
-    );
-    final province = chinaProvinceCatalog.singleWhere(
-      (entry) => entry.cityIds.contains(lockedJourney.cityId),
+    final hiddenJourney = requireDailyJourneyExperience(
+      'beijing-summer-palace',
     );
 
     tester.view.physicalSize = const Size(390, 844);
@@ -156,39 +162,34 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('全开放'), findsNothing);
-    expect(find.text('${state.earnedStampCount} 枚'), findsOneWidget);
+    expect(state.canOpenJourney(hiddenJourney.id), isFalse);
 
     await tester.tap(find.byKey(const ValueKey('passport-country-china')));
     await tester.pumpAndSettle();
 
-    final provinceFinder = find.byKey(
-      ValueKey('passport-province-${province.id}'),
+    expect(
+      find.byKey(const ValueKey('passport-province-sichuan')),
+      findsNothing,
     );
-    await tester.ensureVisible(provinceFinder);
-    await tester.tap(provinceFinder);
+
+    await tester.tap(
+      find.byKey(const ValueKey('passport-province-beijing')),
+    );
     await tester.pumpAndSettle();
 
-    if (!province.isMunicipality) {
-      final cityFinder = find.byKey(
-        ValueKey('passport-city-option-${lockedJourney.cityId}'),
-      );
-      await tester.ensureVisible(cityFinder);
-      await tester.tap(cityFinder);
-      await tester.pumpAndSettle();
-    }
-
-    final destinationFinder = find.byKey(
-      ValueKey('passport-place-option-${lockedJourney.id}'),
-    );
-    await tester.ensureVisible(destinationFinder);
-    final destinationTap = tester.widget<InkWell>(
-      find.descendant(
-        of: destinationFinder,
-        matching: find.byType(InkWell),
+    expect(
+      find.byKey(
+        const ValueKey('passport-place-option-beijing-forbidden-city'),
       ),
+      findsOneWidget,
     );
-
-    expect(destinationTap.onTap, isNull);
-    expect(state.activeJourneyId, isNot(lockedJourney.id));
+    expect(
+      find.byKey(
+        const ValueKey('passport-place-option-beijing-summer-palace'),
+      ),
+      findsNothing,
+    );
+    expect(state.activeJourneyId, isNot(hiddenJourney.id));
   });
+
 }

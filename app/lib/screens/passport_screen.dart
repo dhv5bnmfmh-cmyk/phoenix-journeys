@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/daily_journey_catalog.dart';
+import '../data/journey_publication_catalog.dart';
 import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/journey_level_selector_button.dart';
@@ -23,6 +24,9 @@ class PassportScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final visibleJourneys = publishedJourneyRuntimeIds
+        .map(requireDailyJourneyExperience)
+        .toList(growable: false);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
@@ -35,12 +39,12 @@ class PassportScreen extends StatelessWidget {
           Expanded(
             child: ListView.separated(
               physics: const BouncingScrollPhysics(),
-              itemCount: dailyJourneyExperiences.length,
+              itemCount: visibleJourneys.length,
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 return _CityStampCard(
                   state: state,
-                  journey: dailyJourneyExperiences[index],
+                  journey: visibleJourneys[index],
                 );
               },
             ),
@@ -88,11 +92,7 @@ class _PassportHeader extends StatelessWidget {
               ),
               const SizedBox(height: 1),
               Text(
-                state.displayText(
-                  _passportAllAccessPreview
-                      ? '体验版已开放全部城市与学习步骤。'
-                      : '每天完成一段 Journey，收藏一座城市。',
-                ),
+                state.displayText('北京 · 紫禁城 · 两条路，一张图'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 10.5, color: Colors.black54),
@@ -114,9 +114,7 @@ class _PassportHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(99),
               ),
               child: Text(
-                _passportAllAccessPreview
-                    ? state.displayText('全开放')
-                    : '${state.earnedStampCount} 枚',
+                state.displayText('北京 Reference'),
                 style: const TextStyle(
                   color: PhoenixTheme.red,
                   fontSize: 9,
@@ -139,6 +137,9 @@ class _PassportMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final allAccess = _passportAllAccessPreview;
+    final visibleJourneys = publishedJourneyRuntimeIds
+        .map(requireDailyJourneyExperience)
+        .toList(growable: false);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(13, 11, 13, 12),
@@ -196,7 +197,7 @@ class _PassportMap extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Row(
-            children: dailyJourneyExperiences.map((journey) {
+            children: visibleJourneys.map((journey) {
               final earned = state.isJourneyStampEarned(journey.id);
               final isToday = state.todayJourney.id == journey.id;
               final available = allAccess || earned || isToday;
@@ -384,8 +385,10 @@ class _CityStampCard extends StatelessWidget {
                             const SizedBox(width: 6),
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: () => unawaited(_openJourney(context)),
-                                icon: const Icon(Icons.replay_rounded, size: 16),
+                                onPressed: () =>
+                                    unawaited(_openJourney(context)),
+                                icon:
+                                    const Icon(Icons.replay_rounded, size: 16),
                                 label: Text(
                                   state.displayText('再次体验'),
                                   style: const TextStyle(fontSize: 10),

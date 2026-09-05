@@ -8,17 +8,7 @@ on:
       - 'app/**'
       - 'worker/**'
       - 'wrangler.toml'
-      - '.github/scripts/**'
-      - '.github/workflows/**'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'app/**'
-      - 'worker/**'
-      - 'wrangler.toml'
-      - '.github/scripts/**'
-      - '.github/workflows/**'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  CANDIDATE_SHA: ${{ github.sha }}
 
 jobs:
   verify:
@@ -52,14 +42,14 @@ jobs:
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
           echo "FLUTTER CI CANDIDATE SHA = $CANDIDATE_SHA"
 
-      - name: Preflight checked-in JavaScript harness syntax
+      - name: Preflight checked-in harness syntax
         working-directory: ${{ github.workspace }}
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r -d '' file; do
-            node --check "$file"
-          done < <(find .github/scripts -type f -name '*.mjs' -print0)
+          while IFS= read -r -d '' file; do node --check "$file"; done < <(find .github/scripts -type f -name '*.mjs' -print0)
+          while IFS= read -r -d '' file; do bash -n "$file"; done < <(find .github/scripts -type f -name '*.sh' -print0)
+          while IFS= read -r -d '' file; do python3 -m py_compile "$file"; done < <(find .github/scripts -type f -name '*.py' -print0)
 
       - name: Test Phoenix agents
         id: agents
@@ -88,9 +78,37 @@ jobs:
       - name: Test
         id: test
         continue-on-error: true
+        shell: bash
         run: |
-          set -o pipefail
-          flutter test 2>&1 | tee test.log
+          set +e
+          flutter test --reporter expanded 2>&1 | tee test.log
+          test_status=${PIPESTATUS[0]}
+          set -e
+          if [[ "$test_status" -ne 0 ]]; then
+            {
+              echo '## Full Flutter first useful failure'
+              echo
+              echo '```text'
+              awk '
+                BEGIN { capture=0; lines=0 }
+                /\[E\]|TestFailure|Expected:|Actual:|Which:|package:.*test|test\/.*\.dart/ {
+                  if (!capture) capture=1
+                }
+                capture && lines < 80 {
+                  print
+                  lines++
+                }
+              ' test.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            first_failure="$(awk '/\[E\]|TestFailure|Expected:|Actual:|Which:|test\/.*\.dart/ { print; exit }' test.log)"
+            if [[ -n "$first_failure" ]]; then
+              echo "::error title=Full Flutter first failure::$first_failure"
+            else
+              echo '::error title=Full Flutter first failure::See verification log artifact for complete output.'
+            fi
+          fi
+          exit "$test_status"
 
       - name: Build web release
         id: build

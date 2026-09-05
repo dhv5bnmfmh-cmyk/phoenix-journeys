@@ -12,22 +12,30 @@ const [workflow, reportTool, reportRunner] = await Promise.all([
   readFile(reportRunnerPath, 'utf8'),
 ]);
 
-test('generates and publishes the quality agent report before preview deployment', () => {
-  const generateIndex = workflow.indexOf('Test Flutter app and generate quality report once');
+test('generates and publishes the quality agent report from the single Flutter test run', () => {
+  const testIndex = workflow.indexOf('Test Flutter app once and generate quality evidence');
   const uploadIndex = workflow.indexOf('Upload journey quality report');
   const commentIndex = workflow.indexOf('Add or update quality agent comment');
   const enforceIndex = workflow.indexOf('Enforce quality agent release decision');
-  const buildIndex = workflow.indexOf('Build preview web app');
+  const buildIndex = workflow.indexOf('Build preview web app once');
   const deployIndex = workflow.indexOf('Deploy isolated preview Worker');
 
-  assert.ok(generateIndex >= 0);
-  assert.ok(uploadIndex > generateIndex);
+  assert.ok(testIndex >= 0);
+  assert.ok(uploadIndex > testIndex);
   assert.ok(commentIndex > uploadIndex);
   assert.ok(enforceIndex > commentIndex);
   assert.ok(buildIndex > enforceIndex);
   assert.ok(deployIndex > buildIndex);
   assert.match(workflow, /PHOENIX_GENERATE_QUALITY_REPORT: '1'/);
-  assert.match(workflow, /run: flutter test/);
+  assert.match(workflow, /flutter test --reporter expanded/);
+  assert.doesNotMatch(
+    workflow,
+    /flutter test test\/journey_quality_report_ci_test\.dart/,
+  );
+  assert.equal(
+    (workflow.match(/flutter test --reporter expanded/g) ?? []).length,
+    1,
+  );
   assert.match(workflow, /phoenix-content-quality-agent-report/);
   assert.match(workflow, /journey-quality-report\.json/);
   assert.match(workflow, /if \(!report\.canPublish\)/);

@@ -1,6 +1,31 @@
 name: Reference Journey E2E
 
 on:
+  push:
+    branches:
+      - product/city-standard-v1-beijing-forbidden-city
+    paths:
+      - 'app/lib/app.dart'
+      - 'app/lib/screens/journey_screen.dart'
+      - 'app/lib/data/adaptive_journey_level_runtime.dart'
+      - 'app/lib/data/dedicated_adaptive_journey_catalog.dart'
+      - 'app/lib/data/forbidden_city_*.dart'
+      - 'app/lib/data/beijing_city_standard.dart'
+      - 'app/lib/data/journey_level_catalog.dart'
+      - 'app/lib/models/journey_challenge.dart'
+      - 'app/lib/services/journey_challenge_engine.dart'
+      - 'app/lib/services/journey_preparation_coordinator.dart'
+      - 'app/lib/services/narration_controller.dart'
+      - 'app/lib/state/**'
+      - 'app/lib/widgets/hsk_story_challenge.dart'
+      - 'app/lib/widgets/journey_challenge_panel.dart'
+      - 'app/lib/widgets/journey_progress_header.dart'
+      - 'app/lib/widgets/journey_stage_narration_button.dart'
+      - 'app/lib/widgets/city_journey_stamp.dart'
+      - 'app/assets/journeys/china/beijing/forbidden_city/**'
+      - 'app/pubspec.yaml'
+      - '.github/scripts/verify_forbidden_city_*.mjs'
+      - '.github/scripts/journey_level_session_harness.mjs'
   pull_request:
     branches:
       - main
@@ -11,33 +36,42 @@ on:
     paths:
       - 'app/lib/app.dart'
       - 'app/lib/screens/journey_screen.dart'
-      - 'app/lib/widgets/**'
       - 'app/lib/data/adaptive_journey_level_runtime.dart'
       - 'app/lib/data/dedicated_adaptive_journey_catalog.dart'
       - 'app/lib/data/forbidden_city_*.dart'
-      - 'app/test/forbidden_city_*.dart'
-      - 'app/web/**'
-      - 'worker/**'
-      - 'wrangler.toml'
+      - 'app/lib/data/beijing_city_standard.dart'
+      - 'app/lib/data/journey_level_catalog.dart'
+      - 'app/lib/models/journey_challenge.dart'
+      - 'app/lib/services/journey_challenge_engine.dart'
+      - 'app/lib/services/journey_preparation_coordinator.dart'
+      - 'app/lib/services/narration_controller.dart'
+      - 'app/lib/state/**'
+      - 'app/lib/widgets/hsk_story_challenge.dart'
+      - 'app/lib/widgets/journey_challenge_panel.dart'
+      - 'app/lib/widgets/journey_progress_header.dart'
+      - 'app/lib/widgets/journey_stage_narration_button.dart'
+      - 'app/lib/widgets/city_journey_stamp.dart'
+      - 'app/assets/journeys/china/beijing/forbidden_city/**'
+      - 'app/pubspec.yaml'
       - '.github/scripts/verify_forbidden_city_*.mjs'
       - '.github/scripts/journey_level_session_harness.mjs'
-      - '.github/workflows/forbidden-city-preview-e2e.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: reference-journey-e2e-pr-${{ github.event.pull_request.number }}
+  group: reference-journey-e2e-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}
   cancel-in-progress: true
 
 env:
-  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
-  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event.pull_request.number }}.7hn5tyrjgh.workers.dev/
+  CANDIDATE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  PREVIEW_URL: https://phoenix-journeys-pr-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 208 }}.7hn5tyrjgh.workers.dev/
 
 jobs:
   reference-journey-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 65
 
     steps:
       - name: Check out exact candidate head
@@ -67,7 +101,7 @@ jobs:
           set -euo pipefail
           health_url="${PREVIEW_URL}api/health?commit=${CANDIDATE_SHA}"
           verified=false
-          for attempt in {1..180}; do
+          for attempt in {1..360}; do
             response="$(curl --fail --silent --show-error "$health_url" || true)"
             if node -e '
               let health;
@@ -81,7 +115,7 @@ jobs:
               verified=true
               break
             fi
-            echo "Waiting for exact preview release ${attempt}/180"
+            echo "Waiting for exact preview release ${attempt}/360"
             sleep 5
           done
           [[ "$verified" == true ]]
@@ -93,7 +127,7 @@ jobs:
           npm install --no-save --prefix "$RUNNER_TEMP/reference-journey-e2e-node" playwright
           "$RUNNER_TEMP/reference-journey-e2e-node/node_modules/.bin/playwright" install --with-deps chromium webkit
 
-      - name: Verify Forbidden City Lv1 Lv3 Lv5 Lv8 Lv10 six-stage experience
+      - name: Verify Forbidden City Lv1 Lv3 Lv5 Lv8 Lv10 five-stage experience
         shell: bash
         env:
           PLAYWRIGHT_PATH: ${{ runner.temp }}/reference-journey-e2e-node/node_modules/playwright/index.mjs

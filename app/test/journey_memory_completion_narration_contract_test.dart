@@ -12,7 +12,7 @@ void main() {
     expect(RegExp("narrationStage: 'memory'").allMatches(journey).length, 3);
     expect(
       RegExp("narrationStage: 'completion'").allMatches(journey).length,
-      3,
+      2,
     );
     expect(journey, contains('Widget _stageNarrationFrame({'));
     expect(journey, contains('await _narration.stop();'));
@@ -23,12 +23,7 @@ void main() {
     expect(journey, isNot(contains('_scheduleStageNarration')));
     expect(journey, contains('Future<void> _stopJourneyNarration()'));
     expect(journey, contains('Future<void> _exitJourney()'));
-    expect(
-      RegExp(r'onNext: \(\) => unawaited\(_exitJourney\(\)\),')
-          .allMatches(journey)
-          .length,
-      3,
-    );
+    expect(journey, contains("? () => unawaited(_exitJourney())"));
     expect(
       journey,
       contains(
@@ -49,11 +44,37 @@ void main() {
       contains('journeyStageNarrationLanguageCode(_appState.isTraditional)'),
     );
     expect(journey, contains('_appState.displayText(review.prompt)'));
-    expect(journey, contains('_appState.displayText(item.answer)'));
+    expect(journey, contains('_appState.displayText(memory.anchor)'));
+    expect(journey, contains('_appState.displayText(completion.discovery)'));
+    expect(journey, contains('_appState.displayText(completion.learning)'));
     expect(journey, contains('memoryController.text.trim()'));
   });
 
-  test('six-stage architecture is unchanged', () {
+  test('Forbidden City Memory and Completion bind the locked session level', () {
+    expect(
+      RegExp(r'forbiddenCityMemoryForLevel\(').allMatches(journey).length,
+      2,
+    );
+    expect(
+      RegExp(r'forbiddenCityCompletionForLevel\(').allMatches(journey).length,
+      2,
+    );
+    expect(
+      RegExp(r'_sessionLanguageProfile\.phoenixLevel \?\? 1')
+          .allMatches(journey)
+          .length,
+      greaterThanOrEqualTo(4),
+    );
+    for (final field in <String>[
+      'completion.discovery',
+      'completion.learning',
+      'memory.anchor',
+    ]) {
+      expect(journey, contains(field), reason: field);
+    }
+  });
+
+  test('Forbidden City presents one five-stage finale without a second page', () {
     final expected = <String>[
       '_storyPage(),',
       '_wordsPage(),',
@@ -65,6 +86,10 @@ void main() {
     for (final anchor in expected) {
       expect(journey, contains(anchor));
     }
+    expect(journey, contains("'回忆 · 完成'"));
+    expect(journey, contains("title: '回忆 · 完成'"));
+    expect(journey, isNot(contains('Widget _forbiddenCityCompletePage()')));
+    expect(journey, contains('if (_isForbiddenCity) return _forbiddenCityMemoryPage();'));
     expect(journey, isNot(contains('Audio Stage')));
   });
 

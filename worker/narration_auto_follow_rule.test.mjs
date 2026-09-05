@@ -20,11 +20,25 @@ test('narration auto-follow is paragraph-scoped and pause-safe', () => {
   assert.match(storyText, /Duration\(milliseconds: 360\)/);
 });
 
-test('active narration paragraph has a bounded visual surface', () => {
-  assert.match(storyText, /narration-follow-surface/);
-  assert.match(storyText, /AnimatedContainer/);
-  assert.match(storyText, /Color\(0x16FFD879\)/);
-  assert.match(storyText, /BorderRadius\.circular\(8\)/);
+test('active narration keeps geometry with text-only highlight', () => {
+  const surfaceKey = storyText.indexOf('narration-follow-surface-');
+  const surfaceStart = storyText.lastIndexOf('return AnimatedContainer(', surfaceKey);
+  const surfaceEnd = storyText.indexOf('child: Text.rich(', surfaceKey);
+  assert.ok(surfaceKey >= 0);
+  assert.ok(surfaceStart >= 0);
+  assert.ok(surfaceEnd > surfaceStart);
+
+  const surface = storyText.slice(surfaceStart, surfaceEnd);
+  assert.match(surface, /AnimatedContainer/);
+  assert.match(
+    surface,
+    /padding: const EdgeInsets\.symmetric\(horizontal: 3, vertical: 2\)/,
+  );
+  assert.doesNotMatch(surface, /decoration:/);
+  assert.doesNotMatch(surface, /BoxShadow/);
+  assert.doesNotMatch(surface, /Color\(0x16FFD879\)/);
+  assert.match(storyText, /Color\(0xFFFFE7AA\)/);
+  assert.match(storyText, /fontWeight: FontWeight\.w900/);
 });
 
 test('manual reading temporarily suspends narration auto-follow', () => {

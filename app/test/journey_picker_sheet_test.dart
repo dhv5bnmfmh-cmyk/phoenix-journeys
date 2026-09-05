@@ -5,7 +5,7 @@ import 'package:phoenix_journeys/state/app_state.dart';
 import 'package:phoenix_journeys/widgets/journey_picker_sheet.dart';
 
 void main() {
-  testWidgets('traveler selects a city before opening its destination', (
+  testWidgets('traveler sees only the published Beijing reference', (
     tester,
   ) async {
     final state = AppState(clock: () => DateTime(2026, 7, 22));
@@ -36,22 +36,27 @@ void main() {
 
     expect(find.text('选择城市与地点'), findsOneWidget);
     expect(find.byKey(const ValueKey('journey-city-beijing')), findsOneWidget);
-    expect(find.byKey(const ValueKey('journey-city-shanghai')), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('journey-city-shanghai')));
-    await tester.pumpAndSettle();
-
+    expect(find.byKey(const ValueKey('journey-city-shanghai')), findsNothing);
     expect(
-      find.byKey(const ValueKey('journey-destination-shanghai-bund')),
+      find.byKey(
+        const ValueKey('journey-destination-beijing-forbidden-city'),
+      ),
       findsOneWidget,
     );
-    expect(find.text('上海的地点'), findsOneWidget);
+    expect(
+      find.byKey(
+        const ValueKey('journey-destination-beijing-summer-palace'),
+      ),
+      findsNothing,
+    );
 
     await tester.tap(
-      find.byKey(const ValueKey('journey-destination-shanghai-bund')),
+      find.byKey(
+        const ValueKey('journey-destination-beijing-forbidden-city'),
+      ),
     );
     await tester.pumpAndSettle();
 
-    expect(selectedJourneyId, 'shanghai-bund');
+    expect(selectedJourneyId, 'beijing-forbidden-city');
   });
 }
