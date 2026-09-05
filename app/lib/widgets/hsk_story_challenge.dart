@@ -265,7 +265,9 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
             const SizedBox(height: 12),
             const Divider(color: Colors.white24),
             Text(
-              _correct ? '回答正确' : '回答错误 · 请查看红色标记',
+              _correct
+                  ? '回答正确'
+                  : '回答错误 · 红色为你的错误选择，绿色为正确答案',
               key: const ValueKey('challenge-inline-feedback'),
               style: TextStyle(
                 color: _correct ? Colors.greenAccent : Colors.redAccent,
@@ -283,7 +285,11 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
             Text(
               '正确答案：${question.answer}',
               key: const ValueKey('challenge-inline-correct-answer'),
-              style: const TextStyle(color: Colors.white, height: 1.45),
+              style: const TextStyle(
+                color: Colors.greenAccent,
+                height: 1.45,
+                fontWeight: FontWeight.w800,
+              ),
             ),
             if (question.mode == StoryChallengeMode.grammarRepair &&
                 question.grammarRevisionRule != null) ...[
@@ -354,6 +360,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
   Widget _grammarFinalFeedback() {
     final errorIndex = question.errorSegmentIndex ?? 0;
     final actual = question.errorSegments[errorIndex];
+    final locationCorrect = selectedError == errorIndex;
     final selectedLocation = selectedError == null
         ? '未选择'
         : question.errorSegments[selectedError!];
@@ -369,22 +376,48 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (selectedError != errorIndex) ...[
+        if (!locationCorrect) ...[
           Text(
-            '错误位置：$actual',
-            key: const ValueKey('grammar-error-location'),
+            '你的选择（错误位置）：$selectedLocation',
+            key: const ValueKey('grammar-wrong-location'),
             style: const TextStyle(
               color: Colors.redAccent,
               fontWeight: FontWeight.w900,
             ),
           ),
-          Text(
-            '你定位的是：$selectedLocation',
-            key: const ValueKey('grammar-wrong-location'),
-            style: const TextStyle(color: Colors.redAccent),
-          ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
         ],
+        Text(
+          '正确错误位置：$actual',
+          key: const ValueKey('grammar-correct-location-final'),
+          style: const TextStyle(
+            color: Colors.greenAccent,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        if (question.grammarWhyWrong != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            '为什么这里有语病：${question.grammarWhyWrong}',
+            key: const ValueKey('grammar-final-why-wrong'),
+            style: const TextStyle(
+              color: Colors.white70,
+              height: 1.45,
+            ),
+          ),
+        ],
+        if (question.grammarFamily != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            '语法点：${question.grammarFamily}',
+            key: const ValueKey('grammar-final-family'),
+            style: const TextStyle(
+              color: PhoenixTheme.gold,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+        const SizedBox(height: 5),
         Text(
           repairCorrect ? '修改正确' : '修改错误',
           key: const ValueKey('grammar-repair-feedback'),
@@ -394,7 +427,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
           ),
         ),
         Text(
-          '你选择：$selectedRepair',
+          repairCorrect ? '你的修改（正确）：$selectedRepair' : '你的修改（错误）：$selectedRepair',
           key: const ValueKey('grammar-selected-repair'),
           style: TextStyle(
             color: repairCorrect ? Colors.greenAccent : Colors.redAccent,
@@ -680,6 +713,8 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
         ),
       );
     }
+    final showFeedback = grammarLocationSubmitted || submitted;
+    final errorIndex = question.errorSegmentIndex;
     return RichText(
       key: const ValueKey('grammar-broken-sentence'),
       text: TextSpan(
@@ -692,13 +727,19 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
           for (var i = 0; i < segments.length; i++)
             TextSpan(
               text: segments[i],
-              style: (grammarLocationSubmitted || submitted) &&
-                      i == question.errorSegmentIndex
+              style: showFeedback &&
+                      selectedError == i &&
+                      i != errorIndex
                   ? const TextStyle(
                       color: Colors.redAccent,
                       fontWeight: FontWeight.w900,
                     )
-                  : null,
+                  : showFeedback && i == errorIndex
+                      ? const TextStyle(
+                          color: Colors.greenAccent,
+                          fontWeight: FontWeight.w900,
+                        )
+                      : null,
             ),
         ],
       ),
@@ -846,5 +887,4 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
           ),
         ),
       );
-
 }
