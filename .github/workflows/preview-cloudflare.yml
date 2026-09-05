@@ -142,7 +142,7 @@ jobs:
           exit "$test_status"
 
       - name: Upload Full Flutter failure evidence
-        if: steps.flutter_test.outcome == 'failure'
+        if: ${{ always() && steps.flutter_test.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
         with:
           name: full-flutter-${{ env.PREVIEW_RELEASE }}
