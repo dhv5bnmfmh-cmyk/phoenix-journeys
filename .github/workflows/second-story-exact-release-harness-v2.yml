@@ -41,6 +41,7 @@ jobs:
           while IFS= read -r -d '' file; do node --check "$file"; done < <(find .github/scripts -type f -name '*.mjs' -print0)
           while IFS= read -r -d '' file; do bash -n "$file"; done < <(find .github/scripts -type f -name '*.sh' -print0)
           while IFS= read -r -d '' file; do python3 -m py_compile "$file"; done < <(find .github/scripts -type f -name '*.py' -print0)
+          find .github/scripts -type d -name '__pycache__' -prune -exec rm -rf {} +
 
       - name: Fix only brittle architecture-test whitespace matching
         shell: bash
@@ -72,6 +73,7 @@ jobs:
         run: |
           set -euo pipefail
           git checkout -- worker/journey_runtime_architecture_gate.test.mjs
+          find . -type d -name '__pycache__' -prune -exec rm -rf {} +
           test "$(git rev-parse HEAD)" = "$PREVIEW_RELEASE"
           git diff --exit-code
           test -z "$(git status --porcelain)"
