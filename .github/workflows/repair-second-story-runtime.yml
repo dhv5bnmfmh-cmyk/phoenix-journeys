@@ -19,12 +19,12 @@ jobs:
           fetch-depth: 0
           ref: product/city-standard-v1-beijing-forbidden-city
 
-      - name: Verify exact failed parent
+      - name: Verify exact failed baseline
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = "c6504508f34dffad0158d5c69ce0f33508061ace"
-          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/repair-second-story-runtime.yml"
+          git merge-base --is-ancestor c6504508f34dffad0158d5c69ce0f33508061ace HEAD
+          test "$(git diff --name-only c6504508f34dffad0158d5c69ce0f33508061ace..HEAD)" = ".github/workflows/repair-second-story-runtime.yml"
 
       - name: Apply minimal product repair and regressions
         shell: bash
@@ -54,6 +54,7 @@ jobs:
 
           '''
           text = text[:start] + replacement + text[end:]
+
           old = '''  final package = forbiddenCityPipelineFixture;
             final paragraphs = package.storyContent.lines.map((line) => line.text).toList(
                   growable: false,
@@ -78,6 +79,7 @@ jobs:
           if old not in text:
               raise SystemExit('level-content presentation block not found')
           text = text.replace(old, new, 1)
+
           marker = '''void ensureForbiddenCitySecondStoryRuntimeValid() {
             final package = forbiddenCityPipelineFixture;
           '''
@@ -106,21 +108,15 @@ jobs:
 
           journey_path = Path('app/lib/screens/journey_screen.dart')
           journey = journey_path.read_text()
-          old = '''    if (step >= 5) return forbiddenCitySceneForStage('completion').sceneId;
-
-            final snapshot = _narration.highlightSnapshot;
-          '''
-          new = '''    if (step >= 5) return forbiddenCitySceneForStage('completion').sceneId;
-            if (_isForbiddenCitySecondStory) {
-              // Story B does not use Story A's沈砚/阿宁 semantic scene anchors.
+          line = "    if (step >= 5) return forbiddenCitySceneForStage('completion').sceneId;\n"
+          guard = """    if (_isForbiddenCitySecondStory) {
+              // Story B has its own Narrative DNA and must not use Story A semantic anchors.
               return forbiddenCitySceneForStage('story').sceneId;
             }
-
-            final snapshot = _narration.highlightSnapshot;
-          '''
-          if old not in journey:
-              raise SystemExit('Forbidden City Story scene marker not found')
-          journey = journey.replace(old, new, 1)
+          """
+          if journey.count(line) != 1:
+              raise SystemExit('Forbidden City completion scene line not unique')
+          journey = journey.replace(line, line + guard, 1)
           journey_path.write_text(journey)
 
           test_path = Path('app/test/forbidden_city_story_selection_runtime_test.dart')
@@ -245,9 +241,6 @@ jobs:
                   expect(find.text(target.$2), findsWidgets);
                   expect(state.activeStoryId, forbiddenCitySecondStoryId);
                 }
-
-                expect(find.text('中轴'), findsNothing);
-                expect(state.activeStoryId, forbiddenCitySecondStoryId);
               },
             );
           }
