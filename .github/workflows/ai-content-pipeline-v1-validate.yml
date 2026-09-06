@@ -1,0 +1,58 @@
+name: AI Content Pipeline V1 Validate
+
+on:
+  push:
+    branches:
+      - agent/ai-content-pipeline-v1-3216
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out isolated candidate
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify baseline and diff scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          baseline='3216369b3605972a9f3701275004dd7add91c66e'
+          git cat-file -e "${baseline}^{commit}"
+          test "$(git rev-parse HEAD^)" = "$baseline"
+          actual="$(git diff --name-only "$baseline" HEAD | sort)"
+          expected="$(printf '%s\n' \
+            '.github/workflows/ai-content-pipeline-v1-validate.yml' \
+            'app/lib/data/forbidden_city_ai_content_pipeline_v1.dart' \
+            'app/lib/models/content_pipeline.dart' \
+            'app/test/ai_content_pipeline_v1_test.dart' | sort)"
+          test "$actual" = "$expected"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Targeted AI Content Pipeline regressions
+        working-directory: app
+        run: >-
+          flutter test
+          test/ai_content_pipeline_v1_test.dart
+          test/story_engine_v1_test.dart
+          test/forbidden_city_discovery_authoritative_source_v1_test.dart
+          test/story_discovery_no_yellow_dots_test.dart
+          test/forbidden_city_ten_level_content_contract_test.dart
+          test/multiple_choice_answer_position_contract_test.dart
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
