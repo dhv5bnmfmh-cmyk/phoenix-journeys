@@ -177,17 +177,21 @@ jobs:
           }
           DART
 
-          dart format \
-            app/lib/data/forbidden_city_story_runtime.dart \
-            app/lib/screens/journey_screen.dart \
-            app/test/forbidden_city_story_selection_runtime_test.dart \
-            app/test/forbidden_city_second_story_scene_routing_test.dart
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+
+      - name: Format repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart format \
+            app/lib/data/forbidden_city_story_runtime.dart \
+            app/lib/screens/journey_screen.dart \
+            app/test/forbidden_city_story_selection_runtime_test.dart \
+            app/test/forbidden_city_second_story_scene_routing_test.dart
 
       - name: Install dependencies
         working-directory: app
