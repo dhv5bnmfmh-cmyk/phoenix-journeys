@@ -6,6 +6,8 @@ import 'package:pinyin/pinyin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/daily_journey_catalog.dart';
+import '../data/forbidden_city_journey_runtime.dart';
+import '../data/forbidden_city_story_runtime.dart';
 import '../data/journey_level_catalog.dart';
 import '../models/journey_memory_entry.dart';
 import '../services/journey_memory_repository.dart';
@@ -108,6 +110,7 @@ class AppState extends ChangeNotifier {
       'activeJourney.identityVersion';
   @visibleForTesting
   static const int activeJourneyIdentityVersion = 1;
+  static const String activeStoryIdStorageKey = 'activeStory.id';
 
   final DateTime Function() _clock;
   final Future<SharedPreferences> Function() _preferencesLoader;
@@ -135,6 +138,7 @@ class AppState extends ChangeNotifier {
   final Set<String> _specialJourneyUnlocksInFlight = <String>{};
 
   late String activeJourneyId;
+  String activeStoryId = forbiddenCityPrimaryStoryId;
   int _journeyStep = 0;
   int _journeyFurthestStep = 0;
   int journeyFlowVersion = 1;
@@ -170,6 +174,16 @@ class AppState extends ChangeNotifier {
   bool get isTraditional => scriptMode == ScriptMode.traditional;
   DailyJourneyExperience get activeJourney =>
       requireDailyJourneyExperience(activeJourneyId);
+  String get activeStoryTitle => activeJourneyId == forbiddenCityJourneyId
+      ? requireForbiddenCityStory(
+          normalizeForbiddenCityStoryId(activeStoryId),
+        ).title
+      : activeJourney.storyTitle;
+  String get activeJourneyMemoryId =>
+      activeJourneyId == forbiddenCityJourneyId &&
+              isForbiddenCitySecondStory(activeStoryId)
+          ? 'memory-$activeJourneyId-$activeStoryId'
+          : 'memory-$activeJourneyId';
   DailyJourneyExperience get todayJourney => dailyJourneyForDate(_clock());
   JourneyLocationBinding get activeJourneyLocation =>
       requireJourneyLocation(activeJourneyId);
@@ -244,13 +258,27 @@ class AppState extends ChangeNotifier {
   String _narrationKey(String contentId, String suffix) =>
       _key('narration.$contentId.$suffix');
 
+  String _storyStoragePrefix(String journeyId, String storyId) {
+    final binding = requireJourneyLocation(journeyId);
+    if (journeyId == forbiddenCityJourneyId &&
+        isForbiddenCitySecondStory(storyId)) {
+      return '${binding.storageNamespace}.story.$storyId';
+    }
+    return binding.storageNamespace;
+  }
+
   String _key(String suffix, [String? journeyId]) {
-    final binding = requireJourneyLocation(journeyId ?? activeJourneyId);
-    return '${binding.storageNamespace}.$suffix';
+    final resolvedJourneyId = journeyId ?? activeJourneyId;
+    return '${_storyStoragePrefix(resolvedJourneyId, activeStoryId)}.$suffix';
   }
 
   String _legacyKey(String suffix, [String? journeyId]) {
-    final binding = requireJourneyLocation(journeyId ?? activeJourneyId);
+    final resolvedJourneyId = journeyId ?? activeJourneyId;
+    if (resolvedJourneyId == forbiddenCityJourneyId &&
+        isForbiddenCitySecondStory(activeStoryId)) {
+      return _key(suffix, resolvedJourneyId);
+    }
+    final binding = requireJourneyLocation(resolvedJourneyId);
     return '${binding.legacyStorageNamespace}.$suffix';
   }
 
@@ -335,6 +363,9 @@ class AppState extends ChangeNotifier {
     if (!hasId && !hasNamespace && !hasVersion) {
       final defaultJourney = dailyJourneyForDate(_clock());
       activeJourneyId = defaultJourney.id;
+      activeStoryId = activeJourneyId == forbiddenCityJourneyId
+          ? forbiddenCityPrimaryStoryId
+          : '';
       _loadActiveJourney(prefs);
       await _migrateActiveJourneyStorage(prefs);
       await _persistActiveJourneyIdentity(
@@ -354,6 +385,11 @@ class AppState extends ChangeNotifier {
     }
 
     final journey = journeyExperienceById(persistedId);
+    activeStoryId = persistedId == forbiddenCityJourneyId
+        ? normalizeForbiddenCityStoryId(
+            prefs.getString(activeStoryIdStorageKey),
+          )
+        : '';
     if (journey == null) {
       _failActiveJourneyRestore(
         persistedId,
@@ -407,41 +443,36 @@ class AppState extends ChangeNotifier {
         activeJourneyVersionStorageKey,
         activeJourneyIdentityVersion,
       ),
+      prefs.setString(activeStoryIdStorageKey, activeStoryId),
     ]);
   }
 
   void _loadActiveJourney(SharedPreferences prefs) {
-    final isLegacyBeijing = activeJourneyId == 'beijing-forbidden-city';
+    final isLegacyBeijing = activeJourneyId == forbiddenCityJourneyId &&
+        !isForbiddenCitySecondStory(activeStoryId);
     final isSummerPalace = activeJourneyId == 'beijing-summer-palace';
     final storedDifficulty = _readJourneyString(prefs, 'difficulty');
     journeyDifficulty = parseJourneyDifficulty(storedDifficulty);
     journeyDifficultyChosen = storedDifficulty != null;
-    final storedStep =
-        _readJourneyInt(prefs, 'step') ??
+    final storedStep = _readJourneyInt(prefs, 'step') ??
         (isLegacyBeijing ? prefs.getInt('beijingJourneyStep') : null) ??
         0;
-    final storedFurthest =
-        _readJourneyInt(prefs, 'furthestStep') ??
+    final storedFurthest = _readJourneyInt(prefs, 'furthestStep') ??
         (isLegacyBeijing ? prefs.getInt('beijingJourneyFurthestStep') : null) ??
         storedStep;
 
     _journeyStep = _safeJourneyStep(storedStep);
-    _journeyFurthestStep = math
-        .max(_journeyStep, _safeJourneyStep(storedFurthest))
-        .toInt();
-    journeyCompleted =
-        _readJourneyBool(prefs, 'completed') ??
+    _journeyFurthestStep =
+        math.max(_journeyStep, _safeJourneyStep(storedFurthest)).toInt();
+    journeyCompleted = _readJourneyBool(prefs, 'completed') ??
         (isLegacyBeijing ? prefs.getBool('journeyCompleted') ?? false : false);
-    wonderDraft =
-        _readJourneyString(prefs, 'wonderDraft') ??
+    wonderDraft = _readJourneyString(prefs, 'wonderDraft') ??
         (isLegacyBeijing ? prefs.getString('wonderDraft') : null) ??
         '';
-    expressDraft =
-        _readJourneyString(prefs, 'expressDraft') ??
+    expressDraft = _readJourneyString(prefs, 'expressDraft') ??
         (isLegacyBeijing ? prefs.getString('expressDraft') : null) ??
         '';
-    memoryDraft =
-        _readJourneyString(prefs, 'memoryDraft') ??
+    memoryDraft = _readJourneyString(prefs, 'memoryDraft') ??
         (isLegacyBeijing ? prefs.getString('memoryDraft') : null) ??
         '';
     guideFeedbackReply = _readJourneyString(prefs, 'guideFeedbackReply') ?? '';
@@ -449,9 +480,9 @@ class AppState extends ChangeNotifier {
         _readJourneyBool(prefs, 'guideFeedbackOffline') ?? false;
     guideFeedbackInputIdentity =
         _readJourneyString(prefs, 'guideFeedbackInputIdentity') ??
-        (guideFeedbackReply.isNotEmpty && wonderDraft.trim().isNotEmpty
-            ? journeyFeedbackInputIdentity(wonderDraft)
-            : '');
+            (guideFeedbackReply.isNotEmpty && wonderDraft.trim().isNotEmpty
+                ? journeyFeedbackInputIdentity(wonderDraft)
+                : '');
     writingFeedbackCorrected =
         _readJourneyString(prefs, 'writingFeedbackCorrected') ?? '';
     writingFeedbackExplanation =
@@ -464,11 +495,10 @@ class AppState extends ChangeNotifier {
         _readJourneyBool(prefs, 'writingFeedbackOffline') ?? false;
     writingFeedbackInputIdentity =
         _readJourneyString(prefs, 'writingFeedbackInputIdentity') ??
-        (hasWritingFeedback && expressDraft.trim().isNotEmpty
-            ? journeyFeedbackInputIdentity(expressDraft)
-            : '');
-    journeyFlowVersion =
-        _readJourneyInt(prefs, 'flowVersion') ??
+            (hasWritingFeedback && expressDraft.trim().isNotEmpty
+                ? journeyFeedbackInputIdentity(expressDraft)
+                : '');
+    journeyFlowVersion = _readJourneyInt(prefs, 'flowVersion') ??
         journeyFlowVersionFor(activeJourneyId);
     journeyChallengeAttemptSequence = math.max(
       0,
@@ -499,14 +529,11 @@ class AppState extends ChangeNotifier {
     for (final contentId in const ['story', 'discovery']) {
       final signature =
           prefs.getString(_narrationKey(contentId, 'signature')) ??
-          (journeyNarrationContentId == contentId
-              ? journeyNarrationContentSignature
-              : null);
-      final offset =
-          prefs.getInt(_narrationKey(contentId, 'offset')) ??
-          (journeyNarrationContentId == contentId
-              ? journeyNarrationOffset
-              : 0);
+              (journeyNarrationContentId == contentId
+                  ? journeyNarrationContentSignature
+                  : null);
+      final offset = prefs.getInt(_narrationKey(contentId, 'offset')) ??
+          (journeyNarrationContentId == contentId ? journeyNarrationOffset : 0);
       if (signature != null && offset > 0) {
         _journeyNarrationSignatures[contentId] = signature;
         _journeyNarrationOffsets[contentId] = offset;
@@ -605,13 +632,20 @@ class AppState extends ChangeNotifier {
     return value.clamp(0, journeyLastStep).toInt();
   }
 
-  Future<void> activateJourney(String journeyId) async {
+  Future<void> activateJourney(
+    String journeyId, {
+    String? storyId,
+  }) async {
     final journey = requireDailyJourneyExperience(journeyId);
     final binding = requireJourneyLocation(journey.id);
     final prefs = await _preferencesLoader();
+    final resolvedStoryId = journey.id == forbiddenCityJourneyId
+        ? normalizeForbiddenCityStoryId(storyId)
+        : '';
 
-    if (journey.id != activeJourneyId) {
+    if (journey.id != activeJourneyId || resolvedStoryId != activeStoryId) {
       activeJourneyId = journey.id;
+      activeStoryId = resolvedStoryId;
       activeJourneyRestoreFailureId = null;
       activeJourneyRestoreFailureReason = null;
       _loadActiveJourney(prefs);
@@ -828,8 +862,12 @@ class AppState extends ChangeNotifier {
       return journeyChallengeAttemptId;
     }
     journeyChallengeAttemptSequence += 1;
+    final challengeIdentity = activeJourneyId == forbiddenCityJourneyId &&
+            isForbiddenCitySecondStory(activeStoryId)
+        ? '$activeJourneyId:$activeStoryId'
+        : activeJourneyId;
     journeyChallengeAttemptId =
-        '$activeJourneyId:flow-v$journeyFlowVersion:attempt-$journeyChallengeAttemptSequence';
+        '$challengeIdentity:flow-v$journeyFlowVersion:attempt-$journeyChallengeAttemptSequence';
     final prefs = await _preferencesLoader();
     await Future.wait([
       prefs.setInt(
@@ -875,7 +913,8 @@ class AppState extends ChangeNotifier {
         prefs.setString(_key('narrationContentId'), contentId),
         prefs.setString(_key('narrationContentSignature'), contentSignature),
         prefs.setInt(_key('narrationOffset'), safeOffset),
-        prefs.setString(_narrationKey(contentId, 'signature'), contentSignature),
+        prefs.setString(
+            _narrationKey(contentId, 'signature'), contentSignature),
         prefs.setInt(_narrationKey(contentId, 'offset'), safeOffset),
       ]),
     );
@@ -1111,13 +1150,15 @@ class AppState extends ChangeNotifier {
         : JourneyCompositeSubstage.none;
     journeyChallengeAttemptId = '';
     if (memory.trim().isNotEmpty) {
-      final compatibilityMemory = '${activeJourney.stampTitle}｜${memory.trim()}';
+      final compatibilityMemory =
+          '${activeJourney.stampTitle}｜${memory.trim()}';
       if (!memories.contains(compatibilityMemory)) {
         memories.insert(0, compatibilityMemory);
       }
     }
     if (activeJourneyId == 'beijing-forbidden-city') {
-      await saveActiveJourneyMemory(memory, sessionLevel: sessionLevel, notify: false);
+      await saveActiveJourneyMemory(memory,
+          sessionLevel: sessionLevel, notify: false);
     }
     wonderDraft = '';
     expressDraft = '';
@@ -1157,6 +1198,52 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<ForbiddenCityStoryProgress> forbiddenCityStoryProgress(
+    String storyId,
+  ) async {
+    final normalized = normalizeForbiddenCityStoryId(storyId);
+    final prefs = await _preferencesLoader();
+    final binding = requireJourneyLocation(forbiddenCityJourneyId);
+    final prefix = normalized == forbiddenCityPrimaryStoryId
+        ? binding.storageNamespace
+        : '${binding.storageNamespace}.story.$normalized';
+    final legacyPrefix = binding.legacyStorageNamespace;
+    int? readInt(String suffix) =>
+        prefs.getInt('$prefix.$suffix') ??
+        (normalized == forbiddenCityPrimaryStoryId
+            ? prefs.getInt('$legacyPrefix.$suffix')
+            : null);
+    bool? readBool(String suffix) =>
+        prefs.getBool('$prefix.$suffix') ??
+        (normalized == forbiddenCityPrimaryStoryId
+            ? prefs.getBool('$legacyPrefix.$suffix')
+            : null);
+    String? readString(String suffix) =>
+        prefs.getString('$prefix.$suffix') ??
+        (normalized == forbiddenCityPrimaryStoryId
+            ? prefs.getString('$legacyPrefix.$suffix')
+            : null);
+    final completed = readBool('completed') ??
+        (normalized == forbiddenCityPrimaryStoryId
+            ? prefs.getBool('journeyCompleted') ?? false
+            : false);
+    final step = completed
+        ? journeyLastStep
+        : (readInt('step') ??
+                (normalized == forbiddenCityPrimaryStoryId
+                    ? prefs.getInt('beijingJourneyStep')
+                    : null) ??
+                0)
+            .clamp(0, journeyLastStep)
+            .toInt();
+    return ForbiddenCityStoryProgress(
+      storyId: normalized,
+      step: step,
+      completed: completed,
+      updatedAt: DateTime.tryParse(readString('updatedAt') ?? ''),
+    );
+  }
+
   Future<void> saveJourneyMemory(JourneyMemoryEntry entry) async {
     final repository = await _journeyMemoryRepo();
     await repository.upsert(entry);
@@ -1189,34 +1276,42 @@ class AppState extends ChangeNotifier {
     final now = _clock();
     JourneyMemoryEntry? existing;
     for (final candidate in journeyMemories) {
-      if (candidate.journeyId == activeJourneyId && !candidate.legacy) {
+      if (candidate.id == activeJourneyMemoryId && !candidate.legacy) {
         existing = candidate;
         break;
       }
     }
     final entry = existing == null
         ? JourneyMemoryEntry(
-            id: 'memory-$activeJourneyId', journeyId: activeJourneyId,
-            city: activeJourney.city, place: activeJourney.place,
-            journeyTitle: activeJourney.storyTitle, sessionLevel: sessionLevel,
-            initialNote: note.trim(), initialCreatedAt: now,
-            updatedNote: '', updatedAt: now, isVisited: false,
+            id: activeJourneyMemoryId,
+            journeyId: activeJourneyId,
+            city: activeJourney.city,
+            place: activeJourney.place,
+            journeyTitle: activeStoryTitle,
+            sessionLevel: sessionLevel,
+            initialNote: note.trim(),
+            initialCreatedAt: now,
+            updatedNote: '',
+            updatedAt: now,
+            isVisited: false,
             photoRefs: const [],
           )
         : existing.copyWith(updatedNote: note.trim(), updatedAt: now);
     final repository = await _journeyMemoryRepo();
     await repository.upsert(entry);
     journeyMemories
-      ..removeWhere((item) => item.journeyId == activeJourneyId && !item.legacy)
+      ..removeWhere((item) => item.id == activeJourneyMemoryId && !item.legacy)
       ..insert(0, entry);
     if (notify) notifyListeners();
     return entry;
   }
 
-  Future<String> addJourneyMemoryPhoto(JourneyMemoryEntry entry, Uint8List bytes) async {
+  Future<String> addJourneyMemoryPhoto(
+      JourneyMemoryEntry entry, Uint8List bytes) async {
     final repository = await _journeyMemoryRepo();
     final ref = await repository.addPhoto(entry.id, bytes, now: _clock());
-    await saveJourneyMemory(entry.copyWith(photoRefs: [...entry.photoRefs, ref], updatedAt: _clock()));
+    await saveJourneyMemory(entry
+        .copyWith(photoRefs: [...entry.photoRefs, ref], updatedAt: _clock()));
     return ref;
   }
 
@@ -1247,11 +1342,15 @@ class AppState extends ChangeNotifier {
     return ref;
   }
 
-  Future<Uint8List?> journeyMemoryPhoto(String ref) async => (await _journeyMemoryRepo()).readPhoto(ref);
+  Future<Uint8List?> journeyMemoryPhoto(String ref) async =>
+      (await _journeyMemoryRepo()).readPhoto(ref);
 
-  Future<void> deleteJourneyMemoryPhoto(JourneyMemoryEntry entry, String ref) async {
+  Future<void> deleteJourneyMemoryPhoto(
+      JourneyMemoryEntry entry, String ref) async {
     final repository = await _journeyMemoryRepo();
     await repository.deletePhoto(ref);
-    await saveJourneyMemory(entry.copyWith(photoRefs: entry.photoRefs.where((item) => item != ref).toList(), updatedAt: _clock()));
+    await saveJourneyMemory(entry.copyWith(
+        photoRefs: entry.photoRefs.where((item) => item != ref).toList(),
+        updatedAt: _clock()));
   }
 }

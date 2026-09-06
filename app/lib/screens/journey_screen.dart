@@ -11,6 +11,7 @@ import '../data/batch_one_adaptive_story_levels.dart';
 import '../data/daily_journey_catalog.dart';
 import '../data/forbidden_city_content_cache.dart';
 import '../data/forbidden_city_journey_runtime.dart';
+import '../data/forbidden_city_story_runtime.dart';
 import '../data/beijing_city_standard.dart';
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
@@ -132,9 +133,10 @@ PilotN1CompositePage resolvePilotN1CompositePage({
 }
 
 class JourneyScreen extends StatefulWidget {
-  const JourneyScreen({super.key, this.journeyId});
+  const JourneyScreen({super.key, this.journeyId, this.storyId});
 
   final String? journeyId;
+  final String? storyId;
 
   @override
   State<JourneyScreen> createState() => _JourneyScreenState();
@@ -153,6 +155,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   String? _stageNarrationRequestedId;
   int _stageNarrationIntent = 0;
   late final DailyJourneyExperience _experience;
+  late String _storyId;
   late final PhoenixAiService _ai;
   late AppState _appState;
   PhoenixGuideFeedback? _guideFeedback;
@@ -189,6 +192,27 @@ class _JourneyScreenState extends State<JourneyScreen>
   // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
   bool get _isSummerPalacePilot => false;
   bool get _isForbiddenCity => _experience.id == forbiddenCityJourneyId;
+  bool get _isForbiddenCitySecondStory =>
+      _isForbiddenCity && isForbiddenCitySecondStory(_storyId);
+  String get _storyTitle => _isForbiddenCity
+      ? requireForbiddenCityStory(_storyId).title
+      : _experience.storyTitle;
+  ForbiddenCityMemoryMoment get _forbiddenCityMemory =>
+      _isForbiddenCitySecondStory
+          ? forbiddenCitySecondStoryMemoryForLevel(
+              _sessionLanguageProfile.phoenixLevel ?? 1,
+            )
+          : forbiddenCityMemoryForLevel(
+              _sessionLanguageProfile.phoenixLevel ?? 1,
+            );
+  ForbiddenCityCompletionMoment get _forbiddenCityCompletion =>
+      _isForbiddenCitySecondStory
+          ? forbiddenCitySecondStoryCompletionForLevel(
+              _sessionLanguageProfile.phoenixLevel ?? 1,
+            )
+          : forbiddenCityCompletionForLevel(
+              _sessionLanguageProfile.phoenixLevel ?? 1,
+            );
 
   @override
   void initState() {
@@ -219,19 +243,33 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (_initialized) return;
 
     _appState = context.read<AppState>();
-    _preparedBundle = JourneyPreparationCoordinator.instance.prepared(
-          journeyId: _experience.id,
-          profile: _sessionLanguageProfile,
-          scriptMode: _appState.scriptMode.name,
-        ) ??
-        JourneyPreparationCoordinator.instance.prepareNow(
-          journeyId: _experience.id,
-          profile: _sessionLanguageProfile,
-          scriptMode: _appState.scriptMode.name,
-          knownWords: _appState.savedWords,
-        );
+    _storyId = _isForbiddenCity
+        ? normalizeForbiddenCityStoryId(
+            widget.storyId ?? _appState.activeStoryId)
+        : '';
+    if (_isForbiddenCitySecondStory) {
+      ensureForbiddenCitySecondStoryRuntimeValid();
+      _preparedBundle = forbiddenCitySecondStoryPreparedBundle(
+        phoenixLevel: _sessionLanguageProfile.phoenixLevel ?? 1,
+        scriptMode: _appState.scriptMode.name,
+      );
+    } else {
+      _preparedBundle = JourneyPreparationCoordinator.instance.prepared(
+            journeyId: _experience.id,
+            profile: _sessionLanguageProfile,
+            scriptMode: _appState.scriptMode.name,
+          ) ??
+          JourneyPreparationCoordinator.instance.prepareNow(
+            journeyId: _experience.id,
+            profile: _sessionLanguageProfile,
+            scriptMode: _appState.scriptMode.name,
+            knownWords: _appState.savedWords,
+          );
+    }
     _preparedChallenge = const JourneyChallengeEngine().build(
-      journeyId: _experience.id,
+      journeyId: _isForbiddenCitySecondStory
+          ? forbiddenCitySecondStoryId
+          : _experience.id,
       sessionLevel: _sessionLanguageProfile.phoenixLevel ?? 1,
       storyParagraphs: _preparedBundle.challengeSourceMaterial,
     );
@@ -485,12 +523,8 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
     }
     if (_isForbiddenCity) {
-      final memory = forbiddenCityMemoryForLevel(
-        _sessionLanguageProfile.phoenixLevel ?? 1,
-      );
-      final completion = forbiddenCityCompletionForLevel(
-        _sessionLanguageProfile.phoenixLevel ?? 1,
-      );
+      final memory = _forbiddenCityMemory;
+      final completion = _forbiddenCityCompletion;
       return buildJourneyStageNarrationItems(
         stage: 'memory',
         displayedLines: _forbiddenCityFinaleCompleted
@@ -1296,8 +1330,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               readOnly: true,
               child: Container(
                 key: const ValueKey('journey-session-level-badge'),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFDF4DF).withValues(alpha: .96),
                   borderRadius: BorderRadius.circular(99),
@@ -1325,9 +1358,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 8),
               ),
               child: Text(
-                state.scriptMode == ScriptMode.simplified
-                    ? '简 / 繁'
-                    : '繁 / 简',
+                state.scriptMode == ScriptMode.simplified ? '简 / 繁' : '繁 / 简',
                 style: const TextStyle(fontSize: 10.5),
               ),
             ),
@@ -1586,7 +1617,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           NarrationPlayerCard(
             controller: _narration,
             contentId: 'story',
-            title: _appState.displayText(_experience.storyTitle),
+            title: _appState.displayText(_storyTitle),
             subtitle:
                 '$_readingLevelLabel · ${_readingShapeLabel(storyParagraphs.length)} · ${storyParagraphs.length} 段',
             compact: true,
@@ -2318,8 +2349,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       if (!mounted) return;
       setState(() {
         _memoryPhotoBusy = false;
-        _memoryPhotoError =
-            photoRead ? '无法保存照片，请重试' : '无法读取照片，请重试';
+        _memoryPhotoError = photoRead ? '无法保存照片，请重试' : '无法读取照片，请重试';
       });
     }
   }
@@ -2350,14 +2380,11 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _forbiddenCityMemoryPage() {
-    final memory = forbiddenCityMemoryForLevel(
-      _sessionLanguageProfile.phoenixLevel ?? 1,
+    final memory = _forbiddenCityMemory;
+    final completion = _forbiddenCityCompletion;
+    final existing = _appState.journeyMemories.where(
+      (entry) => entry.id == _appState.activeJourneyMemoryId && !entry.legacy,
     );
-    final completion = forbiddenCityCompletionForLevel(
-      _sessionLanguageProfile.phoenixLevel ?? 1,
-    );
-    final existing = _appState.journeyMemories
-        .where((entry) => entry.journeyId == _experience.id && !entry.legacy);
     if (memoryController.text.isEmpty && existing.isNotEmpty) {
       memoryController.text = existing.first.note;
     }
@@ -2650,7 +2677,6 @@ class _JourneyScreenState extends State<JourneyScreen>
       ),
     );
   }
-
 }
 
 class _ForbiddenCityCompleteCard extends StatelessWidget {
