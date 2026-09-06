@@ -251,19 +251,24 @@ new_completion_branch = """    if (_isForbiddenCity) {
 """
 replace_once(old_completion_branch, new_completion_branch, 'completion narration routing')
 
-old_reward_card = """            const _ForbiddenCityCompleteCard(
-              title: 'Challenge Reward',
-              body:
-                  '$forbiddenCityChallengeRewardName\n$forbiddenCityChallengeRewardMeaning',
-            ),
-"""
+reward_marker = "              title: 'Challenge Reward',\n"
+marker_index = text.find(reward_marker)
+if marker_index < 0:
+    raise SystemExit('completion reward routing: marker missing')
+reward_start = text.rfind('            const _ForbiddenCityCompleteCard(\n', 0, marker_index)
+if reward_start < 0:
+    raise SystemExit('completion reward routing: card start missing')
+reward_end = text.find('            ),\n', marker_index)
+if reward_end < 0:
+    raise SystemExit('completion reward routing: card end missing')
+reward_end += len('            ),\n')
 new_reward_card = """            _ForbiddenCityCompleteCard(
               title: 'Challenge Reward',
               body: _isSecondStoryPilot
-                  ? '${completion.storyClosure}\n${completion.relationship}'
-                  : '$forbiddenCityChallengeRewardName\n$forbiddenCityChallengeRewardMeaning',
+                  ? '${completion.storyClosure}\\n${completion.relationship}'
+                  : '$forbiddenCityChallengeRewardName\\n$forbiddenCityChallengeRewardMeaning',
             ),
 """
-replace_once(old_reward_card, new_reward_card, 'completion reward routing')
+text = text[:reward_start] + new_reward_card + text[reward_end:]
 
 path.write_text(text)
