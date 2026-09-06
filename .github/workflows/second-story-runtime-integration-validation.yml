@@ -1,0 +1,376 @@
+name: Second Story Runtime Integration Validation
+
+on:
+  push:
+    branches:
+      - agent/second-story-runtime-integration-429ffc
+
+permissions:
+  contents: write
+
+jobs:
+  integrate-and-validate:
+    if: github.event.head_commit.message == 'chore: prepare second story runtime integration'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact harness head
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Apply runtime-only integration patch
+        shell: bash
+        env:
+          EDITORIAL_BASE: 429ffc9d46f2b65e8833e3157ff08a00e425ac4d
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/lib/screens/journey_screen.dart')
+          text = path.read_text()
+
+          def replace_once(old: str, new: str, label: str):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 match, got {count}')
+              text = text.replace(old, new, 1)
+
+          def replace_count(old: str, new: str, expected: int, label: str):
+              global text
+              count = text.count(old)
+              if count != expected:
+                  raise SystemExit(f'{label}: expected {expected} matches, got {count}')
+              text = text.replace(old, new)
+
+          replace_once(
+              "import '../data/forbidden_city_journey_runtime.dart';\n",
+              "import '../data/forbidden_city_journey_runtime.dart';\n"
+              "import '../data/forbidden_city_second_story_runtime.dart';\n",
+              'second-story import',
+          )
+
+          replace_once(
+              "  bool get _isForbiddenCity => _experience.id == forbiddenCityJourneyId;\n",
+              "  bool get _isForbiddenCity => _experience.id == forbiddenCityJourneyId;\n"
+              "  bool get _isSecondStoryPilot =>\n"
+              "      _isForbiddenCity && forbiddenCitySecondStoryPilotRequested;\n"
+              "  String get _activeStoryTitle => _isSecondStoryPilot\n"
+              "      ? forbiddenCitySecondStoryPilotTitle\n"
+              "      : _experience.storyTitle;\n",
+              'pilot getters',
+          )
+
+          old_prepare = """    _appState = context.read<AppState>();
+    _preparedBundle = JourneyPreparationCoordinator.instance.prepared(
+          journeyId: _experience.id,
+          profile: _sessionLanguageProfile,
+          scriptMode: _appState.scriptMode.name,
+        ) ??
+        JourneyPreparationCoordinator.instance.prepareNow(
+          journeyId: _experience.id,
+          profile: _sessionLanguageProfile,
+          scriptMode: _appState.scriptMode.name,
+          knownWords: _appState.savedWords,
+        );
+    _preparedChallenge = const JourneyChallengeEngine().build(
+      journeyId: _experience.id,
+      sessionLevel: _sessionLanguageProfile.phoenixLevel ?? 1,
+      storyParagraphs: _preparedBundle.challengeSourceMaterial,
+    );
+    step = _appState.beijingJourneyStep;
+    if (_isForbiddenCity) {
+      _forbiddenCityFinaleCompleted = _appState.journeyCompleted;
+      if (_forbiddenCityFinaleCompleted || step >= AppState.journeyLastStep) {
+        step = 4;
+      }
+    }
+    wonderController.text = _appState.wonderDraft;
+    expressController.text = _appState.expressDraft;
+    memoryController.text = _appState.memoryDraft;
+"""
+          new_prepare = """    _appState = context.read<AppState>();
+    final sessionLevel = _sessionLanguageProfile.phoenixLevel ?? 1;
+    if (_isSecondStoryPilot) {
+      _preparedBundle = forbiddenCitySecondStoryPilotPreparedBundle(
+        phoenixLevel: sessionLevel,
+        scriptMode: _appState.scriptMode.name,
+      );
+      _preparedChallenge = forbiddenCitySecondStoryPilotChallengeSet(
+        sessionLevel,
+      );
+      step = 0;
+      _forbiddenCityFinaleCompleted = false;
+    } else {
+      _preparedBundle = JourneyPreparationCoordinator.instance.prepared(
+            journeyId: _experience.id,
+            profile: _sessionLanguageProfile,
+            scriptMode: _appState.scriptMode.name,
+          ) ??
+          JourneyPreparationCoordinator.instance.prepareNow(
+            journeyId: _experience.id,
+            profile: _sessionLanguageProfile,
+            scriptMode: _appState.scriptMode.name,
+            knownWords: _appState.savedWords,
+          );
+      _preparedChallenge = const JourneyChallengeEngine().build(
+        journeyId: _experience.id,
+        sessionLevel: sessionLevel,
+        storyParagraphs: _preparedBundle.challengeSourceMaterial,
+      );
+      step = _appState.beijingJourneyStep;
+      if (_isForbiddenCity) {
+        _forbiddenCityFinaleCompleted = _appState.journeyCompleted;
+        if (_forbiddenCityFinaleCompleted || step >= AppState.journeyLastStep) {
+          step = 4;
+        }
+      }
+    }
+    wonderController.text = _isSecondStoryPilot ? '' : _appState.wonderDraft;
+    expressController.text = _isSecondStoryPilot ? '' : _appState.expressDraft;
+    memoryController.text = _isSecondStoryPilot ? '' : _appState.memoryDraft;
+"""
+          replace_once(old_prepare, new_prepare, 'prepared bundle routing')
+
+          replace_once(
+              "  Future<void> _persistProgress({int? overrideStep}) {\n"
+              "    return _appState.saveJourneyProgress(\n",
+              "  Future<void> _persistProgress({int? overrideStep}) {\n"
+              "    if (_isSecondStoryPilot) return Future<void>.value();\n"
+              "    return _appState.saveJourneyProgress(\n",
+              'pilot progress isolation',
+          )
+
+          replace_once(
+              "  Future<void> _persistNarrationPosition() {\n"
+              "    final contentId = _narration.contentId;\n",
+              "  Future<void> _persistNarrationPosition() {\n"
+              "    if (_isSecondStoryPilot) return Future<void>.value();\n"
+              "    final contentId = _narration.contentId;\n",
+              'pilot narration isolation',
+          )
+
+          title_old = "title: _appState.displayText(_experience.storyTitle),"
+          title_count = text.count(title_old)
+          if title_count < 1:
+              raise SystemExit('active story title: no matches')
+          text = text.replace(
+              title_old,
+              "title: _appState.displayText(_activeStoryTitle),",
+          )
+
+          old_memory_inner = """      final memory = forbiddenCityMemoryForLevel(
+        _sessionLanguageProfile.phoenixLevel ?? 1,
+      );
+      final completion = forbiddenCityCompletionForLevel(
+        _sessionLanguageProfile.phoenixLevel ?? 1,
+      );
+"""
+          new_memory_inner = """      final runtimeLevel = _sessionLanguageProfile.phoenixLevel ?? 1;
+      final memory = _isSecondStoryPilot
+          ? forbiddenCitySecondStoryPilotMemoryForLevel(runtimeLevel)
+          : forbiddenCityMemoryForLevel(runtimeLevel);
+      final completion = _isSecondStoryPilot
+          ? forbiddenCitySecondStoryPilotCompletionForLevel(runtimeLevel)
+          : forbiddenCityCompletionForLevel(runtimeLevel);
+"""
+          replace_once(old_memory_inner, new_memory_inner, 'memory narration routing')
+
+          old_memory_page = """    final memory = forbiddenCityMemoryForLevel(
+      _sessionLanguageProfile.phoenixLevel ?? 1,
+    );
+    final completion = forbiddenCityCompletionForLevel(
+      _sessionLanguageProfile.phoenixLevel ?? 1,
+    );
+"""
+          new_memory_page = """    final runtimeLevel = _sessionLanguageProfile.phoenixLevel ?? 1;
+    final memory = _isSecondStoryPilot
+        ? forbiddenCitySecondStoryPilotMemoryForLevel(runtimeLevel)
+        : forbiddenCityMemoryForLevel(runtimeLevel);
+    final completion = _isSecondStoryPilot
+        ? forbiddenCitySecondStoryPilotCompletionForLevel(runtimeLevel)
+        : forbiddenCityCompletionForLevel(runtimeLevel);
+"""
+          replace_once(old_memory_page, new_memory_page, 'memory page routing')
+
+          replace_once(
+              ".where((entry) => entry.journeyId == _experience.id && !entry.legacy);",
+              ".where((entry) =>\n"
+              "            !_isSecondStoryPilot &&\n"
+              "            entry.journeyId == _experience.id &&\n"
+              "            !entry.legacy);",
+              'pilot memory isolation',
+          )
+
+          replace_once(
+              "  Future<void> _finishJourney() async {\n"
+              "    await _stopJourneyNarration();\n",
+              "  Future<void> _finishJourney() async {\n"
+              "    await _stopJourneyNarration();\n"
+              "    if (_isSecondStoryPilot) {\n"
+              "      if (!mounted) return;\n"
+              "      setState(() {\n"
+              "        _forbiddenCityFinaleCompleted = true;\n"
+              "        step = 4;\n"
+              "      });\n"
+              "      return;\n"
+              "    }\n",
+              'pilot local completion',
+          )
+
+          replace_once(
+              "  Future<void> _restartJourney() async {\n"
+              "    await _stopJourneyNarration();\n"
+              "    await _appState.restartJourney();\n",
+              "  Future<void> _restartJourney() async {\n"
+              "    await _stopJourneyNarration();\n"
+              "    if (_isSecondStoryPilot) {\n"
+              "      wonderController.clear();\n"
+              "      expressController.clear();\n"
+              "      memoryController.clear();\n"
+              "      if (!mounted) return;\n"
+              "      setState(() {\n"
+              "        step = 0;\n"
+              "        _challengeResolved = false;\n"
+              "        _forbiddenCityFinaleCompleted = false;\n"
+              "      });\n"
+              "      return;\n"
+              "    }\n"
+              "    await _appState.restartJourney();\n",
+              'pilot local restart',
+          )
+
+          # Completed Memory narration must not leak the Founder PASS Story reward copy.
+          replace_once(
+              """                forbiddenCityChallengeRewardName,
+                forbiddenCityChallengeRewardMeaning,
+""",
+              """                _isSecondStoryPilot
+                    ? completion.storyClosure
+                    : forbiddenCityChallengeRewardName,
+                _isSecondStoryPilot
+                    ? completion.relationship
+                    : forbiddenCityChallengeRewardMeaning,
+""",
+              'memory completed narration',
+          )
+
+          # Completion narration has no local completion value, so derive it only for the pilot branch.
+          old_completion_branch = """    if (_isForbiddenCity) {
+      return buildJourneyStageNarrationItems(
+        stage: 'completion',
+        displayedLines: [
+          'Journey 完成',
+          forbiddenCityChallengeRewardName,
+          forbiddenCityChallengeRewardMeaning,
+          'Lv.${_sessionLanguageProfile.phoenixLevel} Journey 已记录',
+        ],
+      );
+    }
+"""
+          new_completion_branch = """    if (_isForbiddenCity) {
+      final completion = _isSecondStoryPilot
+          ? forbiddenCitySecondStoryPilotCompletionForLevel(
+              _sessionLanguageProfile.phoenixLevel ?? 1,
+            )
+          : null;
+      return buildJourneyStageNarrationItems(
+        stage: 'completion',
+        displayedLines: [
+          'Journey 完成',
+          completion?.storyClosure ?? forbiddenCityChallengeRewardName,
+          completion?.relationship ?? forbiddenCityChallengeRewardMeaning,
+          'Lv.${_sessionLanguageProfile.phoenixLevel} Journey 已记录',
+        ],
+      );
+    }
+"""
+          replace_once(old_completion_branch, new_completion_branch, 'completion narration routing')
+
+          old_reward_card = """            const _ForbiddenCityCompleteCard(
+              title: 'Challenge Reward',
+              body:
+                  '$forbiddenCityChallengeRewardName\n$forbiddenCityChallengeRewardMeaning',
+            ),
+"""
+          new_reward_card = """            _ForbiddenCityCompleteCard(
+              title: 'Challenge Reward',
+              body: _isSecondStoryPilot
+                  ? '${completion.storyClosure}\n${completion.relationship}'
+                  : '$forbiddenCityChallengeRewardName\n$forbiddenCityChallengeRewardMeaning',
+            ),
+"""
+          replace_once(old_reward_card, new_reward_card, 'completion reward routing')
+
+          path.write_text(text)
+          PY
+
+      - name: Verify runtime scope and UI freeze
+        shell: bash
+        env:
+          EDITORIAL_BASE: 429ffc9d46f2b65e8833e3157ff08a00e425ac4d
+        run: |
+          set -euo pipefail
+          actual="$(git diff --name-only "$EDITORIAL_BASE" | sort)"
+          expected="$(printf '%s\n' \
+            '.github/workflows/second-story-runtime-integration-validation.yml' \
+            'app/lib/data/forbidden_city_second_story_runtime.dart' \
+            'app/lib/screens/journey_screen.dart' \
+            'app/test/forbidden_city_second_story_runtime_test.dart' | sort)"
+          test "$actual" = "$expected"
+          python3 - <<'PY'
+          import subprocess
+          diff = subprocess.check_output([
+              'git', 'diff', '--unified=0',
+              '429ffc9d46f2b65e8833e3157ff08a00e425ac4d', '--',
+              'app/lib/screens/journey_screen.dart',
+          ], text=True)
+          forbidden = (
+              'EdgeInsets', 'TextStyle', 'fontSize', 'fontWeight',
+              'Color(', 'Colors.', 'SizedBox(', 'Padding(', 'Container(',
+              'Navigation', 'ButtonStyle', 'AnimatedContainer(', 'BoxDecoration(',
+              'BorderRadius', 'BoxShadow', 'LayoutBuilder(',
+          )
+          changed = [line for line in diff.splitlines()
+                     if line.startswith(('+', '-')) and not line.startswith(('+++', '---'))]
+          hits = [(line, token) for line in changed for token in forbidden if token in line]
+          if hits:
+              raise SystemExit(f'UI freeze violation: {hits}')
+          PY
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Targeted tests
+        working-directory: app
+        run: >-
+          flutter test --reporter expanded
+          test/forbidden_city_second_story_runtime_test.dart
+          test/ai_content_pipeline_v1_test.dart
+          test/story_engine_v1_test.dart
+          test/forbidden_city_ten_level_content_contract_test.dart
+          test/multiple_choice_answer_position_contract_test.dart
+          test/story_discovery_no_yellow_dots_test.dart
+          test/founder_real_device_ux_test.dart
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Commit validated runtime integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'dhv5bnmfmh-cmyk'
+          git config user.email 'dhv5bnmfmh@privaterelay.appleid.com'
+          git add app/lib/screens/journey_screen.dart
+          git commit -m 'feat: integrate Forbidden City second Story pilot runtime'
+          git push origin HEAD:agent/second-story-runtime-integration-429ffc
