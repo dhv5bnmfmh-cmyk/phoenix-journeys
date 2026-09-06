@@ -54,6 +54,8 @@ jobs:
           PY
           python3 -m py_compile /tmp/runtime_repair.py
           python3 /tmp/runtime_repair.py
+          sed -i 's/^  final paragraphs = _secondStoryVisibleParagraphs;$/  const paragraphs = _secondStoryVisibleParagraphs;/' app/lib/data/forbidden_city_story_runtime.dart
+          sed -i 's/^  final visibleParagraphs = _secondStoryVisibleParagraphs;$/  const visibleParagraphs = _secondStoryVisibleParagraphs;/' app/lib/data/forbidden_city_story_runtime.dart
 
           python3 - <<'PY'
           from pathlib import Path
