@@ -1,0 +1,94 @@
+name: Second Story Runtime Integration Validation V2
+
+on:
+  push:
+    branches:
+      - agent/second-story-runtime-integration-429ffc
+    paths:
+      - '.github/workflows/second-story-runtime-integration-validation-v2.yml'
+      - '.github/scripts/second_story_runtime_patch.py'
+
+permissions:
+  contents: write
+
+jobs:
+  integrate-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact harness head
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Apply runtime-only integration patch
+        run: python3 .github/scripts/second_story_runtime_patch.py
+
+      - name: Verify runtime scope and UI freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=429ffc9d46f2b65e8833e3157ff08a00e425ac4d
+          actual="$(git diff --name-only "$BASE" | sort)"
+          expected="$(printf '%s\n' \
+            '.github/scripts/second_story_runtime_patch.py' \
+            '.github/workflows/second-story-runtime-integration-validation-v2.yml' \
+            '.github/workflows/second-story-runtime-integration-validation.yml' \
+            'app/lib/data/forbidden_city_second_story_runtime.dart' \
+            'app/lib/screens/journey_screen.dart' \
+            'app/test/forbidden_city_second_story_runtime_test.dart' | sort)"
+          test "$actual" = "$expected"
+          python3 - <<'PY'
+          import subprocess
+          diff = subprocess.check_output([
+              'git', 'diff', '--unified=0',
+              '429ffc9d46f2b65e8833e3157ff08a00e425ac4d', '--',
+              'app/lib/screens/journey_screen.dart',
+          ], text=True)
+          forbidden = (
+              'EdgeInsets', 'TextStyle', 'fontSize', 'fontWeight',
+              'Color(', 'Colors.', 'SizedBox(', 'Padding(', 'Container(',
+              'Navigation', 'ButtonStyle', 'AnimatedContainer(', 'BoxDecoration(',
+              'BorderRadius', 'BoxShadow', 'LayoutBuilder(',
+          )
+          changed = [line for line in diff.splitlines()
+                     if line.startswith(('+', '-')) and not line.startswith(('+++', '---'))]
+          hits = [(line, token) for line in changed for token in forbidden if token in line]
+          if hits:
+              raise SystemExit(f'UI freeze violation: {hits}')
+          PY
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Targeted tests
+        working-directory: app
+        run: >-
+          flutter test --reporter expanded
+          test/forbidden_city_second_story_runtime_test.dart
+          test/ai_content_pipeline_v1_test.dart
+          test/story_engine_v1_test.dart
+          test/forbidden_city_ten_level_content_contract_test.dart
+          test/multiple_choice_answer_position_contract_test.dart
+          test/story_discovery_no_yellow_dots_test.dart
+          test/founder_real_device_ux_test.dart
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Commit validated runtime integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'dhv5bnmfmh-cmyk'
+          git config user.email 'dhv5bnmfmh@privaterelay.appleid.com'
+          git add app/lib/screens/journey_screen.dart
+          git commit -m 'feat: integrate Forbidden City second Story pilot runtime'
+          git push origin HEAD:agent/second-story-runtime-integration-429ffc
