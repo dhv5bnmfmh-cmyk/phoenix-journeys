@@ -1,0 +1,302 @@
+name: Repair Second Story Runtime
+
+on:
+  push:
+    branches:
+      - product/city-standard-v1-beijing-forbidden-city
+    paths:
+      - '.github/workflows/repair-second-story-runtime.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: product/city-standard-v1-beijing-forbidden-city
+
+      - name: Verify exact failed parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "c6504508f34dffad0158d5c69ce0f33508061ace"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/repair-second-story-runtime.yml"
+
+      - name: Apply minimal product repair and regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          runtime_path = Path('app/lib/data/forbidden_city_story_runtime.dart')
+          text = runtime_path.read_text()
+          start = text.index('const _storyVietnamese = <String>[')
+          end = text.index('String _vocabularyVietnamese(String id)', start)
+          replacement = r'''const _secondStoryVisibleParagraphs = <String>[
+            '交接前，林乔把记录册推到新同事许澄面前。许澄第二天就要接手，问明天是否直接照表使用。林乔已经拔开笔帽，却又把笔放回桌上：“先一起核对一遍。”两人从前面的页码往后看。许澄圈出“中轴”，又在“景运门”旁做了记号。他说这两处还容易弄混。林乔让他先标出不确定处。翻到旧表时，两人发现景运门被标在乾清门前广场西侧。许澄问：“如果我明天照这张表走呢？”林乔的手停在签名栏上。她原本只差签名就能完成交接，现在却不愿把疑问留给接手的人。',
+            '两人把图页摊开，核到景运门位于乾清门前广场东侧。许澄圈住旧表的“西”，没有擦掉。林乔也没有只把“西”改成“东”。她让许澄把疑问写在页边，再一起核对。能确认的当场更正，不能确认的先留空。林乔签下更正，把笔递给许澄。“接手以后，也照这个办法往下查。”许澄接过册子，指着两个空格确认要继续核对。最后，他把待核的格子折了角，把签字笔放到两人中间。他问：“下一页一起看完？”林乔把椅子拉近。',
+          ];
+
+          const _storyVietnamese = <String>[
+            'Trước khi bàn giao, Lâm Kiều đẩy cuốn sổ ghi chép về phía đồng nghiệp mới Hứa Trừng. Ngày hôm sau anh sẽ tiếp nhận công việc và hỏi liệu có thể cứ theo bảng mà làm. Lâm Kiều đã mở nắp bút nhưng lại đặt bút xuống: “Trước tiên cùng đối chiếu một lượt.” Hai người xem lại từng trang. Hứa Trừng khoanh “trục giữa”, đánh dấu “Cảnh Vận Môn” và nói mình vẫn dễ nhầm hai mục này. Lâm Kiều bảo anh đánh dấu trước những chỗ chưa chắc. Khi đến bảng cũ, họ thấy Cảnh Vận Môn bị ghi ở phía tây quảng trường trước Càn Thanh Môn. Hứa Trừng hỏi nếu ngày mai anh đi theo bảng này thì sao. Tay Lâm Kiều dừng trên dòng ký tên; cô không muốn để câu hỏi đó lại cho người tiếp nhận.',
+            'Hai người trải trang sơ đồ ra và xác nhận Cảnh Vận Môn nằm ở phía đông quảng trường trước Càn Thanh Môn. Hứa Trừng khoanh chữ “tây” trên bảng cũ và chưa xóa nó. Lâm Kiều cũng không chỉ đổi “tây” thành “đông”. Cô bảo Hứa Trừng ghi câu hỏi bên lề rồi cùng tiếp tục đối chiếu: điều nào xác nhận được thì sửa, điều nào chưa chắc thì để trống. Lâm Kiều ký vào chỗ sửa và đưa bút cho Hứa Trừng, dặn anh tiếp tục kiểm tra theo cách đó. Hứa Trừng nhận sổ, xác nhận hai ô trống mình sẽ tiếp tục đối chiếu. Cuối cùng anh gấp góc ô còn chờ kiểm tra, đặt bút giữa hai người và hỏi có cùng xem nốt trang sau không. Lâm Kiều kéo ghế lại gần.',
+          ];
+
+          const _storyEnglish = <String>[
+            'Before the handoff, Lin Qiao slides the record book toward her new colleague Xu Cheng. He will take it over the next day and asks whether he should simply follow the sheet. Lin Qiao has already uncapped her pen, but sets it down again: “Let’s check it together first.” They work through the pages. Xu Cheng circles “central axis,” marks “Jingyun Gate,” and says he still mixes the two up. Lin Qiao asks him to mark uncertain points first. On the old sheet they find Jingyun Gate marked on the west side of the square before Qianqing Gate. Xu Cheng asks what happens if he follows the sheet tomorrow. Lin Qiao’s hand stops over the signature line; she does not want to leave that question to the person taking over.',
+            'They spread out the map page and verify that Jingyun Gate is on the east side of the square before Qianqing Gate. Xu Cheng circles “west” on the old sheet and leaves it visible. Lin Qiao does not merely change “west” to “east.” She asks Xu Cheng to note the question in the margin and keeps checking with him: confirmed items are corrected, while uncertain ones stay blank. Lin Qiao signs the correction and hands him the pen, telling him to continue checking the same way after the handoff. Xu Cheng takes the book and confirms that he will keep checking the two blank items. Finally he folds the corner of the remaining unchecked box, places the pen between them, and asks whether they should finish the next page together. Lin Qiao pulls her chair closer.',
+          ];
+
+          '''
+          text = text[:start] + replacement + text[end:]
+          old = '''  final package = forbiddenCityPipelineFixture;
+            final paragraphs = package.storyContent.lines.map((line) => line.text).toList(
+                  growable: false,
+                );
+            if (paragraphs.length != _storyVietnamese.length ||
+                paragraphs.length != _storyEnglish.length) {
+              throw StateError(
+                  'Second Story annotation count must match canonical Story.');
+            }
+          '''
+          new = '''  final package = forbiddenCityPipelineFixture;
+            final paragraphs = _secondStoryVisibleParagraphs;
+            if (package.storyContent.lines.length != 7) {
+              throw StateError('Second Story must retain seven internal narrative beats.');
+            }
+            if (paragraphs.length != _storyVietnamese.length ||
+                paragraphs.length != _storyEnglish.length) {
+              throw StateError(
+                  'Second Story annotation count must match visible Story paragraphs.');
+            }
+          '''
+          if old not in text:
+              raise SystemExit('level-content presentation block not found')
+          text = text.replace(old, new, 1)
+          marker = '''void ensureForbiddenCitySecondStoryRuntimeValid() {
+            final package = forbiddenCityPipelineFixture;
+          '''
+          insert = '''void ensureForbiddenCitySecondStoryRuntimeValid() {
+            final package = forbiddenCityPipelineFixture;
+            final visibleParagraphs = _secondStoryVisibleParagraphs;
+            final visibleCharacterCount = visibleParagraphs.fold<int>(
+              0,
+              (total, paragraph) => total + paragraph.length,
+            );
+            final visibleSentenceLengths = visibleParagraphs
+                .expand((paragraph) => paragraph.split(RegExp(r'[。！？]')))
+                .map((sentence) => sentence.trim().length)
+                .where((length) => length > 0);
+            if (visibleParagraphs.length != 2 ||
+                visibleCharacterCount < 280 ||
+                visibleCharacterCount > 400 ||
+                visibleSentenceLengths.any((length) => length > 30)) {
+              throw StateError('Second Story Lv5 visible reading contract drifted.');
+            }
+          '''
+          if marker not in text:
+              raise SystemExit('runtime validation marker not found')
+          text = text.replace(marker, insert, 1)
+          runtime_path.write_text(text)
+
+          journey_path = Path('app/lib/screens/journey_screen.dart')
+          journey = journey_path.read_text()
+          old = '''    if (step >= 5) return forbiddenCitySceneForStage('completion').sceneId;
+
+            final snapshot = _narration.highlightSnapshot;
+          '''
+          new = '''    if (step >= 5) return forbiddenCitySceneForStage('completion').sceneId;
+            if (_isForbiddenCitySecondStory) {
+              // Story B does not use Story A's沈砚/阿宁 semantic scene anchors.
+              return forbiddenCitySceneForStage('story').sceneId;
+            }
+
+            final snapshot = _narration.highlightSnapshot;
+          '''
+          if old not in journey:
+              raise SystemExit('Forbidden City Story scene marker not found')
+          journey = journey.replace(old, new, 1)
+          journey_path.write_text(journey)
+
+          test_path = Path('app/test/forbidden_city_story_selection_runtime_test.dart')
+          test = test_path.read_text()
+          old = '''    expect(
+              content.storyParagraphs,
+              forbiddenCityPipelineFixture.storyContent.lines
+                  .map((line) => line.text)
+                  .toList(growable: false),
+            );
+          '''
+          new = '''    expect(forbiddenCityPipelineFixture.storyContent.lines, hasLength(7));
+            expect(content.storyParagraphs, hasLength(2));
+            expect(
+              content.storyParagraphs.length,
+              isNot(forbiddenCityPipelineFixture.storyContent.lines.length),
+            );
+            final visibleStory = content.storyParagraphs.join();
+            expect(visibleStory.length, inInclusiveRange(280, 400));
+            final sentenceLengths = content.storyParagraphs
+                .expand((paragraph) => paragraph.split(RegExp(r'[。！？]')))
+                .map((sentence) => sentence.trim().length)
+                .where((length) => length > 0);
+            expect(sentenceLengths.every((length) => length <= 30), isTrue);
+            for (final marker in <String>[
+              '林乔',
+              '许澄',
+              '中轴',
+              '景运门',
+              '乾清门前广场西侧',
+              '乾清门前广场东侧',
+              '核对',
+              '交接',
+              '先留空',
+              '下一页一起看完',
+            ]) {
+              expect(visibleStory, contains(marker));
+            }
+          '''
+          if old not in test:
+              raise SystemExit('existing Story import assertion not found')
+          test = test.replace(old, new, 1)
+          test_path.write_text(test)
+
+          smoke = r'''import 'package:flutter/material.dart';
+          import 'package:flutter_test/flutter_test.dart';
+          import 'package:provider/provider.dart';
+          import 'package:shared_preferences/shared_preferences.dart';
+
+          import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
+          import 'package:phoenix_journeys/data/forbidden_city_story_runtime.dart';
+          import 'package:phoenix_journeys/screens/journey_screen.dart';
+          import 'package:phoenix_journeys/services/language_level_preference_store.dart';
+          import 'package:phoenix_journeys/services/narration_controller.dart';
+          import 'package:phoenix_journeys/state/app_state.dart';
+
+          void main() {
+            TestWidgetsFlutterBinding.ensureInitialized();
+
+            testWidgets(
+              'Second Story restored Story traverses Vocabulary Discovery Challenge Memory without blank screen',
+              (tester) async {
+                SharedPreferences.setMockInitialValues(<String, Object>{
+                  'phoenix.level': 5,
+                });
+                await const LanguageLevelPreferenceStore().initializePhoenixLevel();
+                final state = AppState(
+                  clock: () => DateTime(2026, 9, 6, 20),
+                  preferencesLoader: SharedPreferences.getInstance,
+                );
+                await state.load();
+                await state.activateJourney(
+                  forbiddenCityJourneyId,
+                  storyId: forbiddenCitySecondStoryId,
+                );
+
+                final content = forbiddenCitySecondStoryLevelContent();
+                final narrationItems = content.storyParagraphs
+                    .asMap()
+                    .entries
+                    .map(
+                      (entry) => NarrationItem(
+                        id: 'story-${entry.key}',
+                        text: entry.value,
+                        label: '故事第 ${entry.key + 1} 段',
+                      ),
+                    )
+                    .toList(growable: false);
+                await state.saveJourneyNarrationPosition(
+                  contentId: 'story',
+                  contentSignature: narrationContentSignature(narrationItems),
+                  offset: 8,
+                );
+
+                await tester.pumpWidget(
+                  ChangeNotifierProvider<AppState>.value(
+                    value: state,
+                    child: const MaterialApp(
+                      home: JourneyScreen(
+                        journeyId: forbiddenCityJourneyId,
+                        storyId: forbiddenCitySecondStoryId,
+                      ),
+                    ),
+                  ),
+                );
+                await tester.pump();
+                await tester.pump(const Duration(milliseconds: 80));
+                expect(tester.takeException(), isNull);
+                expect(find.text('交接前的标记'), findsOneWidget);
+                expect(find.textContaining('2 段'), findsOneWidget);
+
+                for (final target in <(String, String)>[
+                  ('Vocabulary', '单词'),
+                  ('Discovery', '发现'),
+                  ('Challenge', '挑战'),
+                  ('回忆 · 完成', '回忆 · 完成'),
+                ]) {
+                  await tester.tap(find.text(target.$1).last);
+                  await tester.pump();
+                  await tester.pump(const Duration(milliseconds: 350));
+                  expect(tester.takeException(), isNull);
+                  expect(find.text(target.$2), findsWidgets);
+                  expect(state.activeStoryId, forbiddenCitySecondStoryId);
+                }
+
+                expect(find.text('中轴'), findsNothing);
+                expect(state.activeStoryId, forbiddenCitySecondStoryId);
+              },
+            );
+          }
+          '''
+          Path('app/test/forbidden_city_second_story_navigation_smoke_test.dart').write_text(
+              '\n'.join(line[10:] if line.startswith('          ') else line for line in smoke.splitlines()) + '\n')
+          PY
+
+          dart format app/lib/data/forbidden_city_story_runtime.dart app/lib/screens/journey_screen.dart app/test/forbidden_city_story_selection_runtime_test.dart app/test/forbidden_city_second_story_navigation_smoke_test.dart
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Targeted tests
+        working-directory: app
+        run: >-
+          flutter test
+          test/forbidden_city_story_selection_runtime_test.dart
+          test/forbidden_city_second_story_navigation_smoke_test.dart
+          test/journey_memory_completion_narration_contract_test.dart
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Scope and commit exact repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/repair-second-story-runtime.yml
+          git diff --name-only | sort > /tmp/changed.txt
+          cat >/tmp/allowed.txt <<'EOF'
+          .github/workflows/repair-second-story-runtime.yml
+          app/lib/data/forbidden_city_story_runtime.dart
+          app/lib/screens/journey_screen.dart
+          app/test/forbidden_city_second_story_navigation_smoke_test.dart
+          app/test/forbidden_city_story_selection_runtime_test.dart
+          EOF
+          sort -o /tmp/allowed.txt /tmp/allowed.txt
+          diff -u /tmp/allowed.txt /tmp/changed.txt
+          git config user.name phoenix-agent
+          git config user.email phoenix-agent@users.noreply.github.com
+          git add -A
+          git commit -m "fix: stabilize Forbidden City second Story runtime"
+          git push origin HEAD:product/city-standard-v1-beijing-forbidden-city
