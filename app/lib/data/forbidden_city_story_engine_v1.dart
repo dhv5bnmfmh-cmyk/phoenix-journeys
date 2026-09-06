@@ -11,8 +11,8 @@ const forbiddenCitySecondStorySeed = StorySeed(
   periodRef: knowledgePeriodModern,
   characterRoleRef: knowledgeRoleRestorationWorker,
   professionRef: knowledgeProfessionHeritageConservation,
-  goal: '在交接学习记录前，核对午门、中轴、乾清门与景运门的地点标记是否符合已验证资料。',
-  conflict: '一张学习记录把景运门的位置写反；照旧表抄最快，但角色必须选择熟悉印象还是可追溯证据。',
+  goal: '在把地点记录交给新同事许澄前，和他一起核对关键标记，让接手的人知道哪些信息已经确认、哪些还要继续查。',
+  conflict: '旧表把景运门写在乾清门前广场西侧；许澄第二天就要接手使用，林乔必须决定是照旧签名交出去，还是停下例行交接并承担更正责任。',
   knowledgeUnitRefs: <String>[
     kuMeridianGateAxis,
     kuCentralAxisSequence,
@@ -20,7 +20,7 @@ const forbiddenCitySecondStorySeed = StorySeed(
     kuJingyunGateEast,
   ],
   languageLevel: 5,
-  learningFocus: <String>['地点关系', '中轴', '宫门功能', '证据与记录'],
+  learningFocus: <String>['空间关系', '中轴', '核对与交接', '证据意识'],
 );
 
 const forbiddenCitySecondStoryBlueprint = StoryBlueprint(
@@ -33,41 +33,42 @@ const forbiddenCitySecondStoryBlueprint = StoryBlueprint(
       professionRef: knowledgeProfessionHeritageConservation,
       status: StoryCharacterStatus.fictional,
     ),
+    StoryCharacter(
+      name: '许澄',
+      roleRef: knowledgeRoleRestorationWorker,
+      professionRef: knowledgeProfessionHeritageConservation,
+      status: StoryCharacterStatus.fictional,
+    ),
   ],
   storyBeats: <StoryBeat>[
     StoryBeat(
       type: StoryBeatType.setup,
-      text: '林乔接过一张待交接的地点标记表。纸上四个名字都很熟，她却决定先逐项核对，再签自己的名字。',
+      text: '交接前，林乔把地点记录册推到新同事许澄面前。许澄第二天要接手这份记录，他翻到签名页问：“我明天就按这里写的走吗？”林乔本来已经拔开笔帽，又把笔放回桌上：“先一起核对一遍。”',
     ),
     StoryBeat(
       type: StoryBeatType.observation,
-      text: '第一条写着午门。资料确认午门是紫禁城正门，也位于南北轴线上，她在这一项旁边打了勾。',
-      knowledgeUnitRefs: <String>[kuMeridianGateAxis],
+      text: '两人从前面的页码往后看。许澄把“中轴”圈了一下，又在“景运门”旁做了记号：“这两个我还容易弄混。”林乔没有替他背答案，只让他把不确定的地方先标出来。',
     ),
     StoryBeat(
       type: StoryBeatType.conflict,
-      text: '看到景运门时，她停住了：旧表把它标在乾清门前广场西侧。照着旧表抄最快，但她没有落笔。',
+      text: '翻到旧表时，他们看到景运门被标在乾清门前广场西侧。许澄抬头：“如果我明天照这张表走呢？”林乔的手停在签名栏上。她原本只差一个名字就能完成交接，现在却不能把这个疑问留给接手的人。',
     ),
     StoryBeat(
       type: StoryBeatType.evidence,
-      text: '她把已核过的资料并排打开：景运门在乾清门前广场东侧；乾清门是内廷正宫门，也是连接内廷与外朝往来的重要通道；中轴上的宫门、院落和主要建筑形成清楚的南北空间序列。',
-      knowledgeUnitRefs: <String>[
-        kuJingyunGateEast,
-        kuQianqingGateCourts,
-        kuCentralAxisSequence,
-      ],
+      text: '两人把图页摊在桌上，核到同一处：景运门位于乾清门前广场东侧。许澄用铅笔把旧表的“西”圈起来，没有马上擦掉，等林乔决定这页该怎么交。',
+      knowledgeUnitRefs: <String>[kuJingyunGateEast],
     ),
     StoryBeat(
       type: StoryBeatType.decision,
-      text: '林乔改正了方向，把每一处改动只绑定到能追到来源的记录；没有资料支持的细节，她宁可留空。',
+      text: '林乔没有只把“西”改成“东”。她让许澄把刚才的疑问写在页边，两人继续核对交接页：能确认的当场更正，不能确认的先留空。林乔在更正处签名，又把笔递给许澄：“你接手以后，也照这个办法往下查。”',
     ),
     StoryBeat(
       type: StoryBeatType.resolution,
-      text: '交接时，表上少了一条想当然的注释，多了四个能追到出处的标记。她把旧表夹在后面，保留修改痕迹。',
+      text: '第二天要交出去的记录不再假装每一格都有答案。许澄接过册子，先指着两个空格问：“这两项我接着核，对吗？”林乔点头。原来只需要她签一个名字的交接，变成了两个人都知道下一步该做什么。',
     ),
     StoryBeat(
       type: StoryBeatType.takeaway,
-      text: '林乔扣上笔帽：熟悉一个地方，不等于可以替事实补空白。',
+      text: '许澄没有立刻收起册子。他把最后一个待核的格子折了角，再把签字笔放到两人中间：“下一页一起看完？”林乔把椅子拉近。',
     ),
   ],
   requiredFacts: <String>[
@@ -78,66 +79,53 @@ const forbiddenCitySecondStoryBlueprint = StoryBlueprint(
   ],
   narrativeClaims: <NarrativeClaim>[
     NarrativeClaim(
-      id: 'fact.meridian_gate_axis',
-      text: '午门是紫禁城正门，位于紫禁城南北轴线上。',
-      type: NarrativeClaimType.fact,
-      knowledgeUnitRefs: <String>[kuMeridianGateAxis],
-    ),
-    NarrativeClaim(
-      id: 'fact.central_axis_sequence',
-      text: '紫禁城中轴上的宫门、院落与主要建筑形成清晰的南北空间序列。',
-      type: NarrativeClaimType.fact,
-      knowledgeUnitRefs: <String>[kuCentralAxisSequence],
-    ),
-    NarrativeClaim(
-      id: 'fact.qianqing_gate_courts',
-      text: '乾清门为内廷正宫门，也是连接内廷与外朝往来的重要通道。',
-      type: NarrativeClaimType.fact,
-      knowledgeUnitRefs: <String>[kuQianqingGateCourts],
-    ),
-    NarrativeClaim(
       id: 'fact.jingyun_gate_east',
-      text: '景运门位于乾清门前广场东侧，是进入这一广场的重要门户之一。',
+      text: '景运门位于乾清门前广场东侧。',
       type: NarrativeClaimType.fact,
       knowledgeUnitRefs: <String>[kuJingyunGateEast],
     ),
     NarrativeClaim(
       id: 'fiction.marker_sheet_error',
-      text: '虚构的地点标记表把景运门方向写反。',
+      text: '虚构的旧地点记录把景运门标在乾清门前广场西侧。',
+      type: NarrativeClaimType.fictionalNarrative,
+    ),
+    NarrativeClaim(
+      id: 'fiction.handoff_relationship',
+      text: '虚构角色许澄是即将接手地点记录的新同事，林乔负责与他完成交接。',
       type: NarrativeClaimType.fictionalNarrative,
     ),
     NarrativeClaim(
       id: 'fiction.lin_qiao_decision',
-      text: '虚构角色林乔选择回到证据，不凭熟悉印象补写事实。',
+      text: '虚构角色林乔停下例行签名，与许澄共同核对记录并改变交接方式。',
       type: NarrativeClaimType.fictionalNarrative,
     ),
   ],
   vocabularyTargets: <VocabularyTarget>[
-    VocabularyTarget(
-      id: 'vocab.meridian_gate',
-      term: '午门',
-      knowledgeUnitRefs: <String>[kuMeridianGateAxis],
-    ),
     VocabularyTarget(
       id: 'vocab.central_axis',
       term: '中轴',
       knowledgeUnitRefs: <String>[kuCentralAxisSequence],
     ),
     VocabularyTarget(
-      id: 'vocab.qianqing_gate',
-      term: '乾清门',
-      knowledgeUnitRefs: <String>[kuQianqingGateCourts],
-    ),
-    VocabularyTarget(
       id: 'vocab.jingyun_gate',
       term: '景运门',
+      knowledgeUnitRefs: <String>[kuJingyunGateEast],
+    ),
+    VocabularyTarget(
+      id: 'vocab.verify',
+      term: '核对',
+      knowledgeUnitRefs: <String>[kuJingyunGateEast],
+    ),
+    VocabularyTarget(
+      id: 'vocab.handoff',
+      term: '交接',
       knowledgeUnitRefs: <String>[kuJingyunGateEast],
     ),
   ],
   discoveryTargets: <DiscoveryTarget>[
     DiscoveryTarget(
-      id: 'discovery.entry_axis',
-      concept: '午门与紫禁城南北中轴的关系',
+      id: 'discovery.spatial_types',
+      concept: '区分具体宫门与组织建筑关系的中轴',
       knowledgeUnitRefs: <String>[
         kuMeridianGateAxis,
         kuCentralAxisSequence,
@@ -145,13 +133,16 @@ const forbiddenCitySecondStoryBlueprint = StoryBlueprint(
     ),
     DiscoveryTarget(
       id: 'discovery.qianqing_gate_function',
-      concept: '乾清门与外朝、内廷往来的关系',
+      concept: '乾清门与外朝、内廷往来的空间功能关系',
       knowledgeUnitRefs: <String>[kuQianqingGateCourts],
     ),
     DiscoveryTarget(
-      id: 'discovery.jingyun_gate_position',
-      concept: '景运门位于乾清门前广场东侧',
-      knowledgeUnitRefs: <String>[kuJingyunGateEast],
+      id: 'discovery.spatial_relations',
+      concept: '用门、广场、方向与中轴关系理解紫禁城空间',
+      knowledgeUnitRefs: <String>[
+        kuJingyunGateEast,
+        kuCentralAxisSequence,
+      ],
     ),
   ],
   challengeTargets: <ChallengeTarget>[
@@ -188,4 +179,4 @@ final forbiddenCitySecondStoryLearningAlignment =
     forbiddenCityStoryEngineV1.alignment(forbiddenCitySecondStoryPlan);
 
 const forbiddenCitySecondStorySummary =
-    '虚构的现代文保学习角色林乔在交接前发现地点标记冲突，并依据午门、中轴、乾清门与景运门的可追溯空间事实完成核对。';
+    '虚构的现代文保角色林乔在把地点记录交给新同事许澄前发现景运门方向错误，两人由一次例行签名改成共同核对并明确后续待查事项。';

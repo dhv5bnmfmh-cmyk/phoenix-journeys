@@ -18,43 +18,43 @@ const forbiddenCityPipelineFixtureSelection = KnowledgeSelectionRequest(
 );
 
 const _fixtureVocabularyMetadata = <String, VocabularyMetadata>{
-  'vocab.meridian_gate': VocabularyMetadata(
-    pinyin: 'wǔmén',
-    partOfSpeech: '专名',
-    simpleChinese: '紫禁城的正门。',
-    usage: '核对午门与中轴的空间关系。',
-    semanticContrast: '午门是具体宫门；中轴是组织空间的轴线。',
-  ),
   'vocab.central_axis': VocabularyMetadata(
     pinyin: 'zhōngzhóu',
     partOfSpeech: '名词',
     simpleChinese: '建筑或城市空间中的中心轴线。',
-    usage: '午门位于紫禁城南北中轴线上。',
-    semanticContrast: '中轴表示空间关系，不是某一座宫门。',
-  ),
-  'vocab.qianqing_gate': VocabularyMetadata(
-    pinyin: 'qiánqīngmén',
-    partOfSpeech: '专名',
-    simpleChinese: '紫禁城内廷正宫门。',
-    usage: '乾清门连接内廷与外朝往来。',
-    semanticContrast: '乾清门的学习重点包含门的功能关系，不只看方向。',
+    usage: '看紫禁城空间时，不只记宫门，也要理解中轴关系。',
+    semanticContrast: '中轴表示组织空间的轴线；宫门是具体建筑。',
   ),
   'vocab.jingyun_gate': VocabularyMetadata(
     pinyin: 'jǐngyùnmén',
     partOfSpeech: '专名',
     simpleChinese: '乾清门前广场东侧的重要门户之一。',
-    usage: '核对景运门在广场东侧的标记。',
-    semanticContrast: '景运门是东侧门户；不要把虚构旧表中的西侧标记当事实。',
+    usage: '核对景运门在乾清门前广场东侧的方位。',
+    semanticContrast: '景运门是具体宫门；“东侧”描述它与广场的空间关系。',
+  ),
+  'vocab.verify': VocabularyMetadata(
+    pinyin: 'héduì',
+    partOfSpeech: '动词',
+    simpleChinese: '把信息放在一起检查，看是不是一致。',
+    usage: '交接前，两个人一起核对地点记录。',
+    semanticContrast: '核对强调对照检查；确认强调得到明确结果。',
+  ),
+  'vocab.handoff': VocabularyMetadata(
+    pinyin: 'jiāojiē',
+    partOfSpeech: '动词 / 名词',
+    simpleChinese: '把工作、资料或责任从一个人交给另一个人继续负责。',
+    usage: '林乔和许澄在下班前完成记录交接。',
+    semanticContrast: '交接包含责任继续转移；交给只表示把东西给别人。',
   ),
 };
 
 const _fixtureDiscoveryText = <String, String>{
-  'discovery.entry_axis':
-      '午门与中轴要分成两个概念学习：一个是具体宫门，一个是空间轴线。核对位置时，两条已验证资料共同支撑它们的关系。',
+  'discovery.spatial_types':
+      '看紫禁城空间时，“午门”和“中轴”不是同一类信息：午门是具体宫门；中轴描述宫门、院落和主要建筑形成的南北空间序列。午门位于这条南北轴线上，所以理解路线既要认建筑，也要认组织建筑的空间关系。',
   'discovery.qianqing_gate_function':
-      '乾清门这一知识点同时包含“内廷正宫门”和“连接内廷、外朝往来”两层信息。学习重点是区分名称、位置与功能关系。',
-  'discovery.jingyun_gate_position':
-      '景运门的方位必须回到来源核对。已验证知识把它放在乾清门前广场东侧；虚构旧表的西侧写法不进入事实层。',
+      '乾清门不只是地图上的一个名称。已验证资料说明它是内廷正宫门，也是连接内廷与外朝往来的重要通道。学习乾清门时，名称和“它连接哪些空间”应一起理解。',
+  'discovery.spatial_relations':
+      '单独背建筑名字不足以判断空间关系。已验证资料把景运门放在乾清门前广场东侧，同时把紫禁城中轴上的宫门、院落和主要建筑组织成清晰的南北序列。把门、广场、方向和轴线一起看，名称才会变成可使用的空间信息。',
 };
 
 const _fixtureChallengeSpecs = <ChallengeGenerationSpec>[
@@ -63,26 +63,26 @@ const _fixtureChallengeSpecs = <ChallengeGenerationSpec>[
     kind: GeneratedChallengeKind.sentenceRebuild,
     targetText: '午门在中轴线上',
     teachingSourceRefs: <String>[
-      'vocab.meridian_gate',
       'vocab.central_axis',
-      'discovery.entry_axis',
+      'discovery.spatial_types',
     ],
     knowledgeUnitRefs: <String>[kuMeridianGateAxis],
   ),
   ChallengeGenerationSpec(
     id: 'pipeline.challenge.grammar',
     kind: GeneratedChallengeKind.grammar,
-    targetText: '她决定先逐项核对',
-    teachingSourceRefs: <String>['story.setup'],
+    targetText: '交接前先核对记录',
+    teachingSourceRefs: <String>[
+      'story.setup',
+      'vocab.handoff',
+      'vocab.verify',
+    ],
   ),
   ChallengeGenerationSpec(
     id: 'pipeline.challenge.knowledge_mcq',
     kind: GeneratedChallengeKind.knowledgeMcq,
     targetText: '乾清门连接外朝与内廷往来',
-    teachingSourceRefs: <String>[
-      'vocab.qianqing_gate',
-      'discovery.qianqing_gate_function',
-    ],
+    teachingSourceRefs: <String>['discovery.qianqing_gate_function'],
     knowledgeUnitRefs: <String>[kuQianqingGateCourts],
   ),
   ChallengeGenerationSpec(
@@ -90,8 +90,9 @@ const _fixtureChallengeSpecs = <ChallengeGenerationSpec>[
     kind: GeneratedChallengeKind.completion,
     targetText: '景运门位于乾清门前广场东侧',
     teachingSourceRefs: <String>[
+      'story.evidence',
       'vocab.jingyun_gate',
-      'discovery.jingyun_gate_position',
+      'discovery.spatial_relations',
     ],
     knowledgeUnitRefs: <String>[kuJingyunGateEast],
   ),
@@ -100,32 +101,36 @@ const _fixtureChallengeSpecs = <ChallengeGenerationSpec>[
 const _fixtureMemory = GeneratedMemory(
   storyAnchor: GeneratedMemoryItem(
     id: 'memory.story_anchor',
-    text: '林乔在交接前停笔核对景运门方向。',
+    text: '林乔在签名栏前停下，把许澄留下来一起核对那一页。',
     teachingSourceRefs: <String>['story.conflict', 'story.decision'],
   ),
   knowledgeTakeaway: GeneratedMemoryItem(
     id: 'memory.knowledge_takeaway',
-    text: '午门在中轴线上；景运门在乾清门前广场东侧。',
+    text: '午门是具体宫门，中轴是空间轴线；景运门在乾清门前广场东侧。',
     teachingSourceRefs: <String>[
-      'discovery.entry_axis',
-      'discovery.jingyun_gate_position',
+      'discovery.spatial_types',
+      'discovery.spatial_relations',
     ],
-    knowledgeUnitRefs: <String>[kuMeridianGateAxis, kuJingyunGateEast],
+    knowledgeUnitRefs: <String>[
+      kuMeridianGateAxis,
+      kuCentralAxisSequence,
+      kuJingyunGateEast,
+    ],
   ),
   vocabularyRecall: GeneratedMemoryItem(
     id: 'memory.vocabulary_recall',
-    text: '午门 / 中轴 / 乾清门 / 景运门',
+    text: '交接 / 核对 / 中轴 / 景运门',
     teachingSourceRefs: <String>[
-      'vocab.meridian_gate',
+      'vocab.handoff',
+      'vocab.verify',
       'vocab.central_axis',
-      'vocab.qianqing_gate',
       'vocab.jingyun_gate',
     ],
   ),
   characterMoment: GeneratedMemoryItem(
     id: 'memory.character_moment',
-    text: '林乔没有照抄旧表，而是只保留能追到来源的记录。',
-    teachingSourceRefs: <String>['story.decision', 'story.resolution'],
+    text: '许澄接过记录后先问哪一项还没核，林乔把下一页和他一起继续看。',
+    teachingSourceRefs: <String>['story.resolution', 'story.takeaway'],
   ),
 );
 

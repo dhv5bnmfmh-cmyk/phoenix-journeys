@@ -53,10 +53,14 @@ void main() {
       );
     });
 
-    test('2 factual claims are traceable KnowledgeUnit -> Source', () {
+    test('2 factual Story claims are traceable KnowledgeUnit -> Source', () {
       final audit = forbiddenCitySecondStoryKnowledgeCoverage;
-      expect(audit.factualClaimMap, hasLength(4));
+      expect(audit.factualClaimMap, hasLength(1));
       for (final trace in audit.factualClaimMap) {
+        final storyText = forbiddenCitySecondStoryPlan.storyBeats
+            .map((beat) => beat.text)
+            .join('');
+        expect(storyText, contains(trace.storyClaim));
         expect(trace.knowledgeUnitRefs, isNotEmpty);
         expect(trace.sourceRefs, isNotEmpty);
         for (final ref in trace.knowledgeUnitRefs) {
@@ -79,7 +83,7 @@ void main() {
       final fictional = forbiddenCitySecondStoryPlan.narrativeClaims
           .where((claim) => claim.type == NarrativeClaimType.fictionalNarrative)
           .toList(growable: false);
-      expect(fictional, isNotEmpty);
+      expect(fictional, hasLength(3));
       expect(fictional.every((claim) => claim.knowledgeUnitRefs.isEmpty), isTrue);
       final tracedIds = forbiddenCitySecondStoryKnowledgeCoverage.factualClaimMap
           .map((trace) => trace.claimId)
@@ -150,7 +154,7 @@ void main() {
       }
       expect(
         forbiddenCitySecondStoryLearningAlignment.whatVocabularyCameFromIt(),
-        <String>['午门', '中轴', '乾清门', '景运门'],
+        <String>['中轴', '景运门', '核对', '交接'],
       );
     });
 
@@ -198,7 +202,7 @@ void main() {
       );
     });
 
-    test('11 second Forbidden City Story is distinct from Founder PASS Story', () {
+    test('11 fixture Story is distinct from Founder PASS Story', () {
       expect(forbiddenCitySecondStoryPlan.title, '交接前的标记');
       expect(forbiddenCitySecondStoryPlan.title, isNot(forbiddenCityJourney01.title));
       final candidate = forbiddenCitySecondStoryPlan.storyBeats
@@ -206,7 +210,10 @@ void main() {
           .join('');
       expect(candidate, isNot(contains('沈砚')));
       expect(candidate, isNot(contains('阿宁')));
+      expect(candidate, isNot(contains('同一个地方，可以有不同路线')));
       expect(candidate, contains('林乔'));
+      expect(candidate, contains('许澄'));
+      expect(candidate, contains('下一页一起看完'));
     });
 
     test('12 current Founder PASS Story remains unchanged', () {

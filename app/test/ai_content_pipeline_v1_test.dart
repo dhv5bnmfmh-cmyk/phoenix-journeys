@@ -54,10 +54,11 @@ void main() {
       );
     });
 
-    test('5 factual claim traces KnowledgeUnit to Source completely', () {
+    test('5 Story factual claim traces KnowledgeUnit to Source completely', () {
       final package = forbiddenCityPipelineFixture;
-      expect(package.factTrace, hasLength(4));
+      expect(package.factTrace, hasLength(1));
       for (final trace in package.factTrace) {
+        expect(package.storyContent.text, contains(trace.storyClaim));
         expect(trace.knowledgeUnitRefs, isNotEmpty);
         expect(trace.sourceRefs, isNotEmpty);
         for (final ref in trace.knowledgeUnitRefs) {
@@ -77,7 +78,7 @@ void main() {
       final fictional = forbiddenCityPipelineFixture.storyPlan.narrativeClaims
           .where((claim) => claim.type.name == 'fictionalNarrative')
           .toList(growable: false);
-      expect(fictional, isNotEmpty);
+      expect(fictional, hasLength(3));
       expect(fictional.every((claim) => claim.knowledgeUnitRefs.isEmpty), isTrue);
       final tracedIds = forbiddenCityPipelineFixture.factTrace
           .map((trace) => trace.claimId)
@@ -227,6 +228,68 @@ void main() {
       expect(governance, contains('REAL PRODUCT FAILURE'));
       expect(governance, contains('HARNESS / TEST FAILURE'));
       expect(governance, contains('DEPLOY / INFRA FAILURE'));
+    });
+
+    test('17 relationship evidence is explicit and causal', () {
+      final plan = forbiddenCityPipelineFixture.storyPlan;
+      final story = forbiddenCityPipelineFixture.storyContent;
+      expect(plan.characters.map((character) => character.name).toSet(),
+          containsAll(<String>{'林乔', '许澄'}));
+      expect(plan.goal, contains('许澄'));
+      expect(plan.goal, contains('接手'));
+      expect(plan.conflict, contains('许澄'));
+      expect(plan.conflict, contains('交接'));
+      expect(story.lines.first.text, contains('新同事许澄'));
+      expect(story.lines[4].text, contains('把笔递给许澄'));
+      expect(story.lines[5].text, contains('许澄接过册子'));
+      expect(story.lines.last.text, contains('下一页一起看完'));
+    });
+
+    test('18 emotional movement has concrete action evidence', () {
+      final lines = forbiddenCityPipelineFixture.storyContent.lines;
+      expect(lines[0].text, contains('又把笔放回桌上'));
+      expect(lines[2].text, contains('手停在签名栏上'));
+      expect(lines[4].text, contains('把笔递给许澄'));
+      expect(lines[6].text, contains('把椅子拉近'));
+      expect(
+        forbiddenCityPipelineFixture.validationReport.literaryReview,
+        HumanReviewStatus.pending,
+      );
+    });
+
+    test('19 Story keeps action facts lean while Discovery adds understanding', () {
+      final story = forbiddenCityPipelineFixture.storyContent.text;
+      final discoveries = forbiddenCityPipelineFixture.discoveries
+          .map((item) => item.text)
+          .join('\n');
+      expect(story, contains('景运门位于乾清门前广场东侧'));
+      expect(story, isNot(contains('内廷正宫门')));
+      expect(story, isNot(contains('宫门、院落和主要建筑形成的南北空间序列')));
+      expect(discoveries, contains('内廷正宫门'));
+      expect(discoveries, contains('宫门、院落和主要建筑形成的南北空间序列'));
+      expect(
+        forbiddenCityPipelineFixture.validationReport
+            .passed(ContentQualityCheckKind.duplication),
+        isTrue,
+      );
+    });
+
+    test('20 Vocabulary mixes place knowledge with transferable Chinese', () {
+      final words = forbiddenCityPipelineFixture.vocabulary
+          .map((item) => item.word)
+          .toSet();
+      expect(words, <String>{'中轴', '景运门', '核对', '交接'});
+      expect(words, containsAll(<String>{'核对', '交接'}));
+      expect(words, isNot(contains('午门')));
+      expect(words, isNot(contains('乾清门')));
+    });
+
+    test('21 fixture narrative mechanism does not reuse Founder PASS ending', () {
+      final story = forbiddenCityPipelineFixture.storyContent.text;
+      expect(story, isNot(contains('你走错了')));
+      expect(story, isNot(contains('同一个地方，可以有不同路线')));
+      expect(story, isNot(contains('熟悉一个地方，不等于可以替事实补空白')));
+      expect(story, contains('下一页一起看完'));
     });
 
     test('automated structural checks are all PASS for fixture', () {
