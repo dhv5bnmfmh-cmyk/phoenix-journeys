@@ -1,0 +1,114 @@
+name: Repair Second Story Runtime V5
+
+on:
+  push:
+    branches:
+      - product/city-standard-v1-beijing-forbidden-city
+    paths:
+      - '.github/workflows/repair-second-story-runtime-v5.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: product/city-standard-v1-beijing-forbidden-city
+
+      - name: Verify exact repair scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor c6504508f34dffad0158d5c69ce0f33508061ace HEAD
+          git diff --name-only c6504508f34dffad0158d5c69ce0f33508061ace..HEAD | sort >/tmp/scope
+          cat >/tmp/expected <<'EOF'
+          .github/workflows/repair-second-story-runtime-v3.yml
+          .github/workflows/repair-second-story-runtime-v4.yml
+          .github/workflows/repair-second-story-runtime-v5.yml
+          .github/workflows/repair-second-story-runtime.yml
+          EOF
+          diff -u /tmp/expected /tmp/scope
+
+      - name: Apply already-validated minimum repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('.github/workflows/repair-second-story-runtime-v4.yml').read_text()
+          start_marker = '      - name: Apply already-defined minimum product repair\n'
+          end_marker = '      - name: Set up Flutter\n'
+          start = text.index(start_marker)
+          run_start = text.index('        run: |\n', start) + len('        run: |\n')
+          end = text.index(end_marker, run_start)
+          block = text[run_start:end]
+          script = '\n'.join(
+              line[10:] if line.startswith('          ') else line
+              for line in block.splitlines()
+          )
+          Path('/tmp/apply_repair.sh').write_text(script + '\n')
+          PY
+          bash -n /tmp/apply_repair.sh
+          bash /tmp/apply_repair.sh
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Format repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart format \
+            app/lib/data/forbidden_city_story_runtime.dart \
+            app/lib/screens/journey_screen.dart \
+            app/test/forbidden_city_story_selection_runtime_test.dart \
+            app/test/forbidden_city_second_story_scene_routing_test.dart
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Targeted tests
+        working-directory: app
+        run: >-
+          flutter test
+          test/forbidden_city_story_selection_runtime_test.dart
+          test/forbidden_city_second_story_scene_routing_test.dart
+          test/journey_memory_completion_narration_contract_test.dart
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Commit exact candidate and push
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/repair-second-story-runtime.yml
+          rm .github/workflows/repair-second-story-runtime-v3.yml
+          rm .github/workflows/repair-second-story-runtime-v4.yml
+          rm .github/workflows/repair-second-story-runtime-v5.yml
+          git add -A
+          git diff --cached --name-only | sort >/tmp/changed
+          cat >/tmp/expected <<'EOF'
+          .github/workflows/repair-second-story-runtime-v3.yml
+          .github/workflows/repair-second-story-runtime-v4.yml
+          .github/workflows/repair-second-story-runtime-v5.yml
+          .github/workflows/repair-second-story-runtime.yml
+          app/lib/data/forbidden_city_story_runtime.dart
+          app/lib/screens/journey_screen.dart
+          app/test/forbidden_city_second_story_scene_routing_test.dart
+          app/test/forbidden_city_story_selection_runtime_test.dart
+          EOF
+          diff -u /tmp/expected /tmp/changed
+          git config user.name phoenix-agent
+          git config user.email phoenix-agent@users.noreply.github.com
+          git commit -m 'fix: stabilize Forbidden City second Story runtime'
+          git push origin HEAD:product/city-standard-v1-beijing-forbidden-city
