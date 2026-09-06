@@ -1,0 +1,30 @@
+name: Dispatch Second Story Exact Release
+
+on:
+  push:
+    branches:
+      - validation/second-story-exact-release-e262
+    paths:
+      - '.github/workflows/dispatch-second-story-exact-release.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch existing exact release workflow on product candidate
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/preview-cloudflare.yml/dispatches" \
+            --data '{"ref":"product/city-standard-v1-beijing-forbidden-city","inputs":{"pr_number":"208"}}'
