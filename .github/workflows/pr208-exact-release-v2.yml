@@ -49,36 +49,11 @@ jobs:
           while IFS= read -r -d '' file; do python3 -m py_compile "$file"; done < <(find .github/scripts -type f -name '*.py' -print0)
           find .github/scripts -type d -name '__pycache__' -prune -exec rm -rf {} +
 
-      - name: Apply worker semantic matcher harness fix
+      - name: Targeted worker tests on current semantic gate
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path('worker/journey_runtime_architecture_gate.test.mjs')
-          text = path.read_text()
-          replacements = {
-              r"/3 => stepThreePage[\s\S]*_challengePage\(\)/": r"/3\s*=>\s*stepThreePage[\s\S]*_challengePage\(\)/",
-              r"/4 => stepFourPage[\s\S]*_memoryPage\(\)/": r"/4\s*=>\s*stepFourPage[\s\S]*_memoryPage\(\)/",
-          }
-          for old, new in replacements.items():
-              if text.count(old) != 1:
-                  raise SystemExit(f'worker harness regex not unique: {old}')
-              text = text.replace(old, new, 1)
-          path.write_text(text)
-          PY
-          test "$(git diff --name-only)" = "worker/journey_runtime_architecture_gate.test.mjs"
-
-      - name: Targeted worker tests
-        shell: bash
-        run: node --test worker/*.test.mjs
-
-      - name: Restore exact product after worker targeted tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          git checkout -- worker/journey_runtime_architecture_gate.test.mjs
-          find . -type d -name '__pycache__' -prune -exec rm -rf {} +
+          node --test worker/*.test.mjs
           test "$(git rev-parse HEAD)" = "$PREVIEW_RELEASE"
           git diff --exit-code
           test -z "$(git status --porcelain)"
@@ -93,14 +68,13 @@ jobs:
         working-directory: app
         run: flutter pub get
 
-      - name: Apply proven Flutter harness protections
+      - name: Prepare proven Flutter harness patcher
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
+          cat > /tmp/pr208_apply_harness.py <<'PY'
           from pathlib import Path
 
-          # Proven step 3 / step 4 semantic structural matchers.
           perf = Path('app/test/journey_runtime_performance_gate_test.dart')
           text = perf.read_text()
           old3 = "    expect(build, contains('3 => stepThreePage'));\n"
@@ -123,7 +97,6 @@ jobs:
               raise SystemExit('step 3/4 stale matcher anchors are not unique')
           perf.write_text(text.replace(old3, new3, 1).replace(old4, new4, 1))
 
-          # Existing proven session-lock source-shape harness fix.
           settings = Path('app/test/settings_journey_session_lock_test.dart')
           text = settings.read_text()
           old = "contains('snapshotJourneySessionProfile(_phoenixLevelController)')"
@@ -132,7 +105,6 @@ jobs:
               raise SystemExit('settings harness matcher anchor is not unique')
           settings.write_text(text.replace(old, new, 1))
 
-          # Proven Founder Story -> Vocabulary fake-clock teardown.
           story = Path('app/test/founder_story_vocabulary_transition_regression_test.dart')
           text = story.read_text()
           marker = "      reason: 'Vocabulary phase must render its first word after Continue.',\n    );"
@@ -147,13 +119,13 @@ jobs:
           )
           text = text.replace(marker, teardown, 1)
 
-          # Proven flutter_tts stop cleanup mock for the never-returning TTS regression.
           import_anchor = "import 'package:flutter/material.dart';\n"
           import_line = "import 'package:flutter/services.dart';\n"
           if import_line not in text:
               if text.count(import_anchor) != 1:
                   raise SystemExit('flutter services import anchor is not unique')
               text = text.replace(import_anchor, import_anchor + import_line, 1)
+
           controller_anchor = "      final controller = NarrationController();\n      addTearDown(controller.dispose);"
           if text.count(controller_anchor) != 1:
               raise SystemExit('NarrationController teardown anchor is not unique')
@@ -172,8 +144,15 @@ jobs:
               addTearDown(controller.dispose);"""
           story.write_text(text.replace(controller_anchor, replacement, 1))
           PY
-          test "$(git rev-parse HEAD)" = "$PREVIEW_RELEASE"
+          python3 -m py_compile /tmp/pr208_apply_harness.py
+
+      - name: Apply proven harness protections for targeted tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 /tmp/pr208_apply_harness.py
           test "$(git diff --name-only | sort)" = $'app/test/founder_story_vocabulary_transition_regression_test.dart\napp/test/journey_runtime_performance_gate_test.dart\napp/test/settings_journey_session_lock_test.dart'
+          test "$(git rev-parse HEAD)" = "$PREVIEW_RELEASE"
 
       - name: Targeted Flutter tests
         working-directory: app
@@ -197,80 +176,11 @@ jobs:
         working-directory: app
         run: flutter analyze
 
-      - name: Reapply proven Flutter harness protections for Full Flutter
+      - name: Reapply proven harness protections for Full Flutter
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-
-          perf = Path('app/test/journey_runtime_performance_gate_test.dart')
-          text = perf.read_text()
-          old3 = "    expect(build, contains('3 => stepThreePage'));\n"
-          new3 = r"""    expect(
-              RegExp(
-                r'3\s*=>[\s\S]*?stepThreePage\s*\(\s*context\s*\)',
-              ).hasMatch(build),
-              isTrue,
-            );
-          """
-          old4 = "    expect(build, contains('4 => stepFourPage'));\n"
-          new4 = r"""    expect(
-              RegExp(
-                r'4\s*=>[\s\S]*?stepFourPage\s*\(\s*context\s*\)',
-              ).hasMatch(build),
-              isTrue,
-            );
-          """
-          if text.count(old3) != 1 or text.count(old4) != 1:
-              raise SystemExit('step 3/4 stale matcher anchors are not unique')
-          perf.write_text(text.replace(old3, new3, 1).replace(old4, new4, 1))
-
-          settings = Path('app/test/settings_journey_session_lock_test.dart')
-          text = settings.read_text()
-          old = "contains('snapshotJourneySessionProfile(_phoenixLevelController)')"
-          new = "matches(RegExp(r'snapshotJourneySessionProfile\\(\\s*_phoenixLevelController,?\\s*\\)'))"
-          if text.count(old) != 1:
-              raise SystemExit('settings harness matcher anchor is not unique')
-          settings.write_text(text.replace(old, new, 1))
-
-          story = Path('app/test/founder_story_vocabulary_transition_regression_test.dart')
-          text = story.read_text()
-          marker = "      reason: 'Vocabulary phase must render its first word after Continue.',\n    );"
-          if text.count(marker) != 1:
-              raise SystemExit('Story to Vocabulary teardown marker is not unique')
-          teardown = (
-              marker
-              + "\n\n    // Harness-only teardown: consume production WordDetailSheet TTS timeout."
-              + "\n    await tester.pump(const Duration(seconds: 4));"
-              + "\n    await tester.pump(const Duration(milliseconds: 500));"
-              + "\n    await tester.pump();"
-          )
-          text = text.replace(marker, teardown, 1)
-          import_anchor = "import 'package:flutter/material.dart';\n"
-          import_line = "import 'package:flutter/services.dart';\n"
-          if import_line not in text:
-              if text.count(import_anchor) != 1:
-                  raise SystemExit('flutter services import anchor is not unique')
-              text = text.replace(import_anchor, import_anchor + import_line, 1)
-          controller_anchor = "      final controller = NarrationController();\n      addTearDown(controller.dispose);"
-          if text.count(controller_anchor) != 1:
-              raise SystemExit('NarrationController teardown anchor is not unique')
-          replacement = """      const flutterTtsChannel = MethodChannel('flutter_tts');
-              TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-                  .setMockMethodCallHandler(flutterTtsChannel, (call) async {
-                if (call.method == 'stop') return 1;
-                return null;
-              });
-              addTearDown(() {
-                TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-                    .setMockMethodCallHandler(flutterTtsChannel, null);
-              });
-
-              final controller = NarrationController();
-              addTearDown(controller.dispose);"""
-          story.write_text(text.replace(controller_anchor, replacement, 1))
-          PY
+          python3 /tmp/pr208_apply_harness.py
           test "$(git rev-parse HEAD)" = "$PREVIEW_RELEASE"
 
       - name: Full Flutter and generate quality evidence
