@@ -1,5 +1,5 @@
 name: PR208 Founder Device Milestone Browser V4
-# Probe revision 3: enter Second Story through the Passport Story Selection path.
+# Probe revision 4: use exact Passport rail hit targets; reuse the exact deployed diagnostic artifact.
 
 on:
   push:
@@ -31,32 +31,6 @@ jobs:
           test "$(git ls-remote origin refs/heads/diagnostic/pr208-founder-device-milestones-d560fa | awk '{print $1}')" = "$DIAGNOSTIC_SHA"
           git fetch origin "$PRODUCT_SHA" "$DIAGNOSTIC_SHA"
           test "$(git merge-base "$PRODUCT_SHA" "$DIAGNOSTIC_SHA")" = "$PRODUCT_SHA"
-      - name: Check out exact diagnostic candidate
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ env.DIAGNOSTIC_SHA }}
-          path: diagnostic
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-      - name: Build diagnostic artifact once
-        working-directory: diagnostic/app
-        run: |
-          flutter pub get
-          flutter analyze
-          flutter build web --release
-      - name: Deploy same diagnostic artifact
-        working-directory: diagnostic
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        shell: bash
-        run: |
-          test "$(git rev-parse HEAD)" = "$DIAGNOSTIC_SHA"
-          npx --yes wrangler@4 deploy --name phoenix-journeys-pr-208-diagnostic \
-            --var "PHOENIX_RELEASE:$DIAGNOSTIC_SHA"
       - name: Wait for exact diagnostic deployment
         shell: bash
         run: |
