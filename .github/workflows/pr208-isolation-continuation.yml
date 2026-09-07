@@ -1,0 +1,91 @@
+name: PR208 Story Isolation Continuation
+
+on:
+  push:
+    branches:
+      - validation/pr208-pronunciation-product-fix-49a088
+    paths:
+      - .github/workflows/pr208-isolation-continuation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr208-story-isolation-continuation
+  cancel-in-progress: false
+
+env:
+  CANDIDATE_SHA: 9c7d00a1ee80b2e50b40a3b6f4922a9d38b3753e
+
+jobs:
+  isolation:
+    name: Story isolation contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 1
+
+      - name: Verify exact candidate SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$CANDIDATE_SHA"
+          echo "candidate=$actual"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Run real Story progress-memory-resume isolation test
+        working-directory: app
+        run: >-
+          flutter test
+          test/forbidden_city_story_selection_runtime_test.dart
+          --plain-name
+          "Story progress, completion, resume and Memory are isolated by Story ID"
+
+  analyze:
+    name: Analyze exact candidate
+    needs: isolation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 1
+
+      - name: Verify exact candidate SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$CANDIDATE_SHA"
+          echo "candidate=$actual"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Analyze exact candidate
+        working-directory: app
+        run: flutter analyze
