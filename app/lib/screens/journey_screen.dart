@@ -818,7 +818,11 @@ class _JourneyScreenState extends State<JourneyScreen>
       return;
     }
 
-    await _stopJourneyNarration();
+    try {
+      await _stopJourneyNarration().timeout(const Duration(milliseconds: 500));
+    } on TimeoutException {
+      // External speech cleanup must never block Journey step navigation.
+    }
     if (!mounted || safeStep == step) return;
 
     setState(() => step = safeStep);
