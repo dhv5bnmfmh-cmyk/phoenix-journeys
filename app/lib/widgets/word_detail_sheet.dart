@@ -35,9 +35,8 @@ Future<void> showWordDetail(
       : List<WordEntry>.unmodifiable(entries);
   final found = studyEntries.indexWhere((item) => item.word == entry.word);
   final requestedIndex = initialIndex ?? found;
-  final safeIndex = requestedIndex < 0
-      ? 0
-      : requestedIndex.clamp(0, studyEntries.length - 1);
+  final safeIndex =
+      requestedIndex < 0 ? 0 : requestedIndex.clamp(0, studyEntries.length - 1);
   final controller = narrationController ?? NarrationController();
   final appState = context.read<AppState>();
 
@@ -73,9 +72,8 @@ Future<void> showWordDetail(
                 onSpeak: narrationController == null
                     ? () => speakLocally(entry)
                     : onSpeak,
-                onSpeakEntry: narrationController == null
-                    ? speakLocally
-                    : onSpeakEntry,
+                onSpeakEntry:
+                    narrationController == null ? speakLocally : onSpeakEntry,
               ),
             ),
           ),
