@@ -897,7 +897,14 @@ class _JourneyScreenState extends State<JourneyScreen>
           }());
         });
       });
+      _pjDiagnostic('PJ_PROGRESS_PERSIST_BEGIN');
+      final pjPersistWatch = Stopwatch()..start();
       await _persistProgress(overrideStep: safeStep);
+      pjPersistWatch.stop();
+      _pjDiagnostic(
+        'PJ_PROGRESS_PERSIST_END',
+        reason: 'elapsedMs=${pjPersistWatch.elapsedMilliseconds}',
+      );
       return;
     }
     if (safeStep == 2 && safeStep != step) {
@@ -945,6 +952,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Future<void> _openWord(WordEntry entry) async {
+    _pjDiagnostic('PJ_WORD_OPEN_ENTER', reason: 'word=${entry.word}');
     final shouldResume = _narration.status == NarrationStatus.playing;
     if (shouldResume) {
       await _narration.pause();
@@ -955,21 +963,60 @@ class _JourneyScreenState extends State<JourneyScreen>
     final initialIndex = _levelContent.words.indexWhere(
       (item) => item.word == entry.word,
     );
-    await showWordDetail(
+
+    _pjDiagnostic('PJ_WORD_DETAIL_ROUTE_PUSH_BEGIN');
+    final wordDetailFuture = showWordDetail(
       context,
       entry,
       narrationController: _narration,
       entries: _levelContent.words,
       initialIndex: initialIndex < 0 ? 0 : initialIndex,
-      onSpeak: () => _narration.speakWord(
-        _appState.displayText(entry.word),
-        languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
-      ),
-      onSpeakEntry: (currentEntry) => _narration.speakWord(
-        _appState.displayText(currentEntry.word),
-        languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
-      ),
+      onSpeak: () {
+        _pjDiagnostic(
+          'PJ_WORD_SPEAK_CALL_BEGIN',
+          reason: 'source=initial word=${entry.word}',
+        );
+        final speech = _narration.speakWord(
+          _appState.displayText(entry.word),
+          languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
+        );
+        _pjDiagnostic(
+          'PJ_WORD_SPEAK_FUTURE_RETURNED',
+          reason: 'source=initial',
+        );
+        return speech.then((success) {
+          _pjDiagnostic(
+            'PJ_WORD_SPEAK_COMPLETE',
+            reason: 'source=initial success=$success',
+          );
+          return success;
+        });
+      },
+      onSpeakEntry: (currentEntry) {
+        _pjDiagnostic(
+          'PJ_WORD_SPEAK_CALL_BEGIN',
+          reason: 'source=entry word=${currentEntry.word}',
+        );
+        final speech = _narration.speakWord(
+          _appState.displayText(currentEntry.word),
+          languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
+        );
+        _pjDiagnostic(
+          'PJ_WORD_SPEAK_FUTURE_RETURNED',
+          reason: 'source=entry',
+        );
+        return speech.then((success) {
+          _pjDiagnostic(
+            'PJ_WORD_SPEAK_COMPLETE',
+            reason: 'source=entry success=$success',
+          );
+          return success;
+        });
+      },
     );
+    _pjDiagnostic('PJ_WORD_DETAIL_ROUTE_PUSH_RETURNED');
+    await wordDetailFuture;
+    _pjDiagnostic('PJ_WORD_DETAIL_CLOSED');
     if (!mounted || !shouldResume) return;
 
     await Future<void>.delayed(const Duration(milliseconds: 360));
@@ -981,6 +1028,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     _pjDiagnostic('PJ_CONTINUE_TAP_RECEIVED');
     try {
       await _goToStep(1);
+      _pjDiagnostic('PJ_ENTER_VOCAB_AFTER_GO');
     } catch (error, stackTrace) {
       _pjDiagnostic('PJ_CONTINUE_EXCEPTION_${error.runtimeType}');
       Error.throwWithStackTrace(error, stackTrace);
@@ -998,7 +1046,9 @@ class _JourneyScreenState extends State<JourneyScreen>
       return;
     }
 
+    _pjDiagnostic('PJ_FIRST_WORD_END_OF_FRAME_BEGIN');
     await WidgetsBinding.instance.endOfFrame;
+    _pjDiagnostic('PJ_FIRST_WORD_END_OF_FRAME_END');
     if (!mounted) {
       _pjDiagnostic('PJ_CONTINUE_ABORT_not_mounted_after_frame');
       return;
@@ -1008,7 +1058,9 @@ class _JourneyScreenState extends State<JourneyScreen>
       return;
     }
 
+    _pjDiagnostic('PJ_FIRST_WORD_OPEN_BEGIN');
     await _openWord(_levelContent.words.first);
+    _pjDiagnostic('PJ_FIRST_WORD_OPEN_END');
   }
 
   Future<void> _prepareAgentAction(FocusNode focusNode, String message) async {
@@ -1912,7 +1964,9 @@ class _JourneyScreenState extends State<JourneyScreen>
       }
       if (_pjVocabularyStableScheduled) return;
       _pjVocabularyStableScheduled = true;
+      _pjDiagnostic('PJ_VOCAB_STABLE_TIMER_SCHEDULED');
       Timer(const Duration(seconds: 2), () {
+        _pjDiagnostic('PJ_VOCAB_STABLE_TIMER_FIRED');
         if (!mounted) {
           _pjDiagnostic('PJ_CONTINUE_ABORT_vocab_stability_not_mounted');
           return;
