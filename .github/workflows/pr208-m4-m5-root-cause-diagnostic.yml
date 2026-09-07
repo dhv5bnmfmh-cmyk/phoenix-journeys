@@ -1,0 +1,161 @@
+name: PR208 M4-M5 Root Cause Diagnostic
+
+on:
+  push:
+    branches:
+      - validation/pr208-pronunciation-product-fix-49a088
+    paths:
+      - '.github/workflows/pr208-m4-m5-root-cause-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+  DIAGNOSTIC_PARENT: a8f58d9d4780a09f4e5f75ecccb713fe72d25ba3
+  DIAGNOSTIC_BRANCH: diagnostic/pr208-founder-device-milestones-d560fa
+  PREVIEW_WORKER: phoenix-journeys-pr-208-diagnostic
+  PREVIEW_URL: https://phoenix-journeys-pr-208-diagnostic.7hn5tyrjgh.workers.dev
+
+jobs:
+  trace-m4-m5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Check out validation harness
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Preserve diagnostic tools outside worktree
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pr208-m4m5
+          cp .github/pr208/instrument_m4_m5_timeline.py /tmp/pr208-m4m5/
+          cp .github/scripts/pr208_m4_m5_timeline_probe.mjs /tmp/pr208-m4m5/
+          cp .github/scripts/journey_level_session_harness.mjs /tmp/pr208-m4m5/
+          sed -i 's/70000/180000/' /tmp/pr208-m4m5/pr208_m4_m5_timeline_probe.mjs
+
+      - name: Check out exact diagnostic parent and guard product
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_product="$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')"
+          remote_diag="$(git ls-remote origin "refs/heads/${DIAGNOSTIC_BRANCH}" | awk '{print $1}')"
+          test "$remote_product" = "$PRODUCT_SHA"
+          test "$remote_diag" = "$DIAGNOSTIC_PARENT"
+          git checkout -B "$DIAGNOSTIC_BRANCH" "$DIAGNOSTIC_PARENT"
+          test "$(git merge-base "$PRODUCT_SHA" HEAD)" = "$PRODUCT_SHA"
+
+      - name: Apply instrumentation only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 /tmp/pr208-m4m5/instrument_m4_m5_timeline.py
+          test "$(git diff --name-only | wc -l | tr -d ' ')" = "1"
+          test "$(git diff --name-only)" = "app/lib/screens/journey_screen.dart"
+          test -z "$(git diff --name-only | grep -E 'word_detail_sheet|forbidden_city_story|pronunciation' || true)"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Analyze diagnostic only
+        working-directory: app
+        run: flutter analyze
+
+      - name: Preserve visible one-tap regression
+        working-directory: app
+        run: flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart
+
+      - name: Worker governance contracts
+        run: node --test worker/*.test.mjs
+
+      - name: Commit isolated diagnostic instrumentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "phoenix-diagnostic"
+          git config user.email "phoenix-diagnostic@users.noreply.github.com"
+          git add app/lib/screens/journey_screen.dart
+          git commit -m "diagnostic(pr208): trace M4 to M5 execution timeline"
+          echo "DIAGNOSTIC_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          test "$(git merge-base "$PRODUCT_SHA" HEAD)" = "$PRODUCT_SHA"
+          test "$(git rev-parse HEAD^)" = "$DIAGNOSTIC_PARENT"
+          git push origin "HEAD:refs/heads/${DIAGNOSTIC_BRANCH}"
+
+      - name: Build diagnostic artifact once
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Fingerprint diagnostic artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          find app/build/web -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/m4m5-artifact.sha256
+          test -s /tmp/m4m5-artifact.sha256
+
+      - name: Deploy same diagnostic artifact
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$DIAGNOSTIC_SHA"
+          sha256sum -c /tmp/m4m5-artifact.sha256
+          npx --yes wrangler@4 deploy --name "$PREVIEW_WORKER" --var "PHOENIX_RELEASE:$DIAGNOSTIC_SHA"
+          sha256sum -c /tmp/m4m5-artifact.sha256
+
+      - name: Verify exact diagnostic deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..24}; do
+            response="$(curl --fail --silent --show-error "$PREVIEW_URL/api/health" || true)"
+            if node -e 'const h=JSON.parse(process.argv[1]); if(!h.ok || h.release!==process.argv[2]) process.exit(1)' "$response" "$DIAGNOSTIC_SHA"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+
+      - name: Install iPhone WebKit driver
+        shell: bash
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/pr208-browser-node" playwright
+          "$RUNNER_TEMP/pr208-browser-node/node_modules/.bin/playwright" install --with-deps webkit
+
+      - name: Execute M4-M5 control and visible-state probes
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/pr208-browser-node/node_modules/playwright/index.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          node /tmp/pr208-m4m5/pr208_m4_m5_timeline_probe.mjs "$PREVIEW_URL" "$DIAGNOSTIC_SHA" \
+            2>&1 | tee test-results/pr208-m4-m5-timeline.log
+
+      - name: Reconfirm product branch untouched
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')" = "$PRODUCT_SHA"
+
+      - name: Upload M4-M5 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr208-m4-m5-root-cause-${{ env.DIAGNOSTIC_SHA }}
+          path: test-results/
+          if-no-files-found: warn
