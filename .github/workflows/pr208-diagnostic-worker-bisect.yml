@@ -1,0 +1,83 @@
+name: PR208 Diagnostic Worker Contract Bisect
+
+on:
+  push:
+    branches:
+      - validation/pr208-pronunciation-product-fix-49a088
+    paths:
+      - '.github/workflows/pr208-diagnostic-worker-bisect.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  DIAGNOSTIC_SHA: 2c9653038487955b4289b32b0d1166000e9a519f
+  VALIDATION_BRANCH: validation/pr208-pronunciation-product-fix-49a088
+
+jobs:
+  bisect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out validation harness
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run only worker contracts affected by diagnostic files
+        shell: bash
+        run: |
+          set -euo pipefail
+          validation_head="$(git rev-parse HEAD)"
+          git checkout --detach "$DIAGNOSTIC_SHA"
+
+          report=/tmp/pr208-diagnostic-worker-bisect-report.txt
+          : > "$report"
+          {
+            echo "DIAGNOSTIC_SHA=$DIAGNOSTIC_SHA"
+            echo "VALIDATION_HEAD=$validation_head"
+            echo "METHOD=tests whose source text references journey_screen.dart, narration_controller.dart, or worker/index.mjs"
+          } >> "$report"
+
+          mapfile -t affected < <(
+            grep -El "journey_screen\.dart|narration_controller\.dart|worker/index\.mjs|['\"]index\.mjs['\"]" worker/*.test.mjs | sort
+          )
+          echo "AFFECTED_COUNT=${#affected[@]}" >> "$report"
+          printf 'AFFECTED=%s\n' "${affected[@]}" >> "$report"
+
+          failures=0
+          first_failure=''
+          for file in "${affected[@]}"; do
+            output="$(mktemp)"
+            if node --test "$file" >"$output" 2>&1; then
+              echo "PASS $file" >> "$report"
+            else
+              echo "FAIL $file" >> "$report"
+              if [[ -z "$first_failure" ]]; then
+                first_failure="$file"
+                {
+                  echo "FIRST_USEFUL_FAILURE_FILE=$file"
+                  echo "----- FIRST USEFUL FAILURE OUTPUT -----"
+                  cat "$output"
+                  echo "----- END FIRST USEFUL FAILURE OUTPUT -----"
+                } >> "$report"
+              fi
+              failures=$((failures + 1))
+            fi
+            rm -f "$output"
+          done
+          echo "FAILURE_COUNT=$failures" >> "$report"
+          echo "FIRST_USEFUL_FAILURE_FILE=$first_failure" >> "$report"
+
+          git checkout "$VALIDATION_BRANCH"
+          test "$(git rev-parse HEAD)" = "$validation_head"
+          cp "$report" .github/pr208/diagnostic-worker-bisect-report.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/pr208/diagnostic-worker-bisect-report.txt
+          git commit -m 'diagnostic(pr208): record affected worker contract failure' || true
+          git push origin "$VALIDATION_BRANCH"
+
+          test "$failures" -gt 0
+          test -n "$first_failure"
