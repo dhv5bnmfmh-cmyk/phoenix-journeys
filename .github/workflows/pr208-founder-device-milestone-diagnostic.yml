@@ -1,0 +1,447 @@
+name: PR208 Founder Device Milestone Diagnostic
+
+on:
+  push:
+    branches:
+      - validation/pr208-pronunciation-product-fix-49a088
+    paths:
+      - '.github/workflows/pr208-founder-device-milestone-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+  BASE_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
+  DIAGNOSTIC_BRANCH: diagnostic/pr208-founder-device-milestones-d560fa
+  PREVIEW_WORKER: phoenix-journeys-pr-208-diagnostic
+  PREVIEW_URL: https://phoenix-journeys-pr-208-diagnostic.7hn5tyrjgh.workers.dev
+
+jobs:
+  diagnostic-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out workflow source
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Guard authoritative product and check out exact failed release
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_product="$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')"
+          test "$remote_product" = "$BASE_PRODUCT_SHA"
+          git fetch origin "$BASE_PRODUCT_SHA"
+          git checkout -B "$DIAGNOSTIC_BRANCH" "$BASE_PRODUCT_SHA"
+          test "$(git rev-parse HEAD)" = "$BASE_PRODUCT_SHA"
+          test -z "$(git status --porcelain)"
+
+      - name: Add non-visual milestone diagnostics only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          journey = Path('app/lib/screens/journey_screen.dart')
+          text = journey.read_text()
+
+          old = "import 'dart:async';\nimport 'dart:math' as math;\n"
+          new = "import 'dart:async';\nimport 'dart:convert';\nimport 'dart:math' as math;\n"
+          if text.count(old) != 1:
+              raise SystemExit('dart import anchor not unique')
+          text = text.replace(old, new, 1)
+
+          old = "import 'package:provider/provider.dart';\n"
+          new = "import 'package:provider/provider.dart';\nimport 'package:http/http.dart' as http;\n"
+          if text.count(old) != 1:
+              raise SystemExit('http import anchor not unique')
+          text = text.replace(old, new, 1)
+
+          old = "  Future<void> _persistProgress({int? overrideStep}) {\n"
+          helper = r'''  int _pjDiagnosticSequence = 0;
+
+  void _pjDiagnostic(String marker, {String? reason}) {
+    final isNarrating = _narration.status == NarrationStatus.playing;
+    final payload = <String, Object?>{
+      'marker': marker,
+      'sequence': ++_pjDiagnosticSequence,
+      'mounted': mounted,
+      'step': step,
+      'isNarrating': isNarrating,
+      'isTransitioning': false,
+      'isSpeaking': isNarrating || _narration.isSpeakingWord,
+      'loading': _guideLoading || _writingLoading || _memoryPhotoBusy,
+      'disabled': false,
+      'currentStoryId': _storyId,
+      'currentLevel': _sessionLanguageProfile.phoenixLevel,
+      'webSpeechAvailable': _narration.webSpeechAvailableForDiagnostics,
+      if (reason != null) 'reason': reason,
+      'timestamp': DateTime.now().toUtc().toIso8601String(),
+    };
+    debugPrint('$marker ${jsonEncode(payload)}');
+    final session = Uri.base.queryParameters['diagSession']?.trim();
+    if (session == null || session.isEmpty) return;
+    final uri = Uri.base.resolve(
+      '/api/diagnostic?session=${Uri.encodeQueryComponent(session)}',
+    );
+    unawaited(
+      http
+          .post(
+            uri,
+            headers: const {'content-type': 'application/json'},
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 2))
+          .then<void>(
+            (_) {},
+            onError: (Object error, StackTrace stackTrace) {
+              debugPrint('PJ_DIAGNOSTIC_UPLOAD_ERROR ${error.runtimeType}');
+            },
+          ),
+    );
+  }
+
+  Future<void> _persistProgress({int? overrideStep}) {
+'''
+          if text.count(old) != 1:
+              raise SystemExit('diagnostic helper anchor not unique')
+          text = text.replace(old, helper, 1)
+
+          old = """    if (!_appState.journeyCompleted &&
+        safeStep != step &&
+        safeStep != step - 1 &&
+        safeStep != step + 1) {
+      return;
+    }
+"""
+          new = """    if (!_appState.journeyCompleted &&
+        safeStep != step &&
+        safeStep != step - 1 &&
+        safeStep != step + 1) {
+      if (targetStep == 1) {
+        _pjDiagnostic('PJ_CONTINUE_ABORT_invalid_step_guard');
+      }
+      return;
+    }
+"""
+          if text.count(old) != 1:
+              raise SystemExit('guard anchor not unique')
+          text = text.replace(old, new, 1)
+
+          old = """    if (step == 0 && safeStep == 1) {
+      _stageNarrationIntent += 1;
+      final cancellationToken = _narration.cancelPlaybackImmediately();
+      setState(() {
+        _stageNarrationRequestedId = null;
+        step = safeStep;
+      });
+"""
+          new = """    if (step == 0 && safeStep == 1) {
+      _pjDiagnostic('PJ_CONTINUE_PRE_GUARDS_COMPLETE');
+      _pjDiagnostic('PJ_STEP_1_COMMIT_BEGIN');
+      _stageNarrationIntent += 1;
+      final cancellationToken = _narration.cancelPlaybackImmediately();
+      setState(() {
+        _stageNarrationRequestedId = null;
+        step = safeStep;
+      });
+      _pjDiagnostic('PJ_STEP_1_COMMITTED');
+"""
+          if text.count(old) != 1:
+              raise SystemExit('step 1 commit anchor not unique')
+          text = text.replace(old, new, 1)
+
+          old = """  Future<void> _enterVocabularyAtFirstWord() async {
+    await _goToStep(1);
+    if (!mounted || step != 1 || _levelContent.words.isEmpty) return;
+
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted || step != 1) return;
+
+    await _openWord(_levelContent.words.first);
+  }
+"""
+          new = """  Future<void> _enterVocabularyAtFirstWord() async {
+    try {
+      await _goToStep(1);
+    } catch (error, stackTrace) {
+      _pjDiagnostic('PJ_CONTINUE_EXCEPTION_${error.runtimeType}');
+      Error.throwWithStackTrace(error, stackTrace);
+    }
+    if (!mounted) {
+      _pjDiagnostic('PJ_CONTINUE_ABORT_not_mounted_after_step');
+      return;
+    }
+    if (step != 1) {
+      _pjDiagnostic('PJ_CONTINUE_ABORT_step_not_1_after_go');
+      return;
+    }
+    if (_levelContent.words.isEmpty) {
+      _pjDiagnostic('PJ_CONTINUE_ABORT_vocabulary_empty');
+      return;
+    }
+
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) {
+      _pjDiagnostic('PJ_CONTINUE_ABORT_not_mounted_after_frame');
+      return;
+    }
+    if (step != 1) {
+      _pjDiagnostic('PJ_CONTINUE_ABORT_step_changed_after_frame');
+      return;
+    }
+
+    await _openWord(_levelContent.words.first);
+  }
+"""
+          if text.count(old) != 1:
+              raise SystemExit('vocabulary entry anchor not unique')
+          text = text.replace(old, new, 1)
+
+          old = """      title: '故事',
+      onNext: () => unawaited(_enterVocabularyAtFirstWord()),
+"""
+          new = """      title: '故事',
+      onNext: () {
+        _pjDiagnostic('PJ_CONTINUE_TAP_RECEIVED');
+        unawaited(_enterVocabularyAtFirstWord());
+      },
+"""
+          if text.count(old) != 1:
+              raise SystemExit('Continue callback anchor not unique')
+          text = text.replace(old, new, 1)
+
+          old = """  Widget _wordsPage() {
+    final state = context.watch<AppState>();
+"""
+          new = """  Widget _wordsPage() {
+    _pjDiagnostic('PJ_VOCAB_BUILD_BEGIN');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        _pjDiagnostic('PJ_CONTINUE_ABORT_vocab_frame_not_mounted');
+        return;
+      }
+      if (step != 1) {
+        _pjDiagnostic('PJ_CONTINUE_ABORT_vocab_frame_step_not_1');
+        return;
+      }
+      _pjDiagnostic('PJ_VOCAB_FIRST_FRAME');
+    });
+    final state = context.watch<AppState>();
+"""
+          if text.count(old) != 1:
+              raise SystemExit('Vocabulary build anchor not unique')
+          journey.write_text(text.replace(old, new, 1))
+
+          narration = Path('app/lib/services/narration_controller.dart')
+          text = narration.read_text()
+          old = "  bool get isSpeakingWord => _isSpeakingWord;\n"
+          new = "  bool get isSpeakingWord => _isSpeakingWord;\n  bool get webSpeechAvailableForDiagnostics => _webSpeech.isAvailable;\n"
+          if text.count(old) != 1:
+              raise SystemExit('web speech diagnostic getter anchor not unique')
+          narration.write_text(text.replace(old, new, 1))
+
+          worker = Path('worker/index.mjs')
+          text = worker.read_text()
+          anchor = "export default {\n"
+          diagnostic = r'''function diagnosticSession(value) {
+  const session = `${value ?? ''}`.trim();
+  return /^[A-Za-z0-9._-]{1,80}$/.test(session) ? session : null;
+}
+
+function diagnosticCacheKey(request, session, sequence) {
+  const key = new URL(request.url);
+  key.pathname = `/__pj_diagnostic/${session}/${sequence}`;
+  key.search = '';
+  return new Request(key.toString(), { method: 'GET' });
+}
+
+async function handlePhoenixDiagnostic(request) {
+  const url = new URL(request.url);
+  const session = diagnosticSession(url.searchParams.get('session'));
+  if (!session) {
+    return Response.json({ ok: false, error: 'invalid-session' }, { status: 400 });
+  }
+
+  const cache = caches.default;
+  if (request.method === 'GET') {
+    const events = [];
+    for (let sequence = 1; sequence <= 24; sequence += 1) {
+      const cached = await cache.match(diagnosticCacheKey(request, session, sequence));
+      if (!cached) continue;
+      events.push(await cached.json());
+    }
+    events.sort((a, b) => Number(a.sequence ?? 0) - Number(b.sequence ?? 0));
+    return Response.json(
+      { ok: true, session, events },
+      { headers: { 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } },
+    );
+  }
+
+  if (request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
+  let event;
+  try {
+    event = await request.json();
+  } catch (_) {
+    return Response.json({ ok: false, error: 'invalid-json' }, { status: 400 });
+  }
+  const sequence = Number(event?.sequence);
+  if (!Number.isInteger(sequence) || sequence < 1 || sequence > 24) {
+    return Response.json({ ok: false, error: 'invalid-sequence' }, { status: 400 });
+  }
+  const stored = {
+    ...event,
+    sequence,
+    receivedAt: new Date().toISOString(),
+  };
+  await cache.put(
+    diagnosticCacheKey(request, session, sequence),
+    new Response(JSON.stringify(stored), {
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'cache-control': 'public, max-age=3600',
+      },
+    }),
+  );
+  return Response.json({ ok: true, session, sequence });
+}
+
+export default {
+'''
+          if text.count(anchor) != 1:
+              raise SystemExit('worker export anchor not unique')
+          text = text.replace(anchor, diagnostic, 1)
+          old = """    if (url.pathname === '/api/phoenix-ai') {
+      return handlePhoenixAi(request, env);
+    }
+"""
+          new = """    if (url.pathname === '/api/diagnostic') {
+      return handlePhoenixDiagnostic(request);
+    }
+
+    if (url.pathname === '/api/phoenix-ai') {
+      return handlePhoenixAi(request, env);
+    }
+"""
+          if text.count(old) != 1:
+              raise SystemExit('worker route anchor not unique')
+          worker.write_text(text.replace(old, new, 1))
+          PY
+
+          actual="$(git diff --name-only | sort)"
+          expected=$'app/lib/screens/journey_screen.dart\napp/lib/services/narration_controller.dart\nworker/index.mjs'
+          test "$actual" = "$expected"
+          git diff --check
+          git diff --exit-code -- app/lib/data/forbidden_city_story_runtime.dart app/lib/widgets/word_detail_sheet.dart
+          grep -q 'PJ_CONTINUE_TAP_RECEIVED' app/lib/screens/journey_screen.dart
+          grep -q 'PJ_STEP_1_COMMITTED' app/lib/screens/journey_screen.dart
+          grep -q 'PJ_VOCAB_FIRST_FRAME' app/lib/screens/journey_screen.dart
+          grep -q 'webSpeechAvailableForDiagnostics' app/lib/services/narration_controller.dart
+          grep -q '/api/diagnostic' worker/index.mjs
+
+      - name: Commit isolated diagnostic candidate
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/lib/screens/journey_screen.dart app/lib/services/narration_controller.dart worker/index.mjs
+          git commit -m 'diagnostic(pr208): trace Founder Continue M1 M2 M3'
+          diag_sha="$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD^)" = "$BASE_PRODUCT_SHA"
+          git push --force-with-lease origin "HEAD:refs/heads/${DIAGNOSTIC_BRANCH}"
+          echo "diag_sha=$diag_sha" >> "$GITHUB_OUTPUT"
+          echo "DIAGNOSTIC_SHA=$diag_sha" >> "$GITHUB_ENV"
+
+      - name: Confirm product PR branch remains untouched
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_product="$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')"
+          test "$remote_product" = "$BASE_PRODUCT_SHA"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Analyze diagnostic candidate
+        working-directory: app
+        run: flutter analyze
+
+      - name: Preserve actual visible Continue hit-path regression
+        working-directory: app
+        run: flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart
+
+      - name: Worker tests
+        run: node --test worker/*.test.mjs
+
+      - name: Build diagnostic preview once
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Fingerprint diagnostic artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          find app/build/web -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/diag-artifact.sha256
+          test -s /tmp/diag-artifact.sha256
+
+      - name: Validate same diagnostic artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-diagnostic-dry-run
+          sha256sum -c /tmp/diag-artifact.sha256
+          test "$(git rev-parse HEAD)" = "$DIAGNOSTIC_SHA"
+          test -z "$(git status --porcelain --untracked-files=no)"
+
+      - name: Deploy same diagnostic artifact
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$DIAGNOSTIC_SHA"
+          sha256sum -c /tmp/diag-artifact.sha256
+          npx --yes wrangler@4 deploy --name "$PREVIEW_WORKER" --var "PHOENIX_RELEASE:$DIAGNOSTIC_SHA"
+          sha256sum -c /tmp/diag-artifact.sha256
+
+      - name: Verify exact diagnostic SHA and runtime diagnostic storage
+        shell: bash
+        run: |
+          set -euo pipefail
+          health="$(curl --fail --silent --show-error "${PREVIEW_URL}/api/health?commit=${DIAGNOSTIC_SHA}")"
+          node -e '
+            const health = JSON.parse(process.argv[1]);
+            const expected = process.argv[2];
+            if (!health.ok || health.release !== expected) process.exit(1);
+          ' "$health" "$DIAGNOSTIC_SHA"
+
+          session="ci-${GITHUB_RUN_ID}"
+          curl --fail --silent --show-error \
+            -H 'content-type: application/json' \
+            --data '{"marker":"PJ_DIAGNOSTIC_STORAGE_SMOKE","sequence":1}' \
+            "${PREVIEW_URL}/api/diagnostic?session=${session}" >/dev/null
+          trace="$(curl --fail --silent --show-error "${PREVIEW_URL}/api/diagnostic?session=${session}")"
+          node -e '
+            const trace = JSON.parse(process.argv[1]);
+            if (!trace.ok || !trace.events.some((event) => event.marker === "PJ_DIAGNOSTIC_STORAGE_SMOKE")) process.exit(1);
+          ' "$trace"
+
+          echo "DIAGNOSTIC_SHA=$DIAGNOSTIC_SHA"
+          echo "DIAGNOSTIC_PREVIEW=${PREVIEW_URL}/?unlock=all&prototype=journeys&v=${DIAGNOSTIC_SHA}"
