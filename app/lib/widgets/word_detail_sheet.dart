@@ -18,6 +18,7 @@ const _cream = Color(0xFFFFF4D8);
 const _blue = Color(0xFFEAF3FF);
 const _green = Color(0xFFEAF6E8);
 const _goldLine = Color(0xFFE1B85D);
+const _wordSpeechFallbackTimeout = Duration(seconds: 4);
 
 Future<void> showWordDetail(
   BuildContext context,
@@ -182,9 +183,16 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
       _speechUnavailable = false;
     });
     final callback = widget.onSpeakEntry;
-    final success = callback == null
-        ? await widget.onSpeak()
-        : await callback(_entry);
+    var success = false;
+    try {
+      final speech = callback == null ? widget.onSpeak() : callback(_entry);
+      success = await speech.timeout(
+        _wordSpeechFallbackTimeout,
+        onTimeout: () => false,
+      );
+    } catch (_) {
+      success = false;
+    }
     if (!mounted) return;
     setState(() {
       _isSpeaking = false;
