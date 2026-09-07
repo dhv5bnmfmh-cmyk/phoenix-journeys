@@ -1,0 +1,169 @@
+name: PR208 Fixed Word Detail WebKit Acceptance
+
+on:
+  push:
+    branches:
+      - validation/pr208-word-context-lazy-fix
+    paths:
+      - '.github/workflows/pr208-fixed-word-detail-webkit-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  OLD_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
+  CANDIDATE_SHA: 830193899cbfdb7ea5f1aa4495a38508a3bf33a5
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+  PREVIEW_WORKER: phoenix-journeys-pr-208-fixed-acceptance
+  PREVIEW_URL: https://phoenix-journeys-pr-208-fixed-acceptance.7hn5tyrjgh.workers.dev
+
+jobs:
+  fixed-webkit-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out validation harness
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Preserve focused acceptance tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pr208-fixed-acceptance
+          cp .github/pr208/instrument_word_detail_fixed_acceptance.py /tmp/pr208-fixed-acceptance/
+          cp .github/scripts/pr208_word_detail_fixed_acceptance_probe.mjs /tmp/pr208-fixed-acceptance/
+          cp .github/scripts/journey_level_session_harness.mjs /tmp/pr208-fixed-acceptance/
+
+      - name: Guard exact candidate and untouched product
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_product="$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')"
+          echo "remote_product=$remote_product"
+          test "$remote_product" = "$OLD_PRODUCT_SHA"
+          git checkout --detach "$CANDIDATE_SHA"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git merge-base "$OLD_PRODUCT_SHA" HEAD)" = "$OLD_PRODUCT_SHA"
+
+      - name: Apply acceptance diagnostics only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 /tmp/pr208-fixed-acceptance/instrument_word_detail_fixed_acceptance.py
+          mapfile -t changed < <(git diff --name-only | sort)
+          printf '%s\n' "${changed[@]}"
+          test "${#changed[@]}" -eq 2
+          test "${changed[0]}" = "app/lib/screens/journey_screen.dart"
+          test "${changed[1]}" = "app/lib/widgets/word_detail_sheet.dart"
+          test -z "$(git diff --name-only | grep -E 'forbidden_city_story|pronunciation|daily_journey_catalog|app_state|phoenix_vocabulary_service' || true)"
+          git diff --check
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Analyze diagnostic overlay
+        working-directory: app
+        run: flutter analyze
+
+      - name: Build diagnostic artifact once
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Fingerprint diagnostic artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          find app/build/web -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/fixed-acceptance-artifact.sha256
+          test -s /tmp/fixed-acceptance-artifact.sha256
+
+      - name: Deploy same diagnostic artifact
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          sha256sum -c /tmp/fixed-acceptance-artifact.sha256
+          npx --yes wrangler@4 deploy --name "$PREVIEW_WORKER" --var "PHOENIX_RELEASE:$CANDIDATE_SHA"
+          sha256sum -c /tmp/fixed-acceptance-artifact.sha256
+
+      - name: Verify exact candidate deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..30}; do
+            response="$(curl --fail --silent --show-error "$PREVIEW_URL/api/health" || true)"
+            if node -e 'const h=JSON.parse(process.argv[1]); if(!h.ok || h.release!==process.argv[2]) process.exit(1)' "$response" "$CANDIDATE_SHA"; then
+              echo "verified candidate=$CANDIDATE_SHA"
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+
+      - name: Install iPhone WebKit driver
+        shell: bash
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/pr208-browser-node" playwright
+          "$RUNNER_TEMP/pr208-browser-node/node_modules/.bin/playwright" install --with-deps webkit
+
+      - name: Execute focused cold WebKit acceptance
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/pr208-browser-node/node_modules/playwright/index.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          cp /tmp/pr208-fixed-acceptance/journey_level_session_harness.mjs /tmp/pr208-fixed-acceptance/journey_level_session_harness.mjs.keep
+          node /tmp/pr208-fixed-acceptance/pr208_word_detail_fixed_acceptance_probe.mjs "$PREVIEW_URL" "$CANDIDATE_SHA" \
+            2>&1 | tee test-results/fixed-word-detail-webkit.log
+          test -s test-results/fixed-word-detail-performance.json
+
+      - name: Publish concise performance summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test -s test-results/fixed-word-detail-performance.json; then
+            node - <<'NODE' >> "$GITHUB_STEP_SUMMARY"
+          const fs = require('fs');
+          const r = JSON.parse(fs.readFileSync('test-results/fixed-word-detail-performance.json', 'utf8'));
+          console.log('## PR208 fixed Word Detail WebKit acceptance');
+          console.log(`Candidate: ${r.productSha}`);
+          console.log(`Old context lookup: ${r.oldBaseline.contextLookupMs} ms`);
+          for (const x of r.results) {
+            console.log(`- ${x.label}: cold=${x.resolveDownloadedExampleColdMs}ms warm=${x.resolveDownloadedExampleWarmMs}ms context=${x.contextLookupMs}ms lazy=${x.lazyBuildersInvoked} M4→M5=${x.m4ToM5Ms}ms`);
+          }
+          console.log(`Acceptance: ${JSON.stringify(r.acceptance)}`);
+          NODE
+          else
+            echo '## PR208 fixed Word Detail WebKit acceptance' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Focused probe did not produce a terminal performance JSON.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Reconfirm product branch untouched
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')" = "$OLD_PRODUCT_SHA"
+
+      - name: Upload permanent performance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr208-fixed-word-detail-webkit-${{ env.CANDIDATE_SHA }}
+          path: test-results/
+          if-no-files-found: error
+          retention-days: 30
