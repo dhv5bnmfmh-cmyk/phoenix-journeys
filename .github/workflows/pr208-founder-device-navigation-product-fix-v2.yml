@@ -1,0 +1,93 @@
+name: PR208 Founder Device Navigation Product Fix V2
+
+on:
+  push:
+    branches:
+      - validation/pr208-pronunciation-product-fix-49a088
+    paths:
+      - '.github/workflows/pr208-founder-device-navigation-product-fix-v2.yml'
+
+permissions:
+  contents: write
+
+env:
+  OLD_PRODUCT_SHA: 9c7d00a1ee80b2e50b40a3b6f4922a9d38b3753e
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Check out validation harness
+        uses: actions/checkout@v6
+        with:
+          ref: validation/pr208-pronunciation-product-fix-49a088
+          path: harness
+
+      - name: Check out exact failed product
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.OLD_PRODUCT_SHA }}
+          fetch-depth: 0
+          path: product
+
+      - name: Guard product branch
+        working-directory: product
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$OLD_PRODUCT_SHA"
+          git fetch origin "$PRODUCT_BRANCH"
+          test "$(git rev-parse FETCH_HEAD)" = "$OLD_PRODUCT_SHA"
+          test -z "$(git status --porcelain)"
+
+      - name: Apply exact minimum fix and regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 harness/.github/pr208/apply_founder_device_nav_fix.py product/app/lib/screens/journey_screen.dart
+          cp harness/.github/pr208/founder_device_story_continue_regression_test.dart product/app/test/founder_device_story_continue_regression_test.dart
+          test "$(git -C product rev-parse HEAD)" = "$OLD_PRODUCT_SHA"
+          test "$(git -C product status --porcelain | wc -l)" -eq 2
+          git -C product diff --exit-code -- app/lib/widgets/word_detail_sheet.dart
+          git -C product diff --exit-code -- app/lib/data/forbidden_city_story_runtime.dart
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: product/app
+        run: flutter pub get
+
+      - name: Founder device transition regressions
+        working-directory: product/app
+        run: flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart
+
+      - name: Story isolation control
+        working-directory: product/app
+        run: flutter test test/forbidden_city_story_selection_runtime_test.dart --plain-name "Story progress, completion, resume and Memory are isolated by Story ID"
+
+      - name: Analyze fixed product
+        working-directory: product/app
+        run: flutter analyze
+
+      - name: Commit and push new product SHA
+        working-directory: product
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$PRODUCT_BRANCH"
+          test "$(git rev-parse FETCH_HEAD)" = "$OLD_PRODUCT_SHA"
+          git config user.name "Phoenix Release Governance"
+          git config user.email "actions@github.com"
+          git add app/lib/screens/journey_screen.dart app/test/founder_device_story_continue_regression_test.dart
+          git commit -m "fix: bound narration cleanup before Journey navigation"
+          NEW_SHA="$(git rev-parse HEAD)"
+          test "$NEW_SHA" != "$OLD_PRODUCT_SHA"
+          git push origin "HEAD:refs/heads/$PRODUCT_BRANCH"
+          echo "NEW_PRODUCT_SHA=$NEW_SHA"
+          test -z "$(git status --porcelain)"
