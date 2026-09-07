@@ -1,0 +1,90 @@
+name: PR208 Founder Device Milestone Browser V4
+
+on:
+  push:
+    branches:
+      - validation/pr208-pronunciation-product-fix-49a088
+    paths:
+      - '.github/workflows/pr208-founder-device-milestone-browser-v4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
+  DIAGNOSTIC_SHA: a8f58d9d4780a09f4e5f75ecccb713fe72d25ba3
+  PREVIEW_URL: https://phoenix-journeys-pr-208-diagnostic.7hn5tyrjgh.workers.dev
+
+jobs:
+  founder-like-milestones:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify product branch remains failed SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin product/city-standard-v1-beijing-forbidden-city diagnostic/pr208-founder-device-milestones-d560fa
+          test "$(git rev-parse FETCH_HEAD)" = "$DIAGNOSTIC_SHA"
+          test "$(git rev-parse origin/product/city-standard-v1-beijing-forbidden-city)" = "$PRODUCT_SHA"
+          test "$(git merge-base "$PRODUCT_SHA" "$DIAGNOSTIC_SHA")" = "$PRODUCT_SHA"
+      - name: Check out exact diagnostic candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.DIAGNOSTIC_SHA }}
+          path: diagnostic
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Build diagnostic artifact once
+        working-directory: diagnostic/app
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter build web --release
+      - name: Deploy same diagnostic artifact
+        working-directory: diagnostic
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$DIAGNOSTIC_SHA"
+          npx --yes wrangler@4 deploy --name phoenix-journeys-pr-208-diagnostic \
+            --var "PHOENIX_RELEASE:$DIAGNOSTIC_SHA"
+      - name: Wait for exact diagnostic deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..60}; do
+            response="$(curl --fail --silent --show-error "$PREVIEW_URL/api/health" || true)"
+            if node -e 'const h=JSON.parse(process.argv[1]); if(!h.ok || h.release!==process.argv[2]) process.exit(1)' "$response" "$DIAGNOSTIC_SHA"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+      - name: Install iPhone WebKit driver
+        shell: bash
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/pr208-browser-node" playwright
+          "$RUNNER_TEMP/pr208-browser-node/node_modules/.bin/playwright" install --with-deps webkit
+      - name: Execute visible Continue one-tap milestone probe
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/pr208-browser-node/node_modules/playwright/index.mjs
+        shell: bash
+        run: |
+          mkdir -p test-results
+          node .github/scripts/pr208_founder_milestone_probe.mjs "$PREVIEW_URL" "$DIAGNOSTIC_SHA" \
+            2>&1 | tee test-results/pr208-founder-milestone-probe.log
+      - name: Upload diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr208-founder-milestones-${{ env.DIAGNOSTIC_SHA }}
+          path: test-results/
+          if-no-files-found: warn
