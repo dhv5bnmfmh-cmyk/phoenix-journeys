@@ -99,11 +99,11 @@ await tap(page, '护照', { prefix: true });
 await find(page, '探索护照');
 await tap(page, '中国', { exact: true });
 await find(page, '请从左侧选择省份');
-await tap(page, '北京', { exact: true });
+await tap(page, '北京市', { exact: true });
 await find(page, '北京的地点');
 await tap(page, '紫禁城', { exact: true });
 await find(page, '选择 Story');
-await tapSemanticChoice(page, '交接前的标记', { absentText: '选择 Story' });
+await tap(page, '交接前的标记', { exact: true });
 await find(page, '1/5', { prefix: true });
 await find(page, '交接前的标记');
 
