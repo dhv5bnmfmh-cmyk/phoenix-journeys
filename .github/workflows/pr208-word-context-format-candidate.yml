@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 env:
-  SOURCE_CANDIDATE_SHA: 477f1b40940eda444848ded24c8b0219d04fe632
+  SOURCE_CANDIDATE_SHA: c385d04f7d9432946416852b8d5b8d4402f1541d
   OLD_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
   PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
   OUTPUT_BRANCH: validation/pr208-word-context-lazy-product
@@ -42,6 +42,10 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Resolve formatter configuration
+        working-directory: app
+        run: flutter pub get
+
       - name: Apply dart format only
         working-directory: app
         run: dart format lib/widgets/word_detail_sheet.dart
@@ -64,7 +68,7 @@ jobs:
           git config user.name "phoenix-validation"
           git config user.email "phoenix-validation@users.noreply.github.com"
           git add app/lib/widgets/word_detail_sheet.dart
-          git commit -m "style: format lazy context fix"
+          git commit -m "style: format lazy context fix with resolved config"
           formatted_sha="$(git rev-parse HEAD)"
           echo "FORMATTED_CANDIDATE_SHA=$formatted_sha" >> "$GITHUB_ENV"
           test "$(git rev-parse HEAD^)" = "$SOURCE_CANDIDATE_SHA"
