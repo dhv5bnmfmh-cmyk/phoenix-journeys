@@ -1,4 +1,4 @@
-name: PR208 M4-M5 Root Cause Diagnostic
+name: PR208 M4-M5 Root Cause Diagnostic V2
 
 on:
   push:
@@ -6,6 +6,8 @@ on:
       - validation/pr208-pronunciation-product-fix-49a088
     paths:
       - '.github/workflows/pr208-m4-m5-root-cause-diagnostic.yml'
+      - '.github/pr208/instrument_m4_m5_timeline.py'
+      - '.github/scripts/pr208_m4_m5_timeline_probe.mjs'
   workflow_dispatch:
 
 permissions:
