@@ -105,31 +105,21 @@ jobs:
 
           path = Path("test/founder_story_vocabulary_transition_regression_test.dart")
           text = path.read_text()
-          old = """    expect(
-              find.byKey(const ValueKey('next-word-button')),
-              findsOneWidget,
-              reason: 'Vocabulary phase must render its first word after Continue.',
-            );
-          }
-          """
-          new = """    expect(
-              find.byKey(const ValueKey('next-word-button')),
-              findsOneWidget,
-              reason: 'Vocabulary phase must render its first word after Continue.',
-            );
-
-            // Harness-only teardown: advance fake time through the production
-            // WordDetailSheet 4-second TTS timeout before the test returns.
-            await tester.pump(const Duration(seconds: 4));
-            await tester.pump();
-          }
-          """
-          if text.count(old) != 1:
-              raise SystemExit("Story to Vocabulary teardown anchor is not unique")
-          path.write_text(text.replace(old, new, 1))
+          marker = "      reason: 'Vocabulary phase must render its first word after Continue.',\n    );"
+          if text.count(marker) != 1:
+              raise SystemExit("Story to Vocabulary teardown marker is not unique")
+          teardown = (
+              marker
+              + "\n\n    // Harness-only teardown: advance fake time through the production"
+              + "\n    // WordDetailSheet 4-second TTS timeout before the test returns."
+              + "\n    await tester.pump(const Duration(seconds: 4));"
+              + "\n    await tester.pump(const Duration(milliseconds: 500));"
+              + "\n    await tester.pump();"
+          )
+          path.write_text(text.replace(marker, teardown, 1))
           patched = path.read_text()
-          if "await tester.pump(const Duration(seconds: 4));" not in patched:
-              raise SystemExit("4-second fake-clock teardown missing")
+          if patched.count("await tester.pump(const Duration(seconds: 4));") < 2:
+              raise SystemExit("Story transition 4-second fake-clock teardown missing")
           PY
 
       - name: Founder Story pronunciation and Story to Vocabulary regression
