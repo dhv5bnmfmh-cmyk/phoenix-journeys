@@ -1,0 +1,126 @@
+name: PR208 Founder Device Milestone Diagnostic V2
+
+on:
+  push:
+    branches:
+      - validation/pr208-pronunciation-product-fix-49a088
+    paths:
+      - '.github/workflows/pr208-founder-device-milestone-diagnostic-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  BASE_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+  PREVIEW_WORKER: phoenix-journeys-pr-208-diagnostic
+  PREVIEW_URL: https://phoenix-journeys-pr-208-diagnostic.7hn5tyrjgh.workers.dev
+
+jobs:
+  diagnostic-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out diagnostic harness
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Copy diagnostic builder outside worktree
+        run: cp .github/pr208/prepare_founder_milestone_diagnostic.sh /tmp/prepare_founder_milestone_diagnostic.sh
+
+      - name: Create isolated diagnostic candidate from exact product
+        shell: bash
+        run: bash /tmp/prepare_founder_milestone_diagnostic.sh
+
+      - name: Confirm product branch remains exact d560fa
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_product="$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')"
+          test "$remote_product" = "$BASE_PRODUCT_SHA"
+          test "$(git rev-parse HEAD^)" = "$BASE_PRODUCT_SHA"
+          test "$(git rev-parse HEAD)" = "$DIAGNOSTIC_SHA"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Analyze diagnostic candidate
+        working-directory: app
+        run: flutter analyze
+
+      - name: Preserve visible Continue hit-path regression
+        working-directory: app
+        run: flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart
+
+      - name: Worker tests
+        run: node --test worker/*.test.mjs
+
+      - name: Build diagnostic preview once
+        working-directory: app
+        run: flutter build web --release
+
+      - name: Fingerprint diagnostic artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          find app/build/web -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/diag-artifact.sha256
+          test -s /tmp/diag-artifact.sha256
+
+      - name: Validate same diagnostic artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-diagnostic-dry-run
+          sha256sum -c /tmp/diag-artifact.sha256
+          test "$(git rev-parse HEAD)" = "$DIAGNOSTIC_SHA"
+          test -z "$(git status --porcelain --untracked-files=no)"
+
+      - name: Deploy same diagnostic artifact
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$DIAGNOSTIC_SHA"
+          sha256sum -c /tmp/diag-artifact.sha256
+          npx --yes wrangler@4 deploy --name "$PREVIEW_WORKER" --var "PHOENIX_RELEASE:$DIAGNOSTIC_SHA"
+          sha256sum -c /tmp/diag-artifact.sha256
+
+      - name: Verify exact diagnostic SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          verified=false
+          for attempt in {1..18}; do
+            response="$(curl --fail --silent --show-error "${PREVIEW_URL}/api/health?commit=${DIAGNOSTIC_SHA}" || true)"
+            if node -e 'const h=JSON.parse(process.argv[1]); if(!h.ok || h.release!==process.argv[2]) process.exit(1)' "$response" "$DIAGNOSTIC_SHA"; then
+              verified=true
+              break
+            fi
+            sleep 5
+          done
+          [[ "$verified" == true ]]
+
+      - name: Verify runtime diagnostic storage
+        shell: bash
+        run: |
+          set -euo pipefail
+          session="ci-${GITHUB_RUN_ID}"
+          curl --fail --silent --show-error \
+            -H 'content-type: application/json' \
+            --data '{"marker":"PJ_DIAGNOSTIC_STORAGE_SMOKE","sequence":1}' \
+            "${PREVIEW_URL}/api/diagnostic?session=${session}" >/dev/null
+          trace="$(curl --fail --silent --show-error "${PREVIEW_URL}/api/diagnostic?session=${session}")"
+          node -e 'const t=JSON.parse(process.argv[1]); if(!t.ok || !t.events.some(e=>e.marker==="PJ_DIAGNOSTIC_STORAGE_SMOKE")) process.exit(1)' "$trace"
+          echo "DIAGNOSTIC_SHA=$DIAGNOSTIC_SHA"
+          echo "DIAGNOSTIC_PREVIEW=${PREVIEW_URL}/?unlock=all&prototype=journeys&v=${DIAGNOSTIC_SHA}"
