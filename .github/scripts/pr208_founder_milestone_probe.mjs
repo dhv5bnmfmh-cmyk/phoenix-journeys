@@ -114,7 +114,7 @@ console.log(`NARRATION_RECT ${JSON.stringify(narration)}`);
 await page.screenshot({ path: 'test-results/pr208-before-narration.png', fullPage: false });
 // Flutter WebKit merges the enabled media control with a disabled seek rail in one
 // semantics container. Tap the visible 32px media control's actual screen point.
-await page.touchscreen.tap(narration.x + narration.width - 124, narration.y + 19);
+await page.touchscreen.tap(narration.x + narration.width * 0.535, narration.y + 22);
 await find(page, '正在朗读', { timeout: 10000 });
 
 const continueButton = await find(page, '继续', { role: 'button', prefix: true });
