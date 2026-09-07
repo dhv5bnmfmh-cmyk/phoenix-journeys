@@ -1,5 +1,5 @@
 name: PR208 Founder Device Milestone Browser V4
-# Probe revision 10: tap the visible narration control point inside merged WebKit semantics.
+# Probe revision 11: capture the merged narration hit geometry before its physical tap.
 
 on:
   push:
