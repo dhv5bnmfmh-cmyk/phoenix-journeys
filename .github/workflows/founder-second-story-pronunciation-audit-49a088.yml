@@ -1,0 +1,119 @@
+name: Founder Second Story Pronunciation Audit 49a088
+
+on:
+  push:
+    branches:
+      - validation/founder-device-exact-release-49a088
+    paths:
+      - '.github/workflows/founder-second-story-pronunciation-audit-49a088.yml'
+
+env:
+  PREVIEW_RELEASE: 49a088c550649432a42bae3009cc5a555b469ccb
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact product candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.PREVIEW_RELEASE }}
+          fetch-depth: 0
+
+      - name: Verify exact candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PREVIEW_RELEASE"
+          test -z "$(git status --porcelain)"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Create temporary pronunciation diagnostic
+        shell: bash
+        run: |
+          cat > app/test/_founder_pronunciation_audit_tmp_test.dart <<'DART'
+          import 'package:flutter_test/flutter_test.dart';
+          import 'package:pinyin/pinyin.dart';
+          import 'package:phoenix_journeys/data/forbidden_city_story_runtime.dart';
+
+          void main() {
+            test('print Second Story contextual pinyin audit', () {
+              String reading(String text) => PinyinHelper.getPinyinE(
+                    text,
+                    separator: ' ',
+                    format: PinyinFormat.WITH_TONE_MARK,
+                  );
+
+              const phrases = <String>[
+                '林乔',
+                '许澄',
+                '紫禁城',
+                '乾清门',
+                '景运门',
+                '中轴',
+                '午门',
+                '核对',
+                '交接',
+                '空格',
+                '还容易',
+                '不确定处',
+                '只差签名',
+                '当场更正',
+                '更正',
+                '折了角',
+                '待核',
+                '圈出',
+                '留空',
+              ];
+
+              for (final phrase in phrases) {
+                // ignore: avoid_print
+                print('AUDIT|$phrase|${reading(phrase)}');
+              }
+
+              final content = forbiddenCitySecondStoryLevelContent();
+              for (var i = 0; i < content.storyParagraphs.length; i += 1) {
+                // ignore: avoid_print
+                print('PARAGRAPH|${i + 1}|${content.storyParagraphs[i]}');
+                // ignore: avoid_print
+                print('ANNOTATION|${i + 1}|${content.storyAnnotations[i].pinyin}');
+              }
+
+              expect(
+                content.storyParagraphs.join('\n'),
+                contains('许澄接过册子，指着两个空格确认要继续核对。'),
+              );
+            });
+          }
+          DART
+
+      - name: Run temporary pronunciation diagnostic
+        working-directory: app
+        shell: bash
+        run: flutter test --reporter expanded test/_founder_pronunciation_audit_tmp_test.dart 2>&1 | tee ../founder_pronunciation_audit.log
+
+      - name: Upload pronunciation audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: founder-pronunciation-audit-${{ env.PREVIEW_RELEASE }}
+          path: founder_pronunciation_audit.log
+          if-no-files-found: error
+
+      - name: Restore clean exact candidate
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f app/test/_founder_pronunciation_audit_tmp_test.dart
+          test "$(git rev-parse HEAD)" = "$PREVIEW_RELEASE"
+          git diff --exit-code
+          test -z "$(git status --porcelain --untracked-files=no)"
