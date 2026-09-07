@@ -2,7 +2,6 @@ import { pathToFileURL } from 'node:url';
 import {
   returnToExplore,
   setConfiguredLevel,
-  tapSemanticChoice,
 } from './journey_level_session_harness.mjs';
 
 const { webkit, devices } = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
@@ -31,12 +30,13 @@ async function records(page) {
   }));
 }
 
-async function find(page, needle, { role = null, prefix = false, timeout = 20000 } = {}) {
+async function find(page, needle, { role = null, prefix = false, exact = false, timeout = 20000 } = {}) {
   const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
     const matches = (await records(page)).filter((record) => record.visible &&
       (!role || record.role === role) &&
-      (prefix ? record.text.startsWith(needle) : record.text.includes(needle)));
+      (exact ? record.text === needle : prefix ? record.text.startsWith(needle) : record.text.includes(needle)))
+      .sort((a, b) => (a.width * a.height) - (b.width * b.height));
     if (matches.length) return page.locator('flt-semantics').nth(matches[0].index);
     await sleep(100);
   }
@@ -97,9 +97,12 @@ await setConfiguredLevel(page, 6);
 await returnToExplore(page);
 await tap(page, '护照', { prefix: true });
 await find(page, '探索护照');
-await tapSemanticChoice(page, '中国', { expectedText: '请从左侧选择省份' });
-await tapSemanticChoice(page, '北京', { expectedText: '北京的地点' });
-await tapSemanticChoice(page, '紫禁城', { expectedText: '选择 Story' });
+await tap(page, '中国', { exact: true });
+await find(page, '请从左侧选择省份');
+await tap(page, '北京', { exact: true });
+await find(page, '北京的地点');
+await tap(page, '紫禁城', { exact: true });
+await find(page, '选择 Story');
 await tapSemanticChoice(page, '交接前的标记', { absentText: '选择 Story' });
 await find(page, '1/5', { prefix: true });
 await find(page, '交接前的标记');
