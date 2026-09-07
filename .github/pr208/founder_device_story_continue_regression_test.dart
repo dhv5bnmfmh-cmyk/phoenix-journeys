@@ -52,7 +52,6 @@ void main() {
     });
 
     final state = AppState();
-    addTearDown(state.dispose);
     await state.load();
     await state.activateJourney(journeyId, storyId: storyId);
 
@@ -107,6 +106,7 @@ void main() {
     await tester.tap(continueButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 900));
+    await tester.pump();
 
     expect(
       calls.contains('stop:HANG'),
@@ -124,9 +124,9 @@ void main() {
       reason: '$label must commit Story -> Vocabulary.',
     );
     expect(
-      find.byKey(const ValueKey('next-word-button')),
+      find.byKey(const ValueKey('单词')),
       findsOneWidget,
-      reason: '$label must render the next phase, not only mutate state.',
+      reason: '$label must render the Vocabulary page, not only mutate state.',
     );
 
     await tester.pump(const Duration(seconds: 9));
