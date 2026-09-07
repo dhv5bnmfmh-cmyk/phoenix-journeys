@@ -1,0 +1,17 @@
+name: PR208 Product Fix Smoke
+
+on:
+  push:
+    branches:
+      - validation/pr208-pronunciation-product-fix-49a088
+    paths:
+      - '.github/workflows/pr208-product-fix-smoke.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ready
