@@ -1,5 +1,5 @@
 name: PR208 Founder Device Milestone Browser V4
-# Probe revision 2: capture WebKit startup evidence before milestone execution.
+# Probe revision 3: enter Second Story through the Passport Story Selection path.
 
 on:
   push:
