@@ -59,29 +59,29 @@ jobs:
           path = Path("test/journey_runtime_performance_gate_test.dart")
           text = path.read_text()
 
-          old3 = "    expect(source.contains('3 => stepThreePage'), isTrue);\n"
-          new3 = r"""    expect(src.contains('case 3:'), isTrue);
-              expect(
-                RegExp(
-                  r'case\s+3\s*:\s*(?:return\s+)?(?:const\s+)?Center\s*\([\s\S]*?child\s*:\s*stageCard\s*\([\s\S]*?stepThreePage\s*\(\s*context\s*\)',
-                ).hasMatch(src),
-                isTrue,
-              );
+          old3 = "    expect(build, contains('3 => stepThreePage'));\n"
+          new3 = r"""    expect(
+              RegExp(
+                r'3\s*=>[\s\S]*?stepThreePage\s*\(\s*context\s*\)',
+              ).hasMatch(build),
+              isTrue,
+            );
           """
-          old4 = "    expect(source.contains('4 => stepFourPage'), isTrue);\n"
-          new4 = r"""    expect(src.contains('case 4:'), isTrue);
-              expect(
-                RegExp(
-                  r'case\s+4\s*:\s*(?:return\s+)?(?:const\s+)?Center\s*\([\s\S]*?child\s*:\s*stageCard\s*\([\s\S]*?stepFourPage\s*\(\s*context\s*\)',
-                ).hasMatch(src),
-                isTrue,
-              );
+          old4 = "    expect(build, contains('4 => stepFourPage'));\n"
+          new4 = r"""    expect(
+              RegExp(
+                r'4\s*=>[\s\S]*?stepFourPage\s*\(\s*context\s*\)',
+              ).hasMatch(build),
+              isTrue,
+            );
           """
 
-          if old3 in text:
-              text = text.replace(old3, new3)
-          if old4 in text:
-              text = text.replace(old4, new4)
+          if old3 not in text:
+              raise SystemExit("expected step 3 stale matcher not found")
+          if old4 not in text:
+              raise SystemExit("expected step 4 stale matcher not found")
+
+          text = text.replace(old3, new3).replace(old4, new4)
           path.write_text(text)
 
           patched = path.read_text()
@@ -89,9 +89,9 @@ jobs:
               raise SystemExit("stale step 3 source-shape assertion remains")
           if "contains('4 => stepFourPage')" in patched:
               raise SystemExit("stale step 4 source-shape assertion remains")
-          if "case\\s+3" not in patched or "stepThreePage" not in patched:
+          if r"3\s*=>[\s\S]*?stepThreePage" not in patched:
               raise SystemExit("step 3 semantic structural matcher missing")
-          if "case\\s+4" not in patched or "stepFourPage" not in patched:
+          if r"4\s*=>[\s\S]*?stepFourPage" not in patched:
               raise SystemExit("step 4 semantic structural matcher missing")
           PY
 
