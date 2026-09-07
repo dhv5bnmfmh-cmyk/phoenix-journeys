@@ -95,6 +95,43 @@ jobs:
               raise SystemExit("step 4 semantic structural matcher missing")
           PY
 
+      - name: Preserve Founder Story to Vocabulary fake-clock teardown
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("test/founder_story_vocabulary_transition_regression_test.dart")
+          text = path.read_text()
+          old = """    expect(
+              find.byKey(const ValueKey('next-word-button')),
+              findsOneWidget,
+              reason: 'Vocabulary phase must render its first word after Continue.',
+            );
+          }
+          """
+          new = """    expect(
+              find.byKey(const ValueKey('next-word-button')),
+              findsOneWidget,
+              reason: 'Vocabulary phase must render its first word after Continue.',
+            );
+
+            // Harness-only teardown: advance fake time through the production
+            // WordDetailSheet 4-second TTS timeout before the test returns.
+            await tester.pump(const Duration(seconds: 4));
+            await tester.pump();
+          }
+          """
+          if text.count(old) != 1:
+              raise SystemExit("Story to Vocabulary teardown anchor is not unique")
+          path.write_text(text.replace(old, new, 1))
+          patched = path.read_text()
+          if "await tester.pump(const Duration(seconds: 4));" not in patched:
+              raise SystemExit("4-second fake-clock teardown missing")
+          PY
+
       - name: Founder Story pronunciation and Story to Vocabulary regression
         working-directory: app
         run: flutter test test/founder_story_vocabulary_transition_regression_test.dart
