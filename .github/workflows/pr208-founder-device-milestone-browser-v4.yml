@@ -1,5 +1,5 @@
 name: PR208 Founder Device Milestone Browser V4
-# Probe revision 4: use exact Passport rail hit targets; reuse the exact deployed diagnostic artifact.
+# Probe revision 5: use exact municipality and Story button semantics; reuse the exact deployed artifact.
 
 on:
   push:
