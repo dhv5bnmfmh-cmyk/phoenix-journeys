@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 env:
-  SOURCE_CANDIDATE_SHA: ad60af5ddd6d57cf3ebc7f751ebb8e06c2ee5d2d
+  SOURCE_CANDIDATE_SHA: cfbceb329a5de448c257f7084d2cbe8f3d6c95ee
   OLD_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
   PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
   OUTPUT_BRANCH: validation/pr208-word-context-lazy-product
@@ -68,7 +68,7 @@ jobs:
           git config user.name "phoenix-validation"
           git config user.email "phoenix-validation@users.noreply.github.com"
           git add app/test/founder_story_vocabulary_transition_regression_test.dart
-          git commit -m "style: format permanent Word Detail regression harness"
+          git commit -m "style: format current Word Detail timer harness"
           formatted_sha="$(git rev-parse HEAD)"
           echo "FORMATTED_CANDIDATE_SHA=$formatted_sha" >> "$GITHUB_ENV"
           test "$(git rev-parse HEAD^)" = "$SOURCE_CANDIDATE_SHA"
