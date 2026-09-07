@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
+import '../services/journey_vocabulary_context.dart';
 import '../services/narration_controller.dart';
 import '../services/phoenix_vocabulary_service.dart';
 import '../state/app_state.dart';
@@ -146,7 +147,11 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
       );
     }
 
-    final contextData = _findVocabularyContext(state, entry);
+    final contextData = findJourneyVocabularyContext(
+      activeJourney: state.activeJourney,
+      fallbackJourneys: dailyJourneyExperiences,
+      entry: entry,
+    );
     if (contextData.chinese.isNotEmpty) {
       return PhoenixVocabularyExample(
         chinese: contextData.chinese,
@@ -608,68 +613,4 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
       ),
     );
   }
-}
-
-class _VocabularyContext {
-  const _VocabularyContext({
-    required this.chinese,
-    required this.pinyin,
-    required this.vietnamese,
-    required this.english,
-  });
-
-  final String chinese;
-  final String pinyin;
-  final String vietnamese;
-  final String english;
-
-  String nativeText(String language) {
-    return switch (language) {
-      '英语' => english,
-      '中文解释' => chinese,
-      _ => vietnamese,
-    };
-  }
-}
-
-_VocabularyContext _findVocabularyContext(AppState state, WordEntry entry) {
-  final journeys = [
-    state.activeJourney,
-    ...dailyJourneyExperiences.where(
-      (journey) => journey.id != state.activeJourney.id,
-    ),
-  ];
-
-  for (final journey in journeys) {
-    if (!journey.words.any((word) => word.word == entry.word)) continue;
-    for (var index = 0; index < journey.content.sections.length; index += 1) {
-      final section = journey.content.sections[index];
-      if (!section.text.contains(entry.word)) continue;
-      final annotation = index < journey.storyAnnotations.length
-          ? journey.storyAnnotations[index]
-          : null;
-      return _VocabularyContext(
-        chinese: section.text,
-        pinyin: annotation?.pinyin ?? '',
-        vietnamese: annotation?.vietnamese ?? '',
-        english: annotation?.english ?? '',
-      );
-    }
-    for (final discovery in journey.discoveries) {
-      if (!discovery.text.contains(entry.word)) continue;
-      return _VocabularyContext(
-        chinese: discovery.text,
-        pinyin: discovery.pinyin,
-        vietnamese: discovery.vietnamese,
-        english: discovery.english,
-      );
-    }
-  }
-
-  return const _VocabularyContext(
-    chinese: '',
-    pinyin: '',
-    vietnamese: '',
-    english: '',
-  );
 }
