@@ -122,6 +122,50 @@ jobs:
               raise SystemExit("Story transition 4-second fake-clock teardown missing")
           PY
 
+      - name: Mock flutter_tts stop for harness teardown only
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("test/founder_story_vocabulary_transition_regression_test.dart")
+          text = path.read_text()
+
+          import_anchor = "import 'package:flutter/material.dart';\n"
+          import_line = "import 'package:flutter/services.dart';\n"
+          if import_line not in text:
+              if text.count(import_anchor) != 1:
+                  raise SystemExit("flutter services import anchor is not unique")
+              text = text.replace(import_anchor, import_anchor + import_line, 1)
+
+          controller_anchor = "      final controller = NarrationController();\n      addTearDown(controller.dispose);"
+          if text.count(controller_anchor) != 1:
+              raise SystemExit("NarrationController teardown anchor is not unique")
+          replacement = """      const flutterTtsChannel = MethodChannel('flutter_tts');
+              TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+                  .setMockMethodCallHandler(flutterTtsChannel, (call) async {
+                if (call.method == 'stop') return 1;
+                return null;
+              });
+              addTearDown(() {
+                TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+                    .setMockMethodCallHandler(flutterTtsChannel, null);
+              });
+
+              final controller = NarrationController();
+              addTearDown(controller.dispose);"""
+          text = text.replace(controller_anchor, replacement, 1)
+          path.write_text(text)
+
+          patched = path.read_text()
+          if "MethodChannel('flutter_tts')" not in patched:
+              raise SystemExit("flutter_tts harness mock missing")
+          if "if (call.method == 'stop') return 1;" not in patched:
+              raise SystemExit("flutter_tts stop response missing")
+          PY
+
       - name: Founder Story pronunciation and Story to Vocabulary regression
         working-directory: app
         run: flutter test test/founder_story_vocabulary_transition_regression_test.dart
