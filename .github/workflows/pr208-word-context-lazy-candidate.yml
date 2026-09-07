@@ -13,7 +13,7 @@ permissions:
 
 env:
   OLD_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
-  CANDIDATE_SHA: 37d69aaa2bf8fe0efb9df5a76d54f5d2a8aaad9b
+  CANDIDATE_SHA: ad60af5ddd6d57cf3ebc7f751ebb8e06c2ee5d2d
   PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
 
 jobs:
@@ -36,10 +36,11 @@ jobs:
           test "$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')" = "$OLD_PRODUCT_SHA"
           mapfile -t changed < <(git diff --name-only "$OLD_PRODUCT_SHA" "$CANDIDATE_SHA" | sort)
           printf '%s\n' "${changed[@]}"
-          test "${#changed[@]}" -eq 3
+          test "${#changed[@]}" -eq 4
           test "${changed[0]}" = "app/lib/services/journey_vocabulary_context.dart"
           test "${changed[1]}" = "app/lib/widgets/word_detail_sheet.dart"
-          test "${changed[2]}" = "app/test/journey_vocabulary_context_lazy_test.dart"
+          test "${changed[2]}" = "app/test/founder_story_vocabulary_transition_regression_test.dart"
+          test "${changed[3]}" = "app/test/journey_vocabulary_context_lazy_test.dart"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -53,7 +54,7 @@ jobs:
 
       - name: Format gate
         working-directory: app
-        run: dart format --output=none --set-exit-if-changed lib/services/journey_vocabulary_context.dart lib/widgets/word_detail_sheet.dart test/journey_vocabulary_context_lazy_test.dart
+        run: dart format --output=none --set-exit-if-changed lib/services/journey_vocabulary_context.dart lib/widgets/word_detail_sheet.dart test/founder_story_vocabulary_transition_regression_test.dart test/journey_vocabulary_context_lazy_test.dart
 
       - name: Lazy materialization behavior regression
         working-directory: app
