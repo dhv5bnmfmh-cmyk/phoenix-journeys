@@ -1,0 +1,83 @@
+name: PR208 Word Context Lazy Candidate
+
+on:
+  push:
+    branches:
+      - validation/pr208-word-context-lazy-fix
+    paths:
+      - '.github/workflows/pr208-word-context-lazy-candidate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  OLD_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
+  CANDIDATE_SHA: 477f1b40940eda444848ded24c8b0219d04fe632
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+
+jobs:
+  targeted-analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+
+      - name: Guard exact candidate and untouched product
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git merge-base "$OLD_PRODUCT_SHA" HEAD)" = "$OLD_PRODUCT_SHA"
+          test "$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')" = "$OLD_PRODUCT_SHA"
+          mapfile -t changed < <(git diff --name-only "$OLD_PRODUCT_SHA" "$CANDIDATE_SHA" | sort)
+          printf '%s\n' "${changed[@]}"
+          test "${#changed[@]}" -eq 3
+          test "${changed[0]}" = "app/lib/services/journey_vocabulary_context.dart"
+          test "${changed[1]}" = "app/lib/widgets/word_detail_sheet.dart"
+          test "${changed[2]}" = "app/test/journey_vocabulary_context_lazy_test.dart"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Format gate
+        working-directory: app
+        run: dart format --output=none --set-exit-if-changed lib/services/journey_vocabulary_context.dart lib/widgets/word_detail_sheet.dart test/journey_vocabulary_context_lazy_test.dart
+
+      - name: Lazy materialization behavior regression
+        working-directory: app
+        run: flutter test --reporter expanded test/journey_vocabulary_context_lazy_test.dart
+
+      - name: Founder Story Continue regression
+        working-directory: app
+        run: flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart
+
+      - name: Vocabulary transition and pending TTS regression
+        working-directory: app
+        run: flutter test --reporter expanded test/founder_story_vocabulary_transition_regression_test.dart
+
+      - name: Story isolation regression
+        working-directory: app
+        run: flutter test --reporter expanded test/forbidden_city_story_selection_runtime_test.dart --plain-name 'Story progress, completion, resume and Memory are isolated by Story ID'
+
+      - name: Analyze exact candidate
+        working-directory: app
+        run: flutter analyze
+
+      - name: Reconfirm product branch untouched
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')" = "$OLD_PRODUCT_SHA"
