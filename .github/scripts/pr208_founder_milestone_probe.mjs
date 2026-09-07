@@ -76,12 +76,21 @@ await context.addInitScript(() => {
 
 const page = await context.newPage();
 page.on('console', (message) => {
-  if (message.text().includes('PJ_')) console.log(`BROWSER ${message.text()}`);
+  console.log(`BROWSER_CONSOLE_${message.type()} ${message.text()}`);
 });
-await page.goto(`${baseUrl}/?unlock=all&prototype=journeys&v=${diagnosticSha}&diagSession=${session}`,
+page.on('pageerror', (error) => console.log(`BROWSER_PAGE_ERROR ${error.stack || error}`));
+page.on('requestfailed', (request) => console.log(`BROWSER_REQUEST_FAILED ${request.url()} ${request.failure()?.errorText}`));
+const navigation = await page.goto(`${baseUrl}/?unlock=all&prototype=journeys&v=${diagnosticSha}&diagSession=${session}`,
   { waitUntil: 'domcontentloaded', timeout: 60000 });
+console.log(`NAVIGATION status=${navigation?.status()} url=${page.url()} title=${await page.title()}`);
 const placeholder = page.locator('flt-semantics-placeholder').first();
-if (await placeholder.count()) await placeholder.evaluate((element) => element.click());
+await placeholder.waitFor({ state: 'attached', timeout: 60000 }).catch(async (error) => {
+  console.log(`STARTUP_DOM ${clean(await page.locator('body').innerText().catch(() => ''))}`);
+  console.log(`STARTUP_HTML ${(await page.content()).slice(0, 4000)}`);
+  await page.screenshot({ path: 'test-results/pr208-diagnostic-startup-failure.png', fullPage: false });
+  throw error;
+});
+await placeholder.evaluate((element) => element.click());
 await page.locator('flt-semantics').first().waitFor({ state: 'attached', timeout: 30000 });
 
 await setConfiguredLevel(page, 6);
