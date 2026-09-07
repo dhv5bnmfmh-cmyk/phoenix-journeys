@@ -23,6 +23,7 @@ void main() {
     required String storyId,
     required int level,
     required List<String> calls,
+    required bool hangTransitionStop,
   }) async {
     final previousLevel = PhoenixLevelController.instance.level;
     addTearDown(() => PhoenixLevelController.instance.setLevel(previousLevel));
@@ -30,7 +31,7 @@ void main() {
 
     final pendingStop = Completer<dynamic>();
     var speakCalls = 0;
-    var hangingStopIssued = false;
+    var transitionStopIssued = false;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(flutterTtsChannel, (call) async {
       calls.add(call.method);
@@ -39,14 +40,22 @@ void main() {
         speakCalls += 1;
         return 1;
       }
-      if (call.method == 'stop' && speakCalls > 0 && !hangingStopIssued) {
-        hangingStopIssued = true;
-        calls.add('stop:HANG');
-        return pendingStop.future;
+      if (call.method == 'stop' && speakCalls > 0 && !transitionStopIssued) {
+        transitionStopIssued = true;
+        final vocabularyAlreadyBuilt =
+            find.byKey(const ValueKey('单词')).evaluate().isNotEmpty;
+        calls.add(
+          vocabularyAlreadyBuilt
+              ? 'transition-stop:AFTER-VOCABULARY'
+              : 'transition-stop:BEFORE-VOCABULARY',
+        );
+        if (hangTransitionStop) return pendingStop.future;
+        return 1;
       }
       return 1;
     });
     addTearDown(() {
+      if (!pendingStop.isCompleted) pendingStop.complete(1);
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(flutterTtsChannel, null);
     });
@@ -88,6 +97,7 @@ void main() {
     required String storyId,
     required int level,
     required String label,
+    required bool hangTransitionStop,
   }) async {
     final calls = <String>[];
     final state = await pumpStory(
@@ -95,6 +105,7 @@ void main() {
       storyId: storyId,
       level: level,
       calls: calls,
+      hangTransitionStop: hangTransitionStop,
     );
     await startStoryNarration(tester);
 
@@ -109,24 +120,23 @@ void main() {
     await tester.pump();
 
     expect(
-      calls.contains('stop:HANG'),
+      calls.contains('transition-stop:BEFORE-VOCABULARY'),
+      isFalse,
+      reason:
+          '$label must commit/render primary navigation before any external engine cleanup is invoked.',
+    );
+    expect(
+      calls.contains('transition-stop:AFTER-VOCABULARY'),
       isTrue,
-      reason: '$label must exercise a never-returning speech stop.',
+      reason:
+          '$label must still issue best-effort engine cleanup after Vocabulary has built.',
     );
-    expect(
-      tester.takeException(),
-      isNull,
-      reason: '$label must not throw during transition.',
-    );
-    expect(
-      state.beijingJourneyStep,
-      1,
-      reason: '$label must commit Story -> Vocabulary.',
-    );
+    expect(tester.takeException(), isNull);
+    expect(state.beijingJourneyStep, 1);
     expect(
       find.byKey(const ValueKey('单词')),
       findsOneWidget,
-      reason: '$label must render the Vocabulary page, not only mutate state.',
+      reason: '$label must visibly render Vocabulary after one tap.',
     );
 
     await tester.pump(const Duration(seconds: 9));
@@ -135,37 +145,53 @@ void main() {
   }
 
   testWidgets(
-    'Second Story Lv5 Continue renders Vocabulary when narration stop never returns',
-    (tester) async {
-      await expectContinueRendersVocabulary(
-        tester,
-        storyId: forbiddenCitySecondStoryId,
-        level: 5,
-        label: 'Second Story Lv5',
-      );
-    },
-  );
-
-  testWidgets(
-    'Second Story Lv6 Continue renders Vocabulary when narration stop never returns',
+    'Second Story Lv6 one tap renders Vocabulary before hanging external cleanup',
     (tester) async {
       await expectContinueRendersVocabulary(
         tester,
         storyId: forbiddenCitySecondStoryId,
         level: 6,
         label: 'Second Story Lv6',
+        hangTransitionStop: true,
       );
     },
   );
 
   testWidgets(
-    'Existing Story Lv5 Continue renders Vocabulary when narration stop never returns',
+    'Second Story Lv5 one tap renders Vocabulary before hanging external cleanup',
+    (tester) async {
+      await expectContinueRendersVocabulary(
+        tester,
+        storyId: forbiddenCitySecondStoryId,
+        level: 5,
+        label: 'Second Story Lv5',
+        hangTransitionStop: true,
+      );
+    },
+  );
+
+  testWidgets(
+    'Existing Story Lv5 one tap renders Vocabulary before hanging external cleanup',
     (tester) async {
       await expectContinueRendersVocabulary(
         tester,
         storyId: forbiddenCityPrimaryStoryId,
         level: 5,
         label: 'Existing Story Lv5',
+        hangTransitionStop: true,
+      );
+    },
+  );
+
+  testWidgets(
+    'Second Story Lv6 normal external cleanup still follows visible navigation',
+    (tester) async {
+      await expectContinueRendersVocabulary(
+        tester,
+        storyId: forbiddenCitySecondStoryId,
+        level: 6,
+        label: 'Second Story Lv6 normal stop',
+        hangTransitionStop: false,
       );
     },
   );

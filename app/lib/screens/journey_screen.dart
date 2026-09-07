@@ -805,6 +805,28 @@ class _JourneyScreenState extends State<JourneyScreen>
     if (safeStep != step) {
       _checkpointNarrationBeforeStepChange();
     }
+    if (step == 0 && safeStep == 1) {
+      _stageNarrationIntent += 1;
+      final cancellationToken = _narration.cancelPlaybackImmediately();
+      setState(() {
+        _stageNarrationRequestedId = null;
+        step = safeStep;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Timer.run(() {
+          if (!mounted) return;
+          unawaited(() async {
+            try {
+              await _narration.flushCancelledPlayback(cancellationToken);
+            } catch (error) {
+              debugPrint('Unable to flush narration after navigation: $error');
+            }
+          }());
+        });
+      });
+      await _persistProgress(overrideStep: safeStep);
+      return;
+    }
     if (safeStep == 2 && safeStep != step) {
       setState(() => step = safeStep);
       if (_appState.journeyNarrationOffsetFor('discovery') > 0) {
