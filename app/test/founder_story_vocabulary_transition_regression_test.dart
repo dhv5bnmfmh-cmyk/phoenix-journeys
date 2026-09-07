@@ -189,7 +189,7 @@ void main() {
       scriptMode: 'simplified',
     );
     expect(
-      bundle.narrationItems.map((item) => item.text).toList(),
+      bundle.narrationItems,
       content.storyParagraphs,
       reason: 'Story narration must contain source prose only, not UI metadata.',
     );
