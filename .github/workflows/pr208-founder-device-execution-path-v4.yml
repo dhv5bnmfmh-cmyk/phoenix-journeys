@@ -1,0 +1,402 @@
+name: PR208 Founder Device Execution Path V4
+
+on:
+  push:
+    branches:
+      - validation/pr208-pronunciation-product-fix-49a088
+    paths:
+      - '.github/workflows/pr208-founder-device-execution-path-v4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  OLD_PRODUCT_SHA: f2e879e3f59510f2139114cadc2a2e464bdc92bb
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+
+jobs:
+  audit-fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out exact Founder-device-failed product
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.OLD_PRODUCT_SHA }}
+          fetch-depth: 0
+          path: product
+
+      - name: Guard exact failed product branch
+        working-directory: product
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$OLD_PRODUCT_SHA"
+          git fetch origin "$PRODUCT_BRANCH"
+          test "$(git rev-parse FETCH_HEAD)" = "$OLD_PRODUCT_SHA"
+          test -z "$(git status --porcelain)"
+
+      - name: Install device-matching outer-boundary regression
+        shell: bash
+        run: |
+          cat > product/app/test/founder_device_story_continue_regression_test.dart <<'DART'
+          import 'dart:async';
+
+          import 'package:flutter/material.dart';
+          import 'package:flutter/services.dart';
+          import 'package:flutter_test/flutter_test.dart';
+          import 'package:provider/provider.dart';
+          import 'package:shared_preferences/shared_preferences.dart';
+          import 'package:phoenix_journeys/data/forbidden_city_story_runtime.dart';
+          import 'package:phoenix_journeys/screens/journey_screen.dart';
+          import 'package:phoenix_journeys/services/phoenix_level_controller.dart';
+          import 'package:phoenix_journeys/state/app_state.dart';
+
+          void main() {
+            const journeyId = 'beijing-forbidden-city';
+            const flutterTtsChannel = MethodChannel('flutter_tts');
+
+            setUp(() {
+              SharedPreferences.setMockInitialValues(<String, Object>{});
+            });
+
+            Future<AppState> pumpStory(
+              WidgetTester tester, {
+              required String storyId,
+              required int level,
+              required List<String> calls,
+              required bool hangTransitionStop,
+            }) async {
+              final previousLevel = PhoenixLevelController.instance.level;
+              addTearDown(() => PhoenixLevelController.instance.setLevel(previousLevel));
+              PhoenixLevelController.instance.setLevel(level);
+
+              final pendingStop = Completer<dynamic>();
+              var speakCalls = 0;
+              var transitionStopIssued = false;
+              TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+                  .setMockMethodCallHandler(flutterTtsChannel, (call) async {
+                calls.add(call.method);
+                if (call.method == 'getVoices') return <dynamic>[];
+                if (call.method == 'speak') {
+                  speakCalls += 1;
+                  return 1;
+                }
+                if (call.method == 'stop' && speakCalls > 0 && !transitionStopIssued) {
+                  transitionStopIssued = true;
+                  final vocabularyAlreadyBuilt =
+                      find.byKey(const ValueKey('单词')).evaluate().isNotEmpty;
+                  calls.add(
+                    vocabularyAlreadyBuilt
+                        ? 'transition-stop:AFTER-VOCABULARY'
+                        : 'transition-stop:BEFORE-VOCABULARY',
+                  );
+                  if (hangTransitionStop) return pendingStop.future;
+                  return 1;
+                }
+                return 1;
+              });
+              addTearDown(() {
+                if (!pendingStop.isCompleted) pendingStop.complete(1);
+                TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+                    .setMockMethodCallHandler(flutterTtsChannel, null);
+              });
+
+              final state = AppState();
+              await state.load();
+              await state.activateJourney(journeyId, storyId: storyId);
+
+              await tester.binding.setSurfaceSize(const Size(390, 844));
+              addTearDown(() => tester.binding.setSurfaceSize(null));
+              await tester.pumpWidget(
+                ChangeNotifierProvider<AppState>.value(
+                  value: state,
+                  child: MaterialApp(
+                    home: JourneyScreen(journeyId: journeyId, storyId: storyId),
+                  ),
+                ),
+              );
+              await tester.pump();
+              await tester.pump(const Duration(milliseconds: 180));
+              return state;
+            }
+
+            Future<void> startStoryNarration(WidgetTester tester) async {
+              final narration = find.byKey(const ValueKey('narration-main-control'));
+              expect(narration, findsOneWidget);
+              await tester.tap(narration);
+              await tester.pump();
+              await tester.pump(const Duration(milliseconds: 260));
+              expect(
+                find.byTooltip('暂停朗读'),
+                findsOneWidget,
+                reason: 'Story narration must be active before Continue.',
+              );
+            }
+
+            Future<void> expectContinueRendersVocabulary(
+              WidgetTester tester, {
+              required String storyId,
+              required int level,
+              required String label,
+              required bool hangTransitionStop,
+            }) async {
+              final calls = <String>[];
+              final state = await pumpStory(
+                tester,
+                storyId: storyId,
+                level: level,
+                calls: calls,
+                hangTransitionStop: hangTransitionStop,
+              );
+              await startStoryNarration(tester);
+
+              final continueButton = find.widgetWithText(FilledButton, '继续');
+              expect(continueButton, findsOneWidget);
+              expect(tester.widget<FilledButton>(continueButton).onPressed, isNotNull);
+              expect(state.beijingJourneyStep, 0);
+
+              await tester.tap(continueButton);
+              await tester.pump();
+              await tester.pump(const Duration(milliseconds: 900));
+              await tester.pump();
+
+              expect(
+                calls.contains('transition-stop:BEFORE-VOCABULARY'),
+                isFalse,
+                reason:
+                    '$label must commit/render primary navigation before any external engine cleanup is invoked.',
+              );
+              expect(
+                calls.contains('transition-stop:AFTER-VOCABULARY'),
+                isTrue,
+                reason:
+                    '$label must still issue best-effort engine cleanup after Vocabulary has built.',
+              );
+              expect(tester.takeException(), isNull);
+              expect(state.beijingJourneyStep, 1);
+              expect(
+                find.byKey(const ValueKey('单词')),
+                findsOneWidget,
+                reason: '$label must visibly render Vocabulary after one tap.',
+              );
+
+              await tester.pump(const Duration(seconds: 9));
+              await tester.pump(const Duration(milliseconds: 500));
+              await tester.pump();
+            }
+
+            testWidgets(
+              'Second Story Lv6 one tap renders Vocabulary before hanging external cleanup',
+              (tester) async {
+                await expectContinueRendersVocabulary(
+                  tester,
+                  storyId: forbiddenCitySecondStoryId,
+                  level: 6,
+                  label: 'Second Story Lv6',
+                  hangTransitionStop: true,
+                );
+              },
+            );
+
+            testWidgets(
+              'Second Story Lv5 one tap renders Vocabulary before hanging external cleanup',
+              (tester) async {
+                await expectContinueRendersVocabulary(
+                  tester,
+                  storyId: forbiddenCitySecondStoryId,
+                  level: 5,
+                  label: 'Second Story Lv5',
+                  hangTransitionStop: true,
+                );
+              },
+            );
+
+            testWidgets(
+              'Existing Story Lv5 one tap renders Vocabulary before hanging external cleanup',
+              (tester) async {
+                await expectContinueRendersVocabulary(
+                  tester,
+                  storyId: forbiddenCityPrimaryStoryId,
+                  level: 5,
+                  label: 'Existing Story Lv5',
+                  hangTransitionStop: true,
+                );
+              },
+            );
+
+            testWidgets(
+              'Second Story Lv6 normal external cleanup still follows visible navigation',
+              (tester) async {
+                await expectContinueRendersVocabulary(
+                  tester,
+                  storyId: forbiddenCitySecondStoryId,
+                  level: 6,
+                  label: 'Second Story Lv6 normal stop',
+                  hangTransitionStop: false,
+                );
+              },
+            );
+          }
+          DART
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: product/app
+        run: flutter pub get
+
+      - name: Prove old product invokes external cleanup before Vocabulary build
+        id: old-ordering
+        continue-on-error: true
+        working-directory: product/app
+        shell: bash
+        run: |
+          flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart \
+            --plain-name "Second Story Lv6 one tap renders Vocabulary before hanging external cleanup"
+
+      - name: Require first useful device-matching failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ steps.old-ordering.outcome }}" = failure
+
+      - name: Apply minimal navigation-first two-phase cleanup fix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('product/app/lib/screens/journey_screen.dart')
+          text = path.read_text()
+          anchor = """    if (safeStep != step) {
+                _checkpointNarrationBeforeStepChange();
+              }
+              if (safeStep == 2 && safeStep != step) {
+          """
+          replacement = """    if (safeStep != step) {
+                _checkpointNarrationBeforeStepChange();
+              }
+              if (step == 0 && safeStep == 1) {
+                _stageNarrationIntent += 1;
+                final cancellationToken = _narration.cancelPlaybackImmediately();
+                setState(() {
+                  _stageNarrationRequestedId = null;
+                  step = safeStep;
+                });
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Timer.run(() {
+                    if (!mounted) return;
+                    unawaited(() async {
+                      try {
+                        await _narration.flushCancelledPlayback(cancellationToken);
+                      } catch (error) {
+                        debugPrint('Unable to flush narration after navigation: $error');
+                      }
+                    }());
+                  });
+                });
+                await _persistProgress(overrideStep: safeStep);
+                return;
+              }
+              if (safeStep == 2 && safeStep != step) {
+          """
+          if text.count(anchor) != 1:
+              raise SystemExit('Story navigation ordering anchor is not unique')
+          path.write_text(text.replace(anchor, replacement, 1))
+          PY
+
+      - name: Real-path Story Continue regressions after fix
+        working-directory: product/app
+        run: flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart
+
+      - name: Apply proven old Vocabulary TTS harness protection
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          story = Path('product/app/test/founder_story_vocabulary_transition_regression_test.dart')
+          text = story.read_text()
+          marker = "      reason: 'Vocabulary phase must render its first word after Continue.',\n    );"
+          if text.count(marker) != 1:
+              raise SystemExit('Vocabulary teardown marker is not unique')
+          text = text.replace(
+              marker,
+              marker
+              + "\n\n    await tester.pump(const Duration(seconds: 4));"
+              + "\n    await tester.pump(const Duration(milliseconds: 500));"
+              + "\n    await tester.pump();",
+              1,
+          )
+          import_anchor = "import 'package:flutter/material.dart';\n"
+          services = "import 'package:flutter/services.dart';\n"
+          if services not in text:
+              text = text.replace(import_anchor, import_anchor + services, 1)
+          controller_anchor = "      final controller = NarrationController();\n      addTearDown(controller.dispose);"
+          replacement = """      const flutterTtsChannel = MethodChannel('flutter_tts');
+              TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+                  .setMockMethodCallHandler(flutterTtsChannel, (call) async {
+                if (call.method == 'stop') return 1;
+                return null;
+              });
+              addTearDown(() {
+                TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+                    .setMockMethodCallHandler(flutterTtsChannel, null);
+              });
+
+              final controller = NarrationController();
+              addTearDown(controller.dispose);"""
+          if text.count(controller_anchor) != 1:
+              raise SystemExit('NarrationController harness anchor is not unique')
+          story.write_text(text.replace(controller_anchor, replacement, 1))
+          PY
+
+      - name: Previous Vocabulary TTS pending regression
+        working-directory: product/app
+        run: flutter test --reporter expanded test/founder_story_vocabulary_transition_regression_test.dart
+
+      - name: Restore harness-only old regression patch
+        working-directory: product
+        run: git checkout -- app/test/founder_story_vocabulary_transition_regression_test.dart
+
+      - name: Story isolation control
+        working-directory: product/app
+        run: >-
+          flutter test test/forbidden_city_story_selection_runtime_test.dart
+          --plain-name "Story progress, completion, resume and Memory are isolated by Story ID"
+
+      - name: Analyze fixed product
+        working-directory: product/app
+        run: flutter analyze
+
+      - name: Final minimal scope guard
+        working-directory: product
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$OLD_PRODUCT_SHA"
+          test "$(git diff --name-only | sort)" = $'app/lib/screens/journey_screen.dart\napp/test/founder_device_story_continue_regression_test.dart'
+          git diff --exit-code -- app/lib/widgets/word_detail_sheet.dart
+          git diff --exit-code -- app/lib/data/forbidden_city_story_runtime.dart
+          git diff --exit-code -- app/lib/data/forbidden_city_journey_runtime.dart
+
+      - name: Commit and push new exact product SHA
+        working-directory: product
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$PRODUCT_BRANCH"
+          test "$(git rev-parse FETCH_HEAD)" = "$OLD_PRODUCT_SHA"
+          git config user.name "Phoenix Release Governance"
+          git config user.email "actions@github.com"
+          git add app/lib/screens/journey_screen.dart app/test/founder_device_story_continue_regression_test.dart
+          git commit -m "fix: render Vocabulary before speech engine cleanup"
+          NEW_SHA="$(git rev-parse HEAD)"
+          test "$NEW_SHA" != "$OLD_PRODUCT_SHA"
+          git push origin "HEAD:refs/heads/$PRODUCT_BRANCH"
+          echo "NEW_PRODUCT_SHA=$NEW_SHA"
+          test -z "$(git status --porcelain)"
