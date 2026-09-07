@@ -1058,6 +1058,10 @@ class _JourneyScreenState extends State<JourneyScreen>
       return;
     }
 
+    if (Uri.base.queryParameters['pjNoAutoOpen'] == '1') {
+      _pjDiagnostic('PJ_FIRST_WORD_AUTO_OPEN_SKIPPED');
+      return;
+    }
     _pjDiagnostic('PJ_FIRST_WORD_OPEN_BEGIN');
     await _openWord(_levelContent.words.first);
     _pjDiagnostic('PJ_FIRST_WORD_OPEN_END');
