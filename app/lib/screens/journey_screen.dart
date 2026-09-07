@@ -956,6 +956,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Future<void> _enterVocabularyAtFirstWord() async {
+    _pjDiagnostic('PJ_CONTINUE_TAP_RECEIVED');
     try {
       await _goToStep(1);
     } catch (error, stackTrace) {
@@ -1741,10 +1742,7 @@ class _JourneyScreenState extends State<JourneyScreen>
 
     return _page(
       title: '故事',
-      onNext: () {
-        _pjDiagnostic('PJ_CONTINUE_TAP_RECEIVED');
-        unawaited(_enterVocabularyAtFirstWord());
-      },
+      onNext: () => unawaited(_enterVocabularyAtFirstWord()),
       child: Column(
         children: [
           if (SpecialRealmStoryIntro.supports(_experience.id))
