@@ -110,6 +110,8 @@ const narration = (await records(page)).filter((record) => record.visible &&
   record.role === 'button' && record.text.includes('开始朗读') && !record.text.includes('继续'))
   .sort((a, b) => (a.width * a.height) - (b.width * b.height))[0];
 if (!narration) throw new Error('visible Story narration button not found');
+console.log(`NARRATION_RECT ${JSON.stringify(narration)}`);
+await page.screenshot({ path: 'test-results/pr208-before-narration.png', fullPage: false });
 // Flutter WebKit merges the enabled media control with a disabled seek rail in one
 // semantics container. Tap the visible 32px media control's actual screen point.
 await page.touchscreen.tap(narration.x + narration.width - 124, narration.y + 19);
