@@ -110,8 +110,8 @@ test('normal Journeys keep the stable shared six-stage navigation', () => {
   assert.match(stageRuntime, /0 => _storyPage\(\)/);
   assert.match(stageRuntime, /1 => _wordsPage\(\)/);
   assert.match(stageRuntime, /2 => _discoveryPage\(\)/);
-  assert.match(stageRuntime, /3 => stepThreePage[\s\S]*_challengePage\(\)/);
-  assert.match(stageRuntime, /4 => stepFourPage[\s\S]*_memoryPage\(\)/);
+  assert.match(stageRuntime, /3 =>\s*stepThreePage[\s\S]*_challengePage\(\)/);
+  assert.match(stageRuntime, /4 =>\s*stepFourPage[\s\S]*_memoryPage\(\)/);
   assert.match(stageRuntime, /_ => _completePage\(\)/);
   assert.match(stageRuntime, /child: page/);
   assert.doesNotMatch(stageRuntime, /final pages = <Widget>\[/);
