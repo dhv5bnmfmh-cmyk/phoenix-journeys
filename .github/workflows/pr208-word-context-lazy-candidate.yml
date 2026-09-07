@@ -13,7 +13,7 @@ permissions:
 
 env:
   OLD_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
-  CANDIDATE_SHA: 477f1b40940eda444848ded24c8b0219d04fe632
+  CANDIDATE_SHA: c385d04f7d9432946416852b8d5b8d4402f1541d
   PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
 
 jobs:
