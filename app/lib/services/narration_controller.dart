@@ -267,6 +267,7 @@ class NarrationController extends ChangeNotifier {
 
   int get totalCharacters => _plan.text.length;
   bool get isSpeakingWord => _isSpeakingWord;
+  bool get webSpeechAvailableForDiagnostics => _webSpeech.isAvailable;
   bool get wordSpeechUnavailable => _wordSpeechUnavailable;
   String? get spokenWord => _spokenWord;
   NarrationHighlightSnapshot? get highlightSnapshot {

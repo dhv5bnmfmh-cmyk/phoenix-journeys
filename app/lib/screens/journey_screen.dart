@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../agents/phoenix_language_level_agent.dart';
@@ -358,6 +360,49 @@ class _JourneyScreenState extends State<JourneyScreen>
     expressFocusNode.dispose();
     memoryFocusNode.dispose();
     super.dispose();
+  }
+
+  int _pjDiagnosticSequence = 0;
+
+  void _pjDiagnostic(String marker, {String? reason}) {
+    final isNarrating = _narration.status == NarrationStatus.playing;
+    final payload = <String, Object?>{
+      'marker': marker,
+      'sequence': ++_pjDiagnosticSequence,
+      'mounted': mounted,
+      'step': step,
+      'isNarrating': isNarrating,
+      'isTransitioning': false,
+      'isSpeaking': isNarrating || _narration.isSpeakingWord,
+      'loading': _guideLoading || _writingLoading || _memoryPhotoBusy,
+      'disabled': false,
+      'currentStoryId': _storyId,
+      'currentLevel': _sessionLanguageProfile.phoenixLevel,
+      'webSpeechAvailable': _narration.webSpeechAvailableForDiagnostics,
+      if (reason != null) 'reason': reason,
+      'timestamp': DateTime.now().toUtc().toIso8601String(),
+    };
+    debugPrint('$marker ${jsonEncode(payload)}');
+    final session = Uri.base.queryParameters['diagSession']?.trim();
+    if (session == null || session.isEmpty) return;
+    final uri = Uri.base.resolve(
+      '/api/diagnostic?session=${Uri.encodeQueryComponent(session)}',
+    );
+    unawaited(
+      http
+          .post(
+            uri,
+            headers: const {'content-type': 'application/json'},
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 2))
+          .then<void>(
+            (_) {},
+            onError: (Object error, StackTrace stackTrace) {
+              debugPrint('PJ_DIAGNOSTIC_UPLOAD_ERROR ${error.runtimeType}');
+            },
+          ),
+    );
   }
 
   Future<void> _persistProgress({int? overrideStep}) {
@@ -800,18 +845,24 @@ class _JourneyScreenState extends State<JourneyScreen>
         safeStep != step &&
         safeStep != step - 1 &&
         safeStep != step + 1) {
+      if (targetStep == 1) {
+        _pjDiagnostic('PJ_CONTINUE_ABORT_invalid_step_guard');
+      }
       return;
     }
     if (safeStep != step) {
       _checkpointNarrationBeforeStepChange();
     }
     if (step == 0 && safeStep == 1) {
+      _pjDiagnostic('PJ_CONTINUE_PRE_GUARDS_COMPLETE');
+      _pjDiagnostic('PJ_STEP_1_COMMIT_BEGIN');
       _stageNarrationIntent += 1;
       final cancellationToken = _narration.cancelPlaybackImmediately();
       setState(() {
         _stageNarrationRequestedId = null;
         step = safeStep;
       });
+      _pjDiagnostic('PJ_STEP_1_COMMITTED');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Timer.run(() {
           if (!mounted) return;
@@ -905,11 +956,34 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Future<void> _enterVocabularyAtFirstWord() async {
-    await _goToStep(1);
-    if (!mounted || step != 1 || _levelContent.words.isEmpty) return;
+    try {
+      await _goToStep(1);
+    } catch (error, stackTrace) {
+      _pjDiagnostic('PJ_CONTINUE_EXCEPTION_${error.runtimeType}');
+      Error.throwWithStackTrace(error, stackTrace);
+    }
+    if (!mounted) {
+      _pjDiagnostic('PJ_CONTINUE_ABORT_not_mounted_after_step');
+      return;
+    }
+    if (step != 1) {
+      _pjDiagnostic('PJ_CONTINUE_ABORT_step_not_1_after_go');
+      return;
+    }
+    if (_levelContent.words.isEmpty) {
+      _pjDiagnostic('PJ_CONTINUE_ABORT_vocabulary_empty');
+      return;
+    }
 
     await WidgetsBinding.instance.endOfFrame;
-    if (!mounted || step != 1) return;
+    if (!mounted) {
+      _pjDiagnostic('PJ_CONTINUE_ABORT_not_mounted_after_frame');
+      return;
+    }
+    if (step != 1) {
+      _pjDiagnostic('PJ_CONTINUE_ABORT_step_changed_after_frame');
+      return;
+    }
 
     await _openWord(_levelContent.words.first);
   }
@@ -1667,7 +1741,10 @@ class _JourneyScreenState extends State<JourneyScreen>
 
     return _page(
       title: '故事',
-      onNext: () => unawaited(_enterVocabularyAtFirstWord()),
+      onNext: () {
+        _pjDiagnostic('PJ_CONTINUE_TAP_RECEIVED');
+        unawaited(_enterVocabularyAtFirstWord());
+      },
       child: Column(
         children: [
           if (SpecialRealmStoryIntro.supports(_experience.id))
@@ -1787,6 +1864,18 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _wordsPage() {
+    _pjDiagnostic('PJ_VOCAB_BUILD_BEGIN');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        _pjDiagnostic('PJ_CONTINUE_ABORT_vocab_frame_not_mounted');
+        return;
+      }
+      if (step != 1) {
+        _pjDiagnostic('PJ_CONTINUE_ABORT_vocab_frame_step_not_1');
+        return;
+      }
+      _pjDiagnostic('PJ_VOCAB_FIRST_FRAME');
+    });
     final state = context.watch<AppState>();
     final language = state.translationLanguage;
 

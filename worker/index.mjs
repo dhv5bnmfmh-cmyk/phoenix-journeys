@@ -4,6 +4,71 @@ import {
   GUIDE_FALLBACK_MODEL,
 } from './phoenix_ai.mjs';
 
+function diagnosticSession(value) {
+  const session = `${value ?? ''}`.trim();
+  return /^[A-Za-z0-9._-]{1,80}$/.test(session) ? session : null;
+}
+
+function diagnosticCacheKey(request, session, sequence) {
+  const key = new URL(request.url);
+  key.pathname = `/__pj_diagnostic/${session}/${sequence}`;
+  key.search = '';
+  return new Request(key.toString(), { method: 'GET' });
+}
+
+async function handlePhoenixDiagnostic(request) {
+  const url = new URL(request.url);
+  const session = diagnosticSession(url.searchParams.get('session'));
+  if (!session) {
+    return Response.json({ ok: false, error: 'invalid-session' }, { status: 400 });
+  }
+
+  const cache = caches.default;
+  if (request.method === 'GET') {
+    const events = [];
+    for (let sequence = 1; sequence <= 24; sequence += 1) {
+      const cached = await cache.match(diagnosticCacheKey(request, session, sequence));
+      if (!cached) continue;
+      events.push(await cached.json());
+    }
+    events.sort((a, b) => Number(a.sequence ?? 0) - Number(b.sequence ?? 0));
+    return Response.json(
+      { ok: true, session, events },
+      { headers: { 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } },
+    );
+  }
+
+  if (request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
+  let event;
+  try {
+    event = await request.json();
+  } catch (_) {
+    return Response.json({ ok: false, error: 'invalid-json' }, { status: 400 });
+  }
+  const sequence = Number(event?.sequence);
+  if (!Number.isInteger(sequence) || sequence < 1 || sequence > 24) {
+    return Response.json({ ok: false, error: 'invalid-sequence' }, { status: 400 });
+  }
+  const stored = {
+    ...event,
+    sequence,
+    receivedAt: new Date().toISOString(),
+  };
+  await cache.put(
+    diagnosticCacheKey(request, session, sequence),
+    new Response(JSON.stringify(stored), {
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'cache-control': 'public, max-age=3600',
+      },
+    }),
+  );
+  return Response.json({ ok: true, session, sequence });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -64,6 +129,10 @@ export default {
           },
         },
       );
+    }
+
+    if (url.pathname === '/api/diagnostic') {
+      return handlePhoenixDiagnostic(request);
     }
 
     if (url.pathname === '/api/phoenix-ai') {
