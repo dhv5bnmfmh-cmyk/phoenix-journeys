@@ -363,6 +363,11 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   int _pjDiagnosticSequence = 0;
+  bool _pjHitTargetReadyLogged = false;
+  bool _pjVocabularyBuildLogged = false;
+  bool _pjVocabularyFirstFrameLogged = false;
+  bool _pjVocabularyStableScheduled = false;
+  int _pjPreviousObservedStep = 0;
 
   void _pjDiagnostic(String marker, {String? reason}) {
     final isNarrating = _narration.status == NarrationStatus.playing;
@@ -371,6 +376,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       'sequence': ++_pjDiagnosticSequence,
       'mounted': mounted,
       'step': step,
+      'phase': _appState.beijingJourneyStepLabel,
       'isNarrating': isNarrating,
       'isTransitioning': false,
       'isSpeaking': isNarrating || _narration.isSpeakingWord,
@@ -378,7 +384,11 @@ class _JourneyScreenState extends State<JourneyScreen>
       'disabled': false,
       'currentStoryId': _storyId,
       'currentLevel': _sessionLanguageProfile.phoenixLevel,
+      'narrationState': _narration.status.name,
+      'speechAvailable': _narration.webSpeechAvailableForDiagnostics,
       'webSpeechAvailable': _narration.webSpeechAvailableForDiagnostics,
+      'webSpeechActive':
+          _narration.webSpeechAvailableForDiagnostics && isNarrating,
       if (reason != null) 'reason': reason,
       'timestamp': DateTime.now().toUtc().toIso8601String(),
     };
@@ -831,6 +841,18 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Future<void> _goToStep(int targetStep) async {
     final safeStep = targetStep.clamp(0, AppState.journeyLastStep);
+    if (targetStep == 1) {
+      _pjDiagnostic('PJ_CONTINUE_GUARD_CHECK_BEGIN');
+      _pjDiagnostic(
+        'PJ_CONTINUE_GUARD_mounted_$mounted',
+      );
+      _pjDiagnostic(
+        'PJ_CONTINUE_GUARD_step_${step}_target_$safeStep',
+      );
+      _pjDiagnostic(
+        'PJ_CONTINUE_GUARD_journeyCompleted_${_appState.journeyCompleted}',
+      );
+    }
     if (_isSummerPalacePilot && safeStep == step + 1) {
       if (step == 3 && _guideFeedback != null && !_pilotChallengeVisible) {
         setState(() => _pilotChallengeVisible = true);
@@ -1417,6 +1439,10 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (_pjPreviousObservedStep == 1 && step == 0) {
+      _pjDiagnostic('PJ_STEP_ROLLBACK_1_0');
+    }
+    _pjPreviousObservedStep = step;
     final stepThreePage = _isSummerPalacePilot
         ? resolvePilotN1CompositePage(
             step: 3,
@@ -1740,6 +1766,11 @@ class _JourneyScreenState extends State<JourneyScreen>
     final storyAnnotations = levelContent.storyAnnotations;
     final words = levelContent.words;
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || step != 0 || _pjHitTargetReadyLogged) return;
+      _pjHitTargetReadyLogged = true;
+      _pjDiagnostic('PJ_CONTINUE_HIT_TARGET_READY');
+    });
     return _page(
       title: '故事',
       onNext: () => unawaited(_enterVocabularyAtFirstWord()),
@@ -1862,7 +1893,10 @@ class _JourneyScreenState extends State<JourneyScreen>
   }
 
   Widget _wordsPage() {
-    _pjDiagnostic('PJ_VOCAB_BUILD_BEGIN');
+    if (!_pjVocabularyBuildLogged) {
+      _pjVocabularyBuildLogged = true;
+      _pjDiagnostic('PJ_VOCAB_BUILD_BEGIN');
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
         _pjDiagnostic('PJ_CONTINUE_ABORT_vocab_frame_not_mounted');
@@ -1872,7 +1906,23 @@ class _JourneyScreenState extends State<JourneyScreen>
         _pjDiagnostic('PJ_CONTINUE_ABORT_vocab_frame_step_not_1');
         return;
       }
-      _pjDiagnostic('PJ_VOCAB_FIRST_FRAME');
+      if (!_pjVocabularyFirstFrameLogged) {
+        _pjVocabularyFirstFrameLogged = true;
+        _pjDiagnostic('PJ_VOCAB_FIRST_FRAME');
+      }
+      if (_pjVocabularyStableScheduled) return;
+      _pjVocabularyStableScheduled = true;
+      Timer(const Duration(seconds: 2), () {
+        if (!mounted) {
+          _pjDiagnostic('PJ_CONTINUE_ABORT_vocab_stability_not_mounted');
+          return;
+        }
+        if (step == 1) {
+          _pjDiagnostic('PJ_VOCAB_STABLE');
+        } else {
+          _pjDiagnostic('PJ_STEP_ROLLBACK_1_$step');
+        }
+      });
     });
     final state = context.watch<AppState>();
     final language = state.translationLanguage;
