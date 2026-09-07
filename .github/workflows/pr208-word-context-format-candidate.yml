@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 env:
-  SOURCE_CANDIDATE_SHA: c385d04f7d9432946416852b8d5b8d4402f1541d
+  SOURCE_CANDIDATE_SHA: ad60af5ddd6d57cf3ebc7f751ebb8e06c2ee5d2d
   OLD_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
   PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
   OUTPUT_BRANCH: validation/pr208-word-context-lazy-product
@@ -48,7 +48,7 @@ jobs:
 
       - name: Apply dart format only
         working-directory: app
-        run: dart format lib/widgets/word_detail_sheet.dart
+        run: dart format test/founder_story_vocabulary_transition_regression_test.dart
 
       - name: Prove formatter-only delta
         shell: bash
@@ -57,9 +57,9 @@ jobs:
           mapfile -t changed < <(git diff --name-only)
           printf 'FORMAT_CHANGED=%s\n' "${changed[@]}"
           test "${#changed[@]}" -eq 1
-          test "${changed[0]}" = "app/lib/widgets/word_detail_sheet.dart"
+          test "${changed[0]}" = "app/test/founder_story_vocabulary_transition_regression_test.dart"
           git diff --check
-          git diff -- app/lib/widgets/word_detail_sheet.dart
+          git diff -- app/test/founder_story_vocabulary_transition_regression_test.dart
 
       - name: Commit exact formatted product candidate
         shell: bash
@@ -67,8 +67,8 @@ jobs:
           set -euo pipefail
           git config user.name "phoenix-validation"
           git config user.email "phoenix-validation@users.noreply.github.com"
-          git add app/lib/widgets/word_detail_sheet.dart
-          git commit -m "style: format lazy context fix with resolved config"
+          git add app/test/founder_story_vocabulary_transition_regression_test.dart
+          git commit -m "style: format permanent Word Detail regression harness"
           formatted_sha="$(git rev-parse HEAD)"
           echo "FORMATTED_CANDIDATE_SHA=$formatted_sha" >> "$GITHUB_ENV"
           test "$(git rev-parse HEAD^)" = "$SOURCE_CANDIDATE_SHA"
