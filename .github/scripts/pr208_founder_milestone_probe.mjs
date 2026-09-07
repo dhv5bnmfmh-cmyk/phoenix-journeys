@@ -106,11 +106,13 @@ await tap(page, '交接前的标记');
 await find(page, '1/5', { prefix: true });
 await find(page, '交接前的标记');
 
-const narration = (await records(page)).filter((record) => record.visible && !record.disabled &&
+const narration = (await records(page)).filter((record) => record.visible &&
   record.role === 'button' && record.text.includes('开始朗读') && !record.text.includes('继续'))
   .sort((a, b) => (a.width * a.height) - (b.width * b.height))[0];
 if (!narration) throw new Error('visible Story narration button not found');
-await page.locator('flt-semantics').nth(narration.index).tap({ timeout: 10000 });
+// Flutter WebKit merges the enabled media control with a disabled seek rail in one
+// semantics container. Tap the visible 32px media control's actual screen point.
+await page.touchscreen.tap(narration.x + narration.width - 124, narration.y + 19);
 await find(page, '正在朗读', { timeout: 10000 });
 
 const continueButton = await find(page, '继续', { role: 'button', prefix: true });
