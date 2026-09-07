@@ -185,7 +185,8 @@ void main() {
         '交接前，林乔把记录册推到新同事许澄面前。许澄第二天就要接手，问明天是否直接照表使用。林乔已经拔开笔帽，却又把笔放回桌上：“先一起核对一遍。”两人从前面的页码往后看。许澄圈出“中轴”，又在“景运门”旁做了记号。他说这两处还容易弄混。林乔让他先标出不确定处。翻到旧表时，两人发现景运门被标在乾清门前广场西侧。许澄问：“如果我明天照这张表走呢？”林乔的手停在签名栏上。她原本只差签名就能完成交接，现在却不愿把疑问留给接手的人。',
         '两人把图页摊开，核到景运门位于乾清门前广场东侧。许澄圈住旧表的“西”，没有擦掉。林乔也没有只把“西”改成“东”。她让许澄把疑问写在页边，再一起核对。能确认的当场更正，不能确认的先留空。林乔签下更正，把笔递给许澄。“接手以后，也照这个办法往下查。”许澄接过册子，指着两个空格确认要继续核对。最后，他把待核的格子折了角，把签字笔放到两人中间。他问：“下一页一起看完？”林乔把椅子拉近。',
       ],
-      reason: 'Founder-reviewed Second Story source prose must remain unchanged.',
+      reason:
+          'Founder-reviewed Second Story source prose must remain unchanged.',
     );
 
     final runtimeSources = <MapEntry<String, String>>[
@@ -205,7 +206,8 @@ void main() {
       expect(
         matches,
         isNotEmpty,
-        reason: 'Pronunciation audit phrase must come from visible runtime content: $phrase',
+        reason:
+            'Pronunciation audit phrase must come from visible runtime content: $phrase',
       );
       for (final source in matches) {
         expect(
@@ -259,7 +261,8 @@ void main() {
     expect(
       bundle.narrationItems,
       content.storyParagraphs,
-      reason: 'Story narration must contain source prose only, not UI metadata.',
+      reason:
+          'Story narration must contain source prose only, not UI metadata.',
     );
   });
 }
