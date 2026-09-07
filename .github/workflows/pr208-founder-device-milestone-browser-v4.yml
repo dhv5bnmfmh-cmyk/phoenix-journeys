@@ -26,9 +26,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin product/city-standard-v1-beijing-forbidden-city diagnostic/pr208-founder-device-milestones-d560fa
-          test "$(git rev-parse FETCH_HEAD)" = "$DIAGNOSTIC_SHA"
-          test "$(git rev-parse origin/product/city-standard-v1-beijing-forbidden-city)" = "$PRODUCT_SHA"
+          test "$(git ls-remote origin refs/heads/product/city-standard-v1-beijing-forbidden-city | awk '{print $1}')" = "$PRODUCT_SHA"
+          test "$(git ls-remote origin refs/heads/diagnostic/pr208-founder-device-milestones-d560fa | awk '{print $1}')" = "$DIAGNOSTIC_SHA"
+          git fetch origin "$PRODUCT_SHA" "$DIAGNOSTIC_SHA"
           test "$(git merge-base "$PRODUCT_SHA" "$DIAGNOSTIC_SHA")" = "$PRODUCT_SHA"
       - name: Check out exact diagnostic candidate
         uses: actions/checkout@v6
