@@ -95,7 +95,9 @@ await page.locator('flt-semantics').first().waitFor({ state: 'attached', timeout
 
 await setConfiguredLevel(page, 6);
 await returnToExplore(page);
-await tap(page, '选择城市', { prefix: true });
+await tap(page, '护照', { prefix: true });
+await find(page, '探索护照');
+await tapSemanticChoice(page, '中国', { expectedText: '请从左侧选择省份' });
 await tapSemanticChoice(page, '北京', { expectedText: '北京的地点' });
 await tapSemanticChoice(page, '紫禁城', { expectedText: '选择 Story' });
 await tapSemanticChoice(page, '交接前的标记', { absentText: '选择 Story' });
