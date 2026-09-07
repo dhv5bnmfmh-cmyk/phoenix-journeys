@@ -1,4 +1,5 @@
 name: PR208 Founder Device Milestone Browser V4
+# Probe revision 2: capture WebKit startup evidence before milestone execution.
 
 on:
   push:
