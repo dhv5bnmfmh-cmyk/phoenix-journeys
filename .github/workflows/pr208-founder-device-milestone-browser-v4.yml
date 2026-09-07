@@ -1,5 +1,5 @@
 name: PR208 Founder Device Milestone Browser V4
-# Probe revision 8: use the destination's geographic place label; reuse the exact artifact.
+# Probe revision 9: tap the enabled narration semantics leaf; reuse the exact artifact.
 
 on:
   push:
