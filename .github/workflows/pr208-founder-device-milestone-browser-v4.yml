@@ -1,5 +1,5 @@
 name: PR208 Founder Device Milestone Browser V4
-# Probe revision 5: use exact municipality and Story button semantics; reuse the exact deployed artifact.
+# Probe revision 6: traverse the municipality city-equivalent rail; reuse the exact deployed artifact.
 
 on:
   push:
