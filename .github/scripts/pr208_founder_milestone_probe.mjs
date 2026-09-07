@@ -1,0 +1,124 @@
+import { pathToFileURL } from 'node:url';
+import {
+  returnToExplore,
+  setConfiguredLevel,
+  tapSemanticChoice,
+} from './journey_level_session_harness.mjs';
+
+const { webkit, devices } = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
+const baseUrl = process.argv[2];
+const diagnosticSha = process.argv[3];
+if (!baseUrl || !diagnosticSha) throw new Error('usage: probe <preview-url> <diagnostic-sha>');
+
+const session = `webkit-lv6-${Date.now()}`;
+const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function records(page) {
+  return page.locator('flt-semantics').evaluateAll((elements) => elements.map((element, index) => {
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    return {
+      index,
+      role: element.getAttribute('role') || '',
+      text: [element.getAttribute('aria-label'), element.getAttribute('aria-valuetext'),
+        element.getAttribute('aria-description'), element.textContent]
+        .filter(Boolean).join(' ').replace(/\s+/g, ' ').trim(),
+      disabled: element.getAttribute('aria-disabled') === 'true',
+      visible: rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden',
+      x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+    };
+  }));
+}
+
+async function find(page, needle, { role = null, prefix = false, timeout = 20000 } = {}) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const matches = (await records(page)).filter((record) => record.visible &&
+      (!role || record.role === role) &&
+      (prefix ? record.text.startsWith(needle) : record.text.includes(needle)));
+    if (matches.length) return page.locator('flt-semantics').nth(matches[0].index);
+    await sleep(100);
+  }
+  throw new Error(`semantic state not found: ${needle}`);
+}
+
+async function tap(page, needle, options = {}) {
+  const node = await find(page, needle, { ...options, role: 'button' });
+  if ((await node.getAttribute('aria-disabled')) === 'true') throw new Error(`disabled: ${needle}`);
+  await node.tap({ timeout: 10000 });
+}
+
+async function visibleText(page) {
+  return (await records(page)).filter((record) => record.visible).map((record) => record.text).join('\n');
+}
+
+const browser = await webkit.launch({ headless: true });
+const context = await browser.newContext({ ...devices['iPhone 13 Pro Max'] });
+await context.addInitScript(() => {
+  class DiagnosticUtterance extends EventTarget {
+    constructor(text) { super(); this.text = text; this.lang = ''; this.rate = 1; this.pitch = 1; this.volume = 1; }
+  }
+  const synth = {
+    speaking: false, pending: false, paused: false,
+    getVoices: () => [],
+    speak(utterance) {
+      this.speaking = true;
+      setTimeout(() => utterance.dispatchEvent(new Event('start')), 0);
+    },
+    cancel() { this.speaking = false; this.pending = false; this.paused = false; },
+    pause() { this.paused = true; },
+    resume() { this.paused = false; this.speaking = true; },
+  };
+  Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: DiagnosticUtterance });
+  Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: synth });
+});
+
+const page = await context.newPage();
+page.on('console', (message) => {
+  if (message.text().includes('PJ_')) console.log(`BROWSER ${message.text()}`);
+});
+await page.goto(`${baseUrl}/?unlock=all&prototype=journeys&v=${diagnosticSha}&diagSession=${session}`,
+  { waitUntil: 'domcontentloaded', timeout: 60000 });
+const placeholder = page.locator('flt-semantics-placeholder').first();
+if (await placeholder.count()) await placeholder.evaluate((element) => element.click());
+await page.locator('flt-semantics').first().waitFor({ state: 'attached', timeout: 30000 });
+
+await setConfiguredLevel(page, 6);
+await returnToExplore(page);
+await tap(page, '选择城市', { prefix: true });
+await tapSemanticChoice(page, '北京', { expectedText: '北京的地点' });
+await tapSemanticChoice(page, '紫禁城', { expectedText: '选择 Story' });
+await tapSemanticChoice(page, '交接前的标记', { absentText: '选择 Story' });
+await find(page, '1/5', { prefix: true });
+await find(page, '交接前的标记');
+
+const narration = (await records(page)).filter((record) => record.visible && record.role === 'button' &&
+  record.text.includes('朗读') && !record.text.includes('继续'))[0];
+if (!narration) throw new Error('visible Story narration button not found');
+await page.locator('flt-semantics').nth(narration.index).tap({ timeout: 10000 });
+await find(page, '正在朗读', { timeout: 10000 });
+
+const continueButton = await find(page, '继续', { role: 'button', prefix: true });
+const box = await continueButton.boundingBox();
+if (!box || box.width < 20 || box.height < 20) throw new Error('M0 visible Continue hit target unavailable');
+await continueButton.tap({ timeout: 10000 });
+await sleep(3500);
+
+const traceResponse = await page.request.get(`${baseUrl}/api/diagnostic?session=${session}`);
+if (!traceResponse.ok()) throw new Error(`diagnostic trace GET ${traceResponse.status()}`);
+const trace = await traceResponse.json();
+console.log(`PJ_TRACE ${JSON.stringify(trace)}`);
+const markers = trace.events.map((event) => event.marker);
+for (const required of ['PJ_CONTINUE_HIT_TARGET_READY', 'PJ_CONTINUE_TAP_RECEIVED']) {
+  if (!markers.includes(required)) throw new Error(`${required} missing`);
+}
+const text = await visibleText(page);
+console.log(`VISIBLE_AFTER_ONE_TAP ${clean(text).slice(0, 2000)}`);
+console.log(`MILESTONE_STOP=${markers.includes('PJ_VOCAB_STABLE') ? 'M5' :
+  markers.includes('PJ_VOCAB_FIRST_FRAME') ? 'M4' :
+  markers.includes('PJ_STEP_1_COMMITTED') ? 'M3' :
+  markers.includes('PJ_CONTINUE_PRE_GUARDS_COMPLETE') ? 'M2' : 'M1'}`);
+
+await page.screenshot({ path: 'test-results/pr208-diagnostic-after-one-tap.png', fullPage: false });
+await browser.close();
