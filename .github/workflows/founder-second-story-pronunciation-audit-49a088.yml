@@ -73,6 +73,9 @@ jobs:
                 '待核',
                 '圈出',
                 '留空',
+                '前面的页码',
+                '确认的当场',
+                '指着',
               ];
 
               for (final phrase in phrases) {
@@ -86,6 +89,12 @@ jobs:
                 print('PARAGRAPH|${i + 1}|${content.storyParagraphs[i]}');
                 // ignore: avoid_print
                 print('ANNOTATION|${i + 1}|${content.storyAnnotations[i].pinyin}');
+              }
+              for (var i = 0; i < content.discoveries.length; i += 1) {
+                // ignore: avoid_print
+                print('DISCOVERY|${i + 1}|${content.discoveries[i].text}');
+                // ignore: avoid_print
+                print('DISCOVERY_PINYIN|${i + 1}|${content.discoveries[i].pinyin}');
               }
 
               expect(
