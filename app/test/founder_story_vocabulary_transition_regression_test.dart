@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pinyin/pinyin.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:phoenix_journeys/data/forbidden_city_story_runtime.dart';
@@ -160,24 +159,76 @@ void main() {
     },
   );
 
-  test('Second Story pronunciation source audit covers risky readings', () {
-    String reading(String text) => PinyinHelper.getPinyinE(
-          text,
-          separator: ' ',
-          format: PinyinFormat.WITH_TONE_MARK,
-        );
-
-    expect(reading('乾清门'), 'qián qīng mén');
-    expect(reading('景运门'), 'jǐng yùn mén');
-    expect(reading('中轴'), 'zhōng zhóu');
-    expect(reading('许澄'), 'xǔ chéng');
-    expect(reading('圈出'), 'quān chū');
-    expect(reading('更正'), 'gēng zhèng');
-    expect(reading('留空'), 'liú kòng');
-    expect(reading('空格'), 'kòng gé');
-    expect(reading('折了角'), 'zhé le jiǎo');
-
+  test('Second Story runtime pronunciation audit covers risky readings', () {
     final content = forbiddenCitySecondStoryLevelContent();
+
+    expect(
+      content.storyParagraphs,
+      const <String>[
+        '交接前，林乔把记录册推到新同事许澄面前。许澄第二天就要接手，问明天是否直接照表使用。林乔已经拔开笔帽，却又把笔放回桌上：“先一起核对一遍。”两人从前面的页码往后看。许澄圈出“中轴”，又在“景运门”旁做了记号。他说这两处还容易弄混。林乔让他先标出不确定处。翻到旧表时，两人发现景运门被标在乾清门前广场西侧。许澄问：“如果我明天照这张表走呢？”林乔的手停在签名栏上。她原本只差签名就能完成交接，现在却不愿把疑问留给接手的人。',
+        '两人把图页摊开，核到景运门位于乾清门前广场东侧。许澄圈住旧表的“西”，没有擦掉。林乔也没有只把“西”改成“东”。她让许澄把疑问写在页边，再一起核对。能确认的当场更正，不能确认的先留空。林乔签下更正，把笔递给许澄。“接手以后，也照这个办法往下查。”许澄接过册子，指着两个空格确认要继续核对。最后，他把待核的格子折了角，把签字笔放到两人中间。他问：“下一页一起看完？”林乔把椅子拉近。',
+      ],
+      reason: 'Founder-reviewed Second Story source prose must remain unchanged.',
+    );
+
+    final runtimeSources = <MapEntry<String, String>>[
+      for (var index = 0; index < content.storyParagraphs.length; index += 1)
+        MapEntry(
+          content.storyParagraphs[index],
+          content.storyAnnotations[index].pinyin,
+        ),
+      for (final discovery in content.discoveries)
+        MapEntry(discovery.text, discovery.pinyin),
+    ];
+
+    void expectRuntimeReading(String phrase, String expected) {
+      final matches = runtimeSources
+          .where((source) => source.key.contains(phrase))
+          .toList(growable: false);
+      expect(
+        matches,
+        isNotEmpty,
+        reason: 'Pronunciation audit phrase must come from visible runtime content: $phrase',
+      );
+      for (final source in matches) {
+        expect(
+          source.value,
+          contains(expected),
+          reason: 'Visible runtime pinyin must read $phrase as $expected.',
+        );
+      }
+    }
+
+    const expectedReadings = <String, String>{
+      '林乔': 'lín qiáo',
+      '许澄': 'xǔ chéng',
+      '紫禁城': 'zǐ jìn chéng',
+      '乾清门': 'qián qīng mén',
+      '景运门': 'jǐng yùn mén',
+      '中轴': 'zhōng zhóu',
+      '午门': 'wǔ mén',
+      '核对': 'hé duì',
+      '交接': 'jiāo jiē',
+      '空格': 'kòng gé',
+      '还容易': 'hái róng yì',
+      '不确定处': 'bù què dìng chù',
+      '只差签名': 'zhǐ chà qiān míng',
+      '当场更正': 'dāng chǎng gēng zhèng',
+      '更正': 'gēng zhèng',
+      '折了角': 'zhé le jiǎo',
+      '待核': 'dài hé',
+      '圈出': 'quān chū',
+      '留空': 'liú kòng',
+      '前面的页码': 'qián miàn de yè mǎ',
+      '确认的当场': 'què rèn de dāng chǎng',
+      '指着': 'zhǐ zhe',
+      '地图': 'dì tú',
+      '背建筑名字': 'bèi jiàn zhù míng zi',
+    };
+    for (final entry in expectedReadings.entries) {
+      expectRuntimeReading(entry.key, entry.value);
+    }
+
     final words = {for (final word in content.words) word.word: word.pinyin};
     expect(words['中轴'], 'zhōngzhóu');
     expect(words['景运门'], 'jǐngyùnmén');

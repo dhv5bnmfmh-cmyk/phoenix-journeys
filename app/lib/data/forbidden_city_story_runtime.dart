@@ -72,11 +72,71 @@ class ForbiddenCityStoryProgress {
   int get percent => completed ? 100 : ((step.clamp(0, 5) / 5) * 100).round();
 }
 
-String _pinyin(String text) => PinyinHelper.getPinyinE(
-  text,
-  separator: ' ',
-  format: PinyinFormat.WITH_TONE_MARK,
-);
+class _ContextualPinyinOverride {
+  const _ContextualPinyinOverride({
+    required this.sourcePhrase,
+    required this.generatedPhrase,
+    required this.expectedPhrase,
+  });
+
+  final String sourcePhrase;
+  final String generatedPhrase;
+  final String expectedPhrase;
+}
+
+const _secondStoryPinyinOverrides = <_ContextualPinyinOverride>[
+  _ContextualPinyinOverride(
+    sourcePhrase: '空格',
+    generatedPhrase: 'kōng gé',
+    expectedPhrase: 'kòng gé',
+  ),
+  _ContextualPinyinOverride(
+    sourcePhrase: '不确定处',
+    generatedPhrase: 'bù què dìng chǔ',
+    expectedPhrase: 'bù què dìng chù',
+  ),
+  _ContextualPinyinOverride(
+    sourcePhrase: '前面的页码',
+    generatedPhrase: 'qián miàn dī yè mǎ',
+    expectedPhrase: 'qián miàn de yè mǎ',
+  ),
+  _ContextualPinyinOverride(
+    sourcePhrase: '确认的当场',
+    generatedPhrase: 'què rèn dí dàng chǎng',
+    expectedPhrase: 'què rèn de dāng chǎng',
+  ),
+  _ContextualPinyinOverride(
+    sourcePhrase: '指着',
+    generatedPhrase: 'zhǐ zhuó',
+    expectedPhrase: 'zhǐ zhe',
+  ),
+  _ContextualPinyinOverride(
+    sourcePhrase: '地图',
+    generatedPhrase: 'de tú',
+    expectedPhrase: 'dì tú',
+  ),
+  _ContextualPinyinOverride(
+    sourcePhrase: '背建筑名字',
+    generatedPhrase: 'bēi jiàn zhù míng zi',
+    expectedPhrase: 'bèi jiàn zhù míng zi',
+  ),
+];
+
+String _pinyin(String text) {
+  var reading = PinyinHelper.getPinyinE(
+    text,
+    separator: ' ',
+    format: PinyinFormat.WITH_TONE_MARK,
+  );
+  for (final override in _secondStoryPinyinOverrides) {
+    if (!text.contains(override.sourcePhrase)) continue;
+    reading = reading.replaceAll(
+      override.generatedPhrase,
+      override.expectedPhrase,
+    );
+  }
+  return reading;
+}
 
 const _secondStoryVisibleParagraphs = <String>[
   '交接前，林乔把记录册推到新同事许澄面前。许澄第二天就要接手，问明天是否直接照表使用。林乔已经拔开笔帽，却又把笔放回桌上：“先一起核对一遍。”两人从前面的页码往后看。许澄圈出“中轴”，又在“景运门”旁做了记号。他说这两处还容易弄混。林乔让他先标出不确定处。翻到旧表时，两人发现景运门被标在乾清门前广场西侧。许澄问：“如果我明天照这张表走呢？”林乔的手停在签名栏上。她原本只差签名就能完成交接，现在却不愿把疑问留给接手的人。',
