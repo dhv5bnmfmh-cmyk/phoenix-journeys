@@ -601,9 +601,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                     size: 16,
                   ),
                   label: _buttonLabel(
-                    state.displayText(
-                      _isLast ? '完成并收起' : '下一个单词',
-                    ),
+                    state.displayText(_isLast ? '完成并收起' : '下一个单词'),
                   ),
                 ),
               ),
