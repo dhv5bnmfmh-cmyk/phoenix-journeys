@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,9 +14,17 @@ import 'package:phoenix_journeys/widgets/word_detail_sheet.dart';
 
 void main() {
   const journeyId = 'beijing-forbidden-city';
+  const flutterTtsChannel = MethodChannel('flutter_tts');
 
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(flutterTtsChannel, (call) async => 1);
+  });
+
+  tearDown(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(flutterTtsChannel, null);
   });
 
   Future<AppState> pumpStory(
@@ -61,6 +70,12 @@ void main() {
       findsOneWidget,
       reason: 'Vocabulary phase must render its first word after Continue.',
     );
+
+    // Consume the production WordDetailSheet speech fallback window so widget
+    // teardown cannot leave a test-only fake timer behind.
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
   }
 
   testWidgets(
@@ -156,6 +171,9 @@ void main() {
         find.text('当前浏览器没有提供中文语音，请检查静音设置。'),
         findsOneWidget,
       );
+
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump();
     },
   );
 
