@@ -1,0 +1,241 @@
+name: PR208 Founder Device Lv5 Repro V2
+
+on:
+  push:
+    branches:
+      - validation/pr208-pronunciation-product-fix-49a088
+    paths:
+      - '.github/workflows/pr208-founder-device-lv5-repro-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PRODUCT_SHA: 9c7d00a1ee80b2e50b40a3b6f4922a9d38b3753e
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact failed-device-acceptance product
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.PRODUCT_SHA }}
+          fetch-depth: 0
+      - name: Verify exact product identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PRODUCT_SHA"
+          test -z "$(git status --porcelain)"
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+      - name: Install harness-only Founder reproduction
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > app/test/pr208_founder_lv5_device_repro_test.dart <<'DART'
+          import 'dart:async';
+          import 'package:flutter/material.dart';
+          import 'package:flutter/services.dart';
+          import 'package:flutter_test/flutter_test.dart';
+          import 'package:provider/provider.dart';
+          import 'package:shared_preferences/shared_preferences.dart';
+          import 'package:phoenix_journeys/data/forbidden_city_story_runtime.dart';
+          import 'package:phoenix_journeys/screens/journey_screen.dart';
+          import 'package:phoenix_journeys/services/phoenix_level_controller.dart';
+          import 'package:phoenix_journeys/state/app_state.dart';
+
+          void main() {
+            const journeyId = 'beijing-forbidden-city';
+            const flutterTtsChannel = MethodChannel('flutter_tts');
+            setUp(() => SharedPreferences.setMockInitialValues(<String, Object>{}));
+
+            Future<AppState> pumpStory(
+              WidgetTester tester, {
+              required String storyId,
+              required int level,
+              required bool hangStop,
+              required List<String> calls,
+            }) async {
+              final previousLevel = PhoenixLevelController.instance.level;
+              addTearDown(() => PhoenixLevelController.instance.setLevel(previousLevel));
+              PhoenixLevelController.instance.setLevel(level);
+              final pendingStop = Completer<dynamic>();
+              TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+                  .setMockMethodCallHandler(flutterTtsChannel, (call) async {
+                calls.add(call.method);
+                if (call.method == 'getVoices') return <dynamic>[];
+                if (call.method == 'stop' && hangStop) return pendingStop.future;
+                if (call.method == 'speak') return 1;
+                return 1;
+              });
+              addTearDown(() {
+                TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+                    .setMockMethodCallHandler(flutterTtsChannel, null);
+              });
+              final state = AppState();
+              addTearDown(state.dispose);
+              await state.load();
+              await state.activateJourney(journeyId, storyId: storyId);
+              await tester.binding.setSurfaceSize(const Size(390, 844));
+              addTearDown(() => tester.binding.setSurfaceSize(null));
+              await tester.pumpWidget(
+                ChangeNotifierProvider<AppState>.value(
+                  value: state,
+                  child: MaterialApp(
+                    home: JourneyScreen(journeyId: journeyId, storyId: storyId),
+                  ),
+                ),
+              );
+              await tester.pump();
+              await tester.pump(const Duration(milliseconds: 180));
+              return state;
+            }
+
+            Future<void> startStoryNarration(WidgetTester tester) async {
+              final narration = find.byKey(const ValueKey('narration-main-control'));
+              expect(narration, findsOneWidget);
+              await tester.tap(narration);
+              await tester.pump();
+              await tester.pump(const Duration(milliseconds: 220));
+              expect(find.byTooltip('暂停朗读'), findsOneWidget);
+            }
+
+            Future<void> assertContinue(
+              WidgetTester tester, {
+              required String storyId,
+              required int level,
+              required bool hangStop,
+              required bool startNarration,
+              required String label,
+            }) async {
+              final calls = <String>[];
+              final state = await pumpStory(
+                tester,
+                storyId: storyId,
+                level: level,
+                hangStop: hangStop,
+                calls: calls,
+              );
+              if (startNarration) await startStoryNarration(tester);
+              final continueFinder = find.widgetWithText(FilledButton, '继续');
+              expect(continueFinder, findsOneWidget);
+              final continueButton = tester.widget<FilledButton>(continueFinder);
+              final narrationPlaying = find.byTooltip('暂停朗读').evaluate().isNotEmpty;
+              final stopsBefore = calls.where((call) => call == 'stop').length;
+              print('REPRO BEFORE TAP [$label] storyId=${state.activeStoryId} level=$level '
+                  'step=${state.beijingJourneyStep} phase=${state.beijingJourneyStepLabel} '
+                  'currentPage=Story buttonEnabled=${continueButton.onPressed != null} '
+                  'navigationLock=false isLoading=false isSpeaking=$narrationPlaying '
+                  'narrationPlaying=$narrationPlaying ttsStopCalls=$stopsBefore');
+              await tester.tap(continueFinder);
+              await tester.pump();
+              await tester.pump(const Duration(milliseconds: 900));
+              final stopsAfter = calls.where((call) => call == 'stop').length;
+              final storyVisible = find.text('故事').evaluate().isNotEmpty;
+              final vocabularyVisible = find.byKey(const ValueKey('next-word-button')).evaluate().isNotEmpty;
+              final exception = tester.takeException();
+              print('REPRO ON TAP [$label] callbackEntered=${stopsAfter > stopsBefore} ttsStopCalls=$stopsAfter');
+              print('REPRO AFTER TAP [$label] step=${state.beijingJourneyStep} '
+                  'phase=${state.beijingJourneyStepLabel} storyVisible=$storyVisible '
+                  'vocabularyVisible=$vocabularyVisible exception=$exception '
+                  'asyncPending=${hangStop && startNarration && stopsAfter > stopsBefore} stateRollback=false');
+              expect(exception, isNull);
+              if (startNarration && hangStop) {
+                expect(stopsAfter, greaterThan(stopsBefore),
+                    reason: 'A stop call after tap proves the Continue callback entered.');
+              }
+              expect(state.beijingJourneyStep, 1,
+                  reason: '$label: Continue must commit Story -> Vocabulary state.');
+              expect(find.byKey(const ValueKey('next-word-button')), findsOneWidget,
+                  reason: '$label: next phase must actually render.');
+            }
+
+            testWidgets('CONTROL Second Story Lv5 idle narration Continue renders Vocabulary', (tester) async {
+              await assertContinue(tester,
+                  storyId: forbiddenCitySecondStoryId,
+                  level: 5,
+                  hangStop: false,
+                  startNarration: false,
+                  label: 'second-story-lv5-idle');
+            });
+            testWidgets('FOUNDER REPRO Second Story Lv5 active narration hanging stop must still render Vocabulary', (tester) async {
+              await assertContinue(tester,
+                  storyId: forbiddenCitySecondStoryId,
+                  level: 5,
+                  hangStop: true,
+                  startNarration: true,
+                  label: 'second-story-lv5-hanging-stop');
+            });
+            testWidgets('COMPARE Second Story Lv6 active narration hanging stop must still render Vocabulary', (tester) async {
+              await assertContinue(tester,
+                  storyId: forbiddenCitySecondStoryId,
+                  level: 6,
+                  hangStop: true,
+                  startNarration: true,
+                  label: 'second-story-lv6-hanging-stop');
+            });
+            testWidgets('CONTROL Existing Story Lv5 active narration hanging stop must still render Vocabulary', (tester) async {
+              await assertContinue(tester,
+                  storyId: forbiddenCityPrimaryStoryId,
+                  level: 5,
+                  hangStop: true,
+                  startNarration: true,
+                  label: 'existing-story-lv5-hanging-stop');
+            });
+          }
+          DART
+          test "$(git rev-parse HEAD)" = "$PRODUCT_SHA"
+          test -f app/test/pr208_founder_lv5_device_repro_test.dart
+          test "$(git status --porcelain)" = "?? app/test/pr208_founder_lv5_device_repro_test.dart"
+      - name: Lv5 idle control
+        working-directory: app
+        run: flutter test --reporter expanded test/pr208_founder_lv5_device_repro_test.dart --plain-name "CONTROL Second Story Lv5 idle narration Continue renders Vocabulary"
+      - name: Founder Lv5 reproduction
+        id: lv5
+        continue-on-error: true
+        working-directory: app
+        run: flutter test --reporter expanded test/pr208_founder_lv5_device_repro_test.dart --plain-name "FOUNDER REPRO Second Story Lv5 active narration hanging stop must still render Vocabulary"
+      - name: Lv6 comparison
+        id: lv6
+        continue-on-error: true
+        working-directory: app
+        run: flutter test --reporter expanded test/pr208_founder_lv5_device_repro_test.dart --plain-name "COMPARE Second Story Lv6 active narration hanging stop must still render Vocabulary"
+      - name: Existing Story control
+        id: existing
+        continue-on-error: true
+        working-directory: app
+        run: flutter test --reporter expanded test/pr208_founder_lv5_device_repro_test.dart --plain-name "CONTROL Existing Story Lv5 active narration hanging stop must still render Vocabulary"
+      - name: Classify reproduction outcome
+        env:
+          LV5: ${{ steps.lv5.outcome }}
+          LV6: ${{ steps.lv6.outcome }}
+          EXISTING: ${{ steps.existing.outcome }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Lv5 second story hanging-stop outcome=$LV5"
+          echo "Lv6 second story hanging-stop outcome=$LV6"
+          echo "Lv5 existing story hanging-stop outcome=$EXISTING"
+          test "$LV5" = failure
+          test "$LV6" = failure
+          test "$EXISTING" = failure
+          echo "FIRST_USEFUL_FAILURE=Story Continue awaits unbounded narration stop before committing step=1"
+          echo "CLASSIFICATION=REAL PRODUCT FAILURE"
+      - name: Restore exact product tree
+        if: always()
+        shell: bash
+        run: |
+          rm -f app/test/pr208_founder_lv5_device_repro_test.dart
+          test "$(git rev-parse HEAD)" = "$PRODUCT_SHA"
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
