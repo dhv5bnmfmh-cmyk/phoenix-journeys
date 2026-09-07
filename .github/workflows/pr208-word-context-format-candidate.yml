@@ -1,0 +1,78 @@
+name: PR208 Word Context Format Candidate
+
+on:
+  push:
+    branches:
+      - validation/pr208-word-context-lazy-fix
+    paths:
+      - '.github/workflows/pr208-word-context-format-candidate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  SOURCE_CANDIDATE_SHA: 477f1b40940eda444848ded24c8b0219d04fe632
+  OLD_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+  OUTPUT_BRANCH: validation/pr208-word-context-lazy-product
+
+jobs:
+  format-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact source candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.SOURCE_CANDIDATE_SHA }}
+          fetch-depth: 0
+
+      - name: Guard source and untouched product
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_CANDIDATE_SHA"
+          test "$(git merge-base "$OLD_PRODUCT_SHA" HEAD)" = "$OLD_PRODUCT_SHA"
+          test "$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')" = "$OLD_PRODUCT_SHA"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Apply dart format only
+        working-directory: app
+        run: dart format lib/widgets/word_detail_sheet.dart
+
+      - name: Prove formatter-only delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git diff --name-only)
+          printf 'FORMAT_CHANGED=%s\n' "${changed[@]}"
+          test "${#changed[@]}" -eq 1
+          test "${changed[0]}" = "app/lib/widgets/word_detail_sheet.dart"
+          git diff --check
+          git diff -- app/lib/widgets/word_detail_sheet.dart
+
+      - name: Commit exact formatted product candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "phoenix-validation"
+          git config user.email "phoenix-validation@users.noreply.github.com"
+          git add app/lib/widgets/word_detail_sheet.dart
+          git commit -m "style: format lazy context fix"
+          formatted_sha="$(git rev-parse HEAD)"
+          echo "FORMATTED_CANDIDATE_SHA=$formatted_sha" >> "$GITHUB_ENV"
+          test "$(git rev-parse HEAD^)" = "$SOURCE_CANDIDATE_SHA"
+          git push --force-with-lease origin "HEAD:refs/heads/${OUTPUT_BRANCH}"
+
+      - name: Reconfirm product branch untouched
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin "refs/heads/${PRODUCT_BRANCH}" | awk '{print $1}')" = "$OLD_PRODUCT_SHA"
+          echo "FORMATTED_CANDIDATE_SHA=$FORMATTED_CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
