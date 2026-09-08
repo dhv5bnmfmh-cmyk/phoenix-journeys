@@ -36,6 +36,18 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
 
+          helper = Path('app/lib/services/forbidden_city_challenge_completion.dart')
+          helper_text = helper.read_text()
+          helper_text = helper_text.replace(
+              "'${correct.substring(0, markerIndex)}${marker}以后。'",
+              "'${correct.substring(0, markerIndex)}$marker以后。'",
+          )
+          helper_text = helper_text.replace(
+              "_segmentsAround(broken, '${marker}以后')",
+              "_segmentsAround(broken, '$marker以后')",
+          )
+          helper.write_text(helper_text)
+
           runtime = Path('app/lib/data/forbidden_city_story_runtime.dart')
           text = runtime.read_text()
           anchor = "import 'forbidden_city_journey_runtime.dart';\n"
