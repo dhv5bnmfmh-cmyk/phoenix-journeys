@@ -141,12 +141,13 @@ word = word.replace(old, new, 1)
 
 word_path.write_text(word)
 
-old = "import '../data/daily_journey_experience.dart';\n"
+old = "import '../data/daily_journey_experience.dart';\nimport '../data/journey_data.dart';\n"
 new = """import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
 import '../data/daily_journey_experience.dart';
+import '../data/journey_data.dart';
 
 void _pjContextAccept(String marker, {String? reason}) {
   if (Uri.base.queryParameters['pjFixedAccept'] != '1') return;
