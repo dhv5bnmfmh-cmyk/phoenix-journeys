@@ -64,6 +64,25 @@ jobs:
               ),
           ''' + s[end:]
           assert 'forbiddenCitySecondStoryWordsForLevel(phoenixLevel)' in s
+
+          # The level-specific Vocabulary/Discovery binding above makes these
+          # five legacy fixed-content translation helpers unreachable. Remove
+          # only those proven-dead helpers so full analyze stays strict.
+          for helper in (
+              '_vocabularyVietnamese',
+              '_vocabularyEnglish',
+              '_vocabularySymbol',
+              '_discoveryVietnamese',
+              '_discoveryEnglish',
+          ):
+              pattern = re.compile(
+                  rf"\nString {re.escape(helper)}\(String id\) => switch \(id\) \{{.*?\n\}};\n",
+                  re.S,
+              )
+              s, count = pattern.subn('\n', s, count=1)
+              if count == 0 and f'String {helper}(String id)' in s:
+                  raise SystemExit(f'Unable to remove dead helper {helper}')
+
           s = s.replace(
               '  final content = forbiddenCitySecondStoryLevelContent();',
               '''  final content = forbiddenCitySecondStoryLevelContent(
@@ -105,6 +124,19 @@ jobs:
           s, count = pattern.subn(replacement, s, count=1)
           if count != 1 and 'return applyForbiddenCityLevelChallengeStandard(\n      StoryChallengeSet(' not in s:
               raise SystemExit(f'Challenge final return patch count={count}')
+          p.write_text(s)
+
+          p = Path('app/test/pr208_level_completeness_contract_test.dart')
+          s = p.read_text()
+          old = '      if (blank.options.length == 4) positions.add(blank.options.indexOf(blank.answer));\n'
+          new = '''      if (blank.options.length == 4) {
+                positions.add(blank.options.indexOf(blank.answer));
+              }
+          '''
+          if old in s:
+              s = s.replace(old, new, 1)
+          if old in s:
+              raise SystemExit('Contract test single-line if lint remains')
           p.write_text(s)
           PY
 
