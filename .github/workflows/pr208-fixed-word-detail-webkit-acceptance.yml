@@ -1,5 +1,5 @@
 name: PR208 Fixed Word Detail WebKit Acceptance
-# Revision 7: reuse exact deployed artifact and tap the manual word semantics button.
+# Revision 8: touch the smallest visible word-label hit node for manual open.
 
 on:
   push:
