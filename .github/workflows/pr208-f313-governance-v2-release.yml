@@ -1,4 +1,4 @@
-name: PR208 F313 Governance V2 Release
+name: PR208 AC471FE Governance V2 Release
 
 on:
   push:
@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  RELEASE_SHA: f3136e2eb8dd99c945db1ec6901c4c0d8da59cfb
+  RELEASE_SHA: ac471fe477aac3afd4bb9276dd1cb64ae7a7a4a5
   PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
   PREVIEW_WORKER: phoenix-journeys-pr-208
   PREVIEW_URL: https://phoenix-journeys-pr-208.7hn5tyrjgh.workers.dev
