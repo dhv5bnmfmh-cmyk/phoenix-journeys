@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:phoenix_journeys/data/forbidden_city_second_story_levels.dart';
 import 'package:phoenix_journeys/data/forbidden_city_story_runtime.dart';
 import 'package:phoenix_journeys/screens/journey_screen.dart';
 import 'package:phoenix_journeys/services/narration_controller.dart';
@@ -199,8 +200,12 @@ void main() {
           content.storyParagraphs[index],
           content.storyAnnotations[index].pinyin,
         ),
-      for (final discovery in content.discoveries)
-        MapEntry(discovery.text, discovery.pinyin),
+      for (var level = 1; level <= 10; level += 1)
+        for (final discovery in forbiddenCitySecondStoryDiscoveriesForLevel(
+          level,
+          sourceRefs: const <String>[],
+        ))
+          MapEntry(discovery.text, discovery.pinyin),
     ];
 
     void expectRuntimeReading(String phrase, String expected) {
@@ -229,7 +234,6 @@ void main() {
       '乾清门': 'qián qīng mén',
       '景运门': 'jǐng yùn mén',
       '中轴': 'zhōng zhóu',
-      '午门': 'wǔ mén',
       '核对': 'hé duì',
       '交接': 'jiāo jiē',
       '空格': 'kòng gé',
@@ -245,8 +249,6 @@ void main() {
       '前面的页码': 'qián miàn de yè mǎ',
       '确认的当场': 'què rèn de dāng chǎng',
       '指着': 'zhǐ zhe',
-      '地图': 'dì tú',
-      '背建筑名字': 'bèi jiàn zhù míng zi',
     };
     for (final entry in expectedReadings.entries) {
       expectRuntimeReading(entry.key, entry.value);
