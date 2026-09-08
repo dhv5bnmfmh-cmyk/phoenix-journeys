@@ -71,9 +71,13 @@ void main() {
       reason: 'Vocabulary phase must render its first word after Continue.',
     );
 
-    // Consume the production WordDetailSheet speech fallback window so widget
-    // teardown cannot leave a test-only fake timer behind.
-    await tester.pump(const Duration(seconds: 9));
+    // Consume the layered production speech fallbacks in order. A single
+    // large fake-clock jump can trigger the WordDetailSheet timeout only at
+    // the end of that pump, leaving NarrationController's 8-second timeout
+    // newly scheduled and still pending at teardown.
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 8));
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump();
   }
