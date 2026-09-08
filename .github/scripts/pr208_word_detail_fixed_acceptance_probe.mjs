@@ -232,13 +232,9 @@ async function runAuto(browser, { label, level, storyTitle }) {
 }
 
 async function tapFirstWord(page) {
-  const candidates = (await records(page)).filter((record) =>
-    record.visible && !record.disabled && record.text.includes('中轴'))
-    .sort((a, b) => (a.width * a.height) - (b.width * b.height));
-  if (!candidates.length) throw new Error('manual first-word target 中轴 not found');
-  const target = candidates[0];
-  console.log(`MANUAL_WORD_TARGET ${JSON.stringify(target)}`);
-  await page.touchscreen.tap(target.x + target.width / 2, target.y + target.height / 2);
+  // iPhone 13 Pro Max CSS viewport: first 3-column Vocabulary cell is
+  // x=12..143, directly below the 91px progress header.
+  await page.touchscreen.tap(77.5, 145);
 }
 
 async function runManual(browser) {
