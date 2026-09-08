@@ -345,7 +345,12 @@ Future<T> _withRenderedJourney<T>(
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 160));
 
-  expect(find.text('Lv.$level'), findsOneWidget);
+  expect(PhoenixLevelController.instance.level, level);
+  expect(
+    find.byKey(const ValueKey('journey-progress-strip')),
+    findsOneWidget,
+    reason: 'Journey runtime must be structurally rendered before inspection.',
+  );
   final result = await inspect(state);
 
   await tester.pumpWidget(const SizedBox.shrink());
