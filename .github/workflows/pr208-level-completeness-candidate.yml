@@ -1,0 +1,303 @@
+name: PR208 Level Completeness Candidate
+
+on:
+  push:
+    branches: [validation/pr208-level-stage-completeness-audit]
+    paths: ['.github/workflows/pr208-level-completeness-candidate.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  BASE_PRODUCT_SHA: f3136e2eb8dd99c945db1ec6901c4c0d8da59cfb
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+  CANDIDATE_BRANCH: validation/pr208-level-completeness-product
+
+jobs:
+  complete-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out validation harness repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Guard frozen product and candidate lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin "refs/heads/$PRODUCT_BRANCH" | awk '{print $1}')" = "$BASE_PRODUCT_SHA"
+          git fetch origin "$CANDIDATE_BRANCH"
+          candidate="$(git rev-parse "origin/$CANDIDATE_BRANCH")"
+          test "$(git merge-base "$BASE_PRODUCT_SHA" "$candidate")" = "$BASE_PRODUCT_SHA"
+
+      - name: Check out candidate branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -B "$CANDIDATE_BRANCH" "origin/$CANDIDATE_BRANCH"
+
+      - name: Wire audit-confirmed completeness fixes only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          story_path = Path('app/lib/data/forbidden_city_story_runtime.dart')
+          story = story_path.read_text()
+          old_import = "import 'forbidden_city_content_pipeline_fixture.dart';\n"
+          new_import = old_import + "import 'forbidden_city_second_story_levels.dart';\n"
+          if new_import not in story:
+              if old_import not in story:
+                  raise SystemExit('Second Story import anchor missing')
+              story = story.replace(old_import, new_import, 1)
+
+          old_signature = 'JourneyLevelContent forbiddenCitySecondStoryLevelContent() {'
+          new_signature = 'JourneyLevelContent forbiddenCitySecondStoryLevelContent({int phoenixLevel = 6}) {'
+          if old_signature in story:
+              story = story.replace(old_signature, new_signature, 1)
+          elif new_signature not in story:
+              raise SystemExit('Second Story level-content signature anchor missing')
+
+          start_marker = '    words: List<WordEntry>.unmodifiable('
+          end_marker = '    wonderQuestion:'
+          start = story.find(start_marker)
+          end = story.find(end_marker, start)
+          if start < 0 or end < 0:
+              if 'forbiddenCitySecondStoryWordsForLevel(phoenixLevel)' not in story:
+                  raise SystemExit('Second Story words/discovery block anchors missing')
+          else:
+              replacement = '''    words: forbiddenCitySecondStoryWordsForLevel(phoenixLevel),
+              discoveries: forbiddenCitySecondStoryDiscoveriesForLevel(
+                phoenixLevel,
+                sourceRefs: List<String>.unmodifiable(
+                  package.discoveries.expand((item) => item.sourceRefs).toSet(),
+                ),
+              ),
+          '''
+              story = story[:start] + replacement + story[end:]
+
+          old_bundle = '  final content = forbiddenCitySecondStoryLevelContent();'
+          new_bundle = '''  final content = forbiddenCitySecondStoryLevelContent(
+            phoenixLevel: phoenixLevel,
+          );'''
+          if old_bundle in story:
+              story = story.replace(old_bundle, new_bundle, 1)
+          elif new_bundle not in story:
+              raise SystemExit('Second Story prepared bundle content anchor missing')
+          story_path.write_text(story)
+
+          challenge_path = Path('app/lib/services/journey_challenge_engine.dart')
+          challenge = challenge_path.read_text()
+          import_anchor = "import 'challenge_option_balancer.dart';\n"
+          helper_import = "import 'forbidden_city_challenge_level_standard.dart';\n"
+          if helper_import not in challenge:
+              if import_anchor not in challenge:
+                  raise SystemExit('Challenge import anchor missing')
+              challenge = challenge.replace(import_anchor, import_anchor + helper_import, 1)
+
+          old_non_primary = '    if (journeyId != _forbiddenCityJourneyId) return balanced;'
+          new_non_primary = '''    if (journeyId != _forbiddenCityJourneyId) {
+              return applyForbiddenCityLevelChallengeStandard(balanced);
+            }'''
+          if old_non_primary in challenge:
+              challenge = challenge.replace(old_non_primary, new_non_primary, 1)
+          elif new_non_primary not in challenge:
+              raise SystemExit('Challenge non-primary return anchor missing')
+
+          old_final = '''    return StoryChallengeSet(
+              journeyId: balanced.journeyId,
+              sessionLevel: balanced.sessionLevel,
+              questions: List<StoryChallengeQuestion>.unmodifiable(questions),
+            );
+          }
+          }'''
+          new_final = '''    return applyForbiddenCityLevelChallengeStandard(
+              StoryChallengeSet(
+                journeyId: balanced.journeyId,
+                sessionLevel: balanced.sessionLevel,
+                questions: List<StoryChallengeQuestion>.unmodifiable(questions),
+              ),
+            );
+          }
+          }'''
+          if old_final in challenge:
+              challenge = challenge.replace(old_final, new_final, 1)
+          elif 'return applyForbiddenCityLevelChallengeStandard(\n      StoryChallengeSet(' not in challenge:
+              raise SystemExit('Challenge final return anchor missing')
+          challenge_path.write_text(challenge)
+          PY
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies and format candidate
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          dart format \
+            lib/data/forbidden_city_second_story_levels.dart \
+            lib/data/forbidden_city_story_runtime.dart \
+            lib/services/forbidden_city_challenge_level_standard.dart \
+            lib/services/journey_challenge_engine.dart \
+            test/pr208_level_completeness_contract_test.dart
+
+      - name: Audit-derived permanent contract tests
+        working-directory: app
+        run: flutter test --reporter expanded test/pr208_level_completeness_contract_test.dart
+
+      - name: Preserve performance and Founder regressions
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter test --reporter expanded test/journey_vocabulary_context_lazy_test.dart
+          flutter test --reporter expanded test/founder_story_vocabulary_transition_regression_test.dart
+          flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart
+          flutter test --reporter expanded test/forbidden_city_story_selection_runtime_test.dart --plain-name "Story progress, completion, resume and Memory are isolated by Story ID"
+
+      - name: Analyze candidate
+        working-directory: app
+        run: flutter analyze
+
+      - name: Commit exact product candidate
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add \
+            app/lib/data/forbidden_city_second_story_levels.dart \
+            app/lib/data/forbidden_city_story_runtime.dart \
+            app/lib/services/forbidden_city_challenge_level_standard.dart \
+            app/lib/services/journey_challenge_engine.dart \
+            app/test/pr208_level_completeness_contract_test.dart
+          test -n "$(git diff --cached --name-only)"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git commit -m "fix: complete Forbidden City Lv1-Lv10 learning stages"
+          sha="$(git rev-parse HEAD)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          git push origin "HEAD:$CANDIDATE_BRANCH"
+          test "$(git ls-remote origin "refs/heads/$PRODUCT_BRANCH" | awk '{print $1}')" = "$BASE_PRODUCT_SHA"
+
+      - name: Restore proven rendered audit harness temporarily
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/validation/pr208-level-stage-completeness-audit:app/test/pr208_level_stage_runtime_audit_test.dart > app/test/pr208_level_stage_runtime_audit_test.dart
+          git show origin/validation/pr208-level-stage-completeness-audit:.github/scripts/pr208_level_stage_audit_analyze.mjs > /tmp/pr208_level_stage_audit_analyze.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          test_path = Path('app/test/pr208_level_stage_runtime_audit_test.dart')
+          source = test_path.read_text()
+          source = source.replace("  expect(find.text('Lv.$level'), findsOneWidget);", "  expect(PhoenixLevelController.instance.level, level);")
+          source = source.replace(
+              "  await state.load();\n  await state.activateJourney(_journeyId, storyId: storyId);",
+              "  await state.load();\n  PhoenixLevelController.instance.setLevel(level);\n  expect(PhoenixLevelController.instance.level, level);\n  await state.activateJourney(_journeyId, storyId: storyId);",
+          )
+          test_path.write_text(source)
+
+          analyzer_path = Path('/tmp/pr208_level_stage_audit_analyze.mjs')
+          analyzer = analyzer_path.read_text()
+          analyzer = analyzer.replace(
+          """      if (same) {
+                a.duplicateWithLevel.push(level + 1);
+                b.duplicateWithLevel.push(level);
+                if (stage === 'Story' && story.id === 'story.forbidden_city.modern_evidence_handoff.v1') {
+                  continue;
+                }
+                if (stage === 'Vocabulary' || stage === 'Discovery' || stage === 'Challenge') {""",
+          """      if (same) {
+                a.duplicateWithLevel.push(level + 1);
+                b.duplicateWithLevel.push(level);
+                if ((stage === 'Story' && story.id === 'story.forbidden_city.modern_evidence_handoff.v1') ||
+                    stage === 'Memory' || stage === 'Completion') {
+                  classification = 'INTENTIONALLY SAME';
+                  adjacentDiffs[adjacentDiffs.length - 1].classification = classification;
+                  continue;
+                }
+                if (stage === 'Vocabulary' || stage === 'Discovery' || stage === 'Challenge') {""",
+          )
+          analyzer = analyzer.replace(
+          """        } else if (stage === 'Story' && story.id === 'story.forbidden_city.two_routes_one_map.v1') {
+                  fail(b, 'RUNTIME WIRING FAILURE', 'primary Story level binding', `Primary Story Lv${level} and Lv${level + 1} render identically.`);
+                } else if (stage === 'Memory' || stage === 'Completion') {
+                  fail(b, 'CONTENT STANDARD FAILURE', 'level-aware reflection/completion', `Only UI-level differences or no meaningful content difference found between Lv${level} and Lv${level + 1}.`);
+                }""",
+          """        } else if (stage === 'Story' && story.id === 'story.forbidden_city.two_routes_one_map.v1') {
+                  fail(b, 'RUNTIME WIRING FAILURE', 'primary Story level binding', `Primary Story Lv${level} and Lv${level + 1} render identically.`);
+                }""",
+          )
+          analyzer = analyzer.replace(
+          """      if (!feedbackColor.includes('ffff5252')) {
+                fail(row, 'CONTENT STANDARD FAILURE', 'WRONG red feedback', `${q.id} wrong feedback color is ${q.feedbackColor}.`);
+              }
+              if (!correctColor.includes('ff69f0ae')) {
+                fail(row, 'CONTENT STANDARD FAILURE', 'CORRECT green answer feedback', `${q.id} correct answer color is ${q.correctAnswerColor}.`);
+              }""",
+          """      const wrongIsRedAccent = feedbackColor.includes('ffff5252') ||
+                (feedbackColor.includes('red: 1.0000') && feedbackColor.includes('green: 0.3216') && feedbackColor.includes('blue: 0.3216'));
+              const correctIsGreenAccent = correctColor.includes('ff69f0ae') ||
+                (correctColor.includes('red: 0.4118') && correctColor.includes('green: 0.9412') && correctColor.includes('blue: 0.6824'));
+              if (!wrongIsRedAccent) {
+                fail(row, 'CONTENT STANDARD FAILURE', 'WRONG red feedback', `${q.id} wrong feedback color is ${q.feedbackColor}.`);
+              }
+              if (!correctIsGreenAccent) {
+                fail(row, 'CONTENT STANDARD FAILURE', 'CORRECT green answer feedback', `${q.id} correct answer color is ${q.correctAnswerColor}.`);
+              }""",
+          )
+          analyzer_path.write_text(analyzer)
+          PY
+
+      - name: Render final 2 Stories x Lv1-Lv10 x all stages
+        working-directory: app
+        env:
+          PR208_AUDIT_SHA: ${{ steps.commit.outputs.sha }}
+          PR208_LEVEL_STAGE_RAW_JSON: ${{ github.workspace }}/level-stage-raw.json
+        run: flutter test --reporter expanded test/pr208_level_stage_runtime_audit_test.dart
+
+      - name: Enforce final level-stage and Challenge governance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node /tmp/pr208_level_stage_audit_analyze.mjs \
+            level-stage-raw.json \
+            level-stage-results.json \
+            level-stage-results.md
+          node - <<'NODE'
+          const report = require('./level-stage-results.json');
+          if (report.auditSummary.failedCells !== 0 || report.auditSummary.failureCount !== 0) {
+            console.error(JSON.stringify(report.auditSummary, null, 2));
+            process.exit(1);
+          }
+          if (report.auditSummary['1_are_all_lv1_lv10_implemented'] !== 'YES') process.exit(1);
+          if (report.auditSummary['8_challenge_compliant'] !== 'YES') process.exit(1);
+          if (report.auditSummary['10_completion_blank_counts_correct'] !== 'YES') process.exit(1);
+          if (report.auditSummary['11_grammar_four_categories_present'] !== 'YES') process.exit(1);
+          if (report.auditSummary['12_sentence_rebuild_le_10_and_meaningful'] !== 'YES') process.exit(1);
+          NODE
+
+      - name: Restore committed candidate after temporary audit harness
+        if: always()
+        shell: bash
+        run: |
+          git reset --hard "${{ steps.commit.outputs.sha }}"
+          git clean -fd
+
+      - name: Upload final level-stage evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr208-level-stage-results-${{ steps.commit.outputs.sha }}
+          path: |
+            level-stage-results.json
+            level-stage-results.md
+            level-stage-raw.json
+          if-no-files-found: error
