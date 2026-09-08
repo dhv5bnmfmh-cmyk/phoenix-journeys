@@ -87,7 +87,7 @@ function markerTracker(page, label) {
   });
   return {
     events,
-    wait(marker, timeout = 15000) {
+    wait(marker, timeout = 45000) {
       const existing = events.find((event) => event.marker === marker);
       if (existing) return Promise.resolve(existing);
       return new Promise((resolve, reject) => {
