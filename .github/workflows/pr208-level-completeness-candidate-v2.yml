@@ -212,6 +212,16 @@ jobs:
           if old not in s:
               raise SystemExit('Unable to locate audit level setup block')
           s = s.replace(old, new, 1)
+
+          old_tile = '''      final finder = find.widgetWithText(ActionChip, chunk);
+                expect(finder, findsOneWidget, reason: 'missing rebuild tile $chunk');
+                await _tapFinder(tester, finder);'''
+          new_tile = '''      final finder = find.widgetWithText(ActionChip, chunk);
+                expect(finder, findsWidgets, reason: 'missing rebuild tile $chunk');
+                await _tapFinder(tester, finder.first);'''
+          if old_tile not in s:
+              raise SystemExit('Unable to locate rebuild tile harness block')
+          s = s.replace(old_tile, new_tile, 1)
           p.write_text(s)
 
           p = Path('/tmp/audit.mjs')
