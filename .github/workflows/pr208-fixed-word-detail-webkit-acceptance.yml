@@ -1,5 +1,5 @@
 name: PR208 Fixed Word Detail WebKit Acceptance
-# Revision 8: touch the smallest visible word-label hit node for manual open.
+# Revision 9: bypass stale Story semantics and touch the visible first grid cell.
 
 on:
   push:
