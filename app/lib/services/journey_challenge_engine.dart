@@ -1,5 +1,6 @@
 import '../models/journey_challenge.dart';
 import 'challenge_option_balancer.dart';
+import 'forbidden_city_challenge_level_standard.dart';
 import 'journey_challenge_engine_legacy.dart' as legacy;
 
 export 'journey_challenge_engine_legacy.dart' hide JourneyChallengeEngine;
@@ -26,7 +27,9 @@ class JourneyChallengeEngine {
       storyParagraphs: storyParagraphs,
     );
     final balanced = _balanceRenderedMultipleChoiceOrder(base);
-    if (journeyId != _forbiddenCityJourneyId) return balanced;
+    if (journeyId != _forbiddenCityJourneyId) {
+      return applyForbiddenCityLevelChallengeStandard(balanced);
+    }
 
     var rebuildIndex = 0;
     final questions = <StoryChallengeQuestion>[];
@@ -45,10 +48,12 @@ class JourneyChallengeEngine {
       rebuildIndex += 1;
     }
 
-    return StoryChallengeSet(
-      journeyId: balanced.journeyId,
-      sessionLevel: balanced.sessionLevel,
-      questions: List<StoryChallengeQuestion>.unmodifiable(questions),
+    return applyForbiddenCityLevelChallengeStandard(
+      StoryChallengeSet(
+        journeyId: balanced.journeyId,
+        sessionLevel: balanced.sessionLevel,
+        questions: List<StoryChallengeQuestion>.unmodifiable(questions),
+      ),
     );
   }
 }
@@ -101,7 +106,8 @@ StoryChallengeSet _balanceRenderedMultipleChoiceOrder(
         <String>[for (final index in order) question.options[index]],
       );
       if (question.grammarOptionExplanations.isNotEmpty) {
-        if (question.grammarOptionExplanations.length != question.options.length) {
+        if (question.grammarOptionExplanations.length !=
+            question.options.length) {
           throw StateError(
             '${question.id} option explanations must align before reorder.',
           );
@@ -154,7 +160,8 @@ StoryChallengeSet _balanceRenderedMultipleChoiceOrder(
 
   if (directCursor != directPositions.length ||
       completionCursor != completionPositions.length) {
-    throw StateError('Rendered multiple-choice scheduling did not consume all items.');
+    throw StateError(
+        'Rendered multiple-choice scheduling did not consume all items.');
   }
 
   return StoryChallengeSet(
@@ -177,7 +184,8 @@ List<int> _optionIndexOrderForTarget(
       if (options[index] == answer) index,
   ];
   if (correctIndices.length != 1) {
-    throw StateError('Multiple-choice item must contain exactly one correct option.');
+    throw StateError(
+        'Multiple-choice item must contain exactly one correct option.');
   }
   final correctIndex = correctIndices.single;
   final order = List<int>.generate(options.length, (index) => index)
@@ -322,10 +330,12 @@ StoryChallengeQuestion _compactForbiddenCityRebuild(
   final band = ((level.clamp(1, 10).toInt() - 1) ~/ 2).clamp(0, 4);
   final authored = _forbiddenCityConciseRebuildBands[band][index];
   if (_hanCount(authored.sentence) != 10) {
-    throw StateError('Forbidden City rebuild must stay exactly 10 Han characters.');
+    throw StateError(
+        'Forbidden City rebuild must stay exactly 10 Han characters.');
   }
   if (authored.chunks.join() != authored.sentence) {
-    throw StateError('Forbidden City concise rebuild chunks must reconstruct the sentence.');
+    throw StateError(
+        'Forbidden City concise rebuild chunks must reconstruct the sentence.');
   }
 
   final punctuationSentence = '${authored.sentence}。';
@@ -360,7 +370,8 @@ StoryChallengeQuestion _compactForbiddenCityRebuild(
       operationType: signature.operationType,
       errorFamily: signature.errorFamily,
       gapType: signature.gapType,
-      answerShape: '${_hanCount(authored.sentence)}字 / ${authored.chunks.length}块',
+      answerShape:
+          '${_hanCount(authored.sentence)}字 / ${authored.chunks.length}块',
       distractorStrategy: signature.distractorStrategy,
       blankPositionPattern: signature.blankPositionPattern,
     ),

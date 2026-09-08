@@ -3,6 +3,7 @@ import 'package:pinyin/pinyin.dart';
 import '../models/content_pipeline.dart';
 import '../models/journey_prepared_bundle.dart';
 import 'forbidden_city_content_pipeline_fixture.dart';
+import 'forbidden_city_second_story_levels.dart';
 import 'forbidden_city_journey_runtime.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
@@ -155,48 +156,55 @@ const _storyEnglish = <String>[
 
 // ignore: unused_element
 String _vocabularyVietnamese(String id) => switch (id) {
-  'vocab.central_axis' => 'trục trung tâm',
-  'vocab.jingyun_gate' => 'Cảnh Vận Môn',
-  'vocab.verify' => 'đối chiếu; kiểm tra chéo',
-  'vocab.handoff' => 'bàn giao',
-  _ => '',
-};
+      'vocab.central_axis' => 'trục trung tâm',
+      'vocab.jingyun_gate' => 'Cảnh Vận Môn',
+      'vocab.verify' => 'đối chiếu; kiểm tra chéo',
+      'vocab.handoff' => 'bàn giao',
+      _ => '',
+    };
 
 // ignore: unused_element
 String _vocabularyEnglish(String id) => switch (id) {
-  'vocab.central_axis' => 'central axis',
-  'vocab.jingyun_gate' => 'Jingyun Gate',
-  'vocab.verify' => 'to cross-check; to verify by comparison',
-  'vocab.handoff' => 'handoff; transfer of work or responsibility',
-  _ => '',
-};
+      'vocab.central_axis' => 'central axis',
+      'vocab.jingyun_gate' => 'Jingyun Gate',
+      'vocab.verify' => 'to cross-check; to verify by comparison',
+      'vocab.handoff' => 'handoff; transfer of work or responsibility',
+      _ => '',
+    };
 
 // ignore: unused_element
 String _vocabularySymbol(String id) => switch (id) {
-  'vocab.central_axis' => '↕️',
-  'vocab.jingyun_gate' => '🚪',
-  'vocab.verify' => '🔎',
-  'vocab.handoff' => '🤝',
-  _ => '•',
-};
+      'vocab.central_axis' => '↕️',
+      'vocab.jingyun_gate' => '🚪',
+      'vocab.verify' => '🔎',
+      'vocab.handoff' => '🤝',
+      _ => '•',
+    };
 
 // ignore: unused_element
 String _discoveryVietnamese(String id) => switch (id) {
-  'discovery.spatial_types' => 'Khi đọc không gian Tử Cấm Thành, “Ngọ Môn” và “trục giữa” không phải cùng một loại thông tin: Ngọ Môn là một cổng cụ thể, còn trục giữa mô tả chuỗi không gian bắc–nam do các cổng, sân và công trình chính tạo thành. Ngọ Môn nằm trên trục bắc–nam này, vì vậy hiểu tuyến đường đòi hỏi vừa nhận diện công trình vừa hiểu quan hệ không gian tổ chức chúng.',
-  'discovery.qianqing_gate_function' => 'Càn Thanh Môn không chỉ là một tên trên bản đồ. Tư liệu đã được xác minh cho biết đây là chính môn của Nội đình và cũng là lối quan trọng nối việc đi lại giữa Nội đình và Ngoại triều. Khi học về Càn Thanh Môn, cần hiểu tên gọi cùng với những không gian mà nó kết nối.',
-  'discovery.spatial_relations' => 'Chỉ học thuộc tên công trình không đủ để phán đoán quan hệ không gian. Tư liệu đã được xác minh đặt Cảnh Vận Môn ở phía đông quảng trường trước Càn Thanh Môn, đồng thời cho thấy các cổng, sân và công trình chính trên trục giữa tạo thành một chuỗi bắc–nam rõ ràng. Khi nhìn cổng, quảng trường, phương hướng và trục cùng nhau, tên gọi mới trở thành thông tin không gian có thể sử dụng.',
-  _ => '',
-};
+      'discovery.spatial_types' =>
+        'Khi đọc không gian Tử Cấm Thành, “Ngọ Môn” và “trục giữa” không phải cùng một loại thông tin: Ngọ Môn là một cổng cụ thể, còn trục giữa mô tả chuỗi không gian bắc–nam do các cổng, sân và công trình chính tạo thành. Ngọ Môn nằm trên trục bắc–nam này, vì vậy hiểu tuyến đường đòi hỏi vừa nhận diện công trình vừa hiểu quan hệ không gian tổ chức chúng.',
+      'discovery.qianqing_gate_function' =>
+        'Càn Thanh Môn không chỉ là một tên trên bản đồ. Tư liệu đã được xác minh cho biết đây là chính môn của Nội đình và cũng là lối quan trọng nối việc đi lại giữa Nội đình và Ngoại triều. Khi học về Càn Thanh Môn, cần hiểu tên gọi cùng với những không gian mà nó kết nối.',
+      'discovery.spatial_relations' =>
+        'Chỉ học thuộc tên công trình không đủ để phán đoán quan hệ không gian. Tư liệu đã được xác minh đặt Cảnh Vận Môn ở phía đông quảng trường trước Càn Thanh Môn, đồng thời cho thấy các cổng, sân và công trình chính trên trục giữa tạo thành một chuỗi bắc–nam rõ ràng. Khi nhìn cổng, quảng trường, phương hướng và trục cùng nhau, tên gọi mới trở thành thông tin không gian có thể sử dụng.',
+      _ => '',
+    };
 
 // ignore: unused_element
 String _discoveryEnglish(String id) => switch (id) {
-  'discovery.spatial_types' => 'In the Forbidden City, “Meridian Gate” and “central axis” are different kinds of spatial information. Meridian Gate is a specific gate, while the central axis describes the north–south sequence formed by gates, courtyards, and major buildings. Because Meridian Gate lies on that axis, route understanding requires both recognizing buildings and understanding the spatial relations that organize them.',
-  'discovery.qianqing_gate_function' => 'Qianqing Gate is more than a name on a map. Verified material identifies it as the principal gate of the Inner Court and an important passage connecting movement between the Inner and Outer Courts. Learning the gate therefore means understanding both its name and the spaces it connects.',
-  'discovery.spatial_relations' => 'Memorizing building names alone is not enough to reason about space. Verified material places Jingyun Gate on the east side of the square before Qianqing Gate and describes the gates, courtyards, and major buildings along the central axis as a clear north–south sequence. Reading gate, square, direction, and axis together turns names into usable spatial information.',
-  _ => '',
-};
+      'discovery.spatial_types' =>
+        'In the Forbidden City, “Meridian Gate” and “central axis” are different kinds of spatial information. Meridian Gate is a specific gate, while the central axis describes the north–south sequence formed by gates, courtyards, and major buildings. Because Meridian Gate lies on that axis, route understanding requires both recognizing buildings and understanding the spatial relations that organize them.',
+      'discovery.qianqing_gate_function' =>
+        'Qianqing Gate is more than a name on a map. Verified material identifies it as the principal gate of the Inner Court and an important passage connecting movement between the Inner and Outer Courts. Learning the gate therefore means understanding both its name and the spaces it connects.',
+      'discovery.spatial_relations' =>
+        'Memorizing building names alone is not enough to reason about space. Verified material places Jingyun Gate on the east side of the square before Qianqing Gate and describes the gates, courtyards, and major buildings along the central axis as a clear north–south sequence. Reading gate, square, direction, and axis together turns names into usable spatial information.',
+      _ => '',
+    };
 
-JourneyLevelContent forbiddenCitySecondStoryLevelContent() {
+JourneyLevelContent forbiddenCitySecondStoryLevelContent(
+    {int phoenixLevel = 6}) {
   ensureForbiddenCitySecondStoryRuntimeValid();
   final package = forbiddenCityPipelineFixture;
   const paragraphs = _secondStoryVisibleParagraphs;
@@ -221,29 +229,11 @@ JourneyLevelContent forbiddenCitySecondStoryLevelContent() {
           english: _storyEnglish[index],
         ),
     ]),
-    words: List<WordEntry>.unmodifiable(
-      package.vocabulary.map(
-        (item) => WordEntry(
-          word: item.word,
-          pinyin: item.pinyin,
-          partOfSpeech: item.partOfSpeech,
-          simpleChinese: item.simpleChinese,
-          translation: _vocabularyVietnamese(item.id),
-          englishDefinition: _vocabularyEnglish(item.id),
-          symbol: _vocabularySymbol(item.id),
-        ),
-      ),
-    ),
-    discoveries: List<DiscoveryEntry>.unmodifiable(
-      package.discoveries.map(
-        (item) => DiscoveryEntry(
-          text: item.text,
-          pinyin: _pinyin(item.text),
-          simpleChinese: item.text,
-          vietnamese: _discoveryVietnamese(item.id),
-          english: _discoveryEnglish(item.id),
-          sourceRefs: item.sourceRefs,
-        ),
+    words: forbiddenCitySecondStoryWordsForLevel(phoenixLevel),
+    discoveries: forbiddenCitySecondStoryDiscoveriesForLevel(
+      phoenixLevel,
+      sourceRefs: List<String>.unmodifiable(
+        package.discoveries.expand((item) => item.sourceRefs).toSet(),
       ),
     ),
     wonderQuestion: '',
@@ -262,7 +252,9 @@ JourneyPreparedBundle forbiddenCitySecondStoryPreparedBundle({
   required int phoenixLevel,
   required String scriptMode,
 }) {
-  final content = forbiddenCitySecondStoryLevelContent();
+  final content = forbiddenCitySecondStoryLevelContent(
+    phoenixLevel: phoenixLevel,
+  );
   final paragraphs = List<String>.unmodifiable(content.storyParagraphs);
   return JourneyPreparedBundle(
     key: JourneyPreparationKey(

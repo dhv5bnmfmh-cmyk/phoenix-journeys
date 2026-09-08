@@ -206,8 +206,25 @@ const _levelWordIds = <List<String>>[
   ['axis', 'jingyun', 'qianqing', 'verify', 'handoff', 'blank'],
   ['qianqing', 'correction', 'leaveBlank', 'pending', 'confirm', 'doubt'],
   ['jingyun', 'qianqing', 'east', 'correction', 'recordBook', 'takeOver'],
-  ['uncertain', 'correction', 'leaveBlank', 'pending', 'page', 'signature', 'confirm'],
-  ['axis', 'jingyun', 'qianqing', 'verify', 'handoff', 'uncertain', 'correction', 'pending'],
+  [
+    'uncertain',
+    'correction',
+    'leaveBlank',
+    'pending',
+    'page',
+    'signature',
+    'confirm'
+  ],
+  [
+    'axis',
+    'jingyun',
+    'qianqing',
+    'verify',
+    'handoff',
+    'uncertain',
+    'correction',
+    'pending'
+  ],
 ];
 
 WordEntry _entry(String id) {

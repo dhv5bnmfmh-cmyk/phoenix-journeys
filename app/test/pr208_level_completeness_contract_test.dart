@@ -4,15 +4,15 @@ import 'package:phoenix_journeys/data/forbidden_city_story_runtime.dart';
 import 'package:phoenix_journeys/models/journey_challenge.dart';
 import 'package:phoenix_journeys/services/journey_challenge_engine.dart';
 
-String _challengeIdentity(StoryChallengeSet set, StoryChallengeMode mode) => set
-    .questions
-    .where((question) => question.mode == mode)
-    .map(
-      (question) =>
-          '${question.prompt}|${question.answer}|${question.sourceSentence}',
-    )
-    .toList(growable: false)
-    .join('\n');
+String _challengeIdentity(StoryChallengeSet set, StoryChallengeMode mode) =>
+    set.questions
+        .where((question) => question.mode == mode)
+        .map(
+          (question) =>
+              '${question.prompt}|${question.answer}|${question.sourceSentence}',
+        )
+        .toList(growable: false)
+        .join('\n');
 
 int _hanCount(String value) =>
     RegExp(r'[\u3400-\u9fff]').allMatches(value).length;
@@ -32,7 +32,8 @@ int _maxStreak(List<int> values) {
 void _expectChallengeContracts(StoryChallengeSet set, String storyId) {
   expect(set.questions, hasLength(12));
   for (final mode in StoryChallengeMode.values) {
-    expect(set.questions.where((question) => question.mode == mode), hasLength(4));
+    expect(
+        set.questions.where((question) => question.mode == mode), hasLength(4));
   }
 
   final rebuild = set.questions
@@ -71,12 +72,14 @@ void _expectChallengeContracts(StoryChallengeSet set, String storyId) {
     expect(question.errorSegments.join(), question.prompt);
     expect(question.options, hasLength(4));
     expect(question.options.toSet(), hasLength(4));
-    expect(question.options.where((option) => option == question.answer), hasLength(1));
+    expect(question.options.where((option) => option == question.answer),
+        hasLength(1));
     expect(question.grammarWhyWrong?.trim(), isNotEmpty);
     expect(question.grammarRevisionRule?.trim(), isNotEmpty);
     expect(question.grammarOptionExplanations, hasLength(4));
     expect(
-      question.grammarOptionExplanations.every((item) => item.trim().isNotEmpty),
+      question.grammarOptionExplanations
+          .every((item) => item.trim().isNotEmpty),
       isTrue,
     );
   }
@@ -89,7 +92,8 @@ void _expectChallengeContracts(StoryChallengeSet set, String storyId) {
     for (final blank in question.completionBlanks) {
       expect(blank.options, hasLength(4));
       expect(blank.options.toSet(), hasLength(4));
-      expect(blank.options.where((option) => option == blank.answer), hasLength(1));
+      expect(blank.options.where((option) => option == blank.answer),
+          hasLength(1));
     }
   }
 
@@ -110,11 +114,16 @@ void _expectChallengeContracts(StoryChallengeSet set, String storyId) {
   for (final position in positions) {
     counts[position] += 1;
   }
-  expect(counts.reduce((a, b) => a > b ? a : b) - counts.reduce((a, b) => a < b ? a : b), lessThanOrEqualTo(1));
+  expect(
+      counts.reduce((a, b) => a > b ? a : b) -
+          counts.reduce((a, b) => a < b ? a : b),
+      lessThanOrEqualTo(1));
 }
 
 void main() {
-  test('Second Story keeps Founder prose while Vocabulary and Discovery scale Lv1-Lv10', () {
+  test(
+      'Second Story keeps Founder prose while Vocabulary and Discovery scale Lv1-Lv10',
+      () {
     final vocabularyIdentities = <String>{};
     final discoveryIdentities = <String>{};
     List<String>? founderStory;
@@ -127,7 +136,8 @@ void main() {
       expect(content.discoveries, isNotEmpty);
       for (final word in content.words) {
         expect(
-          content.storyParagraphs.any((paragraph) => paragraph.contains(word.word)),
+          content.storyParagraphs
+              .any((paragraph) => paragraph.contains(word.word)),
           isTrue,
           reason: 'Lv$level ${word.word} must occur in Founder Story',
         );
@@ -135,7 +145,8 @@ void main() {
         expect(word.simpleChinese, isNotEmpty);
         expect(word.englishDefinition, isNotEmpty);
       }
-      vocabularyIdentities.add(content.words.map((word) => word.word).join('|'));
+      vocabularyIdentities
+          .add(content.words.map((word) => word.word).join('|'));
       discoveryIdentities.add(
         content.discoveries.map((item) => item.text).join('|'),
       );
@@ -145,14 +156,18 @@ void main() {
     expect(discoveryIdentities, hasLength(10));
 
     final defaultContent = forbiddenCitySecondStoryLevelContent();
-    final defaultWords = {for (final word in defaultContent.words) word.word: word.pinyin};
+    final defaultWords = {
+      for (final word in defaultContent.words) word.word: word.pinyin
+    };
     expect(defaultWords['中轴'], 'zhōngzhóu');
     expect(defaultWords['景运门'], 'jǐngyùnmén');
     expect(defaultWords['核对'], 'héduì');
     expect(defaultWords['交接'], 'jiāojiē');
   });
 
-  test('Both Forbidden City Stories have complete level-specific Challenge contracts', () {
+  test(
+      'Both Forbidden City Stories have complete level-specific Challenge contracts',
+      () {
     final primaryRebuild = <String>[];
     final primaryGrammar = <String>[];
     final secondRebuild = <String>[];

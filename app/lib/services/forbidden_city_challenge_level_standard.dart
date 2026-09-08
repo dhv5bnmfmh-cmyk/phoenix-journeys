@@ -274,7 +274,8 @@ StoryChallengeQuestion _standardRebuild(
   final sentence = levels[safeLevel - 1][index].sentence;
   final han = _hanCount(sentence);
   if (han == 0 || han > 10) {
-    throw StateError('$journeyId Lv$safeLevel rebuild-$index has $han Han chars');
+    throw StateError(
+        '$journeyId Lv$safeLevel rebuild-$index has $han Han chars');
   }
   final chunks = _chunks(sentence, safeLevel);
   if (chunks.join() != sentence || chunks.length < 2) {
@@ -291,7 +292,8 @@ StoryChallengeQuestion _standardRebuild(
         : '复原一条来自“交接前的标记”的紫禁城知识句',
     answer: sentence,
     options: source.options,
-    characterTiles: List<String>.unmodifiable(_scramble(chunks, index, safeLevel)),
+    characterTiles:
+        List<String>.unmodifiable(_scramble(chunks, index, safeLevel)),
     errorSegments: source.errorSegments,
     errorSegmentIndex: source.errorSegmentIndex,
     grammarFamily: source.grammarFamily,
@@ -604,7 +606,11 @@ List<String> _chunks(String sentence, int level) {
     ..sort((a, b) => b.length.compareTo(a.length));
   final result = <String>[];
   var cursor = 0;
-  final width = level >= 7 ? 1 : level >= 4 ? 2 : 3;
+  final width = level >= 7
+      ? 1
+      : level >= 4
+          ? 2
+          : 3;
   while (cursor < sentence.length) {
     String? protected;
     for (final term in terms) {
