@@ -250,6 +250,7 @@ async function runManual(browser) {
   await tracker.wait('PJ_M3_STEP_COMMITTED');
   await tracker.wait('PJ_M4_VOCAB_FIRST_FRAME');
   await tracker.wait('PJ_FIRST_WORD_AUTO_OPEN_SKIPPED');
+  await sleep(500);
   await tapFirstWord(page);
   await tracker.wait('PJ_WORD_DETAIL_ROUTE_PUSH_RETURNED');
   await tracker.wait('PJ_WORD_EXAMPLE_COLD_END');
