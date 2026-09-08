@@ -1,0 +1,143 @@
+name: PR208 F313 Governance V2 Release
+
+on:
+  push:
+    branches: [validation/pr208-word-context-lazy-fix]
+    paths: ['.github/workflows/pr208-f313-governance-v2-release.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: pr208-f313-governance-v2-release
+  cancel-in-progress: false
+
+env:
+  RELEASE_SHA: f3136e2eb8dd99c945db1ec6901c4c0d8da59cfb
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+  PREVIEW_WORKER: phoenix-journeys-pr-208
+  PREVIEW_URL: https://phoenix-journeys-pr-208.7hn5tyrjgh.workers.dev
+
+jobs:
+  governance-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Preserve release smoke harness
+        uses: actions/checkout@v6
+        with: { fetch-depth: 0 }
+      - shell: bash
+        run: |
+          mkdir -p /tmp/pr208-release
+          cp .github/scripts/pr208_deployed_product_webkit_smoke.mjs /tmp/pr208-release/
+          cp .github/scripts/journey_level_session_harness.mjs /tmp/pr208-release/
+      - name: Check out clean exact release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$RELEASE_SHA"
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          test "$(git ls-remote origin "refs/heads/$PRODUCT_BRANCH" | awk '{print $1}')" = "$RELEASE_SHA"
+          test -z "$(git status --porcelain)"
+          test "$(git merge-base 86619b8173c3e57fc6be3780030dfdad0a38afa1 "$RELEASE_SHA")" = 86619b8173c3e57fc6be3780030dfdad0a38afa1
+      - name: Founder-like automated acceptance and targeted tests
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart
+          flutter test --reporter expanded test/founder_story_vocabulary_transition_regression_test.dart
+          flutter test --reporter expanded test/journey_vocabulary_context_lazy_test.dart
+          flutter test --reporter expanded test/forbidden_city_story_selection_runtime_test.dart --plain-name "Story progress, completion, resume and Memory are isolated by Story ID"
+          flutter test --reporter expanded test/journey_runtime_performance_gate_test.dart test/settings_journey_session_lock_test.dart
+      - name: Analyze exact product
+        working-directory: app
+        run: flutter analyze
+      - name: Full Flutter and quality evidence
+        working-directory: app
+        env:
+          PHOENIX_GENERATE_QUALITY_REPORT: '1'
+          PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
+          PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
+        run: flutter test --reporter expanded
+      - name: Targeted worker tests
+        run: node --test worker/*.test.mjs
+      - name: Enforce quality
+        shell: bash
+        run: |
+          node -e 'const r=require("./journey-quality-report.json"); if(!r.canPublish) process.exit(1)'
+      - name: Upload quality evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr208-quality-${{ env.RELEASE_SHA }}
+          path: |
+            journey-quality-report.md
+            journey-quality-report.json
+          if-no-files-found: error
+      - name: Build artifact A once
+        working-directory: app
+        run: flutter build web --release
+      - name: Fingerprint artifact A
+        shell: bash
+        run: |
+          find app/build/web -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/artifact-a.sha256
+          test -s /tmp/artifact-a.sha256
+      - name: Validate same artifact A
+        shell: bash
+        run: |
+          npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
+          sha256sum -c /tmp/artifact-a.sha256
+      - name: Clean exact release check
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          test "$(git ls-remote origin "refs/heads/$PRODUCT_BRANCH" | awk '{print $1}')" = "$RELEASE_SHA"
+          test -z "$(git status --porcelain --untracked-files=no)"
+          sha256sum -c /tmp/artifact-a.sha256
+      - name: Deploy same artifact A
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          sha256sum -c /tmp/artifact-a.sha256
+          npx --yes wrangler@4 deploy --name "$PREVIEW_WORKER" --var "PHOENIX_RELEASE:$RELEASE_SHA"
+          sha256sum -c /tmp/artifact-a.sha256
+      - name: Health exact SHA
+        shell: bash
+        run: |
+          for attempt in {1..30}; do
+            response="$(curl -fsS "$PREVIEW_URL/api/health" || true)"
+            if node -e 'const h=JSON.parse(process.argv[1]); if(!h.ok||h.release!==process.argv[2])process.exit(1)' "$response" "$RELEASE_SHA"; then exit 0; fi
+            sleep 5
+          done
+          exit 1
+      - name: Install mobile WebKit
+        shell: bash
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/pr208-browser" playwright
+          "$RUNNER_TEMP/pr208-browser/node_modules/.bin/playwright" install --with-deps webkit
+      - name: Deployed mobile WebKit smoke
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/pr208-browser/node_modules/playwright/index.mjs
+        shell: bash
+        run: |
+          cp /tmp/pr208-release/*.mjs /tmp/
+          node /tmp/pr208_deployed_product_webkit_smoke.mjs "$PREVIEW_URL" "$RELEASE_SHA" | tee deployed-webkit-smoke.log
+      - name: Upload deployed smoke
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr208-deployed-webkit-${{ env.RELEASE_SHA }}
+          path: deployed-webkit-smoke.log
+          if-no-files-found: error
+      - name: Publish exact preview status
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          target="$PREVIEW_URL/?unlock=all&prototype=journeys&v=$RELEASE_SHA"
+          payload="$(node -e 'process.stdout.write(JSON.stringify({state:"success",description:"Governance V2 + deployed WebKit PASS",context:"cloudflare/preview",target_url:process.argv[1]}))' "$target")"
+          curl -fsS -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/$GITHUB_REPOSITORY/statuses/$RELEASE_SHA" --data "$payload" >/dev/null
