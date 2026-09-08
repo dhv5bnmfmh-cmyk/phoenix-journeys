@@ -76,7 +76,7 @@ jobs:
               '_discoveryEnglish',
           ):
               pattern = re.compile(
-                  rf"\n(?:// ignore: unused_element\n)?String {re.escape(helper)}\(String id\) => switch \(id\) \{{.*?\n\}};\n",
+                  rf"\n(?:// ignore: unused_element\n)?String {re.escape(helper)}\(String id\) => switch \(id\) \{{.*?\n\s*\}};\n",
                   re.S,
               )
               s, count = pattern.subn('\n', s, count=1)
