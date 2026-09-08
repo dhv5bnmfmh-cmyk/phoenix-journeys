@@ -1,5 +1,5 @@
 name: PR208 Fixed Word Detail WebKit Acceptance
-# Revision 5: validate minimal active-level context candidate.
+# Revision 6: treat bundled-example hit as a zero-context-lookup fast path.
 
 on:
   push:
