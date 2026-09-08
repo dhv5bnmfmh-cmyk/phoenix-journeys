@@ -69,14 +69,14 @@ function installSpeechMock(context) {
 function markerTracker(page, label) {
   const events = [];
   const waiters = new Map();
-  const started = Date.now();
+  const started = performance.now();
   page.on('console', (message) => {
     const text = message.text();
     const match = text.match(/\b(PJ_[A-Z0-9_]+)\s+(\{.*\})$/);
     if (!match) return;
     let payload = {};
     try { payload = JSON.parse(match[2]); } catch {}
-    const event = { marker: match[1], wallMs: Date.now() - started, payload };
+    const event = { marker: match[1], wallMs: performance.now() - started, payload };
     events.push(event);
     console.log(`${label}_MARKER wallMs=${event.wallMs} ${event.marker} ${JSON.stringify(payload)}`);
     const pending = waiters.get(event.marker);
@@ -168,12 +168,16 @@ function summarize(label, tracker, pathMeta) {
     m2: Boolean(first(events, 'PJ_M2_PRE_GUARDS')),
     m3: Boolean(first(events, 'PJ_M3_STEP_COMMITTED')),
     m4: Boolean(first(events, 'PJ_M4_VOCAB_FIRST_FRAME')),
+    wordDetailBuild: Boolean(first(events, 'PJ_WORD_DETAIL_BUILD')),
     wordDetailFirstFrame: Boolean(first(events, 'PJ_WORD_DETAIL_FIRST_FRAME')),
+    layoutPaint: Boolean(first(events, 'PJ_WORD_DETAIL_LAYOUT_PAINT_COMPLETE')),
     m5: Boolean(first(events, 'PJ_M5_STABLE')),
     m1ToM4Ms: delta(events, 'PJ_M1_TAP_RECEIVED', 'PJ_M4_VOCAB_FIRST_FRAME'),
     m4ToWordDetailFirstFrameMs: delta(events, 'PJ_M4_VOCAB_FIRST_FRAME', 'PJ_WORD_DETAIL_FIRST_FRAME'),
     routeToWordDetailFirstFrameMs: delta(events, 'PJ_WORD_DETAIL_ROUTE_PUSH_RETURNED', 'PJ_WORD_DETAIL_FIRST_FRAME'),
     m4ToM5Ms: delta(events, 'PJ_M4_VOCAB_FIRST_FRAME', 'PJ_M5_STABLE'),
+    m1ToWordDetailFirstFrameMs: delta(events, 'PJ_M1_TAP_RECEIVED', 'PJ_WORD_DETAIL_FIRST_FRAME'),
+    m1ToM5Ms: delta(events, 'PJ_M1_TAP_RECEIVED', 'PJ_M5_STABLE'),
     resolveDownloadedExampleColdMs: numberFromReason(coldReason, 'elapsedUs') / 1000,
     resolveDownloadedExampleWarmMs: numberFromReason(warmReason, 'elapsedUs') / 1000,
     contextLookupMs: numberFromReason(contextReason, 'elapsedUs') / 1000,
@@ -182,7 +186,8 @@ function summarize(label, tracker, pathMeta) {
     warmContent: contentFromReason(warmReason),
     postFramePrompt: Boolean(first(events, 'PJ_WORD_POST_FRAME_CALLBACK_ENTERED')),
   };
-  if (![result.m1, result.m2, result.m3, result.m4, result.wordDetailFirstFrame, result.m5, result.postFramePrompt].every(Boolean)) {
+  if (![result.m1, result.m2, result.m3, result.m4, result.wordDetailBuild,
+    result.wordDetailFirstFrame, result.layoutPaint, result.m5, result.postFramePrompt].every(Boolean)) {
     throw new Error(`${label}: missing mandatory milestone`);
   }
   if (result.lazyBuildersInvoked !== 0) throw new Error(`${label}: active hit invoked ${result.lazyBuildersInvoked} fallback builders`);
@@ -219,6 +224,7 @@ async function runAuto(browser, { label, level, storyTitle }) {
   await tracker.wait('PJ_WORD_EXAMPLE_WARM_END');
   await tracker.wait('PJ_WORD_CONTEXT_LOOKUP_END');
   await tracker.wait('PJ_WORD_DETAIL_FIRST_FRAME');
+  await tracker.wait('PJ_WORD_DETAIL_LAYOUT_PAINT_COMPLETE');
   await tracker.wait('PJ_M5_STABLE');
   await assertResponsive(page, label);
   const result = summarize(label, tracker, pathMeta);
@@ -259,6 +265,7 @@ async function runManual(browser) {
   await tracker.wait('PJ_WORD_EXAMPLE_WARM_END');
   await tracker.wait('PJ_WORD_CONTEXT_LOOKUP_END');
   await tracker.wait('PJ_WORD_DETAIL_FIRST_FRAME');
+  await tracker.wait('PJ_WORD_DETAIL_LAYOUT_PAINT_COMPLETE');
   await tracker.wait('PJ_M5_STABLE');
   await assertResponsive(page, label);
   const result = summarize(label, tracker, pathMeta);
@@ -281,6 +288,17 @@ if (!autoLv6 || !manualLv6 || autoLv6.coldContent !== manualLv6.coldContent) {
 }
 
 const report = {
+  candidate_sha: productSha,
+  cold_auto_ms: Math.max(...results.filter((r) => r.label.startsWith('auto-')).map((r) => r.resolveDownloadedExampleColdMs)),
+  warm_auto_ms: Math.max(...results.filter((r) => r.label.startsWith('auto-')).map((r) => r.resolveDownloadedExampleWarmMs)),
+  cold_manual_ms: manualLv6.resolveDownloadedExampleColdMs,
+  warm_manual_ms: manualLv6.resolveDownloadedExampleWarmMs,
+  resolve_downloaded_example_ms: Math.max(...results.map((r) => r.resolveDownloadedExampleColdMs)),
+  context_lookup_ms: Math.max(...results.map((r) => r.contextLookupMs)),
+  all_journeys_materialize_ms: 0,
+  lazy_builders_invoked: Math.max(...results.map((r) => r.lazyBuildersInvoked)),
+  word_detail_first_frame_ms: Math.max(...results.map((r) => r.m1ToWordDetailFirstFrameMs)),
+  m5_ms: Math.max(...results.map((r) => r.m1ToM5Ms)),
   productSha,
   oldBaseline: {
     productSha: 'd560fa1403e5c8ec14e4291eaf4ae34184a125b8',
@@ -305,5 +323,5 @@ const report = {
 };
 if (!Object.values(report.acceptance).every(Boolean)) throw new Error(`acceptance failed ${JSON.stringify(report.acceptance)}`);
 fs.mkdirSync('test-results', { recursive: true });
-fs.writeFileSync('test-results/fixed-word-detail-performance.json', JSON.stringify(report, null, 2));
+fs.writeFileSync('test-results/performance-results.json', JSON.stringify(report, null, 2));
 console.log(`FIXED_ACCEPTANCE ${JSON.stringify(report)}`);
