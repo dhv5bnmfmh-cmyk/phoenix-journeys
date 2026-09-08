@@ -1,5 +1,5 @@
 name: PR208 Fixed Word Detail WebKit Acceptance
-# Revision 9: bypass stale Story semantics and touch the visible first grid cell.
+# Revision 10: allow the manual Vocabulary input frame to stabilize before touch.
 
 on:
   push:
