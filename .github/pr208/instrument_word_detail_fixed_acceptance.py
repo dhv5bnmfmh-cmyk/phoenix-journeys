@@ -2,9 +2,11 @@ from pathlib import Path
 
 journey_path = Path('app/lib/screens/journey_screen.dart')
 word_path = Path('app/lib/widgets/word_detail_sheet.dart')
+context_path = Path('app/lib/services/journey_vocabulary_context.dart')
 
 journey = journey_path.read_text()
 word = word_path.read_text()
+context = context_path.read_text()
 
 # Journey milestone diagnostics. Query-gated controls only; default product behavior is unchanged.
 old = "import 'dart:async';\n"
@@ -138,4 +140,43 @@ if word.count(old) != 1:
 word = word.replace(old, new, 1)
 
 word_path.write_text(word)
+
+old = "import '../data/daily_journey_experience.dart';\n"
+new = """import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
+import '../data/daily_journey_experience.dart';
+
+void _pjContextAccept(String marker, {String? reason}) {
+  if (Uri.base.queryParameters['pjFixedAccept'] != '1') return;
+  debugPrint('$marker ${jsonEncode(<String, Object?>{
+    'marker': marker,
+    if (reason != null) 'reason': reason,
+  })}');
+}
+"""
+if context.count(old) != 1:
+    raise SystemExit(f'context import anchor count={context.count(old)}')
+context = context.replace(old, new, 1)
+
+old = """  final activeMatch = _contextInJourney(activeJourney, entry);
+  if (!activeMatch.isEmpty) return activeMatch;
+
+  for (final journey in fallbackJourneys) {"""
+new = """  final activeWatch = Stopwatch()..start();
+  _pjContextAccept('PJ_CONTEXT_ACTIVE_BEGIN', reason: 'journey=${activeJourney.id} word=${entry.word}');
+  final activeMatch = _contextInJourney(activeJourney, entry);
+  activeWatch.stop();
+  _pjContextAccept('PJ_CONTEXT_ACTIVE_END', reason: 'elapsedUs=${activeWatch.elapsedMicroseconds} hit=${!activeMatch.isEmpty}');
+  if (!activeMatch.isEmpty) return activeMatch;
+
+  var fallbackIndex = 0;
+  for (final journey in fallbackJourneys) {
+    fallbackIndex += 1;
+    _pjContextAccept('PJ_CONTEXT_FALLBACK_ADVANCE', reason: 'index=$fallbackIndex journey=${journey.id}');"""
+if context.count(old) != 1:
+    raise SystemExit(f'context active anchor count={context.count(old)}')
+context = context.replace(old, new, 1)
+context_path.write_text(context)
 print('WORD_DETAIL_FIXED_ACCEPTANCE_INSTRUMENTED')
