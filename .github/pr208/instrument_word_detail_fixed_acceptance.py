@@ -38,8 +38,8 @@ new = """    final detailFuture = showWordDetail(\n      context,\n      entry,"
 if journey.count(old) != 1:
     raise SystemExit(f'showWordDetail anchor count={journey.count(old)}')
 journey = journey.replace(old, new, 1)
-old = """      ),\n    );\n    if (!mounted || !shouldResume) return;"""
-new = """      ),\n    );\n    _pjAccept('PJ_WORD_DETAIL_ROUTE_PUSH_RETURNED', reason: 'word=${entry.word}');\n    await detailFuture;\n    if (!mounted || !shouldResume) return;"""
+old = """      },\n    );\n    if (!mounted || !shouldResume) return;"""
+new = """      },\n    );\n    _pjAccept('PJ_WORD_DETAIL_ROUTE_PUSH_RETURNED', reason: 'word=${entry.word}');\n    await detailFuture;\n    if (!mounted || !shouldResume) return;"""
 if journey.count(old) != 1:
     raise SystemExit(f'showWordDetail close anchor count={journey.count(old)}')
 journey = journey.replace(old, new, 1)
@@ -117,6 +117,21 @@ old = """    final contextData = findJourneyVocabularyContext(\n      activeJour
 new = """    final fallbackProbe = _PjCountingJourneyIterable(dailyJourneyExperiences);\n    final contextWatch = Stopwatch()..start();\n    _pjWordAccept('PJ_WORD_CONTEXT_LOOKUP_BEGIN', reason: 'active=${state.activeJourney.id}');\n    final contextData = findJourneyVocabularyContext(\n      activeJourney: state.activeJourney,\n      fallbackJourneys: fallbackProbe,\n      entry: entry,\n    );\n    contextWatch.stop();\n    _pjWordAccept(\n      'PJ_WORD_CONTEXT_LOOKUP_END',\n      reason: 'elapsedUs=${contextWatch.elapsedMicroseconds} lazyBuilders=${fallbackProbe.invoked} hit=${contextData.chinese.isNotEmpty}',\n    );\n    if (contextData.chinese.isNotEmpty) {"""
 if word.count(old) != 1:
     raise SystemExit(f'context anchor count={word.count(old)}')
+word = word.replace(old, new, 1)
+
+old = """    final activeContext = widget.activeContextResolver?.call(entry);
+    if (activeContext != null && !activeContext.isEmpty) {"""
+new = """    final activeWatch = Stopwatch()..start();
+    _pjWordAccept('PJ_WORD_CONTEXT_LOOKUP_BEGIN', reason: 'source=active-level');
+    final activeContext = widget.activeContextResolver?.call(entry);
+    activeWatch.stop();
+    _pjWordAccept(
+      'PJ_WORD_CONTEXT_LOOKUP_END',
+      reason: 'elapsedUs=${activeWatch.elapsedMicroseconds} lazyBuilders=0 hit=${activeContext != null && !activeContext.isEmpty}',
+    );
+    if (activeContext != null && !activeContext.isEmpty) {"""
+if word.count(old) != 1:
+    raise SystemExit(f'active level resolver anchor count={word.count(old)}')
 word = word.replace(old, new, 1)
 
 old = """      _pjWordAccept('PJ_WORD_DETAIL_FIRST_FRAME', reason: 'word=${_entry.word}');
