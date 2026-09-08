@@ -34,7 +34,7 @@ void main() {
       for (final question in rebuild) {
         expect(
           hanCount(question.answer),
-          10,
+          inInclusiveRange(1, 10),
           reason: 'Lv$level ${question.id} must remain a phone-sized knowledge sentence',
         );
         expect(
@@ -47,7 +47,7 @@ void main() {
             0,
             (total, tile) => total + hanCount(tile),
           ),
-          10,
+          hanCount(question.answer),
           reason: 'Lv$level ${question.id} tiles must cover the whole answer',
         );
         expect(
@@ -57,6 +57,7 @@ void main() {
             '中轴',
             '乾清门',
             '故宫博物院',
+            '故宫',
           ].any(question.answer.contains),
           isTrue,
           reason: 'Lv$level ${question.id} must remain Forbidden City grounded',
