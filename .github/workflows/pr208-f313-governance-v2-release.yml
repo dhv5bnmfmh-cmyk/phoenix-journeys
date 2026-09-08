@@ -42,7 +42,12 @@ jobs:
           test "$(git ls-remote origin "refs/heads/$PRODUCT_BRANCH" | awk '{print $1}')" = "$RELEASE_SHA"
           test -z "$(git status --porcelain)"
           test "$(git merge-base 86619b8173c3e57fc6be3780030dfdad0a38afa1 "$RELEASE_SHA")" = 86619b8173c3e57fc6be3780030dfdad0a38afa1
-      - name: Set up Flutter\n        uses: subosito/flutter-action@v2\n        with:\n          channel: stable\n          cache: true\n      - name: Founder-like automated acceptance and targeted tests
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Founder-like automated acceptance and targeted tests
         working-directory: app
         shell: bash
         run: |
