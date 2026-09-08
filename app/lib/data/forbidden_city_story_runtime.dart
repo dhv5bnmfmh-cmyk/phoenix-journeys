@@ -153,6 +153,7 @@ const _storyEnglish = <String>[
   'They spread out the map page and verify that Jingyun Gate is on the east side of the square before Qianqing Gate. Xu Cheng circles “west” on the old sheet and leaves it visible. Lin Qiao does not merely change “west” to “east.” She asks Xu Cheng to note the question in the margin and keeps checking with him: confirmed items are corrected, while uncertain ones stay blank. Lin Qiao signs the correction and hands him the pen, telling him to continue checking the same way after the handoff. Xu Cheng takes the book and confirms that he will keep checking the two blank items. Finally he folds the corner of the remaining unchecked box, places the pen between them, and asks whether they should finish the next page together. Lin Qiao pulls her chair closer.',
 ];
 
+// ignore: unused_element
 String _vocabularyVietnamese(String id) => switch (id) {
   'vocab.central_axis' => 'trục trung tâm',
   'vocab.jingyun_gate' => 'Cảnh Vận Môn',
@@ -161,6 +162,7 @@ String _vocabularyVietnamese(String id) => switch (id) {
   _ => '',
 };
 
+// ignore: unused_element
 String _vocabularyEnglish(String id) => switch (id) {
   'vocab.central_axis' => 'central axis',
   'vocab.jingyun_gate' => 'Jingyun Gate',
@@ -169,6 +171,7 @@ String _vocabularyEnglish(String id) => switch (id) {
   _ => '',
 };
 
+// ignore: unused_element
 String _vocabularySymbol(String id) => switch (id) {
   'vocab.central_axis' => '↕️',
   'vocab.jingyun_gate' => '🚪',
@@ -177,13 +180,15 @@ String _vocabularySymbol(String id) => switch (id) {
   _ => '•',
 };
 
+// ignore: unused_element
 String _discoveryVietnamese(String id) => switch (id) {
   'discovery.spatial_types' => 'Khi đọc không gian Tử Cấm Thành, “Ngọ Môn” và “trục giữa” không phải cùng một loại thông tin: Ngọ Môn là một cổng cụ thể, còn trục giữa mô tả chuỗi không gian bắc–nam do các cổng, sân và công trình chính tạo thành. Ngọ Môn nằm trên trục bắc–nam này, vì vậy hiểu tuyến đường đòi hỏi vừa nhận diện công trình vừa hiểu quan hệ không gian tổ chức chúng.',
   'discovery.qianqing_gate_function' => 'Càn Thanh Môn không chỉ là một tên trên bản đồ. Tư liệu đã được xác minh cho biết đây là chính môn của Nội đình và cũng là lối quan trọng nối việc đi lại giữa Nội đình và Ngoại triều. Khi học về Càn Thanh Môn, cần hiểu tên gọi cùng với những không gian mà nó kết nối.',
-  'discovery.spatial_relations' => 'Chỉ học thuộc tên công trình không đủ để phán đoán quan hệ không gian. Tư liệu đã xác minh đặt Cảnh Vận Môn ở phía đông quảng trường trước Càn Thanh Môn, đồng thời cho thấy các cổng, sân và công trình chính trên trục giữa tạo thành một chuỗi bắc–nam rõ ràng. Khi nhìn cổng, quảng trường, phương hướng và trục cùng nhau, tên gọi mới trở thành thông tin không gian có thể sử dụng.',
+  'discovery.spatial_relations' => 'Chỉ học thuộc tên công trình không đủ để phán đoán quan hệ không gian. Tư liệu đã được xác minh đặt Cảnh Vận Môn ở phía đông quảng trường trước Càn Thanh Môn, đồng thời cho thấy các cổng, sân và công trình chính trên trục giữa tạo thành một chuỗi bắc–nam rõ ràng. Khi nhìn cổng, quảng trường, phương hướng và trục cùng nhau, tên gọi mới trở thành thông tin không gian có thể sử dụng.',
   _ => '',
 };
 
+// ignore: unused_element
 String _discoveryEnglish(String id) => switch (id) {
   'discovery.spatial_types' => 'In the Forbidden City, “Meridian Gate” and “central axis” are different kinds of spatial information. Meridian Gate is a specific gate, while the central axis describes the north–south sequence formed by gates, courtyards, and major buildings. Because Meridian Gate lies on that axis, route understanding requires both recognizing buildings and understanding the spatial relations that organize them.',
   'discovery.qianqing_gate_function' => 'Qianqing Gate is more than a name on a map. Verified material identifies it as the principal gate of the Inner Court and an important passage connecting movement between the Inner and Outer Courts. Learning the gate therefore means understanding both its name and the spaces it connects.',
