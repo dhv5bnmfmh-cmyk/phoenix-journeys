@@ -65,9 +65,6 @@ jobs:
           ''' + s[end:]
           assert 'forbiddenCitySecondStoryWordsForLevel(phoenixLevel)' in s
 
-          # The level-specific Vocabulary/Discovery binding above makes these
-          # five legacy fixed-content translation helpers unreachable. Remove
-          # only those proven-dead helpers so full analyze stays strict.
           for helper in (
               '_vocabularyVietnamese',
               '_vocabularyEnglish',
@@ -181,13 +178,14 @@ jobs:
             app/lib/services/forbidden_city_challenge_level_standard.dart \
             app/lib/services/journey_challenge_engine.dart \
             app/test/pr208_level_completeness_contract_test.dart
-          test -n "$(git diff --cached --name-only)"
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git commit -m "fix: complete Forbidden City Lv1-Lv10 learning stages"
+          if test -n "$(git diff --cached --name-only)"; then
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git commit -m "fix: complete Forbidden City Lv1-Lv10 learning stages"
+            git push origin "HEAD:$CANDIDATE_BRANCH"
+          fi
           sha="$(git rev-parse HEAD)"
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
-          git push origin "HEAD:$CANDIDATE_BRANCH"
           test "$(git ls-remote origin "refs/heads/$PRODUCT_BRANCH" | awk '{print $1}')" = "$BASE_PRODUCT_SHA"
 
       - name: Materialize proven rendered audit harness
@@ -198,6 +196,24 @@ jobs:
           git show origin/validation/pr208-level-stage-completeness-audit:.github/scripts/pr208_level_stage_audit_analyze.mjs > /tmp/audit.mjs
           python3 - <<'PY'
           from pathlib import Path
+
+          p = Path('app/test/pr208_level_stage_runtime_audit_test.dart')
+          s = p.read_text()
+          old = '''  SharedPreferences.setMockInitialValues(<String, Object>{});
+            PhoenixLevelController.instance.setLevel(level);
+            final state = AppState();
+            await state.load();
+            await state.activateJourney(_journeyId, storyId: storyId);'''
+          new = '''  SharedPreferences.setMockInitialValues(<String, Object>{});
+            final state = AppState();
+            await state.load();
+            PhoenixLevelController.instance.setLevel(level);
+            await state.activateJourney(_journeyId, storyId: storyId);'''
+          if old not in s:
+              raise SystemExit('Unable to locate audit level setup block')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+
           p = Path('/tmp/audit.mjs')
           s = p.read_text()
           old = """        if (stage === 'Story' && story.id === 'story.forbidden_city.modern_evidence_handoff.v1') {
