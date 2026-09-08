@@ -1,5 +1,5 @@
 name: PR208 Fixed Word Detail WebKit Acceptance
-# Revision 2: remove redundant diagnostic import; exact candidate unchanged.
+# Revision 3: isolate active-context versus fallback traversal timing.
 
 on:
   push:
@@ -56,9 +56,10 @@ jobs:
           python3 /tmp/pr208-fixed-acceptance/instrument_word_detail_fixed_acceptance.py
           mapfile -t changed < <(git diff --name-only | sort)
           printf '%s\n' "${changed[@]}"
-          test "${#changed[@]}" -eq 2
+          test "${#changed[@]}" -eq 3
           test "${changed[0]}" = "app/lib/screens/journey_screen.dart"
-          test "${changed[1]}" = "app/lib/widgets/word_detail_sheet.dart"
+          test "${changed[1]}" = "app/lib/services/journey_vocabulary_context.dart"
+          test "${changed[2]}" = "app/lib/widgets/word_detail_sheet.dart"
           test -z "$(git diff --name-only | grep -E 'forbidden_city_story|pronunciation|daily_journey_catalog|app_state|phoenix_vocabulary_service' || true)"
           git diff --check
 
