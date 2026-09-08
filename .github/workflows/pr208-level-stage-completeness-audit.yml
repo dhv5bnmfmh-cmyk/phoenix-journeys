@@ -52,11 +52,17 @@ jobs:
           from pathlib import Path
           path = Path('app/test/pr208_level_stage_runtime_audit_test.dart')
           source = path.read_text()
-          old = "  expect(find.text('Lv.$level'), findsOneWidget);"
-          new = "  expect(PhoenixLevelController.instance.level, level);"
-          if old not in source:
+          old_badge = "  expect(find.text('Lv.$level'), findsOneWidget);"
+          new_badge = "  expect(PhoenixLevelController.instance.level, level);"
+          old_load = "  await state.load();\n  await state.activateJourney(_journeyId, storyId: storyId);"
+          new_load = "  await state.load();\n  PhoenixLevelController.instance.setLevel(level);\n  expect(PhoenixLevelController.instance.level, level);\n  await state.activateJourney(_journeyId, storyId: storyId);"
+          if old_badge not in source:
               raise SystemExit('expected fragile level badge assertion not found')
-          path.write_text(source.replace(old, new, 1))
+          if old_load not in source:
+              raise SystemExit('expected pre-load level harness shape not found')
+          source = source.replace(old_badge, new_badge, 1)
+          source = source.replace(old_load, new_load, 1)
+          path.write_text(source)
           PY
 
       - name: Capture rendered Lv1-Lv10 x all learning stages
