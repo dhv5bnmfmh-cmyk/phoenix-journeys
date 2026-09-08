@@ -99,7 +99,9 @@ void _expectChallengeContracts(StoryChallengeSet set, String storyId) {
       positions.add(question.options.indexOf(question.answer));
     }
     for (final blank in question.completionBlanks) {
-      if (blank.options.length == 4) positions.add(blank.options.indexOf(blank.answer));
+      if (blank.options.length == 4) {
+        positions.add(blank.options.indexOf(blank.answer));
+      }
     }
   }
   expect(positions.every((position) => position >= 0 && position < 4), isTrue);
