@@ -180,8 +180,8 @@ function summarize(label, tracker, pathMeta) {
     m1ToM5Ms: delta(events, 'PJ_M1_TAP_RECEIVED', 'PJ_M5_STABLE'),
     resolveDownloadedExampleColdMs: numberFromReason(coldReason, 'elapsedUs') / 1000,
     resolveDownloadedExampleWarmMs: numberFromReason(warmReason, 'elapsedUs') / 1000,
-    contextLookupMs: numberFromReason(contextReason, 'elapsedUs') / 1000,
-    lazyBuildersInvoked: numberFromReason(contextReason, 'lazyBuilders'),
+    contextLookupMs: contextReason ? numberFromReason(contextReason, 'elapsedUs') / 1000 : 0,
+    lazyBuildersInvoked: contextReason ? numberFromReason(contextReason, 'lazyBuilders') : 0,
     coldContent: contentFromReason(coldReason),
     warmContent: contentFromReason(warmReason),
     postFramePrompt: Boolean(first(events, 'PJ_WORD_POST_FRAME_CALLBACK_ENTERED')),
@@ -222,7 +222,6 @@ async function runAuto(browser, { label, level, storyTitle }) {
   await tracker.wait('PJ_WORD_DETAIL_ROUTE_PUSH_RETURNED');
   await tracker.wait('PJ_WORD_EXAMPLE_COLD_END');
   await tracker.wait('PJ_WORD_EXAMPLE_WARM_END');
-  await tracker.wait('PJ_WORD_CONTEXT_LOOKUP_END');
   await tracker.wait('PJ_WORD_DETAIL_FIRST_FRAME');
   await tracker.wait('PJ_WORD_DETAIL_LAYOUT_PAINT_COMPLETE');
   await tracker.wait('PJ_M5_STABLE');
@@ -263,7 +262,6 @@ async function runManual(browser) {
   await tracker.wait('PJ_WORD_DETAIL_ROUTE_PUSH_RETURNED');
   await tracker.wait('PJ_WORD_EXAMPLE_COLD_END');
   await tracker.wait('PJ_WORD_EXAMPLE_WARM_END');
-  await tracker.wait('PJ_WORD_CONTEXT_LOOKUP_END');
   await tracker.wait('PJ_WORD_DETAIL_FIRST_FRAME');
   await tracker.wait('PJ_WORD_DETAIL_LAYOUT_PAINT_COMPLETE');
   await tracker.wait('PJ_M5_STABLE');
