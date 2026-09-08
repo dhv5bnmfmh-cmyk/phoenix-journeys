@@ -95,7 +95,7 @@ const _secondRebuildLevels = <List<_RebuildSpec>>[
     _RebuildSpec('景运门应标在东侧'),
     _RebuildSpec('乾清门前广场可定位'),
     _RebuildSpec('中轴描述南北序列'),
-    _RebuildSpec('更正前先保留旧证'),
+    _RebuildSpec('更正前保留景运门旧证'),
   ],
   [
     _RebuildSpec('中轴用于组织空间'),
@@ -113,7 +113,7 @@ const _secondRebuildLevels = <List<_RebuildSpec>>[
     _RebuildSpec('乾清门前可比较方位'),
     _RebuildSpec('景运门位置来自核证'),
     _RebuildSpec('中轴帮助读空间关系'),
-    _RebuildSpec('待核项目不能先改'),
+    _RebuildSpec('景运门待核项不能先改'),
   ],
   [
     _RebuildSpec('核对方位要看广场关系'),
@@ -191,8 +191,8 @@ const _secondActions = <String>[
   '核对景运门方位',
   '比较中轴和具体宫门',
   '检查乾清门连接关系',
-  '保留旧表错误标记',
-  '区分已确认项和待核项',
+  '保留景运门旧表错误标记',
+  '区分紫禁城已确认项和待核项',
   '查验景运门位置证据',
   '记录页码和未决疑问',
   '核对空间事实与过程',
