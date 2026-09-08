@@ -1,5 +1,5 @@
 name: PR208 Fixed Word Detail WebKit Acceptance
-# Revision 4: keep diagnostic imports before declarations.
+# Revision 5: validate minimal active-level context candidate.
 
 on:
   push:
@@ -14,7 +14,7 @@ permissions:
 
 env:
   OLD_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
-  CANDIDATE_SHA: 86619b8173c3e57fc6be3780030dfdad0a38afa1
+  CANDIDATE_SHA: f3136e2eb8dd99c945db1ec6901c4c0d8da59cfb
   PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
   PREVIEW_WORKER: phoenix-journeys-pr-208-fixed-acceptance
   PREVIEW_URL: https://phoenix-journeys-pr-208-fixed-acceptance.7hn5tyrjgh.workers.dev
