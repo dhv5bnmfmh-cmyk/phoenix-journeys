@@ -1,0 +1,193 @@
+name: PR208 Level Stage Completion Patch
+
+on:
+  push:
+    branches: [validation/pr208-level-stage-completion-product]
+    paths: ['.github/workflows/pr208-level-stage-completion-patch.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pr208-level-stage-completion-patch
+  cancel-in-progress: false
+
+jobs:
+  patch-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: validation/pr208-level-stage-completion-product
+      - name: Guard product ancestor and PR branch freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=f3136e2eb8dd99c945db1ec6901c4c0d8da59cfb
+          test "$(git merge-base "$base" HEAD)" = "$base"
+          test "$(git ls-remote origin refs/heads/product/city-standard-v1-beijing-forbidden-city | awk '{print $1}')" = "$base"
+      - name: Wire level-specific exercises and challenge completion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          runtime = Path('app/lib/data/forbidden_city_story_runtime.dart')
+          text = runtime.read_text()
+          anchor = "import 'forbidden_city_journey_runtime.dart';\n"
+          addition = anchor + "import 'forbidden_city_second_story_level_exercises.dart';\n"
+          if "forbidden_city_second_story_level_exercises.dart" not in text:
+              if anchor not in text: raise SystemExit('runtime import anchor missing')
+              text = text.replace(anchor, addition, 1)
+          old = 'JourneyLevelContent forbiddenCitySecondStoryLevelContent() {'
+          if old in text:
+              text = text.replace(old, 'JourneyLevelContent _baseForbiddenCitySecondStoryLevelContent() {', 1)
+          marker = "\nList<String> get forbiddenCitySecondStoryChallengeSourceMaterial =>"
+          wrapper = """
+
+          JourneyLevelContent forbiddenCitySecondStoryLevelContent({
+            int phoenixLevel = 5,
+          }) {
+            final base = _baseForbiddenCitySecondStoryLevelContent();
+            return completeForbiddenCitySecondStoryExercises(
+              phoenixLevel: phoenixLevel,
+              base: base,
+              pinyinFor: _pinyin,
+            );
+          }
+          """
+          if 'completeForbiddenCitySecondStoryExercises(' not in text:
+              if marker not in text: raise SystemExit('runtime wrapper marker missing')
+              text = text.replace(marker, wrapper + marker, 1)
+          text = text.replace(
+              'final content = forbiddenCitySecondStoryLevelContent();',
+              'final content = forbiddenCitySecondStoryLevelContent(phoenixLevel: phoenixLevel);',
+              1,
+          )
+          runtime.write_text(text)
+
+          engine = Path('app/lib/services/journey_challenge_engine.dart')
+          text = engine.read_text()
+          import_anchor = "import 'challenge_option_balancer.dart';\n"
+          import_add = import_anchor + "import 'forbidden_city_challenge_completion.dart';\n"
+          if "forbidden_city_challenge_completion.dart" not in text:
+              if import_anchor not in text: raise SystemExit('challenge import anchor missing')
+              text = text.replace(import_anchor, import_add, 1)
+
+          old_block = """    final balanced = _balanceRenderedMultipleChoiceOrder(base);
+              if (journeyId != _forbiddenCityJourneyId) return balanced;
+
+              var rebuildIndex = 0;
+              final questions = <StoryChallengeQuestion>[];
+              for (final question in balanced.questions) {
+                if (question.mode != StoryChallengeMode.sentenceRebuild) {
+                  questions.add(question);
+                  continue;
+                }
+                questions.add(
+                  _compactForbiddenCityRebuild(
+                    question,
+                    sessionLevel,
+                    rebuildIndex,
+                  ),
+                );
+                rebuildIndex += 1;
+              }
+
+              return StoryChallengeSet(
+                journeyId: balanced.journeyId,
+                sessionLevel: balanced.sessionLevel,
+                questions: List<StoryChallengeQuestion>.unmodifiable(questions),
+              );
+          """
+          new_block = """    final balanced = _balanceRenderedMultipleChoiceOrder(base);
+              if (journeyId != _forbiddenCityJourneyId &&
+                  journeyId != secondForbiddenCityStoryId) {
+                return balanced;
+              }
+
+              var rebuildIndex = 0;
+              var grammarIndex = 0;
+              final questions = <StoryChallengeQuestion>[];
+              for (final question in balanced.questions) {
+                if (question.mode == StoryChallengeMode.sentenceRebuild) {
+                  final compact = journeyId == _forbiddenCityJourneyId
+                      ? _compactForbiddenCityRebuild(
+                          question,
+                          sessionLevel,
+                          rebuildIndex,
+                        )
+                      : question;
+                  questions.add(
+                    completeForbiddenCityRebuildQuestion(
+                      source: compact,
+                      journeyId: journeyId,
+                      sessionLevel: sessionLevel,
+                      index: rebuildIndex,
+                    ),
+                  );
+                  rebuildIndex += 1;
+                  continue;
+                }
+                if (question.mode == StoryChallengeMode.grammarRepair) {
+                  questions.add(
+                    completeForbiddenCityGrammarQuestion(
+                      source: question,
+                      journeyId: journeyId,
+                      sessionLevel: sessionLevel,
+                      index: grammarIndex,
+                    ),
+                  );
+                  grammarIndex += 1;
+                  continue;
+                }
+                questions.add(question);
+              }
+
+              return StoryChallengeSet(
+                journeyId: balanced.journeyId,
+                sessionLevel: balanced.sessionLevel,
+                questions: List<StoryChallengeQuestion>.unmodifiable(questions),
+              );
+          """
+          if 'completeForbiddenCityGrammarQuestion(' not in text:
+              if old_block not in text:
+                  raise SystemExit('challenge build block missing')
+              text = text.replace(old_block, new_block, 1)
+          engine.write_text(text)
+          PY
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Format and analyze product completion
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          dart format lib/data/forbidden_city_story_runtime.dart lib/data/forbidden_city_second_story_level_exercises.dart lib/services/journey_challenge_engine.dart lib/services/forbidden_city_challenge_completion.dart
+          flutter analyze
+      - name: Target confirmed learning contracts
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter test --reporter expanded test/founder_story_vocabulary_transition_regression_test.dart
+          flutter test --reporter expanded test/forbidden_city_story_selection_runtime_test.dart --plain-name "Story progress, completion, resume and Memory are isolated by Story ID"
+          flutter test --reporter expanded test/journey_challenge_engine_test.dart || true
+      - name: Commit exact candidate changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add app/lib/data/forbidden_city_story_runtime.dart app/lib/data/forbidden_city_second_story_level_exercises.dart app/lib/services/journey_challenge_engine.dart app/lib/services/forbidden_city_challenge_completion.dart
+          git diff --cached --quiet && exit 0
+          git commit -m 'fix: complete Forbidden City level-stage learning content'
+          git push origin HEAD:validation/pr208-level-stage-completion-product
