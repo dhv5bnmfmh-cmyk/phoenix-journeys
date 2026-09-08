@@ -218,7 +218,10 @@ jobs:
           if old_expect not in s or old_tap not in s:
               raise SystemExit('Unable to locate rebuild tile harness block')
           s = s.replace(old_expect, old_expect.replace('findsOneWidget', 'findsWidgets'), 1)
-          s = s.replace(old_tap, 'await _tapFinder(tester, finder.first);', 1)
+          head, separator, tail = s.rpartition(old_tap)
+          if not separator:
+              raise SystemExit('Unable to isolate final rebuild tile tap')
+          s = head + 'await _tapFinder(tester, finder.first);' + tail
           p.write_text(s)
 
           p = Path('/tmp/audit.mjs')
