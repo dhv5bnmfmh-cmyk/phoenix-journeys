@@ -1,5 +1,5 @@
 name: PR208 Fixed Word Detail WebKit Acceptance
-# Revision 3: isolate active-context versus fallback traversal timing.
+# Revision 4: keep diagnostic imports before declarations.
 
 on:
   push:
