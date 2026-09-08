@@ -1,4 +1,5 @@
 name: PR208 Fixed Word Detail WebKit Acceptance
+# Revision 2: remove redundant diagnostic import; exact candidate unchanged.
 
 on:
   push:
