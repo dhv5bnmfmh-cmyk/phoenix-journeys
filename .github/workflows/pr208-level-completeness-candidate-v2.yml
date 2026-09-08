@@ -10,9 +10,9 @@ permissions:
   contents: write
 
 env:
-  BASE_PRODUCT_SHA: f3136e2eb8dd99c945db1ec6901c4c0d8da59cfb
+  BASE_PRODUCT_SHA: ac471fe477aac3afd4bb9276dd1cb64ae7a7a4a5
   PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
-  CANDIDATE_BRANCH: validation/pr208-level-completeness-product
+  CANDIDATE_BRANCH: validation/pr208-full-level-completion-v2
 
 jobs:
   validate:
