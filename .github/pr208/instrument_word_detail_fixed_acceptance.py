@@ -123,5 +123,25 @@ if word.count(old) != 1:
     raise SystemExit(f'context anchor count={word.count(old)}')
 word = word.replace(old, new, 1)
 
+old = """      _pjWordAccept('PJ_WORD_DETAIL_FIRST_FRAME', reason: 'word=${_entry.word}');
+      _pjWordAccept('PJ_WORD_POST_FRAME_CALLBACK_ENTERED');"""
+new = """      _pjWordAccept('PJ_WORD_DETAIL_FIRST_FRAME', reason: 'word=${_entry.word}');
+      _pjWordAccept('PJ_WORD_DETAIL_LAYOUT_PAINT_COMPLETE');
+      _pjWordAccept('PJ_WORD_POST_FRAME_CALLBACK_ENTERED');"""
+if word.count(old) != 1:
+    raise SystemExit(f'layout/paint anchor count={word.count(old)}')
+word = word.replace(old, new, 1)
+
+old = """    final state = context.watch<AppState>();
+    final entry = _entry;
+    final language = state.translationLanguage;"""
+new = """    final state = context.watch<AppState>();
+    final entry = _entry;
+    _pjWordAccept('PJ_WORD_DETAIL_BUILD', reason: 'word=${entry.word}');
+    final language = state.translationLanguage;"""
+if word.count(old) != 1:
+    raise SystemExit(f'word build anchor count={word.count(old)}')
+word = word.replace(old, new, 1)
+
 word_path.write_text(word)
 print('WORD_DETAIL_FIXED_ACCEPTANCE_INSTRUMENTED')
