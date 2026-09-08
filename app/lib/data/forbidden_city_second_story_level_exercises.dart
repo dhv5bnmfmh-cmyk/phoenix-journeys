@@ -137,8 +137,7 @@ JourneyLevelContent completeForbiddenCitySecondStoryExercises({
           WordEntry(
             word: word,
             pinyin: pinyinFor(word).replaceAll(' ', ''),
-            simpleChinese:
-                _simpleChinese[word] ?? '当前 Story 中需要理解和核对的词语。',
+            simpleChinese: _simpleChinese[word] ?? '当前 Story 中需要理解和核对的词语。',
             translation: _vietnamese[word] ?? word,
             symbol: '•',
             partOfSpeech: word.endsWith('门') ? '专名' : '词语',

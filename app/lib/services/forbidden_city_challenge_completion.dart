@@ -353,7 +353,7 @@ _GrammarVariant _grammarVariant({
           'Missing-component blueprint lacks location marker: $correct',
         );
       }
-      final broken = '${correct.substring(0, markerIndex)}${marker}以后。';
+      final broken = '${correct.substring(0, markerIndex)}$marker以后。';
       final subjectless = correct.replaceFirst('把', '');
       final noPreposition = correct.replaceFirst(
         marker,
@@ -362,7 +362,7 @@ _GrammarVariant _grammarVariant({
       return _GrammarVariant(
         family: '成分缺失',
         broken: broken,
-        errorSegments: _segmentsAround(broken, '${marker}以后'),
+        errorSegments: _segmentsAround(broken, '$marker以后'),
         errorSegmentIndex: 2,
         distractors: <String>[broken, subjectless, noPreposition],
         whyWrong: '“$marker”后缺少地点成分，句子意思没有说完整。',
@@ -375,7 +375,8 @@ _GrammarVariant _grammarVariant({
 
 int _correctPosition(StoryChallengeQuestion source) {
   if (source.options.length == 4) {
-    final index = source.options.indexWhere((option) => option == source.answer);
+    final index =
+        source.options.indexWhere((option) => option == source.answer);
     if (index >= 0) return index;
   }
   return source.signature.sessionLevel % 4;
