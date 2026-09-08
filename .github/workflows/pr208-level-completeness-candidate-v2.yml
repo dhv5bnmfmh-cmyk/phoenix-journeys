@@ -238,6 +238,16 @@ jobs:
                   if (stage === 'Vocabulary' || stage === 'Discovery' || stage === 'Challenge') {"""
           if old in s: s = s.replace(old, new, 1)
           s = s.replace(
+              "if (!feedbackColor.includes('ffff5252')) {",
+              "if (!feedbackColor.includes('ffff5252') && !feedbackColor.includes('red: 1.0000, green: 0.3216, blue: 0.3216')) {",
+              1,
+          )
+          s = s.replace(
+              "if (!correctColor.includes('ff69f0ae')) {",
+              "if (!correctColor.includes('ff69f0ae') && !correctColor.includes('red: 0.4118, green: 0.9412, blue: 0.6824')) {",
+              1,
+          )
+          s = s.replace(
           """        } else if (stage === 'Story' && story.id === 'story.forbidden_city.two_routes_one_map.v1') {
                     fail(b, 'RUNTIME WIRING FAILURE', 'primary Story level binding', `Primary Story Lv${level} and Lv${level + 1} render identically.`);
                   } else if (stage === 'Memory' || stage === 'Completion') {
