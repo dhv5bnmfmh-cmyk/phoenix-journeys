@@ -13,7 +13,7 @@ permissions:
 
 env:
   OLD_PRODUCT_SHA: d560fa1403e5c8ec14e4291eaf4ae34184a125b8
-  CANDIDATE_SHA: 830193899cbfdb7ea5f1aa4495a38508a3bf33a5
+  CANDIDATE_SHA: 86619b8173c3e57fc6be3780030dfdad0a38afa1
   PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
   PREVIEW_WORKER: phoenix-journeys-pr-208-fixed-acceptance
   PREVIEW_URL: https://phoenix-journeys-pr-208-fixed-acceptance.7hn5tyrjgh.workers.dev
@@ -128,17 +128,17 @@ jobs:
           cp /tmp/pr208-fixed-acceptance/journey_level_session_harness.mjs /tmp/pr208-fixed-acceptance/journey_level_session_harness.mjs.keep
           node /tmp/pr208-fixed-acceptance/pr208_word_detail_fixed_acceptance_probe.mjs "$PREVIEW_URL" "$CANDIDATE_SHA" \
             2>&1 | tee test-results/fixed-word-detail-webkit.log
-          test -s test-results/fixed-word-detail-performance.json
+          test -s test-results/performance-results.json
 
       - name: Publish concise performance summary
         if: always()
         shell: bash
         run: |
           set -euo pipefail
-          if test -s test-results/fixed-word-detail-performance.json; then
+          if test -s test-results/performance-results.json; then
             node - <<'NODE' >> "$GITHUB_STEP_SUMMARY"
           const fs = require('fs');
-          const r = JSON.parse(fs.readFileSync('test-results/fixed-word-detail-performance.json', 'utf8'));
+          const r = JSON.parse(fs.readFileSync('test-results/performance-results.json', 'utf8'));
           console.log('## PR208 fixed Word Detail WebKit acceptance');
           console.log(`Candidate: ${r.productSha}`);
           console.log(`Old context lookup: ${r.oldBaseline.contextLookupMs} ms`);
