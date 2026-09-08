@@ -29,6 +29,7 @@ Future<void> showWordDetail(
   List<WordEntry>? entries,
   int? initialIndex,
   Future<bool> Function(WordEntry entry)? onSpeakEntry,
+  JourneyVocabularyContext Function(WordEntry entry)? activeContextResolver,
 }) {
   final studyEntries = entries == null || entries.isEmpty
       ? <WordEntry>[entry]
@@ -74,6 +75,7 @@ Future<void> showWordDetail(
                     : onSpeak,
                 onSpeakEntry:
                     narrationController == null ? speakLocally : onSpeakEntry,
+                activeContextResolver: activeContextResolver,
               ),
             ),
           ),
@@ -92,6 +94,7 @@ class _WordDetailSheet extends StatefulWidget {
     required this.initialIndex,
     required this.onSpeak,
     required this.onSpeakEntry,
+    this.activeContextResolver,
   });
 
   final NarrationController narrationController;
@@ -99,6 +102,8 @@ class _WordDetailSheet extends StatefulWidget {
   final int initialIndex;
   final Future<bool> Function() onSpeak;
   final Future<bool> Function(WordEntry entry)? onSpeakEntry;
+  final JourneyVocabularyContext Function(WordEntry entry)?
+      activeContextResolver;
 
   @override
   State<_WordDetailSheet> createState() => _WordDetailSheetState();
@@ -139,6 +144,22 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
         usageNote: '来自 Phoenix 已审核并随旅程下载的实际应用例句。',
         isOfflineFallback: true,
         provider: 'phoenix-preloaded-pack',
+        model: 'bundled',
+        qualityReviewed: true,
+        qualityScore: 100,
+      );
+    }
+
+    final activeContext = widget.activeContextResolver?.call(entry);
+    if (activeContext != null && !activeContext.isEmpty) {
+      return PhoenixVocabularyExample(
+        chinese: activeContext.chinese,
+        pinyin: activeContext.pinyin,
+        native: activeContext.nativeText(state.translationLanguage),
+        english: activeContext.english,
+        usageNote: '来自当前 Journey 已下载的真实语境。',
+        isOfflineFallback: true,
+        provider: 'phoenix-journey-context',
         model: 'bundled',
         qualityReviewed: true,
         qualityScore: 100,

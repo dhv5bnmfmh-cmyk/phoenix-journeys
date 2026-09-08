@@ -49,6 +49,39 @@ JourneyVocabularyContext findJourneyVocabularyContext({
   return JourneyVocabularyContext.empty;
 }
 
+JourneyVocabularyContext findJourneyVocabularyContextInLevel({
+  required List<String> storyParagraphs,
+  required List<ReadingAnnotation> storyAnnotations,
+  required List<DiscoveryEntry> discoveries,
+  required WordEntry entry,
+}) {
+  for (var index = 0; index < storyParagraphs.length; index += 1) {
+    final paragraph = storyParagraphs[index];
+    if (!paragraph.contains(entry.word)) continue;
+    final annotation = index < storyAnnotations.length
+        ? storyAnnotations[index]
+        : null;
+    return JourneyVocabularyContext(
+      chinese: paragraph,
+      pinyin: annotation?.pinyin ?? '',
+      vietnamese: annotation?.vietnamese ?? '',
+      english: annotation?.english ?? '',
+    );
+  }
+
+  for (final discovery in discoveries) {
+    if (!discovery.text.contains(entry.word)) continue;
+    return JourneyVocabularyContext(
+      chinese: discovery.text,
+      pinyin: discovery.pinyin,
+      vietnamese: discovery.vietnamese,
+      english: discovery.english,
+    );
+  }
+
+  return JourneyVocabularyContext.empty;
+}
+
 JourneyVocabularyContext _contextInJourney(
   DailyJourneyExperience journey,
   WordEntry entry,

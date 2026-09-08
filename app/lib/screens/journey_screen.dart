@@ -22,6 +22,7 @@ import '../models/language_proficiency.dart';
 import '../services/phoenix_level_controller.dart';
 import '../services/narration_controller.dart';
 import '../services/journey_preparation_coordinator.dart';
+import '../services/journey_vocabulary_context.dart';
 import '../services/journey_challenge_engine.dart';
 import '../services/phoenix_ai_service.dart';
 import '../services/journey_memory_photo_picker.dart';
@@ -896,6 +897,15 @@ class _JourneyScreenState extends State<JourneyScreen>
         _appState.displayText(currentEntry.word),
         languageCode: _appState.isTraditional ? 'zh-TW' : 'zh-CN',
       ),
+      activeContextResolver: (currentEntry) {
+        final content = _levelContent;
+        return findJourneyVocabularyContextInLevel(
+          storyParagraphs: content.storyParagraphs,
+          storyAnnotations: content.storyAnnotations,
+          discoveries: content.discoveries,
+          entry: currentEntry,
+        );
+      },
     );
     if (!mounted || !shouldResume) return;
 
