@@ -233,7 +233,7 @@ async function runAuto(browser, { label, level, storyTitle }) {
 
 async function tapFirstWord(page) {
   const candidates = (await records(page)).filter((record) =>
-    record.visible && !record.disabled && record.text.includes('中轴'))
+    record.visible && !record.disabled && record.role === 'button' && record.text.includes('中轴'))
     .sort((a, b) => {
       const aButton = a.role === 'button' ? 0 : 1;
       const bButton = b.role === 'button' ? 0 : 1;
@@ -242,7 +242,8 @@ async function tapFirstWord(page) {
     });
   if (!candidates.length) throw new Error('manual first-word target 中轴 not found');
   const target = candidates[0];
-  await page.touchscreen.tap(target.x + target.width / 2, target.y + target.height / 2);
+  console.log(`MANUAL_WORD_TARGET ${JSON.stringify(target)}`);
+  await page.locator('flt-semantics').nth(target.index).tap({ timeout: 10000 });
 }
 
 async function runManual(browser) {
