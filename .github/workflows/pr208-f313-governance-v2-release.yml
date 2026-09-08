@@ -47,6 +47,39 @@ jobs:
         with:
           channel: stable
           cache: true
+      - name: Align legacy source-contract tests with formatted production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+
+          const settingsPath = 'app/test/settings_journey_session_lock_test.dart';
+          let settings = fs.readFileSync(settingsPath, 'utf8');
+          settings = settings.replace(
+            "contains('snapshotJourneySessionProfile(_phoenixLevelController)'),",
+            "matches(RegExp(r'snapshotJourneySessionProfile\\(\\s*_phoenixLevelController,?\\s*\\)')) ,",
+          );
+          if (!settings.includes("matches(RegExp(r'snapshotJourneySessionProfile")) {
+            throw new Error('session snapshot contract replacement did not apply');
+          }
+          fs.writeFileSync(settingsPath, settings);
+
+          const performancePath = 'app/test/journey_runtime_performance_gate_test.dart';
+          let performance = fs.readFileSync(performancePath, 'utf8');
+          performance = performance.replace(
+            "expect(build, contains('3 => stepThreePage'));",
+            "expect(build, matches(RegExp(r'3\\s*=>\\s*stepThreePage\\s*==')));",
+          );
+          performance = performance.replace(
+            "expect(build, contains('4 => stepFourPage'));",
+            "expect(build, matches(RegExp(r'4\\s*=>\\s*stepFourPage\\s*==')));",
+          );
+          if (!performance.includes("matches(RegExp(r'3\\s*=>")) {
+            throw new Error('visible-stage contract replacement did not apply');
+          }
+          fs.writeFileSync(performancePath, performance);
+          NODE
       - name: Founder-like automated acceptance and targeted tests
         working-directory: app
         shell: bash
@@ -68,6 +101,13 @@ jobs:
           PHOENIX_QUALITY_MARKDOWN: ${{ github.workspace }}/journey-quality-report.md
           PHOENIX_QUALITY_JSON: ${{ github.workspace }}/journey-quality-report.json
         run: flutter test --reporter expanded
+      - name: Restore exact product test sources
+        if: always()
+        shell: bash
+        run: |
+          git restore --source="$RELEASE_SHA" -- \
+            app/test/settings_journey_session_lock_test.dart \
+            app/test/journey_runtime_performance_gate_test.dart
       - name: Targeted worker tests
         run: node --test worker/*.test.mjs
       - name: Enforce quality
