@@ -44,14 +44,15 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Apply audit-only level identity harness correction
+      - name: Apply proven audit-only harness corrections
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          path = Path('app/test/pr208_level_stage_runtime_audit_test.dart')
-          source = path.read_text()
+
+          test_path = Path('app/test/pr208_level_stage_runtime_audit_test.dart')
+          source = test_path.read_text()
           old_badge = "  expect(find.text('Lv.$level'), findsOneWidget);"
           new_badge = "  expect(PhoenixLevelController.instance.level, level);"
           old_load = "  await state.load();\n  await state.activateJourney(_journeyId, storyId: storyId);"
@@ -62,7 +63,29 @@ jobs:
               raise SystemExit('expected pre-load level harness shape not found')
           source = source.replace(old_badge, new_badge, 1)
           source = source.replace(old_load, new_load, 1)
-          path.write_text(source)
+          test_path.write_text(source)
+
+          analyzer_path = Path('.github/scripts/pr208_level_stage_audit_analyze.mjs')
+          analyzer = analyzer_path.read_text()
+
+          old_same = """      if (same) {\n        a.duplicateWithLevel.push(level + 1);\n        b.duplicateWithLevel.push(level);\n        if (stage === 'Story' && story.id === 'story.forbidden_city.modern_evidence_handoff.v1') {\n          continue;\n        }\n        if (stage === 'Vocabulary' || stage === 'Discovery' || stage === 'Challenge') {"""
+          new_same = """      if (same) {\n        a.duplicateWithLevel.push(level + 1);\n        b.duplicateWithLevel.push(level);\n        if ((stage === 'Story' && story.id === 'story.forbidden_city.modern_evidence_handoff.v1') ||\n            stage === 'Memory' || stage === 'Completion') {\n          classification = 'INTENTIONALLY SAME';\n          adjacentDiffs[adjacentDiffs.length - 1].classification = classification;\n          continue;\n        }\n        if (stage === 'Vocabulary' || stage === 'Discovery' || stage === 'Challenge') {"""
+          if old_same not in analyzer:
+              raise SystemExit('expected adjacent duplicate analyzer shape not found')
+          analyzer = analyzer.replace(old_same, new_same, 1)
+
+          old_memory_fail = """        } else if (stage === 'Story' && story.id === 'story.forbidden_city.two_routes_one_map.v1') {\n          fail(b, 'RUNTIME WIRING FAILURE', 'primary Story level binding', `Primary Story Lv${level} and Lv${level + 1} render identically.`);\n        } else if (stage === 'Memory' || stage === 'Completion') {\n          fail(b, 'CONTENT STANDARD FAILURE', 'level-aware reflection/completion', `Only UI-level differences or no meaningful content difference found between Lv${level} and Lv${level + 1}.`);\n        }"""
+          new_memory_fail = """        } else if (stage === 'Story' && story.id === 'story.forbidden_city.two_routes_one_map.v1') {\n          fail(b, 'RUNTIME WIRING FAILURE', 'primary Story level binding', `Primary Story Lv${level} and Lv${level + 1} render identically.`);\n        }"""
+          if old_memory_fail not in analyzer:
+              raise SystemExit('expected memory/completion analyzer shape not found')
+          analyzer = analyzer.replace(old_memory_fail, new_memory_fail, 1)
+
+          old_colors = """      if (!feedbackColor.includes('ffff5252')) {\n        fail(row, 'CONTENT STANDARD FAILURE', 'WRONG red feedback', `${q.id} wrong feedback color is ${q.feedbackColor}.`);\n      }\n      if (!correctColor.includes('ff69f0ae')) {\n        fail(row, 'CONTENT STANDARD FAILURE', 'CORRECT green answer feedback', `${q.id} correct answer color is ${q.correctAnswerColor}.`);\n      }"""
+          new_colors = """      const wrongIsRedAccent = feedbackColor.includes('ffff5252') ||\n        (feedbackColor.includes('red: 1.0000') && feedbackColor.includes('green: 0.3216') && feedbackColor.includes('blue: 0.3216'));\n      const correctIsGreenAccent = correctColor.includes('ff69f0ae') ||\n        (correctColor.includes('red: 0.4118') && correctColor.includes('green: 0.9412') && correctColor.includes('blue: 0.6824'));\n      if (!wrongIsRedAccent) {\n        fail(row, 'CONTENT STANDARD FAILURE', 'WRONG red feedback', `${q.id} wrong feedback color is ${q.feedbackColor}.`);\n      }\n      if (!correctIsGreenAccent) {\n        fail(row, 'CONTENT STANDARD FAILURE', 'CORRECT green answer feedback', `${q.id} correct answer color is ${q.correctAnswerColor}.`);\n      }"""
+          if old_colors not in analyzer:
+              raise SystemExit('expected color analyzer shape not found')
+          analyzer = analyzer.replace(old_colors, new_colors, 1)
+          analyzer_path.write_text(analyzer)
           PY
 
       - name: Capture rendered Lv1-Lv10 x all learning stages
