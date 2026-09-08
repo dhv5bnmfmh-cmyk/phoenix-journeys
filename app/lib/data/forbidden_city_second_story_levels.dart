@@ -275,7 +275,7 @@ const _discoveries = <_DiscoveryPair>[
     'Qianqing Gate is an important node between the Outer and Inner Courts, while Jingyun Gate provides a concrete east-side location. Names, spatial relations, and directions are different evidence types.',
   ),
   _DiscoveryPair(
-    '把旧表的“西”直接擦成“东”会丢失错误从哪里来的信息；保留旧标记再写更正，更容易追溯。',
+    '把紫禁城旧表的“西”直接擦成“东”会丢失景运门错误从哪里来的信息；保留旧标记再写更正，更容易追溯。',
     '故事中的核对不是机械改字，而是先记录疑问、再用紫禁城空间事实确认方位。',
     'Xóa ngay “tây” thành “đông” sẽ làm mất dấu nguồn gốc lỗi. Giữ dấu cũ rồi ghi đính chính giúp truy vết; việc đối chiếu phải dựa trên dữ kiện không gian của Tử Cấm Thành.',
     'Simply erasing west and writing east loses the history of the error. Keeping the old mark and recording a correction preserves traceability and ties the check to Forbidden City spatial evidence.',
@@ -293,8 +293,8 @@ const _discoveries = <_DiscoveryPair>[
     'The square before Qianqing Gate can be read through the axis, named gates, and directions, but each plays a different role. Jingyun Gate’s east-side position requires specific location evidence.',
   ),
   _DiscoveryPair(
-    '交接质量不只看最后答案，还要看下一位接手者能不能知道哪些项目已核、哪些仍待核。',
-    '把疑问、页码和更正一起保留，会形成一条可以继续复查的证据链。',
+    '紫禁城景运门方位的交接质量不只看最后答案，还要看下一位接手者能不能知道哪些项目已核、哪些仍待核。',
+    '把乾清门前广场的疑问、页码和更正一起保留，会形成一条可以继续复查的证据链。',
     'Chất lượng bàn giao còn phụ thuộc vào việc người tiếp nhận biết mục nào đã kiểm tra và mục nào còn chờ. Giữ nghi vấn, số trang và đính chính tạo thành chuỗi bằng chứng có thể rà soát.',
     'A good handoff shows not only the final answer but also what is verified and what remains pending. Preserving questions, page references, and corrections creates a reviewable evidence chain.',
   ),
