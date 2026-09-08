@@ -55,12 +55,6 @@ new = "import 'dart:async';\nimport 'dart:convert';\n"
 if word.count(old) != 1:
     raise SystemExit(f'word import anchor count={word.count(old)}')
 word = word.replace(old, new, 1)
-old = "import '../data/daily_journey_catalog.dart';\n"
-new = "import '../data/daily_journey_catalog.dart';\nimport '../data/daily_journey_experience.dart';\n"
-if word.count(old) != 1:
-    raise SystemExit(f'word journey import anchor count={word.count(old)}')
-word = word.replace(old, new, 1)
-
 anchor = "const _wordSpeechFallbackTimeout = Duration(seconds: 4);\n\n"
 helpers = r'''const _wordSpeechFallbackTimeout = Duration(seconds: 4);
 
