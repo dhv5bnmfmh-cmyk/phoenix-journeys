@@ -1,0 +1,77 @@
+name: PR208 Full Level Stage Completeness Audit
+
+on:
+  push:
+    branches: [validation/pr208-level-stage-completeness-audit]
+    paths:
+      - '.github/workflows/pr208-level-stage-completeness-audit.yml'
+      - '.github/scripts/pr208_level_stage_audit_analyze.mjs'
+      - 'app/test/pr208_level_stage_runtime_audit_test.dart'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr208-level-stage-completeness-audit
+  cancel-in-progress: false
+
+env:
+  PRODUCT_SHA: f3136e2eb8dd99c945db1ec6901c4c0d8da59cfb
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+
+jobs:
+  runtime-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact product and audit-only branch scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git merge-base "$PRODUCT_SHA" HEAD)" = "$PRODUCT_SHA"
+          test "$(git ls-remote origin "refs/heads/$PRODUCT_BRANCH" | awk '{print $1}')" = "$PRODUCT_SHA"
+          unexpected="$(git diff --name-only "$PRODUCT_SHA"...HEAD | grep -Ev '^(app/test/pr208_level_stage_runtime_audit_test\.dart|\.github/scripts/pr208_level_stage_audit_analyze\.mjs|\.github/workflows/pr208-level-stage-completeness-audit\.yml)$' || true)"
+          test -z "$unexpected" || { echo "Unexpected validation-branch changes:"; echo "$unexpected"; exit 1; }
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Capture rendered Lv1-Lv10 x all learning stages
+        working-directory: app
+        env:
+          PR208_AUDIT_SHA: ${{ env.PRODUCT_SHA }}
+          PR208_LEVEL_STAGE_RAW_JSON: ${{ github.workspace }}/phoenix-level-stage-raw.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter test --reporter expanded test/pr208_level_stage_runtime_audit_test.dart
+
+      - name: Analyze semantic completeness and contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/pr208_level_stage_audit_analyze.mjs \
+            phoenix-level-stage-raw.json \
+            phoenix-level-stage-audit.json \
+            phoenix-level-stage-audit.md
+          test -s phoenix-level-stage-audit.json
+          test -s phoenix-level-stage-audit.md
+
+      - name: Upload completeness audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr208-level-stage-audit-${{ env.PRODUCT_SHA }}
+          path: |
+            phoenix-level-stage-audit.json
+            phoenix-level-stage-audit.md
+            phoenix-level-stage-raw.json
+          if-no-files-found: error
