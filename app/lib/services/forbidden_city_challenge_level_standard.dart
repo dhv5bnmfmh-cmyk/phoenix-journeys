@@ -311,7 +311,7 @@ StoryChallengeQuestion _standardRebuild(
       sourceSentenceIndex: signature.sourceSentenceIndex,
       sourceHash: _hash(punctuation),
       syntaxPattern: _syntax(punctuation),
-      operationType: '知识句语义块顺序恢复',
+      operationType: _rebuildPedagogy(journeyId, index),
       errorFamily: signature.errorFamily,
       gapType: signature.gapType,
       answerShape: '$han字 / ${chunks.length}块',
@@ -319,6 +319,22 @@ StoryChallengeQuestion _standardRebuild(
       blankPositionPattern: signature.blankPositionPattern,
     ),
   );
+}
+
+String _rebuildPedagogy(String journeyId, int index) {
+  const primary = <String>[
+    '宫门位置知识句重建',
+    '中轴空间关系知识句重建',
+    '内外廷建筑关系知识句重建',
+    '故宫历史证据知识句重建',
+  ];
+  const second = <String>[
+    '紫禁城空间框架知识句重建',
+    '景运门方位知识句重建',
+    '乾清门空间证据知识句重建',
+    '交接核对证据知识句重建',
+  ];
+  return (journeyId == _primaryStoryChallengeId ? primary : second)[index];
 }
 
 StoryChallengeQuestion _contextualizePrimaryGrammar(
