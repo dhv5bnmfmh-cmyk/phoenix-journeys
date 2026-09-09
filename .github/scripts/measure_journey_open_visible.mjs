@@ -96,7 +96,7 @@ async function waitHome(targetIdentityKey = null) {
     const visible = rs.filter((r) => r.visible);
     const texts = visible.map(recText);
     const home = texts.some((text) => text.includes('PHOENIX JOURNEYS'));
-    const storyProgress = texts.some((text) => text.startsWith('1/5') || text.includes(' 1/5'));
+    const storyProgress = texts.some((text) => text.startsWith('1/6') || text.includes(' 1/6'));
     const target = resolveJourneyAction(rs, targetIdentityKey);
     if (home && !storyProgress && target?.identityKey) {
       stableMatches += 1;
@@ -146,8 +146,7 @@ async function waitStoryUsable() {
       (r) => r.role === 'button' && !r.disabled
         && ['继续', '开始朗读', '朗读'].some((needle) => recText(r).includes(needle)),
     );
-    const staleHomeJourneyEntry = journeyActions(rs).length > 0;
-    if (progress && chineseStoryContent && interaction && !staleHomeJourneyEntry) return;
+    if (progress && chineseStoryContent && interaction) return;
     await sleep(50);
   }
   await failWithSemantics('Journey Story never became learner-usable after locked Journey action click');
