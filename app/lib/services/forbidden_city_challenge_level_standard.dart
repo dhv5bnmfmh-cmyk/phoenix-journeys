@@ -1,4 +1,6 @@
+import '../data/forbidden_city_story_runtime.dart';
 import '../models/journey_challenge.dart';
+import 'challenge_option_balancer.dart';
 
 const _primaryStoryChallengeId = 'beijing-forbidden-city';
 const _secondStoryChallengeId =
@@ -165,7 +167,7 @@ const _secondConclusions = <String>[
   '记录才能被正确使用',
   '宫门名称才不会和空间框架混淆',
   '接手者才能理解宫城连接关系',
-  '更正时必须保留原来的错误证据',
+  '更正时才能保留错误来源',
   '记录册才能清楚表达确认状态',
   '不能只凭中轴框架推断具体位置',
   '下一位接手者才能继续追查',
@@ -223,6 +225,7 @@ StoryChallengeSet applyForbiddenCityLevelChallengeStandard(
 
   var rebuildIndex = 0;
   var grammarIndex = 0;
+  var completionIndex = 0;
   final questions = <StoryChallengeQuestion>[];
   for (final question in source.questions) {
     switch (question.mode) {
@@ -235,6 +238,7 @@ StoryChallengeSet applyForbiddenCityLevelChallengeStandard(
             index: rebuildIndex++,
           ),
         );
+        break;
       case StoryChallengeMode.grammarRepair:
         questions.add(
           source.journeyId == _primaryStoryChallengeId
@@ -249,8 +253,19 @@ StoryChallengeSet applyForbiddenCityLevelChallengeStandard(
                 ),
         );
         grammarIndex += 1;
+        break;
       case StoryChallengeMode.storyCompletion:
-        questions.add(question);
+        questions.add(
+          source.journeyId == _secondStoryChallengeId
+              ? _secondStoryCompletion(
+                  question,
+                  level: source.sessionLevel,
+                  index: completionIndex,
+                )
+              : question,
+        );
+        completionIndex += 1;
+        break;
     }
   }
 
@@ -267,15 +282,19 @@ StoryChallengeQuestion _standardRebuild(
   required int level,
   required int index,
 }) {
-  final safeLevel = level.clamp(1, 10).toInt();
+  final safeLevel = _requireLevel(level);
   final levels = journeyId == _primaryStoryChallengeId
       ? _primaryRebuildLevels
       : _secondRebuildLevels;
+  if (index < 0 || index >= 4) {
+    throw StateError('$journeyId Lv$safeLevel requires four Rebuild questions.');
+  }
   final sentence = levels[safeLevel - 1][index].sentence;
   final han = _hanCount(sentence);
   if (han == 0 || han > 10) {
     throw StateError(
-        '$journeyId Lv$safeLevel rebuild-$index has $han Han chars');
+      '$journeyId Lv$safeLevel rebuild-$index has $han Han chars',
+    );
   }
   final chunks = _chunks(sentence, safeLevel);
   if (chunks.join() != sentence || chunks.length < 2) {
@@ -341,7 +360,8 @@ StoryChallengeQuestion _contextualizePrimaryGrammar(
   StoryChallengeQuestion source, {
   required int level,
 }) {
-  final context = _primaryGrammarContexts[level.clamp(1, 10).toInt() - 1];
+  final safeLevel = _requireLevel(level);
+  final context = _primaryGrammarContexts[safeLevel - 1];
   final signature = source.signature;
   return StoryChallengeQuestion(
     id: source.id,
@@ -380,7 +400,7 @@ StoryChallengeQuestion _contextualizePrimaryGrammar(
       gapType: signature.gapType,
       answerShape: signature.answerShape,
       distractorStrategy:
-          '${signature.distractorStrategy} / Lv${level.clamp(1, 10)} context',
+          '${signature.distractorStrategy} / Lv$safeLevel context',
       blankPositionPattern: signature.blankPositionPattern,
     ),
   );
@@ -391,7 +411,11 @@ StoryChallengeQuestion _secondStoryGrammar(
   required int level,
   required int index,
 }) {
-  final i = level.clamp(1, 10).toInt() - 1;
+  final safeLevel = _requireLevel(level);
+  if (index < 0 || index >= 4) {
+    throw StateError('Second Story Lv$safeLevel requires four Grammar questions.');
+  }
+  final i = safeLevel - 1;
   final target = source.options.indexOf(source.answer);
   final targetIndex = target < 0 ? index % 4 : target;
   return switch (index) {
@@ -411,29 +435,28 @@ StoryChallengeQuestion _associationGrammar(
   final conclusion = _secondConclusions[levelIndex];
   final broken = '虽然$fact，所以$conclusion。';
   final correct = '因为$fact，所以$conclusion。';
-  final raw = <String>[
-    correct,
-    '虽然$fact，所以$conclusion。',
-    '因为$fact，但是$conclusion。',
-    '不但$fact，所以$conclusion。',
-  ];
   return _grammarQuestion(
     source,
     levelIndex: levelIndex,
     family: '关联词错误',
     broken: broken,
     correct: correct,
-    errorSegments: ['虽然', '$fact，', '所以$conclusion', '。'],
+    errorSegments: ['虽然', '$fact，', '所以', '$conclusion。'],
     errorSegmentIndex: 0,
-    rawOptions: raw,
+    rawOptions: [
+      correct,
+      '虽然$fact，但是$conclusion。',
+      '如果$fact，那么$conclusion。',
+      '即使$fact，也$conclusion。',
+    ],
     rawExplanations: const [
       '对。“因为……所以……”准确表达事实依据与结论之间的因果关系。',
-      '错。“虽然……所以……”把让步和因果关联词混在一起。',
-      '错。“因为……但是……”把因果和转折关系混在一起。',
-      '错。“不但……所以……”不是规范的关联词配对。',
+      '错。句子变成让步转折关系，弱化了这里明确的事实依据与结果。',
+      '错。把已经确认的事实改成假设条件，改变了证据状态。',
+      '错。让步关系表示即便条件成立也有结果，不符合这里的核对逻辑。',
     ],
-    whyWrong: '“虽然”表示让步或转折，不能和表达结果的“所以”组成这里需要的因果关系。',
-    revisionRule: '先判断句子的逻辑关系，再选择成套、匹配的关联词。',
+    whyWrong: '“虽然”表示让步，不能和这里需要的确定因果结论“所以”混用。',
+    revisionRule: '先判断事实与结论的逻辑关系，再选择完整、成套的关联结构。',
     target: target,
   );
 }
@@ -444,29 +467,29 @@ StoryChallengeQuestion _collocationGrammar(
   int target,
 ) {
   final object = _secondObjects[levelIndex];
-  final broken = '林乔和许澄制造$object。';
-  final correct = '林乔和许澄核对$object。';
+  final broken = '林乔和许澄制造$object，并准备交接。';
+  final correct = '林乔和许澄核对$object，并准备交接。';
   return _grammarQuestion(
     source,
     levelIndex: levelIndex,
     family: '搭配错误',
     broken: broken,
     correct: correct,
-    errorSegments: ['林乔和许澄', '制造', object, '。'],
+    errorSegments: ['林乔和许澄', '制造', object, '，并准备交接。'],
     errorSegmentIndex: 1,
     rawOptions: [
       correct,
-      broken,
-      '林乔和许澄生产$object。',
-      '林乔和许澄发明$object。',
+      '林乔和许澄整理$object，并准备交接。',
+      '林乔和许澄抄录$object，并准备交接。',
+      '林乔和许澄归档$object，并准备交接。',
     ],
     rawExplanations: const [
-      '对。“核对记录 / 证据”符合故事中的工作动作和自然动宾搭配。',
-      '错。“制造记录 / 方位证据”不能表达把已有资料进行比对检查。',
-      '错。“生产”用于制造产品，不适合这里的记录核查动作。',
-      '错。“发明”表示创造新事物，不是核验已有信息。',
+      '对。“核对记录 / 证据”准确表达把已有资料进行比对检查。',
+      '错。“整理”可以处理材料，但没有表达验证信息是否一致。',
+      '错。“抄录”只是复制内容，不能完成证据核验。',
+      '错。“归档”是保存步骤，不是确认记录真伪和一致性的动作。',
     ],
-    whyWrong: '这里处理的是已有记录和空间证据，动作应是“核对”，不能用“制造”。',
+    whyWrong: '这里处理的是已有记录和空间证据，核心动作应是“核对”，不能用“制造”。',
     revisionRule: '动词必须与宾语和真实任务形成自然、准确的搭配。',
     target: target,
   );
@@ -478,30 +501,30 @@ StoryChallengeQuestion _redundancyGrammar(
   int target,
 ) {
   final action = _secondActions[levelIndex];
-  final broken = '两人一起共同$action。';
-  final correct = '两人一起$action。';
+  final broken = '两人一起共同$action，随后记录结果。';
+  final correct = '两人一起$action，随后记录结果。';
   return _grammarQuestion(
     source,
     levelIndex: levelIndex,
     family: '成分赘余',
     broken: broken,
     correct: correct,
-    errorSegments: ['两人', '一起共同', action, '。'],
+    errorSegments: ['两人', '一起共同', action, '，随后记录结果。'],
     errorSegmentIndex: 1,
     rawOptions: [
       correct,
       broken,
-      '两人共同一起$action。',
-      '两人一起共同都$action。',
+      '两人共同一起$action，随后记录结果。',
+      '两人一起又共同$action，随后记录结果。',
     ],
     rawExplanations: const [
-      '对。保留“一起”已经能表达共同完成动作，句子简洁完整。',
-      '错。“一起”和“共同”语义重复。',
-      '错。交换“一起 / 共同”的位置仍然没有消除重复。',
-      '错。“一起、共同、都”叠加造成更明显的赘余。',
+      '对。保留“一起”已经能表达共同动作，句子简洁完整。',
+      '错。“一起”和“共同”重复表达同一关系。',
+      '错。交换“一起 / 共同”的顺序仍然没有消除重复。',
+      '错。“一起、又、共同”叠加，让赘余更明显。',
     ],
     whyWrong: '“一起”和“共同”表达相同的共同动作含义，同时保留造成语义重复。',
-    revisionRule: '重复表达同一意义的成分只保留一个。',
+    revisionRule: '重复表达同一意义的成分只保留一个，同时保持句子完整。',
     target: target,
   );
 }
@@ -512,30 +535,30 @@ StoryChallengeQuestion _missingComponentGrammar(
   int target,
 ) {
   final object = _secondWriteObjects[levelIndex];
-  final broken = '许澄把$object写。';
-  final correct = '许澄把$object写在页边。';
+  final broken = '交接前，许澄把$object写，却没有说明记录位置。';
+  final correct = '交接前，许澄把$object写在页边，并保留核对依据。';
   return _grammarQuestion(
     source,
     levelIndex: levelIndex,
     family: '成分缺失',
     broken: broken,
     correct: correct,
-    errorSegments: ['许澄把', object, '写', '。'],
+    errorSegments: ['交接前，', '许澄把$object', '写，', '却没有说明记录位置。'],
     errorSegmentIndex: 2,
     rawOptions: [
       correct,
-      broken,
-      '许澄把$object在页边。',
-      '许澄把$object写在。',
+      '交接前，许澄把$object写在封面，并保留核对依据。',
+      '交接前，许澄把$object抄到新页，并保留核对依据。',
+      '交接前，许澄把$object写进标题，并保留核对依据。',
     ],
     rawExplanations: const [
-      '对。“写在页边”补足动作的处所，句意和交接记录动作都完整。',
-      '错。“写”后缺少必要的处所补语，动作没有说完整。',
-      '错。句子有处所却缺少核心动作“写”。',
-      '错。“写在”后缺少处所宾语，句子仍不完整。',
+      '对。“写在页边”补足记录位置，也符合故事中保留原记录和核对依据的动作。',
+      '错。句子完整，但把核对信息放在封面不符合当前记录语境。',
+      '错。句子完整，但“抄到新页”会弱化保留原位置与原标记的追溯关系。',
+      '错。句子完整，但标题不是记录具体疑问或更正依据的合理位置。',
     ],
-    whyWrong: '“把”字句中的处理动作没有说完整；只说“写”不能交代记录落在哪里。',
-    revisionRule: '补足动作所需要的处所或结果成分，使“把”字句表达完整。',
+    whyWrong: '原句只说“写”，没有补足记录落在哪里，导致把字句动作信息不完整。',
+    revisionRule: '补足动作所需要的处所成分，并让修正后的句子符合当前 Story 的记录方式。',
     target: target,
   );
 }
@@ -554,14 +577,36 @@ StoryChallengeQuestion _grammarQuestion(
   required String revisionRule,
   required int target,
 }) {
-  if (errorSegments.join() != broken) {
-    throw StateError('Second Story grammar segments must reconstruct prompt');
+  if (errorSegments.join() != broken ||
+      errorSegments.length != 4 ||
+      errorSegmentIndex < 0 ||
+      errorSegmentIndex >= errorSegments.length) {
+    throw StateError('Second Story grammar segmentation contract failed.');
+  }
+  final punctuationOnly = RegExp(r'^[。，！？：；,.!?;:]+$');
+  if (errorSegments.any(
+    (segment) =>
+        segment.trim().isEmpty || punctuationOnly.hasMatch(segment.trim()),
+  )) {
+    throw StateError(
+      'Second Story Grammar Step 1 requires meaningful grammatical segments.',
+    );
   }
   if (rawOptions.length != 4 ||
       rawExplanations.length != 4 ||
-      rawOptions.toSet().length != 4) {
-    throw StateError('Second Story grammar requires four unique options');
+      rawOptions.toSet().length != 4 ||
+      rawOptions.where((option) => option == correct).length != 1 ||
+      rawOptions.any(
+        (option) =>
+            option.trim().isEmpty ||
+            !RegExp(r'[。！？!?]$').hasMatch(option.trim()) ||
+            _looksLikeBrokenRepair(option),
+      )) {
+    throw StateError(
+      'Second Story Grammar Step 2 requires four complete plausible candidates.',
+    );
   }
+
   final order = <int>[1, 2, 3]..insert(target.clamp(0, 3), 0);
   final options = <String>[for (final index in order) rawOptions[index]];
   final explanations = <String>[
@@ -599,6 +644,310 @@ StoryChallengeQuestion _grammarQuestion(
       blankPositionPattern: signature.blankPositionPattern,
     ),
   );
+}
+
+bool _looksLikeBrokenRepair(String value) {
+  final text = value.trim();
+  return text.endsWith('写。') ||
+      text.endsWith('写在。') ||
+      text.endsWith('内廷往。') ||
+      text.contains('，所以。');
+}
+
+class _CompletionLexeme {
+  const _CompletionLexeme(this.value, this.slot);
+  final String value;
+  final String slot;
+}
+
+const _secondCompletionLexemes = <_CompletionLexeme>[
+  _CompletionLexeme('下一位接手者', 'PERSON'),
+  _CompletionLexeme('接手的人', 'PERSON'),
+  _CompletionLexeme('林乔', 'PERSON'),
+  _CompletionLexeme('许澄', 'PERSON'),
+  _CompletionLexeme('景运门', 'PLACE'),
+  _CompletionLexeme('乾清门', 'PLACE'),
+  _CompletionLexeme('紫禁城', 'PLACE'),
+  _CompletionLexeme('广场', 'PLACE'),
+  _CompletionLexeme('东侧位置', 'DIRECTION'),
+  _CompletionLexeme('东侧方位', 'DIRECTION'),
+  _CompletionLexeme('东侧', 'DIRECTION'),
+  _CompletionLexeme('西侧', 'DIRECTION'),
+  _CompletionLexeme('中轴', 'FRAME'),
+  _CompletionLexeme('整体空间框架', 'FRAME'),
+  _CompletionLexeme('空间框架', 'FRAME'),
+  _CompletionLexeme('空间序列', 'FRAME'),
+  _CompletionLexeme('核对', 'ACTION'),
+  _CompletionLexeme('更正', 'ACTION'),
+  _CompletionLexeme('留空', 'ACTION'),
+  _CompletionLexeme('确认', 'ACTION'),
+  _CompletionLexeme('记录', 'ACTION'),
+  _CompletionLexeme('保留', 'ACTION'),
+  _CompletionLexeme('追查', 'ACTION'),
+  _CompletionLexeme('接手', 'ACTION'),
+  _CompletionLexeme('签字', 'ACTION'),
+  _CompletionLexeme('复核', 'ACTION'),
+  _CompletionLexeme('记录册', 'RECORD'),
+  _CompletionLexeme('待核项目', 'RECORD'),
+  _CompletionLexeme('待核标记', 'RECORD'),
+  _CompletionLexeme('核对依据', 'RECORD'),
+  _CompletionLexeme('确认结果', 'RECORD'),
+  _CompletionLexeme('原记录', 'RECORD'),
+  _CompletionLexeme('原标记', 'RECORD'),
+  _CompletionLexeme('页码', 'RECORD'),
+  _CompletionLexeme('疑问', 'RECORD'),
+  _CompletionLexeme('空格', 'RECORD'),
+  _CompletionLexeme('证据', 'RECORD'),
+  _CompletionLexeme('结论', 'RECORD'),
+  _CompletionLexeme('已确认', 'STATE'),
+  _CompletionLexeme('不确定处', 'STATE'),
+  _CompletionLexeme('不确定', 'STATE'),
+  _CompletionLexeme('待核', 'STATE'),
+  _CompletionLexeme('已核', 'STATE'),
+  _CompletionLexeme('外朝', 'RELATION'),
+  _CompletionLexeme('内廷', 'RELATION'),
+  _CompletionLexeme('空间关系', 'RELATION'),
+  _CompletionLexeme('连接关系', 'RELATION'),
+  _CompletionLexeme('方位', 'RELATION'),
+];
+
+class _CompletionSpan {
+  const _CompletionSpan(this.start, this.end, this.lexeme);
+  final int start;
+  final int end;
+  final _CompletionLexeme lexeme;
+}
+
+StoryChallengeQuestion _secondStoryCompletion(
+  StoryChallengeQuestion source, {
+  required int level,
+  required int index,
+}) {
+  final safeLevel = _requireLevel(level);
+  if (index < 0 || index >= 4) {
+    throw StateError(
+      'Second Story Lv$safeLevel requires four Story Completion questions.',
+    );
+  }
+
+  final passage = _secondCompletionPassage(safeLevel, index);
+  final spans = _completionSpans(passage);
+  if (spans.length < safeLevel) {
+    throw StateError(
+      'Second Story Lv$safeLevel completion-$index has only '
+      '${spans.length} semantic blank candidates.',
+    );
+  }
+
+  final selected = _spreadCompletionSpans(spans, safeLevel, index);
+  final positions = balancedChallengeAnswerPositions(
+    itemCount: safeLevel * 4,
+    seed: '$_secondStoryChallengeId:$safeLevel:completion',
+    variationOrdinal: safeLevel,
+  );
+
+  final segments = <String>[];
+  final blanks = <StoryCompletionBlank>[];
+  var cursor = 0;
+  for (var blankIndex = 0; blankIndex < selected.length; blankIndex += 1) {
+    final span = selected[blankIndex];
+    segments.add(passage.substring(cursor, span.start));
+    final answer = passage.substring(span.start, span.end);
+    final slot = span.lexeme.slot;
+    final target = positions[index * safeLevel + blankIndex];
+    final options = _completionOptions(
+      answer: answer,
+      slot: slot,
+      target: target,
+      seed: '$safeLevel:$index:$blankIndex',
+    );
+    blanks.add(
+      StoryCompletionBlank(
+        answer: answer,
+        options: List<String>.unmodifiable(options),
+        answerType: _answerType(answer),
+        semanticSlotType: slot,
+        sourceStart: span.start,
+      ),
+    );
+    cursor = span.end;
+  }
+  segments.add(passage.substring(cursor));
+
+  final rebuilt = StringBuffer();
+  for (var i = 0; i < blanks.length; i += 1) {
+    rebuilt
+      ..write(segments[i])
+      ..write(blanks[i].answer);
+  }
+  rebuilt.write(segments.last);
+  if (rebuilt.toString() != passage) {
+    throw StateError(
+      'Second Story Lv$safeLevel completion-$index cannot restore its natural passage.',
+    );
+  }
+
+  final prompt = StringBuffer();
+  for (var i = 0; i < blanks.length; i += 1) {
+    prompt
+      ..write(segments[i])
+      ..write('〔${i + 1}〕____');
+  }
+  prompt.write(segments.last);
+
+  final signature = source.signature;
+  return StoryChallengeQuestion(
+    id: source.id,
+    mode: StoryChallengeMode.storyCompletion,
+    sourceSentence: passage,
+    prompt: prompt.toString(),
+    answer: passage,
+    options: const <String>[],
+    characterTiles: source.characterTiles,
+    errorSegments: source.errorSegments,
+    errorSegmentIndex: source.errorSegmentIndex,
+    grammarFamily: source.grammarFamily,
+    grammarWhyWrong: source.grammarWhyWrong,
+    grammarRevisionRule: source.grammarRevisionRule,
+    grammarOptionExplanations: source.grammarOptionExplanations,
+    completionSegments: List<String>.unmodifiable(segments),
+    completionBlanks: List<StoryCompletionBlank>.unmodifiable(blanks),
+    narrationText: prompt.toString().replaceAll('____', '空位'),
+    signature: QuestionDesignSignature(
+      journeyId: signature.journeyId,
+      sessionLevel: safeLevel,
+      mode: StoryChallengeMode.storyCompletion,
+      sourceParagraphIndex: signature.sourceParagraphIndex,
+      sourceSentenceIndex: signature.sourceSentenceIndex,
+      sourceHash: _hash(passage),
+      syntaxPattern: _syntax(passage),
+      operationType: 'Story 语义槽多空位选择填空',
+      errorFamily: signature.errorFamily,
+      gapType: '多空位选择填空',
+      answerShape: blanks.map((blank) => blank.semanticSlotType).toSet().join('+'),
+      distractorStrategy:
+          'Second Story Lv$safeLevel same-slot plausible distractors',
+      blankPositionPattern: 'semantic-spread-${index + 1}',
+    ),
+  );
+}
+
+String _secondCompletionPassage(int level, int index) {
+  final paragraphs =
+      forbiddenCitySecondStoryChallengeSourceMaterialForLevel(level);
+  final sentences = <String>[
+    for (final paragraph in paragraphs)
+      ...RegExp(r'[^。！？!?]+[。！？!?]')
+          .allMatches(paragraph)
+          .map((match) => match.group(0)!.trim()),
+  ];
+  if (sentences.length < 4) {
+    throw StateError('Second Story Lv$level requires at least four Story sentences.');
+  }
+
+  var passage = '';
+  var cursor = 0;
+  while (_completionSpans(passage).length < level || cursor < 2) {
+    if (cursor >= sentences.length) {
+      throw StateError(
+        'Second Story Lv$level Story cannot supply $level semantic Completion blanks.',
+      );
+    }
+    passage += sentences[(index + cursor) % sentences.length];
+    cursor += 1;
+  }
+  return passage;
+}
+
+List<_CompletionSpan> _completionSpans(String passage) {
+  if (passage.isEmpty) return const <_CompletionSpan>[];
+  final lexemes = [..._secondCompletionLexemes]
+    ..sort((a, b) => b.value.length.compareTo(a.value.length));
+  final spans = <_CompletionSpan>[];
+  var cursor = 0;
+  while (cursor < passage.length) {
+    _CompletionLexeme? match;
+    for (final lexeme in lexemes) {
+      if (passage.startsWith(lexeme.value, cursor)) {
+        match = lexeme;
+        break;
+      }
+    }
+    if (match == null) {
+      cursor += 1;
+      continue;
+    }
+    spans.add(_CompletionSpan(cursor, cursor + match.value.length, match));
+    cursor += match.value.length;
+  }
+  return spans;
+}
+
+List<_CompletionSpan> _spreadCompletionSpans(
+  List<_CompletionSpan> spans,
+  int count,
+  int index,
+) {
+  if (count == 1) {
+    return <_CompletionSpan>[spans[index % spans.length]];
+  }
+  final selected = <int>{};
+  for (var i = 0; i < count; i += 1) {
+    final position = ((i * (spans.length - 1)) / (count - 1)).round();
+    selected.add((position + index) % spans.length);
+  }
+  var probe = index;
+  while (selected.length < count) {
+    selected.add(probe % spans.length);
+    probe += 1;
+  }
+  final result = selected.map((i) => spans[i]).toList()
+    ..sort((a, b) => a.start.compareTo(b.start));
+  return result.take(count).toList(growable: false);
+}
+
+List<String> _completionOptions({
+  required String answer,
+  required String slot,
+  required int target,
+  required String seed,
+}) {
+  final pool = _secondCompletionLexemes
+      .where((item) => item.slot == slot && item.value != answer)
+      .map((item) => item.value)
+      .toSet()
+      .toList(growable: false);
+  if (pool.length < 3) {
+    throw StateError('Second Story Completion slot $slot lacks distractors.');
+  }
+  pool.sort((a, b) {
+    final lengthA = (_hanCount(a) - _hanCount(answer)).abs();
+    final lengthB = (_hanCount(b) - _hanCount(answer)).abs();
+    if (lengthA != lengthB) return lengthA.compareTo(lengthB);
+    return _hash('$seed:$a').compareTo(_hash('$seed:$b'));
+  });
+  final options = pool.take(3).toList(growable: true);
+  options.insert(target.clamp(0, 3), answer);
+  if (options.length != 4 ||
+      options.toSet().length != 4 ||
+      options.where((item) => item == answer).length != 1) {
+    throw StateError('Second Story Completion option invariant failed.');
+  }
+  return options;
+}
+
+String _answerType(String answer) {
+  final count = _hanCount(answer);
+  if (count <= 1) return '字';
+  if (count <= 2) return '词';
+  return '短语';
+}
+
+int _requireLevel(int level) {
+  if (level < 1 || level > 10) {
+    throw StateError('Forbidden City Challenge requires Lv1-Lv10, got $level');
+  }
+  return level;
 }
 
 const _protectedTerms = <String>[
