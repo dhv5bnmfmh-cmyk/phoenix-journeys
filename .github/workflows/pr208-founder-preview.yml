@@ -1,5 +1,6 @@
 name: PR208 Founder Preview 189EFD
 
+# Founder Preview Gate: exact product SHA, isolated from full release approval.
 on:
   push:
     branches:
