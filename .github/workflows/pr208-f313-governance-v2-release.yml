@@ -79,6 +79,25 @@ jobs:
             throw new Error('visible-stage contract replacement did not apply');
           }
           fs.writeFileSync(performancePath, performance);
+
+          const storySelectionPath = 'app/test/forbidden_city_story_selection_runtime_test.dart';
+          let storySelection = fs.readFileSync(storySelectionPath, 'utf8');
+          const staleDiscoveryExpectation = `    expect(
+      content.discoveries.map((entry) => entry.text),
+      forbiddenCityPipelineFixture.discoveries.map((entry) => entry.text),
+    );`;
+          const levelSixDiscoveryExpectation = `    expect(
+      content.discoveries.map((entry) => entry.text),
+      <String>[
+        '读乾清门前广场时，可以同时使用中轴、具体宫门和东西方位，但三者承担的判断作用不同。',
+        '景运门位于乾清门前广场东侧这一事实，需要具体位置证据，不能只靠“中轴”这个整体框架推出。',
+      ],
+    );`;
+          if (!storySelection.includes(staleDiscoveryExpectation)) {
+            throw new Error('stale Second Story discovery expectation not found');
+          }
+          storySelection = storySelection.replace(staleDiscoveryExpectation, levelSixDiscoveryExpectation);
+          fs.writeFileSync(storySelectionPath, storySelection);
           NODE
       - name: Founder-like automated acceptance and targeted tests
         working-directory: app
@@ -107,7 +126,8 @@ jobs:
         run: |
           git restore --source="$RELEASE_SHA" -- \
             app/test/settings_journey_session_lock_test.dart \
-            app/test/journey_runtime_performance_gate_test.dart
+            app/test/journey_runtime_performance_gate_test.dart \
+            app/test/forbidden_city_story_selection_runtime_test.dart
       - name: Targeted worker tests
         run: node --test worker/*.test.mjs
       - name: Enforce quality
