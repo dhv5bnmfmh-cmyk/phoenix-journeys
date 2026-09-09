@@ -1,4 +1,4 @@
-name: PR208 Lv6 Rebuild Targeted
+name: PR208 Rebuild Continuous Closeout
 
 on:
   push:
@@ -6,36 +6,117 @@ on:
     paths: ['.github/workflows/pr208-lv6-rebuild-targeted.yml']
 
 permissions:
-  contents: read
+  contents: write
 
 env:
-  CANDIDATE_SHA: 88a378024d589f2e7c45a77e512c77326c77f1ae
+  START_SHA: 88a378024d589f2e7c45a77e512c77326c77f1ae
+  CANDIDATE_BRANCH: validation/pr208-lv6-rebuild-protected-term-fix
 
 jobs:
-  targeted:
+  closeout:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: app
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ env.CANDIDATE_SHA }}
+          ref: ${{ env.CANDIDATE_BRANCH }}
           fetch-depth: 0
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-      - name: Exact candidate
+      - name: Exact starting candidate
         run: |
-          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          git status --porcelain
-      - name: Targeted permanent contracts
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$START_SHA"
+          test -z "$(git status --porcelain)"
+      - name: Clear rebuild protected-term split family
+        shell: bash
         run: |
+          set -euo pipefail
           flutter pub get
+          for iteration in 1 2 3 4 5; do
+            set +e
+            flutter test --reporter expanded test/forbidden_city_product_reference_test.dart > /tmp/product-reference.log 2>&1
+            rc=$?
+            set -e
+            cat /tmp/product-reference.log
+            if [ "$rc" -eq 0 ]; then
+              echo "Permanent product reference auditor PASS"
+              break
+            fi
+            level="$(grep -oE 'Lv[0-9]+: \[rebuild-protected-term-split\]' /tmp/product-reference.log | head -1 | sed -E 's/Lv([0-9]+).*/\1/' || true)"
+            if [ -z "$level" ]; then
+              echo "First failure is not rebuild-protected-term-split; stop for classification."
+              exit "$rc"
+            fi
+            echo "Evidence-backed protected-term split at Lv${level}"
+            LEVEL="$level" python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          path = Path('lib/services/forbidden_city_challenge_level_standard.dart')
+          text = path.read_text()
+          level = int(os.environ['LEVEL'])
+          fixes = {
+              7: [
+                  ('中轴秩序并不等于路线', '中轴秩序并不等于路径'),
+                  ('午门入口不是唯一路线', '午门入口不是唯一路径'),
+              ],
+              8: [
+                  ('中轴框架服务空间判断', '中轴框架服务空间关系'),
+                  ('乾清门是路线共同节点', '乾清门是任务汇合点'),
+                  ('故宫证据来自建筑文物', '故宫史料来自建筑文物'),
+              ],
+              9: [
+                  ('中轴框架并非行动路线', '中轴框架并非行动路径'),
+                  ('乾清门需结合任务判断', '乾清门需结合任务辨识'),
+                  ('故宫博物院以证据释史', '故宫博物院以史料释史'),
+              ],
+              10: [
+                  ('中轴证据不能替代目标', '中轴资料不能替代目标'),
+                  ('午门路线需要说明任务', '午门路径需要说明任务'),
+                  ('乾清门连接需结合证据', '乾清门衔接需结合史料'),
+              ],
+          }
+          if level not in fixes:
+              raise SystemExit(f'No authorized same-class content fix for Lv{level}')
+          changed = False
+          for old, new in fixes[level]:
+              if old in text:
+                  print(f'Lv{level}: {old} -> {new}')
+                  text = text.replace(old, new, 1)
+                  changed = True
+          if not changed:
+              raise SystemExit(f'Lv{level} reported split but no expected offending sentence matched')
+          path.write_text(text)
+          PY
+          done
           flutter test --reporter expanded test/forbidden_city_product_reference_test.dart
-          flutter test --reporter expanded test/forbidden_city_rebuild_concise_contract_test.dart
-          flutter test --reporter expanded test/forbidden_city_story_isolation_test.dart
+      - name: Rebuild concise contract
+        run: flutter test --reporter expanded test/forbidden_city_rebuild_concise_contract_test.dart
+      - name: Story isolation contract
+        run: flutter test --reporter expanded test/forbidden_city_story_isolation_test.dart
       - name: Analyze
         run: flutter analyze
+      - name: Commit evidence-backed product fixes
+        working-directory: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$(git status --porcelain -- app/lib/services/forbidden_city_challenge_level_standard.dart)"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add app/lib/services/forbidden_city_challenge_level_standard.dart
+          git commit -m "fix(pr208): preserve rebuild terms Lv7-Lv10"
+          git push origin "HEAD:$CANDIDATE_BRANCH"
+          echo "FINAL_CANDIDATE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "FINAL_CANDIDATE_SHA=$(git rev-parse HEAD)"
+      - name: Exact committed candidate
+        working-directory: .
+        run: |
+          test "$(git rev-parse HEAD)" = "$FINAL_CANDIDATE_SHA"
+          test -z "$(git status --porcelain --untracked-files=no)"
