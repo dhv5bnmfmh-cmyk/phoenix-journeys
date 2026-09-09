@@ -96,7 +96,9 @@ async function waitHome(targetIdentityKey = null) {
     const visible = rs.filter((r) => r.visible);
     const texts = visible.map(recText);
     const home = texts.some((text) => text.includes('PHOENIX JOURNEYS'));
-    const storyProgress = texts.some((text) => text.startsWith('1/6') || text.includes(' 1/6'));
+    const storyProgress = texts.some(
+      (text) => ['1/5', '1/6'].some((progress) => text.startsWith(progress) || text.includes(` ${progress}`)),
+    );
     const target = resolveJourneyAction(rs, targetIdentityKey);
     if (home && !storyProgress && target?.identityKey) {
       stableMatches += 1;
@@ -138,7 +140,9 @@ async function waitStoryUsable() {
   while (Date.now() < deadline) {
     const rs = (await records()).filter((r) => r.visible);
     const texts = rs.map(recText);
-    const progress = texts.some((text) => text.startsWith('1/6') || text.includes(' 1/6'));
+    const progress = texts.some(
+      (text) => ['1/5', '1/6'].some((value) => text.startsWith(value) || text.includes(` ${value}`)),
+    );
     const chineseStoryContent = texts.some(
       (text) => (text.match(/[\u3400-\u9fff]/g) ?? []).length >= 12,
     );
@@ -206,7 +210,7 @@ const values = samples.map((s) => s.elapsedMs).sort((a, b) => a - b);
 const medianMs = values[Math.floor(values.length / 2)];
 const result = {
   sourceSha,
-  metric: 'Home usable -> click SAME parsed Journey entry -> learner-usable Story 1/6 + Chinese content + interaction target',
+  metric: 'Home usable -> click SAME parsed Journey entry -> learner-usable Golden Story progress + Chinese content + interaction target',
   identityKey,
   validSamples: samples.length,
   samples,
