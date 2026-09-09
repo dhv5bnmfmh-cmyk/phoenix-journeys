@@ -34,3 +34,6 @@ jobs:
           test/forbidden_city_story_standard_test.dart
           test/founder_device_story_continue_regression_test.dart
           test/journey_runtime_performance_gate_test.dart
+      - name: Analyze Golden product
+        working-directory: app
+        run: flutter analyze
