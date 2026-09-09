@@ -26,13 +26,13 @@ grep -Fq 'templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md' "$contract"
 grep -Fq '两条路，一张图' "$contract"
 
 rejected='story\.forbidden_city\.modern_evidence_handoff|seed\.forbidden_city\.modern_evidence_handoff|fixture\.forbidden_city\.modern_evidence_handoff|交接前的标记|forbiddenCitySecondStory|forbidden_city_second_story|forbidden_city_story_runtime|forbidden_city_content_pipeline_fixture|forbidden_city_story_engine_v1'
-if rg -n "$rejected" app/lib app/test .github/scripts .github/workflows \
-  -g '!enforce_authoritative_story_contract.sh'; then
+if grep -R -n -E "$rejected" app/lib app/test .github/scripts .github/workflows \
+  --exclude='enforce_authoritative_story_contract.sh'; then
   echo 'Rejected Story runtime or support path remains.' >&2
   exit 1
 fi
 
-test "$(rg -l "title: '两条路，一张图'" app/lib/data | wc -l)" -eq 1
+test "$(grep -R -l -F "title: '两条路，一张图'" app/lib/data | wc -l)" -eq 1
 
 for workflow in .github/workflows/deploy-cloudflare.yml \
   .github/workflows/preview-cloudflare.yml \
