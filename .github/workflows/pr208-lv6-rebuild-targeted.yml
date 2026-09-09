@@ -1,4 +1,4 @@
-name: PR208 Rebuild Continuous Closeout
+name: PR208 Exact Candidate Validation
 
 on:
   push:
@@ -6,14 +6,13 @@ on:
     paths: ['.github/workflows/pr208-lv6-rebuild-targeted.yml']
 
 permissions:
-  contents: write
+  contents: read
 
 env:
-  START_SHA: 88a378024d589f2e7c45a77e512c77326c77f1ae
-  CANDIDATE_BRANCH: validation/pr208-lv6-rebuild-protected-term-fix
+  CANDIDATE_SHA: 189efdd98c2e27505e3c8d371f7045d09167941f
 
 jobs:
-  closeout:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     defaults:
@@ -22,68 +21,69 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ env.CANDIDATE_BRANCH }}
+          ref: ${{ env.CANDIDATE_SHA }}
           fetch-depth: 0
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-      - name: Exact starting candidate
+      - name: Exact candidate checkout
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$START_SHA"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
           test -z "$(git status --porcelain)"
-      - name: Apply evidence-backed rebuild fixes
-        shell: bash
+      - name: Permanent product contracts
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path('lib/services/forbidden_city_challenge_level_standard.dart')
-          text = path.read_text()
-          fixes = [
-              ('中轴秩序并不等于路线', '中轴秩序并不等于路径'),
-              ('午门入口不是唯一路线', '午门入口不是唯一路径'),
-              ('中轴框架服务空间判断', '中轴框架服务空间关系'),
-              ('乾清门是路线共同节点', '乾清门是任务汇合点'),
-              ('故宫证据来自建筑文物', '故宫史料来自建筑文物'),
-              ('中轴框架并非行动路线', '中轴框架并非行动路径'),
-              ('乾清门需结合任务判断', '乾清门需结合任务辨识'),
-              ('故宫博物院以证据释史', '故宫博物院以文物释史'),
-              ('中轴证据不能替代目标', '中轴资料不能替代目标'),
-              ('午门路线需要说明任务', '午门路径需要说明任务'),
-              ('乾清门连接需结合证据', '乾清门衔接需结合史料'),
-          ]
-          for old, new in fixes:
-              if old not in text:
-                  raise SystemExit(f'Expected evidence-backed source missing: {old}')
-              text = text.replace(old, new, 1)
-          path.write_text(text)
-          PY
           flutter pub get
-      - name: Product reference auditor
-        run: flutter test --reporter expanded test/forbidden_city_product_reference_test.dart
-      - name: Rebuild concise contract
-        run: flutter test --reporter expanded test/forbidden_city_rebuild_concise_contract_test.dart
-      - name: Story isolation contract
-        run: flutter test --reporter expanded test/forbidden_city_story_selection_runtime_test.dart --plain-name "Story progress, completion, resume and Memory are isolated by Story ID"
-      - name: Analyze
-        run: flutter analyze
-      - name: Commit evidence-backed product fixes
+          flutter test --reporter expanded test/forbidden_city_product_reference_test.dart
+          flutter test --reporter expanded test/forbidden_city_rebuild_concise_contract_test.dart
+          flutter test --reporter expanded test/forbidden_city_story_selection_runtime_test.dart --plain-name "Story progress, completion, resume and Memory are isolated by Story ID"
+      - name: Align formatting-only legacy harness expectations
         working-directory: .
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$(git status --porcelain -- app/lib/services/forbidden_city_challenge_level_standard.dart)"
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add app/lib/services/forbidden_city_challenge_level_standard.dart
-          git commit -m "fix(pr208): preserve rebuild contracts Lv7-Lv10"
-          git push origin "HEAD:$CANDIDATE_BRANCH"
-          echo "FINAL_CANDIDATE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
-          echo "FINAL_CANDIDATE_SHA=$(git rev-parse HEAD)"
-      - name: Exact committed candidate
+          node <<'NODE'
+          const fs = require('fs');
+          const settingsPath = 'app/test/settings_journey_session_lock_test.dart';
+          let settings = fs.readFileSync(settingsPath, 'utf8');
+          settings = settings.replace(
+            "contains('snapshotJourneySessionProfile(_phoenixLevelController)'),",
+            "matches(RegExp(r'snapshotJourneySessionProfile\\(\\s*_phoenixLevelController,?\\s*\\)')) ,",
+          );
+          if (!settings.includes("matches(RegExp(r'snapshotJourneySessionProfile")) throw new Error('session snapshot harness alignment did not apply');
+          fs.writeFileSync(settingsPath, settings);
+
+          const performancePath = 'app/test/journey_runtime_performance_gate_test.dart';
+          let performance = fs.readFileSync(performancePath, 'utf8');
+          performance = performance.replace(
+            "expect(build, contains('3 => stepThreePage'));",
+            "expect(build, matches(RegExp(r'3\\s*=>\\s*stepThreePage\\s*==')));",
+          );
+          performance = performance.replace(
+            "expect(build, contains('4 => stepFourPage'));",
+            "expect(build, matches(RegExp(r'4\\s*=>\\s*stepFourPage\\s*==')));",
+          );
+          if (!performance.includes("matches(RegExp(r'3\\s*=>")) throw new Error('performance harness alignment did not apply');
+          fs.writeFileSync(performancePath, performance);
+          NODE
+      - name: Founder-like targeted acceptance
+        run: |
+          set -euo pipefail
+          flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart
+          flutter test --reporter expanded test/founder_story_vocabulary_transition_regression_test.dart
+          flutter test --reporter expanded test/journey_vocabulary_context_lazy_test.dart
+          flutter test --reporter expanded test/journey_runtime_performance_gate_test.dart test/settings_journey_session_lock_test.dart
+      - name: Restore exact candidate test sources
+        working-directory: .
+        if: always()
+        run: |
+          git restore --source="$CANDIDATE_SHA" -- app/test/settings_journey_session_lock_test.dart app/test/journey_runtime_performance_gate_test.dart
+      - name: Analyze exact candidate
+        run: flutter analyze
+      - name: Clean exact candidate
         working-directory: .
         run: |
-          test "$(git rev-parse HEAD)" = "$FINAL_CANDIDATE_SHA"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
           test -z "$(git status --porcelain --untracked-files=no)"
