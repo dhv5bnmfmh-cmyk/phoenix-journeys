@@ -1,4 +1,4 @@
-name: PR208 Founder Preview 189EFD VocabularyRetry
+name: PR208 Founder Preview 189EFD FirstDetail
 
 on:
   push:
@@ -36,9 +36,9 @@ jobs:
           test -f .github/scripts/journey_level_session_harness.mjs
           node --check .github/scripts/pr208_founder_preview_webkit_smoke.mjs
           node --check .github/scripts/journey_level_session_harness.mjs
-          grep -Fq "await tap(page,'继续');const started=performance.now();await findAny" .github/scripts/pr208_founder_preview_webkit_smoke.mjs
-          grep -Fq "async function tapAny(page,needles" .github/scripts/pr208_founder_preview_webkit_smoke.mjs
-          grep -Fq "const action=await tapAny(page,['完成并收起','下一个单词']" .github/scripts/pr208_founder_preview_webkit_smoke.mjs
+          grep -Fq "await tap(page,'继续');const started=performance.now();const detail=await findAny" .github/scripts/pr208_founder_preview_webkit_smoke.mjs
+          grep -Fq "const specs=[1,5,6,7,10]" .github/scripts/pr208_founder_preview_webkit_smoke.mjs
+          ! grep -Fq "advanceVocabulary" .github/scripts/pr208_founder_preview_webkit_smoke.mjs
           cp .github/scripts/pr208_founder_preview_webkit_smoke.mjs /tmp/pr208-founder-preview/
           cp .github/scripts/journey_level_session_harness.mjs /tmp/pr208-founder-preview/
 
