@@ -266,8 +266,8 @@ void main() {
     expect(build, contains('0 => _storyPage()'));
     expect(build, contains('1 => _wordsPage()'));
     expect(build, contains('2 => _discoveryPage()'));
-    expect(build, contains('3 => stepThreePage'));
-    expect(build, contains('4 => stepFourPage'));
+    expect(build, matches(RegExp(r'3\s*=>\s*stepThreePage\s*==')));
+    expect(build, matches(RegExp(r'4\s*=>\s*stepFourPage\s*==')));
     expect(build, contains('_ => _completePage()'));
     expect(build, contains('child: page'));
     expect(build, isNot(contains('final pages = <Widget>[')));
