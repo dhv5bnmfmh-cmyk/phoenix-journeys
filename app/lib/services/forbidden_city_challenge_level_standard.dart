@@ -43,7 +43,7 @@ const _primaryRebuildLevels = <List<_RebuildSpec>>[
   [
     _RebuildSpec('中轴帮助判断空间关系'),
     _RebuildSpec('午门位置标明南侧入口'),
-    _RebuildSpec('乾清门前连接不同路线'),
+    _RebuildSpec('乾清门连接不同路线图'),
     _RebuildSpec('故宫文物补充建筑证据'),
   ],
   [
