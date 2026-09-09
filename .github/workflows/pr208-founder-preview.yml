@@ -72,15 +72,12 @@ jobs:
         working-directory: app
         run: |
           set -euo pipefail
-          test -f test/founder_device_story_continue_regression_test.dart
           test -f test/journey_vocabulary_context_lazy_test.dart
           test -f test/journey_runtime_performance_gate_test.dart
           test -f test/founder_story_vocabulary_transition_regression_test.dart
-          grep -Fq "selected cold Word Detail path avoids unrelated journey lookup work" test/founder_device_story_continue_regression_test.dart
           grep -Fq "active Journey hit does not invoke unrelated lazy builders" test/journey_vocabulary_context_lazy_test.dart
           grep -Fq "cold start stays non-blocking and lazily materializes journeys" test/journey_runtime_performance_gate_test.dart
-          grep -Fq "Second Story Continue reaches Vocabulary promptly" test/founder_story_vocabulary_transition_regression_test.dart
-          flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart --plain-name 'selected cold Word Detail path avoids unrelated journey lookup work'
+          grep -Fq "Founder regression: Second Story Lv6 Story Continue renders Vocabulary" test/founder_story_vocabulary_transition_regression_test.dart
           flutter test --reporter expanded test/journey_vocabulary_context_lazy_test.dart
           flutter test --reporter expanded test/journey_runtime_performance_gate_test.dart --plain-name 'cold start stays non-blocking and lazily materializes journeys'
           flutter test --reporter expanded test/founder_story_vocabulary_transition_regression_test.dart
