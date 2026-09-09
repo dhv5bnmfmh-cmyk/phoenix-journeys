@@ -18,6 +18,7 @@ on:
       - '.github/scripts/journey_level_session_harness.mjs'
       - '.github/scripts/enforce_authoritative_story_contract.sh'
       - '.github/workflows/startup-performance-audit.yml'
+      - '.github/workflows/preview-cloudflare.yml'
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
@@ -35,6 +36,7 @@ on:
       - '.github/scripts/journey_level_session_harness.mjs'
       - '.github/scripts/enforce_authoritative_story_contract.sh'
       - '.github/workflows/startup-performance-audit.yml'
+      - '.github/workflows/preview-cloudflare.yml'
   workflow_dispatch:
 
 permissions:
