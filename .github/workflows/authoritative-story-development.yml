@@ -12,6 +12,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: authoritative-story-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   authoritative-story-contract:
     runs-on: ubuntu-latest
