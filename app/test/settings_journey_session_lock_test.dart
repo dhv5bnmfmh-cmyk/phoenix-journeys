@@ -66,7 +66,9 @@ void main() {
     );
     expect(
       journey,
-      contains('snapshotJourneySessionProfile(_phoenixLevelController)'),
+      contains(
+        'snapshotJourneySessionProfile(\n      _phoenixLevelController,\n    )',
+      ),
     );
     expect(
       journey,
