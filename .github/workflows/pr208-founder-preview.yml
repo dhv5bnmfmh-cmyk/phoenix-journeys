@@ -34,6 +34,8 @@ jobs:
           mkdir -p /tmp/pr208-founder-preview
           test -f .github/scripts/pr208_founder_preview_webkit_smoke.mjs
           test -f .github/scripts/journey_level_session_harness.mjs
+          node --check .github/scripts/pr208_founder_preview_webkit_smoke.mjs
+          node --check .github/scripts/journey_level_session_harness.mjs
           cp .github/scripts/pr208_founder_preview_webkit_smoke.mjs /tmp/pr208-founder-preview/
           cp .github/scripts/journey_level_session_harness.mjs /tmp/pr208-founder-preview/
 
