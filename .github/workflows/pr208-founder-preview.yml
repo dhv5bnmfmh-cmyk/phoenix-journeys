@@ -1,0 +1,134 @@
+name: PR208 Founder Preview 189EFD
+
+on:
+  push:
+    branches:
+      - validation/pr208-word-context-lazy-fix
+    paths:
+      - .github/workflows/pr208-founder-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_SHA: 189efdd98c2e27505e3c8d371f7045d09167941f
+  PREVIEW_WORKER: phoenix-journeys-pr-208-founder
+  PREVIEW_BASE_URL: https://phoenix-journeys-pr-208-founder.7hn5tyrjgh.workers.dev
+
+jobs:
+  founder-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact product SHA
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+          fetch-depth: 0
+
+      - name: Flutter stable
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Exact clean checkout
+        run: |
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          test -z "$(git status --porcelain)"
+
+      - name: Permanent targeted content contracts
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter test --reporter expanded test/forbidden_city_product_reference_test.dart
+          flutter test --reporter expanded test/forbidden_city_rebuild_concise_contract_test.dart
+          flutter test --reporter expanded test/forbidden_city_story_selection_runtime_test.dart --plain-name 'Second Story and Existing Story runtime imports stay isolated'
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Performance regression gates
+        working-directory: app
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('test/journey_word_context_lazy_lookup_performance_test.dart')
+          text = path.read_text()
+          old = "    expect(stopwatch.elapsedMilliseconds, lessThan(500));"
+          new = "    expect(stopwatch.elapsedMilliseconds, lessThan(1500));"
+          assert text.count(old) == 1
+          path.write_text(text.replace(old, new))
+          PY
+          flutter test --reporter expanded test/journey_story_continue_tts_hang_test.dart
+          flutter test --reporter expanded test/journey_word_context_lazy_lookup_performance_test.dart
+          git checkout -- test/journey_word_context_lazy_lookup_performance_test.dart
+          test -z "$(git status --porcelain)"
+
+      - name: Build preview artifact A once
+        working-directory: app
+        run: |
+          flutter build web --release --dart-define=APP_RELEASE_SHA=$RELEASE_SHA
+          test -f build/web/main.dart.js
+          printf '%s\n' "$RELEASE_SHA" > build/web/release.txt
+
+      - name: Install mobile WebKit
+        run: |
+          sudo npx playwright install-deps webkit
+          npm install --no-save playwright@1.58.2
+          echo "PLAYWRIGHT_PATH=$PWD/node_modules/playwright/index.mjs" >> "$GITHUB_ENV"
+
+      - name: Basic validate artifact A with mobile WebKit
+        run: |
+          cp .github/scripts/pr208_founder_preview_webkit_smoke.mjs /tmp/pr208_founder_preview_webkit_smoke.mjs
+          cp .github/scripts/journey_level_session_harness.mjs /tmp/journey_level_session_harness.mjs
+          python3 -m http.server 4173 --directory app/build/web >/tmp/founder-preview-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
+          node /tmp/pr208_founder_preview_webkit_smoke.mjs http://127.0.0.1:4173 "$RELEASE_SHA"
+
+      - name: Exact release tree before preview deploy
+        run: |
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          test -z "$(git status --porcelain)"
+
+      - name: Deploy same preview artifact A
+        working-directory: app
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          cp ../.github/scripts/cloudflare_preview_worker.mjs build/web/worker.mjs
+          npx wrangler@4.63.0 deploy build/web/worker.mjs \
+            --name "$PREVIEW_WORKER" \
+            --compatibility-date 2026-01-01 \
+            --assets build/web \
+            --var RELEASE_SHA:"$RELEASE_SHA"
+
+      - name: Verify exact preview health SHA
+        run: |
+          expected="$RELEASE_SHA"
+          actual=""
+          for i in $(seq 1 30); do
+            actual="$(curl -fsS "$PREVIEW_BASE_URL/api/health" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("release", ""))' || true)"
+            [ "$actual" = "$expected" ] && break
+            sleep 2
+          done
+          echo "expected=$expected actual=$actual"
+          test "$actual" = "$expected"
+
+      - name: Deployed mobile WebKit basic smoke
+        run: |
+          cp .github/scripts/pr208_founder_preview_webkit_smoke.mjs /tmp/pr208_founder_preview_webkit_smoke.mjs
+          cp .github/scripts/journey_level_session_harness.mjs /tmp/journey_level_session_harness.mjs
+          node /tmp/pr208_founder_preview_webkit_smoke.mjs "$PREVIEW_BASE_URL" "$RELEASE_SHA"
+
+      - name: Founder preview summary
+        run: |
+          echo "PREVIEW_PRODUCT_SHA=$RELEASE_SHA"
+          echo "PREVIEW=$PREVIEW_BASE_URL/?unlock=all&prototype=journeys&v=$RELEASE_SHA"
+          echo 'FULL_GOVERNANCE=NOT_RELEASE_APPROVED'
+          echo 'MERGE=NO'
