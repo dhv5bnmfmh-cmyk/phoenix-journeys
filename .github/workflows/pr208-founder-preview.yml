@@ -45,7 +45,7 @@ jobs:
           flutter pub get
           flutter test --reporter expanded test/forbidden_city_product_reference_test.dart
           flutter test --reporter expanded test/forbidden_city_rebuild_concise_contract_test.dart
-          flutter test --reporter expanded test/forbidden_city_story_selection_runtime_test.dart --plain-name 'Second Story and Existing Story runtime imports stay isolated'
+          flutter test --reporter expanded test/forbidden_city_story_selection_runtime_test.dart --plain-name 'Story progress, completion, resume and Memory are isolated by Story ID'
 
       - name: Analyze
         working-directory: app
