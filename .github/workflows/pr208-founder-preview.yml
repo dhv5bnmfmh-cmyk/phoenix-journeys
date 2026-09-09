@@ -1,6 +1,5 @@
 name: PR208 Founder Preview 189EFD
 
-# Founder Preview Gate: exact product SHA, isolated from full release approval.
 on:
   push:
     branches:
@@ -14,6 +13,7 @@ permissions:
 
 env:
   RELEASE_SHA: 189efdd98c2e27505e3c8d371f7045d09167941f
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
   PREVIEW_WORKER: phoenix-journeys-pr-208-founder
   PREVIEW_BASE_URL: https://phoenix-journeys-pr-208-founder.7hn5tyrjgh.workers.dev
 
@@ -22,11 +22,29 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - name: Checkout exact product SHA
+      - name: Preserve Founder preview smoke harness
         uses: actions/checkout@v6
         with:
-          ref: ${{ env.RELEASE_SHA }}
           fetch-depth: 0
+
+      - name: Preserve validation-only preview helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pr208-founder-preview
+          test -f .github/scripts/pr208_founder_preview_webkit_smoke.mjs
+          test -f .github/scripts/journey_level_session_harness.mjs
+          cp .github/scripts/pr208_founder_preview_webkit_smoke.mjs /tmp/pr208-founder-preview/
+          cp .github/scripts/journey_level_session_harness.mjs /tmp/pr208-founder-preview/
+
+      - name: Checkout exact product SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "$RELEASE_SHA"
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          test "$(git ls-remote origin "refs/heads/$PRODUCT_BRANCH" | awk '{print $1}')" = "$RELEASE_SHA"
+          test -z "$(git status --porcelain)"
 
       - name: Flutter stable
         uses: subosito/flutter-action@v2
@@ -34,15 +52,14 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Exact clean checkout
-        run: |
-          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
-          test -z "$(git status --porcelain)"
-
-      - name: Permanent targeted content contracts
+      - name: Permanent targeted product contracts
         working-directory: app
         run: |
+          set -euo pipefail
           flutter pub get
+          test -f test/forbidden_city_product_reference_test.dart
+          test -f test/forbidden_city_rebuild_concise_contract_test.dart
+          test -f test/forbidden_city_story_selection_runtime_test.dart
           flutter test --reporter expanded test/forbidden_city_product_reference_test.dart
           flutter test --reporter expanded test/forbidden_city_rebuild_concise_contract_test.dart
           flutter test --reporter expanded test/forbidden_city_story_selection_runtime_test.dart --plain-name 'Story progress, completion, resume and Memory are isolated by Story ID'
@@ -54,78 +71,102 @@ jobs:
       - name: Performance regression gates
         working-directory: app
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path('test/journey_word_context_lazy_lookup_performance_test.dart')
-          text = path.read_text()
-          old = "    expect(stopwatch.elapsedMilliseconds, lessThan(500));"
-          new = "    expect(stopwatch.elapsedMilliseconds, lessThan(1500));"
-          assert text.count(old) == 1
-          path.write_text(text.replace(old, new))
-          PY
-          flutter test --reporter expanded test/journey_story_continue_tts_hang_test.dart
-          flutter test --reporter expanded test/journey_word_context_lazy_lookup_performance_test.dart
-          git checkout -- test/journey_word_context_lazy_lookup_performance_test.dart
-          test -z "$(git status --porcelain)"
+          set -euo pipefail
+          test -f test/founder_device_story_continue_regression_test.dart
+          test -f test/journey_vocabulary_context_lazy_test.dart
+          test -f test/journey_runtime_performance_gate_test.dart
+          test -f test/founder_story_vocabulary_transition_regression_test.dart
+          grep -Fq "selected cold Word Detail path avoids unrelated journey lookup work" test/founder_device_story_continue_regression_test.dart
+          grep -Fq "active Journey hit does not invoke unrelated lazy builders" test/journey_vocabulary_context_lazy_test.dart
+          grep -Fq "cold start stays non-blocking and lazily materializes journeys" test/journey_runtime_performance_gate_test.dart
+          grep -Fq "Second Story Continue reaches Vocabulary promptly" test/founder_story_vocabulary_transition_regression_test.dart
+          flutter test --reporter expanded test/founder_device_story_continue_regression_test.dart --plain-name 'selected cold Word Detail path avoids unrelated journey lookup work'
+          flutter test --reporter expanded test/journey_vocabulary_context_lazy_test.dart
+          flutter test --reporter expanded test/journey_runtime_performance_gate_test.dart --plain-name 'cold start stays non-blocking and lazily materializes journeys'
+          flutter test --reporter expanded test/founder_story_vocabulary_transition_regression_test.dart
+          test -z "$(git status --porcelain --untracked-files=no)"
 
       - name: Build preview artifact A once
         working-directory: app
         run: |
-          flutter build web --release --dart-define=APP_RELEASE_SHA=$RELEASE_SHA
+          set -euo pipefail
+          flutter build web --release
           test -f build/web/main.dart.js
-          printf '%s\n' "$RELEASE_SHA" > build/web/release.txt
+
+      - name: Fingerprint artifact A
+        shell: bash
+        run: |
+          set -euo pipefail
+          find app/build/web -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/pr208-founder-preview-artifact-a.sha256
+          test -s /tmp/pr208-founder-preview-artifact-a.sha256
 
       - name: Install mobile WebKit
+        shell: bash
         run: |
-          sudo npx playwright install-deps webkit
-          npm install --no-save playwright@1.58.2
-          echo "PLAYWRIGHT_PATH=$PWD/node_modules/playwright/index.mjs" >> "$GITHUB_ENV"
+          set -euo pipefail
+          npm install --no-save --prefix "$RUNNER_TEMP/pr208-founder-browser" playwright@1.58.2
+          "$RUNNER_TEMP/pr208-founder-browser/node_modules/.bin/playwright" install --with-deps webkit
 
       - name: Basic validate artifact A with mobile WebKit
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/pr208-founder-browser/node_modules/playwright/index.mjs
+        shell: bash
         run: |
-          cp .github/scripts/pr208_founder_preview_webkit_smoke.mjs /tmp/pr208_founder_preview_webkit_smoke.mjs
-          cp .github/scripts/journey_level_session_harness.mjs /tmp/journey_level_session_harness.mjs
+          set -euo pipefail
+          sha256sum -c /tmp/pr208-founder-preview-artifact-a.sha256
           python3 -m http.server 4173 --directory app/build/web >/tmp/founder-preview-http.log 2>&1 &
           SERVER_PID=$!
           trap 'kill $SERVER_PID || true' EXIT
-          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
-          node /tmp/pr208_founder_preview_webkit_smoke.mjs http://127.0.0.1:4173 "$RELEASE_SHA"
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && break
+            sleep 1
+          done
+          node /tmp/pr208-founder-preview/pr208_founder_preview_webkit_smoke.mjs http://127.0.0.1:4173 "$RELEASE_SHA"
+          sha256sum -c /tmp/pr208-founder-preview-artifact-a.sha256
 
       - name: Exact release tree before preview deploy
+        shell: bash
         run: |
+          set -euo pipefail
           test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
-          test -z "$(git status --porcelain)"
+          test "$(git ls-remote origin "refs/heads/$PRODUCT_BRANCH" | awk '{print $1}')" = "$RELEASE_SHA"
+          test -z "$(git status --porcelain --untracked-files=no)"
+          sha256sum -c /tmp/pr208-founder-preview-artifact-a.sha256
 
       - name: Deploy same preview artifact A
-        working-directory: app
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
         run: |
-          cp ../.github/scripts/cloudflare_preview_worker.mjs build/web/worker.mjs
-          npx wrangler@4.63.0 deploy build/web/worker.mjs \
-            --name "$PREVIEW_WORKER" \
-            --compatibility-date 2026-01-01 \
-            --assets build/web \
-            --var RELEASE_SHA:"$RELEASE_SHA"
+          set -euo pipefail
+          sha256sum -c /tmp/pr208-founder-preview-artifact-a.sha256
+          npx --yes wrangler@4 deploy --name "$PREVIEW_WORKER" --var "PHOENIX_RELEASE:$RELEASE_SHA"
+          sha256sum -c /tmp/pr208-founder-preview-artifact-a.sha256
 
-      - name: Verify exact preview health SHA
+      - name: Verify strict exact preview health SHA
+        shell: bash
         run: |
-          expected="$RELEASE_SHA"
-          actual=""
-          for i in $(seq 1 30); do
-            actual="$(curl -fsS "$PREVIEW_BASE_URL/api/health" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("release", ""))' || true)"
-            [ "$actual" = "$expected" ] && break
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            response="$(curl -fsS "$PREVIEW_BASE_URL/api/health" || true)"
+            if node -e 'const h=JSON.parse(process.argv[1]); if(!h.ok||h.release!==process.argv[2])process.exit(1)' "$response" "$RELEASE_SHA"; then
+              echo "health.release=$RELEASE_SHA"
+              exit 0
+            fi
             sleep 2
           done
-          echo "expected=$expected actual=$actual"
-          test "$actual" = "$expected"
+          echo "Exact health verification failed" >&2
+          exit 1
 
       - name: Deployed mobile WebKit basic smoke
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/pr208-founder-browser/node_modules/playwright/index.mjs
+        shell: bash
         run: |
-          cp .github/scripts/pr208_founder_preview_webkit_smoke.mjs /tmp/pr208_founder_preview_webkit_smoke.mjs
-          cp .github/scripts/journey_level_session_harness.mjs /tmp/journey_level_session_harness.mjs
-          node /tmp/pr208_founder_preview_webkit_smoke.mjs "$PREVIEW_BASE_URL" "$RELEASE_SHA"
+          set -euo pipefail
+          sha256sum -c /tmp/pr208-founder-preview-artifact-a.sha256
+          node /tmp/pr208-founder-preview/pr208_founder_preview_webkit_smoke.mjs "$PREVIEW_BASE_URL" "$RELEASE_SHA"
 
       - name: Founder preview summary
         run: |
