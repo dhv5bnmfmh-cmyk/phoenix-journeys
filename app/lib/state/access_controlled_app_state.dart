@@ -4,8 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/daily_journey_catalog.dart';
-import '../data/forbidden_city_journey_runtime.dart';
-import '../data/forbidden_city_story_runtime.dart';
 import '../data/journey_level_catalog.dart';
 import '../data/journey_publication_catalog.dart';
 import '../services/critical_persistence_store.dart';
@@ -205,33 +203,23 @@ class AccessControlledAppState extends AppState {
     );
   }
 
-  bool get _usesStoryScopedBaseState =>
-      activeJourneyId == forbiddenCityJourneyId &&
-      isForbiddenCitySecondStory(activeStoryId);
+  @override
+  int get journeyStep => _criticalStep;
 
   @override
-  int get journeyStep =>
-      _usesStoryScopedBaseState ? super.journeyStep : _criticalStep;
+  int get journeyFurthestStep => _criticalFurthestStep;
 
   @override
-  int get journeyFurthestStep => _usesStoryScopedBaseState
-      ? super.journeyFurthestStep
-      : _criticalFurthestStep;
+  int get beijingJourneyStep => _criticalStep;
 
   @override
-  int get beijingJourneyStep => journeyStep;
+  int get beijingJourneyFurthestStep => _criticalFurthestStep;
 
   @override
-  int get beijingJourneyFurthestStep => journeyFurthestStep;
-
-  @override
-  bool get hasJourneyInProgress => _usesStoryScopedBaseState
-      ? super.hasJourneyInProgress
-      : !journeyCompleted && _criticalStep > 0;
+  bool get hasJourneyInProgress => !journeyCompleted && _criticalStep > 0;
 
   @override
   double get journeyProgress {
-    if (_usesStoryScopedBaseState) return super.journeyProgress;
     if (journeyCompleted) return 1;
     return (_criticalStep + 1) / (AppState.journeyLastStep + 1);
   }
@@ -246,18 +234,14 @@ class AccessControlledAppState extends AppState {
   int get beijingJourneyProgressPercent => journeyProgressPercent;
 
   @override
-  String get journeyStepLabel => _usesStoryScopedBaseState
-      ? super.journeyStepLabel
-      : displayText(
-          _journeyLabelFor(_criticalStep, journeyCompositeSubstage),
-        );
+  String get journeyStepLabel => displayText(
+        _journeyLabelFor(_criticalStep, journeyCompositeSubstage),
+      );
 
   @override
-  String get journeyFurthestStepLabel => _usesStoryScopedBaseState
-      ? super.journeyFurthestStepLabel
-      : displayText(
-          AppState.journeyStepLabels[_safeJourneyStep(_criticalFurthestStep)],
-        );
+  String get journeyFurthestStepLabel => displayText(
+        AppState.journeyStepLabels[_safeJourneyStep(_criticalFurthestStep)],
+      );
 
   String _journeyLabelFor(int step, JourneyCompositeSubstage substage) {
     if (activeJourneyId == 'beijing-summer-palace') {
@@ -279,14 +263,11 @@ class AccessControlledAppState extends AppState {
 
   @override
   String? journeyNarrationSignatureFor(String contentId) =>
-      _usesStoryScopedBaseState
-          ? super.journeyNarrationSignatureFor(contentId)
-          : _criticalNarrationSignatures[contentId];
+      _criticalNarrationSignatures[contentId];
 
   @override
-  int journeyNarrationOffsetFor(String contentId) => _usesStoryScopedBaseState
-      ? super.journeyNarrationOffsetFor(contentId)
-      : _criticalNarrationOffsets[contentId] ?? 0;
+  int journeyNarrationOffsetFor(String contentId) =>
+      _criticalNarrationOffsets[contentId] ?? 0;
 
   bool canOpenJourney(String journeyId) {
     if (!_isRegisteredJourneyId(journeyId)) return false;
@@ -395,23 +376,6 @@ class AccessControlledAppState extends AppState {
         revision: committed.revision,
         schemaVersion: committed.schemaVersion,
       );
-      final restoredStoryId = snapshot.activeJourneyId == forbiddenCityJourneyId
-          ? normalizeForbiddenCityStoryId(
-              preferences.getString(AppState.activeStoryIdStorageKey),
-            )
-          : '';
-      if (isForbiddenCitySecondStory(restoredStoryId)) {
-        await super.activateJourney(
-          snapshot.activeJourneyId,
-          storyId: restoredStoryId,
-        );
-      } else {
-        activeStoryId = restoredStoryId;
-        await preferences.setString(
-          AppState.activeStoryIdStorageKey,
-          activeStoryId,
-        );
-      }
 
       if (!_canRestoreActiveJourney(activeJourneyId)) {
         throw StateError(
@@ -440,10 +404,7 @@ class AccessControlledAppState extends AppState {
   }
 
   @override
-  Future<void> activateJourney(
-    String journeyId, {
-    String? storyId,
-  }) async {
+  Future<void> activateJourney(String journeyId) async {
     final journey = requireDailyJourneyExperience(journeyId);
     if (!canOpenJourney(journeyId) && !canResumeActiveJourney(journeyId)) {
       throw JourneyAccessDeniedException(
@@ -452,9 +413,6 @@ class AccessControlledAppState extends AppState {
       );
     }
     final binding = requireJourneyLocation(journey.id);
-    final resolvedStoryId = journey.id == forbiddenCityJourneyId
-        ? normalizeForbiddenCityStoryId(storyId)
-        : '';
 
     await _transact<void>((current) {
       if (current.activeJourneyId == journey.id &&
@@ -470,20 +428,6 @@ class AccessControlledAppState extends AppState {
       );
     });
     _activeIdentityReady = true;
-    await super.activateJourney(
-      journey.id,
-      storyId: resolvedStoryId.isEmpty ? null : resolvedStoryId,
-    );
-    if (!isForbiddenCitySecondStory(resolvedStoryId)) {
-      final committed = _committedSnapshot;
-      if (committed != null) {
-        _applyCommitted(
-          committed,
-          revision: criticalRevision,
-          schemaVersion: criticalSchemaVersion,
-        );
-      }
-    }
   }
 
   Future<bool> tryActivateJourney(String journeyId) async {
@@ -508,15 +452,6 @@ class AccessControlledAppState extends AppState {
     required String memory,
     JourneyCompositeSubstage? compositeSubstage,
   }) async {
-    if (_usesStoryScopedBaseState) {
-      return super.saveJourneyProgress(
-        step: step,
-        wonder: wonder,
-        express: express,
-        memory: memory,
-        compositeSubstage: compositeSubstage,
-      );
-    }
     final journeyId = activeJourneyId;
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
@@ -542,9 +477,6 @@ class AccessControlledAppState extends AppState {
 
   @override
   Future<String> ensureChallengeAttemptIdentity() async {
-    if (_usesStoryScopedBaseState) {
-      return super.ensureChallengeAttemptIdentity();
-    }
     final journeyId = activeJourneyId;
     return _transact<String>((current) {
       final existing = current.requireJourney(journeyId);
@@ -575,13 +507,6 @@ class AccessControlledAppState extends AppState {
     required String contentSignature,
     required int offset,
   }) async {
-    if (_usesStoryScopedBaseState) {
-      return super.saveJourneyNarrationPosition(
-        contentId: contentId,
-        contentSignature: contentSignature,
-        offset: offset,
-      );
-    }
     final journeyId = activeJourneyId;
     final safeOffset = math.max(0, offset);
     await _transact<void>((current) {
@@ -608,9 +533,6 @@ class AccessControlledAppState extends AppState {
 
   @override
   Future<void> clearJourneyNarrationPosition({String? contentId}) async {
-    if (_usesStoryScopedBaseState) {
-      return super.clearJourneyNarrationPosition(contentId: contentId);
-    }
     final journeyId = activeJourneyId;
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
@@ -775,7 +697,6 @@ class AccessControlledAppState extends AppState {
 
   @override
   Future<void> restartJourney() async {
-    if (_usesStoryScopedBaseState) return super.restartJourney();
     final journeyId = activeJourneyId;
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
@@ -811,9 +732,6 @@ class AccessControlledAppState extends AppState {
 
   @override
   Future<void> completeJourney(String memory, {int sessionLevel = 1}) async {
-    if (_usesStoryScopedBaseState) {
-      return super.completeJourney(memory, sessionLevel: sessionLevel);
-    }
     final journeyId = activeJourneyId;
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
@@ -975,26 +893,6 @@ class AccessControlledAppState extends AppState {
     });
   }
 
-  @override
-  Future<ForbiddenCityStoryProgress> forbiddenCityStoryProgress(
-    String storyId,
-  ) async {
-    final normalized = normalizeForbiddenCityStoryId(storyId);
-    if (normalized == forbiddenCityPrimaryStoryId) {
-      final journey =
-          _committedSnapshot?.requireJourney(forbiddenCityJourneyId);
-      if (journey != null) {
-        return ForbiddenCityStoryProgress(
-          storyId: normalized,
-          step: journey.step,
-          completed: journey.completed,
-          updatedAt: DateTime.tryParse(journey.updatedAt ?? ''),
-        );
-      }
-    }
-    return super.forbiddenCityStoryProgress(normalized);
-  }
-
   @visibleForTesting
   Future<Map<String, dynamic>> readCommittedCriticalPayload() async {
     final record = await _criticalStore?.readCommitted();
@@ -1092,45 +990,40 @@ class AccessControlledAppState extends AppState {
       ..clear()
       ..addAll(snapshot.unlockedSpecialJourneyIds);
 
-    if (!_usesStoryScopedBaseState) {
-      final journey = snapshot.requireJourney(snapshot.activeJourneyId);
-      _criticalStep = journey.step;
-      _criticalFurthestStep = journey.furthestStep;
-      journeyCompleted = journey.completed;
-      journeyFlowVersion = journey.flowVersion;
-      journeyCompositeSubstage = journey.compositeSubstage;
-      journeyChallengeAttemptSequence = journey.challengeAttemptSequence;
-      journeyChallengeAttemptId = journey.challengeAttemptId;
-      wonderDraft = journey.wonderDraft;
-      expressDraft = journey.expressDraft;
-      memoryDraft = journey.memoryDraft;
-      guideFeedbackReply = journey.guideFeedbackReply;
-      guideFeedbackOffline = journey.guideFeedbackOffline;
-      guideFeedbackInputIdentity = journey.guideFeedbackInputIdentity;
-      writingFeedbackCorrected = journey.writingFeedbackCorrected;
-      writingFeedbackExplanation = journey.writingFeedbackExplanation;
-      writingFeedbackNatural = journey.writingFeedbackNatural;
-      writingFeedbackEncouragement = journey.writingFeedbackEncouragement;
-      writingFeedbackOffline = journey.writingFeedbackOffline;
-      writingFeedbackInputIdentity = journey.writingFeedbackInputIdentity;
-      journeyNarrationContentId = journey.narrationContentId;
-      journeyNarrationContentSignature = journey.narrationContentSignature;
-      journeyNarrationOffset = journey.narrationOffset;
-      _criticalNarrationSignatures
-        ..clear()
-        ..addAll(journey.narrationSignatures);
-      _criticalNarrationOffsets
-        ..clear()
-        ..addAll(journey.narrationOffsets);
-      journeyUpdatedAt = DateTime.tryParse(journey.updatedAt ?? '');
-    }
+    final journey = snapshot.requireJourney(snapshot.activeJourneyId);
+    _criticalStep = journey.step;
+    _criticalFurthestStep = journey.furthestStep;
+    journeyCompleted = journey.completed;
+    journeyFlowVersion = journey.flowVersion;
+    journeyCompositeSubstage = journey.compositeSubstage;
+    journeyChallengeAttemptSequence = journey.challengeAttemptSequence;
+    journeyChallengeAttemptId = journey.challengeAttemptId;
+    wonderDraft = journey.wonderDraft;
+    expressDraft = journey.expressDraft;
+    memoryDraft = journey.memoryDraft;
+    guideFeedbackReply = journey.guideFeedbackReply;
+    guideFeedbackOffline = journey.guideFeedbackOffline;
+    guideFeedbackInputIdentity = journey.guideFeedbackInputIdentity;
+    writingFeedbackCorrected = journey.writingFeedbackCorrected;
+    writingFeedbackExplanation = journey.writingFeedbackExplanation;
+    writingFeedbackNatural = journey.writingFeedbackNatural;
+    writingFeedbackEncouragement = journey.writingFeedbackEncouragement;
+    writingFeedbackOffline = journey.writingFeedbackOffline;
+    writingFeedbackInputIdentity = journey.writingFeedbackInputIdentity;
+    journeyNarrationContentId = journey.narrationContentId;
+    journeyNarrationContentSignature = journey.narrationContentSignature;
+    journeyNarrationOffset = journey.narrationOffset;
+    _criticalNarrationSignatures
+      ..clear()
+      ..addAll(journey.narrationSignatures);
+    _criticalNarrationOffsets
+      ..clear()
+      ..addAll(journey.narrationOffsets);
+    journeyUpdatedAt = DateTime.tryParse(journey.updatedAt ?? '');
 
     final preferences = _preferences;
     if (preferences != null) {
-      final baseNamespace = _storageNamespaceForJourneyId(activeJourneyId);
-      final currentNamespace = _usesStoryScopedBaseState
-          ? '$baseNamespace.story.$activeStoryId'
-          : baseNamespace;
+      final currentNamespace = _storageNamespaceForJourneyId(activeJourneyId);
       final legacyNamespace =
           _legacyStorageNamespaceForJourneyId(activeJourneyId);
       final storedDifficulty =

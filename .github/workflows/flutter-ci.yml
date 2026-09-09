@@ -42,6 +42,10 @@ jobs:
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
           echo "FLUTTER CI CANDIDATE SHA = $CANDIDATE_SHA"
 
+      - name: Enforce authoritative Story development contract
+        working-directory: ${{ github.workspace }}
+        run: .github/scripts/enforce_authoritative_story_contract.sh
+
       - name: Preflight checked-in harness syntax
         working-directory: ${{ github.workspace }}
         shell: bash

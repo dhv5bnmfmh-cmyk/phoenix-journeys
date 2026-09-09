@@ -10,6 +10,7 @@ on:
       - '.github/scripts/**'
       - 'worker/*.test.mjs'
       - 'docs/FAST_DEVELOPMENT_GOVERNANCE_V2.md'
+      - 'docs/AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md'
   pull_request:
     branches:
       - main
@@ -22,6 +23,7 @@ on:
       - '.github/scripts/**'
       - 'worker/*.test.mjs'
       - 'docs/FAST_DEVELOPMENT_GOVERNANCE_V2.md'
+      - 'docs/AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md'
   workflow_dispatch:
 
 permissions:
@@ -65,6 +67,9 @@ jobs:
           while IFS= read -r -d '' file; do node --check "$file"; done < <(find worker -maxdepth 1 -type f -name '*.test.mjs' -print0)
           while IFS= read -r -d '' file; do bash -n "$file"; done < <(find .github/scripts -type f -name '*.sh' -print0)
           while IFS= read -r -d '' file; do python3 -m py_compile "$file"; done < <(find .github/scripts -type f -name '*.py' -print0)
+
+      - name: Enforce authoritative Story development contract
+        run: .github/scripts/enforce_authoritative_story_contract.sh
 
       - name: Validate fast feedback dependency mapping
         shell: bash

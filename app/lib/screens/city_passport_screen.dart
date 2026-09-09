@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/daily_journey_catalog.dart';
-import '../data/forbidden_city_journey_runtime.dart';
-import '../data/forbidden_city_story_runtime.dart';
 import '../data/journey_city_catalog.dart';
 import '../data/journey_geography_catalog.dart';
 import '../services/journey_location_binding.dart';
@@ -99,7 +97,7 @@ class _PassportMap extends StatefulWidget {
   State<_PassportMap> createState() => _PassportMapState();
 }
 
-enum _PassportMapLevel { continent, country, province, city, story }
+enum _PassportMapLevel { continent, country, province, city }
 
 class _PassportMapState extends State<_PassportMap> {
   static const _continents = <({String id, String name})>[
@@ -114,7 +112,6 @@ class _PassportMapState extends State<_PassportMap> {
   _PassportMapLevel _level = _PassportMapLevel.continent;
   String? _selectedProvinceId;
   String? _selectedCityId;
-  String? _selectedJourneyId;
   late final TransformationController _mapTransformationController;
 
   AppState get state => widget.state;
@@ -148,7 +145,6 @@ class _PassportMapState extends State<_PassportMap> {
       _level = _PassportMapLevel.continent;
       _selectedProvinceId = null;
       _selectedCityId = null;
-      _selectedJourneyId = null;
     });
   }
 
@@ -158,7 +154,6 @@ class _PassportMapState extends State<_PassportMap> {
       _level = _PassportMapLevel.country;
       _selectedProvinceId = null;
       _selectedCityId = null;
-      _selectedJourneyId = null;
     });
   }
 
@@ -167,7 +162,6 @@ class _PassportMapState extends State<_PassportMap> {
     _resetMapTransform();
     setState(() {
       _selectedProvinceId = provinceId;
-      _selectedJourneyId = null;
       if (province.isMunicipality) {
         _level = _PassportMapLevel.city;
         _selectedCityId = province.cityIds.single;
@@ -183,46 +177,13 @@ class _PassportMapState extends State<_PassportMap> {
     setState(() {
       _level = _PassportMapLevel.city;
       _selectedCityId = cityId;
-      _selectedJourneyId = null;
     });
-  }
-
-  void _selectStoryPlace(String journeyId) {
-    if (journeyId != forbiddenCityJourneyId) return;
-    _resetMapTransform();
-    setState(() {
-      _selectedJourneyId = journeyId;
-      _level = _PassportMapLevel.story;
-    });
-  }
-
-  Future<void> _openForbiddenCityStory(
-    BuildContext context,
-    ForbiddenCityStoryRuntimeEntry story,
-  ) async {
-    await state.activateJourney(
-      forbiddenCityJourneyId,
-      storyId: story.id,
-    );
-    if (!context.mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => JourneyScreen(
-          journeyId: forbiddenCityJourneyId,
-          storyId: story.id,
-        ),
-      ),
-    );
-    if (mounted) setState(() {});
   }
 
   void _goBack() {
     _resetMapTransform();
     setState(() {
-      if (_level == _PassportMapLevel.story) {
-        _level = _PassportMapLevel.city;
-        _selectedJourneyId = null;
-      } else if (_level == _PassportMapLevel.city) {
+      if (_level == _PassportMapLevel.city) {
         final province = requirePublishedJourneyProvince(_selectedProvinceId!);
         _level = province.isMunicipality
             ? _PassportMapLevel.country
@@ -294,7 +255,6 @@ class _PassportMapState extends State<_PassportMap> {
                   onSelectChina: _selectChina,
                   onSelectProvince: _selectProvince,
                   onSelectCity: _selectCity,
-                  onSelectStoryPlace: _selectStoryPlace,
                 ),
               ),
               const SizedBox(width: 6),
@@ -307,13 +267,6 @@ class _PassportMapState extends State<_PassportMap> {
   }
 
   Widget _buildMap() {
-    if (_level == _PassportMapLevel.story &&
-        _selectedJourneyId == forbiddenCityJourneyId) {
-      return _ForbiddenCityStorySelection(
-        state: state,
-        onOpen: (story) => _openForbiddenCityStory(context, story),
-      );
-    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final mapSize = constraints.biggest;
@@ -497,167 +450,6 @@ class _PassportMapState extends State<_PassportMap> {
   }
 }
 
-class _ForbiddenCityStorySelection extends StatelessWidget {
-  const _ForbiddenCityStorySelection({
-    required this.state,
-    required this.onOpen,
-  });
-
-  final AppState state;
-  final ValueChanged<ForbiddenCityStoryRuntimeEntry> onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      key: const ValueKey('passport-story-selection'),
-      decoration: BoxDecoration(
-        color: const Color(0xEFFFF8E8),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: PhoenixTheme.red.withValues(alpha: .24)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              state.displayText('中国 · 北京 · 紫禁城'),
-              style: const TextStyle(
-                color: PhoenixTheme.red,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              state.displayText('选择 Story'),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: FutureBuilder<List<ForbiddenCityStoryProgress>>(
-                future: Future.wait(
-                  forbiddenCityStoryCatalog.map(
-                    (story) => state.forbiddenCityStoryProgress(story.id),
-                  ),
-                ),
-                builder: (context, snapshot) {
-                  final progressById = <String, ForbiddenCityStoryProgress>{
-                    for (final progress in snapshot.data ??
-                        const <ForbiddenCityStoryProgress>[])
-                      progress.storyId: progress,
-                  };
-                  return ListView.separated(
-                    key: const ValueKey('passport-forbidden-city-story-list'),
-                    itemCount: forbiddenCityStoryCatalog.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final story = forbiddenCityStoryCatalog[index];
-                      return _ForbiddenCityStoryCard(
-                        state: state,
-                        story: story,
-                        progress: progressById[story.id],
-                        onTap: () => onOpen(story),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ForbiddenCityStoryCard extends StatelessWidget {
-  const _ForbiddenCityStoryCard({
-    required this.state,
-    required this.story,
-    required this.progress,
-    required this.onTap,
-  });
-
-  final AppState state;
-  final ForbiddenCityStoryRuntimeEntry story;
-  final ForbiddenCityStoryProgress? progress;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final resolved = progress;
-    final status = resolved == null
-        ? '读取进度'
-        : resolved.completed
-            ? '已完成'
-            : resolved.hasProgress
-                ? '继续 · ${resolved.percent}%'
-                : '开始';
-    final selected = state.activeJourneyId == forbiddenCityJourneyId &&
-        state.activeStoryId == story.id;
-    return Material(
-      key: ValueKey('passport-story-${story.id}'),
-      color: selected
-          ? PhoenixTheme.red.withValues(alpha: .08)
-          : Colors.white.withValues(alpha: .72),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      state.displayText(story.title),
-                      style: const TextStyle(
-                        color: Color(0xFF38231A),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      state.displayText(story.subtitle),
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                state.displayText(status),
-                style: const TextStyle(
-                  color: PhoenixTheme.red,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(width: 2),
-              const Icon(
-                Icons.chevron_right_rounded,
-                size: 18,
-                color: PhoenixTheme.red,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _PassportPlaceRail extends StatelessWidget {
   const _PassportPlaceRail({
     required this.state,
@@ -669,7 +461,6 @@ class _PassportPlaceRail extends StatelessWidget {
     required this.onSelectChina,
     required this.onSelectProvince,
     required this.onSelectCity,
-    required this.onSelectStoryPlace,
   });
 
   final AppState state;
@@ -681,7 +472,6 @@ class _PassportPlaceRail extends StatelessWidget {
   final VoidCallback onSelectChina;
   final ValueChanged<String> onSelectProvince;
   final ValueChanged<String> onSelectCity;
-  final ValueChanged<String> onSelectStoryPlace;
 
   Future<void> _openDestination(
     BuildContext context,
@@ -768,88 +558,67 @@ class _PassportPlaceRail extends StatelessWidget {
                               );
                             },
                           )
-                        : level == _PassportMapLevel.story
-                            ? ListView(
-                                key: const ValueKey(
-                                  'passport-story-place-context',
-                                ),
+                        : level == _PassportMapLevel.city
+                            ? ListView.separated(
+                                key:
+                                    const ValueKey('passport-destination-list'),
                                 padding: const EdgeInsets.all(6),
-                                children: [
-                                  _PlaceRailButton(
-                                    label: state.displayText('紫禁城'),
-                                    selected: true,
-                                    onTap: null,
-                                  ),
-                                ],
+                                itemCount: requirePublishedJourneyCity(
+                                  selectedCityId!,
+                                ).destinations.length,
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 4),
+                                itemBuilder: (context, index) {
+                                  final journey = requirePublishedJourneyCity(
+                                    selectedCityId!,
+                                  ).destinations[index];
+                                  final canOpen =
+                                      state.canOpenJourney(journey.id);
+                                  final location = requireJourneyLocation(
+                                    journey.id,
+                                  );
+                                  return _PlaceRailJourneyButton(
+                                    key: ValueKey(
+                                      'passport-place-option-${journey.id}',
+                                    ),
+                                    state: state,
+                                    location: location,
+                                    selected: canOpen &&
+                                        state.activeJourneyId == journey.id,
+                                    onTap: canOpen
+                                        ? () => unawaited(
+                                              _openDestination(
+                                                  context, journey),
+                                            )
+                                        : null,
+                                  );
+                                },
                               )
-                            : level == _PassportMapLevel.city
-                                ? ListView.separated(
-                                    key: const ValueKey(
-                                        'passport-destination-list'),
-                                    padding: const EdgeInsets.all(6),
-                                    itemCount: requirePublishedJourneyCity(
-                                      selectedCityId!,
-                                    ).destinations.length,
-                                    separatorBuilder: (context, index) =>
-                                        const SizedBox(height: 4),
-                                    itemBuilder: (context, index) {
-                                      final journey =
-                                          requirePublishedJourneyCity(
-                                        selectedCityId!,
-                                      ).destinations[index];
-                                      final canOpen =
-                                          state.canOpenJourney(journey.id);
-                                      final location = requireJourneyLocation(
-                                        journey.id,
-                                      );
-                                      return _PlaceRailJourneyButton(
-                                        key: ValueKey(
-                                          'passport-place-option-${journey.id}',
-                                        ),
-                                        state: state,
-                                        location: location,
-                                        selected: canOpen &&
-                                            state.activeJourneyId == journey.id,
-                                        onTap: canOpen
-                                            ? journey.id ==
-                                                    forbiddenCityJourneyId
-                                                ? () => onSelectStoryPlace(
-                                                    journey.id)
-                                                : () => unawaited(
-                                                      _openDestination(
-                                                        context,
-                                                        journey,
-                                                      ),
-                                                    )
-                                            : null,
-                                      );
-                                    },
-                                  )
-                                : ListView.separated(
-                                    key: const ValueKey('passport-city-list'),
-                                    padding: const EdgeInsets.all(6),
-                                    itemCount: requirePublishedJourneyProvince(
-                                      selectedProvinceId!,
-                                    ).cityIds.length,
-                                    separatorBuilder: (context, index) =>
-                                        const SizedBox(height: 4),
-                                    itemBuilder: (context, index) {
-                                      final province =
-                                          requirePublishedJourneyProvince(
-                                        selectedProvinceId!,
-                                      );
-                                      final city = requirePublishedJourneyCity(
-                                        province.cityIds[index],
-                                      );
-                                      return _PlaceRailButton(
-                                        key: ValueKey(
-                                            'passport-city-option-${city.id}'),
-                                        label: state.displayText(city.name),
-                                        selected: selectedCityId == city.id,
-                                        onTap: () => onSelectCity(city.id),
-                                      );
-                                    },
-                                  ),
+                            : ListView.separated(
+                                key: const ValueKey('passport-city-list'),
+                                padding: const EdgeInsets.all(6),
+                                itemCount: requirePublishedJourneyProvince(
+                                  selectedProvinceId!,
+                                ).cityIds.length,
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 4),
+                                itemBuilder: (context, index) {
+                                  final province =
+                                      requirePublishedJourneyProvince(
+                                    selectedProvinceId!,
+                                  );
+                                  final city = requirePublishedJourneyCity(
+                                    province.cityIds[index],
+                                  );
+                                  return _PlaceRailButton(
+                                    key: ValueKey(
+                                        'passport-city-option-${city.id}'),
+                                    label: state.displayText(city.name),
+                                    selected: selectedCityId == city.id,
+                                    onTap: () => onSelectCity(city.id),
+                                  );
+                                },
+                              ),
           ),
         ],
       ),

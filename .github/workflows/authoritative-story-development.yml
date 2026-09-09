@@ -1,0 +1,36 @@
+name: Authoritative Story Development Contract
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - product/city-standard-v1-beijing-forbidden-city
+      - fix/pr208-golden-single-story-baseline
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authoritative-story-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Enforce the single Story development line
+        run: .github/scripts/enforce_authoritative_story_contract.sh
+      - name: Golden Story product contracts
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - working-directory: app
+        run: flutter pub get
+      - working-directory: app
+        run: >-
+          flutter test --reporter expanded
+          test/forbidden_city_product_reference_test.dart
+          test/forbidden_city_full_lifecycle_level_consistency_test.dart
+          test/forbidden_city_story_standard_test.dart
+          test/founder_device_story_continue_regression_test.dart
+          test/journey_runtime_performance_gate_test.dart

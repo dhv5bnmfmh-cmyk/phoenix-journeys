@@ -41,6 +41,9 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
 
+      - name: Enforce authoritative Story development contract
+        run: .github/scripts/enforce_authoritative_story_contract.sh
+
       - name: Download exact tested web artifact
         uses: actions/download-artifact@v4
         with:

@@ -60,22 +60,10 @@ void main() {
       1,
     );
     expect(
-      RegExp(r'forbiddenCitySecondStoryMemoryForLevel\(')
-          .allMatches(journey)
-          .length,
-      1,
-    );
-    expect(
-      RegExp(r'forbiddenCitySecondStoryCompletionForLevel\(')
-          .allMatches(journey)
-          .length,
-      1,
-    );
-    expect(
       RegExp(r'_sessionLanguageProfile\.phoenixLevel \?\? 1')
           .allMatches(journey)
           .length,
-      greaterThanOrEqualTo(4),
+      greaterThanOrEqualTo(2),
     );
     for (final field in <String>[
       'completion.discovery',
