@@ -40,6 +40,15 @@ for workflow in .github/workflows/deploy-cloudflare.yml \
   grep -Fq '.github/scripts/enforce_authoritative_story_contract.sh' "$workflow"
 done
 
+for workflow in .github/workflows/*.yml; do
+  if grep -E -q 'wrangler(@[0-9]+)? deploy|statuses/\$|Publish exact' "$workflow"; then
+    grep -Fq '.github/scripts/enforce_authoritative_story_contract.sh' "$workflow" || {
+      echo "Story Preview/Deploy/Publish bypass: $workflow" >&2
+      exit 1
+    }
+  fi
+done
+
 echo 'AUTHORITATIVE STORY DEVELOPMENT CONTRACT: ENFORCED'
 echo 'GOLDEN STORY: 两条路，一张图'
 echo 'REJECTED STORY PATHS: 0'
