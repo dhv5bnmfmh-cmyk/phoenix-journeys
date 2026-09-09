@@ -217,15 +217,8 @@ void main() {
       );
     });
 
-    test('modern StorySeed is backed only by valid KnowledgeUnits', () {
-      final seed = forbiddenCityKnowledgeUniverse.storySeeds.single;
-      final knowledge = forbiddenCityKnowledgeUniverse.knowledgeById;
-
-      expect(seed.placeRef, knowledgePlaceForbiddenCity);
-      expect(seed.periodRef, knowledgePeriodModern);
-      expect(seed.characterRoleRef, knowledgeRoleRestorationWorker);
-      expect(seed.professionRef, knowledgeProfessionHeritageConservation);
-      expect(seed.knowledgeUnitRefs.every(knowledge.containsKey), isTrue);
+    test('rejected Story seeds are absent from the Golden product', () {
+      expect(forbiddenCityKnowledgeUniverse.storySeeds, isEmpty);
     });
   });
 
