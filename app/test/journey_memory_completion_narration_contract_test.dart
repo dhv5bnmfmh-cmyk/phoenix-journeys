@@ -53,11 +53,11 @@ void main() {
   test('Forbidden City Memory and Completion bind the locked session level', () {
     expect(
       RegExp(r'forbiddenCityMemoryForLevel\(').allMatches(journey).length,
-      1,
+      2,
     );
     expect(
       RegExp(r'forbiddenCityCompletionForLevel\(').allMatches(journey).length,
-      1,
+      2,
     );
     expect(
       RegExp(r'_sessionLanguageProfile\.phoenixLevel \?\? 1')
