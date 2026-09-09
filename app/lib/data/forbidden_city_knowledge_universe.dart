@@ -513,25 +513,7 @@ const forbiddenCityKnowledgeRelations = <KnowledgeRelation>[
   ),
 ];
 
-const forbiddenCityStorySeeds = <StorySeed>[
-  StorySeed(
-    id: 'seed.forbidden_city.modern_restoration_route',
-    placeRef: knowledgePlaceForbiddenCity,
-    periodRef: knowledgePeriodModern,
-    characterRoleRef: knowledgeRoleRestorationWorker,
-    professionRef: knowledgeProfessionHeritageConservation,
-    goal: '核对宫门与空间关系，为修缮记录准备一张可追溯的现场路线图。',
-    conflict: '常用观察路线与任务路线不同，需要用可验证知识决定记录顺序。',
-    knowledgeUnitRefs: <String>[
-      kuMeridianGateAxis,
-      kuQianqingGateCourts,
-      kuJingyunGateEast,
-      kuCentralAxisSequence,
-    ],
-    languageLevel: 5,
-    learningFocus: <String>['空间关系', '宫门', '中轴', '证据与判断'],
-  ),
-];
+const forbiddenCityStorySeeds = <StorySeed>[];
 
 final forbiddenCityKnowledgeUniverse = KnowledgeUniverseRepository(
   sources: forbiddenCityKnowledgeSources,
