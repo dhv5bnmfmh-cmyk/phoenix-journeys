@@ -21,6 +21,8 @@ on:
       - 'app/web/**'
       - '.github/scripts/verify_mobile_interaction.mjs'
       - '.github/scripts/journey_level_session_harness.mjs'
+      - '.github/scripts/enforce_authoritative_story_contract.sh'
+      - '.github/workflows/mobile-interaction-audit.yml'
   pull_request:
     branches:
       - main
@@ -45,6 +47,8 @@ on:
       - 'app/web/**'
       - '.github/scripts/verify_mobile_interaction.mjs'
       - '.github/scripts/journey_level_session_harness.mjs'
+      - '.github/scripts/enforce_authoritative_story_contract.sh'
+      - '.github/workflows/mobile-interaction-audit.yml'
   workflow_dispatch:
 
 permissions:
