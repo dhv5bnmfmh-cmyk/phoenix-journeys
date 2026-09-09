@@ -1,4 +1,4 @@
-name: PR208 74132FA Governance V2 Release
+name: PR208 189EFD Governance V2 Release
 
 on:
   push:
@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  RELEASE_SHA: 74132fae991027eabbc35b77f8137c0a6169a4dd
+  RELEASE_SHA: 189efdd98c2e27505e3c8d371f7045d09167941f
   PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
   PREVIEW_WORKER: phoenix-journeys-pr-208
   PREVIEW_URL: https://phoenix-journeys-pr-208.7hn5tyrjgh.workers.dev
