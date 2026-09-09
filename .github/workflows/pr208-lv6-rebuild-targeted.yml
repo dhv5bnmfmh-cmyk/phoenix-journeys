@@ -1,0 +1,41 @@
+name: PR208 Lv6 Rebuild Targeted
+
+on:
+  push:
+    branches: [validation/pr208-lv6-rebuild-targeted]
+    paths: ['.github/workflows/pr208-lv6-rebuild-targeted.yml']
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATE_SHA: 88a378024d589f2e7c45a77e512c77326c77f1ae
+
+jobs:
+  targeted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Exact candidate
+        run: |
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          git status --porcelain
+      - name: Targeted permanent contracts
+        run: |
+          flutter pub get
+          flutter test --reporter expanded test/forbidden_city_product_reference_test.dart
+          flutter test --reporter expanded test/forbidden_city_rebuild_concise_contract_test.dart
+          flutter test --reporter expanded test/forbidden_city_story_isolation_test.dart
+      - name: Analyze
+        run: flutter analyze
