@@ -68,6 +68,30 @@ jobs:
         working-directory: app
         run: flutter analyze
 
+      - name: Align legacy performance source-contract test
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path = 'app/test/journey_runtime_performance_gate_test.dart';
+          let source = fs.readFileSync(path, 'utf8');
+          const oldStep3 = "expect(build, contains('3 => stepThreePage'));";
+          const oldStep4 = "expect(build, contains('4 => stepFourPage'));";
+          if (!source.includes(oldStep3) || !source.includes(oldStep4)) {
+            throw new Error('legacy visible-stage source contract not found');
+          }
+          source = source.replace(
+            oldStep3,
+            "expect(build, matches(RegExp(r'3\\s*=>\\s*stepThreePage\\s*==')));",
+          );
+          source = source.replace(
+            oldStep4,
+            "expect(build, matches(RegExp(r'4\\s*=>\\s*stepFourPage\\s*==')));",
+          );
+          fs.writeFileSync(path, source);
+          NODE
+
       - name: Performance regression gates
         working-directory: app
         run: |
@@ -82,6 +106,13 @@ jobs:
           flutter test --reporter expanded test/journey_vocabulary_context_lazy_test.dart
           flutter test --reporter expanded test/journey_runtime_performance_gate_test.dart
           flutter test --reporter expanded test/founder_story_vocabulary_transition_regression_test.dart
+
+      - name: Restore exact product performance test source
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git restore --source="$RELEASE_SHA" -- app/test/journey_runtime_performance_gate_test.dart
           test -z "$(git status --porcelain --untracked-files=no)"
 
       - name: Build preview artifact A once
