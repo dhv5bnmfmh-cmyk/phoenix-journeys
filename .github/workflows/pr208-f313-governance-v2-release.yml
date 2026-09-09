@@ -53,49 +53,22 @@ jobs:
           set -euo pipefail
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-
           const settingsPath = 'app/test/settings_journey_session_lock_test.dart';
           let settings = fs.readFileSync(settingsPath, 'utf8');
-          settings = settings.replace(
-            "contains('snapshotJourneySessionProfile(_phoenixLevelController)'),",
-            "matches(RegExp(r'snapshotJourneySessionProfile\\(\\s*_phoenixLevelController,?\\s*\\)')) ,",
-          );
-          if (!settings.includes("matches(RegExp(r'snapshotJourneySessionProfile")) {
-            throw new Error('session snapshot contract replacement did not apply');
-          }
+          settings = settings.replace("contains('snapshotJourneySessionProfile(_phoenixLevelController)'),", "matches(RegExp(r'snapshotJourneySessionProfile\\(\\s*_phoenixLevelController,?\\s*\\)')) ,");
+          if (!settings.includes("matches(RegExp(r'snapshotJourneySessionProfile")) throw new Error('session snapshot contract replacement did not apply');
           fs.writeFileSync(settingsPath, settings);
-
           const performancePath = 'app/test/journey_runtime_performance_gate_test.dart';
           let performance = fs.readFileSync(performancePath, 'utf8');
-          performance = performance.replace(
-            "expect(build, contains('3 => stepThreePage'));",
-            "expect(build, matches(RegExp(r'3\\s*=>\\s*stepThreePage\\s*==')));",
-          );
-          performance = performance.replace(
-            "expect(build, contains('4 => stepFourPage'));",
-            "expect(build, matches(RegExp(r'4\\s*=>\\s*stepFourPage\\s*==')));",
-          );
-          if (!performance.includes("matches(RegExp(r'3\\s*=>")) {
-            throw new Error('visible-stage contract replacement did not apply');
-          }
+          performance = performance.replace("expect(build, contains('3 => stepThreePage'));", "expect(build, matches(RegExp(r'3\\s*=>\\s*stepThreePage\\s*==')));");
+          performance = performance.replace("expect(build, contains('4 => stepFourPage'));", "expect(build, matches(RegExp(r'4\\s*=>\\s*stepFourPage\\s*==')));");
+          if (!performance.includes("matches(RegExp(r'3\\s*=>")) throw new Error('visible-stage contract replacement did not apply');
           fs.writeFileSync(performancePath, performance);
-
           const storySelectionPath = 'app/test/forbidden_city_story_selection_runtime_test.dart';
           let storySelection = fs.readFileSync(storySelectionPath, 'utf8');
-          const staleDiscoveryExpectation = `    expect(
-      content.discoveries.map((entry) => entry.text),
-      forbiddenCityPipelineFixture.discoveries.map((entry) => entry.text),
-    );`;
-          const levelSixDiscoveryExpectation = `    expect(
-      content.discoveries.map((entry) => entry.text),
-      <String>[
-        '读乾清门前广场时，可以同时使用中轴、具体宫门和东西方位，但三者承担的判断作用不同。',
-        '景运门位于乾清门前广场东侧这一事实，需要具体位置证据，不能只靠“中轴”这个整体框架推出。',
-      ],
-    );`;
-          if (!storySelection.includes(staleDiscoveryExpectation)) {
-            throw new Error('stale Second Story discovery expectation not found');
-          }
+          const staleDiscoveryExpectation = "    expect(\n      content.discoveries.map((entry) => entry.text),\n      forbiddenCityPipelineFixture.discoveries.map((entry) => entry.text),\n    );";
+          const levelSixDiscoveryExpectation = "    expect(\n      content.discoveries.map((entry) => entry.text),\n      <String>[\n        '读乾清门前广场时，可以同时使用中轴、具体宫门和东西方位，但三者承担的判断作用不同。',\n        '景运门位于乾清门前广场东侧这一事实，需要具体位置证据，不能只靠“中轴”这个整体框架推出。',\n      ],\n    );";
+          if (!storySelection.includes(staleDiscoveryExpectation)) throw new Error('stale Second Story discovery expectation not found');
           storySelection = storySelection.replace(staleDiscoveryExpectation, levelSixDiscoveryExpectation);
           fs.writeFileSync(storySelectionPath, storySelection);
           NODE
@@ -132,8 +105,7 @@ jobs:
         run: node --test worker/*.test.mjs
       - name: Enforce quality
         shell: bash
-        run: |
-          node -e 'const r=require("./journey-quality-report.json"); if(!r.canPublish) process.exit(1)'
+        run: node -e 'const r=require("./journey-quality-report.json"); if(!r.canPublish) process.exit(1)'
       - name: Upload quality evidence
         uses: actions/upload-artifact@v4
         with:
