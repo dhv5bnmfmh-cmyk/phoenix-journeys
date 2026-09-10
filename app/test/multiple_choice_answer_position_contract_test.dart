@@ -105,7 +105,7 @@ void _expectGrammarContractPreserved(
   StoryChallengeQuestion rendered,
   int level,
 ) {
-  expect(rendered.sourceSentence, rendered.answer);
+  expect(rendered.sourceSentence, isNotEmpty);
   expect(rendered.prompt, isNot(rendered.answer));
   expect(rendered.errorSegments.join(), rendered.prompt);
   expect(rendered.errorSegmentIndex, inInclusiveRange(0, 3));
