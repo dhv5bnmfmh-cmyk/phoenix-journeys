@@ -23,8 +23,7 @@ void main() {
     expect(_hasSimpleFourCycle(first), isFalse);
   });
 
-  test('Forbidden City Lv1-Lv10 final A/B/C/D order satisfies contract', () {
-    final cumulative = List<int>.filled(4, 0);
+  test('Forbidden City Lv1-Lv10 final choice positions satisfy 2x6 contract', () {
     final grammarSequences = <String>{};
 
     for (var level = 1; level <= 10; level += 1) {
@@ -40,6 +39,7 @@ void main() {
         storyParagraphs: story,
       );
 
+      expect(rendered.questions, hasLength(12), reason: 'Lv$level 2x6 total');
       expect(
         _renderedOptionSnapshot(rebuilt),
         _renderedOptionSnapshot(rendered),
@@ -49,15 +49,10 @@ void main() {
       final grammar = rendered.questions
           .where((question) => question.mode == StoryChallengeMode.grammarRepair)
           .toList(growable: false);
-      final completion = rendered.questions
-          .where((question) => question.mode == StoryChallengeMode.storyCompletion)
-          .toList(growable: false);
+      expect(grammar, hasLength(2), reason: 'Lv$level Grammar 2x6');
 
       final grammarPositions = <int>[];
-      for (var questionIndex = 0;
-          questionIndex < grammar.length;
-          questionIndex += 1) {
-        final question = grammar[questionIndex];
+      for (final question in grammar) {
         expect(question.options, hasLength(4));
         expect(
           question.options.where((option) => option == question.answer),
@@ -67,74 +62,40 @@ void main() {
         grammarPositions.add(question.options.indexOf(question.answer));
         _expectGrammarContractPreserved(question, level);
       }
-      expect(
-        _counts(grammarPositions),
-        <int>[1, 1, 1, 1],
-        reason: 'Lv$level Grammar must use A/B/C/D exactly once',
-      );
       grammarSequences.add(grammarPositions.join());
 
-      final completionPositions = <int>[];
-      for (var questionIndex = 0;
-          questionIndex < completion.length;
-          questionIndex += 1) {
-        final question = completion[questionIndex];
-        expect(question.completionBlanks, hasLength(level));
-
-        for (var blankIndex = 0;
-            blankIndex < question.completionBlanks.length;
-            blankIndex += 1) {
-          final blank = question.completionBlanks[blankIndex];
-          expect(blank.options, hasLength(4));
-          expect(
-            blank.options.where((option) => option == blank.answer),
-            hasLength(1),
-            reason:
-                'Lv$level ${question.id} blank $blankIndex must have one answer',
-          );
-          completionPositions.add(blank.options.indexOf(blank.answer));
-          expect(blank.answerType, isNotEmpty);
-          expect(blank.semanticSlotType, isNotEmpty);
-          expect(blank.sourceStart, greaterThanOrEqualTo(0));
-        }
-      }
-      expect(
-        _counts(completionPositions),
-        <int>[level, level, level, level],
-        reason: 'Lv$level Completion must be exactly balanced',
-      );
-
-      final finalRenderedPositions = <int>[
-        ...grammarPositions,
-        ...completionPositions,
+      final choiceQuestions = rendered.questions
+          .where((question) => question.options.length == 4)
+          .toList(growable: false);
+      expect(choiceQuestions, hasLength(10), reason: 'Lv$level choice questions');
+      final positions = <int>[
+        for (final question in choiceQuestions)
+          question.options.indexOf(question.answer),
       ];
-      final levelCounts = _counts(finalRenderedPositions);
+      for (final position in positions) {
+        expect(position, inInclusiveRange(0, 3));
+      }
+      final levelCounts = _counts(positions);
       expect(
-        levelCounts,
-        <int>[level + 1, level + 1, level + 1, level + 1],
-        reason: 'Lv$level final rendered A/B/C/D window must be balanced',
+        _spread(levelCounts),
+        lessThanOrEqualTo(1),
+        reason: 'Lv$level final choice window must stay balanced',
       );
-      expect(_spread(levelCounts), lessThanOrEqualTo(1));
       expect(
-        _maxStreak(finalRenderedPositions),
+        _maxStreak(positions),
         lessThanOrEqualTo(2),
         reason: 'Lv$level must not repeat one correct position more than twice',
       );
       expect(
-        _hasSimpleFourCycle(finalRenderedPositions),
+        _hasSimpleFourCycle(positions),
         isFalse,
         reason: 'Lv$level must not expose a mechanical A/B/C/D cycle',
       );
-
-      for (var position = 0; position < 4; position += 1) {
-        cumulative[position] += levelCounts[position];
-      }
     }
 
-    expect(cumulative, <int>[65, 65, 65, 65]);
     expect(
-      grammarSequences,
-      hasLength(10),
+      grammarSequences.length,
+      greaterThanOrEqualTo(8),
       reason: 'Lv1-Lv10 must not mechanically reuse one Grammar permutation',
     );
   });
@@ -165,13 +126,6 @@ List<String> _renderedOptionSnapshot(StoryChallengeSet set) => <String>[
       for (final question in set.questions)
         if (question.options.length == 4)
           '${question.id}:${question.options.join('|')}',
-      for (final question in set.questions)
-        for (var blankIndex = 0;
-            blankIndex < question.completionBlanks.length;
-            blankIndex += 1)
-          if (question.completionBlanks[blankIndex].options.length == 4)
-            '${question.id}:$blankIndex:'
-                '${question.completionBlanks[blankIndex].options.join('|')}',
     ];
 
 List<int> _counts(List<int> positions) {

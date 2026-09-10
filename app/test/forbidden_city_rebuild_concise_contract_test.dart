@@ -11,7 +11,7 @@ void main() {
   int hanCount(String value) =>
       RegExp(r'[\u3400-\u9fff]').allMatches(value).length;
 
-  test('Forbidden City Sentence Rebuild stays concise from Lv1 to Lv10', () {
+  test('Forbidden City Semantic Rebuild stays concise from Lv1 to Lv10', () {
     for (var level = 1; level <= 10; level += 1) {
       final profile = levelAgent.allProfiles.singleWhere(
         (item) => item.phoenixLevel == level,
@@ -30,12 +30,12 @@ void main() {
           .where((question) => question.mode.name == 'sentenceRebuild')
           .toList(growable: false);
 
-      expect(rebuild, hasLength(4), reason: 'Lv$level');
+      expect(rebuild, hasLength(2), reason: 'Lv$level');
       for (final question in rebuild) {
         expect(
           hanCount(question.answer),
-          inInclusiveRange(1, 10),
-          reason: 'Lv$level ${question.id} must remain a phone-sized knowledge sentence',
+          inInclusiveRange(8, 26),
+          reason: 'Lv$level ${question.id} must remain mobile-readable',
         );
         expect(
           question.characterTiles.toSet(),
@@ -56,17 +56,23 @@ void main() {
             '午门',
             '中轴',
             '乾清门',
-            '故宫博物院',
-            '故宫',
+            '路线',
+            '沈砚',
+            '阿宁',
+            '建筑',
+            '空间',
+            '证据',
+            '任务',
+            '框架',
           ].any(question.answer.contains),
           isTrue,
-          reason: 'Lv$level ${question.id} must remain Forbidden City grounded',
+          reason: 'Lv$level ${question.id} must remain Forbidden City Journey grounded',
         );
         if (level >= 7) {
           expect(
             question.characterTiles.length,
             greaterThanOrEqualTo(4),
-            reason: 'Lv$level keeps concise wording without making the rebuild trivial',
+            reason: 'Lv$level keeps semantic-unit rebuild non-trivial',
           );
         }
       }

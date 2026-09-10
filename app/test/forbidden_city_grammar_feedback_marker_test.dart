@@ -5,7 +5,7 @@ import 'package:phoenix_journeys/widgets/hsk_story_challenge.dart';
 
 void main() {
   testWidgets(
-    'correct Grammar location plus wrong repair shows 修改错误 without 错误位置',
+    'correct Grammar location plus wrong repair keeps final feedback unambiguous',
     (tester) async {
       const correct = '因为紫禁城沿中轴展开，所以层次清楚。';
       const broken = '虽然紫禁城沿中轴展开，所以层次清楚。';
@@ -78,33 +78,23 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('A  虽然'));
+      await tester.tap(find.byKey(const ValueKey('grammar-location-0')));
       await tester.pump();
       await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
       expect(find.text('位置正确'), findsOneWidget);
-
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
-      await tester.pump();
       expect(find.text('STEP 2 · 怎么改？'), findsOneWidget);
 
-      await tester.tap(
-        find.text('A  虽然紫禁城沿中轴展开，但是层次清楚。'),
-      );
+      await tester.tap(find.byKey(const ValueKey('grammar-repair-0')));
       await tester.pump();
       await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
 
-      expect(
-        find.byKey(const ValueKey('grammar-repair-feedback')),
-        findsOneWidget,
-      );
-      expect(find.text('修改错误'), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('grammar-error-location')),
-        findsNothing,
-      );
-      expect(find.textContaining('为什么不对：'), findsOneWidget);
+      expect(find.text('回答错误'), findsOneWidget);
+      expect(find.byKey(const ValueKey('grammar-wrong-location-final')), findsNothing);
+      expect(find.byKey(const ValueKey('grammar-correct-location-final')), findsOneWidget);
+      expect(find.byKey(const ValueKey('grammar-selected-repair')), findsOneWidget);
+      expect(find.byKey(const ValueKey('grammar-option-explanation')), findsOneWidget);
       expect(find.textContaining('正确答案：$correct'), findsOneWidget);
     },
   );

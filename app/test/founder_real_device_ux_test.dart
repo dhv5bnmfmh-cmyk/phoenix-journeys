@@ -74,10 +74,6 @@ void main() {
     );
   }
 
-  FilledButton submitButton(WidgetTester tester) => tester.widget<FilledButton>(
-        find.byKey(const ValueKey('challenge-submit')),
-      );
-
   test('shared Journey content surfaces are borderless glass', () {
     expect(PhoenixTheme.destinationGlass().border, isNull);
     expect(PhoenixTheme.journeyPanelDecoration.border, isNull);
@@ -228,7 +224,7 @@ void main() {
     expect(discovery, contains('transparentSurface: true'));
   });
 
-  testWidgets('Sentence Rebuild tap returns only the chosen built tile', (
+  testWidgets('Semantic Rebuild tap returns only the chosen built tile', (
     tester,
   ) async {
     final question = challenge(5).questions
@@ -242,7 +238,6 @@ void main() {
       await tester.pump();
     }
 
-    expect(submitButton(tester).onPressed, isNull);
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('challenge-rebuild-built-0')),
@@ -284,50 +279,6 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const ValueKey('challenge-rebuild-built-2')), findsNothing);
-  });
-
-  testWidgets('Lv4 Completion clears and refills one filled blank directly', (
-    tester,
-  ) async {
-    final question = challenge(4).questions
-        .firstWhere((q) => q.mode == StoryChallengeMode.storyCompletion);
-    expect(question.completionBlanks, hasLength(4));
-    await pumpSingleQuestion(tester, question);
-
-    for (final blank in question.completionBlanks) {
-      final correctIndex = blank.options.indexOf(blank.answer);
-      await tester.tap(
-        find.text('${String.fromCharCode(65 + correctIndex)}  ${blank.answer}'),
-      );
-      await tester.pump();
-    }
-
-    expect(submitButton(tester).onPressed, isNotNull);
-    for (var i = 0; i < question.completionBlanks.length; i++) {
-      expect(
-        find.text('〔${i + 1}〕${question.completionBlanks[i].answer}'),
-        findsOneWidget,
-      );
-    }
-
-    await tester.tap(find.byKey(const ValueKey('completion-passage-blank-1')));
-    await tester.pump();
-
-    expect(find.text('〔2〕____'), findsOneWidget);
-    expect(find.text('〔1〕${question.completionBlanks[0].answer}'), findsOneWidget);
-    expect(find.text('〔3〕${question.completionBlanks[2].answer}'), findsOneWidget);
-    expect(find.text('〔4〕${question.completionBlanks[3].answer}'), findsOneWidget);
-    expect(submitButton(tester).onPressed, isNull);
-
-    final blankTwo = question.completionBlanks[1];
-    final correctIndex = blankTwo.options.indexOf(blankTwo.answer);
-    await tester.tap(
-      find.text('${String.fromCharCode(65 + correctIndex)}  ${blankTwo.answer}'),
-    );
-    await tester.pump();
-
-    expect(find.text('〔2〕${blankTwo.answer}'), findsOneWidget);
-    expect(submitButton(tester).onPressed, isNotNull);
   });
 
   testWidgets('Forbidden City completed Finale centers exactly one stamp', (

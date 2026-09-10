@@ -108,7 +108,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('Sentence Rebuild wrong submission keeps correct answer green', (
+  testWidgets('Semantic Rebuild wrong submission marks wrong and correct chunks', (
     tester,
   ) async {
     final question = const JourneyChallengeEngine()
@@ -128,10 +128,14 @@ void main() {
       final match = available.indexWhere(
         (tile) => question.answer.startsWith(tile, cursor),
       );
+      expect(match, isNonNegative);
       final tile = available.removeAt(match);
       correctChunks.add(tile);
       cursor += tile.length;
     }
+    expect(cursor, question.answer.length);
+    expect(correctChunks.length, greaterThanOrEqualTo(3));
+
     final wrongChunks = List<String>.of(correctChunks);
     final swap = wrongChunks[0];
     wrongChunks[0] = wrongChunks[1];
@@ -145,7 +149,10 @@ void main() {
     await tester.pump();
 
     final wrongText = tester.widget<Text>(
-      find.byKey(const ValueKey('challenge-rebuild-error-0')),
+      find.descendant(
+        of: find.byKey(const ValueKey('challenge-wrong-rebuild-0')),
+        matching: find.text(wrongChunks[0]),
+      ),
     );
     expect(wrongText.style?.color, Colors.redAccent);
 
@@ -173,14 +180,11 @@ void main() {
         .where((item) => item.mode == StoryChallengeMode.grammarRepair)
         .toList(growable: false);
 
-    test('all four Grammar categories keep key, correction and explanation aligned', () {
-      expect(grammarQuestions, hasLength(4));
-      expect(
-        grammarQuestions.map((question) => question.grammarFamily).toSet(),
-        <String>{'关联词错误', '搭配错误', '成分赘余', '成分缺失'},
-      );
+    test('both Grammar questions keep key, correction and explanation aligned', () {
+      expect(grammarQuestions, hasLength(2));
 
       for (final question in grammarQuestions) {
+        expect(question.grammarFamily, isNotEmpty);
         expect(question.errorSegmentIndex, isNotNull);
         expect(
           question.errorSegments.join(),
@@ -209,27 +213,17 @@ void main() {
       final correctLocation = question.errorSegmentIndex!;
       final correctRepair = question.options.indexOf(question.answer);
 
-      await tester.tap(
-        find.text(
-          '${String.fromCharCode(65 + correctLocation)}  ${question.errorSegments[correctLocation]}',
-        ),
-      );
+      await tester.tap(find.byKey(ValueKey('grammar-location-$correctLocation')));
       await tester.pump();
-      await tester.tap(find.text('确认位置'));
+      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
-      await tester.tap(find.text('继续修改'));
+      await tester.tap(find.byKey(ValueKey('grammar-repair-$correctRepair')));
       await tester.pump();
-      await tester.tap(
-        find.text(
-          '${String.fromCharCode(65 + correctRepair)}  ${question.answer}',
-        ),
-      );
-      await tester.pump();
-      await tester.tap(find.text('提交'));
+      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
 
       expect(find.text('回答正确'), findsOneWidget);
-      expect(find.textContaining('回答错误'), findsNothing);
+      expect(find.text('回答错误'), findsNothing);
       final selectedRepair = tester.widget<Text>(
         find.byKey(const ValueKey('grammar-selected-repair')),
       );
@@ -239,7 +233,7 @@ void main() {
     testWidgets('Case B wrong location is red and actual location is green', (
       tester,
     ) async {
-      final question = grammarQuestions[1];
+      final question = grammarQuestions.last;
       await pumpQuestion(tester, question);
       final correctLocation = question.errorSegmentIndex!;
       final wrongLocation =
@@ -247,81 +241,61 @@ void main() {
               .firstWhere((index) => index != correctLocation);
       final correctRepair = question.options.indexOf(question.answer);
 
-      await tester.tap(
-        find.text(
-          '${String.fromCharCode(65 + wrongLocation)}  ${question.errorSegments[wrongLocation]}',
-        ),
-      );
+      await tester.tap(find.byKey(ValueKey('grammar-location-$wrongLocation')));
       await tester.pump();
-      await tester.tap(find.text('确认位置'));
+      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
 
-      final wrongChoice = tester.widget<Text>(
-        find.text(
-          '${String.fromCharCode(65 + wrongLocation)}  ${question.errorSegments[wrongLocation]}',
-        ),
+      final locationFeedback = tester.widget<Text>(
+        find.byKey(const ValueKey('grammar-location-feedback')),
       );
       final correctChoice = tester.widget<Text>(
-        find.text(
-          '${String.fromCharCode(65 + correctLocation)}  ${question.errorSegments[correctLocation]}',
-        ),
+        find.byKey(const ValueKey('grammar-correct-location')),
       );
-      expect(wrongChoice.style?.color, Colors.redAccent);
-      expect(correctChoice.style?.color, Colors.greenAccent);
-
-      await tester.tap(find.text('继续修改'));
-      await tester.pump();
-      await tester.tap(
-        find.text(
-          '${String.fromCharCode(65 + correctRepair)}  ${question.answer}',
-        ),
-      );
-      await tester.pump();
-      await tester.tap(find.text('提交'));
-      await tester.pump();
-
-      expect(find.textContaining('回答错误'), findsOneWidget);
-      final wrongLocationText = tester.widget<Text>(
+      final wrongChoice = tester.widget<Text>(
         find.byKey(const ValueKey('grammar-wrong-location')),
+      );
+      expect(locationFeedback.style?.color, Colors.redAccent);
+      expect(correctChoice.style?.color, Colors.greenAccent);
+      expect(wrongChoice.style?.color, Colors.redAccent);
+
+      await tester.tap(find.byKey(ValueKey('grammar-repair-$correctRepair')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
+      await tester.pump();
+
+      expect(find.text('回答错误'), findsOneWidget);
+      final wrongLocationText = tester.widget<Text>(
+        find.byKey(const ValueKey('grammar-wrong-location-final')),
       );
       final actualLocationText = tester.widget<Text>(
         find.byKey(const ValueKey('grammar-correct-location-final')),
       );
       expect(wrongLocationText.style?.color, Colors.redAccent);
       expect(actualLocationText.style?.color, Colors.greenAccent);
-      expect(find.textContaining('为什么这里有语病：'), findsOneWidget);
-      expect(find.textContaining('语法点：'), findsOneWidget);
+      expect(find.byKey(const ValueKey('grammar-final-why-wrong')), findsOneWidget);
+      expect(find.byKey(const ValueKey('grammar-revision-rule')), findsOneWidget);
     });
 
     testWidgets('Case C correct location plus wrong repair stays unambiguous', (
       tester,
     ) async {
-      final question = grammarQuestions[2];
+      final question = grammarQuestions.first;
       await pumpQuestion(tester, question);
       final correctLocation = question.errorSegmentIndex!;
       final wrongRepair = List<int>.generate(question.options.length, (index) => index)
           .firstWhere((index) => question.options[index] != question.answer);
 
-      await tester.tap(
-        find.text(
-          '${String.fromCharCode(65 + correctLocation)}  ${question.errorSegments[correctLocation]}',
-        ),
-      );
+      await tester.tap(find.byKey(ValueKey('grammar-location-$correctLocation')));
       await tester.pump();
-      await tester.tap(find.text('确认位置'));
+      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
-      await tester.tap(find.text('继续修改'));
+      await tester.tap(find.byKey(ValueKey('grammar-repair-$wrongRepair')));
       await tester.pump();
-      await tester.tap(
-        find.text(
-          '${String.fromCharCode(65 + wrongRepair)}  ${question.options[wrongRepair]}',
-        ),
-      );
-      await tester.pump();
-      await tester.tap(find.text('提交'));
+      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
 
-      expect(find.textContaining('回答错误'), findsOneWidget);
+      expect(find.text('回答错误'), findsOneWidget);
       final selectedRepair = tester.widget<Text>(
         find.byKey(const ValueKey('grammar-selected-repair')),
       );
@@ -334,9 +308,8 @@ void main() {
       expect(selectedRepair.style?.color, Colors.redAccent);
       expect(actualLocationText.style?.color, Colors.greenAccent);
       expect(correctAnswer.style?.color, Colors.greenAccent);
-      expect(find.textContaining('为什么这里有语病：'), findsOneWidget);
-      expect(find.textContaining('修改原则：'), findsOneWidget);
-      expect(find.textContaining('语法点：'), findsOneWidget);
+      expect(find.byKey(const ValueKey('grammar-final-why-wrong')), findsOneWidget);
+      expect(find.byKey(const ValueKey('grammar-revision-rule')), findsOneWidget);
     });
   });
 }

@@ -16,7 +16,7 @@ void main() {
       'TAUGHT CONTENT → CLEAR LEARNING INTENT',
       'TEACH BEFORE TEST',
       'One primary learning intent',
-      'Mode differentiation',
+      'Family differentiation',
       'One defensible best answer',
       'Gold distractors',
       'Diagnosable misunderstanding',
@@ -39,12 +39,17 @@ void main() {
       'NO LEGACY CONTAMINATION',
       'NO CROSS-JOURNEY CONTAMINATION',
       'LANGUAGE LEARNING VALUE',
+      'Semantic Sentence Rebuild / 语义块复原 × 2',
+      'Grammar Repair / 语病修复 × 2',
+      'Context Completion / 情境补全 × 2',
+      'Story Evidence / Understanding / 故事证据与理解 × 2',
+      'Knowledge & Spatial Reasoning / 知识与空间推理 × 2',
+      'Scenario / Route Decision / 情境与路线决策 × 2',
     ]) {
       expect(standard, contains(required), reason: required);
     }
-    expect(standard, contains('paragraphRebuild'));
-    expect(standard, contains('grammarRepair'));
-    expect(standard, contains('missingSentence'));
+    expect(standard, isNot(contains('paragraphRebuild')));
+    expect(standard, isNot(contains('missingSentence')));
   });
 
   test('Acceptance, design, quality and AI layers bind to the same authority', () {

@@ -38,11 +38,12 @@ void main() {
     return ordered;
   }
 
-  Future<List<String>> pumpRebuild(
+  Future<void> pumpRebuild(
     WidgetTester tester,
-    StoryChallengeQuestion question,
-  ) async {
-    final narration = <String>[];
+    StoryChallengeQuestion question, {
+    required List<String> narration,
+    required List<bool> feedback,
+  }) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -58,13 +59,13 @@ void main() {
               displayText: (value) => value,
               onCompleted: () async {},
               onNarrate: (_, text) async => narration.add(text),
+              onFeedbackAudio: (_, correct) async => feedback.add(correct),
             ),
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
-    return narration;
   }
 
   Future<void> submitRebuild(
@@ -87,45 +88,76 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('Sentence Rebuild speaker is hidden before submit with no leak', (
+  testWidgets('Challenge question speaker is available before submit without feedback leak', (
     tester,
   ) async {
     final question = rebuildQuestion();
-    final narration = await pumpRebuild(tester, question);
+    final narration = <String>[];
+    final feedback = <bool>[];
+    await pumpRebuild(
+      tester,
+      question,
+      narration: narration,
+      feedback: feedback,
+    );
 
+    final speaker = find.byKey(ValueKey('challenge-question-speaker-${question.id}'));
+    expect(speaker, findsOneWidget);
     expect(
-      find.byKey(ValueKey('challenge-speaker-${question.id}')),
+      find.byKey(ValueKey('challenge-feedback-speaker-${question.id}')),
       findsNothing,
     );
     expect(narration, isEmpty);
+    expect(feedback, isEmpty);
+
+    await tester.tap(speaker);
+    await tester.pump();
+    expect(narration, <String>[question.narrationText]);
+    expect(feedback, isEmpty);
   });
 
-  testWidgets('Sentence Rebuild speaker uses question.answer after correct submit', (
+  testWidgets('Challenge feedback speaker appears after correct Rebuild submit', (
     tester,
   ) async {
     final question = rebuildQuestion();
-    final narration = await pumpRebuild(tester, question);
+    final narration = <String>[];
+    final feedback = <bool>[];
+    await pumpRebuild(
+      tester,
+      question,
+      narration: narration,
+      feedback: feedback,
+    );
     await submitRebuild(tester, question, correct: true);
 
-    final speaker = find.byKey(ValueKey('challenge-speaker-${question.id}'));
+    final speaker = find.byKey(ValueKey('challenge-feedback-speaker-${question.id}'));
     expect(speaker, findsOneWidget);
+    expect(feedback, <bool>[true]);
     await tester.tap(speaker);
     await tester.pump();
-    expect(narration, <String>[question.answer]);
+    expect(feedback, <bool>[true, true]);
   });
 
-  testWidgets('Sentence Rebuild speaker also appears after wrong submit', (
+  testWidgets('Challenge feedback speaker reports wrong Rebuild submit', (
     tester,
   ) async {
     final question = rebuildQuestion();
-    final narration = await pumpRebuild(tester, question);
+    final narration = <String>[];
+    final feedback = <bool>[];
+    await pumpRebuild(
+      tester,
+      question,
+      narration: narration,
+      feedback: feedback,
+    );
     await submitRebuild(tester, question, correct: false);
 
-    final speaker = find.byKey(ValueKey('challenge-speaker-${question.id}'));
+    final speaker = find.byKey(ValueKey('challenge-feedback-speaker-${question.id}'));
     expect(speaker, findsOneWidget);
+    expect(feedback, <bool>[false]);
     await tester.tap(speaker);
     await tester.pump();
-    expect(narration, <String>[question.answer]);
+    expect(feedback, <bool>[false, false]);
   });
 
   Uint8List previewPng() => base64Decode(
