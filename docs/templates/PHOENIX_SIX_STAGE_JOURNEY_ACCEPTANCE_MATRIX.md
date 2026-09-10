@@ -151,7 +151,7 @@ Only one:
 
 ## Stage 3 Challenge Gold evidence
 
-Stage 3 remains the existing `challenge` stage and MUST NOT introduce a new user-visible stage. Confirm all six runtime families, exactly two questions per family and 12 per level, then attach the Challenge Gold gate results from [Phoenix Six-Stage Journey Standard §3](../PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-families), including Lv1/Lv5/Lv10 human review.
+Stage 3 remains the existing `challenge` stage and MUST NOT introduce a new user-visible stage. Confirm all six runtime families, exactly two questions per family and 12 per level, then attach the Challenge Gold gate results from [AUTHORITATIVE STORY DEVELOPMENT CONTRACT — Active Challenge contract: 2 × 6](../AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md#active-challenge-contract-2--6), including Lv1/Lv5/Lv10 human review.
 
 ### Stage 3 all-Gold convergence evidence
 

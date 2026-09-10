@@ -612,13 +612,13 @@ Data-model migration authorized by this record: NO
 
 ## Challenge Gold design extension
 
-Use this matrix together with [Phoenix Six-Stage Journey Standard §3](../PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-families). The Six-Stage Standard owns the detailed semantics; this template records design evidence.
+Use this matrix together with [AUTHORITATIVE STORY DEVELOPMENT CONTRACT — Active Challenge contract: 2 × 6](../AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md#active-challenge-contract-2--6). The authoritative contract owns the detailed semantics; this template records design evidence.
 
 For every active Challenge item record: `Level`, `Family`, `Question`, `Primary Learning Intent`, `Source Provenance`, `Taught Before Tested`, `Correct Answer`, `Why Correct`, each `Distractor Misconception`, `Level Appropriateness`, and `Human Review`. The six authoritative families MUST show distinct learning functions, exactly two questions per family per level, and Lv1/Lv5/Lv10 MUST receive explicit human review.
 
 ### All-Gold Challenge audit matrix
 
-Detailed semantics remain owned by Phoenix Six-Stage Journey Standard §3. For global Challenge convergence, create one row for every current approved Gold `Journey × Level × Family × Question` using the registry from merged current `main`.
+Detailed semantics remain owned by the AUTHORITATIVE STORY DEVELOPMENT CONTRACT. For global Challenge convergence, create one row for every current approved Gold `Journey × Level × Family × Question` using the registry from merged current `main`.
 
 | Journey ID | Level | Family | Question | Primary Learning Intent | Secondary Intent | Active Source | Source Provenance | Taught Before Tested | Correct Answer | Why Correct | Alternative Answer Ambiguity | Distractor Quality | Distractor Misconception | Historical Truth | Language Value | Story / Discovery Connection | Level Appropriateness | Cognitive Band | Legacy Contamination | Cross-Journey Contamination | Result |
 |---|---:|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|

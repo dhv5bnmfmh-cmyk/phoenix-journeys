@@ -330,15 +330,18 @@ Any missing `REQUIRED` item or applicable `CONDITIONALLY_REQUIRED` item blocks C
 
 ## Challenge Gold required gates
 
-Detailed definitions are owned by [Phoenix Six-Stage Journey Standard §3](../PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes). Record each row independently; do not infer one PASS from another.
+Detailed definitions are owned only by [AUTHORITATIVE STORY DEVELOPMENT CONTRACT — Active Challenge contract: 2 × 6](../AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md#active-challenge-contract-2--6). Record each row independently; do not infer one PASS from another.
 
 | Gate | Class | Required evidence |
 |---|---|---|
 | Challenge Learning Intent | REQUIRED | One primary intent per active item |
-| Mode Differentiation | REQUIRED | Three modes exercise distinct canonical functions |
-| Paragraph Rebuild Quality | REQUIRED | Structure/sequence/causal-order evidence; not punctuation or rote ordering |
+| Family Differentiation | REQUIRED | All six families exercise their distinct authoritative learning functions |
+| Semantic Rebuild Quality | REQUIRED | Natural semantic-unit ordering; not punctuation, character atomization, or rote ordering |
 | Grammar Repair Quality | REQUIRED | Genuine, explainable, level-fit Chinese repair |
-| Missing Sentence Quality | REQUIRED | Contextual comprehension/inference; not keyword matching |
+| Context Completion Quality | REQUIRED | Contextual comprehension/inference; not keyword matching |
+| Story Evidence Quality | REQUIRED | Answer is grounded in current Story evidence |
+| Knowledge / Spatial Reasoning Quality | REQUIRED | Answer is grounded in taught, sourced place knowledge |
+| Scenario / Route Decision Quality | REQUIRED | Decision integrates Story, place knowledge, language, and reasoning |
 | One Defensible Answer | REQUIRED | Unique best answer under taught context |
 | Distractor Quality | REQUIRED | Plausible, non-duplicated, non-trick distractors |
 | Distractor Misconception Logic | REQUIRED | Misunderstanding represented by each distractor |

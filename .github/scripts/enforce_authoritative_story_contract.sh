@@ -29,9 +29,13 @@ grep -Fq 'TRIVIAL VARIATION = 0' "$contract"
 
 active_challenge_contracts=(
   docs/PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md
+  docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md
   docs/PHOENIX_JOURNEY_ACCEPTANCE_CONTRACT.md
   docs/journey-content-quality-gate.md
+  docs/templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md
   docs/templates/PHOENIX_SIX_STAGE_JOURNEY_ACCEPTANCE_MATRIX.md
+  docs/templates/PHOENIX_STORY_DISCOVERY_DESIGN_MATRIX.md
+  ai/AI_BEHAVIOR.md
 )
 for active_contract in "${active_challenge_contracts[@]}"; do
   if grep -E -q 'all three (required |canonical |active )?(Challenge )?modes|three-mode|paragraphRebuild|missingSentence' "$active_contract"; then
@@ -39,8 +43,9 @@ for active_contract in "${active_challenge_contracts[@]}"; do
     exit 1
   fi
 done
-grep -Fq 'Semantic Sentence Rebuild' docs/PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md
-grep -Fq 'Scenario / Route Decision' docs/PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md
+grep -Fq 'This document MUST NOT duplicate or redefine it' docs/PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md
+grep -Fq 'Semantic Sentence Rebuild' "$contract"
+grep -Fq 'Scenario / Route Decision' "$contract"
 
 rejected='story\.forbidden_city\.modern_evidence_handoff|seed\.forbidden_city\.modern_evidence_handoff|seed\.forbidden_city\.modern_restoration_route|fixture\.forbidden_city\.modern_evidence_handoff|交接前的标记|forbiddenCitySecondStory|forbidden_city_second_story|forbidden_city_story_runtime|forbidden_city_content_pipeline_fixture|forbidden_city_story_engine_v1'
 if grep -R -n -E "$rejected" app/lib app/test .github/scripts .github/workflows \

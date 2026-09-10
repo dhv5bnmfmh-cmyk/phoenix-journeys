@@ -45,11 +45,12 @@ test('the single active Challenge contract requires and implements 2 x 6', () =>
   assert.ok(standard.includes('exactly 12 questions'));
   assert.ok(authority.includes('Active Challenge contract: 2 × 6'));
   for (const [family, mode] of requiredFamilies) {
-    assert.ok(standard.includes(family), `standard must require ${family}`);
+    assert.ok(authority.includes(family), `authority must require ${family}`);
     assert.ok(matrix.includes(family), `matrix must verify ${family}`);
     assert.ok(model.includes(mode), `runtime model must implement ${mode}`);
     assert.ok(challenge.includes(mode), `Challenge shell must render ${mode}`);
   }
+  assert.ok(standard.includes('This document MUST NOT duplicate or redefine it'));
   for (const legacy of ['paragraphRebuild', 'missingSentence']) {
     assert.ok(!standard.includes(`${legacy}\``), `old authority must not require ${legacy}`);
     assert.ok(!matrix.includes(`${legacy}\``), `matrix must not require ${legacy}`);
