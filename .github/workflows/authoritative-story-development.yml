@@ -7,6 +7,7 @@ on:
       - main
       - product/city-standard-v1-beijing-forbidden-city
       - fix/pr208-golden-single-story-baseline
+      - fix/golden-challenge-2x6
   workflow_dispatch:
 
 permissions:
@@ -21,16 +22,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Enforce the single Story development line
+      - name: Enforce single Story development line
         run: .github/scripts/enforce_authoritative_story_contract.sh
-      - name: Golden Story product contracts
+      - name: Flutter stable
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-      - working-directory: app
+      - name: Dependencies
+        working-directory: app
         run: flutter pub get
-      - working-directory: app
+      - name: Layer 1 — Authoritative Golden Challenge rendered acceptance
+        working-directory: app
+        run: >-
+          flutter test --reporter expanded
+          test/authoritative_story_challenge_contract_test.dart
+      - name: Upload rendered Challenge evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: authoritative-golden-challenge-evidence
+          path: |
+            app/build/authoritative-story/challenge-rendered-matrix.json
+            app/build/authoritative-story/challenge-semantic-uniqueness-report.json
+          if-no-files-found: warn
+      - name: Golden Story targeted product contracts
+        working-directory: app
         run: >-
           flutter test --reporter expanded
           test/forbidden_city_product_reference_test.dart
