@@ -72,7 +72,8 @@ void main() {
           expect(
             question.characterTiles.length,
             greaterThanOrEqualTo(3),
-            reason: 'Lv$level keeps semantic-unit rebuild non-trivial without forcing character fragmentation',
+            reason:
+                'Lv$level keeps semantic-unit rebuild non-trivial without forcing character fragmentation',
           );
         }
       }
