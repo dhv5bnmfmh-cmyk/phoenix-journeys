@@ -29,33 +29,28 @@ String _normalize(String value) => value
     .replaceAll(RegExp(r'[，。！？：；、“”\s]'), '')
     .toLowerCase();
 
-String _comparisonClass(
-  StoryChallengeQuestion first,
-  StoryChallengeQuestion second,
-) {
+String _classify(StoryChallengeQuestion a, StoryChallengeQuestion b) {
   final exactA = _normalize(
-    '${first.mode.name}|${first.prompt}|${first.answer}|'
-    '${first.options.join('|')}',
+    '${a.mode.name}|${a.prompt}|${a.answer}|${a.options.join('|')}',
   );
   final exactB = _normalize(
-    '${second.mode.name}|${second.prompt}|${second.answer}|'
-    '${second.options.join('|')}',
+    '${b.mode.name}|${b.prompt}|${b.answer}|${b.options.join('|')}',
   );
   if (exactA == exactB ||
-      first.signature.semanticSignature == second.signature.semanticSignature) {
+      a.signature.semanticSignature == b.signature.semanticSignature) {
     return 'TEMPLATE DUPLICATE';
   }
-  if (first.signature.templateSignature == second.signature.templateSignature) {
+  if (a.signature.templateSignature == b.signature.templateSignature) {
     return 'TRIVIAL VARIATION';
   }
-  if (first.mode == second.mode &&
-      _normalize(first.knowledgeTarget) == _normalize(second.knowledgeTarget)) {
+  if (a.mode == b.mode &&
+      _normalize(a.knowledgeTarget) == _normalize(b.knowledgeTarget)) {
     return 'INTENTIONALLY RELATED';
   }
   return 'MEANINGFULLY DIFFERENT';
 }
 
-Future<void> _pumpQuestion(
+Future<void> _pump(
   WidgetTester tester,
   StoryChallengeQuestion question,
   int level,
@@ -84,7 +79,13 @@ Future<void> _pumpQuestion(
   await tester.pump();
 }
 
-Future<void> _submitCorrect(
+Future<void> _tapSubmit(WidgetTester tester) async {
+  expect(find.text('提交'), findsOneWidget);
+  await tester.tap(find.text('提交'));
+  await tester.pump();
+}
+
+Future<void> _answerCorrectly(
   WidgetTester tester,
   StoryChallengeQuestion question,
 ) async {
@@ -93,55 +94,51 @@ Future<void> _submitCorrect(
       final available = List<String>.of(question.characterTiles);
       var cursor = 0;
       while (available.isNotEmpty && cursor < question.answer.length) {
-        final match = available.indexWhere(
+        final index = available.indexWhere(
           (tile) => question.answer.startsWith(tile, cursor),
         );
-        expect(match, greaterThanOrEqualTo(0), reason: question.id);
-        final tile = available.removeAt(match);
+        expect(index, greaterThanOrEqualTo(0), reason: question.id);
+        final tile = available.removeAt(index);
         await tester.tap(find.widgetWithText(ActionChip, tile).first);
         await tester.pump();
         cursor += tile.length;
       }
       expect(cursor, question.answer.length, reason: question.id);
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
-      await tester.pump();
+      await _tapSubmit(tester);
     case StoryChallengeMode.grammarRepair:
       final error = question.errorSegmentIndex!;
       await tester.tap(find.byKey(ValueKey('grammar-location-$error')));
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
-      await tester.pump();
+      await _tapSubmit(tester);
       expect(
         find.byKey(ValueKey('challenge-feedback-speaker-${question.id}')),
         findsNothing,
-        reason: '${question.id} Step 1 must not expose feedback speaker',
+        reason: '${question.id}: Step 1 is not final feedback',
       );
-      final answerIndex = question.options.indexOf(question.answer);
-      await tester.tap(find.byKey(ValueKey('grammar-repair-$answerIndex')));
+      final correct = question.options.indexOf(question.answer);
+      await tester.tap(find.byKey(ValueKey('grammar-repair-$correct')));
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
-      await tester.pump();
+      await _tapSubmit(tester);
     case StoryChallengeMode.storyCompletion:
     case StoryChallengeMode.storyEvidence:
     case StoryChallengeMode.knowledgeReasoning:
     case StoryChallengeMode.scenarioDecision:
-      final answerIndex = question.options.indexOf(question.answer);
-      expect(answerIndex, greaterThanOrEqualTo(0), reason: question.id);
-      await tester.tap(find.byKey(ValueKey('challenge-option-$answerIndex')));
+      final correct = question.options.indexOf(question.answer);
+      expect(correct, greaterThanOrEqualTo(0), reason: question.id);
+      await tester.tap(find.byKey(ValueKey('challenge-option-$correct')));
       await tester.pump();
-      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
-      await tester.pump();
+      await _tapSubmit(tester);
   }
 }
 
 void main() {
   testWidgets(
-    'Authoritative Golden Challenge renders Lv1-Lv10 120 questions without template or lifecycle defects',
+    'Golden Challenge renders all 120 authored 2x6 questions',
     (tester) async {
       const engine = JourneyChallengeEngine();
       const auditor = ChallengeAntiTemplateAuditor();
-      final levels = <StoryChallengeSet>[];
-      final matrix = <Map<String, Object?>>[];
+      final sets = <StoryChallengeSet>[];
+      final rows = <Map<String, Object?>>[];
       final comparisons = <Map<String, Object?>>[];
 
       for (var level = 1; level <= 10; level += 1) {
@@ -150,8 +147,8 @@ void main() {
           sessionLevel: level,
           storyParagraphs: forbiddenCityStoryParagraphsByLevel[level - 1],
         );
-        levels.add(set);
-        expect(set.questions, hasLength(12), reason: 'Lv$level');
+        sets.add(set);
+        expect(set.questions, hasLength(12), reason: 'Lv$level count');
         for (final mode in StoryChallengeMode.values) {
           expect(
             set.questions.where((q) => q.mode == mode),
@@ -160,24 +157,19 @@ void main() {
           );
         }
 
-        for (var questionIndex = 0;
-            questionIndex < set.questions.length;
-            questionIndex += 1) {
-          final question = set.questions[questionIndex];
-          await _pumpQuestion(tester, question, level);
+        for (var index = 0; index < set.questions.length; index += 1) {
+          final question = set.questions[index];
+          await _pump(tester, question, level);
 
+          expect(find.text('上一步'), findsOneWidget);
+          expect(find.text('提交'), findsOneWidget);
           expect(find.text('完成挑战后继续'), findsNothing);
           expect(find.text('确认位置'), findsNothing);
           expect(find.text('继续修改'), findsNothing);
-          expect(find.byKey(const ValueKey('challenge-back')), findsOneWidget);
-          expect(
-            find.byKey(const ValueKey('challenge-submit')),
-            findsOneWidget,
-          );
           expect(
             find.byKey(ValueKey('challenge-feedback-speaker-${question.id}')),
             findsNothing,
-            reason: '${question.id} pre-submit feedback speaker',
+            reason: '${question.id}: pre-submit feedback speaker',
           );
 
           if (question.mode == StoryChallengeMode.sentenceRebuild) {
@@ -187,7 +179,7 @@ void main() {
                 return han == 1 && !const <String>{'却', '再'}.contains(tile);
               }),
               isFalse,
-              reason: '${question.id} character atomization',
+              reason: '${question.id}: character atomization',
             );
           }
           if (question.mode == StoryChallengeMode.grammarRepair) {
@@ -197,37 +189,29 @@ void main() {
                 (segment) => punctuation.contains(segment.trim()),
               ),
               isFalse,
-              reason: '${question.id} standalone punctuation',
+              reason: '${question.id}: punctuation option',
             );
             expect(
               question.options.every(
                 (option) => RegExp(r'[。？！]$').hasMatch(option.trim()),
               ),
               isTrue,
-              reason: '${question.id} complete repair candidates',
+              reason: '${question.id}: complete repair candidates',
             );
           }
 
-          await _submitCorrect(tester, question);
-          expect(
-            find.byKey(const ValueKey('challenge-inline-feedback')),
-            findsOneWidget,
-            reason: question.id,
-          );
+          await _answerCorrectly(tester, question);
           expect(find.text('回答正确'), findsOneWidget, reason: question.id);
+          expect(find.text('下一题'), findsOneWidget, reason: question.id);
           expect(
             find.byKey(ValueKey('challenge-feedback-speaker-${question.id}')),
             findsOneWidget,
-            reason: '${question.id} post-submit feedback speaker',
-          );
-          expect(
-            find.byKey(const ValueKey('challenge-next')),
-            findsOneWidget,
+            reason: '${question.id}: post-submit feedback speaker',
           );
 
-          matrix.add(<String, Object?>{
+          rows.add(<String, Object?>{
             'level': level,
-            'question_index': questionIndex + 1,
+            'question_index': index + 1,
             'family': _family(question.mode),
             'prompt': question.prompt,
             'body': question.sourceSentence,
@@ -251,71 +235,56 @@ void main() {
           });
         }
 
-        for (var first = 0; first < set.questions.length; first += 1) {
-          for (var second = first + 1;
-              second < set.questions.length;
-              second += 1) {
-            final a = set.questions[first];
-            final b = set.questions[second];
+        for (var a = 0; a < set.questions.length; a += 1) {
+          for (var b = a + 1; b < set.questions.length; b += 1) {
             comparisons.add(<String, Object?>{
               'scope': 'within-level',
               'level': level,
-              'a': a.id,
-              'b': b.id,
-              'classification': _comparisonClass(a, b),
+              'a': set.questions[a].id,
+              'b': set.questions[b].id,
+              'classification': _classify(set.questions[a], set.questions[b]),
             });
           }
         }
       }
 
-      for (var levelIndex = 1; levelIndex < levels.length; levelIndex += 1) {
-        final previous = levels[levelIndex - 1];
-        final current = levels[levelIndex];
+      for (var i = 1; i < sets.length; i += 1) {
         for (final mode in StoryChallengeMode.values) {
-          final aItems = previous.questions.where((q) => q.mode == mode).toList();
-          final bItems = current.questions.where((q) => q.mode == mode).toList();
-          for (final a in aItems) {
-            for (final b in bItems) {
+          final previous = sets[i - 1].questions.where((q) => q.mode == mode);
+          final current = sets[i].questions.where((q) => q.mode == mode);
+          for (final a in previous) {
+            for (final b in current) {
               comparisons.add(<String, Object?>{
                 'scope': 'adjacent-level',
-                'from_level': previous.sessionLevel,
-                'to_level': current.sessionLevel,
+                'from_level': i,
+                'to_level': i + 1,
                 'family': _family(mode),
                 'a': a.id,
                 'b': b.id,
-                'classification': _comparisonClass(a, b),
+                'classification': _classify(a, b),
               });
             }
           }
         }
       }
 
-      final audit = auditor.auditMatrix(levels);
+      final audit = auditor.auditMatrix(sets);
       final templateDuplicates = comparisons
-          .where((row) => row['classification'] == 'TEMPLATE DUPLICATE')
+          .where((item) => item['classification'] == 'TEMPLATE DUPLICATE')
           .length;
       final trivialVariations = comparisons
-          .where((row) => row['classification'] == 'TRIVIAL VARIATION')
+          .where((item) => item['classification'] == 'TRIVIAL VARIATION')
           .length;
-      final invalid = audit.failures.length;
-
       final output = Directory('build/authoritative-story')
         ..createSync(recursive: true);
+
       File('${output.path}/challenge-rendered-matrix.json').writeAsStringSync(
         const JsonEncoder.withIndent('  ').convert(<String, Object?>{
           'journey_id': _journeyId,
           'story': '两条路，一张图',
           'levels': 10,
-          'total_rendered_questions': matrix.length,
-          'architecture': <String, int>{
-            'Semantic Sentence Rebuild': 2,
-            'Grammar Repair': 2,
-            'Context Completion': 2,
-            'Story Evidence / Understanding': 2,
-            'Knowledge / Spatial Reasoning': 2,
-            'Scenario / Route Decision': 2,
-          },
-          'questions': matrix,
+          'total_rendered_questions': rows.length,
+          'questions': rows,
         }),
       );
       File('${output.path}/challenge-semantic-uniqueness-report.json')
@@ -323,16 +292,16 @@ void main() {
         const JsonEncoder.withIndent('  ').convert(<String, Object?>{
           'template_duplicate': templateDuplicates,
           'trivial_variation': trivialVariations,
-          'invalid': invalid,
+          'invalid': audit.failures.length,
           'audit_failures': audit.failures,
           'comparisons': comparisons,
         }),
       );
 
-      expect(matrix, hasLength(120));
+      expect(rows, hasLength(120));
       expect(templateDuplicates, 0);
       expect(trivialVariations, 0);
-      expect(invalid, 0, reason: audit.failures.join('\n'));
+      expect(audit.failures, isEmpty, reason: audit.failures.join('\n'));
     },
   );
 }
