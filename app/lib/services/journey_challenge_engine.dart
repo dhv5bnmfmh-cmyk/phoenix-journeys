@@ -3,16 +3,17 @@ import 'challenge_option_balancer.dart';
 import 'forbidden_city_challenge_level_standard.dart';
 import 'journey_challenge_engine_legacy.dart' as legacy;
 
-export 'journey_challenge_engine_legacy.dart' hide JourneyChallengeEngine;
+export 'journey_challenge_engine_legacy.dart'
+    hide JourneyChallengeEngine, ChallengeAntiTemplateAuditor;
 
-/// Product-facing challenge adapter.
+const _forbiddenCityJourneyId = 'beijing-forbidden-city';
+
+/// Single product-facing Challenge entry point.
 ///
-/// The underlying challenge engine remains shared. Final A/B/C/D presentation
-/// order is normalized here after question content is authored, so answer
-/// placement can be deterministic and balanced without changing answer or
-/// distractor semantics. Forbidden City Sentence Rebuild is then authored as a
-/// compact mobile learning interaction so the user rebuilds one meaningful
-/// knowledge sentence without turning the task into a long paragraph puzzle.
+/// Golden Forbidden City uses the Founder-approved explicitly authored 2×6
+/// package. Other existing Journeys retain their current legacy content path
+/// until they are deliberately migrated through the same authoritative
+/// contract. Final A/B/C/D order remains deterministic and content-preserving.
 class JourneyChallengeEngine {
   const JourneyChallengeEngine();
 
@@ -21,40 +22,17 @@ class JourneyChallengeEngine {
     required int sessionLevel,
     required List<String> storyParagraphs,
   }) {
-    final base = const legacy.JourneyChallengeEngine().build(
-      journeyId: journeyId,
-      sessionLevel: sessionLevel,
-      storyParagraphs: storyParagraphs,
-    );
-    final balanced = _balanceRenderedMultipleChoiceOrder(base);
-    if (journeyId != _forbiddenCityJourneyId) {
-      return applyForbiddenCityLevelChallengeStandard(balanced);
-    }
-
-    var rebuildIndex = 0;
-    final questions = <StoryChallengeQuestion>[];
-    for (final question in balanced.questions) {
-      if (question.mode != StoryChallengeMode.sentenceRebuild) {
-        questions.add(question);
-        continue;
-      }
-      questions.add(
-        _compactForbiddenCityRebuild(
-          question,
-          sessionLevel,
-          rebuildIndex,
-        ),
-      );
-      rebuildIndex += 1;
-    }
-
-    return applyForbiddenCityLevelChallengeStandard(
-      StoryChallengeSet(
-        journeyId: balanced.journeyId,
-        sessionLevel: balanced.sessionLevel,
-        questions: List<StoryChallengeQuestion>.unmodifiable(questions),
-      ),
-    );
+    final authored = journeyId == _forbiddenCityJourneyId
+        ? buildForbiddenCityGoldenChallenge(
+            level: sessionLevel,
+            storyParagraphs: storyParagraphs,
+          )
+        : const legacy.JourneyChallengeEngine().build(
+            journeyId: journeyId,
+            sessionLevel: sessionLevel,
+            storyParagraphs: storyParagraphs,
+          );
+    return _balanceRenderedMultipleChoiceOrder(authored);
   }
 }
 
@@ -66,104 +44,57 @@ StoryChallengeSet _balanceRenderedMultipleChoiceOrder(
       .toList(growable: false);
   final directPositions = balancedChallengeAnswerPositions(
     itemCount: directChoiceQuestions.length,
-    seed: '${source.journeyId}:direct:'
+    seed: '${source.journeyId}:${source.sessionLevel}:2x6:'
         '${directChoiceQuestions.map((question) => question.id).join('|')}',
     variationOrdinal: source.sessionLevel,
   );
 
-  final completionKeys = <String>[];
-  for (final question in source.questions) {
-    for (var blankIndex = 0;
-        blankIndex < question.completionBlanks.length;
-        blankIndex += 1) {
-      if (question.completionBlanks[blankIndex].options.length == 4) {
-        completionKeys.add('${question.id}:$blankIndex');
-      }
-    }
-  }
-  final completionPositions = balancedChallengeAnswerPositions(
-    itemCount: completionKeys.length,
-    seed: '${source.journeyId}:${source.sessionLevel}:completion:'
-        '${completionKeys.join('|')}',
-    variationOrdinal: source.sessionLevel,
-    previousPositions: directPositions,
-  );
-
-  var directCursor = 0;
-  var completionCursor = 0;
+  var cursor = 0;
   final questions = <StoryChallengeQuestion>[];
   for (final question in source.questions) {
-    var options = question.options;
-    var explanations = question.grammarOptionExplanations;
-    if (question.options.length == 4) {
-      final order = _optionIndexOrderForTarget(
-        question.options,
-        answer: question.answer,
-        targetIndex: directPositions[directCursor],
-      );
-      directCursor += 1;
-      options = List<String>.unmodifiable(
-        <String>[for (final index in order) question.options[index]],
-      );
-      if (question.grammarOptionExplanations.isNotEmpty) {
-        if (question.grammarOptionExplanations.length !=
-            question.options.length) {
-          throw StateError(
-            '${question.id} option explanations must align before reorder.',
+    if (question.options.length != 4) {
+      questions.add(question);
+      continue;
+    }
+
+    final order = _optionIndexOrderForTarget(
+      question.options,
+      answer: question.answer,
+      targetIndex: directPositions[cursor++],
+    );
+    final options = List<String>.unmodifiable(
+      <String>[for (final index in order) question.options[index]],
+    );
+    final explanations = question.grammarOptionExplanations.isEmpty
+        ? question.grammarOptionExplanations
+        : List<String>.unmodifiable(
+            <String>[
+              for (final index in order)
+                question.grammarOptionExplanations[index],
+            ],
           );
-        }
-        explanations = List<String>.unmodifiable(
-          <String>[
-            for (final index in order)
-              question.grammarOptionExplanations[index],
-          ],
-        );
-      }
-    }
-
-    final blanks = <StoryCompletionBlank>[];
-    for (final blank in question.completionBlanks) {
-      if (blank.options.length != 4) {
-        blanks.add(blank);
-        continue;
-      }
-      final order = _optionIndexOrderForTarget(
-        blank.options,
-        answer: blank.answer,
-        targetIndex: completionPositions[completionCursor],
-      );
-      completionCursor += 1;
-      blanks.add(
-        StoryCompletionBlank(
-          answer: blank.answer,
-          options: List<String>.unmodifiable(
-            <String>[for (final index in order) blank.options[index]],
-          ),
-          answerType: blank.answerType,
-          semanticSlotType: blank.semanticSlotType,
-          sourceStart: blank.sourceStart,
-        ),
-      );
-    }
-
+    final rationales = question.distractorRationales.isEmpty
+        ? question.distractorRationales
+        : List<String>.unmodifiable(
+            <String>[
+              for (final index in order) question.distractorRationales[index],
+            ],
+          );
     questions.add(
       _copyQuestion(
         question,
         options: options,
         grammarOptionExplanations: explanations,
-        completionBlanks: blanks.isEmpty && question.completionBlanks.isEmpty
-            ? question.completionBlanks
-            : List<StoryCompletionBlank>.unmodifiable(blanks),
+        distractorRationales: rationales,
       ),
     );
   }
 
-  if (directCursor != directPositions.length ||
-      completionCursor != completionPositions.length) {
+  if (cursor != directPositions.length) {
     throw StateError(
-        'Rendered multiple-choice scheduling did not consume all items.');
+      'Rendered multiple-choice scheduler did not consume all 2×6 items.',
+    );
   }
-
   return StoryChallengeSet(
     journeyId: source.journeyId,
     sessionLevel: source.sessionLevel,
@@ -185,7 +116,8 @@ List<int> _optionIndexOrderForTarget(
   ];
   if (correctIndices.length != 1) {
     throw StateError(
-        'Multiple-choice item must contain exactly one correct option.');
+      'Multiple-choice item must contain exactly one correct option.',
+    );
   }
   final correctIndex = correctIndices.single;
   final order = List<int>.generate(options.length, (index) => index)
@@ -198,7 +130,7 @@ StoryChallengeQuestion _copyQuestion(
   StoryChallengeQuestion source, {
   required List<String> options,
   required List<String> grammarOptionExplanations,
-  required List<StoryCompletionBlank> completionBlanks,
+  required List<String> distractorRationales,
 }) =>
     StoryChallengeQuestion(
       id: source.id,
@@ -215,197 +147,244 @@ StoryChallengeQuestion _copyQuestion(
       grammarRevisionRule: source.grammarRevisionRule,
       grammarOptionExplanations: grammarOptionExplanations,
       completionSegments: source.completionSegments,
-      completionBlanks: completionBlanks,
+      completionBlanks: source.completionBlanks,
       narrationText: source.narrationText,
+      learningObjective: source.learningObjective,
+      knowledgeTarget: source.knowledgeTarget,
+      languageTarget: source.languageTarget,
+      reasoningTarget: source.reasoningTarget,
+      whyCorrect: source.whyCorrect,
+      distractorRationales: distractorRationales,
+      difficulty: source.difficulty,
+      storyEvidence: source.storyEvidence,
+      knowledgeSource: source.knowledgeSource,
       signature: source.signature,
     );
 
-const _forbiddenCityJourneyId = 'beijing-forbidden-city';
+/// The existing Semantic Anti-Template gate, extended to the active 2×6
+/// Challenge contract. This remains the single active Challenge auditor.
+class ChallengeAntiTemplateAuditor {
+  const ChallengeAntiTemplateAuditor();
 
-class _ConciseRebuildBlueprint {
-  const _ConciseRebuildBlueprint(this.sentence, this.chunks);
+  ChallengeAuditReport audit(StoryChallengeSet set) {
+    final failures = <String>[];
+    if (set.journeyId == _forbiddenCityJourneyId) {
+      if (set.questions.length != 12) failures.add('question-count');
+      for (final mode in _goldenModes) {
+        if (set.questions.where((q) => q.mode == mode).length != 2) {
+          failures.add('${mode.name}-count');
+        }
+      }
+    }
 
-  final String sentence;
-  final List<String> chunks;
+    final ids = <String>{};
+    final prompts = <String>{};
+    final semantic = <String>{};
+    for (final question in set.questions) {
+      if (!ids.add(question.id)) failures.add('duplicate-id:${question.id}');
+      final normalizedPrompt = _normalize(question.prompt);
+      if (!prompts.add(normalizedPrompt)) {
+        failures.add('normalized-prompt-duplicate:${question.id}');
+      }
+      if (question.signature.semanticSignature.isNotEmpty &&
+          !semantic.add(question.signature.semanticSignature)) {
+        failures.add('semantic-duplicate:${question.id}');
+      }
+      if (_missingAuthoringRecord(question)) {
+        failures.add('authoring-record:${question.id}');
+      }
+      _auditQuestion(question, failures);
+    }
+
+    return ChallengeAuditReport(failures: List<String>.unmodifiable(failures));
+  }
+
+  ChallengeAuditReport auditMatrix(List<StoryChallengeSet> levels) {
+    final failures = <String>[];
+    if (levels.length != 10) failures.add('level-count');
+    final semantic = <String, String>{};
+    final exact = <String, String>{};
+    for (final set in levels) {
+      failures.addAll(
+        audit(set).failures.map((failure) => 'Lv${set.sessionLevel}:$failure'),
+      );
+      for (final question in set.questions) {
+        final exactKey = _normalize(
+          '${question.mode.name}|${question.prompt}|${question.answer}|'
+          '${question.options.join('|')}',
+        );
+        final exactPrior = exact[exactKey];
+        if (exactPrior != null) {
+          failures.add('cross-level-exact:$exactPrior:${question.id}');
+        } else {
+          exact[exactKey] = question.id;
+        }
+        final signature = question.signature.semanticSignature;
+        if (signature.isNotEmpty) {
+          final prior = semantic[signature];
+          if (prior != null) {
+            failures.add('cross-level-semantic:$prior:${question.id}');
+          } else {
+            semantic[signature] = question.id;
+          }
+        }
+      }
+    }
+
+    final ordered = [...levels]
+      ..sort((a, b) => a.sessionLevel.compareTo(b.sessionLevel));
+    for (var levelIndex = 1; levelIndex < ordered.length; levelIndex += 1) {
+      final previous = ordered[levelIndex - 1];
+      final current = ordered[levelIndex];
+      for (final mode in _goldenModes) {
+        final previousItems = previous.questions.where((q) => q.mode == mode);
+        final currentItems = current.questions.where((q) => q.mode == mode);
+        for (final prior in previousItems) {
+          for (final next in currentItems) {
+            if (_trivialAdjacentVariation(prior, next)) {
+              failures.add('adjacent-template:${prior.id}:${next.id}');
+            }
+          }
+        }
+      }
+    }
+    return ChallengeAuditReport(failures: List<String>.unmodifiable(failures));
+  }
+
+  void _auditQuestion(
+    StoryChallengeQuestion question,
+    List<String> failures,
+  ) {
+    if (question.mode == StoryChallengeMode.sentenceRebuild) {
+      if (question.characterTiles.length < 3 ||
+          question.characterTiles.join().length != question.answer.length) {
+        failures.add('rebuild-structure:${question.id}');
+      }
+      if (question.characterTiles.any(_singleHanFragment)) {
+        failures.add('character-atomization:${question.id}');
+      }
+      final available = List<String>.of(question.characterTiles);
+      var cursor = 0;
+      while (available.isNotEmpty && cursor < question.answer.length) {
+        final index = available.indexWhere(
+          (tile) => question.answer.startsWith(tile, cursor),
+        );
+        if (index < 0) {
+          failures.add('rebuild-unique-order:${question.id}');
+          break;
+        }
+        cursor += available.removeAt(index).length;
+      }
+      if (cursor != question.answer.length) {
+        failures.add('rebuild-answer-coverage:${question.id}');
+      }
+      return;
+    }
+
+    if (question.options.length != 4 ||
+        question.options.toSet().length != 4 ||
+        question.options.where((option) => option == question.answer).length !=
+            1) {
+      failures.add('mcq-answer-contract:${question.id}');
+    }
+
+    if (question.mode == StoryChallengeMode.grammarRepair) {
+      const punctuation = <String>{'。', '，', '！', '？', '：', '；'};
+      if (question.errorSegments.length != 4 ||
+          question.errorSegmentIndex == null ||
+          question.errorSegments.join() != question.prompt ||
+          question.errorSegments.any(
+            (segment) =>
+                segment.trim().isEmpty || punctuation.contains(segment.trim()),
+          )) {
+        failures.add('grammar-step1:${question.id}');
+      }
+      if (question.options.any((option) => !_looksLikeCompleteSentence(option))) {
+        failures.add('grammar-step2-fragment:${question.id}');
+      }
+      if (question.grammarWhyWrong?.trim().isEmpty ?? true) {
+        failures.add('grammar-why:${question.id}');
+      }
+      if (question.grammarRevisionRule?.trim().isEmpty ?? true) {
+        failures.add('grammar-rule:${question.id}');
+      }
+      if (question.grammarOptionExplanations.length != 4) {
+        failures.add('grammar-explanations:${question.id}');
+      }
+    }
+
+    if (question.mode == StoryChallengeMode.storyCompletion &&
+        (!question.prompt.contains('____') ||
+            question.sourceSentence.trim().isEmpty)) {
+      failures.add('context-completion:${question.id}');
+    }
+    if (question.mode == StoryChallengeMode.storyEvidence &&
+        question.storyEvidence.trim().isEmpty) {
+      failures.add('story-evidence:${question.id}');
+    }
+    if (question.mode == StoryChallengeMode.knowledgeReasoning &&
+        question.knowledgeSource.trim().isEmpty) {
+      failures.add('knowledge-source:${question.id}');
+    }
+    if (question.mode == StoryChallengeMode.scenarioDecision &&
+        question.reasoningTarget.trim().isEmpty) {
+      failures.add('scenario-reasoning:${question.id}');
+    }
+  }
 }
 
-const _forbiddenCityConciseRebuildBands = <List<_ConciseRebuildBlueprint>>[
-  <_ConciseRebuildBlueprint>[
-    _ConciseRebuildBlueprint(
-      '午门是紫禁城南面正门',
-      <String>['午门', '是', '紫禁城', '南面正门'],
-    ),
-    _ConciseRebuildBlueprint(
-      '中轴串起紫禁城宫殿群',
-      <String>['中轴', '串起', '紫禁城', '宫殿群'],
-    ),
-    _ConciseRebuildBlueprint(
-      '乾清门连接外朝和内廷',
-      <String>['乾清门', '连接', '外朝', '和内廷'],
-    ),
-    _ConciseRebuildBlueprint(
-      '故宫博物院藏宫廷文物',
-      <String>['故宫博物院', '藏', '宫廷', '文物'],
-    ),
-  ],
-  <_ConciseRebuildBlueprint>[
-    _ConciseRebuildBlueprint(
-      '紫禁城中轴组织宫殿群',
-      <String>['紫禁城', '中轴', '组织', '宫殿群'],
-    ),
-    _ConciseRebuildBlueprint(
-      '午门兼有入口礼仪功能',
-      <String>['午门', '兼有', '入口', '礼仪功能'],
-    ),
-    _ConciseRebuildBlueprint(
-      '乾清门处在内外廷之间',
-      <String>['乾清门', '处在', '内外廷', '之间'],
-    ),
-    _ConciseRebuildBlueprint(
-      '故宫博物院保存古建筑',
-      <String>['故宫博物院', '保存', '古建筑'],
-    ),
-  ],
-  <_ConciseRebuildBlueprint>[
-    _ConciseRebuildBlueprint(
-      '中轴形成宫城空间层级',
-      <String>['中轴', '形成', '宫城', '空间层级'],
-    ),
-    _ConciseRebuildBlueprint(
-      '午门开启宫城礼仪序列',
-      <String>['午门', '开启', '宫城', '礼仪序列'],
-    ),
-    _ConciseRebuildBlueprint(
-      '乾清门是内外廷转换处',
-      <String>['乾清门', '是', '内外廷', '转换处'],
-    ),
-    _ConciseRebuildBlueprint(
-      '故宫博物院藏历代文物',
-      <String>['故宫博物院', '藏', '历代', '文物'],
-    ),
-  ],
-  <_ConciseRebuildBlueprint>[
-    _ConciseRebuildBlueprint(
-      '中轴秩序并不等于路线',
-      <String>['中轴', '秩序', '并不等于', '路线'],
-    ),
-    _ConciseRebuildBlueprint(
-      '午门入口不是唯一路线',
-      <String>['午门', '入口', '不是', '唯一', '路线'],
-    ),
-    _ConciseRebuildBlueprint(
-      '乾清门可汇合不同任务',
-      <String>['乾清门', '可', '汇合', '不同', '任务'],
-    ),
-    _ConciseRebuildBlueprint(
-      '故宫博物院用文物释史',
-      <String>['故宫博物院', '用', '文物', '释史'],
-    ),
-  ],
-  <_ConciseRebuildBlueprint>[
-    _ConciseRebuildBlueprint(
-      '中轴框架并非行动路线',
-      <String>['中轴', '框架', '并非', '行动', '路线'],
-    ),
-    _ConciseRebuildBlueprint(
-      '午门序列不是唯一答案',
-      <String>['午门', '序列', '不是', '唯一', '答案'],
-    ),
-    _ConciseRebuildBlueprint(
-      '乾清门需结合任务判断',
-      <String>['乾清门', '需', '结合', '任务', '判断'],
-    ),
-    _ConciseRebuildBlueprint(
-      '故宫博物院以证据释史',
-      <String>['故宫博物院', '以', '证据', '释史'],
-    ),
-  ],
+const _goldenModes = <StoryChallengeMode>[
+  StoryChallengeMode.sentenceRebuild,
+  StoryChallengeMode.grammarRepair,
+  StoryChallengeMode.storyCompletion,
+  StoryChallengeMode.storyEvidence,
+  StoryChallengeMode.knowledgeReasoning,
+  StoryChallengeMode.scenarioDecision,
 ];
 
-StoryChallengeQuestion _compactForbiddenCityRebuild(
-  StoryChallengeQuestion source,
-  int level,
-  int index,
+bool _missingAuthoringRecord(StoryChallengeQuestion question) =>
+    question.learningObjective.trim().isEmpty ||
+    question.knowledgeTarget.trim().isEmpty ||
+    question.languageTarget.trim().isEmpty ||
+    question.reasoningTarget.trim().isEmpty ||
+    question.whyCorrect.trim().isEmpty ||
+    question.difficulty.trim().isEmpty ||
+    question.knowledgeSource.trim().isEmpty ||
+    question.signature.templateSignature.trim().isEmpty ||
+    question.signature.semanticSignature.trim().isEmpty;
+
+bool _singleHanFragment(String value) {
+  final han = RegExp(r'[\u3400-\u9fff]').allMatches(value).length;
+  return han == 1 && !const <String>{'却', '再'}.contains(value);
+}
+
+bool _looksLikeCompleteSentence(String value) {
+  final text = value.trim();
+  return text.length >= 8 && RegExp(r'[。？！]$').hasMatch(text);
+}
+
+bool _trivialAdjacentVariation(
+  StoryChallengeQuestion previous,
+  StoryChallengeQuestion current,
 ) {
-  final band = ((level.clamp(1, 10).toInt() - 1) ~/ 2).clamp(0, 4);
-  final authored = _forbiddenCityConciseRebuildBands[band][index];
-  if (_hanCount(authored.sentence) != 10) {
-    throw StateError(
-        'Forbidden City rebuild must stay exactly 10 Han characters.');
+  if (previous.signature.templateSignature !=
+      current.signature.templateSignature) {
+    return false;
   }
-  if (authored.chunks.join() != authored.sentence) {
-    throw StateError(
-        'Forbidden City concise rebuild chunks must reconstruct the sentence.');
-  }
-
-  final punctuationSentence = '${authored.sentence}。';
-  final tiles = _scramble(authored.chunks, index);
-  final signature = source.signature;
-
-  return StoryChallengeQuestion(
-    id: source.id,
-    mode: source.mode,
-    sourceSentence: punctuationSentence,
-    prompt: source.prompt,
-    answer: authored.sentence,
-    options: source.options,
-    characterTiles: List<String>.unmodifiable(tiles),
-    errorSegments: source.errorSegments,
-    errorSegmentIndex: source.errorSegmentIndex,
-    grammarFamily: source.grammarFamily,
-    grammarWhyWrong: source.grammarWhyWrong,
-    grammarRevisionRule: source.grammarRevisionRule,
-    grammarOptionExplanations: source.grammarOptionExplanations,
-    completionSegments: source.completionSegments,
-    completionBlanks: source.completionBlanks,
-    narrationText: punctuationSentence,
-    signature: QuestionDesignSignature(
-      journeyId: signature.journeyId,
-      sessionLevel: signature.sessionLevel,
-      mode: signature.mode,
-      sourceParagraphIndex: signature.sourceParagraphIndex,
-      sourceSentenceIndex: signature.sourceSentenceIndex,
-      sourceHash: _hash(punctuationSentence),
-      syntaxPattern: _syntax(punctuationSentence),
-      operationType: signature.operationType,
-      errorFamily: signature.errorFamily,
-      gapType: signature.gapType,
-      answerShape:
-          '${_hanCount(authored.sentence)}字 / ${authored.chunks.length}块',
-      distractorStrategy: signature.distractorStrategy,
-      blankPositionPattern: signature.blankPositionPattern,
-    ),
+  final previousLogic = _normalize(
+    '${previous.reasoningTarget}|${previous.whyCorrect}',
   );
+  final currentLogic = _normalize(
+    '${current.reasoningTarget}|${current.whyCorrect}',
+  );
+  return previousLogic == currentLogic;
 }
 
-List<String> _scramble(List<String> ordered, int index) {
-  final result = List<String>.of(ordered.reversed);
-  if (result.length > 2) {
-    final shift = (index + 1) % result.length;
-    return <String>[
-      ...result.skip(shift),
-      ...result.take(shift),
-    ];
-  }
-  return result;
-}
-
-int _hanCount(String value) =>
-    RegExp(r'[\u3400-\u9fff]').allMatches(value).length;
-
-String _syntax(String sentence) {
-  if (sentence.contains('把')) return '把字句';
-  if (sentence.contains(RegExp(r'因为|所以|因此'))) return '因果结构';
-  if (sentence.contains(RegExp(r'却|但是|而'))) return '转折结构';
-  if (sentence.startsWith(RegExp(r'当|后来|随后|这时|为了'))) return '时间目的前置';
-  if (sentence.contains('，')) return '复句';
-  return '主谓宾';
-}
-
-String _hash(String value) {
-  var hash = 0x811c9dc5;
-  for (final unit in value.codeUnits) {
-    hash = ((hash ^ unit) * 0x01000193) & 0xffffffff;
-  }
-  return hash.toRadixString(16).padLeft(8, '0');
-}
+String _normalize(String value) => value
+    .replaceAll(RegExp(r'沈砚|阿宁|周师傅'), '<PERSON>')
+    .replaceAll(
+      RegExp(r'紫禁城|午门|乾清门|中轴|外朝|内廷|东侧'),
+      '<PLACE>',
+    )
+    .replaceAll(RegExp(r'[，。！？：；、“”\s]'), '')
+    .toLowerCase();
